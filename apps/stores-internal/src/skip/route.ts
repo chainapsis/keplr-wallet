@@ -132,6 +132,31 @@ const Schema = Joi.object<RouteResponse>({
         })
           .required()
           .unknown(true),
+      }).unknown(true),
+      Joi.object({
+        axelar_transfer: Joi.object({
+          from_chain: Joi.string().required(),
+          from_chain_id: Joi.string().required(),
+          to_chain: Joi.string().required(),
+          to_chain_id: Joi.string().required(),
+          asset: Joi.string().required(),
+          should_unwrap: Joi.boolean().required(),
+          denom_in: Joi.string().required(),
+          denom_out: Joi.string().required(),
+          fee_amount: Joi.string().required(),
+          usd_fee_amount: Joi.string().required(),
+          fee_asset: Joi.object({
+            denom: Joi.string().required(),
+            chain_id: Joi.string().required(),
+            is_cw20: Joi.boolean().required(),
+            is_evm: Joi.boolean().required(),
+            is_svm: Joi.boolean().required(),
+            symbol: Joi.string().required(),
+            decimals: Joi.number().required(),
+          }).unknown(true),
+          bridge_id: Joi.string().required(),
+          smart_relay: Joi.boolean().required(),
+        }).unknown(true),
       }).unknown(true)
     )
     .required(),

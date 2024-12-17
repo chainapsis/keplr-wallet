@@ -351,9 +351,8 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
       if ("type" in currency) {
         switch (currency.type) {
           case "erc20":
-            return true;
+            return this.queryChains.isChainTypeEVM(chainId);
           // 현재 CW20같은 얘들은 처리할 수 없다.
-
           default:
             return false;
         }
@@ -456,7 +455,10 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
             }
           } else if (!("paths" in currency)) {
             // 현재 CW20같은 얘들은 처리할 수 없다.
-            if (!("type" in currency)) {
+            if (
+              !("type" in currency) ||
+              ("type" in currency && currency.type === "erc20")
+            ) {
               // if currency is not ibc currency
               const inner = getMap(chainId);
               if (
@@ -551,6 +553,8 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
             return true;
           }
         }
+      } else {
+        return this.queryChains.isChainTypeEVM(chainId);
       }
 
       return false;

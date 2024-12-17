@@ -142,6 +142,32 @@ export interface RouteResponse {
           destination_domain: string;
         };
       }
+    | {
+        axelar_transfer: {
+          from_chain: string;
+          from_chain_id: string;
+          to_chain: string;
+          to_chain_id: string;
+          asset: string;
+          should_unwrap: boolean;
+          denom_in: string;
+          denom_out: string;
+          fee_amount: string;
+          usd_fee_amount: string;
+          fee_asset: {
+            denom: string;
+            chain_id: string;
+            is_cw20: boolean;
+            is_evm: boolean;
+            is_svm: boolean;
+            symbol: string;
+            name: string;
+            decimals: number;
+          };
+          bridge_id: string;
+          smart_relay: boolean;
+        };
+      }
   )[];
   chain_ids: string[];
   does_swap?: boolean;
