@@ -58,6 +58,7 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
     queriesStore,
     skipQueriesStore,
     priceStore,
+    uiConfigStore,
   } = useStore();
   const route = useRoute<RouteProp<RootStackParamList, 'Send'>>();
   const navigation = useNavigation<StackNavProp>();
@@ -401,7 +402,7 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
           />
         </Box>
 
-        {!isErc20 && (
+        {!isErc20 && !uiConfigStore.swapDisabledConfig.disabled && (
           <Box>
             <LayeredHorizontalRadioGroup
               size="large"
