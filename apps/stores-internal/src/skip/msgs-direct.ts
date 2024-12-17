@@ -23,7 +23,15 @@ const Schema = Joi.object<MsgsDirectResponse>({
         evm_tx: Joi.object({
           chain_id: Joi.string().required(),
           data: Joi.string().required(),
-          required_erc20_approvals: Joi.array().items(Joi.string()).required(),
+          required_erc20_approvals: Joi.array()
+            .items(
+              Joi.object({
+                amount: Joi.string().required(),
+                spender: Joi.string().required(),
+                token_contract: Joi.string().required(),
+              }).unknown(true)
+            )
+            .required(),
           signer_address: Joi.string().required(),
           to: Joi.string().required(),
           value: Joi.string().required(),
@@ -78,6 +86,9 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
     | {
         type: "evmTx";
         chainId: string;
+        to: string;
+        value: string;
+        data: string;
       }
     | undefined {
     if (!this.response) {
@@ -93,10 +104,14 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
     }
 
     const msg = this.response.data.msgs[0];
+
     if (msg.evm_tx) {
       return {
         type: "evmTx",
         chainId: `eip155:${msg.evm_tx.chain_id}`,
+        to: msg.evm_tx.to,
+        value: `0x${BigInt(msg.evm_tx.value).toString(16)}`,
+        data: `0x${msg.evm_tx.data}`,
       };
     }
 
@@ -271,11 +286,11 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
 
   protected override getCacheKey(): string {
     return `${super.getCacheKey()}-${JSON.stringify({
-      amountInDenom: this.amountInDenom.replace("erc20:", ""),
+      amountInDenom: this.amountInDenom,
       amountInAmount: this.amountInAmount,
-      sourceAssetChainId: this.sourceAssetChainId.replace("eip155:", ""),
-      destAssetDenom: this.destAssetDenom.replace("erc20:", ""),
-      destAssetChainId: this.destAssetChainId.replace("eip155:", ""),
+      sourceAssetChainId: this.sourceAssetChainId,
+      destAssetDenom: this.destAssetDenom,
+      destAssetChainId: this.destAssetChainId,
       chainIdsToAddresses: this.chainIdsToAddresses,
       slippageTolerancePercent: this.slippageTolerancePercent,
       affiliateFeeBps: this.affiliateFeeBps,

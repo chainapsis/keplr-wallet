@@ -18,7 +18,10 @@ import {
   SkipQueries,
   ObservableQueryIBCSwapInner,
 } from "@keplr-wallet/stores-internal";
-import { EthereumAccountStore } from "@keplr-wallet/stores-eth";
+import {
+  EthereumAccountStore,
+  UnsignedEVMTransaction,
+} from "@keplr-wallet/stores-eth";
 
 export class IBCSwapAmountConfig extends AmountConfig {
   @observable
@@ -140,7 +143,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
     slippageTolerancePercent: number,
     affiliateFeeReceiver: string,
     priorOutAmount?: Int
-  ): Promise<MakeTxResponse> {
+  ): Promise<MakeTxResponse | UnsignedEVMTransaction> {
     const queryIBCSwap = this.getQueryIBCSwap();
     if (!queryIBCSwap) {
       throw new Error("Query IBC Swap is not initialized");
@@ -199,7 +202,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
       ) {
         throw new Error("Destination account is not set");
       }
-      chainIdsToAddresses[destinationChainId.replace("eip155", "")] =
+      chainIdsToAddresses[destinationChainId.replace("eip155:", "")] =
         isDestinationChainEVMOnly
           ? destinationAccount.ethereumHexAddress
           : destinationAccount.bech32Address;
@@ -309,7 +312,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
   getTxIfReady(
     slippageTolerancePercent: number,
     affiliateFeeReceiver: string
-  ): MakeTxResponse | undefined {
+  ): MakeTxResponse | UnsignedEVMTransaction | undefined {
     if (!this.currency) {
       return;
     }
@@ -454,6 +457,9 @@ export class IBCSwapAmountConfig extends AmountConfig {
       tx.ui.overrideType("ibc-swap");
       return tx;
     } else if (msg.type === "evmTx") {
+      const ethereumAccount = this.ethereumAccountStore.getAccount(msg.chainId);
+      const tx = ethereumAccount.makeTx(msg.to, msg.value, msg.data);
+      return tx;
     }
   }
 
