@@ -231,7 +231,7 @@ describe("Test IntPretty", () => {
     }
   });
 
-  it("Test the add calcutation of IntPretty", () => {
+  it("Test the add calculation of IntPretty", () => {
     const params: {
       base: Dec | Int;
       target: Dec | Int;
@@ -316,7 +316,7 @@ describe("Test IntPretty", () => {
     }
   });
 
-  it("Test the sub calcutation of IntPretty", () => {
+  it("Test the sub calculation of IntPretty", () => {
     const params: {
       base: Dec | Int;
       target: Dec | Int;
