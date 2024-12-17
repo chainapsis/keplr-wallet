@@ -508,7 +508,10 @@ export const HomeScreen: FunctionComponent = observer(() => {
       ) : null}
 
       <RecallPasswordModal
-        isOpen={uiConfigStore.recallPasswordConfig.open}
+        isOpen={
+          uiConfigStore.userPassword.length > 0 &&
+          uiConfigStore.recallPasswordConfig.open
+        }
         setIsOpen={() => {
           // noop
         }}
