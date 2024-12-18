@@ -157,6 +157,28 @@ const Schema = Joi.object<RouteResponse>({
           bridge_id: Joi.string().required(),
           smart_relay: Joi.boolean().required(),
         }).unknown(true),
+      }).unknown(true),
+      Joi.object({
+        hyperlane_transfer: Joi.object({
+          from_chain_id: Joi.string().required(),
+          to_chain_id: Joi.string().required(),
+          denom_in: Joi.string().required(),
+          denom_out: Joi.string().required(),
+          hyperlane_contract_address: Joi.string().required(),
+          fee_amount: Joi.string().required(),
+          usd_fee_amount: Joi.string().required(),
+          fee_asset: Joi.object({
+            denom: Joi.string().required(),
+            chain_id: Joi.string().required(),
+            is_cw20: Joi.boolean().required(),
+            is_evm: Joi.boolean().required(),
+            is_svm: Joi.boolean().required(),
+            symbol: Joi.string().required(),
+            decimals: Joi.number().required(),
+          }).unknown(true),
+          bridge_id: Joi.string().required(),
+          smart_relay: Joi.boolean().required(),
+        }).unknown(true),
       }).unknown(true)
     )
     .required(),
@@ -334,10 +356,10 @@ export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
   protected override getCacheKey(): string {
     return `${super.getCacheKey()}-${JSON.stringify({
       amount_in: this.sourceAmount,
-      source_asset_denom: this.sourceDenom.replace("erc20:", ""),
-      source_asset_chain_id: this.sourceChainId.replace("eip155:", ""),
-      dest_asset_denom: this.destDenom.replace("erc20:", ""),
-      dest_asset_chain_id: this.destChainId.replace("eip155:", ""),
+      source_asset_denom: this.sourceDenom,
+      source_asset_chain_id: this.sourceChainId,
+      dest_asset_denom: this.destDenom,
+      dest_asset_chain_id: this.destChainId,
       affiliateFeeBps: this.affiliateFeeBps,
       swap_venue: this.swapVenues,
     })}`;

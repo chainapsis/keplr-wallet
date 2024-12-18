@@ -168,6 +168,28 @@ export interface RouteResponse {
           smart_relay: boolean;
         };
       }
+    | {
+        hyperlane_transfer: {
+          from_chain_id: string;
+          to_chain_id: string;
+          denom_in: string;
+          denom_out: string;
+          hyperlane_contract_address: string;
+          fee_amount: string;
+          usd_fee_amount: string;
+          fee_asset: {
+            denom: string;
+            chain_id: string;
+            is_cw20: boolean;
+            is_evm: boolean;
+            is_svm: boolean;
+            symbol: string;
+            decimals: number;
+          };
+          bridge_id: string;
+          smart_relay: boolean;
+        };
+      }
   )[];
   chain_ids: string[];
   does_swap?: boolean;
