@@ -1033,47 +1033,80 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               const ethereumAccount = ethereumAccountStore.getAccount(
                 ibcSwapConfigs.amountConfig.chainId
               );
-              const sender = ibcSwapConfigs.senderConfig.sender;
-              const queryBalances = queriesStore.get(
-                ibcSwapConfigs.amountConfig.chainId
-              ).queryBalances;
-
               ethereumAccount.setIsSendingTx(true);
-              await ethereumAccount.sendEthereumTx(sender, tx, {
-                onFulfill: (txReceipt) => {
-                  queryBalances
-                    .getQueryEthereumHexAddress(sender)
-                    .balances.forEach((balance) => {
-                      if (
-                        balance.currency.coinMinimalDenom ===
-                          ibcSwapConfigs.amountConfig.currency
-                            .coinMinimalDenom ||
-                        ibcSwapConfigs.feeConfig.fees.some(
-                          (fee) =>
-                            fee.currency.coinMinimalDenom ===
-                            balance.currency.coinMinimalDenom
-                        )
-                      ) {
-                        balance.fetch();
-                      }
-                    });
-                  if (txReceipt.status === EthTxStatus.Success) {
-                    notification.show(
-                      "success",
-                      intl.formatMessage({
-                        id: "notification.transaction-success",
-                      }),
-                      ""
-                    );
-                  } else {
-                    notification.show(
-                      "failed",
-                      intl.formatMessage({ id: "error.transaction-failed" }),
-                      ""
-                    );
-                  }
+
+              const { maxFeePerGas, maxPriorityFeePerGas, gasPrice } =
+                ibcSwapConfigs.feeConfig.getEIP1559TxFees(
+                  ibcSwapConfigs.feeConfig.type
+                );
+              const feeObject =
+                maxFeePerGas && maxPriorityFeePerGas
+                  ? {
+                      maxFeePerGas: `0x${BigInt(
+                        maxFeePerGas.truncate().toString()
+                      ).toString(16)}`,
+                      maxPriorityFeePerGas: `0x${BigInt(
+                        maxPriorityFeePerGas.truncate().toString()
+                      ).toString(16)}`,
+                      gasLimit: `0x${ibcSwapConfigs.gasConfig.gas.toString(
+                        16
+                      )}`,
+                    }
+                  : {
+                      gasPrice: `0x${BigInt(
+                        gasPrice.truncate().toString()
+                      ).toString(16)}`,
+                      gasLimit: `0x${ibcSwapConfigs.gasConfig.gas.toString(
+                        16
+                      )}`,
+                    };
+              const sender = ibcSwapConfigs.senderConfig.sender;
+
+              await ethereumAccount.sendEthereumTx(
+                sender,
+                {
+                  ...tx,
+                  ...feeObject,
                 },
-              });
+                {
+                  onFulfill: (txReceipt) => {
+                    const queryBalances = queriesStore.get(
+                      ibcSwapConfigs.amountConfig.chainId
+                    ).queryBalances;
+                    queryBalances
+                      .getQueryEthereumHexAddress(sender)
+                      .balances.forEach((balance) => {
+                        if (
+                          balance.currency.coinMinimalDenom ===
+                            ibcSwapConfigs.amountConfig.currency
+                              .coinMinimalDenom ||
+                          ibcSwapConfigs.feeConfig.fees.some(
+                            (fee) =>
+                              fee.currency.coinMinimalDenom ===
+                              balance.currency.coinMinimalDenom
+                          )
+                        ) {
+                          balance.fetch();
+                        }
+                      });
+                    if (txReceipt.status === EthTxStatus.Success) {
+                      notification.show(
+                        "success",
+                        intl.formatMessage({
+                          id: "notification.transaction-success",
+                        }),
+                        ""
+                      );
+                    } else {
+                      notification.show(
+                        "failed",
+                        intl.formatMessage({ id: "error.transaction-failed" }),
+                        ""
+                      );
+                    }
+                  },
+                }
+              );
               ethereumAccount.setIsSendingTx(false);
             }
 
@@ -1274,6 +1307,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           gasConfig={ibcSwapConfigs.gasConfig}
           feeConfig={ibcSwapConfigs.feeConfig}
           gasSimulator={gasSimulator}
+          isForEVMTx={isInChainEVMOnly}
         />
 
         <WarningGuideBox
