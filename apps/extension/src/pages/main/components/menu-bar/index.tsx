@@ -529,13 +529,10 @@ const PanelModeItem: FunctionComponent<{
 }> = ({
   isSelected,
   onClick,
-  isSidePanel,
   text,
   img,
   animateSidePanelRecommendationTooltip,
 }) => {
-  const theme = useTheme();
-
   return (
     <PanelModeItemStylesContainer
       position="relative"
@@ -552,24 +549,6 @@ const PanelModeItem: FunctionComponent<{
       }}
     >
       {animateSidePanelRecommendationTooltip ? <AnimatedTooltip /> : null}
-      {isSidePanel ? (
-        <img
-          src={
-            theme.mode === "light"
-              ? require("../../../../public/assets/img/side-menu-side-panel-ribbon-light.png")
-              : require("../../../../public/assets/img/side-menu-side-panel-ribbon.png")
-          }
-          alt="Side Panel Mode is here"
-          style={{
-            position: "absolute",
-            zIndex: 1,
-            aspectRatio: "1/1",
-            width: "2.625rem",
-            top: "1px",
-            left: "1px",
-          }}
-        />
-      ) : null}
       <Box alignX="center">
         <PanelModeItemStylesImageContainer isSelected={isSelected}>
           {img}
