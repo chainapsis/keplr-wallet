@@ -1069,6 +1069,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   ...feeObject,
                 },
                 {
+                  onBroadcasted: () => {
+                    // TODO: Add history
+                  },
                   onFulfill: (txReceipt) => {
                     const queryBalances = queriesStore.get(
                       ibcSwapConfigs.amountConfig.chainId
