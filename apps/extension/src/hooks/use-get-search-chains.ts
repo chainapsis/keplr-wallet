@@ -104,7 +104,11 @@ export const useGetSearchChains = ({
 
         const chains = queryChains.response.data.chains;
         for (const disabledChainInfo of disabledChainInfos) {
-          if (!dupCheck.has(disabledChainInfo.chainId)) {
+          if (
+            !dupCheck.has(
+              ChainIdHelper.parse(disabledChainInfo.chainId).identifier
+            )
+          ) {
             chains.push(disabledChainInfo.embedded);
           }
         }
