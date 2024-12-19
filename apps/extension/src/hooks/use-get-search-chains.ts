@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useStore } from "../stores";
 import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import { autorun } from "mobx";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 type SearchOption = "all" | "cosmos" | "evm";
 type FilterOption = "all" | "chain" | "token" | "chainNameAndToken";
@@ -48,7 +49,7 @@ export const useGetSearchChains = ({
   trimSearch: string;
   searchedChainInfos: (ChainInfo | ModularChainInfo)[];
 } => {
-  const { queriesStore } = useStore();
+  const { queriesStore, chainStore } = useStore();
 
   const trimSearch = search.trim().toLowerCase();
 
@@ -74,6 +75,16 @@ export const useGetSearchChains = ({
     (ChainInfo | ModularChainInfo)[]
   >([]);
 
+  const disabledChainInfos = useMemo(
+    () =>
+      chainStore.chainInfosInListUI.filter(
+        (modularChainInfo) =>
+          !chainStore.isEnabledChain(modularChainInfo.chainId)
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [chainStore.chainInfosInListUI]
+  );
+
   useEffect(() => {
     const disposer = autorun(() => {
       if (!queryChains) {
@@ -86,7 +97,21 @@ export const useGetSearchChains = ({
       }
       if (queryChains.isFetching) return;
       if (queryChains.response?.data) {
-        setSearchedChainInfos(queryChains.response.data.chains);
+        const dupCheck = new Set<string>();
+        for (const chain of queryChains.response.data.chains) {
+          dupCheck.add(ChainIdHelper.parse(chain.chainId).identifier);
+        }
+
+        const chains = queryChains.response.data.chains;
+        for (const disabledChainInfo of disabledChainInfos) {
+          if (!dupCheck.has(disabledChainInfo.chainId)) {
+            chains.push(disabledChainInfo.embedded);
+          }
+        }
+
+        setSearchedChainInfos(
+          chains.sort((a, b) => a.chainName.localeCompare(b.chainName))
+        );
       } else {
         setSearchedChainInfos((prev) => (prev.length > 0 ? [] : prev));
       }
@@ -97,7 +122,12 @@ export const useGetSearchChains = ({
         disposer();
       }
     };
-  }, [clearResultsOnEmptyQuery, initialChainInfos, queryChains]);
+  }, [
+    clearResultsOnEmptyQuery,
+    initialChainInfos,
+    queryChains,
+    disabledChainInfos,
+  ]);
 
   return {
     trimSearch,
