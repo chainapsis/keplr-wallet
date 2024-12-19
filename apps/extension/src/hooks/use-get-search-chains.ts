@@ -75,15 +75,55 @@ export const useGetSearchChains = ({
     (ChainInfo | ModularChainInfo)[]
   >([]);
 
-  const disabledChainInfos = useMemo(
-    () =>
-      chainStore.chainInfosInListUI.filter(
+  const disabledChainInfosSearched = useMemo(() => {
+    return chainStore.chainInfosInListUI
+      .filter(
         (modularChainInfo) =>
           !chainStore.isEnabledChain(modularChainInfo.chainId)
-      ),
+      )
+      .filter((chainInfo) => {
+        const chainId = chainInfo.chainId.toLowerCase();
+        const chainName = chainInfo.chainName.toLowerCase();
+        const mainCurrencyDenom =
+          chainInfo.currencies[0].coinDenom.toLowerCase();
+        const stakeCurrencyDenom =
+          chainInfo.stakeCurrency?.coinDenom.toLowerCase();
+        const tokenDenom = chainStore.isEvmOnlyChain(chainInfo.chainId)
+          ? mainCurrencyDenom
+          : stakeCurrencyDenom || mainCurrencyDenom;
+
+        // search text가 eth 또는 eth~ethereum일 경우 evm 체인은 모두 보여준다.
+        if (trimSearch.startsWith("eth")) {
+          const isEVM = !("bech32Config" in chainInfo);
+
+          if (isEVM) {
+            return true;
+          }
+        }
+
+        switch (filterOption) {
+          case "all":
+            return (
+              chainName.includes(trimSearch) ||
+              chainId.includes(trimSearch) ||
+              tokenDenom.includes(trimSearch)
+            );
+          case "chain":
+            return (
+              chainName.includes(trimSearch) || chainId.includes(trimSearch)
+            );
+          case "token":
+            return tokenDenom.includes(trimSearch);
+          case "chainNameAndToken":
+            return (
+              chainName.includes(trimSearch) || tokenDenom.includes(trimSearch)
+            );
+          default:
+            return false;
+        }
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [chainStore.chainInfosInListUI]
-  );
+  }, [chainStore.chainInfosInListUI, filterOption, trimSearch]);
 
   useEffect(() => {
     const disposer = autorun(() => {
@@ -103,7 +143,7 @@ export const useGetSearchChains = ({
         }
 
         const chains = queryChains.response.data.chains;
-        for (const disabledChainInfo of disabledChainInfos) {
+        for (const disabledChainInfo of disabledChainInfosSearched) {
           if (
             !dupCheck.has(
               ChainIdHelper.parse(disabledChainInfo.chainId).identifier
@@ -130,7 +170,7 @@ export const useGetSearchChains = ({
     clearResultsOnEmptyQuery,
     initialChainInfos,
     queryChains,
-    disabledChainInfos,
+    disabledChainInfosSearched,
   ]);
 
   return {
