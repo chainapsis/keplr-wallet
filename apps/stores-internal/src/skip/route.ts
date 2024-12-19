@@ -40,6 +40,32 @@ const Schema = Joi.object<RouteResponse>({
             swap_amount_in: Joi.string().required(),
             price_impact_percent: Joi.string(),
           }).unknown(true),
+          smart_swap_in: Joi.object({
+            swap_venue: Joi.object({
+              name: Joi.string().required(),
+              chain_id: Joi.string().required(),
+            })
+              .unknown(true)
+              .required(),
+            swap_routes: Joi.array()
+              .items(
+                Joi.object({
+                  swap_amount_in: Joi.string().required(),
+                  denom_in: Joi.string().required(),
+                  swap_operations: Joi.array()
+                    .items(
+                      Joi.object({
+                        pool: Joi.string().required(),
+                        denom_in: Joi.string().required(),
+                        denom_out: Joi.string().required(),
+                      }).unknown(true)
+                    )
+                    .required(),
+                }).unknown(true)
+              )
+              .required(),
+            estimated_amount_out: Joi.string().required(),
+          }).unknown(true),
           estimated_affiliate_fee: Joi.string().required(),
         })
           .required()
@@ -259,11 +285,14 @@ export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
     }[] = [];
     for (const operation of this.response.data.operations) {
       if ("swap" in operation) {
-        estimatedAffiliateFees.push({
-          fee: operation.swap.estimated_affiliate_fee,
-          // QUESTION: swap_out이 생기면...?
-          venueChainId: operation.swap.swap_in.swap_venue.chain_id,
-        });
+        const swapIn = operation.swap.swap_in ?? operation.swap.smart_swap_in;
+        if (swapIn) {
+          estimatedAffiliateFees.push({
+            fee: operation.swap.estimated_affiliate_fee,
+            // QUESTION: swap_out이 생기면...?
+            venueChainId: swapIn.swap_venue.chain_id,
+          });
+        }
       }
     }
 

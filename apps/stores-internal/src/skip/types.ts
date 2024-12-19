@@ -74,7 +74,7 @@ export interface RouteResponse {
       }
     | {
         swap: {
-          swap_in: {
+          swap_in?: {
             swap_venue: {
               name: string;
               chain_id: string;
@@ -86,6 +86,22 @@ export interface RouteResponse {
             }[];
             swap_amount_in: string;
             price_impact_percent?: string;
+          };
+          smart_swap_in?: {
+            swap_venue: {
+              name: string;
+              chain_id: string;
+            };
+            swap_routes: {
+              swap_amount_in: string;
+              denom_in: string;
+              swap_operations: {
+                pool: string;
+                denom_in: string;
+                denom_out: string;
+              }[];
+            }[];
+            estimated_amount_out: string;
           };
           estimated_affiliate_fee: string;
         };

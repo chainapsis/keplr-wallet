@@ -315,6 +315,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         // 일단 swap-1로 설정한다.
         if (
           queryRoute.response.data.swap_venues &&
+          queryRoute.response.data.swap_venues[0] &&
           ibcSwapConfigs.amountConfig.chainInfo.chainIdentifier ===
             chainStore.getChain(
               queryRoute.response.data.swap_venues[0].chain_id

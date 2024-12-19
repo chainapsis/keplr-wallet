@@ -472,8 +472,16 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
     for (const operation of response.operations) {
       if ("swap" in operation) {
-        for (const swapOperation of operation.swap.swap_in.swap_operations) {
-          key += `/${swapOperation.pool}/${swapOperation.denom_in}/${swapOperation.denom_out}`;
+        if (operation.swap.swap_in) {
+          for (const swapOperation of operation.swap.swap_in.swap_operations) {
+            key += `/${swapOperation.pool}/${swapOperation.denom_in}/${swapOperation.denom_out}`;
+          }
+        } else if (operation.swap.smart_swap_in) {
+          for (const swapRoute of operation.swap.smart_swap_in.swap_routes) {
+            for (const swapOperation of swapRoute.swap_operations) {
+              key += `/${swapOperation.pool}/${swapOperation.denom_in}/${swapOperation.denom_out}`;
+            }
+          }
         }
       }
     }
