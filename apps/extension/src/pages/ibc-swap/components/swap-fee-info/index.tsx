@@ -221,7 +221,7 @@ export const SwapFeeInfo: FunctionComponent<{
       }
     })();
 
-    const isShowingEstimatedFee = isForEVMTx && !!gasSimulator?.gasEstimated;
+    const isShowingEstimatedFee = isForEVMTx && !!gasSimulator.gasEstimated;
 
     return (
       <React.Fragment>
@@ -386,13 +386,13 @@ export const SwapFeeInfo: FunctionComponent<{
                       {fee
                         .quo(
                           new Dec(
-                            isShowingEstimatedFee ? gasConfig?.gas || 1 : 1
+                            isShowingEstimatedFee ? gasConfig.gas || 1 : 1
                           )
                         )
                         .mul(
                           new Dec(
                             isShowingEstimatedFee
-                              ? gasSimulator?.gasEstimated || 1
+                              ? gasSimulator.gasEstimated || 1
                               : 1
                           )
                         )
