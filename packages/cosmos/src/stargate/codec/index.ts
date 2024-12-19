@@ -94,6 +94,7 @@ import {
   MsgSetOperatorAddress as MsgSetOperatorAddressStakeDym,
 } from "@keplr-wallet/proto-types/stride/stakedym/tx";
 import { Buffer } from "buffer/";
+import { MsgSend as ThorMsgSend } from "@keplr-wallet/proto-types/thorchain/v1/types/msg_send";
 
 export * from "./unknown";
 
@@ -513,3 +514,4 @@ defaultProtoCodec.registerAny(
   "/stride.stakedym.MsgSetOperatorAddress",
   MsgSetOperatorAddressStakeDym
 );
+defaultProtoCodec.registerAny("/types.MsgSend", ThorMsgSend);
