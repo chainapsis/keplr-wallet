@@ -198,7 +198,7 @@ This is an experimental implementation of [ADR-36](https://github.com/cosmos/cos
   
 Its main usage is to prove ownership of an account off-chain, requesting ADR-36 signature using the `signArbitrary` API.  
   
-If requested sign doc with the `signAnimo` API with the ADR-36 that Keplr requires instead of using the `signArbitary` API, it would function as `signArbitary`  
+If requested sign doc with the `signAmino` API with the ADR-36 that Keplr requires instead of using the `signArbitrary` API, it would function as `signArbitrary`  
 - Only supports sign doc in the format of Amino. (in the case of protobuf, [ADR-36](https://github.com/cosmos/cosmos-sdk/blob/master/docs/architecture/adr-036-arbitrary-signature.md) requirements aren't fully specified for implementation)
 - sign doc message should be single and the message type should be "sign/MsgSignData"
 - sign doc "sign/MsgSignData" message should have "signer" and "data" as its value. "data" should be base64 encoded
