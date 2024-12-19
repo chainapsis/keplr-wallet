@@ -526,7 +526,8 @@ const PanelModeItem: FunctionComponent<{
       position="relative"
       isSelected={isSelected}
       borderRadius="0.5rem"
-      paddingY="0.5rem"
+      paddingTop="0.75rem"
+      paddingBottom="0.5rem"
       cursor={isSelected ? undefined : "pointer"}
       onClick={(e) => {
         e.preventDefault();
@@ -541,7 +542,7 @@ const PanelModeItem: FunctionComponent<{
         <PanelModeItemStylesImageContainer isSelected={isSelected}>
           {img}
         </PanelModeItemStylesImageContainer>
-        <Gutter size="0.5rem" />
+        <Gutter size="0.25rem" />
         <PanelModeItemStylesTextContainer isSelected={isSelected}>
           <XAxis alignY="center">{text}</XAxis>
         </PanelModeItemStylesTextContainer>
