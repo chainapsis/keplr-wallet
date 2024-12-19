@@ -1,0 +1,21 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "common/common.proto";
+import "gogoproto/gogo.proto";
+
+message LiquidityProvider {
+  common.Asset asset = 1 [(gogoproto.nullable) = false, (gogoproto.customtype) = "gitlab.com/thorchain/thornode/v3/common.Asset"];
+  string rune_address = 2 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.Address"];
+  string asset_address = 3 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.Address"];
+  int64 last_add_height = 4;
+  int64 last_withdraw_height = 5;
+  string units = 6 [(gogoproto.customtype) = "cosmossdk.io/math.Uint", (gogoproto.nullable) = false];
+  string pending_rune = 7 [(gogoproto.customtype) = "cosmossdk.io/math.Uint", (gogoproto.nullable) = false];
+  string pending_asset = 8 [(gogoproto.customtype) = "cosmossdk.io/math.Uint", (gogoproto.nullable) = false];
+  string pending_tx_Id = 9 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.TxID", (gogoproto.customname) = "PendingTxID"];
+  string rune_deposit_value = 10 [(gogoproto.customtype) = "cosmossdk.io/math.Uint", (gogoproto.nullable) = false];
+  string asset_deposit_value = 11 [(gogoproto.customtype) = "cosmossdk.io/math.Uint", (gogoproto.nullable) = false];
+}

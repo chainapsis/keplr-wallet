@@ -1,0 +1,16 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "gogoproto/gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+
+message QueryRagnarokRequest{
+  string height = 1;
+}
+
+message QueryRagnarokResponse{
+  bool in_progress = 1;
+}

@@ -1,0 +1,35 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all)         = false;
+option (gogoproto.goproto_getters_all) = false;
+
+import "common/common.proto";
+import "gogoproto/gogo.proto";
+
+// |    State    | Swap | Add   | Withdraw  | Refunding |
+// | ----------- | ---- | ----- | --------- | --------- |
+// | `staged`    | no   | yes   | yes       | Refund Invalid Add/Remove Liquidity && all Swaps |
+// | `available` | yes  | yes   | yes       | Refund Invalid Tx |
+// | `suspended` | no   | no    | no        | Refund all |
+enum PoolStatus {
+  UnknownPoolStatus = 0;
+  Available = 1;
+  Staged = 2;
+  Suspended = 3;
+}
+
+message Pool {
+  string balance_rune = 1 [(gogoproto.customtype) = "cosmossdk.io/math.Uint", (gogoproto.nullable) = false];
+  string balance_asset = 2 [(gogoproto.customtype) = "cosmossdk.io/math.Uint", (gogoproto.nullable) = false];
+  common.Asset asset = 3 [(gogoproto.nullable) = false, (gogoproto.customtype) = "gitlab.com/thorchain/thornode/v3/common.Asset"];
+  string LP_units = 4 [(gogoproto.customtype) = "cosmossdk.io/math.Uint", (gogoproto.nullable) = false];
+  PoolStatus status = 5;
+  int64 status_since = 10;
+  int64 decimals = 6;
+  string synth_units = 7 [(gogoproto.customtype) = "cosmossdk.io/math.Uint", (gogoproto.nullable) = false];
+  string pending_inbound_rune = 8 [(gogoproto.customtype) = "cosmossdk.io/math.Uint", (gogoproto.nullable) = false];
+  string pending_inbound_asset = 9 [(gogoproto.customtype) = "cosmossdk.io/math.Uint", (gogoproto.nullable) = false];
+}

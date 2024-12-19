@@ -1,0 +1,36 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "gogoproto/gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+
+message QueryBorrowerRequest{
+  string asset = 1;
+  string address = 2;
+  string height = 3;
+}
+
+message QueryBorrowerResponse{
+  string owner = 1 [(gogoproto.jsontag) = "owner"];
+  string asset = 2 [(gogoproto.jsontag) = "asset"];
+  string debt_issued = 3 [(gogoproto.jsontag) = "debt_issued"];
+  string debt_repaid = 4 [(gogoproto.jsontag) = "debt_repaid"];
+  string debt_current = 5 [(gogoproto.jsontag) = "debt_current"];
+  string collateral_deposited = 6 [(gogoproto.jsontag) = "collateral_deposited"];
+  string collateral_withdrawn = 7 [(gogoproto.jsontag) = "collateral_withdrawn"];
+  string collateral_current = 8 [(gogoproto.jsontag) = "collateral_current"];
+  int64  last_open_height = 9 [(gogoproto.jsontag) = "last_open_height"];
+  int64  last_replay_height = 10 [(gogoproto.jsontag) = "last_replay_height"];
+}
+
+message QueryBorrowersRequest{
+  string asset = 1;
+  string height = 2;
+}
+
+message QueryBorrowersResponse{
+  repeated QueryBorrowerResponse borrowers = 1;
+}

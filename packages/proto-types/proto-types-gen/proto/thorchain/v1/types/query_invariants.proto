@@ -1,0 +1,30 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "gogoproto/gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+
+message QueryInvariantRequest{
+  string path = 1;
+  string height = 2;
+}
+
+message QueryInvariantResponse{
+	// The name of the invariant.
+  string invariant = 1 [(gogoproto.jsontag) = "invariant"];
+	// Returns true if the invariant is broken.
+  bool   broken = 2 [(gogoproto.jsontag) = "broken"];
+	// Informative message about the invariant result.
+  repeated string msg = 3 [(gogoproto.jsontag) = "msg"];
+}
+
+message QueryInvariantsRequest{
+  string height = 1;
+}
+
+message QueryInvariantsResponse{
+  repeated string invariants = 1;
+}

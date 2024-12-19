@@ -1,0 +1,20 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "gogoproto/gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+
+message QueryAccountRequest{
+  string address = 1;
+  string height = 2;
+}
+
+message QueryAccountResponse{
+  string address = 1;
+  string pub_key = 2;
+  string account_number = 3;
+  string sequence = 4;
+}

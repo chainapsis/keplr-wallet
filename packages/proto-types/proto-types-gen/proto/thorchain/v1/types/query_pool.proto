@@ -1,0 +1,62 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "gogoproto/gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+
+message QueryPoolRequest{
+  string asset = 1;
+  string height = 2;
+}
+
+message QueryPoolResponse{
+  string asset = 1 [(gogoproto.jsontag) = "asset"];
+  string short_code = 2;
+  string status = 3 [(gogoproto.jsontag) = "status"];
+  int64 decimals = 4;
+  string pending_inbound_asset = 5 [(gogoproto.jsontag) = "pending_inbound_asset"];
+  string pending_inbound_rune = 6 [(gogoproto.jsontag) = "pending_inbound_rune"];
+  string balance_asset = 7 [(gogoproto.jsontag) = "balance_asset"];
+  string balance_rune = 8 [(gogoproto.jsontag) = "balance_rune"];
+	// the USD (TOR) price of the asset in 1e8
+  string asset_tor_price = 9 [(gogoproto.jsontag) = "asset_tor_price"];
+	// the total pool units, this is the sum of LP and synth units
+  string pool_units = 10 [(gogoproto.jsontag) = "pool_units"];
+	// the total pool liquidity provider units
+  string LP_units = 11 [(gogoproto.jsontag) = "LP_units"];
+	// the total synth units in the pool
+  string synth_units = 12 [(gogoproto.jsontag) = "synth_units"];
+	// the total supply of synths for the asset
+  string synth_supply = 13 [(gogoproto.jsontag) = "synth_supply"];
+	// the balance of L1 asset deposited into the Savers Vault
+  string savers_depth = 14 [(gogoproto.jsontag) = "savers_depth"];
+	// the number of units owned by Savers
+  string savers_units = 15 [(gogoproto.jsontag) = "savers_units"];
+	// the filled savers capacity in basis points, 4500/10000 = 45%
+  string savers_fill_bps = 16 [(gogoproto.jsontag) = "savers_fill_bps"];
+	// amount of remaining capacity in asset
+  string savers_capacity_remaining = 17 [(gogoproto.jsontag) = "savers_capacity_remaining"];
+	// whether additional synths cannot be minted
+  bool synth_mint_paused = 18 [(gogoproto.jsontag) = "synth_mint_paused"];
+	// the amount of synth supply remaining before the current max supply is reached
+  string synth_supply_remaining = 19 [(gogoproto.jsontag) = "synth_supply_remaining"];
+	// the amount of collateral collects for loans
+  string loan_collateral = 20 [(gogoproto.jsontag) = "loan_collateral"];
+	// the amount of remaining collateral collects for loans
+  string loan_collateral_remaining = 21 [(gogoproto.jsontag) = "loan_collateral_remaining"];
+	// the current loan collateralization ratio
+  string loan_cr = 22 [(gogoproto.jsontag) = "loan_cr"];
+	// the depth of the derived virtual pool relative to L1 pool (in basis points)
+  string derived_depth_bps = 23 [(gogoproto.jsontag) = "derived_depth_bps"];
+}
+
+message QueryPoolsRequest{
+  string height = 1;
+}
+
+message QueryPoolsResponse{
+  repeated QueryPoolResponse pools = 1;
+}

@@ -1,0 +1,16 @@
+syntax = "proto3";
+package types;
+
+import "gogoproto/gogo.proto";
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+
+message NodeMimir {
+  string key = 1;
+  int64 value = 2;
+  bytes signer = 3 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+}
+
+message NodeMimirs {
+  repeated NodeMimir mimirs = 1 [(gogoproto.nullable) = false];
+}
