@@ -264,36 +264,23 @@ export const MenuBar: FunctionComponent<{
                     isSelected={sidePanelEnabled}
                     isSidePanel={true}
                     img={
-                      <img
-                        src={require("../../../../public/assets/img/side-menu-side-panel.png")}
-                        alt="Turn on side classic mode"
-                        style={{
-                          aspectRatio: "172/120",
-                          height: "2.5rem",
-                        }}
-                      />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <path
+                          d="M15 3V21M7.8 3H16.2C17.8802 3 18.7202 3 19.362 3.32698C19.9265 3.6146 20.3854 4.07354 20.673 4.63803C21 5.27976 21 6.11984 21 7.8V16.2C21 17.8802 21 18.7202 20.673 19.362C20.3854 19.9265 19.9265 20.3854 19.362 20.673C18.7202 21 17.8802 21 16.2 21H7.8C6.11984 21 5.27976 21 4.63803 20.673C4.07354 20.3854 3.6146 19.9265 3.32698 19.362C3 18.7202 3 17.8802 3 16.2V7.8C3 6.11984 3 5.27976 3.32698 4.63803C3.6146 4.07354 4.07354 3.6146 4.63803 3.32698C5.27976 3 6.11984 3 7.8 3Z"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
                     }
-                    text={
-                      <React.Fragment>
-                        <svg
-                          width="12"
-                          height="12"
-                          viewBox="0 0 12 12"
-                          fill="none"
-                          stroke="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M7.5 1.5V10.5M3.9 1.5H8.1C8.94008 1.5 9.36012 1.5 9.68099 1.66349C9.96323 1.8073 10.1927 2.03677 10.3365 2.31901C10.5 2.63988 10.5 3.05992 10.5 3.9V8.1C10.5 8.94008 10.5 9.36012 10.3365 9.68099C10.1927 9.96323 9.96323 10.1927 9.68099 10.3365C9.36012 10.5 8.94008 10.5 8.1 10.5H3.9C3.05992 10.5 2.63988 10.5 2.31901 10.3365C2.03677 10.1927 1.8073 9.96323 1.66349 9.68099C1.5 9.36012 1.5 8.94008 1.5 8.1V3.9C1.5 3.05992 1.5 2.63988 1.66349 2.31901C1.8073 2.03677 2.03677 1.8073 2.31901 1.66349C2.63988 1.5 3.05992 1.5 3.9 1.5Z"
-                            stroke="currentColor"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                        <Gutter size="0.25rem" />
-                        <Subtitle4>Side Panel</Subtitle4>
-                      </React.Fragment>
-                    }
+                    text={<Subtitle4>Side Panel</Subtitle4>}
                   />
                 </Column>
                 <Gutter size="0.5rem" />
@@ -311,36 +298,23 @@ export const MenuBar: FunctionComponent<{
                     isSidePanel={false}
                     isSelected={!sidePanelEnabled}
                     img={
-                      <img
-                        src={require("../../../../public/assets/img/side-menu-classic-mode.png")}
-                        alt="Turn on side classic mode"
-                        style={{
-                          aspectRatio: "172/120",
-                          height: "2.5rem",
-                        }}
-                      />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <path
+                          d="M4 14H10M10 14V20M10 14L3 21M20 10H14M14 10V4M14 10L21 3"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
                     }
-                    text={
-                      <React.Fragment>
-                        <svg
-                          width="13"
-                          height="12"
-                          viewBox="0 0 13 12"
-                          fill="none"
-                          stroke="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M2.75 7H5.75M5.75 7V10M5.75 7L2.25 10.5M10.75 5H7.75M7.75 5V2M7.75 5L11.25 1.5"
-                            stroke="currentColor"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                        <Gutter size="0.25rem" />
-                        <Subtitle4> Classic</Subtitle4>
-                      </React.Fragment>
-                    }
+                    text={<Subtitle4> Classic</Subtitle4>}
                   />
                 </Column>
               </Columns>
@@ -419,11 +393,19 @@ export const MenuBar: FunctionComponent<{
 const PanelModeItemStylesImageContainer = styled.div<{
   isSelected: boolean;
 }>`
-  transition: opacity 0.15s linear;
+  transition: color 0.15s linear;
 
-  opacity: ${(props) =>
-    props.isSelected ? 1 : props.theme.mode === "light" ? 0.7 : 0.5};
-  mix-blend-mode: luminosity;
+  color: ${(props) => {
+    if (props.theme.mode === "light") {
+      return props.isSelected
+        ? ColorPalette["blue-400"]
+        : ColorPalette["gray-300"];
+    }
+
+    return props.isSelected
+      ? ColorPalette["gray-50"]
+      : ColorPalette["gray-300"];
+  }};
 `;
 
 const PanelModeItemStylesTextContainer = styled(Box)<{
@@ -493,7 +475,13 @@ const PanelModeItemStylesContainer = styled(Box)<{
     }};
 
     ${PanelModeItemStylesImageContainer} {
-      opacity: 1;
+      color: ${(props) => {
+        if (props.theme.mode === "light") {
+          return ColorPalette["blue-400"];
+        }
+
+        return ColorPalette["gray-50"];
+      }};
     }
 
     ${PanelModeItemStylesTextContainer} {
@@ -529,19 +517,17 @@ const PanelModeItem: FunctionComponent<{
 }> = ({
   isSelected,
   onClick,
-  isSidePanel,
   text,
   img,
   animateSidePanelRecommendationTooltip,
 }) => {
-  const theme = useTheme();
-
   return (
     <PanelModeItemStylesContainer
       position="relative"
       isSelected={isSelected}
       borderRadius="0.5rem"
-      paddingY="0.5rem"
+      paddingTop="0.75rem"
+      paddingBottom="0.5rem"
       cursor={isSelected ? undefined : "pointer"}
       onClick={(e) => {
         e.preventDefault();
@@ -552,29 +538,11 @@ const PanelModeItem: FunctionComponent<{
       }}
     >
       {animateSidePanelRecommendationTooltip ? <AnimatedTooltip /> : null}
-      {isSidePanel ? (
-        <img
-          src={
-            theme.mode === "light"
-              ? require("../../../../public/assets/img/side-menu-side-panel-ribbon-light.png")
-              : require("../../../../public/assets/img/side-menu-side-panel-ribbon.png")
-          }
-          alt="Side Panel Mode is here"
-          style={{
-            position: "absolute",
-            zIndex: 1,
-            aspectRatio: "1/1",
-            width: "2.625rem",
-            top: "1px",
-            left: "1px",
-          }}
-        />
-      ) : null}
       <Box alignX="center">
         <PanelModeItemStylesImageContainer isSelected={isSelected}>
           {img}
         </PanelModeItemStylesImageContainer>
-        <Gutter size="0.5rem" />
+        <Gutter size="0.25rem" />
         <PanelModeItemStylesTextContainer isSelected={isSelected}>
           <XAxis alignY="center">{text}</XAxis>
         </PanelModeItemStylesTextContainer>
