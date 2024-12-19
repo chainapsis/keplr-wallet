@@ -1,0 +1,64 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "gogoproto/gogo.proto";
+import "common/common.proto";
+
+option (gogoproto.marshaler_all) = true;
+
+message QueryVaultRequest{
+  string pub_key = 1;
+  string height = 2;
+}
+
+message QueryVaultResponse{
+  int64 block_height = 1;
+  string pub_key = 2;
+  repeated common.Coin coins = 3 [(gogoproto.castrepeated) = "gitlab.com/thorchain/thornode/v3/common.Coins", (gogoproto.nullable) = false, (gogoproto.jsontag) = "coins"];
+  string type = 4;
+  string status = 5 [(gogoproto.jsontag) = "status"];
+  int64 status_since = 6;
+	// the list of node public keys which are members of the vault
+  repeated string membership = 7;
+  repeated string chains = 8;
+  int64 inbound_tx_count = 9;
+  int64 outbound_tx_count = 10;
+  repeated int64 pending_tx_block_heights = 11;
+  repeated VaultRouter routers = 12 [(gogoproto.jsontag) = "routers"];
+  repeated VaultAddress addresses = 13 [(gogoproto.jsontag) = "addresses"];
+  repeated string frozen = 14;
+}
+
+message QueryAsgardVaultsRequest{
+  string height = 1;
+}
+
+message QueryAsgardVaultsResponse{
+  repeated QueryVaultResponse asgard_vaults = 1;
+}
+
+message QueryVaultsPubkeysRequest{
+  string height = 1;
+}
+
+message QueryVaultsPubkeysResponse{
+  repeated VaultInfo asgard = 1 [(gogoproto.jsontag) = "asgard"];
+  repeated VaultInfo inactive = 2 [(gogoproto.jsontag) = "inactive"];
+}
+
+message VaultInfo{
+  string pub_key = 1 [(gogoproto.jsontag) = "pub_key"];
+  repeated VaultRouter routers = 2 [(gogoproto.jsontag) = "routers"];
+}
+
+message VaultRouter{
+  string chain = 1;
+  string router = 2;
+}
+
+message VaultAddress{
+  string chain = 1 [(gogoproto.jsontag) = "chain"];
+  string address = 2 [(gogoproto.jsontag) = "address"];
+}

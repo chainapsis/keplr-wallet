@@ -1,0 +1,57 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "gogoproto/gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+
+message QueryRunePoolRequest{
+  string height = 1;
+}
+
+message QueryRunePoolResponse{
+  POL pol = 1 [(gogoproto.jsontag) = "pol"];
+  RunePoolProviders providers = 2 [(gogoproto.jsontag) = "providers"];
+  RunePoolReserve reserve = 3 [(gogoproto.jsontag) = "reserve"];
+}
+
+message POL{
+	// total amount of RUNE deposited into the pools
+  string rune_deposited = 1 [(gogoproto.jsontag) = "rune_deposited"];
+	// total amount of RUNE withdrawn from the pools
+  string rune_withdrawn = 2 [(gogoproto.jsontag) = "rune_withdrawn"];
+	// total value of protocol's LP position in RUNE value
+  string value = 3 [(gogoproto.jsontag) = "value"];
+	// profit and loss of protocol owned liquidity
+  string pnl = 4 [(gogoproto.jsontag) = "pnl"];
+	// current amount of rune deposited
+  string current_deposit = 5 [(gogoproto.jsontag) = "current_deposit"];
+}
+
+message RunePoolProviders{
+	// the units of RUNEPool owned by providers (including pending)
+  string units = 1 [(gogoproto.jsontag) = "units"];
+	// the units of RUNEPool owned by providers that remain pending
+  string pending_units = 2 [(gogoproto.jsontag) = "pending_units"];
+	// the amount of RUNE pending
+  string pending_rune = 3 [(gogoproto.jsontag) = "pending_rune"];
+	// the value of the provider share of the RUNEPool (includes pending RUNE)
+  string value = 4 [(gogoproto.jsontag) = "value"];
+	// the profit and loss of the provider share of the RUNEPool
+  string pnl = 5 [(gogoproto.jsontag) = "pnl"];
+	// the current RUNE deposited by providers
+  string current_deposit = 6 [(gogoproto.jsontag) = "current_deposit"];
+}
+
+message RunePoolReserve{
+	// the units of RUNEPool owned by the reserve
+  string units = 1 [(gogoproto.jsontag) = "units"];
+	// the value of the reserve share of the RUNEPool
+  string value = 2 [(gogoproto.jsontag) = "value"];
+	// the profit and loss of the reserve share of the RUNEPool
+  string pnl = 3 [(gogoproto.jsontag) = "pnl"];
+	// the current RUNE deposited by the reserve
+  string current_deposit = 4 [(gogoproto.jsontag) = "current_deposit"];
+}

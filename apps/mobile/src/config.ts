@@ -2355,6 +2355,51 @@ export const EmbedChainInfos: ChainInfo[] = [
     },
     features: ['cosmwasm'],
   },
+  {
+    chainId: 'thorchain-1',
+    chainName: 'THORChain',
+    chainSymbolImageUrl:
+      'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/thorchain/chain.png',
+    rpc: 'https://rpc-thorchain.keplr.app',
+    rest: 'https://lcd-thorchain.keplr.app',
+    bip44: {
+      coinType: 931,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: 'thor',
+      bech32PrefixAccPub: 'thorpub',
+      bech32PrefixValAddr: 'thorvaloper',
+      bech32PrefixValPub: 'thorvaloperpub',
+      bech32PrefixConsAddr: 'thorvalcons',
+      bech32PrefixConsPub: 'thorvalconspub',
+    },
+    currencies: [
+      {
+        coinDenom: 'RUNE',
+        coinMinimalDenom: 'rune',
+        coinDecimals: 8,
+        coinGeckoId: 'thorchain',
+        coinImageUrl:
+          'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/thorchain/rune.png',
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: 'RUNE',
+        coinMinimalDenom: 'rune',
+        coinDecimals: 8,
+        coinGeckoId: 'thorchain',
+        coinImageUrl:
+          'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/thorchain/rune.png',
+        gasPriceStep: {
+          low: 0.02,
+          average: 0.02,
+          high: 0.03,
+        },
+      },
+    ],
+    features: [],
+  },
 ];
 
 // TODO: 원격으로 변경할 수 있도록 나중에 네트워크에서 이 정보를 가져오는 방식으로 변경될 수 있음

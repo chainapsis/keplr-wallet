@@ -1,0 +1,65 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all)         = false;
+option (gogoproto.goproto_getters_all) = false;
+  
+import "common/common.proto";
+import "gogoproto/gogo.proto";
+
+enum NodeStatus {
+  option (gogoproto.goproto_enum_stringer) = true;
+  Unknown = 0;
+  Whitelisted = 1;
+  Standby = 2;
+  Ready = 3;
+  Active = 4;
+  Disabled = 5;
+}
+
+enum NodeType {
+  option (gogoproto.goproto_enum_stringer) = true;
+  TypeValidator = 0;
+  TypeVault =  1;
+  TypeUnknown = 2;
+}
+
+message NodeAccount {
+  option (gogoproto.stringer) = false;
+  bytes node_address = 1 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+  NodeStatus status = 2;
+  common.PubKeySet pub_key_set = 3 [(gogoproto.nullable) = false];
+  string validator_cons_pub_key = 4;
+  string bond = 5 [(gogoproto.customtype) = "cosmossdk.io/math.Uint", (gogoproto.nullable) = false];
+  int64 active_block_height = 6;
+  string bond_address = 7 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.Address"];
+  int64 status_since = 8;
+  repeated string signer_membership = 9;
+  bool requested_to_leave = 10;
+  bool forced_to_leave = 11;
+  uint64 leave_score = 12;
+  string ip_address = 13 [(gogoproto.customname) = "IPAddress"];
+  string version = 14;
+  NodeType type = 15;
+}
+
+message BondProvider {
+  option (gogoproto.stringer) = true;
+  bytes bond_address = 1 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+  string bond = 2 [(gogoproto.customtype) = "cosmossdk.io/math.Uint", (gogoproto.nullable) = false];
+}
+
+message BondProviders {
+  option (gogoproto.stringer) = true;
+  bytes node_address = 1 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+  string node_operator_fee = 2 [(gogoproto.customtype) = "cosmossdk.io/math.Uint", (gogoproto.nullable) = false];
+  repeated BondProvider providers = 3 [(gogoproto.nullable) = false];
+}
+
+message MinJoinLast {
+  option (gogoproto.stringer) = true;
+  int64 last_changed_height = 1;
+  string version = 2;
+}

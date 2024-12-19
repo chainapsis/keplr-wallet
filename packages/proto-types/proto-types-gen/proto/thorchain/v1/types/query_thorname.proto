@@ -1,0 +1,30 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "gogoproto/gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+
+message QueryThornameRequest{
+  string name = 1;
+  string height = 2;
+}
+
+message QueryThornameResponse{
+  string name = 1;
+  int64 expire_block_height = 2;
+  string owner = 3;
+  string preferred_asset = 4 [(gogoproto.jsontag) = "preferred_asset"];
+	// Amount of RUNE currently accrued by this thorname in affiliate fees waiting to be swapped to preferred asset.
+  string affiliate_collector_rune = 5;
+  repeated ThornameAlias aliases = 6 [(gogoproto.jsontag) = "aliases"];
+  // Amount of RUNE currently needed to trigger a preferred asset swap.
+  string preferred_asset_swap_threshold_rune = 7;
+}
+
+message ThornameAlias{
+  string chain = 1;
+  string address = 2;
+}

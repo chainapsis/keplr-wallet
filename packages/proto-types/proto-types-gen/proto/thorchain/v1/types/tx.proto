@@ -1,0 +1,49 @@
+syntax = "proto3";
+package types;
+
+import "cosmos/msg/v1/msg.proto";
+import "types/msg_ban.proto";
+import "types/msg_deposit.proto";
+import "types/msg_errata.proto";
+import "types/msg_mimir.proto";
+import "types/msg_network_fee.proto";
+import "types/msg_node_pause_chain.proto";
+import "types/msg_observed_txin.proto";
+import "types/msg_observed_txout.proto";
+import "types/msg_send.proto";
+import "types/msg_set_ip_address.proto";
+import "types/msg_set_node_keys.proto";
+import "types/msg_solvency.proto";
+import "types/msg_tss_keysign_fail.proto";
+import "types/msg_tss_pool.proto";
+import "types/msg_version.proto";
+import "types/msg_upgrade.proto";
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+// Msg defines the bank Msg service.
+service Msg {
+    option (cosmos.msg.v1.service) = true;
+  
+    rpc Ban(MsgBan) returns (MsgEmpty);
+    rpc Deposit(MsgDeposit) returns (MsgEmpty);
+    rpc ErrataTx(MsgErrataTx) returns (MsgEmpty);
+    rpc Mimir(MsgMimir) returns (MsgEmpty);
+    rpc NetworkFee(MsgNetworkFee) returns (MsgEmpty);
+    rpc NodePauseChain(MsgNodePauseChain) returns (MsgEmpty);
+    rpc ObservedTxIn(MsgObservedTxIn) returns (MsgEmpty);
+    rpc ObservedTxOut(MsgObservedTxOut) returns (MsgEmpty);
+    rpc ThorSend(MsgSend) returns (MsgEmpty);
+    rpc SetIPAddress(MsgSetIPAddress) returns (MsgEmpty);
+    rpc SetNodeKeys(MsgSetNodeKeys) returns (MsgEmpty);
+    rpc Solvency(MsgSolvency) returns (MsgEmpty);
+    rpc TssKeysignFail(MsgTssKeysignFail) returns (MsgEmpty);
+    rpc TssPool(MsgTssPool) returns (MsgEmpty);
+    rpc SetVersion(MsgSetVersion) returns (MsgEmpty);
+    rpc ProposeUpgrade(MsgProposeUpgrade) returns (MsgEmpty);
+    rpc ApproveUpgrade(MsgApproveUpgrade) returns (MsgEmpty);
+    rpc RejectUpgrade(MsgRejectUpgrade) returns (MsgEmpty);
+}
+
+// MsgEmpty is the return type for all current Msg Server messages
+message MsgEmpty {}

@@ -1,0 +1,20 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all)         = false;
+option (gogoproto.goproto_getters_all) = false;
+
+import "gogoproto/gogo.proto";
+import "common/common.proto";
+
+message SolvencyVoter {
+  string id = 1 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.TxID"];
+  string chain = 2 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.Chain"];
+  string pub_key = 3 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.PubKey"];
+  repeated common.Coin coins = 4 [(gogoproto.castrepeated) = "gitlab.com/thorchain/thornode/v3/common.Coins", (gogoproto.nullable) = false];
+  int64 height = 5;
+  int64 consensus_block_height = 6;
+  repeated string signers = 7;
+}
