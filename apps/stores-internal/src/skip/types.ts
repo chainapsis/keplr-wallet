@@ -41,7 +41,11 @@ export interface MsgsDirectResponse {
     evm_tx?: {
       chain_id: string;
       data: string;
-      required_erc20_approvals: string[];
+      required_erc20_approvals: {
+        amount: string;
+        spender: string;
+        token_contract: string;
+      }[];
       signer_address: string;
       to: string;
       value: string;

@@ -52,7 +52,7 @@ import { useEffectOnce } from "../../hooks/use-effect-once";
 import { amountToAmbiguousAverage, amountToAmbiguousString } from "../../utils";
 import { Button } from "../../components/button";
 import { TextButtonProps } from "../../components/button-text";
-import { UnsignedEVMTransaction } from "@keplr-wallet/stores-eth";
+import { UnsignedEVMTransactionWithErc20Approvals } from "@keplr-wallet/stores-eth";
 import { EthTxStatus } from "@keplr-wallet/types";
 
 const TextButtonStyles = {
@@ -314,10 +314,11 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         // 이 가정에 따라서 첫로드시에 gas를 restore하기 위해서 트랜잭션을 보내는 체인에서 swap 할 경우
         // 일단 swap-1로 설정한다.
         if (
-          queryRoute.response.data.swap_venue &&
+          queryRoute.response.data.swap_venues &&
           ibcSwapConfigs.amountConfig.chainInfo.chainIdentifier ===
-            chainStore.getChain(queryRoute.response.data.swap_venue.chain_id)
-              .chainIdentifier
+            chainStore.getChain(
+              queryRoute.response.data.swap_venues[0].chain_id
+            ).chainIdentifier
         ) {
           type = `swap-1`;
         }
@@ -328,6 +329,26 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             if ("swap_in" in firstOperation.swap) {
               type = `swap-${firstOperation.swap.swap_in.swap_operations.length}`;
             }
+          }
+
+          if ("axelar_transfer" in firstOperation) {
+            type = "axelar_transfer";
+          }
+
+          if ("cctp_transfer" in firstOperation) {
+            type = "cctp_transfer";
+          }
+
+          if ("go_fast_transfer" in firstOperation) {
+            type = "go_fast_transfer";
+          }
+
+          if ("hyperlane_transfer" in firstOperation) {
+            type = "hyperlane_transfer";
+          }
+
+          if ("evm_swap" in firstOperation) {
+            type = "evm_swap";
           }
         }
       }
@@ -375,6 +396,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         // 코스모스 스왑은 스왑베뉴가 무조건 하나라고 해서 일단 처음걸 쓰기로 한다.
         swapFeeBpsReceiver[0]
       );
+
       if (!tx) {
         throw new Error("Not ready to simulate tx");
       }
@@ -386,6 +408,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           ibcSwapConfigs.amountConfig.chainId
         );
         const sender = ibcSwapConfigs.senderConfig.sender;
+
         return {
           simulate: () => ethereumAccount.simulateGas(sender, tx),
         };
@@ -669,7 +692,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         if (!interactionBlocked) {
           setIsTxLoading(true);
 
-          let tx: MakeTxResponse | UnsignedEVMTransaction;
+          let tx: MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals;
 
           const queryRoute = ibcSwapConfigs.amountConfig
             .getQueryIBCSwap()!
@@ -1029,12 +1052,14 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   },
                 }
               );
+
+              navigate("/", {
+                replace: true,
+              });
             } else {
               const ethereumAccount = ethereumAccountStore.getAccount(
                 ibcSwapConfigs.amountConfig.chainId
               );
-              ethereumAccount.setIsSendingTx(true);
-
               const { maxFeePerGas, maxPriorityFeePerGas, gasPrice } =
                 ibcSwapConfigs.feeConfig.getEIP1559TxFees(
                   ibcSwapConfigs.feeConfig.type
@@ -1042,6 +1067,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               const feeObject =
                 maxFeePerGas && maxPriorityFeePerGas
                   ? {
+                      type: 2,
                       maxFeePerGas: `0x${BigInt(
                         maxFeePerGas.truncate().toString()
                       ).toString(16)}`,
@@ -1062,15 +1088,85 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                     };
               const sender = ibcSwapConfigs.senderConfig.sender;
 
+              const isErc20InCurrency =
+                ("type" in inCurrency && inCurrency.type === "erc20") ||
+                inCurrency.coinMinimalDenom.startsWith("erc20:");
+              const erc20Approval = tx.requiredErc20Approvals?.[0];
+              const erc20ApprovalTxTemp =
+                erc20Approval && isErc20InCurrency
+                  ? ethereumAccount.makeErc20ApprovalTx(
+                      {
+                        ...inCurrency,
+                        type: "erc20",
+                        contractAddress: inCurrency.coinMinimalDenom.replace(
+                          "erc20:",
+                          ""
+                        ),
+                      },
+                      erc20Approval.spender,
+                      erc20Approval.amount
+                    )
+                  : undefined;
+              const erc20ApprovalFeeObject = await (async () => {
+                if (erc20ApprovalTxTemp) {
+                  const { gasUsed } = await ethereumAccount.simulateGas(
+                    sender,
+                    erc20ApprovalTxTemp
+                  );
+
+                  const { maxFeePerGas, maxPriorityFeePerGas, gasPrice } =
+                    ibcSwapConfigs.feeConfig.getEIP1559TxFees(
+                      ibcSwapConfigs.feeConfig.type
+                    );
+
+                  const feeObject =
+                    maxFeePerGas && maxPriorityFeePerGas
+                      ? {
+                          type: 2,
+                          maxFeePerGas: `0x${Number(
+                            maxFeePerGas.toString()
+                          ).toString(16)}`,
+                          maxPriorityFeePerGas: `0x${Number(
+                            maxPriorityFeePerGas.toString()
+                          ).toString(16)}`,
+                          gasLimit: `0x${gasUsed.toString(16)}`,
+                        }
+                      : {
+                          gasPrice: `0x${Number(gasPrice ?? "0").toString(16)}`,
+                          gasLimit: `0x${gasUsed.toString(16)}`,
+                        };
+
+                  return feeObject;
+                }
+
+                return {};
+              })();
+              const erc20ApprovalTx = erc20ApprovalTxTemp
+                ? {
+                    ...erc20ApprovalTxTemp,
+                    ...erc20ApprovalFeeObject,
+                  }
+                : undefined;
+
+              ethereumAccount.setIsSendingTx(true);
+
               await ethereumAccount.sendEthereumTx(
                 sender,
                 {
-                  ...tx,
-                  ...feeObject,
+                  ...(erc20ApprovalTx ?? {
+                    ...tx,
+                    ...feeObject,
+                  }),
                 },
                 {
                   onBroadcasted: () => {
                     // TODO: Add history
+                    ethereumAccount.setIsSendingTx(false);
+                    if (!erc20ApprovalTx) {
+                      navigate("/", {
+                        replace: true,
+                      });
+                    }
                   },
                   onFulfill: (txReceipt) => {
                     const queryBalances = queriesStore.get(
@@ -1093,6 +1189,65 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                         }
                       });
                     if (txReceipt.status === EthTxStatus.Success) {
+                      if (erc20ApprovalTx) {
+                        delete tx.requiredErc20Approvals;
+                        ethereumAccount.setIsSendingTx(true);
+                        ethereumAccount.sendEthereumTx(
+                          sender,
+                          {
+                            ...tx,
+                            ...feeObject,
+                          },
+                          {
+                            onBroadcasted: () => {
+                              // TODO: Add history
+                              ethereumAccount.setIsSendingTx(false);
+                              navigate("/", {
+                                replace: true,
+                              });
+                            },
+                            onFulfill: (txReceipt) => {
+                              const queryBalances = queriesStore.get(
+                                ibcSwapConfigs.amountConfig.chainId
+                              ).queryBalances;
+                              queryBalances
+                                .getQueryEthereumHexAddress(sender)
+                                .balances.forEach((balance) => {
+                                  if (
+                                    balance.currency.coinMinimalDenom ===
+                                      ibcSwapConfigs.amountConfig.currency
+                                        .coinMinimalDenom ||
+                                    ibcSwapConfigs.feeConfig.fees.some(
+                                      (fee) =>
+                                        fee.currency.coinMinimalDenom ===
+                                        balance.currency.coinMinimalDenom
+                                    )
+                                  ) {
+                                    balance.fetch();
+                                  }
+                                });
+                              if (txReceipt.status === EthTxStatus.Success) {
+                                notification.show(
+                                  "success",
+                                  intl.formatMessage({
+                                    id: "notification.transaction-success",
+                                  }),
+                                  ""
+                                );
+                              } else {
+                                notification.show(
+                                  "failed",
+                                  intl.formatMessage({
+                                    id: "error.transaction-failed",
+                                  }),
+                                  ""
+                                );
+                              }
+                            },
+                          }
+                        );
+                      }
+
                       notification.show(
                         "success",
                         intl.formatMessage({
@@ -1110,12 +1265,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   },
                 }
               );
-              ethereumAccount.setIsSendingTx(false);
             }
-
-            navigate("/", {
-              replace: true,
-            });
           } catch (e) {
             if (e?.message === "Request rejected") {
               return;

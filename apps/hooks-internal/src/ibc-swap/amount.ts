@@ -20,7 +20,7 @@ import {
 } from "@keplr-wallet/stores-internal";
 import {
   EthereumAccountStore,
-  UnsignedEVMTransaction,
+  UnsignedEVMTransactionWithErc20Approvals,
 } from "@keplr-wallet/stores-eth";
 
 export class IBCSwapAmountConfig extends AmountConfig {
@@ -143,7 +143,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
     slippageTolerancePercent: number,
     affiliateFeeReceiver: string,
     priorOutAmount?: Int
-  ): Promise<MakeTxResponse | UnsignedEVMTransaction> {
+  ): Promise<MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals> {
     const queryIBCSwap = this.getQueryIBCSwap();
     if (!queryIBCSwap) {
       throw new Error("Query IBC Swap is not initialized");
@@ -312,7 +312,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
   getTxIfReady(
     slippageTolerancePercent: number,
     affiliateFeeReceiver: string
-  ): MakeTxResponse | UnsignedEVMTransaction | undefined {
+  ): MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals | undefined {
     if (!this.currency) {
       return;
     }
@@ -459,7 +459,10 @@ export class IBCSwapAmountConfig extends AmountConfig {
     } else if (msg.type === "evmTx") {
       const ethereumAccount = this.ethereumAccountStore.getAccount(msg.chainId);
       const tx = ethereumAccount.makeTx(msg.to, msg.value, msg.data);
-      return tx;
+      return {
+        ...tx,
+        requiredErc20Approvals: msg.requiredErc20Approvals,
+      };
     }
   }
 

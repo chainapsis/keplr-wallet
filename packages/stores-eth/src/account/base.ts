@@ -1,6 +1,7 @@
 import { ChainGetter } from "@keplr-wallet/stores";
 import {
   AppCurrency,
+  ERC20Currency,
   EthSignType,
   EthTxReceipt,
   Keplr,
@@ -231,7 +232,7 @@ export class EthereumAccountBase {
           };
         default:
           return {
-            ...this.makeTx(to, hexValue(parsedAmount), "0x0"),
+            ...this.makeTx(to, hexValue(parsedAmount)),
             ...feeObject,
           };
       }
@@ -240,7 +241,24 @@ export class EthereumAccountBase {
     return unsignedTx;
   }
 
-  makeTx(to: string, value: string, data: string): UnsignedTransaction {
+  makeErc20ApprovalTx(
+    currency: ERC20Currency,
+    spender: string,
+    amount: string
+  ): UnsignedTransaction {
+    const parsedAmount = parseUnits(amount, currency.coinDecimals);
+
+    return this.makeTx(
+      currency.contractAddress,
+      "0x0",
+      erc20ContractInterface.encodeFunctionData("approve", [
+        spender,
+        hexValue(parsedAmount),
+      ])
+    );
+  }
+
+  makeTx(to: string, value: string, data?: string): UnsignedTransaction {
     const chainInfo = this.chainGetter.getChain(this.chainId);
     const evmInfo = chainInfo.evm;
     if (!evmInfo) {

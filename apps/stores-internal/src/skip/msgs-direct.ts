@@ -89,6 +89,11 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
         to: string;
         value: string;
         data: string;
+        requiredErc20Approvals?: {
+          amount: string;
+          spender: string;
+          tokenAddress: string;
+        }[];
       }
     | undefined {
     if (!this.response) {
@@ -112,6 +117,13 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
         to: msg.evm_tx.to,
         value: `0x${BigInt(msg.evm_tx.value).toString(16)}`,
         data: `0x${msg.evm_tx.data}`,
+        requiredErc20Approvals: msg.evm_tx.required_erc20_approvals.map(
+          (approval) => ({
+            amount: approval.amount,
+            spender: approval.spender,
+            tokenAddress: approval.token_contract,
+          })
+        ),
       };
     }
 
