@@ -27,3 +27,7 @@ Keplr is a non-custodial blockchain wallets for webpages that allow users to int
 [Use with secretjs](./api/secretjs.md) describes how to use secretjs with Keplr if you need to use secret-wasm feature.
   
 [Suggest chain](./api/suggest-chain.md) describes how to suggest the chain to Keplr if the chain is not supported natively in Keplr.
+
+[EVM-based chains support](./api/evm.md) describes how to support EVM-based chains with Keplr.
+
+[Starknet Support](./api/starknet.md) describes how to support Starknet chains with Keplr.
