@@ -213,11 +213,12 @@ export const CopyAddressScene: FunctionComponent<{
 
   const initialLookingForChains = useMemo(
     () =>
-      chainStore.modularChainInfos.filter(
+      chainStore.modularChainInfosInListUI.filter(
         (modularChainInfo) =>
           !chainStore.isEnabledChain(modularChainInfo.chainId)
       ),
-    [chainStore]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [chainStore.modularChainInfosInListUI]
   );
 
   const { trimSearch, searchedChainInfos } = useGetSearchChains({
