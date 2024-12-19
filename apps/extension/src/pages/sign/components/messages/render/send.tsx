@@ -27,8 +27,12 @@ export const SendMessage: IMessageRenderer = {
       if ("type" in msg && msg.type === "thorchain/MsgSend") {
         return {
           amount: msg.value.amount,
-          fromAddress: Buffer.from(msg.value.from_address, "base64").toString(),
-          toAddress: Buffer.from(msg.value.to_address, "base64").toString(),
+          fromAddress: new Bech32Address(
+            Buffer.from(msg.value.from_address, "base64")
+          ).toBech32("thor"),
+          toAddress: new Bech32Address(
+            Buffer.from(msg.value.to_address, "base64")
+          ).toBech32("thor"),
         };
       }
 
