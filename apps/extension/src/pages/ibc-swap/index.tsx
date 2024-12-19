@@ -315,20 +315,40 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         // 일단 swap-1로 설정한다.
         if (
           queryRoute.response.data.swap_venues &&
-          queryRoute.response.data.swap_venues[0] &&
-          ibcSwapConfigs.amountConfig.chainInfo.chainIdentifier ===
-            chainStore.getChain(
-              queryRoute.response.data.swap_venues[0].chain_id
-            ).chainIdentifier
+          queryRoute.response.data.swap_venues.length === 1
         ) {
-          type = `swap-1`;
+          const swapVenueChainId = (() => {
+            const evmLikeChainId = Number(
+              queryRoute.response.data.swap_venues[0].chain_id
+            );
+            const isEVMChainId =
+              !Number.isNaN(evmLikeChainId) && evmLikeChainId > 0;
+
+            return isEVMChainId
+              ? `eip155:${evmLikeChainId}`
+              : queryRoute.response.data.swap_venues[0].chain_id;
+          })();
+
+          if (
+            ibcSwapConfigs.amountConfig.chainInfo.chainIdentifier ===
+            chainStore.getChain(swapVenueChainId).chainIdentifier
+          ) {
+            type = `swap-1`;
+          }
         }
 
         if (queryRoute.response.data.operations.length > 0) {
           const firstOperation = queryRoute.response.data.operations[0];
           if ("swap" in firstOperation) {
-            if ("swap_in" in firstOperation.swap) {
+            if (firstOperation.swap.swap_in) {
               type = `swap-${firstOperation.swap.swap_in.swap_operations.length}`;
+            } else if (firstOperation.swap.smart_swap_in) {
+              type = `swap-${firstOperation.swap.smart_swap_in.swap_routes.reduce(
+                (acc, cur) => {
+                  return (acc += cur.swap_operations.length);
+                },
+                0
+              )}`;
             }
           }
 
@@ -380,11 +400,15 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         if (queryRoute.response.data.operations.length > 0) {
           for (const operation of queryRoute.response.data.operations) {
             if ("swap" in operation) {
-              const swapFeeBpsReceiverAddress = SwapFeeBps.receivers.find(
-                (r) => r.chainId === operation.swap.swap_in.swap_venue.chain_id
-              );
-              if (swapFeeBpsReceiverAddress) {
-                swapFeeBpsReceiver.push(swapFeeBpsReceiverAddress.address);
+              const swapIn =
+                operation.swap.swap_in ?? operation.swap.smart_swap_in;
+              if (swapIn) {
+                const swapFeeBpsReceiverAddress = SwapFeeBps.receivers.find(
+                  (r) => r.chainId === swapIn.swap_venue.chain_id
+                );
+                if (swapFeeBpsReceiverAddress) {
+                  swapFeeBpsReceiver.push(swapFeeBpsReceiverAddress.address);
+                }
               }
             }
           }
@@ -410,8 +434,29 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         );
         const sender = ibcSwapConfigs.senderConfig.sender;
 
+        const isErc20InCurrency =
+          ("type" in inCurrency && inCurrency.type === "erc20") ||
+          inCurrency.coinMinimalDenom.startsWith("erc20:");
+        const erc20Approval = tx.requiredErc20Approvals?.[0];
+        const erc20ApprovalTx =
+          erc20Approval && isErc20InCurrency
+            ? ethereumAccount.makeErc20ApprovalTx(
+                {
+                  ...inCurrency,
+                  type: "erc20",
+                  contractAddress: inCurrency.coinMinimalDenom.replace(
+                    "erc20:",
+                    ""
+                  ),
+                },
+                erc20Approval.spender,
+                erc20Approval.amount
+              )
+            : undefined;
+
         return {
-          simulate: () => ethereumAccount.simulateGas(sender, tx),
+          simulate: () =>
+            ethereumAccount.simulateGas(sender, erc20ApprovalTx ?? tx),
         };
       }
     }
@@ -748,12 +793,15 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   counterpartyChainId: queryClientState.clientChainId,
                 });
               } else if ("swap" in operation) {
-                const swapFeeBpsReceiverAddress = SwapFeeBps.receivers.find(
-                  (r) =>
-                    r.chainId === operation.swap.swap_in.swap_venue.chain_id
-                );
-                if (swapFeeBpsReceiverAddress) {
-                  swapFeeBpsReceiver.push(swapFeeBpsReceiverAddress.address);
+                const swapIn =
+                  operation.swap.swap_in ?? operation.swap.smart_swap_in;
+                if (swapIn) {
+                  const swapFeeBpsReceiverAddress = SwapFeeBps.receivers.find(
+                    (r) => r.chainId === swapIn.swap_venue.chain_id
+                  );
+                  if (swapFeeBpsReceiverAddress) {
+                    swapFeeBpsReceiver.push(swapFeeBpsReceiverAddress.address);
+                  }
                 }
                 swapChannelIndex = channels.length - 1;
               }
@@ -1065,7 +1113,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 ibcSwapConfigs.feeConfig.getEIP1559TxFees(
                   ibcSwapConfigs.feeConfig.type
                 );
-              const feeObject =
+              const firstTxFeeObject =
                 maxFeePerGas && maxPriorityFeePerGas
                   ? {
                       type: 2,
@@ -1093,7 +1141,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 ("type" in inCurrency && inCurrency.type === "erc20") ||
                 inCurrency.coinMinimalDenom.startsWith("erc20:");
               const erc20Approval = tx.requiredErc20Approvals?.[0];
-              const erc20ApprovalTxTemp =
+              const erc20ApprovalTx =
                 erc20Approval && isErc20InCurrency
                   ? ethereumAccount.makeErc20ApprovalTx(
                       {
@@ -1108,11 +1156,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       erc20Approval.amount
                     )
                   : undefined;
-              const erc20ApprovalFeeObject = await (async () => {
-                if (erc20ApprovalTxTemp) {
+
+              const secondTxFeeObject = await (async () => {
+                if (erc20ApprovalTx) {
                   const { gasUsed } = await ethereumAccount.simulateGas(
                     sender,
-                    erc20ApprovalTxTemp
+                    tx
                   );
 
                   const { maxFeePerGas, maxPriorityFeePerGas, gasPrice } =
@@ -1142,22 +1191,14 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
                 return {};
               })();
-              const erc20ApprovalTx = erc20ApprovalTxTemp
-                ? {
-                    ...erc20ApprovalTxTemp,
-                    ...erc20ApprovalFeeObject,
-                  }
-                : undefined;
 
               ethereumAccount.setIsSendingTx(true);
 
               await ethereumAccount.sendEthereumTx(
                 sender,
                 {
-                  ...(erc20ApprovalTx ?? {
-                    ...tx,
-                    ...feeObject,
-                  }),
+                  ...(erc20ApprovalTx ?? tx),
+                  ...firstTxFeeObject,
                 },
                 {
                   onBroadcasted: () => {
@@ -1197,7 +1238,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                           sender,
                           {
                             ...tx,
-                            ...feeObject,
+                            ...secondTxFeeObject,
                           },
                           {
                             onBroadcasted: () => {
