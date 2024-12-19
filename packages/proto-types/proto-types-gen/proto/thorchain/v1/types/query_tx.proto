@@ -1,0 +1,168 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "gogoproto/gogo.proto";
+import "types/query_vault.proto";
+import "types/type_tss_metric.proto";
+import "types/type_tx_out.proto";
+import "types/type_observed_tx.proto";
+import "common/common.proto";
+import "types/misc.proto";
+
+option (gogoproto.marshaler_all) = true;
+
+message QueryTxStagesRequest{
+  string tx_id = 1;
+  string height = 2;
+}
+
+message QueryTxStagesResponse{
+  InboundObservedStage inbound_observed = 1 [(gogoproto.nullable) = false, (gogoproto.jsontag) = "inbound_observed"];
+  InboundConfirmationCountedStage inbound_confirmation_counted = 2;
+  InboundFinalisedStage inbound_finalised = 3;
+  SwapStatus swap_status = 4;
+  SwapFinalisedStage swap_finalised = 5;
+  OutboundDelayStage outbound_delay = 6;
+  OutboundSignedStage outbound_signed = 7;
+}
+
+message QueryTxStatusRequest{
+  string tx_id = 1;
+  string height = 2;
+}
+
+message QueryTxStatusResponse{
+  common.Tx tx = 1;
+  repeated PlannedOutTx planned_out_txs = 2;
+  repeated common.Tx out_txs = 3 [(gogoproto.castrepeated) = "gitlab.com/thorchain/thornode/v3/common.Txs", (gogoproto.nullable) = false];
+  QueryTxStagesResponse stages = 4 [(gogoproto.nullable) = false, (gogoproto.jsontag) = "stages"];
+}
+
+message QueryTxRequest{
+  string tx_id = 1;
+  string height = 2;
+}
+
+message QueryTxResponse{
+  QueryObservedTx observed_tx = 1 [(gogoproto.jsontag) = "observed_tx", (gogoproto.nullable) = false];
+	// the thorchain height at which the inbound reached consensus
+  int64 consensus_height = 2;
+	// the thorchain height at which the outbound was finalised
+  int64 finalised_height = 3;
+	// the thorchain height for which the outbound was scheduled
+  int64 outbound_height = 4;
+  TssKeysignMetric keysign_metric = 5 [(gogoproto.jsontag) = "keysign_metric"];
+}
+
+// Same as ObservedTx, but changes block_height and finalise_height (openapi spec)
+message QueryObservedTx {
+  common.Tx tx = 1 [(gogoproto.nullable) = false, (gogoproto.jsontag) = "tx"];
+  string status = 2;
+  repeated string out_hashes = 3;
+  int64 block_height = 4 [(gogoproto.jsontag) = "external_observed_height,omitempty"];
+  repeated string signers = 5;
+  string observed_pub_key = 6 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.PubKey"];
+  int64 keysign_ms = 7;
+  int64 finalise_height = 8 [(gogoproto.jsontag) = "external_confirmation_delay_height,omitempty"];
+  string aggregator = 9;
+  string aggregator_target = 10;
+  string aggregator_target_limit = 11 [(gogoproto.customtype) = "cosmossdk.io/math.Uint", (gogoproto.nullable) = true];
+}
+
+// Same as ObservedTxVoter, but changes height (openapi spec)
+message QueryObservedTxVoter {
+  string tx_id = 1 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.TxID", (gogoproto.customname) = "TxID"];
+  QueryObservedTx tx = 2 [(gogoproto.nullable) = false, (gogoproto.jsontag) = "tx"];
+  int64 height = 3 [(gogoproto.jsontag) = "consensus_height,omitempty"];
+  repeated QueryObservedTx txs = 4 [(gogoproto.nullable) = false, (gogoproto.jsontag) = "txs"];
+  repeated TxOutItem actions = 5 [(gogoproto.nullable) = false, (gogoproto.jsontag) = "actions"];
+  repeated common.Tx out_txs = 6 [(gogoproto.castrepeated) = "gitlab.com/thorchain/thornode/v3/common.Txs", (gogoproto.nullable) = false];
+  int64 finalised_height = 7;
+  bool updated_vault = 8;
+  bool reverted = 9;
+  int64 outbound_height = 10;
+}
+
+message QueryTxVotersRequest{
+  string tx_id = 1;
+  string height = 2;
+}
+
+message PlannedOutTx{
+  string chain = 1 [(gogoproto.jsontag) = "chain"];
+  string to_address = 2 [(gogoproto.jsontag) = "to_address"];
+  common.Coin coin = 3 [(gogoproto.jsontag) = "coin"];
+	// returns true if the planned transaction has a refund memo
+  bool refund = 4 [(gogoproto.jsontag) = "refund"];
+}
+
+message InboundObservedStage{
+	// returns true if any nodes have observed the transaction (to be deprecated in favour of counts)
+  bool started = 1;
+	// number of signers for pre-confirmation-counting observations
+  int64 pre_confirmation_count = 2;
+	// number of signers for final observations, after any confirmation counting complete
+  int64 final_count = 3 [(gogoproto.jsontag) = "final_count"];
+	// returns true if no transaction observation remains to be done
+  bool completed = 4 [(gogoproto.jsontag) = "completed"];
+}
+
+message InboundConfirmationCountedStage{
+	// the THORChain block height when confirmation counting began
+  int64 counting_start_height = 1;
+	// the external source chain for which confirmation counting takes place
+  string chain = 2;
+	// the block height on the external source chain when the transaction was observed
+  int64 external_observed_height = 3;
+	// the block height on the external source chain when confirmation counting will be complete
+  int64 external_confirmation_delay_height = 4;
+	// the estimated remaining seconds before confirmation counting completes
+  int64 remaining_confirmation_seconds = 5 [(gogoproto.jsontag) = "remaining_confirmation_seconds"];
+	// returns true if no transaction confirmation counting remains to be done
+  bool completed = 6 [(gogoproto.jsontag) = "completed"];
+}
+
+message InboundFinalisedStage{
+	// returns true if the inbound transaction has been finalised (THORChain agreeing it exists)
+  bool completed = 1 [(gogoproto.jsontag) = "completed"];
+}
+
+message SwapStatus{
+	// true when awaiting a swap
+  bool pending = 1 [(gogoproto.jsontag) = "pending"];
+  StreamingStatus streaming = 2;
+}
+
+message StreamingStatus{
+	// how often each swap is made, in blocks
+  int64 interval = 1 [(gogoproto.jsontag) = "interval"];
+	// the total number of swaps in a streaming swaps
+  int64 quantity = 2 [(gogoproto.jsontag) = "quantity"];
+	// the amount of swap attempts so far
+  int64 count = 3 [(gogoproto.jsontag) = "count"];
+}
+
+message SwapFinalisedStage{
+	// (to be deprecated in favor of swap_status) returns true if an inbound transaction's swap (successful or refunded) is no longer pending
+  bool completed = 1 [(gogoproto.jsontag) = "completed"];
+}
+
+message OutboundDelayStage{
+	// the number of remaining THORChain blocks the outbound will be delayed
+  int64 remaining_delay_blocks = 1;
+	// the estimated remaining seconds of the outbound delay before it will be sent
+  int64 remaining_delay_seconds = 2;
+	// returns true if no transaction outbound delay remains
+  bool completed = 3 [(gogoproto.jsontag) = "completed"];
+}
+
+message OutboundSignedStage{
+	// THORChain height for which the external outbound is scheduled
+  int64 scheduled_outbound_height = 1;
+	// THORChain blocks since the scheduled outbound height
+  ProtoInt64 blocks_since_scheduled = 2;
+	// returns true if an external transaction has been signed and broadcast (and observed in its mempool)
+  bool completed = 3 [(gogoproto.jsontag) = "completed"];
+}

@@ -1,0 +1,12 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+  
+import "common/common.proto";
+import "gogoproto/gogo.proto";
+
+message RagnarokWithdrawPosition {
+  int64 number = 1;
+  common.Asset pool = 2 [(gogoproto.nullable) = false, (gogoproto.customtype) = "gitlab.com/thorchain/thornode/v3/common.Asset"];
+}

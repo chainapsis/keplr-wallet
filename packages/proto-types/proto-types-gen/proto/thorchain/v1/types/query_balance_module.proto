@@ -1,0 +1,20 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "cosmos/base/v1beta1/coin.proto";
+import "gogoproto/gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+
+message QueryBalanceModuleRequest{
+  string name = 1;
+  string height = 2;
+}
+
+message QueryBalanceModuleResponse{
+  string name = 1 [(gogoproto.jsontag) = "name"];
+  bytes address = 2  [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress", (gogoproto.jsontag) = "address"];
+  repeated cosmos.base.v1beta1.Coin coins = 3 [(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins", (gogoproto.nullable) = false, (gogoproto.jsontag) = "coins"];
+}

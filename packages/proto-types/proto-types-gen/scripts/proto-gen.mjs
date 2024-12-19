@@ -122,6 +122,7 @@ function setOutputHash(root, hash) {
       "stride/stakeibc/tx.proto",
       "stride/staketia/tx.proto",
       "stride/stakedym/tx.proto",
+      "thorchain/v1/types/msg_send.proto",
     ];
 
     const thirdPartyInputs = ["tendermint/crypto/keys.proto"];

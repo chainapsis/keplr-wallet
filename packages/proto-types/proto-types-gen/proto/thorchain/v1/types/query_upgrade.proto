@@ -1,0 +1,50 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "gogoproto/gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+
+message QueryUpgradeProposalRequest{
+  string name = 1;
+  string height = 2;
+}
+
+message QueryUpgradeProposalResponse{
+	// the name of the upgrade
+	string name = 1 [(gogoproto.jsontag) = "name"];
+	// the block height at which the upgrade will occur
+	int64 height = 2 [(gogoproto.jsontag) = "height"];
+	// the description of the upgrade, typically json with URLs to binaries for use with automation tools
+	string info = 3 [(gogoproto.jsontag) = "info"];
+	// whether the upgrade has been approved by the active validators
+	bool approved = 4 [(gogoproto.jsontag) = "approved"];
+	// the percentage of active validators that have approved the upgrade
+	string approved_percent = 5;
+	// the amount of additional active validators required to reach quorum for the upgrade
+	int64 validators_to_quorum = 6 [(gogoproto.jsontag) = "validators_to_quorum"];
+}
+
+message QueryUpgradeProposalsRequest{
+	string height = 1;
+}
+
+message QueryUpgradeProposalsResponse{
+  repeated QueryUpgradeProposalResponse upgrade_proposals = 1;
+}
+
+message QueryUpgradeVotesRequest{
+  string name = 1;
+  string height = 2;
+}
+
+message UpgradeVote{
+  string node_address = 1 [(gogoproto.jsontag) = "node_address"];
+  string vote = 2 [(gogoproto.jsontag) = "vote"];
+}
+
+message QueryUpgradeVotesResponse{
+  repeated UpgradeVote upgrade_votes = 1;
+}

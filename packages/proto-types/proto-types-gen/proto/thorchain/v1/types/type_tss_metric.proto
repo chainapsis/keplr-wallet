@@ -1,0 +1,21 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "gogoproto/gogo.proto";
+
+message NodeTssTime {
+  bytes address = 1 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+  int64 tss_time = 2;
+}
+
+message TssKeygenMetric {
+  string pub_key = 1 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.PubKey"];
+  repeated NodeTssTime node_tss_times = 2  [(gogoproto.nullable) = false];
+}
+
+message TssKeysignMetric {
+  string tx_id = 1 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.TxID", (gogoproto.customname) = "TxID"];
+  repeated NodeTssTime node_tss_times = 2  [(gogoproto.nullable) = false];
+}

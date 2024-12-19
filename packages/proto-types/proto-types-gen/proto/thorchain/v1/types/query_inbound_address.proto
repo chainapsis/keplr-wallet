@@ -1,0 +1,41 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "gogoproto/gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+
+message QueryInboundAddressResponse{
+  string chain = 1;
+  string pub_key = 2;
+  string address = 3;
+  string router = 4;
+  // Returns true if trading is unavailable for this chain, either because trading is halted globally or specifically for this chain
+  bool   halted = 5 [(gogoproto.jsontag) = "halted"];
+  // Returns true if trading is paused globally
+  bool   global_trading_paused = 6 [(gogoproto.jsontag) = "global_trading_paused"];
+  // Returns true if trading is paused for this chain
+  bool   chain_trading_paused = 7 [(gogoproto.jsontag) = "chain_trading_paused"];
+  // Returns true if LP actions are paused for this chain
+  bool   chain_lp_actions_paused = 8 [(gogoproto.jsontag) = "chain_lp_actions_paused"];
+  // The minimum fee rate used by vaults to send outbound TXs. The actual fee rate may be higher. For EVM chains this is returned in gwei (1e9).
+  string gas_rate = 9;
+	// Units of the gas_rate.
+  string gas_rate_units = 10;
+  // Avg size of outbound TXs on each chain. For UTXO chains it may be larger than average, as it takes into account vault consolidation txs, which can have many vouts
+  string outbound_tx_size = 11;
+	// The total outbound fee charged to the user for outbound txs in the gas asset of the chain.
+  string outbound_fee = 12;
+	// Defines the minimum transaction size for the chain in base units (sats, wei, uatom). Transactions with asset amounts lower than the dust_threshold are ignored.
+  string dust_threshold = 13;
+}
+
+message QueryInboundAddressesRequest{
+  string height = 1;
+}
+
+message QueryInboundAddressesResponse{
+  repeated QueryInboundAddressResponse inbound_addresses = 1;
+}

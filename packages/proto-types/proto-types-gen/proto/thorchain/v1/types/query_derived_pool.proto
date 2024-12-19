@@ -1,0 +1,31 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "gogoproto/gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+
+message QueryDerivedPoolRequest{
+  string asset = 1;
+  string height = 2;
+}
+
+message QueryDerivedPoolResponse{
+  string asset = 1 [(gogoproto.jsontag) = "asset"];
+  string status = 2 [(gogoproto.jsontag) = "status"];
+  int64  decimals = 3;
+  string balance_asset = 4 [(gogoproto.jsontag) = "balance_asset"];
+  string balance_rune = 5 [(gogoproto.jsontag) = "balance_rune"];
+  // the depth of the derived virtual pool relative to L1 pool (in basis points)
+  string derived_depth_bps = 6 [(gogoproto.jsontag) = "derived_depth_bps"];
+}
+
+message QueryDerivedPoolsRequest{
+  string height = 1;
+}
+
+message QueryDerivedPoolsResponse{
+  repeated QueryDerivedPoolResponse pools = 1;
+}
