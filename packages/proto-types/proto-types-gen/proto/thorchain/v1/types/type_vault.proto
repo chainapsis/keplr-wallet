@@ -1,0 +1,37 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+option (gogoproto.goproto_getters_all) = false;
+
+import "common/common.proto";
+import "types/type_chain_contract.proto";
+import "gogoproto/gogo.proto";
+
+enum VaultType {
+  UnknownVault = 0;
+  AsgardVault = 1;
+}
+
+enum VaultStatus {
+  InactiveVault = 0;
+  ActiveVault = 1;
+  RetiringVault = 2;
+  InitVault = 3;
+}
+
+message Vault {
+  int64 block_height = 1;
+  string pub_key = 2 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.PubKey"];
+  repeated common.Coin coins = 3 [(gogoproto.castrepeated) = "gitlab.com/thorchain/thornode/v3/common.Coins", (gogoproto.nullable) = false];
+  VaultType type = 4;
+  VaultStatus status = 5;
+  int64 status_since = 6;
+  repeated string membership = 7;
+  repeated string chains = 8;
+  int64 inbound_tx_count = 9;
+  int64 outbound_tx_count = 10;
+  repeated int64 pending_tx_block_heights = 11;
+  repeated types.ChainContract routers = 22 [(gogoproto.nullable) = false];
+  repeated string frozen = 23;
+}

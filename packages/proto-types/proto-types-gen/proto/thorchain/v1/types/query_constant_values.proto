@@ -1,0 +1,33 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "gogoproto/gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+
+message QueryConstantValuesRequest{
+  string height = 1;
+}
+
+message QueryConstantValuesResponse{
+  repeated Int64Constants int_64_values = 1;
+  repeated BoolConstants bool_values = 2;
+  repeated StringConstants string_values = 3;
+}
+
+message Int64Constants{
+  string name = 1;
+  int64 value = 2;
+}
+
+message BoolConstants{
+  string name = 1;
+  bool value = 2;
+}
+
+message StringConstants{
+  string name = 1;
+  string value = 2;
+}

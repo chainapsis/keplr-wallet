@@ -1,0 +1,34 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "gogoproto/gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+
+message QuerySaverRequest{
+  string asset = 1;
+  string address = 2;
+  string height = 3;
+}
+
+message QuerySaverResponse{
+  string asset = 1 [(gogoproto.jsontag) = "asset"];
+  string asset_address = 2 [(gogoproto.jsontag) = "asset_address"];
+  int64  last_add_height = 3;
+  int64  last_withdraw_height = 4;
+  string units = 5 [(gogoproto.jsontag) = "units"];
+  string asset_deposit_value = 6 [(gogoproto.jsontag) = "asset_deposit_value"];
+  string asset_redeem_value = 7 [(gogoproto.jsontag) = "asset_redeem_value"];
+  string growth_pct = 8 [(gogoproto.jsontag) = "growth_pct"];
+}
+
+message QuerySaversRequest{
+  string asset = 1;
+  string height = 2;
+}
+
+message QuerySaversResponse{
+  repeated QuerySaverResponse savers = 1;
+}

@@ -1,0 +1,29 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "common/common.proto";
+import "gogoproto/gogo.proto";
+
+enum OrderType {
+  market = 0;
+  limit = 1;
+}
+
+
+message MsgSwap {
+  common.Tx tx = 1 [(gogoproto.nullable) = false, (gogoproto.jsontag) = "tx"];
+  common.Asset target_asset = 2 [(gogoproto.nullable) = false, (gogoproto.jsontag) = "target_asset", (gogoproto.customtype) = "gitlab.com/thorchain/thornode/v3/common.Asset"];
+  string destination = 3 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.Address"];
+  string trade_target = 4 [(gogoproto.customtype) = "cosmossdk.io/math.Uint", (gogoproto.nullable) = false, (gogoproto.jsontag) = "trade_target"];
+  string affiliate_address = 5 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.Address"];
+  string affiliate_basis_points = 6 [(gogoproto.customtype) = "cosmossdk.io/math.Uint", (gogoproto.nullable) = false, (gogoproto.jsontag) = "affiliate_basis_points"];
+  bytes signer = 7  [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+  string aggregator = 8;
+  string aggregator_target_address = 9;
+  string aggregator_target_limit = 10 [(gogoproto.customtype) = "cosmossdk.io/math.Uint", (gogoproto.nullable) = true];
+  OrderType order_type = 11;
+  uint64 stream_quantity = 12;
+  uint64 stream_interval = 13;
+}

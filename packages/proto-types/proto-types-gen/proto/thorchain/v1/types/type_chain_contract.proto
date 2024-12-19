@@ -1,0 +1,14 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all)         = false;
+option (gogoproto.goproto_getters_all) = false;
+
+import "gogoproto/gogo.proto";
+
+message ChainContract {
+  string chain = 1 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.Chain"];
+  string router = 2 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.Address"];
+}

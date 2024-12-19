@@ -1,0 +1,360 @@
+syntax = "proto3";
+package types;
+
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "google/api/annotations.proto";
+import "gogoproto/gogo.proto";
+import "types/query_pool.proto";
+import "types/query_derived_pool.proto";
+import "types/query_liquidity_provider.proto";
+import "types/query_saver.proto";
+import "types/query_borrower.proto";
+import "types/query_trade_unit.proto";
+import "types/query_trade_account.proto";
+import "types/query_node.proto";
+import "types/query_pool_slip.proto";
+import "types/query_outbound_fee.proto";
+import "types/query_streaming_swap.proto";
+import "types/query_ban.proto";
+import "types/type_ban_voter.proto";
+import "types/query_ragnarok.proto";
+import "types/query_rune_pool.proto";
+import "types/query_rune_provider.proto";
+import "types/query_mimir.proto";
+import "types/query_inbound_address.proto";
+import "types/query_version.proto";
+import "types/query_thorname.proto";
+import "types/query_invariants.proto";
+import "types/query_network.proto";
+import "types/query_balance_module.proto";
+import "types/query_quotes.proto";
+import "types/query_constant_values.proto";
+import "types/query_swap_queue.proto";
+import "types/query_last_block.proto";
+import "types/query_vault.proto";
+import "types/query_tx.proto";
+import "types/query_swapper_clout.proto";
+import "types/type_clout.proto";
+import "types/query_queue.proto";
+import "types/query_outbound.proto";
+import "types/query_block.proto";
+import "types/query_tss.proto";
+import "types/type_tss_metric.proto";
+import "types/query_keystore.proto";
+import "types/query_upgrade.proto";
+import "types/query_account.proto";
+import "types/query_export.proto";
+import "types/query_bank.proto";
+import "types/query_secured_asset.proto";
+
+option (gogoproto.marshaler_all) = true;
+
+// Query defines the gRPC querier service.
+service Query {
+  // Account returns account details for a given address.
+  rpc Account(QueryAccountRequest) returns (QueryAccountResponse) {
+    option (google.api.http).get = "/auth/accounts/{address}";
+  }
+
+  // Balances returns the bank module balances for a given address.
+  rpc Balances(QueryBalancesRequest) returns (QueryBalancesResponse) {
+    option (google.api.http).get = "/bank/balances/{address}";
+  }
+
+  // Export returns the content of the export file (regression test only).
+  rpc Export(QueryExportRequest) returns (QueryExportResponse) {
+    option (google.api.http).get = "/thorchain/export";
+  }
+
+  // Returns the extended pool information for the provided asset.
+  rpc Pool(QueryPoolRequest) returns (QueryPoolResponse) {
+    option (google.api.http).get = "/thorchain/pool/{asset}";
+  }
+
+  // Pools returns all extended pools
+  rpc Pools(QueryPoolsRequest) returns (QueryPoolsResponse) {
+    option (google.api.http).get = "/thorchain/pools";
+  }
+
+  rpc DerivedPool(QueryDerivedPoolRequest) returns (QueryDerivedPoolResponse) {
+    option (google.api.http).get = "/thorchain/dpool/{asset}";
+  }
+
+  rpc DerivedPools(QueryDerivedPoolsRequest) returns (QueryDerivedPoolsResponse) {
+    option (google.api.http).get = "/thorchain/dpools";
+  }
+
+  rpc LiquidityProvider(QueryLiquidityProviderRequest) returns (QueryLiquidityProviderResponse) {
+    option (google.api.http).get = "/thorchain/pool/{asset}/liquidity_provider/{address}";
+  }
+
+  rpc LiquidityProviders(QueryLiquidityProvidersRequest) returns (QueryLiquidityProvidersResponse) {
+    option (google.api.http).get = "/thorchain/pool/{asset}/liquidity_providers";
+  }
+
+  rpc Saver(QuerySaverRequest) returns (QuerySaverResponse) {
+    option (google.api.http).get = "/thorchain/pool/{asset}/saver/{address}";
+  }
+
+  rpc Savers(QuerySaversRequest) returns (QuerySaversResponse) {
+    option (google.api.http).get = "/thorchain/pool/{asset}/savers";
+  }
+
+  rpc Borrower(QueryBorrowerRequest) returns (QueryBorrowerResponse) {
+    option (google.api.http).get = "/thorchain/pool/{asset}/borrower/{address}";
+  }
+
+  rpc Borrowers(QueryBorrowersRequest) returns (QueryBorrowersResponse) {
+    option (google.api.http).get = "/thorchain/pool/{asset}/borrowers";
+  }
+
+  rpc TradeUnit(QueryTradeUnitRequest) returns (QueryTradeUnitResponse) {
+    option (google.api.http).get = "/thorchain/trade/unit/{asset}";
+  }
+
+  rpc TradeUnits(QueryTradeUnitsRequest) returns (QueryTradeUnitsResponse) {
+    option (google.api.http).get = "/thorchain/trade/units";
+  }
+
+  rpc TradeAccount(QueryTradeAccountRequest) returns (QueryTradeAccountsResponse) {
+    option (google.api.http).get = "/thorchain/trade/account/{address}";
+  }
+
+  rpc TradeAccounts(QueryTradeAccountsRequest) returns (QueryTradeAccountsResponse) {
+    option (google.api.http).get = "/thorchain/trade/accounts/{asset}";
+  }
+
+  rpc SecuredAsset(QuerySecuredAssetRequest) returns (QuerySecuredAssetResponse) {
+    option (google.api.http).get = "/thorchain/securedasset/{asset}";
+  }
+
+  rpc SecuredAssets(QuerySecuredAssetsRequest) returns (QuerySecuredAssetsResponse) {
+    option (google.api.http).get = "/thorchain/securedassets";
+  }
+
+  rpc Node(QueryNodeRequest) returns (QueryNodeResponse) {
+    option (google.api.http).get = "/thorchain/node/{address}";
+  }
+
+  rpc Nodes(QueryNodesRequest) returns (QueryNodesResponse) {
+    option (google.api.http).get = "/thorchain/nodes";
+  }
+
+  rpc PoolSlip(QueryPoolSlipRequest) returns (QueryPoolSlipsResponse) {
+    option (google.api.http).get = "/thorchain/slip/{asset}";
+  }
+
+  rpc PoolSlips(QueryPoolSlipsRequest) returns (QueryPoolSlipsResponse) {
+    option (google.api.http).get = "/thorchain/slips";
+  }
+
+  rpc OutboundFee(QueryOutboundFeeRequest) returns (QueryOutboundFeesResponse) {
+    option (google.api.http).get = "/thorchain/outbound_fee/{asset}";
+  }
+
+  rpc OutboundFees(QueryOutboundFeesRequest) returns (QueryOutboundFeesResponse) {
+    option (google.api.http).get = "/thorchain/outbound_fees";
+  }
+
+  rpc StreamingSwap(QueryStreamingSwapRequest) returns (QueryStreamingSwapResponse) {
+    option (google.api.http).get = "/thorchain/swap/streaming/{tx_id}";
+  }
+
+  rpc StreamingSwaps(QueryStreamingSwapsRequest) returns (QueryStreamingSwapsResponse) {
+    option (google.api.http).get = "/thorchain/swaps/streaming";
+  }
+
+  rpc Ban(QueryBanRequest) returns (BanVoter) {
+    option (google.api.http).get = "/thorchain/ban/{address}";
+  }
+
+  rpc Ragnarok(QueryRagnarokRequest) returns (QueryRagnarokResponse) {
+    option (google.api.http).get = "/thorchain/ragnarok";
+  }
+
+  rpc RunePool(QueryRunePoolRequest) returns (QueryRunePoolResponse) {
+    option (google.api.http).get = "/thorchain/runepool";
+  }
+
+  rpc RuneProvider(QueryRuneProviderRequest) returns (QueryRuneProviderResponse) {
+    option (google.api.http).get = "/thorchain/rune_provider/{address}";
+  }
+
+  rpc RuneProviders(QueryRuneProvidersRequest) returns (QueryRuneProvidersResponse) {
+    option (google.api.http).get = "/thorchain/rune_providers";
+  }
+
+  rpc MimirValues(QueryMimirValuesRequest) returns (QueryMimirValuesResponse) {
+    option (google.api.http).get = "/thorchain/mimir";
+  }
+
+  rpc MimirWithKey(QueryMimirWithKeyRequest) returns (QueryMimirWithKeyResponse) {
+    option (google.api.http).get = "/thorchain/mimir/key/{key}";
+  }
+
+  rpc MimirAdminValues(QueryMimirAdminValuesRequest) returns (QueryMimirAdminValuesResponse) {
+    option (google.api.http).get = "/thorchain/mimir/admin";
+  }
+
+  rpc MimirNodesAllValues(QueryMimirNodesAllValuesRequest) returns (QueryMimirNodesAllValuesResponse) {
+    option (google.api.http).get = "/thorchain/mimir/nodes_all";
+  }
+
+  rpc MimirNodesValues(QueryMimirNodesValuesRequest) returns (QueryMimirNodesValuesResponse) {
+    option (google.api.http).get = "/thorchain/mimir/nodes";
+  }
+
+  rpc MimirNodeValues(QueryMimirNodeValuesRequest) returns (QueryMimirNodeValuesResponse) {
+    option (google.api.http).get = "/thorchain/mimir/node/{address}";
+  }
+
+  rpc InboundAddresses(QueryInboundAddressesRequest) returns (QueryInboundAddressesResponse) {
+    option (google.api.http).get = "/thorchain/inbound_addresses";
+  }
+
+  rpc Version(QueryVersionRequest) returns (QueryVersionResponse) {
+    option (google.api.http).get = "/thorchain/version";
+  }
+
+  rpc Thorname(QueryThornameRequest) returns (QueryThornameResponse) {
+    option (google.api.http).get = "/thorchain/thorname/{name}";
+  }
+
+  rpc Invariant(QueryInvariantRequest) returns (QueryInvariantResponse) {
+    option (google.api.http).get = "/thorchain/invariant/{path}";
+  }
+
+  rpc Invariants(QueryInvariantsRequest) returns (QueryInvariantsResponse) {
+    option (google.api.http).get = "/thorchain/invariants";
+  }
+
+  rpc Network(QueryNetworkRequest) returns (QueryNetworkResponse) {
+    option (google.api.http).get = "/thorchain/network";
+  }
+
+  rpc BalanceModule(QueryBalanceModuleRequest) returns (QueryBalanceModuleResponse) {
+    option (google.api.http).get = "/thorchain/balance/module/{name}";
+  }
+
+  rpc QuoteSwap(QueryQuoteSwapRequest) returns (QueryQuoteSwapResponse) {
+    option (google.api.http).get = "/thorchain/quote/swap";
+  }
+
+  rpc QuoteSaverDeposit(QueryQuoteSaverDepositRequest) returns (QueryQuoteSaverDepositResponse) {
+    option (google.api.http).get = "/thorchain/quote/saver/deposit";
+  }
+
+  rpc QuoteSaverWithdraw(QueryQuoteSaverWithdrawRequest) returns (QueryQuoteSaverWithdrawResponse) {
+    option (google.api.http).get = "/thorchain/quote/saver/withdraw";
+  }
+
+  rpc QuoteLoanOpen(QueryQuoteLoanOpenRequest) returns (QueryQuoteLoanOpenResponse) {
+    option (google.api.http).get = "/thorchain/quote/loan/open";
+  }
+
+  rpc QuoteLoanClose(QueryQuoteLoanCloseRequest) returns (QueryQuoteLoanCloseResponse) {
+    option (google.api.http).get = "/thorchain/quote/loan/close";
+  }
+
+  rpc ConstantValues(QueryConstantValuesRequest) returns (QueryConstantValuesResponse) {
+    option (google.api.http).get = "/thorchain/constants";
+  }
+
+  rpc SwapQueue(QuerySwapQueueRequest) returns (QuerySwapQueueResponse) {
+    option (google.api.http).get = "/thorchain/queue/swap";
+  }
+
+  rpc LastBlocks(QueryLastBlocksRequest) returns (QueryLastBlocksResponse) {
+    option (google.api.http).get = "/thorchain/lastblock";
+  }
+
+  rpc ChainsLastBlock(QueryChainsLastBlockRequest) returns (QueryLastBlocksResponse) {
+    option (google.api.http).get = "/thorchain/lastblock/{chain}";
+  }
+
+  rpc Vault(QueryVaultRequest) returns (QueryVaultResponse) {
+    option (google.api.http).get = "/thorchain/vault/{pub_key}";
+  }
+
+  rpc AsgardVaults(QueryAsgardVaultsRequest) returns (QueryAsgardVaultsResponse) {
+    option (google.api.http).get = "/thorchain/vaults/asgard";
+  }
+
+  rpc VaultsPubkeys(QueryVaultsPubkeysRequest) returns (QueryVaultsPubkeysResponse) {
+    option (google.api.http).get = "/thorchain/vaults/pubkeys";
+  }
+
+  rpc TxStages(QueryTxStagesRequest) returns (QueryTxStagesResponse) {
+    option (google.api.http).get = "/thorchain/tx/stages/{tx_id}";
+  }
+
+  rpc TxStatus(QueryTxStatusRequest) returns (QueryTxStatusResponse) {
+    option (google.api.http).get = "/thorchain/tx/status/{tx_id}";
+  }
+
+  rpc Tx(QueryTxRequest) returns (QueryTxResponse) {
+    option (google.api.http).get = "/thorchain/tx/{tx_id}";
+  }
+
+  rpc TxVoters(QueryTxVotersRequest) returns (QueryObservedTxVoter) {
+    option (google.api.http).get = "/thorchain/tx/details/{tx_id}";
+  }
+
+  rpc TxVotersOld(QueryTxVotersRequest) returns (QueryObservedTxVoter) {
+    option (google.api.http).get = "/thorchain/tx/{tx_id}/signers";
+  }
+
+  rpc Clout(QuerySwapperCloutRequest) returns (SwapperClout) {
+    option (google.api.http).get = "/thorchain/clout/swap/{address}";
+  }
+
+  rpc Queue(QueryQueueRequest) returns (QueryQueueResponse) {
+    option (google.api.http).get = "/thorchain/queue";
+  }
+
+  rpc ScheduledOutbound(QueryScheduledOutboundRequest) returns (QueryOutboundResponse) {
+    option (google.api.http).get = "/thorchain/queue/scheduled";
+  }
+
+  rpc PendingOutbound(QueryPendingOutboundRequest) returns (QueryOutboundResponse) {
+    option (google.api.http).get = "/thorchain/queue/outbound";
+  }
+
+  rpc Block(QueryBlockRequest) returns (QueryBlockResponse) {
+    option (google.api.http).get = "/thorchain/block";
+  }
+
+  rpc TssKeygenMetric(QueryTssKeygenMetricRequest) returns (QueryTssKeygenMetricResponse) {
+    option (google.api.http).get = "/thorchain/metric/keygen/{pub_key}";
+  }
+
+  rpc TssMetric(QueryTssMetricRequest) returns (QueryTssMetricResponse) {
+    option (google.api.http).get = "/thorchain/metric";
+  }
+
+  rpc Keysign(QueryKeysignRequest) returns (QueryKeysignResponse) {
+    option (google.api.http).get = "/thorchain/keysign/{height}";
+  }
+
+  rpc KeysignPubkey(QueryKeysignPubkeyRequest) returns (QueryKeysignResponse) {
+    option (google.api.http).get = "/thorchain/keysign/{height}/{pub_key}";
+  }
+
+  rpc Keygen(QueryKeygenRequest) returns (QueryKeygenResponse) {
+    option (google.api.http).get = "/thorchain/keygen/{height}/{pub_key}";
+  }
+
+  rpc UpgradeProposals(QueryUpgradeProposalsRequest) returns (QueryUpgradeProposalsResponse) {
+    option (google.api.http).get = "/thorchain/upgrade_proposals";
+  }
+
+  rpc UpgradeProposal(QueryUpgradeProposalRequest) returns (QueryUpgradeProposalResponse) {
+    option (google.api.http).get = "/thorchain/upgrade_proposal/{name}";
+  }
+
+  rpc UpgradeVotes(QueryUpgradeVotesRequest) returns (QueryUpgradeVotesResponse) {
+    option (google.api.http).get = "/thorchain/upgrade_votes/{name}";
+  }
+}

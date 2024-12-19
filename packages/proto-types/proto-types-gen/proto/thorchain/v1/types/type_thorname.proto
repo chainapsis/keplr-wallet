@@ -1,0 +1,20 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "common/common.proto";
+import "gogoproto/gogo.proto";
+
+message THORNameAlias {
+  string chain = 1 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.Chain"];
+  string address = 2 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.Address"];
+}
+
+message THORName {
+  string name = 1 ;
+  int64 expire_block_height = 2;
+  bytes owner = 3  [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+  common.Asset preferred_asset = 4 [(gogoproto.nullable) = false, (gogoproto.customtype) = "gitlab.com/thorchain/thornode/v3/common.Asset"];
+  repeated THORNameAlias aliases = 5  [(gogoproto.nullable) = false];
+}

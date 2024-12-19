@@ -1,0 +1,22 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "gogoproto/gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+
+message QueryBalancesRequest{
+  string address = 1;
+  string height = 2;
+}
+
+message QueryBalancesResponse{
+  repeated Amount balances = 1;
+}
+
+message Amount {
+  string denom = 1;
+  string amount = 2;
+}

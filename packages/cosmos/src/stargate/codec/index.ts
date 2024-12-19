@@ -64,6 +64,7 @@ import {
   MsgUpdateInnerRedemptionRateBounds,
 } from "@keplr-wallet/proto-types/stride/stakeibc/tx";
 import { Buffer } from "buffer/";
+import { MsgSend as ThorMsgSend } from "@keplr-wallet/proto-types/thorchain/v1/types/msg_send";
 
 export * from "./unknown";
 
@@ -375,3 +376,4 @@ defaultProtoCodec.registerAny(
   "/stride.stakeibc.MsgUpdateInnerRedemptionRateBounds",
   MsgUpdateInnerRedemptionRateBounds
 );
+defaultProtoCodec.registerAny("/types.MsgSend", ThorMsgSend);

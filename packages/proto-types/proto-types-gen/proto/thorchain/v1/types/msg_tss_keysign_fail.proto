@@ -1,0 +1,22 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+option (gogoproto.goproto_getters_all) = false;
+
+import "types/type_blame.proto";
+import "common/common.proto";
+import "gogoproto/gogo.proto";
+import "amino/amino.proto";
+
+message MsgTssKeysignFail {
+  option (amino.name) = "thorchain/TssKeysignFail";
+
+  string id = 1 [(gogoproto.customname) = "ID"];
+  int64 height = 2;
+  Blame blame = 3 [(gogoproto.nullable) = false];
+  string memo = 4;
+  repeated common.Coin coins = 5 [(gogoproto.castrepeated) = "gitlab.com/thorchain/thornode/v3/common.Coins", (gogoproto.nullable) = false];
+  string pub_key = 6 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.PubKey"];
+  bytes signer = 7  [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress", (amino.encoding) = "bech32"];
+}

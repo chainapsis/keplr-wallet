@@ -1,0 +1,36 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "gogoproto/gogo.proto";
+import "common/common.proto";
+
+option (gogoproto.marshaler_all) = true;
+
+message QueryScheduledOutboundRequest{
+  string height = 1;
+}
+
+message QueryPendingOutboundRequest{
+  string height = 1;
+}
+
+message QueryOutboundResponse{
+  repeated QueryTxOutItem tx_out_items = 1;
+}
+
+message QueryTxOutItem{
+  string chain = 1 [(gogoproto.jsontag) = "chain"];
+  string to_address = 2 [(gogoproto.jsontag) = "to_address"];
+  string vault_pub_key = 3;
+  common.Coin coin = 4 [(gogoproto.jsontag) = "coin"];
+  string memo = 5;
+  repeated common.Coin max_gas = 6 [(gogoproto.castrepeated) = "gitlab.com/thorchain/thornode/v3/common.Gas", (gogoproto.nullable) = false, (gogoproto.jsontag) = "max_gas"];
+  int64 gas_rate = 7;
+  string in_hash = 8;
+  string out_hash = 9;
+  int64 height = 10;
+	// clout spent in RUNE for the outbound
+  string clout_spent = 11;
+}

@@ -316,6 +316,16 @@ export class RootStore {
               },
             };
           }
+
+          if (chainId.startsWith("thorchain-")) {
+            return {
+              send: {
+                native: {
+                  type: "thorchain/MsgSend",
+                },
+              },
+            };
+          }
         },
       }),
       CosmwasmAccount.use({
