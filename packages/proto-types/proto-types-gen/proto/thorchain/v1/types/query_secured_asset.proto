@@ -1,0 +1,30 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "gogoproto/gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+
+message QuerySecuredAssetRequest{
+  string asset = 1;
+  string height = 2;
+}
+
+message QuerySecuredAssetResponse{
+	// bridge account asset with \"-\" separator
+  string asset = 1 [(gogoproto.jsontag) = "asset"];
+	// total share tokens issued for the pool
+  string supply = 2 [(gogoproto.jsontag) = "supply"];
+	// total depth of bridge asset
+  string depth = 3 [(gogoproto.jsontag) = "depth"];
+}
+
+message QuerySecuredAssetsRequest{
+  string height = 1;
+}
+
+message QuerySecuredAssetsResponse{
+  repeated QuerySecuredAssetResponse assets = 1;
+}

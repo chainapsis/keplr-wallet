@@ -1,0 +1,16 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all)         = false;
+option (gogoproto.goproto_getters_all) = false;
+
+import "gogoproto/gogo.proto";
+
+message ErrataTxVoter {
+  string tx_id = 1 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.TxID", (gogoproto.customname) = "TxID"];
+  string chain = 2 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.Chain"];
+  int64 block_height = 3;
+  repeated string signers = 4;
+}

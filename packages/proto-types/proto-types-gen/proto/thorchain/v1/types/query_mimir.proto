@@ -1,0 +1,64 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "gogoproto/gogo.proto";
+import "types/type_mimir.proto";
+
+option (gogoproto.marshaler_all) = true;
+
+message QueryMimirValuesRequest{
+  string height = 1;
+}
+
+message QueryMimirValuesResponse{
+  repeated Mimir mimirs = 1;
+}
+
+message QueryMimirWithKeyRequest{
+  string key = 1;
+  string height = 2;
+}
+
+message QueryMimirWithKeyResponse{
+  int64 value = 1;
+}
+
+message QueryMimirAdminValuesRequest{
+  string height = 1;
+}
+
+message QueryMimirAdminValuesResponse{
+  repeated Mimir admin_mimirs = 1;
+}
+
+message QueryMimirNodesAllValuesRequest{
+  string height = 1;
+}
+
+message QueryMimirNodesAllValuesResponse{
+  repeated NodeMimir mimirs = 1 [(gogoproto.nullable) = false, (gogoproto.jsontag) = "mimirs"];
+}
+
+message QueryMimirNodesValuesRequest{
+  string height = 1;
+}
+
+message QueryMimirNodesValuesResponse{
+  repeated Mimir mimirs = 1;
+}
+
+message QueryMimirNodeValuesRequest{
+  string address = 1;
+  string height = 2;
+}
+
+message QueryMimirNodeValuesResponse{
+  repeated Mimir node_mimirs = 1;
+}
+
+message Mimir{
+  string key = 1;
+  int64  value = 2;
+}

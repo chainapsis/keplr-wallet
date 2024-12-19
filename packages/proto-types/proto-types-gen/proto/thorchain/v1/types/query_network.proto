@@ -1,0 +1,43 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "gogoproto/gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+
+message QueryNetworkRequest{
+  string height = 1;
+}
+
+message QueryNetworkResponse{
+  // total amount of RUNE awarded to node operators
+  string bond_reward_rune = 1 [(gogoproto.jsontag) = "bond_reward_rune"];
+  // total bonded RUNE
+  string total_bond_units = 2 [(gogoproto.jsontag) = "total_bond_units"];
+  // effective security bond used to determine maximum pooled RUNE
+  string effective_security_bond = 3 [(gogoproto.jsontag) = "effective_security_bond"];
+  // total reserve RUNE
+  string total_reserve = 4 [(gogoproto.jsontag) = "total_reserve"];
+  // Returns true if there exist RetiringVaults which have not finished migrating funds to new ActiveVaults
+  bool   vaults_migrating = 5 [(gogoproto.jsontag) = "vaults_migrating"];
+  // Sum of the gas the network has spent to send outbounds
+  string gas_spent_rune = 6 [(gogoproto.jsontag) = "gas_spent_rune"];
+  // Sum of the gas withheld from users to cover outbound gas
+  string gas_withheld_rune = 7 [(gogoproto.jsontag) = "gas_withheld_rune"];
+  // Current outbound fee multiplier, in basis points
+  string outbound_fee_multiplier = 8;
+  // the outbound transaction fee in rune, converted from the NativeOutboundFeeUSD mimir (after USD fees are enabled)
+  string native_outbound_fee_rune = 9 [(gogoproto.jsontag) = "native_outbound_fee_rune"];
+  // the native transaction fee in rune, converted from the NativeTransactionFeeUSD mimir (after USD fees are enabled)
+  string native_tx_fee_rune = 10 [(gogoproto.jsontag) = "native_tx_fee_rune"];
+  // the thorname register fee in rune, converted from the TNSRegisterFeeUSD mimir (after USD fees are enabled)
+  string tns_register_fee_rune = 11 [(gogoproto.jsontag) = "tns_register_fee_rune"];
+  // the thorname fee per block in rune, converted from the TNSFeePerBlockUSD mimir (after USD fees are enabled)
+  string tns_fee_per_block_rune = 12 [(gogoproto.jsontag) = "tns_fee_per_block_rune"];
+  // the rune price in tor
+  string rune_price_in_tor = 13 [(gogoproto.jsontag) = "rune_price_in_tor"];
+  // the tor price in rune
+  string tor_price_in_rune = 14 [(gogoproto.jsontag) = "tor_price_in_rune"];
+}

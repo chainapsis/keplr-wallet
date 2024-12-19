@@ -1,0 +1,14 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "gogoproto/gogo.proto";
+
+// NetworkFee represents the fee rate and typical outbound transaction size. Some chains
+// may have simplifid usage to report the fee as the "fee_rate" and set size to 1.
+message NetworkFee {
+  string chain = 1 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.Chain"];
+  uint64 transaction_size = 2;
+  uint64 transaction_fee_rate = 3;
+}

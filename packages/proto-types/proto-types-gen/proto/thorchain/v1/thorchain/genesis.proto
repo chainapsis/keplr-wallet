@@ -1,0 +1,80 @@
+syntax = "proto3";
+package thorchain;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain";
+
+import "common/common.proto";
+import "types/type_pool.proto";
+import "types/type_chain_contract.proto";
+import "types/type_network_fee.proto";
+import "types/msg_swap.proto";
+import "types/type_affiliate_fee_collector.proto";
+import "types/type_streaming_swap.proto";
+import "types/type_network.proto";
+import "types/type_pol.proto";
+import "types/type_reserve_contributor.proto";
+import "types/type_vault.proto";
+import "types/type_tx_out.proto";
+import "types/type_mimir.proto";
+import "types/type_node_account.proto";
+import "types/type_observed_tx.proto";
+import "types/type_liquidity_provider.proto";
+import "types/type_thorname.proto";
+import "types/type_loan.proto";
+import "types/type_clout.proto";
+import "types/type_trade_account.proto";
+import "types/type_rune_provider.proto";
+import "types/type_rune_pool.proto";
+import "types/type_secured_asset.proto";
+import "gogoproto/gogo.proto";
+
+message lastChainHeight {
+  string chain = 1;
+  int64 height = 2;
+}
+
+message mimir{
+  string key = 1;
+  int64 value = 2;
+}
+
+message GenesisState {
+  repeated types.Pool pools = 1 [(gogoproto.nullable) = false];
+  repeated types.LiquidityProvider liquidity_providers = 2 [(gogoproto.castrepeated) = "gitlab.com/thorchain/thornode/v3/x/thorchain/types.LiquidityProviders", (gogoproto.nullable) = false];
+  repeated types.ObservedTxVoter observed_tx_in_voters = 3 [(gogoproto.castrepeated) = "gitlab.com/thorchain/thornode/v3/x/thorchain/types.ObservedTxVoters", (gogoproto.nullable) = false];
+  repeated types.ObservedTxVoter observed_tx_out_voters = 4 [(gogoproto.castrepeated) = "gitlab.com/thorchain/thornode/v3/x/thorchain/types.ObservedTxVoters", (gogoproto.nullable) = false];
+  repeated types.TxOut tx_outs = 5 [(gogoproto.nullable) = false];
+  repeated types.NodeAccount node_accounts = 6 [(gogoproto.castrepeated) = "gitlab.com/thorchain/thornode/v3/x/thorchain/types.NodeAccounts", (gogoproto.nullable) = false];
+  repeated types.Vault vaults = 7 [(gogoproto.castrepeated) = "gitlab.com/thorchain/thornode/v3/x/thorchain/types.Vaults", (gogoproto.nullable) = false];
+  uint64 reserve = 8;
+  reserved 9;
+  int64 last_signed_height = 10;
+  repeated lastChainHeight last_chain_heights = 11 [(gogoproto.nullable) = false];
+  repeated types.ReserveContributor reserve_contributors = 12 [(gogoproto.castrepeated) = "gitlab.com/thorchain/thornode/v3/x/thorchain/types.ReserveContributors", (gogoproto.nullable) = false];
+  types.Network network = 13 [(gogoproto.nullable) = false];
+  reserved 14,15,16,17,18;
+  repeated types.MsgSwap orderbook_items = 19 [(gogoproto.nullable) = false];
+  repeated types.NetworkFee network_fees = 20 [(gogoproto.nullable) = false];
+  reserved 21;
+  repeated types.ChainContract chain_contracts = 22 [(gogoproto.nullable) = false];
+  repeated types.THORName THORNames = 23 [(gogoproto.nullable) = false];
+  repeated mimir mimirs = 24 [(gogoproto.nullable) = false];
+  // store_version is deprecated in v3.0.0
+  int64 store_version = 25 [deprecated = true];
+  repeated types.BondProviders bond_providers = 26 [(gogoproto.nullable) = false];
+  types.ProtocolOwnedLiquidity POL = 27 [(gogoproto.nullable) = false];
+  repeated types.Loan loans = 28 [(gogoproto.nullable) = false];
+  repeated types.StreamingSwap streaming_swaps = 29 [(gogoproto.nullable) = false];
+  repeated types.MsgSwap swap_queue_items = 30 [(gogoproto.nullable) = false];
+  repeated types.SwapperClout swapper_clout = 31 [(gogoproto.nullable) = false];
+  repeated types.TradeAccount trade_accounts = 32 [(gogoproto.nullable) = false];
+  repeated types.TradeUnit trade_units = 33 [(gogoproto.nullable) = false];
+  repeated common.Coin outbound_fee_withheld_rune = 34 [(gogoproto.castrepeated) = "gitlab.com/thorchain/thornode/v3/common.Coins", (gogoproto.nullable) = false];
+  repeated common.Coin outbound_fee_spent_rune = 35 [(gogoproto.castrepeated) = "gitlab.com/thorchain/thornode/v3/common.Coins", (gogoproto.nullable) = false];
+  repeated types.RUNEProvider rune_providers = 36 [(gogoproto.nullable) = false];
+  types.RUNEPool rune_pool = 37 [(gogoproto.nullable) = false];
+  repeated types.NodeMimir nodeMimirs = 38 [(gogoproto.nullable) = false];
+  repeated types.AffiliateFeeCollector affiliate_collectors = 39 [(gogoproto.nullable) = false];
+  repeated common.Coin loan_total_collateral = 40 [(gogoproto.castrepeated) = "gitlab.com/thorchain/thornode/v3/common.Coins", (gogoproto.nullable) = false];
+  repeated types.SecuredAsset secured_assets = 41 [(gogoproto.nullable) = false];
+}

@@ -1,0 +1,20 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all)         = false;
+option (gogoproto.goproto_getters_all) = false;
+
+import "gogoproto/gogo.proto";
+
+message TssVoter {
+  string id = 1 [(gogoproto.customname) = "ID"];
+  string pool_pub_key = 2 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.PubKey"];
+  repeated string pub_keys = 3;
+  int64 block_height = 4;
+  repeated string chains = 5;
+  repeated string signers = 6;
+  int64 majority_consensus_block_height = 7;
+  repeated string secp256k1_signatures = 8;
+}
