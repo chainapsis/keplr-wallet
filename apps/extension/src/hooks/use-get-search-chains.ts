@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useStore } from "../stores";
 import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import { autorun } from "mobx";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 type SearchOption = "all" | "cosmos" | "evm";
 type FilterOption = "all" | "chain" | "token" | "chainNameAndToken";
@@ -48,7 +49,7 @@ export const useGetSearchChains = ({
   trimSearch: string;
   searchedChainInfos: (ChainInfo | ModularChainInfo)[];
 } => {
-  const { queriesStore } = useStore();
+  const { queriesStore, chainStore } = useStore();
 
   const trimSearch = search.trim().toLowerCase();
 
@@ -74,6 +75,56 @@ export const useGetSearchChains = ({
     (ChainInfo | ModularChainInfo)[]
   >([]);
 
+  const disabledChainInfosSearched = useMemo(() => {
+    return chainStore.chainInfosInListUI
+      .filter(
+        (modularChainInfo) =>
+          !chainStore.isEnabledChain(modularChainInfo.chainId)
+      )
+      .filter((chainInfo) => {
+        const chainId = chainInfo.chainId.toLowerCase();
+        const chainName = chainInfo.chainName.toLowerCase();
+        const mainCurrencyDenom =
+          chainInfo.currencies[0].coinDenom.toLowerCase();
+        const stakeCurrencyDenom =
+          chainInfo.stakeCurrency?.coinDenom.toLowerCase();
+        const tokenDenom = chainStore.isEvmOnlyChain(chainInfo.chainId)
+          ? mainCurrencyDenom
+          : stakeCurrencyDenom || mainCurrencyDenom;
+
+        // search text가 eth 또는 eth~ethereum일 경우 evm 체인은 모두 보여준다.
+        if (trimSearch.startsWith("eth")) {
+          const isEVM = !("bech32Config" in chainInfo);
+
+          if (isEVM) {
+            return true;
+          }
+        }
+
+        switch (filterOption) {
+          case "all":
+            return (
+              chainName.includes(trimSearch) ||
+              chainId.includes(trimSearch) ||
+              tokenDenom.includes(trimSearch)
+            );
+          case "chain":
+            return (
+              chainName.includes(trimSearch) || chainId.includes(trimSearch)
+            );
+          case "token":
+            return tokenDenom.includes(trimSearch);
+          case "chainNameAndToken":
+            return (
+              chainName.includes(trimSearch) || tokenDenom.includes(trimSearch)
+            );
+          default:
+            return false;
+        }
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chainStore.chainInfosInListUI, filterOption, trimSearch]);
+
   useEffect(() => {
     const disposer = autorun(() => {
       if (!queryChains) {
@@ -86,7 +137,25 @@ export const useGetSearchChains = ({
       }
       if (queryChains.isFetching) return;
       if (queryChains.response?.data) {
-        setSearchedChainInfos(queryChains.response.data.chains);
+        const dupCheck = new Set<string>();
+        for (const chain of queryChains.response.data.chains) {
+          dupCheck.add(ChainIdHelper.parse(chain.chainId).identifier);
+        }
+
+        const chains = queryChains.response.data.chains;
+        for (const disabledChainInfo of disabledChainInfosSearched) {
+          if (
+            !dupCheck.has(
+              ChainIdHelper.parse(disabledChainInfo.chainId).identifier
+            )
+          ) {
+            chains.push(disabledChainInfo.embedded);
+          }
+        }
+
+        setSearchedChainInfos(
+          chains.sort((a, b) => a.chainName.localeCompare(b.chainName))
+        );
       } else {
         setSearchedChainInfos((prev) => (prev.length > 0 ? [] : prev));
       }
@@ -97,7 +166,12 @@ export const useGetSearchChains = ({
         disposer();
       }
     };
-  }, [clearResultsOnEmptyQuery, initialChainInfos, queryChains]);
+  }, [
+    clearResultsOnEmptyQuery,
+    initialChainInfos,
+    queryChains,
+    disabledChainInfosSearched,
+  ]);
 
   return {
     trimSearch,

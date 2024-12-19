@@ -1,0 +1,36 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "gogoproto/gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+
+message QueryOutboundFeeRequest{
+  string asset = 1;
+  string height = 2;
+}
+
+message QueryOutboundFeeResponse{
+	// the asset to display the outbound fee for
+  string asset = 1 [(gogoproto.jsontag) = "asset"];
+	// the asset's outbound fee, in (1e8-format) units of the asset
+  string outbound_fee = 2 [(gogoproto.jsontag) = "outbound_fee"];
+	// Total RUNE the network has withheld as fees to later cover gas costs for this asset's outbounds
+  string fee_withheld_rune = 3;
+	// Total RUNE the network has spent to reimburse gas costs for this asset's outbounds
+  string fee_spent_rune = 4;
+	// amount of RUNE by which the fee_withheld_rune exceeds the fee_spent_rune
+  string surplus_rune = 5;
+	// dynamic multiplier basis points, based on the surplus_rune, affecting the size of the outbound_fee
+  string dynamic_multiplier_basis_points = 6;
+}
+
+message QueryOutboundFeesRequest{
+  string height = 1;
+}
+
+message QueryOutboundFeesResponse{
+  repeated QueryOutboundFeeResponse outbound_fees = 1;
+}

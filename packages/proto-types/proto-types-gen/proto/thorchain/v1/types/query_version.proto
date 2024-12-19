@@ -1,0 +1,23 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "gogoproto/gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+
+message QueryVersionRequest{
+  string height = 1;
+}
+
+message QueryVersionResponse{
+	// current version
+  string current = 1 [(gogoproto.jsontag) = "current"];
+	// next version (minimum version for a node to become Active)
+  string next = 2 [(gogoproto.jsontag) = "next"];
+	// height at which the minimum joining version last changed
+  int64  next_since_height = 3;
+	// querier version
+  string querier = 4 [(gogoproto.jsontag) = "querier"];
+}

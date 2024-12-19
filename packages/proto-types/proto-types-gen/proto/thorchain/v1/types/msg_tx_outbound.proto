@@ -1,0 +1,13 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "types/type_observed_tx.proto";
+import "gogoproto/gogo.proto";
+
+message MsgOutboundTx {
+  ObservedTx tx = 1 [(gogoproto.nullable) = false];
+  string in_tx_id = 2 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.TxID", (gogoproto.customname) = "InTxID"];
+  bytes signer = 3  [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+}

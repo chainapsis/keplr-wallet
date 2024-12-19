@@ -1,0 +1,84 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "gogoproto/gogo.proto";
+import "common/common.proto";
+
+option (gogoproto.marshaler_all) = true;
+
+message QueryNodeRequest{
+  string address = 1;
+  string height = 2;
+}
+
+message QueryNodeResponse{
+  string node_address = 1 [(gogoproto.jsontag) = "node_address"];
+  string status = 2 [(gogoproto.jsontag) = "status"];
+  common.PubKeySet pub_key_set = 3 [(gogoproto.nullable) = false, (gogoproto.jsontag) = "pub_key_set"];
+	// the consensus pub key for the node
+  string validator_cons_pub_key = 4 [(gogoproto.jsontag) = "validator_cons_pub_key"];
+	// the P2PID (:6040/p2pid endpoint) of the node
+  string peer_id = 5 [(gogoproto.jsontag) = "peer_id"];
+	// the block height at which the node became active
+  int64 active_block_height = 6 [(gogoproto.jsontag) = "active_block_height"];
+	// the block height of the current provided information for the node
+  int64 status_since = 7 [(gogoproto.jsontag) = "status_since"];
+  string node_operator_address = 8 [(gogoproto.jsontag) = "node_operator_address"];
+	// current node bond
+  string total_bond = 9 [(gogoproto.jsontag) = "total_bond"];
+  NodeBondProviders bond_providers = 10 [(gogoproto.jsontag) = "bond_providers"];
+	// the set of vault public keys of which the node is a member
+  repeated string signer_membership = 11 [(gogoproto.jsontag) = "signer_membership"];
+  bool requested_to_leave = 12 [(gogoproto.jsontag) = "requested_to_leave"];
+	// indicates whether the node has been forced to leave by the network, typically via ban
+  bool forced_to_leave = 13 [(gogoproto.jsontag) = "forced_to_leave"];
+  int64 leave_height = 14 [(gogoproto.jsontag) = "leave_height"];
+	// the currently set version of the node
+  string ip_address = 15 [(gogoproto.jsontag) = "ip_address"];
+  string version = 16 [(gogoproto.jsontag) = "version"];
+	// the accumulated slash points, reset at churn but excessive slash points may carry over
+  int64 slash_points = 17 [(gogoproto.jsontag) = "slash_points"];
+  NodeJail jail = 18 [(gogoproto.jsontag) = "jail"];
+  string current_award = 19 [(gogoproto.jsontag) = "current_award"];
+	// the last observed heights for all chain by the node
+  repeated ChainHeight observe_chains = 20 [(gogoproto.jsontag) = "observe_chains"];
+  NodePreflightStatus preflight_status = 21 [(gogoproto.jsontag) = "preflight_status"];
+}
+
+message QueryNodesRequest{
+  string height = 1;
+}
+
+message QueryNodesResponse{
+  repeated QueryNodeResponse nodes = 1;
+}
+
+message NodeBondProviders{
+  string node_operator_fee = 1 [(gogoproto.jsontag) = "node_operator_fee"];
+  repeated NodeBondProvider providers = 2 [(gogoproto.jsontag) = "providers"];
+}
+
+message NodeBondProvider{
+  string bond_address = 1;
+  string bond = 2;
+}
+
+message NodeJail{
+  int64 release_height = 1;
+  string reason = 2;
+}
+
+message ChainHeight{
+  string chain = 1 [(gogoproto.jsontag) = "chain"];
+  int64 height = 2 [(gogoproto.jsontag) = "height"];
+}
+
+message NodePreflightStatus{
+	// the next status of the node
+  string status = 1 [(gogoproto.jsontag) = "status"];
+	// the reason for the transition to the next status
+  string reason = 2 [(gogoproto.jsontag) = "reason"];
+  int64  code = 3 [(gogoproto.jsontag) = "code"];
+}

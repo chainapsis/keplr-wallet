@@ -1,0 +1,78 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "gogoproto/gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+
+message QueryBlockRequest{
+  string height = 1;
+}
+
+message QueryBlockResponse{
+  BlockResponseId id = 1 [(gogoproto.jsontag) = "id"];
+  BlockResponseHeader header = 2 [(gogoproto.jsontag) = "header"];
+  repeated BlockEvent begin_block_events = 3 [(gogoproto.jsontag) = "begin_block_events"];
+  repeated BlockEvent end_block_events = 4 [(gogoproto.jsontag) = "end_block_events"];
+  repeated QueryBlockTx txs = 5 [(gogoproto.jsontag) = "txs"];
+}
+
+message BlockResponseId{
+  string hash = 1 [(gogoproto.jsontag) = "hash"];
+  BlockResponseIdParts parts = 2 [(gogoproto.jsontag) = "parts"];
+}
+
+message BlockResponseIdParts{
+  int64 total = 1 [(gogoproto.jsontag) = "total"];
+  string hash = 2 [(gogoproto.jsontag) = "hash"];
+}
+
+message BlockResponseHeader{
+  BlockResponseHeaderVersion version = 1 [(gogoproto.jsontag) = "version"];
+  string chain_id = 2 [(gogoproto.jsontag) = "chain_id"];
+  int64 height = 3 [(gogoproto.jsontag) = "height"];
+  string time = 4 [(gogoproto.jsontag) = "time"];
+  BlockResponseId last_block_id = 5 [(gogoproto.jsontag) = "last_block_id"];
+  string last_commit_hash = 6 [(gogoproto.jsontag) = "last_commit_hash"];
+  string data_hash = 7 [(gogoproto.jsontag) = "data_hash"];
+  string validators_hash = 8 [(gogoproto.jsontag) = "validators_hash"];
+  string next_validators_hash = 9 [(gogoproto.jsontag) = "next_validators_hash"];
+  string consensus_hash = 10 [(gogoproto.jsontag) = "consensus_hash"];
+  string app_hash = 11 [(gogoproto.jsontag) = "app_hash"];
+  string last_results_hash = 12 [(gogoproto.jsontag) = "last_results_hash"];
+  string evidence_hash = 13 [(gogoproto.jsontag) = "evidence_hash"];
+  string proposer_address = 14 [(gogoproto.jsontag) = "proposer_address"];
+}
+
+message BlockResponseHeaderVersion{
+  string block = 1 [(gogoproto.jsontag) = "block"];
+  string app = 2 [(gogoproto.jsontag) = "app"];
+}
+
+message BlockEvent{
+  repeated EventKeyValuePair event_kv_pair = 1;
+}
+
+message EventKeyValuePair{
+  string key = 1;
+  string value = 2;
+}
+
+message QueryBlockTx{
+  string hash = 1 [(gogoproto.jsontag) = "hash"];
+  bytes tx = 2;
+  BlockTxResult result = 3 [(gogoproto.jsontag) = "result"];
+}
+
+message BlockTxResult{
+  int64 code = 1 [(gogoproto.jsontag) = "code"];
+  string data = 2;
+  string log = 3;
+  string info = 4;
+  string gas_wanted = 5;
+  string gas_used = 6;
+  repeated BlockEvent events = 7;
+  string codespace = 8;
+}
