@@ -130,7 +130,7 @@ Keplr handles EVM JSON-RPC requests via the `window.keplr.ethereum` object, enab
   ```typescript
   params: [
     {
-    eth_accounts: object
+      eth_accounts: object
     },
   ]
   ```
@@ -154,7 +154,7 @@ Keplr handles EVM JSON-RPC requests via the `window.keplr.ethereum` object, enab
 
 - `eth_call`, `eth_estimateGas`, `eth_getTransactionCount`, `eth_getTransactionByHash`, `eth_getTransactionByBlockHashAndIndex`, `eth_getTransactionByBlockNumberAndIndex`, `eth_getTransactionReceipt`, `eth_sendRawTransaction`, `eth_protocolVersion`, `eth_syncing`, `eth_getCode`, `eth_getLogs`, `eth_getProof`, `eth_getStorageAt`, `eth_getBalance`, `eth_blockNumber`, `eth_getBlockByHash`, `eth_getBlockByNumber`, `eth_gasPrice`, `eth_feeHistory`, `eth_maxPriorityFeePerGas`
 
-Keplr supports Ethereum-native methods following [EIP-1193](https://eips.ethereum.org/EIPS/eip-1193) and [EIP-2522](https://eips.ethereum.org/EIPS/eip-2522) standards. For a complete list, refer to the [Ethereum JSON-RPC API](https://ethereum.org/en/developers/docs/apis/json-rpc/).
+Keplr supports Ethereum-native methods following [EIP-1193](https://eips.ethereum.org/EIPS/eip-1193) and [EIP-2255](https://eips.ethereum.org/EIPS/eip-2255) standards. For a complete list, refer to the [Ethereum JSON-RPC API](https://ethereum.org/en/developers/docs/apis/json-rpc/).
 
 ## Example Usage
 
