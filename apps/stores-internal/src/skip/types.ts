@@ -24,6 +24,7 @@ export interface AssetsResponse {
             origin_chain_id: string;
             is_evm: boolean;
             token_contract?: string;
+            recommended_symbol?: string;
           }[];
         }
       | undefined;
