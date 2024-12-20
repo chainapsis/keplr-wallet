@@ -75,9 +75,6 @@ request<T = unknown>({
 
 ### Supported Request Types
 
-#### Keplr-Specific Request Types
-
-- **`keplr_initStarknetProviderState`, `keplr_enableStarknetProvider`:** Initialize the Starknet provider state.
 - **`wallet_watchAsset`:** Suggest ERC20 tokens.
   ```typescript
   params: {

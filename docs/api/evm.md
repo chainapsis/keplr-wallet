@@ -50,11 +50,6 @@ Keplr handles EVM JSON-RPC requests via the `window.keplr.ethereum` object, enab
 
 ### Supported Request Types
 
-#### Keplr-Specific Methods
-
-- **`keplr_initProviderState`**: Retrieves the current EVM chain ID, network version, and selected address.
-- **`keplr_connect`**: Establishes a connection and returns the selected address.
-- **`keplr_disconnect`**: Revokes permissions for all chains for a specific origin.
 - **`eth_chainId`**: Returns the current chain's EVM chain ID.
 - **`net_version`**: Retrieves the network version.
 - **`eth_accounts` & `eth_requestAccounts`**: Returns the selected address.
@@ -177,17 +172,4 @@ window.keplr.ethereum.request({
     },
   ],
 });
-```
-
-## EIP-6963 Provider Info
-
-Keplr complies with the [EIP-6963](https://eips.ethereum.org/EIPS/eip-6963) standard, allowing dApps to retrieve wallet provider information. Call `window.keplr.eip6963ProviderInfo` to access the following details:
-
-```typescript
-type EIP6963ProviderInfo = {
-  uuid: string; // Unique identifier for the provider session
-  name: string; // Name of the provider (Keplr)
-  icon: string; // URL to Keplr's icon
-  rdns: string; // Reverse domain name for Keplr (app.keplr)
-};
 ```
