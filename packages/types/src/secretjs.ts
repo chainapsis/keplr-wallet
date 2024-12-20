@@ -1,5 +1,4 @@
 export interface SecretUtils {
-  isNewApi: () => Promise<boolean>;
   getPubkey: () => Promise<Uint8Array>;
   decrypt: (ciphertext: Uint8Array, nonce: Uint8Array) => Promise<Uint8Array>;
   encrypt: (
