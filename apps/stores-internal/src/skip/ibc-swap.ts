@@ -613,17 +613,23 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
         if (isCandidateChain) {
           const candidateAsset = this.queryAssets
             .getAssets(candidateChain.chainInfo.chainId)
-            .assets.find(
+            .assetsRaw.find(
               (a) =>
                 a.recommendedSymbol &&
                 a.recommendedSymbol === asset?.recommendedSymbol
             );
 
           if (candidateAsset) {
-            res.push({
-              denom: candidateAsset.denom,
-              chainId: candidateChain.chainInfo.chainId,
-            });
+            const currencyFound = this.chainStore
+              .getChain(candidateChain.chainInfo.chainId)
+              .findCurrencyWithoutReaction(candidateAsset.denom);
+
+            if (currencyFound) {
+              res.push({
+                denom: candidateAsset.denom,
+                chainId: candidateChain.chainInfo.chainId,
+              });
+            }
           }
         }
       }

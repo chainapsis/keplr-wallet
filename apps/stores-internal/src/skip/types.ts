@@ -25,6 +25,7 @@ export interface AssetsResponse {
             is_evm: boolean;
             token_contract?: string;
             recommended_symbol?: string;
+            decimals: number;
           }[];
         }
       | undefined;
