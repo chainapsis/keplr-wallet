@@ -150,7 +150,3 @@ window.keplr.starknet.request({
   params: { transactionHash: "0x123456789abcdef" },
 });
 ```
-
-## Starknet Provider Information
-
-You can retrieve wallet provider information using the `keplr.starknetProviderInfo` method.
