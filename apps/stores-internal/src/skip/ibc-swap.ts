@@ -599,7 +599,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
               },
             ];
 
-      // EVM 체인들에 한해서는 Skip에서 내려주는 응답에서 symbol(coinDenom)이 같다면 해당 토큰의 도착 체인 후보가 될 수 있는 걸로 간주한다.
+      // Skip에서 내려주는 응답에서 symbol(coinDenom)이 같다면 해당 토큰의 도착 체인 후보가 될 수 있는 걸로 간주한다.
       const isEVMOnlyChain = chainInfo.chainId.startsWith("eip155:");
       const asset = this.queryAssets
         .getAssets(chainInfo.chainId)

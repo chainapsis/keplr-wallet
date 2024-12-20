@@ -53,6 +53,29 @@ export interface MsgsDirectResponse {
       value: string;
     };
   }[];
+  txs: {
+    cosmos_tx?: {
+      chain_id: string;
+      path: string[];
+      signer_address: string;
+      msgs: {
+        msg: string;
+        msg_type_url: string;
+      }[];
+    };
+    evm_tx?: {
+      chain_id: string;
+      data: string;
+      required_erc20_approvals: {
+        amount: string;
+        spender: string;
+        token_contract: string;
+      }[];
+      signer_address: string;
+      to: string;
+      value: string;
+    };
+  }[];
   route: RouteResponse;
 }
 

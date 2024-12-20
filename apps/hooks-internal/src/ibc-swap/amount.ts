@@ -463,6 +463,12 @@ export class IBCSwapAmountConfig extends AmountConfig {
         ...tx,
         requiredErc20Approvals: msg.requiredErc20Approvals,
       };
+    } else if (msg.type === "MsgCCTP") {
+      const tx = sourceAccount.cosmos.makeCCTPTx(
+        msg.msgs[0].msg,
+        msg.msgs[1].msg
+      );
+      return tx;
     }
   }
 
@@ -495,13 +501,13 @@ export class IBCSwapAmountConfig extends AmountConfig {
   ): string {
     let key = "";
 
-    for (const msg of response.msgs) {
-      if (msg.multi_chain_msg) {
+    for (const msg of response.txs) {
+      if (msg.cosmos_tx) {
+        const cosmosMsg = msg.cosmos_tx.msgs[0];
         if (
-          msg.multi_chain_msg.msg_type_url ===
-          "/ibc.applications.transfer.v1.MsgTransfer"
+          cosmosMsg.msg_type_url === "/ibc.applications.transfer.v1.MsgTransfer"
         ) {
-          const memo = JSON.parse(msg.multi_chain_msg.msg).memo;
+          const memo = JSON.parse(cosmosMsg.msg).memo;
           if (memo) {
             const obj = JSON.parse(memo);
             const wasms: any = [];
@@ -553,11 +559,8 @@ export class IBCSwapAmountConfig extends AmountConfig {
             }
           }
         }
-        if (
-          msg.multi_chain_msg.msg_type_url ===
-          "/cosmwasm.wasm.v1.MsgExecuteContract"
-        ) {
-          const obj = JSON.parse(msg.multi_chain_msg.msg);
+        if (cosmosMsg.msg_type_url === "/cosmwasm.wasm.v1.MsgExecuteContract") {
+          const obj = JSON.parse(cosmosMsg.msg);
           for (const operation of obj.msg.swap_and_action.user_swap
             .swap_exact_asset_in.operations) {
             key += `/${operation.pool}/${operation.denom_in}/${operation.denom_out}`;

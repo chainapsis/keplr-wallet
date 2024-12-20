@@ -858,6 +858,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
           try {
             if ("send" in tx) {
+              const isCCTPTx = tx.ui.type();
               await tx.send(
                 ibcSwapConfigs.feeConfig.toStdFee(),
                 ibcSwapConfigs.memoConfig.memo,
@@ -866,7 +867,37 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   preferNoSetMemo: false,
 
                   sendTx: async (chainId, tx, mode) => {
-                    if (ibcSwapConfigs.amountConfig.type === "transfer") {
+                    if (isCCTPTx) {
+                      // TODO: CCTP를 위한 msg 필요
+                      const msg: Message<Uint8Array> = new SendTxAndRecordMsg(
+                        "ibc-swap/cctp",
+                        chainId,
+                        outChainId,
+                        tx,
+                        mode,
+                        false,
+                        ibcSwapConfigs.senderConfig.sender,
+                        accountStore.getAccount(outChainId).bech32Address,
+                        ibcSwapConfigs.amountConfig.amount.map((amount) => {
+                          return {
+                            amount: DecUtils.getTenExponentN(
+                              amount.currency.coinDecimals
+                            )
+                              .mul(amount.toDec())
+                              .toString(),
+                            denom: amount.currency.coinMinimalDenom,
+                          };
+                        }),
+                        ibcSwapConfigs.memoConfig.memo,
+                        true
+                      );
+                      return await new InExtensionMessageRequester().sendMessage(
+                        BACKGROUND_PORT,
+                        msg
+                      );
+                    } else if (
+                      ibcSwapConfigs.amountConfig.type === "transfer"
+                    ) {
                       const msg: Message<Uint8Array> = new SendTxAndRecordMsg(
                         "ibc-swap/ibc-transfer",
                         chainId,
