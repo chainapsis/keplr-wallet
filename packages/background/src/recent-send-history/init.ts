@@ -12,6 +12,12 @@ import {
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
 import { RecentSendHistoryService } from "./service";
+import {
+  ClearAllSkipHistoryMsg,
+  GetSkipHistoriesMsg,
+  RecordTxWithSkipSwapMsg,
+  RemoveSkipHistoryMsg,
+} from "./temp-skip-message";
 
 export function init(router: Router, service: RecentSendHistoryService): void {
   router.registerMessage(GetRecentSendHistoriesMsg);
@@ -22,6 +28,10 @@ export function init(router: Router, service: RecentSendHistoryService): void {
   router.registerMessage(GetIBCHistoriesMsg);
   router.registerMessage(RemoveIBCHistoryMsg);
   router.registerMessage(ClearAllIBCHistoryMsg);
+  router.registerMessage(RecordTxWithSkipSwapMsg);
+  router.registerMessage(GetSkipHistoriesMsg);
+  router.registerMessage(RemoveSkipHistoryMsg);
+  router.registerMessage(ClearAllSkipHistoryMsg);
 
   router.addHandler(ROUTE, getHandler(service));
 }

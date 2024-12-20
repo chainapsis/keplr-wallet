@@ -54,6 +54,8 @@ import { Button } from "../../components/button";
 import { TextButtonProps } from "../../components/button-text";
 import { UnsignedEVMTransaction } from "@keplr-wallet/stores-eth";
 import { EthTxStatus } from "@keplr-wallet/types";
+import { simpleFetch } from "@keplr-wallet/simple-fetch";
+import { RecordTxWithSkipSwapMsg } from "@keplr-wallet/background/build/recent-send-history/temp-skip-message";
 
 const TextButtonStyles = {
   Container: styled.div`
@@ -1069,8 +1071,54 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   ...feeObject,
                 },
                 {
-                  onBroadcasted: () => {
-                    // TODO: Add history
+                  onBroadcasted: (txHash) => {
+                    const evmChainId = parseInt(inChainId.split(":")[1]);
+
+                    // 1. track the transaction
+                    setTimeout(() => {
+                      // no wait
+                      simpleFetch<any>(
+                        "https://api.skip.build/",
+                        "/v2/tx/track",
+                        {
+                          method: "POST",
+                          headers: {
+                            "content-type": "application/json",
+                            ...(() => {
+                              const res: { authorization?: string } = {};
+                              if (process.env["SKIP_API_KEY"]) {
+                                res.authorization = process.env["SKIP_API_KEY"];
+                              }
+                              return res;
+                            })(),
+                          },
+                          body: JSON.stringify({
+                            tx_hash: txHash,
+                            chain_id: evmChainId,
+                          }),
+                        }
+                      )
+                        .then((result) => {
+                          console.log(
+                            `Skip tx track result: ${JSON.stringify(result)}`
+                          );
+                        })
+                        .catch((e) => {
+                          console.log(e);
+                        });
+                    }, 2000);
+
+                    // 2. create message and send it to the background script
+                    //   to create IBCHistory for displaying the transaction history in the home screen.
+
+                    // 2-1. Define new message
+                    const msg = new RecordTxWithSkipSwapMsg();
+
+                    // 2-2. Send the message to the background script
+                    new InExtensionMessageRequester().sendMessage(
+                      BACKGROUND_PORT,
+                      msg
+                    );
                   },
                   onFulfill: (txReceipt) => {
                     const queryBalances = queriesStore.get(

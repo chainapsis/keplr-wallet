@@ -20,6 +20,7 @@ import { Buffer } from "buffer/";
 import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
+import { SkipHistory } from "./temp-skip-message";
 
 export class RecentSendHistoryService {
   // Key: {chain_identifier}/{type}
@@ -32,6 +33,12 @@ export class RecentSendHistoryService {
   // Key: id (sequence, it should be increased by 1 for each)
   @observable
   protected readonly recentIBCHistoryMap: Map<string, IBCHistory> = new Map();
+
+  @observable
+  protected recentSkipHistorySeq: number = 0;
+  // Key: id (sequence, it should be increased by 1 for each
+  @observable
+  protected readonly recentSkipHistoryMap: Map<string, SkipHistory> = new Map();
 
   constructor(
     protected readonly kvStore: KVStore,
@@ -109,6 +116,9 @@ export class RecentSendHistoryService {
     for (const history of this.getRecentIBCHistories()) {
       this.trackIBCPacketForwardingRecursive(history.id);
     }
+
+    // TODO: Load skip history from storage
+    //       and track unfinished skip history if exists
 
     this.chainsService.addChainRemovedHandler(this.onChainRemoved);
   }
@@ -1054,6 +1064,34 @@ export class RecentSendHistoryService {
   @action
   clearAllRecentIBCHistory(): void {
     this.recentIBCHistoryMap.clear();
+  }
+
+  // skip related methods
+  recordTxWithSkipSwap(): string {
+    const id = (this.recentIBCHistorySeq++).toString();
+
+    // TODO: Implement this
+
+    return id;
+  }
+
+  getRecentSkipHistory(id: string): SkipHistory | undefined {
+    return this.recentSkipHistoryMap.get(id);
+  }
+
+  getRecentSkipHistories(): SkipHistory[] {
+    // TODO: Implement this
+    return Array.from(this.recentSkipHistoryMap.values());
+  }
+
+  @action
+  removeRecentSkipHistory(id: string): boolean {
+    return this.recentSkipHistoryMap.delete(id);
+  }
+
+  @action
+  clearAllRecentSkipHistory(): void {
+    this.recentSkipHistoryMap.clear();
   }
 
   protected getIBCWriteAcknowledgementAckFromTx(
