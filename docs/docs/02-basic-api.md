@@ -71,7 +71,7 @@ There may be multiple ways to achieve the same result, and no preferred method.
 
 ## Keplr-specific features
 
-If you were able to connect Keplr with CosmJS, you may skip to the [Use Keplr with CosmJS](./cosmjs.md) section.
+If you were able to connect Keplr with CosmJS, you may skip to the [Use Keplr with CosmJS](./03-cosmjs.md) section.
 
 While Keplr supports an easy way to connect to CosmJS, there are additional functions specific to Keplr which provide additional features.
 
@@ -134,7 +134,7 @@ If the webpage has permission and Keplr is unlocked, this function will return t
 ```
 
 It also returns the nickname for the key store currently selected, which should allow the webpage to display the current key store selected to the user in a more convenient mane.  
-`isNanoLedger` field in the return type is used to indicate whether the selected account is from the Ledger Nano. Because current Cosmos app in the Ledger Nano doesn't support the direct (protobuf) format msgs, this field can be used to select the amino or direct signer. [Ref](./cosmjs.md#types-of-offline-signers)
+`isNanoLedger` field in the return type is used to indicate whether the selected account is from the Ledger Nano. Because current Cosmos app in the Ledger Nano doesn't support the direct (protobuf) format msgs, this field can be used to select the amino or direct signer. [Ref](./03-cosmjs.md#types-of-offline-signers)
 
 ### Sign Amino
 
