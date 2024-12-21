@@ -15,12 +15,11 @@ import {
   toJS,
 } from "mobx";
 import { KVStore, retry } from "@keplr-wallet/common";
-import { IBCHistory, RecentSendHistory } from "./types";
+import { IBCHistory, RecentSendHistory, SkipHistory } from "./types";
 import { Buffer } from "buffer/";
 import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
-import { SkipHistory } from "./temp-skip-message";
 
 export class RecentSendHistoryService {
   // Key: {chain_identifier}/{type}

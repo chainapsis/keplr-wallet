@@ -1,4 +1,5 @@
 import { AppCurrency } from "@keplr-wallet/types";
+import { TransferAssetRelease } from "./temp-skip-types";
 
 export interface RecentSendHistory {
   timestamp: number;
@@ -92,3 +93,43 @@ export interface IBCSwapHistory {
     }[];
   };
 }
+
+export type SkipHistory = {
+  id: string;
+  chainId: string;
+  destinationChainId: string;
+  timestamp: number;
+  sender: string;
+
+  amount: {
+    amount: string;
+    denom: string;
+  }[];
+  txHash: string;
+
+  txFulfilled?: boolean;
+  txError?: string;
+
+  notified?: boolean;
+  notificationInfo?: {
+    currencies: AppCurrency[];
+  };
+
+  swapReceiver: string[];
+
+  simpleRoute: string[];
+  routeIndex: number;
+  routeDurationSeconds: number;
+
+  destinationAsset: {
+    chainId: string;
+    denom: string;
+  };
+
+  resAmount: {
+    amount: string;
+    denom: string;
+  }[][];
+
+  transferAssetRelease?: TransferAssetRelease;
+};

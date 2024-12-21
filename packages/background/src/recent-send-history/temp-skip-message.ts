@@ -1,10 +1,7 @@
 import { Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
 import { AppCurrency } from "@keplr-wallet/types";
-
-export type SkipHistory = {
-  // TODO: Define the properties of the skip history
-};
+import { SkipHistory } from "./types";
 
 export class RecordTxWithSkipSwapMsg extends Message<string> {
   public static type() {
