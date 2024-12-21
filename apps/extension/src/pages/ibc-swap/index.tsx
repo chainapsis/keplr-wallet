@@ -360,6 +360,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         if (queryRoute.response.data.operations.length > 0) {
           for (const operation of queryRoute.response.data.operations) {
             if ("swap" in operation) {
+              // CHECK: operation.swap.swap_in이 undefined로 가져와져서
+              // 아래 swap_venue를 읽어올 때 에러가 발생함
               const swapFeeBpsReceiverAddress = SwapFeeBps.receivers.find(
                 (r) => r.chainId === operation.swap.swap_in.swap_venue.chain_id
               );
@@ -684,6 +686,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           let swapChannelIndex: number = -1;
           const swapReceiver: string[] = [];
           const swapFeeBpsReceiver: string[] = [];
+          let simpleRoute: string[] = [];
+          let routeDurationSeconds: number = 0;
 
           // queryRoute는 ibc history를 추적하기 위한 채널 정보 등을 얻기 위해서 사용된다.
           // /msgs_direct로도 얻을 순 있지만 따로 데이터를 해석해야되기 때문에 좀 힘들다...
@@ -701,39 +705,64 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             if (!queryRoute.response) {
               throw new Error("queryRoute.response is undefined");
             }
-            for (const operation of queryRoute.response.data.operations) {
-              if ("transfer" in operation) {
-                const queryClientState = queriesStore
-                  .get(operation.transfer.chain_id)
-                  .cosmos.queryIBCClientState.getClientState(
-                    operation.transfer.port,
-                    operation.transfer.channel
-                  );
 
-                await queryClientState.waitResponse();
-                if (!queryClientState.response) {
-                  throw new Error("queryClientState.response is undefined");
-                }
-                if (!queryClientState.clientChainId) {
-                  throw new Error(
-                    "queryClientState.clientChainId is undefined"
-                  );
-                }
+            // bridge가 필요한 경우와, 아닌 경우를 나눠서 처리
+            // swap, transfer 이외의 다른 operation이 있으면 bridge가 사용된다.
+            const operations = queryRoute.response.data.operations;
+            const isInterchainSwap = operations.some(
+              (operation) =>
+                !("swap" in operation) && !("transfer" in operation)
+            );
 
-                channels.push({
-                  portId: operation.transfer.port,
-                  channelId: operation.transfer.channel,
-                  counterpartyChainId: queryClientState.clientChainId,
-                });
-              } else if ("swap" in operation) {
-                const swapFeeBpsReceiverAddress = SwapFeeBps.receivers.find(
-                  (r) =>
-                    r.chainId === operation.swap.swap_in.swap_venue.chain_id
-                );
-                if (swapFeeBpsReceiverAddress) {
-                  swapFeeBpsReceiver.push(swapFeeBpsReceiverAddress.address);
+            if (isInterchainSwap) {
+              // TODO: 예상 시간이 없는 경우에 대한 처리
+              routeDurationSeconds =
+                queryRoute.response.data.estimated_route_duration_seconds ?? 0;
+
+              // CHECK: improve this logic
+              // 일단은 체인 id를 keplr에서 사용하는 형태로 바꿔서 사용한다.
+              simpleRoute = queryRoute.response.data.chain_ids.map((id) => {
+                const isEvmChain = chainStore.hasChain(`eip155:${id}`);
+                if (!isEvmChain && !chainStore.hasChain(id)) {
+                  throw new Error("Chain not found");
                 }
-                swapChannelIndex = channels.length - 1;
+                return isEvmChain ? `eip155:${id}` : id;
+              });
+            } else {
+              for (const operation of operations) {
+                if ("transfer" in operation) {
+                  const queryClientState = queriesStore
+                    .get(operation.transfer.chain_id)
+                    .cosmos.queryIBCClientState.getClientState(
+                      operation.transfer.port,
+                      operation.transfer.channel
+                    );
+
+                  await queryClientState.waitResponse();
+                  if (!queryClientState.response) {
+                    throw new Error("queryClientState.response is undefined");
+                  }
+                  if (!queryClientState.clientChainId) {
+                    throw new Error(
+                      "queryClientState.clientChainId is undefined"
+                    );
+                  }
+
+                  channels.push({
+                    portId: operation.transfer.port,
+                    channelId: operation.transfer.channel,
+                    counterpartyChainId: queryClientState.clientChainId,
+                  });
+                } else if ("swap" in operation) {
+                  const swapFeeBpsReceiverAddress = SwapFeeBps.receivers.find(
+                    (r) =>
+                      r.chainId === operation.swap.swap_in.swap_venue.chain_id
+                  );
+                  if (swapFeeBpsReceiverAddress) {
+                    swapFeeBpsReceiver.push(swapFeeBpsReceiverAddress.address);
+                  }
+                  swapChannelIndex = channels.length - 1;
+                }
               }
             }
 
@@ -1072,7 +1101,47 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 },
                 {
                   onBroadcasted: (txHash) => {
-                    const evmChainId = parseInt(inChainId.split(":")[1]);
+                    const evmChainId = inChainId.replace("eip155:", "");
+                    // 2. create message and send it to the background script
+                    //   to create SkipHistory for displaying the transaction history in the home screen.
+                    const msg = new RecordTxWithSkipSwapMsg(
+                      inChainId,
+                      outChainId,
+                      {
+                        chainId: outChainId,
+                        denom: outCurrency.coinMinimalDenom,
+                      },
+                      simpleRoute,
+                      swapReceiver,
+                      sender,
+                      ibcSwapConfigs.amountConfig.amount.map((amount) => {
+                        return {
+                          amount: DecUtils.getTenExponentN(
+                            amount.currency.coinDecimals
+                          )
+                            .mul(amount.toDec())
+                            .toString(),
+                          denom: amount.currency.coinMinimalDenom,
+                        };
+                      }),
+                      {
+                        currencies: chainStore.getChain(outChainId).currencies,
+                      },
+                      routeDurationSeconds,
+                      true,
+                      {
+                        txHash,
+                        chainId: evmChainId,
+                      }
+                    );
+
+                    new InExtensionMessageRequester().sendMessage(
+                      BACKGROUND_PORT,
+                      msg
+                    );
+                  },
+                  onFulfill: (txReceipt) => {
+                    const evmChainId = inChainId.replace("eip155:", "");
 
                     // 1. track the transaction
                     setTimeout(() => {
@@ -1093,7 +1162,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                             })(),
                           },
                           body: JSON.stringify({
-                            tx_hash: txHash,
+                            tx_hash: txReceipt.transactionHash,
                             chain_id: evmChainId,
                           }),
                         }
@@ -1108,19 +1177,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                         });
                     }, 2000);
 
-                    // 2. create message and send it to the background script
-                    //   to create IBCHistory for displaying the transaction history in the home screen.
-
-                    // 2-1. Define new message
-                    const msg = new RecordTxWithSkipSwapMsg();
-
-                    // 2-2. Send the message to the background script
-                    new InExtensionMessageRequester().sendMessage(
-                      BACKGROUND_PORT,
-                      msg
-                    );
-                  },
-                  onFulfill: (txReceipt) => {
                     const queryBalances = queriesStore.get(
                       ibcSwapConfigs.amountConfig.chainId
                     ).queryBalances;

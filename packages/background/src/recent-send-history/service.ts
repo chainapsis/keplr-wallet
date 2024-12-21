@@ -1067,7 +1067,30 @@ export class RecentSendHistoryService {
   }
 
   // skip related methods
-  recordTxWithSkipSwap(): string {
+  recordTxWithSkipSwap(
+    _sourceChainId: string,
+    _destinationChainId: string,
+    _destinationAsset: {
+      chainId: string;
+      denom: string;
+    },
+    _simpleRoute: string[],
+    _swapReceiver: string[],
+    _sender: string,
+    _amount: {
+      amount: string;
+      denom: string;
+    }[],
+    _notificationInfo: {
+      currencies: AppCurrency[];
+    },
+    _routeDurationSeconds: number,
+    _isSkipTrack: boolean = false,
+    _trackParams: {
+      txHash: string;
+      chainId: string;
+    }
+  ): string {
     const id = (this.recentIBCHistorySeq++).toString();
 
     // TODO: Implement this

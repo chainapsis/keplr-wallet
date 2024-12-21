@@ -214,9 +214,20 @@ const handleClearAllIBCHistoryMsg: (
 const handleRecordTxWithSkipSwapMsg: (
   service: RecentSendHistoryService
 ) => InternalHandler<RecordTxWithSkipSwapMsg> = (service) => {
-  return async (_env, _msg) => {
-    // TODO: Implement this
-    return service.recordTxWithSkipSwap();
+  return async (_env, msg) => {
+    return service.recordTxWithSkipSwap(
+      msg.sourceChainId,
+      msg.destinationChainId,
+      msg.destinationAsset,
+      msg.simpleRoute,
+      msg.swapReceiver,
+      msg.sender,
+      msg.amount,
+      msg.notificationInfo,
+      msg.routeDurationSeconds,
+      msg.isSkipTrack,
+      msg.trackParams
+    );
   };
 };
 
