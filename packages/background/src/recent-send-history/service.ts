@@ -35,7 +35,7 @@ export class RecentSendHistoryService {
 
   @observable
   protected recentSkipHistorySeq: number = 0;
-  // Key: id (sequence, it should be increased by 1 for each
+  // Key: id (sequence, it should be increased by 1 for each)
   @observable
   protected readonly recentSkipHistoryMap: Map<string, SkipHistory> = new Map();
 
@@ -116,8 +116,54 @@ export class RecentSendHistoryService {
       this.trackIBCPacketForwardingRecursive(history.id);
     }
 
-    // TODO: Load skip history from storage
-    //       and track unfinished skip history if exists
+    // Load skip history sequence from the storage
+    const recentSkipHistorySeqSaved = await this.kvStore.get<number>(
+      "recentSkipHistorySeq"
+    );
+
+    if (recentSkipHistorySeqSaved) {
+      // Set the loaded sequence to the observable
+      runInAction(() => {
+        this.recentSkipHistorySeq = recentSkipHistorySeqSaved;
+      });
+    }
+
+    // Save the sequence to the storage when the sequence is changed
+    autorun(() => {
+      const js = toJS(this.recentSkipHistorySeq);
+      this.kvStore.set<number>("recentSkipHistorySeq", js);
+    });
+
+    // Load skip history from the storage
+    const recentSkipHistoryMapSaved = await this.kvStore.get<
+      Record<string, SkipHistory>
+    >("recentSkipHistoryMap");
+    if (recentSkipHistoryMapSaved) {
+      runInAction(() => {
+        let entries = Object.entries(recentSkipHistoryMapSaved);
+        entries = entries.sort(([, a], [, b]) => {
+          return parseInt(a.id) - parseInt(b.id);
+        });
+        for (const [key, value] of entries) {
+          this.recentSkipHistoryMap.set(key, value);
+        }
+      });
+    }
+
+    // Save the skip history to the storage when the skip history is changed
+    autorun(() => {
+      const js = toJS(this.recentSkipHistoryMap);
+      const obj = Object.fromEntries(js);
+      this.kvStore.set<Record<string, SkipHistory>>(
+        "recentSkipHistoryMap",
+        obj
+      );
+    });
+
+    // Track the recent skip history
+    for (const _history of this.getRecentSkipHistories()) {
+      // TODO: Implement the logic to track the skip history
+    }
 
     this.chainsService.addChainRemovedHandler(this.onChainRemoved);
   }
@@ -1123,8 +1169,25 @@ export class RecentSendHistoryService {
   }
 
   getRecentSkipHistories(): SkipHistory[] {
-    // TODO: Implement this
-    return Array.from(this.recentSkipHistoryMap.values());
+    return Array.from(this.recentSkipHistoryMap.values()).filter((history) => {
+      if (!this.chainsService.hasChainInfo(history.chainId)) {
+        return false;
+      }
+
+      if (!this.chainsService.hasChainInfo(history.destinationChainId)) {
+        return false;
+      }
+
+      if (
+        history.simpleRoute.some((route) => {
+          return !this.chainsService.hasChainInfo(route.chainId);
+        })
+      ) {
+        return false;
+      }
+
+      return true;
+    });
   }
 
   @action
