@@ -14,10 +14,17 @@ export class RecordTxWithSkipSwapMsg extends Message<string> {
     public readonly destinationAsset: {
       chainId: string;
       denom: string;
+      expectedAmount: string;
     },
-    public readonly simpleRoute: string[],
-    public readonly swapReceiver: string[],
+    public readonly simpleRoute: {
+      isOnlyEvm: boolean;
+      chainId: string;
+      receiver: string;
+    }[],
     public readonly sender: string,
+
+    // amount 대신 amountIn, amountOut을 사용하도록 변경
+
     public readonly amount: {
       readonly amount: string;
       readonly denom: string;
@@ -27,10 +34,7 @@ export class RecordTxWithSkipSwapMsg extends Message<string> {
     },
     public readonly routeDurationSeconds: number,
     public readonly isSkipTrack: boolean = false,
-    public readonly trackParams: {
-      txHash: string;
-      chainId: string; // e.g. cosmos - "cosmoshub-4", evm "4853"
-    }
+    public readonly txHash: string
   ) {
     super();
   }

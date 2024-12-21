@@ -220,13 +220,12 @@ const handleRecordTxWithSkipSwapMsg: (
       msg.destinationChainId,
       msg.destinationAsset,
       msg.simpleRoute,
-      msg.swapReceiver,
       msg.sender,
       msg.amount,
       msg.notificationInfo,
       msg.routeDurationSeconds,
       msg.isSkipTrack,
-      msg.trackParams
+      msg.txHash
     );
   };
 };

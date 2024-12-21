@@ -686,8 +686,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           let swapChannelIndex: number = -1;
           const swapReceiver: string[] = [];
           const swapFeeBpsReceiver: string[] = [];
-          let simpleRoute: string[] = [];
-          let routeDurationSeconds: number = 0;
+          const simpleRoute: {
+            isOnlyEvm: boolean;
+            chainId: string;
+            receiver: string;
+          }[] = [];
+          let routeDurationSeconds: number | undefined;
 
           // queryRoute는 ibc history를 추적하기 위한 채널 정보 등을 얻기 위해서 사용된다.
           // /msgs_direct로도 얻을 순 있지만 따로 데이터를 해석해야되기 때문에 좀 힘들다...
@@ -714,21 +718,79 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 !("swap" in operation) && !("transfer" in operation)
             );
 
+            // 브릿지를 사용하는 경우, ibc swap channel까지 보여주면 ui가 너무 복잡해질 수 있으므로
+            // evm -> osmosis -> destination 식으로 뭉퉁그려서 보여주는 것이 좋다고 판단, 경로를 간소화한다.
+            // 문제는 chain_ids에 이미 ibc swap channel이 포함되어 있을 가능성 (아직 확인은 안됨)
             if (isInterchainSwap) {
-              // TODO: 예상 시간이 없는 경우에 대한 처리
               routeDurationSeconds =
-                queryRoute.response.data.estimated_route_duration_seconds ?? 0;
+                queryRoute.response.data.estimated_route_duration_seconds;
 
-              // CHECK: improve this logic
-              // 일단은 체인 id를 keplr에서 사용하는 형태로 바꿔서 사용한다.
-              simpleRoute = queryRoute.response.data.chain_ids.map((id) => {
-                const isEvmChain = chainStore.hasChain(`eip155:${id}`);
-                if (!isEvmChain && !chainStore.hasChain(id)) {
+              // 일단은 체인 id를 keplr에서 사용하는 형태로 바꿔야 한다.
+              for (const chainId of queryRoute.response.data.chain_ids) {
+                const isOnlyEvm = chainStore.hasChain(`eip155:${chainId}`);
+                if (!isOnlyEvm && !chainStore.hasChain(chainId)) {
                   throw new Error("Chain not found");
                 }
-                return isEvmChain ? `eip155:${id}` : id;
-              });
+
+                if (isOnlyEvm) {
+                  const receiverAccount = accountStore.getAccount(
+                    `eip155:${chainId}`
+                  );
+
+                  const ethereumHexAddress =
+                    receiverAccount.hasEthereumHexAddress
+                      ? receiverAccount.ethereumHexAddress
+                      : undefined;
+
+                  if (!ethereumHexAddress) {
+                    throw new Error("ethereumHexAddress is undefined");
+                  }
+
+                  simpleRoute.push({
+                    isOnlyEvm,
+                    chainId: `eip155:${chainId}`,
+                    receiver: ethereumHexAddress,
+                  });
+                } else {
+                  const receiverAccount = accountStore.getAccount(chainId);
+
+                  if (receiverAccount.walletStatus !== WalletStatus.Loaded) {
+                    await receiverAccount.init();
+                  }
+
+                  if (!receiverAccount.bech32Address) {
+                    const receiverChainInfo =
+                      chainStore.hasChain(chainId) &&
+                      chainStore.getChain(chainId);
+                    if (
+                      receiverAccount.isNanoLedger &&
+                      receiverChainInfo &&
+                      (receiverChainInfo.bip44.coinType === 60 ||
+                        receiverChainInfo.features.includes(
+                          "eth-address-gen"
+                        ) ||
+                        receiverChainInfo.features.includes("eth-key-sign") ||
+                        receiverChainInfo.evm != null)
+                    ) {
+                      throw new Error(
+                        "Please connect Ethereum app on Ledger with Keplr to get the address"
+                      );
+                    }
+
+                    throw new Error(
+                      "receiverAccount.bech32Address is undefined"
+                    );
+                  }
+
+                  simpleRoute.push({
+                    isOnlyEvm,
+                    chainId,
+                    receiver: receiverAccount.bech32Address,
+                  });
+                }
+              }
             } else {
+              // 브릿지를 사용하지 않는 경우, 자세한 ibc swap channel 정보를 보여준다.
               for (const operation of operations) {
                 if ("transfer" in operation) {
                   const queryClientState = queriesStore
@@ -764,38 +826,39 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   swapChannelIndex = channels.length - 1;
                 }
               }
-            }
 
-            const receiverChainIds = [inChainId];
-            for (const channel of channels) {
-              receiverChainIds.push(channel.counterpartyChainId);
-            }
-            for (const receiverChainId of receiverChainIds) {
-              const receiverAccount = accountStore.getAccount(receiverChainId);
-              if (receiverAccount.walletStatus !== WalletStatus.Loaded) {
-                await receiverAccount.init();
+              const receiverChainIds = [inChainId];
+              for (const channel of channels) {
+                receiverChainIds.push(channel.counterpartyChainId);
               }
-
-              if (!receiverAccount.bech32Address) {
-                const receiverChainInfo =
-                  chainStore.hasChain(receiverChainId) &&
-                  chainStore.getChain(receiverChainId);
-                if (
-                  receiverAccount.isNanoLedger &&
-                  receiverChainInfo &&
-                  (receiverChainInfo.bip44.coinType === 60 ||
-                    receiverChainInfo.features.includes("eth-address-gen") ||
-                    receiverChainInfo.features.includes("eth-key-sign") ||
-                    receiverChainInfo.evm != null)
-                ) {
-                  throw new Error(
-                    "Please connect Ethereum app on Ledger with Keplr to get the address"
-                  );
+              for (const receiverChainId of receiverChainIds) {
+                const receiverAccount =
+                  accountStore.getAccount(receiverChainId);
+                if (receiverAccount.walletStatus !== WalletStatus.Loaded) {
+                  await receiverAccount.init();
                 }
 
-                throw new Error("receiverAccount.bech32Address is undefined");
+                if (!receiverAccount.bech32Address) {
+                  const receiverChainInfo =
+                    chainStore.hasChain(receiverChainId) &&
+                    chainStore.getChain(receiverChainId);
+                  if (
+                    receiverAccount.isNanoLedger &&
+                    receiverChainInfo &&
+                    (receiverChainInfo.bip44.coinType === 60 ||
+                      receiverChainInfo.features.includes("eth-address-gen") ||
+                      receiverChainInfo.features.includes("eth-key-sign") ||
+                      receiverChainInfo.evm != null)
+                  ) {
+                    throw new Error(
+                      "Please connect Ethereum app on Ledger with Keplr to get the address"
+                    );
+                  }
+
+                  throw new Error("receiverAccount.bech32Address is undefined");
+                }
+                swapReceiver.push(receiverAccount.bech32Address);
               }
-              swapReceiver.push(receiverAccount.bech32Address);
             }
 
             const [_tx] = await Promise.all([
@@ -1101,38 +1164,47 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 },
                 {
                   onBroadcasted: (txHash) => {
-                    const evmChainId = inChainId.replace("eip155:", "");
-                    // 2. create message and send it to the background script
-                    //   to create SkipHistory for displaying the transaction history in the home screen.
                     const msg = new RecordTxWithSkipSwapMsg(
                       inChainId,
                       outChainId,
                       {
                         chainId: outChainId,
                         denom: outCurrency.coinMinimalDenom,
+                        expectedAmount: ibcSwapConfigs.amountConfig.outAmount
+                          .toDec()
+                          .toString(),
                       },
                       simpleRoute,
-                      swapReceiver,
                       sender,
-                      ibcSwapConfigs.amountConfig.amount.map((amount) => {
-                        return {
+                      [
+                        ...ibcSwapConfigs.amountConfig.amount.map((amount) => {
+                          return {
+                            amount: DecUtils.getTenExponentN(
+                              amount.currency.coinDecimals
+                            )
+                              .mul(amount.toDec())
+                              .toString(),
+                            denom: amount.currency.coinMinimalDenom,
+                          };
+                        }),
+                        {
                           amount: DecUtils.getTenExponentN(
-                            amount.currency.coinDecimals
+                            ibcSwapConfigs.amountConfig.outAmount.currency
+                              .coinDecimals
                           )
-                            .mul(amount.toDec())
+                            .mul(ibcSwapConfigs.amountConfig.outAmount.toDec())
                             .toString(),
-                          denom: amount.currency.coinMinimalDenom,
-                        };
-                      }),
+                          denom:
+                            ibcSwapConfigs.amountConfig.outAmount.currency
+                              .coinMinimalDenom,
+                        },
+                      ],
                       {
                         currencies: chainStore.getChain(outChainId).currencies,
                       },
-                      routeDurationSeconds,
+                      routeDurationSeconds ?? 0,
                       true,
-                      {
-                        txHash,
-                        chainId: evmChainId,
-                      }
+                      txHash
                     );
 
                     new InExtensionMessageRequester().sendMessage(
@@ -1141,42 +1213,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                     );
                   },
                   onFulfill: (txReceipt) => {
-                    const evmChainId = inChainId.replace("eip155:", "");
-
-                    // 1. track the transaction
-                    setTimeout(() => {
-                      // no wait
-                      simpleFetch<any>(
-                        "https://api.skip.build/",
-                        "/v2/tx/track",
-                        {
-                          method: "POST",
-                          headers: {
-                            "content-type": "application/json",
-                            ...(() => {
-                              const res: { authorization?: string } = {};
-                              if (process.env["SKIP_API_KEY"]) {
-                                res.authorization = process.env["SKIP_API_KEY"];
-                              }
-                              return res;
-                            })(),
-                          },
-                          body: JSON.stringify({
-                            tx_hash: txReceipt.transactionHash,
-                            chain_id: evmChainId,
-                          }),
-                        }
-                      )
-                        .then((result) => {
-                          console.log(
-                            `Skip tx track result: ${JSON.stringify(result)}`
-                          );
-                        })
-                        .catch((e) => {
-                          console.log(e);
-                        });
-                    }, 2000);
-
                     const queryBalances = queriesStore.get(
                       ibcSwapConfigs.amountConfig.chainId
                     ).queryBalances;
@@ -1196,6 +1232,43 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                           balance.fetch();
                         }
                       });
+
+                    // onBroadcasted에서 실행하기에는 너무 빨라서 tx not found가 발생할 수 있음
+                    // 재실행 로직을 사용해도 되지만, txReceipt를 기다렸다가 실행하는 게 자원 낭비가 적음
+                    const chainIdForTrack = inChainId.replace("eip155:", "");
+
+                    setTimeout(() => {
+                      // no wait
+                      simpleFetch<any>(
+                        "https://api.skip.build/",
+                        "/v2/tx/track",
+                        {
+                          method: "POST",
+                          headers: {
+                            "content-type": "application/json",
+                            ...(() => {
+                              const res: { authorization?: string } = {};
+                              if (process.env["SKIP_API_KEY"]) {
+                                res.authorization = process.env["SKIP_API_KEY"];
+                              }
+                              return res;
+                            })(),
+                          },
+                          body: JSON.stringify({
+                            tx_hash: txReceipt.transactionHash,
+                            chain_id: chainIdForTrack,
+                          }),
+                        }
+                      )
+                        .then((result) => {
+                          console.log(
+                            `Skip tx track result: ${JSON.stringify(result)}`
+                          );
+                        })
+                        .catch((e) => {
+                          console.log(e);
+                        });
+                    }, 2000);
                     if (txReceipt.status === EthTxStatus.Success) {
                       notification.show(
                         "success",

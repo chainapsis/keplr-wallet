@@ -35,6 +35,7 @@ import { useSpringValue, animated, easings } from "@react-spring/web";
 import { defaultSpringConfig } from "../../../../styles/spring";
 import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse";
 import { FormattedMessage, useIntl } from "react-intl";
+import { GetSkipHistoriesMsg } from "@keplr-wallet/background/build/recent-send-history/temp-skip-message";
 
 export const IbcHistoryView: FunctionComponent<{
   isNotReady: boolean;
@@ -45,9 +46,9 @@ export const IbcHistoryView: FunctionComponent<{
   useLayoutEffectOnce(() => {
     let count = 0;
     const alreadyCompletedHistoryMap = new Map<string, boolean>();
+    const requester = new InExtensionMessageRequester();
 
     const fn = () => {
-      const requester = new InExtensionMessageRequester();
       const msg = new GetIBCHistoriesMsg();
       requester.sendMessage(BACKGROUND_PORT, msg).then((newHistories) => {
         setHistories((histories) => {
@@ -97,7 +98,15 @@ export const IbcHistoryView: FunctionComponent<{
       });
     };
 
+    const skipFn = () => {
+      const msg = new GetSkipHistoriesMsg();
+      requester.sendMessage(BACKGROUND_PORT, msg).then((histories) => {
+        console.log("skip histories", histories);
+      });
+    };
+
     fn();
+    skipFn();
     const interval = setInterval(fn, 1000);
 
     return () => {

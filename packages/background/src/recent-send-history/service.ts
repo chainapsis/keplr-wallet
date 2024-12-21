@@ -1067,32 +1067,53 @@ export class RecentSendHistoryService {
 
   // skip related methods
   recordTxWithSkipSwap(
-    _sourceChainId: string,
-    _destinationChainId: string,
-    _destinationAsset: {
+    sourceChainId: string,
+    destinationChainId: string,
+    destinationAsset: {
       chainId: string;
       denom: string;
+      expectedAmount: string;
     },
-    _simpleRoute: string[],
-    _swapReceiver: string[],
-    _sender: string,
-    _amount: {
+    simpleRoute: {
+      isOnlyEvm: boolean;
+      chainId: string;
+      receiver: string;
+    }[],
+    sender: string,
+    amount: {
       amount: string;
       denom: string;
     }[],
-    _notificationInfo: {
+    notificationInfo: {
       currencies: AppCurrency[];
     },
-    _routeDurationSeconds: number,
-    _isSkipTrack: boolean = false,
-    _trackParams: {
-      txHash: string;
-      chainId: string;
-    }
+    routeDurationSeconds: number = 0,
+    isSkipTrack: boolean = false,
+    txHash: string
   ): string {
     const id = (this.recentIBCHistorySeq++).toString();
 
-    // TODO: Implement this
+    const history: SkipHistory = {
+      id,
+      chainId: sourceChainId,
+      destinationChainId: destinationChainId,
+      destinationAsset,
+      simpleRoute,
+      sender,
+      amount,
+      notificationInfo,
+      routeDurationSeconds,
+      txHash,
+      routeIndex: 0,
+      resAmount: [],
+      timestamp: Date.now(),
+    };
+
+    this.recentSkipHistoryMap.set(id, history);
+
+    if (isSkipTrack) {
+      // TODO: run skip track
+    }
 
     return id;
   }

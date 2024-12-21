@@ -115,15 +115,14 @@ export type SkipHistory = {
     currencies: AppCurrency[];
   };
 
-  swapReceiver: string[];
-
-  simpleRoute: string[];
+  simpleRoute: { isOnlyEvm: boolean; chainId: string; receiver: string }[];
   routeIndex: number;
   routeDurationSeconds: number;
 
   destinationAsset: {
     chainId: string;
     denom: string;
+    expectedAmount: string;
   };
 
   resAmount: {
