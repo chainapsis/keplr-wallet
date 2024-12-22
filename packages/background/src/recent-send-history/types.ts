@@ -127,7 +127,7 @@ export type SkipHistory = {
   destinationAsset: {
     chainId: string;
     denom: string;
-    expectedAmount: string;
+    expectedAmount?: string;
   };
 
   resAmount: {

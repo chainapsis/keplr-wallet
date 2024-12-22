@@ -20,11 +20,7 @@ import { Buffer } from "buffer/";
 import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
-import {
-  StatusRequest,
-  TransferAssetRelease,
-  TxStatusResponse,
-} from "./temp-skip-types";
+import { StatusRequest, TxStatusResponse } from "./temp-skip-types";
 
 export class RecentSendHistoryService {
   // Key: {chain_identifier}/{type}
@@ -1242,7 +1238,28 @@ export class RecentSendHistoryService {
       return;
     }
 
-    if (history.trackDone) {
+    const needRun = (() => {
+      const status = history.trackStatus;
+      const trackDone = history.trackDone;
+      const routeIndex = history.routeIndex;
+
+      // status가 COMPLETED이지만, 아직 다음 라우트가 남아있는 경우
+      if (
+        status?.includes("COMPLETED") &&
+        routeIndex !== history.simpleRoute.length - 1
+      ) {
+        return true;
+      }
+
+      // status가 없거나, track이 완료되지 않은 경우
+      if (!status || !trackDone) {
+        return true;
+      }
+
+      return false;
+    })();
+
+    if (!needRun) {
       onFulfill();
       return;
     }
@@ -1281,69 +1298,246 @@ export class RecentSendHistoryService {
           transfer_asset_release,
         } = res.data;
 
-        history.trackStatus = status; // 상태 업데이트
+        // 상태 저장
+        history.trackStatus = state;
 
-        // state는 status와 비슷하지만 상위 범주의 상태를 나타냄
-        // e.g. state가 completed이면 status는 completed, completed_error, completed_success 중 하나
-
-        // history 업데이트 함수
-        const handleHistoryUpdate = () => {
-          const simpleRoute = history.simpleRoute;
-          const currentRouteIndex = history.routeIndex;
-          const errorMessage: string | undefined = error?.message; // detail한 에러 메시지는 transfer에서 가져옴
-          const transferAssetRelease: TransferAssetRelease | null =
-            transfer_asset_release;
-
-          const nextBlockingTransferIndex =
-            next_blocking_transfer?.transfer_sequence_index ?? -1;
-
-          // 다음 블로킹 트랜스퍼 정보가 있는 경우 (다음 블로킹 트랜스퍼가 없으면 -1)
-          if (nextBlockingTransferIndex >= 0) {
-            // transfer_sequence의 길이 체크
-            if (nextBlockingTransferIndex >= simpleRoute.length) {
-              history.trackError = "Invalid next_blocking_transfer index";
-              // TODO: 어떻게 처리할지 고민 필요, 일단은 에러 처리
-              onError();
-              return;
-            }
-
-            // 다음 블로킹 트랜스퍼 정보 가져오기
-            const transfer = transfer_sequence[nextBlockingTransferIndex];
-          }
-
-          history.trackError = errorMessage;
-          if (transferAssetRelease) {
-            history.transferAssetRelease = transferAssetRelease;
-          }
-
-          switch (state) {
-            case "STATE_ABANDONED": // 30분 이상 트래킹했는데 상태 변화가 없는 경우. 문제가 뭔지 진단하기 어려움. 웬만하면 발생하지 않는다고 optimistic하게
-            case "STATE_COMPLETED_ERROR": // 오류가 발생하였고, 오류 전파 및 처리가 완료된 상태
-            case "STATE_COMPLETED_SUCCESS": // 성공적으로 완료된 상태
-              // 더 이상 트래킹할 필요가 없는 상태
-              history.trackDone = true;
-              onFulfill();
-              break;
-            case "STATE_PENDING": // route 진행 중
-            case "STATE_PENDING_ERROR": // route 진행 중에 에러가 발생하였고 오류가 전파되는 중
-              // 다시 트래킹 요청 (retry)
-              onError();
-          }
-        };
-
+        // status(상위 상태)와 state(하위 범주)에 따른 분기
         switch (status) {
+          // 트래킹 불확실/미완료 상태 => 에러 처리 후 재시도
           case "STATE_SUBMITTED":
           case "STATE_RECEIVED":
           case "STATE_COMPLETED":
           case "STATE_UNKNOWN":
-            // 트래킹 요청이 성공적으로 전달되었지만, 아직 트래킹이 시작되지 않은 상태
-            // 또는 트래킹이 완료되었지만, 결과가 아직 처리되지 않은 상태
-            // `UNKNOWN`은 상태를 알 수 없는 경우 (TODO: 어떻게 처리할지 고민 필요)
-            // 다음 상태가 주어질 때까지 일단 오류 처리하고 retry 로직이 동작하도록 한다.
             onError();
-            break;
+            return;
+
           default:
-            handleHistoryUpdate();
+            // 여기서부터는 status가 '정상적으로 트래킹이 진행 중'이라고 가정
+
+            // 라우트, 현재 라우트 인덱스 가져오기
+            const route = history.simpleRoute;
+            const currentRouteIndex = history.routeIndex;
+
+            let nextRouteIndex = currentRouteIndex; // 다음 라우트 인덱스, src와 dst가 동일할 수 있으므로 초기값은 현재 인덱스로 설정
+            let errorMsg: string | undefined = error?.message; // 우선 API에서 내려오는 error?.message 세팅
+
+            // 언락된 asset 정보가 있는 경우 저장
+            if (transfer_asset_release) {
+              history.transferAssetRelease = transfer_asset_release;
+            }
+
+            // 현재 처리중인 transfer의 인덱스 가져오기, 없을 경우 -1
+            const nextBlockingTransferIndex =
+              next_blocking_transfer?.transfer_sequence_index ?? -1;
+
+            // 다음 블로킹 트랜스퍼가 있을 경우, 해당 정보를 통해 다음 체인 인덱스 계산
+            if (nextBlockingTransferIndex >= 0) {
+              // 인덱스 유효성 검사 (없어도 되지만 혹시 모르니)
+              if (nextBlockingTransferIndex >= transfer_sequence.length) {
+                history.trackError = "Invalid next_blocking_transfer index";
+                onError();
+                return;
+              }
+
+              // 다음 blocking transfer의 정보를 가져옴
+              const transfer = transfer_sequence[nextBlockingTransferIndex];
+
+              // -------------------------
+              // 1) 일단 targetChainId/errorMsg를 구하는 단계
+              // -------------------------
+              let targetChainId: string | undefined;
+              // 예: `transfer`가 여러 타입 중 하나일 것이므로 순서대로 체크
+              if ("ibc_transfer" in transfer) {
+                const ibc = transfer.ibc_transfer;
+                switch (ibc.state) {
+                  case "TRANSFER_UNKNOWN":
+                  case "TRANSFER_FAILURE":
+                    targetChainId = ibc.src_chain_id;
+                    errorMsg = ibc.packet_txs.error?.message;
+                    break;
+                  case "TRANSFER_PENDING":
+                  case "TRANSFER_RECEIVED":
+                    targetChainId = ibc.src_chain_id;
+                    break;
+                  case "TRANSFER_SUCCESS":
+                    targetChainId = ibc.dst_chain_id;
+                    break;
+                }
+              } else if ("axelar_transfer" in transfer) {
+                const axelar = transfer.axelar_transfer;
+                switch (axelar.state) {
+                  case "AXELAR_TRANSFER_UNKNOWN":
+                    targetChainId = axelar.from_chain_id;
+                    errorMsg = "Unknown Axelar transfer error";
+                    break;
+                  case "AXELAR_TRANSFER_FAILURE":
+                    targetChainId = axelar.from_chain_id;
+                    errorMsg = (axelar.txs as any).error?.message;
+                    break;
+                  case "AXELAR_TRANSFER_PENDING_CONFIRMATION":
+                  case "AXELAR_TRANSFER_PENDING_RECEIPT":
+                    targetChainId = axelar.from_chain_id;
+                    break;
+                  case "AXELAR_TRANSFER_SUCCESS":
+                    targetChainId = axelar.to_chain_id;
+                    break;
+                }
+              } else if ("cctp_transfer" in transfer) {
+                const cctp = transfer.cctp_transfer;
+                switch (cctp.state) {
+                  case "CCTP_TRANSFER_UNKNOWN":
+                    targetChainId = cctp.from_chain_id;
+                    errorMsg = "Unknown CCTP transfer error";
+                    break;
+                  case "CCTP_TRANSFER_CONFIRMED":
+                  case "CCTP_TRANSFER_PENDING_CONFIRMATION":
+                  case "CCTP_TRANSFER_SENT":
+                    targetChainId = cctp.from_chain_id;
+                    break;
+                  case "CCTP_TRANSFER_RECEIVED":
+                    targetChainId = cctp.to_chain_id;
+                    break;
+                }
+              } else if ("hyperlane_transfer" in transfer) {
+                const hyperlane = transfer.hyperlane_transfer;
+                switch (hyperlane.state) {
+                  case "HYPERLANE_TRANSFER_UNKNOWN":
+                    targetChainId = hyperlane.from_chain_id;
+                    errorMsg = "Unknown Hyperlane transfer error";
+                    break;
+                  case "HYPERLANE_TRANSFER_FAILED":
+                    targetChainId = hyperlane.from_chain_id;
+                    errorMsg = "Hyperlane transfer failed";
+                    break;
+                  case "HYPERLANE_TRANSFER_SENT":
+                    targetChainId = hyperlane.from_chain_id;
+                    break;
+                  case "HYPERLANE_TRANSFER_RECEIVED":
+                    targetChainId = hyperlane.to_chain_id;
+                    break;
+                }
+              } else if ("op_init_transfer" in transfer) {
+                const opinit = transfer.op_init_transfer;
+                switch (opinit.state) {
+                  case "OPINIT_TRANSFER_UNKNOWN":
+                    targetChainId = opinit.from_chain_id;
+                    errorMsg = "Unknown OP_INIT transfer error";
+                    break;
+                  case "OPINIT_TRANSFER_RECEIVED":
+                    targetChainId = opinit.from_chain_id;
+                    break;
+                  case "OPINIT_TRANSFER_SENT":
+                    targetChainId = opinit.to_chain_id;
+                    break;
+                }
+              } else if ("go_fast_transfer" in transfer) {
+                const gofast = transfer.go_fast_transfer;
+                switch (gofast.state) {
+                  case "GO_FAST_TRANSFER_UNKNOWN":
+                    targetChainId = gofast.from_chain_id;
+                    errorMsg = "Unknown GoFast transfer error";
+                    break;
+                  case "GO_FAST_TRANSFER_TIMEOUT":
+                    targetChainId = gofast.from_chain_id;
+                    errorMsg = "GoFast transfer timeout";
+                    break;
+                  case "GO_FAST_POST_ACTION_FAILED":
+                    targetChainId = gofast.from_chain_id;
+                    errorMsg = "GoFast post action failed";
+                    break;
+                  case "GO_FAST_TRANSFER_REFUNDED":
+                    targetChainId = gofast.from_chain_id;
+                    errorMsg = "GoFast transfer refunded";
+                    break;
+                  case "GO_FAST_TRANSFER_SENT":
+                    targetChainId = gofast.from_chain_id;
+                    break;
+                  case "GO_FAST_TRANSFER_FILLED":
+                    targetChainId = gofast.to_chain_id;
+                    break;
+                }
+              } else {
+                // stargate_transfer
+                const stargate = transfer.stargate_transfer;
+                switch (stargate.state) {
+                  case "STARGATE_TRANSFER_UNKNOWN":
+                    targetChainId = stargate.from_chain_id;
+                    errorMsg = "Unknown Stargate transfer error";
+                    break;
+                  case "STARGATE_TRANSFER_FAILED":
+                    targetChainId = stargate.from_chain_id;
+                    errorMsg = "Stargate transfer failed";
+                    break;
+                  case "STARGATE_TRANSFER_SENT":
+                    targetChainId = stargate.from_chain_id;
+                    break;
+                  case "STARGATE_TRANSFER_RECEIVED":
+                    targetChainId = stargate.to_chain_id;
+                    break;
+                }
+              }
+
+              // -------------------------
+              // 2) 구한 targetChainId로 nextRouteIndex를 찾는 단계
+              // -------------------------
+              if (targetChainId) {
+                const chainIdToFind = targetChainId.replace("eip155:", "");
+                let foundNextRouteIndex = false;
+                for (let i = currentRouteIndex; i < route.length; i++) {
+                  if (
+                    route[i].chainId.replace("eip155:", "") === chainIdToFind
+                  ) {
+                    nextRouteIndex = i;
+                    foundNextRouteIndex = true;
+                    break;
+                  }
+                }
+
+                // 찾지 못한 경우 에러 처리 후 재시도
+                if (!foundNextRouteIndex) {
+                  history.trackError = "Invalid next_blocking_transfer chainId";
+                  onError();
+                  return;
+                }
+              }
+
+              // 에러 메시지 갱신
+              history.trackError = errorMsg;
+            }
+
+            // 최종적으로 routeIndex 업데이트
+            history.routeIndex = nextRouteIndex;
+
+            // state(하위 범주 상태)에 따라 트래킹 완료/재시도 결정
+            switch (state) {
+              case "STATE_ABANDONED":
+              case "STATE_COMPLETED_ERROR":
+              case "STATE_COMPLETED_SUCCESS":
+                // 더 이상 트래킹하지 않아도 됨
+                history.trackDone = true;
+
+                if (nextRouteIndex !== route.length - 1) {
+                  history.routeIndex = route.length - 1;
+                }
+
+                // TODO: routeIndex가 끝까지 도달했을 때, 최종적으로 도달한 자산의 양을 가져오는 로직 추가 필요 (어려울 듯)
+
+                onFulfill();
+                break;
+
+              case "STATE_PENDING":
+              case "STATE_PENDING_ERROR":
+                // 트래킹 중 (또는 에러 상태 전파 중) => 재시도
+                onError();
+                break;
+
+              default:
+                // 그 외 예외 상태. 에러 메시지가 있으면 에러 처리
+                if (errorMsg) {
+                  onError();
+                }
+                break;
+            }
             break;
         }
       })
