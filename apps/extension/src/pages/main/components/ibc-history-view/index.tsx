@@ -4,6 +4,7 @@ import {
   GetIBCHistoriesMsg,
   IBCHistory,
   RemoveIBCHistoryMsg,
+  SkipHistory,
 } from "@keplr-wallet/background";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
@@ -35,14 +36,19 @@ import { useSpringValue, animated, easings } from "@react-spring/web";
 import { defaultSpringConfig } from "../../../../styles/spring";
 import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse";
 import { FormattedMessage, useIntl } from "react-intl";
-import { GetSkipHistoriesMsg } from "@keplr-wallet/background/build/recent-send-history/temp-skip-message";
+import {
+  GetSkipHistoriesMsg,
+  RemoveSkipHistoryMsg,
+} from "@keplr-wallet/background/build/recent-send-history/temp-skip-message";
 
 export const IbcHistoryView: FunctionComponent<{
   isNotReady: boolean;
 }> = observer(({ isNotReady }) => {
-  const { queriesStore, accountStore } = useStore();
+  const { queriesStore, accountStore, chainStore } = useStore();
 
   const [histories, setHistories] = useState<IBCHistory[]>([]);
+  const [skipHistories, setSkipHistories] = useState<SkipHistory[]>([]);
+
   useLayoutEffectOnce(() => {
     let count = 0;
     const alreadyCompletedHistoryMap = new Map<string, boolean>();
@@ -98,16 +104,74 @@ export const IbcHistoryView: FunctionComponent<{
       });
     };
 
-    const skipFn = () => {
+    fn();
+    const interval = setInterval(fn, 1000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  });
+
+  useLayoutEffectOnce(() => {
+    let count = 0;
+    const alreadyCompletedHistoryMap = new Map<string, boolean>();
+    const requester = new InExtensionMessageRequester();
+
+    const fn = () => {
       const msg = new GetSkipHistoriesMsg();
-      requester.sendMessage(BACKGROUND_PORT, msg).then((histories) => {
-        // TODO: 메시지 들어오는 것 까지 확인. 백그라운드에서 polling 돌리고 가져온 메시지 보여주는 작업 추가
-        console.log("skip histories", histories);
+      requester.sendMessage(BACKGROUND_PORT, msg).then((newHistories) => {
+        setSkipHistories((histories) => {
+          if (JSON.stringify(histories) !== JSON.stringify(newHistories)) {
+            count++;
+
+            // Currently there is no elegant way to automatically refresh when an ibc transfer is complete.
+            // For now, deal with it here
+            const newCompletes = newHistories.filter((history) => {
+              if (alreadyCompletedHistoryMap.get(history.id)) {
+                return false;
+              }
+              return (
+                !!history.trackDone &&
+                history.routeIndex === history.simpleRoute.length - 1
+              );
+            });
+
+            if (count > 1) {
+              // There is no need to refresh balance if first time. (onMount)
+              for (const newComplete of newCompletes) {
+                const lastRoute =
+                  newComplete.simpleRoute[newComplete.routeIndex];
+
+                if (lastRoute.isOnlyEvm) {
+                  queriesStore
+                    .get(`eip155:${lastRoute.chainId}`)
+                    .queryBalances.getQueryEthereumHexAddress(
+                      newComplete.simpleRoute[newComplete.routeIndex].receiver
+                    )
+                    .fetch();
+                } else {
+                  queriesStore
+                    .get(newComplete.destinationChainId)
+                    .queryBalances.getQueryBech32Address(
+                      newComplete.simpleRoute[newComplete.routeIndex].receiver
+                    )
+                    .fetch();
+                }
+              }
+            }
+            for (const newComplete of newCompletes) {
+              alreadyCompletedHistoryMap.set(newComplete.id, true);
+            }
+
+            return newHistories;
+          }
+          return histories;
+        });
       });
     };
 
     fn();
-    skipFn();
+
     const interval = setInterval(fn, 1000);
 
     return () => {
@@ -122,6 +186,25 @@ export const IbcHistoryView: FunctionComponent<{
     }
     return false;
   });
+
+  const filteredSkipHistories = skipHistories.filter((history) => {
+    const firstRoute = history.simpleRoute[0];
+    const account = accountStore.getAccount(firstRoute.chainId);
+
+    if (firstRoute.isOnlyEvm) {
+      if (account.ethereumHexAddress === history.sender) {
+        return true;
+      }
+      return false;
+    }
+
+    if (account.bech32Address === history.sender) {
+      return true;
+    }
+    return false;
+  });
+
+  console.log(histories, skipHistories);
 
   if (isNotReady) {
     return null;
@@ -144,7 +227,22 @@ export const IbcHistoryView: FunctionComponent<{
           />
         );
       })}
-      {filteredHistories.length > 0 ? <Gutter size="0.75rem" /> : null}
+      {filteredSkipHistories.reverse().map((_history) => (
+        <SkipHistoryViewItem
+          key={_history.id}
+          history={_history}
+          removeHistory={(id) => {
+            const requester = new InExtensionMessageRequester();
+            const msg = new RemoveSkipHistoryMsg(id);
+            requester.sendMessage(BACKGROUND_PORT, msg).then((histories) => {
+              setSkipHistories(histories);
+            });
+          }}
+        />
+      ))}
+      {filteredHistories.length > 0 || filteredSkipHistories.length > 0 ? (
+        <Gutter size="0.75rem" />
+      ) : null}
     </Stack>
   );
 });
@@ -655,6 +753,417 @@ const IbcHistoryViewItem: FunctionComponent<{
                     })(),
                     1
                   ),
+                }}
+              />
+            </Body2>
+          </XAxis>
+
+          <Gutter size="1rem" />
+
+          <Caption2
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-300"]
+                : ColorPalette["gray-200"]
+            }
+          >
+            <FormattedMessage
+              id={
+                isIBCSwap
+                  ? "page.main.components.ibc-history-view.ibc-swap.help.can-close-extension"
+                  : "page.main.components.ibc-history-view.help.can-close-extension"
+              }
+            />
+          </Caption2>
+        </VerticalCollapseTransition>
+      </YAxis>
+    </Box>
+  );
+});
+
+const SkipHistoryViewItem: FunctionComponent<{
+  history: SkipHistory;
+  removeHistory: (id: string) => void;
+}> = observer(({ history, removeHistory }) => {
+  const { chainStore } = useStore();
+
+  const theme = useTheme();
+  const intl = useIntl();
+
+  const isIBCSwap = "swapType" in history;
+
+  const historyCompleted = (() => {
+    if (!history.trackDone) {
+      return false;
+    }
+
+    if (history.trackError) {
+      return false;
+    }
+
+    return (
+      history.trackStatus === "STATE_COMPLETED_SUCCESS" &&
+      history.routeIndex === history.simpleRoute.length - 1
+    );
+  })();
+
+  const failedRouteIndex = (() => {
+    return history.trackError ? history.routeIndex : -1;
+  })();
+
+  const failedRoute = (() => {
+    if (failedRouteIndex >= 0) {
+      return history.simpleRoute[failedRouteIndex];
+    }
+  })();
+
+  return (
+    <Box
+      padding="1.25rem"
+      borderRadius="0.375rem"
+      backgroundColor={
+        theme.mode === "light" ? ColorPalette.white : ColorPalette["gray-600"]
+      }
+      style={{
+        boxShadow:
+          theme.mode === "light"
+            ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+            : "none",
+      }}
+    >
+      <YAxis>
+        <XAxis alignY="center">
+          {(() => {
+            if (failedRouteIndex >= 0) {
+              return (
+                <ErrorIcon
+                  width="1.25rem"
+                  height="1.25rem"
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["orange-400"]
+                      : ColorPalette["yellow-400"]
+                  }
+                />
+              );
+            }
+
+            if (!historyCompleted) {
+              return (
+                <LoadingIcon
+                  width="1.25rem"
+                  height="1.25rem"
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-200"]
+                      : ColorPalette.white
+                  }
+                />
+              );
+            }
+
+            return (
+              <CheckCircleIcon
+                width="1.25rem"
+                height="1.25rem"
+                color={ColorPalette["green-400"]}
+              />
+            );
+          })()}
+
+          <Gutter size="0.5rem" />
+
+          <Subtitle4
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-600"]
+                : ColorPalette["gray-10"]
+            }
+          >
+            {(() => {
+              if (failedRouteIndex >= 0) {
+                if (
+                  history.trackStatus === "STATE_COMPLETED_ERROR" &&
+                  history.transferAssetRelease &&
+                  history.transferAssetRelease.released
+                ) {
+                  return intl.formatMessage({
+                    id: "page.main.components.ibc-history-view.ibc-swap.item.refund.succeed",
+                  });
+                }
+                return intl.formatMessage({
+                  id: "page.main.components.ibc-history-view.ibc-swap.item.refund.pending",
+                });
+              }
+
+              return !historyCompleted
+                ? intl.formatMessage({
+                    id: isIBCSwap
+                      ? "page.main.components.ibc-history-view.ibc-swap.item.pending"
+                      : "page.main.components.ibc-history-view.item.pending",
+                  })
+                : intl.formatMessage({
+                    id: isIBCSwap
+                      ? "page.main.components.ibc-history-view.ibc-swap.item.succeed"
+                      : "page.main.components.ibc-history-view.item.succeed",
+                  });
+            })()}
+          </Subtitle4>
+          <div
+            style={{
+              flex: 1,
+            }}
+          />
+          <Box
+            cursor="pointer"
+            onClick={(e) => {
+              e.preventDefault();
+
+              removeHistory(history.id);
+            }}
+          >
+            <XMarkIcon
+              width="1.5rem"
+              height="1.5rem"
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-200"]
+                  : ColorPalette["gray-300"]
+              }
+            />
+          </Box>
+        </XAxis>
+
+        <Gutter size="1rem" />
+
+        <Body2
+          color={
+            theme.mode === "light"
+              ? ColorPalette["gray-400"]
+              : ColorPalette["gray-100"]
+          }
+        >
+          {(() => {
+            const sourceChain = chainStore.getChain(history.chainId);
+            // const destinationChain = chainStore.getChain(
+            //   history.destinationChainId
+            // );
+
+            if (historyCompleted && failedRouteIndex < 0) {
+              // const chainId = history.destinationChainId;
+              // const chainInfo = chainStore.getChain(chainId);
+              const assets = (() => {
+                return "Unknown";
+              })();
+
+              return intl.formatMessage(
+                {
+                  id: "page.main.components.ibc-history-view.ibc-swap.succeed.paragraph",
+                },
+                {
+                  assets,
+                }
+              );
+            }
+
+            const assets = history.amount
+              .map((amount) => {
+                const currency = sourceChain.forceFindCurrency(amount.denom);
+                const pretty = new CoinPretty(currency, amount.amount);
+                return pretty
+                  .hideIBCMetadata(true)
+                  .shrink(true)
+                  .maxDecimals(6)
+                  .inequalitySymbol(true)
+                  .trim(true)
+                  .toString();
+              })
+              .join(", ");
+
+            return intl.formatMessage(
+              {
+                id: "page.main.components.ibc-history-view.ibc-swap.paragraph",
+              },
+              {
+                assets,
+                destinationDenom: (() => {
+                  const currency = chainStore
+                    .getChain(history.destinationAsset.chainId)
+                    .forceFindCurrency(history.destinationAsset.denom);
+
+                  if ("originCurrency" in currency && currency.originCurrency) {
+                    return currency.originCurrency.coinDenom;
+                  }
+
+                  return currency.coinDenom;
+                })(),
+              }
+            );
+          })()}
+        </Body2>
+
+        <Gutter size="1rem" />
+
+        <Box
+          borderRadius="9999999px"
+          padding="0.625rem"
+          backgroundColor={
+            theme.mode === "light"
+              ? ColorPalette["gray-10"]
+              : ColorPalette["gray-500"]
+          }
+        >
+          <XAxis alignY="center">
+            {(() => {
+              const chainIds = history.simpleRoute.map((route) => {
+                return route.chainId;
+              });
+
+              return chainIds.map((chainId, i) => {
+                const chainInfo = chainStore.getChain(chainId);
+                const completed =
+                  !!history.trackDone && i <= history.routeIndex;
+                const error = !!history.trackError;
+
+                return (
+                  // 일부분 순환하는 경우도 이론적으로 가능은 하기 때문에 chain id를 key로 사용하지 않음.
+                  <IbcHistoryViewItemChainImage
+                    key={i}
+                    chainInfo={chainInfo}
+                    completed={!error && completed}
+                    notCompletedBlink={(() => {
+                      if (failedRoute) {
+                        return i === failedRouteIndex;
+                      }
+
+                      if (completed) {
+                        return false;
+                      }
+
+                      if (i === 0 && !completed) {
+                        return true;
+                      }
+
+                      if (!history.trackDone) {
+                        return false;
+                      }
+
+                      return i - 1 === history.routeIndex;
+                    })()}
+                    arrowDirection={(() => {
+                      if (!failedRoute) {
+                        return "right";
+                      }
+
+                      return i <= failedRouteIndex ? "left" : "hide";
+                    })()}
+                    error={error}
+                    isLast={chainIds.length - 1 === i}
+                  />
+                );
+              });
+            })()}
+          </XAxis>
+        </Box>
+
+        <VerticalCollapseTransition collapsed={!failedRoute}>
+          <Gutter size="0.5rem" />
+          <Caption1
+            color={
+              theme.mode === "light"
+                ? ColorPalette["orange-400"]
+                : ColorPalette["yellow-400"]
+            }
+          >
+            <FormattedMessage
+              id={(() => {
+                const complete = !failedRoute;
+
+                if (
+                  history.trackDone &&
+                  history.trackError &&
+                  history.transferAssetRelease
+                ) {
+                  return intl.formatMessage(
+                    {
+                      id: "page.main.components.ibc-history-view.ibc-swap.failed.after-swap.complete",
+                    },
+                    {
+                      chain: chainStore.getChain(
+                        history.transferAssetRelease.chain_id
+                      ).chainName,
+                      assets: "Unknown",
+                    }
+                  );
+                }
+
+                return complete
+                  ? "page.main.components.ibc-history-view.ibc-swap.failed.complete"
+                  : "page.main.components.ibc-history-view.ibc-swap.failed.in-progress";
+              })()}
+            />
+          </Caption1>
+        </VerticalCollapseTransition>
+
+        <VerticalCollapseTransition
+          collapsed={(() => {
+            if (historyCompleted) {
+              return true;
+            }
+
+            if (failedRouteIndex >= 0) {
+              // if (
+              //   !history.ibcHistory
+              //     .slice(0, failedChannelIndex + 1)
+              //     .some((h) => !h.rewound) ||
+              //   history.ibcHistory
+              //     .slice(0, failedChannelIndex + 1)
+              //     .some((h) => h.rewoundButNextRewindingBlocked)
+              // ) {
+              //   return true;
+              // }
+            }
+
+            return false;
+          })()}
+        >
+          <Gutter size="1rem" />
+          <Box
+            height="1px"
+            backgroundColor={
+              theme.mode === "light"
+                ? ColorPalette["gray-100"]
+                : ColorPalette["gray-500"]
+            }
+          />
+          <Gutter size="1rem" />
+
+          <XAxis alignY="center">
+            <Subtitle3
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-300"]
+                  : ColorPalette["gray-200"]
+              }
+            >
+              <FormattedMessage id="page.main.components.ibc-history-view.estimated-duration" />
+            </Subtitle3>
+            <div
+              style={{
+                flex: 1,
+              }}
+            />
+            <Body2
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-600"]
+                  : ColorPalette["gray-10"]
+              }
+            >
+              <FormattedMessage
+                id="page.main.components.ibc-history-view.estimated-duration.value"
+                values={{
+                  minutes: history.routeDurationSeconds / 60,
                 }}
               />
             </Body2>
