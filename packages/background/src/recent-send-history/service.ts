@@ -1200,7 +1200,7 @@ export class RecentSendHistoryService {
     const diff = expectedEndTimestamp - now;
 
     const waitMsAfterError = 10 * 1000;
-    const maxRetries = diff > 0 ? (diff / waitMsAfterError) * 2 : 10;
+    const maxRetries = diff > 0 ? diff / waitMsAfterError : 10;
 
     retry(
       () => {
@@ -1221,7 +1221,7 @@ export class RecentSendHistoryService {
       {
         maxRetries,
         waitMsAfterError,
-        maxWaitMsAfterError: 5 * 60 * 1000, // 5min
+        maxWaitMsAfterError: 60 * 1000, // 1min
       }
     );
   }

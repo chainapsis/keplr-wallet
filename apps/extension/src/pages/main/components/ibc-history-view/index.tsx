@@ -44,7 +44,7 @@ import {
 export const IbcHistoryView: FunctionComponent<{
   isNotReady: boolean;
 }> = observer(({ isNotReady }) => {
-  const { queriesStore, accountStore, chainStore } = useStore();
+  const { queriesStore, accountStore } = useStore();
 
   const [histories, setHistories] = useState<IBCHistory[]>([]);
   const [skipHistories, setSkipHistories] = useState<SkipHistory[]>([]);
