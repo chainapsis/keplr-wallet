@@ -718,7 +718,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 !("swap" in operation) && !("transfer" in operation)
             );
 
-            // 브릿지를 사용하는 경우, ibc swap channel까지 보여주면 ui가 너무 복잡해질 수 있으므로
+            // 브릿지를 사용하는 경우, ibc swap channel까지 보여주면 ui가 너무 복잡해질 수 있으므로 (operation이 최소 3개 이상)
             // evm -> osmosis -> destination 식으로 뭉퉁그려서 보여주는 것이 좋다고 판단, 경로를 간소화한다.
             // 문제는 chain_ids에 이미 ibc swap channel이 포함되어 있을 가능성 (아직 확인은 안됨)
             if (isInterchainSwap) {
@@ -1203,7 +1203,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                         currencies: chainStore.getChain(outChainId).currencies,
                       },
                       routeDurationSeconds ?? 0,
-                      true,
                       txHash
                     );
 

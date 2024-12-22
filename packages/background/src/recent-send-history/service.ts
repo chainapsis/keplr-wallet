@@ -20,6 +20,11 @@ import { Buffer } from "buffer/";
 import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
+import {
+  StatusRequest,
+  TransferAssetRelease,
+  TxStatusResponse,
+} from "./temp-skip-types";
 
 export class RecentSendHistoryService {
   // Key: {chain_identifier}/{type}
@@ -161,8 +166,8 @@ export class RecentSendHistoryService {
     });
 
     // Track the recent skip history
-    for (const _history of this.getRecentSkipHistories()) {
-      // TODO: Implement the logic to track the skip history
+    for (const history of this.getRecentSkipHistories()) {
+      this.trackSkipSwapRecursive(history.id);
     }
 
     this.chainsService.addChainRemovedHandler(this.onChainRemoved);
@@ -590,6 +595,7 @@ export class RecentSendHistoryService {
         const txTracer = new TendermintTxTracer(chainInfo.rpc, "/websocket");
         txTracer.addEventListener("close", onClose);
         txTracer.addEventListener("error", onError);
+
         txTracer.traceTx(txHash).then((tx) => {
           txTracer.close();
 
@@ -1134,7 +1140,6 @@ export class RecentSendHistoryService {
       currencies: AppCurrency[];
     },
     routeDurationSeconds: number = 0,
-    isSkipTrack: boolean = false,
     txHash: string
   ): string {
     const id = (this.recentIBCHistorySeq++).toString();
@@ -1148,18 +1153,15 @@ export class RecentSendHistoryService {
       sender,
       amount,
       notificationInfo,
-      routeDurationSeconds,
+      routeDurationSeconds: routeDurationSeconds,
       txHash,
-      routeIndex: 0,
+      routeIndex: -1,
       resAmount: [],
       timestamp: Date.now(),
     };
 
     this.recentSkipHistoryMap.set(id, history);
-
-    if (isSkipTrack) {
-      // TODO: run skip track
-    }
+    this.trackSkipSwapRecursive(id);
 
     return id;
   }
@@ -1189,6 +1191,167 @@ export class RecentSendHistoryService {
       return true;
     });
   }
+
+  trackSkipSwapRecursive(id: string): void {
+    const history = this.getRecentSkipHistory(id);
+    if (!history) {
+      return;
+    }
+
+    const now = Date.now();
+    const expectedEndTimestamp =
+      history.timestamp + history.routeDurationSeconds * 1000;
+    const diff = expectedEndTimestamp - now;
+
+    const waitMsAfterError = 10 * 1000;
+    const maxRetries = diff > 0 ? (diff / waitMsAfterError) * 2 : 10;
+
+    retry(
+      () => {
+        return new Promise<void>((resolve, reject) => {
+          this.trackSkipSwapRecursiveInternal(
+            id,
+            () => {
+              resolve();
+            },
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
+            () => {},
+            () => {
+              reject();
+            }
+          );
+        });
+      },
+      {
+        maxRetries,
+        waitMsAfterError,
+        maxWaitMsAfterError: 5 * 60 * 1000, // 5min
+      }
+    );
+  }
+
+  protected trackSkipSwapRecursiveInternal = (
+    id: string,
+    onFulfill: () => void,
+    _onClose: () => void,
+    onError: () => void
+  ): void => {
+    const history = this.getRecentSkipHistory(id);
+    if (!history) {
+      onFulfill();
+      return;
+    }
+
+    if (history.trackDone) {
+      onFulfill();
+      return;
+    }
+
+    const chainId = history.chainId.replace("eip155:", "");
+    const request: StatusRequest = {
+      tx_hash: history.txHash,
+      chain_id: chainId,
+    };
+    const requestParams = new URLSearchParams(request).toString();
+
+    simpleFetch<TxStatusResponse>(
+      "https://api.skip.build/",
+      `v2/tx/status?${requestParams}`,
+      {
+        method: "GET",
+        headers: {
+          "content-type": "application/json",
+          ...(() => {
+            const res: { authorization?: string } = {};
+            if (process.env["SKIP_API_KEY"]) {
+              res.authorization = process.env["SKIP_API_KEY"];
+            }
+            return res;
+          })(),
+        },
+      }
+    )
+      .then((res) => {
+        const {
+          status,
+          state,
+          error,
+          transfer_sequence,
+          next_blocking_transfer,
+          transfer_asset_release,
+        } = res.data;
+
+        history.trackStatus = status; // 상태 업데이트
+
+        // state는 status와 비슷하지만 상위 범주의 상태를 나타냄
+        // e.g. state가 completed이면 status는 completed, completed_error, completed_success 중 하나
+
+        // history 업데이트 함수
+        const handleHistoryUpdate = () => {
+          const simpleRoute = history.simpleRoute;
+          const currentRouteIndex = history.routeIndex;
+          const errorMessage: string | undefined = error?.message; // detail한 에러 메시지는 transfer에서 가져옴
+          const transferAssetRelease: TransferAssetRelease | null =
+            transfer_asset_release;
+
+          const nextBlockingTransferIndex =
+            next_blocking_transfer?.transfer_sequence_index ?? -1;
+
+          // 다음 블로킹 트랜스퍼 정보가 있는 경우 (다음 블로킹 트랜스퍼가 없으면 -1)
+          if (nextBlockingTransferIndex >= 0) {
+            // transfer_sequence의 길이 체크
+            if (nextBlockingTransferIndex >= simpleRoute.length) {
+              history.trackError = "Invalid next_blocking_transfer index";
+              // TODO: 어떻게 처리할지 고민 필요, 일단은 에러 처리
+              onError();
+              return;
+            }
+
+            // 다음 블로킹 트랜스퍼 정보 가져오기
+            const transfer = transfer_sequence[nextBlockingTransferIndex];
+          }
+
+          history.trackError = errorMessage;
+          if (transferAssetRelease) {
+            history.transferAssetRelease = transferAssetRelease;
+          }
+
+          switch (state) {
+            case "STATE_ABANDONED": // 30분 이상 트래킹했는데 상태 변화가 없는 경우. 문제가 뭔지 진단하기 어려움. 웬만하면 발생하지 않는다고 optimistic하게
+            case "STATE_COMPLETED_ERROR": // 오류가 발생하였고, 오류 전파 및 처리가 완료된 상태
+            case "STATE_COMPLETED_SUCCESS": // 성공적으로 완료된 상태
+              // 더 이상 트래킹할 필요가 없는 상태
+              history.trackDone = true;
+              onFulfill();
+              break;
+            case "STATE_PENDING": // route 진행 중
+            case "STATE_PENDING_ERROR": // route 진행 중에 에러가 발생하였고 오류가 전파되는 중
+              // 다시 트래킹 요청 (retry)
+              onError();
+          }
+        };
+
+        switch (status) {
+          case "STATE_SUBMITTED":
+          case "STATE_RECEIVED":
+          case "STATE_COMPLETED":
+          case "STATE_UNKNOWN":
+            // 트래킹 요청이 성공적으로 전달되었지만, 아직 트래킹이 시작되지 않은 상태
+            // 또는 트래킹이 완료되었지만, 결과가 아직 처리되지 않은 상태
+            // `UNKNOWN`은 상태를 알 수 없는 경우 (TODO: 어떻게 처리할지 고민 필요)
+            // 다음 상태가 주어질 때까지 일단 오류 처리하고 retry 로직이 동작하도록 한다.
+            onError();
+            break;
+          default:
+            handleHistoryUpdate();
+            break;
+        }
+      })
+      .catch((e) => {
+        console.error(e);
+        onError();
+      });
+  };
 
   @action
   removeRecentSkipHistory(id: string): boolean {

@@ -224,7 +224,6 @@ const handleRecordTxWithSkipSwapMsg: (
       msg.amount,
       msg.notificationInfo,
       msg.routeDurationSeconds,
-      msg.isSkipTrack,
       msg.txHash
     );
   };

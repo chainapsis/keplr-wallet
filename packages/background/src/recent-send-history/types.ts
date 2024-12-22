@@ -1,5 +1,5 @@
 import { AppCurrency } from "@keplr-wallet/types";
-import { TransferAssetRelease } from "./temp-skip-types";
+import { StatusState, TransferAssetRelease } from "./temp-skip-types";
 
 export interface RecentSendHistory {
   timestamp: number;
@@ -107,15 +107,20 @@ export type SkipHistory = {
   }[];
   txHash: string;
 
-  txFulfilled?: boolean;
-  txError?: string;
+  trackDone?: boolean;
+  trackError?: string;
+  trackStatus?: StatusState;
 
   notified?: boolean;
   notificationInfo?: {
     currencies: AppCurrency[];
   };
 
-  simpleRoute: { isOnlyEvm: boolean; chainId: string; receiver: string }[];
+  simpleRoute: {
+    isOnlyEvm: boolean;
+    chainId: string;
+    receiver: string;
+  }[];
   routeIndex: number;
   routeDurationSeconds: number;
 

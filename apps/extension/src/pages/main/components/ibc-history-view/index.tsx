@@ -101,6 +101,7 @@ export const IbcHistoryView: FunctionComponent<{
     const skipFn = () => {
       const msg = new GetSkipHistoriesMsg();
       requester.sendMessage(BACKGROUND_PORT, msg).then((histories) => {
+        // TODO: 메시지 들어오는 것 까지 확인. 백그라운드에서 polling 돌리고 가져온 메시지 보여주는 작업 추가
         console.log("skip histories", histories);
       });
     };
