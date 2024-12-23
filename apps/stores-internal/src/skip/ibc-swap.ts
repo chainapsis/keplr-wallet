@@ -35,7 +35,7 @@ export class ObservableQueryIBCSwapInner {
   getQueryMsgsDirect(
     chainIdsToAddresses: Record<string, string>,
     slippageTolerancePercent: number,
-    affiliateFeeReceiver: string
+    affiliateFeeReceiver: string | undefined
   ): ObservableQueryMsgsDirectInner {
     const inAmount = new CoinPretty(
       this.chainStore

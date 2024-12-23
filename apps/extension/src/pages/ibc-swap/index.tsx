@@ -454,6 +454,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               )
             : undefined;
 
+        // OP Stack L1 Data Fee 계산은 일단 무시하기로 한다.
+
         return {
           simulate: () =>
             ethereumAccount.simulateGas(sender, erc20ApprovalTx ?? tx),
@@ -858,7 +860,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
           try {
             if ("send" in tx) {
-              const isCCTPTx = tx.ui.type();
+              const isCCTPTx = tx.ui.type() === "cctp";
+
               await tx.send(
                 ibcSwapConfigs.feeConfig.toStdFee(),
                 ibcSwapConfigs.memoConfig.memo,

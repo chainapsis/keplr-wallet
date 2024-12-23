@@ -181,6 +181,10 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
         };
       }
 
+      if (msg.cosmos_tx.msgs.length >= 2) {
+        return;
+      }
+
       const cosmosMsg = msg.cosmos_tx.msgs[0];
       if (
         cosmosMsg.msg_type_url !==
@@ -410,7 +414,7 @@ export class ObservableQueryMsgsDirect extends HasMapStore<ObservableQueryMsgsDi
     chainIdsToAddresses: Record<string, string>,
     slippageTolerancePercent: number,
     affiliateFeeBps: number,
-    affiliateFeeReceiver: string,
+    affiliateFeeReceiver: string | undefined,
     swapVenues: {
       readonly name: string;
       readonly chainId: string;

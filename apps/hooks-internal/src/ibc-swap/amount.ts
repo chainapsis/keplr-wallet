@@ -141,7 +141,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
   async getTx(
     slippageTolerancePercent: number,
-    affiliateFeeReceiver: string,
+    affiliateFeeReceiver: string | undefined,
     priorOutAmount?: Int
   ): Promise<MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals> {
     const queryIBCSwap = this.getQueryIBCSwap();
@@ -311,7 +311,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
   getTxIfReady(
     slippageTolerancePercent: number,
-    affiliateFeeReceiver: string
+    affiliateFeeReceiver?: string
   ): MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals | undefined {
     if (!this.currency) {
       return;
