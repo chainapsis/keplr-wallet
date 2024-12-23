@@ -1057,7 +1057,7 @@ const SkipHistoryViewItem: FunctionComponent<{
                         return "right";
                       }
 
-                      return i <= failedRouteIndex ? "left" : "hide";
+                      return i === failedRouteIndex ? "left" : "hide";
                     })()}
                     error={error}
                     isLast={chainIds.length - 1 === i}
@@ -1144,7 +1144,7 @@ const SkipHistoryViewItem: FunctionComponent<{
           </Caption1>
         </VerticalCollapseTransition>
 
-        <VerticalCollapseTransition collapsed={false}>
+        <VerticalCollapseTransition collapsed={historyCompleted}>
           <Gutter size="1rem" />
           <Box
             height="1px"

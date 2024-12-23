@@ -1370,7 +1370,17 @@ export class RecentSendHistoryService {
                   errorMsg = "Unknown Axelar transfer error";
                   break;
                 case "AXELAR_TRANSFER_FAILURE":
-                  targetChainId = axelar.from_chain_id;
+                  const fromChainId = axelar.from_chain_id;
+                  const toChainId = axelar.to_chain_id;
+                  if (
+                    transfer_asset_release &&
+                    transfer_asset_release.chain_id === toChainId
+                  ) {
+                    targetChainId = toChainId;
+                  } else {
+                    targetChainId = fromChainId;
+                  }
+
                   errorMsg =
                     (axelar.txs as any).error?.message ??
                     "Axelar transfer failed";
@@ -1407,7 +1417,17 @@ export class RecentSendHistoryService {
                   errorMsg = "Unknown Hyperlane transfer error";
                   break;
                 case "HYPERLANE_TRANSFER_FAILED":
-                  targetChainId = hyperlane.from_chain_id;
+                  const fromChainId = hyperlane.from_chain_id;
+                  const toChainId = hyperlane.to_chain_id;
+                  if (
+                    transfer_asset_release &&
+                    transfer_asset_release.chain_id === toChainId
+                  ) {
+                    targetChainId = toChainId;
+                  } else {
+                    targetChainId = fromChainId;
+                  }
+
                   errorMsg = "Hyperlane transfer failed";
                   break;
                 case "HYPERLANE_TRANSFER_SENT":
@@ -1433,25 +1453,50 @@ export class RecentSendHistoryService {
               }
             } else if ("go_fast_transfer" in transfer) {
               const gofast = transfer.go_fast_transfer;
+              const fromChainId = gofast.from_chain_id;
+              const toChainId = gofast.to_chain_id;
+
               switch (gofast.state) {
                 case "GO_FAST_TRANSFER_UNKNOWN":
                   targetChainId = gofast.from_chain_id;
                   errorMsg = "Unknown GoFast transfer error";
                   break;
-                case "GO_FAST_TRANSFER_TIMEOUT":
+                case "GO_FAST_TRANSFER_SENT":
                   targetChainId = gofast.from_chain_id;
+                  break;
+                case "GO_FAST_TRANSFER_TIMEOUT":
+                  if (
+                    transfer_asset_release &&
+                    transfer_asset_release.chain_id === toChainId
+                  ) {
+                    targetChainId = toChainId;
+                  } else {
+                    targetChainId = fromChainId;
+                  }
+
                   errorMsg = "GoFast transfer timeout";
                   break;
                 case "GO_FAST_POST_ACTION_FAILED":
-                  targetChainId = gofast.from_chain_id;
+                  if (
+                    transfer_asset_release &&
+                    transfer_asset_release.chain_id === toChainId
+                  ) {
+                    targetChainId = toChainId;
+                  } else {
+                    targetChainId = fromChainId;
+                  }
                   errorMsg = "GoFast post action failed";
                   break;
                 case "GO_FAST_TRANSFER_REFUNDED":
-                  targetChainId = gofast.from_chain_id;
+                  if (
+                    transfer_asset_release &&
+                    transfer_asset_release.chain_id === toChainId
+                  ) {
+                    targetChainId = toChainId;
+                  } else {
+                    targetChainId = fromChainId;
+                  }
                   errorMsg = "GoFast transfer refunded";
-                  break;
-                case "GO_FAST_TRANSFER_SENT":
-                  targetChainId = gofast.from_chain_id;
                   break;
                 case "GO_FAST_TRANSFER_FILLED":
                   targetChainId = gofast.to_chain_id;
@@ -1466,7 +1511,16 @@ export class RecentSendHistoryService {
                   errorMsg = "Unknown Stargate transfer error";
                   break;
                 case "STARGATE_TRANSFER_FAILED":
-                  targetChainId = stargate.from_chain_id;
+                  const fromChainId = stargate.from_chain_id;
+                  const toChainId = stargate.to_chain_id;
+                  if (
+                    transfer_asset_release &&
+                    transfer_asset_release.chain_id === toChainId
+                  ) {
+                    targetChainId = toChainId;
+                  } else {
+                    targetChainId = fromChainId;
+                  }
                   errorMsg = "Stargate transfer failed";
                   break;
                 case "STARGATE_TRANSFER_SENT":
