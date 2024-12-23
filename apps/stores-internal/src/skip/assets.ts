@@ -22,6 +22,8 @@ const Schema = Joi.object<AssetsResponse>({
           origin_chain_id: Joi.string().required(),
           is_evm: Joi.boolean().required(),
           token_contract: Joi.string().optional(),
+          recommended_symbol: Joi.string().optional(),
+          decimals: Joi.number().required(),
         }).unknown(true)
       ),
     }).unknown(true)
@@ -49,11 +51,14 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
   }
 
   @computed
-  get assets(): {
+  get assetsRaw(): {
     denom: string;
     chainId: string;
     originDenom: string;
     originChainId: string;
+    isEvm: boolean;
+    tokenContract?: string;
+    recommendedSymbol?: string;
   }[] {
     if (
       !this.response ||
@@ -82,6 +87,9 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
         chainId: string;
         originDenom: string;
         originChainId: string;
+        isEvm: boolean;
+        tokenContract?: string;
+        recommendedSymbol?: string;
       }[] = [];
 
       for (const asset of assetsInResponse.assets) {
@@ -102,6 +110,102 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
               chainId: chainId,
               originDenom: asset.origin_denom,
               originChainId: originChainId,
+              isEvm: false,
+              recommendedSymbol: asset.recommended_symbol,
+            });
+          } else {
+            const coinMinimalDenom =
+              asset.is_evm && asset.token_contract != null
+                ? `erc20:${asset.denom}`
+                : asset.denom;
+            const originCoinMinimalDenom =
+              asset.is_evm && asset.token_contract != null
+                ? `erc20:${asset.origin_denom}`
+                : asset.denom;
+            // TODO: Dec, Int 같은 곳에서 18 이상인 경우도 고려하도록 수정
+            if (asset.decimals <= 18) {
+              res.push({
+                denom: coinMinimalDenom,
+                chainId: chainId,
+                originDenom: originCoinMinimalDenom,
+                originChainId: originChainId,
+                isEvm: asset.is_evm,
+                tokenContract: asset.token_contract,
+                recommendedSymbol: asset.recommended_symbol,
+              });
+            }
+          }
+        }
+      }
+
+      return res;
+    }
+
+    return [];
+  }
+
+  @computed
+  get assets(): {
+    denom: string;
+    chainId: string;
+    originDenom: string;
+    originChainId: string;
+    isEvm: boolean;
+    tokenContract?: string;
+    recommendedSymbol?: string;
+  }[] {
+    if (
+      !this.response ||
+      !this.response.data ||
+      !this.response.data.chain_to_assets_map
+    ) {
+      return [];
+    }
+
+    if (!this.chainStore.hasChain(this.chainId)) {
+      return [];
+    }
+
+    const chainInfo = this.chainStore.getChain(this.chainId);
+    if (!this.chainStore.isInChainInfosInListUI(chainInfo.chainId)) {
+      return [];
+    }
+
+    const assetsInResponse =
+      this.response.data.chain_to_assets_map[
+        this.chainId.replace("eip155:", "")
+      ];
+    if (assetsInResponse) {
+      const res: {
+        denom: string;
+        chainId: string;
+        originDenom: string;
+        originChainId: string;
+        isEvm: boolean;
+        tokenContract?: string;
+        recommendedSymbol?: string;
+      }[] = [];
+
+      for (const asset of assetsInResponse.assets) {
+        const chainId = asset.is_evm
+          ? `eip155:${asset.chain_id}`
+          : asset.chain_id;
+        const originChainId = asset.is_evm
+          ? `eip155:${asset.origin_chain_id}`
+          : asset.origin_chain_id;
+        if (
+          this.chainStore.hasChain(chainId) &&
+          this.chainStore.hasChain(originChainId)
+        ) {
+          // IBC asset일 경우 그냥 넣는다.
+          if (asset.denom.startsWith("ibc/")) {
+            res.push({
+              denom: asset.denom,
+              chainId: chainId,
+              originDenom: asset.origin_denom,
+              originChainId: originChainId,
+              isEvm: false,
+              recommendedSymbol: asset.recommended_symbol,
             });
             // IBC asset이 아니라면 알고있는 currency만 넣는다.
           } else {
@@ -123,6 +227,9 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
                 chainId: chainId,
                 originDenom: originCoinMinimalDenom,
                 originChainId: originChainId,
+                isEvm: asset.is_evm,
+                tokenContract: asset.token_contract,
+                recommendedSymbol: asset.recommended_symbol,
               });
             }
           }

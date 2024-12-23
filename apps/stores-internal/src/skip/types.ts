@@ -24,6 +24,8 @@ export interface AssetsResponse {
             origin_chain_id: string;
             is_evm: boolean;
             token_contract?: string;
+            recommended_symbol?: string;
+            decimals: number;
           }[];
         }
       | undefined;
@@ -41,7 +43,34 @@ export interface MsgsDirectResponse {
     evm_tx?: {
       chain_id: string;
       data: string;
-      required_erc20_approvals: string[];
+      required_erc20_approvals: {
+        amount: string;
+        spender: string;
+        token_contract: string;
+      }[];
+      signer_address: string;
+      to: string;
+      value: string;
+    };
+  }[];
+  txs: {
+    cosmos_tx?: {
+      chain_id: string;
+      path: string[];
+      signer_address: string;
+      msgs: {
+        msg: string;
+        msg_type_url: string;
+      }[];
+    };
+    evm_tx?: {
+      chain_id: string;
+      data: string;
+      required_erc20_approvals: {
+        amount: string;
+        spender: string;
+        token_contract: string;
+      }[];
       signer_address: string;
       to: string;
       value: string;
@@ -70,7 +99,7 @@ export interface RouteResponse {
       }
     | {
         swap: {
-          swap_in: {
+          swap_in?: {
             swap_venue: {
               name: string;
               chain_id: string;
@@ -82,6 +111,22 @@ export interface RouteResponse {
             }[];
             swap_amount_in: string;
             price_impact_percent?: string;
+          };
+          smart_swap_in?: {
+            swap_venue: {
+              name: string;
+              chain_id: string;
+            };
+            swap_routes: {
+              swap_amount_in: string;
+              denom_in: string;
+              swap_operations: {
+                pool: string;
+                denom_in: string;
+                denom_out: string;
+              }[];
+            }[];
+            estimated_amount_out: string;
           };
           estimated_affiliate_fee: string;
         };
