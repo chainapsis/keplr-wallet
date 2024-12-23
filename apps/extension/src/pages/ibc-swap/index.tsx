@@ -55,7 +55,10 @@ import { TextButtonProps } from "../../components/button-text";
 import { UnsignedEVMTransaction } from "@keplr-wallet/stores-eth";
 import { EthTxStatus } from "@keplr-wallet/types";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
-import { RecordTxWithSkipSwapMsg } from "@keplr-wallet/background/build/recent-send-history/temp-skip-message";
+import {
+  RecordTxWithSkipSwapMsg,
+  RemoveSkipHistoryMsg,
+} from "@keplr-wallet/background/build/recent-send-history/temp-skip-message";
 
 const TextButtonStyles = {
   Container: styled.div`
@@ -1155,6 +1158,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       )}`,
                     };
               const sender = ibcSwapConfigs.senderConfig.sender;
+              let historyId: string | undefined = undefined;
 
               await ethereumAccount.sendEthereumTx(
                 sender,
@@ -1206,10 +1210,11 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       txHash
                     );
 
-                    new InExtensionMessageRequester().sendMessage(
-                      BACKGROUND_PORT,
-                      msg
-                    );
+                    new InExtensionMessageRequester()
+                      .sendMessage(BACKGROUND_PORT, msg)
+                      .then((response) => {
+                        historyId = response;
+                      });
                   },
                   onFulfill: (txReceipt) => {
                     const queryBalances = queriesStore.get(
@@ -1232,43 +1237,44 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                         }
                       });
 
-                    // onBroadcasted에서 실행하기에는 너무 빨라서 tx not found가 발생할 수 있음
-                    // 재실행 로직을 사용해도 되지만, txReceipt를 기다렸다가 실행하는 게 자원 낭비가 적음
-                    const chainIdForTrack = inChainId.replace("eip155:", "");
-
-                    setTimeout(() => {
-                      // no wait
-                      simpleFetch<any>(
-                        "https://api.skip.build/",
-                        "/v2/tx/track",
-                        {
-                          method: "POST",
-                          headers: {
-                            "content-type": "application/json",
-                            ...(() => {
-                              const res: { authorization?: string } = {};
-                              if (process.env["SKIP_API_KEY"]) {
-                                res.authorization = process.env["SKIP_API_KEY"];
-                              }
-                              return res;
-                            })(),
-                          },
-                          body: JSON.stringify({
-                            tx_hash: txReceipt.transactionHash,
-                            chain_id: chainIdForTrack,
-                          }),
-                        }
-                      )
-                        .then((result) => {
-                          console.log(
-                            `Skip tx track result: ${JSON.stringify(result)}`
-                          );
-                        })
-                        .catch((e) => {
-                          console.log(e);
-                        });
-                    }, 2000);
                     if (txReceipt.status === EthTxStatus.Success) {
+                      // onBroadcasted에서 실행하기에는 너무 빨라서 tx not found가 발생할 수 있음
+                      // 재실행 로직을 사용해도 되지만, txReceipt를 기다렸다가 실행하는 게 자원 낭비가 적음
+                      const chainIdForTrack = inChainId.replace("eip155:", "");
+                      setTimeout(() => {
+                        // no wait
+                        simpleFetch<any>(
+                          "https://api.skip.build/",
+                          "/v2/tx/track",
+                          {
+                            method: "POST",
+                            headers: {
+                              "content-type": "application/json",
+                              ...(() => {
+                                const res: { authorization?: string } = {};
+                                if (process.env["SKIP_API_KEY"]) {
+                                  res.authorization =
+                                    process.env["SKIP_API_KEY"];
+                                }
+                                return res;
+                              })(),
+                            },
+                            body: JSON.stringify({
+                              tx_hash: txReceipt.transactionHash,
+                              chain_id: chainIdForTrack,
+                            }),
+                          }
+                        )
+                          .then((result) => {
+                            console.log(
+                              `Skip tx track result: ${JSON.stringify(result)}`
+                            );
+                          })
+                          .catch((e) => {
+                            console.log(e);
+                          });
+                      }, 2000);
+
                       notification.show(
                         "success",
                         intl.formatMessage({
@@ -1277,6 +1283,13 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                         ""
                       );
                     } else {
+                      if (historyId) {
+                        new InExtensionMessageRequester().sendMessage(
+                          BACKGROUND_PORT,
+                          new RemoveSkipHistoryMsg(historyId)
+                        );
+                      }
+
                       notification.show(
                         "failed",
                         intl.formatMessage({ id: "error.transaction-failed" }),
