@@ -104,12 +104,12 @@ export type SkipHistory = {
   amount: {
     amount: string;
     denom: string;
-  }[];
-  txHash: string;
+  }[]; // [sourceChain asset, destinationChain asset] 형태로 저장
+  txHash: string; // hex string
 
-  trackDone?: boolean;
-  trackError?: string;
-  trackStatus?: StatusState;
+  trackDone?: boolean; // status tracking이 완료되었는지 여부
+  trackError?: string; // status tracking 중 에러가 발생했는지 여부
+  trackStatus?: StatusState; // status tracking의 현재 상태
 
   notified?: boolean;
   notificationInfo?: {
@@ -120,20 +120,20 @@ export type SkipHistory = {
     isOnlyEvm: boolean;
     chainId: string;
     receiver: string;
-  }[];
-  routeIndex: number;
-  routeDurationSeconds: number;
+  }[]; // 세부적인 채널 정보를 제외, 덩어리 경로 정보만 저장
+  routeIndex: number; // 현재까지 진행된 라우팅 인덱스
+  routeDurationSeconds: number; // 라우팅에 걸리는 예상 시간
 
   destinationAsset: {
     chainId: string;
     denom: string;
     expectedAmount?: string;
-  };
+  }; // 최종 목적지의 asset 정보
 
   resAmount: {
     amount: string;
     denom: string;
   }[][];
 
-  transferAssetRelease?: TransferAssetRelease;
+  transferAssetRelease?: TransferAssetRelease; // 라우팅 중간에 실패한 경우, 사용자의 자산이 어디에서 릴리즈 되었는지 정보
 };

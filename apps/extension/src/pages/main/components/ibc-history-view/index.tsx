@@ -179,66 +179,77 @@ export const IbcHistoryView: FunctionComponent<{
     };
   });
 
-  const filteredHistories = histories.filter((history) => {
-    const account = accountStore.getAccount(history.chainId);
-    if (account.bech32Address === history.sender) {
-      return true;
-    }
-    return false;
-  });
-
-  const filteredSkipHistories = skipHistories.filter((history) => {
-    const firstRoute = history.simpleRoute[0];
-    const account = accountStore.getAccount(firstRoute.chainId);
-
-    if (firstRoute.isOnlyEvm) {
-      if (account.ethereumHexAddress === history.sender) {
+  const filteredHistories = (() => {
+    const filteredIBCHistories = histories.filter((history) => {
+      const account = accountStore.getAccount(history.chainId);
+      if (account.bech32Address === history.sender) {
         return true;
       }
       return false;
+    });
+
+    const filteredSkipHistories = skipHistories.filter((history) => {
+      const firstRoute = history.simpleRoute[0];
+      const account = accountStore.getAccount(firstRoute.chainId);
+
+      if (firstRoute.isOnlyEvm) {
+        if (account.ethereumHexAddress === history.sender) {
+          return true;
+        }
+        return false;
+      }
+
+      if (account.bech32Address === history.sender) {
+        return true;
+      }
+      return false;
+    });
+
+    if (isNotReady) {
+      return null;
     }
 
-    if (account.bech32Address === history.sender) {
-      return true;
-    }
-    return false;
-  });
-
-  if (isNotReady) {
-    return null;
-  }
+    return [...filteredIBCHistories, ...filteredSkipHistories].sort(
+      (a, b) => b.timestamp - a.timestamp // The latest history should be shown first
+    );
+  })();
 
   return (
     <Stack gutter="0.75rem">
-      {filteredHistories.reverse().map((history) => {
+      {filteredHistories?.map((history) => {
+        if ("ibcHistory" in history) {
+          return (
+            <IbcHistoryViewItem
+              key={history.id}
+              history={history}
+              removeHistory={(id) => {
+                const requester = new InExtensionMessageRequester();
+                const msg = new RemoveIBCHistoryMsg(id);
+                requester
+                  .sendMessage(BACKGROUND_PORT, msg)
+                  .then((histories) => {
+                    setHistories(histories);
+                  });
+              }}
+            />
+          );
+        }
+
         return (
-          <IbcHistoryViewItem
+          <SkipHistoryViewItem
             key={history.id}
             history={history}
             removeHistory={(id) => {
               const requester = new InExtensionMessageRequester();
-              const msg = new RemoveIBCHistoryMsg(id);
+              const msg = new RemoveSkipHistoryMsg(id);
               requester.sendMessage(BACKGROUND_PORT, msg).then((histories) => {
-                setHistories(histories);
+                setSkipHistories(histories);
               });
             }}
           />
         );
       })}
-      {filteredSkipHistories.reverse().map((_history) => (
-        <SkipHistoryViewItem
-          key={_history.id}
-          history={_history}
-          removeHistory={(id) => {
-            const requester = new InExtensionMessageRequester();
-            const msg = new RemoveSkipHistoryMsg(id);
-            requester.sendMessage(BACKGROUND_PORT, msg).then((histories) => {
-              setSkipHistories(histories);
-            });
-          }}
-        />
-      ))}
-      {filteredHistories.length > 0 || filteredSkipHistories.length > 0 ? (
+      {filteredHistories && filteredHistories.length > 0 ? (
         <Gutter size="0.75rem" />
       ) : null}
     </Stack>
@@ -966,7 +977,7 @@ const SkipHistoryViewItem: FunctionComponent<{
             }
 
             // skip history의 amount에는 [sourceChain의 amount, destinationChain의 expected amount]가 들어있으므로
-            // 첫 번째 amount를 사용
+            // 첫 번째 amount만 사용
             const assets = (() => {
               const amount = history.amount[0];
               const currency = sourceChain.forceFindCurrency(amount.denom);
@@ -1024,7 +1035,7 @@ const SkipHistoryViewItem: FunctionComponent<{
               return chainIds.map((chainId, i) => {
                 const chainInfo = chainStore.getChain(chainId);
                 const completed = !!history.trackDone || i < history.routeIndex;
-                const error = !!history.trackError && i === failedRouteIndex;
+                const error = !!history.trackError && i >= failedRouteIndex;
 
                 return (
                   // 일부분 순환하는 경우도 이론적으로 가능은 하기 때문에 chain id를 key로 사용하지 않음.

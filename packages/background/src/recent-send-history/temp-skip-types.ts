@@ -1,3 +1,8 @@
+/**
+ * This file is a temporary file to store types that are required for tracking the status of a transaction related to the skip-go.
+ * Reference: https://github.com/skip-mev/skip-go/blob/staging/packages/client/src/types/lifecycle.ts
+ */
+
 export type StatusState =
   | "STATE_UNKNOWN"
   | "STATE_SUBMITTED"

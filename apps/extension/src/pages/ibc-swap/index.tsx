@@ -696,6 +696,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           }[] = [];
           let routeDurationSeconds: number | undefined;
           let isInterchainSwap: boolean = false;
+          let skipHistoryId: string | undefined = undefined;
 
           // queryRoute는 ibc history를 추적하기 위한 채널 정보 등을 얻기 위해서 사용된다.
           // /msgs_direct로도 얻을 순 있지만 따로 데이터를 해석해야되기 때문에 좀 힘들다...
@@ -1012,10 +1013,11 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                         Buffer.from(txHash).toString("hex")
                       );
 
-                      new InExtensionMessageRequester().sendMessage(
-                        BACKGROUND_PORT,
-                        msg
-                      );
+                      new InExtensionMessageRequester()
+                        .sendMessage(BACKGROUND_PORT, msg)
+                        .then((response) => {
+                          skipHistoryId = response;
+                        });
 
                       if (
                         !chainStore.isEnabledChain(
@@ -1164,6 +1166,13 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   onFulfill: (tx: any) => {
                     if (tx.code != null && tx.code !== 0) {
                       console.log(tx.log ?? tx.raw_log);
+                      if (skipHistoryId) {
+                        new InExtensionMessageRequester().sendMessage(
+                          BACKGROUND_PORT,
+                          new RemoveSkipHistoryMsg(skipHistoryId)
+                        );
+                      }
+
                       notification.show(
                         "failed",
                         intl.formatMessage({ id: "error.transaction-failed" }),
@@ -1250,7 +1259,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       )}`,
                     };
               const sender = ibcSwapConfigs.senderConfig.sender;
-              let historyId: string | undefined = undefined;
 
               await ethereumAccount.sendEthereumTx(
                 sender,
@@ -1305,7 +1313,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                     new InExtensionMessageRequester()
                       .sendMessage(BACKGROUND_PORT, msg)
                       .then((response) => {
-                        historyId = response;
+                        skipHistoryId = response;
                       });
                   },
                   onFulfill: (txReceipt) => {
@@ -1375,10 +1383,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                         ""
                       );
                     } else {
-                      if (historyId) {
+                      if (skipHistoryId) {
                         new InExtensionMessageRequester().sendMessage(
                           BACKGROUND_PORT,
-                          new RemoveSkipHistoryMsg(historyId)
+                          new RemoveSkipHistoryMsg(skipHistoryId)
                         );
                       }
 
