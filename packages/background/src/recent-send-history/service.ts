@@ -357,22 +357,24 @@ export class RecentSendHistoryService {
       },
     });
 
-    const id = this.addRecentIBCSwapHistory(
-      swapType,
-      sourceChainId,
-      destinationChainId,
-      sender,
-      amount,
-      memo,
-      ibcChannels,
-      destinationAsset,
-      swapChannelIndex,
-      swapReceiver,
-      notificationInfo,
-      txHash
-    );
+    if (isSkipTrack) {
+      const id = this.addRecentIBCSwapHistory(
+        swapType,
+        sourceChainId,
+        destinationChainId,
+        sender,
+        amount,
+        memo,
+        ibcChannels,
+        destinationAsset,
+        swapChannelIndex,
+        swapReceiver,
+        notificationInfo,
+        txHash
+      );
 
-    this.trackIBCPacketForwardingRecursive(id);
+      this.trackIBCPacketForwardingRecursive(id);
+    }
 
     return txHash;
   }
@@ -1221,7 +1223,7 @@ export class RecentSendHistoryService {
       {
         maxRetries,
         waitMsAfterError,
-        maxWaitMsAfterError: 60 * 1000, // 1min
+        maxWaitMsAfterError: 30 * 1000, // 30sec
       }
     );
   }
@@ -1264,10 +1266,9 @@ export class RecentSendHistoryService {
       return;
     }
 
-    const chainId = history.chainId.replace("eip155:", "");
     const request: StatusRequest = {
       tx_hash: history.txHash,
-      chain_id: chainId,
+      chain_id: history.chainId.replace("eip155:", ""),
     };
     const requestParams = new URLSearchParams(request).toString();
 
@@ -1313,6 +1314,7 @@ export class RecentSendHistoryService {
 
           default:
             // 여기서부터는 status가 '정상적으로 트래킹이 진행 중'이라고 가정
+            history.trackError = undefined; // 에러 초기화
 
             // 라우트, 현재 라우트 인덱스 가져오기 (처음에 -1로 초기화되어 있음)
             const route = history.simpleRoute;
@@ -1350,7 +1352,7 @@ export class RecentSendHistoryService {
                     "Unknown IBC transfer error";
                   break;
                 case "TRANSFER_FAILURE":
-                  targetChainId = ibc.from_chain_id;
+                  targetChainId = ibc.to_chain_id; // to에서 오류가 발생하여 from으로 돌아감
                   errorMsg =
                     ibc.packet_txs.error?.message ?? "IBC transfer failed";
                   break;
@@ -1370,17 +1372,7 @@ export class RecentSendHistoryService {
                   errorMsg = "Unknown Axelar transfer error";
                   break;
                 case "AXELAR_TRANSFER_FAILURE":
-                  const fromChainId = axelar.from_chain_id;
-                  const toChainId = axelar.to_chain_id;
-                  if (
-                    transfer_asset_release &&
-                    transfer_asset_release.chain_id === toChainId
-                  ) {
-                    targetChainId = toChainId;
-                  } else {
-                    targetChainId = fromChainId;
-                  }
-
+                  targetChainId = axelar.to_chain_id; // to로 자산이 이동하다가 실패 (source <- target 표시를 위해 to_chain_id로 설정)
                   errorMsg =
                     (axelar.txs as any).error?.message ??
                     "Axelar transfer failed";
@@ -1417,17 +1409,7 @@ export class RecentSendHistoryService {
                   errorMsg = "Unknown Hyperlane transfer error";
                   break;
                 case "HYPERLANE_TRANSFER_FAILED":
-                  const fromChainId = hyperlane.from_chain_id;
-                  const toChainId = hyperlane.to_chain_id;
-                  if (
-                    transfer_asset_release &&
-                    transfer_asset_release.chain_id === toChainId
-                  ) {
-                    targetChainId = toChainId;
-                  } else {
-                    targetChainId = fromChainId;
-                  }
-
+                  targetChainId = hyperlane.to_chain_id; // to로 자산이 이동하다가 실패
                   errorMsg = "Hyperlane transfer failed";
                   break;
                 case "HYPERLANE_TRANSFER_SENT":
@@ -1453,8 +1435,6 @@ export class RecentSendHistoryService {
               }
             } else if ("go_fast_transfer" in transfer) {
               const gofast = transfer.go_fast_transfer;
-              const fromChainId = gofast.from_chain_id;
-              const toChainId = gofast.to_chain_id;
 
               switch (gofast.state) {
                 case "GO_FAST_TRANSFER_UNKNOWN":
@@ -1465,37 +1445,15 @@ export class RecentSendHistoryService {
                   targetChainId = gofast.from_chain_id;
                   break;
                 case "GO_FAST_TRANSFER_TIMEOUT":
-                  if (
-                    transfer_asset_release &&
-                    transfer_asset_release.chain_id === toChainId
-                  ) {
-                    targetChainId = toChainId;
-                  } else {
-                    targetChainId = fromChainId;
-                  }
-
+                  targetChainId = gofast.from_chain_id;
                   errorMsg = "GoFast transfer timeout";
                   break;
                 case "GO_FAST_POST_ACTION_FAILED":
-                  if (
-                    transfer_asset_release &&
-                    transfer_asset_release.chain_id === toChainId
-                  ) {
-                    targetChainId = toChainId;
-                  } else {
-                    targetChainId = fromChainId;
-                  }
+                  targetChainId = gofast.from_chain_id;
                   errorMsg = "GoFast post action failed";
                   break;
                 case "GO_FAST_TRANSFER_REFUNDED":
-                  if (
-                    transfer_asset_release &&
-                    transfer_asset_release.chain_id === toChainId
-                  ) {
-                    targetChainId = toChainId;
-                  } else {
-                    targetChainId = fromChainId;
-                  }
+                  targetChainId = gofast.to_chain_id;
                   errorMsg = "GoFast transfer refunded";
                   break;
                 case "GO_FAST_TRANSFER_FILLED":
@@ -1511,16 +1469,7 @@ export class RecentSendHistoryService {
                   errorMsg = "Unknown Stargate transfer error";
                   break;
                 case "STARGATE_TRANSFER_FAILED":
-                  const fromChainId = stargate.from_chain_id;
-                  const toChainId = stargate.to_chain_id;
-                  if (
-                    transfer_asset_release &&
-                    transfer_asset_release.chain_id === toChainId
-                  ) {
-                    targetChainId = toChainId;
-                  } else {
-                    targetChainId = fromChainId;
-                  }
+                  targetChainId = stargate.to_chain_id;
                   errorMsg = "Stargate transfer failed";
                   break;
                 case "STARGATE_TRANSFER_SENT":

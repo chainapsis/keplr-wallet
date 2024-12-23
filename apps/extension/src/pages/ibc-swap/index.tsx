@@ -695,6 +695,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             receiver: string;
           }[] = [];
           let routeDurationSeconds: number | undefined;
+          let isInterchainSwap: boolean = false;
 
           // queryRoute는 ibc history를 추적하기 위한 채널 정보 등을 얻기 위해서 사용된다.
           // /msgs_direct로도 얻을 순 있지만 따로 데이터를 해석해야되기 때문에 좀 힘들다...
@@ -716,7 +717,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             // bridge가 필요한 경우와, 아닌 경우를 나눠서 처리
             // swap, transfer 이외의 다른 operation이 있으면 bridge가 사용된다.
             const operations = queryRoute.response.data.operations;
-            const isInterchainSwap = operations.some(
+            isInterchainSwap = operations.some(
               (operation) =>
                 !("swap" in operation) && !("transfer" in operation)
             );
@@ -951,7 +952,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                           currencies:
                             chainStore.getChain(outChainId).currencies,
                         },
-                        true
+                        !isInterchainSwap // ibc swap이 아닌 interchain swap인 경우, ibc swap history에 추가하는 대신 skip swap history를 추가한다.
                       );
 
                       return await new InExtensionMessageRequester().sendMessage(
@@ -962,31 +963,85 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   },
                 },
                 {
-                  onBroadcasted: () => {
-                    if (
-                      !chainStore.isEnabledChain(
-                        ibcSwapConfigs.amountConfig.outChainId
-                      )
-                    ) {
-                      chainStore.enableChainInfoInUI(
-                        ibcSwapConfigs.amountConfig.outChainId
+                  onBroadcasted: (txHash) => {
+                    if (isInterchainSwap) {
+                      const msg = new RecordTxWithSkipSwapMsg(
+                        inChainId,
+                        outChainId,
+                        {
+                          chainId: outChainId,
+                          denom: outCurrency.coinMinimalDenom,
+                          expectedAmount: ibcSwapConfigs.amountConfig.outAmount
+                            .toDec()
+                            .toString(),
+                        },
+                        simpleRoute,
+                        ibcSwapConfigs.senderConfig.sender,
+                        [
+                          ...ibcSwapConfigs.amountConfig.amount.map(
+                            (amount) => {
+                              return {
+                                amount: DecUtils.getTenExponentN(
+                                  amount.currency.coinDecimals
+                                )
+                                  .mul(amount.toDec())
+                                  .toString(),
+                                denom: amount.currency.coinMinimalDenom,
+                              };
+                            }
+                          ),
+                          {
+                            amount: DecUtils.getTenExponentN(
+                              ibcSwapConfigs.amountConfig.outAmount.currency
+                                .coinDecimals
+                            )
+                              .mul(
+                                ibcSwapConfigs.amountConfig.outAmount.toDec()
+                              )
+                              .toString(),
+                            denom:
+                              ibcSwapConfigs.amountConfig.outAmount.currency
+                                .coinMinimalDenom,
+                          },
+                        ],
+                        {
+                          currencies:
+                            chainStore.getChain(outChainId).currencies,
+                        },
+                        routeDurationSeconds ?? 0,
+                        Buffer.from(txHash).toString("hex")
                       );
 
-                      if (keyRingStore.selectedKeyInfo) {
-                        const outChainInfo = chainStore.getChain(
+                      new InExtensionMessageRequester().sendMessage(
+                        BACKGROUND_PORT,
+                        msg
+                      );
+
+                      if (
+                        !chainStore.isEnabledChain(
+                          ibcSwapConfigs.amountConfig.outChainId
+                        )
+                      ) {
+                        chainStore.enableChainInfoInUI(
                           ibcSwapConfigs.amountConfig.outChainId
                         );
-                        if (
-                          keyRingStore.needKeyCoinTypeFinalize(
-                            keyRingStore.selectedKeyInfo.id,
-                            outChainInfo
-                          )
-                        ) {
-                          keyRingStore.finalizeKeyCoinType(
-                            keyRingStore.selectedKeyInfo.id,
-                            outChainInfo.chainId,
-                            outChainInfo.bip44.coinType
+
+                        if (keyRingStore.selectedKeyInfo) {
+                          const outChainInfo = chainStore.getChain(
+                            ibcSwapConfigs.amountConfig.outChainId
                           );
+                          if (
+                            keyRingStore.needKeyCoinTypeFinalize(
+                              keyRingStore.selectedKeyInfo.id,
+                              outChainInfo
+                            )
+                          ) {
+                            keyRingStore.finalizeKeyCoinType(
+                              keyRingStore.selectedKeyInfo.id,
+                              outChainInfo.chainId,
+                              outChainInfo.bip44.coinType
+                            );
+                          }
                         }
                       }
                     }
@@ -1116,6 +1171,43 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       );
                       return;
                     }
+
+                    if (isInterchainSwap) {
+                      setTimeout(() => {
+                        // no wait
+                        simpleFetch<any>(
+                          "https://api.skip.build/",
+                          "/v2/tx/track",
+                          {
+                            method: "POST",
+                            headers: {
+                              "content-type": "application/json",
+                              ...(() => {
+                                const res: { authorization?: string } = {};
+                                if (process.env["SKIP_API_KEY"]) {
+                                  res.authorization =
+                                    process.env["SKIP_API_KEY"];
+                                }
+                                return res;
+                              })(),
+                            },
+                            body: JSON.stringify({
+                              tx_hash: tx.hash,
+                              chain_id: inChainId,
+                            }),
+                          }
+                        )
+                          .then((result) => {
+                            console.log(
+                              `Skip tx track result: ${JSON.stringify(result)}`
+                            );
+                          })
+                          .catch((e) => {
+                            console.log(e);
+                          });
+                      }, 2000);
+                    }
+
                     notification.show(
                       "success",
                       intl.formatMessage({
