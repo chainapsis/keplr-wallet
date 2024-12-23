@@ -877,7 +877,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                         mode,
                         false,
                         ibcSwapConfigs.senderConfig.sender,
-                        accountStore.getAccount(outChainId).bech32Address,
+                        chainStore.isEvmOnlyChain(outChainId)
+                          ? accountStore.getAccount(outChainId)
+                              .ethereumHexAddress
+                          : accountStore.getAccount(outChainId).bech32Address,
                         ibcSwapConfigs.amountConfig.amount.map((amount) => {
                           return {
                             amount: DecUtils.getTenExponentN(
