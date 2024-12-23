@@ -957,7 +957,7 @@ const SkipHistoryViewItem: FunctionComponent<{
 
               return intl.formatMessage(
                 {
-                  id: "page.main.components.ibc-history-view.ibc-swap.succeed.paragraph",
+                  id: "page.main.components.ibc-history-view.ibc-swap.succeed.paragraph", // TODO: Change the content
                 },
                 {
                   assets: destinationDenom,
@@ -965,8 +965,8 @@ const SkipHistoryViewItem: FunctionComponent<{
               );
             }
 
-            // bridge, swap 등으로 경로가 길어져서 자산 정보가 2개 이상인 경우가 많음.
-            // 따라서 첫 번째 자산 정보만 보여줌.
+            // skip history의 amount에는 [sourceChain의 amount, destinationChain의 expected amount]가 들어있으므로
+            // 첫 번째 amount를 사용
             const assets = (() => {
               const amount = history.amount[0];
               const currency = sourceChain.forceFindCurrency(amount.denom);
@@ -1023,8 +1023,7 @@ const SkipHistoryViewItem: FunctionComponent<{
 
               return chainIds.map((chainId, i) => {
                 const chainInfo = chainStore.getChain(chainId);
-                const completed =
-                  !!history.trackDone && i <= history.routeIndex;
+                const completed = !!history.trackDone || i < history.routeIndex;
                 const error = !!history.trackError && i === failedRouteIndex;
 
                 return (
@@ -1046,11 +1045,7 @@ const SkipHistoryViewItem: FunctionComponent<{
                         return true;
                       }
 
-                      if (!history.trackDone) {
-                        return false;
-                      }
-
-                      return i - 1 === history.routeIndex;
+                      return i === history.routeIndex;
                     })()}
                     arrowDirection={(() => {
                       if (!failedRoute) {
@@ -1089,33 +1084,34 @@ const SkipHistoryViewItem: FunctionComponent<{
                   history.trackError &&
                   transferAssetRelease
                 ) {
-                  const isOnlyEvm = chainStore.hasChain(
-                    `eip155:${transferAssetRelease.chain_id}`
-                  );
-                  const releasedChain = chainStore.getChain(
-                    isOnlyEvm
-                      ? `eip155:${transferAssetRelease.chain_id}`
-                      : transferAssetRelease.chain_id
-                  );
-                  const destinationDenom = (() => {
-                    const currency = releasedChain.forceFindCurrency(
-                      transferAssetRelease.denom
-                    );
-
-                    if (
-                      "originCurrency" in currency &&
-                      currency.originCurrency
-                    ) {
-                      return currency.originCurrency.coinDenom;
-                    }
-
-                    return currency.coinDenom;
-                  })();
                   // 자산이 성공적으로 반환된 경우
-                  if (transferAssetRelease.released) {
+                  if (transferAssetRelease && transferAssetRelease.released) {
+                    const isOnlyEvm = chainStore.hasChain(
+                      `eip155:${transferAssetRelease.chain_id}`
+                    );
+                    const releasedChain = chainStore.getChain(
+                      isOnlyEvm
+                        ? `eip155:${transferAssetRelease.chain_id}`
+                        : transferAssetRelease.chain_id
+                    );
+                    const destinationDenom = (() => {
+                      const currency = releasedChain.forceFindCurrency(
+                        transferAssetRelease.denom
+                      );
+
+                      if (
+                        "originCurrency" in currency &&
+                        currency.originCurrency
+                      ) {
+                        return currency.originCurrency.coinDenom;
+                      }
+
+                      return currency.coinDenom;
+                    })();
+
                     return intl.formatMessage(
                       {
-                        id: "page.main.components.ibc-history-view.ibc-swap.failed.after-swap.complete",
+                        id: "page.main.components.ibc-history-view.ibc-swap.failed.after-swap.complete", // TODO: Change the content
                       },
                       {
                         chain: releasedChain.chainName,
@@ -1123,17 +1119,6 @@ const SkipHistoryViewItem: FunctionComponent<{
                       }
                     );
                   }
-
-                  // 자산이 반환되지 않은 경우
-                  return intl.formatMessage(
-                    {
-                      id: "page.main.components.ibc-history-view.ibc-swap.failed.after-swap.complete",
-                    },
-                    {
-                      chain: releasedChain.chainName,
-                      assets: destinationDenom,
-                    }
-                  );
                 }
 
                 return completedAnyways
