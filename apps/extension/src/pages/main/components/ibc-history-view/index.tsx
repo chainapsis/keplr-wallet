@@ -144,7 +144,7 @@ export const IbcHistoryView: FunctionComponent<{
 
                 if (lastRoute.isOnlyEvm) {
                   queriesStore
-                    .get(`eip155:${lastRoute.chainId}`)
+                    .get(lastRoute.chainId)
                     .queryBalances.getQueryEthereumHexAddress(
                       newComplete.simpleRoute[newComplete.routeIndex].receiver
                     )
@@ -203,8 +203,6 @@ export const IbcHistoryView: FunctionComponent<{
     }
     return false;
   });
-
-  console.log(histories, skipHistories);
 
   if (isNotReady) {
     return null;
@@ -790,14 +788,16 @@ const SkipHistoryViewItem: FunctionComponent<{
   const theme = useTheme();
   const intl = useIntl();
 
-  const isIBCSwap = "swapType" in history;
-
   const historyCompleted = (() => {
     if (!history.trackDone) {
       return false;
     }
 
     if (history.trackError) {
+      if (history.transferAssetRelease) {
+        return history.transferAssetRelease.released;
+      }
+
       return false;
     }
 
@@ -898,14 +898,10 @@ const SkipHistoryViewItem: FunctionComponent<{
 
               return !historyCompleted
                 ? intl.formatMessage({
-                    id: isIBCSwap
-                      ? "page.main.components.ibc-history-view.ibc-swap.item.pending"
-                      : "page.main.components.ibc-history-view.item.pending",
+                    id: "page.main.components.ibc-history-view.ibc-swap.item.pending",
                   })
                 : intl.formatMessage({
-                    id: isIBCSwap
-                      ? "page.main.components.ibc-history-view.ibc-swap.item.succeed"
-                      : "page.main.components.ibc-history-view.item.succeed",
+                    id: "page.main.components.ibc-history-view.ibc-swap.item.succeed",
                   });
             })()}
           </Subtitle4>
@@ -945,15 +941,18 @@ const SkipHistoryViewItem: FunctionComponent<{
         >
           {(() => {
             const sourceChain = chainStore.getChain(history.chainId);
-            // const destinationChain = chainStore.getChain(
-            //   history.destinationChainId
-            // );
 
             if (historyCompleted && failedRouteIndex < 0) {
-              // const chainId = history.destinationChainId;
-              // const chainInfo = chainStore.getChain(chainId);
-              const assets = (() => {
-                return "Unknown";
+              const destinationDenom = (() => {
+                const currency = chainStore
+                  .getChain(history.destinationAsset.chainId)
+                  .forceFindCurrency(history.destinationAsset.denom);
+
+                if ("originCurrency" in currency && currency.originCurrency) {
+                  return currency.originCurrency.coinDenom;
+                }
+
+                return currency.coinDenom;
               })();
 
               return intl.formatMessage(
@@ -961,24 +960,37 @@ const SkipHistoryViewItem: FunctionComponent<{
                   id: "page.main.components.ibc-history-view.ibc-swap.succeed.paragraph",
                 },
                 {
-                  assets,
+                  assets: destinationDenom,
                 }
               );
             }
 
-            const assets = history.amount
-              .map((amount) => {
-                const currency = sourceChain.forceFindCurrency(amount.denom);
-                const pretty = new CoinPretty(currency, amount.amount);
-                return pretty
-                  .hideIBCMetadata(true)
-                  .shrink(true)
-                  .maxDecimals(6)
-                  .inequalitySymbol(true)
-                  .trim(true)
-                  .toString();
-              })
-              .join(", ");
+            // bridge, swap 등으로 경로가 길어져서 자산 정보가 2개 이상인 경우가 많음.
+            // 따라서 첫 번째 자산 정보만 보여줌.
+            const assets = (() => {
+              const amount = history.amount[0];
+              const currency = sourceChain.forceFindCurrency(amount.denom);
+              const pretty = new CoinPretty(currency, amount.amount);
+              return pretty
+                .hideIBCMetadata(true)
+                .shrink(true)
+                .maxDecimals(6)
+                .inequalitySymbol(true)
+                .trim(true)
+                .toString();
+            })();
+
+            const destinationDenom = (() => {
+              const currency = chainStore
+                .getChain(history.destinationAsset.chainId)
+                .forceFindCurrency(history.destinationAsset.denom);
+
+              if ("originCurrency" in currency && currency.originCurrency) {
+                return currency.originCurrency.coinDenom;
+              }
+
+              return currency.coinDenom;
+            })();
 
             return intl.formatMessage(
               {
@@ -986,17 +998,7 @@ const SkipHistoryViewItem: FunctionComponent<{
               },
               {
                 assets,
-                destinationDenom: (() => {
-                  const currency = chainStore
-                    .getChain(history.destinationAsset.chainId)
-                    .forceFindCurrency(history.destinationAsset.denom);
-
-                  if ("originCurrency" in currency && currency.originCurrency) {
-                    return currency.originCurrency.coinDenom;
-                  }
-
-                  return currency.coinDenom;
-                })(),
+                destinationDenom,
               }
             );
           })()}
@@ -1023,7 +1025,7 @@ const SkipHistoryViewItem: FunctionComponent<{
                 const chainInfo = chainStore.getChain(chainId);
                 const completed =
                   !!history.trackDone && i <= history.routeIndex;
-                const error = !!history.trackError;
+                const error = !!history.trackError && i === failedRouteIndex;
 
                 return (
                   // 일부분 순환하는 경우도 이론적으로 가능은 하기 때문에 chain id를 key로 사용하지 않음.
@@ -1077,27 +1079,64 @@ const SkipHistoryViewItem: FunctionComponent<{
           >
             <FormattedMessage
               id={(() => {
-                const complete = !failedRoute;
+                const completedAnyways =
+                  history.trackStatus?.includes("COMPLETED");
+                const transferAssetRelease = history.transferAssetRelease;
 
+                // status tracking이 오류로 끝난 경우
                 if (
                   history.trackDone &&
                   history.trackError &&
-                  history.transferAssetRelease
+                  transferAssetRelease
                 ) {
+                  const isOnlyEvm = chainStore.hasChain(
+                    `eip155:${transferAssetRelease.chain_id}`
+                  );
+                  const releasedChain = chainStore.getChain(
+                    isOnlyEvm
+                      ? `eip155:${transferAssetRelease.chain_id}`
+                      : transferAssetRelease.chain_id
+                  );
+                  const destinationDenom = (() => {
+                    const currency = releasedChain.forceFindCurrency(
+                      transferAssetRelease.denom
+                    );
+
+                    if (
+                      "originCurrency" in currency &&
+                      currency.originCurrency
+                    ) {
+                      return currency.originCurrency.coinDenom;
+                    }
+
+                    return currency.coinDenom;
+                  })();
+                  // 자산이 성공적으로 반환된 경우
+                  if (transferAssetRelease.released) {
+                    return intl.formatMessage(
+                      {
+                        id: "page.main.components.ibc-history-view.ibc-swap.failed.after-swap.complete",
+                      },
+                      {
+                        chain: releasedChain.chainName,
+                        assets: destinationDenom,
+                      }
+                    );
+                  }
+
+                  // 자산이 반환되지 않은 경우
                   return intl.formatMessage(
                     {
                       id: "page.main.components.ibc-history-view.ibc-swap.failed.after-swap.complete",
                     },
                     {
-                      chain: chainStore.getChain(
-                        history.transferAssetRelease.chain_id
-                      ).chainName,
-                      assets: "Unknown",
+                      chain: releasedChain.chainName,
+                      assets: destinationDenom,
                     }
                   );
                 }
 
-                return complete
+                return completedAnyways
                   ? "page.main.components.ibc-history-view.ibc-swap.failed.complete"
                   : "page.main.components.ibc-history-view.ibc-swap.failed.in-progress";
               })()}
@@ -1105,28 +1144,7 @@ const SkipHistoryViewItem: FunctionComponent<{
           </Caption1>
         </VerticalCollapseTransition>
 
-        <VerticalCollapseTransition
-          collapsed={(() => {
-            if (historyCompleted) {
-              return true;
-            }
-
-            if (failedRouteIndex >= 0) {
-              // if (
-              //   !history.ibcHistory
-              //     .slice(0, failedChannelIndex + 1)
-              //     .some((h) => !h.rewound) ||
-              //   history.ibcHistory
-              //     .slice(0, failedChannelIndex + 1)
-              //     .some((h) => h.rewoundButNextRewindingBlocked)
-              // ) {
-              //   return true;
-              // }
-            }
-
-            return false;
-          })()}
-        >
+        <VerticalCollapseTransition collapsed={false}>
           <Gutter size="1rem" />
           <Box
             height="1px"
@@ -1163,7 +1181,14 @@ const SkipHistoryViewItem: FunctionComponent<{
               <FormattedMessage
                 id="page.main.components.ibc-history-view.estimated-duration.value"
                 values={{
-                  minutes: history.routeDurationSeconds / 60,
+                  minutes: (() => {
+                    const minutes = Math.floor(
+                      history.routeDurationSeconds / 60
+                    );
+                    const seconds = history.routeDurationSeconds % 60;
+
+                    return minutes + Math.ceil(seconds / 60);
+                  })(),
                 }}
               />
             </Body2>
@@ -1180,9 +1205,7 @@ const SkipHistoryViewItem: FunctionComponent<{
           >
             <FormattedMessage
               id={
-                isIBCSwap
-                  ? "page.main.components.ibc-history-view.ibc-swap.help.can-close-extension"
-                  : "page.main.components.ibc-history-view.help.can-close-extension"
+                "page.main.components.ibc-history-view.ibc-swap.help.can-close-extension"
               }
             />
           </Caption2>
