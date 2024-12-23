@@ -5,7 +5,7 @@ order: 3
 
 ## How to detect Keplr
 Keplr API may be undefined right after the webpage shown.
-Please check the [How to detect Keplr](./README.md#how-to-detect-keplr) first before reading this section.
+Please check the [How to detect Keplr](./02-basic-api.md#how-to-detect-keplr) first before reading this section.
 
 ## Connecting with SecretJS
 
@@ -59,4 +59,4 @@ Returns the viewing key of a SNIP-20 token registered in Keplr.
 If the SNIP-20 of the contract address doesn't exist, it will throw an error.
 
 ### Interaction Options
-You can use Keplr native API’s to set interaction options even when using SecretJS. Please refer to [this section](./#interaction-options).
+You can use Keplr native API’s to set interaction options even when using SecretJS. Please refer to [this section](./02-basic-api.md#interaction-options).

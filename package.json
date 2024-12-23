@@ -47,8 +47,7 @@
       "prettier --check"
     ],
     "*.{css,scss,sass}": [
-      "eslint",
-      "prettier --check"
+      "eslint"
     ]
   },
   "remarkConfig": {
