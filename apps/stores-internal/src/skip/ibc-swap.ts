@@ -1,5 +1,5 @@
 import { HasMapStore, IChainInfoImpl } from "@keplr-wallet/stores";
-import { AppCurrency, Currency } from "@keplr-wallet/types";
+import { AppCurrency, Currency, ERC20Currency } from "@keplr-wallet/types";
 import { ObservableQueryAssets } from "./assets";
 import { computed, makeObservable } from "mobx";
 import { ObservableQueryChains } from "./chains";
@@ -457,7 +457,8 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
             // 현재 CW20같은 얘들은 처리할 수 없다.
             if (
               !("type" in currency) ||
-              ("type" in currency && currency.type === "erc20")
+              ("type" in currency &&
+                (currency as ERC20Currency).type === "erc20")
             ) {
               // if currency is not ibc currency
               const inner = getMap(chainId);

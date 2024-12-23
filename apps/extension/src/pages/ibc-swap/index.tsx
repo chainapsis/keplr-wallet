@@ -1266,12 +1266,13 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       });
                     if (txReceipt.status === EthTxStatus.Success) {
                       if (erc20ApprovalTx) {
-                        delete tx.requiredErc20Approvals;
+                        delete (tx as UnsignedEVMTransactionWithErc20Approvals)
+                          .requiredErc20Approvals;
                         ethereumAccount.setIsSendingTx(true);
                         ethereumAccount.sendEthereumTx(
                           sender,
                           {
-                            ...tx,
+                            ...(tx as UnsignedEVMTransactionWithErc20Approvals),
                             ...secondTxFeeObject,
                           },
                           {
