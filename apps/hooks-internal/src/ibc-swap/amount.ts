@@ -20,7 +20,7 @@ import {
 } from "@keplr-wallet/stores-internal";
 import {
   EthereumAccountStore,
-  UnsignedEVMTransaction,
+  UnsignedEVMTransactionWithErc20Approvals,
 } from "@keplr-wallet/stores-eth";
 
 export class IBCSwapAmountConfig extends AmountConfig {
@@ -141,9 +141,9 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
   async getTx(
     slippageTolerancePercent: number,
-    affiliateFeeReceiver: string,
+    affiliateFeeReceiver: string | undefined,
     priorOutAmount?: Int
-  ): Promise<MakeTxResponse | UnsignedEVMTransaction> {
+  ): Promise<MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals> {
     const queryIBCSwap = this.getQueryIBCSwap();
     if (!queryIBCSwap) {
       throw new Error("Query IBC Swap is not initialized");
@@ -311,8 +311,8 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
   getTxIfReady(
     slippageTolerancePercent: number,
-    affiliateFeeReceiver: string
-  ): MakeTxResponse | UnsignedEVMTransaction | undefined {
+    affiliateFeeReceiver?: string
+  ): MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals | undefined {
     if (!this.currency) {
       return;
     }
@@ -459,6 +459,15 @@ export class IBCSwapAmountConfig extends AmountConfig {
     } else if (msg.type === "evmTx") {
       const ethereumAccount = this.ethereumAccountStore.getAccount(msg.chainId);
       const tx = ethereumAccount.makeTx(msg.to, msg.value, msg.data);
+      return {
+        ...tx,
+        requiredErc20Approvals: msg.requiredErc20Approvals,
+      };
+    } else if (msg.type === "MsgCCTP") {
+      const tx = sourceAccount.cosmos.makeCCTPTx(
+        msg.msgs[0].msg,
+        msg.msgs[1].msg
+      );
       return tx;
     }
   }
@@ -469,8 +478,16 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
     for (const operation of response.operations) {
       if ("swap" in operation) {
-        for (const swapOperation of operation.swap.swap_in.swap_operations) {
-          key += `/${swapOperation.pool}/${swapOperation.denom_in}/${swapOperation.denom_out}`;
+        if (operation.swap.swap_in) {
+          for (const swapOperation of operation.swap.swap_in.swap_operations) {
+            key += `/${swapOperation.pool}/${swapOperation.denom_in}/${swapOperation.denom_out}`;
+          }
+        } else if (operation.swap.smart_swap_in) {
+          for (const swapRoute of operation.swap.smart_swap_in.swap_routes) {
+            for (const swapOperation of swapRoute.swap_operations) {
+              key += `/${swapOperation.pool}/${swapOperation.denom_in}/${swapOperation.denom_out}`;
+            }
+          }
         }
       }
     }
@@ -484,13 +501,13 @@ export class IBCSwapAmountConfig extends AmountConfig {
   ): string {
     let key = "";
 
-    for (const msg of response.msgs) {
-      if (msg.multi_chain_msg) {
+    for (const msg of response.txs) {
+      if (msg.cosmos_tx) {
+        const cosmosMsg = msg.cosmos_tx.msgs[0];
         if (
-          msg.multi_chain_msg.msg_type_url ===
-          "/ibc.applications.transfer.v1.MsgTransfer"
+          cosmosMsg.msg_type_url === "/ibc.applications.transfer.v1.MsgTransfer"
         ) {
-          const memo = JSON.parse(msg.multi_chain_msg.msg).memo;
+          const memo = JSON.parse(cosmosMsg.msg).memo;
           if (memo) {
             const obj = JSON.parse(memo);
             const wasms: any = [];
@@ -542,11 +559,8 @@ export class IBCSwapAmountConfig extends AmountConfig {
             }
           }
         }
-        if (
-          msg.multi_chain_msg.msg_type_url ===
-          "/cosmwasm.wasm.v1.MsgExecuteContract"
-        ) {
-          const obj = JSON.parse(msg.multi_chain_msg.msg);
+        if (cosmosMsg.msg_type_url === "/cosmwasm.wasm.v1.MsgExecuteContract") {
+          const obj = JSON.parse(cosmosMsg.msg);
           for (const operation of obj.msg.swap_and_action.user_swap
             .swap_exact_asset_in.operations) {
             key += `/${operation.pool}/${operation.denom_in}/${operation.denom_out}`;

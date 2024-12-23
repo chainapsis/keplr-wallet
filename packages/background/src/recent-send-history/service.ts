@@ -204,10 +204,16 @@ export class RecentSendHistoryService {
 
     const destinationChainInfo =
       this.chainsService.getChainInfoOrThrow(destinationChainId);
-    Bech32Address.validate(
-      recipient,
-      destinationChainInfo.bech32Config?.bech32PrefixAccAddr
-    );
+    if (recipient.startsWith("0x")) {
+      if (!recipient.match(/^0x[0-9A-Fa-f]*$/) || recipient.length !== 42) {
+        throw new Error("Recipient address is not valid hex address");
+      }
+    } else {
+      Bech32Address.validate(
+        recipient,
+        destinationChainInfo.bech32Config?.bech32PrefixAccAddr
+      );
+    }
 
     const txHash = await this.txService.sendTx(sourceChainId, tx, mode, {
       silent,
