@@ -222,22 +222,7 @@ export class CosmosAccountImpl {
       return this.makeTx(
         "send",
         {
-          aminoMsgs: [
-            isThorchain
-              ? {
-                  ...msg,
-                  value: {
-                    ...msg.value,
-                    from_address: Buffer.from(
-                      Bech32Address.fromBech32(msg.value.from_address).address
-                    ).toString("base64"),
-                    to_address: Buffer.from(
-                      Bech32Address.fromBech32(msg.value.to_address).address
-                    ).toString("base64"),
-                  },
-                }
-              : msg,
-          ],
+          aminoMsgs: [msg],
           protoMsgs: [
             {
               typeUrl: isThorchain
