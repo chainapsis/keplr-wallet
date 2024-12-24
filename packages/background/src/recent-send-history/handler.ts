@@ -221,6 +221,7 @@ const handleRecordTxWithSkipSwapMsg: (
       msg.destinationAsset,
       msg.simpleRoute,
       msg.sender,
+      msg.recipient,
       msg.amount,
       msg.notificationInfo,
       msg.routeDurationSeconds,

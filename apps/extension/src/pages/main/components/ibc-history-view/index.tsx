@@ -954,24 +954,38 @@ const SkipHistoryViewItem: FunctionComponent<{
             const sourceChain = chainStore.getChain(history.chainId);
 
             if (historyCompleted && failedRouteIndex < 0) {
-              const destinationDenom = (() => {
-                const currency = chainStore
-                  .getChain(history.destinationAsset.chainId)
-                  .forceFindCurrency(history.destinationAsset.denom);
-
-                if ("originCurrency" in currency && currency.originCurrency) {
-                  return currency.originCurrency.coinDenom;
+              const destinationAssets = (() => {
+                if (!history.resAmount[0]) {
+                  return chainStore
+                    .getChain(history.destinationAsset.chainId)
+                    .forceFindCurrency(history.destinationAsset.denom)
+                    .coinDenom;
                 }
 
-                return currency.coinDenom;
+                return history.resAmount[0]
+                  .map((amount) => {
+                    return new CoinPretty(
+                      chainStore
+                        .getChain(history.destinationAsset.chainId)
+                        .forceFindCurrency(amount.denom),
+                      amount.amount
+                    )
+                      .hideIBCMetadata(true)
+                      .shrink(true)
+                      .maxDecimals(6)
+                      .inequalitySymbol(true)
+                      .trim(true)
+                      .toString();
+                  })
+                  .join(", ");
               })();
 
               return intl.formatMessage(
                 {
-                  id: "page.main.components.ibc-history-view.ibc-swap.succeed.paragraph", // TODO: Change the content
+                  id: "page.main.components.ibc-history-view.ibc-swap.succeed.paragraph",
                 },
                 {
-                  assets: destinationDenom,
+                  assets: destinationAssets,
                 }
               );
             }

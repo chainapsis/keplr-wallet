@@ -100,6 +100,7 @@ export type SkipHistory = {
   destinationChainId: string;
   timestamp: number;
   sender: string;
+  recipient: string;
 
   amount: {
     amount: string;

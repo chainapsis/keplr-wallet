@@ -22,6 +22,7 @@ export class RecordTxWithSkipSwapMsg extends Message<string> {
       receiver: string;
     }[],
     public readonly sender: string,
+    public readonly recipient: string,
 
     // amount 대신 amountIn, amountOut을 사용하도록 변경
 
@@ -53,6 +54,10 @@ export class RecordTxWithSkipSwapMsg extends Message<string> {
 
     if (!this.sender) {
       throw new Error("sender is empty");
+    }
+
+    if (!this.recipient) {
+      throw new Error("recipient is empty");
     }
   }
 

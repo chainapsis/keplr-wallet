@@ -17,10 +17,11 @@ import {
 import { KVStore, retry } from "@keplr-wallet/common";
 import { IBCHistory, RecentSendHistory, SkipHistory } from "./types";
 import { Buffer } from "buffer/";
-import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
+import { AppCurrency, ChainInfo, EthTxReceipt } from "@keplr-wallet/types";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { StatusRequest, TxStatusResponse } from "./temp-skip-types";
+import { id } from "@ethersproject/hash";
 
 export class RecentSendHistoryService {
   // Key: {chain_identifier}/{type}
@@ -1136,6 +1137,7 @@ export class RecentSendHistoryService {
       receiver: string;
     }[],
     sender: string,
+    recipient: string,
     amount: {
       amount: string;
       denom: string;
@@ -1155,6 +1157,7 @@ export class RecentSendHistoryService {
       destinationAsset,
       simpleRoute,
       sender,
+      recipient,
       amount,
       notificationInfo,
       routeDurationSeconds: routeDurationSeconds,
@@ -1218,8 +1221,16 @@ export class RecentSendHistoryService {
             () => {
               resolve();
             },
-            // eslint-disable-next-line @typescript-eslint/no-empty-function
-            () => {},
+            () => {
+              // reject if ws closed before fulfilled
+              // 하지만 로직상 fulfill 되기 전에 ws가 닫히는게 되기 때문에
+              // delay를 좀 준다.
+              // 현재 trackIBCPacketForwardingRecursiveInternal에 ws close 이후에는 동기적인 로직밖에 없으므로
+              // 문제될게 없다.
+              setTimeout(() => {
+                reject();
+              }, 500);
+            },
             () => {
               reject();
             }
@@ -1237,7 +1248,7 @@ export class RecentSendHistoryService {
   protected trackSkipSwapRecursiveInternal = (
     id: string,
     onFulfill: () => void,
-    _onClose: () => void,
+    onClose: () => void,
     onError: () => void
   ): void => {
     const history = this.getRecentSkipHistory(id);
@@ -1340,170 +1351,191 @@ export class RecentSendHistoryService {
         const transfer = transfer_sequence[nextBlockingTransferIndex];
 
         // -------------------------
-        // 어떤 타입의 transfer인지 확인하여 targetChainId / errorMsg 결정 (if-else 체인)
+        // 어떤 타입의 transfer인지 확인하여 targetChainId / errorMsg / receiveTxHash 결정 (if-else 체인)
         // -------------------------
         let targetChainId: string | undefined;
+        let receiveTxHash: string | undefined;
 
-        if ("ibc_transfer" in transfer) {
-          const {
-            state: ibcState,
-            from_chain_id,
-            to_chain_id,
-            packet_txs,
-          } = transfer.ibc_transfer;
-          switch (ibcState) {
-            case "TRANSFER_UNKNOWN":
-              targetChainId = from_chain_id;
-              errorMsg =
-                packet_txs.error?.message ?? "Unknown IBC transfer error";
-              break;
-            case "TRANSFER_FAILURE":
-              targetChainId = to_chain_id;
-              errorMsg = packet_txs.error?.message ?? "IBC transfer failed";
-              break;
-            case "TRANSFER_PENDING":
-            case "TRANSFER_RECEIVED":
-              targetChainId = from_chain_id;
-              break;
-            case "TRANSFER_SUCCESS":
-              targetChainId = to_chain_id;
-              break;
+        if (transfer) {
+          if ("ibc_transfer" in transfer) {
+            const {
+              state: ibcState,
+              from_chain_id,
+              to_chain_id,
+              packet_txs,
+            } = transfer.ibc_transfer;
+            switch (ibcState) {
+              case "TRANSFER_UNKNOWN":
+                targetChainId = from_chain_id;
+                errorMsg =
+                  packet_txs.error?.message ?? "Unknown IBC transfer error";
+                break;
+              case "TRANSFER_FAILURE":
+                targetChainId = to_chain_id;
+                errorMsg = packet_txs.error?.message ?? "IBC transfer failed";
+                break;
+              case "TRANSFER_PENDING":
+              case "TRANSFER_RECEIVED":
+                targetChainId = from_chain_id;
+                break;
+              case "TRANSFER_SUCCESS":
+                targetChainId = to_chain_id;
+                receiveTxHash = packet_txs.receive_tx?.tx_hash;
+                break;
+            }
+          } else if ("axelar_transfer" in transfer) {
+            const {
+              state: axelarState,
+              from_chain_id,
+              to_chain_id,
+            } = transfer.axelar_transfer;
+            switch (axelarState) {
+              case "AXELAR_TRANSFER_UNKNOWN":
+                targetChainId = from_chain_id;
+                errorMsg = "Unknown Axelar transfer error";
+                break;
+              case "AXELAR_TRANSFER_FAILURE":
+                targetChainId = to_chain_id;
+                errorMsg = "Axelar transfer failed";
+                break;
+              case "AXELAR_TRANSFER_PENDING_CONFIRMATION":
+              case "AXELAR_TRANSFER_PENDING_RECEIPT":
+                targetChainId = to_chain_id;
+                break;
+              case "AXELAR_TRANSFER_SUCCESS":
+                targetChainId = to_chain_id;
+                receiveTxHash =
+                  "contract_call_with_token_txs" in transfer.axelar_transfer.txs
+                    ? transfer.axelar_transfer.txs.contract_call_with_token_txs
+                        .execute_tx?.tx_hash
+                    : transfer.axelar_transfer.txs.send_token_txs.execute_tx
+                        ?.tx_hash;
+                break;
+            }
+          } else if ("cctp_transfer" in transfer) {
+            const {
+              state: cctpState,
+              from_chain_id,
+              to_chain_id,
+            } = transfer.cctp_transfer;
+            switch (cctpState) {
+              case "CCTP_TRANSFER_UNKNOWN":
+                targetChainId = from_chain_id;
+                errorMsg = "Unknown CCTP transfer error";
+                break;
+              case "CCTP_TRANSFER_SENT":
+                targetChainId = from_chain_id;
+                break;
+              case "CCTP_TRANSFER_CONFIRMED":
+              case "CCTP_TRANSFER_PENDING_CONFIRMATION":
+                targetChainId = to_chain_id;
+                break;
+              case "CCTP_TRANSFER_RECEIVED":
+                targetChainId = to_chain_id;
+                receiveTxHash = transfer.cctp_transfer.txs.receive_tx?.tx_hash;
+                break;
+            }
+          } else if ("hyperlane_transfer" in transfer) {
+            const {
+              state: hyperState,
+              from_chain_id,
+              to_chain_id,
+            } = transfer.hyperlane_transfer;
+            switch (hyperState) {
+              case "HYPERLANE_TRANSFER_UNKNOWN":
+                targetChainId = from_chain_id;
+                errorMsg = "Unknown Hyperlane transfer error";
+                break;
+              case "HYPERLANE_TRANSFER_FAILED":
+                targetChainId = to_chain_id;
+                errorMsg = "Hyperlane transfer failed";
+                break;
+              case "HYPERLANE_TRANSFER_SENT":
+                targetChainId = from_chain_id;
+                break;
+              case "HYPERLANE_TRANSFER_RECEIVED":
+                targetChainId = to_chain_id;
+                receiveTxHash =
+                  transfer.hyperlane_transfer.txs.receive_tx?.tx_hash;
+                break;
+            }
+          } else if ("op_init_transfer" in transfer) {
+            const {
+              state: opState,
+              from_chain_id,
+              to_chain_id,
+            } = transfer.op_init_transfer;
+            switch (opState) {
+              case "OPINIT_TRANSFER_UNKNOWN":
+                targetChainId = from_chain_id;
+                errorMsg = "Unknown OP_INIT transfer error";
+                break;
+              case "OPINIT_TRANSFER_RECEIVED":
+                targetChainId = from_chain_id;
+                break;
+              case "OPINIT_TRANSFER_SENT":
+                targetChainId = to_chain_id;
+                break;
+            }
+          } else if ("go_fast_transfer" in transfer) {
+            const {
+              state: gofastState,
+              from_chain_id,
+              to_chain_id,
+            } = transfer.go_fast_transfer;
+            switch (gofastState) {
+              case "GO_FAST_TRANSFER_UNKNOWN":
+                targetChainId = from_chain_id;
+                errorMsg = "Unknown GoFast transfer error";
+                break;
+              case "GO_FAST_TRANSFER_SENT":
+                targetChainId = from_chain_id;
+                break;
+              case "GO_FAST_TRANSFER_TIMEOUT":
+                targetChainId = from_chain_id;
+                errorMsg = "GoFast transfer timeout";
+                break;
+              case "GO_FAST_POST_ACTION_FAILED":
+                targetChainId = from_chain_id;
+                errorMsg = "GoFast post action failed";
+                break;
+              case "GO_FAST_TRANSFER_REFUNDED":
+                targetChainId = to_chain_id;
+                errorMsg = "GoFast transfer refunded";
+                break;
+              case "GO_FAST_TRANSFER_FILLED":
+                targetChainId = to_chain_id;
+                receiveTxHash =
+                  transfer.go_fast_transfer.txs.order_filled_tx?.tx_hash;
+                break;
+            }
+          } else if (transfer.stargate_transfer) {
+            const {
+              state: sgState,
+              from_chain_id,
+              to_chain_id,
+            } = transfer.stargate_transfer;
+            switch (sgState) {
+              case "STARGATE_TRANSFER_UNKNOWN":
+                targetChainId = from_chain_id;
+                errorMsg = "Unknown Stargate transfer error";
+                break;
+              case "STARGATE_TRANSFER_FAILED":
+                targetChainId = to_chain_id;
+                errorMsg = "Stargate transfer failed";
+                break;
+              case "STARGATE_TRANSFER_SENT":
+                targetChainId = from_chain_id;
+                break;
+              case "STARGATE_TRANSFER_RECEIVED":
+                targetChainId = to_chain_id;
+                break;
+            }
           }
-        } else if ("axelar_transfer" in transfer) {
-          const {
-            state: axelarState,
-            from_chain_id,
-            to_chain_id,
-          } = transfer.axelar_transfer;
-          switch (axelarState) {
-            case "AXELAR_TRANSFER_UNKNOWN":
-              targetChainId = from_chain_id;
-              errorMsg = "Unknown Axelar transfer error";
-              break;
-            case "AXELAR_TRANSFER_FAILURE":
-              targetChainId = to_chain_id;
-              errorMsg = "Axelar transfer failed";
-              break;
-            case "AXELAR_TRANSFER_PENDING_CONFIRMATION":
-            case "AXELAR_TRANSFER_PENDING_RECEIPT":
-              targetChainId = from_chain_id;
-              break;
-            case "AXELAR_TRANSFER_SUCCESS":
-              targetChainId = to_chain_id;
-              break;
-          }
-        } else if ("cctp_transfer" in transfer) {
-          const {
-            state: cctpState,
-            from_chain_id,
-            to_chain_id,
-          } = transfer.cctp_transfer;
-          switch (cctpState) {
-            case "CCTP_TRANSFER_UNKNOWN":
-              targetChainId = from_chain_id;
-              errorMsg = "Unknown CCTP transfer error";
-              break;
-            case "CCTP_TRANSFER_CONFIRMED":
-            case "CCTP_TRANSFER_PENDING_CONFIRMATION":
-            case "CCTP_TRANSFER_SENT":
-              targetChainId = from_chain_id;
-              break;
-            case "CCTP_TRANSFER_RECEIVED":
-              targetChainId = to_chain_id;
-              break;
-          }
-        } else if ("hyperlane_transfer" in transfer) {
-          const {
-            state: hyperState,
-            from_chain_id,
-            to_chain_id,
-          } = transfer.hyperlane_transfer;
-          switch (hyperState) {
-            case "HYPERLANE_TRANSFER_UNKNOWN":
-              targetChainId = from_chain_id;
-              errorMsg = "Unknown Hyperlane transfer error";
-              break;
-            case "HYPERLANE_TRANSFER_FAILED":
-              targetChainId = to_chain_id;
-              errorMsg = "Hyperlane transfer failed";
-              break;
-            case "HYPERLANE_TRANSFER_SENT":
-              targetChainId = from_chain_id;
-              break;
-            case "HYPERLANE_TRANSFER_RECEIVED":
-              targetChainId = to_chain_id;
-              break;
-          }
-        } else if ("op_init_transfer" in transfer) {
-          const {
-            state: opState,
-            from_chain_id,
-            to_chain_id,
-          } = transfer.op_init_transfer;
-          switch (opState) {
-            case "OPINIT_TRANSFER_UNKNOWN":
-              targetChainId = from_chain_id;
-              errorMsg = "Unknown OP_INIT transfer error";
-              break;
-            case "OPINIT_TRANSFER_RECEIVED":
-              targetChainId = from_chain_id;
-              break;
-            case "OPINIT_TRANSFER_SENT":
-              targetChainId = to_chain_id;
-              break;
-          }
-        } else if ("go_fast_transfer" in transfer) {
-          const {
-            state: gofastState,
-            from_chain_id,
-            to_chain_id,
-          } = transfer.go_fast_transfer;
-          switch (gofastState) {
-            case "GO_FAST_TRANSFER_UNKNOWN":
-              targetChainId = from_chain_id;
-              errorMsg = "Unknown GoFast transfer error";
-              break;
-            case "GO_FAST_TRANSFER_SENT":
-              targetChainId = from_chain_id;
-              break;
-            case "GO_FAST_TRANSFER_TIMEOUT":
-              targetChainId = from_chain_id;
-              errorMsg = "GoFast transfer timeout";
-              break;
-            case "GO_FAST_POST_ACTION_FAILED":
-              targetChainId = from_chain_id;
-              errorMsg = "GoFast post action failed";
-              break;
-            case "GO_FAST_TRANSFER_REFUNDED":
-              targetChainId = to_chain_id;
-              errorMsg = "GoFast transfer refunded";
-              break;
-            case "GO_FAST_TRANSFER_FILLED":
-              targetChainId = to_chain_id;
-              break;
-          }
-        } else if (transfer.stargate_transfer) {
-          const {
-            state: sgState,
-            from_chain_id,
-            to_chain_id,
-          } = transfer.stargate_transfer;
-          switch (sgState) {
-            case "STARGATE_TRANSFER_UNKNOWN":
-              targetChainId = from_chain_id;
-              errorMsg = "Unknown Stargate transfer error";
-              break;
-            case "STARGATE_TRANSFER_FAILED":
-              targetChainId = to_chain_id;
-              errorMsg = "Stargate transfer failed";
-              break;
-            case "STARGATE_TRANSFER_SENT":
-              targetChainId = from_chain_id;
-              break;
-            case "STARGATE_TRANSFER_RECEIVED":
-              targetChainId = to_chain_id;
-              break;
-          }
+        } else {
+          // 아마 EVM 체인 위에서만 발생하는 경우 transfer가 없는 것으로 처리되는 것 같음
+          targetChainId = history.destinationChainId;
+          receiveTxHash = history.txHash;
         }
 
         // -------------------------
@@ -1544,9 +1576,17 @@ export class RecentSendHistoryService {
               history.routeIndex = simpleRoute.length - 1;
             }
 
-            // TODO: destination asset이 얼마나 transfer되었는지 확인
-
-            onFulfill();
+            if (receiveTxHash) {
+              this.trackDestinationAssetAmount(
+                id,
+                receiveTxHash,
+                onFulfill,
+                onClose,
+                onError
+              );
+            } else {
+              onFulfill();
+            }
             break;
 
           case "STATE_PENDING":
@@ -1561,6 +1601,140 @@ export class RecentSendHistoryService {
         onError();
       });
   };
+
+  protected trackDestinationAssetAmount(
+    historyId: string,
+    txHash: string,
+    onFullfill: () => void,
+    onClose: () => void,
+    onError: () => void
+  ) {
+    const history = this.getRecentSkipHistory(historyId);
+    if (!history) {
+      onFullfill();
+      return;
+    }
+
+    const chainInfo = this.chainsService.getChainInfo(
+      history.destinationChainId
+    );
+    if (!chainInfo) {
+      onFullfill();
+      return;
+    }
+
+    if (this.chainsService.isEvmChain(history.destinationChainId)) {
+      const evmInfo = chainInfo.evm;
+      if (!evmInfo) {
+        onFullfill();
+        return;
+      }
+
+      simpleFetch<{
+        result: EthTxReceipt | null;
+        error?: Error;
+      }>(evmInfo.rpc, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "request-source": origin,
+        },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method: "eth_getTransactionReceipt",
+          params: [txHash],
+          id: 1,
+        }),
+      })
+        .then((res) => {
+          const txReceipt = res.data.result;
+          if (txReceipt) {
+            const logs = txReceipt.logs;
+            const transferTopic = id("Transfer(address,address,uint256)");
+            const withdrawTopic = id("Withdrawal(address,uint256)");
+            const hyperlaneReceiveTopic = id(
+              "ReceivedTransferRemote(uint32,bytes32,uint256)"
+            );
+            for (const log of logs) {
+              if (log.topics[0] === transferTopic) {
+                const to = "0x" + log.topics[2].slice(26);
+                if (to.toLowerCase() === history.recipient.toLowerCase()) {
+                  const amount = BigInt(log.data).toString(10);
+                  history.resAmount.push([
+                    {
+                      amount,
+                      denom: history.destinationAsset.denom,
+                    },
+                  ]);
+
+                  return;
+                }
+              } else if (log.topics[0] === withdrawTopic) {
+                const to = "0x" + log.topics[1].slice(26);
+                if (to.toLowerCase() === txReceipt.to.toLowerCase()) {
+                  const amount = BigInt(log.data).toString(10);
+                  history.resAmount.push([
+                    { amount, denom: history.destinationAsset.denom },
+                  ]);
+                  return;
+                }
+              } else if (log.topics[0] === hyperlaneReceiveTopic) {
+                const to = "0x" + log.topics[2].slice(26);
+                if (to.toLowerCase() === history.recipient.toLowerCase()) {
+                  const amount = BigInt(log.data).toString(10);
+                  // Hyperlane을 통해 Forma로 TIA를 받는 경우 토큰 수량이 decimal 6으로 기록되는데,
+                  // Forma에서는 decimal 18이기 때문에 12자리 만큼 0을 붙여준다.
+                  history.resAmount.push([
+                    {
+                      amount:
+                        history.destinationAsset.denom === "forma-native"
+                          ? `${amount}000000000000`
+                          : amount,
+                      denom: history.destinationAsset.denom,
+                    },
+                  ]);
+                  return;
+                }
+              }
+            }
+          }
+        })
+        .finally(() => {
+          onFullfill();
+        });
+    } else {
+      const txTracer = new TendermintTxTracer(chainInfo.rpc, "/websocket");
+      txTracer.addEventListener("close", onClose);
+      txTracer.addEventListener("error", onError);
+      txTracer
+        .queryTx({
+          "tx.hash": txHash,
+        })
+        .then((res: any) => {
+          txTracer.close();
+
+          if (!res) {
+            return;
+          }
+
+          const txs = res.txs
+            ? res.txs.map((res: any) => res.tx_result || res)
+            : [res.tx_result || res];
+          for (const tx of txs) {
+            const resAmount = this.getIBCSwapResAmountFromTx(
+              tx,
+              history.recipient
+            );
+
+            history.resAmount.push(resAmount);
+            return;
+          }
+        })
+        .finally(() => {
+          onFullfill();
+        });
+    }
+  }
 
   @action
   removeRecentSkipHistory(id: string): boolean {
