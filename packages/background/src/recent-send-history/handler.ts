@@ -16,6 +16,12 @@ import {
   ClearAllIBCHistoryMsg,
 } from "./messages";
 import { RecentSendHistoryService } from "./service";
+import {
+  ClearAllSkipHistoryMsg,
+  GetSkipHistoriesMsg,
+  RecordTxWithSkipSwapMsg,
+  RemoveSkipHistoryMsg,
+} from "./temp-skip-message";
 
 export const getHandler: (service: RecentSendHistoryService) => Handler = (
   service: RecentSendHistoryService
@@ -61,6 +67,26 @@ export const getHandler: (service: RecentSendHistoryService) => Handler = (
         return handleClearAllIBCHistoryMsg(service)(
           env,
           msg as ClearAllIBCHistoryMsg
+        );
+      case RecordTxWithSkipSwapMsg:
+        return handleRecordTxWithSkipSwapMsg(service)(
+          env,
+          msg as RecordTxWithSkipSwapMsg
+        );
+      case GetSkipHistoriesMsg:
+        return handleGetSkipHistoriesMsg(service)(
+          env,
+          msg as GetSkipHistoriesMsg
+        );
+      case RemoveSkipHistoryMsg:
+        return handleRemoveSkipHistoryMsg(service)(
+          env,
+          msg as RemoveSkipHistoryMsg
+        );
+      case ClearAllSkipHistoryMsg:
+        return handleClearAllSkipHistoryMsg(service)(
+          env,
+          msg as ClearAllSkipHistoryMsg
         );
       default:
         throw new KeplrError("tx", 110, "Unknown msg type");
@@ -182,5 +208,49 @@ const handleClearAllIBCHistoryMsg: (
 ) => InternalHandler<ClearAllIBCHistoryMsg> = (service) => {
   return () => {
     service.clearAllRecentIBCHistory();
+  };
+};
+
+const handleRecordTxWithSkipSwapMsg: (
+  service: RecentSendHistoryService
+) => InternalHandler<RecordTxWithSkipSwapMsg> = (service) => {
+  return async (_env, msg) => {
+    return service.recordTxWithSkipSwap(
+      msg.sourceChainId,
+      msg.destinationChainId,
+      msg.destinationAsset,
+      msg.simpleRoute,
+      msg.sender,
+      msg.recipient,
+      msg.amount,
+      msg.notificationInfo,
+      msg.routeDurationSeconds,
+      msg.txHash
+    );
+  };
+};
+
+const handleGetSkipHistoriesMsg: (
+  service: RecentSendHistoryService
+) => InternalHandler<GetSkipHistoriesMsg> = (service) => {
+  return (_env, _msg) => {
+    return service.getRecentSkipHistories();
+  };
+};
+
+const handleRemoveSkipHistoryMsg: (
+  service: RecentSendHistoryService
+) => InternalHandler<RemoveSkipHistoryMsg> = (service) => {
+  return async (_env, msg) => {
+    service.removeRecentSkipHistory(msg.id);
+    return service.getRecentSkipHistories();
+  };
+};
+
+const handleClearAllSkipHistoryMsg: (
+  service: RecentSendHistoryService
+) => InternalHandler<ClearAllSkipHistoryMsg> = (service) => {
+  return (_env, _msg) => {
+    service.clearAllRecentSkipHistory();
   };
 };

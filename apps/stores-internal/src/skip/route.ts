@@ -211,12 +211,19 @@ const Schema = Joi.object<RouteResponse>({
   chain_ids: Joi.array().items(Joi.string()).required(),
   does_swap: Joi.boolean(),
   estimated_amount_out: Joi.string(),
+  swap_price_impact_percent: Joi.string(),
   swap_venue: Joi.object({
     name: Joi.string().required(),
     chain_id: Joi.string().required(),
   }).unknown(true),
-  swap_price_impact_percent: Joi.string(),
+  swap_venues: Joi.array().items(
+    Joi.object({
+      name: Joi.string().required(),
+      chain_id: Joi.string().required(),
+    }).unknown(true)
+  ),
   txs_required: Joi.number().required(),
+  estimated_route_duration_seconds: Joi.number(),
 }).unknown(true);
 
 export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
@@ -283,6 +290,7 @@ export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
       fee: string;
       venueChainId: string;
     }[] = [];
+
     for (const operation of this.response.data.operations) {
       if ("swap" in operation) {
         const swapIn = operation.swap.swap_in ?? operation.swap.smart_swap_in;

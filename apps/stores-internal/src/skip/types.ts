@@ -249,6 +249,7 @@ export interface RouteResponse {
     chain_id: string;
   }[];
   txs_required: number;
+  estimated_route_duration_seconds: number;
 }
 
 export interface ChainsResponse {
