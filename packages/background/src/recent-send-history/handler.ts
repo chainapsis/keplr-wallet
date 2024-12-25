@@ -119,7 +119,7 @@ const handleSendTxAndRecordMsg: (
       {
         currencies: [],
       },
-      msg.isSkipTrack
+      msg.shouldLegacyTrack
     );
   };
 };
@@ -179,7 +179,7 @@ const handleSendTxAndRecordWithIBCSwapMsg: (
       msg.swapChannelIndex,
       msg.swapReceiver,
       msg.notificationInfo,
-      msg.isSkipTrack
+      msg.shouldLegacyTrack
     );
   };
 };

@@ -199,7 +199,7 @@ export class RecentSendHistoryService {
     notificationInfo: {
       currencies: AppCurrency[];
     },
-    isSkipTrack: boolean = false
+    shouldLegacyTrack: boolean = false
   ): Promise<Uint8Array> {
     const sourceChainInfo =
       this.chainsService.getChainInfoOrThrow(sourceChainId);
@@ -234,7 +234,7 @@ export class RecentSendHistoryService {
           });
 
           if (tx.hash) {
-            if (isSkipTrack) {
+            if (shouldLegacyTrack) {
               // no wait
               setTimeout(() => {
                 simpleFetch<any>("https://api.skip.build/", "/v2/tx/track", {
@@ -317,7 +317,7 @@ export class RecentSendHistoryService {
     notificationInfo: {
       currencies: AppCurrency[];
     },
-    isSkipTrack: boolean = false
+    shouldLegacyTrack: boolean = false
   ): Promise<Uint8Array> {
     const sourceChainInfo =
       this.chainsService.getChainInfoOrThrow(sourceChainId);
@@ -333,7 +333,7 @@ export class RecentSendHistoryService {
       onFulfill: (tx) => {
         if (tx.code == null || tx.code === 0) {
           if (tx.hash) {
-            if (isSkipTrack) {
+            if (shouldLegacyTrack) {
               setTimeout(() => {
                 // no wait
                 simpleFetch<any>("https://api.skip.build/", "/v2/tx/track", {
@@ -369,7 +369,7 @@ export class RecentSendHistoryService {
       },
     });
 
-    if (isSkipTrack) {
+    if (shouldLegacyTrack) {
       const id = this.addRecentIBCSwapHistory(
         swapType,
         sourceChainId,
@@ -1128,6 +1128,7 @@ export class RecentSendHistoryService {
   }
 
   // skip related methods
+  @action
   recordTxWithSkipSwap(
     sourceChainId: string,
     destinationChainId: string,
@@ -1226,16 +1227,8 @@ export class RecentSendHistoryService {
             () => {
               resolve();
             },
-            () => {
-              // reject if ws closed before fulfilled
-              // 하지만 로직상 fulfill 되기 전에 ws가 닫히는게 되기 때문에
-              // delay를 좀 준다.
-              // 현재 trackIBCPacketForwardingRecursiveInternal에 ws close 이후에는 동기적인 로직밖에 없으므로
-              // 문제될게 없다.
-              setTimeout(() => {
-                reject();
-              }, 500);
-            },
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
+            () => {},
             () => {
               reject();
             }

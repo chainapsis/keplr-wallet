@@ -799,67 +799,43 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
               // 일단은 체인 id를 keplr에서 사용하는 형태로 바꿔야 한다.
               for (const chainId of queryRoute.response.data.chain_ids) {
-                const isOnlyEvm = chainStore.hasChain(`eip155:${chainId}`);
-                if (!isOnlyEvm && !chainStore.hasChain(chainId)) {
-                  throw new Error("Chain not found");
+                const isOnlyEvm = parseInt(chainId) > 0;
+                const receiverAccount = accountStore.getAccount(
+                  isOnlyEvm ? `eip155:${chainId}` : chainId
+                );
+                if (receiverAccount.walletStatus !== WalletStatus.Loaded) {
+                  await receiverAccount.init();
                 }
 
-                if (isOnlyEvm) {
-                  const receiverAccount = accountStore.getAccount(
-                    `eip155:${chainId}`
-                  );
-
-                  const ethereumHexAddress =
-                    receiverAccount.hasEthereumHexAddress
-                      ? receiverAccount.ethereumHexAddress
-                      : undefined;
-
-                  if (!ethereumHexAddress) {
-                    throw new Error("ethereumHexAddress is undefined");
-                  }
-
-                  simpleRoute.push({
-                    isOnlyEvm,
-                    chainId: `eip155:${chainId}`,
-                    receiver: ethereumHexAddress,
-                  });
-                } else {
-                  const receiverAccount = accountStore.getAccount(chainId);
-
-                  if (receiverAccount.walletStatus !== WalletStatus.Loaded) {
-                    await receiverAccount.init();
-                  }
-
-                  if (!receiverAccount.bech32Address) {
-                    const receiverChainInfo =
-                      chainStore.hasChain(chainId) &&
-                      chainStore.getChain(chainId);
-                    if (
-                      receiverAccount.isNanoLedger &&
-                      receiverChainInfo &&
-                      (receiverChainInfo.bip44.coinType === 60 ||
-                        receiverChainInfo.features.includes(
-                          "eth-address-gen"
-                        ) ||
-                        receiverChainInfo.features.includes("eth-key-sign") ||
-                        receiverChainInfo.evm != null)
-                    ) {
-                      throw new Error(
-                        "Please connect Ethereum app on Ledger with Keplr to get the address"
-                      );
-                    }
-
+                if (isOnlyEvm && !receiverAccount.ethereumHexAddress) {
+                  const receiverChainInfo =
+                    chainStore.hasChain(chainId) &&
+                    chainStore.getChain(chainId);
+                  if (
+                    receiverAccount.isNanoLedger &&
+                    receiverChainInfo &&
+                    (receiverChainInfo.bip44.coinType === 60 ||
+                      receiverChainInfo.features.includes("eth-address-gen") ||
+                      receiverChainInfo.features.includes("eth-key-sign") ||
+                      receiverChainInfo.evm != null)
+                  ) {
                     throw new Error(
-                      "receiverAccount.bech32Address is undefined"
+                      "Please connect Ethereum app on Ledger with Keplr to get the address"
                     );
                   }
 
-                  simpleRoute.push({
-                    isOnlyEvm,
-                    chainId,
-                    receiver: receiverAccount.bech32Address,
-                  });
+                  throw new Error(
+                    "receiverAccount.ethereumHexAddress is undefined"
+                  );
                 }
+
+                simpleRoute.push({
+                  isOnlyEvm,
+                  chainId,
+                  receiver: isOnlyEvm
+                    ? receiverAccount.ethereumHexAddress
+                    : receiverAccount.bech32Address,
+                });
               }
             } else {
               // 브릿지를 사용하지 않는 경우, 자세한 ibc swap channel 정보를 보여준다.

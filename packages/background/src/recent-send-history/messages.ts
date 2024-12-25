@@ -106,7 +106,7 @@ export class SendTxAndRecordMsg extends Message<Uint8Array> {
       readonly denom: string;
     }[],
     public readonly memo: string,
-    public readonly isSkipTrack: boolean = false
+    public readonly shouldLegacyTrack: boolean = false
   ) {
     super();
   }
@@ -288,7 +288,7 @@ export class SendTxAndRecordWithIBCSwapMsg extends Message<Uint8Array> {
     public readonly notificationInfo: {
       currencies: AppCurrency[];
     },
-    public readonly isSkipTrack: boolean = false
+    public readonly shouldLegacyTrack: boolean = false
   ) {
     super();
   }
