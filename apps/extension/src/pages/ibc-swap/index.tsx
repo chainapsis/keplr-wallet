@@ -42,6 +42,8 @@ import { MakeTxResponse, WalletStatus } from "@keplr-wallet/stores";
 import { autorun } from "mobx";
 import {
   LogAnalyticsEventMsg,
+  RecordTxWithSkipSwapMsg,
+  RemoveSkipHistoryMsg,
   SendTxAndRecordMsg,
   SendTxAndRecordWithIBCSwapMsg,
 } from "@keplr-wallet/background";
@@ -55,10 +57,6 @@ import { TextButtonProps } from "../../components/button-text";
 import { UnsignedEVMTransactionWithErc20Approvals } from "@keplr-wallet/stores-eth";
 import { EthTxStatus } from "@keplr-wallet/types";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
-import {
-  RecordTxWithSkipSwapMsg,
-  RemoveSkipHistoryMsg,
-} from "@keplr-wallet/background/build/recent-send-history/temp-skip-message";
 
 const TextButtonStyles = {
   Container: styled.div`

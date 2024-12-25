@@ -8,16 +8,14 @@ import {
   GetIBCHistoriesMsg,
   RemoveIBCHistoryMsg,
   ClearAllIBCHistoryMsg,
+  ClearAllSkipHistoryMsg,
+  RecordTxWithSkipSwapMsg,
+  GetSkipHistoriesMsg,
+  RemoveSkipHistoryMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
 import { RecentSendHistoryService } from "./service";
-import {
-  ClearAllSkipHistoryMsg,
-  GetSkipHistoriesMsg,
-  RecordTxWithSkipSwapMsg,
-  RemoveSkipHistoryMsg,
-} from "./temp-skip-message";
 
 export function init(router: Router, service: RecentSendHistoryService): void {
   router.registerMessage(GetRecentSendHistoriesMsg);

@@ -2,8 +2,10 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import {
   GetIBCHistoriesMsg,
+  GetSkipHistoriesMsg,
   IBCHistory,
   RemoveIBCHistoryMsg,
+  RemoveSkipHistoryMsg,
   SkipHistory,
 } from "@keplr-wallet/background";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
@@ -36,10 +38,6 @@ import { useSpringValue, animated, easings } from "@react-spring/web";
 import { defaultSpringConfig } from "../../../../styles/spring";
 import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse";
 import { FormattedMessage, useIntl } from "react-intl";
-import {
-  GetSkipHistoriesMsg,
-  RemoveSkipHistoryMsg,
-} from "@keplr-wallet/background/build/recent-send-history/temp-skip-message";
 
 export const IbcHistoryView: FunctionComponent<{
   isNotReady: boolean;

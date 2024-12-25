@@ -14,14 +14,12 @@ import {
   GetIBCHistoriesMsg,
   RemoveIBCHistoryMsg,
   ClearAllIBCHistoryMsg,
+  GetSkipHistoriesMsg,
+  RemoveSkipHistoryMsg,
+  ClearAllSkipHistoryMsg,
+  RecordTxWithSkipSwapMsg,
 } from "./messages";
 import { RecentSendHistoryService } from "./service";
-import {
-  ClearAllSkipHistoryMsg,
-  GetSkipHistoriesMsg,
-  RecordTxWithSkipSwapMsg,
-  RemoveSkipHistoryMsg,
-} from "./temp-skip-message";
 
 export const getHandler: (service: RecentSendHistoryService) => Handler = (
   service: RecentSendHistoryService

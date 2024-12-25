@@ -15,12 +15,17 @@ import {
   toJS,
 } from "mobx";
 import { KVStore, retry } from "@keplr-wallet/common";
-import { IBCHistory, RecentSendHistory, SkipHistory } from "./types";
+import {
+  IBCHistory,
+  RecentSendHistory,
+  SkipHistory,
+  StatusRequest,
+  TxStatusResponse,
+} from "./types";
 import { Buffer } from "buffer/";
 import { AppCurrency, ChainInfo, EthTxReceipt } from "@keplr-wallet/types";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
-import { StatusRequest, TxStatusResponse } from "./temp-skip-types";
 import { id } from "@ethersproject/hash";
 
 export class RecentSendHistoryService {
