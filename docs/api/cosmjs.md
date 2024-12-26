@@ -9,7 +9,7 @@ Please check the [How to detect Keplr](./README.md#how-to-detect-keplr) first be
 
 ## Connecting with CosmJS
 
-CosmJS link: [https://www.npmjs.com/package/@cosmjs/launchpad](https://www.npmjs.com/package/@cosmjs/launchpad), [https://www.npmjs.com/package/@cosmjs/stargate](https://www.npmjs.com/package/@cosmjs/stargate)
+CosmJS links: [https://www.npmjs.com/package/@cosmjs/launchpad](https://www.npmjs.com/package/@cosmjs/launchpad), [https://www.npmjs.com/package/@cosmjs/stargate](https://www.npmjs.com/package/@cosmjs/stargate)
 
 You can connect Keplr to CosmJS using the `OfflineSigner`.
 
