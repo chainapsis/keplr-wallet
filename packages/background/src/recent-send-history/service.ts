@@ -15,11 +15,23 @@ import {
   toJS,
 } from "mobx";
 import { KVStore, retry } from "@keplr-wallet/common";
-import { IBCHistory, RecentSendHistory } from "./types";
+import {
+  IBCHistory,
+  RecentSendHistory,
+  SkipHistory,
+  StatusRequest,
+  TxStatusResponse,
+} from "./types";
 import { Buffer } from "buffer/";
-import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
+import {
+  AppCurrency,
+  ChainInfo,
+  EthTxReceipt,
+  EthTxStatus,
+} from "@keplr-wallet/types";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
+import { id } from "@ethersproject/hash";
 
 export class RecentSendHistoryService {
   // Key: {chain_identifier}/{type}
@@ -32,6 +44,12 @@ export class RecentSendHistoryService {
   // Key: id (sequence, it should be increased by 1 for each)
   @observable
   protected readonly recentIBCHistoryMap: Map<string, IBCHistory> = new Map();
+
+  @observable
+  protected recentSkipHistorySeq: number = 0;
+  // Key: id (sequence, it should be increased by 1 for each)
+  @observable
+  protected readonly recentSkipHistoryMap: Map<string, SkipHistory> = new Map();
 
   constructor(
     protected readonly kvStore: KVStore,
@@ -110,6 +128,55 @@ export class RecentSendHistoryService {
       this.trackIBCPacketForwardingRecursive(history.id);
     }
 
+    // Load skip history sequence from the storage
+    const recentSkipHistorySeqSaved = await this.kvStore.get<number>(
+      "recentSkipHistorySeq"
+    );
+
+    if (recentSkipHistorySeqSaved) {
+      // Set the loaded sequence to the observable
+      runInAction(() => {
+        this.recentSkipHistorySeq = recentSkipHistorySeqSaved;
+      });
+    }
+
+    // Save the sequence to the storage when the sequence is changed
+    autorun(() => {
+      const js = toJS(this.recentSkipHistorySeq);
+      this.kvStore.set<number>("recentSkipHistorySeq", js);
+    });
+
+    // Load skip history from the storage
+    const recentSkipHistoryMapSaved = await this.kvStore.get<
+      Record<string, SkipHistory>
+    >("recentSkipHistoryMap");
+    if (recentSkipHistoryMapSaved) {
+      runInAction(() => {
+        let entries = Object.entries(recentSkipHistoryMapSaved);
+        entries = entries.sort(([, a], [, b]) => {
+          return parseInt(a.id) - parseInt(b.id);
+        });
+        for (const [key, value] of entries) {
+          this.recentSkipHistoryMap.set(key, value);
+        }
+      });
+    }
+
+    // Save the skip history to the storage when the skip history is changed
+    autorun(() => {
+      const js = toJS(this.recentSkipHistoryMap);
+      const obj = Object.fromEntries(js);
+      this.kvStore.set<Record<string, SkipHistory>>(
+        "recentSkipHistoryMap",
+        obj
+      );
+    });
+
+    // Track the recent skip history
+    for (const history of this.getRecentSkipHistories()) {
+      this.trackSkipSwapRecursive(history.id);
+    }
+
     this.chainsService.addChainRemovedHandler(this.onChainRemoved);
   }
 
@@ -137,7 +204,7 @@ export class RecentSendHistoryService {
     notificationInfo: {
       currencies: AppCurrency[];
     },
-    isSkipTrack: boolean = false
+    shouldLegacyTrack: boolean = false
   ): Promise<Uint8Array> {
     const sourceChainInfo =
       this.chainsService.getChainInfoOrThrow(sourceChainId);
@@ -172,7 +239,7 @@ export class RecentSendHistoryService {
           });
 
           if (tx.hash) {
-            if (isSkipTrack) {
+            if (shouldLegacyTrack) {
               // no wait
               setTimeout(() => {
                 simpleFetch<any>("https://api.skip.build/", "/v2/tx/track", {
@@ -255,7 +322,7 @@ export class RecentSendHistoryService {
     notificationInfo: {
       currencies: AppCurrency[];
     },
-    isSkipTrack: boolean = false
+    shouldLegacyTrack: boolean = false
   ): Promise<Uint8Array> {
     const sourceChainInfo =
       this.chainsService.getChainInfoOrThrow(sourceChainId);
@@ -271,7 +338,7 @@ export class RecentSendHistoryService {
       onFulfill: (tx) => {
         if (tx.code == null || tx.code === 0) {
           if (tx.hash) {
-            if (isSkipTrack) {
+            if (shouldLegacyTrack) {
               setTimeout(() => {
                 // no wait
                 simpleFetch<any>("https://api.skip.build/", "/v2/tx/track", {
@@ -307,22 +374,24 @@ export class RecentSendHistoryService {
       },
     });
 
-    const id = this.addRecentIBCSwapHistory(
-      swapType,
-      sourceChainId,
-      destinationChainId,
-      sender,
-      amount,
-      memo,
-      ibcChannels,
-      destinationAsset,
-      swapChannelIndex,
-      swapReceiver,
-      notificationInfo,
-      txHash
-    );
+    if (shouldLegacyTrack) {
+      const id = this.addRecentIBCSwapHistory(
+        swapType,
+        sourceChainId,
+        destinationChainId,
+        sender,
+        amount,
+        memo,
+        ibcChannels,
+        destinationAsset,
+        swapChannelIndex,
+        swapReceiver,
+        notificationInfo,
+        txHash
+      );
 
-    this.trackIBCPacketForwardingRecursive(id);
+      this.trackIBCPacketForwardingRecursive(id);
+    }
 
     return txHash;
   }
@@ -541,6 +610,7 @@ export class RecentSendHistoryService {
         const txTracer = new TendermintTxTracer(chainInfo.rpc, "/websocket");
         txTracer.addEventListener("close", onClose);
         txTracer.addEventListener("error", onError);
+
         txTracer.traceTx(txHash).then((tx) => {
           txTracer.close();
 
@@ -1060,6 +1130,830 @@ export class RecentSendHistoryService {
   @action
   clearAllRecentIBCHistory(): void {
     this.recentIBCHistoryMap.clear();
+  }
+
+  // skip related methods
+  @action
+  recordTxWithSkipSwap(
+    sourceChainId: string,
+    destinationChainId: string,
+    destinationAsset: {
+      chainId: string;
+      denom: string;
+      expectedAmount: string;
+    },
+    simpleRoute: {
+      isOnlyEvm: boolean;
+      chainId: string;
+      receiver: string;
+    }[],
+    sender: string,
+    recipient: string,
+    amount: {
+      amount: string;
+      denom: string;
+    }[],
+    notificationInfo: {
+      currencies: AppCurrency[];
+    },
+    routeDurationSeconds: number = 0,
+    txHash: string
+  ): string {
+    const id = (this.recentIBCHistorySeq++).toString();
+
+    const history: SkipHistory = {
+      id,
+      chainId: sourceChainId,
+      destinationChainId: destinationChainId,
+      destinationAsset,
+      simpleRoute,
+      sender,
+      recipient,
+      amount,
+      notificationInfo,
+      routeDurationSeconds: routeDurationSeconds,
+      txHash,
+      routeIndex: -1,
+      resAmount: [],
+      timestamp: Date.now(),
+    };
+
+    this.recentSkipHistoryMap.set(id, history);
+    this.trackSkipSwapRecursive(id);
+
+    return id;
+  }
+
+  getRecentSkipHistory(id: string): SkipHistory | undefined {
+    return this.recentSkipHistoryMap.get(id);
+  }
+
+  getRecentSkipHistories(): SkipHistory[] {
+    return Array.from(this.recentSkipHistoryMap.values()).filter((history) => {
+      if (!this.chainsService.hasChainInfo(history.chainId)) {
+        return false;
+      }
+
+      if (!this.chainsService.hasChainInfo(history.destinationChainId)) {
+        return false;
+      }
+
+      if (
+        history.simpleRoute.some((route) => {
+          return !this.chainsService.hasChainInfo(route.chainId);
+        })
+      ) {
+        return false;
+      }
+
+      return true;
+    });
+  }
+
+  trackSkipSwapRecursive(id: string): void {
+    const history = this.getRecentSkipHistory(id);
+    if (!history) {
+      return;
+    }
+
+    // check tx fulfilled and update history
+    retry(
+      () => {
+        return new Promise<void>((txFulfilledResolve, txFulfilledReject) => {
+          this.checkAndTrackSkipSwapTxFulfilledRecursive(
+            history,
+            (keepTracking: boolean) => {
+              txFulfilledResolve();
+
+              if (!keepTracking) {
+                return;
+              }
+
+              const now = Date.now();
+              const expectedEndTimestamp =
+                history.timestamp + history.routeDurationSeconds * 1000;
+              const diff = expectedEndTimestamp - now;
+
+              const waitMsAfterError = 5 * 1000;
+              const maxRetries = diff > 0 ? diff / waitMsAfterError : 10;
+
+              retry(
+                () => {
+                  return new Promise<void>((resolve, reject) => {
+                    this.checkAndUpdateSkipSwapHistoryRecursive(
+                      id,
+                      resolve,
+                      reject
+                    );
+                  });
+                },
+                {
+                  maxRetries,
+                  waitMsAfterError,
+                  maxWaitMsAfterError: 30 * 1000, // 30sec
+                }
+              );
+            },
+            txFulfilledReject
+          );
+        });
+      },
+      {
+        maxRetries: 10,
+        waitMsAfterError: 500,
+        maxWaitMsAfterError: 4000,
+      }
+    );
+  }
+
+  protected checkAndTrackSkipSwapTxFulfilledRecursive = (
+    history: SkipHistory,
+    onFulfill: (keepTracking: boolean) => void,
+    onError: () => void
+  ): void => {
+    const chainInfo = this.chainsService.getChainInfo(history.chainId);
+    if (!chainInfo) {
+      onFulfill(false);
+      return;
+    }
+
+    if (this.chainsService.isEvmChain(history.chainId)) {
+      const evmInfo = chainInfo.evm;
+      if (!evmInfo) {
+        onFulfill(false);
+        return;
+      }
+
+      simpleFetch<{
+        result: EthTxReceipt | null;
+        error?: Error;
+      }>(evmInfo.rpc, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "request-source": origin,
+        },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method: "eth_getTransactionReceipt",
+          params: [history.txHash],
+          id: 1,
+        }),
+      })
+        .then((res) => {
+          const txReceipt = res.data.result;
+          if (txReceipt) {
+            if (txReceipt.status === EthTxStatus.Success) {
+              setTimeout(() => {
+                simpleFetch("https://api.skip.build/", "/v2/tx/track", {
+                  method: "POST",
+                  headers: {
+                    "content-type": "application/json",
+                    ...(() => {
+                      const res: {
+                        authorization?: string;
+                      } = {};
+                      if (process.env["SKIP_API_KEY"]) {
+                        res.authorization = process.env["SKIP_API_KEY"];
+                      }
+                      return res;
+                    })(),
+                  },
+                  body: JSON.stringify({
+                    tx_hash: history.txHash,
+                    chain_id: history.chainId.replace("eip155:", ""),
+                  }),
+                })
+                  .then((result) => {
+                    console.log(
+                      `Skip tx track result: ${JSON.stringify(result)}`
+                    );
+                    onFulfill(true);
+                  })
+                  .catch((e) => {
+                    console.log(e);
+                    this.removeRecentSkipHistory(history.id);
+                    onFulfill(false);
+                  });
+              }, 2000);
+            } else {
+              // tx가 실패한거면 종료
+              this.removeRecentSkipHistory(history.id);
+              onFulfill(false);
+            }
+          } else {
+            onError();
+          }
+        })
+        .catch(() => {
+          // 오류가 발생하면 종료
+          onFulfill(false);
+        });
+    } else {
+      const txTracer = new TendermintTxTracer(chainInfo.rpc, "/websocket");
+      txTracer.addEventListener("error", () => onFulfill(false));
+      txTracer
+        .traceTx({
+          "tx.hash": history.txHash,
+        })
+        .then((res: any) => {
+          txTracer.close();
+
+          if (Array.isArray(res.txs) && res.txs.length > 0) {
+            const tx = res.txs[0];
+            if (tx.tx_result.code === 0) {
+              setTimeout(() => {
+                simpleFetch("https://api.skip.build/", "/v2/tx/track", {
+                  method: "POST",
+                  headers: {
+                    "content-type": "application/json",
+                    ...(() => {
+                      const res: {
+                        authorization?: string;
+                      } = {};
+                      if (process.env["SKIP_API_KEY"]) {
+                        res.authorization = process.env["SKIP_API_KEY"];
+                      }
+                      return res;
+                    })(),
+                  },
+                  body: JSON.stringify({
+                    tx_hash: history.txHash,
+                    chain_id: history.chainId,
+                  }),
+                })
+                  .then((result) => {
+                    console.log(
+                      `Skip tx track result: ${JSON.stringify(result)}`
+                    );
+                    onFulfill(true);
+                  })
+                  .catch((e) => {
+                    console.log(e);
+                    this.removeRecentSkipHistory(history.id);
+                    onFulfill(false);
+                  });
+              }, 2000);
+            } else {
+              // tx가 실패한거면 종료
+              this.removeRecentSkipHistory(history.id);
+              onFulfill(false);
+            }
+          } else {
+            onError();
+          }
+        })
+        .catch(() => {
+          // 오류가 발생하면 종료
+          onFulfill(false);
+        });
+    }
+  };
+
+  protected checkAndUpdateSkipSwapHistoryRecursive = (
+    id: string,
+    onFulfill: () => void,
+    onError: () => void
+  ): void => {
+    const history = this.getRecentSkipHistory(id);
+    if (!history) {
+      onFulfill();
+      return;
+    }
+
+    const { txHash, chainId, trackStatus, trackDone, routeIndex, simpleRoute } =
+      history;
+
+    // 실행이 필요한지 판별
+    const needRun = (() => {
+      // 1) 상태가 COMPLETED인데 아직 다음 라우트가 남아 있는 경우
+      if (
+        trackStatus?.includes("COMPLETED") &&
+        routeIndex !== simpleRoute.length - 1
+      ) {
+        return true;
+      }
+      // 2) status가 없거나, track이 완료되지 않은 경우
+      if (!trackStatus || !trackDone) {
+        return true;
+      }
+      return false;
+    })();
+
+    // 더 이상 진행할 필요가 없다면 종료
+    if (!needRun) {
+      onFulfill();
+      return;
+    }
+
+    // Skip API에 보낼 request 정보
+    const request: StatusRequest = {
+      tx_hash: txHash,
+      chain_id: chainId.replace("eip155:", ""),
+    };
+    const requestParams = new URLSearchParams(request).toString();
+
+    simpleFetch<TxStatusResponse>(
+      "https://api.skip.build/",
+      `v2/tx/status?${requestParams}`,
+      {
+        method: "GET",
+        headers: {
+          "content-type": "application/json",
+          ...(() => {
+            const res: { authorization?: string } = {};
+            if (process.env["SKIP_API_KEY"]) {
+              res.authorization = process.env["SKIP_API_KEY"];
+            }
+            return res;
+          })(),
+        },
+      }
+    )
+      .then((res) => {
+        const {
+          state,
+          error,
+          transfer_sequence,
+          next_blocking_transfer,
+          transfer_asset_release,
+        } = res.data;
+
+        // 상태 갱신
+        history.trackStatus = state;
+
+        // 트래킹이 불확실하거나 미완료 상태에 해당하면 에러 처리 후 재시도
+        if (
+          [
+            "STATE_SUBMITTED",
+            "STATE_RECEIVED",
+            "STATE_COMPLETED",
+            "STATE_UNKNOWN",
+          ].includes(state)
+        ) {
+          onError();
+          return;
+        }
+
+        // 정상적인 트래킹 진행으로 가정
+        history.trackError = undefined;
+
+        const currentRouteIndex =
+          history.routeIndex < 0 ? 0 : history.routeIndex;
+        let nextRouteIndex = currentRouteIndex;
+        let errorMsg: string | undefined = error?.message;
+
+        // 언락된 자산 정보가 있으면 저장
+        if (transfer_asset_release) {
+          history.transferAssetRelease = transfer_asset_release;
+        }
+
+        // 다음 blocking transfer의 인덱스
+        const nextBlockingTransferIndex =
+          next_blocking_transfer?.transfer_sequence_index ??
+          transfer_sequence.length - 1;
+        const transfer = transfer_sequence[nextBlockingTransferIndex];
+
+        // -------------------------
+        // 어떤 타입의 transfer인지 확인하여 targetChainId / errorMsg / receiveTxHash 결정 (if-else 체인)
+        // -------------------------
+        let targetChainId: string | undefined;
+        let receiveTxHash: string | undefined;
+
+        if (transfer) {
+          if ("ibc_transfer" in transfer) {
+            const {
+              state: ibcState,
+              from_chain_id,
+              to_chain_id,
+              packet_txs,
+            } = transfer.ibc_transfer;
+            switch (ibcState) {
+              case "TRANSFER_UNKNOWN":
+                targetChainId = from_chain_id;
+                errorMsg =
+                  packet_txs.error?.message ?? "Unknown IBC transfer error";
+                break;
+              case "TRANSFER_FAILURE":
+                targetChainId = to_chain_id;
+                errorMsg = packet_txs.error?.message ?? "IBC transfer failed";
+                break;
+              case "TRANSFER_PENDING":
+              case "TRANSFER_RECEIVED":
+                targetChainId = from_chain_id;
+                break;
+              case "TRANSFER_SUCCESS":
+                targetChainId = to_chain_id;
+                receiveTxHash = packet_txs.receive_tx?.tx_hash;
+                break;
+            }
+          } else if ("axelar_transfer" in transfer) {
+            const {
+              state: axelarState,
+              from_chain_id,
+              to_chain_id,
+            } = transfer.axelar_transfer;
+            switch (axelarState) {
+              case "AXELAR_TRANSFER_UNKNOWN":
+                targetChainId = from_chain_id;
+                errorMsg = "Unknown Axelar transfer error";
+                break;
+              case "AXELAR_TRANSFER_FAILURE":
+                targetChainId = to_chain_id;
+                errorMsg = "Axelar transfer failed";
+                break;
+              case "AXELAR_TRANSFER_PENDING_CONFIRMATION":
+              case "AXELAR_TRANSFER_PENDING_RECEIPT":
+                targetChainId = to_chain_id;
+                break;
+              case "AXELAR_TRANSFER_SUCCESS":
+                targetChainId = to_chain_id;
+                receiveTxHash =
+                  "contract_call_with_token_txs" in transfer.axelar_transfer.txs
+                    ? transfer.axelar_transfer.txs.contract_call_with_token_txs
+                        .execute_tx?.tx_hash
+                    : transfer.axelar_transfer.txs.send_token_txs.execute_tx
+                        ?.tx_hash;
+                break;
+            }
+          } else if ("cctp_transfer" in transfer) {
+            const {
+              state: cctpState,
+              from_chain_id,
+              to_chain_id,
+            } = transfer.cctp_transfer;
+            switch (cctpState) {
+              case "CCTP_TRANSFER_UNKNOWN":
+                targetChainId = from_chain_id;
+                errorMsg = "Unknown CCTP transfer error";
+                break;
+              case "CCTP_TRANSFER_SENT":
+                targetChainId = from_chain_id;
+                break;
+              case "CCTP_TRANSFER_CONFIRMED":
+              case "CCTP_TRANSFER_PENDING_CONFIRMATION":
+                targetChainId = to_chain_id;
+                break;
+              case "CCTP_TRANSFER_RECEIVED":
+                targetChainId = to_chain_id;
+                receiveTxHash = transfer.cctp_transfer.txs.receive_tx?.tx_hash;
+                break;
+            }
+          } else if ("hyperlane_transfer" in transfer) {
+            const {
+              state: hyperState,
+              from_chain_id,
+              to_chain_id,
+            } = transfer.hyperlane_transfer;
+            switch (hyperState) {
+              case "HYPERLANE_TRANSFER_UNKNOWN":
+                targetChainId = from_chain_id;
+                errorMsg = "Unknown Hyperlane transfer error";
+                break;
+              case "HYPERLANE_TRANSFER_FAILED":
+                targetChainId = to_chain_id;
+                errorMsg = "Hyperlane transfer failed";
+                break;
+              case "HYPERLANE_TRANSFER_SENT":
+                targetChainId = from_chain_id;
+                break;
+              case "HYPERLANE_TRANSFER_RECEIVED":
+                targetChainId = to_chain_id;
+                receiveTxHash =
+                  transfer.hyperlane_transfer.txs.receive_tx?.tx_hash;
+                break;
+            }
+          } else if ("op_init_transfer" in transfer) {
+            const {
+              state: opState,
+              from_chain_id,
+              to_chain_id,
+            } = transfer.op_init_transfer;
+            switch (opState) {
+              case "OPINIT_TRANSFER_UNKNOWN":
+                targetChainId = from_chain_id;
+                errorMsg = "Unknown OP_INIT transfer error";
+                break;
+              case "OPINIT_TRANSFER_RECEIVED":
+                targetChainId = from_chain_id;
+                break;
+              case "OPINIT_TRANSFER_SENT":
+                targetChainId = to_chain_id;
+                break;
+            }
+          } else if ("go_fast_transfer" in transfer) {
+            const {
+              state: gofastState,
+              from_chain_id,
+              to_chain_id,
+            } = transfer.go_fast_transfer;
+            switch (gofastState) {
+              case "GO_FAST_TRANSFER_UNKNOWN":
+                targetChainId = from_chain_id;
+                errorMsg = "Unknown GoFast transfer error";
+                break;
+              case "GO_FAST_TRANSFER_SENT":
+                targetChainId = from_chain_id;
+                break;
+              case "GO_FAST_TRANSFER_TIMEOUT":
+                targetChainId = from_chain_id;
+                errorMsg = "GoFast transfer timeout";
+                break;
+              case "GO_FAST_POST_ACTION_FAILED":
+                targetChainId = from_chain_id;
+                errorMsg = "GoFast post action failed";
+                break;
+              case "GO_FAST_TRANSFER_REFUNDED":
+                targetChainId = to_chain_id;
+                errorMsg = "GoFast transfer refunded";
+                break;
+              case "GO_FAST_TRANSFER_FILLED":
+                targetChainId = to_chain_id;
+                receiveTxHash =
+                  transfer.go_fast_transfer.txs.order_filled_tx?.tx_hash;
+                break;
+            }
+          } else if (transfer.stargate_transfer) {
+            const {
+              state: sgState,
+              from_chain_id,
+              to_chain_id,
+            } = transfer.stargate_transfer;
+            switch (sgState) {
+              case "STARGATE_TRANSFER_UNKNOWN":
+                targetChainId = from_chain_id;
+                errorMsg = "Unknown Stargate transfer error";
+                break;
+              case "STARGATE_TRANSFER_FAILED":
+                targetChainId = to_chain_id;
+                errorMsg = "Stargate transfer failed";
+                break;
+              case "STARGATE_TRANSFER_SENT":
+                targetChainId = from_chain_id;
+                break;
+              case "STARGATE_TRANSFER_RECEIVED":
+                targetChainId = to_chain_id;
+                break;
+            }
+          }
+        } else {
+          // 아마 EVM 체인 위에서만 발생하는 경우 transfer가 없는 것으로 처리되는 것 같음
+          targetChainId = history.destinationChainId;
+          receiveTxHash = history.txHash;
+        }
+
+        // -------------------------
+        // 찾은 targetChainId로 다음 라우트 인덱스를 갱신
+        // -------------------------
+        if (targetChainId) {
+          for (let i = currentRouteIndex; i < simpleRoute.length; i++) {
+            const routeChain = simpleRoute[i].chainId.replace("eip155:", "");
+            if (
+              routeChain.toLocaleLowerCase() ===
+              targetChainId.toLocaleLowerCase()
+            ) {
+              nextRouteIndex = i;
+              break;
+            }
+          }
+
+          // 찾지못하더라도 optimistic하게 다음 트라이로 이동
+        }
+
+        // 에러 메시지 갱신
+        history.trackError = errorMsg;
+        // 최종 routeIndex 갱신
+        history.routeIndex = nextRouteIndex;
+
+        // state에 따라 트래킹 완료/재시도 결정
+        switch (state) {
+          case "STATE_ABANDONED":
+          case "STATE_COMPLETED_ERROR":
+          case "STATE_COMPLETED_SUCCESS":
+            history.trackDone = true;
+
+            // 성공 상태인데 라우트가 남았다면 마지막 라우트로 이동
+            if (
+              state === "STATE_COMPLETED_SUCCESS" &&
+              nextRouteIndex !== simpleRoute.length - 1
+            ) {
+              history.routeIndex = simpleRoute.length - 1;
+            }
+
+            if (receiveTxHash) {
+              this.trackDestinationAssetAmount(id, receiveTxHash, onFulfill);
+            } else {
+              onFulfill();
+            }
+            break;
+
+          case "STATE_PENDING":
+          case "STATE_PENDING_ERROR":
+            // 아직 트래킹 중이거나 에러 상태 전파 중 => 재시도
+            onError();
+            break;
+        }
+      })
+      .catch((e) => {
+        console.error(e);
+        onError();
+      });
+  };
+
+  protected trackDestinationAssetAmount(
+    historyId: string,
+    txHash: string,
+    onFulfill: () => void
+  ) {
+    const history = this.getRecentSkipHistory(historyId);
+    if (!history) {
+      onFulfill();
+      return;
+    }
+
+    const chainInfo = this.chainsService.getChainInfo(
+      history.destinationChainId
+    );
+    if (!chainInfo) {
+      onFulfill();
+      return;
+    }
+
+    if (this.chainsService.isEvmChain(history.destinationChainId)) {
+      const evmInfo = chainInfo.evm;
+      if (!evmInfo) {
+        onFulfill();
+        return;
+      }
+
+      simpleFetch<{
+        result: EthTxReceipt | null;
+        error?: Error;
+      }>(evmInfo.rpc, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "request-source": origin,
+        },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method: "eth_getTransactionReceipt",
+          params: [txHash],
+          id: 1,
+        }),
+      })
+        .then((res) => {
+          const txReceipt = res.data.result;
+          if (txReceipt) {
+            simpleFetch<{
+              result: any;
+              error?: Error;
+            }>(evmInfo.rpc, {
+              method: "POST",
+              headers: {
+                "content-type": "application/json",
+                "request-source": origin,
+              },
+              body: JSON.stringify({
+                jsonrpc: "2.0",
+                method: "debug_traceTransaction",
+                params: [txHash, { tracer: "callTracer" }],
+                id: 1,
+              }),
+            }).then((res) => {
+              let isFoundFromCall = false;
+              if (res.data.result) {
+                const searchForTransfers = (calls: any) => {
+                  for (const call of calls) {
+                    if (
+                      call.type === "CALL" &&
+                      call.to.toLowerCase() === history.recipient.toLowerCase()
+                    ) {
+                      const isERC20Transfer =
+                        call.input.startsWith("0xa9059cbb");
+                      const value = BigInt(
+                        isERC20Transfer
+                          ? `0x${call.input.substring(74)}`
+                          : call.value
+                      );
+
+                      history.resAmount.push([
+                        {
+                          amount: value.toString(10),
+                          denom: history.destinationAsset.denom,
+                        },
+                      ]);
+                      isFoundFromCall = true;
+                    }
+
+                    if (call.calls && call.calls.length > 0) {
+                      searchForTransfers(call.calls);
+                    }
+                  }
+                };
+
+                searchForTransfers(res.data.result.calls || []);
+              }
+
+              if (isFoundFromCall) {
+                return;
+              }
+
+              const logs = txReceipt.logs;
+              const transferTopic = id("Transfer(address,address,uint256)");
+              const withdrawTopic = id("Withdrawal(address,uint256)");
+              const hyperlaneReceiveTopic = id(
+                "ReceivedTransferRemote(uint32,bytes32,uint256)"
+              );
+              for (const log of logs) {
+                if (log.topics[0] === transferTopic) {
+                  const to = "0x" + log.topics[2].slice(26);
+                  if (to.toLowerCase() === history.recipient.toLowerCase()) {
+                    const amount = BigInt(log.data).toString(10);
+                    history.resAmount.push([
+                      {
+                        amount,
+                        denom: history.destinationAsset.denom,
+                      },
+                    ]);
+
+                    return;
+                  }
+                } else if (log.topics[0] === withdrawTopic) {
+                  const to = "0x" + log.topics[1].slice(26);
+                  if (to.toLowerCase() === txReceipt.to.toLowerCase()) {
+                    const amount = BigInt(log.data).toString(10);
+                    history.resAmount.push([
+                      { amount, denom: history.destinationAsset.denom },
+                    ]);
+                    return;
+                  }
+                } else if (log.topics[0] === hyperlaneReceiveTopic) {
+                  const to = "0x" + log.topics[2].slice(26);
+                  if (to.toLowerCase() === history.recipient.toLowerCase()) {
+                    const amount = BigInt(log.data).toString(10);
+                    // Hyperlane을 통해 Forma로 TIA를 받는 경우 토큰 수량이 decimal 6으로 기록되는데,
+                    // Forma에서는 decimal 18이기 때문에 12자리 만큼 0을 붙여준다.
+                    history.resAmount.push([
+                      {
+                        amount:
+                          history.destinationAsset.denom === "forma-native"
+                            ? `${amount}000000000000`
+                            : amount,
+                        denom: history.destinationAsset.denom,
+                      },
+                    ]);
+                    return;
+                  }
+                }
+              }
+            });
+          }
+        })
+        .finally(() => {
+          onFulfill();
+        });
+    } else {
+      const txTracer = new TendermintTxTracer(chainInfo.rpc, "/websocket");
+      txTracer.addEventListener("error", () => onFulfill());
+      txTracer
+        .queryTx({
+          "tx.hash": txHash,
+        })
+        .then((res: any) => {
+          txTracer.close();
+
+          if (!res) {
+            return;
+          }
+
+          const txs = res.txs
+            ? res.txs.map((res: any) => res.tx_result || res)
+            : [res.tx_result || res];
+          for (const tx of txs) {
+            const resAmount = this.getIBCSwapResAmountFromTx(
+              tx,
+              history.recipient
+            );
+
+            history.resAmount.push(resAmount);
+            return;
+          }
+        })
+        .finally(() => {
+          onFulfill();
+        });
+    }
+  }
+
+  @action
+  removeRecentSkipHistory(id: string): boolean {
+    return this.recentSkipHistoryMap.delete(id);
+  }
+
+  @action
+  clearAllRecentSkipHistory(): void {
+    this.recentSkipHistoryMap.clear();
   }
 
   protected getIBCWriteAcknowledgementAckFromTx(
