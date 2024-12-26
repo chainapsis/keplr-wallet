@@ -1,0 +1,35 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "gogoproto/gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+
+message QueryPoolSlipRequest{
+  string asset = 1;
+  string height = 2;
+}
+
+message QueryPoolSlipResponse{
+  string asset = 1 [(gogoproto.jsontag) = "asset"];
+	// Pool slip for this asset's pool for the current height
+  int64  pool_slip = 2 [(gogoproto.jsontag) = "pool_slip"];
+	// Number of stored pool slips contributing to the current stored rollup
+  int64  rollup_count = 3 [(gogoproto.jsontag) = "rollup_count"];
+	// Median of rollup snapshots over a long period
+  int64  long_rollup = 4 [(gogoproto.jsontag) = "long_rollup"];
+	// Stored sum of pool slips over a number of previous block heights
+  int64  rollup = 5 [(gogoproto.jsontag) = "rollup"];
+	// Summed pool slips over a number of previous block heights, to checksum the stored rollup
+  int64  summed_rollup = 6  [(gogoproto.nullable) = true];
+}
+
+message QueryPoolSlipsRequest{
+  string height = 1;
+}
+
+message QueryPoolSlipsResponse{
+  repeated QueryPoolSlipResponse pool_slips = 1;
+}

@@ -60,6 +60,7 @@ import Long from "long";
 import { IAccountStore } from "./store";
 import { autorun } from "mobx";
 import { MsgDepositForBurnWithCaller } from "@keplr-wallet/proto-types/circle/cctp/v1/tx";
+import { MsgSend as ThorMsgSend } from "@keplr-wallet/proto-types/thorchain/v1/types/msg_send";
 
 export interface CosmosAccount {
   cosmos: CosmosAccountImpl;
@@ -203,6 +204,8 @@ export class CosmosAccountImpl {
           ?.bech32PrefixAccAddr
       );
 
+      const isThorchain = this.chainId.startsWith("thorchain-");
+
       const msg = {
         type: this.msgOpts.send.native.type,
         value: {
@@ -223,12 +226,23 @@ export class CosmosAccountImpl {
           aminoMsgs: [msg],
           protoMsgs: [
             {
-              typeUrl: "/cosmos.bank.v1beta1.MsgSend",
-              value: MsgSend.encode({
-                fromAddress: msg.value.from_address,
-                toAddress: msg.value.to_address,
-                amount: msg.value.amount,
-              }).finish(),
+              typeUrl: isThorchain
+                ? "/types.MsgSend"
+                : "/cosmos.bank.v1beta1.MsgSend",
+              value: isThorchain
+                ? ThorMsgSend.encode({
+                    fromAddress: Bech32Address.fromBech32(
+                      msg.value.from_address
+                    ).address,
+                    toAddress: Bech32Address.fromBech32(msg.value.to_address)
+                      .address,
+                    amount: msg.value.amount,
+                  }).finish()
+                : MsgSend.encode({
+                    fromAddress: msg.value.from_address,
+                    toAddress: msg.value.to_address,
+                    amount: msg.value.amount,
+                  }).finish(),
             },
           ],
           rlpTypes: {

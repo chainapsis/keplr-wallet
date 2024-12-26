@@ -491,7 +491,7 @@ const SceneComponent: FunctionComponent<
       <animated.div
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr",
+          gridTemplateColumns: "100%",
           zIndex: index + 1,
           width: to([sceneWidth], (sceneWidth) => {
             return sceneWidth || "100%";

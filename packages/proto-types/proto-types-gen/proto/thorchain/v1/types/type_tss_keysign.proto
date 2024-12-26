@@ -1,0 +1,16 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all)         = false;
+option (gogoproto.goproto_getters_all) = false;
+
+import "gogoproto/gogo.proto";
+
+message TssKeysignFailVoter {
+  string id = 1 [(gogoproto.customname) = "ID"];
+  int64 height = 4;
+  repeated string signers = 6;
+  int64 round7_count = 7;
+}

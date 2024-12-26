@@ -1,0 +1,51 @@
+syntax = "proto3";
+package common;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/common";
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all)         = false;
+option (gogoproto.goproto_getters_all)  = false;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+message Asset {
+    string chain = 1 [(gogoproto.casttype) = "Chain"];
+    string symbol = 2 [(gogoproto.casttype) = "Symbol"];
+    string ticker = 3 [(gogoproto.casttype) = "Ticker"];
+    bool synth = 4;
+    bool trade = 5;
+    bool secured = 6;
+}
+
+message Coin {
+    Asset asset = 1 [(gogoproto.jsontag) = "asset", (gogoproto.nullable) = false, (gogoproto.customtype) = "Asset", (amino.encoding) = "asset"];
+    string amount = 2 [(gogoproto.jsontag) = "amount", (gogoproto.customtype) = "cosmossdk.io/math.Uint", (gogoproto.nullable) = false];
+    int64 decimals = 3;
+}
+
+// PubKeySet contains two pub keys , secp256k1 and ed25519
+message PubKeySet {
+    string secp256k1 = 1 [(gogoproto.casttype) = "PubKey", (gogoproto.customname) = "Secp256k1"];
+    string ed25519   = 2 [(gogoproto.casttype) = "PubKey"];
+}
+
+message Tx {
+    string id = 1 [(gogoproto.casttype) = "TxID", (gogoproto.customname) = "ID"];
+    string chain = 2 [(gogoproto.casttype) = "Chain"];
+    string from_address = 3 [(gogoproto.casttype) = "Address"];
+    string to_address = 4 [(gogoproto.casttype) = "Address"];
+    repeated Coin coins = 5 [(gogoproto.jsontag) = "coins", (gogoproto.castrepeated) = "Coins", (gogoproto.nullable) = false];
+    repeated Coin gas = 6 [(gogoproto.jsontag) = "gas", (gogoproto.castrepeated) = "Gas", (gogoproto.nullable) = false];
+    string memo = 7;
+}
+
+message Fee {
+    repeated Coin coins = 1 [(gogoproto.castrepeated) = "Coins", (gogoproto.nullable) = false];
+    string pool_deduct = 2 [(gogoproto.customtype) = "cosmossdk.io/math.Uint", (gogoproto.nullable) = false];
+}
+
+message ProtoUint {
+    option (gogoproto.stringer) = true;
+    string value = 1 [(gogoproto.customtype) = "cosmossdk.io/math.Uint", (gogoproto.nullable) = false];
+}

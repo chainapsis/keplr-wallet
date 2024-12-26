@@ -29,6 +29,8 @@ import styled, { useTheme } from "styled-components";
 import { DenomHelper } from "@keplr-wallet/common";
 import { TokenDetailModal } from "./token-detail";
 import { useSearchParams } from "react-router-dom";
+import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
+import { useGetSearchChains } from "../../hooks/use-get-search-chains";
 
 const zeroDec = new Dec(0);
 
@@ -63,6 +65,14 @@ export const AvailableTabView: FunctionComponent<{
     const intl = useIntl();
     const theme = useTheme();
 
+    const { trimSearch, searchedChainInfos } = useGetSearchChains({
+      search,
+      searchOption: "all",
+      filterOption: "chainNameAndToken",
+      minSearchLength: 3,
+      clearResultsOnEmptyQuery: true,
+    });
+
     const allBalances = hugeQueriesStore.getAllBalances(true);
     const allBalancesNonZero = useMemo(() => {
       return allBalances.filter((token) => {
@@ -71,16 +81,12 @@ export const AvailableTabView: FunctionComponent<{
     }, [allBalances]);
 
     const isFirstTime = allBalancesNonZero.length === 0;
-    const trimSearch = search.trim();
+
     const _allBalancesSearchFiltered = useMemo(() => {
       return allBalances.filter((token) => {
         return (
-          token.chainInfo.chainName
-            .toLowerCase()
-            .includes(trimSearch.toLowerCase()) ||
-          token.token.currency.coinDenom
-            .toLowerCase()
-            .includes(trimSearch.toLowerCase())
+          token.chainInfo.chainName.toLowerCase().includes(trimSearch) ||
+          token.token.currency.coinDenom.toLowerCase().includes(trimSearch)
         );
       });
     }, [allBalances, trimSearch]);
@@ -94,35 +100,79 @@ export const AvailableTabView: FunctionComponent<{
         ? lowBalanceFilteredAllBalancesSearchFiltered
         : _allBalancesSearchFiltered;
 
-    const lookingForChains = (() => {
-      return chainStore.chainInfosInListUI.filter((chainInfo) => {
-        if (chainStore.isEnabledChain(chainInfo.chainId)) {
-          return false;
-        }
-
-        const replacedSearchValue = trimSearch.replace(/ /g, "").toLowerCase();
-
-        if (replacedSearchValue.length < 3) {
-          return false;
-        }
-
-        const hasChainName =
-          chainInfo.chainName.replace(/ /gi, "").toLowerCase() ===
-          replacedSearchValue;
-        const hasCurrency = chainInfo.currencies.some(
-          (currency) =>
-            currency.coinDenom.replace(/ /gi, "").toLowerCase() ===
-            replacedSearchValue
+    const lookingForChains = useMemo(() => {
+      let disabledChainInfos: (ChainInfo | ModularChainInfo)[] =
+        searchedChainInfos.filter(
+          (chainInfo) => !chainStore.isEnabledChain(chainInfo.chainId)
         );
 
-        const hasStakeCurrency =
-          chainInfo.stakeCurrency &&
-          chainInfo.stakeCurrency.coinDenom.replace(/ /gi, "").toLowerCase() ===
-            replacedSearchValue;
+      const disabledStarknetChainInfos = chainStore.modularChainInfos.filter(
+        (modularChainInfo) =>
+          "starknet" in modularChainInfo &&
+          !chainStore.isEnabledChain(modularChainInfo.chainId) &&
+          trimSearch.length >= 3 &&
+          (modularChainInfo.chainId.toLowerCase().includes(trimSearch) ||
+            modularChainInfo.chainName.toLowerCase().includes(trimSearch) ||
+            trimSearch === "eth")
+      );
 
-        return hasChainName || hasCurrency || hasStakeCurrency;
-      });
-    })();
+      disabledChainInfos = [
+        ...new Set([...disabledChainInfos, ...disabledStarknetChainInfos]),
+      ].sort((a, b) => a.chainName.localeCompare(b.chainName));
+
+      return disabledChainInfos.reduce(
+        (acc, chainInfo) => {
+          let embedded: boolean | undefined = false;
+          let stored: boolean = true;
+
+          const isStarknet = "starknet" in chainInfo;
+
+          try {
+            if (isStarknet) {
+              embedded = true;
+            } else {
+              const chainInfoInStore = chainStore.getChain(chainInfo.chainId);
+
+              if (!chainInfoInStore) {
+                stored = false;
+              } else {
+                if (chainInfoInStore.hideInUI) {
+                  return acc;
+                }
+
+                stored = true;
+                embedded = chainInfoInStore.embedded?.embedded;
+              }
+            }
+          } catch (e) {
+            // got an error while getting chain info
+            embedded = undefined;
+            stored = false;
+          }
+
+          const chainItem = {
+            embedded: !!embedded,
+            stored,
+            chainInfo,
+          };
+
+          acc.push(chainItem);
+
+          return acc;
+        },
+        [] as {
+          embedded: boolean;
+          stored: boolean;
+          chainInfo: ChainInfo | ModularChainInfo;
+        }[]
+      );
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [
+      chainStore,
+      chainStore.modularChainInfosInUI,
+      searchedChainInfos,
+      trimSearch,
+    ]);
 
     const TokenViewData: {
       title: string;
@@ -166,7 +216,9 @@ export const AvailableTabView: FunctionComponent<{
     const [isFoundTokenModalOpen, setIsFoundTokenModalOpen] = useState(false);
 
     const isShowNotFound =
-      allBalancesSearchFiltered.length === 0 && trimSearch.length > 0;
+      allBalancesSearchFiltered.length === 0 &&
+      trimSearch.length > 0 &&
+      lookingForChains.length === 0;
 
     const [searchParams, setSearchParams] = useSearchParams();
 
@@ -309,14 +361,14 @@ export const AvailableTabView: FunctionComponent<{
                 }
               )}
             </Stack>
-
-            {lookingForChains.length > 0 ? (
+            {lookingForChains.length > 0 && (
               <React.Fragment>
-                <Gutter size="0.5rem" direction="vertical" />
-                <LookingForChains chainInfos={lookingForChains} />
+                {allBalancesSearchFiltered.length > 0 && (
+                  <Gutter size="1rem" direction="vertical" />
+                )}
+                <LookingForChains lookingForChains={lookingForChains} />
               </React.Fragment>
-            ) : null}
-
+            )}
             {isShowNotFound ? (
               <Box marginY="2rem">
                 <EmptyView>
@@ -362,7 +414,6 @@ export const AvailableTabView: FunctionComponent<{
                 }
               />
             ) : null}
-
             {numFoundToken > 0 ? (
               <Box padding="0.75rem">
                 <YAxis alignX="center">

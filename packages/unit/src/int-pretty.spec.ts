@@ -231,7 +231,7 @@ describe("Test IntPretty", () => {
     }
   });
 
-  it("Test the add calcutation of IntPretty", () => {
+  it("Test the add calculation of IntPretty", () => {
     const params: {
       base: Dec | Int;
       target: Dec | Int;
@@ -316,7 +316,7 @@ describe("Test IntPretty", () => {
     }
   });
 
-  it("Test the sub calcutation of IntPretty", () => {
+  it("Test the sub calculation of IntPretty", () => {
     const params: {
       base: Dec | Int;
       target: Dec | Int;
@@ -400,7 +400,7 @@ describe("Test IntPretty", () => {
     }
   });
 
-  it("Test the mul calcutation of IntPretty", () => {
+  it("Test the mul calculation of IntPretty", () => {
     const params: {
       base: Dec | Int;
       target: Dec | Int;
@@ -486,7 +486,7 @@ describe("Test IntPretty", () => {
     }
   });
 
-  it("Test the quo calcutation of IntPretty", () => {
+  it("Test the quo calculation of IntPretty", () => {
     expect(() => {
       new IntPretty(new Dec("1")).quo(new IntPretty(new Int(0)));
     }).toThrow();

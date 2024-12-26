@@ -138,7 +138,7 @@ message State {
 }
 
 // TransactionLogs define the logs generated from a transaction execution
-// with a given hash. It it used for import/export data as transactions are not
+// with a given hash. It is used for import/export data as transactions are not
 // persisted on blockchain state after an upgrade.
 message TransactionLogs {
   string hash = 1;

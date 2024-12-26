@@ -454,6 +454,24 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
               }
             }
           } else if (!("paths" in currency)) {
+            if (
+              swapVenue.chainId === "osmosis-1" &&
+              currency.coinMinimalDenom ===
+                "ibc/0FA9232B262B89E77D1335D54FB1E1F506A92A7E4B51524B400DC69C68D28372"
+            ) {
+              const inner = getMap(swapVenue.chainId);
+
+              if (
+                !inner.currencies.some(
+                  (c) => c.coinMinimalDenom === currency.coinMinimalDenom
+                )
+              ) {
+                inner.currencies.push(currency);
+              }
+
+              continue;
+            }
+
             // 현재 CW20같은 얘들은 처리할 수 없다.
             if (
               !("type" in currency) ||

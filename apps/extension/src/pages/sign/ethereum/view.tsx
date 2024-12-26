@@ -289,7 +289,16 @@ export const EthereumSigningView: FunctionComponent<{
           const text = (() => {
             const string = signingDataBuff.toString("utf8");
             if (string.startsWith("0x")) {
-              return Buffer.from(string.slice(2), "hex").toString("utf8");
+              const buf = Buffer.from(string.slice(2), "hex");
+              try {
+                // 정상적인 utf-8 문자열인지 확인
+                const decoder = new TextDecoder("utf-8", { fatal: true });
+                decoder.decode(new Uint8Array(buf)); // UTF-8 변환 시도
+              } catch {
+                return buf.toString("hex");
+              }
+
+              return buf.toString("utf8");
             }
 
             return string;

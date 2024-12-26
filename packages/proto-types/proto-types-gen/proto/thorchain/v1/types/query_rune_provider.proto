@@ -1,0 +1,32 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "gogoproto/gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+
+message QueryRuneProviderRequest{
+  string address = 1;
+  string height = 2;
+}
+
+message QueryRuneProviderResponse{
+  string rune_address = 1 [(gogoproto.jsontag) = "rune_address"];
+  string units = 2 [(gogoproto.jsontag) = "units"];
+  string value = 3 [(gogoproto.jsontag) = "value"];
+  string pnl = 4 [(gogoproto.jsontag) = "pnl"];
+  string deposit_amount = 5 [(gogoproto.jsontag) = "deposit_amount"];
+  string withdraw_amount = 6 [(gogoproto.jsontag) = "withdraw_amount"];
+  int64  last_deposit_height = 7 [(gogoproto.jsontag) = "last_deposit_height"];
+  int64  last_withdraw_height = 8 [(gogoproto.jsontag) = "last_withdraw_height"];
+}
+
+message QueryRuneProvidersRequest{
+  string height = 1;
+}
+
+message QueryRuneProvidersResponse{
+  repeated QueryRuneProviderResponse providers = 1;
+}

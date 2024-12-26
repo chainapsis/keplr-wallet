@@ -1,0 +1,35 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "gogoproto/gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+
+message QueryTradeAccountRequest{
+  string address = 1;
+  string height = 2;
+}
+
+message QueryTradeAccountResponse{
+	// trade account asset with \"~\" separator
+  string asset = 1 [(gogoproto.jsontag) = "asset"];
+	// units of trade asset belonging to this owner
+  string units = 2 [(gogoproto.jsontag) = "units"];
+	// thor address of trade account owner
+  string owner = 3 [(gogoproto.jsontag) = "owner"];
+	// last thorchain height trade assets were added to trade account
+  int64  last_add_height = 4 [(gogoproto.jsontag) = "last_add_height"];
+	// last thorchain height trade assets were withdrawn from trade account
+  int64  last_withdraw_height = 5 [(gogoproto.jsontag) = "last_withdraw_height"];
+}
+
+message QueryTradeAccountsRequest{
+  string asset = 1;
+  string height = 2;
+}
+
+message QueryTradeAccountsResponse{
+  repeated QueryTradeAccountResponse trade_accounts = 1;
+}
