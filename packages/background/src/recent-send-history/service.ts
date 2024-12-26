@@ -23,7 +23,12 @@ import {
   TxStatusResponse,
 } from "./types";
 import { Buffer } from "buffer/";
-import { AppCurrency, ChainInfo, EthTxReceipt } from "@keplr-wallet/types";
+import {
+  AppCurrency,
+  ChainInfo,
+  EthTxReceipt,
+  EthTxStatus,
+} from "@keplr-wallet/types";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { id } from "@ethersproject/hash";
@@ -1211,42 +1216,203 @@ export class RecentSendHistoryService {
       return;
     }
 
-    const now = Date.now();
-    const expectedEndTimestamp =
-      history.timestamp + history.routeDurationSeconds * 1000;
-    const diff = expectedEndTimestamp - now;
-
-    const waitMsAfterError = 5 * 1000;
-    const maxRetries = diff > 0 ? diff / waitMsAfterError : 10;
-
+    // check tx fulfilled and update history
     retry(
       () => {
-        return new Promise<void>((resolve, reject) => {
-          this.trackSkipSwapRecursiveInternal(
-            id,
-            () => {
-              resolve();
+        return new Promise<void>((txFulfilledResolve, txFulfilledReject) => {
+          this.checkAndTrackSkipSwapTxFulfilledRecursive(
+            history,
+            (keepTracking: boolean) => {
+              txFulfilledResolve();
+
+              if (!keepTracking) {
+                return;
+              }
+
+              const now = Date.now();
+              const expectedEndTimestamp =
+                history.timestamp + history.routeDurationSeconds * 1000;
+              const diff = expectedEndTimestamp - now;
+
+              const waitMsAfterError = 5 * 1000;
+              const maxRetries = diff > 0 ? diff / waitMsAfterError : 10;
+
+              retry(
+                () => {
+                  return new Promise<void>((resolve, reject) => {
+                    this.checkAndUpdateSkipSwapHistoryRecursive(
+                      id,
+                      resolve,
+                      reject
+                    );
+                  });
+                },
+                {
+                  maxRetries,
+                  waitMsAfterError,
+                  maxWaitMsAfterError: 30 * 1000, // 30sec
+                }
+              );
             },
-            // eslint-disable-next-line @typescript-eslint/no-empty-function
-            () => {},
-            () => {
-              reject();
-            }
+            txFulfilledReject
           );
         });
       },
       {
-        maxRetries,
-        waitMsAfterError,
-        maxWaitMsAfterError: 30 * 1000, // 30sec
+        maxRetries: 10,
+        waitMsAfterError: 500,
+        maxWaitMsAfterError: 4000,
       }
     );
   }
 
-  protected trackSkipSwapRecursiveInternal = (
+  protected checkAndTrackSkipSwapTxFulfilledRecursive = (
+    history: SkipHistory,
+    onFulfill: (keepTracking: boolean) => void,
+    onError: () => void
+  ): void => {
+    const chainInfo = this.chainsService.getChainInfo(history.chainId);
+    if (!chainInfo) {
+      onFulfill(false);
+      return;
+    }
+
+    if (this.chainsService.isEvmChain(history.chainId)) {
+      const evmInfo = chainInfo.evm;
+      if (!evmInfo) {
+        onFulfill(false);
+        return;
+      }
+
+      simpleFetch<{
+        result: EthTxReceipt | null;
+        error?: Error;
+      }>(evmInfo.rpc, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "request-source": origin,
+        },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method: "eth_getTransactionReceipt",
+          params: [history.txHash],
+          id: 1,
+        }),
+      })
+        .then((res) => {
+          const txReceipt = res.data.result;
+          if (txReceipt) {
+            if (txReceipt.status === EthTxStatus.Success) {
+              setTimeout(() => {
+                simpleFetch("https://api.skip.build/", "/v2/tx/track", {
+                  method: "POST",
+                  headers: {
+                    "content-type": "application/json",
+                    ...(() => {
+                      const res: {
+                        authorization?: string;
+                      } = {};
+                      if (process.env["SKIP_API_KEY"]) {
+                        res.authorization = process.env["SKIP_API_KEY"];
+                      }
+                      return res;
+                    })(),
+                  },
+                  body: JSON.stringify({
+                    tx_hash: history.txHash,
+                    chain_id: history.chainId.replace("eip155:", ""),
+                  }),
+                })
+                  .then((result) => {
+                    console.log(
+                      `Skip tx track result: ${JSON.stringify(result)}`
+                    );
+                    onFulfill(true);
+                  })
+                  .catch((e) => {
+                    console.log(e);
+                    this.removeRecentSkipHistory(history.id);
+                    onFulfill(false);
+                  });
+              }, 2000);
+            } else {
+              // tx가 실패한거면 종료
+              this.removeRecentSkipHistory(history.id);
+              onFulfill(false);
+            }
+          } else {
+            onError();
+          }
+        })
+        .catch(() => {
+          // 오류가 발생하면 종료
+          onFulfill(false);
+        });
+    } else {
+      const txTracer = new TendermintTxTracer(chainInfo.rpc, "/websocket");
+      txTracer.addEventListener("error", () => onFulfill(false));
+      txTracer
+        .traceTx({
+          "tx.hash": history.txHash,
+        })
+        .then((res: any) => {
+          txTracer.close();
+
+          if (Array.isArray(res.txs) && res.txs.length > 0) {
+            const tx = res.txs[0];
+            if (tx.tx_result.code === 0) {
+              setTimeout(() => {
+                simpleFetch("https://api.skip.build/", "/v2/tx/track", {
+                  method: "POST",
+                  headers: {
+                    "content-type": "application/json",
+                    ...(() => {
+                      const res: {
+                        authorization?: string;
+                      } = {};
+                      if (process.env["SKIP_API_KEY"]) {
+                        res.authorization = process.env["SKIP_API_KEY"];
+                      }
+                      return res;
+                    })(),
+                  },
+                  body: JSON.stringify({
+                    tx_hash: history.txHash,
+                    chain_id: history.chainId,
+                  }),
+                })
+                  .then((result) => {
+                    console.log(
+                      `Skip tx track result: ${JSON.stringify(result)}`
+                    );
+                    onFulfill(true);
+                  })
+                  .catch((e) => {
+                    console.log(e);
+                    this.removeRecentSkipHistory(history.id);
+                    onFulfill(false);
+                  });
+              }, 2000);
+            } else {
+              // tx가 실패한거면 종료
+              this.removeRecentSkipHistory(history.id);
+              onFulfill(false);
+            }
+          } else {
+            onError();
+          }
+        })
+        .catch(() => {
+          // 오류가 발생하면 종료
+          onFulfill(false);
+        });
+    }
+  };
+
+  protected checkAndUpdateSkipSwapHistoryRecursive = (
     id: string,
     onFulfill: () => void,
-    onClose: () => void,
     onError: () => void
   ): void => {
     const history = this.getRecentSkipHistory(id);
@@ -1575,13 +1741,7 @@ export class RecentSendHistoryService {
             }
 
             if (receiveTxHash) {
-              this.trackDestinationAssetAmount(
-                id,
-                receiveTxHash,
-                onFulfill,
-                onClose,
-                onError
-              );
+              this.trackDestinationAssetAmount(id, receiveTxHash, onFulfill);
             } else {
               onFulfill();
             }
@@ -1603,13 +1763,11 @@ export class RecentSendHistoryService {
   protected trackDestinationAssetAmount(
     historyId: string,
     txHash: string,
-    onFullfill: () => void,
-    onClose: () => void,
-    onError: () => void
+    onFulfill: () => void
   ) {
     const history = this.getRecentSkipHistory(historyId);
     if (!history) {
-      onFullfill();
+      onFulfill();
       return;
     }
 
@@ -1617,14 +1775,14 @@ export class RecentSendHistoryService {
       history.destinationChainId
     );
     if (!chainInfo) {
-      onFullfill();
+      onFulfill();
       return;
     }
 
     if (this.chainsService.isEvmChain(history.destinationChainId)) {
       const evmInfo = chainInfo.evm;
       if (!evmInfo) {
-        onFullfill();
+        onFulfill();
         return;
       }
 
@@ -1647,63 +1805,117 @@ export class RecentSendHistoryService {
         .then((res) => {
           const txReceipt = res.data.result;
           if (txReceipt) {
-            const logs = txReceipt.logs;
-            const transferTopic = id("Transfer(address,address,uint256)");
-            const withdrawTopic = id("Withdrawal(address,uint256)");
-            const hyperlaneReceiveTopic = id(
-              "ReceivedTransferRemote(uint32,bytes32,uint256)"
-            );
-            for (const log of logs) {
-              if (log.topics[0] === transferTopic) {
-                const to = "0x" + log.topics[2].slice(26);
-                if (to.toLowerCase() === history.recipient.toLowerCase()) {
-                  const amount = BigInt(log.data).toString(10);
-                  history.resAmount.push([
-                    {
-                      amount,
-                      denom: history.destinationAsset.denom,
-                    },
-                  ]);
+            simpleFetch<{
+              result: any;
+              error?: Error;
+            }>(evmInfo.rpc, {
+              method: "POST",
+              headers: {
+                "content-type": "application/json",
+                "request-source": origin,
+              },
+              body: JSON.stringify({
+                jsonrpc: "2.0",
+                method: "debug_traceTransaction",
+                params: [txHash, { tracer: "callTracer" }],
+                id: 1,
+              }),
+            }).then((res) => {
+              let isFoundFromCall = false;
+              if (res.data.result) {
+                const searchForTransfers = (calls: any) => {
+                  for (const call of calls) {
+                    if (
+                      call.type === "CALL" &&
+                      call.to.toLowerCase() === history.recipient.toLowerCase()
+                    ) {
+                      const isERC20Transfer =
+                        call.input.startsWith("0xa9059cbb");
+                      const value = BigInt(
+                        isERC20Transfer
+                          ? `0x${call.input.substring(74)}`
+                          : call.value
+                      );
 
-                  return;
-                }
-              } else if (log.topics[0] === withdrawTopic) {
-                const to = "0x" + log.topics[1].slice(26);
-                if (to.toLowerCase() === txReceipt.to.toLowerCase()) {
-                  const amount = BigInt(log.data).toString(10);
-                  history.resAmount.push([
-                    { amount, denom: history.destinationAsset.denom },
-                  ]);
-                  return;
-                }
-              } else if (log.topics[0] === hyperlaneReceiveTopic) {
-                const to = "0x" + log.topics[2].slice(26);
-                if (to.toLowerCase() === history.recipient.toLowerCase()) {
-                  const amount = BigInt(log.data).toString(10);
-                  // Hyperlane을 통해 Forma로 TIA를 받는 경우 토큰 수량이 decimal 6으로 기록되는데,
-                  // Forma에서는 decimal 18이기 때문에 12자리 만큼 0을 붙여준다.
-                  history.resAmount.push([
-                    {
-                      amount:
-                        history.destinationAsset.denom === "forma-native"
-                          ? `${amount}000000000000`
-                          : amount,
-                      denom: history.destinationAsset.denom,
-                    },
-                  ]);
-                  return;
+                      history.resAmount.push([
+                        {
+                          amount: value.toString(10),
+                          denom: history.destinationAsset.denom,
+                        },
+                      ]);
+                      isFoundFromCall = true;
+                    }
+
+                    if (call.calls && call.calls.length > 0) {
+                      searchForTransfers(call.calls);
+                    }
+                  }
+                };
+
+                searchForTransfers(res.data.result.calls || []);
+              }
+
+              if (isFoundFromCall) {
+                return;
+              }
+
+              const logs = txReceipt.logs;
+              const transferTopic = id("Transfer(address,address,uint256)");
+              const withdrawTopic = id("Withdrawal(address,uint256)");
+              const hyperlaneReceiveTopic = id(
+                "ReceivedTransferRemote(uint32,bytes32,uint256)"
+              );
+              for (const log of logs) {
+                if (log.topics[0] === transferTopic) {
+                  const to = "0x" + log.topics[2].slice(26);
+                  if (to.toLowerCase() === history.recipient.toLowerCase()) {
+                    const amount = BigInt(log.data).toString(10);
+                    history.resAmount.push([
+                      {
+                        amount,
+                        denom: history.destinationAsset.denom,
+                      },
+                    ]);
+
+                    return;
+                  }
+                } else if (log.topics[0] === withdrawTopic) {
+                  const to = "0x" + log.topics[1].slice(26);
+                  if (to.toLowerCase() === txReceipt.to.toLowerCase()) {
+                    const amount = BigInt(log.data).toString(10);
+                    history.resAmount.push([
+                      { amount, denom: history.destinationAsset.denom },
+                    ]);
+                    return;
+                  }
+                } else if (log.topics[0] === hyperlaneReceiveTopic) {
+                  const to = "0x" + log.topics[2].slice(26);
+                  if (to.toLowerCase() === history.recipient.toLowerCase()) {
+                    const amount = BigInt(log.data).toString(10);
+                    // Hyperlane을 통해 Forma로 TIA를 받는 경우 토큰 수량이 decimal 6으로 기록되는데,
+                    // Forma에서는 decimal 18이기 때문에 12자리 만큼 0을 붙여준다.
+                    history.resAmount.push([
+                      {
+                        amount:
+                          history.destinationAsset.denom === "forma-native"
+                            ? `${amount}000000000000`
+                            : amount,
+                        denom: history.destinationAsset.denom,
+                      },
+                    ]);
+                    return;
+                  }
                 }
               }
-            }
+            });
           }
         })
         .finally(() => {
-          onFullfill();
+          onFulfill();
         });
     } else {
       const txTracer = new TendermintTxTracer(chainInfo.rpc, "/websocket");
-      txTracer.addEventListener("close", onClose);
-      txTracer.addEventListener("error", onError);
+      txTracer.addEventListener("error", () => onFulfill());
       txTracer
         .queryTx({
           "tx.hash": txHash,
@@ -1729,7 +1941,7 @@ export class RecentSendHistoryService {
           }
         })
         .finally(() => {
-          onFullfill();
+          onFulfill();
         });
     }
   }

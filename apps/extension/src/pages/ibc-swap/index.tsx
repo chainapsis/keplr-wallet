@@ -43,7 +43,6 @@ import { autorun } from "mobx";
 import {
   LogAnalyticsEventMsg,
   RecordTxWithSkipSwapMsg,
-  RemoveSkipHistoryMsg,
   SendTxAndRecordMsg,
   SendTxAndRecordWithIBCSwapMsg,
 } from "@keplr-wallet/background";
@@ -56,7 +55,6 @@ import { Button } from "../../components/button";
 import { TextButtonProps } from "../../components/button-text";
 import { UnsignedEVMTransactionWithErc20Approvals } from "@keplr-wallet/stores-eth";
 import { EthTxStatus } from "@keplr-wallet/types";
-import { simpleFetch } from "@keplr-wallet/simple-fetch";
 
 const TextButtonStyles = {
   Container: styled.div`
@@ -763,7 +761,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           }[] = [];
           let routeDurationSeconds: number | undefined;
           let isInterchainSwap: boolean = false;
-          let skipHistoryId: string | undefined = undefined;
 
           // queryRoute는 ibc history를 추적하기 위한 채널 정보 등을 얻기 위해서 사용된다.
           // /msgs_direct로도 얻을 순 있지만 따로 데이터를 해석해야되기 때문에 좀 힘들다...
@@ -800,9 +797,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               // 일단은 체인 id를 keplr에서 사용하는 형태로 바꿔야 한다.
               for (const chainId of queryRoute.response.data.chain_ids) {
                 const isOnlyEvm = parseInt(chainId) > 0;
-                const receiverAccount = accountStore.getAccount(
-                  isOnlyEvm ? `eip155:${chainId}` : chainId
-                );
+                const chainIdInKeplr = isOnlyEvm
+                  ? `eip155:${chainId}`
+                  : chainId;
+                const receiverAccount = accountStore.getAccount(chainIdInKeplr);
                 if (receiverAccount.walletStatus !== WalletStatus.Loaded) {
                   await receiverAccount.init();
                 }
@@ -831,7 +829,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
                 simpleRoute.push({
                   isOnlyEvm,
-                  chainId,
+                  chainId: chainIdInKeplr,
                   receiver: isOnlyEvm
                     ? receiverAccount.ethereumHexAddress
                     : receiverAccount.bech32Address,
@@ -1068,11 +1066,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                         Buffer.from(txHash).toString("hex")
                       );
 
-                      new InExtensionMessageRequester()
-                        .sendMessage(BACKGROUND_PORT, msg)
-                        .then((response) => {
-                          skipHistoryId = response;
-                        });
+                      new InExtensionMessageRequester().sendMessage(
+                        BACKGROUND_PORT,
+                        msg
+                      );
 
                       if (
                         !chainStore.isEnabledChain(
@@ -1217,16 +1214,14 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       out_currency_minimal_denom: outCurrency.coinMinimalDenom,
                       out_currency_denom: outCurrency.coinDenom,
                     });
+
+                    navigate("/", {
+                      replace: true,
+                    });
                   },
                   onFulfill: (tx: any) => {
                     if (tx.code != null && tx.code !== 0) {
                       console.log(tx.log ?? tx.raw_log);
-                      if (skipHistoryId) {
-                        new InExtensionMessageRequester().sendMessage(
-                          BACKGROUND_PORT,
-                          new RemoveSkipHistoryMsg(skipHistoryId)
-                        );
-                      }
 
                       notification.show(
                         "failed",
@@ -1234,42 +1229,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                         ""
                       );
                       return;
-                    }
-
-                    if (isInterchainSwap) {
-                      setTimeout(() => {
-                        // no wait
-                        simpleFetch<any>(
-                          "https://api.skip.build/",
-                          "/v2/tx/track",
-                          {
-                            method: "POST",
-                            headers: {
-                              "content-type": "application/json",
-                              ...(() => {
-                                const res: { authorization?: string } = {};
-                                if (process.env["SKIP_API_KEY"]) {
-                                  res.authorization =
-                                    process.env["SKIP_API_KEY"];
-                                }
-                                return res;
-                              })(),
-                            },
-                            body: JSON.stringify({
-                              tx_hash: tx.hash,
-                              chain_id: inChainId,
-                            }),
-                          }
-                        )
-                          .then((result) => {
-                            console.log(
-                              `Skip tx track result: ${JSON.stringify(result)}`
-                            );
-                          })
-                          .catch((e) => {
-                            console.log(e);
-                          });
-                      }, 2000);
                     }
 
                     notification.show(
@@ -1282,10 +1241,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   },
                 }
               );
-
-              navigate("/", {
-                replace: true,
-              });
             } else {
               const ethereumAccount = ethereumAccountStore.getAccount(
                 ibcSwapConfigs.amountConfig.chainId
@@ -1437,15 +1392,14 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                         txHash
                       );
 
-                      new InExtensionMessageRequester()
-                        .sendMessage(BACKGROUND_PORT, msg)
-                        .then((response) => {
-                          skipHistoryId = response;
+                      new InExtensionMessageRequester().sendMessage(
+                        BACKGROUND_PORT,
+                        msg
+                      );
 
-                          navigate("/", {
-                            replace: true,
-                          });
-                        });
+                      navigate("/", {
+                        replace: true,
+                      });
                     }
                   },
                   onFulfill: (txReceipt) => {
@@ -1537,15 +1491,14 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                                 txHash
                               );
 
-                              new InExtensionMessageRequester()
-                                .sendMessage(BACKGROUND_PORT, msg)
-                                .then((response) => {
-                                  skipHistoryId = response;
+                              new InExtensionMessageRequester().sendMessage(
+                                BACKGROUND_PORT,
+                                msg
+                              );
 
-                                  navigate("/", {
-                                    replace: true,
-                                  });
-                                });
+                              navigate("/", {
+                                replace: true,
+                              });
                             },
                             onFulfill: (txReceipt) => {
                               const queryBalances = queriesStore.get(
@@ -1567,51 +1520,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                                     balance.fetch();
                                   }
                                 });
-                              if (txReceipt.status === EthTxStatus.Success) {
-                                // onBroadcasted에서 실행하기에는 너무 빨라서 tx not found가 발생할 수 있음
-                                // 재실행 로직을 사용해도 되지만, txReceipt를 기다렸다가 실행하는 게 자원 낭비가 적음
-                                const chainIdForTrack = inChainId.replace(
-                                  "eip155:",
-                                  ""
-                                );
-                                setTimeout(() => {
-                                  // no wait
-                                  simpleFetch<any>(
-                                    "https://api.skip.build/",
-                                    "/v2/tx/track",
-                                    {
-                                      method: "POST",
-                                      headers: {
-                                        "content-type": "application/json",
-                                        ...(() => {
-                                          const res: {
-                                            authorization?: string;
-                                          } = {};
-                                          if (process.env["SKIP_API_KEY"]) {
-                                            res.authorization =
-                                              process.env["SKIP_API_KEY"];
-                                          }
-                                          return res;
-                                        })(),
-                                      },
-                                      body: JSON.stringify({
-                                        tx_hash: txReceipt.transactionHash,
-                                        chain_id: chainIdForTrack,
-                                      }),
-                                    }
-                                  )
-                                    .then((result) => {
-                                      console.log(
-                                        `Skip tx track result: ${JSON.stringify(
-                                          result
-                                        )}`
-                                      );
-                                    })
-                                    .catch((e) => {
-                                      console.log(e);
-                                    });
-                                }, 2000);
 
+                              if (txReceipt.status === EthTxStatus.Success) {
                                 notification.show(
                                   "success",
                                   intl.formatMessage({
@@ -1620,13 +1530,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                                   ""
                                 );
                               } else {
-                                if (skipHistoryId) {
-                                  new InExtensionMessageRequester().sendMessage(
-                                    BACKGROUND_PORT,
-                                    new RemoveSkipHistoryMsg(skipHistoryId)
-                                  );
-                                }
-
                                 notification.show(
                                   "failed",
                                   intl.formatMessage({
@@ -1638,48 +1541,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                             },
                           }
                         );
-                      } else {
-                        // onBroadcasted에서 실행하기에는 너무 빨라서 tx not found가 발생할 수 있음
-                        // 재실행 로직을 사용해도 되지만, txReceipt를 기다렸다가 실행하는 게 자원 낭비가 적음
-                        const chainIdForTrack = inChainId.replace(
-                          "eip155:",
-                          ""
-                        );
-                        setTimeout(() => {
-                          // no wait
-                          simpleFetch<any>(
-                            "https://api.skip.build/",
-                            "/v2/tx/track",
-                            {
-                              method: "POST",
-                              headers: {
-                                "content-type": "application/json",
-                                ...(() => {
-                                  const res: { authorization?: string } = {};
-                                  if (process.env["SKIP_API_KEY"]) {
-                                    res.authorization =
-                                      process.env["SKIP_API_KEY"];
-                                  }
-                                  return res;
-                                })(),
-                              },
-                              body: JSON.stringify({
-                                tx_hash: txReceipt.transactionHash,
-                                chain_id: chainIdForTrack,
-                              }),
-                            }
-                          )
-                            .then((result) => {
-                              console.log(
-                                `Skip tx track result: ${JSON.stringify(
-                                  result
-                                )}`
-                              );
-                            })
-                            .catch((e) => {
-                              console.log(e);
-                            });
-                        }, 2000);
                       }
 
                       notification.show(
@@ -1690,13 +1551,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                         ""
                       );
                     } else {
-                      if (skipHistoryId) {
-                        new InExtensionMessageRequester().sendMessage(
-                          BACKGROUND_PORT,
-                          new RemoveSkipHistoryMsg(skipHistoryId)
-                        );
-                      }
-
                       notification.show(
                         "failed",
                         intl.formatMessage({ id: "error.transaction-failed" }),
