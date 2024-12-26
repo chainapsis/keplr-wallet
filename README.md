@@ -28,8 +28,8 @@ For help using Keplr Wallet, Visit our [User Support Site](https://help.keplr.ap
     # This script is example for mac arm64 user. for other OS, replace URL(starts with https://..) to be matched with your OS from https://github.com/protocolbuffers/protobuf/releases/tag/v21.3
     curl -Lo protoc-21.3.zip https://github.com/protocolbuffers/protobuf/releases/download/v21.3/protoc-21.3-osx-aarch_64.zip 
     unzip protoc-21.3.zip -d $HOME/protoc
-    cp -r $HOME/protoc/include /usr/local
-    cp -r $HOME/protoc/bin /usr/local
+    cp -r $HOME/protoc/include/* /usr/local/include/
+    cp $HOME/protoc/bin/* /usr/local/bin/
   ```
   
 - [Node.js v18+](https://nodejs.org/)
