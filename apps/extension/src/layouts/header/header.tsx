@@ -196,6 +196,7 @@ export const HeaderLayout: FunctionComponent<
   isNotReady,
   additionalPaddingBottom,
   headerContainerStyle,
+  contentContainerStyle,
 
   fixedTop,
 }) => {
@@ -296,6 +297,7 @@ export const HeaderLayout: FunctionComponent<
         fixedMinHeight={fixedMinHeight || false}
         bottomPadding={bottomPadding}
         fixedTopHeight={fixedTop?.height}
+        style={contentContainerStyle}
       >
         {children}
       </Styles.ContentContainer>

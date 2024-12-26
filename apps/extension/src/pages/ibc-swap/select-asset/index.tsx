@@ -18,6 +18,8 @@ import { computed, makeObservable } from "mobx";
 import { ObservableQueryIbcSwap } from "@keplr-wallet/stores-internal";
 import { Currency } from "@keplr-wallet/types";
 import { IChainInfoImpl } from "@keplr-wallet/stores";
+import { FixedSizeList } from "react-window";
+import AutoSizer from "react-virtualized-auto-sizer";
 
 // 계산이 복잡해서 memoize을 적용해야하는데
 // mobx와 useMemo()는 같이 사용이 어려워서
@@ -118,6 +120,7 @@ class IBCSwapDestinationState {
 
 const Styles = {
   Container: styled(Stack)`
+    height: 100%;
     padding: 0.75rem;
   `,
 };
@@ -219,6 +222,7 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
       <HeaderLayout
         title={intl.formatMessage({ id: "page.send.select-asset.title" })}
         left={<BackButton />}
+        contentContainerStyle={{ height: "100vh" }}
       >
         <Styles.Container gutter="0.5rem">
           <SearchTextInput
@@ -233,64 +237,94 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
               setSearch(e.target.value);
             }}
           />
-          {filteredTokens.map((viewToken) => {
-            return (
-              <TokenItem
-                viewToken={viewToken}
-                key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
-                onClick={() => {
-                  if (paramNavigateTo) {
-                    navigate(
-                      paramNavigateTo
-                        .replace("{chainId}", viewToken.chainInfo.chainId)
-                        .replace(
-                          "{coinMinimalDenom}",
-                          viewToken.token.currency.coinMinimalDenom
-                        ),
-                      {
-                        replace: paramNavigateReplace === "true",
-                      }
-                    );
-                  } else {
-                    console.error("Empty navigateTo param");
-                  }
+          <AutoSizer>
+            {({ height, width }: { height: number; width: number }) => (
+              <FixedSizeList
+                itemData={{
+                  filteredTokens,
+                  filteredRemaining,
+                  onClick: (chainId, coinMinimalDenom) => {
+                    if (paramNavigateTo) {
+                      navigate(
+                        paramNavigateTo
+                          .replace("{chainId}", chainId)
+                          .replace("{coinMinimalDenom}", coinMinimalDenom),
+                        {
+                          replace: paramNavigateReplace === "true",
+                        }
+                      );
+                    } else {
+                      console.error("Empty navigateTo param");
+                    }
+                  },
                 }}
-              />
-            );
-          })}
-          {filteredRemaining.map((item) => {
-            return (
-              <TokenItem
-                viewToken={{
-                  chainInfo: item.chainInfo,
-                  token: new CoinPretty(item.currency, new Dec(0)),
-                  isFetching: false,
-                  error: undefined,
-                }}
-                hideBalance={true}
-                key={`${item.chainInfo.chainId}-${item.currency.coinMinimalDenom}`}
-                onClick={() => {
-                  if (paramNavigateTo) {
-                    navigate(
-                      paramNavigateTo
-                        .replace("{chainId}", item.chainInfo.chainId)
-                        .replace(
-                          "{coinMinimalDenom}",
-                          item.currency.coinMinimalDenom
-                        ),
-                      {
-                        replace: paramNavigateReplace === "true",
-                      }
-                    );
-                  } else {
-                    console.error("Empty navigateTo param");
-                  }
-                }}
-              />
-            );
-          })}
+                width={width}
+                height={height}
+                itemCount={filteredTokens.length + filteredRemaining.length}
+                itemSize={76}
+              >
+                {TokenListItem}
+              </FixedSizeList>
+            )}
+          </AutoSizer>
         </Styles.Container>
       </HeaderLayout>
     );
   }
 );
+
+const TOKEN_LIST_ITEM_GUTTER = 8;
+
+const TokenListItem = ({
+  data,
+  index,
+  style,
+}: {
+  data: {
+    filteredTokens: ViewToken[];
+    filteredRemaining: {
+      currency: Currency;
+      chainInfo: IChainInfoImpl;
+    }[];
+    onClick: (chainId: string, coinMinimalDenom: string) => void;
+  };
+  index: number;
+  style: any;
+}) => {
+  const isFilteredTokens = index < data.filteredTokens.length;
+  const item = isFilteredTokens
+    ? data.filteredTokens[index]
+    : data.filteredRemaining[index - data.filteredTokens.length];
+  const viewToken =
+    "currency" in item
+      ? {
+          chainInfo: item.chainInfo,
+          token: new CoinPretty(item.currency, new Dec(0)),
+          isFetching: false,
+          error: undefined,
+        }
+      : item;
+
+  return (
+    <div
+      style={{
+        ...style,
+        paddingTop: index === 0 ? 0 : TOKEN_LIST_ITEM_GUTTER,
+        height:
+          index === 0 ? style.height - TOKEN_LIST_ITEM_GUTTER : style.height,
+        top: index === 0 ? style.top : style.top - TOKEN_LIST_ITEM_GUTTER,
+      }}
+    >
+      <TokenItem
+        viewToken={viewToken}
+        hideBalance={isFilteredTokens ? false : true}
+        onClick={() =>
+          data.onClick(
+            viewToken.chainInfo.chainId,
+            viewToken.token.currency.coinMinimalDenom
+          )
+        }
+      />
+    </div>
+  );
+};

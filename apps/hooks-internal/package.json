@@ -16,6 +16,7 @@
   "dependencies": {
     "@keplr-wallet/hooks": "0.12.169",
     "@keplr-wallet/stores": "0.12.169",
+    "@keplr-wallet/stores-eth": "0.12.169",
     "@keplr-wallet/stores-internal": "0.12.169",
     "@keplr-wallet/types": "0.12.169",
     "@keplr-wallet/unit": "0.12.169"

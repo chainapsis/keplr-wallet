@@ -20,6 +20,57 @@ const Schema = Joi.object<MsgsDirectResponse>({
           msg: Joi.string().required(),
           msg_type_url: Joi.string().required(),
         }).unknown(true),
+        evm_tx: Joi.object({
+          chain_id: Joi.string().required(),
+          data: Joi.string().required(),
+          required_erc20_approvals: Joi.array()
+            .items(
+              Joi.object({
+                amount: Joi.string().required(),
+                spender: Joi.string().required(),
+                token_contract: Joi.string().required(),
+              }).unknown(true)
+            )
+            .required(),
+          signer_address: Joi.string().required(),
+          to: Joi.string().required(),
+          value: Joi.string().required(),
+        }).unknown(true),
+      }).unknown(true)
+    )
+    .required(),
+  txs: Joi.array()
+    .items(
+      Joi.object({
+        cosmos_tx: Joi.object({
+          chain_id: Joi.string().required(),
+          path: Joi.array().items(Joi.string()).required(),
+          msgs: Joi.array()
+            .items(
+              Joi.object({
+                msg: Joi.string().required(),
+                msg_type_url: Joi.string().required(),
+              }).unknown(true)
+            )
+            .required(),
+          signer_address: Joi.string().required(),
+        }).unknown(true),
+        evm_tx: Joi.object({
+          chain_id: Joi.string().required(),
+          data: Joi.string().required(),
+          required_erc20_approvals: Joi.array()
+            .items(
+              Joi.object({
+                amount: Joi.string().required(),
+                spender: Joi.string().required(),
+                token_contract: Joi.string().required(),
+              }).unknown(true)
+            )
+            .required(),
+          signer_address: Joi.string().required(),
+          to: Joi.string().required(),
+          value: Joi.string().required(),
+        }).unknown(true),
       }).unknown(true)
     )
     .required(),
@@ -67,70 +118,122 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
         contract: string;
         msg: object;
       }
+    | {
+        type: "evmTx";
+        chainId: string;
+        to: string;
+        value: string;
+        data: string;
+        requiredErc20Approvals?: {
+          amount: string;
+          spender: string;
+          tokenAddress: string;
+        }[];
+      }
+    | {
+        type: "MsgCCTP";
+        msgs: {
+          msg: string;
+          msg_type_url: string;
+        }[];
+      }
     | undefined {
     if (!this.response) {
       return;
     }
 
-    if (this.response.data.msgs.length === 0) {
+    if (this.response.data.txs.length === 0) {
       return;
     }
 
-    if (this.response.data.msgs.length >= 2) {
+    if (this.response.data.txs.length >= 2) {
       return;
     }
 
-    const msg = this.response.data.msgs[0];
-    if (
-      msg.multi_chain_msg.msg_type_url !==
-        "/ibc.applications.transfer.v1.MsgTransfer" &&
-      msg.multi_chain_msg.msg_type_url !==
-        "/cosmwasm.wasm.v1.MsgExecuteContract"
-    ) {
-      return;
-    }
+    const msg = this.response.data.txs[0];
 
-    const chainMsg = JSON.parse(msg.multi_chain_msg.msg);
-    if (
-      msg.multi_chain_msg.msg_type_url ===
-      "/cosmwasm.wasm.v1.MsgExecuteContract"
-    ) {
+    if (msg.evm_tx) {
       return {
-        type: "MsgExecuteContract",
-        funds: chainMsg.funds.map((fund: { denom: string; amount: string }) => {
-          return new CoinPretty(
-            this.chainGetter
-              .getChain(msg.multi_chain_msg.chain_id)
-              .forceFindCurrency(fund.denom),
-            fund.amount
-          );
-        }),
-        contract: chainMsg.contract,
-        msg: chainMsg.msg,
+        type: "evmTx",
+        chainId: `eip155:${msg.evm_tx.chain_id}`,
+        to: msg.evm_tx.to,
+        value: `0x${BigInt(msg.evm_tx.value).toString(16)}`,
+        data: `0x${msg.evm_tx.data}`,
+        requiredErc20Approvals: msg.evm_tx.required_erc20_approvals.map(
+          (approval) => ({
+            amount: approval.amount,
+            spender: approval.spender,
+            tokenAddress: approval.token_contract,
+          })
+        ),
       };
-    } else if (
-      msg.multi_chain_msg.msg_type_url ===
-      "/ibc.applications.transfer.v1.MsgTransfer"
-    ) {
-      if (msg.multi_chain_msg.path.length < 2) {
+    }
+
+    if (msg.cosmos_tx) {
+      const isCCTP =
+        msg.cosmos_tx.msgs.length === 2 &&
+        msg.cosmos_tx.msgs[0].msg_type_url ===
+          "/circle.cctp.v1.MsgDepositForBurnWithCaller";
+      if (isCCTP) {
+        return {
+          type: "MsgCCTP",
+          msgs: msg.cosmos_tx.msgs,
+        };
+      }
+
+      if (msg.cosmos_tx.msgs.length >= 2) {
         return;
       }
 
-      return {
-        type: "MsgTransfer",
-        receiver: chainMsg.receiver,
-        sourcePort: chainMsg.source_port,
-        sourceChannel: chainMsg.source_channel,
-        counterpartyChainId: msg.multi_chain_msg.path[1],
-        timeoutTimestamp: chainMsg.timeout_timestamp,
-        token: new CoinPretty(
-          this.chainGetter
-            .getChain(msg.multi_chain_msg.chain_id)
-            .forceFindCurrency(chainMsg.token.denom),
-          chainMsg.token.amount
-        ),
-        memo: chainMsg.memo,
-      };
+      const cosmosMsg = msg.cosmos_tx.msgs[0];
+      if (
+        cosmosMsg.msg_type_url !==
+          "/ibc.applications.transfer.v1.MsgTransfer" &&
+        cosmosMsg.msg_type_url !== "/cosmwasm.wasm.v1.MsgExecuteContract"
+      ) {
+        return;
+      }
+
+      const chainMsg = JSON.parse(cosmosMsg.msg);
+      if (cosmosMsg.msg_type_url === "/cosmwasm.wasm.v1.MsgExecuteContract") {
+        return {
+          type: "MsgExecuteContract",
+          funds: chainMsg.funds.map(
+            (fund: { denom: string; amount: string }) => {
+              return new CoinPretty(
+                this.chainGetter
+                  .getChain(msg.cosmos_tx!.chain_id)
+                  .forceFindCurrency(fund.denom),
+                fund.amount
+              );
+            }
+          ),
+          contract: chainMsg.contract,
+          msg: chainMsg.msg,
+        };
+      } else if (
+        cosmosMsg.msg_type_url === "/ibc.applications.transfer.v1.MsgTransfer"
+      ) {
+        if (msg.cosmos_tx.path.length < 2) {
+          return;
+        }
+
+        return {
+          type: "MsgTransfer",
+          receiver: chainMsg.receiver,
+          sourcePort: chainMsg.source_port,
+          sourceChannel: chainMsg.source_channel,
+          counterpartyChainId: msg.cosmos_tx.path[1],
+          timeoutTimestamp: chainMsg.timeout_timestamp,
+          token: new CoinPretty(
+            this.chainGetter
+              .getChain(msg.cosmos_tx.chain_id)
+              .forceFindCurrency(chainMsg.token.denom),
+            chainMsg.token.amount
+          ),
+          memo: chainMsg.memo,
+        };
+      }
     }
 
     throw new Error("Unknown error");
@@ -151,7 +254,27 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
         funds: CoinPretty[];
         contract: string;
         msg: object;
-      } {
+      }
+    | {
+        type: "evmTx";
+        chainId: string;
+        to: string;
+        value: string;
+        data: string;
+        requiredErc20Approvals?: {
+          amount: string;
+          spender: string;
+          tokenAddress: string;
+        }[];
+      }
+    | {
+        type: "MsgCCTP";
+        msgs: {
+          msg: string;
+          msg_type_url: string;
+        }[];
+      }
+    | undefined {
     if (!this.response) {
       throw new Error("Response is empty");
     }
@@ -192,10 +315,10 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
           })(),
         },
         body: JSON.stringify({
-          source_asset_denom: this.amountInDenom,
-          source_asset_chain_id: this.sourceAssetChainId,
-          dest_asset_denom: this.destAssetDenom,
-          dest_asset_chain_id: this.destAssetChainId,
+          source_asset_denom: this.amountInDenom.replace("erc20:", ""),
+          source_asset_chain_id: this.sourceAssetChainId.replace("eip155:", ""),
+          dest_asset_denom: this.destAssetDenom.replace("erc20:", ""),
+          dest_asset_chain_id: this.destAssetChainId.replace("eip155:", ""),
           amount_in: this.amountInAmount,
           chain_ids_to_addresses: this.chainIdsToAddresses,
           slippage_tolerance_percent: this.slippageTolerancePercent.toString(),
@@ -208,8 +331,18 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
                   },
                 ]
               : [],
-          swap_venues: this.swapVenues,
+          swap_venues: this.swapVenues.map((swapVenue) => ({
+            ...swapVenue,
+            chainId: swapVenue.chainId.replace("eip155:", ""),
+          })),
           allow_unsafe: true,
+          smart_relay: true,
+          go_fast: true,
+          experimental_features: ["hyperlane"],
+          smart_swap_options: {
+            evm_swaps: true,
+            split_routes: true,
+          },
         }),
         signal: abortController.signal,
       }
@@ -221,10 +354,7 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
 
     const validated = Schema.validate(result.data);
     if (validated.error) {
-      console.log(
-        "Failed to validate assets from source response",
-        validated.error
-      );
+      console.log("Failed to validate msgs direct response", validated.error);
       throw validated.error;
     }
 
@@ -284,7 +414,7 @@ export class ObservableQueryMsgsDirect extends HasMapStore<ObservableQueryMsgsDi
     chainIdsToAddresses: Record<string, string>,
     slippageTolerancePercent: number,
     affiliateFeeBps: number,
-    affiliateFeeReceiver: string,
+    affiliateFeeReceiver: string | undefined,
     swapVenues: {
       readonly name: string;
       readonly chainId: string;

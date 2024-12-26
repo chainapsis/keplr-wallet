@@ -216,6 +216,38 @@ export const SwapVenues: {
     name: "chihuahua-white-whale",
     chainId: "chihuahua-1",
   },
+  {
+    name: "arbitrum-uniswap",
+    chainId: "eip155:42161",
+  },
+  {
+    name: "base-uniswap",
+    chainId: "eip155:8453",
+  },
+  {
+    name: "binance-uniswap",
+    chainId: "eip155:56",
+  },
+  {
+    name: "avalanche-uniswap",
+    chainId: "eip155:43114",
+  },
+  {
+    name: "optimism-uniswap",
+    chainId: "eip155:10",
+  },
+  {
+    name: "polygon-uniswap",
+    chainId: "eip155:137",
+  },
+  {
+    name: "blast-uniswap",
+    chainId: "eip155:81457",
+  },
+  {
+    name: "ethereum-uniswap",
+    chainId: "eip155:1",
+  },
 ];
 
 export const SwapFeeBps = {
@@ -225,7 +257,6 @@ export const SwapFeeBps = {
       chainId: "osmosis-1",
       address: "osmo1my4tk420gjmhggqwvvha6ey9390gqwfree2p4u",
     },
-    // TODO: 여기 밑으론 실제 receiver 주소로 변경해야 함
     {
       chainId: "injective-1",
       address: "inj1tfn0awxutuvrgqvme7g3e9nd2fe5r3uzqa4fjr",

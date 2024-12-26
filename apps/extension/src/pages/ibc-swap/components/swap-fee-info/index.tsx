@@ -29,8 +29,16 @@ export const SwapFeeInfo: FunctionComponent<{
   gasConfig: IGasConfig;
   feeConfig: IFeeConfig;
   gasSimulator: IGasSimulator;
+  isForEVMTx?: boolean;
 }> = observer(
-  ({ senderConfig, amountConfig, gasConfig, feeConfig, gasSimulator }) => {
+  ({
+    senderConfig,
+    amountConfig,
+    gasConfig,
+    feeConfig,
+    gasSimulator,
+    isForEVMTx,
+  }) => {
     const { queriesStore, chainStore, priceStore, uiConfigStore } = useStore();
 
     const theme = useTheme();
@@ -213,6 +221,8 @@ export const SwapFeeInfo: FunctionComponent<{
       }
     })();
 
+    const isShowingEstimatedFee = isForEVMTx && !!gasSimulator.gasEstimated;
+
     return (
       <React.Fragment>
         <Box
@@ -374,6 +384,18 @@ export const SwapFeeInfo: FunctionComponent<{
                       key={fee.currency.coinMinimalDenom}
                     >
                       {fee
+                        .quo(
+                          new Dec(
+                            isShowingEstimatedFee ? gasConfig.gas || 1 : 1
+                          )
+                        )
+                        .mul(
+                          new Dec(
+                            isShowingEstimatedFee
+                              ? gasSimulator.gasEstimated || 1
+                              : 1
+                          )
+                        )
                         .maxDecimals(6)
                         .trim(true)
                         .shrink(true)
@@ -506,6 +528,7 @@ export const SwapFeeInfo: FunctionComponent<{
               feeConfig={feeConfig}
               gasConfig={gasConfig}
               gasSimulator={gasSimulator}
+              isForEVMTx={isForEVMTx}
             />
           </Modal>
         </Box>
