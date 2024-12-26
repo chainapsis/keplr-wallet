@@ -800,6 +800,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 const chainIdInKeplr = isOnlyEvm
                   ? `eip155:${chainId}`
                   : chainId;
+                if (!chainStore.hasChain(chainIdInKeplr)) {
+                  continue;
+                }
+
                 const receiverAccount = accountStore.getAccount(chainIdInKeplr);
                 if (receiverAccount.walletStatus !== WalletStatus.Loaded) {
                   await receiverAccount.init();
