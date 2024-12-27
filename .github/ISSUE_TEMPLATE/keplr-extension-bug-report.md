@@ -32,7 +32,7 @@ If applicable, add screenshots to help explain your problem.
 **Device details (please complete the following information):**
  - OS: [e.g. OS X, Windows]
  - Browser: [e.g. Chrome Version 79.0.3945.79 (Official Build)]
- - Keplr Version: [e.g. 0.9.8 - find it on Extension tap(browser at the top right, click More(3 dots) > More tools > Extensions]
+ - Keplr Version: [e.g. 0.9.8 - find it on Extension tab (browser at the top right, click More(3 dots) > More tools > Extensions]
  - Hardware Wallet: [e.g. Ledger Nano S Firmware version 1.6.0]
 
 **Additional context**
