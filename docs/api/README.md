@@ -88,7 +88,7 @@ declare global {
 
 The `@keplr-wallet/types` package has the type definition related to Keplr.  
 If you're using TypeScript, run `npm install --save-dev @keplr-wallet/types` or `yarn add -D @keplr-wallet/types` to install `@keplr-wallet/types`.  
-Then, you can add the `@keplr-wallet/types` window to a global window object and register the Keplr related types.
+Then, you can add the `@keplr-wallet/types` window to a global window object and register the Keplr-related types.
 
 > Usage of any other packages besides @keplr-wallet/types is not recommended.
 > - Any other packages besides @keplr-wallet/types are actively being developed, backward compatibility is not in the scope of support.
@@ -133,7 +133,7 @@ If the webpage has permission and Keplr is unlocked, this function will return t
 }
 ```
 
-It also returns the nickname for the key store currently selected, which should allow the webpage to display the current key store selected to the user in a more convenient mane.  
+It also returns the nickname for the key store currently selected, which should allow the webpage to display the current key store selected to the user in a more convenient manner.  
 `isNanoLedger` field in the return type is used to indicate whether the selected account is from the Ledger Nano. Because current Cosmos app in the Ledger Nano doesn't support the direct (protobuf) format msgs, this field can be used to select the amino or direct signer. [Ref](./cosmjs.md#types-of-offline-signers)
 
 ### Sign Amino
@@ -175,7 +175,7 @@ sendTx(
 ```
 
 This function requests Keplr to delegate the broadcasting of the transaction to Keplr's LCD endpoints (rather than the webpage broadcasting the transaction).
-This method returns the transaction hash if it succeeds to broadcast, if else the method will throw an error.
+This method returns the transaction hash if it succeeds to broadcast, else the method will throw an error.
 When Keplr broadcasts the transaction, Keplr will send the notification on the transaction's progress.
 
 ### Request Signature for Arbitrary Message
@@ -226,7 +226,7 @@ signEthereum(
 )
 ```
 
-This is an experimental implementation of native Ethereum signing in Keplr to be used by dApps on EVM-compatible chains such as Evmos. 
+This is an experimental implementation of native Ethereum signing in Keplr to be used by dApps on EVM-compatible chains, such as Evmos. 
 
 It supports signing either [Personal Messages](https://eips.ethereum.org/EIPS/eip-191) or [Transactions](https://ethereum.org/en/developers/docs/transactions/), with plans to support [Typed Data](https://eips.ethereum.org/EIPS/eip-712) in the future.
 
@@ -237,7 +237,7 @@ Notes on Usage:
 ### Interaction Options
 
 ```javascript
-export interface KeplrIntereactionOptions {
+export interface KeplrInteractionOptions {
   readonly sign?: KeplrSignOptions;
 }
 
