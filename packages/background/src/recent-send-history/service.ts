@@ -1353,9 +1353,12 @@ export class RecentSendHistoryService {
       const txTracer = new TendermintTxTracer(chainInfo.rpc, "/websocket");
       txTracer.addEventListener("error", () => onFulfill(false));
       txTracer
-        .traceTx({
-          "tx.hash": history.txHash,
-        })
+        .traceTx(
+          {
+            "tx.hash": history.txHash,
+          },
+          true
+        )
         .then((res: any) => {
           txTracer.close();
 
