@@ -248,6 +248,12 @@ export const SwapVenues: {
     name: "ethereum-uniswap",
     chainId: "eip155:1",
   },
+  // Forma가 destination asset에 뜨게하기 위해 임시로 추가
+  // 실제 swap venue로 사용되진 않음
+  {
+    name: "temp-forma",
+    chainId: "eip155:984122",
+  },
 ];
 
 export const SwapFeeBps = {

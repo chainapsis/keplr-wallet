@@ -357,10 +357,13 @@ export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
         dest_asset_denom: this.destDenom.replace("erc20:", ""),
         dest_asset_chain_id: this.destChainId.replace("eip155:", ""),
         cumulative_affiliate_fee_bps: this.affiliateFeeBps.toString(),
-        swap_venues: this.swapVenues.map((swapVenue) => ({
-          ...swapVenue,
-          chainId: swapVenue.chainId.replace("eip155:", ""),
-        })),
+        swap_venues: this.swapVenues
+          .map((swapVenue) => ({
+            ...swapVenue,
+            chainId: swapVenue.chainId.replace("eip155:", ""),
+          }))
+          // 임시로 추가된 swap venue는 제외
+          .filter((swapVenue) => !swapVenue.name.startsWith("temp-")),
         allow_unsafe: true,
         smart_relay: true,
         go_fast: true,
