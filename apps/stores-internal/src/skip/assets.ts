@@ -119,11 +119,11 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
           } else {
             const coinMinimalDenom =
               asset.is_evm && asset.token_contract != null
-                ? `erc20:${asset.denom}`
+                ? `erc20:${asset.denom.toLowerCase()}`
                 : asset.denom;
             const originCoinMinimalDenom =
               asset.is_evm && asset.token_contract != null
-                ? `erc20:${asset.origin_denom}`
+                ? `erc20:${asset.origin_denom.toLowerCase()}`
                 : asset.denom;
             // TODO: Dec, Int 같은 곳에서 18 이상인 경우도 고려하도록 수정
             if (asset.decimals <= 18) {
@@ -214,11 +214,11 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
           } else {
             const coinMinimalDenom =
               asset.is_evm && asset.token_contract != null
-                ? `erc20:${asset.denom}`
+                ? `erc20:${asset.denom.toLowerCase()}`
                 : asset.denom;
             const originCoinMinimalDenom =
               asset.is_evm && asset.token_contract != null
-                ? `erc20:${asset.origin_denom}`
+                ? `erc20:${asset.origin_denom.toLowerCase()}`
                 : asset.denom;
             const currencyFound =
               chainInfo.findCurrencyWithoutReaction(coinMinimalDenom);
