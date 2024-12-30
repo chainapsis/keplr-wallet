@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/provider-extension",
-  "version": "0.12.165",
+  "version": "0.12.169",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -17,7 +17,7 @@
     "version": "zx ./scripts/lerna-lifecyle-version.mjs"
   },
   "dependencies": {
-    "@keplr-wallet/types": "0.12.165",
+    "@keplr-wallet/types": "0.12.169",
     "deepmerge": "^4.2.2",
     "long": "^4.0.0"
   },

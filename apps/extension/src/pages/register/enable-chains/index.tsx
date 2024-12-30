@@ -342,6 +342,11 @@ export const EnableChainsScene: FunctionComponent<{
         const enabledChainIdentifiers: string[] =
           chainStore.enabledChainIdentifiers;
 
+        // 모든 처리 이후에 모든 체인을 enable한다.
+        // 실제 로직은 계정이 만들어질때 최초에 자동으로 enable할 체인을 찾지 못할때
+        // (기존에 자산을 가진 계정을 찾을 수 없을때)
+        // 모든 체인을 eanble한다.
+        let enableAllChains = false;
         // noble과 ethereum도 default로 활성화되어야 한다.
         // 근데 enable-chains가 처음 register일때가 아니라
         // manage chain visibility로부터 왔을수도 있다
@@ -353,25 +358,7 @@ export const EnableChainsScene: FunctionComponent<{
           enabledChainIdentifiers[0] ===
             chainStore.chainInfos[0].chainIdentifier
         ) {
-          if (
-            chainStore.chainInfos.find((c) => c.chainIdentifier === "noble")
-          ) {
-            enabledChainIdentifiers.push("noble");
-          }
-
-          if (
-            chainStore.chainInfos.find((c) => c.chainIdentifier === "eip155:1")
-          ) {
-            enabledChainIdentifiers.push("eip155:1");
-          }
-
-          if (
-            chainStore.modularChainInfos.find(
-              (m) => "starknet" in m && m.chainId === "starknet:SN_MAIN"
-            )
-          ) {
-            enabledChainIdentifiers.push("starknet:SN_MAIN");
-          }
+          enableAllChains = true;
         }
 
         // 스타크넷 관련 체인들은 `candidateAddresses`에 추가되지 않으므로 여기서 enable 할지 판단한다.
@@ -390,6 +377,7 @@ export const EnableChainsScene: FunctionComponent<{
               );
 
             if (queryBalance && queryBalance.balance.toDec().gt(new Dec(0))) {
+              enableAllChains = false;
               enabledChainIdentifiers.push(
                 ChainIdHelper.parse(modularChainInfo.chainId).identifier
               );
@@ -453,11 +441,13 @@ export const EnableChainsScene: FunctionComponent<{
                   );
                 })
               ) {
+                enableAllChains = false;
                 enabledChainIdentifiers.push(chainInfo.chainIdentifier);
                 break;
               }
 
               if (isEVMOnlyChain && balance.balance.toDec().gt(new Dec(0))) {
+                enableAllChains = false;
                 enabledChainIdentifiers.push(chainInfo.chainIdentifier);
                 break;
               }
@@ -469,11 +459,18 @@ export const EnableChainsScene: FunctionComponent<{
                   bech32Address.address
                 );
               if (queryDelegations.delegationBalances.length > 0) {
+                enableAllChains = false;
                 enabledChainIdentifiers.push(chainInfo.chainIdentifier);
                 break;
               }
             }
           }
+        }
+
+        if (enableAllChains) {
+          return chainStore.modularChainInfosInListUI.map(
+            (chainInfo) => ChainIdHelper.parse(chainInfo.chainId).identifier
+          );
         }
 
         return [...new Set(enabledChainIdentifiers)];

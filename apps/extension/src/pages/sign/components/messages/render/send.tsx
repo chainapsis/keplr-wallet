@@ -10,7 +10,6 @@ import { Coin } from "@keplr-wallet/types";
 import { FormattedMessage } from "react-intl";
 import { MessageSendIcon } from "../../../../../components/icon";
 import { ItemLogo } from "../../../../main/token-detail/msg-items/logo";
-import { Buffer } from "buffer/";
 import { MsgSend as ThorMsgSend } from "@keplr-wallet/proto-types/thorchain/v1/types/msg_send";
 
 export const SendMessage: IMessageRenderer = {
@@ -27,12 +26,8 @@ export const SendMessage: IMessageRenderer = {
       if ("type" in msg && msg.type === "thorchain/MsgSend") {
         return {
           amount: msg.value.amount,
-          fromAddress: new Bech32Address(
-            Buffer.from(msg.value.from_address, "base64")
-          ).toBech32("thor"),
-          toAddress: new Bech32Address(
-            Buffer.from(msg.value.to_address, "base64")
-          ).toBech32("thor"),
+          fromAddress: msg.value.from_address,
+          toAddress: msg.value.to_address,
         };
       }
 
