@@ -97,7 +97,14 @@ const ExecuteContractMessagePretty: FunctionComponent<{
       <FormattedMessage
         id="page.sign.components.messages.execute-wasm-contract.paragraph"
         values={{
-          address: Bech32Address.shortenAddress(contract, 26),
+          address: Bech32Address.shortenAddress(
+            isSecretWasm
+              ? new Bech32Address(Buffer.from(contract, "base64")).toBech32(
+                  "secret"
+                )
+              : contract,
+            26
+          ),
           b: (...chunks: any) => <b>{chunks}</b>,
           ["only-sent-exist"]: (...chunks: any[]) =>
             coins.length > 0 ? chunks : "",

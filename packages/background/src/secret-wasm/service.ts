@@ -75,19 +75,6 @@ export class SecretWasmService {
     return utils.getTxEncryptionKey(nonce);
   }
 
-  async isNewApi(chainId: string): Promise<boolean> {
-    const chainInfo = await this.chainsService.getChainInfoOrThrow(chainId);
-
-    // XXX: Keplr should generate the seed deterministically according to the account.
-    // Otherwise, it will lost the encryption/decryption key if Keplr is uninstalled or local storage is cleared.
-    // For now, use the signature of some string to generate the seed.
-    // It need to more research.
-    const seed = await this.getSeed(chainInfo);
-
-    const utils = this.getEnigmaUtils(chainInfo, seed);
-    return utils.isNewApi;
-  }
-
   async encrypt(
     chainId: string,
     contractCodeHash: string,

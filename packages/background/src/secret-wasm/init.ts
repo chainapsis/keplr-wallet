@@ -4,7 +4,6 @@ import {
   GetTxEncryptionKeyMsg,
   ReqeustEncryptMsg,
   RequestDecryptMsg,
-  IsNewApiMsg,
 } from "./messages";
 import { SecretWasmService } from "./service";
 import { ROUTE } from "./constants";
@@ -20,7 +19,6 @@ export function init(
   router.registerMessage(ReqeustEncryptMsg);
   router.registerMessage(RequestDecryptMsg);
   router.registerMessage(GetTxEncryptionKeyMsg);
-  router.registerMessage(IsNewApiMsg);
 
   router.addHandler(ROUTE, getHandler(service, permissionInteractionService));
 }

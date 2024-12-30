@@ -765,18 +765,6 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     });
   }
 
-  async enigmaIsNewApi(chainId: string): Promise<boolean> {
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "secret-wasm",
-      "is-new-api-msg",
-      {
-        chainId,
-      }
-    );
-  }
-
   async enigmaEncrypt(
     chainId: string,
     contractCodeHash: string,

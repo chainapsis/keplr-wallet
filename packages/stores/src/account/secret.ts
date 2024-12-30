@@ -4,16 +4,10 @@ import { Buffer } from "buffer/";
 import { CoinPrimitive } from "../common";
 import { ChainGetter } from "../chain";
 import { DenomHelper } from "@keplr-wallet/common";
-import { MsgExecuteContract as MsgExecuteContractV1Beta1 } from "@keplr-wallet/proto-types/secret/compute/v1beta1/msg";
-import { MsgExecuteContract as MsgExecuteContractV1 } from "@keplr-wallet/proto-types/secret/compute/v1/msg";
+import { MsgExecuteContract } from "@keplr-wallet/proto-types/secret/compute/v1beta1/msg";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
-import {
-  AppCurrency,
-  KeplrSignOptions,
-  StdFee,
-  SecretUtils,
-} from "@keplr-wallet/types";
+import { AppCurrency, KeplrSignOptions, StdFee } from "@keplr-wallet/types";
 import { DeepPartial, DeepReadonly, Optional } from "utility-types";
 import { CosmosAccount } from "./cosmos";
 import deepmerge from "deepmerge";
@@ -220,76 +214,42 @@ export class SecretAccountImpl {
     return this.base.cosmos.makeTx(
       type,
       async () => {
-        const keplr = await this.base.getKeplr();
-        if (!keplr) {
-          throw new Error("Can't get the Keplr API");
-        }
-
-        const enigmaUtils = keplr.getEnigmaUtils(this.chainId);
-
         encryptedMsg = await this.encryptSecretContractMsg(
           contractAddress,
-          obj,
-          enigmaUtils
+          obj
         );
 
-        const msg = (await enigmaUtils.isNewApi())
-          ? {
-              type: this.msgOpts.executeSecretWasm.type,
-              value: {
-                sender: Buffer.from(
-                  Bech32Address.fromBech32(this.base.bech32Address).address
-                ).toString("base64"),
-                contract: Buffer.from(
-                  Bech32Address.fromBech32(contractAddress).address
-                ).toString("base64"),
-                // callback_code_hash: "",
-                msg: Buffer.from(encryptedMsg).toString("base64"),
-                sent_funds: sentFunds,
-                // callback_sig: null,
-              },
-            }
-          : {
-              type: this.msgOpts.executeSecretWasm.type,
-              value: {
-                sender: this.base.bech32Address,
-                contract: contractAddress,
-                // callback_code_hash: "",
-                msg: Buffer.from(encryptedMsg).toString("base64"),
-                sent_funds: sentFunds,
-                // callback_sig: null,
-              },
-            };
+        const msg = {
+          type: this.msgOpts.executeSecretWasm.type,
+          value: {
+            sender: Buffer.from(
+              Bech32Address.fromBech32(this.base.bech32Address).address
+            ).toString("base64"),
+            contract: Buffer.from(
+              Bech32Address.fromBech32(contractAddress).address
+            ).toString("base64"),
+            // callback_code_hash: "",
+            msg: Buffer.from(encryptedMsg).toString("base64"),
+            sent_funds: sentFunds,
+            // callback_sig: null,
+          },
+        };
 
-        const protoMsg = (await enigmaUtils.isNewApi())
-          ? {
-              // type url must be with v1beta1
+        return {
+          aminoMsgs: [msg],
+          protoMsgs: [
+            {
               typeUrl: "/secret.compute.v1beta1.MsgExecuteContract",
-              value: MsgExecuteContractV1.encode(
-                MsgExecuteContractV1.fromPartial({
+              value: MsgExecuteContract.encode(
+                MsgExecuteContract.fromPartial({
                   sender: Buffer.from(msg.value.sender, "base64"),
                   contract: Buffer.from(msg.value.contract, "base64"),
                   msg: Buffer.from(msg.value.msg, "base64"),
                   sentFunds: msg.value.sent_funds,
                 })
               ).finish(),
-            }
-          : {
-              typeUrl: "/secret.compute.v1beta1.MsgExecuteContract",
-              value: MsgExecuteContractV1Beta1.encode(
-                MsgExecuteContractV1Beta1.fromPartial({
-                  sender: Bech32Address.fromBech32(msg.value.sender).address,
-                  contract: Bech32Address.fromBech32(msg.value.contract)
-                    .address,
-                  msg: Buffer.from(msg.value.msg, "base64"),
-                  sentFunds: msg.value.sent_funds,
-                })
-              ).finish(),
-            };
-
-        return {
-          aminoMsgs: [msg],
-          protoMsgs: [protoMsg],
+            },
+          ],
         };
       },
       preOnTxEvents
@@ -321,76 +281,42 @@ export class SecretAccountImpl {
     await this.base.cosmos.sendMsgs(
       type,
       async () => {
-        const keplr = await this.base.getKeplr();
-        if (!keplr) {
-          throw new Error("Can't get the Keplr API");
-        }
-
-        const enigmaUtils = keplr.getEnigmaUtils(this.chainId);
-
         encryptedMsg = await this.encryptSecretContractMsg(
           contractAddress,
-          obj,
-          enigmaUtils
+          obj
         );
 
-        const msg = (await enigmaUtils.isNewApi())
-          ? {
-              type: this.msgOpts.executeSecretWasm.type,
-              value: {
-                sender: Buffer.from(
-                  Bech32Address.fromBech32(this.base.bech32Address).address
-                ).toString("base64"),
-                contract: Buffer.from(
-                  Bech32Address.fromBech32(contractAddress).address
-                ).toString("base64"),
-                // callback_code_hash: "",
-                msg: Buffer.from(encryptedMsg).toString("base64"),
-                sent_funds: sentFunds,
-                // callback_sig: null,
-              },
-            }
-          : {
-              type: this.msgOpts.executeSecretWasm.type,
-              value: {
-                sender: this.base.bech32Address,
-                contract: contractAddress,
-                // callback_code_hash: "",
-                msg: Buffer.from(encryptedMsg).toString("base64"),
-                sent_funds: sentFunds,
-                // callback_sig: null,
-              },
-            };
+        const msg = {
+          type: this.msgOpts.executeSecretWasm.type,
+          value: {
+            sender: Buffer.from(
+              Bech32Address.fromBech32(this.base.bech32Address).address
+            ).toString("base64"),
+            contract: Buffer.from(
+              Bech32Address.fromBech32(contractAddress).address
+            ).toString("base64"),
+            // callback_code_hash: "",
+            msg: Buffer.from(encryptedMsg).toString("base64"),
+            sent_funds: sentFunds,
+            // callback_sig: null,
+          },
+        };
 
-        const protoMsg = (await enigmaUtils.isNewApi())
-          ? {
-              // type url must be with v1beta1
+        return {
+          aminoMsgs: [msg],
+          protoMsgs: [
+            {
               typeUrl: "/secret.compute.v1beta1.MsgExecuteContract",
-              value: MsgExecuteContractV1.encode(
-                MsgExecuteContractV1.fromPartial({
+              value: MsgExecuteContract.encode(
+                MsgExecuteContract.fromPartial({
                   sender: Buffer.from(msg.value.sender, "base64"),
                   contract: Buffer.from(msg.value.contract, "base64"),
                   msg: Buffer.from(msg.value.msg, "base64"),
                   sentFunds: msg.value.sent_funds,
                 })
               ).finish(),
-            }
-          : {
-              typeUrl: "/secret.compute.v1beta1.MsgExecuteContract",
-              value: MsgExecuteContractV1Beta1.encode(
-                MsgExecuteContractV1Beta1.fromPartial({
-                  sender: Bech32Address.fromBech32(msg.value.sender).address,
-                  contract: Bech32Address.fromBech32(msg.value.contract)
-                    .address,
-                  msg: Buffer.from(msg.value.msg, "base64"),
-                  sentFunds: msg.value.sent_funds,
-                })
-              ).finish(),
-            };
-
-        return {
-          aminoMsgs: [msg],
-          protoMsgs: [protoMsg],
+            },
+          ],
         };
       },
       memo,
@@ -409,8 +335,7 @@ export class SecretAccountImpl {
   protected async encryptSecretContractMsg(
     contractAddress: string,
     // eslint-disable-next-line @typescript-eslint/ban-types
-    obj: object,
-    enigmaUtils: SecretUtils
+    obj: object
   ): Promise<Uint8Array> {
     const queryContractCodeHashResponse =
       await this.queries.secret.querySecretContractCodeHash
@@ -425,6 +350,12 @@ export class SecretAccountImpl {
 
     const contractCodeHash = queryContractCodeHashResponse.data.code_hash;
 
+    const keplr = await this.base.getKeplr();
+    if (!keplr) {
+      throw new Error("Can't get the Keplr API");
+    }
+
+    const enigmaUtils = keplr.getEnigmaUtils(this.chainId);
     return await enigmaUtils.encrypt(contractCodeHash, obj);
   }
 

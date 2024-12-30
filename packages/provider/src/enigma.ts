@@ -9,10 +9,6 @@ export class KeplrEnigmaUtils implements SecretUtils {
     protected readonly keplr: Keplr
   ) {}
 
-  async isNewApi(): Promise<boolean> {
-    return await this.keplr.enigmaIsNewApi(this.chainId);
-  }
-
   async getPubkey(): Promise<Uint8Array> {
     return await this.keplr.getEnigmaPubKey(this.chainId);
   }

@@ -430,10 +430,6 @@ export class KeplrWalletConnectV2 implements Keplr {
     throw new Error("Not yet implemented");
   }
 
-  enigmaIsNewApi(_chainId: string): Promise<boolean> {
-    throw new Error("Not yet implemented");
-  }
-
   experimentalSignEIP712CosmosTx_v0(
     _chainId: string,
     _signer: string,

@@ -504,10 +504,6 @@ export class Keplr implements IKeplr {
     ]);
   }
 
-  async enigmaIsNewApi(chainId: string): Promise<boolean> {
-    return await Keplr.requestMethod("enigmaIsNewApi", [chainId]);
-  }
-
   getEnigmaUtils(chainId: string): SecretUtils {
     if (this.enigmaUtils.has(chainId)) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
