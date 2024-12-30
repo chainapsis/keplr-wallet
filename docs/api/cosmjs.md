@@ -9,63 +9,113 @@ Please check the [How to detect Keplr](./README.md#how-to-detect-keplr) first be
 
 ## Connecting with CosmJS
 
-CosmJS link: [https://www.npmjs.com/package/@cosmjs/launchpad](https://www.npmjs.com/package/@cosmjs/launchpad), [https://www.npmjs.com/package/@cosmjs/stargate](https://www.npmjs.com/package/@cosmjs/stargate)
+CosmJS official documentation: [https://cosmos.github.io/cosmjs/](https://cosmos.github.io/cosmjs/)
 
-You can connect Keplr to CosmJS using the `OfflineSigner`.
+Latest packages:
+- Stargate client: [@cosmjs/stargate](https://www.npmjs.com/package/@cosmjs/stargate)
+- Tendermint client: [@cosmjs/tendermint-rpc](https://www.npmjs.com/package/@cosmjs/tendermint-rpc)
+
+### Basic Connection
 
 ```javascript
-// Enabling before using the Keplr is recommended.
-// This method will ask the user whether or not to allow access if they haven't visited this website.
-// Also, it will request user to unlock the wallet if the wallet is locked.
-await window.keplr.enable(chainId);
+try {
+  // Enabling before using the Keplr is recommended.
+  await window.keplr.enable(chainId);
 
-const offlineSigner = window.getOfflineSigner(chainId);
+  const offlineSigner = window.getOfflineSigner(chainId);
+  const accounts = await offlineSigner.getAccounts();
 
-// You can get the address/public keys by `getAccounts` method.
-// It can return the array of address/public key.
-// But, currently, Keplr extension manages only one address/public key pair.
-// XXX: This line is needed to set the sender address for SigningCosmosClient.
-const accounts = await offlineSigner.getAccounts();
-
-// Initialize the gaia api with the offline signer that is injected by Keplr extension.
-const cosmJS = new SigningCosmosClient(
-    "https://lcd-cosmoshub.keplr.app/rest",
-    accounts[0].address,
-    offlineSigner,
-);
+  // Initialize the Stargate client
+  const cosmJS = await SigningStargateClient.connectWithSigner(
+    "https://rpc-endpoint.example.com",
+    offlineSigner
+  );
+  
+  console.log("Connected to CosmJS with address:", accounts[0].address);
+} catch (error) {
+  console.error("Error connecting to Keplr:", error);
+}
 ```
 
-To get the `OfflineSigner`, you may use `keplr.getOfflineSigner(chainId)` or `window.getOfflineSigner(chainId)`. (`window.getOfflineSigner` is an alias that runs `keplr.getOfflineSigner` and returns the value)
+### Error Handling
 
-The `window.keplr.enable(chainId)` method will request the user to unlock their Keplr extension if it's locked. If the user has not given permission to connect their extension to the website, it will first ask to connect the website.
+When working with Keplr and CosmJS, you should handle these common errors:
 
-If the user cancels the unlock or rejects the permission to connect, an error will be thrown.
-
-If the extension is already unlocked and the website has permission to connect, no action will happen and resolve.
-
-`window.keplr.enable(chainId)` is not mandatory. Even if the method wasn't called, if an API that requests access to Keplr is called the flow above will automatically run. However, it is recommended that `window.keplr.enable(chainId)` is first run.
+```javascript
+try {
+  // Your CosmJS code
+} catch (error) {
+  if (error instanceof KeplrConnectionError) {
+    console.error("Failed to connect to Keplr");
+  } else if (error instanceof SigningError) {
+    console.error("User rejected the transaction");
+  } else {
+    console.error("Unknown error:", error);
+  }
+}
+```
 
 ## Types of Offline Signers
 
-In CosmJS, there are two types of Signers: OfflineSigner and OfflineDirectSigner. OfflineSigner is used to sign SignDoc serialized with Amino in Cosmos SDK Launchpad (Cosmos SDK v0.39.x or below). OfflineDirectSigner is used to sign Protobuf encoded SignDoc.
+Keplr supports multiple types of signers:
 
-Keplr supports both types of Signers. Keplr’s `keplr.getOfflineSigner(chainId)` or `window.getOfflineSigner(chainId)` returns a Signer that satisfies both the OfflineSigner and OfflineDirectSigner. Therefore, when using CosmJS with this Signer, Amino is used for Launchpad chains and Protobuf is used for Stargate chains.
+1. **Combined Signer (Default)**
+```javascript
+const signer = window.getOfflineSigner(chainId);
+// Works with both Amino and Protobuf
+```
 
-However, if the msg to be sent is able to be serialized/deserialized using Amino codec you can use a signer for Amino. Also, as there are some limitations to protobuf type sign doc, there may be cases when Amino is necessary. For example, Protobuf formatted sign doc is currently not supported by Ledger Nano’s Cosmos app. Also, because protobuf sign doc is binary formatted, msgs not natively supported by Keplr may not be human-readable.
+2. **Amino-Only Signer**
+```javascript
+const aminoSigner = window.getOfflineSignerOnlyAmino(chainId);
+// Forces Amino encoding
+```
 
-If you’d like to enforce the use of Amino, you can use the following APIs: `keplr.getOfflineSignerOnlyAmino(chainId)` or `window.getOfflineSignerOnlyAmino(chainId: string)`. Because this will always return an Amino compatible signer, any CosmJS requested msg that is Amino compatible will request an Amino SignDoc to Keplr.
+3. **Auto-detecting Signer**
+```javascript
+const autoSigner = await window.getOfflineSignerAuto(chainId);
+// Automatically chooses based on account type
+```
 
-Also, `keplr.getOfflineSignerAuto(chainId: string): Promise<OfflineSigner | OfflineDirectSigner>` or `window.getOfflineSignerAuto(chainId: string): Promise<OfflineSigner | OfflineDirectSigner>` API is supported. Please note that the value returned is async. This API automatically returns a signer that only supports Amino if the account is a Ledger-based account, and returns a signer that is compatible for both Amino and Protobuf if the account is a mnemonic/private key-based account. Because this API is affected by the type of the connected Keplr account, if [keplr_keystorechange](./README.md#change-key-store-event) event is used to detect account changes the signer must be changed using the API when this event has been triggered.
+### When to Use Each Signer
 
-## Use with Stargate
+- Use **Combined Signer** for most modern applications
+- Use **Amino-Only Signer** when:
+  - Working with Ledger devices
+  - Using chains that don't support Protobuf
+  - Need human-readable transaction data
+- Use **Auto-detecting Signer** when supporting multiple account types
 
-Keplr's `OfflineSigner` implements the `OfflineDirectSigner` interface. Use `SigningStargateClient` with Keplr's `OfflineSigner`, and Keplr will sign the transaction in Proto sign doc format.
+## Advanced Usage
 
-### Example
-Refer to the [keplr-example](https://github.com/chainapsis/keplr-example/blob/master/src/main.js) repository for example code on how to integrate Keplr with CosmJS.
+### Custom Gas Settings
+```javascript
+const tx = await cosmJS.sendTokens(
+  recipient,
+  amount,
+  {
+    gasLimit: "200000",
+    gasPriceInFeeDenom: "0.025",
+  }
+);
+```
 
 ### Interaction Options
-You can use Keplr native API’s to set interaction options even when using CosmJS. Please refer to [this section](./#interaction-options).
+You can customize the user experience using [Interaction Options](./#interaction-options).
 
-### Adding a custom blockchain to Keplr
-If Keplr doesn't natively support your blockchain within the extension, please refer to the [Suggest chain](./suggest-chain.md#suggest-chain) section.
+### Chain Registration
+For adding custom blockchains to Keplr, see the [Suggest Chain](./suggest-chain.md) documentation.
+
+## Best Practices
+
+1. Always check for Keplr availability before usage
+2. Implement proper error handling
+3. Use appropriate signer type for your use case
+4. Test with multiple account types (mnemonic, ledger, etc.)
+5. Monitor [keplr_keystorechange](./README.md#change-key-store-event) events
+
+## Examples
+
+For complete implementation examples, check our:
+- [Keplr Example Repository](https://github.com/chainapsis/keplr-example)
+- [CosmJS Integration Guide](https://cosmos.github.io/cosmjs/latest/stargate/classes/SigningStargateClient.html)
