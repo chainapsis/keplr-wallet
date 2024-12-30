@@ -110,6 +110,7 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
             denom: coinMinimalDenom,
             reaction,
           });
+          this.unknownDenoms = this.unknownDenoms.slice();
           this.registrationInProgressCurrencyMap.set(coinMinimalDenom, true);
         });
       }
@@ -166,6 +167,7 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
                 prev = this.unknownDenoms[index];
                 if (generator.done) {
                   this.unknownDenoms.splice(index, 1);
+                  this.unknownDenoms = this.unknownDenoms.slice();
                 }
               }
 
@@ -241,7 +243,10 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
     if (index >= 0) {
       const currency = this.registeredCurrenciesNoReaction[index];
       this.registeredCurrenciesNoReaction.splice(index, 1);
+      this.registeredCurrenciesNoReaction =
+        this.registeredCurrenciesNoReaction.slice();
       this.registeredCurrencies.push(currency);
+      this.registeredCurrencies = this.registeredCurrencies.slice();
     }
   }
 
@@ -273,6 +278,7 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
     for (const currency of currencies) {
       if (!currencyMap.has(currency.coinMinimalDenom)) {
         this.registeredCurrencies.push(currency);
+        this.registeredCurrencies = this.registeredCurrencies.slice();
       }
     }
   }
@@ -406,10 +412,12 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
           sortedJsonByKeyStringify(prev) !== sortedJsonByKeyStringify(currency)
         ) {
           this.registeredCurrencies.splice(index, 1, currency);
+          this.registeredCurrencies = this.registeredCurrencies.slice();
         }
       }
     } else {
       this.registeredCurrencies.push(currency);
+      this.registeredCurrencies = this.registeredCurrencies.slice();
     }
   }
 
@@ -426,10 +434,14 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
           sortedJsonByKeyStringify(prev) !== sortedJsonByKeyStringify(currency)
         ) {
           this.registeredCurrenciesNoReaction.splice(index, 1, currency);
+          this.registeredCurrenciesNoReaction =
+            this.registeredCurrenciesNoReaction.slice();
         }
       }
     } else {
       this.registeredCurrenciesNoReaction.push(currency);
+      this.registeredCurrenciesNoReaction =
+        this.registeredCurrenciesNoReaction.slice();
     }
   }
 
