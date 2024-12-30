@@ -561,6 +561,7 @@
   "page.main.components.ibc-history-view.ibc-swap.failed.in-progress": "교환에 실패했습니다. 토큰을 환불 중입니다",
   "page.main.components.ibc-history-view.ibc-swap.failed.complete": "토큰 교환 실패. 환불이 완료되었습니다",
   "page.main.components.ibc-history-view.ibc-swap.failed.after-swap.complete": "교환에는 성공했으나 목적지로 전송에 실패하였습니다. {assets}가 마지막 경유지 {chain}로 반환되었습니다.",
+  "page.main.components.ibc-history-view.skip-swap.failed.after-transfer.complete": "전송에는 성공했으나 목적지에서 교환에 실패하였습니다. {assets}가 마지막 경유지 {chain}로 반환되었습니다.",
   "page.main.components.ibc-transfer-view.title": "고급 IBC 전송",
   "page.main.components.ibc-transfer-view.tooltip": "릴레이어가 비활성 상태일 경우 전송이 더 오래 걸릴 수 있습니다. 이 경우 해당 커뮤니티를 방문하여 릴레이어 담당 벨리데이터에게 연락해야 합니다.",
   "page.main.components.ibc-transfer-view.paragraph": "토큰을 IBC를 통해 전송하세요",
