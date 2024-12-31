@@ -892,9 +892,10 @@ const SkipHistoryViewItem: FunctionComponent<{
             {(() => {
               if (failedRouteIndex >= 0) {
                 if (
-                  history.trackStatus === "STATE_COMPLETED_ERROR" &&
-                  history.transferAssetRelease &&
-                  history.transferAssetRelease.released
+                  (history.trackStatus === "STATE_COMPLETED_ERROR" &&
+                    history.transferAssetRelease &&
+                    history.transferAssetRelease.released) ||
+                  history.swapRefundInfo
                 ) {
                   return intl.formatMessage({
                     id: "page.main.components.ibc-history-view.ibc-swap.item.refund.succeed",
@@ -1105,18 +1106,50 @@ const SkipHistoryViewItem: FunctionComponent<{
                 if (
                   history.trackDone &&
                   history.trackError &&
-                  transferAssetRelease
+                  transferAssetRelease &&
+                  transferAssetRelease.released
                 ) {
-                  // 자산이 성공적으로 반환된 경우
-                  if (transferAssetRelease && transferAssetRelease.released) {
-                    const isOnlyEvm = chainStore.hasChain(
-                      `eip155:${transferAssetRelease.chain_id}`
-                    );
-                    const releasedChain = chainStore.getChain(
-                      isOnlyEvm
-                        ? `eip155:${transferAssetRelease.chain_id}`
-                        : transferAssetRelease.chain_id
-                    );
+                  if (history.swapRefundInfo) {
+                    if (chainStore.hasChain(history.swapRefundInfo.chainId)) {
+                      const swapRefundChain = chainStore.getChain(
+                        history.swapRefundInfo.chainId
+                      );
+
+                      return intl.formatMessage(
+                        {
+                          id: "page.main.components.ibc-history-view.skip-swap.failed.after-transfer.complete",
+                        },
+                        {
+                          chain: swapRefundChain.chainName,
+                          assets: history.swapRefundInfo.amount
+                            .map((amount) => {
+                              return new CoinPretty(
+                                chainStore
+                                  .getChain(history.swapRefundInfo!.chainId)
+                                  .forceFindCurrency(amount.denom),
+                                amount.amount
+                              )
+                                .hideIBCMetadata(true)
+                                .shrink(true)
+                                .maxDecimals(6)
+                                .inequalitySymbol(true)
+                                .trim(true)
+                                .toString();
+                            })
+                            .join(", "),
+                        }
+                      );
+                    }
+                  }
+
+                  const isOnlyEvm = parseInt(transferAssetRelease.chain_id) > 0;
+                  const chainIdInKeplr = isOnlyEvm
+                    ? `eip155:${transferAssetRelease.chain_id}`
+                    : transferAssetRelease.chain_id;
+
+                  if (chainStore.hasChain(chainIdInKeplr)) {
+                    const releasedChain = chainStore.getChain(chainIdInKeplr);
+
                     const destinationDenom = (() => {
                       const currency = releasedChain.forceFindCurrency(
                         transferAssetRelease.denom
@@ -1134,7 +1167,7 @@ const SkipHistoryViewItem: FunctionComponent<{
 
                     return intl.formatMessage(
                       {
-                        id: "page.main.components.ibc-history-view.ibc-swap.failed.after-swap.complete", // TODO: Change the content
+                        id: "page.main.components.ibc-history-view.skip-swap.failed.after-transfer.complete",
                       },
                       {
                         chain: releasedChain.chainName,

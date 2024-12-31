@@ -1733,8 +1733,6 @@ export class RecentSendHistoryService {
           case "STATE_ABANDONED":
           case "STATE_COMPLETED_ERROR":
           case "STATE_COMPLETED_SUCCESS":
-            history.trackDone = true;
-
             // 성공 상태인데 라우트가 남았다면 마지막 라우트로 이동
             if (
               state === "STATE_COMPLETED_SUCCESS" &&
@@ -1746,6 +1744,7 @@ export class RecentSendHistoryService {
             if (receiveTxHash) {
               this.trackDestinationAssetAmount(id, receiveTxHash, onFulfill);
             } else {
+              history.trackDone = true;
               onFulfill();
             }
             break;
@@ -1824,96 +1823,124 @@ export class RecentSendHistoryService {
                 id: 1,
               }),
             }).then((res) => {
-              let isFoundFromCall = false;
-              if (res.data.result) {
-                const searchForTransfers = (calls: any) => {
-                  for (const call of calls) {
-                    if (
-                      call.type === "CALL" &&
-                      call.to.toLowerCase() === history.recipient.toLowerCase()
-                    ) {
-                      const isERC20Transfer =
-                        call.input.startsWith("0xa9059cbb");
-                      const value = BigInt(
-                        isERC20Transfer
-                          ? `0x${call.input.substring(74)}`
-                          : call.value
-                      );
+              runInAction(() => {
+                let isFoundFromCall = false;
+                if (res.data.result) {
+                  const searchForTransfers = (calls: any) => {
+                    for (const call of calls) {
+                      if (
+                        call.type === "CALL" &&
+                        call.to.toLowerCase() ===
+                          history.recipient.toLowerCase()
+                      ) {
+                        const isERC20Transfer =
+                          call.input.startsWith("0xa9059cbb");
+                        const value = BigInt(
+                          isERC20Transfer
+                            ? `0x${call.input.substring(74)}`
+                            : call.value
+                        );
 
+                        history.resAmount.push([
+                          {
+                            amount: value.toString(10),
+                            denom: history.destinationAsset.denom,
+                          },
+                        ]);
+                        isFoundFromCall = true;
+                      }
+
+                      if (call.calls && call.calls.length > 0) {
+                        searchForTransfers(call.calls);
+                      }
+                    }
+                  };
+
+                  searchForTransfers(res.data.result.calls || []);
+                }
+
+                if (isFoundFromCall) {
+                  history.trackDone = true;
+                  return;
+                }
+
+                const logs = txReceipt.logs;
+                const transferTopic = id("Transfer(address,address,uint256)");
+                const withdrawTopic = id("Withdrawal(address,uint256)");
+                const hyperlaneReceiveTopic = id(
+                  "ReceivedTransferRemote(uint32,bytes32,uint256)"
+                );
+                for (const log of logs) {
+                  if (log.topics[0] === transferTopic) {
+                    const to = "0x" + log.topics[2].slice(26);
+                    if (to.toLowerCase() === history.recipient.toLowerCase()) {
+                      const destinationAssetDenom =
+                        history.destinationAsset.denom.replace("erc20:", "");
+
+                      const amount = BigInt(log.data).toString(10);
+                      if (log.address === destinationAssetDenom) {
+                        history.resAmount.push([
+                          {
+                            amount,
+                            denom: history.destinationAsset.denom,
+                          },
+                        ]);
+                      } else {
+                        console.log("refunded", log.address);
+                        // Transfer 토픽인 경우엔 ERC20의 tranfer 호출일텐데
+                        // 받을 토큰의 컨트랙트가 아닌 다른 컨트랙트에서 호출된 경우는 Swap을 실패한 것으로 추측
+                        // 고로 실제로 받은 토큰의 컨트랙트 주소로 환불 정보에 저장한다.
+                        history.trackError = "Swap failed";
+                        history.swapRefundInfo = {
+                          chainId: history.destinationChainId,
+                          amount: [
+                            {
+                              amount,
+                              denom: `erc20:${log.address.toLowerCase()}`,
+                            },
+                          ],
+                        };
+                      }
+
+                      history.trackDone = true;
+                      return;
+                    }
+                  } else if (log.topics[0] === withdrawTopic) {
+                    const to = "0x" + log.topics[1].slice(26);
+                    if (to.toLowerCase() === txReceipt.to.toLowerCase()) {
+                      const amount = BigInt(log.data).toString(10);
+                      history.resAmount.push([
+                        { amount, denom: history.destinationAsset.denom },
+                      ]);
+                      history.trackDone = true;
+                      return;
+                    }
+                  } else if (log.topics[0] === hyperlaneReceiveTopic) {
+                    const to = "0x" + log.topics[2].slice(26);
+                    if (to.toLowerCase() === history.recipient.toLowerCase()) {
+                      const amount = BigInt(log.data).toString(10);
+                      // Hyperlane을 통해 Forma로 TIA를 받는 경우 토큰 수량이 decimal 6으로 기록되는데,
+                      // Forma에서는 decimal 18이기 때문에 12자리 만큼 0을 붙여준다.
                       history.resAmount.push([
                         {
-                          amount: value.toString(10),
+                          amount:
+                            history.destinationAsset.denom === "forma-native"
+                              ? `${amount}000000000000`
+                              : amount,
                           denom: history.destinationAsset.denom,
                         },
                       ]);
-                      isFoundFromCall = true;
+                      history.trackDone = true;
+                      return;
                     }
-
-                    if (call.calls && call.calls.length > 0) {
-                      searchForTransfers(call.calls);
-                    }
-                  }
-                };
-
-                searchForTransfers(res.data.result.calls || []);
-              }
-
-              if (isFoundFromCall) {
-                return;
-              }
-
-              const logs = txReceipt.logs;
-              const transferTopic = id("Transfer(address,address,uint256)");
-              const withdrawTopic = id("Withdrawal(address,uint256)");
-              const hyperlaneReceiveTopic = id(
-                "ReceivedTransferRemote(uint32,bytes32,uint256)"
-              );
-              for (const log of logs) {
-                if (log.topics[0] === transferTopic) {
-                  const to = "0x" + log.topics[2].slice(26);
-                  if (to.toLowerCase() === history.recipient.toLowerCase()) {
-                    const amount = BigInt(log.data).toString(10);
-                    history.resAmount.push([
-                      {
-                        amount,
-                        denom: history.destinationAsset.denom,
-                      },
-                    ]);
-
-                    return;
-                  }
-                } else if (log.topics[0] === withdrawTopic) {
-                  const to = "0x" + log.topics[1].slice(26);
-                  if (to.toLowerCase() === txReceipt.to.toLowerCase()) {
-                    const amount = BigInt(log.data).toString(10);
-                    history.resAmount.push([
-                      { amount, denom: history.destinationAsset.denom },
-                    ]);
-                    return;
-                  }
-                } else if (log.topics[0] === hyperlaneReceiveTopic) {
-                  const to = "0x" + log.topics[2].slice(26);
-                  if (to.toLowerCase() === history.recipient.toLowerCase()) {
-                    const amount = BigInt(log.data).toString(10);
-                    // Hyperlane을 통해 Forma로 TIA를 받는 경우 토큰 수량이 decimal 6으로 기록되는데,
-                    // Forma에서는 decimal 18이기 때문에 12자리 만큼 0을 붙여준다.
-                    history.resAmount.push([
-                      {
-                        amount:
-                          history.destinationAsset.denom === "forma-native"
-                            ? `${amount}000000000000`
-                            : amount,
-                        denom: history.destinationAsset.denom,
-                      },
-                    ]);
-                    return;
                   }
                 }
-              }
+              });
             });
           }
         })
         .finally(() => {
+          history.trackDone = true;
           onFulfill();
         });
     } else {
@@ -1929,21 +1956,24 @@ export class RecentSendHistoryService {
           if (!res) {
             return;
           }
+          runInAction(() => {
+            const txs = res.txs
+              ? res.txs.map((res: any) => res.tx_result || res)
+              : [res.tx_result || res];
+            for (const tx of txs) {
+              const resAmount = this.getIBCSwapResAmountFromTx(
+                tx,
+                history.recipient
+              );
 
-          const txs = res.txs
-            ? res.txs.map((res: any) => res.tx_result || res)
-            : [res.tx_result || res];
-          for (const tx of txs) {
-            const resAmount = this.getIBCSwapResAmountFromTx(
-              tx,
-              history.recipient
-            );
-
-            history.resAmount.push(resAmount);
-            return;
-          }
+              history.resAmount.push(resAmount);
+              history.trackDone = true;
+              return;
+            }
+          });
         })
         .finally(() => {
+          history.trackDone = true;
           onFulfill();
         });
     }

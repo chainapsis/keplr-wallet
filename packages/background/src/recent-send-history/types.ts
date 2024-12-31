@@ -135,6 +135,14 @@ export type SkipHistory = {
     denom: string;
   }[][];
 
+  swapRefundInfo?: {
+    chainId: string;
+    amount: {
+      amount: string;
+      denom: string;
+    }[];
+  };
+
   transferAssetRelease?: TransferAssetRelease; // 라우팅 중간에 실패한 경우, 사용자의 자산이 어디에서 릴리즈 되었는지 정보
 };
 
