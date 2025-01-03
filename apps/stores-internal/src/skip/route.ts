@@ -223,6 +223,15 @@ const Schema = Joi.object<RouteResponse>({
     }).unknown(true)
   ),
   txs_required: Joi.number().required(),
+  estimated_fees: Joi.array().items(
+    Joi.object({
+      amount: Joi.string().required(),
+      origin_asset: Joi.object({
+        denom: Joi.string().required(),
+        chain_id: Joi.string().required(),
+      }).unknown(true),
+    }).unknown(true)
+  ),
   estimated_route_duration_seconds: Joi.number(),
 }).unknown(true);
 
@@ -271,6 +280,39 @@ export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
         .forceFindCurrency(this.destDenom),
       this.response.data.amount_out
     );
+  }
+
+  // 프로퍼티 이름이 애매하긴 한데... 일단 skip response에서 estimated_fees를 차리하기 위한 property이고
+  // 현재 이 값은 브릿징 수수료를 의미한다.
+  @computed
+  get otherFees(): CoinPretty[] {
+    if (!this.response) {
+      return [];
+    }
+    if (!this.response.data.estimated_fees) {
+      return [];
+    }
+
+    return this.response.data.estimated_fees.map((fee) => {
+      return new CoinPretty(
+        this.chainGetter.hasChain(fee.origin_asset.chain_id)
+          ? this.chainGetter
+              .getChain(fee.origin_asset.chain_id)
+              .forceFindCurrency(fee.origin_asset.denom)
+          : this.chainGetter
+              .getChain(`eip155:${fee.origin_asset.chain_id}`)
+              .forceFindCurrency(
+                (() => {
+                  if (fee.origin_asset.denom.startsWith("0x")) {
+                    return `erc20:${fee.origin_asset.denom.toLowerCase()}`;
+                  }
+
+                  return fee.origin_asset.denom;
+                })()
+              ),
+        fee.amount
+      );
+    });
   }
 
   @computed

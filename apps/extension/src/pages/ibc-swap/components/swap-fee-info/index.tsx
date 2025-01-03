@@ -516,6 +516,95 @@ export const SwapFeeInfo: FunctionComponent<{
             </Subtitle4>
           </XAxis>
 
+          {amountConfig.otherFees.length > 0 ? (
+            <React.Fragment>
+              <Gutter size="0.62rem" />
+              <XAxis alignY="center">
+                <Box>
+                  <Subtitle4
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-300"]
+                        : ColorPalette["gray-300"]
+                    }
+                  >
+                    Bridge Fee
+                  </Subtitle4>
+                </Box>
+                <div
+                  style={{
+                    flex: 1,
+                  }}
+                />
+
+                <Body3
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-300"]
+                      : ColorPalette["gray-300"]
+                  }
+                >
+                  {(() => {
+                    let totalPrice: PricePretty | undefined;
+                    if (amountConfig.otherFees.length > 0) {
+                      for (const fee of amountConfig.otherFees) {
+                        const price = priceStore.calculatePrice(fee);
+                        if (price) {
+                          if (totalPrice) {
+                            totalPrice = totalPrice.add(price);
+                          } else {
+                            totalPrice = price;
+                          }
+                        } else {
+                          return "-";
+                        }
+                      }
+                    }
+
+                    if (totalPrice) {
+                      return totalPrice.toString();
+                    }
+                    return "-";
+                  })()}
+                </Body3>
+
+                <Gutter size="0.25rem" />
+                <Body3
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-600"]
+                      : ColorPalette["gray-100"]
+                  }
+                >
+                  =
+                </Body3>
+                <Gutter size="0.25rem" />
+                <YAxis>
+                  {amountConfig.otherFees.map((fee) => {
+                    return (
+                      <Body3
+                        color={
+                          theme.mode === "light"
+                            ? ColorPalette["gray-600"]
+                            : ColorPalette["gray-100"]
+                        }
+                        key={fee.currency.coinMinimalDenom}
+                      >
+                        {fee
+                          .maxDecimals(6)
+                          .trim(true)
+                          .shrink(true)
+                          .inequalitySymbol(true)
+                          .hideIBCMetadata(true)
+                          .toString()}
+                      </Body3>
+                    );
+                  })}
+                </YAxis>
+              </XAxis>
+            </React.Fragment>
+          ) : null}
+
           <Modal
             isOpen={isModalOpen}
             align="bottom"

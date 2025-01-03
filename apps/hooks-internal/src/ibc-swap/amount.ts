@@ -106,6 +106,15 @@ export class IBCSwapAmountConfig extends AmountConfig {
     return queryIBCSwap.getQueryRoute().swapFee;
   }
 
+  get otherFees(): CoinPretty[] {
+    const queryIBCSwap = this.getQueryIBCSwap();
+    if (!queryIBCSwap) {
+      return [new CoinPretty(this.outCurrency, "0")];
+    }
+
+    return queryIBCSwap.getQueryRoute().otherFees;
+  }
+
   async fetch(): Promise<void> {
     const queryIBCSwap = this.getQueryIBCSwap();
     if (queryIBCSwap) {

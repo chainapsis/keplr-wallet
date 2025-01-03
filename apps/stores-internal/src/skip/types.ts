@@ -249,6 +249,13 @@ export interface RouteResponse {
     chain_id: string;
   }[];
   txs_required: number;
+  estimated_fees?: {
+    amount: string;
+    origin_asset: {
+      denom: string;
+      chain_id: string;
+    };
+  }[];
   estimated_route_duration_seconds: number;
 }
 

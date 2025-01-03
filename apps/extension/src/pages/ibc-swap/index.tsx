@@ -589,10 +589,21 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         // priceStore.calculatePrice를 여기서 먼저 실행하는건 의도적인 행동임.
         // 유저가 amount를 입력하기 전에 미리 fecth를 해놓기 위해서임.
         const inPrice = priceStore.calculatePrice(amt, "usd");
-        const outPrice = priceStore.calculatePrice(
+        let outPrice = priceStore.calculatePrice(
           ibcSwapConfigs.amountConfig.outAmount,
           "usd"
         );
+        if (outPrice) {
+          // otherFees는 브릿징 수수료를 의미힌다.
+          // slippage 경고에서 브릿징 수수료를 포함시키지 않으면 경고가 너무 자주 뜨게 되므로
+          // 브릿징 수수료를 out price에 감안한다.
+          for (const otherFee of ibcSwapConfigs.amountConfig.otherFees) {
+            const price = priceStore.calculatePrice(otherFee, "usd");
+            if (price) {
+              outPrice = outPrice.add(price);
+            }
+          }
+        }
         if (amt.toDec().gt(new Dec(0))) {
           if (
             inPrice &&
