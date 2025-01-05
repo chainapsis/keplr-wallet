@@ -88,8 +88,9 @@ export class KeyRingEthereumService {
     }
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
     const evmInfo = ChainsService.getEVMInfo(chainInfo);
-    const isDymensionNetwork =
-      chainInfo.features?.includes("dymension-network");
+    const forceEVMLedger = chainInfo.features?.includes(
+      "force-enable-evm-ledger"
+    );
 
     if (!isEthermintLike && !evmInfo) {
       throw new Error("Not ethermint like and EVM chain");
@@ -100,7 +101,7 @@ export class KeyRingEthereumService {
       throw new Error("Null key info");
     }
 
-    if (keyInfo.type === "ledger" && !isDymensionNetwork) {
+    if (keyInfo.type === "ledger" && !forceEVMLedger) {
       KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
         chainId
       );
