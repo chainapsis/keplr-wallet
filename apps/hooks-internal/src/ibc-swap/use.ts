@@ -14,11 +14,13 @@ import {
 import { useIBCSwapAmountConfig } from "./amount";
 import { SkipQueries } from "@keplr-wallet/stores-internal";
 import { AppCurrency } from "@keplr-wallet/types";
+import { EthereumAccountStore } from "@keplr-wallet/stores-eth";
 
 export const useIBCSwapConfig = (
   chainGetter: ChainGetter,
   queriesStore: IQueriesStore,
   accountStore: IAccountStoreWithInjects<[CosmosAccount, CosmwasmAccount]>,
+  ethereumAccountStore: EthereumAccountStore,
   skipQueries: SkipQueries,
   chainId: string,
   sender: string,
@@ -32,6 +34,7 @@ export const useIBCSwapConfig = (
     chainGetter,
     queriesStore,
     accountStore,
+    ethereumAccountStore,
     skipQueries,
     chainId,
     senderConfig,

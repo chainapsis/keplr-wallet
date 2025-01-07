@@ -22,6 +22,7 @@ export interface HeaderProps {
   isNotReady?: boolean;
 
   headerContainerStyle?: React.CSSProperties;
+  contentContainerStyle?: React.CSSProperties;
 
   // MainHeaderLayout에서만 테스트해봄
   // 다른 props 옵션과 섞였을때 잘 작동되는지는 모름

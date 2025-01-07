@@ -116,12 +116,12 @@ function setOutputHash(root, hash) {
       "ibc/applications/fee/v1/fee.proto",
       "ibc/applications/fee/v1/tx.proto",
       "secret/compute/v1beta1/msg.proto",
-      "secret/compute/v1/msg.proto",
       "ethermint/types/v1/web3.proto",
       "stride/stakeibc/validator.proto",
       "stride/stakeibc/tx.proto",
       "stride/staketia/tx.proto",
       "stride/stakedym/tx.proto",
+      "circle/cctp/v1/tx.proto",
       "thorchain/v1/types/msg_send.proto",
     ];
 

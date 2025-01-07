@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/hooks-internal",
-  "version": "0.12.169",
+  "version": "0.12.170-rc.4",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -14,11 +14,12 @@
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "dependencies": {
-    "@keplr-wallet/hooks": "0.12.169",
-    "@keplr-wallet/stores": "0.12.169",
-    "@keplr-wallet/stores-internal": "0.12.169",
-    "@keplr-wallet/types": "0.12.169",
-    "@keplr-wallet/unit": "0.12.169"
+    "@keplr-wallet/hooks": "0.12.170-rc.4",
+    "@keplr-wallet/stores": "0.12.170-rc.4",
+    "@keplr-wallet/stores-eth": "0.12.170-rc.4",
+    "@keplr-wallet/stores-internal": "0.12.170-rc.4",
+    "@keplr-wallet/types": "0.12.170-rc.4",
+    "@keplr-wallet/unit": "0.12.170-rc.4"
   },
   "peerDependencies": {
     "mobx": "^6",

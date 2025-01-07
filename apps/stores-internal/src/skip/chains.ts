@@ -17,6 +17,7 @@ const Schema = Joi.object<ChainsResponse>({
       chain_id: Joi.string(),
       pfm_enabled: Joi.boolean(),
       supports_memo: Joi.boolean(),
+      chain_type: Joi.string(),
     }).unknown(true)
   ),
 }).unknown(true);
@@ -27,7 +28,7 @@ export class ObservableQueryChains extends ObservableQuery<ChainsResponse> {
     protected readonly chainStore: InternalChainStore,
     protected readonly skipURL: string
   ) {
-    super(sharedContext, skipURL, "/v2/info/chains");
+    super(sharedContext, skipURL, "/v2/info/chains?include_evm=true");
 
     makeObservable(this);
   }
@@ -70,6 +71,7 @@ export class ObservableQueryChains extends ObservableQuery<ChainsResponse> {
     chainInfo: IChainInfoImpl;
     pfmEnabled: boolean;
     supportsMemo: boolean;
+    chainType: string;
   }[] {
     if (!this.response) {
       return [];
@@ -77,16 +79,32 @@ export class ObservableQueryChains extends ObservableQuery<ChainsResponse> {
 
     return this.response.data.chains
       .filter((chain) => {
-        return this.chainStore.hasChain(chain.chain_id);
+        const isEVMChain = chain.chain_type === "evm";
+        const chainId = isEVMChain
+          ? `eip155:${chain.chain_id}`
+          : chain.chain_id;
+
+        return this.chainStore.hasChain(chainId);
       })
       .filter((chain) => {
-        return this.chainStore.isInChainInfosInListUI(chain.chain_id);
+        const isEVMChain = chain.chain_type === "evm";
+        const chainId = isEVMChain
+          ? `eip155:${chain.chain_id}`
+          : chain.chain_id;
+
+        return this.chainStore.isInChainInfosInListUI(chainId);
       })
       .map((chain) => {
+        const isEVMChain = chain.chain_type === "evm";
+        const chainId = isEVMChain
+          ? `eip155:${chain.chain_id}`
+          : chain.chain_id;
+
         return {
-          chainInfo: this.chainStore.getChain(chain.chain_id),
+          chainInfo: this.chainStore.getChain(chainId),
           pfmEnabled: chain.pfm_enabled,
           supportsMemo: chain.supports_memo ?? false,
+          chainType: chain.chain_type,
         };
       });
   }
@@ -117,5 +135,19 @@ export class ObservableQueryChains extends ObservableQuery<ChainsResponse> {
     }
 
     return chain.supportsMemo;
+  });
+
+  isChainTypeEVM = computedFn((chainId: string): boolean => {
+    const chain = this.chains.find((chain) => {
+      return (
+        chain.chainInfo.chainIdentifier ===
+        ChainIdHelper.parse(chainId).identifier
+      );
+    });
+    if (!chain) {
+      return false;
+    }
+
+    return chain.chainType === "evm";
   });
 }
