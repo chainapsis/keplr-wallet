@@ -1513,6 +1513,7 @@ Salt: ${salt}`;
       !chainId.startsWith("injective") &&
       !chainId.startsWith("dymension_") &&
       !chainId.startsWith("nim_") &&
+      !chainId.startsWith("dimension_") &&
       !chainId.startsWith("zetachain_") &&
       !chainId.startsWith("eip155:")
     ) {
