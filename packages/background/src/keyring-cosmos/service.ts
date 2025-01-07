@@ -102,13 +102,16 @@ export class KeyRingCosmosService {
 
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
     const evmInfo = ChainsService.getEVMInfo(chainInfo);
+    const forceEVMLedger = chainInfo.features?.includes(
+      "force-enable-evm-ledger"
+    );
 
     const keyInfo = this.keyRingService.getKeyInfo(vaultId);
     if (!keyInfo) {
       throw new Error("Null key info");
     }
 
-    if (isEthermintLike && keyInfo.type === "ledger") {
+    if (isEthermintLike && keyInfo.type === "ledger" && !forceEVMLedger) {
       KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
         chainId
       );
@@ -228,13 +231,16 @@ export class KeyRingCosmosService {
       throw new Error("Can't sign for hidden chain");
     }
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
+    const forceEVMLedger = chainInfo.features?.includes(
+      "force-enable-evm-ledger"
+    );
 
     const keyInfo = this.keyRingService.getKeyInfo(vaultId);
     if (!keyInfo) {
       throw new Error("Null key info");
     }
 
-    if (isEthermintLike && keyInfo.type === "ledger") {
+    if (isEthermintLike && keyInfo.type === "ledger" && !forceEVMLedger) {
       KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
         chainId
       );
@@ -371,13 +377,16 @@ export class KeyRingCosmosService {
     const vaultId = this.keyRingService.selectedVaultId;
 
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
+    const forceEVMLedger = chainInfo.features?.includes(
+      "force-enable-evm-ledger"
+    );
 
     const keyInfo = this.keyRingService.getKeyInfo(vaultId);
     if (!keyInfo) {
       throw new Error("Null key info");
     }
 
-    if (isEthermintLike && keyInfo.type === "ledger") {
+    if (isEthermintLike && keyInfo.type === "ledger" && !forceEVMLedger) {
       KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
         chainId
       );
@@ -471,13 +480,16 @@ export class KeyRingCosmosService {
     const vaultId = this.keyRingService.selectedVaultId;
 
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
+    const forceEVMLedger = chainInfo.features?.includes(
+      "force-enable-evm-ledger"
+    );
 
     const keyInfo = this.keyRingService.getKeyInfo(vaultId);
     if (!keyInfo) {
       throw new Error("Null key info");
     }
 
-    if (isEthermintLike && keyInfo.type === "ledger") {
+    if (isEthermintLike && keyInfo.type === "ledger" && !forceEVMLedger) {
       KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
         chainId
       );
@@ -589,13 +601,16 @@ export class KeyRingCosmosService {
       throw new Error("Can't sign for hidden chain");
     }
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
+    const forceEVMLedger = chainInfo.features?.includes(
+      "force-enable-evm-ledger"
+    );
 
     const keyInfo = this.keyRingService.getKeyInfo(vaultId);
     if (!keyInfo) {
       throw new Error("Null key info");
     }
 
-    if (isEthermintLike && keyInfo.type === "ledger") {
+    if (isEthermintLike && keyInfo.type === "ledger" && !forceEVMLedger) {
       KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
         chainId
       );
@@ -685,13 +700,16 @@ export class KeyRingCosmosService {
       throw new Error("Can't sign for hidden chain");
     }
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
+    const forceEVMLedger = chainInfo.features?.includes(
+      "force-enable-evm-ledger"
+    );
 
     const keyInfo = this.keyRingService.getKeyInfo(vaultId);
     if (!keyInfo) {
       throw new Error("Null key info");
     }
 
-    if (isEthermintLike && keyInfo.type === "ledger") {
+    if (isEthermintLike && keyInfo.type === "ledger" && !forceEVMLedger) {
       KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
         chainId
       );
@@ -822,13 +840,16 @@ export class KeyRingCosmosService {
       throw new Error("Can't sign for hidden chain");
     }
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
+    const forceEVMLedger = chainInfo.features?.includes(
+      "force-enable-evm-ledger"
+    );
 
     const keyInfo = this.keyRingService.getKeyInfo(vaultId);
     if (!keyInfo) {
       throw new Error("Null key info");
     }
 
-    if (isEthermintLike && keyInfo.type === "ledger") {
+    if (isEthermintLike && keyInfo.type === "ledger" && !forceEVMLedger) {
       KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
         chainId
       );
@@ -1028,6 +1049,9 @@ export class KeyRingCosmosService {
       throw new Error("Can't sign for hidden chain");
     }
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
+    const forceEVMLedger = chainInfo.features?.includes(
+      "force-enable-evm-ledger"
+    );
 
     if (!isEthermintLike) {
       throw new Error("This feature is only usable on cosmos-sdk evm chain");
@@ -1042,7 +1066,7 @@ export class KeyRingCosmosService {
       throw new Error("This feature is only usable on ledger ethereum app");
     }
 
-    if (isEthermintLike && keyInfo.type === "ledger") {
+    if (isEthermintLike && keyInfo.type === "ledger" && !forceEVMLedger) {
       KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
         chainId
       );
@@ -1489,7 +1513,6 @@ Salt: ${salt}`;
       !chainId.startsWith("injective") &&
       !chainId.startsWith("dymension_") &&
       !chainId.startsWith("nim_") &&
-      !chainId.startsWith("dimension_") &&
       !chainId.startsWith("zetachain_") &&
       !chainId.startsWith("eip155:")
     ) {

@@ -24,6 +24,7 @@ export const SupportedChainFeatures = [
   "osmosis-base-fee-beta",
   "feemarket",
   "op-stack-l1-data-fee",
+  "force-enable-evm-ledger",
 ];
 
 /**
