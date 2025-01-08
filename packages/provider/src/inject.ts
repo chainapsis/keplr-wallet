@@ -47,6 +47,7 @@ import {
   InvocationsSignerDetails,
   ProviderInterface,
 } from "starknet";
+import { KeplrBBNProvider } from "./babylon";
 
 export interface ProxyRequest {
   type: "proxy-request";
@@ -105,6 +106,11 @@ export function injectKeplrToWindow(keplr: IKeplr): void {
   );
 
   defineUnwritablePropertyIfPossible(window, "starknet_keplr", keplr.starknet);
+  defineUnwritablePropertyIfPossible(
+    window,
+    "bbnwallet",
+    new KeplrBBNProvider(keplr)
+  );
 }
 
 /**
