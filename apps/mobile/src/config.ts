@@ -2400,6 +2400,86 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: [],
   },
+  {
+    chainId: 'elys-1',
+    chainName: 'Elys Network',
+    chainSymbolImageUrl:
+      'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/elys/chain.png',
+    rpc: 'https://rpc-elys.keplr.app',
+    rest: 'https://lcd-elys.keplr.app',
+    walletUrlForStaking: 'https://wallet.keplr.app/chains/elys-network',
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: 'elys',
+      bech32PrefixAccPub: 'elyspub',
+      bech32PrefixValAddr: 'elysvaloper',
+      bech32PrefixValPub: 'elysvaloperpub',
+      bech32PrefixConsAddr: 'elysvalcons',
+      bech32PrefixConsPub: 'elysvalconspub',
+    },
+    currencies: [
+      {
+        coinDenom: 'ELYS',
+        coinMinimalDenom: 'uelys',
+        coinDecimals: 6,
+        coinGeckoId: 'elys-network',
+        coinImageUrl:
+          'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/elys/chain.png',
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: 'ELYS',
+        coinMinimalDenom: 'uelys',
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.01,
+          average: 0.025,
+          high: 0.03,
+        },
+        coinImageUrl:
+          'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/elys/chain.png',
+      },
+      {
+        coinDenom: 'USDC',
+        coinMinimalDenom:
+          'ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349',
+        coinDecimals: 6,
+        coinGeckoId: 'usd-coin',
+        gasPriceStep: {
+          low: 0.01,
+          average: 0.025,
+          high: 0.03,
+        },
+        coinImageUrl:
+          'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/elys/uusdc.png',
+      },
+      {
+        coinDenom: 'ATOM',
+        coinMinimalDenom:
+          'ibc/C4CFF46FD6DE35CA4CF4CE031E643C8FDC9BA4B99AE598E9B0ED98FE3A2319F9',
+        coinDecimals: 6,
+        coinGeckoId: 'cosmos',
+        gasPriceStep: {
+          low: 0.01,
+          average: 0.025,
+          high: 0.03,
+        },
+        coinImageUrl:
+          'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/elys/uatom.png',
+      },
+    ],
+    stakeCurrency: {
+      coinDenom: 'ELYS',
+      coinMinimalDenom: 'uelys',
+      coinDecimals: 6,
+      coinImageUrl:
+        'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/elys/chain.png',
+    },
+    features: [],
+  },
 ];
 
 // TODO: 원격으로 변경할 수 있도록 나중에 네트워크에서 이 정보를 가져오는 방식으로 변경될 수 있음
