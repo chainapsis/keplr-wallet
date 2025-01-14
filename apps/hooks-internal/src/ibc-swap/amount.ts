@@ -18,6 +18,10 @@ import {
   SkipQueries,
   ObservableQueryIBCSwapInner,
 } from "@keplr-wallet/stores-internal";
+import {
+  EthereumAccountStore,
+  UnsignedEVMTransactionWithErc20Approvals,
+} from "@keplr-wallet/stores-eth";
 
 export class IBCSwapAmountConfig extends AmountConfig {
   @observable
@@ -33,6 +37,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
     protected readonly accountStore: IAccountStoreWithInjects<
       [CosmosAccount, CosmwasmAccount]
     >,
+    public readonly ethereumAccountStore: EthereumAccountStore,
     protected readonly skipQueries: SkipQueries,
     initialChainId: string,
     senderConfig: ISenderConfig,
@@ -101,6 +106,15 @@ export class IBCSwapAmountConfig extends AmountConfig {
     return queryIBCSwap.getQueryRoute().swapFee;
   }
 
+  get otherFees(): CoinPretty[] {
+    const queryIBCSwap = this.getQueryIBCSwap();
+    if (!queryIBCSwap) {
+      return [new CoinPretty(this.outCurrency, "0")];
+    }
+
+    return queryIBCSwap.getQueryRoute().otherFees;
+  }
+
   async fetch(): Promise<void> {
     const queryIBCSwap = this.getQueryIBCSwap();
     if (queryIBCSwap) {
@@ -136,9 +150,9 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
   async getTx(
     slippageTolerancePercent: number,
-    affiliateFeeReceiver: string,
+    affiliateFeeReceiver: string | undefined,
     priorOutAmount?: Int
-  ): Promise<MakeTxResponse> {
+  ): Promise<MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals> {
     const queryIBCSwap = this.getQueryIBCSwap();
     if (!queryIBCSwap) {
       throw new Error("Query IBC Swap is not initialized");
@@ -151,51 +165,86 @@ export class IBCSwapAmountConfig extends AmountConfig {
     }
 
     const chainIdsToAddresses: Record<string, string> = {};
+
     const sourceAccount = this.accountStore.getAccount(this.chainId);
-    const destinationChainIds = queryRouteResponse.data.chain_ids;
     if (sourceAccount.walletStatus === WalletStatus.NotInit) {
       await sourceAccount.init();
     }
+
+    const isSourceAccountEVMOnly = this.chainId.startsWith("eip155:");
+    if (
+      isSourceAccountEVMOnly
+        ? !sourceAccount.ethereumHexAddress
+        : !sourceAccount.bech32Address
+    ) {
+      throw new Error("Source account is not set");
+    }
+    chainIdsToAddresses[this.chainId.replace("eip155:", "")] =
+      isSourceAccountEVMOnly
+        ? sourceAccount.ethereumHexAddress
+        : sourceAccount.bech32Address;
+
+    const destinationChainIds = queryRouteResponse.data.chain_ids.map(
+      (chainId) => {
+        const evmLikeChainId = Number(chainId);
+        const isEVMChainId =
+          !Number.isNaN(evmLikeChainId) && evmLikeChainId !== 0;
+        if (isEVMChainId) {
+          return `eip155:${chainId}`;
+        }
+        return chainId;
+      }
+    );
     for (const destinationChainId of destinationChainIds) {
       const destinationAccount =
         this.accountStore.getAccount(destinationChainId);
       if (destinationAccount.walletStatus === WalletStatus.NotInit) {
         await destinationAccount.init();
       }
-    }
 
-    if (!sourceAccount.bech32Address) {
-      throw new Error("Source account is not set");
-    }
-    for (const destinationChainId of destinationChainIds) {
-      const destinationAccount =
-        this.accountStore.getAccount(destinationChainId);
-      if (!destinationAccount.bech32Address) {
+      const isDestinationChainEVMOnly =
+        destinationChainId.startsWith("eip155:");
+      if (
+        isDestinationChainEVMOnly
+          ? !destinationAccount.ethereumHexAddress
+          : !destinationAccount.bech32Address
+      ) {
         throw new Error("Destination account is not set");
       }
-    }
-
-    chainIdsToAddresses[this.chainId] = sourceAccount.bech32Address;
-    for (const destinationChainId of destinationChainIds) {
-      const destinationAccount =
-        this.accountStore.getAccount(destinationChainId);
-      chainIdsToAddresses[destinationChainId] =
-        destinationAccount.bech32Address;
+      chainIdsToAddresses[destinationChainId.replace("eip155:", "")] =
+        isDestinationChainEVMOnly
+          ? destinationAccount.ethereumHexAddress
+          : destinationAccount.bech32Address;
     }
 
     for (const swapVenue of queryRouteResponse.data.swap_venues ?? [
       queryRouteResponse.data.swap_venue,
     ]) {
       if (swapVenue) {
-        const swapAccount = this.accountStore.getAccount(swapVenue.chain_id);
+        const swapVenueChainId = (() => {
+          const evmLikeChainId = Number(swapVenue.chain_id);
+          const isEVMChainId =
+            !Number.isNaN(evmLikeChainId) && evmLikeChainId !== 0;
+          if (isEVMChainId) {
+            return `eip155:${swapVenue.chain_id}`;
+          }
 
+          return swapVenue.chain_id;
+        })();
+        const swapAccount = this.accountStore.getAccount(swapVenueChainId);
         if (swapAccount.walletStatus === WalletStatus.NotInit) {
           await swapAccount.init();
         }
-        if (!swapAccount.bech32Address) {
+
+        const isSwapVenueChainEVMOnly = swapVenueChainId.startsWith("eip155:");
+        if (
+          isSwapVenueChainEVMOnly
+            ? !swapAccount.ethereumHexAddress
+            : !swapAccount.bech32Address
+        ) {
           const swapVenueChainInfo =
-            this.chainGetter.hasChain(swapVenue.chain_id) &&
-            this.chainGetter.getChain(swapVenue.chain_id);
+            this.chainGetter.hasChain(swapVenueChainId) &&
+            this.chainGetter.getChain(swapVenueChainId);
           if (
             swapAccount.isNanoLedger &&
             swapVenueChainInfo &&
@@ -211,8 +260,10 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
           throw new Error("Swap account is not set");
         }
-
-        chainIdsToAddresses[swapVenue.chain_id] = swapAccount.bech32Address;
+        chainIdsToAddresses[swapVenueChainId.replace("eip155:", "")] =
+          isSwapVenueChainEVMOnly
+            ? swapAccount.ethereumHexAddress
+            : swapAccount.bech32Address;
       }
     }
 
@@ -269,8 +320,8 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
   getTxIfReady(
     slippageTolerancePercent: number,
-    affiliateFeeReceiver: string
-  ): MakeTxResponse | undefined {
+    affiliateFeeReceiver?: string
+  ): MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals | undefined {
     if (!this.currency) {
       return;
     }
@@ -294,52 +345,90 @@ export class IBCSwapAmountConfig extends AmountConfig {
     }
 
     const chainIdsToAddresses: Record<string, string> = {};
-    const sourceAccount = this.accountStore.getAccount(this.chainId);
-    const destinationChainIds = queryRouteResponse.data.chain_ids;
 
+    const sourceAccount = this.accountStore.getAccount(this.chainId);
     if (sourceAccount.walletStatus === WalletStatus.NotInit) {
       sourceAccount.init();
     }
+
+    const isSourceAccountEVMOnly = this.chainId.startsWith("eip155:");
+    if (
+      isSourceAccountEVMOnly
+        ? !sourceAccount.ethereumHexAddress
+        : !sourceAccount.bech32Address
+    ) {
+      return;
+    }
+    chainIdsToAddresses[this.chainId.replace("eip155:", "")] =
+      isSourceAccountEVMOnly
+        ? sourceAccount.ethereumHexAddress
+        : sourceAccount.bech32Address;
+
+    const destinationChainIds = queryRouteResponse.data.chain_ids.map(
+      (chainId) => {
+        const evmLikeChainId = Number(chainId);
+        const isEVMChainId =
+          !Number.isNaN(evmLikeChainId) && evmLikeChainId !== 0;
+        if (isEVMChainId) {
+          return `eip155:${chainId}`;
+        }
+        return chainId;
+      }
+    );
     for (const destinationChainId of destinationChainIds) {
       const destinationAccount =
         this.accountStore.getAccount(destinationChainId);
+
       if (destinationAccount.walletStatus === WalletStatus.NotInit) {
         destinationAccount.init();
       }
-    }
 
-    if (!sourceAccount.bech32Address) {
-      return;
-    }
-    for (const destinationChainId of destinationChainIds) {
-      const destinationAccount =
-        this.accountStore.getAccount(destinationChainId);
-      if (!destinationAccount.bech32Address) {
+      const isDestinationChainEVMOnly =
+        destinationChainId.startsWith("eip155:");
+      if (
+        isDestinationChainEVMOnly
+          ? !destinationAccount.ethereumHexAddress
+          : !destinationAccount.bech32Address
+      ) {
         return;
       }
-    }
-
-    chainIdsToAddresses[this.chainId] = sourceAccount.bech32Address;
-    for (const destinationChainId of destinationChainIds) {
-      const destinationAccount =
-        this.accountStore.getAccount(destinationChainId);
-      chainIdsToAddresses[destinationChainId] =
-        destinationAccount.bech32Address;
+      chainIdsToAddresses[destinationChainId.replace("eip155:", "")] =
+        isDestinationChainEVMOnly
+          ? destinationAccount.ethereumHexAddress
+          : destinationAccount.bech32Address;
     }
 
     for (const swapVenue of queryRouteResponse.data.swap_venues ?? [
       queryRouteResponse.data.swap_venue,
     ]) {
       if (swapVenue) {
-        const swapAccount = this.accountStore.getAccount(swapVenue.chain_id);
+        const swapVenueChainId = (() => {
+          const evmLikeChainId = Number(swapVenue.chain_id);
+          const isEVMChainId =
+            !Number.isNaN(evmLikeChainId) && evmLikeChainId !== 0;
+          if (isEVMChainId) {
+            return `eip155:${swapVenue.chain_id}`;
+          }
+
+          return swapVenue.chain_id;
+        })();
+        const swapAccount = this.accountStore.getAccount(swapVenueChainId);
         if (swapAccount.walletStatus === WalletStatus.NotInit) {
           swapAccount.init();
         }
 
-        if (!swapAccount.bech32Address) {
+        const isSwapVenueChainEVMOnly = swapVenueChainId.startsWith("eip155:");
+        if (
+          isSwapVenueChainEVMOnly
+            ? !swapAccount.ethereumHexAddress
+            : !swapAccount.bech32Address
+        ) {
           return;
         }
-        chainIdsToAddresses[swapVenue.chain_id] = swapAccount.bech32Address;
+        chainIdsToAddresses[swapVenueChainId.replace("eip155:", "")] =
+          isSwapVenueChainEVMOnly
+            ? swapAccount.ethereumHexAddress
+            : swapAccount.bech32Address;
       }
     }
 
@@ -376,6 +465,19 @@ export class IBCSwapAmountConfig extends AmountConfig {
       );
       tx.ui.overrideType("ibc-swap");
       return tx;
+    } else if (msg.type === "evmTx") {
+      const ethereumAccount = this.ethereumAccountStore.getAccount(msg.chainId);
+      const tx = ethereumAccount.makeTx(msg.to, msg.value, msg.data);
+      return {
+        ...tx,
+        requiredErc20Approvals: msg.requiredErc20Approvals,
+      };
+    } else if (msg.type === "MsgCCTP") {
+      const tx = sourceAccount.cosmos.makeCCTPTx(
+        msg.msgs[0].msg,
+        msg.msgs[1].msg
+      );
+      return tx;
     }
   }
 
@@ -385,8 +487,16 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
     for (const operation of response.operations) {
       if ("swap" in operation) {
-        for (const swapOperation of operation.swap.swap_in.swap_operations) {
-          key += `/${swapOperation.pool}/${swapOperation.denom_in}/${swapOperation.denom_out}`;
+        if (operation.swap.swap_in) {
+          for (const swapOperation of operation.swap.swap_in.swap_operations) {
+            key += `/${swapOperation.pool}/${swapOperation.denom_in}/${swapOperation.denom_out}`;
+          }
+        } else if (operation.swap.smart_swap_in) {
+          for (const swapRoute of operation.swap.smart_swap_in.swap_routes) {
+            for (const swapOperation of swapRoute.swap_operations) {
+              key += `/${swapOperation.pool}/${swapOperation.denom_in}/${swapOperation.denom_out}`;
+            }
+          }
         }
       }
     }
@@ -400,71 +510,70 @@ export class IBCSwapAmountConfig extends AmountConfig {
   ): string {
     let key = "";
 
-    for (const msg of response.msgs) {
-      if (
-        msg.multi_chain_msg.msg_type_url ===
-        "/ibc.applications.transfer.v1.MsgTransfer"
-      ) {
-        const memo = JSON.parse(msg.multi_chain_msg.msg).memo;
-        if (memo) {
-          const obj = JSON.parse(memo);
-          const wasms: any = [];
+    for (const msg of response.txs) {
+      if (msg.cosmos_tx) {
+        const cosmosMsg = msg.cosmos_tx.msgs[0];
+        if (
+          cosmosMsg.msg_type_url === "/ibc.applications.transfer.v1.MsgTransfer"
+        ) {
+          const memo = JSON.parse(cosmosMsg.msg).memo;
+          if (memo) {
+            const obj = JSON.parse(memo);
+            const wasms: any = [];
 
-          if (obj.wasm) {
-            wasms.push(obj.wasm);
-          }
+            if (obj.wasm) {
+              wasms.push(obj.wasm);
+            }
 
-          let forward = obj.forward;
-          if (forward) {
-            while (true) {
-              if (forward) {
-                if (forward.memo) {
-                  const obj = JSON.parse(forward.memo);
-                  if (obj.wasm) {
-                    wasms.push(obj.wasm);
+            let forward = obj.forward;
+            if (forward) {
+              while (true) {
+                if (forward) {
+                  if (forward.memo) {
+                    const obj = JSON.parse(forward.memo);
+                    if (obj.wasm) {
+                      wasms.push(obj.wasm);
+                    }
                   }
-                }
 
-                if (forward.wasm) {
-                  wasms.push(forward.wasm);
-                }
+                  if (forward.wasm) {
+                    wasms.push(forward.wasm);
+                  }
 
-                if (forward.next) {
-                  const obj =
-                    typeof forward.next === "string"
-                      ? JSON.parse(forward.next)
-                      : forward.next;
+                  if (forward.next) {
+                    const obj =
+                      typeof forward.next === "string"
+                        ? JSON.parse(forward.next)
+                        : forward.next;
 
-                  if (obj.forward) {
-                    forward = obj.forward;
+                    if (obj.forward) {
+                      forward = obj.forward;
+                    } else {
+                      forward = obj;
+                    }
                   } else {
-                    forward = obj;
+                    break;
                   }
                 } else {
                   break;
                 }
-              } else {
-                break;
+              }
+            }
+
+            for (const wasm of wasms) {
+              for (const operation of wasm.msg.swap_and_action.user_swap
+                .swap_exact_asset_in.operations) {
+                key += `/${operation.pool}/${operation.denom_in}/${operation.denom_out}`;
               }
             }
           }
-
-          for (const wasm of wasms) {
-            for (const operation of wasm.msg.swap_and_action.user_swap
-              .swap_exact_asset_in.operations) {
-              key += `/${operation.pool}/${operation.denom_in}/${operation.denom_out}`;
-            }
-          }
         }
-      }
-      if (
-        msg.multi_chain_msg.msg_type_url ===
-        "/cosmwasm.wasm.v1.MsgExecuteContract"
-      ) {
-        const obj = JSON.parse(msg.multi_chain_msg.msg);
-        for (const operation of obj.msg.swap_and_action.user_swap
-          .swap_exact_asset_in.operations) {
-          key += `/${operation.pool}/${operation.denom_in}/${operation.denom_out}`;
+        if (cosmosMsg.msg_type_url === "/cosmwasm.wasm.v1.MsgExecuteContract") {
+          const obj = JSON.parse(cosmosMsg.msg);
+          for (const operation of obj.msg.swap_and_action.user_swap
+            .swap_exact_asset_in.operations) {
+            key += `/${operation.pool}/${operation.denom_in}/${operation.denom_out}`;
+          }
         }
       }
     }
@@ -576,6 +685,7 @@ export const useIBCSwapAmountConfig = (
   chainGetter: ChainGetter,
   queriesStore: IQueriesStore,
   accountStore: IAccountStoreWithInjects<[CosmosAccount, CosmwasmAccount]>,
+  ethereumAccountStore: EthereumAccountStore,
   skipQueries: SkipQueries,
   chainId: string,
   senderConfig: ISenderConfig,
@@ -589,6 +699,7 @@ export const useIBCSwapAmountConfig = (
         chainGetter,
         queriesStore,
         accountStore,
+        ethereumAccountStore,
         skipQueries,
         chainId,
         senderConfig,

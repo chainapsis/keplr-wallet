@@ -577,6 +577,7 @@
   "page.main.components.ibc-history-view.ibc-swap.failed.in-progress": "Swap failed. Refunding in progress.",
   "page.main.components.ibc-history-view.ibc-swap.failed.complete": "Swap failed. Refunding completed.",
   "page.main.components.ibc-history-view.ibc-swap.failed.after-swap.complete": "Swap succeeded, but failed to transfer to the destination chain. {assets} have been refunded to {chain}.",
+  "page.main.components.ibc-history-view.skip-swap.failed.after-transfer.complete": "Tranfer succeeded, but failed to swap on the destination chain. {assets} have been refunded to {chain}.",
   "page.main.components.ibc-transfer-view.title": "Advanced IBC Transfer",
   "page.main.components.ibc-transfer-view.tooltip": "Transfers might take longer if relayers are inactive. Ask in the corresponding community groups for help in reaching the relaying validators.",
   "page.main.components.ibc-transfer-view.paragraph": "Send tokens over IBC",

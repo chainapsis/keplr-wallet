@@ -545,6 +545,7 @@
   "page.main.components.ibc-history-view.ibc-swap.failed.in-progress": "兑换失败，正在退款。",
   "page.main.components.ibc-history-view.ibc-swap.failed.complete": "兑换失败，退款已完成。",
   "page.main.components.ibc-history-view.ibc-swap.failed.after-swap.complete": "兑换成功，但未能转入目标链。已将{assets}退还到{chain}。",
+  "page.main.components.ibc-history-view.skip-swap.failed.after-transfer.complete": "轉移成功，但在目的地鏈上交換失敗。{assets} 已退還給 {chain}。",
   "page.main.components.ibc-transfer-view.title": "高级IBC转账",
   "page.main.components.ibc-transfer-view.tooltip": "如果中继器处于非活动状态，转账可能需要更长的时间。在相应的社区组中寻求帮助，以联系中继验证者。",
   "page.main.components.ibc-transfer-view.paragraph": "通过IBC（跨链通信协议）发送币",

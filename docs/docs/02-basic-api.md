@@ -71,7 +71,7 @@ There may be multiple ways to achieve the same result, and no preferred method.
 
 ## Keplr-specific features
 
-If you were able to connect Keplr with CosmJS, you may skip to the [Use Keplr with CosmJS](./cosmjs.md) section.
+If you were able to connect Keplr with CosmJS, you may skip to the [Use Keplr with CosmJS](./03-cosmjs.md) section.
 
 While Keplr supports an easy way to connect to CosmJS, there are additional functions specific to Keplr which provide additional features.
 
@@ -134,7 +134,7 @@ If the webpage has permission and Keplr is unlocked, this function will return t
 ```
 
 It also returns the nickname for the key store currently selected, which should allow the webpage to display the current key store selected to the user in a more convenient mane.  
-`isNanoLedger` field in the return type is used to indicate whether the selected account is from the Ledger Nano. Because current Cosmos app in the Ledger Nano doesn't support the direct (protobuf) format msgs, this field can be used to select the amino or direct signer. [Ref](./cosmjs.md#types-of-offline-signers)
+`isNanoLedger` field in the return type is used to indicate whether the selected account is from the Ledger Nano. Because current Cosmos app in the Ledger Nano doesn't support the direct (protobuf) format msgs, this field can be used to select the amino or direct signer. [Ref](./03-cosmjs.md#types-of-offline-signers)
 
 ### Sign Amino
 
@@ -215,24 +215,6 @@ Using `verifyArbitrary`, you can verify the results requested by `signArbitrary`
 `verifyArbitrary` has been only implemented for simple usage. `verifyArbitrary` returns the result of the verification of the current selected account's sign doc. If the account is not the currently selected account, it would throw an error.  
   
 It is recommended to use `verifyADR36Amino` function in the `@keplr-wallet/cosmos` package or your own implementation instead of using `verifyArbitrary` API.  
-
-### Request Ethereum Signature
-```javascript
-signEthereum(
-  chainId: string,
-  signer: string, // Bech32 address, not hex
-  data: string | Uint8Array,
-  type: 'message' | 'transaction'
-)
-```
-
-This is an experimental implementation of native Ethereum signing in Keplr to be used by dApps on EVM-compatible chains such as Evmos. 
-
-It supports signing either [Personal Messages](https://eips.ethereum.org/EIPS/eip-191) or [Transactions](https://ethereum.org/en/developers/docs/transactions/), with plans to support [Typed Data](https://eips.ethereum.org/EIPS/eip-712) in the future.
-
-Notes on Usage:
-- The `signer` field must be a Bech32 address, not an Ethereum hex address
-- The data should be either stringified JSON (for transactions) or a string message (for messages). Byte arrays are accepted as alternatives for either.
   
 ### Interaction Options
 

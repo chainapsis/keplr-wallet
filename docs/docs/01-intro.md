@@ -1,10 +1,7 @@
 ---
 title: Introduction
 description: Keplr is a non-custodial blockchain wallets for webpages that allow users to interact with blockchain applications.
-footer:
-  newsletter: false
 aside: true
-order: 1
 ---
 
 # Keplr wallet Documentation
@@ -20,10 +17,14 @@ Keplr is a non-custodial blockchain wallets for webpages that allow users to int
 - Keplr can easily connect to libraries such as CosmJS, simplifying the process of connecting webpages to blockchains.
 
 ## Sections
-[Integrate with Keplr](./api) describes how to integrate with Keplr in the webpage.  
+[Integrate with Keplr](./02-basic-api.md) describes how to integrate with Keplr in the webpage.  
 
-[Use with cosmjs](./api/cosmjs.md) describes how to use cosmjs with Keplr.
+[Use with cosmjs](./03-cosmjs.md) describes how to use cosmjs with Keplr.
 
-[Use with secretjs](./api/secretjs.md) describes how to use secretjs with Keplr if you need to use secret-wasm feature.
+[Use with secretjs](./04-secretjs.md) describes how to use secretjs with Keplr if you need to use secret-wasm feature.
   
-[Suggest chain](./api/suggest-chain.md) describes how to suggest the chain to Keplr if the chain is not supported natively in Keplr.
+[Suggest chain](./05-suggest-chain.md) describes how to suggest the chain to Keplr if the chain is not supported natively in Keplr.
+
+[EVM-based chains support](./06-evm.md) describes how to support EVM-based chains with Keplr.
+
+[Starknet Support](./07-starknet.md) describes how to support Starknet chains with Keplr.

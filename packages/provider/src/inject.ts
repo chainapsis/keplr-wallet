@@ -47,6 +47,7 @@ import {
   InvocationsSignerDetails,
   ProviderInterface,
 } from "starknet";
+import { KeplrBBNProvider } from "./babylon";
 
 export interface ProxyRequest {
   type: "proxy-request";
@@ -105,6 +106,11 @@ export function injectKeplrToWindow(keplr: IKeplr): void {
   );
 
   defineUnwritablePropertyIfPossible(window, "starknet_keplr", keplr.starknet);
+  defineUnwritablePropertyIfPossible(
+    window,
+    "bbnwallet",
+    new KeplrBBNProvider(keplr)
+  );
 }
 
 /**
@@ -874,10 +880,6 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
       ciphertext,
       nonce,
     ]);
-  }
-
-  async enigmaIsNewApi(chainId: string): Promise<boolean> {
-    return await this.requestMethod("enigmaIsNewApi", [chainId]);
   }
 
   getEnigmaUtils(chainId: string): SecretUtils {

@@ -2507,6 +2507,15 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
           coinImageUrl:
             "https://keplr-ext-update-note-images.s3.amazonaws.com/token/dai.png",
         },
+        {
+          type: "erc20",
+          contractAddress:
+            "0x28d709c875c0ceac3dce7065bec5328186dc89fe254527084d1689910954b0a",
+          coinDenom: "xSTRK",
+          coinMinimalDenom:
+            "erc20:0x28d709c875c0ceac3dce7065bec5328186dc89fe254527084d1689910954b0a",
+          coinDecimals: 18,
+        },
       ],
       ethContractAddress:
         "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
@@ -2917,78 +2926,84 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     features: [],
   },
   {
-    chainId: "ggezchain",
-    chainName: "GGEZ1 Chain",
+    chainId: "elys-1",
+    chainName: "Elys Network",
     chainSymbolImageUrl:
-      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/ggezchain/chain.png",
-    rpc: "https://bc.ggez.one:8443",
-    rest: "https://rest.ggez.one",
-    nodeProvider: {
-      name: "GGEZ1 Foundation DAO LLC.",
-      email: "ggez@ggez.one",
-      website: "https://ggez.one",
-    },
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/elys/chain.png",
+    rpc: "https://rpc-elys.keplr.app",
+    rest: "https://lcd-elys.keplr.app",
+    walletUrlForStaking: "https://wallet.keplr.app/chains/elys-network",
     bip44: {
       coinType: 118,
     },
     bech32Config: {
-      bech32PrefixAccAddr: "ggez",
-      bech32PrefixAccPub: "ggezpub",
-      bech32PrefixValAddr: "ggezvaloper",
-      bech32PrefixValPub: "ggezvaloperpub",
-      bech32PrefixConsAddr: "ggezvalcons",
-      bech32PrefixConsPub: "ggezvalconspub",
+      bech32PrefixAccAddr: "elys",
+      bech32PrefixAccPub: "elyspub",
+      bech32PrefixValAddr: "elysvaloper",
+      bech32PrefixValPub: "elysvaloperpub",
+      bech32PrefixConsAddr: "elysvalcons",
+      bech32PrefixConsPub: "elysvalconspub",
     },
     currencies: [
       {
-        coinDenom: "GGEZ1",
-        coinMinimalDenom: "uggez1",
+        coinDenom: "ELYS",
+        coinMinimalDenom: "uelys",
         coinDecimals: 6,
+        coinGeckoId: "elys-network",
         coinImageUrl:
-          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/ggezchain/ggez1.png",
-      },
-      {
-        coinDenom: "GGZ",
-        coinMinimalDenom: "uggz",
-        coinDecimals: 6,
-        coinImageUrl:
-          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/ggezchain/ggz.png",
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/elys/chain.png",
       },
     ],
     feeCurrencies: [
       {
-        coinDenom: "GGEZ1",
-        coinMinimalDenom: "uggez1",
+        coinDenom: "ELYS",
+        coinMinimalDenom: "uelys",
         coinDecimals: 6,
         gasPriceStep: {
-          low: 0.4,
-          average: 0.5,
-          high: 0.75,
+          low: 0.01,
+          average: 0.025,
+          high: 0.03,
         },
         coinImageUrl:
-          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/ggezchain/ggez1.png",
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/elys/chain.png",
       },
       {
-        coinDenom: "GGZ",
-        coinMinimalDenom: "uggz",
+        coinDenom: "USDC",
+        coinMinimalDenom:
+          "ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349",
         coinDecimals: 6,
+        coinGeckoId: "usd-coin",
         gasPriceStep: {
-          low: 0.5,
-          average: 0.75,
-          high: 1,
+          low: 0.01,
+          average: 0.025,
+          high: 0.03,
         },
         coinImageUrl:
-          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/ggezchain/ggz.png",
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/elys/uusdc.png",
+      },
+      {
+        coinDenom: "ATOM",
+        coinMinimalDenom:
+          "ibc/C4CFF46FD6DE35CA4CF4CE031E643C8FDC9BA4B99AE598E9B0ED98FE3A2319F9",
+        coinDecimals: 6,
+        coinGeckoId: "cosmos",
+        gasPriceStep: {
+          low: 0.01,
+          average: 0.025,
+          high: 0.03,
+        },
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/elys/uatom.png",
       },
     ],
     stakeCurrency: {
-      coinDenom: "GGEZ1",
-      coinMinimalDenom: "uggez1",
+      coinDenom: "ELYS",
+      coinMinimalDenom: "uelys",
       coinDecimals: 6,
       coinImageUrl:
-        "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/ggezchain/ggez1.png",
+        "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/elys/chain.png",
     },
-    features: ["cosmwasm"],
+    features: [],
   },
 ];
 
