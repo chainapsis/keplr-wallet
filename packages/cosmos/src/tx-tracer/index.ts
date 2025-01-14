@@ -248,8 +248,7 @@ export class TendermintTxTracer {
 
   // Query the tx and subscribe the tx.
   traceTx(
-    query: Uint8Array | Record<string, string | number | boolean>,
-    noCheckTotalCount?: boolean
+    query: Uint8Array | Record<string, string | number | boolean>
   ): Promise<any> {
     let resolved = false;
     return new Promise<any>((resolve) => {
@@ -262,15 +261,7 @@ export class TendermintTxTracer {
             return;
           }
 
-          if (noCheckTotalCount) {
-            const txs = result.txs
-              ? result.txs.map((res: any) => res.tx_result || res)
-              : [result.tx_result || result];
-            if (txs.length > 0) {
-              resolve(result);
-              return;
-            }
-          } else if (result?.total_count !== "0") {
+          if (result?.total_count !== "0") {
             resolve(result);
             return;
           }
@@ -300,20 +291,10 @@ export class TendermintTxTracer {
                 return;
               }
 
-              if (noCheckTotalCount) {
-                const txs = result.txs
-                  ? result.txs.map((res: any) => res.tx_result || res)
-                  : [result.tx_result || result];
-                if (txs.length > 0) {
-                  resolve(result);
-                  return;
-                }
-              } else if (result?.total_count !== "0") {
+              if (result?.total_count !== "0") {
                 resolve(result);
                 return;
               }
-
-              resolve(result);
             })
             .catch(() => {
               // noop
