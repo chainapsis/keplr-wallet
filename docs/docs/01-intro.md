@@ -12,9 +12,17 @@ Keplr is a non-custodial blockchain wallets for webpages that allow users to int
 
 ## Why Keplr?
 
-- Private keys are stored locally. This removes the friction and risk of webpages having to manage user private keys safely and securely.
-- As the user's private key is not managed by the website, users do not have to worry about the level of security of the website. The user only has to trust the security guarantees of Keplr, and freely interact with various web applications as they wish (and verify the contents of the transaction).
-- Keplr can easily connect to libraries such as CosmJS, simplifying the process of connecting webpages to blockchains.
+#### User Security and Trust
+Keplr enhances user security by storing private keys locally, removing the need for websites to manage sensitive user data. This eliminates the risks associated with external key management and ensures that users only need to trust Keplr's security guarantees. With this approach, users can freely interact with web applications while independently verifying transaction details.
+
+#### Developer Convenience
+Keplr simplifies blockchain integration for developers by offering seamless compatibility with libraries like CosmJS. This eliminates complex connection processes, making it easier for developers to link web applications to blockchains and focus on creating user-centric experiences.
+
+#### Multi-Chain Support Across Ecosystems
+Keplr supports a wide range of blockchains, including Cosmos SDK-based chains, EVM-based chains, and Starknet, making it a versatile wallet for dApp developers. Additionally, Keplr is actively expanding its boundaries to support other major blockchain ecosystems, providing developers with a future-proof solution to reach broader audiences.
+
+#### Cross-Platform Accessibility
+Available as both a browser extension and mobile app, Keplr ensures users can securely access their wallets and interact with dApps on their preferred platform. This comprehensive accessibility empowers developers to build scalable and user-friendly dApps that meet modern multi-platform demands.
 
 ## Sections
 [Integrate with Keplr](./02-basic-api.md) describes how to integrate with Keplr in the webpage.  
