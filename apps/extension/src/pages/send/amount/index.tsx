@@ -65,6 +65,7 @@ const Styles = {
 };
 
 const QUERY_ROUTE_FETCH_TIMEOUT_MS = 10000;
+export type SendType = "bridge" | "ibc-transfer" | "send";
 
 export const SendAmountPage: FunctionComponent = observer(() => {
   const {
@@ -97,7 +98,15 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
   const isErc20 = new DenomHelper(currency.coinMinimalDenom).type === "erc20";
 
-  const [isIBCTransfer, setIsIBCTransfer] = useState(false);
+  const [sendType, setSendType] = useState<SendType>("send");
+
+  //NOTE 일단 이건 브릿지용이긴 함 분리가 필요해 보이긴 한데 일단 패스
+  const [destinationChainInfoOfBridge, setDestinationChainInfoOfBridge] =
+    useState({
+      chainId: "",
+      currency: currency,
+    });
+
   const [
     isIBCTransferDestinationModalOpen,
     setIsIBCTransferDestinationModalOpen,
@@ -122,6 +131,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   const [isEvmTx, setIsEvmTx] = useState(isErc20 || isEVMOnlyChain);
 
   const account = accountStore.getAccount(chainId);
+
   const ethereumAccount = ethereumAccountStore.getAccount(chainId);
 
   const queryBalances = queriesStore.get(chainId).queryBalances;
@@ -130,14 +140,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     ? queryBalances.getQueryEthereumHexAddress(sender).getBalance(currency)
     : queryBalances.getQueryBech32Address(sender).getBalance(currency);
 
-  //NOTE 일단 이건 브릿지용이긴 함 분리가 필요해 보이긴 한데 일단 패스
-  const [destinationChainInfoOfBridge, setDestinationChainInfoOfBridge] =
-    useState({
-      chainId: "",
-      currency: currency,
-    });
-
-  const ibcSwapConfigs = useIBCSwapConfig(
+  const ibcSwapConfigsForBridge = useIBCSwapConfig(
     chainStore,
     queriesStore,
     accountStore,
@@ -145,19 +148,13 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     skipQueriesStore,
     chainId,
     account.ethereumHexAddress,
-    // TODO: config로 빼기
     200000,
     destinationChainInfoOfBridge.chainId,
     destinationChainInfoOfBridge.currency,
     //NOTE - when swap is used on send page, it use bridge so swap fee is 0
-    0
+    0.75
   );
-  ibcSwapConfigs.amountConfig.setCurrency(currency);
-
-  const queryIBCSwap = ibcSwapConfigs.amountConfig.getQueryIBCSwap();
-  const queryRoute = queryIBCSwap?.getQueryRoute();
-
-  useFetchBridgeRouterPer10sec(queryRoute);
+  ibcSwapConfigsForBridge.amountConfig.setCurrency(currency);
 
   const sendConfigs = useSendMixedIBCTransferConfig(
     chainStore,
@@ -166,7 +163,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     sender,
     // TODO: 이 값을 config 밑으로 빼자
     isEvmTx ? 21000 : 300000,
-    isIBCTransfer,
+    sendType === "ibc-transfer",
     {
       allowHexAddressToBech32Address:
         !isEvmChain &&
@@ -219,13 +216,13 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     chainId,
     sendConfigs.gasConfig,
     sendConfigs.feeConfig,
-    isIBCTransfer ? `ibc/${gasSimulatorKey}` : gasSimulatorKey,
+    sendType === "ibc-transfer" ? `ibc/${gasSimulatorKey}` : gasSimulatorKey,
     () => {
       if (!sendConfigs.amountConfig.currency) {
         throw new Error("Send currency not set");
       }
 
-      if (isIBCTransfer) {
+      if (sendType === "ibc-transfer") {
         if (
           sendConfigs.channelConfig.uiProperties.loadingState ===
             "loading-block" ||
@@ -257,7 +254,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         throw new Error("Simulating secret wasm not supported");
       }
 
-      if (isIBCTransfer) {
+      if (sendType === "ibc-transfer") {
         return account.cosmos.makePacketForwardIBCTransferTx(
           accountStore,
           sendConfigs.channelConfig.channels,
@@ -421,7 +418,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   });
   useIBCChannelConfigQueryString(sendConfigs.channelConfig, (channels) => {
     if (channels && channels.length > 0) {
-      setIsIBCTransfer(true);
+      setSendType("ibc-transfer");
     }
   });
 
@@ -437,14 +434,14 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
   useEffect(() => {
     if (
-      !isIBCTransfer ||
+      sendType === "send" ||
       sendConfigs.recipientConfig.value !== ibcRecipientAddress
     ) {
       setIsIBCRecipientSetAuto(false);
     }
     // else 문을 써서 같다면 setAuto를 true로 해주면 안된다.
     // 의도상 한번 바꾸면 다시 auto fill 값과 같더라도 유저가 수정한걸로 간주한다.
-  }, [ibcRecipientAddress, sendConfigs.recipientConfig.value, isIBCTransfer]);
+  }, [ibcRecipientAddress, sendConfigs.recipientConfig.value, sendType]);
 
   const [ibcChannelFluent, setIBCChannelFluent] = useState<
     | {
@@ -464,11 +461,12 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
   const isDetachedMode = searchParams.get("detached") === "true";
 
-  const historyType = isIBCTransfer ? "basic-send/ibc" : "basic-send";
+  const historyType =
+    sendType === "ibc-transfer" ? "basic-send/ibc" : "basic-send";
 
   const [isSendingIBCToken, setIsSendingIBCToken] = useState(false);
   useEffect(() => {
-    if (!isIBCTransfer) {
+    if (sendType === "send") {
       if (
         new DenomHelper(sendConfigs.amountConfig.currency.coinMinimalDenom)
           .type === "native" &&
@@ -480,7 +478,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     }
 
     setIsSendingIBCToken(false);
-  }, [isIBCTransfer, sendConfigs.amountConfig.currency]);
+  }, [sendType, sendConfigs.amountConfig.currency]);
 
   // Prefetch IBC channels to reduce the UI flickering(?) when open ibc channel modal.
   try {
@@ -531,7 +529,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           isLoading: isEvmTx
             ? ethereumAccount.isSendingTx
             : accountStore.getAccount(chainId).isSendingMsg ===
-              (!isIBCTransfer ? "send" : "ibcTransfer"),
+              (sendType === "ibc-transfer" ? "ibcTransfer" : "send"),
         },
       ]}
       onSubmit={async (e) => {
@@ -607,23 +605,24 @@ export const SendAmountPage: FunctionComponent = observer(() => {
               });
               ethereumAccount.setIsSendingTx(false);
             } else {
-              const tx = isIBCTransfer
-                ? accountStore
-                    .getAccount(chainId)
-                    .cosmos.makePacketForwardIBCTransferTx(
-                      accountStore,
-                      sendConfigs.channelConfig.channels,
-                      sendConfigs.amountConfig.amount[0].toDec().toString(),
-                      sendConfigs.amountConfig.amount[0].currency,
-                      sendConfigs.recipientConfig.recipient
-                    )
-                : accountStore
-                    .getAccount(chainId)
-                    .makeSendTokenTx(
-                      sendConfigs.amountConfig.amount[0].toDec().toString(),
-                      sendConfigs.amountConfig.amount[0].currency,
-                      sendConfigs.recipientConfig.recipient
-                    );
+              const tx =
+                sendType === "ibc-transfer"
+                  ? accountStore
+                      .getAccount(chainId)
+                      .cosmos.makePacketForwardIBCTransferTx(
+                        accountStore,
+                        sendConfigs.channelConfig.channels,
+                        sendConfigs.amountConfig.amount[0].toDec().toString(),
+                        sendConfigs.amountConfig.amount[0].currency,
+                        sendConfigs.recipientConfig.recipient
+                      )
+                  : accountStore
+                      .getAccount(chainId)
+                      .makeSendTokenTx(
+                        sendConfigs.amountConfig.amount[0].toDec().toString(),
+                        sendConfigs.amountConfig.amount[0].currency,
+                        sendConfigs.recipientConfig.recipient
+                      );
 
               await tx.send(
                 sendConfigs.feeConfig.toStdFee(),
@@ -653,7 +652,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                       }),
                       sendConfigs.memoConfig.memo
                     );
-                    if (isIBCTransfer) {
+                    if (sendType === "ibc-transfer") {
                       if (msg instanceof SendTxAndRecordMsg) {
                         msg = msg.withIBCPacketForwarding(
                           sendConfigs.channelConfig.channels,
@@ -678,7 +677,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                       sendConfigs.recipientConfig.recipient
                     );
 
-                    if (!isIBCTransfer) {
+                    if (sendType === "send") {
                       const inCurrencyPrice =
                         await priceStore.waitCalculatePrice(
                           sendConfigs.amountConfig.amount[0],
@@ -881,7 +880,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
           <LayeredHorizontalRadioGroup
             size="large"
-            selectedKey={isIBCTransfer ? "ibc-transfer" : "send"}
+            selectedKey={sendType !== "send" ? "ibc-transfer" : "send"}
             items={[
               {
                 key: "send",
@@ -903,12 +902,12 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                 }
               } else {
                 sendConfigs.channelConfig.setChannels([]);
-                setIsIBCTransfer(false);
+                setSendType("send");
               }
             }}
           />
 
-          <VerticalCollapseTransition collapsed={!isIBCTransfer}>
+          <VerticalCollapseTransition collapsed={sendType === "send"}>
             <DestinationChainView
               ibcChannelConfig={sendConfigs.channelConfig}
               onClick={() => {
@@ -925,7 +924,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             recipientConfig={sendConfigs.recipientConfig}
             memoConfig={sendConfigs.memoConfig}
             currency={sendConfigs.amountConfig.currency}
-            permitAddressBookSelfKeyInfo={isIBCTransfer}
+            permitAddressBookSelfKeyInfo={sendType !== "send"}
             bottom={
               <VerticalCollapseTransition
                 collapsed={!isIBCRecipientSetAuto}
@@ -958,15 +957,16 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                 // 근데 memo의 placeholder는 cex로 보낼때 메모를 꼭 확인하라고 하니 서로 모순이라 이상하다.
                 // 그래서 IBC Send일때는 memo의 placeholder를 없앤다.
                 intl.formatMessage({
-                  id: isIBCTransfer
-                    ? "components.input.memo-input.optional-placeholder"
-                    : "page.send.amount.memo-placeholder",
+                  id:
+                    sendType === "ibc-transfer"
+                      ? "components.input.memo-input.optional-placeholder"
+                      : "page.send.amount.memo-placeholder",
                 })
               }
             />
           )}
 
-          <VerticalCollapseTransition collapsed={!isIBCTransfer}>
+          <VerticalCollapseTransition collapsed={sendType === "send"}>
             <GuideBox
               color="warning"
               title={intl.formatMessage({
@@ -1015,7 +1015,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             setDestinationChainInfoOfBridge(value);
           }}
           ibcChannelConfig={sendConfigs.channelConfig}
-          setIsIBCTransfer={setIsIBCTransfer}
+          setSendType={setSendType}
           setAutomaticRecipient={(address: string) => {
             setIsIBCRecipientSetAuto(true);
             setIBCRecipientAddress(address);

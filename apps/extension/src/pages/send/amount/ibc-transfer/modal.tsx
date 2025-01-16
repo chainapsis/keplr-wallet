@@ -18,19 +18,19 @@ import { HomeIcon } from "../../../../components/icon";
 import { WalletStatus } from "@keplr-wallet/stores";
 import { IBCChannel, NoneIBCBridgeInfo } from "@keplr-wallet/stores-internal";
 import { AppCurrency } from "@keplr-wallet/types";
+import { SendType } from "..";
 
 export const IBCTransferSelectDestinationModal: FunctionComponent<{
   chainId: string;
   denom: string;
   recipientConfig: IRecipientConfig;
   ibcChannelConfig: IIBCChannelConfig;
-  setIsIBCTransfer: (value: boolean) => void;
+  setSendType: (value: SendType) => void;
   close: () => void;
   setDestinationChainInfoOfBridge: (value: {
     chainId: string;
     currency: AppCurrency;
   }) => void;
-
   // 이 컴포넌트는 사실 send page에서만 쓰이기 때문에 사용하는 쪽에서 필요한 로직을 위해서 몇몇 이상한(?) prop을 넘겨준다.
   // setAutomaticRecipient는 send page에서 recipient가 자동으로 설정되었을때 유저에게 UI를 보여주기 위해서 필요하다.
   setAutomaticRecipient: (address: string) => void;
@@ -53,7 +53,7 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
     denom,
     recipientConfig,
     ibcChannelConfig,
-    setIsIBCTransfer,
+    setSendType,
     close,
     setAutomaticRecipient,
     setIBCChannelsInfoFluent,
@@ -169,7 +169,6 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
             })
             .map((bridgeOrChannel) => {
               const isIBCChain = "originChainId" in bridgeOrChannel;
-
               const isToOrigin = isIBCChain
                 ? bridgeOrChannel.destinationChainId ===
                   bridgeOrChannel.originChainId
@@ -205,6 +204,7 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
                           bridgeOrChannel.denom
                         ),
                       });
+                      setSendType("bridge");
                       close();
                       return;
                     }
@@ -222,7 +222,7 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
                       }
 
                       //이걸 합쳐서 bridge 타입으로 변경해서 분리 시키는게 났지 않을까?
-                      setIsIBCTransfer(true);
+                      setSendType("ibc-transfer");
                       ibcChannelConfig.setChannels(bridgeOrChannel.channels);
                       setIBCChannelsInfoFluent(bridgeOrChannel);
                       // ledger에서 evmos, injective같은 경우는 유저가 먼저 ethereum app을 init 해놓지 않으면 주소를 가져올 수 없음.
