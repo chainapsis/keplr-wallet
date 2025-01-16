@@ -1,6 +1,7 @@
 import {IQueriesStore} from '@keplr-wallet/stores';
 import {autorun, makeObservable, observable, runInAction} from 'mobx';
 import {KVStore, PrefixKVStore} from '@keplr-wallet/common';
+import {Platform} from 'react-native';
 
 export class RecallPasswordConfig {
   @observable
@@ -35,7 +36,9 @@ export class RecallPasswordConfig {
         enabled: boolean;
       }>(
         process.env['KEPLR_EXT_CONFIG_SERVER'] || 'http://unknown',
-        '/recall-password/config.json',
+        `/recall-password/${
+          Platform.OS === 'android' ? 'android.json' : 'config.json'
+        }`,
       );
       if (res.response) {
         if (res.response.data.enabled) {
