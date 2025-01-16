@@ -490,8 +490,30 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     console.log(e);
   }
 
-  const isSendByBridge =
-    isEVMOnlyChain && ibcSwapConfigs.amountConfig.outChainId !== chainId;
+  const destinationChainInfo = useMemo(() => {
+    if (sendType === "ibc-transfer") {
+      if (sendConfigs.channelConfig.channels.length === 0) {
+        return undefined;
+      }
+
+      return chainStore.getChain(
+        sendConfigs.channelConfig.channels[
+          sendConfigs.channelConfig.channels.length - 1
+        ].counterpartyChainId
+      );
+    }
+
+    if (sendType === "bridge") {
+      return chainStore.getChain(
+        ibcSwapConfigsForBridge.amountConfig.outChainId
+      );
+    }
+  }, [
+    sendType,
+    chainStore,
+    sendConfigs.channelConfig.channels,
+    ibcSwapConfigsForBridge,
+  ]);
 
   return (
     <HeaderLayout
@@ -909,7 +931,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
           <VerticalCollapseTransition collapsed={sendType === "send"}>
             <DestinationChainView
-              ibcChannelConfig={sendConfigs.channelConfig}
+              chainInfo={destinationChainInfo}
               onClick={() => {
                 setIsIBCTransferDestinationModalOpen(true);
               }}
@@ -943,8 +965,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
           <AmountInput
             amountConfig={
-              isSendByBridge
-                ? ibcSwapConfigs.amountConfig
+              sendType === "bridge"
+                ? ibcSwapConfigsForBridge.amountConfig
                 : sendConfigs.amountConfig
             }
           />

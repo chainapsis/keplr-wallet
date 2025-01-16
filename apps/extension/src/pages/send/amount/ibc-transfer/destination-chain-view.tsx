@@ -1,8 +1,6 @@
 import React, { FunctionComponent } from "react";
 import { Box } from "../../../../components/box";
-import { IIBCChannelConfig } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../../../stores";
 import { Subtitle2 } from "../../../../components/typography";
 import { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
@@ -12,13 +10,12 @@ import { ChainImageFallback } from "../../../../components/image";
 import { Gutter } from "../../../../components/gutter";
 import { ArrowRightIcon } from "../../../../components/icon";
 import { useIntl } from "react-intl";
+import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 
 export const DestinationChainView: FunctionComponent<{
-  ibcChannelConfig: IIBCChannelConfig;
+  chainInfo?: ModularChainInfo | ChainInfo;
   onClick: () => void;
-}> = observer(({ ibcChannelConfig, onClick }) => {
-  const { chainStore } = useStore();
-
+}> = observer(({ chainInfo, onClick }) => {
   const theme = useTheme();
   const intl = useIntl();
 
@@ -48,16 +45,9 @@ export const DestinationChainView: FunctionComponent<{
         }}
       >
         <XAxis alignY="center">
-          {ibcChannelConfig.channels.length === 0 ? null : (
+          {!chainInfo ? null : (
             <React.Fragment>
-              <ChainImageFallback
-                chainInfo={chainStore.getChain(
-                  ibcChannelConfig.channels[
-                    ibcChannelConfig.channels.length - 1
-                  ].counterpartyChainId
-                )}
-                size="2rem"
-              />
+              <ChainImageFallback chainInfo={chainInfo} size="2rem" />
               <Gutter size="0.75rem" />
             </React.Fragment>
           )}
@@ -69,14 +59,9 @@ export const DestinationChainView: FunctionComponent<{
             }
           >
             {(() => {
-              if (ibcChannelConfig.channels.length === 0) {
+              if (!chainInfo) {
                 return "";
               }
-
-              const chainInfo = chainStore.getChain(
-                ibcChannelConfig.channels[ibcChannelConfig.channels.length - 1]
-                  .counterpartyChainId
-              );
 
               return chainInfo.chainName;
             })()}
