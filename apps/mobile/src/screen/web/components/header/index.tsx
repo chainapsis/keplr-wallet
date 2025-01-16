@@ -166,7 +166,10 @@ export const OnScreenWebpageScreenHeader: FunctionComponent = observer(() => {
             <Box style={style.flatten(['flex-1'])}>
               <TouchableWithoutFeedback
                 onPress={() => {
-                  navigation.navigate('WebTab', {screen: 'Web.Search'});
+                  navigation.navigate('WebTab', {
+                    screen: 'Web.Search',
+                    params: {url: webViewState.url},
+                  });
                 }}>
                 <Text
                   numberOfLines={1}

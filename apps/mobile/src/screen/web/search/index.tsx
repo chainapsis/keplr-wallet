@@ -4,8 +4,8 @@ import {Box} from '../../../components/box';
 import {useStyle} from '../../../styles';
 import {validURL} from '../util.ts';
 import {useIntl} from 'react-intl';
-import {useNavigation} from '@react-navigation/native';
-import {WebStackNavigation} from '../../../navigation.tsx';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
+import {RootStackParamList, WebStackNavigation} from '../../../navigation.tsx';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {XAxis} from '../../../components/axis';
 import {TextButton} from '../../../components/text-button';
@@ -23,6 +23,7 @@ import {SearchedUrl} from '../../../stores/webpage/types.ts';
 export const SearchUrlScreen: FunctionComponent = observer(() => {
   const intl = useIntl();
   const style = useStyle();
+  const route = useRoute<RouteProp<RootStackParamList, 'Web.Search'>>();
   const navigation =
     useNavigation<NativeStackNavigationProp<WebStackNavigation>>();
 
@@ -30,7 +31,7 @@ export const SearchUrlScreen: FunctionComponent = observer(() => {
 
   const safeAreaInsets = useSafeAreaInsets();
 
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(route.params.url || '');
 
   const inputRef = useRef<NativeTextInput>(null);
   useEffectOnce(() => {

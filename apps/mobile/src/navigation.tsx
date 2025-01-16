@@ -295,6 +295,7 @@ export type RootStackParamList = {
 
   Stake: NavigatorScreenParams<StakeNavigation>;
   Web: {url: string; isExternal: true};
+  'Web.Search': {url?: string};
   WebTab: NavigatorScreenParams<WebStackNavigation>;
   Governance: NavigatorScreenParams<GovernanceNavigation>;
 
@@ -404,7 +405,7 @@ export type WebStackNavigation = {
   'Web.Intro': undefined;
   'Web.WebPage': {url: string};
   'Web.EditFavorite': {url: FavoriteUrl};
-  'Web.Search': undefined;
+  'Web.Search': {url?: string};
 };
 
 export type StackNavProp = StackNavigationProp<RootStackParamList>;

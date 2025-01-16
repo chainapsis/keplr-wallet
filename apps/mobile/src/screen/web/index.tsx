@@ -61,6 +61,7 @@ export const WebScreen: FunctionComponent = observer(() => {
         onPress={() =>
           navigation.navigate('WebTab', {
             screen: 'Web.Search',
+            params: {},
           })
         }>
         <Box
