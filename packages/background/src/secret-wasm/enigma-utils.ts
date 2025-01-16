@@ -71,13 +71,13 @@ export class EnigmaUtils implements EncryptionUtils {
       return this.consensusIoPubKey;
     }
 
-    const response = await simpleFetch<{ result: { TxKey: string } }>(
+    const response = await simpleFetch<{ key: string }>(
       this.url,
-      "/reg/tx-key"
+      "/registration/v1beta1/tx-key"
     );
 
     this.consensusIoPubKey = new Uint8Array(
-      Buffer.from(response.data.result.TxKey, "base64")
+      Buffer.from(response.data.key, "base64")
     );
 
     return this.consensusIoPubKey;

@@ -221,8 +221,12 @@ export class SecretAccountImpl {
         const msg = {
           type: this.msgOpts.executeSecretWasm.type,
           value: {
-            sender: this.base.bech32Address,
-            contract: contractAddress,
+            sender: Buffer.from(
+              Bech32Address.fromBech32(this.base.bech32Address).address
+            ).toString("base64"),
+            contract: Buffer.from(
+              Bech32Address.fromBech32(contractAddress).address
+            ).toString("base64"),
             // callback_code_hash: "",
             msg: Buffer.from(encryptedMsg).toString("base64"),
             sent_funds: sentFunds,
@@ -237,9 +241,8 @@ export class SecretAccountImpl {
               typeUrl: "/secret.compute.v1beta1.MsgExecuteContract",
               value: MsgExecuteContract.encode(
                 MsgExecuteContract.fromPartial({
-                  sender: Bech32Address.fromBech32(msg.value.sender).address,
-                  contract: Bech32Address.fromBech32(msg.value.contract)
-                    .address,
+                  sender: Buffer.from(msg.value.sender, "base64"),
+                  contract: Buffer.from(msg.value.contract, "base64"),
                   msg: Buffer.from(msg.value.msg, "base64"),
                   sentFunds: msg.value.sent_funds,
                 })
@@ -285,8 +288,12 @@ export class SecretAccountImpl {
         const msg = {
           type: this.msgOpts.executeSecretWasm.type,
           value: {
-            sender: this.base.bech32Address,
-            contract: contractAddress,
+            sender: Buffer.from(
+              Bech32Address.fromBech32(this.base.bech32Address).address
+            ).toString("base64"),
+            contract: Buffer.from(
+              Bech32Address.fromBech32(contractAddress).address
+            ).toString("base64"),
             // callback_code_hash: "",
             msg: Buffer.from(encryptedMsg).toString("base64"),
             sent_funds: sentFunds,
@@ -301,9 +308,8 @@ export class SecretAccountImpl {
               typeUrl: "/secret.compute.v1beta1.MsgExecuteContract",
               value: MsgExecuteContract.encode(
                 MsgExecuteContract.fromPartial({
-                  sender: Bech32Address.fromBech32(msg.value.sender).address,
-                  contract: Bech32Address.fromBech32(msg.value.contract)
-                    .address,
+                  sender: Buffer.from(msg.value.sender, "base64"),
+                  contract: Buffer.from(msg.value.contract, "base64"),
                   msg: Buffer.from(msg.value.msg, "base64"),
                   sentFunds: msg.value.sent_funds,
                 })
