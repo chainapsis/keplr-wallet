@@ -61,7 +61,10 @@ export class SkipQueries {
     this.queryIBCPacketForwardingTransfer = new ObservableQueryIbcPfmTransfer(
       chainStore,
       this.queryChains,
-      this.queryAssetsFromSource
+      this.queryAssets,
+      this.queryAssetsFromSource,
+      this.queryRoute,
+      this.queryMsgsDirect
     );
     this.queryIBCSwap = new ObservableQueryIbcSwap(
       chainStore,

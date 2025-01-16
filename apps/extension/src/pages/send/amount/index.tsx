@@ -55,12 +55,16 @@ import { GuideBox } from "../../../components/guide-box";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { amountToAmbiguousAverage, isRunningInSidePanel } from "../../../utils";
 import { EthTxStatus } from "@keplr-wallet/types";
+import { useIBCSwapConfig } from "@keplr-wallet/hooks-internal";
+import { ObservableQueryRouteInner } from "@keplr-wallet/stores-internal";
 
 const Styles = {
   Flex1: styled.div`
     flex: 1;
   `,
 };
+
+const QUERY_ROUTE_FETCH_TIMEOUT_MS = 10000;
 
 export const SendAmountPage: FunctionComponent = observer(() => {
   const {
@@ -125,6 +129,35 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   const balance = isEvmTx
     ? queryBalances.getQueryEthereumHexAddress(sender).getBalance(currency)
     : queryBalances.getQueryBech32Address(sender).getBalance(currency);
+
+  //NOTE 일단 이건 브릿지용이긴 함 분리가 필요해 보이긴 한데 일단 패스
+  const [destinationChainInfoOfBridge, setDestinationChainInfoOfBridge] =
+    useState({
+      chainId: "",
+      currency: currency,
+    });
+
+  const ibcSwapConfigs = useIBCSwapConfig(
+    chainStore,
+    queriesStore,
+    accountStore,
+    ethereumAccountStore,
+    skipQueriesStore,
+    chainId,
+    account.ethereumHexAddress,
+    // TODO: config로 빼기
+    200000,
+    destinationChainInfoOfBridge.chainId,
+    destinationChainInfoOfBridge.currency,
+    //NOTE - when swap is used on send page, it use bridge so swap fee is 0
+    0
+  );
+  ibcSwapConfigs.amountConfig.setCurrency(currency);
+
+  const queryIBCSwap = ibcSwapConfigs.amountConfig.getQueryIBCSwap();
+  const queryRoute = queryIBCSwap?.getQueryRoute();
+
+  useFetchBridgeRouterPer10sec(queryRoute);
 
   const sendConfigs = useSendMixedIBCTransferConfig(
     chainStore,
@@ -458,6 +491,9 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   } catch (e) {
     console.log(e);
   }
+
+  const isSendByBridge =
+    isEVMOnlyChain && ibcSwapConfigs.amountConfig.outChainId !== chainId;
 
   return (
     <HeaderLayout
@@ -843,36 +879,34 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             />
           </YAxis>
 
-          {!isErc20 && !isEVMOnlyChain && (
-            <LayeredHorizontalRadioGroup
-              size="large"
-              selectedKey={isIBCTransfer ? "ibc-transfer" : "send"}
-              items={[
-                {
-                  key: "send",
-                  text: intl.formatMessage({
-                    id: "page.send.type.send",
-                  }),
-                },
-                {
-                  key: "ibc-transfer",
-                  text: intl.formatMessage({
-                    id: "page.send.type.ibc-transfer",
-                  }),
-                },
-              ]}
-              onSelect={(key) => {
-                if (key === "ibc-transfer") {
-                  if (sendConfigs.channelConfig.channels.length === 0) {
-                    setIsIBCTransferDestinationModalOpen(true);
-                  }
-                } else {
-                  sendConfigs.channelConfig.setChannels([]);
-                  setIsIBCTransfer(false);
+          <LayeredHorizontalRadioGroup
+            size="large"
+            selectedKey={isIBCTransfer ? "ibc-transfer" : "send"}
+            items={[
+              {
+                key: "send",
+                text: intl.formatMessage({
+                  id: "page.send.type.send",
+                }),
+              },
+              {
+                key: "ibc-transfer",
+                text: intl.formatMessage({
+                  id: "page.send.type.ibc-transfer",
+                }),
+              },
+            ]}
+            onSelect={(key) => {
+              if (key === "ibc-transfer") {
+                if (sendConfigs.channelConfig.channels.length === 0) {
+                  setIsIBCTransferDestinationModalOpen(true);
                 }
-              }}
-            />
-          )}
+              } else {
+                sendConfigs.channelConfig.setChannels([]);
+                setIsIBCTransfer(false);
+              }
+            }}
+          />
 
           <VerticalCollapseTransition collapsed={!isIBCTransfer}>
             <DestinationChainView
@@ -908,7 +942,13 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             }
           />
 
-          <AmountInput amountConfig={sendConfigs.amountConfig} />
+          <AmountInput
+            amountConfig={
+              isSendByBridge
+                ? ibcSwapConfigs.amountConfig
+                : sendConfigs.amountConfig
+            }
+          />
 
           {!isEvmTx && (
             <MemoInput
@@ -971,6 +1011,9 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           chainId={chainId}
           denom={currency.coinMinimalDenom}
           recipientConfig={sendConfigs.recipientConfig}
+          setDestinationChainInfoOfBridge={(value) => {
+            setDestinationChainInfoOfBridge(value);
+          }}
           ibcChannelConfig={sendConfigs.channelConfig}
           setIsIBCTransfer={setIsIBCTransfer}
           setAutomaticRecipient={(address: string) => {
@@ -1009,3 +1052,28 @@ const DetachIcon: FunctionComponent<{
     </svg>
   );
 };
+
+function useFetchBridgeRouterPer10sec(
+  queryRoute: ObservableQueryRouteInner | undefined
+) {
+  useEffect(() => {
+    if (queryRoute && !queryRoute.isFetching) {
+      const timeoutId = setTimeout(() => {
+        if (!queryRoute.isFetching) {
+          queryRoute.fetch();
+        }
+      }, QUERY_ROUTE_FETCH_TIMEOUT_MS);
+
+      return () => {
+        clearTimeout(timeoutId);
+      };
+    }
+    // eslint가 자동으로 추천해주는 deps를 쓰면 안된다.
+    // queryRoute는 amountConfig에서 필요할때마다 reference가 바뀌므로 deps에 넣는다.
+    // queryRoute.isFetching는 현재 fetch중인지 아닌지를 알려주는 값이므로 deps에 꼭 넣어야한다.
+    // queryRoute는 input이 같으면 reference가 같으므로 eslint에서 추천하는대로 queryRoute만 deps에 넣으면
+    // queryRoute.isFetching이 무시되기 때문에 수동으로 넣어줌
+    // 해당 코드는 IBCSwapPage에서 그대로 가져옴
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryRoute, queryRoute?.isFetching]);
+}
