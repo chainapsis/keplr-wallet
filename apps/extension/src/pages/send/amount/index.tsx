@@ -14,9 +14,16 @@ import { Stack } from "../../../components/stack";
 import styled from "styled-components";
 import { useSearchParams } from "react-router-dom";
 
-import { useStore } from "../../../stores";
+import { ChainStore, useStore } from "../../../stores";
 import {
+  FeeConfig,
+  GasConfig,
+  IBCAmountConfig,
+  IBCChannelConfig,
+  MemoConfig,
+  SenderConfig,
   useGasSimulator,
+  useIBCChannelConfig,
   useSendMixedIBCTransferConfig,
   useTxConfigsValidate,
 } from "@keplr-wallet/hooks";
@@ -38,6 +45,7 @@ import { openPopupWindow } from "@keplr-wallet/popup";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT, Message } from "@keplr-wallet/router";
 import {
+  ChainInfoWithCoreTypes,
   LogAnalyticsEventMsg,
   SendTxAndRecordMsg,
 } from "@keplr-wallet/background";
@@ -54,9 +62,31 @@ import { VerticalCollapseTransition } from "../../../components/transition/verti
 import { GuideBox } from "../../../components/guide-box";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { amountToAmbiguousAverage, isRunningInSidePanel } from "../../../utils";
-import { EthTxStatus } from "@keplr-wallet/types";
+import { AppCurrency, EthTxStatus } from "@keplr-wallet/types";
 import { useIBCSwapConfig } from "@keplr-wallet/hooks-internal";
-import { ObservableQueryRouteInner } from "@keplr-wallet/stores-internal";
+import {
+  ObservableQueryRouteInner,
+  SkipQueries,
+} from "@keplr-wallet/stores-internal";
+import {
+  IBCRecipientConfig,
+  useIBCRecipientConfig,
+} from "@keplr-wallet/hooks/build/ibc/reciepient";
+import {
+  AccountSetBase,
+  AccountStore,
+  ChainGetter,
+  CosmosAccount,
+  CosmwasmAccount,
+  IAccountStoreWithInjects,
+  IChainInfoImpl,
+  IQueriesStore,
+  SecretAccount,
+} from "@keplr-wallet/stores";
+import {
+  EthereumAccountBase,
+  EthereumAccountStore,
+} from "@keplr-wallet/stores-eth";
 
 const Styles = {
   Flex1: styled.div`
@@ -64,119 +94,29 @@ const Styles = {
   `,
 };
 
-const QUERY_ROUTE_FETCH_TIMEOUT_MS = 10000;
 export type SendType = "bridge" | "ibc-transfer" | "send";
 
-export const SendAmountPage: FunctionComponent = observer(() => {
-  const {
-    analyticsStore,
-    accountStore,
-    ethereumAccountStore,
-    chainStore,
-    queriesStore,
-    skipQueriesStore,
-    priceStore,
-  } = useStore();
-  const addressRef = useRef<HTMLInputElement | null>(null);
-
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const notification = useNotification();
-  const intl = useIntl();
-
-  const initialChainId = searchParams.get("chainId");
-  const initialCoinMinimalDenom = searchParams.get("coinMinimalDenom");
-
-  const chainId = initialChainId || chainStore.chainInfosInUI[0].chainId;
-  const chainInfo = chainStore.getChain(chainId);
-  const isEvmChain = chainStore.isEvmChain(chainId);
-  const isEVMOnlyChain = chainStore.isEvmOnlyChain(chainId);
-
-  const coinMinimalDenom =
-    initialCoinMinimalDenom ||
-    chainStore.getChain(chainId).currencies[0].coinMinimalDenom;
-  const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
-  const isErc20 = new DenomHelper(currency.coinMinimalDenom).type === "erc20";
-
-  const [sendType, setSendType] = useState<SendType>("send");
-
-  //NOTE 일단 이건 브릿지용이긴 함 분리가 필요해 보이긴 한데 일단 패스
-  const [destinationChainInfoOfBridge, setDestinationChainInfoOfBridge] =
-    useState({
-      chainId: "",
-      currency: currency,
-    });
-
-  const [
-    isIBCTransferDestinationModalOpen,
-    setIsIBCTransferDestinationModalOpen,
-  ] = useState(false);
-
-  useEffect(() => {
-    if (addressRef.current) {
-      addressRef.current.focus();
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!initialChainId || !initialCoinMinimalDenom) {
-      navigate(
-        `/send/select-asset?navigateReplace=true&navigateTo=${encodeURIComponent(
-          "/send?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}"
-        )}`
-      );
-    }
-  }, [navigate, initialChainId, initialCoinMinimalDenom]);
-
-  const [isEvmTx, setIsEvmTx] = useState(isErc20 || isEVMOnlyChain);
-
-  const account = accountStore.getAccount(chainId);
-
-  const ethereumAccount = ethereumAccountStore.getAccount(chainId);
-
-  const queryBalances = queriesStore.get(chainId).queryBalances;
-  const sender = isEvmTx ? account.ethereumHexAddress : account.bech32Address;
-  const balance = isEvmTx
-    ? queryBalances.getQueryEthereumHexAddress(sender).getBalance(currency)
-    : queryBalances.getQueryBech32Address(sender).getBalance(currency);
-
-  const ibcSwapConfigsForBridge = useIBCSwapConfig(
-    chainStore,
-    queriesStore,
-    accountStore,
-    ethereumAccountStore,
-    skipQueriesStore,
-    chainId,
-    account.ethereumHexAddress,
-    200000,
-    destinationChainInfoOfBridge.chainId,
-    destinationChainInfoOfBridge.currency,
-    //NOTE - when swap is used on send page, it use bridge so swap fee is 0
-    0.75
-  );
-  ibcSwapConfigsForBridge.amountConfig.setCurrency(currency);
-
-  const sendConfigs = useSendMixedIBCTransferConfig(
-    chainStore,
-    queriesStore,
-    chainId,
-    sender,
-    // TODO: 이 값을 config 밑으로 빼자
-    isEvmTx ? 21000 : 300000,
-    sendType === "ibc-transfer",
-    {
-      allowHexAddressToBech32Address:
-        !isEvmChain &&
-        !isEvmTx &&
-        !chainStore.getChain(chainId).chainId.startsWith("injective"),
-      allowHexAddressOnly: isEvmTx,
-      icns: ICNSInfo,
-      ens: ENSInfo,
-      computeTerraClassicTax: true,
-    }
-  );
-  sendConfigs.amountConfig.setCurrency(currency);
-
+function useGetGasSimulatorOfNotBridge(
+  isEvmTx: boolean,
+  sendConfigs: {
+    amountConfig: IBCAmountConfig;
+    memoConfig: MemoConfig;
+    gasConfig: GasConfig;
+    feeConfig: FeeConfig;
+    recipientConfig: IBCRecipientConfig;
+    channelConfig: IBCChannelConfig;
+    senderConfig: SenderConfig;
+  },
+  chainStore: ChainStore,
+  chainId: string,
+  sendType: string,
+  account: AccountSetBase & CosmosAccount & CosmwasmAccount & SecretAccount,
+  accountStore: AccountStore<
+    [CosmosAccount, CosmwasmAccount, SecretAccount],
+    AccountSetBase & CosmosAccount & CosmwasmAccount & SecretAccount
+  >,
+  ethereumAccount: EthereumAccountBase
+) {
   const gasSimulatorKey = useMemo(() => {
     const txType: "evm" | "cosmos" = isEvmTx ? "evm" : "cosmos";
 
@@ -283,24 +223,26 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       );
     }
   );
+  return gasSimulator;
+}
 
-  const currentFeeCurrencyCoinMinimalDenom =
-    sendConfigs.feeConfig.fees[0]?.currency.coinMinimalDenom;
-  useEffect(() => {
-    const chainInfo = chainStore.getChain(chainId);
-    // feemarket 이상하게 만들어서 simulate하면 더 적은 gas가 나온다 귀찮아서 대충 처리.
-    if (chainInfo.hasFeature("feemarket")) {
-      if (
-        currentFeeCurrencyCoinMinimalDenom !==
-        chainInfo.currencies[0].coinMinimalDenom
-      ) {
-        gasSimulator.setGasAdjustmentValue("2");
-      } else {
-        gasSimulator.setGasAdjustmentValue("1.6");
-      }
-    }
-  }, [chainId, chainStore, gasSimulator, currentFeeCurrencyCoinMinimalDenom]);
-
+function useSetupEvmSenderAddressAndSetupEvmTx(
+  isEvmChain: boolean,
+  sendConfigs: {
+    amountConfig: IBCAmountConfig;
+    memoConfig: MemoConfig;
+    gasConfig: GasConfig;
+    feeConfig: FeeConfig;
+    recipientConfig: IBCRecipientConfig;
+    channelConfig: IBCChannelConfig;
+    senderConfig: SenderConfig;
+  },
+  chainInfo: IChainInfoImpl<ChainInfoWithCoreTypes>,
+  isEVMOnlyChain: boolean,
+  account: AccountSetBase & CosmosAccount & CosmwasmAccount & SecretAccount,
+  setIsEvmTx: React.Dispatch<React.SetStateAction<boolean>>,
+  ethereumAccount: EthereumAccountBase
+) {
   useEffect(() => {
     if (isEvmChain) {
       const sendingDenomHelper = new DenomHelper(
@@ -312,10 +254,11 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         (chainInfo.stakeCurrency?.coinMinimalDenom ??
           chainInfo.currencies[0].coinMinimalDenom) ===
           sendingDenomHelper.denom;
-      const newIsEvmTx =
-        isEVMOnlyChain ||
-        (sendConfigs.recipientConfig.isRecipientEthereumHexAddress &&
-          (isERC20 || isSendingNativeToken));
+      const isSendToHexAddressAndNotIBCToken =
+        sendConfigs.recipientConfig.isRecipientEthereumHexAddress &&
+        (isERC20 || isSendingNativeToken);
+
+      const newIsEvmTx = isEVMOnlyChain || isSendToHexAddressAndNotIBCToken;
 
       const newSenderAddress = newIsEvmTx
         ? account.ethereumHexAddress
@@ -335,10 +278,291 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     sendConfigs.senderConfig,
     chainInfo.stakeCurrency?.coinMinimalDenom,
     chainInfo.currencies,
+    setIsEvmTx,
   ]);
+}
+
+const REFRESH_EIP1559_TX_FEE_INTERVAL_TIME_MS = 12000;
+function useRefreshEIP1559TxFee(
+  isEvmTx: boolean,
+  sendConfigs: {
+    amountConfig: IBCAmountConfig;
+    memoConfig: MemoConfig;
+    gasConfig: GasConfig;
+    feeConfig: FeeConfig;
+    recipientConfig: IBCRecipientConfig;
+    channelConfig: IBCChannelConfig;
+    senderConfig: SenderConfig;
+  }
+) {
+  useEffect(() => {
+    if (isEvmTx) {
+      // Refresh EIP-1559 fee every 12 seconds.
+      const intervalId = setInterval(() => {
+        sendConfigs.feeConfig.refreshEIP1559TxFees();
+      }, REFRESH_EIP1559_TX_FEE_INTERVAL_TIME_MS);
+
+      return () => clearInterval(intervalId);
+    }
+  }, [isEvmTx, sendConfigs.feeConfig]);
+}
+
+const QUERY_ROUTE_FETCH_TIMEOUT_MS = 10000;
+function useFetchBridgeRouterPer10sec(
+  queryRoute: ObservableQueryRouteInner | undefined
+) {
+  useEffect(() => {
+    if (queryRoute && !queryRoute.isFetching) {
+      const timeoutId = setTimeout(() => {
+        if (!queryRoute.isFetching) {
+          queryRoute.fetch();
+        }
+      }, QUERY_ROUTE_FETCH_TIMEOUT_MS);
+
+      return () => {
+        clearTimeout(timeoutId);
+      };
+    }
+    // eslint가 자동으로 추천해주는 deps를 쓰면 안된다.
+    // queryRoute는 amountConfig에서 필요할때마다 reference가 바뀌므로 deps에 넣는다.
+    // queryRoute.isFetching는 현재 fetch중인지 아닌지를 알려주는 값이므로 deps에 꼭 넣어야한다.
+    // queryRoute는 input이 같으면 reference가 같으므로 eslint에서 추천하는대로 queryRoute만 deps에 넣으면
+    // queryRoute.isFetching이 무시되기 때문에 수동으로 넣어줌
+    // 해당 코드는 IBCSwapPage에서 그대로 가져옴
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryRoute, queryRoute?.isFetching]);
+}
+
+const useIBCSwapConfigWithRecipientConfig = (
+  chainGetter: ChainGetter,
+  queriesStore: IQueriesStore,
+  accountStore: IAccountStoreWithInjects<[CosmosAccount, CosmwasmAccount]>,
+  ethereumAccountStore: EthereumAccountStore,
+  skipQueries: SkipQueries,
+  chainId: string,
+  sender: string,
+  initialGas: number,
+  outChainId: string,
+  outCurrency: AppCurrency,
+  swapFeeBps: number,
+  options: {
+    allowHexAddressToBech32Address?: boolean;
+    allowHexAddressOnly?: boolean;
+    icns?: {
+      chainId: string;
+      resolverContractAddress: string;
+    };
+    ens?: {
+      chainId: string;
+    };
+    computeTerraClassicTax?: boolean;
+  } = {}
+) => {
+  const ibcSwapConfigsForBridge = useIBCSwapConfig(
+    chainGetter,
+    queriesStore,
+    accountStore,
+    ethereumAccountStore,
+    skipQueries,
+    chainId,
+    sender,
+    initialGas,
+    outChainId,
+    outCurrency,
+    swapFeeBps
+  );
+  const channelConfig = useIBCChannelConfig(false);
+
+  const recipientConfig = useIBCRecipientConfig(
+    chainGetter,
+    chainId,
+    channelConfig,
+    options,
+    false
+  );
+
+  return {
+    ibcSwapConfigsForBridge,
+    recipientConfig,
+  };
+};
+
+export const SendAmountPage: FunctionComponent = observer(() => {
+  const {
+    analyticsStore,
+    accountStore,
+    ethereumAccountStore,
+    chainStore,
+    queriesStore,
+    skipQueriesStore,
+    priceStore,
+  } = useStore();
+  const addressRef = useRef<HTMLInputElement | null>(null);
+
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const notification = useNotification();
+  const intl = useIntl();
+
+  const initialChainId = searchParams.get("chainId");
+  const initialCoinMinimalDenom = searchParams.get("coinMinimalDenom");
+
+  const chainId = initialChainId || chainStore.chainInfosInUI[0].chainId;
+  const chainInfo = chainStore.getChain(chainId);
+  const isEvmChain = chainStore.isEvmChain(chainId);
+  const isEVMOnlyChain = chainStore.isEvmOnlyChain(chainId);
+
+  const coinMinimalDenom =
+    initialCoinMinimalDenom ||
+    chainStore.getChain(chainId).currencies[0].coinMinimalDenom;
+  const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
+  const isErc20 = new DenomHelper(currency.coinMinimalDenom).type === "erc20";
+
+  const [sendType, setSendType] = useState<SendType>("send");
+
+  //NOTE 일단 이건 브릿지용이긴 함 분리가 필요해 보이긴 한데 일단 패스
+  const [destinationChainInfoOfBridge, setDestinationChainInfoOfBridge] =
+    useState({
+      chainId: "",
+      currency: currency,
+    });
+
+  const [
+    isIBCTransferDestinationModalOpen,
+    setIsIBCTransferDestinationModalOpen,
+  ] = useState(false);
+
+  useEffect(() => {
+    if (addressRef.current) {
+      addressRef.current.focus();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!initialChainId || !initialCoinMinimalDenom) {
+      navigate(
+        `/send/select-asset?navigateReplace=true&navigateTo=${encodeURIComponent(
+          "/send?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}"
+        )}`
+      );
+    }
+  }, [navigate, initialChainId, initialCoinMinimalDenom]);
+
+  const [isEvmTx, setIsEvmTx] = useState(isErc20 || isEVMOnlyChain);
+
+  const account = accountStore.getAccount(chainId);
+
+  const ethereumAccount = ethereumAccountStore.getAccount(chainId);
+
+  const queryBalances = queriesStore.get(chainId).queryBalances;
+  const sender = isEvmTx ? account.ethereumHexAddress : account.bech32Address;
+  const balance = isEvmTx
+    ? queryBalances.getQueryEthereumHexAddress(sender).getBalance(currency)
+    : queryBalances.getQueryBech32Address(sender).getBalance(currency);
+
+  const { ibcSwapConfigsForBridge, recipientConfig: recipientConfigForBridge } =
+    useIBCSwapConfigWithRecipientConfig(
+      chainStore,
+      queriesStore,
+      accountStore,
+      ethereumAccountStore,
+      skipQueriesStore,
+      destinationChainInfoOfBridge.chainId.length
+        ? destinationChainInfoOfBridge.chainId
+        : chainId,
+      account.ethereumHexAddress,
+      200000,
+      destinationChainInfoOfBridge.chainId,
+      destinationChainInfoOfBridge.currency,
+      //NOTE - when swap is used on send page, it use bridge so swap fee is 0
+      0.75,
+      {
+        allowHexAddressToBech32Address:
+          !isEvmChain &&
+          !isEvmTx &&
+          !chainStore.getChain(chainId).chainId.startsWith("injective"),
+        allowHexAddressOnly: sendType === "bridge",
+        icns: ICNSInfo,
+        ens: ENSInfo,
+        computeTerraClassicTax: true,
+      }
+    );
+  ibcSwapConfigsForBridge.amountConfig.setCurrency(currency);
+
+  const queryIBCSwap = ibcSwapConfigsForBridge.amountConfig.getQueryIBCSwap();
+  const queryRoute = queryIBCSwap?.getQueryRoute();
+  useFetchBridgeRouterPer10sec(queryRoute);
+
+  const sendConfigs = useSendMixedIBCTransferConfig(
+    chainStore,
+    queriesStore,
+    chainId,
+    sender,
+    // TODO: 이 값을 config 밑으로 빼자
+    isEvmTx ? 21000 : 300000,
+    sendType === "ibc-transfer",
+    {
+      allowHexAddressToBech32Address:
+        !isEvmChain &&
+        !isEvmTx &&
+        !chainStore.getChain(chainId).chainId.startsWith("injective"),
+      allowHexAddressOnly: isEvmTx,
+      icns: ICNSInfo,
+      ens: ENSInfo,
+      computeTerraClassicTax: true,
+    }
+  );
+  sendConfigs.amountConfig.setCurrency(currency);
+
+  const gasSimulatorForNotBridgeSend = useGetGasSimulatorOfNotBridge(
+    isEvmTx,
+    sendConfigs,
+    chainStore,
+    chainId,
+    sendType,
+    account,
+    accountStore,
+    ethereumAccount
+  );
+
+  const currentFeeCurrencyCoinMinimalDenom =
+    sendConfigs.feeConfig.fees[0]?.currency.coinMinimalDenom;
+  useEffect(() => {
+    const chainInfo = chainStore.getChain(chainId);
+    // feemarket 이상하게 만들어서 simulate하면 더 적은 gas가 나온다 귀찮아서 대충 처리.
+    if (chainInfo.hasFeature("feemarket")) {
+      if (
+        currentFeeCurrencyCoinMinimalDenom !==
+        chainInfo.currencies[0].coinMinimalDenom
+      ) {
+        gasSimulatorForNotBridgeSend.setGasAdjustmentValue("2");
+      } else {
+        gasSimulatorForNotBridgeSend.setGasAdjustmentValue("1.6");
+      }
+    }
+  }, [
+    chainId,
+    chainStore,
+    gasSimulatorForNotBridgeSend,
+    currentFeeCurrencyCoinMinimalDenom,
+  ]);
+
+  useSetupEvmSenderAddressAndSetupEvmTx(
+    isEvmChain,
+    sendConfigs,
+    chainInfo,
+    isEVMOnlyChain,
+    account,
+    setIsEvmTx,
+    ethereumAccount
+  );
 
   useEffect(() => {
     (async () => {
+      if (sendType === "bridge") {
+        return;
+      }
+
       if (chainInfo.features.includes("op-stack-l1-data-fee")) {
         const { maxFeePerGas, maxPriorityFeePerGas, gasPrice } =
           sendConfigs.feeConfig.getEIP1559TxFees(sendConfigs.feeConfig.type);
@@ -365,6 +589,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       }
     })();
   }, [
+    sendType,
     chainInfo.features,
     ethereumAccount,
     sendConfigs.amountConfig.amount,
@@ -373,16 +598,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     sendConfigs.recipientConfig.recipient,
   ]);
 
-  useEffect(() => {
-    if (isEvmTx) {
-      // Refresh EIP-1559 fee every 12 seconds.
-      const intervalId = setInterval(() => {
-        sendConfigs.feeConfig.refreshEIP1559TxFees();
-      }, 12000);
-
-      return () => clearInterval(intervalId);
-    }
-  }, [isEvmTx, sendConfigs.feeConfig]);
+  useRefreshEIP1559TxFee(isEvmTx, sendConfigs);
 
   useEffect(() => {
     // To simulate secretwasm, we need to include the signature in the tx.
@@ -392,7 +608,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       new DenomHelper(sendConfigs.amountConfig.currency.coinMinimalDenom)
         .type === "secret20"
     ) {
-      gasSimulator.forceDisable(
+      gasSimulatorForNotBridgeSend.forceDisable(
         new Error(
           intl.formatMessage({ id: "error.simulating-secret-20-not-supported" })
         )
@@ -402,11 +618,11 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         250000
       );
     } else {
-      gasSimulator.forceDisable(false);
-      gasSimulator.setEnabled(true);
+      gasSimulatorForNotBridgeSend.forceDisable(false);
+      gasSimulatorForNotBridgeSend.setEnabled(true);
     }
   }, [
-    gasSimulator,
+    gasSimulatorForNotBridgeSend,
     intl,
     sendConfigs.amountConfig.currency,
     sendConfigs.gasConfig,
@@ -414,7 +630,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
   useTxConfigsQueryString(chainId, {
     ...sendConfigs,
-    gasSimulator,
+    gasSimulator: gasSimulatorForNotBridgeSend,
   });
   useIBCChannelConfigQueryString(sendConfigs.channelConfig, (channels) => {
     if (channels && channels.length > 0) {
@@ -424,7 +640,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
   const txConfigsValidate = useTxConfigsValidate({
     ...sendConfigs,
-    gasSimulator,
+    gasSimulator: gasSimulatorForNotBridgeSend,
   });
 
   // IBC Send일때 auto fill일때는 recipient input에서 paragraph로 auto fill되었다는 것을 알려준다.
@@ -1016,7 +1232,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             senderConfig={sendConfigs.senderConfig}
             feeConfig={sendConfigs.feeConfig}
             gasConfig={sendConfigs.gasConfig}
-            gasSimulator={gasSimulator}
+            gasSimulator={gasSimulatorForNotBridgeSend}
             isForEVMTx={isEvmTx}
           />
         </Stack>
@@ -1074,28 +1290,3 @@ const DetachIcon: FunctionComponent<{
     </svg>
   );
 };
-
-function useFetchBridgeRouterPer10sec(
-  queryRoute: ObservableQueryRouteInner | undefined
-) {
-  useEffect(() => {
-    if (queryRoute && !queryRoute.isFetching) {
-      const timeoutId = setTimeout(() => {
-        if (!queryRoute.isFetching) {
-          queryRoute.fetch();
-        }
-      }, QUERY_ROUTE_FETCH_TIMEOUT_MS);
-
-      return () => {
-        clearTimeout(timeoutId);
-      };
-    }
-    // eslint가 자동으로 추천해주는 deps를 쓰면 안된다.
-    // queryRoute는 amountConfig에서 필요할때마다 reference가 바뀌므로 deps에 넣는다.
-    // queryRoute.isFetching는 현재 fetch중인지 아닌지를 알려주는 값이므로 deps에 꼭 넣어야한다.
-    // queryRoute는 input이 같으면 reference가 같으므로 eslint에서 추천하는대로 queryRoute만 deps에 넣으면
-    // queryRoute.isFetching이 무시되기 때문에 수동으로 넣어줌
-    // 해당 코드는 IBCSwapPage에서 그대로 가져옴
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryRoute, queryRoute?.isFetching]);
-}
