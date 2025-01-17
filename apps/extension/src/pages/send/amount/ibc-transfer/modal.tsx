@@ -24,6 +24,7 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
   chainId: string;
   denom: string;
   recipientConfig: IRecipientConfig;
+  recipientConfigForBridge: IRecipientConfig;
   ibcChannelConfig: IIBCChannelConfig;
   setSendType: (value: SendType) => void;
   close: () => void;
@@ -52,6 +53,7 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
     chainId,
     denom,
     recipientConfig,
+    recipientConfigForBridge,
     ibcChannelConfig,
     setSendType,
     close,
@@ -198,6 +200,18 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
                     const isIBCChain = "channels" in bridgeOrChannel;
 
                     if (!isIBCChain) {
+                      const isEVMOnlyChain = chainStore.isEvmOnlyChain(
+                        bridgeOrChannel.destinationChainId
+                      );
+
+                      const account = accountStore.getAccount(
+                        bridgeOrChannel.destinationChainId
+                      );
+
+                      if (account.walletStatus === WalletStatus.NotInit) {
+                        await account.init();
+                      }
+
                       setDestinationChainInfoOfBridge({
                         chainId: bridgeOrChannel.destinationChainId,
                         currency: chainInfo.forceFindCurrency(
@@ -205,6 +219,18 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
                         ),
                       });
                       setSendType("bridge");
+
+                      if (isEVMOnlyChain) {
+                        recipientConfigForBridge.setValue(
+                          account.ethereumHexAddress
+                        );
+                        setAutomaticRecipient(account.ethereumHexAddress);
+                      } else {
+                        recipientConfigForBridge.setValue(
+                          account.bech32Address
+                        );
+                        setAutomaticRecipient(account.bech32Address);
+                      }
                       close();
                       return;
                     }

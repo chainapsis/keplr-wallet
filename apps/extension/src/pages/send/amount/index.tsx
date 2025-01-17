@@ -382,7 +382,7 @@ const useIBCSwapConfigWithRecipientConfig = (
   );
 
   return {
-    ibcSwapConfigsForBridge,
+    ...ibcSwapConfigsForBridge,
     recipientConfig,
   };
 };
@@ -460,33 +460,32 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     ? queryBalances.getQueryEthereumHexAddress(sender).getBalance(currency)
     : queryBalances.getQueryBech32Address(sender).getBalance(currency);
 
-  const { ibcSwapConfigsForBridge, recipientConfig: recipientConfigForBridge } =
-    useIBCSwapConfigWithRecipientConfig(
-      chainStore,
-      queriesStore,
-      accountStore,
-      ethereumAccountStore,
-      skipQueriesStore,
-      destinationChainInfoOfBridge.chainId.length
-        ? destinationChainInfoOfBridge.chainId
-        : chainId,
-      account.ethereumHexAddress,
-      200000,
-      destinationChainInfoOfBridge.chainId,
-      destinationChainInfoOfBridge.currency,
-      //NOTE - when swap is used on send page, it use bridge so swap fee is 0
-      0.75,
-      {
-        allowHexAddressToBech32Address:
-          !isEvmChain &&
-          !isEvmTx &&
-          !chainStore.getChain(chainId).chainId.startsWith("injective"),
-        allowHexAddressOnly: sendType === "bridge",
-        icns: ICNSInfo,
-        ens: ENSInfo,
-        computeTerraClassicTax: true,
-      }
-    );
+  const ibcSwapConfigsForBridge = useIBCSwapConfigWithRecipientConfig(
+    chainStore,
+    queriesStore,
+    accountStore,
+    ethereumAccountStore,
+    skipQueriesStore,
+    destinationChainInfoOfBridge.chainId.length
+      ? destinationChainInfoOfBridge.chainId
+      : chainId,
+    account.ethereumHexAddress,
+    200000,
+    destinationChainInfoOfBridge.chainId,
+    destinationChainInfoOfBridge.currency,
+    //NOTE - when swap is used on send page, it use bridge so swap fee is 0
+    0.75,
+    {
+      allowHexAddressToBech32Address:
+        !isEvmChain &&
+        !isEvmTx &&
+        !chainStore.getChain(chainId).chainId.startsWith("injective"),
+      allowHexAddressOnly: sendType === "bridge",
+      icns: ICNSInfo,
+      ens: ENSInfo,
+      computeTerraClassicTax: true,
+    }
+  );
   ibcSwapConfigsForBridge.amountConfig.setCurrency(currency);
 
   const queryIBCSwap = ibcSwapConfigsForBridge.amountConfig.getQueryIBCSwap();
@@ -644,20 +643,32 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   });
 
   // IBC Send일때 auto fill일때는 recipient input에서 paragraph로 auto fill되었다는 것을 알려준다.
-  const [isIBCRecipientSetAuto, setIsIBCRecipientSetAuto] = useState(false);
+  const [isRecipientNotBasicSendSetAuto, setIsRecipientNotBasicSendSetAuto] =
+    useState(false);
   // 유저가 주소를 수정했을때 auto fill이라는 state를 해제하기 위해서 마지막으로 auto fill된 주소를 기억한다.
-  const [ibcRecipientAddress, setIBCRecipientAddress] = useState("");
+  const [recipientAddressNotBasicSend, setRecipientAddressNotBasicSend] =
+    useState("");
 
   useEffect(() => {
+    const recipientAddress =
+      sendType === "bridge"
+        ? ibcSwapConfigsForBridge.recipientConfig.value
+        : sendConfigs.recipientConfig.value;
+
     if (
       sendType === "send" ||
-      sendConfigs.recipientConfig.value !== ibcRecipientAddress
+      recipientAddress !== recipientAddressNotBasicSend
     ) {
-      setIsIBCRecipientSetAuto(false);
+      setIsRecipientNotBasicSendSetAuto(false);
     }
     // else 문을 써서 같다면 setAuto를 true로 해주면 안된다.
     // 의도상 한번 바꾸면 다시 auto fill 값과 같더라도 유저가 수정한걸로 간주한다.
-  }, [ibcRecipientAddress, sendConfigs.recipientConfig.value, sendType]);
+  }, [
+    recipientAddressNotBasicSend,
+    sendConfigs.recipientConfig.value,
+    ibcSwapConfigsForBridge.recipientConfig.value,
+    sendType,
+  ]);
 
   const [ibcChannelFluent, setIBCChannelFluent] = useState<
     | {
@@ -1159,13 +1170,25 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           <RecipientInput
             ref={addressRef}
             historyType={historyType}
-            recipientConfig={sendConfigs.recipientConfig}
-            memoConfig={sendConfigs.memoConfig}
-            currency={sendConfigs.amountConfig.currency}
+            recipientConfig={
+              sendType === "bridge"
+                ? ibcSwapConfigsForBridge.recipientConfig
+                : sendConfigs.recipientConfig
+            }
+            memoConfig={
+              sendType === "bridge"
+                ? ibcSwapConfigsForBridge.memoConfig
+                : sendConfigs.memoConfig
+            }
+            currency={
+              sendType === "bridge"
+                ? ibcSwapConfigsForBridge.amountConfig.currency
+                : sendConfigs.amountConfig.currency
+            }
             permitAddressBookSelfKeyInfo={sendType !== "send"}
             bottom={
               <VerticalCollapseTransition
-                collapsed={!isIBCRecipientSetAuto}
+                collapsed={!isRecipientNotBasicSendSetAuto}
                 transitionAlign="top"
               >
                 <Gutter size="0.25rem" />
@@ -1249,14 +1272,15 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           chainId={chainId}
           denom={currency.coinMinimalDenom}
           recipientConfig={sendConfigs.recipientConfig}
+          recipientConfigForBridge={ibcSwapConfigsForBridge.recipientConfig}
           setDestinationChainInfoOfBridge={(value) => {
             setDestinationChainInfoOfBridge(value);
           }}
           ibcChannelConfig={sendConfigs.channelConfig}
           setSendType={setSendType}
           setAutomaticRecipient={(address: string) => {
-            setIsIBCRecipientSetAuto(true);
-            setIBCRecipientAddress(address);
+            setIsRecipientNotBasicSendSetAuto(true);
+            setRecipientAddressNotBasicSend(address);
           }}
           setIBCChannelsInfoFluent={setIBCChannelFluent}
           close={() => {
