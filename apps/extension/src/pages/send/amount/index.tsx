@@ -254,6 +254,7 @@ function useSetupEvmSenderAddressAndSetupEvmTx(
         (chainInfo.stakeCurrency?.coinMinimalDenom ??
           chainInfo.currencies[0].coinMinimalDenom) ===
           sendingDenomHelper.denom;
+
       const isSendToHexAddressAndNotIBCToken =
         sendConfigs.recipientConfig.isRecipientEthereumHexAddress &&
         (isERC20 || isSendingNativeToken);
@@ -420,7 +421,6 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
   const [sendType, setSendType] = useState<SendType>("send");
 
-  //NOTE 일단 이건 브릿지용이긴 함 분리가 필요해 보이긴 한데 일단 패스
   const [destinationChainInfoOfBridge, setDestinationChainInfoOfBridge] =
     useState({
       chainId: "",
@@ -466,10 +466,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     accountStore,
     ethereumAccountStore,
     skipQueriesStore,
-    destinationChainInfoOfBridge.chainId.length
-      ? destinationChainInfoOfBridge.chainId
-      : chainId,
-    account.ethereumHexAddress,
+    chainId,
+    isEVMOnlyChain ? account.ethereumHexAddress : account.bech32Address,
     200000,
     destinationChainInfoOfBridge.chainId,
     destinationChainInfoOfBridge.currency,
@@ -1252,9 +1250,21 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           <Gutter size="0" />
 
           <FeeControl
-            senderConfig={sendConfigs.senderConfig}
-            feeConfig={sendConfigs.feeConfig}
-            gasConfig={sendConfigs.gasConfig}
+            senderConfig={
+              sendType === "bridge"
+                ? ibcSwapConfigsForBridge.senderConfig
+                : sendConfigs.senderConfig
+            }
+            feeConfig={
+              sendType === "bridge"
+                ? ibcSwapConfigsForBridge.feeConfig
+                : sendConfigs.feeConfig
+            }
+            gasConfig={
+              sendType === "bridge"
+                ? ibcSwapConfigsForBridge.gasConfig
+                : sendConfigs.gasConfig
+            }
             gasSimulator={gasSimulatorForNotBridgeSend}
             isForEVMTx={isEvmTx}
           />
