@@ -48,7 +48,7 @@ import { VerticalCollapseTransition } from "../../../components/transition/verti
 /**
  * EnableChainsScene은 finalize-key scene에서 선택한 chains를 활성화하는 scene이다.
  * 근데 문제는 extension 자체의 메인 페이지에서 manage chains 버튼을 눌러서도 올 수 있다는 점이다...
- * registeration이 하는 역할이 많아지면서 복잡해졌는데... 알아서 잘 처리하자
+ * registration이 하는 역할이 많아지면서 복잡해졌는데... 알아서 잘 처리하자
  */
 export const EnableChainsScene: FunctionComponent<{
   vaultId: string;
