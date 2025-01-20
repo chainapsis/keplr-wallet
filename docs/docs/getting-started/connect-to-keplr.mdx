@@ -24,29 +24,13 @@ Register a function to `window.onload`:
 window.onload = async () => {
   if (!window.keplr) {
     alert("Please install the Keplr extension.");
-  } else {
-    const chainId = "cosmoshub-4";
-
-    // It is recommended to enable Keplr before using it.
-    // This method prompts the user to allow access if they haven't visited this website before.
-    // Additionally, it requests the user to unlock the wallet if it is locked.
-    await window.keplr.enable(chainId);
-
-    const offlineSigner = window.keplr.getOfflineSigner(chainId);
-
-    // Retrieve the address and public keys using the `getAccounts` method.
-    // This method returns an array of address/public key pairs.
-    // Note: Currently, the Keplr extension manages only a single address/public key pair.
-    // XXX: This step is required to set the sender address for SigningCosmosClient.
-    const accounts = await offlineSigner.getAccounts();
-
-    // Initialize the Gaia API with the offline signer provided by the Keplr extension.
-    const cosmJS = new SigningCosmosClient(
-      "https://lcd-cosmoshub.keplr.app",
-      accounts[0].address,
-      offlineSigner
-    );
+    return;
   }
+
+  const keplr = window.keplr;
+
+  const chainId = "cosmoshub-4";
+  await keplr.enable(chainId);
 };
 ```
 
