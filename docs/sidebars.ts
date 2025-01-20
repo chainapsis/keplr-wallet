@@ -15,6 +15,12 @@ import type { SidebarsConfig } from "@docusaurus/plugin-content-docs";
 const sidebars: SidebarsConfig = {
   tutorialSidebar: [
     "intro/index",
+    {
+      type: "category",
+      label: "Getting Started",
+      collapsed: false,
+      items: ["getting-started/connect-to-keplr"],
+    },
     "basic-api",
     "cosmjs",
     "secretjs",

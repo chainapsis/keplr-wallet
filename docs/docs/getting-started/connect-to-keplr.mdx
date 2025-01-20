@@ -1,0 +1,78 @@
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Connect to Keplr
+
+Integrating your dApp with Keplr allows you to provide seamless interactions for your users. To meet various development needs, Keplr offers flexible integration methods, as detailed below:
+
+- [Direct Integration](#direct-integration)
+
+---
+
+## Direct Integration
+
+The most straightforward approach to connect your dApp to Keplr is by utilizing the provider that Keplr injects directly into your web application. This provider is globally available at `window.keplr`. With this integration, you'll always have access to the latest functionality provided by Keplr.
+
+### How to Detect Keplr
+
+To check if Keplr is installed on a user's device, you can verify the presence of `window.keplr`. If `window.keplr` is `undefined` after the `document.load` event, Keplr is not installed. Below are some examples of how to wait for the load event to check the status.
+
+Register a function to `window.onload`:
+
+```javascript
+window.onload = async () => {
+  if (!window.keplr) {
+    alert("Please install the Keplr extension.");
+  } else {
+    const chainId = "cosmoshub-4";
+
+    // It is recommended to enable Keplr before using it.
+    // This method prompts the user to allow access if they haven't visited this website before.
+    // Additionally, it requests the user to unlock the wallet if it is locked.
+    await window.keplr.enable(chainId);
+
+    const offlineSigner = window.keplr.getOfflineSigner(chainId);
+
+    // Retrieve the address and public keys using the `getAccounts` method.
+    // This method returns an array of address/public key pairs.
+    // Note: Currently, the Keplr extension manages only a single address/public key pair.
+    // XXX: This step is required to set the sender address for SigningCosmosClient.
+    const accounts = await offlineSigner.getAccounts();
+
+    // Initialize the Gaia API with the offline signer provided by the Keplr extension.
+    const cosmJS = new SigningCosmosClient(
+      "https://lcd-cosmoshub.keplr.app",
+      accounts[0].address,
+      offlineSigner
+    );
+  }
+};
+```
+
+Or track the document's ready state through the document event listener:
+
+```javascript
+async getKeplr(): Promise<Keplr | undefined> {
+    if (window.keplr) {
+        return window.keplr;
+    }
+
+    if (document.readyState === "complete") {
+        return window.keplr;
+    }
+
+    return new Promise((resolve) => {
+        const documentStateChange = (event: Event) => {
+            if (
+                event.target &&
+                (event.target as Document).readyState === "complete"
+            ) {
+                resolve(window.keplr);
+                document.removeEventListener("readystatechange", documentStateChange);
+            }
+        };
+
+        document.addEventListener("readystatechange", documentStateChange);
+    });
+}
+```

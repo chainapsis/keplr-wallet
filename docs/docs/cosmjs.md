@@ -5,7 +5,7 @@ order: 2
 
 ## How to detect Keplr
 Keplr API may be undefined right after the webpage is shown.
-Please check the [How to detect Keplr](./02-basic-api.md#how-to-detect-keplr) first before reading this section.
+Please check the [How to detect Keplr](./getting-started/connect-to-keplr#how-to-detect-keplr) first before reading this section.
 
 ## Connecting with CosmJS
 
