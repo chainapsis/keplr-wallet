@@ -87,6 +87,7 @@ import {
   EthereumAccountBase,
   EthereumAccountStore,
 } from "@keplr-wallet/stores-eth";
+import { SendTxEthereumMsgAndRecordMsg } from "@keplr-wallet/background/build/tx-ethereum";
 
 const Styles = {
   Flex1: styled.div`
@@ -800,56 +801,88 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                 maxPriorityFeePerGas: maxPriorityFeePerGas?.toString(),
                 gasPrice: gasPrice?.toString(),
               });
-              await ethereumAccount.sendEthereumTx(sender, unsignedTx, {
-                onFulfill: (txReceipt) => {
-                  queryBalances
-                    .getQueryEthereumHexAddress(sender)
-                    .balances.forEach((balance) => {
-                      if (
-                        balance.currency.coinMinimalDenom ===
-                          coinMinimalDenom ||
-                        sendConfigs.feeConfig.fees.some(
-                          (fee) =>
-                            fee.currency.coinMinimalDenom ===
-                            balance.currency.coinMinimalDenom
-                        )
-                      ) {
-                        balance.fetch();
-                      }
-                    });
-                  queryBalances
-                    .getQueryBech32Address(account.bech32Address)
-                    .balances.forEach((balance) => {
-                      if (
-                        balance.currency.coinMinimalDenom ===
-                          coinMinimalDenom ||
-                        sendConfigs.feeConfig.fees.some(
-                          (fee) =>
-                            fee.currency.coinMinimalDenom ===
-                            balance.currency.coinMinimalDenom
-                        )
-                      ) {
-                        balance.fetch();
-                      }
-                    });
+              await ethereumAccount.sendEthereumTx(
+                sender,
+                unsignedTx,
+                {
+                  onFulfill: (txReceipt) => {
+                    queryBalances
+                      .getQueryEthereumHexAddress(sender)
+                      .balances.forEach((balance) => {
+                        if (
+                          balance.currency.coinMinimalDenom ===
+                            coinMinimalDenom ||
+                          sendConfigs.feeConfig.fees.some(
+                            (fee) =>
+                              fee.currency.coinMinimalDenom ===
+                              balance.currency.coinMinimalDenom
+                          )
+                        ) {
+                          balance.fetch();
+                        }
+                      });
+                    queryBalances
+                      .getQueryBech32Address(account.bech32Address)
+                      .balances.forEach((balance) => {
+                        if (
+                          balance.currency.coinMinimalDenom ===
+                            coinMinimalDenom ||
+                          sendConfigs.feeConfig.fees.some(
+                            (fee) =>
+                              fee.currency.coinMinimalDenom ===
+                              balance.currency.coinMinimalDenom
+                          )
+                        ) {
+                          balance.fetch();
+                        }
+                      });
 
-                  if (txReceipt.status === EthTxStatus.Success) {
-                    notification.show(
-                      "success",
-                      intl.formatMessage({
-                        id: "notification.transaction-success",
-                      }),
-                      ""
-                    );
-                  } else {
-                    notification.show(
-                      "failed",
-                      intl.formatMessage({ id: "error.transaction-failed" }),
-                      ""
-                    );
-                  }
+                    if (txReceipt.status === EthTxStatus.Success) {
+                      notification.show(
+                        "success",
+                        intl.formatMessage({
+                          id: "notification.transaction-success",
+                        }),
+                        ""
+                      );
+                    } else {
+                      notification.show(
+                        "failed",
+                        intl.formatMessage({ id: "error.transaction-failed" }),
+                        ""
+                      );
+                    }
+                  },
                 },
-              });
+                {
+                  sendTx: async (chainId, signedTx) => {
+                    const msg = new SendTxEthereumMsgAndRecordMsg(
+                      historyType,
+                      chainId,
+                      sendConfigs.recipientConfig.chainId,
+                      signedTx,
+                      sendConfigs.senderConfig.sender,
+                      sendConfigs.recipientConfig.recipient,
+                      sendConfigs.amountConfig.amount.map((amount) => {
+                        return {
+                          amount: DecUtils.getTenExponentN(
+                            amount.currency.coinDecimals
+                          )
+                            .mul(amount.toDec())
+                            .toString(),
+                          denom: amount.currency.coinMinimalDenom,
+                        };
+                      }),
+                      sendConfigs.memoConfig.memo
+                    );
+
+                    return await new InExtensionMessageRequester().sendMessage(
+                      BACKGROUND_PORT,
+                      msg
+                    );
+                  },
+                }
+              );
               ethereumAccount.setIsSendingTx(false);
             } else {
               const tx =

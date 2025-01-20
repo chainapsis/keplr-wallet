@@ -292,7 +292,8 @@ export function init(
   BackgroundTxEthereum.init(
     router,
     backgroundTxEthereumService,
-    permissionInteractiveService
+    permissionInteractiveService,
+    recentSendHistoryService
   );
   PhishingList.init(router, phishingListService);
   AutoLocker.init(router, autoLockAccountService);
