@@ -227,7 +227,7 @@ function useGetGasSimulatorOfNotBridge(
   return gasSimulator;
 }
 
-function useSetupEvmSenderAddressAndSetupEvmTx(
+function useChangeSenderAddressWhenEtherMintChainSendToHexAddress(
   isEvmChain: boolean,
   sendConfigs: {
     amountConfig: IBCAmountConfig;
@@ -377,7 +377,7 @@ const useIBCSwapConfigWithRecipientConfig = (
 
   const recipientConfig = useIBCRecipientConfig(
     chainGetter,
-    chainId,
+    outChainId,
     channelConfig,
     options,
     false
@@ -473,7 +473,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     destinationChainInfoOfBridge.chainId,
     destinationChainInfoOfBridge.currency,
     //NOTE - when swap is used on send page, it use bridge so swap fee is 0
-    0.75,
+    0,
     {
       allowHexAddressToBech32Address:
         !isEvmChain &&
@@ -545,7 +545,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     currentFeeCurrencyCoinMinimalDenom,
   ]);
 
-  useSetupEvmSenderAddressAndSetupEvmTx(
+  useChangeSenderAddressWhenEtherMintChainSendToHexAddress(
     isEvmChain,
     sendConfigs,
     chainInfo,
@@ -740,6 +740,35 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     sendConfigs.channelConfig.channels,
     ibcSwapConfigsForBridge,
   ]);
+
+  const {
+    feeConfig,
+    gasConfig,
+    senderConfig,
+    recipientConfig,
+    memoConfig,
+    amountConfig,
+  } = useMemo(() => {
+    if (sendType === "bridge") {
+      return {
+        feeConfig: ibcSwapConfigsForBridge.feeConfig,
+        gasConfig: ibcSwapConfigsForBridge.gasConfig,
+        senderConfig: ibcSwapConfigsForBridge.senderConfig,
+        recipientConfig: ibcSwapConfigsForBridge.recipientConfig,
+        memoConfig: ibcSwapConfigsForBridge.memoConfig,
+        amountConfig: ibcSwapConfigsForBridge.amountConfig,
+      };
+    }
+
+    return {
+      feeConfig: sendConfigs.feeConfig,
+      gasConfig: sendConfigs.gasConfig,
+      senderConfig: sendConfigs.senderConfig,
+      recipientConfig: sendConfigs.recipientConfig,
+      memoConfig: sendConfigs.memoConfig,
+      amountConfig: sendConfigs.amountConfig,
+    };
+  }, [sendType, sendConfigs, ibcSwapConfigsForBridge]);
 
   return (
     <HeaderLayout
@@ -1201,21 +1230,9 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           <RecipientInput
             ref={addressRef}
             historyType={historyType}
-            recipientConfig={
-              sendType === "bridge"
-                ? ibcSwapConfigsForBridge.recipientConfig
-                : sendConfigs.recipientConfig
-            }
-            memoConfig={
-              sendType === "bridge"
-                ? ibcSwapConfigsForBridge.memoConfig
-                : sendConfigs.memoConfig
-            }
-            currency={
-              sendType === "bridge"
-                ? ibcSwapConfigsForBridge.amountConfig.currency
-                : sendConfigs.amountConfig.currency
-            }
+            recipientConfig={recipientConfig}
+            memoConfig={memoConfig}
+            currency={currency}
             permitAddressBookSelfKeyInfo={sendType !== "send"}
             bottom={
               <VerticalCollapseTransition
@@ -1233,13 +1250,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             }
           />
 
-          <AmountInput
-            amountConfig={
-              sendType === "bridge"
-                ? ibcSwapConfigsForBridge.amountConfig
-                : sendConfigs.amountConfig
-            }
-          />
+          <AmountInput amountConfig={amountConfig} />
 
           {!isEvmTx && (
             <MemoInput
@@ -1283,21 +1294,9 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           <Gutter size="0" />
 
           <FeeControl
-            senderConfig={
-              sendType === "bridge"
-                ? ibcSwapConfigsForBridge.senderConfig
-                : sendConfigs.senderConfig
-            }
-            feeConfig={
-              sendType === "bridge"
-                ? ibcSwapConfigsForBridge.feeConfig
-                : sendConfigs.feeConfig
-            }
-            gasConfig={
-              sendType === "bridge"
-                ? ibcSwapConfigsForBridge.gasConfig
-                : sendConfigs.gasConfig
-            }
+            senderConfig={senderConfig}
+            feeConfig={feeConfig}
+            gasConfig={gasConfig}
             gasSimulator={gasSimulatorForNotBridgeSend}
             isForEVMTx={isEvmTx}
           />
