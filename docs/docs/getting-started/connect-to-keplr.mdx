@@ -6,6 +6,7 @@ import TabItem from "@theme/TabItem";
 Integrating your dApp with Keplr allows you to provide seamless interactions for your users. To meet various development needs, Keplr offers flexible integration methods, as detailed below:
 
 - [Direct Integration](#direct-integration)
+- [Keplr Wallet SDK](#keplr-wallet-sdk)
 
 ---
 
@@ -76,3 +77,36 @@ async getKeplr(): Promise<Keplr | undefined> {
     });
 }
 ```
+
+---
+
+## Keplr Wallet SDK
+
+For a more modular approach, you can use the Keplr client by using the JavaScript SDK. This allows you to connect your dApp to Keplr by installing the SDK via package managers. The client provides an easy-to-use interface for interacting with Keplr, making integration simpler and more scalable for complex projects.
+
+#### Installation Steps
+
+1. Install `@keplr-wallet/provider-extension` via package managers.
+
+   <Tabs>
+     <TabItem value="npm" label="npm" default>
+       ```bash npm i @keplr-wallet/provider-extension ```
+     </TabItem>
+     <TabItem value="yarn" label="Yarn">
+       ```bash yarn add @keplr-wallet/provider-extension ```
+     </TabItem>
+   </Tabs>
+
+2. Import the SDK into your application.
+
+   ```tsx
+   import { Keplr } from "@keplr-wallet/provider-extension";
+   ```
+
+3. Initialize the SDK.
+
+   ```tsx
+   export const getKeplrFromProvider = async () => {
+     return await Keplr.getKeplr();
+   };
+   ```
