@@ -19,6 +19,7 @@ import { WalletStatus } from "@keplr-wallet/stores";
 import { IBCChannel, NoneIBCBridgeInfo } from "@keplr-wallet/stores-internal";
 import { AppCurrency } from "@keplr-wallet/types";
 import { SendType } from "..";
+import { DenomHelper } from "@keplr-wallet/common";
 
 export const IBCTransferSelectDestinationModal: FunctionComponent<{
   chainId: string;
@@ -203,6 +204,15 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
                       const isEVMOnlyChain = chainStore.isEvmOnlyChain(
                         bridgeOrChannel.destinationChainId
                       );
+                      const isEvmChain = chainStore.isEvmChain(chainId);
+
+                      const sendingDenomHelper = new DenomHelper(
+                        bridgeOrChannel.denom
+                      );
+                      const isERC20 = sendingDenomHelper.type === "erc20";
+
+                      const isDestinationEvmAddress =
+                        isEVMOnlyChain || (isERC20 && isEvmChain);
 
                       const account = accountStore.getAccount(
                         bridgeOrChannel.destinationChainId
@@ -220,7 +230,7 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
                       });
                       setSendType("bridge");
 
-                      if (isEVMOnlyChain) {
+                      if (isDestinationEvmAddress) {
                         recipientConfigForBridge.setValue(
                           account.ethereumHexAddress
                         );
