@@ -19,7 +19,10 @@ const sidebars: SidebarsConfig = {
       type: "category",
       label: "Getting Started",
       collapsed: false,
-      items: ["getting-started/connect-to-keplr"],
+      items: [
+        "getting-started/connect-to-keplr",
+        "getting-started/typescript-support",
+      ],
     },
     "basic-api",
     "cosmjs",
