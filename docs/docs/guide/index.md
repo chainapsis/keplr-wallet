@@ -3,7 +3,6 @@ title: Basic API
 order: 1
 ---
 
-
 ## Keplr-specific features
 
 If you were able to connect Keplr with CosmJS, you may skip to the [Use Keplr with CosmJS](./03-cosmjs.md) section.

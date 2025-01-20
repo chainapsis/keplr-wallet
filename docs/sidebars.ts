@@ -24,7 +24,12 @@ const sidebars: SidebarsConfig = {
         "getting-started/typescript-support",
       ],
     },
-    "basic-api",
+    {
+      type: "category",
+      label: "Guide",
+      collapsed: false,
+      items: ["guide/index"],
+    },
     "cosmjs",
     "secretjs",
     "suggest-chain",
