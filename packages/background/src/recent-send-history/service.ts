@@ -1357,48 +1357,54 @@ export class RecentSendHistoryService {
         .then((res: any) => {
           txTracer.close();
 
+          let txResult = res;
+
           if (Array.isArray(res.txs) && res.txs.length > 0) {
-            const tx = res.txs[0];
-            if (tx.tx_result.code === 0) {
-              setTimeout(() => {
-                simpleFetch("https://api.skip.build/", "/v2/tx/track", {
-                  method: "POST",
-                  headers: {
-                    "content-type": "application/json",
-                    ...(() => {
-                      const res: {
-                        authorization?: string;
-                      } = {};
-                      if (process.env["SKIP_API_KEY"]) {
-                        res.authorization = process.env["SKIP_API_KEY"];
-                      }
-                      return res;
-                    })(),
-                  },
-                  body: JSON.stringify({
-                    tx_hash: history.txHash,
-                    chain_id: history.chainId,
-                  }),
-                })
-                  .then((result) => {
-                    console.log(
-                      `Skip tx track result: ${JSON.stringify(result)}`
-                    );
-                    onFulfill(true);
-                  })
-                  .catch((e) => {
-                    console.log(e);
-                    this.removeRecentSkipHistory(history.id);
-                    onFulfill(false);
-                  });
-              }, 2000);
-            } else {
-              // tx가 실패한거면 종료
-              this.removeRecentSkipHistory(history.id);
-              onFulfill(false);
-            }
-          } else {
+            txResult = res.txs[0].tx_result;
+          }
+
+          if (!txResult) {
             onError();
+            return;
+          }
+
+          if (txResult.code === 0) {
+            setTimeout(() => {
+              simpleFetch("https://api.skip.build/", "/v2/tx/track", {
+                method: "POST",
+                headers: {
+                  "content-type": "application/json",
+                  ...(() => {
+                    const res: {
+                      authorization?: string;
+                    } = {};
+                    if (process.env["SKIP_API_KEY"]) {
+                      res.authorization = process.env["SKIP_API_KEY"];
+                    }
+                    return res;
+                  })(),
+                },
+                body: JSON.stringify({
+                  tx_hash: history.txHash,
+                  chain_id: history.chainId,
+                }),
+              })
+                .then((result) => {
+                  console.log(
+                    `Skip tx track result: ${JSON.stringify(result)}`
+                  );
+                  onFulfill(true);
+                })
+                .catch((e) => {
+                  console.log(e);
+                  this.removeRecentSkipHistory(history.id);
+                  onFulfill(false);
+                });
+            }, 2000);
+          } else {
+            // tx가 실패한거면 종료
+            this.removeRecentSkipHistory(history.id);
+            onFulfill(false);
           }
         })
         .catch(() => {
