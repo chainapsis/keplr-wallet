@@ -257,7 +257,6 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
                         await account.init();
                       }
 
-                      //이걸 합쳐서 bridge 타입으로 변경해서 분리 시키는게 났지 않을까?
                       setSendType("ibc-transfer");
                       ibcChannelConfig.setChannels(bridgeOrChannel.channels);
                       setIBCChannelsInfoFluent(bridgeOrChannel);
