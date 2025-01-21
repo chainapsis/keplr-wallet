@@ -1,0 +1,43 @@
+import EnableChainExampleImage from "@site/static/img/guide/enable-chain-example.png";
+
+# Enable Connection
+
+The `enable` method is used to request Keplr to unlock if it is currently locked. If the webpage has not been granted permission to access Keplr, this method prompts the user to grant the necessary permissions.
+
+---
+
+## Function Signature
+
+```javascript
+enable(chainIds: string | string[]): Promise<void>
+```
+
+### Parameters
+
+- **`chainIds`** (`string | string[]`):
+  - A single chain ID as a string, or multiple chain IDs as an array of strings.
+  - When multiple chain IDs are provided, the method requests permissions for all specified chains in a single operation.
+
+:::note
+Note that the chain IDs must correspond to Keplr's natively supported Cosmos SDK-based chains. A "native chain" refers to any blockchain that is officially supported by Keplr without requiring custom integration. For a complete list of native chains and their respective chain IDs, explore our [public API](https://keplr-chain-registry.vercel.app/api/native-chains).
+:::
+
+---
+
+## Example Usage
+
+In the following example, the `enable` method requests access to the `cosmoshub-4` and `juno-1` chains:
+
+```javascript
+await keplr.enable(["cosmoshub-4", "juno-1"]);
+```
+
+When the enable method is called, the user will see a popup similar to the one shown below. This allows them to grant or deny permissions for the requested chain IDs:
+
+<img
+  src={EnableChainExampleImage}
+  width="300"
+  alt="Keplr - Enable Chain Example"
+/>
+
+<!-- TODO: Add a link to enabling EVM chains -->
