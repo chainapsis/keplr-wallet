@@ -1357,13 +1357,21 @@ export class RecentSendHistoryService {
         .then((res: any) => {
           txTracer.close();
 
-          let txResult = res;
+          let txResult;
 
-          if (Array.isArray(res.txs) && res.txs.length > 0) {
-            txResult = res.txs[0].tx_result;
+          if (Array.isArray(res.txs)) {
+            if (res.txs && res.txs.length > 0) {
+              txResult = res.txs[0].tx_result;
+            } else {
+              // In case tx is not confirmed, just wait for next check
+              onError();
+              return;
+            }
+          } else {
+            txResult = res;
           }
 
-          if (!txResult) {
+          if (!txResult || typeof txResult.code !== "number") {
             onError();
             return;
           }
