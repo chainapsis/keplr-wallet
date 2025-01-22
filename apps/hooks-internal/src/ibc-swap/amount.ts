@@ -596,20 +596,6 @@ export class IBCSwapAmountConfig extends AmountConfig {
       };
     }
 
-    if (
-      !this.skipQueries.queryIBCSwap.isSwapDestinationOrAlternatives(
-        this.outChainId,
-        this.outAmount.currency
-      )
-    ) {
-      return {
-        ...prev,
-        error: new Error(
-          "The currency you are swapping to is currently not supported"
-        ),
-      };
-    }
-
     if (queryIBCSwap.getQueryRoute().isFetching) {
       return {
         ...prev,
@@ -652,6 +638,20 @@ export class IBCSwapAmountConfig extends AmountConfig {
           ),
         };
       }
+    }
+
+    if (
+      !this.skipQueries.queryIBCSwap.isSwapDestinationOrAlternatives(
+        this.outChainId,
+        this.outAmount.currency
+      )
+    ) {
+      return {
+        ...prev,
+        error: new Error(
+          "The currency you are swapping to is currently not supported"
+        ),
+      };
     }
 
     if (queryIBCSwap.getQueryRoute().response?.data.txs_required !== 1) {
