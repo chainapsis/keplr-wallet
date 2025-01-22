@@ -93,8 +93,8 @@ The `signAmino` method signs an Amino-encoded `StdSignDoc`. Unlike CosmJS's `Off
     }
     ```
 - **`signOptions`** (`KeplrSignOptions`, optional): Additional signing options.
-  - `preferNoSetFee`: If true, a transaction fee should be set manually by the dApp.
-  - `preferNoSetMemo`: If true, the memo won't be able to write by the user.
+  - `preferNoSetFee`: If true, the fee configured by the dApp will be prioritized over the fee set by the user.
+  - `preferNoSetMemo`: If true, the memo will be set by the dApp and the user will not be able to modify it.
   - `disableBalanceCheck`: If true, the transaction won't be blocked even if the balance is insufficient.
 
 #### Return Type
