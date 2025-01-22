@@ -86,6 +86,7 @@ import {
   EthereumAccountBase,
   EthereumAccountStore,
 } from "@keplr-wallet/stores-eth";
+import { autorun } from "mobx";
 
 const Styles = {
   Flex1: styled.div`
@@ -430,6 +431,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     isIBCTransferDestinationModalOpen,
     setIsIBCTransferDestinationModalOpen,
   ] = useState(false);
+
+  useKeepIBCSwapObservable(skipQueriesStore);
 
   useEffect(() => {
     if (addressRef.current) {
@@ -1354,3 +1357,26 @@ const DetachIcon: FunctionComponent<{
     </svg>
   );
 };
+
+const noopToPreventLintWarning = (..._args: any[]) => {
+  // noop
+};
+
+//NOTE - Hooks for maintaining the observable state of IBC swap queries
+// when uiProperties of amountConfig of swapConfig is called only inside amount input and an error occurs on amountInput
+// Observable values used in uiProperties had an issue with unobserving, so I fixed it so that we can temporarily keep observers on the page
+function useKeepIBCSwapObservable(skipQueriesStore: SkipQueries) {
+  useEffect(() => {
+    const disposal = autorun(() => {
+      noopToPreventLintWarning(
+        skipQueriesStore.queryIBCSwap.swapDestinationCurrenciesMap
+      );
+    });
+
+    return () => {
+      if (disposal) {
+        disposal();
+      }
+    };
+  }, [skipQueriesStore.queryIBCSwap]);
+}
