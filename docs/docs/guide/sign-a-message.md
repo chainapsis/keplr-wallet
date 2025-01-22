@@ -1,6 +1,30 @@
+import SignMessageExampleImage from "@site/static/img/guide/sign-message-example.png";
+import SignMessageEvmExampleImage from "@site/static/img/guide/sign-message-evm-example.png";
+
 # Sign a Message
 
 ## Overview
+
+Before submitting a transaction, users are required to review and sign a message to ensure their approval. Keplr simplifies this process by providing methods for signing messages across various blockchain networks. When a signing request is initiated, a popup appears prompting the user to confirm the action. Below is an example of the popup that users will encounter:
+
+<div style={{ display: "flex", justifyContent: "space-around" }}>
+  <figure style={{ textAlign: "center" }}>
+    <figcaption style={{ fontSize: "0.8em", fontWeight: "bold" }}>For a Cosmos-based Chain Tx</figcaption>
+    <img
+      src={SignMessageExampleImage}
+      width="300"
+      alt="Signing Message For Cosmos-based Chains"
+    />
+  </figure>
+  <figure style={{ textAlign: "center" }}>
+    <figcaption style={{ fontSize: "0.8em", fontWeight: "bold" }}>For a EVM-based Chain Tx</figcaption>
+    <img
+      src={SignMessageEvmExampleImage}
+      width="300"
+      alt="Signing Message For EVM-based Chains"
+    />
+  </figure>
+</div>
 
 - Cosmos-based Chains
   - Keplr provides methods to sign messages using two distinct signing modes: **Amino** and **Protobuf (Direct)**. Each mode has its own use cases and compatibility considerations, as described in the next section.
