@@ -28,7 +28,11 @@ const sidebars: SidebarsConfig = {
       type: "category",
       label: "Guide",
       collapsed: false,
-      items: ["guide/enable-connection", "guide/get-key"],
+      items: [
+        "guide/enable-connection",
+        "guide/get-key",
+        "guide/sign-a-message",
+      ],
     },
     "cosmjs",
     "secretjs",
