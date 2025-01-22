@@ -26,6 +26,8 @@ import {
   useIBCChannelConfig,
   useSendMixedIBCTransferConfig,
   useTxConfigsValidate,
+  IBCRecipientConfig,
+  useIBCRecipientConfig,
 } from "@keplr-wallet/hooks";
 import { useNavigate } from "react-router";
 import { AmountInput, RecipientInput } from "../../../components/input";
@@ -48,6 +50,7 @@ import {
   ChainInfoWithCoreTypes,
   LogAnalyticsEventMsg,
   SendTxAndRecordMsg,
+  SendTxEthereumMsgAndRecordMsg,
 } from "@keplr-wallet/background";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTxConfigsQueryString } from "../../../hooks/use-tx-config-query-string";
@@ -69,10 +72,6 @@ import {
   SkipQueries,
 } from "@keplr-wallet/stores-internal";
 import {
-  IBCRecipientConfig,
-  useIBCRecipientConfig,
-} from "@keplr-wallet/hooks/build/ibc/reciepient";
-import {
   AccountSetBase,
   AccountStore,
   ChainGetter,
@@ -87,7 +86,6 @@ import {
   EthereumAccountBase,
   EthereumAccountStore,
 } from "@keplr-wallet/stores-eth";
-import { SendTxEthereumMsgAndRecordMsg } from "@keplr-wallet/background/build/tx-ethereum";
 
 const Styles = {
   Flex1: styled.div`
