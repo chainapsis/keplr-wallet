@@ -62,9 +62,7 @@ export class SkipQueries {
       chainStore,
       this.queryChains,
       this.queryAssets,
-      this.queryAssetsFromSource,
-      this.queryRoute,
-      this.queryMsgsDirect
+      this.queryAssetsFromSource
     );
     this.queryIBCSwap = new ObservableQueryIbcSwap(
       chainStore,

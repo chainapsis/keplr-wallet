@@ -3,8 +3,6 @@ import { ObservableQueryChains } from "./chains";
 import { computedFn } from "mobx-utils";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { InternalChainStore } from "../internal";
-import { ObservableQueryRoute } from "./route";
-import { ObservableQueryMsgsDirect } from "./msgs-direct";
 import { ObservableQueryAssets } from "./assets";
 import { IBCChannel, NoneIBCBridgeInfo } from "./types";
 
@@ -13,9 +11,7 @@ export class ObservableQueryIbcPfmTransfer {
     protected readonly chainStore: InternalChainStore,
     protected readonly queryChains: ObservableQueryChains,
     protected readonly queryAssets: ObservableQueryAssets,
-    protected readonly queryAssetsFromSource: ObservableQueryAssetsFromSource,
-    protected readonly queryRoute: ObservableQueryRoute,
-    protected readonly queryMsgsDirect: ObservableQueryMsgsDirect
+    protected readonly queryAssetsFromSource: ObservableQueryAssetsFromSource
   ) {}
 
   getBridges = computedFn(
