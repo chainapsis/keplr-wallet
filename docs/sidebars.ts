@@ -33,6 +33,7 @@ const sidebars: SidebarsConfig = {
         "guide/get-key",
         "guide/sign-a-message",
         "guide/broadcast-tx",
+        "guide/sign-arbitrary",
       ],
     },
     "cosmjs",
