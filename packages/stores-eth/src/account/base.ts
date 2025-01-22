@@ -280,6 +280,9 @@ export class EthereumAccountBase {
       onBroadcastFailed?: (e?: Error) => void;
       onBroadcasted?: (txHash: string) => void;
       onFulfill?: (txReceipt: EthTxReceipt) => void;
+    },
+    options?: {
+      sendTx?: (chainId: string, signedTx: Buffer) => Promise<string>;
     }
   ) {
     try {
@@ -323,7 +326,10 @@ export class EthereumAccountBase {
       );
 
       const sendEthereumTx = keplr.sendEthereumTx.bind(keplr);
-      const txHash = await sendEthereumTx(this.chainId, signedTx);
+      const txHash = options?.sendTx
+        ? await options.sendTx(this.chainId, signedTx)
+        : await sendEthereumTx(this.chainId, signedTx);
+
       if (!txHash) {
         throw new Error("No tx hash responded");
       }

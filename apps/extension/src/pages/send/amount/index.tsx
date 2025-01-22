@@ -14,11 +14,20 @@ import { Stack } from "../../../components/stack";
 import styled from "styled-components";
 import { useSearchParams } from "react-router-dom";
 
-import { useStore } from "../../../stores";
+import { ChainStore, useStore } from "../../../stores";
 import {
+  FeeConfig,
+  GasConfig,
+  IBCAmountConfig,
+  IBCChannelConfig,
+  MemoConfig,
+  SenderConfig,
   useGasSimulator,
+  useIBCChannelConfig,
   useSendMixedIBCTransferConfig,
   useTxConfigsValidate,
+  IBCRecipientConfig,
+  useIBCRecipientConfig,
 } from "@keplr-wallet/hooks";
 import { useNavigate } from "react-router";
 import { AmountInput, RecipientInput } from "../../../components/input";
@@ -38,8 +47,10 @@ import { openPopupWindow } from "@keplr-wallet/popup";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT, Message } from "@keplr-wallet/router";
 import {
+  ChainInfoWithCoreTypes,
   LogAnalyticsEventMsg,
   SendTxAndRecordMsg,
+  SendTxEthereumMsgAndRecordMsg,
 } from "@keplr-wallet/background";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTxConfigsQueryString } from "../../../hooks/use-tx-config-query-string";
@@ -54,7 +65,28 @@ import { VerticalCollapseTransition } from "../../../components/transition/verti
 import { GuideBox } from "../../../components/guide-box";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { amountToAmbiguousAverage, isRunningInSidePanel } from "../../../utils";
-import { EthTxStatus } from "@keplr-wallet/types";
+import { AppCurrency, EthTxStatus } from "@keplr-wallet/types";
+import { useIBCSwapConfig } from "@keplr-wallet/hooks-internal";
+import {
+  ObservableQueryRouteInner,
+  SkipQueries,
+} from "@keplr-wallet/stores-internal";
+import {
+  AccountSetBase,
+  AccountStore,
+  ChainGetter,
+  CosmosAccount,
+  CosmwasmAccount,
+  IAccountStoreWithInjects,
+  IChainInfoImpl,
+  IQueriesStore,
+  SecretAccount,
+} from "@keplr-wallet/stores";
+import {
+  EthereumAccountBase,
+  EthereumAccountStore,
+} from "@keplr-wallet/stores-eth";
+import { autorun } from "mobx";
 
 const Styles = {
   Flex1: styled.div`
@@ -62,91 +94,29 @@ const Styles = {
   `,
 };
 
-export const SendAmountPage: FunctionComponent = observer(() => {
-  const {
-    analyticsStore,
-    accountStore,
-    ethereumAccountStore,
-    chainStore,
-    queriesStore,
-    skipQueriesStore,
-    priceStore,
-  } = useStore();
-  const addressRef = useRef<HTMLInputElement | null>(null);
+export type SendType = "bridge" | "ibc-transfer" | "send";
 
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const notification = useNotification();
-  const intl = useIntl();
-
-  const initialChainId = searchParams.get("chainId");
-  const initialCoinMinimalDenom = searchParams.get("coinMinimalDenom");
-
-  const chainId = initialChainId || chainStore.chainInfosInUI[0].chainId;
-  const chainInfo = chainStore.getChain(chainId);
-  const isEvmChain = chainStore.isEvmChain(chainId);
-  const isEVMOnlyChain = chainStore.isEvmOnlyChain(chainId);
-
-  const coinMinimalDenom =
-    initialCoinMinimalDenom ||
-    chainStore.getChain(chainId).currencies[0].coinMinimalDenom;
-  const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
-  const isErc20 = new DenomHelper(currency.coinMinimalDenom).type === "erc20";
-
-  const [isIBCTransfer, setIsIBCTransfer] = useState(false);
-  const [
-    isIBCTransferDestinationModalOpen,
-    setIsIBCTransferDestinationModalOpen,
-  ] = useState(false);
-
-  useEffect(() => {
-    if (addressRef.current) {
-      addressRef.current.focus();
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!initialChainId || !initialCoinMinimalDenom) {
-      navigate(
-        `/send/select-asset?navigateReplace=true&navigateTo=${encodeURIComponent(
-          "/send?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}"
-        )}`
-      );
-    }
-  }, [navigate, initialChainId, initialCoinMinimalDenom]);
-
-  const [isEvmTx, setIsEvmTx] = useState(isErc20 || isEVMOnlyChain);
-
-  const account = accountStore.getAccount(chainId);
-  const ethereumAccount = ethereumAccountStore.getAccount(chainId);
-
-  const queryBalances = queriesStore.get(chainId).queryBalances;
-  const sender = isEvmTx ? account.ethereumHexAddress : account.bech32Address;
-  const balance = isEvmTx
-    ? queryBalances.getQueryEthereumHexAddress(sender).getBalance(currency)
-    : queryBalances.getQueryBech32Address(sender).getBalance(currency);
-
-  const sendConfigs = useSendMixedIBCTransferConfig(
-    chainStore,
-    queriesStore,
-    chainId,
-    sender,
-    // TODO: 이 값을 config 밑으로 빼자
-    isEvmTx ? 21000 : 300000,
-    isIBCTransfer,
-    {
-      allowHexAddressToBech32Address:
-        !isEvmChain &&
-        !isEvmTx &&
-        !chainStore.getChain(chainId).chainId.startsWith("injective"),
-      allowHexAddressOnly: isEvmTx,
-      icns: ICNSInfo,
-      ens: ENSInfo,
-      computeTerraClassicTax: true,
-    }
-  );
-  sendConfigs.amountConfig.setCurrency(currency);
-
+function useGetGasSimulatorOfNotBridge(
+  isEvmTx: boolean,
+  sendConfigs: {
+    amountConfig: IBCAmountConfig;
+    memoConfig: MemoConfig;
+    gasConfig: GasConfig;
+    feeConfig: FeeConfig;
+    recipientConfig: IBCRecipientConfig;
+    channelConfig: IBCChannelConfig;
+    senderConfig: SenderConfig;
+  },
+  chainStore: ChainStore,
+  chainId: string,
+  sendType: string,
+  account: AccountSetBase & CosmosAccount & CosmwasmAccount & SecretAccount,
+  accountStore: AccountStore<
+    [CosmosAccount, CosmwasmAccount, SecretAccount],
+    AccountSetBase & CosmosAccount & CosmwasmAccount & SecretAccount
+  >,
+  ethereumAccount: EthereumAccountBase
+) {
   const gasSimulatorKey = useMemo(() => {
     const txType: "evm" | "cosmos" = isEvmTx ? "evm" : "cosmos";
 
@@ -186,13 +156,13 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     chainId,
     sendConfigs.gasConfig,
     sendConfigs.feeConfig,
-    isIBCTransfer ? `ibc/${gasSimulatorKey}` : gasSimulatorKey,
+    sendType === "ibc-transfer" ? `ibc/${gasSimulatorKey}` : gasSimulatorKey,
     () => {
       if (!sendConfigs.amountConfig.currency) {
         throw new Error("Send currency not set");
       }
 
-      if (isIBCTransfer) {
+      if (sendType === "ibc-transfer") {
         if (
           sendConfigs.channelConfig.uiProperties.loadingState ===
             "loading-block" ||
@@ -224,7 +194,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         throw new Error("Simulating secret wasm not supported");
       }
 
-      if (isIBCTransfer) {
+      if (sendType === "ibc-transfer") {
         return account.cosmos.makePacketForwardIBCTransferTx(
           accountStore,
           sendConfigs.channelConfig.channels,
@@ -253,24 +223,26 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       );
     }
   );
+  return gasSimulator;
+}
 
-  const currentFeeCurrencyCoinMinimalDenom =
-    sendConfigs.feeConfig.fees[0]?.currency.coinMinimalDenom;
-  useEffect(() => {
-    const chainInfo = chainStore.getChain(chainId);
-    // feemarket 이상하게 만들어서 simulate하면 더 적은 gas가 나온다 귀찮아서 대충 처리.
-    if (chainInfo.hasFeature("feemarket")) {
-      if (
-        currentFeeCurrencyCoinMinimalDenom !==
-        chainInfo.currencies[0].coinMinimalDenom
-      ) {
-        gasSimulator.setGasAdjustmentValue("2");
-      } else {
-        gasSimulator.setGasAdjustmentValue("1.6");
-      }
-    }
-  }, [chainId, chainStore, gasSimulator, currentFeeCurrencyCoinMinimalDenom]);
-
+function useChangeSenderAddressWhenEtherMintChainSendToHexAddress(
+  isEvmChain: boolean,
+  sendConfigs: {
+    amountConfig: IBCAmountConfig;
+    memoConfig: MemoConfig;
+    gasConfig: GasConfig;
+    feeConfig: FeeConfig;
+    recipientConfig: IBCRecipientConfig;
+    channelConfig: IBCChannelConfig;
+    senderConfig: SenderConfig;
+  },
+  chainInfo: IChainInfoImpl<ChainInfoWithCoreTypes>,
+  isEVMOnlyChain: boolean,
+  account: AccountSetBase & CosmosAccount & CosmwasmAccount & SecretAccount,
+  setIsEvmTx: React.Dispatch<React.SetStateAction<boolean>>,
+  ethereumAccount: EthereumAccountBase
+) {
   useEffect(() => {
     if (isEvmChain) {
       const sendingDenomHelper = new DenomHelper(
@@ -282,10 +254,12 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         (chainInfo.stakeCurrency?.coinMinimalDenom ??
           chainInfo.currencies[0].coinMinimalDenom) ===
           sendingDenomHelper.denom;
-      const newIsEvmTx =
-        isEVMOnlyChain ||
-        (sendConfigs.recipientConfig.isRecipientEthereumHexAddress &&
-          (isERC20 || isSendingNativeToken));
+
+      const isSendToHexAddressAndNotIBCToken =
+        sendConfigs.recipientConfig.isRecipientEthereumHexAddress &&
+        (isERC20 || isSendingNativeToken);
+
+      const newIsEvmTx = isEVMOnlyChain || isSendToHexAddressAndNotIBCToken;
 
       const newSenderAddress = newIsEvmTx
         ? account.ethereumHexAddress
@@ -305,10 +279,289 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     sendConfigs.senderConfig,
     chainInfo.stakeCurrency?.coinMinimalDenom,
     chainInfo.currencies,
+    setIsEvmTx,
   ]);
+}
+
+const REFRESH_EIP1559_TX_FEE_INTERVAL_TIME_MS = 12000;
+function useRefreshEIP1559TxFee(
+  isEvmTx: boolean,
+  sendConfigs: {
+    amountConfig: IBCAmountConfig;
+    memoConfig: MemoConfig;
+    gasConfig: GasConfig;
+    feeConfig: FeeConfig;
+    recipientConfig: IBCRecipientConfig;
+    channelConfig: IBCChannelConfig;
+    senderConfig: SenderConfig;
+  }
+) {
+  useEffect(() => {
+    if (isEvmTx) {
+      // Refresh EIP-1559 fee every 12 seconds.
+      const intervalId = setInterval(() => {
+        sendConfigs.feeConfig.refreshEIP1559TxFees();
+      }, REFRESH_EIP1559_TX_FEE_INTERVAL_TIME_MS);
+
+      return () => clearInterval(intervalId);
+    }
+  }, [isEvmTx, sendConfigs.feeConfig]);
+}
+
+const QUERY_ROUTE_FETCH_TIMEOUT_MS = 10000;
+function useFetchBridgeRouterPer10sec(
+  queryRoute: ObservableQueryRouteInner | undefined
+) {
+  useEffect(() => {
+    if (queryRoute && !queryRoute.isFetching) {
+      const timeoutId = setTimeout(() => {
+        if (!queryRoute.isFetching) {
+          queryRoute.fetch();
+        }
+      }, QUERY_ROUTE_FETCH_TIMEOUT_MS);
+
+      return () => {
+        clearTimeout(timeoutId);
+      };
+    }
+    // eslint가 자동으로 추천해주는 deps를 쓰면 안된다.
+    // queryRoute는 amountConfig에서 필요할때마다 reference가 바뀌므로 deps에 넣는다.
+    // queryRoute.isFetching는 현재 fetch중인지 아닌지를 알려주는 값이므로 deps에 꼭 넣어야한다.
+    // queryRoute는 input이 같으면 reference가 같으므로 eslint에서 추천하는대로 queryRoute만 deps에 넣으면
+    // queryRoute.isFetching이 무시되기 때문에 수동으로 넣어줌
+    // 해당 코드는 IBCSwapPage에서 그대로 가져옴
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryRoute, queryRoute?.isFetching]);
+}
+
+const useIBCSwapConfigWithRecipientConfig = (
+  chainGetter: ChainGetter,
+  queriesStore: IQueriesStore,
+  accountStore: IAccountStoreWithInjects<[CosmosAccount, CosmwasmAccount]>,
+  ethereumAccountStore: EthereumAccountStore,
+  skipQueries: SkipQueries,
+  chainId: string,
+  sender: string,
+  initialGas: number,
+  outChainId: string,
+  outCurrency: AppCurrency,
+  swapFeeBps: number,
+  options: {
+    allowHexAddressToBech32Address?: boolean;
+    allowHexAddressOnly?: boolean;
+    icns?: {
+      chainId: string;
+      resolverContractAddress: string;
+    };
+    ens?: {
+      chainId: string;
+    };
+    computeTerraClassicTax?: boolean;
+  } = {}
+) => {
+  const ibcSwapConfigsForBridge = useIBCSwapConfig(
+    chainGetter,
+    queriesStore,
+    accountStore,
+    ethereumAccountStore,
+    skipQueries,
+    chainId,
+    sender,
+    initialGas,
+    outChainId,
+    outCurrency,
+    swapFeeBps
+  );
+  const channelConfig = useIBCChannelConfig(false);
+
+  const recipientConfig = useIBCRecipientConfig(
+    chainGetter,
+    outChainId,
+    channelConfig,
+    options,
+    false
+  );
+
+  return {
+    ...ibcSwapConfigsForBridge,
+    recipientConfig,
+  };
+};
+
+export const SendAmountPage: FunctionComponent = observer(() => {
+  const {
+    analyticsStore,
+    accountStore,
+    ethereumAccountStore,
+    chainStore,
+    queriesStore,
+    skipQueriesStore,
+    priceStore,
+  } = useStore();
+  const addressRef = useRef<HTMLInputElement | null>(null);
+
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const notification = useNotification();
+  const intl = useIntl();
+
+  const initialChainId = searchParams.get("chainId");
+  const initialCoinMinimalDenom = searchParams.get("coinMinimalDenom");
+
+  const chainId = initialChainId || chainStore.chainInfosInUI[0].chainId;
+  const chainInfo = chainStore.getChain(chainId);
+  const isEvmChain = chainStore.isEvmChain(chainId);
+  const isEVMOnlyChain = chainStore.isEvmOnlyChain(chainId);
+
+  const coinMinimalDenom =
+    initialCoinMinimalDenom ||
+    chainStore.getChain(chainId).currencies[0].coinMinimalDenom;
+  const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
+  const isErc20 = new DenomHelper(currency.coinMinimalDenom).type === "erc20";
+
+  const [sendType, setSendType] = useState<SendType>("send");
+
+  const [destinationChainInfoOfBridge, setDestinationChainInfoOfBridge] =
+    useState({
+      chainId: "",
+      currency: currency,
+    });
+
+  const [
+    isIBCTransferDestinationModalOpen,
+    setIsIBCTransferDestinationModalOpen,
+  ] = useState(false);
+
+  useKeepIBCSwapObservable(skipQueriesStore);
+
+  useEffect(() => {
+    if (addressRef.current) {
+      addressRef.current.focus();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!initialChainId || !initialCoinMinimalDenom) {
+      navigate(
+        `/send/select-asset?navigateReplace=true&navigateTo=${encodeURIComponent(
+          "/send?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}"
+        )}`
+      );
+    }
+  }, [navigate, initialChainId, initialCoinMinimalDenom]);
+
+  const [isEvmTx, setIsEvmTx] = useState(isErc20 || isEVMOnlyChain);
+
+  const account = accountStore.getAccount(chainId);
+
+  const ethereumAccount = ethereumAccountStore.getAccount(chainId);
+
+  const queryBalances = queriesStore.get(chainId).queryBalances;
+  const sender = isEvmTx ? account.ethereumHexAddress : account.bech32Address;
+  const balance = isEvmTx
+    ? queryBalances.getQueryEthereumHexAddress(sender).getBalance(currency)
+    : queryBalances.getQueryBech32Address(sender).getBalance(currency);
+
+  const ibcSwapConfigsForBridge = useIBCSwapConfigWithRecipientConfig(
+    chainStore,
+    queriesStore,
+    accountStore,
+    ethereumAccountStore,
+    skipQueriesStore,
+    chainId,
+    isEVMOnlyChain ? account.ethereumHexAddress : account.bech32Address,
+    200000,
+    destinationChainInfoOfBridge.chainId,
+    destinationChainInfoOfBridge.currency,
+    //NOTE - when swap is used on send page, it use bridge so swap fee is 0
+    0,
+    {
+      allowHexAddressToBech32Address:
+        !isEvmChain &&
+        !isEvmTx &&
+        !chainStore.getChain(chainId).chainId.startsWith("injective"),
+      allowHexAddressOnly: sendType === "bridge",
+      icns: ICNSInfo,
+      ens: ENSInfo,
+      computeTerraClassicTax: true,
+    }
+  );
+  ibcSwapConfigsForBridge.amountConfig.setCurrency(currency);
+
+  const queryIBCSwap = ibcSwapConfigsForBridge.amountConfig.getQueryIBCSwap();
+  const queryRoute = queryIBCSwap?.getQueryRoute();
+  useFetchBridgeRouterPer10sec(queryRoute);
+
+  const sendConfigs = useSendMixedIBCTransferConfig(
+    chainStore,
+    queriesStore,
+    chainId,
+    sender,
+    // TODO: 이 값을 config 밑으로 빼자
+    isEvmTx ? 21000 : 300000,
+    sendType === "ibc-transfer",
+    {
+      allowHexAddressToBech32Address:
+        !isEvmChain &&
+        !isEvmTx &&
+        !chainStore.getChain(chainId).chainId.startsWith("injective"),
+      allowHexAddressOnly: isEvmTx,
+      icns: ICNSInfo,
+      ens: ENSInfo,
+      computeTerraClassicTax: true,
+    }
+  );
+  sendConfigs.amountConfig.setCurrency(currency);
+
+  const gasSimulatorForNotBridgeSend = useGetGasSimulatorOfNotBridge(
+    isEvmTx,
+    sendConfigs,
+    chainStore,
+    chainId,
+    sendType,
+    account,
+    accountStore,
+    ethereumAccount
+  );
+
+  const currentFeeCurrencyCoinMinimalDenom =
+    sendConfigs.feeConfig.fees[0]?.currency.coinMinimalDenom;
+  useEffect(() => {
+    const chainInfo = chainStore.getChain(chainId);
+    // feemarket 이상하게 만들어서 simulate하면 더 적은 gas가 나온다 귀찮아서 대충 처리.
+    if (chainInfo.hasFeature("feemarket")) {
+      if (
+        currentFeeCurrencyCoinMinimalDenom !==
+        chainInfo.currencies[0].coinMinimalDenom
+      ) {
+        gasSimulatorForNotBridgeSend.setGasAdjustmentValue("2");
+      } else {
+        gasSimulatorForNotBridgeSend.setGasAdjustmentValue("1.6");
+      }
+    }
+  }, [
+    chainId,
+    chainStore,
+    gasSimulatorForNotBridgeSend,
+    currentFeeCurrencyCoinMinimalDenom,
+  ]);
+
+  useChangeSenderAddressWhenEtherMintChainSendToHexAddress(
+    isEvmChain,
+    sendConfigs,
+    chainInfo,
+    isEVMOnlyChain,
+    account,
+    setIsEvmTx,
+    ethereumAccount
+  );
 
   useEffect(() => {
     (async () => {
+      if (sendType === "bridge") {
+        return;
+      }
+
       if (chainInfo.features.includes("op-stack-l1-data-fee")) {
         const { maxFeePerGas, maxPriorityFeePerGas, gasPrice } =
           sendConfigs.feeConfig.getEIP1559TxFees(sendConfigs.feeConfig.type);
@@ -335,6 +588,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       }
     })();
   }, [
+    sendType,
     chainInfo.features,
     ethereumAccount,
     sendConfigs.amountConfig.amount,
@@ -343,16 +597,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     sendConfigs.recipientConfig.recipient,
   ]);
 
-  useEffect(() => {
-    if (isEvmTx) {
-      // Refresh EIP-1559 fee every 12 seconds.
-      const intervalId = setInterval(() => {
-        sendConfigs.feeConfig.refreshEIP1559TxFees();
-      }, 12000);
-
-      return () => clearInterval(intervalId);
-    }
-  }, [isEvmTx, sendConfigs.feeConfig]);
+  useRefreshEIP1559TxFee(isEvmTx, sendConfigs);
 
   useEffect(() => {
     // To simulate secretwasm, we need to include the signature in the tx.
@@ -362,7 +607,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       new DenomHelper(sendConfigs.amountConfig.currency.coinMinimalDenom)
         .type === "secret20"
     ) {
-      gasSimulator.forceDisable(
+      gasSimulatorForNotBridgeSend.forceDisable(
         new Error(
           intl.formatMessage({ id: "error.simulating-secret-20-not-supported" })
         )
@@ -372,11 +617,11 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         250000
       );
     } else {
-      gasSimulator.forceDisable(false);
-      gasSimulator.setEnabled(true);
+      gasSimulatorForNotBridgeSend.forceDisable(false);
+      gasSimulatorForNotBridgeSend.setEnabled(true);
     }
   }, [
-    gasSimulator,
+    gasSimulatorForNotBridgeSend,
     intl,
     sendConfigs.amountConfig.currency,
     sendConfigs.gasConfig,
@@ -384,34 +629,46 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
   useTxConfigsQueryString(chainId, {
     ...sendConfigs,
-    gasSimulator,
+    gasSimulator: gasSimulatorForNotBridgeSend,
   });
   useIBCChannelConfigQueryString(sendConfigs.channelConfig, (channels) => {
     if (channels && channels.length > 0) {
-      setIsIBCTransfer(true);
+      setSendType("ibc-transfer");
     }
   });
 
   const txConfigsValidate = useTxConfigsValidate({
     ...sendConfigs,
-    gasSimulator,
+    gasSimulator: gasSimulatorForNotBridgeSend,
   });
 
   // IBC Send일때 auto fill일때는 recipient input에서 paragraph로 auto fill되었다는 것을 알려준다.
-  const [isIBCRecipientSetAuto, setIsIBCRecipientSetAuto] = useState(false);
+  const [isRecipientNotBasicSendSetAuto, setIsRecipientNotBasicSendSetAuto] =
+    useState(false);
   // 유저가 주소를 수정했을때 auto fill이라는 state를 해제하기 위해서 마지막으로 auto fill된 주소를 기억한다.
-  const [ibcRecipientAddress, setIBCRecipientAddress] = useState("");
+  const [recipientAddressNotBasicSend, setRecipientAddressNotBasicSend] =
+    useState("");
 
   useEffect(() => {
+    const recipientAddress =
+      sendType === "bridge"
+        ? ibcSwapConfigsForBridge.recipientConfig.value
+        : sendConfigs.recipientConfig.value;
+
     if (
-      !isIBCTransfer ||
-      sendConfigs.recipientConfig.value !== ibcRecipientAddress
+      sendType === "send" ||
+      recipientAddress !== recipientAddressNotBasicSend
     ) {
-      setIsIBCRecipientSetAuto(false);
+      setIsRecipientNotBasicSendSetAuto(false);
     }
     // else 문을 써서 같다면 setAuto를 true로 해주면 안된다.
     // 의도상 한번 바꾸면 다시 auto fill 값과 같더라도 유저가 수정한걸로 간주한다.
-  }, [ibcRecipientAddress, sendConfigs.recipientConfig.value, isIBCTransfer]);
+  }, [
+    recipientAddressNotBasicSend,
+    sendConfigs.recipientConfig.value,
+    ibcSwapConfigsForBridge.recipientConfig.value,
+    sendType,
+  ]);
 
   const [ibcChannelFluent, setIBCChannelFluent] = useState<
     | {
@@ -431,11 +688,12 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
   const isDetachedMode = searchParams.get("detached") === "true";
 
-  const historyType = isIBCTransfer ? "basic-send/ibc" : "basic-send";
+  const historyType =
+    sendType === "ibc-transfer" ? "basic-send/ibc" : "basic-send";
 
   const [isSendingIBCToken, setIsSendingIBCToken] = useState(false);
   useEffect(() => {
-    if (!isIBCTransfer) {
+    if (sendType === "send") {
       if (
         new DenomHelper(sendConfigs.amountConfig.currency.coinMinimalDenom)
           .type === "native" &&
@@ -447,7 +705,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     }
 
     setIsSendingIBCToken(false);
-  }, [isIBCTransfer, sendConfigs.amountConfig.currency]);
+  }, [sendType, sendConfigs.amountConfig.currency]);
 
   // Prefetch IBC channels to reduce the UI flickering(?) when open ibc channel modal.
   try {
@@ -458,6 +716,60 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   } catch (e) {
     console.log(e);
   }
+
+  const destinationChainInfo = useMemo(() => {
+    if (sendType === "ibc-transfer") {
+      if (sendConfigs.channelConfig.channels.length === 0) {
+        return undefined;
+      }
+
+      return chainStore.getChain(
+        sendConfigs.channelConfig.channels[
+          sendConfigs.channelConfig.channels.length - 1
+        ].counterpartyChainId
+      );
+    }
+
+    if (sendType === "bridge") {
+      return chainStore.getChain(
+        ibcSwapConfigsForBridge.amountConfig.outChainId
+      );
+    }
+  }, [
+    sendType,
+    chainStore,
+    sendConfigs.channelConfig.channels,
+    ibcSwapConfigsForBridge,
+  ]);
+
+  const {
+    feeConfig,
+    gasConfig,
+    senderConfig,
+    recipientConfig,
+    memoConfig,
+    amountConfig,
+  } = useMemo(() => {
+    if (sendType === "bridge") {
+      return {
+        feeConfig: ibcSwapConfigsForBridge.feeConfig,
+        gasConfig: ibcSwapConfigsForBridge.gasConfig,
+        senderConfig: ibcSwapConfigsForBridge.senderConfig,
+        recipientConfig: ibcSwapConfigsForBridge.recipientConfig,
+        memoConfig: ibcSwapConfigsForBridge.memoConfig,
+        amountConfig: ibcSwapConfigsForBridge.amountConfig,
+      };
+    }
+
+    return {
+      feeConfig: sendConfigs.feeConfig,
+      gasConfig: sendConfigs.gasConfig,
+      senderConfig: sendConfigs.senderConfig,
+      recipientConfig: sendConfigs.recipientConfig,
+      memoConfig: sendConfigs.memoConfig,
+      amountConfig: sendConfigs.amountConfig,
+    };
+  }, [sendType, sendConfigs, ibcSwapConfigsForBridge]);
 
   return (
     <HeaderLayout
@@ -495,7 +807,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           isLoading: isEvmTx
             ? ethereumAccount.isSendingTx
             : accountStore.getAccount(chainId).isSendingMsg ===
-              (!isIBCTransfer ? "send" : "ibcTransfer"),
+              (sendType === "ibc-transfer" ? "ibcTransfer" : "send"),
         },
       ]}
       onSubmit={async (e) => {
@@ -519,75 +831,108 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                 maxPriorityFeePerGas: maxPriorityFeePerGas?.toString(),
                 gasPrice: gasPrice?.toString(),
               });
-              await ethereumAccount.sendEthereumTx(sender, unsignedTx, {
-                onFulfill: (txReceipt) => {
-                  queryBalances
-                    .getQueryEthereumHexAddress(sender)
-                    .balances.forEach((balance) => {
-                      if (
-                        balance.currency.coinMinimalDenom ===
-                          coinMinimalDenom ||
-                        sendConfigs.feeConfig.fees.some(
-                          (fee) =>
-                            fee.currency.coinMinimalDenom ===
-                            balance.currency.coinMinimalDenom
-                        )
-                      ) {
-                        balance.fetch();
-                      }
-                    });
-                  queryBalances
-                    .getQueryBech32Address(account.bech32Address)
-                    .balances.forEach((balance) => {
-                      if (
-                        balance.currency.coinMinimalDenom ===
-                          coinMinimalDenom ||
-                        sendConfigs.feeConfig.fees.some(
-                          (fee) =>
-                            fee.currency.coinMinimalDenom ===
-                            balance.currency.coinMinimalDenom
-                        )
-                      ) {
-                        balance.fetch();
-                      }
-                    });
+              await ethereumAccount.sendEthereumTx(
+                sender,
+                unsignedTx,
+                {
+                  onFulfill: (txReceipt) => {
+                    queryBalances
+                      .getQueryEthereumHexAddress(sender)
+                      .balances.forEach((balance) => {
+                        if (
+                          balance.currency.coinMinimalDenom ===
+                            coinMinimalDenom ||
+                          sendConfigs.feeConfig.fees.some(
+                            (fee) =>
+                              fee.currency.coinMinimalDenom ===
+                              balance.currency.coinMinimalDenom
+                          )
+                        ) {
+                          balance.fetch();
+                        }
+                      });
+                    queryBalances
+                      .getQueryBech32Address(account.bech32Address)
+                      .balances.forEach((balance) => {
+                        if (
+                          balance.currency.coinMinimalDenom ===
+                            coinMinimalDenom ||
+                          sendConfigs.feeConfig.fees.some(
+                            (fee) =>
+                              fee.currency.coinMinimalDenom ===
+                              balance.currency.coinMinimalDenom
+                          )
+                        ) {
+                          balance.fetch();
+                        }
+                      });
 
-                  if (txReceipt.status === EthTxStatus.Success) {
-                    notification.show(
-                      "success",
-                      intl.formatMessage({
-                        id: "notification.transaction-success",
-                      }),
-                      ""
-                    );
-                  } else {
-                    notification.show(
-                      "failed",
-                      intl.formatMessage({ id: "error.transaction-failed" }),
-                      ""
-                    );
-                  }
+                    if (txReceipt.status === EthTxStatus.Success) {
+                      notification.show(
+                        "success",
+                        intl.formatMessage({
+                          id: "notification.transaction-success",
+                        }),
+                        ""
+                      );
+                    } else {
+                      notification.show(
+                        "failed",
+                        intl.formatMessage({ id: "error.transaction-failed" }),
+                        ""
+                      );
+                    }
+                  },
                 },
-              });
+                {
+                  sendTx: async (chainId, signedTx) => {
+                    const msg = new SendTxEthereumMsgAndRecordMsg(
+                      historyType,
+                      chainId,
+                      sendConfigs.recipientConfig.chainId,
+                      signedTx,
+                      sendConfigs.senderConfig.sender,
+                      sendConfigs.recipientConfig.recipient,
+                      sendConfigs.amountConfig.amount.map((amount) => {
+                        return {
+                          amount: DecUtils.getTenExponentN(
+                            amount.currency.coinDecimals
+                          )
+                            .mul(amount.toDec())
+                            .toString(),
+                          denom: amount.currency.coinMinimalDenom,
+                        };
+                      }),
+                      sendConfigs.memoConfig.memo
+                    );
+
+                    return await new InExtensionMessageRequester().sendMessage(
+                      BACKGROUND_PORT,
+                      msg
+                    );
+                  },
+                }
+              );
               ethereumAccount.setIsSendingTx(false);
             } else {
-              const tx = isIBCTransfer
-                ? accountStore
-                    .getAccount(chainId)
-                    .cosmos.makePacketForwardIBCTransferTx(
-                      accountStore,
-                      sendConfigs.channelConfig.channels,
-                      sendConfigs.amountConfig.amount[0].toDec().toString(),
-                      sendConfigs.amountConfig.amount[0].currency,
-                      sendConfigs.recipientConfig.recipient
-                    )
-                : accountStore
-                    .getAccount(chainId)
-                    .makeSendTokenTx(
-                      sendConfigs.amountConfig.amount[0].toDec().toString(),
-                      sendConfigs.amountConfig.amount[0].currency,
-                      sendConfigs.recipientConfig.recipient
-                    );
+              const tx =
+                sendType === "ibc-transfer"
+                  ? accountStore
+                      .getAccount(chainId)
+                      .cosmos.makePacketForwardIBCTransferTx(
+                        accountStore,
+                        sendConfigs.channelConfig.channels,
+                        sendConfigs.amountConfig.amount[0].toDec().toString(),
+                        sendConfigs.amountConfig.amount[0].currency,
+                        sendConfigs.recipientConfig.recipient
+                      )
+                  : accountStore
+                      .getAccount(chainId)
+                      .makeSendTokenTx(
+                        sendConfigs.amountConfig.amount[0].toDec().toString(),
+                        sendConfigs.amountConfig.amount[0].currency,
+                        sendConfigs.recipientConfig.recipient
+                      );
 
               await tx.send(
                 sendConfigs.feeConfig.toStdFee(),
@@ -617,7 +962,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                       }),
                       sendConfigs.memoConfig.memo
                     );
-                    if (isIBCTransfer) {
+                    if (sendType === "ibc-transfer") {
                       if (msg instanceof SendTxAndRecordMsg) {
                         msg = msg.withIBCPacketForwarding(
                           sendConfigs.channelConfig.channels,
@@ -642,7 +987,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                       sendConfigs.recipientConfig.recipient
                     );
 
-                    if (!isIBCTransfer) {
+                    if (sendType === "send") {
                       const inCurrencyPrice =
                         await priceStore.waitCalculatePrice(
                           sendConfigs.amountConfig.amount[0],
@@ -843,40 +1188,38 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             />
           </YAxis>
 
-          {!isErc20 && !isEVMOnlyChain && (
-            <LayeredHorizontalRadioGroup
-              size="large"
-              selectedKey={isIBCTransfer ? "ibc-transfer" : "send"}
-              items={[
-                {
-                  key: "send",
-                  text: intl.formatMessage({
-                    id: "page.send.type.send",
-                  }),
-                },
-                {
-                  key: "ibc-transfer",
-                  text: intl.formatMessage({
-                    id: "page.send.type.ibc-transfer",
-                  }),
-                },
-              ]}
-              onSelect={(key) => {
-                if (key === "ibc-transfer") {
-                  if (sendConfigs.channelConfig.channels.length === 0) {
-                    setIsIBCTransferDestinationModalOpen(true);
-                  }
-                } else {
-                  sendConfigs.channelConfig.setChannels([]);
-                  setIsIBCTransfer(false);
+          <LayeredHorizontalRadioGroup
+            size="large"
+            selectedKey={sendType !== "send" ? "ibc-transfer" : "send"}
+            items={[
+              {
+                key: "send",
+                text: intl.formatMessage({
+                  id: "page.send.type.send",
+                }),
+              },
+              {
+                key: "ibc-transfer",
+                text: intl.formatMessage({
+                  id: "page.send.type.ibc-transfer",
+                }),
+              },
+            ]}
+            onSelect={(key) => {
+              if (key === "ibc-transfer") {
+                if (sendConfigs.channelConfig.channels.length === 0) {
+                  setIsIBCTransferDestinationModalOpen(true);
                 }
-              }}
-            />
-          )}
+              } else {
+                sendConfigs.channelConfig.setChannels([]);
+                setSendType("send");
+              }
+            }}
+          />
 
-          <VerticalCollapseTransition collapsed={!isIBCTransfer}>
+          <VerticalCollapseTransition collapsed={sendType === "send"}>
             <DestinationChainView
-              ibcChannelConfig={sendConfigs.channelConfig}
+              chainInfo={destinationChainInfo}
               onClick={() => {
                 setIsIBCTransferDestinationModalOpen(true);
               }}
@@ -888,13 +1231,13 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           <RecipientInput
             ref={addressRef}
             historyType={historyType}
-            recipientConfig={sendConfigs.recipientConfig}
-            memoConfig={sendConfigs.memoConfig}
-            currency={sendConfigs.amountConfig.currency}
-            permitAddressBookSelfKeyInfo={isIBCTransfer}
+            recipientConfig={recipientConfig}
+            memoConfig={memoConfig}
+            currency={currency}
+            permitAddressBookSelfKeyInfo={sendType !== "send"}
             bottom={
               <VerticalCollapseTransition
-                collapsed={!isIBCRecipientSetAuto}
+                collapsed={!isRecipientNotBasicSendSetAuto}
                 transitionAlign="top"
               >
                 <Gutter size="0.25rem" />
@@ -908,7 +1251,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             }
           />
 
-          <AmountInput amountConfig={sendConfigs.amountConfig} />
+          <AmountInput amountConfig={amountConfig} />
 
           {!isEvmTx && (
             <MemoInput
@@ -918,15 +1261,16 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                 // 근데 memo의 placeholder는 cex로 보낼때 메모를 꼭 확인하라고 하니 서로 모순이라 이상하다.
                 // 그래서 IBC Send일때는 memo의 placeholder를 없앤다.
                 intl.formatMessage({
-                  id: isIBCTransfer
-                    ? "components.input.memo-input.optional-placeholder"
-                    : "page.send.amount.memo-placeholder",
+                  id:
+                    sendType === "ibc-transfer"
+                      ? "components.input.memo-input.optional-placeholder"
+                      : "page.send.amount.memo-placeholder",
                 })
               }
             />
           )}
 
-          <VerticalCollapseTransition collapsed={!isIBCTransfer}>
+          <VerticalCollapseTransition collapsed={sendType === "send"}>
             <GuideBox
               color="warning"
               title={intl.formatMessage({
@@ -951,10 +1295,10 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           <Gutter size="0" />
 
           <FeeControl
-            senderConfig={sendConfigs.senderConfig}
-            feeConfig={sendConfigs.feeConfig}
-            gasConfig={sendConfigs.gasConfig}
-            gasSimulator={gasSimulator}
+            senderConfig={senderConfig}
+            feeConfig={feeConfig}
+            gasConfig={gasConfig}
+            gasSimulator={gasSimulatorForNotBridgeSend}
             isForEVMTx={isEvmTx}
           />
         </Stack>
@@ -971,11 +1315,15 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           chainId={chainId}
           denom={currency.coinMinimalDenom}
           recipientConfig={sendConfigs.recipientConfig}
+          recipientConfigForBridge={ibcSwapConfigsForBridge.recipientConfig}
+          setDestinationChainInfoOfBridge={(value) => {
+            setDestinationChainInfoOfBridge(value);
+          }}
           ibcChannelConfig={sendConfigs.channelConfig}
-          setIsIBCTransfer={setIsIBCTransfer}
+          setSendType={setSendType}
           setAutomaticRecipient={(address: string) => {
-            setIsIBCRecipientSetAuto(true);
-            setIBCRecipientAddress(address);
+            setIsRecipientNotBasicSendSetAuto(true);
+            setRecipientAddressNotBasicSend(address);
           }}
           setIBCChannelsInfoFluent={setIBCChannelFluent}
           close={() => {
@@ -1009,3 +1357,26 @@ const DetachIcon: FunctionComponent<{
     </svg>
   );
 };
+
+const noopToPreventLintWarning = (..._args: any[]) => {
+  // noop
+};
+
+//NOTE - Hooks for maintaining the observable state of IBC swap queries
+// when uiProperties of amountConfig of swapConfig is called only inside amount input and an error occurs on amountInput
+// Observable values used in uiProperties had an issue with unobserving, so I fixed it so that we can temporarily keep observers on the page
+function useKeepIBCSwapObservable(skipQueriesStore: SkipQueries) {
+  useEffect(() => {
+    const disposal = autorun(() => {
+      noopToPreventLintWarning(
+        skipQueriesStore.queryIBCSwap.swapDestinationCurrenciesMap
+      );
+    });
+
+    return () => {
+      if (disposal) {
+        disposal();
+      }
+    };
+  }, [skipQueriesStore.queryIBCSwap]);
+}
