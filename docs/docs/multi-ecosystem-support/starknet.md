@@ -1,5 +1,5 @@
 ---
-title: Starknet Support
+title: Starknet
 order: 6
 ---
 

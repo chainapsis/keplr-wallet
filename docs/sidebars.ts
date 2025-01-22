@@ -33,15 +33,26 @@ const sidebars: SidebarsConfig = {
         "guide/get-key",
         "guide/sign-a-message",
         "guide/broadcast-tx",
+        "guide/suggest-chain",
         "guide/sign-arbitrary",
         "guide/custom-event",
       ],
     },
-    "cosmjs",
-    "secretjs",
-    "suggest-chain",
-    "evm",
-    "starknet",
+    {
+      type: "category",
+      label: "Multi-Ecosystem Support",
+      collapsed: true,
+      items: [
+        "multi-ecosystem-support/evm",
+        "multi-ecosystem-support/starknet",
+      ],
+    },
+    {
+      type: "category",
+      label: "Use with",
+      collapsed: true,
+      items: ["use-with/cosmjs", "use-with/secretjs"],
+    },
   ],
 };
 

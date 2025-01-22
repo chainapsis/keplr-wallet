@@ -1,7 +1,9 @@
 ---
-title: Use with CosmJs
+title: CosmJs
 order: 2
 ---
+
+# Use with CosmJs
 
 ## How to detect Keplr
 Keplr API may be undefined right after the webpage is shown.

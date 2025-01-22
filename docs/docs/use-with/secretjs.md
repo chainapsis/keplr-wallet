@@ -1,8 +1,9 @@
 ---
-title: Use with SecretJs
+title: SecretJs
 order: 3
 ---
 
+# Use with SecretJS
 ## How to detect Keplr
 Keplr API may be undefined right after the webpage shown.
 Please check the [How to detect Keplr](./getting-started/connect-to-keplr#how-to-detect-keplr) first before reading this section.
