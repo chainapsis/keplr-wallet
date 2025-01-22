@@ -6,12 +6,12 @@ order: 3
 # Use with SecretJS
 ## How to detect Keplr
 Keplr API may be undefined right after the webpage shown.
-Please check the [How to detect Keplr](./getting-started/connect-to-keplr#how-to-detect-keplr) first before reading this section.
+Please check the [How to detect Keplr](../getting-started/connect-to-keplr.mdx#how-to-detect-keplr) first before reading this section.
 
 ## Connecting with SecretJS
 
 SecretJS link: [https://www.npmjs.com/package/secretjs](https://www.npmjs.com/package/secretjs)
-The basics of using SecretJS are similar to CosmJS. Refer to the [Use with CosmJs](./cosmjs) section for more information.  
+The basics of using SecretJS are similar to CosmJS. Refer to the [Use with CosmJs](../use-with/cosmjs) section for more information.  
   
 One difference between CosmJS and SecretJS is that we recommend using Keplr's `EnigmaUtils`.
 By using Keplr's `EnigmaUtils`, you can use Keplr to encrypt/decrypt, and the decrypted transaction messages are shown to the user in a human-readable format.
@@ -60,4 +60,4 @@ Returns the viewing key of a SNIP-20 token registered in Keplr.
 If the SNIP-20 of the contract address doesn't exist, it will throw an error.
 
 ### Interaction Options
-You can use Keplr native API’s to set interaction options even when using SecretJS. Please refer to [this section](./02-basic-api.md#interaction-options).
+You can use Keplr native API’s to set interaction options even when using SecretJS. Please refer to [this section](../guide/sign-a-message#sign-options).

@@ -7,7 +7,7 @@ order: 2
 
 ## How to detect Keplr
 Keplr API may be undefined right after the webpage is shown.
-Please check the [How to detect Keplr](./getting-started/connect-to-keplr#how-to-detect-keplr) first before reading this section.
+Please check the [How to detect Keplr](../getting-started/connect-to-keplr#how-to-detect-keplr) first before reading this section.
 
 ## Connecting with CosmJS
 
@@ -57,7 +57,7 @@ However, if the msg to be sent is able to be serialized/deserialized using Amino
 
 If you’d like to enforce the use of Amino, you can use the following APIs: `keplr.getOfflineSignerOnlyAmino(chainId)` or `window.getOfflineSignerOnlyAmino(chainId: string)`. Because this will always return an Amino compatible signer, any CosmJS requested msg that is Amino compatible will request an Amino SignDoc to Keplr.
 
-Also, `keplr.getOfflineSignerAuto(chainId: string): Promise<OfflineSigner | OfflineDirectSigner>` or `window.getOfflineSignerAuto(chainId: string): Promise<OfflineSigner | OfflineDirectSigner>` API is supported. Please note that the value returned is async. This API automatically returns a signer that only supports Amino if the account is a Ledger-based account, and returns a signer that is compatible for both Amino and Protobuf if the account is a mnemonic/private key-based account. Because this API is affected by the type of the connected Keplr account, if [keplr_keystorechange](./02-basic-api.md#change-key-store-event) event is used to detect account changes the signer must be changed using the API when this event has been triggered.
+Also, `keplr.getOfflineSignerAuto(chainId: string): Promise<OfflineSigner | OfflineDirectSigner>` or `window.getOfflineSignerAuto(chainId: string): Promise<OfflineSigner | OfflineDirectSigner>` API is supported. Please note that the value returned is async. This API automatically returns a signer that only supports Amino if the account is a Ledger-based account, and returns a signer that is compatible for both Amino and Protobuf if the account is a mnemonic/private key-based account. Because this API is affected by the type of the connected Keplr account, if [keplr_keystorechange](../guide/custom-event#key-store-change) event is used to detect account changes the signer must be changed using the API when this event has been triggered.
 
 ## Use with Stargate
 
@@ -67,7 +67,7 @@ Keplr's `OfflineSigner` implements the `OfflineDirectSigner` interface. Use `Sig
 Refer to the [keplr-example](https://github.com/chainapsis/keplr-example/blob/master/src/main.js) repository for example code on how to integrate Keplr with CosmJS.
 
 ### Interaction Options
-You can use Keplr native API’s to set interaction options even when using CosmJS. Please refer to [this section](./02-basic-api.md#interaction-options).
+You can use Keplr native API’s to set interaction options even when using CosmJS. Please refer to [signOptions](../guide/sign-a-message#sign-options).
 
 ### Adding a custom blockchain to Keplr
-If Keplr doesn't natively support your blockchain within the extension, please refer to the [Suggest chain](./05-suggest-chain.md#suggest-chain) section.
+If Keplr doesn't natively support your blockchain within the extension, please refer to the [Suggest chain](../guide/suggest-chain) section.

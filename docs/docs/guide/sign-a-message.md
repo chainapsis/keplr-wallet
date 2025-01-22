@@ -29,9 +29,9 @@ Before submitting a transaction, users are required to review and sign a message
 - Cosmos-based Chains
   - Keplr provides methods to sign messages using two distinct signing modes: **Amino** and **Protobuf (Direct)**. Each mode has its own use cases and compatibility considerations, as described in the next section.
 - EVM-based Chains
-  - Continue from the [EVM-based Chains](../evm#requesting-ethereum-signatures) section.
+  - Continue from the [EVM-based Chains](../multi-ecosystem-support/evm#requesting-ethereum-signatures) section.
 - Starknet
-  - Continue from the [Starknet](../starknet#requesting-a-starknet-signature) section.
+  - Continue from the [Starknet](../multi-ecosystem-support/starknet#requesting-a-starknet-signature) section.
 
 ---
 
@@ -92,7 +92,7 @@ The `signAmino` method signs an Amino-encoded `StdSignDoc`. Unlike CosmJS's `Off
       memo: string;
     }
     ```
-- **`signOptions`** (`KeplrSignOptions`, optional): Additional signing options.
+- **`signOptions`** (`KeplrSignOptions`, optional): Additional signing options. <a id="sign-options"></a>
   - `preferNoSetFee`: If true, the fee configured by the dApp will be prioritized over the fee set by the user.
   - `preferNoSetMemo`: If true, the memo will be set by the dApp and the user will not be able to modify it.
   - `disableBalanceCheck`: If true, the transaction won't be blocked even if the balance is insufficient.

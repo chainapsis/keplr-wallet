@@ -7,9 +7,9 @@ Now that you’ve learned [how to get a signed result](./sign-a-message), let’
 - Cosmos-based Chains
   - Continue from the next section.
 - EVM-based Chains
-  - Continue from the [EVM-based Chains](../evm#sending-ethereum-transactions) section.
+  - Continue from the [EVM-based Chains](../multi-ecosystem-support/evm#sending-ethereum-transactions) section.
 - Starknet
-  - Continue from the [Starknet](../starknet#signing-transactions-on-starknet) section.
+  - Continue from the [Starknet](../multi-ecosystem-support/starknet#signing-transactions-on-starknet) section.
 
 ---
 
