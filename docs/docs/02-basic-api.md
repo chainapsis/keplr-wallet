@@ -5,7 +5,7 @@ order: 1
 
 ## How to detect Keplr
 
-You can determine whether Keplr is installed on the user device by checking `window.keplr`. If `window.keplr` returns `undefined` after document.load, Keplr is not installed. There are several ways to wait for the load event to check the status. Refer to the examples below:
+You can determine whether Keplr is installed on the user's device by checking `window.keplr`. If `window.keplr` returns `undefined` after document.load, Keplr is not installed. There are several ways to wait for the load event to check the status. Refer to the examples below:
 
 You can register the function to `window.onload`:
 
@@ -73,7 +73,7 @@ There may be multiple ways to achieve the same result, and no preferred method.
 
 If you were able to connect Keplr with CosmJS, you may skip to the [Use Keplr with CosmJS](./03-cosmjs.md) section.
 
-While Keplr supports an easy way to connect to CosmJS, there are additional functions specific to Keplr which provide additional features.
+While Keplr supports an easy way to connect to CosmJS, there are additional functions specific to Keplr that provide additional features.
 
 ### Using with Typescript
 **`window.d.ts`**
@@ -88,7 +88,7 @@ declare global {
 
 The `@keplr-wallet/types` package has the type definition related to Keplr.  
 If you're using TypeScript, run `npm install --save-dev @keplr-wallet/types` or `yarn add -D @keplr-wallet/types` to install `@keplr-wallet/types`.  
-Then, you can add the `@keplr-wallet/types` window to a global window object and register the Keplr related types.
+Then, you can add the `@keplr-wallet/types` window to a global window object and register the Keplr-related types.
 
 > Usage of any other packages besides @keplr-wallet/types is not recommended.
 > - Any other packages besides @keplr-wallet/types are actively being developed, backward compatibility is not in the scope of support.
@@ -133,7 +133,7 @@ If the webpage has permission and Keplr is unlocked, this function will return t
 }
 ```
 
-It also returns the nickname for the key store currently selected, which should allow the webpage to display the current key store selected to the user in a more convenient mane.  
+It also returns the nickname for the key store currently selected, which should allow the webpage to display the current key store selected to the user in a more convenient manner.  
 `isNanoLedger` field in the return type is used to indicate whether the selected account is from the Ledger Nano. Because current Cosmos app in the Ledger Nano doesn't support the direct (protobuf) format msgs, this field can be used to select the amino or direct signer. [Ref](./03-cosmjs.md#types-of-offline-signers)
 
 ### Sign Amino

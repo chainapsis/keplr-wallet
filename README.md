@@ -25,7 +25,7 @@ For help using Keplr Wallet, Visit our [User Support Site](https://help.keplr.ap
 - protoc v21.3 (recommended)
 
   ```sh
-    # This script is example for mac arm64 user. for other OS, replace URL(starts with https://..) to be matched with your OS from https://github.com/protocolbuffers/protobuf/releases/tag/v21.3
+    # This script is an example for mac arm64 user. for other OS, replace URL(starts with https://..) to be matched with your OS from https://github.com/protocolbuffers/protobuf/releases/tag/v21.3
     curl -Lo protoc-21.3.zip https://github.com/protocolbuffers/protobuf/releases/download/v21.3/protoc-21.3-osx-aarch_64.zip 
     unzip protoc-21.3.zip -d $HOME/protoc
     cp -r $HOME/protoc/include /usr/local
@@ -71,7 +71,7 @@ Usage of any other packages besides @keplr-wallet/types is not recommended.
 - Any other packages besides @keplr-wallet/types are actively being developed, backward compatibility is not in the scope of support.
 - Since there are active changes being made, documentation is not being updated to the most recent version of the package as of right now. Documentations would be updated as packages get stable.
 
-Also, this repo contains submodules that are not open sourced and are only available through the Chainapsis’ official Keplr Browser Extension release. However, all primary features of the extension will work without the closed sourced submodules.
+Also, this repo contains submodules that are not open-sourced and are only available through the Chainapsis’ official Keplr Browser Extension release. However, all primary features of the extension will work without the closed-sourced submodules.
 
 ## License
 

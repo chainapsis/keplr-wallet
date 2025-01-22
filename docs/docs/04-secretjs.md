@@ -45,8 +45,8 @@ const cosmJS = new SigningCosmWasmClient(
 async suggestToken(chainId: string, contractAddress: string): Promise<void>
 ```
 
-The webpage can request the user permission to add a SNIP-20 token to Keplr's token list. Will throw an error if the user rejects the request.  
-If a SNIP-20 with the same contract address already exists, nothing will happen.
+The webpage can request the user's permission to add a SNIP-20 token to Keplr's token list. Will throw an error if the user rejects the request.  
+If an SNIP-20 with the same contract address already exists, nothing will happen.
 
 ### Get SNIP-20 Viewing Key
 ```javascript

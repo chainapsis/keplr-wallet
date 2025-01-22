@@ -7,7 +7,7 @@ order: 4
 
 *Warning: This is an experimental feature.*
 
-Keplr's 'suggest chain' feature allows front-ends to request adding new Cosmos-SDK based blockchains that aren't natively integrated to Keplr extension.  
+Keplr's 'suggest chain' feature allows front-ends to request adding new Cosmos-SDK based blockchains that aren't natively integrated into Keplr extension.  
 If the same chain is already added to Keplr, nothing will happen. If the user rejects the request, an error will be thrown.
 
 This allows all Cosmos-SDK blockchains to have permissionless, instant wallet and transaction signing support for front-ends.
@@ -55,7 +55,7 @@ experimentalSuggestChain(chainInfo: SuggestingChainInfo): Promise<void>
 |-|-|-|
 | `rpc` | `http://123.456.789.012:26657` | Address of RPC endpoint of the chain. Default port is 26657 |
 | `rest` | `http://123.456.789.012:1317` | Address of REST/API endpoint of the chain. Default port is 1317. Must be enabled in `app.toml` |
-| `chainId` | mychain-1 | Keplr has a feature which automatically detects when the chain-id has changed, and automatically update to support new chain. However, it should be noted that this functionality will only work when the chain-id follows the \{identifier\}-\{version\}(ex.cosmoshub-4) format. Therefore, it is recommended that the chain follows the chain-id format. |
+| `chainId` | mychain-1 | Keplr has a feature which automatically detects when the chain-id has changed, and automatically updates to support new chain. However, it should be noted that this functionality will only work when the chain-id follows the \{identifier\}-\{version\}(ex.cosmoshub-4) format. Therefore, it is recommended that the chain follows the chain-id format. |
 | `stakeCurrency` | ```{     coinDenom: "ATOM",     coinMinimalDenom: "uatom",     coinDecimals: 6,     coinGeckoId: "cosmos",   }``` | Information on the staking token of the chain |
 | `walletUrlForStaking` | https://wallet.keplr.app/chains/cosmos-hub | The URL for the staking interface frontend for the chain. If you don't have a staking interface built, you can use [Lunie Light](https://github.com/luniehq/lunie-light) which supports Keplr. |
 | `bip44.coinType` | 118 | BIP44 coin type for address derivation. We recommend using `118`(Cosmos Hub) as this would provide good Ledger hardware wallet compatibility by utilizing the Cosmos Ledger app. |
