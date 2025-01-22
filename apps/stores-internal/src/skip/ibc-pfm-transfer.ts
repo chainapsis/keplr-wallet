@@ -21,9 +21,10 @@ export class ObservableQueryIbcPfmTransfer {
       const chainInfo = this.chainStore.getChain(chainId);
 
       const isEVMOnlyChain = chainInfo.chainId.startsWith("eip155:");
-      const asset = this.queryAssets
+
+      const assetForBridge = this.queryAssets
         .getAssets(chainInfo.chainId)
-        .assets.find((asset) => asset.denom === coinMinimalDenom);
+        .assetsRaw.find((asset) => asset.denom === coinMinimalDenom);
 
       for (const candidateChain of this.queryChains.chains) {
         const isCandidateChainEVMOnlyChain =
@@ -38,7 +39,7 @@ export class ObservableQueryIbcPfmTransfer {
             .assetsRaw.find(
               (a) =>
                 a.recommendedSymbol &&
-                a.recommendedSymbol === asset?.recommendedSymbol
+                a.recommendedSymbol === assetForBridge?.recommendedSymbol
             );
 
           if (candidateAsset) {
