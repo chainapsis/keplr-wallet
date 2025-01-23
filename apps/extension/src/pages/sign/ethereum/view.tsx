@@ -43,6 +43,7 @@ import {
   useFeeConfig,
   useGasSimulator,
   useSenderConfig,
+  useTxConfigsValidate,
   useZeroAllowedGasConfig,
 } from "@keplr-wallet/hooks";
 import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
@@ -355,12 +356,20 @@ export const EthereumSigningView: FunctionComponent<{
   const [isUnknownContractExecution, setIsUnknownContractExecution] =
     useState(false);
 
+  const txConfigsValidate = useTxConfigsValidate({
+    senderConfig,
+    gasConfig,
+    feeConfig,
+  });
+
   const isLoading =
     signEthereumInteractionStore.isObsoleteInteractionApproved(
       interactionData.id
     ) ||
     isLedgerInteracting ||
     isKeystoneInteracting;
+
+  const buttonDisabled = txConfigsValidate.interactionBlocked;
 
   return (
     <HeaderLayout
@@ -419,6 +428,7 @@ export const EthereumSigningView: FunctionComponent<{
           color: "primary",
           size: "large",
           left: !isLoading && <ApproveIcon />,
+          disabled: buttonDisabled,
           isLoading,
           onClick: async () => {
             try {
