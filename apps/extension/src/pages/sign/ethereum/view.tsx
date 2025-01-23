@@ -108,6 +108,7 @@ export const EthereumSigningView: FunctionComponent<{
   );
 
   const [signingDataBuff, setSigningDataBuff] = useState(Buffer.from(message));
+  const [preferNoSetFee, setPreferNoSetFee] = useState<boolean>(false);
   const isTxSigning = signType === EthSignType.TRANSACTION;
 
   const gasSimulator = useGasSimulator(
@@ -195,6 +196,10 @@ export const EthereumSigningView: FunctionComponent<{
             )
           );
         }
+
+        // 만약 사이트에서 제공된 gasLimit 또는 gasPrice가 있으면,
+        // 사용자가 수동으로 설정하는 것을 지양하기 위해 preferNoSetFee를 true로 설정
+        setPreferNoSetFee(gasLimitFromTx > 0 || gasPriceFromTx > 0);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -742,6 +747,7 @@ export const EthereumSigningView: FunctionComponent<{
                 senderConfig={senderConfig}
                 gasConfig={gasConfig}
                 gasSimulator={gasSimulator}
+                disableAutomaticFeeSet={preferNoSetFee}
                 isForEVMTx
               />
             );
