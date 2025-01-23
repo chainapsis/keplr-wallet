@@ -48,7 +48,7 @@ import {
 import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
 import { EthTxBase } from "../components/eth-tx/render/tx-base";
 import { MemoryKVStore } from "@keplr-wallet/common";
-import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
+import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { Image } from "../../../components/image";
 import { Column, Columns } from "../../../components/column";
 import { useNavigate } from "react-router";
@@ -209,34 +209,26 @@ export const EthereumSigningView: FunctionComponent<{
     if (isTxSigning && !interactionData.isInternal) {
       const unsignedTx = JSON.parse(Buffer.from(message).toString("utf8"));
 
+      // 수수료 옵션을 사이트에서 제공하는 경우, 수수료 옵션을 사용하지 않음
+      if (feeConfig.type === "manual") {
+        return;
+      }
+
       if (gasConfig.gas > 0) {
         unsignedTx.gasLimit = `0x${gasConfig.gas.toString(16)}`;
-
-        if (!unsignedTx.maxFeePerGas && !unsignedTx.gasPrice) {
-          unsignedTx.maxFeePerGas = `0x${new Int(
-            feeConfig.getFeePrimitive()[0].amount
-          )
-            .div(new Int(gasConfig.gas))
-            .toBigNumber()
-            .toString(16)}`;
-        }
       }
 
-      if (
-        !unsignedTx.maxPriorityFeePerGas &&
-        !unsignedTx.gasPrice &&
-        maxPriorityFeePerGas
-      ) {
-        unsignedTx.maxPriorityFeePerGas =
-          unsignedTx.maxPriorityFeePerGas ?? maxPriorityFeePerGas;
+      // EIP-1559 우선 적용
+      if (maxFeePerGas) {
+        unsignedTx.gasPrice = undefined;
+        unsignedTx.maxFeePerGas = maxFeePerGas;
       }
 
-      if (
-        !unsignedTx.gasPrice &&
-        !unsignedTx.maxFeePerGas &&
-        !unsignedTx.maxPriorityFeePerGas &&
-        gasPrice
-      ) {
+      if (unsignedTx.maxFeePerGas && maxPriorityFeePerGas) {
+        unsignedTx.maxPriorityFeePerGas = maxPriorityFeePerGas;
+      }
+
+      if (!maxFeePerGas && !maxPriorityFeePerGas && gasPrice) {
         unsignedTx.gasPrice = gasPrice;
       }
 
@@ -252,6 +244,7 @@ export const EthereumSigningView: FunctionComponent<{
     gasSimulator,
     gasConfig,
     feeConfig,
+    feeConfig.type,
     interactionData.isInternal,
   ]);
 
