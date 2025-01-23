@@ -23,6 +23,8 @@ const config: Config = {
     locales: ["en"],
   },
 
+  staticDirectories: ["public", "static"],
+
   presets: [
     [
       "classic",
