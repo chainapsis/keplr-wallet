@@ -66,7 +66,10 @@ import { GuideBox } from "../../../components/guide-box";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { amountToAmbiguousAverage, isRunningInSidePanel } from "../../../utils";
 import { AppCurrency, EthTxStatus } from "@keplr-wallet/types";
-import { useIBCSwapConfig } from "@keplr-wallet/hooks-internal";
+import {
+  IBCSwapAmountConfig,
+  useIBCSwapConfig,
+} from "@keplr-wallet/hooks-internal";
 import {
   ObservableQueryRouteInner,
   SkipQueries,
@@ -413,6 +416,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   const chainInfo = chainStore.getChain(chainId);
   const isEvmChain = chainStore.isEvmChain(chainId);
   const isEVMOnlyChain = chainStore.isEvmOnlyChain(chainId);
+  // const [isLessAmountThanFee, setIsLessAmountThanFee] = useState(false);
 
   const coinMinimalDenom =
     initialCoinMinimalDenom ||
@@ -424,7 +428,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
   const [destinationChainInfoOfBridge, setDestinationChainInfoOfBridge] =
     useState({
-      chainId: "",
+      chainId,
       currency: currency,
     });
 
@@ -488,6 +492,22 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     }
   );
   ibcSwapConfigsForBridge.amountConfig.setCurrency(currency);
+
+  const gasSimulatorForBridge = useGetGasSimulationForBridge(
+    chainStore,
+    chainId,
+    ibcSwapConfigsForBridge,
+    ethereumAccountStore,
+    currency
+  );
+  const txConfigsValidateForBridge = useTxConfigsValidate({
+    ...ibcSwapConfigsForBridge,
+    gasSimulator: gasSimulatorForBridge,
+  });
+  useTxConfigsQueryString(chainId, {
+    ...ibcSwapConfigsForBridge,
+    gasSimulator: gasSimulatorForBridge,
+  });
 
   const queryIBCSwap = ibcSwapConfigsForBridge.amountConfig.getQueryIBCSwap();
   const queryRoute = queryIBCSwap?.getQueryRoute();
@@ -780,6 +800,18 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     };
   }, [sendType, sendConfigs, ibcSwapConfigsForBridge]);
 
+  const outCurrencyFetched =
+    chainStore
+      .getChain(ibcSwapConfigsForBridge.amountConfig.outChainId)
+      .findCurrency(
+        ibcSwapConfigsForBridge.amountConfig.outCurrency.coinMinimalDenom
+      ) != null;
+
+  const interactionBlocked =
+    sendType === "bridge"
+      ? txConfigsValidateForBridge.interactionBlocked || !outCurrencyFetched
+      : txConfigsValidate.interactionBlocked;
+
   return (
     <HeaderLayout
       title={intl.formatMessage({ id: "page.send.amount.title" })}
@@ -808,7 +840,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       }
       bottomButtons={[
         {
-          disabled: txConfigsValidate.interactionBlocked,
+          disabled: interactionBlocked,
           text: intl.formatMessage({ id: "button.next" }),
           color: "primary",
           size: "large",
@@ -822,7 +854,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       onSubmit={async (e) => {
         e.preventDefault();
 
-        if (!txConfigsValidate.interactionBlocked) {
+        if (!interactionBlocked) {
           try {
             if (isEvmTx) {
               ethereumAccount.setIsSendingTx(true);
@@ -1388,4 +1420,193 @@ function useKeepIBCSwapObservable(skipQueriesStore: SkipQueries) {
       }
     };
   }, [skipQueriesStore.queryIBCSwap]);
+}
+
+function useGetGasSimulationForBridge(
+  chainStore: ChainStore,
+  chainId: string,
+  ibcSwapConfigsForBridge: {
+    recipientConfig: IBCRecipientConfig;
+    amountConfig: IBCSwapAmountConfig;
+    memoConfig: MemoConfig;
+    gasConfig: GasConfig;
+    feeConfig: FeeConfig;
+    senderConfig: SenderConfig;
+  },
+  ethereumAccountStore: EthereumAccountStore,
+  currency: AppCurrency
+) {
+  const gasSimulator = useGasSimulator(
+    new ExtensionKVStore("gas-simulator.ibc-swap.swap"),
+    chainStore,
+    chainId,
+    ibcSwapConfigsForBridge.gasConfig,
+    ibcSwapConfigsForBridge.feeConfig,
+    (() => {
+      // simulation 할때 예상되는 gas에 따라서 밑의 값을 설정해야한다.
+      // 근데 이걸 엄밀히 정하기는 어렵다
+      // 추정을해보면 당연히 destination token에 따라서 값이 다를 수 있다.
+      // 또한 트랜잭션이 ibc transfer인지 cosmwasm execute인지에 따라서 다를 수 있다.
+      // ibc transfer일 경우는 차이는 memo의 길이일 뿐인데 이건 gas에 그다지 영향을 미치지 않기 때문에 gas adjustment로 충분하다.
+      // swap일 경우 (osmosis에서 실행될 경우) swpa이 몇번 필요한지에 따라 영향을 미칠 것이다.
+      let type = "default";
+
+      const queryRoute = ibcSwapConfigsForBridge.amountConfig
+        .getQueryIBCSwap()
+        ?.getQueryRoute();
+      if (queryRoute && queryRoute.response) {
+        // swap일 경우 웬만하면 swap 한번으로 충분할 확률이 높다.
+        // 이 가정에 따라서 첫로드시에 gas를 restore하기 위해서 트랜잭션을 보내는 체인에서 swap 할 경우
+        // 일단 swap-1로 설정한다.
+        if (
+          queryRoute.response.data.swap_venues &&
+          queryRoute.response.data.swap_venues.length === 1
+        ) {
+          const swapVenueChainId = (() => {
+            const evmLikeChainId = Number(
+              queryRoute.response.data.swap_venues[0].chain_id
+            );
+            const isEVMChainId =
+              !Number.isNaN(evmLikeChainId) && evmLikeChainId > 0;
+
+            return isEVMChainId
+              ? `eip155:${evmLikeChainId}`
+              : queryRoute.response.data.swap_venues[0].chain_id;
+          })();
+
+          if (
+            ibcSwapConfigsForBridge.amountConfig.chainInfo.chainIdentifier ===
+            chainStore.getChain(swapVenueChainId).chainIdentifier
+          ) {
+            type = `swap-1`;
+          }
+        }
+
+        if (queryRoute.response.data.operations.length > 0) {
+          const firstOperation = queryRoute.response.data.operations[0];
+          if ("swap" in firstOperation) {
+            if (firstOperation.swap.swap_in) {
+              type = `swap-${firstOperation.swap.swap_in.swap_operations.length}`;
+            } else if (firstOperation.swap.smart_swap_in) {
+              type = `swap-${firstOperation.swap.smart_swap_in.swap_routes.reduce(
+                (acc, cur) => {
+                  return (acc += cur.swap_operations.length);
+                },
+                0
+              )}`;
+            }
+          }
+
+          if ("axelar_transfer" in firstOperation) {
+            type = "axelar_transfer";
+          }
+
+          if ("cctp_transfer" in firstOperation) {
+            type = "cctp_transfer";
+          }
+
+          if ("go_fast_transfer" in firstOperation) {
+            type = "go_fast_transfer";
+          }
+
+          if ("hyperlane_transfer" in firstOperation) {
+            type = "hyperlane_transfer";
+          }
+
+          if ("evm_swap" in firstOperation) {
+            type = "evm_swap";
+          }
+        }
+      }
+
+      return `${ibcSwapConfigsForBridge.amountConfig.outChainId}/${ibcSwapConfigsForBridge.amountConfig.outCurrency.coinMinimalDenom}/${type}`;
+    })(),
+    () => {
+      if (!ibcSwapConfigsForBridge.amountConfig.currency) {
+        throw new Error("Send currency not set");
+      }
+
+      // Prefer not to use the gas config or fee config,
+      // because gas simulator can change the gas config and fee config from the result of reaction,
+      // and it can make repeated reaction.
+      if (
+        ibcSwapConfigsForBridge.amountConfig.uiProperties.loadingState ===
+          "loading-block" ||
+        ibcSwapConfigsForBridge.amountConfig.uiProperties.error != null
+      ) {
+        throw new Error("Not ready to simulate tx");
+      }
+
+      const swapFeeBpsReceiver: string[] = [];
+      const queryRoute = ibcSwapConfigsForBridge.amountConfig
+        .getQueryIBCSwap()
+        ?.getQueryRoute();
+      if (queryRoute && queryRoute.response) {
+        if (queryRoute.response.data.operations.length > 0) {
+          for (const operation of queryRoute.response.data.operations) {
+            if ("swap" in operation) {
+              const swapIn =
+                operation.swap.swap_in ?? operation.swap.smart_swap_in;
+              if (swapIn) {
+                // const swapFeeBpsReceiverAddress = SwapFeeBps.receivers.find(
+                //   (r) => r.chainId === swapIn.swap_venue.chain_id
+                // );
+                // if (swapFeeBpsReceiverAddress) {
+                //   swapFeeBpsReceiver.push(swapFeeBpsReceiverAddress.address);
+                // }
+              }
+            }
+          }
+        }
+      }
+
+      const tx = ibcSwapConfigsForBridge.amountConfig.getTxIfReady(
+        // simulation 자체는 쉽게 통과시키기 위해서 슬리피지를 50으로 설정한다.
+        50,
+        // 코스모스 스왑은 스왑베뉴가 무조건 하나라고 해서 일단 처음걸 쓰기로 한다.
+        swapFeeBpsReceiver[0]
+      );
+
+      if (!tx) {
+        throw new Error("Not ready to simulate tx");
+      }
+
+      if ("send" in tx) {
+        return tx;
+      } else {
+        const ethereumAccount = ethereumAccountStore.getAccount(
+          ibcSwapConfigsForBridge.amountConfig.chainId
+        );
+        const sender = ibcSwapConfigsForBridge.senderConfig.sender;
+
+        const isErc20InCurrency =
+          ("type" in currency && currency.type === "erc20") ||
+          currency.coinMinimalDenom.startsWith("erc20:");
+        const erc20Approval = tx.requiredErc20Approvals?.[0];
+        const erc20ApprovalTx =
+          erc20Approval && isErc20InCurrency
+            ? ethereumAccount.makeErc20ApprovalTx(
+                {
+                  ...currency,
+                  type: "erc20",
+                  contractAddress: currency.coinMinimalDenom.replace(
+                    "erc20:",
+                    ""
+                  ),
+                },
+                erc20Approval.spender,
+                erc20Approval.amount
+              )
+            : undefined;
+
+        // OP Stack L1 Data Fee 계산은 일단 무시하기로 한다.
+        return {
+          simulate: () =>
+            ethereumAccount.simulateGas(sender, erc20ApprovalTx ?? tx),
+        };
+      }
+    }
+  );
+
+  return gasSimulator;
 }
