@@ -467,6 +467,13 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     ? queryBalances.getQueryEthereumHexAddress(sender).getBalance(currency)
     : queryBalances.getQueryBech32Address(sender).getBalance(currency);
 
+  const isDestinationEvmChain = chainStore.isEvmChain(
+    destinationChainInfoOfBridge.chainId
+  );
+  const isDestinationEvmOnlyChain = chainStore.isEvmOnlyChain(
+    destinationChainInfoOfBridge.chainId
+  );
+
   const ibcSwapConfigsForBridge = useIBCSwapConfigWithRecipientConfig(
     chainStore,
     queriesStore,
@@ -482,10 +489,10 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     0,
     {
       allowHexAddressToBech32Address:
-        !isEvmChain &&
-        !isEvmTx &&
+        isDestinationEvmChain &&
+        !isDestinationEvmOnlyChain &&
         !chainStore.getChain(chainId).chainId.startsWith("injective"),
-      allowHexAddressOnly: sendType === "bridge",
+      allowHexAddressOnly: isDestinationEvmOnlyChain,
       icns: ICNSInfo,
       ens: ENSInfo,
       computeTerraClassicTax: true,
