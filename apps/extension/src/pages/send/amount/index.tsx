@@ -55,6 +55,7 @@ import { GuideBox } from "../../../components/guide-box";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { amountToAmbiguousAverage, isRunningInSidePanel } from "../../../utils";
 import { EthTxStatus } from "@keplr-wallet/types";
+import { usePreviousDistinct } from "../../../hooks/use-previous";
 
 const Styles = {
   Flex1: styled.div`
@@ -391,6 +392,14 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       setIsIBCTransfer(true);
     }
   });
+
+  const isIBCTransferPrevious = usePreviousDistinct(isIBCTransfer);
+  useEffect(() => {
+    if (isIBCTransferPrevious && !isIBCTransfer) {
+      // ibc transfer에서 기본 send로 변할때 recipient를 초기화한다.
+      sendConfigs.recipientConfig.setValue("");
+    }
+  }, [isIBCTransfer, isIBCTransferPrevious, sendConfigs.recipientConfig]);
 
   const txConfigsValidate = useTxConfigsValidate({
     ...sendConfigs,
