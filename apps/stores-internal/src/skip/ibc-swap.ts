@@ -29,7 +29,8 @@ export class ObservableQueryIBCSwapInner {
     public readonly swapVenues: {
       readonly name: string;
       readonly chainId: string;
-    }[]
+    }[],
+    public readonly allowSwaps?: boolean
   ) {}
 
   getQueryMsgsDirect(
@@ -71,7 +72,8 @@ export class ObservableQueryIBCSwapInner {
       this.destAssetChainId,
       this.destAssetDenom,
       this.affiliateFeeBps,
-      this.swapVenues
+      this.swapVenues,
+      this.allowSwaps
     );
   }
 }
@@ -92,6 +94,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
   ) {
     super((str) => {
       const parsed = JSON.parse(str);
+
       return new ObservableQueryIBCSwapInner(
         this.chainStore,
         this.queryRoute,
@@ -102,7 +105,8 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
         parsed.destDenom,
         parsed.destChainId,
         parsed.affiliateFeeBps,
-        parsed.swapVenues
+        parsed.swapVenues,
+        parsed.allowSwaps
       );
     });
 
@@ -114,7 +118,8 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
     amount: CoinPretty,
     destChainId: string,
     destDenom: string,
-    affiliateFeeBps: number
+    affiliateFeeBps: number,
+    allowSwaps?: boolean
   ): ObservableQueryIBCSwapInner {
     const str = JSON.stringify({
       sourceChainId,
@@ -124,6 +129,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
       destDenom,
       affiliateFeeBps,
       swapVenues: this.swapVenues,
+      allowSwaps,
     });
     return this.get(str);
   }

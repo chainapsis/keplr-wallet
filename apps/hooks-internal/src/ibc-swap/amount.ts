@@ -30,6 +30,8 @@ export class IBCSwapAmountConfig extends AmountConfig {
   protected _outCurrency: AppCurrency;
   @observable
   protected _swapFeeBps: number;
+  @observable
+  protected _allowSwaps?: boolean;
 
   constructor(
     chainGetter: ChainGetter,
@@ -43,14 +45,15 @@ export class IBCSwapAmountConfig extends AmountConfig {
     senderConfig: ISenderConfig,
     initialOutChainId: string,
     initialOutCurrency: AppCurrency,
-    swapFeeBps: number
+    swapFeeBps: number,
+    allowSwaps?: boolean
   ) {
     super(chainGetter, queriesStore, initialChainId, senderConfig);
 
     this._outChainId = initialOutChainId;
     this._outCurrency = initialOutCurrency;
     this._swapFeeBps = swapFeeBps;
-
+    this._allowSwaps = allowSwaps;
     makeObservable(this);
   }
 
@@ -68,6 +71,10 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
   get outCurrency(): AppCurrency {
     return this._outCurrency;
+  }
+
+  get allowSwaps(): boolean | undefined {
+    return this._allowSwaps;
   }
 
   get swapPriceImpact(): RatePretty | undefined {
@@ -676,7 +683,8 @@ export class IBCSwapAmountConfig extends AmountConfig {
       this.amount[0],
       this.outChainId,
       this.outCurrency.coinMinimalDenom,
-      this.swapFeeBps
+      this.swapFeeBps,
+      this.allowSwaps
     );
   }
 }
@@ -691,7 +699,8 @@ export const useIBCSwapAmountConfig = (
   senderConfig: ISenderConfig,
   outChainId: string,
   outCurrency: AppCurrency,
-  swapFeeBps: number
+  swapFeeBps: number,
+  allowSwaps?: boolean
 ) => {
   const [txConfig] = useState(
     () =>
@@ -705,7 +714,8 @@ export const useIBCSwapAmountConfig = (
         senderConfig,
         outChainId,
         outCurrency,
-        swapFeeBps
+        swapFeeBps,
+        allowSwaps
       )
   );
   txConfig.setChain(chainId);

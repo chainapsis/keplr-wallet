@@ -249,10 +249,10 @@ export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
     public readonly swapVenues: {
       readonly name: string;
       readonly chainId: string;
-    }[]
+    }[],
+    public readonly allowSwaps?: boolean
   ) {
     super(sharedContext, skipURL, "/v2/fungible/route");
-
     makeObservable(this);
   }
 
@@ -414,6 +414,9 @@ export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
           evm_swaps: true,
           split_routes: true,
         },
+        ...(this.allowSwaps !== undefined && {
+          allow_swaps: this.allowSwaps,
+        }),
       }),
       signal: abortController.signal,
     });
@@ -466,7 +469,8 @@ export class ObservableQueryRoute extends HasMapStore<ObservableQueryRouteInner>
         parsed.destChainId,
         parsed.destDenom,
         parsed.affiliateFeeBps,
-        parsed.swapVenues
+        parsed.swapVenues,
+        parsed.allowSwaps
       );
     });
   }
@@ -480,7 +484,8 @@ export class ObservableQueryRoute extends HasMapStore<ObservableQueryRouteInner>
     swapVenues: {
       readonly name: string;
       readonly chainId: string;
-    }[]
+    }[],
+    allowSwaps?: boolean
   ): ObservableQueryRouteInner {
     const str = JSON.stringify({
       sourceChainId,
@@ -490,6 +495,7 @@ export class ObservableQueryRoute extends HasMapStore<ObservableQueryRouteInner>
       destDenom,
       affiliateFeeBps,
       swapVenues,
+      allowSwaps,
     });
     return this.get(str);
   }

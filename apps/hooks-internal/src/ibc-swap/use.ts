@@ -27,7 +27,8 @@ export const useIBCSwapConfig = (
   initialGas: number,
   outChainId: string,
   outCurrency: AppCurrency,
-  swapFeeBps: number
+  swapFeeBps: number,
+  allowSwaps?: boolean
 ) => {
   const senderConfig = useSenderConfig(chainGetter, chainId, sender);
   const amountConfig = useIBCSwapAmountConfig(
@@ -40,7 +41,8 @@ export const useIBCSwapConfig = (
     senderConfig,
     outChainId,
     outCurrency,
-    swapFeeBps
+    swapFeeBps,
+    allowSwaps
   );
 
   const memoConfig = useMemoConfig(chainGetter, chainId);
