@@ -1,5 +1,5 @@
 ---
-title: CosmJs
+title: Use with CosmJs
 order: 2
 ---
 

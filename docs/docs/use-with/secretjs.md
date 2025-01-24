@@ -1,5 +1,5 @@
 ---
-title: SecretJs
+title: Use with SecretJs
 order: 3
 ---
 
