@@ -29,8 +29,6 @@ export const FeeSummary: FunctionComponent<{
 
   const theme = useTheme();
 
-  const isShowingGasEstimatedOnly = isForEVMTx && !!gasSimulator?.gasEstimated;
-
   return (
     <Box>
       <Box
@@ -84,16 +82,7 @@ export const FeeSummary: FunctionComponent<{
             })()
               .map((fee) =>
                 fee
-                  .quo(
-                    new Dec(isShowingGasEstimatedOnly ? gasConfig?.gas || 1 : 1)
-                  )
-                  .mul(
-                    new Dec(
-                      isShowingGasEstimatedOnly
-                        ? gasSimulator?.gasEstimated || 1
-                        : 1
-                    )
-                  )
+                  .add(new Dec(feeConfig.l1DataFee?.toString() || "0"))
                   .maxDecimals(6)
                   .inequalitySymbol(true)
                   .trim(true)
@@ -134,19 +123,7 @@ export const FeeSummary: FunctionComponent<{
                   break;
                 } else {
                   const price = priceStore.calculatePrice(
-                    fee
-                      .quo(
-                        new Dec(
-                          isShowingGasEstimatedOnly ? gasConfig?.gas || 1 : 1
-                        )
-                      )
-                      .mul(
-                        new Dec(
-                          isShowingGasEstimatedOnly
-                            ? gasSimulator?.gasEstimated || 1
-                            : 1
-                        )
-                      )
+                    fee.add(new Dec(feeConfig.l1DataFee?.toString() || "0"))
                   );
                   if (price) {
                     if (!total) {
