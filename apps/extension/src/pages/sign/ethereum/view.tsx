@@ -190,17 +190,17 @@ export const EthereumSigningView: FunctionComponent<{
           unsignedTx.maxFeePerGas ?? unsignedTx.gasPrice ?? 0
         );
         if (gasPriceFromTx > 0) {
+          // 사이트에서 제공된 수수료를 사용하는 경우, fee type이 manual로 설정되며,
+          // 사용자가 수동으로 설정하는 것을 지양하기 위해 preferNoSetFee를 true로 설정
           feeConfig.setFee(
             new CoinPretty(
               chainInfo.currencies[0],
               new Dec(gasConfig.gas).mul(new Dec(gasPriceFromTx))
             )
           );
-        }
 
-        // 만약 사이트에서 제공된 gasLimit 또는 gasPrice가 있으면,
-        // 사용자가 수동으로 설정하는 것을 지양하기 위해 preferNoSetFee를 true로 설정
-        setPreferNoSetFee(gasLimitFromTx > 0 || gasPriceFromTx > 0);
+          setPreferNoSetFee(!interactionData.isInternal);
+        }
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

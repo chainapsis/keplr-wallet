@@ -145,8 +145,8 @@ export const TransactionFeeModal: FunctionComponent<{
 
     const isShowingMaxFee = isForEVMTx;
     const isFeeSetByUser = isForEVMTx && feeConfig.type !== "manual";
-    const isShowingGasEstimated =
-      isForEVMTx && !!isGasSimulatorEnabled && !!gasSimulator?.gasEstimated;
+    const isShowingFeeWithGasEstimated =
+      !!isGasSimulatorEnabled && !!gasSimulator?.gasEstimated && isFeeSetByUser;
 
     return (
       <Styles.Container>
@@ -210,7 +210,7 @@ export const TransactionFeeModal: FunctionComponent<{
               feeConfig={feeConfig}
               gasConfig={gasConfig}
               gasSimulator={gasSimulator}
-              isShowingGasEstimated={isShowingGasEstimated}
+              isShowingFeeWithGasEstimated={isShowingFeeWithGasEstimated}
             />
           </Stack>
 
@@ -512,9 +512,9 @@ const FeeSelector: FunctionComponent<{
   feeConfig: IFeeConfig;
   gasConfig?: IGasConfig;
   gasSimulator?: IGasSimulator;
-  isShowingGasEstimated?: boolean;
+  isShowingFeeWithGasEstimated?: boolean;
 }> = observer(
-  ({ feeConfig, gasConfig, gasSimulator, isShowingGasEstimated }) => {
+  ({ feeConfig, gasConfig, gasSimulator, isShowingFeeWithGasEstimated }) => {
     const { priceStore } = useStore();
     const theme = useTheme();
 
@@ -561,19 +561,21 @@ const FeeSelector: FunctionComponent<{
                         .sub(new Dec(feeConfig.l1DataFee?.toString() || "0"))
                         .quo(
                           new Dec(
-                            isShowingGasEstimated ? gasConfig?.gas || 1 : 1
+                            isShowingFeeWithGasEstimated
+                              ? gasConfig?.gas || 1
+                              : 1
                           )
                         )
                         .mul(
                           new Dec(
-                            isShowingGasEstimated
+                            isShowingFeeWithGasEstimated
                               ? gasSimulator?.gasAdjustment || 1
                               : 1
                           )
                         )
                         .mul(
                           new Dec(
-                            isShowingGasEstimated
+                            isShowingFeeWithGasEstimated
                               ? gasSimulator?.gasEstimated || 1
                               : 1
                           )
@@ -587,17 +589,21 @@ const FeeSelector: FunctionComponent<{
                 {feeConfig
                   .getFeeTypePrettyForFeeCurrency(feeCurrency, "low")
                   .sub(new Dec(feeConfig.l1DataFee?.toString() || "0"))
-                  .quo(new Dec(isShowingGasEstimated ? gasConfig?.gas || 1 : 1))
+                  .quo(
+                    new Dec(
+                      isShowingFeeWithGasEstimated ? gasConfig?.gas || 1 : 1
+                    )
+                  )
                   .mul(
                     new Dec(
-                      isShowingGasEstimated
+                      isShowingFeeWithGasEstimated
                         ? gasSimulator?.gasAdjustment || 1
                         : 1
                     )
                   )
                   .mul(
                     new Dec(
-                      isShowingGasEstimated
+                      isShowingFeeWithGasEstimated
                         ? gasSimulator?.gasEstimated || 1
                         : 1
                     )
@@ -638,19 +644,21 @@ const FeeSelector: FunctionComponent<{
                         .sub(new Dec(feeConfig.l1DataFee?.toString() || "0"))
                         .quo(
                           new Dec(
-                            isShowingGasEstimated ? gasConfig?.gas || 1 : 1
+                            isShowingFeeWithGasEstimated
+                              ? gasConfig?.gas || 1
+                              : 1
                           )
                         )
                         .mul(
                           new Dec(
-                            isShowingGasEstimated
+                            isShowingFeeWithGasEstimated
                               ? gasSimulator?.gasAdjustment || 1
                               : 1
                           )
                         )
                         .mul(
                           new Dec(
-                            isShowingGasEstimated
+                            isShowingFeeWithGasEstimated
                               ? gasSimulator?.gasEstimated || 1
                               : 1
                           )
@@ -664,17 +672,21 @@ const FeeSelector: FunctionComponent<{
                 {feeConfig
                   .getFeeTypePrettyForFeeCurrency(feeCurrency, "average")
                   .sub(new Dec(feeConfig.l1DataFee?.toString() || "0"))
-                  .quo(new Dec(isShowingGasEstimated ? gasConfig?.gas || 1 : 1))
+                  .quo(
+                    new Dec(
+                      isShowingFeeWithGasEstimated ? gasConfig?.gas || 1 : 1
+                    )
+                  )
                   .mul(
                     new Dec(
-                      isShowingGasEstimated
+                      isShowingFeeWithGasEstimated
                         ? gasSimulator?.gasAdjustment || 1
                         : 1
                     )
                   )
                   .mul(
                     new Dec(
-                      isShowingGasEstimated
+                      isShowingFeeWithGasEstimated
                         ? gasSimulator?.gasEstimated || 1
                         : 1
                     )
@@ -723,19 +735,21 @@ const FeeSelector: FunctionComponent<{
                         .sub(new Dec(feeConfig.l1DataFee?.toString() || "0"))
                         .quo(
                           new Dec(
-                            isShowingGasEstimated ? gasConfig?.gas || 1 : 1
+                            isShowingFeeWithGasEstimated
+                              ? gasConfig?.gas || 1
+                              : 1
                           )
                         )
                         .mul(
                           new Dec(
-                            isShowingGasEstimated
+                            isShowingFeeWithGasEstimated
                               ? gasSimulator?.gasAdjustment || 1
                               : 1
                           )
                         )
                         .mul(
                           new Dec(
-                            isShowingGasEstimated
+                            isShowingFeeWithGasEstimated
                               ? gasSimulator?.gasEstimated || 1
                               : 1
                           )
@@ -749,17 +763,21 @@ const FeeSelector: FunctionComponent<{
                 {feeConfig
                   .getFeeTypePrettyForFeeCurrency(feeCurrency, "high")
                   .sub(new Dec(feeConfig.l1DataFee?.toString() || "0"))
-                  .quo(new Dec(isShowingGasEstimated ? gasConfig?.gas || 1 : 1))
+                  .quo(
+                    new Dec(
+                      isShowingFeeWithGasEstimated ? gasConfig?.gas || 1 : 1
+                    )
+                  )
                   .mul(
                     new Dec(
-                      isShowingGasEstimated
+                      isShowingFeeWithGasEstimated
                         ? gasSimulator?.gasAdjustment || 1
                         : 1
                     )
                   )
                   .mul(
                     new Dec(
-                      isShowingGasEstimated
+                      isShowingFeeWithGasEstimated
                         ? gasSimulator?.gasEstimated || 1
                         : 1
                     )

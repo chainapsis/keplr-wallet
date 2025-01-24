@@ -219,11 +219,8 @@ export const FeeControl: FunctionComponent<{
     const isFeeSetByUser = isForEVMTx && feeConfig.type !== "manual";
 
     // gasAdjustment와 gasEstimated를 사용해 계산된 값을 보여주는 경우
-    const isShowingFeeWithGasAdjustment =
-      isForEVMTx &&
-      gasSimulator?.enabled &&
-      !!gasSimulator?.gasEstimated &&
-      isFeeSetByUser;
+    const isShowingFeeWithGasEstimated =
+      !!gasSimulator?.enabled && !!gasSimulator?.gasEstimated && isFeeSetByUser;
 
     return (
       <Box>
@@ -287,21 +284,21 @@ export const FeeControl: FunctionComponent<{
                             )
                             .quo(
                               new Dec(
-                                isShowingFeeWithGasAdjustment
+                                isShowingFeeWithGasEstimated
                                   ? gasConfig?.gas || 1
                                   : 1
                               )
                             )
                             .mul(
                               new Dec(
-                                isShowingFeeWithGasAdjustment
+                                isShowingFeeWithGasEstimated
                                   ? gasSimulator?.gasEstimated || 1
                                   : 1
                               )
                             )
                             .mul(
                               new Dec(
-                                isShowingFeeWithGasAdjustment
+                                isShowingFeeWithGasEstimated
                                   ? gasSimulator?.gasAdjustment || 1
                                   : 1
                               )
@@ -353,21 +350,21 @@ export const FeeControl: FunctionComponent<{
                           .sub(new Dec(feeConfig.l1DataFee?.toString() || "0"))
                           .quo(
                             new Dec(
-                              isShowingFeeWithGasAdjustment
+                              isShowingFeeWithGasEstimated
                                 ? gasConfig?.gas || 1
                                 : 1
                             )
                           )
                           .mul(
                             new Dec(
-                              isShowingFeeWithGasAdjustment
+                              isShowingFeeWithGasEstimated
                                 ? gasSimulator?.gasEstimated || 1
                                 : 1
                             )
                           )
                           .mul(
                             new Dec(
-                              isShowingFeeWithGasAdjustment
+                              isShowingFeeWithGasEstimated
                                 ? gasSimulator?.gasAdjustment || 1
                                 : 1
                             )
