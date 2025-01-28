@@ -13,7 +13,7 @@ Now that you’ve learned [how to get a signed result](./sign-a-message), let’
 
 ---
 
-The `sendTx` method allows developers to broadcast a transaction via Keplr's LCD endpoints. Keplr handles the entire broadcasting process, including notifications on the transaction's progress(e.g., pending, success, or failure). If the transaction fails to broadcast, the method throws an error.
+The `sendTx` method allows developers to broadcast a transaction via Keplr's LCD endpoints. Keplr handles the entire broadcasting process, including notifications on the transaction's progress (e.g., pending, success, or failure). If the transaction fails to broadcast, the method throws an error.
 
 ## Function Signature
 
