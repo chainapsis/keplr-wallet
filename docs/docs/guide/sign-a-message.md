@@ -17,7 +17,7 @@ Before submitting a transaction, users are required to review and sign a message
     />
   </figure>
   <figure style={{ textAlign: "center" }}>
-    <figcaption style={{ fontSize: "0.8em", fontWeight: "bold" }}>For a EVM-based Chain Tx</figcaption>
+    <figcaption style={{ fontSize: "0.8em", fontWeight: "bold" }}>For an EVM-based Chain Tx</figcaption>
     <img
       src={SignMessageEvmExampleImage}
       width="300"
