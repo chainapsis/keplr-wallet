@@ -43,12 +43,13 @@ import {
   useFeeConfig,
   useGasSimulator,
   useSenderConfig,
+  useTxConfigsValidate,
   useZeroAllowedGasConfig,
 } from "@keplr-wallet/hooks";
 import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
 import { EthTxBase } from "../components/eth-tx/render/tx-base";
 import { MemoryKVStore } from "@keplr-wallet/common";
-import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
+import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { Image } from "../../../components/image";
 import { Column, Columns } from "../../../components/column";
 import { useNavigate } from "react-router";
@@ -108,6 +109,7 @@ export const EthereumSigningView: FunctionComponent<{
   );
 
   const [signingDataBuff, setSigningDataBuff] = useState(Buffer.from(message));
+  const [preferNoSetFee, setPreferNoSetFee] = useState<boolean>(false);
   const isTxSigning = signType === EthSignType.TRANSACTION;
 
   const gasSimulator = useGasSimulator(
@@ -188,12 +190,16 @@ export const EthereumSigningView: FunctionComponent<{
           unsignedTx.maxFeePerGas ?? unsignedTx.gasPrice ?? 0
         );
         if (gasPriceFromTx > 0) {
+          // 사이트에서 제공된 수수료를 사용하는 경우, fee type이 manual로 설정되며,
+          // 사용자가 수동으로 설정하는 것을 지양하기 위해 preferNoSetFee를 true로 설정
           feeConfig.setFee(
             new CoinPretty(
               chainInfo.currencies[0],
               new Dec(gasConfig.gas).mul(new Dec(gasPriceFromTx))
             )
           );
+
+          setPreferNoSetFee(!interactionData.isInternal);
         }
       }
     }
@@ -204,34 +210,26 @@ export const EthereumSigningView: FunctionComponent<{
     if (isTxSigning && !interactionData.isInternal) {
       const unsignedTx = JSON.parse(Buffer.from(message).toString("utf8"));
 
+      // 수수료 옵션을 사이트에서 제공하는 경우, 수수료 옵션을 사용하지 않음
+      if (feeConfig.type === "manual") {
+        return;
+      }
+
       if (gasConfig.gas > 0) {
         unsignedTx.gasLimit = `0x${gasConfig.gas.toString(16)}`;
-
-        if (!unsignedTx.maxFeePerGas && !unsignedTx.gasPrice) {
-          unsignedTx.maxFeePerGas = `0x${new Int(
-            feeConfig.getFeePrimitive()[0].amount
-          )
-            .div(new Int(gasConfig.gas))
-            .toBigNumber()
-            .toString(16)}`;
-        }
       }
 
-      if (
-        !unsignedTx.maxPriorityFeePerGas &&
-        !unsignedTx.gasPrice &&
-        maxPriorityFeePerGas
-      ) {
-        unsignedTx.maxPriorityFeePerGas =
-          unsignedTx.maxPriorityFeePerGas ?? maxPriorityFeePerGas;
+      // EIP-1559 우선 적용
+      if (maxFeePerGas) {
+        unsignedTx.gasPrice = undefined;
+        unsignedTx.maxFeePerGas = maxFeePerGas;
       }
 
-      if (
-        !unsignedTx.gasPrice &&
-        !unsignedTx.maxFeePerGas &&
-        !unsignedTx.maxPriorityFeePerGas &&
-        gasPrice
-      ) {
+      if (unsignedTx.maxFeePerGas && maxPriorityFeePerGas) {
+        unsignedTx.maxPriorityFeePerGas = maxPriorityFeePerGas;
+      }
+
+      if (!maxFeePerGas && !maxPriorityFeePerGas && gasPrice) {
         unsignedTx.gasPrice = gasPrice;
       }
 
@@ -247,6 +245,7 @@ export const EthereumSigningView: FunctionComponent<{
     gasSimulator,
     gasConfig,
     feeConfig,
+    feeConfig.type,
     interactionData.isInternal,
   ]);
 
@@ -357,12 +356,20 @@ export const EthereumSigningView: FunctionComponent<{
   const [isUnknownContractExecution, setIsUnknownContractExecution] =
     useState(false);
 
+  const txConfigsValidate = useTxConfigsValidate({
+    senderConfig,
+    gasConfig,
+    feeConfig,
+  });
+
   const isLoading =
     signEthereumInteractionStore.isObsoleteInteractionApproved(
       interactionData.id
     ) ||
     isLedgerInteracting ||
     isKeystoneInteracting;
+
+  const buttonDisabled = txConfigsValidate.interactionBlocked;
 
   return (
     <HeaderLayout
@@ -421,6 +428,7 @@ export const EthereumSigningView: FunctionComponent<{
           color: "primary",
           size: "large",
           left: !isLoading && <ApproveIcon />,
+          disabled: buttonDisabled,
           isLoading,
           onClick: async () => {
             try {
@@ -742,6 +750,7 @@ export const EthereumSigningView: FunctionComponent<{
                 senderConfig={senderConfig}
                 gasConfig={gasConfig}
                 gasSimulator={gasSimulator}
+                disableAutomaticFeeSet={preferNoSetFee}
                 isForEVMTx
               />
             );
