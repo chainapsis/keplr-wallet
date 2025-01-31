@@ -3005,49 +3005,6 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     },
     features: [],
   },
-  {
-    rpc: "https://rpc.derive.xyz/",
-    rest: "https://rpc.derive.xyz/",
-    evm: {
-      chainId: 957,
-      rpc: "https://rpc.derive.xyz/",
-      websocket: "wss://rpc.derive.xyz/",
-    },
-    chainId: "eip155:957",
-    chainName: "Derive",
-    bip44: {
-      coinType: 60,
-    },
-    currencies: [
-      {
-        coinDenom: "DRV",
-        coinMinimalDenom: "derive-drv",
-        coinDecimals: 18,
-        coinGeckoId: "derive",
-      },
-      {
-        coinDenom: "stDRV",
-        coinMinimalDenom: "derive-stdrv",
-        coinDecimals: 18,
-        coinGeckoId: "derive",
-      },
-      {
-        coinDenom: "ETH",
-        coinMinimalDenom: "derive-ethereum",
-        coinDecimals: 18,
-        coinGeckoId: "ethereum",
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "ETH",
-        coinMinimalDenom: "derive-ethereum",
-        coinDecimals: 18,
-        coinGeckoId: "ethereum",
-      },
-    ],
-    features: [],
-  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
