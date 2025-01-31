@@ -3020,25 +3020,22 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     },
     currencies: [
       {
-        coinDenom: "ETH",
-        coinMinimalDenom: "derive-ethereum",
-        coinDecimals: 18,
-        coinGeckoId: "ethereum",
-      },
-      {
-        type: "erc20",
-        contractAddress: "0xb1d1eae60eea9525032a6dcb4c1ce336a1de71be",
         coinDenom: "DRV",
-        coinMinimalDenom: "erc20:0xb1d1eae60eea9525032a6dcb4c1ce336a1de71be",
+        coinMinimalDenom: "derive-drv",
         coinDecimals: 18,
         coinGeckoId: "derive",
       },
       {
-        type: "erc20",
-        contractAddress: "0x7499d654422023a407d92e1D83D387d81BC68De1",
         coinDenom: "stDRV",
-        coinMinimalDenom: "erc20:0x7499d654422023a407d92e1D83D387d81BC68De1",
+        coinMinimalDenom: "derive-stdrv",
         coinDecimals: 18,
+        coinGeckoId: "derive",
+      },
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "derive-ethereum",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
       },
     ],
     feeCurrencies: [
@@ -3049,7 +3046,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         coinGeckoId: "ethereum",
       },
     ],
-    features: ["op-stack-l1-data-fee"],
+    features: [],
   },
 ];
 
