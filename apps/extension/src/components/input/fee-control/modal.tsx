@@ -143,7 +143,10 @@ export const TransactionFeeModal: FunctionComponent<{
       isGasSimulatorEnabled,
     ]);
 
-    const isShowingMaxFee = isForEVMTx && !!gasSimulator?.gasEstimated;
+    const isShowingMaxFee = isForEVMTx;
+    const isFeeSetByUser = isForEVMTx && feeConfig.type !== "manual";
+    const isShowingFeeWithGasEstimated =
+      !!isGasSimulatorEnabled && !!gasSimulator?.gasEstimated && isFeeSetByUser;
 
     return (
       <Styles.Container>
@@ -207,7 +210,7 @@ export const TransactionFeeModal: FunctionComponent<{
               feeConfig={feeConfig}
               gasConfig={gasConfig}
               gasSimulator={gasSimulator}
-              isForEVMTx={isForEVMTx}
+              isShowingFeeWithGasEstimated={isShowingFeeWithGasEstimated}
             />
           </Stack>
 
@@ -226,6 +229,11 @@ export const TransactionFeeModal: FunctionComponent<{
                     <FormattedMessage id="components.input.fee-control.modal.max-fee" />
                   </b>
                   {`: ${feeConfig.fees[0]
+                    .sub(
+                      isFeeSetByUser
+                        ? new Dec(feeConfig.l1DataFee?.toString() || "0")
+                        : new Dec(0)
+                    )
                     .maxDecimals(6)
                     .inequalitySymbol(true)
                     .trim(true)
@@ -246,7 +254,11 @@ export const TransactionFeeModal: FunctionComponent<{
                   {` ${(() => {
                     let total: PricePretty | undefined;
                     let hasUnknown = false;
-                    const maxFee = feeConfig.fees[0];
+                    const maxFee = feeConfig.fees[0].sub(
+                      isFeeSetByUser
+                        ? new Dec(feeConfig.l1DataFee?.toString() || "0")
+                        : new Dec(0)
+                    );
                     if (!maxFee.currency.coinGeckoId) {
                       hasUnknown = true;
                     } else {
@@ -500,222 +512,288 @@ const FeeSelector: FunctionComponent<{
   feeConfig: IFeeConfig;
   gasConfig?: IGasConfig;
   gasSimulator?: IGasSimulator;
-  isForEVMTx?: boolean;
-}> = observer(({ feeConfig, gasConfig, gasSimulator, isForEVMTx }) => {
-  const { priceStore } = useStore();
-  const theme = useTheme();
+  isShowingFeeWithGasEstimated?: boolean;
+}> = observer(
+  ({ feeConfig, gasConfig, gasSimulator, isShowingFeeWithGasEstimated }) => {
+    const { priceStore } = useStore();
+    const theme = useTheme();
 
-  const feeCurrency =
-    feeConfig.fees.length > 0
-      ? feeConfig.fees[0].currency
-      : feeConfig.selectableFeeCurrencies[0];
+    const feeCurrency =
+      feeConfig.fees.length > 0
+        ? feeConfig.fees[0].currency
+        : feeConfig.selectableFeeCurrencies[0];
 
-  if (!feeCurrency) {
-    return null;
+    if (!feeCurrency) {
+      return null;
+    }
+
+    return (
+      <Columns sum={3}>
+        <Column weight={1}>
+          <FeeSelectorStyle.Item
+            style={{
+              borderRadius: "0.5rem 0 0 0.5rem",
+              borderRight: `1px solid ${
+                theme.mode === "light"
+                  ? ColorPalette["gray-100"]
+                  : ColorPalette["gray-400"]
+              }`,
+            }}
+            onClick={() => {
+              feeConfig.setFee({
+                type: "low",
+                currency: feeCurrency,
+              });
+            }}
+            selected={feeConfig.type === "low"}
+          >
+            {/* 텍스트의 길이 등에 의해서 레이아웃이 변하는걸 막기 위해서 가라로 1px의 너비르 가지는 Box로 감싸준다. */}
+            <Box width="1px" alignX="center">
+              <FeeSelectorStyle.Title selected={feeConfig.type === "low"}>
+                <FormattedMessage id="components.input.fee-control.modal.fee-selector.low" />
+              </FeeSelectorStyle.Title>
+              {feeCurrency.coinGeckoId ? (
+                <FeeSelectorStyle.Price selected={feeConfig.type === "low"}>
+                  {priceStore
+                    .calculatePrice(
+                      feeConfig
+                        .getFeeTypePrettyForFeeCurrency(feeCurrency, "low")
+                        .sub(new Dec(feeConfig.l1DataFee?.toString() || "0"))
+                        .quo(
+                          new Dec(
+                            isShowingFeeWithGasEstimated
+                              ? gasConfig?.gas || 1
+                              : 1
+                          )
+                        )
+                        .mul(
+                          new Dec(
+                            isShowingFeeWithGasEstimated
+                              ? gasSimulator?.gasAdjustment || 1
+                              : 1
+                          )
+                        )
+                        .mul(
+                          new Dec(
+                            isShowingFeeWithGasEstimated
+                              ? gasSimulator?.gasEstimated || 1
+                              : 1
+                          )
+                        )
+                        .add(new Dec(feeConfig.l1DataFee?.toString() || "0"))
+                    )
+                    ?.toString() || "-"}
+                </FeeSelectorStyle.Price>
+              ) : null}
+              <FeeSelectorStyle.Amount selected={feeConfig.type === "low"}>
+                {feeConfig
+                  .getFeeTypePrettyForFeeCurrency(feeCurrency, "low")
+                  .sub(new Dec(feeConfig.l1DataFee?.toString() || "0"))
+                  .quo(
+                    new Dec(
+                      isShowingFeeWithGasEstimated ? gasConfig?.gas || 1 : 1
+                    )
+                  )
+                  .mul(
+                    new Dec(
+                      isShowingFeeWithGasEstimated
+                        ? gasSimulator?.gasAdjustment || 1
+                        : 1
+                    )
+                  )
+                  .mul(
+                    new Dec(
+                      isShowingFeeWithGasEstimated
+                        ? gasSimulator?.gasEstimated || 1
+                        : 1
+                    )
+                  )
+                  .add(new Dec(feeConfig.l1DataFee?.toString() || "0"))
+                  .maxDecimals(6)
+                  .inequalitySymbol(true)
+                  .trim(true)
+                  .shrink(true)
+                  .hideIBCMetadata(true)
+                  .toString()}
+              </FeeSelectorStyle.Amount>
+            </Box>
+          </FeeSelectorStyle.Item>
+        </Column>
+
+        <Column weight={1}>
+          <FeeSelectorStyle.Item
+            onClick={() => {
+              feeConfig.setFee({
+                type: "average",
+                currency: feeCurrency,
+              });
+            }}
+            selected={feeConfig.type === "average"}
+          >
+            {/* 텍스트의 길이 등에 의해서 레이아웃이 변하는걸 막기 위해서 가라로 1px의 너비르 가지는 Box로 감싸준다. */}
+            <Box width="1px" alignX="center">
+              <FeeSelectorStyle.Title selected={feeConfig.type === "average"}>
+                <FormattedMessage id="components.input.fee-control.modal.fee-selector.average" />
+              </FeeSelectorStyle.Title>
+              {feeCurrency.coinGeckoId ? (
+                <FeeSelectorStyle.Price selected={feeConfig.type === "average"}>
+                  {priceStore
+                    .calculatePrice(
+                      feeConfig
+                        .getFeeTypePrettyForFeeCurrency(feeCurrency, "average")
+                        .sub(new Dec(feeConfig.l1DataFee?.toString() || "0"))
+                        .quo(
+                          new Dec(
+                            isShowingFeeWithGasEstimated
+                              ? gasConfig?.gas || 1
+                              : 1
+                          )
+                        )
+                        .mul(
+                          new Dec(
+                            isShowingFeeWithGasEstimated
+                              ? gasSimulator?.gasAdjustment || 1
+                              : 1
+                          )
+                        )
+                        .mul(
+                          new Dec(
+                            isShowingFeeWithGasEstimated
+                              ? gasSimulator?.gasEstimated || 1
+                              : 1
+                          )
+                        )
+                        .add(new Dec(feeConfig.l1DataFee?.toString() || "0"))
+                    )
+                    ?.toString() || "-"}
+                </FeeSelectorStyle.Price>
+              ) : null}
+              <FeeSelectorStyle.Amount selected={feeConfig.type === "average"}>
+                {feeConfig
+                  .getFeeTypePrettyForFeeCurrency(feeCurrency, "average")
+                  .sub(new Dec(feeConfig.l1DataFee?.toString() || "0"))
+                  .quo(
+                    new Dec(
+                      isShowingFeeWithGasEstimated ? gasConfig?.gas || 1 : 1
+                    )
+                  )
+                  .mul(
+                    new Dec(
+                      isShowingFeeWithGasEstimated
+                        ? gasSimulator?.gasAdjustment || 1
+                        : 1
+                    )
+                  )
+                  .mul(
+                    new Dec(
+                      isShowingFeeWithGasEstimated
+                        ? gasSimulator?.gasEstimated || 1
+                        : 1
+                    )
+                  )
+                  .add(new Dec(feeConfig.l1DataFee?.toString() || "0"))
+                  .maxDecimals(6)
+                  .inequalitySymbol(true)
+                  .trim(true)
+                  .shrink(true)
+                  .hideIBCMetadata(true)
+                  .toString()}
+              </FeeSelectorStyle.Amount>
+            </Box>
+          </FeeSelectorStyle.Item>
+        </Column>
+
+        <Column weight={1}>
+          <FeeSelectorStyle.Item
+            style={{
+              borderRadius: "0 0.5rem 0.5rem 0",
+              borderLeft: `1px solid ${
+                theme.mode === "light"
+                  ? ColorPalette["gray-100"]
+                  : ColorPalette["gray-400"]
+              }`,
+            }}
+            onClick={() => {
+              feeConfig.setFee({
+                type: "high",
+                currency: feeCurrency,
+              });
+            }}
+            selected={feeConfig.type === "high"}
+          >
+            {/* 텍스트의 길이 등에 의해서 레이아웃이 변하는걸 막기 위해서 가라로 1px의 너비르 가지는 Box로 감싸준다. */}
+            <Box width="1px" alignX="center">
+              <FeeSelectorStyle.Title selected={feeConfig.type === "high"}>
+                <FormattedMessage id="components.input.fee-control.modal.fee-selector.high" />
+              </FeeSelectorStyle.Title>
+              {feeCurrency.coinGeckoId ? (
+                <FeeSelectorStyle.Price selected={feeConfig.type === "high"}>
+                  {priceStore
+                    .calculatePrice(
+                      feeConfig
+                        .getFeeTypePrettyForFeeCurrency(feeCurrency, "high")
+                        .sub(new Dec(feeConfig.l1DataFee?.toString() || "0"))
+                        .quo(
+                          new Dec(
+                            isShowingFeeWithGasEstimated
+                              ? gasConfig?.gas || 1
+                              : 1
+                          )
+                        )
+                        .mul(
+                          new Dec(
+                            isShowingFeeWithGasEstimated
+                              ? gasSimulator?.gasAdjustment || 1
+                              : 1
+                          )
+                        )
+                        .mul(
+                          new Dec(
+                            isShowingFeeWithGasEstimated
+                              ? gasSimulator?.gasEstimated || 1
+                              : 1
+                          )
+                        )
+                        .add(new Dec(feeConfig.l1DataFee?.toString() || "0"))
+                    )
+                    ?.toString() || "-"}
+                </FeeSelectorStyle.Price>
+              ) : null}
+              <FeeSelectorStyle.Amount selected={feeConfig.type === "high"}>
+                {feeConfig
+                  .getFeeTypePrettyForFeeCurrency(feeCurrency, "high")
+                  .sub(new Dec(feeConfig.l1DataFee?.toString() || "0"))
+                  .quo(
+                    new Dec(
+                      isShowingFeeWithGasEstimated ? gasConfig?.gas || 1 : 1
+                    )
+                  )
+                  .mul(
+                    new Dec(
+                      isShowingFeeWithGasEstimated
+                        ? gasSimulator?.gasAdjustment || 1
+                        : 1
+                    )
+                  )
+                  .mul(
+                    new Dec(
+                      isShowingFeeWithGasEstimated
+                        ? gasSimulator?.gasEstimated || 1
+                        : 1
+                    )
+                  )
+                  .add(new Dec(feeConfig.l1DataFee?.toString() || "0"))
+                  .maxDecimals(6)
+                  .inequalitySymbol(true)
+                  .trim(true)
+                  .shrink(true)
+                  .hideIBCMetadata(true)
+                  .toString()}
+              </FeeSelectorStyle.Amount>
+            </Box>
+          </FeeSelectorStyle.Item>
+        </Column>
+      </Columns>
+    );
   }
-
-  const isShowingGasEstimatedOnly = isForEVMTx && !!gasSimulator?.gasEstimated;
-
-  return (
-    <Columns sum={3}>
-      <Column weight={1}>
-        <FeeSelectorStyle.Item
-          style={{
-            borderRadius: "0.5rem 0 0 0.5rem",
-            borderRight: `1px solid ${
-              theme.mode === "light"
-                ? ColorPalette["gray-100"]
-                : ColorPalette["gray-400"]
-            }`,
-          }}
-          onClick={() => {
-            feeConfig.setFee({
-              type: "low",
-              currency: feeCurrency,
-            });
-          }}
-          selected={feeConfig.type === "low"}
-        >
-          {/* 텍스트의 길이 등에 의해서 레이아웃이 변하는걸 막기 위해서 가라로 1px의 너비르 가지는 Box로 감싸준다. */}
-          <Box width="1px" alignX="center">
-            <FeeSelectorStyle.Title selected={feeConfig.type === "low"}>
-              <FormattedMessage id="components.input.fee-control.modal.fee-selector.low" />
-            </FeeSelectorStyle.Title>
-            {feeCurrency.coinGeckoId ? (
-              <FeeSelectorStyle.Price selected={feeConfig.type === "low"}>
-                {priceStore
-                  .calculatePrice(
-                    feeConfig
-                      .getFeeTypePrettyForFeeCurrency(feeCurrency, "low")
-                      .quo(
-                        new Dec(
-                          isShowingGasEstimatedOnly ? gasConfig?.gas || 1 : 1
-                        )
-                      )
-                      .mul(
-                        new Dec(
-                          isShowingGasEstimatedOnly
-                            ? gasSimulator?.gasEstimated || 1
-                            : 1
-                        )
-                      )
-                  )
-                  ?.toString() || "-"}
-              </FeeSelectorStyle.Price>
-            ) : null}
-            <FeeSelectorStyle.Amount selected={feeConfig.type === "low"}>
-              {feeConfig
-                .getFeeTypePrettyForFeeCurrency(feeCurrency, "low")
-                .quo(
-                  new Dec(isShowingGasEstimatedOnly ? gasConfig?.gas || 1 : 1)
-                )
-                .mul(
-                  new Dec(
-                    isShowingGasEstimatedOnly
-                      ? gasSimulator?.gasEstimated || 1
-                      : 1
-                  )
-                )
-                .maxDecimals(6)
-                .inequalitySymbol(true)
-                .trim(true)
-                .shrink(true)
-                .hideIBCMetadata(true)
-                .toString()}
-            </FeeSelectorStyle.Amount>
-          </Box>
-        </FeeSelectorStyle.Item>
-      </Column>
-
-      <Column weight={1}>
-        <FeeSelectorStyle.Item
-          onClick={() => {
-            feeConfig.setFee({
-              type: "average",
-              currency: feeCurrency,
-            });
-          }}
-          selected={feeConfig.type === "average"}
-        >
-          {/* 텍스트의 길이 등에 의해서 레이아웃이 변하는걸 막기 위해서 가라로 1px의 너비르 가지는 Box로 감싸준다. */}
-          <Box width="1px" alignX="center">
-            <FeeSelectorStyle.Title selected={feeConfig.type === "average"}>
-              <FormattedMessage id="components.input.fee-control.modal.fee-selector.average" />
-            </FeeSelectorStyle.Title>
-            {feeCurrency.coinGeckoId ? (
-              <FeeSelectorStyle.Price selected={feeConfig.type === "average"}>
-                {priceStore
-                  .calculatePrice(
-                    feeConfig
-                      .getFeeTypePrettyForFeeCurrency(feeCurrency, "average")
-                      .quo(
-                        new Dec(
-                          isShowingGasEstimatedOnly ? gasConfig?.gas || 1 : 1
-                        )
-                      )
-                      .mul(
-                        new Dec(
-                          isShowingGasEstimatedOnly
-                            ? gasSimulator?.gasEstimated || 1
-                            : 1
-                        )
-                      )
-                  )
-                  ?.toString() || "-"}
-              </FeeSelectorStyle.Price>
-            ) : null}
-            <FeeSelectorStyle.Amount selected={feeConfig.type === "average"}>
-              {feeConfig
-                .getFeeTypePrettyForFeeCurrency(feeCurrency, "average")
-                .quo(
-                  new Dec(isShowingGasEstimatedOnly ? gasConfig?.gas || 1 : 1)
-                )
-                .mul(
-                  new Dec(
-                    isShowingGasEstimatedOnly
-                      ? gasSimulator?.gasEstimated || 1
-                      : 1
-                  )
-                )
-                .maxDecimals(6)
-                .inequalitySymbol(true)
-                .trim(true)
-                .shrink(true)
-                .hideIBCMetadata(true)
-                .toString()}
-            </FeeSelectorStyle.Amount>
-          </Box>
-        </FeeSelectorStyle.Item>
-      </Column>
-
-      <Column weight={1}>
-        <FeeSelectorStyle.Item
-          style={{
-            borderRadius: "0 0.5rem 0.5rem 0",
-            borderLeft: `1px solid ${
-              theme.mode === "light"
-                ? ColorPalette["gray-100"]
-                : ColorPalette["gray-400"]
-            }`,
-          }}
-          onClick={() => {
-            feeConfig.setFee({
-              type: "high",
-              currency: feeCurrency,
-            });
-          }}
-          selected={feeConfig.type === "high"}
-        >
-          {/* 텍스트의 길이 등에 의해서 레이아웃이 변하는걸 막기 위해서 가라로 1px의 너비르 가지는 Box로 감싸준다. */}
-          <Box width="1px" alignX="center">
-            <FeeSelectorStyle.Title selected={feeConfig.type === "high"}>
-              <FormattedMessage id="components.input.fee-control.modal.fee-selector.high" />
-            </FeeSelectorStyle.Title>
-            {feeCurrency.coinGeckoId ? (
-              <FeeSelectorStyle.Price selected={feeConfig.type === "high"}>
-                {priceStore
-                  .calculatePrice(
-                    feeConfig
-                      .getFeeTypePrettyForFeeCurrency(feeCurrency, "high")
-                      .quo(
-                        new Dec(
-                          isShowingGasEstimatedOnly ? gasConfig?.gas || 1 : 1
-                        )
-                      )
-                      .mul(
-                        new Dec(
-                          isShowingGasEstimatedOnly
-                            ? gasSimulator?.gasEstimated || 1
-                            : 1
-                        )
-                      )
-                  )
-                  ?.toString() || "-"}
-              </FeeSelectorStyle.Price>
-            ) : null}
-            <FeeSelectorStyle.Amount selected={feeConfig.type === "high"}>
-              {feeConfig
-                .getFeeTypePrettyForFeeCurrency(feeCurrency, "high")
-                .quo(
-                  new Dec(isShowingGasEstimatedOnly ? gasConfig?.gas || 1 : 1)
-                )
-                .mul(
-                  new Dec(
-                    isShowingGasEstimatedOnly
-                      ? gasSimulator?.gasEstimated || 1
-                      : 1
-                  )
-                )
-                .maxDecimals(6)
-                .inequalitySymbol(true)
-                .trim(true)
-                .shrink(true)
-                .hideIBCMetadata(true)
-                .toString()}
-            </FeeSelectorStyle.Amount>
-          </Box>
-        </FeeSelectorStyle.Item>
-      </Column>
-    </Columns>
-  );
-});
+);
