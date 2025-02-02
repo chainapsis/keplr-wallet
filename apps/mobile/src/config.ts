@@ -2141,6 +2141,80 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: [],
   },
+  {
+    chainId: 'ggezchain',
+    chainName: 'GGEZ1 Chain',
+    chainSymbolImageUrl:
+      'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/ggezchain/chain.png',
+    rpc: 'https://bc.ggez.one:8443',
+    rest: 'https://rest.ggez.one',
+    nodeProvider: {
+      name: 'GGEZ1 Foundation DAO LLC.',
+      email: 'ggez@ggez.one',
+      website: 'https://ggez.one',
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: 'ggez',
+      bech32PrefixAccPub: 'ggezpub',
+      bech32PrefixValAddr: 'ggezvaloper',
+      bech32PrefixValPub: 'ggezvaloperpub',
+      bech32PrefixConsAddr: 'ggezvalcons',
+      bech32PrefixConsPub: 'ggezvalconspub',
+    },
+    currencies: [
+      {
+        coinDenom: 'GGEZ1',
+        coinMinimalDenom: 'uggez1',
+        coinDecimals: 6,
+        coinImageUrl:
+          'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/ggezchain/ggez1.png',
+      },
+      {
+        coinDenom: 'GGZ',
+        coinMinimalDenom: 'uggz',
+        coinDecimals: 6,
+        coinImageUrl:
+          'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/ggezchain/ggz.png',
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: 'GGEZ1',
+        coinMinimalDenom: 'uggez1',
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.4,
+          average: 0.5,
+          high: 0.75,
+        },
+        coinImageUrl:
+          'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/ggezchain/ggez1.png',
+      },
+      {
+        coinDenom: 'GGZ',
+        coinMinimalDenom: 'uggz',
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.5,
+          average: 0.75,
+          high: 1,
+        },
+        coinImageUrl:
+          'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/ggezchain/ggz.png',
+      },
+    ],
+    stakeCurrency: {
+      coinDenom: 'GGEZ1',
+      coinMinimalDenom: 'uggez1',
+      coinDecimals: 6,
+      coinImageUrl:
+        'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/ggezchain/ggez1.png',
+    },
+    features: ['cosmwasm'],
+  },
 ];
 
 // TODO: 원격으로 변경할 수 있도록 나중에 네트워크에서 이 정보를 가져오는 방식으로 변경될 수 있음
