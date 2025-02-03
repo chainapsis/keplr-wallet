@@ -369,7 +369,7 @@ export const EthereumSigningView: FunctionComponent<{
     isLedgerInteracting ||
     isKeystoneInteracting;
 
-  const buttonDisabled = txConfigsValidate.interactionBlocked;
+  const buttonDisabled = isTxSigning && txConfigsValidate.interactionBlocked;
 
   return (
     <HeaderLayout
