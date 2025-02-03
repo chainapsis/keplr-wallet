@@ -25,6 +25,20 @@ const config: Config = {
 
   staticDirectories: ["public", "static"],
 
+  plugins: [
+    [
+      "@docusaurus/plugin-client-redirects",
+      {
+        redirects: [
+          {
+            from: "/api",
+            to: "/api/intro",
+          },
+        ],
+      },
+    ],
+  ],
+
   presets: [
     [
       "classic",

@@ -2350,6 +2350,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@docusaurus/plugin-client-redirects@npm:3.6.3":
+  version: 3.6.3
+  resolution: "@docusaurus/plugin-client-redirects@npm:3.6.3"
+  dependencies:
+    "@docusaurus/core": 3.6.3
+    "@docusaurus/logger": 3.6.3
+    "@docusaurus/utils": 3.6.3
+    "@docusaurus/utils-common": 3.6.3
+    "@docusaurus/utils-validation": 3.6.3
+    eta: ^2.2.0
+    fs-extra: ^11.1.1
+    lodash: ^4.17.21
+    tslib: ^2.6.0
+  peerDependencies:
+    react: ^18.0.0
+    react-dom: ^18.0.0
+  checksum: 8c254d976253b55d18ae6f3202f0254e00d0e720ac43a2093993f6004c16a9002000528119dfa707304fb337e3db1f4aaf3ce86225931bfce44cea1d85f044de
+  languageName: node
+  linkType: hard
+
 "@docusaurus/plugin-content-blog@npm:3.6.3":
   version: 3.6.3
   resolution: "@docusaurus/plugin-content-blog@npm:3.6.3"
@@ -5524,6 +5544,7 @@ __metadata:
     "@docusaurus/core": 3.6.3
     "@docusaurus/eslint-plugin": ^3.6.3
     "@docusaurus/module-type-aliases": 3.6.3
+    "@docusaurus/plugin-client-redirects": 3.6.3
     "@docusaurus/preset-classic": ^3.6.3
     "@docusaurus/tsconfig": 3.6.3
     "@docusaurus/types": 3.6.3
