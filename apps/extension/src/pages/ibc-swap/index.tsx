@@ -1786,7 +1786,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         <WarningGuideBox
           amountConfig={ibcSwapConfigs.amountConfig}
           title={
-            isHighPriceImpact && !calculatingTxError
+            isHighPriceImpact &&
+            !calculatingTxError &&
+            !ibcSwapConfigs.amountConfig.uiProperties.error &&
+            !ibcSwapConfigs.amountConfig.uiProperties.warning
               ? (() => {
                   const inPrice = priceStore.calculatePrice(
                     ibcSwapConfigs.amountConfig.amount[0],
