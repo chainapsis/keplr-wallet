@@ -283,7 +283,7 @@ export const EthereumSigningView: FunctionComponent<{
       case EthSignType.MESSAGE:
         // If the message is 32 bytes, it's probably a hash.
         if (signingDataBuff.length === 32) {
-          return signingDataBuff.toString("hex");
+          return "0x" + signingDataBuff.toString("hex");
         } else {
           const text = (() => {
             const string = signingDataBuff.toString("utf8");
@@ -294,7 +294,8 @@ export const EthereumSigningView: FunctionComponent<{
                 const decoder = new TextDecoder("utf-8", { fatal: true });
                 decoder.decode(new Uint8Array(buf)); // UTF-8 변환 시도
               } catch {
-                return buf.toString("hex");
+                // 정상적인 utf-8 문자열이 아니면 hex로 변환
+                return "0x" + buf.toString("hex");
               }
 
               return buf.toString("utf8");
@@ -315,7 +316,7 @@ export const EthereumSigningView: FunctionComponent<{
       case EthSignType.EIP712:
         return JSON.stringify(JSON.parse(signingDataBuff.toString()), null, 2);
       default:
-        return signingDataBuff.toString("hex");
+        return "0x" + signingDataBuff.toString("hex");
     }
   }, [signingDataBuff, signType]);
 
@@ -433,12 +434,15 @@ export const EthereumSigningView: FunctionComponent<{
           onClick: async () => {
             try {
               let signature;
+              const signingData = signingDataText.startsWith("0x")
+                ? Buffer.from(signingDataText.slice(2), "hex")
+                : Buffer.from(signingDataText, "utf8");
               if (interactionData.data.keyType === "ledger") {
                 setIsLedgerInteracting(true);
                 setLedgerInteractingError(undefined);
                 signature = await handleEthereumPreSignByLedger(
                   interactionData,
-                  Buffer.from(signingDataText),
+                  signingData,
                   {
                     useWebHID: uiConfigStore.useWebHIDLedger,
                   }
@@ -448,7 +452,7 @@ export const EthereumSigningView: FunctionComponent<{
                 setKeystoneInteractingError(undefined);
                 signature = await handleEthereumPreSignByKeystone(
                   interactionData,
-                  Buffer.from(signingDataText),
+                  signingData,
                   {
                     displayQRCode: async (ur: KeystoneUR) => {
                       setKeystoneUR(ur);
@@ -463,7 +467,7 @@ export const EthereumSigningView: FunctionComponent<{
 
               await signEthereumInteractionStore.approveWithProceedNext(
                 interactionData.id,
-                Buffer.from(signingDataText),
+                signingData,
                 signature,
                 async (proceedNext) => {
                   if (!proceedNext) {
