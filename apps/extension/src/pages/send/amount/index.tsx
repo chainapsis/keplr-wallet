@@ -388,7 +388,10 @@ const useIBCSwapConfigWithRecipientConfig = (
     outChainId,
     outCurrency,
     swapFeeBps,
-    isAllowSwaps
+    isAllowSwaps,
+    {
+      evmSwaps: false,
+    }
   );
   const channelConfig = useIBCChannelConfig(false);
 

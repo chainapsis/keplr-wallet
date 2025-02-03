@@ -93,7 +93,11 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
     public readonly swapVenues: {
       readonly name: string;
       readonly chainId: string;
-    }[]
+    }[],
+    public readonly smartSwapOptions?: {
+      evmSwaps?: boolean;
+      splitRoutes?: boolean;
+    }
   ) {
     super(sharedContext, skipURL, "/v2/fungible/msgs_direct");
 
@@ -343,8 +347,14 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
           go_fast: true,
           experimental_features: ["hyperlane"],
           smart_swap_options: {
-            evm_swaps: true,
-            split_routes: true,
+            evm_swaps:
+              this.smartSwapOptions?.evmSwaps === undefined
+                ? true
+                : this.smartSwapOptions.evmSwaps,
+            split_routes:
+              this.smartSwapOptions?.splitRoutes === undefined
+                ? true
+                : this.smartSwapOptions.splitRoutes,
           },
         }),
         signal: abortController.signal,
@@ -404,7 +414,8 @@ export class ObservableQueryMsgsDirect extends HasMapStore<ObservableQueryMsgsDi
         parsed.slippageTolerancePercent,
         parsed.affiliateFeeBps,
         parsed.affiliateFeeReceiver,
-        parsed.swapVenues
+        parsed.swapVenues,
+        parsed.smartSwapOptions
       );
     });
   }
@@ -421,7 +432,11 @@ export class ObservableQueryMsgsDirect extends HasMapStore<ObservableQueryMsgsDi
     swapVenues: {
       readonly name: string;
       readonly chainId: string;
-    }[]
+    }[],
+    smartSwapOptions?: {
+      evmSwaps?: boolean;
+      splitRoutes?: boolean;
+    }
   ): ObservableQueryMsgsDirectInner {
     const amountInCoin = amountIn.toCoin();
     const str = JSON.stringify({
@@ -435,6 +450,7 @@ export class ObservableQueryMsgsDirect extends HasMapStore<ObservableQueryMsgsDi
       affiliateFeeBps,
       affiliateFeeReceiver,
       swapVenues,
+      smartSwapOptions,
     });
     return this.get(str);
   }

@@ -32,6 +32,11 @@ export class IBCSwapAmountConfig extends AmountConfig {
   protected _swapFeeBps: number;
   @observable
   protected _allowSwaps?: boolean;
+  @observable
+  protected _smartSwapOptions?: {
+    evmSwaps?: boolean;
+    splitRoutes?: boolean;
+  };
 
   constructor(
     chainGetter: ChainGetter,
@@ -46,7 +51,11 @@ export class IBCSwapAmountConfig extends AmountConfig {
     initialOutChainId: string,
     initialOutCurrency: AppCurrency,
     swapFeeBps: number,
-    allowSwaps?: boolean
+    allowSwaps?: boolean,
+    smartSwapOptions?: {
+      evmSwaps?: boolean;
+      splitRoutes?: boolean;
+    }
   ) {
     super(chainGetter, queriesStore, initialChainId, senderConfig);
 
@@ -54,6 +63,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
     this._outCurrency = initialOutCurrency;
     this._swapFeeBps = swapFeeBps;
     this._allowSwaps = allowSwaps;
+    this._smartSwapOptions = smartSwapOptions;
     makeObservable(this);
   }
 
@@ -75,6 +85,15 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
   get allowSwaps(): boolean | undefined {
     return this._allowSwaps;
+  }
+
+  get smartSwapOptions():
+    | {
+        evmSwaps?: boolean;
+        splitRoutes?: boolean;
+      }
+    | undefined {
+    return this._smartSwapOptions;
   }
 
   get swapPriceImpact(): RatePretty | undefined {
@@ -726,7 +745,8 @@ export class IBCSwapAmountConfig extends AmountConfig {
       this.outChainId,
       this.outCurrency.coinMinimalDenom,
       this.swapFeeBps,
-      this.allowSwaps
+      this.allowSwaps,
+      this.smartSwapOptions
     );
   }
 }
@@ -742,7 +762,11 @@ export const useIBCSwapAmountConfig = (
   outChainId: string,
   outCurrency: AppCurrency,
   swapFeeBps: number,
-  allowSwaps?: boolean
+  allowSwaps?: boolean,
+  smartSwapOptions?: {
+    evmSwaps?: boolean;
+    splitRoutes?: boolean;
+  }
 ) => {
   const [txConfig] = useState(
     () =>
@@ -757,7 +781,8 @@ export const useIBCSwapAmountConfig = (
         outChainId,
         outCurrency,
         swapFeeBps,
-        allowSwaps
+        allowSwaps,
+        smartSwapOptions
       )
   );
   txConfig.setChain(chainId);

@@ -28,7 +28,11 @@ export const useIBCSwapConfig = (
   outChainId: string,
   outCurrency: AppCurrency,
   swapFeeBps: number,
-  allowSwaps?: boolean
+  allowSwaps?: boolean,
+  smartSwapOptions?: {
+    evmSwaps?: boolean;
+    splitRoutes?: boolean;
+  }
 ) => {
   const senderConfig = useSenderConfig(chainGetter, chainId, sender);
   const amountConfig = useIBCSwapAmountConfig(
@@ -42,7 +46,8 @@ export const useIBCSwapConfig = (
     outChainId,
     outCurrency,
     swapFeeBps,
-    allowSwaps
+    allowSwaps,
+    smartSwapOptions
   );
 
   const memoConfig = useMemoConfig(chainGetter, chainId);
