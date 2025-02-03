@@ -97,8 +97,8 @@ import {
 import {
   EthereumAccountBase,
   EthereumAccountStore,
+  UnsignedEVMTransaction,
   UnsignedEVMTransactionWithErc20Approvals,
-  // UnsignedEVMTransactionWithErc20Approvals,
 } from "@keplr-wallet/stores-eth";
 import { autorun } from "mobx";
 import { usePreviousDistinct } from "../../../hooks/use-previous";
@@ -881,6 +881,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         e.preventDefault();
 
         if (!interactionBlocked) {
+          let hasApprovalTxWhenBridge = false;
+
           try {
             if (sendType === "bridge") {
               let tx: MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals;
@@ -1238,10 +1240,6 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                             outCurrency.coinMinimalDenom,
                           out_currency_denom: outCurrency.coinDenom,
                         });
-
-                        navigate("/", {
-                          replace: true,
-                        });
                       },
                       onFulfill: (tx: any) => {
                         if (tx.code != null && tx.code !== 0) {
@@ -1268,325 +1266,356 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                     }
                   );
                 } else {
-                  // const ethereumAccount = ethereumAccountStore.getAccount(
-                  //   ibcSwapConfigs.amountConfig.chainId
-                  // );
-                  // const sender = ibcSwapConfigs.senderConfig.sender;
-                  // const isErc20InCurrency =
-                  //   ("type" in inCurrency && inCurrency.type === "erc20") ||
-                  //   inCurrency.coinMinimalDenom.startsWith("erc20:");
-                  // const erc20Approval = tx.requiredErc20Approvals?.[0];
-                  // const erc20ApprovalTx =
-                  //   erc20Approval && isErc20InCurrency
-                  //     ? ethereumAccount.makeErc20ApprovalTx(
-                  //         {
-                  //           ...inCurrency,
-                  //           type: "erc20",
-                  //           contractAddress:
-                  //             inCurrency.coinMinimalDenom.replace("erc20:", ""),
-                  //         },
-                  //         erc20Approval.spender,
-                  //         erc20Approval.amount
-                  //       )
-                  //     : undefined;
-                  // const { maxFeePerGas, maxPriorityFeePerGas, gasPrice } =
-                  //   ibcSwapConfigs.feeConfig.getEIP1559TxFees(
-                  //     ibcSwapConfigs.feeConfig.type
-                  //   );
-                  // const feeObject =
-                  //   maxFeePerGas && maxPriorityFeePerGas
-                  //     ? {
-                  //         type: 2,
-                  //         maxFeePerGas: `0x${BigInt(
-                  //           maxFeePerGas.truncate().toString()
-                  //         ).toString(16)}`,
-                  //         maxPriorityFeePerGas: `0x${BigInt(
-                  //           maxPriorityFeePerGas.truncate().toString()
-                  //         ).toString(16)}`,
-                  //         gasLimit: `0x${ibcSwapConfigs.gasConfig.gas.toString(
-                  //           16
-                  //         )}`,
-                  //       }
-                  //     : {
-                  //         gasPrice: `0x${BigInt(
-                  //           gasPrice.truncate().toString()
-                  //         ).toString(16)}`,
-                  //         gasLimit: `0x${ibcSwapConfigs.gasConfig.gas.toString(
-                  //           16
-                  //         )}`,
-                  //       };
-                  // ethereumAccount.setIsSendingTx(true);
-                  // await ethereumAccount.sendEthereumTx(
-                  //   sender,
-                  //   {
-                  //     ...(erc20ApprovalTx ?? tx),
-                  //     ...feeObject,
-                  //   },
-                  //   {
-                  //     onBroadcasted: (txHash) => {
-                  //       if (!erc20ApprovalTx) {
-                  //         ethereumAccount.setIsSendingTx(false);
-                  //         const msg = new RecordTxWithSkipSwapMsg(
-                  //           inChainId,
-                  //           outChainId,
-                  //           {
-                  //             chainId: outChainId,
-                  //             denom: outCurrency.coinMinimalDenom,
-                  //             expectedAmount:
-                  //               ibcSwapConfigs.amountConfig.outAmount
-                  //                 .toDec()
-                  //                 .toString(),
-                  //           },
-                  //           simpleRoute,
-                  //           sender,
-                  //           chainStore.isEvmOnlyChain(outChainId)
-                  //             ? accountStore.getAccount(outChainId)
-                  //                 .ethereumHexAddress
-                  //             : accountStore.getAccount(outChainId)
-                  //                 .bech32Address,
-                  //           [
-                  //             ...ibcSwapConfigs.amountConfig.amount.map(
-                  //               (amount) => {
-                  //                 return {
-                  //                   amount: DecUtils.getTenExponentN(
-                  //                     amount.currency.coinDecimals
-                  //                   )
-                  //                     .mul(amount.toDec())
-                  //                     .toString(),
-                  //                   denom: amount.currency.coinMinimalDenom,
-                  //                 };
-                  //               }
-                  //             ),
-                  //             {
-                  //               amount: DecUtils.getTenExponentN(
-                  //                 ibcSwapConfigs.amountConfig.outAmount.currency
-                  //                   .coinDecimals
-                  //               )
-                  //                 .mul(
-                  //                   ibcSwapConfigs.amountConfig.outAmount.toDec()
-                  //                 )
-                  //                 .toString(),
-                  //               denom:
-                  //                 ibcSwapConfigs.amountConfig.outAmount.currency
-                  //                   .coinMinimalDenom,
-                  //             },
-                  //           ],
-                  //           {
-                  //             currencies:
-                  //               chainStore.getChain(outChainId).currencies,
-                  //           },
-                  //           routeDurationSeconds ?? 0,
-                  //           txHash
-                  //         );
-                  //         new InExtensionMessageRequester().sendMessage(
-                  //           BACKGROUND_PORT,
-                  //           msg
-                  //         );
-                  //         navigate("/", {
-                  //           replace: true,
-                  //         });
-                  //       }
-                  //     },
-                  //     onFulfill: (txReceipt) => {
-                  //       const queryBalances = queriesStore.get(
-                  //         ibcSwapConfigs.amountConfig.chainId
-                  //       ).queryBalances;
-                  //       queryBalances
-                  //         .getQueryEthereumHexAddress(sender)
-                  //         .balances.forEach((balance) => {
-                  //           if (
-                  //             balance.currency.coinMinimalDenom ===
-                  //               ibcSwapConfigs.amountConfig.currency
-                  //                 .coinMinimalDenom ||
-                  //             ibcSwapConfigs.feeConfig.fees.some(
-                  //               (fee) =>
-                  //                 fee.currency.coinMinimalDenom ===
-                  //                 balance.currency.coinMinimalDenom
-                  //             )
-                  //           ) {
-                  //             balance.fetch();
-                  //           }
-                  //         });
-                  //       if (txReceipt.status === EthTxStatus.Success) {
-                  //         notification.show(
-                  //           "success",
-                  //           intl.formatMessage({
-                  //             id: "notification.transaction-success",
-                  //           }),
-                  //           ""
-                  //         );
-                  //         if (erc20ApprovalTx) {
-                  //           delete (
-                  //             tx as UnsignedEVMTransactionWithErc20Approvals
-                  //           ).requiredErc20Approvals;
-                  //           ethereumAccount.setIsSendingTx(true);
-                  //           ethereumAccount
-                  //             .simulateGas(sender, tx as UnsignedEVMTransaction)
-                  //             .then(({ gasUsed }) => {
-                  //               const {
-                  //                 maxFeePerGas,
-                  //                 maxPriorityFeePerGas,
-                  //                 gasPrice,
-                  //               } = ibcSwapConfigs.feeConfig.getEIP1559TxFees(
-                  //                 ibcSwapConfigs.feeConfig.type
-                  //               );
-                  //               const feeObject =
-                  //                 maxFeePerGas && maxPriorityFeePerGas
-                  //                   ? {
-                  //                       type: 2,
-                  //                       maxFeePerGas: `0x${BigInt(
-                  //                         maxFeePerGas.truncate().toString()
-                  //                       ).toString(16)}`,
-                  //                       maxPriorityFeePerGas: `0x${BigInt(
-                  //                         maxPriorityFeePerGas
-                  //                           .truncate()
-                  //                           .toString()
-                  //                       ).toString(16)}`,
-                  //                       gasLimit: `0x${gasUsed.toString(16)}`,
-                  //                     }
-                  //                   : {
-                  //                       gasPrice: `0x${BigInt(
-                  //                         gasPrice.truncate().toString()
-                  //                       ).toString(16)}`,
-                  //                       gasLimit: `0x${gasUsed.toString(16)}`,
-                  //                     };
-                  //               ethereumAccount.sendEthereumTx(
-                  //                 sender,
-                  //                 {
-                  //                   ...(tx as UnsignedEVMTransactionWithErc20Approvals),
-                  //                   ...feeObject,
-                  //                 },
-                  //                 {
-                  //                   onBroadcasted: (txHash) => {
-                  //                     ethereumAccount.setIsSendingTx(false);
-                  //                     const msg = new RecordTxWithSkipSwapMsg(
-                  //                       inChainId,
-                  //                       outChainId,
-                  //                       {
-                  //                         chainId: outChainId,
-                  //                         denom: outCurrency.coinMinimalDenom,
-                  //                         expectedAmount:
-                  //                           ibcSwapConfigs.amountConfig.outAmount
-                  //                             .toDec()
-                  //                             .toString(),
-                  //                       },
-                  //                       simpleRoute,
-                  //                       sender,
-                  //                       chainStore.isEvmOnlyChain(outChainId)
-                  //                         ? accountStore.getAccount(outChainId)
-                  //                             .ethereumHexAddress
-                  //                         : accountStore.getAccount(outChainId)
-                  //                             .bech32Address,
-                  //                       [
-                  //                         ...ibcSwapConfigs.amountConfig.amount.map(
-                  //                           (amount) => {
-                  //                             return {
-                  //                               amount:
-                  //                                 DecUtils.getTenExponentN(
-                  //                                   amount.currency.coinDecimals
-                  //                                 )
-                  //                                   .mul(amount.toDec())
-                  //                                   .toString(),
-                  //                               denom:
-                  //                                 amount.currency
-                  //                                   .coinMinimalDenom,
-                  //                             };
-                  //                           }
-                  //                         ),
-                  //                         {
-                  //                           amount: DecUtils.getTenExponentN(
-                  //                             ibcSwapConfigs.amountConfig
-                  //                               .outAmount.currency.coinDecimals
-                  //                           )
-                  //                             .mul(
-                  //                               ibcSwapConfigs.amountConfig.outAmount.toDec()
-                  //                             )
-                  //                             .toString(),
-                  //                           denom:
-                  //                             ibcSwapConfigs.amountConfig
-                  //                               .outAmount.currency
-                  //                               .coinMinimalDenom,
-                  //                         },
-                  //                       ],
-                  //                       {
-                  //                         currencies:
-                  //                           chainStore.getChain(outChainId)
-                  //                             .currencies,
-                  //                       },
-                  //                       routeDurationSeconds ?? 0,
-                  //                       txHash
-                  //                     );
-                  //                     new InExtensionMessageRequester().sendMessage(
-                  //                       BACKGROUND_PORT,
-                  //                       msg
-                  //                     );
-                  //                     navigate("/", {
-                  //                       replace: true,
-                  //                     });
-                  //                   },
-                  //                   onFulfill: (txReceipt) => {
-                  //                     const queryBalances = queriesStore.get(
-                  //                       ibcSwapConfigs.amountConfig.chainId
-                  //                     ).queryBalances;
-                  //                     queryBalances
-                  //                       .getQueryEthereumHexAddress(sender)
-                  //                       .balances.forEach((balance) => {
-                  //                         if (
-                  //                           balance.currency
-                  //                             .coinMinimalDenom ===
-                  //                             ibcSwapConfigs.amountConfig
-                  //                               .currency.coinMinimalDenom ||
-                  //                           ibcSwapConfigs.feeConfig.fees.some(
-                  //                             (fee) =>
-                  //                               fee.currency
-                  //                                 .coinMinimalDenom ===
-                  //                               balance.currency
-                  //                                 .coinMinimalDenom
-                  //                           )
-                  //                         ) {
-                  //                           balance.fetch();
-                  //                         }
-                  //                       });
-                  //                     if (
-                  //                       txReceipt.status === EthTxStatus.Success
-                  //                     ) {
-                  //                       notification.show(
-                  //                         "success",
-                  //                         intl.formatMessage({
-                  //                           id: "notification.transaction-success",
-                  //                         }),
-                  //                         ""
-                  //                       );
-                  //                     } else {
-                  //                       notification.show(
-                  //                         "failed",
-                  //                         intl.formatMessage({
-                  //                           id: "error.transaction-failed",
-                  //                         }),
-                  //                         ""
-                  //                       );
-                  //                     }
-                  //                   },
-                  //                 }
-                  //               );
-                  //             })
-                  //             .catch((e) => {
-                  //               console.log(e);
-                  //               ethereumAccount.setIsSendingTx(false);
-                  //             });
-                  //         }
-                  //       } else {
-                  //         notification.show(
-                  //           "failed",
-                  //           intl.formatMessage({
-                  //             id: "error.transaction-failed",
-                  //           }),
-                  //           ""
-                  //         );
-                  //       }
-                  //     },
-                  //   }
-                  // );
+                  const ethereumAccount = ethereumAccountStore.getAccount(
+                    ibcSwapConfigsForBridge.amountConfig.chainId
+                  );
+                  const sender = ibcSwapConfigsForBridge.senderConfig.sender;
+
+                  const inCurrency =
+                    ibcSwapConfigsForBridge.amountConfig.currency;
+                  const inChainId =
+                    ibcSwapConfigsForBridge.amountConfig.chainId;
+                  const outChainId =
+                    ibcSwapConfigsForBridge.amountConfig.outChainId;
+                  const outCurrency =
+                    ibcSwapConfigsForBridge.amountConfig.outCurrency;
+
+                  const isErc20InCurrency =
+                    ("type" in inCurrency && inCurrency.type === "erc20") ||
+                    inCurrency.coinMinimalDenom.startsWith("erc20:");
+                  const erc20Approval = tx.requiredErc20Approvals?.[0];
+                  const erc20ApprovalTx =
+                    erc20Approval && isErc20InCurrency
+                      ? ethereumAccount.makeErc20ApprovalTx(
+                          {
+                            ...inCurrency,
+                            type: "erc20",
+                            contractAddress:
+                              inCurrency.coinMinimalDenom.replace("erc20:", ""),
+                          },
+                          erc20Approval.spender,
+                          erc20Approval.amount
+                        )
+                      : undefined;
+
+                  const { maxFeePerGas, maxPriorityFeePerGas, gasPrice } =
+                    ibcSwapConfigsForBridge.feeConfig.getEIP1559TxFees(
+                      ibcSwapConfigsForBridge.feeConfig.type
+                    );
+
+                  const feeObject =
+                    maxFeePerGas && maxPriorityFeePerGas
+                      ? {
+                          type: 2,
+                          maxFeePerGas: `0x${BigInt(
+                            maxFeePerGas.truncate().toString()
+                          ).toString(16)}`,
+                          maxPriorityFeePerGas: `0x${BigInt(
+                            maxPriorityFeePerGas.truncate().toString()
+                          ).toString(16)}`,
+                          gasLimit: `0x${ibcSwapConfigsForBridge.gasConfig.gas.toString(
+                            16
+                          )}`,
+                        }
+                      : {
+                          gasPrice: `0x${BigInt(
+                            gasPrice.truncate().toString()
+                          ).toString(16)}`,
+                          gasLimit: `0x${ibcSwapConfigsForBridge.gasConfig.gas.toString(
+                            16
+                          )}`,
+                        };
+                  ethereumAccount.setIsSendingTx(true);
+
+                  if (erc20ApprovalTx) {
+                    hasApprovalTxWhenBridge = true;
+                  }
+
+                  await ethereumAccount.sendEthereumTx(
+                    sender,
+                    {
+                      ...(erc20ApprovalTx ?? tx),
+                      ...feeObject,
+                    },
+                    {
+                      onBroadcasted: (txHash) => {
+                        if (!erc20ApprovalTx) {
+                          ethereumAccount.setIsSendingTx(false);
+                          const msg = new RecordTxWithSkipSwapMsg(
+                            inChainId,
+                            outChainId,
+                            {
+                              chainId: outChainId,
+                              denom: outCurrency.coinMinimalDenom,
+                              expectedAmount:
+                                ibcSwapConfigsForBridge.amountConfig.outAmount
+                                  .toDec()
+                                  .toString(),
+                            },
+                            simpleRoute,
+                            sender,
+                            chainStore.isEvmOnlyChain(outChainId)
+                              ? accountStore.getAccount(outChainId)
+                                  .ethereumHexAddress
+                              : accountStore.getAccount(outChainId)
+                                  .bech32Address,
+                            [
+                              ...ibcSwapConfigsForBridge.amountConfig.amount.map(
+                                (amount) => {
+                                  return {
+                                    amount: DecUtils.getTenExponentN(
+                                      amount.currency.coinDecimals
+                                    )
+                                      .mul(amount.toDec())
+                                      .toString(),
+                                    denom: amount.currency.coinMinimalDenom,
+                                  };
+                                }
+                              ),
+                              {
+                                amount: DecUtils.getTenExponentN(
+                                  ibcSwapConfigsForBridge.amountConfig.outAmount
+                                    .currency.coinDecimals
+                                )
+                                  .mul(
+                                    ibcSwapConfigsForBridge.amountConfig.outAmount.toDec()
+                                  )
+                                  .toString(),
+                                denom:
+                                  ibcSwapConfigsForBridge.amountConfig.outAmount
+                                    .currency.coinMinimalDenom,
+                              },
+                            ],
+                            {
+                              currencies:
+                                chainStore.getChain(outChainId).currencies,
+                            },
+                            routeDurationSeconds ?? 0,
+                            txHash
+                          );
+                          new InExtensionMessageRequester().sendMessage(
+                            BACKGROUND_PORT,
+                            msg
+                          );
+
+                          if (!isDetachedMode) {
+                            navigate("/", {
+                              replace: true,
+                            });
+                          } else {
+                            window.close();
+                          }
+                        }
+                      },
+                      onFulfill: (txReceipt) => {
+                        const queryBalances = queriesStore.get(
+                          ibcSwapConfigsForBridge.amountConfig.chainId
+                        ).queryBalances;
+                        queryBalances
+                          .getQueryEthereumHexAddress(sender)
+                          .balances.forEach((balance) => {
+                            if (
+                              balance.currency.coinMinimalDenom ===
+                                ibcSwapConfigsForBridge.amountConfig.currency
+                                  .coinMinimalDenom ||
+                              ibcSwapConfigsForBridge.feeConfig.fees.some(
+                                (fee) =>
+                                  fee.currency.coinMinimalDenom ===
+                                  balance.currency.coinMinimalDenom
+                              )
+                            ) {
+                              balance.fetch();
+                            }
+                          });
+                        if (txReceipt.status === EthTxStatus.Success) {
+                          notification.show(
+                            "success",
+                            intl.formatMessage({
+                              id: "notification.transaction-success",
+                            }),
+                            ""
+                          );
+                          if (erc20ApprovalTx) {
+                            delete (
+                              tx as UnsignedEVMTransactionWithErc20Approvals
+                            ).requiredErc20Approvals;
+                            ethereumAccount.setIsSendingTx(true);
+                            ethereumAccount
+                              .simulateGas(sender, tx as UnsignedEVMTransaction)
+                              .then(({ gasUsed }) => {
+                                const {
+                                  maxFeePerGas,
+                                  maxPriorityFeePerGas,
+                                  gasPrice,
+                                } =
+                                  ibcSwapConfigsForBridge.feeConfig.getEIP1559TxFees(
+                                    ibcSwapConfigsForBridge.feeConfig.type
+                                  );
+                                const feeObject =
+                                  maxFeePerGas && maxPriorityFeePerGas
+                                    ? {
+                                        type: 2,
+                                        maxFeePerGas: `0x${BigInt(
+                                          maxFeePerGas.truncate().toString()
+                                        ).toString(16)}`,
+                                        maxPriorityFeePerGas: `0x${BigInt(
+                                          maxPriorityFeePerGas
+                                            .truncate()
+                                            .toString()
+                                        ).toString(16)}`,
+                                        gasLimit: `0x${gasUsed.toString(16)}`,
+                                      }
+                                    : {
+                                        gasPrice: `0x${BigInt(
+                                          gasPrice.truncate().toString()
+                                        ).toString(16)}`,
+                                        gasLimit: `0x${gasUsed.toString(16)}`,
+                                      };
+                                ethereumAccount.sendEthereumTx(
+                                  sender,
+                                  {
+                                    ...(tx as UnsignedEVMTransactionWithErc20Approvals),
+                                    ...feeObject,
+                                  },
+                                  {
+                                    onBroadcasted: (txHash) => {
+                                      ethereumAccount.setIsSendingTx(false);
+                                      const msg = new RecordTxWithSkipSwapMsg(
+                                        inChainId,
+                                        outChainId,
+                                        {
+                                          chainId: outChainId,
+                                          denom: outCurrency.coinMinimalDenom,
+                                          expectedAmount:
+                                            ibcSwapConfigsForBridge.amountConfig.outAmount
+                                              .toDec()
+                                              .toString(),
+                                        },
+                                        simpleRoute,
+                                        sender,
+                                        chainStore.isEvmOnlyChain(outChainId)
+                                          ? accountStore.getAccount(outChainId)
+                                              .ethereumHexAddress
+                                          : accountStore.getAccount(outChainId)
+                                              .bech32Address,
+                                        [
+                                          ...ibcSwapConfigsForBridge.amountConfig.amount.map(
+                                            (amount) => {
+                                              return {
+                                                amount:
+                                                  DecUtils.getTenExponentN(
+                                                    amount.currency.coinDecimals
+                                                  )
+                                                    .mul(amount.toDec())
+                                                    .toString(),
+                                                denom:
+                                                  amount.currency
+                                                    .coinMinimalDenom,
+                                              };
+                                            }
+                                          ),
+                                          {
+                                            amount: DecUtils.getTenExponentN(
+                                              ibcSwapConfigsForBridge
+                                                .amountConfig.outAmount.currency
+                                                .coinDecimals
+                                            )
+                                              .mul(
+                                                ibcSwapConfigsForBridge.amountConfig.outAmount.toDec()
+                                              )
+                                              .toString(),
+                                            denom:
+                                              ibcSwapConfigsForBridge
+                                                .amountConfig.outAmount.currency
+                                                .coinMinimalDenom,
+                                          },
+                                        ],
+                                        {
+                                          currencies:
+                                            chainStore.getChain(outChainId)
+                                              .currencies,
+                                        },
+                                        routeDurationSeconds ?? 0,
+                                        txHash
+                                      );
+                                      new InExtensionMessageRequester().sendMessage(
+                                        BACKGROUND_PORT,
+                                        msg
+                                      );
+
+                                      if (!isDetachedMode) {
+                                        navigate("/", {
+                                          replace: true,
+                                        });
+                                      } else {
+                                        window.close();
+                                      }
+                                    },
+                                    onFulfill: (txReceipt) => {
+                                      const queryBalances = queriesStore.get(
+                                        ibcSwapConfigsForBridge.amountConfig
+                                          .chainId
+                                      ).queryBalances;
+                                      queryBalances
+                                        .getQueryEthereumHexAddress(sender)
+                                        .balances.forEach((balance) => {
+                                          if (
+                                            balance.currency
+                                              .coinMinimalDenom ===
+                                              ibcSwapConfigsForBridge
+                                                .amountConfig.currency
+                                                .coinMinimalDenom ||
+                                            ibcSwapConfigsForBridge.feeConfig.fees.some(
+                                              (fee) =>
+                                                fee.currency
+                                                  .coinMinimalDenom ===
+                                                balance.currency
+                                                  .coinMinimalDenom
+                                            )
+                                          ) {
+                                            balance.fetch();
+                                          }
+                                        });
+                                      if (
+                                        txReceipt.status === EthTxStatus.Success
+                                      ) {
+                                        notification.show(
+                                          "success",
+                                          intl.formatMessage({
+                                            id: "notification.transaction-success",
+                                          }),
+                                          ""
+                                        );
+                                      } else {
+                                        notification.show(
+                                          "failed",
+                                          intl.formatMessage({
+                                            id: "error.transaction-failed",
+                                          }),
+                                          ""
+                                        );
+                                      }
+                                    },
+                                  }
+                                );
+                              })
+                              .catch((e) => {
+                                console.log(e);
+                                ethereumAccount.setIsSendingTx(false);
+                              });
+                          }
+                        } else {
+                          notification.show(
+                            "failed",
+                            intl.formatMessage({
+                              id: "error.transaction-failed",
+                            }),
+                            ""
+                          );
+                        }
+                      },
+                    }
+                  );
                 }
               } catch (e) {
                 if (e?.message === "Request rejected") {
@@ -1599,9 +1628,13 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                   intl.formatMessage({ id: "error.transaction-failed" }),
                   ""
                 );
-                navigate("/", {
-                  replace: true,
-                });
+                if (!isDetachedMode) {
+                  navigate("/", {
+                    replace: true,
+                  });
+                } else {
+                  window.close();
+                }
               } finally {
                 // setIsTxLoading(false);
               }
@@ -1912,6 +1945,12 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                   },
                 }
               );
+            }
+
+            //NOTE - For evmTx on bridge, erc20 approve may be present, in which case evm tx processing will handle navigation,
+            // so using early return here
+            if (hasApprovalTxWhenBridge) {
+              return;
             }
 
             if (!isDetachedMode) {
