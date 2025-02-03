@@ -1,5 +1,5 @@
 ---
-title: EVM-based Chains Support
+title: EVM-based Chains
 order: 5
 ---
 

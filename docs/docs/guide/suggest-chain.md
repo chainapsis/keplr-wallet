@@ -1,13 +1,6 @@
----
-title: Suggest Chain
-order: 4
----
+# Suggest Chain
 
-### Suggest Chain
-
-*Warning: This is an experimental feature.*
-
-Keplr's 'suggest chain' feature allows front-ends to request adding new Cosmos-SDK based blockchains that aren't natively integrated to Keplr extension.  
+This `suggestChain` feature allows front-ends to request adding new Cosmos-SDK based blockchains that aren't natively integrated to Keplr extension.  
 If the same chain is already added to Keplr, nothing will happen. If the user rejects the request, an error will be thrown.
 
 This allows all Cosmos-SDK blockchains to have permissionless, instant wallet and transaction signing support for front-ends.

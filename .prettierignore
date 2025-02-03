@@ -5,6 +5,7 @@
 **/*.woff2
 **/*.secret
 **/*.md
+**/*.mdx
 **/*.webm
 .DS_Store
 

@@ -87,6 +87,7 @@ import {
   EthereumAccountStore,
 } from "@keplr-wallet/stores-eth";
 import { autorun } from "mobx";
+import { usePreviousDistinct } from "../../../hooks/use-previous";
 
 const Styles = {
   Flex1: styled.div`
@@ -636,6 +637,14 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       setSendType("ibc-transfer");
     }
   });
+
+  const isIBCTransferPrevious = usePreviousDistinct(sendType);
+  useEffect(() => {
+    if (isIBCTransferPrevious !== "send" && sendType === "send") {
+      // ibc transfer에서 기본 send로 변할때 recipient를 초기화한다.
+      sendConfigs.recipientConfig.setValue("");
+    }
+  }, [isIBCTransferPrevious, sendType, sendConfigs.recipientConfig]);
 
   const txConfigsValidate = useTxConfigsValidate({
     ...sendConfigs,
