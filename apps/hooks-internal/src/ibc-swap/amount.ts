@@ -158,7 +158,11 @@ export class IBCSwapAmountConfig extends AmountConfig {
   async getTx(
     slippageTolerancePercent: number,
     affiliateFeeReceiver: string | undefined,
-    priorOutAmount?: Int
+    priorOutAmount?: Int,
+    customRecipient?: {
+      chainId: string;
+      recipient: string;
+    }
   ): Promise<MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals> {
     const queryIBCSwap = this.getQueryIBCSwap();
     if (!queryIBCSwap) {
@@ -224,6 +228,11 @@ export class IBCSwapAmountConfig extends AmountConfig {
           : destinationAccount.bech32Address;
     }
 
+    if (customRecipient) {
+      chainIdsToAddresses[customRecipient.chainId.replace("eip155:", "")] =
+        customRecipient.recipient;
+    }
+
     for (const swapVenue of queryRouteResponse.data.swap_venues ?? [
       queryRouteResponse.data.swap_venue,
     ]) {
@@ -287,7 +296,8 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
     const tx = this.getTxIfReady(
       slippageTolerancePercent,
-      affiliateFeeReceiver
+      affiliateFeeReceiver,
+      customRecipient
     );
     if (!tx) {
       throw new Error("Tx is not ready");
@@ -327,7 +337,11 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
   getTxIfReady(
     slippageTolerancePercent: number,
-    affiliateFeeReceiver?: string
+    affiliateFeeReceiver?: string,
+    customRecipient?: {
+      chainId: string;
+      recipient: string;
+    }
   ): MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals | undefined {
     if (!this.currency) {
       return;
@@ -403,6 +417,11 @@ export class IBCSwapAmountConfig extends AmountConfig {
         isDestinationChainEVMOnly
           ? destinationAccount.ethereumHexAddress
           : destinationAccount.bech32Address;
+    }
+
+    if (customRecipient) {
+      chainIdsToAddresses[customRecipient.chainId.replace("eip155:", "")] =
+        customRecipient.recipient;
     }
 
     for (const swapVenue of queryRouteResponse.data.swap_venues ?? [

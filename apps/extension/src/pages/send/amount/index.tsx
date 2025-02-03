@@ -520,7 +520,11 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     chainId,
     ibcSwapConfigsForBridge,
     ethereumAccountStore,
-    currency
+    currency,
+    {
+      chainId: ibcSwapConfigsForBridge.recipientConfig.chainId,
+      recipient: ibcSwapConfigsForBridge.recipientConfig.value,
+    }
   );
   const txConfigsValidateForBridge = useTxConfigsValidate({
     ...ibcSwapConfigsForBridge,
@@ -980,7 +984,11 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                     uiConfigStore.ibcSwapConfig.slippageNum,
                     // 코스모스 스왑은 스왑베뉴가 무조건 하나라고 해서 일단 처음걸 쓰기로 한다.
                     swapFeeBpsReceiver[0],
-                    priorOutAmount
+                    priorOutAmount,
+                    {
+                      chainId: ibcSwapConfigsForBridge.recipientConfig.chainId,
+                      recipient: ibcSwapConfigsForBridge.recipientConfig.value,
+                    }
                   ),
                 ]);
                 tx = _tx;
@@ -2175,7 +2183,11 @@ function useGetGasSimulationForBridge(
     senderConfig: SenderConfig;
   },
   ethereumAccountStore: EthereumAccountStore,
-  currency: AppCurrency
+  currency: AppCurrency,
+  recipient?: {
+    chainId: string;
+    recipient: string;
+  }
 ) {
   const gasSimulator = useGasSimulator(
     new ExtensionKVStore("gas-simulator.ibc-swap.swap"),
@@ -2320,7 +2332,8 @@ function useGetGasSimulationForBridge(
         // simulation 자체는 쉽게 통과시키기 위해서 슬리피지를 50으로 설정한다.
         50,
         // 코스모스 스왑은 스왑베뉴가 무조건 하나라고 해서 일단 처음걸 쓰기로 한다.
-        swapFeeBpsReceiver[0]
+        swapFeeBpsReceiver[0],
+        recipient
       );
 
       if (!tx) {
