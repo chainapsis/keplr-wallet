@@ -588,6 +588,21 @@ export class IBCSwapAmountConfig extends AmountConfig {
     return key;
   }
 
+  //NOTE - 만약 route로 부터 swap을 사용하는 경우가 있으면 에러를 발생시킨다.
+  _isUseSwapInBridge(routeResponse: RouteResponse | undefined) {
+    if (this.allowSwaps !== false || !routeResponse) {
+      return false;
+    }
+
+    const operations = routeResponse.operations;
+    const isContainsSwap = operations.some(
+      (operation) => "swap" in operation || "evm_swap" in operation
+    );
+    const isUseSwap = routeResponse.does_swap || isContainsSwap;
+
+    return isUseSwap;
+  }
+
   @override
   override get uiProperties(): UIProperties {
     const prev = super.uiProperties;
@@ -615,6 +630,14 @@ export class IBCSwapAmountConfig extends AmountConfig {
       return {
         ...prev,
         error: new Error(routeError.message),
+      };
+    }
+
+    const routeResponse = queryIBCSwap.getQueryRoute().response;
+    if (routeResponse && this._isUseSwapInBridge(routeResponse.data)) {
+      return {
+        ...prev,
+        error: new Error("Swap in bridge is not allowed"),
       };
     }
 
