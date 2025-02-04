@@ -170,7 +170,7 @@ export class KeyRingEthereumService {
                     signature.s,
                     // The metamask doesn't seem to consider the chain id in this case... (maybe bug on metamask?)
                     signature.v
-                      ? Buffer.from(signature.v.toString(16), "hex")
+                      ? Buffer.from("1c", "hex")
                       : Buffer.from("1b", "hex"),
                   ]),
                 };
