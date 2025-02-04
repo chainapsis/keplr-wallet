@@ -1985,7 +1985,7 @@ const WarningGuideBox: FunctionComponent<{
           color="warning"
           title={title || errorText}
           paragraph={title ? errorText : undefined}
-          hideInformationIcon={!!title}
+          hideInformationIcon={!title}
         />
       </VerticalCollapseTransition>
     </React.Fragment>
