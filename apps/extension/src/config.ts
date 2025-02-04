@@ -3005,6 +3005,52 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     },
     features: [],
   },
+  {
+    rpc: "https://rpc.derive.xyz/",
+    rest: "https://rpc.derive.xyz/",
+    evm: {
+      chainId: 957,
+      rpc: "https://rpc.derive.xyz/",
+      websocket: "wss://rpc.derive.xyz/",
+    },
+    chainId: "eip155:957",
+    chainName: "Derive",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "derive-ethereum",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+      },
+      {
+        type: "erc20",
+        contractAddress: "0xb1d1eae60eea9525032a6dcb4c1ce336a1de71be",
+        coinDenom: "DRV",
+        coinMinimalDenom: "erc20:0xb1d1eae60eea9525032a6dcb4c1ce336a1de71be",
+        coinDecimals: 18,
+        coinGeckoId: "derive",
+      },
+      {
+        type: "erc20",
+        contractAddress: "0x7499d654422023a407d92e1D83D387d81BC68De1",
+        coinDenom: "stDRV",
+        coinMinimalDenom: "erc20:0x7499d654422023a407d92e1D83D387d81BC68De1",
+        coinDecimals: 18,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "derive-ethereum",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+      },
+    ],
+    features: ["op-stack-l1-data-fee"],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
