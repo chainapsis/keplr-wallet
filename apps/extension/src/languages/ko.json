@@ -455,7 +455,7 @@
   "page.sign.components.messages.redelegate.paragraph": "현재 <b>{from}</b>에게 위임된 <b>{coin}</b>을 <b>{to}</b> 에게 재위임하기.",
   "page.sign.components.messages.send.title": "토큰 전송",
   "page.sign.components.messages.send.paragraph": "<b>{address}</b>가 <b>{amount}</b>를 받습니다.",
-  "page.sign.components.messages.transfer.title": "IBC 전송",
+  "page.sign.components.messages.transfer.title": "크로스 체인 전송",
   "page.sign.components.messages.transfer.paragraph": "채널 <b>{channelId}</b>를 통해 <b>{address}</b>에게 <b>{coin}</b>를 보냅니다.",
   "page.sign.components.messages.transfer.forwarding.close-button": "닫기",
   "page.sign.components.messages.transfer.forwarding.open-button": "포워딩 정보 보기",
