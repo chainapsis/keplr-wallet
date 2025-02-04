@@ -98,6 +98,7 @@ import {
 } from "@keplr-wallet/stores-eth";
 import { autorun } from "mobx";
 import { usePreviousDistinct } from "../../../hooks/use-previous";
+import { SwapFeeInfoForBridgeOnSend } from "./swap-fee-info";
 
 const Styles = {
   Flex1: styled.div`
@@ -504,8 +505,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     200000,
     destinationChainInfoOfBridge.chainId,
     destinationChainInfoOfBridge.currency,
-    //NOTE - when swap is used on send page, it use bridge so swap fee is 0
-    0,
+    //NOTE - when swap is used on send page, it use bridge so swap fee is 10
+    10,
     {
       allowHexAddressToBech32Address:
         isDestinationEvmChain &&
@@ -2140,6 +2141,12 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             gasSimulator={gasSimulatorForNotBridgeSend}
             isForEVMTx={isEvmTx}
           />
+
+          {sendType === "bridge" && (
+            <SwapFeeInfoForBridgeOnSend
+              amountConfig={ibcSwapConfigsForBridge.amountConfig}
+            />
+          )}
         </Stack>
       </Box>
 
