@@ -440,6 +440,11 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
   const [sendType, setSendType] = useState<SendType>("send");
 
+  const [isTxLoading, setIsTxLoading] = useState(false);
+  // const [calculatingTxError, setCalculatingTxError] = useState<
+  //   Error | undefined
+  // >();
+
   const [destinationChainInfoOfBridge, setDestinationChainInfoOfBridge] =
     useState({
       chainId,
@@ -871,9 +876,10 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           size: "large",
           type: "submit",
           isLoading: isEvmTx
-            ? ethereumAccount.isSendingTx
-            : accountStore.getAccount(chainId).isSendingMsg ===
-              (sendType === "ibc-transfer" ? "ibcTransfer" : "send"),
+            ? isTxLoading || ethereumAccount.isSendingTx
+            : isTxLoading ||
+              accountStore.getAccount(chainId).isSendingMsg ===
+                (sendType === "ibc-transfer" ? "ibcTransfer" : "send"),
         },
       ]}
       onSubmit={async (e) => {
@@ -884,6 +890,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
           try {
             if (sendType === "bridge") {
+              setIsTxLoading(true);
+
               let tx: MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals;
 
               const queryRoute = ibcSwapConfigsForBridge.amountConfig
@@ -994,9 +1002,12 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                 ]);
                 tx = _tx;
               } catch (e) {
-                console.log(e);
+                // setCalculatingTxError(e);
+                setIsTxLoading(false);
                 return;
               }
+
+              // setCalculatingTxError(undefined);
 
               try {
                 if ("send" in tx) {
@@ -1635,7 +1646,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                   window.close();
                 }
               } finally {
-                // setIsTxLoading(false);
+                setIsTxLoading(false);
               }
             } else if (isEvmTx) {
               ethereumAccount.setIsSendingTx(true);
@@ -2098,7 +2109,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             />
           )}
 
-          <VerticalCollapseTransition collapsed={sendType === "send"}>
+          <VerticalCollapseTransition collapsed={sendType !== "ibc-transfer"}>
             <GuideBox
               color="warning"
               title={intl.formatMessage({
