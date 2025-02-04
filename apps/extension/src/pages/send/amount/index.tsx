@@ -66,11 +66,7 @@ import { useIBCChannelConfigQueryString } from "../../../hooks/use-ibc-channel-c
 import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
 import { GuideBox } from "../../../components/guide-box";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import {
-  amountToAmbiguousAverage,
-  amountToAmbiguousString,
-  isRunningInSidePanel,
-} from "../../../utils";
+import { amountToAmbiguousAverage, isRunningInSidePanel } from "../../../utils";
 import { AppCurrency, EthTxStatus } from "@keplr-wallet/types";
 import {
   IBCSwapAmountConfig,
@@ -1049,7 +1045,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                             currencies:
                               chainStore.getChain(outChainId).currencies,
                           },
-                          false // bridge의 경우 무조건 interChainSwap이므로 무조건 false
+                          false // bridge의 경우 무조건 interChainSwap이므로 무조건 false, 정확히는 swap이 아니지만 swap 페이지에서 그렇게 적혀있어서 해당 용어로 사용
                         );
 
                         return await new InExtensionMessageRequester().sendMessage(
@@ -1062,8 +1058,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                       onBroadcasted: (txHash) => {
                         const inChainId =
                           ibcSwapConfigsForBridge.amountConfig.chainId;
-                        const inCurrency =
-                          ibcSwapConfigsForBridge.amountConfig.currency;
+
                         const outChainId =
                           ibcSwapConfigsForBridge.amountConfig.outChainId;
                         const outCurrency =
@@ -1126,123 +1121,124 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                           msg
                         );
 
-                        const params: Record<
-                          string,
-                          | number
-                          | string
-                          | boolean
-                          | number[]
-                          | string[]
-                          | undefined
-                        > = {
-                          inChainId: inChainId,
-                          inChainIdentifier:
-                            ChainIdHelper.parse(inChainId).identifier,
-                          inCurrencyMinimalDenom: inCurrency.coinMinimalDenom,
-                          inCurrencyDenom: inCurrency.coinDenom,
-                          inCurrencyCommonMinimalDenom:
-                            inCurrency.coinMinimalDenom,
-                          inCurrencyCommonDenom: inCurrency.coinDenom,
-                          outChainId: outChainId,
-                          outChainIdentifier:
-                            ChainIdHelper.parse(outChainId).identifier,
-                          outCurrencyMinimalDenom: outCurrency.coinMinimalDenom,
-                          outCurrencyDenom: outCurrency.coinDenom,
-                          outCurrencyCommonMinimalDenom:
-                            outCurrency.coinMinimalDenom,
-                          outCurrencyCommonDenom: outCurrency.coinDenom,
-                          swapType: ibcSwapConfigsForBridge.amountConfig.type,
-                        };
-                        if (
-                          "originChainId" in inCurrency &&
-                          inCurrency.originChainId
-                        ) {
-                          const originChainId = inCurrency.originChainId;
-                          params["inOriginChainId"] = originChainId;
-                          params["inOriginChainIdentifier"] =
-                            ChainIdHelper.parse(originChainId).identifier;
+                        //NOTE - GA에서 어떤 제목으로 기록할지가 먼저 필요함 그 이후 해당 로직 주석 제가 필요
+                        // const params: Record<
+                        //   string,
+                        //   | number
+                        //   | string
+                        //   | boolean
+                        //   | number[]
+                        //   | string[]
+                        //   | undefined
+                        // > = {
+                        //   inChainId: inChainId,
+                        //   inChainIdentifier:
+                        //     ChainIdHelper.parse(inChainId).identifier,
+                        //   inCurrencyMinimalDenom: inCurrency.coinMinimalDenom,
+                        //   inCurrencyDenom: inCurrency.coinDenom,
+                        //   inCurrencyCommonMinimalDenom:
+                        //     inCurrency.coinMinimalDenom,
+                        //   inCurrencyCommonDenom: inCurrency.coinDenom,
+                        //   outChainId: outChainId,
+                        //   outChainIdentifier:
+                        //     ChainIdHelper.parse(outChainId).identifier,
+                        //   outCurrencyMinimalDenom: outCurrency.coinMinimalDenom,
+                        //   outCurrencyDenom: outCurrency.coinDenom,
+                        //   outCurrencyCommonMinimalDenom:
+                        //     outCurrency.coinMinimalDenom,
+                        //   outCurrencyCommonDenom: outCurrency.coinDenom,
+                        //   swapType: ibcSwapConfigsForBridge.amountConfig.type,
+                        // };
+                        // if (
+                        //   "originChainId" in inCurrency &&
+                        //   inCurrency.originChainId
+                        // ) {
+                        //   const originChainId = inCurrency.originChainId;
+                        //   params["inOriginChainId"] = originChainId;
+                        //   params["inOriginChainIdentifier"] =
+                        //     ChainIdHelper.parse(originChainId).identifier;
 
-                          params["inToDifferentChain"] = true;
-                        }
-                        if (
-                          "originCurrency" in inCurrency &&
-                          inCurrency.originCurrency
-                        ) {
-                          params["inCurrencyCommonMinimalDenom"] =
-                            inCurrency.originCurrency.coinMinimalDenom;
-                          params["inCurrencyCommonDenom"] =
-                            inCurrency.originCurrency.coinDenom;
-                        }
-                        if (
-                          "originChainId" in outCurrency &&
-                          outCurrency.originChainId
-                        ) {
-                          const originChainId = outCurrency.originChainId;
-                          params["outOriginChainId"] = originChainId;
-                          params["outOriginChainIdentifier"] =
-                            ChainIdHelper.parse(originChainId).identifier;
+                        //   params["inToDifferentChain"] = true;
+                        // }
+                        // if (
+                        //   "originCurrency" in inCurrency &&
+                        //   inCurrency.originCurrency
+                        // ) {
+                        //   params["inCurrencyCommonMinimalDenom"] =
+                        //     inCurrency.originCurrency.coinMinimalDenom;
+                        //   params["inCurrencyCommonDenom"] =
+                        //     inCurrency.originCurrency.coinDenom;
+                        // }
+                        // if (
+                        //   "originChainId" in outCurrency &&
+                        //   outCurrency.originChainId
+                        // ) {
+                        //   const originChainId = outCurrency.originChainId;
+                        //   params["outOriginChainId"] = originChainId;
+                        //   params["outOriginChainIdentifier"] =
+                        //     ChainIdHelper.parse(originChainId).identifier;
 
-                          params["outToDifferentChain"] = true;
-                        }
-                        if (
-                          "originCurrency" in outCurrency &&
-                          outCurrency.originCurrency
-                        ) {
-                          params["outCurrencyCommonMinimalDenom"] =
-                            outCurrency.originCurrency.coinMinimalDenom;
-                          params["outCurrencyCommonDenom"] =
-                            outCurrency.originCurrency.coinDenom;
-                        }
-                        params["inRange"] = amountToAmbiguousString(
-                          ibcSwapConfigsForBridge.amountConfig.amount[0]
-                        );
-                        params["outRange"] = amountToAmbiguousString(
-                          ibcSwapConfigsForBridge.amountConfig.outAmount
-                        );
+                        //   params["outToDifferentChain"] = true;
+                        // }
+                        // if (
+                        //   "originCurrency" in outCurrency &&
+                        //   outCurrency.originCurrency
+                        // ) {
+                        //   params["outCurrencyCommonMinimalDenom"] =
+                        //     outCurrency.originCurrency.coinMinimalDenom;
+                        //   params["outCurrencyCommonDenom"] =
+                        //     outCurrency.originCurrency.coinDenom;
+                        // }
+                        // params["inRange"] = amountToAmbiguousString(
+                        //   ibcSwapConfigsForBridge.amountConfig.amount[0]
+                        // );
+                        // params["outRange"] = amountToAmbiguousString(
+                        //   ibcSwapConfigsForBridge.amountConfig.outAmount
+                        // );
 
-                        // UI 상에서 in currency의 가격은 in input에서 표시되고
-                        // out currency의 가격은 swap fee에서 표시된다.
-                        // price store에서 usd는 무조건 쿼리하므로 in, out currency의 usd는 보장된다.
-                        const inCurrencyPrice = priceStore.calculatePrice(
-                          ibcSwapConfigsForBridge.amountConfig.amount[0],
-                          "usd"
-                        );
-                        if (inCurrencyPrice) {
-                          params["inFiatRange"] =
-                            amountToAmbiguousString(inCurrencyPrice);
-                          params["inFiatAvg"] =
-                            amountToAmbiguousAverage(inCurrencyPrice);
-                        }
-                        const outCurrencyPrice = priceStore.calculatePrice(
-                          ibcSwapConfigsForBridge.amountConfig.outAmount,
-                          "usd"
-                        );
-                        if (outCurrencyPrice) {
-                          params["outFiatRange"] =
-                            amountToAmbiguousString(outCurrencyPrice);
-                          params["outFiatAvg"] =
-                            amountToAmbiguousAverage(outCurrencyPrice);
-                        }
+                        // // UI 상에서 in currency의 가격은 in input에서 표시되고
+                        // // out currency의 가격은 swap fee에서 표시된다.
+                        // // price store에서 usd는 무조건 쿼리하므로 in, out currency의 usd는 보장된다.
+                        // const inCurrencyPrice = priceStore.calculatePrice(
+                        //   ibcSwapConfigsForBridge.amountConfig.amount[0],
+                        //   "usd"
+                        // );
+                        // if (inCurrencyPrice) {
+                        //   params["inFiatRange"] =
+                        //     amountToAmbiguousString(inCurrencyPrice);
+                        //   params["inFiatAvg"] =
+                        //     amountToAmbiguousAverage(inCurrencyPrice);
+                        // }
+                        // const outCurrencyPrice = priceStore.calculatePrice(
+                        //   ibcSwapConfigsForBridge.amountConfig.outAmount,
+                        //   "usd"
+                        // );
+                        // if (outCurrencyPrice) {
+                        //   params["outFiatRange"] =
+                        //     amountToAmbiguousString(outCurrencyPrice);
+                        //   params["outFiatAvg"] =
+                        //     amountToAmbiguousAverage(outCurrencyPrice);
+                        // }
 
-                        new InExtensionMessageRequester().sendMessage(
-                          BACKGROUND_PORT,
-                          new LogAnalyticsEventMsg("ibc_swap", params)
-                        );
+                        // new InExtensionMessageRequester().sendMessage(
+                        //   BACKGROUND_PORT,
+                        //   new LogAnalyticsEventMsg("ibc_swap", params)
+                        // );
 
-                        analyticsStore.logEvent("swap_occurred", {
-                          in_chain_id: inChainId,
-                          in_chain_identifier:
-                            ChainIdHelper.parse(inChainId).identifier,
-                          in_currency_minimal_denom:
-                            inCurrency.coinMinimalDenom,
-                          in_currency_denom: inCurrency.coinDenom,
-                          out_chain_id: outChainId,
-                          out_chain_identifier:
-                            ChainIdHelper.parse(outChainId).identifier,
-                          out_currency_minimal_denom:
-                            outCurrency.coinMinimalDenom,
-                          out_currency_denom: outCurrency.coinDenom,
-                        });
+                        // analyticsStore.logEvent("swap_occurred", {
+                        //   in_chain_id: inChainId,
+                        //   in_chain_identifier:
+                        //     ChainIdHelper.parse(inChainId).identifier,
+                        //   in_currency_minimal_denom:
+                        //     inCurrency.coinMinimalDenom,
+                        //   in_currency_denom: inCurrency.coinDenom,
+                        //   out_chain_id: outChainId,
+                        //   out_chain_identifier:
+                        //     ChainIdHelper.parse(outChainId).identifier,
+                        //   out_currency_minimal_denom:
+                        //     outCurrency.coinMinimalDenom,
+                        //   out_currency_denom: outCurrency.coinDenom,
+                        // });
                       },
                       onFulfill: (tx: any) => {
                         if (tx.code != null && tx.code !== 0) {
