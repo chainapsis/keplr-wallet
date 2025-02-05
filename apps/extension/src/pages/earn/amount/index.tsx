@@ -72,11 +72,17 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
         setIsEarnOutputModalOpen(true);
       }}
     >
-      <Box paddingX="0.75rem">
+      <Box paddingX="1.5rem" paddingTop="2.5rem">
         <ApyTag chainId={chainId} />
 
         <Gutter size="0.75rem" />
-        <H1>
+        <H1
+          style={{
+            fontWeight: 700,
+            fontSize: "1.875rem",
+            lineHeight: "2.25rem",
+          }}
+        >
           {intl.formatMessage({
             id: "page.earn.amount.input-label",
           })}
@@ -110,49 +116,53 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
         )}
 
         <Gutter size="1rem" />
-        <XAxis>
-          <Subtitle3 color={ColorPalette.white}>
-            {balanceQuery?.balance.hideDenom(true).toString() || "0"}
-          </Subtitle3>
-          <Gutter size="0.25rem" />
-          <Subtitle3 color={ColorPalette["gray-300"]}>
-            {intl.formatMessage(
-              { id: "page.earn.amount.balance.current-chain" },
-              { chain: chainInfo.chainName }
-            )}
-          </Subtitle3>
-        </XAxis>
+        <Box paddingY="0.25rem">
+          <XAxis>
+            <Subtitle3 color={ColorPalette.white}>
+              {balanceQuery?.balance.hideDenom(true).toString() || "0"}
+            </Subtitle3>
+            <Gutter size="0.25rem" />
+            <Subtitle3 color={ColorPalette["gray-300"]}>
+              {intl.formatMessage(
+                { id: "page.earn.amount.balance.current-chain" },
+                { chain: chainInfo.chainName }
+              )}
+            </Subtitle3>
+          </XAxis>
+        </Box>
 
         <Gutter size="0.25rem" />
-        <XAxis>
-          <Subtitle3
-            color={ColorPalette["gray-300"]}
-            style={{
-              fontStyle: "italic",
-            }}
-          >
-            {intl.formatMessage(
-              { id: "page.earn.amount.balance.transfer.label" },
-              { tokenName: currency?.coinDenom }
-            )}
-          </Subtitle3>
-          <Gutter size="0.375rem" />
-          <Subtitle3
-            onClick={() => {
-              // TO-DO: select asset page로 이동. params 필요
-            }}
-            style={{
-              textDecoration: "underline",
-              cursor: "pointer",
-              userSelect: "none",
-            }}
-            color={ColorPalette["blue-300"]}
-          >
-            {intl.formatMessage({
-              id: "page.earn.amount.balance.transfer.button",
-            })}
-          </Subtitle3>
-        </XAxis>
+        <Box paddingY="0.25rem">
+          <XAxis>
+            <Subtitle3
+              color={ColorPalette["gray-300"]}
+              style={{
+                fontStyle: "italic",
+              }}
+            >
+              {intl.formatMessage(
+                { id: "page.earn.amount.balance.transfer.label" },
+                { tokenName: currency?.coinDenom }
+              )}
+            </Subtitle3>
+            <Gutter size="0.375rem" />
+            <Subtitle3
+              onClick={() => {
+                // TO-DO: select asset page로 이동. params 필요
+              }}
+              style={{
+                textDecoration: "underline",
+                cursor: "pointer",
+                userSelect: "none",
+              }}
+              color={ColorPalette["blue-300"]}
+            >
+              {intl.formatMessage({
+                id: "page.earn.amount.balance.transfer.button",
+              })}
+            </Subtitle3>
+          </XAxis>
+        </Box>
       </Box>
 
       <Modal
@@ -179,7 +189,7 @@ const StyledTextInput = styled.input<{ warning?: boolean }>`
 
   background: none;
   margin: 0;
-  padding: 0;
+  padding: 0.25rem;
   padding-bottom: 0.75rem;
 
   border: 0;
