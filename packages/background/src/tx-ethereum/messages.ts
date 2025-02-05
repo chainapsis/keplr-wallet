@@ -89,10 +89,6 @@ export class SendTxEthereumMsgAndRecordMsg extends Message<string> {
     if (!this.amount) {
       throw new Error("amount is empty");
     }
-
-    if (!this.memo) {
-      throw new Error("memo is empty");
-    }
   }
 
   override approveExternal(): boolean {

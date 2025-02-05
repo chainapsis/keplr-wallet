@@ -30,6 +30,13 @@ export class IBCSwapAmountConfig extends AmountConfig {
   protected _outCurrency: AppCurrency;
   @observable
   protected _swapFeeBps: number;
+  @observable
+  protected _allowSwaps?: boolean;
+  @observable
+  protected _smartSwapOptions?: {
+    evmSwaps?: boolean;
+    splitRoutes?: boolean;
+  };
 
   constructor(
     chainGetter: ChainGetter,
@@ -43,14 +50,20 @@ export class IBCSwapAmountConfig extends AmountConfig {
     senderConfig: ISenderConfig,
     initialOutChainId: string,
     initialOutCurrency: AppCurrency,
-    swapFeeBps: number
+    swapFeeBps: number,
+    allowSwaps?: boolean,
+    smartSwapOptions?: {
+      evmSwaps?: boolean;
+      splitRoutes?: boolean;
+    }
   ) {
     super(chainGetter, queriesStore, initialChainId, senderConfig);
 
     this._outChainId = initialOutChainId;
     this._outCurrency = initialOutCurrency;
     this._swapFeeBps = swapFeeBps;
-
+    this._allowSwaps = allowSwaps;
+    this._smartSwapOptions = smartSwapOptions;
     makeObservable(this);
   }
 
@@ -68,6 +81,19 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
   get outCurrency(): AppCurrency {
     return this._outCurrency;
+  }
+
+  get allowSwaps(): boolean | undefined {
+    return this._allowSwaps;
+  }
+
+  get smartSwapOptions():
+    | {
+        evmSwaps?: boolean;
+        splitRoutes?: boolean;
+      }
+    | undefined {
+    return this._smartSwapOptions;
   }
 
   get swapPriceImpact(): RatePretty | undefined {
@@ -151,7 +177,11 @@ export class IBCSwapAmountConfig extends AmountConfig {
   async getTx(
     slippageTolerancePercent: number,
     affiliateFeeReceiver: string | undefined,
-    priorOutAmount?: Int
+    priorOutAmount?: Int,
+    customRecipient?: {
+      chainId: string;
+      recipient: string;
+    }
   ): Promise<MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals> {
     const queryIBCSwap = this.getQueryIBCSwap();
     if (!queryIBCSwap) {
@@ -217,6 +247,11 @@ export class IBCSwapAmountConfig extends AmountConfig {
           : destinationAccount.bech32Address;
     }
 
+    if (customRecipient) {
+      chainIdsToAddresses[customRecipient.chainId.replace("eip155:", "")] =
+        customRecipient.recipient;
+    }
+
     for (const swapVenue of queryRouteResponse.data.swap_venues ?? [
       queryRouteResponse.data.swap_venue,
     ]) {
@@ -280,7 +315,8 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
     const tx = this.getTxIfReady(
       slippageTolerancePercent,
-      affiliateFeeReceiver
+      affiliateFeeReceiver,
+      customRecipient
     );
     if (!tx) {
       throw new Error("Tx is not ready");
@@ -320,7 +356,11 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
   getTxIfReady(
     slippageTolerancePercent: number,
-    affiliateFeeReceiver?: string
+    affiliateFeeReceiver?: string,
+    customRecipient?: {
+      chainId: string;
+      recipient: string;
+    }
   ): MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals | undefined {
     if (!this.currency) {
       return;
@@ -396,6 +436,11 @@ export class IBCSwapAmountConfig extends AmountConfig {
         isDestinationChainEVMOnly
           ? destinationAccount.ethereumHexAddress
           : destinationAccount.bech32Address;
+    }
+
+    if (customRecipient) {
+      chainIdsToAddresses[customRecipient.chainId.replace("eip155:", "")] =
+        customRecipient.recipient;
     }
 
     for (const swapVenue of queryRouteResponse.data.swap_venues ?? [
@@ -581,6 +626,21 @@ export class IBCSwapAmountConfig extends AmountConfig {
     return key;
   }
 
+  //NOTE - 만약 route로 부터 swap을 사용하는 경우가 있으면 에러를 발생시킨다.
+  _isUseSwapInBridge(routeResponse: RouteResponse | undefined) {
+    if (this.allowSwaps !== false || !routeResponse) {
+      return false;
+    }
+
+    const operations = routeResponse.operations;
+    const isContainsSwap = operations.some(
+      (operation) => "swap" in operation || "evm_swap" in operation
+    );
+    const isUseSwap = routeResponse.does_swap || isContainsSwap;
+
+    return isUseSwap;
+  }
+
   @override
   override get uiProperties(): UIProperties {
     const prev = super.uiProperties;
@@ -608,6 +668,14 @@ export class IBCSwapAmountConfig extends AmountConfig {
       return {
         ...prev,
         error: new Error(routeError.message),
+      };
+    }
+
+    const routeResponse = queryIBCSwap.getQueryRoute().response;
+    if (routeResponse && this._isUseSwapInBridge(routeResponse.data)) {
+      return {
+        ...prev,
+        error: new Error("Swap in bridge is not allowed"),
       };
     }
 
@@ -676,7 +744,9 @@ export class IBCSwapAmountConfig extends AmountConfig {
       this.amount[0],
       this.outChainId,
       this.outCurrency.coinMinimalDenom,
-      this.swapFeeBps
+      this.swapFeeBps,
+      this.allowSwaps,
+      this.smartSwapOptions
     );
   }
 }
@@ -691,7 +761,12 @@ export const useIBCSwapAmountConfig = (
   senderConfig: ISenderConfig,
   outChainId: string,
   outCurrency: AppCurrency,
-  swapFeeBps: number
+  swapFeeBps: number,
+  allowSwaps?: boolean,
+  smartSwapOptions?: {
+    evmSwaps?: boolean;
+    splitRoutes?: boolean;
+  }
 ) => {
   const [txConfig] = useState(
     () =>
@@ -705,7 +780,9 @@ export const useIBCSwapAmountConfig = (
         senderConfig,
         outChainId,
         outCurrency,
-        swapFeeBps
+        swapFeeBps,
+        allowSwaps,
+        smartSwapOptions
       )
   );
   txConfig.setChain(chainId);

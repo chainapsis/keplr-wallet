@@ -41,7 +41,7 @@ import { FeeControl } from "../../../components/input/fee-control";
 import { useNotification } from "../../../hooks/notification";
 import { DenomHelper, ExtensionKVStore } from "@keplr-wallet/common";
 import { ENSInfo, ICNSInfo } from "../../../config.ui";
-import { CoinPretty, Dec, DecUtils } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { ColorPalette } from "../../../styles";
 import { openPopupWindow } from "@keplr-wallet/popup";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
@@ -49,7 +49,9 @@ import { BACKGROUND_PORT, Message } from "@keplr-wallet/router";
 import {
   ChainInfoWithCoreTypes,
   LogAnalyticsEventMsg,
+  RecordTxWithSkipSwapMsg,
   SendTxAndRecordMsg,
+  SendTxAndRecordWithIBCSwapMsg,
   SendTxEthereumMsgAndRecordMsg,
 } from "@keplr-wallet/background";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -66,7 +68,10 @@ import { GuideBox } from "../../../components/guide-box";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { amountToAmbiguousAverage, isRunningInSidePanel } from "../../../utils";
 import { AppCurrency, EthTxStatus } from "@keplr-wallet/types";
-import { useIBCSwapConfig } from "@keplr-wallet/hooks-internal";
+import {
+  IBCSwapAmountConfig,
+  useIBCSwapConfig,
+} from "@keplr-wallet/hooks-internal";
 import {
   ObservableQueryRouteInner,
   SkipQueries,
@@ -80,11 +85,16 @@ import {
   IAccountStoreWithInjects,
   IChainInfoImpl,
   IQueriesStore,
+  MakeTxResponse,
+  // MakeTxResponse,
   SecretAccount,
+  WalletStatus,
 } from "@keplr-wallet/stores";
 import {
   EthereumAccountBase,
   EthereumAccountStore,
+  UnsignedEVMTransaction,
+  UnsignedEVMTransactionWithErc20Approvals,
 } from "@keplr-wallet/stores-eth";
 import { autorun } from "mobx";
 import { usePreviousDistinct } from "../../../hooks/use-previous";
@@ -360,6 +370,8 @@ const useIBCSwapConfigWithRecipientConfig = (
     computeTerraClassicTax?: boolean;
   } = {}
 ) => {
+  const isAllowSwaps = false;
+
   const ibcSwapConfigsForBridge = useIBCSwapConfig(
     chainGetter,
     queriesStore,
@@ -371,7 +383,11 @@ const useIBCSwapConfigWithRecipientConfig = (
     initialGas,
     outChainId,
     outCurrency,
-    swapFeeBps
+    swapFeeBps,
+    isAllowSwaps,
+    {
+      evmSwaps: false,
+    }
   );
   const channelConfig = useIBCChannelConfig(false);
 
@@ -398,6 +414,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     queriesStore,
     skipQueriesStore,
     priceStore,
+    uiConfigStore,
   } = useStore();
   const addressRef = useRef<HTMLInputElement | null>(null);
 
@@ -413,6 +430,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   const chainInfo = chainStore.getChain(chainId);
   const isEvmChain = chainStore.isEvmChain(chainId);
   const isEVMOnlyChain = chainStore.isEvmOnlyChain(chainId);
+  // const [isLessAmountThanFee, setIsLessAmountThanFee] = useState(false);
 
   const coinMinimalDenom =
     initialCoinMinimalDenom ||
@@ -422,9 +440,14 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
   const [sendType, setSendType] = useState<SendType>("send");
 
+  const [isTxLoading, setIsTxLoading] = useState(false);
+  // const [calculatingTxError, setCalculatingTxError] = useState<
+  //   Error | undefined
+  // >();
+
   const [destinationChainInfoOfBridge, setDestinationChainInfoOfBridge] =
     useState({
-      chainId: "",
+      chainId,
       currency: currency,
     });
 
@@ -463,6 +486,13 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     ? queryBalances.getQueryEthereumHexAddress(sender).getBalance(currency)
     : queryBalances.getQueryBech32Address(sender).getBalance(currency);
 
+  const isDestinationEvmChain = chainStore.isEvmChain(
+    destinationChainInfoOfBridge.chainId
+  );
+  const isDestinationEvmOnlyChain = chainStore.isEvmOnlyChain(
+    destinationChainInfoOfBridge.chainId
+  );
+
   const ibcSwapConfigsForBridge = useIBCSwapConfigWithRecipientConfig(
     chainStore,
     queriesStore,
@@ -478,16 +508,36 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     0,
     {
       allowHexAddressToBech32Address:
-        !isEvmChain &&
-        !isEvmTx &&
+        isDestinationEvmChain &&
+        !isDestinationEvmOnlyChain &&
         !chainStore.getChain(chainId).chainId.startsWith("injective"),
-      allowHexAddressOnly: sendType === "bridge",
+      allowHexAddressOnly: isDestinationEvmOnlyChain,
       icns: ICNSInfo,
       ens: ENSInfo,
       computeTerraClassicTax: true,
     }
   );
   ibcSwapConfigsForBridge.amountConfig.setCurrency(currency);
+
+  const gasSimulatorForBridge = useGetGasSimulationForBridge(
+    chainStore,
+    chainId,
+    ibcSwapConfigsForBridge,
+    ethereumAccountStore,
+    currency,
+    {
+      chainId: ibcSwapConfigsForBridge.recipientConfig.chainId,
+      recipient: ibcSwapConfigsForBridge.recipientConfig.value,
+    }
+  );
+  const txConfigsValidateForBridge = useTxConfigsValidate({
+    ...ibcSwapConfigsForBridge,
+    gasSimulator: gasSimulatorForBridge,
+  });
+  useTxConfigsQueryString(chainId, {
+    ...ibcSwapConfigsForBridge,
+    gasSimulator: gasSimulatorForBridge,
+  });
 
   const queryIBCSwap = ibcSwapConfigsForBridge.amountConfig.getQueryIBCSwap();
   const queryRoute = queryIBCSwap?.getQueryRoute();
@@ -780,6 +830,18 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     };
   }, [sendType, sendConfigs, ibcSwapConfigsForBridge]);
 
+  const outCurrencyFetched =
+    chainStore
+      .getChain(ibcSwapConfigsForBridge.amountConfig.outChainId)
+      .findCurrency(
+        ibcSwapConfigsForBridge.amountConfig.outCurrency.coinMinimalDenom
+      ) != null;
+
+  const interactionBlocked =
+    sendType === "bridge"
+      ? txConfigsValidateForBridge.interactionBlocked || !outCurrencyFetched
+      : txConfigsValidate.interactionBlocked;
+
   return (
     <HeaderLayout
       title={intl.formatMessage({ id: "page.send.amount.title" })}
@@ -808,23 +870,785 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       }
       bottomButtons={[
         {
-          disabled: txConfigsValidate.interactionBlocked,
+          disabled: interactionBlocked,
           text: intl.formatMessage({ id: "button.next" }),
           color: "primary",
           size: "large",
           type: "submit",
           isLoading: isEvmTx
-            ? ethereumAccount.isSendingTx
-            : accountStore.getAccount(chainId).isSendingMsg ===
-              (sendType === "ibc-transfer" ? "ibcTransfer" : "send"),
+            ? isTxLoading || ethereumAccount.isSendingTx
+            : isTxLoading ||
+              accountStore.getAccount(chainId).isSendingMsg ===
+                (sendType === "ibc-transfer" ? "ibcTransfer" : "send"),
         },
       ]}
       onSubmit={async (e) => {
         e.preventDefault();
 
-        if (!txConfigsValidate.interactionBlocked) {
+        if (!interactionBlocked) {
+          let hasApprovalTxWhenBridge = false;
+
           try {
-            if (isEvmTx) {
+            if (sendType === "bridge") {
+              setIsTxLoading(true);
+
+              let tx: MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals;
+
+              const queryRoute = ibcSwapConfigsForBridge.amountConfig
+                .getQueryIBCSwap()!
+                .getQueryRoute();
+
+              const swapFeeBpsReceiver: string[] = [];
+              const simpleRoute: {
+                isOnlyEvm: boolean;
+                chainId: string;
+                receiver: string;
+              }[] = [];
+              let routeDurationSeconds: number | undefined;
+              const channels: {
+                portId: string;
+                channelId: string;
+                counterpartyChainId: string;
+              }[] = [];
+              const swapChannelIndex: number = -1;
+              const swapReceiver: string[] = [];
+
+              try {
+                let priorOutAmount: Int | undefined = undefined;
+                if (queryRoute.response) {
+                  priorOutAmount = new Int(queryRoute.response.data.amount_out);
+                }
+
+                if (!queryRoute.response) {
+                  throw new Error("queryRoute.response is undefined");
+                }
+
+                const operations = queryRoute.response.data.operations;
+                const isContainsSwap = operations.some(
+                  (operation) => "swap" in operation || "evm_swap" in operation
+                );
+                const isUseSwap =
+                  queryRoute.response.data.does_swap || isContainsSwap;
+
+                if (isUseSwap) {
+                  //NOTE - ibcSwapAmountConfig에서 이미 에러를 발생시키만
+                  //어쩌다 여기까지 오면 tx가 실행되지 않게 막음
+                  throw new Error("Swap in bridge is not allowed");
+                }
+
+                routeDurationSeconds =
+                  queryRoute.response.data.estimated_route_duration_seconds;
+
+                // 일단은 체인 id를 keplr에서 사용하는 형태로 바꿔야 한다.
+                for (const chainId of queryRoute.response.data.chain_ids) {
+                  const isOnlyEvm = parseInt(chainId) > 0;
+                  const chainIdInKeplr = isOnlyEvm
+                    ? `eip155:${chainId}`
+                    : chainId;
+                  if (!chainStore.hasChain(chainIdInKeplr)) {
+                    continue;
+                  }
+
+                  const receiverAccount =
+                    accountStore.getAccount(chainIdInKeplr);
+                  if (receiverAccount.walletStatus !== WalletStatus.Loaded) {
+                    await receiverAccount.init();
+                  }
+
+                  if (isOnlyEvm && !receiverAccount.ethereumHexAddress) {
+                    const receiverChainInfo =
+                      chainStore.hasChain(chainId) &&
+                      chainStore.getChain(chainId);
+                    if (
+                      receiverAccount.isNanoLedger &&
+                      receiverChainInfo &&
+                      (receiverChainInfo.bip44.coinType === 60 ||
+                        receiverChainInfo.features.includes(
+                          "eth-address-gen"
+                        ) ||
+                        receiverChainInfo.features.includes("eth-key-sign") ||
+                        receiverChainInfo.evm != null)
+                    ) {
+                      throw new Error(
+                        "Please connect Ethereum app on Ledger with Keplr to get the address"
+                      );
+                    }
+
+                    throw new Error(
+                      "receiverAccount.ethereumHexAddress is undefined"
+                    );
+                  }
+
+                  simpleRoute.push({
+                    isOnlyEvm,
+                    chainId: chainIdInKeplr,
+                    receiver: isOnlyEvm
+                      ? receiverAccount.ethereumHexAddress
+                      : receiverAccount.bech32Address,
+                  });
+                }
+
+                const [_tx] = await Promise.all([
+                  ibcSwapConfigsForBridge.amountConfig.getTx(
+                    uiConfigStore.ibcSwapConfig.slippageNum,
+                    // 코스모스 스왑은 스왑베뉴가 무조건 하나라고 해서 일단 처음걸 쓰기로 한다.
+                    swapFeeBpsReceiver[0],
+                    priorOutAmount,
+                    {
+                      chainId: ibcSwapConfigsForBridge.recipientConfig.chainId,
+                      recipient: ibcSwapConfigsForBridge.recipientConfig.value,
+                    }
+                  ),
+                ]);
+                tx = _tx;
+              } catch (e) {
+                // setCalculatingTxError(e);
+                setIsTxLoading(false);
+                return;
+              }
+
+              // setCalculatingTxError(undefined);
+
+              try {
+                if ("send" in tx) {
+                  await tx.send(
+                    ibcSwapConfigsForBridge.feeConfig.toStdFee(),
+                    ibcSwapConfigsForBridge.memoConfig.memo,
+                    {
+                      preferNoSetFee: true,
+                      preferNoSetMemo: false,
+
+                      sendTx: async (chainId, tx, mode) => {
+                        const outChainId =
+                          ibcSwapConfigsForBridge.amountConfig.outChainId;
+                        const outCurrency =
+                          ibcSwapConfigsForBridge.amountConfig.outCurrency;
+
+                        const msg = new SendTxAndRecordWithIBCSwapMsg(
+                          "amount-in",
+                          chainId,
+                          outChainId,
+                          tx,
+                          channels,
+                          {
+                            chainId: outChainId,
+                            denom: outCurrency.coinMinimalDenom,
+                          },
+                          swapChannelIndex,
+                          swapReceiver,
+                          mode,
+                          false,
+                          ibcSwapConfigsForBridge.senderConfig.sender,
+                          ibcSwapConfigsForBridge.amountConfig.amount.map(
+                            (amount) => {
+                              return {
+                                amount: DecUtils.getTenExponentN(
+                                  amount.currency.coinDecimals
+                                )
+                                  .mul(amount.toDec())
+                                  .toString(),
+                                denom: amount.currency.coinMinimalDenom,
+                              };
+                            }
+                          ),
+                          ibcSwapConfigsForBridge.memoConfig.memo,
+                          {
+                            currencies:
+                              chainStore.getChain(outChainId).currencies,
+                          },
+                          false // bridge의 경우 무조건 interChainSwap이므로 무조건 false, 정확히는 swap이 아니지만 swap 페이지에서 그렇게 적혀있어서 해당 용어로 사용
+                        );
+
+                        return await new InExtensionMessageRequester().sendMessage(
+                          BACKGROUND_PORT,
+                          msg
+                        );
+                      },
+                    },
+                    {
+                      onBroadcasted: (txHash) => {
+                        const inChainId =
+                          ibcSwapConfigsForBridge.amountConfig.chainId;
+
+                        const outChainId =
+                          ibcSwapConfigsForBridge.amountConfig.outChainId;
+                        const outCurrency =
+                          ibcSwapConfigsForBridge.amountConfig.outCurrency;
+
+                        const msg = new RecordTxWithSkipSwapMsg(
+                          inChainId,
+                          outChainId,
+                          {
+                            chainId: outChainId,
+                            denom: outCurrency.coinMinimalDenom,
+                            expectedAmount:
+                              ibcSwapConfigsForBridge.amountConfig.outAmount
+                                .toDec()
+                                .toString(),
+                          },
+                          simpleRoute,
+                          ibcSwapConfigsForBridge.senderConfig.sender,
+                          chainStore.isEvmOnlyChain(outChainId)
+                            ? accountStore.getAccount(outChainId)
+                                .ethereumHexAddress
+                            : accountStore.getAccount(outChainId).bech32Address,
+                          [
+                            ...ibcSwapConfigsForBridge.amountConfig.amount.map(
+                              (amount) => {
+                                return {
+                                  amount: DecUtils.getTenExponentN(
+                                    amount.currency.coinDecimals
+                                  )
+                                    .mul(amount.toDec())
+                                    .toString(),
+                                  denom: amount.currency.coinMinimalDenom,
+                                };
+                              }
+                            ),
+                            {
+                              amount: DecUtils.getTenExponentN(
+                                ibcSwapConfigsForBridge.amountConfig.outAmount
+                                  .currency.coinDecimals
+                              )
+                                .mul(
+                                  ibcSwapConfigsForBridge.amountConfig.outAmount.toDec()
+                                )
+                                .toString(),
+                              denom:
+                                ibcSwapConfigsForBridge.amountConfig.outAmount
+                                  .currency.coinMinimalDenom,
+                            },
+                          ],
+                          {
+                            currencies:
+                              chainStore.getChain(outChainId).currencies,
+                          },
+                          routeDurationSeconds ?? 0,
+                          Buffer.from(txHash).toString("hex")
+                        );
+
+                        new InExtensionMessageRequester().sendMessage(
+                          BACKGROUND_PORT,
+                          msg
+                        );
+
+                        //NOTE - GA에서 어떤 제목으로 기록할지가 먼저 필요함 그 이후 해당 로직 주석 제가 필요
+                        // const params: Record<
+                        //   string,
+                        //   | number
+                        //   | string
+                        //   | boolean
+                        //   | number[]
+                        //   | string[]
+                        //   | undefined
+                        // > = {
+                        //   inChainId: inChainId,
+                        //   inChainIdentifier:
+                        //     ChainIdHelper.parse(inChainId).identifier,
+                        //   inCurrencyMinimalDenom: inCurrency.coinMinimalDenom,
+                        //   inCurrencyDenom: inCurrency.coinDenom,
+                        //   inCurrencyCommonMinimalDenom:
+                        //     inCurrency.coinMinimalDenom,
+                        //   inCurrencyCommonDenom: inCurrency.coinDenom,
+                        //   outChainId: outChainId,
+                        //   outChainIdentifier:
+                        //     ChainIdHelper.parse(outChainId).identifier,
+                        //   outCurrencyMinimalDenom: outCurrency.coinMinimalDenom,
+                        //   outCurrencyDenom: outCurrency.coinDenom,
+                        //   outCurrencyCommonMinimalDenom:
+                        //     outCurrency.coinMinimalDenom,
+                        //   outCurrencyCommonDenom: outCurrency.coinDenom,
+                        //   swapType: ibcSwapConfigsForBridge.amountConfig.type,
+                        // };
+                        // if (
+                        //   "originChainId" in inCurrency &&
+                        //   inCurrency.originChainId
+                        // ) {
+                        //   const originChainId = inCurrency.originChainId;
+                        //   params["inOriginChainId"] = originChainId;
+                        //   params["inOriginChainIdentifier"] =
+                        //     ChainIdHelper.parse(originChainId).identifier;
+
+                        //   params["inToDifferentChain"] = true;
+                        // }
+                        // if (
+                        //   "originCurrency" in inCurrency &&
+                        //   inCurrency.originCurrency
+                        // ) {
+                        //   params["inCurrencyCommonMinimalDenom"] =
+                        //     inCurrency.originCurrency.coinMinimalDenom;
+                        //   params["inCurrencyCommonDenom"] =
+                        //     inCurrency.originCurrency.coinDenom;
+                        // }
+                        // if (
+                        //   "originChainId" in outCurrency &&
+                        //   outCurrency.originChainId
+                        // ) {
+                        //   const originChainId = outCurrency.originChainId;
+                        //   params["outOriginChainId"] = originChainId;
+                        //   params["outOriginChainIdentifier"] =
+                        //     ChainIdHelper.parse(originChainId).identifier;
+
+                        //   params["outToDifferentChain"] = true;
+                        // }
+                        // if (
+                        //   "originCurrency" in outCurrency &&
+                        //   outCurrency.originCurrency
+                        // ) {
+                        //   params["outCurrencyCommonMinimalDenom"] =
+                        //     outCurrency.originCurrency.coinMinimalDenom;
+                        //   params["outCurrencyCommonDenom"] =
+                        //     outCurrency.originCurrency.coinDenom;
+                        // }
+                        // params["inRange"] = amountToAmbiguousString(
+                        //   ibcSwapConfigsForBridge.amountConfig.amount[0]
+                        // );
+                        // params["outRange"] = amountToAmbiguousString(
+                        //   ibcSwapConfigsForBridge.amountConfig.outAmount
+                        // );
+
+                        // // UI 상에서 in currency의 가격은 in input에서 표시되고
+                        // // out currency의 가격은 swap fee에서 표시된다.
+                        // // price store에서 usd는 무조건 쿼리하므로 in, out currency의 usd는 보장된다.
+                        // const inCurrencyPrice = priceStore.calculatePrice(
+                        //   ibcSwapConfigsForBridge.amountConfig.amount[0],
+                        //   "usd"
+                        // );
+                        // if (inCurrencyPrice) {
+                        //   params["inFiatRange"] =
+                        //     amountToAmbiguousString(inCurrencyPrice);
+                        //   params["inFiatAvg"] =
+                        //     amountToAmbiguousAverage(inCurrencyPrice);
+                        // }
+                        // const outCurrencyPrice = priceStore.calculatePrice(
+                        //   ibcSwapConfigsForBridge.amountConfig.outAmount,
+                        //   "usd"
+                        // );
+                        // if (outCurrencyPrice) {
+                        //   params["outFiatRange"] =
+                        //     amountToAmbiguousString(outCurrencyPrice);
+                        //   params["outFiatAvg"] =
+                        //     amountToAmbiguousAverage(outCurrencyPrice);
+                        // }
+
+                        // new InExtensionMessageRequester().sendMessage(
+                        //   BACKGROUND_PORT,
+                        //   new LogAnalyticsEventMsg("ibc_swap", params)
+                        // );
+
+                        // analyticsStore.logEvent("swap_occurred", {
+                        //   in_chain_id: inChainId,
+                        //   in_chain_identifier:
+                        //     ChainIdHelper.parse(inChainId).identifier,
+                        //   in_currency_minimal_denom:
+                        //     inCurrency.coinMinimalDenom,
+                        //   in_currency_denom: inCurrency.coinDenom,
+                        //   out_chain_id: outChainId,
+                        //   out_chain_identifier:
+                        //     ChainIdHelper.parse(outChainId).identifier,
+                        //   out_currency_minimal_denom:
+                        //     outCurrency.coinMinimalDenom,
+                        //   out_currency_denom: outCurrency.coinDenom,
+                        // });
+                      },
+                      onFulfill: (tx: any) => {
+                        if (tx.code != null && tx.code !== 0) {
+                          console.log(tx.log ?? tx.raw_log);
+
+                          notification.show(
+                            "failed",
+                            intl.formatMessage({
+                              id: "error.transaction-failed",
+                            }),
+                            ""
+                          );
+                          return;
+                        }
+
+                        notification.show(
+                          "success",
+                          intl.formatMessage({
+                            id: "notification.transaction-success",
+                          }),
+                          ""
+                        );
+                      },
+                    }
+                  );
+                } else {
+                  const ethereumAccount = ethereumAccountStore.getAccount(
+                    ibcSwapConfigsForBridge.amountConfig.chainId
+                  );
+                  const sender = ibcSwapConfigsForBridge.senderConfig.sender;
+
+                  const inCurrency =
+                    ibcSwapConfigsForBridge.amountConfig.currency;
+                  const inChainId =
+                    ibcSwapConfigsForBridge.amountConfig.chainId;
+                  const outChainId =
+                    ibcSwapConfigsForBridge.amountConfig.outChainId;
+                  const outCurrency =
+                    ibcSwapConfigsForBridge.amountConfig.outCurrency;
+
+                  const isErc20InCurrency =
+                    ("type" in inCurrency && inCurrency.type === "erc20") ||
+                    inCurrency.coinMinimalDenom.startsWith("erc20:");
+                  const erc20Approval = tx.requiredErc20Approvals?.[0];
+                  const erc20ApprovalTx =
+                    erc20Approval && isErc20InCurrency
+                      ? ethereumAccount.makeErc20ApprovalTx(
+                          {
+                            ...inCurrency,
+                            type: "erc20",
+                            contractAddress:
+                              inCurrency.coinMinimalDenom.replace("erc20:", ""),
+                          },
+                          erc20Approval.spender,
+                          erc20Approval.amount
+                        )
+                      : undefined;
+
+                  const { maxFeePerGas, maxPriorityFeePerGas, gasPrice } =
+                    ibcSwapConfigsForBridge.feeConfig.getEIP1559TxFees(
+                      ibcSwapConfigsForBridge.feeConfig.type
+                    );
+
+                  const feeObject =
+                    maxFeePerGas && maxPriorityFeePerGas
+                      ? {
+                          type: 2,
+                          maxFeePerGas: `0x${BigInt(
+                            maxFeePerGas.truncate().toString()
+                          ).toString(16)}`,
+                          maxPriorityFeePerGas: `0x${BigInt(
+                            maxPriorityFeePerGas.truncate().toString()
+                          ).toString(16)}`,
+                          gasLimit: `0x${ibcSwapConfigsForBridge.gasConfig.gas.toString(
+                            16
+                          )}`,
+                        }
+                      : {
+                          gasPrice: `0x${BigInt(
+                            gasPrice.truncate().toString()
+                          ).toString(16)}`,
+                          gasLimit: `0x${ibcSwapConfigsForBridge.gasConfig.gas.toString(
+                            16
+                          )}`,
+                        };
+                  ethereumAccount.setIsSendingTx(true);
+
+                  if (erc20ApprovalTx) {
+                    hasApprovalTxWhenBridge = true;
+                  }
+
+                  await ethereumAccount.sendEthereumTx(
+                    sender,
+                    {
+                      ...(erc20ApprovalTx ?? tx),
+                      ...feeObject,
+                    },
+                    {
+                      onBroadcasted: (txHash) => {
+                        if (!erc20ApprovalTx) {
+                          ethereumAccount.setIsSendingTx(false);
+                          const msg = new RecordTxWithSkipSwapMsg(
+                            inChainId,
+                            outChainId,
+                            {
+                              chainId: outChainId,
+                              denom: outCurrency.coinMinimalDenom,
+                              expectedAmount:
+                                ibcSwapConfigsForBridge.amountConfig.outAmount
+                                  .toDec()
+                                  .toString(),
+                            },
+                            simpleRoute,
+                            sender,
+                            chainStore.isEvmOnlyChain(outChainId)
+                              ? accountStore.getAccount(outChainId)
+                                  .ethereumHexAddress
+                              : accountStore.getAccount(outChainId)
+                                  .bech32Address,
+                            [
+                              ...ibcSwapConfigsForBridge.amountConfig.amount.map(
+                                (amount) => {
+                                  return {
+                                    amount: DecUtils.getTenExponentN(
+                                      amount.currency.coinDecimals
+                                    )
+                                      .mul(amount.toDec())
+                                      .toString(),
+                                    denom: amount.currency.coinMinimalDenom,
+                                  };
+                                }
+                              ),
+                              {
+                                amount: DecUtils.getTenExponentN(
+                                  ibcSwapConfigsForBridge.amountConfig.outAmount
+                                    .currency.coinDecimals
+                                )
+                                  .mul(
+                                    ibcSwapConfigsForBridge.amountConfig.outAmount.toDec()
+                                  )
+                                  .toString(),
+                                denom:
+                                  ibcSwapConfigsForBridge.amountConfig.outAmount
+                                    .currency.coinMinimalDenom,
+                              },
+                            ],
+                            {
+                              currencies:
+                                chainStore.getChain(outChainId).currencies,
+                            },
+                            routeDurationSeconds ?? 0,
+                            txHash
+                          );
+                          new InExtensionMessageRequester().sendMessage(
+                            BACKGROUND_PORT,
+                            msg
+                          );
+
+                          if (!isDetachedMode) {
+                            navigate("/", {
+                              replace: true,
+                            });
+                          } else {
+                            window.close();
+                          }
+                        }
+                      },
+                      onFulfill: (txReceipt) => {
+                        const queryBalances = queriesStore.get(
+                          ibcSwapConfigsForBridge.amountConfig.chainId
+                        ).queryBalances;
+                        queryBalances
+                          .getQueryEthereumHexAddress(sender)
+                          .balances.forEach((balance) => {
+                            if (
+                              balance.currency.coinMinimalDenom ===
+                                ibcSwapConfigsForBridge.amountConfig.currency
+                                  .coinMinimalDenom ||
+                              ibcSwapConfigsForBridge.feeConfig.fees.some(
+                                (fee) =>
+                                  fee.currency.coinMinimalDenom ===
+                                  balance.currency.coinMinimalDenom
+                              )
+                            ) {
+                              balance.fetch();
+                            }
+                          });
+                        if (txReceipt.status === EthTxStatus.Success) {
+                          notification.show(
+                            "success",
+                            intl.formatMessage({
+                              id: "notification.transaction-success",
+                            }),
+                            ""
+                          );
+                          if (erc20ApprovalTx) {
+                            delete (
+                              tx as UnsignedEVMTransactionWithErc20Approvals
+                            ).requiredErc20Approvals;
+                            ethereumAccount.setIsSendingTx(true);
+                            ethereumAccount
+                              .simulateGas(sender, tx as UnsignedEVMTransaction)
+                              .then(({ gasUsed }) => {
+                                const {
+                                  maxFeePerGas,
+                                  maxPriorityFeePerGas,
+                                  gasPrice,
+                                } =
+                                  ibcSwapConfigsForBridge.feeConfig.getEIP1559TxFees(
+                                    ibcSwapConfigsForBridge.feeConfig.type
+                                  );
+                                const feeObject =
+                                  maxFeePerGas && maxPriorityFeePerGas
+                                    ? {
+                                        type: 2,
+                                        maxFeePerGas: `0x${BigInt(
+                                          maxFeePerGas.truncate().toString()
+                                        ).toString(16)}`,
+                                        maxPriorityFeePerGas: `0x${BigInt(
+                                          maxPriorityFeePerGas
+                                            .truncate()
+                                            .toString()
+                                        ).toString(16)}`,
+                                        gasLimit: `0x${gasUsed.toString(16)}`,
+                                      }
+                                    : {
+                                        gasPrice: `0x${BigInt(
+                                          gasPrice.truncate().toString()
+                                        ).toString(16)}`,
+                                        gasLimit: `0x${gasUsed.toString(16)}`,
+                                      };
+                                ethereumAccount.sendEthereumTx(
+                                  sender,
+                                  {
+                                    ...(tx as UnsignedEVMTransactionWithErc20Approvals),
+                                    ...feeObject,
+                                  },
+                                  {
+                                    onBroadcasted: (txHash) => {
+                                      ethereumAccount.setIsSendingTx(false);
+                                      const msg = new RecordTxWithSkipSwapMsg(
+                                        inChainId,
+                                        outChainId,
+                                        {
+                                          chainId: outChainId,
+                                          denom: outCurrency.coinMinimalDenom,
+                                          expectedAmount:
+                                            ibcSwapConfigsForBridge.amountConfig.outAmount
+                                              .toDec()
+                                              .toString(),
+                                        },
+                                        simpleRoute,
+                                        sender,
+                                        chainStore.isEvmOnlyChain(outChainId)
+                                          ? accountStore.getAccount(outChainId)
+                                              .ethereumHexAddress
+                                          : accountStore.getAccount(outChainId)
+                                              .bech32Address,
+                                        [
+                                          ...ibcSwapConfigsForBridge.amountConfig.amount.map(
+                                            (amount) => {
+                                              return {
+                                                amount:
+                                                  DecUtils.getTenExponentN(
+                                                    amount.currency.coinDecimals
+                                                  )
+                                                    .mul(amount.toDec())
+                                                    .toString(),
+                                                denom:
+                                                  amount.currency
+                                                    .coinMinimalDenom,
+                                              };
+                                            }
+                                          ),
+                                          {
+                                            amount: DecUtils.getTenExponentN(
+                                              ibcSwapConfigsForBridge
+                                                .amountConfig.outAmount.currency
+                                                .coinDecimals
+                                            )
+                                              .mul(
+                                                ibcSwapConfigsForBridge.amountConfig.outAmount.toDec()
+                                              )
+                                              .toString(),
+                                            denom:
+                                              ibcSwapConfigsForBridge
+                                                .amountConfig.outAmount.currency
+                                                .coinMinimalDenom,
+                                          },
+                                        ],
+                                        {
+                                          currencies:
+                                            chainStore.getChain(outChainId)
+                                              .currencies,
+                                        },
+                                        routeDurationSeconds ?? 0,
+                                        txHash
+                                      );
+                                      new InExtensionMessageRequester().sendMessage(
+                                        BACKGROUND_PORT,
+                                        msg
+                                      );
+
+                                      if (!isDetachedMode) {
+                                        navigate("/", {
+                                          replace: true,
+                                        });
+                                      } else {
+                                        window.close();
+                                      }
+                                    },
+                                    onFulfill: (txReceipt) => {
+                                      const queryBalances = queriesStore.get(
+                                        ibcSwapConfigsForBridge.amountConfig
+                                          .chainId
+                                      ).queryBalances;
+                                      queryBalances
+                                        .getQueryEthereumHexAddress(sender)
+                                        .balances.forEach((balance) => {
+                                          if (
+                                            balance.currency
+                                              .coinMinimalDenom ===
+                                              ibcSwapConfigsForBridge
+                                                .amountConfig.currency
+                                                .coinMinimalDenom ||
+                                            ibcSwapConfigsForBridge.feeConfig.fees.some(
+                                              (fee) =>
+                                                fee.currency
+                                                  .coinMinimalDenom ===
+                                                balance.currency
+                                                  .coinMinimalDenom
+                                            )
+                                          ) {
+                                            balance.fetch();
+                                          }
+                                        });
+                                      if (
+                                        txReceipt.status === EthTxStatus.Success
+                                      ) {
+                                        notification.show(
+                                          "success",
+                                          intl.formatMessage({
+                                            id: "notification.transaction-success",
+                                          }),
+                                          ""
+                                        );
+                                      } else {
+                                        notification.show(
+                                          "failed",
+                                          intl.formatMessage({
+                                            id: "error.transaction-failed",
+                                          }),
+                                          ""
+                                        );
+                                      }
+                                    },
+                                  }
+                                );
+                              })
+                              .catch((e) => {
+                                console.log(e);
+                                ethereumAccount.setIsSendingTx(false);
+                              });
+                          }
+                        } else {
+                          notification.show(
+                            "failed",
+                            intl.formatMessage({
+                              id: "error.transaction-failed",
+                            }),
+                            ""
+                          );
+                        }
+                      },
+                    }
+                  );
+                }
+              } catch (e) {
+                if (e?.message === "Request rejected") {
+                  return;
+                }
+
+                console.log(e);
+                notification.show(
+                  "failed",
+                  intl.formatMessage({ id: "error.transaction-failed" }),
+                  ""
+                );
+                if (!isDetachedMode) {
+                  navigate("/", {
+                    replace: true,
+                  });
+                } else {
+                  window.close();
+                }
+              } finally {
+                setIsTxLoading(false);
+              }
+            } else if (isEvmTx) {
               ethereumAccount.setIsSendingTx(true);
               const { maxFeePerGas, maxPriorityFeePerGas, gasPrice } =
                 sendConfigs.feeConfig.getEIP1559TxFees(
@@ -1133,6 +1957,12 @@ export const SendAmountPage: FunctionComponent = observer(() => {
               );
             }
 
+            //NOTE - For evmTx on bridge, erc20 approve may be present, in which case evm tx processing will handle navigation,
+            // so using early return here
+            if (hasApprovalTxWhenBridge) {
+              return;
+            }
+
             if (!isDetachedMode) {
               navigate("/", {
                 replace: true,
@@ -1279,7 +2109,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             />
           )}
 
-          <VerticalCollapseTransition collapsed={sendType === "send"}>
+          <VerticalCollapseTransition collapsed={sendType !== "ibc-transfer"}>
             <GuideBox
               color="warning"
               title={intl.formatMessage({
@@ -1388,4 +2218,213 @@ function useKeepIBCSwapObservable(skipQueriesStore: SkipQueries) {
       }
     };
   }, [skipQueriesStore.queryIBCSwap]);
+}
+
+function useGetGasSimulationForBridge(
+  chainStore: ChainStore,
+  chainId: string,
+  ibcSwapConfigsForBridge: {
+    recipientConfig: IBCRecipientConfig;
+    amountConfig: IBCSwapAmountConfig;
+    memoConfig: MemoConfig;
+    gasConfig: GasConfig;
+    feeConfig: FeeConfig;
+    senderConfig: SenderConfig;
+  },
+  ethereumAccountStore: EthereumAccountStore,
+  currency: AppCurrency,
+  recipient?: {
+    chainId: string;
+    recipient: string;
+  }
+) {
+  const gasSimulator = useGasSimulator(
+    new ExtensionKVStore("gas-simulator.ibc-swap.swap"),
+    chainStore,
+    chainId,
+    ibcSwapConfigsForBridge.gasConfig,
+    ibcSwapConfigsForBridge.feeConfig,
+    (() => {
+      // simulation 할때 예상되는 gas에 따라서 밑의 값을 설정해야한다.
+      // 근데 이걸 엄밀히 정하기는 어렵다
+      // 추정을해보면 당연히 destination token에 따라서 값이 다를 수 있다.
+      // 또한 트랜잭션이 ibc transfer인지 cosmwasm execute인지에 따라서 다를 수 있다.
+      // ibc transfer일 경우는 차이는 memo의 길이일 뿐인데 이건 gas에 그다지 영향을 미치지 않기 때문에 gas adjustment로 충분하다.
+      // swap일 경우 (osmosis에서 실행될 경우) swpa이 몇번 필요한지에 따라 영향을 미칠 것이다.
+      let type = "default";
+
+      const queryRoute = ibcSwapConfigsForBridge.amountConfig
+        .getQueryIBCSwap()
+        ?.getQueryRoute();
+
+      if (queryRoute && queryRoute.response) {
+        // swap일 경우 웬만하면 swap 한번으로 충분할 확률이 높다.
+        // 이 가정에 따라서 첫로드시에 gas를 restore하기 위해서 트랜잭션을 보내는 체인에서 swap 할 경우
+        // 일단 swap-1로 설정한다.
+        if (
+          queryRoute.response.data.swap_venues &&
+          queryRoute.response.data.swap_venues.length === 1
+        ) {
+          const swapVenueChainId = (() => {
+            const evmLikeChainId = Number(
+              queryRoute.response.data.swap_venues[0].chain_id
+            );
+            const isEVMChainId =
+              !Number.isNaN(evmLikeChainId) && evmLikeChainId > 0;
+
+            return isEVMChainId
+              ? `eip155:${evmLikeChainId}`
+              : queryRoute.response.data.swap_venues[0].chain_id;
+          })();
+
+          if (
+            ibcSwapConfigsForBridge.amountConfig.chainInfo.chainIdentifier ===
+            chainStore.getChain(swapVenueChainId).chainIdentifier
+          ) {
+            type = `swap-1`;
+          }
+        }
+
+        if (queryRoute.response.data.operations.length > 0) {
+          const firstOperation = queryRoute.response.data.operations[0];
+          if ("swap" in firstOperation) {
+            if (firstOperation.swap.swap_in) {
+              type = `swap-${firstOperation.swap.swap_in.swap_operations.length}`;
+            } else if (firstOperation.swap.smart_swap_in) {
+              type = `swap-${firstOperation.swap.smart_swap_in.swap_routes.reduce(
+                (acc, cur) => {
+                  return (acc += cur.swap_operations.length);
+                },
+                0
+              )}`;
+            }
+          }
+
+          if ("axelar_transfer" in firstOperation) {
+            type = "axelar_transfer";
+          }
+
+          if ("cctp_transfer" in firstOperation) {
+            type = "cctp_transfer";
+          }
+
+          if ("go_fast_transfer" in firstOperation) {
+            type = "go_fast_transfer";
+          }
+
+          if ("hyperlane_transfer" in firstOperation) {
+            type = "hyperlane_transfer";
+          }
+
+          if ("evm_swap" in firstOperation) {
+            type = "evm_swap";
+          }
+        }
+      }
+
+      return `${ibcSwapConfigsForBridge.amountConfig.outChainId}/${ibcSwapConfigsForBridge.amountConfig.outCurrency.coinMinimalDenom}/${type}`;
+    })(),
+    () => {
+      if (!ibcSwapConfigsForBridge.amountConfig.currency) {
+        throw new Error("Send currency not set");
+      }
+
+      // Prefer not to use the gas config or fee config,
+      // because gas simulator can change the gas config and fee config from the result of reaction,
+      // and it can make repeated reaction.
+      if (
+        ibcSwapConfigsForBridge.amountConfig.uiProperties.loadingState ===
+          "loading-block" ||
+        ibcSwapConfigsForBridge.amountConfig.uiProperties.error != null
+      ) {
+        throw new Error("Not ready to simulate tx");
+      }
+
+      const swapFeeBpsReceiver: string[] = [];
+      const queryRoute = ibcSwapConfigsForBridge.amountConfig
+        .getQueryIBCSwap()
+        ?.getQueryRoute();
+
+      if (queryRoute && queryRoute.response) {
+        const operations = queryRoute.response.data.operations;
+        const isContainsSwap = operations.some(
+          (operation) => "swap" in operation || "evm_swap" in operation
+        );
+        const isUseSwap = queryRoute.response.data.does_swap || isContainsSwap;
+
+        if (true) {
+          // 만약 bridge에서 swap을 하는게 동작되면 에러를 보내게 해서 실행되지 못하게 한다.
+          // 그런데 생각헤보니 이거 미리 해야 되지 않나.
+          // ibcSwapConfigsForBridge.amountConfig.
+          console.log("isUseSwap!!", isUseSwap);
+        }
+
+        if (queryRoute.response.data.operations.length > 0) {
+          for (const operation of queryRoute.response.data.operations) {
+            if ("swap" in operation) {
+              const swapIn =
+                operation.swap.swap_in ?? operation.swap.smart_swap_in;
+              if (swapIn) {
+                // const swapFeeBpsReceiverAddress = SwapFeeBps.receivers.find(
+                //   (r) => r.chainId === swapIn.swap_venue.chain_id
+                // );
+                // if (swapFeeBpsReceiverAddress) {
+                //   swapFeeBpsReceiver.push(swapFeeBpsReceiverAddress.address);
+                // }
+              }
+            }
+          }
+        }
+      }
+
+      const tx = ibcSwapConfigsForBridge.amountConfig.getTxIfReady(
+        // simulation 자체는 쉽게 통과시키기 위해서 슬리피지를 50으로 설정한다.
+        50,
+        // 코스모스 스왑은 스왑베뉴가 무조건 하나라고 해서 일단 처음걸 쓰기로 한다.
+        swapFeeBpsReceiver[0],
+        recipient
+      );
+
+      if (!tx) {
+        throw new Error("Not ready to simulate tx");
+      }
+
+      if ("send" in tx) {
+        return tx;
+      } else {
+        const ethereumAccount = ethereumAccountStore.getAccount(
+          ibcSwapConfigsForBridge.amountConfig.chainId
+        );
+        const sender = ibcSwapConfigsForBridge.senderConfig.sender;
+
+        const isErc20InCurrency =
+          ("type" in currency && currency.type === "erc20") ||
+          currency.coinMinimalDenom.startsWith("erc20:");
+        const erc20Approval = tx.requiredErc20Approvals?.[0];
+        const erc20ApprovalTx =
+          erc20Approval && isErc20InCurrency
+            ? ethereumAccount.makeErc20ApprovalTx(
+                {
+                  ...currency,
+                  type: "erc20",
+                  contractAddress: currency.coinMinimalDenom.replace(
+                    "erc20:",
+                    ""
+                  ),
+                },
+                erc20Approval.spender,
+                erc20Approval.amount
+              )
+            : undefined;
+
+        // OP Stack L1 Data Fee 계산은 일단 무시하기로 한다.
+        return {
+          simulate: () =>
+            ethereumAccount.simulateGas(sender, erc20ApprovalTx ?? tx),
+        };
+      }
+    }
+  );
+
+  return gasSimulator;
 }
