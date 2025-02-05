@@ -19,7 +19,9 @@ import { useTheme } from "styled-components";
 
 export const AmountInput: FunctionComponent<{
   amountConfig: IAmountConfig;
-}> = observer(({ amountConfig }) => {
+  forceError?: Error;
+  forceWarning?: Error;
+}> = observer(({ amountConfig, forceError, forceWarning }) => {
   if (amountConfig.amount.length !== 1) {
     throw new Error(
       `Amount input component only handles single amount: ${amountConfig.amount
@@ -200,6 +202,10 @@ export const AmountInput: FunctionComponent<{
         ) : null
       }
       error={(() => {
+        if (forceError) {
+          return forceError.message || forceError.toString();
+        }
+
         const uiProperties = amountConfig.uiProperties;
 
         const err = uiProperties.error || uiProperties.warning;
@@ -214,6 +220,10 @@ export const AmountInput: FunctionComponent<{
 
         if (err) {
           return err.message || err.toString();
+        }
+
+        if (forceWarning) {
+          return forceWarning.message || forceWarning.toString();
         }
       })()}
     />

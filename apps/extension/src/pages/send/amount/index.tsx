@@ -442,9 +442,9 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   const [sendType, setSendType] = useState<SendType>("send");
 
   const [isTxLoading, setIsTxLoading] = useState(false);
-  // const [calculatingTxError, setCalculatingTxError] = useState<
-  //   Error | undefined
-  // >();
+  const [calculatingTxError, setCalculatingTxError] = useState<
+    Error | undefined
+  >();
 
   const [destinationChainInfoOfBridge, setDestinationChainInfoOfBridge] =
     useState({
@@ -678,6 +678,66 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     sendConfigs.amountConfig.currency,
     sendConfigs.gasConfig,
   ]);
+
+  // --------------------------
+  // from or to 중에서 coingecko로부터 가격을 알 수 없는 경우 price impact를 알 수 없기 때문에
+  // 이런 경우 유저에게 경고를 표시해줌
+  // 가끔씩 바보같이 coingecko에 올라가있지도 않은데 지 맘대로 coingecko id를 넣는 얘들도 있어서
+  // 실제로 쿼리를 해보고 있는지 아닌지 판단하는 로직도 있음
+  // coingecko로부터 가격이 undefined거나 0이면 알 수 없는 것으로 처리함.
+  // 근데 쿼리에 걸리는 시간도 있으니 이 경우는 1000초 쉼.
+  const inCurrency = ibcSwapConfigsForBridge.amountConfig.currency;
+  const outCurrency = ibcSwapConfigsForBridge.amountConfig.outCurrency;
+  const [inOrOutChangedDelay, setInOrOutChangedDelay] = useState(true);
+  useEffect(() => {
+    setInOrOutChangedDelay(true);
+    const timeoutId = setTimeout(() => {
+      setInOrOutChangedDelay(false);
+    }, 1000);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inCurrency.coinMinimalDenom, outCurrency.coinMinimalDenom]);
+  const unablesToPopulatePrice = (() => {
+    const r: string[] = [];
+    if (!inCurrency.coinGeckoId) {
+      if ("originCurrency" in inCurrency && inCurrency.originCurrency) {
+        r.push(inCurrency.originCurrency.coinDenom);
+      } else {
+        r.push(inCurrency.coinDenom);
+      }
+    } else if (!inOrOutChangedDelay) {
+      const price = priceStore.getPrice(inCurrency.coinGeckoId, "usd");
+      if (!price) {
+        if ("originCurrency" in inCurrency && inCurrency.originCurrency) {
+          r.push(inCurrency.originCurrency.coinDenom);
+        } else {
+          r.push(inCurrency.coinDenom);
+        }
+      }
+    }
+    if (!outCurrency.coinGeckoId) {
+      if ("originCurrency" in outCurrency && outCurrency.originCurrency) {
+        r.push(outCurrency.originCurrency.coinDenom);
+      } else {
+        r.push(outCurrency.coinDenom);
+      }
+    } else if (!inOrOutChangedDelay) {
+      const price = priceStore.getPrice(outCurrency.coinGeckoId, "usd");
+      if (!price) {
+        if ("originCurrency" in outCurrency && outCurrency.originCurrency) {
+          r.push(outCurrency.originCurrency.coinDenom);
+        } else {
+          r.push(outCurrency.coinDenom);
+        }
+      }
+    }
+
+    return r;
+  })();
+  // --------------------------
 
   useTxConfigsQueryString(chainId, {
     ...sendConfigs,
@@ -1003,12 +1063,12 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                 ]);
                 tx = _tx;
               } catch (e) {
-                // setCalculatingTxError(e);
+                setCalculatingTxError(e);
                 setIsTxLoading(false);
                 return;
               }
 
-              // setCalculatingTxError(undefined);
+              setCalculatingTxError(undefined);
 
               try {
                 if ("send" in tx) {
@@ -2091,7 +2151,24 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             }
           />
 
-          <AmountInput amountConfig={amountConfig} />
+          <AmountInput
+            amountConfig={amountConfig}
+            forceError={calculatingTxError}
+            forceWarning={(() => {
+              if (unablesToPopulatePrice.length > 0) {
+                return new Error(
+                  intl.formatMessage(
+                    {
+                      id: "page.ibc-swap.warning.unable-to-populate-price",
+                    },
+                    {
+                      assets: unablesToPopulatePrice.join(", "),
+                    }
+                  )
+                );
+              }
+            })()}
+          />
 
           {!isEvmTx && (
             <MemoInput
