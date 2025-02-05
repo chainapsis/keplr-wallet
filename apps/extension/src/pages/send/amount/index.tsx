@@ -1188,7 +1188,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                               chainStore.getChain(outChainId).currencies,
                           },
                           routeDurationSeconds ?? 0,
-                          Buffer.from(txHash).toString("hex")
+                          Buffer.from(txHash).toString("hex"),
+                          true
                         );
 
                         new InExtensionMessageRequester().sendMessage(
@@ -1464,7 +1465,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                                 chainStore.getChain(outChainId).currencies,
                             },
                             routeDurationSeconds ?? 0,
-                            txHash
+                            txHash,
+                            true
                           );
                           new InExtensionMessageRequester().sendMessage(
                             BACKGROUND_PORT,
@@ -1609,7 +1611,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                                               .currencies,
                                         },
                                         routeDurationSeconds ?? 0,
-                                        txHash
+                                        txHash,
+                                        true
                                       );
                                       new InExtensionMessageRequester().sendMessage(
                                         BACKGROUND_PORT,
