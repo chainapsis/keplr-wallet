@@ -28,8 +28,8 @@ import { FormattedMessage, useIntl } from "react-intl";
 import styled, { useTheme } from "styled-components";
 import { DenomHelper } from "@keplr-wallet/common";
 import { TokenDetailModal } from "./token-detail";
-import { useSearchParams } from "react-router-dom";
-import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { ChainInfo, IBCCurrency, ModularChainInfo } from "@keplr-wallet/types";
 import { useGetSearchChains } from "../../hooks/use-get-search-chains";
 
 const zeroDec = new Dec(0);
@@ -238,6 +238,8 @@ export const AvailableTabView: FunctionComponent<{
       };
     })();
 
+    const navigate = useNavigate();
+
     return (
       <React.Fragment>
         {isNotReady ? (
@@ -309,52 +311,70 @@ export const AvailableTabView: FunctionComponent<{
                       }
                       lenAlwaysShown={lenAlwaysShown}
                       items={balance.map((viewToken) => (
-                        <TokenItem
-                          viewToken={viewToken}
+                        <React.Fragment
                           key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
-                          onClick={() => {
-                            setSearchParams((prev) => {
-                              prev.set(
-                                "tokenChainId",
+                        >
+                          <TokenItem
+                            viewToken={viewToken}
+                            key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
+                            onClick={() => {
+                              setSearchParams((prev) => {
+                                prev.set(
+                                  "tokenChainId",
+                                  viewToken.chainInfo.chainId
+                                );
+                                prev.set(
+                                  "tokenCoinMinimalDenom",
+                                  viewToken.token.currency.coinMinimalDenom
+                                );
+                                prev.set("isTokenDetailModalOpen", "true");
+
+                                return prev;
+                              });
+                            }}
+                            copyAddress={(() => {
+                              // For only native tokens, show copy address button
+                              if (
+                                new DenomHelper(
+                                  viewToken.token.currency.coinMinimalDenom
+                                ).type !== "native" ||
+                                viewToken.token.currency.coinMinimalDenom.startsWith(
+                                  "ibc/"
+                                )
+                              ) {
+                                return undefined;
+                              }
+
+                              const account = accountStore.getAccount(
                                 viewToken.chainInfo.chainId
                               );
-                              prev.set(
-                                "tokenCoinMinimalDenom",
-                                viewToken.token.currency.coinMinimalDenom
+                              const isEVMOnlyChain = chainStore.isEvmOnlyChain(
+                                viewToken.chainInfo.chainId
                               );
-                              prev.set("isTokenDetailModalOpen", "true");
 
-                              return prev;
-                            });
-                          }}
-                          copyAddress={(() => {
-                            // For only native tokens, show copy address button
-                            if (
-                              new DenomHelper(
-                                viewToken.token.currency.coinMinimalDenom
-                              ).type !== "native" ||
-                              viewToken.token.currency.coinMinimalDenom.startsWith(
-                                "ibc/"
-                              )
-                            ) {
-                              return undefined;
+                              return isEVMOnlyChain
+                                ? account.ethereumHexAddress
+                                : account.bech32Address;
+                            })()}
+                            showPrice24HChange={
+                              uiConfigStore.show24HChangesInMagePage
                             }
-
-                            const account = accountStore.getAccount(
-                              viewToken.chainInfo.chainId
-                            );
-                            const isEVMOnlyChain = chainStore.isEvmOnlyChain(
-                              viewToken.chainInfo.chainId
-                            );
-
-                            return isEVMOnlyChain
-                              ? account.ethereumHexAddress
-                              : account.bech32Address;
-                          })()}
-                          showPrice24HChange={
-                            uiConfigStore.show24HChangesInMagePage
-                          }
-                        />
+                          />
+                          {(viewToken.token.currency as IBCCurrency)
+                            ?.originChainId === "noble-1" && (
+                            <button
+                              onClick={() => {
+                                navigate(
+                                  `/send/select-asset?isNobleEarn=true&navigateTo=${encodeURIComponent(
+                                    "/send?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}&isIBCTransfer=true&ibcTransferDestinationChainId=noble-1"
+                                  )}`
+                                );
+                              }}
+                            >
+                              hi
+                            </button>
+                          )}
+                        </React.Fragment>
                       ))}
                     />
                   );

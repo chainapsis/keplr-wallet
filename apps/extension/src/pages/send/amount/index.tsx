@@ -56,6 +56,7 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { amountToAmbiguousAverage, isRunningInSidePanel } from "../../../utils";
 import { EthTxStatus } from "@keplr-wallet/types";
 import { usePreviousDistinct } from "../../../hooks/use-previous";
+import { WalletStatus } from "@keplr-wallet/stores";
 
 const Styles = {
   Flex1: styled.div`
@@ -82,6 +83,10 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
   const initialChainId = searchParams.get("chainId");
   const initialCoinMinimalDenom = searchParams.get("coinMinimalDenom");
+  const initialIsIBCTransfer = searchParams.get("isIBCTransfer") === "true";
+  const initialIBCTransferDestinationChainId = searchParams.get(
+    "ibcTransferDestinationChainId"
+  );
 
   const chainId = initialChainId || chainStore.chainInfosInUI[0].chainId;
   const chainInfo = chainStore.getChain(chainId);
@@ -94,7 +99,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
   const isErc20 = new DenomHelper(currency.coinMinimalDenom).type === "erc20";
 
-  const [isIBCTransfer, setIsIBCTransfer] = useState(false);
+  const [isIBCTransfer, setIsIBCTransfer] = useState(initialIsIBCTransfer);
   const [
     isIBCTransferDestinationModalOpen,
     setIsIBCTransferDestinationModalOpen,
@@ -437,6 +442,48 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       }
     | undefined
   >(undefined);
+
+  const initialIBCTransferChannels = initialIsIBCTransfer
+    ? skipQueriesStore.queryIBCPacketForwardingTransfer.getIBCChannels(
+        chainId,
+        coinMinimalDenom
+      )
+    : undefined;
+
+  useEffect(() => {
+    if (initialIBCTransferChannels && initialIBCTransferDestinationChainId) {
+      (async () => {
+        const channel = initialIBCTransferChannels.find(
+          (channel) =>
+            channel.destinationChainId === initialIBCTransferDestinationChainId
+        );
+
+        if (channel && channel.channels.length > 0) {
+          const lastChainId =
+            channel.channels[channel.channels.length - 1].counterpartyChainId;
+
+          const account = accountStore.getAccount(lastChainId);
+
+          if (account.walletStatus === WalletStatus.NotInit) {
+            await account.init();
+          }
+
+          sendConfigs.channelConfig.setChannels(channel.channels);
+          setIBCChannelFluent(channel);
+          if (account.walletStatus === WalletStatus.Loaded) {
+            sendConfigs.recipientConfig.setValue(account.bech32Address);
+            setIsIBCRecipientSetAuto(true);
+          }
+        }
+      })();
+    }
+  }, [
+    accountStore,
+    initialIBCTransferChannels,
+    initialIBCTransferDestinationChainId,
+    sendConfigs.channelConfig,
+    sendConfigs.recipientConfig,
+  ]);
 
   const isDetachedMode = searchParams.get("detached") === "true";
 

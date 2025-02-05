@@ -16,6 +16,7 @@ import { useFocusOnMount } from "../../../hooks/use-focus-on-mount";
 import { useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router";
 import { FormattedMessage, useIntl } from "react-intl";
+import { IBCCurrency } from "@keplr-wallet/types";
 
 const Styles = {
   Container: styled(Stack)`
@@ -42,6 +43,7 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
   const paramNavigateReplace = searchParams.get("navigateReplace");
   const paramIsIBCTransfer = searchParams.get("isIBCTransfer") === "true";
   const paramIsIBCSwap = searchParams.get("isIBCSwap") === "true";
+  const paramIsNobleEarn = searchParams.get("isNobleEarn") === "true";
 
   const [search, setSearch] = useState("");
   const [hideIBCToken, setHideIBCToken] = useState(false);
@@ -95,6 +97,10 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
       );
     }
 
+    if (paramIsNobleEarn) {
+      return (token.token.currency as IBCCurrency)?.originChainId === "noble-1";
+    }
+
     return true;
   });
 
@@ -117,26 +123,28 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
           }}
         />
 
-        <Columns sum={1} gutter="0.25rem">
-          <Column weight={1} />
-          <Body2
-            onClick={() => setHideIBCToken(!hideIBCToken)}
-            style={{
-              color:
-                theme.mode === "light"
-                  ? ColorPalette["gray-200"]
-                  : ColorPalette["gray-300"],
-              cursor: "pointer",
-            }}
-          >
-            <FormattedMessage id="page.send.select-asset.hide-ibc-token" />
-          </Body2>
-          <Checkbox
-            size="small"
-            checked={hideIBCToken}
-            onChange={setHideIBCToken}
-          />
-        </Columns>
+        {!paramIsNobleEarn && (
+          <Columns sum={1} gutter="0.25rem">
+            <Column weight={1} />
+            <Body2
+              onClick={() => setHideIBCToken(!hideIBCToken)}
+              style={{
+                color:
+                  theme.mode === "light"
+                    ? ColorPalette["gray-200"]
+                    : ColorPalette["gray-300"],
+                cursor: "pointer",
+              }}
+            >
+              <FormattedMessage id="page.send.select-asset.hide-ibc-token" />
+            </Body2>
+            <Checkbox
+              size="small"
+              checked={hideIBCToken}
+              onChange={setHideIBCToken}
+            />
+          </Columns>
+        )}
 
         {filteredTokens.map((viewToken) => {
           const modularChainInfo = chainStore.getModularChain(
