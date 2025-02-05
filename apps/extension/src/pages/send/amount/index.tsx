@@ -2153,8 +2153,12 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
           <AmountInput
             amountConfig={amountConfig}
-            forceError={calculatingTxError}
+            forceError={sendType === "bridge" ? calculatingTxError : undefined}
             forceWarning={(() => {
+              if (sendType !== "bridge") {
+                return undefined;
+              }
+
               if (unablesToPopulatePrice.length > 0) {
                 return new Error(
                   intl.formatMessage(
