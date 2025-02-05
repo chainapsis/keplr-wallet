@@ -493,7 +493,7 @@
   "page.send.select-asset.search-placeholder": "搜索资产或链",
   "page.send.select-asset.hide-ibc-token": "隐藏IBC币种",
   "page.send.type.send": "转账",
-  "page.send.type.ibc-transfer": "IBC转账",
+  "page.send.type.ibc-transfer": "跨链发送",
   "page.send.amount.ibc-transfer.destination-chain": "目标链",
   "page.send.amount.ibc-transfer.modal.search-placeholder": "搜索链",
   "page.send.amount.ibc-transfer.modal.no-search-data": "未找到路线",
