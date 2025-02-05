@@ -816,31 +816,53 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                   onFulfill: (tx: any) => {
                     if (tx.code != null && tx.code !== 0) {
                       console.log(tx.log ?? tx.raw_log);
-                      notification.show(
-                        "failed",
-                        intl.formatMessage({ id: "error.transaction-failed" }),
-                        ""
-                      );
+
+                      if (
+                        initialIsIBCTransfer &&
+                        initialIBCTransferDestinationChainId
+                      ) {
+                        navigate("/tx-result/failed");
+                      } else {
+                        notification.show(
+                          "failed",
+                          intl.formatMessage({
+                            id: "error.transaction-failed",
+                          }),
+                          ""
+                        );
+                      }
                       return;
                     }
-                    notification.show(
-                      "success",
-                      intl.formatMessage({
-                        id: "notification.transaction-success",
-                      }),
-                      ""
-                    );
+
+                    if (
+                      initialIsIBCTransfer &&
+                      initialIBCTransferDestinationChainId
+                    ) {
+                      navigate("/tx-result/success");
+                    } else {
+                      notification.show(
+                        "success",
+                        intl.formatMessage({
+                          id: "notification.transaction-success",
+                        }),
+                        ""
+                      );
+                    }
                   },
                 }
               );
             }
 
-            if (!isDetachedMode) {
-              navigate("/", {
-                replace: true,
-              });
+            if (initialIsIBCTransfer && initialIBCTransferDestinationChainId) {
+              navigate("/tx-result/pending");
             } else {
-              window.close();
+              if (!isDetachedMode) {
+                navigate("/", {
+                  replace: true,
+                });
+              } else {
+                window.close();
+              }
             }
           } catch (e) {
             if (e?.message === "Request rejected") {

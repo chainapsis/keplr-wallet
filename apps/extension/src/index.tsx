@@ -102,6 +102,9 @@ import { isRunningInSidePanel } from "./utils";
 import { StarknetSendPage } from "./pages/starknet/send";
 import { SignStarknetTxPage } from "./pages/starknet/sign/tx";
 import { SignStarknetMessagePage } from "./pages/starknet/sign/message";
+import { TxResultFailedPage } from "./pages/tx-result/failed";
+import { TxResultPendingPage } from "./pages/tx-result/pending";
+import { TxResultSuccessPage } from "./pages/tx-result/success";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -489,6 +492,18 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               />
               <Route path="/suggest-chain" element={<SuggestChainPage />} />
               <Route path="/ibc-transfer" element={<IBCTransferPage />} />
+              <Route
+                path="/tx-result/pending"
+                element={<TxResultPendingPage />}
+              />
+              <Route
+                path="/tx-result/success"
+                element={<TxResultSuccessPage />}
+              />
+              <Route
+                path="/tx-result/failed"
+                element={<TxResultFailedPage />}
+              />
             </Routes>
           )
         ) : (
