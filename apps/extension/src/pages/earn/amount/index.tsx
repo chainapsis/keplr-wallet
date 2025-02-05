@@ -1,0 +1,217 @@
+import React, { FunctionComponent, useState } from "react";
+import { observer } from "mobx-react-lite";
+import { HeaderLayout } from "../../../layouts/header";
+import { BackButton } from "../../../layouts/header/components";
+
+import { useStore } from "../../../stores";
+import { CoinPretty, Dec } from "@keplr-wallet/unit";
+import { useIntl } from "react-intl";
+import { Modal } from "../../../components/modal";
+
+import { EarnOutputModal } from "./components/earn-output-modal";
+import { Body2, H1, Subtitle3 } from "../../../components/typography";
+import { ApyTag } from "./components/apy-tag";
+import { Gutter } from "../../../components/gutter";
+import styled from "styled-components";
+import { ColorPalette } from "../../../styles";
+import { Box } from "../../../components/box";
+import { XAxis } from "../../../components/axis";
+import { useSearchParams } from "react-router-dom";
+
+const ZERO_DEC = new Dec("0");
+
+export const EarnAmountPage: FunctionComponent = observer(() => {
+  const [amountInput, setAmountInput] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isEarnOutputModalOpen, setIsEarnOutputModalOpen] = useState(false);
+
+  const { accountStore, chainStore, queriesStore } = useStore();
+  const intl = useIntl();
+  const [searchParams] = useSearchParams();
+
+  const chainId = searchParams.get("chainId") || "noble-1"; // Noble testnet: "grand-1", mainnet: "noble-1"
+  const chainInfo = chainStore.getChain(chainId);
+  const account = accountStore.getAccount(chainId);
+  const currency = chainInfo.currencies[0];
+
+  const balanceQuery = queriesStore
+    .get(chainId)
+    .queryBalances.getQueryBech32Address(account.bech32Address)
+    .getBalance(currency);
+
+  const balance = balanceQuery?.balance.hideDenom(true).toString() || "0";
+
+  const isSubmissionBlocked =
+    !amountInput ||
+    new Dec(amountInput || "0").lte(ZERO_DEC) ||
+    new Dec(balance).equals(ZERO_DEC) ||
+    new Dec(amountInput || "0").gt(new Dec(balance));
+
+  return (
+    <HeaderLayout
+      title={intl.formatMessage({ id: "page.earn.title" })}
+      displayFlex={true}
+      fixedHeight={true}
+      left={<BackButton />}
+      bottomButtons={[
+        {
+          disabled: isSubmissionBlocked,
+          text: intl.formatMessage({ id: "button.next" }),
+          color: "primary",
+          size: "large",
+          type: "submit",
+        },
+      ]}
+      onSubmit={async (e) => {
+        e.preventDefault();
+
+        if (isSubmissionBlocked) {
+          return;
+        }
+
+        setIsEarnOutputModalOpen(true);
+      }}
+    >
+      <Box paddingX="0.75rem">
+        <ApyTag chainId={chainId} />
+
+        <Gutter size="0.75rem" />
+        <H1>
+          {intl.formatMessage({
+            id: "page.earn.amount.input-label",
+          })}
+        </H1>
+
+        <Gutter size="1.75rem" />
+        <StyledTextInput
+          type="number"
+          placeholder={`0 ${currency?.coinDenom ?? ""}`}
+          value={amountInput}
+          warning={new Dec(amountInput || "0").gt(new Dec(balance))}
+          onChange={(e) => {
+            setAmountInput(e.target.value);
+            if (new Dec(e.target.value || "0").gt(new Dec(balance))) {
+              setErrorMessage(
+                intl.formatMessage({
+                  id: "page.earn.amount.error.insufficient-balance",
+                })
+              );
+            } else {
+              setErrorMessage("");
+            }
+          }}
+          autoComplete="off"
+        />
+
+        {errorMessage && (
+          <Box marginTop="0.75rem">
+            <Body2 color={ColorPalette["red-300"]}>{errorMessage}</Body2>
+          </Box>
+        )}
+
+        <Gutter size="1rem" />
+        <XAxis>
+          <Subtitle3 color={ColorPalette.white}>
+            {balanceQuery?.balance.hideDenom(true).toString() || "0"}
+          </Subtitle3>
+          <Gutter size="0.25rem" />
+          <Subtitle3 color={ColorPalette["gray-300"]}>
+            {intl.formatMessage(
+              { id: "page.earn.amount.balance.current-chain" },
+              { chain: chainInfo.chainName }
+            )}
+          </Subtitle3>
+        </XAxis>
+
+        <Gutter size="0.25rem" />
+        <XAxis>
+          <Subtitle3
+            color={ColorPalette["gray-300"]}
+            style={{
+              fontStyle: "italic",
+            }}
+          >
+            {intl.formatMessage(
+              { id: "page.earn.amount.balance.transfer.label" },
+              { tokenName: currency?.coinDenom }
+            )}
+          </Subtitle3>
+          <Gutter size="0.375rem" />
+          <Subtitle3
+            onClick={() => {
+              // TO-DO: select asset page로 이동. params 필요
+            }}
+            style={{
+              textDecoration: "underline",
+              cursor: "pointer",
+              userSelect: "none",
+            }}
+            color={ColorPalette["blue-300"]}
+          >
+            {intl.formatMessage({
+              id: "page.earn.amount.balance.transfer.button",
+            })}
+          </Subtitle3>
+        </XAxis>
+      </Box>
+
+      <Modal
+        isOpen={isEarnOutputModalOpen}
+        align="bottom"
+        close={() => {
+          setIsEarnOutputModalOpen(false);
+        }}
+      >
+        <EarnOutputModal
+          token={new CoinPretty(currency, new Dec(amountInput || "0"))}
+        />
+      </Modal>
+    </HeaderLayout>
+  );
+});
+
+const StyledTextInput = styled.input<{ warning?: boolean }>`
+  font-weight: 700;
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+
+  width: 100%;
+
+  background: none;
+  margin: 0;
+  padding: 0;
+  padding-bottom: 0.75rem;
+
+  border: 0;
+  border-bottom: 1px solid
+    ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-200"]
+        : ColorPalette["gray-300"]};
+
+  color: ${(props) =>
+    props.warning
+      ? ColorPalette["red-300"]
+      : props.theme.mode === "light"
+      ? ColorPalette["gray-700"]
+      : ColorPalette.white};
+
+  ::placeholder {
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-200"]
+        : ColorPalette["gray-300"]};
+  }
+
+  // Remove normalized css properties
+  outline: none;
+
+  ::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  ::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+`;

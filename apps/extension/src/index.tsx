@@ -102,6 +102,8 @@ import { isRunningInSidePanel } from "./utils";
 import { StarknetSendPage } from "./pages/starknet/send";
 import { SignStarknetTxPage } from "./pages/starknet/sign/tx";
 import { SignStarknetMessagePage } from "./pages/starknet/sign/message";
+import { EarnAmountPage } from "./pages/earn/amount";
+import { EarnIntroPage } from "./pages/earn/intro";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -489,6 +491,8 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               />
               <Route path="/suggest-chain" element={<SuggestChainPage />} />
               <Route path="/ibc-transfer" element={<IBCTransferPage />} />
+              <Route path="/earn/intro" element={<EarnIntroPage />} />
+              <Route path="/earn/amount" element={<EarnAmountPage />} />
             </Routes>
           )
         ) : (
