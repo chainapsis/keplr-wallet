@@ -439,7 +439,7 @@
   "page.sign.components.messages.redelegate.paragraph": "将<b>{coin}</b>从<b>{from}</b>重新质押给<b>{to}</b>",
   "page.sign.components.messages.send.title": "发送",
   "page.sign.components.messages.send.paragraph": "<b>{address}</b> 将收到 <b>{amount}</b>",
-  "page.sign.components.messages.transfer.title": "跨链发送",
+  "page.sign.components.messages.transfer.title": "IBC转账",
   "page.sign.components.messages.transfer.paragraph": "通过{channelId}将 {coin} 发送到{address}",
   "page.sign.components.messages.transfer.forwarding.close-button": "关闭",
   "page.sign.components.messages.transfer.forwarding.open-button": "查看转发数据",

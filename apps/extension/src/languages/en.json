@@ -471,7 +471,7 @@
   "page.sign.components.messages.redelegate.paragraph": "Switch Validator from <b>{from}</b> to <b>{to}</b> for <b>{coin}</b>",
   "page.sign.components.messages.send.title": "Send",
   "page.sign.components.messages.send.paragraph": "<b>{address}</b> will receive <b>{amount}</b>",
-  "page.sign.components.messages.transfer.title": "Cross-Chain Send",
+  "page.sign.components.messages.transfer.title": "IBC Transfer",
   "page.sign.components.messages.transfer.paragraph": "Send <b>{coin}</b> to <b>{address}</b> via <b>{channelId}</b>",
   "page.sign.components.messages.transfer.forwarding.close-button": "Close",
   "page.sign.components.messages.transfer.forwarding.open-button": "See forwarding data",
