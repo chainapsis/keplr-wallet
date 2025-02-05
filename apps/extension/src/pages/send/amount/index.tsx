@@ -2179,7 +2179,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             })()}
           />
 
-          {!isEvmTx && (
+          {!isEvmTx && sendType !== "bridge" && (
             <MemoInput
               memoConfig={sendConfigs.memoConfig}
               placeholder={
