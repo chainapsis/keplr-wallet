@@ -163,6 +163,10 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
             return "ibc/8E27BA2D5493AF5636760E354E46004562C46AB7EC0CC4C1CA14E9E20E2545B5";
           }
 
+          if (chainInfo.chainIdentifier === "elys") {
+            return "ueden";
+          }
+
           return chainInfo.stakeCurrency?.coinMinimalDenom;
         })();
 
