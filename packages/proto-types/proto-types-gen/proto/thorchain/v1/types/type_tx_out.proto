@@ -1,0 +1,33 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all)         = false;
+option (gogoproto.goproto_getters_all) = false;
+
+import "common/common.proto";
+import "gogoproto/gogo.proto";
+
+message TxOutItem {
+  string chain = 1 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.Chain", (gogoproto.jsontag) = "chain"];
+  string to_address = 2 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.Address", (gogoproto.jsontag) = "to_address"];
+  string vault_pub_key = 3 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.PubKey"];
+  common.Coin coin = 4 [(gogoproto.nullable) = false, (gogoproto.jsontag) = "coin"];
+  string memo = 5;
+  repeated common.Coin max_gas = 6 [(gogoproto.castrepeated) = "gitlab.com/thorchain/thornode/v3/common.Gas", (gogoproto.nullable) = false, (gogoproto.jsontag) = "max_gas"];
+  int64 gas_rate = 7;
+  string in_hash = 8 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.TxID"];
+  string out_hash = 9 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.TxID"];
+  string module_name = 10 [json_name="-", (gogoproto.jsontag) = "-"];
+  string aggregator = 11;
+  string aggregator_target_asset = 12;
+  string aggregator_target_limit = 13 [(gogoproto.customtype) = "cosmossdk.io/math.Uint", (gogoproto.nullable) = true];
+  string clout_spent = 14 [(gogoproto.customtype) = "cosmossdk.io/math.Uint", (gogoproto.nullable) = true];
+}
+
+message TxOut {
+  option (gogoproto.stringer) = true;
+  int64 height = 1;
+  repeated TxOutItem tx_array = 2 [(gogoproto.nullable) = false];
+}

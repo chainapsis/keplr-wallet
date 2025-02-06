@@ -1,0 +1,15 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "gogoproto/gogo.proto";
+
+message Network {
+  string bond_reward_rune = 1 [(gogoproto.customtype) = "cosmossdk.io/math.Uint", (gogoproto.nullable) = false];
+  string total_bond_units = 2 [(gogoproto.customtype) = "cosmossdk.io/math.Uint", (gogoproto.nullable) = false];
+  int64 LPIncomeSplit = 5;
+  int64 NodeIncomeSplit = 6;
+  uint64 outbound_gas_spent_rune = 7;
+  uint64 outbound_gas_withheld_rune = 8;
+}

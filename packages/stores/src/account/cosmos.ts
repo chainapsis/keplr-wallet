@@ -59,6 +59,8 @@ import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import Long from "long";
 import { IAccountStore } from "./store";
 import { autorun } from "mobx";
+import { MsgDepositForBurnWithCaller } from "@keplr-wallet/proto-types/circle/cctp/v1/tx";
+import { MsgSend as ThorMsgSend } from "@keplr-wallet/proto-types/thorchain/v1/types/msg_send";
 
 export interface CosmosAccount {
   cosmos: CosmosAccountImpl;
@@ -202,6 +204,8 @@ export class CosmosAccountImpl {
           ?.bech32PrefixAccAddr
       );
 
+      const isThorchain = this.chainId.startsWith("thorchain-");
+
       const msg = {
         type: this.msgOpts.send.native.type,
         value: {
@@ -222,12 +226,23 @@ export class CosmosAccountImpl {
           aminoMsgs: [msg],
           protoMsgs: [
             {
-              typeUrl: "/cosmos.bank.v1beta1.MsgSend",
-              value: MsgSend.encode({
-                fromAddress: msg.value.from_address,
-                toAddress: msg.value.to_address,
-                amount: msg.value.amount,
-              }).finish(),
+              typeUrl: isThorchain
+                ? "/types.MsgSend"
+                : "/cosmos.bank.v1beta1.MsgSend",
+              value: isThorchain
+                ? ThorMsgSend.encode({
+                    fromAddress: Bech32Address.fromBech32(
+                      msg.value.from_address
+                    ).address,
+                    toAddress: Bech32Address.fromBech32(msg.value.to_address)
+                      .address,
+                    amount: msg.value.amount,
+                  }).finish()
+                : MsgSend.encode({
+                    fromAddress: msg.value.from_address,
+                    toAddress: msg.value.to_address,
+                    amount: msg.value.amount,
+                  }).finish(),
             },
           ],
           rlpTypes: {
@@ -1880,6 +1895,66 @@ export class CosmosAccountImpl {
           this.queries.cosmos.queryRewards
             .getQueryBech32Address(this.base.bech32Address)
             .fetch();
+        }
+      }
+    );
+  }
+
+  makeCCTPTx(rawCCTPMsgValue: string, rawSendMsg: string) {
+    const cctpMsgValue = JSON.parse(rawCCTPMsgValue);
+    const cctpMsg = {
+      type: "cctp/DepositForBurnWithCaller",
+      value: {
+        from: cctpMsgValue.from,
+        amount: cctpMsgValue.amount,
+        destination_domain: cctpMsgValue.destination_domain,
+        mint_recipient: cctpMsgValue.mint_recipient,
+        burn_token: cctpMsgValue.burn_token,
+        destination_caller: cctpMsgValue.destination_caller,
+      },
+    };
+
+    const sendMsgValue = JSON.parse(rawSendMsg);
+    const sendMsg = {
+      type: this.msgOpts.send.native.type,
+      value: {
+        from_address: sendMsgValue.from_address,
+        to_address: sendMsgValue.to_address,
+        amount: sendMsgValue.amount,
+      },
+    };
+
+    return this.makeTx(
+      "cctp",
+      {
+        aminoMsgs: [cctpMsg, sendMsg],
+        protoMsgs: [
+          {
+            typeUrl: "/circle.cctp.v1.MsgDepositForBurnWithCaller",
+            value: MsgDepositForBurnWithCaller.encode({
+              from: cctpMsg.value.from,
+              amount: cctpMsg.value.amount,
+              destinationDomain: cctpMsg.value.destination_domain,
+              mintRecipient: cctpMsg.value.mint_recipient,
+              burnToken: cctpMsg.value.burn_token,
+              destinationCaller: cctpMsg.value.destination_caller,
+            }).finish(),
+          },
+          {
+            typeUrl: "/cosmos.bank.v1beta1.MsgSend",
+            value: MsgSend.encode({
+              fromAddress: sendMsg.value.from_address,
+              toAddress: sendMsg.value.to_address,
+              amount: sendMsg.value.amount,
+            }).finish(),
+          },
+        ],
+      },
+      (tx) => {
+        if (tx.code == null || tx.code === 0) {
+          this.queries.queryBalances
+            .getQueryBech32Address(this.base.bech32Address)
+            .balances.forEach((queryBalance) => queryBalance.fetch());
         }
       }
     );

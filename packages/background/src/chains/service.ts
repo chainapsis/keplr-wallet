@@ -692,7 +692,11 @@ export class ChainsService {
       await this.addSuggestedChainInfo(validChainInfo);
     };
 
-    if (this.suggestChainPrivilegedOrigins.includes(origin)) {
+    // If the message is internal message or the origin is in the privileged origins, approve it immediately.
+    if (
+      env.isInternalMsg ||
+      this.suggestChainPrivilegedOrigins.includes(origin)
+    ) {
       try {
         const isEvmOnlyChain =
           chainInfo.evm !== undefined &&

@@ -1,0 +1,25 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all)         = false;
+option (gogoproto.goproto_getters_all) = false;
+
+import "gogoproto/gogo.proto";
+
+enum KeygenType {
+    UnknownKeygen = 0;
+    AsgardKeygen = 1;
+}
+
+message Keygen {
+  string id = 1 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.TxID", (gogoproto.customname) = "ID"];
+  KeygenType type = 2;
+  repeated string members = 3;
+}
+
+message KeygenBlock {
+  int64 height = 1;
+  repeated Keygen keygens = 4 [(gogoproto.nullable) = false, (gogoproto.jsontag) = "keygens"];
+}

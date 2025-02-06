@@ -1,0 +1,100 @@
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Connect to Keplr
+
+Integrating your dApp with Keplr allows you to provide seamless interactions for your users. To meet various development needs, Keplr offers flexible integration methods, as detailed below:
+
+- [Direct Integration](#direct-integration)
+- [Keplr Wallet SDK](#keplr-wallet-sdk)
+
+---
+
+## Direct Integration
+
+The most straightforward approach to connect your dApp to Keplr is by utilizing the provider that Keplr injects directly into your web application. This provider is globally available at `window.keplr`. With this integration, you'll always have access to the latest functionality provided by Keplr.
+
+### How to Detect Keplr
+
+To check if Keplr is installed on a user's device, you can verify the presence of `window.keplr`. If `window.keplr` is `undefined` after the `document.load` event, Keplr is not installed. Below are some examples of how to wait for the load event to check the status.
+
+Register a function to `window.onload`:
+
+```javascript
+window.onload = async () => {
+  if (!window.keplr) {
+    alert("Please install the Keplr extension.");
+    return;
+  }
+
+  const keplr = window.keplr;
+
+  const chainId = "cosmoshub-4";
+  await keplr.enable(chainId);
+};
+```
+
+Or track the document's ready state through the document event listener:
+
+```javascript
+async getKeplr(): Promise<Keplr | undefined> {
+    if (window.keplr) {
+        return window.keplr;
+    }
+
+    if (document.readyState === "complete") {
+        return window.keplr;
+    }
+
+    return new Promise((resolve) => {
+        const documentStateChange = (event: Event) => {
+            if (
+                event.target &&
+                (event.target as Document).readyState === "complete"
+            ) {
+                resolve(window.keplr);
+                document.removeEventListener("readystatechange", documentStateChange);
+            }
+        };
+
+        document.addEventListener("readystatechange", documentStateChange);
+    });
+}
+```
+
+---
+
+## Keplr Wallet SDK
+
+For a more modular approach, you can use the Keplr client by using the JavaScript SDK. This allows you to connect your dApp to Keplr by installing the SDK via package managers. The client provides an easy-to-use interface for interacting with Keplr, making integration simpler and more scalable for complex projects.
+
+#### Installation Steps
+
+1. Install `@keplr-wallet/provider-extension` via package managers.
+
+   <Tabs>
+     <TabItem value="npm" label="npm" default>
+        ```bash
+        npm i @keplr-wallet/provider-extension
+        ```
+     </TabItem>
+     <TabItem value="yarn" label="Yarn">
+        ```bash
+        yarn add @keplr-wallet/provider-extension
+        ```
+     </TabItem>
+   </Tabs>
+
+2. Import the SDK into your application.
+
+   ```tsx
+   import { Keplr } from "@keplr-wallet/provider-extension";
+   ```
+
+3. Initialize the SDK.
+
+   ```tsx
+   export const getKeplrFromProvider = async () => {
+     return await Keplr.getKeplr();
+   };
+   ```

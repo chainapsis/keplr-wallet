@@ -215,7 +215,12 @@ export const FeeControl: FunctionComponent<{
 
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const isShowingEstimatedFee = isForEVMTx && !!gasSimulator?.gasEstimated;
+    // EVM 트랜잭션의 경우, 외부에서 fee를 설정한 경우를 구분하기 위해서 사용
+    const isFeeSetByUser = isForEVMTx && feeConfig.type !== "manual";
+
+    // gasAdjustment와 gasEstimated를 사용해 계산된 값을 보여주는 경우
+    const isShowingFeeWithGasEstimated =
+      !!gasSimulator?.enabled && !!gasSimulator?.gasEstimated && isFeeSetByUser;
 
     return (
       <Box>
@@ -274,17 +279,39 @@ export const FeeControl: FunctionComponent<{
                       })()
                         .map((fee) =>
                           fee
+                            .sub(
+                              new Dec(feeConfig.l1DataFee?.toString() || "0")
+                            )
                             .quo(
                               new Dec(
-                                isShowingEstimatedFee ? gasConfig?.gas || 1 : 1
+                                isShowingFeeWithGasEstimated
+                                  ? gasConfig?.gas || 1
+                                  : 1
                               )
                             )
                             .mul(
                               new Dec(
-                                isShowingEstimatedFee
+                                isShowingFeeWithGasEstimated
                                   ? gasSimulator?.gasEstimated || 1
                                   : 1
                               )
+                            )
+                            .mul(
+                              new Dec(
+                                isShowingFeeWithGasEstimated
+                                  ? gasSimulator?.gasAdjustment || 1
+                                  : 1
+                              )
+                            )
+                            .add(
+                              new Dec(feeConfig.l1DataFee?.toString() || "0")
+                            )
+                            .add(
+                              isFeeSetByUser
+                                ? new Dec(0)
+                                : new Dec(
+                                    feeConfig.l1DataFee?.toString() || "0"
+                                  ) // evm fee가 외부에서 설정된 경우, fee = gasLimit * gasPrice이므로 l1DataFee를 더해줘야 함
                             )
                             .maxDecimals(6)
                             .inequalitySymbol(true)
@@ -320,17 +347,33 @@ export const FeeControl: FunctionComponent<{
                     } else {
                       const price = priceStore.calculatePrice(
                         fee
+                          .sub(new Dec(feeConfig.l1DataFee?.toString() || "0"))
                           .quo(
                             new Dec(
-                              isShowingEstimatedFee ? gasConfig?.gas || 1 : 1
+                              isShowingFeeWithGasEstimated
+                                ? gasConfig?.gas || 1
+                                : 1
                             )
                           )
                           .mul(
                             new Dec(
-                              isShowingEstimatedFee
+                              isShowingFeeWithGasEstimated
                                 ? gasSimulator?.gasEstimated || 1
                                 : 1
                             )
+                          )
+                          .mul(
+                            new Dec(
+                              isShowingFeeWithGasEstimated
+                                ? gasSimulator?.gasAdjustment || 1
+                                : 1
+                            )
+                          )
+                          .add(new Dec(feeConfig.l1DataFee?.toString() || "0"))
+                          .add(
+                            isFeeSetByUser
+                              ? new Dec(0)
+                              : new Dec(feeConfig.l1DataFee?.toString() || "0")
                           )
                       );
                       if (price) {

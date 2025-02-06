@@ -2507,6 +2507,15 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
           coinImageUrl:
             "https://keplr-ext-update-note-images.s3.amazonaws.com/token/dai.png",
         },
+        {
+          type: "erc20",
+          contractAddress:
+            "0x28d709c875c0ceac3dce7065bec5328186dc89fe254527084d1689910954b0a",
+          coinDenom: "xSTRK",
+          coinMinimalDenom:
+            "erc20:0x28d709c875c0ceac3dce7065bec5328186dc89fe254527084d1689910954b0a",
+          coinDecimals: 18,
+        },
       ],
       ethContractAddress:
         "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
@@ -2762,6 +2771,285 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       },
     ],
     features: [],
+  },
+  {
+    rpc: "https://rpc-xion.keplr.app",
+    rest: "https://lcd-xion.keplr.app",
+    chainId: "xion-mainnet-1",
+    chainName: "Xion",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/xion-mainnet/chain.png",
+    walletUrlForStaking: "https://wallet.keplr.app/chains/xion",
+    stakeCurrency: {
+      coinDenom: "XION",
+      coinMinimalDenom: "uxion",
+      coinDecimals: 6,
+      coinGeckoId: "xion-2",
+      coinImageUrl:
+        "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/xion-mainnet/chain.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "xion",
+      bech32PrefixAccPub: "xionpub",
+      bech32PrefixValAddr: "xionvaloper",
+      bech32PrefixValPub: "xionvaloperpub",
+      bech32PrefixConsAddr: "xionvalcons",
+      bech32PrefixConsPub: "xionvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "XION",
+        coinMinimalDenom: "uxion",
+        coinDecimals: 6,
+        coinGeckoId: "xion-2",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/xion-mainnet/chain.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "XION",
+        coinMinimalDenom: "uxion",
+        coinDecimals: 6,
+        coinGeckoId: "xion-2",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/xion-mainnet/chain.png",
+        gasPriceStep: {
+          low: 0.0005,
+          average: 0.001,
+          high: 0.002,
+        },
+      },
+    ],
+    features: ["cosmwasm"],
+  },
+  {
+    chainId: "jackal-1",
+    chainName: "Jackal",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/jackal/chain.png",
+    rpc: "https://rpc-jackal.keplr.app",
+    rest: "https://lcd-jackal.keplr.app",
+    walletUrlForStaking: "https://wallet.keplr.app/chains/jackal",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "jkl",
+      bech32PrefixAccPub: "jklpub",
+      bech32PrefixValAddr: "jklvaloper",
+      bech32PrefixValPub: "jklvaloperpub",
+      bech32PrefixConsAddr: "jklvalcons",
+      bech32PrefixConsPub: "jklvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "JKL",
+        coinMinimalDenom: "ujkl",
+        coinDecimals: 6,
+        coinGeckoId: "jackal-protocol",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/jackal/chain.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "JKL",
+        coinMinimalDenom: "ujkl",
+        coinDecimals: 6,
+        coinGeckoId: "jackal-protocol",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/jackal/chain.png",
+        gasPriceStep: {
+          low: 0.002,
+          average: 0.004,
+          high: 0.02,
+        },
+      },
+    ],
+    stakeCurrency: {
+      coinDenom: "JKL",
+      coinMinimalDenom: "ujkl",
+      coinDecimals: 6,
+      coinGeckoId: "jackal-protocol",
+      coinImageUrl:
+        "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/jackal/chain.png",
+    },
+    features: ["cosmwasm"],
+  },
+  {
+    chainId: "thorchain-1",
+    chainName: "THORChain",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/thorchain/chain.png",
+    rpc: "https://rpc-thorchain.keplr.app",
+    rest: "https://lcd-thorchain.keplr.app",
+    bip44: {
+      coinType: 931,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "thor",
+      bech32PrefixAccPub: "thorpub",
+      bech32PrefixValAddr: "thorvaloper",
+      bech32PrefixValPub: "thorvaloperpub",
+      bech32PrefixConsAddr: "thorvalcons",
+      bech32PrefixConsPub: "thorvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "RUNE",
+        coinMinimalDenom: "rune",
+        coinDecimals: 8,
+        coinGeckoId: "thorchain",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/thorchain/rune.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "RUNE",
+        coinMinimalDenom: "rune",
+        coinDecimals: 8,
+        coinGeckoId: "thorchain",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/thorchain/rune.png",
+        gasPriceStep: {
+          low: 0.02,
+          average: 0.02,
+          high: 0.03,
+        },
+      },
+    ],
+    features: [],
+  },
+  {
+    chainId: "elys-1",
+    chainName: "Elys Network",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/elys/chain.png",
+    rpc: "https://rpc-elys.keplr.app",
+    rest: "https://lcd-elys.keplr.app",
+    walletUrlForStaking: "https://wallet.keplr.app/chains/elys-network",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "elys",
+      bech32PrefixAccPub: "elyspub",
+      bech32PrefixValAddr: "elysvaloper",
+      bech32PrefixValPub: "elysvaloperpub",
+      bech32PrefixConsAddr: "elysvalcons",
+      bech32PrefixConsPub: "elysvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "ELYS",
+        coinMinimalDenom: "uelys",
+        coinDecimals: 6,
+        coinGeckoId: "elys-network",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/elys/chain.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ELYS",
+        coinMinimalDenom: "uelys",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.01,
+          average: 0.025,
+          high: 0.03,
+        },
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/elys/chain.png",
+      },
+      {
+        coinDenom: "USDC",
+        coinMinimalDenom:
+          "ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349",
+        coinDecimals: 6,
+        coinGeckoId: "usd-coin",
+        gasPriceStep: {
+          low: 0.01,
+          average: 0.025,
+          high: 0.03,
+        },
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/elys/uusdc.png",
+      },
+      {
+        coinDenom: "ATOM",
+        coinMinimalDenom:
+          "ibc/C4CFF46FD6DE35CA4CF4CE031E643C8FDC9BA4B99AE598E9B0ED98FE3A2319F9",
+        coinDecimals: 6,
+        coinGeckoId: "cosmos",
+        gasPriceStep: {
+          low: 0.01,
+          average: 0.025,
+          high: 0.03,
+        },
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/elys/uatom.png",
+      },
+    ],
+    stakeCurrency: {
+      coinDenom: "ELYS",
+      coinMinimalDenom: "uelys",
+      coinDecimals: 6,
+      coinImageUrl:
+        "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/elys/chain.png",
+    },
+    features: [],
+  },
+  {
+    rpc: "https://rpc.derive.xyz/",
+    rest: "https://rpc.derive.xyz/",
+    evm: {
+      chainId: 957,
+      rpc: "https://rpc.derive.xyz/",
+      websocket: "wss://rpc.derive.xyz/",
+    },
+    chainId: "eip155:957",
+    chainName: "Derive",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "derive-ethereum",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+      },
+      {
+        type: "erc20",
+        contractAddress: "0xb1d1eae60eea9525032a6dcb4c1ce336a1de71be",
+        coinDenom: "DRV",
+        coinMinimalDenom: "erc20:0xb1d1eae60eea9525032a6dcb4c1ce336a1de71be",
+        coinDecimals: 18,
+        coinGeckoId: "derive",
+      },
+      {
+        type: "erc20",
+        contractAddress: "0x7499d654422023a407d92e1D83D387d81BC68De1",
+        coinDenom: "stDRV",
+        coinMinimalDenom: "erc20:0x7499d654422023a407d92e1D83D387d81BC68De1",
+        coinDecimals: 18,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "derive-ethereum",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+      },
+    ],
+    features: ["op-stack-l1-data-fee"],
   },
 ];
 

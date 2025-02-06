@@ -18,12 +18,20 @@ import { FormattedMessage, useIntl } from "react-intl";
 export const LedgerGuideBox: FunctionComponent<{
   data: {
     keyInsensitive: PlainObject;
-    isEthereum: boolean;
+    isEthereum?: boolean;
+    isStarknet?: boolean;
   };
   isLedgerInteracting: boolean;
   ledgerInteractingError: Error | undefined;
   isInternal: boolean;
-}> = ({ isLedgerInteracting, ledgerInteractingError, data, isInternal }) => {
+  backgroundColor?: string;
+}> = ({
+  isLedgerInteracting,
+  ledgerInteractingError,
+  data,
+  isInternal,
+  backgroundColor,
+}) => {
   const [transportErrorCount, setTransportErrorCount] = useState(0);
   const intl = useIntl();
 
@@ -151,7 +159,7 @@ export const LedgerGuideBox: FunctionComponent<{
               case ErrFailedGetPublicKey: {
                 let app = "Cosmos";
 
-                const appData = data.keyInsensitive;
+                const appData = data?.keyInsensitive;
                 if (!appData) {
                   throw new Error("Invalid ledger app data");
                 }
@@ -175,12 +183,19 @@ export const LedgerGuideBox: FunctionComponent<{
                         title={intl.formatMessage({
                           id: "page.sign.components.ledger-guide.box.error-title",
                         })}
-                        paragraph={intl.formatMessage({
-                          id: "page.sign.components.ledger-guide.box.initialize-ethereum-app-first-paragraph",
-                        })}
+                        paragraph={intl.formatMessage(
+                          {
+                            id: "page.sign.components.ledger-guide.box.initialize-app-first-paragraph",
+                          },
+                          { app }
+                        )}
                       />
                     );
                   }
+                }
+
+                if (data.isStarknet && appData["Starknet"]) {
+                  app = "Starknet";
                 }
 
                 return (
@@ -249,6 +264,7 @@ export const LedgerGuideBox: FunctionComponent<{
             paragraph={intl.formatMessage({
               id: "page.sign.components.ledger-guide.box.sign-on-ledger-paragraph",
             })}
+            backgroundColor={backgroundColor}
           />
         );
       })()}

@@ -11,11 +11,18 @@ describe("Test IntPretty", () => {
       "1.10"
     );
 
+    expect(new IntPretty(new Dec("5")).toString()).toBe("5");
+    expect(new IntPretty(new Dec("5.0")).toString()).toBe("5");
+
     expect(new IntPretty("1.1").toDec().equals(new Dec("1.1"))).toBe(true);
     expect(new IntPretty("1.1").maxDecimals(2).toString()).toBe("1.10");
 
     expect(new IntPretty(1.1).toDec().equals(new Dec("1.1"))).toBe(true);
     expect(new IntPretty(1.1).maxDecimals(2).toString()).toBe("1.10");
+    expect(new IntPretty(1.1234).maxDecimals(2).toString()).toBe("1.12");
+    expect(new IntPretty(0.1234).maxDecimals(2).toString()).toBe("0.12");
+    expect(new IntPretty(0.003).maxDecimals(2).toString()).toBe("0.00");
+    expect(new IntPretty(0.00003456).toString()).toBe("0.00003456");
 
     expect(new IntPretty(new Int(1)).toDec().equals(new Dec("1.0"))).toBe(true);
     expect(new IntPretty(new Int(1)).maxDecimals(2).toString()).toBe("1.00");
@@ -224,7 +231,7 @@ describe("Test IntPretty", () => {
     }
   });
 
-  it("Test the add calcutation of IntPretty", () => {
+  it("Test the add calculation of IntPretty", () => {
     const params: {
       base: Dec | Int;
       target: Dec | Int;
@@ -309,7 +316,7 @@ describe("Test IntPretty", () => {
     }
   });
 
-  it("Test the sub calcutation of IntPretty", () => {
+  it("Test the sub calculation of IntPretty", () => {
     const params: {
       base: Dec | Int;
       target: Dec | Int;
@@ -393,7 +400,7 @@ describe("Test IntPretty", () => {
     }
   });
 
-  it("Test the mul calcutation of IntPretty", () => {
+  it("Test the mul calculation of IntPretty", () => {
     const params: {
       base: Dec | Int;
       target: Dec | Int;
@@ -479,7 +486,7 @@ describe("Test IntPretty", () => {
     }
   });
 
-  it("Test the quo calcutation of IntPretty", () => {
+  it("Test the quo calculation of IntPretty", () => {
     expect(() => {
       new IntPretty(new Dec("1")).quo(new IntPretty(new Int(0)));
     }).toThrow();

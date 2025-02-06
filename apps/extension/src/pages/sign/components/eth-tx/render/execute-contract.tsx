@@ -105,7 +105,20 @@ const EthExecuteContractTxPretty: React.FunctionComponent<{
     .replace(/([-_][a-z])/g, (group) =>
       group.toUpperCase().replace("-", "").replace("_", "")
     )
-    .replace(/([A-Z])/g, " $1");
+    .replace(
+      /([a-z])([A-Z]+(?=[A-Z][a-z]|$))|([A-Z][a-z])/g,
+      (match, lower, acronym, normalWord) => {
+        if (acronym) {
+          return `${lower} ${acronym}`;
+        }
+        if (normalWord) {
+          return ` ${normalWord}`;
+        }
+        return match;
+      }
+    )
+    .replace(/\s+/g, " ") // 불필요한 공백 제거
+    .trim();
 
   return (
     <React.Fragment>

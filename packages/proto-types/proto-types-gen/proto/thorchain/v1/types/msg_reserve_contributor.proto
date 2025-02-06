@@ -1,0 +1,14 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "types/type_reserve_contributor.proto";
+import "common/common.proto";
+import "gogoproto/gogo.proto";
+
+message MsgReserveContributor {
+  common.Tx tx = 1 [(gogoproto.nullable) = false];
+  types.ReserveContributor contributor = 2 [(gogoproto.nullable) = false];
+  bytes signer = 3  [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+}

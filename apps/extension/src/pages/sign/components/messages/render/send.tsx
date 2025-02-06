@@ -10,6 +10,7 @@ import { Coin } from "@keplr-wallet/types";
 import { FormattedMessage } from "react-intl";
 import { MessageSendIcon } from "../../../../../components/icon";
 import { ItemLogo } from "../../../../main/token-detail/msg-items/logo";
+import { MsgSend as ThorMsgSend } from "@keplr-wallet/proto-types/thorchain/v1/types/msg_send";
 
 export const SendMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -22,11 +23,31 @@ export const SendMessage: IMessageRenderer = {
         };
       }
 
+      if ("type" in msg && msg.type === "thorchain/MsgSend") {
+        return {
+          amount: msg.value.amount,
+          fromAddress: msg.value.from_address,
+          toAddress: msg.value.to_address,
+        };
+      }
+
       if ("unpacked" in msg && msg.typeUrl === "/cosmos.bank.v1beta1.MsgSend") {
         return {
           amount: (msg.unpacked as MsgSend).amount,
           fromAddress: (msg.unpacked as MsgSend).fromAddress,
           toAddress: (msg.unpacked as MsgSend).toAddress,
+        };
+      }
+
+      if ("unpacked" in msg && msg.typeUrl === "/types.MsgSend") {
+        return {
+          amount: (msg.unpacked as ThorMsgSend).amount,
+          fromAddress: new Bech32Address(
+            (msg.unpacked as ThorMsgSend).fromAddress
+          ).toBech32("thor"),
+          toAddress: new Bech32Address(
+            (msg.unpacked as ThorMsgSend).toAddress
+          ).toBech32("thor"),
         };
       }
     })();

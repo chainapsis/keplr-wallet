@@ -1,0 +1,20 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "common/common.proto";
+import "gogoproto/gogo.proto";
+
+message MsgRunePoolDeposit {
+  bytes signer = 1 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+  common.Tx tx = 2 [(gogoproto.nullable) = false];
+}
+
+message MsgRunePoolWithdraw {
+  bytes signer = 1 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+  common.Tx tx = 2 [(gogoproto.nullable) = false];
+  string basis_points = 3 [(gogoproto.customtype) = "cosmossdk.io/math.Uint", (gogoproto.nullable) = false];
+  string affiliate_address = 4 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.Address"];
+  string affiliate_basis_points = 5 [(gogoproto.customtype) = "cosmossdk.io/math.Uint", (gogoproto.nullable) = false];
+}

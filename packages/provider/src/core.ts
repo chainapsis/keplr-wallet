@@ -765,18 +765,6 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     });
   }
 
-  async enigmaIsNewApi(chainId: string): Promise<boolean> {
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "secret-wasm",
-      "is-new-api-msg",
-      {
-        chainId,
-      }
-    );
-  }
-
   async enigmaEncrypt(
     chainId: string,
     contractCodeHash: string,
@@ -1026,6 +1014,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     hexAddress: string;
     pubKey: Uint8Array;
     address: Uint8Array;
+    isNanoLedger: boolean;
   }> {
     return new Promise((resolve, reject) => {
       let f = false;
@@ -1056,6 +1045,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       hexAddress: string;
       pubKey: Uint8Array;
       address: Uint8Array;
+      isNanoLedger: boolean;
     }>
   > {
     return new Promise((resolve, reject) => {

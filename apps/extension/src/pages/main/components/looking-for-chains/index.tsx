@@ -1,9 +1,8 @@
 import React, { FunctionComponent } from "react";
 import { Box } from "../../../../components/box";
 import { TokenTitleView } from "../token";
-import { Stack } from "../../../../components/stack";
 import { ColorPalette } from "../../../../styles";
-import { ChainInfo } from "@keplr-wallet/types";
+import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import { Gutter } from "../../../../components/gutter";
 import { ChainImageFallback } from "../../../../components/image";
 import { Column, Columns } from "../../../../components/column";
@@ -15,25 +14,35 @@ import { useStore } from "../../../../stores";
 import { observer } from "mobx-react-lite";
 import { useIntl } from "react-intl";
 import { useTheme } from "styled-components";
+import { dispatchGlobalEventExceptSelf } from "../../../../utils/global-events";
+import { Stack } from "../../../../components/stack";
 
 export const LookingForChains: FunctionComponent<{
-  chainInfos: ChainInfo[];
-}> = ({ chainInfos }) => {
+  lookingForChains: {
+    embedded: boolean;
+    stored: boolean;
+    chainInfo: ChainInfo | ModularChainInfo;
+  }[];
+}> = ({ lookingForChains }) => {
   const intl = useIntl();
 
   return (
     <Box>
-      <TokenTitleView
-        title={intl.formatMessage({
-          id: "page.main.components.looking-for-chains.title",
-        })}
-      />
-
-      <Gutter size="0.5rem" />
-
-      <Stack>
-        {chainInfos.map((chainInfo) => (
-          <LookingForChainItem key={chainInfo.chainId} chainInfo={chainInfo} />
+      <Box marginBottom="0.5rem" paddingX="0.375rem">
+        <TokenTitleView
+          title={intl.formatMessage({
+            id: "page.main.components.looking-for-chains.title",
+          })}
+        />
+      </Box>
+      <Stack gutter="0.5rem">
+        {lookingForChains.map((chainData) => (
+          <LookingForChainItem
+            key={chainData.chainInfo.chainId}
+            chainInfo={chainData.chainInfo}
+            embedded={chainData.embedded}
+            stored={chainData.stored}
+          />
         ))}
       </Stack>
     </Box>
@@ -41,9 +50,11 @@ export const LookingForChains: FunctionComponent<{
 };
 
 export const LookingForChainItem: FunctionComponent<{
-  chainInfo: ChainInfo;
-}> = observer(({ chainInfo }) => {
-  const { analyticsStore, keyRingStore } = useStore();
+  chainInfo: ChainInfo | ModularChainInfo;
+  embedded: boolean;
+  stored: boolean;
+}> = observer(({ chainInfo, embedded, stored }) => {
+  const { analyticsStore, keyRingStore, chainStore } = useStore();
   const intl = useIntl();
   const theme = useTheme();
 
@@ -85,8 +96,9 @@ export const LookingForChainItem: FunctionComponent<{
           <Gutter size="0.25rem" />
 
           <Body3 color={Color(ColorPalette["gray-300"]).alpha(0.6).string()}>
-            {chainInfo.stakeCurrency?.coinDenom ||
-              chainInfo.currencies[0].coinDenom}
+            {intl.formatMessage({
+              id: "page.main.components.looking-for-chains.not-enabled",
+            })}
           </Body3>
         </YAxis>
 
@@ -98,20 +110,33 @@ export const LookingForChainItem: FunctionComponent<{
           })}
           size="small"
           color="secondary"
-          onClick={() => {
+          onClick={async () => {
+            // If the chain is not embedded and not added to the store,
+            // add the chain internally and refresh the store.
+            if (!embedded && !stored) {
+              try {
+                await window.keplr?.experimentalSuggestChain(
+                  chainInfo as ChainInfo
+                );
+                await keyRingStore.refreshKeyRingStatus();
+                await chainStore.updateChainInfosFromBackground();
+                await chainStore.updateEnabledChainIdentifiersFromBackground();
+
+                dispatchGlobalEventExceptSelf("keplr_suggested_chain_added");
+              } catch {
+                return;
+              }
+            }
+
             if (keyRingStore.selectedKeyInfo) {
               analyticsStore.logEvent("click_enableChain", {
                 chainId: chainInfo.chainId,
                 chainName: chainInfo.chainName,
               });
 
-              browser.tabs
-                .create({
-                  url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&skipWelcome=true&initialSearchValue=${chainInfo.chainName}`,
-                })
-                .then(() => {
-                  window.close();
-                });
+              browser.tabs.create({
+                url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&skipWelcome=true&initialSearchValue=${chainInfo.chainName}`,
+              });
             }
           }}
         />

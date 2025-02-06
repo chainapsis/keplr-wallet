@@ -6,3 +6,7 @@ export const ErrFailedGetPublicKey = 4;
 export const ErrPublicKeyUnmatched = 5;
 export const ErrFailedSign = 6;
 export const ErrSignRejected = 7;
+
+export interface LedgerOptions {
+  useWebHID: boolean;
+}

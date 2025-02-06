@@ -18,6 +18,11 @@ export type Header =
       paragraphs?: (string | ReactNode)[];
       stepCurrent: number;
       stepTotal: number;
+    }
+  | {
+      mode: "direct";
+      title?: string;
+      paragraphs?: (string | ReactNode)[];
     };
 
 export interface HeaderContext {

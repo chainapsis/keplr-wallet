@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { Fragment, FunctionComponent, useState } from "react";
 import { RegisterSceneBox } from "../components/register-scene-box";
 import {
   useSceneEvents,
@@ -19,21 +19,24 @@ import Transport from "@ledgerhq/hw-transport";
 import { useStore } from "../../../stores";
 import { useNavigate } from "react-router";
 import Eth from "@ledgerhq/hw-app-eth";
+import { LedgerError, StarknetClient } from "@ledgerhq/hw-app-starknet";
 import { Buffer } from "buffer/";
-import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
+import { PubKeySecp256k1, PubKeyStarknet } from "@keplr-wallet/crypto";
 import { LedgerUtils } from "../../../utils";
 import { Checkbox } from "../../../components/checkbox";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 import { useConfirm } from "../../../hooks/confirm";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
+import { STARKNET_LEDGER_DERIVATION_PATH } from "../../sign/utils/handle-starknet-sign";
+import { GuideBox } from "../../../components/guide-box";
 
 type Step = "unknown" | "connected" | "app";
 
 export const ConnectLedgerScene: FunctionComponent<{
   name: string;
   password: string;
-  app: App | "Ethereum";
+  app: App | "Ethereum" | "Starknet";
   bip44Path: {
     account: number;
     change: number;
@@ -45,8 +48,8 @@ export const ConnectLedgerScene: FunctionComponent<{
     vaultId: string;
     afterEnableChains: string[];
   };
-  stepPrevious: number;
-  stepTotal: number;
+  stepPrevious?: number;
+  stepTotal?: number;
 }> = observer(
   ({
     name,
@@ -59,28 +62,55 @@ export const ConnectLedgerScene: FunctionComponent<{
   }) => {
     const intl = useIntl();
 
-    if (!Object.keys(AppHRP).includes(propApp) && propApp !== "Ethereum") {
+    const theme = useTheme();
+
+    if (
+      !Object.keys(AppHRP).includes(propApp) &&
+      propApp !== "Ethereum" &&
+      propApp !== "Starknet"
+    ) {
       throw new Error(`Unsupported app: ${propApp}`);
     }
+
+    const isStepMode = stepPrevious != null && stepTotal != null;
 
     const sceneTransition = useSceneTransition();
 
     const header = useRegisterHeader();
     useSceneEvents({
       onWillVisible: () => {
-        header.setHeader({
-          mode: "step",
-          title: intl.formatMessage({
-            id: "pages.register.connect-ledger.title",
-          }),
-          paragraphs: [
-            intl.formatMessage({
-              id: "pages.register.connect-ledger.paragraph",
-            }),
-          ],
-          stepCurrent: stepPrevious + 1,
-          stepTotal: stepTotal,
-        });
+        header.setHeader(
+          isStepMode
+            ? {
+                mode: "step",
+                title: intl.formatMessage({
+                  id: "pages.register.connect-ledger.title",
+                }),
+                stepCurrent: stepPrevious + 1,
+                stepTotal,
+              }
+            : {
+                mode: "direct",
+                title: intl.formatMessage(
+                  {
+                    id: "pages.register.connect-ledger.direct.title",
+                  },
+                  {
+                    app: propApp,
+                  }
+                ),
+                paragraphs: [
+                  intl.formatMessage(
+                    {
+                      id: "pages.register.connect-ledger.direct.paragraph",
+                    },
+                    {
+                      app: propApp,
+                    }
+                  ),
+                ],
+              }
+        );
       },
     });
 
@@ -98,32 +128,39 @@ export const ConnectLedgerScene: FunctionComponent<{
       let transport: Transport;
 
       try {
-        transport = uiConfigStore.useWebHIDLedger
-          ? await TransportWebHID.create()
-          : await TransportWebUSB.create();
-      } catch {
+        transport =
+          // XXX: Use WebHID for Starknet because WebUSB doesn't work for Starknet app.
+          uiConfigStore.useWebHIDLedger || propApp === "Starknet"
+            ? await TransportWebHID.create()
+            : await TransportWebUSB.create();
+      } catch (e) {
+        console.log(e);
         setStep("unknown");
         setIsLoading(false);
         return;
       }
 
-      if (propApp === "Ethereum") {
-        let ethApp = new Eth(transport);
+      switch (propApp) {
+        case "Cosmos":
+        case "Terra":
+        case "Secret": {
+          if (!bip44Path) {
+            throw new Error("bip44Path not found");
+          }
 
-        // Ensure that the keplr can connect to ethereum app on ledger.
-        // getAppConfiguration() works even if the ledger is on screen saver mode.
-        // To detect the screen saver mode, we should request the address before using.
-        try {
-          await ethApp.getAddress(`m/44'/60'/'0/0/0`);
-        } catch (e) {
-          // Device is locked or user is in home sceen or other app.
-          if (
-            e?.message.includes("(0x6b0c)") ||
-            e?.message.includes("(0x6511)") ||
-            e?.message.includes("(0x6e00)")
-          ) {
+          let app = new CosmosApp(propApp, transport);
+
+          try {
+            const version = await app.getVersion();
+            if (version.device_locked) {
+              throw new Error("Device is locked");
+            }
+
+            // XXX: You must not check "error_message".
+            //      If "error_message" is not "No errors",
+            //      probably it doesn't mean that the device is not connected.
             setStep("connected");
-          } else {
+          } catch (e) {
             console.log(e);
             setStep("unknown");
             await transport.close();
@@ -131,121 +168,209 @@ export const ConnectLedgerScene: FunctionComponent<{
             setIsLoading(false);
             return;
           }
-        }
 
-        transport = await LedgerUtils.tryAppOpen(transport, propApp);
-        ethApp = new Eth(transport);
+          await LedgerUtils.tryAppOpen(transport, propApp);
+          app = new CosmosApp(propApp, transport);
 
-        try {
-          const res = await ethApp.getAddress(
-            `m/44'/60'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`
+          const res = await app.getPublicKey(
+            bip44Path.account,
+            bip44Path.change,
+            bip44Path.addressIndex
           );
+          if (res.error_message === "No errors") {
+            setStep("app");
 
-          const pubKey = new PubKeySecp256k1(Buffer.from(res.publicKey, "hex"));
-
-          setStep("app");
-
-          if (appendModeInfo) {
-            await keyRingStore.appendLedgerKeyApp(
-              appendModeInfo.vaultId,
-              pubKey.toBytes(true),
-              propApp
-            );
-            await chainStore.enableChainInfoInUI(
-              ...appendModeInfo.afterEnableChains
-            );
-            navigate("/welcome", {
-              replace: true,
-            });
+            if (appendModeInfo) {
+              await keyRingStore.appendLedgerKeyApp(
+                appendModeInfo.vaultId,
+                res.compressed_pk,
+                propApp
+              );
+              await chainStore.enableChainInfoInUI(
+                ...appendModeInfo.afterEnableChains
+              );
+              navigate("/welcome", {
+                replace: true,
+              });
+            } else {
+              if (isStepMode) {
+                sceneTransition.replaceAll("finalize-key", {
+                  name,
+                  password,
+                  ledger: {
+                    pubKey: res.compressed_pk,
+                    app: propApp,
+                    bip44Path,
+                  },
+                  stepPrevious: stepPrevious + 1,
+                  stepTotal: stepTotal,
+                });
+              }
+            }
           } else {
-            sceneTransition.replaceAll("finalize-key", {
-              name,
-              password,
-              ledger: {
-                pubKey: pubKey.toBytes(),
-                app: propApp,
-                bip44Path,
-              },
-              stepPrevious: stepPrevious + 1,
-              stepTotal: stepTotal,
-            });
+            setStep("connected");
           }
-        } catch (e) {
-          console.log(e);
-          setStep("connected");
+
+          await transport.close();
+
+          setIsLoading(false);
+
+          return;
         }
+        case "Ethereum": {
+          if (!bip44Path) {
+            throw new Error("bip44Path not found");
+          }
 
-        await transport.close();
+          let ethApp = new Eth(transport);
 
-        setIsLoading(false);
+          // Ensure that the keplr can connect to ethereum app on ledger.
+          // getAppConfiguration() works even if the ledger is on screen saver mode.
+          // To detect the screen saver mode, we should request the address before using.
+          try {
+            await ethApp.getAddress(`m/44'/60'/'0/0/0`);
+          } catch (e) {
+            // Device is locked or user is in home sceen or other app.
+            if (
+              e?.message.includes("(0x6b0c)") ||
+              e?.message.includes("(0x6511)") ||
+              e?.message.includes("(0x6e00)")
+            ) {
+              setStep("connected");
+            } else {
+              console.log(e);
+              setStep("unknown");
+              await transport.close();
 
-        return;
-      }
+              setIsLoading(false);
+              return;
+            }
+          }
 
-      let app = new CosmosApp(propApp, transport);
+          await LedgerUtils.tryAppOpen(transport, propApp);
+          ethApp = new Eth(transport);
 
-      try {
-        const version = await app.getVersion();
-        if (version.device_locked) {
-          throw new Error("Device is locked");
+          try {
+            const res = await ethApp.getAddress(
+              `m/44'/60'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`
+            );
+
+            const pubKey = new PubKeySecp256k1(
+              Buffer.from(res.publicKey, "hex")
+            );
+
+            setStep("app");
+
+            if (appendModeInfo) {
+              await keyRingStore.appendLedgerKeyApp(
+                appendModeInfo.vaultId,
+                pubKey.toBytes(true),
+                propApp
+              );
+              await chainStore.enableChainInfoInUI(
+                ...appendModeInfo.afterEnableChains
+              );
+
+              if (isStepMode) {
+                sceneTransition.push("enable-chains", {
+                  vaultId: appendModeInfo.vaultId,
+                  keyType: "ledger",
+                  candidateAddresses: [],
+                  isFresh: false,
+                  skipWelcome: true,
+                  fallbackStarknetLedgerApp: true,
+                  stepPrevious: stepPrevious,
+                  stepTotal: stepTotal,
+                });
+              } else {
+                window.close();
+              }
+            } else {
+              if (isStepMode) {
+                sceneTransition.replaceAll("finalize-key", {
+                  name,
+                  password,
+                  ledger: {
+                    pubKey: pubKey.toBytes(),
+                    app: propApp,
+                    bip44Path,
+                  },
+                  stepPrevious: stepPrevious + 1,
+                  stepTotal: stepTotal,
+                });
+              }
+            }
+          } catch (e) {
+            console.log(e);
+            setStep("connected");
+          }
+
+          await transport.close();
+
+          setIsLoading(false);
+
+          return;
         }
-
-        // XXX: You must not check "error_message".
-        //      If "error_message" is not "No errors",
-        //      probably it doesn't mean that the device is not connected.
-        setStep("connected");
-      } catch (e) {
-        console.log(e);
-        setStep("unknown");
-        await transport.close();
-
-        setIsLoading(false);
-        return;
-      }
-
-      transport = await LedgerUtils.tryAppOpen(transport, propApp);
-      app = new CosmosApp(propApp, transport);
-
-      const res = await app.getPublicKey(
-        bip44Path.account,
-        bip44Path.change,
-        bip44Path.addressIndex
-      );
-      if (res.error_message === "No errors") {
-        setStep("app");
-
-        if (appendModeInfo) {
-          await keyRingStore.appendLedgerKeyApp(
-            appendModeInfo.vaultId,
-            res.compressed_pk,
-            propApp
+        case "Starknet": {
+          transport = await LedgerUtils.tryAppOpen(transport, propApp);
+          const starknetApp = new StarknetClient(transport);
+          const res = await starknetApp.getPubKey(
+            STARKNET_LEDGER_DERIVATION_PATH,
+            false
           );
-          await chainStore.enableChainInfoInUI(
-            ...appendModeInfo.afterEnableChains
-          );
-          navigate("/welcome", {
-            replace: true,
-          });
-        } else {
-          sceneTransition.replaceAll("finalize-key", {
-            name,
-            password,
-            ledger: {
-              pubKey: res.compressed_pk,
-              app: propApp,
-              bip44Path,
-            },
-            stepPrevious: stepPrevious + 1,
-            stepTotal: stepTotal,
-          });
+          switch (res.returnCode) {
+            case LedgerError.BadCla:
+            case LedgerError.BadIns:
+              setIsLoading(false);
+              setStep("connected");
+
+              await transport.close();
+
+              return;
+            case LedgerError.UserRejected:
+              setIsLoading(false);
+              setStep("app");
+
+              await transport.close();
+
+              return;
+            case LedgerError.NoError:
+              setIsLoading(false);
+              setStep("app");
+
+              await transport.close();
+
+              const pubKey = new PubKeyStarknet(res.publicKey);
+
+              if (appendModeInfo) {
+                await keyRingStore.appendLedgerKeyApp(
+                  appendModeInfo.vaultId,
+                  pubKey.toBytes(),
+                  propApp
+                );
+                await chainStore.enableChainInfoInUI(
+                  ...appendModeInfo.afterEnableChains
+                );
+
+                if (isStepMode) {
+                  navigate("/welcome", {
+                    replace: true,
+                  });
+                } else {
+                  window.close();
+                }
+              }
+              return;
+            default:
+              setIsLoading(false);
+              setStep("unknown");
+
+              await transport.close();
+
+              return;
+          }
         }
-      } else {
-        setStep("connected");
       }
-
-      await transport.close();
-
-      setIsLoading(false);
     };
 
     return (
@@ -266,10 +391,21 @@ export const ConnectLedgerScene: FunctionComponent<{
           />
           <StepView
             step={2}
-            paragraph={intl.formatMessage(
-              { id: "pages.register.connect-ledger.open-app-step-paragraph" },
-              { app: propApp }
-            )}
+            paragraph={
+              isStepMode
+                ? intl.formatMessage(
+                    {
+                      id: "pages.register.connect-ledger.open-app-step-paragraph",
+                    },
+                    { app: propApp }
+                  )
+                : intl.formatMessage(
+                    {
+                      id: "pages.register.connect-ledger.direct.open-app-step-paragraph",
+                    },
+                    { app: propApp }
+                  )
+            }
             icon={
               <Box style={{ opacity: step !== "connected" ? 0.5 : 1 }}>
                 {(() => {
@@ -280,6 +416,8 @@ export const ConnectLedgerScene: FunctionComponent<{
                       return <EthereumIcon />;
                     case "Secret":
                       return <SecretIcon />;
+                    case "Starknet":
+                      return <StarknetIcon />;
                     default:
                       return <CosmosIcon />;
                   }
@@ -291,40 +429,57 @@ export const ConnectLedgerScene: FunctionComponent<{
           />
         </Stack>
 
-        <Gutter size="1.25rem" />
-        <YAxis alignX="center">
-          <XAxis alignY="center">
-            <Checkbox
-              checked={uiConfigStore.useWebHIDLedger}
-              onChange={async (checked) => {
-                if (checked && !window.navigator.hid) {
-                  await confirm.confirm(
-                    intl.formatMessage({
-                      id: "pages.register.connect-ledger.use-hid-confirm-title",
-                    }),
-                    intl.formatMessage({
-                      id: "pages.register.connect-ledger.use-hid-confirm-paragraph",
-                    }),
-                    {
-                      forceYes: true,
+        {propApp !== "Starknet" && (
+          <Fragment>
+            <Gutter size="1.25rem" />
+            <YAxis alignX="center">
+              <XAxis alignY="center">
+                <Checkbox
+                  checked={uiConfigStore.useWebHIDLedger}
+                  onChange={async (checked) => {
+                    if (checked && !window.navigator.hid) {
+                      await confirm.confirm(
+                        intl.formatMessage({
+                          id: "pages.register.connect-ledger.use-hid-confirm-title",
+                        }),
+                        intl.formatMessage({
+                          id: "pages.register.connect-ledger.use-hid-confirm-paragraph",
+                        }),
+                        {
+                          forceYes: true,
+                        }
+                      );
+                      await browser.tabs.create({
+                        url: "chrome://flags/#enable-experimental-web-platform-features",
+                      });
+                      window.close();
+                      return;
                     }
-                  );
-                  await browser.tabs.create({
-                    url: "chrome://flags/#enable-experimental-web-platform-features",
-                  });
-                  window.close();
-                  return;
-                }
 
-                uiConfigStore.setUseWebHIDLedger(checked);
-              }}
-            />
-            <Gutter size="0.5rem" />
-            <Subtitle2 color={ColorPalette["gray-300"]}>
-              <FormattedMessage id="pages.register.connect-ledger.use-hid-text" />
-            </Subtitle2>
-          </XAxis>
-        </YAxis>
+                    uiConfigStore.setUseWebHIDLedger(checked);
+                  }}
+                />
+                <Gutter size="0.5rem" />
+                <Subtitle2 color={ColorPalette["gray-300"]}>
+                  <FormattedMessage id="pages.register.connect-ledger.use-hid-text" />
+                </Subtitle2>
+              </XAxis>
+            </YAxis>
+          </Fragment>
+        )}
+
+        <Gutter size="1.25rem" />
+
+        {propApp === "Starknet" && (
+          <GuideBox
+            title="The custom derivation path set in the previous step does not apply to Starknet App accounts."
+            backgroundColor={
+              theme.mode === "light"
+                ? ColorPalette["gray-50"]
+                : ColorPalette["gray-500"]
+            }
+          />
+        )}
 
         <Gutter size="1.25rem" />
 
@@ -532,6 +687,8 @@ const LedgerIcon: FunctionComponent = () => {
 };
 
 const CosmosIcon: FunctionComponent = () => {
+  const theme = useTheme();
+
   return (
     <svg
       width="80"
@@ -540,7 +697,18 @@ const CosmosIcon: FunctionComponent = () => {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <rect x="8.5" y="9" width="62" height="62" rx="15.6962" fill="#424247" />
+      <rect
+        x="8.5"
+        y="9"
+        width="62"
+        height="62"
+        rx="15.6962"
+        fill={
+          theme.mode === "light"
+            ? ColorPalette["gray-300"]
+            : ColorPalette["gray-400"]
+        }
+      />
       <circle
         cx="39.8219"
         cy="40.321"
@@ -558,6 +726,8 @@ const CosmosIcon: FunctionComponent = () => {
 };
 
 const EthereumIcon: FunctionComponent = () => {
+  const theme = useTheme();
+
   return (
     <svg
       width="80"
@@ -566,7 +736,18 @@ const EthereumIcon: FunctionComponent = () => {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <rect x="9" y="9" width="62" height="62" rx="15.6962" fill="#424247" />
+      <rect
+        x="9"
+        y="9"
+        width="62"
+        height="62"
+        rx="15.6962"
+        fill={
+          theme.mode === "light"
+            ? ColorPalette["gray-300"]
+            : ColorPalette["gray-400"]
+        }
+      />
       <path
         d="M39.879 34.5138V20L27.849 39.9635L39.879 34.5138Z"
         fill="#F6F6F9"
@@ -596,6 +777,8 @@ const EthereumIcon: FunctionComponent = () => {
 };
 
 const TerraIcon: FunctionComponent = () => {
+  const theme = useTheme();
+
   return (
     <svg
       width="80"
@@ -604,7 +787,18 @@ const TerraIcon: FunctionComponent = () => {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <rect x="8.5" y="9" width="62" height="62" rx="15.6962" fill="#424247" />
+      <rect
+        x="8.5"
+        y="9"
+        width="62"
+        height="62"
+        rx="15.6962"
+        fill={
+          theme.mode === "light"
+            ? ColorPalette["gray-300"]
+            : ColorPalette["gray-400"]
+        }
+      />
       <path
         xmlns="http://www.w3.org/2000/svg"
         d="M30.9452 43.907C30.6265 43.3646 29.047 40.8402 27.8945 39.2868C26.7421 37.7333 25.271 36.1999 24.044 34.5995C23.9829 34.7669 23.9219 34.9343 23.8677 35.1017C23.5808 35.9441 23.3653 36.8087 23.2237 37.6864C22.9254 39.4936 22.9254 41.3365 23.2237 43.1437C23.3764 44.0224 23.6031 44.8869 23.9016 45.7283C24.1719 46.5436 24.5027 47.3381 24.8913 48.1054C25.2871 48.8721 25.7403 49.6085 26.2472 50.3084C26.7665 51.0015 27.3351 51.6571 27.9488 52.2703C29.0238 53.3331 30.2392 54.2476 31.5621 54.9889C32.6332 55.5849 32.9993 55.5648 33.1823 55.5514C33.3857 55.2233 33.5416 51.286 33.3924 50.295C33.0338 48.0211 32.2004 45.8458 30.9452 43.907ZM51.2149 27.7495C51.1437 27.6916 51.0689 27.6379 50.9912 27.5888C48.6781 25.7258 45.8875 24.5323 42.9293 24.1411C39.971 23.7498 36.9609 24.1761 34.2331 25.3724C34.0704 25.3724 33.8805 25.3724 33.6772 25.3323C32.8536 25.3485 32.0463 25.5622 31.3248 25.955C30.857 26.2295 30.4096 26.5241 29.969 26.8389C29.2617 27.3474 28.5953 27.9094 27.9759 28.5196C27.3622 29.1328 26.7936 29.7884 26.2743 30.4815C25.7572 31.187 25.2949 31.9302 24.8913 32.7046L24.749 32.9858C25.4269 33.1867 27.9216 32.5706 30.3825 31.4323C30.9457 32.4115 31.7532 33.2321 32.7281 33.8161C32.28 34.5861 32.0968 35.479 32.2061 36.3606C32.7145 40.184 38.3074 42.6214 40.1852 43.4249L40.3411 43.4785C39.404 44.0888 38.5807 44.8545 37.9074 45.7417C37.4603 46.3162 37.1542 46.9852 37.0131 47.6963C36.8719 48.4073 36.8996 49.141 37.0939 49.8397C38.043 53.2546 41.4054 56.1406 43.5002 56.1406H43.6358C44.3963 55.9854 45.1406 55.7613 45.8594 55.471C46.5352 55.6748 47.265 55.6099 47.8931 55.2902C50.8061 53.7904 53.2224 51.4967 54.8554 48.6813C54.9367 48.534 54.8554 48.4067 54.6655 48.4201C54.5239 48.4383 54.3835 48.4651 54.2452 48.5005C54.5031 48.0174 54.7295 47.5187 54.9231 47.0073C55.2692 46.964 55.5934 46.8167 55.8519 46.5854C57.1347 43.356 57.3778 39.8143 56.5479 36.4435C55.7181 33.0726 53.8558 30.0366 51.2149 27.7495ZM33.345 32.9121C32.5299 32.4314 31.8494 31.7569 31.3655 30.9502C32.8635 30.2528 34.1753 29.2186 35.1957 27.9303C35.1957 27.9303 35.9346 26.7987 35.5008 26.0353C37.1962 25.3992 38.9952 25.0746 40.8089 25.0778C43.3073 25.0822 45.7653 25.7013 47.9609 26.879H47.7508C43.9002 26.9862 36.2533 29.3164 33.345 32.9121ZM53.0046 48.4134C52.8894 48.6076 52.7606 48.7951 52.6386 48.9826C49.9269 49.9535 45.8051 52.036 45.1815 54.0849C45.1297 54.2517 45.109 54.4264 45.1204 54.6005C44.5949 54.7868 44.0584 54.9411 43.5138 55.0626H43.4663C42.1105 55.0626 39.026 52.8194 38.1311 49.5584C37.9832 49.0108 37.9676 48.4365 38.0853 47.8818C38.203 47.327 38.4509 46.8073 38.809 46.3644C39.5732 45.3855 40.5244 44.5643 41.6088 43.9472C44.3205 44.9382 50.3472 46.9805 53.7029 47.0876C53.5016 47.5426 53.273 47.9854 53.0182 48.4134H53.0046Z"
@@ -615,6 +809,8 @@ const TerraIcon: FunctionComponent = () => {
 };
 
 const SecretIcon: FunctionComponent = () => {
+  const theme = useTheme();
+
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -623,10 +819,81 @@ const SecretIcon: FunctionComponent = () => {
       fill="none"
       viewBox="0 0 80 80"
     >
-      <rect width="62" height="62" x="9" y="9" fill="#424247" rx="15.696" />
+      <rect
+        width="62"
+        height="62"
+        x="9"
+        y="9"
+        fill={
+          theme.mode === "light"
+            ? ColorPalette["gray-300"]
+            : ColorPalette["gray-400"]
+        }
+        rx="15.696"
+      />
       <path
         fill="#fff"
         d="M51.367 41.368c-2.315-2.095-5.345-3.494-8.281-4.85l-.022-.007c-5.178-2.395-9.655-4.468-9.337-9.369.138-1.868 1.476-2.996 2.575-3.604 1.237-.688 2.878-1.099 4.397-1.099.18 0 .362.008.535.015 4.419.3 7.905 2.198 11.311 6.139l.203.241.239-.205 1.33-1.172.239-.212-.21-.242c-3.797-4.41-7.92-6.63-12.96-6.974a6.993 6.993 0 00-.701-.029c-.152 0-.319 0-.492.007h-.217c-3.305 0-6.929 1.1-9.684 2.945-3.29 2.205-5.135 5.238-5.186 8.541-.13 8.036 6.357 10.74 12.078 13.135l.015.007.058.022c5.062 2.125 9.43 3.956 9.336 8.864-.043 3.238-4.614 5.025-7.753 5.025h-.44v.007c-4.68-.139-8.86-2.183-12.426-6.058l-.217-.234-.231.212-1.295 1.216-.231.22.217.234c4.05 4.418 9.047 6.791 14.457 6.857h.246c3.493 0 7.29-.952 10.154-2.557 3.587-1.985 5.677-4.878 5.894-8.145.246-3.59-.933-6.513-3.601-8.93zM34.573 34.38c2.062 1.787 4.853 3.07 7.55 4.307l.051.022c2.857 1.333 5.562 2.593 7.522 4.344 2.17 1.934 3.088 4.175 2.893 7.054-.181 2.85-2.271 4.754-4.173 5.904.369-.762.571-1.59.593-2.468.043-2.96-1.078-5.326-3.435-7.245-2.061-1.678-4.795-2.813-7.442-3.919-5.504-2.293-10.704-4.461-10.61-10.864.029-2.46 1.49-4.79 4.115-6.556.087-.058.174-.117.268-.176a6.039 6.039 0 00-.528 2.161c-.21 2.967.839 5.4 3.196 7.436z"
+      />
+    </svg>
+  );
+};
+
+const StarknetIcon: FunctionComponent = () => {
+  const theme = useTheme();
+
+  return (
+    <svg
+      width="80"
+      height="80"
+      viewBox="0 0 80 80"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <rect
+        x="9"
+        y="9"
+        width="62"
+        height="62"
+        rx="15.6962"
+        fill={
+          theme.mode === "light"
+            ? ColorPalette["gray-300"]
+            : ColorPalette["gray-400"]
+        }
+      />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M29.3453 33.5692L29.987 31.3661C30.1174 30.918 30.4357 30.5694 30.8404 30.4319L32.8328 29.7511C33.1086 29.6575 33.1108 29.2251 32.8373 29.1266L30.8539 28.4135C30.4514 28.2686 30.1375 27.9149 30.0131 27.4652L29.4011 25.2514C29.3169 24.9458 28.9278 24.9424 28.8391 25.2472L28.1974 27.4503C28.0669 27.8975 27.7487 28.2462 27.3439 28.3845L25.3516 29.0645C25.0758 29.1589 25.0728 29.5904 25.3471 29.689L27.3305 30.402C27.733 30.547 28.0468 30.9015 28.1713 31.3512L28.7832 33.5642C28.8675 33.8706 29.2565 33.8739 29.3453 33.5692Z"
+        fill="#FAFAFA"
+      />
+      <mask id="path-3-inside-1_13610_34339" fill="white">
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M62 32.1347C61.1468 31.1857 58.795 29.2191 57.5 29C56.1948 28.7896 55.0409 28.7724 53.7524 29.0001C51.145 29.4386 49.5809 31.981 47.5149 33.3053C46.442 33.9552 45.527 34.7073 44.5791 35.4732C44.1224 35.8605 43.706 36.273 43.2724 36.6796L42.0874 37.8518C40.7999 39.19 39.5308 40.4089 38.3029 41.4191C37.07 42.4248 35.9174 43.1885 34.7815 43.7218C33.6463 44.258 32.4317 44.5733 30.8484 44.6237C29.2791 44.6788 27.4225 44.3971 25.4365 43.9323C23.4398 43.4695 21.343 42.8099 19 42.2423C19.8175 44.4974 21.0487 46.4903 22.6293 48.3119C24.2284 50.102 26.2253 51.7337 28.7905 52.8068C31.3187 53.9036 34.4958 54.2974 37.4665 53.7034C40.4451 53.1332 43.0589 51.7626 45.1717 50.1779C47.2899 48.5768 49.0037 46.753 50.4484 44.8566C50.8471 44.3328 51.0581 44.0396 51.3467 43.6301L52.1445 42.4552C52.6988 41.7285 53.2035 40.901 53.7524 40.181C54.8282 38.673 55.8886 37.1668 57.121 35.7791C57.7413 35.0752 58.3955 34.402 59.1676 33.755C59.553 33.4392 59.9688 33.1301 60.4297 32.8517C60.8975 32.5514 61.3917 32.3164 62 32.1347Z"
+        />
+      </mask>
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M62 32.1347C61.1468 31.1857 58.795 29.2191 57.5 29C56.1948 28.7896 55.0409 28.7724 53.7524 29.0001C51.145 29.4386 49.5809 31.981 47.5149 33.3053C46.442 33.9552 45.527 34.7073 44.5791 35.4732C44.1224 35.8605 43.706 36.273 43.2724 36.6796L42.0874 37.8518C40.7999 39.19 39.5308 40.4089 38.3029 41.4191C37.07 42.4248 35.9174 43.1885 34.7815 43.7218C33.6463 44.258 32.4317 44.5733 30.8484 44.6237C29.2791 44.6788 27.4225 44.3971 25.4365 43.9323C23.4398 43.4695 21.343 42.8099 19 42.2423C19.8175 44.4974 21.0487 46.4903 22.6293 48.3119C24.2284 50.102 26.2253 51.7337 28.7905 52.8068C31.3187 53.9036 34.4958 54.2974 37.4665 53.7034C40.4451 53.1332 43.0589 51.7626 45.1717 50.1779C47.2899 48.5768 49.0037 46.753 50.4484 44.8566C50.8471 44.3328 51.0581 44.0396 51.3467 43.6301L52.1445 42.4552C52.6988 41.7285 53.2035 40.901 53.7524 40.181C54.8282 38.673 55.8886 37.1668 57.121 35.7791C57.7413 35.0752 58.3955 34.402 59.1676 33.755C59.553 33.4392 59.9688 33.1301 60.4297 32.8517C60.8975 32.5514 61.3917 32.3164 62 32.1347Z"
+        stroke="white"
+        strokeWidth="4"
+        mask="url(#path-3-inside-1_13610_34339)"
+      />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M62 32.2989C61.0832 30.0381 59.3786 28.1351 57.0909 26.7308C54.8166 25.3419 51.6583 24.6332 48.5287 25.2373C46.9823 25.5295 45.4843 26.0921 44.1698 26.8412C42.8612 27.5874 41.6886 28.4856 40.6734 29.4492C40.1666 29.9326 39.7066 30.4369 39.2496 30.9441L38.0652 32.4197L36.2357 34.795C33.9035 37.8511 31.392 41.4327 27.2705 42.494C23.2244 43.5358 21.4695 42.6131 19 42.2319C19.4516 43.3711 20.0109 44.4773 20.7691 45.4504C21.5133 46.4433 22.3922 47.3759 23.4849 48.1751C24.0372 48.559 24.6202 48.9379 25.2678 49.2594C25.9123 49.5698 26.6075 49.8431 27.3494 50.0489C28.8253 50.4442 30.4869 50.5826 32.0957 50.37C33.7053 50.1602 35.2437 49.6617 36.5885 48.9998C37.9432 48.3442 39.1233 47.5456 40.177 46.7029C42.2717 45.0031 43.9009 43.1251 45.2772 41.2267C45.9695 40.2775 46.5978 39.3105 47.179 38.3432L47.863 37.1915C48.0721 36.8549 48.2836 36.5162 48.4986 36.2007C49.3651 34.9334 50.2128 33.9172 51.2424 33.1544C52.2577 32.372 53.6717 31.7938 55.561 31.6595C57.4424 31.5236 59.6145 31.7747 62 32.2989Z"
+        fill="#FAFAFA"
+      />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M51.4692 50.9081C51.4692 52.6039 52.8453 53.9795 54.5415 53.9795C56.2381 53.9795 57.6121 52.6039 57.6121 50.9081C57.6121 49.2123 56.2381 47.8367 54.5415 47.8367C52.8453 47.8367 51.4692 49.2123 51.4692 50.9081Z"
+        fill="white"
       />
     </svg>
   );

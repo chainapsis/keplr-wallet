@@ -876,10 +876,6 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     ]);
   }
 
-  async enigmaIsNewApi(chainId: string): Promise<boolean> {
-    return await this.requestMethod("enigmaIsNewApi", [chainId]);
-  }
-
   getEnigmaUtils(chainId: string): SecretUtils {
     if (this.enigmaUtils.has(chainId)) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -977,6 +973,7 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     hexAddress: string;
     pubKey: Uint8Array;
     address: Uint8Array;
+    isNanoLedger: boolean;
   }> {
     return await this.requestMethod("getStarknetKey", [chainId]);
   }
@@ -987,6 +984,7 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
       hexAddress: string;
       pubKey: Uint8Array;
       address: Uint8Array;
+      isNanoLedger: boolean;
     }>
   > {
     return await this.requestMethod("getStarknetKeysSettled", [chainIds]);
@@ -1137,10 +1135,10 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     }
   }
 
-  protected _requestMethod = async (
+  protected _requestMethod = async <T = unknown>(
     method: keyof IEthereumProvider,
     args: Record<string, any>
-  ): Promise<any> => {
+  ): Promise<T> => {
     const bytes = new Uint8Array(8);
     const id: string = Array.from(crypto.getRandomValues(bytes))
       .map((value) => {
@@ -1203,7 +1201,11 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
   };
 
   protected _initProviderState = async () => {
-    const initialProviderState = await this._requestMethod("request", {
+    const initialProviderState = await this._requestMethod<{
+      currentEvmChainId: number;
+      currentChainId: string;
+      selectedAddress: string;
+    } | null>("request", {
       method: "keplr_initProviderState",
     });
 
@@ -1292,7 +1294,7 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
       return (this.selectedAddress ? [this.selectedAddress] : []) as T;
     }
 
-    return await this._requestMethod("request", {
+    return await this._requestMethod<T>("request", {
       method,
       params,
       providerId: this.eip6963ProviderInfo?.uuid,

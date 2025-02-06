@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -11,15 +11,17 @@ import {
   Caption1,
   Subtitle1,
   Subtitle3,
+  Subtitle4,
 } from "../../../../components/typography";
 import { Gutter } from "../../../../components/gutter";
 import { SearchTextInput } from "../../../../components/input";
 import SimpleBar from "simplebar-react";
-import { ChainImageFallback, Image } from "../../../../components/image";
+import { ChainImageFallback } from "../../../../components/image";
 import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import {
   CheckToggleIcon,
   CopyOutlineIcon,
+  FolderMinusIcon,
   QRCodeIcon,
   StarIcon,
 } from "../../../../components/icon";
@@ -28,22 +30,21 @@ import {
   useSceneEvents,
   useSceneTransition,
 } from "../../../../components/transition";
-import { ModularChainInfo } from "@keplr-wallet/types";
+import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
+import { dispatchGlobalEventExceptSelf } from "../../../../utils/global-events";
+import { isRunningInSidePanel } from "../../../../utils";
+import { IconProps } from "../../../../components/icon/types";
+import { useGetSearchChains } from "../../../../hooks/use-get-search-chains";
 
 export const CopyAddressScene: FunctionComponent<{
   close: () => void;
 }> = observer(({ close }) => {
-  const {
-    chainStore,
-    accountStore,
-    keyRingStore,
-    uiConfigStore,
-    analyticsStore,
-  } = useStore();
+  const { chainStore, accountStore, keyRingStore, uiConfigStore } = useStore();
 
   const intl = useIntl();
   const theme = useTheme();
   const [search, setSearch] = useState("");
+  const runInSidePanel = isRunningInSidePanel();
 
   const searchRef = useFocusOnMount<HTMLInputElement>();
 
@@ -210,12 +211,108 @@ export const CopyAddressScene: FunctionComponent<{
 
   const [blockInteraction, setBlockInteraction] = useState(false);
 
+  const initialLookingForChains = useMemo(
+    () =>
+      chainStore.modularChainInfosInListUI.filter(
+        (modularChainInfo) =>
+          !chainStore.isEnabledChain(modularChainInfo.chainId)
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [chainStore.modularChainInfosInListUI]
+  );
+
+  const { trimSearch, searchedChainInfos } = useGetSearchChains({
+    search,
+    searchOption: "all",
+    filterOption: "chain",
+    initialChainInfos: initialLookingForChains,
+    minSearchLength: 1,
+  });
+
+  const lookingForChains = useMemo(() => {
+    let disabledChainInfos: (ChainInfo | ModularChainInfo)[] =
+      searchedChainInfos.filter(
+        (chainInfo) => !chainStore.isEnabledChain(chainInfo.chainId)
+      );
+
+    const disabledStarknetChainInfos = chainStore.modularChainInfos.filter(
+      (modularChainInfo) =>
+        "starknet" in modularChainInfo &&
+        !chainStore.isEnabledChain(modularChainInfo.chainId) &&
+        (trimSearch.length === 0 ||
+          modularChainInfo.chainId.toLowerCase().includes(trimSearch) ||
+          modularChainInfo.chainName.toLowerCase().includes(trimSearch))
+    );
+
+    disabledChainInfos = [
+      ...new Set([...disabledChainInfos, ...disabledStarknetChainInfos]),
+    ].sort((a, b) => a.chainName.localeCompare(b.chainName));
+
+    return disabledChainInfos.reduce(
+      (acc, chainInfo) => {
+        let embedded: boolean | undefined = false;
+        let stored: boolean = true;
+
+        const isStarknet = "starknet" in chainInfo;
+
+        try {
+          if (isStarknet) {
+            embedded = true;
+          } else {
+            const chainInfoInStore = chainStore.getChain(chainInfo.chainId);
+
+            if (!chainInfoInStore) {
+              stored = false;
+            } else {
+              if (chainInfoInStore.hideInUI) {
+                return acc;
+              }
+
+              stored = true;
+              embedded = chainInfoInStore.embedded?.embedded;
+            }
+          }
+        } catch (e) {
+          // got an error while getting chain info
+          embedded = undefined;
+          stored = false;
+        }
+
+        const chainItem = {
+          embedded: !!embedded,
+          stored,
+          chainInfo,
+        };
+
+        acc.push(chainItem);
+
+        return acc;
+      },
+      [] as {
+        embedded: boolean;
+        stored: boolean;
+        chainInfo: ChainInfo | ModularChainInfo;
+      }[]
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    trimSearch,
+    searchedChainInfos,
+    chainStore,
+    chainStore.modularChainInfosInUI,
+  ]);
+
+  const hasAddresses = addresses.length > 0;
+  const hasLookingForChains = lookingForChains.length > 0;
+  const isShowNoResult = !(hasAddresses || hasLookingForChains);
+
   return (
     <Box
       paddingTop="1.25rem"
       backgroundColor={
         theme.mode === "light" ? ColorPalette.white : ColorPalette["gray-600"]
       }
+      height={runInSidePanel ? "70vh" : undefined}
     >
       <YAxis alignX="center">
         <Subtitle1
@@ -253,66 +350,10 @@ export const CopyAddressScene: FunctionComponent<{
           display: "flex",
           flexDirection: "column",
           overflowY: "auto",
-          height: "21.5rem",
+          height: runInSidePanel ? "" : "21.5rem",
         }}
       >
-        {addresses.length === 0 ? (
-          <Box
-            alignX="center"
-            alignY="center"
-            paddingX="1.625rem"
-            paddingTop="3.1rem"
-            paddingBottom="3.2rem"
-          >
-            <Image
-              width="140px"
-              height="160px"
-              src={require(theme.mode === "light"
-                ? "../../../../public/assets/img/copy-address-no-search-result-light.png"
-                : "../../../../public/assets/img/copy-address-no-search-result.png")}
-              alt="copy-address-no-search-result-image"
-            />
-            <Gutter size="0.75rem" />
-
-            <Subtitle3
-              color={ColorPalette["gray-300"]}
-              style={{ textAlign: "center" }}
-            >
-              <FormattedMessage
-                id="page.main.components.deposit-modal.empty-text"
-                values={{
-                  link: (chunks) => (
-                    <Subtitle3
-                      as="a"
-                      style={{
-                        cursor: "pointer",
-                        textDecoration: "underline",
-                      }}
-                      onClick={(e) => {
-                        e.preventDefault();
-
-                        if (keyRingStore.selectedKeyInfo) {
-                          analyticsStore.logEvent(
-                            "click_menu_manageChainVisibility"
-                          );
-                          browser.tabs
-                            .create({
-                              url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&skipWelcome=true`,
-                            })
-                            .then(() => {
-                              window.close();
-                            });
-                        }
-                      }}
-                    >
-                      {chunks}
-                    </Subtitle3>
-                  ),
-                }}
-              />
-            </Subtitle3>
-          </Box>
-        ) : null}
+        {isShowNoResult && <NoResultBox />}
 
         <Box paddingX="0.75rem">
           {addresses
@@ -353,6 +394,32 @@ export const CopyAddressScene: FunctionComponent<{
               );
             })}
         </Box>
+
+        {hasAddresses && hasLookingForChains && <Gutter size="1.25rem" />}
+        {hasLookingForChains && (
+          <Box paddingX="0.75rem">
+            <Subtitle4
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-500"]
+                  : ColorPalette["gray-200"]
+              }
+            >
+              <FormattedMessage id="page.main.components.deposit-modal.look-for-chains" />
+            </Subtitle4>
+            {lookingForChains.map((chainData) => {
+              return (
+                <EnableChainItem
+                  key={chainData.chainInfo.chainId}
+                  chainInfo={chainData.chainInfo}
+                  embedded={chainData.embedded}
+                  stored={chainData.stored}
+                />
+              );
+            })}
+          </Box>
+        )}
+        <Gutter size="0.75rem" />
       </SimpleBar>
     </Box>
   );
@@ -366,7 +433,6 @@ const CopyAddressItem: FunctionComponent<{
     starknetAddress?: string;
   };
   close: () => void;
-
   blockInteraction: boolean;
   setBlockInteraction: (block: boolean) => void;
   setSortPriorities: (
@@ -658,3 +724,174 @@ const CopyAddressItem: FunctionComponent<{
     );
   }
 );
+
+const EnableChainItem: FunctionComponent<{
+  chainInfo: ChainInfo | ModularChainInfo;
+  embedded: boolean;
+  stored: boolean;
+}> = observer(({ chainInfo, embedded, stored }) => {
+  const { analyticsStore, chainStore, keyRingStore } = useStore();
+  const theme = useTheme();
+  const [isContainerHover, setIsContainerHover] = useState(false);
+
+  return (
+    <Box
+      height="4rem"
+      borderRadius="0.375rem"
+      alignY="center"
+      marginTop="0.75rem"
+    >
+      <Box
+        height="4rem"
+        borderRadius="0.375rem"
+        alignY="center"
+        backgroundColor={
+          isContainerHover
+            ? theme.mode === "light"
+              ? ColorPalette["gray-50"]
+              : ColorPalette["gray-500"]
+            : theme.mode === "light"
+            ? ColorPalette["gray-10"]
+            : ColorPalette["gray-550"]
+        }
+        onHoverStateChange={(isHover) => {
+          setIsContainerHover(isHover);
+        }}
+        cursor="pointer"
+        paddingX="1rem"
+        onClick={async () => {
+          // If the chain is not embedded and not added to the store,
+          // add the chain internally and refresh the store.
+          if (!embedded && !stored) {
+            try {
+              await window.keplr?.experimentalSuggestChain(
+                chainInfo as ChainInfo
+              );
+              await keyRingStore.refreshKeyRingStatus();
+              await chainStore.updateChainInfosFromBackground();
+              await chainStore.updateEnabledChainIdentifiersFromBackground();
+
+              dispatchGlobalEventExceptSelf("keplr_suggested_chain_added");
+            } catch {
+              return;
+            }
+          }
+
+          if (keyRingStore.selectedKeyInfo) {
+            analyticsStore.logEvent("click_enableChain", {
+              chainId: chainInfo.chainId,
+              chainName: chainInfo.chainName,
+            });
+
+            browser.tabs.create({
+              url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&skipWelcome=true&initialSearchValue=${chainInfo.chainName}`,
+            });
+          }
+        }}
+      >
+        <XAxis alignY="center">
+          <ChainImageFallback chainInfo={chainInfo} size="2rem" />
+          <Gutter size="0.5rem" />
+          <Subtitle3
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-700"]
+                : ColorPalette["gray-10"]
+            }
+          >
+            {chainInfo.chainName}
+          </Subtitle3>
+          <div style={{ flex: 1, minWidth: "1rem" }} />
+          <Box>
+            <XAxis alignY="center">
+              <Subtitle3
+                color={
+                  isContainerHover
+                    ? theme.mode === "light"
+                      ? ColorPalette["blue-200"]
+                      : ColorPalette["gray-100"]
+                    : theme.mode === "light"
+                    ? ColorPalette["blue-400"]
+                    : ColorPalette["gray-200"]
+                }
+              >
+                <FormattedMessage id="page.main.components.deposit-modal.enable-chain" />
+              </Subtitle3>
+              <Gutter size="0.25rem" />
+              <ArrowTopRightOnSquareIcon
+                width="1.125rem"
+                height="1.125rem"
+                color={
+                  isContainerHover
+                    ? theme.mode === "light"
+                      ? ColorPalette["blue-200"]
+                      : ColorPalette["gray-100"]
+                    : theme.mode === "light"
+                    ? ColorPalette["blue-400"]
+                    : ColorPalette["gray-200"]
+                }
+              />
+            </XAxis>
+          </Box>
+        </XAxis>
+      </Box>
+    </Box>
+  );
+});
+
+const NoResultBox: FunctionComponent = () => {
+  const theme = useTheme();
+
+  return (
+    <Box alignX="center" alignY="center" paddingY="1.875rem">
+      <FolderMinusIcon
+        width="4.5rem"
+        height="4.5rem"
+        color={
+          theme.mode === "light"
+            ? ColorPalette["gray-200"]
+            : ColorPalette["gray-400"]
+        }
+      />
+      <Gutter size="0.75rem" />
+      <Subtitle3
+        color={
+          theme.mode === "light"
+            ? ColorPalette["gray-200"]
+            : ColorPalette["gray-400"]
+        }
+        style={{
+          textAlign: "center",
+          width: "17.25rem",
+        }}
+      >
+        <FormattedMessage id="page.main.components.deposit-modal.empty-text" />
+      </Subtitle3>
+    </Box>
+  );
+};
+
+const ArrowTopRightOnSquareIcon: FunctionComponent<IconProps> = ({
+  width = "1.5rem",
+  height = "1.5rem",
+  color,
+}) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={width}
+      height={height}
+      viewBox="0 0 18 18"
+      fill="none"
+    >
+      <path
+        d="M3.8248 4.95029C3.45201 4.95029 3.1498 5.2525 3.1498 5.62529V13.2753C3.1498 13.6481 3.45201 13.9503 3.82481 13.9503H11.4748C11.8476 13.9503 12.1498 13.6481 12.1498 13.2753V9.67529C12.1498 9.3025 12.452 9.00029 12.8248 9.00029C13.1976 9.00029 13.4998 9.3025 13.4998 9.67529V13.2753C13.4998 14.3937 12.5932 15.3003 11.4748 15.3003H3.82481C2.70643 15.3003 1.7998 14.3937 1.7998 13.2753V5.62529C1.7998 4.50692 2.70643 3.60029 3.8248 3.60029H8.3248C8.6976 3.60029 8.9998 3.9025 8.9998 4.27529C8.9998 4.64809 8.6976 4.95029 8.3248 4.95029H3.8248Z"
+        fill={color}
+      />
+      <path
+        d="M5.57427 11.4782C5.82438 11.7546 6.25123 11.7759 6.52767 11.5258L14.8498 3.99628V6.52529C14.8498 6.89809 15.152 7.20029 15.5248 7.20029C15.8976 7.20029 16.1998 6.89809 16.1998 6.52529V2.47529C16.1998 2.1025 15.8976 1.80029 15.5248 1.80029H11.4748C11.102 1.80029 10.7998 2.1025 10.7998 2.47529C10.7998 2.84808 11.102 3.15029 11.4748 3.15029H13.7727L5.62194 10.5248C5.3455 10.7749 5.32416 11.2017 5.57427 11.4782Z"
+        fill={color}
+      />
+    </svg>
+  );
+};

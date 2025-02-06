@@ -1,0 +1,26 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "gogoproto/gogo.proto";
+
+message ProtoInt64 {
+  int64 value = 1;
+}
+
+message ProtoUint64 {
+  uint64 value = 1;
+}
+
+message ProtoAccAddresses {
+  repeated bytes value = 1  [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+}
+
+message ProtoStrings {
+  repeated string value = 1;
+}
+
+message ProtoBools {
+  repeated bool value = 1;
+}

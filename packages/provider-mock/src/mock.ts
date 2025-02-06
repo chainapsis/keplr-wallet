@@ -100,10 +100,6 @@ export class MockKeplr implements Keplr {
     throw new Error("Not implemented");
   }
 
-  enigmaIsNewApi(): Promise<boolean> {
-    throw new Error("Not implemented");
-  }
-
   experimentalSuggestChain(): Promise<void> {
     throw new Error("Not implemented");
   }
@@ -402,6 +398,7 @@ export class MockKeplr implements Keplr {
     hexAddress: string;
     pubKey: Uint8Array;
     address: Uint8Array;
+    isNanoLedger: boolean;
   }> {
     throw new Error("Not implemented");
   }
@@ -412,6 +409,7 @@ export class MockKeplr implements Keplr {
       hexAddress: string;
       pubKey: Uint8Array;
       address: Uint8Array;
+      isNanoLedger: boolean;
     }>
   > {
     throw new Error("Not implemented");

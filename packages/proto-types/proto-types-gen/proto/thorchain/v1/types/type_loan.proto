@@ -1,0 +1,18 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "common/common.proto";
+import "gogoproto/gogo.proto";
+
+message Loan {
+  string owner = 1 [(gogoproto.casttype) = "gitlab.com/thorchain/thornode/v3/common.Address"];
+  common.Asset asset = 2 [(gogoproto.nullable) = false, (gogoproto.customtype) = "gitlab.com/thorchain/thornode/v3/common.Asset"];
+  string debt_issued = 3 [(gogoproto.customtype) = "cosmossdk.io/math.Uint", (gogoproto.nullable) = false];
+  string debt_repaid = 4 [(gogoproto.customtype) = "cosmossdk.io/math.Uint", (gogoproto.nullable) = false];
+  string collateral_deposited = 5 [(gogoproto.customtype) = "cosmossdk.io/math.Uint", (gogoproto.nullable) = false];
+  string collateral_withdrawn = 6 [(gogoproto.customtype) = "cosmossdk.io/math.Uint", (gogoproto.nullable) = false];
+  int64 last_open_height = 9;
+  int64 last_repay_height = 10;
+}

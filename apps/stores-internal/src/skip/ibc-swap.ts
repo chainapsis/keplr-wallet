@@ -1,5 +1,5 @@
 import { HasMapStore, IChainInfoImpl } from "@keplr-wallet/stores";
-import { AppCurrency, Currency } from "@keplr-wallet/types";
+import { AppCurrency, Currency, ERC20Currency } from "@keplr-wallet/types";
 import { ObservableQueryAssets } from "./assets";
 import { computed, makeObservable } from "mobx";
 import { ObservableQueryChains } from "./chains";
@@ -35,7 +35,7 @@ export class ObservableQueryIBCSwapInner {
   getQueryMsgsDirect(
     chainIdsToAddresses: Record<string, string>,
     slippageTolerancePercent: number,
-    affiliateFeeReceiver: string
+    affiliateFeeReceiver: string | undefined
   ): ObservableQueryMsgsDirectInner {
     const inAmount = new CoinPretty(
       this.chainStore
@@ -348,9 +348,19 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
         }
       }
     } else {
-      // 현재 CW20같은 얘들은 처리할 수 없다.
-      if (!("type" in currency)) {
-        return this.queryChains.isSupportsMemo(chainId);
+      if ("type" in currency) {
+        switch (currency.type) {
+          case "erc20":
+            return this.queryChains.isChainTypeEVM(chainId);
+          // 현재 CW20같은 얘들은 처리할 수 없다.
+          default:
+            return false;
+        }
+      } else {
+        return (
+          this.queryChains.isChainTypeEVM(chainId) ||
+          this.queryChains.isSupportsMemo(chainId)
+        );
       }
     }
     return false;
@@ -444,8 +454,30 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
               }
             }
           } else if (!("paths" in currency)) {
+            if (
+              swapVenue.chainId === "osmosis-1" &&
+              currency.coinMinimalDenom ===
+                "ibc/0FA9232B262B89E77D1335D54FB1E1F506A92A7E4B51524B400DC69C68D28372"
+            ) {
+              const inner = getMap(swapVenue.chainId);
+
+              if (
+                !inner.currencies.some(
+                  (c) => c.coinMinimalDenom === currency.coinMinimalDenom
+                )
+              ) {
+                inner.currencies.push(currency);
+              }
+
+              continue;
+            }
+
             // 현재 CW20같은 얘들은 처리할 수 없다.
-            if (!("type" in currency)) {
+            if (
+              !("type" in currency) ||
+              ("type" in currency &&
+                (currency as ERC20Currency).type === "erc20")
+            ) {
               // if currency is not ibc currency
               const inner = getMap(chainId);
               if (
@@ -540,6 +572,8 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
             return true;
           }
         }
+      } else {
+        return this.queryChains.isChainTypeEVM(chainId);
       }
 
       return false;
@@ -583,6 +617,41 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
                 denom: originOutCurrency.coinMinimalDenom,
               },
             ];
+
+      // Skip에서 내려주는 응답에서 symbol(coinDenom)이 같다면 해당 토큰의 도착 체인 후보가 될 수 있는 걸로 간주한다.
+      const isEVMOnlyChain = chainInfo.chainId.startsWith("eip155:");
+      const asset = this.queryAssets
+        .getAssets(chainInfo.chainId)
+        .assets.find((asset) => asset.denom === currency.coinMinimalDenom);
+      for (const candidateChain of this.queryChains.chains) {
+        const isCandidateChainEVMOnlyChain =
+          candidateChain.chainInfo.chainId.startsWith("eip155:");
+        const isCandidateChain =
+          candidateChain.chainInfo.chainId !== chainInfo.chainId &&
+          (isEVMOnlyChain ? true : isCandidateChainEVMOnlyChain);
+        if (isCandidateChain) {
+          const candidateAsset = this.queryAssets
+            .getAssets(candidateChain.chainInfo.chainId)
+            .assetsRaw.find(
+              (a) =>
+                a.recommendedSymbol &&
+                a.recommendedSymbol === asset?.recommendedSymbol
+            );
+
+          if (candidateAsset) {
+            const currencyFound = this.chainStore
+              .getChain(candidateChain.chainInfo.chainId)
+              .findCurrencyWithoutReaction(candidateAsset.denom);
+
+            if (currencyFound) {
+              res.push({
+                denom: candidateAsset.denom,
+                chainId: candidateChain.chainInfo.chainId,
+              });
+            }
+          }
+        }
+      }
 
       const channels = this.queryIBCPacketForwardingTransfer.getIBCChannels(
         originOutChainId,

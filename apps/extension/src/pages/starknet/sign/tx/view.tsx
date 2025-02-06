@@ -32,6 +32,10 @@ import { XAxis } from "../../../../components/axis";
 import { ViewDataButton } from "../../../sign/components/view-data-button";
 import { AccountActivationModal } from "../../components/account-activation-modal";
 import { Modal } from "../../../../components/modal";
+import { connectAndSignInvokeTxWithLedger } from "../../../sign/utils/handle-starknet-sign";
+import { KeplrError } from "@keplr-wallet/router";
+import { ErrModuleLedgerSign } from "../../../sign/utils/ledger-types";
+import { LedgerGuideBox } from "../../../sign/components/ledger-guide-box";
 import { useNavigate } from "react-router";
 import { ApproveIcon, CancelIcon } from "../../../../components/button";
 
@@ -164,24 +168,84 @@ export const SignStarknetTxView: FunctionComponent<{
         }> => {
           noop(gasSimulationRefresher.count);
 
-          const res = await starknetAccountStore
+          const estimateResult = await starknetAccountStore
             .getAccount(chainId)
             .estimateInvokeFee(sender, interactionData.data.transactions, type);
 
-          // gas adjustment = 1.2, signature verification = 700
-          const gasConsumed = new Dec(res.gas_consumed);
-          const gasMax = gasConsumed.mul(new Dec(1.2)).add(new Dec(700));
-          const gasPrice = new CoinPretty(feeCurrency, res.gas_price);
-          const maxGasPrice = gasPrice.mul(new Dec(1.2));
+          const {
+            gas_consumed,
+            data_gas_consumed,
+            gas_price,
+            overall_fee,
+            resourceBounds,
+            unit,
+          } = estimateResult;
 
-          feeConfig.setGasPrice({
-            gasPrice: gasPrice,
-            maxGasPrice: maxGasPrice,
-          });
+          const gasMargin = new Dec(1.2);
+          const gasPriceMargin = new Dec(1.5);
 
-          return {
-            gasUsed: parseInt(gasMax.truncate().toString()),
-          };
+          const isV1Tx = feeConfig.type === "ETH" && unit === "WEI";
+
+          const gasConsumed = new Dec(gas_consumed);
+          const dataGasConsumed = new Dec(data_gas_consumed);
+          const sigVerificationGasConsumed = new Dec(583);
+          const totalGasConsumed = gasConsumed
+            .add(dataGasConsumed)
+            .add(sigVerificationGasConsumed);
+
+          const gasPriceDec = new Dec(gas_price);
+
+          // overall_fee = gas_consumed * gas_price + data_gas_consumed * data_gas_price
+          const overallFee = new Dec(overall_fee);
+
+          const signatureVerificationFee =
+            sigVerificationGasConsumed.mul(gasPriceDec);
+
+          // adjusted_overall_fee = overall_fee + signature_verification_gas_consumed * gas_price
+          const adjustedOverallFee = overallFee.add(signatureVerificationFee);
+
+          // adjusted_gas_price = adjusted_overall_fee / total_gas_consumed
+          const adjustedGasPrice = adjustedOverallFee.quo(totalGasConsumed);
+
+          const gasPrice = new CoinPretty(feeCurrency, adjustedGasPrice);
+
+          if (isV1Tx) {
+            const maxGasPrice = gasPrice.mul(gasPriceMargin);
+            const maxGas = totalGasConsumed.mul(gasMargin);
+
+            feeConfig.setGasPrice({
+              gasPrice,
+              maxGasPrice,
+            });
+
+            return {
+              gasUsed: parseInt(maxGas.truncate().toString()),
+            };
+          } else {
+            const l1Gas = resourceBounds.l1_gas;
+
+            const maxGas = adjustedOverallFee.quo(gasPriceDec).mul(gasMargin);
+            const maxGasPrice = gasPrice.mul(gasPriceMargin);
+
+            const maxPricePerUnit = new CoinPretty(
+              feeCurrency,
+              num.hexToDecimalString(l1Gas.max_price_per_unit)
+            );
+
+            feeConfig.setGasPrice({
+              gasPrice: new CoinPretty(feeCurrency, gasPriceDec),
+              maxGasPrice: maxPricePerUnit
+                .sub(maxGasPrice)
+                .toDec()
+                .gt(new Dec(0))
+                ? maxPricePerUnit
+                : maxGasPrice,
+            });
+
+            return {
+              gasUsed: parseInt(maxGas.truncate().toString()),
+            };
+          }
         },
       };
     }
@@ -200,6 +264,11 @@ export const SignStarknetTxView: FunctionComponent<{
   });
 
   const [isViewData, setIsViewData] = useState(false);
+
+  const [isLedgerInteracting, setIsLedgerInteracting] = useState(false);
+  const [ledgerInteractingError, setLedgerInteractingError] = useState<
+    Error | undefined
+  >(undefined);
 
   const isAccountNotDeployed =
     senderConfig.uiProperties.error instanceof AccountNotDeployed;
@@ -224,7 +293,7 @@ export const SignStarknetTxView: FunctionComponent<{
   const isLoading =
     signStarknetTxInteractionStore.isObsoleteInteractionApproved(
       interactionData.id
-    );
+    ) || isLedgerInteracting;
 
   const approve = async () => {
     try {
@@ -264,7 +333,6 @@ export const SignStarknetTxView: FunctionComponent<{
             chainId: interactionData.data.details.chainId,
             cairoVersion: interactionData.data.details.cairoVersion,
             skipValidate: false,
-
             maxFee: feeConfig.maxFee
               ? num.toHex(feeConfig.maxFee.toCoin().amount)
               : "0x0",
@@ -277,7 +345,6 @@ export const SignStarknetTxView: FunctionComponent<{
             chainId: interactionData.data.details.chainId,
             cairoVersion: interactionData.data.details.cairoVersion,
             skipValidate: false,
-
             resourceBounds: {
               l1_gas: {
                 max_amount: num.toHex(gasConfig.gas.toString()),
@@ -308,10 +375,22 @@ export const SignStarknetTxView: FunctionComponent<{
         }
       })();
 
+      let signature: string[] | undefined = undefined;
+      if (interactionData.data.keyType === "ledger") {
+        setIsLedgerInteracting(true);
+        setLedgerInteractingError(undefined);
+        signature = await connectAndSignInvokeTxWithLedger(
+          interactionData.data.pubKey,
+          interactionData.data.transactions,
+          details
+        );
+      }
+
       await signStarknetTxInteractionStore.approveWithProceedNext(
         interactionData.id,
         interactionData.data.transactions,
         details,
+        signature,
         async (proceedNext) => {
           if (!proceedNext) {
             if (
@@ -344,6 +423,18 @@ export const SignStarknetTxView: FunctionComponent<{
       );
     } catch (e) {
       console.log(e);
+
+      if (e instanceof KeplrError) {
+        if (e.module === ErrModuleLedgerSign) {
+          setLedgerInteractingError(e);
+        } else {
+          setLedgerInteractingError(undefined);
+        }
+      } else {
+        setLedgerInteractingError(undefined);
+      }
+    } finally {
+      setIsLedgerInteracting(false);
     }
   };
 
@@ -361,7 +452,15 @@ export const SignStarknetTxView: FunctionComponent<{
       // 유저가 enter를 눌러서 우발적으로(?) approve를 누르지 않도록 onSubmit을 의도적으로 사용하지 않았음.
       bottomButtons={[
         {
-          textOverrideIcon: <CancelIcon color={ColorPalette["gray-200"]} />,
+          textOverrideIcon: (
+            <CancelIcon
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["blue-400"]
+                  : ColorPalette["gray-200"]
+              }
+            />
+          ),
           size: "large",
           color: "secondary",
           style: {
@@ -403,11 +502,12 @@ export const SignStarknetTxView: FunctionComponent<{
     >
       <Box
         height="100%"
+        padding="0.75rem 0.75rem 0"
         style={{
           overflow: "auto",
         }}
       >
-        <Box padding="0.75rem 0.75rem 0" marginBottom="0.5rem">
+        <Box marginBottom="0.5rem">
           <Columns sum={1} alignY="center">
             <XAxis>
               <H5
@@ -450,16 +550,14 @@ export const SignStarknetTxView: FunctionComponent<{
               flex: "0 1 auto",
               overflowY: "auto",
               overflowX: "hidden",
-
               boxShadow:
                 theme.mode === "light"
                   ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
                   : "none",
-
-              margin: "0 0.75rem",
-
               height: "fit-content",
               maxHeight: "23rem",
+
+              borderRadius: "0.375rem",
             }}
           >
             <Box
@@ -505,6 +603,16 @@ export const SignStarknetTxView: FunctionComponent<{
           gasConfig={gasConfig}
           gasSimulator={gasSimulator}
         />
+
+        <LedgerGuideBox
+          data={{
+            keyInsensitive: interactionData.data.keyInsensitive,
+            isStarknet: true,
+          }}
+          isLedgerInteracting={isLedgerInteracting}
+          ledgerInteractingError={ledgerInteractingError}
+          isInternal={interactionData.isInternal}
+        />
       </Box>
 
       <Modal
@@ -516,6 +624,10 @@ export const SignStarknetTxView: FunctionComponent<{
         }}
       >
         <AccountActivationModal
+          data={{
+            keyInsensitive: interactionData.data.keyInsensitive,
+            isEthereum: false,
+          }}
           close={() => setIsAccountActivationModalOpen(false)}
           onAccountDeployed={() => {
             // account가 deploy 되었을때 gas simulator를 refresh한다.
@@ -576,7 +688,6 @@ const DataByTransactionView: FunctionComponent<{
         display: "flex",
         flexDirection: "column",
         flex: "0 1 auto",
-        margin: "0 0.75rem",
 
         overflowY: "auto",
         overflowX: "hidden",

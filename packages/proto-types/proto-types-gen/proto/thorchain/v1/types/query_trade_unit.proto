@@ -1,0 +1,30 @@
+syntax = "proto3";
+package types;
+
+option go_package = "gitlab.com/thorchain/thornode/v3/x/thorchain/types";
+
+import "gogoproto/gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+
+message QueryTradeUnitRequest{
+  string asset = 1;
+  string height = 2;
+}
+
+message QueryTradeUnitResponse{
+	// trade account asset with \"~\" separator
+  string asset = 1 [(gogoproto.jsontag) = "asset"];
+	// total units of trade asset
+  string units = 2 [(gogoproto.jsontag) = "units"];
+	// total depth of trade asset
+  string depth = 3 [(gogoproto.jsontag) = "depth"];
+}
+
+message QueryTradeUnitsRequest{
+  string height = 1;
+}
+
+message QueryTradeUnitsResponse{
+  repeated QueryTradeUnitResponse trade_units = 1;
+}
