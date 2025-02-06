@@ -10,13 +10,13 @@ import { Modal } from "../../../components/modal";
 
 import { EarnOutputModal } from "./components/earn-output-modal";
 import { Body2, H1, Subtitle3 } from "../../../components/typography";
-import { ApyTag } from "./components/apy-tag";
 import { Gutter } from "../../../components/gutter";
 import styled from "styled-components";
 import { ColorPalette } from "../../../styles";
 import { Box } from "../../../components/box";
 import { XAxis } from "../../../components/axis";
 import { useSearchParams } from "react-router-dom";
+import { ApyChip } from "../components/chip";
 
 const ZERO_DEC = new Dec("0");
 
@@ -73,7 +73,7 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
       }}
     >
       <Box paddingX="1.5rem" paddingTop="2.5rem">
-        <ApyTag chainId={chainId} />
+        <ApyChip chainId={chainId} colorType="green" />
 
         <Gutter size="0.75rem" />
         <H1
