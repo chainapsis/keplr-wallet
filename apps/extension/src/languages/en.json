@@ -423,7 +423,7 @@
   "page.sign.cosmos.tx.warning-title": "Incompatible Signing Requested",
   "page.sign.cosmos.tx.warning-paragraph": "Error: SIGN_MODE_DIRECT can’t be signed on Ledger. Contact the web app provider to fix this issue.",
   "page.sign.cosmos.tx.readonly-memo.empty": "(Empty)",
-  "page.sign.cosmos.tx.view-data-button": "View data",
+  "page.sign.cosmos.tx.view-data-button": "Advanced",
   "page.sign.cosmos.tx.high-fee-warning": "The transaction fee is unusually high.{br}I confirm and agree to proceed, nevertheless.",
   "page.sign.cosmos.icns.title": "Request Registration",
   "page.sign.cosmos.lava.guide.title": "🌋 Using Lava Endpoints",
