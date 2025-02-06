@@ -431,7 +431,7 @@
 
   "page.sign.adr36.title": "Prove Ownership",
   "page.sign.adr36.warning-origin": "Only approve if you trust this website",
-  "page.sign.adr36.prove-account-ownership-to": "Prove account ownership to",
+  "page.sign.adr36.signing-with": "Signing with",
   "page.sign.adr36.requested-network": "Requested Network",
   "page.sign.adr36.warning-title": "Incompatible Signing Requested",
   "page.sign.adr36.warning-paragraph": "Error: SIGN_MODE_DIRECT can’t be signed on Ledger. Contact the web app provider to fix this issue.",
