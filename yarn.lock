@@ -8827,7 +8827,7 @@ __metadata:
     "@types/color": ^3.0.3
     "@types/firefox-webext-browser": ^120.0.3
     "@types/js-yaml": ^4
-    "@types/react-is": ^16.7.2
+    "@types/react-is": ^18.2.0
     "@types/react-window": ^1
     "@types/resize-observer-browser": ^0.1.7
     "@types/secp256k1": ^4.0.1
@@ -15140,12 +15140,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-is@npm:^16.7.2":
-  version: 16.7.5
-  resolution: "@types/react-is@npm:16.7.5"
+"@types/react-is@npm:^18.2.0":
+  version: 18.3.1
+  resolution: "@types/react-is@npm:18.3.1"
   dependencies:
-    "@types/react": ^16
-  checksum: d25bc4fd93b275d2e5a75c3280f259bbb94d8f315daba98155a3ef99d651b0768b88c1674af61019a0dc4cc15eaef8f9cdcd6241d80fb31b8bc8263b5e066dfc
+    "@types/react": ^18
+  checksum: ccb79d6e196a5232cde8ccb255ec97e062801a3dafeff3816130fb5ad6b9a87f7c0806ab35bc00890a229773228ef217d0390839b68c705d3add2f798b5fcf82
   languageName: node
   linkType: hard
 
@@ -29869,12 +29869,12 @@ __metadata:
 
 "keplr-wallet-private@file:./noop-keplr-wallet-private::locator=%40keplr-wallet%2Fextension%40workspace%3Aapps%2Fextension":
   version: 0.0.1
-  resolution: "keplr-wallet-private@file:./noop-keplr-wallet-private#./noop-keplr-wallet-private::hash=521164&locator=%40keplr-wallet%2Fextension%40workspace%3Aapps%2Fextension"
+  resolution: "keplr-wallet-private@file:./noop-keplr-wallet-private#./noop-keplr-wallet-private::hash=28117a&locator=%40keplr-wallet%2Fextension%40workspace%3Aapps%2Fextension"
   peerDependencies:
     "@keplr-wallet/simple-fetch": "*"
     react: ^16.8.0 || ^17 || ^18
     styled-components: "*"
-  checksum: 134c3dcc33bb799f0fd0ec07c145a3693b12e3125d43fc6dff748484526a27593249856c7d4b283c5bfdccc4d6a5dd2f43df9e95c7fa40f4c77410ab43c222f3
+  checksum: 12e86c8412aa82b1446e73c24d3ad4cd3fbd22b12e06b7821595dc80ebaec0ee0f18f9a2d2548677c7e665a862fc4321f20155ca4ba697ee62bc70b76612d196
   languageName: node
   linkType: hard
 

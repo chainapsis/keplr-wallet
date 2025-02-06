@@ -4,7 +4,6 @@
 /// <reference types="node" />
 import React from "react";
 import { FlattenSimpleInterpolation } from "styled-components";
-import { SimpleFetchResponse } from "@keplr-wallet/simple-fetch";
 export declare const GlobalStyles: FlattenSimpleInterpolation | undefined;
 export declare const RegisterScenes: {
     name: string;
@@ -16,4 +15,6 @@ export declare const onGoogleSignInClick: ((sceneTransition: {
     replace(name: string, props?: Record<string, any>): void;
 }) => void) | undefined;
 export declare const exportGenerateQRCodeDataByInterval: (_data: string, _setQRCodeData: (data: string) => void) => NodeJS.Timer;
-export declare const exportUpload: (_encryptedData: string) => Promise<SimpleFetchResponse<Response>["data"]>;
+export declare const exportUpload: (_encryptedData: string) => Promise<{
+    otp: string;
+} | null>;

@@ -1,6 +1,5 @@
 import React from "react";
 import { FlattenSimpleInterpolation } from "styled-components";
-import { SimpleFetchResponse } from "@keplr-wallet/simple-fetch";
 
 export const GlobalStyles: FlattenSimpleInterpolation | undefined = undefined;
 
@@ -26,6 +25,8 @@ export const exportGenerateQRCodeDataByInterval = (
 
 export const exportUpload = (
   _encryptedData: string
-): Promise<SimpleFetchResponse<Response>["data"]> => {
+): Promise<{
+  otp: string;
+} | null> => {
   throw new Error("Method not implemented.");
 };
