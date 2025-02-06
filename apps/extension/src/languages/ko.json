@@ -423,6 +423,7 @@
   "page.sign.cosmos.icns.title": "ICNS 등록 요청",
 
   "page.sign.adr36.title": "소유권 증명",
+  "page.sign.adr36.warning-origin": "이 웹사이트를 신뢰하시나요?",
   "page.sign.adr36.prove-account-ownership-to": "아래의 웹사이트에 계정 소유자임을 증명합니다.",
   "page.sign.adr36.requested-network": "요청한 네트워크",
   "page.sign.adr36.warning-title": "호환되지 않는 서명이 요청됨",

@@ -402,6 +402,7 @@
   "page.sign.cosmos.icns.title": "请求注册",
 
   "page.sign.adr36.title": "证明所有权",
+  "page.sign.adr36.warning-origin": "只有当网站受信任时才尝试授权",
   "page.sign.adr36.prove-account-ownership-to": "证明帐户所有权",
   "page.sign.adr36.requested-network": "请求的网络",
   "page.sign.adr36.warning-title": "不兼容的签名请求",
