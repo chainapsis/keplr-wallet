@@ -3051,6 +3051,55 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     ],
     features: ["op-stack-l1-data-fee"],
   },
+  {
+    rpc: "https://evm-80094.keplr.app",
+    rest: "https://evm-80094.keplr.app",
+    evm: {
+      chainId: 80094,
+      rpc: "https://evm-80094.keplr.app",
+      websocket: "wss://evm-80094.keplr.app",
+    },
+    chainId: "eip155:80094",
+    chainName: "Berachain",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:80094/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "BERA",
+        coinMinimalDenom: "berachain-native",
+        coinDecimals: 18,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:80094/berachain-native.png",
+      },
+      {
+        coinDenom: "BGT",
+        coinMinimalDenom: "erc20:0x656b95E550C07a9ffe548bd4085c72418Ceb1dba",
+        coinDecimals: 18,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:80094/erc20/0x656b95E550C07a9ffe548bd4085c72418Ceb1dba.png",
+      },
+      {
+        coinDenom: "HONEY",
+        coinMinimalDenom: "erc20:0xFCBD14DC51f0A4d49d5E53C2E0950e0bC26d0Dce",
+        coinDecimals: 18,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:80094/erc20/0xFCBD14DC51f0A4d49d5E53C2E0950e0bC26d0Dce.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "BERA",
+        coinMinimalDenom: "berachain-native",
+        coinDecimals: 18,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:80094/berachain-native.png",
+      },
+    ],
+    features: [],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
