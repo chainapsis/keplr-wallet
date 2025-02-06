@@ -9,13 +9,7 @@ import {observer} from 'mobx-react-lite';
 import {WebViewStateContext} from './context';
 import WebView, {WebViewMessageEvent} from 'react-native-webview';
 import {RouteProp, useRoute} from '@react-navigation/native';
-import {
-  BackHandler,
-  Linking,
-  PermissionsAndroid,
-  Platform,
-  Text,
-} from 'react-native';
+import {BackHandler, Linking, Platform, Text} from 'react-native';
 import RNFS from 'react-native-fs';
 import EventEmitter from 'eventemitter3';
 import {RNInjectedKeplr} from '../../injected/injected-provider';
@@ -65,53 +59,6 @@ export const useInjectedSourceCode = () => {
 
   return code;
 };
-
-async function hasAndroidPermission() {
-  const getCheckPermissionPromise = async () => {
-    if (typeof Platform.Version === 'number' && Platform.Version >= 33) {
-      const [hasReadMediaImagesPermission, hasReadMediaVideoPermission] =
-        await Promise.all([
-          PermissionsAndroid.check(
-            PermissionsAndroid.PERMISSIONS['READ_MEDIA_IMAGES'],
-          ),
-          PermissionsAndroid.check(
-            PermissionsAndroid.PERMISSIONS['READ_MEDIA_VIDEO'],
-          ),
-        ]);
-      return hasReadMediaImagesPermission && hasReadMediaVideoPermission;
-    } else {
-      return PermissionsAndroid.check(
-        PermissionsAndroid.PERMISSIONS['READ_EXTERNAL_STORAGE'],
-      );
-    }
-  };
-
-  const hasPermission = await getCheckPermissionPromise();
-  if (hasPermission) {
-    return true;
-  }
-  const getRequestPermissionPromise = async () => {
-    if (typeof Platform.Version === 'number' && Platform.Version >= 33) {
-      const statuses = await PermissionsAndroid.requestMultiple([
-        PermissionsAndroid.PERMISSIONS['READ_MEDIA_IMAGES'],
-        PermissionsAndroid.PERMISSIONS['READ_MEDIA_VIDEO'],
-      ]);
-      return (
-        statuses[PermissionsAndroid.PERMISSIONS['READ_MEDIA_IMAGES']] ===
-          PermissionsAndroid.RESULTS['GRANTED'] &&
-        statuses[PermissionsAndroid.PERMISSIONS['READ_MEDIA_VIDEO']] ===
-          PermissionsAndroid.RESULTS['GRANTED']
-      );
-    } else {
-      const status = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS['READ_EXTERNAL_STORAGE'],
-      );
-      return status === PermissionsAndroid.RESULTS['GRANTED'];
-    }
-  };
-
-  return await getRequestPermissionPromise();
-}
 
 const imageLongPressScript = `
   let longPress = false;
@@ -446,14 +393,6 @@ export const WebpageScreen: FunctionComponent = observer(() => {
         setIsOpen={setIsSaveImageModalOpen}
         saveImage={async () => {
           try {
-            if (Platform.OS === 'android') {
-              //권한이 없으면 세팅 페이지로 이동
-              if (!(await hasAndroidPermission())) {
-                await Linking.openSettings();
-                return;
-              }
-            }
-
             //이미지의 content-type을 확인하여 jpeg, png만 저장 가능하도록 함
             const imageFetchResponse = await fetch(imageData);
             if (imageFetchResponse.ok) {
