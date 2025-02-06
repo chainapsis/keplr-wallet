@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/simple-fetch",
-  "version": "0.12.182",
+  "version": "0.12.183",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
