@@ -1,0 +1,166 @@
+syntax = "proto3";
+
+package noble.swap.stableswap.v1;
+
+import "amino/amino.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "swap.noble.xyz/types/stableswap";
+
+service Msg {
+  option (cosmos.msg.v1.service) = true;
+
+  // CreatePool creates a new `StableSwap` Pool.
+  rpc CreatePool(MsgCreatePool) returns (MsgCreatePoolResponse);
+
+  // UpdatePool updates the params of a `StableSwap` Pool.
+  rpc UpdatePool(MsgUpdatePool) returns (MsgUpdatePoolResponse);
+
+  // AddLiquidity allows a user to add liquidity to a `StableSwap` liquidity pool.
+  rpc AddLiquidity(MsgAddLiquidity) returns (MsgAddLiquidityResponse);
+
+  // RemoveLiquidity allows a user to remove liquidity from a `StableSwap` liquidity pool.
+  rpc RemoveLiquidity(MsgRemoveLiquidity) returns (MsgRemoveLiquidityResponse);
+}
+
+message MsgCreatePool {
+  option (cosmos.msg.v1.signer) = "signer";
+  option (amino.name) = "swap/stableswap/CreatePool";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  // The address of the authority creating the pool.
+  string signer = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // The asset pair that will be part of the pool.
+  string pair = 2;
+
+  // The protocol fee percentage.
+  int64 protocol_fee_percentage = 3;
+
+  // The rewards fee value.
+  int64 rewards_fee = 4;
+
+  // The maximum allowed fee.
+  int64 max_fee = 5;
+
+  // The initial A parameter for the pool.
+  int64 initial_a = 6;
+
+  // The future A parameter for pool rebalancing.
+  int64 future_a = 7;
+
+  // The time to reach the future A parameter.
+  int64 future_a_time = 8;
+
+  // The coins rate multipliers.
+  repeated cosmos.base.v1beta1.Coin rate_multipliers = 9 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true,
+    (amino.encoding) = "legacy_coins",
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
+message MsgCreatePoolResponse {}
+
+message MsgUpdatePool {
+  option (cosmos.msg.v1.signer) = "signer";
+  option (amino.name) = "swap/stableswap/UpdatePool";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  // Address of the authority updating the pool.
+  string signer = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // ID of the pool being updated.
+  uint64 pool_id = 2;
+
+  // The new protocol fee percentage.
+  int64 protocol_fee_percentage = 3;
+
+  // The new rewards fee value.
+  int64 rewards_fee = 4;
+
+  // The new maximum allowed fee.
+  int64 max_fee = 5;
+
+  // The new initial A parameter.
+  int64 initial_a = 6;
+
+  // The new future A parameter.
+  int64 future_a = 7;
+
+  // The time to reach the future A parameter.
+  int64 future_a_time = 8;
+
+  // The coins rate multipliers.
+  repeated cosmos.base.v1beta1.Coin rate_multipliers = 9 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true,
+    (amino.encoding) = "legacy_coins",
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
+message MsgUpdatePoolResponse {}
+
+message MsgAddLiquidity {
+  option (cosmos.msg.v1.signer) = "signer";
+  option (amino.name) = "swap/stableswap/AddLiquidity";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  // The address of the user adding liquidity.
+  string signer = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // The ID of the pool to which liquidity is being added.
+  uint64 pool_id = 2;
+
+  // The coins amount to add to the pool.
+  repeated cosmos.base.v1beta1.Coin amount = 3 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true,
+    (amino.encoding) = "legacy_coins",
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
+message MsgAddLiquidityResponse {
+  // The amount of liquidity pool shares minted for the user.
+  int64 minted_shares = 1;
+}
+
+message MsgRemoveLiquidity {
+  option (cosmos.msg.v1.signer) = "signer";
+  option (amino.name) = "swap/stableswap/RemoveLiquidity";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  // The address of the user removing liquidity.
+  string signer = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // The ID of the pool from which liquidity is being removed.
+  uint64 pool_id = 2;
+
+  // The percentage of liquidity to remove.
+  string percentage = 3 [
+    (amino.dont_omitempty) = true,
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+}
+message MsgRemoveLiquidityResponse {
+  // The amount of shares that are unbonding.
+  string unbonding_shares = 1 [
+    (amino.dont_omitempty) = true,
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+}
