@@ -105,6 +105,7 @@ import { SignStarknetMessagePage } from "./pages/starknet/sign/message";
 import { TxResultFailedPage } from "./pages/tx-result/failed";
 import { TxResultPendingPage } from "./pages/tx-result/pending";
 import { TxResultSuccessPage } from "./pages/tx-result/success";
+import { SimpleIBCTransferPage } from "./pages/send/amount/simple-ibc-transfer";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -385,6 +386,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               <Route
                 path="/send/select-asset"
                 element={<SendSelectAssetPage />}
+              />
+              <Route
+                path="/send/simple-ibc-transfer"
+                element={<SimpleIBCTransferPage />}
               />
               <Route
                 path="/ibc-swap/select-destination"

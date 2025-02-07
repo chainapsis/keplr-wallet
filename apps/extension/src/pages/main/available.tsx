@@ -366,7 +366,7 @@ export const AvailableTabView: FunctionComponent<{
                               onClick={() => {
                                 navigate(
                                   `/send/select-asset?isNobleEarn=true&navigateTo=${encodeURIComponent(
-                                    "/send?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}&isIBCTransfer=true&ibcTransferDestinationChainId=noble-1"
+                                    "/send/simple-ibc-transfer?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}&ibcTransferDestinationChainId=noble-1"
                                   )}`
                                 );
                               }}
