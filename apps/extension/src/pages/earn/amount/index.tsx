@@ -154,7 +154,7 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
             <Gutter size="0.375rem" />
             <Subtitle3
               onClick={() => {
-                // TO-DO: select asset page로 이동. params 필요
+                navigate("/earn/transfer/intro");
               }}
               style={{
                 textDecoration: "underline",

@@ -650,6 +650,10 @@
   "page.earn.estimation-confirm.usdc-to-usdn.agree-terms": "I have read and agree to the Keplr Earn Service <link>Terms of Use</link>.",
   "page.earn.terms.title": "Terms of Use",
   "page.earn.terms.contents": "dummy",
+  "page.earn.transfer.intro.title": "Transfer USDC{br}to Noble chain{br}to start earning rewards",
+  "page.earn.transfer.intro.paragraph.first": "보유한 USDC를 USDC on Noble로 바꾸고",
+  "page.earn.transfer.intro.paragraph.first.sub-paragraph": "10초 이내로 완료돼요.",
+  "page.earn.transfer.intro.paragraph.second": "Earn할 금액을 입력하면 완료돼요.",
 
   "components.empty-view.text": "No {subject} Yet",
   "components.input.recipient-input.wallet-address-only-label": "Wallet Address",

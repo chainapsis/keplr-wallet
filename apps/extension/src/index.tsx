@@ -110,6 +110,7 @@ import { EarnAmountPage } from "./pages/earn/amount";
 import { EarnIntroPage } from "./pages/earn/intro";
 import { EarnConfirmUsdnEstimationPage } from "./pages/earn/confirm-usdn-estimation";
 import { EarnNobleTermsPage } from "./pages/earn/noble-terms";
+import { EarnTransferIntroPage } from "./pages/earn/transfer/intro";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -515,6 +516,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               />
               <Route path="/earn/intro" element={<EarnIntroPage />} />
               <Route path="/earn/amount" element={<EarnAmountPage />} />
+              <Route
+                path="/earn/transfer/intro"
+                element={<EarnTransferIntroPage />}
+              />
               <Route
                 path="/earn/confirm-usdn-estimation"
                 element={<EarnConfirmUsdnEstimationPage />}

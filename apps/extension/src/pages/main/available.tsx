@@ -370,13 +370,8 @@ export const AvailableTabView: FunctionComponent<{
                               text="Earn"
                               onClick={() => {
                                 navigate(
-                                  `/send/select-asset?isNobleEarn=true&navigateTo=${encodeURIComponent(
-                                    "/send/simple-ibc-transfer?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}&ibcTransferDestinationChainId=noble-1"
-                                  )}`
+                                  `/earn/intro?chainId=${"noble-1"}&coinMinimalDenom=${"uusdc"}`
                                 );
-                                // navigate(
-                                //   `/earn/intro?chainId=${"noble-1"}&coinMinimalDenom=${"uusdc"}`
-                                // );
                               }}
                             />
                           ) : null}
