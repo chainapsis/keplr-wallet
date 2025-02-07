@@ -10,20 +10,16 @@ import { useNavigate } from "react-router";
 import { Box } from "../../../components/box";
 import { Image } from "../../../components/image";
 import { useSearchParams } from "react-router-dom";
-import { Body2, H1, H4, Subtitle4 } from "../../../components/typography";
+import { Body2, H1, Subtitle4 } from "../../../components/typography";
 import { ColorPalette } from "../../../styles";
 import { Gutter } from "../../../components/gutter";
 import { useStore } from "../../../stores";
 import { XAxis } from "../../../components/axis";
 import { useGetApy } from "../../../hooks/use-get-apy";
 import { Stack } from "../../../components/stack";
-import {
-  ArrowRightIcon,
-  CheckIcon,
-  InformationPlainIcon,
-} from "../../../components/icon";
+import { ArrowRightIcon, CheckIcon } from "../../../components/icon";
 import { Modal } from "../../../components/modal";
-import styled from "styled-components";
+import { DescriptionModal } from "../components/description-modal";
 
 export const EarnIntroPage: FunctionComponent = observer(() => {
   const [isLearnMoreModalOpen, setIsLearnMoreModalOpen] = useState(false);
@@ -134,7 +130,9 @@ export const EarnIntroPage: FunctionComponent = observer(() => {
             id: "page.earn.intro.start-earning-button",
           })}
           onClick={() => {
-            navigate(`/earn/amount?chainId=${chainId}`);
+            navigate(
+              `/earn/amount?chainId=${chainId}&coinMinimalDenom=${coinMinimalDenom}`
+            );
           }}
         />
         <Gutter size="1.5rem" />
@@ -163,76 +161,21 @@ export const EarnIntroPage: FunctionComponent = observer(() => {
         close={() => setIsLearnMoreModalOpen(false)}
         align="bottom"
       >
-        <LearnMoreModal close={() => setIsLearnMoreModalOpen(false)} />
+        <DescriptionModal
+          close={() => setIsLearnMoreModalOpen(false)}
+          title={intl.formatMessage({
+            id: "page.earn.intro.learn-more-modal.title",
+          })}
+          paragraphs={[
+            intl.formatMessage({
+              id: "page.earn.intro.learn-more-modal.paragraph.first",
+            }),
+            intl.formatMessage({
+              id: "page.earn.intro.learn-more-modal.paragraph.second",
+            }),
+          ]}
+        />
       </Modal>
     </HeaderLayout>
   );
 });
-
-const LearnMoreModal: FunctionComponent<{
-  close: () => void;
-}> = observer(({ close }) => {
-  const intl = useIntl();
-
-  return (
-    <Styles.Container>
-      <Box paddingX="0.25rem" paddingY="0.5rem" marginBottom="0.75rem">
-        <XAxis alignY="center">
-          <InformationPlainIcon
-            width="1.25rem"
-            height="1.25rem"
-            color={ColorPalette["gray-300"]}
-          />
-          <Gutter size="0.5rem" />
-          <H4 color={ColorPalette.white}>
-            {intl.formatMessage({
-              id: "page.earn.intro.learn-more-modal.title",
-            })}
-          </H4>
-        </XAxis>
-      </Box>
-
-      <Box paddingX="0.5rem">
-        <Body2>
-          {intl.formatMessage({
-            id: "page.earn.intro.learn-more-modal.paragraph.first",
-          })}
-        </Body2>
-        <Gutter size="0.75rem" />
-        <Body2>
-          {intl.formatMessage({
-            id: "page.earn.intro.learn-more-modal.paragraph.second",
-          })}
-        </Body2>
-
-        <Gutter size="1.25rem" />
-      </Box>
-
-      <Button
-        size="large"
-        color="primary"
-        text={intl.formatMessage({
-          id: "page.earn.intro.learn-more-modal.got-it-button",
-        })}
-        onClick={close}
-      />
-    </Styles.Container>
-  );
-});
-
-const Styles = {
-  Container: styled.div`
-    display: flex;
-    flex-direction: column;
-
-    width: 100%;
-
-    padding: 1rem;
-    padding-top: 0.88rem;
-
-    background-color: ${(props) =>
-      props.theme.mode === "light"
-        ? ColorPalette.white
-        : ColorPalette["gray-600"]};
-  `,
-};

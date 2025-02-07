@@ -4,35 +4,38 @@ import { HeaderLayout } from "../../../layouts/header";
 import { BackButton } from "../../../layouts/header/components";
 
 import { useStore } from "../../../stores";
-import { CoinPretty, Dec } from "@keplr-wallet/unit";
+import { Dec } from "@keplr-wallet/unit";
 import { useIntl } from "react-intl";
-import { Modal } from "../../../components/modal";
 
-import { EarnOutputModal } from "./components/earn-output-modal";
 import { Body2, H1, Subtitle3 } from "../../../components/typography";
 import { Gutter } from "../../../components/gutter";
 import styled from "styled-components";
 import { ColorPalette } from "../../../styles";
 import { Box } from "../../../components/box";
 import { XAxis } from "../../../components/axis";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ApyChip } from "../components/chip";
 
 const ZERO_DEC = new Dec("0");
 
 export const EarnAmountPage: FunctionComponent = observer(() => {
-  const [amountInput, setAmountInput] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
-  const [isEarnOutputModalOpen, setIsEarnOutputModalOpen] = useState(false);
-
   const { accountStore, chainStore, queriesStore } = useStore();
   const intl = useIntl();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const presetAmount = searchParams.get("amount");
+
+  const [amountInput, setAmountInput] = useState(presetAmount || "");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const chainId = searchParams.get("chainId") || "noble-1"; // Noble testnet: "grand-1", mainnet: "noble-1"
   const chainInfo = chainStore.getChain(chainId);
   const account = accountStore.getAccount(chainId);
-  const currency = chainInfo.currencies[0];
+  const currency =
+    chainInfo.currencies.find(
+      (currency) =>
+        currency.coinMinimalDenom === searchParams.get("coinMinimalDenom")
+    ) ?? chainInfo.currencies[0];
 
   const balanceQuery = queriesStore
     .get(chainId)
@@ -69,7 +72,9 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
           return;
         }
 
-        setIsEarnOutputModalOpen(true);
+        if (currency.coinMinimalDenom === "uusdc") {
+          navigate(`/earn/confirm-usdn-estimation?amount=${amountInput}`);
+        }
       }}
     >
       <Box paddingX="1.5rem" paddingTop="2.5rem">
@@ -119,7 +124,7 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
         <Box paddingY="0.25rem">
           <XAxis>
             <Subtitle3 color={ColorPalette.white}>
-              {balanceQuery?.balance.hideDenom(true).toString() || "0"}
+              {balanceQuery?.balance.toString() || "0"}
             </Subtitle3>
             <Gutter size="0.25rem" />
             <Subtitle3 color={ColorPalette["gray-300"]}>
@@ -164,18 +169,6 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
           </XAxis>
         </Box>
       </Box>
-
-      <Modal
-        isOpen={isEarnOutputModalOpen}
-        align="bottom"
-        close={() => {
-          setIsEarnOutputModalOpen(false);
-        }}
-      >
-        <EarnOutputModal
-          token={new CoinPretty(currency, new Dec(amountInput || "0"))}
-        />
-      </Modal>
     </HeaderLayout>
   );
 });

@@ -104,6 +104,8 @@ import { SignStarknetTxPage } from "./pages/starknet/sign/tx";
 import { SignStarknetMessagePage } from "./pages/starknet/sign/message";
 import { EarnAmountPage } from "./pages/earn/amount";
 import { EarnIntroPage } from "./pages/earn/intro";
+import { EarnConfirmUsdnEstimationPage } from "./pages/earn/confirm-usdn-estimation";
+import { EarnNobleTermsPage } from "./pages/earn/noble-terms";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -493,6 +495,14 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               <Route path="/ibc-transfer" element={<IBCTransferPage />} />
               <Route path="/earn/intro" element={<EarnIntroPage />} />
               <Route path="/earn/amount" element={<EarnAmountPage />} />
+              <Route
+                path="/earn/confirm-usdn-estimation"
+                element={<EarnConfirmUsdnEstimationPage />}
+              />
+              <Route
+                path="/earn/noble-terms"
+                element={<EarnNobleTermsPage />}
+              />
             </Routes>
           )
         ) : (
