@@ -160,7 +160,7 @@ export const WelcomePage: FunctionComponent = observer(() => {
                           id: "pages.register.pages.welcome.dashboard-link.paragraph",
                         })}
                         src={require("../../../../public/assets/logo-256.png")}
-                        url="https://wallet.keplr.app/"
+                        url="https://wallet.keplr.app/?utm_source=keplrextension&utm_medium=button&utm_campaign=permanent&utm_content=welcome_portfolio"
                       />
                     </Column>
                     <Column weight={1}>

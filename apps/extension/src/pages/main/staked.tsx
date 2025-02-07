@@ -176,7 +176,7 @@ export const StakedTabView: FunctionComponent<{
               }
               onClick={async () => {
                 await browser.tabs.create({
-                  url: "https://wallet.keplr.app/?modal=staking",
+                  url: "https://wallet.keplr.app/?modal=staking&utm_source=keplrextension&utm_medium=button&utm_campaign=permanent&utm_content=manage_stake",
                 });
 
                 close();
