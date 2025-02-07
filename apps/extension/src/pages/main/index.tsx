@@ -592,7 +592,7 @@ export const MainPage: FunctionComponent<{
                 });
 
                 browser.tabs.create({
-                  url: "https://wallet.keplr.app/?modal=staking",
+                  url: "https://wallet.keplr.app/?modal=staking&utm_source=keplrextension&utm_medium=button&utm_campaign=permanent&utm_content=manage_stake",
                 });
               }}
             >
@@ -622,7 +622,7 @@ export const MainPage: FunctionComponent<{
                 });
 
                 browser.tabs.create({
-                  url: "https://wallet.keplr.app/",
+                  url: "https://wallet.keplr.app/?utm_source=keplrextension&utm_medium=button&utm_campaign=permanent&utm_content=manage_portfolio",
                 });
               }}
             >
