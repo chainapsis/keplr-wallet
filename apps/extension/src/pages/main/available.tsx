@@ -31,6 +31,7 @@ import { TokenDetailModal } from "./token-detail";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import { useGetSearchChains } from "../../hooks/use-get-search-chains";
+import { validateIsUsdcFromNoble } from "../earn/utils";
 
 const zeroDec = new Dec(0);
 
@@ -359,8 +360,10 @@ export const AvailableTabView: FunctionComponent<{
                             }
                           />
 
-                          {viewToken.token.currency.coinDenom === "USDC" &&
-                          !viewToken.chainInfo.chainId.includes("eip155:") ? (
+                          {validateIsUsdcFromNoble(
+                            viewToken.token.currency,
+                            viewToken.chainInfo.chainId
+                          ) ? (
                             <Button
                               size="small"
                               color="secondary"

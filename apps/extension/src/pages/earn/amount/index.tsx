@@ -15,6 +15,7 @@ import { Box } from "../../../components/box";
 import { XAxis } from "../../../components/axis";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ApyChip } from "../components/chip";
+import { validateIsUsdcFromNoble } from "../utils";
 
 const ZERO_DEC = new Dec("0");
 
@@ -72,7 +73,7 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
           return;
         }
 
-        if (currency.coinMinimalDenom === "uusdc") {
+        if (validateIsUsdcFromNoble(currency, chainId)) {
           navigate(`/earn/confirm-usdn-estimation?amount=${amountInput}`);
         }
       }}
