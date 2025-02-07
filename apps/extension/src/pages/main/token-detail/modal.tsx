@@ -510,10 +510,17 @@ export const TokenDetailModal: FunctionComponent<{
                 return (
                   <React.Fragment>
                     <Gutter size="1.25rem" />
-                    <StakedBalance chainId={chainId} />
+                    <StakedBalance modularChainInfo={modularChainInfo} />
                   </React.Fragment>
                 );
               }
+            } else if ("starknet" in modularChainInfo) {
+              return (
+                <React.Fragment>
+                  <Gutter size="1.25rem" />
+                  <StakedBalance modularChainInfo={modularChainInfo} />
+                </React.Fragment>
+              );
             }
             return null;
           })()}
