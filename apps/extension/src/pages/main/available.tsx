@@ -29,8 +29,9 @@ import styled, { useTheme } from "styled-components";
 import { DenomHelper } from "@keplr-wallet/common";
 import { TokenDetailModal } from "./token-detail";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ChainInfo, IBCCurrency, ModularChainInfo } from "@keplr-wallet/types";
+import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import { useGetSearchChains } from "../../hooks/use-get-search-chains";
+import { validateIsUsdcFromNoble } from "../earn/utils";
 
 const zeroDec = new Dec(0);
 
@@ -64,6 +65,7 @@ export const AvailableTabView: FunctionComponent<{
       useStore();
     const intl = useIntl();
     const theme = useTheme();
+    const navigate = useNavigate();
 
     const { trimSearch, searchedChainInfos } = useGetSearchChains({
       search,
@@ -238,8 +240,6 @@ export const AvailableTabView: FunctionComponent<{
       };
     })();
 
-    const navigate = useNavigate();
-
     return (
       <React.Fragment>
         {isNotReady ? (
@@ -311,12 +311,11 @@ export const AvailableTabView: FunctionComponent<{
                       }
                       lenAlwaysShown={lenAlwaysShown}
                       items={balance.map((viewToken) => (
-                        <React.Fragment
+                        <div
                           key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
                         >
                           <TokenItem
                             viewToken={viewToken}
-                            key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
                             onClick={() => {
                               setSearchParams((prev) => {
                                 prev.set(
@@ -360,21 +359,28 @@ export const AvailableTabView: FunctionComponent<{
                               uiConfigStore.show24HChangesInMagePage
                             }
                           />
-                          {(viewToken.token.currency as IBCCurrency)
-                            ?.originChainId === "noble-1" && (
-                            <button
+
+                          {validateIsUsdcFromNoble(
+                            viewToken.token.currency,
+                            viewToken.chainInfo.chainId
+                          ) ? (
+                            <Button
+                              size="small"
+                              color="secondary"
+                              text="Earn"
                               onClick={() => {
                                 navigate(
                                   `/send/select-asset?isNobleEarn=true&navigateTo=${encodeURIComponent(
                                     "/send/simple-ibc-transfer?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}&ibcTransferDestinationChainId=noble-1"
                                   )}`
                                 );
+                                // navigate(
+                                //   `/earn/intro?chainId=${"noble-1"}&coinMinimalDenom=${"uusdc"}`
+                                // );
                               }}
-                            >
-                              hi
-                            </button>
-                          )}
-                        </React.Fragment>
+                            />
+                          ) : null}
+                        </div>
                       ))}
                     />
                   );
