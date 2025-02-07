@@ -15,7 +15,7 @@ export const EstimationSection: FunctionComponent<{
 }> = ({ usdcAmount }) => {
   const NOBLE_CHAIN_ID = "noble-1";
 
-  const DEFAULT_SLIPPAGE_RATE = 0.005;
+  // const DEFAULT_SLIPPAGE_RATE = 0.005;
   const simulatedUsdnAmount = usdcAmount; // TO-DO: dummy. request simluate
 
   const renderAmount = (amount: CoinPretty) => (
