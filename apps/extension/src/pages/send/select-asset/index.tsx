@@ -8,7 +8,7 @@ import { SearchTextInput } from "../../../components/input";
 import { useStore } from "../../../stores";
 import { TokenItem } from "../../main/components";
 import { Column, Columns } from "../../../components/column";
-import { Body2 } from "../../../components/typography";
+import { Body2, H2 } from "../../../components/typography";
 import { Checkbox } from "../../../components/checkbox";
 import { ColorPalette } from "../../../styles";
 import { Dec } from "@keplr-wallet/unit";
@@ -17,10 +17,12 @@ import { useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router";
 import { FormattedMessage, useIntl } from "react-intl";
 import { IBCCurrency } from "@keplr-wallet/types";
-
+import { Box } from "../../../components/box";
+import { Gutter } from "../../../components/gutter";
 const Styles = {
-  Container: styled(Stack)`
-    padding: 0.75rem;
+  Container: styled(Stack)<{ isNobleEarn: boolean }>`
+    padding: ${({ isNobleEarn }) =>
+      isNobleEarn ? "0.75rem 1.25rem" : "0.75rem"};
   `,
 };
 
@@ -106,22 +108,40 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout
-      title={intl.formatMessage({ id: "page.send.select-asset.title" })}
+      title={
+        paramIsNobleEarn
+          ? ""
+          : intl.formatMessage({ id: "page.send.select-asset.title" })
+      }
       left={<BackButton />}
     >
-      <Styles.Container gutter="0.5rem">
-        <SearchTextInput
-          ref={searchRef}
-          placeholder={intl.formatMessage({
-            id: "page.send.select-asset.search-placeholder",
-          })}
-          value={search}
-          onChange={(e) => {
-            e.preventDefault();
+      <Styles.Container gutter="0.5rem" isNobleEarn={paramIsNobleEarn}>
+        {paramIsNobleEarn ? (
+          <Box>
+            <H2 color={ColorPalette["white"]}>
+              {intl.formatMessage(
+                { id: "page.send.select-asset.earn.title" },
+                {
+                  br: <br />,
+                }
+              )}
+            </H2>
+            <Gutter size="1rem" />
+          </Box>
+        ) : (
+          <SearchTextInput
+            ref={searchRef}
+            placeholder={intl.formatMessage({
+              id: "page.send.select-asset.search-placeholder",
+            })}
+            value={search}
+            onChange={(e) => {
+              e.preventDefault();
 
-            setSearch(e.target.value);
-          }}
-        />
+              setSearch(e.target.value);
+            }}
+          />
+        )}
 
         {!paramIsNobleEarn && (
           <Columns sum={1} gutter="0.25rem">
