@@ -43,7 +43,7 @@ export const EthSendTokenTx: IEthTxRenderer = {
           ),
         };
       } catch (e) {
-        // Fallback to other renderers if unsingedTx.data can't be decoded with ERC20 transfer method.
+        // Fallback to other renderers if unsignedTx.data can't be decoded with ERC20 transfer method.
         return undefined;
       }
     } else {

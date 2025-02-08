@@ -250,7 +250,7 @@ class ErrorBoundary extends React.Component<
 
   override render() {
     if (this.state.hasError) {
-      return <UnknownMsgItem title="Unknown error occured" />;
+      return <UnknownMsgItem title="Unknown error occurred" />;
     }
 
     return this.props.children;
