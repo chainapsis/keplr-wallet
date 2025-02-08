@@ -45,6 +45,7 @@ import {
   TokenContractListURL,
   EthereumEndpoint,
   SwapVenue,
+  CoinGeckoCoinDataByTokenAddress,
 } from '../config.ui';
 import {TokenContractsQueries} from './token-contracts';
 import {AprQueries} from './aprs';
@@ -197,7 +198,10 @@ export class RootStore {
       }),
       CosmosGovernanceQueries.use(),
       CosmosGovernanceQueriesV1.use(),
-      EthereumQueries.use(),
+      EthereumQueries.use({
+        coingeckoAPIBaseURL: CoinGeckoAPIEndPoint,
+        coingeckoAPIURI: CoinGeckoCoinDataByTokenAddress,
+      }),
     );
 
     this.swapUsageQueries = new SwapUsageQueries(
