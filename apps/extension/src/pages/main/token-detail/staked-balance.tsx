@@ -36,6 +36,8 @@ const CosmosStakedBalance: FunctionComponent<{
 
   const { queriesStore, accountStore, chainStore, uiConfigStore } = useStore();
 
+  const [isHover, setIsHover] = useState(false);
+
   const chainId = chainInfo.chainId;
   const chain = chainStore.getChain(chainId);
 
@@ -63,72 +65,38 @@ const CosmosStakedBalance: FunctionComponent<{
       accountStore.getAccount(chainId).bech32Address
     );
 
-  const [isHover, setIsHover] = useState(false);
-
   const stakeBalanceIsZero =
     !queryDelegation.total || queryDelegation.total.toDec().equals(new Dec(0));
 
-  const handleClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (chain.walletUrlForStaking) {
-      browser.tabs.create({ url: chain.walletUrlForStaking });
-    }
-  };
-
   return (
-    <Box paddingX="0.75rem">
-      <Box
-        backgroundColor={getBackgroundColor(isHover, theme.mode)}
-        style={{
-          boxShadow:
-            theme.mode === "light"
-              ? "0 1px 4px 0 rgba(43,39,55,0.1)"
-              : undefined,
-        }}
-        cursor={chain.walletUrlForStaking ? "pointer" : undefined}
-        onClick={handleClick}
-        onHoverStateChange={setIsHover}
-        borderRadius="0.375rem"
-        padding="1rem"
-      >
-        <XAxis alignY="center">
-          {theme.mode === "light" ? (
-            <StakingGradientLightIcon />
-          ) : (
-            <StakingGradientDarkIcon />
-          )}
-          <Gutter size="0.75rem" />
-          <YAxis>
-            {(() => {
-              if (stakeBalanceIsZero && chain.walletUrlForStaking) {
-                return (
-                  <React.Fragment>
-                    <Subtitle1
-                      color={
-                        theme.mode === "light"
-                          ? ColorPalette["black"]
-                          : ColorPalette["white"]
-                      }
-                    >
-                      Start Staking
-                    </Subtitle1>
-                    <Gutter size="0.25rem" />
-                    {cosmosAPR && (
-                      <Body3
-                        color={
-                          theme.mode === "light"
-                            ? ColorPalette["gray-300"]
-                            : ColorPalette["gray-200"]
-                        }
-                      >
-                        {`${cosmosAPR}% APY`}
-                      </Body3>
-                    )}
-                  </React.Fragment>
-                );
-              } else {
-                return (
-                  <React.Fragment>
+    <StakedBalanceLayout
+      stakingUrl={chain.walletUrlForStaking}
+      isHover={isHover}
+      onHoverStateChange={setIsHover}
+    >
+      <XAxis alignY="center">
+        {theme.mode === "light" ? (
+          <StakingGradientLightIcon />
+        ) : (
+          <StakingGradientDarkIcon />
+        )}
+        <Gutter size="0.75rem" />
+        <YAxis>
+          {(() => {
+            if (stakeBalanceIsZero && chain.walletUrlForStaking) {
+              return (
+                <React.Fragment>
+                  <Subtitle1
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["black"]
+                        : ColorPalette["white"]
+                    }
+                  >
+                    Start Staking
+                  </Subtitle1>
+                  <Gutter size="0.25rem" />
+                  {cosmosAPR && (
                     <Body3
                       color={
                         theme.mode === "light"
@@ -136,100 +104,112 @@ const CosmosStakedBalance: FunctionComponent<{
                           : ColorPalette["gray-200"]
                       }
                     >
-                      Staked Balance
+                      {`${cosmosAPR}% APY`}
                     </Body3>
-                    <Gutter size="0.25rem" />
-                    <Subtitle3
-                      color={
-                        theme.mode === "light"
-                          ? ColorPalette["black"]
-                          : ColorPalette["white"]
-                      }
-                    >
-                      {queryDelegation.total
-                        ? uiConfigStore.hideStringIfPrivacyMode(
-                            queryDelegation.total
-                              .maxDecimals(6)
-                              .shrink(true)
-                              .inequalitySymbol(true)
-                              .trim(true)
-                              .toString(),
-                            2
-                          )
-                        : "-"}
-                    </Subtitle3>
-                  </React.Fragment>
-                );
-              }
-            })()}
-          </YAxis>
-          <div
-            style={{
-              flex: 1,
-            }}
-          />
-          <XAxis alignY="center">
-            {!stakeBalanceIsZero &&
-            cosmosAPR &&
-            typeof cosmosAPR === "string" ? (
-              <Subtitle3
-                color={
-                  theme.mode === "light"
-                    ? ColorPalette["gray-200"]
-                    : ColorPalette["gray-300"]
-                }
-              >
-                {`${cosmosAPR}% APY`}
-              </Subtitle3>
-            ) : null}
-
-            {chain.walletUrlForStaking ? (
-              stakeBalanceIsZero ? (
+                  )}
+                </React.Fragment>
+              );
+            } else {
+              return (
                 <React.Fragment>
+                  <Body3
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-300"]
+                        : ColorPalette["gray-200"]
+                    }
+                  >
+                    Staked Balance
+                  </Body3>
                   <Gutter size="0.25rem" />
+                  <Subtitle3
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["black"]
+                        : ColorPalette["white"]
+                    }
+                  >
+                    {queryDelegation.total
+                      ? uiConfigStore.hideStringIfPrivacyMode(
+                          queryDelegation.total
+                            .maxDecimals(6)
+                            .shrink(true)
+                            .inequalitySymbol(true)
+                            .trim(true)
+                            .toString(),
+                          2
+                        )
+                      : "-"}
+                  </Subtitle3>
+                </React.Fragment>
+              );
+            }
+          })()}
+        </YAxis>
+        <div
+          style={{
+            flex: 1,
+          }}
+        />
+        <XAxis alignY="center">
+          {!stakeBalanceIsZero && cosmosAPR && typeof cosmosAPR === "string" ? (
+            <Subtitle3
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-200"]
+                  : ColorPalette["gray-300"]
+              }
+            >
+              {`${cosmosAPR}% APY`}
+            </Subtitle3>
+          ) : null}
+
+          {chain.walletUrlForStaking ? (
+            stakeBalanceIsZero ? (
+              <React.Fragment>
+                <Gutter size="0.25rem" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  fill="none"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    stroke={getStrokeColor(isHover, theme.mode)}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="1.7"
+                    d="M11.25 5H4.375C3.339 5 2.5 5.84 2.5 6.875v8.75c0 1.035.84 1.875 1.875 1.875h8.75c1.036 0 1.875-.84 1.875-1.875V8.75m-8.75 5L17.5 2.5m0 0h-4.375m4.375 0v4.375"
+                  />
+                </svg>
+              </React.Fragment>
+            ) : (
+              <React.Fragment>
+                <Gutter size="0.25rem" />
+                <Box marginBottom="2px">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
+                    width="16"
+                    height="16"
                     fill="none"
-                    viewBox="0 0 20 20"
+                    viewBox="0 0 16 16"
                   >
                     <path
                       stroke={getStrokeColor(isHover, theme.mode)}
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      strokeWidth="1.7"
-                      d="M11.25 5H4.375C3.339 5 2.5 5.84 2.5 6.875v8.75c0 1.035.84 1.875 1.875 1.875h8.75c1.036 0 1.875-.84 1.875-1.875V8.75m-8.75 5L17.5 2.5m0 0h-4.375m4.375 0v4.375"
+                      strokeWidth="1.5"
+                      d="M9 4.5H3.5A1.5 1.5 0 002 6v7a1.5 1.5 0 001.5 1.5h7A1.5 1.5 0 0012 13V7.5m-7 4l9-9m0 0h-3.5m3.5 0V6"
                     />
                   </svg>
-                </React.Fragment>
-              ) : (
-                <React.Fragment>
-                  <Gutter size="0.25rem" />
-                  <Box marginBottom="2px">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      fill="none"
-                      viewBox="0 0 16 16"
-                    >
-                      <path
-                        stroke={getStrokeColor(isHover, theme.mode)}
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="1.5"
-                        d="M9 4.5H3.5A1.5 1.5 0 002 6v7a1.5 1.5 0 001.5 1.5h7A1.5 1.5 0 0012 13V7.5m-7 4l9-9m0 0h-3.5m3.5 0V6"
-                      />
-                    </svg>
-                  </Box>
-                </React.Fragment>
-              )
-            ) : null}
-          </XAxis>
+                </Box>
+              </React.Fragment>
+            )
+          ) : null}
         </XAxis>
-      </Box>
-    </Box>
+      </XAxis>
+    </StakedBalanceLayout>
   );
 });
 
@@ -291,11 +271,216 @@ const StarknetStakedBalance: FunctionComponent<{
 
   const stakeBalanceIsZero = false;
 
+  return (
+    <StakedBalanceLayout
+      stakingUrl={"https://dashboard.endur.fi/stake"}
+      isHover={isHover}
+      onHoverStateChange={setIsHover}
+    >
+      <XAxis alignY="center">
+        {theme.mode === "light" ? (
+          stakeBalanceIsZero ? (
+            <EndurFiLightIcon />
+          ) : (
+            <StakingGradientLightIcon />
+          )
+        ) : stakeBalanceIsZero ? (
+          <EndurFiDarkIcon />
+        ) : (
+          <StakingGradientDarkIcon />
+        )}
+        <Gutter size="0.75rem" />
+        <YAxis>
+          {(() => {
+            if (stakeBalanceIsZero) {
+              return (
+                <React.Fragment>
+                  <Subtitle1
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["black"]
+                        : ColorPalette["white"]
+                    }
+                  >
+                    Start Staking
+                  </Subtitle1>
+                  {queryAPR.response &&
+                  "overview" in queryAPR.response.data &&
+                  "apr" in queryAPR.response.data.overview &&
+                  typeof queryAPR.response.data.overview.apr === "number" &&
+                  queryAPR.response.data.overview.apr > 0 ? (
+                    <React.Fragment>
+                      <Gutter size="0.25rem" />
+                      <Body3
+                        color={
+                          theme.mode === "light"
+                            ? ColorPalette["gray-300"]
+                            : ColorPalette["gray-200"]
+                        }
+                        style={{
+                          lineHeight: "140%",
+                        }}
+                      >
+                        {`${new Dec(queryAPR.response.data.overview.apr)
+                          .quo(new Dec(100))
+                          .toString(2)}% APY`}
+                      </Body3>
+                    </React.Fragment>
+                  ) : null}
+                </React.Fragment>
+              );
+            } else {
+              return (
+                <React.Fragment>
+                  <Body3
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-300"]
+                        : ColorPalette["gray-200"]
+                    }
+                    style={{
+                      lineHeight: "140%",
+                    }}
+                  >
+                    Staked Balance
+                  </Body3>
+                  <Gutter size="0.25rem" />
+                  <Subtitle3
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["black"]
+                        : ColorPalette["white"]
+                    }
+                    style={{}}
+                  >
+                    34.342 STRK
+                  </Subtitle3>
+                </React.Fragment>
+              );
+            }
+          })()}
+        </YAxis>
+        <div
+          style={{
+            flex: 1,
+          }}
+        />
+        <YAxis alignX="right">
+          <XAxis alignY="center">
+            {stakeBalanceIsZero ? (
+              <React.Fragment>
+                <Subtitle3
+                  color={
+                    theme.mode === "light"
+                      ? isHover
+                        ? ColorPalette["gray-300"]
+                        : ColorPalette["gray-200"]
+                      : isHover
+                      ? ColorPalette["gray-100"]
+                      : ColorPalette["gray-300"]
+                  }
+                >
+                  Endur.fi
+                </Subtitle3>
+                <Gutter size="0.25rem" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="21"
+                  viewBox="0 0 20 21"
+                  fill="none"
+                >
+                  <path
+                    d="M11.25 5.5H4.375C3.33947 5.5 2.5 6.33947 2.5 7.375V16.125C2.5 17.1605 3.33947 18 4.375 18H13.125C14.1605 18 15 17.1605 15 16.125V9.25M6.25 14.25L17.5 3M17.5 3L13.125 3M17.5 3V7.375"
+                    stroke={getStrokeColor(isHover, theme.mode)}
+                    strokeWidth="1.875"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </React.Fragment>
+            ) : (
+              <React.Fragment>
+                <Body3
+                  color={
+                    theme.mode === "light"
+                      ? isHover
+                        ? ColorPalette["gray-300"]
+                        : ColorPalette["gray-200"]
+                      : isHover
+                      ? ColorPalette["gray-100"]
+                      : ColorPalette["gray-300"]
+                  }
+                  style={{
+                    lineHeight: "140%",
+                  }}
+                >
+                  Endur.fi
+                </Body3>
+                <Gutter size="0.25rem" />
+                <Box marginBottom="2px">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                  >
+                    <path
+                      d="M9 4H3.5C2.67157 4 2 4.67157 2 5.5V12.5C2 13.3284 2.67157 14 3.5 14H10.5C11.3284 14 12 13.3284 12 12.5V7M5 11L14 2M14 2L10.5 2M14 2V5.5"
+                      stroke={getStrokeColor(isHover, theme.mode)}
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </Box>
+              </React.Fragment>
+            )}
+          </XAxis>
+          {!stakeBalanceIsZero &&
+          queryAPR.response &&
+          "overview" in queryAPR.response.data &&
+          "apr" in queryAPR.response.data.overview &&
+          typeof queryAPR.response.data.overview.apr === "number" &&
+          queryAPR.response.data.overview.apr > 0 ? (
+            <React.Fragment>
+              <Gutter size="0.25rem" />
+              <Body3
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-200"]
+                    : ColorPalette["gray-300"]
+                }
+                style={{
+                  lineHeight: "140%",
+                }}
+              >
+                {`${new Dec(queryAPR.response.data.overview.apr)
+                  .quo(new Dec(100))
+                  .toString(2)}% APY`}
+              </Body3>
+            </React.Fragment>
+          ) : null}
+        </YAxis>
+      </XAxis>
+    </StakedBalanceLayout>
+  );
+});
+
+const StakedBalanceLayout: FunctionComponent<{
+  stakingUrl?: string;
+  isHover: boolean;
+  onHoverStateChange: (isHover: boolean) => void;
+  children: React.ReactNode;
+}> = observer(({ stakingUrl, isHover, onHoverStateChange, children }) => {
+  const theme = useTheme();
+
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    browser.tabs.create({
-      url: "https://dashboard.endur.fi/stake",
-    });
+    if (stakingUrl) {
+      browser.tabs.create({ url: stakingUrl });
+    }
   };
 
   return (
@@ -308,199 +493,13 @@ const StarknetStakedBalance: FunctionComponent<{
               ? "0 1px 4px 0 rgba(43,39,55,0.1)"
               : undefined,
         }}
-        cursor={"pointer"}
+        cursor={stakingUrl ? "pointer" : undefined}
         onClick={handleClick}
-        onHoverStateChange={setIsHover}
+        onHoverStateChange={onHoverStateChange}
         borderRadius="0.375rem"
         padding="1rem"
       >
-        <XAxis alignY="center">
-          {theme.mode === "light" ? (
-            stakeBalanceIsZero ? (
-              <EndurFiLightIcon />
-            ) : (
-              <StakingGradientLightIcon />
-            )
-          ) : stakeBalanceIsZero ? (
-            <EndurFiDarkIcon />
-          ) : (
-            <StakingGradientDarkIcon />
-          )}
-          <Gutter size="0.75rem" />
-          <YAxis>
-            {(() => {
-              if (stakeBalanceIsZero) {
-                return (
-                  <React.Fragment>
-                    <Subtitle1
-                      color={
-                        theme.mode === "light"
-                          ? ColorPalette["black"]
-                          : ColorPalette["white"]
-                      }
-                    >
-                      Start Staking
-                    </Subtitle1>
-                    {queryAPR.response &&
-                    "overview" in queryAPR.response.data &&
-                    "apr" in queryAPR.response.data.overview &&
-                    typeof queryAPR.response.data.overview.apr === "number" &&
-                    queryAPR.response.data.overview.apr > 0 ? (
-                      <React.Fragment>
-                        <Gutter size="0.25rem" />
-                        <Body3
-                          color={
-                            theme.mode === "light"
-                              ? ColorPalette["gray-300"]
-                              : ColorPalette["gray-200"]
-                          }
-                          style={{
-                            lineHeight: "140%",
-                          }}
-                        >
-                          {`${new Dec(queryAPR.response.data.overview.apr)
-                            .quo(new Dec(100))
-                            .toString(2)}% APY`}
-                        </Body3>
-                      </React.Fragment>
-                    ) : null}
-                  </React.Fragment>
-                );
-              } else {
-                return (
-                  <React.Fragment>
-                    <Body3
-                      color={
-                        theme.mode === "light"
-                          ? ColorPalette["gray-300"]
-                          : ColorPalette["gray-200"]
-                      }
-                      style={{
-                        lineHeight: "140%",
-                      }}
-                    >
-                      Staked Balance
-                    </Body3>
-                    <Gutter size="0.25rem" />
-                    <Subtitle3
-                      color={
-                        theme.mode === "light"
-                          ? ColorPalette["black"]
-                          : ColorPalette["white"]
-                      }
-                      style={{}}
-                    >
-                      34.342 STRK
-                    </Subtitle3>
-                  </React.Fragment>
-                );
-              }
-            })()}
-          </YAxis>
-          <div
-            style={{
-              flex: 1,
-            }}
-          />
-          <YAxis alignX="right">
-            <XAxis alignY="center">
-              {stakeBalanceIsZero ? (
-                <React.Fragment>
-                  <Subtitle3
-                    color={
-                      theme.mode === "light"
-                        ? isHover
-                          ? ColorPalette["gray-300"]
-                          : ColorPalette["gray-200"]
-                        : isHover
-                        ? ColorPalette["gray-100"]
-                        : ColorPalette["gray-300"]
-                    }
-                  >
-                    Endur.fi
-                  </Subtitle3>
-                  <Gutter size="0.25rem" />
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="21"
-                    viewBox="0 0 20 21"
-                    fill="none"
-                  >
-                    <path
-                      d="M11.25 5.5H4.375C3.33947 5.5 2.5 6.33947 2.5 7.375V16.125C2.5 17.1605 3.33947 18 4.375 18H13.125C14.1605 18 15 17.1605 15 16.125V9.25M6.25 14.25L17.5 3M17.5 3L13.125 3M17.5 3V7.375"
-                      stroke={getStrokeColor(isHover, theme.mode)}
-                      strokeWidth="1.875"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </React.Fragment>
-              ) : (
-                <React.Fragment>
-                  <Body3
-                    color={
-                      theme.mode === "light"
-                        ? isHover
-                          ? ColorPalette["gray-300"]
-                          : ColorPalette["gray-200"]
-                        : isHover
-                        ? ColorPalette["gray-100"]
-                        : ColorPalette["gray-300"]
-                    }
-                    style={{
-                      lineHeight: "140%",
-                    }}
-                  >
-                    Endur.fi
-                  </Body3>
-                  <Gutter size="0.25rem" />
-                  <Box marginBottom="2px">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 16 16"
-                      fill="none"
-                    >
-                      <path
-                        d="M9 4H3.5C2.67157 4 2 4.67157 2 5.5V12.5C2 13.3284 2.67157 14 3.5 14H10.5C11.3284 14 12 13.3284 12 12.5V7M5 11L14 2M14 2L10.5 2M14 2V5.5"
-                        stroke={getStrokeColor(isHover, theme.mode)}
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </Box>
-                </React.Fragment>
-              )}
-            </XAxis>
-            {!stakeBalanceIsZero &&
-            queryAPR.response &&
-            "overview" in queryAPR.response.data &&
-            "apr" in queryAPR.response.data.overview &&
-            typeof queryAPR.response.data.overview.apr === "number" &&
-            queryAPR.response.data.overview.apr > 0 ? (
-              <React.Fragment>
-                <Gutter size="0.25rem" />
-                <Body3
-                  color={
-                    theme.mode === "light"
-                      ? ColorPalette["gray-200"]
-                      : ColorPalette["gray-300"]
-                  }
-                  style={{
-                    lineHeight: "140%",
-                  }}
-                >
-                  {`${new Dec(queryAPR.response.data.overview.apr)
-                    .quo(new Dec(100))
-                    .toString(2)}% APY`}
-                </Body3>
-              </React.Fragment>
-            ) : null}
-          </YAxis>
-        </XAxis>
+        {children}
       </Box>
     </Box>
   );
