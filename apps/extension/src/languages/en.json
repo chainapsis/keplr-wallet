@@ -612,6 +612,7 @@
   "page.main.components.token-found-modal.add-token-on-injective-and-evmos": "Add tokens on Injective and Evmos",
   "page.main.components.token-found-modal.add-chains": "Add Chains",
   "page.main.components.token-item.copy-address.copied": "Copied",
+  "page.main.components.token-item.earn-savings-button": "{balance} in Savings",
 
   "page.main.layouts.header.new-chain.title": "✨ {chains} Now Integrated!",
   "page.main.layouts.header.new-chain.paragraph": "To show the {count, plural, one {chain} other {chains}} and {count, plural, one {its} other {their}} assets on this account, visit \"Manage Chain Visibility\".",
@@ -665,6 +666,14 @@
   "page.tx-result.failed.title": "Transaction failed",
   "page.tx-result.failed.paragraph": "Transaction unsuccessful. Please check the block explorer for more information.",
   "page.tx-result.failed.go-to-home": "Go to Home",
+
+  "page.earn.overview.title": "Earn Overview",
+  "page.earn.overview.tutorial-modal.manage-earn.title": "Manage your Earn balance and rewards",
+  "page.earn.overview.tutorial-modal.manage-earn.paragraph": "Find your balance info under the {tokenName} asset box at Home.",
+  "page.earn.overview.tutorial-modal.claim.title": "Claim {tokenName} with Staking Rewards",
+  "page.earn.overview.tutorial-modal.claim.paragraph": "Easily claim your rewards by clicking \"Claim All\" at Home.",
+  "page.earn.overview.tutorial-modal.claim.pending-reward": "Pending Reward",
+  "page.earn.overview.tutorial-modal.claim.open-earn-overview-button": "Open Earn Overview",
 
   "components.empty-view.text": "No {subject} Yet",
   "components.input.recipient-input.wallet-address-only-label": "Wallet Address",
@@ -720,6 +729,7 @@
   "button.save": "Save",
   "button.close": "Close",
   "button.back": "Back",
+  "button.go-back": "Go Back",
   "button.activate-account": "Activate Account",
   "button.activate": "Activate",
   "button.activating": "Activating",
