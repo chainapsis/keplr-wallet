@@ -654,6 +654,9 @@
   "page.earn.transfer.intro.paragraph.first": "보유한 USDC를 USDC on Noble로 바꾸고",
   "page.earn.transfer.intro.paragraph.first.sub-paragraph": "10초 이내로 완료돼요.",
   "page.earn.transfer.intro.paragraph.second": "Earn할 금액을 입력하면 완료돼요.",
+  "page.earn.transfer.amount.from": "{token}을",
+  "page.earn.transfer.amount.to": "나의 {token}로",
+  "page.earn.transfer.amount.input.placeholder": "얼마나 바꿀까요?",
   "page.send.select-asset.earn.title": "Select asset{br}to transfer to Noble",
 
   "components.empty-view.text": "No {subject} Yet",

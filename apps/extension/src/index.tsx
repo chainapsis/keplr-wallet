@@ -105,12 +105,12 @@ import { SignStarknetMessagePage } from "./pages/starknet/sign/message";
 import { TxResultFailedPage } from "./pages/tx-result/failed";
 import { TxResultPendingPage } from "./pages/tx-result/pending";
 import { TxResultSuccessPage } from "./pages/tx-result/success";
-import { SimpleIBCTransferPage } from "./pages/send/amount/simple-ibc-transfer";
 import { EarnAmountPage } from "./pages/earn/amount";
 import { EarnIntroPage } from "./pages/earn/intro";
 import { EarnConfirmUsdnEstimationPage } from "./pages/earn/confirm-usdn-estimation";
 import { EarnNobleTermsPage } from "./pages/earn/noble-terms";
 import { EarnTransferIntroPage } from "./pages/earn/transfer/intro";
+import { EarnTransferAmountPage } from "./pages/earn/transfer/amount";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -393,10 +393,6 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
                 element={<SendSelectAssetPage />}
               />
               <Route
-                path="/send/simple-ibc-transfer"
-                element={<SimpleIBCTransferPage />}
-              />
-              <Route
                 path="/ibc-swap/select-destination"
                 element={<IBCSwapDestinationSelectAssetPage />}
               />
@@ -519,6 +515,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               <Route
                 path="/earn/transfer/intro"
                 element={<EarnTransferIntroPage />}
+              />
+              <Route
+                path="/earn/transfer/amount"
+                element={<EarnTransferAmountPage />}
               />
               <Route
                 path="/earn/confirm-usdn-estimation"

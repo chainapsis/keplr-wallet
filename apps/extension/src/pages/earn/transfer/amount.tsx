@@ -1,4 +1,10 @@
-import React, { FunctionComponent, useEffect, useRef, useState } from "react";
+import React, {
+  FunctionComponent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { observer } from "mobx-react-lite";
 import { HeaderLayout } from "../../../layouts/header";
 import { BackButton } from "../../../layouts/header/components";
@@ -9,31 +15,37 @@ import { useSearchParams } from "react-router-dom";
 
 import { useStore } from "../../../stores";
 import {
+  EmptyAmountError,
   useSendMixedIBCTransferConfig,
   useTxConfigsValidate,
+  ZeroAmountError,
 } from "@keplr-wallet/hooks";
 import { useNavigate } from "react-router";
-import { AmountInput } from "../../../components/input";
-import { TokenItem } from "../../main/components";
-import { Subtitle3 } from "../../../components/typography";
+import {
+  Body2,
+  H2,
+  Subtitle3,
+  Subtitle4,
+} from "../../../components/typography";
 import { Box } from "../../../components/box";
-import { YAxis } from "../../../components/axis";
 import { Gutter } from "../../../components/gutter";
 import { useNotification } from "../../../hooks/notification";
-import { CoinPretty, DecUtils } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, DecUtils } from "@keplr-wallet/unit";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT, Message } from "@keplr-wallet/router";
 import {
   LogAnalyticsEventMsg,
   SendTxAndRecordMsg,
 } from "@keplr-wallet/background";
-import { FormattedMessage, useIntl } from "react-intl";
+import { useIntl } from "react-intl";
 import { useIBCChannelConfigQueryString } from "../../../hooks/use-ibc-channel-config-query-string";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { amountToAmbiguousAverage } from "../../../utils";
 import { WalletStatus } from "@keplr-wallet/stores";
+import { ColorPalette } from "../../../styles";
+import { Input } from "../components/input";
 
-export const SimpleIBCTransferPage: FunctionComponent = observer(() => {
+export const EarnTransferAmountPage: FunctionComponent = observer(() => {
   const {
     accountStore,
     chainStore,
@@ -55,12 +67,32 @@ export const SimpleIBCTransferPage: FunctionComponent = observer(() => {
   );
 
   const chainId = initialChainId || chainStore.chainInfosInUI[0].chainId;
+  const ibcTransferDestinationChainId =
+    initialIBCTransferDestinationChainId ?? "noble-1";
   const chainInfo = chainStore.getChain(chainId);
+  const ibcTransferDestinationChainInfo = chainStore.getChain(
+    ibcTransferDestinationChainId
+  );
+
+  const [errorMessage, setErrorMessage] = useState("");
 
   const coinMinimalDenom =
-    initialCoinMinimalDenom ||
-    chainStore.getChain(chainId).currencies[0].coinMinimalDenom;
+    initialCoinMinimalDenom || chainInfo.currencies[0].coinMinimalDenom;
   const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
+  const coinDenom = useMemo(() => {
+    if ("originCurrency" in currency && currency.originCurrency) {
+      return currency.originCurrency.coinDenom;
+    }
+    return currency.coinDenom;
+  }, [currency]);
+
+  const account = accountStore.getAccount(chainId);
+
+  const queryBalances = queriesStore.get(chainId).queryBalances;
+  const sender = account.bech32Address;
+  const balance =
+    queryBalances.getQueryBech32Address(sender).getBalance(currency)?.balance ??
+    new CoinPretty(currency, new Dec("0"));
 
   useEffect(() => {
     if (addressRef.current) {
@@ -77,14 +109,6 @@ export const SimpleIBCTransferPage: FunctionComponent = observer(() => {
       );
     }
   }, [navigate, initialChainId, initialCoinMinimalDenom]);
-
-  const account = accountStore.getAccount(chainId);
-
-  const queryBalances = queriesStore.get(chainId).queryBalances;
-  const sender = account.bech32Address;
-  const balance = queryBalances
-    .getQueryBech32Address(sender)
-    .getBalance(currency);
 
   const sendConfigs = useSendMixedIBCTransferConfig(
     chainStore,
@@ -167,6 +191,24 @@ export const SimpleIBCTransferPage: FunctionComponent = observer(() => {
   } catch (e) {
     console.log(e);
   }
+
+  const error = useMemo(() => {
+    const uiProperties = sendConfigs.amountConfig.uiProperties;
+
+    const err = uiProperties.error || uiProperties.warning;
+
+    if (err instanceof EmptyAmountError) {
+      return;
+    }
+
+    if (err instanceof ZeroAmountError) {
+      return;
+    }
+
+    if (err) {
+      return err.message || err.toString();
+    }
+  }, [sendConfigs.amountConfig.uiProperties]);
 
   return (
     <HeaderLayout
@@ -386,38 +428,82 @@ export const SimpleIBCTransferPage: FunctionComponent = observer(() => {
       }}
     >
       <Box
-        paddingX="0.75rem"
+        paddingTop="2rem"
+        paddingX="1.5rem"
         style={{
           flex: 1,
         }}
       >
-        <Stack gutter="0.75rem" flex={1}>
-          <YAxis>
-            <Subtitle3>
-              <FormattedMessage id="page.send.amount.asset-title" />
-            </Subtitle3>
-            <Gutter size="0.375rem" />
-            <TokenItem
-              viewToken={{
-                token: balance?.balance ?? new CoinPretty(currency, "0"),
-                chainInfo: chainStore.getChain(chainId),
-                isFetching: balance?.isFetching ?? false,
-                error: balance?.error,
-              }}
-              forChange
-              onClick={() => {
-                navigate(
-                  `/send/select-asset?navigateReplace=true&navigateTo=${encodeURIComponent(
-                    "/send?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}"
-                  )}`
+        <Stack flex={1}>
+          <H2 color={ColorPalette["white"]}>
+            {intl.formatMessage(
+              { id: "page.earn.transfer.amount.from" },
+              {
+                token: `${coinDenom} on ${chainInfo.chainName}`,
+              }
+            )}
+          </H2>
+          <Gutter size="0.75rem" />
+          <Subtitle3 color={ColorPalette["white"]}>
+            {balance.hideIBCMetadata(true).toString()}{" "}
+            <span style={{ color: ColorPalette["gray-300"] }}>
+              {`on ${chainInfo.chainName}`}
+            </span>
+          </Subtitle3>
+          <Gutter size="1.75rem" />
+          <H2 color={ColorPalette["white"]}>
+            {intl.formatMessage(
+              { id: "page.earn.transfer.amount.to" },
+              {
+                token: `${coinDenom} on ${ibcTransferDestinationChainInfo.chainName}`,
+              }
+            )}
+          </H2>
+          <Gutter size="2.25rem" />
+          <Input
+            type="number"
+            placeholder={intl.formatMessage({
+              id: "page.earn.transfer.amount.input.placeholder",
+            })}
+            value={sendConfigs.amountConfig.value}
+            warning={error != null}
+            onChange={(e) => {
+              sendConfigs.amountConfig.setValue(e.target.value);
+              if (new Dec(e.target.value || "0").gt(balance.toDec())) {
+                setErrorMessage(
+                  intl.formatMessage({
+                    id: "page.earn.amount.error.insufficient-balance",
+                  })
                 );
-              }}
-            />
-          </YAxis>
+              } else {
+                setErrorMessage("");
+              }
+            }}
+            autoComplete="off"
+          />
+          <Gutter size="0.75rem" />
+          <Box
+            padding="0.25rem 0.5rem"
+            backgroundColor={ColorPalette["gray-550"]}
+            borderRadius="0.5rem"
+            width="fit-content"
+            cursor="pointer"
+            onClick={() => {
+              sendConfigs.amountConfig.setValue(
+                balance.hideDenom(true).toString()
+              );
+            }}
+          >
+            <Subtitle4 color={ColorPalette["gray-200"]}>
+              {balance.hideIBCMetadata(true).toString()}
+            </Subtitle4>
+          </Box>
 
-          <Gutter size="0" />
-
-          <AmountInput amountConfig={sendConfigs.amountConfig} />
+          {errorMessage && (
+            <Box marginTop="0.75rem">
+              <Body2 color={ColorPalette["red-300"]}>{errorMessage}</Body2>
+            </Box>
+          )}
         </Stack>
       </Box>
     </HeaderLayout>
