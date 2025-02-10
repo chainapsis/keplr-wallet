@@ -515,6 +515,9 @@ export const TokenDetailModal: FunctionComponent<{
                 );
               }
             } else if ("starknet" in modularChainInfo) {
+              if (modularChainInfo.chainId === "starknet:SN_SEPOLIA")
+                return null;
+
               return (
                 <React.Fragment>
                   <Gutter size="1.25rem" />
