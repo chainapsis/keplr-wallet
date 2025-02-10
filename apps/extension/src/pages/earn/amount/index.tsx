@@ -9,13 +9,13 @@ import { useIntl } from "react-intl";
 
 import { Body2, H1, Subtitle3 } from "../../../components/typography";
 import { Gutter } from "../../../components/gutter";
-import styled from "styled-components";
 import { ColorPalette } from "../../../styles";
 import { Box } from "../../../components/box";
 import { XAxis } from "../../../components/axis";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ApyChip } from "../components/chip";
 import { validateIsUsdcFromNoble } from "../utils";
+import { Input } from "../components/input";
 
 const ZERO_DEC = new Dec("0");
 
@@ -28,6 +28,8 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
 
   const [amountInput, setAmountInput] = useState(presetAmount || "");
   const [errorMessage, setErrorMessage] = useState("");
+
+  const isFromEarnTransfer = searchParams.get("isFromEarnTransfer");
 
   const chainId = searchParams.get("chainId") || "noble-1"; // Noble testnet: "grand-1", mainnet: "noble-1"
   const chainInfo = chainStore.getChain(chainId);
@@ -56,7 +58,17 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
       title={intl.formatMessage({ id: "page.earn.title" })}
       displayFlex={true}
       fixedHeight={true}
-      left={<BackButton />}
+      left={
+        <BackButton
+          {...(isFromEarnTransfer
+            ? {
+                onClick: () => {
+                  navigate("/");
+                },
+              }
+            : {})}
+        />
+      }
       bottomButtons={[
         {
           disabled: isSubmissionBlocked,
@@ -95,7 +107,7 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
         </H1>
 
         <Gutter size="1.75rem" />
-        <StyledTextInput
+        <Input
           type="number"
           placeholder={`0 ${currency?.coinDenom ?? ""}`}
           value={amountInput}
@@ -154,7 +166,7 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
             <Gutter size="0.375rem" />
             <Subtitle3
               onClick={() => {
-                // TO-DO: select asset page로 이동. params 필요
+                navigate("/earn/transfer/intro");
               }}
               style={{
                 textDecoration: "underline",
@@ -173,49 +185,3 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
     </HeaderLayout>
   );
 });
-
-const StyledTextInput = styled.input<{ warning?: boolean }>`
-  font-weight: 700;
-  font-size: 1.875rem;
-  line-height: 2.25rem;
-
-  width: 100%;
-
-  background: none;
-  margin: 0;
-  padding: 0.25rem;
-  padding-bottom: 0.75rem;
-
-  border: 0;
-  border-bottom: 1px solid
-    ${(props) =>
-      props.theme.mode === "light"
-        ? ColorPalette["gray-200"]
-        : ColorPalette["gray-300"]};
-
-  color: ${(props) =>
-    props.warning
-      ? ColorPalette["red-300"]
-      : props.theme.mode === "light"
-      ? ColorPalette["gray-700"]
-      : ColorPalette.white};
-
-  ::placeholder {
-    color: ${(props) =>
-      props.theme.mode === "light"
-        ? ColorPalette["gray-200"]
-        : ColorPalette["gray-300"]};
-  }
-
-  // Remove normalized css properties
-  outline: none;
-
-  ::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-  ::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-`;
