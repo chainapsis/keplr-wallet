@@ -219,7 +219,7 @@ const StarknetStakedBalance: FunctionComponent<{
   const {
     queriesStore,
     // accountStore,
-    // starknetQueriesStore,
+    starknetQueriesStore,
     // chainStore,
     // uiConfigStore,
   } = useStore();
@@ -228,6 +228,8 @@ const StarknetStakedBalance: FunctionComponent<{
 
   const [isHover, setIsHover] = useState(false);
 
+  const chainId = starknetChainInfo.chainId;
+
   const queryAPR = queriesStore.simpleQuery.queryGet<{
     overview: {
       apr: number;
@@ -235,36 +237,12 @@ const StarknetStakedBalance: FunctionComponent<{
     lastUpdated: number;
   }>("https://voyager.online/api/staking/overview");
 
-  // const validators = queriesStore.simpleQuery.queryGet<
-  //   {
-  //     address: string;
-  //     operational_address: string;
-  //     reward_address: string;
-  //     total_stake: string;
-  //     self_stake: string;
-  //     delegated_stake: string;
-  //     delegators_count: number;
-  //     delegators_count_change_24h: string;
-  //     total_stake_change_24h: string;
-  //     commission: number;
-  //     pool_contract_address: string;
-  //     is_active: boolean;
-  //   }[]
-  // >(
-  //   "https://prod-staking-api.karnot.xyz/api/validators?sort_by=total_stake&sort_order=desc"
-  // );
+  const validators =
+    starknetQueriesStore.get(chainId).queryValidators.validators;
 
-  const chainId = starknetChainInfo.chainId;
-
-  console.log(chainId);
+  console.log(validators);
 
   // const account = accountStore.getAccount(chainId);
-
-  // const queryDelegation = queriesStore
-  //   .get(chainId)
-  //   .cosmos.queryDelegations.gyetQueryBech32Address(
-  //     accountStore.getAccount(chainId).bech32Address
-  //   );
 
   // const stakeBalanceIsZero =
   //   !queryDelegation.total || queryDelegation.total.toDec().equals(new Dec(0));
