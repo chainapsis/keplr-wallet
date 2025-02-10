@@ -246,7 +246,6 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
               sendConfigs.feeConfig.toStdFee(),
               sendConfigs.memoConfig.memo,
               {
-                preferNoSetFee: true,
                 preferNoSetMemo: true,
                 sendTx: async (chainId, tx, mode) => {
                   let msg: Message<Uint8Array> = new SendTxAndRecordMsg(
@@ -383,7 +382,7 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
                   }
 
                   if (initialIBCTransferDestinationChainId) {
-                    navigate("/tx-result/success");
+                    navigate("/tx-result/success?isFromEarnTransfer=true");
                   } else {
                     notification.show(
                       "success",
@@ -398,7 +397,7 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
             );
 
             if (initialIBCTransferDestinationChainId) {
-              navigate("/tx-result/pending");
+              navigate("/tx-result/pending?isFromEarnTransfer=true");
             } else {
               navigate("/", {
                 replace: true,

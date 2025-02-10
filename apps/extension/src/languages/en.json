@@ -657,7 +657,14 @@
   "page.earn.transfer.amount.from": "{token}을",
   "page.earn.transfer.amount.to": "나의 {token}로",
   "page.earn.transfer.amount.input.placeholder": "얼마나 바꿀까요?",
+  "page.earn.transfer.amount.tx.paragraph": "Keep this window open{br}to proceed with the next steps!",
   "page.send.select-asset.earn.title": "Select asset{br}to transfer to Noble",
+
+  "page.tx-result.pending.title": "Transaction pending",
+  "page.tx-result.success.title": "Transaction successful",
+  "page.tx-result.failed.title": "Transaction failed",
+  "page.tx-result.failed.paragraph": "Transaction unsuccessful. Please check the block explorer for more information.",
+  "page.tx-result.failed.go-to-home": "Go to Home",
 
   "components.empty-view.text": "No {subject} Yet",
   "components.input.recipient-input.wallet-address-only-label": "Wallet Address",
