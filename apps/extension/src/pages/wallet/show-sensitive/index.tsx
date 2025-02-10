@@ -147,8 +147,11 @@ export const WalletShowSensitivePage: FunctionComponent = observer(() => {
               <div
                 ref={animDivRef}
                 style={{
-                  width: "2.5rem",
-                  height: "2.5rem",
+                  backgroundColor:
+                    theme.mode === "light" ? "none" : ColorPalette["gray-600"],
+                  borderRadius: "2.5rem",
+                  width: "8.5rem",
+                  height: "8.5rem",
                 }}
               />
 

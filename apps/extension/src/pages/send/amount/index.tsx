@@ -56,7 +56,6 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { amountToAmbiguousAverage, isRunningInSidePanel } from "../../../utils";
 import { EthTxStatus } from "@keplr-wallet/types";
 import { usePreviousDistinct } from "../../../hooks/use-previous";
-import { WalletStatus } from "@keplr-wallet/stores";
 
 const Styles = {
   Flex1: styled.div`
@@ -83,10 +82,6 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
   const initialChainId = searchParams.get("chainId");
   const initialCoinMinimalDenom = searchParams.get("coinMinimalDenom");
-  const initialIsIBCTransfer = searchParams.get("isIBCTransfer") === "true";
-  const initialIBCTransferDestinationChainId = searchParams.get(
-    "ibcTransferDestinationChainId"
-  );
 
   const chainId = initialChainId || chainStore.chainInfosInUI[0].chainId;
   const chainInfo = chainStore.getChain(chainId);
@@ -99,7 +94,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
   const isErc20 = new DenomHelper(currency.coinMinimalDenom).type === "erc20";
 
-  const [isIBCTransfer, setIsIBCTransfer] = useState(initialIsIBCTransfer);
+  const [isIBCTransfer, setIsIBCTransfer] = useState(false);
   const [
     isIBCTransferDestinationModalOpen,
     setIsIBCTransferDestinationModalOpen,
@@ -443,48 +438,6 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     | undefined
   >(undefined);
 
-  const initialIBCTransferChannels = initialIsIBCTransfer
-    ? skipQueriesStore.queryIBCPacketForwardingTransfer.getIBCChannels(
-        chainId,
-        coinMinimalDenom
-      )
-    : undefined;
-
-  useEffect(() => {
-    if (initialIBCTransferChannels && initialIBCTransferDestinationChainId) {
-      (async () => {
-        const channel = initialIBCTransferChannels.find(
-          (channel) =>
-            channel.destinationChainId === initialIBCTransferDestinationChainId
-        );
-
-        if (channel && channel.channels.length > 0) {
-          const lastChainId =
-            channel.channels[channel.channels.length - 1].counterpartyChainId;
-
-          const account = accountStore.getAccount(lastChainId);
-
-          if (account.walletStatus === WalletStatus.NotInit) {
-            await account.init();
-          }
-
-          sendConfigs.channelConfig.setChannels(channel.channels);
-          setIBCChannelFluent(channel);
-          if (account.walletStatus === WalletStatus.Loaded) {
-            sendConfigs.recipientConfig.setValue(account.bech32Address);
-            setIsIBCRecipientSetAuto(true);
-          }
-        }
-      })();
-    }
-  }, [
-    accountStore,
-    initialIBCTransferChannels,
-    initialIBCTransferDestinationChainId,
-    sendConfigs.channelConfig,
-    sendConfigs.recipientConfig,
-  ]);
-
   const isDetachedMode = searchParams.get("detached") === "true";
 
   const historyType = isIBCTransfer ? "basic-send/ibc" : "basic-send";
@@ -816,53 +769,31 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                   onFulfill: (tx: any) => {
                     if (tx.code != null && tx.code !== 0) {
                       console.log(tx.log ?? tx.raw_log);
-
-                      if (
-                        initialIsIBCTransfer &&
-                        initialIBCTransferDestinationChainId
-                      ) {
-                        navigate("/tx-result/failed");
-                      } else {
-                        notification.show(
-                          "failed",
-                          intl.formatMessage({
-                            id: "error.transaction-failed",
-                          }),
-                          ""
-                        );
-                      }
-                      return;
-                    }
-
-                    if (
-                      initialIsIBCTransfer &&
-                      initialIBCTransferDestinationChainId
-                    ) {
-                      navigate("/tx-result/success");
-                    } else {
                       notification.show(
-                        "success",
-                        intl.formatMessage({
-                          id: "notification.transaction-success",
-                        }),
+                        "failed",
+                        intl.formatMessage({ id: "error.transaction-failed" }),
                         ""
                       );
+                      return;
                     }
+                    notification.show(
+                      "success",
+                      intl.formatMessage({
+                        id: "notification.transaction-success",
+                      }),
+                      ""
+                    );
                   },
                 }
               );
             }
 
-            if (initialIsIBCTransfer && initialIBCTransferDestinationChainId) {
-              navigate("/tx-result/pending");
+            if (!isDetachedMode) {
+              navigate("/", {
+                replace: true,
+              });
             } else {
-              if (!isDetachedMode) {
-                navigate("/", {
-                  replace: true,
-                });
-              } else {
-                window.close();
-              }
+              window.close();
             }
           } catch (e) {
             if (e?.message === "Request rejected") {
