@@ -29,6 +29,8 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
   const [amountInput, setAmountInput] = useState(presetAmount || "");
   const [errorMessage, setErrorMessage] = useState("");
 
+  const isFromEarnTransfer = searchParams.get("isFromEarnTransfer");
+
   const chainId = searchParams.get("chainId") || "noble-1"; // Noble testnet: "grand-1", mainnet: "noble-1"
   const chainInfo = chainStore.getChain(chainId);
   const account = accountStore.getAccount(chainId);
@@ -56,7 +58,17 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
       title={intl.formatMessage({ id: "page.earn.title" })}
       displayFlex={true}
       fixedHeight={true}
-      left={<BackButton />}
+      left={
+        <BackButton
+          {...(isFromEarnTransfer
+            ? {
+                onClick: () => {
+                  navigate("/");
+                },
+              }
+            : {})}
+        />
+      }
       bottomButtons={[
         {
           disabled: isSubmissionBlocked,
