@@ -1,4 +1,10 @@
-import React, { FunctionComponent, useState, MouseEvent } from "react";
+import React, {
+  FunctionComponent,
+  useState,
+  MouseEvent,
+  useLayoutEffect,
+  useRef,
+} from "react";
 import { ColorPalette } from "../../../../styles";
 import { Box } from "../../../../components/box";
 import { useTheme, DefaultTheme } from "styled-components";
@@ -11,6 +17,7 @@ import {
   MessageIcon,
 } from "../../../../components/icon";
 import { Gutter } from "../../../../components/gutter";
+import SimpleBar from "simplebar-react";
 
 interface Adr36DataViewProps {
   message?: string;
@@ -21,19 +28,38 @@ export const Adr36DataView: FunctionComponent<Adr36DataViewProps> = ({
   message,
   rawMessage,
 }) => {
+  const [isMessageExpanded, setIsMessageExpanded] = useState(false);
+  const [isRawMessageExpanded, setIsRawMessageExpanded] = useState(false);
+  const initialHeight = useRef<number>(0);
+
+  useLayoutEffect(() => {
+    initialHeight.current = window.innerHeight;
+  }, []);
+
+  useLayoutEffect(() => {
+    const anyExpanded = isMessageExpanded || isRawMessageExpanded;
+    const targetHeight = anyExpanded ? MAX_HEIGHT : initialHeight.current;
+
+    if (window.innerHeight !== targetHeight) {
+      window.resizeTo(window.innerWidth, targetHeight);
+    }
+  }, [isMessageExpanded, isRawMessageExpanded]);
+
   if (message && rawMessage) {
     return (
       <React.Fragment>
         <Adr36DataSection
           content={message}
-          isRawMessageStyle={false}
-          canToggle={false}
+          isShowRawMessage={false}
+          isCollapsable={false}
+          onToggle={setIsMessageExpanded}
         />
         <Gutter size="0.725rem" />
         <Adr36DataSection
           content={rawMessage}
-          isRawMessageStyle={true}
-          canToggle={true}
+          isShowRawMessage={true}
+          isCollapsable={true}
+          onToggle={setIsRawMessageExpanded}
         />
       </React.Fragment>
     );
@@ -43,8 +69,9 @@ export const Adr36DataView: FunctionComponent<Adr36DataViewProps> = ({
     return (
       <Adr36DataSection
         content={message}
-        isRawMessageStyle={false}
-        canToggle={false}
+        isShowRawMessage={false}
+        isCollapsable={false}
+        onToggle={setIsMessageExpanded}
       />
     );
   }
@@ -53,8 +80,9 @@ export const Adr36DataView: FunctionComponent<Adr36DataViewProps> = ({
     return (
       <Adr36DataSection
         content={rawMessage}
-        isRawMessageStyle={true}
-        canToggle={false}
+        isShowRawMessage={true}
+        isCollapsable={false}
+        onToggle={setIsRawMessageExpanded}
       />
     );
   }
@@ -63,17 +91,60 @@ export const Adr36DataView: FunctionComponent<Adr36DataViewProps> = ({
 
 interface Adr36DataSectionProps {
   content?: string;
-  isRawMessageStyle: boolean;
-  canToggle: boolean;
+  isShowRawMessage: boolean;
+  isCollapsable: boolean;
+  onToggle?: (expanded: boolean) => void;
 }
 
+const MAX_HEIGHT = 780;
+const INITIAL_HEIGHT = 650;
 const Adr36DataSection: FunctionComponent<Adr36DataSectionProps> = ({
   content,
-  isRawMessageStyle,
-  canToggle,
+  isShowRawMessage,
+  isCollapsable,
+  onToggle,
 }) => {
   const theme: DefaultTheme = useTheme();
-  const [expanded, setExpanded] = useState<boolean>(!canToggle);
+
+  const [expanded, setExpanded] = useState<boolean>(
+    isShowRawMessage && isCollapsable ? false : true
+  );
+  const [needsEllipsis, setNeedsEllipsis] = useState<boolean>(false);
+  const preRef = useRef<HTMLPreElement>(null);
+  const prevHeight = useRef<number>(0);
+  const screenHeight = useRef<number>(0);
+
+  useLayoutEffect(() => {
+    const initialHeight =
+      INITIAL_HEIGHT > window.screen.availHeight
+        ? window.innerHeight
+        : INITIAL_HEIGHT;
+    prevHeight.current = initialHeight;
+    screenHeight.current = window.screen.availHeight;
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!isShowRawMessage && preRef.current) {
+      const THRESHOLD: number = 72;
+      const contentHeight: number = preRef.current.scrollHeight;
+      if (contentHeight > THRESHOLD) {
+        setNeedsEllipsis(true);
+        setExpanded(false);
+      } else {
+        setNeedsEllipsis(false);
+        setExpanded(true);
+      }
+    }
+  }, [content, isShowRawMessage]);
+
+  const handleToggle = (e: MouseEvent<HTMLDivElement>): void => {
+    e.preventDefault();
+    setExpanded((prev: boolean) => {
+      const newValue = !prev;
+      onToggle?.(newValue);
+      return newValue;
+    });
+  };
 
   const containerStyle: React.CSSProperties = {
     overflow: "auto",
@@ -81,50 +152,88 @@ const Adr36DataSection: FunctionComponent<Adr36DataSectionProps> = ({
       theme.mode === "light"
         ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
         : "none",
-    ...(!isRawMessageStyle && !canToggle ? { maxHeight: "8rem" } : {}),
+    display: "flex",
+    flexDirection: "column",
+    overflowY: "auto",
+    overflowX: "auto",
+    borderRadius: "0.375rem",
+    backgroundColor:
+      theme.mode === "light" ? ColorPalette.white : ColorPalette["gray-600"],
+    padding: "1rem",
+    minHeight: "3rem",
   };
 
-  // pre 태그 스타일을 인라인으로 정의 (raw 스타일 여부에 따라 폰트 크기 및 색상 변경)
   const preStyle: React.CSSProperties = {
     margin: 0,
     fontWeight: 400,
-    fontSize: isRawMessageStyle ? "0.875rem" : "1rem",
-    ...(isRawMessageStyle
-      ? { color: ColorPalette["gray-200"] }
+    fontSize: isShowRawMessage ? "0.875rem" : "1rem",
+    wordBreak: "break-all",
+    whiteSpace: "pre-wrap",
+    ...(isShowRawMessage
+      ? {
+          color: ColorPalette["gray-200"],
+        }
       : {
           color:
             theme.mode === "light"
               ? ColorPalette["gray-500"]
               : ColorPalette["white"],
-          overflowWrap: "anywhere",
-          whiteSpace: "break-spaces",
         }),
   };
 
-  const handleToggle = (e: MouseEvent<HTMLDivElement>): void => {
-    e.preventDefault();
-    setExpanded((prev: boolean) => !prev);
-  };
+  const ellipsisStyle: React.CSSProperties =
+    !isShowRawMessage && needsEllipsis && !expanded
+      ? {
+          display: "-webkit-box",
+          WebkitBoxOrient: "vertical",
+          textOverflow: "ellipsis",
+          overflow: "hidden",
+          WebkitLineClamp: 3,
+        }
+      : {};
+
+  const computedPreStyle = { ...preStyle, ...ellipsisStyle };
 
   return (
-    <Box
-      padding="1rem"
-      backgroundColor={
-        theme.mode === "light" ? ColorPalette.white : ColorPalette["gray-600"]
-      }
-      borderRadius="0.375rem"
-      style={containerStyle}
-    >
-      {canToggle ? <AdvancedTitle onClick={handleToggle} /> : <MessageTitle />}
+    <SimpleBar autoHide={false} style={containerStyle}>
+      {isCollapsable ? (
+        <AdvancedTitle onClick={handleToggle} />
+      ) : (
+        <MessageTitle />
+      )}
       <Box>
-        {(!canToggle || (canToggle && expanded)) && (
+        {isCollapsable ? (
+          expanded && (
+            <React.Fragment>
+              <Gutter size={isShowRawMessage ? "1rem" : "0.5rem"} />
+              <pre style={preStyle} ref={preRef}>
+                {content}
+              </pre>
+            </React.Fragment>
+          )
+        ) : (
           <React.Fragment>
-            <Gutter size={isRawMessageStyle ? "1rem" : "0.5rem"} />
-            <pre style={preStyle}>{content}</pre>
+            <Gutter size={isShowRawMessage ? "1rem" : "0.5rem"} />
+            <pre style={computedPreStyle} ref={preRef}>
+              {content}
+            </pre>
+            {needsEllipsis && (
+              <div
+                onClick={handleToggle}
+                style={{
+                  cursor: "pointer",
+                  marginTop: "0.75rem",
+                }}
+              >
+                <Subtitle4 color={ColorPalette["gray-200"]}>
+                  {expanded ? "Show Less Detail" : "Show More Detail"}
+                </Subtitle4>
+              </div>
+            )}
           </React.Fragment>
         )}
       </Box>
-    </Box>
+    </SimpleBar>
   );
 };
 
@@ -166,7 +275,6 @@ const AdvancedTitle = ({
     <Box
       cursor="pointer"
       onClick={onClick}
-      paddingY="0.5rem"
       style={{
         color:
           theme.mode === "light"
