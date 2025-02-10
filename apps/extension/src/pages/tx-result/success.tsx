@@ -39,7 +39,7 @@ export const TxResultSuccessPage: FunctionComponent = observer(() => {
   useEffect(() => {
     if (isFromEarnTransfer) {
       setTimeout(() => {
-        navigate(`/earn/amount`);
+        navigate(`/earn/amount?isFromEarnTransfer=true`);
       }, 3000);
     }
   }, [isFromEarnTransfer, navigate]);
