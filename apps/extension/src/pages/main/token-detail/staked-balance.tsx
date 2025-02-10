@@ -260,7 +260,11 @@ export const StakedBalance: FunctionComponent<{
                     <path
                       stroke={
                         theme.mode === "light"
-                          ? ColorPalette["gray-200"]
+                          ? isHover
+                            ? ColorPalette["gray-300"]
+                            : ColorPalette["gray-200"]
+                          : isHover
+                          ? ColorPalette["gray-100"]
                           : ColorPalette["gray-300"]
                       }
                       strokeLinecap="round"
@@ -284,7 +288,11 @@ export const StakedBalance: FunctionComponent<{
                       <path
                         stroke={
                           theme.mode === "light"
-                            ? ColorPalette["gray-200"]
+                            ? isHover
+                              ? ColorPalette["gray-300"]
+                              : ColorPalette["gray-200"]
+                            : isHover
+                            ? ColorPalette["gray-100"]
                             : ColorPalette["gray-300"]
                         }
                         strokeLinecap="round"
