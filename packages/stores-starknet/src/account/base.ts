@@ -8,6 +8,7 @@ import {
   DeployContractResponse,
   num,
   DeployAccountSignerDetails,
+  InvocationsSignerDetails,
 } from "starknet";
 import { StoreAccount } from "./internal";
 import { Dec, DecUtils, Int } from "@keplr-wallet/unit";
@@ -238,7 +239,16 @@ export class StarknetAccountBase {
           type: "STRK";
           gas: string;
           maxGasPrice: string;
-        }
+        },
+    signTx?: (
+      chainId: string,
+      calls: Call[],
+      details: InvocationsSignerDetails
+    ) => Promise<{
+      transactions: Call[];
+      details: InvocationsSignerDetails;
+      signature: string[];
+    }>
   ) {
     const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
     if (!("starknet" in modularChainInfo)) {
@@ -252,7 +262,7 @@ export class StarknetAccountBase {
       this.getKeplr
     );
 
-    return await walletAccount.executeWithFee(calls, fee);
+    return await walletAccount.executeWithFee(calls, fee, signTx);
   }
 
   async executeForSendTokenTx(

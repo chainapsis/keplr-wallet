@@ -838,7 +838,11 @@ export class KeyRingStarknetService {
     chainId: string,
     transactions: Call[],
     details: InvocationsSignerDetails
-  ): Promise<string[]> {
+  ): Promise<{
+    transactions: Call[];
+    details: InvocationsSignerDetails;
+    signature: string[];
+  }> {
     if (!env.isInternalMsg) {
       throw new Error("Permission Rejected");
     }
@@ -886,7 +890,11 @@ export class KeyRingStarknetService {
       Buffer.from(msgHash, "hex"),
       "noop"
     );
-    return this.formatEthSignature(sig);
+    return {
+      transactions,
+      details,
+      signature: this.formatEthSignature(sig),
+    };
   }
 
   protected formatEthSignature(sig: {

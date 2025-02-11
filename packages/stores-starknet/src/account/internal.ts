@@ -304,7 +304,16 @@ export class StoreAccount extends Account {
           type: "STRK";
           gas: string;
           maxGasPrice: string;
-        }
+        },
+    signTx?: (
+      chainId: string,
+      calls: Call[],
+      details: InvocationsSignerDetails
+    ) => Promise<{
+      transactions: Call[];
+      details: InvocationsSignerDetails;
+      signature: string[];
+    }>
   ): Promise<InvokeFunctionResponse> {
     const nonce = await this.getNonce();
     const chainId = await this.getChainId();
@@ -319,7 +328,6 @@ export class StoreAccount extends Account {
             chainId: chainId,
             cairoVersion: this.cairoVersion,
             skipValidate: false,
-
             maxFee: num.toHex(fee.maxFee),
           };
         case "STRK":
@@ -330,7 +338,6 @@ export class StoreAccount extends Account {
             chainId: chainId,
             cairoVersion: this.cairoVersion,
             skipValidate: false,
-
             resourceBounds: {
               l1_gas: {
                 max_amount: num.toHex(fee.gas),
@@ -352,24 +359,38 @@ export class StoreAccount extends Account {
       }
     })();
 
-    const keplr = await this.getKeplr();
-    if (!keplr) {
-      throw new Error("Keplr is not initialized");
+    let transactions: Call[];
+    let details: InvocationsSignerDetails;
+    let signature: string[];
+
+    if (signTx) {
+      const result = await signTx(this.keplrChainId, calls, signerDetails);
+      transactions = result.transactions;
+      details = result.details;
+      signature = result.signature;
+    } else {
+      const keplr = await this.getKeplr();
+      if (!keplr) {
+        throw new Error("Keplr is not initialized");
+      }
+      const result = await keplr.signStarknetTx(
+        this.keplrChainId,
+        calls,
+        signerDetails
+      );
+      transactions = result.transactions;
+      details = result.details;
+      signature = result.signature;
     }
-    const {
-      transactions: newTransactions,
-      details: newDetails,
-      signature,
-    } = await keplr.signStarknetTx(this.keplrChainId, calls, signerDetails);
 
     const calldata = transaction.getExecuteCalldata(
-      newTransactions,
+      transactions,
       await this.getCairoVersion()
     );
 
     return this.invokeFunction(
       { contractAddress: this.address, calldata, signature },
-      newDetails
+      details
     );
   }
 }

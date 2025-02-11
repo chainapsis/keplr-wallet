@@ -328,7 +328,11 @@ export class GetStarknetKeyParamsSelectedMsg extends Message<{
   }
 }
 
-export class PrivilegeStarknetSignClaimRewardsMsg extends Message<string[]> {
+export class PrivilegeStarknetSignClaimRewardsMsg extends Message<{
+  transactions: Call[];
+  details: InvocationsSignerDetails;
+  signature: string[];
+}> {
   public static type() {
     return "privilege-starknet-sign-claim-rewards";
   }
