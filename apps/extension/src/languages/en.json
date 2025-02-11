@@ -435,8 +435,8 @@
   "page.sign.adr36.requested-network": "Requested Network",
   "page.sign.adr36.message": "Message",
   "page.sign.adr36.raw-message": "Advanced",
-  "page.sign.adr36.show-more-detail": "Show more detail",
-  "page.sign.adr36.show-less-detail": "Show less detail",
+  "page.sign.adr36.show-more-detail": "Show more",
+  "page.sign.adr36.show-less-detail": "Show less",
 
   "page.sign.adr36.warning-title": "Incompatible Signing Requested",
   "page.sign.adr36.warning-paragraph": "Error: SIGN_MODE_DIRECT can’t be signed on Ledger. Contact the web app provider to fix this issue.",
