@@ -30,15 +30,15 @@ export const Adr36WalletDetails: FunctionComponent<Adr36WalletDetailsProps> = ({
   const theme = useTheme();
   const shortenAddress = (() => {
     if (addressInfo.type === "starknet") {
-      return `${addressInfo.address.slice(0, 10)}...${addressInfo.address.slice(
-        -8
+      return `${addressInfo.address.slice(0, 8)}...${addressInfo.address.slice(
+        -6
       )}`;
     }
 
     if (addressInfo.type === "ethereum") {
       return addressInfo.address.length === 42
-        ? `${addressInfo.address.slice(0, 10)}...${addressInfo.address.slice(
-            -8
+        ? `${addressInfo.address.slice(0, 8)}...${addressInfo.address.slice(
+            -6
           )}`
         : addressInfo.address;
     }
