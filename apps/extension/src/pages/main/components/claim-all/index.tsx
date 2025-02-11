@@ -28,6 +28,7 @@ import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import {
   PrivilegeCosmosSignAminoWithdrawRewardsMsg,
+  PrivilegeStarknetSignClaimRewardsMsg,
   SendTxMsg,
 } from "@keplr-wallet/background";
 import { action, makeObservable, observable } from "mobx";
@@ -44,6 +45,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { CurrencyImageFallback } from "../../../../components/image";
 import { DefaultGasPriceStep } from "@keplr-wallet/hooks";
 import { IChainInfoImpl, MakeTxResponse } from "@keplr-wallet/stores";
+import { Call, CallData, num } from "starknet";
 
 interface ClaimToken extends ViewToken {
   onClaimAll: (chainId: string, token: CoinPretty) => void | Promise<void>;
@@ -131,10 +133,16 @@ const useClaimAllEachState = () => {
   const { chainStore } = useStore();
   const statesRef = useRef(new Map<string, ClaimAllEachState>());
   const getClaimAllEachState = (chainId: string): ClaimAllEachState => {
-    // modular chain의 경우 chainIdentifier가 없다. 따라서 chainId를 사용한다.
+    // modular chain의 경우 chainIdentifier가 없다.
+    // 따라서 chainId를 사용한다.
+
     const chainIdentifier = chainStore.hasChain(chainId)
       ? chainStore.getChain(chainId).chainIdentifier
       : chainId;
+
+    if (chainId.startsWith("stark")) {
+      console.log("chainIdentifier", chainIdentifier);
+    }
 
     let state = statesRef.current.get(chainIdentifier);
     if (!state) {
@@ -570,6 +578,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
       chainStore,
       accountStore,
       queriesStore,
+      starknetAccountStore,
       starknetQueriesStore,
       priceStore,
       keyRingStore,
@@ -692,7 +701,336 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
       })();
     };
 
-    const handleStarknetInnerClaim = (chainId: string, token: CoinPretty) => {};
+    const handleStarknetInnerClaim = (chainId: string, token: CoinPretty) => {
+      const starknetChainInfo = chainStore.getModularChain(chainId);
+      const account = accountStore.getAccount(chainId);
+      if (!account.starknetHexAddress) {
+        return;
+      }
+
+      const starknetAccount = starknetAccountStore.getAccount(chainId);
+
+      const starknetQueries = starknetQueriesStore.get(chainId);
+      const queryValidators = starknetQueries.queryValidators;
+      const validators = queryValidators.validators;
+      const queryStakingInfo = queryValidators
+        .getQueryPoolMemberInfoMap(account.starknetHexAddress)
+        ?.getQueryStakingInfo(validators);
+
+      const claimableRewards =
+        queryStakingInfo?.getDescendingPendingClaimableRewards(
+          account.isNanoLedger ? 5 : 8
+        );
+
+      if (!claimableRewards || claimableRewards.length === 0) {
+        return;
+      }
+
+      const state = getClaimAllEachState(chainId);
+
+      state.setIsLoading(true);
+
+      // build tx
+      const calls: Call[] = [];
+
+      for (const claimableReward of claimableRewards) {
+        if (claimableReward.poolAddress) {
+          calls.push({
+            contractAddress: claimableReward.poolAddress,
+            calldata: CallData.compile([account.starknetHexAddress]),
+            entrypoint: "claim_rewards",
+          });
+        }
+      }
+
+      const currencies = chainStore
+        .getModularChainInfoImpl(chainId)
+        .getCurrencies("starknet");
+
+      const STRK = currencies.find((c) => c.coinDenom === "STRK");
+      const ETH = currencies.find((c) => c.coinDenom === "ETH");
+
+      // estimate fee
+      (async () => {
+        try {
+          const {
+            gas_consumed,
+            data_gas_consumed,
+            gas_price,
+            overall_fee,
+            resourceBounds,
+            unit,
+          } = await starknetAccount.estimateInvokeFee(
+            account.starknetHexAddress,
+            calls,
+            "STRK"
+          );
+
+          const gasMargin = new Dec(1.2);
+          const gasPriceMargin = new Dec(1.5);
+
+          const gasConsumedDec = new Dec(gas_consumed);
+          const dataGasConsumedDec = new Dec(data_gas_consumed);
+          const sigVerificationGasConsumedDec = new Dec(583);
+          const totalGasConsumed = gasConsumedDec
+            .add(dataGasConsumedDec)
+            .add(sigVerificationGasConsumedDec);
+
+          const gasPriceDec = new Dec(gas_price);
+          // overallFee는 (gas_consumed * gas_price + data_gas_consumed * data_gas_price)로 계산됨.
+          const overallFeeDec = new Dec(overall_fee);
+
+          const sigVerificationFee =
+            sigVerificationGasConsumedDec.mul(gasPriceDec);
+
+          const adjustedOverallFee = overallFeeDec.add(sigVerificationFee);
+
+          const adjustedGasPrice = adjustedOverallFee.quo(totalGasConsumed);
+
+          // Calculate fee values for STRK fee currency.
+          let v3Fee:
+            | {
+                gasPrice: CoinPretty;
+                maxGasPrice: CoinPretty;
+                gas: Dec;
+                maxGas: Dec;
+              }
+            | undefined;
+          if (STRK && unit === "FRI") {
+            const gasPrice = new CoinPretty(STRK, adjustedGasPrice);
+            const l1Gas = resourceBounds.l1_gas;
+
+            const maxGasForSTRK = adjustedOverallFee
+              .quo(gasPriceDec)
+              .mul(gasMargin);
+            const maxGasPriceForSTRK = gasPrice.mul(gasPriceMargin);
+
+            const maxPricePerUnitForSTRK = new CoinPretty(
+              STRK,
+              num.hexToDecimalString(l1Gas.max_price_per_unit)
+            );
+
+            const finalMaxGasPriceForSTRK = maxPricePerUnitForSTRK
+              .sub(maxGasPriceForSTRK)
+              .toDec()
+              .gt(new Dec(0))
+              ? maxPricePerUnitForSTRK
+              : maxGasPriceForSTRK;
+
+            v3Fee = {
+              gasPrice: new CoinPretty(STRK, adjustedGasPrice),
+              maxGasPrice: finalMaxGasPriceForSTRK,
+              gas: totalGasConsumed,
+              maxGas: maxGasForSTRK,
+            };
+          }
+
+          // // Calculate fee values for ETH fee currency.
+          // let v1Fee:
+          //   | {
+          //       gasPrice: CoinPretty;
+          //       maxGasPrice: CoinPretty;
+          //       gas: Dec;
+          //       maxGas: Dec;
+          //     }
+          //   | undefined;
+          // if (ETH) {
+          //   const gasPriceForETH = new CoinPretty(ETH, adjustedGasPrice);
+          //   const l1Gas = resourceBounds.l1_gas;
+
+          //   // maxGasForETH는 (adjustedOverallFee / gasPriceDec) * gasMargin 로 계산.
+          //   const maxGasForETH = adjustedOverallFee
+          //     .quo(gasPriceDec)
+          //     .mul(gasMargin);
+          //   const computedMaxGasPriceForETH =
+          //     gasPriceForETH.mul(gasPriceMargin);
+
+          //   const maxPricePerUnitForETH = new CoinPretty(
+          //     ETH,
+          //     num.hexToDecimalString(l1Gas.max_price_per_unit)
+          //   );
+
+          //   const finalMaxGasPriceForETH = maxPricePerUnitForETH
+          //     .sub(computedMaxGasPriceForETH)
+          //     .toDec()
+          //     .gt(new Dec(0))
+          //     ? maxPricePerUnitForETH
+          //     : computedMaxGasPriceForETH;
+
+          //   v1Fee = {
+          //     gasPrice: gasPriceForETH,
+          //     maxGasPrice: finalMaxGasPriceForETH,
+          //     gas: maxGasForETH,
+          //     maxGas: maxGasForETH,
+          //   };
+          // }
+
+          // check balance for fee (Priority: STRK > ETH)
+          let fee:
+            | {
+                version: "v3" | "v1";
+                currency: AppCurrency;
+                gasPrice: CoinPretty;
+                maxGasPrice: CoinPretty;
+                gas: Dec;
+                maxGas: Dec;
+              }
+            | undefined;
+
+          if (STRK && v3Fee) {
+            // check balance
+            const querySTRK =
+              starknetQueries.queryStarknetERC20Balance.getBalance(
+                chainId,
+                chainStore,
+                account.starknetHexAddress,
+                STRK?.coinMinimalDenom
+              );
+
+            const balance = querySTRK?.balance;
+            if (balance) {
+              const tolerance = v3Fee.maxGasPrice.mul(v3Fee.gas);
+              if (balance.sub(tolerance).toDec().gt(zeroDec)) {
+                fee = {
+                  version: "v3",
+                  currency: STRK,
+                  ...v3Fee,
+                };
+              }
+            }
+          }
+
+          // if (ETH && v1Fee && !fee) {
+          //   // check balance
+          //   const queryETH =
+          //     starknetQueries.queryStarknetERC20Balance.getBalance(
+          //       chainId,
+          //       chainStore,
+          //       account.starknetHexAddress,
+          //       ETH?.coinMinimalDenom
+          //     );
+
+          //   const balance = queryETH?.balance;
+          //   if (balance) {
+          //     const tolerance = v1Fee.maxGasPrice.mul(v1Fee.gas);
+          //     if (balance.sub(tolerance).toDec().gt(zeroDec)) {
+          //       fee = {
+          //         version: "v1",
+          //         currency: ETH,
+          //         ...v1Fee,
+          //       };
+          //     }
+          //   }
+          // }
+
+          if (!fee) {
+            throw new Error(
+              intl.formatMessage({
+                id: "error.can-not-find-fee-for-claim-all",
+              })
+            );
+          }
+
+          // check balance for claimable rewards
+          // in case fee is ETH, compare the price of claimable rewards and fee.
+          const totalClaimableRewards = claimableRewards.reduce((acc, curr) => {
+            return acc.add(curr.amount);
+          }, new CoinPretty(token.currency, new Dec(0)));
+
+          const feeAmount = fee.maxGasPrice.mul(fee.gas);
+
+          const rewardsPrice = priceStore.calculatePrice(totalClaimableRewards);
+          const feePrice = priceStore.calculatePrice(feeAmount);
+
+          if (!rewardsPrice || !feePrice) {
+            throw new Error(
+              intl.formatMessage({
+                id: "error.can-not-find-price-for-claim-all",
+              })
+            );
+          }
+
+          // if the price of claimable rewards is less than the price of fee, throw an error
+          if (rewardsPrice.sub(feePrice).toDec().lt(zeroDec)) {
+            throw new Error(
+              intl.formatMessage({
+                id: "error.insufficient-balance",
+              })
+            );
+          }
+
+          // analyticsStore.logEvent("complete_claim_all", {
+          //   chainId: starknetChainInfo.chainId,
+          //   chainName: starknetChainInfo.chainName,
+          // });
+
+          // PrivilegeStarknetSignClaimRewardsMsg
+
+          // const requester = new InExtensionMessageRequester();
+
+          // const msg = new PrivilegeStarknetSignClaimRewardsMsg(
+          //   starknetChainInfo.chainId,
+          //   calls,
+          //   {
+          //     version: "0x3",
+          //     walletAddress: account.starknetHexAddress,
+          //     nonce: 0,
+          //   }
+          // );
+
+          // execute (TODO: 서명 제거하도록)
+          const { transaction_hash: txHash } = await starknetAccount.execute(
+            account.starknetHexAddress,
+            calls,
+            fee.version === "v3"
+              ? {
+                  type: "STRK",
+                  gas: fee.gas.roundUp().toString(),
+                  maxGasPrice: fee.maxGasPrice
+                    .mul(new Dec(10 ** fee.currency.coinDecimals))
+                    .toDec()
+                    .roundUp()
+                    .toString(),
+                }
+              : {
+                  type: "ETH",
+                  maxFee: fee.maxGasPrice
+                    .mul(fee.gas)
+                    .mul(new Dec(10 ** fee.currency.coinDecimals))
+                    .toDec()
+                    .roundUp()
+                    .toString(),
+                },
+            async (chainId, calls, details) => {
+              const requester = new InExtensionMessageRequester();
+
+              return await requester.sendMessage(
+                BACKGROUND_PORT,
+                new PrivilegeStarknetSignClaimRewardsMsg(
+                  chainId,
+                  calls,
+                  details
+                )
+              );
+            }
+          );
+
+          setTimeout(() => {
+            state.setIsLoading(false);
+          }, 1000);
+
+          if (!txHash) {
+            throw new Error("Failed to claim all");
+          }
+        } catch (e) {
+          state.setFailedReason(e);
+          console.log(e);
+          return;
+        }
+      })();
+
+      state.setIsLoading(false);
+    };
 
     const claimTokens: ClaimToken[] = (() => {
       const res: ClaimToken[] = [];
@@ -997,6 +1335,15 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
           }}
         >
           {claimTokens.map((claimToken) => {
+            const state = getClaimAllEachState(claimToken.chainInfo.chainId);
+
+            if (claimToken.chainInfo.chainId.startsWith("stark")) {
+              console.log(
+                claimToken.chainInfo.chainId,
+                state.isLoading,
+                state.failedReason
+              );
+            }
             return (
               <ClaimTokenItem
                 key={`${claimToken.chainInfo.chainId}-${claimToken.token.currency.coinMinimalDenom}`}

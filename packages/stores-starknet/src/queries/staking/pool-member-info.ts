@@ -427,4 +427,20 @@ export class ObservableQueryStakingInfo {
       totalUnbondingAmount: amount,
     };
   }
+
+  readonly getDescendingPendingClaimableRewards = computedFn(
+    (maxValiadtors: number): ClaimableReward[] => {
+      const rewards = this.claimableRewards;
+      if (!rewards) {
+        return [];
+      }
+
+      const sortedRewards = rewards.claimableRewards.slice();
+      sortedRewards.sort((reward1, reward2) => {
+        return reward2.amount.toDec().gt(reward1.amount.toDec()) ? 1 : -1;
+      });
+
+      return sortedRewards.slice(0, maxValiadtors);
+    }
+  );
 }
