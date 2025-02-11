@@ -92,7 +92,10 @@ export class KeyRingEthereumService {
       throw new Error("Null key info");
     }
 
-    if (keyInfo.type === "ledger") {
+    const forceEVMLedger = chainInfo.features?.includes(
+      "force-enable-evm-ledger"
+    );
+    if (keyInfo.type === "ledger" && !forceEVMLedger) {
       KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
         chainId
       );
