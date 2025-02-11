@@ -536,6 +536,7 @@
   "page.send.amount.memo-placeholder": "Required for sending to centralized exchanges",
   "page.send.amount.ibc-transfer-warning.title": "Avoid IBC transfers to centralized exchanges. Your assets may be lost.",
   "page.send.amount.avoid-cex-warning.title": "Centralized exchanges may not support this type of asset. Avoid transferring to centralized exchanges.",
+  "page.send.amount.warning.expected-amount-too-small": "Bridge fee is high compared to the amount used. Big drop in received amount is expected. Click \"Next\" if you still want to proceed.",
 
   "page.main.chart.available": "Total Available",
   "page.main.chart.staked": "Total Staked",
