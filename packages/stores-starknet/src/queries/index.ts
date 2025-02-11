@@ -43,8 +43,6 @@ class StarknetQueriesStoreImpl {
 
   public readonly queryValidators: DeepReadonly<ObservableQueryValidators>;
 
-  // TODO: add queryPoolMemberInfo
-
   constructor(
     protected readonly sharedContext: QuerySharedContext,
     protected readonly chainId: string,
@@ -74,6 +72,10 @@ class StarknetQueriesStoreImpl {
       chainGetter
     );
 
-    this.queryValidators = new ObservableQueryValidators(sharedContext);
+    this.queryValidators = new ObservableQueryValidators(
+      sharedContext,
+      chainId,
+      chainGetter
+    );
   }
 }

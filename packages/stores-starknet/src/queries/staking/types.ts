@@ -1,3 +1,5 @@
+import { CoinPretty } from "@keplr-wallet/unit";
+
 export type StarknetValidator = {
   address: string;
   operational_address: string;
@@ -16,4 +18,17 @@ export type StarknetValidator = {
 export type StarknetValidators = {
   validators: StarknetValidator[];
   total_count: number;
+};
+
+export type ClaimableReward = {
+  validatorAddress: string;
+  poolAddress: string;
+  amount: CoinPretty;
+};
+
+export type UnpoolDelegation = {
+  validatorAddress: string;
+  poolAddress: string;
+  amount: CoinPretty;
+  period: number;
 };

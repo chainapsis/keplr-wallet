@@ -216,19 +216,15 @@ const CosmosStakedBalance: FunctionComponent<{
 const StarknetStakedBalance: FunctionComponent<{
   starknetChainInfo: StarknetChainInfo;
 }> = observer(({ starknetChainInfo }) => {
-  const {
-    queriesStore,
-    // accountStore,
-    starknetQueriesStore,
-    // chainStore,
-    // uiConfigStore,
-  } = useStore();
+  const { queriesStore, accountStore, starknetQueriesStore, uiConfigStore } =
+    useStore();
 
   const theme = useTheme();
 
   const [isHover, setIsHover] = useState(false);
 
   const chainId = starknetChainInfo.chainId;
+  const account = accountStore.getAccount(chainId);
 
   const queryAPR = queriesStore.simpleQuery.queryGet<{
     overview: {
@@ -237,17 +233,18 @@ const StarknetStakedBalance: FunctionComponent<{
     lastUpdated: number;
   }>("https://voyager.online/api/staking/overview");
 
-  const validators =
-    starknetQueriesStore.get(chainId).queryValidators.validators;
+  const queryValidators = starknetQueriesStore.get(chainId).queryValidators;
 
-  console.log(validators);
+  const validators = queryValidators.validators;
 
-  // const account = accountStore.getAccount(chainId);
+  const queryStakingInfo = queryValidators
+    .getQueryPoolMemberInfoMap(account.starknetHexAddress)
+    ?.getQueryStakingInfo(validators);
 
-  // const stakeBalanceIsZero =
-  //   !queryDelegation.total || queryDelegation.total.toDec().equals(new Dec(0));
+  const totalStakedAmount = queryStakingInfo?.totalStakedAmount;
 
-  const stakeBalanceIsZero = false;
+  const stakeBalanceIsZero =
+    !totalStakedAmount || totalStakedAmount.toDec().equals(new Dec(0));
 
   return (
     <StakedBalanceLayout
@@ -331,7 +328,17 @@ const StarknetStakedBalance: FunctionComponent<{
                     }
                     style={{}}
                   >
-                    34.342 STRK
+                    {totalStakedAmount
+                      ? uiConfigStore.hideStringIfPrivacyMode(
+                          totalStakedAmount
+                            .maxDecimals(6)
+                            .shrink(true)
+                            .inequalitySymbol(true)
+                            .trim(true)
+                            .toString(),
+                          2
+                        )
+                      : "-"}
                   </Subtitle3>
                 </React.Fragment>
               );
