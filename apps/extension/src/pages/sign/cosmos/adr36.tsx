@@ -316,18 +316,17 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
         />
 
         <Gutter size="1.5rem" />
-        <Adr36WalletDetails
-          walletName={account?.name || ""}
-          chainInfo={
-            signInteractionStore.waitingData?.data.chainId
-              ? chainStore.getChain(chainId)
-              : chainStore.getChain("osmosis-1")
-          }
-          addressInfo={{
-            type: "bech32",
-            address: account?.bech32Address || "",
-          }}
-        />
+        {chainId && (
+          <Adr36WalletDetails
+            walletName={account?.name || ""}
+            chainInfo={chainStore.getChain(chainId)}
+            addressInfo={{
+              type: "bech32",
+              address: account.bech32Address,
+            }}
+          />
+        )}
+
         <Gutter size="1.5rem" />
         <Adr36DataView
           message={content.value}
