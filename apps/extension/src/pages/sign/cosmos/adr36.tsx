@@ -6,35 +6,33 @@ import { HeaderLayout } from "../../../layouts/header";
 import { BackButton } from "../../../layouts/header/components";
 import { checkAndValidateADR36AminoSignDoc } from "@keplr-wallet/cosmos";
 import { Box } from "../../../components/box";
-import { XAxis, YAxis } from "../../../components/axis";
 import { Gutter } from "../../../components/gutter";
-import { Body2, Body3, H5, Subtitle3 } from "../../../components/typography";
 import { ColorPalette } from "../../../styles";
-import { ViewDataButton } from "../components/view-data-button";
 import { handleCosmosPreSign } from "../utils/handle-cosmos-sign";
 import { KeplrError } from "@keplr-wallet/router";
 import { ErrModuleLedgerSign } from "../utils/ledger-types";
 import { LedgerGuideBox } from "../components/ledger-guide-box";
 import { GuideBox } from "../../../components/guide-box";
-import { FormattedMessage, useIntl } from "react-intl";
+import { useIntl } from "react-intl";
 import { ErrModuleKeystoneSign, KeystoneUR } from "../utils/keystone";
 import { KeystoneSign } from "../components/keystone";
 import { useTheme } from "styled-components";
 import { KeyRingService } from "@keplr-wallet/background";
 import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
-import { MessageAdr36Icon } from "../../../components/icon";
-import { ItemLogo } from "../../main/token-detail/msg-items/logo";
 import { KeystoneUSBBox } from "../components/keystone-usb-box";
 import { useNavigate } from "react-router";
 import { ApproveIcon, CancelIcon } from "../../../components/button";
+import { Adr36RequestOrigin } from "../components/adr36/adr36-request-origin";
+import { Adr36SignHeader } from "../components/adr36/adr36-header";
+import { Adr36WalletDetails } from "../components/adr36/adr36-wallet-details";
+import { Adr36DataView } from "../components/adr36/adr36-data-view";
 
 export const SignCosmosADR36Page: FunctionComponent = observer(() => {
-  const { chainStore, signInteractionStore, uiConfigStore } = useStore();
+  const { chainStore, signInteractionStore, uiConfigStore, accountStore } =
+    useStore();
   const intl = useIntl();
   const theme = useTheme();
   const navigate = useNavigate();
-
-  const [isViewData, setIsViewData] = useState(false);
 
   const interactionInfo = useInteractionInfo({
     onWindowClose: () => {
@@ -140,10 +138,18 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
     ) ||
     isLedgerInteracting ||
     isKeystoneInteracting;
+  const chainId: string = signInteractionStore.waitingData?.data.chainId || "";
+  const account = accountStore.getAccount(chainId);
 
   return (
     <HeaderLayout
-      title={intl.formatMessage({ id: "page.sign.adr36.title" })}
+      title={""}
+      headerContainerStyle={{
+        height: "0",
+      }}
+      contentContainerStyle={{
+        paddingTop: "2rem",
+      }}
       fixedHeight={true}
       left={
         <BackButton
@@ -295,163 +301,40 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
     >
       <Box
         height="100%"
-        padding="0.75rem"
-        paddingTop="0.5rem"
-        paddingBottom="0"
+        paddingX="0.75rem"
+        //NOTE - In light mode, the simplebar has shadow, but if there is no bottom margin,
+        // it feels like it gets cut off, so I arbitrarily added about 2px.
+        paddingBottom="0.125rem"
         style={{
           overflow: "auto",
         }}
       >
-        <Box>
-          <XAxis alignY="center">
-            <div
-              style={{
-                flex: 1,
-              }}
-            />
-            <ViewDataButton
-              isViewData={isViewData}
-              setIsViewData={setIsViewData}
-            />
-          </XAxis>
-        </Box>
-
-        <Gutter size="0.5rem" />
-
-        <Box
-          padding="1rem"
-          backgroundColor={
-            theme.mode === "light"
-              ? ColorPalette.white
-              : ColorPalette["gray-600"]
-          }
-          borderRadius="0.375rem"
-          style={{
-            boxShadow:
-              theme.mode === "light"
-                ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
-                : "none",
-          }}
-        >
-          <XAxis alignY="center">
-            <ItemLogo
-              width="2.5rem"
-              height="2.5rem"
-              center={<MessageAdr36Icon width="2.5rem" height="2.5rem" />}
-            />
-            <Gutter size="0.75rem" />
-            <YAxis>
-              <H5
-                color={
-                  theme.mode === "light"
-                    ? ColorPalette["gray-500"]
-                    : ColorPalette["gray-10"]
-                }
-              >
-                <FormattedMessage id="Prove account ownership to" />
-              </H5>
-              <Gutter size="2px" />
-              <Body3
-                color={
-                  theme.mode === "light"
-                    ? ColorPalette["gray-300"]
-                    : ColorPalette["gray-200"]
-                }
-              >
-                {signInteractionStore.waitingData?.data.origin || ""}
-              </Body3>
-            </YAxis>
-          </XAxis>
-        </Box>
-
+        <Adr36SignHeader />
         <Gutter size="0.75rem" />
+        <Adr36RequestOrigin
+          origin={signInteractionStore.waitingData?.data.origin || ""}
+        />
 
-        <Box
-          height="13rem"
-          padding="1rem"
-          backgroundColor={
-            theme.mode === "light"
-              ? ColorPalette.white
-              : ColorPalette["gray-600"]
+        <Gutter size="1.5rem" />
+        <Adr36WalletDetails
+          walletName={account?.name || ""}
+          chainInfo={
+            signInteractionStore.waitingData?.data.chainId
+              ? chainStore.getChain(chainId)
+              : chainStore.getChain("osmosis-1")
           }
-          borderRadius="0.375rem"
-          style={{
-            overflow: "auto",
-            boxShadow:
-              theme.mode === "light"
-                ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
-                : "none",
+          addressInfo={{
+            type: "bech32",
+            address: account?.bech32Address || "",
           }}
-        >
-          <pre
-            style={{
-              color:
-                theme.mode === "light"
-                  ? ColorPalette["gray-400"]
-                  : ColorPalette["gray-10"],
-              // Remove normalized style of pre tag
-              margin: 0,
-              ...(!content.isJSON
-                ? {
-                    overflowWrap: "anywhere",
-                    whiteSpace: "break-spaces",
-                  }
-                : {}),
-            }}
-          >
-            {!isViewData
-              ? content.value
-              : JSON.stringify(
-                  signInteractionStore.waitingData?.data.signDocWrapper
-                    .aminoSignDoc,
-                  null,
-                  2
-                )}
-          </pre>
-        </Box>
+        />
+        <Gutter size="1.5rem" />
+        <Adr36DataView
+          message={content.value}
+          rawMessage={JSON.stringify(signDocWrapper?.aminoSignDoc, null, 2)}
+        />
 
         <div style={{ flex: 1 }} />
-        <Box
-          padding="1rem"
-          backgroundColor={
-            theme.mode === "light"
-              ? ColorPalette.white
-              : ColorPalette["gray-600"]
-          }
-          borderRadius="0.375rem"
-          style={{
-            boxShadow:
-              theme.mode === "light"
-                ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
-                : "none",
-          }}
-        >
-          <XAxis alignY="center">
-            <Body2
-              color={
-                theme.mode === "light"
-                  ? ColorPalette["gray-300"]
-                  : ColorPalette["gray-200"]
-              }
-            >
-              <FormattedMessage id="page.sign.adr36.requested-network" />
-            </Body2>
-            <div style={{ flex: 1 }} />
-            <Subtitle3
-              color={
-                theme.mode === "light"
-                  ? ColorPalette["gray-400"]
-                  : ColorPalette["gray-50"]
-              }
-            >
-              {signInteractionStore.waitingData?.data.chainId
-                ? chainStore.getChain(
-                    signInteractionStore.waitingData?.data.chainId
-                  ).chainName
-                : ""}
-            </Subtitle3>
-          </XAxis>
-        </Box>
 
         {isLedgerAndDirect ? (
           <React.Fragment>
