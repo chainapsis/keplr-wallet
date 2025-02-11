@@ -49,7 +49,7 @@ const SampleTokenItemCard: FunctionComponent<{
 }> = ({ denom, coinImageUrl }) => {
   console.log(denom);
   return (
-    <Box position="relative">
+    <Box position="relative" style={{ cursor: "default" }}>
       <Box
         zIndex={2}
         paddingX="1rem"
@@ -86,10 +86,20 @@ const SampleTokenItemCard: FunctionComponent<{
         </Body3>
       </Box>
       <Image
+        src={require("../../../../public/assets/img/circle-wave.png")}
+        style={{
+          zIndex: 3,
+          position: "absolute",
+          bottom: "0.125rem",
+          right: 63,
+        }}
+        alt=""
+      />
+      <Image
         src={require("../../../../public/assets/img/icon-click-pointer.png")}
         alt="click-pointer"
         style={{
-          zIndex: 3,
+          zIndex: 4,
           position: "absolute",
           bottom: "-0.5rem",
           right: 53,
