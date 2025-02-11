@@ -1,4 +1,8 @@
-import { ChainGetter, QuerySharedContext } from "@keplr-wallet/stores";
+import {
+  ChainGetter,
+  QueryError,
+  QuerySharedContext,
+} from "@keplr-wallet/stores";
 import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
 import { computed, makeObservable, observable } from "mobx";
 import {
@@ -240,6 +244,29 @@ export class ObservableQueryStakingInfo {
 
     this.map = map;
     this.validators = validators;
+  }
+
+  get isFetching(): boolean {
+    return this.validators.some((validator) => {
+      const queryPoolMemberInfo = this.map.getQueryPoolAddress(
+        validator.pool_contract_address
+      );
+
+      return queryPoolMemberInfo?.isFetching;
+    });
+  }
+
+  get error(): QueryError<any> | undefined {
+    for (const validator of this.validators) {
+      const queryPoolMemberInfo = this.map.getQueryPoolAddress(
+        validator.pool_contract_address
+      );
+
+      if (queryPoolMemberInfo?.error) {
+        return queryPoolMemberInfo.error;
+      }
+    }
+    return undefined;
   }
 
   @computed

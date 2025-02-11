@@ -42,6 +42,17 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { CurrencyImageFallback } from "../../../../components/image";
 import { DefaultGasPriceStep } from "@keplr-wallet/hooks";
 
+type ClaimTokenFunction = (
+  chainId: string,
+  token: CoinPretty,
+  state?: ClaimAllEachState
+) => void | Promise<void>;
+
+interface ClaimToken extends ViewToken {
+  onClaimAll: ClaimTokenFunction;
+  onClaim?: ClaimTokenFunction;
+}
+
 const Styles = {
   Container: styled.div<{ isNotReady?: boolean }>`
     background-color: ${(props) =>
@@ -128,6 +139,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
       chainStore,
       accountStore,
       queriesStore,
+      starknetQueriesStore,
       priceStore,
       keyRingStore,
       uiConfigStore,
@@ -139,7 +151,11 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
 
     const statesRef = useRef(new Map<string, ClaimAllEachState>());
     const getClaimAllEachState = (chainId: string): ClaimAllEachState => {
-      const chainIdentifier = chainStore.getChain(chainId).chainIdentifier;
+      // modular chain의 경우 chainIdentifier가 없다. 따라서 chainId를 사용한다.
+      const chainIdentifier = chainStore.hasChain(chainId)
+        ? chainStore.getChain(chainId).chainIdentifier
+        : chainId;
+
       let state = statesRef.current.get(chainIdentifier);
       if (!state) {
         state = new ClaimAllEachState();
@@ -149,8 +165,8 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
       return state;
     };
 
-    const viewTokens: ViewToken[] = (() => {
-      const res: ViewToken[] = [];
+    const claimTokens: ClaimToken[] = (() => {
+      const res: ClaimToken[] = [];
       for (const chainInfo of chainStore.chainInfosInUI) {
         const chainId = chainInfo.chainId;
         const accountAddress = accountStore.getAccount(chainId).bech32Address;
@@ -177,14 +193,566 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
               (r) => r.currency.coinMinimalDenom === targetDenom
             );
             if (reward) {
+              const onClaimAll = (chainId: string, token: CoinPretty) => {
+                const cosmosChainInfo = chainStore.getChain(chainId);
+
+                const account = accountStore.getAccount(chainId);
+
+                if (!account.bech32Address) {
+                  return;
+                }
+
+                const queries = queriesStore.get(chainId);
+                const queryRewards =
+                  queries.cosmos.queryRewards.getQueryBech32Address(
+                    account.bech32Address
+                  );
+
+                const validatorAddresses =
+                  queryRewards.getDescendingPendingRewardValidatorAddresses(
+                    account.isNanoLedger ? 5 : 8
+                  );
+
+                if (validatorAddresses.length === 0) {
+                  return;
+                }
+
+                const state = getClaimAllEachState(chainId);
+
+                state.setIsLoading(true);
+
+                const tx =
+                  account.cosmos.makeWithdrawDelegationRewardTx(
+                    validatorAddresses
+                  );
+
+                (async () => {
+                  // feemarket feature가 있는 경우 이후의 로직에서 사용할 수 있는 fee currency를 찾아야하기 때문에 undefined로 시작시킨다.
+                  let feeCurrency = cosmosChainInfo.hasFeature("feemarket")
+                    ? undefined
+                    : chainInfo.feeCurrencies.find(
+                        (cur) =>
+                          cur.coinMinimalDenom ===
+                          chainInfo.stakeCurrency?.coinMinimalDenom
+                      );
+
+                  if (
+                    chainInfo.hasFeature("osmosis-base-fee-beta") &&
+                    feeCurrency
+                  ) {
+                    const queryBaseFee = queriesStore.get(chainInfo.chainId)
+                      .osmosis.queryBaseFee;
+                    const queryRemoteBaseFeeStep =
+                      queriesStore.simpleQuery.queryGet<{
+                        low?: number;
+                        average?: number;
+                        high?: number;
+                      }>(
+                        "https://gjsttg7mkgtqhjpt3mv5aeuszi0zblbb.lambda-url.us-west-2.on.aws/osmosis/osmosis-base-fee-beta.json"
+                      );
+
+                    await queryBaseFee.waitFreshResponse();
+                    await queryRemoteBaseFeeStep.waitFreshResponse();
+
+                    const baseFee = queryBaseFee.baseFee;
+                    const remoteBaseFeeStep = queryRemoteBaseFeeStep.response;
+                    if (baseFee) {
+                      const low = remoteBaseFeeStep?.data.low
+                        ? parseFloat(
+                            baseFee
+                              .mul(new Dec(remoteBaseFeeStep.data.low))
+                              .toString(8)
+                          )
+                        : feeCurrency.gasPriceStep?.low ??
+                          DefaultGasPriceStep.low;
+                      const average = Math.max(
+                        low,
+                        remoteBaseFeeStep?.data.average
+                          ? parseFloat(
+                              baseFee
+                                .mul(new Dec(remoteBaseFeeStep.data.average))
+                                .toString(8)
+                            )
+                          : feeCurrency.gasPriceStep?.average ??
+                              DefaultGasPriceStep.average
+                      );
+                      const high = Math.max(
+                        average,
+                        remoteBaseFeeStep?.data.high
+                          ? parseFloat(
+                              baseFee
+                                .mul(new Dec(remoteBaseFeeStep.data.high))
+                                .toString(8)
+                            )
+                          : feeCurrency.gasPriceStep?.high ??
+                              DefaultGasPriceStep.high
+                      );
+
+                      feeCurrency = {
+                        ...feeCurrency,
+                        gasPriceStep: {
+                          low,
+                          average,
+                          high,
+                        },
+                      };
+                    }
+                  }
+
+                  if (!feeCurrency) {
+                    let prev:
+                      | {
+                          balance: CoinPretty;
+                          price: PricePretty | undefined;
+                        }
+                      | undefined;
+
+                    const feeCurrencies = await (async () => {
+                      if (chainInfo.hasFeature("feemarket")) {
+                        const queryFeeMarketGasPrices =
+                          queriesStore.get(chainId).cosmos
+                            .queryFeeMarketGasPrices;
+                        await queryFeeMarketGasPrices.waitFreshResponse();
+
+                        const result: FeeCurrency[] = [];
+
+                        for (const gasPrice of queryFeeMarketGasPrices.gasPrices) {
+                          const currency = await chainInfo.findCurrencyAsync(
+                            gasPrice.denom
+                          );
+                          if (currency) {
+                            let multiplication = {
+                              low: 1.1,
+                              average: 1.2,
+                              high: 1.3,
+                            };
+
+                            const multificationConfig =
+                              queriesStore.simpleQuery.queryGet<{
+                                [str: string]:
+                                  | {
+                                      low: number;
+                                      average: number;
+                                      high: number;
+                                    }
+                                  | undefined;
+                              }>(
+                                "https://gjsttg7mkgtqhjpt3mv5aeuszi0zblbb.lambda-url.us-west-2.on.aws",
+                                "/feemarket/info.json"
+                              );
+
+                            if (multificationConfig.response) {
+                              const _default =
+                                multificationConfig.response.data[
+                                  "__default__"
+                                ];
+                              if (
+                                _default &&
+                                _default.low != null &&
+                                typeof _default.low === "number" &&
+                                _default.average != null &&
+                                typeof _default.average === "number" &&
+                                _default.high != null &&
+                                typeof _default.high === "number"
+                              ) {
+                                multiplication = {
+                                  low: _default.low,
+                                  average: _default.average,
+                                  high: _default.high,
+                                };
+                              }
+                              const specific =
+                                multificationConfig.response.data[
+                                  chainInfo.chainIdentifier
+                                ];
+                              if (
+                                specific &&
+                                specific.low != null &&
+                                typeof specific.low === "number" &&
+                                specific.average != null &&
+                                typeof specific.average === "number" &&
+                                specific.high != null &&
+                                typeof specific.high === "number"
+                              ) {
+                                multiplication = {
+                                  low: specific.low,
+                                  average: specific.average,
+                                  high: specific.high,
+                                };
+                              }
+                            }
+
+                            result.push({
+                              ...currency,
+                              gasPriceStep: {
+                                low: parseFloat(
+                                  new Dec(multiplication.low)
+                                    .mul(gasPrice.amount)
+                                    .toString()
+                                ),
+                                average: parseFloat(
+                                  new Dec(multiplication.average)
+                                    .mul(gasPrice.amount)
+                                    .toString()
+                                ),
+                                high: parseFloat(
+                                  new Dec(multiplication.high)
+                                    .mul(gasPrice.amount)
+                                    .toString()
+                                ),
+                              },
+                            });
+                          }
+                        }
+
+                        return result;
+                      } else {
+                        return chainInfo.feeCurrencies;
+                      }
+                    })();
+                    for (const chainFeeCurrency of feeCurrencies) {
+                      const currency = await chainInfo.findCurrencyAsync(
+                        chainFeeCurrency.coinMinimalDenom
+                      );
+                      if (currency) {
+                        const balance = queries.queryBalances
+                          .getQueryBech32Address(account.bech32Address)
+                          .getBalance(currency);
+                        if (balance && balance.balance.toDec().gt(new Dec(0))) {
+                          const price = await priceStore.waitCalculatePrice(
+                            balance.balance,
+                            "usd"
+                          );
+
+                          if (!prev) {
+                            feeCurrency = {
+                              ...chainFeeCurrency,
+                              ...currency,
+                            };
+                            prev = {
+                              balance: balance.balance,
+                              price,
+                            };
+                          } else {
+                            if (!prev.price) {
+                              if (
+                                prev.balance.toDec().lt(balance.balance.toDec())
+                              ) {
+                                feeCurrency = {
+                                  ...chainFeeCurrency,
+                                  ...currency,
+                                };
+                                prev = {
+                                  balance: balance.balance,
+                                  price,
+                                };
+                              }
+                            } else if (price) {
+                              if (prev.price.toDec().lt(price.toDec())) {
+                                feeCurrency = {
+                                  ...chainFeeCurrency,
+                                  ...currency,
+                                };
+                                prev = {
+                                  balance: balance.balance,
+                                  price,
+                                };
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+
+                  if (feeCurrency) {
+                    try {
+                      const simulated = await tx.simulate();
+
+                      // Gas adjustment is 1.5
+                      // Since there is currently no convenient way to adjust the gas adjustment on the UI,
+                      // Use high gas adjustment to prevent failure.
+                      const gasEstimated = new Dec(
+                        simulated.gasUsed * 1.5
+                      ).truncate();
+                      let fee = {
+                        denom: feeCurrency.coinMinimalDenom,
+                        amount: new Dec(
+                          feeCurrency.gasPriceStep?.average ?? 0.025
+                        )
+                          .mul(new Dec(gasEstimated))
+                          .roundUp()
+                          .toString(),
+                      };
+
+                      // USD 기준으로 average fee가 0.2달러를 넘으면 low로 설정해서 보낸다.
+                      const averageFeePrice =
+                        await priceStore.waitCalculatePrice(
+                          new CoinPretty(feeCurrency, fee.amount),
+                          "usd"
+                        );
+                      if (
+                        averageFeePrice &&
+                        averageFeePrice.toDec().gte(new Dec(0.2))
+                      ) {
+                        fee = {
+                          denom: feeCurrency.coinMinimalDenom,
+                          amount: new Dec(
+                            feeCurrency.gasPriceStep?.low ?? 0.025
+                          )
+                            .mul(new Dec(gasEstimated))
+                            .roundUp()
+                            .toString(),
+                        };
+                        console.log(
+                          `(${chainId}) Choose low gas price because average fee price is greater or equal than 0.2 USD`
+                        );
+                      }
+
+                      // Ensure fee currency fetched before querying balance
+                      const feeCurrencyFetched =
+                        await chainInfo.findCurrencyAsync(
+                          feeCurrency.coinMinimalDenom
+                        );
+                      if (!feeCurrencyFetched) {
+                        state.setFailedReason(
+                          new Error(
+                            intl.formatMessage({
+                              id: "error.can-not-find-balance-for-fee-currency",
+                            })
+                          )
+                        );
+                        return;
+                      }
+                      const balance = queries.queryBalances
+                        .getQueryBech32Address(account.bech32Address)
+                        .getBalance(feeCurrencyFetched);
+
+                      if (!balance) {
+                        state.setFailedReason(
+                          new Error(
+                            intl.formatMessage({
+                              id: "error.can-not-find-balance-for-fee-currency",
+                            })
+                          )
+                        );
+                        return;
+                      }
+
+                      await balance.waitResponse();
+
+                      if (
+                        new Dec(balance.balance.toCoin().amount).lt(
+                          new Dec(fee.amount)
+                        )
+                      ) {
+                        state.setFailedReason(
+                          new Error(
+                            intl.formatMessage({
+                              id: "error.not-enough-balance-to-pay-fee",
+                            })
+                          )
+                        );
+                        return;
+                      }
+
+                      if (
+                        (token.toCoin().denom === fee.denom &&
+                          new Dec(token.toCoin().amount).lte(
+                            new Dec(fee.amount)
+                          )) ||
+                        (await (async () => {
+                          if (token.toCoin().denom !== fee.denom) {
+                            if (
+                              token.currency.coinGeckoId &&
+                              feeCurrencyFetched.coinGeckoId
+                            ) {
+                              const rewardPrice =
+                                await priceStore.waitCalculatePrice(
+                                  token,
+                                  "usd"
+                                );
+                              const feePrice =
+                                await priceStore.waitCalculatePrice(
+                                  new CoinPretty(
+                                    feeCurrencyFetched,
+                                    fee.amount
+                                  ),
+                                  "usd"
+                                );
+                              if (
+                                rewardPrice &&
+                                rewardPrice.toDec().gt(new Dec(0)) &&
+                                feePrice &&
+                                feePrice.toDec().gt(new Dec(0))
+                              ) {
+                                if (
+                                  rewardPrice
+                                    .toDec()
+                                    .mul(new Dec(1.2))
+                                    .lte(feePrice.toDec())
+                                ) {
+                                  return true;
+                                }
+                              }
+                            }
+                          }
+
+                          return false;
+                        })())
+                      ) {
+                        console.log(
+                          `(${chainId}) Skip claim rewards. Fee: ${fee.amount}${
+                            fee.denom
+                          } is greater than stakable reward: ${
+                            token.toCoin().amount
+                          }${token.toCoin().denom}`
+                        );
+                        state.setFailedReason(
+                          new Error(
+                            intl.formatMessage({
+                              id: "error.claimable-reward-is-smaller-than-the-required-fee",
+                            })
+                          )
+                        );
+                        return;
+                      }
+
+                      await tx.send(
+                        {
+                          gas: gasEstimated.toString(),
+                          amount: [fee],
+                        },
+                        "",
+                        {
+                          signAmino: async (
+                            chainId: string,
+                            signer: string,
+                            signDoc: StdSignDoc
+                          ): Promise<AminoSignResponse> => {
+                            const requester = new InExtensionMessageRequester();
+
+                            return await requester.sendMessage(
+                              BACKGROUND_PORT,
+                              new PrivilegeCosmosSignAminoWithdrawRewardsMsg(
+                                chainId,
+                                signer,
+                                signDoc
+                              )
+                            );
+                          },
+                          sendTx: async (
+                            chainId: string,
+                            tx: Uint8Array,
+                            mode: BroadcastMode
+                          ): Promise<Uint8Array> => {
+                            const requester = new InExtensionMessageRequester();
+
+                            return await requester.sendMessage(
+                              BACKGROUND_PORT,
+                              new SendTxMsg(chainId, tx, mode, true)
+                            );
+                          },
+                        },
+                        {
+                          onBroadcasted: () => {
+                            analyticsStore.logEvent("complete_claim_all", {
+                              chainId: chainInfo.chainId,
+                              chainName: chainInfo.chainName,
+                            });
+                          },
+                          onFulfill: (tx: any) => {
+                            // Tx가 성공한 이후에 rewards가 다시 쿼리되면서 여기서 빠지는게 의도인데...
+                            // 쿼리하는 동안 시간차가 있기 때문에 훼이크로 그냥 1초 더 기다린다.
+                            setTimeout(() => {
+                              state.setIsLoading(false);
+                            }, 1000);
+
+                            if (tx.code) {
+                              state.setFailedReason(new Error(tx["raw_log"]));
+                            }
+                          },
+                        }
+                      );
+                    } catch (e) {
+                      if (isSimpleFetchError(e) && e.response) {
+                        const response = e.response;
+                        if (
+                          response.status === 400 &&
+                          response.data?.message &&
+                          typeof response.data.message === "string" &&
+                          response.data.message.includes("invalid empty tx")
+                        ) {
+                          state.setFailedReason(
+                            new Error(
+                              intl.formatMessage({
+                                id: "error.outdated-cosmos-sdk",
+                              })
+                            )
+                          );
+                          return;
+                        }
+                      }
+
+                      state.setFailedReason(e);
+                      console.log(e);
+                      return;
+                    }
+                  } else {
+                    state.setFailedReason(
+                      new Error(
+                        intl.formatMessage({
+                          id: "error.can-not-find-fee-for-claim-all",
+                        })
+                      )
+                    );
+                    return;
+                  }
+                })();
+              };
+
               res.push({
                 token: reward,
                 chainInfo,
                 isFetching: queryRewards.isFetching,
                 error: queryRewards.error,
+                onClaimAll,
               });
             }
           }
+        }
+      }
+
+      const starknetChainInfo = chainStore.getModularChain("starknet:SN_MAIN");
+      if (starknetChainInfo) {
+        const queryValidators = starknetQueriesStore.get(
+          starknetChainInfo.chainId
+        ).queryValidators;
+
+        const validators = queryValidators.validators;
+        const queryStakingInfo = queryValidators
+          .getQueryPoolMemberInfoMap(
+            accountStore.getAccount(starknetChainInfo.chainId)
+              .starknetHexAddress
+          )
+          ?.getQueryStakingInfo(validators);
+
+        const totalClaimableRewardAmount =
+          queryStakingInfo?.totalClaimableRewardAmount;
+
+        if (totalClaimableRewardAmount?.toDec().gt(zeroDec)) {
+          const onClaimAll = (chainId: string, token: CoinPretty) => {
+            // TODO: 클레임 로직 구현
+            console.log(chainId, token);
+          };
+
+          res.push({
+            token: totalClaimableRewardAmount,
+            chainInfo: starknetChainInfo,
+            isFetching: queryStakingInfo?.isFetching ?? false,
+            error: queryValidators?.error, // ignore queryStakingInfo error
+            onClaimAll,
+          });
         }
       }
 
@@ -229,8 +797,8 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
 
       let res = new PricePretty(fiatCurrency, 0);
 
-      for (const viewToken of viewTokens) {
-        const price = priceStore.calculatePrice(viewToken.token);
+      for (const claimToken of claimTokens) {
+        const price = priceStore.calculatePrice(claimToken.token);
         if (price) {
           res = res.add(price);
         }
@@ -250,7 +818,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
     const claimAll = () => {
       analyticsStore.logEvent("click_claimAll");
 
-      if (viewTokens.length > 0) {
+      if (claimTokens.length > 0) {
         setIsExpanded(true);
       }
 
@@ -260,501 +828,18 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
         return;
       }
 
-      for (const viewToken of viewTokens) {
-        const chainId = viewToken.chainInfo.chainId;
-        const account = accountStore.getAccount(chainId);
-
-        if (!account.bech32Address) {
-          continue;
-        }
-
-        const chainInfo = chainStore.getChain(chainId);
-        const queries = queriesStore.get(chainId);
-        const queryRewards = queries.cosmos.queryRewards.getQueryBech32Address(
-          account.bech32Address
-        );
-
-        const validatorAddresses =
-          queryRewards.getDescendingPendingRewardValidatorAddresses(
-            account.isNanoLedger ? 5 : 8
-          );
-
-        if (validatorAddresses.length === 0) {
-          continue;
-        }
-
-        const state = getClaimAllEachState(chainId);
-
-        state.setIsLoading(true);
-
-        const tx =
-          account.cosmos.makeWithdrawDelegationRewardTx(validatorAddresses);
-
-        (async () => {
-          // feemarket feature가 있는 경우 이후의 로직에서 사용할 수 있는 fee currency를 찾아야하기 때문에 undefined로 시작시킨다.
-          let feeCurrency = chainInfo.hasFeature("feemarket")
-            ? undefined
-            : chainInfo.feeCurrencies.find(
-                (cur) =>
-                  cur.coinMinimalDenom ===
-                  chainInfo.stakeCurrency?.coinMinimalDenom
-              );
-
-          if (chainInfo.hasFeature("osmosis-base-fee-beta") && feeCurrency) {
-            const queryBaseFee = queriesStore.get(chainInfo.chainId).osmosis
-              .queryBaseFee;
-            const queryRemoteBaseFeeStep = queriesStore.simpleQuery.queryGet<{
-              low?: number;
-              average?: number;
-              high?: number;
-            }>(
-              "https://gjsttg7mkgtqhjpt3mv5aeuszi0zblbb.lambda-url.us-west-2.on.aws/osmosis/osmosis-base-fee-beta.json"
-            );
-
-            await queryBaseFee.waitFreshResponse();
-            await queryRemoteBaseFeeStep.waitFreshResponse();
-
-            const baseFee = queryBaseFee.baseFee;
-            const remoteBaseFeeStep = queryRemoteBaseFeeStep.response;
-            if (baseFee) {
-              const low = remoteBaseFeeStep?.data.low
-                ? parseFloat(
-                    baseFee.mul(new Dec(remoteBaseFeeStep.data.low)).toString(8)
-                  )
-                : feeCurrency.gasPriceStep?.low ?? DefaultGasPriceStep.low;
-              const average = Math.max(
-                low,
-                remoteBaseFeeStep?.data.average
-                  ? parseFloat(
-                      baseFee
-                        .mul(new Dec(remoteBaseFeeStep.data.average))
-                        .toString(8)
-                    )
-                  : feeCurrency.gasPriceStep?.average ??
-                      DefaultGasPriceStep.average
-              );
-              const high = Math.max(
-                average,
-                remoteBaseFeeStep?.data.high
-                  ? parseFloat(
-                      baseFee
-                        .mul(new Dec(remoteBaseFeeStep.data.high))
-                        .toString(8)
-                    )
-                  : feeCurrency.gasPriceStep?.high ?? DefaultGasPriceStep.high
-              );
-
-              feeCurrency = {
-                ...feeCurrency,
-                gasPriceStep: {
-                  low,
-                  average,
-                  high,
-                },
-              };
-            }
-          }
-
-          if (!feeCurrency) {
-            let prev:
-              | {
-                  balance: CoinPretty;
-                  price: PricePretty | undefined;
-                }
-              | undefined;
-
-            const feeCurrencies = await (async () => {
-              if (chainInfo.hasFeature("feemarket")) {
-                const queryFeeMarketGasPrices =
-                  queriesStore.get(chainId).cosmos.queryFeeMarketGasPrices;
-                await queryFeeMarketGasPrices.waitFreshResponse();
-
-                const result: FeeCurrency[] = [];
-
-                for (const gasPrice of queryFeeMarketGasPrices.gasPrices) {
-                  const currency = await chainInfo.findCurrencyAsync(
-                    gasPrice.denom
-                  );
-                  if (currency) {
-                    let multiplication = {
-                      low: 1.1,
-                      average: 1.2,
-                      high: 1.3,
-                    };
-
-                    const multificationConfig =
-                      queriesStore.simpleQuery.queryGet<{
-                        [str: string]:
-                          | {
-                              low: number;
-                              average: number;
-                              high: number;
-                            }
-                          | undefined;
-                      }>(
-                        "https://gjsttg7mkgtqhjpt3mv5aeuszi0zblbb.lambda-url.us-west-2.on.aws",
-                        "/feemarket/info.json"
-                      );
-
-                    if (multificationConfig.response) {
-                      const _default =
-                        multificationConfig.response.data["__default__"];
-                      if (
-                        _default &&
-                        _default.low != null &&
-                        typeof _default.low === "number" &&
-                        _default.average != null &&
-                        typeof _default.average === "number" &&
-                        _default.high != null &&
-                        typeof _default.high === "number"
-                      ) {
-                        multiplication = {
-                          low: _default.low,
-                          average: _default.average,
-                          high: _default.high,
-                        };
-                      }
-                      const specific =
-                        multificationConfig.response.data[
-                          chainInfo.chainIdentifier
-                        ];
-                      if (
-                        specific &&
-                        specific.low != null &&
-                        typeof specific.low === "number" &&
-                        specific.average != null &&
-                        typeof specific.average === "number" &&
-                        specific.high != null &&
-                        typeof specific.high === "number"
-                      ) {
-                        multiplication = {
-                          low: specific.low,
-                          average: specific.average,
-                          high: specific.high,
-                        };
-                      }
-                    }
-
-                    result.push({
-                      ...currency,
-                      gasPriceStep: {
-                        low: parseFloat(
-                          new Dec(multiplication.low)
-                            .mul(gasPrice.amount)
-                            .toString()
-                        ),
-                        average: parseFloat(
-                          new Dec(multiplication.average)
-                            .mul(gasPrice.amount)
-                            .toString()
-                        ),
-                        high: parseFloat(
-                          new Dec(multiplication.high)
-                            .mul(gasPrice.amount)
-                            .toString()
-                        ),
-                      },
-                    });
-                  }
-                }
-
-                return result;
-              } else {
-                return chainInfo.feeCurrencies;
-              }
-            })();
-            for (const chainFeeCurrency of feeCurrencies) {
-              const currency = await chainInfo.findCurrencyAsync(
-                chainFeeCurrency.coinMinimalDenom
-              );
-              if (currency) {
-                const balance = queries.queryBalances
-                  .getQueryBech32Address(account.bech32Address)
-                  .getBalance(currency);
-                if (balance && balance.balance.toDec().gt(new Dec(0))) {
-                  const price = await priceStore.waitCalculatePrice(
-                    balance.balance,
-                    "usd"
-                  );
-
-                  if (!prev) {
-                    feeCurrency = {
-                      ...chainFeeCurrency,
-                      ...currency,
-                    };
-                    prev = {
-                      balance: balance.balance,
-                      price,
-                    };
-                  } else {
-                    if (!prev.price) {
-                      if (prev.balance.toDec().lt(balance.balance.toDec())) {
-                        feeCurrency = {
-                          ...chainFeeCurrency,
-                          ...currency,
-                        };
-                        prev = {
-                          balance: balance.balance,
-                          price,
-                        };
-                      }
-                    } else if (price) {
-                      if (prev.price.toDec().lt(price.toDec())) {
-                        feeCurrency = {
-                          ...chainFeeCurrency,
-                          ...currency,
-                        };
-                        prev = {
-                          balance: balance.balance,
-                          price,
-                        };
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-
-          if (feeCurrency) {
-            try {
-              const simulated = await tx.simulate();
-
-              // Gas adjustment is 1.5
-              // Since there is currently no convenient way to adjust the gas adjustment on the UI,
-              // Use high gas adjustment to prevent failure.
-              const gasEstimated = new Dec(simulated.gasUsed * 1.5).truncate();
-              let fee = {
-                denom: feeCurrency.coinMinimalDenom,
-                amount: new Dec(feeCurrency.gasPriceStep?.average ?? 0.025)
-                  .mul(new Dec(gasEstimated))
-                  .roundUp()
-                  .toString(),
-              };
-
-              // USD 기준으로 average fee가 0.2달러를 넘으면 low로 설정해서 보낸다.
-              const averageFeePrice = await priceStore.waitCalculatePrice(
-                new CoinPretty(feeCurrency, fee.amount),
-                "usd"
-              );
-              if (
-                averageFeePrice &&
-                averageFeePrice.toDec().gte(new Dec(0.2))
-              ) {
-                fee = {
-                  denom: feeCurrency.coinMinimalDenom,
-                  amount: new Dec(feeCurrency.gasPriceStep?.low ?? 0.025)
-                    .mul(new Dec(gasEstimated))
-                    .roundUp()
-                    .toString(),
-                };
-                console.log(
-                  `(${chainId}) Choose low gas price because average fee price is greater or equal than 0.2 USD`
-                );
-              }
-
-              // Ensure fee currency fetched before querying balance
-              const feeCurrencyFetched = await chainInfo.findCurrencyAsync(
-                feeCurrency.coinMinimalDenom
-              );
-              if (!feeCurrencyFetched) {
-                state.setFailedReason(
-                  new Error(
-                    intl.formatMessage({
-                      id: "error.can-not-find-balance-for-fee-currency",
-                    })
-                  )
-                );
-                return;
-              }
-              const balance = queries.queryBalances
-                .getQueryBech32Address(account.bech32Address)
-                .getBalance(feeCurrencyFetched);
-
-              if (!balance) {
-                state.setFailedReason(
-                  new Error(
-                    intl.formatMessage({
-                      id: "error.can-not-find-balance-for-fee-currency",
-                    })
-                  )
-                );
-                return;
-              }
-
-              await balance.waitResponse();
-
-              if (
-                new Dec(balance.balance.toCoin().amount).lt(new Dec(fee.amount))
-              ) {
-                state.setFailedReason(
-                  new Error(
-                    intl.formatMessage({
-                      id: "error.not-enough-balance-to-pay-fee",
-                    })
-                  )
-                );
-                return;
-              }
-
-              if (
-                (viewToken.token.toCoin().denom === fee.denom &&
-                  new Dec(viewToken.token.toCoin().amount).lte(
-                    new Dec(fee.amount)
-                  )) ||
-                (await (async () => {
-                  if (viewToken.token.toCoin().denom !== fee.denom) {
-                    if (
-                      viewToken.token.currency.coinGeckoId &&
-                      feeCurrencyFetched.coinGeckoId
-                    ) {
-                      const rewardPrice = await priceStore.waitCalculatePrice(
-                        viewToken.token,
-                        "usd"
-                      );
-                      const feePrice = await priceStore.waitCalculatePrice(
-                        new CoinPretty(feeCurrencyFetched, fee.amount),
-                        "usd"
-                      );
-                      if (
-                        rewardPrice &&
-                        rewardPrice.toDec().gt(new Dec(0)) &&
-                        feePrice &&
-                        feePrice.toDec().gt(new Dec(0))
-                      ) {
-                        if (
-                          rewardPrice
-                            .toDec()
-                            .mul(new Dec(1.2))
-                            .lte(feePrice.toDec())
-                        ) {
-                          return true;
-                        }
-                      }
-                    }
-                  }
-
-                  return false;
-                })())
-              ) {
-                console.log(
-                  `(${chainId}) Skip claim rewards. Fee: ${fee.amount}${
-                    fee.denom
-                  } is greater than stakable reward: ${
-                    viewToken.token.toCoin().amount
-                  }${viewToken.token.toCoin().denom}`
-                );
-                state.setFailedReason(
-                  new Error(
-                    intl.formatMessage({
-                      id: "error.claimable-reward-is-smaller-than-the-required-fee",
-                    })
-                  )
-                );
-                return;
-              }
-
-              await tx.send(
-                {
-                  gas: gasEstimated.toString(),
-                  amount: [fee],
-                },
-                "",
-                {
-                  signAmino: async (
-                    chainId: string,
-                    signer: string,
-                    signDoc: StdSignDoc
-                  ): Promise<AminoSignResponse> => {
-                    const requester = new InExtensionMessageRequester();
-
-                    return await requester.sendMessage(
-                      BACKGROUND_PORT,
-                      new PrivilegeCosmosSignAminoWithdrawRewardsMsg(
-                        chainId,
-                        signer,
-                        signDoc
-                      )
-                    );
-                  },
-                  sendTx: async (
-                    chainId: string,
-                    tx: Uint8Array,
-                    mode: BroadcastMode
-                  ): Promise<Uint8Array> => {
-                    const requester = new InExtensionMessageRequester();
-
-                    return await requester.sendMessage(
-                      BACKGROUND_PORT,
-                      new SendTxMsg(chainId, tx, mode, true)
-                    );
-                  },
-                },
-                {
-                  onBroadcasted: () => {
-                    analyticsStore.logEvent("complete_claim_all", {
-                      chainId: viewToken.chainInfo.chainId,
-                      chainName: viewToken.chainInfo.chainName,
-                    });
-                  },
-                  onFulfill: (tx: any) => {
-                    // Tx가 성공한 이후에 rewards가 다시 쿼리되면서 여기서 빠지는게 의도인데...
-                    // 쿼리하는 동안 시간차가 있기 때문에 훼이크로 그냥 1초 더 기다린다.
-                    setTimeout(() => {
-                      state.setIsLoading(false);
-                    }, 1000);
-
-                    if (tx.code) {
-                      state.setFailedReason(new Error(tx["raw_log"]));
-                    }
-                  },
-                }
-              );
-            } catch (e) {
-              if (isSimpleFetchError(e) && e.response) {
-                const response = e.response;
-                if (
-                  response.status === 400 &&
-                  response.data?.message &&
-                  typeof response.data.message === "string" &&
-                  response.data.message.includes("invalid empty tx")
-                ) {
-                  state.setFailedReason(
-                    new Error(
-                      intl.formatMessage({
-                        id: "error.outdated-cosmos-sdk",
-                      })
-                    )
-                  );
-                  return;
-                }
-              }
-
-              state.setFailedReason(e);
-              console.log(e);
-              return;
-            }
-          } else {
-            state.setFailedReason(
-              new Error(
-                intl.formatMessage({
-                  id: "error.can-not-find-fee-for-claim-all",
-                })
-              )
-            );
-            return;
-          }
-        })();
+      for (const claimToken of claimTokens) {
+        claimToken.onClaimAll(claimToken.chainInfo.chainId, claimToken.token);
       }
     };
 
     const claimAllDisabled = (() => {
-      if (viewTokens.length === 0) {
+      if (claimTokens.length === 0) {
         return true;
       }
 
-      for (const viewToken of viewTokens) {
-        if (viewToken.token.toDec().gt(new Dec(0))) {
+      for (const claimToken of claimTokens) {
+        if (claimToken.token.toDec().gt(new Dec(0))) {
           return false;
         }
       }
@@ -857,10 +942,10 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
         <Styles.ExpandButton
           paddingX="0.125rem"
           alignX="center"
-          viewTokenCount={viewTokens.length}
+          viewTokenCount={claimTokens.length}
           onClick={() => {
             analyticsStore.logEvent("click_claimExpandButton");
-            if (viewTokens.length > 0) {
+            if (claimTokens.length > 0) {
               setIsExpanded(!isExpanded);
             }
           }}
@@ -899,13 +984,13 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
             }
           }}
         >
-          {viewTokens.map((viewToken) => {
+          {claimTokens.map((claimToken) => {
             return (
               <ClaimTokenItem
-                key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
-                viewToken={viewToken}
-                state={getClaimAllEachState(viewToken.chainInfo.chainId)}
-                itemsLength={viewTokens.length}
+                key={`${claimToken.chainInfo.chainId}-${claimToken.token.currency.coinMinimalDenom}`}
+                viewToken={claimToken}
+                state={getClaimAllEachState(claimToken.chainInfo.chainId)}
+                itemsLength={claimTokens.length}
               />
             );
           })}
@@ -915,6 +1000,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
   }
 );
 
+// TODO: 상위 컴포넌트에서 claim 함수를 전달해주는 방식으로 변경
 const ClaimTokenItem: FunctionComponent<{
   viewToken: ViewToken;
   state: ClaimAllEachState;
