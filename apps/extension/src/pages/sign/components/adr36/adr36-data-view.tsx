@@ -23,7 +23,7 @@ interface Adr36DataViewProps {
   message?: string;
   rawMessage?: string;
 }
-
+const MAX_HEIGHT = 780;
 export const Adr36DataView: FunctionComponent<Adr36DataViewProps> = ({
   message,
   rawMessage,
@@ -33,7 +33,7 @@ export const Adr36DataView: FunctionComponent<Adr36DataViewProps> = ({
   const initialHeight = useRef<number>(0);
 
   useLayoutEffect(() => {
-    initialHeight.current = window.innerHeight;
+    initialHeight.current = window.outerHeight;
   }, []);
 
   useLayoutEffect(() => {
@@ -96,8 +96,6 @@ interface Adr36DataSectionProps {
   onToggle?: (expanded: boolean) => void;
 }
 
-const MAX_HEIGHT = 780;
-const INITIAL_HEIGHT = 650;
 const Adr36DataSection: FunctionComponent<Adr36DataSectionProps> = ({
   content,
   isShowRawMessage,
@@ -111,17 +109,6 @@ const Adr36DataSection: FunctionComponent<Adr36DataSectionProps> = ({
   );
   const [needsEllipsis, setNeedsEllipsis] = useState<boolean>(false);
   const preRef = useRef<HTMLPreElement>(null);
-  const prevHeight = useRef<number>(0);
-  const screenHeight = useRef<number>(0);
-
-  useLayoutEffect(() => {
-    const initialHeight =
-      INITIAL_HEIGHT > window.screen.availHeight
-        ? window.innerHeight
-        : INITIAL_HEIGHT;
-    prevHeight.current = initialHeight;
-    screenHeight.current = window.screen.availHeight;
-  }, []);
 
   useLayoutEffect(() => {
     if (!isShowRawMessage && preRef.current) {
