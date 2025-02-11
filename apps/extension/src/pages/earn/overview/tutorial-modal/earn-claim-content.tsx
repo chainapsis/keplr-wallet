@@ -17,7 +17,7 @@ export const EarnClaimContent: FunctionComponent<{
   tokenName: string;
   moveToNext: () => void;
   moveToPrev: () => void;
-}> = ({ tokenName: tokenName, moveToNext, moveToPrev }) => (
+}> = ({ tokenName, moveToNext, moveToPrev }) => (
   <Fragment>
     <Box paddingY="1.25rem">
       <H4 color={ColorPalette.white} style={{ textAlign: "center" }}>
