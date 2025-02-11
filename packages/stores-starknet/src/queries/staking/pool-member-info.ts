@@ -334,6 +334,7 @@ export class ObservableQueryStakingInfo {
         claimableRewards.push({
           validatorAddress: validator.operational_address,
           poolAddress: validator.pool_contract_address,
+          rewardAddress: validator.reward_address,
           amount: unclaimedRewards,
         });
 
@@ -386,6 +387,7 @@ export class ObservableQueryStakingInfo {
       unbondings.push({
         validatorAddress: validator.operational_address,
         poolAddress: validator.pool_contract_address,
+        rewardAddress: validator.reward_address,
         amount: unpoolAmount,
         period: unpoolTime,
       });

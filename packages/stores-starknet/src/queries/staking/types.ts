@@ -22,13 +22,15 @@ export type StarknetValidators = {
 
 export type ClaimableReward = {
   validatorAddress: string;
-  poolAddress: string;
+  poolAddress: string; // pool address binding to the validator
+  rewardAddress: string; // where to send the reward
   amount: CoinPretty;
 };
 
 export type UnpoolDelegation = {
   validatorAddress: string;
   poolAddress: string;
+  rewardAddress: string;
   amount: CoinPretty;
   period: number;
 };
