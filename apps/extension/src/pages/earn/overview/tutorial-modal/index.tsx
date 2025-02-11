@@ -52,7 +52,10 @@ export const EarnOverviewTutorialModal: FunctionComponent<{
         width="95%"
         maxWidth="18.75rem"
       >
-        <Box style={{ marginLeft: "auto" }}>
+        <Box
+          style={{ marginLeft: "auto", cursor: "pointer" }}
+          onClick={onClose}
+        >
           <CancelIcon
             width="1.25rem"
             height="1.25rem"
