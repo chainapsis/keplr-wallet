@@ -213,7 +213,11 @@ const Adr36DataSection: FunctionComponent<Adr36DataSectionProps> = ({
                 }}
               >
                 <Subtitle4 color={ColorPalette["gray-200"]}>
-                  {expanded ? "Show Less Detail" : "Show More Detail"}
+                  {expanded ? (
+                    <FormattedMessage id="page.sign.adr36.show-less-detail" />
+                  ) : (
+                    <FormattedMessage id="page.sign.adr36.show-more-detail" />
+                  )}
                 </Subtitle4>
               </div>
             )}
@@ -246,7 +250,9 @@ const MessageTitle: FunctionComponent = () => {
           }
         />
         <Gutter size="0.375rem" />
-        <Subtitle4>Message</Subtitle4>
+        <Subtitle4>
+          <FormattedMessage id="page.sign.adr36.message" />
+        </Subtitle4>
       </XAxis>
     </Box>
   );
@@ -281,7 +287,7 @@ const AdvancedTitle = ({
         />
         <Gutter size="0.375rem" />
         <Subtitle4>
-          <FormattedMessage id="page.sign.cosmos.tx.view-data-button" />
+          <FormattedMessage id="page.sign.adr36.raw-message" />
         </Subtitle4>
         <div style={{ flex: 1 }} />
         <ArrowDropDownIcon
