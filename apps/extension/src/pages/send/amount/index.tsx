@@ -1,6 +1,7 @@
 import React, {
   FunctionComponent,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -102,6 +103,8 @@ import {
 import { autorun } from "mobx";
 import { usePreviousDistinct } from "../../../hooks/use-previous";
 import { SwapFeeInfoForBridgeOnSend } from "./swap-fee-info";
+import { useEffectOnce } from "../../../hooks/use-effect-once";
+import { useGlobarSimpleBar } from "../../../hooks/global-simplebar";
 
 const Styles = {
   Flex1: styled.div`
@@ -440,6 +443,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     chainStore.getChain(chainId).currencies[0].coinMinimalDenom;
   const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
   const isErc20 = new DenomHelper(currency.coinMinimalDenom).type === "erc20";
+  const [isExpectedAmountTooSmall, setIsExpectedAmountTooSmall] =
+    useState(false);
 
   const [sendType, setSendType] = useState<SendType>("send");
 
@@ -690,6 +695,11 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       setSendType("ibc-transfer");
     }
   });
+
+  useCheckExpectedOutIsTooSmall(
+    ibcSwapConfigsForBridge,
+    setIsExpectedAmountTooSmall
+  );
 
   const isIBCTransferPrevious = usePreviousDistinct(sendType);
   useEffect(() => {
@@ -2097,15 +2107,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             }
           />
 
-          <AmountInput
-            amountConfig={amountConfig}
-            forceError={sendType === "bridge" ? calculatingTxError : undefined}
-            forceWarning={(() => {
-              if (sendType !== "bridge") {
-                return undefined;
-              }
-            })()}
-          />
+          <AmountInput amountConfig={amountConfig} />
 
           {!isEvmTx && sendType !== "bridge" && (
             <MemoInput
@@ -2123,7 +2125,29 @@ export const SendAmountPage: FunctionComponent = observer(() => {
               }
             />
           )}
+          <Gutter size="0.75rem" />
+          <WarningGuideBox
+            amountConfigError={
+              sendType === "bridge"
+                ? ibcSwapConfigsForBridge.amountConfig.uiProperties.error ||
+                  ibcSwapConfigsForBridge.amountConfig.uiProperties.warning
+                : undefined
+            }
+            forceError={sendType === "bridge" ? calculatingTxError : undefined}
+            forceWarning={(() => {
+              if (sendType !== "bridge") {
+                return undefined;
+              }
 
+              if (isExpectedAmountTooSmall) {
+                return new Error(
+                  intl.formatMessage({
+                    id: "page.send.amount.warning.expected-amount-too-small",
+                  })
+                );
+              }
+            })()}
+          />
           <VerticalCollapseTransition collapsed={sendType !== "ibc-transfer"}>
             <GuideBox
               color="warning"
@@ -2221,6 +2245,56 @@ const DetachIcon: FunctionComponent<{
 const noopToPreventLintWarning = (..._args: any[]) => {
   // noop
 };
+
+function useCheckExpectedOutIsTooSmall(
+  ibcSwapConfigsForBridge: {
+    recipientConfig: IBCRecipientConfig;
+    amountConfig: IBCSwapAmountConfig;
+    memoConfig: MemoConfig;
+    gasConfig: GasConfig;
+    feeConfig: FeeConfig;
+    senderConfig: SenderConfig;
+  },
+  setIsExpectedAmountTooSmall: React.Dispatch<React.SetStateAction<boolean>>
+) {
+  useEffectOnce(() => {
+    const disposal = autorun(() => {
+      if (
+        ibcSwapConfigsForBridge.amountConfig.amount.length > 0 &&
+        !ibcSwapConfigsForBridge.amountConfig.isFetching
+      ) {
+        const inputDec = ibcSwapConfigsForBridge.amountConfig.amount[0].toDec();
+        const outputDec =
+          ibcSwapConfigsForBridge.amountConfig.outAmount.toDec();
+
+        const diff = (() => {
+          if (inputDec.isZero()) {
+            throw new Error("Input amount cannot be zero");
+          }
+
+          const feeAmount = inputDec.sub(outputDec);
+          const ratio = feeAmount
+            .quo(inputDec)
+            .mul(DecUtils.getTenExponentN(2));
+          return ratio;
+        })();
+
+        if (diff.gt(new Dec(2.5))) {
+          setIsExpectedAmountTooSmall(true);
+          return;
+        }
+      }
+
+      setIsExpectedAmountTooSmall(false);
+    });
+
+    return () => {
+      if (disposal) {
+        disposal();
+      }
+    };
+  });
+}
 
 //NOTE - Hooks for maintaining the observable state of IBC swap queries
 // when uiProperties of amountConfig of swapConfig is called only inside amount input and an error occurs on amountInput
@@ -2414,3 +2488,76 @@ function useGetGasSimulationForBridge(
 
   return gasSimulator;
 }
+
+const WarningGuideBox: FunctionComponent<{
+  amountConfigError?: Error;
+  forceError?: Error;
+  forceWarning?: Error;
+}> = observer(({ amountConfigError, forceError, forceWarning }) => {
+  const error: string | undefined = (() => {
+    //NOTE - ibc swap의 amountConfig에러는 amount input에서 처리하기 때문에 여기서는 처리하지 않는다.
+    if (amountConfigError) {
+      return undefined;
+    }
+
+    if (forceError) {
+      return forceError.message || forceError.toString();
+    }
+
+    if (forceWarning) {
+      return forceWarning.message || forceWarning.toString();
+    }
+  })();
+
+  // Collapse됐을때는 이미 error가 없어졌기 때문이다.
+  // 그러면 트랜지션 중에 이미 내용은 사라져있기 때문에
+  // 이 문제를 해결하기 위해서 마지막 오류를 기억해야 한다.
+  const [lastError, setLastError] = useState("");
+  useLayoutEffect(() => {
+    if (error != null) {
+      setLastError(error);
+    }
+  }, [error]);
+
+  const collapsed = error == null;
+
+  const globalSimpleBar = useGlobarSimpleBar();
+  useEffect(() => {
+    if (!collapsed) {
+      const timeoutId = setTimeout(() => {
+        const el = globalSimpleBar.ref.current?.getScrollElement();
+        if (el) {
+          // 오류 메세지가 가장 밑에 있는 관계로 유저가 잘 못볼수도 있기 때문에
+          // 트랜지션 종료 이후에 스크롤을 맨 밑으로 내린다.
+          // 어차피 높이는 대충 정해져있기 때문에 대충 큰 값을 넣으면 가장 밑으로 스크롤 된다.
+          el.scrollTo({
+            top: 1000,
+            behavior: "smooth",
+          });
+        }
+      }, 300);
+      return () => {
+        clearTimeout(timeoutId);
+      };
+    }
+  }, [collapsed, globalSimpleBar.ref]);
+
+  return (
+    <React.Fragment>
+      {/* 별 차이는 없기는한데 gutter와 실제 컴포넌트의 트랜지션을 분리하는게 아주 약간 더 자연스러움 */}
+      <VerticalCollapseTransition collapsed={collapsed}>
+        <Gutter size="0.75rem" />
+      </VerticalCollapseTransition>
+      <VerticalCollapseTransition collapsed={collapsed}>
+        <GuideBox
+          color="warning"
+          title={(() => {
+            const err = error || lastError;
+            return err;
+          })()}
+          hideInformationIcon={true}
+        />
+      </VerticalCollapseTransition>
+    </React.Fragment>
+  );
+});
