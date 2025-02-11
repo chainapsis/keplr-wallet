@@ -416,7 +416,7 @@ export class ObservableQueryStakingInfo {
         poolAddress: validator.pool_contract_address,
         rewardAddress: validator.reward_address,
         amount: unpoolAmount,
-        period: unpoolTime,
+        completeTime: unpoolTime,
       });
 
       amount = amount.add(unpoolAmount);

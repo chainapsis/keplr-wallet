@@ -32,5 +32,5 @@ export type UnpoolDelegation = {
   poolAddress: string;
   rewardAddress: string;
   amount: CoinPretty;
-  period: number;
+  completeTime: number;
 };

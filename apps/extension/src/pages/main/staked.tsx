@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useMemo } from "react";
 import { CollapsibleList } from "../../components/collapsible-list";
 import { MainEmptyView, TokenItem, TokenTitleView } from "./components";
-import { Dec } from "@keplr-wallet/unit";
+import { Dec, PricePretty } from "@keplr-wallet/unit";
 import { observer } from "mobx-react-lite";
 import { Stack } from "../../components/stack";
 import { useStore } from "../../stores";
@@ -9,16 +9,18 @@ import { TextButton } from "../../components/button-text";
 import { ArrowRightSolidIcon } from "../../components/icon";
 import { ColorPalette } from "../../styles";
 import { useIntl } from "react-intl";
-import { ViewTokenCosmosOnly } from "../../stores/huge-queries";
+import { ViewToken } from ".";
 
-export const StakedTabView: FunctionComponent<{
-  onMoreTokensClosed: () => void;
-}> = observer(({ onMoreTokensClosed }) => {
-  const { hugeQueriesStore, uiConfigStore } = useStore();
+type ViewTokenDelegation = ViewToken & {
+  price: PricePretty | undefined;
+  stakingUrl?: string;
+};
 
+const useCosmosViewTokenDelegations = () => {
+  const { hugeQueriesStore } = useStore();
   const intl = useIntl();
 
-  const delegations: ViewTokenCosmosOnly[] = useMemo(
+  const delegations: ViewTokenDelegation[] = useMemo(
     () =>
       hugeQueriesStore.delegations.filter((token) => {
         return token.token.toDec().gt(new Dec(0));
@@ -27,7 +29,7 @@ export const StakedTabView: FunctionComponent<{
   );
 
   const unbondings: {
-    viewToken: ViewTokenCosmosOnly;
+    viewToken: ViewTokenDelegation;
     altSentence: string;
   }[] = useMemo(
     () =>
@@ -39,7 +41,10 @@ export const StakedTabView: FunctionComponent<{
           const relativeTime = formatRelativeTime(unbonding.completeTime);
 
           return {
-            viewToken: unbonding.viewToken,
+            viewToken: {
+              ...unbonding.viewToken,
+              stakingUrl: unbonding.viewToken.chainInfo.walletUrlForStaking,
+            },
             altSentence: intl.formatRelativeTime(
               relativeTime.value,
               relativeTime.unit
@@ -49,12 +54,140 @@ export const StakedTabView: FunctionComponent<{
     [hugeQueriesStore.unbondings, intl]
   );
 
+  return {
+    delegations,
+    unbondings,
+  };
+};
+
+const useStarknetViewTokenDelegations = () => {
+  const { chainStore, priceStore, starknetQueriesStore, accountStore } =
+    useStore();
+
+  const intl = useIntl();
+
+  const chainId = "starknet:SN_MAIN";
+  const modularChainInfo = chainStore.getModularChain(chainId);
+
+  const account = accountStore.getAccount(chainId);
+
+  const queryValidators = starknetQueriesStore.get(chainId).queryValidators;
+  const validators = queryValidators.validators;
+  const queryStakingInfo = queryValidators
+    .getQueryPoolMemberInfoMap(account.starknetHexAddress)
+    ?.getQueryStakingInfo(validators);
+
+  const delegation: ViewTokenDelegation | undefined = useMemo(() => {
+    const token = queryStakingInfo?.totalStakedAmount;
+    if (!token) {
+      return;
+    }
+
+    const price = priceStore.calculatePrice(token);
+
+    return {
+      chainInfo: modularChainInfo,
+      token,
+      price,
+      isFetching: queryStakingInfo?.isFetching,
+      error: queryValidators.error,
+    };
+  }, [
+    modularChainInfo,
+    priceStore,
+    queryStakingInfo?.isFetching,
+    queryStakingInfo?.totalStakedAmount,
+    queryValidators.error,
+  ]);
+
+  const unbondings: {
+    viewToken: ViewTokenDelegation;
+    altSentence: string;
+  }[] = useMemo(() => {
+    const unbondings = queryStakingInfo?.unbondings;
+    if (!unbondings) {
+      return [];
+    }
+
+    return unbondings.unbondings.map((unbonding) => {
+      const relativeTime = formatRelativeTime(unbonding.completeTime * 1000);
+
+      return {
+        viewToken: {
+          chainInfo: modularChainInfo,
+          token: unbonding.amount,
+          price: priceStore.calculatePrice(unbonding.amount),
+          isFetching: queryStakingInfo?.isFetching,
+          error: queryValidators.error,
+          stakingUrl: "https://dashboard.endur.fi/stake",
+        },
+        altSentence: intl.formatRelativeTime(
+          relativeTime.value,
+          relativeTime.unit
+        ),
+      };
+    });
+  }, [
+    intl,
+    modularChainInfo,
+    priceStore,
+    queryStakingInfo?.isFetching,
+    queryStakingInfo?.unbondings,
+    queryValidators.error,
+  ]);
+
+  return {
+    delegation,
+    unbondings,
+  };
+};
+
+export const StakedTabView: FunctionComponent<{
+  onMoreTokensClosed: () => void;
+}> = observer(({ onMoreTokensClosed }) => {
+  const { uiConfigStore } = useStore();
+  const intl = useIntl();
+
+  const { delegations: cosmosDelegations, unbondings: cosmosUnbondings } =
+    useCosmosViewTokenDelegations();
+  const { delegation: starknetDelegation, unbondings: starknetUnbondings } =
+    useStarknetViewTokenDelegations();
+
+  const delegations = useMemo(() => {
+    if (!starknetDelegation) {
+      return cosmosDelegations;
+    }
+
+    return [...cosmosDelegations, starknetDelegation].sort((a, b) => {
+      const priceA = a.price?.toDec() || new Dec(0);
+      const priceB = b.price?.toDec() || new Dec(0);
+      if (priceA.equals(priceB)) {
+        return 0;
+      }
+      return priceA.gt(priceB) ? -1 : 1;
+    });
+  }, [cosmosDelegations, starknetDelegation]);
+
+  const unbondings = useMemo(() => {
+    if (!starknetUnbondings) {
+      return cosmosUnbondings;
+    }
+    return [...cosmosUnbondings, ...starknetUnbondings].sort((a, b) => {
+      const priceA = a.viewToken.price?.toDec() || new Dec(0);
+      const priceB = b.viewToken.price?.toDec() || new Dec(0);
+      if (priceA.equals(priceB)) {
+        return 0;
+      }
+      return priceA.gt(priceB) ? -1 : 1;
+    });
+  }, [cosmosUnbondings, starknetUnbondings]);
+
   const TokenViewData: {
     title: string;
     balance:
-      | ViewTokenCosmosOnly[]
+      | ViewTokenDelegation[]
       | {
-          viewToken: ViewTokenCosmosOnly;
+          viewToken: ViewTokenDelegation;
           altSentence: string;
         }[];
     lenAlwaysShown: number;
@@ -107,14 +240,11 @@ export const StakedTabView: FunctionComponent<{
                     <TokenItem
                       viewToken={viewToken.viewToken}
                       key={`${viewToken.viewToken.chainInfo.chainId}-${viewToken.viewToken.token.currency.coinMinimalDenom}`}
-                      disabled={
-                        !viewToken.viewToken.chainInfo.walletUrlForStaking
-                      }
+                      disabled={!viewToken.viewToken.stakingUrl}
                       onClick={() => {
-                        if (viewToken.viewToken.chainInfo.walletUrlForStaking) {
+                        if (viewToken.viewToken.stakingUrl) {
                           browser.tabs.create({
-                            url: viewToken.viewToken.chainInfo
-                              .walletUrlForStaking,
+                            url: viewToken.viewToken.stakingUrl,
                           });
                         }
                       }}
@@ -127,11 +257,11 @@ export const StakedTabView: FunctionComponent<{
                   <TokenItem
                     viewToken={viewToken}
                     key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
-                    disabled={!viewToken.chainInfo.walletUrlForStaking}
+                    disabled={!viewToken.stakingUrl}
                     onClick={() => {
-                      if (viewToken.chainInfo.walletUrlForStaking) {
+                      if (viewToken.stakingUrl) {
                         browser.tabs.create({
-                          url: viewToken.chainInfo.walletUrlForStaking,
+                          url: viewToken.stakingUrl,
                         });
                       }
                     }}
@@ -189,11 +319,26 @@ export const StakedTabView: FunctionComponent<{
   );
 });
 
-function formatRelativeTime(time: string): {
+function formatRelativeTime(time: string | number): {
   unit: "minute" | "hour" | "day";
   value: number;
 } {
-  const remaining = new Date(time).getTime() - Date.now();
+  let timeMs: number;
+  if (typeof time === "number") {
+    timeMs = time;
+  } else {
+    const parsed = Number(time);
+    if (!isNaN(parsed)) {
+      timeMs = parsed;
+    } else {
+      timeMs = new Date(time).getTime();
+    }
+  }
+
+  const remaining = timeMs - Date.now();
+
+  console.log("remaining", remaining);
+
   if (remaining <= 0) {
     return {
       unit: "minute",
