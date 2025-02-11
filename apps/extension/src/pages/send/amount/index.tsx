@@ -2127,6 +2127,32 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           )}
           <Gutter size="0.75rem" />
           <WarningGuideBox
+            title={
+              isExpectedAmountTooSmall &&
+              !calculatingTxError &&
+              !ibcSwapConfigsForBridge.amountConfig.uiProperties.error &&
+              !ibcSwapConfigsForBridge.amountConfig.uiProperties.warning
+                ? (() => {
+                    return intl.formatMessage(
+                      {
+                        id: "page.send.amount.warning.expected-amount-too-small-title",
+                      },
+                      {
+                        inAmount:
+                          ibcSwapConfigsForBridge.amountConfig.amount[0].toString(),
+                        srcChain:
+                          ibcSwapConfigsForBridge.amountConfig.chainInfo
+                            .chainName,
+                        outAmount:
+                          ibcSwapConfigsForBridge.amountConfig.outAmount.toString(),
+                        dstChain: chainStore.getChain(
+                          ibcSwapConfigsForBridge.amountConfig.outChainId
+                        ).chainName,
+                      }
+                    );
+                  })()
+                : undefined
+            }
             amountConfigError={
               sendType === "bridge"
                 ? ibcSwapConfigsForBridge.amountConfig.uiProperties.error ||
@@ -2493,7 +2519,8 @@ const WarningGuideBox: FunctionComponent<{
   amountConfigError?: Error;
   forceError?: Error;
   forceWarning?: Error;
-}> = observer(({ amountConfigError, forceError, forceWarning }) => {
+  title?: string;
+}> = observer(({ amountConfigError, forceError, forceWarning, title }) => {
   const error: string | undefined = (() => {
     //NOTE - ibc swap의 amountConfig에러는 amount input에서 처리하기 때문에 여기서는 처리하지 않는다.
     if (amountConfigError) {
@@ -2542,6 +2569,11 @@ const WarningGuideBox: FunctionComponent<{
     }
   }, [collapsed, globalSimpleBar.ref]);
 
+  const errorText = (() => {
+    const err = error || lastError;
+    return err;
+  })();
+
   return (
     <React.Fragment>
       {/* 별 차이는 없기는한데 gutter와 실제 컴포넌트의 트랜지션을 분리하는게 아주 약간 더 자연스러움 */}
@@ -2551,10 +2583,8 @@ const WarningGuideBox: FunctionComponent<{
       <VerticalCollapseTransition collapsed={collapsed}>
         <GuideBox
           color="warning"
-          title={(() => {
-            const err = error || lastError;
-            return err;
-          })()}
+          title={title || errorText}
+          paragraph={title ? errorText : undefined}
           hideInformationIcon={true}
         />
       </VerticalCollapseTransition>

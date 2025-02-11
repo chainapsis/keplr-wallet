@@ -521,6 +521,7 @@
   "page.send.amount.ibc-transfer-warning.title": "중앙화 거래소에 IBC 전송을 하지 마세요. 자산을 잃을 수 있습니다.",
   "page.send.amount.avoid-cex-warning.title": "중앙화 거래소에서는 지원되지 않는 자산 유형일 수 있습니다. 중앙화 거래소에 송금하지 않는 것을 권장합니다.",
   "page.send.amount.warning.expected-amount-too-small": "예상 금액이 브릿지 수수료에 비해서 너무 적습니다. 그래도 계속 진행하시려면 \"다음\"을 클릭하세요.",
+  "page.send.amount.warning.expected-amount-too-small-title": "{inAmount} ({srcChain}) → {outAmount} ({dstChain})",
 
   "page.main.chart.available": "사용 가능한 자산",
   "page.main.chart.staked": "스테이킹된 자산",
