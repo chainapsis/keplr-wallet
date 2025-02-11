@@ -22,11 +22,13 @@ import SimpleBar from "simplebar-react";
 interface Adr36DataViewProps {
   message?: string;
   rawMessage?: string;
+  messageIsShownAsJSON?: boolean;
 }
 const MAX_HEIGHT = 780;
 export const Adr36DataView: FunctionComponent<Adr36DataViewProps> = ({
   message,
   rawMessage,
+  messageIsShownAsJSON = false,
 }) => {
   const [isMessageExpanded, setIsMessageExpanded] = useState(false);
   const [isRawMessageExpanded, setIsRawMessageExpanded] = useState(false);
@@ -50,7 +52,7 @@ export const Adr36DataView: FunctionComponent<Adr36DataViewProps> = ({
       <React.Fragment>
         <Adr36DataSection
           content={message}
-          isShowRawMessage={false}
+          isShowRawMessage={messageIsShownAsJSON}
           isCollapsable={false}
           onToggle={setIsMessageExpanded}
         />

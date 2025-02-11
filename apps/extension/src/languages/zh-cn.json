@@ -402,6 +402,7 @@
   "page.sign.cosmos.icns.title": "请求注册",
 
   "page.sign.adr36.title": "签名申请",
+  "page.sign.adr36.title.from-keplr": "使用 Keplr 登录",
   "page.sign.adr36.warning-origin": "只有当网站受信任时才尝试授权",
   "page.sign.adr36.signing-with": "签名",
   "page.sign.adr36.requested-network": "请求的网络",

@@ -3,11 +3,17 @@ import { H4 } from "../../../../components/typography";
 import { FormattedMessage } from "react-intl";
 import { YAxis } from "../../../../components/axis";
 
-export const Adr36SignHeader: FunctionComponent = () => {
+export const Adr36SignHeader: FunctionComponent<{
+  isFromKeplr?: boolean;
+}> = ({ isFromKeplr }) => {
   return (
     <YAxis alignX="center">
       <H4>
-        <FormattedMessage id="page.sign.adr36.title" />
+        {isFromKeplr ? (
+          <FormattedMessage id="page.sign.adr36.title.from-keplr" />
+        ) : (
+          <FormattedMessage id="page.sign.adr36.title" />
+        )}
       </H4>
     </YAxis>
   );

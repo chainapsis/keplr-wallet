@@ -68,14 +68,16 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
     }
     return false;
   })();
-  const content: {
-    value: string;
-    isJSON: boolean;
-  } = useMemo(() => {
+
+  const origin = signInteractionStore.waitingData?.data.origin || "";
+  const isOriginKeplr = origin === "https://wallet.keplr.app";
+
+  const { message, rawMessage, isMessageShownAsJSON } = useMemo(() => {
     if (!signDocWrapper) {
       return {
-        value: "",
-        isJSON: false,
+        message: "",
+        rawMessage: "",
+        isMessageShownAsJSON: false,
       };
     }
 
@@ -88,28 +90,42 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
       throw new Error("Sign doc is improper ADR-36");
     }
 
+    const rawMessage = JSON.stringify(signDocWrapper?.aminoSignDoc, null, 2);
+
     if (isADR36WithString) {
       const str = Buffer.from(msg.value.data, "base64").toString();
+
+      if (isOriginKeplr) {
+        return {
+          // message: str,
+          message: `Unlock the full features of Keplr Dashboard, including commission and status updates from your validators, setting up your profile pic with NFTs, and more.\n\nBy signing in, you agree to our Terms of Use and Privacy Policy.`,
+          rawMessage: rawMessage,
+          isMessageShownAsJSON: false,
+        };
+      }
 
       try {
         // In case of json, it is displayed more easily to read.
         return {
-          value: JSON.stringify(JSON.parse(str), null, 2),
-          isJSON: true,
+          message: JSON.stringify(JSON.parse(str), null, 2),
+          rawMessage,
+          isMessageShownAsJSON: true,
         };
       } catch {
         return {
-          value: str,
-          isJSON: false,
+          message: str,
+          rawMessage,
+          isMessageShownAsJSON: false,
         };
       }
     } else {
       return {
-        value: msg.value.data as string,
-        isJSON: false,
+        message: msg.value.data as string,
+        rawMessage,
+        isMessageShownAsJSON: false,
       };
     }
-  }, [isADR36WithString, signDocWrapper]);
+  }, [isADR36WithString, isOriginKeplr, signDocWrapper]);
 
   const isLedgerAndDirect =
     signInteractionStore.waitingData?.data.keyType === "ledger" &&
@@ -309,11 +325,9 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
           overflow: "auto",
         }}
       >
-        <Adr36SignHeader />
+        <Adr36SignHeader isFromKeplr={isOriginKeplr} />
         <Gutter size="0.75rem" />
-        <Adr36RequestOrigin
-          origin={signInteractionStore.waitingData?.data.origin || ""}
-        />
+        <Adr36RequestOrigin origin={origin} />
 
         <Gutter size="1.5rem" />
         {chainId && (
@@ -329,8 +343,9 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
 
         <Gutter size="1.5rem" />
         <Adr36DataView
-          message={content.value}
-          rawMessage={JSON.stringify(signDocWrapper?.aminoSignDoc, null, 2)}
+          message={message}
+          rawMessage={rawMessage}
+          messageIsShownAsJSON={isMessageShownAsJSON}
         />
 
         <div style={{ flex: 1 }} />

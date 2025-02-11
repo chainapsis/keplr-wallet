@@ -430,6 +430,7 @@
   "page.sign.cosmos.lava.guide.paragraph": "You are currently using endpoints provided Lava.",
 
   "page.sign.adr36.title": "Signature Request",
+  "page.sign.adr36.title.from-keplr": "Sign in with Keplr",
   "page.sign.adr36.warning-origin": "Only approve if you trust this website",
   "page.sign.adr36.signing-with": "Signing with",
   "page.sign.adr36.requested-network": "Requested Network",
