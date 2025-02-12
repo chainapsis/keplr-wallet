@@ -216,8 +216,7 @@ const CosmosStakedBalance: FunctionComponent<{
 const StarknetStakedBalance: FunctionComponent<{
   starknetChainInfo: StarknetChainInfo;
 }> = observer(({ starknetChainInfo }) => {
-  const { queriesStore, accountStore, starknetQueriesStore, uiConfigStore } =
-    useStore();
+  const { accountStore, starknetQueriesStore, uiConfigStore } = useStore();
 
   const theme = useTheme();
 
@@ -226,12 +225,9 @@ const StarknetStakedBalance: FunctionComponent<{
   const chainId = starknetChainInfo.chainId;
   const account = accountStore.getAccount(chainId);
 
-  const queryAPR = queriesStore.simpleQuery.queryGet<{
-    overview: {
-      apr: number;
-    };
-    lastUpdated: number;
-  }>("https://voyager.online/api/staking/overview");
+  const queryApr = starknetQueriesStore.get(chainId).queryStakingApr;
+
+  const stakingApr = queryApr.apr ? queryApr.apr.toString(2) : null;
 
   const queryValidators = starknetQueriesStore.get(chainId).queryValidators;
 
@@ -279,11 +275,7 @@ const StarknetStakedBalance: FunctionComponent<{
                   >
                     Start Staking
                   </Subtitle1>
-                  {queryAPR.response &&
-                  "overview" in queryAPR.response.data &&
-                  "apr" in queryAPR.response.data.overview &&
-                  typeof queryAPR.response.data.overview.apr === "number" &&
-                  queryAPR.response.data.overview.apr > 0 ? (
+                  {stakingApr && (
                     <React.Fragment>
                       <Gutter size="0.25rem" />
                       <Body3
@@ -296,12 +288,10 @@ const StarknetStakedBalance: FunctionComponent<{
                           lineHeight: "140%",
                         }}
                       >
-                        {`${new Dec(queryAPR.response.data.overview.apr)
-                          .quo(new Dec(100))
-                          .toString(2)}% APY`}
+                        {`${stakingApr}% APY`}
                       </Body3>
                     </React.Fragment>
-                  ) : null}
+                  )}
                 </React.Fragment>
               );
             } else {
@@ -423,12 +413,7 @@ const StarknetStakedBalance: FunctionComponent<{
               </React.Fragment>
             )}
           </XAxis>
-          {!stakeBalanceIsZero &&
-          queryAPR.response &&
-          "overview" in queryAPR.response.data &&
-          "apr" in queryAPR.response.data.overview &&
-          typeof queryAPR.response.data.overview.apr === "number" &&
-          queryAPR.response.data.overview.apr > 0 ? (
+          {!stakeBalanceIsZero && stakingApr && (
             <React.Fragment>
               <Gutter size="0.25rem" />
               <Body3
@@ -441,12 +426,10 @@ const StarknetStakedBalance: FunctionComponent<{
                   lineHeight: "140%",
                 }}
               >
-                {`${new Dec(queryAPR.response.data.overview.apr)
-                  .quo(new Dec(100))
-                  .toString(2)}% APY`}
+                {`${stakingApr}% APY`}
               </Body3>
             </React.Fragment>
-          ) : null}
+          )}
         </YAxis>
       </XAxis>
     </StakedBalanceLayout>

@@ -337,8 +337,6 @@ function formatRelativeTime(time: string | number): {
 
   const remaining = timeMs - Date.now();
 
-  console.log("remaining", remaining);
-
   if (remaining <= 0) {
     return {
       unit: "minute",

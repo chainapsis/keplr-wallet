@@ -4,7 +4,10 @@ import { ObservableQueryStarknetERC20Balance } from "./erc20-balance";
 import { ObservableQueryStarknetERC20ContractInfo } from "./erc20-contract-info";
 import { ObservableQueryTokenContracts } from "./token-contracts";
 import { ObservableQueryAccountNonce } from "./account-nonce";
-import { ObservableQueryValidators } from "./staking";
+import {
+  ObservableQueryStakingApr,
+  ObservableQueryValidators,
+} from "./staking";
 
 export class StarknetQueriesStore {
   protected map: Map<string, StarknetQueriesStoreImpl> = new Map();
@@ -43,6 +46,8 @@ class StarknetQueriesStoreImpl {
 
   public readonly queryValidators: DeepReadonly<ObservableQueryValidators>;
 
+  public readonly queryStakingApr: DeepReadonly<ObservableQueryStakingApr>;
+
   constructor(
     protected readonly sharedContext: QuerySharedContext,
     protected readonly chainId: string,
@@ -73,6 +78,12 @@ class StarknetQueriesStoreImpl {
     );
 
     this.queryValidators = new ObservableQueryValidators(
+      sharedContext,
+      chainId,
+      chainGetter
+    );
+
+    this.queryStakingApr = new ObservableQueryStakingApr(
       sharedContext,
       chainId,
       chainGetter
