@@ -30,21 +30,21 @@ export const Adr36WalletDetails: FunctionComponent<Adr36WalletDetailsProps> = ({
   const theme = useTheme();
   const shortenAddress = (() => {
     if (addressInfo.type === "starknet") {
-      return `${addressInfo.address.slice(0, 8)}...${addressInfo.address.slice(
-        -6
+      return `${addressInfo.address.slice(0, 12)}...${addressInfo.address.slice(
+        -10
       )}`;
     }
 
     if (addressInfo.type === "ethereum") {
       return addressInfo.address.length === 42
-        ? `${addressInfo.address.slice(0, 8)}...${addressInfo.address.slice(
-            -6
+        ? `${addressInfo.address.slice(0, 12)}...${addressInfo.address.slice(
+            -10
           )}`
         : addressInfo.address;
     }
 
     if (addressInfo.type === "bech32") {
-      return Bech32Address.shortenAddress(addressInfo.address, 20);
+      return Bech32Address.shortenAddress(addressInfo.address, 30);
     }
   })();
 
@@ -143,44 +143,57 @@ export const Adr36WalletDetails: FunctionComponent<Adr36WalletDetailsProps> = ({
         </Box>
       </Box>
       <Box padding="1rem">
-        <XAxis alignY="center">
-          <Subtitle4
-            color={
-              theme.mode === "light"
-                ? ColorPalette["gray-300"]
-                : ColorPalette["gray-200"]
-            }
-          >
-            on
-          </Subtitle4>
-          <Gutter size="0.375rem" />
-          <ChainImageFallback
-            chainInfo={chainInfo}
-            size="1.5rem"
-            alt={chainInfo.chainName}
-          />
-          <Gutter size="0.375rem" />
-
-          <Body1
-            color={
-              theme.mode === "light"
-                ? ColorPalette["gray-700"]
-                : ColorPalette["white"]
-            }
-          >
-            {chainInfo.chainName}
-          </Body1>
-          <Gutter size="1rem" />
-          <Body1
-            color={
-              theme.mode === "light"
-                ? ColorPalette["gray-400"]
-                : hexToRgba("#FFFFFF", 0.5)
-            }
-          >
-            {shortenAddress}
-          </Body1>
-        </XAxis>
+        <YAxis>
+          <XAxis alignY="center">
+            <Subtitle4
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-300"]
+                  : ColorPalette["gray-200"]
+              }
+            >
+              on
+            </Subtitle4>
+            <Gutter size="0.5rem" />
+            <ChainImageFallback
+              chainInfo={chainInfo}
+              size="1.5rem"
+              alt={chainInfo.chainName}
+            />
+            <Gutter size="0.5rem" />
+            <Body1
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-700"]
+                  : ColorPalette["white"]
+              }
+            >
+              {chainInfo.chainName}
+            </Body1>
+          </XAxis>
+          <Gutter size="0.5rem" />
+          <XAxis alignY="center">
+            <Subtitle4
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-300"]
+                  : ColorPalette["gray-200"]
+              }
+            >
+              with
+            </Subtitle4>
+            <Gutter size="0.5rem" />
+            <Body1
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-400"]
+                  : ColorPalette["white"]
+              }
+            >
+              {shortenAddress}
+            </Body1>
+          </XAxis>
+        </YAxis>
       </Box>
     </Box>
   );
