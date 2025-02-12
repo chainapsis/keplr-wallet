@@ -173,17 +173,12 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
           }
 
           const starknetChainInfo = chainStore.getModularChain(chainId);
-          const queryValidators = starknetQueriesStore.get(
-            starknetChainInfo.chainId
-          ).queryValidators;
-
-          const validators = queryValidators.validators;
-          const queryStakingInfo = queryValidators
-            .getQueryPoolMemberInfoMap(
+          const queryStakingInfo = starknetQueriesStore
+            .get(chainId)
+            .stakingInfoManager.getStakingInfo(
               accountStore.getAccount(starknetChainInfo.chainId)
                 .starknetHexAddress
-            )
-            ?.getQueryStakingInfo(validators);
+            );
 
           const totalClaimableRewardAmount =
             queryStakingInfo?.totalClaimableRewardAmount;
@@ -193,7 +188,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
               token: totalClaimableRewardAmount,
               modularChainInfo: starknetChainInfo,
               isFetching: queryStakingInfo?.isFetching ?? false,
-              error: queryValidators?.error, // ignore queryStakingInfo error
+              error: queryStakingInfo?.error, // ignore queryStakingInfo error
               onClaimAll: handleStarknetClaimAllEach,
               onClaimSingle: handleStarknetClaimSingle,
             });

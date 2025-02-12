@@ -67,37 +67,36 @@ const useStarknetViewTokenDelegations = () => {
   const intl = useIntl();
 
   const chainId = "starknet:SN_MAIN";
-  const modularChainInfo = chainStore.getModularChain(chainId);
+  const starknetChainInfo = chainStore.getModularChain(chainId);
 
   const account = accountStore.getAccount(chainId);
 
-  const queryValidators = starknetQueriesStore.get(chainId).queryValidators;
-  const validators = queryValidators.validators;
-  const queryStakingInfo = queryValidators
-    .getQueryPoolMemberInfoMap(account.starknetHexAddress)
-    ?.getQueryStakingInfo(validators);
+  const starknetQueries = starknetQueriesStore.get(chainId);
+  const queryStakingInfo = starknetQueries.stakingInfoManager.getStakingInfo(
+    account.starknetHexAddress
+  );
 
   const delegation: ViewTokenDelegation | undefined = useMemo(() => {
     const token = queryStakingInfo?.totalStakedAmount;
     if (!token) {
-      return;
+      return undefined;
     }
 
     const price = priceStore.calculatePrice(token);
 
     return {
-      chainInfo: modularChainInfo,
+      chainInfo: starknetChainInfo,
       token,
       price,
-      isFetching: queryStakingInfo?.isFetching,
-      error: queryValidators.error,
+      isFetching: queryStakingInfo.isFetching,
+      error: queryStakingInfo.error,
     };
   }, [
-    modularChainInfo,
+    starknetChainInfo,
     priceStore,
     queryStakingInfo?.isFetching,
     queryStakingInfo?.totalStakedAmount,
-    queryValidators.error,
+    queryStakingInfo?.error,
   ]);
 
   const unbondings: {
@@ -114,11 +113,11 @@ const useStarknetViewTokenDelegations = () => {
 
       return {
         viewToken: {
-          chainInfo: modularChainInfo,
+          chainInfo: starknetChainInfo,
           token: unbonding.amount,
           price: priceStore.calculatePrice(unbonding.amount),
-          isFetching: queryStakingInfo?.isFetching,
-          error: queryValidators.error,
+          isFetching: queryStakingInfo.isFetching,
+          error: queryStakingInfo?.error,
           stakingUrl: "https://dashboard.endur.fi/stake",
         },
         altSentence: intl.formatRelativeTime(
@@ -129,11 +128,11 @@ const useStarknetViewTokenDelegations = () => {
     });
   }, [
     intl,
-    modularChainInfo,
+    starknetChainInfo,
     priceStore,
     queryStakingInfo?.isFetching,
     queryStakingInfo?.unbondings,
-    queryValidators.error,
+    queryStakingInfo?.error,
   ]);
 
   return {

@@ -40,11 +40,9 @@ export const useStarknetClaimRewards = () => {
     const starknetAccount = starknetAccountStore.getAccount(chainId);
 
     const starknetQueries = starknetQueriesStore.get(chainId);
-    const queryValidators = starknetQueries.queryValidators;
-    const validators = queryValidators.validators;
-    const queryStakingInfo = queryValidators
-      .getQueryPoolMemberInfoMap(account.starknetHexAddress)
-      ?.getQueryStakingInfo(validators);
+    const queryStakingInfo = starknetQueries.stakingInfoManager.getStakingInfo(
+      account.starknetHexAddress
+    );
 
     const claimableRewards =
       queryStakingInfo?.getDescendingPendingClaimableRewards(
@@ -348,13 +346,10 @@ export const useStarknetClaimRewards = () => {
 
     const starknetAccount = starknetAccountStore.getAccount(chainId);
 
-    const queries = starknetQueriesStore.get(chainId);
-    const queryValidators = queries.queryValidators;
-
-    const validators = queryValidators.validators;
-    const queryStakingInfo = queryValidators
-      .getQueryPoolMemberInfoMap(account.starknetHexAddress)
-      ?.getQueryStakingInfo(validators);
+    const starknetQueries = starknetQueriesStore.get(chainId);
+    const queryStakingInfo = starknetQueries.stakingInfoManager.getStakingInfo(
+      account.starknetHexAddress
+    );
 
     const claimableRewards =
       queryStakingInfo?.getDescendingPendingClaimableRewards(

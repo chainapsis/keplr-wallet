@@ -229,13 +229,9 @@ const StarknetStakedBalance: FunctionComponent<{
 
   const stakingApr = queryApr.apr ? queryApr.apr.toString(2) : null;
 
-  const queryValidators = starknetQueriesStore.get(chainId).queryValidators;
-
-  const validators = queryValidators.validators;
-
-  const queryStakingInfo = queryValidators
-    .getQueryPoolMemberInfoMap(account.starknetHexAddress)
-    ?.getQueryStakingInfo(validators);
+  const queryStakingInfo = starknetQueriesStore
+    .get(chainId)
+    .stakingInfoManager.getStakingInfo(account.starknetHexAddress);
 
   const totalStakedAmount = queryStakingInfo?.totalStakedAmount;
 
