@@ -389,6 +389,7 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
       affiliateFeeBps: this.affiliateFeeBps,
       affiliateFeeReceiver: this.affiliateFeeReceiver,
       swap_venues: this.swapVenues,
+      smartSwapOptions: this.smartSwapOptions,
     })}`;
   }
 }

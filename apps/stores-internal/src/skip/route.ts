@@ -457,6 +457,8 @@ export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
       dest_asset_chain_id: this.destChainId,
       affiliateFeeBps: this.affiliateFeeBps,
       swap_venue: this.swapVenues,
+      allow_swaps: this.allowSwaps,
+      smart_swap_options: this.smartSwapOptions,
     })}`;
   }
 }
