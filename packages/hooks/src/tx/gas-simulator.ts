@@ -457,7 +457,11 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
 
     this._disposers.push(
       autorun(() => {
-        if (this.enabled && this.gasEstimated != null) {
+        if (
+          this.enabled &&
+          this.gasEstimated != null &&
+          !Number.isNaN(this.gasEstimated)
+        ) {
           this.gasConfig.setValue(this.gasEstimated * this.gasAdjustment);
         }
       })
