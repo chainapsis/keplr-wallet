@@ -927,7 +927,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
             );
           }
 
-          // compare the price of claimable rewards and fee
+          // compare the price of claimable rewards and fee (just consider maxGasPrice)
           const maxFee = fee.maxGasPrice.mul(fee.gas);
 
           const rewardsPrice = await priceStore.waitCalculatePrice(
@@ -973,7 +973,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
               : {
                   type: "ETH",
                   maxFee: fee.maxGasPrice
-                    .mul(fee.gas)
+                    .mul(fee.maxGas)
                     .mul(new Dec(10 ** fee.currency.coinDecimals))
                     .toDec()
                     .roundUp()
@@ -993,6 +993,10 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
             }
           );
 
+          if (!txHash) {
+            throw new Error("Failed to claim all");
+          }
+
           analyticsStore.logEvent("complete_claim_all", {
             chainId: starknetChainInfo.chainId,
             chainName: starknetChainInfo.chainName,
@@ -1001,10 +1005,6 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
           setTimeout(() => {
             state.setIsLoading(false);
           }, 1000);
-
-          if (!txHash) {
-            throw new Error("Failed to claim all");
-          }
         } catch (e) {
           state.setFailedReason(e);
           console.log(e);
@@ -1509,12 +1509,157 @@ const ViewStarknetClaimTokenItem: FunctionComponent<{
   state: ClaimAllEachState;
   itemsLength: number;
 }> = observer(({ viewClaimToken, state, itemsLength }) => {
-  const { starknetAccountStore } = useStore();
+  const {
+    accountStore,
+    starknetAccountStore,
+    starknetQueriesStore,
+    analyticsStore,
+    chainStore,
+  } = useStore();
 
+  const intl = useIntl();
+  const navigate = useNavigate();
+  const notification = useNotification();
   const [isSimulating, setIsSimulating] = useState(false);
 
   const claim = async () => {
-    // TODO: Implement
+    analyticsStore.logEvent("click_claim", {
+      chainId: viewClaimToken.modularChainInfo.chainId,
+      chainName: viewClaimToken.modularChainInfo.chainName,
+    });
+
+    if (state.failedReason) {
+      state.setFailedReason(undefined);
+      return;
+    }
+
+    const chainId = viewClaimToken.modularChainInfo.chainId;
+    const account = accountStore.getAccount(chainId);
+    const starknetAccount = starknetAccountStore.getAccount(chainId);
+
+    const queries = starknetQueriesStore.get(chainId);
+    const queryValidators = queries.queryValidators;
+
+    const validators = queryValidators.validators;
+    const queryStakingInfo = queryValidators
+      .getQueryPoolMemberInfoMap(account.starknetHexAddress)
+      ?.getQueryStakingInfo(validators);
+
+    const claimableRewards =
+      queryStakingInfo?.getDescendingPendingClaimableRewards(
+        account.isNanoLedger ? 5 : 8
+      );
+
+    if (!claimableRewards || claimableRewards.length === 0) {
+      return;
+    }
+
+    const currencies = chainStore
+      .getModularChainInfoImpl(chainId)
+      .getCurrencies("starknet");
+
+    const feeCurrency = currencies.find(
+      (currency) => currency.coinDenom === "ETH"
+    );
+
+    if (!feeCurrency) {
+      return;
+    }
+
+    const calls: Call[] = [];
+
+    for (const claimableReward of claimableRewards) {
+      if (claimableReward.poolAddress) {
+        calls.push({
+          contractAddress: claimableReward.poolAddress,
+          calldata: CallData.compile([account.starknetHexAddress]),
+          entrypoint: "claim_rewards",
+        });
+      }
+    }
+
+    try {
+      setIsSimulating(true);
+
+      // estimate fee with ETH first
+      const { gas_consumed, data_gas_consumed, gas_price, overall_fee, unit } =
+        await starknetAccount.estimateInvokeFee(
+          account.starknetHexAddress,
+          calls,
+          "ETH"
+        );
+
+      if (unit !== "WEI") {
+        throw new Error("Invalid fee unit");
+      }
+
+      const gasMargin = new Dec(1.2);
+      const gasPriceMargin = new Dec(1.5);
+
+      const gasConsumedDec = new Dec(gas_consumed);
+      const dataGasConsumedDec = new Dec(data_gas_consumed);
+      const sigVerificationGasConsumedDec = new Dec(583);
+      const totalGasConsumed = gasConsumedDec
+        .add(dataGasConsumedDec)
+        .add(sigVerificationGasConsumedDec);
+
+      const gasPriceDec = new Dec(gas_price);
+      const overallFeeDec = new Dec(overall_fee);
+
+      const sigVerificationFee = sigVerificationGasConsumedDec.mul(gasPriceDec);
+
+      const adjustedOverallFee = overallFeeDec.add(sigVerificationFee);
+
+      const adjustedGasPrice = adjustedOverallFee.quo(totalGasConsumed);
+
+      const gasPrice = new CoinPretty(feeCurrency, adjustedGasPrice);
+
+      const maxGasPrice = gasPrice.mul(gasPriceMargin);
+      const maxGas = totalGasConsumed.mul(gasMargin);
+
+      const { transaction_hash: txHash } = await starknetAccount.execute(
+        account.starknetHexAddress,
+        calls,
+        {
+          type: "ETH",
+          maxFee: maxGasPrice
+            .mul(maxGas)
+            .mul(new Dec(10 ** feeCurrency.coinDecimals))
+            .toDec()
+            .roundUp()
+            .toString(),
+        }
+      );
+
+      if (!txHash) {
+        throw new Error("Failed to claim rewards");
+      }
+
+      analyticsStore.logEvent("complete_claim", {
+        chainId: viewClaimToken.modularChainInfo.chainId,
+        chainName: viewClaimToken.modularChainInfo.chainName,
+      });
+
+      navigate("/", {
+        replace: true,
+      });
+    } catch (e) {
+      if (e?.message === "Request rejected") {
+        return;
+      }
+
+      console.log(e);
+      notification.show(
+        "failed",
+        intl.formatMessage({ id: "error.transaction-failed" }),
+        ""
+      );
+      navigate("/", {
+        replace: true,
+      });
+    } finally {
+      setIsSimulating(false);
+    }
   };
 
   const isLoading =
