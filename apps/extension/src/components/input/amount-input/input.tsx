@@ -67,6 +67,24 @@ export const AmountInput: FunctionComponent<{
     }
   }, [isPriceBased]);
 
+  const error = (() => {
+    const uiProperties = amountConfig.uiProperties;
+
+    const err = uiProperties.error || uiProperties.warning;
+
+    if (err instanceof EmptyAmountError) {
+      return;
+    }
+
+    if (err instanceof ZeroAmountError) {
+      return;
+    }
+
+    if (err) {
+      return err.message || err.toString();
+    }
+  })();
+
   return (
     <TextInput
       ref={inputRef}
@@ -74,6 +92,9 @@ export const AmountInput: FunctionComponent<{
         id: "components.input.amount-input.amount-label",
       })}
       type="number"
+      inputStyle={{
+        color: error ? ColorPalette["yellow-400"] : undefined,
+      }}
       value={(() => {
         if (isPriceBased) {
           if (amountConfig.fraction != 0) {
@@ -199,23 +220,7 @@ export const AmountInput: FunctionComponent<{
           />
         ) : null
       }
-      error={(() => {
-        const uiProperties = amountConfig.uiProperties;
-
-        const err = uiProperties.error || uiProperties.warning;
-
-        if (err instanceof EmptyAmountError) {
-          return;
-        }
-
-        if (err instanceof ZeroAmountError) {
-          return;
-        }
-
-        if (err) {
-          return err.message || err.toString();
-        }
-      })()}
+      error={error}
     />
   );
 });

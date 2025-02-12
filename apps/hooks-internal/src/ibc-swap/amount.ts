@@ -665,6 +665,17 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
     const routeError = queryIBCSwap.getQueryRoute().error;
     if (routeError) {
+      const CCTP_BRIDGE_FEE_ERROR_MESSAGE =
+        "Input amount is too low to cover CCTP bridge relay fee";
+
+      //NOTE For expected error messages, convert the message to be more user-friendly
+      if (routeError.message.includes(CCTP_BRIDGE_FEE_ERROR_MESSAGE)) {
+        return {
+          ...prev,
+          error: new Error("Input amount too low to cover the bridge fees."),
+        };
+      }
+
       return {
         ...prev,
         error: new Error(routeError.message),

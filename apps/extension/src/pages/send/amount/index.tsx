@@ -1,6 +1,7 @@
 import React, {
   FunctionComponent,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -66,7 +67,11 @@ import { useIBCChannelConfigQueryString } from "../../../hooks/use-ibc-channel-c
 import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
 import { GuideBox } from "../../../components/guide-box";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import { amountToAmbiguousAverage, isRunningInSidePanel } from "../../../utils";
+import {
+  amountToAmbiguousAverage,
+  amountToAmbiguousString,
+  isRunningInSidePanel,
+} from "../../../utils";
 import { AppCurrency, EthTxStatus } from "@keplr-wallet/types";
 import {
   IBCSwapAmountConfig,
@@ -86,7 +91,6 @@ import {
   IChainInfoImpl,
   IQueriesStore,
   MakeTxResponse,
-  // MakeTxResponse,
   SecretAccount,
   WalletStatus,
 } from "@keplr-wallet/stores";
@@ -98,6 +102,9 @@ import {
 } from "@keplr-wallet/stores-eth";
 import { autorun } from "mobx";
 import { usePreviousDistinct } from "../../../hooks/use-previous";
+import { SwapFeeInfoForBridgeOnSend } from "./swap-fee-info";
+import { useEffectOnce } from "../../../hooks/use-effect-once";
+import { useGlobarSimpleBar } from "../../../hooks/global-simplebar";
 
 const Styles = {
   Flex1: styled.div`
@@ -430,20 +437,21 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   const chainInfo = chainStore.getChain(chainId);
   const isEvmChain = chainStore.isEvmChain(chainId);
   const isEVMOnlyChain = chainStore.isEvmOnlyChain(chainId);
-  // const [isLessAmountThanFee, setIsLessAmountThanFee] = useState(false);
 
   const coinMinimalDenom =
     initialCoinMinimalDenom ||
     chainStore.getChain(chainId).currencies[0].coinMinimalDenom;
   const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
   const isErc20 = new DenomHelper(currency.coinMinimalDenom).type === "erc20";
+  const [isExpectedAmountTooSmall, setIsExpectedAmountTooSmall] =
+    useState(false);
 
   const [sendType, setSendType] = useState<SendType>("send");
 
   const [isTxLoading, setIsTxLoading] = useState(false);
-  // const [calculatingTxError, setCalculatingTxError] = useState<
-  //   Error | undefined
-  // >();
+  const [calculatingTxError, setCalculatingTxError] = useState<
+    Error | undefined
+  >();
 
   const [destinationChainInfoOfBridge, setDestinationChainInfoOfBridge] =
     useState({
@@ -504,8 +512,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     200000,
     destinationChainInfoOfBridge.chainId,
     destinationChainInfoOfBridge.currency,
-    //NOTE - when swap is used on send page, it use bridge so swap fee is 0
-    0,
+    //NOTE - when swap is used on send page, it use bridge so swap fee is 10
+    10,
     {
       allowHexAddressToBech32Address:
         isDestinationEvmChain &&
@@ -687,6 +695,11 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       setSendType("ibc-transfer");
     }
   });
+
+  useCheckExpectedOutIsTooSmall(
+    ibcSwapConfigsForBridge,
+    setIsExpectedAmountTooSmall
+  );
 
   const isIBCTransferPrevious = usePreviousDistinct(sendType);
   useEffect(() => {
@@ -1002,12 +1015,12 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                 ]);
                 tx = _tx;
               } catch (e) {
-                // setCalculatingTxError(e);
+                setCalculatingTxError(e);
                 setIsTxLoading(false);
                 return;
               }
 
-              // setCalculatingTxError(undefined);
+              setCalculatingTxError(undefined);
 
               try {
                 if ("send" in tx) {
@@ -1069,6 +1082,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                       onBroadcasted: (txHash) => {
                         const inChainId =
                           ibcSwapConfigsForBridge.amountConfig.chainId;
+                        const inCurrency =
+                          ibcSwapConfigsForBridge.amountConfig.currency;
 
                         const outChainId =
                           ibcSwapConfigsForBridge.amountConfig.outChainId;
@@ -1124,7 +1139,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                               chainStore.getChain(outChainId).currencies,
                           },
                           routeDurationSeconds ?? 0,
-                          Buffer.from(txHash).toString("hex")
+                          Buffer.from(txHash).toString("hex"),
+                          true
                         );
 
                         new InExtensionMessageRequester().sendMessage(
@@ -1132,124 +1148,123 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                           msg
                         );
 
-                        //NOTE - GA에서 어떤 제목으로 기록할지가 먼저 필요함 그 이후 해당 로직 주석 제가 필요
-                        // const params: Record<
-                        //   string,
-                        //   | number
-                        //   | string
-                        //   | boolean
-                        //   | number[]
-                        //   | string[]
-                        //   | undefined
-                        // > = {
-                        //   inChainId: inChainId,
-                        //   inChainIdentifier:
-                        //     ChainIdHelper.parse(inChainId).identifier,
-                        //   inCurrencyMinimalDenom: inCurrency.coinMinimalDenom,
-                        //   inCurrencyDenom: inCurrency.coinDenom,
-                        //   inCurrencyCommonMinimalDenom:
-                        //     inCurrency.coinMinimalDenom,
-                        //   inCurrencyCommonDenom: inCurrency.coinDenom,
-                        //   outChainId: outChainId,
-                        //   outChainIdentifier:
-                        //     ChainIdHelper.parse(outChainId).identifier,
-                        //   outCurrencyMinimalDenom: outCurrency.coinMinimalDenom,
-                        //   outCurrencyDenom: outCurrency.coinDenom,
-                        //   outCurrencyCommonMinimalDenom:
-                        //     outCurrency.coinMinimalDenom,
-                        //   outCurrencyCommonDenom: outCurrency.coinDenom,
-                        //   swapType: ibcSwapConfigsForBridge.amountConfig.type,
-                        // };
-                        // if (
-                        //   "originChainId" in inCurrency &&
-                        //   inCurrency.originChainId
-                        // ) {
-                        //   const originChainId = inCurrency.originChainId;
-                        //   params["inOriginChainId"] = originChainId;
-                        //   params["inOriginChainIdentifier"] =
-                        //     ChainIdHelper.parse(originChainId).identifier;
+                        const params: Record<
+                          string,
+                          | number
+                          | string
+                          | boolean
+                          | number[]
+                          | string[]
+                          | undefined
+                        > = {
+                          inChainId: inChainId,
+                          inChainIdentifier:
+                            ChainIdHelper.parse(inChainId).identifier,
+                          inCurrencyMinimalDenom: inCurrency.coinMinimalDenom,
+                          inCurrencyDenom: inCurrency.coinDenom,
+                          inCurrencyCommonMinimalDenom:
+                            inCurrency.coinMinimalDenom,
+                          inCurrencyCommonDenom: inCurrency.coinDenom,
+                          outChainId: outChainId,
+                          outChainIdentifier:
+                            ChainIdHelper.parse(outChainId).identifier,
+                          outCurrencyMinimalDenom: outCurrency.coinMinimalDenom,
+                          outCurrencyDenom: outCurrency.coinDenom,
+                          outCurrencyCommonMinimalDenom:
+                            outCurrency.coinMinimalDenom,
+                          outCurrencyCommonDenom: outCurrency.coinDenom,
+                          swapType: ibcSwapConfigsForBridge.amountConfig.type,
+                        };
+                        if (
+                          "originChainId" in inCurrency &&
+                          inCurrency.originChainId
+                        ) {
+                          const originChainId = inCurrency.originChainId;
+                          params["inOriginChainId"] = originChainId;
+                          params["inOriginChainIdentifier"] =
+                            ChainIdHelper.parse(originChainId).identifier;
 
-                        //   params["inToDifferentChain"] = true;
-                        // }
-                        // if (
-                        //   "originCurrency" in inCurrency &&
-                        //   inCurrency.originCurrency
-                        // ) {
-                        //   params["inCurrencyCommonMinimalDenom"] =
-                        //     inCurrency.originCurrency.coinMinimalDenom;
-                        //   params["inCurrencyCommonDenom"] =
-                        //     inCurrency.originCurrency.coinDenom;
-                        // }
-                        // if (
-                        //   "originChainId" in outCurrency &&
-                        //   outCurrency.originChainId
-                        // ) {
-                        //   const originChainId = outCurrency.originChainId;
-                        //   params["outOriginChainId"] = originChainId;
-                        //   params["outOriginChainIdentifier"] =
-                        //     ChainIdHelper.parse(originChainId).identifier;
+                          params["inToDifferentChain"] = true;
+                        }
+                        if (
+                          "originCurrency" in inCurrency &&
+                          inCurrency.originCurrency
+                        ) {
+                          params["inCurrencyCommonMinimalDenom"] =
+                            inCurrency.originCurrency.coinMinimalDenom;
+                          params["inCurrencyCommonDenom"] =
+                            inCurrency.originCurrency.coinDenom;
+                        }
+                        if (
+                          "originChainId" in outCurrency &&
+                          outCurrency.originChainId
+                        ) {
+                          const originChainId = outCurrency.originChainId;
+                          params["outOriginChainId"] = originChainId;
+                          params["outOriginChainIdentifier"] =
+                            ChainIdHelper.parse(originChainId).identifier;
 
-                        //   params["outToDifferentChain"] = true;
-                        // }
-                        // if (
-                        //   "originCurrency" in outCurrency &&
-                        //   outCurrency.originCurrency
-                        // ) {
-                        //   params["outCurrencyCommonMinimalDenom"] =
-                        //     outCurrency.originCurrency.coinMinimalDenom;
-                        //   params["outCurrencyCommonDenom"] =
-                        //     outCurrency.originCurrency.coinDenom;
-                        // }
-                        // params["inRange"] = amountToAmbiguousString(
-                        //   ibcSwapConfigsForBridge.amountConfig.amount[0]
-                        // );
-                        // params["outRange"] = amountToAmbiguousString(
-                        //   ibcSwapConfigsForBridge.amountConfig.outAmount
-                        // );
+                          params["outToDifferentChain"] = true;
+                        }
+                        if (
+                          "originCurrency" in outCurrency &&
+                          outCurrency.originCurrency
+                        ) {
+                          params["outCurrencyCommonMinimalDenom"] =
+                            outCurrency.originCurrency.coinMinimalDenom;
+                          params["outCurrencyCommonDenom"] =
+                            outCurrency.originCurrency.coinDenom;
+                        }
+                        params["inRange"] = amountToAmbiguousString(
+                          ibcSwapConfigsForBridge.amountConfig.amount[0]
+                        );
+                        params["outRange"] = amountToAmbiguousString(
+                          ibcSwapConfigsForBridge.amountConfig.outAmount
+                        );
 
-                        // // UI 상에서 in currency의 가격은 in input에서 표시되고
-                        // // out currency의 가격은 swap fee에서 표시된다.
-                        // // price store에서 usd는 무조건 쿼리하므로 in, out currency의 usd는 보장된다.
-                        // const inCurrencyPrice = priceStore.calculatePrice(
-                        //   ibcSwapConfigsForBridge.amountConfig.amount[0],
-                        //   "usd"
-                        // );
-                        // if (inCurrencyPrice) {
-                        //   params["inFiatRange"] =
-                        //     amountToAmbiguousString(inCurrencyPrice);
-                        //   params["inFiatAvg"] =
-                        //     amountToAmbiguousAverage(inCurrencyPrice);
-                        // }
-                        // const outCurrencyPrice = priceStore.calculatePrice(
-                        //   ibcSwapConfigsForBridge.amountConfig.outAmount,
-                        //   "usd"
-                        // );
-                        // if (outCurrencyPrice) {
-                        //   params["outFiatRange"] =
-                        //     amountToAmbiguousString(outCurrencyPrice);
-                        //   params["outFiatAvg"] =
-                        //     amountToAmbiguousAverage(outCurrencyPrice);
-                        // }
+                        // UI 상에서 in currency의 가격은 in input에서 표시되고
+                        // out currency의 가격은 swap fee에서 표시된다.
+                        // price store에서 usd는 무조건 쿼리하므로 in, out currency의 usd는 보장된다.
+                        const inCurrencyPrice = priceStore.calculatePrice(
+                          ibcSwapConfigsForBridge.amountConfig.amount[0],
+                          "usd"
+                        );
+                        if (inCurrencyPrice) {
+                          params["inFiatRange"] =
+                            amountToAmbiguousString(inCurrencyPrice);
+                          params["inFiatAvg"] =
+                            amountToAmbiguousAverage(inCurrencyPrice);
+                        }
+                        const outCurrencyPrice = priceStore.calculatePrice(
+                          ibcSwapConfigsForBridge.amountConfig.outAmount,
+                          "usd"
+                        );
+                        if (outCurrencyPrice) {
+                          params["outFiatRange"] =
+                            amountToAmbiguousString(outCurrencyPrice);
+                          params["outFiatAvg"] =
+                            amountToAmbiguousAverage(outCurrencyPrice);
+                        }
 
-                        // new InExtensionMessageRequester().sendMessage(
-                        //   BACKGROUND_PORT,
-                        //   new LogAnalyticsEventMsg("ibc_swap", params)
-                        // );
+                        new InExtensionMessageRequester().sendMessage(
+                          BACKGROUND_PORT,
+                          new LogAnalyticsEventMsg("send_bridge", params)
+                        );
 
-                        // analyticsStore.logEvent("swap_occurred", {
-                        //   in_chain_id: inChainId,
-                        //   in_chain_identifier:
-                        //     ChainIdHelper.parse(inChainId).identifier,
-                        //   in_currency_minimal_denom:
-                        //     inCurrency.coinMinimalDenom,
-                        //   in_currency_denom: inCurrency.coinDenom,
-                        //   out_chain_id: outChainId,
-                        //   out_chain_identifier:
-                        //     ChainIdHelper.parse(outChainId).identifier,
-                        //   out_currency_minimal_denom:
-                        //     outCurrency.coinMinimalDenom,
-                        //   out_currency_denom: outCurrency.coinDenom,
-                        // });
+                        analyticsStore.logEvent("bridge_occurred_by_skip", {
+                          in_chain_id: inChainId,
+                          in_chain_identifier:
+                            ChainIdHelper.parse(inChainId).identifier,
+                          in_currency_minimal_denom:
+                            inCurrency.coinMinimalDenom,
+                          in_currency_denom: inCurrency.coinDenom,
+                          out_chain_id: outChainId,
+                          out_chain_identifier:
+                            ChainIdHelper.parse(outChainId).identifier,
+                          out_currency_minimal_denom:
+                            outCurrency.coinMinimalDenom,
+                          out_currency_denom: outCurrency.coinDenom,
+                        });
                       },
                       onFulfill: (tx: any) => {
                         if (tx.code != null && tx.code !== 0) {
@@ -1401,7 +1416,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                                 chainStore.getChain(outChainId).currencies,
                             },
                             routeDurationSeconds ?? 0,
-                            txHash
+                            txHash,
+                            true
                           );
                           new InExtensionMessageRequester().sendMessage(
                             BACKGROUND_PORT,
@@ -1546,7 +1562,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                                               .currencies,
                                         },
                                         routeDurationSeconds ?? 0,
-                                        txHash
+                                        txHash,
+                                        true
                                       );
                                       new InExtensionMessageRequester().sendMessage(
                                         BACKGROUND_PORT,
@@ -2092,7 +2109,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
           <AmountInput amountConfig={amountConfig} />
 
-          {!isEvmTx && (
+          {!isEvmTx && sendType !== "bridge" && (
             <MemoInput
               memoConfig={sendConfigs.memoConfig}
               placeholder={
@@ -2108,7 +2125,55 @@ export const SendAmountPage: FunctionComponent = observer(() => {
               }
             />
           )}
+          <Gutter size="0.75rem" />
+          <WarningGuideBox
+            title={
+              isExpectedAmountTooSmall &&
+              !calculatingTxError &&
+              !ibcSwapConfigsForBridge.amountConfig.uiProperties.error &&
+              !ibcSwapConfigsForBridge.amountConfig.uiProperties.warning
+                ? (() => {
+                    return intl.formatMessage(
+                      {
+                        id: "page.send.amount.warning.expected-amount-too-small-title",
+                      },
+                      {
+                        inAmount:
+                          ibcSwapConfigsForBridge.amountConfig.amount[0].toString(),
+                        srcChain:
+                          ibcSwapConfigsForBridge.amountConfig.chainInfo
+                            .chainName,
+                        outAmount:
+                          ibcSwapConfigsForBridge.amountConfig.outAmount.toString(),
+                        dstChain: chainStore.getChain(
+                          ibcSwapConfigsForBridge.amountConfig.outChainId
+                        ).chainName,
+                      }
+                    );
+                  })()
+                : undefined
+            }
+            amountConfigError={
+              sendType === "bridge"
+                ? ibcSwapConfigsForBridge.amountConfig.uiProperties.error ||
+                  ibcSwapConfigsForBridge.amountConfig.uiProperties.warning
+                : undefined
+            }
+            forceError={sendType === "bridge" ? calculatingTxError : undefined}
+            forceWarning={(() => {
+              if (sendType !== "bridge") {
+                return undefined;
+              }
 
+              if (isExpectedAmountTooSmall) {
+                return new Error(
+                  intl.formatMessage({
+                    id: "page.send.amount.warning.expected-amount-too-small",
+                  })
+                );
+              }
+            })()}
+          />
           <VerticalCollapseTransition collapsed={sendType !== "ibc-transfer"}>
             <GuideBox
               color="warning"
@@ -2140,6 +2205,12 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             gasSimulator={gasSimulatorForNotBridgeSend}
             isForEVMTx={isEvmTx}
           />
+
+          {sendType === "bridge" && (
+            <SwapFeeInfoForBridgeOnSend
+              amountConfig={ibcSwapConfigsForBridge.amountConfig}
+            />
+          )}
         </Stack>
       </Box>
 
@@ -2200,6 +2271,56 @@ const DetachIcon: FunctionComponent<{
 const noopToPreventLintWarning = (..._args: any[]) => {
   // noop
 };
+
+function useCheckExpectedOutIsTooSmall(
+  ibcSwapConfigsForBridge: {
+    recipientConfig: IBCRecipientConfig;
+    amountConfig: IBCSwapAmountConfig;
+    memoConfig: MemoConfig;
+    gasConfig: GasConfig;
+    feeConfig: FeeConfig;
+    senderConfig: SenderConfig;
+  },
+  setIsExpectedAmountTooSmall: React.Dispatch<React.SetStateAction<boolean>>
+) {
+  useEffectOnce(() => {
+    const disposal = autorun(() => {
+      if (
+        ibcSwapConfigsForBridge.amountConfig.amount.length > 0 &&
+        !ibcSwapConfigsForBridge.amountConfig.isFetching
+      ) {
+        const inputDec = ibcSwapConfigsForBridge.amountConfig.amount[0].toDec();
+        const outputDec =
+          ibcSwapConfigsForBridge.amountConfig.outAmount.toDec();
+
+        const diff = (() => {
+          if (inputDec.isZero()) {
+            throw new Error("Input amount cannot be zero");
+          }
+
+          const feeAmount = inputDec.sub(outputDec);
+          const ratio = feeAmount
+            .quo(inputDec)
+            .mul(DecUtils.getTenExponentN(2));
+          return ratio;
+        })();
+
+        if (diff.gt(new Dec(2.5))) {
+          setIsExpectedAmountTooSmall(true);
+          return;
+        }
+      }
+
+      setIsExpectedAmountTooSmall(false);
+    });
+
+    return () => {
+      if (disposal) {
+        disposal();
+      }
+    };
+  });
+}
 
 //NOTE - Hooks for maintaining the observable state of IBC swap queries
 // when uiProperties of amountConfig of swapConfig is called only inside amount input and an error occurs on amountInput
@@ -2341,41 +2462,6 @@ function useGetGasSimulationForBridge(
       }
 
       const swapFeeBpsReceiver: string[] = [];
-      const queryRoute = ibcSwapConfigsForBridge.amountConfig
-        .getQueryIBCSwap()
-        ?.getQueryRoute();
-
-      if (queryRoute && queryRoute.response) {
-        const operations = queryRoute.response.data.operations;
-        const isContainsSwap = operations.some(
-          (operation) => "swap" in operation || "evm_swap" in operation
-        );
-        const isUseSwap = queryRoute.response.data.does_swap || isContainsSwap;
-
-        if (true) {
-          // 만약 bridge에서 swap을 하는게 동작되면 에러를 보내게 해서 실행되지 못하게 한다.
-          // 그런데 생각헤보니 이거 미리 해야 되지 않나.
-          // ibcSwapConfigsForBridge.amountConfig.
-          console.log("isUseSwap!!", isUseSwap);
-        }
-
-        if (queryRoute.response.data.operations.length > 0) {
-          for (const operation of queryRoute.response.data.operations) {
-            if ("swap" in operation) {
-              const swapIn =
-                operation.swap.swap_in ?? operation.swap.smart_swap_in;
-              if (swapIn) {
-                // const swapFeeBpsReceiverAddress = SwapFeeBps.receivers.find(
-                //   (r) => r.chainId === swapIn.swap_venue.chain_id
-                // );
-                // if (swapFeeBpsReceiverAddress) {
-                //   swapFeeBpsReceiver.push(swapFeeBpsReceiverAddress.address);
-                // }
-              }
-            }
-          }
-        }
-      }
 
       const tx = ibcSwapConfigsForBridge.amountConfig.getTxIfReady(
         // simulation 자체는 쉽게 통과시키기 위해서 슬리피지를 50으로 설정한다.
@@ -2428,3 +2514,80 @@ function useGetGasSimulationForBridge(
 
   return gasSimulator;
 }
+
+const WarningGuideBox: FunctionComponent<{
+  amountConfigError?: Error;
+  forceError?: Error;
+  forceWarning?: Error;
+  title?: string;
+}> = observer(({ amountConfigError, forceError, forceWarning, title }) => {
+  const error: string | undefined = (() => {
+    //NOTE - ibc swap의 amountConfig에러는 amount input에서 처리하기 때문에 여기서는 처리하지 않는다.
+    if (amountConfigError) {
+      return undefined;
+    }
+
+    if (forceError) {
+      return forceError.message || forceError.toString();
+    }
+
+    if (forceWarning) {
+      return forceWarning.message || forceWarning.toString();
+    }
+  })();
+
+  // Collapse됐을때는 이미 error가 없어졌기 때문이다.
+  // 그러면 트랜지션 중에 이미 내용은 사라져있기 때문에
+  // 이 문제를 해결하기 위해서 마지막 오류를 기억해야 한다.
+  const [lastError, setLastError] = useState("");
+  useLayoutEffect(() => {
+    if (error != null) {
+      setLastError(error);
+    }
+  }, [error]);
+
+  const collapsed = error == null;
+
+  const globalSimpleBar = useGlobarSimpleBar();
+  useEffect(() => {
+    if (!collapsed) {
+      const timeoutId = setTimeout(() => {
+        const el = globalSimpleBar.ref.current?.getScrollElement();
+        if (el) {
+          // 오류 메세지가 가장 밑에 있는 관계로 유저가 잘 못볼수도 있기 때문에
+          // 트랜지션 종료 이후에 스크롤을 맨 밑으로 내린다.
+          // 어차피 높이는 대충 정해져있기 때문에 대충 큰 값을 넣으면 가장 밑으로 스크롤 된다.
+          el.scrollTo({
+            top: 1000,
+            behavior: "smooth",
+          });
+        }
+      }, 300);
+      return () => {
+        clearTimeout(timeoutId);
+      };
+    }
+  }, [collapsed, globalSimpleBar.ref]);
+
+  const errorText = (() => {
+    const err = error || lastError;
+    return err;
+  })();
+
+  return (
+    <React.Fragment>
+      {/* 별 차이는 없기는한데 gutter와 실제 컴포넌트의 트랜지션을 분리하는게 아주 약간 더 자연스러움 */}
+      <VerticalCollapseTransition collapsed={collapsed}>
+        <Gutter size="0.75rem" />
+      </VerticalCollapseTransition>
+      <VerticalCollapseTransition collapsed={collapsed}>
+        <GuideBox
+          color="warning"
+          title={title || errorText}
+          paragraph={title ? errorText : undefined}
+          hideInformationIcon={true}
+        />
+      </VerticalCollapseTransition>
+    </React.Fragment>
+  );
+});
