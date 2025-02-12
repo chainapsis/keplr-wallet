@@ -95,6 +95,7 @@ export const EnableChainsScene: FunctionComponent<{
     const theme = useTheme();
 
     const searchRef = useRef<HTMLInputElement | null>(null);
+    useScrollDownWhenCantSeeSaveButton();
 
     const header = useRegisterHeader();
     useSceneEvents({
@@ -1557,3 +1558,45 @@ const NextStepChainItem: FunctionComponent<{
     </Box>
   );
 };
+
+function useScrollDownWhenCantSeeSaveButton() {
+  useEffectOnce(() => {
+    setTimeout(() => {
+      const remInPixels = parseFloat(
+        getComputedStyle(document.documentElement).fontSize
+      );
+      const headerHeight = 145;
+      const paddingTop = 3 * remInPixels;
+      const searchInputHeight = 3.25 * remInPixels;
+      const selectedChainTextHeightWithGutter = 2.5 * remInPixels;
+      const simpleBarContentHeight = 22.5 * remInPixels;
+      const selectAllButtonHeightWithGutter = 3.5 * remInPixels;
+      const otherForStarknetUsersGuideBoxHeight = 7 * remInPixels;
+      const lastGutterHeight = 1.25 * remInPixels;
+      const verticalCollapseTransitionHeight = 1.25 * remInPixels;
+      const saveButtonHalfHeight = (3.25 * remInPixels) / 2;
+
+      const totalContentHeightWithSaveButton =
+        headerHeight +
+        paddingTop +
+        searchInputHeight +
+        selectedChainTextHeightWithGutter +
+        simpleBarContentHeight +
+        selectAllButtonHeightWithGutter +
+        otherForStarknetUsersGuideBoxHeight +
+        lastGutterHeight +
+        verticalCollapseTransitionHeight +
+        saveButtonHalfHeight;
+
+      if (window.innerHeight < totalContentHeightWithSaveButton) {
+        window.scrollTo({
+          // NOTE - if innerHeight is smaller than totalContentHeightWithSaveButton,
+          // scroll to the bottom of the page so add extra 500px just in case.
+          top: totalContentHeightWithSaveButton + 500,
+          behavior: "smooth",
+        });
+      }
+      // NOTE - the time is set arbitrarily
+    }, 500);
+  });
+}
