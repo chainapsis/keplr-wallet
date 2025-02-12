@@ -22,6 +22,7 @@ import {
   BroadcastMode,
   Coin,
   FeeCurrency,
+  ModularChainInfo,
   StdSignDoc,
 } from "@keplr-wallet/types";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
@@ -47,7 +48,9 @@ import { DefaultGasPriceStep } from "@keplr-wallet/hooks";
 import { IChainInfoImpl, MakeTxResponse } from "@keplr-wallet/stores";
 import { Call, CallData, num } from "starknet";
 
-interface ClaimToken extends ViewToken {
+interface ViewClaimToken extends Omit<ViewToken, "chainInfo"> {
+  modularChainInfo: ModularChainInfo;
+  price?: PricePretty;
   onClaimAll: (
     chainId: string,
     rewardToken: CoinPretty
@@ -141,10 +144,6 @@ const useClaimAllEachState = () => {
     const chainIdentifier = chainStore.hasChain(chainId)
       ? chainStore.getChain(chainId).chainIdentifier
       : chainId;
-
-    if (chainId.startsWith("stark")) {
-      console.log("chainIdentifier", chainIdentifier);
-    }
 
     let state = statesRef.current.get(chainIdentifier);
     if (!state) {
@@ -1012,12 +1011,10 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
           return;
         }
       })();
-
-      state.setIsLoading(false);
     };
 
-    const claimTokens: ClaimToken[] = (() => {
-      const res: ClaimToken[] = [];
+    const viewClaimTokens: ViewClaimToken[] = (() => {
+      const res: ViewClaimToken[] = [];
       for (const modularChainInfo of chainStore.modularChainInfos) {
         const chainId = modularChainInfo.chainId;
 
@@ -1049,7 +1046,8 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
               if (reward) {
                 res.push({
                   token: reward,
-                  chainInfo: modularChainInfo,
+                  price: priceStore.calculatePrice(reward),
+                  modularChainInfo: modularChainInfo,
                   isFetching: queryRewards.isFetching,
                   error: queryRewards.error,
                   onClaimAll: handleCosmosInnerClaim,
@@ -1081,7 +1079,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
           if (totalClaimableRewardAmount?.toDec().gt(zeroDec)) {
             res.push({
               token: totalClaimableRewardAmount,
-              chainInfo: starknetChainInfo,
+              modularChainInfo: starknetChainInfo,
               isFetching: queryStakingInfo?.isFetching ?? false,
               error: queryValidators?.error, // ignore queryStakingInfo error
               onClaimAll: handleStarknetInnerClaim,
@@ -1103,9 +1101,11 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
         })
         .sort((a, b) => {
           const aHasError =
-            getClaimAllEachState(a.chainInfo.chainId).failedReason != null;
+            getClaimAllEachState(a.modularChainInfo.chainId).failedReason !=
+            null;
           const bHasError =
-            getClaimAllEachState(b.chainInfo.chainId).failedReason != null;
+            getClaimAllEachState(b.modularChainInfo.chainId).failedReason !=
+            null;
 
           if (aHasError || bHasError) {
             if (aHasError && bHasError) {
@@ -1131,8 +1131,8 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
 
       let res = new PricePretty(fiatCurrency, 0);
 
-      for (const claimToken of claimTokens) {
-        const price = priceStore.calculatePrice(claimToken.token);
+      for (const viewClaimToken of viewClaimTokens) {
+        const price = priceStore.calculatePrice(viewClaimToken.token);
         if (price) {
           res = res.add(price);
         }
@@ -1152,7 +1152,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
     const claimAll = () => {
       analyticsStore.logEvent("click_claimAll");
 
-      if (claimTokens.length > 0) {
+      if (viewClaimTokens.length > 0) {
         setIsExpanded(true);
       }
 
@@ -1162,18 +1162,21 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
         return;
       }
 
-      for (const claimToken of claimTokens) {
-        claimToken.onClaimAll(claimToken.chainInfo.chainId, claimToken.token);
+      for (const viewClaimToken of viewClaimTokens) {
+        viewClaimToken.onClaimAll(
+          viewClaimToken.modularChainInfo.chainId,
+          viewClaimToken.token
+        );
       }
     };
 
     const claimAllDisabled = (() => {
-      if (claimTokens.length === 0) {
+      if (viewClaimTokens.length === 0) {
         return true;
       }
 
-      for (const claimToken of claimTokens) {
-        if (claimToken.token.toDec().gt(new Dec(0))) {
+      for (const viewClaimToken of viewClaimTokens) {
+        if (viewClaimToken.token.toDec().gt(new Dec(0))) {
           return false;
         }
       }
@@ -1276,10 +1279,10 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
         <Styles.ExpandButton
           paddingX="0.125rem"
           alignX="center"
-          viewTokenCount={claimTokens.length}
+          viewTokenCount={viewClaimTokens.length}
           onClick={() => {
             analyticsStore.logEvent("click_claimExpandButton");
-            if (claimTokens.length > 0) {
+            if (viewClaimTokens.length > 0) {
               setIsExpanded(!isExpanded);
             }
           }}
@@ -1318,25 +1321,16 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
             }
           }}
         >
-          {claimTokens.map((claimToken) => {
-            const state = getClaimAllEachState(claimToken.chainInfo.chainId);
-
-            if (claimToken.chainInfo.chainId.startsWith("stark")) {
-              console.log(
-                claimToken.chainInfo.chainId,
-                state.isLoading,
-                state.failedReason
-              );
-            }
-            return (
-              <ClaimTokenItem
-                key={`${claimToken.chainInfo.chainId}-${claimToken.token.currency.coinMinimalDenom}`}
-                viewToken={claimToken}
-                state={getClaimAllEachState(claimToken.chainInfo.chainId)}
-                itemsLength={claimTokens.length}
-              />
-            );
-          })}
+          {viewClaimTokens.map((viewClaimToken) => (
+            <ViewClaimTokenItem
+              key={`${viewClaimToken.modularChainInfo.chainId}-${viewClaimToken.token.currency.coinMinimalDenom}`}
+              viewClaimToken={viewClaimToken}
+              state={getClaimAllEachState(
+                viewClaimToken.modularChainInfo.chainId
+              )}
+              itemsLength={viewClaimTokens.length}
+            />
+          ))}
         </VerticalCollapseTransition>
       </Styles.Container>
     );
@@ -1344,17 +1338,42 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
 );
 
 // TODO: 상위 컴포넌트에서 claim 함수를 전달해주는 방식으로 변경
-const ClaimTokenItem: FunctionComponent<{
-  viewToken: ViewToken;
+const ViewClaimTokenItem: FunctionComponent<{
+  viewClaimToken: ViewClaimToken;
   state: ClaimAllEachState;
-
   itemsLength: number;
-}> = observer(({ viewToken, state, itemsLength }) => {
-  const { analyticsStore, accountStore, queriesStore, uiConfigStore } =
-    useStore();
+}> = observer(({ viewClaimToken, state, itemsLength }) => {
+  if ("starknet" in viewClaimToken.modularChainInfo) {
+    return (
+      <ViewStarknetClaimTokenItem
+        viewClaimToken={viewClaimToken}
+        state={state}
+        itemsLength={itemsLength}
+      />
+    );
+  }
+
+  if ("cosmos" in viewClaimToken.modularChainInfo) {
+    return (
+      <ViewCosmosClaimTokenItem
+        viewClaimToken={viewClaimToken}
+        state={state}
+        itemsLength={itemsLength}
+      />
+    );
+  }
+
+  return null;
+});
+
+const ViewCosmosClaimTokenItem: FunctionComponent<{
+  viewClaimToken: ViewClaimToken;
+  state: ClaimAllEachState;
+  itemsLength: number;
+}> = observer(({ viewClaimToken, state, itemsLength }) => {
+  const { analyticsStore, accountStore, queriesStore } = useStore();
 
   const intl = useIntl();
-  const theme = useTheme();
   const navigate = useNavigate();
   const notification = useNotification();
 
@@ -1365,15 +1384,15 @@ const ClaimTokenItem: FunctionComponent<{
 
   const claim = async () => {
     analyticsStore.logEvent("click_claim", {
-      chainId: viewToken.chainInfo.chainId,
-      chainName: viewToken.chainInfo.chainName,
+      chainId: viewClaimToken.modularChainInfo.chainId,
+      chainName: viewClaimToken.modularChainInfo.chainName,
     });
 
     if (state.failedReason) {
       state.setFailedReason(undefined);
       return;
     }
-    const chainId = viewToken.chainInfo.chainId;
+    const chainId = viewClaimToken.modularChainInfo.chainId;
     const account = accountStore.getAccount(chainId);
 
     const queries = queriesStore.get(chainId);
@@ -1421,8 +1440,8 @@ const ClaimTokenItem: FunctionComponent<{
         {
           onBroadcasted: () => {
             analyticsStore.logEvent("complete_claim", {
-              chainId: viewToken.chainInfo.chainId,
-              chainName: viewToken.chainInfo.chainName,
+              chainId: viewClaimToken.modularChainInfo.chainId,
+              chainName: viewClaimToken.modularChainInfo.chainName,
             });
           },
           onFulfill: (tx: any) => {
@@ -1469,18 +1488,71 @@ const ClaimTokenItem: FunctionComponent<{
   };
 
   const isLoading =
-    accountStore.getAccount(viewToken.chainInfo.chainId).isSendingMsg ===
-      "withdrawRewards" ||
+    accountStore.getAccount(viewClaimToken.modularChainInfo.chainId)
+      .isSendingMsg === "withdrawRewards" ||
     state.isLoading ||
     isSimulating;
 
   return (
+    <ViewClaimTokenItemContent
+      viewClaimToken={viewClaimToken}
+      state={state}
+      itemsLength={itemsLength}
+      isLoading={isLoading}
+      onClick={claim}
+    />
+  );
+});
+
+const ViewStarknetClaimTokenItem: FunctionComponent<{
+  viewClaimToken: ViewClaimToken;
+  state: ClaimAllEachState;
+  itemsLength: number;
+}> = observer(({ viewClaimToken, state, itemsLength }) => {
+  const { starknetAccountStore } = useStore();
+
+  const [isSimulating, setIsSimulating] = useState(false);
+
+  const claim = async () => {
+    // TODO: Implement
+  };
+
+  const isLoading =
+    state.isLoading ||
+    starknetAccountStore.getAccount(viewClaimToken.modularChainInfo.chainId)
+      .isSendingTx ||
+    isSimulating;
+
+  return (
+    <ViewClaimTokenItemContent
+      viewClaimToken={viewClaimToken}
+      state={state}
+      itemsLength={itemsLength}
+      isLoading={isLoading}
+      onClick={claim}
+    />
+  );
+});
+
+const ViewClaimTokenItemContent: FunctionComponent<{
+  viewClaimToken: ViewClaimToken;
+  state: ClaimAllEachState;
+  itemsLength: number;
+  isLoading: boolean;
+  onClick: () => void | Promise<void>;
+}> = observer(({ viewClaimToken, state, itemsLength, isLoading, onClick }) => {
+  const theme = useTheme();
+  const intl = useIntl();
+
+  const { uiConfigStore } = useStore();
+
+  return (
     <Box padding="1rem">
       <Columns sum={1} alignY="center">
-        {viewToken.token.currency.coinImageUrl && (
+        {viewClaimToken.token.currency.coinImageUrl && (
           <CurrencyImageFallback
-            chainInfo={viewToken.chainInfo}
-            currency={viewToken.token.currency}
+            chainInfo={viewClaimToken.modularChainInfo}
+            currency={viewClaimToken.token.currency}
             size="2rem"
           />
         )}
@@ -1498,15 +1570,15 @@ const ClaimTokenItem: FunctionComponent<{
               }}
             >
               {(() => {
-                if ("paths" in viewToken.token.currency) {
+                if ("paths" in viewClaimToken.token.currency) {
                   const originDenom =
-                    viewToken.token.currency.originCurrency?.coinDenom;
+                    viewClaimToken.token.currency.originCurrency?.coinDenom;
                   if (originDenom) {
-                    return `${originDenom} (${viewToken.chainInfo.chainName})`;
+                    return `${originDenom} (${viewClaimToken.modularChainInfo.chainName})`;
                   }
                 }
 
-                return viewToken.token.currency.coinDenom;
+                return viewClaimToken.token.currency.coinDenom;
               })()}
             </Subtitle3>
             <Subtitle2
@@ -1518,7 +1590,7 @@ const ClaimTokenItem: FunctionComponent<{
               }}
             >
               {uiConfigStore.hideStringIfPrivacyMode(
-                viewToken.token
+                viewClaimToken.token
                   .maxDecimals(6)
                   .shrink(true)
                   .inequalitySymbol(true)
@@ -1548,7 +1620,7 @@ const ClaimTokenItem: FunctionComponent<{
             size="small"
             color="secondary"
             isLoading={isLoading}
-            disabled={viewToken.token.toDec().lte(new Dec(0))}
+            disabled={viewClaimToken.token.toDec().lte(new Dec(0))}
             textOverrideIcon={
               state.failedReason ? (
                 <WarningIcon
@@ -1558,7 +1630,7 @@ const ClaimTokenItem: FunctionComponent<{
                 />
               ) : undefined
             }
-            onClick={claim}
+            onClick={onClick}
           />
         </Tooltip>
       </Columns>
