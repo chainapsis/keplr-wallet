@@ -1,6 +1,7 @@
 import {
   ChainGetter,
   QueryError,
+  QueryResponse,
   QuerySharedContext,
 } from "@keplr-wallet/stores";
 import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
@@ -199,6 +200,9 @@ export class ObservableQueryStakingInfo extends ObservableStarknetChainJsonRpcQu
 > {
   protected starknetHexAddress: string;
 
+  // TODO: change to observableQueryDelegations
+  // the api is not fully implemented yet, so just use queryValidators for now
+  // although it's not efficient (there are 106 validators and it queries all of them)
   @observable.shallow
   protected queryValidators: ObservableQueryValidators;
 
@@ -222,6 +226,28 @@ export class ObservableQueryStakingInfo extends ObservableStarknetChainJsonRpcQu
 
     this.starknetHexAddress = starknetHexAddress;
     this.queryValidators = queryValidators;
+  }
+
+  // only use for refreshing staking info
+  async waitFreshResponse(): Promise<
+    Readonly<QueryResponse<void>> | undefined
+  > {
+    const response = await this.queryValidators.waitFreshResponse();
+    if (response) {
+      await Promise.all(
+        this.queryValidators.validators.map((validator) => {
+          const queryPoolMemberInfo = this.getQueryPoolAddress(
+            validator.pool_contract_address
+          );
+          if (queryPoolMemberInfo) {
+            return queryPoolMemberInfo.waitFreshResponse();
+          }
+          return Promise.resolve(undefined);
+        })
+      );
+    }
+
+    return undefined;
   }
 
   get isFetching(): boolean {

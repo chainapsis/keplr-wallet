@@ -916,6 +916,12 @@ const RefreshButton: FunctionComponent<{
                 query.fetch();
               }
             }
+
+            // refresh starknet staking info
+            const stakingInfo = queries.stakingInfoManager.getStakingInfo(
+              account.starknetHexAddress
+            );
+            promises.push(stakingInfo.waitFreshResponse());
           }
         }
       }
