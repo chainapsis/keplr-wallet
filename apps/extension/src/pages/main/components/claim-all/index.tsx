@@ -1,16 +1,23 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { Column, Columns } from "../../../../components/column";
 import { Button } from "../../../../components/button";
 import { Stack } from "../../../../components/stack";
 import { Box } from "../../../../components/box";
 import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse";
-import { Body2, Subtitle2, Subtitle3 } from "../../../../components/typography";
+import {
+  Body2,
+  Body3,
+  Subtitle2,
+  Subtitle3,
+} from "../../../../components/typography";
 import { ColorPalette } from "../../../../styles";
 import { ViewToken } from "../../index";
 import styled, { css, useTheme } from "styled-components";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
+  CoinsPlusOutlineIcon,
+  LoadingIcon,
   WarningIcon,
 } from "../../../../components/icon";
 import { observer } from "mobx-react-lite";
@@ -19,7 +26,7 @@ import { CoinPretty, Dec, PricePretty } from "@keplr-wallet/unit";
 import { ModularChainInfo } from "@keplr-wallet/types";
 import { Tooltip } from "../../../../components/tooltip";
 import { Skeleton } from "../../../../components/skeleton";
-import { YAxis } from "../../../../components/axis";
+import { XAxis, YAxis } from "../../../../components/axis";
 import Color from "color";
 import { SpecialButton } from "../../../../components/special-button";
 import { Gutter } from "../../../../components/gutter";
@@ -31,6 +38,7 @@ import {
   useClaimAllEachState,
   useStarknetClaimRewards,
 } from "../../../../hooks/claim";
+import { IconButton } from "../../../../components/icon-button";
 
 interface ViewClaimToken extends Omit<ViewToken, "chainInfo"> {
   modularChainInfo: ModularChainInfo;
@@ -96,6 +104,24 @@ const Styles = {
         }
       `;
     }};
+  `,
+  ItemContentBox: styled(Box)`
+    padding: 0.875rem 1rem;
+    border-radius: 0.375rem;
+
+    &:hover {
+      background-color: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-10"]
+          : ColorPalette["gray-600"]};
+    }
+
+    &:active {
+      background-color: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-50"]
+          : ColorPalette["gray-550"]};
+    }
   `,
 };
 
@@ -186,6 +212,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
           if (totalClaimableRewardAmount?.toDec().gt(zeroDec)) {
             res.push({
               token: totalClaimableRewardAmount,
+              price: priceStore.calculatePrice(totalClaimableRewardAmount),
               modularChainInfo: starknetChainInfo,
               isFetching: queryStakingInfo?.isFetching ?? false,
               error: queryStakingInfo?.error, // ignore queryStakingInfo error
@@ -544,12 +571,33 @@ const ViewClaimTokenItemContent: FunctionComponent<{
   onClick: () => void | Promise<void>;
 }> = observer(({ viewClaimToken, state, itemsLength, isLoading, onClick }) => {
   const theme = useTheme();
-  const intl = useIntl();
-
   const { uiConfigStore } = useStore();
 
+  const [isHover, setIsHover] = useState(false);
+
+  const coinDenom = useMemo(() => {
+    if ("paths" in viewClaimToken.token.currency) {
+      const originDenom =
+        viewClaimToken.token.currency.originCurrency?.coinDenom;
+      if (originDenom) {
+        return `${originDenom} (${viewClaimToken.modularChainInfo.chainName})`;
+      }
+    }
+
+    return viewClaimToken.token.currency.coinDenom;
+  }, [
+    viewClaimToken.modularChainInfo.chainName,
+    viewClaimToken.token.currency,
+  ]);
+
+  const showClaimButton = isHover || isLoading || state.failedReason;
+
   return (
-    <Box padding="1rem">
+    <Styles.ItemContentBox
+      onHoverStateChange={(isHover) => {
+        setIsHover(isHover);
+      }}
+    >
       <Columns sum={1} alignY="center">
         {viewClaimToken.token.currency.coinImageUrl && (
           <CurrencyImageFallback
@@ -562,33 +610,39 @@ const ViewClaimTokenItemContent: FunctionComponent<{
         <Gutter size="0.75rem" />
 
         <Column weight={1}>
-          <Stack gutter="0.375rem">
+          <Stack gutter="0.25rem">
+            <Subtitle2
+              style={{
+                color:
+                  theme.mode === "light"
+                    ? ColorPalette["gray-700"]
+                    : ColorPalette["white"],
+              }}
+            >
+              {coinDenom}
+            </Subtitle2>
+            <Body3
+              style={{
+                color: ColorPalette["gray-300"],
+                lineClamp: 1,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {viewClaimToken.modularChainInfo.chainName}
+            </Body3>
+          </Stack>
+        </Column>
+
+        <XAxis alignY="center">
+          <Stack gutter="0.25rem" alignX="right">
             <Subtitle3
               style={{
                 color:
                   theme.mode === "light"
                     ? ColorPalette["gray-700"]
-                    : ColorPalette["gray-300"],
-              }}
-            >
-              {(() => {
-                if ("paths" in viewClaimToken.token.currency) {
-                  const originDenom =
-                    viewClaimToken.token.currency.originCurrency?.coinDenom;
-                  if (originDenom) {
-                    return `${originDenom} (${viewClaimToken.modularChainInfo.chainName})`;
-                  }
-                }
-
-                return viewClaimToken.token.currency.coinDenom;
-              })()}
-            </Subtitle3>
-            <Subtitle2
-              style={{
-                color:
-                  theme.mode === "light"
-                    ? ColorPalette["gray-300"]
-                    : ColorPalette["gray-10"],
+                    : ColorPalette["white"],
               }}
             >
               {uiConfigStore.hideStringIfPrivacyMode(
@@ -600,42 +654,72 @@ const ViewClaimTokenItemContent: FunctionComponent<{
                   .toString(),
                 2
               )}
-            </Subtitle2>
+            </Subtitle3>
+            <Subtitle3
+              style={{
+                color: ColorPalette["gray-300"],
+              }}
+            >
+              {uiConfigStore.hideStringIfPrivacyMode(
+                viewClaimToken.price?.toString() ?? "-",
+                2
+              )}
+            </Subtitle3>
           </Stack>
-        </Column>
-
-        <Tooltip
-          enabled={!!state.failedReason}
-          content={
-            state.failedReason?.message || state.failedReason?.toString()
-          }
-          // 아이템이 한개만 있으면 tooltip이 VerticalCollapseTransition가 overflow: hidden이라
-          // 위/아래로 나타나면 가려져서 유저가 오류 메세지를 볼 방법이 없다.
-          // VerticalCollapseTransition가 overflow: hidden이여야 하는건 필수적이므로 이 부분을 수정할 순 없기 때문에
-          // 대충 아이템이 한개면 tooltip이 왼족에 나타나도록 한다.
-          allowedPlacements={itemsLength === 1 ? ["left"] : undefined}
-        >
-          <Button
-            text={intl.formatMessage({
-              id: "page.main.components.claim-all.claim-button",
-            })}
-            size="small"
-            color="secondary"
-            isLoading={isLoading}
-            disabled={viewClaimToken.token.toDec().lte(new Dec(0))}
-            textOverrideIcon={
-              state.failedReason ? (
-                <WarningIcon
-                  width="1rem"
-                  height="1rem"
-                  color={ColorPalette["gray-200"]}
-                />
-              ) : undefined
-            }
-            onClick={onClick}
-          />
-        </Tooltip>
+          {/* TODO: 애미네이션 적용 */}
+          {showClaimButton && (
+            <React.Fragment>
+              <Gutter size="0.375rem" />
+              <Tooltip
+                enabled={!!state.failedReason}
+                content={
+                  state.failedReason?.message || state.failedReason?.toString()
+                }
+                // 아이템이 한개만 있으면 tooltip이 VerticalCollapseTransition가 overflow: hidden이라
+                // 위/아래로 나타나면 가려져서 유저가 오류 메세지를 볼 방법이 없다.
+                // VerticalCollapseTransition가 overflow: hidden이여야 하는건 필수적이므로 이 부분을 수정할 순 없기 때문에
+                // 대충 아이템이 한개면 tooltip이 왼족에 나타나도록 한다.
+                allowedPlacements={itemsLength === 1 ? ["left"] : undefined}
+              >
+                <IconButton
+                  onClick={onClick}
+                  disabled={viewClaimToken.token.toDec().lte(new Dec(0))}
+                >
+                  {isLoading ? (
+                    <LoadingIcon
+                      width="1rem"
+                      height="1rem"
+                      color={
+                        ColorPalette[
+                          theme.mode === "light" ? "gray-200" : "gray-300"
+                        ]
+                      }
+                    />
+                  ) : state.failedReason ? (
+                    <WarningIcon
+                      width="1rem"
+                      height="1rem"
+                      color={
+                        ColorPalette[
+                          theme.mode === "light" ? "gray-200" : "gray-300"
+                        ]
+                      }
+                    />
+                  ) : (
+                    <CoinsPlusOutlineIcon
+                      color={
+                        ColorPalette[
+                          theme.mode === "light" ? "gray-200" : "gray-300"
+                        ]
+                      }
+                    />
+                  )}
+                </IconButton>
+              </Tooltip>
+            </React.Fragment>
+          )}
+        </XAxis>
       </Columns>
-    </Box>
+    </Styles.ItemContentBox>
   );
 });
