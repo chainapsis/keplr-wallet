@@ -2,7 +2,7 @@ import { Router } from "@keplr-wallet/router";
 import {
   GetPubkeyMsg,
   GetTxEncryptionKeyMsg,
-  ReqeustEncryptMsg,
+  RequestEncryptMsg,
   RequestDecryptMsg,
 } from "./messages";
 import { SecretWasmService } from "./service";
@@ -16,7 +16,7 @@ export function init(
   permissionInteractionService: PermissionInteractiveService
 ): void {
   router.registerMessage(GetPubkeyMsg);
-  router.registerMessage(ReqeustEncryptMsg);
+  router.registerMessage(RequestEncryptMsg);
   router.registerMessage(RequestDecryptMsg);
   router.registerMessage(GetTxEncryptionKeyMsg);
 
