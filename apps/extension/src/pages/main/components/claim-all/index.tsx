@@ -15,7 +15,6 @@ import { ViewToken } from "../../index";
 import styled, { css, useTheme } from "styled-components";
 import {
   ArrowDownIcon,
-  ArrowUpIcon,
   CoinsPlusOutlineIcon,
   LoadingIcon,
   WarningIcon,
@@ -39,8 +38,7 @@ import {
   useStarknetClaimRewards,
 } from "../../../../hooks/claim";
 import { IconButton } from "../../../../components/icon-button";
-import { useSpring } from "@react-spring/web";
-import { animated } from "@react-spring/web";
+import { useSpring, animated } from "@react-spring/web";
 
 interface ViewClaimToken extends Omit<ViewToken, "chainInfo"> {
   modularChainInfo: ModularChainInfo;
@@ -220,7 +218,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
               price: priceStore.calculatePrice(totalClaimableRewardAmount),
               modularChainInfo: starknetChainInfo,
               isFetching: queryStakingInfo?.isFetching ?? false,
-              error: queryStakingInfo?.error, // ignore queryStakingInfo error
+              error: queryStakingInfo?.error,
               onClaimAll: handleStarknetClaimAllEach,
               onClaimSingle: handleStarknetClaimSingle,
             });
@@ -353,6 +351,11 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isExpanded]);
 
+    const arrowAnimation = useSpring({
+      transform: isExpanded ? "rotate(-180deg)" : "rotate(0deg)",
+      config: { tension: 300, friction: 25, clamp: true },
+    });
+
     return (
       <Styles.Container isNotReady={isNotReady}>
         <Box paddingX="1rem" paddingBottom="0.25rem">
@@ -437,19 +440,13 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
               opacity: isNotReady ? 0 : 1,
             }}
           >
-            {!isExpanded ? (
+            <animated.div style={arrowAnimation}>
               <ArrowDownIcon
                 width="1.25rem"
                 height="1.25rem"
                 color={ColorPalette["gray-300"]}
               />
-            ) : (
-              <ArrowUpIcon
-                width="1.25rem"
-                height="1.25rem"
-                color={ColorPalette["gray-300"]}
-              />
-            )}
+            </animated.div>
           </Box>
         </Styles.ExpandButton>
 
@@ -465,6 +462,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
               }
             }
           }}
+          animateOnResize={true}
         >
           {viewClaimTokens.map((viewClaimToken, index) => (
             <ViewClaimTokenItem

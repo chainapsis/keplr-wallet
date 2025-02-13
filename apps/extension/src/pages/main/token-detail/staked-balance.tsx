@@ -284,7 +284,7 @@ const StarknetStakedBalance: FunctionComponent<{
                           lineHeight: "140%",
                         }}
                       >
-                        {`${stakingApr}% APY`}
+                        {`${stakingApr}% APR`}
                       </Body3>
                     </React.Fragment>
                   )}
@@ -422,7 +422,7 @@ const StarknetStakedBalance: FunctionComponent<{
                   lineHeight: "140%",
                 }}
               >
-                {`${stakingApr}% APY`}
+                {`${stakingApr}% APR`}
               </Body3>
             </React.Fragment>
           )}
