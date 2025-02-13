@@ -66,7 +66,7 @@ import {
 import { useIBCChannelConfigQueryString } from "../../../hooks/use-ibc-channel-config-query-string";
 import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
 import { GuideBox } from "../../../components/guide-box";
-import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import {
   amountToAmbiguousAverage,
   amountToAmbiguousString,
@@ -532,11 +532,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     chainId,
     ibcSwapConfigsForBridge,
     ethereumAccountStore,
-    currency,
-    {
-      chainId: ibcSwapConfigsForBridge.recipientConfig.chainId,
-      recipient: ibcSwapConfigsForBridge.recipientConfig.value,
-    }
+    currency
   );
   const txConfigsValidateForBridge = useTxConfigsValidate({
     ...ibcSwapConfigsForBridge,
@@ -1007,10 +1003,18 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                     // 코스모스 스왑은 스왑베뉴가 무조건 하나라고 해서 일단 처음걸 쓰기로 한다.
                     swapFeeBpsReceiver[0],
                     priorOutAmount,
-                    {
-                      chainId: ibcSwapConfigsForBridge.recipientConfig.chainId,
-                      recipient: ibcSwapConfigsForBridge.recipientConfig.value,
-                    }
+                    convertToBech32IfNeed(
+                      ibcSwapConfigsForBridge.recipientConfig.value,
+                      chainStore.getChain(
+                        ibcSwapConfigsForBridge.recipientConfig.chainId
+                      ),
+                      chainStore.isEvmChain(
+                        ibcSwapConfigsForBridge.recipientConfig.chainId
+                      ),
+                      chainStore.isEvmOnlyChain(
+                        ibcSwapConfigsForBridge.recipientConfig.chainId
+                      )
+                    )
                   ),
                 ]);
                 tx = _tx;
@@ -2353,11 +2357,7 @@ function useGetGasSimulationForBridge(
     senderConfig: SenderConfig;
   },
   ethereumAccountStore: EthereumAccountStore,
-  currency: AppCurrency,
-  recipient?: {
-    chainId: string;
-    recipient: string;
-  }
+  currency: AppCurrency
 ) {
   const gasSimulator = useGasSimulator(
     new ExtensionKVStore("gas-simulator.ibc-swap.swap"),
@@ -2468,7 +2468,16 @@ function useGetGasSimulationForBridge(
         50,
         // 코스모스 스왑은 스왑베뉴가 무조건 하나라고 해서 일단 처음걸 쓰기로 한다.
         swapFeeBpsReceiver[0],
-        recipient
+        convertToBech32IfNeed(
+          ibcSwapConfigsForBridge.recipientConfig.value,
+          chainStore.getChain(ibcSwapConfigsForBridge.recipientConfig.chainId),
+          chainStore.isEvmChain(
+            ibcSwapConfigsForBridge.recipientConfig.chainId
+          ),
+          chainStore.isEvmOnlyChain(
+            ibcSwapConfigsForBridge.recipientConfig.chainId
+          )
+        )
       );
 
       if (!tx) {
@@ -2591,3 +2600,33 @@ const WarningGuideBox: FunctionComponent<{
     </React.Fragment>
   );
 });
+
+const convertToBech32IfNeed = (
+  address: string,
+  chainInfo: IChainInfoImpl<ChainInfoWithCoreTypes>,
+  isEvmChain: boolean,
+  isEvmOnlyChain: boolean
+) => {
+  const isHexAddress = (value: string): boolean => {
+    return value.startsWith("0x");
+  };
+
+  if (!isHexAddress(address) || isEvmOnlyChain || !isEvmChain) {
+    return {
+      chainId: chainInfo.chainId,
+      recipient: address,
+    };
+  }
+
+  const hexAddress = Uint8Array.from(
+    Buffer.from(address.replace("0x", ""), "hex")
+  );
+  const bech32Address = new Bech32Address(hexAddress).toBech32(
+    chainInfo.bech32Config?.bech32PrefixAccAddr ?? ""
+  );
+
+  return {
+    chainId: chainInfo.chainId,
+    recipient: bech32Address,
+  };
+};
