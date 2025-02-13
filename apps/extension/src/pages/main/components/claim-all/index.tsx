@@ -39,6 +39,8 @@ import {
   useStarknetClaimRewards,
 } from "../../../../hooks/claim";
 import { IconButton } from "../../../../components/icon-button";
+import { useSpring } from "@react-spring/web";
+import { animated } from "@react-spring/web";
 
 interface ViewClaimToken extends Omit<ViewToken, "chainInfo"> {
   modularChainInfo: ModularChainInfo;
@@ -105,9 +107,12 @@ const Styles = {
       `;
     }};
   `,
-  ItemContentBox: styled(Box)`
+  ItemContentBox: styled(Box)<{ isLastItem?: boolean }>`
     padding: 0.875rem 1rem;
     border-radius: 0.375rem;
+
+    margin: 0 0.75rem;
+    margin-bottom: ${(props) => (props.isLastItem ? "0.75rem" : "0")};
 
     &:hover {
       background-color: ${(props) =>
@@ -461,7 +466,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
             }
           }}
         >
-          {viewClaimTokens.map((viewClaimToken) => (
+          {viewClaimTokens.map((viewClaimToken, index) => (
             <ViewClaimTokenItem
               key={`${viewClaimToken.modularChainInfo.chainId}-${viewClaimToken.token.currency.coinMinimalDenom}`}
               viewClaimToken={viewClaimToken}
@@ -469,6 +474,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
                 viewClaimToken.modularChainInfo.chainId
               )}
               itemsLength={viewClaimTokens.length}
+              isLastItem={index === viewClaimTokens.length - 1}
             />
           ))}
         </VerticalCollapseTransition>
@@ -481,13 +487,15 @@ const ViewClaimTokenItem: FunctionComponent<{
   viewClaimToken: ViewClaimToken;
   state: ClaimAllEachState;
   itemsLength: number;
-}> = observer(({ viewClaimToken, state, itemsLength }) => {
+  isLastItem: boolean;
+}> = observer(({ viewClaimToken, state, itemsLength, isLastItem }) => {
   if ("starknet" in viewClaimToken.modularChainInfo) {
     return (
       <ViewStarknetClaimTokenItem
         viewClaimToken={viewClaimToken}
         state={state}
         itemsLength={itemsLength}
+        isLastItem={isLastItem}
       />
     );
   }
@@ -498,6 +506,7 @@ const ViewClaimTokenItem: FunctionComponent<{
         viewClaimToken={viewClaimToken}
         state={state}
         itemsLength={itemsLength}
+        isLastItem={isLastItem}
       />
     );
   }
@@ -509,7 +518,8 @@ const ViewCosmosClaimTokenItem: FunctionComponent<{
   viewClaimToken: ViewClaimToken;
   state: ClaimAllEachState;
   itemsLength: number;
-}> = observer(({ viewClaimToken, state, itemsLength }) => {
+  isLastItem: boolean;
+}> = observer(({ viewClaimToken, state, itemsLength, isLastItem }) => {
   const { accountStore } = useStore();
 
   const isLoading =
@@ -524,6 +534,7 @@ const ViewCosmosClaimTokenItem: FunctionComponent<{
       state={state}
       itemsLength={itemsLength}
       isLoading={isLoading}
+      isLastItem={isLastItem}
       onClick={() => {
         viewClaimToken.onClaimSingle(
           viewClaimToken.modularChainInfo.chainId,
@@ -538,7 +549,8 @@ const ViewStarknetClaimTokenItem: FunctionComponent<{
   viewClaimToken: ViewClaimToken;
   state: ClaimAllEachState;
   itemsLength: number;
-}> = observer(({ viewClaimToken, state, itemsLength }) => {
+  isLastItem: boolean;
+}> = observer(({ viewClaimToken, state, itemsLength, isLastItem }) => {
   const { starknetAccountStore } = useStore();
 
   const isLoading =
@@ -553,6 +565,7 @@ const ViewStarknetClaimTokenItem: FunctionComponent<{
       state={state}
       itemsLength={itemsLength}
       isLoading={isLoading}
+      isLastItem={isLastItem}
       onClick={() => {
         viewClaimToken.onClaimSingle(
           viewClaimToken.modularChainInfo.chainId,
@@ -568,118 +581,127 @@ const ViewClaimTokenItemContent: FunctionComponent<{
   state: ClaimAllEachState;
   itemsLength: number;
   isLoading: boolean;
+  isLastItem: boolean;
   onClick: () => void | Promise<void>;
-}> = observer(({ viewClaimToken, state, itemsLength, isLoading, onClick }) => {
-  const theme = useTheme();
-  const { uiConfigStore } = useStore();
+}> = observer(
+  ({ viewClaimToken, state, itemsLength, isLoading, isLastItem, onClick }) => {
+    const theme = useTheme();
+    const { uiConfigStore } = useStore();
 
-  const [isHover, setIsHover] = useState(false);
+    const [isHover, setIsHover] = useState(false);
 
-  const coinDenom = useMemo(() => {
-    if ("paths" in viewClaimToken.token.currency) {
-      const originDenom =
-        viewClaimToken.token.currency.originCurrency?.coinDenom;
-      if (originDenom) {
-        return `${originDenom} (${viewClaimToken.modularChainInfo.chainName})`;
+    const coinDenom = useMemo(() => {
+      if ("paths" in viewClaimToken.token.currency) {
+        const originDenom =
+          viewClaimToken.token.currency.originCurrency?.coinDenom;
+        if (originDenom) {
+          return `${originDenom} (${viewClaimToken.modularChainInfo.chainName})`;
+        }
       }
-    }
 
-    return viewClaimToken.token.currency.coinDenom;
-  }, [
-    viewClaimToken.modularChainInfo.chainName,
-    viewClaimToken.token.currency,
-  ]);
+      return viewClaimToken.token.currency.coinDenom;
+    }, [
+      viewClaimToken.modularChainInfo.chainName,
+      viewClaimToken.token.currency,
+    ]);
 
-  const showClaimButton = isHover || isLoading || state.failedReason;
+    const showClaimButton = isHover || isLoading || !!state.failedReason;
 
-  return (
-    <Styles.ItemContentBox
-      onHoverStateChange={(isHover) => {
-        setIsHover(isHover);
-      }}
-    >
-      <Columns sum={1} alignY="center">
-        {viewClaimToken.token.currency.coinImageUrl && (
-          <CurrencyImageFallback
-            chainInfo={viewClaimToken.modularChainInfo}
-            currency={viewClaimToken.token.currency}
-            size="2rem"
-          />
-        )}
+    const slideAnimation = useSpring({
+      transform: showClaimButton ? "translateX(-6px)" : "translateX(0px)",
+      config: { tension: 500, friction: 20 },
+    });
 
-        <Gutter size="0.75rem" />
+    return (
+      <Styles.ItemContentBox
+        isLastItem={isLastItem}
+        onHoverStateChange={(isHover) => {
+          setIsHover(isHover);
+        }}
+      >
+        <Columns sum={1} alignY="center">
+          {viewClaimToken.token.currency.coinImageUrl && (
+            <CurrencyImageFallback
+              chainInfo={viewClaimToken.modularChainInfo}
+              currency={viewClaimToken.token.currency}
+              size="2rem"
+            />
+          )}
 
-        <Column weight={1}>
-          <Stack gutter="0.25rem">
-            <Subtitle2
-              style={{
-                color:
-                  theme.mode === "light"
-                    ? ColorPalette["gray-700"]
-                    : ColorPalette["white"],
-              }}
-            >
-              {coinDenom}
-            </Subtitle2>
-            <Body3
-              style={{
-                color: ColorPalette["gray-300"],
-                lineClamp: 1,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {viewClaimToken.modularChainInfo.chainName}
-            </Body3>
-          </Stack>
-        </Column>
+          <Gutter size="0.75rem" />
 
-        <XAxis alignY="center">
-          <Stack gutter="0.25rem" alignX="right">
-            <Subtitle3
-              style={{
-                color:
-                  theme.mode === "light"
-                    ? ColorPalette["gray-700"]
-                    : ColorPalette["white"],
-              }}
-            >
-              {uiConfigStore.hideStringIfPrivacyMode(
-                viewClaimToken.token
-                  .maxDecimals(6)
-                  .shrink(true)
-                  .inequalitySymbol(true)
-                  .hideDenom(true)
-                  .toString(),
-                2
-              )}
-            </Subtitle3>
-            <Subtitle3
-              style={{
-                color: ColorPalette["gray-300"],
-              }}
-            >
-              {uiConfigStore.hideStringIfPrivacyMode(
-                viewClaimToken.price?.toString() ?? "-",
-                2
-              )}
-            </Subtitle3>
-          </Stack>
-          {/* TODO: 애미네이션 적용 */}
-          {showClaimButton && (
-            <React.Fragment>
-              <Gutter size="0.375rem" />
-              <Tooltip
-                enabled={!!state.failedReason}
-                content={
-                  state.failedReason?.message || state.failedReason?.toString()
-                }
-                // 아이템이 한개만 있으면 tooltip이 VerticalCollapseTransition가 overflow: hidden이라
-                // 위/아래로 나타나면 가려져서 유저가 오류 메세지를 볼 방법이 없다.
-                // VerticalCollapseTransition가 overflow: hidden이여야 하는건 필수적이므로 이 부분을 수정할 순 없기 때문에
-                // 대충 아이템이 한개면 tooltip이 왼족에 나타나도록 한다.
-                allowedPlacements={itemsLength === 1 ? ["left"] : undefined}
+          <Column weight={1}>
+            <Stack gutter="0.25rem">
+              <Subtitle2
+                style={{
+                  color:
+                    theme.mode === "light"
+                      ? ColorPalette["gray-700"]
+                      : ColorPalette["white"],
+                }}
+              >
+                {coinDenom}
+              </Subtitle2>
+              <Body3
+                style={{
+                  color: ColorPalette["gray-300"],
+                  lineClamp: 1,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {viewClaimToken.modularChainInfo.chainName}
+              </Body3>
+            </Stack>
+          </Column>
+
+          <Tooltip
+            enabled={!!state.failedReason}
+            content={
+              state.failedReason?.message || state.failedReason?.toString()
+            }
+            allowedPlacements={itemsLength === 1 ? ["left"] : undefined}
+          >
+            <XAxis alignY="center">
+              <animated.div style={slideAnimation}>
+                <Stack gutter="0.25rem" alignX="right">
+                  <Subtitle3
+                    style={{
+                      color:
+                        theme.mode === "light"
+                          ? ColorPalette["gray-700"]
+                          : ColorPalette["white"],
+                    }}
+                  >
+                    {uiConfigStore.hideStringIfPrivacyMode(
+                      viewClaimToken.token
+                        .maxDecimals(6)
+                        .shrink(true)
+                        .inequalitySymbol(true)
+                        .hideDenom(true)
+                        .toString(),
+                      2
+                    )}
+                  </Subtitle3>
+                  <Subtitle3
+                    style={{
+                      color: ColorPalette["gray-300"],
+                    }}
+                  >
+                    {uiConfigStore.hideStringIfPrivacyMode(
+                      viewClaimToken.price?.toString() ?? "-",
+                      2
+                    )}
+                  </Subtitle3>
+                </Stack>
+              </animated.div>
+              <div
+                style={{
+                  display: showClaimButton ? "block" : "none",
+                  width: "1.5rem",
+                  alignItems: "right",
+                }}
               >
                 <IconButton
                   onClick={onClick}
@@ -715,11 +737,11 @@ const ViewClaimTokenItemContent: FunctionComponent<{
                     />
                   )}
                 </IconButton>
-              </Tooltip>
-            </React.Fragment>
-          )}
-        </XAxis>
-      </Columns>
-    </Styles.ItemContentBox>
-  );
-});
+              </div>
+            </XAxis>
+          </Tooltip>
+        </Columns>
+      </Styles.ItemContentBox>
+    );
+  }
+);
