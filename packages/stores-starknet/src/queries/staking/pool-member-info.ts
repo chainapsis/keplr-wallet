@@ -38,6 +38,14 @@ export class ObservableQueryPoolMemberInfo extends ObservableStarknetChainJsonRp
     makeObservable(this);
   }
 
+  protected override canFetch(): boolean {
+    if (this.chainId === "starknet:SN_SEPOLIA") {
+      return false;
+    }
+
+    return super.canFetch();
+  }
+
   @computed
   get stakedAmount(): CoinPretty | undefined {
     const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
@@ -474,12 +482,6 @@ export class StakingInfoManager {
     this.queryValidators = queryValidators;
   }
 
-  /**
-   * Returns the StakingInfo instance corresponding to the given starknet hex address.
-   * If it does not exist, creates a new one (passing the hex address) and caches it.
-   *
-   * @param starknetHexAddress - The hex address of the Starknet account.
-   */
   getStakingInfo = computedFn((starknetHexAddress: string) => {
     if (!this.stakingInfoByStarknetHexAddress.has(starknetHexAddress)) {
       runInAction(() => {
@@ -490,7 +492,7 @@ export class StakingInfoManager {
           starknetHexAddress,
           this.queryValidators
         );
-        // 만약 poolMemberInfoMap 생성 시 validators 정보를 추가로 저장할 필요가 있다면 이곳에서 처리할 수 있음.
+
         this.stakingInfoByStarknetHexAddress.set(
           starknetHexAddress,
           stakingInfo

@@ -27,7 +27,11 @@ export class ObservableQueryYearlyMint extends ObservableStarknetChainJsonRpcQue
   }
 
   protected override canFetch(): boolean {
-    return this.chainId === "starknet:SN_MAIN";
+    if (this.chainId === "starknet:SN_SEPOLIA") {
+      return false;
+    }
+
+    return super.canFetch();
   }
 
   @computed

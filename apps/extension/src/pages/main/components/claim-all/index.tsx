@@ -450,7 +450,6 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
   }
 );
 
-// TODO: 상위 컴포넌트에서 claim 함수를 전달해주는 방식으로 변경
 const ViewClaimTokenItem: FunctionComponent<{
   viewClaimToken: ViewClaimToken;
   state: ClaimAllEachState;
