@@ -624,6 +624,9 @@
   "page.starknet.components.account-activation-modal.title": "Activate Your Account",
   "page.starknet.components.account-activation-modal.description": "Activate your account to access various features of Starknet!{br}A small fee applies for account activation.",
 
+  "page.token-detail.earn-apy-banner.title": "Earn rewards",
+  "page.token-detail.earn-apy-banner.start-earn-button": "Start Earn",
+
   "page.earn.title": "Earn",
   "page.earn.intro.title": "Earn real-time rewards\nwith <token></token>",
   "page.earn.intro.paragraph": "Put your stable asset to work and earn {apy} APY—effortless and simple.",

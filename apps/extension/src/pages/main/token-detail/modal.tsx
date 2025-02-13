@@ -29,6 +29,8 @@ import { Stack } from "../../../components/stack";
 import { EmptyView } from "../../../components/empty-view";
 import { DenomHelper } from "@keplr-wallet/common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { EarnApyBanner } from "./banners/earn-apy-banner";
+import { validateIsUsdcFromNoble } from "../../earn/utils";
 
 const Styles = {
   Container: styled.div`
@@ -502,6 +504,11 @@ export const TokenDetailModal: FunctionComponent<{
           {(() => {
             if ("cosmos" in modularChainInfo) {
               const chainInfo = chainStore.getChain(chainId);
+
+              if (validateIsUsdcFromNoble(currency, chainId)) {
+                return <EarnApyBanner chainId="noble-1" />;
+              }
+
               if (
                 chainInfo.stakeCurrency &&
                 chainInfo.stakeCurrency.coinMinimalDenom ===
