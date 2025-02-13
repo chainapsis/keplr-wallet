@@ -5,7 +5,7 @@ import { Gutter } from "../../../components/gutter";
 import { Body3 } from "../../../components/typography";
 import { ColorPalette } from "../../../styles";
 import { useTheme } from "styled-components";
-import Color from "color";
+import { IconInCircle } from "./icon-in-circle";
 
 export const CircleButton: FunctionComponent<{
   onClick: () => void;
@@ -38,43 +38,11 @@ export const CircleButton: FunctionComponent<{
       }}
     >
       <YAxis alignX="center">
-        <Box
-          width="2.5rem"
-          height="2.5rem"
-          alignX="center"
-          alignY="center"
-          borderRadius="999999px"
-          backgroundColor={
-            !isHover
-              ? theme.mode === "light"
-                ? ColorPalette["blue-100"]
-                : ColorPalette["gray-400"]
-              : theme.mode === "light"
-              ? ColorPalette["blue-100"]
-              : ColorPalette["gray-400"]
-          }
-          style={{
-            color: !isHover
-              ? theme.mode === "light"
-                ? ColorPalette["blue-400"]
-                : ColorPalette["white"]
-              : theme.mode === "light"
-              ? ColorPalette["blue-400"]
-              : ColorPalette["gray-200"],
-          }}
-          after={
-            isHover && theme.mode === "light"
-              ? {
-                  backgroundColor: Color(ColorPalette["gray-500"])
-                    .alpha(0.1)
-                    .toString(),
-                  borderRadius: "99999px",
-                }
-              : undefined
-          }
-        >
-          {icon}
-        </Box>
+        <IconInCircle
+          icon={icon}
+          isLightMode={theme.mode === "light"}
+          isHover={isHover}
+        />
         <Gutter size="0.375rem" />
         <Box alignX="center" width="1px">
           <Box>

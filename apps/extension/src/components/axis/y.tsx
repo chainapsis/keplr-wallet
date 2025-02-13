@@ -16,6 +16,7 @@ const Styles = {
           return "center";
       }
     }};
+    gap: ${({ gap }) => gap};
   `,
 };
 

@@ -64,7 +64,9 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
       bottomButtons={[
         {
           disabled: !isTermAgreed,
-          text: intl.formatMessage({ id: "button.next" }),
+          text: intl.formatMessage({
+            id: "page.earn.estimation-confirm.usdc-to-usdn.swap-button",
+          }),
           color: "primary",
           size: "large",
           type: "submit",
