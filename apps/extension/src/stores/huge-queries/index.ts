@@ -470,9 +470,8 @@ export class HugeQueriesStore {
           account.starknetHexAddress
         );
 
-        const totalClaimableRewardAmount =
-          queryStakingInfo.totalClaimableRewardAmount;
-        if (!totalClaimableRewardAmount) {
+        const totalStakedAmount = queryStakingInfo.totalStakedAmount;
+        if (!totalStakedAmount) {
           continue;
         }
 
@@ -480,8 +479,8 @@ export class HugeQueriesStore {
         prevKeyMap.delete(key);
         this.delegationBinarySort.pushAndSort(key, {
           chainInfo: modularChainInfo,
-          token: totalClaimableRewardAmount,
-          price: this.priceStore.calculatePrice(totalClaimableRewardAmount),
+          token: totalStakedAmount,
+          price: this.priceStore.calculatePrice(totalStakedAmount),
           isFetching: queryStakingInfo.isFetching,
           error: queryStakingInfo.error,
           stakingUrl: "https://dashboard.endur.fi/stake",
