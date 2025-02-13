@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useMemo } from "react";
 import { CollapsibleList } from "../../components/collapsible-list";
 import { MainEmptyView, TokenItem, TokenTitleView } from "./components";
-import { Dec, PricePretty } from "@keplr-wallet/unit";
+import { Dec } from "@keplr-wallet/unit";
 import { observer } from "mobx-react-lite";
 import { Stack } from "../../components/stack";
 import { useStore } from "../../stores";
@@ -9,18 +9,13 @@ import { TextButton } from "../../components/button-text";
 import { ArrowRightSolidIcon } from "../../components/icon";
 import { ColorPalette } from "../../styles";
 import { useIntl } from "react-intl";
-import { ViewToken } from ".";
+import { ViewStakedToken, ViewUnbondingToken } from "../../stores/huge-queries";
 
-type ViewTokenDelegation = ViewToken & {
-  price: PricePretty | undefined;
-  stakingUrl?: string;
-};
-
-const useCosmosViewTokenDelegations = () => {
+const useViewStakingTokens = () => {
   const { hugeQueriesStore } = useStore();
   const intl = useIntl();
 
-  const delegations: ViewTokenDelegation[] = useMemo(
+  const delegations: ViewStakedToken[] = useMemo(
     () =>
       hugeQueriesStore.delegations.filter((token) => {
         return token.token.toDec().gt(new Dec(0));
@@ -29,22 +24,19 @@ const useCosmosViewTokenDelegations = () => {
   );
 
   const unbondings: {
-    viewToken: ViewTokenDelegation;
+    unbonding: ViewUnbondingToken;
     altSentence: string;
   }[] = useMemo(
     () =>
       hugeQueriesStore.unbondings
         .filter((unbonding) => {
-          return unbonding.viewToken.token.toDec().gt(new Dec(0));
+          return unbonding.token.toDec().gt(new Dec(0));
         })
         .map((unbonding) => {
           const relativeTime = formatRelativeTime(unbonding.completeTime);
 
           return {
-            viewToken: {
-              ...unbonding.viewToken,
-              stakingUrl: unbonding.viewToken.chainInfo.walletUrlForStaking,
-            },
+            unbonding,
             altSentence: intl.formatRelativeTime(
               relativeTime.value,
               relativeTime.unit
@@ -60,133 +52,20 @@ const useCosmosViewTokenDelegations = () => {
   };
 };
 
-const useStarknetViewTokenDelegations = () => {
-  const { chainStore, priceStore, starknetQueriesStore, accountStore } =
-    useStore();
-
-  const intl = useIntl();
-
-  const chainId = "starknet:SN_MAIN";
-  const starknetChainInfo = chainStore.getModularChain(chainId);
-
-  const account = accountStore.getAccount(chainId);
-
-  const starknetQueries = starknetQueriesStore.get(chainId);
-  const queryStakingInfo = starknetQueries.stakingInfoManager.getStakingInfo(
-    account.starknetHexAddress
-  );
-
-  const delegation: ViewTokenDelegation | undefined = useMemo(() => {
-    const token = queryStakingInfo?.totalStakedAmount;
-    if (!token) {
-      return undefined;
-    }
-
-    const price = priceStore.calculatePrice(token);
-
-    return {
-      chainInfo: starknetChainInfo,
-      token,
-      price,
-      isFetching: queryStakingInfo.isFetching,
-      error: queryStakingInfo.error,
-    };
-  }, [
-    starknetChainInfo,
-    priceStore,
-    queryStakingInfo?.isFetching,
-    queryStakingInfo?.totalStakedAmount,
-    queryStakingInfo?.error,
-  ]);
-
-  const unbondings: {
-    viewToken: ViewTokenDelegation;
-    altSentence: string;
-  }[] = useMemo(() => {
-    const unbondings = queryStakingInfo?.unbondings;
-    if (!unbondings) {
-      return [];
-    }
-
-    return unbondings.unbondings.map((unbonding) => {
-      const relativeTime = formatRelativeTime(unbonding.completeTime * 1000);
-
-      return {
-        viewToken: {
-          chainInfo: starknetChainInfo,
-          token: unbonding.amount,
-          price: priceStore.calculatePrice(unbonding.amount),
-          isFetching: queryStakingInfo.isFetching,
-          error: queryStakingInfo?.error,
-          stakingUrl: "https://dashboard.endur.fi/stake",
-        },
-        altSentence: intl.formatRelativeTime(
-          relativeTime.value,
-          relativeTime.unit
-        ),
-      };
-    });
-  }, [
-    intl,
-    starknetChainInfo,
-    priceStore,
-    queryStakingInfo?.isFetching,
-    queryStakingInfo?.unbondings,
-    queryStakingInfo?.error,
-  ]);
-
-  return {
-    delegation,
-    unbondings,
-  };
-};
-
 export const StakedTabView: FunctionComponent<{
   onMoreTokensClosed: () => void;
 }> = observer(({ onMoreTokensClosed }) => {
   const { uiConfigStore } = useStore();
   const intl = useIntl();
 
-  const { delegations: cosmosDelegations, unbondings: cosmosUnbondings } =
-    useCosmosViewTokenDelegations();
-  const { delegation: starknetDelegation, unbondings: starknetUnbondings } =
-    useStarknetViewTokenDelegations();
-
-  const delegations = useMemo(() => {
-    if (!starknetDelegation) {
-      return cosmosDelegations;
-    }
-
-    return [...cosmosDelegations, starknetDelegation].sort((a, b) => {
-      const priceA = a.price?.toDec() || new Dec(0);
-      const priceB = b.price?.toDec() || new Dec(0);
-      if (priceA.equals(priceB)) {
-        return 0;
-      }
-      return priceA.gt(priceB) ? -1 : 1;
-    });
-  }, [cosmosDelegations, starknetDelegation]);
-
-  const unbondings = useMemo(() => {
-    if (!starknetUnbondings) {
-      return cosmosUnbondings;
-    }
-    return [...cosmosUnbondings, ...starknetUnbondings].sort((a, b) => {
-      const priceA = a.viewToken.price?.toDec() || new Dec(0);
-      const priceB = b.viewToken.price?.toDec() || new Dec(0);
-      if (priceA.equals(priceB)) {
-        return 0;
-      }
-      return priceA.gt(priceB) ? -1 : 1;
-    });
-  }, [cosmosUnbondings, starknetUnbondings]);
+  const { delegations, unbondings } = useViewStakingTokens();
 
   const TokenViewData: {
     title: string;
     balance:
-      | ViewTokenDelegation[]
+      | ViewStakedToken[]
       | {
-          viewToken: ViewTokenDelegation;
+          unbonding: ViewUnbondingToken;
           altSentence: string;
         }[];
     lenAlwaysShown: number;
@@ -237,13 +116,13 @@ export const StakedTabView: FunctionComponent<{
                 if ("altSentence" in viewToken) {
                   return (
                     <TokenItem
-                      viewToken={viewToken.viewToken}
-                      key={`${viewToken.viewToken.chainInfo.chainId}-${viewToken.viewToken.token.currency.coinMinimalDenom}`}
-                      disabled={!viewToken.viewToken.stakingUrl}
+                      viewToken={viewToken.unbonding}
+                      key={`${viewToken.unbonding.chainInfo.chainId}-${viewToken.unbonding.token.currency.coinMinimalDenom}`}
+                      disabled={!viewToken.unbonding.stakingUrl}
                       onClick={() => {
-                        if (viewToken.viewToken.stakingUrl) {
+                        if (viewToken.unbonding.stakingUrl) {
                           browser.tabs.create({
-                            url: viewToken.viewToken.stakingUrl,
+                            url: viewToken.unbonding.stakingUrl,
                           });
                         }
                       }}
