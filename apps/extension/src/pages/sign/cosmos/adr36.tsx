@@ -28,8 +28,7 @@ import { ArbitraryMsgWalletDetails } from "../components/arbitrary-message/arbit
 import { ArbitraryMsgDataView } from "../components/arbitrary-message/arbitrary-message-data-view";
 
 export const SignCosmosADR36Page: FunctionComponent = observer(() => {
-  const { chainStore, signInteractionStore, uiConfigStore, accountStore } =
-    useStore();
+  const { chainStore, signInteractionStore, uiConfigStore } = useStore();
   const intl = useIntl();
   const theme = useTheme();
   const navigate = useNavigate();
