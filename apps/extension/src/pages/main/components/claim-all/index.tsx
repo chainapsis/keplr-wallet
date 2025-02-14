@@ -28,7 +28,6 @@ import { Skeleton } from "../../../../components/skeleton";
 import { XAxis, YAxis } from "../../../../components/axis";
 import Color from "color";
 import { SpecialButton } from "../../../../components/special-button";
-import { Gutter } from "../../../../components/gutter";
 import { FormattedMessage, useIntl } from "react-intl";
 import { CurrencyImageFallback } from "../../../../components/image";
 import {
@@ -37,8 +36,13 @@ import {
   useClaimAllEachState,
   useStarknetClaimRewards,
 } from "../../../../hooks/claim";
-import { IconButton } from "../../../../components/icon-button";
-import { useSpring, animated } from "@react-spring/web";
+import {
+  useSpring,
+  animated,
+  useTransition,
+  useSpringRef,
+  easings,
+} from "@react-spring/web";
 
 interface ViewClaimToken extends Omit<ViewToken, "chainInfo"> {
   modularChainInfo: ModularChainInfo;
@@ -105,8 +109,9 @@ const Styles = {
       `;
     }};
   `,
-  ItemContentBox: styled(Box)<{ isLastItem?: boolean }>`
+  ItemContentBox: styled(Box)<{ showButton?: boolean; isLastItem?: boolean }>`
     padding: 0.875rem 1rem;
+    padding-right: ${(props) => (props.showButton ? "0.625rem" : "1rem")};
     border-radius: 0.375rem;
 
     margin: 0 0.75rem;
@@ -605,19 +610,48 @@ const ViewClaimTokenItemContent: FunctionComponent<{
 
     const showClaimButton = isHover || isLoading || !!state.failedReason;
 
-    const slideAnimation = useSpring({
-      transform: showClaimButton ? "translateX(-6px)" : "translateX(0px)",
-      config: { tension: 500, friction: 20 },
+    const buttonWrapperRef = useSpringRef();
+
+    const transitions = useTransition(showClaimButton, {
+      ref: buttonWrapperRef,
+      from: {
+        opacity: 0,
+        width: "0rem",
+      },
+      enter: {
+        opacity: 1,
+        width: "1.875rem",
+      },
+      leave: {
+        opacity: 0,
+        width: "0rem",
+      },
+      config: {
+        easing: easings.easeInOutQuart,
+        duration: 250,
+      },
     });
+
+    useEffect(() => {
+      buttonWrapperRef.start();
+    }, [buttonWrapperRef, showClaimButton]);
 
     return (
       <Styles.ItemContentBox
         isLastItem={isLastItem}
-        onHoverStateChange={(isHover) => {
-          setIsHover(isHover);
+        showButton={showClaimButton}
+        onHoverStateChange={setIsHover}
+        onClick={() => {
+          if (isLoading) {
+            return;
+          }
+          onClick();
+        }}
+        style={{
+          cursor: isLoading ? "default" : "pointer",
         }}
       >
-        <Columns sum={1} alignY="center">
+        <Columns sum={1} alignY="center" gutter="0.75rem">
           {viewClaimToken.token.currency.coinImageUrl && (
             <CurrencyImageFallback
               chainInfo={viewClaimToken.modularChainInfo}
@@ -625,8 +659,6 @@ const ViewClaimTokenItemContent: FunctionComponent<{
               size="2rem"
             />
           )}
-
-          <Gutter size="0.75rem" />
 
           <Column weight={1}>
             <Stack gutter="0.25rem">
@@ -643,101 +675,105 @@ const ViewClaimTokenItemContent: FunctionComponent<{
               <Body3
                 style={{
                   color: ColorPalette["gray-300"],
-                  lineClamp: 1,
+                  display: "-webkit-box",
+                  WebkitBoxOrient: "vertical",
+                  WebkitLineClamp: 1,
                   overflow: "hidden",
                   textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
                 }}
               >
                 {viewClaimToken.modularChainInfo.chainName}
               </Body3>
             </Stack>
           </Column>
-
-          <Tooltip
-            enabled={!!state.failedReason}
-            content={
-              state.failedReason?.message || state.failedReason?.toString()
-            }
-            allowedPlacements={itemsLength === 1 ? ["left"] : undefined}
-          >
-            <XAxis alignY="center">
-              <animated.div style={slideAnimation}>
-                <Stack gutter="0.25rem" alignX="right">
-                  <Subtitle3
-                    style={{
-                      color:
-                        theme.mode === "light"
-                          ? ColorPalette["gray-700"]
-                          : ColorPalette["white"],
-                    }}
-                  >
-                    {uiConfigStore.hideStringIfPrivacyMode(
-                      viewClaimToken.token
-                        .maxDecimals(6)
-                        .shrink(true)
-                        .inequalitySymbol(true)
-                        .hideDenom(true)
-                        .toString(),
-                      2
-                    )}
-                  </Subtitle3>
-                  <Subtitle3
-                    style={{
-                      color: ColorPalette["gray-300"],
-                    }}
-                  >
-                    {uiConfigStore.hideStringIfPrivacyMode(
-                      viewClaimToken.price?.toString() ?? "-",
-                      2
-                    )}
-                  </Subtitle3>
-                </Stack>
-              </animated.div>
-              <div
+          <XAxis alignY="center">
+            <Stack gutter="0.25rem" alignX="right">
+              <Subtitle3
                 style={{
-                  display: showClaimButton ? "block" : "none",
-                  width: "1.5rem",
-                  alignItems: "right",
+                  color:
+                    theme.mode === "light"
+                      ? ColorPalette["gray-700"]
+                      : ColorPalette["white"],
                 }}
               >
-                <IconButton
-                  onClick={onClick}
-                  disabled={viewClaimToken.token.toDec().lte(new Dec(0))}
-                >
-                  {isLoading ? (
-                    <LoadingIcon
-                      width="1rem"
-                      height="1rem"
-                      color={
-                        ColorPalette[
-                          theme.mode === "light" ? "gray-200" : "gray-300"
-                        ]
+                {uiConfigStore.hideStringIfPrivacyMode(
+                  viewClaimToken.token
+                    .maxDecimals(6)
+                    .shrink(true)
+                    .inequalitySymbol(true)
+                    .hideDenom(true)
+                    .toString(),
+                  2
+                )}
+              </Subtitle3>
+              <Subtitle3
+                style={{
+                  color: ColorPalette["gray-300"],
+                }}
+              >
+                {uiConfigStore.hideStringIfPrivacyMode(
+                  viewClaimToken.price?.toString() ?? "-",
+                  2
+                )}
+              </Subtitle3>
+            </Stack>
+
+            {transitions(
+              (styles, item) =>
+                item && (
+                  <animated.div
+                    style={{
+                      ...styles,
+                      overflow: "hidden",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "flex-end",
+                    }}
+                  >
+                    <Tooltip
+                      enabled={!!state.failedReason}
+                      content={
+                        state.failedReason?.message ||
+                        state.failedReason?.toString()
                       }
-                    />
-                  ) : state.failedReason ? (
-                    <WarningIcon
-                      width="1rem"
-                      height="1rem"
-                      color={
-                        ColorPalette[
-                          theme.mode === "light" ? "gray-200" : "gray-300"
-                        ]
+                      allowedPlacements={
+                        itemsLength === 1 ? ["left"] : undefined
                       }
-                    />
-                  ) : (
-                    <CoinsPlusOutlineIcon
-                      color={
-                        ColorPalette[
-                          theme.mode === "light" ? "gray-200" : "gray-300"
-                        ]
-                      }
-                    />
-                  )}
-                </IconButton>
-              </div>
-            </XAxis>
-          </Tooltip>
+                    >
+                      {isLoading ? (
+                        <LoadingIcon
+                          width="1rem"
+                          height="1rem"
+                          color={
+                            ColorPalette[
+                              theme.mode === "light" ? "gray-200" : "gray-300"
+                            ]
+                          }
+                        />
+                      ) : state.failedReason ? (
+                        <WarningIcon
+                          width="1rem"
+                          height="1rem"
+                          color={
+                            ColorPalette[
+                              theme.mode === "light" ? "gray-200" : "gray-300"
+                            ]
+                          }
+                        />
+                      ) : (
+                        <CoinsPlusOutlineIcon
+                          color={
+                            ColorPalette[
+                              theme.mode === "light" ? "gray-200" : "gray-300"
+                            ]
+                          }
+                        />
+                      )}
+                    </Tooltip>
+                  </animated.div>
+                )
+            )}
+          </XAxis>
         </Columns>
       </Styles.ItemContentBox>
     );

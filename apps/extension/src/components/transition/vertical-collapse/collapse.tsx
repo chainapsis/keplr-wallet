@@ -79,7 +79,7 @@ export const VerticalCollapseTransition: FunctionComponent<
 
   const resizeAnimation = useSpring({
     opacity: collapsed ? 0.1 : 1,
-    scale: collapsed ? 0.8 : 1,
+    scale: collapsed ? 0.9 : 1,
     config: defaultSpringConfig,
   });
 
