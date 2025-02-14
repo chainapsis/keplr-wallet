@@ -28,6 +28,7 @@ import { Skeleton } from "../../../../components/skeleton";
 import { XAxis, YAxis } from "../../../../components/axis";
 import Color from "color";
 import { SpecialButton } from "../../../../components/special-button";
+import { Gutter } from "../../../../components/gutter";
 import { FormattedMessage, useIntl } from "react-intl";
 import { CurrencyImageFallback } from "../../../../components/image";
 import {
@@ -36,13 +37,8 @@ import {
   useClaimAllEachState,
   useStarknetClaimRewards,
 } from "../../../../hooks/claim";
-import {
-  useSpring,
-  animated,
-  useTransition,
-  useSpringRef,
-  easings,
-} from "@react-spring/web";
+import { IconButton } from "../../../../components/icon-button";
+import { useSpring, animated } from "@react-spring/web";
 
 interface ViewClaimToken extends Omit<ViewToken, "chainInfo"> {
   modularChainInfo: ModularChainInfo;
@@ -109,9 +105,8 @@ const Styles = {
       `;
     }};
   `,
-  ItemContentBox: styled(Box)<{ showButton?: boolean; isLastItem?: boolean }>`
+  ItemContentBox: styled(Box)<{ isLastItem?: boolean }>`
     padding: 0.875rem 1rem;
-    padding-right: ${(props) => (props.showButton ? "0.625rem" : "1rem")};
     border-radius: 0.375rem;
 
     margin: 0 0.75rem;
@@ -610,48 +605,19 @@ const ViewClaimTokenItemContent: FunctionComponent<{
 
     const showClaimButton = isHover || isLoading || !!state.failedReason;
 
-    const buttonWrapperRef = useSpringRef();
-
-    const transitions = useTransition(showClaimButton, {
-      ref: buttonWrapperRef,
-      from: {
-        opacity: 0,
-        width: "0rem",
-      },
-      enter: {
-        opacity: 1,
-        width: "1.875rem",
-      },
-      leave: {
-        opacity: 0,
-        width: "0rem",
-      },
-      config: {
-        easing: easings.easeInOutQuart,
-        duration: 250,
-      },
+    const slideAnimation = useSpring({
+      transform: showClaimButton ? "translateX(-6px)" : "translateX(0px)",
+      config: { tension: 500, friction: 20 },
     });
-
-    useEffect(() => {
-      buttonWrapperRef.start();
-    }, [buttonWrapperRef, showClaimButton]);
 
     return (
       <Styles.ItemContentBox
         isLastItem={isLastItem}
-        showButton={showClaimButton}
-        onHoverStateChange={setIsHover}
-        onClick={() => {
-          if (isLoading) {
-            return;
-          }
-          onClick();
-        }}
-        style={{
-          cursor: isLoading ? "default" : "pointer",
+        onHoverStateChange={(isHover) => {
+          setIsHover(isHover);
         }}
       >
-        <Columns sum={1} alignY="center" gutter="0.75rem">
+        <Columns sum={1} alignY="center">
           {viewClaimToken.token.currency.coinImageUrl && (
             <CurrencyImageFallback
               chainInfo={viewClaimToken.modularChainInfo}
@@ -659,6 +625,8 @@ const ViewClaimTokenItemContent: FunctionComponent<{
               size="2rem"
             />
           )}
+
+          <Gutter size="0.75rem" />
 
           <Column weight={1}>
             <Stack gutter="0.25rem">
@@ -675,105 +643,101 @@ const ViewClaimTokenItemContent: FunctionComponent<{
               <Body3
                 style={{
                   color: ColorPalette["gray-300"],
-                  display: "-webkit-box",
-                  WebkitBoxOrient: "vertical",
-                  WebkitLineClamp: 1,
+                  lineClamp: 1,
                   overflow: "hidden",
                   textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
                 }}
               >
                 {viewClaimToken.modularChainInfo.chainName}
               </Body3>
             </Stack>
           </Column>
-          <XAxis alignY="center">
-            <Stack gutter="0.25rem" alignX="right">
-              <Subtitle3
-                style={{
-                  color:
-                    theme.mode === "light"
-                      ? ColorPalette["gray-700"]
-                      : ColorPalette["white"],
-                }}
-              >
-                {uiConfigStore.hideStringIfPrivacyMode(
-                  viewClaimToken.token
-                    .maxDecimals(6)
-                    .shrink(true)
-                    .inequalitySymbol(true)
-                    .hideDenom(true)
-                    .toString(),
-                  2
-                )}
-              </Subtitle3>
-              <Subtitle3
-                style={{
-                  color: ColorPalette["gray-300"],
-                }}
-              >
-                {uiConfigStore.hideStringIfPrivacyMode(
-                  viewClaimToken.price?.toString() ?? "-",
-                  2
-                )}
-              </Subtitle3>
-            </Stack>
 
-            {transitions(
-              (styles, item) =>
-                item && (
-                  <animated.div
+          <Tooltip
+            enabled={!!state.failedReason}
+            content={
+              state.failedReason?.message || state.failedReason?.toString()
+            }
+            allowedPlacements={itemsLength === 1 ? ["left"] : undefined}
+          >
+            <XAxis alignY="center">
+              <animated.div style={slideAnimation}>
+                <Stack gutter="0.25rem" alignX="right">
+                  <Subtitle3
                     style={{
-                      ...styles,
-                      overflow: "hidden",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "flex-end",
+                      color:
+                        theme.mode === "light"
+                          ? ColorPalette["gray-700"]
+                          : ColorPalette["white"],
                     }}
                   >
-                    <Tooltip
-                      enabled={!!state.failedReason}
-                      content={
-                        state.failedReason?.message ||
-                        state.failedReason?.toString()
+                    {uiConfigStore.hideStringIfPrivacyMode(
+                      viewClaimToken.token
+                        .maxDecimals(6)
+                        .shrink(true)
+                        .inequalitySymbol(true)
+                        .hideDenom(true)
+                        .toString(),
+                      2
+                    )}
+                  </Subtitle3>
+                  <Subtitle3
+                    style={{
+                      color: ColorPalette["gray-300"],
+                    }}
+                  >
+                    {uiConfigStore.hideStringIfPrivacyMode(
+                      viewClaimToken.price?.toString() ?? "-",
+                      2
+                    )}
+                  </Subtitle3>
+                </Stack>
+              </animated.div>
+              <div
+                style={{
+                  display: showClaimButton ? "block" : "none",
+                  width: "1.5rem",
+                  alignItems: "right",
+                }}
+              >
+                <IconButton
+                  onClick={onClick}
+                  disabled={viewClaimToken.token.toDec().lte(new Dec(0))}
+                >
+                  {isLoading ? (
+                    <LoadingIcon
+                      width="1rem"
+                      height="1rem"
+                      color={
+                        ColorPalette[
+                          theme.mode === "light" ? "gray-200" : "gray-300"
+                        ]
                       }
-                      allowedPlacements={
-                        itemsLength === 1 ? ["left"] : undefined
+                    />
+                  ) : state.failedReason ? (
+                    <WarningIcon
+                      width="1rem"
+                      height="1rem"
+                      color={
+                        ColorPalette[
+                          theme.mode === "light" ? "gray-200" : "gray-300"
+                        ]
                       }
-                    >
-                      {isLoading ? (
-                        <LoadingIcon
-                          width="1rem"
-                          height="1rem"
-                          color={
-                            ColorPalette[
-                              theme.mode === "light" ? "gray-200" : "gray-300"
-                            ]
-                          }
-                        />
-                      ) : state.failedReason ? (
-                        <WarningIcon
-                          width="1rem"
-                          height="1rem"
-                          color={
-                            ColorPalette[
-                              theme.mode === "light" ? "gray-200" : "gray-300"
-                            ]
-                          }
-                        />
-                      ) : (
-                        <CoinsPlusOutlineIcon
-                          color={
-                            ColorPalette[
-                              theme.mode === "light" ? "gray-200" : "gray-300"
-                            ]
-                          }
-                        />
-                      )}
-                    </Tooltip>
-                  </animated.div>
-                )
-            )}
-          </XAxis>
+                    />
+                  ) : (
+                    <CoinsPlusOutlineIcon
+                      color={
+                        ColorPalette[
+                          theme.mode === "light" ? "gray-200" : "gray-300"
+                        ]
+                      }
+                    />
+                  )}
+                </IconButton>
+              </div>
+            </XAxis>
+          </Tooltip>
         </Columns>
       </Styles.ItemContentBox>
     );
