@@ -18,6 +18,7 @@ import {
 } from "../../../../components/icon";
 import { Gutter } from "../../../../components/gutter";
 import SimpleBar from "simplebar-react";
+import { isRunningInSidePanel } from "../../../../utils";
 
 interface Adr36DataViewProps {
   message?: string;
@@ -114,8 +115,9 @@ const Adr36DataSection: FunctionComponent<Adr36DataSectionProps> = ({
 
   useLayoutEffect(() => {
     if (!isShowRawMessage && preRef.current) {
-      const THRESHOLD: number = 72;
+      const THRESHOLD: number = isRunningInSidePanel() ? 300 : 72;
       const contentHeight: number = preRef.current.scrollHeight;
+
       if (contentHeight > THRESHOLD) {
         setNeedsEllipsis(true);
         setExpanded(false);

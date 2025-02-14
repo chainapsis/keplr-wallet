@@ -89,6 +89,14 @@ export const EthereumSigningView: FunctionComponent<{
   const { message, signType, signer, chainId } = interactionData.data;
 
   const account = accountStore.getAccount(chainId);
+  const signerInfo = {
+    name:
+      typeof interactionData.data.keyInsensitive["keyRingName"] === "string"
+        ? interactionData.data.keyInsensitive["keyRingName"]
+        : "",
+    address: interactionData.data.signer || "",
+  };
+
   const ethereumAccount = ethereumAccountStore.getAccount(chainId);
   const chainInfo = chainStore.getChain(chainId);
 
@@ -568,11 +576,11 @@ export const EthereumSigningView: FunctionComponent<{
         keystoneUSBBox={keystoneUSBBox}
         keystoneSign={keystoneSign}
         origin={interactionData.data.origin}
-        walletName={account.name}
+        walletName={signerInfo.name}
         chainInfo={chainInfo}
         addressInfo={{
           type: "ethereum",
-          address: account.ethereumHexAddress,
+          address: signerInfo.address,
         }}
         messageData={{
           signType: signType,

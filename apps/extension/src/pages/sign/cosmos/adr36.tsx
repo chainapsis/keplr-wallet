@@ -155,7 +155,15 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
     isLedgerInteracting ||
     isKeystoneInteracting;
   const chainId: string = signInteractionStore.waitingData?.data.chainId || "";
-  const account = accountStore.getAccount(chainId);
+  const signerInfo = {
+    name:
+      typeof signInteractionStore.waitingData?.data.keyInsensitive[
+        "keyRingName"
+      ] === "string"
+        ? signInteractionStore.waitingData?.data.keyInsensitive["keyRingName"]
+        : "",
+    address: signInteractionStore.waitingData?.data.signer || "",
+  };
 
   return (
     <HeaderLayout
@@ -332,11 +340,11 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
         <Gutter size="1.5rem" />
         {chainId && (
           <Adr36WalletDetails
-            walletName={account?.name || ""}
+            walletName={signerInfo.name}
             chainInfo={chainStore.getChain(chainId)}
             addressInfo={{
               type: "bech32",
-              address: account.bech32Address,
+              address: signerInfo.address,
             }}
           />
         )}
