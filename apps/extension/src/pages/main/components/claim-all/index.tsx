@@ -670,7 +670,7 @@ const ViewClaimTokenItemContent: FunctionComponent<{
 
                   return v / parentExpandHeight;
                 })
-                .to([0.1, 0.95], [0.75, 1], "clamp")
+                .to([0.1, 0.95], [0.85, 1], "clamp")
                 .to((v) => {
                   return `scale(${v})`;
                 })
