@@ -160,7 +160,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
 
     const viewClaimTokens: ViewClaimToken[] = (() => {
       const res: ViewClaimToken[] = [];
-      for (const modularChainInfo of chainStore.modularChainInfos) {
+      for (const modularChainInfo of chainStore.modularChainInfosInUI) {
         const chainId = modularChainInfo.chainId;
 
         if ("cosmos" in modularChainInfo) {
