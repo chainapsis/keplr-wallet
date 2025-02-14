@@ -104,7 +104,7 @@ const CosmosStakedBalance: FunctionComponent<{
                           : ColorPalette["gray-200"]
                       }
                     >
-                      {`${cosmosAPR}% APY`}
+                      {`${cosmosAPR}% APR`}
                     </Body3>
                   )}
                 </React.Fragment>
@@ -160,7 +160,7 @@ const CosmosStakedBalance: FunctionComponent<{
                   : ColorPalette["gray-300"]
               }
             >
-              {`${cosmosAPR}% APY`}
+              {`${cosmosAPR}% APR`}
             </Subtitle3>
           ) : null}
 
