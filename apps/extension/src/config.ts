@@ -3135,6 +3135,43 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     ],
     features: [],
   },
+  {
+    rpc: "https://evm-130.keplr.app",
+    rest: "https://evm-130.keplr.app",
+    evm: {
+      chainId: 130,
+      rpc: "https://evm-130.keplr.app",
+      websocket: "wss://evm-130.keplr.app/websocket",
+    },
+    chainId: "eip155:130",
+    chainName: "Unichain",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:130/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "unichain-native",
+        coinDecimals: 18,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:130/unichain-native.png",
+        coinGeckoId: "ethereum",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "unichain-native",
+        coinDecimals: 18,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:130/unichain-native.png",
+        coinGeckoId: "ethereum",
+      },
+    ],
+    features: [],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
