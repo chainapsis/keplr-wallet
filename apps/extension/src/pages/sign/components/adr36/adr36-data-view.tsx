@@ -42,7 +42,7 @@ export const Adr36DataView: FunctionComponent<Adr36DataViewProps> = ({
     const anyExpanded = isMessageExpanded || isRawMessageExpanded;
     const targetHeight = anyExpanded ? MAX_HEIGHT : initialHeight.current;
 
-    if (window.innerHeight !== targetHeight) {
+    if (window.outerHeight !== targetHeight) {
       window.resizeTo(window.innerWidth, targetHeight);
     }
   }, [isMessageExpanded, isRawMessageExpanded]);
