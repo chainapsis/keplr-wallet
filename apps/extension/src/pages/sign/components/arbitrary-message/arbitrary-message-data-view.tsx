@@ -156,17 +156,19 @@ const Adr36DataSection: FunctionComponent<Adr36DataSectionProps> = ({
     margin: 0,
     fontWeight: 400,
     fontSize: isShowRawMessage ? "0.875rem" : "1rem",
-    wordBreak: "break-all",
-    whiteSpace: "pre-wrap",
     ...(isShowRawMessage
       ? {
           color: ColorPalette["gray-200"],
+          wordBreak: "break-all",
+          whiteSpace: "pre-wrap",
         }
       : {
           color:
             theme.mode === "light"
               ? ColorPalette["gray-500"]
               : ColorPalette["white"],
+          whiteSpace: "normal",
+          overflowWrap: "break-word",
         }),
   };
 
