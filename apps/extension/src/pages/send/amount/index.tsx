@@ -259,10 +259,11 @@ function useChangeSenderAddressWhenEtherMintChainSendToHexAddress(
   isEVMOnlyChain: boolean,
   account: AccountSetBase & CosmosAccount & CosmwasmAccount & SecretAccount,
   setIsEvmTx: React.Dispatch<React.SetStateAction<boolean>>,
-  ethereumAccount: EthereumAccountBase
+  ethereumAccount: EthereumAccountBase,
+  sendType: SendType
 ) {
   useEffect(() => {
-    if (isEvmChain) {
+    if (isEvmChain && sendType === "send") {
       const sendingDenomHelper = new DenomHelper(
         sendConfigs.amountConfig.currency.coinMinimalDenom
       );
@@ -608,7 +609,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     isEVMOnlyChain,
     account,
     setIsEvmTx,
-    ethereumAccount
+    ethereumAccount,
+    sendType
   );
 
   useEffect(() => {
