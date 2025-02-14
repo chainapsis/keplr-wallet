@@ -2,7 +2,7 @@ import { useIntl } from "react-intl";
 import { useStore } from "../../stores";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { Call, CallData, num } from "starknet";
-import { AppCurrency } from "@keplr-wallet/types";
+import { AppCurrency, ERC20Currency } from "@keplr-wallet/types";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { PrivilegeStarknetSignClaimRewardsMsg } from "@keplr-wallet/background";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
@@ -31,7 +31,7 @@ export const useStarknetClaimRewards = () => {
     rewardToken: CoinPretty,
     state: ClaimAllEachState
   ) => {
-    const starknetChainInfo = chainStore.getModularChain(chainId);
+    const modularChainInfo = chainStore.getModularChain(chainId);
     const account = accountStore.getAccount(chainId);
     if (!account.starknetHexAddress) {
       return;
@@ -68,12 +68,21 @@ export const useStarknetClaimRewards = () => {
       }
     }
 
-    const currencies = chainStore
-      .getModularChainInfoImpl(chainId)
-      .getCurrencies("starknet");
+    let STRK: ERC20Currency | undefined;
+    let ETH: ERC20Currency | undefined;
 
-    const STRK = currencies.find((c) => c.coinDenom === "STRK");
-    const ETH = currencies.find((c) => c.coinDenom === "ETH");
+    if ("starknet" in modularChainInfo) {
+      STRK = modularChainInfo.starknet.currencies.find(
+        (c) =>
+          c.coinMinimalDenom ===
+          `erc20:${modularChainInfo.starknet.strkContractAddress}`
+      );
+      ETH = modularChainInfo.starknet.currencies.find(
+        (c) =>
+          c.coinMinimalDenom ===
+          `erc20:${modularChainInfo.starknet.ethContractAddress}`
+      );
+    }
 
     (async () => {
       try {
@@ -111,6 +120,8 @@ export const useStarknetClaimRewards = () => {
             if (strkPrice && ethPrice) {
               if (strkPrice.sub(ethPrice).toDec().lt(zeroDec)) {
                 feeCurrency = STRK;
+              } else {
+                feeCurrency = ETH;
               }
             }
           }
@@ -308,8 +319,8 @@ export const useStarknetClaimRewards = () => {
         }
 
         analyticsStore.logEvent("complete_claim_all", {
-          chainId: starknetChainInfo.chainId,
-          chainName: starknetChainInfo.chainName,
+          chainId: modularChainInfo.chainId,
+          chainName: modularChainInfo.chainName,
         });
 
         setTimeout(() => {
@@ -327,7 +338,7 @@ export const useStarknetClaimRewards = () => {
     chainId: string,
     state: ClaimAllEachState
   ) => {
-    const starknetChainInfo = chainStore.getModularChain(chainId);
+    const modularChainInfo = chainStore.getModularChain(chainId);
     const account = accountStore.getAccount(chainId);
 
     if (!account.starknetHexAddress) {
@@ -335,8 +346,8 @@ export const useStarknetClaimRewards = () => {
     }
 
     analyticsStore.logEvent("click_claim", {
-      chainId: starknetChainInfo.chainId,
-      chainName: starknetChainInfo.chainName,
+      chainId: modularChainInfo.chainId,
+      chainName: modularChainInfo.chainName,
     });
 
     if (state.failedReason) {
@@ -360,14 +371,23 @@ export const useStarknetClaimRewards = () => {
       return;
     }
 
-    const currencies = chainStore
-      .getModularChainInfoImpl(chainId)
-      .getCurrencies("starknet");
+    let STRK: ERC20Currency | undefined;
+    let ETH: ERC20Currency | undefined;
 
-    const feeCurrency = currencies.find(
-      (currency) => currency.coinDenom === "ETH"
-    );
+    if ("starknet" in modularChainInfo) {
+      STRK = modularChainInfo.starknet.currencies.find(
+        (c) =>
+          c.coinMinimalDenom ===
+          `erc20:${modularChainInfo.starknet.strkContractAddress}`
+      );
+      ETH = modularChainInfo.starknet.currencies.find(
+        (c) =>
+          c.coinMinimalDenom ===
+          `erc20:${modularChainInfo.starknet.ethContractAddress}`
+      );
+    }
 
+    const feeCurrency = STRK || ETH;
     if (!feeCurrency) {
       return;
     }
@@ -387,17 +407,18 @@ export const useStarknetClaimRewards = () => {
     try {
       state.setIsSimulating(true);
 
-      // estimate fee with ETH first
-      const { gas_consumed, data_gas_consumed, gas_price, overall_fee, unit } =
-        await starknetAccount.estimateInvokeFee(
-          account.starknetHexAddress,
-          calls,
-          "ETH"
-        );
-
-      if (unit !== "WEI") {
-        throw new Error("Invalid fee unit");
-      }
+      const {
+        gas_consumed,
+        data_gas_consumed,
+        gas_price,
+        overall_fee,
+        unit,
+        resourceBounds,
+      } = await starknetAccount.estimateInvokeFee(
+        account.starknetHexAddress,
+        calls,
+        feeCurrency.coinDenom === "STRK" ? "STRK" : "ETH"
+      );
 
       const gasMargin = new Dec(1.2);
       const gasPriceMargin = new Dec(1.5);
@@ -420,30 +441,97 @@ export const useStarknetClaimRewards = () => {
 
       const gasPrice = new CoinPretty(feeCurrency, adjustedGasPrice);
 
-      const maxGasPrice = gasPrice.mul(gasPriceMargin);
-      const maxGas = totalGasConsumed.mul(gasMargin);
+      let fee:
+        | {
+            version: "v1" | "v3";
+            currency: AppCurrency;
+            gasPrice: CoinPretty;
+            maxGasPrice: CoinPretty;
+            gas: Dec;
+            maxGas: Dec;
+          }
+        | undefined;
+
+      if (feeCurrency.coinDenom === "ETH" && unit === "WEI") {
+        const maxGasPriceForETH = gasPrice.mul(gasPriceMargin);
+        const maxGasForETH = totalGasConsumed.mul(gasMargin);
+
+        fee = {
+          version: "v1",
+          currency: feeCurrency,
+          gasPrice,
+          maxGasPrice: maxGasPriceForETH,
+          gas: totalGasConsumed,
+          maxGas: maxGasForETH,
+        };
+      } else if (feeCurrency.coinDenom === "STRK" && unit === "FRI") {
+        const l1Gas = resourceBounds.l1_gas;
+
+        const maxGasForSTRK = adjustedOverallFee
+          .quo(gasPriceDec)
+          .mul(gasMargin);
+        const maxGasPriceForSTRK = gasPrice.mul(gasPriceMargin);
+
+        const maxPricePerUnitForSTRK = new CoinPretty(
+          feeCurrency,
+          num.hexToDecimalString(l1Gas.max_price_per_unit)
+        );
+
+        const finalMaxGasPriceForSTRK = maxPricePerUnitForSTRK
+          .sub(maxGasPriceForSTRK)
+          .toDec()
+          .gt(new Dec(0))
+          ? maxPricePerUnitForSTRK
+          : maxGasPriceForSTRK;
+
+        fee = {
+          version: "v3",
+          currency: feeCurrency,
+          gasPrice,
+          maxGasPrice: finalMaxGasPriceForSTRK,
+          gas: totalGasConsumed,
+          maxGas: maxGasForSTRK,
+        };
+      }
+
+      if (!fee) {
+        throw new Error(
+          intl.formatMessage({
+            id: "error.can-not-find-fee-for-claim-all",
+          })
+        );
+      }
 
       const { transaction_hash: txHash } = await starknetAccount.execute(
         account.starknetHexAddress,
         calls,
-        {
-          type: "ETH",
-          maxFee: maxGasPrice
-            .mul(maxGas)
-            .mul(new Dec(10 ** feeCurrency.coinDecimals))
-            .toDec()
-            .roundUp()
-            .toString(),
-        }
+        fee.version === "v3"
+          ? {
+              type: "STRK",
+              gas: fee.gas.roundUp().toString(),
+              maxGasPrice: fee.maxGasPrice
+                .mul(new Dec(10 ** fee.currency.coinDecimals))
+                .toDec()
+                .roundUp()
+                .toString(),
+            }
+          : {
+              type: "ETH",
+              maxFee: fee.maxGasPrice
+                .mul(fee.maxGas)
+                .mul(new Dec(10 ** fee.currency.coinDecimals))
+                .toDec()
+                .roundUp()
+                .toString(),
+            }
       );
-
       if (!txHash) {
         throw new Error("Failed to claim rewards");
       }
 
       analyticsStore.logEvent("complete_claim", {
-        chainId: starknetChainInfo.chainId,
-        chainName: starknetChainInfo.chainName,
+        chainId: modularChainInfo.chainId,
+        chainName: modularChainInfo.chainName,
       });
 
       navigate("/", {

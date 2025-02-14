@@ -49,15 +49,7 @@ export class ObservableQueryPoolMemberInfo extends ObservableStarknetChainJsonRp
 
   @computed
   get stakedAmount(): CoinPretty | undefined {
-    const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
-    if (!("starknet" in modularChainInfo)) {
-      return;
-    }
-
-    const currency = modularChainInfo.starknet.currencies.find(
-      (c) => c.coinDenom === "STRK"
-    );
-
+    const currency = this.stakingCurrency;
     if (!currency) {
       return;
     }
@@ -94,15 +86,7 @@ export class ObservableQueryPoolMemberInfo extends ObservableStarknetChainJsonRp
 
   @computed
   get unclaimedRewards(): CoinPretty | undefined {
-    const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
-    if (!("starknet" in modularChainInfo)) {
-      return;
-    }
-
-    const currency = modularChainInfo.starknet.currencies.find(
-      (c) => c.coinDenom === "STRK"
-    );
-
+    const currency = this.stakingCurrency;
     if (!currency) {
       return;
     }
@@ -125,15 +109,7 @@ export class ObservableQueryPoolMemberInfo extends ObservableStarknetChainJsonRp
 
   @computed
   get unpoolAmount(): CoinPretty | undefined {
-    const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
-    if (!("starknet" in modularChainInfo)) {
-      return;
-    }
-
-    const currency = modularChainInfo.starknet.currencies.find(
-      (c) => c.coinDenom === "STRK"
-    );
-
+    const currency = this.stakingCurrency;
     if (!currency) {
       return;
     }
@@ -192,6 +168,19 @@ export class ObservableQueryPoolMemberInfo extends ObservableStarknetChainJsonRp
     }
 
     return parseInt(this.response.data[4], 16) / 100;
+  }
+
+  private get stakingCurrency(): ERC20Currency | undefined {
+    const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
+    if (!("starknet" in modularChainInfo)) {
+      return;
+    }
+
+    return modularChainInfo.starknet.currencies.find(
+      (c) =>
+        c.coinMinimalDenom ===
+        `erc20:${modularChainInfo.starknet.strkContractAddress}`
+    );
   }
 }
 
@@ -475,7 +464,9 @@ export class ObservableQueryStakingInfo extends ObservableStarknetChainJsonRpcQu
     }
 
     return modularChainInfo.starknet.currencies.find(
-      (c) => c.coinDenom === "STRK"
+      (c) =>
+        c.coinMinimalDenom ===
+        `erc20:${modularChainInfo.starknet.strkContractAddress}`
     );
   }
 }
