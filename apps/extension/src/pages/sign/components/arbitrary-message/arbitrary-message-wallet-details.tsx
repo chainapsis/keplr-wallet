@@ -13,7 +13,7 @@ import { Bech32Address } from "@keplr-wallet/cosmos";
 import { ChainInfoWithCoreTypes } from "@keplr-wallet/background";
 import { IChainInfoImpl } from "@keplr-wallet/stores";
 
-interface Adr36WalletDetailsProps {
+interface ArbitraryMsgWalletDetailsProps {
   walletName: string;
   chainInfo: IChainInfoImpl<ChainInfoWithCoreTypes>;
   addressInfo: {
@@ -22,11 +22,9 @@ interface Adr36WalletDetailsProps {
   };
 }
 
-export const Adr36WalletDetails: FunctionComponent<Adr36WalletDetailsProps> = ({
-  walletName,
-  chainInfo,
-  addressInfo,
-}) => {
+export const ArbitraryMsgWalletDetails: FunctionComponent<
+  ArbitraryMsgWalletDetailsProps
+> = ({ walletName, chainInfo, addressInfo }) => {
   const theme = useTheme();
   const shortenAddress = (() => {
     if (addressInfo.type === "starknet") {

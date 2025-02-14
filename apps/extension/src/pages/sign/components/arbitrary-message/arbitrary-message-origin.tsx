@@ -9,7 +9,7 @@ import { ShieldExclamationIcon } from "../../../../components/icon";
 import { FormattedMessage } from "react-intl";
 import { Image } from "../../../../components/image";
 
-interface Adr36RequestOriginProps {
+interface ArbitraryMsgRequestOriginProps {
   origin: string;
 }
 
@@ -56,9 +56,9 @@ function FaviconImage({ origin }: { origin: string }) {
   );
 }
 
-export const Adr36RequestOrigin: FunctionComponent<Adr36RequestOriginProps> = ({
-  origin,
-}: Adr36RequestOriginProps) => {
+export const ArbitraryMsgRequestOrigin: FunctionComponent<
+  ArbitraryMsgRequestOriginProps
+> = ({ origin }) => {
   const theme = useTheme();
 
   return (

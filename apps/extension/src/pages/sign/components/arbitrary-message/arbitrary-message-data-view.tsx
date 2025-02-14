@@ -20,17 +20,15 @@ import { Gutter } from "../../../../components/gutter";
 import SimpleBar from "simplebar-react";
 import { isRunningInSidePanel } from "../../../../utils";
 
-interface Adr36DataViewProps {
+interface ArbitraryMsgDataViewProps {
   message?: string;
   rawMessage?: string;
   messageIsShownAsJSON?: boolean;
 }
 const MAX_HEIGHT = 780;
-export const Adr36DataView: FunctionComponent<Adr36DataViewProps> = ({
-  message,
-  rawMessage,
-  messageIsShownAsJSON = false,
-}) => {
+export const ArbitraryMsgDataView: FunctionComponent<
+  ArbitraryMsgDataViewProps
+> = ({ message, rawMessage, messageIsShownAsJSON = false }) => {
   const [isMessageExpanded, setIsMessageExpanded] = useState(false);
   const [isRawMessageExpanded, setIsRawMessageExpanded] = useState(false);
   const initialHeight = useRef<number>(0);

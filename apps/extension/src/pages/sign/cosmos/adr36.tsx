@@ -22,10 +22,10 @@ import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
 import { KeystoneUSBBox } from "../components/keystone-usb-box";
 import { useNavigate } from "react-router";
 import { ApproveIcon, CancelIcon } from "../../../components/button";
-import { Adr36RequestOrigin } from "../components/adr36/adr36-request-origin";
-import { Adr36SignHeader } from "../components/adr36/adr36-header";
-import { Adr36WalletDetails } from "../components/adr36/adr36-wallet-details";
-import { Adr36DataView } from "../components/adr36/adr36-data-view";
+import { ArbitraryMsgRequestOrigin } from "../components/arbitrary-message/arbitrary-message-origin";
+import { ArbitraryMsgSignHeader } from "../components/arbitrary-message/arbitrary-message-header";
+import { ArbitraryMsgWalletDetails } from "../components/arbitrary-message/arbitrary-message-wallet-details";
+import { ArbitraryMsgDataView } from "../components/arbitrary-message/arbitrary-message-data-view";
 
 export const SignCosmosADR36Page: FunctionComponent = observer(() => {
   const { chainStore, signInteractionStore, uiConfigStore, accountStore } =
@@ -333,13 +333,13 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
           overflow: "auto",
         }}
       >
-        <Adr36SignHeader isFromKeplr={isOriginKeplr} />
+        <ArbitraryMsgSignHeader isFromKeplr={isOriginKeplr} />
         <Gutter size="0.75rem" />
-        <Adr36RequestOrigin origin={origin} />
+        <ArbitraryMsgRequestOrigin origin={origin} />
 
         <Gutter size="1.5rem" />
         {chainId && (
-          <Adr36WalletDetails
+          <ArbitraryMsgWalletDetails
             walletName={signerInfo.name}
             chainInfo={chainStore.getChain(chainId)}
             addressInfo={{
@@ -350,7 +350,7 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
         )}
 
         <Gutter size="1.5rem" />
-        <Adr36DataView
+        <ArbitraryMsgDataView
           message={message}
           rawMessage={rawMessage}
           messageIsShownAsJSON={isMessageShownAsJSON}

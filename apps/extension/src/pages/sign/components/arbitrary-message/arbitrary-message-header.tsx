@@ -3,7 +3,7 @@ import { H4 } from "../../../../components/typography";
 import { FormattedMessage } from "react-intl";
 import { YAxis } from "../../../../components/axis";
 
-export const Adr36SignHeader: FunctionComponent<{
+export const ArbitraryMsgSignHeader: FunctionComponent<{
   isFromKeplr?: boolean;
 }> = ({ isFromKeplr }) => {
   return (

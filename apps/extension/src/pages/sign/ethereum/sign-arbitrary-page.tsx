@@ -3,10 +3,10 @@ import { HeaderProps } from "../../../layouts/header/types";
 import { EthSignType } from "@keplr-wallet/types";
 import { observer } from "mobx-react-lite";
 import { HeaderLayout } from "../../../layouts/header";
-import { Adr36SignHeader } from "../components/adr36/adr36-header";
-import { Adr36RequestOrigin } from "../components/adr36/adr36-request-origin";
-import { Adr36WalletDetails } from "../components/adr36/adr36-wallet-details";
-import { Adr36DataView } from "../components/adr36/adr36-data-view";
+import { ArbitraryMsgSignHeader } from "../components/arbitrary-message/arbitrary-message-header";
+import { ArbitraryMsgRequestOrigin } from "../components/arbitrary-message/arbitrary-message-origin";
+import { ArbitraryMsgWalletDetails } from "../components/arbitrary-message/arbitrary-message-wallet-details";
+import { ArbitraryMsgDataView } from "../components/arbitrary-message/arbitrary-message-data-view";
 import { IChainInfoImpl } from "@keplr-wallet/stores";
 import { ChainInfoWithCoreTypes } from "@keplr-wallet/background";
 import { Box } from "../../../components/box";
@@ -65,17 +65,17 @@ export const EthereumArbitrarySignPage: FunctionComponent<{
             overflow: "auto",
           }}
         >
-          <Adr36SignHeader />
+          <ArbitraryMsgSignHeader />
           <Gutter size="0.75rem" />
-          <Adr36RequestOrigin origin={origin} />
+          <ArbitraryMsgRequestOrigin origin={origin} />
           <Gutter size="0.75rem" />
-          <Adr36WalletDetails
+          <ArbitraryMsgWalletDetails
             walletName={walletName}
             chainInfo={chainInfo}
             addressInfo={addressInfo}
           />
           <Gutter size="0.75rem" />
-          <Adr36DataView
+          <ArbitraryMsgDataView
             {...(messageData.signType === EthSignType.MESSAGE
               ? { message: messageData.signingDataText }
               : { rawMessage: messageData.signingDataText })}
