@@ -6,6 +6,7 @@ export interface VerticalCollapseTransitionProps {
   width?: string;
   transitionAlign?: "top" | "bottom" | "center";
 
+  opacityLeft?: number;
   disableOpacityAnimation?: boolean;
   // height, opacity의 animation config 설정
   // 근데 static이라고 해놓은 뜻은

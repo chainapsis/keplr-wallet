@@ -32,6 +32,7 @@ export const VerticalCollapseTransition: FunctionComponent<
   children,
   collapsed,
   width,
+  opacityLeft = 0.1,
   disableOpacityAnimation,
   staticHeightAnimConfig = defaultSpringConfig,
   staticOpacityAnimConfig = defaultSpringConfig,
@@ -52,7 +53,7 @@ export const VerticalCollapseTransition: FunctionComponent<
   });
 
   const opacity = useSpringValue(
-    collapsed ? (disableOpacityAnimation ? 1 : 0.1) : 1,
+    collapsed ? (disableOpacityAnimation ? 1 : opacityLeft) : 1,
     {
       config: staticOpacityAnimConfig,
     }
@@ -90,10 +91,14 @@ export const VerticalCollapseTransition: FunctionComponent<
   // 그래서 안에서 disableOpacityAnimation를 바로 쓸수가 없으므로 대충 ref으로 해결...
   const disableOpacityAnimationRef = useRef(disableOpacityAnimation);
   disableOpacityAnimationRef.current = disableOpacityAnimation;
+  const opacityLeftRef = useRef(opacityLeft);
+  opacityLeftRef.current = opacityLeft;
   useEffect(() => {
     if (collapsed) {
       heightPx.start(0);
-      opacity.start(disableOpacityAnimationRef.current ? 1 : 0.1);
+      opacity.start(
+        disableOpacityAnimationRef.current ? 1 : opacityLeftRef.current
+      );
     } else {
       heightPx.start(lastHeight.current);
       opacity.start(1);
