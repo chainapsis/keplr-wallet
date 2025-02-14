@@ -645,6 +645,7 @@ const ViewClaimTokenItemContent: FunctionComponent<{
           if (isLoading) {
             return;
           }
+          setIsHover(false); // 아래 아이콘이 포함된 애니메이션 wrapper 영역을 클릭하면 포커스가 해제되지 않아서 수동으로 해줌
           onClick();
         }}
         style={{
