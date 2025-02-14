@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/mobx-utils",
-  "version": "0.12.187-rc.1",
+  "version": "0.12.187",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -16,7 +16,7 @@
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "dependencies": {
-    "@keplr-wallet/types": "0.12.187-rc.1"
+    "@keplr-wallet/types": "0.12.187"
   },
   "peerDependencies": {
     "mobx": "^6"
