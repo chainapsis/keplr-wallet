@@ -423,7 +423,7 @@
   "page.sign.cosmos.icns.title": "ICNS 등록 요청",
 
   "page.sign.adr36.title": "서명 요청",
-  "page.sign.adr36.title.from-keplr": "Keplr에 로그인",
+  "page.sign.adr36.title.from-keplr": "Keplr로 로그인",
   "page.sign.adr36.warning-origin": "이 웹사이트를 신뢰하시나요?",
   "page.sign.adr36.signing-with": "서명 하기",
   "page.sign.adr36.requested-network": "요청한 네트워크",
