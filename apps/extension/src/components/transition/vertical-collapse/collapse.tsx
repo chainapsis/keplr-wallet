@@ -49,8 +49,12 @@ export const VerticalCollapseTransition: FunctionComponent<
     },
   });
 
+  const opacity = useSpringValue(collapsed ? 0.1 : 1, {
+    config: defaultSpringConfig,
+  });
+
   const [registry] = useState<IDescendantRegistry>(
-    () => new DescendantHeightPxRegistry(heightPx)
+    () => new DescendantHeightPxRegistry(heightPx, opacity)
   );
   const internalContext = useVerticalSizeInternalContext();
 
@@ -74,10 +78,6 @@ export const VerticalCollapseTransition: FunctionComponent<
     if (onResize) {
       onResize(height);
     }
-  });
-
-  const opacity = useSpringValue(collapsed ? 0.1 : 1, {
-    config: defaultSpringConfig,
   });
 
   useEffect(() => {
