@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { SignEthereumInteractionStore } from "@keplr-wallet/stores-core";
 import { Box } from "../../../components/box";
-import { XAxis, YAxis } from "../../../components/axis";
+import { XAxis } from "../../../components/axis";
 import { Body2, Body3, H5 } from "../../../components/typography";
 import { ColorPalette } from "../../../styles";
 import { observer } from "mobx-react-lite";
@@ -50,10 +50,11 @@ import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
 import { EthTxBase } from "../components/eth-tx/render/tx-base";
 import { MemoryKVStore } from "@keplr-wallet/common";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
-import { Image } from "../../../components/image";
 import { Column, Columns } from "../../../components/column";
 import { useNavigate } from "react-router";
 import { ApproveIcon, CancelIcon } from "../../../components/button";
+import { EthereumArbitrarySignPage } from "./sign-arbitrary-page";
+import { HeaderProps } from "../../../layouts/header/types";
 
 /**
  * CosmosTxView의 주석을 꼭 참고하셈
@@ -88,6 +89,14 @@ export const EthereumSigningView: FunctionComponent<{
   const { message, signType, signer, chainId } = interactionData.data;
 
   const account = accountStore.getAccount(chainId);
+  const signerInfo = {
+    name:
+      typeof interactionData.data.keyInsensitive["keyRingName"] === "string"
+        ? interactionData.data.keyInsensitive["keyRingName"]
+        : "",
+    address: interactionData.data.signer || "",
+  };
+
   const ethereumAccount = ethereumAccountStore.getAccount(chainId);
   const chainInfo = chainStore.getChain(chainId);
 
@@ -289,6 +298,7 @@ export const EthereumSigningView: FunctionComponent<{
             const string = signingDataBuff.toString("utf8");
             if (string.startsWith("0x")) {
               const buf = Buffer.from(string.slice(2), "hex");
+
               try {
                 // 정상적인 utf-8 문자열인지 확인
                 const decoder = new TextDecoder("utf-8", { fatal: true });
@@ -371,6 +381,214 @@ export const EthereumSigningView: FunctionComponent<{
     isKeystoneInteracting;
 
   const buttonDisabled = isTxSigning && txConfigsValidate.interactionBlocked;
+  const bottomButtons: HeaderProps["bottomButtons"] = [
+    {
+      textOverrideIcon: (
+        <CancelIcon
+          color={
+            theme.mode === "light"
+              ? ColorPalette["blue-400"]
+              : ColorPalette["gray-200"]
+          }
+        />
+      ),
+      size: "large",
+      color: "secondary",
+      style: {
+        width: "3.25rem",
+      },
+      onClick: async () => {
+        await signEthereumInteractionStore.rejectWithProceedNext(
+          interactionData.id,
+          async (proceedNext) => {
+            if (!proceedNext) {
+              if (
+                interactionInfo.interaction &&
+                !interactionInfo.interactionInternal
+              ) {
+                handleExternalInteractionWithNoProceedNext();
+              } else if (
+                interactionInfo.interaction &&
+                interactionInfo.interactionInternal
+              ) {
+                window.history.length > 1 ? navigate(-1) : navigate("/");
+              } else {
+                navigate("/", { replace: true });
+              }
+            }
+          }
+        );
+      },
+    },
+    {
+      text: intl.formatMessage({ id: "button.approve" }),
+      color: "primary",
+      size: "large",
+      left: !isLoading && <ApproveIcon />,
+      disabled: buttonDisabled,
+      isLoading,
+      onClick: async () => {
+        try {
+          let signature;
+          if (interactionData.data.keyType === "ledger") {
+            setIsLedgerInteracting(true);
+            setLedgerInteractingError(undefined);
+            signature = await handleEthereumPreSignByLedger(
+              interactionData,
+              signingDataBuff,
+              {
+                useWebHID: uiConfigStore.useWebHIDLedger,
+              }
+            );
+          } else if (interactionData.data.keyType === "keystone") {
+            setIsKeystoneInteracting(true);
+            setKeystoneInteractingError(undefined);
+            signature = await handleEthereumPreSignByKeystone(
+              interactionData,
+              signingDataBuff,
+              {
+                displayQRCode: async (ur: KeystoneUR) => {
+                  setKeystoneUR(ur);
+                },
+                scanQRCode: () =>
+                  new Promise<KeystoneUR>((resolve) => {
+                    keystoneScanResolve.current = resolve;
+                  }),
+              }
+            );
+          }
+
+          await signEthereumInteractionStore.approveWithProceedNext(
+            interactionData.id,
+            signingDataBuff,
+            signature,
+            async (proceedNext) => {
+              if (!proceedNext) {
+                if (
+                  interactionInfo.interaction &&
+                  !interactionInfo.interactionInternal
+                ) {
+                  handleExternalInteractionWithNoProceedNext();
+                }
+              }
+
+              if (
+                interactionInfo.interaction &&
+                interactionInfo.interactionInternal
+              ) {
+                // XXX: 약간 난해한 부분인데
+                //      내부의 tx의 경우에는 tx 이후의 routing을 요청한 쪽에서 처리한다.
+                //      하지만 tx를 처리할때 tx broadcast 등의 과정이 있고
+                //      서명 페이지에서는 이러한 과정이 끝났는지 아닌지를 파악하기 힘들다.
+                //      만약에 밑과같은 처리를 하지 않으면 interaction data가 먼저 지워지면서
+                //      화면이 깜빡거리는 문제가 발생한다.
+                //      이 문제를 해결하기 위해서 내부의 tx는 보내는 쪽에서 routing을 잘 처리한다고 가정하고
+                //      페이지를 벗어나고 나서야 data를 지우도록한다.
+                await unmountPromise.promise;
+              }
+            }
+          );
+        } catch (e) {
+          console.log(e);
+
+          if (e instanceof KeplrError) {
+            if (e.module === ErrModuleLedgerSign) {
+              setLedgerInteractingError(e);
+            } else if (e.module === ErrModuleKeystoneSign) {
+              setKeystoneInteractingError(e);
+            } else {
+              setLedgerInteractingError(undefined);
+              setKeystoneInteractingError(undefined);
+            }
+          } else {
+            setLedgerInteractingError(undefined);
+            setKeystoneInteractingError(undefined);
+          }
+        } finally {
+          setIsLedgerInteracting(false);
+          setIsKeystoneInteracting(false);
+        }
+      },
+    },
+  ];
+
+  const headerLeft = (
+    <BackButton
+      hidden={
+        interactionInfo.interaction && !interactionInfo.interactionInternal
+      }
+    />
+  );
+  const ledgerGuideBox = useMemo(
+    () => (
+      <LedgerGuideBox
+        data={{
+          keyInsensitive: interactionData.data.keyInsensitive,
+          isEthereum: true,
+        }}
+        isLedgerInteracting={isLedgerInteracting}
+        ledgerInteractingError={ledgerInteractingError}
+        isInternal={interactionData.isInternal}
+      />
+    ),
+    [
+      interactionData.data.keyInsensitive,
+      interactionData.isInternal,
+      isLedgerInteracting,
+      ledgerInteractingError,
+    ]
+  );
+
+  const keystoneUSBBox = isKeystonUSB && (
+    <KeystoneUSBBox
+      isKeystoneInteracting={isKeystoneInteracting}
+      KeystoneInteractingError={keystoneInteractingError}
+    />
+  );
+
+  const keystoneSign = !isKeystonUSB && (
+    <KeystoneSign
+      ur={keystoneUR}
+      isOpen={isKeystoneInteracting}
+      close={() => setIsKeystoneInteracting(false)}
+      onScan={(ur) => {
+        if (keystoneScanResolve.current === undefined) {
+          throw new Error("Keystone Scan Error");
+        }
+        keystoneScanResolve.current(ur);
+      }}
+      error={keystoneInteractingError}
+      onCloseError={() => {
+        if (keystoneInteractingError) {
+          setIsKeystoneInteracting(false);
+        }
+        setKeystoneInteractingError(undefined);
+      }}
+    />
+  );
+
+  if (!isTxSigning) {
+    return (
+      <EthereumArbitrarySignPage
+        bottomButtons={bottomButtons}
+        headerLeft={headerLeft}
+        ledgerGuideBox={ledgerGuideBox}
+        keystoneUSBBox={keystoneUSBBox}
+        keystoneSign={keystoneSign}
+        origin={interactionData.data.origin}
+        walletName={signerInfo.name}
+        chainInfo={chainInfo}
+        addressInfo={{
+          type: "ethereum",
+          address: signerInfo.address,
+        }}
+        messageData={{
+          signType: signType,
+          signingDataText: signingDataText,
+        }}
+      />
+    );
+  }
 
   return (
     <HeaderLayout
@@ -378,143 +596,8 @@ export const EthereumSigningView: FunctionComponent<{
         id: `page.sign.ethereum.${signType}.title`,
       })}
       fixedHeight={true}
-      left={
-        <BackButton
-          hidden={
-            interactionInfo.interaction && !interactionInfo.interactionInternal
-          }
-        />
-      }
-      bottomButtons={[
-        {
-          textOverrideIcon: (
-            <CancelIcon
-              color={
-                theme.mode === "light"
-                  ? ColorPalette["blue-400"]
-                  : ColorPalette["gray-200"]
-              }
-            />
-          ),
-          size: "large",
-          color: "secondary",
-          style: {
-            width: "3.25rem",
-          },
-          onClick: async () => {
-            await signEthereumInteractionStore.rejectWithProceedNext(
-              interactionData.id,
-              async (proceedNext) => {
-                if (!proceedNext) {
-                  if (
-                    interactionInfo.interaction &&
-                    !interactionInfo.interactionInternal
-                  ) {
-                    handleExternalInteractionWithNoProceedNext();
-                  } else if (
-                    interactionInfo.interaction &&
-                    interactionInfo.interactionInternal
-                  ) {
-                    window.history.length > 1 ? navigate(-1) : navigate("/");
-                  } else {
-                    navigate("/", { replace: true });
-                  }
-                }
-              }
-            );
-          },
-        },
-        {
-          text: intl.formatMessage({ id: "button.approve" }),
-          color: "primary",
-          size: "large",
-          left: !isLoading && <ApproveIcon />,
-          disabled: buttonDisabled,
-          isLoading,
-          onClick: async () => {
-            try {
-              let signature;
-              if (interactionData.data.keyType === "ledger") {
-                setIsLedgerInteracting(true);
-                setLedgerInteractingError(undefined);
-                signature = await handleEthereumPreSignByLedger(
-                  interactionData,
-                  signingDataBuff,
-                  {
-                    useWebHID: uiConfigStore.useWebHIDLedger,
-                  }
-                );
-              } else if (interactionData.data.keyType === "keystone") {
-                setIsKeystoneInteracting(true);
-                setKeystoneInteractingError(undefined);
-                signature = await handleEthereumPreSignByKeystone(
-                  interactionData,
-                  signingDataBuff,
-                  {
-                    displayQRCode: async (ur: KeystoneUR) => {
-                      setKeystoneUR(ur);
-                    },
-                    scanQRCode: () =>
-                      new Promise<KeystoneUR>((resolve) => {
-                        keystoneScanResolve.current = resolve;
-                      }),
-                  }
-                );
-              }
-
-              await signEthereumInteractionStore.approveWithProceedNext(
-                interactionData.id,
-                signingDataBuff,
-                signature,
-                async (proceedNext) => {
-                  if (!proceedNext) {
-                    if (
-                      interactionInfo.interaction &&
-                      !interactionInfo.interactionInternal
-                    ) {
-                      handleExternalInteractionWithNoProceedNext();
-                    }
-                  }
-
-                  if (
-                    interactionInfo.interaction &&
-                    interactionInfo.interactionInternal
-                  ) {
-                    // XXX: 약간 난해한 부분인데
-                    //      내부의 tx의 경우에는 tx 이후의 routing을 요청한 쪽에서 처리한다.
-                    //      하지만 tx를 처리할때 tx broadcast 등의 과정이 있고
-                    //      서명 페이지에서는 이러한 과정이 끝났는지 아닌지를 파악하기 힘들다.
-                    //      만약에 밑과같은 처리를 하지 않으면 interaction data가 먼저 지워지면서
-                    //      화면이 깜빡거리는 문제가 발생한다.
-                    //      이 문제를 해결하기 위해서 내부의 tx는 보내는 쪽에서 routing을 잘 처리한다고 가정하고
-                    //      페이지를 벗어나고 나서야 data를 지우도록한다.
-                    await unmountPromise.promise;
-                  }
-                }
-              );
-            } catch (e) {
-              console.log(e);
-
-              if (e instanceof KeplrError) {
-                if (e.module === ErrModuleLedgerSign) {
-                  setLedgerInteractingError(e);
-                } else if (e.module === ErrModuleKeystoneSign) {
-                  setKeystoneInteractingError(e);
-                } else {
-                  setLedgerInteractingError(undefined);
-                  setKeystoneInteractingError(undefined);
-                }
-              } else {
-                setLedgerInteractingError(undefined);
-                setKeystoneInteractingError(undefined);
-              }
-            } finally {
-              setIsLedgerInteracting(false);
-              setIsKeystoneInteracting(false);
-            }
-          },
-        },
-      ]}
+      left={headerLeft}
+      bottomButtons={bottomButtons}
     >
       <Box
         height="100%"
@@ -524,117 +607,66 @@ export const EthereumSigningView: FunctionComponent<{
           overflow: "auto",
         }}
       >
-        {isTxSigning ? (
-          <Box marginBottom="0.5rem" alignX="center" alignY="center">
-            <Box
-              padding="0.375rem 0.625rem 0.375rem 0.75rem"
-              backgroundColor={
-                theme.mode === "light"
-                  ? ColorPalette.white
-                  : ColorPalette["gray-600"]
-              }
-              borderRadius="20rem"
-            >
-              <XAxis alignY="center">
-                <Body3
-                  color={
-                    theme.mode === "light"
-                      ? ColorPalette["gray-500"]
-                      : ColorPalette["gray-200"]
-                  }
-                >
-                  <FormattedMessage
-                    id="page.sign.ethereum.requested-network"
-                    values={{
-                      network: chainInfo.chainName,
-                    }}
-                  />
-                </Body3>
-                <Gutter direction="horizontal" size="0.5rem" />
-                <ChainImageFallback
-                  size="1.25rem"
-                  chainInfo={chainInfo}
-                  alt={chainInfo.chainName}
-                />
-              </XAxis>
-            </Box>
-          </Box>
-        ) : (
+        <Box marginBottom="0.5rem" alignX="center" alignY="center">
           <Box
-            padding="1rem"
+            padding="0.375rem 0.625rem 0.375rem 0.75rem"
             backgroundColor={
               theme.mode === "light"
                 ? ColorPalette.white
                 : ColorPalette["gray-600"]
             }
-            borderRadius="0.375rem"
-            style={{
-              boxShadow:
-                theme.mode === "light"
-                  ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
-                  : "none",
-            }}
+            borderRadius="20rem"
           >
             <XAxis alignY="center">
-              <Image
-                alt="sign-custom-image"
-                src={require("../../../public/assets/img/sign-adr36.png")}
-                style={{ width: "3rem", height: "3rem" }}
+              <Body3
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-500"]
+                    : ColorPalette["gray-200"]
+                }
+              >
+                <FormattedMessage
+                  id="page.sign.ethereum.requested-network"
+                  values={{
+                    network: chainInfo.chainName,
+                  }}
+                />
+              </Body3>
+              <Gutter direction="horizontal" size="0.5rem" />
+              <ChainImageFallback
+                size="1.25rem"
+                chainInfo={chainInfo}
+                alt={chainInfo.chainName}
               />
-              <Gutter size="0.75rem" />
-              <YAxis>
-                <H5
-                  color={
-                    theme.mode === "light"
-                      ? ColorPalette["gray-500"]
-                      : ColorPalette["gray-10"]
-                  }
-                >
-                  <FormattedMessage id="Prove account ownership to" />
-                </H5>
-                <Gutter size="2px" />
-                <Body3
-                  color={
-                    theme.mode === "light"
-                      ? ColorPalette["gray-300"]
-                      : ColorPalette["gray-200"]
-                  }
-                >
-                  {interactionData?.data.origin || ""}
-                </Body3>
-              </YAxis>
             </XAxis>
           </Box>
-        )}
-
+        </Box>
         <Gutter size="0.75rem" />
 
-        {isTxSigning && (
-          <Box marginBottom="0.5rem">
-            <Columns sum={1} alignY="center">
-              <XAxis>
-                <H5
-                  style={{
-                    color:
-                      theme.mode === "light"
-                        ? ColorPalette["gray-500"]
-                        : ColorPalette["gray-50"],
-                  }}
-                >
-                  <FormattedMessage
-                    id={"page.sign.ethereum.transaction.summary"}
-                  />
-                </H5>
-              </XAxis>
-              <Column weight={1} />
+        <Box marginBottom="0.5rem">
+          <Columns sum={1} alignY="center">
+            <XAxis>
+              <H5
+                style={{
+                  color:
+                    theme.mode === "light"
+                      ? ColorPalette["gray-500"]
+                      : ColorPalette["gray-50"],
+                }}
+              >
+                <FormattedMessage
+                  id={"page.sign.ethereum.transaction.summary"}
+                />
+              </H5>
+            </XAxis>
+            <Column weight={1} />
 
-              <ViewDataButton
-                isViewData={isViewData}
-                setIsViewData={setIsViewData}
-              />
-            </Columns>
-          </Box>
-        )}
+            <ViewDataButton
+              isViewData={isViewData}
+              setIsViewData={setIsViewData}
+            />
+          </Columns>
+        </Box>
         <SimpleBar
           autoHide={false}
           style={{
@@ -654,7 +686,7 @@ export const EthereumSigningView: FunctionComponent<{
                 : "none",
           }}
         >
-          {isTxSigning && !isUnknownContractExecution ? (
+          {!isUnknownContractExecution ? (
             <Box>
               {isViewData ? (
                 <Box
@@ -732,69 +764,34 @@ export const EthereumSigningView: FunctionComponent<{
 
         {!isViewData ? <div style={{ flex: 1 }} /> : null}
 
-        {isTxSigning &&
-          (() => {
-            if (interactionData.isInternal) {
-              return (
-                <FeeSummary
-                  feeConfig={feeConfig}
-                  gasConfig={gasConfig}
-                  gasSimulator={gasSimulator}
-                  isForEVMTx
-                />
-              );
-            }
-
+        {(() => {
+          if (interactionData.isInternal) {
             return (
-              <FeeControl
+              <FeeSummary
                 feeConfig={feeConfig}
-                senderConfig={senderConfig}
                 gasConfig={gasConfig}
                 gasSimulator={gasSimulator}
-                disableAutomaticFeeSet={preferNoSetFee}
                 isForEVMTx
               />
             );
-          })()}
+          }
 
-        <LedgerGuideBox
-          data={{
-            keyInsensitive: interactionData.data.keyInsensitive,
-            isEthereum: true,
-          }}
-          isLedgerInteracting={isLedgerInteracting}
-          ledgerInteractingError={ledgerInteractingError}
-          isInternal={interactionData.isInternal}
-        />
-        {isKeystonUSB && (
-          <KeystoneUSBBox
-            isKeystoneInteracting={isKeystoneInteracting}
-            KeystoneInteractingError={keystoneInteractingError}
-          />
-        )}
+          return (
+            <FeeControl
+              feeConfig={feeConfig}
+              senderConfig={senderConfig}
+              gasConfig={gasConfig}
+              gasSimulator={gasSimulator}
+              disableAutomaticFeeSet={preferNoSetFee}
+              isForEVMTx
+            />
+          );
+        })()}
+
+        {ledgerGuideBox}
+        {keystoneUSBBox}
       </Box>
-      {!isKeystonUSB && (
-        <KeystoneSign
-          ur={keystoneUR}
-          isOpen={isKeystoneInteracting}
-          close={() => {
-            setIsKeystoneInteracting(false);
-          }}
-          onScan={(ur) => {
-            if (keystoneScanResolve.current === undefined) {
-              throw new Error("Keystone Scan Error");
-            }
-            keystoneScanResolve.current(ur);
-          }}
-          error={keystoneInteractingError}
-          onCloseError={() => {
-            if (keystoneInteractingError) {
-              setIsKeystoneInteracting(false);
-            }
-            setKeystoneInteractingError(undefined);
-          }}
-        />
-      )}
+      {keystoneSign}
     </HeaderLayout>
   );
 });

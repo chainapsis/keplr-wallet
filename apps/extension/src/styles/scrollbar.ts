@@ -13,7 +13,7 @@ export const ScrollBarStyle = createGlobalStyle`
 
   .simplebar-scrollbar::before {
     background-color: ${ColorPalette["gray-400"]};
-    border-radius: 0;
+    border-radius: 999px;
   }
 
   .simplebar-scrollbar.simplebar-visible:before {

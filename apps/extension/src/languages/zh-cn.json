@@ -401,10 +401,16 @@
   "page.sign.cosmos.tx.view-data-button": "查看数据",
   "page.sign.cosmos.icns.title": "请求注册",
 
-  "page.sign.adr36.title": "证明所有权",
-  "page.sign.adr36.prove-account-ownership-to": "证明帐户所有权",
+  "page.sign.adr36.title": "签名申请",
+  "page.sign.adr36.title.from-keplr": "使用 Keplr 登录",
+  "page.sign.adr36.warning-origin": "只有当网站受信任时才尝试授权",
+  "page.sign.adr36.signing-with": "签名",
   "page.sign.adr36.requested-network": "请求的网络",
   "page.sign.adr36.warning-title": "不兼容的签名请求",
+  "page.sign.adr36.message": "消息",
+  "page.sign.adr36.raw-message": "数据视图",
+  "page.sign.adr36.show-more-detail": "显示更多详情",
+  "page.sign.adr36.show-less-detail": "显示更少详情",
   "page.sign.adr36.warning-paragraph": "错误：SIGN_MODE_DIRECT无法在Ledger上签名。请联系网络应用提供商来解决此问题。",
 
   "page.sign.ethereum.title": "签以太坊",
