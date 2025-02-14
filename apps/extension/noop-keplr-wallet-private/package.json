@@ -5,6 +5,7 @@
   "sideEffects": false,
   "dependencies": {},
   "peerDependencies": {
+    "@keplr-wallet/simple-fetch": "*",
     "react": "^16.8.0 || ^17 || ^18",
     "styled-components": "*"
   }
