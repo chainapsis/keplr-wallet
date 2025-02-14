@@ -12,7 +12,7 @@ import {
   useVerticalResizeObserver,
   VerticalResizeContainer,
 } from "../internal";
-import { animated, useSpring, useSpringValue } from "@react-spring/web";
+import { animated, useSpringValue } from "@react-spring/web";
 import {
   DescendantHeightPxRegistry,
   IDescendantRegistry,
@@ -25,8 +25,8 @@ export const VerticalCollapseTransition: FunctionComponent<
   PropsWithChildren<
     VerticalCollapseTransitionProps & {
       onTransitionEnd?: () => void;
+
       onResize?: (height: number) => void;
-      animateOnResize?: boolean;
     }
   >
 > = ({
@@ -36,7 +36,6 @@ export const VerticalCollapseTransition: FunctionComponent<
   transitionAlign,
   onTransitionEnd,
   onResize,
-  animateOnResize = false,
 }) => {
   const onTransitionEndRef = useRef(onTransitionEnd);
   onTransitionEndRef.current = onTransitionEnd;
@@ -77,19 +76,19 @@ export const VerticalCollapseTransition: FunctionComponent<
     }
   });
 
-  const resizeAnimation = useSpring({
-    opacity: collapsed ? 0.1 : 1,
-    scale: collapsed ? 0.8 : 1,
+  const opacity = useSpringValue(collapsed ? 0.1 : 1, {
     config: defaultSpringConfig,
   });
 
   useEffect(() => {
     if (collapsed) {
       heightPx.start(0);
+      opacity.start(0.1);
     } else {
       heightPx.start(lastHeight.current);
+      opacity.start(1);
     }
-  }, [collapsed, heightPx]);
+  }, [collapsed, heightPx, opacity]);
 
   const contextValue = useMemo(() => {
     return {
@@ -107,10 +106,7 @@ export const VerticalCollapseTransition: FunctionComponent<
       <_VerticalSizeInternalContext.Provider value={contextValue}>
         <animated.div
           style={{
-            opacity: resizeAnimation.opacity,
-            transform: animateOnResize
-              ? resizeAnimation.scale.to((s) => `scale(${s})`)
-              : "scale(1)",
+            opacity,
           }}
         >
           {children}
