@@ -18,4 +18,4 @@ Then, you can add the `@keplr-wallet/types` window to a global window object and
 
 > Usage of any other packages besides @keplr-wallet/types is not recommended.
 > - Any other packages besides @keplr-wallet/types are actively being developed, backward compatibility is not in the scope of support.
-> - Since there are active changes being made, documentation is not being updated to the most recent version of the package as of right now. Documentations would be updated as packages get stable.
+> - Since there are active changes being made, documentation is not being updated to the most recent version of the package as of right now. Documentation will be updated as packages become stable.
