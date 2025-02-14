@@ -110,8 +110,9 @@ const Styles = {
       `;
     }};
   `,
-  ItemContentBox: styled(Box)<{ isLastItem?: boolean }>`
+  ItemContentBox: styled(Box)<{ showButton?: boolean; isLastItem?: boolean }>`
     padding: 0.875rem 1rem;
+    padding-right: ${(props) => (props.showButton ? "0.625rem" : "1rem")};
     border-radius: 0.375rem;
 
     margin: 0 0.75rem;
@@ -678,8 +679,17 @@ const ViewClaimTokenItemContent: FunctionComponent<{
       >
         <Styles.ItemContentBox
           isLastItem={isLastItem}
-          onHoverStateChange={(isHover) => {
-            setIsHover(isHover);
+          showButton={showClaimButton}
+          onHoverStateChange={setIsHover}
+          onClick={() => {
+            if (isLoading) {
+              return;
+            }
+            setIsHover(false); // 아래 아이콘이 포함된 애니메이션 wrapper 영역을 클릭하면 포커스가 해제되지 않아서 수동으로 해줌
+            onClick();
+          }}
+          style={{
+            cursor: isLoading ? "default" : "pointer",
           }}
         >
           <Columns sum={1} alignY="center">
