@@ -15,6 +15,7 @@ import { ViewToken } from "../../index";
 import styled, { css, useTheme } from "styled-components";
 import {
   ArrowDownIcon,
+  ArrowUpIcon,
   CoinsPlusOutlineIcon,
   LoadingIcon,
   WarningIcon,
@@ -28,6 +29,7 @@ import { Skeleton } from "../../../../components/skeleton";
 import { XAxis, YAxis } from "../../../../components/axis";
 import Color from "color";
 import { SpecialButton } from "../../../../components/special-button";
+import { Gutter } from "../../../../components/gutter";
 import { FormattedMessage, useIntl } from "react-intl";
 import { CurrencyImageFallback } from "../../../../components/image";
 import {
@@ -36,13 +38,12 @@ import {
   useClaimAllEachState,
   useStarknetClaimRewards,
 } from "../../../../hooks/claim";
+import { IconButton } from "../../../../components/icon-button";
+import { useSpring, animated } from "@react-spring/web";
 import {
-  useSpring,
-  animated,
-  useTransition,
-  useSpringRef,
-  easings,
-} from "@react-spring/web";
+  DescendantHeightPxRegistry,
+  useVerticalSizeInternalContext,
+} from "../../../../components/transition/vertical-size/internal";
 
 interface ViewClaimToken extends Omit<ViewToken, "chainInfo"> {
   modularChainInfo: ModularChainInfo;
@@ -160,7 +161,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
 
     const viewClaimTokens: ViewClaimToken[] = (() => {
       const res: ViewClaimToken[] = [];
-      for (const modularChainInfo of chainStore.modularChainInfosInUI) {
+      for (const modularChainInfo of chainStore.modularChainInfos) {
         const chainId = modularChainInfo.chainId;
 
         if ("cosmos" in modularChainInfo) {
@@ -223,7 +224,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
               price: priceStore.calculatePrice(totalClaimableRewardAmount),
               modularChainInfo: starknetChainInfo,
               isFetching: queryStakingInfo?.isFetching ?? false,
-              error: queryStakingInfo?.error,
+              error: queryStakingInfo?.error, // ignore queryStakingInfo error
               onClaimAll: handleStarknetClaimAllEach,
               onClaimSingle: handleStarknetClaimSingle,
             });
@@ -356,11 +357,6 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isExpanded]);
 
-    const arrowAnimation = useSpring({
-      transform: isExpanded ? "rotate(-180deg)" : "rotate(0deg)",
-      config: { tension: 300, friction: 25, clamp: true },
-    });
-
     return (
       <Styles.Container isNotReady={isNotReady}>
         <Box paddingX="1rem" paddingBottom="0.25rem">
@@ -445,18 +441,25 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
               opacity: isNotReady ? 0 : 1,
             }}
           >
-            <animated.div style={arrowAnimation}>
+            {!isExpanded ? (
               <ArrowDownIcon
                 width="1.25rem"
                 height="1.25rem"
                 color={ColorPalette["gray-300"]}
               />
-            </animated.div>
+            ) : (
+              <ArrowUpIcon
+                width="1.25rem"
+                height="1.25rem"
+                color={ColorPalette["gray-300"]}
+              />
+            )}
           </Box>
         </Styles.ExpandButton>
 
         <VerticalCollapseTransition
           collapsed={!isExpanded}
+          opacityLeft={0}
           onTransitionEnd={() => {
             if (!isExpanded) {
               if (!claimAllIsLoading) {
@@ -467,7 +470,6 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
               }
             }
           }}
-          animateOnResize={true}
         >
           {viewClaimTokens.map((viewClaimToken, index) => (
             <ViewClaimTokenItem
@@ -588,6 +590,23 @@ const ViewClaimTokenItemContent: FunctionComponent<{
   onClick: () => void | Promise<void>;
 }> = observer(
   ({ viewClaimToken, state, itemsLength, isLoading, isLastItem, onClick }) => {
+    const verticalSizeInternalContext = useVerticalSizeInternalContext();
+    const parentHeightPxAnim = (() => {
+      if (
+        !verticalSizeInternalContext ||
+        !verticalSizeInternalContext.registry
+      ) {
+        return;
+      }
+      if (
+        verticalSizeInternalContext.registry instanceof
+        DescendantHeightPxRegistry
+      ) {
+        return verticalSizeInternalContext.registry.heightPx;
+      }
+      return;
+    })();
+
     const theme = useTheme();
     const { uiConfigStore } = useStore();
 
@@ -610,173 +629,193 @@ const ViewClaimTokenItemContent: FunctionComponent<{
 
     const showClaimButton = isHover || isLoading || !!state.failedReason;
 
-    const buttonWrapperRef = useSpringRef();
-
-    const transitions = useTransition(showClaimButton, {
-      ref: buttonWrapperRef,
-      from: {
-        opacity: 0,
-        width: "0rem",
-      },
-      enter: {
-        opacity: 1,
-        width: "1.875rem",
-      },
-      leave: {
-        opacity: 0,
-        width: "0rem",
-      },
-      config: {
-        easing: easings.easeInOutQuart,
-        duration: 250,
-      },
+    const slideAnimation = useSpring({
+      transform: showClaimButton ? "translateX(-6px)" : "translateX(0px)",
+      config: { tension: 500, friction: 20 },
     });
 
-    useEffect(() => {
-      buttonWrapperRef.start();
-    }, [buttonWrapperRef, showClaimButton]);
-
     return (
-      <Styles.ItemContentBox
-        isLastItem={isLastItem}
-        showButton={showClaimButton}
-        onHoverStateChange={setIsHover}
-        onClick={() => {
-          if (isLoading) {
-            return;
-          }
-          setIsHover(false); // 아래 아이콘이 포함된 애니메이션 wrapper 영역을 클릭하면 포커스가 해제되지 않아서 수동으로 해줌
-          onClick();
-        }}
+      <animated.div
         style={{
-          cursor: isLoading ? "default" : "pointer",
+          transform: parentHeightPxAnim
+            ? parentHeightPxAnim
+                .to((v) => {
+                  // 처음에 초기화가 되기 전에는 -1이기 때문에 이때는 처리를 하지 않는다.
+                  if (v < 0) {
+                    return 1;
+                  }
+
+                  // 얘는 react rendering과 상관없이 동작해야 하기 때문에 여기서 처리해야한다.
+                  const parentExpandHeight = (() => {
+                    if (
+                      !verticalSizeInternalContext ||
+                      !verticalSizeInternalContext.registry
+                    ) {
+                      return;
+                    }
+                    if (
+                      verticalSizeInternalContext.registry instanceof
+                      DescendantHeightPxRegistry
+                    ) {
+                      return verticalSizeInternalContext.registry.expandHeight;
+                    }
+                    return;
+                  })();
+
+                  // parentExpandHeight도 초기화 전에는 -1일 수 있다
+                  // 뒤에서 나누기를 해야하기 때문에 0일때도 처리하면 안된다.
+                  if (!parentExpandHeight || parentExpandHeight < 0) {
+                    return 1;
+                  }
+
+                  return v / parentExpandHeight;
+                })
+                .to([0.1, 0.95], [0.85, 1], "clamp")
+                .to((v) => {
+                  return `scale(${v})`;
+                })
+            : undefined,
         }}
       >
-        <Columns sum={1} alignY="center" gutter="0.75rem">
-          {viewClaimToken.token.currency.coinImageUrl && (
-            <CurrencyImageFallback
-              chainInfo={viewClaimToken.modularChainInfo}
-              currency={viewClaimToken.token.currency}
-              size="2rem"
-            />
-          )}
-
-          <Column weight={1}>
-            <Stack gutter="0.25rem">
-              <Subtitle2
-                style={{
-                  color:
-                    theme.mode === "light"
-                      ? ColorPalette["gray-700"]
-                      : ColorPalette["white"],
-                }}
-              >
-                {coinDenom}
-              </Subtitle2>
-              <Body3
-                style={{
-                  color: ColorPalette["gray-300"],
-                  display: "-webkit-box",
-                  WebkitBoxOrient: "vertical",
-                  WebkitLineClamp: 1,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                {viewClaimToken.modularChainInfo.chainName}
-              </Body3>
-            </Stack>
-          </Column>
-          <XAxis alignY="center">
-            <Stack gutter="0.25rem" alignX="right">
-              <Subtitle3
-                style={{
-                  color:
-                    theme.mode === "light"
-                      ? ColorPalette["gray-700"]
-                      : ColorPalette["white"],
-                }}
-              >
-                {uiConfigStore.hideStringIfPrivacyMode(
-                  viewClaimToken.token
-                    .maxDecimals(6)
-                    .shrink(true)
-                    .inequalitySymbol(true)
-                    .hideDenom(true)
-                    .toString(),
-                  2
-                )}
-              </Subtitle3>
-              <Subtitle3
-                style={{
-                  color: ColorPalette["gray-300"],
-                }}
-              >
-                {uiConfigStore.hideStringIfPrivacyMode(
-                  viewClaimToken.price?.toString() ?? "-",
-                  2
-                )}
-              </Subtitle3>
-            </Stack>
-
-            {transitions(
-              (styles, item) =>
-                item && (
-                  <animated.div
-                    style={{
-                      ...styles,
-                      overflow: "hidden",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "flex-end",
-                    }}
-                  >
-                    <Tooltip
-                      enabled={!!state.failedReason}
-                      content={
-                        state.failedReason?.message ||
-                        state.failedReason?.toString()
-                      }
-                      allowedPlacements={
-                        itemsLength === 1 ? ["left"] : undefined
-                      }
-                    >
-                      {isLoading ? (
-                        <LoadingIcon
-                          width="1rem"
-                          height="1rem"
-                          color={
-                            ColorPalette[
-                              theme.mode === "light" ? "gray-200" : "gray-300"
-                            ]
-                          }
-                        />
-                      ) : state.failedReason ? (
-                        <WarningIcon
-                          width="1rem"
-                          height="1rem"
-                          color={
-                            ColorPalette[
-                              theme.mode === "light" ? "gray-200" : "gray-300"
-                            ]
-                          }
-                        />
-                      ) : (
-                        <CoinsPlusOutlineIcon
-                          color={
-                            ColorPalette[
-                              theme.mode === "light" ? "gray-200" : "gray-300"
-                            ]
-                          }
-                        />
-                      )}
-                    </Tooltip>
-                  </animated.div>
-                )
+        <Styles.ItemContentBox
+          isLastItem={isLastItem}
+          showButton={showClaimButton}
+          onHoverStateChange={setIsHover}
+          onClick={() => {
+            if (isLoading) {
+              return;
+            }
+            setIsHover(false); // 아래 아이콘이 포함된 애니메이션 wrapper 영역을 클릭하면 포커스가 해제되지 않아서 수동으로 해줌
+            onClick();
+          }}
+          style={{
+            cursor: isLoading ? "default" : "pointer",
+          }}
+        >
+          <Columns sum={1} alignY="center">
+            {viewClaimToken.token.currency.coinImageUrl && (
+              <CurrencyImageFallback
+                chainInfo={viewClaimToken.modularChainInfo}
+                currency={viewClaimToken.token.currency}
+                size="2rem"
+              />
             )}
-          </XAxis>
-        </Columns>
-      </Styles.ItemContentBox>
+
+            <Gutter size="0.75rem" />
+
+            <Column weight={1}>
+              <Stack gutter="0.25rem">
+                <Subtitle2
+                  style={{
+                    color:
+                      theme.mode === "light"
+                        ? ColorPalette["gray-700"]
+                        : ColorPalette["white"],
+                  }}
+                >
+                  {coinDenom}
+                </Subtitle2>
+                <Body3
+                  style={{
+                    color: ColorPalette["gray-300"],
+                    lineClamp: 1,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {viewClaimToken.modularChainInfo.chainName}
+                </Body3>
+              </Stack>
+            </Column>
+
+            <Tooltip
+              enabled={!!state.failedReason}
+              content={
+                state.failedReason?.message || state.failedReason?.toString()
+              }
+              allowedPlacements={itemsLength === 1 ? ["left"] : undefined}
+            >
+              <XAxis alignY="center">
+                <animated.div style={slideAnimation}>
+                  <Stack gutter="0.25rem" alignX="right">
+                    <Subtitle3
+                      style={{
+                        color:
+                          theme.mode === "light"
+                            ? ColorPalette["gray-700"]
+                            : ColorPalette["white"],
+                      }}
+                    >
+                      {uiConfigStore.hideStringIfPrivacyMode(
+                        viewClaimToken.token
+                          .maxDecimals(6)
+                          .shrink(true)
+                          .inequalitySymbol(true)
+                          .hideDenom(true)
+                          .toString(),
+                        2
+                      )}
+                    </Subtitle3>
+                    <Subtitle3
+                      style={{
+                        color: ColorPalette["gray-300"],
+                      }}
+                    >
+                      {uiConfigStore.hideStringIfPrivacyMode(
+                        viewClaimToken.price?.toString() ?? "-",
+                        2
+                      )}
+                    </Subtitle3>
+                  </Stack>
+                </animated.div>
+                <div
+                  style={{
+                    display: showClaimButton ? "block" : "none",
+                    width: "1.5rem",
+                    alignItems: "right",
+                  }}
+                >
+                  <IconButton
+                    onClick={onClick}
+                    disabled={viewClaimToken.token.toDec().lte(new Dec(0))}
+                  >
+                    {isLoading ? (
+                      <LoadingIcon
+                        width="1rem"
+                        height="1rem"
+                        color={
+                          ColorPalette[
+                            theme.mode === "light" ? "gray-200" : "gray-300"
+                          ]
+                        }
+                      />
+                    ) : state.failedReason ? (
+                      <WarningIcon
+                        width="1rem"
+                        height="1rem"
+                        color={
+                          ColorPalette[
+                            theme.mode === "light" ? "gray-200" : "gray-300"
+                          ]
+                        }
+                      />
+                    ) : (
+                      <CoinsPlusOutlineIcon
+                        color={
+                          ColorPalette[
+                            theme.mode === "light" ? "gray-200" : "gray-300"
+                          ]
+                        }
+                      />
+                    )}
+                  </IconButton>
+                </div>
+              </XAxis>
+            </Tooltip>
+          </Columns>
+        </Styles.ItemContentBox>
+      </animated.div>
     );
   }
 );

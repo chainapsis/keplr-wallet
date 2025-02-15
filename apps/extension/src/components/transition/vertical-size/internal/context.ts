@@ -89,14 +89,21 @@ export abstract class DescendantRegistryBase implements IDescendantRegistry {
  */
 export class DescendantHeightPxRegistry extends DescendantRegistryBase {
   public readonly heightPx: SpringValue<number>;
+  public expandHeight: number = -1;
+  public readonly opacity?: SpringValue<number>;
 
-  constructor(heightPx: SpringValue<number>) {
+  constructor(heightPx: SpringValue<number>, opacity?: SpringValue<number>) {
     super();
     this.heightPx = heightPx;
+    this.opacity = opacity;
   }
 
   isAnimating(): boolean {
     return this.heightPx.isAnimating;
+  }
+
+  setExpandHeight(height: number) {
+    this.expandHeight = height;
   }
 }
 

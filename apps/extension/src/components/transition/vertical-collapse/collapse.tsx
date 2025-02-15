@@ -12,10 +12,9 @@ import {
   useVerticalResizeObserver,
   VerticalResizeContainer,
 } from "../internal";
-import { animated, useSpring, useSpringValue } from "@react-spring/web";
+import { animated, useSpringValue } from "@react-spring/web";
 import {
   DescendantHeightPxRegistry,
-  IDescendantRegistry,
   useVerticalSizeInternalContext,
   _VerticalSizeInternalContext,
 } from "../vertical-size/internal";
@@ -25,24 +24,27 @@ export const VerticalCollapseTransition: FunctionComponent<
   PropsWithChildren<
     VerticalCollapseTransitionProps & {
       onTransitionEnd?: () => void;
+
       onResize?: (height: number) => void;
-      animateOnResize?: boolean;
     }
   >
 > = ({
   children,
   collapsed,
   width,
+  opacityLeft = 0.1,
+  disableOpacityAnimation,
+  staticHeightAnimConfig = defaultSpringConfig,
+  staticOpacityAnimConfig = defaultSpringConfig,
   transitionAlign,
   onTransitionEnd,
   onResize,
-  animateOnResize = false,
 }) => {
   const onTransitionEndRef = useRef(onTransitionEnd);
   onTransitionEndRef.current = onTransitionEnd;
 
   const heightPx = useSpringValue(collapsed ? 0 : -1, {
-    config: defaultSpringConfig,
+    config: staticHeightAnimConfig,
     onRest: () => {
       if (onTransitionEndRef.current) {
         onTransitionEndRef.current();
@@ -50,8 +52,15 @@ export const VerticalCollapseTransition: FunctionComponent<
     },
   });
 
-  const [registry] = useState<IDescendantRegistry>(
-    () => new DescendantHeightPxRegistry(heightPx)
+  const opacity = useSpringValue(
+    collapsed ? (disableOpacityAnimation ? 1 : opacityLeft) : 1,
+    {
+      config: staticOpacityAnimConfig,
+    }
+  );
+
+  const [registry] = useState<DescendantHeightPxRegistry>(
+    () => new DescendantHeightPxRegistry(heightPx, opacity)
   );
   const internalContext = useVerticalSizeInternalContext();
 
@@ -68,6 +77,7 @@ export const VerticalCollapseTransition: FunctionComponent<
   const lastHeight = useRef(collapsed ? 0 : -1);
   const ref = useVerticalResizeObserver((height: number) => {
     lastHeight.current = height;
+    registry.setExpandHeight(height);
     if (!collapsed) {
       heightPx.set(height);
     }
@@ -77,19 +87,23 @@ export const VerticalCollapseTransition: FunctionComponent<
     }
   });
 
-  const resizeAnimation = useSpring({
-    opacity: collapsed ? 0.1 : 1,
-    scale: collapsed ? 0.9 : 1,
-    config: defaultSpringConfig,
-  });
-
+  // useEffect에서는 구조상 collapsed만 deps로 받아서 처리해야한다. (heightPx, opacity는 ref이 변할수가 없으므로 ㄱㅊ)
+  // 그래서 안에서 disableOpacityAnimation를 바로 쓸수가 없으므로 대충 ref으로 해결...
+  const disableOpacityAnimationRef = useRef(disableOpacityAnimation);
+  disableOpacityAnimationRef.current = disableOpacityAnimation;
+  const opacityLeftRef = useRef(opacityLeft);
+  opacityLeftRef.current = opacityLeft;
   useEffect(() => {
     if (collapsed) {
       heightPx.start(0);
+      opacity.start(
+        disableOpacityAnimationRef.current ? 1 : opacityLeftRef.current
+      );
     } else {
       heightPx.start(lastHeight.current);
+      opacity.start(1);
     }
-  }, [collapsed, heightPx]);
+  }, [collapsed, heightPx, opacity]);
 
   const contextValue = useMemo(() => {
     return {
@@ -107,10 +121,7 @@ export const VerticalCollapseTransition: FunctionComponent<
       <_VerticalSizeInternalContext.Provider value={contextValue}>
         <animated.div
           style={{
-            opacity: resizeAnimation.opacity,
-            transform: animateOnResize
-              ? resizeAnimation.scale.to((s) => `scale(${s})`)
-              : "scale(1)",
+            opacity,
           }}
         >
           {children}
