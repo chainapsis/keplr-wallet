@@ -3,32 +3,65 @@ import { ObservableQueryChains } from "./chains";
 import { computedFn } from "mobx-utils";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { InternalChainStore } from "../internal";
+import { ObservableQueryAssets } from "./assets";
+import { IBCChannel, NoneIBCBridgeInfo } from "./types";
 
 export class ObservableQueryIbcPfmTransfer {
   constructor(
     protected readonly chainStore: InternalChainStore,
     protected readonly queryChains: ObservableQueryChains,
+    protected readonly queryAssets: ObservableQueryAssets,
     protected readonly queryAssetsFromSource: ObservableQueryAssetsFromSource
   ) {}
 
+  getBridges = computedFn(
+    (chainId: string, coinMinimalDenom: string): NoneIBCBridgeInfo[] => {
+      const res: NoneIBCBridgeInfo[] = [];
+
+      const chainInfo = this.chainStore.getChain(chainId);
+
+      const isEVMOnlyChain = chainInfo.chainId.startsWith("eip155:");
+
+      const assetForBridge = this.queryAssets
+        .getAssets(chainInfo.chainId)
+        .assetsRaw.find((asset) => asset.denom === coinMinimalDenom);
+
+      for (const candidateChain of this.queryChains.chains) {
+        const isCandidateChainEVMOnlyChain =
+          candidateChain.chainInfo.chainId.startsWith("eip155:");
+        const isCandidateChain =
+          candidateChain.chainInfo.chainId !== chainInfo.chainId &&
+          (isEVMOnlyChain || isCandidateChainEVMOnlyChain);
+
+        if (isCandidateChain) {
+          const candidateAsset = this.queryAssets
+            .getAssets(candidateChain.chainInfo.chainId)
+            .assetsRaw.find(
+              (a) =>
+                a.recommendedSymbol &&
+                a.recommendedSymbol === assetForBridge?.recommendedSymbol
+            );
+
+          if (candidateAsset) {
+            const currencyFound = this.chainStore
+              .getChain(candidateChain.chainInfo.chainId)
+              .findCurrencyWithoutReaction(candidateAsset.denom);
+
+            if (currencyFound) {
+              res.push({
+                destinationChainId: candidateChain.chainInfo.chainId,
+                denom: candidateAsset.denom,
+              });
+            }
+          }
+        }
+      }
+      return res;
+    }
+  );
+
   getIBCChannels = computedFn(
-    (
-      chainId: string,
-      denom: string
-    ): {
-      destinationChainId: string;
-      originDenom: string;
-      originChainId: string;
-
-      channels: {
-        portId: string;
-        channelId: string;
-
-        counterpartyChainId: string;
-      }[];
-
-      denom: string;
-    }[] => {
+    (chainId: string, denom: string): IBCChannel[] => {
       if (!this.chainStore.hasChain(chainId)) {
         return [];
       }

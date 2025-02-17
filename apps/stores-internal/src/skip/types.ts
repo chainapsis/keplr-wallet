@@ -267,3 +267,22 @@ export interface ChainsResponse {
     chain_type: string;
   }[];
 }
+
+export type NoneIBCBridgeInfo = {
+  destinationChainId: string;
+  denom: string;
+};
+
+export type IBCChannel = {
+  destinationChainId: string;
+  originDenom: string;
+  originChainId: string;
+
+  channels: {
+    portId: string;
+    channelId: string;
+    counterpartyChainId: string;
+  }[];
+
+  denom: string;
+};

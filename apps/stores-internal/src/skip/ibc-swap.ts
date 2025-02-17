@@ -29,7 +29,12 @@ export class ObservableQueryIBCSwapInner {
     public readonly swapVenues: {
       readonly name: string;
       readonly chainId: string;
-    }[]
+    }[],
+    public readonly allowSwaps?: boolean,
+    public readonly smartSwapOptions?: {
+      evmSwaps?: boolean;
+      splitRoutes?: boolean;
+    }
   ) {}
 
   getQueryMsgsDirect(
@@ -53,7 +58,8 @@ export class ObservableQueryIBCSwapInner {
       slippageTolerancePercent,
       this.affiliateFeeBps,
       affiliateFeeReceiver,
-      this.swapVenues
+      this.swapVenues,
+      this.smartSwapOptions
     );
   }
 
@@ -71,7 +77,9 @@ export class ObservableQueryIBCSwapInner {
       this.destAssetChainId,
       this.destAssetDenom,
       this.affiliateFeeBps,
-      this.swapVenues
+      this.swapVenues,
+      this.allowSwaps,
+      this.smartSwapOptions
     );
   }
 }
@@ -92,6 +100,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
   ) {
     super((str) => {
       const parsed = JSON.parse(str);
+
       return new ObservableQueryIBCSwapInner(
         this.chainStore,
         this.queryRoute,
@@ -102,7 +111,9 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
         parsed.destDenom,
         parsed.destChainId,
         parsed.affiliateFeeBps,
-        parsed.swapVenues
+        parsed.swapVenues,
+        parsed.allowSwaps,
+        parsed.smartSwapOptions
       );
     });
 
@@ -114,7 +125,12 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
     amount: CoinPretty,
     destChainId: string,
     destDenom: string,
-    affiliateFeeBps: number
+    affiliateFeeBps: number,
+    allowSwaps?: boolean,
+    smartSwapOptions?: {
+      evmSwaps?: boolean;
+      splitRoutes?: boolean;
+    }
   ): ObservableQueryIBCSwapInner {
     const str = JSON.stringify({
       sourceChainId,
@@ -124,6 +140,8 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
       destDenom,
       affiliateFeeBps,
       swapVenues: this.swapVenues,
+      allowSwaps,
+      smartSwapOptions,
     });
     return this.get(str);
   }
