@@ -3,8 +3,18 @@ import * as utils from "@noble/curves/abstract/utils";
 import { sha256 } from "@noble/hashes/sha2";
 import { ripemd160 } from "@noble/hashes/ripemd160";
 import { Buffer } from "buffer/";
+import { Buffer as NodeBuffer } from "buffer";
 import { Hash } from "./hash";
 import { hash as starknetHash } from "starknet";
+import { ECPairInterface, ECPairFactory } from "ecpair";
+import * as ecc from "tiny-secp256k1";
+import { Network } from "bitcoinjs-lib";
+import { p2pkh, p2tr, p2wpkh } from "bitcoinjs-lib/src/payments";
+import { toXOnly } from "bitcoinjs-lib/src/psbt/bip371";
+
+// This code is required before using bitcoinjs-lib.
+// import * as bitcoin from "bitcoinjs-lib";
+// bitcoin.initEccLib(ecc);
 
 export class PrivKeySecp256k1 {
   static generateRandomKey(): PrivKeySecp256k1 {
@@ -17,8 +27,17 @@ export class PrivKeySecp256k1 {
     return new Uint8Array(this.privKey);
   }
 
+  toKeyPair(): ECPairInterface {
+    return ECPairFactory(ecc).fromPrivateKey(NodeBuffer.from(this.privKey));
+  }
+
   getPubKey(): PubKeySecp256k1 {
     return new PubKeySecp256k1(secp256k1.getPublicKey(this.privKey, true));
+  }
+
+  getBitcoinPubKey(): BitcoinCompatiblePubKey {
+    const pubKey = secp256k1.getPublicKey(this.toBytes(), false);
+    return new BitcoinCompatiblePubKey(pubKey);
   }
 
   signDigest32(digest: Uint8Array): {
@@ -209,5 +228,51 @@ export class PubKeySecp256k1 {
       digest,
       this.pubKey
     );
+  }
+}
+
+export class BitcoinCompatiblePubKey extends PubKeySecp256k1 {
+  /**
+   * returns the legacy address of the public key compatible with Bitcoin.
+   * both compressed and uncompressed are supported.
+   * CAUTION: the returned address can be differ between compressed and uncompressed.
+   */
+  getLegacyAddress(
+    uncompressed?: boolean,
+    network?: Network
+  ): string | undefined {
+    const pubKey = this.toBytes(uncompressed);
+    const paymentPkh = p2pkh({
+      pubkey: NodeBuffer.from(pubKey),
+      network,
+    });
+    return paymentPkh.address;
+  }
+
+  /**
+   * returns the native segwit address of the public key compatible with Bitcoin.
+   * only compressed public key is supported.
+   */
+  getNativeSegwitAddress(network?: Network): string | undefined {
+    const pubKey = this.toBytes(false);
+    const paymentWpk = p2wpkh({
+      pubkey: NodeBuffer.from(pubKey),
+      network,
+    });
+    return paymentWpk.address;
+  }
+
+  /**
+   * returns the taproot address of the public key compatible with Bitcoin.
+   * only compressed public key is supported.
+   */
+  getTaprootAddress(network?: Network): string | undefined {
+    const pubKey = this.toBytes(false);
+    const internalPubkey = toXOnly(NodeBuffer.from(pubKey)); // remove y coordinate.
+    const paymentTr = p2tr({
+      internalPubkey,
+      network,
+    });
+    return paymentTr.address;
   }
 }
