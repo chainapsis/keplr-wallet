@@ -327,3 +327,47 @@ export class GetStarknetKeyParamsSelectedMsg extends Message<{
     return GetStarknetKeyParamsSelectedMsg.type();
   }
 }
+
+export class PrivilegeStarknetSignClaimRewardsMsg extends Message<{
+  transactions: Call[];
+  details: InvocationsSignerDetails;
+  signature: string[];
+}> {
+  public static type() {
+    return "privilege-starknet-sign-claim-rewards";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly transactions: Call[],
+    public readonly details: InvocationsSignerDetails
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chainId is not set");
+    }
+
+    if (!this.transactions) {
+      throw new Error("transactions are not set");
+    }
+
+    if (!this.details) {
+      throw new Error("details are not set");
+    }
+  }
+
+  override approveExternal(): boolean {
+    return false;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return PrivilegeStarknetSignClaimRewardsMsg.type();
+  }
+}

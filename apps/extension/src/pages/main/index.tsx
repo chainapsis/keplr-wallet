@@ -160,11 +160,11 @@ export const MainPage: FunctionComponent<{
       }
     }
     for (const bal of hugeQueriesStore.unbondings) {
-      if (bal.viewToken.price) {
+      if (bal.price) {
         if (!result) {
-          result = bal.viewToken.price;
+          result = bal.price;
         } else {
-          result = result.add(bal.viewToken.price);
+          result = result.add(bal.price);
         }
       }
     }
@@ -191,16 +191,14 @@ export const MainPage: FunctionComponent<{
       }
     }
     for (const bal of hugeQueriesStore.unbondings) {
-      if (!("currencies" in bal.viewToken.chainInfo)) {
+      if (!("currencies" in bal.chainInfo)) {
         continue;
       }
-      if (
-        !(bal.viewToken.chainInfo.embedded as ChainInfoWithCoreTypes).embedded
-      ) {
+      if (!(bal.chainInfo.embedded as ChainInfoWithCoreTypes).embedded) {
         continue;
       }
-      if (bal.viewToken.price) {
-        const price = priceStore.calculatePrice(bal.viewToken.token, "usd");
+      if (bal.price) {
+        const price = priceStore.calculatePrice(bal.token, "usd");
         if (price) {
           if (!result) {
             result = price;
@@ -918,6 +916,12 @@ const RefreshButton: FunctionComponent<{
                 query.fetch();
               }
             }
+
+            // refresh starknet staking info
+            const stakingInfo = queries.stakingInfoManager.getStakingInfo(
+              account.starknetHexAddress
+            );
+            promises.push(stakingInfo.waitFreshResponse());
           }
         }
       }

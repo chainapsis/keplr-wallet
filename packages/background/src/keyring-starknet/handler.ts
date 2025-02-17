@@ -14,6 +14,7 @@ import {
   GetStarknetKeysForEachVaultSettledMsg,
   GetStarknetKeyParamsSelectedMsg,
   RequestSignStarknetMessage,
+  PrivilegeStarknetSignClaimRewardsMsg,
 } from "./messages";
 import { KeyRingStarknetService } from "./service";
 import { PermissionInteractiveService } from "../permission-interactive";
@@ -66,6 +67,11 @@ export const getHandler: (
         return handleGetStarknetKeyParamsSelectedMsg(service)(
           env,
           msg as GetStarknetKeyParamsSelectedMsg
+        );
+      case PrivilegeStarknetSignClaimRewardsMsg:
+        return handlePrivilegeStarknetSignClaimRewardsMsg(service)(
+          env,
+          msg as PrivilegeStarknetSignClaimRewardsMsg
         );
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
@@ -239,5 +245,19 @@ const handleGetStarknetKeyParamsSelectedMsg: (
 ) => InternalHandler<GetStarknetKeyParamsSelectedMsg> = (service) => {
   return async (_, msg) => {
     return await service.getStarknetKeyParamsSelected(msg.chainId);
+  };
+};
+
+const handlePrivilegeStarknetSignClaimRewardsMsg: (
+  service: KeyRingStarknetService
+) => InternalHandler<PrivilegeStarknetSignClaimRewardsMsg> = (service) => {
+  return async (env, msg) => {
+    return await service.privilegeStarknetSignClaimRewards(
+      env,
+      msg.origin,
+      msg.chainId,
+      msg.transactions,
+      msg.details
+    );
   };
 };

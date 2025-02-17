@@ -832,6 +832,71 @@ export class KeyRingStarknetService {
     return this.formatEthSignature(sig);
   }
 
+  async privilegeStarknetSignClaimRewards(
+    env: Env,
+    _origin: string,
+    chainId: string,
+    transactions: Call[],
+    details: InvocationsSignerDetails
+  ): Promise<{
+    transactions: Call[];
+    details: InvocationsSignerDetails;
+    signature: string[];
+  }> {
+    if (!env.isInternalMsg) {
+      throw new Error("Permission Rejected");
+    }
+
+    const compiledCalldata = starknetTransactionUtils.getExecuteCalldata(
+      transactions,
+      details.cairoVersion
+    );
+    let msgHash;
+
+    if (Object.values(ETransactionVersion1).includes(details.version as any)) {
+      const det = details as V2InvocationsSignerDetails;
+      msgHash = starknetHashUtils.calculateInvokeTransactionHash({
+        ...det,
+        senderAddress: det.walletAddress,
+        compiledCalldata,
+        version: det.version,
+      });
+    } else if (
+      Object.values(ETransactionVersion3).includes(details.version as any)
+    ) {
+      const det = details as V3InvocationsSignerDetails;
+      msgHash = starknetHashUtils.calculateInvokeTransactionHash({
+        ...det,
+        senderAddress: det.walletAddress,
+        compiledCalldata,
+        version: det.version,
+        nonceDataAvailabilityMode: intDAM(det.nonceDataAvailabilityMode),
+        feeDataAvailabilityMode: intDAM(det.feeDataAvailabilityMode),
+      });
+    } else {
+      throw Error("unsupported signTransaction version");
+    }
+
+    msgHash = msgHash.replace("0x", "");
+    const padZero = 64 - msgHash.length;
+    if (padZero > 0) {
+      msgHash = "0".repeat(padZero) + msgHash;
+    } else if (padZero < 0) {
+      throw new Error("Invalid length of msg hash");
+    }
+    const sig = await this.keyRingService.sign(
+      chainId,
+      this.keyRingService.selectedVaultId,
+      Buffer.from(msgHash, "hex"),
+      "noop"
+    );
+    return {
+      transactions,
+      details,
+      signature: this.formatEthSignature(sig),
+    };
+  }
+
   protected formatEthSignature(sig: {
     readonly r: Uint8Array;
     readonly s: Uint8Array;
