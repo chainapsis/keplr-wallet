@@ -612,6 +612,7 @@
   "page.main.components.token-found-modal.add-token-on-injective-and-evmos": "Add tokens on Injective and Evmos",
   "page.main.components.token-found-modal.add-chains": "Add Chains",
   "page.main.components.token-item.copy-address.copied": "Copied",
+  "page.main.components.token-item.earn-nudge-button": "Earn {apy} APY with USDC",
   "page.main.components.token-item.earn-savings-button": "{balance} in Savings",
 
   "page.main.layouts.header.new-chain.title": "✨ {chains} Now Integrated!",
