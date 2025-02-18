@@ -15,7 +15,7 @@ import {
   H1,
   Body3,
 } from "../../../components/typography";
-import { useGetApy } from "../../../hooks/use-get-apy";
+import { useGetEarnApy } from "../../../hooks/use-get-apy";
 import { useStore } from "../../../stores";
 import { ColorPalette } from "../../../styles";
 
@@ -41,7 +41,7 @@ export const EarnOverviewBalanceSection: FunctionComponent<{
     ? priceStore.calculatePrice(balance, balance.currency.coinDenom)?.toString()
     : new PricePretty(uiConfigStore.fiatCurrency, new Dec(0)).toString();
 
-  const { apy } = useGetApy(chainId);
+  const { apy } = useGetEarnApy(chainId);
 
   const navigate = useNavigate();
 

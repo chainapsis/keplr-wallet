@@ -15,7 +15,7 @@ import { ColorPalette } from "../../../styles";
 import { Gutter } from "../../../components/gutter";
 import { useStore } from "../../../stores";
 import { XAxis } from "../../../components/axis";
-import { useGetApy } from "../../../hooks/use-get-apy";
+import { useGetEarnApy } from "../../../hooks/use-get-apy";
 import { Stack } from "../../../components/stack";
 import { ArrowRightIcon, CheckIcon } from "../../../components/icon";
 import { Modal } from "../../../components/modal";
@@ -37,7 +37,7 @@ export const EarnIntroPage: FunctionComponent = observer(() => {
       (currency) => currency.coinMinimalDenom === coinMinimalDenom
     ) ?? chainInfo.currencies[0];
 
-  const { apy } = useGetApy(chainId);
+  const { apy } = useGetEarnApy(chainId);
 
   const benefits = [
     intl.formatMessage({ id: "page.earn.intro.benefits.no-lockup" }),

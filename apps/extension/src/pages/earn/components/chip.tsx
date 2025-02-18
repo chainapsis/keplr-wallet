@@ -5,7 +5,7 @@ import { useTheme } from "styled-components";
 import { Box } from "../../../components/box";
 import { Subtitle4 } from "../../../components/typography";
 import { ColorPalette } from "../../../styles";
-import { useGetApy } from "../../../hooks/use-get-apy";
+import { useGetEarnApy } from "../../../hooks/use-get-apy";
 
 export const Chip: FunctionComponent<{
   text: string;
@@ -56,7 +56,7 @@ export const ApyChip: FunctionComponent<{
   chainId: string;
   colorType: "green" | "gray";
 }> = ({ chainId, colorType }) => {
-  const { apy } = useGetApy(chainId);
+  const { apy } = useGetEarnApy(chainId);
 
   return <Chip colorType={colorType} text={`APY ${apy}`} />;
 };
