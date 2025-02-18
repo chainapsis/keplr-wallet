@@ -29,6 +29,11 @@ import { Stack } from "../../../components/stack";
 import { EmptyView } from "../../../components/empty-view";
 import { DenomHelper } from "@keplr-wallet/common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { EarnApyBanner } from "./banners/earn-apy-banner";
+import { validateIsUsdcFromNoble } from "../../earn/utils";
+import { Button } from "../../../components/button";
+import { FormattedMessage } from "react-intl";
+import { IBCCurrency } from "@keplr-wallet/types";
 
 const Styles = {
   Container: styled.div`
@@ -475,6 +480,24 @@ export const TokenDetailModal: FunctionComponent<{
               )}
             </Subtitle3>
           </YAxis>
+
+          {currency.coinMinimalDenom === "uusdn" &&
+          (chainId === "noble-1" ||
+            (currency as IBCCurrency).originChainId === "noble-1") ? (
+            <Box padding="1.25rem 0.75rem 1.25rem 0.75rem">
+              <Button
+                text={
+                  <FormattedMessage id="page.token-detail.manage-earn-button" />
+                }
+                color="secondary"
+                size="medium"
+                onClick={() => {
+                  navigate(`/earn/overview?chainId=${chainId}`);
+                }}
+              />
+            </Box>
+          ) : null}
+
           <Gutter size="1.25rem" />
           <YAxis alignX="center">
             <XAxis>
@@ -502,6 +525,11 @@ export const TokenDetailModal: FunctionComponent<{
           {(() => {
             if ("cosmos" in modularChainInfo) {
               const chainInfo = chainStore.getChain(chainId);
+
+              if (validateIsUsdcFromNoble(currency, chainId)) {
+                return <EarnApyBanner chainId="noble-1" />;
+              }
+
               if (
                 chainInfo.stakeCurrency &&
                 chainInfo.stakeCurrency.coinMinimalDenom ===

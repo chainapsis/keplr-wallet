@@ -17,6 +17,7 @@ const Styles = {
         default:
       }
     }};
+    gap: ${({ gap }) => gap};
   `,
 };
 

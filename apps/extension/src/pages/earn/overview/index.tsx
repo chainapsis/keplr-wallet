@@ -9,6 +9,10 @@ import { Modal } from "../../../components/modal";
 import { EarnOverviewTutorialModal } from "./tutorial-modal";
 import { useSearchParams } from "react-router-dom";
 import { useStore } from "../../../stores";
+import { Gutter } from "../../../components/gutter";
+import { Divider } from "../../../components/divder";
+import { EarnOverviewClaimSection } from "../components/overview-claim-section";
+import { EarnOverviewBalanceSection } from "../components/overview-balance-section";
 
 const NOBLE_CHAIN_ID = "noble-1";
 
@@ -27,27 +31,50 @@ export const EarnOverviewPage: FunctionComponent = observer(() => {
     localStorage.setItem("isOnceTutorialModalOpen", "true");
   };
 
-  const { chainStore } = useStore();
+  const { chainStore, accountStore } = useStore();
   const [searchParams] = useSearchParams();
   const chainId = searchParams.get("chainId") || NOBLE_CHAIN_ID;
   const chainInfo = chainStore.getChain(chainId);
+
+  const account = accountStore.getAccount(NOBLE_CHAIN_ID);
 
   const holdingCurrency = chainInfo.currencies[0];
   const rewardCurrency =
     chainId === NOBLE_CHAIN_ID
       ? chainInfo.currencies.find((c) => c.coinMinimalDenom === "uusdn")
-      : null;
+      : {
+          coinDenom: "USDN",
+          coinMinimalDenom: "uusdn",
+          coinDecimals: 6,
+        };
 
   return (
     <HeaderLayout
       title={intl.formatMessage({ id: "page.earn.overview.title" })}
       left={<BackToHomeButton />}
     >
+      <Gutter size="1.25rem" />
+
+      <EarnOverviewClaimSection
+        rest={chainInfo.rest}
+        bech32Address={account.bech32Address}
+      />
+
+      <Divider direction="horizontal" spacing="1.625rem" />
+
+      <EarnOverviewBalanceSection
+        chainId={chainId}
+        holdingCurrency={holdingCurrency}
+        rewardCurrency={rewardCurrency}
+        bech32Address={account.bech32Address}
+      />
+
+      <Divider direction="horizontal" spacing="1.625rem" />
+
       {/* TO-DO:
-        - EarnClaimSection
-        - EarnBalanceSection
         - EarnHistorySection
       */}
+
       <Modal
         isOpen={isTutorialModalOpen}
         close={handleCloseTutorialModal}
