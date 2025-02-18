@@ -695,6 +695,9 @@ const ViewClaimTokenItemContent: FunctionComponent<{
                 })
                 .to([0.1, 0.95], [0.85, 1], "clamp")
                 .to((v) => {
+                  if (v === 1) {
+                    return "";
+                  }
                   return `scale(${v})`;
                 })
             : undefined,
@@ -801,7 +804,11 @@ const ViewClaimTokenItemContent: FunctionComponent<{
                           state.failedReason?.toString()
                         }
                         allowedPlacements={
-                          itemsLength === 1 ? ["left"] : undefined
+                          itemsLength === 1
+                            ? ["left"]
+                            : isLastItem
+                            ? ["top"]
+                            : undefined
                         }
                       >
                         {isLoading ? (
