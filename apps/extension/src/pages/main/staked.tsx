@@ -35,7 +35,7 @@ const useViewStakingTokens = () => {
         .map((unbonding) => {
           const relativeTime = formatRelativeTime(
             unbonding.completeTime,
-            unbonding.discardDecimal
+            unbonding.omitCompleteTimeFraction
           );
 
           return {
