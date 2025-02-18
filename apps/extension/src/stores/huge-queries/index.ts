@@ -30,6 +30,7 @@ export interface ViewStakedToken extends ViewToken {
 
 export interface ViewUnbondingToken extends ViewStakedToken {
   completeTime: string | number;
+  omitCompleteTimeFraction?: boolean;
 }
 
 export type ViewRewardToken = ViewStakedToken;
@@ -571,6 +572,7 @@ export class HugeQueriesStore {
             isFetching: queryUnbonding.isFetching,
             error: queryUnbonding.error,
             stakingUrl: "https://dashboard.endur.fi/stake",
+            omitCompleteTimeFraction: true, // endur.fi와 동일하게 표기하기 위한 옵션
           });
         }
       }

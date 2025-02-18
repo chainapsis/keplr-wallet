@@ -33,7 +33,10 @@ const useViewStakingTokens = () => {
           return unbonding.token.toDec().gt(new Dec(0));
         })
         .map((unbonding) => {
-          const relativeTime = formatRelativeTime(unbonding.completeTime);
+          const relativeTime = formatRelativeTime(
+            unbonding.completeTime,
+            unbonding.omitCompleteTimeFraction
+          );
 
           return {
             unbonding,
@@ -197,7 +200,10 @@ export const StakedTabView: FunctionComponent<{
   );
 });
 
-function formatRelativeTime(time: string | number): {
+function formatRelativeTime(
+  time: string | number,
+  discardDecimal?: boolean
+): {
   unit: "minute" | "hour" | "day";
   value: number;
 } {
@@ -222,6 +228,8 @@ function formatRelativeTime(time: string | number): {
     };
   }
 
+  const round = discardDecimal ? Math.floor : Math.ceil;
+
   const remainingSeconds = remaining / 1000;
   const remainingMinutes = remainingSeconds / 60;
   if (remainingMinutes < 1) {
@@ -237,19 +245,19 @@ function formatRelativeTime(time: string | number): {
   if (remainingDays >= 1) {
     return {
       unit: "day",
-      value: Math.ceil(remainingDays),
+      value: round(remainingDays),
     };
   }
 
   if (remainingHours >= 1) {
     return {
       unit: "hour",
-      value: Math.ceil(remainingHours),
+      value: round(remainingHours),
     };
   }
 
   return {
     unit: "minute",
-    value: Math.ceil(remainingMinutes),
+    value: round(remainingMinutes),
   };
 }
