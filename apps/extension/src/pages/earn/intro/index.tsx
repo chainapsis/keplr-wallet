@@ -69,20 +69,28 @@ export const EarnIntroPage: FunctionComponent = observer(() => {
         <Gutter size="1rem" />
 
         <Stack gutter="0.25rem">
-          <H1>{intl.formatMessage({ id: "page.earn.intro.title" })}</H1>
-          <XAxis alignY="center">
-            <Image
-              src={currency.coinImageUrl}
-              width="24px"
-              height="24px"
-              style={{ borderRadius: "50%" }}
-              alt={currency.coinDenom}
-            />
-            <Gutter size="0.25rem" />
-            <H1 style={{ color: ColorPalette["blue-300"] }}>
-              {currency.coinDenom}
-            </H1>
-          </XAxis>
+          <H1>
+            {intl.formatMessage(
+              { id: "page.earn.intro.title" },
+              {
+                token: () => (
+                  <Box style={{ display: "inline-block" }}>
+                    <XAxis alignY="center">
+                      <Image
+                        src={currency.coinImageUrl}
+                        width="24px"
+                        height="24px"
+                        style={{ borderRadius: "50%" }}
+                        alt={currency.coinDenom}
+                      />
+                      <Gutter size="0.25rem" />
+                      {currency.coinDenom}
+                    </XAxis>
+                  </Box>
+                ),
+              }
+            )}
+          </H1>
         </Stack>
 
         <Gutter size="1rem" />

@@ -23,21 +23,21 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
   const { accountStore, chainStore, queriesStore } = useStore();
   const intl = useIntl();
   const navigate = useNavigate();
+
   const [searchParams] = useSearchParams();
   const presetAmount = searchParams.get("amount");
+  const isFromEarnTransfer = searchParams.get("isFromEarnTransfer");
+  const chainId = searchParams.get("chainId") || "noble-1"; // Noble testnet: "grand-1", mainnet: "noble-1"
+  const coinMinimalDenom = searchParams.get("coinMinimalDenom");
 
   const [amountInput, setAmountInput] = useState(presetAmount || "");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const isFromEarnTransfer = searchParams.get("isFromEarnTransfer");
-
-  const chainId = searchParams.get("chainId") || "noble-1"; // Noble testnet: "grand-1", mainnet: "noble-1"
   const chainInfo = chainStore.getChain(chainId);
   const account = accountStore.getAccount(chainId);
   const currency =
     chainInfo.currencies.find(
-      (currency) =>
-        currency.coinMinimalDenom === searchParams.get("coinMinimalDenom")
+      (currency) => currency.coinMinimalDenom === coinMinimalDenom
     ) ?? chainInfo.currencies[0];
 
   const balanceQuery = queriesStore

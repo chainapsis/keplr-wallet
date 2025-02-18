@@ -1,7 +1,7 @@
 import { CoinPretty } from "@keplr-wallet/unit";
 import React from "react";
 import { FunctionComponent } from "react";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { XAxis } from "../../../components/axis";
 import { Box } from "../../../components/box";
 import { Gutter } from "../../../components/gutter";
@@ -14,6 +14,7 @@ export const EstimationSection: FunctionComponent<{
   usdcAmount: CoinPretty;
 }> = ({ usdcAmount }) => {
   const NOBLE_CHAIN_ID = "noble-1";
+  const intl = useIntl();
 
   // const DEFAULT_SLIPPAGE_RATE = 0.005;
   const simulatedUsdnAmount = usdcAmount; // TO-DO: dummy. request simluate
@@ -39,7 +40,12 @@ export const EstimationSection: FunctionComponent<{
       backgroundColor={ColorPalette["gray-650"]}
       borderRadius="0.75rem"
     >
-      <Chip colorType="gray" text="APY 0%" />
+      <Chip
+        colorType="gray"
+        text={intl.formatMessage({
+          id: "page.earn.estimation-confirm.usdc-to-usdn.no-rewards",
+        })}
+      />
       <Gutter size="0.75rem" />
       {renderAmount(usdcAmount)}
 
