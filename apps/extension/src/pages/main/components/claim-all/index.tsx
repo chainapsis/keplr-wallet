@@ -461,6 +461,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
 
         <VerticalCollapseTransition
           collapsed={!isExpanded}
+          opacityLeft={0}
           onTransitionEnd={() => {
             if (!isExpanded) {
               if (!claimAllIsLoading) {
