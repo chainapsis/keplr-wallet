@@ -223,7 +223,8 @@ const handleRecordTxWithSkipSwapMsg: (
       msg.amount,
       msg.notificationInfo,
       msg.routeDurationSeconds,
-      msg.txHash
+      msg.txHash,
+      msg.isOnlyUseBridge
     );
   };
 };
