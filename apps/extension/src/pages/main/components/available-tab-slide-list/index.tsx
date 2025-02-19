@@ -12,10 +12,11 @@ import { ColorPalette } from "../../../../styles";
 import { StakeWithKeplrDashboardButton } from "../stake-with-keplr-dashboard-button";
 import { useStore } from "../../../../stores";
 import { useGetEarnApy } from "../../../../hooks/use-get-apy";
+import { observer } from "mobx-react-lite";
 
 const NOBLE_CHAIN_ID = "noble-1";
 
-export const AvailableTabSlideList = () => {
+export const AvailableTabSlideList = observer(() => {
   const navigate = useNavigate();
   const { analyticsStore, hugeQueriesStore } = useStore();
   const { apy } = useGetEarnApy(NOBLE_CHAIN_ID);
@@ -78,4 +79,4 @@ export const AvailableTabSlideList = () => {
       Buttons={usdcToken ? [EarnButton, DashboardButton] : [DashboardButton]}
     />
   );
-};
+});

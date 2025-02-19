@@ -7,10 +7,11 @@ import { ArrowRightIcon } from "../../../../components/icon";
 import { Body3 } from "../../../../components/typography";
 import { useGetEarnApy } from "../../../../hooks/use-get-apy";
 import { ColorPalette } from "../../../../styles";
+import { observer } from "mobx-react-lite";
 
 type BottomTagType = "nudgeEarn" | "showEarnSavings";
 
-export const WrapperwithBottomTag = function ({
+export const WrapperwithBottomTag = observer(function ({
   children,
   bottomTagType,
   earnedAssetPrice,
@@ -82,4 +83,4 @@ export const WrapperwithBottomTag = function ({
       </Box>
     </Box>
   );
-};
+});
