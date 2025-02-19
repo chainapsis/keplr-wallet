@@ -1,6 +1,10 @@
 import { Mnemonic } from "./mnemonic";
 import { PrivKeySecp256k1, PubKeySecp256k1 } from "./key";
 import { Hash } from "./hash";
+import * as ecc from "tiny-secp256k1";
+import * as bitcoin from "bitcoinjs-lib";
+
+bitcoin.initEccLib(ecc);
 
 describe("Test priv key", () => {
   it("priv key should generate the valid pub key", () => {
@@ -21,6 +25,16 @@ describe("Test priv key", () => {
     expect(Buffer.from(pubKey.toBytes(true)).toString("hex")).toBe(
       "04394bc53633366a2ab9b5d697a94c8c0121cc5e3f0d554a63167edb318ceae8bc4eb24976de98fa19e8f947e9aaaca820251c77c45a87049f2c3cd649bb26c3d8"
     );
+  });
+
+  it("priv key should generate the valid key pair", () => {
+    const privKey = PrivKeySecp256k1.generateRandomKey();
+    const keyPair = privKey.toKeyPair();
+
+    const pubKey = Buffer.from(privKey.getPubKey().toBytes()).toString("hex");
+    const pubKeyFromKeyPair = keyPair.publicKey.toString("hex");
+
+    expect(pubKeyFromKeyPair).toBe(pubKey);
   });
 
   it("priv key should generate the valid signature", () => {
@@ -116,5 +130,86 @@ describe("Test priv key", () => {
     expect(Buffer.from(pubKey.getEthAddress()).toString("hex")).toBe(
       "d38de26638cbf4f5c99bd8787fedfdb50c3f236a"
     );
+  });
+
+  it("test bitcoin address", () => {
+    const mnemonic =
+      "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about";
+
+    const privKey = new PrivKeySecp256k1(
+      Mnemonic.generateWalletFromMnemonic(mnemonic)
+    );
+
+    const bitcoinPubKey = privKey.getBitcoinPubKey();
+
+    const legacyAddressUncompressed = bitcoinPubKey.getLegacyAddress(true);
+
+    expect(legacyAddressUncompressed).not.toBeUndefined();
+    expect(legacyAddressUncompressed?.startsWith("1")).toBe(true);
+    expect(legacyAddressUncompressed).toBe("1z5bFTcS7zfCHHKk3kXjvBNr6hMMNQYjh");
+    const legacyAddressCompressed = bitcoinPubKey.getLegacyAddress(false);
+
+    expect(legacyAddressCompressed).not.toBeUndefined();
+    expect(legacyAddressCompressed?.startsWith("1")).toBe(true);
+    expect(legacyAddressCompressed).toBe("14jmwUEdEZ7Bn3ksbhceZryVdkbbdSCsMU");
+
+    const nativeSegwitAddress = bitcoinPubKey.getNativeSegwitAddress();
+
+    expect(nativeSegwitAddress).not.toBeUndefined();
+    expect(nativeSegwitAddress?.startsWith("bc1q")).toBe(true);
+    expect(nativeSegwitAddress).toBe(
+      "bc1q9rl4cm2hmr8afy4kldpxz3fka4jguq0a26nkmc"
+    );
+
+    const taprootAddress = bitcoinPubKey.getTaprootAddress();
+
+    expect(taprootAddress).not.toBeUndefined();
+    expect(taprootAddress?.startsWith("bc1p")).toBe(true);
+    expect(taprootAddress).toBe(
+      "bc1ps0m23ua63lejktfq0vf9dp603q4h7l4tkcc4n644uph5ccjkjs8suu99pl"
+    );
+  });
+
+  it("test dogecoin address", () => {
+    const mnemonic =
+      "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about";
+
+    const privKey = new PrivKeySecp256k1(
+      Mnemonic.generateWalletFromMnemonic(mnemonic)
+    );
+
+    const dogecoinPubKey = privKey.getBitcoinPubKey();
+
+    const dogecoinMainnet = {
+      messagePrefix: "\x19Dogecoin Signed Message:\n",
+      bech32: "doge",
+      bip32: {
+        public: 0x02facafd, // dpub
+        private: 0x02fac398, // dprv
+      },
+      pubKeyHash: 0x1e, // 30 (주소가 D로 시작)
+      scriptHash: 0x16, // 22
+      wif: 0x9e, // 158
+    };
+
+    const legacyAddressUncompressed = dogecoinPubKey.getLegacyAddress(
+      true,
+      dogecoinMainnet
+    );
+
+    expect(legacyAddressUncompressed).not.toBeUndefined();
+    expect(legacyAddressUncompressed?.startsWith("D")).toBe(true);
+    expect(legacyAddressUncompressed).toBe(
+      "D68B8WQFjXtwjHTvUdk6HgLyjERecjVEYX"
+    );
+
+    const legacyAddressCompressed = dogecoinPubKey.getLegacyAddress(
+      false,
+      dogecoinMainnet
+    );
+
+    expect(legacyAddressCompressed).not.toBeUndefined();
+    expect(legacyAddressCompressed?.startsWith("D")).toBe(true);
+    expect(legacyAddressCompressed).toBe("D8ssUjBGXy1UK3wULHcD7d96WtKtus5My3");
   });
 });

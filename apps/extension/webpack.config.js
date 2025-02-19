@@ -72,6 +72,9 @@ module.exports = {
     ),
     filename: "[name].bundle.js",
   },
+  experiments: {
+    asyncWebAssembly: true,
+  },
   optimization: {
     splitChunks: {
       chunks(chunk) {

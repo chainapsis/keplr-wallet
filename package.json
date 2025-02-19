@@ -70,6 +70,7 @@
     "@types/react-is": "^18.2.1",
     "@typescript-eslint/eslint-plugin": "^5.52.0",
     "@typescript-eslint/parser": "^5.52.0",
+    "bitcoinjs-lib": "^6.1.7",
     "cross-env": "^5.2.0",
     "eslint": "^8.34.0",
     "eslint-config-prettier": "^8.6.0",
