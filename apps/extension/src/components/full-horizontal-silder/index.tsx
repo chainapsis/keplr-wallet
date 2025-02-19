@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React from "react";
 import { FunctionComponent, useState } from "react";
 import { Box } from "../box";
 import { ArrowLeftIcon, ArrowRightIcon } from "../icon";
@@ -12,7 +12,7 @@ const SCREEN_PADDING_X = 12;
 const MAX_SCREEN_WIDTH = 540;
 
 export const FullHorizontalSlider: FunctionComponent<{
-  Buttons: ReactNode[];
+  Buttons: JSX.Element[];
 }> = ({ Buttons }) => {
   const [slideIndex, setSlideIndex] = useState(0);
 

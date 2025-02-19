@@ -1,5 +1,5 @@
 import Color from "color";
-import React, { PropsWithChildren } from "react";
+import React, { Fragment, PropsWithChildren } from "react";
 import { useIntl } from "react-intl";
 import { useNavigate } from "react-router";
 import { Box } from "../../../../components/box";
@@ -25,16 +25,16 @@ export const WrapperwithBottomTag = function ({
   const navigate = useNavigate();
   const { apy } = useGetEarnApy(NOBLE_CHAIN_ID);
 
-  if (!bottomTagType) {
-    return children;
-  }
-
   function onClick() {
     if (isNudgeEarn) {
       navigate(`/earn/intro?chainId=${NOBLE_CHAIN_ID}`);
     } else {
       navigate(`/earn/overview?chainId=${NOBLE_CHAIN_ID}`);
     }
+  }
+
+  if (!bottomTagType) {
+    return <Fragment>{children}</Fragment>;
   }
 
   const message =
