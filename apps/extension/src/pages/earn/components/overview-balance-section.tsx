@@ -76,16 +76,20 @@ export const EarnOverviewBalanceSection: FunctionComponent<{
       <Gutter size="1.25rem" />
 
       <XAxis gap="0.75rem">
-        <Button
-          text={intl.formatMessage({ id: "button.withdraw" })}
-          color="secondary"
-          size="medium"
-          disabled={balance?.toDec().equals(new Dec(0))}
-          style={{ width: "100%" }}
-          onClick={() => {
-            // TO-DO: Withdraw page
-          }}
-        />
+        {rewardCurrency && (
+          <Button
+            text={intl.formatMessage({ id: "button.withdraw" })}
+            color="secondary"
+            size="medium"
+            // disabled={balance?.toDec().equals(new Dec(0))}
+            style={{ width: "100%" }}
+            onClick={() => {
+              navigate(
+                `/earn/withdraw/amount?chainId=${chainId}&coinMinimalDenom=${rewardCurrency.coinMinimalDenom}`
+              );
+            }}
+          />
+        )}
         <Button
           text={intl.formatMessage({ id: "button.deposit" })}
           color="secondary"

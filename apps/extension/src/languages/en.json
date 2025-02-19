@@ -683,6 +683,8 @@
   "page.earn.overview.tutorial-modal.claim.pending-reward": "Pending Reward",
   "page.earn.overview.tutorial-modal.claim.open-earn-overview-button": "Open Earn Overview",
 
+  "page.earn.withdraw.amount.title": "Enter the amount{br}to withdraw.",
+
   "components.empty-view.text": "No {subject} Yet",
   "components.input.recipient-input.wallet-address-only-label": "Wallet Address",
   "components.input.recipient-input.wallet-address-label": "Wallet Address or ICNS",

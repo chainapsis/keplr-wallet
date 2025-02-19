@@ -30,10 +30,12 @@ import { EmptyView } from "../../../components/empty-view";
 import { DenomHelper } from "@keplr-wallet/common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { EarnApyBanner } from "./banners/earn-apy-banner";
-import { validateIsUsdcFromNoble } from "../../earn/utils";
+import {
+  validateIsUsdcFromNoble,
+  validateIsUsdnFromNoble,
+} from "../../earn/utils";
 import { Button } from "../../../components/button";
 import { FormattedMessage } from "react-intl";
-import { IBCCurrency } from "@keplr-wallet/types";
 
 const Styles = {
   Container: styled.div`
@@ -481,9 +483,7 @@ export const TokenDetailModal: FunctionComponent<{
             </Subtitle3>
           </YAxis>
 
-          {currency.coinMinimalDenom === "uusdn" &&
-          (chainId === "noble-1" ||
-            (currency as IBCCurrency).originChainId === "noble-1") ? (
+          {validateIsUsdnFromNoble(currency, chainId) ? (
             <Box padding="1.25rem 0.75rem 1.25rem 0.75rem">
               <Button
                 text={
