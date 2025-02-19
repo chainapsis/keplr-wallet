@@ -13,9 +13,9 @@ import { StakeWithKeplrDashboardButton } from "../stake-with-keplr-dashboard-but
 import { useStore } from "../../../../stores";
 import { useGetEarnApy } from "../../../../hooks/use-get-apy";
 
-export const AvailableTabSlideList = () => {
-  const NOBLE_CHAIN_ID = "noble-1";
+const NOBLE_CHAIN_ID = "noble-1";
 
+export const AvailableTabSlideList = () => {
   const navigate = useNavigate();
   const { analyticsStore, hugeQueriesStore } = useStore();
   const { apy } = useGetEarnApy(NOBLE_CHAIN_ID);
