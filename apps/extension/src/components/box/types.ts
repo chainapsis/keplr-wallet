@@ -30,6 +30,7 @@ export interface BoxProps {
   marginBottom?: string;
   marginLeft?: string;
   marginRight?: string;
+  opacity?: number;
 
   zIndex?: number;
 
@@ -53,8 +54,10 @@ export interface BoxProps {
   hover?: {
     color?: string;
     backgroundColor?: string;
+    background?: string;
     borderWidth?: string;
     borderColor?: string;
+    opacity?: number;
   };
 
   after?: {
