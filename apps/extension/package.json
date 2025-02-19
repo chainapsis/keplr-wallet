@@ -117,7 +117,7 @@
     "@types/color": "^3.0.3",
     "@types/firefox-webext-browser": "^120.0.3",
     "@types/js-yaml": "^4",
-    "@types/react-is": "^16.7.2",
+    "@types/react-is": "^18.2.0",
     "@types/react-window": "^1",
     "@types/resize-observer-browser": "^0.1.7",
     "@types/secp256k1": "^4.0.1",
