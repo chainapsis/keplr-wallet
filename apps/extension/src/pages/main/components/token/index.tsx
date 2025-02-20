@@ -296,11 +296,21 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
       >
         <Columns sum={1} gutter="0.5rem" alignY="center">
           <Skeleton type="circle" layer={1} isNotReady={isNotReady}>
-            <CurrencyImageFallback
-              chainInfo={viewToken.chainInfo}
-              currency={viewToken.token.currency}
-              size="2rem"
-            />
+            {viewToken.token.currency.coinMinimalDenom === "uusdn" ? (
+              <EarnBadgeWrapper>
+                <CurrencyImageFallback
+                  chainInfo={viewToken.chainInfo}
+                  currency={viewToken.token.currency}
+                  size="1.5rem"
+                />
+              </EarnBadgeWrapper>
+            ) : (
+              <CurrencyImageFallback
+                chainInfo={viewToken.chainInfo}
+                currency={viewToken.token.currency}
+                size="2rem"
+              />
+            )}
           </Skeleton>
 
           <Gutter size="0.75rem" />
@@ -1095,3 +1105,29 @@ const PriceChangeTag: FunctionComponent<{
     </Box>
   );
 };
+
+const EarnBadgeWrapper: FunctionComponent<PropsWithChildren> = ({
+  children,
+}) => (
+  <Box
+    position="relative"
+    width="2rem"
+    height="2rem"
+    backgroundColor={ColorPalette["gray-550"]}
+    borderRadius="1rem"
+    style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+  >
+    {children}
+    <Box
+      position="absolute"
+      style={{ bottom: -8.5, left: -1, whiteSpace: "nowrap" }}
+      backgroundColor={ColorPalette["green-800"]}
+      padding="0.25rem"
+      borderRadius="0.375rem"
+      width="max-content"
+      margin="auto"
+    >
+      <Caption1 color={ColorPalette["green-400"]}>Earn</Caption1>
+    </Box>
+  </Box>
+);

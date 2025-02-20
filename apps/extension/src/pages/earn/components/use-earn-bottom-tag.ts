@@ -22,7 +22,9 @@ export function useEarnBottomTag(balances: ViewToken[]) {
       chainInfo.chainId
     );
 
-    if (!isUsdcFromNoble) {
+    const isUsdn = token.currency.coinMinimalDenom === "uusdn";
+
+    if (!isUsdcFromNoble && !isUsdn) {
       return {};
     }
 
@@ -38,14 +40,23 @@ export function useEarnBottomTag(balances: ViewToken[]) {
       };
     }
 
+    const earnedAssetPrice = priceStore
+      .calculatePrice(usdnAsset.current)
+      ?.toString();
+
+    if (isUsdn) {
+      return {
+        bottomTagType: "showEarnSavings",
+        earnedAssetPrice,
+      };
+    }
+
     if (!topUsdcFound.current || topUsdcFound.current === key) {
       topUsdcFound.current = key;
 
       return {
         bottomTagType: "showEarnSavings",
-        earnedAssetPrice: priceStore
-          .calculatePrice(usdnAsset.current)
-          ?.toString(),
+        earnedAssetPrice,
       };
     }
 
