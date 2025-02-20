@@ -31,7 +31,7 @@ import { TokenDetailModal } from "./token-detail";
 import { useSearchParams } from "react-router-dom";
 import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import { useGetSearchChains } from "../../hooks/use-get-search-chains";
-import { useEarnBottomTag } from "./components/use-earn-bottom-tag";
+import { useEarnBottomTag } from "../earn/components/use-earn-bottom-tag";
 
 const zeroDec = new Dec(0);
 

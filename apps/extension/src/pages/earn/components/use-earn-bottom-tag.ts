@@ -1,8 +1,8 @@
 import { CoinPretty } from "@keplr-wallet/unit";
 import { useRef } from "react";
-import { ViewToken } from "../..";
-import { validateIsUsdcFromNoble } from "../../../earn/utils";
-import { useStore } from "../../../../stores";
+import { ViewToken } from "../../main";
+import { validateIsUsdcFromNoble } from "../utils";
+import { useStore } from "../../../stores";
 
 export function useEarnBottomTag(balances: ViewToken[]) {
   const topUsdcFound = useRef("");
