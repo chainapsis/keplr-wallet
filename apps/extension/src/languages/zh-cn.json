@@ -219,6 +219,9 @@
   "page.setting.general.manage-chain-visibility-title": "管理链可见性",
   "page.setting.general.manage-chain-visibility-paragraph": "选择要显示在你当前帐户里的链（及其资产）",
 
+  "page.setting.general.manage-asset-list-title": "管理资产列表",
+  "page.setting.general.manage-asset-list.search.placeholder": " ",
+
   "page.setting.general.language.automatic-title": "自动（浏览器默认）",
 
   "page.setting.general.theme.dark-mode": "深色模式",
@@ -569,6 +572,7 @@
   "page.main.components.claim-all.button": "全部提取",
   "page.main.components.claim-all.claim-button": "提取",
   "page.main.components.menu-bar.manage-chain-visibility-title": "管理链可见性",
+  "page.main.components.menu-bar.manage-asset-list-title": "管理资产列表",
   "page.main.components.menu-bar.my-contacts-title": "我的联系人",
   "page.main.components.menu-bar.add-token-title": "添加币种",
   "page.main.components.menu-bar.setting-title": "设置",

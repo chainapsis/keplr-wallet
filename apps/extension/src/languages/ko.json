@@ -232,6 +232,9 @@
   "page.setting.general.manage-chain-visibility-title": "체인 표시",
   "page.setting.general.manage-chain-visibility-paragraph": "현재 계정에 표시될 체인(해당 체인의 자산 포함)을 선택해주세요.",
 
+  "page.setting.general.manage-asset-list-title": "자산 표시 관리",
+  "page.setting.general.manage-asset-list.search.placeholder": " ",
+
   "page.setting.general.language.automatic-title": "자동 (브라우저 언어)",
 
   "page.setting.general.theme.dark-mode": "다크 모드",
@@ -585,6 +588,7 @@
   "page.main.components.claim-all.button": "한번에 받기",
   "page.main.components.claim-all.claim-button": "받기",
   "page.main.components.menu-bar.manage-chain-visibility-title": "체인 표시",
+  "page.main.components.menu-bar.manage-asset-list-title": "자산 표시 관리",
   "page.main.components.menu-bar.my-contacts-title": "연락처",
   "page.main.components.menu-bar.add-token-title": "토큰 추가",
   "page.main.components.menu-bar.setting-title": "설정",

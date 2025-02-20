@@ -232,6 +232,9 @@
   "page.setting.general.manage-chain-visibility-title": "Manage Chain Visibility",
   "page.setting.general.manage-chain-visibility-paragraph": "Select chains (and their assets) to be displayed on your current account",
 
+  "page.setting.general.manage-asset-list-title": "Manage Asset List",
+  "page.setting.general.manage-asset-list.search.placeholder": " ",
+
   "page.setting.general.language.automatic-title": "Automatic (Browser default)",
 
   "page.setting.general.theme.dark-mode": "Dark Mode",
@@ -602,6 +605,7 @@
   "page.main.components.claim-all.button": "Claim All",
   "page.main.components.claim-all.claim-button": "Claim",
   "page.main.components.menu-bar.manage-chain-visibility-title": "Manage Chain Visibility",
+  "page.main.components.menu-bar.manage-asset-list-title": "Manage Asset List",
   "page.main.components.menu-bar.my-contacts-title": "My Contacts",
   "page.main.components.menu-bar.add-token-title": "Add Token",
   "page.main.components.menu-bar.setting-title": "Settings",
