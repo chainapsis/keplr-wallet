@@ -628,6 +628,7 @@
 
   "page.token-detail.earn-apy-banner.title": "Earn rewards",
   "page.token-detail.earn-apy-banner.start-earn-button": "Start Earn",
+  "page.token-detail.manage-earn-button": "Manage Earn",
 
   "page.earn.title": "Earn",
   "page.earn.intro.title": "Earn real-time rewards\nwith <token></token>",
