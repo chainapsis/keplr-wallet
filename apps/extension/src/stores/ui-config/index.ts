@@ -25,6 +25,7 @@ import { ChangelogConfig } from "./changelog";
 import { SelectWalletConfig } from "./select-wallet";
 import { GetSidePanelIsSupportedMsg } from "@keplr-wallet/background";
 import { isRunningInSidePanel } from "../../utils";
+import { ManageViewAssetTokenConfig } from "./manage-token-asset";
 
 export interface UIConfigOptions {
   isDeveloperMode: boolean;
@@ -46,7 +47,7 @@ export class UIConfigStore {
   public readonly changelogConfig: ChangelogConfig;
   public readonly newChainSuggestionConfig: NewChainSuggestionConfig;
   public readonly selectWalletConfig: SelectWalletConfig;
-
+  public readonly manageViewAssetTokenConfig: ManageViewAssetTokenConfig;
   @observable
   protected _isInitialized: boolean = false;
 
@@ -118,7 +119,11 @@ export class UIConfigStore {
       this.changelogConfig
     );
     this.selectWalletConfig = new SelectWalletConfig(kvStores.kvStore);
-
+    this.manageViewAssetTokenConfig = new ManageViewAssetTokenConfig(
+      messageRequester,
+      chainStore,
+      keyRingStore
+    );
     this._icnsInfo = _icnsInfo;
 
     makeObservable(this);
@@ -227,6 +232,7 @@ export class UIConfigStore {
         this._installedVersion,
         this._currentVersion
       ),
+      this.manageViewAssetTokenConfig.init(),
       (async () => {
         let isFirefox = false;
         if (typeof browser.runtime.getBrowserInfo === "function") {
