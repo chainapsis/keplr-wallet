@@ -10,6 +10,7 @@ import { ColorPalette } from "../../../../styles";
 import { observer } from "mobx-react-lite";
 
 type BottomTagType = "nudgeEarn" | "showEarnSavings";
+const NOBLE_CHAIN_ID = "noble-1";
 
 export const WrapperwithBottomTag = observer(function ({
   children,
@@ -19,7 +20,6 @@ export const WrapperwithBottomTag = observer(function ({
   bottomTagType?: BottomTagType;
   earnedAssetPrice?: string;
 }>) {
-  const NOBLE_CHAIN_ID = "noble-1";
   const isNudgeEarn = bottomTagType === "nudgeEarn";
 
   const intl = useIntl();
@@ -50,9 +50,10 @@ export const WrapperwithBottomTag = observer(function ({
         );
 
   return (
-    <Box position="relative" onClick={onClick} style={{ cursor: "pointer" }}>
+    <Box position="relative" style={{ cursor: "pointer" }}>
       {children}
       <Box
+        onClick={onClick}
         zIndex={1}
         position="relative"
         style={{
