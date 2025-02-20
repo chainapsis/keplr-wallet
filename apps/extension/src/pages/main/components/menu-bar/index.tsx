@@ -137,6 +137,17 @@ export const MenuBar: FunctionComponent<{
         <Styles.MenuItem
           onClick={(e) => {
             e.preventDefault();
+            navigate("/manage-asset-list");
+          }}
+        >
+          <FormattedMessage id="page.main.components.menu-bar.manage-asset-list-title" />
+        </Styles.MenuItem>
+
+        <Gutter size="1rem" />
+
+        <Styles.MenuItem
+          onClick={(e) => {
+            e.preventDefault();
 
             if (keyRingStore.selectedKeyInfo) {
               analyticsStore.logEvent("click_menu_manageChainVisibility");
