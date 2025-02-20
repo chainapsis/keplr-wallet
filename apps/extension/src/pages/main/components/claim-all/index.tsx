@@ -719,13 +719,11 @@ const ViewClaimTokenItemContent: FunctionComponent<{
           }}
         >
           <Columns sum={1} alignY="center" gutter="0.75rem">
-            {viewClaimToken.token.currency.coinImageUrl && (
-              <CurrencyImageFallback
-                chainInfo={viewClaimToken.modularChainInfo}
-                currency={viewClaimToken.token.currency}
-                size="2rem"
-              />
-            )}
+            <CurrencyImageFallback
+              chainInfo={viewClaimToken.modularChainInfo}
+              currency={viewClaimToken.token.currency}
+              size="2rem"
+            />
 
             <Column weight={1}>
               <Stack gutter="0.25rem">
