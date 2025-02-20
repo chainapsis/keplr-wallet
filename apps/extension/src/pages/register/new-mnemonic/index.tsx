@@ -31,6 +31,7 @@ import { WarningBox } from "../../../components/warning-box";
 import { CopyToClipboard } from "../components/copy-to-clipboard";
 import { useIntl } from "react-intl";
 import { useTheme } from "styled-components";
+import { checkButtonPositionAndScrollToButton } from "../utils/check-button-position-and-scroll-to-button";
 
 type WordsType = "12words" | "24words";
 
@@ -112,6 +113,8 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
   const bip44PathState = useBIP44PathState();
   const [isBIP44CardOpen, setIsBIP44CardOpen] = useState(false);
 
+  const buttonContainerRef = useRef<HTMLDivElement>(null);
+
   return (
     <RegisterSceneBox>
       <Box position="relative">
@@ -192,7 +195,15 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
       <Gutter size="1.5rem" />
 
       <Box width="27.25rem" marginX="auto">
-        <VerticalCollapseTransition width="100%" collapsed={isBIP44CardOpen}>
+        <VerticalCollapseTransition
+          width="100%"
+          collapsed={isBIP44CardOpen}
+          onTransitionEnd={() => {
+            if (isBIP44CardOpen) {
+              checkButtonPositionAndScrollToButton(buttonContainerRef);
+            }
+          }}
+        >
           <Box alignX="center">
             <Button
               size="small"
@@ -217,24 +228,25 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
         </VerticalCollapseTransition>
       </Box>
       <Gutter size="1.25rem" />
+
       <Box width="22.5rem" marginX="auto">
         {policyVerified ? (
-          <Button
-            text={intl.formatMessage({
-              id: "button.next",
-            })}
-            size="large"
-            onClick={() => {
-              if (words.join(" ").trim() !== "") {
-                sceneTransition.push("verify-mnemonic", {
-                  mnemonic: words.join(" "),
-                  bip44Path: bip44PathState.getPath(),
-                  stepPrevious: 1,
-                  stepTotal: 3,
-                });
-              }
-            }}
-          />
+          <div ref={buttonContainerRef}>
+            <Button
+              text={intl.formatMessage({ id: "button.next" })}
+              size="large"
+              onClick={() => {
+                if (words.join(" ").trim() !== "") {
+                  sceneTransition.push("verify-mnemonic", {
+                    mnemonic: words.join(" "),
+                    bip44Path: bip44PathState.getPath(),
+                    stepPrevious: 1,
+                    stepTotal: 3,
+                  });
+                }
+              }}
+            />
+          </div>
         ) : (
           <Button
             text={`${intl.formatMessage({
