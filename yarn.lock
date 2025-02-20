@@ -8766,7 +8766,7 @@ __metadata:
     ecpair: ^2.1.0
     tiny-secp256k1: ^2.2.3
   peerDependencies:
-    bitcoinjs-lib: ^6.1.7
+    bitcoinjs-lib: ^6
     starknet: ^6
   languageName: unknown
   linkType: soft

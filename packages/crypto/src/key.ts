@@ -8,9 +8,7 @@ import { Hash } from "./hash";
 import { hash as starknetHash } from "starknet";
 import { ECPairInterface, ECPairFactory } from "ecpair";
 import * as ecc from "tiny-secp256k1";
-import { Network } from "bitcoinjs-lib";
-import { p2pkh, p2tr, p2wpkh } from "bitcoinjs-lib/src/payments";
-import { toXOnly } from "bitcoinjs-lib/src/psbt/bip371";
+import { Network, payments } from "bitcoinjs-lib";
 
 // This code is required before using bitcoinjs-lib.
 // import * as bitcoin from "bitcoinjs-lib";
@@ -242,7 +240,7 @@ export class BitcoinCompatiblePubKey extends PubKeySecp256k1 {
     network?: Network
   ): string | undefined {
     const pubKey = this.toBytes(uncompressed);
-    const paymentPkh = p2pkh({
+    const paymentPkh = payments.p2pkh({
       pubkey: NodeBuffer.from(pubKey),
       network,
     });
@@ -255,7 +253,7 @@ export class BitcoinCompatiblePubKey extends PubKeySecp256k1 {
    */
   getNativeSegwitAddress(network?: Network): string | undefined {
     const pubKey = this.toBytes(false);
-    const paymentWpk = p2wpkh({
+    const paymentWpk = payments.p2wpkh({
       pubkey: NodeBuffer.from(pubKey),
       network,
     });
@@ -269,10 +267,18 @@ export class BitcoinCompatiblePubKey extends PubKeySecp256k1 {
   getTaprootAddress(network?: Network): string | undefined {
     const pubKey = this.toBytes(false);
     const internalPubkey = toXOnly(NodeBuffer.from(pubKey)); // remove y coordinate.
-    const paymentTr = p2tr({
+    const paymentTr = payments.p2tr({
       internalPubkey,
       network,
     });
     return paymentTr.address;
   }
 }
+
+/**
+ * Converts a public key to an X-only public key.
+ * @param pubKey The public key to convert.
+ * @returns The X-only public key.
+ */
+export const toXOnly = (pubKey: NodeBuffer) =>
+  pubKey.length === 32 ? pubKey : pubKey.slice(1, 33);

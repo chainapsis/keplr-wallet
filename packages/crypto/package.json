@@ -26,7 +26,7 @@
     "tiny-secp256k1": "^2.2.3"
   },
   "peerDependencies": {
-    "bitcoinjs-lib": "^6.1.7",
+    "bitcoinjs-lib": "^6",
     "starknet": "^6"
   }
 }
