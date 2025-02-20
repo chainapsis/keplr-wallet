@@ -3,7 +3,7 @@ import { ROUTE } from "./constants";
 import { ViewAssetToken } from "./types";
 
 export class GetAllDisabledViewAssetTokenMsg extends Message<
-  Map<string, ViewAssetToken[]>
+  Record<string, Record<string, ViewAssetToken>>
 > {
   public static type() {
     return "get-all-disabled-view-asset-token";
@@ -27,7 +27,7 @@ export class GetAllDisabledViewAssetTokenMsg extends Message<
 }
 
 export class GetDisabledViewAssetTokenListMsg extends Message<
-  ViewAssetToken[]
+  Record<string, ViewAssetToken>
 > {
   public static type() {
     return "get-disabled-view-asset-token-list";
@@ -52,7 +52,9 @@ export class GetDisabledViewAssetTokenListMsg extends Message<
   }
 }
 
-export class DisableViewAssetTokenMsg extends Message<void> {
+export class DisableViewAssetTokenMsg extends Message<
+  Record<string, Record<string, ViewAssetToken>>
+> {
   public static type() {
     return "disable-view-asset-token";
   }
