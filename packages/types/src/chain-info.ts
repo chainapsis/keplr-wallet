@@ -71,7 +71,17 @@ export interface StarknetChainInfo {
   readonly strkContractAddress: string;
 }
 
-export type ChainInfoModule = "cosmos" | "starknet";
+export interface BitcoinChainInfo {
+  readonly rpc: string;
+  readonly chainId: string;
+  readonly addrFormats: "segwit" | "taproot" | "legacy";
+  readonly coinType: number;
+  readonly bech32: string;
+  readonly messagePrefix: string;
+  readonly pubKeyHash: number;
+}
+
+export type ChainInfoModule = "cosmos" | "starknet" | "bitcoin";
 
 export type ModularChainInfo =
   | {
@@ -85,4 +95,10 @@ export type ModularChainInfo =
       readonly chainName: string;
       readonly chainSymbolImageUrl?: string;
       readonly starknet: StarknetChainInfo;
+    }
+  | {
+      readonly chainId: string;
+      readonly chainName: string;
+      readonly chainSymbolImageUrl?: string;
+      readonly bitcoin: BitcoinChainInfo;
     };
