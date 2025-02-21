@@ -6,6 +6,7 @@ import { Box } from "../../../components/box";
 import { Subtitle4 } from "../../../components/typography";
 import { ColorPalette } from "../../../styles";
 import { useGetEarnApy } from "../../../hooks/use-get-apy";
+import { observer } from "mobx-react-lite";
 
 export const Chip: FunctionComponent<{
   text: string;
@@ -55,8 +56,8 @@ export const Chip: FunctionComponent<{
 export const ApyChip: FunctionComponent<{
   chainId: string;
   colorType: "green" | "gray";
-}> = ({ chainId, colorType }) => {
+}> = observer(({ chainId, colorType }) => {
   const { apy } = useGetEarnApy(chainId);
 
   return <Chip colorType={colorType} text={`APY ${apy}`} />;
-};
+});

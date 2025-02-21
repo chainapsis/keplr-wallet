@@ -539,6 +539,7 @@
 
   "page.main.chart.available": "Total Available",
   "page.main.chart.staked": "Total Staked",
+  "page.main.chart.earn-apy-button": "Earn up to {apy} APY with {tokenName}",
   "page.main.chart.stake-with-keplr-dashboard-button": "Stake with Keplr Dashboard",
   "page.main.chart.manage-portfolio-in-keplr-dashboard": "Manage Portfolio in Keplr Dashboard",
   "page.main.search-placeholder": "Search for asset or chain (i.e. ATOM, Cosmos)",
@@ -612,6 +613,7 @@
   "page.main.components.token-found-modal.add-token-on-injective-and-evmos": "Add tokens on Injective and Evmos",
   "page.main.components.token-found-modal.add-chains": "Add Chains",
   "page.main.components.token-item.copy-address.copied": "Copied",
+  "page.main.components.token-item.earn-nudge-button": "Earn {apy} APY with USDC",
   "page.main.components.token-item.earn-savings-button": "{balance} in Savings",
 
   "page.main.layouts.header.new-chain.title": "✨ {chains} Now Integrated!",
@@ -626,6 +628,7 @@
 
   "page.token-detail.earn-apy-banner.title": "Earn rewards",
   "page.token-detail.earn-apy-banner.start-earn-button": "Start Earn",
+  "page.token-detail.manage-earn-button": "Manage Earn",
 
   "page.earn.title": "Earn",
   "page.earn.intro.title": "Earn real-time rewards\nwith <token></token>",

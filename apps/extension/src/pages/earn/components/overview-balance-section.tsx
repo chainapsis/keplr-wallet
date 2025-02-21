@@ -18,13 +18,14 @@ import {
 import { useGetEarnApy } from "../../../hooks/use-get-apy";
 import { useStore } from "../../../stores";
 import { ColorPalette } from "../../../styles";
+import { observer } from "mobx-react-lite";
 
 export const EarnOverviewBalanceSection: FunctionComponent<{
   chainId: string;
   holdingCurrency: Currency;
   rewardCurrency?: Currency;
   bech32Address: string;
-}> = ({ chainId, holdingCurrency, rewardCurrency, bech32Address }) => {
+}> = observer(({ chainId, holdingCurrency, rewardCurrency, bech32Address }) => {
   const intl = useIntl();
 
   const { queriesStore, priceStore, uiConfigStore } = useStore();
@@ -100,7 +101,7 @@ export const EarnOverviewBalanceSection: FunctionComponent<{
       </XAxis>
     </Box>
   );
-};
+});
 
 const Dot: FunctionComponent = () => (
   <Box width="3px" height="3px" backgroundColor={ColorPalette["gray-400"]} />

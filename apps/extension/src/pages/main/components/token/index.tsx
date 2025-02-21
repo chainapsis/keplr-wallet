@@ -44,6 +44,7 @@ import { animated, useSpringValue, to } from "@react-spring/web";
 import { defaultSpringConfig } from "../../../../styles/spring";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { DecUtils, RatePretty } from "@keplr-wallet/unit";
+import { WrapperwithBottomTag } from "./wrapper-with-bottom-tag";
 
 const Styles = {
   Container: styled.div<{
@@ -52,6 +53,7 @@ const Styles = {
     disabled?: boolean;
     isNotReady?: boolean;
   }>`
+    z-index: 2;
     background-color: ${(props) =>
       props.theme.mode === "light"
         ? props.isNotReady
@@ -144,6 +146,8 @@ export const TokenTitleView: FunctionComponent<{
   );
 };
 
+type BottomTagType = "nudgeEarn" | "showEarnSavings";
+
 interface TokenItemProps {
   viewToken: ViewToken;
   onClick?: () => void;
@@ -160,6 +164,9 @@ interface TokenItemProps {
   // swap destination select 페이지에서 balance 숨기기 위한 옵션
   hideBalance?: boolean;
   showPrice24HChange?: boolean;
+
+  bottomTagType?: BottomTagType;
+  earnedAssetPrice?: string;
 }
 
 export const TokenItem: FunctionComponent<TokenItemProps> = observer(
@@ -173,6 +180,8 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
     copyAddress,
     hideBalance,
     showPrice24HChange,
+    bottomTagType,
+    earnedAssetPrice,
   }) => {
     const { priceStore, price24HChangesStore, uiConfigStore } = useStore();
     const navigate = useNavigate();
@@ -241,7 +250,7 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
       );
     })();
 
-    return (
+    const TokenItemContent = () => (
       <Styles.Container
         forChange={forChange}
         isError={viewToken.error != null}
@@ -287,11 +296,21 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
       >
         <Columns sum={1} gutter="0.5rem" alignY="center">
           <Skeleton type="circle" layer={1} isNotReady={isNotReady}>
-            <CurrencyImageFallback
-              chainInfo={viewToken.chainInfo}
-              currency={viewToken.token.currency}
-              size="2rem"
-            />
+            {viewToken.token.currency.coinMinimalDenom === "uusdn" ? (
+              <EarnBadgeWrapper>
+                <CurrencyImageFallback
+                  chainInfo={viewToken.chainInfo}
+                  currency={viewToken.token.currency}
+                  size="1.5rem"
+                />
+              </EarnBadgeWrapper>
+            ) : (
+              <CurrencyImageFallback
+                chainInfo={viewToken.chainInfo}
+                currency={viewToken.token.currency}
+                size="2rem"
+              />
+            )}
           </Skeleton>
 
           <Gutter size="0.75rem" />
@@ -503,6 +522,19 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
         </Columns>
       </Styles.Container>
     );
+
+    if (bottomTagType) {
+      return (
+        <WrapperwithBottomTag
+          bottomTagType={bottomTagType as BottomTagType}
+          earnedAssetPrice={earnedAssetPrice}
+        >
+          <TokenItemContent />
+        </WrapperwithBottomTag>
+      );
+    }
+
+    return <TokenItemContent />;
   }
 );
 
@@ -1073,3 +1105,29 @@ const PriceChangeTag: FunctionComponent<{
     </Box>
   );
 };
+
+const EarnBadgeWrapper: FunctionComponent<PropsWithChildren> = ({
+  children,
+}) => (
+  <Box
+    position="relative"
+    width="2rem"
+    height="2rem"
+    backgroundColor={ColorPalette["gray-550"]}
+    borderRadius="1rem"
+    style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+  >
+    {children}
+    <Box
+      position="absolute"
+      style={{ bottom: -8.5, left: -1, whiteSpace: "nowrap" }}
+      backgroundColor={ColorPalette["green-800"]}
+      padding="0.25rem"
+      borderRadius="0.375rem"
+      width="max-content"
+      margin="auto"
+    >
+      <Caption1 color={ColorPalette["green-400"]}>Earn</Caption1>
+    </Box>
+  </Box>
+);
