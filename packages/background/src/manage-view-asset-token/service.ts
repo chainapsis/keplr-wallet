@@ -131,7 +131,6 @@ export class ManageViewAssetTokenService {
           Array.from(coinSet),
         ])
       );
-      console.log(res);
       return res;
     }
   );
