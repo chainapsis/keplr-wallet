@@ -12,6 +12,9 @@ import { KeyRingService } from "../keyring";
 import { computedFn } from "mobx-utils";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { ChainsUIService } from "../chains-ui";
+import { ChainsService } from "../chains";
+import { ChainInfo } from "@keplr-wallet/types";
+import { VaultService } from "../vault";
 
 const DISABLED_VIEW_ASSET_TOKEN_MAP_KEY = "disabledViewAssetTokenMap";
 
@@ -23,7 +26,9 @@ export class ManageViewAssetTokenService {
   constructor(
     protected readonly kvStore: KVStore,
     public readonly keyRingService: KeyRingService,
-    public readonly chainsUIService: ChainsUIService
+    protected readonly vaultService: VaultService,
+    public readonly chainsUIService: ChainsUIService,
+    protected chainsService: ChainsService
   ) {
     makeObservable(this);
   }
@@ -51,7 +56,60 @@ export class ManageViewAssetTokenService {
         this.convertFromNestedObservableToJs(this.disabledViewAssetTokenMap)
       );
     });
+
+    this.chainsService.addChainRemovedHandler(this.onChainRemoved);
+    this.chainsUIService.addChainUIEnabledChangedHandler(
+      this.onChainUIEnabledChanged
+    );
+    this.vaultService.addVaultRemovedHandler(this.onVaultRemoved);
   }
+
+  protected readonly onVaultRemoved = (type: string, id: string) => {
+    if (type === "keyRing" && this.disabledViewAssetTokenMap.has(id)) {
+      runInAction(() => {
+        this.disabledViewAssetTokenMap.delete(id);
+      });
+    }
+  };
+
+  protected readonly onChainUIEnabledChanged = (
+    vaultId: string,
+    chainIdentifiers: ReadonlyArray<string>
+  ) => {
+    const targetVaultDisabledChainMap =
+      this.disabledViewAssetTokenMap.get(vaultId);
+    if (!targetVaultDisabledChainMap) {
+      return;
+    }
+
+    const shouldBeDeletedChainIdentifiers = [];
+
+    for (const chainIdentifier of targetVaultDisabledChainMap.keys()) {
+      if (!chainIdentifiers.includes(chainIdentifier)) {
+        shouldBeDeletedChainIdentifiers.push(chainIdentifier);
+      }
+    }
+
+    for (const chainIdentifier of shouldBeDeletedChainIdentifiers) {
+      targetVaultDisabledChainMap.delete(chainIdentifier);
+    }
+
+    runInAction(() => {
+      this.disabledViewAssetTokenMap.set(vaultId, targetVaultDisabledChainMap);
+    });
+  };
+
+  protected readonly onChainRemoved = (chainInfo: ChainInfo) => {
+    //이상하긴 하지만 ChainsUIService과 비슷하게 처리 하도록 구현
+    //해서 다른 vault에서 체인을 삭제하면 전체 vault에서 삭제됨
+    const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId).identifier;
+    const vaultIds = this.disabledViewAssetTokenMap.keys();
+    runInAction(() => {
+      for (const vaultId of vaultIds) {
+        this.disabledViewAssetTokenMap.get(vaultId)?.delete(chainIdentifier);
+      }
+    });
+  };
 
   getDisabledViewAssetTokenList = computedFn(
     (vaultId: string): Record<string, string[]> => {
@@ -80,15 +138,10 @@ export class ManageViewAssetTokenService {
 
   getAllDisabledViewAssetTokenList = computedFn(
     (): Record<string, Record<string, string[]>> => {
-      console.log(
-        "[service] getAllDisabledViewAssetTokenList",
-        this.disabledViewAssetTokenMap
-      );
       const res = this.convertFromNestedObservableToJs(
         this.disabledViewAssetTokenMap
       );
 
-      console.log("[service] getAllDisabledViewAssetTokenList @@", res);
       return res;
     }
   );
@@ -101,8 +154,6 @@ export class ManageViewAssetTokenService {
     if (!this.checkIsValidVaultId(vaultId)) {
       throw new Error("Invalid vault id");
     }
-
-    console.log("[service] disableViewAssetToken", vaultId, token);
 
     if (!this.disabledViewAssetTokenMap.has(vaultId)) {
       runInAction(() => {
@@ -122,28 +173,11 @@ export class ManageViewAssetTokenService {
       new Map<string, Set<string>>();
     let coinSet: Set<string> | undefined = previousMap?.get(chainIdentifier);
 
-    console.log(
-      "[service] disableViewAssetToken",
-      vaultId,
-      token,
-      previousMap,
-      coinSet
-    );
-
     if (!coinSet) {
       coinSet = new Set<string>();
     }
     coinSet.add(token.coinMinimalDenom);
     previousMap?.set(chainIdentifier, coinSet);
-
-    console.log(
-      "[service] disableViewAssetToken",
-      vaultId,
-      token,
-      previousMap,
-      coinSet,
-      this.disabledViewAssetTokenMap
-    );
 
     this.disabledViewAssetTokenMap.set(vaultId, previousMap);
 
@@ -151,7 +185,6 @@ export class ManageViewAssetTokenService {
       this.disabledViewAssetTokenMap
     );
 
-    console.log("[service] disableViewAssetToken", res);
     return res;
   }
 
