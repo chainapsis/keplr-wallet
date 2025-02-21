@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useMemo, useState } from "react";
+import React, { Fragment, FunctionComponent, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { HeaderLayout } from "../../../layouts/header";
 import { BackButton } from "../../../layouts/header/components";
@@ -15,8 +15,7 @@ import {
 } from "@keplr-wallet/hooks";
 import {
   Body2,
-  H2,
-  H3,
+  MobileH3,
   Subtitle3,
   Subtitle4,
 } from "../../../components/typography";
@@ -118,14 +117,14 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
         }}
       >
         <Stack flex={1}>
-          <H2 color={ColorPalette["white"]}>
+          <MobileH3 color={ColorPalette["white"]}>
             {intl.formatMessage(
               { id: "page.earn.withdraw.amount.title" },
               {
                 br: <br />,
               }
             )}
-          </H2>
+          </MobileH3>
 
           <Gutter size="2rem" />
           <Input
@@ -150,22 +149,22 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
           <Gutter size="0.75rem" />
           <Box padding="0.25rem 0">
             <XAxis alignY="center">
-              <Box
-                padding="0.25rem 0.5rem"
-                backgroundColor={ColorPalette["gray-550"]}
-                borderRadius="0.5rem"
-                width="fit-content"
-                cursor="pointer"
-                onClick={() => {
-                  nobleEarnAmountConfig.setValue(
-                    balance.hideDenom(true).toString()
-                  );
-                }}
-              >
-                <Subtitle4 color={ColorPalette["gray-200"]}>
-                  {balance.trim(true).toString()}
-                </Subtitle4>
-              </Box>
+              {nobleEarnAmountConfig.amount[0].toDec().equals(new Dec("0")) && (
+                <Box
+                  padding="0.25rem 0.5rem"
+                  backgroundColor={ColorPalette["gray-550"]}
+                  borderRadius="0.5rem"
+                  width="fit-content"
+                  cursor="pointer"
+                  onClick={() => {
+                    nobleEarnAmountConfig.setFraction(1);
+                  }}
+                >
+                  <Subtitle4 color={ColorPalette["gray-200"]}>
+                    {balance.trim(true).toString()}
+                  </Subtitle4>
+                </Box>
+              )}
               <Box padding="0.25rem">
                 <Subtitle3 color={ColorPalette["gray-300"]}>
                   {`on ${chainInfo.chainName}`}
@@ -180,22 +179,26 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
             </Box>
           )}
 
-          <YAxis alignX="center">
-            <LongArrowDownIcon
-              width="1.5rem"
-              height="1.5rem"
-              color={ColorPalette["gray-400"]}
-            />
-          </YAxis>
-          <Gutter size="1rem" />
+          {nobleEarnAmountConfig.expectedOutAmount.toDec().gt(new Dec("0")) && (
+            <Fragment>
+              <YAxis alignX="center">
+                <LongArrowDownIcon
+                  width="1.5rem"
+                  height="1.5rem"
+                  color={ColorPalette["gray-400"]}
+                />
+              </YAxis>
+              <Gutter size="1rem" />
 
-          <H3>
-            {nobleEarnAmountConfig.expectedOutAmount.trim(true).toString()}
-          </H3>
-          <Gutter size="0.5rem" />
-          <Subtitle3 color={ColorPalette["gray-300"]}>
-            {`on ${chainInfo.chainName}`}
-          </Subtitle3>
+              <MobileH3>
+                {nobleEarnAmountConfig.expectedOutAmount.trim(true).toString()}
+              </MobileH3>
+              <Gutter size="0.5rem" />
+              <Subtitle3 color={ColorPalette["gray-300"]}>
+                {`on ${chainInfo.chainName}`}
+              </Subtitle3>
+            </Fragment>
+          )}
         </Stack>
       </Box>
     </HeaderLayout>
