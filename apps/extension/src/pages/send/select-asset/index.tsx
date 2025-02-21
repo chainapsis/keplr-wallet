@@ -48,7 +48,9 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
 
   const searchRef = useFocusOnMount<HTMLInputElement>();
 
-  const tokens = hugeQueriesStore.getAllBalances(!hideIBCToken);
+  const tokens = hugeQueriesStore.getAllBalances({
+    allowIBCToken: !hideIBCToken,
+  });
 
   const _filteredTokens = useMemo(() => {
     const zeroDec = new Dec(0);

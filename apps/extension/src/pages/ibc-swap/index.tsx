@@ -548,7 +548,11 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   // ------ 기능상 의미는 없고 이 페이지에서 select asset page로의 전환시 UI flash를 막기 위해서 필요한 값들을 prefetch하는 용도
   useEffect(() => {
     const disposal = autorun(() => {
-      noop(hugeQueriesStore.getAllBalances(true));
+      noop(
+        hugeQueriesStore.getAllBalances({
+          allowIBCToken: true,
+        })
+      );
       noop(skipQueriesStore.queryIBCSwap.swapDestinationCurrenciesMap);
     });
 
