@@ -605,7 +605,7 @@
   "page.main.components.claim-all.title": "Claimable Staking Reward",
   "page.main.components.claim-all.button": "Claim All",
   "page.main.components.claim-all.claim-button": "Claim",
-  "page.main.components.menu-bar.manage-chain-visibility-title": "Manage Chain Visibility",
+  "page.main.components.menu-bar.manage-chain-visibility-title": "Add/Remove Chains",
   "page.main.components.menu-bar.manage-asset-list-title": "Manage Asset List",
   "page.main.components.menu-bar.my-contacts-title": "My Contacts",
   "page.main.components.menu-bar.add-token-title": "Add Token",

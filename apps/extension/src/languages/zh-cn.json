@@ -571,7 +571,7 @@
   "page.main.components.claim-all.title": "可提取的质押收益",
   "page.main.components.claim-all.button": "全部提取",
   "page.main.components.claim-all.claim-button": "提取",
-  "page.main.components.menu-bar.manage-chain-visibility-title": "管理链可见性",
+  "page.main.components.menu-bar.manage-chain-visibility-title": "添加/删除链",
   "page.main.components.menu-bar.manage-asset-list-title": "管理资产列表",
   "page.main.components.menu-bar.my-contacts-title": "我的联系人",
   "page.main.components.menu-bar.add-token-title": "添加币种",
