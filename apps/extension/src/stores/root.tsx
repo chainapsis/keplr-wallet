@@ -28,6 +28,7 @@ import {
   AgoricQueries,
   LSMCurrencyRegistrar,
   TokenFactoryCurrencyRegistrar,
+  NobleQueries,
 } from "@keplr-wallet/stores";
 import {
   IBCChannelStore,
@@ -129,7 +130,8 @@ export class RootStore {
       KeplrETCQueries,
       ICNSQueries,
       TokenContractsQueries,
-      EthereumQueries
+      EthereumQueries,
+      NobleQueries
     ]
   >;
   public readonly swapUsageQueries: SwapUsageQueries;
@@ -321,7 +323,8 @@ export class RootStore {
       EthereumQueries.use({
         coingeckoAPIBaseURL: CoinGeckoAPIEndPoint,
         coingeckoAPIURI: CoinGeckoCoinDataByTokenAddress,
-      })
+      }),
+      NobleQueries.use()
     );
     this.swapUsageQueries = new SwapUsageQueries(
       this.queriesStore.sharedContext,

@@ -10,8 +10,7 @@ import { useSearchParams } from "react-router-dom";
 import { useStore } from "../../../stores";
 import {
   EmptyAmountError,
-  useSendMixedIBCTransferConfig,
-  useTxConfigsValidate,
+  useSenderConfig,
   ZeroAmountError,
 } from "@keplr-wallet/hooks";
 import {
@@ -25,16 +24,16 @@ import { Box } from "../../../components/box";
 import { Gutter } from "../../../components/gutter";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { useIntl } from "react-intl";
-import { useIBCChannelConfigQueryString } from "../../../hooks/use-ibc-channel-config-query-string";
 import { ColorPalette } from "../../../styles";
 import { Input } from "../components/input";
-import { ApyChip } from "../components/chip";
 import { XAxis, YAxis } from "../../../components/axis";
 import { LongArrowDownIcon } from "../../../components/icon/long-arrow-down";
+import { useNobleEarnAmountConfig } from "@keplr-wallet/hooks-internal";
+
+const NOBLE_EARN_WITHDRAW_OUT_COIN_MINIMAL_DENOM = "uusdc";
 
 export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
-  const { accountStore, chainStore, queriesStore, skipQueriesStore } =
-    useStore();
+  const { accountStore, chainStore, queriesStore } = useStore();
   const [searchParams] = useSearchParams();
   const intl = useIntl();
 
@@ -43,14 +42,17 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
 
   const chainId = initialChainId || chainStore.chainInfosInUI[0].chainId;
   const chainInfo = chainStore.getChain(chainId);
-
-  const [errorMessage, setErrorMessage] = useState("");
+  const account = accountStore.getAccount(chainId);
 
   const coinMinimalDenom =
     initialCoinMinimalDenom || chainInfo.currencies[0].coinMinimalDenom;
   const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
 
-  const account = accountStore.getAccount(chainId);
+  const outCurrency = chainInfo.forceFindCurrency(
+    NOBLE_EARN_WITHDRAW_OUT_COIN_MINIMAL_DENOM
+  );
+
+  const [errorMessage, setErrorMessage] = useState("");
 
   const queryBalances = queriesStore.get(chainId).queryBalances;
   const sender = account.bech32Address;
@@ -58,34 +60,19 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
     queryBalances.getQueryBech32Address(sender).getBalance(currency)?.balance ??
     new CoinPretty(currency, new Dec("0"));
 
-  const sendConfigs = useSendMixedIBCTransferConfig(
+  const senderConfig = useSenderConfig(chainStore, chainId, sender);
+  const nobleEarnAmountConfig = useNobleEarnAmountConfig(
     chainStore,
     queriesStore,
+    accountStore,
     chainId,
-    sender,
-    300000,
-    true
+    senderConfig,
+    currency,
+    outCurrency
   );
-  sendConfigs.amountConfig.setCurrency(currency);
-
-  useIBCChannelConfigQueryString(sendConfigs.channelConfig);
-
-  const txConfigsValidate = useTxConfigsValidate({
-    ...sendConfigs,
-  });
-
-  // Prefetch IBC channels to reduce the UI flickering(?) when open ibc channel modal.
-  try {
-    skipQueriesStore.queryIBCPacketForwardingTransfer.getIBCChannels(
-      chainId,
-      currency.coinMinimalDenom
-    );
-  } catch (e) {
-    console.log(e);
-  }
 
   const error = useMemo(() => {
-    const uiProperties = sendConfigs.amountConfig.uiProperties;
+    const uiProperties = nobleEarnAmountConfig.uiProperties;
 
     const err = uiProperties.error || uiProperties.warning;
 
@@ -100,7 +87,7 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
     if (err) {
       return err.message || err.toString();
     }
-  }, [sendConfigs.amountConfig.uiProperties]);
+  }, [nobleEarnAmountConfig.uiProperties]);
 
   return (
     <HeaderLayout
@@ -110,7 +97,7 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
       left={<BackButton />}
       bottomButtons={[
         {
-          disabled: txConfigsValidate.interactionBlocked,
+          disabled: error != null,
           text: intl.formatMessage({ id: "button.next" }),
           color: "primary",
           size: "large",
@@ -131,8 +118,6 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
         }}
       >
         <Stack flex={1}>
-          <ApyChip chainId={chainId} colorType="green" />
-          <Gutter size="0.5rem" />
           <H2 color={ColorPalette["white"]}>
             {intl.formatMessage(
               { id: "page.earn.withdraw.amount.title" },
@@ -145,13 +130,11 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
           <Gutter size="2rem" />
           <Input
             type="number"
-            placeholder={intl.formatMessage({
-              id: "page.earn.transfer.amount.input.placeholder",
-            })}
-            value={sendConfigs.amountConfig.value}
+            placeholder={balance.trim(true).toString()}
+            value={nobleEarnAmountConfig.value}
             warning={error != null}
             onChange={(e) => {
-              sendConfigs.amountConfig.setValue(e.target.value);
+              nobleEarnAmountConfig.setValue(e.target.value);
               if (new Dec(e.target.value || "0").gt(balance.toDec())) {
                 setErrorMessage(
                   intl.formatMessage({
@@ -174,13 +157,13 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
                 width="fit-content"
                 cursor="pointer"
                 onClick={() => {
-                  sendConfigs.amountConfig.setValue(
+                  nobleEarnAmountConfig.setValue(
                     balance.hideDenom(true).toString()
                   );
                 }}
               >
                 <Subtitle4 color={ColorPalette["gray-200"]}>
-                  {balance.hideIBCMetadata(true).toString()}
+                  {balance.trim(true).toString()}
                 </Subtitle4>
               </Box>
               <Box padding="0.25rem">
@@ -206,8 +189,10 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
           </YAxis>
           <Gutter size="1rem" />
 
-          <H3>{`${sendConfigs.amountConfig.value} ${currency.coinDenom}`}</H3>
-          <Gutter size="0.25rem" />
+          <H3>
+            {nobleEarnAmountConfig.expectedOutAmount.trim(true).toString()}
+          </H3>
+          <Gutter size="0.5rem" />
           <Subtitle3 color={ColorPalette["gray-300"]}>
             {`on ${chainInfo.chainName}`}
           </Subtitle3>
