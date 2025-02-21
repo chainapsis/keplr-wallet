@@ -102,7 +102,7 @@ import { isRunningInSidePanel } from "./utils";
 import { StarknetSendPage } from "./pages/starknet/send";
 import { SignStarknetTxPage } from "./pages/starknet/sign/tx";
 import { SignStarknetMessagePage } from "./pages/starknet/sign/message";
-import { ManageAssetListPage } from "./pages/manage-token-list";
+import { ManageViewAssetTokenListPage } from "./pages/manage-view-asset-token-list";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -390,8 +390,8 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               />
               <Route path="/activities" element={<ActivitiesPage />} />
               <Route
-                path="/manage-asset-list"
-                element={<ManageAssetListPage />}
+                path="/manage-view-asset-token-list"
+                element={<ManageViewAssetTokenListPage />}
               />
               <Route path="/setting" element={<SettingPage />} />
               <Route path="/setting/general" element={<SettingGeneralPage />} />

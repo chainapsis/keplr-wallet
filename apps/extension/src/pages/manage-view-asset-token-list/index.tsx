@@ -14,7 +14,7 @@ import { Gutter } from "../../components/gutter";
 import { XAxis } from "../../components/axis";
 import { TextInput } from "../../components/input";
 
-export const ManageAssetListPage: FunctionComponent = observer(() => {
+export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
   const { hugeQueriesStore, keyRingStore, uiConfigStore } = useStore();
   const intl = useIntl();
 

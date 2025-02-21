@@ -137,7 +137,7 @@ export const MenuBar: FunctionComponent<{
         <Styles.MenuItem
           onClick={(e) => {
             e.preventDefault();
-            navigate("/manage-asset-list");
+            navigate("/manage-view-asset-token-list");
           }}
         >
           <FormattedMessage id="page.main.components.menu-bar.manage-asset-list-title" />
