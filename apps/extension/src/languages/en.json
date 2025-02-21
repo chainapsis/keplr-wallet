@@ -203,8 +203,9 @@
   "page.setting.advanced-paragraph": "Developer Mode, Change Endpoints...",
   "page.setting.security-privacy-title": "Security & Privacy",
   "page.setting.security-privacy-paragraph": "Connected Websites, Auto-Lock",
-  "page.setting.manage-token-list-title": "Manage Token List",
+  "page.setting.manage-token-list-title": "Add/Remove Custom Token",
   "page.setting.manage-token-list-paragraph": "Only for the tokens that can be added manually via contract addresses",
+  "page.setting.search-placeholder": "Search for the features",
 
   "page.setting.advanced.developer-mode-title": "Developer Mode",
   "page.setting.advanced.developer-mode-paragraph": "Feeling techie today? :)",
@@ -296,7 +297,7 @@
   "page.setting.token.manage.token-view.disable-token-tooltip": "Disable Token",
   "page.setting.token.manage.token-view.disable-token-confirm": "Are you sure you’d like to disable this token? You will not be able to see your balance or transfer until you add it again.",
 
-  "page.setting.token.add.title": "Add Token Manually",
+  "page.setting.token.add.title": "Add Custom Token",
   "page.setting.token.add.confirm-button": "Confirm",
   "page.setting.token.add.contract-address-label": "Contract Address",
   "page.setting.token.add.name-label": "Name",

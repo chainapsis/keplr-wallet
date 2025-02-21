@@ -204,8 +204,9 @@
   "page.setting.advanced-paragraph": "개발자 모드, 노드 주소 변경...",
   "page.setting.security-privacy-title": "보안과 프라이버시",
   "page.setting.security-privacy-paragraph": "연결된 웹사이트, 자동잠금",
-  "page.setting.manage-token-list-title": "토큰 리스트 관리하기",
+  "page.setting.manage-token-list-title": "토큰 추가 및 삭제",
   "page.setting.manage-token-list-paragraph": "컨트랙트 주소로 직접 추가할 수 있는 토큰만 여기서 관리할 수 있습니다.",
+  "page.setting.search-placeholder": "기능 검색",
 
   "page.setting.advanced.developer-mode-title": "개발자 모드",
   "page.setting.advanced.developer-mode-paragraph": "오늘은 내가 바로 개발자? :)",
@@ -296,7 +297,7 @@
   "page.setting.token.manage.token-view.disable-token-tooltip": "토큰 비활성화",
   "page.setting.token.manage.token-view.disable-token-confirm": "이 토큰을 비활성화하시겠습니까? 비활성화하시면 다시 추가하기 전까지 잔액을 조회하거나 송금 기능을 사용할 수 없습니다.",
 
-  "page.setting.token.add.title": "토큰 직접 추가하기",
+  "page.setting.token.add.title": "커스텀 토큰 추가",
   "page.setting.token.add.confirm-button": "등록",
   "page.setting.token.add.contract-address-label": "토큰 컨트랙트 주소",
   "page.setting.token.add.name-label": "토큰 이름",
