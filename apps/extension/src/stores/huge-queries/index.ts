@@ -341,14 +341,15 @@ export class HugeQueriesStore {
       return this.balanceBinarySort.arr.filter((viewToken) => {
         const key = viewToken[BinarySortArray.SymbolKey];
         if (enableDisableAssetToken) {
-          const isDisabled = disabledViewAssetTokenMap.has(
-            this.uiConfigStore.manageViewAssetTokenConfig.makeViewAssetTokenKey(
-              {
-                chainId: viewToken.chainInfo.chainId,
-                coinMinimalDenom: viewToken.token.currency.coinMinimalDenom,
-              }
-            )
+          const chainIdentifier = ChainIdHelper.parse(
+            viewToken.chainInfo.chainId
+          ).identifier;
+          const disabledCoinSet =
+            disabledViewAssetTokenMap.get(chainIdentifier);
+          const isDisabled = disabledCoinSet?.has(
+            viewToken.token.currency.coinMinimalDenom
           );
+
           return !isDisabled;
         }
         return keys.get(key);

@@ -13,7 +13,7 @@ export class ManageViewAssetTokenConfig {
   @observable.ref
   protected viewAssetTokenMap: ReadonlyMap<
     string,
-    ReadonlyMap<string, ViewAssetToken>
+    ReadonlyMap<string, ReadonlySet<string>>
   > = new Map();
 
   constructor(
@@ -36,11 +36,19 @@ export class ManageViewAssetTokenConfig {
     );
 
     runInAction(() => {
-      const map = new Map<string, ReadonlyMap<string, ViewAssetToken>>();
+      const map = new Map<string, ReadonlyMap<string, ReadonlySet<string>>>();
 
       for (const [key, value] of Object.entries(disabledViewAssetTokenMap)) {
         if (value) {
-          map.set(key, new Map(Object.entries(value)));
+          map.set(
+            key,
+            new Map(
+              Object.entries(value).map(([chainIdentifier, coinArray]) => [
+                chainIdentifier,
+                new Set(coinArray),
+              ])
+            )
+          );
         }
       }
       this.viewAssetTokenMap = map;
@@ -49,7 +57,7 @@ export class ManageViewAssetTokenConfig {
 
   getViewAssetTokenMapByVaultId(
     vaultId: string
-  ): ReadonlyMap<string, ViewAssetToken> {
+  ): ReadonlyMap<string, ReadonlySet<string>> {
     return this.viewAssetTokenMap.get(vaultId) ?? new Map();
   }
 
@@ -61,9 +69,16 @@ export class ManageViewAssetTokenConfig {
       const newTokenMap = new Map(this.viewAssetTokenMap);
       const newTokens = res[vaultId];
       if (newTokens) {
-        newTokenMap.set(vaultId, new Map(Object.entries(newTokens)));
+        newTokenMap.set(
+          vaultId,
+          new Map(
+            Object.entries(newTokens).map(([chainIdentifier, coinArray]) => [
+              chainIdentifier,
+              new Set(coinArray),
+            ])
+          )
+        );
       }
-
       this.viewAssetTokenMap = newTokenMap;
     });
   }

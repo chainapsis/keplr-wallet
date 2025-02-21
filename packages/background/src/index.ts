@@ -284,7 +284,8 @@ export function init(
   const manageViewAssetTokenService =
     new ManageViewAssetToken.ManageViewAssetTokenService(
       storeCreator("manage-view-asset-token"),
-      keyRingV2Service
+      keyRingV2Service,
+      chainsUIService
     );
 
   Interaction.init(router, interactionService);
