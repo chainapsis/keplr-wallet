@@ -296,10 +296,10 @@ export class HugeQueriesStore {
   getAllBalances = computedFn(
     ({
       allowIBCToken,
-      enableDisableAssetToken = true,
+      enableFilterDisabledAssetToken = true,
     }: {
       allowIBCToken?: boolean;
-      enableDisableAssetToken?: boolean;
+      enableFilterDisabledAssetToken?: boolean;
     }): ReadonlyArray<ViewToken> => {
       const keys: Map<string, boolean> = new Map();
 
@@ -340,7 +340,7 @@ export class HugeQueriesStore {
       }
       return this.balanceBinarySort.arr.filter((viewToken) => {
         const key = viewToken[BinarySortArray.SymbolKey];
-        if (enableDisableAssetToken) {
+        if (enableFilterDisabledAssetToken) {
           const chainIdentifier = ChainIdHelper.parse(
             viewToken.chainInfo.chainId
           ).identifier;

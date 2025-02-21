@@ -20,7 +20,7 @@ export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
 
   const allBalances = hugeQueriesStore.getAllBalances({
     allowIBCToken: true,
-    enableDisableAssetToken: false,
+    enableFilterDisabledAssetToken: false,
   });
 
   const [search, setSearch] = useState("");
