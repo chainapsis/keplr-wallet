@@ -25,7 +25,7 @@ import { ChangelogConfig } from "./changelog";
 import { SelectWalletConfig } from "./select-wallet";
 import { GetSidePanelIsSupportedMsg } from "@keplr-wallet/background";
 import { isRunningInSidePanel } from "../../utils";
-import { ManageViewAssetTokenConfig } from "./manage-token-asset";
+import { ManageViewAssetTokenConfig } from "./manage-view-asset-token";
 
 export interface UIConfigOptions {
   isDeveloperMode: boolean;
