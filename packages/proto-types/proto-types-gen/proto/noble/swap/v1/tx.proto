@@ -1,0 +1,163 @@
+syntax = "proto3";
+
+package noble.swap.v1;
+
+import "amino/amino.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "noble/swap/v1/algorithm.proto";
+import "noble/swap/v1/swap.proto";
+
+option go_package = "swap.noble.xyz/types";
+
+service Msg {
+  option (cosmos.msg.v1.service) = true;
+
+  // Swap allows a user to swap one type of token for another, using multiple routes.
+  rpc Swap(MsgSwap) returns (MsgSwapResponse);
+
+  // WithdrawProtocolFees allows the protocol to withdraw accumulated fees and move them to another account.
+  rpc WithdrawProtocolFees(MsgWithdrawProtocolFees) returns (MsgWithdrawProtocolFeesResponse);
+
+  // WithdrawRewards allows a user to claim their accumulated rewards.
+  rpc WithdrawRewards(MsgWithdrawRewards) returns (MsgWithdrawRewardsResponse);
+
+  // PauseByAlgorithm pauses all pools using a specific algorithm.
+  rpc PauseByAlgorithm(MsgPauseByAlgorithm) returns (MsgPauseByAlgorithmResponse);
+
+  // PauseByPoolIds pauses specific pools identified by their pool IDs.
+  rpc PauseByPoolIds(MsgPauseByPoolIds) returns (MsgPauseByPoolIdsResponse);
+
+  // UnpauseByAlgorithm unpauses all pools using a specific algorithm.
+  rpc UnpauseByAlgorithm(MsgUnpauseByAlgorithm) returns (MsgUnpauseByAlgorithmResponse);
+
+  // UnpauseByPoolIds unpauses specific pools identified by their pool IDs.
+  rpc UnpauseByPoolIds(MsgUnpauseByPoolIds) returns (MsgUnpauseByPoolIdsResponse);
+}
+
+message MsgWithdrawProtocolFees {
+  option (cosmos.msg.v1.signer) = "signer";
+  option (amino.name) = "swap/RemoveLiquidity";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  // Address of the signer who is requesting the fee withdrawal.
+  string signer = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // Address to which the withdrawn fees will be sent.
+  string to = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+}
+message MsgWithdrawProtocolFeesResponse {}
+
+message MsgWithdrawRewards {
+  option (cosmos.msg.v1.signer) = "signer";
+  option (amino.name) = "swap/RemoveLiquidity";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  // Address of the signer who is requesting the reward withdrawal.
+  string signer = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+}
+message MsgWithdrawRewardsResponse {
+  // List of rewards withdrawn by the user.
+  repeated cosmos.base.v1beta1.Coin rewards = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true,
+    (amino.encoding) = "legacy_coins",
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
+
+message MsgSwap {
+  option (cosmos.msg.v1.signer) = "signer";
+  option (amino.name) = "swap/Swap";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  // Address of the signer who is initiating the swap.
+  string signer = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // The coin to be swapped.
+  cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
+  // The routes through which the swap will occur.
+  repeated swap.v1.Route routes = 3 [(gogoproto.nullable) = false];
+  // The minimum amount of tokens expected after the swap.
+  cosmos.base.v1beta1.Coin min = 4 [(gogoproto.nullable) = false];
+}
+message MsgSwapResponse {
+  // The resulting amount of tokens after the swap.
+  cosmos.base.v1beta1.Coin result = 1 [(gogoproto.nullable) = false];
+  // Details of each individual swap involved in the process.
+  repeated Swap swaps = 2;
+}
+
+message MsgPauseByAlgorithm {
+  option (cosmos.msg.v1.signer) = "signer";
+  option (amino.name) = "swap/PauseByAlgorithm";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  // Address of the signer who is requesting to pause the pools.
+  string signer = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // The algorithm used by the pools to be paused.
+  swap.v1.Algorithm algorithm = 2;
+}
+message MsgPauseByAlgorithmResponse {
+  // List of IDs of the paused pools.
+  repeated uint64 paused_pools = 1;
+}
+
+message MsgPauseByPoolIds {
+  option (cosmos.msg.v1.signer) = "signer";
+  option (amino.name) = "swap/PauseByPoolIds";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  // Address of the signer who is requesting to pause the pools.
+  string signer = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // List of IDs of the pools to be paused.
+  repeated uint64 pool_ids = 2;
+}
+message MsgPauseByPoolIdsResponse {
+  // List of IDs of the paused pools.
+  repeated uint64 paused_pools = 1;
+}
+
+message MsgUnpauseByAlgorithm {
+  option (cosmos.msg.v1.signer) = "signer";
+  option (amino.name) = "swap/UnpauseByAlgorithm";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  // Address of the signer who is requesting to unpause the pools.
+  string signer = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // The algorithm used by the pools to be unpaused.
+  swap.v1.Algorithm algorithm = 2;
+}
+message MsgUnpauseByAlgorithmResponse {
+  // List of IDs of the unpaused pools.
+  repeated uint64 unpaused_pools = 1;
+}
+
+message MsgUnpauseByPoolIds {
+  option (cosmos.msg.v1.signer) = "signer";
+  option (amino.name) = "swap/UnpauseByPoolIds";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  // Address of the signer who is requesting to unpause the pools.
+  string signer = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // List of IDs of the pools to be unpaused.
+  repeated uint64 pool_ids = 2;
+}
+message MsgUnpauseByPoolIdsResponse {
+  // List of IDs of the unpaused pools.
+  repeated uint64 unpaused_pools = 1;
+}

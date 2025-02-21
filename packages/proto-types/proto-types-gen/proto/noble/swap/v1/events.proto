@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+package noble.swap.v1;
+
+import "amino/amino.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "gogoproto/gogo.proto";
+import "noble/swap/v1/swap.proto";
+
+option go_package = "swap.noble.xyz/types";
+
+message PoolsPaused {
+  // IDs of the pools paused.
+  repeated uint64 pool_ids = 1;
+}
+
+message PoolsUnpaused {
+  // IDs of the pools unpaused.
+  repeated uint64 pool_ids = 1;
+}
+
+message Swapped {
+  // Address of the user initiating the swap.
+  string signer = 1;
+
+  // Coin input by the user.
+  cosmos.base.v1beta1.Coin input = 2 [(gogoproto.nullable) = false];
+
+  // Final output coin from the swap.
+  cosmos.base.v1beta1.Coin output = 3 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true,
+    (amino.encoding) = "legacy_coins",
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+
+  // Routing outing of the swap.
+  repeated swap.v1.Route routes = 4 [(gogoproto.nullable) = false];
+
+  // Amount of fees incurred during the swap.
+  repeated cosmos.base.v1beta1.Coin fees = 5 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true,
+    (amino.encoding) = "legacy_coins",
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
+
+message WithdrawnProtocolFees {
+  // Address to which the fees are transferred
+  string to = 2;
+
+  // Amount of rewards withdrawn.
+  repeated cosmos.base.v1beta1.Coin rewards = 3 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true,
+    (amino.encoding) = "legacy_coins",
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
+
+message WithdrawnRewards {
+  // Address of the user withdrawing rewards.
+  string signer = 1;
+
+  // Amount of rewards withdrawn.
+  repeated cosmos.base.v1beta1.Coin rewards = 2 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true,
+    (amino.encoding) = "legacy_coins",
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
