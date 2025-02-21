@@ -684,6 +684,9 @@
   "page.earn.overview.tutorial-modal.claim.open-earn-overview-button": "Open Earn Overview",
 
   "page.earn.withdraw.amount.title": "Enter the amount{br}to withdraw.",
+  "page.earn.withdraw.amount.confirm.title": "Swap {from} for{br}{to}.",
+  "page.earn.withdraw.amount.confirm.description": "You will receive {to} on {chain}.",
+  "page.earn.withdraw.amount.confirm.norewards": "No rewards",
 
   "components.empty-view.text": "No {subject} Yet",
   "components.input.recipient-input.wallet-address-only-label": "Wallet Address",

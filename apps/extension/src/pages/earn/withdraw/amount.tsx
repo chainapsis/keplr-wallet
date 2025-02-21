@@ -11,10 +11,13 @@ import { useStore } from "../../../stores";
 import {
   EmptyAmountError,
   useSenderConfig,
+  useTxConfigsValidate,
   ZeroAmountError,
 } from "@keplr-wallet/hooks";
 import {
   Body2,
+  Body3,
+  H3,
   MobileH3,
   Subtitle3,
   Subtitle4,
@@ -27,7 +30,11 @@ import { ColorPalette } from "../../../styles";
 import { Input } from "../components/input";
 import { XAxis, YAxis } from "../../../components/axis";
 import { LongArrowDownIcon } from "../../../components/icon/long-arrow-down";
-import { useNobleEarnAmountConfig } from "@keplr-wallet/hooks-internal";
+import {
+  NobleEarnAmountConfig,
+  useNobleEarnAmountConfig,
+} from "@keplr-wallet/hooks-internal";
+import { ApyChip } from "../components/chip";
 
 const NOBLE_EARN_WITHDRAW_OUT_COIN_MINIMAL_DENOM = "uusdc";
 
@@ -50,8 +57,6 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
   const outCurrency = chainInfo.forceFindCurrency(
     NOBLE_EARN_WITHDRAW_OUT_COIN_MINIMAL_DENOM
   );
-
-  const [errorMessage, setErrorMessage] = useState("");
 
   const queryBalances = queriesStore.get(chainId).queryBalances;
   const sender = account.bech32Address;
@@ -88,15 +93,32 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
     }
   }, [nobleEarnAmountConfig.uiProperties]);
 
+  const [isConfirmView, setIsConfirmView] = useState(false);
+
+  const txConfigsValidate = useTxConfigsValidate({
+    senderConfig,
+    amountConfig: nobleEarnAmountConfig,
+  });
+
   return (
     <HeaderLayout
       title={""} // No title for this page
       displayFlex={true}
       fixedMinHeight={true}
-      left={<BackButton />}
+      left={
+        <BackButton
+          {...(isConfirmView
+            ? {
+                onClick: () => {
+                  setIsConfirmView(false);
+                },
+              }
+            : {})}
+        />
+      }
       bottomButtons={[
         {
-          disabled: error != null,
+          disabled: txConfigsValidate.interactionBlocked,
           text: intl.formatMessage({ id: "button.next" }),
           color: "primary",
           size: "large",
@@ -107,100 +129,222 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
       ]}
       onSubmit={async (e) => {
         e.preventDefault();
+
+        if (!isConfirmView) {
+          setIsConfirmView(true);
+        }
       }}
     >
-      <Box
-        paddingTop="2rem"
-        paddingX="1.5rem"
-        style={{
-          flex: 1,
-        }}
-      >
-        <Stack flex={1}>
-          <MobileH3 color={ColorPalette["white"]}>
-            {intl.formatMessage(
-              { id: "page.earn.withdraw.amount.title" },
-              {
-                br: <br />,
-              }
-            )}
-          </MobileH3>
-
-          <Gutter size="2rem" />
-          <Input
-            type="number"
-            placeholder={balance.trim(true).toString()}
-            value={nobleEarnAmountConfig.value}
-            warning={error != null}
-            onChange={(e) => {
-              nobleEarnAmountConfig.setValue(e.target.value);
-              if (new Dec(e.target.value || "0").gt(balance.toDec())) {
-                setErrorMessage(
-                  intl.formatMessage({
-                    id: "page.earn.amount.error.insufficient-balance",
-                  })
-                );
-              } else {
-                setErrorMessage("");
-              }
-            }}
-            autoComplete="off"
-          />
-          <Gutter size="0.75rem" />
-          <Box padding="0.25rem 0">
-            <XAxis alignY="center">
-              {nobleEarnAmountConfig.amount[0].toDec().equals(new Dec("0")) && (
-                <Box
-                  padding="0.25rem 0.5rem"
-                  backgroundColor={ColorPalette["gray-550"]}
-                  borderRadius="0.5rem"
-                  width="fit-content"
-                  cursor="pointer"
-                  onClick={() => {
-                    nobleEarnAmountConfig.setFraction(1);
-                  }}
-                >
-                  <Subtitle4 color={ColorPalette["gray-200"]}>
-                    {balance.trim(true).toString()}
-                  </Subtitle4>
-                </Box>
+      {isConfirmView ? (
+        <ConfirmView nobleEarnAmountConfig={nobleEarnAmountConfig} />
+      ) : (
+        <Box
+          paddingTop="2rem"
+          paddingX="1.5rem"
+          style={{
+            flex: 1,
+          }}
+        >
+          <Stack flex={1}>
+            <MobileH3 color={ColorPalette["white"]}>
+              {intl.formatMessage(
+                { id: "page.earn.withdraw.amount.title" },
+                {
+                  br: <br />,
+                }
               )}
-              <Box padding="0.25rem">
+            </MobileH3>
+
+            <Gutter size="2rem" />
+            <Input
+              type="number"
+              placeholder={balance.trim(true).toString()}
+              value={nobleEarnAmountConfig.value}
+              warning={error != null}
+              onChange={(e) => {
+                nobleEarnAmountConfig.setValue(e.target.value);
+              }}
+              autoComplete="off"
+            />
+            <Gutter size="0.75rem" />
+            <Box padding="0.25rem 0">
+              <XAxis alignY="center">
+                {nobleEarnAmountConfig.amount[0]
+                  .toDec()
+                  .equals(new Dec("0")) && (
+                  <Box
+                    padding="0.25rem 0.5rem"
+                    backgroundColor={ColorPalette["gray-550"]}
+                    borderRadius="0.5rem"
+                    width="fit-content"
+                    cursor="pointer"
+                    onClick={() => {
+                      nobleEarnAmountConfig.setFraction(1);
+                    }}
+                  >
+                    <Subtitle4 color={ColorPalette["gray-200"]}>
+                      {balance.trim(true).toString()}
+                    </Subtitle4>
+                  </Box>
+                )}
+                <Box padding="0.25rem">
+                  <Subtitle3 color={ColorPalette["gray-300"]}>
+                    {`on ${chainInfo.chainName}`}
+                  </Subtitle3>
+                </Box>
+              </XAxis>
+            </Box>
+
+            {error && (
+              <Box marginTop="0.75rem">
+                <Body2 color={ColorPalette["red-300"]}>{error}</Body2>
+              </Box>
+            )}
+
+            {nobleEarnAmountConfig.expectedOutAmount
+              .toDec()
+              .gt(new Dec("0")) && (
+              <Fragment>
+                <YAxis alignX="center">
+                  <LongArrowDownIcon
+                    width="1.5rem"
+                    height="1.5rem"
+                    color={ColorPalette["gray-400"]}
+                  />
+                </YAxis>
+                <Gutter size="1rem" />
+
+                <MobileH3>
+                  {nobleEarnAmountConfig.expectedOutAmount
+                    .trim(true)
+                    .toString()}
+                </MobileH3>
+                <Gutter size="0.5rem" />
                 <Subtitle3 color={ColorPalette["gray-300"]}>
                   {`on ${chainInfo.chainName}`}
                 </Subtitle3>
-              </Box>
-            </XAxis>
+              </Fragment>
+            )}
+          </Stack>
+        </Box>
+      )}
+    </HeaderLayout>
+  );
+});
+
+const ConfirmView: FunctionComponent<{
+  nobleEarnAmountConfig: NobleEarnAmountConfig;
+}> = observer(({ nobleEarnAmountConfig }) => {
+  const intl = useIntl();
+
+  return (
+    <Box
+      paddingTop="2rem"
+      paddingX="1.5rem"
+      style={{
+        flex: 1,
+      }}
+    >
+      <Stack flex={1}>
+        <MobileH3 color={ColorPalette["white"]}>
+          {intl.formatMessage(
+            { id: "page.earn.withdraw.amount.confirm.title" },
+            {
+              from: nobleEarnAmountConfig.amount[0].trim(true).toString(),
+              to: nobleEarnAmountConfig.expectedOutAmount.trim(true).toString(),
+              br: <br />,
+            }
+          )}
+        </MobileH3>
+        <Gutter size="1rem" />
+        <Body2 color={ColorPalette["gray-200"]}>
+          {intl.formatMessage(
+            {
+              id: "page.earn.withdraw.amount.confirm.description",
+            },
+            {
+              to: nobleEarnAmountConfig.expectedOutAmount.trim(true).toString(),
+              chain: nobleEarnAmountConfig.chainInfo.chainName,
+            }
+          )}
+        </Body2>
+
+        <Gutter size="1.75rem" />
+        <Box
+          padding="1rem"
+          borderRadius="0.75rem"
+          backgroundColor={ColorPalette["gray-650"]}
+        >
+          <ApyChip chainId={nobleEarnAmountConfig.chainId} colorType="green" />
+          <Gutter size="0.75rem" />
+          <XAxis alignY="center" gap="0.25rem">
+            <H3 color={ColorPalette["white"]}>
+              {nobleEarnAmountConfig.amount[0]
+                .hideDenom(true)
+                .trim(true)
+                .toString()}
+            </H3>
+            <H3 color={ColorPalette["gray-300"]}>
+              {nobleEarnAmountConfig.amount[0].currency.coinDenom}
+            </H3>
+          </XAxis>
+          <Gutter size="0.25rem" />
+
+          <Body3
+            color={ColorPalette["gray-300"]}
+            style={{ textAlign: "right" }}
+          >
+            {`on ${nobleEarnAmountConfig.chainInfo.chainName}`}
+          </Body3>
+
+          <Gutter size="0.25rem" />
+
+          <YAxis alignX="center">
+            <LongArrowDownIcon
+              width="1.5rem"
+              height="1.5rem"
+              color={ColorPalette["gray-400"]}
+            />
+          </YAxis>
+
+          <Gutter size="0.75rem" />
+
+          <Box
+            padding="0.25rem 0.5rem"
+            backgroundColor={ColorPalette["gray-600"]}
+            borderRadius="0.375rem"
+            width="fit-content"
+          >
+            <Subtitle4 color={ColorPalette["gray-300"]}>
+              {intl.formatMessage({
+                id: "page.earn.withdraw.amount.confirm.norewards",
+              })}
+            </Subtitle4>
           </Box>
 
-          {errorMessage && (
-            <Box marginTop="0.75rem">
-              <Body2 color={ColorPalette["red-300"]}>{errorMessage}</Body2>
-            </Box>
-          )}
+          <Gutter size="0.75rem" />
 
-          {nobleEarnAmountConfig.expectedOutAmount.toDec().gt(new Dec("0")) && (
-            <Fragment>
-              <YAxis alignX="center">
-                <LongArrowDownIcon
-                  width="1.5rem"
-                  height="1.5rem"
-                  color={ColorPalette["gray-400"]}
-                />
-              </YAxis>
-              <Gutter size="1rem" />
+          <XAxis alignY="center" gap="0.25rem">
+            <H3 color={ColorPalette["white"]}>
+              {nobleEarnAmountConfig.expectedOutAmount
+                .hideDenom(true)
+                .trim(true)
+                .toString()}
+            </H3>
+            <H3 color={ColorPalette["gray-300"]}>
+              {nobleEarnAmountConfig.expectedOutAmount.currency.coinDenom}
+            </H3>
+          </XAxis>
+          <Gutter size="0.25rem" />
 
-              <MobileH3>
-                {nobleEarnAmountConfig.expectedOutAmount.trim(true).toString()}
-              </MobileH3>
-              <Gutter size="0.5rem" />
-              <Subtitle3 color={ColorPalette["gray-300"]}>
-                {`on ${chainInfo.chainName}`}
-              </Subtitle3>
-            </Fragment>
-          )}
-        </Stack>
-      </Box>
-    </HeaderLayout>
+          <Body3
+            color={ColorPalette["gray-300"]}
+            style={{ textAlign: "right" }}
+          >
+            {`on ${nobleEarnAmountConfig.chainInfo.chainName}`}
+          </Body3>
+        </Box>
+      </Stack>
+    </Box>
   );
 });
