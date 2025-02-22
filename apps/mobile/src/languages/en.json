@@ -649,7 +649,7 @@
   "page.stake.delegate.guide-box.paragraph": "You will need to unstake in order for your staked assets to be liquid again.This process will take {unbondingPeriodDay} days to complete.",
   "page.stake.undelegate.title": "Unstake",
   "page.stake.undelegate.guide-box.title": "Once the unstaking period begins you will:",
-  "page.stake.undelegate.guide-box.paragraph-1": "NOT recieve staking rewards",
+  "page.stake.undelegate.guide-box.paragraph-1": "NOT receive staking rewards",
   "page.stake.undelegate.guide-box.paragraph-2": "need to wait {unbondingPeriodDay} days for the amount to be liquid",
   "page.stake.undelegate.guide-box.paragraph-3": "But you will be able to cancel the unstaking process anytime, as this chain currently supports the function",
   "page.stake.redelegate.title": "Switch Validator",
