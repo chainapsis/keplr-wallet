@@ -1,4 +1,10 @@
-import { AmountConfig, ISenderConfig } from "@keplr-wallet/hooks";
+import {
+  AmountConfig,
+  ISenderConfig,
+  useFeeConfig,
+  useGasConfig,
+  useSenderConfig,
+} from "@keplr-wallet/hooks";
 import { AppCurrency } from "@keplr-wallet/types";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import {
@@ -67,11 +73,13 @@ export const useNobleEarnAmountConfig = (
   queriesStore: IQueriesStore,
   accountStore: IAccountStoreWithInjects<[CosmosAccount]>,
   chainId: string,
-  senderConfig: ISenderConfig,
+  sender: string,
   inCurrency: AppCurrency,
   outCurrency: AppCurrency
 ) => {
-  const [txConfig] = useState(
+  const senderConfig = useSenderConfig(chainGetter, chainId, sender);
+
+  const [amountConfig] = useState(
     () =>
       new NobleEarnAmountConfig(
         chainGetter,
@@ -82,9 +90,26 @@ export const useNobleEarnAmountConfig = (
         outCurrency
       )
   );
-  txConfig.setChain(chainId);
-  txConfig.setCurrency(inCurrency);
-  txConfig.setOutCurrency(outCurrency);
+  amountConfig.setChain(chainId);
+  amountConfig.setCurrency(inCurrency);
+  amountConfig.setOutCurrency(outCurrency);
 
-  return txConfig;
+  const gasConfig = useGasConfig(chainGetter, chainId);
+  const feeConfig = useFeeConfig(
+    chainGetter,
+    queriesStore,
+    chainId,
+    senderConfig,
+    amountConfig,
+    gasConfig
+  );
+
+  amountConfig.setFeeConfig(feeConfig);
+
+  return {
+    senderConfig,
+    amountConfig,
+    gasConfig,
+    feeConfig,
+  };
 };

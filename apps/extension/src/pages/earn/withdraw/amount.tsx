@@ -10,10 +10,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useStore } from "../../../stores";
 import {
   EmptyAmountError,
-  useFeeConfig,
-  useGasConfig,
   useGasSimulator,
-  useSenderConfig,
   useTxConfigsValidate,
   ZeroAmountError,
 } from "@keplr-wallet/hooks";
@@ -69,19 +66,18 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
     queryBalances.getQueryBech32Address(sender).getBalance(currency)?.balance ??
     new CoinPretty(currency, new Dec("0"));
 
-  const senderConfig = useSenderConfig(chainStore, chainId, sender);
   const nobleEarnAmountConfig = useNobleEarnAmountConfig(
     chainStore,
     queriesStore,
     accountStore,
     chainId,
-    senderConfig,
+    sender,
     currency,
     outCurrency
   );
 
   const error = useMemo(() => {
-    const uiProperties = nobleEarnAmountConfig.uiProperties;
+    const uiProperties = nobleEarnAmountConfig.amountConfig.uiProperties;
 
     const err = uiProperties.error || uiProperties.warning;
 
@@ -96,7 +92,7 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
     if (err) {
       return err.message || err.toString();
     }
-  }, [nobleEarnAmountConfig.uiProperties]);
+  }, [nobleEarnAmountConfig.amountConfig.uiProperties]);
 
   const [isConfirmView, setIsConfirmView] = useState(false);
 
@@ -113,41 +109,31 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
         pool.algorithm === "STABLESWAP"
     );
 
-  // TODO: noble earn config 로 묶어버리기
-  const gasConfig = useGasConfig(chainStore, chainId);
-  const feeConfig = useFeeConfig(
-    chainStore,
-    queriesStore,
-    chainId,
-    senderConfig,
-    nobleEarnAmountConfig,
-    gasConfig
-  );
-
   const gasSimulator = useGasSimulator(
     new ExtensionKVStore("gas-simulator.main.send"),
     chainStore,
     chainId,
-    gasConfig,
-    feeConfig,
+    nobleEarnAmountConfig.gasConfig,
+    nobleEarnAmountConfig.feeConfig,
     "noble-earn-withdraw",
     () => {
-      if (!nobleEarnAmountConfig.currency) {
+      if (!nobleEarnAmountConfig.amountConfig.currency) {
         throw new Error("Withdraw currency not set");
       }
 
       if (
-        nobleEarnAmountConfig.uiProperties.loadingState === "loading-block" ||
-        nobleEarnAmountConfig.uiProperties.error != null
+        nobleEarnAmountConfig.amountConfig.uiProperties.loadingState ===
+          "loading-block" ||
+        nobleEarnAmountConfig.amountConfig.uiProperties.error != null
       ) {
         throw new Error("Not ready to simulate tx");
       }
 
       return account.noble.makeSwapTx(
         "noble-earn-withdraw",
-        nobleEarnAmountConfig.amount[0].toDec().toString(),
+        nobleEarnAmountConfig.amountConfig.amount[0].toDec().toString(),
         currency,
-        nobleEarnAmountConfig.minOutAmount.toDec().toString(),
+        nobleEarnAmountConfig.amountConfig.minOutAmount.toDec().toString(),
         outCurrency,
         [
           {
@@ -160,8 +146,7 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
   );
 
   const txConfigsValidate = useTxConfigsValidate({
-    senderConfig,
-    amountConfig: nobleEarnAmountConfig,
+    ...nobleEarnAmountConfig,
     gasSimulator,
   });
 
@@ -205,9 +190,11 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
           try {
             const tx = account.noble.makeSwapTx(
               "noble-earn-withdraw",
-              nobleEarnAmountConfig.amount[0].toDec().toString(),
+              nobleEarnAmountConfig.amountConfig.amount[0].toDec().toString(),
               currency,
-              nobleEarnAmountConfig.minOutAmount.toDec().toString(),
+              nobleEarnAmountConfig.amountConfig.minOutAmount
+                .toDec()
+                .toString(),
               outCurrency,
               [
                 {
@@ -217,23 +204,28 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
               ]
             );
 
-            await tx.send(feeConfig.toStdFee(), undefined, undefined, {
-              onBroadcasted: (_txHash) => {
-                navigate("/tx-result/pending");
+            await tx.send(
+              nobleEarnAmountConfig.feeConfig.toStdFee(),
+              undefined,
+              undefined,
+              {
+                onBroadcasted: (_txHash) => {
+                  navigate("/tx-result/pending");
 
-                // TODO: Log analytics
-              },
-              onFulfill: (tx: any) => {
-                if (tx.code != null && tx.code !== 0) {
-                  console.log(tx.log ?? tx.raw_log);
-                  navigate("/tx-result/failed");
+                  // TODO: Log analytics
+                },
+                onFulfill: (tx: any) => {
+                  if (tx.code != null && tx.code !== 0) {
+                    console.log(tx.log ?? tx.raw_log);
+                    navigate("/tx-result/failed");
 
-                  return;
-                }
+                    return;
+                  }
 
-                navigate("/tx-result/success");
-              },
-            });
+                  navigate("/tx-result/success");
+                },
+              }
+            );
           } catch (e) {
             console.error(e);
             navigate("/tx-result/failed");
@@ -242,7 +234,7 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
       }}
     >
       {isConfirmView ? (
-        <ConfirmView nobleEarnAmountConfig={nobleEarnAmountConfig} />
+        <ConfirmView amountConfig={nobleEarnAmountConfig.amountConfig} />
       ) : (
         <Box
           paddingTop="2rem"
@@ -265,17 +257,17 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
             <Input
               type="number"
               placeholder={balance.trim(true).toString()}
-              value={nobleEarnAmountConfig.value}
+              value={nobleEarnAmountConfig.amountConfig.value}
               warning={error != null}
               onChange={(e) => {
-                nobleEarnAmountConfig.setValue(e.target.value);
+                nobleEarnAmountConfig.amountConfig.setValue(e.target.value);
               }}
               autoComplete="off"
             />
             <Gutter size="0.75rem" />
             <Box padding="0.25rem 0">
               <XAxis alignY="center">
-                {nobleEarnAmountConfig.amount[0]
+                {nobleEarnAmountConfig.amountConfig.amount[0]
                   .toDec()
                   .equals(new Dec("0")) && (
                   <Box
@@ -285,7 +277,7 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
                     width="fit-content"
                     cursor="pointer"
                     onClick={() => {
-                      nobleEarnAmountConfig.setFraction(1);
+                      nobleEarnAmountConfig.amountConfig.setFraction(1);
                     }}
                   >
                     <Subtitle4 color={ColorPalette["gray-200"]}>
@@ -307,7 +299,7 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
               </Box>
             )}
 
-            {nobleEarnAmountConfig.expectedOutAmount
+            {nobleEarnAmountConfig.amountConfig.expectedOutAmount
               .toDec()
               .gt(new Dec("0")) && (
               <Fragment>
@@ -321,7 +313,7 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
                 <Gutter size="1rem" />
 
                 <MobileH3>
-                  {nobleEarnAmountConfig.expectedOutAmount
+                  {nobleEarnAmountConfig.amountConfig.expectedOutAmount
                     .trim(true)
                     .toString()}
                 </MobileH3>
@@ -339,8 +331,8 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
 });
 
 const ConfirmView: FunctionComponent<{
-  nobleEarnAmountConfig: NobleEarnAmountConfig;
-}> = observer(({ nobleEarnAmountConfig }) => {
+  amountConfig: NobleEarnAmountConfig;
+}> = observer(({ amountConfig }) => {
   const intl = useIntl();
 
   return (
@@ -356,8 +348,8 @@ const ConfirmView: FunctionComponent<{
           {intl.formatMessage(
             { id: "page.earn.withdraw.amount.confirm.title" },
             {
-              from: nobleEarnAmountConfig.amount[0].trim(true).toString(),
-              to: nobleEarnAmountConfig.expectedOutAmount.trim(true).toString(),
+              from: amountConfig.amount[0].trim(true).toString(),
+              to: amountConfig.expectedOutAmount.trim(true).toString(),
               br: <br />,
             }
           )}
@@ -369,8 +361,8 @@ const ConfirmView: FunctionComponent<{
               id: "page.earn.withdraw.amount.confirm.description",
             },
             {
-              to: nobleEarnAmountConfig.expectedOutAmount.trim(true).toString(),
-              chain: nobleEarnAmountConfig.chainInfo.chainName,
+              to: amountConfig.expectedOutAmount.trim(true).toString(),
+              chain: amountConfig.chainInfo.chainName,
             }
           )}
         </Body2>
@@ -381,17 +373,14 @@ const ConfirmView: FunctionComponent<{
           borderRadius="0.75rem"
           backgroundColor={ColorPalette["gray-650"]}
         >
-          <ApyChip chainId={nobleEarnAmountConfig.chainId} colorType="green" />
+          <ApyChip chainId={amountConfig.chainId} colorType="green" />
           <Gutter size="0.75rem" />
           <XAxis alignY="center" gap="0.25rem">
             <H3 color={ColorPalette["white"]}>
-              {nobleEarnAmountConfig.amount[0]
-                .hideDenom(true)
-                .trim(true)
-                .toString()}
+              {amountConfig.amount[0].hideDenom(true).trim(true).toString()}
             </H3>
             <H3 color={ColorPalette["gray-300"]}>
-              {nobleEarnAmountConfig.amount[0].currency.coinDenom}
+              {amountConfig.amount[0].currency.coinDenom}
             </H3>
           </XAxis>
           <Gutter size="0.25rem" />
@@ -400,7 +389,7 @@ const ConfirmView: FunctionComponent<{
             color={ColorPalette["gray-300"]}
             style={{ textAlign: "right" }}
           >
-            {`on ${nobleEarnAmountConfig.chainInfo.chainName}`}
+            {`on ${amountConfig.chainInfo.chainName}`}
           </Body3>
 
           <Gutter size="0.25rem" />
@@ -432,13 +421,13 @@ const ConfirmView: FunctionComponent<{
 
           <XAxis alignY="center" gap="0.25rem">
             <H3 color={ColorPalette["white"]}>
-              {nobleEarnAmountConfig.expectedOutAmount
+              {amountConfig.expectedOutAmount
                 .hideDenom(true)
                 .trim(true)
                 .toString()}
             </H3>
             <H3 color={ColorPalette["gray-300"]}>
-              {nobleEarnAmountConfig.expectedOutAmount.currency.coinDenom}
+              {amountConfig.expectedOutAmount.currency.coinDenom}
             </H3>
           </XAxis>
           <Gutter size="0.25rem" />
@@ -447,7 +436,7 @@ const ConfirmView: FunctionComponent<{
             color={ColorPalette["gray-300"]}
             style={{ textAlign: "right" }}
           >
-            {`on ${nobleEarnAmountConfig.chainInfo.chainName}`}
+            {`on ${amountConfig.chainInfo.chainName}`}
           </Body3>
         </Box>
       </Stack>
