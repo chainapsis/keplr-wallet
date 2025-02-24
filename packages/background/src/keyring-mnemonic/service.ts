@@ -1,15 +1,18 @@
 import { VaultService, PlainObject, Vault } from "../vault";
 import { Buffer } from "buffer/";
+import { Buffer as NodeBuffer } from "buffer";
 import {
   Hash,
   Mnemonic,
   PrivKeySecp256k1,
   PubKeySecp256k1,
 } from "@keplr-wallet/crypto";
+import { KeyRing } from "src/keyring/types";
+import { ModularChainInfo } from "@keplr-wallet/types";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
 
-export class KeyRingMnemonicService {
+export class KeyRingMnemonicService implements KeyRing {
   constructor(protected readonly vaultService: VaultService) {}
 
   async init(): Promise<void> {
@@ -85,11 +88,17 @@ export class KeyRingMnemonicService {
     vault: Vault,
     coinType: number,
     data: Uint8Array,
-    digestMethod: "sha256" | "keccak256" | "noop"
+    digestMethod: "sha256" | "keccak256" | "hash256" | "noop",
+    _modularChainInfo: ModularChainInfo,
+    options?: {
+      signMethod?: "ecdsa" | "schnorr";
+      tweak?: Uint8Array;
+    }
   ): {
     readonly r: Uint8Array;
     readonly s: Uint8Array;
     readonly v: number | null;
+    readonly schnorr?: Uint8Array;
   } {
     const privKey = this.getPrivKey(vault, coinType);
 
@@ -101,11 +110,31 @@ export class KeyRingMnemonicService {
       case "keccak256":
         digest = Hash.keccak256(data);
         break;
+      case "hash256":
+        digest = Hash.hash256(data);
+        break;
       case "noop":
         digest = data.slice();
         break;
       default:
         throw new Error(`Unknown digest method: ${digestMethod}`);
+    }
+
+    if (options?.signMethod === "schnorr") {
+      let keyPair = privKey.toKeyPair();
+
+      if (options?.tweak) {
+        keyPair = keyPair.tweak(NodeBuffer.from(options.tweak));
+      }
+
+      const schnorr = keyPair.signSchnorr(NodeBuffer.from(digest));
+
+      return {
+        r: new Uint8Array(),
+        s: new Uint8Array(),
+        v: null,
+        schnorr,
+      };
     }
 
     return privKey.signDigest32(digest);
