@@ -20,7 +20,6 @@ import {
   DeployAccountSignerDetails,
   InvocationsSignerDetails,
 } from "starknet";
-import { IBitcoinProvider } from "./bitcoin";
 
 export interface Key {
   // Name of the selected key store.
@@ -284,10 +283,9 @@ export interface Keplr {
   }>;
 
   // TODO: bitcoin handle
+  // readonly bitcoin: IBitcoinProvider;
 
   readonly ethereum: IEthereumProvider;
 
   readonly starknet: IStarknetProvider;
-
-  readonly bitcoin: IBitcoinProvider;
 }

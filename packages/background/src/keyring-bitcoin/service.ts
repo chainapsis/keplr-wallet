@@ -7,8 +7,6 @@ import { PermissionInteractiveService } from "../permission-interactive";
 import { BackgroundTxService } from "src/tx";
 
 export class KeyRingBitcoinService {
-  protected websocketSubscriptionMap = new Map<string, WebSocket>();
-
   constructor(
     protected readonly chainsService: ChainsService,
     protected readonly keyRingService: KeyRingService,

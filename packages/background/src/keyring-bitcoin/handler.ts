@@ -8,7 +8,7 @@ import {
 import { Env } from "@keplr-wallet/router";
 import { KeyRingBitcoinService } from "./service";
 import { PermissionInteractiveService } from "src/permission-interactive";
-import { RequestSignBitcoinMessage } from "./messages";
+import { RequestSignBitcoinMessageMsg } from "./messages";
 
 export const getHandler: (
   service: KeyRingBitcoinService,
@@ -19,11 +19,11 @@ export const getHandler: (
 ) => {
   return (env: Env, msg: Message<unknown>) => {
     switch (msg.constructor) {
-      case RequestSignBitcoinMessage:
+      case RequestSignBitcoinMessageMsg:
         return handleRequestSignBitcoinMessage(
           _service,
           _permissionInteractionService
-        )(env, msg as RequestSignBitcoinMessage);
+        )(env, msg as RequestSignBitcoinMessageMsg);
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
     }
@@ -33,12 +33,14 @@ export const getHandler: (
 const handleRequestSignBitcoinMessage: (
   service: KeyRingBitcoinService,
   permissionInteractionService: PermissionInteractiveService
-) => InternalHandler<RequestSignBitcoinMessage> = (
+) => InternalHandler<RequestSignBitcoinMessageMsg> = (
   _service,
   _permissionInteractionService
 ) => {
   return async (_env, _msg) => {
     // TODO: implement
-    return ["0x1234"];
+    return {
+      signatureHex: "0x1234",
+    };
   };
 };

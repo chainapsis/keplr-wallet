@@ -4,6 +4,16 @@ export enum Network {
   SIGNET = "signet",
 }
 
+export enum SupportedPaymentType {
+  NATIVE_SEGWIT = "native-segwit",
+  TAPROOT = "taproot",
+}
+
+export enum SupportedWitnessVersion {
+  WITNESS_V0 = 0, // native segwit
+  WITNESS_V1 = 1, // taproot
+}
+
 export type Fees = {
   // fee for inclusion in the next block
   fastestFee: number;
