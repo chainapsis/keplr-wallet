@@ -626,9 +626,11 @@ export class IBCSwapAmountConfig extends AmountConfig {
     return key;
   }
 
-  //NOTE - 만약 route로 부터 swap을 사용하는 경우가 있으면 에러를 발생시킨다.
   _isUseSwapInBridge(routeResponse: RouteResponse | undefined) {
-    if (this.allowSwaps !== false || !routeResponse) {
+    const isForcedDisableSwap =
+      this.allowSwaps === false && this._smartSwapOptions?.evmSwaps === false;
+
+    if (!isForcedDisableSwap || !routeResponse) {
       return false;
     }
 
@@ -682,6 +684,8 @@ export class IBCSwapAmountConfig extends AmountConfig {
       };
     }
 
+    //NOTE - 만약 swap을 의도적으로 다 disable 시켰는데
+    //route로 부터 swap을 사용하는 경우가 있으면 에러를 발생시킨다.
     const routeResponse = queryIBCSwap.getQueryRoute().response;
     if (routeResponse && this._isUseSwapInBridge(routeResponse.data)) {
       return {
