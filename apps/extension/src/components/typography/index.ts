@@ -1,6 +1,6 @@
 export * from "./base";
 
-export * from "./moblie-h3";
+export * from "./mobile-h3";
 
 export * from "./h1";
 export * from "./h2";
