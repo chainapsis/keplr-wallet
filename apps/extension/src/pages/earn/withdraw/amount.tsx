@@ -235,6 +235,10 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
               },
             });
           } catch (e) {
+            if (e?.message === "Request rejected") {
+              setIsConfirmView(true);
+              return;
+            }
             console.error(e);
             navigate("/tx-result/failed");
           }
