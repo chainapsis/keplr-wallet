@@ -6,20 +6,25 @@ import { Subtitle3, H4 } from "../../../components/typography";
 import { ColorPalette } from "../../../styles";
 import { Button } from "../../../components/button";
 import { Gutter } from "../../../components/gutter";
+import { CoinPretty } from "@keplr-wallet/unit";
+import { Currency } from "@keplr-wallet/types";
+import { observer } from "mobx-react-lite";
 
 export const EarnOverviewClaimSection: FunctionComponent<{
   rest: string;
   bech32Address?: string;
-}> = ({ rest, bech32Address }) => {
+  currency: Currency;
+}> = observer(({ rest, bech32Address, currency }) => {
   const intl = useIntl();
 
   const { queriesStore } = useStore();
 
   // TO-DO: use readymade query later
   const claimableAmountRes = queriesStore.simpleQuery.queryGet<{
-    amount: string;
+    claimable_amount: string;
   }>(rest, `/noble/dollar/v1/yield/${bech32Address}`);
-  const claimableAmount = claimableAmountRes.response?.data?.amount ?? "0";
+  const claimableAmount =
+    claimableAmountRes.response?.data?.claimable_amount ?? "0";
 
   const totalAmount = "0"; // TO-DO: use total amount from Satellite
 
@@ -38,7 +43,12 @@ export const EarnOverviewClaimSection: FunctionComponent<{
             <FormattedMessage id="page.earn.overview.claim-section.claimable-reward" />
           </Subtitle3>
           <Gutter size="0.875rem" />
-          <H4 color={ColorPalette["green-400"]}>{claimableAmount}</H4>
+          <H4 color={ColorPalette["green-400"]}>
+            {new CoinPretty(currency, claimableAmount)
+              .hideDenom(true)
+              .trim(true)
+              .toString()}
+          </H4>
         </Box>
         <Box width="50%">
           <Subtitle3 color={ColorPalette["gray-200"]}>
@@ -64,4 +74,4 @@ export const EarnOverviewClaimSection: FunctionComponent<{
       />
     </Box>
   );
-};
+});
