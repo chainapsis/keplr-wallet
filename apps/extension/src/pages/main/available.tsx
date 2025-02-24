@@ -28,10 +28,10 @@ import { FormattedMessage, useIntl } from "react-intl";
 import styled, { useTheme } from "styled-components";
 import { DenomHelper } from "@keplr-wallet/common";
 import { TokenDetailModal } from "./token-detail";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import { useGetSearchChains } from "../../hooks/use-get-search-chains";
-import { validateIsUsdcFromNoble } from "../earn/utils";
+import { useEarnBottomTag } from "../earn/components/use-earn-bottom-tag";
 
 const zeroDec = new Dec(0);
 
@@ -65,7 +65,6 @@ export const AvailableTabView: FunctionComponent<{
       useStore();
     const intl = useIntl();
     const theme = useTheme();
-    const navigate = useNavigate();
 
     const { trimSearch, searchedChainInfos } = useGetSearchChains({
       search,
@@ -240,6 +239,10 @@ export const AvailableTabView: FunctionComponent<{
       };
     })();
 
+    const { getBottomTagInfoProps } = useEarnBottomTag(
+      allBalancesSearchFiltered
+    );
+
     return (
       <React.Fragment>
         {isNotReady ? (
@@ -310,12 +313,13 @@ export const AvailableTabView: FunctionComponent<{
                         />
                       }
                       lenAlwaysShown={lenAlwaysShown}
-                      items={balance.map((viewToken) => (
-                        <div
-                          key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
-                        >
+                      items={balance.map((viewToken) => {
+                        const key = `${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`;
+                        return (
                           <TokenItem
+                            key={key}
                             viewToken={viewToken}
+                            {...getBottomTagInfoProps(viewToken, key)}
                             onClick={() => {
                               setSearchParams((prev) => {
                                 prev.set(
@@ -359,24 +363,8 @@ export const AvailableTabView: FunctionComponent<{
                               uiConfigStore.show24HChangesInMagePage
                             }
                           />
-
-                          {validateIsUsdcFromNoble(
-                            viewToken.token.currency,
-                            viewToken.chainInfo.chainId
-                          ) ? (
-                            <Button
-                              size="small"
-                              color="secondary"
-                              text="Earn"
-                              onClick={() => {
-                                navigate(
-                                  `/earn/intro?chainId=${"duke-1"}&coinMinimalDenom=${"uusdc"}`
-                                );
-                              }}
-                            />
-                          ) : null}
-                        </div>
-                      ))}
+                        );
+                      })}
                     />
                   );
                 }
