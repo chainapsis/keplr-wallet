@@ -7,7 +7,8 @@ import { PermissionService } from "../permission";
 import { PermissionInteractiveService } from "../permission-interactive";
 import { BackgroundTxService } from "src/tx";
 import { SupportedPaymentType } from "@keplr-wallet/types";
-import { KeplrError } from "@keplr-wallet/router";
+import { Env, KeplrError } from "@keplr-wallet/router";
+import { Psbt } from "bitcoinjs-lib";
 
 export class KeyRingBitcoinService {
   constructor(
@@ -27,14 +28,13 @@ export class KeyRingBitcoinService {
 
   async getBitcoinKey(
     vaultId: string,
-    chainId: string
+    chainId: string,
+    paymentType?: SupportedPaymentType
   ): Promise<{
     name: string;
     pubKey: Uint8Array;
-    addresses: {
-      address: string;
-      paymentType: SupportedPaymentType;
-    }[];
+    address: string;
+    paymentType: SupportedPaymentType;
     isNanoLedger: boolean;
   }> {
     const keyInfo = this.keyRingService.getKeyInfo(vaultId);
@@ -42,40 +42,46 @@ export class KeyRingBitcoinService {
       throw new KeplrError("keyring", 221, "Null key info");
     }
 
-    const params = await this.getBitcoinKeyParams(vaultId, chainId);
+    const params = await this.getBitcoinKeyParams(
+      vaultId,
+      chainId,
+      paymentType
+    );
 
     return {
       name: keyInfo.name,
       pubKey: params.pubKey,
-      addresses: params.addresses,
+      address: params.address,
+      paymentType: params.paymentType,
       isNanoLedger: keyInfo.type === "ledger",
     };
   }
 
-  async getBitcoinKeySelected(chainId: string): Promise<{
+  async getBitcoinKeySelected(
+    chainId: string,
+    paymentType?: SupportedPaymentType
+  ): Promise<{
     name: string;
     pubKey: Uint8Array;
-    addresses: {
-      address: string;
-      paymentType: SupportedPaymentType;
-    }[];
+    address: string;
+    paymentType: SupportedPaymentType;
     isNanoLedger: boolean;
   }> {
     return await this.getBitcoinKey(
       this.keyRingService.selectedVaultId,
-      chainId
+      chainId,
+      paymentType
     );
   }
 
   async getBitcoinKeyParams(
     vaultId: string,
-    chainId: string
+    chainId: string,
+    paymentType?: SupportedPaymentType
   ): Promise<{
     pubKey: Uint8Array;
-    addresses: {
-      address: string;
-      paymentType: SupportedPaymentType;
-    }[];
+    address: string;
+    paymentType: SupportedPaymentType;
   }> {
     const chainInfo = this.chainsService.getModularChainInfoOrThrow(chainId);
     if (!("bitcoin" in chainInfo)) {
@@ -94,34 +100,125 @@ export class KeyRingBitcoinService {
       await this.keyRingService.getPubKey(chainId, vaultId)
     ).toBitcoinPubKey();
 
-    const addresses: {
-      address: string;
-      paymentType: SupportedPaymentType;
-    }[] = [];
+    let address: string | undefined;
 
-    const nativeSegwitAddress = bitcoinPubKey.getNativeSegwitAddress();
-    if (nativeSegwitAddress) {
-      addresses.push({
-        address: nativeSegwitAddress,
-        paymentType: SupportedPaymentType.NATIVE_SEGWIT,
-      });
+    if (paymentType) {
+      if (paymentType === SupportedPaymentType.NATIVE_SEGWIT) {
+        const nativeSegwitAddress = bitcoinPubKey.getNativeSegwitAddress();
+        if (nativeSegwitAddress) {
+          address = nativeSegwitAddress;
+        }
+      }
+
+      if (paymentType === SupportedPaymentType.TAPROOT) {
+        const taprootAddress = bitcoinPubKey.getTaprootAddress();
+        if (taprootAddress) {
+          address = taprootAddress;
+        }
+      }
+    } else {
+      const taprootAddress = bitcoinPubKey.getTaprootAddress(); // taproot address by default
+      if (taprootAddress) {
+        address = taprootAddress;
+      }
     }
 
-    const taprootAddress = bitcoinPubKey.getTaprootAddress();
-    if (taprootAddress) {
-      addresses.push({
-        address: taprootAddress,
-        paymentType: SupportedPaymentType.TAPROOT,
-      });
-    }
-
-    if (addresses.length === 0) {
+    if (!address) {
       throw new KeplrError("keyring", 221, "No payment address found");
     }
 
     return {
       pubKey: bitcoinPubKey.toBytes(),
-      addresses,
+      address,
+      paymentType: paymentType || SupportedPaymentType.TAPROOT,
     };
+  }
+
+  async signPsbtSelected(
+    env: Env,
+    origin: string,
+    chainId: string,
+    psbt: Psbt,
+    checkOrdinals: boolean
+  ) {
+    return await this.signPsbt(
+      env,
+      origin,
+      this.keyRingService.selectedVaultId,
+      chainId,
+      psbt,
+      checkOrdinals
+    );
+  }
+
+  async signPsbtsSelected(
+    env: Env,
+    origin: string,
+    chainId: string,
+    psbts: Psbt[],
+    checkOrdinals: boolean
+  ) {
+    return await this.signPsbts(
+      env,
+      origin,
+      this.keyRingService.selectedVaultId,
+      chainId,
+      psbts,
+      checkOrdinals
+    );
+  }
+
+  async signPsbts(
+    env: Env,
+    origin: string,
+    vaultId: string,
+    chainId: string,
+    psbts: Psbt[],
+    checkOrdinals: boolean
+  ) {
+    return await Promise.all(
+      psbts.map((psbt) =>
+        this.signPsbt(env, origin, vaultId, chainId, psbt, checkOrdinals)
+      )
+    );
+  }
+
+  async signPsbt(
+    env: Env,
+    origin: string,
+    vaultId: string,
+    chainId: string,
+    psbt: Psbt,
+    checkOrdinals: boolean
+  ) {
+    return "0x01";
+  }
+
+  async signMessageSelected(
+    env: Env,
+    origin: string,
+    chainId: string,
+    message: string,
+    signType: "ecdsa" | "bip322-simple"
+  ) {
+    return await this.signMessage(
+      env,
+      origin,
+      this.keyRingService.selectedVaultId,
+      chainId,
+      message,
+      signType
+    );
+  }
+
+  async signMessage(
+    env: Env,
+    origin: string,
+    vaultId: string,
+    chainId: string,
+    message: string,
+    signType: "ecdsa" | "bip322-simple"
+  ) {
+    return "0x01";
   }
 }

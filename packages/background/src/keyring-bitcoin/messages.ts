@@ -5,16 +5,17 @@ import { Psbt } from "bitcoinjs-lib";
 
 export class GetBitcoinKeyMsg extends Message<{
   pubKey: Uint8Array;
-  addresses: {
-    address: string;
-    paymentType: SupportedPaymentType;
-  }[];
+  address: string;
+  paymentType: SupportedPaymentType;
 }> {
   public static type() {
     return "get-bitcoin-key";
   }
 
-  constructor(public readonly chainId: string) {
+  constructor(
+    public readonly chainId: string,
+    public readonly paymentType?: SupportedPaymentType
+  ) {
     super();
   }
 
@@ -41,10 +42,8 @@ export class GetBitcoinKeysSettledMsg extends Message<
   SettledResponses<{
     name: string;
     pubKey: Uint8Array;
-    addresses: {
-      address: string;
-      paymentType: SupportedPaymentType;
-    }[];
+    address: string;
+    paymentType: SupportedPaymentType;
     isNanoLedger: boolean;
   }>
 > {
@@ -55,6 +54,7 @@ export class GetBitcoinKeysSettledMsg extends Message<
   constructor(
     public readonly chainConfigs: Array<{
       chainId: string;
+      paymentType?: SupportedPaymentType;
     }>
   ) {
     super();
@@ -92,10 +92,8 @@ export class GetBitcoinKeysForEachVaultSettledMsg extends Message<
     {
       name: string;
       pubKey: Uint8Array;
-      addresses: {
-        address: string;
-        paymentType: SupportedPaymentType;
-      }[];
+      address: string;
+      paymentType: SupportedPaymentType;
       isNanoLedger: boolean;
     } & {
       vaultId: string;
@@ -140,9 +138,7 @@ export class GetBitcoinKeysForEachVaultSettledMsg extends Message<
   }
 }
 
-export class RequestSignBitcoinPsbtMsg extends Message<{
-  signedTxHex: string;
-}> {
+export class RequestSignBitcoinPsbtMsg extends Message<string> {
   public static type() {
     return "request-sign-bitcoin-psbt";
   }
@@ -181,9 +177,7 @@ export class RequestSignBitcoinPsbtMsg extends Message<{
 /**
  * BTCProvider.signPsbts(psbtsHexes: string[])
  */
-export class RequestSignBitcoinPsbtsMsg extends Message<{
-  signedTxHexes: string[];
-}> {
+export class RequestSignBitcoinPsbtsMsg extends Message<string[]> {
   public static type() {
     return "request-sign-bitcoin-psbts";
   }
@@ -214,14 +208,13 @@ export class RequestSignBitcoinPsbtsMsg extends Message<{
   }
 }
 
-export class RequestSignBitcoinMessageMsg extends Message<{
-  signatureHex: string;
-}> {
+export class RequestSignBitcoinMessageMsg extends Message<string> {
   public static type() {
     return "request-sign-bitcoin-message";
   }
 
   constructor(
+    public readonly chainId: string,
     public readonly message: string,
     public readonly signType: "ecdsa" | "bip322-simple"
   ) {
@@ -229,6 +222,9 @@ export class RequestSignBitcoinMessageMsg extends Message<{
   }
 
   validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chainId is not set");
+    }
     if (!this.message) {
       throw new Error("message is not set");
     }

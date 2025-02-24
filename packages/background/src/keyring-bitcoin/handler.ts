@@ -117,11 +117,19 @@ const handleRequestSignBitcoinPsbtMsg: (
   service: KeyRingBitcoinService,
   permissionInteractionService: PermissionInteractiveService
 ) => InternalHandler<RequestSignBitcoinPsbtMsg> = (
-  _service,
-  _permissionInteractionService
+  service,
+  permissionInteractionService
 ) => {
-  return async (_env, _msg) => {
-    throw new KeplrError("keyring", 221, "Not implemented");
+  return async (env, msg) => {
+    await permissionInteractionService.ensureEnabledForBitcoin(env, msg.origin);
+
+    return await service.signPsbtSelected(
+      env,
+      msg.origin,
+      msg.chainId,
+      msg.psbt,
+      false
+    );
   };
 };
 
@@ -129,11 +137,19 @@ const handleRequestSignBitcoinPsbtsMsg: (
   service: KeyRingBitcoinService,
   permissionInteractionService: PermissionInteractiveService
 ) => InternalHandler<RequestSignBitcoinPsbtsMsg> = (
-  _service,
-  _permissionInteractionService
+  service,
+  permissionInteractionService
 ) => {
-  return async (_env, _msg) => {
-    throw new KeplrError("keyring", 221, "Not implemented");
+  return async (env, msg) => {
+    await permissionInteractionService.ensureEnabledForBitcoin(env, msg.origin);
+
+    return await service.signPsbtsSelected(
+      env,
+      msg.origin,
+      msg.chainId,
+      msg.psbts,
+      false
+    );
   };
 };
 
@@ -141,13 +157,18 @@ const handleRequestSignBitcoinMessageMsg: (
   service: KeyRingBitcoinService,
   permissionInteractionService: PermissionInteractiveService
 ) => InternalHandler<RequestSignBitcoinMessageMsg> = (
-  _service,
-  _permissionInteractionService
+  service,
+  permissionInteractionService
 ) => {
-  return async (_env, _msg) => {
-    // TODO: implement
-    return {
-      signatureHex: "0x1234",
-    };
+  return async (env, msg) => {
+    await permissionInteractionService.ensureEnabledForBitcoin(env, msg.origin);
+
+    return await service.signMessageSelected(
+      env,
+      msg.origin,
+      msg.chainId,
+      msg.message,
+      msg.signType
+    );
   };
 };
