@@ -2,7 +2,6 @@ import React, { FunctionComponent, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useIntl } from "react-intl";
 import { useStore } from "../../stores";
-import { useGetSearchChains } from "../../hooks/use-get-search-chains";
 import { HeaderLayout } from "../../layouts/header";
 import { BackButton } from "../../layouts/header/components";
 import { Box } from "../../components/box";
@@ -12,7 +11,7 @@ import { Toggle } from "../../components/toggle";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { Gutter } from "../../components/gutter";
 import { XAxis } from "../../components/axis";
-import { TextInput } from "../../components/input";
+import { SearchTextInput } from "../../components/input";
 
 export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
   const { hugeQueriesStore, keyRingStore, uiConfigStore } = useStore();
@@ -24,13 +23,7 @@ export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
   });
 
   const [search, setSearch] = useState("");
-  const { trimSearch } = useGetSearchChains({
-    search,
-    searchOption: "all",
-    filterOption: "chainNameAndToken",
-    minSearchLength: 3,
-    clearResultsOnEmptyQuery: true,
-  });
+  const trimSearch = search.trim().toLowerCase();
 
   const disabledTokenMap =
     uiConfigStore.manageViewAssetTokenConfig.getViewAssetTokenMapByVaultId(
@@ -66,7 +59,7 @@ export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
       left={<BackButton />}
     >
       <Box paddingX="0.75rem" style={{ overflowX: "hidden" }}>
-        <TextInput
+        <SearchTextInput
           placeholder={intl.formatMessage({
             id: "page.setting.general.manage-asset-list.search.placeholder",
           })}

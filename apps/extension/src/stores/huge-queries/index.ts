@@ -350,7 +350,7 @@ export class HugeQueriesStore {
             viewToken.token.currency.coinMinimalDenom
           );
 
-          return !isDisabled;
+          if (isDisabled) return false;
         }
         return keys.get(key);
       });

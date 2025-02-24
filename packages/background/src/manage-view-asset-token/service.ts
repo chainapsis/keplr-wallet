@@ -132,6 +132,9 @@ export class ManageViewAssetTokenService {
         ])
       );
       return res;
+    },
+    {
+      keepAlive: true,
     }
   );
 
@@ -142,6 +145,9 @@ export class ManageViewAssetTokenService {
       );
 
       return res;
+    },
+    {
+      keepAlive: true,
     }
   );
 
