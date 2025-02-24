@@ -622,8 +622,9 @@
   "page.main.components.looking-for-chains.not-enabled": "Not Enabled",
   "page.main.components.looking-for-chains.enable-button": "Enable",
   "page.main.components.token-found-modal.title": "{numFoundToken} New Token(s) Found",
+  "page.main.components.token-found-modal.description": "Tokens from chains not enabled in your Keplr Wallet have been detected. To add or remove the tokens later, visit Manage Asset List.",
   "page.main.components.token-found-modal.add-token-on-injective-and-evmos": "Add tokens on Injective and Evmos",
-  "page.main.components.token-found-modal.add-chains": "Add Chains",
+  "page.main.components.token-found-modal.add-chains": "Enable Chains",
   "page.main.components.token-item.copy-address.copied": "Copied",
 
   "page.main.layouts.header.new-chain.title": "✨ {chains} Now Integrated!",

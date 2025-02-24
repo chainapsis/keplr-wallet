@@ -588,8 +588,9 @@
   "page.main.components.looking-for-chains.not-enabled": "未启用",
   "page.main.components.looking-for-chains.enable-button": "启用",
   "page.main.components.token-found-modal.title": "{numFoundToken}个新币种",
+  "page.main.components.token-found-modal.description": "在Keplr钱包中未启用的链的币种已被检测到。稍后可以添加或删除这些币种，请访问“管理资产列表”。",
   "page.main.components.token-found-modal.add-token-on-injective-and-evmos": "添加币种到Injective和Evmos",
-  "page.main.components.token-found-modal.add-chains": "添加链",
+  "page.main.components.token-found-modal.add-chains": "启用链",
   "page.main.components.token-item.copy-address.copied": "已复制",
 
   "page.main.layouts.header.new-chain.title": "✨ {chains} 现已集成!",
