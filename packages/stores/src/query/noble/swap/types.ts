@@ -1,3 +1,41 @@
+import { Coin } from "@keplr-wallet/unit";
+
+export interface NobleSwapPool {
+  id: number;
+
+  // Address of the Pool.
+  address: string;
+
+  // Algorithm of the pool.
+  algorithm: string;
+
+  // Pair asset denom in the pool.
+  pair: string;
+
+  // Details of the Underlying Pool with the specific custom attributes.
+  details: {
+    "@type": string;
+    protocol_fee_percentage: string;
+    rewards_fee: string;
+    initial_a: string;
+    future_a: string;
+    initial_a_time: string;
+    future_a_time: string;
+    rate_multipliers: Coin[];
+    total_shares: string;
+    initial_rewards_time: string;
+  };
+
+  // Amount of liquidity in the Pool.
+  liquidity: Coin[];
+
+  // Amount of protocol fees currently collected.
+  protocol_fees: Coin[];
+
+  // Amount of rewards fees currently collected.
+  reward_fees: Coin[];
+}
+
 export interface NobleSwapRate {
   // Denomination of the base currency.
   denom: string;

@@ -2,7 +2,10 @@ import { QueriesSetBase } from "../queries";
 import { ChainGetter } from "../../chain";
 import { DeepReadonly } from "utility-types";
 import { QuerySharedContext } from "../../common";
-import { ObservableQueryNobleSwapRates } from "./swap";
+import {
+  ObservableQueryNobleSwapPools,
+  ObservableQueryNobleSwapRates,
+} from "./swap";
 
 export interface NobleQueries {
   noble: NobleQueriesImpl;
@@ -35,6 +38,7 @@ export const NobleQueries = {
 
 export class NobleQueriesImpl {
   public readonly querySwapRates: DeepReadonly<ObservableQueryNobleSwapRates>;
+  public readonly querySwapPools: DeepReadonly<ObservableQueryNobleSwapPools>;
 
   constructor(
     _: QueriesSetBase,
@@ -43,6 +47,11 @@ export class NobleQueriesImpl {
     chainGetter: ChainGetter
   ) {
     this.querySwapRates = new ObservableQueryNobleSwapRates(
+      sharedContext,
+      chainId,
+      chainGetter
+    );
+    this.querySwapPools = new ObservableQueryNobleSwapPools(
       sharedContext,
       chainId,
       chainGetter

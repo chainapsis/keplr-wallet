@@ -10,6 +10,8 @@ import { useSearchParams } from "react-router-dom";
 import { useStore } from "../../../stores";
 import {
   EmptyAmountError,
+  useFeeConfig,
+  useGasConfig,
   useSenderConfig,
   useTxConfigsValidate,
   ZeroAmountError,
@@ -100,6 +102,30 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
     amountConfig: nobleEarnAmountConfig,
   });
 
+  const poolForWithdraw = queriesStore
+    .get(chainId)
+    .noble.querySwapPools.pools.find(
+      (pool) =>
+        pool.liquidity.some(
+          (coin) => coin.denom === currency.coinMinimalDenom
+        ) &&
+        pool.liquidity.some(
+          (coin) => coin.denom === outCurrency.coinMinimalDenom
+        ) &&
+        pool.algorithm === "STABLESWAP"
+    );
+
+  // TODO: noble earn config 로 묶어버리기
+  const gasConfig = useGasConfig(chainStore, chainId);
+  const feeConfig = useFeeConfig(
+    chainStore,
+    queriesStore,
+    chainId,
+    senderConfig,
+    nobleEarnAmountConfig,
+    gasConfig
+  );
+
   return (
     <HeaderLayout
       title={""} // No title for this page
@@ -132,6 +158,25 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
 
         if (!isConfirmView) {
           setIsConfirmView(true);
+        } else {
+          if (poolForWithdraw) {
+            const tx = account.noble.makeSwapTx(
+              "noble-earn-withdraw",
+              nobleEarnAmountConfig.value,
+              currency,
+              nobleEarnAmountConfig.expectedOutAmount.toCoin().amount,
+              outCurrency,
+              [
+                {
+                  poolId: poolForWithdraw.id.toString(),
+                  denomTo: outCurrency.coinMinimalDenom,
+                },
+              ]
+            );
+
+            await tx.send(feeConfig.toStdFee());
+            // TODO: 성공 / 실패 케이스 처리
+          }
         }
       }}
     >

@@ -29,6 +29,7 @@ import {
   LSMCurrencyRegistrar,
   TokenFactoryCurrencyRegistrar,
   NobleQueries,
+  NobleAccount,
 } from "@keplr-wallet/stores";
 import {
   IBCChannelStore,
@@ -138,7 +139,7 @@ export class RootStore {
   public readonly skipQueriesStore: SkipQueries;
   public readonly starknetQueriesStore: StarknetQueriesStore;
   public readonly accountStore: AccountStore<
-    [CosmosAccount, CosmwasmAccount, SecretAccount]
+    [CosmosAccount, CosmwasmAccount, SecretAccount, NobleAccount]
   >;
   public readonly ethereumAccountStore: EthereumAccountStore;
   public readonly starknetAccountStore: StarknetAccountStore;
@@ -468,6 +469,9 @@ export class RootStore {
             };
           }
         },
+      }),
+      NobleAccount.use({
+        queriesStore: this.queriesStore,
       })
     );
 

@@ -1,6 +1,7 @@
 import { AppCurrency } from "@keplr-wallet/types";
-import { ChainStore, QueriesStore } from "@keplr-wallet/stores";
+import { ChainStore, IQueriesStore } from "@keplr-wallet/stores";
 import { DenomHelper, KVStore } from "@keplr-wallet/common";
+import { KeplrETCQueries } from "../queries";
 import { autorun, makeObservable, observable, runInAction, toJS } from "mobx";
 
 export class GravityBridgeCurrencyRegistrar {
@@ -21,7 +22,7 @@ export class GravityBridgeCurrencyRegistrar {
     protected readonly kvStore: KVStore,
     protected readonly cacheDuration: number = 24 * 3600 * 1000, // 1 days
     protected readonly chainStore: ChainStore,
-    protected readonly queriesStore: QueriesStore<[CosmosQueries, NobleQueries]>
+    protected readonly queriesStore: IQueriesStore<KeplrETCQueries>
   ) {
     this.chainStore.registerCurrencyRegistrar(
       this.currencyRegistrar.bind(this)
