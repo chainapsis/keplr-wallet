@@ -1,15 +1,16 @@
 import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
-import { PricePretty } from "@keplr-wallet/unit";
+import { Dec, DecUtils, PricePretty } from "@keplr-wallet/unit";
 import { useStore } from "../../../../stores";
 import { IBCSwapAmountConfig } from "@keplr-wallet/hooks-internal";
 import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
 import { Gutter } from "../../../../components/gutter";
 import { XAxis } from "../../../../components/axis";
-import { Body3, Subtitle4 } from "../../../../components/typography";
-import { LoadingIcon } from "../../../../components/icon";
+import { Body3, Subtitle3, Subtitle4 } from "../../../../components/typography";
+import { ArticleOutlineIcon, LoadingIcon } from "../../../../components/icon";
 import { useTheme } from "styled-components";
+import { FormattedMessage } from "react-intl";
 
 export const SwapFeeInfoForBridgeOnSend: FunctionComponent<{
   amountConfig: IBCSwapAmountConfig;
@@ -17,6 +18,23 @@ export const SwapFeeInfoForBridgeOnSend: FunctionComponent<{
   const { priceStore } = useStore();
 
   const theme = useTheme();
+
+  const expectedAmountRatio = (() => {
+    const inputDec = amountConfig.amount[0].toDec();
+    const outputDec = amountConfig.outAmount.toDec();
+    const ratioOutputByInput = (() => {
+      if (inputDec.isZero()) {
+        return "0";
+      }
+
+      const feeAmount = inputDec.sub(outputDec);
+      const ratio = feeAmount.quo(inputDec).mul(DecUtils.getTenExponentN(2));
+      //ratio는 input에 대한 수수료의 비율이기 때문에 보여줄때는 부호를 반대로 해야함
+      return ratio.lt(new Dec(0)) ? ratio.toString(2) : `-${ratio.toString(2)}`;
+    })();
+
+    return ratioOutputByInput;
+  })();
 
   return (
     <React.Fragment>
@@ -128,6 +146,64 @@ export const SwapFeeInfoForBridgeOnSend: FunctionComponent<{
               })}
             </React.Fragment>
           )}
+        </XAxis>
+        <Gutter size="0.625rem" />
+
+        <XAxis alignY="center">
+          <Subtitle3
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-400"]
+                : ColorPalette["gray-200"]
+            }
+          >
+            <FormattedMessage id="page.send.amount.bridge-fee-info.expected-amount" />
+          </Subtitle3>
+          <Gutter size="0.25rem" />
+          <ArticleOutlineIcon
+            width="1rem"
+            height="1rem"
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-400"]
+                : ColorPalette["gray-200"]
+            }
+          />
+          <div style={{ flex: 1 }} />
+          {expectedAmountRatio !== "0" && (
+            <Body3 color={ColorPalette["gray-300"]}>
+              ({expectedAmountRatio}%)
+            </Body3>
+          )}
+
+          <Gutter size="0.25rem" />
+
+          {(() => {
+            if (theme.mode === "light") {
+              return (
+                <Body3 color={ColorPalette["gray-600"]}>
+                  {amountConfig.outAmount
+                    .maxDecimals(6)
+                    .trim(true)
+                    .shrink(true)
+                    .inequalitySymbol(true)
+                    .hideIBCMetadata(true)
+                    .toString()}
+                </Body3>
+              );
+            }
+            return (
+              <Subtitle4>
+                {amountConfig.outAmount
+                  .maxDecimals(6)
+                  .trim(true)
+                  .shrink(true)
+                  .inequalitySymbol(true)
+                  .hideIBCMetadata(true)
+                  .toString()}
+              </Subtitle4>
+            );
+          })()}
         </XAxis>
       </Box>
     </React.Fragment>
