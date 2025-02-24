@@ -221,4 +221,8 @@ export class KeyRingBitcoinService {
   ) {
     return "0x01";
   }
+
+  async getSupportedPaymentTypes() {
+    return [SupportedPaymentType.NATIVE_SEGWIT, SupportedPaymentType.TAPROOT];
+  }
 }

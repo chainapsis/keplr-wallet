@@ -12,6 +12,7 @@ import {
   GetBitcoinKeyMsg,
   GetBitcoinKeysForEachVaultSettledMsg,
   GetBitcoinKeysSettledMsg,
+  GetSupportedPaymentTypesMsg,
   RequestSignBitcoinMessageMsg,
   RequestSignBitcoinPsbtMsg,
   RequestSignBitcoinPsbtsMsg,
@@ -57,6 +58,11 @@ export const getHandler: (
           _service,
           _permissionInteractionService
         )(env, msg as RequestSignBitcoinMessageMsg);
+      case GetSupportedPaymentTypesMsg:
+        return handleGetSupportedPaymentTypesMsg(_service)(
+          env,
+          msg as GetSupportedPaymentTypesMsg
+        );
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
     }
@@ -170,5 +176,13 @@ const handleRequestSignBitcoinMessageMsg: (
       msg.message,
       msg.signType
     );
+  };
+};
+
+const handleGetSupportedPaymentTypesMsg: (
+  service: KeyRingBitcoinService
+) => InternalHandler<GetSupportedPaymentTypesMsg> = (service) => {
+  return async (_) => {
+    return await service.getSupportedPaymentTypes();
   };
 };

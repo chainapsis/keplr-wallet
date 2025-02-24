@@ -246,3 +246,31 @@ export class RequestSignBitcoinMessageMsg extends Message<string> {
     return RequestSignBitcoinMessageMsg.type();
   }
 }
+
+export class GetSupportedPaymentTypesMsg extends Message<
+  SupportedPaymentType[]
+> {
+  public static type() {
+    return "get-supported-payment-types";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetSupportedPaymentTypesMsg.type();
+  }
+}
