@@ -636,6 +636,12 @@ export class KeyRingService {
         throw new Error("Coin type is not associated to chain");
       }
     }
+    if ("bitcoin" in modularChainInfo) {
+      const chainInfo = modularChainInfo.bitcoin;
+      if (chainInfo.coinType !== coinType) {
+        throw new Error("Coin type is not associated to chain");
+      }
+    }
 
     const vault = this.vaultService.getVault("keyRing", vaultId);
     if (!vault) {
@@ -1053,6 +1059,10 @@ export class KeyRingService {
         return 9004;
       }
 
+      if ("bitcoin" in modularChainInfo) {
+        return modularChainInfo.bitcoin.coinType;
+      }
+
       throw new Error("Can't determine default coin type");
     })();
 
@@ -1100,6 +1110,10 @@ export class KeyRingService {
       // TODO: starknet에서는 일단 코인타입을 9004로 고정해서 쓴다.
       //       일단은 임시조치인데 나중에 다른 방식으로 바뀔수도 있다.
       if (coinType !== 9004) {
+        throw new Error("Coin type is not associated to chain");
+      }
+    } else if ("bitcoin" in modularChainInfo) {
+      if (modularChainInfo.bitcoin.coinType !== coinType) {
         throw new Error("Coin type is not associated to chain");
       }
     } else {
@@ -1166,6 +1180,8 @@ export class KeyRingService {
         // TODO: starknet에서는 일단 코인타입을 9004로 고정해서 쓴다.
         //       일단은 임시조치인데 나중에 다른 방식으로 바뀔수도 있다.
         return 9004;
+      } else if ("bitcoin" in modularChainInfo) {
+        return modularChainInfo.bitcoin.coinType;
       } else {
         throw new Error("Can't determine default coin type");
       }
