@@ -2,6 +2,7 @@ import { makeObservable, observable, runInAction } from "mobx";
 import { ChainStore } from "../chain";
 import {
   DisableViewAssetTokenMsg,
+  EnableViewAssetTokenMsg,
   GetAllDisabledViewAssetTokenMsg,
   ViewAssetToken,
 } from "@keplr-wallet/background";
@@ -63,6 +64,28 @@ export class ManageViewAssetTokenConfig {
 
   async disableViewAssetToken(vaultId: string, token: ViewAssetToken) {
     const msg = new DisableViewAssetTokenMsg(vaultId, token);
+    const res = await this.requester.sendMessage(BACKGROUND_PORT, msg);
+
+    runInAction(() => {
+      const newTokenMap = new Map(this.viewAssetTokenMap);
+      const newTokens = res[vaultId];
+      if (newTokens) {
+        newTokenMap.set(
+          vaultId,
+          new Map(
+            Object.entries(newTokens).map(([chainIdentifier, coinArray]) => [
+              chainIdentifier,
+              new Set(coinArray),
+            ])
+          )
+        );
+      }
+      this.viewAssetTokenMap = newTokenMap;
+    });
+  }
+
+  async enableViewAssetToken(vaultId: string, token: ViewAssetToken) {
+    const msg = new EnableViewAssetTokenMsg(vaultId, token);
     const res = await this.requester.sendMessage(BACKGROUND_PORT, msg);
 
     runInAction(() => {

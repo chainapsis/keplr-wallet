@@ -51,6 +51,19 @@ export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
     );
   };
 
+  const handleEnableToken = async (
+    chainId: string,
+    coinMinimalDenom: string
+  ) => {
+    uiConfigStore.manageViewAssetTokenConfig.enableViewAssetToken(
+      keyRingStore.selectedKeyInfo?.id ?? "",
+      {
+        chainId,
+        coinMinimalDenom,
+      }
+    );
+  };
+
   return (
     <HeaderLayout
       title={intl.formatMessage({
@@ -87,10 +100,15 @@ export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
                     <Toggle
                       isOpen={!isDisabled}
                       setIsOpen={() =>
-                        handleDisableToken(
-                          viewToken.chainInfo.chainId,
-                          viewToken.token.currency.coinMinimalDenom
-                        )
+                        isDisabled
+                          ? handleEnableToken(
+                              viewToken.chainInfo.chainId,
+                              viewToken.token.currency.coinMinimalDenom
+                            )
+                          : handleDisableToken(
+                              viewToken.chainInfo.chainId,
+                              viewToken.token.currency.coinMinimalDenom
+                            )
                       }
                       size="small"
                     />

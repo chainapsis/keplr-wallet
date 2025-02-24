@@ -3,6 +3,7 @@ import { ManageViewAssetTokenService } from "./service";
 import { ROUTE } from "./constants";
 import {
   DisableViewAssetTokenMsg,
+  EnableViewAssetTokenMsg,
   GetAllDisabledViewAssetTokenMsg,
   GetDisabledViewAssetTokenListMsg,
 } from "./messages";
@@ -15,6 +16,7 @@ export function init(
   router.registerMessage(GetAllDisabledViewAssetTokenMsg);
   router.registerMessage(GetDisabledViewAssetTokenListMsg);
   router.registerMessage(DisableViewAssetTokenMsg);
+  router.registerMessage(EnableViewAssetTokenMsg);
 
   router.addHandler(ROUTE, getHandler(service));
 }
