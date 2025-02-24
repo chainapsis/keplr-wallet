@@ -30,6 +30,10 @@ export class PermissionService {
   protected currentChainIdForStarknetByOriginMap: Map<string, string> =
     new Map();
 
+  @observable
+  protected currentChainIdForBitcoinByOriginMap: Map<string, string> =
+    new Map();
+
   constructor(
     protected readonly kvStore: KVStore,
     privilegedOrigins: string[],
@@ -98,6 +102,22 @@ export class PermissionService {
               this.currentChainIdForStarknetByOriginMap.set(
                 key,
                 savedCurrentChainIdForStarknetByOriginMap[key]
+              );
+            }
+          });
+        }
+
+        const savedCurrentChainIdForBitcoinByOriginMap = await this.kvStore.get<
+          Record<string, string>
+        >("currentChainIdForBitcoinByOriginMap/v1");
+        if (savedCurrentChainIdForBitcoinByOriginMap) {
+          runInAction(() => {
+            for (const key of Object.keys(
+              savedCurrentChainIdForBitcoinByOriginMap
+            )) {
+              this.currentChainIdForBitcoinByOriginMap.set(
+                key,
+                savedCurrentChainIdForBitcoinByOriginMap[key]
               );
             }
           });
@@ -269,6 +289,10 @@ export class PermissionService {
           const chainId = newChainId ?? chainIds[0];
           this.addPermission([chainId], type, origins);
           this.setCurrentChainIdForStarknet(origins, chainId);
+        } else if (options?.isForBitcoin) {
+          const chainId = newChainId ?? chainIds[0];
+          this.addPermission([chainId], type, origins);
+          this.setCurrentChainIdForBitcoin(origins, chainId);
         } else {
           this.addPermission(chainIds, type, origins);
         }
@@ -744,6 +768,71 @@ export class PermissionService {
       }
     } else {
       this.setCurrentChainIdForStarknet(origins, chainId);
+    }
+  }
+
+  getCurrentChainIdForBitcoin(origin: string): string | undefined {
+    const currentChainId = this.currentChainIdForBitcoinByOriginMap.get(origin);
+    if (
+      currentChainId &&
+      !this.hasPermission(
+        currentChainId,
+        getBasicAccessPermissionType(),
+        origin
+      )
+    ) {
+      this.currentChainIdForBitcoinByOriginMap.delete(origin);
+      return;
+    }
+
+    return currentChainId;
+  }
+
+  @action
+  setCurrentChainIdForBitcoin(origins: string[], chainId: string) {
+    for (const origin of origins) {
+      this.currentChainIdForBitcoinByOriginMap.set(origin, chainId);
+
+      // {genesis_hash}:{addr_format}
+      const bitcoinChainId =
+        "0x" +
+        Buffer.from(
+          chainId.replace(":native-segwit", "").replace(":taproot", "")
+        );
+
+      this.interactionService.dispatchEvent(
+        WEBPAGE_PORT,
+        "keplr_bitcoinChainChanged",
+        {
+          origin,
+          bitcoinChainId,
+        }
+      );
+    }
+  }
+
+  @action
+  async updateCurrentChainIdForBitcoin(
+    env: Env,
+    origin: string,
+    chainId: string
+  ) {
+    const type = getBasicAccessPermissionType();
+    const chainIds = [chainId];
+    const origins = [origin];
+
+    if (!this.hasPermission(chainId, type, origin)) {
+      if (env.isInternalMsg) {
+        this.addPermission(chainIds, type, origins);
+        this.setCurrentChainIdForBitcoin(origins, chainId);
+      } else {
+        await this.grantPermission(env, chainIds, type, origins, {
+          isForBitcoin: true,
+          isUnableToChangeChainInUI: true,
+        });
+      }
+    } else {
+      this.setCurrentChainIdForBitcoin(origins, chainId);
     }
   }
 }
