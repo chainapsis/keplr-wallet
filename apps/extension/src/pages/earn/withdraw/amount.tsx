@@ -5,13 +5,14 @@ import { BackButton } from "../../../layouts/header/components";
 
 import { Stack } from "../../../components/stack";
 
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { useStore } from "../../../stores";
 import {
   EmptyAmountError,
   useFeeConfig,
   useGasConfig,
+  useGasSimulator,
   useSenderConfig,
   useTxConfigsValidate,
   ZeroAmountError,
@@ -37,6 +38,7 @@ import {
   useNobleEarnAmountConfig,
 } from "@keplr-wallet/hooks-internal";
 import { ApyChip } from "../components/chip";
+import { ExtensionKVStore } from "@keplr-wallet/common";
 
 const NOBLE_EARN_WITHDRAW_OUT_COIN_MINIMAL_DENOM = "uusdc";
 
@@ -44,6 +46,7 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
   const { accountStore, chainStore, queriesStore } = useStore();
   const [searchParams] = useSearchParams();
   const intl = useIntl();
+  const navigate = useNavigate();
 
   const initialChainId = searchParams.get("chainId");
   const initialCoinMinimalDenom = searchParams.get("coinMinimalDenom");
@@ -97,11 +100,6 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
 
   const [isConfirmView, setIsConfirmView] = useState(false);
 
-  const txConfigsValidate = useTxConfigsValidate({
-    senderConfig,
-    amountConfig: nobleEarnAmountConfig,
-  });
-
   const poolForWithdraw = queriesStore
     .get(chainId)
     .noble.querySwapPools.pools.find(
@@ -125,6 +123,47 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
     nobleEarnAmountConfig,
     gasConfig
   );
+
+  const gasSimulator = useGasSimulator(
+    new ExtensionKVStore("gas-simulator.main.send"),
+    chainStore,
+    chainId,
+    gasConfig,
+    feeConfig,
+    "noble-earn-withdraw",
+    () => {
+      if (!nobleEarnAmountConfig.currency) {
+        throw new Error("Withdraw currency not set");
+      }
+
+      if (
+        nobleEarnAmountConfig.uiProperties.loadingState === "loading-block" ||
+        nobleEarnAmountConfig.uiProperties.error != null
+      ) {
+        throw new Error("Not ready to simulate tx");
+      }
+
+      return account.noble.makeSwapTx(
+        "noble-earn-withdraw",
+        nobleEarnAmountConfig.amount[0].toDec().toString(),
+        currency,
+        nobleEarnAmountConfig.minOutAmount.toDec().toString(),
+        outCurrency,
+        [
+          {
+            poolId: poolForWithdraw?.id.toString() ?? "",
+            denomTo: outCurrency.coinMinimalDenom,
+          },
+        ]
+      );
+    }
+  );
+
+  const txConfigsValidate = useTxConfigsValidate({
+    senderConfig,
+    amountConfig: nobleEarnAmountConfig,
+    gasSimulator,
+  });
 
   return (
     <HeaderLayout
@@ -159,12 +198,16 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
         if (!isConfirmView) {
           setIsConfirmView(true);
         } else {
-          if (poolForWithdraw) {
+          if (!poolForWithdraw) {
+            throw new Error("No pool for withdraw");
+          }
+
+          try {
             const tx = account.noble.makeSwapTx(
               "noble-earn-withdraw",
-              nobleEarnAmountConfig.value,
+              nobleEarnAmountConfig.amount[0].toDec().toString(),
               currency,
-              nobleEarnAmountConfig.expectedOutAmount.toCoin().amount,
+              nobleEarnAmountConfig.minOutAmount.toDec().toString(),
               outCurrency,
               [
                 {
@@ -174,8 +217,26 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
               ]
             );
 
-            await tx.send(feeConfig.toStdFee());
-            // TODO: 성공 / 실패 케이스 처리
+            await tx.send(feeConfig.toStdFee(), undefined, undefined, {
+              onBroadcasted: (_txHash) => {
+                navigate("/tx-result/pending");
+
+                // TODO: Log analytics
+              },
+              onFulfill: (tx: any) => {
+                if (tx.code != null && tx.code !== 0) {
+                  console.log(tx.log ?? tx.raw_log);
+                  navigate("/tx-result/failed");
+
+                  return;
+                }
+
+                navigate("/tx-result/success");
+              },
+            });
+          } catch (e) {
+            console.error(e);
+            navigate("/tx-result/failed");
           }
         }
       }}

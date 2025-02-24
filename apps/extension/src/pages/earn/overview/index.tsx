@@ -14,7 +14,7 @@ import { Divider } from "../../../components/divder";
 import { EarnOverviewClaimSection } from "../components/overview-claim-section";
 import { EarnOverviewBalanceSection } from "../components/overview-balance-section";
 
-const NOBLE_CHAIN_ID = "noble-1";
+const NOBLE_CHAIN_ID = "duke-1"; // "noble-1";
 
 export const EarnOverviewPage: FunctionComponent = observer(() => {
   const intl = useIntl();

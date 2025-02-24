@@ -370,7 +370,7 @@ export const AvailableTabView: FunctionComponent<{
                               text="Earn"
                               onClick={() => {
                                 navigate(
-                                  `/earn/intro?chainId=${"noble-1"}&coinMinimalDenom=${"uusdc"}`
+                                  `/earn/intro?chainId=${"duke-1"}&coinMinimalDenom=${"uusdc"}`
                                 );
                               }}
                             />

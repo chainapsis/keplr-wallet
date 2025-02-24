@@ -100,7 +100,7 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
     }
 
     if (paramIsNobleEarn) {
-      return (token.token.currency as IBCCurrency)?.originChainId === "noble-1";
+      return (token.token.currency as IBCCurrency)?.originChainId === "duke-1";
     }
 
     return true;

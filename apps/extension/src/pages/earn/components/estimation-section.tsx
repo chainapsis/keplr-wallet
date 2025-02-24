@@ -10,10 +10,11 @@ import { ColorPalette } from "../../../styles";
 import { Chip, ApyChip } from "./chip";
 import { LongArrowDownIcon } from "../../../components/icon/long-arrow-down";
 
+const NOBLE_CHAIN_ID = "duke-1"; // "noble-1";
+
 export const EstimationSection: FunctionComponent<{
   usdcAmount: CoinPretty;
 }> = ({ usdcAmount }) => {
-  const NOBLE_CHAIN_ID = "noble-1";
   const intl = useIntl();
 
   // const DEFAULT_SLIPPAGE_RATE = 0.005;

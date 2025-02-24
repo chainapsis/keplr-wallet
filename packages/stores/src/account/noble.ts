@@ -96,7 +96,6 @@ export class NobleAccountImpl {
     return this.base.cosmos.makeTx(
       type,
       {
-        aminoMsgs: [msg],
         protoMsgs: [
           {
             typeUrl: "/noble.swap.v1.MsgSwap",
