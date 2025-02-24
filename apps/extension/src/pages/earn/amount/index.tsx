@@ -45,13 +45,13 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
     .queryBalances.getQueryBech32Address(account.bech32Address)
     .getBalance(currency);
 
-  const balance = balanceQuery?.balance.hideDenom(true).toString() || "0";
+  const balanceDec = balanceQuery?.balance.toDec() ?? ZERO_DEC;
 
   const isSubmissionBlocked =
     !amountInput ||
     new Dec(amountInput || "0").lte(ZERO_DEC) ||
-    new Dec(balance).equals(ZERO_DEC) ||
-    new Dec(amountInput || "0").gt(new Dec(balance));
+    balanceDec.equals(ZERO_DEC) ||
+    new Dec(amountInput || "0").gt(balanceDec);
 
   return (
     <HeaderLayout
@@ -111,10 +111,10 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
           type="number"
           placeholder={`0 ${currency?.coinDenom ?? ""}`}
           value={amountInput}
-          warning={new Dec(amountInput || "0").gt(new Dec(balance))}
+          warning={new Dec(amountInput || "0").gt(balanceDec)}
           onChange={(e) => {
             setAmountInput(e.target.value);
-            if (new Dec(e.target.value || "0").gt(new Dec(balance))) {
+            if (new Dec(e.target.value || "0").gt(balanceDec)) {
               setErrorMessage(
                 intl.formatMessage({
                   id: "page.earn.amount.error.insufficient-balance",
@@ -137,7 +137,7 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
         <Box paddingY="0.25rem">
           <XAxis>
             <Subtitle3 color={ColorPalette.white}>
-              {balanceQuery?.balance.toString() || "0"}
+              {balanceQuery?.balance.shrink(true).toString() || "0"}
             </Subtitle3>
             <Gutter size="0.25rem" />
             <Subtitle3 color={ColorPalette["gray-300"]}>
