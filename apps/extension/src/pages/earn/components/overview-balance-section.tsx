@@ -82,7 +82,7 @@ export const EarnOverviewBalanceSection: FunctionComponent<{
             text={intl.formatMessage({ id: "button.withdraw" })}
             color="secondary"
             size="medium"
-            // disabled={balance?.toDec().equals(new Dec(0))}
+            disabled={balance?.toDec().equals(new Dec(0))}
             style={{ width: "100%" }}
             onClick={() => {
               navigate(
