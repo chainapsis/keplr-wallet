@@ -112,6 +112,7 @@ import { EarnNobleTermsPage } from "./pages/earn/noble-terms";
 import { EarnTransferIntroPage } from "./pages/earn/transfer/intro";
 import { EarnTransferAmountPage } from "./pages/earn/transfer/amount";
 import { EarnOverviewPage } from "./pages/earn/overview";
+import { EarnWithdrawAmountPage } from "./pages/earn/withdraw/amount";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -530,6 +531,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
                 element={<EarnNobleTermsPage />}
               />
               <Route path="/earn/overview" element={<EarnOverviewPage />} />
+              <Route
+                path="/earn/withdraw/amount"
+                element={<EarnWithdrawAmountPage />}
+              />
             </Routes>
           )
         ) : (

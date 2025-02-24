@@ -68,7 +68,7 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
 
   const chainId = initialChainId || chainStore.chainInfosInUI[0].chainId;
   const ibcTransferDestinationChainId =
-    initialIBCTransferDestinationChainId ?? "noble-1";
+    initialIBCTransferDestinationChainId ?? "duke-1";
   const chainInfo = chainStore.getChain(chainId);
   const ibcTransferDestinationChainInfo = chainStore.getChain(
     ibcTransferDestinationChainId

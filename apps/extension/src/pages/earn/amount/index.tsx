@@ -27,7 +27,7 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
   const [searchParams] = useSearchParams();
   const presetAmount = searchParams.get("amount");
   const isFromEarnTransfer = searchParams.get("isFromEarnTransfer");
-  const chainId = searchParams.get("chainId") || "noble-1"; // Noble testnet: "grand-1", mainnet: "noble-1"
+  const chainId = searchParams.get("chainId") || "duke-1"; // Noble devnet: "duke-1", mainnet: "noble-1"
   const coinMinimalDenom = searchParams.get("coinMinimalDenom");
 
   const [amountInput, setAmountInput] = useState(presetAmount || "");

@@ -670,7 +670,10 @@
   "page.send.select-asset.earn.title": "Select asset{br}to transfer to Noble",
 
   "page.tx-result.pending.title": "Transaction pending",
+  "page.tx-result.pending.paragraph": "Transaction has been broadcasted to the blockchain and pending confirmation.",
   "page.tx-result.success.title": "Transaction successful",
+  "page.tx-result.success.paragraph": "Congratulations!{br}Your transaction has been completed and confirmed by the blockchain.",
+  "page.tx-result.success.done": "Done",
   "page.tx-result.failed.title": "Transaction failed",
   "page.tx-result.failed.paragraph": "Transaction unsuccessful. Please check the block explorer for more information.",
   "page.tx-result.failed.go-to-home": "Go to Home",
@@ -685,6 +688,11 @@
   "page.earn.overview.tutorial-modal.claim.paragraph": "Easily claim your rewards by clicking \"Claim All\" at Home.",
   "page.earn.overview.tutorial-modal.claim.pending-reward": "Pending Reward",
   "page.earn.overview.tutorial-modal.claim.open-earn-overview-button": "Open Earn Overview",
+
+  "page.earn.withdraw.amount.title": "Enter the amount{br}to withdraw.",
+  "page.earn.withdraw.amount.confirm.title": "Swap {from} for{br}{to}.",
+  "page.earn.withdraw.amount.confirm.description": "You will receive {to} on {chain}.",
+  "page.earn.withdraw.amount.confirm.norewards": "No rewards",
 
   "components.empty-view.text": "No {subject} Yet",
   "components.input.recipient-input.wallet-address-only-label": "Wallet Address",

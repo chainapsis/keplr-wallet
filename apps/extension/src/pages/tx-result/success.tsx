@@ -10,6 +10,7 @@ import { useIntl } from "react-intl";
 import { ColorPalette } from "../../styles";
 import { Box } from "../../components/box";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { Button } from "../../components/button";
 
 export const TxResultSuccessPage: FunctionComponent = observer(() => {
   const intl = useIntl();
@@ -39,7 +40,12 @@ export const TxResultSuccessPage: FunctionComponent = observer(() => {
   useEffect(() => {
     if (isFromEarnTransfer) {
       setTimeout(() => {
-        navigate(`/earn/amount?isFromEarnTransfer=true`);
+        navigate(
+          isFromEarnTransfer ? `/earn/amount?isFromEarnTransfer=true` : "/",
+          {
+            replace: true,
+          }
+        );
       }, 3000);
     }
   }, [isFromEarnTransfer, navigate]);
@@ -61,20 +67,29 @@ export const TxResultSuccessPage: FunctionComponent = observer(() => {
           {intl.formatMessage({ id: "page.tx-result.success.title" })}
         </H3>
         <Gutter size="2rem" />
-        {isFromEarnTransfer && (
-          <Box paddingX="1.25rem" style={{ textAlign: "center" }}>
-            <Subtitle2 color={ColorPalette["gray-200"]}>
-              {intl.formatMessage(
-                {
-                  id: "page.earn.transfer.amount.tx.paragraph",
-                },
-                {
-                  br: <br />,
-                }
-              )}
-            </Subtitle2>
-          </Box>
-        )}
+        <Box paddingX="1.25rem" style={{ textAlign: "center" }}>
+          <Subtitle2 color={ColorPalette["gray-200"]}>
+            {intl.formatMessage(
+              {
+                id: isFromEarnTransfer
+                  ? "page.earn.transfer.amount.tx.paragraph"
+                  : "page.tx-result.success.paragraph",
+              },
+              {
+                br: <br />,
+              }
+            )}
+          </Subtitle2>
+        </Box>
+        <Gutter size="2.25rem" />
+        <Button
+          size="large"
+          onClick={() => navigate("/")}
+          text={intl.formatMessage({ id: "page.tx-result.success.done" })}
+          style={{
+            width: "18.125rem",
+          }}
+        />
       </Stack>
     </Container>
   );

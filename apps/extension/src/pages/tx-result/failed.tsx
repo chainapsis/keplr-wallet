@@ -9,9 +9,8 @@ import { H3, Subtitle2 } from "../../components/typography";
 import { useIntl } from "react-intl";
 import { ColorPalette } from "../../styles";
 import { Box } from "../../components/box";
-import { TextButton } from "../../components/button-text";
 import { useNavigate } from "react-router-dom";
-import { ArrowRightIcon } from "../../components/icon";
+import { Button } from "../../components/button";
 
 export const TxResultFailedPage: FunctionComponent = observer(() => {
   const intl = useIntl();
@@ -65,11 +64,13 @@ export const TxResultFailedPage: FunctionComponent = observer(() => {
           </Subtitle2>
         </Box>
         <Gutter size="2.25rem" />
-        <StyledTextButton
+        <Button
           size="large"
           onClick={() => navigate("/")}
           text={intl.formatMessage({ id: "page.tx-result.failed.go-to-home" })}
-          right={<ArrowRightIcon color={ColorPalette["gray-200"]} />}
+          style={{
+            width: "18.125rem",
+          }}
         />
       </Stack>
     </Container>
@@ -81,18 +82,4 @@ const Container = styled.div`
   height: 100vh;
 
   background: linear-gradient(168deg, #381111 0%, #0c0101 44.57%);
-`;
-
-const StyledTextButton = styled(TextButton)`
-  svg {
-    fill: none;
-    stroke: none;
-  }
-
-  :hover {
-    svg {
-      fill: none;
-      stroke: none;
-    }
-  }
 `;

@@ -62,20 +62,20 @@ export const TxResultPendingPage: FunctionComponent = observer(() => {
           {intl.formatMessage({ id: "page.tx-result.pending.title" })}
         </H3>
         <Gutter size="2rem" />
-        {isFromEarnTransfer && (
-          <Box paddingX="1.25rem" style={{ textAlign: "center" }}>
-            <Subtitle2 color={ColorPalette["gray-200"]}>
-              {intl.formatMessage(
-                {
-                  id: "page.earn.transfer.amount.tx.paragraph",
-                },
-                {
-                  br: <br />,
-                }
-              )}
-            </Subtitle2>
-          </Box>
-        )}
+        <Box paddingX="1.25rem" style={{ textAlign: "center" }}>
+          <Subtitle2 color={ColorPalette["gray-200"]}>
+            {intl.formatMessage(
+              {
+                id: isFromEarnTransfer
+                  ? "page.earn.transfer.amount.tx.paragraph"
+                  : "page.tx-result.pending.paragraph",
+              },
+              {
+                br: <br />,
+              }
+            )}
+          </Subtitle2>
+        </Box>
       </Stack>
     </Container>
   );

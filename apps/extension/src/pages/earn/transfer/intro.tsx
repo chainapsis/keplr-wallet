@@ -36,7 +36,7 @@ export const EarnTransferIntroPage: FunctionComponent = observer(() => {
 
         navigate(
           `/send/select-asset?isNobleEarn=true&navigateTo=${encodeURIComponent(
-            "/earn/transfer/amount?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}&ibcTransferDestinationChainId=noble-1"
+            "/earn/transfer/amount?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}&ibcTransferDestinationChainId=duke-1"
           )}`
         );
       }}

@@ -29,7 +29,7 @@ export const EarnIntroPage: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
 
   const [searchParams] = useSearchParams();
-  const chainId = searchParams.get("chainId") || "noble-1"; // Noble testnet: "grand-1", mainnet: "noble-1"
+  const chainId = searchParams.get("chainId") || "duke-1"; // Noble devnet: "duke-1", mainnet: "noble-1"
   const coinMinimalDenom = searchParams.get("coinMinimalDenom") || "uusdc";
   const chainInfo = chainStore.getChain(chainId);
   const currency =
