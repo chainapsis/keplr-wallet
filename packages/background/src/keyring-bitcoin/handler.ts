@@ -37,10 +37,10 @@ export const getHandler: (
           _permissionInteractionService
         )(env, msg as GetBitcoinKeysSettledMsg);
       case GetBitcoinKeysForEachVaultSettledMsg:
-        return handleGetBitcoinKeysForEachVaultSettledMsg(
-          _service,
-          _permissionInteractionService
-        )(env, msg as GetBitcoinKeysForEachVaultSettledMsg);
+        return handleGetBitcoinKeysForEachVaultSettledMsg(_service)(
+          env,
+          msg as GetBitcoinKeysForEachVaultSettledMsg
+        );
       case RequestSignBitcoinPsbtMsg:
         return handleRequestSignBitcoinPsbtMsg(
           _service,
@@ -67,11 +67,13 @@ const handleGetBitcoinKeyMsg: (
   service: KeyRingBitcoinService,
   permissionInteractionService: PermissionInteractiveService
 ) => InternalHandler<GetBitcoinKeyMsg> = (
-  _service,
-  _permissionInteractionService
+  service,
+  permissionInteractionService
 ) => {
-  return async (_env, _msg) => {
-    throw new KeplrError("keyring", 221, "Not implemented");
+  return async (env, msg) => {
+    await permissionInteractionService.ensureEnabledForBitcoin(env, msg.origin);
+
+    return await service.getBitcoinKeySelected(msg.chainId);
   };
 };
 
@@ -79,23 +81,35 @@ const handleGetBitcoinKeysSettledMsg: (
   service: KeyRingBitcoinService,
   permissionInteractionService: PermissionInteractiveService
 ) => InternalHandler<GetBitcoinKeysSettledMsg> = (
-  _service,
-  _permissionInteractionService
+  service,
+  permissionInteractionService
 ) => {
-  return async (_env, _msg) => {
-    throw new KeplrError("keyring", 221, "Not implemented");
+  return async (env, msg) => {
+    await permissionInteractionService.ensureEnabledForBitcoin(env, msg.origin);
+
+    return await Promise.allSettled(
+      msg.chainConfigs.map((chainConfig) =>
+        service.getBitcoinKeySelected(chainConfig.chainId)
+      )
+    );
   };
 };
 
 const handleGetBitcoinKeysForEachVaultSettledMsg: (
-  service: KeyRingBitcoinService,
-  permissionInteractionService: PermissionInteractiveService
-) => InternalHandler<GetBitcoinKeysForEachVaultSettledMsg> = (
-  _service,
-  _permissionInteractionService
-) => {
-  return async (_env, _msg) => {
-    throw new KeplrError("keyring", 221, "Not implemented");
+  service: KeyRingBitcoinService
+) => InternalHandler<GetBitcoinKeysForEachVaultSettledMsg> = (service) => {
+  return async (_, msg) => {
+    return await Promise.allSettled(
+      msg.vaultIds.map((vaultId) =>
+        (async () => {
+          const key = await service.getBitcoinKey(vaultId, msg.chainId);
+          return {
+            vaultId,
+            ...key,
+          };
+        })()
+      )
+    );
   };
 };
 

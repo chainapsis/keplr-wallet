@@ -1,27 +1,20 @@
 import { Message } from "@keplr-wallet/router";
-import {
-  SettledResponses,
-  SupportedPaymentType,
-  SupportedWitnessVersion,
-} from "@keplr-wallet/types";
+import { SettledResponses, SupportedPaymentType } from "@keplr-wallet/types";
 import { ROUTE } from "./constants";
 import { Psbt } from "bitcoinjs-lib";
 
 export class GetBitcoinKeyMsg extends Message<{
   pubKey: Uint8Array;
-  payments: {
-    payment: SupportedPaymentType;
-    witnessVersion: SupportedWitnessVersion;
+  addresses: {
+    address: string;
+    paymentType: SupportedPaymentType;
   }[];
 }> {
   public static type() {
     return "get-bitcoin-key";
   }
 
-  constructor(
-    public readonly chainId: string,
-    public readonly payment?: SupportedPaymentType
-  ) {
+  constructor(public readonly chainId: string) {
     super();
   }
 
@@ -51,9 +44,8 @@ export class GetBitcoinKeysSettledMsg extends Message<
     addresses: {
       address: string;
       paymentType: SupportedPaymentType;
-      witnessVersion: SupportedWitnessVersion;
     }[];
-    isNanoLedger?: boolean;
+    isNanoLedger: boolean;
   }>
 > {
   public static type() {
@@ -63,7 +55,6 @@ export class GetBitcoinKeysSettledMsg extends Message<
   constructor(
     public readonly chainConfigs: Array<{
       chainId: string;
-      payment: "native-segwit" | "taproot";
     }>
   ) {
     super();
@@ -104,9 +95,8 @@ export class GetBitcoinKeysForEachVaultSettledMsg extends Message<
       addresses: {
         address: string;
         paymentType: SupportedPaymentType;
-        witnessVersion: SupportedWitnessVersion;
       }[];
-      isLedger?: boolean;
+      isNanoLedger: boolean;
     } & {
       vaultId: string;
     }
