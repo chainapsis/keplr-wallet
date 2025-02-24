@@ -96,6 +96,8 @@ export class NobleAccountImpl {
     return this.base.cosmos.makeTx(
       type,
       {
+        // XXX: It needs to add aminoMsgs when this message supports amino.
+        // aminoMsgs: [msg],
         protoMsgs: [
           {
             typeUrl: "/noble.swap.v1.MsgSwap",
@@ -140,7 +142,8 @@ export class NobleAccountImpl {
     return this.base.cosmos.makeTx(
       type,
       {
-        aminoMsgs: [msg],
+        // XXX: It needs to add aminoMsgs when this message supports amino.
+        // aminoMsgs: [msg],
         protoMsgs: [
           {
             typeUrl: "/noble.swap.v1.MsgWithdrawRewards",
