@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package noble.dollar.portal.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "dollar.noble.xyz/types/portal";
+
+// PeerUpdated is an event emitted whenever a peer is updated.
+message PeerUpdated {
+  uint32 chain = 1 [
+    (gogoproto.customtype) = "uint16",
+    (gogoproto.nullable) = false
+  ];
+
+  bytes old_transceiver = 2;
+  bytes new_transceiver = 3;
+
+  bytes old_manager = 4;
+  bytes new_manager = 5;
+}
+
+// OwnershipTransferred is an event emitted whenever an ownership transfer occurs.
+message OwnershipTransferred {
+  string previous_owner = 1;
+  string new_owner = 2;
+}

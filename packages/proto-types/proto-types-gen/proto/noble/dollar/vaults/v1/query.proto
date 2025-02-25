@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+package noble.dollar.vaults.v1;
+
+import "amino/amino.proto";
+import "cosmos/query/v1/query.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "noble/dollar/vaults/v1/vaults.proto";
+
+option go_package = "dollar.noble.xyz/types/vaults";
+
+service Query {
+  rpc PositionsByProvider(QueryPositionsByProvider) returns (QueryPositionsByProviderResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/noble/dollar/vaults/v1/positions/{provider}";
+  }
+
+  rpc Paused(QueryPaused) returns (QueryPausedResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/noble/dollar/vaults/v1/paused";
+  }
+
+  rpc Stats(QueryStats) returns (QueryStatsResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/noble/dollar/vaults/v1/stats";
+  }
+}
+
+message QueryPositionsByProvider {
+  string provider = 1;
+}
+
+message QueryPositionsByProviderResponse {
+  repeated vaults.v1.PositionEntry positions = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryPaused {}
+
+message QueryPausedResponse {
+  vaults.v1.PausedType paused = 1;
+}
+
+message QueryStats {}
+
+message QueryStatsResponse {
+  string flexible_total_principal = 1 [
+    (amino.dont_omitempty) = true,
+    (cosmos_proto.scalar) = "cosmos.Int",
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.nullable) = false
+  ];
+
+  uint64 flexible_total_users = 2 [(amino.dont_omitempty) = true];
+
+  string flexible_total_distributed_rewards_principal = 3 [
+    (amino.dont_omitempty) = true,
+    (cosmos_proto.scalar) = "cosmos.Int",
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.nullable) = false
+  ];
+
+  string staked_total_principal = 4 [
+    (amino.dont_omitempty) = true,
+    (cosmos_proto.scalar) = "cosmos.Int",
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.nullable) = false
+  ];
+
+  uint64 staked_total_users = 5 [(amino.dont_omitempty) = true];
+}

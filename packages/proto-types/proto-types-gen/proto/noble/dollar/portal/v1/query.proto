@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package noble.dollar.portal.v1;
+
+import "amino/amino.proto";
+import "cosmos/query/v1/query.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "noble/dollar/portal/v1/portal.proto";
+
+option go_package = "dollar.noble.xyz/types/portal";
+
+service Query {
+  rpc Owner(QueryOwner) returns (QueryOwnerResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/noble/dollar/portal/v1/owner";
+  }
+
+  rpc Paused(QueryPaused) returns (QueryPausedResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/noble/dollar/portal/v1/paused";
+  }
+
+  rpc Peers(QueryPeers) returns (QueryPeersResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/noble/dollar/portal/v1/peers";
+  }
+
+  rpc Nonce(QueryNonce) returns (QueryNonceResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/noble/dollar/portal/v1/nonce";
+  }
+}
+
+message QueryOwner {}
+
+message QueryOwnerResponse {
+  string owner = 1 [(amino.dont_omitempty) = true];
+}
+
+message QueryPaused {}
+
+message QueryPausedResponse {
+  bool paused = 1 [(amino.dont_omitempty) = true];
+}
+
+message QueryPeers {}
+
+message QueryPeersResponse {
+  map<uint32, Peer> peers = 1 [
+    (gogoproto.castkey) = "uint16",
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
+
+message QueryNonce {}
+
+message QueryNonceResponse {
+  uint32 nonce = 1 [(amino.dont_omitempty) = true];
+}
