@@ -55,26 +55,21 @@ export class GetBitcoinKeysSettledMsg extends Message<
     return "get-bitcoin-keys-settled";
   }
 
-  constructor(
-    public readonly chainConfigs: Array<{
-      chainId: string;
-      paymentType?: SupportedPaymentType;
-    }>
-  ) {
+  constructor(public readonly chainIds: string[]) {
     super();
   }
 
   validateBasic(): void {
-    if (!this.chainConfigs || this.chainConfigs.length === 0) {
-      throw new Error("chainConfigs are not set");
+    if (!this.chainIds || this.chainIds.length === 0) {
+      throw new Error("chainIds are not set");
     }
 
     const seen = new Map<string, boolean>();
-    for (const config of this.chainConfigs) {
-      if (seen.has(config.chainId)) {
-        throw new Error(`chainId ${config.chainId} is duplicated`);
+    for (const chainId of this.chainIds) {
+      if (seen.has(chainId)) {
+        throw new Error(`chainId ${chainId} is duplicated`);
       }
-      seen.set(config.chainId, true);
+      seen.set(chainId, true);
     }
   }
 

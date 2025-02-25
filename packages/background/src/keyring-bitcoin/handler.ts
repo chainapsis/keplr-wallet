@@ -94,9 +94,7 @@ const handleGetBitcoinKeysSettledMsg: (
     await permissionInteractionService.ensureEnabledForBitcoin(env, msg.origin);
 
     return await Promise.allSettled(
-      msg.chainConfigs.map((chainConfig) =>
-        service.getBitcoinKeySelected(chainConfig.chainId)
-      )
+      msg.chainIds.map((chainId) => service.getBitcoinKeySelected(chainId))
     );
   };
 };

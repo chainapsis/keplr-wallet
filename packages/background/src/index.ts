@@ -24,6 +24,7 @@ import * as KeyRingPrivateKey from "./keyring-private-key/internal";
 import * as KeyRingCosmos from "./keyring-cosmos/internal";
 import * as KeyRingEthereum from "./keyring-ethereum/internal";
 import * as KeyRingStarknet from "./keyring-starknet/internal";
+import * as KeyRingBitcoin from "./keyring-bitcoin/internal";
 import * as PermissionInteractive from "./permission-interactive/internal";
 import * as TokenScan from "./token-scan/internal";
 import * as RecentSendHistory from "./recent-send-history/internal";
@@ -221,6 +222,14 @@ export function init(
     backgroundTxService
   );
 
+  const keyRingBitcoinService = new KeyRingBitcoin.KeyRingBitcoinService(
+    chainsService,
+    vaultService,
+    keyRingV2Service,
+    interactionService,
+    permissionService
+  );
+
   const autoLockAccountService = new AutoLocker.AutoLockAccountService(
     storeCreator("auto-lock-account"),
     keyRingV2Service,
@@ -311,6 +320,11 @@ export function init(
   KeyRingStarknet.init(
     router,
     keyRingStarknetService,
+    permissionInteractiveService
+  );
+  KeyRingBitcoin.init(
+    router,
+    keyRingBitcoinService,
     permissionInteractiveService
   );
   PermissionInteractive.init(router, permissionInteractiveService);

@@ -2,10 +2,7 @@ import { ChainsService } from "../chains";
 import { VaultService } from "../vault";
 import { KeyRingService } from "../keyring";
 import { InteractionService } from "../interaction";
-import { AnalyticsService } from "../analytics";
 import { PermissionService } from "../permission";
-import { PermissionInteractiveService } from "../permission-interactive";
-import { BackgroundTxService } from "src/tx";
 import {
   BitcoinSignMessageType,
   SupportedPaymentType,
@@ -22,10 +19,7 @@ export class KeyRingBitcoinService {
     protected readonly vaultService: VaultService,
     protected readonly keyRingService: KeyRingService,
     protected readonly interactionService: InteractionService,
-    protected readonly analyticsService: AnalyticsService,
-    protected readonly permissionService: PermissionService,
-    protected readonly permissionInteractiveService: PermissionInteractiveService,
-    protected readonly backgroundTxService: BackgroundTxService
+    protected readonly permissionService: PermissionService
   ) {}
 
   async init() {

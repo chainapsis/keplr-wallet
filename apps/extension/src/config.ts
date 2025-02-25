@@ -3211,7 +3211,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
   {
     chainId:
       "000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943:taproot",
-    chainName: "Bitcoin",
+    chainName: "Bitcoin Testnet",
     chainSymbolImageUrl:
       "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
     bitcoin: {
@@ -3229,7 +3229,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
   {
     chainId:
       "000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943:native-segwit",
-    chainName: "Bitcoin",
+    chainName: "Bitcoin Testnet",
     chainSymbolImageUrl:
       "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
     bitcoin: {
