@@ -79,7 +79,7 @@ const handleGetBitcoinKeyMsg: (
   return async (env, msg) => {
     await permissionInteractionService.ensureEnabledForBitcoin(env, msg.origin);
 
-    return await service.getBitcoinKeySelected(msg.chainId);
+    return await service.getBitcoinKeySelected(msg.chainId, msg.paymentType);
   };
 };
 
@@ -179,6 +179,6 @@ const handleGetSupportedPaymentTypesMsg: (
   service: KeyRingBitcoinService
 ) => InternalHandler<GetSupportedPaymentTypesMsg> = (service) => {
   return async (_) => {
-    return await service.getSupportedPaymentTypes();
+    return service.getSupportedPaymentTypes();
   };
 };

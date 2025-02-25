@@ -93,6 +93,21 @@ export class KeyRingBitcoinService {
       throw new KeplrError("keyring", 221, "Vault not found");
     }
 
+    let adjustedPaymentType: SupportedPaymentType = "taproot"; // default
+    if (paymentType) {
+      adjustedPaymentType = paymentType;
+    } else if ("bitcoin" in chainInfo && chainInfo.bitcoin.paymentType) {
+      adjustedPaymentType = chainInfo.bitcoin.paymentType;
+    } else {
+      const split = chainId.split(":");
+      if (split.length === 2) {
+        const paymentType = split[1];
+        if (paymentType === "native-segwit" || paymentType === "taproot") {
+          adjustedPaymentType = paymentType;
+        }
+      }
+    }
+
     // TODO: Ledger support
     // const isLedger = vault.insensitive["keyRingType"] === "ledger";
 
@@ -104,7 +119,7 @@ export class KeyRingBitcoinService {
 
     let address: string | undefined;
 
-    if (paymentType === SupportedPaymentType.NATIVE_SEGWIT) {
+    if (adjustedPaymentType === "native-segwit") {
       const nativeSegwitAddress = bitcoinPubKey.getNativeSegwitAddress(network);
       if (nativeSegwitAddress) {
         address = nativeSegwitAddress;
@@ -123,7 +138,7 @@ export class KeyRingBitcoinService {
     return {
       pubKey: bitcoinPubKey.toBytes(),
       address,
-      paymentType: paymentType || SupportedPaymentType.TAPROOT,
+      paymentType: adjustedPaymentType,
     };
   }
 
@@ -284,9 +299,7 @@ export class KeyRingBitcoinService {
     const bitcoinPubKey = await this.getBitcoinKey(
       vaultId,
       chainId,
-      signType === "message"
-        ? SupportedPaymentType.NATIVE_SEGWIT
-        : SupportedPaymentType.TAPROOT
+      signType === "message" ? "native-segwit" : "taproot"
     );
 
     const network = this.getNetwork(chainId);
@@ -363,8 +376,8 @@ export class KeyRingBitcoinService {
     );
   }
 
-  async getSupportedPaymentTypes() {
-    return [SupportedPaymentType.NATIVE_SEGWIT, SupportedPaymentType.TAPROOT];
+  getSupportedPaymentTypes(): SupportedPaymentType[] {
+    return ["native-segwit", "taproot"];
   }
 
   private getNetwork(chainId: string) {

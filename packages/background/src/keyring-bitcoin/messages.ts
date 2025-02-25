@@ -8,9 +8,11 @@ import { ROUTE } from "./constants";
 import { Psbt } from "bitcoinjs-lib";
 
 export class GetBitcoinKeyMsg extends Message<{
+  name: string;
   pubKey: Uint8Array;
   address: string;
   paymentType: SupportedPaymentType;
+  isNanoLedger: boolean;
 }> {
   public static type() {
     return "get-bitcoin-key";
