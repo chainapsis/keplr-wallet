@@ -143,11 +143,7 @@ export class RequestSignBitcoinPsbtMsg extends Message<string> {
     return "request-sign-bitcoin-psbt";
   }
 
-  constructor(
-    public readonly chainId: string,
-    /** UTXO 리스트, destination, amount, fee 등 필요한 필드들 */
-    public readonly psbt: Psbt
-  ) {
+  constructor(public readonly chainId: string, public readonly psbt: Psbt) {
     super();
   }
 
@@ -161,7 +157,6 @@ export class RequestSignBitcoinPsbtMsg extends Message<string> {
   }
 
   override approveExternal(): boolean {
-    // 사용자 승인(외부 UI)이 필요한 경우 true
     return true;
   }
 
@@ -174,9 +169,6 @@ export class RequestSignBitcoinPsbtMsg extends Message<string> {
   }
 }
 
-/**
- * BTCProvider.signPsbts(psbtsHexes: string[])
- */
 export class RequestSignBitcoinPsbtsMsg extends Message<string[]> {
   public static type() {
     return "request-sign-bitcoin-psbts";
@@ -234,7 +226,6 @@ export class RequestSignBitcoinMessageMsg extends Message<string> {
   }
 
   override approveExternal(): boolean {
-    // 메시지 서명은 일반적으로 사용자 확인 있음
     return true;
   }
 
