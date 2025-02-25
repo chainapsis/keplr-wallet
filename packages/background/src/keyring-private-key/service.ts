@@ -1,8 +1,15 @@
 import { VaultService, PlainObject, Vault } from "../vault";
 import { Buffer } from "buffer/";
 import { Buffer as NodeBuffer } from "buffer";
-import { Hash, PrivKeySecp256k1, PubKeySecp256k1 } from "@keplr-wallet/crypto";
+import {
+  Hash,
+  PrivKeySecp256k1,
+  PubKeySecp256k1,
+  toXOnly,
+} from "@keplr-wallet/crypto";
 import { ModularChainInfo } from "@keplr-wallet/types";
+import { Psbt, payments } from "bitcoinjs-lib";
+import { taggedHash } from "bitcoinjs-lib/src/crypto";
 
 export class KeyRingPrivateKeyService {
   constructor(protected readonly vaultService: VaultService) {}
@@ -102,5 +109,81 @@ export class KeyRingPrivateKeyService {
       };
     }
     return privateKey.signDigest32(digest);
+  }
+
+  signPsbt(vault: Vault, _coinType: number, psbt: Psbt): Promise<Psbt> {
+    const privateKeyText = this.vaultService.decrypt(vault.sensitive)[
+      "privateKey"
+    ] as string;
+    const privateKey = new PrivKeySecp256k1(Buffer.from(privateKeyText, "hex"));
+    const signer = privateKey.toKeyPair();
+    const tapInternalKey = toXOnly(signer.publicKey);
+    const taprootSigner = signer.tweak(taggedHash("TapTweak", tapInternalKey));
+
+    const isP2TR = (script: NodeBuffer): boolean => {
+      try {
+        payments.p2tr({ output: script });
+        return true;
+      } catch (err) {
+        return false;
+      }
+    };
+
+    const isTaprootInput = (input: any) => {
+      if (
+        !!(
+          input.tapInternalKey ||
+          input.tapMerkleRoot ||
+          (input.tapLeafScript && input.tapLeafScript.length) ||
+          (input.tapBip32Derivation && input.tapBip32Derivation.length) ||
+          (input.witnessUtxo && isP2TR(input.witnessUtxo.script))
+        )
+      ) {
+        return true;
+      }
+      return false;
+    };
+
+    for (const [index, input] of psbt.data.inputs.entries()) {
+      if (isTaprootInput(input)) {
+        if (!input.tapInternalKey) {
+          input.tapInternalKey = tapInternalKey;
+        }
+
+        // CHECK: signInputAsync might be required for hardware wallets
+
+        // sign taproot
+        psbt.signInput(index, taprootSigner);
+
+        // verify taproot
+        const isValid = psbt.validateSignaturesOfInput(
+          index,
+          (_, msgHash, signature) => {
+            return taprootSigner.verifySchnorr(msgHash, signature);
+          }
+        );
+
+        if (!isValid) {
+          throw new Error("Invalid taproot signature");
+        }
+      } else {
+        // sign ecdsa
+        psbt.signInput(index, signer);
+
+        // verify ecdsa
+        const isValid = psbt.validateSignaturesOfInput(
+          index,
+          (_, msgHash, signature) => {
+            return signer.verify(msgHash, signature);
+          }
+        );
+
+        if (!isValid) {
+          throw new Error("Invalid ecdsa signature");
+        }
+      }
+    }
+
+    return Promise.resolve(psbt.finalizeAllInputs());
   }
 }

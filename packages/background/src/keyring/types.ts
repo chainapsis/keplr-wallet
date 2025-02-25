@@ -1,6 +1,7 @@
 import { PlainObject, Vault } from "../vault";
 import { PubKeySecp256k1, PubKeyStarknet } from "@keplr-wallet/crypto";
 import { ModularChainInfo } from "@keplr-wallet/types";
+import { Psbt } from "bitcoinjs-lib";
 
 export type KeyRingStatus = "empty" | "locked" | "unlocked";
 
@@ -57,6 +58,12 @@ export interface KeyRing {
         readonly v: number | null;
         readonly schnorr?: Uint8Array;
       }>;
+  signPsbt?(
+    vault: Vault,
+    coinType: number,
+    psbt: Psbt,
+    modularChainInfo: ModularChainInfo
+  ): Promise<Psbt>;
 }
 
 export interface ExportedKeyRingVault {

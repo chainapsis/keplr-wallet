@@ -21,6 +21,7 @@ import { MultiAccounts } from "../keyring-keystone";
 import { AnalyticsService } from "../analytics";
 import { Primitive } from "utility-types";
 import { runIfOnlyAppStart } from "../utils";
+import { Psbt } from "bitcoinjs-lib";
 
 export class KeyRingService {
   protected _needMigration = false;
@@ -1208,6 +1209,41 @@ export class KeyRingService {
     return signature;
   }
 
+  signPsbt(chainId: string, vaultId: string, psbt: Psbt) {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
+    const modularChainInfo =
+      this.chainsService.getModularChainInfoOrThrow(chainId);
+
+    const vault = this.vaultService.getVault("keyRing", vaultId);
+    if (!vault) {
+      throw new Error("Vault is null");
+    }
+
+    const coinType = (() => {
+      if ("bitcoin" in modularChainInfo) {
+        return modularChainInfo.bitcoin.coinType;
+      }
+
+      throw new Error("Can't determine default coin type");
+    })();
+
+    const signedPsbt = this.signPsbtWithVault(
+      vault,
+      coinType,
+      psbt,
+      modularChainInfo
+    );
+
+    if (this.needKeyCoinTypeFinalize(vault.id, chainId)) {
+      this.finalizeKeyCoinType(vault.id, chainId, coinType);
+    }
+
+    return signedPsbt;
+  }
+
   getStarknetPubKeyWithVault(
     vault: Vault,
     modularChainInfo: ModularChainInfo
@@ -1272,6 +1308,27 @@ export class KeyRingService {
         modularChainInfo,
         options
       )
+    );
+  }
+
+  signPsbtWithVault(
+    vault: Vault,
+    coinType: number,
+    psbt: Psbt,
+    modularChainInfo: ModularChainInfo
+  ) {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
+    const keyRing = this.getVaultKeyRing(vault);
+
+    if (typeof keyRing.signPsbt !== "function") {
+      throw new Error("This keyring doesn't support 'signPsbt'");
+    }
+
+    return Promise.resolve(
+      keyRing.signPsbt(vault, coinType, psbt, modularChainInfo)
     );
   }
 
