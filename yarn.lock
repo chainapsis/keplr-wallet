@@ -8705,6 +8705,7 @@ __metadata:
     pbkdf2: ^3.1.2
     utility-types: ^3.10.0
   peerDependencies:
+    bitcoinjs-lib: ^6
     mobx: ^6
     mobx-utils: ^6
     starknet: ^6

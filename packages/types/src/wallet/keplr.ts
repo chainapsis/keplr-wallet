@@ -282,6 +282,9 @@ export interface Keplr {
     signature: string[];
   }>;
 
+  // TODO: bitcoin handle
+  // readonly bitcoin: IBitcoinProvider;
+
   readonly ethereum: IEthereumProvider;
 
   readonly starknet: IStarknetProvider;
