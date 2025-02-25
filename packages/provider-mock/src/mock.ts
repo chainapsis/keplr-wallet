@@ -18,6 +18,7 @@ import {
   SettledResponses,
   DirectAuxSignResponse,
   IEthereumProvider,
+  SupportedPaymentType,
 } from "@keplr-wallet/types";
 import {
   Bech32Address,
@@ -428,6 +429,31 @@ export class MockKeplr implements Keplr {
     signature: string[];
   }> {
     throw new Error("Not implemented");
+  }
+
+  getBitcoinKey(
+    _chainId: string,
+    _paymentType?: SupportedPaymentType
+  ): Promise<{
+    name: string;
+    pubKey: Uint8Array;
+    address: string;
+    paymentType: SupportedPaymentType;
+    isNanoLedger: boolean;
+  }> {
+    throw new Error("Not yet implemented");
+  }
+
+  getBitcoinKeysSettled(_chainIds: string[]): Promise<
+    SettledResponses<{
+      name: string;
+      pubKey: Uint8Array;
+      address: string;
+      paymentType: SupportedPaymentType;
+      isNanoLedger: boolean;
+    }>
+  > {
+    throw new Error("Not yet implemented");
   }
 
   public readonly ethereum = new MockEthereumProvider();

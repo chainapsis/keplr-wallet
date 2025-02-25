@@ -24,6 +24,7 @@ import {
   EIP6963ProviderDetail,
   EIP6963EventNames,
   IStarknetProvider,
+  SupportedPaymentType,
 } from "@keplr-wallet/types";
 import { JSONUint8Array } from "./uint8-array";
 import deepmerge from "deepmerge";
@@ -617,6 +618,31 @@ export class Keplr implements IKeplr {
       chainId,
       transaction,
     ]);
+  }
+
+  async getBitcoinKey(
+    chainId: string,
+    paymentType?: SupportedPaymentType
+  ): Promise<{
+    name: string;
+    pubKey: Uint8Array;
+    address: string;
+    paymentType: SupportedPaymentType;
+    isNanoLedger: boolean;
+  }> {
+    return await Keplr.requestMethod("getBitcoinKey", [chainId, paymentType]);
+  }
+
+  async getBitcoinKeysSettled(chainIds: string[]): Promise<
+    SettledResponses<{
+      name: string;
+      pubKey: Uint8Array;
+      address: string;
+      paymentType: SupportedPaymentType;
+      isNanoLedger: boolean;
+    }>
+  > {
+    return await Keplr.requestMethod("getBitcoinKeysSettled", [chainIds]);
   }
 
   public readonly ethereum = new EthereumProvider(this);

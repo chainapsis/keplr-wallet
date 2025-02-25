@@ -22,6 +22,7 @@ import {
   IEthereumProvider,
   IStarknetProvider,
   WalletEvents,
+  SupportedPaymentType,
 } from "@keplr-wallet/types";
 import {
   BACKGROUND_PORT,
@@ -1133,6 +1134,72 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
           this.protectedTryOpenSidePanelIfEnabled();
         }
       });
+    });
+  }
+
+  async getBitcoinKey(
+    chainId: string,
+    paymentType?: SupportedPaymentType
+  ): Promise<{
+    name: string;
+    pubKey: Uint8Array;
+    address: string;
+    paymentType: SupportedPaymentType;
+    isNanoLedger: boolean;
+  }> {
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-bitcoin",
+        "get-bitcoin-key",
+        {
+          chainId,
+          paymentType,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
+  }
+
+  async getBitcoinKeysSettled(chainIds: string[]): Promise<
+    SettledResponses<{
+      name: string;
+      pubKey: Uint8Array;
+      address: string;
+      paymentType: SupportedPaymentType;
+      isNanoLedger: boolean;
+    }>
+  > {
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-bitcoin",
+        "get-bitcoin-keys-settled",
+        {
+          chainIds,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
     });
   }
 

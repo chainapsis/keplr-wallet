@@ -19,6 +19,7 @@ import {
   SettledResponses,
   StdSignature,
   StdSignDoc,
+  SupportedPaymentType,
 } from "@keplr-wallet/types";
 import SignClient from "@walletconnect/sign-client";
 import {
@@ -901,6 +902,31 @@ export class KeplrWalletConnectV2 implements Keplr {
     transaction: DeployAccountSignerDetails;
     signature: string[];
   }> {
+    throw new Error("Not yet implemented");
+  }
+
+  getBitcoinKey(
+    _chainId: string,
+    _paymentType?: SupportedPaymentType
+  ): Promise<{
+    name: string;
+    pubKey: Uint8Array;
+    address: string;
+    paymentType: SupportedPaymentType;
+    isNanoLedger: boolean;
+  }> {
+    throw new Error("Not yet implemented");
+  }
+
+  getBitcoinKeysSettled(_chainIds: string[]): Promise<
+    SettledResponses<{
+      name: string;
+      pubKey: Uint8Array;
+      address: string;
+      paymentType: SupportedPaymentType;
+      isNanoLedger: boolean;
+    }>
+  > {
     throw new Error("Not yet implemented");
   }
 
