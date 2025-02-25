@@ -53,7 +53,7 @@ export class AccountSetBase {
   @observable
   protected _isKeystone: boolean = false;
   @observable
-  protected _bitcoinPaymentType: SupportedPaymentType | undefined = undefined;
+  protected _bitcoinPaymentType: SupportedPaymentType = "taproot";
 
   @observable
   protected _txTypeInProgress: string = "";
@@ -351,6 +351,14 @@ export class AccountSetBase {
 
   get starknetHexAddress(): string {
     return this._starknetHexAddress;
+  }
+
+  get bitcoinBech32Address(): string {
+    return this._bitcoinBech32Address;
+  }
+
+  get bitcoinPaymentType(): SupportedPaymentType {
+    return this._bitcoinPaymentType;
   }
 }
 

@@ -30,7 +30,11 @@ import {
   useSceneEvents,
   useSceneTransition,
 } from "../../../../components/transition";
-import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
+import {
+  ChainInfo,
+  ModularChainInfo,
+  SupportedPaymentType,
+} from "@keplr-wallet/types";
 import { dispatchGlobalEventExceptSelf } from "../../../../utils/global-events";
 import { isRunningInSidePanel } from "../../../../utils";
 import { IconProps } from "../../../../components/icon/types";
@@ -90,6 +94,8 @@ export const CopyAddressScene: FunctionComponent<{
     bech32Address?: string;
     ethereumAddress?: string;
     starknetAddress?: string;
+    bitcoinBech32Address?: string;
+    paymentType?: SupportedPaymentType;
   }[] = chainStore.modularChainInfosInUI
     .map((modularChainInfo) => {
       const accountInfo = accountStore.getAccount(modularChainInfo.chainId);
@@ -126,11 +132,29 @@ export const CopyAddressScene: FunctionComponent<{
         return accountInfo.starknetHexAddress;
       })();
 
+      const bitcoinBech32Address = (() => {
+        if (!("bitcoin" in modularChainInfo)) {
+          return undefined;
+        }
+
+        return accountInfo.bitcoinBech32Address;
+      })();
+
+      const bitcoinPaymentType = (() => {
+        if (!("bitcoin" in modularChainInfo)) {
+          return undefined;
+        }
+
+        return accountInfo.bitcoinPaymentType;
+      })();
+
       return {
         modularChainInfo,
         bech32Address,
         ethereumAddress,
         starknetAddress,
+        bitcoinBech32Address,
+        paymentType: bitcoinPaymentType,
       };
     })
     .filter(({ modularChainInfo, bech32Address }) => {
@@ -383,7 +407,8 @@ export const CopyAddressScene: FunctionComponent<{
                     ChainIdHelper.parse(address.modularChainInfo.chainId)
                       .identifier +
                     address.bech32Address +
-                    (address.ethereumAddress || "")
+                    (address.ethereumAddress || "") +
+                    (address.bitcoinBech32Address || "")
                   }
                   address={address}
                   close={close}
@@ -431,6 +456,7 @@ const CopyAddressItem: FunctionComponent<{
     bech32Address?: string;
     ethereumAddress?: string;
     starknetAddress?: string;
+    bitcoinBech32Address?: string;
   };
   close: () => void;
   blockInteraction: boolean;
@@ -513,6 +539,7 @@ const CopyAddressItem: FunctionComponent<{
                 address.starknetAddress ||
                   address.ethereumAddress ||
                   address.bech32Address ||
+                  address.bitcoinBech32Address ||
                   ""
               );
               setHasCopied(true);
@@ -654,6 +681,13 @@ const CopyAddressItem: FunctionComponent<{
                         20
                       );
                     }
+
+                    if (address.bitcoinBech32Address) {
+                      return Bech32Address.shortenAddress(
+                        address.bitcoinBech32Address,
+                        20
+                      );
+                    }
                   })()}
                 </Caption1>
               </YAxis>
@@ -703,7 +737,8 @@ const CopyAddressItem: FunctionComponent<{
                   address:
                     address.starknetAddress ||
                     address.ethereumAddress ||
-                    address.bech32Address,
+                    address.bech32Address ||
+                    address.bitcoinBech32Address,
                 });
               }}
             >
