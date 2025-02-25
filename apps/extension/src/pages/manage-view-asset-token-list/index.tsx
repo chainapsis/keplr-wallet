@@ -13,14 +13,22 @@ import { Gutter } from "../../components/gutter";
 import { XAxis, YAxis } from "../../components/axis";
 import { SearchTextInput } from "../../components/input";
 import { Dec } from "@keplr-wallet/unit";
-import styled, { css, FlattenSimpleInterpolation } from "styled-components";
+import styled, {
+  css,
+  FlattenSimpleInterpolation,
+  useTheme,
+} from "styled-components";
 import { ColorPalette } from "../../styles";
 import { ButtonTheme } from "../../components/button";
+import { PlusIcon } from "../../components/icon";
+import { useNavigate } from "react-router";
 
 export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
   const { hugeQueriesStore, keyRingStore, uiConfigStore } = useStore();
   const intl = useIntl();
   const [isSortAsc, setIsSortAsc] = useState(false);
+  const navigate = useNavigate();
+  const theme = useTheme();
 
   const allBalances = hugeQueriesStore.getAllBalances({
     allowIBCToken: true,
@@ -106,6 +114,21 @@ export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
         id: "page.setting.general.manage-asset-list-title",
       })}
       left={<BackButton />}
+      right={
+        <Box
+          paddingRight="1rem"
+          cursor="pointer"
+          onClick={() => navigate("/setting/token/add")}
+        >
+          <PlusIcon
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-200"]
+                : ColorPalette["gray-300"]
+            }
+          />
+        </Box>
+      }
     >
       <Box paddingX="0.75rem" style={{ overflowX: "hidden" }}>
         <SearchTextInput
@@ -122,7 +145,7 @@ export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
               {intl.formatMessage({
                 id: "page.setting.general.manage-asset-list.sort-button",
               })}
-              <UpDownArrowIcon isAsc={isSortAsc} />
+              <UpDownArrowIcon isAsc={isSortAsc} mode={theme.mode} />
             </Styles.Button>
           </XAxis>
         </YAxis>
@@ -169,7 +192,13 @@ export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
   );
 });
 
-const UpDownArrowIcon = ({ isAsc }: { isAsc: boolean }) => {
+const UpDownArrowIcon = ({
+  isAsc,
+  mode,
+}: {
+  isAsc: boolean;
+  mode: "light" | "dark";
+}) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -180,11 +209,27 @@ const UpDownArrowIcon = ({ isAsc }: { isAsc: boolean }) => {
     >
       <path
         d="M2.63295 0.847697C2.77212 0.52629 3.22791 0.526291 3.36708 0.847698L5.35608 5.44107C5.47044 5.70519 5.27682 6.00002 4.98901 6.00002H1.01102C0.72321 6.00002 0.529592 5.70519 0.643956 5.44107L2.63295 0.847697Z"
-        fill={isAsc ? "#72747B" : "#F2F2F7"}
+        fill={
+          mode === "light"
+            ? isAsc
+              ? ColorPalette["gray-300"]
+              : ColorPalette["blue-400"]
+            : isAsc
+            ? ColorPalette["gray-300"]
+            : ColorPalette["white"]
+        }
       />
       <path
         d="M3.36711 15.1523C3.22794 15.4737 2.77215 15.4737 2.63298 15.1523L0.643986 10.5589C0.529621 10.2948 0.72324 9.99998 1.01105 9.99998L4.98904 9.99998C5.27685 9.99998 5.47047 10.2948 5.3561 10.5589L3.36711 15.1523Z"
-        fill={isAsc ? "#F2F2F7" : "#72747B"}
+        fill={
+          mode === "light"
+            ? isAsc
+              ? ColorPalette["blue-400"]
+              : ColorPalette["gray-300"]
+            : isAsc
+            ? ColorPalette["white"]
+            : ColorPalette["gray-300"]
+        }
       />
     </svg>
   );
