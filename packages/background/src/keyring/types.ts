@@ -40,23 +40,17 @@ export interface KeyRing {
     coinType: number,
     data: Uint8Array,
     digestMethod: "sha256" | "keccak256" | "hash256" | "noop",
-    modularChainInfo: ModularChainInfo,
-    options?: {
-      signMethod?: "ecdsa" | "schnorr";
-      tweak?: Uint8Array;
-    }
+    modularChainInfo: ModularChainInfo
   ):
     | {
         readonly r: Uint8Array;
         readonly s: Uint8Array;
         readonly v: number | null;
-        readonly schnorr?: Uint8Array;
       }
     | Promise<{
         readonly r: Uint8Array;
         readonly s: Uint8Array;
         readonly v: number | null;
-        readonly schnorr?: Uint8Array;
       }>;
   signPsbt?(
     vault: Vault,

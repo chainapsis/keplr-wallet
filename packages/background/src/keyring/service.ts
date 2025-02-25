@@ -1148,16 +1148,11 @@ export class KeyRingService {
     chainId: string,
     vaultId: string,
     data: Uint8Array,
-    digestMethod: "sha256" | "keccak256" | "hash256" | "noop",
-    options?: {
-      signMethod?: "ecdsa" | "schnorr";
-      tweak?: Uint8Array;
-    }
+    digestMethod: "sha256" | "keccak256" | "hash256" | "noop"
   ): Promise<{
     readonly r: Uint8Array;
     readonly s: Uint8Array;
     readonly v: number | null;
-    readonly schnorr?: Uint8Array;
   }> {
     if (this.vaultService.isLocked) {
       throw new Error("KeyRing is locked");
@@ -1198,8 +1193,7 @@ export class KeyRingService {
       coinType,
       data,
       digestMethod,
-      modularChainInfo,
-      options
+      modularChainInfo
     );
 
     if (this.needKeyCoinTypeFinalize(vault.id, chainId)) {
@@ -1282,16 +1276,11 @@ export class KeyRingService {
     coinType: number,
     data: Uint8Array,
     digestMethod: "sha256" | "keccak256" | "hash256" | "noop",
-    modularChainInfo: ModularChainInfo,
-    options?: {
-      signMethod?: "ecdsa" | "schnorr";
-      tweak?: Uint8Array;
-    }
+    modularChainInfo: ModularChainInfo
   ): Promise<{
     readonly r: Uint8Array;
     readonly s: Uint8Array;
     readonly v: number | null;
-    readonly schnorr?: Uint8Array;
   }> {
     if (this.vaultService.isLocked) {
       throw new Error("KeyRing is locked");
@@ -1300,14 +1289,7 @@ export class KeyRingService {
     const keyRing = this.getVaultKeyRing(vault);
 
     return Promise.resolve(
-      keyRing.sign(
-        vault,
-        coinType,
-        data,
-        digestMethod,
-        modularChainInfo,
-        options
-      )
+      keyRing.sign(vault, coinType, data, digestMethod, modularChainInfo)
     );
   }
 

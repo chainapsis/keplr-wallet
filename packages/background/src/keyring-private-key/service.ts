@@ -7,7 +7,6 @@ import {
   PubKeySecp256k1,
   toXOnly,
 } from "@keplr-wallet/crypto";
-import { ModularChainInfo } from "@keplr-wallet/types";
 import { Psbt, payments } from "bitcoinjs-lib";
 import { taggedHash } from "bitcoinjs-lib/src/crypto";
 
@@ -57,17 +56,11 @@ export class KeyRingPrivateKeyService {
     vault: Vault,
     _coinType: number,
     data: Uint8Array,
-    digestMethod: "sha256" | "keccak256" | "hash256" | "noop",
-    _modularChainInfo: ModularChainInfo,
-    options?: {
-      signMethod?: "ecdsa" | "schnorr";
-      tweak?: Uint8Array;
-    }
+    digestMethod: "sha256" | "keccak256" | "hash256" | "noop"
   ): {
     readonly r: Uint8Array;
     readonly s: Uint8Array;
     readonly v: number | null;
-    readonly schnorr?: Uint8Array;
   } {
     const privateKeyText = this.vaultService.decrypt(vault.sensitive)[
       "privateKey"
@@ -92,22 +85,6 @@ export class KeyRingPrivateKeyService {
         throw new Error(`Unknown digest method: ${digestMethod}`);
     }
 
-    if (options?.signMethod === "schnorr") {
-      let keyPair = privateKey.toKeyPair();
-
-      if (options?.tweak) {
-        keyPair = keyPair.tweak(NodeBuffer.from(options.tweak));
-      }
-
-      const schnorr = keyPair.signSchnorr(NodeBuffer.from(digest));
-
-      return {
-        r: new Uint8Array(),
-        s: new Uint8Array(),
-        v: null,
-        schnorr,
-      };
-    }
     return privateKey.signDigest32(digest);
   }
 
