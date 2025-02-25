@@ -3172,6 +3172,78 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     ],
     features: [],
   },
+  {
+    chainId:
+      "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:taproot",
+    chainName: "Bitcoin",
+    chainSymbolImageUrl:
+      "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+    bitcoin: {
+      chainId:
+        "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
+      rpc: "",
+      rest: "",
+      paymentType: "taproot",
+      coinType: 0,
+      bech32: "bc",
+      messagePrefix: "\x18Bitcoin Signed Message:\n",
+      pubKeyHash: 0x00,
+    },
+  },
+  {
+    chainId:
+      "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:native-segwit",
+    chainName: "Bitcoin",
+    chainSymbolImageUrl:
+      "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+    bitcoin: {
+      chainId:
+        "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
+      rpc: "",
+      rest: "",
+      paymentType: "native-segwit",
+      coinType: 1,
+      bech32: "bc",
+      messagePrefix: "\x18Bitcoin Signed Message:\n",
+      pubKeyHash: 0x00,
+    },
+  },
+  {
+    chainId:
+      "000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943:taproot",
+    chainName: "Bitcoin",
+    chainSymbolImageUrl:
+      "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+    bitcoin: {
+      chainId:
+        "000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943",
+      rpc: "",
+      rest: "",
+      paymentType: "taproot",
+      coinType: 1,
+      bech32: "tb",
+      messagePrefix: "\x18Bitcoin Signed Message:\n",
+      pubKeyHash: 0x6f,
+    },
+  },
+  {
+    chainId:
+      "000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943:native-segwit",
+    chainName: "Bitcoin",
+    chainSymbolImageUrl:
+      "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+    bitcoin: {
+      chainId:
+        "000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943",
+      rpc: "",
+      rest: "",
+      paymentType: "native-segwit",
+      coinType: 0,
+      bech32: "tb",
+      messagePrefix: "\x18Bitcoin Signed Message:\n",
+      pubKeyHash: 0x6f,
+    },
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
