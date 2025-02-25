@@ -235,6 +235,7 @@
 
   "page.setting.general.manage-asset-list-title": "자산 표시 관리",
   "page.setting.general.manage-asset-list.search.placeholder": " ",
+  "page.setting.general.manage-asset-list.sort-button": "자산 가격",
 
   "page.setting.general.language.automatic-title": "자동 (브라우저 언어)",
 

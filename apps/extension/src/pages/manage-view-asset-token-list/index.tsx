@@ -10,17 +10,53 @@ import { Stack } from "../../components/stack";
 import { Toggle } from "../../components/toggle";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { Gutter } from "../../components/gutter";
-import { XAxis } from "../../components/axis";
+import { XAxis, YAxis } from "../../components/axis";
 import { SearchTextInput } from "../../components/input";
+import { Dec } from "@keplr-wallet/unit";
+import styled, { css, FlattenSimpleInterpolation } from "styled-components";
+import { ColorPalette } from "../../styles";
+import { ButtonTheme } from "../../components/button";
 
 export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
   const { hugeQueriesStore, keyRingStore, uiConfigStore } = useStore();
   const intl = useIntl();
+  const [isSortAsc, setIsSortAsc] = useState(false);
 
   const allBalances = hugeQueriesStore.getAllBalances({
     allowIBCToken: true,
     enableFilterDisabledAssetToken: false,
   });
+  const sortedBalances = useMemo(() => {
+    const allBalancesSliced = [...allBalances];
+    if (isSortAsc) {
+      return allBalancesSliced.sort((a, b) => {
+        const aPrice = a.price?.toDec() ?? new Dec(0);
+        const bPrice = b.price?.toDec() ?? new Dec(0);
+
+        if (aPrice.equals(bPrice)) {
+          if (aPrice.equals(Dec.zero)) {
+            const aHasBalance = a.token.toDec().gt(Dec.zero);
+            const bHasBalance = b.token.toDec().gt(Dec.zero);
+
+            if (aHasBalance && !bHasBalance) {
+              return 1;
+            } else if (!aHasBalance && bHasBalance) {
+              return -1;
+            } else {
+              return 0;
+            }
+          }
+          return 0;
+        } else if (aPrice.gt(bPrice)) {
+          return 1;
+        } else {
+          return -1;
+        }
+      });
+    } else {
+      return allBalancesSliced;
+    }
+  }, [allBalances, isSortAsc]);
 
   const [search, setSearch] = useState("");
   const trimSearch = search.trim().toLowerCase();
@@ -31,12 +67,12 @@ export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
     );
 
   const filteredTokens = useMemo(() => {
-    return allBalances.filter(
+    return sortedBalances.filter(
       (token) =>
         token.chainInfo.chainName.toLowerCase().includes(trimSearch) ||
         token.token.currency.coinDenom.toLowerCase().includes(trimSearch)
     );
-  }, [allBalances, trimSearch]);
+  }, [sortedBalances, trimSearch]);
 
   const handleDisableToken = async (
     chainId: string,
@@ -79,7 +115,17 @@ export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-
+        <YAxis alignX="right">
+          <Gutter size="0.25rem" />
+          <XAxis alignY="center">
+            <Styles.Button onClick={() => setIsSortAsc(!isSortAsc)}>
+              {intl.formatMessage({
+                id: "page.setting.general.manage-asset-list.sort-button",
+              })}
+              <UpDownArrowIcon isAsc={isSortAsc} />
+            </Styles.Button>
+          </XAxis>
+        </YAxis>
         <Stack gutter="0.5rem">
           {filteredTokens.map((viewToken) => {
             const chainIdentifier = ChainIdHelper.parse(
@@ -122,3 +168,71 @@ export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
     </HeaderLayout>
   );
 });
+
+const UpDownArrowIcon = ({ isAsc }: { isAsc: boolean }) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="6"
+      height="16"
+      viewBox="0 0 6 16"
+      fill="none"
+    >
+      <path
+        d="M2.63295 0.847697C2.77212 0.52629 3.22791 0.526291 3.36708 0.847698L5.35608 5.44107C5.47044 5.70519 5.27682 6.00002 4.98901 6.00002H1.01102C0.72321 6.00002 0.529592 5.70519 0.643956 5.44107L2.63295 0.847697Z"
+        fill={isAsc ? "#72747B" : "#F2F2F7"}
+      />
+      <path
+        d="M3.36711 15.1523C3.22794 15.4737 2.77215 15.4737 2.63298 15.1523L0.643986 10.5589C0.529621 10.2948 0.72324 9.99998 1.01105 9.99998L4.98904 9.99998C5.27685 9.99998 5.47047 10.2948 5.3561 10.5589L3.36711 15.1523Z"
+        fill={isAsc ? "#F2F2F7" : "#72747B"}
+      />
+    </svg>
+  );
+};
+
+//NOTE - 기존 textButton과 다른 hover 스타일이라서 따로 정의
+const Styles = {
+  Button: styled.button`
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem; /* 텍스트와 아이콘 사이 간격 */
+    height: 2rem;
+    padding: 0 0.5rem;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    overflow: hidden;
+    font-weight: 500;
+    font-size: 0.875rem;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+    border: 0;
+    ${({ theme }) => buttonStyleFromColorAndMode[theme.mode || "dark"]}
+    background-color: transparent;
+    position: relative;
+    ::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
+  `,
+};
+const buttonStyleFromColorAndMode: Record<
+  ButtonTheme,
+  FlattenSimpleInterpolation
+> = {
+  light: css`
+    color: ${ColorPalette["gray-300"]};
+    :hover {
+      color: ${ColorPalette["gray-200"]};
+    }
+  `,
+  dark: css`
+    color: ${ColorPalette["gray-300"]};
+    :hover {
+      color: ${ColorPalette["gray-400"]};
+    }
+  `,
+};
