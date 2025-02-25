@@ -203,8 +203,9 @@
   "page.setting.advanced-paragraph": "Developer Mode, Change Endpoints...",
   "page.setting.security-privacy-title": "Security & Privacy",
   "page.setting.security-privacy-paragraph": "Connected Websites, Auto-Lock",
-  "page.setting.manage-token-list-title": "Manage Token List",
+  "page.setting.manage-token-list-title": "Add/Remove Custom Token",
   "page.setting.manage-token-list-paragraph": "Only for the tokens that can be added manually via contract addresses",
+  "page.setting.search-placeholder": "Search for the features",
 
   "page.setting.advanced.developer-mode-title": "Developer Mode",
   "page.setting.advanced.developer-mode-paragraph": "Feeling techie today? :)",
@@ -231,6 +232,9 @@
   "page.setting.general.manage-non-native-chains-paragraph": "Non-native chains should be first added to Keplr to manage their visibility.",
   "page.setting.general.manage-chain-visibility-title": "Manage Chain Visibility",
   "page.setting.general.manage-chain-visibility-paragraph": "Select chains (and their assets) to be displayed on your current account",
+
+  "page.setting.general.manage-asset-list-title": "Manage Asset List",
+  "page.setting.general.manage-asset-list.search.placeholder": " ",
 
   "page.setting.general.language.automatic-title": "Automatic (Browser default)",
 
@@ -293,7 +297,7 @@
   "page.setting.token.manage.token-view.disable-token-tooltip": "Disable Token",
   "page.setting.token.manage.token-view.disable-token-confirm": "Are you sure you’d like to disable this token? You will not be able to see your balance or transfer until you add it again.",
 
-  "page.setting.token.add.title": "Add Token Manually",
+  "page.setting.token.add.title": "Add Custom Token",
   "page.setting.token.add.confirm-button": "Confirm",
   "page.setting.token.add.contract-address-label": "Contract Address",
   "page.setting.token.add.name-label": "Name",
@@ -601,7 +605,8 @@
   "page.main.components.claim-all.title": "Claimable Staking Reward",
   "page.main.components.claim-all.button": "Claim All",
   "page.main.components.claim-all.claim-button": "Claim",
-  "page.main.components.menu-bar.manage-chain-visibility-title": "Manage Chain Visibility",
+  "page.main.components.menu-bar.manage-chain-visibility-title": "Add/Remove Chains",
+  "page.main.components.menu-bar.manage-asset-list-title": "Manage Asset List",
   "page.main.components.menu-bar.my-contacts-title": "My Contacts",
   "page.main.components.menu-bar.add-token-title": "Add Token",
   "page.main.components.menu-bar.setting-title": "Settings",

@@ -160,6 +160,7 @@ interface TokenItemProps {
   // swap destination select 페이지에서 balance 숨기기 위한 옵션
   hideBalance?: boolean;
   showPrice24HChange?: boolean;
+  right?: React.ReactElement;
 }
 
 export const TokenItem: FunctionComponent<TokenItemProps> = observer(
@@ -173,6 +174,7 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
     copyAddress,
     hideBalance,
     showPrice24HChange,
+    right,
   }) => {
     const { priceStore, price24HChangesStore, uiConfigStore } = useStore();
     const navigate = useNavigate();
@@ -500,6 +502,7 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
               </Styles.IconContainer>
             ) : null}
           </Columns>
+          {right}
         </Columns>
       </Styles.Container>
     );

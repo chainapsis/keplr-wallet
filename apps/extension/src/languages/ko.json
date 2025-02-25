@@ -204,8 +204,9 @@
   "page.setting.advanced-paragraph": "개발자 모드, 노드 주소 변경...",
   "page.setting.security-privacy-title": "보안과 프라이버시",
   "page.setting.security-privacy-paragraph": "연결된 웹사이트, 자동잠금",
-  "page.setting.manage-token-list-title": "토큰 리스트 관리하기",
+  "page.setting.manage-token-list-title": "토큰 추가 및 삭제",
   "page.setting.manage-token-list-paragraph": "컨트랙트 주소로 직접 추가할 수 있는 토큰만 여기서 관리할 수 있습니다.",
+  "page.setting.search-placeholder": "기능 검색",
 
   "page.setting.advanced.developer-mode-title": "개발자 모드",
   "page.setting.advanced.developer-mode-paragraph": "오늘은 내가 바로 개발자? :)",
@@ -231,6 +232,9 @@
   "page.setting.general.manage-non-native-chains-paragraph": "선택형 체인들은 먼저 케플러 익스텐션에 추가해야 \"체인 표시\" 기능에서 사용할 수 있습니다.",
   "page.setting.general.manage-chain-visibility-title": "체인 표시",
   "page.setting.general.manage-chain-visibility-paragraph": "현재 계정에 표시될 체인(해당 체인의 자산 포함)을 선택해주세요.",
+
+  "page.setting.general.manage-asset-list-title": "자산 표시 관리",
+  "page.setting.general.manage-asset-list.search.placeholder": " ",
 
   "page.setting.general.language.automatic-title": "자동 (브라우저 언어)",
 
@@ -293,7 +297,7 @@
   "page.setting.token.manage.token-view.disable-token-tooltip": "토큰 비활성화",
   "page.setting.token.manage.token-view.disable-token-confirm": "이 토큰을 비활성화하시겠습니까? 비활성화하시면 다시 추가하기 전까지 잔액을 조회하거나 송금 기능을 사용할 수 없습니다.",
 
-  "page.setting.token.add.title": "토큰 직접 추가하기",
+  "page.setting.token.add.title": "커스텀 토큰 추가",
   "page.setting.token.add.confirm-button": "등록",
   "page.setting.token.add.contract-address-label": "토큰 컨트랙트 주소",
   "page.setting.token.add.name-label": "토큰 이름",
@@ -584,7 +588,8 @@
   "page.main.components.claim-all.title": "아직 받지 않은 리워드",
   "page.main.components.claim-all.button": "한번에 받기",
   "page.main.components.claim-all.claim-button": "받기",
-  "page.main.components.menu-bar.manage-chain-visibility-title": "체인 표시",
+  "page.main.components.menu-bar.manage-chain-visibility-title": "체인 추가/제거",
+  "page.main.components.menu-bar.manage-asset-list-title": "자산 표시 관리",
   "page.main.components.menu-bar.my-contacts-title": "연락처",
   "page.main.components.menu-bar.add-token-title": "토큰 추가",
   "page.main.components.menu-bar.setting-title": "설정",

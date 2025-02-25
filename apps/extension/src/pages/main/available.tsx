@@ -73,7 +73,9 @@ export const AvailableTabView: FunctionComponent<{
       clearResultsOnEmptyQuery: true,
     });
 
-    const allBalances = hugeQueriesStore.getAllBalances(true);
+    const allBalances = hugeQueriesStore.getAllBalances({
+      allowIBCToken: true,
+    });
     const allBalancesNonZero = useMemo(() => {
       return allBalances.filter((token) => {
         return token.token.toDec().gt(zeroDec);
