@@ -8765,7 +8765,6 @@ __metadata:
     bs58check: ^2.1.2
     buffer: ^6.0.3
     ecpair: ^2.1.0
-    tiny-secp256k1: ^2.2.3
   peerDependencies:
     bitcoinjs-lib: ^6
     starknet: ^6
@@ -42068,15 +42067,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tiny-secp256k1@npm:^2.2.3":
-  version: 2.2.3
-  resolution: "tiny-secp256k1@npm:2.2.3"
-  dependencies:
-    uint8array-tools: 0.0.7
-  checksum: f7a74a1fceacab39d268907cd84798d3a07f3de2e00ba2557a043316ef45298d9acc96fb1614d72c728c3e512ecfef985b0fbd43b7fdb789fd9901df983e3e44
-  languageName: node
-  linkType: hard
-
 "tinyify@npm:^4.0.0":
   version: 4.0.0
   resolution: "tinyify@npm:4.0.0"
@@ -42768,13 +42758,6 @@ __metadata:
   version: 0.0.6
   resolution: "uid-number@npm:0.0.6"
   checksum: ff17525bb9b17313b839222efa1fe69baf136992cf675e8d1d50e9b1ef4563742968e390a96a57645d99cf8b283866c36ef9747bbf186bbbf2ef601b60ed4443
-  languageName: node
-  linkType: hard
-
-"uint8array-tools@npm:0.0.7":
-  version: 0.0.7
-  resolution: "uint8array-tools@npm:0.0.7"
-  checksum: 6ffc45c7d2136757d63c6e556eb8345f908948618a9de37c805fec1249d989c265187b3fbef6cffc4ce5129083204829025b3c58800a0f24c8548e243d42ba13
   languageName: node
   linkType: hard
 
