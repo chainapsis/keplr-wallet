@@ -6,7 +6,10 @@ import { AnalyticsService } from "../analytics";
 import { PermissionService } from "../permission";
 import { PermissionInteractiveService } from "../permission-interactive";
 import { BackgroundTxService } from "src/tx";
-import { SupportedPaymentType } from "@keplr-wallet/types";
+import {
+  BitcoinSignMessageType,
+  SupportedPaymentType,
+} from "@keplr-wallet/types";
 import { Env, KeplrError } from "@keplr-wallet/router";
 import { Psbt, payments } from "bitcoinjs-lib";
 import { encodeLegacyMessage, encodeLegacySignature } from "./helper";
@@ -259,7 +262,7 @@ export class KeyRingBitcoinService {
     origin: string,
     chainId: string,
     message: string,
-    signType: "ecdsa" | "bip322-simple"
+    signType: BitcoinSignMessageType
   ) {
     return await this.signMessage(
       env,
@@ -277,7 +280,7 @@ export class KeyRingBitcoinService {
     vaultId: string,
     chainId: string,
     message: string,
-    signType: "ecdsa" | "bip322-simple"
+    signType: BitcoinSignMessageType
   ) {
     const keyInfo = this.keyRingService.getKeyInfo(vaultId);
     if (!keyInfo) {
@@ -287,7 +290,7 @@ export class KeyRingBitcoinService {
     const bitcoinPubKey = await this.getBitcoinKey(
       vaultId,
       chainId,
-      signType === "ecdsa"
+      signType === "message"
         ? SupportedPaymentType.NATIVE_SEGWIT
         : SupportedPaymentType.TAPROOT
     );
@@ -317,7 +320,7 @@ export class KeyRingBitcoinService {
         }
 
         // legacy signature
-        if (signType === "ecdsa") {
+        if (signType === "message") {
           const data = encodeLegacyMessage(network.messagePrefix, message);
 
           const sig = await this.keyRingService.sign(

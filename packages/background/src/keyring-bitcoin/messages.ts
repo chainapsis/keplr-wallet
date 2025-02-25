@@ -1,5 +1,9 @@
 import { Message } from "@keplr-wallet/router";
-import { SettledResponses, SupportedPaymentType } from "@keplr-wallet/types";
+import {
+  BitcoinSignMessageType,
+  SettledResponses,
+  SupportedPaymentType,
+} from "@keplr-wallet/types";
 import { ROUTE } from "./constants";
 import { Psbt } from "bitcoinjs-lib";
 
@@ -208,7 +212,7 @@ export class RequestSignBitcoinMessageMsg extends Message<string> {
   constructor(
     public readonly chainId: string,
     public readonly message: string,
-    public readonly signType: "ecdsa" | "bip322-simple"
+    public readonly signType: BitcoinSignMessageType
   ) {
     super();
   }
