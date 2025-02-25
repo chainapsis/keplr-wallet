@@ -228,9 +228,7 @@
   "page.setting.general.side-panel-paragraph": "케플러 지갑을 브라우저의 사이드 패널에서 사용할 수 있습니다.",
   "page.setting.general.show-24h-price-changes-title": "24시간 가격변동률 표시",
   "page.setting.general.show-24h-price-changes-paragraph": "각 토큰의 24시간 가격변동률을 표시하는 기능입니다.",
-  "page.setting.general.manage-non-native-chains-title": "선택형 체인 추가 및 삭제",
-  "page.setting.general.manage-non-native-chains-paragraph": "선택형 체인들은 먼저 케플러 익스텐션에 추가해야 \"체인 표시\" 기능에서 사용할 수 있습니다.",
-  "page.setting.general.manage-chain-visibility-title": "체인 표시",
+  "page.setting.general.manage-chain-visibility-title": "체인 추가/제거",
   "page.setting.general.manage-chain-visibility-paragraph": "현재 계정에 표시될 체인(해당 체인의 자산 포함)을 선택해주세요.",
 
   "page.setting.general.manage-asset-list-title": "자산 표시 관리",
