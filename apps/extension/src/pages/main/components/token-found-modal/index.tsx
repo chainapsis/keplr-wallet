@@ -20,6 +20,7 @@ import {
   ArrowDownIcon,
   ArrowUpIcon,
   InformationPlainIcon,
+  NativeChainMarkIcon,
 } from "../../../../components/icon";
 import styled, { useTheme } from "styled-components";
 import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse";
@@ -32,6 +33,7 @@ import { Gutter } from "../../../../components/gutter";
 import { FormattedMessage, useIntl } from "react-intl";
 import SimpleBar from "simplebar-react";
 import { XAxis, YAxis } from "../../../../components/axis";
+import { EmbedChainInfos } from "../../../../config";
 
 export const TokenFoundModal: FunctionComponent<{
   close: () => void;
@@ -204,6 +206,9 @@ export const TokenFoundModal: FunctionComponent<{
                 checked={checkedChainIdentifiers.includes(
                   ChainIdHelper.parse(tokenScan.chainId).identifier
                 )}
+                isNativeChain={EmbedChainInfos.some(
+                  (chain) => chain.chainId === tokenScan.chainId
+                )}
                 onCheckbox={(checked) => {
                   if (checked) {
                     setCheckedChainIdentifiers((ids) => [
@@ -314,9 +319,9 @@ export const TokenFoundModal: FunctionComponent<{
 const FoundChainView: FunctionComponent<{
   checked: boolean;
   onCheckbox: (checked: boolean) => void;
-
+  isNativeChain?: boolean;
   tokenScan: TokenScan;
-}> = observer(({ checked, onCheckbox, tokenScan }) => {
+}> = observer(({ checked, onCheckbox, isNativeChain, tokenScan }) => {
   const { chainStore } = useStore();
   const theme = useTheme();
 
@@ -349,7 +354,7 @@ const FoundChainView: FunctionComponent<{
       borderRadius="0.375rem"
     >
       <Columns sum={1} gutter="0.5rem" alignY="center">
-        <Box width="2.25rem" height="2.25rem">
+        <Box width="2.25rem" height="2.25rem" position="relative">
           <ChainImageFallback
             chainInfo={
               chainStore.hasChain(tokenScan.chainId)
@@ -359,6 +364,17 @@ const FoundChainView: FunctionComponent<{
             size="2rem"
             alt="Token Found Modal Chain Image"
           />
+          {isNativeChain && (
+            <Box
+              position="absolute"
+              style={{
+                bottom: "0.125rem",
+                right: "0rem",
+              }}
+            >
+              <NativeChainMarkIcon width="1rem" height="1rem" />
+            </Box>
+          )}
         </Box>
 
         <Stack gutter="0.25rem">
