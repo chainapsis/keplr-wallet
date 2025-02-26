@@ -1,13 +1,12 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { Fragment, FunctionComponent, useMemo } from "react";
 import { observer } from "mobx-react-lite";
 import { HeaderLayout } from "../../../layouts/header";
 import { BackButton } from "../../../layouts/header/components";
 
 import { useStore } from "../../../stores";
-import { Dec } from "@keplr-wallet/unit";
 import { useIntl } from "react-intl";
 
-import { Body2, H1, Subtitle3 } from "../../../components/typography";
+import { Body2, H3, Subtitle3 } from "../../../components/typography";
 import { Gutter } from "../../../components/gutter";
 import { ColorPalette } from "../../../styles";
 import { Box } from "../../../components/box";
@@ -16,8 +15,10 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { ApyChip } from "../components/chip";
 import { validateIsUsdcFromNoble } from "../utils";
 import { Input } from "../components/input";
+import { useNobleEarnAmountConfig } from "@keplr-wallet/hooks-internal";
+import { EmptyAmountError, ZeroAmountError } from "@keplr-wallet/hooks";
 
-const ZERO_DEC = new Dec("0");
+const NOBLE_EARN_DEPOSIT_OUT_COIN_MINIMAL_DENOM = "uusdn";
 
 export const EarnAmountPage: FunctionComponent = observer(() => {
   const { accountStore, chainStore, queriesStore } = useStore();
@@ -25,13 +26,9 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
   const navigate = useNavigate();
 
   const [searchParams] = useSearchParams();
-  const presetAmount = searchParams.get("amount");
   const isFromEarnTransfer = searchParams.get("isFromEarnTransfer");
   const chainId = searchParams.get("chainId") || "duke-1"; // Noble devnet: "duke-1", mainnet: "noble-1"
   const coinMinimalDenom = searchParams.get("coinMinimalDenom");
-
-  const [amountInput, setAmountInput] = useState(presetAmount || "");
-  const [errorMessage, setErrorMessage] = useState("");
 
   const chainInfo = chainStore.getChain(chainId);
   const account = accountStore.getAccount(chainId);
@@ -45,13 +42,47 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
     .queryBalances.getQueryBech32Address(account.bech32Address)
     .getBalance(currency);
 
-  const balanceDec = balanceQuery?.balance.toDec() ?? ZERO_DEC;
+  const sender = account.bech32Address;
+  const outCurrency = chainInfo.forceFindCurrency(
+    NOBLE_EARN_DEPOSIT_OUT_COIN_MINIMAL_DENOM
+  );
+
+  const nobleEarnAmountConfig = useNobleEarnAmountConfig(
+    chainStore,
+    queriesStore,
+    accountStore,
+    chainId,
+    sender,
+    currency,
+    outCurrency
+  );
+
+  const amountInput = nobleEarnAmountConfig.amountConfig.value;
+
+  const amountError = useMemo(() => {
+    const uiProperties = nobleEarnAmountConfig.amountConfig.uiProperties;
+
+    const err = uiProperties.error || uiProperties.warning;
+
+    if (err instanceof EmptyAmountError) {
+      return;
+    }
+
+    if (err instanceof ZeroAmountError) {
+      return;
+    }
+
+    if (err) {
+      return err.message || err.toString();
+    }
+  }, [nobleEarnAmountConfig.amountConfig.uiProperties]);
 
   const isSubmissionBlocked =
-    !amountInput ||
-    new Dec(amountInput || "0").lte(ZERO_DEC) ||
-    balanceDec.equals(ZERO_DEC) ||
-    new Dec(amountInput || "0").gt(balanceDec);
+    !amountInput || amountInput === "0" || !!amountError;
+
+  function maximizeInput() {
+    nobleEarnAmountConfig.amountConfig.setFraction(1);
+  }
 
   return (
     <HeaderLayout
@@ -69,32 +100,36 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
             : {})}
         />
       }
-      bottomButtons={[
-        {
-          disabled: isSubmissionBlocked,
-          text: intl.formatMessage({ id: "button.next" }),
-          color: "primary",
-          size: "large",
-          type: "submit",
-        },
-      ]}
-      onSubmit={async (e) => {
-        e.preventDefault();
+      bottomButtons={
+        isSubmissionBlocked
+          ? undefined
+          : [
+              {
+                text: intl.formatMessage({ id: "button.next" }),
+                color: "primary",
+                size: "large",
+                type: "submit",
+                disabled: isSubmissionBlocked,
+                onClick: async () => {
+                  if (isSubmissionBlocked) {
+                    return;
+                  }
 
-        if (isSubmissionBlocked) {
-          return;
-        }
-
-        if (validateIsUsdcFromNoble(currency, chainId)) {
-          navigate(`/earn/confirm-usdn-estimation?amount=${amountInput}`);
-        }
-      }}
+                  if (validateIsUsdcFromNoble(currency, chainId)) {
+                    navigate(
+                      `/earn/confirm-usdn-estimation?amount=${amountInput}`
+                    );
+                  }
+                },
+              },
+            ]
+      }
     >
       <Box paddingX="1.5rem" paddingTop="2.5rem">
         <ApyChip chainId={chainId} colorType="green" />
 
         <Gutter size="0.75rem" />
-        <H1
+        <H3
           style={{
             fontWeight: 700,
             fontSize: "1.875rem",
@@ -104,42 +139,46 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
           {intl.formatMessage({
             id: "page.earn.amount.input-label",
           })}
-        </H1>
+        </H3>
 
         <Gutter size="1.75rem" />
         <Input
           type="number"
           placeholder={`0 ${currency?.coinDenom ?? ""}`}
           value={amountInput}
-          warning={new Dec(amountInput || "0").gt(balanceDec)}
+          warning={amountError != null}
           onChange={(e) => {
-            setAmountInput(e.target.value);
-            if (new Dec(e.target.value || "0").gt(balanceDec)) {
-              setErrorMessage(
-                intl.formatMessage({
-                  id: "page.earn.amount.error.insufficient-balance",
-                })
-              );
-            } else {
-              setErrorMessage("");
-            }
+            nobleEarnAmountConfig.amountConfig.setValue(e.target.value);
           }}
           autoComplete="off"
         />
 
-        {errorMessage && (
+        {amountError && (
           <Box marginTop="0.75rem">
-            <Body2 color={ColorPalette["red-300"]}>{errorMessage}</Body2>
+            <Body2 color={ColorPalette["red-300"]}>{amountError}</Body2>
           </Box>
         )}
 
         <Gutter size="1rem" />
         <Box paddingY="0.25rem">
-          <XAxis>
-            <Subtitle3 color={ColorPalette.white}>
-              {balanceQuery?.balance.shrink(true).toString() || "0"}
-            </Subtitle3>
-            <Gutter size="0.25rem" />
+          <XAxis alignY="center">
+            {isSubmissionBlocked && (
+              <Fragment>
+                <Box
+                  borderRadius="0.5rem"
+                  paddingX="0.375rem"
+                  paddingY="0.25rem"
+                  cursor="pointer"
+                  backgroundColor={ColorPalette["gray-550"]}
+                  onClick={maximizeInput}
+                >
+                  <Subtitle3 color={ColorPalette["gray-200"]}>
+                    {balanceQuery?.balance.shrink(true).toString() || "0"}
+                  </Subtitle3>
+                </Box>
+                <Gutter size="0.25rem" />
+              </Fragment>
+            )}
             <Subtitle3 color={ColorPalette["gray-300"]}>
               {intl.formatMessage(
                 { id: "page.earn.amount.balance.current-chain" },
@@ -150,37 +189,39 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
         </Box>
 
         <Gutter size="0.25rem" />
-        <Box paddingY="0.25rem">
-          <XAxis>
-            <Subtitle3
-              color={ColorPalette["gray-300"]}
-              style={{
-                fontStyle: "italic",
-              }}
-            >
-              {intl.formatMessage(
-                { id: "page.earn.amount.balance.transfer.label" },
-                { tokenName: currency?.coinDenom }
-              )}
-            </Subtitle3>
-            <Gutter size="0.375rem" />
-            <Subtitle3
-              onClick={() => {
-                navigate("/earn/transfer/intro");
-              }}
-              style={{
-                textDecoration: "underline",
-                cursor: "pointer",
-                userSelect: "none",
-              }}
-              color={ColorPalette["blue-300"]}
-            >
-              {intl.formatMessage({
-                id: "page.earn.amount.balance.transfer.button",
-              })}
-            </Subtitle3>
-          </XAxis>
-        </Box>
+        {isSubmissionBlocked && (
+          <Box paddingY="0.25rem">
+            <XAxis>
+              <Subtitle3
+                color={ColorPalette["gray-300"]}
+                style={{
+                  fontStyle: "italic",
+                }}
+              >
+                {intl.formatMessage(
+                  { id: "page.earn.amount.balance.transfer.label" },
+                  { tokenName: currency?.coinDenom }
+                )}
+              </Subtitle3>
+              <Gutter size="0.375rem" />
+              <Subtitle3
+                onClick={() => {
+                  navigate("/earn/transfer/intro");
+                }}
+                style={{
+                  textDecoration: "underline",
+                  cursor: "pointer",
+                  userSelect: "none",
+                }}
+                color={ColorPalette["blue-300"]}
+              >
+                {intl.formatMessage({
+                  id: "page.earn.amount.balance.transfer.button",
+                })}
+              </Subtitle3>
+            </XAxis>
+          </Box>
+        )}
       </Box>
     </HeaderLayout>
   );
