@@ -94,8 +94,27 @@ export class NobleAccountImpl {
     return this.base.cosmos.makeTx(
       type,
       {
-        // XXX: It needs to add aminoMsgs when this message supports amino.
-        // aminoMsgs: [msg],
+        aminoMsgs: [
+          {
+            type: msg.type,
+            value: {
+              ...msg.value,
+              routes: msg.value.routes.map((route) => {
+                if (route.pool_id === "0") {
+                  // pool id가 0일 경우 omit empty에 의해서 아예 field를 없애야한다.
+                  return {
+                    denom_to: route.denom_to,
+                  };
+                }
+
+                return {
+                  pool_id: route.pool_id,
+                  denom_to: route.denom_to,
+                };
+              }),
+            },
+          },
+        ],
         protoMsgs: [
           {
             typeUrl: "/noble.swap.v1.MsgSwap",
@@ -139,8 +158,7 @@ export class NobleAccountImpl {
     return this.base.cosmos.makeTx(
       type,
       {
-        // XXX: It needs to add aminoMsgs when this message supports amino.
-        // aminoMsgs: [msg],
+        aminoMsgs: [msg],
         protoMsgs: [
           {
             typeUrl: "/noble.dollar.v1.MsgClaimYield",
