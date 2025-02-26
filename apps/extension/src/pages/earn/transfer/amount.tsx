@@ -475,6 +475,23 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
                           // 이미 여기서 ibc 성공까지 기다렸기 때문에 메인에서 보이는 history는 자동으로 삭제해준다...
                           const msg = new RemoveIBCHistoryMsg(recent.id);
                           await requester.sendMessage(BACKGROUND_PORT, msg);
+
+                          const destinationAccount = accountStore.getAccount(
+                            ibcTransferDestinationChainId
+                          );
+                          if (
+                            destinationAccount.walletStatus ===
+                            WalletStatus.NotInit
+                          ) {
+                            await destinationAccount.init();
+                          }
+                          queriesStore
+                            .get(ibcTransferDestinationChainId)
+                            .queryBalances.getQueryBech32Address(
+                              destinationAccount.bech32Address
+                            )
+                            .fetch();
+
                           navigate(
                             "/tx-result/success?isFromEarnTransfer=true"
                           );
