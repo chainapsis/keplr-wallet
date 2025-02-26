@@ -9,8 +9,7 @@ import { H3, Body3 } from "../../../components/typography";
 import { ColorPalette } from "../../../styles";
 import { Chip, ApyChip } from "./chip";
 import { LongArrowDownIcon } from "../../../components/icon/long-arrow-down";
-
-const NOBLE_CHAIN_ID = "duke-1"; // "noble-1";
+import { NOBLE_CHAIN_ID } from "../../../config.ui";
 
 export const EstimationSection: FunctionComponent<{
   usdcAmount: CoinPretty;

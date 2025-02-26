@@ -16,8 +16,8 @@ import { DescriptionModal } from "../components/description-modal";
 import { useStore } from "../../../stores";
 import { CoinPretty, Dec, DecUtils } from "@keplr-wallet/unit";
 import { Checkbox } from "../../../components/checkbox";
+import { NOBLE_CHAIN_ID } from "../../../config.ui";
 
-const NOBLE_CHAIN_ID = "duke-1"; // "noble-1";
 const TERM_AGREED_STORAGE_KEY = "nobleTermAgreed";
 
 export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {

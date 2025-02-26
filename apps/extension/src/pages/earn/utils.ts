@@ -1,7 +1,5 @@
 import { Currency, IBCCurrency } from "@keplr-wallet/types";
-
-// TODO: 런칭시 메인넷으로 변경 필요
-const NOBLE_CHAIN_ID = "duke-1"; // "noble-1";
+import { NOBLE_CHAIN_ID } from "../../config.ui";
 
 export function validateIsUsdcFromNoble(currency: Currency, chainId: string) {
   return (

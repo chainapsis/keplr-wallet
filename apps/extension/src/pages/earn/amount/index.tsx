@@ -16,6 +16,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { ApyChip } from "../components/chip";
 import { validateIsUsdcFromNoble } from "../utils";
 import { Input } from "../components/input";
+import { NOBLE_CHAIN_ID } from "../../../config.ui";
 
 const ZERO_DEC = new Dec("0");
 
@@ -27,7 +28,7 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
   const [searchParams] = useSearchParams();
   const presetAmount = searchParams.get("amount");
   const isFromEarnTransfer = searchParams.get("isFromEarnTransfer");
-  const chainId = searchParams.get("chainId") || "duke-1"; // Noble devnet: "duke-1", mainnet: "noble-1"
+  const chainId = searchParams.get("chainId") || NOBLE_CHAIN_ID;
   const coinMinimalDenom = searchParams.get("coinMinimalDenom");
 
   const [amountInput, setAmountInput] = useState(presetAmount || "");
@@ -45,7 +46,8 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
     .queryBalances.getQueryBech32Address(account.bech32Address)
     .getBalance(currency);
 
-  const balance = balanceQuery?.balance.hideDenom(true).toString() || "0";
+  const balance =
+    balanceQuery?.balance.locale(false).hideDenom(true).toString() || "0";
 
   const isSubmissionBlocked =
     !amountInput ||
