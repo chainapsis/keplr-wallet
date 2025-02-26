@@ -171,8 +171,8 @@ export class PermissionInteractiveService {
 
     const currentChainIdForBitcoin =
       this.permissionService.getCurrentChainIdForBitcoin(origin) ?? [
-        `${GenesisHash.MAINNET}:taproot`,
-        `${GenesisHash.MAINNET}:native-segwit`,
+        `bip122:${GenesisHash.MAINNET}:taproot`,
+        `bip122:${GenesisHash.MAINNET}:native-segwit`,
       ];
 
     await this.permissionService.checkOrGrantBasicAccessPermission(
