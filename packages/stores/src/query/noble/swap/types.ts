@@ -49,3 +49,19 @@ export interface NobleSwapRate {
   // Algorithm of the underlying Pool used for the calculation.
   algorithm: string;
 }
+
+export interface NobleSwapSimulateSwap {
+  // The resulting amount of tokens after the swap.
+  result: Coin;
+  // Details of each individual swap involved in the process.
+  swaps: {
+    // ID of the pool used in the swap.
+    pool_id: number;
+    // The input coin for the swap.
+    in: Coin;
+    // The output coin after the swap.
+    out: Coin;
+    // Any fees incurred during the swap.
+    fees: Coin[];
+  }[];
+}

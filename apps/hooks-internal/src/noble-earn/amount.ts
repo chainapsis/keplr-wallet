@@ -16,6 +16,9 @@ import {
 import { useState } from "react";
 import { makeObservable, observable } from "mobx";
 
+// Slippage is 0.1% referred from Osmosis
+const SLIPPAGE = new Dec(0.001);
+
 export class NobleEarnAmountConfig extends AmountConfig {
   @observable.ref
   protected _outCurrency: AppCurrency;
@@ -44,27 +47,57 @@ export class NobleEarnAmountConfig extends AmountConfig {
   }
 
   get expectedOutAmount(): CoinPretty {
-    const nobleSwapRates =
-      this.queriesStore
-        .get(this.chainId)
-        .noble?.querySwapRates.getQueryCoinMinimalDenom(
-          this.currency.coinMinimalDenom
-        ).rates ?? [];
+    const rates = this.queriesStore
+      .get(this.chainId)
+      .noble?.querySwapRates.getQueryCoinMinimalDenom(
+        this.amount[0].currency.coinMinimalDenom
+      ).rates;
+    const bestRate = rates?.reduce((best, rate) => {
+      if (new Dec(best.price).gt(new Dec(rate.price))) {
+        return rate;
+      }
+      return best;
+    }, rates?.[0]);
 
-    const outCurrencySwapRate = nobleSwapRates.find(
-      (rate) => rate.vs === this.outCurrency.coinMinimalDenom
+    const pools = this.queriesStore.get(this.chainId).noble?.querySwapPools
+      .pools;
+    const pool = pools?.find(
+      (pool) =>
+        pool.algorithm === bestRate?.algorithm &&
+        pool.liquidity.some(
+          (liq) => liq.denom === this.amount[0].currency.coinMinimalDenom
+        ) &&
+        pool.liquidity.some(
+          (liq) => liq.denom === this.outCurrency.coinMinimalDenom
+        )
     );
 
-    // TODO: It needs to confirm from noble team how to calculate the expected amount
-    return new CoinPretty(this.outCurrency, this.amount[0].toCoin().amount).quo(
-      new Dec(outCurrencySwapRate?.price ?? "1")
+    const nobleSwapSimulateSwap =
+      pool &&
+      this.queriesStore.get(this.chainId).noble?.querySwapSimulateSwap.getQuery(
+        this.senderConfig.sender,
+        this.amount[0].toCoin(),
+        [
+          {
+            pool_id: pool.id,
+            denom_to: this.outCurrency.coinMinimalDenom,
+          },
+        ],
+        {
+          denom: this.outCurrency.coinMinimalDenom,
+          // XXX: zero amount is okay just for simulation
+          amount: "0",
+        }
+      );
+
+    return (
+      nobleSwapSimulateSwap?.simulatedOutAmount ??
+      new CoinPretty(this.outCurrency, "0")
     );
   }
 
   get minOutAmount(): CoinPretty {
-    // TODO: It needs to confirm from noble team how to calculate the minimal amount
-    // Temporarily, It subtracts 0.5% slippage from the expected amount
-    return this.expectedOutAmount.mul(new Dec(0.995));
+    return this.expectedOutAmount.mul(new Dec(1).sub(SLIPPAGE));
   }
 }
 
