@@ -202,7 +202,7 @@ export const CopyAddressScene: FunctionComponent<{
             return true;
           }
         }
-      }
+      } // TODO: Add bitcoin search (set currencies for bitcoin first)
     })
     .sort((a, b) => {
       const aChainIdentifier = ChainIdHelper.parse(
@@ -230,11 +230,28 @@ export const CopyAddressScene: FunctionComponent<{
   const [blockInteraction, setBlockInteraction] = useState(false);
 
   const initialLookingForChains = useMemo(
-    () =>
-      chainStore.modularChainInfosInListUI.filter(
-        (modularChainInfo) =>
-          !chainStore.isEnabledChain(modularChainInfo.chainId)
-      ),
+    () => {
+      const networkGroupCheckSet = new Set<string>();
+
+      const disabledChainInfos: ModularChainInfo[] = [];
+
+      for (const modularChainInfo of chainStore.modularChainInfosInListUI) {
+        if ("networkGroupChainIds" in modularChainInfo) {
+          if (networkGroupCheckSet.has(modularChainInfo.chainId)) {
+            continue;
+          }
+
+          networkGroupCheckSet.add(modularChainInfo.chainId);
+          modularChainInfo.networkGroupChainIds.forEach((id) =>
+            networkGroupCheckSet.add(id)
+          );
+        }
+
+        disabledChainInfos.push(modularChainInfo);
+      }
+
+      return disabledChainInfos;
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [chainStore.modularChainInfosInListUI]
   );
@@ -253,17 +270,43 @@ export const CopyAddressScene: FunctionComponent<{
         (chainInfo) => !chainStore.isEnabledChain(chainInfo.chainId)
       );
 
-    const disabledStarknetChainInfos = chainStore.modularChainInfos.filter(
-      (modularChainInfo) =>
-        "starknet" in modularChainInfo &&
-        !chainStore.isEnabledChain(modularChainInfo.chainId) &&
-        (trimSearch.length === 0 ||
-          modularChainInfo.chainId.toLowerCase().includes(trimSearch) ||
-          modularChainInfo.chainName.toLowerCase().includes(trimSearch))
-    );
+    const networkGroupCheckSet = new Set<string>();
+    const disabledModularChainInfos: ModularChainInfo[] = [];
+
+    for (const modularChainInfo of chainStore.modularChainInfos) {
+      if (
+        (!("starknet" in modularChainInfo) &&
+          !("bitcoin" in modularChainInfo)) ||
+        chainStore.isEnabledChain(modularChainInfo.chainId)
+      ) {
+        continue;
+      }
+
+      if ("networkGroupChainIds" in modularChainInfo) {
+        if (networkGroupCheckSet.has(modularChainInfo.chainId)) {
+          continue;
+        }
+
+        networkGroupCheckSet.add(modularChainInfo.chainId);
+        modularChainInfo.networkGroupChainIds.forEach((id) =>
+          networkGroupCheckSet.add(id)
+        );
+      }
+
+      disabledModularChainInfos.push(modularChainInfo);
+    }
+
+    const filteredDisabledModularChainInfos =
+      trimSearch.length === 0
+        ? disabledModularChainInfos
+        : disabledModularChainInfos.filter(
+            (info) =>
+              info.chainId.toLowerCase().includes(trimSearch) ||
+              info.chainName.toLowerCase().includes(trimSearch)
+          );
 
     disabledChainInfos = [
-      ...new Set([...disabledChainInfos, ...disabledStarknetChainInfos]),
+      ...new Set([...disabledChainInfos, ...filteredDisabledModularChainInfos]),
     ].sort((a, b) => a.chainName.localeCompare(b.chainName));
 
     return disabledChainInfos.reduce(
@@ -271,10 +314,10 @@ export const CopyAddressScene: FunctionComponent<{
         let embedded: boolean | undefined = false;
         let stored: boolean = true;
 
-        const isStarknet = "starknet" in chainInfo;
+        const isModular = "starknet" in chainInfo || "bitcoin" in chainInfo;
 
         try {
-          if (isStarknet) {
+          if (isModular) {
             embedded = true;
           } else {
             const chainInfoInStore = chainStore.getChain(chainInfo.chainId);
