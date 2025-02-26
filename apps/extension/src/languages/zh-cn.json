@@ -530,6 +530,8 @@
   "page.main.available.empty-view-paragraph": "装满钱包，为迎接未知的征程做好准备吧！",
   "page.main.available.get-started-button": "开始",
   "page.main.available.new-token-found": "找到{numFoundToken}个新币种",
+  "page.main.available.manage-asset-list-button": "管理资产列表",
+
   "page.main.staked.staked-balance-title": "质押数量",
   "page.main.staked.staked-balance-tooltip": "质押给验证者并获得收益的币种。",
   "page.main.staked.unstaking-balance-title": "解除质押数量",

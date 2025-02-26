@@ -11,7 +11,7 @@ import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { ViewToken } from "./index";
 import { observer } from "mobx-react-lite";
 import { Stack } from "../../components/stack";
-import { Button } from "../../components/button";
+import { Button, makeTextAndSvgColor } from "../../components/button";
 import { useStore } from "../../stores";
 import { Styles, TextButton } from "../../components/button-text";
 import { Box } from "../../components/box";
@@ -20,7 +20,7 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { Gutter } from "../../components/gutter";
 import { EmptyView } from "../../components/empty-view";
 import { Subtitle3 } from "../../components/typography";
-import { YAxis } from "../../components/axis";
+import { XAxis, YAxis } from "../../components/axis";
 import { Checkbox } from "../../components/checkbox";
 import { Caption2 } from "../../components/typography";
 import { ColorPalette } from "../../styles";
@@ -28,24 +28,53 @@ import { FormattedMessage, useIntl } from "react-intl";
 import styled, { useTheme } from "styled-components";
 import { DenomHelper } from "@keplr-wallet/common";
 import { TokenDetailModal } from "./token-detail";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import { useGetSearchChains } from "../../hooks/use-get-search-chains";
+import { AdjustmentIcon } from "../../components/icon/adjustment";
 
 const zeroDec = new Dec(0);
 
-const NewTokenFoundButton = styled(TextButton)`
+const StyledCircle = styled.svg`
+  width: 7px;
+  height: 6px;
+  // TextButton에서 적용되는 스타일을 무시하기 위해서 추가
+  fill: none !important;
+  stroke: none !important;
+`;
+
+const CircleIndicator: FunctionComponent = () => {
+  return (
+    <StyledCircle xmlns="http://www.w3.org/2000/svg" viewBox="0 0 7 6">
+      <circle cx="3.5" cy="3" r="3" fill="#2C4BE2" />
+    </StyledCircle>
+  );
+};
+
+const ManageViewAssetTokenPageButton = styled(TextButton)`
   ${Styles.Button} {
     color: ${(props) =>
       props.theme.mode === "light"
         ? ColorPalette["blue-400"]
-        : ColorPalette["gray-50"]};
+        : ColorPalette["white"]};
+    ${(props) =>
+      makeTextAndSvgColor(
+        props.theme.mode === "light"
+          ? ColorPalette["blue-400"]
+          : ColorPalette["white"]
+      )}
 
     :hover {
       color: ${(props) =>
         props.theme.mode === "light"
-          ? ColorPalette["blue-500"]
+          ? ColorPalette["blue-300"]
           : ColorPalette["gray-200"]};
+      ${(props) =>
+        makeTextAndSvgColor(
+          props.theme.mode === "light"
+            ? ColorPalette["blue-300"]
+            : ColorPalette["gray-200"]
+        )}
     }
   }
 `;
@@ -64,6 +93,7 @@ export const AvailableTabView: FunctionComponent<{
       useStore();
     const intl = useIntl();
     const theme = useTheme();
+    const navigate = useNavigate();
 
     const { trimSearch, searchedChainInfos } = useGetSearchChains({
       search,
@@ -416,20 +446,38 @@ export const AvailableTabView: FunctionComponent<{
                 }
               />
             ) : null}
-            {numFoundToken > 0 ? (
-              <Box padding="0.75rem">
-                <YAxis alignX="center">
-                  <NewTokenFoundButton
-                    text={intl.formatMessage(
-                      { id: "page.main.available.new-token-found" },
-                      { numFoundToken }
-                    )}
-                    size="small"
-                    onClick={() => setIsFoundTokenModalOpen(true)}
-                  />
-                </YAxis>
-              </Box>
-            ) : null}
+
+            <Box padding="0.75rem">
+              <YAxis alignX="center">
+                <ManageViewAssetTokenPageButton
+                  text={intl.formatMessage({
+                    id: "page.main.available.manage-asset-list-button",
+                  })}
+                  size="small"
+                  right={
+                    <XAxis alignY="center">
+                      <AdjustmentIcon
+                        width="1.125rem"
+                        height="1.125rem"
+                        color={
+                          theme.mode === "light"
+                            ? ColorPalette["blue-400"]
+                            : ColorPalette["white"]
+                        }
+                      />
+                      {numFoundToken > 0 ? (
+                        <React.Fragment>
+                          <Gutter size="0.375rem" />
+
+                          <CircleIndicator />
+                        </React.Fragment>
+                      ) : null}
+                    </XAxis>
+                  }
+                  onClick={() => navigate("/manage-view-asset-token-list")}
+                />
+              </YAxis>
+            </Box>
           </React.Fragment>
         )}
 

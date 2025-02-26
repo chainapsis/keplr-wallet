@@ -564,6 +564,8 @@
   "page.main.available.empty-view-paragraph": "Gear up yourself by topping up your wallet!",
   "page.main.available.get-started-button": "Get Started",
   "page.main.available.new-token-found": "{numFoundToken} new token(s) found",
+  "page.main.available.manage-asset-list-button": "Manage Asset List",
+
   "page.main.staked.staked-balance-title": "Staked Balance",
   "page.main.staked.staked-balance-tooltip": "Tokens that are staked to validators and earning rewards.",
   "page.main.staked.unstaking-balance-title": "Unstaking Balance",
