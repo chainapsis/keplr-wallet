@@ -3256,6 +3256,49 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       pubKeyHash: 0x6f,
     },
   },
+  {
+    chainId:
+      "00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6:taproot",
+    chainName: "Bitcoin Signet",
+    chainSymbolImageUrl:
+      "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+    linkedChainIds: [
+      "00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6:native-segwit",
+    ],
+    bitcoin: {
+      chainId:
+        "00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6",
+      rpc: "",
+      rest: "",
+      paymentType: "taproot",
+      // signet shares parameters with testnet
+      coinType: 1,
+      bech32: "tb",
+      messagePrefix: "\x18Bitcoin Signed Message:\n",
+      pubKeyHash: 0x6f,
+    },
+  },
+  {
+    chainId:
+      "00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6:native-segwit",
+    chainName: "Bitcoin Signet",
+    chainSymbolImageUrl:
+      "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+    linkedChainIds: [
+      "00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6:taproot",
+    ],
+    bitcoin: {
+      chainId:
+        "00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6",
+      rpc: "",
+      rest: "",
+      paymentType: "native-segwit",
+      coinType: 1,
+      bech32: "tb",
+      messagePrefix: "\x18Bitcoin Signed Message:\n",
+      pubKeyHash: 0x6f,
+    },
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
