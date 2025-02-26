@@ -16,6 +16,7 @@ import { useIntl } from "react-intl";
 import { useTheme } from "styled-components";
 import { dispatchGlobalEventExceptSelf } from "../../../../utils/global-events";
 import { Stack } from "../../../../components/stack";
+import { NativeChainMarkIcon } from "../../../../components/icon";
 
 export const LookingForChains: FunctionComponent<{
   lookingForChains: {
@@ -61,22 +62,35 @@ export const LookingForChainItem: FunctionComponent<{
   return (
     <Box
       backgroundColor={Color(
-        theme.mode === "light" ? ColorPalette.white : ColorPalette["gray-600"]
+        theme.mode === "light" ? ColorPalette.white : ColorPalette["gray-650"]
       )
         .alpha(0.6)
         .string()}
       paddingX="1rem"
       paddingY="0.875rem"
       borderRadius="0.375rem"
+      style={{
+        boxShadow:
+          theme.mode === "light"
+            ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+            : undefined,
+      }}
     >
       <Columns sum={1} gutter="0.5rem" alignY="center">
-        <ChainImageFallback
-          size="2rem"
-          chainInfo={chainInfo}
-          style={{
-            opacity: "0.6",
-          }}
-        />
+        <Box position="relative">
+          <ChainImageFallback chainInfo={chainInfo} size="2rem" />
+          {embedded && (
+            <Box
+              position="absolute"
+              style={{
+                bottom: "-0.125rem",
+                right: "-0.125rem",
+              }}
+            >
+              <NativeChainMarkIcon width="1rem" height="1rem" />
+            </Box>
+          )}
+        </Box>
 
         <Gutter size="0.75rem" />
 
