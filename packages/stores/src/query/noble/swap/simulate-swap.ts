@@ -55,6 +55,15 @@ export class ObservableQueryNobleSwapSimulateSwapInner extends ObservableChainQu
     };
   }
 
+  protected override getCacheKey(): string {
+    return `${super.getCacheKey()}-${JSON.stringify({
+      signer: this.signer,
+      amount: this.amount,
+      routes: this.routes,
+      min: this.min,
+    })}`;
+  }
+
   @computed
   get simulatedOutAmount(): CoinPretty | undefined {
     if (!this.response) {
