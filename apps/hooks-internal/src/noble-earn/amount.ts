@@ -15,9 +15,7 @@ import {
 } from "@keplr-wallet/stores";
 import { useState } from "react";
 import { makeObservable, observable } from "mobx";
-
-// Slippage is 0.1% referred from Osmosis
-const SLIPPAGE = new Dec(0.001);
+import { computedFn } from "mobx-utils";
 
 export class NobleEarnAmountConfig extends AmountConfig {
   @observable.ref
@@ -96,9 +94,9 @@ export class NobleEarnAmountConfig extends AmountConfig {
     );
   }
 
-  get minOutAmount(): CoinPretty {
-    return this.expectedOutAmount.mul(new Dec(1).sub(SLIPPAGE));
-  }
+  calculateMinOutAmount = computedFn((slippage: Dec): CoinPretty => {
+    return this.expectedOutAmount.mul(new Dec(1).sub(slippage));
+  });
 }
 
 export const useNobleEarnAmountConfig = (

@@ -29,14 +29,11 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
   const [searchParams] = useSearchParams();
   const isFromEarnTransfer = searchParams.get("isFromEarnTransfer");
   const chainId = searchParams.get("chainId") || NOBLE_CHAIN_ID;
-  const coinMinimalDenom = searchParams.get("coinMinimalDenom");
+  const coinMinimalDenom = searchParams.get("coinMinimalDenom") || "uusdc";
 
   const chainInfo = chainStore.getChain(chainId);
   const account = accountStore.getAccount(chainId);
-  const currency =
-    chainInfo.currencies.find(
-      (currency) => currency.coinMinimalDenom === coinMinimalDenom
-    ) ?? chainInfo.currencies[0];
+  const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
 
   const balanceQuery = queriesStore
     .get(chainId)
@@ -101,6 +98,17 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
             : {})}
         />
       }
+      onSubmit={(e) => {
+        e.preventDefault();
+
+        if (isSubmissionBlocked) {
+          return;
+        }
+
+        if (validateIsUsdcFromNoble(currency, chainId)) {
+          navigate(`/earn/confirm-usdn-estimation?amount=${amountInput}`);
+        }
+      }}
       bottomButtons={
         isSubmissionBlocked
           ? undefined
@@ -111,17 +119,6 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
                 size: "large",
                 type: "submit",
                 disabled: isSubmissionBlocked,
-                onClick: async () => {
-                  if (isSubmissionBlocked) {
-                    return;
-                  }
-
-                  if (validateIsUsdcFromNoble(currency, chainId)) {
-                    navigate(
-                      `/earn/confirm-usdn-estimation?amount=${amountInput}`
-                    );
-                  }
-                },
               },
             ]
       }
