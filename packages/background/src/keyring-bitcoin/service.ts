@@ -2,11 +2,11 @@ import { ChainsService } from "../chains";
 import { VaultService } from "../vault";
 import { KeyRingService } from "../keyring";
 import { InteractionService } from "../interaction";
-import { AnalyticsService } from "../analytics";
 import { PermissionService } from "../permission";
-import { PermissionInteractiveService } from "../permission-interactive";
-import { BackgroundTxService } from "src/tx";
-import { SupportedPaymentType } from "@keplr-wallet/types";
+import {
+  BitcoinSignMessageType,
+  SupportedPaymentType,
+} from "@keplr-wallet/types";
 import { Env, KeplrError } from "@keplr-wallet/router";
 import { Psbt, payments } from "bitcoinjs-lib";
 import { encodeLegacyMessage, encodeLegacySignature } from "./helper";
@@ -19,10 +19,7 @@ export class KeyRingBitcoinService {
     protected readonly vaultService: VaultService,
     protected readonly keyRingService: KeyRingService,
     protected readonly interactionService: InteractionService,
-    protected readonly analyticsService: AnalyticsService,
-    protected readonly permissionService: PermissionService,
-    protected readonly permissionInteractiveService: PermissionInteractiveService,
-    protected readonly backgroundTxService: BackgroundTxService
+    protected readonly permissionService: PermissionService
   ) {}
 
   async init() {
@@ -96,6 +93,21 @@ export class KeyRingBitcoinService {
       throw new KeplrError("keyring", 221, "Vault not found");
     }
 
+    let adjustedPaymentType: SupportedPaymentType = "taproot"; // default
+    if (paymentType) {
+      adjustedPaymentType = paymentType;
+    } else if ("bitcoin" in chainInfo && chainInfo.bitcoin.paymentType) {
+      adjustedPaymentType = chainInfo.bitcoin.paymentType;
+    } else {
+      const split = chainId.split(":");
+      if (split.length === 2) {
+        const paymentType = split[1];
+        if (paymentType === "native-segwit" || paymentType === "taproot") {
+          adjustedPaymentType = paymentType;
+        }
+      }
+    }
+
     // TODO: Ledger support
     // const isLedger = vault.insensitive["keyRingType"] === "ledger";
 
@@ -107,7 +119,7 @@ export class KeyRingBitcoinService {
 
     let address: string | undefined;
 
-    if (paymentType === SupportedPaymentType.NATIVE_SEGWIT) {
+    if (adjustedPaymentType === "native-segwit") {
       const nativeSegwitAddress = bitcoinPubKey.getNativeSegwitAddress(network);
       if (nativeSegwitAddress) {
         address = nativeSegwitAddress;
@@ -126,7 +138,7 @@ export class KeyRingBitcoinService {
     return {
       pubKey: bitcoinPubKey.toBytes(),
       address,
-      paymentType: paymentType || SupportedPaymentType.TAPROOT,
+      paymentType: adjustedPaymentType,
     };
   }
 
@@ -259,7 +271,7 @@ export class KeyRingBitcoinService {
     origin: string,
     chainId: string,
     message: string,
-    signType: "ecdsa" | "bip322-simple"
+    signType: BitcoinSignMessageType
   ) {
     return await this.signMessage(
       env,
@@ -277,7 +289,7 @@ export class KeyRingBitcoinService {
     vaultId: string,
     chainId: string,
     message: string,
-    signType: "ecdsa" | "bip322-simple"
+    signType: BitcoinSignMessageType
   ) {
     const keyInfo = this.keyRingService.getKeyInfo(vaultId);
     if (!keyInfo) {
@@ -287,9 +299,7 @@ export class KeyRingBitcoinService {
     const bitcoinPubKey = await this.getBitcoinKey(
       vaultId,
       chainId,
-      signType === "ecdsa"
-        ? SupportedPaymentType.NATIVE_SEGWIT
-        : SupportedPaymentType.TAPROOT
+      signType === "message" ? "native-segwit" : "taproot"
     );
 
     const network = this.getNetwork(chainId);
@@ -317,7 +327,7 @@ export class KeyRingBitcoinService {
         }
 
         // legacy signature
-        if (signType === "ecdsa") {
+        if (signType === "message") {
           const data = encodeLegacyMessage(network.messagePrefix, message);
 
           const sig = await this.keyRingService.sign(
@@ -366,8 +376,8 @@ export class KeyRingBitcoinService {
     );
   }
 
-  async getSupportedPaymentTypes() {
-    return [SupportedPaymentType.NATIVE_SEGWIT, SupportedPaymentType.TAPROOT];
+  getSupportedPaymentTypes(): SupportedPaymentType[] {
+    return ["native-segwit", "taproot"];
   }
 
   private getNetwork(chainId: string) {

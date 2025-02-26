@@ -67,6 +67,7 @@ export const EnableChainsScene: FunctionComponent<{
   initialSearchValue?: string;
   fallbackEthereumLedgerApp?: boolean;
   fallbackStarknetLedgerApp?: boolean;
+  // fallbackBitcoinLedgerApp?: boolean;
   stepPrevious: number;
   stepTotal: number;
 }> = observer(
@@ -211,7 +212,7 @@ export const EnableChainsScene: FunctionComponent<{
                   }
                 })()
               );
-            }
+            } // TODO: Add bitcoin
           }
 
           await Promise.allSettled(promises);
@@ -383,6 +384,8 @@ export const EnableChainsScene: FunctionComponent<{
               );
             }
           }
+
+          // TODO: Add bitcoin
         }
 
         for (const candidateAddress of candidateAddresses) {
@@ -501,7 +504,8 @@ export const EnableChainsScene: FunctionComponent<{
     // 그래서 이를 위한 변수로 따로 둔다.
     // 실제로는 modularChainInfos를 사용하면 된다.
     const preSortModularChainInfos = useMemo(() => {
-      let modularChainInfos = chainStore.modularChainInfosInListUI.slice();
+      let modularChainInfos =
+        chainStore.groupedModularChainInfosInListUI.slice();
 
       if (keyType === "ledger") {
         modularChainInfos = modularChainInfos.filter((modularChainInfo) => {
@@ -724,7 +728,7 @@ export const EnableChainsScene: FunctionComponent<{
 
     const numSelected = useMemo(() => {
       const modularChainInfoMap = new Map<string, ModularChainInfo>();
-      for (const modularChainInfo of chainStore.modularChainInfos) {
+      for (const modularChainInfo of chainStore.groupedModularChainInfos) {
         modularChainInfoMap.set(
           ChainIdHelper.parse(modularChainInfo.chainId).identifier,
           modularChainInfo
@@ -768,7 +772,7 @@ export const EnableChainsScene: FunctionComponent<{
       }
       return numSelected;
     }, [
-      chainStore.modularChainInfos,
+      chainStore.groupedModularChainInfos,
       enabledChainIdentifiers,
       fallbackEthereumLedgerApp,
       fallbackStarknetLedgerApp,
@@ -882,6 +886,7 @@ export const EnableChainsScene: FunctionComponent<{
 
                   return new CoinPretty(mainCurrency, "0");
                 }
+                // TODO: support bitcoin
               })();
               const chainIdentifier = ChainIdHelper.parse(
                 modularChainInfo.chainId
@@ -903,18 +908,35 @@ export const EnableChainsScene: FunctionComponent<{
                   blockInteraction={blockInteraction}
                   isFresh={isFresh ?? false}
                   onClick={() => {
-                    if (enabledChainIdentifierMap.get(chainIdentifier)) {
-                      setEnabledChainIdentifiers(
-                        enabledChainIdentifiers.filter(
-                          (ci) => ci !== chainIdentifier
+                    const isEnabled =
+                      enabledChainIdentifierMap.get(chainIdentifier);
+                    const chainIdentifiersSet = new Set([chainIdentifier]);
+
+                    if ("linkedChainIds" in modularChainInfo) {
+                      modularChainInfo.linkedChainIds.forEach((linkedChainId) =>
+                        chainIdentifiersSet.add(
+                          ChainIdHelper.parse(linkedChainId).identifier
                         )
                       );
-                    } else {
-                      setEnabledChainIdentifiers([
-                        ...enabledChainIdentifiers,
-                        chainIdentifier,
-                      ]);
                     }
+
+                    setEnabledChainIdentifiers((prev) => {
+                      const result = new Set(prev);
+
+                      // If selected chain is enabled, disable all linked chains.
+                      // Otherwise, enable all linked chains including selected chain.
+                      const shouldEnable = !isEnabled;
+
+                      chainIdentifiersSet.forEach((id) => {
+                        if (shouldEnable) {
+                          result.add(id);
+                        } else {
+                          result.delete(id);
+                        }
+                      });
+
+                      return Array.from(result);
+                    });
                   }}
                 />
               );

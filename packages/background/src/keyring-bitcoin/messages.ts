@@ -1,12 +1,18 @@
 import { Message } from "@keplr-wallet/router";
-import { SettledResponses, SupportedPaymentType } from "@keplr-wallet/types";
+import {
+  BitcoinSignMessageType,
+  SettledResponses,
+  SupportedPaymentType,
+} from "@keplr-wallet/types";
 import { ROUTE } from "./constants";
 import { Psbt } from "bitcoinjs-lib";
 
 export class GetBitcoinKeyMsg extends Message<{
+  name: string;
   pubKey: Uint8Array;
   address: string;
   paymentType: SupportedPaymentType;
+  isNanoLedger: boolean;
 }> {
   public static type() {
     return "get-bitcoin-key";
@@ -51,26 +57,21 @@ export class GetBitcoinKeysSettledMsg extends Message<
     return "get-bitcoin-keys-settled";
   }
 
-  constructor(
-    public readonly chainConfigs: Array<{
-      chainId: string;
-      paymentType?: SupportedPaymentType;
-    }>
-  ) {
+  constructor(public readonly chainIds: string[]) {
     super();
   }
 
   validateBasic(): void {
-    if (!this.chainConfigs || this.chainConfigs.length === 0) {
-      throw new Error("chainConfigs are not set");
+    if (!this.chainIds || this.chainIds.length === 0) {
+      throw new Error("chainIds are not set");
     }
 
     const seen = new Map<string, boolean>();
-    for (const config of this.chainConfigs) {
-      if (seen.has(config.chainId)) {
-        throw new Error(`chainId ${config.chainId} is duplicated`);
+    for (const chainId of this.chainIds) {
+      if (seen.has(chainId)) {
+        throw new Error(`chainId ${chainId} is duplicated`);
       }
-      seen.set(config.chainId, true);
+      seen.set(chainId, true);
     }
   }
 
@@ -208,7 +209,7 @@ export class RequestSignBitcoinMessageMsg extends Message<string> {
   constructor(
     public readonly chainId: string,
     public readonly message: string,
-    public readonly signType: "ecdsa" | "bip322-simple"
+    public readonly signType: BitcoinSignMessageType
   ) {
     super();
   }

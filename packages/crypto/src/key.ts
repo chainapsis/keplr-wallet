@@ -7,12 +7,11 @@ import { Buffer as NodeBuffer } from "buffer";
 import { Hash } from "./hash";
 import { hash as starknetHash } from "starknet";
 import { ECPairInterface, ECPairFactory } from "ecpair";
-import * as ecc from "tiny-secp256k1";
 import { Network, payments } from "bitcoinjs-lib";
+import * as ecc from "./ecc-adapter";
 import * as bitcoin from "bitcoinjs-lib";
 
 bitcoin.initEccLib(ecc);
-
 export class PrivKeySecp256k1 {
   static generateRandomKey(): PrivKeySecp256k1 {
     return new PrivKeySecp256k1(secp256k1.utils.randomPrivateKey());

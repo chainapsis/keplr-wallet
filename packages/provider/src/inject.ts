@@ -28,6 +28,7 @@ import {
   WalletEvents,
   AccountChangeEventHandler,
   NetworkChangeEventHandler,
+  SupportedPaymentType,
 } from "@keplr-wallet/types";
 import {
   Result,
@@ -1031,6 +1032,31 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
       this.eventListener,
       this.parseMessage
     );
+  }
+
+  async getBitcoinKey(
+    chainId: string,
+    paymentType?: SupportedPaymentType
+  ): Promise<{
+    name: string;
+    pubKey: Uint8Array;
+    address: string;
+    paymentType: SupportedPaymentType;
+    isNanoLedger: boolean;
+  }> {
+    return await this.requestMethod("getBitcoinKey", [chainId, paymentType]);
+  }
+
+  async getBitcoinKeysSettled(chainIds: string[]): Promise<
+    SettledResponses<{
+      name: string;
+      pubKey: Uint8Array;
+      address: string;
+      paymentType: SupportedPaymentType;
+      isNanoLedger: boolean;
+    }>
+  > {
+    return await this.requestMethod("getBitcoinKeysSettled", [chainIds]);
   }
 
   public readonly ethereum = new EthereumProvider(

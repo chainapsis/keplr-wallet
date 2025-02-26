@@ -73,8 +73,9 @@ export interface StarknetChainInfo {
 
 export interface BitcoinChainInfo {
   readonly rpc: string;
+  readonly rest: string;
   readonly chainId: string;
-  readonly addrFormats: "segwit" | "taproot" | "legacy";
+  readonly paymentType: "native-segwit" | "taproot";
   readonly coinType: number;
   readonly bech32: string;
   readonly messagePrefix: string;
@@ -100,5 +101,6 @@ export type ModularChainInfo =
       readonly chainId: string;
       readonly chainName: string;
       readonly chainSymbolImageUrl?: string;
+      readonly linkedChainIds: string[];
       readonly bitcoin: BitcoinChainInfo;
     };

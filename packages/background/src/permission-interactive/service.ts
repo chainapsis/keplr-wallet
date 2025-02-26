@@ -4,7 +4,6 @@ import { PermissionService } from "../permission";
 import { ChainsService } from "../chains";
 import { KVStore } from "@keplr-wallet/common";
 import { autorun, makeObservable, observable, runInAction } from "mobx";
-import { SupportedPaymentType } from "@keplr-wallet/types";
 import { GenesisHash } from "@keplr-wallet/types";
 
 export class PermissionInteractiveService {
@@ -172,8 +171,8 @@ export class PermissionInteractiveService {
 
     const currentChainIdForBitcoin =
       this.permissionService.getCurrentChainIdForBitcoin(origin) ?? [
-        `${GenesisHash.MAINNET}:${SupportedPaymentType.TAPROOT}`,
-        `${GenesisHash.MAINNET}:${SupportedPaymentType.NATIVE_SEGWIT}`,
+        `${GenesisHash.MAINNET}:taproot`,
+        `${GenesisHash.MAINNET}:native-segwit`,
       ];
 
     await this.permissionService.checkOrGrantBasicAccessPermission(
