@@ -186,19 +186,24 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
    */
   @computed
   get groupedModularChainInfos(): ModularChainInfo[] {
-    const networkGroupCheckSet = new Set<string>();
+    const processedChainIds = new Set<string>();
     const groupedModularChainInfos: ModularChainInfo[] = [];
 
     for (const modularChainInfo of this.modularChainInfos) {
-      if ("linkedChainIds" in modularChainInfo) {
-        if (networkGroupCheckSet.has(modularChainInfo.chainId)) {
-          continue;
-        }
+      if (processedChainIds.has(modularChainInfo.chainId)) {
+        continue;
+      }
 
-        networkGroupCheckSet.add(modularChainInfo.chainId);
+      if (
+        "linkedChainIds" in modularChainInfo &&
+        modularChainInfo.linkedChainIds.length > 0
+      ) {
+        processedChainIds.add(modularChainInfo.chainId);
         modularChainInfo.linkedChainIds.forEach((id) =>
-          networkGroupCheckSet.add(id)
+          processedChainIds.add(id)
         );
+      } else {
+        processedChainIds.add(modularChainInfo.chainId);
       }
 
       groupedModularChainInfos.push(modularChainInfo);

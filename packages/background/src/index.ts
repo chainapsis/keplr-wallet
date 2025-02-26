@@ -50,6 +50,7 @@ export * from "./keyring-cosmos";
 export * from "./keyring-ethereum";
 export * from "./keyring-starknet";
 export * from "./keyring-keystone";
+export * from "./keyring-bitcoin";
 export * from "./token-scan";
 export * from "./recent-send-history";
 export * from "./side-panel";
