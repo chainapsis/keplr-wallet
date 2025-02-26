@@ -1,9 +1,8 @@
-import React, { FunctionComponent, useMemo, useState } from "react";
+import React, { FunctionComponent, useMemo } from "react";
 import { CollapsibleList } from "../../components/collapsible-list";
 import {
   LookingForChains,
   MainEmptyView,
-  TokenFoundModal,
   TokenItem,
   TokenTitleView,
 } from "./components";
@@ -245,8 +244,6 @@ export const AvailableTabView: FunctionComponent<{
       return Array.from(set).length;
     }, [chainStore.tokenScans]);
 
-    const [isFoundTokenModalOpen, setIsFoundTokenModalOpen] = useState(false);
-
     const isShowNotFound =
       allBalancesSearchFiltered.length === 0 &&
       trimSearch.length > 0 &&
@@ -480,14 +477,6 @@ export const AvailableTabView: FunctionComponent<{
             </Box>
           </React.Fragment>
         )}
-
-        <Modal
-          isOpen={isFoundTokenModalOpen && numFoundToken > 0}
-          align="bottom"
-          close={() => setIsFoundTokenModalOpen(false)}
-        >
-          <TokenFoundModal close={() => setIsFoundTokenModalOpen(false)} />
-        </Modal>
 
         <Modal
           isOpen={

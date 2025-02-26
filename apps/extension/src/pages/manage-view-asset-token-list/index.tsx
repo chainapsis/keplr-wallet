@@ -20,15 +20,41 @@ import styled, {
 } from "styled-components";
 import { ColorPalette } from "../../styles";
 import { ButtonTheme } from "../../components/button";
-import { PlusIcon } from "../../components/icon";
+import { ArrowRightIcon, PlusIcon } from "../../components/icon";
 import { useNavigate } from "react-router";
+import { TokenFoundModal } from "../main/components";
+import { Modal } from "../../components/modal";
+import { Subtitle3 } from "../../components/typography";
 
 export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
-  const { hugeQueriesStore, keyRingStore, uiConfigStore } = useStore();
+  const { hugeQueriesStore, keyRingStore, uiConfigStore, chainStore } =
+    useStore();
   const intl = useIntl();
   const [isSortAsc, setIsSortAsc] = useState(false);
   const navigate = useNavigate();
   const theme = useTheme();
+  const [isFoundTokenModalOpen, setIsFoundTokenModalOpen] = useState(false);
+
+  const numFoundToken = useMemo(() => {
+    if (chainStore.tokenScans.length === 0) {
+      return 0;
+    }
+
+    const set = new Set<string>();
+
+    for (const tokenScan of chainStore.tokenScans) {
+      for (const info of tokenScan.infos) {
+        for (const asset of info.assets) {
+          const key = `${ChainIdHelper.parse(tokenScan.chainId).identifier}/${
+            asset.currency.coinMinimalDenom
+          }`;
+          set.add(key);
+        }
+      }
+    }
+
+    return Array.from(set).length;
+  }, [chainStore.tokenScans]);
 
   const allBalances = hugeQueriesStore.getAllBalances({
     allowIBCToken: true,
@@ -141,15 +167,47 @@ export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
         <YAxis alignX="right">
           <Gutter size="0.25rem" />
           <XAxis alignY="center">
-            <Styles.Button onClick={() => setIsSortAsc(!isSortAsc)}>
+            <Styles.SortButton onClick={() => setIsSortAsc(!isSortAsc)}>
               {intl.formatMessage({
                 id: "page.setting.general.manage-asset-list.sort-button",
               })}
               <UpDownArrowIcon isAsc={isSortAsc} mode={theme.mode} />
-            </Styles.Button>
+            </Styles.SortButton>
           </XAxis>
         </YAxis>
+
         <Stack gutter="0.5rem">
+          {numFoundToken > 0 && (
+            <Styles.NewTokenFoundButtonContainer
+              onClick={() => setIsFoundTokenModalOpen(true)}
+            >
+              <XAxis alignY="center">
+                <Subtitle3>
+                  {intl.formatMessage(
+                    { id: "page.main.available.new-token-found" },
+                    {
+                      numFoundToken: (
+                        <span
+                          style={{
+                            paddingRight: "0.25rem",
+                            color: ColorPalette["blue-300"],
+                          }}
+                        >
+                          {numFoundToken}
+                        </span>
+                      ),
+                    }
+                  )}
+                </Subtitle3>
+                <div style={{ flex: 1 }} />
+                <ArrowRightIcon
+                  width="1.25rem"
+                  height="1.25rem"
+                  color={ColorPalette["gray-300"]}
+                />
+              </XAxis>
+            </Styles.NewTokenFoundButtonContainer>
+          )}
           {filteredTokens.map((viewToken) => {
             const chainIdentifier = ChainIdHelper.parse(
               viewToken.chainInfo.chainId
@@ -188,6 +246,14 @@ export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
           })}
         </Stack>
       </Box>
+
+      <Modal
+        isOpen={isFoundTokenModalOpen && numFoundToken > 0}
+        align="bottom"
+        close={() => setIsFoundTokenModalOpen(false)}
+      >
+        <TokenFoundModal close={() => setIsFoundTokenModalOpen(false)} />
+      </Modal>
     </HeaderLayout>
   );
 });
@@ -235,9 +301,34 @@ const UpDownArrowIcon = ({
   );
 };
 
-//NOTE - 기존 textButton과 다른 hover 스타일이라서 따로 정의
 const Styles = {
-  Button: styled.button`
+  NewTokenFoundButtonContainer: styled.div`
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["skeleton-layer-0"]
+        : ColorPalette["gray-650"]};
+    padding: 1rem 0.875rem;
+    border-radius: 0.375rem;
+    cursor: pointer;
+
+    box-shadow: ${(props) =>
+      props.theme.mode === "light"
+        ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+        : "none"};
+
+    ${(props) => {
+      return css`
+        &:hover {
+          background-color: ${props.theme.mode === "light"
+            ? ColorPalette["gray-10"]
+            : ColorPalette["gray-600"]};
+        }
+      `;
+    }}}
+  `,
+
+  //NOTE - 기존 textButton과 다른 hover 스타일이라서 따로 정의
+  SortButton: styled.button`
     display: inline-flex;
     align-items: center;
     gap: 0.5rem; /* 텍스트와 아이콘 사이 간격 */
