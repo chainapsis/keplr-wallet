@@ -3178,6 +3178,10 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     chainName: "Bitcoin",
     chainSymbolImageUrl:
       "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+    networkGroupChainIds: [
+      "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:taproot",
+      "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:native-segwit",
+    ],
     bitcoin: {
       chainId:
         "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
@@ -3196,6 +3200,10 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     chainName: "Bitcoin",
     chainSymbolImageUrl:
       "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+    networkGroupChainIds: [
+      "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:taproot",
+      "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:native-segwit",
+    ],
     bitcoin: {
       chainId:
         "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
@@ -3214,6 +3222,10 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     chainName: "Bitcoin Testnet",
     chainSymbolImageUrl:
       "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+    networkGroupChainIds: [
+      "000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943:taproot",
+      "000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943:native-segwit",
+    ],
     bitcoin: {
       chainId:
         "000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943",
@@ -3232,6 +3244,10 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     chainName: "Bitcoin Testnet",
     chainSymbolImageUrl:
       "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+    networkGroupChainIds: [
+      "000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943:taproot",
+      "000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943:native-segwit",
+    ],
     bitcoin: {
       chainId:
         "000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943",
