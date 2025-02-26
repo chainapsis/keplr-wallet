@@ -47,13 +47,16 @@ export class AccountSetBase {
   @observable
   protected _starknetHexAddress: string = "";
   @observable
-  protected _bitcoinBech32Address: string = "";
+  protected _bitcoinAddress:
+    | {
+        bech32Address: string;
+        paymentType: SupportedPaymentType;
+      }
+    | undefined = undefined;
   @observable
   protected _isNanoLedger: boolean = false;
   @observable
   protected _isKeystone: boolean = false;
-  @observable
-  protected _bitcoinPaymentType: SupportedPaymentType = "taproot";
 
   @observable
   protected _txTypeInProgress: string = "";
@@ -193,12 +196,14 @@ export class AccountSetBase {
             this._bech32Address = "";
             this._ethereumHexAddress = "";
             this._starknetHexAddress = "";
-            this._bitcoinBech32Address = key.address;
+            this._bitcoinAddress = {
+              bech32Address: key.address,
+              paymentType: key.paymentType,
+            };
             this._isNanoLedger = key.isNanoLedger;
             this._isKeystone = false;
             this._name = key.name;
             this._pubKey = key.pubKey;
-            this._bitcoinPaymentType = key.paymentType;
           } else {
             this._bech32Address = "";
             this._ethereumHexAddress = "";
@@ -353,12 +358,13 @@ export class AccountSetBase {
     return this._starknetHexAddress;
   }
 
-  get bitcoinBech32Address(): string {
-    return this._bitcoinBech32Address;
-  }
-
-  get bitcoinPaymentType(): SupportedPaymentType {
-    return this._bitcoinPaymentType;
+  get bitcoinAddress():
+    | {
+        bech32Address: string;
+        paymentType: SupportedPaymentType;
+      }
+    | undefined {
+    return this._bitcoinAddress;
   }
 }
 

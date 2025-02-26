@@ -8,6 +8,7 @@ import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
 import { XAxis, YAxis } from "../../../../components/axis";
 import {
+  BaseTypography,
   Caption1,
   Subtitle1,
   Subtitle3,
@@ -94,8 +95,10 @@ export const CopyAddressScene: FunctionComponent<{
     bech32Address?: string;
     ethereumAddress?: string;
     starknetAddress?: string;
-    bitcoinBech32Address?: string;
-    paymentType?: SupportedPaymentType;
+    bitcoinAddress?: {
+      bech32Address: string;
+      paymentType: SupportedPaymentType;
+    };
   }[] = chainStore.modularChainInfosInUI
     .map((modularChainInfo) => {
       const accountInfo = accountStore.getAccount(modularChainInfo.chainId);
@@ -132,20 +135,12 @@ export const CopyAddressScene: FunctionComponent<{
         return accountInfo.starknetHexAddress;
       })();
 
-      const bitcoinBech32Address = (() => {
+      const bitcoinAddress = (() => {
         if (!("bitcoin" in modularChainInfo)) {
           return undefined;
         }
 
-        return accountInfo.bitcoinBech32Address;
-      })();
-
-      const bitcoinPaymentType = (() => {
-        if (!("bitcoin" in modularChainInfo)) {
-          return undefined;
-        }
-
-        return accountInfo.bitcoinPaymentType;
+        return accountInfo.bitcoinAddress;
       })();
 
       return {
@@ -153,8 +148,7 @@ export const CopyAddressScene: FunctionComponent<{
         bech32Address,
         ethereumAddress,
         starknetAddress,
-        bitcoinBech32Address,
-        paymentType: bitcoinPaymentType,
+        bitcoinAddress,
       };
     })
     .filter(({ modularChainInfo, bech32Address }) => {
@@ -408,7 +402,7 @@ export const CopyAddressScene: FunctionComponent<{
                       .identifier +
                     address.bech32Address +
                     (address.ethereumAddress || "") +
-                    (address.bitcoinBech32Address || "")
+                    (address.bitcoinAddress?.bech32Address || "")
                   }
                   address={address}
                   close={close}
@@ -456,7 +450,10 @@ const CopyAddressItem: FunctionComponent<{
     bech32Address?: string;
     ethereumAddress?: string;
     starknetAddress?: string;
-    bitcoinBech32Address?: string;
+    bitcoinAddress?: {
+      bech32Address: string;
+      paymentType: SupportedPaymentType;
+    };
   };
   close: () => void;
   blockInteraction: boolean;
@@ -539,7 +536,7 @@ const CopyAddressItem: FunctionComponent<{
                 address.starknetAddress ||
                   address.ethereumAddress ||
                   address.bech32Address ||
-                  address.bitcoinBech32Address ||
+                  address.bitcoinAddress?.bech32Address ||
                   ""
               );
               setHasCopied(true);
@@ -647,15 +644,51 @@ const CopyAddressItem: FunctionComponent<{
               />
               <Gutter size="0.5rem" />
               <YAxis>
-                <Subtitle3
-                  color={
-                    theme.mode === "light"
-                      ? ColorPalette["gray-700"]
-                      : ColorPalette["gray-10"]
-                  }
-                >
-                  {address.modularChainInfo.chainName}
-                </Subtitle3>
+                <XAxis>
+                  <Subtitle3
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-700"]
+                        : ColorPalette["gray-10"]
+                    }
+                  >
+                    {address.modularChainInfo.chainName}
+                  </Subtitle3>
+                  {address.bitcoinAddress && (
+                    <React.Fragment>
+                      <Gutter size="0.25rem" />
+                      <Box
+                        alignX="center"
+                        alignY="center"
+                        backgroundColor={
+                          theme.mode === "light"
+                            ? ColorPalette["blue-50"]
+                            : ColorPalette["gray-500"]
+                        }
+                        borderRadius="0.375rem"
+                        height="1rem"
+                        paddingX="0.375rem"
+                      >
+                        <BaseTypography
+                          style={{
+                            fontWeight: 400,
+                            fontSize: "0.6875rem",
+                          }}
+                          color={
+                            theme.mode === "light"
+                              ? ColorPalette["blue-400"]
+                              : ColorPalette["gray-200"]
+                          }
+                        >
+                          {address.bitcoinAddress.paymentType ===
+                          "native-segwit"
+                            ? "NSW"
+                            : "TR"}
+                        </BaseTypography>
+                      </Box>
+                    </React.Fragment>
+                  )}
+                </XAxis>
                 <Gutter size="0.25rem" />
                 <Caption1 color={ColorPalette["gray-300"]}>
                   {(() => {
@@ -682,9 +715,9 @@ const CopyAddressItem: FunctionComponent<{
                       );
                     }
 
-                    if (address.bitcoinBech32Address) {
+                    if (address.bitcoinAddress?.bech32Address) {
                       return Bech32Address.shortenAddress(
-                        address.bitcoinBech32Address,
+                        address.bitcoinAddress.bech32Address,
                         20
                       );
                     }
@@ -738,7 +771,7 @@ const CopyAddressItem: FunctionComponent<{
                     address.starknetAddress ||
                     address.ethereumAddress ||
                     address.bech32Address ||
-                    address.bitcoinBech32Address,
+                    address.bitcoinAddress?.bech32Address,
                 });
               }}
             >
