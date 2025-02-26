@@ -16,6 +16,9 @@ export const makeTextAndSvgColor = (color: string) => {
     svg {
       fill: ${color};
       stroke: ${color};
+      path {
+        fill: ${color};
+      }
     }
   `;
 };
