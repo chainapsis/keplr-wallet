@@ -10,7 +10,7 @@ import { useNavigate } from "react-router";
 import { Box } from "../../../components/box";
 import { Image } from "../../../components/image";
 import { useSearchParams } from "react-router-dom";
-import { Body2, H1, Subtitle4 } from "../../../components/typography";
+import { Body2, H1 } from "../../../components/typography";
 import { ColorPalette } from "../../../styles";
 import { Gutter } from "../../../components/gutter";
 import { useStore } from "../../../stores";
@@ -20,9 +20,12 @@ import { Stack } from "../../../components/stack";
 import { ArrowRightIcon, CheckIcon } from "../../../components/icon";
 import { Modal } from "../../../components/modal";
 import { DescriptionModal } from "../components/description-modal";
+import { ApyChip } from "../components/chip";
+import { useTheme } from "styled-components";
 
 export const EarnIntroPage: FunctionComponent = observer(() => {
   const [isLearnMoreModalOpen, setIsLearnMoreModalOpen] = useState(false);
+  const theme = useTheme();
 
   const navigate = useNavigate();
   const intl = useIntl();
@@ -52,20 +55,18 @@ export const EarnIntroPage: FunctionComponent = observer(() => {
       left={<BackButton />}
     >
       <Box paddingX="1.5rem" paddingTop="2rem" paddingBottom="1.5rem">
-        {/* TO-DO: this image is a dummy that needs to be replaced with the actual graphic */}
         <Image
-          src={currency.coinImageUrl}
-          width="48px"
-          height="48px"
-          style={{ borderRadius: "50%" }}
+          src={require(theme.mode === "light"
+            ? "../../../public/assets/img/earn-usdc-light.png"
+            : "../../../public/assets/img/earn-usdc-dark.png")}
+          width="52px"
+          height="52px"
           alt={currency.coinDenom}
         />
 
         <Gutter size="1.25rem" />
 
-        <Subtitle4 color={ColorPalette["blue-300"]}>
-          {intl.formatMessage({ id: "page.earn.title" }).toUpperCase()}
-        </Subtitle4>
+        <ApyChip chainId={chainId} colorType="green" />
         <Gutter size="1rem" />
 
         <Stack gutter="0.25rem">

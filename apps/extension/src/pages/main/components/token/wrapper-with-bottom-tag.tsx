@@ -10,7 +10,7 @@ import { ColorPalette } from "../../../../styles";
 import { observer } from "mobx-react-lite";
 
 type BottomTagType = "nudgeEarn" | "showEarnSavings";
-const NOBLE_CHAIN_ID = "noble-1";
+const NOBLE_CHAIN_ID = "duke-1";
 
 export const WrapperwithBottomTag = observer(function ({
   children,

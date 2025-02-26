@@ -14,7 +14,7 @@ import { useStore } from "../../../../stores";
 import { useGetEarnApy } from "../../../../hooks/use-get-apy";
 import { observer } from "mobx-react-lite";
 
-const NOBLE_CHAIN_ID = "noble-1";
+const NOBLE_CHAIN_ID = "duke-1";
 
 export const AvailableTabSlideList = observer(() => {
   const navigate = useNavigate();
@@ -31,7 +31,7 @@ export const AvailableTabSlideList = observer(() => {
       type="button"
       onClick={(e) => {
         e.preventDefault();
-        navigate("/earn/intro?chainId=noble-1");
+        navigate(`/earn/intro?chainId=${NOBLE_CHAIN_ID}`);
       }}
     >
       <Box color={ColorPalette["gray-300"]} marginLeft="0.5rem">
