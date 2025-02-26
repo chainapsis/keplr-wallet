@@ -177,6 +177,36 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     });
   }
 
+  /**
+   * Group modular chain infos by linked chain ids.
+   * For example, bitcoin has separated chain for native segwit and taproot,
+   * but they have to be shown as a same chain in some cases.
+   *
+   * @returns Grouped modular chain infos.
+   */
+  @computed
+  get groupedModularChainInfos(): ModularChainInfo[] {
+    const networkGroupCheckSet = new Set<string>();
+    const groupedModularChainInfos: ModularChainInfo[] = [];
+
+    for (const modularChainInfo of this.modularChainInfos) {
+      if ("linkedChainIds" in modularChainInfo) {
+        if (networkGroupCheckSet.has(modularChainInfo.chainId)) {
+          continue;
+        }
+
+        networkGroupCheckSet.add(modularChainInfo.chainId);
+        modularChainInfo.linkedChainIds.forEach((id) =>
+          networkGroupCheckSet.add(id)
+        );
+      }
+
+      groupedModularChainInfos.push(modularChainInfo);
+    }
+
+    return groupedModularChainInfos;
+  }
+
   get enabledChainIdentifiers(): string[] {
     return this._enabledChainIdentifiers;
   }
@@ -206,6 +236,21 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     });
   }
 
+  @computed
+  get groupedModularChainInfosInUI() {
+    return this.groupedModularChainInfos.filter((modularChainInfo) => {
+      if ("cosmos" in modularChainInfo && modularChainInfo.cosmos.hideInUI) {
+        return false;
+      }
+
+      const chainIdentifier = ChainIdHelper.parse(
+        modularChainInfo.chainId
+      ).identifier;
+
+      return this.enabledChainIdentifiesMap.get(chainIdentifier);
+    });
+  }
+
   // chain info들을 list로 보여줄때 hideInUI인 얘들은 빼고 보여줘야한다
   // property 이름이 얘매해서 일단 이렇게 지었다.
   @computed
@@ -218,6 +263,17 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   @computed
   get modularChainInfosInListUI() {
     return this.modularChainInfos.filter((modularChainInfo) => {
+      if ("cosmos" in modularChainInfo && modularChainInfo.cosmos.hideInUI) {
+        return false;
+      }
+
+      return true;
+    });
+  }
+
+  @computed
+  get groupedModularChainInfosInListUI() {
+    return this.groupedModularChainInfos.filter((modularChainInfo) => {
       if ("cosmos" in modularChainInfo && modularChainInfo.cosmos.hideInUI) {
         return false;
       }
