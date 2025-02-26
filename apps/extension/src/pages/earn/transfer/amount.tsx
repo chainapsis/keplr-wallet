@@ -35,7 +35,9 @@ import { CoinPretty, Dec, DecUtils } from "@keplr-wallet/unit";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT, Message } from "@keplr-wallet/router";
 import {
+  GetIBCHistoriesMsg,
   LogAnalyticsEventMsg,
+  RemoveIBCHistoryMsg,
   SendTxAndRecordMsg,
 } from "@keplr-wallet/background";
 import { useIntl } from "react-intl";
@@ -430,7 +432,56 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
                   }
 
                   if (initialIBCTransferDestinationChainId) {
-                    navigate("/tx-result/success?isFromEarnTransfer=true");
+                    (async () => {
+                      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+                      while (
+                        // tx pending 페이지에서만 처리되어야하는데 문제는 이미 tx pending page로 넘어갔기 때문에
+                        // 이 페이지에서 unmount 등을 파악할 수가 없다...
+                        // 그렇다고 tx pending page의 로직에서 처리하면 로직이 복잡해져서 그냥 여기서 url을 보고 파악한다.
+                        window.location.hash.startsWith("#/tx-result/pending")
+                      ) {
+                        await new Promise((resolve) =>
+                          setTimeout(resolve, 3000)
+                        );
+
+                        const requester = new InExtensionMessageRequester();
+                        const msg = new GetIBCHistoriesMsg();
+                        const res = await requester.sendMessage(
+                          BACKGROUND_PORT,
+                          msg
+                        );
+                        if (res.length === 0) {
+                          // 이 경우 먼가 잘못된건데 방법이 없다...
+                          navigate("/", {
+                            replace: true,
+                          });
+                          break;
+                        }
+
+                        // 어차피 이 tx pending page를 벗어나지 않았을 것으로 가정해야하기 때문에
+                        // 그냥 최근의 기록이 방금 보낸 tx라고 가정한다.
+                        const recent = res[0];
+                        if (recent.ibcHistory.some((h) => h.error != null)) {
+                          // 이 경우 ibc가 실패한 것이다...
+                          navigate("/tx-result/failed");
+                          break;
+                        }
+                        if (
+                          recent.txFulfilled &&
+                          !recent.ibcHistory.some((h) => !h.completed)
+                        ) {
+                          // 이 경우 ibc가 완료된 것이다...
+                          // 이미 여기서 ibc 성공까지 기다렸기 때문에 메인에서 보이는 history는 자동으로 삭제해준다...
+                          const msg = new RemoveIBCHistoryMsg(recent.id);
+                          await requester.sendMessage(BACKGROUND_PORT, msg);
+                          navigate(
+                            "/tx-result/success?isFromEarnTransfer=true"
+                          );
+                          break;
+                        }
+                      }
+                    })();
                   } else {
                     notification.show(
                       "success",
