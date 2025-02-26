@@ -620,17 +620,14 @@ export class Keplr implements IKeplr {
     ]);
   }
 
-  async getBitcoinKey(
-    chainId: string,
-    paymentType?: SupportedPaymentType
-  ): Promise<{
+  async getBitcoinKey(chainId: string): Promise<{
     name: string;
     pubKey: Uint8Array;
     address: string;
     paymentType: SupportedPaymentType;
     isNanoLedger: boolean;
   }> {
-    return await Keplr.requestMethod("getBitcoinKey", [chainId, paymentType]);
+    return await Keplr.requestMethod("getBitcoinKey", [chainId]);
   }
 
   async getBitcoinKeysSettled(chainIds: string[]): Promise<

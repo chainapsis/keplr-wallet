@@ -1137,10 +1137,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     });
   }
 
-  async getBitcoinKey(
-    chainId: string,
-    paymentType?: SupportedPaymentType
-  ): Promise<{
+  async getBitcoinKey(chainId: string): Promise<{
     name: string;
     pubKey: Uint8Array;
     address: string;
@@ -1156,7 +1153,6 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         "get-bitcoin-key",
         {
           chainId,
-          paymentType,
         }
       )
         .then(resolve)

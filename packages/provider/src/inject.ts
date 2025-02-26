@@ -1034,17 +1034,14 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     );
   }
 
-  async getBitcoinKey(
-    chainId: string,
-    paymentType?: SupportedPaymentType
-  ): Promise<{
+  async getBitcoinKey(chainId: string): Promise<{
     name: string;
     pubKey: Uint8Array;
     address: string;
     paymentType: SupportedPaymentType;
     isNanoLedger: boolean;
   }> {
-    return await this.requestMethod("getBitcoinKey", [chainId, paymentType]);
+    return await this.requestMethod("getBitcoinKey", [chainId]);
   }
 
   async getBitcoinKeysSettled(chainIds: string[]): Promise<

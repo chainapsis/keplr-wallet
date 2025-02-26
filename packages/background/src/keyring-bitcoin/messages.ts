@@ -18,10 +18,7 @@ export class GetBitcoinKeyMsg extends Message<{
     return "get-bitcoin-key";
   }
 
-  constructor(
-    public readonly chainId: string,
-    public readonly paymentType?: SupportedPaymentType
-  ) {
+  constructor(public readonly chainId: string) {
     super();
   }
 

@@ -282,10 +282,7 @@ export interface Keplr {
     details: InvocationsSignerDetails;
     signature: string[];
   }>;
-  getBitcoinKey(
-    chainId: string,
-    paymentType?: SupportedPaymentType
-  ): Promise<{
+  getBitcoinKey(chainId: string): Promise<{
     name: string;
     pubKey: Uint8Array;
     address: string;

@@ -79,7 +79,7 @@ const handleGetBitcoinKeyMsg: (
   return async (env, msg) => {
     await permissionInteractionService.ensureEnabledForBitcoin(env, msg.origin);
 
-    return await service.getBitcoinKeySelected(msg.chainId, msg.paymentType);
+    return await service.getBitcoinKeySelected(msg.chainId);
   };
 };
 

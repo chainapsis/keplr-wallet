@@ -28,8 +28,7 @@ export class KeyRingBitcoinService {
 
   async getBitcoinKey(
     vaultId: string,
-    chainId: string,
-    paymentType?: SupportedPaymentType
+    chainId: string
   ): Promise<{
     name: string;
     pubKey: Uint8Array;
@@ -42,11 +41,7 @@ export class KeyRingBitcoinService {
       throw new KeplrError("keyring", 221, "Null key info");
     }
 
-    const params = await this.getBitcoinKeyParams(
-      vaultId,
-      chainId,
-      paymentType
-    );
+    const params = await this.getBitcoinKeyParams(vaultId, chainId);
 
     return {
       name: keyInfo.name,
@@ -57,10 +52,7 @@ export class KeyRingBitcoinService {
     };
   }
 
-  async getBitcoinKeySelected(
-    chainId: string,
-    paymentType?: SupportedPaymentType
-  ): Promise<{
+  async getBitcoinKeySelected(chainId: string): Promise<{
     name: string;
     pubKey: Uint8Array;
     address: string;
@@ -69,15 +61,13 @@ export class KeyRingBitcoinService {
   }> {
     return await this.getBitcoinKey(
       this.keyRingService.selectedVaultId,
-      chainId,
-      paymentType
+      chainId
     );
   }
 
   async getBitcoinKeyParams(
     vaultId: string,
-    chainId: string,
-    paymentType?: SupportedPaymentType
+    chainId: string
   ): Promise<{
     pubKey: Uint8Array;
     address: string;
@@ -93,19 +83,15 @@ export class KeyRingBitcoinService {
       throw new KeplrError("keyring", 221, "Vault not found");
     }
 
-    let adjustedPaymentType: SupportedPaymentType = "taproot"; // default
-    if (paymentType) {
-      adjustedPaymentType = paymentType;
-    } else if ("bitcoin" in chainInfo && chainInfo.bitcoin.paymentType) {
-      adjustedPaymentType = chainInfo.bitcoin.paymentType;
-    } else {
-      const split = chainId.split(":");
-      if (split.length === 2) {
-        const paymentType = split[1];
-        if (paymentType === "native-segwit" || paymentType === "taproot") {
-          adjustedPaymentType = paymentType;
-        }
-      }
+    // {bip122}:{genesisHash}:{paymentType}
+    const split = chainId.split(":");
+    if (split.length < 3) {
+      throw new KeplrError("keyring", 221, "Invalid bitcoin chain id");
+    }
+
+    const paymentType = split[2];
+    if (paymentType !== "native-segwit" && paymentType !== "taproot") {
+      throw new KeplrError("keyring", 221, "Invalid payment type");
     }
 
     // TODO: Ledger support
@@ -119,7 +105,7 @@ export class KeyRingBitcoinService {
 
     let address: string | undefined;
 
-    if (adjustedPaymentType === "native-segwit") {
+    if (paymentType === "native-segwit") {
       const nativeSegwitAddress = bitcoinPubKey.getNativeSegwitAddress(network);
       if (nativeSegwitAddress) {
         address = nativeSegwitAddress;
@@ -138,7 +124,7 @@ export class KeyRingBitcoinService {
     return {
       pubKey: bitcoinPubKey.toBytes(),
       address,
-      paymentType: adjustedPaymentType,
+      paymentType,
     };
   }
 
@@ -296,11 +282,7 @@ export class KeyRingBitcoinService {
       throw new KeplrError("keyring", 221, "Null key info");
     }
 
-    const bitcoinPubKey = await this.getBitcoinKey(
-      vaultId,
-      chainId,
-      signType === "message" ? "native-segwit" : "taproot"
-    );
+    const bitcoinPubKey = await this.getBitcoinKey(vaultId, chainId);
 
     const network = this.getNetwork(chainId);
 
@@ -326,7 +308,6 @@ export class KeyRingBitcoinService {
           return signatureHex;
         }
 
-        // legacy signature
         if (signType === "message") {
           const data = encodeLegacyMessage(network.messagePrefix, message);
 
@@ -349,18 +330,18 @@ export class KeyRingBitcoinService {
         }
 
         const internalPubkey = toXOnly(Buffer.from(bitcoinPubKey.pubKey));
-        const p2tr = payments.p2tr({
+        const { output: scriptPubKey } = payments.p2tr({
           internalPubkey,
           network,
         });
-        if (!p2tr.output) {
+        if (!scriptPubKey) {
           throw new KeplrError("keyring", 221, "Invalid pubkey");
         }
 
-        const txToSpend = BIP322.buildToSpendTx(message, p2tr.output);
+        const txToSpend = BIP322.buildToSpendTx(message, scriptPubKey);
         const txToSign = BIP322.buildToSignTx(
           txToSpend.getId(),
-          p2tr.output,
+          scriptPubKey,
           false,
           internalPubkey
         );

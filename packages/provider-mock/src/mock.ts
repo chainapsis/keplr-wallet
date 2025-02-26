@@ -431,10 +431,7 @@ export class MockKeplr implements Keplr {
     throw new Error("Not implemented");
   }
 
-  getBitcoinKey(
-    _chainId: string,
-    _paymentType?: SupportedPaymentType
-  ): Promise<{
+  getBitcoinKey(_chainId: string): Promise<{
     name: string;
     pubKey: Uint8Array;
     address: string;
