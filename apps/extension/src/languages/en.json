@@ -538,6 +538,7 @@
   "page.send.amount.avoid-cex-warning.title": "Centralized exchanges may not support this type of asset. Avoid transferring to centralized exchanges.",
   "page.send.amount.warning.expected-amount-too-small": "Bridge fee is high compared to the amount used. Big drop in received amount is expected. Click \"Next\" if you still want to proceed.",
   "page.send.amount.warning.expected-amount-too-small-title": "{inAmount} on {srcChain} → {outAmount} on {dstChain}",
+  "page.send.amount.bridge-fee-info.expected-amount": "You will receive",
 
   "page.main.chart.available": "Total Available",
   "page.main.chart.staked": "Total Staked",

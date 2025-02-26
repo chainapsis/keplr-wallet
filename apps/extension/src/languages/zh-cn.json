@@ -506,6 +506,7 @@
   "page.send.amount.avoid-cex-warning.title": "中心化交易所可能不支持此类资产，避免转账到中心化交易所。",
   "page.send.amount.warning.expected-amount-too-small": "与使用的金额相比，过桥费过高。预计收到的金额会大幅下降。如果您还想继续，请单击 \"下一步\"",
   "page.send.amount.warning.expected-amount-too-small-title": "{inAmount} ({srcChain}) → {outAmount} ({dstChain})",
+  "page.send.amount.bridge-fee-info.expected-amount": "你将收到",
 
   "page.main.chart.available": "可用总额",
   "page.main.chart.staked": "质押总额",
