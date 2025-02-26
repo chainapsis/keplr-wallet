@@ -8,9 +8,9 @@ import { Body3 } from "../../../../components/typography";
 import { useGetEarnApy } from "../../../../hooks/use-get-apy";
 import { ColorPalette } from "../../../../styles";
 import { observer } from "mobx-react-lite";
+import { NOBLE_CHAIN_ID } from "../../../../config.ui";
 
 type BottomTagType = "nudgeEarn" | "showEarnSavings";
-const NOBLE_CHAIN_ID = "noble-1";
 
 export const WrapperwithBottomTag = observer(function ({
   children,

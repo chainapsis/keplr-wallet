@@ -130,7 +130,6 @@ export class NobleAccountImpl {
         }
   ) {
     const msg = {
-      // TODO: 이거 뭔지 확인해야함. (noble에서 처음에 실수해서 아직 뭐가 맞는지 정확히 모름)
       type: "dollar/ClaimYield",
       value: {
         signer: this.base.bech32Address,

@@ -15,6 +15,12 @@ import { EarnOverviewClaimSection } from "../components/overview-claim-section";
 import { EarnOverviewBalanceSection } from "../components/overview-balance-section";
 import { NOBLE_CHAIN_ID } from "../../../config.ui";
 
+const USDN_CURRENCY = {
+  coinDenom: "USDN",
+  coinMinimalDenom: "uusdn",
+  coinDecimals: 6,
+};
+
 export const EarnOverviewPage: FunctionComponent = observer(() => {
   const intl = useIntl();
 
@@ -39,13 +45,8 @@ export const EarnOverviewPage: FunctionComponent = observer(() => {
 
   const holdingCurrency = chainInfo.currencies[0];
   const rewardCurrency =
-    chainId === NOBLE_CHAIN_ID
-      ? chainInfo.currencies.find((c) => c.coinMinimalDenom === "uusdn")
-      : {
-          coinDenom: "USDN",
-          coinMinimalDenom: "uusdn",
-          coinDecimals: 6,
-        };
+    chainInfo.currencies.find((c) => c.coinMinimalDenom === "uusdn") ??
+    USDN_CURRENCY;
 
   return (
     <HeaderLayout
@@ -54,10 +55,7 @@ export const EarnOverviewPage: FunctionComponent = observer(() => {
     >
       <Gutter size="1.25rem" />
 
-      <EarnOverviewClaimSection
-        rest={chainInfo.rest}
-        bech32Address={account.bech32Address}
-      />
+      <EarnOverviewClaimSection chainId={chainId} currency={rewardCurrency} />
 
       <Divider direction="horizontal" spacing="1.625rem" />
 
