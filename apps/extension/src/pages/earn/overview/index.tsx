@@ -55,11 +55,7 @@ export const EarnOverviewPage: FunctionComponent = observer(() => {
     >
       <Gutter size="1.25rem" />
 
-      <EarnOverviewClaimSection
-        rest={chainInfo.rest}
-        bech32Address={account.bech32Address}
-        currency={rewardCurrency}
-      />
+      <EarnOverviewClaimSection chainId={chainId} currency={rewardCurrency} />
 
       <Divider direction="horizontal" spacing="1.625rem" />
 

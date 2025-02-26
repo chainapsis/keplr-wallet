@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useStore } from "../../../stores";
 import { Box } from "../../../components/box";
@@ -6,27 +6,84 @@ import { Subtitle3, H4 } from "../../../components/typography";
 import { ColorPalette } from "../../../styles";
 import { Button } from "../../../components/button";
 import { Gutter } from "../../../components/gutter";
-import { CoinPretty } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
 import { Currency } from "@keplr-wallet/types";
 import { observer } from "mobx-react-lite";
+import { useNavigate } from "react-router";
 
 export const EarnOverviewClaimSection: FunctionComponent<{
-  rest: string;
-  bech32Address?: string;
+  chainId: string;
   currency: Currency;
-}> = observer(({ rest, bech32Address, currency }) => {
+}> = observer(({ chainId, currency }) => {
   const intl = useIntl();
+  const navigate = useNavigate();
+  const { queriesStore, chainStore, accountStore } = useStore();
 
-  const { queriesStore } = useStore();
+  const account = accountStore.getAccount(chainId);
+  const chainInfo = chainStore.getChain(chainId);
 
   // TO-DO: use readymade query later
   const claimableAmountRes = queriesStore.simpleQuery.queryGet<{
     claimable_amount: string;
-  }>(rest, `/noble/dollar/v1/yield/${bech32Address}`);
+  }>(chainInfo.rest, `/noble/dollar/v1/yield/${account.bech32Address}`);
   const claimableAmount =
     claimableAmountRes.response?.data?.claimable_amount ?? "0";
 
   const totalAmount = "0"; // TO-DO: use total amount from Satellite
+
+  const [isSimulating, setIsSimulating] = useState(false);
+
+  async function handleClaim() {
+    const defaultGas = 60000;
+
+    try {
+      const tx = account.noble.makeClaimYieldTx("noble-earn-claim-yield");
+      let gas = new Int(defaultGas);
+
+      try {
+        setIsSimulating(true);
+
+        const simulated = await tx.simulate();
+        gas = new Dec(simulated.gasUsed * 1.5).truncate();
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setIsSimulating(false);
+      }
+
+      await tx.send(
+        {
+          gas: gas.toString(),
+          amount: [],
+        },
+        "",
+        {},
+        {
+          onBroadcasted: () => {
+            navigate("/tx-result/pending");
+
+            // TODO: Log analytics
+          },
+          onFulfill: (tx: any) => {
+            if (tx.code != null && tx.code !== 0) {
+              console.log(tx.log ?? tx.raw_log);
+              navigate("/tx-result/failed");
+
+              return;
+            }
+
+            navigate("/tx-result/success");
+          },
+        }
+      );
+    } catch (e) {
+      if (e?.message === "Request rejected") {
+        return;
+      }
+      console.error(e);
+      navigate("/tx-result/failed");
+    }
+  }
 
   return (
     <Box paddingX="1.25rem">
@@ -68,9 +125,8 @@ export const EarnOverviewClaimSection: FunctionComponent<{
         color="primary"
         size="medium"
         disabled={claimableAmount === "0"}
-        onClick={() => {
-          // TODO: Implement claim
-        }}
+        onClick={handleClaim}
+        isLoading={isSimulating}
       />
     </Box>
   );
