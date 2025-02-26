@@ -16,6 +16,7 @@ import { useSearchParams } from "react-router-dom";
 import { useStore } from "../../../stores";
 import {
   EmptyAmountError,
+  useGasSimulator,
   useSendMixedIBCTransferConfig,
   useTxConfigsValidate,
   ZeroAmountError,
@@ -45,6 +46,7 @@ import { WalletStatus } from "@keplr-wallet/stores";
 import { ColorPalette } from "../../../styles";
 import { Input } from "../components/input";
 import { NOBLE_CHAIN_ID } from "../../../config.ui";
+import { DenomHelper, ExtensionKVStore } from "@keplr-wallet/common";
 
 export const EarnTransferAmountPage: FunctionComponent = observer(() => {
   const {
@@ -66,8 +68,11 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
   const initialIBCTransferDestinationChainId = searchParams.get(
     "ibcTransferDestinationChainId"
   );
+  if (!initialChainId || !initialCoinMinimalDenom) {
+    throw new Error("Invalid params");
+  }
 
-  const chainId = initialChainId || chainStore.chainInfosInUI[0].chainId;
+  const chainId = initialChainId;
   const ibcTransferDestinationChainId =
     initialIBCTransferDestinationChainId ?? NOBLE_CHAIN_ID;
   const chainInfo = chainStore.getChain(chainId);
@@ -77,9 +82,7 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
 
   const [errorMessage, setErrorMessage] = useState("");
 
-  const coinMinimalDenom =
-    initialCoinMinimalDenom || chainInfo.currencies[0].coinMinimalDenom;
-  const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
+  const currency = chainInfo.forceFindCurrency(initialCoinMinimalDenom);
   const coinDenom = useMemo(() => {
     if ("originCurrency" in currency && currency.originCurrency) {
       return currency.originCurrency.coinDenom;
@@ -101,16 +104,6 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
     }
   }, []);
 
-  useEffect(() => {
-    if (!initialChainId || !initialCoinMinimalDenom) {
-      navigate(
-        `/send/select-asset?navigateReplace=true&navigateTo=${encodeURIComponent(
-          "/send?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}"
-        )}`
-      );
-    }
-  }, [navigate, initialChainId, initialCoinMinimalDenom]);
-
   const sendConfigs = useSendMixedIBCTransferConfig(
     chainStore,
     queriesStore,
@@ -120,6 +113,59 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
     true
   );
   sendConfigs.amountConfig.setCurrency(currency);
+
+  useGasSimulator(
+    // 어차피 일반 send랑 똑같으니 send 페이지랑 똑같이 쓴다.
+    new ExtensionKVStore("gas-simulator.main.send"),
+    chainStore,
+    chainId,
+    sendConfigs.gasConfig,
+    sendConfigs.feeConfig,
+    "cosmos/native",
+    () => {
+      if (!sendConfigs.amountConfig.currency) {
+        throw new Error("Send currency not set");
+      }
+
+      if (
+        sendConfigs.channelConfig.uiProperties.loadingState ===
+          "loading-block" ||
+        sendConfigs.channelConfig.uiProperties.error != null
+      ) {
+        throw new Error("Not ready to simulate tx");
+      }
+
+      // Prefer not to use the gas config or fee config,
+      // because gas simulator can change the gas config and fee config from the result of reaction,
+      // and it can make repeated reaction.
+      if (
+        sendConfigs.amountConfig.uiProperties.loadingState ===
+          "loading-block" ||
+        sendConfigs.amountConfig.uiProperties.error != null ||
+        sendConfigs.recipientConfig.uiProperties.loadingState ===
+          "loading-block" ||
+        sendConfigs.recipientConfig.uiProperties.error != null
+      ) {
+        throw new Error("Not ready to simulate tx");
+      }
+
+      const denomHelper = new DenomHelper(
+        sendConfigs.amountConfig.currency.coinMinimalDenom
+      );
+      // I don't know why, but simulation does not work for secret20
+      if (denomHelper.type === "secret20") {
+        throw new Error("Simulating secret wasm not supported");
+      }
+
+      return account.cosmos.makePacketForwardIBCTransferTx(
+        accountStore,
+        sendConfigs.channelConfig.channels,
+        sendConfigs.amountConfig.amount[0].toDec().toString(),
+        sendConfigs.amountConfig.amount[0].currency,
+        sendConfigs.recipientConfig.recipient
+      );
+    }
+  );
 
   useIBCChannelConfigQueryString(sendConfigs.channelConfig);
 
@@ -146,7 +192,7 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
   const initialIBCTransferChannels =
     skipQueriesStore.queryIBCPacketForwardingTransfer.getIBCChannels(
       chainId,
-      coinMinimalDenom
+      currency.coinMinimalDenom
     );
 
   useEffect(() => {
@@ -250,7 +296,7 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
                 preferNoSetMemo: true,
                 sendTx: async (chainId, tx, mode) => {
                   let msg: Message<Uint8Array> = new SendTxAndRecordMsg(
-                    "basic-send/ibc",
+                    "noble/transfer/earn",
                     chainId,
                     sendConfigs.recipientConfig.chainId,
                     tx,
@@ -309,6 +355,7 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
                       "usd"
                     );
 
+                    // TODO: analytics를 noble earn 전용으로 수정해야할 것 같음.
                     const params: Record<
                       string,
                       | number
