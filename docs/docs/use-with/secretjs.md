@@ -1,63 +1,96 @@
----
-title: SecretJs
-order: 3
----
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 # Use with SecretJS
-## How to detect Keplr
-Keplr API may be undefined right after the webpage shown.
-Please check the [How to detect Keplr](../getting-started/connect-to-keplr.mdx#how-to-detect-keplr) first before reading this section.
+
+## Prerequisites
+
+### Detecting Keplr
+Keplr API may be undefined immediately after the webpage loads. Ensure you follow the guidelines in the [How to detect Keplr](../getting-started/connect-to-keplr#how-to-detect-keplr) section before proceeding.
+
+### Installing SecretJS Package
+To install the `secretjs` package, use either npm or Yarn:
+
+<Tabs>
+  <TabItem value="npm" label="npm" default>
+  
+  ```bash
+  npm install secretjs
+  ```
+  <a href="https://www.npmjs.com/package/secretjs" target="_blank">View on npm</a>
+  </TabItem>
+
+  <TabItem value="yarn" label="Yarn">
+  
+  ```bash
+  yarn add secretjs
+  ```
+  <a href="https://classic.yarnpkg.com/en/package/secretjs" target="_blank">View on Yarn</a>
+  </TabItem>
+</Tabs>
+
+---
 
 ## Connecting with SecretJS
+The core usage of SecretJS is basically similar to using CosmJS. Refer to the [Use with CosmJS](./cosmjs) section if you need more details.
 
-SecretJS link: [https://www.npmjs.com/package/secretjs](https://www.npmjs.com/package/secretjs)
-The basics of using SecretJS are similar to CosmJS. Refer to the [Use with CosmJs](../use-with/cosmjs) section for more information.  
-  
-One difference between CosmJS and SecretJS is that we recommend using Keplr's `EnigmaUtils`.
-By using Keplr's `EnigmaUtils`, you can use Keplr to encrypt/decrypt, and the decrypted transaction messages are shown to the user in a human-readable format.
+One key difference is that SecretJS utilizes Keplr's `EnigmaUtils` for encryption and decryption. This ensures that decrypted transaction messages are displayed to users in a human-readable format.
+
+### Basic Setup
+Before interacting with SecretJS, it is recommended to enable the Keplr:
 
 ```javascript
-// Enabling before using the Keplr is recommended.
-// This method will ask the user whether or not to allow access if they haven't visited this website.
-// Also, it will request the user to unlock the wallet if the wallet is locked.
-await window.keplr.enable(chainId);
+const CHAIN_ID = "secret-1";
+await keplr.enable(CHAIN_ID);
+```
 
-const offlineSigner = window.getOfflineSigner(chainId);
-**const enigmaUtils = window.getEnigmaUtils(chainId);**
-
-// You can get the address/public keys by `getAccounts` method.
-// It can return the array of address/public key.
-// But, currently, Keplr extension manages only one address/public key pair.
-// XXX: This line is needed to set the sender address for SigningCosmosClient.
+### Initialize SecretJS
+```javascript
+const offlineSigner = keplr.getOfflineSigner(CHAIN_ID, signOptions);
 const accounts = await offlineSigner.getAccounts();
 
-// Initialize the gaia api with the offline signer that is injected by Keplr extension.
-const cosmJS = new SigningCosmWasmClient(
-    "https://lcd-secret.keplr.app/rest",
-    accounts[0].address,
-    offlineSigner,
-    **enigmaUtils**
-);
+// Retrieve EnigmaUtils for encryption/decryption.
+const enigmaUtils = keplr.getEnigmaUtils(CHAIN_ID);
+
+// Initialize the SecretJS client with Keplr's offline signer and EnigmaUtils.
+const secretjs = new SecretNetworkClient({
+  url,
+  chainId: CHAIN_ID,
+  wallet: offlineSigner,
+  walletAddress: accounts[0].address,
+  encryptionUtils: enigmaUtils,
+});
 ```
 
-### Suggest Adding SNIP-20 Tokens to Keplr
+:::note
+Even when using SecretJS, you can leverage Keplr’s native API to customize signing options. For more details, refer to the [Sign Options](../guide/sign-a-message#sign-options) section.
+:::
+
+---
+
+## Managing SNIP-20 Tokens in Keplr
+
+### Adding a SNIP-20 Token
+To request user permission to add a SNIP-20 token to Keplr's token list, use the following method:
 
 ```javascript
-async suggestToken(chainId: string, contractAddress: string): Promise<void>
+function suggestToken(
+  chainId: string, 
+  contractAddress: string
+): Promise<void>
 ```
+- If the user accepts, the token will be added to their Keplr wallet.
+- If the user rejects, an error will be thrown.
+- If the token is already registered, no action will be taken.
 
-The webpage can request the user permission to add a SNIP-20 token to Keplr's token list. Will throw an error if the user rejects the request.  
-If a SNIP-20 with the same contract address already exists, nothing will happen.
+### Retrieving a SNIP-20 Viewing Key
+To obtain the viewing key of a SNIP-20 token registered in Keplr, use:
 
-### Get SNIP-20 Viewing Key
 ```javascript
 getSecret20ViewingKey(
-    chainId: string,
-    contractAddress: string
+  chainId: string,
+  contractAddress: string
 ): Promise<string>;
 ```
-Returns the viewing key of a SNIP-20 token registered in Keplr.  
-If the SNIP-20 of the contract address doesn't exist, it will throw an error.
-
-### Interaction Options
-You can use Keplr native API’s to set interaction options even when using SecretJS. Please refer to [this section](../guide/sign-a-message#sign-options).
+- Returns the viewing key of the specified SNIP-20 token.
+- Throws an error if the token is not registered in Keplr.

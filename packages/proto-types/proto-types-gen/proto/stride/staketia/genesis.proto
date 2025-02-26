@@ -4,7 +4,7 @@ package stride.staketia;
 import "gogoproto/gogo.proto";
 import "stride/staketia/staketia.proto";
 
-option go_package = "github.com/Stride-Labs/stride/v22/x/staketia/types";
+option go_package = "github.com/Stride-Labs/stride/v25/x/staketia/types";
 
 // Params defines the staketia module parameters.
 message Params {}

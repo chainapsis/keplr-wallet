@@ -1785,6 +1785,36 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
         <WarningGuideBox
           amountConfig={ibcSwapConfigs.amountConfig}
+          title={
+            isHighPriceImpact &&
+            !calculatingTxError &&
+            !ibcSwapConfigs.amountConfig.uiProperties.error &&
+            !ibcSwapConfigs.amountConfig.uiProperties.warning
+              ? (() => {
+                  const inPrice = priceStore.calculatePrice(
+                    ibcSwapConfigs.amountConfig.amount[0],
+                    "usd"
+                  );
+                  const outPrice = priceStore.calculatePrice(
+                    ibcSwapConfigs.amountConfig.outAmount,
+                    "usd"
+                  );
+                  return intl.formatMessage(
+                    {
+                      id: "page.ibc-swap.warning.high-price-impact-title",
+                    },
+                    {
+                      inPrice: inPrice?.toString(),
+                      srcChain: ibcSwapConfigs.amountConfig.chainInfo.chainName,
+                      outPrice: outPrice?.toString(),
+                      dstChain: chainStore.getChain(
+                        ibcSwapConfigs.amountConfig.outChainId
+                      ).chainName,
+                    }
+                  );
+                })()
+              : undefined
+          }
           forceError={calculatingTxError}
           forceWarning={(() => {
             if (unablesToPopulatePrice.length > 0) {
@@ -1864,7 +1894,8 @@ const WarningGuideBox: FunctionComponent<{
 
   forceError?: Error;
   forceWarning?: Error;
-}> = observer(({ amountConfig, forceError, forceWarning }) => {
+  title?: string;
+}> = observer(({ amountConfig, forceError, forceWarning, title }) => {
   const error: string | undefined = (() => {
     if (forceError) {
       return forceError.message || forceError.toString();
@@ -1931,6 +1962,18 @@ const WarningGuideBox: FunctionComponent<{
 
   const intl = useIntl();
 
+  const errorText = (() => {
+    const err = error || lastError;
+
+    if (err && err === "could not find a path to execute the requested swap") {
+      return intl.formatMessage({
+        id: "page.ibc-swap.error.no-route-found",
+      });
+    }
+
+    return err;
+  })();
+
   return (
     <React.Fragment>
       {/* 별 차이는 없기는한데 gutter와 실제 컴포넌트의 트랜지션을 분리하는게 아주 약간 더 자연스러움 */}
@@ -1940,21 +1983,9 @@ const WarningGuideBox: FunctionComponent<{
       <VerticalCollapseTransition collapsed={collapsed}>
         <GuideBox
           color="warning"
-          title={(() => {
-            const err = error || lastError;
-
-            if (
-              err &&
-              err === "could not find a path to execute the requested swap"
-            ) {
-              return intl.formatMessage({
-                id: "page.ibc-swap.error.no-route-found",
-              });
-            }
-
-            return err;
-          })()}
-          hideInformationIcon={true}
+          title={title || errorText}
+          paragraph={title ? errorText : undefined}
+          hideInformationIcon={!title}
         />
       </VerticalCollapseTransition>
     </React.Fragment>

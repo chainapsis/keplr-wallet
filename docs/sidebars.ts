@@ -24,6 +24,14 @@ const sidebars: SidebarsConfig = {
         "getting-started/typescript-support",
       ],
     },
+    // {
+    //   type: "category",
+    //   label: "Use with",
+    //   collapsed: false,
+    //   items: ["use-with/cosmjs", "use-with/secretjs"],
+    // },
+    "use-with/cosmjs",
+    "use-with/secretjs",
     {
       type: "category",
       label: "Guide",
@@ -41,17 +49,11 @@ const sidebars: SidebarsConfig = {
     {
       type: "category",
       label: "Multi-Ecosystem Support",
-      collapsed: true,
+      collapsed: false,
       items: [
         "multi-ecosystem-support/evm",
         "multi-ecosystem-support/starknet",
       ],
-    },
-    {
-      type: "category",
-      label: "Use with",
-      collapsed: true,
-      items: ["use-with/cosmjs", "use-with/secretjs"],
     },
   ],
 };

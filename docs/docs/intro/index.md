@@ -25,14 +25,14 @@ Keplr supports a wide range of blockchains, including Cosmos SDK-based chains, E
 Available as both a browser extension and mobile app, Keplr ensures users can securely access their wallets and interact with dApps on their preferred platform. This comprehensive accessibility empowers developers to build scalable and user-friendly dApps that meet modern multi-platform demands.
 
 ## Sections
-[Connect to Keplr](../getting-started/connect-to-keplr) describes how to integrate with Keplr in the webpage.  
+[Connect to Keplr](/api/getting-started/connect-to-keplr) describes how to integrate with Keplr in the webpage.  
 
-[Use with cosmjs](../use-with/cosmjs) describes how to use cosmjs with Keplr.
+[Use with cosmjs](/api/use-with/cosmjs) describes how to use cosmjs with Keplr.
 
-[Use with secretjs](../use-with/secretjs) describes how to use secretjs with Keplr if you need to use secret-wasm feature.
+[Use with secretjs](/api/use-with/secretjs) describes how to use secretjs with Keplr if you need to use secret-wasm feature.
   
-[Suggest chain](../guide/suggest-chain) describes how to suggest the chain to Keplr if the chain is not supported natively in Keplr.
+[Suggest chain](/api/guide/suggest-chain) describes how to suggest the chain to Keplr if the chain is not supported natively in Keplr.
 
-[EVM-based chains support](../multi-ecosystem-support/evm) describes how to support EVM-based chains with Keplr.
+[EVM-based chains support](/api/multi-ecosystem-support/evm) describes how to support EVM-based chains with Keplr.
 
-[Starknet Support](../multi-ecosystem-support/starknet) describes how to support Starknet chains with Keplr.
+[Starknet Support](/api/multi-ecosystem-support/starknet) describes how to support Starknet chains with Keplr.

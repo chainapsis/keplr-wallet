@@ -393,7 +393,8 @@
   "page.ibc-swap.button.next": "Next",
   "page.ibc-swap.error.no-route-found": "No routes found for this swap",
   "page.ibc-swap.warning.unable-to-populate-price": "Unable to retrieve {assets} price from Coingecko. Check the fiat values of input and output from other sources before clicking \"Next\".",
-  "page.ibc-swap.warning.high-price-impact": "Due to a lack of liquidity, there is a significant difference in the USD value between the assets before and after the swap. Click \"Next\" if you still want to proceed.",
+  "page.ibc-swap.warning.high-price-impact-title": "{inPrice} on {srcChain} → {outPrice} on {dstChain}",
+  "page.ibc-swap.warning.high-price-impact": "Big drop in USD value detected due to low liquidity. Review your trade, or click \"Next\" to continue.",
   "page.ibc-swap.components.swap-asset-info.from": "From",
   "page.ibc-swap.components.swap-asset-info.to": "To",
   "page.ibc-swap.components.swap-asset-info.max-asset": "Max: {asset}",
@@ -428,9 +429,16 @@
   "page.sign.cosmos.lava.guide.title": "🌋 Using Lava Endpoints",
   "page.sign.cosmos.lava.guide.paragraph": "You are currently using endpoints provided Lava.",
 
-  "page.sign.adr36.title": "Prove Ownership",
-  "page.sign.adr36.prove-account-ownership-to": "Prove account ownership to",
+  "page.sign.adr36.title": "Signature Request",
+  "page.sign.adr36.title.from-keplr": "Sign in with Keplr",
+  "page.sign.adr36.warning-origin": "Only approve if you trust this website",
+  "page.sign.adr36.signing-with": "Signing with",
   "page.sign.adr36.requested-network": "Requested Network",
+  "page.sign.adr36.message": "Message",
+  "page.sign.adr36.raw-message": "Advanced",
+  "page.sign.adr36.show-more-detail": "Show more",
+  "page.sign.adr36.show-less-detail": "Show less",
+
   "page.sign.adr36.warning-title": "Incompatible Signing Requested",
   "page.sign.adr36.warning-paragraph": "Error: SIGN_MODE_DIRECT can’t be signed on Ledger. Contact the web app provider to fix this issue.",
 

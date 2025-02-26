@@ -600,7 +600,9 @@ export class KeyRingEthereumService {
             origin,
             currentChainId,
             signer,
-            Buffer.from(message),
+            message.startsWith("0x")
+              ? Buffer.from(message.slice(2), "hex")
+              : Buffer.from(message, "utf8"),
             EthSignType.MESSAGE
           );
 
