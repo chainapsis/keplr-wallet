@@ -3174,19 +3174,18 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
   },
   {
     chainId:
-      "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:taproot",
+      "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:taproot",
     chainName: "Bitcoin",
     chainSymbolImageUrl:
       "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
     linkedChainIds: [
-      "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:native-segwit",
+      "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:native-segwit",
     ],
     bitcoin: {
       chainId:
-        "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
+        "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
       rpc: "",
       rest: "",
-      paymentType: "taproot",
       coinType: 0,
       bech32: "bc",
       messagePrefix: "\x18Bitcoin Signed Message:\n",
@@ -3195,19 +3194,18 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
   },
   {
     chainId:
-      "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:native-segwit",
+      "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:native-segwit",
     chainName: "Bitcoin",
     chainSymbolImageUrl:
       "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
     linkedChainIds: [
-      "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:taproot",
+      "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:taproot",
     ],
     bitcoin: {
       chainId:
-        "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
+        "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
       rpc: "",
       rest: "",
-      paymentType: "native-segwit",
       coinType: 0,
       bech32: "bc",
       messagePrefix: "\x18Bitcoin Signed Message:\n",
@@ -3216,19 +3214,18 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
   },
   {
     chainId:
-      "000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943:taproot",
+      "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943:taproot",
     chainName: "Bitcoin Testnet",
     chainSymbolImageUrl:
       "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
     linkedChainIds: [
-      "000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943:native-segwit",
+      "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943:native-segwit",
     ],
     bitcoin: {
       chainId:
-        "000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943",
+        "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943",
       rpc: "",
       rest: "",
-      paymentType: "taproot",
       coinType: 1,
       bech32: "tb",
       messagePrefix: "\x18Bitcoin Signed Message:\n",
@@ -3237,19 +3234,18 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
   },
   {
     chainId:
-      "000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943:native-segwit",
+      "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943:native-segwit",
     chainName: "Bitcoin Testnet",
     chainSymbolImageUrl:
       "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
     linkedChainIds: [
-      "000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943:taproot",
+      "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943:taproot",
     ],
     bitcoin: {
       chainId:
-        "000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943",
+        "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943",
       rpc: "",
       rest: "",
-      paymentType: "native-segwit",
       coinType: 1,
       bech32: "tb",
       messagePrefix: "\x18Bitcoin Signed Message:\n",
@@ -3258,19 +3254,18 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
   },
   {
     chainId:
-      "00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6:taproot",
+      "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6:taproot",
     chainName: "Bitcoin Signet",
     chainSymbolImageUrl:
       "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
     linkedChainIds: [
-      "00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6:native-segwit",
+      "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6:native-segwit",
     ],
     bitcoin: {
       chainId:
-        "00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6",
+        "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6",
       rpc: "",
       rest: "",
-      paymentType: "taproot",
       // signet shares parameters with testnet
       coinType: 1,
       bech32: "tb",
@@ -3280,19 +3275,18 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
   },
   {
     chainId:
-      "00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6:native-segwit",
+      "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6:native-segwit",
     chainName: "Bitcoin Signet",
     chainSymbolImageUrl:
       "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
     linkedChainIds: [
-      "00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6:taproot",
+      "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6:taproot",
     ],
     bitcoin: {
       chainId:
-        "00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6",
+        "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6",
       rpc: "",
       rest: "",
-      paymentType: "native-segwit",
       coinType: 1,
       bech32: "tb",
       messagePrefix: "\x18Bitcoin Signed Message:\n",

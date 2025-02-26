@@ -75,7 +75,6 @@ export interface BitcoinChainInfo {
   readonly rpc: string;
   readonly rest: string;
   readonly chainId: string;
-  readonly paymentType: "native-segwit" | "taproot";
   readonly coinType: number;
   readonly bech32: string;
   readonly messagePrefix: string;
