@@ -358,6 +358,7 @@ export function init(
       await keyRingCosmosService.init();
       await keyRingEthereumService.init();
       await keyRingStarknetService.init();
+      await keyRingBitcoinService.init();
       await permissionService.init();
       await tokenCW20Service.init();
       await tokenERC20Service.init();
