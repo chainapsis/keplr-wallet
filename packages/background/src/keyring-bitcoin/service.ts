@@ -340,8 +340,8 @@ export class KeyRingBitcoinService {
           const encodedSignature = encodeLegacySignature(
             sig.r,
             sig.s,
-            sig.v ?? 0, // TODO: check if this is correct
-            true,
+            sig.v!,
+            true, // @noble/curves/secp256k1 is using compressed pubkey
             "p2wpkh"
           );
 
