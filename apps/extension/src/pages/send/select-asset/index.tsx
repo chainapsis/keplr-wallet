@@ -50,6 +50,9 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
 
   const tokens = hugeQueriesStore.getAllBalances({
     allowIBCToken: !hideIBCToken,
+    //현재 스왑에서는 해당 페이지를 쓰는게 from일때라서 paramIsIBCSwap이 true이면
+    //필터링을 활성화함
+    enableFilterDisabledAssetToken: paramIsIBCSwap,
   });
 
   const _filteredTokens = useMemo(() => {
