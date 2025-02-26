@@ -35,6 +35,7 @@ import { dispatchGlobalEventExceptSelf } from "../../../../utils/global-events";
 import { isRunningInSidePanel } from "../../../../utils";
 import { IconProps } from "../../../../components/icon/types";
 import { useGetSearchChains } from "../../../../hooks/use-get-search-chains";
+import { LookingForChainItem } from "../looking-for-chains";
 
 export const CopyAddressScene: FunctionComponent<{
   close: () => void;
@@ -408,6 +409,18 @@ export const CopyAddressScene: FunctionComponent<{
               <FormattedMessage id="page.main.components.deposit-modal.look-for-chains" />
             </Subtitle4>
             {lookingForChains.map((chainData) => {
+              if (chainData.embedded) {
+                return (
+                  <React.Fragment key={chainData.chainInfo.chainId}>
+                    <Gutter size="0.75rem" />
+                    <LookingForChainItem
+                      chainInfo={chainData.chainInfo}
+                      stored={chainData.stored}
+                      embedded={chainData.embedded}
+                    />
+                  </React.Fragment>
+                );
+              }
               return (
                 <EnableChainItem
                   key={chainData.chainInfo.chainId}
@@ -791,6 +804,7 @@ const EnableChainItem: FunctionComponent<{
       >
         <XAxis alignY="center">
           <ChainImageFallback chainInfo={chainInfo} size="2rem" />
+
           <Gutter size="0.5rem" />
           <Subtitle3
             color={
