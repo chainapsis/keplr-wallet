@@ -36,6 +36,7 @@ import {
 } from "../../earn/utils";
 import { Button } from "../../../components/button";
 import { FormattedMessage } from "react-intl";
+import { NOBLE_CHAIN_ID } from "../../../config.ui";
 
 const Styles = {
   Container: styled.div`
@@ -527,7 +528,7 @@ export const TokenDetailModal: FunctionComponent<{
               const chainInfo = chainStore.getChain(chainId);
 
               if (validateIsUsdcFromNoble(currency, chainId)) {
-                return <EarnApyBanner chainId="noble-1" />;
+                return <EarnApyBanner chainId={NOBLE_CHAIN_ID} />;
               }
 
               if (

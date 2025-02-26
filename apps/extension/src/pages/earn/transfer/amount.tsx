@@ -44,6 +44,7 @@ import { amountToAmbiguousAverage } from "../../../utils";
 import { WalletStatus } from "@keplr-wallet/stores";
 import { ColorPalette } from "../../../styles";
 import { Input } from "../components/input";
+import { NOBLE_CHAIN_ID } from "../../../config.ui";
 
 export const EarnTransferAmountPage: FunctionComponent = observer(() => {
   const {
@@ -68,7 +69,7 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
 
   const chainId = initialChainId || chainStore.chainInfosInUI[0].chainId;
   const ibcTransferDestinationChainId =
-    initialIBCTransferDestinationChainId ?? "duke-1";
+    initialIBCTransferDestinationChainId ?? NOBLE_CHAIN_ID;
   const chainInfo = chainStore.getChain(chainId);
   const ibcTransferDestinationChainInfo = chainStore.getChain(
     ibcTransferDestinationChainId

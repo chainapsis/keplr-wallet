@@ -13,8 +13,7 @@ import { StakeWithKeplrDashboardButton } from "../stake-with-keplr-dashboard-but
 import { useStore } from "../../../../stores";
 import { useGetEarnApy } from "../../../../hooks/use-get-apy";
 import { observer } from "mobx-react-lite";
-
-const NOBLE_CHAIN_ID = "duke-1";
+import { NOBLE_CHAIN_ID } from "../../../../config.ui";
 
 export const AvailableTabSlideList = observer(() => {
   const navigate = useNavigate();

@@ -17,6 +17,7 @@ import { validateIsUsdcFromNoble } from "../utils";
 import { Input } from "../components/input";
 import { useNobleEarnAmountConfig } from "@keplr-wallet/hooks-internal";
 import { EmptyAmountError, ZeroAmountError } from "@keplr-wallet/hooks";
+import { NOBLE_CHAIN_ID } from "../../../config.ui";
 
 const NOBLE_EARN_DEPOSIT_OUT_COIN_MINIMAL_DENOM = "uusdn";
 
@@ -27,7 +28,7 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
 
   const [searchParams] = useSearchParams();
   const isFromEarnTransfer = searchParams.get("isFromEarnTransfer");
-  const chainId = searchParams.get("chainId") || "duke-1"; // Noble devnet: "duke-1", mainnet: "noble-1"
+  const chainId = searchParams.get("chainId") || NOBLE_CHAIN_ID;
   const coinMinimalDenom = searchParams.get("coinMinimalDenom");
 
   const chainInfo = chainStore.getChain(chainId);

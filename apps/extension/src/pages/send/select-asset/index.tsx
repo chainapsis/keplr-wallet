@@ -16,9 +16,9 @@ import { useFocusOnMount } from "../../../hooks/use-focus-on-mount";
 import { useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router";
 import { FormattedMessage, useIntl } from "react-intl";
-import { IBCCurrency } from "@keplr-wallet/types";
 import { Box } from "../../../components/box";
 import { Gutter } from "../../../components/gutter";
+import { NOBLE_CHAIN_ID } from "../../../config.ui";
 const Styles = {
   Container: styled(Stack)<{ isNobleEarn: boolean }>`
     padding: ${({ isNobleEarn }) =>
@@ -100,7 +100,13 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
     }
 
     if (paramIsNobleEarn) {
-      return (token.token.currency as IBCCurrency)?.originChainId === "duke-1";
+      if (
+        "originChainId" in token.token.currency &&
+        token.token.currency.originChainId === NOBLE_CHAIN_ID
+      ) {
+        return true;
+      }
+      return false;
     }
 
     return true;

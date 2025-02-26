@@ -12,6 +12,7 @@ import { Gutter } from "../../../components/gutter";
 import { Column, Columns } from "../../../components/column";
 import { ColorPalette } from "../../../styles";
 import { Stack } from "../../../components/stack";
+import { NOBLE_CHAIN_ID } from "../../../config.ui";
 
 export const EarnTransferIntroPage: FunctionComponent = observer(() => {
   const intl = useIntl();
@@ -36,7 +37,7 @@ export const EarnTransferIntroPage: FunctionComponent = observer(() => {
 
         navigate(
           `/send/select-asset?isNobleEarn=true&navigateTo=${encodeURIComponent(
-            "/earn/transfer/amount?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}&ibcTransferDestinationChainId=duke-1"
+            `/earn/transfer/amount?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}&ibcTransferDestinationChainId=${NOBLE_CHAIN_ID}`
           )}`
         );
       }}

@@ -22,6 +22,7 @@ import { Modal } from "../../../components/modal";
 import { DescriptionModal } from "../components/description-modal";
 import { ApyChip } from "../components/chip";
 import { useTheme } from "styled-components";
+import { NOBLE_CHAIN_ID } from "../../../config.ui";
 
 export const EarnIntroPage: FunctionComponent = observer(() => {
   const [isLearnMoreModalOpen, setIsLearnMoreModalOpen] = useState(false);
@@ -32,7 +33,7 @@ export const EarnIntroPage: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
 
   const [searchParams] = useSearchParams();
-  const chainId = searchParams.get("chainId") || "duke-1"; // Noble devnet: "duke-1", mainnet: "noble-1"
+  const chainId = searchParams.get("chainId") || NOBLE_CHAIN_ID;
   const coinMinimalDenom = searchParams.get("coinMinimalDenom") || "uusdc";
   const chainInfo = chainStore.getChain(chainId);
   const currency =
