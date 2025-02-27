@@ -3216,7 +3216,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       chainId:
         "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943",
       rpc: "",
-      rest: "",
+      rest: "https://blockstream.info/testnet/api",
       coinType: 1,
     },
   },
@@ -3232,7 +3232,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       chainId:
         "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943",
       rpc: "",
-      rest: "",
+      rest: "https://blockstream.info/testnet/api",
       coinType: 1,
     },
   },
@@ -3264,7 +3264,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       chainId:
         "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6",
       rpc: "",
-      rest: "",
+      rest: "https://explorer.bc-2.jp/api",
       coinType: 1,
     },
   },
