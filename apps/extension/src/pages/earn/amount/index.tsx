@@ -1,4 +1,4 @@
-import React, { Fragment, FunctionComponent, useMemo } from "react";
+import React, { Fragment, FunctionComponent, useEffect, useMemo } from "react";
 import { observer } from "mobx-react-lite";
 import { HeaderLayout } from "../../../layouts/header";
 import { BackButton } from "../../../layouts/header/components";
@@ -29,11 +29,14 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
   const [searchParams] = useSearchParams();
   const isFromEarnTransfer = searchParams.get("isFromEarnTransfer");
   const chainId = searchParams.get("chainId") || NOBLE_CHAIN_ID;
-  const coinMinimalDenom = searchParams.get("coinMinimalDenom") || "uusdc";
+  const coinMinimalDenom = searchParams.get("coinMinimalDenom");
 
   const chainInfo = chainStore.getChain(chainId);
   const account = accountStore.getAccount(chainId);
-  const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
+  const currency =
+    chainInfo.currencies.find(
+      (currency) => currency.coinMinimalDenom === coinMinimalDenom
+    ) ?? chainInfo.currencies[0];
 
   const balanceQuery = queriesStore
     .get(chainId)
@@ -57,7 +60,7 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
 
   const amountInput = nobleEarnAmountConfig.amountConfig.value;
 
-  const amountError = useMemo(() => {
+  const amountInputError = useMemo(() => {
     const uiProperties = nobleEarnAmountConfig.amountConfig.uiProperties;
 
     const err = uiProperties.error || uiProperties.warning;
@@ -76,11 +79,21 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
   }, [nobleEarnAmountConfig.amountConfig.uiProperties]);
 
   const isSubmissionBlocked =
-    !amountInput || amountInput === "0" || !!amountError;
+    !amountInput ||
+    amountInput === "0" ||
+    !!amountInputError ||
+    !!nobleEarnAmountConfig.amountConfig.error;
 
   function maximizeInput() {
     nobleEarnAmountConfig.amountConfig.setFraction(1);
   }
+
+  useEffect(() => {
+    console.log("[log] error?", nobleEarnAmountConfig.amountConfig.error);
+    if (nobleEarnAmountConfig.amountConfig.error) {
+      console.error(nobleEarnAmountConfig.amountConfig.error);
+    }
+  }, [nobleEarnAmountConfig.amountConfig]);
 
   return (
     <HeaderLayout
@@ -98,17 +111,6 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
             : {})}
         />
       }
-      onSubmit={(e) => {
-        e.preventDefault();
-
-        if (isSubmissionBlocked) {
-          return;
-        }
-
-        if (validateIsUsdcFromNoble(currency, chainId)) {
-          navigate(`/earn/confirm-usdn-estimation?amount=${amountInput}`);
-        }
-      }}
       bottomButtons={
         isSubmissionBlocked
           ? undefined
@@ -119,6 +121,17 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
                 size: "large",
                 type: "submit",
                 disabled: isSubmissionBlocked,
+                onClick: async () => {
+                  if (isSubmissionBlocked) {
+                    return;
+                  }
+
+                  if (validateIsUsdcFromNoble(currency, chainId)) {
+                    navigate(
+                      `/earn/confirm-usdn-estimation?amount=${amountInput}`
+                    );
+                  }
+                },
               },
             ]
       }
@@ -144,16 +157,16 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
           type="number"
           placeholder={`0 ${currency?.coinDenom ?? ""}`}
           value={amountInput}
-          warning={amountError != null}
+          warning={amountInputError != null}
           onChange={(e) => {
             nobleEarnAmountConfig.amountConfig.setValue(e.target.value);
           }}
           autoComplete="off"
         />
 
-        {amountError && (
+        {amountInputError && (
           <Box marginTop="0.75rem">
-            <Body2 color={ColorPalette["red-300"]}>{amountError}</Body2>
+            <Body2 color={ColorPalette["red-300"]}>{amountInputError}</Body2>
           </Box>
         )}
 

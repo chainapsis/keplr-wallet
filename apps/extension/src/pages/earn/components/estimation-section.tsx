@@ -12,17 +12,17 @@ import { LongArrowDownIcon } from "../../../components/icon/long-arrow-down";
 import { NOBLE_CHAIN_ID } from "../../../config.ui";
 
 export const EstimationSection: FunctionComponent<{
-  usdcAmount: CoinPretty;
-}> = ({ usdcAmount }) => {
+  inAmount: CoinPretty;
+  outAmount: CoinPretty;
+}> = ({ inAmount, outAmount }) => {
   const intl = useIntl();
-
-  // const DEFAULT_SLIPPAGE_RATE = 0.005;
-  const simulatedUsdnAmount = usdcAmount; // TO-DO: dummy. request simluate
 
   const renderAmount = (amount: CoinPretty) => (
     <Box>
       <XAxis>
-        <H3 color={ColorPalette.white}>{amount.hideDenom(true).toString()}</H3>
+        <H3 color={ColorPalette.white}>
+          {amount.shrink(true).hideDenom(true).trim(true).toString()}
+        </H3>
         <Gutter size="0.25rem" />
         <H3 color={ColorPalette["gray-300"]}>{amount.denom}</H3>
       </XAxis>
@@ -47,7 +47,7 @@ export const EstimationSection: FunctionComponent<{
         })}
       />
       <Gutter size="0.75rem" />
-      {renderAmount(usdcAmount)}
+      {renderAmount(inAmount)}
 
       <Gutter size="0.5rem" />
       <Box alignX="center">
@@ -65,7 +65,7 @@ export const EstimationSection: FunctionComponent<{
         <Chip colorType="green" text="EARN" />
       </XAxis>
       <Gutter size="0.75rem" />
-      {renderAmount(simulatedUsdnAmount)}
+      {renderAmount(outAmount)}
     </Box>
   );
 };

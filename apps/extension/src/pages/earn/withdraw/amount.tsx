@@ -1,4 +1,10 @@
-import React, { Fragment, FunctionComponent, useMemo, useState } from "react";
+import React, {
+  Fragment,
+  FunctionComponent,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { observer } from "mobx-react-lite";
 import { HeaderLayout } from "../../../layouts/header";
 import { BackButton } from "../../../layouts/header/components";
@@ -150,6 +156,13 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
     gasSimulator,
   });
 
+  useEffect(() => {
+    console.log("[log] error?", nobleEarnAmountConfig.amountConfig.error);
+    if (nobleEarnAmountConfig.amountConfig.error) {
+      console.error(nobleEarnAmountConfig.amountConfig.error);
+    }
+  }, [nobleEarnAmountConfig.amountConfig]);
+
   return (
     <HeaderLayout
       title={""} // No title for this page
@@ -168,7 +181,9 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
       }
       bottomButtons={[
         {
-          disabled: txConfigsValidate.interactionBlocked,
+          disabled:
+            txConfigsValidate.interactionBlocked ||
+            !!nobleEarnAmountConfig.amountConfig.error,
           text: intl.formatMessage({ id: "button.next" }),
           color: "primary",
           size: "large",
