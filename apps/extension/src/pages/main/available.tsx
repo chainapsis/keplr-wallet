@@ -106,9 +106,9 @@ export const AvailableTabView: FunctionComponent<{
           (chainInfo) => !chainStore.isEnabledChain(chainInfo.chainId)
         );
 
-      const disabledStarknetChainInfos = chainStore.modularChainInfos.filter(
+      const disabledModularChainInfos = chainStore.modularChainInfos.filter(
         (modularChainInfo) =>
-          "starknet" in modularChainInfo &&
+          ("starknet" in modularChainInfo || "bitcoin" in modularChainInfo) &&
           !chainStore.isEnabledChain(modularChainInfo.chainId) &&
           trimSearch.length >= 3 &&
           (modularChainInfo.chainId.toLowerCase().includes(trimSearch) ||
@@ -117,7 +117,7 @@ export const AvailableTabView: FunctionComponent<{
       );
 
       disabledChainInfos = [
-        ...new Set([...disabledChainInfos, ...disabledStarknetChainInfos]),
+        ...new Set([...disabledChainInfos, ...disabledModularChainInfos]),
       ].sort((a, b) => a.chainName.localeCompare(b.chainName));
 
       return disabledChainInfos.reduce(
@@ -125,10 +125,10 @@ export const AvailableTabView: FunctionComponent<{
           let embedded: boolean | undefined = false;
           let stored: boolean = true;
 
-          const isStarknet = "starknet" in chainInfo;
+          const isModular = "starknet" in chainInfo || "bitcoin" in chainInfo;
 
           try {
-            if (isStarknet) {
+            if (isModular) {
               embedded = true;
             } else {
               const chainInfoInStore = chainStore.getChain(chainInfo.chainId);
