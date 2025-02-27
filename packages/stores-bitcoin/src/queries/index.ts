@@ -6,8 +6,7 @@ export class BitcoinQueriesStore {
 
   constructor(
     protected readonly sharedContext: QuerySharedContext,
-    protected readonly chainGetter: ChainGetter,
-    protected readonly tokenContractListURL: string
+    protected readonly chainGetter: ChainGetter
   ) {}
 
   public get(chainId: string): DeepReadonly<BitcoinQueriesStoreImpl> {
@@ -19,8 +18,7 @@ export class BitcoinQueriesStore {
     const store = new BitcoinQueriesStoreImpl(
       this.sharedContext,
       chainId,
-      this.chainGetter,
-      this.tokenContractListURL
+      this.chainGetter
     );
     this.map.set(chainId, store);
 
@@ -34,8 +32,7 @@ class BitcoinQueriesStoreImpl {
   constructor(
     protected readonly sharedContext: QuerySharedContext,
     protected readonly chainId: string,
-    protected readonly chainGetter: ChainGetter,
-    protected readonly tokenContractListURL: string
+    protected readonly chainGetter: ChainGetter
   ) {
     this.queryBitcoinBalance = new ObservableQueryBitcoinBalance(sharedContext);
   }
