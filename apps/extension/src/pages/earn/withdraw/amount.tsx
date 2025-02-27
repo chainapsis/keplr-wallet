@@ -97,18 +97,7 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
 
   const [isConfirmView, setIsConfirmView] = useState(false);
 
-  const poolForWithdraw = queriesStore
-    .get(chainId)
-    .noble.querySwapPools.pools.find(
-      (pool) =>
-        pool.liquidity.some(
-          (coin) => coin.denom === currency.coinMinimalDenom
-        ) &&
-        pool.liquidity.some(
-          (coin) => coin.denom === outCurrency.coinMinimalDenom
-        ) &&
-        pool.algorithm === "STABLESWAP"
-    );
+  const poolForWithdraw = nobleEarnAmountConfig.amountConfig.pool;
 
   const gasSimulator = useGasSimulator(
     new ExtensionKVStore("gas-simulator.main.send"),

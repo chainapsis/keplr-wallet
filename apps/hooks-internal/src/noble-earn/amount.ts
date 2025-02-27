@@ -12,6 +12,7 @@ import {
   CosmosAccount,
   IAccountStoreWithInjects,
   IQueriesStore,
+  NobleSwapPool,
 } from "@keplr-wallet/stores";
 import { useState } from "react";
 import { action, makeObservable, observable } from "mobx";
@@ -59,16 +60,13 @@ export class NobleEarnAmountConfig extends AmountConfig {
     this._error = error;
   }
 
-  get expectedOutAmount(): CoinPretty {
-    if (this.amount[0].toDec().isZero()) {
-      return new CoinPretty(this.outCurrency, "0");
-    }
-
+  get pool(): NobleSwapPool | undefined {
     const rates = this.queriesStore
       .get(this.chainId)
       .noble?.querySwapRates.getQueryCoinMinimalDenom(
         this.amount[0].currency.coinMinimalDenom
       ).rates;
+
     const bestRate = rates?.reduce((best, rate) => {
       if (new Dec(best.price).gt(new Dec(rate.price))) {
         return rate;
@@ -78,7 +76,8 @@ export class NobleEarnAmountConfig extends AmountConfig {
 
     const pools = this.queriesStore.get(this.chainId).noble?.querySwapPools
       .pools;
-    const pool = pools?.find(
+
+    return pools?.find(
       (pool) =>
         pool.algorithm === bestRate?.algorithm &&
         pool.liquidity.some(
@@ -88,17 +87,23 @@ export class NobleEarnAmountConfig extends AmountConfig {
           (liq) => liq.denom === this.outCurrency.coinMinimalDenom
         )
     );
+  }
+
+  get expectedOutAmount(): CoinPretty {
+    if (this.amount[0].toDec().isZero()) {
+      return new CoinPretty(this.outCurrency, "0");
+    }
 
     const min = this.amount[0].mul(new Dec(0.99));
 
     const nobleSwapSimulateSwap =
-      pool &&
+      this.pool &&
       this.queriesStore.get(this.chainId).noble?.querySwapSimulateSwap.getQuery(
         this.senderConfig.sender,
         this.amount[0].toCoin(),
         [
           {
-            pool_id: pool.id,
+            pool_id: this.pool.id,
             denom_to: this.outCurrency.coinMinimalDenom,
           },
         ],

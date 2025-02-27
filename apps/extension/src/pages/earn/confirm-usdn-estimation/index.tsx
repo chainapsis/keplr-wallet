@@ -72,18 +72,7 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
     outCurrency
   );
 
-  const poolForDeposit = queriesStore
-    .get(NOBLE_CHAIN_ID)
-    .noble.querySwapPools.pools.find(
-      (pool) =>
-        pool.liquidity.some(
-          (coin) => coin.denom === inCurrency.coinMinimalDenom
-        ) &&
-        pool.liquidity.some(
-          (coin) => coin.denom === outCurrency.coinMinimalDenom
-        ) &&
-        pool.algorithm === "STABLESWAP"
-    );
+  const poolForDeposit = nobleEarnAmountConfig.amountConfig.pool;
 
   const gasSimulator = useGasSimulator(
     new ExtensionKVStore("gas-simulator.main.send"),
