@@ -288,6 +288,186 @@ export class HugeQueriesStore {
     }
   }
 
+  //Select chain에서만 사용될 거 라고 가정해서 만들어서
+  @action
+  getAllTokenMapByChainIdentifier(): Map<string, ViewToken[]> {
+    const tokensByChainId = new Map<string, ViewToken[]>();
+    const modularChainInfos = this.chainStore.modularChainInfos.filter(
+      (chainInfo) => {
+        if ("cosmos" in chainInfo && chainInfo.cosmos.hideInUI) {
+          return false;
+        }
+        return true;
+      }
+    );
+
+    for (const modularChainInfo of modularChainInfos) {
+      const chainIdentifier = ChainIdHelper.parse(
+        modularChainInfo.chainId
+      ).identifier;
+
+      if (!tokensByChainId.has(chainIdentifier)) {
+        tokensByChainId.set(chainIdentifier, []);
+      }
+
+      const account = this.accountStore.getAccount(modularChainInfo.chainId);
+      if ("cosmos" in modularChainInfo) {
+        const chainInfo = this.chainStore.getChain(modularChainInfo.chainId);
+
+        const mainCurrency = chainInfo.stakeCurrency || chainInfo.currencies[0];
+
+        if (account.bech32Address === "") {
+          continue;
+        }
+        const queries = this.queriesStore.get(chainInfo.chainId);
+
+        const currencies = [...chainInfo.currencies];
+        if (chainInfo.stakeCurrency) {
+          currencies.push(chainInfo.stakeCurrency);
+        }
+
+        for (const currency of currencies) {
+          const denomHelper = new DenomHelper(currency.coinMinimalDenom);
+          const isERC20 = denomHelper.type === "erc20";
+          const isMainCurrency =
+            mainCurrency.coinMinimalDenom === currency.coinMinimalDenom;
+          const queryBalance =
+            this.chainStore.isEvmChain(chainInfo.chainId) &&
+            (isMainCurrency || isERC20)
+              ? queries.queryBalances.getQueryEthereumHexAddress(
+                  account.ethereumHexAddress
+                )
+              : queries.queryBalances.getQueryBech32Address(
+                  account.bech32Address
+                );
+
+          if (
+            chainInfo.stakeCurrency?.coinMinimalDenom ===
+            currency.coinMinimalDenom
+          ) {
+            const balance = queryBalance.stakable?.balance;
+            if (!balance) {
+              continue;
+            }
+
+            if (
+              tokensByChainId
+                .get(chainIdentifier)!
+                .find(
+                  (token) =>
+                    token.token.currency.coinMinimalDenom ===
+                    currency.coinMinimalDenom
+                )
+            ) {
+              continue;
+            }
+
+            tokensByChainId.get(chainIdentifier)!.push({
+              chainInfo,
+              token: balance,
+              price: currency.coinGeckoId
+                ? this.priceStore.calculatePrice(balance)
+                : undefined,
+              isFetching: queryBalance.stakable.isFetching,
+              error: queryBalance.stakable.error,
+            });
+          } else {
+            const balance = queryBalance.getBalance(currency);
+            if (balance) {
+              if (balance.balance.toDec().equals(HugeQueriesStore.zeroDec)) {
+                const denomHelper = new DenomHelper(currency.coinMinimalDenom);
+                // If the balance is zero and currency is "native" or "erc20", don't show it.
+                if (
+                  denomHelper.type === "native" ||
+                  denomHelper.type === "erc20"
+                ) {
+                  // However, if currency is native currency and not ibc, and same with currencies[0],
+                  // just show it as 0 balance.
+                  if (
+                    chainInfo.currencies.length > 0 &&
+                    chainInfo.currencies[0].coinMinimalDenom ===
+                      currency.coinMinimalDenom &&
+                    !currency.coinMinimalDenom.startsWith("ibc/")
+                  ) {
+                    // 위의 if 문을 뒤집기(?) 귀찮아서 그냥 빈 if-else로 처리한다...
+                  } else {
+                    continue;
+                  }
+                }
+              }
+
+              tokensByChainId.get(chainIdentifier)!.push({
+                chainInfo,
+                token: balance.balance,
+                price: currency.coinGeckoId
+                  ? this.priceStore.calculatePrice(balance.balance)
+                  : undefined,
+                isFetching: balance.isFetching,
+                error: balance.error,
+              });
+            }
+          }
+        }
+      }
+
+      if ("starknet" in modularChainInfo) {
+        if (account.starknetHexAddress === "") {
+          continue;
+        }
+
+        const modularChainInfoImpl = this.chainStore.getModularChainInfoImpl(
+          modularChainInfo.chainId
+        );
+        const queries = this.starknetQueriesStore.get(modularChainInfo.chainId);
+        const currencies = modularChainInfoImpl.getCurrencies("starknet");
+
+        for (const currency of currencies) {
+          const queryBalance = queries.queryStarknetERC20Balance.getBalance(
+            modularChainInfo.chainId,
+            this.chainStore,
+            account.starknetHexAddress,
+            currency.coinMinimalDenom
+          );
+
+          if (!queryBalance) {
+            continue;
+          }
+
+          const isNative =
+            currency.coinMinimalDenom ===
+              `erc20:${modularChainInfo.starknet.strkContractAddress}` ||
+            currency.coinMinimalDenom ===
+              `erc20:${modularChainInfo.starknet.ethContractAddress}`;
+          if (
+            !isNative &&
+            queryBalance.balance.toDec().equals(HugeQueriesStore.zeroDec)
+          ) {
+            continue;
+          }
+
+          tokensByChainId.get(chainIdentifier)!.push({
+            chainInfo: modularChainInfo,
+            token: queryBalance.balance,
+            price: currency.coinGeckoId
+              ? this.priceStore.calculatePrice(queryBalance.balance)
+              : undefined,
+            isFetching: queryBalance.isFetching,
+            error: queryBalance.error,
+          });
+        }
+      }
+    }
+
+    for (const [chainId, tokens] of tokensByChainId.entries()) {
+      tokensByChainId.set(
+        chainId,
+        tokens.sort((a, b) => this.sortByPrice(a, b))
+      );
+    }
+
+    return tokensByChainId;
+  }
+
   @computed
   get allKnownBalances(): ReadonlyArray<ViewToken> {
     return this.balanceBinarySort.arr;
