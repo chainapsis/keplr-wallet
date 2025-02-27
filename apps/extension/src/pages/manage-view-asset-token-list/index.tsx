@@ -221,6 +221,7 @@ export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
               <TokenItem
                 key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
                 viewToken={viewToken}
+                disableHoverStyle={true}
                 right={
                   <XAxis>
                     <Gutter size="0.5rem" />
