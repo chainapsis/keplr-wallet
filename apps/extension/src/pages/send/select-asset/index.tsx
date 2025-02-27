@@ -102,7 +102,9 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
     if (paramIsNobleEarn) {
       if (
         "originChainId" in token.token.currency &&
-        token.token.currency.originChainId === NOBLE_CHAIN_ID
+        token.token.currency.originChainId === NOBLE_CHAIN_ID &&
+        token.token.currency.originCurrency &&
+        token.token.currency.originCurrency.coinMinimalDenom === "uusdc"
       ) {
         return true;
       }

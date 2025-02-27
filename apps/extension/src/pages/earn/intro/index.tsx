@@ -36,10 +36,7 @@ export const EarnIntroPage: FunctionComponent = observer(() => {
   const chainId = searchParams.get("chainId") || NOBLE_CHAIN_ID;
   const coinMinimalDenom = searchParams.get("coinMinimalDenom") || "uusdc";
   const chainInfo = chainStore.getChain(chainId);
-  const currency =
-    chainInfo.currencies.find(
-      (currency) => currency.coinMinimalDenom === coinMinimalDenom
-    ) ?? chainInfo.currencies[0];
+  const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
 
   const { apy } = useGetEarnApy(chainId);
 

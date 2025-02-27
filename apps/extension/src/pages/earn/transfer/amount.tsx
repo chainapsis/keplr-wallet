@@ -16,6 +16,7 @@ import { useSearchParams } from "react-router-dom";
 import { useStore } from "../../../stores";
 import {
   EmptyAmountError,
+  useGasSimulator,
   useSendMixedIBCTransferConfig,
   useTxConfigsValidate,
   ZeroAmountError,
@@ -34,7 +35,9 @@ import { CoinPretty, Dec, DecUtils } from "@keplr-wallet/unit";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT, Message } from "@keplr-wallet/router";
 import {
+  GetIBCHistoriesMsg,
   LogAnalyticsEventMsg,
+  RemoveIBCHistoryMsg,
   SendTxAndRecordMsg,
 } from "@keplr-wallet/background";
 import { useIntl } from "react-intl";
@@ -45,6 +48,7 @@ import { WalletStatus } from "@keplr-wallet/stores";
 import { ColorPalette } from "../../../styles";
 import { Input } from "../components/input";
 import { NOBLE_CHAIN_ID } from "../../../config.ui";
+import { DenomHelper, ExtensionKVStore } from "@keplr-wallet/common";
 
 export const EarnTransferAmountPage: FunctionComponent = observer(() => {
   const {
@@ -66,8 +70,11 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
   const initialIBCTransferDestinationChainId = searchParams.get(
     "ibcTransferDestinationChainId"
   );
+  if (!initialChainId || !initialCoinMinimalDenom) {
+    throw new Error("Invalid params");
+  }
 
-  const chainId = initialChainId || chainStore.chainInfosInUI[0].chainId;
+  const chainId = initialChainId;
   const ibcTransferDestinationChainId =
     initialIBCTransferDestinationChainId ?? NOBLE_CHAIN_ID;
   const chainInfo = chainStore.getChain(chainId);
@@ -77,9 +84,7 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
 
   const [errorMessage, setErrorMessage] = useState("");
 
-  const coinMinimalDenom =
-    initialCoinMinimalDenom || chainInfo.currencies[0].coinMinimalDenom;
-  const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
+  const currency = chainInfo.forceFindCurrency(initialCoinMinimalDenom);
   const coinDenom = useMemo(() => {
     if ("originCurrency" in currency && currency.originCurrency) {
       return currency.originCurrency.coinDenom;
@@ -101,16 +106,6 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
     }
   }, []);
 
-  useEffect(() => {
-    if (!initialChainId || !initialCoinMinimalDenom) {
-      navigate(
-        `/send/select-asset?navigateReplace=true&navigateTo=${encodeURIComponent(
-          "/send?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}"
-        )}`
-      );
-    }
-  }, [navigate, initialChainId, initialCoinMinimalDenom]);
-
   const sendConfigs = useSendMixedIBCTransferConfig(
     chainStore,
     queriesStore,
@@ -120,6 +115,59 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
     true
   );
   sendConfigs.amountConfig.setCurrency(currency);
+
+  useGasSimulator(
+    // 어차피 일반 send랑 똑같으니 send 페이지랑 똑같이 쓴다.
+    new ExtensionKVStore("gas-simulator.main.send"),
+    chainStore,
+    chainId,
+    sendConfigs.gasConfig,
+    sendConfigs.feeConfig,
+    "cosmos/native",
+    () => {
+      if (!sendConfigs.amountConfig.currency) {
+        throw new Error("Send currency not set");
+      }
+
+      if (
+        sendConfigs.channelConfig.uiProperties.loadingState ===
+          "loading-block" ||
+        sendConfigs.channelConfig.uiProperties.error != null
+      ) {
+        throw new Error("Not ready to simulate tx");
+      }
+
+      // Prefer not to use the gas config or fee config,
+      // because gas simulator can change the gas config and fee config from the result of reaction,
+      // and it can make repeated reaction.
+      if (
+        sendConfigs.amountConfig.uiProperties.loadingState ===
+          "loading-block" ||
+        sendConfigs.amountConfig.uiProperties.error != null ||
+        sendConfigs.recipientConfig.uiProperties.loadingState ===
+          "loading-block" ||
+        sendConfigs.recipientConfig.uiProperties.error != null
+      ) {
+        throw new Error("Not ready to simulate tx");
+      }
+
+      const denomHelper = new DenomHelper(
+        sendConfigs.amountConfig.currency.coinMinimalDenom
+      );
+      // I don't know why, but simulation does not work for secret20
+      if (denomHelper.type === "secret20") {
+        throw new Error("Simulating secret wasm not supported");
+      }
+
+      return account.cosmos.makePacketForwardIBCTransferTx(
+        accountStore,
+        sendConfigs.channelConfig.channels,
+        sendConfigs.amountConfig.amount[0].toDec().toString(),
+        sendConfigs.amountConfig.amount[0].currency,
+        sendConfigs.recipientConfig.recipient
+      );
+    }
+  );
 
   useIBCChannelConfigQueryString(sendConfigs.channelConfig);
 
@@ -146,7 +194,7 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
   const initialIBCTransferChannels =
     skipQueriesStore.queryIBCPacketForwardingTransfer.getIBCChannels(
       chainId,
-      coinMinimalDenom
+      currency.coinMinimalDenom
     );
 
   useEffect(() => {
@@ -250,7 +298,7 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
                 preferNoSetMemo: true,
                 sendTx: async (chainId, tx, mode) => {
                   let msg: Message<Uint8Array> = new SendTxAndRecordMsg(
-                    "basic-send/ibc",
+                    "noble/transfer/earn",
                     chainId,
                     sendConfigs.recipientConfig.chainId,
                     tx,
@@ -309,6 +357,7 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
                       "usd"
                     );
 
+                    // TODO: analytics를 noble earn 전용으로 수정해야할 것 같음.
                     const params: Record<
                       string,
                       | number
@@ -383,7 +432,77 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
                   }
 
                   if (initialIBCTransferDestinationChainId) {
-                    navigate("/tx-result/success?isFromEarnTransfer=true");
+                    (async () => {
+                      while (
+                        // tx pending 페이지에서만 처리되어야하는데 문제는 이미 tx pending page로 넘어갔기 때문에
+                        // 이 페이지에서 unmount 등을 파악할 수가 없다...
+                        // 그렇다고 tx pending page의 로직에서 처리하면 로직이 복잡해져서 그냥 여기서 url을 보고 파악한다.
+                        window.location.hash.startsWith("#/tx-result/pending")
+                      ) {
+                        await new Promise((resolve) =>
+                          setTimeout(resolve, 1000)
+                        );
+
+                        const requester = new InExtensionMessageRequester();
+                        const msg = new GetIBCHistoriesMsg();
+                        const res = await requester.sendMessage(
+                          BACKGROUND_PORT,
+                          msg
+                        );
+                        if (res.length === 0) {
+                          // 이 경우 먼가 잘못된건데 방법이 없다...
+                          navigate("/", {
+                            replace: true,
+                          });
+                          break;
+                        }
+
+                        // 어차피 이 tx pending page를 벗어나지 않았을 것으로 가정해야하기 때문에
+                        // 그냥 최근의 기록이 방금 보낸 tx라고 가정한다.
+                        const recent = res[0];
+                        if (recent.ibcHistory.some((h) => h.error != null)) {
+                          // 이 경우 ibc가 실패한 것이다...
+                          navigate("/tx-result/failed");
+                          break;
+                        }
+                        if (
+                          recent.txFulfilled &&
+                          !recent.ibcHistory.some((h) => !h.completed)
+                        ) {
+                          // 이 경우 ibc가 완료된 것이다...
+                          // 이미 여기서 ibc 성공까지 기다렸기 때문에 메인에서 보이는 history는 자동으로 삭제해준다...
+                          const msg = new RemoveIBCHistoryMsg(recent.id);
+                          await requester.sendMessage(BACKGROUND_PORT, msg);
+
+                          const destinationAccount = accountStore.getAccount(
+                            ibcTransferDestinationChainId
+                          );
+                          if (
+                            destinationAccount.walletStatus ===
+                            WalletStatus.NotInit
+                          ) {
+                            await destinationAccount.init();
+                          }
+                          const balances = queriesStore
+                            .get(ibcTransferDestinationChainId)
+                            .queryBalances.getQueryBech32Address(
+                              destinationAccount.bech32Address
+                            ).balances;
+                          if (balances.length > 0) {
+                            // native 토큰에 대해서 refresh를 해야하는데
+                            // 어차피 cosmos-sdk의 balance 쿼리는 묶어서 이뤄지기 때문에
+                            // 하나만 refresh를 하면 된다.
+                            // 거의 무조건 첫번째 currency는 native 토큰이기 때문에 첫번째 currency에 대해서만 refresh를 한다.
+                            balances[0].waitFreshResponse();
+                          }
+
+                          navigate(
+                            "/tx-result/success?isFromEarnTransfer=true"
+                          );
+                          break;
+                        }
+                      }
+                    })();
                   } else {
                     notification.show(
                       "success",

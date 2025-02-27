@@ -30,7 +30,7 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
 
   const { chainStore } = useStore();
   const chainInfo = chainStore.getChain(NOBLE_CHAIN_ID);
-  const currency = chainInfo.currencies[0];
+  const currency = chainInfo.forceFindCurrency("uusdc");
 
   const amountValue = searchParams.get("amount");
   const usdcAmount = new CoinPretty(

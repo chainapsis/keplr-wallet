@@ -37,18 +37,28 @@ export const TxResultSuccessPage: FunctionComponent = observer(() => {
     }
   }, []);
 
+  const unmountedRef = useRef(false);
+  useEffect(() => {
+    return () => {
+      unmountedRef.current = true;
+    };
+  }, []);
+
   useEffect(() => {
     if (isFromEarnTransfer) {
       setTimeout(() => {
-        navigate(
-          isFromEarnTransfer ? `/earn/amount?isFromEarnTransfer=true` : "/",
-          {
-            replace: true,
-          }
-        );
+        if (!unmountedRef.current) {
+          navigate(
+            isFromEarnTransfer ? `/earn/amount?isFromEarnTransfer=true` : "/",
+            {
+              replace: true,
+            }
+          );
+        }
       }, 3000);
     }
-  }, [isFromEarnTransfer, navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isFromEarnTransfer]);
 
   return (
     <Container>
