@@ -14,7 +14,7 @@ import {
   IQueriesStore,
 } from "@keplr-wallet/stores";
 import { useState } from "react";
-import { makeObservable, observable } from "mobx";
+import { action, makeObservable, observable } from "mobx";
 
 // Slippage is 0.1% referred from Osmosis
 const SLIPPAGE = new Dec(0.001);
@@ -22,6 +22,9 @@ const SLIPPAGE = new Dec(0.001);
 export class NobleEarnAmountConfig extends AmountConfig {
   @observable.ref
   protected _outCurrency: AppCurrency;
+
+  @observable.ref
+  protected _error: Error | undefined;
 
   constructor(
     chainGetter: ChainGetter,
@@ -42,11 +45,25 @@ export class NobleEarnAmountConfig extends AmountConfig {
     return this._outCurrency;
   }
 
+  @action
   setOutCurrency(currency: AppCurrency): void {
     this._outCurrency = currency;
   }
 
+  get error(): Error | undefined {
+    return this._error;
+  }
+
+  @action
+  setError(error: Error): void {
+    this._error = error;
+  }
+
   get expectedOutAmount(): CoinPretty {
+    if (this.amount[0].toDec().isZero()) {
+      return new CoinPretty(this.outCurrency, "0");
+    }
+
     const rates = this.queriesStore
       .get(this.chainId)
       .noble?.querySwapRates.getQueryCoinMinimalDenom(
@@ -72,6 +89,8 @@ export class NobleEarnAmountConfig extends AmountConfig {
         )
     );
 
+    const min = this.amount[0].mul(new Dec(0.99));
+
     const nobleSwapSimulateSwap =
       pool &&
       this.queriesStore.get(this.chainId).noble?.querySwapSimulateSwap.getQuery(
@@ -85,10 +104,20 @@ export class NobleEarnAmountConfig extends AmountConfig {
         ],
         {
           denom: this.outCurrency.coinMinimalDenom,
-          // XXX: zero amount is okay just for simulation
-          amount: "0",
+          amount: min.toCoin().amount,
         }
       );
+
+    const isLessThanMin =
+      nobleSwapSimulateSwap?.error?.message.includes("min amount") ||
+      nobleSwapSimulateSwap?.simulatedOutAmount?.toDec().lt(min.toDec());
+
+    if (isLessThanMin) {
+      this.setError(
+        new Error("Estimated out amount is less than 99% of input amount")
+      );
+      return new CoinPretty(this.outCurrency, min.toCoin().amount);
+    }
 
     return (
       nobleSwapSimulateSwap?.simulatedOutAmount ??

@@ -36,6 +36,7 @@ import {
 } from "@keplr-wallet/hooks-internal";
 import { ApyChip } from "../components/chip";
 import { ExtensionKVStore } from "@keplr-wallet/common";
+import { WarningBox } from "../../../components/warning-box";
 
 const NOBLE_EARN_WITHDRAW_OUT_COIN_MINIMAL_DENOM = "uusdc";
 
@@ -168,7 +169,9 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
       }
       bottomButtons={[
         {
-          disabled: txConfigsValidate.interactionBlocked,
+          disabled:
+            txConfigsValidate.interactionBlocked ||
+            !!nobleEarnAmountConfig.amountConfig.error,
           text: intl.formatMessage({ id: "button.next" }),
           color: "primary",
           size: "large",
@@ -326,6 +329,16 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
                   {`on ${chainInfo.chainName}`}
                 </Subtitle3>
               </Fragment>
+            )}
+
+            {nobleEarnAmountConfig.amountConfig.error && (
+              <Box marginTop="1rem">
+                <WarningBox
+                  title={
+                    nobleEarnAmountConfig.amountConfig.error?.message ?? ""
+                  }
+                />
+              </Box>
             )}
           </Stack>
         </Box>

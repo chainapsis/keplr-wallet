@@ -20,6 +20,7 @@ import { NOBLE_CHAIN_ID } from "../../../config.ui";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import { useGasSimulator, useTxConfigsValidate } from "@keplr-wallet/hooks";
 import { useNobleEarnAmountConfig } from "@keplr-wallet/hooks-internal";
+import { WarningBox } from "../../../components/warning-box";
 
 const TERM_AGREED_STORAGE_KEY = "nobleTermAgreed";
 const NOBLE_EARN_DEPOSIT_IN_COIN_MINIMAL_DENOM = "uusdc";
@@ -150,7 +151,10 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
       left={<BackButton />}
       bottomButtons={[
         {
-          disabled: !isTermAgreed || txConfigsValidate.interactionBlocked,
+          disabled:
+            !isTermAgreed ||
+            txConfigsValidate.interactionBlocked ||
+            !!nobleEarnAmountConfig.amountConfig.error,
           text: intl.formatMessage({
             id: "page.earn.estimation-confirm.usdc-to-usdn.swap-button",
           }),
@@ -277,6 +281,14 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
             />
           </Body2>
         </XAxis>
+
+        {nobleEarnAmountConfig.amountConfig.error && (
+          <Box marginTop="1rem">
+            <WarningBox
+              title={nobleEarnAmountConfig.amountConfig.error?.message ?? ""}
+            />
+          </Box>
+        )}
       </Box>
 
       <Modal
