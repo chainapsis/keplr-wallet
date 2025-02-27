@@ -3186,6 +3186,22 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       rpc: "",
       rest: "",
       coinType: 0,
+<<<<<<< HEAD
+=======
+      bech32: "bc",
+      messagePrefix: "\x18Bitcoin Signed Message:\n",
+      pubKeyHash: 0x00,
+      currencies: [
+        {
+          coinDenom: "BTC",
+          coinMinimalDenom: "bitcoin-native",
+          coinDecimals: 8,
+          coinGeckoId: "bitcoin",
+          coinImageUrl:
+            "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+        },
+      ],
+>>>>>>> 7308bf2b7 (Add currencies field to bitcoin modular chain info)
     },
   },
   {
