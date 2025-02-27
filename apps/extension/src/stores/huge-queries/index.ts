@@ -8,7 +8,7 @@ import {
   QueryError,
 } from "@keplr-wallet/stores";
 import { CoinPretty, Dec, PricePretty } from "@keplr-wallet/unit";
-import { action, autorun, computed } from "mobx";
+import { action, autorun, computed, observable } from "mobx";
 import { DenomHelper } from "@keplr-wallet/common";
 import { computedFn } from "mobx-utils";
 import { BinarySortArray } from "./sort";
@@ -52,6 +52,8 @@ export class HugeQueriesStore {
   protected unbondingBinarySort: BinarySortArray<ViewUnbondingToken>;
   protected claimableRewardsBinarySort: BinarySortArray<ViewRewardToken>;
 
+  @observable
+  tokenMapByChainIdentifier: Map<string, ViewToken[]>;
   constructor(
     protected readonly chainStore: ChainStore,
     protected readonly queriesStore: IQueriesStore<CosmosQueries>,
@@ -119,6 +121,11 @@ export class HugeQueriesStore {
         }
       }
     );
+
+    this.tokenMapByChainIdentifier = new Map();
+    autorun(() => {
+      this.tokenMapByChainIdentifier = this.getAllTokenMapByChainIdentifier();
+    });
   }
 
   @action
@@ -290,7 +297,7 @@ export class HugeQueriesStore {
 
   //Select chain에서만 사용될 거 라고 가정해서 만들어서
   @action
-  getAllTokenMapByChainIdentifier(): Map<string, ViewToken[]> {
+  protected getAllTokenMapByChainIdentifier(): Map<string, ViewToken[]> {
     const tokensByChainId = new Map<string, ViewToken[]>();
     const modularChainInfos = this.chainStore.modularChainInfos.filter(
       (chainInfo) => {
