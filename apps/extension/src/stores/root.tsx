@@ -83,7 +83,7 @@ import {
   StarknetAccountStore,
   StarknetQueriesStore,
 } from "@keplr-wallet/stores-starknet";
-
+import { BitcoinQueriesStore } from "@keplr-wallet/stores-bitcoin";
 let _sidePanelWindowId: number | undefined;
 async function getSidePanelWindowId(): Promise<number | undefined> {
   if (_sidePanelWindowId != null) {
@@ -135,6 +135,7 @@ export class RootStore {
   public readonly swapUsageQueries: SwapUsageQueries;
   public readonly skipQueriesStore: SkipQueries;
   public readonly starknetQueriesStore: StarknetQueriesStore;
+  public readonly bitcoinQueriesStore: BitcoinQueriesStore;
   public readonly accountStore: AccountStore<
     [CosmosAccount, CosmwasmAccount, SecretAccount]
   >;
@@ -339,6 +340,11 @@ export class RootStore {
       TokenContractListURL
     );
 
+    this.bitcoinQueriesStore = new BitcoinQueriesStore(
+      this.queriesStore.sharedContext,
+      this.chainStore
+    );
+
     this.accountStore = new AccountStore(
       window,
       this.chainStore,
@@ -503,6 +509,7 @@ export class RootStore {
       this.chainStore,
       this.queriesStore,
       this.starknetQueriesStore,
+      this.bitcoinQueriesStore,
       this.accountStore,
       this.priceStore
     );

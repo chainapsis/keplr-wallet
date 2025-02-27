@@ -15,6 +15,7 @@ import { BinarySortArray } from "./sort";
 import { StarknetQueriesStore } from "@keplr-wallet/stores-starknet";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { ModularChainInfo } from "@keplr-wallet/types";
+import { BitcoinQueriesStore } from "@keplr-wallet/stores-bitcoin";
 
 interface ViewToken {
   chainInfo: IChainInfoImpl | ModularChainInfo;
@@ -54,6 +55,7 @@ export class HugeQueriesStore {
     protected readonly chainStore: ChainStore,
     protected readonly queriesStore: IQueriesStore<CosmosQueries>,
     protected readonly starknetQueriesStore: StarknetQueriesStore,
+    protected readonly bitcoinQueriesStore: BitcoinQueriesStore,
     protected readonly accountStore: IAccountStore,
     protected readonly priceStore: CoinGeckoPriceStore
   ) {
@@ -277,6 +279,60 @@ export class HugeQueriesStore {
           }
         }
       }
+
+      if ("bitcoin" in modularChainInfo) {
+        if (!account.bitcoinAddress) {
+          continue;
+        }
+
+        const modularChainInfoImpl = this.chainStore.getModularChainInfoImpl(
+          modularChainInfo.chainId
+        );
+        const queries = this.bitcoinQueriesStore.get(modularChainInfo.chainId);
+        const currencies = modularChainInfoImpl.getCurrencies("bitcoin");
+
+        // TODO: bitcoin coinMinimalDenom 변경 시 수정 필요
+        const currency = currencies.find(
+          (currency) =>
+            currency.coinMinimalDenom.startsWith("taproot:bitcoin") ||
+            currency.coinMinimalDenom.startsWith("nativeSegwit:bitcoin")
+        );
+        if (!currency) {
+          continue;
+        }
+
+        const queryBalance = queries.queryBitcoinBalance.getBalance(
+          modularChainInfo.chainId,
+          this.chainStore,
+          account.bitcoinAddress.bech32Address,
+          currency.coinMinimalDenom
+        );
+
+        if (!queryBalance) {
+          continue;
+        }
+
+        const key = `${
+          ChainIdHelper.parse(modularChainInfo.chainId).identifier
+        }/${currency.coinMinimalDenom}`;
+        if (!keysUsed.get(key)) {
+          if (queryBalance.balance.toDec().equals(HugeQueriesStore.zeroDec)) {
+            continue;
+          }
+
+          keysUsed.set(key, true);
+          prevKeyMap.delete(key);
+          this.balanceBinarySort.pushAndSort(key, {
+            chainInfo: modularChainInfo,
+            token: queryBalance.balance,
+            price: currency.coinGeckoId
+              ? this.priceStore.calculatePrice(queryBalance.balance)
+              : undefined,
+            isFetching: queryBalance.isFetching,
+            error: queryBalance.error,
+          });
+        }
+      }
     }
 
     for (const removedKey of prevKeyMap.keys()) {
@@ -309,13 +365,14 @@ export class HugeQueriesStore {
             keys.set(key, true);
           }
         }
-        if ("starknet" in modularChainInfo) {
+        if ("starknet" in modularChainInfo || "bitcoin" in modularChainInfo) {
+          const module =
+            "starknet" in modularChainInfo ? "starknet" : "bitcoin";
+
           const modularChainInfoImpl = this.chainStore.getModularChainInfoImpl(
             modularChainInfo.chainId
           );
-          for (const currency of modularChainInfoImpl.getCurrencies(
-            "starknet"
-          )) {
+          for (const currency of modularChainInfoImpl.getCurrencies(module)) {
             const key = `${
               ChainIdHelper.parse(modularChainInfo.chainId).identifier
             }/${currency.coinMinimalDenom}`;

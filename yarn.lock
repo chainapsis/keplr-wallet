@@ -8801,6 +8801,7 @@ __metadata:
     "@keplr-wallet/router-extension": 0.12.190
     "@keplr-wallet/simple-fetch": 0.12.190
     "@keplr-wallet/stores": 0.12.190
+    "@keplr-wallet/stores-bitcoin": 0.12.190
     "@keplr-wallet/stores-core": 0.12.190
     "@keplr-wallet/stores-etc": 0.12.190
     "@keplr-wallet/stores-eth": 0.12.190
@@ -9192,7 +9193,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/stores-bitcoin@workspace:packages/stores-bitcoin":
+"@keplr-wallet/stores-bitcoin@0.12.190, @keplr-wallet/stores-bitcoin@workspace:packages/stores-bitcoin":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/stores-bitcoin@workspace:packages/stores-bitcoin"
   dependencies:
