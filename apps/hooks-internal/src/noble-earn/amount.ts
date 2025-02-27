@@ -62,7 +62,7 @@ export class NobleEarnAmountConfig extends AmountConfig {
       nobleSwapSimulateSwap?.simulatedOutAmount?.toDec().lt(min.toDec());
 
     if (isLessThanMin) {
-      return new Error("Estimated out amount is less than input amount");
+      return new Error("Estimated out amount is less than expected");
     }
   }
 
