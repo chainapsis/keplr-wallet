@@ -433,7 +433,6 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
 
                   if (initialIBCTransferDestinationChainId) {
                     (async () => {
-                      await new Promise((resolve) => setTimeout(resolve, 3000));
 
                       while (
                         // tx pending 페이지에서만 처리되어야하는데 문제는 이미 tx pending page로 넘어갔기 때문에
