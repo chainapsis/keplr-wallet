@@ -3286,7 +3286,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       chainId:
         "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6",
       rpc: "",
-      rest: "",
+      rest: "https://explorer.bc-2.jp/api",
       coinType: 1,
       currencies: [
         {

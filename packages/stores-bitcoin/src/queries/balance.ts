@@ -27,41 +27,6 @@ export class ObservableQueryBitcoinBalanceImpl
   }
 
   /**
-   * Confirmed balance is the sum of all the confirmed transactions in the chain.
-   */
-  @computed
-  get confirmedBalance(): CoinPretty {
-    if (!this.response || !this.response.data) {
-      return new CoinPretty(this.currency, new Int(0));
-    }
-
-    const data = this.response.data;
-
-    return new CoinPretty(
-      this.currency,
-      new Int(data.chain_stats.funded_txo_sum - data.chain_stats.spent_txo_sum)
-    );
-  }
-
-  /**
-   * Unconfirmed balance is the sum of all the unconfirmed transactions in the mempool.
-   */
-  @computed
-  get unconfirmedBalance(): CoinPretty {
-    if (!this.response || !this.response.data) {
-      return new CoinPretty(this.currency, new Int(0));
-    }
-
-    const data = this.response.data;
-    return new CoinPretty(
-      this.currency,
-      new Int(
-        data.mempool_stats.funded_txo_sum - data.mempool_stats.spent_txo_sum
-      )
-    );
-  }
-
-  /**
    * balance is the sum of confirmed and unconfirmed balances.
    */
   @computed
