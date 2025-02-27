@@ -441,7 +441,7 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
                         window.location.hash.startsWith("#/tx-result/pending")
                       ) {
                         await new Promise((resolve) =>
-                          setTimeout(resolve, 3000)
+                          setTimeout(resolve, 1000)
                         );
 
                         const requester = new InExtensionMessageRequester();
