@@ -136,7 +136,7 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
     <HeaderLayout
       title={intl.formatMessage({ id: "page.earn.title" })}
       displayFlex={true}
-      fixedHeight={true}
+      fixedHeight={false}
       left={<BackButton />}
       bottomButtons={[
         {
