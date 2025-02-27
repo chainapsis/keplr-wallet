@@ -3187,9 +3187,6 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       rpc: "",
       rest: "",
       coinType: 0,
-      bech32: "bc",
-      messagePrefix: "\x18Bitcoin Signed Message:\n",
-      pubKeyHash: 0x00,
     },
   },
   {
@@ -3207,9 +3204,6 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       rpc: "",
       rest: "",
       coinType: 0,
-      bech32: "bc",
-      messagePrefix: "\x18Bitcoin Signed Message:\n",
-      pubKeyHash: 0x00,
     },
   },
   {
@@ -3227,9 +3221,6 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       rpc: "",
       rest: "",
       coinType: 1,
-      bech32: "tb",
-      messagePrefix: "\x18Bitcoin Signed Message:\n",
-      pubKeyHash: 0x6f,
     },
   },
   {
@@ -3247,9 +3238,6 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       rpc: "",
       rest: "",
       coinType: 1,
-      bech32: "tb",
-      messagePrefix: "\x18Bitcoin Signed Message:\n",
-      pubKeyHash: 0x6f,
     },
   },
   {
@@ -3266,11 +3254,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6",
       rpc: "",
       rest: "",
-      // signet shares parameters with testnet
       coinType: 1,
-      bech32: "tb",
-      messagePrefix: "\x18Bitcoin Signed Message:\n",
-      pubKeyHash: 0x6f,
     },
   },
   {
@@ -3288,9 +3272,6 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       rpc: "",
       rest: "",
       coinType: 1,
-      bech32: "tb",
-      messagePrefix: "\x18Bitcoin Signed Message:\n",
-      pubKeyHash: 0x6f,
     },
   },
 ];

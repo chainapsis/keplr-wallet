@@ -5,10 +5,14 @@ import { InteractionService } from "../interaction";
 import { PermissionService } from "../permission";
 import {
   BitcoinSignMessageType,
+  GENESIS_HASH_TO_NETWORK,
+  GenesisHash,
+  Network,
   SupportedPaymentType,
 } from "@keplr-wallet/types";
 import { Env, KeplrError } from "@keplr-wallet/router";
 import { Psbt, payments } from "bitcoinjs-lib";
+import { mainnet, signet, testnet } from "./constants";
 import { encodeLegacyMessage, encodeLegacySignature } from "./helper";
 import { toXOnly } from "@keplr-wallet/crypto";
 import { BIP322 } from "./bip322";
@@ -83,16 +87,7 @@ export class KeyRingBitcoinService {
       throw new KeplrError("keyring", 221, "Vault not found");
     }
 
-    // {bip122}:{genesisHash}:{paymentType}
-    const split = chainId.split(":");
-    if (split.length < 3) {
-      throw new KeplrError("keyring", 221, "Invalid bitcoin chain id");
-    }
-
-    const paymentType = split[2];
-    if (paymentType !== "native-segwit" && paymentType !== "taproot") {
-      throw new KeplrError("keyring", 221, "Invalid payment type");
-    }
+    const { paymentType } = this.parseChainId(chainId);
 
     // TODO: Ledger support
     // const isLedger = vault.insensitive["keyRingType"] === "ledger";
@@ -367,16 +362,37 @@ export class KeyRingBitcoinService {
       throw new KeplrError("keyring", 221, "Chain is not a bitcoin chain");
     }
 
+    const { genesisHash } = this.parseChainId(chainId);
+    const network = GENESIS_HASH_TO_NETWORK[genesisHash];
+
+    switch (network) {
+      case Network.MAINNET:
+        return mainnet;
+      case Network.TESTNET:
+        return testnet;
+      case Network.SIGNET:
+        return signet;
+    }
+  }
+
+  private parseChainId(chainId: string): {
+    genesisHash: GenesisHash;
+    paymentType: SupportedPaymentType;
+  } {
+    // {bip122}:{genesisHash}:{paymentType}
+    const split = chainId.split(":");
+    if (split.length < 3) {
+      throw new KeplrError("keyring", 221, "Invalid bitcoin chain id");
+    }
+
+    const supportedPaymentTypes = this.getSupportedPaymentTypes();
+    if (!supportedPaymentTypes.includes(split[2] as SupportedPaymentType)) {
+      throw new KeplrError("keyring", 221, "Invalid payment type");
+    }
+
     return {
-      messagePrefix: chainInfo.bitcoin.messagePrefix,
-      bech32: chainInfo.bitcoin.bech32,
-      bip32: {
-        public: -1,
-        private: -1,
-      },
-      pubKeyHash: chainInfo.bitcoin.pubKeyHash,
-      scriptHash: -1,
-      wif: -1,
+      genesisHash: split[1] as GenesisHash,
+      paymentType: split[2] as SupportedPaymentType,
     };
   }
 }

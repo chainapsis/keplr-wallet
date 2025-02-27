@@ -76,9 +76,6 @@ export interface BitcoinChainInfo {
   readonly rest: string;
   readonly chainId: string;
   readonly coinType: number;
-  readonly bech32: string;
-  readonly messagePrefix: string;
-  readonly pubKeyHash: number;
 }
 
 export type ChainInfoModule = "cosmos" | "starknet" | "bitcoin";
