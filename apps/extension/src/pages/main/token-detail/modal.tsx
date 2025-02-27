@@ -70,6 +70,7 @@ export const TokenDetailModal: FunctionComponent<{
     accountStore,
     queriesStore,
     starknetQueriesStore,
+    bitcoinQueriesStore,
     priceStore,
     price24HChangesStore,
     skipQueriesStore,
@@ -87,9 +88,13 @@ export const TokenDetailModal: FunctionComponent<{
     // TODO: 일단 cosmos가 아니면 대충에기에다가 force currency 로직을 박아놓는다...
     //       나중에 이런 기능을 chain store 자체에다가 만들어야한다.
     const modularChainInfoImpl = chainStore.getModularChainInfoImpl(chainId);
-    const res = modularChainInfoImpl
-      .getCurrencies("starknet")
-      .find((cur) => cur.coinMinimalDenom === coinMinimalDenom);
+    const modularChainInfoImplImpl =
+      "bitcoin" in modularChainInfo
+        ? modularChainInfoImpl.getCurrencies("bitcoin")
+        : modularChainInfoImpl.getCurrencies("starknet");
+    const res = modularChainInfoImplImpl.find(
+      (cur) => cur.coinMinimalDenom === coinMinimalDenom
+    );
     if (res) {
       return res;
     }
@@ -132,14 +137,30 @@ export const TokenDetailModal: FunctionComponent<{
             .getQueryBech32Address(account.bech32Address)
             .getBalance(currency);
     }
-    return starknetQueriesStore
-      .get(chainId)
-      .queryStarknetERC20Balance.getBalance(
-        chainId,
-        chainStore,
-        account.starknetHexAddress,
-        currency.coinMinimalDenom
-      );
+
+    if ("starknet" in modularChainInfo) {
+      return starknetQueriesStore
+        .get(chainId)
+        .queryStarknetERC20Balance.getBalance(
+          chainId,
+          chainStore,
+          account.starknetHexAddress,
+          currency.coinMinimalDenom
+        );
+    }
+
+    if ("bitcoin" in modularChainInfo) {
+      return bitcoinQueriesStore
+        .get(chainId)
+        .queryBitcoinBalance.getBalance(
+          chainId,
+          chainStore,
+          account.bitcoinAddress?.bech32Address ?? "",
+          currency.coinMinimalDenom
+        );
+    }
+
+    throw new Error(`Unsupported chain: ${chainId}`);
   })();
 
   const price24HChange = (() => {
@@ -285,6 +306,11 @@ export const TokenDetailModal: FunctionComponent<{
             `/starknet/send?chainId=${chainId}&coinMinimalDenom=${coinMinimalDenom}`
           );
         }
+        if ("bitcoin" in modularChainInfo) {
+          navigate(
+            `/bitcoin/send?chainId=${chainId}&coinMinimalDenom=${coinMinimalDenom}`
+          );
+        }
       },
     },
   ];
@@ -298,6 +324,12 @@ export const TokenDetailModal: FunctionComponent<{
         if ("cosmos" in modularChainInfo) {
           return accountStore.getAccount(chainId).bech32Address;
         }
+        // TODO: handle bitcoin tx history
+        // if ("bitcoin" in modularChainInfo) {
+        //   return (
+        //     accountStore.getAccount(chainId).bitcoinAddress?.bech32Address ?? ""
+        //   );
+        // }
         return accountStore.getAccount(chainId).starknetHexAddress;
       })()}?relations=${Relations.join(",")}&denoms=${encodeURIComponent(
         currency.coinMinimalDenom
