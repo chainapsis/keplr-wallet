@@ -433,7 +433,6 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
 
                   if (initialIBCTransferDestinationChainId) {
                     (async () => {
-
                       while (
                         // tx pending 페이지에서만 처리되어야하는데 문제는 이미 tx pending page로 넘어갔기 때문에
                         // 이 페이지에서 unmount 등을 파악할 수가 없다...
