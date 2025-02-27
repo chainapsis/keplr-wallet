@@ -97,6 +97,6 @@ export type ModularChainInfo =
       readonly chainId: string;
       readonly chainName: string;
       readonly chainSymbolImageUrl?: string;
-      readonly linkedChainIds: string[];
+      readonly linkedChainKey: string;
       readonly bitcoin: BitcoinChainInfo;
     };

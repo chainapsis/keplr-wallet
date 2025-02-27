@@ -186,27 +186,29 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
    */
   @computed
   get groupedModularChainInfos(): ModularChainInfo[] {
-    const processedChainIds = new Set<string>();
+    const linkedChainInfosByChainKey = new Map<string, ModularChainInfo[]>();
     const groupedModularChainInfos: ModularChainInfo[] = [];
 
     for (const modularChainInfo of this.modularChainInfos) {
-      if (processedChainIds.has(modularChainInfo.chainId)) {
-        continue;
-      }
-
-      if (
-        "linkedChainIds" in modularChainInfo &&
-        modularChainInfo.linkedChainIds.length > 0
-      ) {
-        processedChainIds.add(modularChainInfo.chainId);
-        modularChainInfo.linkedChainIds.forEach((id) =>
-          processedChainIds.add(id)
-        );
+      if ("linkedChainKey" in modularChainInfo) {
+        const linkedChainKey = modularChainInfo.linkedChainKey;
+        const linkedChainInfos = linkedChainInfosByChainKey.get(linkedChainKey);
+        if (linkedChainInfos) {
+          linkedChainInfos.push(modularChainInfo);
+        } else {
+          linkedChainInfosByChainKey.set(linkedChainKey, [modularChainInfo]);
+        }
       } else {
-        processedChainIds.add(modularChainInfo.chainId);
+        groupedModularChainInfos.push(modularChainInfo);
       }
+    }
 
-      groupedModularChainInfos.push(modularChainInfo);
+    for (const linkedChainInfos of linkedChainInfosByChainKey.values()) {
+      // 하나의 체인 키에 여러개의 체인이 연결되어 있으면 하나의 체인만 남기고 나머지는 버린다
+      // CHECK: 어떤 것이 primary 체인인지 결정할 필요가 있는지? 우선 첫번째 체인을 primary로 설정
+      if (linkedChainInfos.length > 1) {
+        groupedModularChainInfos.push(linkedChainInfos[0]);
+      }
     }
 
     return groupedModularChainInfos;

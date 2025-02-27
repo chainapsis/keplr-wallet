@@ -910,13 +910,23 @@ export const EnableChainsScene: FunctionComponent<{
                   onClick={() => {
                     const isEnabled =
                       enabledChainIdentifierMap.get(chainIdentifier);
-                    const chainIdentifiersSet = new Set([chainIdentifier]);
+                    const linkedChainIdentifiers = new Set<string>([
+                      chainIdentifier,
+                    ]);
 
-                    if ("linkedChainIds" in modularChainInfo) {
-                      modularChainInfo.linkedChainIds.forEach((linkedChainId) =>
-                        chainIdentifiersSet.add(
-                          ChainIdHelper.parse(linkedChainId).identifier
-                        )
+                    if ("linkedChainKey" in modularChainInfo) {
+                      const linkedChainKey = modularChainInfo.linkedChainKey;
+                      chainStore.modularChainInfos.forEach(
+                        (modularChainInfo) => {
+                          if (
+                            "linkedChainKey" in modularChainInfo &&
+                            modularChainInfo.linkedChainKey === linkedChainKey
+                          ) {
+                            linkedChainIdentifiers.add(
+                              modularChainInfo.chainId
+                            );
+                          }
+                        }
                       );
                     }
 
@@ -927,13 +937,9 @@ export const EnableChainsScene: FunctionComponent<{
                       // Otherwise, enable all linked chains including selected chain.
                       const shouldEnable = !isEnabled;
 
-                      chainIdentifiersSet.forEach((id) => {
-                        if (shouldEnable) {
-                          result.add(id);
-                        } else {
-                          result.delete(id);
-                        }
-                      });
+                      linkedChainIdentifiers.forEach((id) =>
+                        shouldEnable ? result.add(id) : result.delete(id)
+                      );
 
                       return Array.from(result);
                     });

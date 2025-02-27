@@ -3178,9 +3178,8 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     chainName: "Bitcoin",
     chainSymbolImageUrl:
       "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
-    linkedChainIds: [
-      "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:native-segwit",
-    ],
+    linkedChainKey:
+      "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
     bitcoin: {
       chainId:
         "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
@@ -3195,9 +3194,8 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     chainName: "Bitcoin",
     chainSymbolImageUrl:
       "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
-    linkedChainIds: [
-      "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:taproot",
-    ],
+    linkedChainKey:
+      "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
     bitcoin: {
       chainId:
         "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
@@ -3212,9 +3210,8 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     chainName: "Bitcoin Testnet",
     chainSymbolImageUrl:
       "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
-    linkedChainIds: [
-      "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943:native-segwit",
-    ],
+    linkedChainKey:
+      "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943",
     bitcoin: {
       chainId:
         "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943",
@@ -3229,9 +3226,8 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     chainName: "Bitcoin Testnet",
     chainSymbolImageUrl:
       "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
-    linkedChainIds: [
-      "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943:taproot",
-    ],
+    linkedChainKey:
+      "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943",
     bitcoin: {
       chainId:
         "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943",
@@ -3246,9 +3242,8 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     chainName: "Bitcoin Signet",
     chainSymbolImageUrl:
       "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
-    linkedChainIds: [
-      "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6:native-segwit",
-    ],
+    linkedChainKey:
+      "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6",
     bitcoin: {
       chainId:
         "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6",
@@ -3263,9 +3258,8 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     chainName: "Bitcoin Signet",
     chainSymbolImageUrl:
       "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
-    linkedChainIds: [
-      "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6:taproot",
-    ],
+    linkedChainKey:
+      "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6",
     bitcoin: {
       chainId:
         "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6",
