@@ -136,6 +136,12 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
     }
   }, []);
 
+  useEffect(() => {
+    return () => {
+      sessionStorage.removeItem(TERM_AGREED_STORAGE_KEY);
+    };
+  }, []);
+
   return (
     <HeaderLayout
       title={intl.formatMessage({ id: "page.earn.title" })}
