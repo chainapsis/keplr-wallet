@@ -13,6 +13,7 @@ import {
   IAccountStoreWithInjects,
   IQueriesStore,
   NobleSwapPool,
+  ObservableQueryNobleSwapSimulateSwapInner,
 } from "@keplr-wallet/stores";
 import { useState } from "react";
 import { action, makeObservable, observable } from "mobx";
@@ -23,9 +24,6 @@ const SLIPPAGE = new Dec(0.001);
 export class NobleEarnAmountConfig extends AmountConfig {
   @observable.ref
   protected _outCurrency: AppCurrency;
-
-  @observable.ref
-  protected _error: Error | undefined;
 
   constructor(
     chainGetter: ChainGetter,
@@ -52,12 +50,20 @@ export class NobleEarnAmountConfig extends AmountConfig {
   }
 
   get error(): Error | undefined {
-    return this._error;
-  }
+    if (this.amount[0].toDec().isZero()) {
+      return;
+    }
 
-  @action
-  setError(error: Error): void {
-    this._error = error;
+    const min = this.amount[0].mul(new Dec(0.99));
+    const nobleSwapSimulateSwap = this.querySimulateSwap(min);
+
+    const isLessThanMin =
+      nobleSwapSimulateSwap?.error?.message.includes("min amount") ||
+      nobleSwapSimulateSwap?.simulatedOutAmount?.toDec().lt(min.toDec());
+
+    if (isLessThanMin) {
+      return new Error("Estimated out amount is less than 99% of input amount");
+    }
   }
 
   get pool(): NobleSwapPool | undefined {
@@ -89,13 +95,9 @@ export class NobleEarnAmountConfig extends AmountConfig {
     );
   }
 
-  get expectedOutAmount(): CoinPretty {
-    if (this.amount[0].toDec().isZero()) {
-      return new CoinPretty(this.outCurrency, "0");
-    }
-
-    const min = this.amount[0].mul(new Dec(0.99));
-
+  private querySimulateSwap(
+    min: CoinPretty
+  ): ObservableQueryNobleSwapSimulateSwapInner | undefined {
     const nobleSwapSimulateSwap =
       this.pool &&
       this.queriesStore.get(this.chainId).noble?.querySwapSimulateSwap.getQuery(
@@ -113,14 +115,22 @@ export class NobleEarnAmountConfig extends AmountConfig {
         }
       );
 
+    return nobleSwapSimulateSwap;
+  }
+
+  get expectedOutAmount(): CoinPretty {
+    if (this.amount[0].toDec().isZero()) {
+      return new CoinPretty(this.outCurrency, "0");
+    }
+
+    const min = this.amount[0].mul(new Dec(0.99));
+    const nobleSwapSimulateSwap = this.querySimulateSwap(min);
+
     const isLessThanMin =
       nobleSwapSimulateSwap?.error?.message.includes("min amount") ||
       nobleSwapSimulateSwap?.simulatedOutAmount?.toDec().lt(min.toDec());
 
     if (isLessThanMin) {
-      this.setError(
-        new Error("Estimated out amount is less than 99% of input amount")
-      );
       return new CoinPretty(this.outCurrency, min.toCoin().amount);
     }
 
