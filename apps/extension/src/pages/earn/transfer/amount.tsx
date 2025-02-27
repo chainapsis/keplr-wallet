@@ -483,12 +483,18 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
                           ) {
                             await destinationAccount.init();
                           }
-                          queriesStore
+                          const balances = queriesStore
                             .get(ibcTransferDestinationChainId)
                             .queryBalances.getQueryBech32Address(
                               destinationAccount.bech32Address
-                            )
-                            .fetch();
+                            ).balances;
+                          if (balances.length > 0) {
+                            // native 토큰에 대해서 refresh를 해야하는데
+                            // 어차피 cosmos-sdk의 balance 쿼리는 묶어서 이뤄지기 때문에
+                            // 하나만 refresh를 하면 된다.
+                            // 거의 무조건 첫번째 currency는 native 토큰이기 때문에 첫번째 currency에 대해서만 refresh를 한다.
+                            balances[0].waitFreshResponse();
+                          }
 
                           navigate(
                             "/tx-result/success?isFromEarnTransfer=true"
