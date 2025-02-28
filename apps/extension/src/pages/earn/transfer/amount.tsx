@@ -1,4 +1,5 @@
 import React, {
+  Fragment,
   FunctionComponent,
   useEffect,
   useMemo,
@@ -24,7 +25,7 @@ import {
 import { useNavigate } from "react-router";
 import {
   Body2,
-  H2,
+  MobileH3,
   Subtitle3,
   Subtitle4,
 } from "../../../components/typography";
@@ -49,6 +50,8 @@ import { ColorPalette } from "../../../styles";
 import { Input } from "../components/input";
 import { NOBLE_CHAIN_ID } from "../../../config.ui";
 import { DenomHelper, ExtensionKVStore } from "@keplr-wallet/common";
+import { XAxis, YAxis } from "../../../components/axis";
+import { LongArrowDownIcon } from "../../../components/icon/long-arrow-down";
 
 export const EarnTransferAmountPage: FunctionComponent = observer(() => {
   const {
@@ -82,16 +85,7 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
     ibcTransferDestinationChainId
   );
 
-  const [errorMessage, setErrorMessage] = useState("");
-
   const currency = chainInfo.forceFindCurrency(initialCoinMinimalDenom);
-  const coinDenom = useMemo(() => {
-    if ("originCurrency" in currency && currency.originCurrency) {
-      return currency.originCurrency.coinDenom;
-    }
-    return currency.coinDenom;
-  }, [currency]);
-
   const account = accountStore.getAccount(chainId);
 
   const queryBalances = queriesStore.get(chainId).queryBalances;
@@ -554,74 +548,83 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
         }}
       >
         <Stack flex={1}>
-          <H2 color={ColorPalette["white"]}>
+          <MobileH3 color={ColorPalette["white"]}>
             {intl.formatMessage(
-              { id: "page.earn.transfer.amount.from" },
+              { id: "page.earn.transfer.amount.title" },
               {
-                token: `${coinDenom} on ${chainInfo.chainName}`,
+                br: <br />,
               }
             )}
-          </H2>
-          <Gutter size="0.75rem" />
-          <Subtitle3 color={ColorPalette["white"]}>
-            {balance.hideIBCMetadata(true).toString()}{" "}
-            <span style={{ color: ColorPalette["gray-300"] }}>
-              {`on ${chainInfo.chainName}`}
-            </span>
-          </Subtitle3>
-          <Gutter size="1.75rem" />
-          <H2 color={ColorPalette["white"]}>
-            {intl.formatMessage(
-              { id: "page.earn.transfer.amount.to" },
-              {
-                token: `${coinDenom} on ${ibcTransferDestinationChainInfo.chainName}`,
-              }
-            )}
-          </H2>
-          <Gutter size="2.25rem" />
+          </MobileH3>
+
+          <Gutter size="2rem" />
           <Input
             type="number"
-            placeholder={intl.formatMessage({
-              id: "page.earn.transfer.amount.input.placeholder",
-            })}
+            placeholder={balance.trim(true).hideIBCMetadata(true).toString()}
             value={sendConfigs.amountConfig.value}
             warning={error != null}
             onChange={(e) => {
               sendConfigs.amountConfig.setValue(e.target.value);
-              if (new Dec(e.target.value || "0").gt(balance.toDec())) {
-                setErrorMessage(
-                  intl.formatMessage({
-                    id: "page.earn.amount.error.insufficient-balance",
-                  })
-                );
-              } else {
-                setErrorMessage("");
-              }
             }}
             autoComplete="off"
           />
           <Gutter size="0.75rem" />
-          <Box
-            padding="0.25rem 0.5rem"
-            backgroundColor={ColorPalette["gray-550"]}
-            borderRadius="0.5rem"
-            width="fit-content"
-            cursor="pointer"
-            onClick={() => {
-              sendConfigs.amountConfig.setValue(
-                balance.hideDenom(true).toString()
-              );
-            }}
-          >
-            <Subtitle4 color={ColorPalette["gray-200"]}>
-              {balance.hideIBCMetadata(true).toString()}
-            </Subtitle4>
+          <Box padding="0.25rem 0">
+            <XAxis alignY="center" gap="0.25rem">
+              {sendConfigs.amountConfig.amount[0]
+                .toDec()
+                .equals(new Dec("0")) && (
+                <Box
+                  padding="0.25rem 0.375rem"
+                  backgroundColor={ColorPalette["gray-550"]}
+                  borderRadius="0.5rem"
+                  width="fit-content"
+                  cursor="pointer"
+                  onClick={() => {
+                    sendConfigs.amountConfig.setFraction(1);
+                  }}
+                >
+                  <Subtitle4 color={ColorPalette["gray-200"]}>
+                    {balance.trim(true).hideIBCMetadata(true).toString()}
+                  </Subtitle4>
+                </Box>
+              )}
+              <Subtitle3 color={ColorPalette["gray-300"]}>
+                {`on ${chainInfo.chainName}`}
+              </Subtitle3>
+            </XAxis>
           </Box>
 
-          {errorMessage && (
+          {error && (
             <Box marginTop="0.75rem">
-              <Body2 color={ColorPalette["red-300"]}>{errorMessage}</Body2>
+              <Body2 color={ColorPalette["red-300"]}>{error}</Body2>
             </Box>
+          )}
+
+          {sendConfigs.amountConfig.amount[0].toDec().gt(new Dec("0")) && (
+            <Fragment>
+              <YAxis alignX="center">
+                <LongArrowDownIcon
+                  width="1.5rem"
+                  height="1.5rem"
+                  color={ColorPalette["gray-400"]}
+                />
+              </YAxis>
+              <Gutter size="1rem" />
+
+              <Box paddingLeft="0.25rem">
+                <MobileH3>
+                  {sendConfigs.amountConfig.amount[0]
+                    .trim(true)
+                    .hideIBCMetadata(true)
+                    .toString()}
+                </MobileH3>
+              </Box>
+              <Gutter size="0.5rem" />
+              <Subtitle3 color={ColorPalette["gray-300"]}>
+                {`on ${ibcTransferDestinationChainInfo.chainName}`}
+              </Subtitle3>
+            </Fragment>
           )}
         </Stack>
       </Box>
