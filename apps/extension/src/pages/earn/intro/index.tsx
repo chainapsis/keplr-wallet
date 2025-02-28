@@ -52,7 +52,7 @@ export const EarnIntroPage: FunctionComponent = observer(() => {
       fixedHeight={true}
       left={<BackButton />}
     >
-      <Box paddingX="1.5rem" paddingTop="2rem" paddingBottom="1.5rem">
+      <Box paddingX="1.5rem" paddingTop="1.25rem" paddingBottom="1.5rem">
         <Image
           src={require(theme.mode === "light"
             ? "../../../public/assets/img/earn-usdc-light.png"
