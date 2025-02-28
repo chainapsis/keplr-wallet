@@ -291,25 +291,42 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
 
         const chainInfo = chainStore.getChain(chainId);
         const queries = queriesStore.get(chainId);
-        const queryRewards = queries.cosmos.queryRewards.getQueryBech32Address(
-          account.bech32Address
-        );
 
-        const validatorAddresses =
-          queryRewards.getDescendingPendingRewardValidatorAddresses(
-            account.isNanoLedger ? 5 : 8
-          );
+        const txOrNull = (() => {
+          if (
+            chainId === NOBLE_CHAIN_ID &&
+            viewToken.token.currency.coinMinimalDenom === "uusdn"
+          ) {
+            return account.noble.makeClaimYieldTx("withdrawRewards");
+          } else {
+            const queryRewards =
+              queries.cosmos.queryRewards.getQueryBech32Address(
+                account.bech32Address
+              );
 
-        if (validatorAddresses.length === 0) {
+            const validatorAddresses =
+              queryRewards.getDescendingPendingRewardValidatorAddresses(
+                account.isNanoLedger ? 5 : 8
+              );
+
+            if (validatorAddresses.length === 0) {
+              return;
+            }
+
+            return account.cosmos.makeWithdrawDelegationRewardTx(
+              validatorAddresses
+            );
+          }
+        })();
+
+        if (!txOrNull) {
           continue;
         }
 
+        const tx = txOrNull;
         const state = getClaimAllEachState(chainId);
 
         state.setIsLoading(true);
-
-        const tx =
-          account.cosmos.makeWithdrawDelegationRewardTx(validatorAddresses);
 
         (async () => {
           // feemarket feature가 있는 경우 이후의 로직에서 사용할 수 있는 fee currency를 찾아야하기 때문에 undefined로 시작시킨다.
