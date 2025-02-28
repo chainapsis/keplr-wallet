@@ -1,7 +1,7 @@
 import { ChainGetter, QuerySharedContext } from "@keplr-wallet/stores";
 import { FeeEstimates, Fees } from "./types";
 import { ObservableBitcoinIndexerQuery } from "./bitcoin-indexer";
-
+import { makeObservable } from "mobx";
 export class ObservableQueryBitcoinFeeEstimates extends ObservableBitcoinIndexerQuery<FeeEstimates> {
   constructor(
     sharedContext: QuerySharedContext,
@@ -9,6 +9,8 @@ export class ObservableQueryBitcoinFeeEstimates extends ObservableBitcoinIndexer
     chainGetter: ChainGetter
   ) {
     super(sharedContext, chainId, chainGetter, "fee-estimates");
+
+    makeObservable(this);
   }
 
   get fees(): Fees {
