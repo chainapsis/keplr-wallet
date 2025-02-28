@@ -7,6 +7,7 @@ import {
   ObservableQueryNobleSwapRates,
   ObservableQueryNobleSwapSimulateSwap,
 } from "./swap";
+import { ObservableQueryNobleYield } from "./yield";
 
 export interface NobleQueries {
   noble: NobleQueriesImpl;
@@ -41,6 +42,7 @@ export class NobleQueriesImpl {
   public readonly querySwapRates: DeepReadonly<ObservableQueryNobleSwapRates>;
   public readonly querySwapPools: DeepReadonly<ObservableQueryNobleSwapPools>;
   public readonly querySwapSimulateSwap: DeepReadonly<ObservableQueryNobleSwapSimulateSwap>;
+  public readonly queryYield: DeepReadonly<ObservableQueryNobleYield>;
 
   constructor(
     _: QueriesSetBase,
@@ -59,6 +61,11 @@ export class NobleQueriesImpl {
       chainGetter
     );
     this.querySwapSimulateSwap = new ObservableQueryNobleSwapSimulateSwap(
+      sharedContext,
+      chainId,
+      chainGetter
+    );
+    this.queryYield = new ObservableQueryNobleYield(
       sharedContext,
       chainId,
       chainGetter

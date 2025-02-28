@@ -17,17 +17,15 @@ export const EarnOverviewClaimSection: FunctionComponent<{
 }> = observer(({ chainId, currency }) => {
   const intl = useIntl();
   const navigate = useNavigate();
-  const { queriesStore, chainStore, accountStore } = useStore();
+  const { queriesStore, accountStore } = useStore();
 
   const account = accountStore.getAccount(chainId);
-  const chainInfo = chainStore.getChain(chainId);
 
-  // TO-DO: use readymade query later
-  const claimableAmountRes = queriesStore.simpleQuery.queryGet<{
-    claimable_amount: string;
-  }>(chainInfo.rest, `/noble/dollar/v1/yield/${account.bech32Address}`);
-  const claimableAmount =
-    claimableAmountRes.response?.data?.claimable_amount ?? "0";
+  const claimableAmount = queriesStore
+    .get(chainId)
+    .noble.queryYield.getQueryBech32Address(
+      account.bech32Address
+    ).claimableAmount;
 
   const totalAmount = "0"; // TO-DO: use total amount from Satellite
 
