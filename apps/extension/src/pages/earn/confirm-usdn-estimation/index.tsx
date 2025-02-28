@@ -11,31 +11,45 @@ import { ColorPalette } from "../../../styles";
 import { QuestionIcon } from "../../../components/icon";
 import { EstimationSection } from "../components/estimation-section";
 import { Modal } from "../../../components/modal";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { DescriptionModal } from "../components/description-modal";
 import { useStore } from "../../../stores";
 import { CoinPretty, Dec, DecUtils } from "@keplr-wallet/unit";
 import { Checkbox } from "../../../components/checkbox";
 import { NOBLE_CHAIN_ID } from "../../../config.ui";
+import { ExtensionKVStore } from "@keplr-wallet/common";
+import { useGasSimulator, useTxConfigsValidate } from "@keplr-wallet/hooks";
+import { useNobleEarnAmountConfig } from "@keplr-wallet/hooks-internal";
+import { WarningBox } from "../../../components/warning-box";
 
 const TERM_AGREED_STORAGE_KEY = "nobleTermAgreed";
+const NOBLE_EARN_DEPOSIT_IN_COIN_MINIMAL_DENOM = "uusdc";
+const NOBLE_EARN_DEPOSIT_OUT_COIN_MINIMAL_DENOM = "uusdn";
 
 export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
   const [searchParams] = useSearchParams();
   const intl = useIntl();
+  const navigate = useNavigate();
+  const { chainStore, queriesStore, accountStore } = useStore();
 
   const [isTermAgreed, setIsTermAgreed] = useState(false);
   const [isUsdnDescriptionModalOpen, setIsUsdnDescriptionModalOpen] =
     useState(false);
 
-  const { chainStore } = useStore();
   const chainInfo = chainStore.getChain(NOBLE_CHAIN_ID);
-  const currency = chainInfo.forceFindCurrency("uusdc");
+  const account = accountStore.getAccount(NOBLE_CHAIN_ID);
 
   const amountValue = searchParams.get("amount");
-  const usdcAmount = new CoinPretty(
-    currency,
-    DecUtils.getTenExponentN(currency.coinDecimals)
+
+  const inCurrency = chainInfo.forceFindCurrency(
+    NOBLE_EARN_DEPOSIT_IN_COIN_MINIMAL_DENOM
+  );
+  const outCurrency = chainInfo.forceFindCurrency(
+    NOBLE_EARN_DEPOSIT_OUT_COIN_MINIMAL_DENOM
+  );
+  const inAmount = new CoinPretty(
+    inCurrency,
+    DecUtils.getTenExponentN(inCurrency.coinDecimals)
       .mul(new Dec(amountValue || "0"))
       .toString()
   );
@@ -48,6 +62,63 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
     });
   };
 
+  const nobleEarnAmountConfig = useNobleEarnAmountConfig(
+    chainStore,
+    queriesStore,
+    accountStore,
+    NOBLE_CHAIN_ID,
+    account.bech32Address,
+    inCurrency,
+    outCurrency
+  );
+
+  const poolForDeposit = nobleEarnAmountConfig.amountConfig.pool;
+
+  const gasSimulator = useGasSimulator(
+    new ExtensionKVStore("gas-simulator.main.send"),
+    chainStore,
+    NOBLE_CHAIN_ID,
+    nobleEarnAmountConfig.gasConfig,
+    nobleEarnAmountConfig.feeConfig,
+    "noble-earn-deposit",
+    () => {
+      if (!nobleEarnAmountConfig.amountConfig.currency) {
+        throw new Error("Deposit currency not set");
+      }
+
+      if (
+        nobleEarnAmountConfig.amountConfig.uiProperties.loadingState ===
+          "loading-block" ||
+        nobleEarnAmountConfig.amountConfig.uiProperties.error != null
+      ) {
+        throw new Error("Not ready to simulate tx");
+      }
+
+      return account.noble.makeSwapTx(
+        "noble-earn-deposit",
+        nobleEarnAmountConfig.amountConfig.amount[0].toDec().toString(),
+        inCurrency,
+        nobleEarnAmountConfig.amountConfig.minOutAmount.toDec().toString(),
+        outCurrency,
+        [
+          {
+            poolId: poolForDeposit?.id.toString() ?? "",
+            denomTo: outCurrency.coinMinimalDenom,
+          },
+        ]
+      );
+    }
+  );
+
+  const txConfigsValidate = useTxConfigsValidate({
+    ...nobleEarnAmountConfig,
+    gasSimulator,
+  });
+
+  useEffect(() => {
+    nobleEarnAmountConfig.amountConfig.setValue(amountValue || "0");
+  }, [amountValue, nobleEarnAmountConfig.amountConfig]);
+
   useEffect(() => {
     const storedValue = sessionStorage.getItem(TERM_AGREED_STORAGE_KEY);
     if (storedValue) {
@@ -55,15 +126,24 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
     }
   }, []);
 
+  useEffect(() => {
+    return () => {
+      sessionStorage.removeItem(TERM_AGREED_STORAGE_KEY);
+    };
+  }, []);
+
   return (
     <HeaderLayout
       title={intl.formatMessage({ id: "page.earn.title" })}
       displayFlex={true}
-      fixedHeight={true}
+      fixedHeight={false}
       left={<BackButton />}
       bottomButtons={[
         {
-          disabled: !isTermAgreed,
+          disabled:
+            !isTermAgreed ||
+            txConfigsValidate.interactionBlocked ||
+            !!nobleEarnAmountConfig.amountConfig.error,
           text: intl.formatMessage({
             id: "page.earn.estimation-confirm.usdc-to-usdn.swap-button",
           }),
@@ -78,7 +158,54 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
         if (!isTermAgreed) {
           return;
         }
-        // TO-DO: Tx confirmation modal
+        try {
+          if (!poolForDeposit) {
+            throw new Error("No pool for deposit");
+          }
+
+          const tx = account.noble.makeSwapTx(
+            "noble-earn-deposit",
+            nobleEarnAmountConfig.amountConfig.amount[0].toDec().toString(),
+            inCurrency,
+            nobleEarnAmountConfig.amountConfig.minOutAmount.toDec().toString(),
+            outCurrency,
+            [
+              {
+                poolId: poolForDeposit?.id.toString() ?? "",
+                denomTo: outCurrency.coinMinimalDenom,
+              },
+            ]
+          );
+
+          await tx.send(
+            nobleEarnAmountConfig.feeConfig.toStdFee(),
+            undefined,
+            undefined,
+            {
+              onBroadcasted: (_txHash) => {
+                navigate("/tx-result/pending");
+
+                // TODO: Log analytics
+              },
+              onFulfill: (tx: any) => {
+                if (tx.code != null && tx.code !== 0) {
+                  console.log(tx.log ?? tx.raw_log);
+                  navigate("/tx-result/failed");
+
+                  return;
+                }
+
+                navigate("/tx-result/success");
+              },
+            }
+          );
+        } catch (e) {
+          if (e?.message === "Request rejected") {
+            return;
+          }
+          console.error(e);
+          navigate("/tx-result/failed");
+        }
       }}
     >
       <Box paddingX="1.25rem" paddingTop="1.75rem" height="100%">
@@ -91,7 +218,10 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
         </Body2>
         <Gutter size="1.75rem" />
 
-        <EstimationSection usdcAmount={usdcAmount} />
+        <EstimationSection
+          inAmount={inAmount}
+          outAmount={nobleEarnAmountConfig.amountConfig.minOutAmount}
+        />
         <Gutter size="1.25rem" />
 
         <Box
@@ -140,6 +270,14 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
             />
           </Body2>
         </XAxis>
+
+        {nobleEarnAmountConfig.amountConfig.error && (
+          <Box marginTop="1rem">
+            <WarningBox
+              title={nobleEarnAmountConfig.amountConfig.error?.message ?? ""}
+            />
+          </Box>
+        )}
       </Box>
 
       <Modal

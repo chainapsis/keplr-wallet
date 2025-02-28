@@ -12,9 +12,11 @@ import {
   CosmosAccount,
   IAccountStoreWithInjects,
   IQueriesStore,
+  NobleSwapPool,
+  ObservableQueryNobleSwapSimulateSwapInner,
 } from "@keplr-wallet/stores";
 import { useState } from "react";
-import { makeObservable, observable } from "mobx";
+import { action, makeObservable, observable } from "mobx";
 
 // Slippage is 0.1% referred from Osmosis
 const SLIPPAGE = new Dec(0.001);
@@ -42,16 +44,35 @@ export class NobleEarnAmountConfig extends AmountConfig {
     return this._outCurrency;
   }
 
+  @action
   setOutCurrency(currency: AppCurrency): void {
     this._outCurrency = currency;
   }
 
-  get expectedOutAmount(): CoinPretty {
+  get error(): Error | undefined {
+    if (this.amount[0].toDec().isZero()) {
+      return;
+    }
+
+    const min = this.amount[0].mul(new Dec(0.99));
+    const nobleSwapSimulateSwap = this.querySimulateSwap(min);
+
+    const isLessThanMin =
+      nobleSwapSimulateSwap?.error?.message.includes("min amount") ||
+      nobleSwapSimulateSwap?.simulatedOutAmount?.toDec().lt(min.toDec());
+
+    if (isLessThanMin) {
+      return new Error("Estimated out amount is less than expected");
+    }
+  }
+
+  get pool(): NobleSwapPool | undefined {
     const rates = this.queriesStore
       .get(this.chainId)
       .noble?.querySwapRates.getQueryCoinMinimalDenom(
         this.amount[0].currency.coinMinimalDenom
       ).rates;
+
     const bestRate = rates?.reduce((best, rate) => {
       if (new Dec(best.price).gt(new Dec(rate.price))) {
         return rate;
@@ -61,7 +82,8 @@ export class NobleEarnAmountConfig extends AmountConfig {
 
     const pools = this.queriesStore.get(this.chainId).noble?.querySwapPools
       .pools;
-    const pool = pools?.find(
+
+    return pools?.find(
       (pool) =>
         pool.algorithm === bestRate?.algorithm &&
         pool.liquidity.some(
@@ -71,24 +93,46 @@ export class NobleEarnAmountConfig extends AmountConfig {
           (liq) => liq.denom === this.outCurrency.coinMinimalDenom
         )
     );
+  }
 
+  private querySimulateSwap(
+    min: CoinPretty
+  ): ObservableQueryNobleSwapSimulateSwapInner | undefined {
     const nobleSwapSimulateSwap =
-      pool &&
+      this.pool &&
       this.queriesStore.get(this.chainId).noble?.querySwapSimulateSwap.getQuery(
         this.senderConfig.sender,
         this.amount[0].toCoin(),
         [
           {
-            pool_id: pool.id,
+            pool_id: this.pool.id,
             denom_to: this.outCurrency.coinMinimalDenom,
           },
         ],
         {
           denom: this.outCurrency.coinMinimalDenom,
-          // XXX: zero amount is okay just for simulation
-          amount: "0",
+          amount: min.toCoin().amount,
         }
       );
+
+    return nobleSwapSimulateSwap;
+  }
+
+  get expectedOutAmount(): CoinPretty {
+    if (this.amount[0].toDec().isZero()) {
+      return new CoinPretty(this.outCurrency, "0");
+    }
+
+    const min = this.amount[0].mul(new Dec(0.99));
+    const nobleSwapSimulateSwap = this.querySimulateSwap(min);
+
+    const isLessThanMin =
+      nobleSwapSimulateSwap?.error?.message.includes("min amount") ||
+      nobleSwapSimulateSwap?.simulatedOutAmount?.toDec().lt(min.toDec());
+
+    if (isLessThanMin) {
+      return new CoinPretty(this.outCurrency, min.toCoin().amount);
+    }
 
     return (
       nobleSwapSimulateSwap?.simulatedOutAmount ??
