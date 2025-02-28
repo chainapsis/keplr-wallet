@@ -262,12 +262,12 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
             />
             <Gutter size="0.75rem" />
             <Box padding="0.25rem 0">
-              <XAxis alignY="center">
+              <XAxis alignY="center" gap="0.25rem">
                 {nobleEarnAmountConfig.amountConfig.amount[0]
                   .toDec()
                   .equals(new Dec("0")) && (
                   <Box
-                    padding="0.25rem 0.5rem"
+                    padding="0.25rem 0.375rem"
                     backgroundColor={ColorPalette["gray-550"]}
                     borderRadius="0.5rem"
                     width="fit-content"
@@ -281,11 +281,9 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
                     </Subtitle4>
                   </Box>
                 )}
-                <Box padding="0.25rem">
-                  <Subtitle3 color={ColorPalette["gray-300"]}>
-                    {`on ${chainInfo.chainName}`}
-                  </Subtitle3>
-                </Box>
+                <Subtitle3 color={ColorPalette["gray-300"]}>
+                  {`on ${chainInfo.chainName}`}
+                </Subtitle3>
               </XAxis>
             </Box>
 
@@ -308,11 +306,13 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
                 </YAxis>
                 <Gutter size="1rem" />
 
-                <MobileH3>
-                  {nobleEarnAmountConfig.amountConfig.expectedOutAmount
-                    .trim(true)
-                    .toString()}
-                </MobileH3>
+                <Box paddingLeft="0.25rem">
+                  <MobileH3>
+                    {nobleEarnAmountConfig.amountConfig.expectedOutAmount
+                      .trim(true)
+                      .toString()}
+                  </MobileH3>
+                </Box>
                 <Gutter size="0.5rem" />
                 <Subtitle3 color={ColorPalette["gray-300"]}>
                   {`on ${chainInfo.chainName}`}

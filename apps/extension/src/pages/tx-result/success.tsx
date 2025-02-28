@@ -55,7 +55,7 @@ export const TxResultSuccessPage: FunctionComponent = observer(() => {
             }
           );
         }
-      }, 3000);
+      }, 2000);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isFromEarnTransfer]);
@@ -92,14 +92,16 @@ export const TxResultSuccessPage: FunctionComponent = observer(() => {
           </Subtitle2>
         </Box>
         <Gutter size="2.25rem" />
-        <Button
-          size="large"
-          onClick={() => navigate("/")}
-          text={intl.formatMessage({ id: "page.tx-result.success.done" })}
-          style={{
-            width: "18.125rem",
-          }}
-        />
+        {!isFromEarnTransfer && (
+          <Button
+            size="large"
+            onClick={() => navigate("/")}
+            text={intl.formatMessage({ id: "page.tx-result.success.done" })}
+            style={{
+              width: "18.125rem",
+            }}
+          />
+        )}
       </Stack>
     </Container>
   );
