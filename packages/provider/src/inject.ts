@@ -70,6 +70,7 @@ function defineUnwritablePropertyIfPossible(o: any, p: string, value: any) {
       Object.defineProperty(o, p, {
         value,
         writable: false,
+        configurable: false,
       });
     } else {
       o[p] = value;
@@ -532,6 +533,7 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
         Object.defineProperty(this, fieldName, {
           value: (this as any)[fieldName],
           writable: false,
+          configurable: false,
         });
       }
 
@@ -542,6 +544,7 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
           Object.defineProperty(this.eventListener, fieldName, {
             value: (this.eventListener as any)[fieldName],
             writable: false,
+            configurable: false,
           });
         }
       }
@@ -556,6 +559,7 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
         Object.defineProperty(this, methodName, {
           value: (this as any)[methodName].bind(this),
           writable: false,
+          configurable: false,
         });
       }
     }
