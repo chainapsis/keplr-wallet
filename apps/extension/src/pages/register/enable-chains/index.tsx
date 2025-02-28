@@ -22,6 +22,7 @@ import { XAxis, YAxis } from "../../../components/axis";
 import { Gutter } from "../../../components/gutter";
 import { SearchTextInput } from "../../../components/input";
 import {
+  BaseTypography,
   Body2,
   Body3,
   Subtitle2,
@@ -32,7 +33,10 @@ import { Button } from "../../../components/button";
 import { ColorPalette } from "../../../styles";
 import { useEffectOnce } from "../../../hooks/use-effect-once";
 import { useNavigate } from "react-router";
-import { ChainImageFallback } from "../../../components/image";
+import {
+  ChainImageFallback,
+  CurrencyImageFallback,
+} from "../../../components/image";
 import { Checkbox } from "../../../components/checkbox";
 import { KeyRingCosmosService } from "@keplr-wallet/background";
 import { WalletStatus } from "@keplr-wallet/stores";
@@ -44,6 +48,13 @@ import SimpleBar from "simplebar-react";
 import { useTheme } from "styled-components";
 import { dispatchGlobalEventExceptSelf } from "../../../utils/global-events";
 import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
+import { ArrowDownIcon, NativeChainMarkIcon } from "../../../components/icon";
+import { EmbedChainInfos } from "../../../config";
+import { ViewToken } from "../../main";
+import { IconButton } from "../../../components/icon-button";
+import { DenomHelper } from "@keplr-wallet/common";
+import { Tooltip } from "../../../components/tooltip";
+import { useSpring, animated } from "@react-spring/web";
 
 /**
  * EnableChainsScene은 finalize-key scene에서 선택한 chains를 활성화하는 scene이다.
@@ -88,6 +99,7 @@ export const EnableChainsScene: FunctionComponent<{
       priceStore,
       keyRingStore,
       starknetQueriesStore,
+      hugeQueriesStore,
     } = useStore();
 
     const navigate = useNavigate();
@@ -95,6 +107,13 @@ export const EnableChainsScene: FunctionComponent<{
     const theme = useTheme();
 
     const searchRef = useRef<HTMLInputElement | null>(null);
+    const embedChainIdentifierSet = new Set(
+      EmbedChainInfos.map(
+        (chainInfo) => ChainIdHelper.parse(chainInfo.chainId).identifier
+      )
+    );
+
+    const tokensByChainIdentifier = hugeQueriesStore.tokenMapByChainIdentifier;
 
     const header = useRegisterHeader();
     useSceneEvents({
@@ -840,6 +859,11 @@ export const EnableChainsScene: FunctionComponent<{
           <Stack gutter="0.5rem">
             {modularChainInfos.map((modularChainInfo) => {
               const account = accountStore.getAccount(modularChainInfo.chainId);
+              const tokens =
+                tokensByChainIdentifier.get(
+                  ChainIdHelper.parse(modularChainInfo.chainId).identifier
+                ) ?? [];
+
               const balance = (() => {
                 if ("cosmos" in modularChainInfo) {
                   const chainInfo = chainStore.getChain(
@@ -902,6 +926,7 @@ export const EnableChainsScene: FunctionComponent<{
                   enabled={enabled}
                   blockInteraction={blockInteraction}
                   isFresh={isFresh ?? false}
+                  isNativeChain={embedChainIdentifierSet.has(chainIdentifier)}
                   onClick={() => {
                     if (enabledChainIdentifierMap.get(chainIdentifier)) {
                       setEnabledChainIdentifiers(
@@ -916,6 +941,7 @@ export const EnableChainsScene: FunctionComponent<{
                       ]);
                     }
                   }}
+                  tokens={tokens}
                 />
               );
             })}
@@ -1411,30 +1437,39 @@ export const EnableChainsScene: FunctionComponent<{
 const ChainItem: FunctionComponent<{
   modularChainInfo: ModularChainInfo;
   balance?: CoinPretty;
-
+  isNativeChain?: boolean;
   enabled: boolean;
   blockInteraction: boolean;
 
   onClick: () => void;
 
   isFresh: boolean;
+  tokens: ViewToken[];
 }> = observer(
   ({
     modularChainInfo,
     balance,
     enabled,
     blockInteraction,
+    isNativeChain,
     onClick,
     isFresh,
+    tokens,
   }) => {
     const { priceStore } = useStore();
     const theme = useTheme();
+    const [isCollapsedTokenView, setIsCollapsedTokenView] = useState(true);
 
     const price = balance ? priceStore.calculatePrice(balance) : undefined;
 
     const chainIdentifier = ChainIdHelper.parse(
       modularChainInfo.chainId
     ).identifier;
+
+    const arrowAnimation = useSpring({
+      transform: isCollapsedTokenView ? "rotate(0deg)" : "rotate(-180deg)",
+      config: { tension: 300, friction: 25, clamp: true },
+    });
 
     return (
       <Box
@@ -1445,7 +1480,7 @@ const ChainItem: FunctionComponent<{
           enabled
             ? theme.mode === "light"
               ? ColorPalette["gray-10"]
-              : ColorPalette["gray-500"]
+              : ColorPalette["gray-550"]
             : theme.mode === "light"
             ? ColorPalette.white
             : ColorPalette["gray-600"]
@@ -1459,21 +1494,64 @@ const ChainItem: FunctionComponent<{
       >
         <Columns sum={1}>
           <XAxis alignY="center">
-            <ChainImageFallback chainInfo={modularChainInfo} size="3rem" />
+            {isNativeChain ? (
+              <Box position="relative">
+                <ChainImageFallback chainInfo={modularChainInfo} size="3rem" />
+                <Box
+                  position="absolute"
+                  style={{
+                    bottom: "-0.125rem",
+                    right: "-0.125rem",
+                  }}
+                >
+                  <NativeChainMarkIcon width="1.25rem" height="1.25rem" />
+                </Box>
+              </Box>
+            ) : (
+              <ChainImageFallback chainInfo={modularChainInfo} size="3rem" />
+            )}
 
             <Gutter size="0.5rem" />
 
             <YAxis>
-              <Subtitle2>
-                {(() => {
-                  // Noble의 경우만 약간 특수하게 표시해줌
-                  if (chainIdentifier === "noble") {
-                    return `${modularChainInfo.chainName} (USDC)`;
-                  }
+              <XAxis alignY="center">
+                <Subtitle2>
+                  {(() => {
+                    // Noble의 경우만 약간 특수하게 표시해줌
+                    if (chainIdentifier === "noble") {
+                      return `${modularChainInfo.chainName} (USDC)`;
+                    }
 
-                  return modularChainInfo.chainName;
-                })()}
-              </Subtitle2>
+                    return modularChainInfo.chainName;
+                  })()}
+                </Subtitle2>
+                {tokens.length > 1 && (
+                  <React.Fragment>
+                    <Gutter size="0.25rem" />
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        setIsCollapsedTokenView(!isCollapsedTokenView);
+                      }}
+                      hoverColor={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-100"]
+                          : ColorPalette["gray-500"]
+                      }
+                      padding="0.25rem"
+                    >
+                      <animated.div style={arrowAnimation}>
+                        <ArrowDownIcon width="1rem" height="1rem" />
+                      </animated.div>
+                    </IconButton>
+                  </React.Fragment>
+                )}
+              </XAxis>
+              <Gutter size="0.375rem" />
+              <Subtitle3 color={ColorPalette["gray-300"]}>
+                {tokens?.length} Tokens
+              </Subtitle3>
             </YAxis>
           </XAxis>
           <Column weight={1} />
@@ -1511,10 +1589,179 @@ const ChainItem: FunctionComponent<{
             />
           </XAxis>
         </Columns>
+        <VerticalCollapseTransition
+          collapsed={isCollapsedTokenView}
+          opacityLeft={0}
+        >
+          <TokenView tokens={tokens} />
+        </VerticalCollapseTransition>
       </Box>
     );
   }
 );
+
+const TokenView: FunctionComponent<{
+  tokens: ViewToken[];
+}> = ({ tokens }) => {
+  const theme = useTheme();
+
+  return (
+    <Box
+      paddingX="1rem"
+      paddingY="0.75rem"
+      marginTop="0.625rem"
+      borderRadius="0.375rem"
+      backgroundColor={
+        theme.mode === "light"
+          ? ColorPalette["gray-100"]
+          : ColorPalette["gray-500"]
+      }
+    >
+      <Stack gutter="0.5rem">
+        {tokens?.map((token) => (
+          <TokenItem
+            key={token.token.currency.coinMinimalDenom}
+            viewToken={token}
+          />
+        ))}
+      </Stack>
+    </Box>
+  );
+};
+
+const TokenItem: FunctionComponent<{
+  viewToken: ViewToken;
+}> = ({ viewToken }) => {
+  const theme = useTheme();
+
+  const tag = useMemo(() => {
+    const currency = viewToken.token.currency;
+    const denomHelper = new DenomHelper(currency.coinMinimalDenom);
+    if (
+      denomHelper.type === "native" &&
+      currency.coinMinimalDenom.startsWith("ibc/")
+    ) {
+      return {
+        text: "IBC",
+        tooltip: (() => {
+          const start = currency.coinDenom.indexOf("(");
+          const end = currency.coinDenom.lastIndexOf(")");
+
+          if (start < 0 || end < 0) {
+            return "Unknown";
+          }
+
+          return currency.coinDenom.slice(start + 1, end);
+        })(),
+      };
+    }
+    if (denomHelper.type !== "native") {
+      return {
+        text: denomHelper.type,
+      };
+    }
+  }, [viewToken.token.currency]);
+  const coinDenom = useMemo(() => {
+    if (
+      "originCurrency" in viewToken.token.currency &&
+      viewToken.token.currency.originCurrency
+    ) {
+      return viewToken.token.currency.originCurrency.coinDenom;
+    }
+    return viewToken.token.currency.coinDenom;
+  }, [viewToken.token.currency]);
+
+  return (
+    <Columns
+      alignY="center"
+      sum={1}
+      key={viewToken.token.currency.coinMinimalDenom}
+    >
+      <CurrencyImageFallback
+        chainInfo={viewToken.chainInfo}
+        currency={viewToken.token.currency}
+        size="1.75rem"
+      />
+      <Gutter size="0.5rem" />
+      <Subtitle3
+        color={
+          theme.mode === "light"
+            ? ColorPalette["gray-700"]
+            : ColorPalette["gray-50"]
+        }
+        style={{
+          wordBreak: "break-all",
+        }}
+      >
+        {coinDenom}
+      </Subtitle3>
+
+      {tag ? (
+        <React.Fragment>
+          <Gutter size="0.25rem" />
+          <Box alignY="center" height="1px">
+            <TokenTag text={tag.text} tooltip={tag.tooltip} />
+          </Box>
+        </React.Fragment>
+      ) : null}
+
+      <Column weight={1} />
+      <Gutter size="0.5rem" />
+      <Subtitle3
+        color={
+          theme.mode === "light"
+            ? ColorPalette["gray-300"]
+            : ColorPalette["gray-200"]
+        }
+      >
+        {viewToken.token
+          .hideDenom(true)
+          .maxDecimals(6)
+          .inequalitySymbol(true)
+          .shrink(true)
+          .toString()}
+      </Subtitle3>
+    </Columns>
+  );
+};
+
+const TokenTag: FunctionComponent<{
+  text: string;
+  tooltip?: string;
+}> = ({ text, tooltip }) => {
+  const theme = useTheme();
+
+  return (
+    <Tooltip enabled={!!tooltip} content={tooltip}>
+      <Box
+        alignX="center"
+        alignY="center"
+        backgroundColor={
+          theme.mode === "light"
+            ? ColorPalette["blue-50"]
+            : ColorPalette["gray-550"]
+        }
+        borderRadius="0.375rem"
+        height="1rem"
+        paddingX="0.375rem"
+      >
+        <BaseTypography
+          style={{
+            fontWeight: 400,
+            fontSize: "0.6875rem",
+          }}
+          color={
+            theme.mode === "light"
+              ? ColorPalette["blue-400"]
+              : ColorPalette["gray-200"]
+          }
+        >
+          {text}
+        </BaseTypography>
+      </Box>
+    </Tooltip>
+  );
+};
 
 const NextStepChainItem: FunctionComponent<{
   modularChainInfo: ModularChainInfo;
