@@ -14,6 +14,7 @@ import { useStore } from "../../../../stores";
 import { useGetEarnApy } from "../../../../hooks/use-get-apy";
 import { observer } from "mobx-react-lite";
 import { NOBLE_CHAIN_ID } from "../../../../config.ui";
+import { Dec } from "@keplr-wallet/unit";
 
 export const AvailableTabSlideList = observer(() => {
   const navigate = useNavigate();
@@ -23,6 +24,9 @@ export const AvailableTabSlideList = observer(() => {
   const usdcToken = hugeQueriesStore.allKnownBalances.find(
     (balance) => balance.token.currency.coinMinimalDenom === "uusdc"
   )?.token;
+  const usdnToken = hugeQueriesStore.allKnownBalances.find(
+    (balance) => balance.token.currency.coinMinimalDenom === "uusdn"
+  )?.token;
 
   const EarnButton = (
     <StakeWithKeplrDashboardButton
@@ -30,7 +34,11 @@ export const AvailableTabSlideList = observer(() => {
       type="button"
       onClick={(e) => {
         e.preventDefault();
-        navigate(`/earn/intro?chainId=${NOBLE_CHAIN_ID}`);
+        if (usdnToken?.toDec().gt(new Dec(0))) {
+          navigate(`/earn/overview?chainId=${NOBLE_CHAIN_ID}`);
+        } else {
+          navigate(`/earn/intro?chainId=${NOBLE_CHAIN_ID}`);
+        }
       }}
     >
       <Box color={ColorPalette["gray-300"]} marginLeft="0.5rem">
