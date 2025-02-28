@@ -41,6 +41,14 @@ import { Gutter } from "../../../../components/gutter";
 import { FormattedMessage, useIntl } from "react-intl";
 import { CurrencyImageFallback } from "../../../../components/image";
 import { DefaultGasPriceStep } from "@keplr-wallet/hooks";
+import { NOBLE_CHAIN_ID } from "../../../../config.ui";
+import { MakeTxResponse } from "@keplr-wallet/stores";
+
+const USDN_CURRENCY = {
+  coinDenom: "USDN",
+  coinMinimalDenom: "uusdn",
+  coinDecimals: 6,
+};
 
 const Styles = {
   Container: styled.div<{ isNotReady?: boolean }>`
@@ -155,6 +163,23 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
         const chainId = chainInfo.chainId;
         const accountAddress = accountStore.getAccount(chainId).bech32Address;
         const queries = queriesStore.get(chainId);
+
+        if (chainId === NOBLE_CHAIN_ID) {
+          const queryYield =
+            queries.noble.queryYield.getQueryBech32Address(accountAddress);
+          const usdnCurrency = chainInfo.findCurrency("uusdn") || USDN_CURRENCY;
+          const rawAmount = queryYield.claimableAmount;
+          const amount = new CoinPretty(usdnCurrency, rawAmount);
+          if (amount.toDec().gt(new Dec(0))) {
+            res.push({
+              token: amount,
+              chainInfo,
+              isFetching: queryYield.isFetching,
+              error: queryYield.error,
+            });
+          }
+        }
+
         const queryRewards =
           queries.cosmos.queryRewards.getQueryBech32Address(accountAddress);
 
@@ -944,23 +969,50 @@ const ClaimTokenItem: FunctionComponent<{
     const account = accountStore.getAccount(chainId);
 
     const queries = queriesStore.get(chainId);
-    const queryRewards = queries.cosmos.queryRewards.getQueryBech32Address(
-      account.bech32Address
-    );
+    const txAndGasOrNull: { tx: MakeTxResponse; gas: Int } | undefined =
+      (() => {
+        if (
+          chainId === NOBLE_CHAIN_ID &&
+          viewToken.token.currency.coinMinimalDenom === "uusdn"
+        ) {
+          const tx = account.noble.makeClaimYieldTx("withdrawRewards");
+          return {
+            tx,
+            gas: new Int(100000),
+          };
+        } else {
+          const queryRewards =
+            queries.cosmos.queryRewards.getQueryBech32Address(
+              account.bech32Address
+            );
 
-    const validatorAddresses =
-      queryRewards.getDescendingPendingRewardValidatorAddresses(
-        account.isNanoLedger ? 5 : 8
-      );
+          const validatorAddresses =
+            queryRewards.getDescendingPendingRewardValidatorAddresses(
+              account.isNanoLedger ? 5 : 8
+            );
 
-    if (validatorAddresses.length === 0) {
+          if (validatorAddresses.length === 0) {
+            return;
+          }
+          const tx =
+            account.cosmos.makeWithdrawDelegationRewardTx(validatorAddresses);
+
+          const gas = new Int(
+            validatorAddresses.length * defaultGasPerDelegation
+          );
+          return {
+            tx,
+            gas,
+          };
+        }
+      })();
+
+    if (!txAndGasOrNull) {
       return;
     }
 
-    const tx =
-      account.cosmos.makeWithdrawDelegationRewardTx(validatorAddresses);
-
-    let gas = new Int(validatorAddresses.length * defaultGasPerDelegation);
+    const tx = txAndGasOrNull.tx;
+    let gas = txAndGasOrNull.gas;
 
     try {
       setIsSimulating(true);
