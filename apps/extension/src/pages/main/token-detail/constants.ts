@@ -16,6 +16,9 @@ export const Relations = [
   "ibc-swap-skip",
   "ibc-swap-skip-receive",
   "ibc-swap-skip-refunded",
+  "noble-claim-yield",
+  "noble-deposit-usdc",
+  "noble-withdraw-usdc",
 ];
 
 export const PaginationLimit = 20;
