@@ -74,9 +74,19 @@ export const FullHorizontalSlider: FunctionComponent<{
       </Box>
 
       {slideIndex === 0 ? (
-        <SliderButton Icon={ArrowRightIcon} handleNext={handleNext} />
+        <SliderButton
+          // hover state 문제로 위치가 바뀌면 unmount를 시켜줘야해서
+          // key를 사용해서 강제로 unmount 시킴
+          key={slideIndex}
+          Icon={ArrowRightIcon}
+          handleNext={handleNext}
+        />
       ) : (
-        <SliderButton Icon={ArrowLeftIcon} handlePrev={handlePrev} />
+        <SliderButton
+          key={slideIndex}
+          Icon={ArrowLeftIcon}
+          handlePrev={handlePrev}
+        />
       )}
     </Box>
   );
@@ -87,9 +97,12 @@ const SliderButton: FunctionComponent<{
   handlePrev?: () => void;
   Icon: React.FunctionComponent<IconProps>;
 }> = ({ handleNext, handlePrev, Icon }) => {
+  const [isHover, setIsHover] = useState(false);
+
   return (
     <Box
       as="button"
+      onHoverStateChange={setIsHover}
       onClick={handleNext ?? handlePrev}
       marginLeft="auto"
       position="absolute"
@@ -102,25 +115,23 @@ const SliderButton: FunctionComponent<{
         left: handlePrev ? "0" : "auto",
         border: "none",
         cursor: "pointer",
-        transition: "opacity 0.3s ease, background 0.3s ease",
-      }}
-      height="100%"
-      width="70px"
-      opacity={0}
-      backgroundColor="transparent"
-      hover={{
-        opacity: 1,
         background: `linear-gradient(${handleNext ? "270deg" : "90deg"}, ${
           ColorPalette["gray-700"]
         } 0%, rgba(9, 9, 10, 0.00) 100%)`,
       }}
+      height="100%"
+      width="70px"
     >
       <Box
+        opacity={isHover ? 1 : 0}
         borderColor={ColorPalette["gray-400"]}
         backgroundColor={ColorPalette["gray-500"]}
         borderRadius="10rem"
         padding="0.5rem"
         margin={handleNext ? "0 0.5rem 0 0" : "0 0 0 0.5rem"}
+        style={{
+          transition: "opacity 0.3s ease",
+        }}
       >
         <Icon width="1rem" height="1rem" color={ColorPalette["gray-200"]} />
       </Box>
