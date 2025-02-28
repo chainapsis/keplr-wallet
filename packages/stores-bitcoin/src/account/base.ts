@@ -22,4 +22,14 @@ export class BitcoinAccountBase {
   get isSendingTx(): boolean {
     return this._isSendingTx;
   }
+
+  // TODO: estimate fee
+
+  // TODO: make send tx
+
+  // TODO: sign and push tx (keplr interface 확장 필요)
+
+  // TODO: track tx status (이거 좀 어려움)
+
+  // static validate address
 }
