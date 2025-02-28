@@ -88,11 +88,11 @@ export const TokenDetailModal: FunctionComponent<{
     // TODO: 일단 cosmos가 아니면 대충에기에다가 force currency 로직을 박아놓는다...
     //       나중에 이런 기능을 chain store 자체에다가 만들어야한다.
     const modularChainInfoImpl = chainStore.getModularChainInfoImpl(chainId);
-    const modularChainInfoImplImpl =
+    const currencies =
       "bitcoin" in modularChainInfo
         ? modularChainInfoImpl.getCurrencies("bitcoin")
         : modularChainInfoImpl.getCurrencies("starknet");
-    const res = modularChainInfoImplImpl.find(
+    const res = currencies.find(
       (cur) => cur.coinMinimalDenom === coinMinimalDenom
     );
     if (res) {

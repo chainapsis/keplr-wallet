@@ -291,15 +291,7 @@ export class HugeQueriesStore {
         const queries = this.bitcoinQueriesStore.get(modularChainInfo.chainId);
         const currencies = modularChainInfoImpl.getCurrencies("bitcoin");
 
-        // TODO: bitcoin coinMinimalDenom 변경 시 수정 필요
-        const currency = currencies.find(
-          (currency) =>
-            currency.coinMinimalDenom.startsWith("taproot:bitcoin") ||
-            currency.coinMinimalDenom.startsWith("nativeSegwit:bitcoin")
-        );
-        if (!currency) {
-          continue;
-        }
+        const currency = currencies[0];
 
         const queryBalance = queries.queryBitcoinBalance.getBalance(
           modularChainInfo.chainId,
