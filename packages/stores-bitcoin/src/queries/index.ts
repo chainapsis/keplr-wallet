@@ -1,6 +1,7 @@
 import { ChainGetter, QuerySharedContext } from "@keplr-wallet/stores";
 import { DeepReadonly } from "utility-types";
 import { ObservableQueryBitcoinBalance } from "./balance";
+import { ObservableQueryBitcoinFeeEstimates } from "./fee-estimates";
 export class BitcoinQueriesStore {
   protected map: Map<string, BitcoinQueriesStoreImpl> = new Map();
 
@@ -28,6 +29,7 @@ export class BitcoinQueriesStore {
 
 class BitcoinQueriesStoreImpl {
   public readonly queryBitcoinBalance: DeepReadonly<ObservableQueryBitcoinBalance>;
+  public readonly queryBitcoinFeeEstimates: DeepReadonly<ObservableQueryBitcoinFeeEstimates>;
 
   constructor(
     protected readonly sharedContext: QuerySharedContext,
@@ -35,5 +37,10 @@ class BitcoinQueriesStoreImpl {
     protected readonly chainGetter: ChainGetter
   ) {
     this.queryBitcoinBalance = new ObservableQueryBitcoinBalance(sharedContext);
+    this.queryBitcoinFeeEstimates = new ObservableQueryBitcoinFeeEstimates(
+      sharedContext,
+      chainId,
+      chainGetter
+    );
   }
 }
