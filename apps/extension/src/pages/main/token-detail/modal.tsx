@@ -160,7 +160,7 @@ export const TokenDetailModal: FunctionComponent<{
         );
     }
 
-    throw new Error(`Unsupported chain: ${chainId}`);
+    return undefined;
   })();
 
   const price24HChange = (() => {
