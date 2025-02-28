@@ -10,7 +10,7 @@ export const Input: FunctionComponent<
 
 const StyledInput = styled.input<{ warning?: boolean }>`
   font-weight: 700;
-  font-size: 1.875rem;
+  font-size: 1.75rem;
   line-height: 2.25rem;
 
   width: 100%;
