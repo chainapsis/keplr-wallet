@@ -631,7 +631,7 @@
   "page.token-detail.manage-earn-button": "Manage Earn",
 
   "page.earn.title": "Earn",
-  "page.earn.intro.title": "Earn real-time rewards\nwith <token></token>",
+  "page.earn.intro.title": "Earn real-time rewards{br}with <image></image> USDC",
   "page.earn.intro.paragraph": "Put your stable asset to work and earn {apy} APY—effortless and simple.",
   "page.earn.intro.benefits.no-lockup": "No Lock-Ups",
   "page.earn.intro.benefits.daily-accrued": "Real-time Accrued Rewards",

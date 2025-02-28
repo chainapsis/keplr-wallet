@@ -72,20 +72,36 @@ export const EarnIntroPage: FunctionComponent = observer(() => {
             {intl.formatMessage(
               { id: "page.earn.intro.title" },
               {
-                token: () => (
-                  <Box style={{ display: "inline-block" }}>
-                    <XAxis alignY="center">
+                br: <br />,
+                image: () => (
+                  // text를 감싸는 div의 height에 영향을 미치지 않으면서 이미지를 중앙에 그리기 위해서 이렇게 처리함...
+                  <div
+                    style={{
+                      display: "inline-block",
+                      verticalAlign: "middle",
+                      height: "0px",
+                      width: "1.5rem",
+                    }}
+                  >
+                    <Box
+                      width="1.5rem"
+                      height="0px"
+                      alignX="center"
+                      alignY="center"
+                    >
                       <Image
                         src={currency.coinImageUrl}
-                        width="24px"
-                        height="24px"
-                        style={{ borderRadius: "50%" }}
+                        style={{
+                          width: "1.5rem",
+                          height: "1.5rem",
+                          borderRadius: "50%",
+                          // font 자체가 완벽하게 세로 중앙에 존재하는게 아니기 때문에 수동으로 bottom margin을 조절함...
+                          marginBottom: "4px",
+                        }}
                         alt={currency.coinDenom}
                       />
-                      <Gutter size="0.25rem" />
-                      {currency.coinDenom}
-                    </XAxis>
-                  </Box>
+                    </Box>
+                  </div>
                 ),
               }
             )}
