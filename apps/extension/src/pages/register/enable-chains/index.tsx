@@ -1,5 +1,6 @@
 import React, {
   FunctionComponent,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -48,7 +49,11 @@ import SimpleBar from "simplebar-react";
 import { useTheme } from "styled-components";
 import { dispatchGlobalEventExceptSelf } from "../../../utils/global-events";
 import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
-import { ArrowDownIcon, NativeChainMarkIcon } from "../../../components/icon";
+import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  NativeChainMarkIcon,
+} from "../../../components/icon";
 import { EmbedChainInfos } from "../../../config";
 import { ViewToken } from "../../main";
 import { IconButton } from "../../../components/icon-button";
@@ -352,6 +357,8 @@ export const EnableChainsScene: FunctionComponent<{
     ]);
 
     const sceneTransition = useSceneTransition();
+    const [isCollapsedNativeChainView, setIsCollapsedNativeChainView] =
+      useState(false);
 
     const [enabledChainIdentifiers, setEnabledChainIdentifiers] = useState(
       () => {
@@ -487,13 +494,21 @@ export const EnableChainsScene: FunctionComponent<{
         }
 
         if (enableAllChains) {
-          return chainStore.modularChainInfosInListUI.map(
+          // enableAllChains일때는 native chain만 활성화한다.
+          return EmbedChainInfos.map(
             (chainInfo) => ChainIdHelper.parse(chainInfo.chainId).identifier
           );
         }
 
         return [...new Set(enabledChainIdentifiers)];
       }
+    );
+
+    const nativeEnabledChainIdentifiers = enabledChainIdentifiers.filter(
+      (chainIdentifier) => embedChainIdentifierSet.has(chainIdentifier)
+    );
+    const enabledSuggestChainIdentifiers = enabledChainIdentifiers.filter(
+      (chainIdentifier) => !embedChainIdentifierSet.has(chainIdentifier)
     );
 
     const enabledChainIdentifierMap = useMemo(() => {
@@ -612,8 +627,11 @@ export const EnableChainsScene: FunctionComponent<{
       search,
     ]);
 
-    const modularChainInfos = preSortModularChainInfos.sort(
-      (aModularChainInfo, bModularChainInfo) => {
+    const chainSort = useCallback(
+      (
+        aModularChainInfo: ModularChainInfo,
+        bModularChainInfo: ModularChainInfo
+      ) => {
         const aChainIdentifier = ChainIdHelper.parse(
           aModularChainInfo.chainId
         ).identifier;
@@ -738,8 +756,35 @@ export const EnableChainsScene: FunctionComponent<{
         return aModularChainInfo.chainName.localeCompare(
           bModularChainInfo.chainName
         );
-      }
+      },
+      [
+        sortPriorityChainIdentifierMap,
+        candidateAddressesMap,
+        chainStore,
+        queriesStore,
+        accountStore,
+        starknetQueriesStore,
+        priceStore,
+      ]
     );
+
+    const nativeModularChainInfos = preSortModularChainInfos
+      .filter((modularChainInfo) =>
+        embedChainIdentifierSet.has(
+          ChainIdHelper.parse(modularChainInfo.chainId).identifier
+        )
+      )
+      .sort(chainSort);
+    const suggestModularChainInfos = preSortModularChainInfos
+      .filter(
+        (modularChainInfo) =>
+          !embedChainIdentifierSet.has(
+            ChainIdHelper.parse(modularChainInfo.chainId).identifier
+          )
+      )
+      .sort(chainSort);
+
+    const modularChainInfos = preSortModularChainInfos.sort(chainSort);
 
     const numSelected = useMemo(() => {
       const modularChainInfoMap = new Map<string, ModularChainInfo>();
@@ -804,6 +849,8 @@ export const EnableChainsScene: FunctionComponent<{
       }
     };
 
+    // 얘는 enabledChainIdentifiers이 변경되거나 검색을 통해서 체인 필터링이 변경되면 다시 계싼되는데 아마
+    // selecctall에서 일단 쓰이고
     const enabledChainIdentifiersInPage = useMemo(() => {
       return enabledChainIdentifiers.filter((chainIdentifier) =>
         modularChainInfos.some(
@@ -814,8 +861,100 @@ export const EnableChainsScene: FunctionComponent<{
       );
     }, [enabledChainIdentifiers, modularChainInfos]);
 
+    const enabledNativeChainIdentifiersInPage = useMemo(() => {
+      return enabledChainIdentifiers.filter(
+        (chainIdentifier) =>
+          nativeModularChainInfos.some(
+            (modularChainInfo) =>
+              chainIdentifier ===
+              ChainIdHelper.parse(modularChainInfo.chainId).identifier
+          ) && embedChainIdentifierSet.has(chainIdentifier)
+      );
+    }, [
+      embedChainIdentifierSet,
+      enabledChainIdentifiers,
+      nativeModularChainInfos,
+    ]);
+
     const [preSelectedChainIdentifiers, setPreSelectedChainIdentifiers] =
       useState<string[]>([]);
+
+    const getChainItemInfoForView = useCallback(
+      (modularChainInfo: ModularChainInfo) => {
+        const account = accountStore.getAccount(modularChainInfo.chainId);
+        const tokens =
+          tokensByChainIdentifier.get(
+            ChainIdHelper.parse(modularChainInfo.chainId).identifier
+          ) ?? [];
+
+        const balance = (() => {
+          if ("cosmos" in modularChainInfo) {
+            const chainInfo = chainStore.getChain(
+              modularChainInfo.cosmos.chainId
+            );
+            const queries = queriesStore.get(modularChainInfo.chainId);
+            const mainCurrency =
+              chainInfo.stakeCurrency || chainInfo.currencies[0];
+
+            const queryBalance = chainStore.isEvmOnlyChain(chainInfo.chainId)
+              ? queries.queryBalances.getQueryEthereumHexAddress(
+                  account.ethereumHexAddress
+                )
+              : queries.queryBalances.getQueryBech32Address(
+                  account.bech32Address
+                );
+            const balance = queryBalance.getBalance(mainCurrency);
+
+            if (balance) {
+              return balance.balance;
+            }
+
+            return new CoinPretty(mainCurrency, "0");
+          } else if ("starknet" in modularChainInfo) {
+            const mainCurrency = modularChainInfo.starknet.currencies[0];
+            const queryBalance = starknetQueriesStore
+              .get(modularChainInfo.chainId)
+              .queryStarknetERC20Balance.getBalance(
+                modularChainInfo.chainId,
+                chainStore,
+                account.starknetHexAddress,
+                mainCurrency.coinMinimalDenom
+              );
+
+            if (queryBalance) {
+              return queryBalance.balance;
+            }
+
+            return new CoinPretty(mainCurrency, "0");
+          }
+        })();
+        const chainIdentifier = ChainIdHelper.parse(
+          modularChainInfo.chainId
+        ).identifier;
+
+        const enabled = enabledChainIdentifierMap.get(chainIdentifier) || false;
+
+        // At least, one chain should be enabled.
+        const blockInteraction = enabledChainIdentifiers.length <= 1 && enabled;
+
+        return {
+          balance,
+          enabled,
+          blockInteraction,
+          tokens,
+          chainIdentifier,
+        };
+      },
+      [
+        accountStore,
+        chainStore,
+        enabledChainIdentifiers,
+        enabledChainIdentifierMap,
+        queriesStore,
+        starknetQueriesStore,
+        tokensByChainIdentifier,
+      ]
+    );
 
     return (
       <RegisterSceneBox>
@@ -857,66 +996,63 @@ export const EnableChainsScene: FunctionComponent<{
           }}
         >
           <Stack gutter="0.5rem">
-            {modularChainInfos.map((modularChainInfo) => {
-              const account = accountStore.getAccount(modularChainInfo.chainId);
-              const tokens =
-                tokensByChainIdentifier.get(
-                  ChainIdHelper.parse(modularChainInfo.chainId).identifier
-                ) ?? [];
+            <NativeChainSection
+              onClick={() => {}}
+              isCollapsed={isCollapsedNativeChainView}
+              isSelectAll={false}
+              enabledNativeChainIdentifierList={
+                enabledNativeChainIdentifiersInPage
+              }
+              onClickCollapse={() => {
+                setIsCollapsedNativeChainView(!isCollapsedNativeChainView);
+              }}
+            >
+              {nativeModularChainInfos.map((modularChainInfo) => {
+                const {
+                  balance,
+                  enabled,
+                  blockInteraction,
+                  tokens,
+                  chainIdentifier,
+                } = getChainItemInfoForView(modularChainInfo);
 
-              const balance = (() => {
-                if ("cosmos" in modularChainInfo) {
-                  const chainInfo = chainStore.getChain(
-                    modularChainInfo.cosmos.chainId
-                  );
-                  const queries = queriesStore.get(modularChainInfo.chainId);
-                  const mainCurrency =
-                    chainInfo.stakeCurrency || chainInfo.currencies[0];
+                return (
+                  <ChainItem
+                    tokens={tokens}
+                    key={chainIdentifier}
+                    modularChainInfo={modularChainInfo}
+                    balance={balance}
+                    enabled={enabled}
+                    blockInteraction={blockInteraction}
+                    isFresh={isFresh ?? false}
+                    isNativeChain={embedChainIdentifierSet.has(chainIdentifier)}
+                    onClick={() => {
+                      if (enabledChainIdentifierMap.get(chainIdentifier)) {
+                        setEnabledChainIdentifiers(
+                          enabledChainIdentifiers.filter(
+                            (ci) => ci !== chainIdentifier
+                          )
+                        );
+                      } else {
+                        setEnabledChainIdentifiers([
+                          ...enabledChainIdentifiers,
+                          chainIdentifier,
+                        ]);
+                      }
+                    }}
+                  />
+                );
+              })}
+            </NativeChainSection>
 
-                  const queryBalance = chainStore.isEvmOnlyChain(
-                    chainInfo.chainId
-                  )
-                    ? queries.queryBalances.getQueryEthereumHexAddress(
-                        account.ethereumHexAddress
-                      )
-                    : queries.queryBalances.getQueryBech32Address(
-                        account.bech32Address
-                      );
-                  const balance = queryBalance.getBalance(mainCurrency);
-
-                  if (balance) {
-                    return balance.balance;
-                  }
-
-                  return new CoinPretty(mainCurrency, "0");
-                } else if ("starknet" in modularChainInfo) {
-                  const mainCurrency = modularChainInfo.starknet.currencies[0];
-                  const queryBalance = starknetQueriesStore
-                    .get(modularChainInfo.chainId)
-                    .queryStarknetERC20Balance.getBalance(
-                      modularChainInfo.chainId,
-                      chainStore,
-                      account.starknetHexAddress,
-                      mainCurrency.coinMinimalDenom
-                    );
-
-                  if (queryBalance) {
-                    return queryBalance.balance;
-                  }
-
-                  return new CoinPretty(mainCurrency, "0");
-                }
-              })();
-              const chainIdentifier = ChainIdHelper.parse(
-                modularChainInfo.chainId
-              ).identifier;
-
-              const enabled =
-                enabledChainIdentifierMap.get(chainIdentifier) || false;
-
-              // At least, one chain should be enabled.
-              const blockInteraction =
-                enabledChainIdentifiers.length <= 1 && enabled;
+            {suggestModularChainInfos.map((modularChainInfo) => {
+              const {
+                balance,
+                enabled,
+                blockInteraction,
+                tokens,
+                chainIdentifier,
+              } = getChainItemInfoForView(modularChainInfo);
 
               return (
                 <ChainItem
@@ -1093,13 +1229,14 @@ export const EnableChainsScene: FunctionComponent<{
 
         <VerticalCollapseTransition
           collapsed={(() => {
-            for (const chainIdentifier of enabledChainIdentifiersInPage) {
-              const modularChainInfo =
-                chainStore.getModularChain(chainIdentifier);
-              if ("starknet" in modularChainInfo) {
-                return false;
-              }
-            }
+            //FIXME: 일단 이거는 미뤄두고 어떻게 처리 할지 의견이 필요함
+            // for (const chainIdentifier of enabledChainIdentifiersInPage) {
+            //   const modularChainInfo =
+            //     chainStore.getModularChain(chainIdentifier);
+            //   if ("starknet" in modularChainInfo) {
+            //     return false;
+            //   }
+            // }
             return true;
           })()}
         >
@@ -1433,6 +1570,153 @@ export const EnableChainsScene: FunctionComponent<{
     );
   }
 );
+
+const NativeChainSection: FunctionComponent<{
+  isCollapsed: boolean;
+  isSelectAll: boolean;
+  children: React.ReactNode;
+
+  enabledNativeChainIdentifierList: string[];
+  onClickCollapse: () => void;
+  onClick: () => void;
+}> = ({
+  isCollapsed,
+  isSelectAll,
+  children,
+  enabledNativeChainIdentifierList,
+  onClick,
+  onClickCollapse,
+}) => {
+  const theme = useTheme();
+  const { chainStore } = useStore();
+
+  // 이미지 전환 애니메이션
+  const imageTransition = useSpring({
+    opacity: 1,
+    transform: isCollapsed ? "scale(0.8)" : "scale(1)",
+    config: { tension: 280, friction: 20 },
+  });
+
+  return (
+    <React.Fragment>
+      <Box
+        borderRadius="0.375rem"
+        paddingX="1rem"
+        paddingY="0.75rem"
+        backgroundColor={
+          isSelectAll
+            ? theme.mode === "light"
+              ? ColorPalette["gray-10"]
+              : ColorPalette["gray-550"]
+            : theme.mode === "light"
+            ? ColorPalette.white
+            : ColorPalette["gray-600"]
+        }
+        cursor={"pointer"}
+        onClick={onClick}
+        style={{
+          transition: "background-color 0.3s ease",
+        }}
+      >
+        <Columns sum={1} alignY="center">
+          <animated.div style={imageTransition}>
+            {isCollapsed ? (
+              <NativeChainMarkIcon width="1.75rem" height="1.75rem" />
+            ) : (
+              <Box position="relative">
+                <ChainImageFallback
+                  chainInfo={chainStore.getChain("cosmoshub-4")}
+                  size="3rem"
+                />
+
+                <Box
+                  position="absolute"
+                  style={{
+                    bottom: "-0.125rem",
+                    right: "-0.125rem",
+                  }}
+                >
+                  <NativeChainMarkIcon width="1.25rem" height="1.25rem" />
+                </Box>
+              </Box>
+            )}
+          </animated.div>
+          <Gutter size="0.5rem" />
+          <YAxis>
+            <XAxis alignY="center">
+              <Subtitle2>
+                <FormattedMessage id="pages.register.enable-chains.native-chain-view.title" />
+              </Subtitle2>
+              <Gutter size="0.25rem" />
+              <Subtitle3 color={ColorPalette["blue-300"]}>
+                {enabledNativeChainIdentifierList.length}
+              </Subtitle3>
+            </XAxis>
+            <Gutter size="0.25rem" />
+            {isCollapsed ? null : (
+              <Subtitle3 color={ColorPalette["gray-300"]}>
+                <FormattedMessage id="pages.register.enable-chains.native-chain-view.paragraph" />
+              </Subtitle3>
+            )}
+          </YAxis>
+          <Column weight={1} />
+
+          <Column weight={1} />
+          <XAxis alignY="center">
+            <IconButton
+              onClick={(e) => {
+                e.stopPropagation();
+                onClickCollapse();
+              }}
+              padding="0.25rem"
+              hoverColor={
+                theme.mode === "light"
+                  ? ColorPalette["gray-100"]
+                  : ColorPalette["gray-500"]
+              }
+            >
+              {isCollapsed ? (
+                <ArrowDownIcon
+                  width="1.5rem"
+                  height="1.5rem"
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-200"]
+                      : ColorPalette["gray-300"]
+                  }
+                />
+              ) : (
+                <ArrowUpIcon
+                  width="1.5rem"
+                  height="1.5rem"
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-200"]
+                      : ColorPalette["gray-300"]
+                  }
+                />
+              )}
+            </IconButton>
+            <Gutter size="0.5rem" />
+            <Checkbox
+              checked={isSelectAll}
+              onChange={() => {
+                onClick();
+              }}
+            />
+          </XAxis>
+        </Columns>
+      </Box>
+      <VerticalCollapseTransition
+        collapsed={isCollapsed}
+        opacityLeft={0}
+        transitionAlign="top"
+      >
+        <Stack gutter="0.5rem">{children}</Stack>
+      </VerticalCollapseTransition>
+    </React.Fragment>
+  );
+};
 
 const ChainItem: FunctionComponent<{
   modularChainInfo: ModularChainInfo;

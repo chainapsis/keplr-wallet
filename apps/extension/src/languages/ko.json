@@ -166,6 +166,8 @@
   "pages.register.enable-chains.guide.can-select-starknet-later-step": "Starknet 체인 선택은 추후의 단계에서 진행할 수 있습니다.",
   "pages.register.enable-chains.guide.starknet.title": "스타크넷 유저를 위한 안내",
   "pages.register.enable-chains.guide.starknet.paragraph": "Argent, Braavos 등의 타 지갑 서비스에서 계정을 불러와도 서로 다른 새로운 계정이 생성됩니다.",
+  "pages.register.enable-chains.native-chain-view.title": "모든 네이티브 체인",
+  "pages.register.enable-chains.native-chain-view.paragraph": "Cosmos, Osmosis, Stargaze, ...",
 
   "pages.register.select-derivation-path.title": "계정 파생 경로(Derivation Path) 선택하기",
   "pages.register.select-derivation-path.paragraph": "두 가지 경로를 모두 사용하려면, 각각에 대해 불러오기 과정을 한번씩 거쳐야 합니다.",

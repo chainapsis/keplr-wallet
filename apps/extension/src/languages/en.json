@@ -165,6 +165,8 @@
   "pages.register.enable-chains.guide.can-select-starknet-later-step": "You can select Starknet chains in a later step.",
   "pages.register.enable-chains.guide.starknet.title": "Note for Starknet Users",
   "pages.register.enable-chains.guide.starknet.paragraph": "Importing from other wallets (e.g. Argent, Braavos) will create a new, different account in Keplr.",
+  "pages.register.enable-chains.native-chain-view.title": "All Native Chains",
+  "pages.register.enable-chains.native-chain-view.paragraph": "Cosmos, Osmosis, Stargaze, ...",
 
   "pages.register.select-derivation-path.title": "Select Account Derivation Path",
   "pages.register.select-derivation-path.paragraph": "To use both paths, you need to go through the import process twice.",
