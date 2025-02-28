@@ -21,6 +21,7 @@ import { MultiAccounts } from "../keyring-keystone";
 import { AnalyticsService } from "../analytics";
 import { Primitive } from "utility-types";
 import { runIfOnlyAppStart } from "../utils";
+import { Psbt } from "bitcoinjs-lib";
 
 export class KeyRingService {
   protected _needMigration = false;
@@ -636,6 +637,12 @@ export class KeyRingService {
         throw new Error("Coin type is not associated to chain");
       }
     }
+    if ("bitcoin" in modularChainInfo) {
+      const chainInfo = modularChainInfo.bitcoin;
+      if (chainInfo.coinType !== coinType) {
+        throw new Error("Coin type is not associated to chain");
+      }
+    }
 
     const vault = this.vaultService.getVault("keyRing", vaultId);
     if (!vault) {
@@ -1053,6 +1060,10 @@ export class KeyRingService {
         return 9004;
       }
 
+      if ("bitcoin" in modularChainInfo) {
+        return modularChainInfo.bitcoin.coinType;
+      }
+
       throw new Error("Can't determine default coin type");
     })();
 
@@ -1102,6 +1113,10 @@ export class KeyRingService {
       if (coinType !== 9004) {
         throw new Error("Coin type is not associated to chain");
       }
+    } else if ("bitcoin" in modularChainInfo) {
+      if (modularChainInfo.bitcoin.coinType !== coinType) {
+        throw new Error("Coin type is not associated to chain");
+      }
     } else {
       throw new Error("Can't know that the coin type is associated to chain");
     }
@@ -1133,7 +1148,7 @@ export class KeyRingService {
     chainId: string,
     vaultId: string,
     data: Uint8Array,
-    digestMethod: "sha256" | "keccak256" | "noop"
+    digestMethod: "sha256" | "keccak256" | "hash256" | "noop"
   ): Promise<{
     readonly r: Uint8Array;
     readonly s: Uint8Array;
@@ -1166,6 +1181,8 @@ export class KeyRingService {
         // TODO: starknet에서는 일단 코인타입을 9004로 고정해서 쓴다.
         //       일단은 임시조치인데 나중에 다른 방식으로 바뀔수도 있다.
         return 9004;
+      } else if ("bitcoin" in modularChainInfo) {
+        return modularChainInfo.bitcoin.coinType;
       } else {
         throw new Error("Can't determine default coin type");
       }
@@ -1184,6 +1201,41 @@ export class KeyRingService {
     }
 
     return signature;
+  }
+
+  signPsbt(chainId: string, vaultId: string, psbt: Psbt) {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
+    const modularChainInfo =
+      this.chainsService.getModularChainInfoOrThrow(chainId);
+
+    const vault = this.vaultService.getVault("keyRing", vaultId);
+    if (!vault) {
+      throw new Error("Vault is null");
+    }
+
+    const coinType = (() => {
+      if ("bitcoin" in modularChainInfo) {
+        return modularChainInfo.bitcoin.coinType;
+      }
+
+      throw new Error("Can't determine default coin type");
+    })();
+
+    const signedPsbt = this.signPsbtWithVault(
+      vault,
+      coinType,
+      psbt,
+      modularChainInfo
+    );
+
+    if (this.needKeyCoinTypeFinalize(vault.id, chainId)) {
+      this.finalizeKeyCoinType(vault.id, chainId, coinType);
+    }
+
+    return signedPsbt;
   }
 
   getStarknetPubKeyWithVault(
@@ -1223,7 +1275,7 @@ export class KeyRingService {
     vault: Vault,
     coinType: number,
     data: Uint8Array,
-    digestMethod: "sha256" | "keccak256" | "noop",
+    digestMethod: "sha256" | "keccak256" | "hash256" | "noop",
     modularChainInfo: ModularChainInfo
   ): Promise<{
     readonly r: Uint8Array;
@@ -1238,6 +1290,27 @@ export class KeyRingService {
 
     return Promise.resolve(
       keyRing.sign(vault, coinType, data, digestMethod, modularChainInfo)
+    );
+  }
+
+  signPsbtWithVault(
+    vault: Vault,
+    coinType: number,
+    psbt: Psbt,
+    modularChainInfo: ModularChainInfo
+  ) {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
+    const keyRing = this.getVaultKeyRing(vault);
+
+    if (typeof keyRing.signPsbt !== "function") {
+      throw new Error("This keyring doesn't support 'signPsbt'");
+    }
+
+    return Promise.resolve(
+      keyRing.signPsbt(vault, coinType, psbt, modularChainInfo)
     );
   }
 

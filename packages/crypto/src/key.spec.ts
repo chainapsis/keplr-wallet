@@ -1,7 +1,7 @@
 import { Mnemonic } from "./mnemonic";
 import { PrivKeySecp256k1, PubKeySecp256k1 } from "./key";
 import { Hash } from "./hash";
-import * as ecc from "tiny-secp256k1";
+import * as ecc from "./ecc-adapter";
 import * as bitcoin from "bitcoinjs-lib";
 
 bitcoin.initEccLib(ecc);

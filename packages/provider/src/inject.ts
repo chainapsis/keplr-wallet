@@ -28,6 +28,7 @@ import {
   WalletEvents,
   AccountChangeEventHandler,
   NetworkChangeEventHandler,
+  SupportedPaymentType,
 } from "@keplr-wallet/types";
 import {
   Result,
@@ -1033,6 +1034,28 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     );
   }
 
+  async getBitcoinKey(chainId: string): Promise<{
+    name: string;
+    pubKey: Uint8Array;
+    address: string;
+    paymentType: SupportedPaymentType;
+    isNanoLedger: boolean;
+  }> {
+    return await this.requestMethod("getBitcoinKey", [chainId]);
+  }
+
+  async getBitcoinKeysSettled(chainIds: string[]): Promise<
+    SettledResponses<{
+      name: string;
+      pubKey: Uint8Array;
+      address: string;
+      paymentType: SupportedPaymentType;
+      isNanoLedger: boolean;
+    }>
+  > {
+    return await this.requestMethod("getBitcoinKeysSettled", [chainIds]);
+  }
+
   public readonly ethereum = new EthereumProvider(
     () => this,
     this.eventListener,
@@ -1578,3 +1601,5 @@ class StarknetProvider implements IStarknetProvider {
     }
   }
 }
+
+// TODO: Implement bitcoin provider

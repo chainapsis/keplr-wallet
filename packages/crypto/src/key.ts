@@ -7,13 +7,11 @@ import { Buffer as NodeBuffer } from "buffer";
 import { Hash } from "./hash";
 import { hash as starknetHash } from "starknet";
 import { ECPairInterface, ECPairFactory } from "ecpair";
-import * as ecc from "tiny-secp256k1";
 import { Network, payments } from "bitcoinjs-lib";
+import * as ecc from "./ecc-adapter";
+import * as bitcoin from "bitcoinjs-lib";
 
-// This code is required before using bitcoinjs-lib.
-// import * as bitcoin from "bitcoinjs-lib";
-// bitcoin.initEccLib(ecc);
-
+bitcoin.initEccLib(ecc);
 export class PrivKeySecp256k1 {
   static generateRandomKey(): PrivKeySecp256k1 {
     return new PrivKeySecp256k1(secp256k1.utils.randomPrivateKey());
@@ -33,9 +31,9 @@ export class PrivKeySecp256k1 {
     return new PubKeySecp256k1(secp256k1.getPublicKey(this.privKey, true));
   }
 
-  getBitcoinPubKey(): BitcoinCompatiblePubKey {
+  getBitcoinPubKey(): PubKeyBitcoinCompatible {
     const pubKey = secp256k1.getPublicKey(this.toBytes(), false);
-    return new BitcoinCompatiblePubKey(pubKey);
+    return new PubKeyBitcoinCompatible(pubKey);
   }
 
   signDigest32(digest: Uint8Array): {
@@ -137,6 +135,10 @@ export class PubKeySecp256k1 {
     }
   }
 
+  toBitcoinPubKey(): PubKeyBitcoinCompatible {
+    return new PubKeyBitcoinCompatible(this.toBytes(false));
+  }
+
   /**
    * @deprecated Use `getCosmosAddress()` instead.
    */
@@ -229,7 +231,7 @@ export class PubKeySecp256k1 {
   }
 }
 
-export class BitcoinCompatiblePubKey extends PubKeySecp256k1 {
+export class PubKeyBitcoinCompatible extends PubKeySecp256k1 {
   /**
    * returns the legacy address of the public key compatible with Bitcoin.
    * both compressed and uncompressed are supported.

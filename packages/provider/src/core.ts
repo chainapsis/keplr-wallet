@@ -22,6 +22,7 @@ import {
   IEthereumProvider,
   IStarknetProvider,
   WalletEvents,
+  SupportedPaymentType,
 } from "@keplr-wallet/types";
 import {
   BACKGROUND_PORT,
@@ -1136,6 +1137,68 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     });
   }
 
+  async getBitcoinKey(chainId: string): Promise<{
+    name: string;
+    pubKey: Uint8Array;
+    address: string;
+    paymentType: SupportedPaymentType;
+    isNanoLedger: boolean;
+  }> {
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-bitcoin",
+        "get-bitcoin-key",
+        {
+          chainId,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
+  }
+
+  async getBitcoinKeysSettled(chainIds: string[]): Promise<
+    SettledResponses<{
+      name: string;
+      pubKey: Uint8Array;
+      address: string;
+      paymentType: SupportedPaymentType;
+      isNanoLedger: boolean;
+    }>
+  > {
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-bitcoin",
+        "get-bitcoin-keys-settled",
+        {
+          chainIds,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
+  }
+
   // IMPORTANT: protected로 시작하는 method는 InjectedKeplr.startProxy()에서 injected 쪽에서 event system으로도 호출할 수 없도록 막혀있다.
   //            protected로 시작하지 않는 method는 injected keplr에 없어도 event system을 통하면 호출 할 수 있다.
   //            이를 막기 위해서 method 이름을 protected로 시작하게 한다.
@@ -1690,3 +1753,5 @@ class StarknetProvider implements IStarknetProvider {
     throw new Error("Method not implemented.");
   }
 }
+
+// TODO: Implement bitcoin provider
