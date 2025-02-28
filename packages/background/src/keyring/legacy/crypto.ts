@@ -11,7 +11,7 @@ import { Buffer } from "buffer/";
 
 /**
  * This is similar to ethereum's key store.
- * But, the encryped data is not the private key, but the mnemonic words.
+ * But, the encrypted data is not the private key, but the mnemonic words.
  */
 export interface KeyStore {
   version: "1.2";
