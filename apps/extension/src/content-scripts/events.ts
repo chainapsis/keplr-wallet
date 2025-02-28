@@ -72,6 +72,7 @@ export function initEvents(router: Router) {
                     msg as PushEventDataMsg<{
                       origin: string;
                       bitcoinChainId: string;
+                      network: string;
                     }>
                   ).data.data,
                 },

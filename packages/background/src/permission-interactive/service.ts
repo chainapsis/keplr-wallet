@@ -169,15 +169,13 @@ export class PermissionInteractiveService {
     // TODO: support ledger
     // await this.ensureKeyRingLedgerAppConnected(env, "Bitcoin");
 
-    const currentChainIdForBitcoin =
-      this.permissionService.getCurrentChainIdForBitcoin(origin) ?? [
-        `bip122:${GenesisHash.MAINNET}:taproot`,
-        `bip122:${GenesisHash.MAINNET}:native-segwit`,
-      ];
+    const currentBaseChainIdForBitcoin =
+      this.permissionService.getCurrentBaseChainIdForBitcoin(origin) ??
+      `bip122:${GenesisHash.MAINNET}`;
 
     await this.permissionService.checkOrGrantBasicAccessPermission(
       env,
-      currentChainIdForBitcoin,
+      currentBaseChainIdForBitcoin,
       origin,
       {
         isForBitcoin: true,
