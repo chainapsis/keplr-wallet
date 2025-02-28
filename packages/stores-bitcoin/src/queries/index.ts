@@ -3,6 +3,8 @@ import { DeepReadonly } from "utility-types";
 import { ObservableQueryBitcoinBalance } from "./balance";
 import { ObservableQueryBitcoinFeeEstimates } from "./fee-estimates";
 import { ObservableQueryBitcoinUTXOs } from "./utxos";
+import { ObservableQueryBitcoinTx } from "./tx";
+
 export class BitcoinQueriesStore {
   protected map: Map<string, BitcoinQueriesStoreImpl> = new Map();
 
@@ -31,6 +33,7 @@ export class BitcoinQueriesStore {
 class BitcoinQueriesStoreImpl {
   public readonly queryBitcoinBalance: DeepReadonly<ObservableQueryBitcoinBalance>;
   public readonly queryBitcoinUTXOs: DeepReadonly<ObservableQueryBitcoinUTXOs>;
+  public readonly queryBitcoinTx: DeepReadonly<ObservableQueryBitcoinTx>;
   public readonly queryBitcoinFeeEstimates: DeepReadonly<ObservableQueryBitcoinFeeEstimates>;
 
   constructor(
@@ -40,6 +43,7 @@ class BitcoinQueriesStoreImpl {
   ) {
     this.queryBitcoinBalance = new ObservableQueryBitcoinBalance(sharedContext);
     this.queryBitcoinUTXOs = new ObservableQueryBitcoinUTXOs(sharedContext);
+    this.queryBitcoinTx = new ObservableQueryBitcoinTx(sharedContext);
     this.queryBitcoinFeeEstimates = new ObservableQueryBitcoinFeeEstimates(
       sharedContext,
       chainId,
