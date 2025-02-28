@@ -150,12 +150,9 @@ export const EarnOverviewHistorySection: FunctionComponent<{
         return (
           <RenderMessages
             msgHistory={msgHistory}
-            targetDenom={(msg) => {
-              if (relations.includes(msg.relation)) {
-                return msg.denoms?.[1] ?? "uusdc";
-              }
-              return msg.denoms?.[0] ?? "uusdc";
-            }}
+            targetDenom={(msg) =>
+              msg.denoms?.[(msg.denoms?.length ?? 1) - 1] ?? "uusdn"
+            }
             isInAllActivitiesPage={false}
           />
         );

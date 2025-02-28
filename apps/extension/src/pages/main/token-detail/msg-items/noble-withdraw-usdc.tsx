@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useMemo } from "react";
+import React, { FunctionComponent } from "react";
 import { MsgHistory } from "../types";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
@@ -17,27 +17,42 @@ export const MsgRelationNobleWithdrawUsdc: FunctionComponent<{
   const { chainStore } = useStore();
   const chainInfo = chainStore.getChain(msg.chainId);
 
-  const amountPretty = useMemo(() => {
-    const currency = chainInfo.forceFindCurrency(targetDenom);
-    const tokensOut = msg.meta["tokensOut"];
-    if (
-      tokensOut &&
-      Array.isArray(tokensOut) &&
-      tokensOut.length > 0 &&
-      typeof tokensOut[0] === "string"
-    ) {
-      for (const coinStr of tokensOut) {
+  const tokenIn = (() => {
+    const tokensIn = msg.meta["tokensIn"];
+    if (tokensIn && Array.isArray(tokensIn)) {
+      for (const coinStr of tokensIn) {
         if (isValidCoinStr(coinStr as string)) {
-          const coin = parseCoinStr(coinStr as string);
-          if (coin.denom === targetDenom) {
-            return new CoinPretty(currency, coin.amount);
-          }
+          return parseCoinStr(coinStr as string);
         }
       }
     }
+    return undefined;
+  })();
 
-    return new CoinPretty(currency, "0");
-  }, [chainInfo, msg.meta, targetDenom]);
+  const tokenOut = (() => {
+    const tokensOut = msg.meta["tokensOut"];
+    if (tokensOut && Array.isArray(tokensOut)) {
+      for (const coinStr of tokensOut) {
+        if (isValidCoinStr(coinStr as string)) {
+          return parseCoinStr(coinStr as string);
+        }
+      }
+    }
+    return undefined;
+  })();
+
+  const sourceCurrency = chainInfo.forceFindCurrency(tokenIn?.denom ?? "");
+
+  const tokenAmountPretty = (() => {
+    if (tokenIn?.denom !== targetDenom) {
+      return new CoinPretty(sourceCurrency, tokenIn?.amount ?? "0");
+    }
+    if (tokenOut?.denom !== targetDenom) {
+      return new CoinPretty(sourceCurrency, tokenOut?.amount ?? "0");
+    }
+
+    return new CoinPretty(sourceCurrency, "0");
+  })();
 
   return (
     <MsgItemBase
@@ -48,11 +63,17 @@ export const MsgRelationNobleWithdrawUsdc: FunctionComponent<{
       title="Withdraw"
       paragraph={(() => {
         if (chainInfo) {
-          return `To ${amountPretty.denom} on ${chainInfo.chainName}`;
+          if (tokenOut) {
+            const denom = new CoinPretty(
+              chainInfo.forceFindCurrency(tokenOut?.denom ?? ""),
+              tokenOut?.amount
+            ).denom;
+            return `To ${denom} on ${chainInfo.chainName}`;
+          }
         }
         return "Unknown";
       })()}
-      amount={amountPretty}
+      amount={tokenAmountPretty}
       prices={prices || {}}
       msg={msg}
       targetDenom={targetDenom}
