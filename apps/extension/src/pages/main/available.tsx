@@ -106,15 +106,17 @@ export const AvailableTabView: FunctionComponent<{
           (chainInfo) => !chainStore.isEnabledChain(chainInfo.chainId)
         );
 
-      const disabledModularChainInfos = chainStore.modularChainInfos.filter(
-        (modularChainInfo) =>
-          ("starknet" in modularChainInfo || "bitcoin" in modularChainInfo) &&
-          !chainStore.isEnabledChain(modularChainInfo.chainId) &&
-          trimSearch.length >= 3 &&
-          (modularChainInfo.chainId.toLowerCase().includes(trimSearch) ||
-            modularChainInfo.chainName.toLowerCase().includes(trimSearch) ||
-            trimSearch === "eth")
-      );
+      const disabledModularChainInfos =
+        chainStore.groupedModularChainInfos.filter(
+          (modularChainInfo) =>
+            ("starknet" in modularChainInfo || "bitcoin" in modularChainInfo) &&
+            !chainStore.isEnabledChain(modularChainInfo.chainId) &&
+            trimSearch.length >= 3 &&
+            (modularChainInfo.chainId.toLowerCase().includes(trimSearch) ||
+              modularChainInfo.chainName.toLowerCase().includes(trimSearch) ||
+              trimSearch === "eth" ||
+              trimSearch === "btc")
+        );
 
       disabledChainInfos = [
         ...new Set([...disabledChainInfos, ...disabledModularChainInfos]),
