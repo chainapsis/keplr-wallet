@@ -1,5 +1,10 @@
 import { AccountSetBase, AccountSetBaseSuper } from "./base";
-import { QueriesSetBase, IQueriesStore, CosmosQueries } from "../query";
+import {
+  QueriesSetBase,
+  IQueriesStore,
+  CosmosQueries,
+  NobleQueries,
+} from "../query";
 import { ChainGetter } from "../chain";
 import { Currency } from "@keplr-wallet/types";
 import { DeepReadonly } from "utility-types";
@@ -14,7 +19,7 @@ export interface NobleAccount {
 
 export const NobleAccount = {
   use(options: {
-    queriesStore: IQueriesStore<CosmosQueries>;
+    queriesStore: IQueriesStore<CosmosQueries & NobleQueries>;
   }): (
     base: AccountSetBaseSuper & CosmosAccount,
     chainGetter: ChainGetter,
@@ -38,7 +43,7 @@ export class NobleAccountImpl {
     protected readonly base: AccountSetBase & CosmosAccount,
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
-    protected readonly queriesStore: IQueriesStore<CosmosQueries>
+    protected readonly queriesStore: IQueriesStore<CosmosQueries & NobleQueries>
   ) {}
 
   makeSwapTx(
@@ -51,13 +56,7 @@ export class NobleAccountImpl {
     routes: {
       poolId: string;
       denomTo: string;
-    }[],
-    preOnTxEvents?:
-      | ((tx: any) => void)
-      | {
-          onBroadcasted?: (txHash: Uint8Array) => void;
-          onFulfill?: (tx: any) => void;
-        }
+    }[]
   ) {
     const actualAmount = (() => {
       let dec = new Dec(amount);
@@ -134,19 +133,28 @@ export class NobleAccountImpl {
           },
         ],
       },
-      preOnTxEvents
+      (tx) => {
+        if (tx.code == null || tx.code === 0) {
+          // After succeeding to withdraw rewards, refresh rewards.
+          const bals = this.queries.queryBalances
+            .getQueryBech32Address(this.base.bech32Address)
+            .balances.filter(
+              (bal) =>
+                bal.currency.coinMinimalDenom === currency.coinMinimalDenom ||
+                bal.currency.coinMinimalDenom === outCurrency.coinMinimalDenom
+            );
+
+          for (const bal of bals) {
+            bal.fetch();
+          }
+        }
+      }
     );
   }
 
   makeClaimYieldTx(
     // This arg can be used to override the type of sending tx if needed.
-    type: string = "noble-claim-yield",
-    preOnTxEvents?:
-      | ((tx: any) => void)
-      | {
-          onBroadcasted?: (txHash: Uint8Array) => void;
-          onFulfill?: (tx: any) => void;
-        }
+    type: string = "noble-claim-yield"
   ) {
     const msg = {
       type: "dollar/ClaimYield",
@@ -170,11 +178,20 @@ export class NobleAccountImpl {
           },
         ],
       },
-      preOnTxEvents
+      (tx) => {
+        if (tx.code == null || tx.code === 0) {
+          // After succeeding to withdraw rewards, refresh rewards.
+          this.queries.noble.queryYield
+            .getQueryBech32Address(this.base.bech32Address)
+            .fetch();
+        }
+      }
     );
   }
 
-  protected get queries(): DeepReadonly<QueriesSetBase & CosmosQueries> {
+  protected get queries(): DeepReadonly<
+    QueriesSetBase & CosmosQueries & NobleQueries
+  > {
     return this.queriesStore.get(this.chainId);
   }
 }
