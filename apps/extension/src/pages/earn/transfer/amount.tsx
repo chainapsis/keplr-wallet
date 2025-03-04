@@ -53,6 +53,7 @@ import { DenomHelper, ExtensionKVStore } from "@keplr-wallet/common";
 import { XAxis, YAxis } from "../../../components/axis";
 import { LongArrowDownIcon } from "../../../components/icon/long-arrow-down";
 import { useTheme } from "styled-components";
+import { IBCCurrency } from "@keplr-wallet/types";
 
 export const EarnTransferAmountPage: FunctionComponent = observer(() => {
   const theme = useTheme();
@@ -573,7 +574,7 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
               sendConfigs.amountConfig.setValue(e.target.value);
             }}
             autoComplete="off"
-            suffix={currency?.coinDenom ?? ""}
+            suffix={(currency as IBCCurrency)?.originCurrency?.coinDenom ?? ""}
           />
           <Gutter size="0.75rem" />
           <Box padding="0.25rem 0">
