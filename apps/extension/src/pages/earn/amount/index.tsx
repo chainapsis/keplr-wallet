@@ -153,6 +153,7 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
             nobleEarnAmountConfig.amountConfig.setValue(e.target.value);
           }}
           autoComplete="off"
+          suffix={currency?.coinDenom ?? ""}
         />
 
         {amountError && (
