@@ -267,6 +267,7 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
                 nobleEarnAmountConfig.amountConfig.setValue(e.target.value);
               }}
               autoComplete="off"
+              suffix={currency?.coinDenom ?? ""}
             />
             <Gutter size="0.75rem" />
             <Box padding="0.25rem 0">
