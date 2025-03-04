@@ -37,6 +37,7 @@ import {
 import { ApyChip, Chip } from "../components/chip";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import { WarningBox } from "../../../components/warning-box";
+import { HorizontalCollapseTransition } from "../../../components/transition/horizontal-collapse";
 import { useTheme } from "styled-components";
 
 const NOBLE_EARN_WITHDRAW_OUT_COIN_MINIMAL_DENOM = "uusdc";
@@ -160,11 +161,13 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
             : {})}
         />
       }
+      animatedBottomButtons={true}
+      hideBottomButtons={
+        txConfigsValidate.interactionBlocked ||
+        !!nobleEarnAmountConfig.amountConfig.error
+      }
       bottomButtons={[
         {
-          disabled:
-            txConfigsValidate.interactionBlocked ||
-            !!nobleEarnAmountConfig.amountConfig.error,
           text: intl.formatMessage({ id: "button.next" }),
           color: "primary",
           size: "large",
@@ -175,6 +178,13 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
       ]}
       onSubmit={async (e) => {
         e.preventDefault();
+
+        if (
+          txConfigsValidate.interactionBlocked ||
+          !!nobleEarnAmountConfig.amountConfig.error
+        ) {
+          return;
+        }
 
         if (!isConfirmView) {
           setIsConfirmView(true);
@@ -271,42 +281,52 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
             />
             <Gutter size="0.75rem" />
             <Box padding="0.25rem 0">
-              <XAxis alignY="center" gap="0.25rem">
-                {nobleEarnAmountConfig.amountConfig.amount[0]
-                  .toDec()
-                  .equals(new Dec("0")) && (
-                  <Box
-                    padding="0.25rem 0.375rem"
-                    backgroundColor={
-                      isLightMode
-                        ? ColorPalette["gray-50"]
-                        : ColorPalette["gray-550"]
-                    }
-                    borderRadius="0.5rem"
-                    width="fit-content"
-                    cursor="pointer"
-                    onClick={() => {
-                      nobleEarnAmountConfig.amountConfig.setFraction(1);
-                    }}
-                    hover={{
-                      backgroundColor: isLightMode
-                        ? ColorPalette["gray-10"]
-                        : ColorPalette["gray-500"],
-                    }}
-                  >
-                    <Subtitle4
-                      color={
+              <XAxis alignY="center">
+                <HorizontalCollapseTransition
+                  collapsed={
+                    !nobleEarnAmountConfig.amountConfig.amount[0]
+                      .toDec()
+                      .equals(new Dec("0"))
+                  }
+                >
+                  <XAxis alignY="center">
+                    <Box
+                      padding="0.25rem 0.375rem"
+                      backgroundColor={
                         isLightMode
-                          ? ColorPalette["gray-400"]
-                          : ColorPalette["gray-200"]
+                          ? ColorPalette["gray-50"]
+                          : ColorPalette["gray-550"]
                       }
+                      borderRadius="0.5rem"
+                      width="fit-content"
+                      cursor="pointer"
+                      onClick={() => {
+                        nobleEarnAmountConfig.amountConfig.setFraction(1);
+                      }}
+                      hover={{
+                        backgroundColor: isLightMode
+                          ? ColorPalette["gray-10"]
+                          : ColorPalette["gray-500"],
+                      }}
                     >
-                      {balance.trim(true).toString()}
-                    </Subtitle4>
-                  </Box>
-                )}
+                      <Subtitle4
+                        color={
+                          isLightMode
+                            ? ColorPalette["gray-400"]
+                            : ColorPalette["gray-200"]
+                        }
+                      >
+                        {balance.trim(true).toString()}
+                      </Subtitle4>
+                    </Box>
+                    <Gutter size="0.25rem" />
+                  </XAxis>
+                </HorizontalCollapseTransition>
                 <Subtitle3 color={ColorPalette["gray-300"]}>
-                  {`on ${chainInfo.chainName}`}
+                  {intl.formatMessage(
+                    { id: "page.earn.amount.balance.current-chain" },
+                    { chain: chainInfo.chainName }
+                  )}
                 </Subtitle3>
               </XAxis>
             </Box>

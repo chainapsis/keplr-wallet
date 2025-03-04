@@ -1,4 +1,4 @@
-import React, { Fragment, FunctionComponent, useMemo } from "react";
+import React, { FunctionComponent, useMemo } from "react";
 import { observer } from "mobx-react-lite";
 import { HeaderLayout } from "../../../layouts/header";
 import { BackButton } from "../../../layouts/header/components";
@@ -18,6 +18,7 @@ import { Input } from "../components/input";
 import { useNobleEarnAmountConfig } from "@keplr-wallet/hooks-internal";
 import { EmptyAmountError, ZeroAmountError } from "@keplr-wallet/hooks";
 import { NOBLE_CHAIN_ID } from "../../../config.ui";
+import { HorizontalCollapseTransition } from "../../../components/transition/horizontal-collapse";
 import { useTheme } from "styled-components";
 
 const NOBLE_EARN_DEPOSIT_OUT_COIN_MINIMAL_DENOM = "uusdn";
@@ -113,19 +114,16 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
           navigate(`/earn/confirm-usdn-estimation?amount=${amountInput}`);
         }
       }}
-      bottomButtons={
-        isSubmissionBlocked
-          ? undefined
-          : [
-              {
-                text: intl.formatMessage({ id: "button.next" }),
-                color: "primary",
-                size: "large",
-                type: "submit",
-                disabled: isSubmissionBlocked,
-              },
-            ]
-      }
+      animatedBottomButtons={true}
+      hideBottomButtons={isSubmissionBlocked}
+      bottomButtons={[
+        {
+          text: intl.formatMessage({ id: "button.next" }),
+          color: "primary",
+          size: "large",
+          type: "submit",
+        },
+      ]}
     >
       <Box paddingX="1.5rem" paddingTop="2.5rem">
         <ApyChip chainId={chainId} colorType="green" />
@@ -165,8 +163,8 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
         <Gutter size="1rem" />
         <Box paddingY="0.25rem">
           <XAxis alignY="center">
-            {isSubmissionBlocked && (
-              <Fragment>
+            <HorizontalCollapseTransition collapsed={!isSubmissionBlocked}>
+              <XAxis alignY="center">
                 <Box
                   borderRadius="0.5rem"
                   paddingX="0.375rem"
@@ -195,8 +193,8 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
                   </Subtitle3>
                 </Box>
                 <Gutter size="0.25rem" />
-              </Fragment>
-            )}
+              </XAxis>
+            </HorizontalCollapseTransition>
             <Subtitle3 color={ColorPalette["gray-300"]}>
               {intl.formatMessage(
                 { id: "page.earn.amount.balance.current-chain" },
