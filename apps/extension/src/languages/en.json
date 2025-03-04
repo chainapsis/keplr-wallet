@@ -627,7 +627,7 @@
   "page.starknet.components.account-activation-modal.description": "Activate your account to access various features of Starknet!{br}A small fee applies for account activation.",
 
   "page.token-detail.earn-apy-banner.title": "Earn rewards",
-  "page.token-detail.earn-apy-banner.start-earn-button": "Start Earn",
+  "page.token-detail.earn-apy-banner.start-earn-button": "Start Earning",
   "page.token-detail.manage-earn-button": "Manage Earn",
 
   "page.earn.title": "Earn",
@@ -639,7 +639,7 @@
   "page.earn.intro.start-earning-button": "Start Earning",
   "page.earn.intro.learn-more-button": "Learn More",
   "page.earn.intro.learn-more-modal.title": "About Keplr Earn Service",
-  "page.earn.intro.learn-more-modal.paragraph.first": "Our Earn feature lets you grow your assets effortlessly.",
+  "page.earn.intro.learn-more-modal.paragraph.first": "Grow your assets effortlessly with our Earn feature.",
   "page.earn.intro.learn-more-modal.paragraph.second": "Swap USDC for USDN, hold your assets, and earn real-time rewards. Deposit or withdraw anytime—no lock-up. It’s that easy!",
   "page.earn.intro.learn-more-modal.got-it-button": "Got it",
   "page.earn.amount.input-label": "Enter the amount to deposit.",
@@ -648,7 +648,7 @@
   "page.earn.amount.balance.transfer.button": "Transfer",
   "page.earn.amount.error.insufficient-balance": "Insufficient balance",
   "page.earn.amount.earn-output-modal.title": "Get {tokenName} to earn rewards",
-  "page.earn.estimation-confirm.usdc-to-usdn.title": "Swap USDC to USDN{br}and earn Real-time rewards.",
+  "page.earn.estimation-confirm.usdc-to-usdn.title": "Swap USDC to USDN{br}and earn real-time rewards.",
   "page.earn.estimation-confirm.usdc-to-usdn.no-rewards": "No rewards",
   "page.earn.estimation-confirm.usdc-to-usdn.paragraph": "To stop earning later,{br}swap USDN back to USDC.",
   "page.earn.estimation-confirm.usdc-to-usdn.on-noble": "on Noble",
