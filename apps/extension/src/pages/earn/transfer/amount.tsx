@@ -52,8 +52,12 @@ import { NOBLE_CHAIN_ID } from "../../../config.ui";
 import { DenomHelper, ExtensionKVStore } from "@keplr-wallet/common";
 import { XAxis, YAxis } from "../../../components/axis";
 import { LongArrowDownIcon } from "../../../components/icon/long-arrow-down";
+import { useTheme } from "styled-components";
 
 export const EarnTransferAmountPage: FunctionComponent = observer(() => {
+  const theme = useTheme();
+  const isLightMode = theme.mode === "light";
+
   const {
     accountStore,
     chainStore,
@@ -548,7 +552,9 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
         }}
       >
         <Stack flex={1}>
-          <MobileH3 color={ColorPalette["white"]}>
+          <MobileH3
+            color={isLightMode ? ColorPalette["gray-700"] : ColorPalette.white}
+          >
             {intl.formatMessage(
               { id: "page.earn.transfer.amount.title" },
               {
@@ -576,7 +582,9 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
                 .equals(new Dec("0")) && (
                 <Box
                   padding="0.25rem 0.375rem"
-                  backgroundColor={ColorPalette["gray-550"]}
+                  backgroundColor={
+                    isLightMode ? ColorPalette.white : ColorPalette["gray-550"]
+                  }
                   borderRadius="0.5rem"
                   width="fit-content"
                   cursor="pointer"
@@ -584,7 +592,13 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
                     sendConfigs.amountConfig.setFraction(1);
                   }}
                 >
-                  <Subtitle4 color={ColorPalette["gray-200"]}>
+                  <Subtitle4
+                    color={
+                      isLightMode
+                        ? ColorPalette["gray-400"]
+                        : ColorPalette["gray-200"]
+                    }
+                  >
                     {balance.trim(true).hideIBCMetadata(true).toString()}
                   </Subtitle4>
                 </Box>
@@ -607,7 +621,11 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
                 <LongArrowDownIcon
                   width="1.5rem"
                   height="1.5rem"
-                  color={ColorPalette["gray-400"]}
+                  color={
+                    isLightMode
+                      ? ColorPalette["gray-200"]
+                      : ColorPalette["gray-400"]
+                  }
                 />
               </YAxis>
               <Gutter size="1rem" />

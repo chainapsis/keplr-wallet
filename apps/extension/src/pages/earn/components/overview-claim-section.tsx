@@ -10,11 +10,15 @@ import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
 import { Currency } from "@keplr-wallet/types";
 import { observer } from "mobx-react-lite";
 import { useNavigate } from "react-router";
+import { useTheme } from "styled-components";
 
 export const EarnOverviewClaimSection: FunctionComponent<{
   chainId: string;
   currency: Currency;
 }> = observer(({ chainId, currency }) => {
+  const theme = useTheme();
+  const isLightMode = theme.mode === "light";
+
   const intl = useIntl();
   const navigate = useNavigate();
   const { queriesStore, accountStore } = useStore();
@@ -105,11 +109,21 @@ export const EarnOverviewClaimSection: FunctionComponent<{
         }}
       >
         <Box width="50%">
-          <Subtitle3 color={ColorPalette["gray-200"]}>
+          <Subtitle3
+            color={
+              isLightMode ? ColorPalette["gray-400"] : ColorPalette["gray-200"]
+            }
+          >
             <FormattedMessage id="page.earn.overview.claim-section.claimable-reward" />
           </Subtitle3>
           <Gutter size="0.875rem" />
-          <H4 color={ColorPalette["green-400"]}>
+          <H4
+            color={
+              isLightMode
+                ? ColorPalette["green-600"]
+                : ColorPalette["green-400"]
+            }
+          >
             {new CoinPretty(currency, claimableAmount)
               .hideDenom(true)
               .trim(true)
@@ -117,11 +131,17 @@ export const EarnOverviewClaimSection: FunctionComponent<{
           </H4>
         </Box>
         <Box width="50%">
-          <Subtitle3 color={ColorPalette["gray-200"]}>
+          <Subtitle3
+            color={
+              isLightMode ? ColorPalette["gray-400"] : ColorPalette["gray-200"]
+            }
+          >
             <FormattedMessage id="page.earn.overview.claim-section.total-claimed" />
           </Subtitle3>
           <Gutter size="0.875rem" />
-          <H4 color={ColorPalette.white}>
+          <H4
+            color={isLightMode ? ColorPalette["gray-700"] : ColorPalette.white}
+          >
             {totalYield.shrink(true).hideDenom(true).toString()}
           </H4>
         </Box>

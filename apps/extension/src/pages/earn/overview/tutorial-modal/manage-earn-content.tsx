@@ -13,17 +13,24 @@ export const ManageEarnContent: FunctionComponent<{
   denom: string;
   coinImageUrl: string;
   onNext: () => void;
-}> = ({ denom, coinImageUrl, onNext }) => (
+  isLightMode: boolean;
+}> = ({ denom, coinImageUrl, onNext, isLightMode }) => (
   <Fragment>
     <Box paddingY="1.25rem">
-      <H4 color={ColorPalette.white} style={{ textAlign: "center" }}>
+      <H4
+        color={isLightMode ? ColorPalette["gray-700"] : ColorPalette.white}
+        style={{ textAlign: "center" }}
+      >
         <FormattedMessage
           id="page.earn.overview.tutorial-modal.manage-earn.title"
           values={{ tokenName: denom }}
         />
       </H4>
     </Box>
-    <Body3 color={ColorPalette["gray-200"]} style={{ textAlign: "center" }}>
+    <Body3
+      color={isLightMode ? ColorPalette["gray-400"] : ColorPalette["gray-200"]}
+      style={{ textAlign: "center" }}
+    >
       <FormattedMessage
         id="page.earn.overview.tutorial-modal.manage-earn.paragraph"
         values={{ tokenName: denom }}
@@ -31,7 +38,11 @@ export const ManageEarnContent: FunctionComponent<{
     </Body3>
     <Gutter size="1.125rem" />
 
-    <SampleTokenItemCard denom={denom} coinImageUrl={coinImageUrl} />
+    <SampleTokenItemCard
+      denom={denom}
+      coinImageUrl={coinImageUrl}
+      isLightMode={isLightMode}
+    />
     <Gutter size="1.625rem" />
 
     <Button
@@ -46,21 +57,32 @@ export const ManageEarnContent: FunctionComponent<{
 const SampleTokenItemCard: FunctionComponent<{
   denom: string;
   coinImageUrl: string;
-}> = ({ denom, coinImageUrl }) => {
-  console.log(denom);
+  isLightMode: boolean;
+}> = ({ denom, coinImageUrl, isLightMode }) => {
   return (
     <Box position="relative" style={{ cursor: "default" }}>
       <Box
         zIndex={2}
         paddingX="1rem"
         paddingY="0.75rem"
-        backgroundColor={ColorPalette["gray-650"]}
+        backgroundColor={
+          isLightMode ? ColorPalette.white : ColorPalette["gray-650"]
+        }
         borderRadius="0.5rem"
+        style={
+          isLightMode
+            ? { boxShadow: "0px 1px 4px 0px rgba(43, 39, 55, 0.10)" }
+            : {}
+        }
       >
         <XAxis alignY="center">
           <Image src={coinImageUrl} width="24px" height="24px" alt={denom} />
           <Gutter size="0.75rem" />
-          <Subtitle4 color={ColorPalette.white}>{denom}</Subtitle4>
+          <Subtitle4
+            color={isLightMode ? ColorPalette["gray-700"] : ColorPalette.white}
+          >
+            {denom}
+          </Subtitle4>
         </XAxis>
       </Box>
       <Box
@@ -72,11 +94,17 @@ const SampleTokenItemCard: FunctionComponent<{
         }}
         paddingTop="0.875rem"
         paddingBottom="0.375rem"
-        backgroundColor={Color(ColorPalette["green-700"]).alpha(0.2).toString()}
+        backgroundColor={
+          isLightMode
+            ? ColorPalette["green-100"]
+            : Color(ColorPalette["green-700"]).alpha(0.2).toString()
+        }
         borderRadius="0 0 0.5rem 0.5rem"
       >
         <Body3
-          color={ColorPalette["green-400"]}
+          color={
+            isLightMode ? ColorPalette["green-600"] : ColorPalette["green-400"]
+          }
           style={{ textAlign: "center" }}
         >
           <FormattedMessage

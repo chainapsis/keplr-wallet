@@ -19,6 +19,7 @@ import { useGetEarnApy } from "../../../hooks/use-get-apy";
 import { useStore } from "../../../stores";
 import { ColorPalette } from "../../../styles";
 import { observer } from "mobx-react-lite";
+import { useTheme } from "styled-components";
 
 export const EarnOverviewBalanceSection: FunctionComponent<{
   chainId: string;
@@ -26,6 +27,9 @@ export const EarnOverviewBalanceSection: FunctionComponent<{
   rewardCurrency?: Currency;
   bech32Address: string;
 }> = observer(({ chainId, holdingCurrency, rewardCurrency, bech32Address }) => {
+  const theme = useTheme();
+  const isLightMode = theme.mode === "light";
+
   const intl = useIntl();
 
   const { queriesStore, priceStore, uiConfigStore } = useStore();
@@ -58,17 +62,27 @@ export const EarnOverviewBalanceSection: FunctionComponent<{
           />
         )}
 
-        <Subtitle3 color={ColorPalette["gray-200"]}>
+        <Subtitle3
+          color={
+            isLightMode ? ColorPalette["gray-400"] : ColorPalette["gray-200"]
+          }
+        >
           {rewardCurrency?.coinDenom}
         </Subtitle3>
 
         <Dot />
 
-        <Subtitle4 color={ColorPalette["green-400"]}>APY {apy}</Subtitle4>
+        <Subtitle4
+          color={
+            isLightMode ? ColorPalette["green-600"] : ColorPalette["green-400"]
+          }
+        >
+          APY {apy}
+        </Subtitle4>
       </XAxis>
       <Gutter size="0.75rem" />
 
-      <H1 color={ColorPalette.white}>
+      <H1 color={isLightMode ? ColorPalette["gray-700"] : ColorPalette.white}>
         {balance?.hideDenom(true).shrink(true).toString() || "0"}
       </H1>
       <Gutter size="0.5rem" />
@@ -108,5 +122,10 @@ export const EarnOverviewBalanceSection: FunctionComponent<{
 });
 
 const Dot: FunctionComponent = () => (
-  <Box width="3px" height="3px" backgroundColor={ColorPalette["gray-400"]} />
+  <Box
+    width="3px"
+    height="3px"
+    backgroundColor={ColorPalette["gray-400"]}
+    style={{ borderRadius: "50%" }}
+  />
 );
