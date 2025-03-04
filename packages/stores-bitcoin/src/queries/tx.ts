@@ -33,7 +33,7 @@ export class ObservableQueryBitcoinTx {
 
   constructor(protected readonly sharedContext: QuerySharedContext) {}
 
-  getTxHex(
+  getTx(
     chainId: string,
     chainGetter: ChainGetter,
     txid: string
