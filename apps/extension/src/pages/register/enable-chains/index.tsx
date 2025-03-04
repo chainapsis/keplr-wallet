@@ -15,7 +15,7 @@ import {
   useSceneEvents,
   useSceneTransition,
 } from "../../../components/transition";
-import { ModularChainInfo } from "@keplr-wallet/types";
+import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { Box } from "../../../components/box";
 import { Column, Columns } from "../../../components/column";
@@ -59,6 +59,7 @@ import { IconButton } from "../../../components/icon-button";
 import { DenomHelper } from "@keplr-wallet/common";
 import { Tooltip } from "../../../components/tooltip";
 import { useSpring, animated } from "@react-spring/web";
+import { useGetAllChain } from "../../../hooks/use-get-all-chain";
 
 /**
  * EnableChainsScene은 finalize-key scene에서 선택한 chains를 활성화하는 scene이다.
@@ -368,6 +369,9 @@ export const EnableChainsScene: FunctionComponent<{
     const sceneTransition = useSceneTransition();
     const [isCollapsedNativeChainView, setIsCollapsedNativeChainView] =
       useState(false);
+
+    const [nonNativeChainListForSuggest, setNonNativeChainListForSuggest] =
+      useState<(ChainInfo | ModularChainInfo)[]>([]);
 
     const [enabledChainIdentifiers, setEnabledChainIdentifiers] = useState(
       () => {
@@ -794,7 +798,19 @@ export const EnableChainsScene: FunctionComponent<{
       )
       .sort(chainSort);
 
-    const modularChainInfos = preSortModularChainInfos.sort(chainSort);
+    const { chains: searchedChainInfos } = useGetAllChain({
+      search,
+      excludeChainIdentifiers: chainStore.modularChainInfosInListUI.map(
+        (modularChainInfo) =>
+          ChainIdHelper.parse(modularChainInfo.chainId).identifier
+      ),
+    });
+
+    const nonNativeChainInfos = searchedChainInfos.filter((chainInfo) => {
+      return !suggestModularChainInfos?.some(
+        (modularChainInfo) => modularChainInfo.chainId === chainInfo.chainId
+      );
+    });
 
     const numSelected = useMemo(() => {
       const modularChainInfoMap = new Map<string, ModularChainInfo>();
@@ -858,18 +874,6 @@ export const EnableChainsScene: FunctionComponent<{
         });
       }
     };
-
-    // 얘는 enabledChainIdentifiers이 변경되거나 검색을 통해서 체인 필터링이 변경되면 다시 계싼되는데 아마
-    // selecctall에서 일단 쓰이고
-    const enabledChainIdentifiersInPage = useMemo(() => {
-      return enabledChainIdentifiers.filter((chainIdentifier) =>
-        modularChainInfos.some(
-          (modularChainInfo) =>
-            chainIdentifier ===
-            ChainIdHelper.parse(modularChainInfo.chainId).identifier
-        )
-      );
-    }, [enabledChainIdentifiers, modularChainInfos]);
 
     const enabledNativeChainIdentifiersInPage = useMemo(() => {
       return enabledChainIdentifiers.filter(
@@ -1078,7 +1082,7 @@ export const EnableChainsScene: FunctionComponent<{
                   <ChainItem
                     tokens={tokens}
                     key={chainIdentifier}
-                    modularChainInfo={modularChainInfo}
+                    chainInfo={modularChainInfo}
                     balance={balance}
                     enabled={enabled}
                     blockInteraction={blockInteraction}
@@ -1117,7 +1121,7 @@ export const EnableChainsScene: FunctionComponent<{
               return (
                 <ChainItem
                   key={chainIdentifier}
-                  modularChainInfo={modularChainInfo}
+                  chainInfo={modularChainInfo}
                   balance={balance}
                   enabled={enabled}
                   blockInteraction={blockInteraction}
@@ -1137,6 +1141,38 @@ export const EnableChainsScene: FunctionComponent<{
                     }
                   }}
                   tokens={tokens}
+                />
+              );
+            })}
+
+            {nonNativeChainInfos.map((chainInfo) => {
+              const chainIdentifier = ChainIdHelper.parse(
+                chainInfo.chainId
+              ).identifier;
+              const isChecked =
+                nonNativeChainListForSuggest.includes(chainInfo);
+
+              return (
+                <ChainItem
+                  key={chainIdentifier}
+                  chainInfo={chainInfo}
+                  enabled={isChecked}
+                  isFresh={true}
+                  blockInteraction={false}
+                  onClick={() => {
+                    if (isChecked) {
+                      setNonNativeChainListForSuggest(
+                        nonNativeChainListForSuggest.filter(
+                          (ci) => ci.chainId !== chainInfo.chainId
+                        )
+                      );
+                    } else {
+                      setNonNativeChainListForSuggest([
+                        ...nonNativeChainListForSuggest,
+                        chainInfo,
+                      ]);
+                    }
+                  }}
                 />
               );
             })}
@@ -1298,6 +1334,45 @@ export const EnableChainsScene: FunctionComponent<{
               const enables: string[] = [];
               const disables: string[] = [];
 
+              if (nonNativeChainListForSuggest.length > 0) {
+                const successSuggestChainIdentifiers: string[] = [];
+                for (const chainInfo of nonNativeChainListForSuggest) {
+                  try {
+                    await window.keplr?.experimentalSuggestChain(
+                      chainInfo as ChainInfo
+                    );
+                    successSuggestChainIdentifiers.push(
+                      ChainIdHelper.parse(chainInfo.chainId).identifier
+                    );
+                  } catch {
+                    console.error(
+                      `Failed to suggest chain ${chainInfo.chainId}`
+                    );
+                    continue;
+                  }
+                }
+                try {
+                  // console.log(
+                  //   "successSuggestChainIdentifiers @@@@@@",
+                  //   successSuggestChainIdentifiers
+                  // );
+
+                  await keyRingStore.refreshKeyRingStatus();
+                  await chainStore.updateChainInfosFromBackground();
+                  await chainStore.updateEnabledChainIdentifiersFromBackground();
+                  dispatchGlobalEventExceptSelf("keplr_suggested_chain_added");
+                } catch {
+                  console.error(
+                    "Failed to suggest chain @@@@@@",
+                    successSuggestChainIdentifiers
+                  );
+                }
+
+                enables.push(...successSuggestChainIdentifiers);
+              }
+
+              // await new Promise((resolve) => setTimeout(resolve, 10000));
+
               for (const modularChainInfo of chainStore.modularChainInfos) {
                 const chainIdentifier = ChainIdHelper.parse(
                   modularChainInfo.chainId
@@ -1381,6 +1456,18 @@ export const EnableChainsScene: FunctionComponent<{
                   ledgerStarknetAppNeeds.push(enable);
                 }
               }
+              // console.log(
+              //   "enables @@@@@@",
+              //   enables,
+              //   enables.filter((e) =>
+              //     nonNativeChainListForSuggest.some(
+              //       (c) => ChainIdHelper.parse(c.chainId).identifier === e
+              //     )
+              //   )
+              // );
+              // console.log("disables @@@@@@", disables);
+
+              // await new Promise((resolve) => setTimeout(resolve, 100000));
 
               await Promise.all([
                 (async () => {
@@ -1711,7 +1798,7 @@ const NativeChainSection: FunctionComponent<{
 };
 
 const ChainItem: FunctionComponent<{
-  modularChainInfo: ModularChainInfo;
+  chainInfo: ChainInfo | ModularChainInfo;
   balance?: CoinPretty;
   isNativeChain?: boolean;
   enabled: boolean;
@@ -1720,10 +1807,10 @@ const ChainItem: FunctionComponent<{
   onClick: () => void;
 
   isFresh: boolean;
-  tokens: ViewToken[];
+  tokens?: ViewToken[];
 }> = observer(
   ({
-    modularChainInfo,
+    chainInfo,
     balance,
     enabled,
     blockInteraction,
@@ -1738,9 +1825,7 @@ const ChainItem: FunctionComponent<{
 
     const price = balance ? priceStore.calculatePrice(balance) : undefined;
 
-    const chainIdentifier = ChainIdHelper.parse(
-      modularChainInfo.chainId
-    ).identifier;
+    const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId).identifier;
 
     const arrowAnimation = useSpring({
       transform: isCollapsedTokenView ? "rotate(0deg)" : "rotate(-180deg)",
@@ -1772,7 +1857,7 @@ const ChainItem: FunctionComponent<{
           <XAxis alignY="center">
             {isNativeChain ? (
               <Box position="relative">
-                <ChainImageFallback chainInfo={modularChainInfo} size="3rem" />
+                <ChainImageFallback chainInfo={chainInfo} size="3rem" />
                 <Box
                   position="absolute"
                   style={{
@@ -1784,7 +1869,7 @@ const ChainItem: FunctionComponent<{
                 </Box>
               </Box>
             ) : (
-              <ChainImageFallback chainInfo={modularChainInfo} size="3rem" />
+              <ChainImageFallback chainInfo={chainInfo} size="3rem" />
             )}
 
             <Gutter size="0.5rem" />
@@ -1795,13 +1880,13 @@ const ChainItem: FunctionComponent<{
                   {(() => {
                     // Noble의 경우만 약간 특수하게 표시해줌
                     if (chainIdentifier === "noble") {
-                      return `${modularChainInfo.chainName} (USDC)`;
+                      return `${chainInfo.chainName} (USDC)`;
                     }
 
-                    return modularChainInfo.chainName;
+                    return chainInfo.chainName;
                   })()}
                 </Subtitle2>
-                {tokens.length > 1 && (
+                {tokens && tokens.length > 1 && (
                   <React.Fragment>
                     <Gutter size="0.25rem" />
                     <IconButton
@@ -1865,12 +1950,14 @@ const ChainItem: FunctionComponent<{
             />
           </XAxis>
         </Columns>
-        <VerticalCollapseTransition
-          collapsed={isCollapsedTokenView}
-          opacityLeft={0}
-        >
-          <TokenView tokens={tokens} />
-        </VerticalCollapseTransition>
+        {tokens && (
+          <VerticalCollapseTransition
+            collapsed={isCollapsedTokenView}
+            opacityLeft={0}
+          >
+            <TokenView tokens={tokens} />
+          </VerticalCollapseTransition>
+        )}
       </Box>
     );
   }
