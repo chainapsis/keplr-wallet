@@ -545,29 +545,49 @@ export class HugeQueriesStore {
   );
 
   filterLowBalanceTokens = computedFn(
-    (viewTokens: ReadonlyArray<ViewToken>): ViewToken[] => {
-      return viewTokens.filter((viewToken) => {
+    (
+      viewTokens: ReadonlyArray<ViewToken>
+    ): {
+      filteredTokens: ViewToken[];
+      lowBalanceTokens: ViewToken[];
+    } => {
+      const lowBalanceTokens: ViewToken[] = [];
+      const filteredTokens = viewTokens.filter((viewToken) => {
         // Hide the unknown ibc tokens.
         if (
           "paths" in viewToken.token.currency &&
           !viewToken.token.currency.originCurrency
         ) {
+          lowBalanceTokens.push(viewToken);
           return false;
         }
 
         // If currency has coinGeckoId, hide the low price tokens (under $1)
         if (viewToken.token.currency.coinGeckoId != null) {
-          return (
+          const isNotLowPrice =
             this.priceStore
               .calculatePrice(viewToken.token, "usd")
               ?.toDec()
-              .gte(new Dec("1")) ?? false
-          );
+              .gte(new Dec("1")) ?? false;
+
+          if (!isNotLowPrice) {
+            lowBalanceTokens.push(viewToken);
+          }
+          return isNotLowPrice;
         }
 
         // Else, hide the low balance tokens (under 0.001)
-        return viewToken.token.toDec().gte(new Dec("0.001"));
+        const isNotLowBalance = viewToken.token.toDec().gte(new Dec("0.001"));
+        if (!isNotLowBalance) {
+          lowBalanceTokens.push(viewToken);
+        }
+        return isNotLowBalance;
       });
+
+      return {
+        filteredTokens,
+        lowBalanceTokens,
+      };
     }
   );
 
