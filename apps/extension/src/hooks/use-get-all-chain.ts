@@ -1,8 +1,9 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useStore } from "../stores";
 import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import { autorun } from "mobx";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import SimpleBarCore from "simplebar-core";
 
 interface UseGetAllChainParams {
   pageSize?: number;
@@ -19,15 +20,16 @@ interface UseGetAllChainResult {
   setPage: (page: number) => void;
   isLoading: boolean;
   error: Error | null;
+  simpleBarRef: React.MutableRefObject<SimpleBarCore | null>;
 }
 
 /**
  * 모든 체인 정보를 가져오고 페이지네이션과 검색 기능을 제공하는 훅
- * @param params 페이지 크기, 초기 페이지 번호, 검색어, 제외할 체인 identifier 리스트를 받습니다
+ * @param params 페이지 크기, 초기 페이지 번호, 검색어,  제외할 체인 identifier 리스트를 받습니다
  * @returns 체인 목록과 페이지네이션 관련 정보를 반환합니다
  */
 export const useGetAllChain = ({
-  pageSize = 1000,
+  pageSize = 20,
   initialPage = 1,
   search = "",
   excludeChainIdentifiers = [],
@@ -40,6 +42,7 @@ export const useGetAllChain = ({
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const simpleBarRef = useRef<SimpleBarCore>(null);
 
   const queryChains = queriesStore.simpleQuery.queryGet<{
     chains: ChainInfo[];
@@ -99,27 +102,50 @@ export const useGetAllChain = ({
     setCurrentPage(1);
   }, [chains, search]);
 
-  const setPage = useCallback((page: number) => {
-    setCurrentPage(page);
+  // 무한 스크롤 처리
+  useEffect(() => {
+    if (simpleBarRef.current) {
+      const scrollElement = simpleBarRef.current.getScrollElement();
+      if (scrollElement) {
+        const onScroll = () => {
+          const simpleBar = simpleBarRef.current?.getContentElement();
+          const scrollEl = simpleBarRef.current?.getScrollElement();
+          if (simpleBar && scrollEl) {
+            const rect = simpleBar.getBoundingClientRect();
+            const scrollRect = scrollEl.getBoundingClientRect();
+
+            const remainingBottomY =
+              rect.y + rect.height - scrollRect.y - scrollRect.height;
+
+            if (remainingBottomY < scrollRect.height / 5) {
+              setCurrentPage((prev) => prev + 1);
+            }
+          }
+        };
+
+        scrollElement.addEventListener("scroll", onScroll);
+
+        return () => {
+          scrollElement.removeEventListener("scroll", onScroll);
+        };
+      }
+    }
   }, []);
 
   const currentPageChains = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
+    const startIndex = 0;
+    const endIndex = currentPage * pageSize;
     return filteredChains.slice(startIndex, endIndex);
   }, [filteredChains, currentPage, pageSize]);
-
-  const totalPages = useMemo(() => {
-    return Math.ceil(filteredChains.length / pageSize);
-  }, [filteredChains.length, pageSize]);
 
   return {
     chains: currentPageChains,
     totalCount: filteredChains.length,
     currentPage,
-    totalPages,
-    setPage,
+    totalPages: Math.ceil(filteredChains.length / pageSize),
+    setPage: setCurrentPage,
     isLoading,
     error,
+    simpleBarRef,
   };
 };

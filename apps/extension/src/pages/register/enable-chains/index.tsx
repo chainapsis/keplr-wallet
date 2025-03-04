@@ -805,7 +805,7 @@ export const EnableChainsScene: FunctionComponent<{
       );
     }, [chainStore.modularChainInfosInListUI]);
 
-    const { chains: searchedChainInfos } = useGetAllChain({
+    const { chains: searchedChainInfos, simpleBarRef } = useGetAllChain({
       search,
       excludeChainIdentifiers,
     });
@@ -1014,6 +1014,7 @@ export const EnableChainsScene: FunctionComponent<{
             height: "25.5rem",
             overflowY: "auto",
           }}
+          ref={simpleBarRef}
         >
           <Stack gutter="0.5rem">
             <NativeChainSection
@@ -1362,7 +1363,7 @@ export const EnableChainsScene: FunctionComponent<{
                   dispatchGlobalEventExceptSelf("keplr_suggested_chain_added");
                 } catch {
                   console.error(
-                    "Failed to suggest chain @@@@@@",
+                    "Failed to suggest chain",
                     successSuggestChainIdentifiers
                   );
                 }
@@ -1666,7 +1667,6 @@ const NativeChainSection: FunctionComponent<{
   const theme = useTheme();
   const { chainStore } = useStore();
 
-  // 이미지 전환 애니메이션
   const imageTransition = useSpring({
     opacity: 1,
     transform: isCollapsed ? "scale(0.8)" : "scale(1)",
@@ -1785,6 +1785,7 @@ const NativeChainSection: FunctionComponent<{
         opacityLeft={0}
         transitionAlign="top"
       >
+        <Gutter size="0.5rem" />
         <Stack gutter="0.5rem">{children}</Stack>
       </VerticalCollapseTransition>
     </React.Fragment>
