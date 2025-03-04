@@ -37,6 +37,7 @@ import {
 import { ApyChip } from "../components/chip";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import { WarningBox } from "../../../components/warning-box";
+import { HorizontalCollapseTransition } from "../../../components/transition/horizontal-collapse";
 
 const NOBLE_EARN_WITHDRAW_OUT_COIN_MINIMAL_DENOM = "uusdc";
 
@@ -263,29 +264,40 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
             <Gutter size="0.75rem" />
             <Box padding="0.25rem 0">
               <XAxis alignY="center">
-                {nobleEarnAmountConfig.amountConfig.amount[0]
-                  .toDec()
-                  .equals(new Dec("0")) && (
-                  <Box
-                    padding="0.25rem 0.5rem"
-                    backgroundColor={ColorPalette["gray-550"]}
-                    borderRadius="0.5rem"
-                    width="fit-content"
-                    cursor="pointer"
-                    onClick={() => {
-                      nobleEarnAmountConfig.amountConfig.setFraction(1);
-                    }}
-                  >
-                    <Subtitle4 color={ColorPalette["gray-200"]}>
-                      {balance.trim(true).toString()}
-                    </Subtitle4>
-                  </Box>
-                )}
-                <Box padding="0.25rem">
-                  <Subtitle3 color={ColorPalette["gray-300"]}>
-                    {`on ${chainInfo.chainName}`}
-                  </Subtitle3>
-                </Box>
+                <HorizontalCollapseTransition
+                  collapsed={
+                    !nobleEarnAmountConfig.amountConfig.amount[0]
+                      .toDec()
+                      .equals(new Dec("0"))
+                  }
+                >
+                  <XAxis alignY="center">
+                    <Box
+                      padding="0.25rem 0.5rem"
+                      backgroundColor={ColorPalette["gray-550"]}
+                      borderRadius="0.5rem"
+                      width="fit-content"
+                      cursor="pointer"
+                      onClick={() => {
+                        nobleEarnAmountConfig.amountConfig.setFraction(1);
+                      }}
+                    >
+                      <Subtitle4 color={ColorPalette["gray-200"]}>
+                        {balance.trim(true).toString()}
+                      </Subtitle4>
+                    </Box>
+                    <Gutter size="0.25rem" />
+                  </XAxis>
+                </HorizontalCollapseTransition>
+                <Subtitle3 color={ColorPalette["gray-300"]}>
+                  {intl.formatMessage(
+                    { id: "page.earn.amount.balance.current-chain" },
+                    { chain: chainInfo.chainName }
+                  )}
+                </Subtitle3>
+                <Subtitle3 color={ColorPalette["gray-300"]}>
+                  {`on ${chainInfo.chainName}`}
+                </Subtitle3>
               </XAxis>
             </Box>
 
