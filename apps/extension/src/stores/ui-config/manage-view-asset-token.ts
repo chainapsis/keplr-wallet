@@ -84,7 +84,7 @@ export class ManageViewAssetTokenConfig {
     });
   }
 
-  searchIsDisabledToken(search: string) {
+  isDisabledTokenSearched(search: string) {
     const vaultId = this.keyRingStore.selectedKeyInfo?.id ?? "";
     const viewAssetTokenMap = this.getViewAssetTokenMapByVaultId(vaultId);
 

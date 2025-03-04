@@ -258,7 +258,7 @@ export const AvailableTabView: FunctionComponent<{
 
     const isShowCheckMangeAssetViewGuide =
       isShowNotFound &&
-      uiConfigStore.manageViewAssetTokenConfig.searchIsDisabledToken(
+      uiConfigStore.manageViewAssetTokenConfig.isDisabledTokenSearched(
         trimSearch
       );
 
