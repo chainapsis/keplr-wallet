@@ -88,13 +88,17 @@ export class ManageViewAssetTokenConfig {
     const vaultId = this.keyRingStore.selectedKeyInfo?.id ?? "";
     const viewAssetTokenMap = this.getViewAssetTokenMapByVaultId(vaultId);
 
+    if (search.length === 0) {
+      return false;
+    }
+
     for (const [chainIdentifier, coinSet] of viewAssetTokenMap.entries()) {
-      if (chainIdentifier.includes(search)) {
+      if (chainIdentifier.toLowerCase().includes(search)) {
         return true;
       }
 
       for (const coinMinimalDenom of coinSet.values()) {
-        if (coinMinimalDenom.includes(search)) {
+        if (coinMinimalDenom.toLowerCase().includes(search)) {
           return true;
         }
       }

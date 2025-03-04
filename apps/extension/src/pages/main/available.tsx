@@ -123,9 +123,16 @@ export const AvailableTabView: FunctionComponent<{
     }, [allBalances, trimSearch]);
 
     const hasLowBalanceTokens =
-      hugeQueriesStore.filterLowBalanceTokens(allBalances).length > 0;
+      hugeQueriesStore.filterLowBalanceTokens(allBalances).filteredTokens
+        .length > 0;
     const lowBalanceFilteredAllBalancesSearchFiltered =
-      hugeQueriesStore.filterLowBalanceTokens(_allBalancesSearchFiltered);
+      hugeQueriesStore.filterLowBalanceTokens(
+        _allBalancesSearchFiltered
+      ).filteredTokens;
+
+    const lowBalanceTokens =
+      hugeQueriesStore.filterLowBalanceTokens(allBalances).lowBalanceTokens;
+
     const allBalancesSearchFiltered =
       uiConfigStore.isHideLowBalance && hasLowBalanceTokens
         ? lowBalanceFilteredAllBalancesSearchFiltered
@@ -254,6 +261,18 @@ export const AvailableTabView: FunctionComponent<{
       uiConfigStore.manageViewAssetTokenConfig.searchIsDisabledToken(
         trimSearch
       );
+
+    const isShowSearchedLowBalanceTokenGuide =
+      uiConfigStore.isHideLowBalance &&
+      lowBalanceTokens.some((token) => {
+        return (
+          (token.chainInfo.chainName.toLowerCase().includes(trimSearch) ||
+            token.token.currency.coinDenom
+              .toLowerCase()
+              .includes(trimSearch)) &&
+          trimSearch.length
+        );
+      });
 
     const [searchParams, setSearchParams] = useSearchParams();
 
@@ -437,7 +456,8 @@ export const AvailableTabView: FunctionComponent<{
               </YAxis>
             </Box>
 
-            {isShowCheckMangeAssetViewGuide && (
+            {(isShowCheckMangeAssetViewGuide ||
+              isShowSearchedLowBalanceTokenGuide) && (
               <Box marginY="2rem">
                 <EmptyView
                   altSvg={
@@ -467,7 +487,9 @@ export const AvailableTabView: FunctionComponent<{
               </Box>
             )}
 
-            {isShowNotFound && !isShowCheckMangeAssetViewGuide ? (
+            {isShowNotFound &&
+            !isShowCheckMangeAssetViewGuide &&
+            !isShowSearchedLowBalanceTokenGuide ? (
               <Box marginY="2rem">
                 <EmptyView>
                   <Stack alignX="center" gutter="0.1rem">
