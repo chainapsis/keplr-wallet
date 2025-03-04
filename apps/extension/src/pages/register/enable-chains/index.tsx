@@ -1265,14 +1265,16 @@ export const EnableChainsScene: FunctionComponent<{
 
         <VerticalCollapseTransition
           collapsed={(() => {
-            //FIXME: 일단 이거는 미뤄두고 어떻게 처리 할지 의견이 필요함
-            // for (const chainIdentifier of enabledChainIdentifiersInPage) {
-            //   const modularChainInfo =
-            //     chainStore.getModularChain(chainIdentifier);
-            //   if ("starknet" in modularChainInfo) {
-            //     return false;
-            //   }
-            // }
+            for (const chainIdentifier of enabledChainIdentifiers) {
+              if (enabledSuggestChainIdentifiers.includes(chainIdentifier)) {
+                return false;
+              }
+            }
+
+            if (nonNativeChainListForSuggest.length > 0) {
+              return false;
+            }
+
             return true;
           })()}
         >
@@ -1312,7 +1314,7 @@ export const EnableChainsScene: FunctionComponent<{
                     : ColorPalette["gray-100"]
                 }
               >
-                <FormattedMessage id="pages.register.enable-chains.guide.starknet.title" />
+                <FormattedMessage id="pages.register.enable-chains.guide.non-native-chain.title" />
               </Subtitle4>
             </XAxis>
             <Gutter size="0.35rem" />
@@ -1323,7 +1325,7 @@ export const EnableChainsScene: FunctionComponent<{
                   : ColorPalette["gray-200"]
               }
             >
-              <FormattedMessage id="pages.register.enable-chains.guide.starknet.paragraph" />
+              <FormattedMessage id="pages.register.enable-chains.guide.non-native-chain.paragraph" />
             </Body3>
           </Box>
         </VerticalCollapseTransition>

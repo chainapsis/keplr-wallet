@@ -165,6 +165,8 @@
   "pages.register.enable-chains.guide.can-select-starknet-later-step": "You can select Starknet chains in a later step.",
   "pages.register.enable-chains.guide.starknet.title": "Note for Starknet Users",
   "pages.register.enable-chains.guide.starknet.paragraph": "Importing from other wallets (e.g. Argent, Braavos) will create a new, different account in Keplr.",
+  "pages.register.enable-chains.guide.non-native-chain.title": "Enabling Custom Chain",
+  "pages.register.enable-chains.guide.non-native-chain.paragraph": "Chains without green check mark are custom (non-native) chains. You can add and use them anytime with Keplr, but Keplr doesn’t offer direct support for custom chain issues.",
   "pages.register.enable-chains.native-chain-view.title": "All Native Chains",
   "pages.register.enable-chains.native-chain-view.paragraph": "Cosmos, Osmosis, Stargaze, ...",
 
