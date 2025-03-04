@@ -564,6 +564,9 @@
   "page.main.available.hide-low-balance": "Hide Low Balance",
   "page.main.available.search-empty-view-title": "Oops!",
   "page.main.available.search-empty-view-paragraph": "No Result Found",
+  "page.main.available.search-show-check-manage-asset-view-guide-title": "Can't find a token?",
+  "page.main.available.search-show-check-manage-asset-view-guide-paragraph": "Check if 'Hide Low Balance' is enabled or if it's hidden in 'Manage Asset List'.",
+
   "page.main.available.empty-view-title": "Ready to Explore the Interchain?",
   "page.main.available.empty-view-paragraph": "Gear up yourself by topping up your wallet!",
   "page.main.available.get-started-button": "Get Started",

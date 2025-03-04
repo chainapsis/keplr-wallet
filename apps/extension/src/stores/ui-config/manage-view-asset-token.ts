@@ -84,6 +84,24 @@ export class ManageViewAssetTokenConfig {
     });
   }
 
+  searchIsDisabledToken(search: string) {
+    const vaultId = this.keyRingStore.selectedKeyInfo?.id ?? "";
+    const viewAssetTokenMap = this.getViewAssetTokenMapByVaultId(vaultId);
+
+    for (const [chainIdentifier, coinSet] of viewAssetTokenMap.entries()) {
+      if (chainIdentifier.includes(search)) {
+        return true;
+      }
+
+      for (const coinMinimalDenom of coinSet.values()) {
+        if (coinMinimalDenom.includes(search)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   async enableViewAssetToken(vaultId: string, token: ViewAssetToken) {
     const msg = new EnableViewAssetTokenMsg(vaultId, token);
     const res = await this.requester.sendMessage(BACKGROUND_PORT, msg);
