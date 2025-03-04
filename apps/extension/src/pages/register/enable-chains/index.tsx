@@ -798,12 +798,16 @@ export const EnableChainsScene: FunctionComponent<{
       )
       .sort(chainSort);
 
-    const { chains: searchedChainInfos } = useGetAllChain({
-      search,
-      excludeChainIdentifiers: chainStore.modularChainInfosInListUI.map(
+    const excludeChainIdentifiers = useMemo(() => {
+      return chainStore.modularChainInfosInListUI.map(
         (modularChainInfo) =>
           ChainIdHelper.parse(modularChainInfo.chainId).identifier
-      ),
+      );
+    }, [chainStore.modularChainInfosInListUI]);
+
+    const { chains: searchedChainInfos } = useGetAllChain({
+      search,
+      excludeChainIdentifiers,
     });
 
     const nonNativeChainInfos = searchedChainInfos.filter((chainInfo) => {
@@ -1333,9 +1337,9 @@ export const EnableChainsScene: FunctionComponent<{
             onClick={async () => {
               const enables: string[] = [];
               const disables: string[] = [];
+              const successSuggestChainIdentifiers: string[] = [];
 
               if (nonNativeChainListForSuggest.length > 0) {
-                const successSuggestChainIdentifiers: string[] = [];
                 for (const chainInfo of nonNativeChainListForSuggest) {
                   try {
                     await window.keplr?.experimentalSuggestChain(
@@ -1352,11 +1356,6 @@ export const EnableChainsScene: FunctionComponent<{
                   }
                 }
                 try {
-                  // console.log(
-                  //   "successSuggestChainIdentifiers @@@@@@",
-                  //   successSuggestChainIdentifiers
-                  // );
-
                   await keyRingStore.refreshKeyRingStatus();
                   await chainStore.updateChainInfosFromBackground();
                   await chainStore.updateEnabledChainIdentifiersFromBackground();
@@ -1371,8 +1370,6 @@ export const EnableChainsScene: FunctionComponent<{
                 enables.push(...successSuggestChainIdentifiers);
               }
 
-              // await new Promise((resolve) => setTimeout(resolve, 10000));
-
               for (const modularChainInfo of chainStore.modularChainInfos) {
                 const chainIdentifier = ChainIdHelper.parse(
                   modularChainInfo.chainId
@@ -1383,6 +1380,16 @@ export const EnableChainsScene: FunctionComponent<{
                 if (enabled) {
                   enables.push(chainIdentifier);
                 } else {
+                  //NOTE - 위에서 suggest 체인이 추가되었으면
+                  //이 체인은 disable 하면 안되기 때문에 무시함
+                  if (
+                    successSuggestChainIdentifiers.some(
+                      (c) => c === chainIdentifier
+                    )
+                  ) {
+                    continue;
+                  }
+
                   disables.push(chainIdentifier);
                 }
               }
@@ -1456,19 +1463,6 @@ export const EnableChainsScene: FunctionComponent<{
                   ledgerStarknetAppNeeds.push(enable);
                 }
               }
-              // console.log(
-              //   "enables @@@@@@",
-              //   enables,
-              //   enables.filter((e) =>
-              //     nonNativeChainListForSuggest.some(
-              //       (c) => ChainIdHelper.parse(c.chainId).identifier === e
-              //     )
-              //   )
-              // );
-              // console.log("disables @@@@@@", disables);
-
-              // await new Promise((resolve) => setTimeout(resolve, 100000));
-
               await Promise.all([
                 (async () => {
                   if (enables.length > 0) {
