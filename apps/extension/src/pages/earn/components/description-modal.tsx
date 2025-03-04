@@ -1,7 +1,7 @@
 import { observer } from "mobx-react-lite";
 import React, { FunctionComponent } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { XAxis } from "../../../components/axis";
 import { Box } from "../../../components/box";
 import { Button } from "../../../components/button";
@@ -16,6 +16,8 @@ export const DescriptionModal: FunctionComponent<{
   title: string;
   paragraphs: string[];
 }> = observer(({ close, title, paragraphs }) => {
+  const theme = useTheme();
+  const isLightMode = theme.mode === "light";
   const intl = useIntl();
 
   return (
@@ -28,7 +30,9 @@ export const DescriptionModal: FunctionComponent<{
             color={ColorPalette["gray-300"]}
           />
           <Gutter size="0.5rem" />
-          <H4 color={ColorPalette.white}>
+          <H4
+            color={isLightMode ? ColorPalette["gray-700"] : ColorPalette.white}
+          >
             <FormattedMessage id={title} />
           </H4>
         </XAxis>
@@ -37,7 +41,14 @@ export const DescriptionModal: FunctionComponent<{
       <Box paddingX="0.5rem" marginBottom="1.25rem">
         <Stack gutter="0.75rem">
           {paragraphs.map((paragraph) => (
-            <Body2 key={paragraph}>
+            <Body2
+              key={paragraph}
+              color={
+                isLightMode
+                  ? ColorPalette["gray-400"]
+                  : ColorPalette["gray-200"]
+              }
+            >
               <FormattedMessage id={paragraph} />
             </Body2>
           ))}

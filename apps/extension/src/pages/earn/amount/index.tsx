@@ -18,10 +18,14 @@ import { Input } from "../components/input";
 import { useNobleEarnAmountConfig } from "@keplr-wallet/hooks-internal";
 import { EmptyAmountError, ZeroAmountError } from "@keplr-wallet/hooks";
 import { NOBLE_CHAIN_ID } from "../../../config.ui";
+import { useTheme } from "styled-components";
 
 const NOBLE_EARN_DEPOSIT_OUT_COIN_MINIMAL_DENOM = "uusdn";
 
 export const EarnAmountPage: FunctionComponent = observer(() => {
+  const theme = useTheme();
+  const isLightMode = theme.mode === "light";
+
   const { accountStore, chainStore, queriesStore } = useStore();
   const intl = useIntl();
   const navigate = useNavigate();
@@ -167,13 +171,25 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
                   paddingX="0.375rem"
                   paddingY="0.25rem"
                   cursor="pointer"
-                  backgroundColor={ColorPalette["gray-550"]}
+                  backgroundColor={
+                    isLightMode
+                      ? ColorPalette["gray-50"]
+                      : ColorPalette["gray-550"]
+                  }
                   onClick={maximizeInput}
                   hover={{
-                    backgroundColor: ColorPalette["gray-500"],
+                    backgroundColor: isLightMode
+                      ? ColorPalette["gray-10"]
+                      : ColorPalette["gray-500"],
                   }}
                 >
-                  <Subtitle3 color={ColorPalette["gray-200"]}>
+                  <Subtitle3
+                    color={
+                      isLightMode
+                        ? ColorPalette["gray-400"]
+                        : ColorPalette["gray-200"]
+                    }
+                  >
                     {balanceQuery?.balance.shrink(true).toString() || "0"}
                   </Subtitle3>
                 </Box>

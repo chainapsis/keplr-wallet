@@ -21,12 +21,16 @@ import { ExtensionKVStore } from "@keplr-wallet/common";
 import { useGasSimulator, useTxConfigsValidate } from "@keplr-wallet/hooks";
 import { useNobleEarnAmountConfig } from "@keplr-wallet/hooks-internal";
 import { WarningBox } from "../../../components/warning-box";
+import { useTheme } from "styled-components";
 
 const TERM_AGREED_STORAGE_KEY = "nobleTermAgreed";
 const NOBLE_EARN_DEPOSIT_IN_COIN_MINIMAL_DENOM = "uusdc";
 const NOBLE_EARN_DEPOSIT_OUT_COIN_MINIMAL_DENOM = "uusdn";
 
 export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
+  const theme = useTheme();
+  const isLightMode = theme.mode === "light";
+
   const [searchParams] = useSearchParams();
   const intl = useIntl();
   const navigate = useNavigate();
@@ -218,7 +222,11 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
           />
         </H2>
         <Gutter size="1rem" />
-        <Body2 color={ColorPalette["gray-200"]}>
+        <Body2
+          color={
+            isLightMode ? ColorPalette["gray-400"] : ColorPalette["gray-200"]
+          }
+        >
           <FormattedMessage
             id="page.earn.estimation-confirm.usdc-to-usdn.paragraph"
             values={{
@@ -265,7 +273,9 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
           </Box>
           <Gutter size="0.5rem" />
           <Body2
-            color={ColorPalette["gray-100"]}
+            color={
+              isLightMode ? ColorPalette["gray-400"] : ColorPalette["gray-200"]
+            }
             onClick={handleCheckboxChange}
             style={{
               cursor: "pointer",
@@ -277,7 +287,11 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
                 link: (texts) => (
                   <Link
                     to="/earn/noble-terms"
-                    style={{ textDecoration: "underline", cursor: "pointer" }}
+                    style={{
+                      textDecoration: "underline",
+                      cursor: "pointer",
+                      color: "inherit",
+                    }}
                   >
                     {texts}
                   </Link>

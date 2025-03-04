@@ -13,8 +13,15 @@ import { Column, Columns } from "../../../components/column";
 import { ColorPalette } from "../../../styles";
 import { Stack } from "../../../components/stack";
 import { NOBLE_CHAIN_ID } from "../../../config.ui";
+import { useTheme } from "styled-components";
 
 export const EarnTransferIntroPage: FunctionComponent = observer(() => {
+  const theme = useTheme();
+  const isLightMode = theme.mode === "light";
+  const textHighColor = isLightMode
+    ? ColorPalette["gray-700"]
+    : ColorPalette.white;
+
   const intl = useIntl();
   const navigate = useNavigate();
 
@@ -43,7 +50,7 @@ export const EarnTransferIntroPage: FunctionComponent = observer(() => {
       }}
     >
       <Box paddingX="1.5rem" paddingTop="2rem">
-        <H2 color={ColorPalette["white"]}>
+        <H2 color={textHighColor}>
           {intl.formatMessage(
             {
               id: "page.earn.transfer.intro.title",
@@ -61,7 +68,11 @@ export const EarnTransferIntroPage: FunctionComponent = observer(() => {
                 width="1.5rem"
                 height="1.5rem"
                 padding="0.25rem"
-                backgroundColor={ColorPalette["gray-600"]}
+                backgroundColor={
+                  isLightMode
+                    ? ColorPalette["gray-100"]
+                    : ColorPalette["gray-600"]
+                }
                 borderRadius="50%"
                 style={{
                   display: "flex",
@@ -69,19 +80,27 @@ export const EarnTransferIntroPage: FunctionComponent = observer(() => {
                   justifyContent: "center",
                 }}
               >
-                <Caption1 color={ColorPalette["white"]}>1</Caption1>
+                <Caption1 color={textHighColor}>1</Caption1>
               </Box>
               <Box
                 width="0.125rem"
                 height="2.125rem"
-                backgroundColor={ColorPalette["gray-500"]}
+                backgroundColor={
+                  isLightMode
+                    ? ColorPalette["gray-100"]
+                    : ColorPalette["gray-500"]
+                }
                 borderRadius="0.125rem"
               />
               <Box
                 width="1.5rem"
                 height="1.5rem"
                 padding="0.25rem"
-                backgroundColor={ColorPalette["gray-600"]}
+                backgroundColor={
+                  isLightMode
+                    ? ColorPalette["gray-100"]
+                    : ColorPalette["gray-600"]
+                }
                 borderRadius="50%"
                 style={{
                   display: "flex",
@@ -89,27 +108,33 @@ export const EarnTransferIntroPage: FunctionComponent = observer(() => {
                   justifyContent: "center",
                 }}
               >
-                <Caption1 color={ColorPalette["white"]}>2</Caption1>
+                <Caption1 color={textHighColor}>2</Caption1>
               </Box>
             </Stack>
           </Column>
           <Column weight={1}>
             <Stack>
               <Box paddingY="0.21875rem">
-                <Body2 color={ColorPalette["white"]}>
+                <Body2 color={textHighColor}>
                   {intl.formatMessage({
                     id: "page.earn.transfer.intro.paragraph.first",
                   })}
                 </Body2>
               </Box>
-              <Body3 color={ColorPalette["gray-200"]}>
+              <Body3
+                color={
+                  isLightMode
+                    ? ColorPalette["gray-400"]
+                    : ColorPalette["gray-200"]
+                }
+              >
                 {intl.formatMessage({
                   id: "page.earn.transfer.intro.paragraph.first.sub-paragraph",
                 })}
               </Body3>
               <Gutter size="2.25rem" />
               <Box paddingY="0.21875rem">
-                <Body2 color={ColorPalette["white"]}>
+                <Body2 color={textHighColor}>
                   {intl.formatMessage({
                     id: "page.earn.transfer.intro.paragraph.second",
                   })}
