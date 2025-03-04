@@ -3186,6 +3186,16 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       rpc: "",
       rest: "",
       coinType: 0,
+      currencies: [
+        {
+          coinDenom: "BTC",
+          coinMinimalDenom: "taproot:bitcoinMainnet", // TODO: 추후 변경 필요
+          coinDecimals: 8,
+          coinGeckoId: "bitcoin",
+          coinImageUrl:
+            "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+        },
+      ],
     },
   },
   {
@@ -3202,6 +3212,16 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       rpc: "",
       rest: "",
       coinType: 0,
+      currencies: [
+        {
+          coinDenom: "BTC",
+          coinMinimalDenom: "nativeSegwit:bitcoinMainnet",
+          coinDecimals: 8,
+          coinGeckoId: "bitcoin",
+          coinImageUrl:
+            "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+        },
+      ],
     },
   },
   {
@@ -3216,8 +3236,17 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       chainId:
         "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943",
       rpc: "",
-      rest: "",
+      rest: "https://blockstream.info/testnet/api",
       coinType: 1,
+      currencies: [
+        {
+          coinDenom: "tBTC",
+          coinMinimalDenom: "taproot:bitcoinTestnet",
+          coinDecimals: 8,
+          coinImageUrl:
+            "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+        },
+      ],
     },
   },
   {
@@ -3232,8 +3261,17 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       chainId:
         "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943",
       rpc: "",
-      rest: "",
+      rest: "https://blockstream.info/testnet/api",
       coinType: 1,
+      currencies: [
+        {
+          coinDenom: "tBTC",
+          coinMinimalDenom: "nativeSegwit:bitcoinTestnet",
+          coinDecimals: 8,
+          coinImageUrl:
+            "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+        },
+      ],
     },
   },
   {
@@ -3248,8 +3286,18 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       chainId:
         "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6",
       rpc: "",
-      rest: "",
+      rest: "https://explorer.bc-2.jp/api",
       coinType: 1,
+      currencies: [
+        {
+          coinDenom: "sBTC",
+          coinMinimalDenom: "taproot:bitcoinSignet",
+          coinDecimals: 8,
+          coinGeckoId: "bitcoin", // TODO: temporal value for query price test
+          coinImageUrl:
+            "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+        },
+      ],
     },
   },
   {
@@ -3264,8 +3312,18 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       chainId:
         "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6",
       rpc: "",
-      rest: "",
+      rest: "https://explorer.bc-2.jp/api",
       coinType: 1,
+      currencies: [
+        {
+          coinDenom: "sBTC",
+          coinMinimalDenom: "nativeSegwit:bitcoinSignet",
+          coinDecimals: 8,
+          coinGeckoId: "bitcoin",
+          coinImageUrl:
+            "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+        },
+      ],
     },
   },
 ];
