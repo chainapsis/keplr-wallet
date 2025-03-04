@@ -27,7 +27,18 @@ export const EarnOverviewClaimSection: FunctionComponent<{
       account.bech32Address
     ).claimableAmount;
 
-  const totalAmount = "0"; // TO-DO: use total amount from Satellite
+  const response = queriesStore.simpleQuery.queryGet<{
+    totalYield: string;
+    updatedAt: string;
+  }>(
+    process.env["KEPLR_EXT_TX_HISTORY_TEST_BASE_URL"],
+    `/noble-yield/${account.bech32Address}`
+  );
+
+  const totalYield = new CoinPretty(
+    currency,
+    response.response?.data?.totalYield ?? "0"
+  );
 
   const [isSimulating, setIsSimulating] = useState(false);
 
@@ -110,7 +121,9 @@ export const EarnOverviewClaimSection: FunctionComponent<{
             <FormattedMessage id="page.earn.overview.claim-section.total-claimed" />
           </Subtitle3>
           <Gutter size="0.875rem" />
-          <H4 color={ColorPalette.white}>{totalAmount}</H4>
+          <H4 color={ColorPalette.white}>
+            {totalYield.shrink(true).hideDenom(true).toString()}
+          </H4>
         </Box>
       </Box>
 
