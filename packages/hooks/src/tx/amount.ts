@@ -225,7 +225,7 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
 
       if (bal.balance.toDec().lt(amount.toDec())) {
         return {
-          error: new InsufficientAmountError("Insufficient amount"),
+          error: new InsufficientAmountError("Insufficient balance"),
           loadingState: bal.isFetching ? "loading" : undefined,
         };
       }
