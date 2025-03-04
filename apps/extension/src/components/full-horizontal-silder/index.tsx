@@ -16,6 +16,7 @@ export const FullHorizontalSlider: FunctionComponent<{
   Buttons: JSX.Element[];
 }> = ({ Buttons }) => {
   const [slideIndex, setSlideIndex] = useState(0);
+  const [isHover, setIsHover] = useState(false);
 
   const handleNext = () => {
     setSlideIndex((prevIndex) => (prevIndex + 1) % 2);
@@ -56,6 +57,7 @@ export const FullHorizontalSlider: FunctionComponent<{
       position="relative"
       paddingLeft="0.75rem"
       marginLeft={`-${SCREEN_PADDING_X}px`}
+      onHoverStateChange={setIsHover}
     >
       <Box
         width={`${containerWidthPixels}px`}
@@ -81,12 +83,14 @@ export const FullHorizontalSlider: FunctionComponent<{
           key={slideIndex}
           Icon={ArrowRightIcon}
           handleNext={handleNext}
+          isHover={isHover}
         />
       ) : (
         <SliderButton
           key={slideIndex}
           Icon={ArrowLeftIcon}
           handlePrev={handlePrev}
+          isHover={isHover}
         />
       )}
     </Box>
@@ -97,15 +101,14 @@ const SliderButton: FunctionComponent<{
   handleNext?: () => void;
   handlePrev?: () => void;
   Icon: React.FunctionComponent<IconProps>;
-}> = ({ handleNext, handlePrev, Icon }) => {
+  isHover: boolean;
+}> = ({ handleNext, handlePrev, Icon, isHover }) => {
   const theme = useTheme();
   const isLightMode = theme.mode === "light";
-  const [isHover, setIsHover] = useState(false);
 
   return (
     <Box
       as="button"
-      onHoverStateChange={setIsHover}
       onClick={handleNext ?? handlePrev}
       marginLeft="auto"
       position="absolute"
