@@ -198,7 +198,7 @@ const InputContainer = styled.div`
   align-items: center;
 
   margin: 0;
-  padding: 0.25rem;
+  padding: 0.25rem 0.125rem;
   padding-bottom: 0.75rem;
 
   border-bottom: 1px solid
