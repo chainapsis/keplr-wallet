@@ -17,8 +17,6 @@ export const EarnNobleTermsPage: FunctionComponent = () => {
       .then((text) => setHtml(text));
   }, []);
 
-  console.log("html", html);
-
   return (
     <HeaderLayout
       title={intl.formatMessage({ id: "page.earn.terms.title" })}
