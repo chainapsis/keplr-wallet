@@ -17,17 +17,24 @@ export const EarnClaimContent: FunctionComponent<{
   tokenName: string;
   moveToNext: () => void;
   moveToPrev: () => void;
-}> = ({ tokenName, moveToNext, moveToPrev }) => (
+  isLightMode: boolean;
+}> = ({ tokenName, moveToNext, moveToPrev, isLightMode }) => (
   <Fragment>
     <Box paddingY="1.25rem">
-      <H4 color={ColorPalette.white} style={{ textAlign: "center" }}>
+      <H4
+        color={isLightMode ? ColorPalette["gray-700"] : ColorPalette.white}
+        style={{ textAlign: "center" }}
+      >
         <FormattedMessage
           id="page.earn.overview.tutorial-modal.claim.title"
           values={{ tokenName }}
         />
       </H4>
     </Box>
-    <Body3 color={ColorPalette["gray-200"]} style={{ textAlign: "center" }}>
+    <Body3
+      color={isLightMode ? ColorPalette["gray-400"] : ColorPalette["gray-200"]}
+      style={{ textAlign: "center" }}
+    >
       <FormattedMessage
         id="page.earn.overview.tutorial-modal.claim.paragraph"
         values={{ tokenName }}
@@ -35,7 +42,7 @@ export const EarnClaimContent: FunctionComponent<{
     </Body3>
     <Gutter size="1.125rem" />
 
-    <SampleClaimAllRewardCard />
+    <SampleClaimAllRewardCard isLightMode={isLightMode} />
     <Gutter size="1.5rem" />
 
     <XAxis>
@@ -57,13 +64,22 @@ export const EarnClaimContent: FunctionComponent<{
   </Fragment>
 );
 
-const SampleClaimAllRewardCard: FunctionComponent = () => (
+const SampleClaimAllRewardCard: FunctionComponent<{
+  isLightMode: boolean;
+}> = ({ isLightMode }) => (
   <Box position="relative" style={{ cursor: "default" }}>
     <Box
       zIndex={1}
       paddingX="1rem"
       paddingY="0.75rem"
-      backgroundColor={ColorPalette["gray-650"]}
+      backgroundColor={
+        isLightMode ? ColorPalette.white : ColorPalette["gray-650"]
+      }
+      style={
+        isLightMode
+          ? { boxShadow: "0px 1px 4px 0px rgba(43, 39, 55, 0.10)" }
+          : {}
+      }
       borderRadius="0.5rem"
     >
       <XAxis>
@@ -80,7 +96,7 @@ const SampleClaimAllRewardCard: FunctionComponent = () => (
           style={{
             marginLeft: "auto",
             borderRadius: "0.5rem",
-            border: "5px solid #23242D",
+            border: `5px solid ${isLightMode ? "#E1E5FB" : "#23242D"}`,
             background: ColorPalette["blue-400"],
             boxSizing: "border-box",
             maxHeight: "max-content",

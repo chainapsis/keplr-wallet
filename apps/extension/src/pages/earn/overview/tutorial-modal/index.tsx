@@ -32,12 +32,14 @@ export const EarnOverviewTutorialModal: FunctionComponent<{
       coinImageUrl={holdingCurrency.coinImageUrl ?? ""}
       key="manage-earn"
       onNext={handleNext}
+      isLightMode={theme.mode === "light"}
     />,
     <EarnClaimContent
       tokenName={rewardDenom}
       moveToNext={onClose}
       moveToPrev={handlePrev}
       key="earn-claim"
+      isLightMode={theme.mode === "light"}
     />,
   ];
 
