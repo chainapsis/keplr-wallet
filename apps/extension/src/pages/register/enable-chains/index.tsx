@@ -24,7 +24,6 @@ import { Gutter } from "../../../components/gutter";
 import { SearchTextInput } from "../../../components/input";
 import {
   BaseTypography,
-  Body2,
   Body3,
   Subtitle2,
   Subtitle3,
@@ -112,10 +111,20 @@ export const EnableChainsScene: FunctionComponent<{
     const theme = useTheme();
 
     const searchRef = useRef<HTMLInputElement | null>(null);
-    const embedChainIdentifierSet = new Set(
-      EmbedChainInfos.map(
-        (chainInfo) => ChainIdHelper.parse(chainInfo.chainId).identifier
-      )
+
+    const nativeChainIdentifierSet = useMemo(
+      () =>
+        new Set(
+          EmbedChainInfos.filter((chainInfo) => {
+            if ("hideInUI" in chainInfo && chainInfo.hideInUI) {
+              return false;
+            }
+            return true;
+          }).map(
+            (chainInfo) => ChainIdHelper.parse(chainInfo.chainId).identifier
+          )
+        ),
+      []
     );
 
     const tokensByChainIdentifier = hugeQueriesStore.tokenMapByChainIdentifier;
@@ -504,11 +513,11 @@ export const EnableChainsScene: FunctionComponent<{
       }
     );
 
-    const nativeEnabledChainIdentifiers = enabledChainIdentifiers.filter(
-      (chainIdentifier) => embedChainIdentifierSet.has(chainIdentifier)
+    const enabledNativeChainIdentifiers = enabledChainIdentifiers.filter(
+      (chainIdentifier) => nativeChainIdentifierSet.has(chainIdentifier)
     );
     const enabledSuggestChainIdentifiers = enabledChainIdentifiers.filter(
-      (chainIdentifier) => !embedChainIdentifierSet.has(chainIdentifier)
+      (chainIdentifier) => !nativeChainIdentifierSet.has(chainIdentifier)
     );
 
     const enabledChainIdentifierMap = useMemo(() => {
@@ -770,15 +779,16 @@ export const EnableChainsScene: FunctionComponent<{
 
     const nativeModularChainInfos = preSortModularChainInfos
       .filter((modularChainInfo) =>
-        embedChainIdentifierSet.has(
+        nativeChainIdentifierSet.has(
           ChainIdHelper.parse(modularChainInfo.chainId).identifier
         )
       )
       .sort(chainSort);
+
     const suggestModularChainInfos = preSortModularChainInfos
       .filter(
         (modularChainInfo) =>
-          !embedChainIdentifierSet.has(
+          !nativeChainIdentifierSet.has(
             ChainIdHelper.parse(modularChainInfo.chainId).identifier
           )
       )
@@ -868,16 +878,18 @@ export const EnableChainsScene: FunctionComponent<{
             (modularChainInfo) =>
               chainIdentifier ===
               ChainIdHelper.parse(modularChainInfo.chainId).identifier
-          ) && embedChainIdentifierSet.has(chainIdentifier)
+          ) && nativeChainIdentifierSet.has(chainIdentifier)
       );
     }, [
-      embedChainIdentifierSet,
+      nativeChainIdentifierSet,
       enabledChainIdentifiers,
       nativeModularChainInfos,
     ]);
 
-    const [preSelectedChainIdentifiers, setPreSelectedChainIdentifiers] =
-      useState<string[]>([]);
+    const [
+      preSelectedNativeChainIdentifiers,
+      setPreSelectedNativeChainIdentifiers,
+    ] = useState<string[]>([]);
 
     const getChainItemInfoForView = useCallback(
       (modularChainInfo: ModularChainInfo) => {
@@ -997,9 +1009,55 @@ export const EnableChainsScene: FunctionComponent<{
         >
           <Stack gutter="0.5rem">
             <NativeChainSection
-              onClick={() => {}}
               isCollapsed={isCollapsedNativeChainView}
-              isSelectAll={false}
+              isSelectAll={
+                nativeModularChainInfos.length ===
+                enabledNativeChainIdentifiersInPage.length
+              }
+              onClick={() => {
+                if (
+                  nativeModularChainInfos.length ===
+                  enabledNativeChainIdentifiersInPage.length
+                ) {
+                  if (preSelectedNativeChainIdentifiers.length > 0) {
+                    setEnabledChainIdentifiers([
+                      ...enabledSuggestChainIdentifiers,
+                      ...preSelectedNativeChainIdentifiers,
+                    ]);
+                  } else {
+                    if (nativeModularChainInfos.length > 0) {
+                      setEnabledChainIdentifiers([
+                        ChainIdHelper.parse(nativeModularChainInfos[0].chainId)
+                          .identifier,
+                        ...enabledSuggestChainIdentifiers,
+                      ]);
+                    }
+                  }
+                } else {
+                  setPreSelectedNativeChainIdentifiers([
+                    ...enabledNativeChainIdentifiers,
+                  ]);
+
+                  const newEnabledNativeChainIdentifiers: string[] =
+                    enabledNativeChainIdentifiers.slice();
+
+                  for (const modularChainInfo of nativeModularChainInfos) {
+                    const chainIdentifier = ChainIdHelper.parse(
+                      modularChainInfo.chainId
+                    ).identifier;
+
+                    if (
+                      !enabledNativeChainIdentifiers.includes(chainIdentifier)
+                    ) {
+                      newEnabledNativeChainIdentifiers.push(chainIdentifier);
+                    }
+                  }
+                  setEnabledChainIdentifiers([
+                    ...enabledSuggestChainIdentifiers,
+                    ...newEnabledNativeChainIdentifiers,
+                  ]);
+                }
+              }}
               enabledNativeChainIdentifierList={
                 enabledNativeChainIdentifiersInPage
               }
@@ -1025,7 +1083,9 @@ export const EnableChainsScene: FunctionComponent<{
                     enabled={enabled}
                     blockInteraction={blockInteraction}
                     isFresh={isFresh ?? false}
-                    isNativeChain={embedChainIdentifierSet.has(chainIdentifier)}
+                    isNativeChain={nativeChainIdentifierSet.has(
+                      chainIdentifier
+                    )}
                     onClick={() => {
                       if (enabledChainIdentifierMap.get(chainIdentifier)) {
                         setEnabledChainIdentifiers(
@@ -1062,7 +1122,6 @@ export const EnableChainsScene: FunctionComponent<{
                   enabled={enabled}
                   blockInteraction={blockInteraction}
                   isFresh={isFresh ?? false}
-                  isNativeChain={embedChainIdentifierSet.has(chainIdentifier)}
                   onClick={() => {
                     if (enabledChainIdentifierMap.get(chainIdentifier)) {
                       setEnabledChainIdentifiers(
@@ -1081,6 +1140,7 @@ export const EnableChainsScene: FunctionComponent<{
                 />
               );
             })}
+
             {!fallbackStarknetLedgerApp &&
               !fallbackEthereumLedgerApp &&
               keyType === "ledger" &&
@@ -1161,71 +1221,6 @@ export const EnableChainsScene: FunctionComponent<{
                 })}
           </Stack>
         </SimpleBar>
-        <React.Fragment>
-          <Gutter size="1.25rem" />
-
-          <YAxis alignX="center">
-            <Box
-              alignX="center"
-              cursor="pointer"
-              onClick={(e) => {
-                e.preventDefault();
-
-                if (
-                  modularChainInfos.length ===
-                  enabledChainIdentifiersInPage.length
-                ) {
-                  if (preSelectedChainIdentifiers.length > 0) {
-                    setEnabledChainIdentifiers(preSelectedChainIdentifiers);
-                  } else {
-                    if (modularChainInfos.length > 0) {
-                      setEnabledChainIdentifiers([
-                        ChainIdHelper.parse(modularChainInfos[0].chainId)
-                          .identifier,
-                      ]);
-                    }
-                  }
-                } else {
-                  setPreSelectedChainIdentifiers([...enabledChainIdentifiers]);
-                  const newEnabledChainIdentifiers: string[] =
-                    enabledChainIdentifiers.slice();
-                  for (const modularChainInfo of modularChainInfos) {
-                    const chainIdentifier = ChainIdHelper.parse(
-                      modularChainInfo.chainId
-                    ).identifier;
-                    if (!newEnabledChainIdentifiers.includes(chainIdentifier)) {
-                      newEnabledChainIdentifiers.push(chainIdentifier);
-                    }
-                  }
-                  setEnabledChainIdentifiers(newEnabledChainIdentifiers);
-                }
-              }}
-            >
-              <XAxis alignY="center">
-                <Body2
-                  color={
-                    theme.mode === "light"
-                      ? ColorPalette["gray-200"]
-                      : ColorPalette["gray-300"]
-                  }
-                >
-                  <FormattedMessage id="text-button.select-all" />
-                </Body2>
-
-                <Gutter size="0.25rem" />
-
-                <Checkbox
-                  size="small"
-                  checked={
-                    modularChainInfos.length ===
-                    enabledChainIdentifiersInPage.length
-                  }
-                  onChange={() => {}}
-                />
-              </XAxis>
-            </Box>
-          </YAxis>
-        </React.Fragment>
 
         <VerticalCollapseTransition
           collapsed={(() => {
@@ -1614,9 +1609,6 @@ const NativeChainSection: FunctionComponent<{
         }
         cursor={"pointer"}
         onClick={onClick}
-        style={{
-          transition: "background-color 0.3s ease",
-        }}
       >
         <Columns sum={1} alignY="center">
           <animated.div style={imageTransition}>
