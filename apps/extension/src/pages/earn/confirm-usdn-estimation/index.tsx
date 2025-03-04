@@ -21,12 +21,16 @@ import { ExtensionKVStore } from "@keplr-wallet/common";
 import { useGasSimulator, useTxConfigsValidate } from "@keplr-wallet/hooks";
 import { useNobleEarnAmountConfig } from "@keplr-wallet/hooks-internal";
 import { WarningBox } from "../../../components/warning-box";
+import { useTheme } from "styled-components";
 
 const TERM_AGREED_STORAGE_KEY = "nobleTermAgreed";
 const NOBLE_EARN_DEPOSIT_IN_COIN_MINIMAL_DENOM = "uusdc";
 const NOBLE_EARN_DEPOSIT_OUT_COIN_MINIMAL_DENOM = "uusdn";
 
 export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
+  const theme = useTheme();
+  const isLightMode = theme.mode === "light";
+
   const [searchParams] = useSearchParams();
   const intl = useIntl();
   const navigate = useNavigate();
@@ -134,7 +138,7 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout
-      title={intl.formatMessage({ id: "page.earn.title" })}
+      title=""
       displayFlex={true}
       fixedHeight={false}
       left={<BackButton />}
@@ -210,11 +214,25 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
     >
       <Box paddingX="1.25rem" paddingTop="1.75rem" height="100%">
         <H2>
-          <FormattedMessage id="page.earn.estimation-confirm.usdc-to-usdn.title" />
+          <FormattedMessage
+            id="page.earn.estimation-confirm.usdc-to-usdn.title"
+            values={{
+              br: <br />,
+            }}
+          />
         </H2>
         <Gutter size="1rem" />
-        <Body2 color={ColorPalette["gray-200"]}>
-          <FormattedMessage id="page.earn.estimation-confirm.usdc-to-usdn.paragraph" />
+        <Body2
+          color={
+            isLightMode ? ColorPalette["gray-400"] : ColorPalette["gray-200"]
+          }
+        >
+          <FormattedMessage
+            id="page.earn.estimation-confirm.usdc-to-usdn.paragraph"
+            values={{
+              br: <br />,
+            }}
+          />
         </Body2>
         <Gutter size="1.75rem" />
 
@@ -245,23 +263,35 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
 
         <Gutter size="2rem" />
 
-        <XAxis alignY="center">
-          <Box>
-            <Checkbox
-              size="small"
-              checked={isTermAgreed}
-              onChange={handleCheckboxChange}
-            />
+        <XAxis>
+          <Box
+            marginTop="0.125rem"
+            onClick={handleCheckboxChange}
+            cursor="pointer"
+          >
+            <Checkbox size="small" checked={isTermAgreed} onChange={() => {}} />
           </Box>
           <Gutter size="0.5rem" />
-          <Body2 color={ColorPalette["gray-100"]}>
+          <Body2
+            color={
+              isLightMode ? ColorPalette["gray-400"] : ColorPalette["gray-200"]
+            }
+            onClick={handleCheckboxChange}
+            style={{
+              cursor: "pointer",
+            }}
+          >
             <FormattedMessage
               id="page.earn.estimation-confirm.usdc-to-usdn.agree-terms"
               values={{
                 link: (texts) => (
                   <Link
                     to="/earn/noble-terms"
-                    style={{ textDecoration: "underline", cursor: "pointer" }}
+                    style={{
+                      textDecoration: "underline",
+                      cursor: "pointer",
+                      color: "inherit",
+                    }}
                   >
                     {texts}
                   </Link>

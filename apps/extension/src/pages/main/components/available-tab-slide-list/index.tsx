@@ -15,9 +15,12 @@ import { useGetEarnApy } from "../../../../hooks/use-get-apy";
 import { observer } from "mobx-react-lite";
 import { NOBLE_CHAIN_ID } from "../../../../config.ui";
 import { Dec } from "@keplr-wallet/unit";
+import { useTheme } from "styled-components";
 
 export const AvailableTabSlideList = observer(() => {
   const navigate = useNavigate();
+  const theme = useTheme();
+
   const { analyticsStore, hugeQueriesStore } = useStore();
   const { apy } = useGetEarnApy(NOBLE_CHAIN_ID);
 
@@ -45,7 +48,11 @@ export const AvailableTabSlideList = observer(() => {
         <PercentageIcon
           width="0.5rem"
           height="0.5rem"
-          color={ColorPalette.white}
+          color={
+            theme.mode === "light"
+              ? ColorPalette["gray-700"]
+              : ColorPalette.white
+          }
         />
       </Box>
       <Gutter size="0.5rem" />

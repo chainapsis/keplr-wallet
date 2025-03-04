@@ -126,7 +126,13 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
       <Styles.Container gutter="0.5rem" isNobleEarn={paramIsNobleEarn}>
         {paramIsNobleEarn ? (
           <Box>
-            <H2 color={ColorPalette["white"]}>
+            <H2
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-700"]
+                  : ColorPalette.white
+              }
+            >
               {intl.formatMessage(
                 { id: "page.send.select-asset.earn.title" },
                 {

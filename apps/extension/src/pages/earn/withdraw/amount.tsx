@@ -34,14 +34,18 @@ import {
   NobleEarnAmountConfig,
   useNobleEarnAmountConfig,
 } from "@keplr-wallet/hooks-internal";
-import { ApyChip } from "../components/chip";
+import { ApyChip, Chip } from "../components/chip";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import { WarningBox } from "../../../components/warning-box";
 import { HorizontalCollapseTransition } from "../../../components/transition/horizontal-collapse";
+import { useTheme } from "styled-components";
 
 const NOBLE_EARN_WITHDRAW_OUT_COIN_MINIMAL_DENOM = "uusdc";
 
 export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
+  const theme = useTheme();
+  const isLightMode = theme.mode === "light";
+
   const { accountStore, chainStore, queriesStore } = useStore();
   const [searchParams] = useSearchParams();
   const intl = useIntl();
@@ -250,7 +254,11 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
           }}
         >
           <Stack flex={1}>
-            <MobileH3 color={ColorPalette["white"]}>
+            <MobileH3
+              color={
+                isLightMode ? ColorPalette["gray-700"] : ColorPalette["white"]
+              }
+            >
               {intl.formatMessage(
                 { id: "page.earn.withdraw.amount.title" },
                 {
@@ -269,6 +277,7 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
                 nobleEarnAmountConfig.amountConfig.setValue(e.target.value);
               }}
               autoComplete="off"
+              suffix={currency?.coinDenom ?? ""}
             />
             <Gutter size="0.75rem" />
             <Box padding="0.25rem 0">
@@ -282,16 +291,31 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
                 >
                   <XAxis alignY="center">
                     <Box
-                      padding="0.25rem 0.5rem"
-                      backgroundColor={ColorPalette["gray-550"]}
+                      padding="0.25rem 0.375rem"
+                      backgroundColor={
+                        isLightMode
+                          ? ColorPalette["gray-50"]
+                          : ColorPalette["gray-550"]
+                      }
                       borderRadius="0.5rem"
                       width="fit-content"
                       cursor="pointer"
                       onClick={() => {
                         nobleEarnAmountConfig.amountConfig.setFraction(1);
                       }}
+                      hover={{
+                        backgroundColor: isLightMode
+                          ? ColorPalette["gray-10"]
+                          : ColorPalette["gray-500"],
+                      }}
                     >
-                      <Subtitle4 color={ColorPalette["gray-200"]}>
+                      <Subtitle4
+                        color={
+                          isLightMode
+                            ? ColorPalette["gray-400"]
+                            : ColorPalette["gray-200"]
+                        }
+                      >
                         {balance.trim(true).toString()}
                       </Subtitle4>
                     </Box>
@@ -303,9 +327,6 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
                     { id: "page.earn.amount.balance.current-chain" },
                     { chain: chainInfo.chainName }
                   )}
-                </Subtitle3>
-                <Subtitle3 color={ColorPalette["gray-300"]}>
-                  {`on ${chainInfo.chainName}`}
                 </Subtitle3>
               </XAxis>
             </Box>
@@ -324,16 +345,22 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
                   <LongArrowDownIcon
                     width="1.5rem"
                     height="1.5rem"
-                    color={ColorPalette["gray-400"]}
+                    color={
+                      isLightMode
+                        ? ColorPalette["gray-200"]
+                        : ColorPalette["gray-400"]
+                    }
                   />
                 </YAxis>
                 <Gutter size="1rem" />
 
-                <MobileH3>
-                  {nobleEarnAmountConfig.amountConfig.expectedOutAmount
-                    .trim(true)
-                    .toString()}
-                </MobileH3>
+                <Box paddingLeft="0.25rem">
+                  <MobileH3>
+                    {nobleEarnAmountConfig.amountConfig.expectedOutAmount
+                      .trim(true)
+                      .toString()}
+                  </MobileH3>
+                </Box>
                 <Gutter size="0.5rem" />
                 <Subtitle3 color={ColorPalette["gray-300"]}>
                   {`on ${chainInfo.chainName}`}
@@ -360,6 +387,9 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
 const ConfirmView: FunctionComponent<{
   amountConfig: NobleEarnAmountConfig;
 }> = observer(({ amountConfig }) => {
+  const theme = useTheme();
+  const isLightMode = theme.mode === "light";
+
   const intl = useIntl();
 
   return (
@@ -371,7 +401,9 @@ const ConfirmView: FunctionComponent<{
       }}
     >
       <Stack flex={1}>
-        <MobileH3 color={ColorPalette["white"]}>
+        <MobileH3
+          color={isLightMode ? ColorPalette["gray-700"] : ColorPalette["white"]}
+        >
           {intl.formatMessage(
             { id: "page.earn.withdraw.amount.confirm.title" },
             {
@@ -382,7 +414,11 @@ const ConfirmView: FunctionComponent<{
           )}
         </MobileH3>
         <Gutter size="1rem" />
-        <Body2 color={ColorPalette["gray-200"]}>
+        <Body2
+          color={
+            isLightMode ? ColorPalette["gray-400"] : ColorPalette["gray-200"]
+          }
+        >
           {intl.formatMessage(
             {
               id: "page.earn.withdraw.amount.confirm.description",
@@ -398,12 +434,18 @@ const ConfirmView: FunctionComponent<{
         <Box
           padding="1rem"
           borderRadius="0.75rem"
-          backgroundColor={ColorPalette["gray-650"]}
+          backgroundColor={
+            isLightMode ? ColorPalette.white : ColorPalette["gray-650"]
+          }
         >
           <ApyChip chainId={amountConfig.chainId} colorType="green" />
           <Gutter size="0.75rem" />
           <XAxis alignY="center" gap="0.25rem">
-            <H3 color={ColorPalette["white"]}>
+            <H3
+              color={
+                isLightMode ? ColorPalette["gray-700"] : ColorPalette.white
+              }
+            >
               {amountConfig.amount[0].hideDenom(true).trim(true).toString()}
             </H3>
             <H3 color={ColorPalette["gray-300"]}>
@@ -431,23 +473,21 @@ const ConfirmView: FunctionComponent<{
 
           <Gutter size="0.75rem" />
 
-          <Box
-            padding="0.25rem 0.5rem"
-            backgroundColor={ColorPalette["gray-600"]}
-            borderRadius="0.375rem"
-            width="fit-content"
-          >
-            <Subtitle4 color={ColorPalette["gray-300"]}>
-              {intl.formatMessage({
-                id: "page.earn.withdraw.amount.confirm.norewards",
-              })}
-            </Subtitle4>
-          </Box>
+          <Chip
+            text={intl.formatMessage({
+              id: "page.earn.withdraw.amount.confirm.norewards",
+            })}
+            colorType="gray"
+          />
 
           <Gutter size="0.75rem" />
 
           <XAxis alignY="center" gap="0.25rem">
-            <H3 color={ColorPalette["white"]}>
+            <H3
+              color={
+                isLightMode ? ColorPalette["gray-700"] : ColorPalette.white
+              }
+            >
               {amountConfig.expectedOutAmount
                 .hideDenom(true)
                 .trim(true)

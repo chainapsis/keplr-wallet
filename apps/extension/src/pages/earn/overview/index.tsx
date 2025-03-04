@@ -14,6 +14,7 @@ import { Divider } from "../../../components/divder";
 import { EarnOverviewClaimSection } from "../components/overview-claim-section";
 import { EarnOverviewBalanceSection } from "../components/overview-balance-section";
 import { NOBLE_CHAIN_ID } from "../../../config.ui";
+import { EarnOverviewHistorySection } from "../components/overview-history-section";
 
 const USDN_CURRENCY = {
   coinDenom: "USDN",
@@ -68,9 +69,7 @@ export const EarnOverviewPage: FunctionComponent = observer(() => {
 
       <Divider direction="horizontal" spacing="1.625rem" />
 
-      {/* TO-DO:
-        - EarnHistorySection
-      */}
+      <EarnOverviewHistorySection chainInfo={chainInfo} />
 
       <Modal
         isOpen={isTutorialModalOpen}

@@ -68,7 +68,13 @@ export const EarnIntroPage: FunctionComponent = observer(() => {
         <Gutter size="1rem" />
 
         <Stack gutter="0.25rem">
-          <H1>
+          <H1
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-700"]
+                : ColorPalette.white
+            }
+          >
             {intl.formatMessage(
               { id: "page.earn.intro.title" },
               {
@@ -111,7 +117,11 @@ export const EarnIntroPage: FunctionComponent = observer(() => {
         <Gutter size="1rem" />
 
         <Body2
-          color={ColorPalette["gray-100"]}
+          color={
+            theme.mode === "light"
+              ? ColorPalette["gray-500"]
+              : ColorPalette["gray-100"]
+          }
           style={{ lineHeight: "1.225rem" }}
         >
           {intl.formatMessage(
@@ -124,14 +134,21 @@ export const EarnIntroPage: FunctionComponent = observer(() => {
 
         <Stack gutter="0.75rem">
           {benefits.map((benefit) => (
-            <XAxis key={benefit}>
+            <XAxis key={benefit} alignY="center">
               <CheckIcon
                 width="1.25rem"
                 height="1.25rem"
                 color={ColorPalette["green-500"]}
               />
               <Gutter size="0.25rem" />
-              <Body2 key={benefit} color={ColorPalette["gray-100"]}>
+              <Body2
+                key={benefit}
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-500"]
+                    : ColorPalette["gray-100"]
+                }
+              >
                 {benefit}
               </Body2>
             </XAxis>
@@ -167,13 +184,23 @@ export const EarnIntroPage: FunctionComponent = observer(() => {
           style={{ cursor: "pointer" }}
         >
           <XAxis alignY="center">
-            <Body2 color={ColorPalette["gray-200"]}>
+            <Body2
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-400"]
+                  : ColorPalette["gray-200"]
+              }
+            >
               {intl.formatMessage({ id: "page.earn.intro.learn-more-button" })}
             </Body2>
             <ArrowRightIcon
               width="1rem"
               height="1rem"
-              color={ColorPalette["gray-200"]}
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-500"]
+                  : ColorPalette["gray-200"]
+              }
             />
           </XAxis>
         </Box>
