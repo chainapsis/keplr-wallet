@@ -248,6 +248,11 @@ module.exports = {
       filename: "ledger-grant.html",
       chunks: ["ledgerGrant"],
     }),
+    new HtmlWebpackPlugin({
+      template: "./src/keplr-earn-product-terms.html",
+      filename: "keplr-earn-product-terms.html",
+      chunks: ["keplrEarnProductTerms"],
+    }),
     ...(() => {
       if (isBuildManifestV2) {
         return [
