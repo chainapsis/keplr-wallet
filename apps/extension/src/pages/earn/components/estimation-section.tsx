@@ -20,6 +20,7 @@ export const EstimationSection: FunctionComponent<{
   const renderAmount = (amount: CoinPretty) => (
     <Box>
       <XAxis>
+        <Gutter size="0.25rem" />
         <H3 color={ColorPalette.white}>
           {amount.shrink(true).hideDenom(true).trim(true).toString()}
         </H3>
@@ -49,7 +50,7 @@ export const EstimationSection: FunctionComponent<{
       <Gutter size="0.75rem" />
       {renderAmount(inAmount)}
 
-      <Gutter size="0.5rem" />
+      <Gutter size="0.25rem" />
       <Box alignX="center">
         <LongArrowDownIcon
           width="1.5rem"
@@ -59,11 +60,7 @@ export const EstimationSection: FunctionComponent<{
       </Box>
 
       <Gutter size="0.75rem" />
-      <XAxis>
-        <ApyChip chainId={NOBLE_CHAIN_ID} colorType="green" />
-        <Gutter size="0.25rem" />
-        <Chip colorType="green" text="EARN" />
-      </XAxis>
+      <ApyChip chainId={NOBLE_CHAIN_ID} colorType="green" />
       <Gutter size="0.75rem" />
       {renderAmount(outAmount)}
     </Box>

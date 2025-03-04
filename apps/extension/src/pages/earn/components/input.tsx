@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { ColorPalette } from "../../../styles";
 import React, { FunctionComponent } from "react";
+import Color from "color";
 
 export const Input: FunctionComponent<
   React.InputHTMLAttributes<HTMLInputElement> & { warning?: boolean }
@@ -24,8 +25,8 @@ const StyledInput = styled.input<{ warning?: boolean }>`
   border-bottom: 1px solid
     ${(props) =>
       props.theme.mode === "light"
-        ? ColorPalette["gray-200"]
-        : ColorPalette["gray-300"]};
+        ? Color(ColorPalette["gray-200"]).alpha(0.5).toString()
+        : Color(ColorPalette["gray-300"]).alpha(0.5).toString()};
 
   color: ${(props) =>
     props.warning

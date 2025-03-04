@@ -134,7 +134,7 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout
-      title={intl.formatMessage({ id: "page.earn.title" })}
+      title=""
       displayFlex={true}
       fixedHeight={false}
       left={<BackButton />}
@@ -210,11 +210,21 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
     >
       <Box paddingX="1.25rem" paddingTop="1.75rem" height="100%">
         <H2>
-          <FormattedMessage id="page.earn.estimation-confirm.usdc-to-usdn.title" />
+          <FormattedMessage
+            id="page.earn.estimation-confirm.usdc-to-usdn.title"
+            values={{
+              br: <br />,
+            }}
+          />
         </H2>
         <Gutter size="1rem" />
         <Body2 color={ColorPalette["gray-200"]}>
-          <FormattedMessage id="page.earn.estimation-confirm.usdc-to-usdn.paragraph" />
+          <FormattedMessage
+            id="page.earn.estimation-confirm.usdc-to-usdn.paragraph"
+            values={{
+              br: <br />,
+            }}
+          />
         </Body2>
         <Gutter size="1.75rem" />
 
@@ -245,16 +255,22 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
 
         <Gutter size="2rem" />
 
-        <XAxis alignY="center">
-          <Box>
-            <Checkbox
-              size="small"
-              checked={isTermAgreed}
-              onChange={handleCheckboxChange}
-            />
+        <XAxis>
+          <Box
+            marginTop="0.125rem"
+            onClick={handleCheckboxChange}
+            cursor="pointer"
+          >
+            <Checkbox size="small" checked={isTermAgreed} onChange={() => {}} />
           </Box>
           <Gutter size="0.5rem" />
-          <Body2 color={ColorPalette["gray-100"]}>
+          <Body2
+            color={ColorPalette["gray-100"]}
+            onClick={handleCheckboxChange}
+            style={{
+              cursor: "pointer",
+            }}
+          >
             <FormattedMessage
               id="page.earn.estimation-confirm.usdc-to-usdn.agree-terms"
               values={{
