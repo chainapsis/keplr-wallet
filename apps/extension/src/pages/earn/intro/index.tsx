@@ -124,7 +124,7 @@ export const EarnIntroPage: FunctionComponent = observer(() => {
 
         <Stack gutter="0.75rem">
           {benefits.map((benefit) => (
-            <XAxis key={benefit}>
+            <XAxis key={benefit} alignY="center">
               <CheckIcon
                 width="1.25rem"
                 height="1.25rem"

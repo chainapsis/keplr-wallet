@@ -6,7 +6,7 @@ import { BackButton } from "../../../layouts/header/components";
 import { useStore } from "../../../stores";
 import { useIntl } from "react-intl";
 
-import { Body2, H3, Subtitle3 } from "../../../components/typography";
+import { Body2, MobileH3, Subtitle3 } from "../../../components/typography";
 import { Gutter } from "../../../components/gutter";
 import { ColorPalette } from "../../../styles";
 import { Box } from "../../../components/box";
@@ -84,7 +84,7 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout
-      title={intl.formatMessage({ id: "page.earn.title" })}
+      title=""
       displayFlex={true}
       fixedHeight={true}
       left={
@@ -127,7 +127,7 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
         <ApyChip chainId={chainId} colorType="green" />
 
         <Gutter size="0.75rem" />
-        <H3
+        <MobileH3
           style={{
             fontWeight: 700,
             fontSize: "1.875rem",
@@ -137,7 +137,7 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
           {intl.formatMessage({
             id: "page.earn.amount.input-label",
           })}
-        </H3>
+        </MobileH3>
 
         <Gutter size="1.75rem" />
         <Input
@@ -169,6 +169,9 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
                   cursor="pointer"
                   backgroundColor={ColorPalette["gray-550"]}
                   onClick={maximizeInput}
+                  hover={{
+                    backgroundColor: ColorPalette["gray-500"],
+                  }}
                 >
                   <Subtitle3 color={ColorPalette["gray-200"]}>
                     {balanceQuery?.balance.shrink(true).toString() || "0"}

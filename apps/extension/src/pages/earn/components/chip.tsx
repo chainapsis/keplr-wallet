@@ -42,7 +42,7 @@ export const Chip: FunctionComponent<{
     <Box
       borderRadius="0.375rem"
       paddingX="0.5rem"
-      paddingY="0.25rem"
+      height="19px"
       width="fit-content"
       alignY="center"
       backgroundColor={backgroundColor}
