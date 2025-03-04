@@ -110,19 +110,16 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
           navigate(`/earn/confirm-usdn-estimation?amount=${amountInput}`);
         }
       }}
-      bottomButtons={
-        isSubmissionBlocked
-          ? undefined
-          : [
-              {
-                text: intl.formatMessage({ id: "button.next" }),
-                color: "primary",
-                size: "large",
-                type: "submit",
-                disabled: isSubmissionBlocked,
-              },
-            ]
-      }
+      animatedBottomButtons={true}
+      hideBottomButtons={isSubmissionBlocked}
+      bottomButtons={[
+        {
+          text: intl.formatMessage({ id: "button.next" }),
+          color: "primary",
+          size: "large",
+          type: "submit",
+        },
+      ]}
     >
       <Box paddingX="1.5rem" paddingTop="2.5rem">
         <ApyChip chainId={chainId} colorType="green" />

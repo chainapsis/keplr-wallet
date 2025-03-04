@@ -157,11 +157,13 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
             : {})}
         />
       }
+      animatedBottomButtons={true}
+      hideBottomButtons={
+        txConfigsValidate.interactionBlocked ||
+        !!nobleEarnAmountConfig.amountConfig.error
+      }
       bottomButtons={[
         {
-          disabled:
-            txConfigsValidate.interactionBlocked ||
-            !!nobleEarnAmountConfig.amountConfig.error,
           text: intl.formatMessage({ id: "button.next" }),
           color: "primary",
           size: "large",
@@ -172,6 +174,13 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
       ]}
       onSubmit={async (e) => {
         e.preventDefault();
+
+        if (
+          txConfigsValidate.interactionBlocked ||
+          !!nobleEarnAmountConfig.amountConfig.error
+        ) {
+          return;
+        }
 
         if (!isConfirmView) {
           setIsConfirmView(true);
