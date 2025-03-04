@@ -143,7 +143,7 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
 
         <Gutter size="1.75rem" />
         <Input
-          type="number"
+          type="text"
           placeholder={`0 ${currency?.coinDenom ?? ""}`}
           value={amountInput}
           warning={amountError != null}
