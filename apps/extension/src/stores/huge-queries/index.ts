@@ -15,6 +15,8 @@ import { BinarySortArray } from "./sort";
 import { StarknetQueriesStore } from "@keplr-wallet/stores-starknet";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { ModularChainInfo } from "@keplr-wallet/types";
+import { UIConfigStore } from "../ui-config";
+import { KeyRingStore } from "@keplr-wallet/stores-core";
 
 interface ViewToken {
   chainInfo: IChainInfoImpl | ModularChainInfo;
@@ -55,7 +57,9 @@ export class HugeQueriesStore {
     protected readonly queriesStore: IQueriesStore<CosmosQueries>,
     protected readonly starknetQueriesStore: StarknetQueriesStore,
     protected readonly accountStore: IAccountStore,
-    protected readonly priceStore: CoinGeckoPriceStore
+    protected readonly priceStore: CoinGeckoPriceStore,
+    protected readonly uiConfigStore: UIConfigStore,
+    protected readonly keyRingStore: KeyRingStore
   ) {
     let balanceDisposal: (() => void) | undefined;
     this.balanceBinarySort = new BinarySortArray<ViewToken>(
@@ -290,8 +294,19 @@ export class HugeQueriesStore {
   }
 
   getAllBalances = computedFn(
-    (allowIBCToken: boolean): ReadonlyArray<ViewToken> => {
+    ({
+      allowIBCToken,
+      enableFilterDisabledAssetToken = true,
+    }: {
+      allowIBCToken?: boolean;
+      enableFilterDisabledAssetToken?: boolean;
+    }): ReadonlyArray<ViewToken> => {
       const keys: Map<string, boolean> = new Map();
+
+      const disabledViewAssetTokenMap =
+        this.uiConfigStore.manageViewAssetTokenConfig.getViewAssetTokenMapByVaultId(
+          this.keyRingStore.selectedKeyInfo?.id ?? ""
+        );
       for (const modularChainInfo of this.chainStore.modularChainInfosInUI) {
         if ("cosmos" in modularChainInfo) {
           const chainInfo = this.chainStore.getChain(modularChainInfo.chainId);
@@ -325,6 +340,18 @@ export class HugeQueriesStore {
       }
       return this.balanceBinarySort.arr.filter((viewToken) => {
         const key = viewToken[BinarySortArray.SymbolKey];
+        if (enableFilterDisabledAssetToken) {
+          const chainIdentifier = ChainIdHelper.parse(
+            viewToken.chainInfo.chainId
+          ).identifier;
+          const disabledCoinSet =
+            disabledViewAssetTokenMap.get(chainIdentifier);
+          const isDisabled = disabledCoinSet?.has(
+            viewToken.token.currency.coinMinimalDenom
+          );
+
+          if (isDisabled) return false;
+        }
         return keys.get(key);
       });
     }

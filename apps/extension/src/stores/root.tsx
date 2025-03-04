@@ -499,14 +499,6 @@ export class RootStore {
       }
     );
 
-    this.hugeQueriesStore = new HugeQueriesStore(
-      this.chainStore,
-      this.queriesStore,
-      this.starknetQueriesStore,
-      this.accountStore,
-      this.priceStore
-    );
-
     this.uiConfigStore = new UIConfigStore(
       {
         kvStore: new ExtensionKVStore("store_ui_config"),
@@ -517,6 +509,16 @@ export class RootStore {
       this.keyRingStore,
       this.priceStore,
       ICNSInfo
+    );
+
+    this.hugeQueriesStore = new HugeQueriesStore(
+      this.chainStore,
+      this.queriesStore,
+      this.starknetQueriesStore,
+      this.accountStore,
+      this.priceStore,
+      this.uiConfigStore,
+      this.keyRingStore
     );
 
     this.tokensStore = new TokensStore(

@@ -195,9 +195,9 @@
   "page.setting.advanced-paragraph": "开发者模式、修改连接点...",
   "page.setting.security-privacy-title": "安全与隐私",
   "page.setting.security-privacy-paragraph": "已连接的网站、自动锁定",
-  "page.setting.manage-token-list-title": "管理币种列表",
+  "page.setting.manage-token-list-title": "添加/删除自定义令牌",
   "page.setting.manage-token-list-paragraph": "仅适用于可通过合约地址手动添加的币种",
-
+  "page.setting.search-placeholder": "搜索功能",
   "page.setting.advanced.developer-mode-title": "开发者模式",
   "page.setting.advanced.developer-mode-paragraph": "感觉到科技感十足了吗？:)",
   "page.setting.advanced.change-endpoints-title": "修改连接点",
@@ -218,6 +218,9 @@
   "page.setting.general.manage-non-native-chains-paragraph": "应首先将非原生链添加到Keplr以管理其可见性。",
   "page.setting.general.manage-chain-visibility-title": "管理链可见性",
   "page.setting.general.manage-chain-visibility-paragraph": "选择要显示在你当前帐户里的链（及其资产）",
+
+  "page.setting.general.manage-asset-list-title": "管理资产列表",
+  "page.setting.general.manage-asset-list.search.placeholder": " ",
 
   "page.setting.general.language.automatic-title": "自动（浏览器默认）",
 
@@ -280,7 +283,7 @@
   "page.setting.token.manage.token-view.disable-token-tooltip": "禁用币种",
   "page.setting.token.manage.token-view.disable-token-confirm": "确定要禁用此币种吗？在再次添加之前，你将无法看到此币种的余额或转账记录。",
 
-  "page.setting.token.add.title": "手动添加币种",
+  "page.setting.token.add.title": "添加自定义令牌",
   "page.setting.token.add.confirm-button": "确认",
   "page.setting.token.add.contract-address-label": "合约地址",
   "page.setting.token.add.name-label": "名称",
@@ -568,7 +571,8 @@
   "page.main.components.claim-all.title": "可提取的质押收益",
   "page.main.components.claim-all.button": "全部提取",
   "page.main.components.claim-all.claim-button": "提取",
-  "page.main.components.menu-bar.manage-chain-visibility-title": "管理链可见性",
+  "page.main.components.menu-bar.manage-chain-visibility-title": "添加/删除链",
+  "page.main.components.menu-bar.manage-asset-list-title": "管理资产列表",
   "page.main.components.menu-bar.my-contacts-title": "我的联系人",
   "page.main.components.menu-bar.add-token-title": "添加币种",
   "page.main.components.menu-bar.setting-title": "设置",
