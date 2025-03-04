@@ -24,7 +24,10 @@ const StyledInput = styled.input<{ warning?: boolean }>`
 
   width: ${(props) =>
     props.value?.toString().length
-      ? `${props.value.toString().length + 1}ch`
+      ? `${
+          props.value.toString().length +
+          (props.value.toString().includes(".") ? 0.2 : 0.5)
+        }ch`
       : "100%"};
 
   background: none;
