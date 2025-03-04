@@ -163,8 +163,6 @@
   "pages.register.enable-chains.skip-button": "Skip",
   "pages.register.enable-chains.guide.can-select-evm-next-step": "You can select EVM chains in the next step.",
   "pages.register.enable-chains.guide.can-select-starknet-later-step": "You can select Starknet chains in a later step.",
-  "pages.register.enable-chains.guide.starknet.title": "Note for Starknet Users",
-  "pages.register.enable-chains.guide.starknet.paragraph": "Importing from other wallets (e.g. Argent, Braavos) will create a new, different account in Keplr.",
   "pages.register.enable-chains.guide.non-native-chain.title": "Enabling Custom Chain",
   "pages.register.enable-chains.guide.non-native-chain.paragraph": "Chains without green check mark are custom (non-native) chains. You can add and use them anytime with Keplr, but Keplr doesn’t offer direct support for custom chain issues.",
   "pages.register.enable-chains.native-chain-view.title": "All Native Chains",
@@ -636,6 +634,8 @@
   "page.main.components.token-found-modal.add-token-on-injective-and-evmos": "Add tokens on Injective and Evmos",
   "page.main.components.token-found-modal.add-chains": "Enable Chains",
   "page.main.components.token-item.copy-address.copied": "Copied",
+  "page.main.components.starknet-guide-modal.title": "Note for Starknet Users",
+  "page.main.components.starknet-guide-modal.description": "Importing from other wallets (e.g. Argent, Braavos) will create a new, different account in Keplr.",
 
   "page.main.layouts.header.new-chain.title": "✨ {chains} Now Integrated!",
   "page.main.layouts.header.new-chain.paragraph": "To show the {count, plural, one {chain} other {chains}} and {count, plural, one {its} other {their}} assets on this account, visit \"Manage Chain Visibility\".",

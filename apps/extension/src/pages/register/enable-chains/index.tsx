@@ -105,6 +105,7 @@ export const EnableChainsScene: FunctionComponent<{
       keyRingStore,
       starknetQueriesStore,
       hugeQueriesStore,
+      uiConfigStore,
     } = useStore();
 
     const navigate = useNavigate();
@@ -1466,6 +1467,7 @@ export const EnableChainsScene: FunctionComponent<{
                   ledgerStarknetAppNeeds.push(enable);
                 }
               }
+
               await Promise.all([
                 (async () => {
                   if (enables.length > 0) {
@@ -1473,6 +1475,16 @@ export const EnableChainsScene: FunctionComponent<{
                       vaultId,
                       ...enables
                     );
+
+                    //NOTE - ledger는 아래에서 따로 처리해야 함
+                    if (
+                      enables.includes("starknet:SN_MAIN") &&
+                      keyType !== "ledger"
+                    ) {
+                      uiConfigStore.needToShowGuideModalConfig.setNeedToShowStarknetGuideModal(
+                        true
+                      );
+                    }
                   }
                 })(),
                 (async () => {
@@ -1481,6 +1493,12 @@ export const EnableChainsScene: FunctionComponent<{
                       vaultId,
                       ...disables
                     );
+
+                    if (disables.includes("starknet:SN_MAIN")) {
+                      uiConfigStore.needToShowGuideModalConfig.setNeedToShowStarknetGuideModal(
+                        false
+                      );
+                    }
                   }
                 })(),
               ]);
@@ -1521,6 +1539,11 @@ export const EnableChainsScene: FunctionComponent<{
                           "keplr_enabled_chain_changed",
                           keyInfo.id
                         );
+
+                        uiConfigStore.needToShowGuideModalConfig.setNeedToShowStarknetGuideModal(
+                          true
+                        );
+
                         replaceToWelcomePage();
                       } else {
                         const bip44Path = keyInfo.insensitive["bip44Path"];

@@ -164,8 +164,7 @@
   "pages.register.enable-chains.skip-button": "스킵",
   "pages.register.enable-chains.guide.can-select-evm-next-step": "EVM 체인 선택은 다음 단계에서 진행할 수 있습니다.",
   "pages.register.enable-chains.guide.can-select-starknet-later-step": "Starknet 체인 선택은 추후의 단계에서 진행할 수 있습니다.",
-  "pages.register.enable-chains.guide.starknet.title": "스타크넷 유저를 위한 안내",
-  "pages.register.enable-chains.guide.starknet.paragraph": "Argent, Braavos 등의 타 지갑 서비스에서 계정을 불러와도 서로 다른 새로운 계정이 생성됩니다.",
+
   "pages.register.enable-chains.guide.non-native-chain.title": "선택형 체인 설정 안내",
   "pages.register.enable-chains.guide.non-native-chain.paragraph": "녹색 선택 아이콘이 없는 체인은 선택형(기본 체인이 아닌) 체인입니다. 케플러에서 언제든지 추가하여 사용할 수 있지만, 케플러는 선택형 체인 문제에 대한 직접적인 지원을 제공하지 않습니다.",
   "pages.register.enable-chains.native-chain-view.title": "모든 네이티브 체인",
@@ -616,6 +615,8 @@
   "page.main.components.token-found-modal.add-token-on-injective-and-evmos": "인젝티브와 이브모스의 토큰 추가하기",
   "page.main.components.token-found-modal.add-chains": "체인 활성화",
   "page.main.components.token-item.copy-address.copied": "복사됨",
+  "page.main.components.starknet-guide-modal.title": "스타크넷 유저를 위한 안내",
+  "page.main.components.starknet-guide-modal.description": "다른 지갑(e.g. Argent, Braavos)에서 가져오면 Keplr에서 새로운 다른 계정이 생성됩니다.",
 
   "page.main.layouts.header.new-chain.title": "{chains} 체인이 추가되었습니다!",
   "page.main.layouts.header.new-chain.paragraph": "\"체인 표시\"에서 신규 체인을 활성화하면 이 계정에서 사용할 수 있습니다.",
