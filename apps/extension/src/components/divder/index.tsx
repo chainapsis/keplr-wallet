@@ -13,7 +13,7 @@ export const Divider: FunctionComponent<{
     color ??
     (theme.mode === "dark"
       ? ColorPalette["gray-600"]
-      : ColorPalette["gray-500"]);
+      : ColorPalette["gray-50"]);
 
   if (direction === "vertical") {
     return (
