@@ -269,7 +269,7 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
 
             <Gutter size="2rem" />
             <Input
-              type="text"
+              type="number"
               placeholder={balance.trim(true).toString()}
               value={nobleEarnAmountConfig.amountConfig.value}
               warning={error != null}

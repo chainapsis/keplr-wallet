@@ -565,7 +565,7 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
 
           <Gutter size="2rem" />
           <Input
-            type="text"
+            type="number"
             placeholder={balance.trim(true).hideIBCMetadata(true).toString()}
             value={sendConfigs.amountConfig.value}
             warning={error != null}
