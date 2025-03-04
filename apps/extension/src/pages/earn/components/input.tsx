@@ -93,7 +93,12 @@ export const Input: FunctionComponent<
           display: "flex",
         }}
       >
-        <StyledInput ref={inputWidthCheckRef} warning={warning} {...props} />
+        <StyledInput
+          ref={inputWidthCheckRef}
+          value={value}
+          warning={warning}
+          {...props}
+        />
         <div
           style={(() => {
             if (suffixTextWidth == null || !suffix) {
