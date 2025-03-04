@@ -4,6 +4,7 @@ import { Box } from "../box";
 import { ArrowLeftIcon, ArrowRightIcon } from "../icon";
 import { ColorPalette } from "../../styles";
 import { IconProps } from "../icon/types";
+import { useTheme } from "styled-components";
 
 // Pixel values
 const BUTTON_WIDTH = 312;
@@ -97,6 +98,8 @@ const SliderButton: FunctionComponent<{
   handlePrev?: () => void;
   Icon: React.FunctionComponent<IconProps>;
 }> = ({ handleNext, handlePrev, Icon }) => {
+  const theme = useTheme();
+  const isLightMode = theme.mode === "light";
   const [isHover, setIsHover] = useState(false);
 
   return (
@@ -116,7 +119,7 @@ const SliderButton: FunctionComponent<{
         border: "none",
         cursor: "pointer",
         background: `linear-gradient(${handleNext ? "270deg" : "90deg"}, ${
-          ColorPalette["gray-700"]
+          isLightMode ? ColorPalette["blue-10"] : ColorPalette["gray-700"]
         } 0%, rgba(9, 9, 10, 0.00) 100%)`,
       }}
       height="100%"
@@ -124,16 +127,27 @@ const SliderButton: FunctionComponent<{
     >
       <Box
         opacity={isHover ? 1 : 0}
-        borderColor={ColorPalette["gray-400"]}
-        backgroundColor={ColorPalette["gray-500"]}
+        borderColor={
+          isLightMode ? ColorPalette["gray-100"] : ColorPalette["gray-400"]
+        }
+        backgroundColor={
+          isLightMode ? ColorPalette["gray-10"] : ColorPalette["gray-500"]
+        }
         borderRadius="10rem"
+        borderWidth="1px"
         padding="0.5rem"
         margin={handleNext ? "0 0.5rem 0 0" : "0 0 0 0.5rem"}
         style={{
           transition: "opacity 0.3s ease",
         }}
       >
-        <Icon width="1rem" height="1rem" color={ColorPalette["gray-200"]} />
+        <Icon
+          width="1rem"
+          height="1rem"
+          color={
+            isLightMode ? ColorPalette["gray-300"] : ColorPalette["gray-200"]
+          }
+        />
       </Box>
     </Box>
   );
