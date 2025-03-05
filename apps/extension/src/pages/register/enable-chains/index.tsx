@@ -811,6 +811,9 @@ export const EnableChainsScene: FunctionComponent<{
       useGetAllChain({
         search,
         excludeChainIdentifiers,
+        fallbackEthereumLedgerApp,
+        fallbackStarknetLedgerApp,
+        keyType,
       });
     const searchedNonNativeChainInfos = searchedChainInfos.filter(
       (chainInfo) => {
@@ -1088,6 +1091,13 @@ export const EnableChainsScene: FunctionComponent<{
 
                 return (
                   <ChainItem
+                    showTagText={
+                      fallbackEthereumLedgerApp
+                        ? "EVM"
+                        : fallbackStarknetLedgerApp
+                        ? "Starknet"
+                        : undefined
+                    }
                     tokens={tokens}
                     key={chainIdentifier}
                     chainInfo={modularChainInfo}
@@ -1128,6 +1138,13 @@ export const EnableChainsScene: FunctionComponent<{
 
               return (
                 <ChainItem
+                  showTagText={
+                    fallbackEthereumLedgerApp
+                      ? "EVM"
+                      : fallbackStarknetLedgerApp
+                      ? "Starknet"
+                      : undefined
+                  }
                   key={chainIdentifier}
                   chainInfo={modularChainInfo}
                   balance={balance}
@@ -1153,37 +1170,65 @@ export const EnableChainsScene: FunctionComponent<{
               );
             })}
 
-            {nonNativeChainInfos.map((chainInfo) => {
-              const chainIdentifier = ChainIdHelper.parse(
-                chainInfo.chainId
-              ).identifier;
-              const isChecked =
-                nonNativeChainListForSuggest.includes(chainInfo);
+            {!fallbackStarknetLedgerApp &&
+              searchedNonNativeChainInfos.map((modularChainInfo) => {
+                const chainIdentifier = ChainIdHelper.parse(
+                  modularChainInfo.chainId
+                ).identifier;
+                const isChecked =
+                  nonNativeChainListForSuggest.includes(modularChainInfo);
+                const isChainInfoType = "bip44" in modularChainInfo;
 
-              return (
-                <ChainItem
-                  key={chainIdentifier}
-                  chainInfo={chainInfo}
-                  enabled={isChecked}
-                  isFresh={true}
-                  blockInteraction={false}
-                  onClick={() => {
-                    if (isChecked) {
-                      setNonNativeChainListForSuggest(
-                        nonNativeChainListForSuggest.filter(
-                          (ci) => ci.chainId !== chainInfo.chainId
-                        )
-                      );
-                    } else {
-                      setNonNativeChainListForSuggest([
-                        ...nonNativeChainListForSuggest,
-                        chainInfo,
-                      ]);
+                const isNextStepChain =
+                  !fallbackEthereumLedgerApp &&
+                  keyType === "ledger" &&
+                  isChainInfoType &&
+                  (modularChainInfo.bip44.coinType === 60 ||
+                    !!modularChainInfo.features?.includes("eth-address-gen") ||
+                    !!modularChainInfo.features?.includes("eth-key-sign"));
+                if (isNextStepChain) {
+                  return (
+                    <NextStepChainItem
+                      key={chainIdentifier}
+                      modularChainInfo={modularChainInfo}
+                      tagText="EVM"
+                    />
+                  );
+                }
+
+                return (
+                  <ChainItem
+                    showTagText={
+                      fallbackEthereumLedgerApp
+                        ? "EVM"
+                        : fallbackStarknetLedgerApp
+                        ? "Starknet"
+                        : undefined
                     }
-                  }}
-                />
-              );
-            })}
+                    key={chainIdentifier}
+                    chainInfo={modularChainInfo}
+                    enabled={isChecked}
+                    isFresh={true}
+                    blockInteraction={false}
+                    onClick={() => {
+                      if (isChecked) {
+                        setNonNativeChainListForSuggest(
+                          nonNativeChainListForSuggest.filter(
+                            (ci) => ci.chainId !== modularChainInfo.chainId
+                          )
+                        );
+                      } else {
+                        setNonNativeChainListForSuggest([
+                          ...nonNativeChainListForSuggest,
+                          modularChainInfo,
+                        ]);
+                      }
+                    }}
+                  />
+                );
+              })}
+
+            <div ref={infiniteScrollTriggerRef} />
 
             {!fallbackStarknetLedgerApp &&
               !fallbackEthereumLedgerApp &&
@@ -1830,6 +1875,7 @@ const ChainItem: FunctionComponent<{
 
   isFresh: boolean;
   tokens?: ViewToken[];
+  showTagText?: "EVM" | "Starknet";
 }> = observer(
   ({
     chainInfo,
@@ -1840,6 +1886,7 @@ const ChainItem: FunctionComponent<{
     onClick,
     isFresh,
     tokens,
+    showTagText,
   }) => {
     const { priceStore } = useStore();
     const theme = useTheme();
@@ -1898,16 +1945,21 @@ const ChainItem: FunctionComponent<{
 
             <YAxis>
               <XAxis alignY="center">
-                <Subtitle2>
-                  {(() => {
-                    // Noble의 경우만 약간 특수하게 표시해줌
-                    if (chainIdentifier === "noble") {
-                      return `${chainInfo.chainName} (USDC)`;
-                    }
+                <XAxis alignY="center">
+                  <Subtitle2>
+                    {(() => {
+                      // Noble의 경우만 약간 특수하게 표시해줌
+                      if (chainIdentifier === "noble") {
+                        return `${chainInfo.chainName} (USDC)`;
+                      }
 
-                    return chainInfo.chainName;
-                  })()}
-                </Subtitle2>
+                      return chainInfo.chainName;
+                    })()}
+                  </Subtitle2>
+                  <Gutter size="0.375rem" />
+
+                  {showTagText && <Tag text={showTagText} />}
+                </XAxis>
                 {tokens && tokens.length > 1 && (
                   <React.Fragment>
                     <Gutter size="0.25rem" />
@@ -2149,7 +2201,7 @@ const TokenTag: FunctionComponent<{
 };
 
 const NextStepChainItem: FunctionComponent<{
-  modularChainInfo: ModularChainInfo;
+  modularChainInfo: ModularChainInfo | ChainInfo;
   tagText: string;
 }> = ({ modularChainInfo, tagText }) => {
   return (

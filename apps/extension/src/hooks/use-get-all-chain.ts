@@ -3,12 +3,16 @@ import { useStore } from "../stores";
 import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import { autorun } from "mobx";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { KeyRingCosmosService } from "@keplr-wallet/background";
 
 interface UseGetAllChainParams {
   pageSize?: number;
   initialPage?: number;
   search?: string;
   excludeChainIdentifiers?: string[];
+  fallbackEthereumLedgerApp?: boolean;
+  fallbackStarknetLedgerApp?: boolean;
+  keyType?: string;
 }
 
 interface UseGetAllChainResult {
@@ -34,12 +38,22 @@ export const useGetAllChain = ({
   initialPage = 1,
   search = "",
   excludeChainIdentifiers = [],
+  fallbackEthereumLedgerApp,
+  fallbackStarknetLedgerApp,
+  keyType,
 }: UseGetAllChainParams = {}): UseGetAllChainResult => {
   const { queriesStore } = useStore();
+  //구조가 이상하지만 chains 최초 데이터 저장
+  // ledgerFilteredChains는 type과 fallbackEthereumLedgerApp값등이 변경될때만 필터링하게 적용하고
+  // filteredChains는 search가 변경될때만 검색하게 적용하도록 하기위해서 3개의 상태로 분리함
   const [chains, setChains] = useState<(ChainInfo | ModularChainInfo)[]>([]);
+  const [ledgerFilteredChains, setLedgerFilteredChains] = useState<
+    (ChainInfo | ModularChainInfo)[]
+  >([]);
   const [filteredChains, setFilteredChains] = useState<
     (ChainInfo | ModularChainInfo)[]
   >([]);
+
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -87,35 +101,76 @@ export const useGetAllChain = ({
     };
   }, [queryChains, excludeChainIdentifiers]);
 
+  //ledger의 경우 필터링을 해야함
+  useEffect(() => {
+    if (fallbackEthereumLedgerApp && keyType === "ledger") {
+      const filteredChains = chains.filter((modularChainInfo) => {
+        const isChainInfoType = "bip44" in modularChainInfo;
+        const isNotStarknet = !("starknet" in modularChainInfo);
+
+        const isEthermintLike = isChainInfoType
+          ? modularChainInfo.bip44.coinType === 60 ||
+            !!modularChainInfo.features?.includes("eth-address-gen") ||
+            !!modularChainInfo.features?.includes("eth-key-sign")
+          : isNotStarknet &&
+            modularChainInfo.cosmos.bip44.coinType === 60 &&
+            !!modularChainInfo.cosmos.features?.includes("eth-address-gen") &&
+            !!modularChainInfo.cosmos.features?.includes("eth-key-sign");
+
+        const isLedgerSupported = (() => {
+          try {
+            KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
+              modularChainInfo.chainId
+            );
+            return true;
+          } catch {
+            return false;
+          }
+        })();
+
+        if (isEthermintLike && isLedgerSupported) {
+          return true;
+        }
+
+        return false;
+      });
+
+      setLedgerFilteredChains(filteredChains);
+      return;
+    }
+
+    if (fallbackStarknetLedgerApp && keyType === "ledger") {
+      setLedgerFilteredChains([]);
+      return;
+    }
+
+    setFilteredChains(chains);
+  }, [chains, fallbackEthereumLedgerApp, fallbackStarknetLedgerApp, keyType]);
+
   useEffect(() => {
     if (!search.trim()) {
-      setFilteredChains(chains);
+      setFilteredChains(ledgerFilteredChains);
       return;
     }
 
     const searchTerm = search.toLowerCase().trim();
-    const filtered = chains.filter((chain) => {
+    const filtered = ledgerFilteredChains.filter((chain) => {
       const chainName = chain.chainName.toLowerCase();
       return chainName.includes(searchTerm);
     });
 
     setFilteredChains(filtered);
     setCurrentPage(1);
-  }, [chains, search]);
+  }, [ledgerFilteredChains, search]);
 
   // 무한 스크롤 처리
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const [entry] = entries;
-        if (entry.isIntersecting && !isLoading) {
-          setCurrentPage((prev) => prev + 1);
-        }
-      },
-      {
-        threshold: 0.1,
+    const observer = new IntersectionObserver((entries) => {
+      const [entry] = entries;
+      if (entry.isIntersecting && !isLoading) {
+        setCurrentPage((prev) => prev + 1);
       }
-    );
+    });
 
     const triggerElement = ref;
     if (triggerElement) {
