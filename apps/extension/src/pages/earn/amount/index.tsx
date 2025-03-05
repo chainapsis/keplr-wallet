@@ -18,6 +18,7 @@ import { Input } from "../components/input";
 import { useNobleEarnAmountConfig } from "@keplr-wallet/hooks-internal";
 import {
   EmptyAmountError,
+  InsufficientFeeError,
   useGasSimulator,
   ZeroAmountError,
 } from "@keplr-wallet/hooks";
@@ -29,6 +30,7 @@ import {
   useFeeOptionSelectionOnInit,
 } from "../../../components/input/fee-control";
 import { ExtensionKVStore } from "@keplr-wallet/common";
+import { Dec } from "@keplr-wallet/unit";
 
 const NOBLE_EARN_DEPOSIT_OUT_COIN_MINIMAL_DENOM = "uusdn";
 
@@ -123,25 +125,38 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
   const amountInput = nobleEarnAmountConfig.amountConfig.value;
 
   const amountError = useMemo(() => {
-    const uiProperties = nobleEarnAmountConfig.amountConfig.uiProperties;
+    const amountUiPropertiesErr =
+      nobleEarnAmountConfig.amountConfig.uiProperties.error ||
+      nobleEarnAmountConfig.amountConfig.uiProperties.warning;
+    const feeUiPropertiesErr =
+      nobleEarnAmountConfig.feeConfig.uiProperties.error ||
+      nobleEarnAmountConfig.feeConfig.uiProperties.warning;
 
-    const err = uiProperties.error || uiProperties.warning;
-
-    if (err instanceof EmptyAmountError) {
+    if (amountUiPropertiesErr instanceof EmptyAmountError) {
       return;
     }
 
-    if (err instanceof ZeroAmountError) {
+    if (amountUiPropertiesErr instanceof ZeroAmountError) {
+      if (feeUiPropertiesErr instanceof InsufficientFeeError) {
+        return feeUiPropertiesErr.message || feeUiPropertiesErr.toString();
+      }
+
       return;
     }
+
+    const err = amountUiPropertiesErr || feeUiPropertiesErr;
 
     if (err) {
       return err.message || err.toString();
     }
-  }, [nobleEarnAmountConfig.amountConfig.uiProperties]);
+  }, [
+    nobleEarnAmountConfig.amountConfig.uiProperties,
+    nobleEarnAmountConfig.amountConfig.uiProperties,
+  ]);
 
   const isSubmissionBlocked =
-    !amountInput || amountInput === "0" || !!amountError;
+    nobleEarnAmountConfig.amountConfig.amount[0].toDec().equals(new Dec("0")) ||
+    !!amountError;
 
   function maximizeInput() {
     nobleEarnAmountConfig.amountConfig.setFraction(1);

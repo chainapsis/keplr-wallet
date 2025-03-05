@@ -126,6 +126,12 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
     };
   }, []);
 
+  const isSubmissionBlocked =
+    nobleEarnAmountConfig.amountConfig.amount[0].toDec().equals(new Dec("0")) ||
+    !!nobleEarnAmountConfig.amountConfig.error ||
+    txConfigsValidate.interactionBlocked ||
+    !isTermAgreed;
+
   return (
     <HeaderLayout
       title=""
@@ -134,10 +140,7 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
       left={<BackButton />}
       bottomButtons={[
         {
-          disabled:
-            !isTermAgreed ||
-            txConfigsValidate.interactionBlocked ||
-            !!nobleEarnAmountConfig.amountConfig.error,
+          disabled: isSubmissionBlocked,
           text: intl.formatMessage({
             id: "page.earn.estimation-confirm.usdc-to-usdn.swap-button",
           }),
@@ -149,9 +152,10 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
       onSubmit={async (e) => {
         e.preventDefault();
 
-        if (!isTermAgreed) {
+        if (isSubmissionBlocked) {
           return;
         }
+
         try {
           if (!poolForDeposit) {
             throw new Error("No pool for deposit");
