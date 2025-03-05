@@ -54,6 +54,10 @@ import { XAxis, YAxis } from "../../../components/axis";
 import { LongArrowDownIcon } from "../../../components/icon/long-arrow-down";
 import { useTheme } from "styled-components";
 import { IBCCurrency } from "@keplr-wallet/types";
+import {
+  useAutoFeeCurrencySelectionOnInit,
+  useFeeOptionSelectionOnInit,
+} from "../../../components/input/fee-control";
 
 export const EarnTransferAmountPage: FunctionComponent = observer(() => {
   const theme = useTheme();
@@ -65,6 +69,7 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
     queriesStore,
     skipQueriesStore,
     priceStore,
+    uiConfigStore,
   } = useStore();
   const addressRef = useRef<HTMLInputElement | null>(null);
 
@@ -243,7 +248,11 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
   const error = useMemo(() => {
     const uiProperties = sendConfigs.amountConfig.uiProperties;
 
-    const err = uiProperties.error || uiProperties.warning;
+    const err =
+      uiProperties.error ||
+      uiProperties.warning ||
+      sendConfigs.feeConfig.uiProperties.error ||
+      sendConfigs.feeConfig.uiProperties.warning;
 
     if (err instanceof EmptyAmountError) {
       return;
@@ -256,7 +265,20 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
     if (err) {
       return err.message || err.toString();
     }
-  }, [sendConfigs.amountConfig.uiProperties]);
+  }, [
+    sendConfigs.amountConfig.uiProperties,
+    sendConfigs.feeConfig.uiProperties,
+  ]);
+
+  useFeeOptionSelectionOnInit(uiConfigStore, sendConfigs.feeConfig, false);
+
+  useAutoFeeCurrencySelectionOnInit(
+    chainStore,
+    queriesStore,
+    sendConfigs.senderConfig,
+    sendConfigs.feeConfig,
+    false
+  );
 
   return (
     <HeaderLayout
