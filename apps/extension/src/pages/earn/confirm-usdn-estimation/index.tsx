@@ -20,7 +20,7 @@ import { NOBLE_CHAIN_ID } from "../../../config.ui";
 import { FeeType, useTxConfigsValidate } from "@keplr-wallet/hooks";
 import { useNobleEarnAmountConfig } from "@keplr-wallet/hooks-internal";
 import { WarningBox } from "../../../components/warning-box";
-import { useTheme } from "styled-components";
+import styled, { useTheme } from "styled-components";
 
 const TERM_AGREED_STORAGE_KEY = "nobleTermAgreed";
 const NOBLE_EARN_DEPOSIT_IN_COIN_MINIMAL_DENOM = "uusdc";
@@ -322,15 +322,46 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
             id: "page.earn.estimation-confirm.usdn-description.title",
           })}
           paragraphs={[
-            intl.formatMessage({
-              id: "page.earn.estimation-confirm.usdn-description.paragraph.first",
-            }),
-            intl.formatMessage({
-              id: "page.earn.estimation-confirm.usdn-description.paragraph.second",
-            }),
+            <FormattedMessage
+              key="page.earn.estimation-confirm.usdn-description.paragraph.first"
+              id="page.earn.estimation-confirm.usdn-description.paragraph.first"
+            />,
+            <FormattedMessage
+              key="page.earn.estimation-confirm.usdn-description.paragraph.second"
+              id="page.earn.estimation-confirm.usdn-description.paragraph.second"
+              values={{
+                link: (...chunks: any) => (
+                  <Styles.Link
+                    onClick={(e) => {
+                      e.preventDefault();
+
+                      browser.tabs.create({
+                        url: LEARN_MORE_URL,
+                      });
+                    }}
+                  >
+                    {chunks}
+                  </Styles.Link>
+                ),
+              }}
+            />,
           ]}
         />
       </Modal>
     </HeaderLayout>
   );
 });
+
+const LEARN_MORE_URL = "https://help.keplr.app/articles/earn-more-with-keplr";
+
+const Styles = {
+  Link: styled.span`
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-600"]
+        : ColorPalette["gray-50"]};
+
+    cursor: pointer;
+    text-decoration: underline;
+  `,
+};
