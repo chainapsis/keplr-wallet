@@ -16,10 +16,19 @@ import { ApyChip } from "../components/chip";
 import { validateIsUsdcFromNoble } from "../utils";
 import { Input } from "../components/input";
 import { useNobleEarnAmountConfig } from "@keplr-wallet/hooks-internal";
-import { EmptyAmountError, ZeroAmountError } from "@keplr-wallet/hooks";
+import {
+  EmptyAmountError,
+  useGasSimulator,
+  ZeroAmountError,
+} from "@keplr-wallet/hooks";
 import { NOBLE_CHAIN_ID } from "../../../config.ui";
 import { HorizontalCollapseTransition } from "../../../components/transition/horizontal-collapse";
 import { useTheme } from "styled-components";
+import {
+  useAutoFeeCurrencySelectionOnInit,
+  useFeeOptionSelectionOnInit,
+} from "../../../components/input/fee-control";
+import { ExtensionKVStore } from "@keplr-wallet/common";
 
 const NOBLE_EARN_DEPOSIT_OUT_COIN_MINIMAL_DENOM = "uusdn";
 
@@ -27,7 +36,7 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
   const theme = useTheme();
   const isLightMode = theme.mode === "light";
 
-  const { accountStore, chainStore, queriesStore } = useStore();
+  const { accountStore, chainStore, queriesStore, uiConfigStore } = useStore();
   const intl = useIntl();
   const navigate = useNavigate();
 
@@ -58,6 +67,57 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
     sender,
     currency,
     outCurrency
+  );
+
+  // XXX: 원래는 밑의 처리를 FeeControl component에서 해야하지만 이 UI에는 그런게 없기 때문에 따로 불러줘야 함
+  useFeeOptionSelectionOnInit(
+    uiConfigStore,
+    nobleEarnAmountConfig.feeConfig,
+    false
+  );
+  useAutoFeeCurrencySelectionOnInit(
+    chainStore,
+    queriesStore,
+    nobleEarnAmountConfig.senderConfig,
+    nobleEarnAmountConfig.feeConfig,
+    false
+  );
+
+  useGasSimulator(
+    new ExtensionKVStore("gas-simulator.earn.swap"),
+    chainStore,
+    NOBLE_CHAIN_ID,
+    nobleEarnAmountConfig.gasConfig,
+    nobleEarnAmountConfig.feeConfig,
+    "noble-earn-deposit",
+    () => {
+      if (!nobleEarnAmountConfig.amountConfig.currency) {
+        throw new Error("Deposit currency not set");
+      }
+
+      if (
+        nobleEarnAmountConfig.amountConfig.uiProperties.loadingState ===
+          "loading-block" ||
+        nobleEarnAmountConfig.amountConfig.uiProperties.error != null
+      ) {
+        throw new Error("Not ready to simulate tx");
+      }
+
+      return account.noble.makeSwapTx(
+        "noble-earn-deposit",
+        nobleEarnAmountConfig.amountConfig.amount[0].toDec().toString(),
+        currency,
+        nobleEarnAmountConfig.amountConfig.minOutAmount.toDec().toString(),
+        outCurrency,
+        [
+          {
+            poolId:
+              nobleEarnAmountConfig.amountConfig.pool?.id.toString() ?? "",
+            denomTo: outCurrency.coinMinimalDenom,
+          },
+        ]
+      );
+    }
   );
 
   const amountInput = nobleEarnAmountConfig.amountConfig.value;
@@ -111,7 +171,21 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
         }
 
         if (validateIsUsdcFromNoble(currency, chainId)) {
-          navigate(`/earn/confirm-usdn-estimation?amount=${amountInput}`);
+          navigate(
+            `/earn/confirm-usdn-estimation?amount=${amountInput}&gas=${nobleEarnAmountConfig.gasConfig.gas.toString()}&feeCurrency=${(() => {
+              if (
+                nobleEarnAmountConfig.feeConfig.toStdFee().amount.length > 0
+              ) {
+                return nobleEarnAmountConfig.feeConfig.toStdFee().amount[0]
+                  .denom;
+              }
+              return "unknown";
+            })()}&feeType=${nobleEarnAmountConfig.feeConfig.type}&isMax=${
+              nobleEarnAmountConfig.amountConfig.fraction === 1
+                ? "true"
+                : "false"
+            }`
+          );
         }
       }}
       animatedBottomButtons={true}

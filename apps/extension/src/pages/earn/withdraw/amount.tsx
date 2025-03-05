@@ -40,6 +40,10 @@ import { ExtensionKVStore } from "@keplr-wallet/common";
 import { WarningBox } from "../../../components/warning-box";
 import { HorizontalCollapseTransition } from "../../../components/transition/horizontal-collapse";
 import { useTheme } from "styled-components";
+import {
+  useAutoFeeCurrencySelectionOnInit,
+  useFeeOptionSelectionOnInit,
+} from "../../../components/input/fee-control";
 
 const NOBLE_EARN_WITHDRAW_OUT_COIN_MINIMAL_DENOM = "uusdc";
 
@@ -47,7 +51,7 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
   const theme = useTheme();
   const isLightMode = theme.mode === "light";
 
-  const { accountStore, chainStore, queriesStore } = useStore();
+  const { accountStore, chainStore, queriesStore, uiConfigStore } = useStore();
   const [searchParams] = useSearchParams();
   const intl = useIntl();
   const navigate = useNavigate();
@@ -83,6 +87,20 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
     outCurrency
   );
 
+  // XXX: 원래는 밑의 처리를 FeeControl component에서 해야하지만 이 UI에는 그런게 없기 때문에 따로 불러줘야 함
+  useFeeOptionSelectionOnInit(
+    uiConfigStore,
+    nobleEarnAmountConfig.feeConfig,
+    false
+  );
+  useAutoFeeCurrencySelectionOnInit(
+    chainStore,
+    queriesStore,
+    nobleEarnAmountConfig.senderConfig,
+    nobleEarnAmountConfig.feeConfig,
+    false
+  );
+
   const error = useMemo(() => {
     const uiProperties = nobleEarnAmountConfig.amountConfig.uiProperties;
 
@@ -106,7 +124,7 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
   const poolForWithdraw = nobleEarnAmountConfig.amountConfig.pool;
 
   const gasSimulator = useGasSimulator(
-    new ExtensionKVStore("gas-simulator.main.send"),
+    new ExtensionKVStore("gas-simulator.earn.swap"),
     chainStore,
     chainId,
     nobleEarnAmountConfig.gasConfig,
@@ -214,7 +232,11 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
             await tx.send(
               nobleEarnAmountConfig.feeConfig.toStdFee(),
               undefined,
-              undefined,
+              {
+                // max일 경우 서명 페이지에서 수수료를 수정할 수 없게 만든다.
+                preferNoSetFee:
+                  nobleEarnAmountConfig.amountConfig.fraction === 1,
+              },
               {
                 onBroadcasted: (_txHash) => {
                   navigate("/tx-result/pending");
