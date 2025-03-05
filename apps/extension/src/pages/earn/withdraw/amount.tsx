@@ -22,7 +22,6 @@ import {
   H3,
   MobileH3,
   Subtitle3,
-  Subtitle4,
 } from "../../../components/typography";
 import { Box } from "../../../components/box";
 import { Gutter } from "../../../components/gutter";
@@ -347,15 +346,18 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
                           : ColorPalette["gray-500"],
                       }}
                     >
-                      <Subtitle4
+                      <Subtitle3
                         color={
                           isLightMode
                             ? ColorPalette["gray-400"]
                             : ColorPalette["gray-200"]
                         }
+                        style={{
+                          whiteSpace: "nowrap",
+                        }}
                       >
                         {balance.trim(true).toString()}
-                      </Subtitle4>
+                      </Subtitle3>
                     </Box>
                     <Gutter size="0.25rem" />
                   </XAxis>

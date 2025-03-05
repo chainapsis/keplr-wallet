@@ -23,12 +23,7 @@ import {
   ZeroAmountError,
 } from "@keplr-wallet/hooks";
 import { useNavigate } from "react-router";
-import {
-  Body2,
-  MobileH3,
-  Subtitle3,
-  Subtitle4,
-} from "../../../components/typography";
+import { Body2, MobileH3, Subtitle3 } from "../../../components/typography";
 import { Box } from "../../../components/box";
 import { Gutter } from "../../../components/gutter";
 import { useNotification } from "../../../hooks/notification";
@@ -627,15 +622,18 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
                       sendConfigs.amountConfig.setFraction(1);
                     }}
                   >
-                    <Subtitle4
+                    <Subtitle3
                       color={
                         isLightMode
                           ? ColorPalette["gray-400"]
                           : ColorPalette["gray-200"]
                       }
+                      style={{
+                        whiteSpace: "nowrap",
+                      }}
                     >
                       {balance.trim(true).hideIBCMetadata(true).toString()}
-                    </Subtitle4>
+                    </Subtitle3>
                   </Box>
 
                   <Gutter size="0.25rem" />
