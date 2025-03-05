@@ -1024,6 +1024,7 @@ export const EnableChainsScene: FunctionComponent<{
         >
           <Stack gutter="0.5rem">
             <NativeChainSection
+              showTitleBox={search.trim().length < 1}
               isCollapsed={isCollapsedNativeChainView}
               isSelectAll={
                 nativeModularChainInfos.length ===
@@ -1725,6 +1726,7 @@ const NativeChainSection: FunctionComponent<{
   isSelectAll: boolean;
   children: React.ReactNode;
 
+  showTitleBox?: boolean;
   enabledNativeChainIdentifierList: string[];
   onClickCollapse: () => void;
   onClick: () => void;
@@ -1735,6 +1737,7 @@ const NativeChainSection: FunctionComponent<{
   enabledNativeChainIdentifierList,
   onClick,
   onClickCollapse,
+  showTitleBox,
 }) => {
   const theme = useTheme();
   const { chainStore } = useStore();
@@ -1747,111 +1750,113 @@ const NativeChainSection: FunctionComponent<{
 
   return (
     <React.Fragment>
-      <Box
-        borderRadius="0.375rem"
-        paddingX="1rem"
-        paddingY="0.75rem"
-        backgroundColor={
-          isSelectAll
-            ? theme.mode === "light"
-              ? ColorPalette["gray-10"]
-              : ColorPalette["gray-550"]
-            : theme.mode === "light"
-            ? ColorPalette.white
-            : ColorPalette["gray-600"]
-        }
-        cursor={"pointer"}
-        onClick={onClick}
-      >
-        <Columns sum={1} alignY="center">
-          <animated.div style={imageTransition}>
-            {isCollapsed ? (
-              <NativeChainMarkIcon width="1.75rem" height="1.75rem" />
-            ) : (
-              <Box position="relative">
-                <ChainImageFallback
-                  chainInfo={chainStore.getChain("cosmoshub-4")}
-                  size="3rem"
-                />
-
-                <Box
-                  position="absolute"
-                  style={{
-                    bottom: "-0.125rem",
-                    right: "-0.125rem",
-                  }}
-                >
-                  <NativeChainMarkIcon width="1.25rem" height="1.25rem" />
-                </Box>
-              </Box>
-            )}
-          </animated.div>
-          <Gutter size="0.5rem" />
-          <YAxis>
-            <XAxis alignY="center">
-              <Subtitle2>
-                <FormattedMessage id="pages.register.enable-chains.native-chain-view.title" />
-              </Subtitle2>
-              <Gutter size="0.25rem" />
-              <Subtitle3 color={ColorPalette["blue-300"]}>
-                {enabledNativeChainIdentifierList.length}
-              </Subtitle3>
-            </XAxis>
-            <Gutter size="0.25rem" />
-            {isCollapsed ? null : (
-              <Subtitle3 color={ColorPalette["gray-300"]}>
-                <FormattedMessage id="pages.register.enable-chains.native-chain-view.paragraph" />
-              </Subtitle3>
-            )}
-          </YAxis>
-          <Column weight={1} />
-
-          <Column weight={1} />
-          <XAxis alignY="center">
-            <IconButton
-              onClick={(e) => {
-                e.stopPropagation();
-                onClickCollapse();
-              }}
-              padding="0.25rem"
-              hoverColor={
-                theme.mode === "light"
-                  ? ColorPalette["gray-100"]
-                  : ColorPalette["gray-500"]
-              }
-            >
+      {showTitleBox && (
+        <Box
+          borderRadius="0.375rem"
+          paddingX="1rem"
+          paddingY="0.75rem"
+          backgroundColor={
+            isSelectAll
+              ? theme.mode === "light"
+                ? ColorPalette["gray-10"]
+                : ColorPalette["gray-550"]
+              : theme.mode === "light"
+              ? ColorPalette.white
+              : ColorPalette["gray-600"]
+          }
+          cursor={"pointer"}
+          onClick={onClick}
+        >
+          <Columns sum={1} alignY="center">
+            <animated.div style={imageTransition}>
               {isCollapsed ? (
-                <ArrowDownIcon
-                  width="1.5rem"
-                  height="1.5rem"
-                  color={
-                    theme.mode === "light"
-                      ? ColorPalette["gray-200"]
-                      : ColorPalette["gray-300"]
-                  }
-                />
+                <NativeChainMarkIcon width="1.75rem" height="1.75rem" />
               ) : (
-                <ArrowUpIcon
-                  width="1.5rem"
-                  height="1.5rem"
-                  color={
-                    theme.mode === "light"
-                      ? ColorPalette["gray-200"]
-                      : ColorPalette["gray-300"]
-                  }
-                />
+                <Box position="relative">
+                  <ChainImageFallback
+                    chainInfo={chainStore.getChain("cosmoshub-4")}
+                    size="3rem"
+                  />
+
+                  <Box
+                    position="absolute"
+                    style={{
+                      bottom: "-0.125rem",
+                      right: "-0.125rem",
+                    }}
+                  >
+                    <NativeChainMarkIcon width="1.25rem" height="1.25rem" />
+                  </Box>
+                </Box>
               )}
-            </IconButton>
+            </animated.div>
             <Gutter size="0.5rem" />
-            <Checkbox
-              checked={isSelectAll}
-              onChange={() => {
-                onClick();
-              }}
-            />
-          </XAxis>
-        </Columns>
-      </Box>
+            <YAxis>
+              <XAxis alignY="center">
+                <Subtitle2>
+                  <FormattedMessage id="pages.register.enable-chains.native-chain-view.title" />
+                </Subtitle2>
+                <Gutter size="0.25rem" />
+                <Subtitle3 color={ColorPalette["blue-300"]}>
+                  {enabledNativeChainIdentifierList.length}
+                </Subtitle3>
+              </XAxis>
+              <Gutter size="0.25rem" />
+              {isCollapsed ? null : (
+                <Subtitle3 color={ColorPalette["gray-300"]}>
+                  <FormattedMessage id="pages.register.enable-chains.native-chain-view.paragraph" />
+                </Subtitle3>
+              )}
+            </YAxis>
+            <Column weight={1} />
+
+            <Column weight={1} />
+            <XAxis alignY="center">
+              <IconButton
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClickCollapse();
+                }}
+                padding="0.25rem"
+                hoverColor={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-100"]
+                    : ColorPalette["gray-500"]
+                }
+              >
+                {isCollapsed ? (
+                  <ArrowDownIcon
+                    width="1.5rem"
+                    height="1.5rem"
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-200"]
+                        : ColorPalette["gray-300"]
+                    }
+                  />
+                ) : (
+                  <ArrowUpIcon
+                    width="1.5rem"
+                    height="1.5rem"
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-200"]
+                        : ColorPalette["gray-300"]
+                    }
+                  />
+                )}
+              </IconButton>
+              <Gutter size="0.5rem" />
+              <Checkbox
+                checked={isSelectAll}
+                onChange={() => {
+                  onClick();
+                }}
+              />
+            </XAxis>
+          </Columns>
+        </Box>
+      )}
       <VerticalCollapseTransition
         collapsed={isCollapsed}
         opacityLeft={0}
