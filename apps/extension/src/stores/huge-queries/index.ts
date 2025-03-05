@@ -8,7 +8,7 @@ import {
   QueryError,
 } from "@keplr-wallet/stores";
 import { CoinPretty, Dec, PricePretty } from "@keplr-wallet/unit";
-import { action, autorun, computed, observable } from "mobx";
+import { action, autorun, computed, runInAction } from "mobx";
 import { DenomHelper } from "@keplr-wallet/common";
 import { computedFn } from "mobx-utils";
 import { BinarySortArray } from "./sort";
@@ -17,6 +17,7 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { ModularChainInfo } from "@keplr-wallet/types";
 import { UIConfigStore } from "../ui-config";
 import { KeyRingStore } from "@keplr-wallet/stores-core";
+import { AllTokenMapByChainIdentifierState } from "./all-token-map-state";
 
 interface ViewToken {
   chainInfo: IChainInfoImpl | ModularChainInfo;
@@ -52,8 +53,7 @@ export class HugeQueriesStore {
   protected unbondingBinarySort: BinarySortArray<ViewUnbondingToken>;
   protected claimableRewardsBinarySort: BinarySortArray<ViewRewardToken>;
 
-  @observable
-  tokenMapByChainIdentifier: Map<string, ViewToken[]>;
+  protected allTokenMapByChainIdentifierState: AllTokenMapByChainIdentifierState;
   constructor(
     protected readonly chainStore: ChainStore,
     protected readonly queriesStore: IQueriesStore<CosmosQueries>,
@@ -122,10 +122,20 @@ export class HugeQueriesStore {
       }
     );
 
-    this.tokenMapByChainIdentifier = new Map();
-    autorun(() => {
-      this.tokenMapByChainIdentifier = this.getAllTokenMapByChainIdentifier();
-    });
+    let allTokenMapByChainIdentifierDisposal: (() => void) | undefined;
+    this.allTokenMapByChainIdentifierState =
+      new AllTokenMapByChainIdentifierState(
+        () => {
+          allTokenMapByChainIdentifierDisposal = autorun(() => {
+            this.getAllTokenMapByChainIdentifier();
+          });
+        },
+        () => {
+          if (allTokenMapByChainIdentifierDisposal) {
+            allTokenMapByChainIdentifierDisposal();
+          }
+        }
+      );
   }
 
   @action
@@ -295,9 +305,13 @@ export class HugeQueriesStore {
     }
   }
 
+  get allTokenMapByChainIdentifier(): Map<string, ViewToken[]> {
+    return this.allTokenMapByChainIdentifierState.map;
+  }
+
   //Select chain에서만 사용될 거 라고 가정해서 만들어서
   @action
-  protected getAllTokenMapByChainIdentifier(): Map<string, ViewToken[]> {
+  protected getAllTokenMapByChainIdentifier() {
     const tokensByChainId = new Map<string, ViewToken[]>();
     const modularChainInfos = this.chainStore.modularChainInfos.filter(
       (chainInfo) => {
@@ -472,7 +486,9 @@ export class HugeQueriesStore {
       );
     }
 
-    return tokensByChainId;
+    runInAction(() => {
+      this.allTokenMapByChainIdentifierState.map = tokensByChainId;
+    });
   }
 
   @computed

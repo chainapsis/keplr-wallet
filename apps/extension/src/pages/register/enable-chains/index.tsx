@@ -129,7 +129,8 @@ export const EnableChainsScene: FunctionComponent<{
       []
     );
 
-    const tokensByChainIdentifier = hugeQueriesStore.tokenMapByChainIdentifier;
+    const tokensByChainIdentifier =
+      hugeQueriesStore.allTokenMapByChainIdentifier;
 
     const header = useRegisterHeader();
     useSceneEvents({
