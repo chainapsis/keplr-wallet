@@ -58,6 +58,7 @@ import {
   useAutoFeeCurrencySelectionOnInit,
   useFeeOptionSelectionOnInit,
 } from "../../../components/input/fee-control";
+import { HorizontalCollapseTransition } from "../../../components/transition/horizontal-collapse";
 
 export const EarnTransferAmountPage: FunctionComponent = observer(() => {
   const theme = useTheme();
@@ -280,12 +281,18 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
     false
   );
 
+  const isSubmissionBlocked = sendConfigs.amountConfig.amount[0]
+    .toDec()
+    .equals(new Dec("0"));
+
   return (
     <HeaderLayout
       title={""} // No title for this page
       displayFlex={true}
       fixedMinHeight={true}
       left={<BackButton />}
+      animatedBottomButtons={true}
+      hideBottomButtons={isSubmissionBlocked}
       bottomButtons={[
         {
           disabled: txConfigsValidate.interactionBlocked,
@@ -600,33 +607,37 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
           />
           <Gutter size="0.75rem" />
           <Box padding="0.25rem 0">
-            <XAxis alignY="center" gap="0.25rem">
-              {sendConfigs.amountConfig.amount[0]
-                .toDec()
-                .equals(new Dec("0")) && (
-                <Box
-                  padding="0.25rem 0.375rem"
-                  backgroundColor={
-                    isLightMode ? ColorPalette.white : ColorPalette["gray-550"]
-                  }
-                  borderRadius="0.5rem"
-                  width="fit-content"
-                  cursor="pointer"
-                  onClick={() => {
-                    sendConfigs.amountConfig.setFraction(1);
-                  }}
-                >
-                  <Subtitle4
-                    color={
+            <XAxis alignY="center">
+              <HorizontalCollapseTransition collapsed={!isSubmissionBlocked}>
+                <XAxis alignY="center">
+                  <Box
+                    padding="0.25rem 0.375rem"
+                    backgroundColor={
                       isLightMode
-                        ? ColorPalette["gray-400"]
-                        : ColorPalette["gray-200"]
+                        ? ColorPalette.white
+                        : ColorPalette["gray-550"]
                     }
+                    borderRadius="0.5rem"
+                    width="fit-content"
+                    cursor="pointer"
+                    onClick={() => {
+                      sendConfigs.amountConfig.setFraction(1);
+                    }}
                   >
-                    {balance.trim(true).hideIBCMetadata(true).toString()}
-                  </Subtitle4>
-                </Box>
-              )}
+                    <Subtitle4
+                      color={
+                        isLightMode
+                          ? ColorPalette["gray-400"]
+                          : ColorPalette["gray-200"]
+                      }
+                    >
+                      {balance.trim(true).hideIBCMetadata(true).toString()}
+                    </Subtitle4>
+                  </Box>
+
+                  <Gutter size="0.25rem" />
+                </XAxis>
+              </HorizontalCollapseTransition>
               <Subtitle3 color={ColorPalette["gray-300"]}>
                 {`on ${chainInfo.chainName}`}
               </Subtitle3>
