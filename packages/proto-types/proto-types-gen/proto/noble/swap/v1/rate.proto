@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package noble.swap.v1;
+
+import "amino/amino.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "noble/swap/v1/algorithm.proto";
+
+option go_package = "swap.noble.xyz/types";
+
+message Rate {
+  // Denomination of the base currency.
+  string denom = 1;
+
+  // Denomination of the counter currency.
+  string vs = 2;
+
+  // Exchange rate between the base and counter currency.
+  string price = 3 [
+    (amino.dont_omitempty) = true,
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+
+  // Algorithm of the underlying Pool used for the calculation.
+  swap.v1.Algorithm algorithm = 4;
+}

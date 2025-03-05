@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package noble.swap.v1;
+
+import "gogoproto/gogo.proto";
+import "noble/swap/stableswap/v1/genesis.proto";
+import "noble/swap/v1/pool.proto";
+
+option go_package = "swap.noble.xyz/types";
+
+// GenesisState defines the Swap genesis state.
+message GenesisState {
+  uint64 next_pool_id = 1;
+  map<uint64, Pool> pools = 2 [(gogoproto.nullable) = false];
+  map<uint64, bool> paused = 3 [(gogoproto.nullable) = false];
+
+  stableswap.v1.GenesisState stableswap_state = 4 [(gogoproto.nullable) = false];
+}

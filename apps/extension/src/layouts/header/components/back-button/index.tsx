@@ -3,9 +3,10 @@ import { Box } from "../../../../components/box";
 import { ArrowLeftIcon } from "../../../../components/icon";
 import { useNavigate } from "react-router";
 
-export const BackButton: FunctionComponent<{ hidden?: boolean }> = ({
-  hidden,
-}) => {
+export const BackButton: FunctionComponent<{
+  hidden?: boolean;
+  onClick?: () => void;
+}> = ({ hidden, onClick }) => {
   const navigate = useNavigate();
 
   if (window.history.state && window.history.state.idx === 0) {
@@ -17,7 +18,11 @@ export const BackButton: FunctionComponent<{ hidden?: boolean }> = ({
   }
 
   return (
-    <Box paddingLeft="1rem" cursor="pointer" onClick={() => navigate(-1)}>
+    <Box
+      paddingLeft="1rem"
+      cursor="pointer"
+      onClick={() => (onClick ? onClick() : navigate(-1))}
+    >
       <ArrowLeftIcon />
     </Box>
   );

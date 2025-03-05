@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package noble.dollar.portal.ntt.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "dollar.noble.xyz/types/portal/ntt";
+
+// NativeTokenTransfer is the type that stores information about a native token transfer.
+//
+// The wire format of the payload is as follows:
+//   - NativeTokenTransferPrefix - 4 bytes
+//   - numDecimals - 1 byte
+//   - amount - 8 bytes
+//   - sourceToken - 32 bytes
+//   - to - 32 bytes
+//   - toChain - 2 bytes
+//   - additionalPayloadLength - 2 bytes, optional
+//   - additionalPayload - `additionalPayloadLength` bytes
+//
+// https://github.com/wormhole-foundation/native-token-transfers/blob/67df54701e0f4b3793b6c621719911804c9875a3/evm/src/libraries/TransceiverStructs.sol#L97-L119
+message NativeTokenTransfer {
+  uint64 amount = 1;
+  bytes source_token = 2;
+  bytes to = 3;
+  uint32 to_chain = 4 [
+    (gogoproto.customtype) = "uint16",
+    (gogoproto.nullable) = false
+  ];
+  bytes additional_payload = 5;
+}

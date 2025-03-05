@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package noble.dollar.vaults.v1;
+
+import "amino/amino.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "noble/dollar/vaults/v1/vaults.proto";
+
+option go_package = "dollar.noble.xyz/types/vaults";
+
+// GenesisState defines the genesis state of the Noble Dollar Vaults submodule.
+message GenesisState {
+  // total_flexible_principal contains all the users positions inside Vaults.
+  repeated vaults.v1.PositionEntry positions = 2 [(gogoproto.nullable) = false];
+
+  // rewards maps the rewards amounts by the index.
+  repeated vaults.v1.Reward rewards = 3 [(gogoproto.nullable) = false];
+
+  // total_flexible_principal contains the total principal amount contained in the flexible Vault.
+  string total_flexible_principal = 4 [
+    (cosmos_proto.scalar) = "cosmos.Int",
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+
+  // paused represents the current pausing state of the Vaults.
+  vaults.v1.PausedType paused = 5;
+
+  // stats contains the genesis statistics around the Noble Dollar Vaults.
+  vaults.v1.Stats stats = 6 [(gogoproto.nullable) = false];
+}

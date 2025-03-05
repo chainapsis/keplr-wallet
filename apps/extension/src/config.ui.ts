@@ -29,6 +29,8 @@ export const TokenContractListURL =
 export const TokenContractListRepoURL =
   "https://github.com/chainapsis/keplr-contract-registry";
 
+export const NOBLE_CHAIN_ID = "grand-1";
+
 export const FiatCurrencies: FiatCurrency[] = [
   {
     currency: "usd",

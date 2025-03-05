@@ -1,6 +1,7 @@
 import React, {
   FunctionComponent,
   PropsWithChildren,
+  useEffect,
   useLayoutEffect,
   useRef,
 } from "react";
@@ -20,6 +21,8 @@ import {
   SpecialButtonProps,
   getSpecialButtonHeightRem,
 } from "../../components/special-button";
+import { useSpringValue, animated } from "@react-spring/web";
+import { defaultSpringConfig } from "../../styles/spring";
 
 const pxToRem = (px: number) => {
   const base = parseFloat(
@@ -28,6 +31,8 @@ const pxToRem = (px: number) => {
   return px / base;
 };
 const bottomButtonPaddingRem = 0.75;
+
+const AnimatedBox = animated(Box);
 
 export const HeaderHeight = "3.75rem";
 
@@ -188,6 +193,8 @@ export const HeaderLayout: FunctionComponent<
   left,
   right,
   bottomButtons,
+  animatedBottomButtons,
+  hideBottomButtons,
   displayFlex,
   fixedHeight,
   fixedMinHeight,
@@ -203,8 +210,10 @@ export const HeaderLayout: FunctionComponent<
   const [height, setHeight] = React.useState(() => pxToRem(600));
   const lastSetHeight = useRef(-1);
 
-  const hasBottomButton = bottomButtons && bottomButtons.length > 0;
-  const hasMultipleBottomButton = bottomButtons && bottomButtons.length > 1;
+  const hasBottomButton =
+    bottomButtons && bottomButtons.length > 0 && !hideBottomButtons;
+  const hasMultipleBottomButton =
+    bottomButtons && bottomButtons.length > 1 && !hideBottomButtons;
 
   useLayoutEffect(() => {
     function handleResize() {
@@ -258,6 +267,14 @@ export const HeaderLayout: FunctionComponent<
     );
   };
 
+  const bottomButtonAnimation = useSpringValue(hasBottomButton ? 1 : 0, {
+    config: defaultSpringConfig,
+  });
+
+  useEffect(() => {
+    bottomButtonAnimation.start(hasBottomButton ? 1 : 0);
+  }, [bottomButtonAnimation, hasBottomButton]);
+
   return (
     <Styles.Container as={onSubmit ? "form" : undefined} onSubmit={onSubmit}>
       {fixedTop ? (
@@ -302,8 +319,8 @@ export const HeaderLayout: FunctionComponent<
         {children}
       </Styles.ContentContainer>
 
-      {hasBottomButton ? (
-        <Box
+      {hasBottomButton || animatedBottomButtons ? (
+        <AnimatedBox
           padding={bottomButtonPaddingRem + "rem"}
           position="fixed"
           style={{
@@ -315,6 +332,9 @@ export const HeaderLayout: FunctionComponent<
               ? `${"auto ".repeat(bottomButtons.length - 1)}1fr` // 마지막 버튼이 남은 공간을 다 채우도록 함
               : undefined,
             gap: hasMultipleBottomButton ? "0.75rem" : undefined,
+            transform: bottomButtonAnimation.to((value) => {
+              return `translateY(${(1 - value) * 100}%)`;
+            }),
           }}
         >
           {/*
@@ -334,8 +354,8 @@ export const HeaderLayout: FunctionComponent<
               }}
             />
           ) : null}
-          {bottomButtons.map(renderButton)}
-        </Box>
+          {bottomButtons?.map(renderButton)}
+        </AnimatedBox>
       ) : null}
     </Styles.Container>
   );

@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package noble.swap.stableswap.v1;
+
+import "amino/amino.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "swap.noble.xyz/types/stableswap";
+
+message Pool {
+  option (cosmos_proto.implements_interface) = "swap.v1.Pool";
+
+  // Protocol fee percentage for the pool.
+  int64 protocol_fee_percentage = 1;
+
+  // Rewards fee for the pool.
+  int64 rewards_fee = 2;
+
+  // Maximum fee allowed for the pool during a swap.
+  int64 max_fee = 3;
+
+  // Initial amplification coefficient.
+  int64 initial_a = 4;
+
+  // Future amplification coefficient.
+  int64 future_a = 5;
+
+  // Time when the amplification starts taking effect.
+  int64 initial_a_time = 6;
+
+  // Time when the amplification change will take full effect.
+  int64 future_a_time = 7;
+
+  // Rate multipliers applied to the coins.
+  repeated cosmos.base.v1beta1.Coin rate_multipliers = 8 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true,
+    (amino.encoding) = "legacy_coins",
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+
+  // Total shares issued within the Pool.
+  string total_shares = 9 [
+    (amino.dont_omitempty) = true,
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+
+  // Time when the first liquidity was added to start tracking rewards.
+  google.protobuf.Timestamp initial_rewards_time = 10 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdtime) = true
+  ];
+}

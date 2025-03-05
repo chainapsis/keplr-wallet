@@ -115,15 +115,23 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
   otherBech32Addresses.setSupportedChainList(supportedChainList);
 
   const msgHistory = usePaginatedCursorQuery<ResMsgsHistory>(
-    process.env["KEPLR_EXT_TX_HISTORY_BASE_URL"],
+    process.env["KEPLR_EXT_TX_HISTORY_TEST_BASE_URL"],
     () => {
       return `/history/msgs/keplr-multi-chain?baseBech32Address=${
         account.bech32Address
       }&chainIdentifiers=${(() => {
         if (selectedKey === "__all__") {
           return supportedChainList
-            .map((chainInfo) => chainInfo.chainId)
+            .map((chainInfo) => {
+              if (chainInfo.chainId === "noble-1") {
+                return "grand-1";
+              }
+              return chainInfo.chainId;
+            })
             .join(",");
+        }
+        if (selectedKey.includes("noble")) {
+          return selectedKey.replace("noble", "grand");
         }
         return selectedKey;
       })()}&relations=${Relations.join(",")}&vsCurrencies=${

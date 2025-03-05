@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package noble.dollar.portal.v1;
+
+option go_package = "dollar.noble.xyz/types/portal";
+
+// Peer is the type that stores information about a peer.
+message Peer {
+  bytes transceiver = 1;
+  bytes manager = 2;
+}
