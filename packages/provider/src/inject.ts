@@ -1056,6 +1056,14 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     return await this.requestMethod("getBitcoinKeysSettled", [chainIds]);
   }
 
+  async signPsbt(chainId: string, psbtHex: string): Promise<string> {
+    return await this.requestMethod("signPsbt", [chainId, psbtHex]);
+  }
+
+  async signPsbts(chainId: string, psbtsHexes: string[]): Promise<string[]> {
+    return await this.requestMethod("signPsbts", [chainId, psbtsHexes]);
+  }
+
   public readonly ethereum = new EthereumProvider(
     () => this,
     this.eventListener,

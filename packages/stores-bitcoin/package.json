@@ -21,6 +21,7 @@
     "@keplr-wallet/stores": "0.12.190",
     "@keplr-wallet/types": "0.12.190",
     "@keplr-wallet/unit": "0.12.190",
+    "bitcoin-address-validation": "^3.0.0",
     "utility-types": "^3.10.0"
   },
   "peerDependencies": {
