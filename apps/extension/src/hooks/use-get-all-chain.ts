@@ -144,7 +144,7 @@ export const useGetAllChain = ({
       return;
     }
 
-    setFilteredChains(chains);
+    setLedgerFilteredChains(chains);
   }, [chains, fallbackEthereumLedgerApp, fallbackStarknetLedgerApp, keyType]);
 
   useEffect(() => {
@@ -165,12 +165,17 @@ export const useGetAllChain = ({
 
   // 무한 스크롤 처리
   useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      const [entry] = entries;
-      if (entry.isIntersecting && !isLoading) {
-        setCurrentPage((prev) => prev + 1);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting && !isLoading) {
+          setCurrentPage((prev) => prev + 1);
+        }
+      },
+      {
+        threshold: 0.01,
       }
-    });
+    );
 
     const triggerElement = ref;
     if (triggerElement) {
