@@ -102,6 +102,7 @@ import { isRunningInSidePanel } from "./utils";
 import { StarknetSendPage } from "./pages/starknet/send";
 import { SignStarknetTxPage } from "./pages/starknet/sign/tx";
 import { SignStarknetMessagePage } from "./pages/starknet/sign/message";
+import { BitcoinSendPage } from "./pages/bitcoin/send";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -378,6 +379,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               />
               <Route path="/send" element={<SendAmountPage />} />
               <Route path="/starknet/send" element={<StarknetSendPage />} />
+              <Route path="/bitcoin/send" element={<BitcoinSendPage />} />
               <Route path="/ibc-swap" element={<IBCSwapPage />} />
               <Route
                 path="/send/select-asset"
