@@ -389,6 +389,11 @@ export class BitcoinAccountBase {
     return psbt.toHex();
   }
 
+  /**
+   * Sign PSBT
+   * @param psbt PSBT to be signed
+   * @returns Signed PSBT in hex format
+   */
   async signPsbt(psbt: Psbt): Promise<string> {
     const { getKeplr } = this;
     const keplr = await getKeplr();
@@ -399,7 +404,12 @@ export class BitcoinAccountBase {
     return keplr.signPsbt(this.chainId, psbt.toHex());
   }
 
-  async pushTx(txHex: string) {
+  /**
+   * Push transaction to network through indexer
+   * @param txHex Transaction in hex format
+   * @returns Transaction hash
+   */
+  async pushTx(txHex: string): Promise<string> {
     const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
     if (!("bitcoin" in modularChainInfo)) {
       throw new Error(`${this.chainId} is not bitcoin chain`);
@@ -420,12 +430,8 @@ export class BitcoinAccountBase {
     return res.data;
   }
 
-  async signAndPushTx(psbt: Psbt) {
+  async signAndPushTx(psbt: Psbt): Promise<string> {
     const signedPsbt = await this.signPsbt(psbt);
-    return this.pushTx(signedPsbt);
+    return await this.pushTx(signedPsbt);
   }
-
-  // TODO: track tx status (이거 좀 어려움)
-
-  // static validate address
 }
