@@ -10,6 +10,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useStore } from "../../../stores";
 import {
   EmptyAmountError,
+  InsufficientFeeError,
   useGasSimulator,
   useTxConfigsValidate,
   ZeroAmountError,
@@ -102,22 +103,34 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
   );
 
   const error = useMemo(() => {
-    const uiProperties = nobleEarnAmountConfig.amountConfig.uiProperties;
+    const amountUiPropertiesErr =
+      nobleEarnAmountConfig.amountConfig.uiProperties.error ||
+      nobleEarnAmountConfig.amountConfig.uiProperties.warning;
+    const feeUiPropertiesErr =
+      nobleEarnAmountConfig.feeConfig.uiProperties.error ||
+      nobleEarnAmountConfig.feeConfig.uiProperties.warning;
 
-    const err = uiProperties.error || uiProperties.warning;
-
-    if (err instanceof EmptyAmountError) {
+    if (amountUiPropertiesErr instanceof EmptyAmountError) {
       return;
     }
 
-    if (err instanceof ZeroAmountError) {
+    if (amountUiPropertiesErr instanceof ZeroAmountError) {
+      if (feeUiPropertiesErr instanceof InsufficientFeeError) {
+        return feeUiPropertiesErr.message || feeUiPropertiesErr.toString();
+      }
+
       return;
     }
+
+    const err = amountUiPropertiesErr || feeUiPropertiesErr;
 
     if (err) {
       return err.message || err.toString();
     }
-  }, [nobleEarnAmountConfig.amountConfig.uiProperties]);
+  }, [
+    nobleEarnAmountConfig.amountConfig.uiProperties,
+    nobleEarnAmountConfig.amountConfig.uiProperties,
+  ]);
 
   const [isConfirmView, setIsConfirmView] = useState(false);
 
@@ -164,6 +177,11 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
     gasSimulator,
   });
 
+  const isSubmissionBlocked =
+    nobleEarnAmountConfig.amountConfig.amount[0].toDec().equals(new Dec("0")) ||
+    !!error ||
+    txConfigsValidate.interactionBlocked;
+
   return (
     <HeaderLayout
       title={""} // No title for this page
@@ -181,10 +199,7 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
         />
       }
       animatedBottomButtons={true}
-      hideBottomButtons={
-        txConfigsValidate.interactionBlocked ||
-        !!nobleEarnAmountConfig.amountConfig.error
-      }
+      hideBottomButtons={isSubmissionBlocked}
       bottomButtons={[
         {
           text: intl.formatMessage({ id: "button.next" }),
@@ -360,36 +375,37 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
               </Box>
             )}
 
-            {nobleEarnAmountConfig.amountConfig.expectedOutAmount
-              .toDec()
-              .gt(new Dec("0")) && (
-              <Fragment>
-                <YAxis alignX="center">
-                  <LongArrowDownIcon
-                    width="1.5rem"
-                    height="1.5rem"
-                    color={
-                      isLightMode
-                        ? ColorPalette["gray-200"]
-                        : ColorPalette["gray-400"]
-                    }
-                  />
-                </YAxis>
-                <Gutter size="1rem" />
+            {!isSubmissionBlocked &&
+              nobleEarnAmountConfig.amountConfig.expectedOutAmount
+                .toDec()
+                .gt(new Dec("0")) && (
+                <Fragment>
+                  <YAxis alignX="center">
+                    <LongArrowDownIcon
+                      width="1.5rem"
+                      height="1.5rem"
+                      color={
+                        isLightMode
+                          ? ColorPalette["gray-200"]
+                          : ColorPalette["gray-400"]
+                      }
+                    />
+                  </YAxis>
+                  <Gutter size="1rem" />
 
-                <Box paddingLeft="0.25rem">
-                  <MobileH3>
-                    {nobleEarnAmountConfig.amountConfig.expectedOutAmount
-                      .trim(true)
-                      .toString()}
-                  </MobileH3>
-                </Box>
-                <Gutter size="0.5rem" />
-                <Subtitle3 color={ColorPalette["gray-300"]}>
-                  {`on ${chainInfo.chainName}`}
-                </Subtitle3>
-              </Fragment>
-            )}
+                  <Box paddingLeft="0.25rem">
+                    <MobileH3>
+                      {nobleEarnAmountConfig.amountConfig.expectedOutAmount
+                        .trim(true)
+                        .toString()}
+                    </MobileH3>
+                  </Box>
+                  <Gutter size="0.5rem" />
+                  <Subtitle3 color={ColorPalette["gray-300"]}>
+                    {`on ${chainInfo.chainName}`}
+                  </Subtitle3>
+                </Fragment>
+              )}
 
             {nobleEarnAmountConfig.amountConfig.error && (
               <Box marginTop="1rem">

@@ -281,9 +281,10 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
     false
   );
 
-  const isSubmissionBlocked = sendConfigs.amountConfig.amount[0]
-    .toDec()
-    .equals(new Dec("0"));
+  const isSubmissionBlocked =
+    sendConfigs.amountConfig.amount[0].toDec().equals(new Dec("0")) ||
+    !!error ||
+    txConfigsValidate.interactionBlocked;
 
   return (
     <HeaderLayout
@@ -295,7 +296,7 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
       hideBottomButtons={isSubmissionBlocked}
       bottomButtons={[
         {
-          disabled: txConfigsValidate.interactionBlocked,
+          disabled: isSubmissionBlocked,
           text: intl.formatMessage({ id: "button.next" }),
           color: "primary",
           size: "large",
@@ -307,7 +308,7 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
       onSubmit={async (e) => {
         e.preventDefault();
 
-        if (!txConfigsValidate.interactionBlocked) {
+        if (!isSubmissionBlocked) {
           try {
             const tx = accountStore
               .getAccount(chainId)
