@@ -1988,10 +1988,14 @@ const ChainItem: FunctionComponent<{
                   </React.Fragment>
                 )}
               </XAxis>
-              <Gutter size="0.375rem" />
-              <Subtitle3 color={ColorPalette["gray-300"]}>
-                {tokens?.length} Tokens
-              </Subtitle3>
+              {tokens && tokens.length > 0 && (
+                <React.Fragment>
+                  <Gutter size="0.375rem" />
+                  <Subtitle3 color={ColorPalette["gray-300"]}>
+                    {tokens?.length} Tokens
+                  </Subtitle3>
+                </React.Fragment>
+              )}
             </YAxis>
           </XAxis>
           <Column weight={1} />
