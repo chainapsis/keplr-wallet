@@ -24,6 +24,7 @@ export * from "./key";
 export * from "./link";
 export * from "./loading";
 export * from "./menu";
+export * from "./percentage";
 export * from "./plus";
 export * from "./profile";
 export * from "./profile-circle";

@@ -19,6 +19,8 @@ import { useTheme } from "styled-components";
 import { MsgRelationRedelegate } from "./redelegate";
 import { MsgRelationCancelUndelegate } from "./cancel-undelegate";
 import { MsgRelationIBCSwapRefunded } from "./ibc-swap-refunded";
+import { MsgRelationNobleWithdrawUsdc } from "./noble-withdraw-usdc";
+import { MsgRelationNobleDepositUsdc } from "./noble-deposit-usdc";
 
 export const MsgItemRender: FunctionComponent<{
   msg: MsgHistory;
@@ -207,9 +209,30 @@ const MsgItemRenderInner: FunctionComponent<{
         />
       );
     }
+    case "noble-claim-yield":
     case "custom/merged-claim-rewards": {
       return (
         <MsgRelationMergedClaimRewards
+          msg={msg}
+          prices={prices}
+          targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
+        />
+      );
+    }
+    case "noble-withdraw-usdc": {
+      return (
+        <MsgRelationNobleWithdrawUsdc
+          msg={msg}
+          prices={prices}
+          targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
+        />
+      );
+    }
+    case "noble-deposit-usdc": {
+      return (
+        <MsgRelationNobleDepositUsdc
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}

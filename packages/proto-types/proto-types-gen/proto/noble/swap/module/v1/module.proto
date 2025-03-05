@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package noble.swap.module.v1;
+
+import "cosmos/app/v1alpha1/module.proto";
+
+// Module is the config object of the Noble Swap module.
+message Module {
+  option (cosmos.app.v1alpha1.module) = {go_import: "swap.noble.xyz"};
+
+  // authority defines the custom module authority.
+  string authority = 1;
+
+  // base_denom defines the base denom that is used as the standard pairing denomination for all liquidity pools.
+  string base_denom = 2;
+
+  // base_minimum_deposit specifies the minimum amount of the base token required for depositing into liquidity pools.
+  int64 base_minimum_deposit = 3;
+
+  // stableswap contains the custom attributes and configurations required for the StableSwap module.
+  StableSwap stableswap = 4;
+}
+
+message StableSwap {
+  // unbonding_block_delta defines the number of blocks between unbonding BeginBlocker executions.
+  int64 unbonding_block_delta = 1;
+}

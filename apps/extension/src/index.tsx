@@ -102,6 +102,17 @@ import { isRunningInSidePanel } from "./utils";
 import { StarknetSendPage } from "./pages/starknet/send";
 import { SignStarknetTxPage } from "./pages/starknet/sign/tx";
 import { SignStarknetMessagePage } from "./pages/starknet/sign/message";
+import { TxResultFailedPage } from "./pages/tx-result/failed";
+import { TxResultPendingPage } from "./pages/tx-result/pending";
+import { TxResultSuccessPage } from "./pages/tx-result/success";
+import { EarnAmountPage } from "./pages/earn/amount";
+import { EarnIntroPage } from "./pages/earn/intro";
+import { EarnConfirmUsdnEstimationPage } from "./pages/earn/confirm-usdn-estimation";
+import { EarnNobleTermsPage } from "./pages/earn/noble-terms";
+import { EarnTransferIntroPage } from "./pages/earn/transfer/intro";
+import { EarnTransferAmountPage } from "./pages/earn/transfer/amount";
+import { EarnOverviewPage } from "./pages/earn/overview";
+import { EarnWithdrawAmountPage } from "./pages/earn/withdraw/amount";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -489,6 +500,41 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               />
               <Route path="/suggest-chain" element={<SuggestChainPage />} />
               <Route path="/ibc-transfer" element={<IBCTransferPage />} />
+              <Route
+                path="/tx-result/pending"
+                element={<TxResultPendingPage />}
+              />
+              <Route
+                path="/tx-result/success"
+                element={<TxResultSuccessPage />}
+              />
+              <Route
+                path="/tx-result/failed"
+                element={<TxResultFailedPage />}
+              />
+              <Route path="/earn/intro" element={<EarnIntroPage />} />
+              <Route path="/earn/amount" element={<EarnAmountPage />} />
+              <Route
+                path="/earn/transfer/intro"
+                element={<EarnTransferIntroPage />}
+              />
+              <Route
+                path="/earn/transfer/amount"
+                element={<EarnTransferAmountPage />}
+              />
+              <Route
+                path="/earn/confirm-usdn-estimation"
+                element={<EarnConfirmUsdnEstimationPage />}
+              />
+              <Route
+                path="/earn/noble-terms"
+                element={<EarnNobleTermsPage />}
+              />
+              <Route path="/earn/overview" element={<EarnOverviewPage />} />
+              <Route
+                path="/earn/withdraw/amount"
+                element={<EarnWithdrawAmountPage />}
+              />
             </Routes>
           )
         ) : (

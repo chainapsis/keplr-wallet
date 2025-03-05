@@ -27,10 +27,14 @@ export const MsgRelationMergedClaimRewards: FunctionComponent<{
 
   const chainInfo = chainStore.getChain(msg.chainId);
 
+  const isNobleClaimMessage = msg.relation === "noble-claim-yield";
+
   const amountPretty = useMemo(() => {
     const currency = chainInfo.forceFindCurrency(targetDenom);
 
-    const rewards = msg.meta["rewards"];
+    const rewards = isNobleClaimMessage
+      ? msg.meta["yields"]
+      : msg.meta["rewards"];
     if (
       rewards &&
       Array.isArray(rewards) &&
@@ -48,7 +52,7 @@ export const MsgRelationMergedClaimRewards: FunctionComponent<{
     }
 
     return new CoinPretty(currency, "0");
-  }, [chainInfo, msg.meta, targetDenom]);
+  }, [isNobleClaimMessage, chainInfo, msg.meta, targetDenom]);
 
   const otherKnownCurrencies = (() => {
     const res: AppCurrency[] = [];

@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package noble.dollar.v1;
+
+import "gogoproto/gogo.proto";
+import "noble/dollar/portal/v1/genesis.proto";
+import "noble/dollar/v1/dollar.proto";
+import "noble/dollar/vaults/v1/genesis.proto";
+
+option go_package = "dollar.noble.xyz/types";
+
+// GenesisState defines the genesis state of the Noble Dollar module.
+message GenesisState {
+  // portal contains the genesis state of the Noble Dollar Portal submodule.
+  noble.dollar.portal.v1.GenesisState portal = 1 [(gogoproto.nullable) = false];
+
+  // vaults contains the genesis state of the Noble Dollar Vaults submodule.
+  noble.dollar.vaults.v1.GenesisState vaults = 2 [(gogoproto.nullable) = false];
+
+  // paused contains the genesis paused state of the Noble Dollar.
+  bool paused = 3;
+
+  // index contains the genesis index of the Noble Dollar, used for rebasing.
+  int64 index = 4;
+
+  // principal contains the genesis principal amounts of Noble Dollar holders.
+  map<string, string> principal = 5;
+
+  // stats contains the genesis statistics around the Noble Dollar.
+  noble.dollar.v1.Stats stats = 6 [(gogoproto.nullable) = false];
+}

@@ -28,6 +28,7 @@ import { Mnemonic } from "@keplr-wallet/crypto";
 import { Buffer } from "buffer/";
 import { FormattedMessage, useIntl } from "react-intl";
 import { isMnemonicWord } from "@keplr-wallet/common";
+import { checkButtonPositionAndScrollToButton } from "../utils/check-button-position-and-scroll-to-button";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
 
@@ -191,6 +192,7 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
 
   const bip44PathState = useBIP44PathState();
   const [isBIP44CardOpen, setIsBIP44CardOpen] = useState(false);
+  const buttonContainerRef = useRef<HTMLDivElement>(null);
 
   return (
     <RegisterSceneBox>
@@ -369,6 +371,11 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
               <VerticalCollapseTransition
                 width="100%"
                 collapsed={isBIP44CardOpen}
+                onTransitionEnd={() => {
+                  if (isBIP44CardOpen) {
+                    checkButtonPositionAndScrollToButton(buttonContainerRef);
+                  }
+                }}
               >
                 <Box alignX="center">
                   <Button
@@ -397,13 +404,15 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
         ) : null}
 
         <Box width="22.5rem" marginX="auto">
-          <Button
-            text={intl.formatMessage({
-              id: "pages.register.recover-mnemonic.import-button",
-            })}
-            size="large"
-            type="submit"
-          />
+          <div ref={buttonContainerRef}>
+            <Button
+              text={intl.formatMessage({
+                id: "pages.register.recover-mnemonic.import-button",
+              })}
+              size="large"
+              type="submit"
+            />
+          </div>
         </Box>
       </form>
     </RegisterSceneBox>

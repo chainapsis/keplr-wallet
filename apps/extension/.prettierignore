@@ -8,6 +8,7 @@
 **/*.log
 **/*.webm
 **/*.txt
+**/*.html
 .DS_Store
 
 .gitignore

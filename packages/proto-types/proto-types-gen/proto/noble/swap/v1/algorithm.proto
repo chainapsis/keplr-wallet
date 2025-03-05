@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package noble.swap.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "swap.noble.xyz/types";
+
+// buf:lint:ignore ENUM_VALUE_PREFIX
+enum Algorithm {
+  option (gogoproto.goproto_enum_prefix) = false;
+
+  // buf:lint:ignore ENUM_ZERO_VALUE_SUFFIX
+  UNSPECIFIED = 0;
+  STABLESWAP = 1;
+  PERFECTPRICE = 2;
+}
