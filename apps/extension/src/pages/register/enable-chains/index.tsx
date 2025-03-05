@@ -807,16 +807,18 @@ export const EnableChainsScene: FunctionComponent<{
       );
     }, [chainStore.modularChainInfosInListUI]);
 
-    const { chains: searchedChainInfos, simpleBarRef } = useGetAllChain({
-      search,
-      excludeChainIdentifiers,
-    });
-
-    const nonNativeChainInfos = searchedChainInfos.filter((chainInfo) => {
-      return !suggestModularChainInfos?.some(
-        (modularChainInfo) => modularChainInfo.chainId === chainInfo.chainId
-      );
-    });
+    const { chains: searchedChainInfos, infiniteScrollTriggerRef } =
+      useGetAllChain({
+        search,
+        excludeChainIdentifiers,
+      });
+    const searchedNonNativeChainInfos = searchedChainInfos.filter(
+      (chainInfo) => {
+        return !suggestModularChainInfos?.some(
+          (modularChainInfo) => modularChainInfo.chainId === chainInfo.chainId
+        );
+      }
+    );
 
     const numSelected = useMemo(() => {
       const modularChainInfoMap = new Map<string, ModularChainInfo>();
@@ -1016,7 +1018,6 @@ export const EnableChainsScene: FunctionComponent<{
             height: "25.5rem",
             overflowY: "auto",
           }}
-          ref={simpleBarRef}
         >
           <Stack gutter="0.5rem">
             <NativeChainSection

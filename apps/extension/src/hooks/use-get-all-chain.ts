@@ -1,9 +1,8 @@
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useStore } from "../stores";
 import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import { autorun } from "mobx";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import SimpleBarCore from "simplebar-core";
 
 interface UseGetAllChainParams {
   pageSize?: number;
@@ -20,7 +19,9 @@ interface UseGetAllChainResult {
   setPage: (page: number) => void;
   isLoading: boolean;
   error: Error | null;
-  simpleBarRef: React.MutableRefObject<SimpleBarCore | null>;
+  infiniteScrollTriggerRef: React.Dispatch<
+    React.SetStateAction<Element | null>
+  >;
 }
 
 /**
@@ -42,7 +43,7 @@ export const useGetAllChain = ({
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const simpleBarRef = useRef<SimpleBarCore>(null);
+  const [ref, setRef] = useState<Element | null>(null);
 
   const queryChains = queriesStore.simpleQuery.queryGet<{
     chains: ChainInfo[];
@@ -104,33 +105,29 @@ export const useGetAllChain = ({
 
   // 무한 스크롤 처리
   useEffect(() => {
-    if (simpleBarRef.current) {
-      const scrollElement = simpleBarRef.current.getScrollElement();
-      if (scrollElement) {
-        const onScroll = () => {
-          const simpleBar = simpleBarRef.current?.getContentElement();
-          const scrollEl = simpleBarRef.current?.getScrollElement();
-          if (simpleBar && scrollEl) {
-            const rect = simpleBar.getBoundingClientRect();
-            const scrollRect = scrollEl.getBoundingClientRect();
-
-            const remainingBottomY =
-              rect.y + rect.height - scrollRect.y - scrollRect.height;
-
-            if (remainingBottomY < scrollRect.height / 5) {
-              setCurrentPage((prev) => prev + 1);
-            }
-          }
-        };
-
-        scrollElement.addEventListener("scroll", onScroll);
-
-        return () => {
-          scrollElement.removeEventListener("scroll", onScroll);
-        };
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting && !isLoading) {
+          setCurrentPage((prev) => prev + 1);
+        }
+      },
+      {
+        threshold: 0.1,
       }
+    );
+
+    const triggerElement = ref;
+    if (triggerElement) {
+      observer.observe(triggerElement);
     }
-  }, []);
+
+    return () => {
+      if (triggerElement) {
+        observer.unobserve(triggerElement);
+      }
+    };
+  }, [isLoading, ref]);
 
   const currentPageChains = useMemo(() => {
     const startIndex = 0;
@@ -146,6 +143,6 @@ export const useGetAllChain = ({
     setPage: setCurrentPage,
     isLoading,
     error,
-    simpleBarRef,
+    infiniteScrollTriggerRef: setRef,
   };
 };
