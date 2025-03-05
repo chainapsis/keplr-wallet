@@ -695,9 +695,11 @@
   "page.earn.overview.claim-section.claim-button": "Claim",
   "page.earn.overview.tutorial-modal.manage-earn.title": "Manage your Earn balance and rewards",
   "page.earn.overview.tutorial-modal.manage-earn.paragraph": "Find your balance info under the {tokenName} asset box at Home.",
+  "page.earn.overview.tutorial-modal.manage-earn.next-button": "Next",
   "page.earn.overview.tutorial-modal.claim.title": "Claim {tokenName} with Staking Rewards",
   "page.earn.overview.tutorial-modal.claim.paragraph": "Easily claim your rewards by clicking \"Claim All\" at Home.",
   "page.earn.overview.tutorial-modal.claim.pending-reward": "Pending Reward",
+  "page.earn.overview.tutorial-modal.claim.claim-all-button-in-card": "Claim All",
   "page.earn.overview.tutorial-modal.claim.open-earn-overview-button": "Open Earn Overview",
 
   "page.earn.withdraw.amount.title": "Enter the amount{br}to withdraw.",

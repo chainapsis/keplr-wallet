@@ -48,7 +48,9 @@ export const ManageEarnContent: FunctionComponent<{
     <Button
       size="medium"
       color="primary"
-      text={<FormattedMessage id="button.next" />}
+      text={
+        <FormattedMessage id="page.earn.overview.tutorial-modal.manage-earn.next-button" />
+      }
       onClick={onNext}
     />
   </Fragment>

@@ -150,8 +150,10 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
       return err.message || err.toString();
     }
   }, [
-    nobleEarnAmountConfig.amountConfig.uiProperties,
-    nobleEarnAmountConfig.amountConfig.uiProperties,
+    nobleEarnAmountConfig.amountConfig.uiProperties.error,
+    nobleEarnAmountConfig.amountConfig.uiProperties.warning,
+    nobleEarnAmountConfig.feeConfig.uiProperties.error,
+    nobleEarnAmountConfig.feeConfig.uiProperties.warning,
   ]);
 
   const isSubmissionBlocked =
@@ -277,6 +279,9 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
                         ? ColorPalette["gray-400"]
                         : ColorPalette["gray-200"]
                     }
+                    style={{
+                      whiteSpace: "nowrap",
+                    }}
                   >
                     {balanceQuery?.balance.shrink(true).toString() || "0"}
                   </Subtitle3>
