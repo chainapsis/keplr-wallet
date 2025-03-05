@@ -75,6 +75,7 @@ export const EarnOverviewTutorialModal: FunctionComponent<{
                 key={index}
                 isActive={index === carouselIndex}
                 isLast={index === Contents.length - 1}
+                isLightMode={theme.mode === "light"}
               />
             ))}
           </XAxis>
@@ -88,13 +89,20 @@ export const EarnOverviewTutorialModal: FunctionComponent<{
 const DotIndicator: FunctionComponent<{
   isActive: boolean;
   isLast: boolean;
-}> = ({ isActive, isLast }) => (
+  isLightMode: boolean;
+}> = ({ isActive, isLast, isLightMode }) => (
   <Box
     width="5px"
     height="5px"
     borderRadius="50%"
     backgroundColor={
-      isActive ? ColorPalette["gray-100"] : ColorPalette["gray-400"]
+      isLightMode
+        ? isActive
+          ? ColorPalette["blue-400"]
+          : ColorPalette["gray-100"]
+        : isActive
+        ? ColorPalette["gray-100"]
+        : ColorPalette["gray-400"]
     }
     marginRight={isLast ? "0" : "0.5rem"}
   />
