@@ -78,7 +78,11 @@ export const WrapperwithBottomTag = observer(function ({
         }
         hover={
           isLightMode
-            ? {}
+            ? {
+                backgroundColor: Color(ColorPalette["green-200"])
+                  .alpha(0.5)
+                  .toString(),
+              }
             : {
                 backgroundColor: Color(ColorPalette["green-600"])
                   .alpha(0.15)
