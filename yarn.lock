@@ -8911,8 +8911,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/hooks-bitcoin@workspace:packages/hooks-bitcoin"
   dependencies:
-    "@ethersproject/address": ^5.7.0
-    "@ethersproject/providers": ^5.7.0
     "@keplr-wallet/background": 0.12.190
     "@keplr-wallet/common": 0.12.190
     "@keplr-wallet/cosmos": 0.12.190
@@ -8923,6 +8921,7 @@ __metadata:
     "@keplr-wallet/stores-bitcoin": 0.12.190
     "@keplr-wallet/types": 0.12.190
     "@keplr-wallet/unit": 0.12.190
+    bitcoin-address-validation: ^3.0.0
     buffer: ^6.0.3
     long: ^4.0.0
     utility-types: ^3.10.0
