@@ -685,6 +685,10 @@
   "page.tx-result.failed.paragraph": "Transaction unsuccessful. Please check the block explorer for more information.",
   "page.tx-result.failed.go-to-home": "Go to Home",
 
+  "page.tx-result.earn-deposit.success.title": "Earn Activated!",
+  "page.tx-result.earn-deposit.success.paragraph": "Now, your real-time rewards will be automatically accrued to your account.",
+  "page.tx-result.earn-deposit.success.go-to-earn-overview-button": "Go to Earn Overview",
+
   "page.earn.overview.title": "Earn Overview",
   "page.earn.overview.claim-section.claimable-reward": "Claimable Reward",
   "page.earn.overview.claim-section.total-claimed": "Total Claimed",
