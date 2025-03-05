@@ -56,7 +56,9 @@ export const EarnClaimContent: FunctionComponent<{
       <Button
         size="medium"
         color="primary"
-        text={<FormattedMessage id="button.next" />}
+        text={
+          <FormattedMessage id="page.earn.overview.tutorial-modal.claim.open-earn-overview-button" />
+        }
         onClick={moveToNext}
         style={{ flex: 1 }}
       />
@@ -103,7 +105,7 @@ const SampleClaimAllRewardCard: FunctionComponent<{
           }}
         >
           <Button2 color={ColorPalette.white}>
-            <FormattedMessage id="page.main.components.claim-all.button" />
+            <FormattedMessage id="page.earn.overview.tutorial-modal.claim.claim-all-button-in-card" />
           </Button2>
         </Box>
       </XAxis>
