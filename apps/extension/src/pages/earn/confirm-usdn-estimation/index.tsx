@@ -17,8 +17,7 @@ import { useStore } from "../../../stores";
 import { CoinPretty, Dec, DecUtils } from "@keplr-wallet/unit";
 import { Checkbox } from "../../../components/checkbox";
 import { NOBLE_CHAIN_ID } from "../../../config.ui";
-import { ExtensionKVStore } from "@keplr-wallet/common";
-import { useGasSimulator, useTxConfigsValidate } from "@keplr-wallet/hooks";
+import { useTxConfigsValidate } from "@keplr-wallet/hooks";
 import { useNobleEarnAmountConfig } from "@keplr-wallet/hooks-internal";
 import { WarningBox } from "../../../components/warning-box";
 import { useTheme } from "styled-components";
@@ -44,6 +43,8 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
   const account = accountStore.getAccount(NOBLE_CHAIN_ID);
 
   const amountValue = searchParams.get("amount");
+  const gasValue = searchParams.get("gas");
+  const feeMinimalDenom = searchParams.get("feeCurrency");
 
   const inCurrency = chainInfo.forceFindCurrency(
     NOBLE_EARN_DEPOSIT_IN_COIN_MINIMAL_DENOM
@@ -78,50 +79,39 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
 
   const poolForDeposit = nobleEarnAmountConfig.amountConfig.pool;
 
-  const gasSimulator = useGasSimulator(
-    new ExtensionKVStore("gas-simulator.main.send"),
-    chainStore,
-    NOBLE_CHAIN_ID,
-    nobleEarnAmountConfig.gasConfig,
-    nobleEarnAmountConfig.feeConfig,
-    "noble-earn-deposit",
-    () => {
-      if (!nobleEarnAmountConfig.amountConfig.currency) {
-        throw new Error("Deposit currency not set");
-      }
-
-      if (
-        nobleEarnAmountConfig.amountConfig.uiProperties.loadingState ===
-          "loading-block" ||
-        nobleEarnAmountConfig.amountConfig.uiProperties.error != null
-      ) {
-        throw new Error("Not ready to simulate tx");
-      }
-
-      return account.noble.makeSwapTx(
-        "noble-earn-deposit",
-        nobleEarnAmountConfig.amountConfig.amount[0].toDec().toString(),
-        inCurrency,
-        nobleEarnAmountConfig.amountConfig.minOutAmount.toDec().toString(),
-        outCurrency,
-        [
-          {
-            poolId: poolForDeposit?.id.toString() ?? "",
-            denomTo: outCurrency.coinMinimalDenom,
-          },
-        ]
-      );
-    }
-  );
-
   const txConfigsValidate = useTxConfigsValidate({
     ...nobleEarnAmountConfig,
-    gasSimulator,
   });
 
   useEffect(() => {
     nobleEarnAmountConfig.amountConfig.setValue(amountValue || "0");
-  }, [amountValue, nobleEarnAmountConfig.amountConfig]);
+    if (gasValue) {
+      nobleEarnAmountConfig.gasConfig.setValue(gasValue);
+    }
+    if (feeMinimalDenom) {
+      const feeCurrency = chainStore
+        .getChain(NOBLE_CHAIN_ID)
+        .feeCurrencies.find(
+          (feeCurrency) => feeCurrency.coinMinimalDenom === feeMinimalDenom
+        );
+      if (feeCurrency) {
+        // 어차피 earn/amount/index.tsx로부터 여기로 오는데
+        // 그 페이지에서는 fee를 average로만 설정함.
+        nobleEarnAmountConfig.feeConfig.setFee({
+          type: "average",
+          currency: feeCurrency,
+        });
+      }
+    }
+  }, [
+    amountValue,
+    nobleEarnAmountConfig.amountConfig,
+    gasValue,
+    nobleEarnAmountConfig.gasConfig,
+    feeMinimalDenom,
+    nobleEarnAmountConfig.feeConfig,
+    chainStore,
+  ]);
 
   useEffect(() => {
     const storedValue = sessionStorage.getItem(TERM_AGREED_STORAGE_KEY);
@@ -184,7 +174,10 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
           await tx.send(
             nobleEarnAmountConfig.feeConfig.toStdFee(),
             undefined,
-            undefined,
+            {
+              // max일 경우 서명 페이지에서 수수료를 수정할 수 없게 만든다.
+              preferNoSetFee: searchParams.get("isMax") === "true",
+            },
             {
               onBroadcasted: (_txHash) => {
                 navigate("/tx-result/pending");
