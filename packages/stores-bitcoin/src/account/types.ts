@@ -10,10 +10,18 @@ export interface SelectUTXOsParams {
   changeAddress?: string;
 }
 
+export interface BuildPsbtParams {
+  utxos: UTXO[];
+  senderAddress: string;
+  recipients: UTXOSelectionRecipient[];
+  estimatedFee: CoinPretty;
+  xonlyPubKey?: Uint8Array;
+}
+
 export interface UTXOSelection {
   selectedUtxos: UTXO[];
   recipients: UTXOSelectionRecipient[];
-  fee: CoinPretty;
+  estimatedFee: CoinPretty;
   vsize: number;
   hasChange: boolean;
 }
