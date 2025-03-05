@@ -324,6 +324,8 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
               sendConfigs.memoConfig.memo,
               {
                 preferNoSetMemo: true,
+                preferNoSetFee: sendConfigs.amountConfig.fraction === 1,
+
                 sendTx: async (chainId, tx, mode) => {
                   let msg: Message<Uint8Array> = new SendTxAndRecordMsg(
                     "noble/transfer/earn",
