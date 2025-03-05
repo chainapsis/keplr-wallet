@@ -3,6 +3,7 @@ import { useRef } from "react";
 import { ViewToken } from "../../main";
 import { validateIsUsdcFromNoble } from "../utils";
 import { useStore } from "../../../stores";
+import { NOBLE_CHAIN_ID } from "../../../config.ui";
 
 export function useEarnBottomTag(balances: ViewToken[]) {
   const topUsdcFound = useRef("");
@@ -22,7 +23,9 @@ export function useEarnBottomTag(balances: ViewToken[]) {
       chainInfo.chainId
     );
 
-    const isUsdn = token.currency.coinMinimalDenom === "uusdn";
+    const isUsdn =
+      chainInfo.chainId === NOBLE_CHAIN_ID &&
+      token.currency.coinMinimalDenom === "uusdn";
 
     if (!isUsdcFromNoble && !isUsdn) {
       return {};
@@ -30,8 +33,11 @@ export function useEarnBottomTag(balances: ViewToken[]) {
 
     usdnAsset.current =
       usdnAsset.current ??
-      balances.find(({ token }) => token.currency.coinMinimalDenom === "uusdn")
-        ?.token ??
+      balances.find(
+        ({ token, chainInfo }) =>
+          chainInfo.chainId === NOBLE_CHAIN_ID &&
+          token.currency.coinMinimalDenom === "uusdn"
+      )?.token ??
       null;
 
     if (!usdnAsset.current) {

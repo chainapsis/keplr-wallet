@@ -128,6 +128,9 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
 
   const isSubmissionBlocked =
     nobleEarnAmountConfig.amountConfig.amount[0].toDec().equals(new Dec("0")) ||
+    nobleEarnAmountConfig.amountConfig.expectedOutAmount
+      .toDec()
+      .equals(new Dec("0")) ||
     !!nobleEarnAmountConfig.amountConfig.error ||
     txConfigsValidate.interactionBlocked ||
     !isTermAgreed;
@@ -235,7 +238,7 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
 
         <EstimationSection
           inAmount={inAmount}
-          outAmount={nobleEarnAmountConfig.amountConfig.minOutAmount}
+          outAmount={nobleEarnAmountConfig.amountConfig.expectedOutAmount}
         />
         <Gutter size="1.25rem" />
 
