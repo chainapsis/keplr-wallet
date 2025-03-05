@@ -54,6 +54,11 @@ import { XAxis, YAxis } from "../../../components/axis";
 import { LongArrowDownIcon } from "../../../components/icon/long-arrow-down";
 import { useTheme } from "styled-components";
 import { IBCCurrency } from "@keplr-wallet/types";
+import {
+  useAutoFeeCurrencySelectionOnInit,
+  useFeeOptionSelectionOnInit,
+} from "../../../components/input/fee-control";
+import { HorizontalCollapseTransition } from "../../../components/transition/horizontal-collapse";
 
 export const EarnTransferAmountPage: FunctionComponent = observer(() => {
   const theme = useTheme();
@@ -65,6 +70,7 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
     queriesStore,
     skipQueriesStore,
     priceStore,
+    uiConfigStore,
   } = useStore();
   const addressRef = useRef<HTMLInputElement | null>(null);
 
@@ -243,7 +249,11 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
   const error = useMemo(() => {
     const uiProperties = sendConfigs.amountConfig.uiProperties;
 
-    const err = uiProperties.error || uiProperties.warning;
+    const err =
+      uiProperties.error ||
+      uiProperties.warning ||
+      sendConfigs.feeConfig.uiProperties.error ||
+      sendConfigs.feeConfig.uiProperties.warning;
 
     if (err instanceof EmptyAmountError) {
       return;
@@ -256,7 +266,24 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
     if (err) {
       return err.message || err.toString();
     }
-  }, [sendConfigs.amountConfig.uiProperties]);
+  }, [
+    sendConfigs.amountConfig.uiProperties,
+    sendConfigs.feeConfig.uiProperties,
+  ]);
+
+  useFeeOptionSelectionOnInit(uiConfigStore, sendConfigs.feeConfig, false);
+
+  useAutoFeeCurrencySelectionOnInit(
+    chainStore,
+    queriesStore,
+    sendConfigs.senderConfig,
+    sendConfigs.feeConfig,
+    false
+  );
+
+  const isSubmissionBlocked = sendConfigs.amountConfig.amount[0]
+    .toDec()
+    .equals(new Dec("0"));
 
   return (
     <HeaderLayout
@@ -264,6 +291,8 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
       displayFlex={true}
       fixedMinHeight={true}
       left={<BackButton />}
+      animatedBottomButtons={true}
+      hideBottomButtons={isSubmissionBlocked}
       bottomButtons={[
         {
           disabled: txConfigsValidate.interactionBlocked,
@@ -295,6 +324,8 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
               sendConfigs.memoConfig.memo,
               {
                 preferNoSetMemo: true,
+                preferNoSetFee: sendConfigs.amountConfig.fraction === 1,
+
                 sendTx: async (chainId, tx, mode) => {
                   let msg: Message<Uint8Array> = new SendTxAndRecordMsg(
                     "noble/transfer/earn",
@@ -578,33 +609,37 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
           />
           <Gutter size="0.75rem" />
           <Box padding="0.25rem 0">
-            <XAxis alignY="center" gap="0.25rem">
-              {sendConfigs.amountConfig.amount[0]
-                .toDec()
-                .equals(new Dec("0")) && (
-                <Box
-                  padding="0.25rem 0.375rem"
-                  backgroundColor={
-                    isLightMode ? ColorPalette.white : ColorPalette["gray-550"]
-                  }
-                  borderRadius="0.5rem"
-                  width="fit-content"
-                  cursor="pointer"
-                  onClick={() => {
-                    sendConfigs.amountConfig.setFraction(1);
-                  }}
-                >
-                  <Subtitle4
-                    color={
+            <XAxis alignY="center">
+              <HorizontalCollapseTransition collapsed={!isSubmissionBlocked}>
+                <XAxis alignY="center">
+                  <Box
+                    padding="0.25rem 0.375rem"
+                    backgroundColor={
                       isLightMode
-                        ? ColorPalette["gray-400"]
-                        : ColorPalette["gray-200"]
+                        ? ColorPalette.white
+                        : ColorPalette["gray-550"]
                     }
+                    borderRadius="0.5rem"
+                    width="fit-content"
+                    cursor="pointer"
+                    onClick={() => {
+                      sendConfigs.amountConfig.setFraction(1);
+                    }}
                   >
-                    {balance.trim(true).hideIBCMetadata(true).toString()}
-                  </Subtitle4>
-                </Box>
-              )}
+                    <Subtitle4
+                      color={
+                        isLightMode
+                          ? ColorPalette["gray-400"]
+                          : ColorPalette["gray-200"]
+                      }
+                    >
+                      {balance.trim(true).hideIBCMetadata(true).toString()}
+                    </Subtitle4>
+                  </Box>
+
+                  <Gutter size="0.25rem" />
+                </XAxis>
+              </HorizontalCollapseTransition>
               <Subtitle3 color={ColorPalette["gray-300"]}>
                 {`on ${chainInfo.chainName}`}
               </Subtitle3>

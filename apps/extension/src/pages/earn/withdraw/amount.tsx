@@ -17,6 +17,7 @@ import {
 import {
   Body2,
   Body3,
+  H2,
   H3,
   MobileH3,
   Subtitle3,
@@ -401,7 +402,7 @@ const ConfirmView: FunctionComponent<{
       }}
     >
       <Stack flex={1}>
-        <MobileH3
+        <H2
           color={isLightMode ? ColorPalette["gray-700"] : ColorPalette["white"]}
         >
           {intl.formatMessage(
@@ -412,7 +413,7 @@ const ConfirmView: FunctionComponent<{
               br: <br />,
             }
           )}
-        </MobileH3>
+        </H2>
         <Gutter size="1rem" />
         <Body2
           color={
