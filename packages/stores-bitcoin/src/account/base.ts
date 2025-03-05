@@ -4,8 +4,15 @@ import {
   GenesisHash,
   Keplr,
 } from "@keplr-wallet/types";
-import { action, makeObservable, observable } from "mobx";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
+import { simpleFetch } from "@keplr-wallet/simple-fetch";
+import { action, makeObservable, observable } from "mobx";
+import validate, {
+  AddressInfo,
+  Network,
+  getAddressInfo,
+} from "bitcoin-address-validation";
+import { Psbt, networks, address } from "bitcoinjs-lib";
 import { BitcoinTxSizeEstimator } from "./tx-size-estimator";
 import {
   BuildPsbtParams,
@@ -14,13 +21,7 @@ import {
   UTXOSelection,
 } from "./types";
 import { DUST_RELAY_FEE_RATE, DUST_THRESHOLD } from "./constant";
-import validate, {
-  AddressInfo,
-  Network,
-  getAddressInfo,
-} from "bitcoin-address-validation";
-import { Psbt, networks } from "bitcoinjs-lib";
-import { toOutputScript } from "bitcoinjs-lib/src/address";
+
 export class BitcoinAccountBase {
   @observable
   protected _isSendingTx: boolean = false;
@@ -354,7 +355,10 @@ export class BitcoinAccountBase {
       }
     })();
 
-    const senderOutputScript = toOutputScript(senderAddress, networkParams);
+    const senderOutputScript = address.toOutputScript(
+      senderAddress,
+      networkParams
+    );
     const internalPubkey = xonlyPubKey ? Buffer.from(xonlyPubKey) : undefined;
 
     // 4. Build PSBT
@@ -395,9 +399,31 @@ export class BitcoinAccountBase {
     return keplr.signPsbt(this.chainId, psbt.toHex());
   }
 
-  // TODO: make send tx with utxo including fee
+  async pushTx(txHex: string) {
+    const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
+    if (!("bitcoin" in modularChainInfo)) {
+      throw new Error(`${this.chainId} is not bitcoin chain`);
+    }
 
-  // TODO: sign and push tx (keplr interface 확장 필요)
+    const indexerUrl = modularChainInfo.bitcoin.rest;
+    const res = await simpleFetch<string>(`${indexerUrl}/tx`, {
+      method: "POST",
+      body: txHex,
+      headers: {
+        "Content-Type": "text/plain",
+      },
+    });
+    if (res.status !== 200) {
+      throw new Error("Failed to push tx");
+    }
+
+    return res.data;
+  }
+
+  async signAndPushTx(psbt: Psbt) {
+    const signedPsbt = await this.signPsbt(psbt);
+    return this.pushTx(signedPsbt);
+  }
 
   // TODO: track tx status (이거 좀 어려움)
 
