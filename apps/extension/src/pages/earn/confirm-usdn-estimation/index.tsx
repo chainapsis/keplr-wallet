@@ -196,7 +196,7 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
                   return;
                 }
 
-                navigate("/tx-result/success");
+                navigate("/tx-result/success?isFromEarnDeposit=true");
               },
             }
           );

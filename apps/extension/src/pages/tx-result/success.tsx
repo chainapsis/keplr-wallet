@@ -11,6 +11,7 @@ import { ColorPalette } from "../../styles";
 import { Box } from "../../components/box";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Button } from "../../components/button";
+import { NOBLE_CHAIN_ID } from "../../config.ui";
 
 export const TxResultSuccessPage: FunctionComponent = observer(() => {
   const intl = useIntl();
@@ -20,6 +21,7 @@ export const TxResultSuccessPage: FunctionComponent = observer(() => {
   const [searchParams] = useSearchParams();
 
   const isFromEarnTransfer = searchParams.get("isFromEarnTransfer");
+  const isFromEarnDeposit = searchParams.get("isFromEarnDeposit");
 
   useEffect(() => {
     if (animDivRef.current) {
@@ -60,6 +62,18 @@ export const TxResultSuccessPage: FunctionComponent = observer(() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isFromEarnTransfer]);
 
+  const paragraph = (() => {
+    if (isFromEarnDeposit) {
+      return "page.tx-result.earn-deposit.success.paragraph";
+    }
+
+    if (isFromEarnTransfer) {
+      return "page.earn.transfer.amount.tx.paragraph";
+    }
+
+    return "page.tx-result.success.paragraph";
+  })();
+
   return (
     <Container>
       <Stack flex={1} alignX="center">
@@ -74,16 +88,18 @@ export const TxResultSuccessPage: FunctionComponent = observer(() => {
         />
         <Gutter size="1.75rem" />
         <H3 color={ColorPalette["white"]}>
-          {intl.formatMessage({ id: "page.tx-result.success.title" })}
+          {intl.formatMessage({
+            id: isFromEarnDeposit
+              ? "page.tx-result.earn-deposit.success.title"
+              : "page.tx-result.success.title",
+          })}
         </H3>
         <Gutter size="2rem" />
         <Box paddingX="1.25rem" style={{ textAlign: "center" }}>
           <Subtitle2 color={ColorPalette["gray-200"]}>
             {intl.formatMessage(
               {
-                id: isFromEarnTransfer
-                  ? "page.earn.transfer.amount.tx.paragraph"
-                  : "page.tx-result.success.paragraph",
+                id: paragraph,
               },
               {
                 br: <br />,
@@ -95,8 +111,20 @@ export const TxResultSuccessPage: FunctionComponent = observer(() => {
         {!isFromEarnTransfer && (
           <Button
             size="large"
-            onClick={() => navigate("/")}
-            text={intl.formatMessage({ id: "page.tx-result.success.done" })}
+            onClick={() => {
+              if (isFromEarnDeposit) {
+                navigate(`/earn/overview?chainId=${NOBLE_CHAIN_ID}`, {
+                  replace: true,
+                });
+                return;
+              }
+              navigate("/");
+            }}
+            text={intl.formatMessage({
+              id: isFromEarnDeposit
+                ? "page.tx-result.earn-deposit.success.go-to-earn-overview-button"
+                : "page.tx-result.success.done",
+            })}
             style={{
               width: "18.125rem",
             }}
