@@ -128,7 +128,7 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
     }
   }, [
     nobleEarnAmountConfig.amountConfig.uiProperties,
-    nobleEarnAmountConfig.amountConfig.uiProperties,
+    nobleEarnAmountConfig.feeConfig.uiProperties,
   ]);
 
   const [isConfirmView, setIsConfirmView] = useState(false);
@@ -178,6 +178,9 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
 
   const isSubmissionBlocked =
     nobleEarnAmountConfig.amountConfig.amount[0].toDec().equals(new Dec("0")) ||
+    nobleEarnAmountConfig.amountConfig.expectedOutAmount
+      .toDec()
+      .equals(new Dec("0")) ||
     !!error ||
     txConfigsValidate.interactionBlocked;
 
@@ -212,10 +215,7 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
       onSubmit={async (e) => {
         e.preventDefault();
 
-        if (
-          txConfigsValidate.interactionBlocked ||
-          !!nobleEarnAmountConfig.amountConfig.error
-        ) {
+        if (isSubmissionBlocked) {
           return;
         }
 

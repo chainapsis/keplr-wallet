@@ -18,8 +18,8 @@ import {
 import { useState } from "react";
 import { action, makeObservable, observable } from "mobx";
 
-// Slippage is 0.1% referred from Osmosis
-const SLIPPAGE = new Dec(0.001);
+// Slippage is 0.5%
+const SLIPPAGE = new Dec(0.005);
 
 export class NobleEarnAmountConfig extends AmountConfig {
   @observable.ref
