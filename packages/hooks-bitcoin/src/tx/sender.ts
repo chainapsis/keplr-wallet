@@ -98,10 +98,8 @@ export class SenderConfig extends TxChainSetter implements ISenderConfig {
 
       return {};
     } catch (e) {
-      const errorMessage = e instanceof Error ? e.message : "Unknown error";
-
       return {
-        error: new InvalidBitcoinAddressError(errorMessage),
+        error: e,
       };
     }
   }

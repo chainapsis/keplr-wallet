@@ -21,3 +21,21 @@ export interface ISenderConfig extends ITxChainSetter {
 
   uiProperties: UIProperties;
 }
+
+export interface IGasConfig extends ITxChainSetter {
+  value: string;
+  setValue(value: string | number): void;
+
+  gas: number;
+
+  uiProperties: UIProperties;
+}
+
+export interface IRecipientConfig extends ITxChainSetter {
+  value: string;
+  setValue(value: string): void;
+
+  recipient: string;
+
+  uiProperties: UIProperties;
+}

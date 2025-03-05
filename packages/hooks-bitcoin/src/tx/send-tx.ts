@@ -1,12 +1,19 @@
-// import { ChainGetter } from "@keplr-wallet/stores";
+import { ChainGetter } from "@keplr-wallet/stores";
+import { useSenderConfig } from "./sender";
+import { useRecipientConfig } from "./recipient";
 // import { BitcoinQueriesStore } from "@keplr-wallet/stores-bitcoin";
 
-export const useSendTxConfig = () =>
-  // _chainGetter: ChainGetter,
-  // _bitcoinQueriesStore: BitcoinQueriesStore,
-  // _chainId: string,
-  // _sender: string,
-  // _initialGas: number
-  {
-    return {};
+export const useSendTxConfig = (
+  chainGetter: ChainGetter,
+  chainId: string,
+  sender: string
+  // initialGas: number
+) => {
+  const senderConfig = useSenderConfig(chainGetter, chainId, sender);
+  const recipientConfig = useRecipientConfig(chainGetter, chainId);
+
+  return {
+    senderConfig,
+    recipientConfig,
   };
+};
