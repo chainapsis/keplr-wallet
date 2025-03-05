@@ -199,7 +199,7 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
         },
       ]}
     >
-      <Box paddingX="1.5rem" paddingTop="2.5rem">
+      <Box paddingX="1.5rem" paddingTop="1.75rem">
         <ApyChip chainId={chainId} colorType="green" />
 
         <Gutter size="0.75rem" />
@@ -303,7 +303,16 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
                   cursor: "pointer",
                   userSelect: "none",
                 }}
-                color={ColorPalette["blue-300"]}
+                color={
+                  isLightMode
+                    ? ColorPalette["blue-500"]
+                    : ColorPalette["blue-300"]
+                }
+                hoverColor={
+                  isLightMode
+                    ? ColorPalette["blue-300"]
+                    : ColorPalette["blue-200"]
+                }
               >
                 {intl.formatMessage({
                   id: "page.earn.amount.balance.transfer.button",

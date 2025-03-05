@@ -124,6 +124,8 @@ const SampleTokenItemCard: FunctionComponent<{
         alt=""
       />
       <Image
+        width="28px"
+        height="29px"
         src={require("../../../../public/assets/img/icon-click-pointer.png")}
         alt="click-pointer"
         style={{
