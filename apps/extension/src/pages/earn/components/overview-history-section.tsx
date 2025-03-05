@@ -30,7 +30,7 @@ export const EarnOverviewHistorySection: FunctionComponent<{
   const account = accountStore.getAccount(chainInfo.chainId);
 
   const msgHistory = usePaginatedCursorQuery<ResMsgsHistory>(
-    process.env["KEPLR_EXT_TX_HISTORY_TEST_BASE_URL"],
+    process.env["KEPLR_EXT_TX_HISTORY_BASE_URL"],
     () => {
       return `/history/msgs/${chainInfo.chainIdentifier}/${
         account.bech32Address

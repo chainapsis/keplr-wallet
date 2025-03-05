@@ -35,7 +35,7 @@ export const EarnOverviewClaimSection: FunctionComponent<{
     totalYield: string;
     updatedAt: string;
   }>(
-    process.env["KEPLR_EXT_TX_HISTORY_TEST_BASE_URL"],
+    process.env["KEPLR_EXT_TX_HISTORY_BASE_URL"],
     `/noble-yield/${account.bech32Address}`
   );
 

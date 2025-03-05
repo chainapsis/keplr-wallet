@@ -167,9 +167,6 @@ export const TokenDetailModal: FunctionComponent<{
   const isSupported: boolean = useMemo(() => {
     if ("cosmos" in modularChainInfo) {
       const chainInfo = chainStore.getChain(modularChainInfo.chainId);
-      if (chainInfo.chainId === NOBLE_CHAIN_ID) {
-        return true;
-      }
       const map = new Map<string, boolean>();
       for (const chainIdentifier of querySupported.response?.data ?? []) {
         map.set(chainIdentifier, true);
@@ -301,7 +298,7 @@ export const TokenDetailModal: FunctionComponent<{
   ];
 
   const msgHistory = usePaginatedCursorQuery<ResMsgsHistory>(
-    process.env["KEPLR_EXT_TX_HISTORY_TEST_BASE_URL"],
+    process.env["KEPLR_EXT_TX_HISTORY_BASE_URL"],
     () => {
       return `/history/msgs/${
         ChainIdHelper.parse(chainId).identifier
