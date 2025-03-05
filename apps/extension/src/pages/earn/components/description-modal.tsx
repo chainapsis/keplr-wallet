@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, ReactElement } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import styled, { useTheme } from "styled-components";
 import { XAxis } from "../../../components/axis";
@@ -14,7 +14,7 @@ import { Stack } from "../../../components/stack";
 export const DescriptionModal: FunctionComponent<{
   close: () => void;
   title: string;
-  paragraphs: string[];
+  paragraphs: (string | ReactElement)[];
 }> = observer(({ close, title, paragraphs }) => {
   const theme = useTheme();
   const isLightMode = theme.mode === "light";
@@ -42,14 +42,14 @@ export const DescriptionModal: FunctionComponent<{
         <Stack gutter="0.75rem">
           {paragraphs.map((paragraph) => (
             <Body2
-              key={paragraph}
+              key={typeof paragraph === "string" ? paragraph : paragraph.key}
               color={
                 isLightMode
                   ? ColorPalette["gray-400"]
                   : ColorPalette["gray-200"]
               }
             >
-              <FormattedMessage id={paragraph} />
+              {paragraph}
             </Body2>
           ))}
         </Stack>

@@ -663,7 +663,7 @@
   "page.earn.estimation-confirm.usdc-to-usdn.swap-button": "Swap",
   "page.earn.estimation-confirm.usdn-description.title": "How does USDN work?",
   "page.earn.estimation-confirm.usdn-description.paragraph.first": "The Noble Dollar (USDN) is a stablecoin built on M^0's canonical stablecoin, $M, which is backed by short-term U.S. Treasury bills.",
-  "page.earn.estimation-confirm.usdn-description.paragraph.second": "Swap USDC for USDN, hold it, and earn real-time rewards. Deposit or withdraw anytime—no lock-up.  Learn More",
+  "page.earn.estimation-confirm.usdn-description.paragraph.second": "Swap USDC for USDN, hold it, and earn real-time rewards. Deposit or withdraw anytime—no lock-up. <link>Learn More</link>",
   "page.earn.estimation-confirm.usdc-to-usdn.agree-terms": "I have read and agree to the Keplr Earn Service <link>Terms of Use</link>.",
   "page.earn.terms.title": "Terms of Use",
   "page.earn.terms.contents": "dummy",
