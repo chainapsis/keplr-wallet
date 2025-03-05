@@ -171,7 +171,7 @@ export const useNobleEarnAmountConfig = (
   amountConfig.setCurrency(inCurrency);
   amountConfig.setOutCurrency(outCurrency);
 
-  const gasConfig = useGasConfig(chainGetter, chainId);
+  const gasConfig = useGasConfig(chainGetter, chainId, 230000);
   const feeConfig = useFeeConfig(
     chainGetter,
     queriesStore,

@@ -180,7 +180,7 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
                   .denom;
               }
               return "unknown";
-            })()}&isMax=${
+            })()}&feeType=${nobleEarnAmountConfig.feeConfig.type}&isMax=${
               nobleEarnAmountConfig.amountConfig.fraction === 1
                 ? "true"
                 : "false"

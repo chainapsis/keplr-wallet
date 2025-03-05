@@ -17,7 +17,7 @@ import { useStore } from "../../../stores";
 import { CoinPretty, Dec, DecUtils } from "@keplr-wallet/unit";
 import { Checkbox } from "../../../components/checkbox";
 import { NOBLE_CHAIN_ID } from "../../../config.ui";
-import { useTxConfigsValidate } from "@keplr-wallet/hooks";
+import { FeeType, useTxConfigsValidate } from "@keplr-wallet/hooks";
 import { useNobleEarnAmountConfig } from "@keplr-wallet/hooks-internal";
 import { WarningBox } from "../../../components/warning-box";
 import { useTheme } from "styled-components";
@@ -45,6 +45,7 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
   const amountValue = searchParams.get("amount");
   const gasValue = searchParams.get("gas");
   const feeMinimalDenom = searchParams.get("feeCurrency");
+  const feeType = searchParams.get("feeType");
 
   const inCurrency = chainInfo.forceFindCurrency(
     NOBLE_EARN_DEPOSIT_IN_COIN_MINIMAL_DENOM
@@ -88,17 +89,15 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
     if (gasValue) {
       nobleEarnAmountConfig.gasConfig.setValue(gasValue);
     }
-    if (feeMinimalDenom) {
+    if (feeMinimalDenom && feeType) {
       const feeCurrency = chainStore
         .getChain(NOBLE_CHAIN_ID)
         .feeCurrencies.find(
           (feeCurrency) => feeCurrency.coinMinimalDenom === feeMinimalDenom
         );
       if (feeCurrency) {
-        // 어차피 earn/amount/index.tsx로부터 여기로 오는데
-        // 그 페이지에서는 fee를 average로만 설정함.
         nobleEarnAmountConfig.feeConfig.setFee({
-          type: "average",
+          type: feeType as FeeType,
           currency: feeCurrency,
         });
       }
@@ -109,6 +108,7 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
     gasValue,
     nobleEarnAmountConfig.gasConfig,
     feeMinimalDenom,
+    feeType,
     nobleEarnAmountConfig.feeConfig,
     chainStore,
   ]);
