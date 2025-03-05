@@ -73,7 +73,7 @@ export const EarnApyBanner: FunctionComponent<{
         style={{ marginLeft: "auto" }}
         onClick={() => {
           navigate(
-            `/earn/amount?chainId=${chainId}&coinMinimalDenom=${"uusdc"}`
+            `/earn/intro?chainId=${chainId}&coinMinimalDenom=${"uusdc"}`
           );
         }}
       />
