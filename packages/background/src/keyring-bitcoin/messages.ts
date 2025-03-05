@@ -141,7 +141,10 @@ export class RequestSignBitcoinPsbtMsg extends Message<string> {
     return "request-sign-bitcoin-psbt";
   }
 
-  constructor(public readonly chainId: string, public readonly psbt: Psbt) {
+  constructor(
+    public readonly chainId: string,
+    public readonly psbtHex: string
+  ) {
     super();
   }
 
@@ -149,8 +152,14 @@ export class RequestSignBitcoinPsbtMsg extends Message<string> {
     if (!this.chainId) {
       throw new Error("chainId is not set");
     }
-    if (!this.psbt) {
-      throw new Error("psbt is not set");
+    if (!this.psbtHex) {
+      throw new Error("psbtHex is not set");
+    }
+
+    try {
+      Psbt.fromHex(this.psbtHex);
+    } catch (e) {
+      throw new Error("Invalid psbtHex");
     }
   }
 
@@ -172,7 +181,10 @@ export class RequestSignBitcoinPsbtsMsg extends Message<string[]> {
     return "request-sign-bitcoin-psbts";
   }
 
-  constructor(public readonly chainId: string, public readonly psbts: Psbt[]) {
+  constructor(
+    public readonly chainId: string,
+    public readonly psbtsHexes: string[]
+  ) {
     super();
   }
 
@@ -180,8 +192,16 @@ export class RequestSignBitcoinPsbtsMsg extends Message<string[]> {
     if (!this.chainId) {
       throw new Error("chainId is not set");
     }
-    if (!this.psbts || this.psbts.length === 0) {
-      throw new Error("psbts are not set or empty");
+    if (!this.psbtsHexes || this.psbtsHexes.length === 0) {
+      throw new Error("psbtsHexes are not set or empty");
+    }
+
+    for (const psbtHex of this.psbtsHexes) {
+      try {
+        Psbt.fromHex(psbtHex);
+      } catch (e) {
+        throw new Error("Invalid psbtHex");
+      }
     }
   }
 
