@@ -8907,6 +8907,33 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@keplr-wallet/hooks-bitcoin@workspace:packages/hooks-bitcoin":
+  version: 0.0.0-use.local
+  resolution: "@keplr-wallet/hooks-bitcoin@workspace:packages/hooks-bitcoin"
+  dependencies:
+    "@ethersproject/address": ^5.7.0
+    "@ethersproject/providers": ^5.7.0
+    "@keplr-wallet/background": 0.12.190
+    "@keplr-wallet/common": 0.12.190
+    "@keplr-wallet/cosmos": 0.12.190
+    "@keplr-wallet/crypto": 0.12.190
+    "@keplr-wallet/proto-types": 0.12.190
+    "@keplr-wallet/simple-fetch": 0.12.190
+    "@keplr-wallet/stores": 0.12.190
+    "@keplr-wallet/stores-bitcoin": 0.12.190
+    "@keplr-wallet/types": 0.12.190
+    "@keplr-wallet/unit": 0.12.190
+    buffer: ^6.0.3
+    long: ^4.0.0
+    utility-types: ^3.10.0
+  peerDependencies:
+    bitcoinjs-lib: ^6
+    mobx: ^6
+    mobx-utils: ^6
+    react: ^16.8.0 || ^17 || ^18
+  languageName: unknown
+  linkType: soft
+
 "@keplr-wallet/hooks-internal@0.12.190, @keplr-wallet/hooks-internal@workspace:apps/hooks-internal":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/hooks-internal@workspace:apps/hooks-internal"

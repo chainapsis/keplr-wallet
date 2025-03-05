@@ -6,7 +6,6 @@ import { BackButton } from "../../../layouts/header/components";
 import { Stack } from "../../../components/stack";
 
 import { useSearchParams } from "react-router-dom";
-
 import { useStore } from "../../../stores";
 import { useNavigate } from "react-router";
 import { TokenItem } from "../../main/components";
@@ -14,11 +13,12 @@ import { Subtitle3 } from "../../../components/typography";
 import { Box } from "../../../components/box";
 import { YAxis } from "../../../components/axis";
 import { Gutter } from "../../../components/gutter";
-import { useNotification } from "../../../hooks/notification";
+// import { useNotification } from "../../../hooks/notification";
 // import { ExtensionKVStore } from "@keplr-wallet/common";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { ColorPalette } from "../../../styles";
 import { openPopupWindow } from "@keplr-wallet/popup";
+// import { useSendTxConfig } from "@keplr-wallet/hooks-bitcoin";
 import { FormattedMessage, useIntl } from "react-intl";
 import { isRunningInSidePanel } from "../../../utils";
 // import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
@@ -34,7 +34,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
     analyticsStore,
     accountStore,
     chainStore,
-    bitcoinAccountStore,
+    // bitcoinAccountStore,
     bitcoinQueriesStore,
   } = useStore();
   const addressRef = useRef<HTMLInputElement | null>(null);
@@ -43,9 +43,12 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
   const navigate = useNavigate();
   const intl = useIntl();
 
-  const notification = useNotification();
+  //   const notification = useNotification();
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [
+    isLoading,
+    // setIsLoading
+  ] = useState(false);
 
   const initialChainId = searchParams.get("chainId");
   const initialCoinMinimalDenom = searchParams.get("coinMinimalDenom");
@@ -109,7 +112,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
   }, [navigate, initialChainId, initialCoinMinimalDenom]);
 
   const account = accountStore.getAccount(chainId);
-  const bitcoinAccount = bitcoinAccountStore.getAccount(chainId);
+  //   const bitcoinAccount = bitcoinAccountStore.getAccount(chainId);
   const bitcoinQueries = bitcoinQueriesStore.get(chainId);
 
   const sender = account.bitcoinAddress?.bech32Address ?? "";
@@ -120,14 +123,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
     currency.coinMinimalDenom
   );
 
-  //   const sendConfigs = useSendTxConfig(
-  //     chainStore,
-  //     starknetQueriesStore,
-  //     chainId,
-  //     sender,
-  //     // TODO: 이 값을 어케 처리할지 다시 생각...
-  //     300000
-  //   );
+  //   const sendConfigs = useSendTxConfig();
   //   sendConfigs.amountConfig.setCurrency(currency);
 
   //   const gasSimulatorKey = useMemo(() => {
