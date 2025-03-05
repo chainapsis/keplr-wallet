@@ -3,19 +3,19 @@ import { CoinPretty } from "@keplr-wallet/unit";
 export interface SelectUTXOsParams {
   utxos: UTXO[];
   recipients: UTXOSelectionRecipient[];
-  changeAddress: string;
   feeRate: number;
   inscriptionUtxos?: Pick<UTXO, "txid" | "vout">[];
   runesUtxos?: Pick<UTXO, "txid" | "vout">[];
   dustRelayFeeRate?: number;
-  noChange?: boolean;
+  changeAddress?: string;
 }
 
 export interface UTXOSelection {
   selectedUtxos: UTXO[];
   recipients: UTXOSelectionRecipient[];
   fee: CoinPretty;
-  txSize: number;
+  vsize: number;
+  hasChange: boolean;
 }
 
 export interface UTXO {
