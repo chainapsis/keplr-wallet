@@ -230,11 +230,12 @@
   "page.setting.general.show-24h-price-changes-paragraph": "Enable or disable the display of 24H token price change",
   "page.setting.general.manage-non-native-chains-title": "Add/Remove Non-Native Chains",
   "page.setting.general.manage-non-native-chains-paragraph": "Non-native chains should be first added to Keplr to manage their visibility.",
-  "page.setting.general.manage-chain-visibility-title": "Manage Chain Visibility",
+  "page.setting.general.manage-chain-visibility-title": "Add/Remove Chains",
   "page.setting.general.manage-chain-visibility-paragraph": "Select chains (and their assets) to be displayed on your current account",
 
   "page.setting.general.manage-asset-list-title": "Manage Asset List",
   "page.setting.general.manage-asset-list.search.placeholder": " ",
+  "page.setting.general.manage-asset-list.sort-button": "Balance",
 
   "page.setting.general.language.automatic-title": "Automatic (Browser default)",
 
@@ -563,6 +564,8 @@
   "page.main.available.empty-view-paragraph": "Gear up yourself by topping up your wallet!",
   "page.main.available.get-started-button": "Get Started",
   "page.main.available.new-token-found": "{numFoundToken} new token(s) found",
+  "page.main.available.manage-asset-list-button": "Manage Asset List",
+
   "page.main.staked.staked-balance-title": "Staked Balance",
   "page.main.staked.staked-balance-tooltip": "Tokens that are staked to validators and earning rewards.",
   "page.main.staked.unstaking-balance-title": "Unstaking Balance",
@@ -622,8 +625,9 @@
   "page.main.components.looking-for-chains.not-enabled": "Not Enabled",
   "page.main.components.looking-for-chains.enable-button": "Enable",
   "page.main.components.token-found-modal.title": "{numFoundToken} New Token(s) Found",
+  "page.main.components.token-found-modal.description": "Tokens from chains not enabled in your Keplr Wallet have been detected. To add or remove the tokens later, visit Manage Asset List.",
   "page.main.components.token-found-modal.add-token-on-injective-and-evmos": "Add tokens on Injective and Evmos",
-  "page.main.components.token-found-modal.add-chains": "Add Chains",
+  "page.main.components.token-found-modal.add-chains": "Enable Chains",
   "page.main.components.token-item.copy-address.copied": "Copied",
 
   "page.main.layouts.header.new-chain.title": "✨ {chains} Now Integrated!",

@@ -84,3 +84,35 @@ export class DisableViewAssetTokenMsg extends Message<
     return DisableViewAssetTokenMsg.type();
   }
 }
+
+export class EnableViewAssetTokenMsg extends Message<
+  Record<string, Record<string, string[]>>
+> {
+  public static type(): string {
+    return "enable-view-asset-token";
+  }
+
+  constructor(
+    public readonly vaultId: string,
+    public readonly token: ViewAssetToken
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.vaultId) {
+      throw new Error("Empty vault id");
+    }
+    if (!this.token) {
+      throw new Error("Empty token");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return EnableViewAssetTokenMsg.type();
+  }
+}

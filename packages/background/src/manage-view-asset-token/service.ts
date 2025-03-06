@@ -193,6 +193,41 @@ export class ManageViewAssetTokenService {
     return res;
   }
 
+  @action
+  enableViewAssetToken(
+    vaultId: string,
+    token: ViewAssetToken
+  ): Record<string, Record<string, string[]>> {
+    if (!this.checkIsValidVaultId(vaultId)) {
+      throw new Error("Invalid vault id");
+    }
+
+    const previousMap: Map<string, Set<string>> | undefined =
+      this.disabledViewAssetTokenMap.get(vaultId);
+
+    if (!previousMap) {
+      const newMap = new Map<string, Set<string>>();
+      this.disabledViewAssetTokenMap.set(vaultId, newMap);
+      return this.convertFromNestedObservableToJs(
+        this.disabledViewAssetTokenMap
+      );
+    }
+
+    const chainIdentifier: string = ChainIdHelper.parse(
+      token.chainId
+    ).identifier;
+    const coinSet: Set<string> | undefined = previousMap.get(chainIdentifier);
+    if (!coinSet) {
+      return this.convertFromNestedObservableToJs(
+        this.disabledViewAssetTokenMap
+      );
+    }
+    coinSet.delete(token.coinMinimalDenom);
+
+    this.disabledViewAssetTokenMap.set(vaultId, previousMap);
+    return this.convertFromNestedObservableToJs(this.disabledViewAssetTokenMap);
+  }
+
   protected convertFromNestedObservableToJs(
     data: Map<string, Map<string, Set<string>>>
   ): Record<string, Record<string, string[]>> {

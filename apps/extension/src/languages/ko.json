@@ -228,13 +228,12 @@
   "page.setting.general.side-panel-paragraph": "케플러 지갑을 브라우저의 사이드 패널에서 사용할 수 있습니다.",
   "page.setting.general.show-24h-price-changes-title": "24시간 가격변동률 표시",
   "page.setting.general.show-24h-price-changes-paragraph": "각 토큰의 24시간 가격변동률을 표시하는 기능입니다.",
-  "page.setting.general.manage-non-native-chains-title": "선택형 체인 추가 및 삭제",
-  "page.setting.general.manage-non-native-chains-paragraph": "선택형 체인들은 먼저 케플러 익스텐션에 추가해야 \"체인 표시\" 기능에서 사용할 수 있습니다.",
-  "page.setting.general.manage-chain-visibility-title": "체인 표시",
+  "page.setting.general.manage-chain-visibility-title": "체인 추가/제거",
   "page.setting.general.manage-chain-visibility-paragraph": "현재 계정에 표시될 체인(해당 체인의 자산 포함)을 선택해주세요.",
 
   "page.setting.general.manage-asset-list-title": "자산 표시 관리",
   "page.setting.general.manage-asset-list.search.placeholder": " ",
+  "page.setting.general.manage-asset-list.sort-button": "자산 가격",
 
   "page.setting.general.language.automatic-title": "자동 (브라우저 언어)",
 
@@ -546,6 +545,7 @@
   "page.main.available.empty-view-paragraph": "지갑에 자산을 채워 탐험을 시작해보세요!",
   "page.main.available.get-started-button": "시작하기",
   "page.main.available.new-token-found": "{numFoundToken}개의 새로운 토큰 발견",
+  "page.main.available.manage-asset-list-button": "자산 표시 관리",
   "page.main.staked.staked-balance-title": "스테이킹된 자산",
   "page.main.staked.staked-balance-tooltip": "밸리데이터에게 위임되어 리워드를 받고 있는 토큰들입니다.",
   "page.main.staked.unstaking-balance-title": "언스테이킹 중인 자산",
@@ -605,8 +605,9 @@
   "page.main.components.looking-for-chains.not-enabled": "활성화되지 않음",
   "page.main.components.looking-for-chains.enable-button": "활성화",
   "page.main.components.token-found-modal.title": "{numFoundToken} 개의 새로운 토큰 발견",
+  "page.main.components.token-found-modal.description": "케플러 지갑에 활성화되지 않은 체인의 토큰이 발견되었습니다. 나중에 토큰을 추가하거나 제거하려면 \"자산 표시 관리\"를 방문하세요.",
   "page.main.components.token-found-modal.add-token-on-injective-and-evmos": "인젝티브와 이브모스의 토큰 추가하기",
-  "page.main.components.token-found-modal.add-chains": "체인 추가",
+  "page.main.components.token-found-modal.add-chains": "체인 활성화",
   "page.main.components.token-item.copy-address.copied": "복사됨",
 
   "page.main.layouts.header.new-chain.title": "{chains} 체인이 추가되었습니다!",

@@ -5,7 +5,6 @@ import {
   Body3,
   Button2,
   Subtitle1,
-  Subtitle2,
   Subtitle3,
 } from "../../../../components/typography";
 import { ColorPalette } from "../../../../styles";
@@ -17,7 +16,12 @@ import {
 } from "../../../../components/image";
 import { Stack } from "../../../../components/stack";
 import { Checkbox } from "../../../../components/checkbox";
-import { ArrowDownIcon, ArrowUpIcon } from "../../../../components/icon";
+import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  InformationPlainIcon,
+  NativeChainMarkIcon,
+} from "../../../../components/icon";
 import styled, { useTheme } from "styled-components";
 import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse";
 import { observer } from "mobx-react-lite";
@@ -29,6 +33,7 @@ import { Gutter } from "../../../../components/gutter";
 import { FormattedMessage, useIntl } from "react-intl";
 import SimpleBar from "simplebar-react";
 import { XAxis, YAxis } from "../../../../components/axis";
+import { EmbedChainInfos } from "../../../../config";
 
 export const TokenFoundModal: FunctionComponent<{
   close: () => void;
@@ -155,16 +160,34 @@ export const TokenFoundModal: FunctionComponent<{
       }
     >
       <Box paddingTop="1.25rem" paddingBottom="0.75rem">
-        <Subtitle1 style={{ textAlign: "center" }}>
-          <FormattedMessage
-            id="page.main.components.token-found-modal.title"
-            values={{
-              numFoundToken,
-            }}
-          />
-        </Subtitle1>
+        <XAxis alignY="center">
+          <div style={{ flex: 1 }} />
+          <InformationPlainIcon width={16} height={16} />
+          <Gutter size="0.5rem" />
+          <Subtitle1 style={{ textAlign: "center" }}>
+            <FormattedMessage
+              id="page.main.components.token-found-modal.title"
+              values={{
+                numFoundToken,
+              }}
+            />
+          </Subtitle1>
+          <div style={{ flex: 1 }} />
+        </XAxis>
       </Box>
-
+      <Box paddingBottom="1.5rem" paddingX="1rem">
+        <Body2
+          style={{
+            textAlign: "center",
+            color:
+              theme.mode === "light"
+                ? ColorPalette["gray-300"]
+                : ColorPalette["gray-200"],
+          }}
+        >
+          <FormattedMessage id="page.main.components.token-found-modal.description" />
+        </Body2>
+      </Box>
       <SimpleBar
         style={{
           display: "flex",
@@ -182,6 +205,9 @@ export const TokenFoundModal: FunctionComponent<{
                 tokenScan={tokenScan}
                 checked={checkedChainIdentifiers.includes(
                   ChainIdHelper.parse(tokenScan.chainId).identifier
+                )}
+                isNativeChain={EmbedChainInfos.some(
+                  (chain) => chain.chainId === tokenScan.chainId
                 )}
                 onCheckbox={(checked) => {
                   if (checked) {
@@ -293,9 +319,9 @@ export const TokenFoundModal: FunctionComponent<{
 const FoundChainView: FunctionComponent<{
   checked: boolean;
   onCheckbox: (checked: boolean) => void;
-
+  isNativeChain?: boolean;
   tokenScan: TokenScan;
-}> = observer(({ checked, onCheckbox, tokenScan }) => {
+}> = observer(({ checked, onCheckbox, isNativeChain, tokenScan }) => {
   const { chainStore } = useStore();
   const theme = useTheme();
 
@@ -318,16 +344,17 @@ const FoundChainView: FunctionComponent<{
 
   return (
     <Box
-      padding="0.875rem"
+      paddingY="0.875rem"
+      paddingX="1rem"
       backgroundColor={
         theme.mode === "light"
           ? ColorPalette["gray-10"]
-          : ColorPalette["gray-500"]
+          : ColorPalette["gray-650"]
       }
       borderRadius="0.375rem"
     >
       <Columns sum={1} gutter="0.5rem" alignY="center">
-        <Box width="2.25rem" height="2.25rem">
+        <Box width="2.25rem" height="2.25rem" position="relative">
           <ChainImageFallback
             chainInfo={
               chainStore.hasChain(tokenScan.chainId)
@@ -337,23 +364,28 @@ const FoundChainView: FunctionComponent<{
             size="2rem"
             alt="Token Found Modal Chain Image"
           />
+          {isNativeChain && (
+            <Box
+              position="absolute"
+              style={{
+                bottom: "0.125rem",
+                right: "0rem",
+              }}
+            >
+              <NativeChainMarkIcon width="1rem" height="1rem" />
+            </Box>
+          )}
         </Box>
 
         <Stack gutter="0.25rem">
-          <Subtitle2
-            color={
-              theme.mode === "light"
-                ? ColorPalette["gray-500"]
-                : ColorPalette["gray-10"]
-            }
-          >
+          <Subtitle3>
             {
               (chainStore.hasChain(tokenScan.chainId)
                 ? chainStore.getChain(tokenScan.chainId)
                 : chainStore.getModularChain(tokenScan.chainId)
               ).chainName
             }
-          </Subtitle2>
+          </Subtitle3>
           <Body3 color={ColorPalette["gray-300"]}>{numTokens} Tokens</Body3>
         </Stack>
 
@@ -371,12 +403,12 @@ const FoundChainView: FunctionComponent<{
           backgroundColor={
             theme.mode === "light"
               ? ColorPalette["gray-100"]
-              : ColorPalette["gray-400"]
+              : ColorPalette["gray-700"]
           }
           borderRadius="0.375rem"
           paddingY="0.75rem"
           paddingX="1rem"
-          marginTop="0.75rem"
+          marginTop="0.625rem"
         >
           <Stack gutter="0.5rem">
             {tokenScan.infos.length > 0 &&
@@ -468,8 +500,8 @@ const FoundTokenView: FunctionComponent<{
       <Subtitle3
         color={
           theme.mode === "light"
-            ? ColorPalette["gray-400"]
-            : ColorPalette["gray-50"]
+            ? ColorPalette["gray-300"]
+            : ColorPalette["gray-200"]
         }
       >
         {(() => {

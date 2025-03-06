@@ -3,6 +3,7 @@ import {
   DisableViewAssetTokenMsg,
   GetAllDisabledViewAssetTokenMsg,
   GetDisabledViewAssetTokenListMsg,
+  EnableViewAssetTokenMsg,
 } from "./messages";
 import {
   Env,
@@ -32,6 +33,11 @@ export const getHandler: (service: ManageViewAssetTokenService) => Handler = (
           env,
           msg as DisableViewAssetTokenMsg
         );
+      case EnableViewAssetTokenMsg:
+        return handleEnableViewAssetTokenMsg(service)(
+          env,
+          msg as EnableViewAssetTokenMsg
+        );
       default:
         throw new KeplrError("manage-asset", 110, "Unknown msg type");
     }
@@ -59,5 +65,13 @@ const handleGetAllDisabledViewAssetTokenMsg: (
 ) => InternalHandler<GetAllDisabledViewAssetTokenMsg> = (service) => {
   return () => {
     return service.getAllDisabledViewAssetTokenList();
+  };
+};
+
+const handleEnableViewAssetTokenMsg: (
+  service: ManageViewAssetTokenService
+) => InternalHandler<EnableViewAssetTokenMsg> = (service) => {
+  return (_, msg) => {
+    return service.enableViewAssetToken(msg.vaultId, msg.token);
   };
 };
