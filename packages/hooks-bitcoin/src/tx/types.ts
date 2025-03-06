@@ -1,3 +1,6 @@
+import { AppCurrency } from "@keplr-wallet/types";
+import { CoinPretty } from "@keplr-wallet/unit";
+
 export interface ITxChainSetter {
   chainId: string;
   setChain(chainId: string): void;
@@ -36,6 +39,23 @@ export interface IRecipientConfig extends ITxChainSetter {
   setValue(value: string): void;
 
   recipient: string;
+
+  uiProperties: UIProperties;
+}
+
+export interface IAmountConfig extends ITxChainSetter {
+  amount: CoinPretty[];
+
+  value: string;
+  setValue(value: string): void;
+
+  currency: AppCurrency;
+  setCurrency(currency: AppCurrency | undefined): void;
+  canUseCurrency(currency: AppCurrency): boolean;
+
+  // Zero means unset.
+  fraction: number;
+  setFraction(fraction: number): void;
 
   uiProperties: UIProperties;
 }
