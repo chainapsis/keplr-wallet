@@ -1944,9 +1944,13 @@ const ChainItem: FunctionComponent<{
                       return chainInfo.chainName;
                     })()}
                   </Subtitle2>
-                  <Gutter size="0.375rem" />
 
-                  {showTagText && <Tag text={showTagText} />}
+                  {showTagText && (
+                    <React.Fragment>
+                      <Gutter size="0.375rem" />
+                      <Tag text={showTagText} />
+                    </React.Fragment>
+                  )}
                 </XAxis>
                 {tokens && tokens.length > 1 && (
                   <React.Fragment>
@@ -2126,7 +2130,7 @@ const TokenItem: FunctionComponent<{
       <CurrencyImageFallback
         chainInfo={viewToken.chainInfo}
         currency={viewToken.token.currency}
-        size="1.75rem"
+        size="1.5rem"
       />
       <Gutter size="0.5rem" />
       <Subtitle3
