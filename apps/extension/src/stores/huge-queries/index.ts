@@ -309,7 +309,6 @@ export class HugeQueriesStore {
     return this.allTokenMapByChainIdentifierState.map;
   }
 
-  //Select chain에서만 사용될 거 라고 가정해서 만들어서
   @action
   protected getAllTokenMapByChainIdentifier() {
     const tokensByChainId = new Map<string, ViewToken[]>();
