@@ -96,7 +96,8 @@ jobs:
     - run: docker run -v $(pwd):/data builder
       working-directory: ../temp
     - run: sudo apt-get update
-    - run: sudo apt-get install gh awscli
+    - run: sudo apt-get install gh
+    - run: sudo snap install aws-cli --classic
     - run: mkdir release && cd release && gh release download $GITHUB_REF_NAME --pattern '*.firefox.zip' --repo https://github.com/chainapsis/keplr-wallet
       working-directory: ../temp
       env:
