@@ -1519,9 +1519,7 @@ export const EnableChainsScene: FunctionComponent<{
                       enables.includes("starknet:SN_MAIN") &&
                       keyType !== "ledger"
                     ) {
-                      uiConfigStore.needToShowGuideModalConfig.setNeedToShowStarknetGuideModal(
-                        true
-                      );
+                      uiConfigStore.needToShowGuideModalConfig.enableNeedToShowStarknetGuideModal();
                     }
                   }
                 })(),
@@ -1533,9 +1531,7 @@ export const EnableChainsScene: FunctionComponent<{
                     );
 
                     if (disables.includes("starknet:SN_MAIN")) {
-                      uiConfigStore.needToShowGuideModalConfig.setNeedToShowStarknetGuideModal(
-                        false
-                      );
+                      uiConfigStore.needToShowGuideModalConfig.removeNeedToShowStarknetGuideModal();
                     }
                   }
                 })(),
@@ -1578,9 +1574,7 @@ export const EnableChainsScene: FunctionComponent<{
                           keyInfo.id
                         );
 
-                        uiConfigStore.needToShowGuideModalConfig.setNeedToShowStarknetGuideModal(
-                          true
-                        );
+                        uiConfigStore.needToShowGuideModalConfig.enableNeedToShowStarknetGuideModal();
 
                         replaceToWelcomePage();
                       } else {

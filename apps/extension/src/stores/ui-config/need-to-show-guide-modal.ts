@@ -37,11 +37,34 @@ export class NeedToShowGuideModalConfig {
     });
   }
 
-  setNeedToShowStarknetGuideModal(value: boolean) {
+  get needToShowStarknetGuideModal() {
+    return this.vaultToConfigMap.get(
+      this.keyRingStore.selectedKeyInfo?.id ?? ""
+    );
+  }
+
+  enableNeedToShowStarknetGuideModal() {
+    const prev = this.vaultToConfigMap.get(
+      this.keyRingStore.selectedKeyInfo?.id ?? ""
+    );
+
+    if (prev === undefined) {
+      this.vaultToConfigMap.set(
+        this.keyRingStore.selectedKeyInfo?.id ?? "",
+        true
+      );
+    }
+  }
+
+  disableNeedToShowStarknetGuideModal() {
     this.vaultToConfigMap.set(
       this.keyRingStore.selectedKeyInfo?.id ?? "",
-      value
+      false
     );
+  }
+
+  removeNeedToShowStarknetGuideModal() {
+    this.vaultToConfigMap.delete(this.keyRingStore.selectedKeyInfo?.id ?? "");
   }
 
   get isNeedToShowStarknetGuideModal(): boolean {
@@ -51,3 +74,7 @@ export class NeedToShowGuideModalConfig {
     );
   }
 }
+
+//해제하고 이후 다시 설정하면 이게 적용이 되야함.
+//그런데 enable 할때 마다 그러면 안됨 흠
+// 그러면 없으면 false

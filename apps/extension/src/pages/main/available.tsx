@@ -559,9 +559,7 @@ export const AvailableTabView: FunctionComponent<{
               .isNeedToShowStarknetGuideModal
           }
           close={() => {
-            uiConfigStore.needToShowGuideModalConfig.setNeedToShowStarknetGuideModal(
-              false
-            );
+            uiConfigStore.needToShowGuideModalConfig.disableNeedToShowStarknetGuideModal();
           }}
           align="bottom"
         >
@@ -604,9 +602,7 @@ export const AvailableTabView: FunctionComponent<{
               })}
               size="large"
               onClick={() => {
-                uiConfigStore.needToShowGuideModalConfig.setNeedToShowStarknetGuideModal(
-                  false
-                );
+                uiConfigStore.needToShowGuideModalConfig.disableNeedToShowStarknetGuideModal();
               }}
             />
           </Box>
