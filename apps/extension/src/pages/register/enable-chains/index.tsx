@@ -56,6 +56,7 @@ import { DenomHelper } from "@keplr-wallet/common";
 import { Tooltip } from "../../../components/tooltip";
 import { useSpring, animated } from "@react-spring/web";
 import { useGetAllChain } from "../../../hooks/use-get-all-chain";
+import { hexToRgba } from "../../../utils";
 
 /**
  * EnableChainsScene은 finalize-key scene에서 선택한 chains를 활성화하는 scene이다.
@@ -1726,12 +1727,6 @@ const NativeChainSection: FunctionComponent<{
   const theme = useTheme();
   const { chainStore } = useStore();
 
-  const imageTransition = useSpring({
-    opacity: 1,
-    transform: isCollapsed ? "scale(0.8)" : "scale(1)",
-    config: { tension: 280, friction: 20 },
-  });
-
   return (
     <React.Fragment>
       {showTitleBox && (
@@ -1758,28 +1753,26 @@ const NativeChainSection: FunctionComponent<{
           onClick={onClick}
         >
           <Columns sum={1} alignY="center">
-            <animated.div style={imageTransition}>
-              {isCollapsed ? (
-                <NativeChainMarkIcon width="1.75rem" height="1.75rem" />
-              ) : (
-                <Box position="relative">
-                  <ChainImageFallback
-                    chainInfo={chainStore.getChain("cosmoshub-4")}
-                    size="3rem"
-                  />
+            {isCollapsed ? (
+              <NativeChainMarkIcon width="1.75rem" height="1.75rem" />
+            ) : (
+              <Box position="relative">
+                <ChainImageFallback
+                  chainInfo={chainStore.getChain("cosmoshub-4")}
+                  size="3rem"
+                />
 
-                  <Box
-                    position="absolute"
-                    style={{
-                      bottom: "-0.125rem",
-                      right: "-0.125rem",
-                    }}
-                  >
-                    <NativeChainMarkIcon width="1.25rem" height="1.25rem" />
-                  </Box>
+                <Box
+                  position="absolute"
+                  style={{
+                    bottom: "-0.125rem",
+                    right: "-0.125rem",
+                  }}
+                >
+                  <NativeChainMarkIcon width="1.25rem" height="1.25rem" />
                 </Box>
-              )}
-            </animated.div>
+              </Box>
+            )}
             <Gutter size="0.5rem" />
             <YAxis>
               <XAxis alignY="center">
@@ -1810,7 +1803,7 @@ const NativeChainSection: FunctionComponent<{
                 padding="0.25rem"
                 hoverColor={
                   theme.mode === "light"
-                    ? ColorPalette["gray-100"]
+                    ? hexToRgba(ColorPalette["gray-100"], 0.5)
                     : ColorPalette["gray-500"]
                 }
               >
@@ -1966,7 +1959,7 @@ const ChainItem: FunctionComponent<{
                       }}
                       hoverColor={
                         theme.mode === "light"
-                          ? ColorPalette["gray-100"]
+                          ? hexToRgba(ColorPalette["gray-100"], 0.5)
                           : ColorPalette["gray-500"]
                       }
                       padding="0.25rem"
@@ -1979,7 +1972,6 @@ const ChainItem: FunctionComponent<{
                         }}
                       >
                         <LocalArrowDownIcon
-                          strokeWidth="1.5"
                           width="1rem"
                           height="1rem"
                           color={
@@ -2067,7 +2059,7 @@ const TokenView: FunctionComponent<{
       borderRadius="0.375rem"
       backgroundColor={
         theme.mode === "light"
-          ? ColorPalette["gray-100"]
+          ? hexToRgba(ColorPalette["gray-100"], 0.5)
           : ColorPalette["gray-500"]
       }
     >
@@ -2263,12 +2255,10 @@ const LocalArrowDownIcon = ({
   width = "1rem",
   height = "1rem",
   color,
-  strokeWidth = "2",
 }: {
   width?: string;
   height?: string;
   color?: string;
-  strokeWidth?: string;
 }) => {
   return (
     <svg
@@ -2281,7 +2271,7 @@ const LocalArrowDownIcon = ({
       <path
         d="M13 6L8 11L3 6"
         stroke={color || "currentColor"}
-        strokeWidth={strokeWidth}
+        strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
