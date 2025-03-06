@@ -1,4 +1,10 @@
-import React, { FunctionComponent, useEffect, useRef, useState } from "react";
+import React, {
+  FunctionComponent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { observer, useLocalObservable } from "mobx-react-lite";
 import { HeaderLayout } from "../../../layouts/header";
 import { BackButton } from "../../../layouts/header/components";
@@ -14,16 +20,27 @@ import { Box } from "../../../components/box";
 import { YAxis } from "../../../components/axis";
 import { Gutter } from "../../../components/gutter";
 // import { useNotification } from "../../../hooks/notification";
-// import { ExtensionKVStore } from "@keplr-wallet/common";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { ColorPalette } from "../../../styles";
 import { openPopupWindow } from "@keplr-wallet/popup";
-import { useSendTxConfig } from "@keplr-wallet/hooks-bitcoin";
+import {
+  usePsbtSimulator,
+  useSendTxConfig,
+  useTxConfigsValidate,
+  EmptyAddressError,
+  EmptyAmountError,
+  ZeroAmountError,
+} from "@keplr-wallet/hooks-bitcoin";
 import { FormattedMessage, useIntl } from "react-intl";
 import { isRunningInSidePanel } from "../../../utils";
+import { useBitcoinTxConfigsQueryString } from "../../../hooks/bitcoin/use-tx-configs-query-string";
 import { RecipientInput } from "../components/input/recipient-input";
 import { AmountInput } from "../components/input/amount-input";
 import styled from "styled-components";
+import { ExtensionKVStore } from "@keplr-wallet/common";
+import { Psbt } from "bitcoinjs-lib";
+import { toXOnly } from "@keplr-wallet/crypto";
+import { FeeControl } from "../components/input/fee-control";
 // import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 // import { BACKGROUND_PORT } from "@keplr-wallet/router";
 // import {
@@ -43,7 +60,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
     analyticsStore,
     accountStore,
     chainStore,
-    // bitcoinAccountStore,
+    bitcoinAccountStore,
     bitcoinQueriesStore,
   } = useStore();
   const addressRef = useRef<HTMLInputElement | null>(null);
@@ -54,10 +71,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
 
   //   const notification = useNotification();
 
-  const [
-    isLoading,
-    // setIsLoading
-  ] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const initialChainId = searchParams.get("chainId");
   const initialCoinMinimalDenom = searchParams.get("coinMinimalDenom");
@@ -121,7 +135,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
   }, [navigate, initialChainId, initialCoinMinimalDenom]);
 
   const account = accountStore.getAccount(chainId);
-  //   const bitcoinAccount = bitcoinAccountStore.getAccount(chainId);
+  const bitcoinAccount = bitcoinAccountStore.getAccount(chainId);
   const bitcoinQueries = bitcoinQueriesStore.get(chainId);
 
   const sender = account.bitcoinAddress?.bech32Address ?? "";
@@ -131,37 +145,39 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
     sender,
     currency.coinMinimalDenom
   );
+  const initialFeeRate =
+    bitcoinQueries.queryBitcoinFeeEstimates.fees.halfHourFee;
 
   const sendConfigs = useSendTxConfig(
     chainStore,
     bitcoinQueriesStore,
     chainId,
     sender,
-    10
+    initialFeeRate
   );
   sendConfigs.amountConfig.setCurrency(currency);
 
-  //   const gasSimulatorKey = useMemo(() => {
-  //     const res = (() => {
-  //       if (sendConfigs.amountConfig.currency) {
-  //         const amountHexDigits = BigInt(
-  //           sendConfigs.amountConfig.amount[0].toCoin().amount
-  //         ).toString(16).length;
-  //         return amountHexDigits.toString();
-  //       }
+  const psbtSimulatorKey = useMemo(() => {
+    const res = (() => {
+      if (sendConfigs.amountConfig.currency) {
+        const amountHexDigits = BigInt(
+          sendConfigs.amountConfig.amount[0].toCoin().amount
+        ).toString(16).length;
+        return amountHexDigits.toString();
+      }
 
-  //       return "0";
-  //     })();
+      return "0";
+    })();
 
-  //     // fee config의 type마다 다시 시뮬레이션하기 위한 임시조치...
-  //     return res + sendConfigs.feeConfig.type;
-  //   }, [
-  //     sendConfigs.amountConfig.amount,
-  //     sendConfigs.amountConfig.currency,
-  //     sendConfigs.feeConfig.type,
-  //   ]);
+    return res + sendConfigs.feeRateConfig.feeRate.toString();
+  }, [
+    sendConfigs.amountConfig.amount,
+    sendConfigs.amountConfig.currency,
+    sendConfigs.feeRateConfig.feeRate,
+  ]);
 
-  const gasSimulationRefresher = useLocalObservable(() => ({
+  // CHECK: refresh는 불필요할 것으로 보임. btc는 수수료가 빠른 주기로 업데이트되지 않기 때문
+  const psbtSimulationRefresher = useLocalObservable(() => ({
     count: 0,
     increaseCount() {
       this.count++;
@@ -171,177 +187,134 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
   useEffect(() => {
     // Refresh gas simulation every 12 seconds.
     const interval = setInterval(
-      () => gasSimulationRefresher.increaseCount(),
+      () => psbtSimulationRefresher.increaseCount(),
       12000
     );
 
     return () => clearInterval(interval);
-  }, [gasSimulationRefresher]);
+  }, [psbtSimulationRefresher]);
 
-  //   const gasSimulator = useGasSimulator(
-  //     new ExtensionKVStore("gas-simulator.starknet.send"),
-  //     chainStore,
-  //     chainId,
-  //     sendConfigs.gasConfig,
-  //     sendConfigs.feeConfig,
-  //     gasSimulatorKey,
-  //     () => {
-  //       if (!sendConfigs.amountConfig.currency) {
-  //         throw new Error("Send currency not set");
-  //       }
+  const psbtSimulator = usePsbtSimulator(
+    new ExtensionKVStore("psbt-simulator.bitcoin.send"),
+    chainStore,
+    chainId,
+    sendConfigs.feeConfig,
+    psbtSimulatorKey,
+    () => {
+      if (!sendConfigs.amountConfig.currency) {
+        throw new Error("Send currency not set");
+      }
 
-  //       const currency = sendConfigs.amountConfig.amount[0].currency;
-  //       if (!("type" in currency) || currency.type !== "erc20") {
-  //         throw new Error(`Invalid currency: ${coinMinimalDenom}`);
-  //       }
+      // Prefer not to use the gas config or fee config,
+      // because gas simulator can change the gas config and fee config from the result of reaction,
+      // and it can make repeated reaction.
+      if (
+        sendConfigs.amountConfig.uiProperties.loadingState ===
+          "loading-block" ||
+        // If the error is not empty amount error or zero amount error or empty address error,
+        // simulate fee anyway to show initial fee.
+        (sendConfigs.amountConfig.uiProperties.error != null &&
+          !(
+            sendConfigs.amountConfig.uiProperties.error instanceof
+            EmptyAmountError
+          ) &&
+          !(
+            sendConfigs.amountConfig.uiProperties.error instanceof
+            ZeroAmountError
+          )) ||
+        sendConfigs.recipientConfig.uiProperties.loadingState ===
+          "loading-block" ||
+        (sendConfigs.recipientConfig.uiProperties.error != null &&
+          !(
+            sendConfigs.recipientConfig.uiProperties.error instanceof
+            EmptyAddressError
+          ))
+      ) {
+        throw new Error("Not ready to simulate psbt");
+      }
 
-  //       // Prefer not to use the gas config or fee config,
-  //       // because gas simulator can change the gas config and fee config from the result of reaction,
-  //       // and it can make repeated reaction.
-  //       if (
-  //         sendConfigs.amountConfig.uiProperties.loadingState ===
-  //           "loading-block" ||
-  //         // If the error is not empty amount error or zero amount error or empty address error,
-  //         // simulate fee anyway to show initial fee.
-  //         (sendConfigs.amountConfig.uiProperties.error != null &&
-  //           !(
-  //             sendConfigs.amountConfig.uiProperties.error instanceof
-  //             EmptyAmountError
-  //           ) &&
-  //           !(
-  //             sendConfigs.amountConfig.uiProperties.error instanceof
-  //             ZeroAmountError
-  //           )) ||
-  //         sendConfigs.recipientConfig.uiProperties.loadingState ===
-  //           "loading-block" ||
-  //         (sendConfigs.recipientConfig.uiProperties.error != null &&
-  //           !(
-  //             sendConfigs.recipientConfig.uiProperties.error instanceof
-  //             EmptyAddressError
-  //           ))
-  //       ) {
-  //         throw new Error("Not ready to simulate tx");
-  //       }
+      const queryUTXOs = bitcoinQueriesStore
+        .get(chainId)
+        .queryBitcoinUTXOs.getUTXOs(chainId, chainStore, sender);
 
-  //       // observed되어야 하므로 꼭 여기서 참조 해야함.
-  //       const type = sendConfigs.feeConfig.type;
-  //       const feeContractAddress =
-  //         type === "ETH"
-  //           ? starknet.ethContractAddress
-  //           : starknet.strkContractAddress;
-  //       const feeCurrency = chainStore
-  //         .getModularChainInfoImpl(chainId)
-  //         .getCurrencies("starknet")
-  //         .find((cur) => cur.coinMinimalDenom === `erc20:${feeContractAddress}`);
-  //       if (!feeCurrency) {
-  //         throw new Error("Can't find fee currency");
-  //       }
+      if (!queryUTXOs) {
+        throw new Error("Can't find utxos");
+      }
 
-  //       return {
-  //         simulate: async (): Promise<{
-  //           gasUsed: number;
-  //         }> => {
-  //           noop(gasSimulationRefresher.count);
+      const utxos = queryUTXOs.UTXOs;
+      if (!utxos) {
+        throw new Error("Can't find utxos");
+      }
 
-  //           const estimateResult =
-  //             await starknetAccount.estimateInvokeFeeForSendTokenTx(
-  //               {
-  //                 currency: currency,
-  //                 amount: sendConfigs.amountConfig.amount[0].toDec().toString(),
-  //                 sender: sendConfigs.senderConfig.sender,
-  //                 recipient: sendConfigs.recipientConfig.recipient,
-  //               },
-  //               type
-  //             );
+      const simulate = async (): Promise<{
+        psbt: Psbt;
+        txSize: {
+          txVBytes: number;
+          txBytes: number;
+          txWeight: number;
+        };
+        hasChange: boolean;
+      }> => {
+        noop(psbtSimulationRefresher.count);
 
-  //           const {
-  //             gas_consumed,
-  //             data_gas_consumed,
-  //             gas_price,
-  //             overall_fee,
-  //             resourceBounds,
-  //             unit,
-  //           } = estimateResult;
+        const senderAddress = sendConfigs.senderConfig.sender;
+        const publicKey = account.pubKey;
+        const xonlyPubKey = publicKey
+          ? toXOnly(Buffer.from(publicKey))
+          : undefined;
 
-  //           const gasMargin = new Dec(1.2);
-  //           const gasPriceMargin = new Dec(1.5);
+        const selection = bitcoinAccount.selectUTXOs({
+          senderAddress,
+          utxos,
+          recipients: [
+            {
+              address: sendConfigs.recipientConfig.recipient,
+              amount: parseInt(
+                sendConfigs.amountConfig.amount[0].toCoin().amount,
+                10
+              ), // TODO: 너무 큰 값은 여러 개의 입력으로 쪼개야함
+            },
+          ],
+          feeRate: sendConfigs.feeRateConfig.feeRate,
+        });
 
-  //           const isV1Tx = sendConfigs.feeConfig.type === "ETH" && unit === "WEI";
+        if (!selection) {
+          throw new Error("Can't find proper utxos selection");
+        }
 
-  //           const gasConsumed = new Dec(gas_consumed);
-  //           const dataGasConsumed = new Dec(data_gas_consumed);
-  //           const sigVerificationGasConsumed = new Dec(583);
-  //           const totalGasConsumed = gasConsumed
-  //             .add(dataGasConsumed)
-  //             .add(sigVerificationGasConsumed);
+        const { selectedUtxos, recipients, estimatedFee, txSize, hasChange } =
+          selection;
 
-  //           const gasPriceDec = new Dec(gas_price);
+        const psbtHex = bitcoinAccount.buildPsbt({
+          utxos: selectedUtxos,
+          senderAddress,
+          recipients,
+          estimatedFee,
+          xonlyPubKey,
+          hasChange,
+        });
 
-  //           // overall_fee = gas_consumed * gas_price + data_gas_consumed * data_gas_price
-  //           const overallFee = new Dec(overall_fee);
+        const psbt = Psbt.fromHex(psbtHex);
 
-  //           const signatureVerificationFee =
-  //             sigVerificationGasConsumed.mul(gasPriceDec);
+        return {
+          psbt,
+          txSize,
+          hasChange,
+        };
+      };
 
-  //           // adjusted_overall_fee = overall_fee + signature_verification_gas_consumed * gas_price
-  //           const adjustedOverallFee = overallFee.add(signatureVerificationFee);
+      return simulate;
+    }
+  );
 
-  //           // adjusted_gas_price = adjusted_overall_fee / total_gas_consumed
-  //           const adjustedGasPrice = adjustedOverallFee.quo(totalGasConsumed);
+  useBitcoinTxConfigsQueryString({
+    ...sendConfigs,
+  });
 
-  //           const gasPrice = new CoinPretty(feeCurrency, adjustedGasPrice);
-
-  //           if (isV1Tx) {
-  //             const maxGasPrice = gasPrice.mul(gasPriceMargin);
-  //             const maxGas = totalGasConsumed.mul(gasMargin);
-
-  //             sendConfigs.feeConfig.setGasPrice({
-  //               gasPrice,
-  //               maxGasPrice,
-  //             });
-
-  //             return {
-  //               gasUsed: parseInt(maxGas.truncate().toString()),
-  //             };
-  //           } else {
-  //             const l1Gas = resourceBounds.l1_gas;
-
-  //             const maxGas = adjustedOverallFee.quo(gasPriceDec).mul(gasMargin);
-  //             const maxGasPrice = gasPrice.mul(gasPriceMargin);
-
-  //             const maxPricePerUnit = new CoinPretty(
-  //               feeCurrency,
-  //               num.hexToDecimalString(l1Gas.max_price_per_unit)
-  //             );
-
-  //             sendConfigs.feeConfig.setGasPrice({
-  //               gasPrice: new CoinPretty(feeCurrency, gasPriceDec),
-  //               maxGasPrice: maxPricePerUnit
-  //                 .sub(maxGasPrice)
-  //                 .toDec()
-  //                 .gt(new Dec(0))
-  //                 ? maxPricePerUnit
-  //                 : maxGasPrice,
-  //             });
-
-  //             return {
-  //               gasUsed: parseInt(maxGas.truncate().toString()),
-  //             };
-  //           }
-  //         },
-  //       };
-  //     }
-  //   );
-
-  //   useStarknetTxConfigsQueryString({
-  //     ...sendConfigs,
-  //     gasSimulator,
-  //   });
-
-  //   const txConfigsValidate = useTxConfigsValidate({
-  //     ...sendConfigs,
-  //     gasSimulator,
-  //   });
+  const txConfigsValidate = useTxConfigsValidate({
+    ...sendConfigs,
+    psbtSimulator,
+  });
 
   const isDetachedMode = searchParams.get("detached") === "true";
 
@@ -375,9 +348,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
       }
       bottomButtons={[
         {
-          //   disabled:
-          //     starknetAccount.isDeployingAccount ||
-          //     (!isAccountNotDeployed && txConfigsValidate.interactionBlocked),
+          //   disabled: txConfigsValidate.interactionBlocked,
           text: intl.formatMessage({ id: "button.next" }),
           color: "primary",
           size: "large",
@@ -387,6 +358,23 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
       ]}
       onSubmit={async (e) => {
         e.preventDefault();
+
+        if (
+          txConfigsValidate.interactionBlocked ||
+          !sendConfigs.feeConfig.fee
+        ) {
+          return;
+        }
+
+        setIsLoading(true);
+
+        try {
+          // TODO: logic for send bitcoin tx
+        } catch (e) {
+          console.log(e);
+        } finally {
+          setIsLoading(false);
+        }
 
         // if (
         //   !txConfigsValidate.interactionBlocked &&
@@ -564,13 +552,13 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
 
           <Styles.Flex1 />
           <Gutter size="0" />
-          {/* 
+
           <FeeControl
             senderConfig={sendConfigs.senderConfig}
             feeConfig={sendConfigs.feeConfig}
-            gasConfig={sendConfigs.gasConfig}
-            gasSimulator={gasSimulator}
-          /> */}
+            feeRateConfig={sendConfigs.feeRateConfig}
+            psbtSimulator={psbtSimulator}
+          />
         </Stack>
       </Box>
     </HeaderLayout>
@@ -600,6 +588,6 @@ const DetachIcon: FunctionComponent<{
   );
 };
 
-// const noop = (..._args: any[]) => {
-//   // noop
-// };
+const noop = (..._args: any[]) => {
+  // noop
+};

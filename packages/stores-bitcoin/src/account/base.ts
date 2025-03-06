@@ -383,6 +383,8 @@ export class BitcoinAccountBase {
       }
     })();
 
+    console.log("paymentType and internalPubkey", paymentType, xonlyPubKey);
+
     // 6. Build PSBT
     try {
       const psbt = new Psbt({ network: networkParams });
@@ -396,16 +398,25 @@ export class BitcoinAccountBase {
 
       // 6.2. Add sender UTXOs as inputs
       for (const utxo of utxos) {
-        psbt.addInput({
-          hash: utxo.txid,
-          index: utxo.vout,
-          witnessUtxo: {
-            script: senderOutputScript,
-            value: utxo.value,
-          },
-          tapInternalKey:
-            paymentType === "taproot" ? internalPubkey : undefined,
-        });
+        if (paymentType === "taproot") {
+          psbt.addInput({
+            hash: utxo.txid,
+            index: utxo.vout,
+            witnessUtxo: {
+              script: senderOutputScript,
+              value: utxo.value,
+            },
+            tapInternalKey: internalPubkey,
+          });
+        }
+
+        if (paymentType === "native-segwit") {
+          psbt.addInput({
+            hash: utxo.txid,
+            index: utxo.vout,
+            witnessUtxo: { script: senderOutputScript, value: utxo.value },
+          });
+        }
       }
 
       // 6.3. Add all outputs (recipients + change if applicable)

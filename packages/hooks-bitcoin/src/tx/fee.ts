@@ -51,8 +51,10 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       return;
     }
 
-    const feeInt = new Dec(this.feeRateConfig.feeRate).truncate();
-    return new CoinPretty(this.currency, feeInt);
+    return new CoinPretty(
+      this.currency,
+      new Dec(this.feeRateConfig.feeRate * this._vsize).truncate()
+    );
   }
 
   get vsize(): number | undefined {

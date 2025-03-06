@@ -1,9 +1,4 @@
-import {
-  IFeeConfig,
-  IFeeRateConfig,
-  IPsbtSimulator,
-  UIProperties,
-} from "./types";
+import { IFeeConfig, IPsbtSimulator, UIProperties } from "./types";
 import {
   action,
   autorun,
@@ -19,13 +14,16 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { TxChainSetter } from "./chain";
 import { ChainGetter } from "@keplr-wallet/stores";
 import { isSimpleFetchError } from "@keplr-wallet/simple-fetch";
-import { RecipientConfig } from "./recipient";
-import { AmountConfig } from "./amount";
 import { Psbt } from "bitcoinjs-lib";
 
 // TODO: utxo를 사용하는 체인에서 공통으로 사용할 수 있는 tx 타입 정의
 type PsbtSimulate = () => Promise<{
   psbt: Psbt;
+  txSize: {
+    txVBytes: number;
+    txBytes: number;
+    txWeight: number;
+  };
   hasChange: boolean;
 }>;
 export type SimulatePsbtFn = () => PsbtSimulate;
@@ -40,6 +38,12 @@ class PsbtSimulatorState {
 
   @observable.ref
   protected _psbt: Psbt | null = null;
+  @observable.ref
+  protected _txSize: {
+    txVBytes: number;
+    txBytes: number;
+    txWeight: number;
+  } | null = null;
   @observable
   protected _psbtHasChange: boolean | null = null;
 
@@ -82,6 +86,15 @@ class PsbtSimulatorState {
 
   get psbt(): Psbt | null {
     return this._psbt;
+  }
+
+  @action
+  setTxSize(value: { txVBytes: number; txBytes: number; txWeight: number }) {
+    this._txSize = value;
+  }
+
+  get txSize(): { txVBytes: number; txBytes: number; txWeight: number } | null {
+    return this._txSize;
   }
 
   @action
@@ -129,9 +142,6 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
     protected kvStore: KVStore,
     chainGetter: ChainGetter,
     initialChainId: string,
-    protected readonly recipientConfig: RecipientConfig,
-    protected readonly amountConfig: AmountConfig,
-    protected readonly feeRateConfig: IFeeRateConfig,
     protected readonly feeConfig: IFeeConfig,
     protected readonly initialKey: string,
     // TODO: Add comment about the reason why simulatePsbtFn field is not observable.
@@ -223,6 +233,12 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
     return state.psbt;
   }
 
+  get txSize(): { txVBytes: number; txBytes: number; txWeight: number } | null {
+    const key = this.storeKey;
+    const state = this.getState(key);
+    return state.txSize;
+  }
+
   get hasChange(): boolean | null {
     const key = this.storeKey;
     const state = this.getState(key);
@@ -310,23 +326,17 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
         });
 
         promise
-          .then(({ psbt, hasChange }) => {
+          .then(({ psbt, txSize, hasChange }) => {
             // Changing the gas in the gas config definitely will make the reaction to the fee config,
             // and, this reaction can potentially create a reaction in the amount config as well (Ex, when the "Max" option set).
             // These potential reactions can create repeated meaningless reactions.
             // To avoid this potential problem, change the value when there is a meaningful change in the gas estimated.
-            const newVsize = psbt.extractTransaction().virtualSize();
 
-            if (state.psbt) {
-              const prevVsize = state.psbt.extractTransaction().virtualSize();
-              if (newVsize > prevVsize) {
-                // it doesn't need to refresh the psbt
-                return;
-              }
-            }
+            // 무한루프 일어남;
 
             state.setPsbt(psbt);
             state.setPsbtHasChange(hasChange);
+            state.setTxSize(txSize);
             state.setError(undefined);
 
             this.kvStore.set(key, psbt.toHex()).catch((e) => {
@@ -375,8 +385,8 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
 
     this._disposers.push(
       autorun(() => {
-        if (this.enabled && this.psbt != null) {
-          this.feeConfig.setVsize(this.psbt.extractTransaction().virtualSize());
+        if (this.enabled && this.txSize != null) {
+          this.feeConfig.setVsize(this.txSize.txVBytes);
         }
       })
     );
@@ -440,9 +450,6 @@ export const usePsbtSimulator = (
   kvStore: KVStore,
   chainGetter: ChainGetter,
   chainId: string,
-  recipientConfig: RecipientConfig,
-  amountConfig: AmountConfig,
-  feeRateConfig: IFeeRateConfig,
   feeConfig: IFeeConfig,
   key: string,
   simulatePsbtFn: SimulatePsbtFn,
@@ -453,9 +460,6 @@ export const usePsbtSimulator = (
       kvStore,
       chainGetter,
       chainId,
-      recipientConfig,
-      amountConfig,
-      feeRateConfig,
       feeConfig,
       key,
       simulatePsbtFn

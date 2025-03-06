@@ -32,6 +32,8 @@ export const useSendTxConfig = (
     feeRateConfig
   );
 
+  amountConfig.setFeeConfig(feeConfig);
+
   return {
     senderConfig,
     recipientConfig,
