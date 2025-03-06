@@ -60,4 +60,5 @@ export * from "./msg-swap";
 export * from "./msg-cancel-undelegate";
 export * from "./message-icon";
 export * from "./folder-minus";
+export * from "./article-outline";
 export * from "./coins-plus-outline";

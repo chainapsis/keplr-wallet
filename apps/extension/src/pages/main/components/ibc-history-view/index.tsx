@@ -906,6 +906,16 @@ const SkipHistoryViewItem: FunctionComponent<{
                 });
               }
 
+              if (history.isOnlyUseBridge) {
+                return !historyCompleted
+                  ? intl.formatMessage({
+                      id: "page.main.components.ibc-history-view.send-bridge.item.pending",
+                    })
+                  : intl.formatMessage({
+                      id: "page.main.components.ibc-history-view.send-bridge.item.succeed",
+                    });
+              }
+
               return !historyCompleted
                 ? intl.formatMessage({
                     id: "page.main.components.ibc-history-view.ibc-swap.item.pending",
@@ -1015,6 +1025,24 @@ const SkipHistoryViewItem: FunctionComponent<{
 
               return currency.coinDenom;
             })();
+
+            if (history.isOnlyUseBridge) {
+              const sourceChain = chainStore.getChain(history.chainId);
+              const destinationChain = chainStore.getChain(
+                history.destinationChainId
+              );
+
+              return intl.formatMessage(
+                {
+                  id: "page.main.components.ibc-history-view.send-bridge.paragraph",
+                },
+                {
+                  assets,
+                  sourceChain: sourceChain.chainName,
+                  destinationChain: destinationChain.chainName,
+                }
+              );
+            }
 
             return intl.formatMessage(
               {

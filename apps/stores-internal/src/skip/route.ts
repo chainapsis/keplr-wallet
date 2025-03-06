@@ -249,10 +249,14 @@ export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
     public readonly swapVenues: {
       readonly name: string;
       readonly chainId: string;
-    }[]
+    }[],
+    public readonly allowSwaps?: boolean,
+    public readonly smartSwapOptions?: {
+      evmSwaps?: boolean;
+      splitRoutes?: boolean;
+    }
   ) {
     super(sharedContext, skipURL, "/v2/fungible/route");
-
     makeObservable(this);
   }
 
@@ -411,9 +415,18 @@ export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
         go_fast: true,
         experimental_features: ["hyperlane"],
         smart_swap_options: {
-          evm_swaps: true,
-          split_routes: true,
+          evm_swaps:
+            this.smartSwapOptions?.evmSwaps === undefined
+              ? true
+              : this.smartSwapOptions.evmSwaps,
+          split_routes:
+            this.smartSwapOptions?.splitRoutes === undefined
+              ? true
+              : this.smartSwapOptions.splitRoutes,
         },
+        ...(this.allowSwaps !== undefined && {
+          allow_swaps: this.allowSwaps,
+        }),
       }),
       signal: abortController.signal,
     });
@@ -444,6 +457,8 @@ export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
       dest_asset_chain_id: this.destChainId,
       affiliateFeeBps: this.affiliateFeeBps,
       swap_venue: this.swapVenues,
+      allow_swaps: this.allowSwaps,
+      smart_swap_options: this.smartSwapOptions,
     })}`;
   }
 }
@@ -456,6 +471,7 @@ export class ObservableQueryRoute extends HasMapStore<ObservableQueryRouteInner>
   ) {
     super((str) => {
       const parsed = JSON.parse(str);
+
       return new ObservableQueryRouteInner(
         this.sharedContext,
         this.chainGetter,
@@ -466,7 +482,11 @@ export class ObservableQueryRoute extends HasMapStore<ObservableQueryRouteInner>
         parsed.destChainId,
         parsed.destDenom,
         parsed.affiliateFeeBps,
-        parsed.swapVenues
+        parsed.swapVenues,
+        parsed.allowSwaps,
+        {
+          evmSwaps: parsed.smartSwapOptions?.evmSwaps,
+        }
       );
     });
   }
@@ -480,7 +500,12 @@ export class ObservableQueryRoute extends HasMapStore<ObservableQueryRouteInner>
     swapVenues: {
       readonly name: string;
       readonly chainId: string;
-    }[]
+    }[],
+    allowSwaps?: boolean,
+    smartSwapOptions?: {
+      evmSwaps?: boolean;
+      splitRoutes?: boolean;
+    }
   ): ObservableQueryRouteInner {
     const str = JSON.stringify({
       sourceChainId,
@@ -490,6 +515,8 @@ export class ObservableQueryRoute extends HasMapStore<ObservableQueryRouteInner>
       destDenom,
       affiliateFeeBps,
       swapVenues,
+      allowSwaps,
+      smartSwapOptions,
     });
     return this.get(str);
   }

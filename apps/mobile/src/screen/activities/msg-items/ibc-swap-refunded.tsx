@@ -15,7 +15,6 @@ export const MsgRelationIBCSwapRefunded: FunctionComponent<{
   isInAllActivitiesPage: boolean | undefined;
 }> = observer(({msg, prices, targetDenom, isInAllActivitiesPage}) => {
   const {chainStore} = useStore();
-
   const style = useStyle();
 
   const chainInfo = chainStore.getChain(msg.chainId);
