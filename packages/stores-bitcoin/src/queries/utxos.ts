@@ -12,7 +12,7 @@ export class ObservableQueryBitcoinUTXOsImpl extends ObservableBitcoinIndexerQue
     chainGetter: ChainGetter,
     protected readonly address: string
   ) {
-    super(sharedContext, chainId, chainGetter, `address/${address}/utxos`);
+    super(sharedContext, chainId, chainGetter, `address/${address}/utxo`);
 
     makeObservable(this);
   }

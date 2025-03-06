@@ -13,8 +13,8 @@ export type InputScriptType =
 export interface TxSizerParams {
   input_count: number; // number of inputs
   input_script: InputScriptType; // type of input script
-  input_m: number; // number of signatures
-  input_n: number; // number of pubkeys
+  input_m: number; // number of signatures in multisig
+  input_n: number; // number of pubkeys in multisig
   p2pkh_output_count: number; // number of p2pkh outputs
   p2sh_output_count: number; // number of p2sh outputs
   p2sh_p2wpkh_output_count: number; // number of p2sh-p2wpkh outputs
