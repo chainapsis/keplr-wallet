@@ -1,6 +1,6 @@
 import { observer } from "mobx-react-lite";
 import React, { FunctionComponent, useEffect, useRef } from "react";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import lottie from "lottie-web";
 import AniPending from "../../public/assets/lottie/tx-result/pending.json";
 import { Stack } from "../../components/stack";
@@ -12,6 +12,9 @@ import { Box } from "../../components/box";
 import { useSearchParams } from "react-router-dom";
 
 export const TxResultPendingPage: FunctionComponent = observer(() => {
+  const theme = useTheme();
+  const isLightMode = theme.mode === "light";
+
   const intl = useIntl();
   const animDivRef = useRef<HTMLDivElement | null>(null);
 
@@ -35,7 +38,7 @@ export const TxResultPendingPage: FunctionComponent = observer(() => {
   }, []);
 
   return (
-    <Container>
+    <Container isLightMode={isLightMode}>
       <Stack flex={1} alignX="center">
         <Gutter size="9.75rem" />
         <Box
@@ -43,7 +46,9 @@ export const TxResultPendingPage: FunctionComponent = observer(() => {
           height="5rem"
           borderRadius="50%"
           borderWidth="5.246px"
-          borderColor={ColorPalette["blue-300"]}
+          borderColor={
+            isLightMode ? ColorPalette["blue-400"] : ColorPalette["blue-300"]
+          }
           position="relative"
         >
           <div
@@ -58,12 +63,16 @@ export const TxResultPendingPage: FunctionComponent = observer(() => {
           />
         </Box>
         <Gutter size="1.75rem" />
-        <H3 color={ColorPalette["white"]}>
+        <H3 color={isLightMode ? ColorPalette["gray-700"] : ColorPalette.white}>
           {intl.formatMessage({ id: "page.tx-result.pending.title" })}
         </H3>
         <Gutter size="2rem" />
         <Box paddingX="1.25rem" style={{ textAlign: "center" }}>
-          <Subtitle2 color={ColorPalette["gray-200"]}>
+          <Subtitle2
+            color={
+              isLightMode ? ColorPalette["gray-400"] : ColorPalette["gray-200"]
+            }
+          >
             {intl.formatMessage(
               {
                 id: isFromEarnTransfer
@@ -81,9 +90,14 @@ export const TxResultPendingPage: FunctionComponent = observer(() => {
   );
 });
 
-const Container = styled.div`
+const Container = styled.div<{
+  isLightMode: boolean;
+}>`
   display: flex;
   height: 100vh;
 
-  background: linear-gradient(168deg, #2b4267 0%, #030e21 45.81%), #09090a;
+  background: ${({ isLightMode }) =>
+    isLightMode
+      ? "linear-gradient(168deg, #CBDFFF 0%, #FFF 57.49%)"
+      : "linear-gradient(168deg, #2b4267 0%, #030e21 45.81%), #09090a"};
 `;
