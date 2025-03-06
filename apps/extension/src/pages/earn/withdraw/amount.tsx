@@ -481,18 +481,20 @@ const ConfirmView: FunctionComponent<{
         >
           <ApyChip chainId={amountConfig.chainId} colorType="green" />
           <Gutter size="0.75rem" />
-          <XAxis alignY="center" gap="0.25rem">
-            <H3
-              color={
-                isLightMode ? ColorPalette["gray-700"] : ColorPalette.white
-              }
-            >
-              {amountConfig.amount[0].hideDenom(true).trim(true).toString()}
-            </H3>
-            <H3 color={ColorPalette["gray-300"]}>
-              {amountConfig.amount[0].currency.coinDenom}
-            </H3>
-          </XAxis>
+          <Box paddingLeft="0.25rem">
+            <XAxis alignY="center" gap="0.25rem">
+              <H3
+                color={
+                  isLightMode ? ColorPalette["gray-700"] : ColorPalette.white
+                }
+              >
+                {amountConfig.amount[0].hideDenom(true).trim(true).toString()}
+              </H3>
+              <H3 color={ColorPalette["gray-300"]}>
+                {amountConfig.amount[0].currency.coinDenom}
+              </H3>
+            </XAxis>
+          </Box>
           <Gutter size="0.25rem" />
 
           <Body3
@@ -523,21 +525,23 @@ const ConfirmView: FunctionComponent<{
 
           <Gutter size="0.75rem" />
 
-          <XAxis alignY="center" gap="0.25rem">
-            <H3
-              color={
-                isLightMode ? ColorPalette["gray-700"] : ColorPalette.white
-              }
-            >
-              {amountConfig.expectedOutAmount
-                .hideDenom(true)
-                .trim(true)
-                .toString()}
-            </H3>
-            <H3 color={ColorPalette["gray-300"]}>
-              {amountConfig.expectedOutAmount.currency.coinDenom}
-            </H3>
-          </XAxis>
+          <Box paddingLeft="0.25rem">
+            <XAxis alignY="center" gap="0.25rem">
+              <H3
+                color={
+                  isLightMode ? ColorPalette["gray-700"] : ColorPalette.white
+                }
+              >
+                {amountConfig.expectedOutAmount
+                  .hideDenom(true)
+                  .trim(true)
+                  .toString()}
+              </H3>
+              <H3 color={ColorPalette["gray-300"]}>
+                {amountConfig.expectedOutAmount.currency.coinDenom}
+              </H3>
+            </XAxis>
+          </Box>
           <Gutter size="0.25rem" />
 
           <Body3

@@ -675,6 +675,8 @@
 
   "page.earn.transfer.amount.tx.paragraph": "Keep this window open{br}to proceed with the next steps!",
   "page.send.select-asset.earn.title": "Select asset{br}to transfer to Noble",
+  "page.send.select-asset.earn.no-token-found": "Oh, no!{br}You have no USDC on other chains.",
+  "page.send.select-asset.earn.go-back-button": "Go Back",
 
   "page.tx-result.pending.title": "Transaction pending",
   "page.tx-result.pending.paragraph": "Transaction has been broadcasted to the blockchain and pending confirmation.",
