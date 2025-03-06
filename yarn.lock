@@ -8791,6 +8791,7 @@ __metadata:
     "@keplr-wallet/cosmos": 0.12.190
     "@keplr-wallet/crypto": 0.12.190
     "@keplr-wallet/hooks": 0.12.190
+    "@keplr-wallet/hooks-bitcoin": 0.12.190
     "@keplr-wallet/hooks-internal": 0.12.190
     "@keplr-wallet/hooks-starknet": 0.12.190
     "@keplr-wallet/ledger-cosmos": 0.12.190
@@ -8907,7 +8908,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/hooks-bitcoin@workspace:packages/hooks-bitcoin":
+"@keplr-wallet/hooks-bitcoin@0.12.190, @keplr-wallet/hooks-bitcoin@workspace:packages/hooks-bitcoin":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/hooks-bitcoin@workspace:packages/hooks-bitcoin"
   dependencies:

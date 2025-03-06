@@ -4,17 +4,17 @@ import {
   EmptyAmountError,
   IAmountConfig,
   ZeroAmountError,
-} from "@keplr-wallet/hooks-starknet";
-import { TextInput } from "../../../../../../components/input";
-import { useStore } from "../../../../../../stores";
+} from "@keplr-wallet/hooks-bitcoin";
+import { TextInput } from "../../../../../components/input";
+import { useStore } from "../../../../../stores";
 import { CoinPretty, Dec, DecUtils } from "@keplr-wallet/unit";
-import { Box } from "../../../../../../components/box";
-import { Body2, Body3, Button2 } from "../../../../../../components/typography";
-import { ColorPalette } from "../../../../../../styles";
-import { VerticalCollapseTransition } from "../../../../../../components/transition/vertical-collapse";
-import { Columns } from "../../../../../../components/column";
+import { Box } from "../../../../../components/box";
+import { Body2, Body3, Button2 } from "../../../../../components/typography";
+import { ColorPalette } from "../../../../../styles";
+import { VerticalCollapseTransition } from "../../../../../components/transition/vertical-collapse";
+import { Columns } from "../../../../../components/column";
 import { FormattedMessage, useIntl } from "react-intl";
-import { useLanguage } from "../../../../../../languages";
+import { useLanguage } from "../../../../../languages";
 import { useTheme } from "styled-components";
 
 export const AmountInput: FunctionComponent<{

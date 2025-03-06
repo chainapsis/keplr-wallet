@@ -18,9 +18,11 @@ import { Gutter } from "../../../components/gutter";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { ColorPalette } from "../../../styles";
 import { openPopupWindow } from "@keplr-wallet/popup";
-// import { useSendTxConfig } from "@keplr-wallet/hooks-bitcoin";
+import { useSendTxConfig } from "@keplr-wallet/hooks-bitcoin";
 import { FormattedMessage, useIntl } from "react-intl";
 import { isRunningInSidePanel } from "../../../utils";
+import { RecipientInput } from "../components/input/recipient-input";
+import { AmountInput } from "../components/input/amount-input";
 // import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 // import { BACKGROUND_PORT } from "@keplr-wallet/router";
 // import {
@@ -123,7 +125,12 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
     currency.coinMinimalDenom
   );
 
-  //   const sendConfigs = useSendTxConfig();
+  const sendConfigs = useSendTxConfig(
+    chainStore,
+    bitcoinQueriesStore,
+    chainId,
+    sender
+  );
   //   sendConfigs.amountConfig.setCurrency(currency);
 
   //   const gasSimulatorKey = useMemo(() => {
@@ -540,14 +547,15 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
               }}
             />
           </YAxis>
-
-          {/* <RecipientInput
+          <RecipientInput
             ref={addressRef}
             historyType={historyType}
             recipientConfig={sendConfigs.recipientConfig}
           />
-
           <AmountInput amountConfig={sendConfigs.amountConfig} />
+
+          {/* 
+
 
           <Styles.Flex1 />
           <Gutter size="0" />
@@ -587,6 +595,6 @@ const DetachIcon: FunctionComponent<{
   );
 };
 
-const noop = (..._args: any[]) => {
-  // noop
-};
+// const noop = (..._args: any[]) => {
+//   // noop
+// };
