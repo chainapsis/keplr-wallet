@@ -48,11 +48,7 @@ import SimpleBar from "simplebar-react";
 import { useTheme } from "styled-components";
 import { dispatchGlobalEventExceptSelf } from "../../../utils/global-events";
 import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
-import {
-  ArrowDownIcon,
-  ArrowUpIcon,
-  NativeChainMarkIcon,
-} from "../../../components/icon";
+import { NativeChainMarkIcon } from "../../../components/icon";
 import { EmbedChainInfos } from "../../../config";
 import { ViewToken } from "../../main";
 import { IconButton } from "../../../components/icon-button";
@@ -1314,12 +1310,6 @@ export const EnableChainsScene: FunctionComponent<{
 
         <VerticalCollapseTransition
           collapsed={(() => {
-            for (const chainIdentifier of enabledChainIdentifiers) {
-              if (enabledSuggestChainIdentifiers.includes(chainIdentifier)) {
-                return false;
-              }
-            }
-
             if (nonNativeChainListForSuggest.length > 0) {
               return false;
             }
@@ -1755,6 +1745,12 @@ const NativeChainSection: FunctionComponent<{
           borderRadius="0.375rem"
           paddingX="1rem"
           paddingY="0.75rem"
+          borderWidth="1.5px"
+          borderColor={
+            theme.mode === "light"
+              ? ColorPalette["blue-200"]
+              : ColorPalette["blue-600"]
+          }
           backgroundColor={
             isSelectAll
               ? theme.mode === "light"
@@ -1825,7 +1821,7 @@ const NativeChainSection: FunctionComponent<{
                 }
               >
                 {isCollapsed ? (
-                  <ArrowDownIcon
+                  <LocalArrowDownIcon
                     width="1.5rem"
                     height="1.5rem"
                     color={
@@ -1835,7 +1831,7 @@ const NativeChainSection: FunctionComponent<{
                     }
                   />
                 ) : (
-                  <ArrowUpIcon
+                  <LocalArrowUpIcon
                     width="1.5rem"
                     height="1.5rem"
                     color={
@@ -1981,8 +1977,23 @@ const ChainItem: FunctionComponent<{
                       }
                       padding="0.25rem"
                     >
-                      <animated.div style={arrowAnimation}>
-                        <ArrowDownIcon width="1rem" height="1rem" />
+                      <animated.div
+                        style={{
+                          ...arrowAnimation,
+                          padding: "0",
+                          height: "1rem",
+                        }}
+                      >
+                        <LocalArrowDownIcon
+                          strokeWidth="1.5"
+                          width="1rem"
+                          height="1rem"
+                          color={
+                            theme.mode === "light"
+                              ? ColorPalette["gray-200"]
+                              : ColorPalette["gray-300"]
+                          }
+                        />
                       </animated.div>
                     </IconButton>
                   </React.Fragment>
@@ -1990,9 +2001,12 @@ const ChainItem: FunctionComponent<{
               </XAxis>
               {tokens && tokens.length > 0 && (
                 <React.Fragment>
-                  <Gutter size="0.375rem" />
+                  <Gutter size="0.25rem" />
                   <Subtitle3 color={ColorPalette["gray-300"]}>
-                    {tokens?.length} Tokens
+                    {balance?.toDec().gt(new Dec(0))
+                      ? tokens?.length
+                      : tokens?.length - 1}{" "}
+                    Tokens
                   </Subtitle3>
                 </React.Fragment>
               )}
@@ -2248,5 +2262,64 @@ const NextStepChainItem: FunctionComponent<{
         </XAxis>
       </Columns>
     </Box>
+  );
+};
+
+const LocalArrowDownIcon = ({
+  width = "1rem",
+  height = "1rem",
+  color,
+  strokeWidth = "2",
+}: {
+  width?: string;
+  height?: string;
+  color?: string;
+  strokeWidth?: string;
+}) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={width}
+      height={height}
+      viewBox="0 0 16 17"
+      fill="none"
+    >
+      <path
+        d="M13 6L8 11L3 6"
+        stroke={color || "currentColor"}
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
+const LocalArrowUpIcon = ({
+  width = "1rem",
+  height = "1rem",
+  color,
+  strokeWidth = "2",
+}: {
+  width?: string;
+  height?: string;
+  color?: string;
+  strokeWidth?: string;
+}) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={width}
+      height={height}
+      viewBox="0 0 24 25"
+      fill="none"
+    >
+      <path
+        d="M4.5 16.25L12 8.75L19.5 16.25"
+        stroke={color || "currentColor"}
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 };

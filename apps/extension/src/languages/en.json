@@ -157,7 +157,7 @@
   "pages.register.connect-keystone.usb.step-2": "Ensure your Keystone 3 Pro is on the homepage.",
 
   "pages.register.enable-chains.title": "Select Chains",
-  "pages.register.enable-chains.paragraph": "Don’t worry, you can change your selections anytime in the Manage Chain Visibility in the sidebar menu.",
+  "pages.register.enable-chains.paragraph": "We recommend enabling chains natively supported by Keplr for the best experience. Once a chain is enabled, you can view the assets available on it.",
   "pages.register.enable-chains.search-input-placeholder": "Search networks",
   "pages.register.enable-chains.chain-selected-count": "{numSelected} chain(s) selected",
   "pages.register.enable-chains.skip-button": "Skip",

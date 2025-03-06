@@ -10,7 +10,7 @@ import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { ViewToken } from "./index";
 import { observer } from "mobx-react-lite";
 import { Stack } from "../../components/stack";
-import { Button, makeTextAndSvgColor } from "../../components/button";
+import { Button } from "../../components/button";
 import { useStore } from "../../stores";
 import { Styles, TextButton } from "../../components/button-text";
 import { Box } from "../../components/box";
@@ -24,7 +24,7 @@ import { Checkbox } from "../../components/checkbox";
 import { Caption2 } from "../../components/typography";
 import { ColorPalette } from "../../styles";
 import { FormattedMessage, useIntl } from "react-intl";
-import styled, { useTheme } from "styled-components";
+import styled, { css, useTheme } from "styled-components";
 import { DenomHelper } from "@keplr-wallet/common";
 import { TokenDetailModal } from "./token-detail";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -49,6 +49,21 @@ const CircleIndicator: FunctionComponent = () => {
       <circle cx="3.5" cy="3" r="3" fill="#2C4BE2" />
     </StyledCircle>
   );
+};
+
+//NOTE - iconButton에 있는 makeTextAndSvgColor 사용 할 경우 path를 오버라이등 할 수 없기 때문에
+// 별도로 만들어서 사용함.
+const makeTextAndSvgColor = (color: string) => {
+  return css`
+    color: ${color};
+    svg {
+      fill: ${color};
+      stroke: ${color};
+      path {
+        fill: ${color};
+      }
+    }
+  `;
 };
 
 const ManageViewAssetTokenPageButton = styled(TextButton)`
@@ -570,8 +585,9 @@ export const AvailableTabView: FunctionComponent<{
                 <div style={{ flex: 1 }} />
               </XAxis>
             </Box>
-            <Body2 style={{ textAlign: "center" }}>
+            <Box paddingX="1rem">
               <Body2
+                style={{ textAlign: "center" }}
                 color={
                   theme.mode === "light"
                     ? ColorPalette["gray-300"]
@@ -580,7 +596,7 @@ export const AvailableTabView: FunctionComponent<{
               >
                 <FormattedMessage id="page.main.components.starknet-guide-modal.description" />
               </Body2>
-            </Body2>
+            </Box>
             <Gutter size="1.5rem" />
             <Button
               text={intl.formatMessage({
