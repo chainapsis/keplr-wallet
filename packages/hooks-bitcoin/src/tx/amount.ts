@@ -1,6 +1,6 @@
 import {
   IAmountConfig,
-  // IFeeConfig,
+  IFeeConfig,
   ISenderConfig,
   UIProperties,
 } from "./types";
@@ -30,8 +30,8 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
   @observable
   protected _fraction: number = 0;
 
-  // @observable.ref
-  // protected _feeConfig: IFeeConfig | undefined = undefined;
+  @observable.ref
+  protected _feeConfig: IFeeConfig | undefined = undefined;
 
   constructor(
     chainGetter: ChainGetter,
@@ -44,19 +44,19 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
     makeObservable(this);
   }
 
-  // get feeConfig(): IFeeConfig | undefined {
-  //   return this._feeConfig;
-  // }
+  get feeConfig(): IFeeConfig | undefined {
+    return this._feeConfig;
+  }
 
-  // @action
-  // setFeeConfig(feeConfig: IFeeConfig | undefined) {
-  //   this._feeConfig = feeConfig;
-  // }
+  @action
+  setFeeConfig(feeConfig: IFeeConfig | undefined) {
+    this._feeConfig = feeConfig;
+  }
 
   @computed
   get value(): string {
     if (this.fraction > 0) {
-      const result = this.bitcoinQueriesStore
+      let result = this.bitcoinQueriesStore
         .get(this.chainId)
         .queryBitcoinBalance.getBalance(
           this.chainId,
@@ -67,11 +67,11 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
       if (!result) {
         return "0";
       }
-      // if (this.feeConfig) {
-      //   if (this.feeConfig.fee) {
-      //     result = result.sub(this.feeConfig.fee);
-      //   }
-      // }
+      if (this.feeConfig) {
+        if (this.feeConfig.fee) {
+          result = result.sub(this.feeConfig.fee);
+        }
+      }
       if (result.toDec().lte(new Dec(0))) {
         return "0";
       }

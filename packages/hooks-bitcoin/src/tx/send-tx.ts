@@ -4,6 +4,7 @@ import { useRecipientConfig } from "./recipient";
 import { useAmountConfig } from "./amount";
 import { BitcoinQueriesStore } from "@keplr-wallet/stores-bitcoin";
 import { useFeeRateConfig } from "./fee-rate";
+import { useFeeConfig } from "./fee";
 
 export const useSendTxConfig = (
   chainGetter: ChainGetter,
@@ -22,10 +23,20 @@ export const useSendTxConfig = (
   );
   const feeRateConfig = useFeeRateConfig(chainGetter, chainId, initialFeeRate);
 
+  const feeConfig = useFeeConfig(
+    chainGetter,
+    queriesStore,
+    chainId,
+    senderConfig,
+    amountConfig,
+    feeRateConfig
+  );
+
   return {
     senderConfig,
     recipientConfig,
     amountConfig,
     feeRateConfig,
+    feeConfig,
   };
 };
