@@ -136,9 +136,10 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
     chainStore,
     bitcoinQueriesStore,
     chainId,
-    sender
+    sender,
+    10
   );
-  //   sendConfigs.amountConfig.setCurrency(currency);
+  sendConfigs.amountConfig.setCurrency(currency);
 
   //   const gasSimulatorKey = useMemo(() => {
   //     const res = (() => {

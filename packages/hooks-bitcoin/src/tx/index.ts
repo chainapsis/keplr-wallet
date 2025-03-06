@@ -5,3 +5,7 @@ export * from "./amount";
 export * from "./recipient";
 export * from "./sender";
 export * from "./errors";
+export * from "./fee-rate";
+export * from "./fee";
+export * from "./psbt-simulator";
+export * from "./validate";
