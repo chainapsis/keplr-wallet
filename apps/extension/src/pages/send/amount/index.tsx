@@ -83,7 +83,6 @@ import {
 } from "@keplr-wallet/stores-internal";
 import {
   AccountSetBase,
-  AccountStore,
   ChainGetter,
   CosmosAccount,
   CosmwasmAccount,
@@ -129,9 +128,8 @@ function useGetGasSimulatorOfNotBridge(
   chainId: string,
   sendType: string,
   account: AccountSetBase & CosmosAccount & CosmwasmAccount & SecretAccount,
-  accountStore: AccountStore<
-    [CosmosAccount, CosmwasmAccount, SecretAccount],
-    AccountSetBase & CosmosAccount & CosmwasmAccount & SecretAccount
+  accountStore: IAccountStoreWithInjects<
+    [CosmosAccount, CosmwasmAccount, SecretAccount]
   >,
   ethereumAccount: EthereumAccountBase
 ) {
