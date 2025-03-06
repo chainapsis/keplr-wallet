@@ -25,11 +25,11 @@ export interface ISenderConfig extends ITxChainSetter {
   uiProperties: UIProperties;
 }
 
-export interface IGasConfig extends ITxChainSetter {
+export interface IFeeRateConfig extends ITxChainSetter {
   value: string;
   setValue(value: string | number): void;
 
-  gas: number;
+  feeRate: number;
 
   uiProperties: UIProperties;
 }

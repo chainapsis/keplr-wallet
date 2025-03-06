@@ -17,8 +17,12 @@ export class ObservableQueryBitcoinUTXOsImpl extends ObservableBitcoinIndexerQue
     makeObservable(this);
   }
 
-  get utxos(): UTXO[] | undefined {
+  get UTXOs(): UTXO[] | undefined {
     return this.response?.data;
+  }
+
+  get confirmedUTXOs(): UTXO[] | undefined {
+    return this.UTXOs?.filter((utxo) => utxo.status.confirmed);
   }
 }
 

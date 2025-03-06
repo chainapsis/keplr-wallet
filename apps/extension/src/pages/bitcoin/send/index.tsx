@@ -23,6 +23,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { isRunningInSidePanel } from "../../../utils";
 import { RecipientInput } from "../components/input/recipient-input";
 import { AmountInput } from "../components/input/amount-input";
+import styled from "styled-components";
 // import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 // import { BACKGROUND_PORT } from "@keplr-wallet/router";
 // import {
@@ -30,6 +31,12 @@ import { AmountInput } from "../components/input/amount-input";
 //   SubmitStarknetTxHashMsg,
 // } from "@keplr-wallet/background";
 // import { LoadingIcon } from "../../../components/icon";
+
+const Styles = {
+  Flex1: styled.div`
+    flex: 1;
+  `,
+};
 
 export const BitcoinSendPage: FunctionComponent = observer(() => {
   const {
@@ -554,12 +561,9 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
           />
           <AmountInput amountConfig={sendConfigs.amountConfig} />
 
-          {/* 
-
-
           <Styles.Flex1 />
           <Gutter size="0" />
-
+          {/* 
           <FeeControl
             senderConfig={sendConfigs.senderConfig}
             feeConfig={sendConfigs.feeConfig}
