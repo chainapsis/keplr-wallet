@@ -38,9 +38,11 @@ export const useBitcoinTxConfigsQueryString = (configs: {
     if (initialFeeRate) {
       configs.feeRateConfig.setValue(initialFeeRate);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
+    // send page에서 주소랑 amount 입력 안되면 무한 리렌더링 발생.. 어째서..
     setSearchParams(
       (prev) => {
         if (

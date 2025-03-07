@@ -40,7 +40,7 @@ import styled from "styled-components";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import { Psbt } from "bitcoinjs-lib";
 import { toXOnly } from "@keplr-wallet/crypto";
-// import { FeeControl } from "../components/input/fee-control";
+import { FeeControl } from "../components/input/fee-control";
 // import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 // import { BACKGROUND_PORT } from "@keplr-wallet/router";
 // import {
@@ -529,12 +529,12 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
           <Styles.Flex1 />
           <Gutter size="0" />
 
-          {/* <FeeControl
+          <FeeControl
             senderConfig={sendConfigs.senderConfig}
             feeConfig={sendConfigs.feeConfig}
             feeRateConfig={sendConfigs.feeRateConfig}
             psbtSimulator={psbtSimulator}
-          /> */}
+          />
         </Stack>
       </Box>
     </HeaderLayout>

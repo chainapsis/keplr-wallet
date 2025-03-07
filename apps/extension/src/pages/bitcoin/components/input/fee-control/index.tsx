@@ -22,6 +22,8 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { XAxis, YAxis } from "../../../../../components/axis";
 import { UIConfigStore } from "../../../../../stores/ui-config";
 import { Tooltip } from "../../../../../components/tooltip";
+import { Modal } from "../../../../../components/modal";
+import { TransactionFeeModal } from "../../transaction-fee-modal/modal";
 
 // 기본적으로 `FeeControl` 안에 있는 로직이였지만 `FeeControl` 말고도 다른 UI를 가진 똑같은 기능의 component가
 // 여러개 생기게 되면서 공통적으로 사용하기 위해서 custom hook으로 분리함
@@ -72,20 +74,14 @@ export const FeeControl: FunctionComponent<{
   disableClick?: boolean;
 }> = observer(
   ({
-    // senderConfig,
+    senderConfig,
     feeConfig,
     feeRateConfig,
     psbtSimulator,
     disableAutomaticFeeSet,
     disableClick,
   }) => {
-    const {
-      analyticsStore,
-      // bitcoinQueriesStore,
-      priceStore,
-      // chainStore,
-      uiConfigStore,
-    } = useStore();
+    const { analyticsStore, priceStore, uiConfigStore } = useStore();
 
     const intl = useIntl();
     const theme = useTheme();
@@ -96,7 +92,7 @@ export const FeeControl: FunctionComponent<{
       disableAutomaticFeeSet
     );
 
-    const [, setIsModalOpen] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     return (
       <Box>
@@ -377,7 +373,7 @@ export const FeeControl: FunctionComponent<{
           ) : null}
         </VerticalResizeTransition>
 
-        {/* <Modal
+        <Modal
           isOpen={isModalOpen}
           align="bottom"
           maxHeight="95vh"
@@ -389,10 +385,11 @@ export const FeeControl: FunctionComponent<{
             close={() => setIsModalOpen(false)}
             senderConfig={senderConfig}
             feeConfig={feeConfig}
-            gasSimulator={gasSimulator}
+            feeRateConfig={feeRateConfig}
+            psbtSimulator={psbtSimulator}
             disableAutomaticFeeSet={disableAutomaticFeeSet}
           />
-        </Modal> */}
+        </Modal>
       </Box>
     );
   }

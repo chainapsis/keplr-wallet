@@ -402,8 +402,6 @@ export class BitcoinAccountBase {
       }
     })();
 
-    console.log("paymentType and internalPubkey", paymentType, xonlyPubKey);
-
     // 6. Build PSBT
     try {
       const psbt = new Psbt({ network: networkParams });
