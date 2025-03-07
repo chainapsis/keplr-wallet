@@ -8,7 +8,7 @@ import { SearchTextInput } from "../../../components/input";
 import { useStore } from "../../../stores";
 import { TokenItem } from "../../main/components";
 import { Column, Columns } from "../../../components/column";
-import { Body2, H2 } from "../../../components/typography";
+import { Body2, H2, Subtitle3 } from "../../../components/typography";
 import { Checkbox } from "../../../components/checkbox";
 import { ColorPalette } from "../../../styles";
 import { Dec } from "@keplr-wallet/unit";
@@ -19,6 +19,9 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { Box } from "../../../components/box";
 import { Gutter } from "../../../components/gutter";
 import { NOBLE_CHAIN_ID } from "../../../config.ui";
+import { YAxis } from "../../../components/axis";
+import { StackIcon } from "../../../components/icon/stack";
+
 const Styles = {
   Container: styled(Stack)<{ isNobleEarn: boolean }>`
     padding: ${({ isNobleEarn }) =>
@@ -122,6 +125,20 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
           : intl.formatMessage({ id: "page.send.select-asset.title" })
       }
       left={<BackButton />}
+      hideBottomButtons={!(paramIsNobleEarn && !filteredTokens.length)}
+      bottomButtons={[
+        {
+          text: intl.formatMessage({
+            id: "page.send.select-asset.earn.go-back-button",
+          }),
+          color: "primary",
+          size: "large",
+          type: "button",
+          onClick: () => {
+            navigate(-1);
+          },
+        },
+      ]}
     >
       <Styles.Container gutter="0.5rem" isNobleEarn={paramIsNobleEarn}>
         {paramIsNobleEarn ? (
@@ -179,6 +196,35 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
             />
           </Columns>
         )}
+
+        {paramIsNobleEarn && !filteredTokens.length ? (
+          <Box marginY="5rem">
+            <YAxis alignX="center" gap="1.5rem">
+              <StackIcon
+                width="4.5rem"
+                height="4.5rem"
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-200"]
+                    : ColorPalette["gray-400"]
+                }
+              />
+              <Subtitle3
+                color={ColorPalette["gray-300"]}
+                style={{
+                  textAlign: "center",
+                }}
+              >
+                <FormattedMessage
+                  id="page.send.select-asset.earn.no-token-found"
+                  values={{
+                    br: <br />,
+                  }}
+                />
+              </Subtitle3>
+            </YAxis>
+          </Box>
+        ) : null}
 
         {filteredTokens.map((viewToken) => {
           const modularChainInfo = chainStore.getModularChain(

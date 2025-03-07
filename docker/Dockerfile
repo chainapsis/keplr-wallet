@@ -1,4 +1,4 @@
-FROM public.ecr.aws/r3a1l1p0/chainapsis/ubuntu:20.04-keplr-firefox-build
+FROM public.ecr.aws/r3a1l1p0/chainapsis/ubuntu:24.04-keplr-firefox-build
 
 RUN mkdir app
 

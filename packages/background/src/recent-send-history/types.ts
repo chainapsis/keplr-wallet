@@ -144,6 +144,7 @@ export type SkipHistory = {
   };
 
   transferAssetRelease?: TransferAssetRelease; // 라우팅 중간에 실패한 경우, 사용자의 자산이 어디에서 릴리즈 되었는지 정보
+  isOnlyUseBridge?: boolean; // send bridge 페이지에서 swap코드를 사용 하고 있기 때문에 브릿지만 사용했는지 여부 필요함
 };
 
 /**

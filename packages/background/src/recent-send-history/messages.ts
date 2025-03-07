@@ -435,7 +435,8 @@ export class RecordTxWithSkipSwapMsg extends Message<string> {
       currencies: AppCurrency[];
     },
     public readonly routeDurationSeconds: number,
-    public readonly txHash: string
+    public readonly txHash: string,
+    public readonly isOnlyUseBridge?: boolean
   ) {
     super();
   }
