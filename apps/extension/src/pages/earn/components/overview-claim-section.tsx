@@ -57,7 +57,7 @@ export const EarnOverviewClaimSection: FunctionComponent<{
         setIsSimulating(true);
 
         const simulated = await tx.simulate();
-        gas = new Dec(simulated.gasUsed * 1.6).truncate();
+        gas = new Dec(simulated.gasUsed * 1.8).truncate();
       } catch (e) {
         console.error(e);
       } finally {

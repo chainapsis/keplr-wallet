@@ -307,7 +307,7 @@ export const useCosmosClaimRewards = () => {
           // Gas adjustment is 1.5
           // Since there is currently no convenient way to adjust the gas adjustment on the UI,
           // Use high gas adjustment to prevent failure.
-          const adjustment = chainId === NOBLE_CHAIN_ID ? 1.6 : 1.5;
+          const adjustment = chainId === NOBLE_CHAIN_ID ? 1.8 : 1.5;
           const gasEstimated = new Dec(
             simulated.gasUsed * adjustment
           ).truncate();
@@ -599,7 +599,7 @@ export const useCosmosClaimRewards = () => {
       // Gas adjustment is 1.5
       // Since there is currently no convenient way to adjust the gas adjustment on the UI,
       // Use high gas adjustment to prevent failure.
-      const adjustment = chainId === NOBLE_CHAIN_ID ? 1.6 : 1.5;
+      const adjustment = chainId === NOBLE_CHAIN_ID ? 1.8 : 1.5;
       gas = new Dec(simulated.gasUsed * adjustment).truncate();
     } catch (e) {
       console.log(e);
