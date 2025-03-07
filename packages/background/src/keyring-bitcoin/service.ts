@@ -171,7 +171,7 @@ export class KeyRingBitcoinService {
 
     return await this.interactionService.waitApproveV2(
       env,
-      "/sign-bitcoin-psbt",
+      "/sign-bitcoin-tx",
       "request-sign-bitcoin-psbt",
       {
         origin,
@@ -220,7 +220,7 @@ export class KeyRingBitcoinService {
 
     return await this.interactionService.waitApproveV2(
       env,
-      "/sign-bitcoin-psbt",
+      "/sign-bitcoin-tx",
       "request-sign-bitcoin-psbt",
       {
         origin,
