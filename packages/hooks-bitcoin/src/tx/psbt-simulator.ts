@@ -279,8 +279,10 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
               state.setInitialPsbtHex(psbtHex);
               state.setTxSize(txSize);
             } catch (e) {
-              // just log the error, initial psbt is not critical.
+              // initial psbt is not critical,
+              // just log the error and delete the psbt from the store.
               console.log(e);
+              this.kvStore.set(key, "");
             }
           }
 
