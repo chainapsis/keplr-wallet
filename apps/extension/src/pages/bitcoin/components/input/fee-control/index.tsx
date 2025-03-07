@@ -23,7 +23,7 @@ import { XAxis, YAxis } from "../../../../../components/axis";
 import { UIConfigStore } from "../../../../../stores/ui-config";
 import { Tooltip } from "../../../../../components/tooltip";
 import { Modal } from "../../../../../components/modal";
-import { TransactionFeeModal } from "../../transaction-fee-modal/modal";
+import { TransactionFeeModal } from "../../transaction-fee-modal";
 
 // 기본적으로 `FeeControl` 안에 있는 로직이였지만 `FeeControl` 말고도 다른 UI를 가진 똑같은 기능의 component가
 // 여러개 생기게 되면서 공통적으로 사용하기 위해서 custom hook으로 분리함

@@ -5,8 +5,9 @@ import { action, computed, makeObservable, observable } from "mobx";
 import { useState } from "react";
 import { BitcoinQueriesStore } from "@keplr-wallet/stores-bitcoin";
 export class FeeRateConfig extends TxChainSetter implements IFeeRateConfig {
+  // average by default as initialFeeRate is not reliable at the first time
   @observable
-  protected _feeRateType: FeeRateType = "manual";
+  protected _feeRateType: FeeRateType = "average";
 
   /*
    This field is used to handle the value from the input more flexibly.
