@@ -1889,6 +1889,11 @@ const ChainItem: FunctionComponent<{
       config: { tension: 300, friction: 25, clamp: true },
     });
 
+    const isShowTokenView =
+      !!tokens?.length &&
+      (!balance?.toDec().isZero() ||
+        tokens.some((token) => !token.token.toDec().isZero()));
+
     return (
       <Box
         borderRadius="0.375rem"
@@ -1952,7 +1957,7 @@ const ChainItem: FunctionComponent<{
                     </React.Fragment>
                   )}
                 </XAxis>
-                {tokens && tokens.length > 1 && (
+                {isShowTokenView && (
                   <React.Fragment>
                     <Gutter size="0.25rem" />
                     <IconButton
@@ -1989,14 +1994,11 @@ const ChainItem: FunctionComponent<{
                   </React.Fragment>
                 )}
               </XAxis>
-              {tokens && tokens.length > 0 && (
+              {isShowTokenView && (
                 <React.Fragment>
                   <Gutter size="0.25rem" />
                   <Subtitle3 color={ColorPalette["gray-300"]}>
-                    {balance?.toDec().gt(new Dec(0))
-                      ? tokens?.length
-                      : tokens?.length - 1}{" "}
-                    Tokens
+                    {tokens?.length} Tokens
                   </Subtitle3>
                 </React.Fragment>
               )}
@@ -2004,7 +2006,9 @@ const ChainItem: FunctionComponent<{
           </XAxis>
           <Column weight={1} />
           <XAxis alignY="center">
-            {isFresh || balance == null ? null : (
+            {isFresh ||
+            balance == null ||
+            (balance.toDec().isZero() && !isShowTokenView) ? null : (
               <YAxis alignX="right">
                 <Subtitle3
                   color={
