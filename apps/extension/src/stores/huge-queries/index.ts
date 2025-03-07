@@ -153,6 +153,21 @@ export class HugeQueriesStore {
                   account.bech32Address
                 );
 
+          if (this.chainStore.getChain(chainInfo.chainId).bech32Config) {
+            // ethermint 계열의 체인인 경우 ibc token을 보여주기 위해서 native 토큰에 대해서
+            // cosmos 방식의 쿼리를 꼭 발생시켜야 한다.
+            for (const bal of queries.queryBalances.getQueryBech32Address(
+              account.bech32Address
+            ).balances) {
+              if (
+                new DenomHelper(bal.currency.coinMinimalDenom).type === "native"
+              ) {
+                bal.balance;
+                break;
+              }
+            }
+          }
+
           const key = `${chainInfo.chainIdentifier}/${currency.coinMinimalDenom}`;
           if (!keysUsed.get(key)) {
             if (
