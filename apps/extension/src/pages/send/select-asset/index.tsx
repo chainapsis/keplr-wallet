@@ -125,7 +125,7 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
           : intl.formatMessage({ id: "page.send.select-asset.title" })
       }
       left={<BackButton />}
-      hideBottomButtons={paramIsNobleEarn}
+      hideBottomButtons={!(paramIsNobleEarn && !filteredTokens.length)}
       bottomButtons={[
         {
           text: intl.formatMessage({
@@ -133,13 +133,12 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
           }),
           color: "primary",
           size: "large",
-          type: "submit",
+          type: "button",
+          onClick: () => {
+            navigate(-1);
+          },
         },
       ]}
-      onSubmit={(e) => {
-        e.preventDefault();
-        navigate(-1);
-      }}
     >
       <Styles.Container gutter="0.5rem" isNobleEarn={paramIsNobleEarn}>
         {paramIsNobleEarn ? (
