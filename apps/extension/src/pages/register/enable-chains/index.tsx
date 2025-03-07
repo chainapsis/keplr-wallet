@@ -1841,7 +1841,7 @@ const NativeChainSection: FunctionComponent<{
         </Box>
       )}
       <VerticalCollapseTransition
-        collapsed={isCollapsed}
+        collapsed={showTitleBox ? isCollapsed : false}
         opacityLeft={0}
         transitionAlign="top"
       >
