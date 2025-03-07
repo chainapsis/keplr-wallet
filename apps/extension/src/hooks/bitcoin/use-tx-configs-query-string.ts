@@ -1,4 +1,5 @@
 import {
+  FeeRateType,
   IAmountConfig,
   IFeeConfig,
   IFeeRateConfig,
@@ -9,7 +10,7 @@ import { useSearchParams } from "react-router-dom";
 
 export const useBitcoinTxConfigsQueryString = (configs: {
   amountConfig: IAmountConfig;
-  recipientConfig?: IRecipientConfig;
+  recipientConfig: IRecipientConfig;
   feeConfig: IFeeConfig;
   feeRateConfig: IFeeRateConfig;
 }) => {
@@ -34,6 +35,11 @@ export const useBitcoinTxConfigsQueryString = (configs: {
       configs.recipientConfig?.setValue(initialRecipient);
     }
 
+    const initialFeeRateType = searchParams.get("initialFeeRateType");
+    if (initialFeeRateType) {
+      configs.feeRateConfig.setFeeRateType(initialFeeRateType as FeeRateType);
+    }
+
     const initialFeeRate = searchParams.get("initialFeeRate");
     if (initialFeeRate) {
       configs.feeRateConfig.setValue(initialFeeRate);
@@ -42,18 +48,8 @@ export const useBitcoinTxConfigsQueryString = (configs: {
   }, []);
 
   useEffect(() => {
-    // send page에서 주소랑 amount 입력 안되면 무한 리렌더링 발생.. 어째서..
     setSearchParams(
       (prev) => {
-        if (
-          configs.recipientConfig &&
-          configs.recipientConfig.value.trim().length > 0
-        ) {
-          prev.set("initialRecipient", configs.recipientConfig.value);
-        } else {
-          prev.delete("initialRecipient");
-        }
-        // Fraction and amount value are exclusive
         if (configs.amountConfig.fraction <= 0) {
           prev.delete("initialAmountFraction");
           if (configs.amountConfig.value.trim().length > 0) {
@@ -68,6 +64,19 @@ export const useBitcoinTxConfigsQueryString = (configs: {
             configs.amountConfig.fraction.toString()
           );
         }
+
+        if (configs.recipientConfig.value.trim().length > 0) {
+          prev.set("initialRecipient", configs.recipientConfig.value);
+        } else {
+          prev.delete("initialRecipient");
+        }
+
+        if (configs.feeRateConfig.feeRateType != null) {
+          prev.set("initialFeeRateType", configs.feeRateConfig.feeRateType);
+        } else {
+          prev.delete("initialFeeRateType");
+        }
+
         if (configs.feeRateConfig.value != null) {
           prev.set("initialFeeRate", configs.feeRateConfig.value.toString());
         }
@@ -81,9 +90,9 @@ export const useBitcoinTxConfigsQueryString = (configs: {
   }, [
     configs.amountConfig.fraction,
     configs.amountConfig.value,
-    configs.feeConfig.fee,
+    configs.feeRateConfig.feeRateType,
     configs.feeRateConfig.value,
-    configs.recipientConfig,
+    configs.recipientConfig.value,
     setSearchParams,
   ]);
 };
