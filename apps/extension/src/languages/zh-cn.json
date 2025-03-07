@@ -612,9 +612,11 @@
   "components.input.fee-control.modal.guide-title": "交易模拟失败",
   "components.input.fee-control.modal.gas-adjustment-label": "燃料调整",
   "components.input.fee-control.modal.gas-amount-label": "燃料数量",
+  "components.input.fee-control.modal.fee-rate-label": "费用标准",
   "components.input.fee-control.modal.fee-selector.low": "低",
   "components.input.fee-control.modal.fee-selector.average": "中",
   "components.input.fee-control.modal.fee-selector.high": "高",
+  "components.input.fee-control.modal.fee-selector.manual": "手动",
   "components.input.fee-control.modal.max-fee": "最高收费",
 
   "components.address-book-modal.title": "地址目录",

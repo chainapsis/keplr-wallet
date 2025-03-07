@@ -442,6 +442,8 @@ export class TokenScanService {
       );
     }
 
+    // TODO: bitcoin handling
+
     if (tokenScan.infos.length > 0) {
       return tokenScan;
     }

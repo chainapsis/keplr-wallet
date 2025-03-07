@@ -83,7 +83,11 @@ import {
   StarknetAccountStore,
   StarknetQueriesStore,
 } from "@keplr-wallet/stores-starknet";
-import { BitcoinQueriesStore } from "@keplr-wallet/stores-bitcoin";
+import {
+  BitcoinAccountStore,
+  BitcoinQueriesStore,
+} from "@keplr-wallet/stores-bitcoin";
+
 let _sidePanelWindowId: number | undefined;
 async function getSidePanelWindowId(): Promise<number | undefined> {
   if (_sidePanelWindowId != null) {
@@ -141,6 +145,7 @@ export class RootStore {
   >;
   public readonly ethereumAccountStore: EthereumAccountStore;
   public readonly starknetAccountStore: StarknetAccountStore;
+  public readonly bitcoinAccountStore: BitcoinAccountStore;
   public readonly priceStore: CoinGeckoPriceStore;
   public readonly price24HChangesStore: Price24HChangesStore;
   public readonly hugeQueriesStore: HugeQueriesStore;
@@ -479,6 +484,10 @@ export class RootStore {
       getKeplrFromWindow
     );
     this.starknetAccountStore = new StarknetAccountStore(
+      this.chainStore,
+      getKeplrFromWindow
+    );
+    this.bitcoinAccountStore = new BitcoinAccountStore(
       this.chainStore,
       getKeplrFromWindow
     );
