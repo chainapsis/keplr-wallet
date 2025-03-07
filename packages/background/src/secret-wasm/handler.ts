@@ -8,7 +8,7 @@ import {
 import {
   GetPubkeyMsg,
   GetTxEncryptionKeyMsg,
-  ReqeustEncryptMsg,
+  RequestEncryptMsg,
   RequestDecryptMsg,
 } from "./messages";
 import { SecretWasmService } from "./service";
@@ -25,10 +25,10 @@ export const getHandler: (
           env,
           msg as GetPubkeyMsg
         );
-      case ReqeustEncryptMsg:
-        return handleReqeustEncryptMsg(service, permissionInteractionService)(
+      case RequestEncryptMsg:
+        return handleRequestEncryptMsg(service, permissionInteractionService)(
           env,
-          msg as ReqeustEncryptMsg
+          msg as RequestEncryptMsg
         );
       case RequestDecryptMsg:
         return handleRequestDecryptMsg(service, permissionInteractionService)(
@@ -64,10 +64,10 @@ const handleGetPubkeyMsg: (
   };
 };
 
-const handleReqeustEncryptMsg: (
+const handleRequestEncryptMsg: (
   service: SecretWasmService,
   permissionInteractionService: PermissionInteractiveService
-) => InternalHandler<ReqeustEncryptMsg> = (
+) => InternalHandler<RequestEncryptMsg> = (
   service,
   permissionInteractionService
 ) => {
