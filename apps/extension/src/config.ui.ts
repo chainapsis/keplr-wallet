@@ -261,10 +261,6 @@ export const SwapVenues: {
     chainId: "eip155:984122",
   },
   {
-    name: "temp-forma",
-    chainId: "eip155:984122",
-  },
-  {
     name: "neutron-duality",
     chainId: "neutron-1",
   },
