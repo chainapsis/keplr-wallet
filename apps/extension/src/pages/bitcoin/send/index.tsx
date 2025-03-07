@@ -40,7 +40,7 @@ import styled from "styled-components";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import { Psbt } from "bitcoinjs-lib";
 import { toXOnly } from "@keplr-wallet/crypto";
-import { FeeControl } from "../components/input/fee-control";
+// import { FeeControl } from "../components/input/fee-control";
 // import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 // import { BACKGROUND_PORT } from "@keplr-wallet/router";
 // import {
@@ -145,6 +145,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
     sender,
     currency.coinMinimalDenom
   );
+
   const initialFeeRate =
     bitcoinQueries.queryBitcoinFeeEstimates.fees.halfHourFee;
 
@@ -198,6 +199,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
     new ExtensionKVStore("psbt-simulator.bitcoin.send"),
     chainStore,
     chainId,
+    sendConfigs.txSizeConfig,
     sendConfigs.feeConfig,
     psbtSimulatorKey,
     () => {
@@ -260,7 +262,6 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
           vBytes: number;
           relayFeeRate: number;
         };
-        hasChange: boolean;
       }> => {
         noop(psbtSimulationRefresher.count);
 
@@ -325,7 +326,6 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
         return {
           psbtHex,
           txSize,
-          hasChange,
           estimatedFee,
         };
       };
@@ -375,7 +375,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
       }
       bottomButtons={[
         {
-          //   disabled: txConfigsValidate.interactionBlocked,
+          disabled: txConfigsValidate.interactionBlocked,
           text: intl.formatMessage({ id: "button.next" }),
           color: "primary",
           size: "large",
@@ -529,12 +529,12 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
           <Styles.Flex1 />
           <Gutter size="0" />
 
-          <FeeControl
+          {/* <FeeControl
             senderConfig={sendConfigs.senderConfig}
             feeConfig={sendConfigs.feeConfig}
             feeRateConfig={sendConfigs.feeRateConfig}
             psbtSimulator={psbtSimulator}
-          />
+          /> */}
         </Stack>
       </Box>
     </HeaderLayout>

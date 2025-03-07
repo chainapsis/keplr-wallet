@@ -1,4 +1,9 @@
-import { IFeeConfig, IPsbtSimulator, UIProperties } from "./types";
+import {
+  IFeeConfig,
+  IPsbtSimulator,
+  ITxSizeConfig,
+  UIProperties,
+} from "./types";
 import {
   action,
   autorun,
@@ -27,7 +32,6 @@ type PsbtSimulate = () => Promise<{
     txWeight: number;
     dustVBytes?: number;
   };
-  hasChange: boolean;
 }>;
 export type SimulatePsbtFn = () => PsbtSimulate;
 
@@ -51,8 +55,6 @@ class PsbtSimulatorState {
     txWeight: number;
     dustVBytes?: number;
   } | null = null;
-  @observable
-  protected _psbtHasChange: boolean | null = null;
 
   @observable
   protected _psbtSimulate: PsbtSimulate | undefined = undefined;
@@ -114,15 +116,6 @@ class PsbtSimulatorState {
   }
 
   @action
-  setPsbtHasChange(value: boolean) {
-    this._psbtHasChange = value;
-  }
-
-  get hasChange(): boolean | null {
-    return this._psbtHasChange;
-  }
-
-  @action
   setError(error: Error | undefined) {
     this._error = error;
   }
@@ -158,6 +151,7 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
     protected kvStore: KVStore,
     chainGetter: ChainGetter,
     initialChainId: string,
+    protected readonly txSizeConfig: ITxSizeConfig,
     protected readonly feeConfig: IFeeConfig,
     protected readonly initialKey: string,
     // TODO: Add comment about the reason why simulatePsbtFn field is not observable.
@@ -266,12 +260,6 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
     return state.estimatedFee;
   }
 
-  get hasChange(): boolean | null {
-    const key = this.storeKey;
-    const state = this.getState(key);
-    return state.hasChange;
-  }
-
   protected init() {
     // init psbt if it exists
     this._disposers.push(
@@ -286,8 +274,10 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
         this.kvStore.get<string>(key).then((saved) => {
           if (saved) {
             try {
-              Psbt.fromHex(saved); // validate the psbt hex
-              state.setInitialPsbtHex(saved);
+              const { psbtHex, txSize } = this.decodeStoreData(saved);
+              Psbt.fromHex(psbtHex); // validate the psbt hex
+              state.setInitialPsbtHex(psbtHex);
+              state.setTxSize(txSize);
             } catch (e) {
               // just log the error, initial psbt is not critical.
               console.log(e);
@@ -353,7 +343,7 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
         });
 
         promise
-          .then(({ psbtHex, txSize, hasChange, estimatedFee }) => {
+          .then(({ psbtHex, txSize, estimatedFee }) => {
             // Changing the gas in the gas config definitely will make the reaction to the fee config,
             // and, this reaction can potentially create a reaction in the amount config as well (Ex, when the "Max" option set).
             // These potential reactions can create repeated meaningless reactions.
@@ -361,16 +351,17 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
 
             state.setPsbtHex(psbtHex);
             state.setEstimatedFee(estimatedFee);
-            state.setPsbtHasChange(hasChange);
             state.setTxSize(txSize);
             state.setError(undefined);
 
-            this.kvStore.set(key, psbtHex).catch((e) => {
-              console.log(e);
-            });
+            this.kvStore
+              .set(key, this.encodeStoreData(psbtHex, txSize))
+              .catch((e) => {
+                console.log(e);
+              });
           })
           .catch((e) => {
-            console.log(e);
+            console.log("psbt simulate error", e);
             if (isSimpleFetchError(e) && e.response) {
               let message = "";
               const contentType: string = e.response.headers
@@ -416,9 +407,7 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
             this.feeConfig.setFee(this.estimatedFee);
           }
           if (this.txSize != null) {
-            this.feeConfig.setVsize(
-              this.txSize.txVBytes + (this.txSize.dustVBytes ?? 0)
-            );
+            this.txSizeConfig.setTxSize(this.txSize);
           }
         }
       })
@@ -476,6 +465,27 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
     //   .join("/");
     return `${chainIdentifier.identifier}/${psbt}/${this.key}}`;
   }
+
+  protected encodeStoreData(
+    psbtHex: string,
+    txSize: {
+      txVBytes: number;
+      txBytes: number;
+      txWeight: number;
+      dustVBytes?: number;
+    }
+  ): string {
+    const data = JSON.stringify({
+      psbtHex,
+      txSize,
+    });
+    return Buffer.from(data).toString("base64");
+  }
+
+  protected decodeStoreData(data: string) {
+    const decoded = Buffer.from(data, "base64").toString("utf-8");
+    return JSON.parse(decoded);
+  }
 }
 
 // CONTRACT: Use with `observer`
@@ -483,6 +493,7 @@ export const usePsbtSimulator = (
   kvStore: KVStore,
   chainGetter: ChainGetter,
   chainId: string,
+  txSizeConfig: ITxSizeConfig,
   feeConfig: IFeeConfig,
   key: string,
   simulatePsbtFn: SimulatePsbtFn,
@@ -493,6 +504,7 @@ export const usePsbtSimulator = (
       kvStore,
       chainGetter,
       chainId,
+      txSizeConfig,
       feeConfig,
       key,
       simulatePsbtFn

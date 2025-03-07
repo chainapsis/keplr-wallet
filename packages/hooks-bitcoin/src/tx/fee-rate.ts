@@ -1,10 +1,13 @@
-import { IFeeRateConfig, UIProperties } from "./types";
+import { FeeRateType, IFeeRateConfig, UIProperties } from "./types";
 import { TxChainSetter } from "./chain";
 import { ChainGetter } from "@keplr-wallet/stores";
 import { action, computed, makeObservable, observable } from "mobx";
 import { useState } from "react";
-
+import { BitcoinQueriesStore } from "@keplr-wallet/stores-bitcoin";
 export class FeeRateConfig extends TxChainSetter implements IFeeRateConfig {
+  @observable
+  protected _feeRateType: FeeRateType = "manual";
+
   /*
    This field is used to handle the value from the input more flexibly.
    We use string because there is no guarantee that only number is input in input component.
@@ -21,6 +24,7 @@ export class FeeRateConfig extends TxChainSetter implements IFeeRateConfig {
 
   constructor(
     chainGetter: ChainGetter,
+    protected readonly queriesStore: BitcoinQueriesStore,
     initialChainId: string,
     initialFeeRate?: number,
     allowZeroFeeRate?: boolean
@@ -48,17 +52,42 @@ export class FeeRateConfig extends TxChainSetter implements IFeeRateConfig {
     }
   }
 
+  get feeRateType(): FeeRateType {
+    return this._feeRateType;
+  }
+
+  @action
+  setFeeRateType(feeRateType: FeeRateType): void {
+    this._feeRateType = feeRateType;
+  }
+
   get feeRate(): number {
-    if (this.value.trim() === "") {
-      return 0;
+    if (this.feeRateType === "manual") {
+      if (this.value.trim() === "") {
+        return 0;
+      }
+
+      const num = Number.parseFloat(this.value);
+      if (Number.isNaN(num)) {
+        return 0;
+      }
+
+      return num;
     }
 
-    const num = Number.parseFloat(this.value);
-    if (Number.isNaN(num)) {
-      return 0;
-    }
+    const feeRate = this.queriesStore.get(this.chainId).queryBitcoinFeeEstimates
+      .fees;
 
-    return num;
+    switch (this.feeRateType) {
+      case "high":
+        return feeRate.fastestFee;
+      case "average":
+        return feeRate.halfHourFee;
+      case "low":
+        return feeRate.hourFee;
+      default:
+        return 0;
+    }
   }
 
   @computed
@@ -96,11 +125,12 @@ export class FeeRateConfig extends TxChainSetter implements IFeeRateConfig {
 
 export const useFeeRateConfig = (
   chainGetter: ChainGetter,
+  queriesStore: BitcoinQueriesStore,
   chainId: string,
   initialFeeRate?: number
 ) => {
   const [txConfig] = useState(
-    () => new FeeRateConfig(chainGetter, chainId, initialFeeRate)
+    () => new FeeRateConfig(chainGetter, queriesStore, chainId, initialFeeRate)
   );
   txConfig.setChain(chainId);
 
@@ -113,11 +143,19 @@ export const useFeeRateConfig = (
  */
 export const useZeroAllowedFeeRateConfig = (
   chainGetter: ChainGetter,
+  queriesStore: BitcoinQueriesStore,
   chainId: string,
   initialFeeRate?: number
 ) => {
   const [txConfig] = useState(
-    () => new FeeRateConfig(chainGetter, chainId, initialFeeRate, true)
+    () =>
+      new FeeRateConfig(
+        chainGetter,
+        queriesStore,
+        chainId,
+        initialFeeRate,
+        true
+      )
   );
   txConfig.setChain(chainId);
 

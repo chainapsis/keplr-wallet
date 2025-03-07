@@ -41,61 +41,41 @@ export const useBitcoinTxConfigsQueryString = (configs: {
   }, []);
 
   useEffect(() => {
-    console.log("infinite render??");
+    setSearchParams(
+      (prev) => {
+        if (
+          configs.recipientConfig &&
+          configs.recipientConfig.value.trim().length > 0
+        ) {
+          prev.set("initialRecipient", configs.recipientConfig.value);
+        } else {
+          prev.delete("initialRecipient");
+        }
+        // Fraction and amount value are exclusive
+        if (configs.amountConfig.fraction <= 0) {
+          prev.delete("initialAmountFraction");
+          if (configs.amountConfig.value.trim().length > 0) {
+            prev.set("initialAmount", configs.amountConfig.value);
+          } else {
+            prev.delete("initialAmount");
+          }
+        } else {
+          prev.delete("initialAmount");
+          prev.set(
+            "initialAmountFraction",
+            configs.amountConfig.fraction.toString()
+          );
+        }
+        if (configs.feeRateConfig.value != null) {
+          prev.set("initialFeeRate", configs.feeRateConfig.value.toString());
+        }
 
-    // setSearchParams((prev) => {
-    //   if (
-    //     configs.recipientConfig &&
-    //     configs.recipientConfig.value.trim().length > 0
-    //   ) {
-    //     prev.set("initialRecipient", configs.recipientConfig.value);
-    //   } else {
-    //     prev.delete("initialRecipient");
-    //   }
-    //   return prev;
-    // });
-
-    // setSearchParams(
-    //   (prev) => {
-    //     if (
-    //       configs.recipientConfig &&
-    //       configs.recipientConfig.value.trim().length > 0
-    //     ) {
-    //       prev.set("initialRecipient", configs.recipientConfig.value);
-    //     } else {
-    //       prev.delete("initialRecipient");
-    //     }
-    //     // Fraction and amount value are exclusive
-    //     if (configs.amountConfig.fraction <= 0) {
-    //       prev.delete("initialAmountFraction");
-    //       if (configs.amountConfig.value.trim().length > 0) {
-    //         prev.set("initialAmount", configs.amountConfig.value);
-    //       } else {
-    //         prev.delete("initialAmount");
-    //       }
-    //     } else {
-    //       prev.delete("initialAmount");
-    //       prev.set(
-    //         "initialAmountFraction",
-    //         configs.amountConfig.fraction.toString()
-    //       );
-    //     }
-    //     if (configs.feeConfig.fee != null) {
-    //       prev.set(
-    //         "initialFeeCoinDenom",
-    //         configs.feeConfig.fee?.currency.coinDenom
-    //       );
-    //     }
-
-    //     if (configs.feeRateConfig.value != null) {
-    //       prev.set("initialFeeRate", configs.feeRateConfig.value.toString());
-    //     }
-    //     return prev;
-    //   },
-    //   {
-    //     replace: true,
-    //   }
-    // );
+        return prev;
+      },
+      {
+        replace: true,
+      }
+    );
   }, [
     configs.amountConfig.fraction,
     configs.amountConfig.value,

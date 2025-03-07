@@ -3,6 +3,7 @@ import {
   IFeeConfig,
   IFeeRateConfig,
   ISenderConfig,
+  ITxSizeConfig,
   UIProperties,
 } from "./types";
 import { TxChainSetter } from "./chain";
@@ -18,8 +19,6 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   protected _fee: CoinPretty | null = null;
 
   @observable
-  protected _vsize: number | undefined = undefined;
-  @observable
   protected _disableBalanceCheck: boolean = false;
 
   constructor(
@@ -28,7 +27,8 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     initialChainId: string,
     protected readonly senderConfig: ISenderConfig,
     protected readonly amountConfig: IAmountConfig,
-    protected readonly feeRateConfig: IFeeRateConfig
+    protected readonly feeRateConfig: IFeeRateConfig,
+    protected readonly txSizeConfig: ITxSizeConfig
   ) {
     super(chainGetter, initialChainId);
 
@@ -46,11 +46,11 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
   get fee(): CoinPretty | undefined {
     if (!this._fee) {
-      if (!this._vsize) {
+      if (!this.txSizeConfig.txVBytes) {
         return;
       }
 
-      const fee = this.feeRateConfig.feeRate * this._vsize;
+      const fee = this.feeRateConfig.feeRate * this.txSizeConfig.txVBytes;
       // bitcoin will never? has another fee currency than satoshi. (I think)
       return new CoinPretty(this.amountConfig.currency, new Dec(fee));
     }
@@ -61,15 +61,6 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   @action
   setFee(fee: CoinPretty | null) {
     this._fee = fee;
-  }
-
-  get vsize(): number | undefined {
-    return this._vsize;
-  }
-
-  @action
-  setVsize(vsize: number) {
-    this._vsize = vsize;
   }
 
   @computed
@@ -87,6 +78,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       };
     }
 
+    // TODO: check available balance rather than total balance
     const bal = this.bitcoinQueriesStore
       .get(this.chainId)
       .queryBitcoinBalance.getBalance(
@@ -134,6 +126,7 @@ export const useFeeConfig = (
   senderConfig: ISenderConfig,
   amountConfig: IAmountConfig,
   feeRateConfig: IFeeRateConfig,
+  txSizeConfig: ITxSizeConfig,
   initialFn?: (config: FeeConfig) => void
 ) => {
   const [config] = useState(() => {
@@ -143,7 +136,8 @@ export const useFeeConfig = (
       chainId,
       senderConfig,
       amountConfig,
-      feeRateConfig
+      feeRateConfig,
+      txSizeConfig
     );
 
     if (initialFn) {

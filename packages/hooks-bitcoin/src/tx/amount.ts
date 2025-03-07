@@ -67,6 +67,7 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
       if (!result) {
         return "0";
       }
+      // TODO: improve fee handling
       if (this.feeConfig) {
         if (this.feeConfig.fee) {
           result = result.sub(this.feeConfig.fee);
@@ -213,6 +214,7 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
         };
       }
 
+      // TODO: check available balance rather than total balance
       const bal = this.bitcoinQueriesStore
         .get(this.chainId)
         .queryBitcoinBalance.getBalance(
