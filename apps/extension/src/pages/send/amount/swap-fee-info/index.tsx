@@ -62,7 +62,7 @@ export const SwapFeeInfoForBridgeOnSend: FunctionComponent<{
                 : ColorPalette["gray-300"]
             }
           >
-            Bridge Fee
+            <FormattedMessage id="components.fee-info.bridge-fee" />
           </Subtitle4>
           <Gutter size="0.2rem" />
 

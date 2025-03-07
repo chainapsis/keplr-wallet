@@ -760,6 +760,8 @@
   "components.collapsible-list.collapse": "Collapse",
   "components.collapsible-list.view-more": "View {remain} more",
 
+  "components.fee-info.bridge-fee": "Bridge Fee",
+
   "button.confirm": "Confirm",
   "button.ok": "OK",
   "button.next": "Next",

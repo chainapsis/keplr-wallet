@@ -666,6 +666,8 @@
   "components.collapsible-list.collapse": "접기",
   "components.collapsible-list.view-more": "{remain}개 더보기",
 
+  "components.fee-info.bridge-fee": "브릿지 수수료",
+
   "button.confirm": "확인",
   "button.ok": "확인",
   "button.next": "다음",

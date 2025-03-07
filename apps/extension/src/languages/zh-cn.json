@@ -637,6 +637,8 @@
   "components.collapsible-list.view-more-tokens": "查看 {remain} 的更多币种",
   "components.collapsible-list.collapse": "折叠",
 
+  "components.fee-info.bridge-fee": "桥接费用",
+
   "button.confirm": "确定",
   "button.ok": "好的",
   "button.next": "下一步",
