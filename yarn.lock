@@ -8791,6 +8791,7 @@ __metadata:
     "@keplr-wallet/cosmos": 0.12.190
     "@keplr-wallet/crypto": 0.12.190
     "@keplr-wallet/hooks": 0.12.190
+    "@keplr-wallet/hooks-bitcoin": 0.12.190
     "@keplr-wallet/hooks-internal": 0.12.190
     "@keplr-wallet/hooks-starknet": 0.12.190
     "@keplr-wallet/ledger-cosmos": 0.12.190
@@ -8898,12 +8899,39 @@ __metadata:
     "@ledgerhq/hw-transport": ^6
     "@ledgerhq/hw-transport-webhid": ^6
     "@ledgerhq/hw-transport-webusb": ^6
+    bitcoinjs-lib: ^6
     mobx: ^6
     mobx-react-lite: ^3
     mobx-utils: ^6
     react: ^16.8.0 || ^17 || ^18
     react-dom: ^16.8.0 || ^17 || ^18
     starknet: ^6
+  languageName: unknown
+  linkType: soft
+
+"@keplr-wallet/hooks-bitcoin@0.12.190, @keplr-wallet/hooks-bitcoin@workspace:packages/hooks-bitcoin":
+  version: 0.0.0-use.local
+  resolution: "@keplr-wallet/hooks-bitcoin@workspace:packages/hooks-bitcoin"
+  dependencies:
+    "@keplr-wallet/background": 0.12.190
+    "@keplr-wallet/common": 0.12.190
+    "@keplr-wallet/cosmos": 0.12.190
+    "@keplr-wallet/crypto": 0.12.190
+    "@keplr-wallet/proto-types": 0.12.190
+    "@keplr-wallet/simple-fetch": 0.12.190
+    "@keplr-wallet/stores": 0.12.190
+    "@keplr-wallet/stores-bitcoin": 0.12.190
+    "@keplr-wallet/types": 0.12.190
+    "@keplr-wallet/unit": 0.12.190
+    bitcoin-address-validation: ^3.0.0
+    buffer: ^6.0.3
+    long: ^4.0.0
+    utility-types: ^3.10.0
+  peerDependencies:
+    bitcoinjs-lib: ^6
+    mobx: ^6
+    mobx-utils: ^6
+    react: ^16.8.0 || ^17 || ^18
   languageName: unknown
   linkType: soft
 

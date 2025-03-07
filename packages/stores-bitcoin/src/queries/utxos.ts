@@ -12,13 +12,17 @@ export class ObservableQueryBitcoinUTXOsImpl extends ObservableBitcoinIndexerQue
     chainGetter: ChainGetter,
     protected readonly address: string
   ) {
-    super(sharedContext, chainId, chainGetter, `address/${address}/utxos`);
+    super(sharedContext, chainId, chainGetter, `address/${address}/utxo`);
 
     makeObservable(this);
   }
 
-  get utxos(): UTXO[] | undefined {
+  get UTXOs(): UTXO[] | undefined {
     return this.response?.data;
+  }
+
+  get confirmedUTXOs(): UTXO[] | undefined {
+    return this.UTXOs?.filter((utxo) => utxo.status.confirmed);
   }
 }
 
