@@ -1016,6 +1016,82 @@ export const EnableChainsScene: FunctionComponent<{
       ]
     );
 
+    const titleChainImage = (() => {
+      if (keyType === "ledger") {
+        if (fallbackEthereumLedgerApp) {
+          return (
+            <ChainImageFallback
+              chainInfo={chainStore.getChain("eip155:1")}
+              size="3rem"
+            />
+          );
+        }
+
+        if (fallbackStarknetLedgerApp) {
+          return (
+            <ChainImageFallback
+              chainInfo={chainStore.getModularChain("starknet:SN_MAIN")}
+              size="3rem"
+            />
+          );
+        }
+      }
+
+      return (
+        <ChainImageFallback
+          chainInfo={chainStore.getChain("cosmoshub-4")}
+          size="3rem"
+        />
+      );
+    })();
+
+    const nativeChainViewTitle = (() => {
+      if (keyType === "ledger") {
+        if (fallbackEthereumLedgerApp) {
+          return intl.formatMessage({
+            id: "pages.register.enable-chains.native-chain-view.ledger-evm-title",
+          });
+        }
+
+        if (fallbackStarknetLedgerApp) {
+          return intl.formatMessage({
+            id: "pages.register.enable-chains.native-chain-view.ledger-starknet-title",
+          });
+        }
+
+        return intl.formatMessage({
+          id: "pages.register.enable-chains.native-chain-view.ledger-cosmos-title",
+        });
+      }
+
+      return intl.formatMessage({
+        id: "pages.register.enable-chains.native-chain-view.title",
+      });
+    })();
+    const nativeChainViewParagraph = (() => {
+      if (keyType === "ledger") {
+        if (fallbackEthereumLedgerApp) {
+          return intl.formatMessage({
+            id: "pages.register.enable-chains.native-chain-view.ledger-evm-paragraph",
+          });
+        }
+
+        if (fallbackStarknetLedgerApp) {
+          return intl.formatMessage({
+            id: "pages.register.enable-chains.native-chain-view.ledger-starknet-paragraph",
+          });
+        }
+
+        return intl.formatMessage({
+          id: "pages.register.enable-chains.native-chain-view.paragraph",
+        });
+      }
+
+      return intl.formatMessage({
+        id: "pages.register.enable-chains.native-chain-view.paragraph",
+      });
+    })();
+
     return (
       <RegisterSceneBox>
         <SearchTextInput
@@ -1057,6 +1133,9 @@ export const EnableChainsScene: FunctionComponent<{
         >
           <Stack gutter="0.5rem">
             <NativeChainSection
+              title={nativeChainViewTitle}
+              titleChainImage={titleChainImage}
+              paragraph={nativeChainViewParagraph}
               showTitleBox={search.trim().length < 1}
               isCollapsed={isCollapsedNativeChainView}
               isSelectAll={
@@ -1203,67 +1282,6 @@ export const EnableChainsScene: FunctionComponent<{
                 />
               );
             })}
-
-            {!fallbackStarknetLedgerApp &&
-              searchedNonNativeChainInfos.map((modularChainInfo) => {
-                const chainIdentifier = ChainIdHelper.parse(
-                  modularChainInfo.chainId
-                ).identifier;
-                const isChecked =
-                  nonNativeChainListForSuggest.includes(modularChainInfo);
-                const isChainInfoType = "bip44" in modularChainInfo;
-
-                const isNextStepChain =
-                  !fallbackEthereumLedgerApp &&
-                  keyType === "ledger" &&
-                  isChainInfoType &&
-                  (modularChainInfo.bip44.coinType === 60 ||
-                    !!modularChainInfo.features?.includes("eth-address-gen") ||
-                    !!modularChainInfo.features?.includes("eth-key-sign"));
-                if (isNextStepChain) {
-                  return (
-                    <NextStepChainItem
-                      key={chainIdentifier}
-                      modularChainInfo={modularChainInfo}
-                      tagText="EVM"
-                    />
-                  );
-                }
-
-                return (
-                  <ChainItem
-                    showTagText={
-                      fallbackEthereumLedgerApp
-                        ? "EVM"
-                        : fallbackStarknetLedgerApp
-                        ? "Starknet"
-                        : undefined
-                    }
-                    key={chainIdentifier}
-                    chainInfo={modularChainInfo}
-                    enabled={isChecked}
-                    isFresh={true}
-                    blockInteraction={false}
-                    onClick={() => {
-                      if (isChecked) {
-                        setNonNativeChainListForSuggest(
-                          nonNativeChainListForSuggest.filter(
-                            (ci) => ci.chainId !== modularChainInfo.chainId
-                          )
-                        );
-                      } else {
-                        setNonNativeChainListForSuggest([
-                          ...nonNativeChainListForSuggest,
-                          modularChainInfo,
-                        ]);
-                      }
-                    }}
-                  />
-                );
-              })}
-
-            <div ref={infiniteScrollTriggerRef} />
-
             {!fallbackStarknetLedgerApp &&
               !fallbackEthereumLedgerApp &&
               keyType === "ledger" &&
@@ -1342,6 +1360,66 @@ export const EnableChainsScene: FunctionComponent<{
 
                   return null;
                 })}
+
+            {!fallbackStarknetLedgerApp &&
+              searchedNonNativeChainInfos.map((modularChainInfo) => {
+                const chainIdentifier = ChainIdHelper.parse(
+                  modularChainInfo.chainId
+                ).identifier;
+                const isChecked =
+                  nonNativeChainListForSuggest.includes(modularChainInfo);
+                const isChainInfoType = "bip44" in modularChainInfo;
+
+                const isNextStepChain =
+                  !fallbackEthereumLedgerApp &&
+                  keyType === "ledger" &&
+                  isChainInfoType &&
+                  (modularChainInfo.bip44.coinType === 60 ||
+                    !!modularChainInfo.features?.includes("eth-address-gen") ||
+                    !!modularChainInfo.features?.includes("eth-key-sign"));
+                if (isNextStepChain) {
+                  return (
+                    <NextStepChainItem
+                      key={chainIdentifier}
+                      modularChainInfo={modularChainInfo}
+                      tagText="EVM"
+                    />
+                  );
+                }
+
+                return (
+                  <ChainItem
+                    showTagText={
+                      fallbackEthereumLedgerApp
+                        ? "EVM"
+                        : fallbackStarknetLedgerApp
+                        ? "Starknet"
+                        : undefined
+                    }
+                    key={chainIdentifier}
+                    chainInfo={modularChainInfo}
+                    enabled={isChecked}
+                    isFresh={true}
+                    blockInteraction={false}
+                    onClick={() => {
+                      if (isChecked) {
+                        setNonNativeChainListForSuggest(
+                          nonNativeChainListForSuggest.filter(
+                            (ci) => ci.chainId !== modularChainInfo.chainId
+                          )
+                        );
+                      } else {
+                        setNonNativeChainListForSuggest([
+                          ...nonNativeChainListForSuggest,
+                          modularChainInfo,
+                        ]);
+                      }
+                    }}
+                  />
+                );
+              })}
+
+            <div ref={infiniteScrollTriggerRef} />
           </Stack>
         </SimpleBar>
 
@@ -1751,6 +1829,9 @@ const NativeChainSection: FunctionComponent<{
   enabledNativeChainIdentifierList: string[];
   onClickCollapse: () => void;
   onClick: () => void;
+  title: string;
+  titleChainImage: React.ReactNode;
+  paragraph: string;
 }> = ({
   isCollapsed,
   isSelectAll,
@@ -1759,9 +1840,11 @@ const NativeChainSection: FunctionComponent<{
   onClick,
   onClickCollapse,
   showTitleBox,
+  title,
+  titleChainImage,
+  paragraph,
 }) => {
   const theme = useTheme();
-  const { chainStore } = useStore();
 
   return (
     <React.Fragment>
@@ -1793,10 +1876,7 @@ const NativeChainSection: FunctionComponent<{
               <NativeChainMarkIcon width="1.75rem" height="1.75rem" />
             ) : (
               <Box position="relative">
-                <ChainImageFallback
-                  chainInfo={chainStore.getChain("cosmoshub-4")}
-                  size="3rem"
-                />
+                {titleChainImage}
 
                 <Box
                   position="absolute"
@@ -1812,9 +1892,7 @@ const NativeChainSection: FunctionComponent<{
             <Gutter size="0.5rem" />
             <YAxis>
               <XAxis alignY="center">
-                <Subtitle2>
-                  <FormattedMessage id="pages.register.enable-chains.native-chain-view.title" />
-                </Subtitle2>
+                <Subtitle2>{title}</Subtitle2>
                 <Gutter size="0.25rem" />
                 <Subtitle3 color={ColorPalette["blue-300"]}>
                   {enabledNativeChainIdentifierList.length}
@@ -1823,7 +1901,8 @@ const NativeChainSection: FunctionComponent<{
               <Gutter size="0.25rem" />
               {isCollapsed ? null : (
                 <Subtitle3 color={ColorPalette["gray-300"]}>
-                  <FormattedMessage id="pages.register.enable-chains.native-chain-view.paragraph" />
+                  {" "}
+                  {paragraph}
                 </Subtitle3>
               )}
             </YAxis>

@@ -168,6 +168,12 @@
   "pages.register.enable-chains.native-chain-view.title": "All Native Chains",
   "pages.register.enable-chains.native-chain-view.paragraph": "Cosmos, Osmosis, Stargaze, ...",
 
+  "pages.register.enable-chains.native-chain-view.ledger-cosmos-title": "All Native Cosmos Chains",
+  "pages.register.enable-chains.native-chain-view.ledger-evm-title": "All EVM Cosmos Chains",
+  "pages.register.enable-chains.native-chain-view.ledger-evm-paragraph": "Ethereum, Arbitrum, Base...",
+  "pages.register.enable-chains.native-chain-view.ledger-starknet-title": "All Native Starknet Chains",
+  "pages.register.enable-chains.native-chain-view.ledger-starknet-paragraph": "Starknet, Starknet Sepolia",
+
   "pages.register.select-derivation-path.title": "Select Account Derivation Path",
   "pages.register.select-derivation-path.paragraph": "To use both paths, you need to go through the import process twice.",
   "pages.register.select-derivation-path.chain-step": "Chains {currentStep}/{totalStep}",
