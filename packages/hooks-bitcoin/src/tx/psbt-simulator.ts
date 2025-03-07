@@ -15,14 +15,17 @@ import { TxChainSetter } from "./chain";
 import { ChainGetter } from "@keplr-wallet/stores";
 import { isSimpleFetchError } from "@keplr-wallet/simple-fetch";
 import { Psbt } from "bitcoinjs-lib";
+import { CoinPretty } from "@keplr-wallet/unit";
 
 // TODO: utxo를 사용하는 체인에서 공통으로 사용할 수 있는 tx 타입 정의
 type PsbtSimulate = () => Promise<{
-  psbt: Psbt;
+  psbtHex: string;
+  estimatedFee: CoinPretty;
   txSize: {
     txVBytes: number;
     txBytes: number;
     txWeight: number;
+    dustVBytes?: number;
   };
   hasChange: boolean;
 }>;
@@ -32,17 +35,21 @@ class PsbtSimulatorState {
   @observable
   protected _isInitialized: boolean = false;
 
-  // If the initialSelectedUTXOs is null, it means that there is no value stored or being loaded.
+  // If the initialPsbtHex is null, it means that there is no value stored or being loaded.
   @observable.ref
-  protected _initialPsbt: Psbt | null = null;
+  protected _initialPsbtHex: string | null = null;
 
+  // TODO: remove unnecessary observable
+  @observable
+  protected _psbtHex: string | null = null;
   @observable.ref
-  protected _psbt: Psbt | null = null;
+  protected _estimatedFee: CoinPretty | null = null;
   @observable.ref
   protected _txSize: {
     txVBytes: number;
     txBytes: number;
     txWeight: number;
+    dustVBytes?: number;
   } | null = null;
   @observable
   protected _psbtHasChange: boolean | null = null;
@@ -66,8 +73,8 @@ class PsbtSimulatorState {
   }
 
   @action
-  setInitialPsbt(value: Psbt) {
-    this._initialPsbt = value;
+  setInitialPsbtHex(value: string) {
+    this._initialPsbtHex = value;
   }
 
   @action
@@ -80,12 +87,21 @@ class PsbtSimulatorState {
   }
 
   @action
-  setPsbt(value: Psbt) {
-    this._psbt = value;
+  setPsbtHex(value: string) {
+    this._psbtHex = value;
   }
 
-  get psbt(): Psbt | null {
-    return this._psbt;
+  get psbtHex(): string | null {
+    return this._psbtHex;
+  }
+
+  @action
+  setEstimatedFee(value: CoinPretty) {
+    this._estimatedFee = value;
+  }
+
+  get estimatedFee(): CoinPretty | null {
+    return this._estimatedFee;
   }
 
   @action
@@ -227,16 +243,27 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
     return state.error;
   }
 
-  get psbt(): Psbt | null {
+  get psbtHex(): string | null {
     const key = this.storeKey;
     const state = this.getState(key);
-    return state.psbt;
+    return state.psbtHex;
   }
 
-  get txSize(): { txVBytes: number; txBytes: number; txWeight: number } | null {
+  get txSize(): {
+    txVBytes: number;
+    txBytes: number;
+    txWeight: number;
+    dustVBytes?: number;
+  } | null {
     const key = this.storeKey;
     const state = this.getState(key);
     return state.txSize;
+  }
+
+  get estimatedFee(): CoinPretty | null {
+    const key = this.storeKey;
+    const state = this.getState(key);
+    return state.estimatedFee;
   }
 
   get hasChange(): boolean | null {
@@ -259,8 +286,8 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
         this.kvStore.get<string>(key).then((saved) => {
           if (saved) {
             try {
-              const psbt = Psbt.fromHex(saved);
-              state.setInitialPsbt(psbt);
+              Psbt.fromHex(saved); // validate the psbt hex
+              state.setInitialPsbtHex(saved);
             } catch (e) {
               // just log the error, initial psbt is not critical.
               console.log(e);
@@ -297,7 +324,7 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
           const psbtSimulate = this.simulatePsbtFn();
 
           runInAction(() => {
-            if (state.psbt == null || state.error != null) {
+            if (state.psbtHex == null || state.error != null) {
               state.refreshPsbtSimulate(psbtSimulate);
             }
           });
@@ -326,20 +353,19 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
         });
 
         promise
-          .then(({ psbt, txSize, hasChange }) => {
+          .then(({ psbtHex, txSize, hasChange, estimatedFee }) => {
             // Changing the gas in the gas config definitely will make the reaction to the fee config,
             // and, this reaction can potentially create a reaction in the amount config as well (Ex, when the "Max" option set).
             // These potential reactions can create repeated meaningless reactions.
             // To avoid this potential problem, change the value when there is a meaningful change in the gas estimated.
 
-            // 무한루프 일어남;
-
-            state.setPsbt(psbt);
+            state.setPsbtHex(psbtHex);
+            state.setEstimatedFee(estimatedFee);
             state.setPsbtHasChange(hasChange);
             state.setTxSize(txSize);
             state.setError(undefined);
 
-            this.kvStore.set(key, psbt.toHex()).catch((e) => {
+            this.kvStore.set(key, psbtHex).catch((e) => {
               console.log(e);
             });
           })
@@ -385,8 +411,15 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
 
     this._disposers.push(
       autorun(() => {
-        if (this.enabled && this.txSize != null) {
-          this.feeConfig.setVsize(this.txSize.txVBytes);
+        if (this.enabled) {
+          if (this.estimatedFee != null) {
+            this.feeConfig.setFee(this.estimatedFee);
+          }
+          if (this.txSize != null) {
+            this.feeConfig.setVsize(
+              this.txSize.txVBytes + (this.txSize.dustVBytes ?? 0)
+            );
+          }
         }
       })
     );
@@ -416,7 +449,7 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
 
         if (this.isSimulating) {
           // If there is no saved result of the last simulation, user interaction is blocked.
-          return this.psbt == null ? "loading-block" : "loading";
+          return this.psbtHex == null ? "loading-block" : "loading";
         }
       })(),
     };

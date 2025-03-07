@@ -12,15 +12,13 @@ import { useState } from "react";
 import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
 import { InsufficientFeeError } from "./errors";
 import { BitcoinQueriesStore } from "@keplr-wallet/stores-bitcoin";
-import { AppCurrency } from "@keplr-wallet/types";
 
 export class FeeConfig extends TxChainSetter implements IFeeConfig {
   @observable.ref
-  protected _currency?: AppCurrency = undefined;
+  protected _fee: CoinPretty | null = null;
 
   @observable
   protected _vsize: number | undefined = undefined;
-
   @observable
   protected _disableBalanceCheck: boolean = false;
 
@@ -47,14 +45,22 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   get fee(): CoinPretty | undefined {
-    if (!this._vsize) {
-      return;
+    if (!this._fee) {
+      if (!this._vsize) {
+        return;
+      }
+
+      const fee = this.feeRateConfig.feeRate * this._vsize;
+      // bitcoin will never? has another fee currency than satoshi. (I think)
+      return new CoinPretty(this.amountConfig.currency, new Dec(fee));
     }
 
-    return new CoinPretty(
-      this.currency,
-      new Dec(this.feeRateConfig.feeRate * this._vsize).truncate()
-    );
+    return this._fee;
+  }
+
+  @action
+  setFee(fee: CoinPretty | null) {
+    this._fee = fee;
   }
 
   get vsize(): number | undefined {
@@ -62,57 +68,14 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   @action
-  setVsize(vsize: number): void {
+  setVsize(vsize: number) {
     this._vsize = vsize;
-  }
-
-  @computed
-  get currency(): AppCurrency {
-    const modularChainInfo = this.modularChainInfo;
-    if (!("bitcoin" in modularChainInfo)) {
-      throw new Error("Chain doesn't support the bitcoin");
-    }
-
-    if (this._currency) {
-      const find = modularChainInfo.bitcoin.currencies.find(
-        (cur) => cur.coinMinimalDenom === this._currency!.coinMinimalDenom
-      );
-      if (find) {
-        return find;
-      }
-    }
-
-    return modularChainInfo.bitcoin.currencies[0];
-  }
-
-  @action
-  setCurrency(currency: AppCurrency | undefined) {
-    this._currency = currency;
-  }
-  canUseCurrency(currency: AppCurrency): boolean {
-    const modularChainInfo = this.modularChainInfo;
-    if (!("bitcoin" in modularChainInfo)) {
-      throw new Error("Chain doesn't support the bitcoin");
-    }
-
-    return (
-      modularChainInfo.bitcoin.currencies.find(
-        (cur) => cur.coinMinimalDenom === currency.coinMinimalDenom
-      ) != null
-    );
   }
 
   @computed
   get uiProperties(): UIProperties {
     if (this.disableBalanceCheck) {
       return {};
-    }
-
-    if (!this._vsize) {
-      return {
-        error: new Error("Fee is not set"),
-        loadingState: "loading-block",
-      };
     }
 
     const fee = this.fee;

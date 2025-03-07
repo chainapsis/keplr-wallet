@@ -167,8 +167,6 @@ export class BitcoinAccountBase {
       return txSizeEstimator.calcTxSize({
         input_count: inputCount,
         input_script: senderAddressInfo.type,
-        input_m: 1,
-        input_n: 1,
         ...outputParamsWithChange,
       });
     };
@@ -239,23 +237,12 @@ export class BitcoinAccountBase {
         );
         const feeWithChange = calculateFee(txSizeWithChange.txVBytes);
 
-        const dustRelayFee = new Dec(DUST_RELAY_FEE_RATE).mul(
-          new Dec(
-            senderAddressInfo.type === "p2tr"
-              ? txSizeEstimator.P2TR_OUT_SIZE
-              : txSizeEstimator.P2WPKH_OUT_SIZE
-          )
-        ); // TODO: check if this is correct
-
         // Calculate the amount we need with change
-        const requiredAmountWithChange = targetAmount
-          .add(feeWithChange)
-          .add(dustRelayFee);
+        const requiredAmountWithChange = targetAmount.add(feeWithChange);
+        const changeAmount = selectedAmount.sub(requiredAmountWithChange);
 
         // Check if we have enough with a change output
         if (selectedAmount.gte(requiredAmountWithChange)) {
-          const changeAmount = selectedAmount.sub(requiredAmountWithChange);
-
           // If change amount is too small (dust)
           if (changeAmount.lt(DUST)) {
             // If we can discard dust, use fee without change
@@ -269,7 +256,39 @@ export class BitcoinAccountBase {
               };
             }
 
-            // We need to continue and add more UTXOs to make change non-dust
+            // Calculate dust relay fee
+            const dustVBytes =
+              senderAddressInfo.type === "p2tr"
+                ? txSizeEstimator.P2TR_OUT_SIZE
+                : txSizeEstimator.P2WPKH_OUT_SIZE;
+            const dustRelayFee = new Dec(DUST_RELAY_FEE_RATE).mul(
+              new Dec(dustVBytes)
+            );
+
+            const requiredAmountWithChangeAndDust =
+              requiredAmountWithChange.add(dustRelayFee);
+
+            // If we have enough with a change output (output is dust)
+            if (selectedAmount.gte(requiredAmountWithChangeAndDust)) {
+              const dustVBytesInTxVBytes = dustRelayFee
+                .quo(new Dec(feeRate))
+                .roundUp()
+                .toBigNumber()
+                .toJSNumber();
+
+              return {
+                selectedUtxos,
+                recipients,
+                estimatedFee: new CoinPretty(currency, feeWithChange),
+                txSize: {
+                  ...txSizeWithChange,
+                  dustVBytes: dustVBytesInTxVBytes,
+                },
+                hasChange: true,
+              };
+            }
+
+            // We need to continue and add more UTXOs to cover the required amount
             continue;
           }
 

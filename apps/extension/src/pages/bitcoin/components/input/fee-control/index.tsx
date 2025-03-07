@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useLayoutEffect, useState } from "react";
+import React, { FunctionComponent, useState } from "react";
 import { observer } from "mobx-react-lite";
 import {
   IFeeConfig,
@@ -21,9 +21,7 @@ import { VerticalResizeTransition } from "../../../../../components/transition";
 import { FormattedMessage, useIntl } from "react-intl";
 import { XAxis, YAxis } from "../../../../../components/axis";
 import { UIConfigStore } from "../../../../../stores/ui-config";
-import { IChainStore } from "@keplr-wallet/stores";
 import { Tooltip } from "../../../../../components/tooltip";
-import { autorun } from "mobx";
 
 // 기본적으로 `FeeControl` 안에 있는 로직이였지만 `FeeControl` 말고도 다른 UI를 가진 똑같은 기능의 component가
 // 여러개 생기게 되면서 공통적으로 사용하기 위해서 custom hook으로 분리함
@@ -64,45 +62,6 @@ export const useFeeOptionSelectionOnInit = (
   // ]);
 };
 
-export const useAutoFeeCurrencySelectionOnInit = (
-  chainStore: IChainStore,
-  senderConfig: ISenderConfig,
-  feeConfig: IFeeConfig,
-  disableAutomaticFeeSet: boolean | undefined
-) => {
-  useLayoutEffect(() => {
-    if (disableAutomaticFeeSet) {
-      return;
-    }
-
-    // Require to invoke effect whenever chain is changed,
-    // even though it is not used in logic.
-    noop(feeConfig.chainId);
-
-    const disposer = autorun(() => {
-      const modularChainInfo = chainStore.getModularChain(feeConfig.chainId);
-      if ("bitcoin" in modularChainInfo) {
-        const currency = modularChainInfo.bitcoin.currencies[0];
-        if (!currency) {
-          return;
-        }
-
-        feeConfig.setCurrency(currency);
-      }
-    });
-
-    return () => {
-      disposer();
-    };
-  }, [
-    chainStore,
-    disableAutomaticFeeSet,
-    feeConfig,
-    feeConfig.chainId,
-    senderConfig.sender,
-  ]);
-};
-
 export const FeeControl: FunctionComponent<{
   senderConfig: ISenderConfig;
   feeConfig: IFeeConfig;
@@ -113,7 +72,7 @@ export const FeeControl: FunctionComponent<{
   disableClick?: boolean;
 }> = observer(
   ({
-    senderConfig,
+    // senderConfig,
     feeConfig,
     feeRateConfig,
     psbtSimulator,
@@ -124,7 +83,7 @@ export const FeeControl: FunctionComponent<{
       analyticsStore,
       // bitcoinQueriesStore,
       priceStore,
-      chainStore,
+      // chainStore,
       uiConfigStore,
     } = useStore();
 
@@ -133,13 +92,6 @@ export const FeeControl: FunctionComponent<{
 
     useFeeOptionSelectionOnInit(
       uiConfigStore,
-      feeConfig,
-      disableAutomaticFeeSet
-    );
-
-    useAutoFeeCurrencySelectionOnInit(
-      chainStore,
-      senderConfig,
       feeConfig,
       disableAutomaticFeeSet
     );
@@ -446,6 +398,6 @@ export const FeeControl: FunctionComponent<{
   }
 );
 
-const noop = (..._args: any[]) => {
-  // noop
-};
+// const noop = (..._args: any[]) => {
+//   // noop
+// };

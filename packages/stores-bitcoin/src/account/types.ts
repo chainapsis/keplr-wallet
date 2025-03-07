@@ -28,6 +28,7 @@ export interface UTXOSelection {
     txVBytes: number;
     txBytes: number;
     txWeight: number;
+    dustVBytes?: number;
   };
   hasChange: boolean;
 }

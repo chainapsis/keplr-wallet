@@ -19,8 +19,8 @@ import { Subtitle3 } from "../../../components/typography";
 import { Box } from "../../../components/box";
 import { YAxis } from "../../../components/axis";
 import { Gutter } from "../../../components/gutter";
-// import { useNotification } from "../../../hooks/notification";
-import { CoinPretty } from "@keplr-wallet/unit";
+import { useNotification } from "../../../hooks/notification";
+import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { ColorPalette } from "../../../styles";
 import { openPopupWindow } from "@keplr-wallet/popup";
 import {
@@ -69,7 +69,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
   const navigate = useNavigate();
   const intl = useIntl();
 
-  //   const notification = useNotification();
+  const notification = useNotification();
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -246,12 +246,19 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
         throw new Error("Can't find utxos");
       }
 
+      // TODO: check discarding dust change
+
       const simulate = async (): Promise<{
-        psbt: Psbt;
+        psbtHex: string;
         txSize: {
           txVBytes: number;
           txBytes: number;
           txWeight: number;
+        };
+        estimatedFee: CoinPretty;
+        dust?: {
+          vBytes: number;
+          relayFeeRate: number;
         };
         hasChange: boolean;
       }> => {
@@ -263,18 +270,39 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
           ? toXOnly(Buffer.from(publicKey))
           : undefined;
 
+        const MAX_SAFE_OUTPUT = new Dec(2 ** 53 - 1);
+        const ZERO = new Dec(0);
+        const amountInSatoshi = new Dec(
+          sendConfigs.amountConfig.amount[0].toCoin().amount
+        );
+
+        let recipientsForTransaction = [];
+        if (amountInSatoshi > MAX_SAFE_OUTPUT) {
+          // 큰 금액을 여러 출력으로 분할
+          let remainingAmount = amountInSatoshi;
+          while (!remainingAmount.gt(ZERO)) {
+            const chunkAmount = remainingAmount.gt(MAX_SAFE_OUTPUT)
+              ? MAX_SAFE_OUTPUT
+              : remainingAmount;
+            recipientsForTransaction.push({
+              address: sendConfigs.recipientConfig.recipient,
+              amount: chunkAmount.truncate().toBigNumber().toJSNumber(),
+            });
+            remainingAmount = remainingAmount.sub(chunkAmount);
+          }
+        } else {
+          recipientsForTransaction = [
+            {
+              address: sendConfigs.recipientConfig.recipient,
+              amount: amountInSatoshi.truncate().toBigNumber().toJSNumber(),
+            },
+          ];
+        }
+
         const selection = bitcoinAccount.selectUTXOs({
           senderAddress,
           utxos,
-          recipients: [
-            {
-              address: sendConfigs.recipientConfig.recipient,
-              amount: parseInt(
-                sendConfigs.amountConfig.amount[0].toCoin().amount,
-                10
-              ), // TODO: 너무 큰 값은 여러 개의 입력으로 쪼개야함
-            },
-          ],
+          recipients: recipientsForTransaction,
           feeRate: sendConfigs.feeRateConfig.feeRate,
         });
 
@@ -294,12 +322,11 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
           hasChange,
         });
 
-        const psbt = Psbt.fromHex(psbtHex);
-
         return {
-          psbt,
+          psbtHex,
           txSize,
           hasChange,
+          estimatedFee,
         };
       };
 
@@ -361,7 +388,8 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
 
         if (
           txConfigsValidate.interactionBlocked ||
-          !sendConfigs.feeConfig.fee
+          !sendConfigs.feeConfig.fee ||
+          !psbtSimulator.psbtHex
         ) {
           return;
         }
@@ -370,148 +398,96 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
 
         try {
           // TODO: logic for send bitcoin tx
+          const psbt = Psbt.fromHex(psbtSimulator.psbtHex);
+
+          const txHash = await bitcoinAccount.signAndPushTx(psbt);
+
+          // TODO: submit and refresh balance
+
+          //     new InExtensionMessageRequester()
+          //       .sendMessage(
+          //         BACKGROUND_PORT,
+          //         new SubmitStarknetTxHashMsg(chainId, txHash)
+          //       )
+          //       .then(() => {
+          //         starknetQueries.queryStarknetERC20Balance
+          //           .getBalance(
+          //             chainId,
+          //             chainStore,
+          //             account.starknetHexAddress,
+          //             sendConfigs.amountConfig.amount[0].currency.coinMinimalDenom
+          //           )
+          //           ?.fetch();
+          //         if (
+          //           sendConfigs.feeConfig.fee &&
+          //           sendConfigs.feeConfig.fee.currency.coinMinimalDenom !==
+          //             sendConfigs.amountConfig.amount[0].currency.coinMinimalDenom
+          //         ) {
+          //           starknetQueries.queryStarknetERC20Balance
+          //             .getBalance(
+          //               chainId,
+          //               chainStore,
+          //               account.starknetHexAddress,
+          //               sendConfigs.feeConfig.fee.currency.coinMinimalDenom
+          //             )
+          //             ?.fetch();
+          //         }
+          //         notification.show(
+          //           "success",
+          //           intl.formatMessage({
+          //             id: "notification.transaction-success",
+          //           }),
+          //           ""
+          //         );
+          //       })
+          //       .catch((e) => {
+          //         // 이 경우에는 tx가 커밋된 이후의 오류이기 때문에 이미 페이지는 sign 페이지에서부터 전환된 상태다.
+          //         // 따로 멀 처리해줄 필요가 없다
+          //         console.log(e);
+          //       });
+
+          //     new InExtensionMessageRequester().sendMessage(
+          //       BACKGROUND_PORT,
+          //       new AddRecentSendHistoryMsg(
+          //         chainId,
+          //         historyType,
+          //         sender,
+          //         recipient,
+          //         [amount],
+          //         "",
+          //         undefined
+          //       )
+          //     );
+
+          notification.show(
+            "success",
+            intl.formatMessage({ id: "notification.transaction-success" }),
+            txHash
+          );
+
+          if (!isDetachedMode) {
+            navigate("/", {
+              replace: true,
+            });
+          } else {
+            window.close();
+          }
         } catch (e) {
+          if (e?.message === "Request rejected") {
+            return;
+          }
           console.log(e);
+          notification.show(
+            "failed",
+            intl.formatMessage({ id: "error.transaction-failed" }),
+            ""
+          );
+          navigate("/", {
+            replace: true,
+          });
         } finally {
           setIsLoading(false);
         }
-
-        // if (
-        //   !txConfigsValidate.interactionBlocked &&
-        //   sendConfigs.feeConfig.maxFee &&
-        //   sendConfigs.feeConfig.maxGasPrice
-        // ) {
-        //   setIsLoading(true);
-        //   try {
-        //     const type = sendConfigs.feeConfig.type;
-        //     const feeContractAddress =
-        //       type === "ETH"
-        //         ? starknet.ethContractAddress
-        //         : starknet.strkContractAddress;
-        //     const feeCurrency = chainStore
-        //       .getModularChainInfoImpl(chainId)
-        //       .getCurrencies("starknet")
-        //       .find(
-        //         (cur) => cur.coinMinimalDenom === `erc20:${feeContractAddress}`
-        //       );
-        //     if (!feeCurrency) {
-        //       throw new Error("Can't find fee currency");
-        //     }
-
-        //     const sender = account.starknetHexAddress;
-        //     const recipient = sendConfigs.recipientConfig.recipient;
-        //     const currency = sendConfigs.amountConfig.currency;
-        //     const amount = {
-        //       amount: sendConfigs.amountConfig.amount[0].toDec().toString(),
-        //       denom: currency.coinMinimalDenom,
-        //     };
-
-        //     const { transaction_hash: txHash } = await starknetAccountStore
-        //       .getAccount(chainId)
-        //       .executeForSendTokenTx(
-        //         sender,
-        //         amount.amount,
-        //         currency,
-        //         recipient,
-        //         (() => {
-        //           if (type === "ETH") {
-        //             return {
-        //               type: "ETH",
-        //               maxFee: sendConfigs.feeConfig.maxFee.toCoin().amount,
-        //             };
-        //           } else if (type === "STRK") {
-        //             return {
-        //               type: "STRK",
-        //               gas: sendConfigs.gasConfig.gas.toString(),
-        //               maxGasPrice: num.toHex(
-        //                 sendConfigs.feeConfig.maxGasPrice.toCoin().amount
-        //               ),
-        //             };
-        //           } else {
-        //             throw new Error("Invalid fee type");
-        //           }
-        //         })()
-        //       );
-
-        //     new InExtensionMessageRequester()
-        //       .sendMessage(
-        //         BACKGROUND_PORT,
-        //         new SubmitStarknetTxHashMsg(chainId, txHash)
-        //       )
-        //       .then(() => {
-        //         starknetQueries.queryStarknetERC20Balance
-        //           .getBalance(
-        //             chainId,
-        //             chainStore,
-        //             account.starknetHexAddress,
-        //             sendConfigs.amountConfig.amount[0].currency.coinMinimalDenom
-        //           )
-        //           ?.fetch();
-        //         if (
-        //           sendConfigs.feeConfig.fee &&
-        //           sendConfigs.feeConfig.fee.currency.coinMinimalDenom !==
-        //             sendConfigs.amountConfig.amount[0].currency.coinMinimalDenom
-        //         ) {
-        //           starknetQueries.queryStarknetERC20Balance
-        //             .getBalance(
-        //               chainId,
-        //               chainStore,
-        //               account.starknetHexAddress,
-        //               sendConfigs.feeConfig.fee.currency.coinMinimalDenom
-        //             )
-        //             ?.fetch();
-        //         }
-        //         notification.show(
-        //           "success",
-        //           intl.formatMessage({
-        //             id: "notification.transaction-success",
-        //           }),
-        //           ""
-        //         );
-        //       })
-        //       .catch((e) => {
-        //         // 이 경우에는 tx가 커밋된 이후의 오류이기 때문에 이미 페이지는 sign 페이지에서부터 전환된 상태다.
-        //         // 따로 멀 처리해줄 필요가 없다
-        //         console.log(e);
-        //       });
-
-        //     new InExtensionMessageRequester().sendMessage(
-        //       BACKGROUND_PORT,
-        //       new AddRecentSendHistoryMsg(
-        //         chainId,
-        //         historyType,
-        //         sender,
-        //         recipient,
-        //         [amount],
-        //         "",
-        //         undefined
-        //       )
-        //     );
-
-        //     if (!isDetachedMode) {
-        //       navigate("/", {
-        //         replace: true,
-        //       });
-        //     } else {
-        //       window.close();
-        //     }
-        //   } catch (e) {
-        //     if (e?.message === "Request rejected") {
-        //       return;
-        //     }
-        //     console.log(e);
-        //     notification.show(
-        //       "failed",
-        //       intl.formatMessage({ id: "error.transaction-failed" }),
-        //       ""
-        //     );
-        //     navigate("/", {
-        //       replace: true,
-        //     });
-        //   } finally {
-        //     setIsLoading(false);
-        //   }
-        // }
       }}
     >
       <Box
