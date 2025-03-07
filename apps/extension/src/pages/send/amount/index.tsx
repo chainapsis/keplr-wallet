@@ -2142,13 +2142,16 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                         id: "page.send.amount.warning.expected-amount-too-small-title",
                       },
                       {
-                        inAmount:
-                          ibcSwapConfigsForBridge.amountConfig.amount[0].toString(),
+                        inAmount: ibcSwapConfigsForBridge.amountConfig.amount[0]
+                          .hideIBCMetadata(true)
+                          .toString(),
                         srcChain:
                           ibcSwapConfigsForBridge.amountConfig.chainInfo
                             .chainName,
                         outAmount:
-                          ibcSwapConfigsForBridge.amountConfig.outAmount.toString(),
+                          ibcSwapConfigsForBridge.amountConfig.outAmount
+                            .hideIBCMetadata(true)
+                            .toString(),
                         dstChain: chainStore.getChain(
                           ibcSwapConfigsForBridge.amountConfig.outChainId
                         ).chainName,
