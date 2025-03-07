@@ -260,6 +260,10 @@ export const SwapVenues: {
     name: "temp-forma",
     chainId: "eip155:984122",
   },
+  {
+    name: "neutron-duality",
+    chainId: "neutron-1",
+  },
 ];
 
 export const SwapFeeBps = {
