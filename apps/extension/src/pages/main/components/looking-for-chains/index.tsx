@@ -56,6 +56,7 @@ export const LookingForChainItem: FunctionComponent<{
   stored: boolean;
 }> = observer(({ chainInfo, embedded, stored }) => {
   const { analyticsStore, keyRingStore, chainStore } = useStore();
+  const keyType = keyRingStore.selectedKeyInfo?.type;
   const intl = useIntl();
   const theme = useTheme();
 
@@ -147,6 +148,30 @@ export const LookingForChainItem: FunctionComponent<{
                 chainId: chainInfo.chainId,
                 chainName: chainInfo.chainName,
               });
+
+              if (keyType === "ledger" && "starknet" in chainInfo) {
+                browser.tabs.create({
+                  url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&skipWelcome=true&initialSearchValue=${chainInfo.chainName}&fallbackStarknetLedgerApp=true`,
+                });
+                return;
+              }
+
+              const isEthereumChain =
+                ("cosmos" in chainInfo &&
+                  chainInfo.cosmos.bip44.coinType === 60 &&
+                  (!!chainInfo.cosmos.features?.includes("eth-address-gen") ||
+                    !!chainInfo.cosmos.features?.includes("eth-key-sign"))) ||
+                ("bip44" in chainInfo &&
+                  chainInfo.bip44.coinType === 60 &&
+                  (!!chainInfo.features?.includes("eth-address-gen") ||
+                    !!chainInfo.features?.includes("eth-key-sign")));
+
+              if (keyType === "ledger" && isEthereumChain) {
+                browser.tabs.create({
+                  url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&skipWelcome=true&initialSearchValue=${chainInfo.chainName}&fallbackEthereumLedgerApp=true`,
+                });
+                return;
+              }
 
               browser.tabs.create({
                 url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&skipWelcome=true&initialSearchValue=${chainInfo.chainName}`,
