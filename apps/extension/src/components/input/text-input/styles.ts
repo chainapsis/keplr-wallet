@@ -178,6 +178,11 @@ export const Styles = {
 
     font-size: 0.875rem;
     font-weight: 400;
+
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-300"]
+        : ColorPalette["gray-300"]};
   `,
   SubText: styled(Caption2)<Pick<TextInputProps, "error" | "paragraph">>`
     margin-top: 4px;
