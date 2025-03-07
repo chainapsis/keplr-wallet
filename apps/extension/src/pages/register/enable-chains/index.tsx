@@ -650,6 +650,42 @@ export const EnableChainsScene: FunctionComponent<{
         const bChainIdentifier = ChainIdHelper.parse(
           bModularChainInfo.chainId
         ).identifier;
+
+        // Cosmos Hub를 먼저 배치
+        if (
+          aChainIdentifier.startsWith("cosmoshub") &&
+          !bChainIdentifier.startsWith("cosmoshub")
+        ) {
+          return -1;
+        }
+
+        if (
+          !aChainIdentifier.startsWith("cosmoshub") &&
+          bChainIdentifier.startsWith("cosmoshub")
+        ) {
+          return 1;
+        }
+
+        // Ethereum을 두 번째로 배치
+        const isNotCosmosHub =
+          !aChainIdentifier.startsWith("cosmoshub") &&
+          !bChainIdentifier.startsWith("cosmoshub");
+        if (isNotCosmosHub) {
+          if (
+            aChainIdentifier === "eip155:1" &&
+            !bChainIdentifier.startsWith("eip155:1")
+          ) {
+            return -1;
+          }
+
+          if (
+            !aChainIdentifier.startsWith("eip155:1") &&
+            bChainIdentifier === "eip155:1"
+          ) {
+            return 1;
+          }
+        }
+
         const aHasPriority =
           sortPriorityChainIdentifierMap.has(aChainIdentifier);
         const bHasPriority =
