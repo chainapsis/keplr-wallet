@@ -20,7 +20,7 @@ import {
   UTXO,
   UTXOSelection,
 } from "./types";
-import { DUST_RELAY_FEE_RATE, DUST_THRESHOLD } from "./constant";
+import { NATIVE_SEGWIT_DUST_THRESHOLD } from "./constant";
 
 export class BitcoinAccountBase {
   @observable
@@ -49,10 +49,9 @@ export class BitcoinAccountBase {
    * @param utxos UTXOs associated with the sender's address (must be of the same payment type - p2wpkh, p2tr)
    * @param recipients Recipients of the transaction with amount and address
    * @param feeRate Transaction fee rate in sat/vB
-   * @param inscriptionUtxos UTXOs containing inscriptions (for Ordinals)
-   * @param runesUtxos UTXOs containing Runes protocol data
-   * @param dustRelayFeeRate Fee rate for dust outputs
-   * @param discardDust Whether to discard dust outputs
+   * @param feeCurrency Fee currency optional, default is the main currency of the chain
+   * @param isSendMax Whether to send max amount, do not calculate change output
+   * @param discardDustChange Whether to discard dust outputs
    * @returns {selectedUtxos, recipients, estimatedFee, txSize} Selected UTXOs, recipients, transaction fee, and transaction size
    */
   selectUTXOs({
@@ -60,18 +59,12 @@ export class BitcoinAccountBase {
     utxos,
     recipients,
     feeRate,
-    inscriptionUtxos = [],
-    runesUtxos = [],
-    discardDust = false,
-    dustRelayFeeRate = DUST_RELAY_FEE_RATE,
+    feeCurrency,
+    isSendMax = false,
+    discardDustChange = true,
   }: SelectUTXOsParams): UTXOSelection | null {
     // 1. Basic validation
-    if (
-      !utxos.length ||
-      !recipients.length ||
-      feeRate <= 0 ||
-      dustRelayFeeRate <= 0
-    ) {
+    if (!utxos.length || !recipients.length || feeRate <= 0) {
       throw new Error("Invalid parameters");
     }
 
@@ -85,31 +78,17 @@ export class BitcoinAccountBase {
       throw new Error("Invalid chain id");
     }
 
-    const currency = this.chainGetter
-      .getModularChainInfoImpl(this.chainId)
-      .getCurrencies("bitcoin")[0];
+    const currency =
+      feeCurrency ??
+      this.chainGetter
+        .getModularChainInfoImpl(this.chainId)
+        .getCurrencies("bitcoin")[0];
     if (!currency) {
       throw new Error("Invalid currency");
     }
 
-    // 3. Filter and sort UTXOs
-    // 3-1. filter unconfirmed utxos
-    // 3-2. filter outbound utxos (check lately created txs)
-    // 3-3. filter protected utxos (inscription, runes, etc.)
-    // 3-4. filter dust utxos
-
-    const utxosToExclude = new Set<string>();
-    [...inscriptionUtxos, ...runesUtxos].forEach((utxo) => {
-      utxosToExclude.add(`${utxo.txid}:${utxo.vout}`);
-    });
-
-    const sortedUtxos = utxos
-      .filter((utxo) => !utxosToExclude.has(`${utxo.txid}:${utxo.vout}`))
-      .sort((a, b) => b.value - a.value);
-
-    if (sortedUtxos.length === 0) {
-      throw new Error("No UTXOs found");
-    }
+    // 3. Consider utxos is filtered (unconfirmed, outbound, protected, dust), just sort by descending order
+    const sortedUtxos = utxos.sort((a, b) => b.value - a.value);
 
     // 4. Validate addresses
     const validateAndGetAddressInfo = (address: string) => {
@@ -179,62 +158,40 @@ export class BitcoinAccountBase {
     // Helper function for calculating fee
     const calculateFee = (size: number) => new Dec(Math.ceil(size * feeRate));
 
-    // 8. Select UTXOs
+    const DUST = new Dec(NATIVE_SEGWIT_DUST_THRESHOLD);
+
+    // 8. Send max case (use all UTXOs)
+    if (isSendMax) {
+      const totalValue = sortedUtxos.reduce(
+        (sum, utxo) => sum.add(new Dec(utxo.value)),
+        new Dec(0)
+      );
+
+      // No change output in send max case
+      const txSize = calculateTxSize(sortedUtxos.length, outputParams, false);
+      const totalFee = calculateFee(txSize.txVBytes);
+
+      // just return all utxos, even though fee + target amount is greater than total value
+      // recalculation request will be done in the send config
+      return {
+        selectedUtxos: sortedUtxos,
+        spendableAmount: totalValue.sub(totalFee),
+        estimatedFee: new CoinPretty(currency, totalFee),
+        txSize: txSize,
+        hasChange: false,
+      };
+    }
+
+    // 9. General UTXO selection algorithm
     const selectedUtxos: UTXO[] = [];
     let selectedAmount = new Dec(0);
-    const DUST = new Dec(DUST_THRESHOLD);
 
-    for (const candidate of sortedUtxos) {
-      // Calculate tx size and fee before adding this candidate
-      const currentTxSize = calculateTxSize(
-        selectedUtxos.length,
-        outputParams,
-        false
-      );
-      const currentFee = calculateFee(currentTxSize.txVBytes);
+    for (const utxo of sortedUtxos) {
+      selectedUtxos.push(utxo);
+      selectedAmount = selectedAmount.add(new Dec(utxo.value));
 
-      // Calculate tx size and fee after adding this candidate
-      const txSizeWithCandidate = calculateTxSize(
-        selectedUtxos.length + 1,
-        outputParams,
-        false
-      );
-      const feeWithoutChange = calculateFee(txSizeWithCandidate.txVBytes);
-
-      // Calculate the fee contribution of this candidate
-      const candidateFeeContribution = feeWithoutChange.sub(currentFee);
-      const candidateValue = new Dec(candidate.value);
-
-      // Skip if candidate doesn't contribute positively
-      if (candidateValue.lte(candidateFeeContribution)) {
-        throw new Error(
-          `Skipping UTXO: value doesn't exceed fee contribution, ${candidate.txid}:${candidate.vout}`
-        );
-      }
-
-      // Add this candidate to our selection
-      selectedUtxos.push(candidate);
-      selectedAmount = selectedAmount.add(candidateValue);
-
-      // Calculate the amount we need (target + fee without change)
-      const requiredAmount = targetAmount.add(feeWithoutChange);
-
-      // Check if we have enough without a change output
-      if (selectedAmount.gte(requiredAmount)) {
-        const remainderValue = selectedAmount.sub(requiredAmount);
-
-        // If remainder is dust and we can discard it
-        if (remainderValue.lt(DUST) && discardDust) {
-          return {
-            selectedUtxos,
-            recipients,
-            estimatedFee: new CoinPretty(currency, feeWithoutChange),
-            txSize: txSizeWithCandidate,
-            hasChange: false,
-          };
-        }
-
-        // Calculate tx size and fee with change output
+      if (selectedAmount.gte(targetAmount)) {
+        // first assume change output is included
         const txSizeWithChange = calculateTxSize(
           selectedUtxos.length,
           outputParams,
@@ -242,76 +199,69 @@ export class BitcoinAccountBase {
         );
         const feeWithChange = calculateFee(txSizeWithChange.txVBytes);
 
-        // Calculate the amount we need with change
-        const requiredAmountWithChange = targetAmount.add(feeWithChange);
-        const changeAmount = selectedAmount.sub(requiredAmountWithChange);
+        // calculate the value of change output
+        const remainderValue = selectedAmount
+          .sub(targetAmount)
+          .sub(feeWithChange);
 
-        // Check if we have enough with a change output
-        if (selectedAmount.gte(requiredAmountWithChange)) {
-          // If change amount is too small (dust)
-          if (changeAmount.lt(DUST)) {
-            // If we can discard dust, use fee without change
-            if (discardDust) {
-              return {
-                selectedUtxos,
-                recipients,
-                estimatedFee: new CoinPretty(currency, feeWithoutChange),
-                txSize: txSizeWithCandidate,
-                hasChange: false,
-              };
-            }
-
-            // Calculate dust relay fee
-            const dustVBytes =
-              senderAddressInfo.type === "p2tr"
-                ? txSizeEstimator.P2TR_OUT_SIZE
-                : txSizeEstimator.P2WPKH_OUT_SIZE;
-            const dustRelayFee = new Dec(DUST_RELAY_FEE_RATE).mul(
-              new Dec(dustVBytes)
-            );
-
-            const requiredAmountWithChangeAndDust =
-              requiredAmountWithChange.add(dustRelayFee);
-
-            // If we have enough with a change output (output is dust)
-            if (selectedAmount.gte(requiredAmountWithChangeAndDust)) {
-              const dustVBytesInTxVBytes = dustRelayFee
-                .quo(new Dec(feeRate))
-                .roundUp()
-                .toBigNumber()
-                .toJSNumber();
-
-              return {
-                selectedUtxos,
-                recipients,
-                estimatedFee: new CoinPretty(currency, feeWithChange),
-                txSize: {
-                  ...txSizeWithChange,
-                  dustVBytes: dustVBytesInTxVBytes,
-                },
-                hasChange: true,
-              };
-            }
-
-            // We need to continue and add more UTXOs to cover the required amount
-            continue;
-          }
-
-          // We have a valid change amount
-          return {
-            selectedUtxos,
-            recipients,
-            estimatedFee: new CoinPretty(currency, feeWithChange),
-            txSize: txSizeWithChange,
-            hasChange: true,
-          };
+        // if remainderValue is greater than or equal to dust, or
+        // if remainderValue is less than dust and discardDustChange is true
+        // then break
+        if (
+          remainderValue.gte(DUST) ||
+          (remainderValue.lt(DUST) && discardDustChange)
+        ) {
+          break;
         }
       }
-      // If we haven't returned, we need more UTXOs
     }
 
-    // We've used all available UTXOs but still don't have enough
-    return null;
+    // 10. If selectedAmount is less than targetAmount, return null
+    if (selectedAmount.lt(targetAmount)) {
+      return null;
+    }
+
+    // 11. Final calculation
+    // first assume change output is included
+    const txSizeWithChange = calculateTxSize(
+      selectedUtxos.length,
+      outputParams,
+      true
+    );
+    const feeWithChange = calculateFee(txSizeWithChange.txVBytes);
+    const remainderValue = selectedAmount.sub(targetAmount).sub(feeWithChange);
+
+    // if remainderValue is less than dust, then calculate without change output
+    const hasChange = remainderValue.gte(DUST);
+
+    let finalTxSize, finalFee, spendableAmount;
+
+    if (hasChange) {
+      // change output is included
+      finalTxSize = txSizeWithChange;
+      finalFee = feeWithChange;
+      spendableAmount = targetAmount;
+    } else {
+      // change output is not included
+      finalTxSize = calculateTxSize(selectedUtxos.length, outputParams, false);
+      finalFee = calculateFee(finalTxSize.txVBytes);
+
+      // if discardDustChange is true, discard dust and use target amount
+      // otherwise, use selected amount minus fee
+      if (discardDustChange) {
+        spendableAmount = targetAmount;
+      } else {
+        spendableAmount = selectedAmount.sub(finalFee);
+      }
+    }
+
+    return {
+      selectedUtxos,
+      spendableAmount: spendableAmount,
+      estimatedFee: new CoinPretty(currency, finalFee),
+      txSize: finalTxSize,
+      hasChange: hasChange,
+    };
   }
 
   /**

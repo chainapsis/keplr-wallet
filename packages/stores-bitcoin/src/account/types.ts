@@ -1,14 +1,14 @@
-import { CoinPretty } from "@keplr-wallet/unit";
+import { AppCurrency } from "@keplr-wallet/types";
+import { CoinPretty, Dec } from "@keplr-wallet/unit";
 
 export interface SelectUTXOsParams {
   senderAddress: string;
   utxos: UTXO[];
   recipients: UTXOSelectionRecipient[];
   feeRate: number;
-  inscriptionUtxos?: Pick<UTXO, "txid" | "vout">[];
-  runesUtxos?: Pick<UTXO, "txid" | "vout">[];
-  discardDust?: boolean;
-  dustRelayFeeRate?: number;
+  feeCurrency?: AppCurrency;
+  isSendMax?: boolean;
+  discardDustChange?: boolean;
 }
 
 export interface BuildPsbtParams {
@@ -22,13 +22,12 @@ export interface BuildPsbtParams {
 
 export interface UTXOSelection {
   selectedUtxos: UTXO[];
-  recipients: UTXOSelectionRecipient[];
+  spendableAmount: Dec;
   estimatedFee: CoinPretty;
   txSize: {
     txVBytes: number;
     txBytes: number;
     txWeight: number;
-    dustVBytes?: number;
   };
   hasChange: boolean;
 }
