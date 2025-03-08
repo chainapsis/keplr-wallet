@@ -200,7 +200,6 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
     chainStore,
     chainId,
     sendConfigs.txSizeConfig,
-    sendConfigs.feeConfig,
     psbtSimulatorKey,
     () => {
       if (!sendConfigs.amountConfig.currency) {

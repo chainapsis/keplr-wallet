@@ -1,9 +1,4 @@
-import {
-  IFeeConfig,
-  IPsbtSimulator,
-  ITxSizeConfig,
-  UIProperties,
-} from "./types";
+import { IPsbtSimulator, ITxSizeConfig, UIProperties } from "./types";
 import {
   action,
   autorun,
@@ -20,12 +15,9 @@ import { TxChainSetter } from "./chain";
 import { ChainGetter } from "@keplr-wallet/stores";
 import { isSimpleFetchError } from "@keplr-wallet/simple-fetch";
 import { Psbt } from "bitcoinjs-lib";
-import { CoinPretty } from "@keplr-wallet/unit";
 
-// TODO: utxo를 사용하는 체인에서 공통으로 사용할 수 있는 tx 타입 정의
 type PsbtSimulate = () => Promise<{
   psbtHex: string;
-  estimatedFee: CoinPretty;
   txSize: {
     txVBytes: number;
     txBytes: number;
@@ -41,18 +33,13 @@ class PsbtSimulatorState {
   // If the initialPsbtHex is null, it means that there is no value stored or being loaded.
   @observable.ref
   protected _initialPsbtHex: string | null = null;
+  @observable
+  protected _initialTxSize: number | null = null;
 
-  // TODO: remove unnecessary observable
   @observable
   protected _psbtHex: string | null = null;
-  @observable.ref
-  protected _estimatedFee: CoinPretty | null = null;
-  @observable.ref
-  protected _txSize: {
-    txVBytes: number;
-    txBytes: number;
-    txWeight: number;
-  } | null = null;
+  @observable
+  protected _txSize: number | null = null;
 
   @observable
   protected _psbtSimulate: PsbtSimulate | undefined = undefined;
@@ -96,20 +83,11 @@ class PsbtSimulatorState {
   }
 
   @action
-  setEstimatedFee(value: CoinPretty) {
-    this._estimatedFee = value;
-  }
-
-  get estimatedFee(): CoinPretty | null {
-    return this._estimatedFee;
-  }
-
-  @action
-  setTxSize(value: { txVBytes: number; txBytes: number; txWeight: number }) {
+  setTxSize(value: number) {
     this._txSize = value;
   }
 
-  get txSize(): { txVBytes: number; txBytes: number; txWeight: number } | null {
+  get txSize(): number | null {
     return this._txSize;
   }
 
@@ -145,14 +123,11 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
   protected _disposers: IReactionDisposer[] = [];
 
   constructor(
-    // TODO: Add comment about the reason why kvStore field is not observable.
     protected kvStore: KVStore,
     chainGetter: ChainGetter,
     initialChainId: string,
     protected readonly txSizeConfig: ITxSizeConfig,
-    protected readonly feeConfig: IFeeConfig,
     protected readonly initialKey: string,
-    // TODO: Add comment about the reason why simulatePsbtFn field is not observable.
     protected simulatePsbtFn: SimulatePsbtFn
   ) {
     super(chainGetter, initialChainId);
@@ -241,20 +216,10 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
     return state.psbtHex;
   }
 
-  get txSize(): {
-    txVBytes: number;
-    txBytes: number;
-    txWeight: number;
-  } | null {
+  get txSize(): number | null {
     const key = this.storeKey;
     const state = this.getState(key);
     return state.txSize;
-  }
-
-  get estimatedFee(): CoinPretty | null {
-    const key = this.storeKey;
-    const state = this.getState(key);
-    return state.estimatedFee;
   }
 
   protected init() {
@@ -271,10 +236,8 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
         this.kvStore.get<string>(key).then((saved) => {
           if (saved) {
             try {
-              const { psbtHex, txSize } = this.decodeStoreData(saved);
-              Psbt.fromHex(psbtHex); // validate the psbt hex
-              state.setInitialPsbtHex(psbtHex);
-              state.setTxSize(txSize);
+              Psbt.fromHex(saved); // validate the psbt hex
+              state.setInitialPsbtHex(saved);
             } catch (e) {
               // initial psbt is not critical,
               // just log the error and delete the psbt from the store.
@@ -333,14 +296,13 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
         });
 
         promise
-          .then(({ psbtHex, txSize, estimatedFee }) => {
+          .then(({ psbtHex, txSize }) => {
             state.setPsbtHex(psbtHex);
-            state.setEstimatedFee(estimatedFee);
-            state.setTxSize(txSize);
+            state.setTxSize(txSize.txVBytes);
             state.setError(undefined);
 
             this.kvStore
-              .set(key, this.encodeStoreData(psbtHex, txSize))
+              .set(key, `${psbtHex}/${txSize.txVBytes}`)
               .catch((e) => {
                 console.log(e);
               });
@@ -388,11 +350,8 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
     this._disposers.push(
       autorun(() => {
         if (this.enabled) {
-          if (this.estimatedFee != null) {
-            this.feeConfig.setFee(this.estimatedFee);
-          }
           if (this.txSize != null) {
-            this.txSizeConfig.setTxSize(this.txSize);
+            this.txSizeConfig.setValue(this.txSize);
           }
         }
       })
@@ -450,26 +409,6 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
     //   .join("/");
     return `${chainIdentifier.identifier}/${psbt}/${this.key}}`;
   }
-
-  protected encodeStoreData(
-    psbtHex: string,
-    txSize: {
-      txVBytes: number;
-      txBytes: number;
-      txWeight: number;
-    }
-  ): string {
-    const data = JSON.stringify({
-      psbtHex,
-      txSize,
-    });
-    return Buffer.from(data).toString("base64");
-  }
-
-  protected decodeStoreData(data: string) {
-    const decoded = Buffer.from(data, "base64").toString("utf-8");
-    return JSON.parse(decoded);
-  }
 }
 
 // CONTRACT: Use with `observer`
@@ -478,7 +417,6 @@ export const usePsbtSimulator = (
   chainGetter: ChainGetter,
   chainId: string,
   txSizeConfig: ITxSizeConfig,
-  feeConfig: IFeeConfig,
   key: string,
   simulatePsbtFn: SimulatePsbtFn,
   initialDisabled?: boolean
@@ -489,7 +427,6 @@ export const usePsbtSimulator = (
       chainGetter,
       chainId,
       txSizeConfig,
-      feeConfig,
       key,
       simulatePsbtFn
     );

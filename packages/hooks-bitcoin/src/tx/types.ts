@@ -25,28 +25,16 @@ export interface ISenderConfig extends ITxChainSetter {
   uiProperties: UIProperties;
 }
 
-export type FeeRateType = "high" | "average" | "low" | "manual";
-
 export type ITxSizeConfig = {
-  txVBytes: number;
-  txBytes: number;
-  txWeight: number;
-  dustVBytes?: number;
+  value: string;
+  setValue(value: string | number): void;
 
-  setTxSize({
-    txVBytes,
-    txBytes,
-    txWeight,
-    dustVBytes,
-  }: {
-    txVBytes: number;
-    txBytes: number;
-    txWeight: number;
-    dustVBytes?: number;
-  }): void;
+  txSize: number;
 
   uiProperties: UIProperties;
 };
+
+export type FeeRateType = "high" | "average" | "low" | "manual";
 
 export interface IFeeRateConfig extends ITxChainSetter {
   value: string;
@@ -88,7 +76,6 @@ export interface IAmountConfig extends ITxChainSetter {
 
 export interface IFeeConfig extends ITxChainSetter {
   fee: CoinPretty | undefined;
-  setFee(fee: CoinPretty | null): void;
   uiProperties: UIProperties;
 }
 
@@ -98,12 +85,6 @@ export interface IPsbtSimulator {
 
   isSimulating: boolean;
   psbtHex: string | null;
-  estimatedFee: CoinPretty | null;
-  txSize: {
-    txVBytes: number;
-    txBytes: number;
-    txWeight: number;
-    dustVBytes?: number;
-  } | null;
+  txSize: number | null;
   uiProperties: UIProperties;
 }

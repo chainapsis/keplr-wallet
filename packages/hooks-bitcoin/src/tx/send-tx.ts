@@ -22,6 +22,7 @@ export const useSendTxConfig = (
     chainId,
     senderConfig
   );
+  const txSizeConfig = useTxSizeConfig(chainGetter, chainId);
 
   const feeRateConfig = useFeeRateConfig(
     chainGetter,
@@ -30,16 +31,14 @@ export const useSendTxConfig = (
     initialFeeRate
   );
 
-  const txSizeConfig = useTxSizeConfig(chainGetter, chainId);
-
   const feeConfig = useFeeConfig(
     chainGetter,
     queriesStore,
     chainId,
     senderConfig,
     amountConfig,
-    feeRateConfig,
-    txSizeConfig
+    txSizeConfig,
+    feeRateConfig
   );
 
   amountConfig.setFeeConfig(feeConfig);

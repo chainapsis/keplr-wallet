@@ -10,14 +10,11 @@ import { TxChainSetter } from "./chain";
 import { ChainGetter } from "@keplr-wallet/stores";
 import { action, computed, makeObservable, observable } from "mobx";
 import { useState } from "react";
-import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
+import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { InsufficientFeeError } from "./errors";
 import { BitcoinQueriesStore } from "@keplr-wallet/stores-bitcoin";
 
 export class FeeConfig extends TxChainSetter implements IFeeConfig {
-  @observable.ref
-  protected _fee: CoinPretty | null = null;
-
   @observable
   protected _disableBalanceCheck: boolean = false;
 
@@ -27,8 +24,8 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     initialChainId: string,
     protected readonly senderConfig: ISenderConfig,
     protected readonly amountConfig: IAmountConfig,
-    protected readonly feeRateConfig: IFeeRateConfig,
-    protected readonly txSizeConfig: ITxSizeConfig
+    protected readonly txSizeConfig: ITxSizeConfig,
+    protected readonly feeRateConfig: IFeeRateConfig
   ) {
     super(chainGetter, initialChainId);
 
@@ -45,22 +42,10 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   get fee(): CoinPretty | undefined {
-    if (!this._fee) {
-      if (!this.txSizeConfig.txVBytes) {
-        return;
-      }
-
-      const fee = this.feeRateConfig.feeRate * this.txSizeConfig.txVBytes;
-      // bitcoin will never? has another fee currency than satoshi. (I think)
-      return new CoinPretty(this.amountConfig.currency, new Dec(fee));
-    }
-
-    return this._fee;
-  }
-
-  @action
-  setFee(fee: CoinPretty | null) {
-    this._fee = fee;
+    return new CoinPretty(
+      this.amountConfig.currency,
+      this.txSizeConfig.txSize * this.feeRateConfig.feeRate
+    );
   }
 
   @computed
@@ -111,12 +96,12 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     }
 
     const need = amount.reduce((acc, cur) => {
-      return acc.add(new Int(cur.toCoin().amount));
-    }, new Int(0));
+      return acc.add(new Dec(cur.toCoin().amount));
+    }, new Dec(0));
 
     if (
-      new Int(bal.balance.toCoin().amount).lt(
-        new Int(fee.toCoin().amount).add(need)
+      new Dec(bal.balance.toCoin().amount).lt(
+        new Dec(fee.toCoin().amount).add(need)
       )
     ) {
       return {
@@ -135,8 +120,8 @@ export const useFeeConfig = (
   chainId: string,
   senderConfig: ISenderConfig,
   amountConfig: IAmountConfig,
-  feeRateConfig: IFeeRateConfig,
   txSizeConfig: ITxSizeConfig,
+  feeRateConfig: IFeeRateConfig,
   initialFn?: (config: FeeConfig) => void
 ) => {
   const [config] = useState(() => {
@@ -146,8 +131,8 @@ export const useFeeConfig = (
       chainId,
       senderConfig,
       amountConfig,
-      feeRateConfig,
-      txSizeConfig
+      txSizeConfig,
+      feeRateConfig
     );
 
     if (initialFn) {

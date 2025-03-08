@@ -5,7 +5,6 @@ import {
   IPsbtSimulator,
   IRecipientConfig,
   ISenderConfig,
-  ITxSizeConfig,
 } from "./types";
 
 // CONTRACT: Use with `observer`
@@ -14,7 +13,6 @@ export const useTxConfigsValidate = (configs: {
   senderConfig?: ISenderConfig;
   recipientConfig?: IRecipientConfig;
   feeRateConfig?: IFeeRateConfig;
-  txSizeConfig?: ITxSizeConfig;
   feeConfig?: IFeeConfig;
   psbtSimulator?: IPsbtSimulator;
 }) => {
@@ -39,7 +37,6 @@ export const useTxConfigsValidate = (configs: {
     const recipientConfigUIProperties = configs.recipientConfig?.uiProperties;
     const feeRateConfigUIProperties = configs.feeRateConfig?.uiProperties;
     const feeConfigUIProperties = configs.feeConfig?.uiProperties;
-    const txSizeConfigUIProperties = configs.txSizeConfig?.uiProperties;
     const psbtSimulatorUIProperties = configs.psbtSimulator?.uiProperties;
 
     if (
@@ -48,7 +45,6 @@ export const useTxConfigsValidate = (configs: {
       recipientConfigUIProperties?.error ||
       feeRateConfigUIProperties?.error ||
       feeConfigUIProperties?.error ||
-      txSizeConfigUIProperties?.error ||
       psbtSimulatorUIProperties?.error
     ) {
       return true;
@@ -60,7 +56,6 @@ export const useTxConfigsValidate = (configs: {
       recipientConfigUIProperties?.loadingState === "loading-block" ||
       feeRateConfigUIProperties?.loadingState === "loading-block" ||
       feeConfigUIProperties?.loadingState === "loading-block" ||
-      txSizeConfigUIProperties?.loadingState === "loading-block" ||
       psbtSimulatorUIProperties?.loadingState === "loading-block"
     ) {
       return true;
