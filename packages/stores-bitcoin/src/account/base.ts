@@ -93,6 +93,11 @@ export class BitcoinAccountBase {
     }
 
     // 3. Filter and sort UTXOs
+    // 3-1. filter unconfirmed utxos
+    // 3-2. filter outbound utxos (check lately created txs)
+    // 3-3. filter protected utxos (inscription, runes, etc.)
+    // 3-4. filter dust utxos
+
     const utxosToExclude = new Set<string>();
     [...inscriptionUtxos, ...runesUtxos].forEach((utxo) => {
       utxosToExclude.add(`${utxo.txid}:${utxo.vout}`);

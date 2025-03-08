@@ -1,6 +1,6 @@
 import { ChainGetter, QuerySharedContext } from "@keplr-wallet/stores";
-import { UTXO } from "./types";
-import { ObservableBitcoinIndexerQuery } from "./bitcoin-indexer";
+import { UTXO } from "../types";
+import { ObservableBitcoinIndexerQuery } from "../bitcoin-indexer";
 import { makeObservable } from "mobx";
 
 export class ObservableQueryBitcoinUTXOsImpl extends ObservableBitcoinIndexerQuery<

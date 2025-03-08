@@ -1,10 +1,10 @@
 import { ChainGetter, QuerySharedContext } from "@keplr-wallet/stores";
 import { DeepReadonly } from "utility-types";
-import { ObservableQueryBitcoinBalance } from "./balance";
-import { ObservableQueryBitcoinFeeEstimates } from "./fee-estimates";
-import { ObservableQueryBitcoinUTXOs } from "./utxos";
-import { ObservableQueryBitcoinTx } from "./tx";
-import { ObservableQueryBitcoinAddressTxs } from "./address-txs";
+import { ObservableQueryBitcoinBalance } from "./indexer/balance";
+import { ObservableQueryBitcoinFeeEstimates } from "./indexer/fee-estimates";
+import { ObservableQueryBitcoinUTXOs } from "./indexer/utxos";
+import { ObservableQueryBitcoinTx } from "./indexer/tx";
+import { ObservableQueryBitcoinAddressTxs } from "./indexer/address-txs";
 import { ObservableQueryBitcoinAvailableUTXOs } from "./available-utxos";
 
 export class BitcoinQueriesStore {

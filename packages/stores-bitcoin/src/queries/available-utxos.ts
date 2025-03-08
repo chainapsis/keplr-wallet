@@ -3,11 +3,11 @@ import { DeepReadonly } from "utility-types";
 import {
   ObservableQueryBitcoinUTXOs,
   ObservableQueryBitcoinUTXOsImpl,
-} from "./utxos";
+} from "./indexer/utxos";
 import {
   ObservableQueryBitcoinAddressTxs,
   ObservableQueryBitcoinAddressTxsImpl,
-} from "./address-txs";
+} from "./indexer/address-txs";
 import { UTXO } from "./types";
 import { Dec } from "@keplr-wallet/unit";
 
