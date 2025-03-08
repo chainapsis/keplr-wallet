@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { observer, useLocalObservable } from "mobx-react-lite";
+import { observer } from "mobx-react-lite";
 import { HeaderLayout } from "../../../layouts/header";
 import { BackButton } from "../../../layouts/header/components";
 
@@ -178,22 +178,22 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
   ]);
 
   // CHECK: refresh는 불필요할 것으로 보임. btc는 수수료가 빠른 주기로 업데이트되지 않기 때문
-  const psbtSimulationRefresher = useLocalObservable(() => ({
-    count: 0,
-    increaseCount() {
-      this.count++;
-    },
-  }));
+  // const psbtSimulationRefresher = useLocalObservable(() => ({
+  //   count: 0,
+  //   increaseCount() {
+  //     this.count++;
+  //   },
+  // }));
 
-  useEffect(() => {
-    // Refresh gas simulation every 12 seconds.
-    const interval = setInterval(
-      () => psbtSimulationRefresher.increaseCount(),
-      12000
-    );
+  // useEffect(() => {
+  //   // Refresh gas simulation every 12 seconds.
+  //   const interval = setInterval(
+  //     () => psbtSimulationRefresher.increaseCount(),
+  //     12000
+  //   );
 
-    return () => clearInterval(interval);
-  }, [psbtSimulationRefresher]);
+  //   return () => clearInterval(interval);
+  // }, [psbtSimulationRefresher]);
 
   const psbtSimulator = usePsbtSimulator(
     new ExtensionKVStore("psbt-simulator.bitcoin.send"),
@@ -263,7 +263,8 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
         };
         estimatedFee: CoinPretty;
       }> => {
-        noop(psbtSimulationRefresher.count);
+        // CHECK: refresh가 필요할까?
+        // noop(psbtSimulationRefresher.count);
 
         const senderAddress = sendConfigs.senderConfig.sender;
         const publicKey = account.pubKey;
@@ -305,6 +306,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
           utxos: availableUTXOs,
           recipients: recipientsForTransaction,
           feeRate: sendConfigs.feeRateConfig.feeRate,
+          isSendMax: sendConfigs.amountConfig.fraction === 1,
         });
 
         if (!selection) {
@@ -563,6 +565,6 @@ const DetachIcon: FunctionComponent<{
   );
 };
 
-const noop = (..._args: any[]) => {
-  // noop
-};
+// const noop = (..._args: any[]) => {
+//   // noop
+// };

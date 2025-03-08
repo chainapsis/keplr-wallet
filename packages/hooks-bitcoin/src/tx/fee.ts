@@ -78,6 +78,8 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       };
     }
 
+    const amount = this.amountConfig.amount;
+
     // TODO: check available balance rather than total balance
     const bal = this.bitcoinQueriesStore
       .get(this.chainId)
@@ -108,7 +110,15 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       };
     }
 
-    if (new Int(bal.balance.toCoin().amount).lt(new Int(fee.toCoin().amount))) {
+    const need = amount.reduce((acc, cur) => {
+      return acc.add(new Int(cur.toCoin().amount));
+    }, new Int(0));
+
+    if (
+      new Int(bal.balance.toCoin().amount).lt(
+        new Int(fee.toCoin().amount).add(need)
+      )
+    ) {
       return {
         error: new InsufficientFeeError("Insufficient fee"),
         loadingState: bal.isFetching ? "loading" : undefined,
