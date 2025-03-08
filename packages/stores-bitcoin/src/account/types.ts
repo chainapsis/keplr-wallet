@@ -17,6 +17,7 @@ export interface BuildPsbtParams {
   recipients: UTXOSelectionRecipient[];
   estimatedFee: CoinPretty;
   xonlyPubKey?: Uint8Array;
+  isSendMax?: boolean;
   hasChange?: boolean;
 }
 

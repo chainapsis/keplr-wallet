@@ -268,6 +268,7 @@ export class BitcoinAccountBase {
     xonlyPubKey,
     recipients,
     estimatedFee,
+    isSendMax = false,
     hasChange = false,
   }: BuildPsbtParams): string {
     // 1. Basic validation
@@ -321,7 +322,8 @@ export class BitcoinAccountBase {
       .sub(feeInSatoshi);
     const zeroValue = new Dec(0);
 
-    if (remainderValue.lt(zeroValue)) {
+    // If send max is true, it's allowed to simulate build psbt with negative remainder value
+    if (!isSendMax && remainderValue.lt(zeroValue)) {
       throw new Error("Insufficient balance");
     }
 
@@ -419,14 +421,14 @@ export class BitcoinAccountBase {
    * @param psbt PSBT to be signed
    * @returns Signed PSBT in hex format
    */
-  async signPsbt(psbt: Psbt): Promise<string> {
+  async signPsbt(psbtHex: string): Promise<string> {
     const { getKeplr } = this;
     const keplr = await getKeplr();
     if (!keplr) {
       throw new Error("Keplr not found");
     }
 
-    return keplr.signPsbt(this.chainId, psbt.toHex());
+    return keplr.signPsbt(this.chainId, psbtHex);
   }
 
   /**
@@ -455,8 +457,8 @@ export class BitcoinAccountBase {
     return res.data;
   }
 
-  async signAndPushTx(psbt: Psbt): Promise<string> {
-    const signedPsbt = await this.signPsbt(psbt);
+  async signAndPushTx(psbtHex: string): Promise<string> {
+    const signedPsbt = await this.signPsbt(psbtHex);
     return await this.pushTx(signedPsbt);
   }
 

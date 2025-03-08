@@ -252,8 +252,6 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
         throw new Error("Can't find available utxos");
       }
 
-      // TODO: check discarding dust change
-
       const simulate = async (): Promise<{
         psbtHex: string;
         txSize: {
@@ -271,6 +269,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
         const xonlyPubKey = publicKey
           ? toXOnly(Buffer.from(publicKey))
           : undefined;
+        const isSendMax = sendConfigs.amountConfig.fraction === 1;
 
         const MAX_SAFE_OUTPUT = new Dec(2 ** 53 - 1);
         const ZERO = new Dec(0);
@@ -306,7 +305,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
           utxos: availableUTXOs,
           recipients: recipientsForTransaction,
           feeRate: sendConfigs.feeRateConfig.feeRate,
-          isSendMax: sendConfigs.amountConfig.fraction === 1,
+          isSendMax,
         });
 
         if (!selection) {
@@ -321,6 +320,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
           recipients: recipientsForTransaction,
           estimatedFee,
           xonlyPubKey,
+          isSendMax,
           hasChange,
         });
 
@@ -399,9 +399,11 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
 
         try {
           // TODO: logic for send bitcoin tx
-          const psbt = Psbt.fromHex(psbtSimulator.psbtHex);
+          Psbt.fromHex(psbtSimulator.psbtHex); // validate psbt hex
 
-          const txHash = await bitcoinAccount.signAndPushTx(psbt);
+          const txHash = await bitcoinAccount.signAndPushTx(
+            psbtSimulator.psbtHex
+          );
 
           // TODO: submit and refresh balance
 
