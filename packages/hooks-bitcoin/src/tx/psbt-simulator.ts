@@ -30,7 +30,6 @@ type PsbtSimulate = () => Promise<{
     txVBytes: number;
     txBytes: number;
     txWeight: number;
-    dustVBytes?: number;
   };
 }>;
 export type SimulatePsbtFn = () => PsbtSimulate;
@@ -53,7 +52,6 @@ class PsbtSimulatorState {
     txVBytes: number;
     txBytes: number;
     txWeight: number;
-    dustVBytes?: number;
   } | null = null;
 
   @observable
@@ -247,7 +245,6 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
     txVBytes: number;
     txBytes: number;
     txWeight: number;
-    dustVBytes?: number;
   } | null {
     const key = this.storeKey;
     const state = this.getState(key);
@@ -292,13 +289,6 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
     );
 
     // autorun is intentionally split.
-    // The main reason for this implementation is that the gas when paying the fee is somewhat different from when there is a zero fee.
-    // In order to calculate the gas more accurately, the fee should be included in the simulation,
-    // but in the current reactive logic, the gas change by the simulation changes the fee and causes the simulation again.
-    // Even though the implementation is not intuitive, the goals are
-    // - Every time the observable used in simulateGasFn is updated, the simulation is refreshed.
-    // - The simulation is refreshed only when changing from zero fee to paying fee or vice versa.
-    // - feemarket 등에서 문제를 일으켜서 fee의 currency 자체가 바뀔때도 refresh 하도록 수정되었다. 이 경우 원활한 처리를 위해서 (귀찮아서) storeKey setter에서 적용된다.
     this._disposers.push(
       autorun(() => {
         if (!this.enabled) {
@@ -329,8 +319,6 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
 
     this._disposers.push(
       autorun(() => {
-        // TODO: Add debounce logic?
-
         const key = this.storeKey;
         const state = this.getState(key);
 
@@ -346,11 +334,6 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
 
         promise
           .then(({ psbtHex, txSize, estimatedFee }) => {
-            // Changing the gas in the gas config definitely will make the reaction to the fee config,
-            // and, this reaction can potentially create a reaction in the amount config as well (Ex, when the "Max" option set).
-            // These potential reactions can create repeated meaningless reactions.
-            // To avoid this potential problem, change the value when there is a meaningful change in the gas estimated.
-
             state.setPsbtHex(psbtHex);
             state.setEstimatedFee(estimatedFee);
             state.setTxSize(txSize);
@@ -474,7 +457,6 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
       txVBytes: number;
       txBytes: number;
       txWeight: number;
-      dustVBytes?: number;
     }
   ): string {
     const data = JSON.stringify({

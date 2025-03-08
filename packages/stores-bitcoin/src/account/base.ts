@@ -90,32 +90,21 @@ export class BitcoinAccountBase {
     // 3. Consider utxos is filtered (unconfirmed, outbound, protected, dust), just sort by descending order
     const sortedUtxos = utxos.sort((a, b) => b.value - a.value);
 
-    // 4. Validate addresses
-    const validateAndGetAddressInfo = (address: string) => {
-      try {
-        return validate(address, network as unknown as Network, {
-          castTestnetTo: network === "signet" ? Network.signet : undefined,
-        })
-          ? getAddressInfo(address, {
-              castTestnetTo: network === "signet" ? Network.signet : undefined,
-            })
-          : null;
-      } catch (e) {
-        return null;
-      }
-    };
-
-    const senderAddressInfo = validateAndGetAddressInfo(senderAddress);
+    const senderAddressInfo = this.validateAndGetAddressInfo(
+      senderAddress,
+      network as unknown as Network
+    );
     if (!senderAddressInfo) {
       throw new Error("Invalid sender address");
     }
 
     const recipientAddressInfos = recipients
-      .map(({ address }) => validateAndGetAddressInfo(address))
+      .map(({ address }) =>
+        this.validateAndGetAddressInfo(address, network as unknown as Network)
+      )
       .filter(Boolean) as AddressInfo[];
-
     if (!recipientAddressInfos.length) {
-      throw new Error("Invalid recipient address");
+      throw new Error("Invalid recipients");
     }
 
     // 5. Calculate output parameters
@@ -286,12 +275,12 @@ export class BitcoinAccountBase {
       throw new Error("No UTXOs provided for transaction");
     }
 
-    if (!recipients.length) {
-      throw new Error("No recipients specified for transaction");
-    }
-
     if (!senderAddress) {
       throw new Error("Sender address is required");
+    }
+
+    if (!recipients.length) {
+      throw new Error("Recipients are required");
     }
 
     // 2. Parse and validate chain configuration
@@ -313,12 +302,12 @@ export class BitcoinAccountBase {
     }
 
     // 3. Validate transaction economics
-    const totalValue = utxos.reduce(
+    const totalInputAmount = utxos.reduce(
       (sum, utxo) => sum.add(new Dec(utxo.value)),
       new Dec(0)
     );
 
-    const amountToSend = recipients.reduce(
+    const totalOutputAmount = recipients.reduce(
       (sum, recipient) => sum.add(new Dec(recipient.amount)),
       new Dec(0)
     );
@@ -327,7 +316,9 @@ export class BitcoinAccountBase {
       .toDec()
       .mul(DecUtils.getTenExponentN(estimatedFee.currency.coinDecimals));
 
-    const remainderValue = totalValue.sub(amountToSend).sub(feeInSatoshi);
+    const remainderValue = totalInputAmount
+      .sub(totalOutputAmount)
+      .sub(feeInSatoshi);
     const zeroValue = new Dec(0);
 
     if (remainderValue.lt(zeroValue)) {
@@ -337,11 +328,18 @@ export class BitcoinAccountBase {
     const allRecipients = [...recipients];
 
     // 4. Handle change output if needed
-    if (hasChange && remainderValue.gt(zeroValue)) {
-      allRecipients.push({
-        address: senderAddress,
-        amount: remainderValue.truncate().toBigNumber().toJSNumber(),
-      });
+    if (hasChange) {
+      // if change amount is greater than or equal to dust threshold
+      if (remainderValue.gte(new Dec(NATIVE_SEGWIT_DUST_THRESHOLD))) {
+        // add change output address
+        allRecipients.push({
+          address: senderAddress,
+          amount: remainderValue.truncate().toBigNumber().toJSNumber(),
+        });
+      } else {
+        // hasChange is true but change amount is less than dust threshold, log warning
+        console.warn("Change amount is less than dust threshold");
+      }
     }
 
     // 5. Get network params
@@ -357,18 +355,23 @@ export class BitcoinAccountBase {
       }
     })();
 
-    // 6. Build PSBT
+    // 6. Validate recipients
+    allRecipients.forEach((recipient) =>
+      validate(recipient.address, network as unknown as Network)
+    );
+
+    // 7. Build PSBT
     try {
       const psbt = new Psbt({ network: networkParams });
 
-      // 6.1. Process sender address and script
+      // 7.1. Process sender address and script
       const senderOutputScript = address.toOutputScript(
         senderAddress,
         networkParams
       );
       const internalPubkey = xonlyPubKey ? Buffer.from(xonlyPubKey) : undefined;
 
-      // 6.2. Add sender UTXOs as inputs
+      // 7.2. Add sender UTXOs as inputs (RBF enabled)
       for (const utxo of utxos) {
         if (paymentType === "taproot") {
           psbt.addInput({
@@ -379,6 +382,7 @@ export class BitcoinAccountBase {
               value: utxo.value,
             },
             tapInternalKey: internalPubkey,
+            sequence: 0xfffffffd,
           });
         }
 
@@ -387,11 +391,12 @@ export class BitcoinAccountBase {
             hash: utxo.txid,
             index: utxo.vout,
             witnessUtxo: { script: senderOutputScript, value: utxo.value },
+            sequence: 0xfffffffd,
           });
         }
       }
 
-      // 6.3. Add all outputs (recipients + change if applicable)
+      // 7.3. Add all outputs (recipients + change if applicable)
       for (const recipient of allRecipients) {
         psbt.addOutput({
           address: recipient.address,
@@ -454,4 +459,18 @@ export class BitcoinAccountBase {
     const signedPsbt = await this.signPsbt(psbt);
     return await this.pushTx(signedPsbt);
   }
+
+  private validateAndGetAddressInfo = (address: string, network: Network) => {
+    try {
+      return validate(address, network, {
+        castTestnetTo: network === "signet" ? Network.signet : undefined,
+      })
+        ? getAddressInfo(address, {
+            castTestnetTo: network === "signet" ? Network.signet : undefined,
+          })
+        : null;
+    } catch (e) {
+      return null;
+    }
+  };
 }

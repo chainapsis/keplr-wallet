@@ -243,10 +243,6 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
           sender
         );
 
-      // const queryUTXOs = bitcoinQueriesStore
-      //   .get(chainId)
-      //   .queryBitcoinUTXOs.getUTXOs(chainId, chainStore, sender);
-
       if (!queryAvailableUTXOs) {
         throw new Error("Can't find available utxos");
       }
@@ -266,10 +262,6 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
           txWeight: number;
         };
         estimatedFee: CoinPretty;
-        dust?: {
-          vBytes: number;
-          relayFeeRate: number;
-        };
       }> => {
         noop(psbtSimulationRefresher.count);
 
@@ -319,13 +311,12 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
           throw new Error("Can't find proper utxos selection");
         }
 
-        const { selectedUtxos, recipients, estimatedFee, txSize, hasChange } =
-          selection;
+        const { selectedUtxos, estimatedFee, txSize, hasChange } = selection;
 
         const psbtHex = bitcoinAccount.buildPsbt({
           utxos: selectedUtxos,
           senderAddress,
-          recipients,
+          recipients: recipientsForTransaction,
           estimatedFee,
           xonlyPubKey,
           hasChange,
