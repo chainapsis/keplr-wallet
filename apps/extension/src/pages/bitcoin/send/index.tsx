@@ -235,17 +235,25 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
         throw new Error("Not ready to simulate psbt");
       }
 
-      const queryUTXOs = bitcoinQueriesStore
+      const queryAvailableUTXOs = bitcoinQueriesStore
         .get(chainId)
-        .queryBitcoinUTXOs.getUTXOs(chainId, chainStore, sender);
+        .queryBitcoinAvailableUTXOs.getAvailableUTXOs(
+          chainId,
+          chainStore,
+          sender
+        );
 
-      if (!queryUTXOs) {
-        throw new Error("Can't find utxos");
+      // const queryUTXOs = bitcoinQueriesStore
+      //   .get(chainId)
+      //   .queryBitcoinUTXOs.getUTXOs(chainId, chainStore, sender);
+
+      if (!queryAvailableUTXOs) {
+        throw new Error("Can't find available utxos");
       }
 
-      const utxos = queryUTXOs.UTXOs;
-      if (!utxos) {
-        throw new Error("Can't find utxos");
+      const availableUTXOs = queryAvailableUTXOs.availableUTXOs;
+      if (!availableUTXOs) {
+        throw new Error("Can't find available utxos");
       }
 
       // TODO: check discarding dust change
@@ -302,7 +310,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
 
         const selection = bitcoinAccount.selectUTXOs({
           senderAddress,
-          utxos,
+          utxos: availableUTXOs,
           recipients: recipientsForTransaction,
           feeRate: sendConfigs.feeRateConfig.feeRate,
         });
