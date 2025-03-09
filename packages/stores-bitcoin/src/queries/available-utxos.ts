@@ -11,7 +11,7 @@ import {
 import { UTXO } from "./types";
 import { Dec } from "@keplr-wallet/unit";
 
-const uncommercialSatoshiThreshold = 10000;
+const uncommercialSatoshiThreshold = 546; // p2pkh dust threshold, is it ok?
 
 // TODO: add inscription, runes query
 export class ObservableQueryBitcoinAvailableUTXOsImpl {

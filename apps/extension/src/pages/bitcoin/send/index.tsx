@@ -47,7 +47,6 @@ import { FeeControl } from "../components/input/fee-control";
 //   AddRecentSendHistoryMsg,
 //   SubmitStarknetTxHashMsg,
 // } from "@keplr-wallet/background";
-// import { LoadingIcon } from "../../../components/icon";
 
 const Styles = {
   Flex1: styled.div`
@@ -102,8 +101,6 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
   const coinMinimalDenom =
     initialCoinMinimalDenom || bitcoin.currencies[0].coinMinimalDenom;
   const currency = (() => {
-    // TODO: 대충 여기에다가 force currency 로직을 박아놓는다...
-    //       나중에 이런 기능을 chain store 자체에다가 만들어야한다.
     const res = chainStore
       .getModularChainInfoImpl(chainId)
       .getCurrencies("bitcoin")
@@ -158,23 +155,39 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
   );
   sendConfigs.amountConfig.setCurrency(currency);
 
+  // bitcoin tx size는 amount, fee rate, recipient address type에 따라 달라진다.
+  // 따라서 세 가지를 모두 고려해서 key를 생성한다.
   const psbtSimulatorKey = useMemo(() => {
-    const res = (() => {
-      if (sendConfigs.amountConfig.currency) {
-        const amountHexDigits = BigInt(
-          sendConfigs.amountConfig.amount[0].toCoin().amount
-        ).toString(16).length;
-        return amountHexDigits.toString();
+    const recipientPrefix = (() => {
+      if (!sendConfigs.recipientConfig.uiProperties.error) {
+        // return leading 4 string of recipient address if recipient is valid
+        return sendConfigs.recipientConfig.recipient.slice(0, 4);
+      }
+
+      return "invalid";
+    })();
+
+    const amountHex = (() => {
+      if (sendConfigs.amountConfig.amount) {
+        const totalAmount = sendConfigs.amountConfig.amount.reduce(
+          (acc, cur) => acc.add(new Dec(cur.toCoin().amount)),
+          new Dec(0)
+        );
+
+        return totalAmount.toString(16);
       }
 
       return "0";
     })();
 
-    return res + sendConfigs.feeRateConfig.feeRate.toString();
+    return (
+      recipientPrefix + amountHex + sendConfigs.feeRateConfig.feeRate.toString()
+    );
   }, [
     sendConfigs.amountConfig.amount,
-    sendConfigs.amountConfig.currency,
     sendConfigs.feeRateConfig.feeRate,
+    sendConfigs.recipientConfig.recipient,
+    sendConfigs.recipientConfig.uiProperties.error,
   ]);
 
   // CHECK: refresh는 불필요할 것으로 보임. btc는 수수료가 빠른 주기로 업데이트되지 않기 때문
@@ -258,7 +271,6 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
           txBytes: number;
           txWeight: number;
         };
-        estimatedFee: CoinPretty;
       }> => {
         // CHECK: refresh가 필요할까?
         // noop(psbtSimulationRefresher.count);
@@ -311,13 +323,12 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
           throw new Error("Can't find proper utxos selection");
         }
 
-        const { selectedUtxos, estimatedFee, txSize, hasChange } = selection;
+        const { selectedUtxos, txSize, hasChange } = selection;
 
         const psbtHex = bitcoinAccount.buildPsbt({
           utxos: selectedUtxos,
           senderAddress,
           recipients: recipientsForTransaction,
-          estimatedFee,
           xonlyPubKey,
           isSendMax,
           hasChange,
@@ -326,7 +337,6 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
         return {
           psbtHex,
           txSize,
-          estimatedFee,
         };
       };
 
