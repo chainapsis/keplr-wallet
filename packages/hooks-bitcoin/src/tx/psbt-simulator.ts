@@ -37,9 +37,9 @@ class PsbtSimulatorState {
   protected _initialTxSize: number | null = null;
 
   @observable
-  protected _psbtHex: string | null = null;
+  protected _recentPsbtHex: string | null = null;
   @observable
-  protected _txSize: number | null = null;
+  protected _recentTxSize: number | null = null;
 
   @observable
   protected _psbtSimulate: PsbtSimulate | undefined = undefined;
@@ -65,6 +65,23 @@ class PsbtSimulatorState {
   }
 
   @action
+  setInitialTxSize(value: number | string) {
+    if (typeof value === "string") {
+      value = parseInt(value);
+    }
+
+    this._initialTxSize = value;
+  }
+
+  get initialPsbtHex(): string | null {
+    return this._initialPsbtHex;
+  }
+
+  get initialTxSize(): number | null {
+    return this._initialTxSize;
+  }
+
+  @action
   refreshPsbtSimulate(value: PsbtSimulate) {
     this._psbtSimulate = value;
   }
@@ -74,21 +91,21 @@ class PsbtSimulatorState {
   }
 
   @action
-  setPsbtHex(value: string) {
-    this._psbtHex = value;
+  setRecentPsbtHex(value: string) {
+    this._recentPsbtHex = value;
   }
 
-  get psbtHex(): string | null {
-    return this._psbtHex;
+  get recentPsbtHex(): string | null {
+    return this._recentPsbtHex;
   }
 
   @action
-  setTxSize(value: number) {
-    this._txSize = value;
+  setRecentTxSize(value: number) {
+    this._recentTxSize = value;
   }
 
-  get txSize(): number | null {
-    return this._txSize;
+  get recentTxSize(): number | null {
+    return this._recentTxSize;
   }
 
   @action
@@ -119,6 +136,9 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
   // Key is the store key (probably, ${chainIdentifier}/${key})
   @observable.shallow
   protected _stateMap: Map<string, PsbtSimulatorState> = new Map();
+
+  protected _debounceTimeoutId: NodeJS.Timeout | null = null;
+  protected readonly _debounceMs: number = 300;
 
   protected _disposers: IReactionDisposer[] = [];
 
@@ -213,13 +233,23 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
   get psbtHex(): string | null {
     const key = this.storeKey;
     const state = this.getState(key);
-    return state.psbtHex;
+
+    if (state.recentPsbtHex != null) {
+      return state.recentPsbtHex;
+    }
+
+    return state.initialPsbtHex;
   }
 
   get txSize(): number | null {
     const key = this.storeKey;
     const state = this.getState(key);
-    return state.txSize;
+
+    if (state.recentTxSize != null) {
+      return state.recentTxSize;
+    }
+
+    return state.initialTxSize;
   }
 
   protected init() {
@@ -236,12 +266,15 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
         this.kvStore.get<string>(key).then((saved) => {
           if (saved) {
             try {
-              Psbt.fromHex(saved); // validate the psbt hex
-              state.setInitialPsbtHex(saved);
+              const [psbtHex, txSize] = saved.split("/");
+
+              Psbt.fromHex(psbtHex); // validate the psbt hex
+              state.setInitialPsbtHex(psbtHex);
+              state.setInitialTxSize(txSize);
             } catch (e) {
               // initial psbt is not critical,
               // just log the error and delete the psbt from the store.
-              console.log(e);
+              console.warn(e);
               this.kvStore.set(key, "");
             }
           }
@@ -269,7 +302,7 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
           const psbtSimulate = this.simulatePsbtFn();
 
           runInAction(() => {
-            if (state.psbtHex == null || state.error != null) {
+            if (state.recentPsbtHex == null || state.error != null) {
               state.refreshPsbtSimulate(psbtSimulate);
             }
           });
@@ -289,70 +322,80 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
           return;
         }
 
+        if (this._debounceTimeoutId) {
+          clearTimeout(this._debounceTimeoutId);
+        }
+
         const promise = state.psbtSimulate();
 
-        runInAction(() => {
-          this._isSimulating = true;
-        });
-
-        promise
-          .then(({ psbtHex, txSize }) => {
-            state.setPsbtHex(psbtHex);
-            state.setTxSize(txSize.txVBytes);
-            state.setError(undefined);
-
-            this.kvStore
-              .set(key, `${psbtHex}/${txSize.txVBytes}`)
-              .catch((e) => {
-                console.log(e);
-              });
-          })
-          .catch((e) => {
-            console.log("psbt simulate error", e);
-            if (isSimpleFetchError(e) && e.response) {
-              let message = "";
-              const contentType: string = e.response.headers
-                ? e.response.headers.get("content-type") || ""
-                : "";
-              // Try to figure out the message from the response.
-              // If the contentType in the header is specified, try to use the message from the response.
-              if (
-                contentType.startsWith("text/plain") &&
-                typeof e.response.data === "string"
-              ) {
-                message = e.response.data;
-              }
-              // If the response is an object and "message" field exists, it is used as a message.
-              if (
-                contentType.startsWith("application/json") &&
-                e.response.data?.message &&
-                typeof e.response.data?.message === "string"
-              ) {
-                message = e.response.data.message;
-              }
-
-              if (message !== "") {
-                state.setError(new Error(message));
-                return;
-              }
-            }
-
-            state.setError(e);
-          })
-          .finally(() => {
-            runInAction(() => {
-              this._isSimulating = false;
-            });
+        this._debounceTimeoutId = setTimeout(() => {
+          runInAction(() => {
+            this._isSimulating = true;
           });
+
+          promise
+            .then(({ psbtHex, txSize }) => {
+              if (
+                state.recentTxSize === null ||
+                state.recentTxSize > txSize.txVBytes
+              ) {
+                state.setRecentPsbtHex(psbtHex);
+                state.setRecentTxSize(txSize.txVBytes);
+              }
+
+              state.setError(undefined);
+
+              this.kvStore
+                .set(key, `${psbtHex}/${txSize.txVBytes}`)
+                .catch((e) => {
+                  console.log(e);
+                });
+            })
+            .catch((e) => {
+              console.log("psbt simulate error", e);
+              if (isSimpleFetchError(e) && e.response) {
+                let message = "";
+                const contentType: string = e.response.headers
+                  ? e.response.headers.get("content-type") || ""
+                  : "";
+                // Try to figure out the message from the response.
+                // If the contentType in the header is specified, try to use the message from the response.
+                if (
+                  contentType.startsWith("text/plain") &&
+                  typeof e.response.data === "string"
+                ) {
+                  message = e.response.data;
+                }
+                // If the response is an object and "message" field exists, it is used as a message.
+                if (
+                  contentType.startsWith("application/json") &&
+                  e.response.data?.message &&
+                  typeof e.response.data?.message === "string"
+                ) {
+                  message = e.response.data.message;
+                }
+
+                if (message !== "") {
+                  state.setError(new Error(message));
+                  return;
+                }
+              }
+
+              state.setError(e);
+            })
+            .finally(() => {
+              runInAction(() => {
+                this._isSimulating = false;
+              });
+            });
+        }, this._debounceMs);
       })
     );
 
     this._disposers.push(
       autorun(() => {
-        if (this.enabled) {
-          if (this.txSize != null) {
-            this.txSizeConfig.setValue(this.txSize);
-          }
+        if (this.enabled && this.txSize != null) {
+          this.txSizeConfig.setValue(this.txSize);
         }
       })
     );
@@ -382,7 +425,9 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
 
         if (this.isSimulating) {
           // If there is no saved result of the last simulation, user interaction is blocked.
-          return this.psbtHex == null ? "loading-block" : "loading";
+          return this.psbtHex == null || this.txSize == null
+            ? "loading-block"
+            : "loading";
         }
       })(),
     };
@@ -407,7 +452,7 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
     //   .toStdFee()
     //   .amount.map((coin) => coin.denom)
     //   .join("/");
-    return `${chainIdentifier.identifier}/${psbt}/${this.key}}`;
+    return `${chainIdentifier.identifier}/${psbt}/${this.key}`;
   }
 }
 
