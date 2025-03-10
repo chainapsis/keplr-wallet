@@ -45,6 +45,7 @@ import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import {
   AddRecentSendHistoryMsg,
+  LogAnalyticsEventMsg,
   SubmitStarknetTxHashMsg,
 } from "@keplr-wallet/background";
 import { useStarknetTxConfigsQueryString } from "../../../hooks/starknet/use-tx-configs-query-string";
@@ -487,6 +488,17 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
                   }
                 })()
               );
+
+            if (sendConfigs.recipientConfig.nameServiceResult.length > 0) {
+              new InExtensionMessageRequester().sendMessage(
+                BACKGROUND_PORT,
+                new LogAnalyticsEventMsg("send_with_name_service", {
+                  chainId: sendConfigs.recipientConfig.chainId,
+                  nameService:
+                    sendConfigs.recipientConfig.nameServiceResult[0].type,
+                })
+              );
+            }
 
             new InExtensionMessageRequester()
               .sendMessage(
