@@ -20,7 +20,7 @@ import {
   DeployAccountSignerDetails,
   InvocationsSignerDetails,
 } from "starknet";
-import { SupportedPaymentType } from "./bitcoin";
+import { IBitcoinProvider, SupportedPaymentType } from "./bitcoin";
 
 export interface Key {
   // Name of the selected key store.
@@ -301,10 +301,9 @@ export interface Keplr {
   signPsbt(chainId: string, psbtHex: string): Promise<string>;
   signPsbts(chainId: string, psbtsHexes: string[]): Promise<string[]>;
 
-  // TODO: bitcoin handle
-  // readonly bitcoin: IBitcoinProvider;
-
   readonly ethereum: IEthereumProvider;
 
   readonly starknet: IStarknetProvider;
+
+  readonly bitcoin: IBitcoinProvider;
 }

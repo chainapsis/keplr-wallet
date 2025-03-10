@@ -23,6 +23,8 @@ import {
   IStarknetProvider,
   WalletEvents,
   SupportedPaymentType,
+  IBitcoinProvider,
+  Network as BitcoinNetwork,
 } from "@keplr-wallet/types";
 import {
   BACKGROUND_PORT,
@@ -1540,6 +1542,8 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
   public readonly ethereum = new EthereumProvider(this, this.requester);
 
   public readonly starknet = new StarknetProvider(this, this.requester);
+
+  public readonly bitcoin = new BitcoinProvider(this, this.requester);
 }
 
 // IMPORTANT: 사이드 패널을 열어야하는 JSON-RPC 메소드들이 생길 때마다 여기에 추가해야한다.
@@ -1780,4 +1784,63 @@ class StarknetProvider implements IStarknetProvider {
   }
 }
 
-// TODO: Implement bitcoin provider
+class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
+  constructor(
+    protected readonly keplr: Keplr,
+    protected readonly requester: MessageRequester
+  ) {
+    super();
+  }
+
+  async getAccounts(): Promise<string[]> {
+    throw new Error("Method not implemented.");
+  }
+
+  async requestAccounts(): Promise<string[]> {
+    throw new Error("Method not implemented.");
+  }
+
+  async disconnect(): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
+
+  async getNetwork(): Promise<BitcoinNetwork> {
+    throw new Error("Method not implemented.");
+  }
+
+  async switchNetwork(_network: BitcoinNetwork): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
+
+  async getPublicKey(): Promise<string> {
+    throw new Error("Method not implemented.");
+  }
+
+  async getBalance(): Promise<string> {
+    throw new Error("Method not implemented.");
+  }
+
+  async getInscriptions(): Promise<string[]> {
+    throw new Error("Method not implemented.");
+  }
+
+  async signMessage(): Promise<string> {
+    throw new Error("Method not implemented.");
+  }
+
+  async sendBitcoin(_to: string, _amount: string): Promise<string> {
+    throw new Error("Method not implemented.");
+  }
+
+  async pushTx(_rawTxHex: string): Promise<string> {
+    throw new Error("Method not implemented.");
+  }
+
+  async signPsbt(_psbtHex: string): Promise<string> {
+    throw new Error("Method not implemented.");
+  }
+
+  async signPsbts(_psbtsHexes: string[]): Promise<string[]> {
+    throw new Error("Method not implemented.");
+  }
+}
