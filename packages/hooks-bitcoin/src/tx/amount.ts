@@ -262,10 +262,10 @@ export const useAmountConfig = (
   chainId: string,
   senderConfig: ISenderConfig
 ) => {
-  const [txConfig] = useState(
+  const [config] = useState(
     () => new AmountConfig(chainGetter, queriesStore, chainId, senderConfig)
   );
-  txConfig.setChain(chainId);
+  config.setChain(chainId);
 
-  return txConfig;
+  return config;
 };

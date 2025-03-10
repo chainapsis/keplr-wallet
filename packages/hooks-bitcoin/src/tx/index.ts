@@ -9,3 +9,5 @@ export * from "./fee-rate";
 export * from "./fee";
 export * from "./psbt-simulator";
 export * from "./validate";
+export * from "./noop-amount";
+export * from "./tx-size";
