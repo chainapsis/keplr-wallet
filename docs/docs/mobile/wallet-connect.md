@@ -5,7 +5,7 @@ import ManageWcExampleImage from "@site/static/img/guide/manage-wc-example.png";
 
 # Use with WalletConnect
 
-Keplr Mobile supports WalletConnect, allowing seamless integration of dApps with the Keplr Wallet via QR codes. You can find an example at this [link](https://github.com/chainapsis/keplr-wallet/tree/master/packages/wc-client-example).
+Keplr Mobile supports WalletConnect, allowing seamless integration of dApps with Keplr Wallet via QR codes. You can find an example at this [link](https://github.com/chainapsis/keplr-wallet/tree/master/packages/wc-client-example).
 
 ---
 
@@ -55,14 +55,6 @@ import { BroadcastMode, Keplr } from "@keplr-wallet/types";
 
 let keplr: Keplr | undefined = undefined;
 let promise: Promise<Keplr> | undefined = undefined;
-
-type sendResponse = {
-  tx_response: {
-    txhash?: string;
-    code?: number;
-    raw_log?: string;
-  };
-};
 
 async function sendTx(
   chainId: string,
