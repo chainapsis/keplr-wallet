@@ -14,7 +14,7 @@ import {
   useFeeRateConfig,
   useNoopAmountConfig,
   useSenderConfig,
-  useTxConfigsValidate,
+  //   useTxConfigsValidate,
 } from "@keplr-wallet/hooks-bitcoin";
 import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
@@ -83,23 +83,6 @@ export const SignBitcoinTxView: FunctionComponent<{
     feeRateConfig
   );
 
-  //   const gasSimulationRefresher = useLocalObservable(() => ({
-  //     count: 0,
-  //     increaseCount() {
-  //       this.count++;
-  //     },
-  //   }));
-
-  //   useEffect(() => {
-  //     // Refresh gas simulation every 12 seconds.
-  //     const interval = setInterval(
-  //       () => gasSimulationRefresher.increaseCount(),
-  //       12000
-  //     );
-
-  //     return () => clearInterval(interval);
-  //   }, [gasSimulationRefresher]);
-
   const [unmountPromise] = useState(() => {
     let resolver: () => void;
     const promise = new Promise<void>((resolve) => {
@@ -118,14 +101,14 @@ export const SignBitcoinTxView: FunctionComponent<{
     unmountPromise.resolver();
   });
 
-  const txConfigsValidate = useTxConfigsValidate({
-    amountConfig,
-    senderConfig,
-    feeRateConfig,
-    feeConfig,
-  });
+  //   const txConfigsValidate = useTxConfigsValidate({
+  //     amountConfig,
+  //     senderConfig,
+  //     feeRateConfig,
+  //     feeConfig,
+  //   });
 
-  const buttonDisabled = txConfigsValidate.interactionBlocked;
+  //   const buttonDisabled = txConfigsValidate.interactionBlocked;
   const isLoading = signBitcoinTxInteractionStore.isObsoleteInteractionApproved(
     interactionData.id
   );
@@ -149,12 +132,12 @@ export const SignBitcoinTxView: FunctionComponent<{
         throw new Error("Invalid interaction data");
       }
 
-      console.log(psbtHex, psbtsHexes);
-
       await signBitcoinTxInteractionStore.approveWithProceedNext(
         interactionData.id,
         psbtHex,
+        "",
         psbtsHexes,
+        [],
         async (proceedNext) => {
           if (!proceedNext) {
             if (
@@ -246,7 +229,7 @@ export const SignBitcoinTxView: FunctionComponent<{
           text: intl.formatMessage({ id: "button.approve" }),
           size: "large",
           left: !isLoading && <ApproveIcon />,
-          disabled: buttonDisabled,
+          //   disabled: buttonDisabled,
           isLoading,
           onClick: approve,
         },

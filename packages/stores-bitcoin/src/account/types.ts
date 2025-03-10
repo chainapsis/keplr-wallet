@@ -32,6 +32,7 @@ export interface BuildPsbtParams {
   utxos: UTXO[];
   senderAddress: string;
   recipients: UTXOSelectionRecipient[];
+  feeRate: number;
   xonlyPubKey?: Uint8Array;
   isSendMax?: boolean;
   hasChange?: boolean;

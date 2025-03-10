@@ -184,7 +184,7 @@ export class KeyRingBitcoinService {
         keyType: keyInfo.type,
         keyInsensitive: keyInfo.insensitive,
       },
-      async (res: { signedPsbtsHexes: string[] }) => {
+      async (res: { psbtsHexes: string[]; signedPsbtsHexes: string[] }) => {
         if (res.signedPsbtsHexes) {
           return res.signedPsbtsHexes;
         }
@@ -233,7 +233,7 @@ export class KeyRingBitcoinService {
         keyType: keyInfo.type,
         keyInsensitive: keyInfo.insensitive,
       },
-      async (res: { signedPsbtHex: string }) => {
+      async (res: { psbtHex: string; signedPsbtHex: string }) => {
         if (res.signedPsbtHex) {
           return res.signedPsbtHex;
         }

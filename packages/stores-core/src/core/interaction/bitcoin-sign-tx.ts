@@ -15,9 +15,11 @@ export type SignBitcoinTxInteractionData = {
 } & (
   | {
       psbtHex: string;
+      signedPsbtHex: string;
     }
   | {
       psbtsHexes: string[];
+      signedPsbtsHexes: string[];
     }
 );
 
@@ -45,8 +47,10 @@ export class SignBitcoinTxInteractionStore {
 
   async approveWithProceedNext(
     id: string,
+    psbtHex: string,
     signedPsbtHex: string,
-    signedPsbtHexes: string[],
+    psbtsHexes: string[],
+    signedPsbtsHexes: string[],
     afterFn: (proceedNext: boolean) => void | Promise<void>,
     options: {
       preDelay?: number;
@@ -55,8 +59,10 @@ export class SignBitcoinTxInteractionStore {
     await this.interactionStore.approveWithProceedNextV2(
       id,
       {
+        psbtHex,
         signedPsbtHex,
-        signedPsbtHexes,
+        psbtsHexes,
+        signedPsbtsHexes,
       },
       afterFn,
       options

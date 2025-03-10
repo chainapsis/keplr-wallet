@@ -38,7 +38,6 @@ import { RecipientInput } from "../components/input/recipient-input";
 import { AmountInput } from "../components/input/amount-input";
 import styled from "styled-components";
 import { ExtensionKVStore } from "@keplr-wallet/common";
-import { Psbt } from "bitcoinjs-lib";
 import { toXOnly } from "@keplr-wallet/crypto";
 import { FeeControl } from "../components/input/fee-control";
 // import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
@@ -280,6 +279,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
         const xonlyPubKey = publicKey
           ? toXOnly(Buffer.from(publicKey))
           : undefined;
+        const feeRate = sendConfigs.feeRateConfig.feeRate;
         const isSendMax = sendConfigs.amountConfig.fraction === 1;
 
         const MAX_SAFE_OUTPUT = new Dec(2 ** 53 - 1);
@@ -315,7 +315,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
           senderAddress,
           utxos: availableUTXOs,
           recipients: recipientsForTransaction,
-          feeRate: sendConfigs.feeRateConfig.feeRate,
+          feeRate,
           isSendMax,
         });
 
@@ -329,6 +329,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
           utxos: selectedUtxos,
           senderAddress,
           recipients: recipientsForTransaction,
+          feeRate,
           xonlyPubKey,
           isSendMax,
           hasChange,
@@ -407,12 +408,8 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
         setIsLoading(true);
 
         try {
-          // TODO: logic for send bitcoin tx
-          Psbt.fromHex(psbtSimulator.psbtHex); // validate psbt hex
-
-          const txHash = await bitcoinAccount.signAndPushTx(
-            psbtSimulator.psbtHex
-          );
+          const psbtHex = psbtSimulator.psbtHex;
+          const txHash = await bitcoinAccount.signAndPushTx(psbtHex);
 
           // TODO: submit and refresh balance
 

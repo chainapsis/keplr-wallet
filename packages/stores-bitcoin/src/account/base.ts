@@ -244,6 +244,7 @@ export class BitcoinAccountBase {
     senderAddress,
     xonlyPubKey,
     recipients,
+    feeRate,
     isSendMax = false,
     hasChange = false,
   }: BuildPsbtParams): string {
@@ -258,6 +259,10 @@ export class BitcoinAccountBase {
 
     if (!recipients.length) {
       throw new Error("Recipients are required");
+    }
+
+    if (feeRate <= 0) {
+      throw new Error("Invalid fee rate");
     }
 
     // 2. Parse and validate chain configuration
@@ -297,16 +302,71 @@ export class BitcoinAccountBase {
       throw new Error("Insufficient balance");
     }
 
+    const senderAddressInfo = this.validateAndGetAddressInfo(
+      senderAddress,
+      network as unknown as Network
+    );
+
+    if (!senderAddressInfo) {
+      throw new Error("Invalid sender address");
+    }
+
+    const recipientAddressInfos = recipients
+      .map(({ address }) =>
+        this.validateAndGetAddressInfo(address, network as unknown as Network)
+      )
+      .filter(Boolean) as AddressInfo[];
+    if (!recipientAddressInfos.length) {
+      throw new Error("Invalid recipients");
+    }
+
+    // 5. Calculate output parameters
+    const outputParams: Record<string, number> = {};
+    recipientAddressInfos.forEach((info) => {
+      const key = `${info.type}_output_count`;
+      outputParams[key] = (outputParams[key] || 0) + 1;
+    });
+
+    const txSizeEstimator = new BitcoinTxSizeEstimator();
+
+    // Helper functions
+    const calculateTxSize = (
+      inputCount: number,
+      outputParams: Record<string, number>,
+      includeChange: boolean
+    ) => {
+      const outputParamsWithChange = { ...outputParams };
+
+      if (includeChange) {
+        const changeKey = `${senderAddressInfo.type}_output_count`;
+        outputParamsWithChange[changeKey] =
+          (outputParamsWithChange[changeKey] || 0) + 1;
+      }
+
+      return txSizeEstimator.calcTxSize({
+        input_count: inputCount,
+        input_script: senderAddressInfo.type,
+        ...outputParamsWithChange,
+      });
+    };
+
+    const calculateFee = (size: number) => new Dec(Math.ceil(size * feeRate));
+
     const allRecipients = [...recipients];
 
     // 4. Handle change output if needed
     if (hasChange) {
+      const txSize = calculateTxSize(utxos.length, outputParams, true);
+      const fee = calculateFee(txSize.txVBytes);
+
+      const changeAmount = remainderValue.sub(fee);
+
       // if change amount is greater than or equal to dust threshold
-      if (remainderValue.gte(new Dec(NATIVE_SEGWIT_DUST_THRESHOLD))) {
+      if (changeAmount.gte(new Dec(NATIVE_SEGWIT_DUST_THRESHOLD))) {
         // add change output address
         allRecipients.push({
           address: senderAddress,
-          amount: remainderValue.truncate().toBigNumber().toJSNumber(),
+          amount: changeAmount.truncate().toBigNumber().toJSNumber(),
         });
       } else {
         // hasChange is true but change amount is less than dust threshold, log warning
@@ -388,7 +448,7 @@ export class BitcoinAccountBase {
 
   /**
    * Sign PSBT
-   * @param psbt PSBT to be signed
+   * @param psbt PSBT to be signed, all inputs must be finalized
    * @returns Signed PSBT in hex format
    */
   async signPsbt(psbtHex: string): Promise<string> {
@@ -429,7 +489,25 @@ export class BitcoinAccountBase {
 
   async signAndPushTx(psbtHex: string): Promise<string> {
     const signedPsbt = await this.signPsbt(psbtHex);
-    return await this.pushTx(signedPsbt);
+
+    console.log("signedPsbt", signedPsbt);
+
+    try {
+      const psbt = Psbt.fromHex(signedPsbt);
+
+      // CHECK: tx validation required?
+      const tx = psbt.extractTransaction();
+
+      console.log("tx", tx.toHex());
+
+      return await this.pushTx(tx.toHex());
+    } catch (error) {
+      console.error("Error signing PSBT:", error);
+      if (error instanceof Error) {
+        throw new Error(`Failed to sign PSBT: ${error.message}`);
+      }
+      throw new Error("Failed to sign PSBT: Unknown error");
+    }
   }
 
   private validateAndGetAddressInfo = (address: string, network: Network) => {
