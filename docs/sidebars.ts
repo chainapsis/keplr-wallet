@@ -53,7 +53,7 @@ const sidebars: SidebarsConfig = {
       type: "category",
       label: "Keplr Mobile",
       collapsed: false,
-      items: ["mobile/deeplink"],
+      items: ["mobile/deeplink", "mobile/wallet-connect"],
     },
   ],
 };
