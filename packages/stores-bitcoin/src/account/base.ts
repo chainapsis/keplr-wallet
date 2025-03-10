@@ -9,6 +9,7 @@ import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { action, makeObservable, observable } from "mobx";
 import validate, {
   AddressInfo,
+  AddressType,
   Network,
   getAddressInfo,
 } from "bitcoin-address-validation";
@@ -30,12 +31,16 @@ export class BitcoinAccountBase {
   @observable
   protected _isSendingTx: boolean = false;
 
+  protected _txSizeEstimator: BitcoinTxSizeEstimator;
+
   constructor(
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
     protected readonly getKeplr: () => Promise<Keplr | undefined>
   ) {
     makeObservable(this);
+
+    this._txSizeEstimator = new BitcoinTxSizeEstimator();
   }
 
   @action
@@ -116,7 +121,6 @@ export class BitcoinAccountBase {
 
     // 7. Initialize constants and helpers
     const DUST = new Dec(NATIVE_SEGWIT_DUST_THRESHOLD);
-    const txSizeEstimator = new BitcoinTxSizeEstimator();
 
     // Helper functions
     const calculateTxSize = (
@@ -124,19 +128,12 @@ export class BitcoinAccountBase {
       outputParams: Record<string, number>,
       includeChange: boolean
     ) => {
-      const outputParamsWithChange = { ...outputParams };
-
-      if (includeChange) {
-        const changeKey = `${senderAddressInfo.type}_output_count`;
-        outputParamsWithChange[changeKey] =
-          (outputParamsWithChange[changeKey] || 0) + 1;
-      }
-
-      return txSizeEstimator.calcTxSize({
-        input_count: inputCount,
-        input_script: senderAddressInfo.type,
-        ...outputParamsWithChange,
-      });
+      return this.calculateTxSize(
+        senderAddressInfo.type,
+        inputCount,
+        outputParams,
+        includeChange
+      );
     };
 
     const calculateFee = (size: number) => new Dec(Math.ceil(size * feeRate));
@@ -220,7 +217,7 @@ export class BitcoinAccountBase {
     // Final calculations based on whether we have change
     const finalConfig = calculateTxConfig(selectedUtxoIds, hasChange);
 
-    // 10. Return the selection
+    // 11. Return the selection
     return {
       selectedUtxos: utxos.filter((utxo) =>
         selectedUtxoIds.has(`${utxo.txid}:${utxo.vout}`)
@@ -327,30 +324,23 @@ export class BitcoinAccountBase {
       outputParams[key] = (outputParams[key] || 0) + 1;
     });
 
-    const txSizeEstimator = new BitcoinTxSizeEstimator();
-
     // Helper functions
     const calculateTxSize = (
       inputCount: number,
       outputParams: Record<string, number>,
       includeChange: boolean
     ) => {
-      const outputParamsWithChange = { ...outputParams };
-
-      if (includeChange) {
-        const changeKey = `${senderAddressInfo.type}_output_count`;
-        outputParamsWithChange[changeKey] =
-          (outputParamsWithChange[changeKey] || 0) + 1;
-      }
-
-      return txSizeEstimator.calcTxSize({
-        input_count: inputCount,
-        input_script: senderAddressInfo.type,
-        ...outputParamsWithChange,
-      });
+      return this.calculateTxSize(
+        senderAddressInfo.type,
+        inputCount,
+        outputParams,
+        includeChange
+      );
     };
 
     const calculateFee = (size: number) => new Dec(Math.ceil(size * feeRate));
+
+    const DUST = new Dec(NATIVE_SEGWIT_DUST_THRESHOLD);
 
     const allRecipients = [...recipients];
 
@@ -362,7 +352,7 @@ export class BitcoinAccountBase {
       const changeAmount = remainderValue.sub(fee);
 
       // if change amount is greater than or equal to dust threshold
-      if (changeAmount.gte(new Dec(NATIVE_SEGWIT_DUST_THRESHOLD))) {
+      if (changeAmount.gte(DUST)) {
         // add change output address
         allRecipients.push({
           address: senderAddress,
@@ -490,19 +480,14 @@ export class BitcoinAccountBase {
   async signAndPushTx(psbtHex: string): Promise<string> {
     const signedPsbt = await this.signPsbt(psbtHex);
 
-    console.log("signedPsbt", signedPsbt);
-
     try {
       const psbt = Psbt.fromHex(signedPsbt);
 
       // CHECK: tx validation required?
       const tx = psbt.extractTransaction();
 
-      console.log("tx", tx.toHex());
-
       return await this.pushTx(tx.toHex());
     } catch (error) {
-      console.error("Error signing PSBT:", error);
       if (error instanceof Error) {
         throw new Error(`Failed to sign PSBT: ${error.message}`);
       }
@@ -510,7 +495,7 @@ export class BitcoinAccountBase {
     }
   }
 
-  private validateAndGetAddressInfo = (address: string, network: Network) => {
+  private validateAndGetAddressInfo = (address: string, network?: Network) => {
     try {
       return validate(address, network, {
         castTestnetTo: network === "signet" ? Network.signet : undefined,
@@ -522,6 +507,27 @@ export class BitcoinAccountBase {
     } catch (e) {
       return null;
     }
+  };
+
+  private calculateTxSize = (
+    senderAddressType: AddressType,
+    inputCount: number,
+    outputParams: Record<string, number>,
+    includeChange: boolean
+  ) => {
+    const outputParamsWithChange = { ...outputParams };
+
+    if (includeChange) {
+      const changeKey = `${senderAddressType}_output_count`;
+      outputParamsWithChange[changeKey] =
+        (outputParamsWithChange[changeKey] || 0) + 1;
+    }
+
+    return this._txSizeEstimator.calcTxSize({
+      input_count: inputCount,
+      input_script: senderAddressType,
+      ...outputParamsWithChange,
+    });
   };
 
   private branchAndBoundSelection({
