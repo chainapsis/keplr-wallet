@@ -29,6 +29,8 @@ export const TokenContractListURL =
 export const TokenContractListRepoURL =
   "https://github.com/chainapsis/keplr-contract-registry";
 
+export const NOBLE_CHAIN_ID = "noble-1";
+
 export const FiatCurrencies: FiatCurrency[] = [
   {
     currency: "usd",
@@ -193,6 +195,10 @@ export const SwapVenues: {
     chainId: "injective-1",
   },
   {
+    name: "injective-hallswap",
+    chainId: "injective-1",
+  },
+  {
     name: "neutron-drop",
     chainId: "neutron-1",
   },
@@ -253,6 +259,10 @@ export const SwapVenues: {
   {
     name: "temp-forma",
     chainId: "eip155:984122",
+  },
+  {
+    name: "neutron-duality",
+    chainId: "neutron-1",
   },
 ];
 

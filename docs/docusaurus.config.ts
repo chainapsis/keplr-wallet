@@ -23,6 +23,22 @@ const config: Config = {
     locales: ["en"],
   },
 
+  staticDirectories: ["public", "static"],
+
+  plugins: [
+    [
+      "@docusaurus/plugin-client-redirects",
+      {
+        redirects: [
+          {
+            from: "/api",
+            to: "/api/intro",
+          },
+        ],
+      },
+    ],
+  ],
+
   presets: [
     [
       "classic",

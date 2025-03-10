@@ -24,13 +24,16 @@ interface ViewToken {
   error: QueryError<any> | undefined;
 }
 
-export interface ViewTokenCosmosOnly {
-  chainInfo: IChainInfoImpl;
-  token: CoinPretty;
-  price: PricePretty | undefined;
-  isFetching: boolean;
-  error: QueryError<any> | undefined;
+export interface ViewStakedToken extends ViewToken {
+  stakingUrl?: string;
 }
+
+export interface ViewUnbondingToken extends ViewStakedToken {
+  completeTime: string | number;
+  omitCompleteTimeFraction?: boolean;
+}
+
+export type ViewRewardToken = ViewStakedToken;
 
 /**
  * 거대한 쿼리를 만든다.
@@ -43,12 +46,9 @@ export class HugeQueriesStore {
   protected static zeroDec = new Dec(0);
 
   protected balanceBinarySort: BinarySortArray<ViewToken>;
-  protected delegationBinarySort: BinarySortArray<ViewTokenCosmosOnly>;
-  protected unbondingBinarySort: BinarySortArray<{
-    viewToken: ViewTokenCosmosOnly;
-    completeTime: string;
-  }>;
-  protected claimableRewardsBinarySort: BinarySortArray<ViewTokenCosmosOnly>;
+  protected delegationBinarySort: BinarySortArray<ViewStakedToken>;
+  protected unbondingBinarySort: BinarySortArray<ViewUnbondingToken>;
+  protected claimableRewardsBinarySort: BinarySortArray<ViewRewardToken>;
 
   constructor(
     protected readonly chainStore: ChainStore,
@@ -72,7 +72,7 @@ export class HugeQueriesStore {
       }
     );
     let delegationDisposal: (() => void) | undefined;
-    this.delegationBinarySort = new BinarySortArray<ViewTokenCosmosOnly>(
+    this.delegationBinarySort = new BinarySortArray<ViewStakedToken>(
       this.sortByPrice,
       () => {
         delegationDisposal = autorun(() => {
@@ -86,12 +86,9 @@ export class HugeQueriesStore {
       }
     );
     let unbondingDisposal: (() => void) | undefined;
-    this.unbondingBinarySort = new BinarySortArray<{
-      viewToken: ViewTokenCosmosOnly;
-      completeTime: string;
-    }>(
+    this.unbondingBinarySort = new BinarySortArray<ViewUnbondingToken>(
       (a, b) => {
-        return this.sortByPrice(a.viewToken, b.viewToken);
+        return this.sortByPrice(a, b);
       },
       () => {
         unbondingDisposal = autorun(() => {
@@ -105,7 +102,7 @@ export class HugeQueriesStore {
       }
     );
     let claimableRewardsDisposal: (() => void) | undefined;
-    this.claimableRewardsBinarySort = new BinarySortArray<ViewTokenCosmosOnly>(
+    this.claimableRewardsBinarySort = new BinarySortArray<ViewStakedToken>(
       this.sortByPrice,
       () => {
         claimableRewardsDisposal = autorun(() => {
@@ -155,6 +152,21 @@ export class HugeQueriesStore {
               : queries.queryBalances.getQueryBech32Address(
                   account.bech32Address
                 );
+
+          if (this.chainStore.getChain(chainInfo.chainId).bech32Config) {
+            // ethermint 계열의 체인인 경우 ibc token을 보여주기 위해서 native 토큰에 대해서
+            // cosmos 방식의 쿼리를 꼭 발생시켜야 한다.
+            for (const bal of queries.queryBalances.getQueryBech32Address(
+              account.bech32Address
+            ).balances) {
+              if (
+                new DenomHelper(bal.currency.coinMinimalDenom).type === "native"
+              ) {
+                bal.balance;
+                break;
+              }
+            }
+          }
 
           const key = `${chainInfo.chainIdentifier}/${currency.coinMinimalDenom}`;
           if (!keysUsed.get(key)) {
@@ -360,6 +372,8 @@ export class HugeQueriesStore {
     }
   );
 
+  // CHECK: starknet 스테이킹 관련 로직 추가 필요 여부.
+  //        현재 익스텐션에서 stakables, notStakbles, ibcTokens, claimableRewards를 참조하는 곳은 없음.
   @computed
   get stakables(): ViewToken[] {
     const keys: Map<string, boolean> = new Map();
@@ -370,6 +384,7 @@ export class HugeQueriesStore {
       const key = `${chainInfo.chainIdentifier}/${chainInfo.stakeCurrency.coinMinimalDenom}`;
       keys.set(key, true);
     }
+
     return this.balanceBinarySort.arr.filter((viewToken) => {
       const key = viewToken[BinarySortArray.SymbolKey];
       return keys.get(key);
@@ -430,29 +445,63 @@ export class HugeQueriesStore {
   protected updateDelegations(): void {
     const prevKeyMap = new Map(this.delegationBinarySort.indexForKeyMap());
 
-    for (const chainInfo of this.chainStore.chainInfosInUI) {
-      const account = this.accountStore.getAccount(chainInfo.chainId);
-      if (account.bech32Address === "") {
-        continue;
-      }
-      const queries = this.queriesStore.get(chainInfo.chainId);
-      const queryDelegation =
-        queries.cosmos.queryDelegations.getQueryBech32Address(
-          account.bech32Address
-        );
-      if (!queryDelegation.total) {
-        continue;
+    for (const modularChainInfo of this.chainStore.modularChainInfosInUI) {
+      const account = this.accountStore.getAccount(modularChainInfo.chainId);
+
+      if ("cosmos" in modularChainInfo) {
+        if (account.bech32Address === "") {
+          continue;
+        }
+
+        const queries = this.queriesStore.get(modularChainInfo.chainId);
+        const queryDelegation =
+          queries.cosmos.queryDelegations.getQueryBech32Address(
+            account.bech32Address
+          );
+        if (!queryDelegation.total) {
+          continue;
+        }
+
+        const chainInfo = this.chainStore.getChain(modularChainInfo.chainId);
+
+        const key = `${modularChainInfo.chainId}/${account.bech32Address}`;
+        prevKeyMap.delete(key);
+        this.delegationBinarySort.pushAndSort(key, {
+          chainInfo,
+          token: queryDelegation.total,
+          price: this.priceStore.calculatePrice(queryDelegation.total),
+          isFetching: queryDelegation.isFetching,
+          error: queryDelegation.error,
+          stakingUrl: chainInfo.walletUrlForStaking,
+        });
       }
 
-      const key = `${chainInfo.chainId}/${account.bech32Address}`;
-      prevKeyMap.delete(key);
-      this.delegationBinarySort.pushAndSort(key, {
-        chainInfo,
-        token: queryDelegation.total,
-        price: this.priceStore.calculatePrice(queryDelegation.total),
-        isFetching: queryDelegation.isFetching,
-        error: queryDelegation.error,
-      });
+      if ("starknet" in modularChainInfo) {
+        if (account.starknetHexAddress === "") {
+          continue;
+        }
+
+        const queries = this.starknetQueriesStore.get(modularChainInfo.chainId);
+        const queryStakingInfo = queries.stakingInfoManager.getStakingInfo(
+          account.starknetHexAddress
+        );
+
+        const totalStakedAmount = queryStakingInfo.totalStakedAmount;
+        if (!totalStakedAmount) {
+          continue;
+        }
+
+        const key = `${modularChainInfo.chainId}/${account.starknetHexAddress}`;
+        prevKeyMap.delete(key);
+        this.delegationBinarySort.pushAndSort(key, {
+          chainInfo: modularChainInfo,
+          token: totalStakedAmount,
+          price: this.priceStore.calculatePrice(totalStakedAmount),
+          isFetching: queryStakingInfo.isFetching,
+          error: queryStakingInfo.error,
+          stakingUrl: "https://dashboard.endur.fi/stake",
+        });
+      }
     }
 
     for (const removedKey of prevKeyMap.keys()) {
@@ -461,7 +510,7 @@ export class HugeQueriesStore {
   }
 
   @computed
-  get delegations(): ReadonlyArray<ViewTokenCosmosOnly> {
+  get delegations(): ReadonlyArray<ViewStakedToken> {
     return this.delegationBinarySort.arr;
   }
 
@@ -469,40 +518,76 @@ export class HugeQueriesStore {
   protected updateUnbondings(): void {
     const prevKeyMap = new Map(this.unbondingBinarySort.indexForKeyMap());
 
-    for (const chainInfo of this.chainStore.chainInfosInUI) {
-      const account = this.accountStore.getAccount(chainInfo.chainId);
-      if (account.bech32Address === "") {
-        continue;
-      }
-      const queries = this.queriesStore.get(chainInfo.chainId);
-      const queryUnbonding =
-        queries.cosmos.queryUnbondingDelegations.getQueryBech32Address(
-          account.bech32Address
-        );
+    for (const modularChainInfo of this.chainStore.modularChainInfosInUI) {
+      const account = this.accountStore.getAccount(modularChainInfo.chainId);
 
-      for (let i = 0; i < queryUnbonding.unbondings.length; i++) {
-        const unbonding = queryUnbonding.unbondings[i];
-        for (let j = 0; j < unbonding.entries.length; j++) {
-          const entry = unbonding.entries[j];
-          if (!chainInfo.stakeCurrency) {
-            continue;
-          }
-          const balance = new CoinPretty(
-            chainInfo.stakeCurrency,
-            entry.balance
+      if ("cosmos" in modularChainInfo) {
+        if (account.bech32Address === "") {
+          continue;
+        }
+
+        const chainInfo = this.chainStore.getChain(modularChainInfo.chainId);
+
+        const queries = this.queriesStore.get(modularChainInfo.chainId);
+        const queryUnbonding =
+          queries.cosmos.queryUnbondingDelegations.getQueryBech32Address(
+            account.bech32Address
           );
 
-          const key = `${chainInfo.chainId}/${account.bech32Address}/${i}/${j}`;
-          prevKeyMap.delete(key);
-          this.unbondingBinarySort.pushAndSort(key, {
-            viewToken: {
+        for (let i = 0; i < queryUnbonding.unbondings.length; i++) {
+          const unbonding = queryUnbonding.unbondings[i];
+          for (let j = 0; j < unbonding.entries.length; j++) {
+            const entry = unbonding.entries[j];
+            if (!chainInfo.stakeCurrency) {
+              continue;
+            }
+            const balance = new CoinPretty(
+              chainInfo.stakeCurrency,
+              entry.balance
+            );
+
+            const key = `${chainInfo.chainId}/${account.bech32Address}/${i}/${j}`;
+            prevKeyMap.delete(key);
+            this.unbondingBinarySort.pushAndSort(key, {
               chainInfo,
               token: balance,
               price: this.priceStore.calculatePrice(balance),
               isFetching: queryUnbonding.isFetching,
               error: queryUnbonding.error,
-            },
-            completeTime: entry.completion_time,
+              completeTime: entry.completion_time,
+              stakingUrl: chainInfo.walletUrlForStaking,
+            });
+          }
+        }
+      }
+
+      if ("starknet" in modularChainInfo) {
+        if (account.starknetHexAddress === "") {
+          continue;
+        }
+
+        const queries = this.starknetQueriesStore.get(modularChainInfo.chainId);
+        const queryUnbonding = queries.stakingInfoManager.getStakingInfo(
+          account.starknetHexAddress
+        );
+
+        const unbondingsData = queryUnbonding.unbondings;
+        if (!unbondingsData || unbondingsData.unbondings.length === 0) {
+          continue;
+        }
+
+        for (const unbonding of unbondingsData.unbondings) {
+          const key = `${modularChainInfo.chainId}/${account.starknetHexAddress}/${unbonding.validatorAddress}`;
+          prevKeyMap.delete(key);
+          this.unbondingBinarySort.pushAndSort(key, {
+            chainInfo: modularChainInfo,
+            token: unbonding.amount,
+            price: this.priceStore.calculatePrice(unbonding.amount),
+            completeTime: unbonding.completeTime * 1000, // required to convert unix timestamp to ms or iso string
+            isFetching: queryUnbonding.isFetching,
+            error: queryUnbonding.error,
+            stakingUrl: "https://dashboard.endur.fi/stake",
+            omitCompleteTimeFraction: true, // endur.fi와 동일하게 표기하기 위한 옵션
           });
         }
       }
@@ -514,10 +599,7 @@ export class HugeQueriesStore {
   }
 
   @computed
-  get unbondings(): ReadonlyArray<{
-    viewToken: ViewTokenCosmosOnly;
-    completeTime: string;
-  }> {
+  get unbondings(): ReadonlyArray<ViewUnbondingToken> {
     return this.unbondingBinarySort.arr;
   }
 
@@ -559,7 +641,7 @@ export class HugeQueriesStore {
   }
 
   @computed
-  get claimableRewards(): ReadonlyArray<ViewTokenCosmosOnly> {
+  get claimableRewards(): ReadonlyArray<ViewRewardToken> {
     return this.claimableRewardsBinarySort.arr;
   }
 

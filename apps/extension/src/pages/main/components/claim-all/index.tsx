@@ -1,46 +1,73 @@
-import React, { FunctionComponent, useEffect, useRef, useState } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { Column, Columns } from "../../../../components/column";
 import { Button } from "../../../../components/button";
 import { Stack } from "../../../../components/stack";
 import { Box } from "../../../../components/box";
 import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse";
-import { Body2, Subtitle2, Subtitle3 } from "../../../../components/typography";
+import {
+  Body2,
+  Body3,
+  Subtitle2,
+  Subtitle3,
+} from "../../../../components/typography";
 import { ColorPalette } from "../../../../styles";
 import { ViewToken } from "../../index";
 import styled, { css, useTheme } from "styled-components";
 import {
   ArrowDownIcon,
-  ArrowUpIcon,
+  CoinsPlusOutlineIcon,
+  LoadingIcon,
   WarningIcon,
 } from "../../../../components/icon";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
-import { CoinPretty, Dec, Int, PricePretty } from "@keplr-wallet/unit";
-import {
-  AminoSignResponse,
-  BroadcastMode,
-  FeeCurrency,
-  StdSignDoc,
-} from "@keplr-wallet/types";
-import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
-import { BACKGROUND_PORT } from "@keplr-wallet/router";
-import {
-  PrivilegeCosmosSignAminoWithdrawRewardsMsg,
-  SendTxMsg,
-} from "@keplr-wallet/background";
-import { action, makeObservable, observable } from "mobx";
+import { CoinPretty, Dec, PricePretty } from "@keplr-wallet/unit";
+import { ModularChainInfo } from "@keplr-wallet/types";
 import { Tooltip } from "../../../../components/tooltip";
-import { isSimpleFetchError } from "@keplr-wallet/simple-fetch";
-import { useNotification } from "../../../../hooks/notification";
-import { useNavigate } from "react-router";
 import { Skeleton } from "../../../../components/skeleton";
-import { YAxis } from "../../../../components/axis";
+import { XAxis, YAxis } from "../../../../components/axis";
 import Color from "color";
 import { SpecialButton } from "../../../../components/special-button";
-import { Gutter } from "../../../../components/gutter";
 import { FormattedMessage, useIntl } from "react-intl";
 import { CurrencyImageFallback } from "../../../../components/image";
-import { DefaultGasPriceStep } from "@keplr-wallet/hooks";
+import {
+  ClaimAllEachState,
+  useCosmosClaimRewards,
+  useClaimAllEachState,
+  useStarknetClaimRewards,
+} from "../../../../hooks/claim";
+import {
+  useSpring,
+  animated,
+  useTransition,
+  useSpringRef,
+  easings,
+} from "@react-spring/web";
+import {
+  DescendantHeightPxRegistry,
+  useVerticalSizeInternalContext,
+} from "../../../../components/transition/vertical-size/internal";
+import { NOBLE_CHAIN_ID } from "../../../../config.ui";
+
+const USDN_CURRENCY = {
+  coinDenom: "USDN",
+  coinMinimalDenom: "uusdn",
+  coinDecimals: 6,
+};
+
+interface ViewClaimToken extends Omit<ViewToken, "chainInfo"> {
+  modularChainInfo: ModularChainInfo;
+  price?: PricePretty;
+  onClaimAll: (
+    chainId: string,
+    rewardToken: CoinPretty,
+    state: ClaimAllEachState
+  ) => void | Promise<void>;
+  onClaimSingle: (
+    chainId: string,
+    state: ClaimAllEachState
+  ) => void | Promise<void>;
+}
 
 const Styles = {
   Container: styled.div<{ isNotReady?: boolean }>`
@@ -93,31 +120,29 @@ const Styles = {
       `;
     }};
   `,
+  ItemContentBox: styled(Box)<{ showButton?: boolean; isLastItem?: boolean }>`
+    padding: 0.875rem 1rem;
+    padding-right: ${(props) => (props.showButton ? "0.625rem" : "1rem")};
+    border-radius: 0.375rem;
+
+    margin: 0 0.75rem;
+    margin-bottom: ${(props) => (props.isLastItem ? "0.75rem" : "0")};
+
+    &:hover {
+      background-color: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-10"]
+          : ColorPalette["gray-600"]};
+    }
+
+    &:active {
+      background-color: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-50"]
+          : ColorPalette["gray-550"]};
+    }
+  `,
 };
-
-// XXX: 좀 이상하긴 한데 상위/하위 컴포넌트가 state를 공유하기 쉽게하려고 이렇게 한다...
-class ClaimAllEachState {
-  @observable
-  isLoading: boolean = false;
-
-  @observable
-  failedReason: Error | undefined = undefined;
-
-  constructor() {
-    makeObservable(this);
-  }
-
-  @action
-  setIsLoading(value: boolean): void {
-    this.isLoading = value;
-  }
-
-  @action
-  setFailedReason(value: Error | undefined): void {
-    this.isLoading = false;
-    this.failedReason = value;
-  }
-}
 
 const zeroDec = new Dec(0);
 
@@ -128,6 +153,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
       chainStore,
       accountStore,
       queriesStore,
+      starknetQueriesStore,
       priceStore,
       keyRingStore,
       uiConfigStore,
@@ -136,50 +162,103 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
     const theme = useTheme();
 
     const [isExpanded, setIsExpanded] = useState(false);
+    const { states, getClaimAllEachState } = useClaimAllEachState();
 
-    const statesRef = useRef(new Map<string, ClaimAllEachState>());
-    const getClaimAllEachState = (chainId: string): ClaimAllEachState => {
-      const chainIdentifier = chainStore.getChain(chainId).chainIdentifier;
-      let state = statesRef.current.get(chainIdentifier);
-      if (!state) {
-        state = new ClaimAllEachState();
-        statesRef.current.set(chainIdentifier, state);
-      }
+    const { handleCosmosClaimAllEach, handleCosmosClaimSingle } =
+      useCosmosClaimRewards();
+    const { handleStarknetClaimAllEach, handleStarknetClaimSingle } =
+      useStarknetClaimRewards();
 
-      return state;
-    };
+    const viewClaimTokens: ViewClaimToken[] = (() => {
+      const res: ViewClaimToken[] = [];
+      for (const modularChainInfo of chainStore.modularChainInfosInUI) {
+        const chainId = modularChainInfo.chainId;
 
-    const viewTokens: ViewToken[] = (() => {
-      const res: ViewToken[] = [];
-      for (const chainInfo of chainStore.chainInfosInUI) {
-        const chainId = chainInfo.chainId;
-        const accountAddress = accountStore.getAccount(chainId).bech32Address;
-        const queries = queriesStore.get(chainId);
-        const queryRewards =
-          queries.cosmos.queryRewards.getQueryBech32Address(accountAddress);
+        if ("cosmos" in modularChainInfo) {
+          const chainInfo = chainStore.getChain(chainId);
+          const accountAddress = accountStore.getAccount(chainId).bech32Address;
+          const queries = queriesStore.get(chainId);
 
-        const targetDenom = (() => {
-          if (chainInfo.chainIdentifier === "dydx-mainnet") {
-            return "ibc/8E27BA2D5493AF5636760E354E46004562C46AB7EC0CC4C1CA14E9E20E2545B5";
-          }
-
-          return chainInfo.stakeCurrency?.coinMinimalDenom;
-        })();
-
-        if (targetDenom) {
-          const currency = chainInfo.findCurrency(targetDenom);
-          if (currency) {
-            const reward = queryRewards.rewards.find(
-              (r) => r.currency.coinMinimalDenom === targetDenom
-            );
-            if (reward) {
+          if (chainId === NOBLE_CHAIN_ID) {
+            const queryYield =
+              queries.noble.queryYield.getQueryBech32Address(accountAddress);
+            const usdnCurrency =
+              chainInfo.findCurrency("uusdn") || USDN_CURRENCY;
+            const rawAmount = queryYield.claimableAmount;
+            const amount = new CoinPretty(usdnCurrency, rawAmount);
+            if (amount.toDec().gt(new Dec(0))) {
               res.push({
-                token: reward,
-                chainInfo,
-                isFetching: queryRewards.isFetching,
-                error: queryRewards.error,
+                token: amount,
+                price: priceStore.calculatePrice(amount),
+                modularChainInfo: modularChainInfo,
+                isFetching: queryYield.isFetching,
+                error: queryYield.error,
+                onClaimAll: handleCosmosClaimAllEach,
+                onClaimSingle: handleCosmosClaimSingle,
               });
             }
+          }
+
+          const queryRewards =
+            queries.cosmos.queryRewards.getQueryBech32Address(accountAddress);
+
+          const targetDenom = (() => {
+            if (chainInfo.chainIdentifier === "dydx-mainnet") {
+              return "ibc/8E27BA2D5493AF5636760E354E46004562C46AB7EC0CC4C1CA14E9E20E2545B5";
+            }
+
+            if (chainInfo.chainIdentifier === "elys") {
+              return "ueden";
+            }
+
+            return chainInfo.stakeCurrency?.coinMinimalDenom;
+          })();
+
+          if (targetDenom) {
+            const currency = chainInfo.findCurrency(targetDenom);
+            if (currency) {
+              const reward = queryRewards.rewards.find(
+                (r) => r.currency.coinMinimalDenom === targetDenom
+              );
+              if (reward) {
+                res.push({
+                  token: reward,
+                  price: priceStore.calculatePrice(reward),
+                  modularChainInfo: modularChainInfo,
+                  isFetching: queryRewards.isFetching,
+                  error: queryRewards.error,
+                  onClaimAll: handleCosmosClaimAllEach,
+                  onClaimSingle: handleCosmosClaimSingle,
+                });
+              }
+            }
+          }
+        } else if ("starknet" in modularChainInfo) {
+          if (chainId !== "starknet:SN_MAIN") {
+            continue;
+          }
+
+          const starknetChainInfo = chainStore.getModularChain(chainId);
+          const queryStakingInfo = starknetQueriesStore
+            .get(chainId)
+            .stakingInfoManager.getStakingInfo(
+              accountStore.getAccount(starknetChainInfo.chainId)
+                .starknetHexAddress
+            );
+
+          const totalClaimableRewardAmount =
+            queryStakingInfo?.totalClaimableRewardAmount;
+
+          if (totalClaimableRewardAmount?.toDec().gt(zeroDec)) {
+            res.push({
+              token: totalClaimableRewardAmount,
+              price: priceStore.calculatePrice(totalClaimableRewardAmount),
+              modularChainInfo: starknetChainInfo,
+              isFetching: queryStakingInfo?.isFetching ?? false,
+              error: queryStakingInfo?.error,
+              onClaimAll: handleStarknetClaimAllEach,
+              onClaimSingle: handleStarknetClaimSingle,
+            });
           }
         }
       }
@@ -197,9 +276,11 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
         })
         .sort((a, b) => {
           const aHasError =
-            getClaimAllEachState(a.chainInfo.chainId).failedReason != null;
+            getClaimAllEachState(a.modularChainInfo.chainId).failedReason !=
+            null;
           const bHasError =
-            getClaimAllEachState(b.chainInfo.chainId).failedReason != null;
+            getClaimAllEachState(b.modularChainInfo.chainId).failedReason !=
+            null;
 
           if (aHasError || bHasError) {
             if (aHasError && bHasError) {
@@ -225,8 +306,8 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
 
       let res = new PricePretty(fiatCurrency, 0);
 
-      for (const viewToken of viewTokens) {
-        const price = priceStore.calculatePrice(viewToken.token);
+      for (const viewClaimToken of viewClaimTokens) {
+        const price = priceStore.calculatePrice(viewClaimToken.token);
         if (price) {
           res = res.add(price);
         }
@@ -246,7 +327,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
     const claimAll = () => {
       analyticsStore.logEvent("click_claimAll");
 
-      if (viewTokens.length > 0) {
+      if (viewClaimTokens.length > 0) {
         setIsExpanded(true);
       }
 
@@ -256,501 +337,26 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
         return;
       }
 
-      for (const viewToken of viewTokens) {
-        const chainId = viewToken.chainInfo.chainId;
-        const account = accountStore.getAccount(chainId);
-
-        if (!account.bech32Address) {
-          continue;
-        }
-
-        const chainInfo = chainStore.getChain(chainId);
-        const queries = queriesStore.get(chainId);
-        const queryRewards = queries.cosmos.queryRewards.getQueryBech32Address(
-          account.bech32Address
+      for (const viewClaimToken of viewClaimTokens) {
+        const state = getClaimAllEachState(
+          viewClaimToken.modularChainInfo.chainId
         );
 
-        const validatorAddresses =
-          queryRewards.getDescendingPendingRewardValidatorAddresses(
-            account.isNanoLedger ? 5 : 8
-          );
-
-        if (validatorAddresses.length === 0) {
-          continue;
-        }
-
-        const state = getClaimAllEachState(chainId);
-
-        state.setIsLoading(true);
-
-        const tx =
-          account.cosmos.makeWithdrawDelegationRewardTx(validatorAddresses);
-
-        (async () => {
-          // feemarket feature가 있는 경우 이후의 로직에서 사용할 수 있는 fee currency를 찾아야하기 때문에 undefined로 시작시킨다.
-          let feeCurrency = chainInfo.hasFeature("feemarket")
-            ? undefined
-            : chainInfo.feeCurrencies.find(
-                (cur) =>
-                  cur.coinMinimalDenom ===
-                  chainInfo.stakeCurrency?.coinMinimalDenom
-              );
-
-          if (chainInfo.hasFeature("osmosis-base-fee-beta") && feeCurrency) {
-            const queryBaseFee = queriesStore.get(chainInfo.chainId).osmosis
-              .queryBaseFee;
-            const queryRemoteBaseFeeStep = queriesStore.simpleQuery.queryGet<{
-              low?: number;
-              average?: number;
-              high?: number;
-            }>(
-              "https://gjsttg7mkgtqhjpt3mv5aeuszi0zblbb.lambda-url.us-west-2.on.aws/osmosis/osmosis-base-fee-beta.json"
-            );
-
-            await queryBaseFee.waitFreshResponse();
-            await queryRemoteBaseFeeStep.waitFreshResponse();
-
-            const baseFee = queryBaseFee.baseFee;
-            const remoteBaseFeeStep = queryRemoteBaseFeeStep.response;
-            if (baseFee) {
-              const low = remoteBaseFeeStep?.data.low
-                ? parseFloat(
-                    baseFee.mul(new Dec(remoteBaseFeeStep.data.low)).toString(8)
-                  )
-                : feeCurrency.gasPriceStep?.low ?? DefaultGasPriceStep.low;
-              const average = Math.max(
-                low,
-                remoteBaseFeeStep?.data.average
-                  ? parseFloat(
-                      baseFee
-                        .mul(new Dec(remoteBaseFeeStep.data.average))
-                        .toString(8)
-                    )
-                  : feeCurrency.gasPriceStep?.average ??
-                      DefaultGasPriceStep.average
-              );
-              const high = Math.max(
-                average,
-                remoteBaseFeeStep?.data.high
-                  ? parseFloat(
-                      baseFee
-                        .mul(new Dec(remoteBaseFeeStep.data.high))
-                        .toString(8)
-                    )
-                  : feeCurrency.gasPriceStep?.high ?? DefaultGasPriceStep.high
-              );
-
-              feeCurrency = {
-                ...feeCurrency,
-                gasPriceStep: {
-                  low,
-                  average,
-                  high,
-                },
-              };
-            }
-          }
-
-          if (!feeCurrency) {
-            let prev:
-              | {
-                  balance: CoinPretty;
-                  price: PricePretty | undefined;
-                }
-              | undefined;
-
-            const feeCurrencies = await (async () => {
-              if (chainInfo.hasFeature("feemarket")) {
-                const queryFeeMarketGasPrices =
-                  queriesStore.get(chainId).cosmos.queryFeeMarketGasPrices;
-                await queryFeeMarketGasPrices.waitFreshResponse();
-
-                const result: FeeCurrency[] = [];
-
-                for (const gasPrice of queryFeeMarketGasPrices.gasPrices) {
-                  const currency = await chainInfo.findCurrencyAsync(
-                    gasPrice.denom
-                  );
-                  if (currency) {
-                    let multiplication = {
-                      low: 1.1,
-                      average: 1.2,
-                      high: 1.3,
-                    };
-
-                    const multificationConfig =
-                      queriesStore.simpleQuery.queryGet<{
-                        [str: string]:
-                          | {
-                              low: number;
-                              average: number;
-                              high: number;
-                            }
-                          | undefined;
-                      }>(
-                        "https://gjsttg7mkgtqhjpt3mv5aeuszi0zblbb.lambda-url.us-west-2.on.aws",
-                        "/feemarket/info.json"
-                      );
-
-                    if (multificationConfig.response) {
-                      const _default =
-                        multificationConfig.response.data["__default__"];
-                      if (
-                        _default &&
-                        _default.low != null &&
-                        typeof _default.low === "number" &&
-                        _default.average != null &&
-                        typeof _default.average === "number" &&
-                        _default.high != null &&
-                        typeof _default.high === "number"
-                      ) {
-                        multiplication = {
-                          low: _default.low,
-                          average: _default.average,
-                          high: _default.high,
-                        };
-                      }
-                      const specific =
-                        multificationConfig.response.data[
-                          chainInfo.chainIdentifier
-                        ];
-                      if (
-                        specific &&
-                        specific.low != null &&
-                        typeof specific.low === "number" &&
-                        specific.average != null &&
-                        typeof specific.average === "number" &&
-                        specific.high != null &&
-                        typeof specific.high === "number"
-                      ) {
-                        multiplication = {
-                          low: specific.low,
-                          average: specific.average,
-                          high: specific.high,
-                        };
-                      }
-                    }
-
-                    result.push({
-                      ...currency,
-                      gasPriceStep: {
-                        low: parseFloat(
-                          new Dec(multiplication.low)
-                            .mul(gasPrice.amount)
-                            .toString()
-                        ),
-                        average: parseFloat(
-                          new Dec(multiplication.average)
-                            .mul(gasPrice.amount)
-                            .toString()
-                        ),
-                        high: parseFloat(
-                          new Dec(multiplication.high)
-                            .mul(gasPrice.amount)
-                            .toString()
-                        ),
-                      },
-                    });
-                  }
-                }
-
-                return result;
-              } else {
-                return chainInfo.feeCurrencies;
-              }
-            })();
-            for (const chainFeeCurrency of feeCurrencies) {
-              const currency = await chainInfo.findCurrencyAsync(
-                chainFeeCurrency.coinMinimalDenom
-              );
-              if (currency) {
-                const balance = queries.queryBalances
-                  .getQueryBech32Address(account.bech32Address)
-                  .getBalance(currency);
-                if (balance && balance.balance.toDec().gt(new Dec(0))) {
-                  const price = await priceStore.waitCalculatePrice(
-                    balance.balance,
-                    "usd"
-                  );
-
-                  if (!prev) {
-                    feeCurrency = {
-                      ...chainFeeCurrency,
-                      ...currency,
-                    };
-                    prev = {
-                      balance: balance.balance,
-                      price,
-                    };
-                  } else {
-                    if (!prev.price) {
-                      if (prev.balance.toDec().lt(balance.balance.toDec())) {
-                        feeCurrency = {
-                          ...chainFeeCurrency,
-                          ...currency,
-                        };
-                        prev = {
-                          balance: balance.balance,
-                          price,
-                        };
-                      }
-                    } else if (price) {
-                      if (prev.price.toDec().lt(price.toDec())) {
-                        feeCurrency = {
-                          ...chainFeeCurrency,
-                          ...currency,
-                        };
-                        prev = {
-                          balance: balance.balance,
-                          price,
-                        };
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-
-          if (feeCurrency) {
-            try {
-              const simulated = await tx.simulate();
-
-              // Gas adjustment is 1.5
-              // Since there is currently no convenient way to adjust the gas adjustment on the UI,
-              // Use high gas adjustment to prevent failure.
-              const gasEstimated = new Dec(simulated.gasUsed * 1.5).truncate();
-              let fee = {
-                denom: feeCurrency.coinMinimalDenom,
-                amount: new Dec(feeCurrency.gasPriceStep?.average ?? 0.025)
-                  .mul(new Dec(gasEstimated))
-                  .roundUp()
-                  .toString(),
-              };
-
-              // USD 기준으로 average fee가 0.2달러를 넘으면 low로 설정해서 보낸다.
-              const averageFeePrice = await priceStore.waitCalculatePrice(
-                new CoinPretty(feeCurrency, fee.amount),
-                "usd"
-              );
-              if (
-                averageFeePrice &&
-                averageFeePrice.toDec().gte(new Dec(0.2))
-              ) {
-                fee = {
-                  denom: feeCurrency.coinMinimalDenom,
-                  amount: new Dec(feeCurrency.gasPriceStep?.low ?? 0.025)
-                    .mul(new Dec(gasEstimated))
-                    .roundUp()
-                    .toString(),
-                };
-                console.log(
-                  `(${chainId}) Choose low gas price because average fee price is greater or equal than 0.2 USD`
-                );
-              }
-
-              // Ensure fee currency fetched before querying balance
-              const feeCurrencyFetched = await chainInfo.findCurrencyAsync(
-                feeCurrency.coinMinimalDenom
-              );
-              if (!feeCurrencyFetched) {
-                state.setFailedReason(
-                  new Error(
-                    intl.formatMessage({
-                      id: "error.can-not-find-balance-for-fee-currency",
-                    })
-                  )
-                );
-                return;
-              }
-              const balance = queries.queryBalances
-                .getQueryBech32Address(account.bech32Address)
-                .getBalance(feeCurrencyFetched);
-
-              if (!balance) {
-                state.setFailedReason(
-                  new Error(
-                    intl.formatMessage({
-                      id: "error.can-not-find-balance-for-fee-currency",
-                    })
-                  )
-                );
-                return;
-              }
-
-              await balance.waitResponse();
-
-              if (
-                new Dec(balance.balance.toCoin().amount).lt(new Dec(fee.amount))
-              ) {
-                state.setFailedReason(
-                  new Error(
-                    intl.formatMessage({
-                      id: "error.not-enough-balance-to-pay-fee",
-                    })
-                  )
-                );
-                return;
-              }
-
-              if (
-                (viewToken.token.toCoin().denom === fee.denom &&
-                  new Dec(viewToken.token.toCoin().amount).lte(
-                    new Dec(fee.amount)
-                  )) ||
-                (await (async () => {
-                  if (viewToken.token.toCoin().denom !== fee.denom) {
-                    if (
-                      viewToken.token.currency.coinGeckoId &&
-                      feeCurrencyFetched.coinGeckoId
-                    ) {
-                      const rewardPrice = await priceStore.waitCalculatePrice(
-                        viewToken.token,
-                        "usd"
-                      );
-                      const feePrice = await priceStore.waitCalculatePrice(
-                        new CoinPretty(feeCurrencyFetched, fee.amount),
-                        "usd"
-                      );
-                      if (
-                        rewardPrice &&
-                        rewardPrice.toDec().gt(new Dec(0)) &&
-                        feePrice &&
-                        feePrice.toDec().gt(new Dec(0))
-                      ) {
-                        if (
-                          rewardPrice
-                            .toDec()
-                            .mul(new Dec(1.2))
-                            .lte(feePrice.toDec())
-                        ) {
-                          return true;
-                        }
-                      }
-                    }
-                  }
-
-                  return false;
-                })())
-              ) {
-                console.log(
-                  `(${chainId}) Skip claim rewards. Fee: ${fee.amount}${
-                    fee.denom
-                  } is greater than stakable reward: ${
-                    viewToken.token.toCoin().amount
-                  }${viewToken.token.toCoin().denom}`
-                );
-                state.setFailedReason(
-                  new Error(
-                    intl.formatMessage({
-                      id: "error.claimable-reward-is-smaller-than-the-required-fee",
-                    })
-                  )
-                );
-                return;
-              }
-
-              await tx.send(
-                {
-                  gas: gasEstimated.toString(),
-                  amount: [fee],
-                },
-                "",
-                {
-                  signAmino: async (
-                    chainId: string,
-                    signer: string,
-                    signDoc: StdSignDoc
-                  ): Promise<AminoSignResponse> => {
-                    const requester = new InExtensionMessageRequester();
-
-                    return await requester.sendMessage(
-                      BACKGROUND_PORT,
-                      new PrivilegeCosmosSignAminoWithdrawRewardsMsg(
-                        chainId,
-                        signer,
-                        signDoc
-                      )
-                    );
-                  },
-                  sendTx: async (
-                    chainId: string,
-                    tx: Uint8Array,
-                    mode: BroadcastMode
-                  ): Promise<Uint8Array> => {
-                    const requester = new InExtensionMessageRequester();
-
-                    return await requester.sendMessage(
-                      BACKGROUND_PORT,
-                      new SendTxMsg(chainId, tx, mode, true)
-                    );
-                  },
-                },
-                {
-                  onBroadcasted: () => {
-                    analyticsStore.logEvent("complete_claim_all", {
-                      chainId: viewToken.chainInfo.chainId,
-                      chainName: viewToken.chainInfo.chainName,
-                    });
-                  },
-                  onFulfill: (tx: any) => {
-                    // Tx가 성공한 이후에 rewards가 다시 쿼리되면서 여기서 빠지는게 의도인데...
-                    // 쿼리하는 동안 시간차가 있기 때문에 훼이크로 그냥 1초 더 기다린다.
-                    setTimeout(() => {
-                      state.setIsLoading(false);
-                    }, 1000);
-
-                    if (tx.code) {
-                      state.setFailedReason(new Error(tx["raw_log"]));
-                    }
-                  },
-                }
-              );
-            } catch (e) {
-              if (isSimpleFetchError(e) && e.response) {
-                const response = e.response;
-                if (
-                  response.status === 400 &&
-                  response.data?.message &&
-                  typeof response.data.message === "string" &&
-                  response.data.message.includes("invalid empty tx")
-                ) {
-                  state.setFailedReason(
-                    new Error(
-                      intl.formatMessage({
-                        id: "error.outdated-cosmos-sdk",
-                      })
-                    )
-                  );
-                  return;
-                }
-              }
-
-              state.setFailedReason(e);
-              console.log(e);
-              return;
-            }
-          } else {
-            state.setFailedReason(
-              new Error(
-                intl.formatMessage({
-                  id: "error.can-not-find-fee-for-claim-all",
-                })
-              )
-            );
-            return;
-          }
-        })();
+        viewClaimToken.onClaimAll(
+          viewClaimToken.modularChainInfo.chainId,
+          viewClaimToken.token,
+          state
+        );
       }
     };
 
     const claimAllDisabled = (() => {
-      if (viewTokens.length === 0) {
+      if (viewClaimTokens.length === 0) {
         return true;
       }
 
-      for (const viewToken of viewTokens) {
-        if (viewToken.token.toDec().gt(new Dec(0))) {
+      for (const viewClaimToken of viewClaimTokens) {
+        if (viewClaimToken.token.toDec().gt(new Dec(0))) {
           return false;
         }
       }
@@ -772,7 +378,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
       if (isExpanded) {
         if (!claimAllIsLoading) {
           // Clear errors when collapsed.
-          for (const state of statesRef.current.values()) {
+          for (const state of states) {
             state.setFailedReason(undefined);
           }
         }
@@ -781,6 +387,11 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
       // 펼쳐지는 순간에만 발생해야하기 때문에 claimAllIsLoading는 deps에서 없어야한다.
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isExpanded]);
+
+    const arrowAnimation = useSpring({
+      transform: isExpanded ? "rotate(-180deg)" : "rotate(0deg)",
+      config: { tension: 300, friction: 25, clamp: true },
+    });
 
     return (
       <Styles.Container isNotReady={isNotReady}>
@@ -853,10 +464,10 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
         <Styles.ExpandButton
           paddingX="0.125rem"
           alignX="center"
-          viewTokenCount={viewTokens.length}
+          viewTokenCount={viewClaimTokens.length}
           onClick={() => {
             analyticsStore.logEvent("click_claimExpandButton");
-            if (viewTokens.length > 0) {
+            if (viewClaimTokens.length > 0) {
               setIsExpanded(!isExpanded);
             }
           }}
@@ -866,269 +477,403 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
               opacity: isNotReady ? 0 : 1,
             }}
           >
-            {!isExpanded ? (
+            <animated.div style={arrowAnimation}>
               <ArrowDownIcon
                 width="1.25rem"
                 height="1.25rem"
                 color={ColorPalette["gray-300"]}
               />
-            ) : (
-              <ArrowUpIcon
-                width="1.25rem"
-                height="1.25rem"
-                color={ColorPalette["gray-300"]}
-              />
-            )}
+            </animated.div>
           </Box>
         </Styles.ExpandButton>
 
         <VerticalCollapseTransition
           collapsed={!isExpanded}
+          opacityLeft={0}
           onTransitionEnd={() => {
             if (!isExpanded) {
               if (!claimAllIsLoading) {
                 // Clear errors when collapsed.
-                for (const state of statesRef.current.values()) {
+                for (const state of states) {
                   state.setFailedReason(undefined);
                 }
               }
             }
           }}
         >
-          {viewTokens.map((viewToken) => {
-            return (
-              <ClaimTokenItem
-                key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
-                viewToken={viewToken}
-                state={getClaimAllEachState(viewToken.chainInfo.chainId)}
-                itemsLength={viewTokens.length}
-              />
-            );
-          })}
+          {viewClaimTokens.map((viewClaimToken, index) => (
+            <ViewClaimTokenItem
+              key={`${viewClaimToken.modularChainInfo.chainId}-${viewClaimToken.token.currency.coinMinimalDenom}`}
+              viewClaimToken={viewClaimToken}
+              state={getClaimAllEachState(
+                viewClaimToken.modularChainInfo.chainId
+              )}
+              itemsLength={viewClaimTokens.length}
+              isLastItem={index === viewClaimTokens.length - 1}
+            />
+          ))}
         </VerticalCollapseTransition>
       </Styles.Container>
     );
   }
 );
 
-const ClaimTokenItem: FunctionComponent<{
-  viewToken: ViewToken;
+const ViewClaimTokenItem: FunctionComponent<{
+  viewClaimToken: ViewClaimToken;
   state: ClaimAllEachState;
-
   itemsLength: number;
-}> = observer(({ viewToken, state, itemsLength }) => {
-  const { analyticsStore, accountStore, queriesStore, uiConfigStore } =
-    useStore();
-
-  const intl = useIntl();
-  const theme = useTheme();
-  const navigate = useNavigate();
-  const notification = useNotification();
-
-  const [isSimulating, setIsSimulating] = useState(false);
-
-  // TODO: Add below property to config.ui.ts
-  const defaultGasPerDelegation = 140000;
-
-  const claim = async () => {
-    analyticsStore.logEvent("click_claim", {
-      chainId: viewToken.chainInfo.chainId,
-      chainName: viewToken.chainInfo.chainName,
-    });
-
-    if (state.failedReason) {
-      state.setFailedReason(undefined);
-      return;
-    }
-    const chainId = viewToken.chainInfo.chainId;
-    const account = accountStore.getAccount(chainId);
-
-    const queries = queriesStore.get(chainId);
-    const queryRewards = queries.cosmos.queryRewards.getQueryBech32Address(
-      account.bech32Address
+  isLastItem: boolean;
+}> = observer(({ viewClaimToken, state, itemsLength, isLastItem }) => {
+  if ("starknet" in viewClaimToken.modularChainInfo) {
+    return (
+      <ViewStarknetClaimTokenItem
+        viewClaimToken={viewClaimToken}
+        state={state}
+        itemsLength={itemsLength}
+        isLastItem={isLastItem}
+      />
     );
+  }
 
-    const validatorAddresses =
-      queryRewards.getDescendingPendingRewardValidatorAddresses(
-        account.isNanoLedger ? 5 : 8
-      );
+  if ("cosmos" in viewClaimToken.modularChainInfo) {
+    return (
+      <ViewCosmosClaimTokenItem
+        viewClaimToken={viewClaimToken}
+        state={state}
+        itemsLength={itemsLength}
+        isLastItem={isLastItem}
+      />
+    );
+  }
 
-    if (validatorAddresses.length === 0) {
-      return;
-    }
+  return null;
+});
 
-    const tx =
-      account.cosmos.makeWithdrawDelegationRewardTx(validatorAddresses);
-
-    let gas = new Int(validatorAddresses.length * defaultGasPerDelegation);
-
-    try {
-      setIsSimulating(true);
-
-      const simulated = await tx.simulate();
-
-      // Gas adjustment is 1.5
-      // Since there is currently no convenient way to adjust the gas adjustment on the UI,
-      // Use high gas adjustment to prevent failure.
-      gas = new Dec(simulated.gasUsed * 1.5).truncate();
-    } catch (e) {
-      console.log(e);
-    }
-
-    // TODO: gas price step이 고정되어있지 않은 경우에 대해서 처리 해야함 ex) osmosis-base-fee-beta
-
-    try {
-      await tx.send(
-        {
-          gas: gas.toString(),
-          amount: [],
-        },
-        "",
-        {},
-        {
-          onBroadcasted: () => {
-            analyticsStore.logEvent("complete_claim", {
-              chainId: viewToken.chainInfo.chainId,
-              chainName: viewToken.chainInfo.chainName,
-            });
-          },
-          onFulfill: (tx: any) => {
-            if (tx.code != null && tx.code !== 0) {
-              console.log(tx.log ?? tx.raw_log);
-              notification.show(
-                "failed",
-                intl.formatMessage({ id: "error.transaction-failed" }),
-                ""
-              );
-              return;
-            }
-            notification.show(
-              "success",
-              intl.formatMessage({
-                id: "notification.transaction-success",
-              }),
-              ""
-            );
-          },
-        }
-      );
-
-      navigate("/", {
-        replace: true,
-      });
-    } catch (e) {
-      if (e?.message === "Request rejected") {
-        return;
-      }
-
-      console.log(e);
-      notification.show(
-        "failed",
-        intl.formatMessage({ id: "error.transaction-failed" }),
-        ""
-      );
-      navigate("/", {
-        replace: true,
-      });
-    } finally {
-      setIsSimulating(false);
-    }
-  };
+const ViewCosmosClaimTokenItem: FunctionComponent<{
+  viewClaimToken: ViewClaimToken;
+  state: ClaimAllEachState;
+  itemsLength: number;
+  isLastItem: boolean;
+}> = observer(({ viewClaimToken, state, itemsLength, isLastItem }) => {
+  const { accountStore } = useStore();
 
   const isLoading =
-    accountStore.getAccount(viewToken.chainInfo.chainId).isSendingMsg ===
-      "withdrawRewards" ||
+    accountStore.getAccount(viewClaimToken.modularChainInfo.chainId)
+      .isSendingMsg === "withdrawRewards" ||
     state.isLoading ||
-    isSimulating;
+    state.isSimulating;
 
   return (
-    <Box padding="1rem">
-      <Columns sum={1} alignY="center">
-        {viewToken.token.currency.coinImageUrl && (
-          <CurrencyImageFallback
-            chainInfo={viewToken.chainInfo}
-            currency={viewToken.token.currency}
-            size="2rem"
-          />
-        )}
-
-        <Gutter size="0.75rem" />
-
-        <Column weight={1}>
-          <Stack gutter="0.375rem">
-            <Subtitle3
-              style={{
-                color:
-                  theme.mode === "light"
-                    ? ColorPalette["gray-700"]
-                    : ColorPalette["gray-300"],
-              }}
-            >
-              {(() => {
-                if ("paths" in viewToken.token.currency) {
-                  const originDenom =
-                    viewToken.token.currency.originCurrency?.coinDenom;
-                  if (originDenom) {
-                    return `${originDenom} (${viewToken.chainInfo.chainName})`;
-                  }
-                }
-
-                return viewToken.token.currency.coinDenom;
-              })()}
-            </Subtitle3>
-            <Subtitle2
-              style={{
-                color:
-                  theme.mode === "light"
-                    ? ColorPalette["gray-300"]
-                    : ColorPalette["gray-10"],
-              }}
-            >
-              {uiConfigStore.hideStringIfPrivacyMode(
-                viewToken.token
-                  .maxDecimals(6)
-                  .shrink(true)
-                  .inequalitySymbol(true)
-                  .hideDenom(true)
-                  .toString(),
-                2
-              )}
-            </Subtitle2>
-          </Stack>
-        </Column>
-
-        <Tooltip
-          enabled={!!state.failedReason}
-          content={
-            state.failedReason?.message || state.failedReason?.toString()
-          }
-          // 아이템이 한개만 있으면 tooltip이 VerticalCollapseTransition가 overflow: hidden이라
-          // 위/아래로 나타나면 가려져서 유저가 오류 메세지를 볼 방법이 없다.
-          // VerticalCollapseTransition가 overflow: hidden이여야 하는건 필수적이므로 이 부분을 수정할 순 없기 때문에
-          // 대충 아이템이 한개면 tooltip이 왼족에 나타나도록 한다.
-          allowedPlacements={itemsLength === 1 ? ["left"] : undefined}
-        >
-          <Button
-            text={intl.formatMessage({
-              id: "page.main.components.claim-all.claim-button",
-            })}
-            size="small"
-            color="secondary"
-            isLoading={isLoading}
-            disabled={viewToken.token.toDec().lte(new Dec(0))}
-            textOverrideIcon={
-              state.failedReason ? (
-                <WarningIcon
-                  width="1rem"
-                  height="1rem"
-                  color={ColorPalette["gray-200"]}
-                />
-              ) : undefined
-            }
-            onClick={claim}
-          />
-        </Tooltip>
-      </Columns>
-    </Box>
+    <ViewClaimTokenItemContent
+      viewClaimToken={viewClaimToken}
+      state={state}
+      itemsLength={itemsLength}
+      isLoading={isLoading}
+      isLastItem={isLastItem}
+      onClick={() => {
+        viewClaimToken.onClaimSingle(
+          viewClaimToken.modularChainInfo.chainId,
+          state
+        );
+      }}
+    />
   );
 });
+
+const ViewStarknetClaimTokenItem: FunctionComponent<{
+  viewClaimToken: ViewClaimToken;
+  state: ClaimAllEachState;
+  itemsLength: number;
+  isLastItem: boolean;
+}> = observer(({ viewClaimToken, state, itemsLength, isLastItem }) => {
+  const { starknetAccountStore } = useStore();
+
+  const isLoading =
+    starknetAccountStore.getAccount(viewClaimToken.modularChainInfo.chainId)
+      .isSendingTx ||
+    state.isSimulating ||
+    state.isLoading;
+
+  return (
+    <ViewClaimTokenItemContent
+      viewClaimToken={viewClaimToken}
+      state={state}
+      itemsLength={itemsLength}
+      isLoading={isLoading}
+      isLastItem={isLastItem}
+      onClick={() => {
+        viewClaimToken.onClaimSingle(
+          viewClaimToken.modularChainInfo.chainId,
+          state
+        );
+      }}
+    />
+  );
+});
+
+const ViewClaimTokenItemContent: FunctionComponent<{
+  viewClaimToken: ViewClaimToken;
+  state: ClaimAllEachState;
+  itemsLength: number;
+  isLoading: boolean;
+  isLastItem: boolean;
+  onClick: () => void | Promise<void>;
+}> = observer(
+  ({ viewClaimToken, state, itemsLength, isLoading, isLastItem, onClick }) => {
+    const verticalSizeInternalContext = useVerticalSizeInternalContext();
+    const parentHeightPxAnim = (() => {
+      if (
+        !verticalSizeInternalContext ||
+        !verticalSizeInternalContext.registry
+      ) {
+        return;
+      }
+      if (
+        verticalSizeInternalContext.registry instanceof
+        DescendantHeightPxRegistry
+      ) {
+        return verticalSizeInternalContext.registry.heightPx;
+      }
+      return;
+    })();
+
+    const theme = useTheme();
+    const { uiConfigStore } = useStore();
+
+    const [isHover, setIsHover] = useState(false);
+
+    const coinDenom = useMemo(() => {
+      if ("paths" in viewClaimToken.token.currency) {
+        const originDenom =
+          viewClaimToken.token.currency.originCurrency?.coinDenom;
+        if (originDenom) {
+          return `${originDenom} (${viewClaimToken.modularChainInfo.chainName})`;
+        }
+      }
+
+      return viewClaimToken.token.currency.coinDenom;
+    }, [
+      viewClaimToken.modularChainInfo.chainName,
+      viewClaimToken.token.currency,
+    ]);
+
+    const showClaimButton = isHover || isLoading || !!state.failedReason;
+
+    const buttonWrapperRef = useSpringRef();
+
+    const transitions = useTransition(showClaimButton, {
+      ref: buttonWrapperRef,
+      from: {
+        opacity: 0,
+        width: "0rem",
+      },
+      enter: {
+        opacity: 1,
+        width: "1.875rem",
+      },
+      leave: {
+        opacity: 0,
+        width: "0rem",
+      },
+      config: {
+        easing: easings.easeInOutQuart,
+        duration: 250,
+      },
+    });
+
+    useEffect(() => {
+      buttonWrapperRef.start();
+    }, [buttonWrapperRef, showClaimButton]);
+
+    return (
+      <animated.div
+        style={{
+          transform: parentHeightPxAnim
+            ? parentHeightPxAnim
+                .to((v) => {
+                  // 처음에 초기화가 되기 전에는 -1이기 때문에 이때는 처리를 하지 않는다.
+                  if (v < 0) {
+                    return 1;
+                  }
+
+                  // 얘는 react rendering과 상관없이 동작해야 하기 때문에 여기서 처리해야한다.
+                  const parentExpandHeight = (() => {
+                    if (
+                      !verticalSizeInternalContext ||
+                      !verticalSizeInternalContext.registry
+                    ) {
+                      return;
+                    }
+                    if (
+                      verticalSizeInternalContext.registry instanceof
+                      DescendantHeightPxRegistry
+                    ) {
+                      return verticalSizeInternalContext.registry.expandHeight;
+                    }
+                    return;
+                  })();
+
+                  // parentExpandHeight도 초기화 전에는 -1일 수 있다
+                  // 뒤에서 나누기를 해야하기 때문에 0일때도 처리하면 안된다.
+                  if (!parentExpandHeight || parentExpandHeight < 0) {
+                    return 1;
+                  }
+
+                  return v / parentExpandHeight;
+                })
+                .to([0.1, 0.95], [0.85, 1], "clamp")
+                .to((v) => {
+                  if (v === 1) {
+                    return "";
+                  }
+                  return `scale(${v})`;
+                })
+            : undefined,
+        }}
+      >
+        <Styles.ItemContentBox
+          isLastItem={isLastItem}
+          showButton={showClaimButton}
+          onHoverStateChange={setIsHover}
+          onClick={() => {
+            if (isLoading) {
+              return;
+            }
+            setIsHover(false); // 아래 아이콘이 포함된 애니메이션 wrapper 영역을 클릭하면 포커스가 해제되지 않아서 수동으로 해줌
+            onClick();
+          }}
+          style={{
+            cursor: isLoading ? "default" : "pointer",
+          }}
+        >
+          <Columns sum={1} alignY="center" gutter="0.75rem">
+            <CurrencyImageFallback
+              chainInfo={viewClaimToken.modularChainInfo}
+              currency={viewClaimToken.token.currency}
+              size="2rem"
+            />
+
+            <Column weight={1}>
+              <Stack gutter="0.25rem">
+                <Subtitle2
+                  style={{
+                    color:
+                      theme.mode === "light"
+                        ? ColorPalette["gray-700"]
+                        : ColorPalette["white"],
+                  }}
+                >
+                  {coinDenom}
+                </Subtitle2>
+                <Body3
+                  style={{
+                    color: ColorPalette["gray-300"],
+                    display: "-webkit-box",
+                    WebkitBoxOrient: "vertical",
+                    WebkitLineClamp: 1,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {viewClaimToken.modularChainInfo.chainName}
+                </Body3>
+              </Stack>
+            </Column>
+            <XAxis alignY="center">
+              <Stack gutter="0.25rem" alignX="right">
+                <Subtitle3
+                  style={{
+                    color:
+                      theme.mode === "light"
+                        ? ColorPalette["gray-700"]
+                        : ColorPalette["white"],
+                  }}
+                >
+                  {uiConfigStore.hideStringIfPrivacyMode(
+                    viewClaimToken.token
+                      .maxDecimals(6)
+                      .shrink(true)
+                      .inequalitySymbol(true)
+                      .hideDenom(true)
+                      .toString(),
+                    2
+                  )}
+                </Subtitle3>
+                <Subtitle3
+                  style={{
+                    color: ColorPalette["gray-300"],
+                  }}
+                >
+                  {uiConfigStore.hideStringIfPrivacyMode(
+                    viewClaimToken.price?.toString() ?? "-",
+                    2
+                  )}
+                </Subtitle3>
+              </Stack>
+
+              {transitions(
+                (styles, item) =>
+                  item && (
+                    <animated.div
+                      style={{
+                        ...styles,
+                        overflow: "hidden",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "flex-end",
+                      }}
+                    >
+                      <Tooltip
+                        enabled={!!state.failedReason}
+                        content={
+                          state.failedReason?.message ||
+                          state.failedReason?.toString()
+                        }
+                        allowedPlacements={
+                          itemsLength === 1
+                            ? ["left"]
+                            : isLastItem
+                            ? ["top"]
+                            : undefined
+                        }
+                      >
+                        {isLoading ? (
+                          <LoadingIcon
+                            width="1rem"
+                            height="1rem"
+                            color={
+                              ColorPalette[
+                                theme.mode === "light" ? "gray-200" : "gray-300"
+                              ]
+                            }
+                          />
+                        ) : state.failedReason ? (
+                          <WarningIcon
+                            width="1rem"
+                            height="1rem"
+                            color={
+                              ColorPalette[
+                                theme.mode === "light" ? "gray-200" : "gray-300"
+                              ]
+                            }
+                          />
+                        ) : (
+                          <CoinsPlusOutlineIcon
+                            color={
+                              ColorPalette[
+                                theme.mode === "light" ? "gray-200" : "gray-300"
+                              ]
+                            }
+                          />
+                        )}
+                      </Tooltip>
+                    </animated.div>
+                  )
+              )}
+            </XAxis>
+          </Columns>
+        </Styles.ItemContentBox>
+      </animated.div>
+    );
+  }
+);

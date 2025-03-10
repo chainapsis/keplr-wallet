@@ -9,16 +9,13 @@ import { TextButton } from "../../components/button-text";
 import { ArrowRightSolidIcon } from "../../components/icon";
 import { ColorPalette } from "../../styles";
 import { useIntl } from "react-intl";
-import { ViewTokenCosmosOnly } from "../../stores/huge-queries";
+import { ViewStakedToken, ViewUnbondingToken } from "../../stores/huge-queries";
 
-export const StakedTabView: FunctionComponent<{
-  onMoreTokensClosed: () => void;
-}> = observer(({ onMoreTokensClosed }) => {
-  const { hugeQueriesStore, uiConfigStore } = useStore();
-
+const useViewStakingTokens = () => {
+  const { hugeQueriesStore } = useStore();
   const intl = useIntl();
 
-  const delegations: ViewTokenCosmosOnly[] = useMemo(
+  const delegations: ViewStakedToken[] = useMemo(
     () =>
       hugeQueriesStore.delegations.filter((token) => {
         return token.token.toDec().gt(new Dec(0));
@@ -27,19 +24,22 @@ export const StakedTabView: FunctionComponent<{
   );
 
   const unbondings: {
-    viewToken: ViewTokenCosmosOnly;
+    unbonding: ViewUnbondingToken;
     altSentence: string;
   }[] = useMemo(
     () =>
       hugeQueriesStore.unbondings
         .filter((unbonding) => {
-          return unbonding.viewToken.token.toDec().gt(new Dec(0));
+          return unbonding.token.toDec().gt(new Dec(0));
         })
         .map((unbonding) => {
-          const relativeTime = formatRelativeTime(unbonding.completeTime);
+          const relativeTime = formatRelativeTime(
+            unbonding.completeTime,
+            unbonding.omitCompleteTimeFraction
+          );
 
           return {
-            viewToken: unbonding.viewToken,
+            unbonding,
             altSentence: intl.formatRelativeTime(
               relativeTime.value,
               relativeTime.unit
@@ -49,12 +49,26 @@ export const StakedTabView: FunctionComponent<{
     [hugeQueriesStore.unbondings, intl]
   );
 
+  return {
+    delegations,
+    unbondings,
+  };
+};
+
+export const StakedTabView: FunctionComponent<{
+  onMoreTokensClosed: () => void;
+}> = observer(({ onMoreTokensClosed }) => {
+  const { uiConfigStore } = useStore();
+  const intl = useIntl();
+
+  const { delegations, unbondings } = useViewStakingTokens();
+
   const TokenViewData: {
     title: string;
     balance:
-      | ViewTokenCosmosOnly[]
+      | ViewStakedToken[]
       | {
-          viewToken: ViewTokenCosmosOnly;
+          unbonding: ViewUnbondingToken;
           altSentence: string;
         }[];
     lenAlwaysShown: number;
@@ -105,16 +119,13 @@ export const StakedTabView: FunctionComponent<{
                 if ("altSentence" in viewToken) {
                   return (
                     <TokenItem
-                      viewToken={viewToken.viewToken}
-                      key={`${viewToken.viewToken.chainInfo.chainId}-${viewToken.viewToken.token.currency.coinMinimalDenom}`}
-                      disabled={
-                        !viewToken.viewToken.chainInfo.walletUrlForStaking
-                      }
+                      viewToken={viewToken.unbonding}
+                      key={`${viewToken.unbonding.chainInfo.chainId}-${viewToken.unbonding.token.currency.coinMinimalDenom}`}
+                      disabled={!viewToken.unbonding.stakingUrl}
                       onClick={() => {
-                        if (viewToken.viewToken.chainInfo.walletUrlForStaking) {
+                        if (viewToken.unbonding.stakingUrl) {
                           browser.tabs.create({
-                            url: viewToken.viewToken.chainInfo
-                              .walletUrlForStaking,
+                            url: viewToken.unbonding.stakingUrl,
                           });
                         }
                       }}
@@ -127,11 +138,11 @@ export const StakedTabView: FunctionComponent<{
                   <TokenItem
                     viewToken={viewToken}
                     key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
-                    disabled={!viewToken.chainInfo.walletUrlForStaking}
+                    disabled={!viewToken.stakingUrl}
                     onClick={() => {
-                      if (viewToken.chainInfo.walletUrlForStaking) {
+                      if (viewToken.stakingUrl) {
                         browser.tabs.create({
-                          url: viewToken.chainInfo.walletUrlForStaking,
+                          url: viewToken.stakingUrl,
                         });
                       }
                     }}
@@ -176,7 +187,7 @@ export const StakedTabView: FunctionComponent<{
               }
               onClick={async () => {
                 await browser.tabs.create({
-                  url: "https://wallet.keplr.app/?modal=staking",
+                  url: "https://wallet.keplr.app/?modal=staking&utm_source=keplrextension&utm_medium=button&utm_campaign=permanent&utm_content=manage_stake",
                 });
 
                 close();
@@ -189,17 +200,35 @@ export const StakedTabView: FunctionComponent<{
   );
 });
 
-function formatRelativeTime(time: string): {
+function formatRelativeTime(
+  time: string | number,
+  discardDecimal?: boolean
+): {
   unit: "minute" | "hour" | "day";
   value: number;
 } {
-  const remaining = new Date(time).getTime() - Date.now();
+  let timeMs: number;
+  if (typeof time === "number") {
+    timeMs = time;
+  } else {
+    const parsed = Number(time);
+    if (!isNaN(parsed)) {
+      timeMs = parsed;
+    } else {
+      timeMs = new Date(time).getTime();
+    }
+  }
+
+  const remaining = timeMs - Date.now();
+
   if (remaining <= 0) {
     return {
       unit: "minute",
       value: 1,
     };
   }
+
+  const round = discardDecimal ? Math.floor : Math.ceil;
 
   const remainingSeconds = remaining / 1000;
   const remainingMinutes = remainingSeconds / 60;
@@ -216,19 +245,19 @@ function formatRelativeTime(time: string): {
   if (remainingDays >= 1) {
     return {
       unit: "day",
-      value: Math.ceil(remainingDays),
+      value: round(remainingDays),
     };
   }
 
   if (remainingHours >= 1) {
     return {
       unit: "hour",
-      value: Math.ceil(remainingHours),
+      value: round(remainingHours),
     };
   }
 
   return {
     unit: "minute",
-    value: Math.ceil(remainingMinutes),
+    value: round(remainingMinutes),
   };
 }

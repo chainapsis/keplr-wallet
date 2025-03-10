@@ -29,6 +29,14 @@ import { Stack } from "../../../components/stack";
 import { EmptyView } from "../../../components/empty-view";
 import { DenomHelper } from "@keplr-wallet/common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { EarnApyBanner } from "./banners/earn-apy-banner";
+import {
+  validateIsUsdcFromNoble,
+  validateIsUsdnFromNoble,
+} from "../../earn/utils";
+import { Button } from "../../../components/button";
+import { FormattedMessage } from "react-intl";
+import { NOBLE_CHAIN_ID } from "../../../config.ui";
 
 const Styles = {
   Container: styled.div`
@@ -475,6 +483,22 @@ export const TokenDetailModal: FunctionComponent<{
               )}
             </Subtitle3>
           </YAxis>
+
+          {validateIsUsdnFromNoble(currency, chainId) ? (
+            <Box padding="1.25rem 0.75rem 1.25rem 0.75rem">
+              <Button
+                text={
+                  <FormattedMessage id="page.token-detail.manage-earn-button" />
+                }
+                color="secondary"
+                size="medium"
+                onClick={() => {
+                  navigate(`/earn/overview?chainId=${chainId}`);
+                }}
+              />
+            </Box>
+          ) : null}
+
           <Gutter size="1.25rem" />
           <YAxis alignX="center">
             <XAxis>
@@ -502,6 +526,11 @@ export const TokenDetailModal: FunctionComponent<{
           {(() => {
             if ("cosmos" in modularChainInfo) {
               const chainInfo = chainStore.getChain(chainId);
+
+              if (validateIsUsdcFromNoble(currency, chainId)) {
+                return <EarnApyBanner chainId={NOBLE_CHAIN_ID} />;
+              }
+
               if (
                 chainInfo.stakeCurrency &&
                 chainInfo.stakeCurrency.coinMinimalDenom ===
@@ -510,10 +539,20 @@ export const TokenDetailModal: FunctionComponent<{
                 return (
                   <React.Fragment>
                     <Gutter size="1.25rem" />
-                    <StakedBalance chainId={chainId} />
+                    <StakedBalance modularChainInfo={modularChainInfo} />
                   </React.Fragment>
                 );
               }
+            } else if ("starknet" in modularChainInfo) {
+              if (modularChainInfo.chainId === "starknet:SN_SEPOLIA")
+                return null;
+
+              return (
+                <React.Fragment>
+                  <Gutter size="1.25rem" />
+                  <StakedBalance modularChainInfo={modularChainInfo} />
+                </React.Fragment>
+              );
             }
             return null;
           })()}

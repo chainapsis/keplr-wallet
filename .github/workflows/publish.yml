@@ -7,7 +7,7 @@ on:
 jobs:
   publish:
     name: Publish to npm and create release
-    runs-on: ubuntu-20.04-l
+    runs-on: ubuntu-24.04-l
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v3
@@ -55,7 +55,7 @@ jobs:
   check-firefox-archive:
     name: Test that docker can produce the same result for firefox
     needs: [publish]
-    runs-on: ubuntu-20.04-l
+    runs-on: ubuntu-24.04-l
     timeout-minutes: 30
     steps:
     - uses: actions/checkout@v3
@@ -96,7 +96,8 @@ jobs:
     - run: docker run -v $(pwd):/data builder
       working-directory: ../temp
     - run: sudo apt-get update
-    - run: sudo apt-get install gh awscli
+    - run: sudo apt-get install gh
+    - run: sudo snap install aws-cli --classic
     - run: mkdir release && cd release && gh release download $GITHUB_REF_NAME --pattern '*.firefox.zip' --repo https://github.com/chainapsis/keplr-wallet
       working-directory: ../temp
       env:

@@ -16,7 +16,10 @@ import { Label } from "../label";
 // eslint-disable-next-line react/display-name
 export const TextInput = forwardRef<
   HTMLInputElement,
-  TextInputProps & React.InputHTMLAttributes<HTMLInputElement>
+  TextInputProps &
+    React.InputHTMLAttributes<HTMLInputElement> & {
+      inputStyle?: React.CSSProperties;
+    }
 >(
   (
     {
@@ -32,6 +35,7 @@ export const TextInput = forwardRef<
       textSuffix,
       isLoading,
       autoComplete,
+      inputStyle,
       ...props
     },
     ref
@@ -137,6 +141,7 @@ export const TextInput = forwardRef<
               <div style={{ position: "relative", display: "flex" }}>
                 <Styles.TextInput
                   {...props}
+                  style={inputStyle}
                   autoComplete={autoComplete || "off"}
                   paragraph={paragraph}
                   error={error}

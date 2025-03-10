@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package noble.swap.stableswap.v1;
+
+import "amino/amino.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "noble/swap/stableswap/v1/pool.proto";
+import "noble/swap/stableswap/v1/position.proto";
+
+option go_package = "swap.noble.xyz/types/stableswap";
+
+// GenesisState defines the StableSwap genesis state.
+message GenesisState {
+  map<uint64, Pool> pools = 1 [(gogoproto.nullable) = false];
+  repeated PoolsTotalUnbondingSharesEntry pools_total_unbonding_shares = 2 [(gogoproto.nullable) = false];
+  repeated UsersTotalBondedSharesEntry users_total_bonded_shares = 3 [(gogoproto.nullable) = false];
+  repeated UsersTotalUnbondingSharesEntry users_total_unbonding_shares = 4 [(gogoproto.nullable) = false];
+  repeated BondedPositionEntry bonded_positions = 5 [(gogoproto.nullable) = false];
+  repeated UnbondingPositionEntry unbonding_positions = 6 [(gogoproto.nullable) = false];
+}
+
+message BondedPositionEntry {
+  uint64 pool_id = 1;
+  string address = 2;
+  int64 timestamp = 3;
+  BondedPosition bonded_position = 4 [(gogoproto.nullable) = false];
+}
+
+message UnbondingPositionEntry {
+  int64 timestamp = 1;
+  string address = 2;
+  uint64 pool_id = 3;
+  swap.stableswap.v1.UnbondingPosition unbonding_position = 4 [(gogoproto.nullable) = false];
+}
+
+message PoolsTotalUnbondingSharesEntry {
+  uint64 pool_id = 1;
+  string shares = 2 [
+    (amino.dont_omitempty) = true,
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+}
+
+message UsersTotalBondedSharesEntry {
+  uint64 pool_id = 1;
+  string address = 2;
+  string shares = 3 [
+    (amino.dont_omitempty) = true,
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+}
+
+message UsersTotalUnbondingSharesEntry {
+  uint64 pool_id = 1;
+  string address = 2;
+  string shares = 3 [
+    (amino.dont_omitempty) = true,
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+}

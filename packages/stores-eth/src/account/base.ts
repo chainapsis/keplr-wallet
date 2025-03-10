@@ -21,22 +21,7 @@ import { Interface } from "@ethersproject/abi";
 
 const opStackGasPriceOracleProxyAddress =
   "0x420000000000000000000000000000000000000F";
-const opStackGasPriceOracleProxyABI = new Interface([
-  {
-    constant: true,
-    inputs: [],
-    name: "implementation",
-    outputs: [
-      {
-        name: "",
-        type: "address",
-      },
-    ],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-]);
+
 const opStackGasPriceOracleABI = new Interface([
   {
     inputs: [{ internalType: "bytes", name: "_data", type: "bytes" }],
@@ -153,30 +138,17 @@ export class EthereumAccountBase {
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const keplr = (await this.getKeplr())!;
-    const implementationAddress = await keplr.ethereum.request<string>({
-      method: "eth_call",
-      params: [
-        {
-          to: opStackGasPriceOracleProxyAddress,
-          data: opStackGasPriceOracleProxyABI.encodeFunctionData(
-            "implementation"
-          ),
-        },
-      ],
-      chainId: this.chainId,
-    });
-    const gasPriceOracleContractAddress =
-      "0x" + implementationAddress.slice(26);
 
     const l1Fee = await keplr.ethereum.request<string>({
       method: "eth_call",
       params: [
         {
-          to: gasPriceOracleContractAddress,
+          to: opStackGasPriceOracleProxyAddress,
           data: opStackGasPriceOracleABI.encodeFunctionData("getL1Fee", [
             serialize(unsignedTx),
           ]),
         },
+        "latest",
       ],
       chainId: this.chainId,
     });
@@ -280,6 +252,9 @@ export class EthereumAccountBase {
       onBroadcastFailed?: (e?: Error) => void;
       onBroadcasted?: (txHash: string) => void;
       onFulfill?: (txReceipt: EthTxReceipt) => void;
+    },
+    options?: {
+      sendTx?: (chainId: string, signedTx: Buffer) => Promise<string>;
     }
   ) {
     try {
@@ -323,7 +298,10 @@ export class EthereumAccountBase {
       );
 
       const sendEthereumTx = keplr.sendEthereumTx.bind(keplr);
-      const txHash = await sendEthereumTx(this.chainId, signedTx);
+      const txHash = options?.sendTx
+        ? await options.sendTx(this.chainId, signedTx)
+        : await sendEthereumTx(this.chainId, signedTx);
+
       if (!txHash) {
         throw new Error("No tx hash responded");
       }

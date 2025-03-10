@@ -58,6 +58,7 @@ import { BottomTabsHeightRem } from "../../bottom-tabs";
 import { DenomHelper } from "@keplr-wallet/common";
 import { NewSidePanelHeaderTop } from "./new-side-panel-header-top";
 import { ModularChainInfo } from "@keplr-wallet/types";
+import { AvailableTabSlideList } from "./components/available-tab-slide-list";
 
 export interface ViewToken {
   token: CoinPretty;
@@ -160,11 +161,11 @@ export const MainPage: FunctionComponent<{
       }
     }
     for (const bal of hugeQueriesStore.unbondings) {
-      if (bal.viewToken.price) {
+      if (bal.price) {
         if (!result) {
-          result = bal.viewToken.price;
+          result = bal.price;
         } else {
-          result = result.add(bal.viewToken.price);
+          result = result.add(bal.price);
         }
       }
     }
@@ -191,16 +192,14 @@ export const MainPage: FunctionComponent<{
       }
     }
     for (const bal of hugeQueriesStore.unbondings) {
-      if (!("currencies" in bal.viewToken.chainInfo)) {
+      if (!("currencies" in bal.chainInfo)) {
         continue;
       }
-      if (
-        !(bal.viewToken.chainInfo.embedded as ChainInfoWithCoreTypes).embedded
-      ) {
+      if (!(bal.chainInfo.embedded as ChainInfoWithCoreTypes).embedded) {
         continue;
       }
-      if (bal.viewToken.price) {
-        const price = priceStore.calculatePrice(bal.viewToken.token, "usd");
+      if (bal.price) {
+        const price = priceStore.calculatePrice(bal.token, "usd");
         if (price) {
           if (!result) {
             result = price;
@@ -592,7 +591,7 @@ export const MainPage: FunctionComponent<{
                 });
 
                 browser.tabs.create({
-                  url: "https://wallet.keplr.app/?modal=staking",
+                  url: "https://wallet.keplr.app/?modal=staking&utm_source=keplrextension&utm_medium=button&utm_campaign=permanent&utm_content=manage_stake",
                 });
               }}
             >
@@ -613,25 +612,9 @@ export const MainPage: FunctionComponent<{
           <Gutter size="0" />
 
           {tabStatus === "available" && !isNotReady ? (
-            <StakeWithKeplrDashboardButton
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                analyticsStore.logEvent("click_keplrDashboard", {
-                  tabName: tabStatus,
-                });
-
-                browser.tabs.create({
-                  url: "https://wallet.keplr.app/",
-                });
-              }}
-            >
-              <FormattedMessage id="page.main.chart.manage-portfolio-in-keplr-dashboard" />
-              <Box color={ColorPalette["gray-300"]} marginLeft="0.5rem">
-                <ArrowTopRightOnSquareIcon width="1rem" height="1rem" />
-              </Box>
-            </StakeWithKeplrDashboardButton>
+            <AvailableTabSlideList />
           ) : null}
+
           {!isNotReady ? (
             <Stack gutter="0.75rem">
               {tabStatus === "available" ? (
@@ -918,6 +901,12 @@ const RefreshButton: FunctionComponent<{
                 query.fetch();
               }
             }
+
+            // refresh starknet staking info
+            const stakingInfo = queries.stakingInfoManager.getStakingInfo(
+              account.starknetHexAddress
+            );
+            promises.push(stakingInfo.waitFreshResponse());
           }
         }
       }

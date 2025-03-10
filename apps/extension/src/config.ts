@@ -3005,6 +3005,173 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     },
     features: [],
   },
+  {
+    rpc: "https://rpc.derive.xyz/",
+    rest: "https://rpc.derive.xyz/",
+    evm: {
+      chainId: 957,
+      rpc: "https://rpc.derive.xyz/",
+      websocket: "wss://rpc.derive.xyz/",
+    },
+    chainId: "eip155:957",
+    chainName: "Derive",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "derive-ethereum",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+      },
+      {
+        type: "erc20",
+        contractAddress: "0xb1d1eae60eea9525032a6dcb4c1ce336a1de71be",
+        coinDenom: "DRV",
+        coinMinimalDenom: "erc20:0xb1d1eae60eea9525032a6dcb4c1ce336a1de71be",
+        coinDecimals: 18,
+        coinGeckoId: "derive",
+      },
+      {
+        type: "erc20",
+        contractAddress: "0x7499d654422023a407d92e1D83D387d81BC68De1",
+        coinDenom: "stDRV",
+        coinMinimalDenom: "erc20:0x7499d654422023a407d92e1D83D387d81BC68De1",
+        coinDecimals: 18,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "derive-ethereum",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+      },
+    ],
+    features: ["op-stack-l1-data-fee"],
+  },
+  {
+    rpc: "https://evm-80094.keplr.app",
+    rest: "https://evm-80094.keplr.app",
+    evm: {
+      chainId: 80094,
+      rpc: "https://evm-80094.keplr.app",
+      websocket: "wss://evm-80094.keplr.app",
+    },
+    chainId: "eip155:80094",
+    chainName: "Berachain",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:80094/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "BERA",
+        coinMinimalDenom: "berachain-native",
+        coinDecimals: 18,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:80094/berachain-native.png",
+      },
+      {
+        coinDenom: "BGT",
+        coinMinimalDenom: "erc20:0x656b95E550C07a9ffe548bd4085c72418Ceb1dba",
+        coinDecimals: 18,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:80094/erc20/0x656b95E550C07a9ffe548bd4085c72418Ceb1dba.png",
+      },
+      {
+        coinDenom: "HONEY",
+        coinMinimalDenom: "erc20:0xFCBD14DC51f0A4d49d5E53C2E0950e0bC26d0Dce",
+        coinDecimals: 18,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:80094/erc20/0xFCBD14DC51f0A4d49d5E53C2E0950e0bC26d0Dce.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "BERA",
+        coinMinimalDenom: "berachain-native",
+        coinDecimals: 18,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:80094/berachain-native.png",
+      },
+    ],
+    features: [],
+  },
+  {
+    rpc: "https://evm-1514.keplr.app",
+    rest: "https://evm-1514.keplr.app",
+    evm: {
+      chainId: 1514,
+      rpc: "https://evm-1514.keplr.app",
+      websocket: "wss://evm-1514.keplr.app/websocket",
+    },
+    chainId: "eip155:1514",
+    chainName: "Story",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1514/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "IP",
+        coinMinimalDenom: "story-native",
+        coinDecimals: 18,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1514/story-native.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "IP",
+        coinMinimalDenom: "story-native",
+        coinDecimals: 18,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1514/story-native.png",
+      },
+    ],
+    features: [],
+  },
+  {
+    rpc: "https://evm-130.keplr.app",
+    rest: "https://evm-130.keplr.app",
+    evm: {
+      chainId: 130,
+      rpc: "https://evm-130.keplr.app",
+      websocket: "wss://evm-130.keplr.app/websocket",
+    },
+    chainId: "eip155:130",
+    chainName: "Unichain",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:130/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "unichain-native",
+        coinDecimals: 18,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:130/unichain-native.png",
+        coinGeckoId: "ethereum",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "unichain-native",
+        coinDecimals: 18,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:130/unichain-native.png",
+        coinGeckoId: "ethereum",
+      },
+    ],
+    features: [],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.

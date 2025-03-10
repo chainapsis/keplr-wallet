@@ -68,7 +68,7 @@ export const StakedBalance: FunctionComponent<{
                   }}>
                   {`${new Dec(queryAPR.response.data.apr)
                     .mul(new Dec(100))
-                    .toString(2)}% APY`}
+                    .toString(2)}% APR`}
                 </Text>
               ) : null}
             </Box>
@@ -123,7 +123,7 @@ export const StakedBalance: FunctionComponent<{
                     <Text style={style.flatten(['body3', 'color-gray-200'])}>
                       {`${new Dec(queryAPR.response.data.apr)
                         .mul(new Dec(100))
-                        .toString(2)}% APY`}
+                        .toString(2)}% APR`}
                     </Text>
                   ) : null}
                 </React.Fragment>
