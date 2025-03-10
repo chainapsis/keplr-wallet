@@ -1,9 +1,11 @@
 import { AppCurrency, FeeCurrency, StdFee } from "@keplr-wallet/types";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { NameService } from "./name-service";
+import { IChainInfoImpl } from "@keplr-wallet/stores";
 
 export interface ITxChainSetter {
   chainId: string;
+  chainInfo: IChainInfoImpl;
   setChain(chainId: string): void;
 }
 

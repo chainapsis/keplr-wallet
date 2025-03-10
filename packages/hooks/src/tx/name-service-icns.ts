@@ -1,17 +1,11 @@
-import { TxChainSetter } from "./chain";
-import {
-  action,
-  makeObservable,
-  observable,
-  override,
-  runInAction,
-} from "mobx";
-import { ChainGetter } from "@keplr-wallet/stores";
+import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { Buffer } from "buffer";
 import { FetchDebounce, NameService } from "./name-service";
+import { ITxChainSetter } from "./types";
+import { ChainGetter } from "@keplr-wallet/stores";
 
-export class ICNSNameService extends TxChainSetter implements NameService {
+export class ICNSNameService implements NameService {
   readonly type = "icns";
 
   @observable
@@ -45,8 +39,8 @@ export class ICNSNameService extends TxChainSetter implements NameService {
   protected debounce = new FetchDebounce();
 
   constructor(
-    chainGetter: ChainGetter,
-    initialChainId: string,
+    protected readonly base: ITxChainSetter,
+    protected readonly chainGetter: ChainGetter,
     icns:
       | {
           chainId: string;
@@ -54,43 +48,25 @@ export class ICNSNameService extends TxChainSetter implements NameService {
         }
       | undefined = undefined
   ) {
-    super(chainGetter, initialChainId);
-
     this._icns = icns;
 
     makeObservable(this);
-  }
 
-  @override
-  override setChain(chainId: string) {
-    const d = this.chainId !== chainId;
-    super.setChain(chainId);
-
-    if (d) {
+    autorun(() => {
+      noop(this.base.chainInfo, this._icns, this.isEnabled, this.value);
+      // 위의 값에 변경이 있으면 새로고침
       this.fetch();
-    }
+    });
   }
 
   @action
   setICNS(icns: { chainId: string; resolverContractAddress: string }) {
-    const d =
-      this._icns?.chainId !== icns.chainId ||
-      this._icns?.resolverContractAddress !== icns.resolverContractAddress;
     this._icns = icns;
-
-    if (d) {
-      this.fetch();
-    }
   }
 
   @action
   setIsEnabled(isEnabled: boolean) {
-    const d = this._isEnabled !== isEnabled;
     this._isEnabled = isEnabled;
-
-    if (d) {
-      this.fetch();
-    }
   }
 
   get isEnabled(): boolean {
@@ -103,17 +79,12 @@ export class ICNSNameService extends TxChainSetter implements NameService {
 
   @action
   setValue(value: string) {
-    const d = this.value !== value;
     this._value = value;
-
-    if (d) {
-      this.fetch();
-    }
   }
 
   get value(): string {
     let v = this._value;
-    const chainInfo = this.chainInfo;
+    const chainInfo = this.base.chainInfo;
     if (this.isEnabled && chainInfo.bech32Config) {
       const suffix = chainInfo.bech32Config.bech32PrefixAccAddr;
       if (v.endsWith("." + suffix)) {
@@ -145,7 +116,7 @@ export class ICNSNameService extends TxChainSetter implements NameService {
   }
 
   protected async fetch(): Promise<void> {
-    const chainInfo = this.chainInfo;
+    const chainInfo = this.base.chainInfo;
     if (
       !this.isEnabled ||
       this.value.trim().length === 0 ||
@@ -164,7 +135,7 @@ export class ICNSNameService extends TxChainSetter implements NameService {
 
   protected async fetchInternal(): Promise<void> {
     try {
-      const chainInfo = this.chainInfo;
+      const chainInfo = this.base.chainInfo;
       if (!this._icns || !chainInfo.bech32Config) {
         throw new Error("ICNS or bech32 config is not set");
       }
@@ -222,3 +193,7 @@ export class ICNSNameService extends TxChainSetter implements NameService {
     }
   }
 }
+
+const noop = (..._args: any[]) => {
+  // noop
+};

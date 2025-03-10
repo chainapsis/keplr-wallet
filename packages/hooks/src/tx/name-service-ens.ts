@@ -1,16 +1,10 @@
-import { TxChainSetter } from "./chain";
-import {
-  action,
-  makeObservable,
-  observable,
-  override,
-  runInAction,
-} from "mobx";
+import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 import { ChainGetter } from "@keplr-wallet/stores";
 import { FetchDebounce, NameService } from "./name-service";
 import { JsonRpcProvider } from "@ethersproject/providers";
+import { ITxChainSetter } from "./types";
 
-export class ENSNameService extends TxChainSetter implements NameService {
+export class ENSNameService implements NameService {
   readonly type = "ens";
 
   @observable
@@ -43,56 +37,40 @@ export class ENSNameService extends TxChainSetter implements NameService {
   protected debounce = new FetchDebounce();
 
   constructor(
-    chainGetter: ChainGetter,
-    initialChainId: string,
+    protected readonly base: ITxChainSetter,
+    protected readonly chainGetter: ChainGetter,
     ens:
       | {
           chainId: string;
         }
       | undefined = undefined
   ) {
-    super(chainGetter, initialChainId);
-
     this._ens = ens;
 
     makeObservable(this);
-  }
 
-  @override
-  override setChain(chainId: string) {
-    const d = this.chainId !== chainId;
-    super.setChain(chainId);
-
-    if (d) {
+    autorun(() => {
+      noop(this.base.chainInfo, this._ens, this.isEnabled, this.value);
+      // 위의 값에 변경이 있으면 새로고침
       this.fetch();
-    }
+    });
   }
 
   @action
   setENS(ens: { chainId: string }) {
-    const d = this._ens?.chainId !== ens.chainId;
     this._ens = ens;
-
-    if (d) {
-      this.fetch();
-    }
   }
 
   @action
   setIsEnabled(isEnabled: boolean) {
-    const d = this._isEnabled !== isEnabled;
     this._isEnabled = isEnabled;
-
-    if (d) {
-      this.fetch();
-    }
   }
 
   get isEnabled(): boolean {
     if (
       !this._ens ||
-      this.chainInfo.evm == null ||
-      this.chainInfo.bip44.coinType !== 60
+      this.base.chainInfo.evm == null ||
+      this.base.chainInfo.bip44.coinType !== 60
     ) {
       return false;
     }
@@ -102,12 +80,7 @@ export class ENSNameService extends TxChainSetter implements NameService {
 
   @action
   setValue(value: string) {
-    const d = this.value !== value;
     this._value = value;
-
-    if (d) {
-      this.fetch();
-    }
   }
 
   get value(): string {
@@ -156,7 +129,7 @@ export class ENSNameService extends TxChainSetter implements NameService {
 
   protected async fetchInternal(): Promise<void> {
     try {
-      const chainInfo = this.chainInfo;
+      const chainInfo = this.base.chainInfo;
       if (!this._ens) {
         throw new Error("ENS or is not set");
       }
@@ -206,3 +179,7 @@ export class ENSNameService extends TxChainSetter implements NameService {
     }
   }
 }
+
+const noop = (..._args: any[]) => {
+  // noop
+};

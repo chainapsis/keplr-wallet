@@ -1,6 +1,4 @@
-import { ITxChainSetter } from "./types";
-
-export interface NameService extends ITxChainSetter {
+export interface NameService {
   type: string;
 
   setIsEnabled: (isEnabled: boolean) => void;

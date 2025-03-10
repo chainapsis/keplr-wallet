@@ -6,7 +6,7 @@ import {
 import { TxChainSetter } from "./chain";
 import { ChainGetter } from "@keplr-wallet/stores";
 import { EthereumAccountBase } from "@keplr-wallet/stores-eth";
-import { action, computed, makeObservable, observable, override } from "mobx";
+import { action, computed, makeObservable, observable } from "mobx";
 import {
   EmptyAddressError,
   InvalidBech32Error,
@@ -44,19 +44,10 @@ export class RecipientConfig
   constructor(chainGetter: ChainGetter, initialChainId: string) {
     super(chainGetter, initialChainId);
 
-    this.nameServices.push(new ICNSNameService(chainGetter, initialChainId));
-    this.nameServices.push(new ENSNameService(chainGetter, initialChainId));
+    this.nameServices.push(new ICNSNameService(this, chainGetter));
+    this.nameServices.push(new ENSNameService(this, chainGetter));
 
     makeObservable(this);
-  }
-
-  @override
-  override setChain(chainId: string) {
-    super.setChain(chainId);
-
-    for (const nameService of this.nameServices) {
-      nameService.setChain(chainId);
-    }
   }
 
   get preferredNameService(): string | undefined {
@@ -126,7 +117,7 @@ export class RecipientConfig
       (found as ENSNameService).setENS(options);
     } else {
       this.nameServices.push(
-        new ENSNameService(this.chainGetter, this.chainId, options)
+        new ENSNameService(this, this.chainGetter, options)
       );
     }
   }
@@ -154,7 +145,7 @@ export class RecipientConfig
       (found as ICNSNameService).setICNS(options);
     } else {
       this.nameServices.push(
-        new ICNSNameService(this.chainGetter, this.chainId, options)
+        new ICNSNameService(this, this.chainGetter, options)
       );
     }
   }
