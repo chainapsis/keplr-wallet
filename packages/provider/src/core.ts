@@ -1784,6 +1784,14 @@ class StarknetProvider implements IStarknetProvider {
   }
 }
 
+const sidePanelOpenNeededBitcoinMethods = [
+  "switchNetwork",
+  "signMessage",
+  "sendBitcoin",
+  "pushTx",
+  "signPsbt",
+];
+
 class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
   constructor(
     protected readonly keplr: Keplr,
@@ -1792,55 +1800,150 @@ class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
     super();
   }
 
+  protected async protectedEnableAccess(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      let f = false;
+
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "permission-interactive",
+        "enable-access-for-bitcoin",
+        {}
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.keplr.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
+  }
+
+  protected async protectedRequestMethod<T>({
+    method,
+    params,
+  }: {
+    method: string;
+    params: unknown[];
+  }): Promise<T> {
+    await this.protectedEnableAccess();
+
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-bitcoin",
+        "request-method-to-bitcoin",
+        {
+          method,
+          params,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f && sidePanelOpenNeededBitcoinMethods.includes(method)) {
+          this.keplr.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
+  }
+
   async getAccounts(): Promise<string[]> {
-    throw new Error("Method not implemented.");
+    return this.protectedRequestMethod({
+      method: "getAccounts",
+      params: [],
+    });
   }
 
   async requestAccounts(): Promise<string[]> {
-    throw new Error("Method not implemented.");
+    return this.protectedRequestMethod({
+      method: "requestAccounts",
+      params: [],
+    });
   }
 
   async disconnect(): Promise<void> {
-    throw new Error("Method not implemented.");
+    return this.protectedRequestMethod({
+      method: "disconnect",
+      params: [],
+    });
   }
 
   async getNetwork(): Promise<BitcoinNetwork> {
-    throw new Error("Method not implemented.");
+    return this.protectedRequestMethod({
+      method: "getNetwork",
+      params: [],
+    });
   }
 
-  async switchNetwork(_network: BitcoinNetwork): Promise<void> {
-    throw new Error("Method not implemented.");
+  async switchNetwork(network: BitcoinNetwork): Promise<void> {
+    return this.protectedRequestMethod({
+      method: "switchNetwork",
+      params: [network],
+    });
   }
 
   async getPublicKey(): Promise<string> {
-    throw new Error("Method not implemented.");
+    return this.protectedRequestMethod({
+      method: "getPublicKey",
+      params: [],
+    });
   }
 
   async getBalance(): Promise<string> {
-    throw new Error("Method not implemented.");
+    return this.protectedRequestMethod({
+      method: "getBalance",
+      params: [],
+    });
   }
 
   async getInscriptions(): Promise<string[]> {
-    throw new Error("Method not implemented.");
+    return this.protectedRequestMethod({
+      method: "getInscriptions",
+      params: [],
+    });
   }
 
   async signMessage(): Promise<string> {
-    throw new Error("Method not implemented.");
+    return this.protectedRequestMethod({
+      method: "signMessage",
+      params: [],
+    });
   }
 
-  async sendBitcoin(_to: string, _amount: string): Promise<string> {
-    throw new Error("Method not implemented.");
+  async sendBitcoin(to: string, amount: string): Promise<string> {
+    return this.protectedRequestMethod({
+      method: "sendBitcoin",
+      params: [to, amount],
+    });
   }
 
-  async pushTx(_rawTxHex: string): Promise<string> {
-    throw new Error("Method not implemented.");
+  async pushTx(rawTxHex: string): Promise<string> {
+    return this.protectedRequestMethod({
+      method: "pushTx",
+      params: [rawTxHex],
+    });
   }
 
-  async signPsbt(_psbtHex: string): Promise<string> {
-    throw new Error("Method not implemented.");
+  async signPsbt(psbtHex: string): Promise<string> {
+    return this.protectedRequestMethod({
+      method: "signPsbt",
+      params: [psbtHex],
+    });
   }
 
-  async signPsbts(_psbtsHexes: string[]): Promise<string[]> {
-    throw new Error("Method not implemented.");
+  async signPsbts(psbtsHexes: string[]): Promise<string[]> {
+    return this.protectedRequestMethod({
+      method: "signPsbts",
+      params: [psbtsHexes],
+    });
   }
 }
