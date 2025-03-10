@@ -1845,6 +1845,13 @@ const NativeChainSection: FunctionComponent<{
   paragraph,
 }) => {
   const theme = useTheme();
+  const nativeChainMarkColor = isSelectAll
+    ? theme.mode === "light"
+      ? ColorPalette["gray-10"]
+      : ColorPalette["gray-550"]
+    : theme.mode === "light"
+    ? ColorPalette.white
+    : ColorPalette["gray-600"];
 
   return (
     <React.Fragment>
@@ -1873,7 +1880,11 @@ const NativeChainSection: FunctionComponent<{
         >
           <Columns sum={1} alignY="center">
             {isCollapsed ? (
-              <NativeChainMarkIcon width="1.75rem" height="1.75rem" />
+              <NativeChainMarkIcon
+                width="1.75rem"
+                height="1.75rem"
+                color={nativeChainMarkColor}
+              />
             ) : (
               <Box position="relative">
                 {titleChainImage}
@@ -1885,7 +1896,11 @@ const NativeChainSection: FunctionComponent<{
                     right: "-0.125rem",
                   }}
                 >
-                  <NativeChainMarkIcon width="1.25rem" height="1.25rem" />
+                  <NativeChainMarkIcon
+                    width="1.25rem"
+                    height="1.25rem"
+                    color={nativeChainMarkColor}
+                  />
                 </Box>
               </Box>
             )}
@@ -2042,7 +2057,19 @@ const ChainItem: FunctionComponent<{
                     right: "-0.125rem",
                   }}
                 >
-                  <NativeChainMarkIcon width="1.25rem" height="1.25rem" />
+                  <NativeChainMarkIcon
+                    width="1.25rem"
+                    height="1.25rem"
+                    color={
+                      enabled
+                        ? theme.mode === "light"
+                          ? ColorPalette["gray-10"]
+                          : ColorPalette["gray-550"]
+                        : theme.mode === "light"
+                        ? ColorPalette.white
+                        : ColorPalette["gray-600"]
+                    }
+                  />
                 </Box>
               </Box>
             ) : (
