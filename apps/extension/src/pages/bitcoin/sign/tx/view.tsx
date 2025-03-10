@@ -1,4 +1,10 @@
-import React, { FunctionComponent, useState } from "react";
+import React, {
+  FunctionComponent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { SignBitcoinTxInteractionStore } from "@keplr-wallet/stores-core";
 import { handleExternalInteractionWithNoProceedNext } from "../../../../utils";
 import { observer } from "mobx-react-lite";
@@ -15,6 +21,7 @@ import {
   useZeroAllowedFeeRateConfig,
   useAmountConfig,
   useTxConfigsValidate,
+  IFeeConfig,
 } from "@keplr-wallet/hooks-bitcoin";
 import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
@@ -26,16 +33,159 @@ import { ViewDataButton } from "../../../sign/components/view-data-button";
 import { useNavigate } from "react-router";
 import { ApproveIcon, CancelIcon } from "../../../../components/button";
 import { FeeSummary } from "../../components/input/fee-summary";
+import { Psbt } from "bitcoinjs-lib";
+import { Dec } from "@keplr-wallet/unit";
+import {
+  useNativeSegwitUTXOs,
+  useTaprootUTXOs,
+} from "../../../../hooks/bitcoin/use-utxos";
+
+const usePsbtsValidate = (
+  chainId: string,
+  psbtsHexes: string[],
+  feeConfig: IFeeConfig
+) => {
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
+  const [validatedPsbts, setValidatedPsbts] = useState<
+    {
+      psbt: Psbt;
+      feeAmount: Dec;
+      validationError: Error | undefined;
+    }[]
+  >([]);
+  const [validationError, setValidationError] = useState<Error | undefined>(
+    undefined
+  );
+
+  // extension 내부적으로는 각 주소 유형에 따른 utxo만을 사용하지만,
+  // 외부에서 서명 요청이 들어온 경우 공개키에서 생선된 native segwit 주소와 taproot 주소의
+  // utxo가 섞여 들어올 가능성이 있다. 따라서 모든 utxo를 조회하여 유효한 psbt인지 검증한다.
+  // legacy 주소는 일단 무시한다.
+  const nativeSegwitUTXOs = useNativeSegwitUTXOs(chainId);
+  const taprootUTXOs = useTaprootUTXOs(chainId);
+
+  const validatePsbts = useCallback(() => {
+    // 검증에 사용할 utxo가 없으면 오류를 반환한다.
+    if (!nativeSegwitUTXOs || !taprootUTXOs) {
+      setValidationError(new Error("Can't find utxos"));
+      return;
+    }
+
+    setIsValidating(true);
+
+    const availableUTXOs = new Map<string, number>();
+    // `${txid}:${vout}`을 유니크한 키로 사용하고, 값은 utxo의 값을 저장한다.
+    for (const utxo of nativeSegwitUTXOs) {
+      availableUTXOs.set(`${utxo.txid}:${utxo.vout}`, utxo.value);
+    }
+
+    for (const utxo of taprootUTXOs) {
+      availableUTXOs.set(`${utxo.txid}:${utxo.vout}`, utxo.value);
+    }
+
+    try {
+      const psbts = psbtsHexes.map((psbtHex) => Psbt.fromHex(psbtHex));
+      let totalInputAmount = new Dec(0);
+      let totalOutputAmount = new Dec(0);
+      const validatedPsbts: {
+        psbt: Psbt;
+        feeAmount: Dec;
+        validationError: Error | undefined;
+      }[] = [];
+
+      for (const psbt of psbts) {
+        const inputs = psbt.txInputs;
+
+        let sumInputAmount = new Dec(0);
+        let sumOutputAmount = new Dec(0);
+
+        for (const input of inputs) {
+          const utxo = `${input.hash.reverse().toString("hex")}:${input.index}`;
+
+          // 소유하고 있지 않은 input을 사용하는 psbt는 유효하지 않다.
+          if (!availableUTXOs.has(utxo)) {
+            validatedPsbts.push({
+              psbt,
+              feeAmount: new Dec(0),
+              validationError: new Error(
+                "Can't find utxo: not owned, inscription, brc20, runes, etc."
+              ),
+            });
+            continue;
+          }
+
+          sumInputAmount = sumInputAmount.add(
+            new Dec(availableUTXOs.get(utxo) ?? 0)
+          );
+        }
+
+        const outputs = psbt.txOutputs;
+        for (const output of outputs) {
+          sumOutputAmount = sumOutputAmount.add(new Dec(output.value));
+        }
+
+        const feeAmount = sumInputAmount.sub(sumOutputAmount);
+
+        // 수수료가 0보다 작으면 유효하지 않은 psbt이다.
+        if (feeAmount.lte(new Dec(0))) {
+          validatedPsbts.push({
+            psbt,
+            feeAmount: new Dec(0),
+            validationError: new Error(
+              "Invalid psbt: total input amount is less than total output amount"
+            ),
+          });
+        } else {
+          validatedPsbts.push({
+            psbt,
+            feeAmount,
+            validationError: undefined,
+          });
+
+          totalInputAmount = totalInputAmount.add(sumInputAmount);
+          totalOutputAmount = totalOutputAmount.add(sumOutputAmount);
+        }
+      }
+
+      const feeAmount = totalInputAmount.sub(totalOutputAmount);
+      if (feeAmount.lte(new Dec(0))) {
+        throw new Error(
+          "Invalid psbt: total input amount is less than total output amount"
+        );
+      }
+
+      // 각 psbt의 유효성 검증 결과를 저장하고 계산된 수수료를 설정한다.
+      setValidatedPsbts(validatedPsbts);
+      feeConfig.setValue(feeAmount.truncate().toString());
+    } catch (e) {
+      // psbt deserialize 오류 또는 전체 입력의 합이 출력의 합보다 작은 경우
+      setValidationError(e as Error);
+    } finally {
+      setIsValidating(false);
+    }
+  }, [nativeSegwitUTXOs, taprootUTXOs, psbtsHexes, feeConfig]);
+
+  useEffect(() => {
+    if (!isInitialized) {
+      setIsInitialized(true);
+    }
+
+    validatePsbts();
+  }, [validatePsbts, isInitialized]);
+
+  return {
+    isInitialized,
+    isValidating,
+    validatedPsbts,
+    validationError,
+  };
+};
 
 export const SignBitcoinTxView: FunctionComponent<{
   interactionData: NonNullable<SignBitcoinTxInteractionStore["waitingData"]>;
 }> = observer(({ interactionData }) => {
-  const {
-    signBitcoinTxInteractionStore,
-    // bitcoinAccountStore,
-    bitcoinQueriesStore,
-    // accountStore,
-  } = useStore();
+  const { signBitcoinTxInteractionStore, bitcoinQueriesStore } = useStore();
 
   const theme = useTheme();
   const { chainStore } = useStore();
@@ -96,34 +246,18 @@ export const SignBitcoinTxView: FunctionComponent<{
     feeRateConfig
   );
 
-  //   const psbtsHexes = useMemo(() => {
-  //     return "psbtHex" in interactionData.data
-  //       ? [interactionData.data.psbtHex]
-  //       : interactionData.data.psbtsHexes;
-  //   }, [interactionData.data]);
+  const psbtsHexes = useMemo(() => {
+    return "psbtHex" in interactionData.data
+      ? [interactionData.data.psbtHex]
+      : interactionData.data.psbtsHexes;
+  }, [interactionData.data]);
 
-  // TODO: psbt parsing해서 amount, fee 추출해서 넣어줘야함.
-  //   const psbtValidator = usePsbtValidator(
-  //     chainStore,
-  //     chainId,
-  //     accountStore.getAccount(chainId).pubKey,
-  //     () => {
-  //       //   const bitcoin = modularChainInfo.bitcoin;
-
-  //       return (psbtHex: string) => {
-  //         return Promise.resolve(
-  //           {} as {
-  //             psbt: Psbt;
-  //             totalInputAmount: CoinPretty;
-  //             totalOutputAmount: CoinPretty;
-  //             error: Error;
-  //           }
-  //         );
-  //       };
-  //     }
-  //   );
-
-  //   psbtValidator.setPsbtHexes(psbtsHexes);
+  const {
+    isInitialized,
+    isValidating,
+    // validatedPsbts,
+    // validationError
+  } = usePsbtsValidate(chainId, psbtsHexes, feeConfig);
 
   const [unmountPromise] = useState(() => {
     let resolver: () => void;
@@ -148,7 +282,8 @@ export const SignBitcoinTxView: FunctionComponent<{
     feeConfig,
   });
 
-  const buttonDisabled = txConfigsValidate.interactionBlocked;
+  const buttonDisabled =
+    txConfigsValidate.interactionBlocked || !isInitialized || isValidating;
   const isLoading = signBitcoinTxInteractionStore.isObsoleteInteractionApproved(
     interactionData.id
   );
@@ -175,9 +310,9 @@ export const SignBitcoinTxView: FunctionComponent<{
       await signBitcoinTxInteractionStore.approveWithProceedNext(
         interactionData.id,
         psbtHex,
-        "",
+        "", // ledger로 서명된 signedPsbtHex가 들어감
         psbtsHexes,
-        [],
+        [], // ledger로 서명된 signedPsbtHexes가 들어감
         async (proceedNext) => {
           if (!proceedNext) {
             if (
@@ -316,7 +451,10 @@ export const SignBitcoinTxView: FunctionComponent<{
 
         <div style={{ marginTop: "0.75rem", flex: 1 }} />
 
-        <FeeSummary feeConfig={feeConfig} />
+        <FeeSummary
+          feeConfig={feeConfig}
+          isValidating={!isInitialized || isValidating}
+        />
       </Box>
     </HeaderLayout>
   );
