@@ -75,6 +75,9 @@ export interface IAmountConfig extends ITxChainSetter {
 }
 
 export interface IFeeConfig extends ITxChainSetter {
+  value: string;
+  setValue(value: string): void;
+
   fee: CoinPretty | undefined;
   uiProperties: UIProperties;
 }

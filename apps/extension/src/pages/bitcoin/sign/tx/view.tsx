@@ -8,12 +8,12 @@ import { useUnmount } from "../../../../hooks/use-unmount";
 import { BackButton } from "../../../../layouts/header/components";
 import { HeaderLayout } from "../../../../layouts/header";
 import { useIntl } from "react-intl";
-import { FeeControl } from "../../components/input/fee-control";
 import {
   useFeeConfig,
-  useFeeRateConfig,
   useNoopAmountConfig,
+  useNoopTxSizeConfig,
   useSenderConfig,
+  useZeroAllowedFeeRateConfig,
   //   useTxConfigsValidate,
 } from "@keplr-wallet/hooks-bitcoin";
 import { Box } from "../../../../components/box";
@@ -25,7 +25,7 @@ import { XAxis } from "../../../../components/axis";
 import { ViewDataButton } from "../../../sign/components/view-data-button";
 import { useNavigate } from "react-router";
 import { ApproveIcon, CancelIcon } from "../../../../components/button";
-import { useTxSizeConfig } from "@keplr-wallet/hooks-bitcoin/build/tx/tx-size";
+import { FeeSummary } from "../../components/input/fee-summary";
 
 export const SignBitcoinTxView: FunctionComponent<{
   interactionData: NonNullable<SignBitcoinTxInteractionStore["waitingData"]>;
@@ -64,12 +64,18 @@ export const SignBitcoinTxView: FunctionComponent<{
     chainId,
     interactionData.data.address
   );
-  const feeRateConfig = useFeeRateConfig(
+
+  // dummy configs for tx size and fee rate
+  // 비트코인 트랜잭션은 utxo 기반이라 서명 페이지에서 fee rate 또는 tx size를 조정하여
+  // 수수료를 재계산하려면 utxo 조합을 새로 생성해야 하는 굉장한 번거로움이 있다.
+  // 따라서 psbt를 파싱하여 전체 입력의 합에서 출력의 합을 빼서 수수료만 따로 계산한다.
+  const zeroAllowedFeeRateConfig = useZeroAllowedFeeRateConfig(
     chainStore,
     bitcoinQueriesStore,
-    chainId
+    chainId,
+    0
   );
-  const txSizeConfig = useTxSizeConfig(chainStore, chainId);
+  const noopTxSizeConfig = useNoopTxSizeConfig(chainStore, chainId);
 
   const amountConfig = useNoopAmountConfig(chainStore, chainId, senderConfig);
 
@@ -79,9 +85,11 @@ export const SignBitcoinTxView: FunctionComponent<{
     chainId,
     senderConfig,
     amountConfig,
-    txSizeConfig,
-    feeRateConfig
+    noopTxSizeConfig,
+    zeroAllowedFeeRateConfig
   );
+
+  // TODO: psbt parsing해서 amount, fee 추출해서 넣어줘야함.
 
   const [unmountPromise] = useState(() => {
     let resolver: () => void;
@@ -276,11 +284,7 @@ export const SignBitcoinTxView: FunctionComponent<{
 
         <div style={{ marginTop: "0.75rem", flex: 1 }} />
 
-        <FeeControl
-          senderConfig={senderConfig}
-          feeConfig={feeConfig}
-          feeRateConfig={feeRateConfig}
-        />
+        <FeeSummary feeConfig={feeConfig} />
       </Box>
     </HeaderLayout>
   );

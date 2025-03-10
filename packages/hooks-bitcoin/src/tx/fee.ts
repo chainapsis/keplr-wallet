@@ -18,6 +18,9 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   @observable
   protected _disableBalanceCheck: boolean = false;
 
+  @observable
+  protected _value: string = "";
+
   constructor(
     chainGetter: ChainGetter,
     protected readonly bitcoinQueriesStore: BitcoinQueriesStore,
@@ -41,11 +44,24 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     return this._disableBalanceCheck;
   }
 
+  get value(): string {
+    return this._value;
+  }
+
+  @action
+  setValue(value: string) {
+    this._value = value;
+  }
+
   get fee(): CoinPretty | undefined {
-    return new CoinPretty(
-      this.amountConfig.currency,
-      this.txSizeConfig.txSize * this.feeRateConfig.feeRate
-    );
+    if (this.value.trim() === "") {
+      return new CoinPretty(
+        this.amountConfig.currency,
+        this.txSizeConfig.txSize * this.feeRateConfig.feeRate
+      );
+    }
+
+    return new CoinPretty(this.amountConfig.currency, this._value);
   }
 
   @computed
