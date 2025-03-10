@@ -159,6 +159,31 @@ export const Styles = {
       margin: 0;
     }
   `,
+  TextInputWidthChecker: styled.span<TextInputProps>`
+    position: fixed;
+    visibility: hidden;
+    opacity: 0;
+    font-size: 0.875rem;
+    font-weight: 400;
+    white-space: pre;
+  `,
+  TextSuffix: styled.div<{
+    textWidth: number | null;
+  }>`
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-left: 0.75rem;
+    left: ${({ textWidth }) => `${textWidth}px` ?? 0};
+
+    font-size: 0.875rem;
+    font-weight: 400;
+
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-300"]
+        : ColorPalette["gray-300"]};
+  `,
   SubText: styled(Caption2)<Pick<TextInputProps, "error" | "paragraph">>`
     margin-top: 4px;
     ${({ error, paragraph }) =>

@@ -1,4 +1,11 @@
-import React, { forwardRef, FunctionComponent, PropsWithChildren } from "react";
+import React, {
+  forwardRef,
+  FunctionComponent,
+  PropsWithChildren,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { TextInputProps } from "./types";
 import { Styles } from "./styles";
 import { Column, Columns } from "../../column";
@@ -25,6 +32,7 @@ export const TextInput = forwardRef<
       left,
       right,
       bottom,
+      textSuffix,
       isLoading,
       autoComplete,
       inputStyle,
@@ -32,8 +40,77 @@ export const TextInput = forwardRef<
     },
     ref
   ) => {
+    const widthCheckRef = useRef<HTMLSpanElement | null>(null);
+    const [textWidth, setTextWidth] = useState<number | null>(null);
+    useEffect(() => {
+      if (widthCheckRef.current) {
+        const resizeObserver = new ResizeObserver((entries) => {
+          if (entries.length > 0) {
+            const entry = entries[0];
+            const boxSize = Array.isArray(entry.borderBoxSize)
+              ? entry.borderBoxSize[0]
+              : entry.borderBoxSize;
+
+            const width = boxSize.inlineSize;
+            setTextWidth(width);
+          }
+        });
+        resizeObserver.observe(widthCheckRef.current);
+        return () => resizeObserver.disconnect();
+      }
+    }, []);
+    const inputWidthCheckRef = useRef<HTMLInputElement | null>(null);
+    const [textInputWidth, setTextInputWidth] = useState<number | null>(null);
+    useEffect(() => {
+      if (inputWidthCheckRef.current) {
+        const resizeObserver = new ResizeObserver((entries) => {
+          if (entries.length > 0) {
+            const entry = entries[0];
+            const boxSize = Array.isArray(entry.contentBoxSize)
+              ? entry.contentBoxSize[0]
+              : entry.contentBoxSize;
+
+            const width = boxSize.inlineSize;
+            setTextInputWidth(width);
+          }
+        });
+        resizeObserver.observe(inputWidthCheckRef.current);
+        return () => resizeObserver.disconnect();
+      }
+    }, []);
+    const suffixWidthCheckRef = useRef<HTMLDivElement | null>(null);
+    const [suffixTextWidth, setSuffixTextWidth] = useState<number | null>(null);
+    useEffect(() => {
+      if (suffixWidthCheckRef.current) {
+        const resizeObserver = new ResizeObserver((entries) => {
+          if (entries.length > 0) {
+            const entry = entries[0];
+            const boxSize = Array.isArray(entry.borderBoxSize)
+              ? entry.borderBoxSize[0]
+              : entry.borderBoxSize;
+
+            const width = boxSize.inlineSize;
+            setSuffixTextWidth(width);
+          }
+        });
+        resizeObserver.observe(suffixWidthCheckRef.current);
+        return () => resizeObserver.disconnect();
+      }
+    }, []);
+
     return (
       <Styles.Container className={className} style={style}>
+        <div
+          style={{
+            position: "relative",
+            opacity: 0,
+            visibility: "hidden",
+          }}
+        >
+          <Styles.TextInputWidthChecker ref={widthCheckRef}>
+            {props.value}
+          </Styles.TextInputWidthChecker>
+        </div>
         <Columns sum={1} alignY="center">
           {label ? <Label content={label} isLoading={isLoading} /> : null}
           <Column weight={1} />
@@ -61,14 +138,54 @@ export const TextInput = forwardRef<
             </MockBox>
 
             <Column weight={1}>
-              <Styles.TextInput
-                {...props}
-                style={inputStyle}
-                autoComplete={autoComplete || "off"}
-                paragraph={paragraph}
-                error={error}
-                ref={ref}
-              />
+              <div style={{ position: "relative", display: "flex" }}>
+                <Styles.TextInput
+                  {...props}
+                  style={inputStyle}
+                  autoComplete={autoComplete || "off"}
+                  paragraph={paragraph}
+                  error={error}
+                  ref={(r) => {
+                    inputWidthCheckRef.current = r;
+                    if (typeof ref === "function") {
+                      ref(r);
+                    } else if (ref) {
+                      ref.current = r;
+                    }
+                  }}
+                />
+                <div
+                  style={(() => {
+                    if (suffixTextWidth == null || !textSuffix) {
+                      return {
+                        width: 0,
+                        opacity: 0,
+                      };
+                    }
+                    return {
+                      width: suffixTextWidth + "px",
+                    };
+                  })()}
+                />
+                <Styles.TextSuffix
+                  ref={suffixWidthCheckRef}
+                  textWidth={(() => {
+                    if (textWidth != null && textInputWidth != null) {
+                      return Math.min(textWidth, textInputWidth);
+                    }
+                    if (textWidth != null) {
+                      return textWidth;
+                    }
+                    if (textInputWidth != null) {
+                      return textInputWidth;
+                    }
+
+                    return 0;
+                  })()}
+                >
+                  {textSuffix}
+                </Styles.TextSuffix>
+              </div>
             </Column>
 
             <MockBox show={!!right}>
