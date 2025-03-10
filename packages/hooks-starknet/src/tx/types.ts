@@ -1,9 +1,11 @@
-import { ERC20Currency } from "@keplr-wallet/types";
+import { ERC20Currency, ModularChainInfo } from "@keplr-wallet/types";
 import { CoinPretty } from "@keplr-wallet/unit";
+import { NameService } from "./name-service";
 
 export interface ITxChainSetter {
   chainId: string;
   setChain(chainId: string): void;
+  modularChainInfo: ModularChainInfo;
 }
 
 export interface UIProperties {
@@ -64,11 +66,21 @@ export interface IRecipientConfig extends ITxChainSetter {
   uiProperties: UIProperties;
 }
 
-export interface IRecipientConfigWithStarknetID extends IRecipientConfig {
-  readonly isStarknetIDEnabled: boolean;
-  readonly isStarknetID: boolean;
-  readonly starknetExpectedDomain: string;
-  readonly isStarknetIDFetching: boolean;
+export interface IRecipientConfigWithNameServices extends IRecipientConfig {
+  preferredNameService: string | undefined;
+  setPreferredNameService(nameService: string | undefined): void;
+  getNameService(type: string): NameService | undefined;
+  getNameServices(): NameService[];
+  // address를 반환하는 name service의 결과를 반환한다.
+  // preferredNameService가 설정되어 있지 않으면 모든 name service의 결과를 반환한다.
+  // preferredNameService가 설정되어 있으면 해당 name service의 결과를 반환한다.
+  nameServiceResult: {
+    type: string;
+    address: string;
+    fullName: string;
+    domain: string;
+    suffix: string;
+  }[];
 }
 
 export interface IAmountConfig extends ITxChainSetter {
