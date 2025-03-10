@@ -264,45 +264,11 @@ export const FeeControl: FunctionComponent<{
                 })()}
               >
                 <FormattedMessage
-                  id="components.input.fee-control.max-fee"
+                  id="components.input.fee-control.fee-rate"
                   values={{
-                    assets: (() => {
-                      if (!feeConfig.fee) {
-                        return "-";
-                      }
-
-                      return feeConfig.fee
-                        .maxDecimals(6)
-                        .inequalitySymbol(true)
-                        .trim(true)
-                        .shrink(true)
-                        .hideIBCMetadata(true)
-                        .toString();
-                    })(),
+                    feeRate: feeRateConfig.feeRate,
                   }}
                 />
-              </Caption1>
-              <Caption1
-                color={
-                  theme.mode === "light"
-                    ? ColorPalette["gray-300"]
-                    : ColorPalette["gray-300"]
-                }
-                style={{
-                  whiteSpace: "pre-wrap",
-                }}
-              >
-                {` ${(() => {
-                  if (!feeConfig.fee) {
-                    return "";
-                  }
-                  if (!feeConfig.fee.currency.coinGeckoId) {
-                    return "";
-                  }
-                  return `(${(() => {
-                    return priceStore.calculatePrice(feeConfig.fee);
-                  })()})`;
-                })()}`}
               </Caption1>
             </XAxis>
           </Box>

@@ -7,8 +7,8 @@ import { computed, makeObservable } from "mobx";
 import { AppCurrency } from "@keplr-wallet/types";
 import { DenomHelper } from "@keplr-wallet/common";
 import { CoinPretty, Int } from "@keplr-wallet/unit";
-import { ObservableBitcoinIndexerQuery } from "./bitcoin-indexer";
-import { AddressDetails } from "./types";
+import { ObservableBitcoinIndexerQuery } from "../bitcoin-indexer";
+import { AddressDetails } from "../types";
 
 export class ObservableQueryBitcoinBalanceImpl
   extends ObservableBitcoinIndexerQuery<AddressDetails>

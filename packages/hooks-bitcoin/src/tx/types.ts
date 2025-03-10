@@ -1,5 +1,6 @@
 import { AppCurrency } from "@keplr-wallet/types";
 import { CoinPretty } from "@keplr-wallet/unit";
+import { Psbt } from "bitcoinjs-lib";
 
 export interface ITxChainSetter {
   chainId: string;
@@ -25,28 +26,16 @@ export interface ISenderConfig extends ITxChainSetter {
   uiProperties: UIProperties;
 }
 
-export type FeeRateType = "high" | "average" | "low" | "manual";
-
 export type ITxSizeConfig = {
-  txVBytes: number;
-  txBytes: number;
-  txWeight: number;
-  dustVBytes?: number;
+  value: string;
+  setValue(value: string | number): void;
 
-  setTxSize({
-    txVBytes,
-    txBytes,
-    txWeight,
-    dustVBytes,
-  }: {
-    txVBytes: number;
-    txBytes: number;
-    txWeight: number;
-    dustVBytes?: number;
-  }): void;
+  txSize: number | undefined;
 
   uiProperties: UIProperties;
 };
+
+export type FeeRateType = "high" | "average" | "low" | "manual";
 
 export interface IFeeRateConfig extends ITxChainSetter {
   value: string;
@@ -87,8 +76,10 @@ export interface IAmountConfig extends ITxChainSetter {
 }
 
 export interface IFeeConfig extends ITxChainSetter {
+  value: string;
+  setValue(value: string): void;
+
   fee: CoinPretty | undefined;
-  setFee(fee: CoinPretty | null): void;
   uiProperties: UIProperties;
 }
 
@@ -98,12 +89,20 @@ export interface IPsbtSimulator {
 
   isSimulating: boolean;
   psbtHex: string | null;
-  estimatedFee: CoinPretty | null;
-  txSize: {
-    txVBytes: number;
-    txBytes: number;
-    txWeight: number;
-    dustVBytes?: number;
-  } | null;
+  txSize: number | null;
+  uiProperties: UIProperties;
+}
+
+export interface IPsbtValidator {
+  enabled: boolean;
+  setEnabled(value: boolean): void;
+
+  psbtHexes: string[];
+  setPsbtHexes(psbtHexes: string[]): void;
+
+  error(psbtHex: string): Error | undefined;
+  psbt(psbtHex: string): Psbt | undefined;
+  totalInputAmount(psbtHex: string): CoinPretty | undefined;
+  totalOutputAmount(psbtHex: string): CoinPretty | undefined;
   uiProperties: UIProperties;
 }

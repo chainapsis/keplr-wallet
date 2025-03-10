@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { observer, useLocalObservable } from "mobx-react-lite";
+import { observer } from "mobx-react-lite";
 import { HeaderLayout } from "../../../layouts/header";
 import { BackButton } from "../../../layouts/header/components";
 
@@ -38,7 +38,6 @@ import { RecipientInput } from "../components/input/recipient-input";
 import { AmountInput } from "../components/input/amount-input";
 import styled from "styled-components";
 import { ExtensionKVStore } from "@keplr-wallet/common";
-import { Psbt } from "bitcoinjs-lib";
 import { toXOnly } from "@keplr-wallet/crypto";
 import { FeeControl } from "../components/input/fee-control";
 // import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
@@ -47,7 +46,6 @@ import { FeeControl } from "../components/input/fee-control";
 //   AddRecentSendHistoryMsg,
 //   SubmitStarknetTxHashMsg,
 // } from "@keplr-wallet/background";
-// import { LoadingIcon } from "../../../components/icon";
 
 const Styles = {
   Flex1: styled.div`
@@ -102,8 +100,6 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
   const coinMinimalDenom =
     initialCoinMinimalDenom || bitcoin.currencies[0].coinMinimalDenom;
   const currency = (() => {
-    // TODO: 대충 여기에다가 force currency 로직을 박아놓는다...
-    //       나중에 이런 기능을 chain store 자체에다가 만들어야한다.
     const res = chainStore
       .getModularChainInfoImpl(chainId)
       .getCurrencies("bitcoin")
@@ -158,49 +154,64 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
   );
   sendConfigs.amountConfig.setCurrency(currency);
 
+  // bitcoin tx size는 amount, fee rate, recipient address type에 따라 달라진다.
+  // 따라서 세 가지를 모두 고려해서 key를 생성한다.
   const psbtSimulatorKey = useMemo(() => {
-    const res = (() => {
-      if (sendConfigs.amountConfig.currency) {
-        const amountHexDigits = BigInt(
-          sendConfigs.amountConfig.amount[0].toCoin().amount
-        ).toString(16).length;
-        return amountHexDigits.toString();
+    const recipientPrefix = (() => {
+      if (!sendConfigs.recipientConfig.uiProperties.error) {
+        // return leading 4 string of recipient address if recipient is valid
+        return sendConfigs.recipientConfig.recipient.slice(0, 4);
+      }
+
+      return "invalid";
+    })();
+
+    const amountHex = (() => {
+      if (sendConfigs.amountConfig.amount) {
+        const totalAmount = sendConfigs.amountConfig.amount.reduce(
+          (acc, cur) => acc.add(new Dec(cur.toCoin().amount)),
+          new Dec(0)
+        );
+
+        return totalAmount.toString(16);
       }
 
       return "0";
     })();
 
-    return res + sendConfigs.feeRateConfig.feeRate.toString();
+    return (
+      recipientPrefix + amountHex + sendConfigs.feeRateConfig.feeRate.toString()
+    );
   }, [
     sendConfigs.amountConfig.amount,
-    sendConfigs.amountConfig.currency,
     sendConfigs.feeRateConfig.feeRate,
+    sendConfigs.recipientConfig.recipient,
+    sendConfigs.recipientConfig.uiProperties.error,
   ]);
 
   // CHECK: refresh는 불필요할 것으로 보임. btc는 수수료가 빠른 주기로 업데이트되지 않기 때문
-  const psbtSimulationRefresher = useLocalObservable(() => ({
-    count: 0,
-    increaseCount() {
-      this.count++;
-    },
-  }));
+  // const psbtSimulationRefresher = useLocalObservable(() => ({
+  //   count: 0,
+  //   increaseCount() {
+  //     this.count++;
+  //   },
+  // }));
 
-  useEffect(() => {
-    // Refresh gas simulation every 12 seconds.
-    const interval = setInterval(
-      () => psbtSimulationRefresher.increaseCount(),
-      12000
-    );
+  // useEffect(() => {
+  //   // Refresh gas simulation every 12 seconds.
+  //   const interval = setInterval(
+  //     () => psbtSimulationRefresher.increaseCount(),
+  //     12000
+  //   );
 
-    return () => clearInterval(interval);
-  }, [psbtSimulationRefresher]);
+  //   return () => clearInterval(interval);
+  // }, [psbtSimulationRefresher]);
 
   const psbtSimulator = usePsbtSimulator(
     new ExtensionKVStore("psbt-simulator.bitcoin.send"),
     chainStore,
     chainId,
     sendConfigs.txSizeConfig,
-    sendConfigs.feeConfig,
     psbtSimulatorKey,
     () => {
       if (!sendConfigs.amountConfig.currency) {
@@ -235,20 +246,22 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
         throw new Error("Not ready to simulate psbt");
       }
 
-      const queryUTXOs = bitcoinQueriesStore
+      const queryAvailableUTXOs = bitcoinQueriesStore
         .get(chainId)
-        .queryBitcoinUTXOs.getUTXOs(chainId, chainStore, sender);
+        .queryBitcoinAvailableUTXOs.getAvailableUTXOs(
+          chainId,
+          chainStore,
+          sender
+        );
 
-      if (!queryUTXOs) {
-        throw new Error("Can't find utxos");
+      if (!queryAvailableUTXOs) {
+        throw new Error("Can't find available utxos");
       }
 
-      const utxos = queryUTXOs.UTXOs;
-      if (!utxos) {
-        throw new Error("Can't find utxos");
+      const availableUTXOs = queryAvailableUTXOs.availableUTXOs;
+      if (!availableUTXOs) {
+        throw new Error("Can't find available utxos");
       }
-
-      // TODO: check discarding dust change
 
       const simulate = async (): Promise<{
         psbtHex: string;
@@ -257,19 +270,17 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
           txBytes: number;
           txWeight: number;
         };
-        estimatedFee: CoinPretty;
-        dust?: {
-          vBytes: number;
-          relayFeeRate: number;
-        };
       }> => {
-        noop(psbtSimulationRefresher.count);
+        // CHECK: refresh가 필요할까?
+        // noop(psbtSimulationRefresher.count);
 
         const senderAddress = sendConfigs.senderConfig.sender;
         const publicKey = account.pubKey;
         const xonlyPubKey = publicKey
           ? toXOnly(Buffer.from(publicKey))
           : undefined;
+        const feeRate = sendConfigs.feeRateConfig.feeRate;
+        const isSendMax = sendConfigs.amountConfig.fraction === 1;
 
         const MAX_SAFE_OUTPUT = new Dec(2 ** 53 - 1);
         const ZERO = new Dec(0);
@@ -302,31 +313,31 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
 
         const selection = bitcoinAccount.selectUTXOs({
           senderAddress,
-          utxos,
+          utxos: availableUTXOs,
           recipients: recipientsForTransaction,
-          feeRate: sendConfigs.feeRateConfig.feeRate,
+          feeRate,
+          isSendMax,
         });
 
         if (!selection) {
           throw new Error("Can't find proper utxos selection");
         }
 
-        const { selectedUtxos, recipients, estimatedFee, txSize, hasChange } =
-          selection;
+        const { selectedUtxos, txSize, hasChange } = selection;
 
         const psbtHex = bitcoinAccount.buildPsbt({
           utxos: selectedUtxos,
           senderAddress,
-          recipients,
-          estimatedFee,
+          recipients: recipientsForTransaction,
+          feeRate,
           xonlyPubKey,
+          isSendMax,
           hasChange,
         });
 
         return {
           psbtHex,
           txSize,
-          estimatedFee,
         };
       };
 
@@ -397,10 +408,8 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
         setIsLoading(true);
 
         try {
-          // TODO: logic for send bitcoin tx
-          const psbt = Psbt.fromHex(psbtSimulator.psbtHex);
-
-          const txHash = await bitcoinAccount.signAndPushTx(psbt);
+          const psbtHex = psbtSimulator.psbtHex;
+          const txHash = await bitcoinAccount.signAndPushTx(psbtHex);
 
           // TODO: submit and refresh balance
 
@@ -564,6 +573,6 @@ const DetachIcon: FunctionComponent<{
   );
 };
 
-const noop = (..._args: any[]) => {
-  // noop
-};
+// const noop = (..._args: any[]) => {
+//   // noop
+// };

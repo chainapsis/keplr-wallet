@@ -627,6 +627,7 @@
   "components.input.fee-control.title": "트랜잭션 수수료",
   "components.input.fee-control.fee": "수수료: {assets}",
   "components.input.fee-control.max-fee": "최대 수수료: {assets}",
+  "components.input.fee-control.fee-rate": "수수료 비율: {feeRate} sat/vB",
   "components.input.fee-control.error.insufficient-fee": "수수료를 낼 잔고가 부족합니다.",
   "components.input.fee-control.tooltip.external-fee-set": "웹사이트에 의해 설정된 수수료입니다.",
   "components.input.fee-control.modal.title": "수수료 옵션",

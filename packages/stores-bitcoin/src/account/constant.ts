@@ -1,3 +1,2 @@
-// Same as in Bitcoin Core
-export const DUST_RELAY_FEE_RATE = 3;
-export const DUST_THRESHOLD = 546;
+export const NATIVE_SEGWIT_DUST_THRESHOLD = 294;
+export const BRANCH_AND_BOUND_TIMEOUT_MS = 1000;

@@ -604,6 +604,8 @@
   "components.input.memo-input.memo-label": "备注",
   "components.input.memo-input.optional-placeholder": "选填",
   "components.input.fee-control.fee": "交易费: {assets}",
+  "components.input.fee-control.max-fee": "最高费用: {assets}",
+  "components.input.fee-control.fee-rate": "费用标准: {feeRate} sat/vB",
   "components.input.fee-control.error.insufficient-fee": "费用不足",
   "components.input.fee-control.modal.title": "费用选项",
   "components.input.fee-control.modal.fee-title": "费用",

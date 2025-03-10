@@ -1,5 +1,5 @@
 import { ChainGetter, QuerySharedContext } from "@keplr-wallet/stores";
-import { ObservableBitcoinIndexerQuery } from "./bitcoin-indexer";
+import { ObservableBitcoinIndexerQuery } from "../bitcoin-indexer";
 import { makeObservable } from "mobx";
 import { Transaction } from "bitcoinjs-lib";
 

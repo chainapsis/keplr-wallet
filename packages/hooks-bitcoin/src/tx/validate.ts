@@ -14,8 +14,8 @@ export const useTxConfigsValidate = (configs: {
   senderConfig?: ISenderConfig;
   recipientConfig?: IRecipientConfig;
   feeRateConfig?: IFeeRateConfig;
-  txSizeConfig?: ITxSizeConfig;
   feeConfig?: IFeeConfig;
+  txSizeConfig?: ITxSizeConfig;
   psbtSimulator?: IPsbtSimulator;
 }) => {
   const interactionBlocked = (() => {
@@ -41,7 +41,6 @@ export const useTxConfigsValidate = (configs: {
     const feeConfigUIProperties = configs.feeConfig?.uiProperties;
     const txSizeConfigUIProperties = configs.txSizeConfig?.uiProperties;
     const psbtSimulatorUIProperties = configs.psbtSimulator?.uiProperties;
-
     if (
       amountConfigUIProperties?.error ||
       senderConfigUIProperties?.error ||
