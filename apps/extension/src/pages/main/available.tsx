@@ -18,7 +18,7 @@ import { Modal } from "../../components/modal";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { Gutter } from "../../components/gutter";
 import { EmptyView } from "../../components/empty-view";
-import { Body2, H3, Subtitle1, Subtitle3 } from "../../components/typography";
+import { Body2, Subtitle1, Subtitle3 } from "../../components/typography";
 import { XAxis, YAxis } from "../../components/axis";
 import { Checkbox } from "../../components/checkbox";
 import { Caption2 } from "../../components/typography";
@@ -31,7 +31,6 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import { useGetSearchChains } from "../../hooks/use-get-search-chains";
 import { AdjustmentIcon } from "../../components/icon/adjustment";
-import { InformationPlainIcon } from "../../components/icon";
 
 const zeroDec = new Dec(0);
 
@@ -553,60 +552,6 @@ export const AvailableTabView: FunctionComponent<{
           </React.Fragment>
         )}
 
-        <Modal
-          isOpen={
-            uiConfigStore.needToShowGuideModalConfig
-              .isNeedToShowStarknetGuideModal
-          }
-          close={() => {
-            uiConfigStore.needToShowGuideModalConfig.disableNeedToShowStarknetGuideModal();
-          }}
-          align="bottom"
-        >
-          <Box
-            padding="0.75rem"
-            paddingTop="0"
-            backgroundColor={
-              theme.mode === "light"
-                ? ColorPalette.white
-                : ColorPalette["gray-600"]
-            }
-          >
-            <Box paddingTop="1.5rem" paddingBottom="0.75rem">
-              <XAxis alignY="center">
-                <div style={{ flex: 1 }} />
-                <InformationPlainIcon width={16} height={16} />
-                <Gutter size="0.5rem" />
-                <H3 style={{ textAlign: "center" }}>
-                  <FormattedMessage id="page.main.components.starknet-guide-modal.title" />
-                </H3>
-                <div style={{ flex: 1 }} />
-              </XAxis>
-            </Box>
-            <Box paddingX="1rem">
-              <Body2
-                style={{ textAlign: "center" }}
-                color={
-                  theme.mode === "light"
-                    ? ColorPalette["gray-300"]
-                    : ColorPalette["gray-200"]
-                }
-              >
-                <FormattedMessage id="page.main.components.starknet-guide-modal.description" />
-              </Body2>
-            </Box>
-            <Gutter size="1.5rem" />
-            <Button
-              text={intl.formatMessage({
-                id: "button.ok",
-              })}
-              size="large"
-              onClick={() => {
-                uiConfigStore.needToShowGuideModalConfig.disableNeedToShowStarknetGuideModal();
-              }}
-            />
-          </Box>
-        </Modal>
         <Modal
           isOpen={
             tokenDetailInfo.chainId != null &&
