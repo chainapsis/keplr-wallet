@@ -55,15 +55,19 @@ export class NobleEarnAmountConfig extends AmountConfig {
     }
 
     const min = this.amount[0].mul(new Dec(0.99));
-    const nobleSwapSimulateSwap = this.querySimulateSwap(min);
+    const queryNobleSwapSimulateSwap = this.querySimulateSwap(min);
 
     const isLessThanMin =
-      nobleSwapSimulateSwap?.error?.message.includes("min amount") ||
-      nobleSwapSimulateSwap?.simulatedOutAmount?.toDec().lt(min.toDec());
+      queryNobleSwapSimulateSwap?.error?.message.includes("min amount") ||
+      queryNobleSwapSimulateSwap?.simulatedOutAmount?.toDec().lt(min.toDec());
 
     if (isLessThanMin) {
       return new Error("Estimated out amount is less than expected");
     }
+
+    return queryNobleSwapSimulateSwap?.error
+      ? new Error(queryNobleSwapSimulateSwap?.error?.message)
+      : undefined;
   }
 
   get pool(): NobleSwapPool | undefined {
@@ -132,6 +136,10 @@ export class NobleEarnAmountConfig extends AmountConfig {
 
     if (isLessThanMin) {
       return new CoinPretty(this.outCurrency, min.toCoin().amount);
+    }
+
+    if (nobleSwapSimulateSwap?.error) {
+      return new CoinPretty(this.outCurrency, "0");
     }
 
     return (
