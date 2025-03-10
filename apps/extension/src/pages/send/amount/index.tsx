@@ -1954,6 +1954,20 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                         BACKGROUND_PORT,
                         new LogAnalyticsEventMsg("ibc_send", params)
                       );
+
+                      if (
+                        sendConfigs.recipientConfig.nameServiceResult.length > 0
+                      ) {
+                        new InExtensionMessageRequester().sendMessage(
+                          BACKGROUND_PORT,
+                          new LogAnalyticsEventMsg("send_with_name_service", {
+                            chainId: sendConfigs.recipientConfig.chainId,
+                            nameService:
+                              sendConfigs.recipientConfig.nameServiceResult[0]
+                                .type,
+                          })
+                        );
+                      }
                     }
                   },
                   onFulfill: (tx: any) => {

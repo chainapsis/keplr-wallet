@@ -4,7 +4,7 @@ import { observer } from "mobx-react-lite";
 import {
   EmptyAddressError,
   IRecipientConfig,
-  IRecipientConfigWithStarknetID,
+  IRecipientConfigWithNameServices,
 } from "@keplr-wallet/hooks-starknet";
 import { ProfileIcon } from "../../../../../components/icon";
 import { Box } from "../../../../../components/box";
@@ -17,7 +17,7 @@ import { useTheme } from "styled-components";
 
 export interface RecipientInputWithAddressBookProps {
   historyType: string;
-  recipientConfig: IRecipientConfig | IRecipientConfigWithStarknetID;
+  recipientConfig: IRecipientConfig | IRecipientConfigWithNameServices;
 
   permitAddressBookSelfKeyInfo?: boolean;
 }
@@ -35,10 +35,6 @@ export type RecipientInputProps = (
   bottom?: React.ReactNode;
 };
 
-function numOfCharacter(str: string, c: string): number {
-  return str.split(c).length - 1;
-}
-
 export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
   (props, ref) => {
     const { analyticsStore } = useStore();
@@ -49,25 +45,22 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
     const [isAddressBookModalOpen, setIsAddressBookModalOpen] =
       React.useState(false);
 
+    const isFetching = (() => {
+      if ("getNameServices" in recipientConfig) {
+        return recipientConfig
+          .getNameServices()
+          .some((ns) => ns.isEnabled && ns.isFetching);
+      }
+
+      return false;
+    })();
+
     const isStarknetIDEnabled: boolean = (() => {
-      if ("isStarknetIDEnabled" in recipientConfig) {
-        return recipientConfig.isStarknetIDEnabled;
-      }
-
-      return false;
-    })();
-
-    const isStarknetID: boolean = (() => {
-      if ("isStarknetID" in recipientConfig) {
-        return recipientConfig.isStarknetID;
-      }
-
-      return false;
-    })();
-
-    const isStarknetIDFetching: boolean = (() => {
-      if ("isStarknetIDFetching" in recipientConfig) {
-        return recipientConfig.isStarknetIDFetching;
+      if ("getNameService" in recipientConfig) {
+        const starknetId = recipientConfig.getNameService("starknet-id");
+        if (starknetId?.isEnabled) {
+          return true;
+        }
       }
 
       return false;
@@ -83,22 +76,19 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
               : "components.input.recipient-input.wallet-address-only-label",
           })}
           value={recipientConfig.value}
+          textSuffix={(() => {
+            if ("nameServiceResult" in recipientConfig) {
+              const r = recipientConfig.nameServiceResult;
+              if (r.length > 0) {
+                if (!recipientConfig.value.endsWith("." + r[0].suffix)) {
+                  return "." + r[0].suffix;
+                }
+              }
+            }
+          })()}
           autoComplete="off"
           onChange={(e) => {
-            let value = e.target.value;
-
-            if (
-              "isStarknetIDEnabled" in recipientConfig &&
-              isStarknetIDEnabled &&
-              value.length > 0 &&
-              value[value.length - 1] === "." &&
-              numOfCharacter(value, ".") === 1 &&
-              numOfCharacter(recipientConfig.value, ".") === 0
-            ) {
-              value = value + recipientConfig.starknetExpectedDomain;
-            }
-
-            recipientConfig.setValue(value);
+            recipientConfig.setValue(e.target.value);
 
             e.preventDefault();
           }}
@@ -120,17 +110,13 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
               </IconButton>
             ) : null
           }
-          isLoading={isStarknetIDFetching}
+          isLoading={isFetching}
           paragraph={(() => {
-            if (isStarknetID && !recipientConfig.uiProperties.error) {
-              if (isStarknetIDFetching) {
-                return undefined;
+            if ("nameServiceResult" in recipientConfig) {
+              const r = recipientConfig.nameServiceResult;
+              if (r.length > 0) {
+                return r[0].address;
               }
-
-              return `${recipientConfig.recipient.slice(
-                0,
-                10
-              )}...${recipientConfig.recipient.slice(56)}`;
             }
           })()}
           bottom={props.bottom}

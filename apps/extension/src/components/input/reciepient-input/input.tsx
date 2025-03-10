@@ -5,8 +5,7 @@ import {
   EmptyAddressError,
   IMemoConfig,
   IRecipientConfig,
-  IRecipientConfigWithENS,
-  IRecipientConfigWithICNS,
+  IRecipientConfigWithNameServices,
 } from "@keplr-wallet/hooks";
 import { ProfileIcon } from "../../icon";
 import { Box } from "../../box";
@@ -20,10 +19,7 @@ import { AppCurrency } from "@keplr-wallet/types";
 
 export interface RecipientInputWithAddressBookProps {
   historyType: string;
-  recipientConfig:
-    | IRecipientConfig
-    | IRecipientConfigWithICNS
-    | IRecipientConfigWithENS;
+  recipientConfig: IRecipientConfig | IRecipientConfigWithNameServices;
   memoConfig: IMemoConfig;
   currency: AppCurrency;
 
@@ -31,10 +27,7 @@ export interface RecipientInputWithAddressBookProps {
 }
 
 export interface RecipientInputWithoutAddressBookProps {
-  recipientConfig:
-    | IRecipientConfig
-    | IRecipientConfigWithICNS
-    | IRecipientConfigWithENS;
+  recipientConfig: IRecipientConfig | IRecipientConfigWithNameServices;
   memoConfig?: undefined;
 
   hideAddressBookButton: true;
@@ -47,10 +40,6 @@ export type RecipientInputProps = (
   bottom?: React.ReactNode;
 };
 
-function numOfCharacter(str: string, c: string): number {
-  return str.split(c).length - 1;
-}
-
 export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
   (props, ref) => {
     const { analyticsStore } = useStore();
@@ -61,41 +50,13 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
     const [isAddressBookModalOpen, setIsAddressBookModalOpen] =
       React.useState(false);
 
-    const isICNSName: boolean = (() => {
-      if ("isICNSName" in recipientConfig) {
-        return recipientConfig.isICNSName;
+    const isFetching = (() => {
+      if ("getNameServices" in recipientConfig) {
+        return recipientConfig
+          .getNameServices()
+          .some((ns) => ns.isEnabled && ns.isFetching);
       }
-      return false;
-    })();
-    const isICNSEnabled: boolean = (() => {
-      if ("isICNSEnabled" in recipientConfig) {
-        return recipientConfig.isICNSEnabled;
-      }
-      return false;
-    })();
-    const isICNSFetching: boolean = (() => {
-      if ("isICNSFetching" in recipientConfig) {
-        return recipientConfig.isICNSFetching;
-      }
-      return false;
-    })();
 
-    const isENSName: boolean = (() => {
-      if ("isENSName" in recipientConfig) {
-        return recipientConfig.isENSName;
-      }
-      return false;
-    })();
-    const isENSEnabled: boolean = (() => {
-      if ("isENSEnabled" in recipientConfig) {
-        return recipientConfig.isENSEnabled;
-      }
-      return false;
-    })();
-    const isENSFetching: boolean = (() => {
-      if ("isENSFetching" in recipientConfig) {
-        return recipientConfig.isENSFetching;
-      }
       return false;
     })();
 
@@ -104,43 +65,34 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
         <TextInput
           ref={ref}
           label={intl.formatMessage({
-            id:
-              isICNSEnabled && isENSEnabled
-                ? "components.input.recipient-input.wallet-address-label-icns-ens"
-                : isENSEnabled
-                ? "components.input.recipient-input.wallet-address-label-ens"
-                : "components.input.recipient-input.wallet-address-label",
+            id: (() => {
+              if ("getNameService" in recipientConfig) {
+                const icns = recipientConfig.getNameService("icns");
+                const ens = recipientConfig.getNameService("ens");
+                if (icns?.isEnabled && ens?.isEnabled) {
+                  return "components.input.recipient-input.wallet-address-label-icns-ens";
+                }
+                if (ens?.isEnabled) {
+                  return "components.input.recipient-input.wallet-address-label-ens";
+                }
+              }
+              return "components.input.recipient-input.wallet-address-label";
+            })(),
           })}
           value={recipientConfig.value}
+          textSuffix={(() => {
+            if ("nameServiceResult" in recipientConfig) {
+              const r = recipientConfig.nameServiceResult;
+              if (r.length > 0) {
+                if (!recipientConfig.value.endsWith("." + r[0].suffix)) {
+                  return "." + r[0].suffix;
+                }
+              }
+            }
+          })()}
           autoComplete="off"
           onChange={(e) => {
-            let value = e.target.value;
-
-            if (
-              // If icns is possible and users enters ".", complete bech32 prefix automatically.
-              "isICNSEnabled" in recipientConfig &&
-              isICNSEnabled &&
-              value.length > 0 &&
-              value[value.length - 1] === "." &&
-              numOfCharacter(value, ".") === 1 &&
-              numOfCharacter(recipientConfig.value, ".") === 0
-            ) {
-              value = value + recipientConfig.icnsExpectedBech32Prefix;
-            }
-
-            if (
-              // If ens is possible and users enters ".", append ens  domain automatically.
-              "isENSEnabled" in recipientConfig &&
-              isENSEnabled &&
-              value.length > 0 &&
-              value[value.length - 1] === "." &&
-              numOfCharacter(value, ".") === 1 &&
-              numOfCharacter(recipientConfig.value, ".") === 0
-            ) {
-              value = value + recipientConfig.ensExpectedDomain;
-            }
-
-            recipientConfig.setValue(value);
+            recipientConfig.setValue(e.target.value);
 
             e.preventDefault();
           }}
@@ -162,13 +114,13 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
               </IconButton>
             ) : null
           }
-          isLoading={isICNSFetching || isENSFetching}
+          isLoading={isFetching}
           paragraph={(() => {
-            if (
-              (isICNSName || isENSName) &&
-              !recipientConfig.uiProperties.error
-            ) {
-              return recipientConfig.recipient;
+            if ("nameServiceResult" in recipientConfig) {
+              const r = recipientConfig.nameServiceResult;
+              if (r.length > 0) {
+                return r[0].address;
+              }
             }
           })()}
           bottom={props.bottom}
