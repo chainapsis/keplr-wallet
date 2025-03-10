@@ -1,5 +1,6 @@
 import { AppCurrency } from "@keplr-wallet/types";
 import { CoinPretty } from "@keplr-wallet/unit";
+import { Psbt } from "bitcoinjs-lib";
 
 export interface ITxChainSetter {
   chainId: string;
@@ -29,7 +30,7 @@ export type ITxSizeConfig = {
   value: string;
   setValue(value: string | number): void;
 
-  txSize: number;
+  txSize: number | undefined;
 
   uiProperties: UIProperties;
 };
@@ -89,5 +90,19 @@ export interface IPsbtSimulator {
   isSimulating: boolean;
   psbtHex: string | null;
   txSize: number | null;
+  uiProperties: UIProperties;
+}
+
+export interface IPsbtValidator {
+  enabled: boolean;
+  setEnabled(value: boolean): void;
+
+  psbtHexes: string[];
+  setPsbtHexes(psbtHexes: string[]): void;
+
+  error(psbtHex: string): Error | undefined;
+  psbt(psbtHex: string): Psbt | undefined;
+  totalInputAmount(psbtHex: string): CoinPretty | undefined;
+  totalOutputAmount(psbtHex: string): CoinPretty | undefined;
   uiProperties: UIProperties;
 }

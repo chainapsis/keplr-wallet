@@ -10,4 +10,3 @@ export * from "./fee";
 export * from "./psbt-simulator";
 export * from "./validate";
 export * from "./tx-size";
-export * from "./psbt-validator";

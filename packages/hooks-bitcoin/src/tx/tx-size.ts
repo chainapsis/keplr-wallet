@@ -8,6 +8,9 @@ export class TxSizeConfig extends TxChainSetter implements ITxSizeConfig {
   @observable
   protected _value: string = "";
 
+  @observable
+  protected _disallowZeroTxSize: boolean = false;
+
   constructor(chainGetter: ChainGetter, initialChainId: string) {
     super(chainGetter, initialChainId);
 
@@ -27,13 +30,29 @@ export class TxSizeConfig extends TxChainSetter implements ITxSizeConfig {
     return this._value;
   }
 
-  get txSize(): number {
+  get disallowZeroTxSize(): boolean {
+    return this._disallowZeroTxSize;
+  }
+
+  @action
+  setDisallowZeroTxSize(value: boolean): void {
+    this._disallowZeroTxSize = value;
+  }
+
+  get txSize(): number | undefined {
+    // return 0 by default to calculate minimum fee
     if (this._value.trim() === "") {
+      if (this._disallowZeroTxSize) {
+        return undefined;
+      }
       return 0;
     }
 
     const num = Number.parseInt(this._value);
     if (Number.isNaN(num)) {
+      if (this._disallowZeroTxSize) {
+        return undefined;
+      }
       return 0;
     }
 
@@ -59,9 +78,15 @@ export class TxSizeConfig extends TxChainSetter implements ITxSizeConfig {
   }
 }
 
-export const useTxSizeConfig = (chainGetter: ChainGetter, chainId: string) => {
+export const useTxSizeConfig = (
+  chainGetter: ChainGetter,
+  chainId: string,
+  disallowZeroTxSize?: boolean
+) => {
   const [txConfig] = useState(() => new TxSizeConfig(chainGetter, chainId));
   txConfig.setChain(chainId);
-
+  if (disallowZeroTxSize) {
+    txConfig.setDisallowZeroTxSize(disallowZeroTxSize);
+  }
   return txConfig;
 };

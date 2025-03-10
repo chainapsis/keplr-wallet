@@ -55,6 +55,10 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
   get fee(): CoinPretty | undefined {
     if (this.value.trim() === "") {
+      if (this.txSizeConfig.txSize === undefined) {
+        return undefined;
+      }
+
       return new CoinPretty(
         this.amountConfig.currency,
         this.txSizeConfig.txSize * this.feeRateConfig.feeRate

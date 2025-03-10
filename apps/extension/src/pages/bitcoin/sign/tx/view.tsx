@@ -10,11 +10,11 @@ import { HeaderLayout } from "../../../../layouts/header";
 import { useIntl } from "react-intl";
 import {
   useFeeConfig,
-  useNoopAmountConfig,
-  useNoopTxSizeConfig,
+  useTxSizeConfig,
   useSenderConfig,
   useZeroAllowedFeeRateConfig,
-  //   useTxConfigsValidate,
+  useAmountConfig,
+  useTxConfigsValidate,
 } from "@keplr-wallet/hooks-bitcoin";
 import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
@@ -34,6 +34,7 @@ export const SignBitcoinTxView: FunctionComponent<{
     signBitcoinTxInteractionStore,
     // bitcoinAccountStore,
     bitcoinQueriesStore,
+    // accountStore,
   } = useStore();
 
   const theme = useTheme();
@@ -57,7 +58,6 @@ export const SignBitcoinTxView: FunctionComponent<{
   if (!("bitcoin" in modularChainInfo)) {
     throw new Error(`${modularChainInfo.chainId} is not bitcoin chain`);
   }
-  //   const bitcoin = modularChainInfo.bitcoin;
 
   const senderConfig = useSenderConfig(
     chainStore,
@@ -67,17 +67,24 @@ export const SignBitcoinTxView: FunctionComponent<{
 
   // dummy configs for tx size and fee rate
   // 비트코인 트랜잭션은 utxo 기반이라 서명 페이지에서 fee rate 또는 tx size를 조정하여
-  // 수수료를 재계산하려면 utxo 조합을 새로 생성해야 하는 굉장한 번거로움이 있다.
+  // 수수료를 재계산하려면 utxo 조합을 새로 생성해야 하는 문제가 있다.
   // 따라서 psbt를 파싱하여 전체 입력의 합에서 출력의 합을 빼서 수수료만 따로 계산한다.
-  const zeroAllowedFeeRateConfig = useZeroAllowedFeeRateConfig(
+  const feeRateConfig = useZeroAllowedFeeRateConfig(
     chainStore,
     bitcoinQueriesStore,
     chainId,
     0
   );
-  const noopTxSizeConfig = useNoopTxSizeConfig(chainStore, chainId);
 
-  const amountConfig = useNoopAmountConfig(chainStore, chainId, senderConfig);
+  // disallow zero tx size to show fee error
+  const txSizeConfig = useTxSizeConfig(chainStore, chainId, true);
+
+  const amountConfig = useAmountConfig(
+    chainStore,
+    bitcoinQueriesStore,
+    chainId,
+    senderConfig
+  );
 
   const feeConfig = useFeeConfig(
     chainStore,
@@ -85,11 +92,38 @@ export const SignBitcoinTxView: FunctionComponent<{
     chainId,
     senderConfig,
     amountConfig,
-    noopTxSizeConfig,
-    zeroAllowedFeeRateConfig
+    txSizeConfig,
+    feeRateConfig
   );
 
+  //   const psbtsHexes = useMemo(() => {
+  //     return "psbtHex" in interactionData.data
+  //       ? [interactionData.data.psbtHex]
+  //       : interactionData.data.psbtsHexes;
+  //   }, [interactionData.data]);
+
   // TODO: psbt parsing해서 amount, fee 추출해서 넣어줘야함.
+  //   const psbtValidator = usePsbtValidator(
+  //     chainStore,
+  //     chainId,
+  //     accountStore.getAccount(chainId).pubKey,
+  //     () => {
+  //       //   const bitcoin = modularChainInfo.bitcoin;
+
+  //       return (psbtHex: string) => {
+  //         return Promise.resolve(
+  //           {} as {
+  //             psbt: Psbt;
+  //             totalInputAmount: CoinPretty;
+  //             totalOutputAmount: CoinPretty;
+  //             error: Error;
+  //           }
+  //         );
+  //       };
+  //     }
+  //   );
+
+  //   psbtValidator.setPsbtHexes(psbtsHexes);
 
   const [unmountPromise] = useState(() => {
     let resolver: () => void;
@@ -109,14 +143,12 @@ export const SignBitcoinTxView: FunctionComponent<{
     unmountPromise.resolver();
   });
 
-  //   const txConfigsValidate = useTxConfigsValidate({
-  //     amountConfig,
-  //     senderConfig,
-  //     feeRateConfig,
-  //     feeConfig,
-  //   });
+  // only validate feeConfig as other configs are not used in this page
+  const txConfigsValidate = useTxConfigsValidate({
+    feeConfig,
+  });
 
-  //   const buttonDisabled = txConfigsValidate.interactionBlocked;
+  const buttonDisabled = txConfigsValidate.interactionBlocked;
   const isLoading = signBitcoinTxInteractionStore.isObsoleteInteractionApproved(
     interactionData.id
   );
@@ -237,7 +269,7 @@ export const SignBitcoinTxView: FunctionComponent<{
           text: intl.formatMessage({ id: "button.approve" }),
           size: "large",
           left: !isLoading && <ApproveIcon />,
-          //   disabled: buttonDisabled,
+          disabled: buttonDisabled,
           isLoading,
           onClick: approve,
         },

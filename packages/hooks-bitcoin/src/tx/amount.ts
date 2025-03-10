@@ -33,9 +33,6 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
   @observable.ref
   protected _feeConfig: IFeeConfig | undefined = undefined;
 
-  @observable
-  protected _allowZeroAmount?: boolean = undefined;
-
   constructor(
     chainGetter: ChainGetter,
     protected readonly bitcoinQueriesStore: BitcoinQueriesStore,
@@ -45,11 +42,6 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
     super(chainGetter, initialChainId);
 
     makeObservable(this);
-  }
-
-  @action
-  setAllowZeroAmount(allowZeroAmount: boolean | undefined) {
-    this._allowZeroAmount = allowZeroAmount;
   }
 
   get feeConfig(): IFeeConfig | undefined {
@@ -186,7 +178,7 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
       };
     }
 
-    if (this.value.trim() === "" && !this._allowZeroAmount) {
+    if (this.value.trim() === "") {
       return {
         error: new EmptyAmountError("Amount is empty"),
       };
@@ -194,7 +186,7 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
 
     try {
       const dec = new Dec(this.value);
-      if (dec.equals(new Dec(0)) && !this._allowZeroAmount) {
+      if (dec.equals(new Dec(0))) {
         return {
           error: new ZeroAmountError("Amount is zero"),
         };
@@ -265,13 +257,12 @@ export const useAmountConfig = (
   chainGetter: ChainGetter,
   queriesStore: BitcoinQueriesStore,
   chainId: string,
-  senderConfig: ISenderConfig,
-  allowZeroAmount?: boolean
+  senderConfig: ISenderConfig
 ) => {
   const [config] = useState(
     () => new AmountConfig(chainGetter, queriesStore, chainId, senderConfig)
   );
   config.setChain(chainId);
-  config.setAllowZeroAmount(allowZeroAmount);
+
   return config;
 };

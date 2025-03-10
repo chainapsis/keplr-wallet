@@ -41,7 +41,6 @@ export const useTxConfigsValidate = (configs: {
     const feeConfigUIProperties = configs.feeConfig?.uiProperties;
     const txSizeConfigUIProperties = configs.txSizeConfig?.uiProperties;
     const psbtSimulatorUIProperties = configs.psbtSimulator?.uiProperties;
-
     if (
       amountConfigUIProperties?.error ||
       senderConfigUIProperties?.error ||
