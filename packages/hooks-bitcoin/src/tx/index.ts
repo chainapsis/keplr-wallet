@@ -10,5 +10,4 @@ export * from "./fee";
 export * from "./psbt-simulator";
 export * from "./validate";
 export * from "./tx-size";
-export * from "./noop-amount";
-export * from "./noop-tx-size";
+export * from "./psbt-validator";
