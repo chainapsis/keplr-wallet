@@ -407,6 +407,12 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
 
         setIsLoading(true);
 
+        // CHECK: sign page 넘어갈 때 살짝 딜레이를 줘야할 것 같다.
+        // 이미 psbt가 만들어져 있어서 페이지 전환이 너무 빠름.
+        // 사용자가 클릭을 여러번 할 경우, detail review 없이 approve 버튼을 누를 수 있다.
+        // 이를 방지하기 위해 1초 정도 딜레이를 준다.
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
         try {
           const psbtHex = psbtSimulator.psbtHex;
           const txHash = await bitcoinAccount.signAndPushTx(psbtHex);

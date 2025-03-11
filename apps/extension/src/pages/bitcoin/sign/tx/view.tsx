@@ -13,7 +13,7 @@ import { useInteractionInfo } from "../../../../hooks";
 import { useUnmount } from "../../../../hooks/use-unmount";
 import { BackButton } from "../../../../layouts/header/components";
 import { HeaderLayout } from "../../../../layouts/header";
-import { useIntl } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import {
   useFeeConfig,
   useTxSizeConfig,
@@ -26,7 +26,7 @@ import {
 import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
 import { useTheme } from "styled-components";
-import { H5 } from "../../../../components/typography";
+import { Body2, Body3, H5 } from "../../../../components/typography";
 import { Column, Columns } from "../../../../components/column";
 import { XAxis } from "../../../../components/axis";
 import { ViewDataButton } from "../../../sign/components/view-data-button";
@@ -39,6 +39,9 @@ import {
   useNativeSegwitUTXOs,
   useTaprootUTXOs,
 } from "../../../../hooks/bitcoin/use-utxos";
+import { ChainImageFallback } from "../../../../components/image";
+import { Gutter } from "../../../../components/gutter";
+import SimpleBar from "simplebar-react";
 
 const usePsbtsValidate = (
   chainId: string,
@@ -46,7 +49,6 @@ const usePsbtsValidate = (
   feeConfig: IFeeConfig
 ) => {
   const [isInitialized, setIsInitialized] = useState(false);
-  const [isValidating, setIsValidating] = useState(false);
   const [validatedPsbts, setValidatedPsbts] = useState<
     {
       psbt: Psbt;
@@ -59,20 +61,25 @@ const usePsbtsValidate = (
   );
 
   // extension 내부적으로는 각 주소 유형에 따른 utxo만을 사용하지만,
-  // 외부에서 서명 요청이 들어온 경우 공개키에서 생선된 native segwit 주소와 taproot 주소의
+  // 외부에서 서명 요청이 들어온 경우 동일한 공개키에서 생선된 native segwit 주소와 taproot 주소의
   // utxo가 섞여 들어올 가능성이 있다. 따라서 모든 utxo를 조회하여 유효한 psbt인지 검증한다.
   // legacy 주소는 일단 무시한다.
   const nativeSegwitUTXOs = useNativeSegwitUTXOs(chainId);
   const taprootUTXOs = useTaprootUTXOs(chainId);
 
+  const utxosAvailable = useMemo(() => {
+    return nativeSegwitUTXOs !== undefined && taprootUTXOs !== undefined;
+  }, [nativeSegwitUTXOs, taprootUTXOs]);
+
   const validatePsbts = useCallback(() => {
+    // 검증 파라미터가 변경되어서 재검증이 필요하면 오류를 초기화한다.
+    setValidationError(undefined);
+
     // 검증에 사용할 utxo가 없으면 오류를 반환한다.
     if (!nativeSegwitUTXOs || !taprootUTXOs) {
       setValidationError(new Error("Can't find utxos"));
       return;
     }
-
-    setIsValidating(true);
 
     const availableUTXOs = new Map<string, number>();
     // `${txid}:${vout}`을 유니크한 키로 사용하고, 값은 utxo의 값을 저장한다.
@@ -109,7 +116,7 @@ const usePsbtsValidate = (
               psbt,
               feeAmount: new Dec(0),
               validationError: new Error(
-                "Can't find utxo: not owned, inscription, brc20, runes, etc."
+                `${utxo} is not owned, inscription, brc20, runes, etc.`
               ),
             });
             continue;
@@ -120,6 +127,7 @@ const usePsbtsValidate = (
           );
         }
 
+        // CHECK: output은 검증할 것이 있나?
         const outputs = psbt.txOutputs;
         for (const output of outputs) {
           sumOutputAmount = sumOutputAmount.add(new Dec(output.value));
@@ -158,27 +166,34 @@ const usePsbtsValidate = (
       // 각 psbt의 유효성 검증 결과를 저장하고 계산된 수수료를 설정한다.
       setValidatedPsbts(validatedPsbts);
       feeConfig.setValue(feeAmount.truncate().toString());
+      setIsInitialized(true);
     } catch (e) {
       // psbt deserialize 오류 또는 전체 입력의 합이 출력의 합보다 작은 경우
       setValidationError(e as Error);
-    } finally {
-      setIsValidating(false);
     }
   }, [nativeSegwitUTXOs, taprootUTXOs, psbtsHexes, feeConfig]);
 
   useEffect(() => {
-    if (!isInitialized) {
-      setIsInitialized(true);
+    if (utxosAvailable && psbtsHexes.length > 0) {
+      setIsInitialized(false);
+    }
+  }, [utxosAvailable, psbtsHexes]);
+
+  useEffect(() => {
+    if (psbtsHexes.length === 0 || isInitialized) {
+      return;
     }
 
-    validatePsbts();
-  }, [validatePsbts, isInitialized]);
+    if (utxosAvailable) {
+      validatePsbts();
+    }
+  }, [validatePsbts, isInitialized, psbtsHexes, utxosAvailable]);
 
   return {
     isInitialized,
-    isValidating,
     validatedPsbts,
     validationError,
+    validatePsbts,
   };
 };
 
@@ -209,16 +224,17 @@ export const SignBitcoinTxView: FunctionComponent<{
     throw new Error(`${modularChainInfo.chainId} is not bitcoin chain`);
   }
 
+  // 비트코인 트랜잭션은 utxo 기반이라 서명 페이지에서 fee rate 또는 tx size를 조정하여
+  // 수수료를 재계산하려면 utxo 조합을 새로 생성해야 하는 문제가 있다.
+  // 따라서 usePsbtsValidate 훅을 사용하여 psbt를 파싱하여 전체 입력의 합에서 출력의 합을 빼서 수수료만 따로 계산한다.
+  // 아래 config들은 feeConfig를 위해 선언되었을 뿐, 유의미하게 사용되지는 않는다.
+
   const senderConfig = useSenderConfig(
     chainStore,
     chainId,
     interactionData.data.address
   );
 
-  // dummy configs for tx size and fee rate
-  // 비트코인 트랜잭션은 utxo 기반이라 서명 페이지에서 fee rate 또는 tx size를 조정하여
-  // 수수료를 재계산하려면 utxo 조합을 새로 생성해야 하는 문제가 있다.
-  // 따라서 psbt를 파싱하여 전체 입력의 합에서 출력의 합을 빼서 수수료만 따로 계산한다.
   const feeRateConfig = useZeroAllowedFeeRateConfig(
     chainStore,
     bitcoinQueriesStore,
@@ -226,7 +242,7 @@ export const SignBitcoinTxView: FunctionComponent<{
     0
   );
 
-  // disallow zero tx size to show fee error
+  // disallow zero tx size to display fee error
   const txSizeConfig = useTxSizeConfig(chainStore, chainId, true);
 
   const amountConfig = useAmountConfig(
@@ -246,18 +262,22 @@ export const SignBitcoinTxView: FunctionComponent<{
     feeRateConfig
   );
 
+  // 여러 주소 체계의 utxo를 조합하여 사용하는 경우가 있을 수 있으므로
+  // sender address의 balance를 체크하지 않는다.
+  // 중요한 오류는 usePsbtsValidate 훅에서 처리한다.
+  feeConfig.setDisableBalanceCheck(true);
+
   const psbtsHexes = useMemo(() => {
     return "psbtHex" in interactionData.data
       ? [interactionData.data.psbtHex]
       : interactionData.data.psbtsHexes;
   }, [interactionData.data]);
 
-  const {
-    isInitialized,
-    isValidating,
-    // validatedPsbts,
-    // validationError
-  } = usePsbtsValidate(chainId, psbtsHexes, feeConfig);
+  const { isInitialized, validatedPsbts, validationError } = usePsbtsValidate(
+    chainId,
+    psbtsHexes,
+    feeConfig
+  );
 
   const [unmountPromise] = useState(() => {
     let resolver: () => void;
@@ -271,19 +291,20 @@ export const SignBitcoinTxView: FunctionComponent<{
     };
   });
 
-  const [isViewData, setIsViewData] = useState(false);
-
   useUnmount(() => {
     unmountPromise.resolver();
   });
 
-  // only validate feeConfig as other configs are not used in this page
+  // 이 페이지에서는 다른 config들이 사용되지 않으므로 feeConfig만 검증한다.
   const txConfigsValidate = useTxConfigsValidate({
     feeConfig,
   });
 
   const buttonDisabled =
-    txConfigsValidate.interactionBlocked || !isInitialized || isValidating;
+    txConfigsValidate.interactionBlocked ||
+    !isInitialized ||
+    validatedPsbts.some((psbt) => psbt.validationError) ||
+    !!validationError;
   const isLoading = signBitcoinTxInteractionStore.isObsoleteInteractionApproved(
     interactionData.id
   );
@@ -417,18 +438,115 @@ export const SignBitcoinTxView: FunctionComponent<{
           overflow: "auto",
         }}
       >
+        {/* TODO: 여러 psbt를 한번에 보여주는 기능 추가 */}
+        {validatedPsbts && validatedPsbts.length > 1 ? null : (
+          <SinglePsbtView
+            chainId={chainId}
+            psbt={validatedPsbts?.[0]?.psbt}
+            validationError={validatedPsbts?.[0]?.validationError}
+          />
+        )}
+        <div style={{ marginTop: "0.75rem", flex: 1 }} />
+        <FeeSummary feeConfig={feeConfig} isInitialized={isInitialized} />
+      </Box>
+    </HeaderLayout>
+  );
+});
+
+const SinglePsbtView: FunctionComponent<{
+  chainId: string;
+  psbt?: Psbt;
+  validationError?: Error | undefined;
+}> = observer(
+  ({
+    chainId,
+    psbt,
+    // validationError,
+  }) => {
+    const { chainStore } = useStore();
+
+    const theme = useTheme();
+    const modularChainInfo = chainStore.getModularChain(chainId);
+
+    const [isViewData, setIsViewData] = useState(false);
+
+    const signingDataText = useMemo(() => {
+      if (!psbt) {
+        return "";
+      }
+
+      // PSBT 정보를 사용자 친화적인 형태로 파싱
+      const version = psbt.version;
+      const locktime = psbt.locktime;
+      const inputs = psbt.txInputs.map((input, index) => {
+        const hash = input.hash.reverse().toString("hex");
+        return {
+          index,
+          txid: hash,
+          vout: input.index,
+          sequence: input.sequence,
+        };
+      });
+
+      const outputs = psbt.txOutputs.map((output, index) => {
+        return {
+          index,
+          address: output.address || "unknown address",
+          value: output.value,
+        };
+      });
+
+      const readableData = {
+        version,
+        locktime,
+        inputs,
+        outputs,
+      };
+
+      return JSON.stringify(readableData, null, 2);
+    }, [psbt]);
+
+    return (
+      <React.Fragment>
+        <Box marginBottom="0.5rem" alignX="center" alignY="center">
+          <Box
+            padding="0.375rem 0.625rem 0.375rem 0.75rem"
+            backgroundColor={
+              theme.mode === "light"
+                ? ColorPalette.white
+                : ColorPalette["gray-600"]
+            }
+            borderRadius="20rem"
+          >
+            <XAxis alignY="center">
+              <Body3
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-500"]
+                    : ColorPalette["gray-200"]
+                }
+              >
+                <FormattedMessage
+                  id="page.sign.ethereum.requested-network"
+                  values={{
+                    network: modularChainInfo.chainName,
+                  }}
+                />
+              </Body3>
+              <Gutter direction="horizontal" size="0.5rem" />
+              <ChainImageFallback
+                size="1.25rem"
+                chainInfo={modularChainInfo}
+                alt={modularChainInfo.chainName}
+              />
+            </XAxis>
+          </Box>
+        </Box>
+        <Gutter size="0.75rem" />
         <Box marginBottom="0.5rem">
           <Columns sum={1} alignY="center">
             <XAxis>
               <H5
-                style={{
-                  color: ColorPalette["blue-400"],
-                  marginRight: "0.25rem",
-                }}
-              >
-                Signing...
-              </H5>
-              {/* <H5
                 style={{
                   color:
                     theme.mode === "light"
@@ -436,30 +554,87 @@ export const SignBitcoinTxView: FunctionComponent<{
                       : ColorPalette["gray-50"],
                 }}
               >
-                {interactionData.data.transactions.length > 1 && (
-                  <FormattedMessage id="page.sign.starknet.tx.calls" />
-                )}
-              </H5> */}
+                <FormattedMessage
+                  id={"page.sign.ethereum.transaction.summary"}
+                />
+              </H5>
             </XAxis>
             <Column weight={1} />
+
             <ViewDataButton
               isViewData={isViewData}
               setIsViewData={setIsViewData}
             />
           </Columns>
         </Box>
+        <SimpleBar
+          autoHide={false}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            flex: !isViewData ? "0 1 auto" : 1,
+            overflowY: "auto",
+            overflowX: "hidden",
+            borderRadius: "0.375rem",
+            backgroundColor:
+              theme.mode === "light"
+                ? ColorPalette.white
+                : ColorPalette["gray-600"],
+            boxShadow:
+              theme.mode === "light"
+                ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+                : "none",
+          }}
+        >
+          <Box>
+            {isViewData ? (
+              <Box
+                as={"pre"}
+                padding="1rem"
+                // Remove normalized style of pre tag
+                margin="0"
+                style={{
+                  width: "fit-content",
+                  color:
+                    theme.mode === "light"
+                      ? ColorPalette["gray-400"]
+                      : ColorPalette["gray-200"],
+                  whiteSpace: "pre-wrap",
+                  wordBreak: "break-all",
+                }}
+              >
+                {signingDataText}
+              </Box>
+            ) : (
+              <Box padding="1rem">
+                <Body2
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-300"]
+                      : ColorPalette["gray-100"]
+                  }
+                >
+                  {psbt?.toHex()}
+                  {/* {(() => {
+                  const { icon, title, content } = defaultRegistry.render(
+                    interactionData.data.chainId,
+                    JSON.parse(
+                      Buffer.from(interactionData.data.message).toString()
+                    ) as UnsignedTransaction
+                  );
 
-        <div style={{ marginTop: "0.75rem", flex: 1 }} />
-
-        <FeeSummary
-          feeConfig={feeConfig}
-          isValidating={!isInitialized || isValidating}
-        />
-      </Box>
-    </HeaderLayout>
-  );
-});
-
-// const noop = (..._args: any[]) => {
-//   // noop
-// };
+                  if (icon !== undefined && title !== undefined) {
+                    return (
+                      <EthTxBase icon={icon} title={title} content={content} />
+                    );
+                  }
+                })()} */}
+                </Body2>
+              </Box>
+            )}
+          </Box>
+        </SimpleBar>
+      </React.Fragment>
+    );
+  }
+);

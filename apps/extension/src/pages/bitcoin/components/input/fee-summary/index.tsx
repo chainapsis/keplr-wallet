@@ -14,8 +14,8 @@ import { Gutter } from "../../../../../components/gutter";
 
 export const FeeSummary: FunctionComponent<{
   feeConfig: IFeeConfig;
-  isValidating: boolean;
-}> = observer(({ feeConfig, isValidating }) => {
+  isInitialized: boolean;
+}> = observer(({ feeConfig, isInitialized }) => {
   const { priceStore, chainStore } = useStore();
 
   const intl = useIntl();
@@ -99,7 +99,7 @@ export const FeeSummary: FunctionComponent<{
       </Box>
 
       <VerticalResizeTransition transitionAlign="top">
-        {!isValidating &&
+        {isInitialized &&
         (feeConfig.uiProperties.error || feeConfig.uiProperties.warning) ? (
           <Box
             marginTop="0.75rem"
