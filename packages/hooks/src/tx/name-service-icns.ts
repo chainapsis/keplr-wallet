@@ -87,8 +87,12 @@ export class ICNSNameService implements NameService {
     const chainInfo = this.base.chainInfo;
     if (this.isEnabled && chainInfo.bech32Config) {
       const suffix = chainInfo.bech32Config.bech32PrefixAccAddr;
-      if (v.endsWith("." + suffix)) {
-        v = v.slice(0, v.length - suffix.length - 1);
+      const i = v.lastIndexOf(".");
+      if (i >= 0) {
+        const tld = v.slice(i + 1);
+        if (suffix.startsWith(tld)) {
+          v = v.slice(0, i);
+        }
       }
     }
 

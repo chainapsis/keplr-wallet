@@ -80,8 +80,16 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
             if ("nameServiceResult" in recipientConfig) {
               const r = recipientConfig.nameServiceResult;
               if (r.length > 0) {
-                if (!recipientConfig.value.endsWith("." + r[0].suffix)) {
-                  return "." + r[0].suffix;
+                const i = recipientConfig.value.lastIndexOf(".");
+                if (i >= 0) {
+                  const tld = recipientConfig.value.slice(i + 1);
+                  if (r[0].suffix.startsWith(tld) && r[0].suffix !== tld) {
+                    return r[0].suffix.replace(tld, "");
+                  }
+                } else {
+                  if (!recipientConfig.value.endsWith("." + r[0].suffix)) {
+                    return "." + r[0].suffix;
+                  }
                 }
               }
             }

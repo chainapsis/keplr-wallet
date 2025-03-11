@@ -233,7 +233,7 @@ export class RecipientConfig
         return {};
       } else {
         return {
-          error: new InvalidHexError("Invalid hex address for chain"),
+          error: new InvalidHexError("Not found"),
         };
       }
     }
@@ -241,10 +241,16 @@ export class RecipientConfig
     try {
       Bech32Address.validate(this.recipient, this.bech32Prefix);
     } catch (e) {
+      const i = this.recipient.indexOf("1");
+      if (i >= 1) {
+        return {
+          error: new InvalidBech32Error(
+            `Invalid bech32: ${e.message || e.toString()}`
+          ),
+        };
+      }
       return {
-        error: new InvalidBech32Error(
-          `Invalid bech32: ${e.message || e.toString()}`
-        ),
+        error: new InvalidBech32Error("Not found"),
       };
     }
     return {};
