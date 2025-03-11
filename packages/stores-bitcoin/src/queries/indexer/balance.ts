@@ -6,7 +6,7 @@ import {
 import { computed, makeObservable } from "mobx";
 import { AppCurrency } from "@keplr-wallet/types";
 import { DenomHelper } from "@keplr-wallet/common";
-import { CoinPretty, Int } from "@keplr-wallet/unit";
+import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { ObservableBitcoinIndexerQuery } from "../bitcoin-indexer";
 import { AddressDetails } from "../types";
 
@@ -27,23 +27,18 @@ export class ObservableQueryBitcoinBalanceImpl
   }
 
   /**
-   * balance is the sum of confirmed and unconfirmed balances.
+   * balance is the sum of confirmed balances.
    */
   @computed
   get balance(): CoinPretty {
     if (!this.response || !this.response.data) {
-      return new CoinPretty(this.currency, new Int(0));
+      return new CoinPretty(this.currency, new Dec(0));
     }
 
     const data = this.response.data;
     return new CoinPretty(
       this.currency,
-      new Int(
-        data.chain_stats.funded_txo_sum -
-          data.chain_stats.spent_txo_sum +
-          data.mempool_stats.funded_txo_sum -
-          data.mempool_stats.spent_txo_sum
-      )
+      new Dec(data.chain_stats.funded_txo_sum - data.chain_stats.spent_txo_sum)
     );
   }
 

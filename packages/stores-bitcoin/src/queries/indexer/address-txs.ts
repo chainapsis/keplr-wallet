@@ -10,9 +10,17 @@ export class ObservableQueryBitcoinAddressTxsImpl extends ObservableBitcoinIndex
     sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
-    protected readonly address: string
+    protected readonly address: string,
+    protected readonly lastSeenTxId?: string
   ) {
-    super(sharedContext, chainId, chainGetter, `address/${address}/txs`);
+    super(
+      sharedContext,
+      chainId,
+      chainGetter,
+      lastSeenTxId
+        ? `address/${address}/txs/chain/${lastSeenTxId}`
+        : `address/${address}/txs`
+    );
 
     makeObservable(this);
   }

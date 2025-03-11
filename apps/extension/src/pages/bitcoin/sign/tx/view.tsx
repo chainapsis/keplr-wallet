@@ -111,16 +111,19 @@ const usePsbtsValidate = (
         for (const input of inputs) {
           const utxo = `${input.hash.reverse().toString("hex")}:${input.index}`;
 
-          // 소유하고 있지 않은 input을 사용하는 psbt는 유효하지 않다.
+          // 소유하고 있지 않은 input을 사용하는 psbt는
+          // 여러 개의 서명이 필요하거나, 다른 주소의 utxo를 사용하는 경우일 수 있다.
+          // 따라서 오류를 반환하지 않고 무시한다.
+          // CHECK: 여러 개의 서명이 필요한 p2wsh, p2tr input인 경우 사용자의 서명이 필요한지 확인해야 한다.
           if (!availableUTXOs.has(utxo)) {
-            validatedPsbts.push({
-              psbt,
-              feeAmount: new Dec(0),
-              validationError: new Error(
-                `${utxo} is not owned, inscription, brc20, runes, etc.`
-              ),
-            });
-            continue;
+            // validatedPsbts.push({
+            //   psbt,
+            //   feeAmount: new Dec(0),
+            //   validationError: new Error(
+            //     `${utxo} is not owned, inscription, brc20, runes, etc.`
+            //   ),
+            // });
+            // continue;
           }
 
           sumInputAmount = sumInputAmount.add(
