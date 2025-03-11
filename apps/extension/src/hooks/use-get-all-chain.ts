@@ -9,7 +9,6 @@ interface UseGetAllChainParams {
   pageSize?: number;
   initialPage?: number;
   search?: string;
-  excludeChainIdentifiers?: string[];
   fallbackEthereumLedgerApp?: boolean;
   fallbackStarknetLedgerApp?: boolean;
   keyType?: string;
@@ -33,16 +32,24 @@ interface UseGetAllChainResult {
  * @param params 페이지 크기, 초기 페이지 번호, 검색어,  제외할 체인 identifier 리스트를 받습니다
  * @returns 체인 목록과 페이지네이션 관련 정보를 반환합니다
  */
-export const useGetAllChain = ({
+export const useGetAllNonNativeChain = ({
   pageSize = 20,
   initialPage = 1,
   search = "",
-  excludeChainIdentifiers = [],
   fallbackEthereumLedgerApp,
   fallbackStarknetLedgerApp,
   keyType,
 }: UseGetAllChainParams = {}): UseGetAllChainResult => {
-  const { queriesStore } = useStore();
+  const { queriesStore, chainStore } = useStore();
+  const modularChainInfosInListUI = chainStore.modularChainInfosInListUI;
+  const excludeChainIdentifiers = useMemo(
+    () =>
+      modularChainInfosInListUI.map(
+        (chain) => ChainIdHelper.parse(chain.chainId).identifier
+      ),
+    [modularChainInfosInListUI]
+  );
+
   //구조가 이상하지만 chains 최초 데이터 저장
   // ledgerFilteredChains는 type과 fallbackEthereumLedgerApp값등이 변경될때만 필터링하게 적용하고
   // filteredChains는 search가 변경될때만 검색하게 적용하도록 하기위해서 3개의 상태로 분리함

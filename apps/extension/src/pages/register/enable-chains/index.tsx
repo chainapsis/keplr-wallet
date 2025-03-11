@@ -55,7 +55,7 @@ import { IconButton } from "../../../components/icon-button";
 import { DenomHelper } from "@keplr-wallet/common";
 import { Tooltip } from "../../../components/tooltip";
 import { useSpring, animated } from "@react-spring/web";
-import { useGetAllChain } from "../../../hooks/use-get-all-chain";
+import { useGetAllNonNativeChain } from "../../../hooks/use-get-all-chain";
 import { hexToRgba } from "../../../utils";
 
 /**
@@ -832,28 +832,13 @@ export const EnableChainsScene: FunctionComponent<{
       )
       .sort(chainSort);
 
-    const excludeChainIdentifiers = useMemo(() => {
-      return chainStore.modularChainInfosInListUI.map(
-        (modularChainInfo) =>
-          ChainIdHelper.parse(modularChainInfo.chainId).identifier
-      );
-    }, [chainStore.modularChainInfosInListUI]);
-
-    const { chains: searchedChainInfos, infiniteScrollTriggerRef } =
-      useGetAllChain({
+    const { chains: searchedNonNativeChainInfos, infiniteScrollTriggerRef } =
+      useGetAllNonNativeChain({
         search,
-        excludeChainIdentifiers,
         fallbackEthereumLedgerApp,
         fallbackStarknetLedgerApp,
         keyType,
       });
-    const searchedNonNativeChainInfos = searchedChainInfos.filter(
-      (chainInfo) => {
-        return !suggestModularChainInfos?.some(
-          (modularChainInfo) => modularChainInfo.chainId === chainInfo.chainId
-        );
-      }
-    );
 
     const numSelected = useMemo(() => {
       const modularChainInfoMap = new Map<string, ModularChainInfo>();
