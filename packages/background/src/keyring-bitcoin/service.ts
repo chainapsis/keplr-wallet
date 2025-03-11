@@ -6,6 +6,7 @@ import { getBasicAccessPermissionType, PermissionService } from "../permission";
 import {
   BitcoinSignMessageType,
   GENESIS_HASH_TO_NETWORK,
+  NETWORK_TO_GENESIS_HASH,
   GenesisHash,
   IBitcoinProvider,
   Network,
@@ -405,7 +406,7 @@ export class KeyRingBitcoinService {
     env: Env,
     origin: string,
     method: keyof IBitcoinProvider,
-    _params?: unknown[],
+    params?: unknown[],
     chainId?: string
   ) {
     if (env.isInternalMsg && chainId == null) {
@@ -447,6 +448,34 @@ export class KeyRingBitcoinService {
               : [];
           case "requestAccounts":
             return [(await this.getBitcoinKeySelected(currentChainId)).address];
+          case "disconnect":
+            return this.permissionService.removeAllTypePermissionToChainId(
+              currentBaseChainId,
+              [origin]
+            );
+          case "getNetwork":
+            return this.getNetwork(currentChainId).id;
+          case "switchNetwork":
+            const network =
+              (Array.isArray(params) && (params?.[0] as Network)) || undefined;
+            if (
+              !network ||
+              (network && !Object.values(Network).includes(network))
+            ) {
+              throw new Error(
+                "Invalid parameters: must provide a network. available networks: " +
+                  Object.values(Network).join(", ")
+              );
+            }
+
+            const genesisHash = NETWORK_TO_GENESIS_HASH[network];
+            const newCurrentBaseChainId = `bip122:${genesisHash}`;
+
+            return this.permissionService.updateCurrentBaseChainIdForBitcoin(
+              env,
+              origin,
+              newCurrentBaseChainId
+            );
         }
       })
     )() as T;

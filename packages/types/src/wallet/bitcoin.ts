@@ -25,6 +25,12 @@ export const GENESIS_HASH_TO_NETWORK: Record<GenesisHash, Network> = {
   [GenesisHash.SIGNET]: Network.SIGNET,
 };
 
+export const NETWORK_TO_GENESIS_HASH: Record<Network, GenesisHash> = {
+  [Network.MAINNET]: GenesisHash.MAINNET,
+  [Network.TESTNET]: GenesisHash.TESTNET,
+  [Network.SIGNET]: GenesisHash.SIGNET,
+};
+
 export interface IBitcoinProvider extends EventEmitter {
   getAccounts: () => Promise<string[]>;
   requestAccounts: () => Promise<string[]>;

@@ -4,6 +4,7 @@ import {
   sortedJsonByKeyStringify,
 } from "@keplr-wallet/common";
 import {
+  BitcoinChainInfo,
   ChainInfo,
   ChainInfoWithoutEndpoints,
   EVMInfo,
@@ -1249,6 +1250,24 @@ export class ChainsService {
     }
 
     return starknetChainInfo;
+  }
+
+  getBitcoinChainInfo(chainId: string): BitcoinChainInfo | undefined {
+    const modularChainInfos = this.getModularChainInfos();
+
+    const directMatch = modularChainInfos.find(
+      (info) => info.chainId === chainId
+    );
+    if (directMatch && "bitcoin" in directMatch) {
+      return directMatch.bitcoin;
+    }
+
+    const baseChainMatch = modularChainInfos.find(
+      (info) => "bitcoin" in info && info.bitcoin.chainId === chainId
+    );
+    if (baseChainMatch && "bitcoin" in baseChainMatch) {
+      return baseChainMatch.bitcoin;
+    }
   }
 
   /**
