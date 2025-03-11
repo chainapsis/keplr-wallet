@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 import { useStore } from "../../stores";
-import { GENESIS_HASH_TO_NETWORK, GenesisHash } from "@keplr-wallet/types";
-import { Network, networks, payments } from "bitcoinjs-lib";
+import { payments } from "bitcoinjs-lib";
 import { toXOnly } from "@keplr-wallet/crypto";
+import { useBitcoinNetworkConfig } from "./use-bitcoin-network-config";
 
 export const useUTXOs = (chainId: string, address: string) => {
   const { chainStore, bitcoinQueriesStore } = useStore();
@@ -22,6 +22,7 @@ export const useUTXOs = (chainId: string, address: string) => {
 
 export const useNativeSegwitUTXOs = (chainId: string) => {
   const { accountStore } = useStore();
+  const { networkConfig } = useBitcoinNetworkConfig(chainId);
 
   const nativeSegwitAddress = useMemo(() => {
     const pubkey = accountStore.getAccount(chainId).pubKey;
@@ -29,35 +30,20 @@ export const useNativeSegwitUTXOs = (chainId: string) => {
       return undefined;
     }
 
-    const [, genesisHash] = chainId.split(":");
-    const network = GENESIS_HASH_TO_NETWORK[genesisHash as GenesisHash];
-
-    let networkParams: Network | undefined;
-    switch (network) {
-      case "mainnet":
-        networkParams = networks.bitcoin;
-        break;
-      case "testnet":
-        networkParams = networks.testnet;
-        break;
-      case "signet":
-        networkParams = networks.testnet;
-        break;
-    }
-
     const { address } = payments.p2wpkh({
       pubkey: Buffer.from(pubkey),
-      network: networkParams,
+      network: networkConfig,
     });
 
     return address;
-  }, [accountStore, chainId]);
+  }, [accountStore, chainId, networkConfig]);
 
   return useUTXOs(chainId, nativeSegwitAddress ?? "");
 };
 
 export const useTaprootUTXOs = (chainId: string) => {
   const { accountStore } = useStore();
+  const { networkConfig } = useBitcoinNetworkConfig(chainId);
 
   const taprootAddress = useMemo(() => {
     const pubkey = accountStore.getAccount(chainId).pubKey;
@@ -65,31 +51,13 @@ export const useTaprootUTXOs = (chainId: string) => {
       return undefined;
     }
 
-    const internalPubkey = toXOnly(Buffer.from(pubkey));
-
-    const [, genesisHash] = chainId.split(":");
-    const network = GENESIS_HASH_TO_NETWORK[genesisHash as GenesisHash];
-
-    let networkParams: Network | undefined;
-    switch (network) {
-      case "mainnet":
-        networkParams = networks.bitcoin;
-        break;
-      case "testnet":
-        networkParams = networks.testnet;
-        break;
-      case "signet":
-        networkParams = networks.testnet;
-        break;
-    }
-
     const { address } = payments.p2tr({
-      internalPubkey,
-      network: networkParams,
+      internalPubkey: toXOnly(Buffer.from(pubkey)),
+      network: networkConfig,
     });
 
     return address;
-  }, [accountStore, chainId]);
+  }, [accountStore, chainId, networkConfig]);
 
   return useUTXOs(chainId, taprootAddress ?? "");
 };
