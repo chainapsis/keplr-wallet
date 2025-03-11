@@ -113,13 +113,13 @@ export const useGetAllNonNativeChain = ({
     if (fallbackEthereumLedgerApp && keyType === "ledger") {
       const filteredChains = chains.filter((modularChainInfo) => {
         const isChainInfoType = "bip44" in modularChainInfo;
-        const isNotStarknet = !("starknet" in modularChainInfo);
+        const isCosmosChain = "cosmos" in modularChainInfo;
 
         const isEthermintLike = isChainInfoType
           ? modularChainInfo.bip44.coinType === 60 ||
             !!modularChainInfo.features?.includes("eth-address-gen") ||
             !!modularChainInfo.features?.includes("eth-key-sign")
-          : isNotStarknet &&
+          : isCosmosChain &&
             modularChainInfo.cosmos.bip44.coinType === 60 &&
             !!modularChainInfo.cosmos.features?.includes("eth-address-gen") &&
             !!modularChainInfo.cosmos.features?.includes("eth-key-sign");
