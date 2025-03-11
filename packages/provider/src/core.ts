@@ -1830,7 +1830,9 @@ class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
     method: string;
     params: unknown[];
   }): Promise<T> {
-    await this.protectedEnableAccess();
+    if (method !== "getAccounts") {
+      await this.protectedEnableAccess();
+    }
 
     return new Promise((resolve, reject) => {
       let f = false;

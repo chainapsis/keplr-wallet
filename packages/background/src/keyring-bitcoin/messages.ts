@@ -1,6 +1,7 @@
 import { Message } from "@keplr-wallet/router";
 import {
   BitcoinSignMessageType,
+  IBitcoinProvider,
   SettledResponses,
   SupportedPaymentType,
 } from "@keplr-wallet/types";
@@ -281,5 +282,37 @@ export class GetSupportedPaymentTypesMsg extends Message<
 
   type(): string {
     return GetSupportedPaymentTypesMsg.type();
+  }
+}
+
+export class RequestMethodToBitcoinMsg extends Message<void> {
+  public static type() {
+    return "request-method-to-bitcoin";
+  }
+
+  constructor(
+    public readonly method: keyof IBitcoinProvider,
+    public readonly params?: unknown[],
+    public readonly chainId?: string
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.method) {
+      throw new Error("method is not set");
+    }
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestMethodToBitcoinMsg.type();
   }
 }

@@ -2,11 +2,12 @@ import { ChainsService } from "../chains";
 import { VaultService } from "../vault";
 import { KeyRingService } from "../keyring";
 import { InteractionService } from "../interaction";
-import { PermissionService } from "../permission";
+import { getBasicAccessPermissionType, PermissionService } from "../permission";
 import {
   BitcoinSignMessageType,
   GENESIS_HASH_TO_NETWORK,
   GenesisHash,
+  IBitcoinProvider,
   Network,
   SupportedPaymentType,
 } from "@keplr-wallet/types";
@@ -398,5 +399,58 @@ export class KeyRingBitcoinService {
       genesisHash: split[1] as GenesisHash,
       paymentType: split[2] as SupportedPaymentType,
     };
+  }
+
+  async requestMethod<T = any>(
+    env: Env,
+    origin: string,
+    method: keyof IBitcoinProvider,
+    _params?: unknown[],
+    chainId?: string
+  ) {
+    if (env.isInternalMsg && chainId == null) {
+      throw new Error(
+        "The chain id must be provided for the internal message."
+      );
+    }
+
+    const currentBaseChainId =
+      this.permissionService.getCurrentBaseChainIdForBitcoin(origin) ??
+      (chainId ? this.chainsService.getBaseChainId(chainId) : undefined);
+
+    if (currentBaseChainId == null) {
+      if (method === "getAccounts") {
+        return [] as T;
+      }
+
+      throw new Error(
+        `${origin} is not permitted. Please disconnect and reconnect to the website.`
+      );
+    }
+
+    // Taproot is default so specify the chain id.
+    const currentChainId = `${currentBaseChainId}:taproot`;
+
+    const result = (
+      await (async () => {
+        switch (method) {
+          // This method is not ensured permission in the handler.
+          case "getAccounts":
+            const hasPermission = this.permissionService.hasPermission(
+              currentBaseChainId,
+              getBasicAccessPermissionType(),
+              origin
+            );
+
+            return hasPermission
+              ? [(await this.getBitcoinKeySelected(currentChainId)).address]
+              : [];
+          case "requestAccounts":
+            return [(await this.getBitcoinKeySelected(currentChainId)).address];
+        }
+      })
+    )() as T;
+
+    return result;
   }
 }

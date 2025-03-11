@@ -1646,8 +1646,9 @@ class StarknetProvider implements IStarknetProvider {
   }
 }
 
-// TODO: Implement bitcoin provider
 export class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
+  protected _selectedAddress: string | undefined;
+
   constructor(
     protected readonly _injectedKeplr: () => InjectedKeplr,
     protected readonly _eventListener: {
