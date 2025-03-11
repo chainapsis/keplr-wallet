@@ -148,7 +148,7 @@ export class RecipientConfig
 
     if (!isStarknetHexAddress(rawRecipient)) {
       return {
-        error: new InvalidHexError("Invalid hex address for chain"),
+        error: new InvalidHexError("Not found"),
       };
     }
 

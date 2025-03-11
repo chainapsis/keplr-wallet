@@ -108,8 +108,12 @@ export class StarknetIdNameService implements NameService {
     let v = this._value;
     if (this.isEnabled) {
       const suffix = "stark";
-      if (v.endsWith("." + suffix)) {
-        v = v.slice(0, v.length - suffix.length - 1);
+      const i = v.lastIndexOf(".");
+      if (i >= 0) {
+        const tld = v.slice(i + 1);
+        if (suffix.startsWith(tld)) {
+          v = v.slice(0, i);
+        }
       }
     }
 
