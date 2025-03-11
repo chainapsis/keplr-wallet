@@ -50,7 +50,7 @@ const CircleIndicator: FunctionComponent = () => {
   );
 };
 
-//NOTE - iconButton에 있는 makeTextAndSvgColor 사용 할 경우 path를 오버라이등 할 수 없기 때문에
+//NOTE - iconButton에 있는 makeTextAndSvgColor 사용 할 경우 path를 오버라이드를 할 수 없기 때문에
 // 별도로 만들어서 사용함.
 const makeTextAndSvgColor = (color: string) => {
   return css`
