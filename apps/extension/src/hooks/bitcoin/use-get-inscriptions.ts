@@ -25,7 +25,7 @@ export interface Inscription {
   last_sale_price?: number;
   slug?: string;
   collection_name?: string;
-  satpoint: string;
+  satpoint: string; // `${txid}:${vout}:${offset}`
   last_transfer_block_height?: number;
   content_url: string;
   bis_url: string;
