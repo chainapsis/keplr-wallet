@@ -42,6 +42,7 @@ import {
 import { ChainImageFallback } from "../../../../components/image";
 import { Gutter } from "../../../../components/gutter";
 import SimpleBar from "simplebar-react";
+import { ArrowDropDownIcon } from "../../../../components/icon";
 
 const usePsbtsValidate = (
   chainId: string,
@@ -279,6 +280,8 @@ export const SignBitcoinTxView: FunctionComponent<{
     feeConfig
   );
 
+  const [isViewData, setIsViewData] = useState(false);
+
   const [unmountPromise] = useState(() => {
     let resolver: () => void;
     const promise = new Promise<void>((resolve) => {
@@ -438,76 +441,6 @@ export const SignBitcoinTxView: FunctionComponent<{
           overflow: "auto",
         }}
       >
-        {/* TODO: 여러 psbt를 한번에 보여주는 기능 추가 */}
-        {validatedPsbts && validatedPsbts.length > 1 ? null : (
-          <SinglePsbtView
-            chainId={chainId}
-            psbt={validatedPsbts?.[0]?.psbt}
-            validationError={validatedPsbts?.[0]?.validationError}
-          />
-        )}
-        <div style={{ marginTop: "0.75rem", flex: 1 }} />
-        <FeeSummary feeConfig={feeConfig} isInitialized={isInitialized} />
-      </Box>
-    </HeaderLayout>
-  );
-});
-
-const SinglePsbtView: FunctionComponent<{
-  chainId: string;
-  psbt?: Psbt;
-  validationError?: Error | undefined;
-}> = observer(
-  ({
-    chainId,
-    psbt,
-    // validationError,
-  }) => {
-    const { chainStore } = useStore();
-
-    const theme = useTheme();
-    const modularChainInfo = chainStore.getModularChain(chainId);
-
-    const [isViewData, setIsViewData] = useState(false);
-
-    const signingDataText = useMemo(() => {
-      if (!psbt) {
-        return "";
-      }
-
-      // PSBT 정보를 사용자 친화적인 형태로 파싱
-      const version = psbt.version;
-      const locktime = psbt.locktime;
-      const inputs = psbt.txInputs.map((input, index) => {
-        const hash = input.hash.reverse().toString("hex");
-        return {
-          index,
-          txid: hash,
-          vout: input.index,
-          sequence: input.sequence,
-        };
-      });
-
-      const outputs = psbt.txOutputs.map((output, index) => {
-        return {
-          index,
-          address: output.address || "unknown address",
-          value: output.value,
-        };
-      });
-
-      const readableData = {
-        version,
-        locktime,
-        inputs,
-        outputs,
-      };
-
-      return JSON.stringify(readableData, null, 2);
-    }, [psbt]);
-
-    return (
-      <React.Fragment>
         <Box marginBottom="0.5rem" alignX="center" alignY="center">
           <Box
             padding="0.375rem 0.625rem 0.375rem 0.75rem"
@@ -567,55 +500,120 @@ const SinglePsbtView: FunctionComponent<{
             />
           </Columns>
         </Box>
-        <SimpleBar
-          autoHide={false}
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            flex: !isViewData ? "0 1 auto" : 1,
-            overflowY: "auto",
-            overflowX: "hidden",
-            borderRadius: "0.375rem",
-            backgroundColor:
-              theme.mode === "light"
-                ? ColorPalette.white
-                : ColorPalette["gray-600"],
-            boxShadow:
-              theme.mode === "light"
-                ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
-                : "none",
-          }}
-        >
-          <Box>
-            {isViewData ? (
-              <Box
-                as={"pre"}
-                padding="1rem"
-                // Remove normalized style of pre tag
-                margin="0"
-                style={{
-                  width: "fit-content",
-                  color:
-                    theme.mode === "light"
-                      ? ColorPalette["gray-400"]
-                      : ColorPalette["gray-200"],
-                  whiteSpace: "pre-wrap",
-                  wordBreak: "break-all",
-                }}
+        {validatedPsbts.length > 1 ? (
+          <PsbtsView isViewData={isViewData} validatedPsbts={validatedPsbts} />
+        ) : (
+          <SinglePsbtView
+            isViewData={isViewData}
+            psbt={validatedPsbts?.[0]?.psbt}
+            validationError={validatedPsbts?.[0]?.validationError}
+          />
+        )}
+        <div style={{ marginTop: "0.75rem", flex: 1 }} />
+        <FeeSummary feeConfig={feeConfig} isInitialized={isInitialized} />
+      </Box>
+    </HeaderLayout>
+  );
+});
+
+const SinglePsbtView: FunctionComponent<{
+  isViewData: boolean;
+  psbt?: Psbt;
+  validationError?: Error | undefined;
+}> = observer(
+  ({
+    psbt,
+    isViewData,
+    // validationError,
+  }) => {
+    const theme = useTheme();
+
+    const signingDataText = useMemo(() => {
+      if (!psbt) {
+        return "";
+      }
+
+      // PSBT 정보를 사용자 친화적인 형태로 파싱
+      const version = psbt.version;
+      const locktime = psbt.locktime;
+      const inputs = psbt.txInputs.map((input, index) => {
+        const txid = input.hash.reverse().toString("hex");
+        return {
+          index,
+          txid,
+          vout: input.index,
+          sequence: input.sequence,
+        };
+      });
+
+      const outputs = psbt.txOutputs.map((output, index) => {
+        return {
+          index,
+          address: output.address || "unknown address",
+          value: output.value,
+        };
+      });
+
+      const readableData = {
+        version,
+        locktime,
+        inputs,
+        outputs,
+      };
+
+      return JSON.stringify(readableData, null, 2);
+    }, [psbt]);
+
+    return (
+      <SimpleBar
+        autoHide={false}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          flex: !isViewData ? "0 1 auto" : 1,
+          overflowY: "auto",
+          overflowX: "hidden",
+          borderRadius: "0.375rem",
+          backgroundColor:
+            theme.mode === "light"
+              ? ColorPalette.white
+              : ColorPalette["gray-600"],
+          boxShadow:
+            theme.mode === "light"
+              ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+              : "none",
+        }}
+      >
+        <Box>
+          {isViewData ? (
+            <Box
+              as={"pre"}
+              padding="1rem"
+              // Remove normalized style of pre tag
+              margin="0"
+              style={{
+                width: "fit-content",
+                color:
+                  theme.mode === "light"
+                    ? ColorPalette["gray-400"]
+                    : ColorPalette["gray-200"],
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-all",
+              }}
+            >
+              {signingDataText}
+            </Box>
+          ) : (
+            <Box padding="1rem">
+              <Body2
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-300"]
+                    : ColorPalette["gray-100"]
+                }
               >
-                {signingDataText}
-              </Box>
-            ) : (
-              <Box padding="1rem">
-                <Body2
-                  color={
-                    theme.mode === "light"
-                      ? ColorPalette["gray-300"]
-                      : ColorPalette["gray-100"]
-                  }
-                >
-                  {psbt?.toHex()}
-                  {/* {(() => {
+                {psbt?.toHex()}
+                {/* {(() => {
                   const { icon, title, content } = defaultRegistry.render(
                     interactionData.data.chainId,
                     JSON.parse(
@@ -629,12 +627,191 @@ const SinglePsbtView: FunctionComponent<{
                     );
                   }
                 })()} */}
-                </Body2>
-              </Box>
-            )}
-          </Box>
-        </SimpleBar>
-      </React.Fragment>
+              </Body2>
+            </Box>
+          )}
+        </Box>
+      </SimpleBar>
     );
   }
 );
+
+const PsbtsView: FunctionComponent<{
+  validatedPsbts: {
+    psbt: Psbt;
+    feeAmount: Dec;
+    validationError: Error | undefined;
+  }[];
+  isViewData: boolean;
+}> = observer(({ validatedPsbts, isViewData }) => {
+  const theme = useTheme();
+
+  const [openedItemIndex, setOpenedItemIndex] = useState<number | null>(null);
+  const toggleOpen = (index: number) =>
+    index === openedItemIndex
+      ? setOpenedItemIndex(null)
+      : setOpenedItemIndex(index);
+
+  const signingDataText = useMemo(() => {
+    const psbts = validatedPsbts.map(({ psbt }) => {
+      const version = psbt.version;
+      const locktime = psbt.locktime;
+      const inputs = psbt.txInputs.map((input, index) => {
+        const txid = input.hash.reverse().toString("hex");
+        return {
+          index,
+          txid,
+          vout: input.index,
+          sequence: input.sequence,
+        };
+      });
+
+      const outputs = psbt.txOutputs.map((output, index) => {
+        return {
+          index,
+          address: output.address || "unknown address",
+          value: output.value,
+        };
+      });
+
+      return {
+        version,
+        locktime,
+        inputs,
+        outputs,
+      };
+    });
+
+    return JSON.stringify(psbts, null, 2);
+  }, [validatedPsbts]);
+
+  const viewData = (
+    <Box
+      as={"pre"}
+      padding="1rem"
+      // Remove normalized style of pre tag
+      margin="0"
+      style={{
+        width: "fit-content",
+        color:
+          theme.mode === "light"
+            ? ColorPalette["gray-400"]
+            : ColorPalette["gray-200"],
+        whiteSpace: "pre-wrap",
+        wordBreak: "break-all",
+      }}
+    >
+      {signingDataText}
+    </Box>
+  );
+
+  const viewPsbts = validatedPsbts.map(
+    (
+      {
+        psbt,
+        // validationError
+      },
+      i
+    ) => {
+      const isOpen = openedItemIndex === i;
+      return (
+        <Box
+          key={i}
+          padding="1rem 0 0"
+          marginBottom={i !== validatedPsbts.length - 1 ? "0.5rem" : undefined}
+          backgroundColor={
+            theme.mode === "light"
+              ? ColorPalette.white
+              : ColorPalette["gray-600"]
+          }
+          borderRadius="0.375rem"
+          cursor="pointer"
+          height="100%"
+          onClick={() => toggleOpen(i)}
+        >
+          <Box padding="0 1rem 1rem">
+            <Columns sum={1} alignY="center">
+              <Column weight={1}>
+                <H5
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-500"]
+                      : ColorPalette["gray-10"]
+                  }
+                >
+                  PSBT
+                </H5>
+              </Column>
+              <Column weight={0}>
+                <ArrowDropDownIcon
+                  width="1rem"
+                  height="1rem"
+                  color={ColorPalette["gray-300"]}
+                />
+              </Column>
+            </Columns>
+          </Box>
+
+          <SimpleBar
+            autoHide={false}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              flex: "0 1 auto",
+              overflowY: "auto",
+              overflowX: "hidden",
+
+              padding: "0 1rem",
+
+              minWidth: "100%",
+
+              height: "fit-content",
+              minHeight: isOpen ? "3.125rem" : undefined,
+              maxHeight: "12.5rem",
+            }}
+          >
+            {isOpen ? (
+              <Box
+                as="pre"
+                style={{
+                  margin: "0 0 0.5rem",
+                  width: "fit-content",
+                  color:
+                    theme.mode === "light"
+                      ? ColorPalette["gray-400"]
+                      : ColorPalette["gray-200"],
+
+                  whiteSpace: "pre-wrap",
+                  wordBreak: "break-all",
+                }}
+              >
+                {/* TODO: 데이터 표시 방식 변경 */}
+                {isOpen ? psbt.toHex() : ""}
+              </Box>
+            ) : null}
+          </SimpleBar>
+        </Box>
+      );
+    }
+  );
+
+  return (
+    <SimpleBar
+      autoHide={false}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        flex: !isViewData ? "0 1 auto" : 1,
+        overflowY: "auto",
+        overflowX: "hidden",
+        borderRadius: isViewData ? "0.375rem" : undefined,
+        boxShadow:
+          theme.mode === "light"
+            ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+            : "none",
+      }}
+    >
+      {isViewData ? viewData : viewPsbts}
+    </SimpleBar>
+  );
+});
