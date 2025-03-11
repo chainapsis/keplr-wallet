@@ -372,7 +372,15 @@ const FoundChainView: FunctionComponent<{
                 right: "0rem",
               }}
             >
-              <NativeChainMarkIcon width="1rem" height="1rem" />
+              <NativeChainMarkIcon
+                width="1rem"
+                height="1rem"
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-10"]
+                    : ColorPalette["gray-650"]
+                }
+              />
             </Box>
           )}
         </Box>
