@@ -40,6 +40,7 @@ import styled from "styled-components";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import { toXOnly } from "@keplr-wallet/crypto";
 import { FeeControl } from "../components/input/fee-control";
+import { useGetUTXOs } from "../../../hooks/bitcoin/use-get-utxos";
 // import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 // import { BACKGROUND_PORT } from "@keplr-wallet/router";
 // import {
@@ -145,6 +146,15 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
   const initialFeeRate =
     bitcoinQueries.queryBitcoinFeeEstimates.fees.halfHourFee;
 
+  // simulate 함수 안에서 불러오지 않고 커스텀 훅으로 대체해서
+  // 페이지가 렌더링될 때 한 번만 호출해도 충분할 것으로 예상된다.
+  const {
+    isFetching: isFetchingAvailableUTXOs,
+    error: availableUTXOsError,
+    availableUTXOs,
+    // availableBalance, // TODO: send page에서 balance, fee check할 때 사용해야 함
+  } = useGetUTXOs(chainId, sender, true);
+
   const sendConfigs = useSendTxConfig(
     chainStore,
     bitcoinQueriesStore,
@@ -228,20 +238,11 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
         throw new Error("Not ready to simulate psbt");
       }
 
-      const queryAvailableUTXOs = bitcoinQueriesStore
-        .get(chainId)
-        .queryBitcoinAvailableUTXOs.getAvailableUTXOs(
-          chainId,
-          chainStore,
-          sender
-        );
-
-      if (!queryAvailableUTXOs) {
-        throw new Error("Can't find available utxos");
+      if (isFetchingAvailableUTXOs) {
+        throw new Error("Fetching available utxos");
       }
 
-      const availableUTXOs = queryAvailableUTXOs.availableUTXOs;
-      if (!availableUTXOs) {
+      if (availableUTXOsError) {
         throw new Error("Can't find available utxos");
       }
 
@@ -253,9 +254,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
           txWeight: number;
         };
       }> => {
-        // CHECK: refresh가 필요할까?
-        // noop(psbtSimulationRefresher.count);
-
+        // refresh는 필요없다. -> 블록 생성 시간이 10분
         const senderAddress = sendConfigs.senderConfig.sender;
         const publicKey = account.pubKey;
         const xonlyPubKey = publicKey

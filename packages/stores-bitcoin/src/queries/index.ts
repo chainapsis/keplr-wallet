@@ -7,7 +7,6 @@ import {
   ObservableQueryBitcoinTx,
   ObservableQueryBitcoinAddressTxs,
 } from "./indexer";
-import { ObservableQueryBitcoinAvailableUTXOs } from "./available-utxos";
 
 export class BitcoinQueriesStore {
   protected map: Map<string, BitcoinQueriesStoreImpl> = new Map();
@@ -41,8 +40,6 @@ class BitcoinQueriesStoreImpl {
   public readonly queryBitcoinAddressTxs: DeepReadonly<ObservableQueryBitcoinAddressTxs>;
   public readonly queryBitcoinFeeEstimates: DeepReadonly<ObservableQueryBitcoinFeeEstimates>;
 
-  public readonly queryBitcoinAvailableUTXOs: DeepReadonly<ObservableQueryBitcoinAvailableUTXOs>;
-
   constructor(
     protected readonly sharedContext: QuerySharedContext,
     protected readonly chainId: string,
@@ -58,11 +55,6 @@ class BitcoinQueriesStoreImpl {
       sharedContext,
       chainId,
       chainGetter
-    );
-    this.queryBitcoinAvailableUTXOs = new ObservableQueryBitcoinAvailableUTXOs(
-      sharedContext,
-      this.queryBitcoinUTXOs,
-      this.queryBitcoinAddressTxs
     );
   }
 }
