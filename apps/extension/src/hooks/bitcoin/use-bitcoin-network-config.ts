@@ -5,7 +5,8 @@ import {
   GenesisHash,
   SupportedPaymentType,
 } from "@keplr-wallet/types";
-import { Network, networks } from "bitcoinjs-lib";
+import { Network, networks, payments } from "bitcoinjs-lib";
+import { toXOnly } from "@keplr-wallet/crypto";
 
 enum BestInSlotApiUrl {
   MAINNET = "https://api.bestinslot.xyz/v3",
@@ -53,4 +54,57 @@ export const useBitcoinNetworkConfig = (chainId: string) => {
       networkConfig,
     };
   }, [chainId]);
+};
+
+export const useBitcoinAddresses = (chainId: string) => {
+  const { accountStore } = useStore();
+  const { networkConfig } = useBitcoinNetworkConfig(chainId);
+
+  const legacyAddress = useMemo(() => {
+    const pubkey = accountStore.getAccount(chainId).pubKey;
+    if (!pubkey) {
+      return undefined;
+    }
+
+    const { address } = payments.p2pkh({
+      pubkey: Buffer.from(pubkey),
+      network: networkConfig,
+    });
+
+    return address;
+  }, [accountStore, chainId, networkConfig]);
+
+  const nativeSegwitAddress = useMemo(() => {
+    const pubkey = accountStore.getAccount(chainId).pubKey;
+    if (!pubkey) {
+      return undefined;
+    }
+
+    const { address } = payments.p2wpkh({
+      pubkey: Buffer.from(pubkey),
+      network: networkConfig,
+    });
+
+    return address;
+  }, [accountStore, chainId, networkConfig]);
+
+  const taprootAddress = useMemo(() => {
+    const pubkey = accountStore.getAccount(chainId).pubKey;
+    if (!pubkey) {
+      return undefined;
+    }
+
+    const { address } = payments.p2tr({
+      internalPubkey: toXOnly(Buffer.from(pubkey)),
+      network: networkConfig,
+    });
+
+    return address;
+  }, [accountStore, chainId, networkConfig]);
+
+  return {
+    legacyAddress,
+    nativeSegwitAddress,
+    taprootAddress,
+  };
 };
