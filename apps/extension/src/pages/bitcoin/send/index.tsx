@@ -41,8 +41,10 @@ import { ExtensionKVStore } from "@keplr-wallet/common";
 import { toXOnly } from "@keplr-wallet/crypto";
 import { FeeControl } from "../components/input/fee-control";
 import { useGetUTXOs } from "../../../hooks/bitcoin/use-get-utxos";
-// import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
-// import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
+import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { Psbt } from "bitcoinjs-lib";
+import { PushBitcoinTransactionMsg } from "@keplr-wallet/background";
 // import {
 //   AddRecentSendHistoryMsg,
 //   SubmitStarknetTxHashMsg,
@@ -136,6 +138,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
   const bitcoinQueries = bitcoinQueriesStore.get(chainId);
 
   const sender = account.bitcoinAddress?.bech32Address ?? "";
+  const paymentType = account.bitcoinAddress?.paymentType;
   const balance = bitcoinQueries.queryBitcoinBalance.getBalance(
     chainId,
     chainStore,
@@ -152,8 +155,8 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
     isFetching: isFetchingAvailableUTXOs,
     error: availableUTXOsError,
     availableUTXOs,
-    // availableBalance, // TODO: send page에서 balance, fee check할 때 사용해야 함
-  } = useGetUTXOs(chainId, sender, true);
+    // availableBalance, // TODO: send page에서 balance, fee check할 때 사용해야 함 - 어떻게 해야 할지 고민중
+  } = useGetUTXOs(chainId, sender, paymentType === "taproot");
 
   const sendConfigs = useSendTxConfig(
     chainStore,
@@ -169,7 +172,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
   const psbtSimulatorKey = useMemo(() => {
     const recipientPrefix = (() => {
       if (!sendConfigs.recipientConfig.uiProperties.error) {
-        // return leading 4 string of recipient address if recipient is valid
+        // return leading 4 string of recipient address if recipient is valid (bc1p, bc1q, tb1p, tb1q)
         return sendConfigs.recipientConfig.recipient.slice(0, 4);
       }
 
@@ -367,7 +370,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
       }
       bottomButtons={[
         {
-          disabled: txConfigsValidate.interactionBlocked,
+          disabled: txConfigsValidate.interactionBlocked, // TODO: 한 번씩 오류 안내 없이 버튼이 disabled 되는데 오류 핸들링 개선 필요
           text: intl.formatMessage({ id: "button.next" }),
           color: "primary",
           size: "large",
@@ -396,52 +399,30 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
 
         try {
           const psbtHex = psbtSimulator.psbtHex;
-          const txHash = await bitcoinAccount.signAndPushTx(psbtHex);
+          const signedPsbtHex = await bitcoinAccount.signPsbt(psbtHex);
+          const tx = Psbt.fromHex(signedPsbtHex).extractTransaction();
+          const txHex = tx.toHex();
 
-          // TODO: submit and refresh balance
+          new InExtensionMessageRequester()
+            .sendMessage(
+              BACKGROUND_PORT,
+              new PushBitcoinTransactionMsg(chainId, txHex)
+            )
+            .then((txHash) => {
+              // balance refresh를 바로 해도 반영이 안될 수 있으므로 딜레이를 주거나
+              // 비트코인은 refresh를 하지 않고 넘어간다.
 
-          //     new InExtensionMessageRequester()
-          //       .sendMessage(
-          //         BACKGROUND_PORT,
-          //         new SubmitStarknetTxHashMsg(chainId, txHash)
-          //       )
-          //       .then(() => {
-          //         starknetQueries.queryStarknetERC20Balance
-          //           .getBalance(
-          //             chainId,
-          //             chainStore,
-          //             account.starknetHexAddress,
-          //             sendConfigs.amountConfig.amount[0].currency.coinMinimalDenom
-          //           )
-          //           ?.fetch();
-          //         if (
-          //           sendConfigs.feeConfig.fee &&
-          //           sendConfigs.feeConfig.fee.currency.coinMinimalDenom !==
-          //             sendConfigs.amountConfig.amount[0].currency.coinMinimalDenom
-          //         ) {
-          //           starknetQueries.queryStarknetERC20Balance
-          //             .getBalance(
-          //               chainId,
-          //               chainStore,
-          //               account.starknetHexAddress,
-          //               sendConfigs.feeConfig.fee.currency.coinMinimalDenom
-          //             )
-          //             ?.fetch();
-          //         }
-          //         notification.show(
-          //           "success",
-          //           intl.formatMessage({
-          //             id: "notification.transaction-success",
-          //           }),
-          //           ""
-          //         );
-          //       })
-          //       .catch((e) => {
-          //         // 이 경우에는 tx가 커밋된 이후의 오류이기 때문에 이미 페이지는 sign 페이지에서부터 전환된 상태다.
-          //         // 따로 멀 처리해줄 필요가 없다
-          //         console.log(e);
-          //       });
+              notification.show(
+                "success",
+                intl.formatMessage({ id: "notification.transaction-success" }),
+                txHash
+              );
+            })
+            .catch((e) => {
+              console.log(e);
+            });
 
+          // TODO: address book 추가 필요
           //     new InExtensionMessageRequester().sendMessage(
           //       BACKGROUND_PORT,
           //       new AddRecentSendHistoryMsg(
@@ -454,12 +435,6 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
           //         undefined
           //       )
           //     );
-
-          notification.show(
-            "success",
-            intl.formatMessage({ id: "notification.transaction-success" }),
-            txHash
-          );
 
           if (!isDetachedMode) {
             navigate("/", {
