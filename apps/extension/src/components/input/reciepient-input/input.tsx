@@ -42,7 +42,7 @@ export type RecipientInputProps = (
 
 export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
   (props, ref) => {
-    const { analyticsStore } = useStore();
+    const { analyticsStore, chainStore } = useStore();
     const intl = useIntl();
     const theme = useTheme();
     const { recipientConfig, memoConfig } = props;
@@ -69,10 +69,18 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
               if ("getNameService" in recipientConfig) {
                 const icns = recipientConfig.getNameService("icns");
                 const ens = recipientConfig.getNameService("ens");
-                if (icns?.isEnabled && ens?.isEnabled) {
+                if (
+                  icns?.isEnabled &&
+                  !chainStore.isEvmOnlyChain(recipientConfig.chainId) &&
+                  ens?.isEnabled &&
+                  chainStore.isEvmOnlyChain(recipientConfig.chainId)
+                ) {
                   return "components.input.recipient-input.wallet-address-label-icns-ens";
                 }
-                if (ens?.isEnabled) {
+                if (
+                  ens?.isEnabled &&
+                  chainStore.isEvmOnlyChain(recipientConfig.chainId)
+                ) {
                   return "components.input.recipient-input.wallet-address-label-ens";
                 }
               }
