@@ -71,15 +71,16 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
                 const ens = recipientConfig.getNameService("ens");
                 if (
                   icns?.isEnabled &&
-                  !chainStore.isEvmOnlyChain(recipientConfig.chainId) &&
+                  chainStore.getChain(recipientConfig.chainId).bech32Config !=
+                    null &&
                   ens?.isEnabled &&
-                  chainStore.isEvmOnlyChain(recipientConfig.chainId)
+                  chainStore.isEvmChain(recipientConfig.chainId)
                 ) {
                   return "components.input.recipient-input.wallet-address-label-icns-ens";
                 }
                 if (
                   ens?.isEnabled &&
-                  chainStore.isEvmOnlyChain(recipientConfig.chainId)
+                  chainStore.isEvmChain(recipientConfig.chainId)
                 ) {
                   return "components.input.recipient-input.wallet-address-label-ens";
                 }

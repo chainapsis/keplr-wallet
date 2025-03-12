@@ -133,7 +133,6 @@ export class ENSNameService implements NameService {
 
   protected async fetchInternal(): Promise<void> {
     try {
-      const chainInfo = this.base.chainInfo;
       if (!this._ens) {
         throw new Error("ENS or is not set");
       }
@@ -152,9 +151,9 @@ export class ENSNameService implements NameService {
       const domain = this.value;
       const username = domain + "." + suffix;
 
-      const resolver = await new JsonRpcProvider(chainInfo.rpc).getResolver(
-        username
-      );
+      const resolver = await new JsonRpcProvider(
+        this.chainGetter.getChain(this._ens.chainId).rpc
+      ).getResolver(username);
 
       if (!resolver) {
         throw new Error("Can't find resolver");
