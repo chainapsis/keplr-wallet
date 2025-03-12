@@ -5,7 +5,7 @@ import { autorun } from "mobx";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { KeyRingCosmosService } from "@keplr-wallet/background";
 
-interface UseGetAllChainParams {
+interface UseGetAllNonNativeChainParams {
   pageSize?: number;
   initialPage?: number;
   search?: string;
@@ -14,7 +14,7 @@ interface UseGetAllChainParams {
   keyType?: string;
 }
 
-interface UseGetAllChainResult {
+interface UseGetAllNonNativeChainResult {
   chains: ChainInfo[];
   totalCount: number;
   currentPage: number;
@@ -39,7 +39,7 @@ export const useGetAllNonNativeChain = ({
   fallbackEthereumLedgerApp,
   fallbackStarknetLedgerApp,
   keyType,
-}: UseGetAllChainParams = {}): UseGetAllChainResult => {
+}: UseGetAllNonNativeChainParams = {}): UseGetAllNonNativeChainResult => {
   const { queriesStore, chainStore } = useStore();
   const modularChainInfosInListUI = chainStore.modularChainInfosInListUI;
   const excludeChainIdentifiers = useMemo(
@@ -109,29 +109,35 @@ export const useGetAllNonNativeChain = ({
   //ledger의 경우 필터링을 해야함
   useEffect(() => {
     if (fallbackEthereumLedgerApp && keyType === "ledger") {
-      const filteredChains = chains.filter((modularChainInfo) => {
-        const isEthermintLike =
-          modularChainInfo.bip44.coinType === 60 ||
-          !!modularChainInfo.features?.includes("eth-address-gen") ||
-          !!modularChainInfo.features?.includes("eth-key-sign");
+      const filteredChains = chains
+        .filter((chainInfo) => {
+          const isEthermintLike =
+            chainInfo.bip44.coinType === 60 ||
+            !!chainInfo.features?.includes("eth-address-gen") ||
+            !!chainInfo.features?.includes("eth-key-sign");
 
-        const isLedgerSupported = (() => {
-          try {
-            KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
-              modularChainInfo.chainId
-            );
+          const isLedgerSupported = (() => {
+            try {
+              KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
+                chainInfo.chainId
+              );
+              return true;
+            } catch {
+              return false;
+            }
+          })();
+
+          if (isEthermintLike && isLedgerSupported) {
             return true;
-          } catch {
-            return false;
           }
-        })();
 
-        if (isEthermintLike && isLedgerSupported) {
-          return true;
-        }
-
-        return false;
-      });
+          return false;
+        })
+        .filter((chainInfo) => {
+          //혹시나 modularChainInfo인 경우가 있을 수 있어서 체크
+          //왜냐면 non-native chain은 기본적으로 chainInfo 타입이여야함
+          return "bip44" in chainInfo;
+        });
 
       setLedgerFilteredChains(filteredChains);
       return;
