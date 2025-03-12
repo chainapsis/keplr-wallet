@@ -171,9 +171,38 @@ export class BitcoinAccountBase {
       };
     }
 
+    // 9. Check if a single UTXO can satisfy the transaction
+    // Try each UTXO in descending order of value
+    for (const utxo of sortedUtxos) {
+      const utxoId = `${utxo.txid}:${utxo.vout}`;
+      const singleUtxoIds = new Set([utxoId]);
+
+      // Calculate with change first
+      const withChangeConfig = calculateTxConfig(singleUtxoIds, true);
+
+      // If this UTXO can cover the target amount plus fee and has non-dust change
+      if (withChangeConfig.remainder.gte(DUST)) {
+        return {
+          selectedUtxos: [utxo],
+          txSize: withChangeConfig.txSize,
+          hasChange: true,
+        };
+      }
+
+      // If this UTXO can cover the target amount plus fee with no change (or dust change)
+      const withoutChangeConfig = calculateTxConfig(singleUtxoIds, false);
+      if (withoutChangeConfig.remainder.gte(new Dec(0))) {
+        return {
+          selectedUtxos: [utxo],
+          txSize: withoutChangeConfig.txSize,
+          hasChange: false,
+        };
+      }
+    }
+
     let selectedUtxoIds: Set<string>;
 
-    // 9. Select UTXOs using branch and bound algorithm
+    // 10. Select UTXOs using branch and bound algorithm if no single UTXO is sufficient
     // Always try to avoid dust change by setting discardDustChange to false
     // This will make the algorithm prioritize selections that result in non-dust change
     const branchAndBoundResult = this.branchAndBoundSelection({
@@ -206,7 +235,7 @@ export class BitcoinAccountBase {
       return null;
     }
 
-    // 10. Calculate final tx configuration
+    // 11. Calculate final tx configuration
     const withChangeConfig = calculateTxConfig(selectedUtxoIds, true);
 
     // Only include change if it's above dust threshold
@@ -215,7 +244,7 @@ export class BitcoinAccountBase {
     // Final calculations based on whether we have change
     const finalConfig = calculateTxConfig(selectedUtxoIds, hasChange);
 
-    // 11. Return the selection
+    // 12. Return the selection
     return {
       selectedUtxos: utxos.filter((utxo) =>
         selectedUtxoIds.has(`${utxo.txid}:${utxo.vout}`)
@@ -492,9 +521,7 @@ export class BitcoinAccountBase {
     isDust,
     outputParams,
     timeoutMs,
-  }: Omit<SelectionParams, "discardDustChange"> & {
-    timeoutMs?: number;
-  }): Set<string> | null {
+  }: SelectionParams): Set<string> | null {
     // Algorithm execution time limit (ms)
     const TIMEOUT = timeoutMs ?? BRANCH_AND_BOUND_TIMEOUT_MS;
     const startTime = Date.now();
@@ -641,7 +668,7 @@ export class BitcoinAccountBase {
     calculateFee,
     isDust,
     outputParams,
-  }: Omit<SelectionParams, "discardDustChange">): Set<string> {
+  }: Omit<SelectionParams, "timeoutMs">): Set<string> {
     const selectedUtxoIds = new Set<string>();
     let selectedAmount = new Dec(0);
 
