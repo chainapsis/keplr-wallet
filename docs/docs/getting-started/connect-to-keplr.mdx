@@ -108,21 +108,22 @@ Multiple wallets may inject a `window.keplr` object into the browser, making it 
 To address this, use KeplrFallback as the Keplr instance. This utility, provided in Keplr Wallet SDK, first attempts to route requests through the SDK and defaults to `window.keplr` if neccessary. It ensures secure wallet interactions while enabling developers to detect and handle cases where another wallet might be mimicking Keplr. 
 
 ```typescript
-import { KeplrFallback, Keplr } from "@keplr-wallet/provider-extension";
+import { KeplrFallback } from "@keplr-wallet/provider-extension";
+import { Keplr } from "@keplr-wallet/types";
 
-export const getKeplr = async (): Promise<Keplr | undefined> => {
+export const getKeplr = (): Keplr | undefined => {
   if (typeof window === "undefined") {
     return undefined;
   }
 
-  if (window.keplr) {
+  if ((window as any).keplr) {
     return new KeplrFallback(() => {
       // Handler called when real Keplr is not installed.
       // Show appropriate warning to users.
     });
   }
 
-  return await Keplr.getKeplr();
+  return undefined;
 };
 ```
 
