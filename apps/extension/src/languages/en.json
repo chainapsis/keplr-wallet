@@ -157,7 +157,7 @@
   "pages.register.connect-keystone.usb.step-2": "Ensure your Keystone 3 Pro is on the homepage.",
 
   "pages.register.enable-chains.title": "Select Chains",
-  "pages.register.enable-chains.paragraph": "Don’t worry, you can change your selections anytime in the Manage Chain Visibility in the sidebar menu.",
+  "pages.register.enable-chains.paragraph": "We recommend enabling chains natively supported by Keplr for the best experience. Once a chain is enabled, you can view the assets available on it.",
   "pages.register.enable-chains.search-input-placeholder": "Search networks",
   "pages.register.enable-chains.chain-selected-count": "{numSelected} chain(s) selected",
   "pages.register.enable-chains.skip-button": "Skip",
@@ -165,6 +165,16 @@
   "pages.register.enable-chains.guide.can-select-starknet-later-step": "You can select Starknet chains in a later step.",
   "pages.register.enable-chains.guide.starknet.title": "Note for Starknet Users",
   "pages.register.enable-chains.guide.starknet.paragraph": "Importing from other wallets (e.g. Argent, Braavos) will create a new, different account in Keplr.",
+  "pages.register.enable-chains.guide.non-native-chain.title": "Enabling Custom Chain",
+  "pages.register.enable-chains.guide.non-native-chain.paragraph": "Chains without green check mark are custom (non-native) chains. You can add and use them anytime with Keplr, but Keplr doesn’t offer direct support for custom chain issues.",
+  "pages.register.enable-chains.native-chain-view.title": "All Native Chains",
+  "pages.register.enable-chains.native-chain-view.paragraph": "Cosmos, Ethereum, Osmosis..",
+
+  "pages.register.enable-chains.native-chain-view.ledger-cosmos-title": "All Native Cosmos Chains",
+  "pages.register.enable-chains.native-chain-view.ledger-evm-title": "All EVM Cosmos Chains",
+  "pages.register.enable-chains.native-chain-view.ledger-evm-paragraph": "Ethereum, Arbitrum, Base...",
+  "pages.register.enable-chains.native-chain-view.ledger-starknet-title": "All Native Starknet Chains",
+  "pages.register.enable-chains.native-chain-view.ledger-starknet-paragraph": "Starknet, Starknet Sepolia",
 
   "pages.register.select-derivation-path.title": "Select Account Derivation Path",
   "pages.register.select-derivation-path.paragraph": "To use both paths, you need to go through the import process twice.",
@@ -560,6 +570,9 @@
   "page.main.available.hide-low-balance": "Hide Low Balance",
   "page.main.available.search-empty-view-title": "Oops!",
   "page.main.available.search-empty-view-paragraph": "No Result Found",
+  "page.main.available.search-show-check-manage-asset-view-guide-title": "Can't find a token?",
+  "page.main.available.search-show-check-manage-asset-view-guide-paragraph": "Check if 'Hide Low Balance' is enabled or if it's hidden in 'Manage Asset List'.",
+
   "page.main.available.empty-view-title": "Ready to Explore the Interchain?",
   "page.main.available.empty-view-paragraph": "Gear up yourself by topping up your wallet!",
   "page.main.available.get-started-button": "Get Started",

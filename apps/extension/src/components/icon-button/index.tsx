@@ -46,7 +46,7 @@ export const Styles = {
 
 export const IconButton: FunctionComponent<
   PropsWithChildren<{
-    onClick: () => void;
+    onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
     padding?: string;
     color?: string;
     hoverColor?: string;
@@ -63,7 +63,7 @@ export const IconButton: FunctionComponent<
         e.preventDefault();
 
         if (!disabled) {
-          onClick();
+          onClick(e);
         }
       }}
     >

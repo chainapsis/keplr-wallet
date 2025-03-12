@@ -151,7 +151,7 @@
   "pages.register.connect-keystone.usb.step-2": "确保你的 Keystone 3 Pro 在主页上。",
 
   "pages.register.enable-chains.title": "选择链",
-  "pages.register.enable-chains.paragraph": "不用担心，你可以随时在侧边栏菜单中的“管理链可见性”中更改你的选择。",
+  "pages.register.enable-chains.paragraph": "我们建议启用 Keplr 原生支持的链，以获得最佳体验。启用链后，您可以查看链上的可用资产。",
   "pages.register.enable-chains.search-input-placeholder": "搜索网络",
   "pages.register.enable-chains.chain-selected-count": "已选择{numSelected}条链",
   "pages.register.enable-chains.skip-button": "跳过",

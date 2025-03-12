@@ -372,7 +372,15 @@ const FoundChainView: FunctionComponent<{
                 right: "0rem",
               }}
             >
-              <NativeChainMarkIcon width="1rem" height="1rem" />
+              <NativeChainMarkIcon
+                width="1rem"
+                height="1rem"
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-10"]
+                    : ColorPalette["gray-650"]
+                }
+              />
             </Box>
           )}
         </Box>
@@ -441,7 +449,7 @@ const FoundTokenView: FunctionComponent<{
 
   return (
     <Columns sum={1} gutter="0.5rem" alignY="center">
-      <Box width="1.75rem" height="1.75rem">
+      <Box width="1.5rem" height="1.5rem">
         <CurrencyImageFallback
           chainInfo={
             chainStore.hasChain(chainId)
@@ -449,7 +457,7 @@ const FoundTokenView: FunctionComponent<{
               : chainStore.getModularChain(chainId)
           }
           currency={asset.currency}
-          size="1.75rem"
+          size="1.5rem"
           alt="Token Found Modal Token Image"
         />
       </Box>

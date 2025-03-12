@@ -10,7 +10,7 @@ import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { ViewToken } from "./index";
 import { observer } from "mobx-react-lite";
 import { Stack } from "../../components/stack";
-import { Button, makeTextAndSvgColor } from "../../components/button";
+import { Button } from "../../components/button";
 import { useStore } from "../../stores";
 import { Styles, TextButton } from "../../components/button-text";
 import { Box } from "../../components/box";
@@ -18,13 +18,13 @@ import { Modal } from "../../components/modal";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { Gutter } from "../../components/gutter";
 import { EmptyView } from "../../components/empty-view";
-import { Subtitle3 } from "../../components/typography";
+import { Body2, Subtitle1, Subtitle3 } from "../../components/typography";
 import { XAxis, YAxis } from "../../components/axis";
 import { Checkbox } from "../../components/checkbox";
 import { Caption2 } from "../../components/typography";
 import { ColorPalette } from "../../styles";
 import { FormattedMessage, useIntl } from "react-intl";
-import styled, { useTheme } from "styled-components";
+import styled, { css, useTheme } from "styled-components";
 import { DenomHelper } from "@keplr-wallet/common";
 import { TokenDetailModal } from "./token-detail";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -48,6 +48,21 @@ const CircleIndicator: FunctionComponent = () => {
       <circle cx="3.5" cy="3" r="3" fill="#2C4BE2" />
     </StyledCircle>
   );
+};
+
+//NOTE - iconButton에 있는 makeTextAndSvgColor 사용 할 경우 path를 오버라이드를 할 수 없기 때문에
+// 별도로 만들어서 사용함.
+const makeTextAndSvgColor = (color: string) => {
+  return css`
+    color: ${color};
+    svg {
+      fill: ${color};
+      stroke: ${color};
+      path {
+        fill: ${color};
+      }
+    }
+  `;
 };
 
 const ManageViewAssetTokenPageButton = styled(TextButton)`
@@ -123,9 +138,16 @@ export const AvailableTabView: FunctionComponent<{
     }, [allBalances, trimSearch]);
 
     const hasLowBalanceTokens =
-      hugeQueriesStore.filterLowBalanceTokens(allBalances).length > 0;
+      hugeQueriesStore.filterLowBalanceTokens(allBalances).filteredTokens
+        .length > 0;
     const lowBalanceFilteredAllBalancesSearchFiltered =
-      hugeQueriesStore.filterLowBalanceTokens(_allBalancesSearchFiltered);
+      hugeQueriesStore.filterLowBalanceTokens(
+        _allBalancesSearchFiltered
+      ).filteredTokens;
+
+    const lowBalanceTokens =
+      hugeQueriesStore.filterLowBalanceTokens(allBalances).lowBalanceTokens;
+
     const allBalancesSearchFiltered =
       uiConfigStore.isHideLowBalance && hasLowBalanceTokens
         ? lowBalanceFilteredAllBalancesSearchFiltered
@@ -248,6 +270,24 @@ export const AvailableTabView: FunctionComponent<{
       allBalancesSearchFiltered.length === 0 &&
       trimSearch.length > 0 &&
       lookingForChains.length === 0;
+
+    const isShowCheckMangeAssetViewGuide =
+      isShowNotFound &&
+      uiConfigStore.manageViewAssetTokenConfig.isDisabledTokenSearched(
+        trimSearch
+      );
+
+    const isShowSearchedLowBalanceTokenGuide =
+      uiConfigStore.isHideLowBalance &&
+      lowBalanceTokens.some((token) => {
+        return (
+          (token.chainInfo.chainName.toLowerCase().includes(trimSearch) ||
+            token.token.currency.coinDenom
+              .toLowerCase()
+              .includes(trimSearch)) &&
+          trimSearch.length
+        );
+      });
 
     const [searchParams, setSearchParams] = useSearchParams();
 
@@ -398,7 +438,73 @@ export const AvailableTabView: FunctionComponent<{
                 <LookingForChains lookingForChains={lookingForChains} />
               </React.Fragment>
             )}
-            {isShowNotFound ? (
+
+            <Box padding="0.75rem">
+              <YAxis alignX="center">
+                <ManageViewAssetTokenPageButton
+                  text={intl.formatMessage({
+                    id: "page.main.available.manage-asset-list-button",
+                  })}
+                  size="small"
+                  right={
+                    <XAxis alignY="center">
+                      <AdjustmentIcon
+                        width="1.125rem"
+                        height="1.125rem"
+                        color={
+                          theme.mode === "light"
+                            ? ColorPalette["blue-400"]
+                            : ColorPalette["white"]
+                        }
+                      />
+                      {numFoundToken > 0 ? (
+                        <React.Fragment>
+                          <Gutter size="0.375rem" />
+
+                          <CircleIndicator />
+                        </React.Fragment>
+                      ) : null}
+                    </XAxis>
+                  }
+                  onClick={() => navigate("/manage-view-asset-token-list")}
+                />
+              </YAxis>
+            </Box>
+
+            {(isShowCheckMangeAssetViewGuide ||
+              isShowSearchedLowBalanceTokenGuide) && (
+              <Box marginY="2rem">
+                <EmptyView
+                  altSvg={
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="70"
+                      height="70"
+                      viewBox="0 0 70 70"
+                      fill="none"
+                    >
+                      <path
+                        d="M55.9 10H15.1C13.7485 10 12.448 10.5355 11.5045 11.5045C10.5355 12.448 10 13.7485 10 15.1V45.7C10 47.0515 10.5355 48.352 11.5045 49.2955C12.448 50.2645 13.7485 50.8 15.1 50.8H25.3L35.5 61L45.7 50.8H55.9C57.2515 50.8 58.552 50.2645 59.4955 49.2955C60.439 48.3265 61 47.0515 61 45.7V15.1C61 13.7485 60.4645 12.448 59.4955 11.5045C58.552 10.5355 57.2515 10 55.9 10ZM15.1 45.7V15.1H55.9V45.7H43.5835L35.5 53.7835L27.4165 45.7M30.5275 20.302C31.9045 19.384 33.715 18.925 35.9845 18.925C38.3815 18.925 40.294 19.4605 41.671 20.506C43.048 21.577 43.7365 23.005 43.7365 24.79C43.7365 25.912 43.354 26.9065 42.6145 27.85C41.875 28.768 40.906 29.482 39.733 30.0175C39.07 30.4 38.6365 30.7825 38.407 31.216C38.1775 31.675 38.05 32.236 38.05 32.95H32.95C32.95 31.675 33.205 30.808 33.6895 30.196C34.225 29.584 35.092 28.87 36.418 28.054C37.081 27.697 37.6165 27.238 38.05 26.677C38.407 26.1415 38.611 25.504 38.611 24.79C38.611 24.025 38.3815 23.464 37.9225 23.0305C37.4635 22.5715 36.775 22.3675 35.9845 22.3675C35.296 22.3675 34.735 22.546 34.225 22.903C33.817 23.26 33.562 23.7955 33.562 24.5095H28.5385C28.411 22.75 29.125 21.22 30.5275 20.302ZM32.95 40.6V35.5H38.05V40.6H32.95Z"
+                        fill="#424247"
+                      />
+                    </svg>
+                  }
+                >
+                  <Stack alignX="center" gutter="0.1rem">
+                    <Subtitle1>
+                      <FormattedMessage id="page.main.available.search-show-check-manage-asset-view-guide-title" />
+                    </Subtitle1>
+                    <Body2 style={{ textAlign: "center", lineHeight: "1.4" }}>
+                      <FormattedMessage id="page.main.available.search-show-check-manage-asset-view-guide-paragraph" />
+                    </Body2>
+                  </Stack>
+                </EmptyView>
+              </Box>
+            )}
+
+            {isShowNotFound &&
+            !isShowCheckMangeAssetViewGuide &&
+            !isShowSearchedLowBalanceTokenGuide ? (
               <Box marginY="2rem">
                 <EmptyView>
                   <Stack alignX="center" gutter="0.1rem">
@@ -443,38 +549,6 @@ export const AvailableTabView: FunctionComponent<{
                 }
               />
             ) : null}
-
-            <Box padding="0.75rem">
-              <YAxis alignX="center">
-                <ManageViewAssetTokenPageButton
-                  text={intl.formatMessage({
-                    id: "page.main.available.manage-asset-list-button",
-                  })}
-                  size="small"
-                  right={
-                    <XAxis alignY="center">
-                      <AdjustmentIcon
-                        width="1.125rem"
-                        height="1.125rem"
-                        color={
-                          theme.mode === "light"
-                            ? ColorPalette["blue-400"]
-                            : ColorPalette["white"]
-                        }
-                      />
-                      {numFoundToken > 0 ? (
-                        <React.Fragment>
-                          <Gutter size="0.375rem" />
-
-                          <CircleIndicator />
-                        </React.Fragment>
-                      ) : null}
-                    </XAxis>
-                  }
-                  onClick={() => navigate("/manage-view-asset-token-list")}
-                />
-              </YAxis>
-            </Box>
           </React.Fragment>
         )}
 

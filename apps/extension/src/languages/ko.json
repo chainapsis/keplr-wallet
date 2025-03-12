@@ -158,7 +158,7 @@
   "pages.register.connect-keystone.usb.step-2": "귀하의 Keystone 3 Pro가 홈페이지에 있도록 하십시오.",
 
   "pages.register.enable-chains.title": "체인 선택하기",
-  "pages.register.enable-chains.paragraph": "걱정마세요! 언제든지 사이드바 메뉴에 있는 ‘체인 표시’를 방문해서 설정을 변경할 수 있습니다.",
+  "pages.register.enable-chains.paragraph": "좋은 사용자 경험을 위해서 Keplr에서 지원하는 네이티브 체인들을 활성화하는 것을 권장합니다. 체인을 활성화하면 해당 체인에서 사용 가능한 자산을 볼 수 있습니다.",
   "pages.register.enable-chains.search-input-placeholder": "네트워크 검색하기",
   "pages.register.enable-chains.chain-selected-count": "{numSelected}개의 체인이 선택됨",
   "pages.register.enable-chains.skip-button": "스킵",
@@ -166,6 +166,16 @@
   "pages.register.enable-chains.guide.can-select-starknet-later-step": "Starknet 체인 선택은 추후의 단계에서 진행할 수 있습니다.",
   "pages.register.enable-chains.guide.starknet.title": "스타크넷 유저를 위한 안내",
   "pages.register.enable-chains.guide.starknet.paragraph": "Argent, Braavos 등의 타 지갑 서비스에서 계정을 불러와도 서로 다른 새로운 계정이 생성됩니다.",
+  "pages.register.enable-chains.guide.non-native-chain.title": "선택형 체인 설정 안내",
+  "pages.register.enable-chains.guide.non-native-chain.paragraph": "녹색 선택 아이콘이 없는 체인은 선택형(기본 체인이 아닌) 체인입니다. 케플러에서 언제든지 추가하여 사용할 수 있지만, 케플러는 선택형 체인 문제에 대한 직접적인 지원을 제공하지 않습니다.",
+  "pages.register.enable-chains.native-chain-view.title": "모든 네이티브 체인",
+  "pages.register.enable-chains.native-chain-view.paragraph": "Cosmos, Ethereum, Osmosis..",
+
+  "pages.register.enable-chains.native-chain-view.ledger-cosmos-title": "모든 네이티브 코스모스 체인",
+  "pages.register.enable-chains.native-chain-view.ledger-evm-title": "모든 네이티브 EVM 체인",
+  "pages.register.enable-chains.native-chain-view.ledger-evm-paragraph": "Ethereum, Arbitrum, Base...",
+  "pages.register.enable-chains.native-chain-view.ledger-starknet-title": "모든 네이티브 Starknet 체인",
+  "pages.register.enable-chains.native-chain-view.ledger-starknet-paragraph": "Starknet, Starknet Sepolia",
 
   "pages.register.select-derivation-path.title": "계정 파생 경로(Derivation Path) 선택하기",
   "pages.register.select-derivation-path.paragraph": "두 가지 경로를 모두 사용하려면, 각각에 대해 불러오기 과정을 한번씩 거쳐야 합니다.",
@@ -541,6 +551,9 @@
   "page.main.available.hide-low-balance": "소액 숨기기",
   "page.main.available.search-empty-view-title": "앗!",
   "page.main.available.search-empty-view-paragraph": "검색 결과가 없어요",
+  "page.main.available.search-show-check-manage-asset-view-guide-title": "토큰을 찾을 수 없나요?",
+  "page.main.available.search-show-check-manage-asset-view-guide-paragraph": "소액 숨기기가 활성화되어 있는지 확인하거나 '자산 표시 관리'에서 토큰을 확인해보세요.",
+
   "page.main.available.empty-view-title": "인터체인을 탐험할 준비가 되셨나요?",
   "page.main.available.empty-view-paragraph": "지갑에 자산을 채워 탐험을 시작해보세요!",
   "page.main.available.get-started-button": "시작하기",
