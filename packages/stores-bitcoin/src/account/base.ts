@@ -5,7 +5,6 @@ import {
   Keplr,
 } from "@keplr-wallet/types";
 import { Dec } from "@keplr-wallet/unit";
-import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { action, makeObservable, observable } from "mobx";
 import validate, {
   AddressInfo,
@@ -22,10 +21,7 @@ import {
   SelectionResult,
   UTXOSelection,
 } from "./types";
-import {
-  BRANCH_AND_BOUND_TIMEOUT_MS,
-  NATIVE_SEGWIT_DUST_THRESHOLD,
-} from "./constant";
+import { BRANCH_AND_BOUND_TIMEOUT_MS, DUST_THRESHOLD } from "./constant";
 
 export class BitcoinAccountBase {
   @observable
@@ -120,7 +116,7 @@ export class BitcoinAccountBase {
     );
 
     // 7. Initialize constants and helpers
-    const DUST = new Dec(NATIVE_SEGWIT_DUST_THRESHOLD);
+    const DUST = new Dec(DUST_THRESHOLD);
 
     // Helper functions
     const calculateTxSize = (
@@ -340,7 +336,7 @@ export class BitcoinAccountBase {
 
     const calculateFee = (size: number) => new Dec(Math.ceil(size * feeRate));
 
-    const DUST = new Dec(NATIVE_SEGWIT_DUST_THRESHOLD);
+    const DUST = new Dec(DUST_THRESHOLD);
 
     const allRecipients = [...recipients];
 
@@ -449,50 +445,6 @@ export class BitcoinAccountBase {
     }
 
     return keplr.signPsbt(this.chainId, psbtHex);
-  }
-
-  /**
-   * Push transaction to network through indexer
-   * @param txHex Transaction in hex format
-   * @returns Transaction hash
-   */
-  async pushTx(txHex: string): Promise<string> {
-    const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
-    if (!("bitcoin" in modularChainInfo)) {
-      throw new Error(`${this.chainId} is not bitcoin chain`);
-    }
-
-    const indexerUrl = modularChainInfo.bitcoin.rest;
-    const res = await simpleFetch<string>(`${indexerUrl}/tx`, {
-      method: "POST",
-      body: txHex,
-      headers: {
-        "Content-Type": "text/plain",
-      },
-    });
-    if (res.status !== 200) {
-      throw new Error("Failed to push tx");
-    }
-
-    return res.data;
-  }
-
-  async signAndPushTx(psbtHex: string): Promise<string> {
-    const signedPsbt = await this.signPsbt(psbtHex);
-
-    try {
-      const psbt = Psbt.fromHex(signedPsbt);
-
-      // CHECK: tx validation required?
-      const tx = psbt.extractTransaction();
-
-      return await this.pushTx(tx.toHex());
-    } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(`Failed to sign PSBT: ${error.message}`);
-      }
-      throw new Error("Failed to sign PSBT: Unknown error");
-    }
   }
 
   private validateAndGetAddressInfo = (address: string, network?: Network) => {

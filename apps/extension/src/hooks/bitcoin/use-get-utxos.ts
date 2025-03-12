@@ -1,4 +1,4 @@
-import { NATIVE_SEGWIT_DUST_THRESHOLD } from "@keplr-wallet/stores-bitcoin";
+import { DUST_THRESHOLD } from "@keplr-wallet/stores-bitcoin";
 import { useStore } from "../../stores";
 import { useBitcoinAddresses } from "./use-bitcoin-network-config";
 import { useGetInscriptionsByAddress } from "./use-get-inscriptions";
@@ -72,10 +72,7 @@ export const useGetUTXOs = (
 
   // Identify dust UTXOs with memoization
   const uncommercialUTXOs = useMemo(
-    () =>
-      confirmedUTXOs.filter(
-        (utxo) => utxo.value < NATIVE_SEGWIT_DUST_THRESHOLD * 2
-      ),
+    () => confirmedUTXOs.filter((utxo) => utxo.value < DUST_THRESHOLD * 2),
     [confirmedUTXOs]
   );
 
