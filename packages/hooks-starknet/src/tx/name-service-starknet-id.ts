@@ -157,6 +157,7 @@ export class StarknetIdNameService implements NameService {
   }
 
   protected async fetchInternal(): Promise<void> {
+    const prevValue = this.value;
     try {
       const modularChainInfo = this.base.modularChainInfo;
       if (!("starknet" in modularChainInfo)) {
@@ -169,8 +170,6 @@ export class StarknetIdNameService implements NameService {
       runInAction(() => {
         this._isFetching = true;
       });
-
-      const prevValue = this.value;
 
       const suffix = "stark";
       const domain = this.value;
@@ -237,10 +236,12 @@ export class StarknetIdNameService implements NameService {
       }
     } catch (e) {
       console.log(e);
-      runInAction(() => {
-        this._result = undefined;
-        this._isFetching = false;
-      });
+      if (this.value === prevValue) {
+        runInAction(() => {
+          this._result = undefined;
+          this._isFetching = false;
+        });
+      }
     }
   }
 }

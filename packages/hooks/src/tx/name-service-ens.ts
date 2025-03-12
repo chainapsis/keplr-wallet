@@ -132,6 +132,7 @@ export class ENSNameService implements NameService {
   }
 
   protected async fetchInternal(): Promise<void> {
+    const prevValue = this.value;
     try {
       if (!this._ens) {
         throw new Error("ENS or is not set");
@@ -144,8 +145,6 @@ export class ENSNameService implements NameService {
       if (!this.chainGetter.hasChain(this._ens.chainId)) {
         throw new Error(`Can't find chain: ${this._ens.chainId}`);
       }
-
-      const prevValue = this.value;
 
       const suffix = "eth";
       const domain = this.value;
@@ -181,10 +180,12 @@ export class ENSNameService implements NameService {
       }
     } catch (e) {
       console.log(e);
-      runInAction(() => {
-        this._result = undefined;
-        this._isFetching = false;
-      });
+      if (this.value === prevValue) {
+        runInAction(() => {
+          this._result = undefined;
+          this._isFetching = false;
+        });
+      }
     }
   }
 }

@@ -138,6 +138,7 @@ export class ICNSNameService implements NameService {
   }
 
   protected async fetchInternal(): Promise<void> {
+    const prevValue = this.value;
     try {
       const chainInfo = this.base.chainInfo;
       if (!this._icns || !chainInfo.bech32Config) {
@@ -151,8 +152,6 @@ export class ICNSNameService implements NameService {
       if (!this.chainGetter.hasChain(this._icns.chainId)) {
         throw new Error(`Can't find chain: ${this._icns.chainId}`);
       }
-
-      const prevValue = this.value;
 
       const suffix = chainInfo.bech32Config.bech32PrefixAccAddr;
       const domain = this.value;
@@ -190,10 +189,12 @@ export class ICNSNameService implements NameService {
       }
     } catch (e) {
       console.log(e);
-      runInAction(() => {
-        this._result = undefined;
-        this._isFetching = false;
-      });
+      if (this.value === prevValue) {
+        runInAction(() => {
+          this._result = undefined;
+          this._isFetching = false;
+        });
+      }
     }
   }
 }
