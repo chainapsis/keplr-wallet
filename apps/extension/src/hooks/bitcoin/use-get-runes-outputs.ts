@@ -120,7 +120,17 @@ export const useGetRunesOutputsByAddress = (
       };
     },
     (res) => {
-      return res.data.length < validatedOptions.count;
-    }
+      // 주소가 없는 경우 무조건 끝
+      return address === "" ? true : res.data.length < validatedOptions.count;
+    },
+    undefined,
+    undefined,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        "X-API-KEY": process.env["BEST_IN_SLOT_API_KEY"] || "",
+      },
+    },
+    true // 기존의 쿼리 파라미터 대체
   );
 };

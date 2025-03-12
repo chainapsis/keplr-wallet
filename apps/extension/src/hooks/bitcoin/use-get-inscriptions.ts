@@ -90,7 +90,7 @@ export const useGetInscriptionsByAddress = (
         console.warn(
           `Invalid count value: ${count}. Using default 1000 instead.`
         );
-        count = 1000;
+        count = 1000; // UTXO 필터링용으로 우선은 1000개로 default 값 설정
       } else if (count > 2000) {
         console.warn(
           `Count value ${count} exceeds maximum 2000. Using 2000 instead.`
@@ -144,7 +144,17 @@ export const useGetInscriptionsByAddress = (
       };
     },
     (res) => {
-      return res.data.length < validatedOptions.count;
-    }
+      // 주소가 없는 경우 무조건 끝
+      return address === "" ? true : res.data.length < validatedOptions.count;
+    },
+    undefined,
+    undefined,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        "X-API-KEY": process.env["BEST_IN_SLOT_API_KEY"] || "",
+      },
+    },
+    true // 기존의 쿼리 파라미터 대체
   );
 };
