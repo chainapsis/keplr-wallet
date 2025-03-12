@@ -55,7 +55,7 @@ import { IconButton } from "../../../components/icon-button";
 import { DenomHelper } from "@keplr-wallet/common";
 import { Tooltip } from "../../../components/tooltip";
 import { useSpring, animated } from "@react-spring/web";
-import { useGetAllNonNativeChain } from "../../../hooks/use-get-all-chain";
+import { useGetAllNonNativeChain } from "../../../hooks/use-get-all-non-native-chain";
 import { hexToRgba } from "../../../utils";
 
 /**

@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useStore } from "../stores";
-import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
+import { ChainInfo } from "@keplr-wallet/types";
 import { autorun } from "mobx";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { KeyRingCosmosService } from "@keplr-wallet/background";
@@ -15,7 +15,7 @@ interface UseGetAllChainParams {
 }
 
 interface UseGetAllChainResult {
-  chains: (ChainInfo | ModularChainInfo)[];
+  chains: ChainInfo[];
   totalCount: number;
   currentPage: number;
   totalPages: number;
@@ -53,13 +53,11 @@ export const useGetAllNonNativeChain = ({
   //구조가 이상하지만 chains 최초 데이터 저장
   // ledgerFilteredChains는 type과 fallbackEthereumLedgerApp값등이 변경될때만 필터링하게 적용하고
   // filteredChains는 search가 변경될때만 검색하게 적용하도록 하기위해서 3개의 상태로 분리함
-  const [chains, setChains] = useState<(ChainInfo | ModularChainInfo)[]>([]);
-  const [ledgerFilteredChains, setLedgerFilteredChains] = useState<
-    (ChainInfo | ModularChainInfo)[]
-  >([]);
-  const [filteredChains, setFilteredChains] = useState<
-    (ChainInfo | ModularChainInfo)[]
-  >([]);
+  const [chains, setChains] = useState<ChainInfo[]>([]);
+  const [ledgerFilteredChains, setLedgerFilteredChains] = useState<ChainInfo[]>(
+    []
+  );
+  const [filteredChains, setFilteredChains] = useState<ChainInfo[]>([]);
 
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [isLoading, setIsLoading] = useState(true);
@@ -112,17 +110,10 @@ export const useGetAllNonNativeChain = ({
   useEffect(() => {
     if (fallbackEthereumLedgerApp && keyType === "ledger") {
       const filteredChains = chains.filter((modularChainInfo) => {
-        const isChainInfoType = "bip44" in modularChainInfo;
-        const isCosmosChain = "cosmos" in modularChainInfo;
-
-        const isEthermintLike = isChainInfoType
-          ? modularChainInfo.bip44.coinType === 60 ||
-            !!modularChainInfo.features?.includes("eth-address-gen") ||
-            !!modularChainInfo.features?.includes("eth-key-sign")
-          : isCosmosChain &&
-            modularChainInfo.cosmos.bip44.coinType === 60 &&
-            !!modularChainInfo.cosmos.features?.includes("eth-address-gen") &&
-            !!modularChainInfo.cosmos.features?.includes("eth-key-sign");
+        const isEthermintLike =
+          modularChainInfo.bip44.coinType === 60 ||
+          !!modularChainInfo.features?.includes("eth-address-gen") ||
+          !!modularChainInfo.features?.includes("eth-key-sign");
 
         const isLedgerSupported = (() => {
           try {
