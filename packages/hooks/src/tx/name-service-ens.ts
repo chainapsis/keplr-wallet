@@ -152,15 +152,21 @@ export class ENSNameService implements NameService {
       const domain = this.value;
       const username = domain + "." + suffix;
 
-      const res = await new JsonRpcProvider(chainInfo.rpc).getResolver(
+      const resolver = await new JsonRpcProvider(chainInfo.rpc).getResolver(
         username
       );
 
+      if (!resolver) {
+        throw new Error("Can't find resolver");
+      }
+
+      const res = await resolver.getAddress(60);
+
       if (this.value === prevValue) {
-        if (res?.address) {
+        if (res) {
           runInAction(() => {
             this._result = {
-              address: res.address,
+              address: res,
               fullName: username,
               domain,
               suffix,
