@@ -1,10 +1,8 @@
-import { DUST_THRESHOLD } from "@keplr-wallet/stores-bitcoin";
 import { useStore } from "../../stores";
 import { useBitcoinAddresses } from "./use-bitcoin-network-config";
 import { useGetInscriptionsByAddress } from "./use-get-inscriptions";
 import { useGetRunesOutputsByAddress } from "./use-get-runes-outputs";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
-import { useMemo } from "react";
 
 export const useGetUTXOs = (
   chainId: string,
@@ -32,75 +30,45 @@ export const useGetUTXOs = (
     .get(chainId)
     .queryBitcoinUTXOs.getUTXOs(chainId, chainStore, address);
 
-  const confirmedUTXOs = useMemo(
-    () => queryUTXOs?.confirmedUTXOs || [],
-    [queryUTXOs]
-  );
+  const confirmedUTXOs = queryUTXOs?.confirmedUTXOs || [];
 
   // Extract inscribed UTXOs
-  const inscribedUTXOs = useMemo(
-    () =>
-      inscriptionsPages
-        ?.flatMap((page) => page.response?.data ?? [])
-        .map((inscription) => {
-          const { satpoint } = inscription;
-          const [txid, vout] = satpoint.split(":");
-          return {
-            txid,
-            vout: Number(vout),
-          };
-        }),
-    [inscriptionsPages]
-  );
+  const inscribedUTXOs = inscriptionsPages
+    ?.flatMap((page) => page.response?.data ?? [])
+    .map((inscription) => {
+      const { satpoint } = inscription;
+      const [txid, vout] = satpoint.split(":");
+      return {
+        txid,
+        vout: Number(vout),
+      };
+    });
 
   // Extract runes UTXOs
-  const runesUTXOs = useMemo(
-    () =>
-      runesPages
-        ?.flatMap((page) => page.response?.data ?? [])
-        .filter(Boolean)
-        .map((runesOutput) => {
-          const { output } = runesOutput;
-          const [txid, vout] = output.split(":");
-          return {
-            txid,
-            vout: Number(vout),
-          };
-        }) || [],
-    [runesPages]
-  );
-
-  // Identify dust UTXOs with memoization
-  const uncommercialUTXOs = useMemo(
-    () => confirmedUTXOs.filter((utxo) => utxo.value < DUST_THRESHOLD * 2),
-    [confirmedUTXOs]
-  );
+  const runesUTXOs = runesPages
+    ?.flatMap((page) => page.response?.data ?? [])
+    .filter(Boolean)
+    .map((runesOutput) => {
+      const { output } = runesOutput;
+      const [txid, vout] = output.split(":");
+      return {
+        txid,
+        vout: Number(vout),
+      };
+    });
 
   // Create lookup maps for faster filtering
-  const { isInscribedMap, isRunesMap, isUncommercialMap } = useMemo(
-    () => ({
-      isInscribedMap: new Map(
-        inscribedUTXOs.map((utxo) => [`${utxo.txid}:${utxo.vout}`, true])
-      ),
-      isRunesMap: new Map(
-        runesUTXOs.map((utxo) => [`${utxo.txid}:${utxo.vout}`, true])
-      ),
-      isUncommercialMap: new Map(
-        uncommercialUTXOs.map((utxo) => [`${utxo.txid}:${utxo.vout}`, true])
-      ),
-    }),
-    [inscribedUTXOs, runesUTXOs, uncommercialUTXOs]
+  const protectedUTXOs = new Set(
+    [...inscribedUTXOs, ...runesUTXOs].map(
+      (utxo) => `${utxo.txid}:${utxo.vout}`
+    )
   );
 
-  // Filter out UTXOs that are inscribed, runes, or uncommercial
-  const { availableUTXOs, availableBalance } = useMemo(() => {
+  // Filter out UTXOs that are inscribed, runes
+  const { availableUTXOs, availableBalance } = (() => {
     const availableUTXOs = confirmedUTXOs.filter((utxo) => {
       const key = `${utxo.txid}:${utxo.vout}`;
-      return (
-        !isInscribedMap.has(key) &&
-        !isRunesMap.has(key) &&
-        !isUncommercialMap.has(key)
-      );
+      return !protectedUTXOs.has(key);
     });
 
     const availableBalance = new CoinPretty(
@@ -114,7 +82,7 @@ export const useGetUTXOs = (
       availableUTXOs,
       availableBalance,
     };
-  }, [confirmedUTXOs, currency, isInscribedMap, isRunesMap, isUncommercialMap]);
+  })();
 
   const isFetching =
     isFetchingInscriptions || isFetchingRunesOutputs || queryUTXOs?.isFetching;

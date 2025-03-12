@@ -168,7 +168,8 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
   sendConfigs.amountConfig.setCurrency(currency);
 
   // bitcoin tx size는 amount, fee rate, recipient address type에 따라 달라진다.
-  // 따라서 세 가지를 모두 고려해서 key를 생성한다.
+  // 또한 별도의 simulator refresh 로직이 없기 때문에 availableUTXOs의 값이 변경되면
+  // 새로운 key를 생성해서 새로운 simulator를 생성하도록 한다.
   const psbtSimulatorKey = useMemo(() => {
     const recipientPrefix = (() => {
       if (!sendConfigs.recipientConfig.uiProperties.error) {
@@ -193,13 +194,17 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
     })();
 
     return (
-      recipientPrefix + amountHex + sendConfigs.feeRateConfig.feeRate.toString()
+      recipientPrefix +
+      amountHex +
+      sendConfigs.feeRateConfig.feeRate.toString() +
+      availableUTXOs.length.toString()
     );
   }, [
     sendConfigs.amountConfig.amount,
     sendConfigs.feeRateConfig.feeRate,
     sendConfigs.recipientConfig.recipient,
     sendConfigs.recipientConfig.uiProperties.error,
+    availableUTXOs,
   ]);
 
   const psbtSimulator = usePsbtSimulator(
@@ -241,6 +246,14 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
         throw new Error("Not ready to simulate psbt");
       }
 
+      console.log(
+        "isFetchingAvailableUTXOs",
+        isFetchingAvailableUTXOs,
+        "availableUTXOsError",
+        availableUTXOsError,
+        "availableUTXOs",
+        availableUTXOs
+      );
       if (isFetchingAvailableUTXOs) {
         throw new Error("Fetching available utxos");
       }
@@ -370,7 +383,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
       }
       bottomButtons={[
         {
-          disabled: txConfigsValidate.interactionBlocked, // TODO: 한 번씩 오류 안내 없이 버튼이 disabled 되는데 오류 핸들링 개선 필요
+          disabled: txConfigsValidate.interactionBlocked,
           text: intl.formatMessage({ id: "button.next" }),
           color: "primary",
           size: "large",
