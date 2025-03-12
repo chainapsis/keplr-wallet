@@ -104,15 +104,8 @@ export const SignBitcoinTxView: FunctionComponent<{
   // 중요한 오류는 usePsbtsValidate 훅에서 처리한다.
   feeConfig.setDisableBalanceCheck(true);
 
-  const psbtsHexes = useMemo(() => {
-    return "psbtHex" in interactionData.data
-      ? [interactionData.data.psbtHex]
-      : interactionData.data.psbtsHexes;
-  }, [interactionData.data]);
-
   const { isInitialized, validatedPsbts, validationError } = usePsbtsValidate(
-    chainId,
-    psbtsHexes,
+    interactionData,
     feeConfig
   );
 
@@ -140,10 +133,7 @@ export const SignBitcoinTxView: FunctionComponent<{
   });
 
   const buttonDisabled =
-    txConfigsValidate.interactionBlocked ||
-    !isInitialized ||
-    validatedPsbts.some((psbt) => psbt.validationError) ||
-    !!validationError;
+    txConfigsValidate.interactionBlocked || !isInitialized || !!validationError;
   const isLoading = signBitcoinTxInteractionStore.isObsoleteInteractionApproved(
     interactionData.id
   );
@@ -346,7 +336,7 @@ export const SignBitcoinTxView: FunctionComponent<{
           <SinglePsbtView
             isViewData={isViewData}
             psbt={validatedPsbts?.[0]?.psbt}
-            validationError={validatedPsbts?.[0]?.validationError}
+            warnings={validatedPsbts?.[0]?.warnings}
           />
         )}
         <div style={{ marginTop: "0.75rem", flex: 1 }} />
@@ -359,7 +349,7 @@ export const SignBitcoinTxView: FunctionComponent<{
 const SinglePsbtView: FunctionComponent<{
   isViewData: boolean;
   psbt?: Psbt;
-  validationError?: Error | undefined;
+  warnings?: string[];
 }> = observer(
   ({
     psbt,
@@ -480,7 +470,7 @@ const PsbtsView: FunctionComponent<{
   validatedPsbts: {
     psbt: Psbt;
     feeAmount: Dec;
-    validationError: Error | undefined;
+    warnings: string[];
   }[];
   isViewData: boolean;
 }> = observer(({ validatedPsbts, isViewData }) => {
