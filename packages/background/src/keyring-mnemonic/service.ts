@@ -153,59 +153,55 @@ export class KeyRingMnemonicService {
       return false;
     };
 
-    const signAsync = async () => {
-      // Must consider partially signed psbt.
-      // If the input is already signed, skip signing. (in case input index is not in inputsToSign)
-      for (const index of inputsToSign) {
-        const input = psbt.data.inputs[index];
+    // Must consider partially signed psbt.
+    // If the input is already signed, skip signing. (in case input index is not in inputsToSign)
+    for (const index of inputsToSign) {
+      const input = psbt.data.inputs[index];
 
-        if (isTaprootInput(input)) {
-          if (!input.tapInternalKey) {
-            input.tapInternalKey = tapInternalKey;
-          }
-
-          // sign taproot
-          await psbt.signInputAsync(index, taprootSigner);
-
-          // verify taproot
-          const isValid = psbt.validateSignaturesOfInput(
-            index,
-            (_, msgHash, signature) => {
-              return taprootSigner.verifySchnorr(msgHash, signature);
-            }
-          );
-
-          if (!isValid) {
-            throw new Error("Invalid taproot signature");
-          }
-
-          // finalize input signed by this keyring
-          psbt.finalizeTaprootInput(index);
-        } else {
-          // sign ecdsa
-          await psbt.signInputAsync(index, signer);
-
-          // verify ecdsa
-          const isValid = psbt.validateSignaturesOfInput(
-            index,
-            (_, msgHash, signature) => {
-              return signer.verify(msgHash, signature);
-            }
-          );
-
-          if (!isValid) {
-            throw new Error("Invalid ecdsa signature");
-          }
-
-          // finalize input signed by this keyring
-          psbt.finalizeInput(index);
+      if (isTaprootInput(input)) {
+        if (!input.tapInternalKey) {
+          input.tapInternalKey = tapInternalKey;
         }
+
+        // sign taproot
+        psbt.signTaprootInput(index, taprootSigner);
+
+        // verify taproot
+        const isValid = psbt.validateSignaturesOfInput(
+          index,
+          (_, msgHash, signature) => {
+            return taprootSigner.verifySchnorr(msgHash, signature);
+          }
+        );
+
+        if (!isValid) {
+          throw new Error("Invalid taproot signature");
+        }
+
+        // finalize input signed by this keyring
+        psbt.finalizeTaprootInput(index);
+      } else {
+        // sign ecdsa
+        psbt.signInput(index, signer);
+
+        // verify ecdsa
+        const isValid = psbt.validateSignaturesOfInput(
+          index,
+          (_, msgHash, signature) => {
+            return signer.verify(msgHash, signature);
+          }
+        );
+
+        if (!isValid) {
+          throw new Error("Invalid ecdsa signature");
+        }
+
+        // finalize input signed by this keyring
+        psbt.finalizeInput(index);
       }
+    }
 
-      return psbt;
-    };
-
-    return signAsync();
+    return Promise.resolve(psbt);
   }
 
   protected getPrivKey(vault: Vault, coinType: number): PrivKeySecp256k1 {
