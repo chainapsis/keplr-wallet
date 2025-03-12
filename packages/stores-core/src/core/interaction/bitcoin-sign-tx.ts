@@ -47,9 +47,10 @@ export class SignBitcoinTxInteractionStore {
 
   async approveWithProceedNext(
     id: string,
-    psbtHex: string,
-    signedPsbtHex: string,
-    psbtsHexes: string[],
+    psbtSignData: {
+      psbtHex: string;
+      inputsToSign: number[];
+    }[],
     signedPsbtsHexes: string[],
     afterFn: (proceedNext: boolean) => void | Promise<void>,
     options: {
@@ -59,9 +60,7 @@ export class SignBitcoinTxInteractionStore {
     await this.interactionStore.approveWithProceedNextV2(
       id,
       {
-        psbtHex,
-        signedPsbtHex,
-        psbtsHexes,
+        psbtSignData,
         signedPsbtsHexes,
       },
       afterFn,

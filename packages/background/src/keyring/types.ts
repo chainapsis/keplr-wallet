@@ -56,6 +56,7 @@ export interface KeyRing {
     vault: Vault,
     coinType: number,
     psbt: Psbt,
+    inputsToSign: number[],
     modularChainInfo: ModularChainInfo
   ): Promise<Psbt>;
 }

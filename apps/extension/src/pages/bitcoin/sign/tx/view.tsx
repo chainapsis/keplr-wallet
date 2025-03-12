@@ -157,21 +157,25 @@ export const SignBitcoinTxView: FunctionComponent<{
         throw new Error("Can't find fee currency");
       }
 
-      let psbtHex = "";
-      let psbtsHexes: string[] = [];
-      if ("psbtHex" in interactionData.data) {
-        psbtHex = interactionData.data.psbtHex;
-      } else if ("psbtsHexes" in interactionData.data) {
-        psbtsHexes = interactionData.data.psbtsHexes;
-      } else {
-        throw new Error("Invalid interaction data");
+      if (validatedPsbts.length === 0) {
+        return;
+      }
+
+      const psbtSignData: {
+        psbtHex: string;
+        inputsToSign: number[];
+      }[] = [];
+
+      for (const psbt of validatedPsbts) {
+        psbtSignData.push({
+          psbtHex: psbt.psbt.toHex(),
+          inputsToSign: psbt.inputsToSign,
+        });
       }
 
       await signBitcoinTxInteractionStore.approveWithProceedNext(
         interactionData.id,
-        psbtHex,
-        "", // ledger로 서명된 signedPsbtHex가 들어감
-        psbtsHexes,
+        psbtSignData,
         [], // ledger로 서명된 signedPsbtHexes가 들어감
         async (proceedNext) => {
           if (!proceedNext) {

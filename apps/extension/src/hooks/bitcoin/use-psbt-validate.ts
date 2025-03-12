@@ -1,8 +1,13 @@
 import { IFeeConfig } from "@keplr-wallet/hooks-bitcoin";
 import { Dec } from "@keplr-wallet/unit";
-import { Psbt } from "bitcoinjs-lib";
+import { Psbt, Transaction } from "bitcoinjs-lib";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNativeSegwitUTXOs, useTaprootUTXOs } from "./use-utxos";
+import { fromOutputScript } from "bitcoinjs-lib/src/address";
+import {
+  useBitcoinAddresses,
+  useBitcoinNetworkConfig,
+} from "./use-bitcoin-network-config";
 
 export const usePsbtsValidate = (
   chainId: string,
@@ -13,6 +18,7 @@ export const usePsbtsValidate = (
   const [validatedPsbts, setValidatedPsbts] = useState<
     {
       psbt: Psbt;
+      inputsToSign: number[];
       feeAmount: Dec;
       validationError: Error | undefined;
     }[]
@@ -20,6 +26,10 @@ export const usePsbtsValidate = (
   const [validationError, setValidationError] = useState<Error | undefined>(
     undefined
   );
+
+  const { networkConfig } = useBitcoinNetworkConfig(chainId);
+  const { legacyAddress, nativeSegwitAddress, taprootAddress } =
+    useBitcoinAddresses(chainId);
 
   // extension 내부적으로는 각 주소 유형에 따른 utxo만을 사용하지만,
   // 외부에서 서명 요청이 들어온 경우 동일한 공개키에서 생선된 native segwit 주소와 taproot 주소의
@@ -42,14 +52,13 @@ export const usePsbtsValidate = (
       return;
     }
 
-    const availableUTXOs = new Map<string, number>();
-    // `${txid}:${vout}`을 유니크한 키로 사용하고, 값은 utxo의 값을 저장한다.
+    const availableUTXOs = new Set<string>();
     for (const utxo of nativeSegwitUTXOs) {
-      availableUTXOs.set(`${utxo.txid}:${utxo.vout}`, utxo.value);
+      availableUTXOs.add(`${utxo.txid}:${utxo.vout}`);
     }
 
     for (const utxo of taprootUTXOs) {
-      availableUTXOs.set(`${utxo.txid}:${utxo.vout}`, utxo.value);
+      availableUTXOs.add(`${utxo.txid}:${utxo.vout}`);
     }
 
     try {
@@ -58,37 +67,60 @@ export const usePsbtsValidate = (
       let totalOutputAmount = new Dec(0);
       const validatedPsbts: {
         psbt: Psbt;
+        inputsToSign: number[];
         feeAmount: Dec;
         validationError: Error | undefined;
       }[] = [];
 
       for (const psbt of psbts) {
-        const inputs = psbt.txInputs;
+        const txInputs = psbt.txInputs;
+        const rawInputs = psbt.data.inputs;
 
         let sumInputAmount = new Dec(0);
         let sumOutputAmount = new Dec(0);
+        const inputsToSign: number[] = [];
 
-        for (const input of inputs) {
-          const utxo = `${input.hash.reverse().toString("hex")}:${input.index}`;
+        for (const [index, input] of rawInputs.entries()) {
+          let script: any = null;
+          let value = 0;
 
-          // 소유하고 있지 않은 input을 사용하는 psbt는
-          // 여러 개의 서명이 필요하거나, 다른 주소의 utxo를 사용하는 경우일 수 있다.
-          // 따라서 오류를 반환하지 않고 무시한다.
-          // CHECK: 여러 개의 서명이 필요한 p2wsh, p2tr input인 경우 사용자의 서명이 필요한지 확인해야 한다.
-          if (!availableUTXOs.has(utxo)) {
-            // validatedPsbts.push({
-            //   psbt,
-            //   feeAmount: new Dec(0),
-            //   validationError: new Error(
-            //     `${utxo} is not owned, inscription, brc20, runes, etc.`
-            //   ),
-            // });
-            // continue;
+          if (input.witnessUtxo) {
+            script = input.witnessUtxo.script;
+            value = Number(input.witnessUtxo.value);
+          } else if (input.nonWitnessUtxo) {
+            const tx = Transaction.fromBuffer(input.nonWitnessUtxo);
+            const output = tx.outs[txInputs[index].index];
+            script = output.script;
+            value = Number(output.value);
           }
 
-          sumInputAmount = sumInputAmount.add(
-            new Dec(availableUTXOs.get(utxo) ?? 0)
-          );
+          const isSigned = input.finalScriptSig || input.finalScriptWitness;
+
+          if (script && !isSigned) {
+            const address = fromOutputScript(script, networkConfig);
+
+            if (
+              address in [legacyAddress, nativeSegwitAddress, taprootAddress]
+            ) {
+              inputsToSign.push(index);
+
+              const txInput = psbt.txInputs[index];
+              const key = `${txInput.hash.reverse().toString("hex")}:${
+                txInput.index
+              }`;
+
+              if (!availableUTXOs.has(key)) {
+                // 소유하고 있지 않은 input을 사용하는 psbt는
+                // 여러 개의 서명이 필요하거나, 다른 주소의 utxo를 사용하는 경우일 수 있다.
+                // 따라서 오류를 반환하지 않고 무시한다.
+                // CHECK: 여러 개의 서명이 필요한 p2wsh, p2tr input인 경우 사용자의 서명이 필요한지 확인해야 한다.
+              }
+            }
+          } else {
+            // CHECK: 다중 서명이 필요한 경우에 대한 처리가 필요할까?
+          }
+
+          sumInputAmount = sumInputAmount.add(new Dec(value));
         }
 
         // CHECK: output은 검증할 것이 있나?
@@ -103,6 +135,7 @@ export const usePsbtsValidate = (
         if (feeAmount.lte(new Dec(0))) {
           validatedPsbts.push({
             psbt,
+            inputsToSign,
             feeAmount: new Dec(0),
             validationError: new Error(
               "Invalid psbt: total input amount is less than total output amount"
@@ -111,6 +144,7 @@ export const usePsbtsValidate = (
         } else {
           validatedPsbts.push({
             psbt,
+            inputsToSign,
             feeAmount,
             validationError: undefined,
           });
@@ -135,7 +169,16 @@ export const usePsbtsValidate = (
       // psbt deserialize 오류 또는 전체 입력의 합이 출력의 합보다 작은 경우
       setValidationError(e as Error);
     }
-  }, [nativeSegwitUTXOs, taprootUTXOs, psbtsHexes, feeConfig]);
+  }, [
+    nativeSegwitUTXOs,
+    taprootUTXOs,
+    psbtsHexes,
+    feeConfig,
+    networkConfig,
+    legacyAddress,
+    nativeSegwitAddress,
+    taprootAddress,
+  ]);
 
   useEffect(() => {
     if (utxosAvailable && psbtsHexes.length > 0) {

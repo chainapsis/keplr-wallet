@@ -184,16 +184,25 @@ export class KeyRingBitcoinService {
         keyType: keyInfo.type,
         keyInsensitive: keyInfo.insensitive,
       },
-      async (res: { psbtsHexes: string[]; signedPsbtsHexes: string[] }) => {
+      async (res: {
+        psbtSignData: {
+          psbtHex: string;
+          inputsToSign: number[];
+        }[];
+        signedPsbtsHexes: string[];
+      }) => {
         if (res.signedPsbtsHexes) {
           return res.signedPsbtsHexes;
         }
 
-        const psbts = psbtsHexes.map((psbtHex) => Psbt.fromHex(psbtHex));
-
         const signedPsbts = await Promise.all(
-          psbts.map((psbt) =>
-            this.keyRingService.signPsbt(chainId, vaultId, psbt)
+          res.psbtSignData.map((psbtSignData) =>
+            this.keyRingService.signPsbt(
+              chainId,
+              vaultId,
+              Psbt.fromHex(psbtSignData.psbtHex),
+              psbtSignData.inputsToSign
+            )
           )
         );
 
@@ -233,17 +242,28 @@ export class KeyRingBitcoinService {
         keyType: keyInfo.type,
         keyInsensitive: keyInfo.insensitive,
       },
-      async (res: { psbtHex: string; signedPsbtHex: string }) => {
-        if (res.signedPsbtHex) {
-          return res.signedPsbtHex;
+      async (res: {
+        psbtSignData: {
+          psbtHex: string;
+          inputsToSign: number[];
+        }[];
+        signedPsbtsHexes: string[];
+      }) => {
+        if (res.signedPsbtsHexes && res.signedPsbtsHexes.length > 0) {
+          return res.signedPsbtsHexes[0];
         }
 
-        const psbt = Psbt.fromHex(psbtHex);
+        if (res.psbtSignData.length === 0) {
+          throw new KeplrError("keyring", 221, "No psbt sign data");
+        }
+
+        const psbt = Psbt.fromHex(res.psbtSignData[0].psbtHex, { network });
 
         const signedPsbt = await this.keyRingService.signPsbt(
           chainId,
           vaultId,
-          psbt
+          psbt,
+          res.psbtSignData[0].inputsToSign
         );
 
         return signedPsbt.toHex();
@@ -348,7 +368,8 @@ export class KeyRingBitcoinService {
         const signedPsbt = await this.keyRingService.signPsbt(
           chainId,
           vaultId,
-          txToSign
+          txToSign,
+          Array.from({ length: txToSign.data.inputs.length }, (_, i) => i)
         );
 
         return BIP322.encodeWitness(signedPsbt);
