@@ -6,7 +6,7 @@ import { useGetRunesOutputsByAddress } from "./use-get-runes-outputs";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { useMemo } from "react";
 
-export const useUTXOs = (
+export const useGetUTXOs = (
   chainId: string,
   address: string,
   inscriptionProtected: boolean
@@ -143,13 +143,13 @@ export const useUTXOs = (
   };
 };
 
-export const useNativeSegwitUTXOs = (chainId: string) => {
+export const useGetNativeSegwitUTXOs = (chainId: string) => {
   const { nativeSegwitAddress } = useBitcoinAddresses(chainId);
 
-  return useUTXOs(chainId, nativeSegwitAddress ?? "", false);
+  return useGetUTXOs(chainId, nativeSegwitAddress ?? "", false);
 };
 
-export const useTaprootUTXOs = (chainId: string) => {
+export const useGetTaprootUTXOs = (chainId: string) => {
   const { taprootAddress } = useBitcoinAddresses(chainId);
-  return useUTXOs(chainId, taprootAddress ?? "", true);
+  return useGetUTXOs(chainId, taprootAddress ?? "", true);
 };

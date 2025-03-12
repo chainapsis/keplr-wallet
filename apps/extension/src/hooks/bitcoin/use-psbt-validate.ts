@@ -2,7 +2,7 @@ import { IFeeConfig } from "@keplr-wallet/hooks-bitcoin";
 import { Dec } from "@keplr-wallet/unit";
 import { Psbt, Transaction } from "bitcoinjs-lib";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNativeSegwitUTXOs, useTaprootUTXOs } from "./use-utxos";
+import { useGetNativeSegwitUTXOs, useGetTaprootUTXOs } from "./use-get-utxos";
 import { fromOutputScript } from "bitcoinjs-lib/src/address";
 import { useBitcoinAddresses } from "./use-bitcoin-network-config";
 import { SignBitcoinTxInteractionStore } from "@keplr-wallet/stores-core";
@@ -65,12 +65,12 @@ export const usePsbtsValidate = (
     isFetching: isFetchingNativeSegwitUTXOs,
     error: nativeSegwitUtxosError,
     availableUTXOs: nativeSegwitAvailableUTXOs,
-  } = useNativeSegwitUTXOs(chainId);
+  } = useGetNativeSegwitUTXOs(chainId);
   const {
     isFetching: isFetchingTaprootUTXOs,
     error: taprootUtxosError,
     availableUTXOs: taprootAvailableUTXOs,
-  } = useTaprootUTXOs(chainId);
+  } = useGetTaprootUTXOs(chainId);
 
   const availableUTXOsSet = useMemo(() => {
     const utxoSet = new Set<string>();

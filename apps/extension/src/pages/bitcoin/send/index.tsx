@@ -189,24 +189,6 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
     sendConfigs.recipientConfig.uiProperties.error,
   ]);
 
-  // CHECK: refresh는 불필요할 것으로 보임. btc는 수수료가 빠른 주기로 업데이트되지 않기 때문
-  // const psbtSimulationRefresher = useLocalObservable(() => ({
-  //   count: 0,
-  //   increaseCount() {
-  //     this.count++;
-  //   },
-  // }));
-
-  // useEffect(() => {
-  //   // Refresh gas simulation every 12 seconds.
-  //   const interval = setInterval(
-  //     () => psbtSimulationRefresher.increaseCount(),
-  //     12000
-  //   );
-
-  //   return () => clearInterval(interval);
-  // }, [psbtSimulationRefresher]);
-
   const psbtSimulator = usePsbtSimulator(
     new ExtensionKVStore("psbt-simulator.bitcoin.send"),
     chainStore,
