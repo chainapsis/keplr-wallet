@@ -32,6 +32,22 @@ export const useGetUTXOs = (
 
   const confirmedUTXOs = queryUTXOs?.confirmedUTXOs || [];
 
+  const queryAddressTxs = bitcoinQueriesStore
+    .get(chainId)
+    .queryBitcoinAddressTxs.getTxs(chainId, chainStore, address);
+
+  const txs = queryAddressTxs?.response?.data ?? [];
+
+  // Get recently used UTXOs
+  const recentlyUsedUTXOs = txs.flatMap((tx) => {
+    return tx.vin.map((input) => {
+      return {
+        txid: input.txid,
+        vout: input.vout,
+      };
+    });
+  });
+
   // Extract inscribed UTXOs
   const inscribedUTXOs = inscriptionsPages
     ?.flatMap((page) => page.response?.data ?? [])
@@ -59,7 +75,7 @@ export const useGetUTXOs = (
 
   // Create lookup maps for faster filtering
   const protectedUTXOs = new Set(
-    [...inscribedUTXOs, ...runesUTXOs].map(
+    [...inscribedUTXOs, ...runesUTXOs, ...recentlyUsedUTXOs].map(
       (utxo) => `${utxo.txid}:${utxo.vout}`
     )
   );
