@@ -55,8 +55,7 @@ export class BitcoinAccountBase {
    * @param recipients Recipients of the transaction with amount and address
    * @param feeRate Transaction fee rate in sat/vB
    * @param isSendMax Whether to send max amount, do not calculate change output
-   * @param discardDustChange Whether to discard dust outputs
-   * @returns {selectedUtxos, txSize} Selected UTXOs and transaction size
+   * @returns {selectedUtxos, txSize, hasChange} Selected UTXOs and transaction size, whether there is change output
    */
   selectUTXOs({
     senderAddress,
@@ -64,7 +63,6 @@ export class BitcoinAccountBase {
     recipients,
     feeRate,
     isSendMax = false,
-    discardDustChange = true,
   }: SelectUTXOsParams): UTXOSelection | null {
     // 1. Basic validation
     if (!utxos.length || !recipients.length || feeRate <= 0) {
@@ -176,6 +174,8 @@ export class BitcoinAccountBase {
     let selectedUtxoIds: Set<string>;
 
     // 9. Select UTXOs using branch and bound algorithm
+    // Always try to avoid dust change by setting discardDustChange to false
+    // This will make the algorithm prioritize selections that result in non-dust change
     const branchAndBoundResult = this.branchAndBoundSelection({
       utxos: sortedUtxos,
       targetAmount,
@@ -183,11 +183,12 @@ export class BitcoinAccountBase {
       calculateFee,
       isDust,
       outputParams,
-      discardDustChange,
+      timeoutMs: BRANCH_AND_BOUND_TIMEOUT_MS,
     });
 
     if (!branchAndBoundResult) {
       // If branch and bound algorithm fails, use greedy selection
+      // Also prioritize non-dust change
       selectedUtxoIds = this.greedySelection({
         utxos: sortedUtxos,
         targetAmount,
@@ -195,7 +196,6 @@ export class BitcoinAccountBase {
         calculateFee,
         isDust,
         outputParams,
-        discardDustChange,
       });
     } else {
       selectedUtxoIds = branchAndBoundResult;
@@ -208,6 +208,8 @@ export class BitcoinAccountBase {
 
     // 10. Calculate final tx configuration
     const withChangeConfig = calculateTxConfig(selectedUtxoIds, true);
+
+    // Only include change if it's above dust threshold
     const hasChange = withChangeConfig.remainder.gte(DUST);
 
     // Final calculations based on whether we have change
@@ -489,9 +491,10 @@ export class BitcoinAccountBase {
     calculateFee,
     isDust,
     outputParams,
-    discardDustChange,
     timeoutMs,
-  }: SelectionParams): Set<string> | null {
+  }: Omit<SelectionParams, "discardDustChange"> & {
+    timeoutMs?: number;
+  }): Set<string> | null {
     // Algorithm execution time limit (ms)
     const TIMEOUT = timeoutMs ?? BRANCH_AND_BOUND_TIMEOUT_MS;
     const startTime = Date.now();
@@ -542,8 +545,18 @@ export class BitcoinAccountBase {
 
         const isDustRemainder = isDust(remainder);
 
-        // If remainder is greater than or equal to dust threshold, or remainder is less than dust threshold and discardDustChange is true
-        if (isDustRemainder || (!isDustRemainder && discardDustChange)) {
+        // Prioritize non-dust change outputs
+        // If remainder is not dust, consider it as a valid solution
+        if (!isDustRemainder) {
+          currentBest = {
+            utxoIds: new Set(currentSelection),
+            totalValue: currentValue,
+            effectiveValue: effectiveValueWithChange,
+            wastage: remainder,
+          };
+        } else {
+          // If remainder is dust, we'll still consider it but with lower priority
+          // We'll only use it if we can't find a better solution
           currentBest = {
             utxoIds: new Set(currentSelection),
             totalValue: currentValue,
@@ -599,7 +612,15 @@ export class BitcoinAccountBase {
       if (!withUtxo) return withoutUtxo;
       if (!withoutUtxo) return withUtxo;
 
-      // Select the path with less remainder
+      // Prioritize non-dust change outputs
+      const withUtxoDust = isDust(withUtxo.wastage);
+      const withoutUtxoDust = isDust(withoutUtxo.wastage);
+
+      // If one has non-dust change and the other has dust change, prefer the non-dust one
+      if (!withUtxoDust && withoutUtxoDust) return withUtxo;
+      if (withUtxoDust && !withoutUtxoDust) return withoutUtxo;
+
+      // If both have the same dust status, select the one with less wastage
       return withUtxo.wastage.lt(withoutUtxo.wastage) ? withUtxo : withoutUtxo;
     };
 
@@ -620,8 +641,7 @@ export class BitcoinAccountBase {
     calculateFee,
     isDust,
     outputParams,
-    discardDustChange,
-  }: SelectionParams): Set<string> {
+  }: Omit<SelectionParams, "discardDustChange">): Set<string> {
     const selectedUtxoIds = new Set<string>();
     let selectedAmount = new Dec(0);
 
@@ -639,11 +659,9 @@ export class BitcoinAccountBase {
       const remainder = selectedAmount.sub(targetAmount).sub(fee);
       const isDustRemainder = isDust(remainder);
 
-      // If target amount is satisfied and remainder is appropriate, stop
-      if (
-        selectedAmount.gte(targetAmount) &&
-        (isDustRemainder || (!isDustRemainder && discardDustChange))
-      ) {
+      // If target amount is satisfied and remainder is not dust, stop
+      // This prioritizes non-dust change outputs
+      if (selectedAmount.gte(targetAmount) && !isDustRemainder) {
         break;
       }
     }
@@ -668,6 +686,38 @@ export class BitcoinAccountBase {
         if (remainder.gte(new Dec(0))) {
           break;
         }
+      }
+    }
+
+    // 3. If we have a dust remainder, try to find a better combination
+    // that results in a non-dust remainder
+    if (isDust(remainder) && remainder.gt(new Dec(0))) {
+      // Try to find a UTXO that, when added, would result in a non-dust remainder
+      for (const utxo of utxos) {
+        const utxoId = `${utxo.txid}:${utxo.vout}`;
+        if (selectedUtxoIds.has(utxoId)) continue;
+
+        // Add this UTXO
+        selectedUtxoIds.add(utxoId);
+        const newAmount = selectedAmount.add(new Dec(utxo.value));
+
+        // Calculate new fee and remainder
+        const newTxSize = calculateTxSize(
+          selectedUtxoIds.size,
+          outputParams,
+          true
+        );
+        const newFee = calculateFee(newTxSize.txVBytes);
+        const newRemainder = newAmount.sub(targetAmount).sub(newFee);
+
+        // If the new remainder is not dust, keep this UTXO
+        if (!isDust(newRemainder) && newRemainder.gt(new Dec(0))) {
+          selectedAmount = newAmount;
+          break;
+        }
+
+        // Otherwise, remove this UTXO and try another one
+        selectedUtxoIds.delete(utxoId);
       }
     }
 

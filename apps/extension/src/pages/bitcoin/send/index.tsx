@@ -246,14 +246,6 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
         throw new Error("Not ready to simulate psbt");
       }
 
-      console.log(
-        "isFetchingAvailableUTXOs",
-        isFetchingAvailableUTXOs,
-        "availableUTXOsError",
-        availableUTXOsError,
-        "availableUTXOs",
-        availableUTXOs
-      );
       if (isFetchingAvailableUTXOs) {
         throw new Error("Fetching available utxos");
       }

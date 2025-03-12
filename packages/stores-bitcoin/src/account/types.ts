@@ -6,7 +6,6 @@ export interface SelectUTXOsParams {
   recipients: UTXOSelectionRecipient[];
   feeRate: number;
   isSendMax?: boolean;
-  discardDustChange?: boolean;
 }
 
 export interface SelectionParams {
@@ -24,7 +23,6 @@ export interface SelectionParams {
   calculateFee: (size: number) => Dec;
   isDust: (amount: Dec) => boolean;
   outputParams: Record<string, number>;
-  discardDustChange: boolean;
   timeoutMs?: number;
 }
 
