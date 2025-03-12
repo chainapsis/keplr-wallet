@@ -44,6 +44,7 @@ import { animated, useSpringValue, to } from "@react-spring/web";
 import { defaultSpringConfig } from "../../../../styles/spring";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { DecUtils, RatePretty } from "@keplr-wallet/unit";
+import { WrapperwithBottomTag } from "./wrapper-with-bottom-tag";
 
 const Styles = {
   Container: styled.div<{
@@ -53,6 +54,7 @@ const Styles = {
     disableHoverStyle?: boolean;
     isNotReady?: boolean;
   }>`
+    z-index: 2;
     background-color: ${(props) =>
       props.theme.mode === "light"
         ? props.isNotReady
@@ -145,6 +147,8 @@ export const TokenTitleView: FunctionComponent<{
   );
 };
 
+type BottomTagType = "nudgeEarn" | "showEarnSavings";
+
 interface TokenItemProps {
   viewToken: ViewToken;
   onClick?: () => void;
@@ -163,6 +167,9 @@ interface TokenItemProps {
   showPrice24HChange?: boolean;
   disableHoverStyle?: boolean;
   right?: React.ReactElement;
+
+  bottomTagType?: BottomTagType;
+  earnedAssetPrice?: string;
 }
 
 export const TokenItem: FunctionComponent<TokenItemProps> = observer(
@@ -178,6 +185,8 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
     showPrice24HChange,
     disableHoverStyle,
     right,
+    bottomTagType,
+    earnedAssetPrice,
   }) => {
     const { priceStore, price24HChangesStore, uiConfigStore } = useStore();
     const navigate = useNavigate();
@@ -246,7 +255,7 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
       );
     })();
 
-    return (
+    const TokenItemContent = () => (
       <Styles.Container
         forChange={forChange}
         isError={viewToken.error != null}
@@ -510,6 +519,19 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
         </Columns>
       </Styles.Container>
     );
+
+    if (bottomTagType) {
+      return (
+        <WrapperwithBottomTag
+          bottomTagType={bottomTagType as BottomTagType}
+          earnedAssetPrice={earnedAssetPrice}
+        >
+          <TokenItemContent />
+        </WrapperwithBottomTag>
+      );
+    }
+
+    return <TokenItemContent />;
   }
 );
 

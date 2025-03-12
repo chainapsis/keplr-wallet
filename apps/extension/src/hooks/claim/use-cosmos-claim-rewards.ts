@@ -18,6 +18,8 @@ import { isSimpleFetchError } from "@keplr-wallet/simple-fetch";
 import { ClaimAllEachState } from "./use-claim-all-each-state";
 import { useNotification } from "../notification";
 import { useNavigate } from "react-router";
+import { NOBLE_CHAIN_ID } from "../../config.ui";
+import { MakeTxResponse } from "@keplr-wallet/stores";
 
 const zeroDec = new Dec(0);
 // TODO: Add below property to config.ui.ts
@@ -42,23 +44,40 @@ export const useCosmosClaimRewards = () => {
     }
 
     const queries = queriesStore.get(chainId);
-    const queryRewards = queries.cosmos.queryRewards.getQueryBech32Address(
-      account.bech32Address
-    );
 
-    const validatorAddresses =
-      queryRewards.getDescendingPendingRewardValidatorAddresses(
-        account.isNanoLedger ? 5 : 8
-      );
+    const txOrNull = (() => {
+      if (
+        chainId === NOBLE_CHAIN_ID &&
+        rewardToken.currency.coinMinimalDenom === "uusdn"
+      ) {
+        return account.noble.makeClaimYieldTx("withdrawRewards");
+      } else {
+        const queryRewards = queries.cosmos.queryRewards.getQueryBech32Address(
+          account.bech32Address
+        );
 
-    if (validatorAddresses.length === 0) {
+        const validatorAddresses =
+          queryRewards.getDescendingPendingRewardValidatorAddresses(
+            account.isNanoLedger ? 5 : 8
+          );
+
+        if (validatorAddresses.length === 0) {
+          return;
+        }
+
+        return account.cosmos.makeWithdrawDelegationRewardTx(
+          validatorAddresses
+        );
+      }
+    })();
+
+    if (!txOrNull) {
       return;
     }
 
-    state.setIsLoading(true);
+    const tx = txOrNull;
 
-    const tx =
-      account.cosmos.makeWithdrawDelegationRewardTx(validatorAddresses);
+    state.setIsLoading(true);
 
     (async () => {
       // feemarket feature가 있는 경우 이후의 로직에서 사용할 수 있는 fee currency를 찾아야하기 때문에 undefined로 시작시킨다.
@@ -288,7 +307,10 @@ export const useCosmosClaimRewards = () => {
           // Gas adjustment is 1.5
           // Since there is currently no convenient way to adjust the gas adjustment on the UI,
           // Use high gas adjustment to prevent failure.
-          const gasEstimated = new Dec(simulated.gasUsed * 1.5).truncate();
+          const adjustment = chainId === NOBLE_CHAIN_ID ? 1.8 : 1.5;
+          const gasEstimated = new Dec(
+            simulated.gasUsed * adjustment
+          ).truncate();
           let fee = {
             denom: feeCurrency.coinMinimalDenom,
             amount: new Dec(feeCurrency.gasPriceStep?.average ?? 0.025)
@@ -522,23 +544,52 @@ export const useCosmosClaimRewards = () => {
     }
 
     const queries = queriesStore.get(chainId);
-    const queryRewards = queries.cosmos.queryRewards.getQueryBech32Address(
-      account.bech32Address
-    );
+    const txAndGasOrNull: { tx: MakeTxResponse; gas: Int } | undefined =
+      (() => {
+        if (
+          chainId === NOBLE_CHAIN_ID
+          // XXX: 흠 뭐 noble은 어차피 staking이 안되기 때문에
+          //      밑의 처리를 하려면 interface를 바꿔야하는데 굳이 그럴 필요는 없을 것 같아서 그냥 주석 처리...
+          // && viewToken.token.currency.coinMinimalDenom === "uusdn"
+        ) {
+          const tx = account.noble.makeClaimYieldTx("withdrawRewards");
+          return {
+            tx,
+            gas: new Int(100000),
+          };
+        } else {
+          const queryRewards =
+            queries.cosmos.queryRewards.getQueryBech32Address(
+              account.bech32Address
+            );
 
-    const validatorAddresses =
-      queryRewards.getDescendingPendingRewardValidatorAddresses(
-        account.isNanoLedger ? 5 : 8
-      );
+          const validatorAddresses =
+            queryRewards.getDescendingPendingRewardValidatorAddresses(
+              account.isNanoLedger ? 5 : 8
+            );
 
-    if (validatorAddresses.length === 0) {
+          if (validatorAddresses.length === 0) {
+            return;
+          }
+          const tx =
+            account.cosmos.makeWithdrawDelegationRewardTx(validatorAddresses);
+
+          const gas = new Int(
+            validatorAddresses.length * defaultGasPerDelegation
+          );
+          return {
+            tx,
+            gas,
+          };
+        }
+      })();
+
+    if (!txAndGasOrNull) {
       return;
     }
 
-    const tx =
-      account.cosmos.makeWithdrawDelegationRewardTx(validatorAddresses);
-
-    let gas = new Int(validatorAddresses.length * defaultGasPerDelegation);
+    const tx = txAndGasOrNull.tx;
+    let gas = txAndGasOrNull.gas;
 
     try {
       state.setIsSimulating(true);
@@ -548,7 +599,8 @@ export const useCosmosClaimRewards = () => {
       // Gas adjustment is 1.5
       // Since there is currently no convenient way to adjust the gas adjustment on the UI,
       // Use high gas adjustment to prevent failure.
-      gas = new Dec(simulated.gasUsed * 1.5).truncate();
+      const adjustment = chainId === NOBLE_CHAIN_ID ? 1.8 : 1.5;
+      gas = new Dec(simulated.gasUsed * adjustment).truncate();
     } catch (e) {
       console.log(e);
     }

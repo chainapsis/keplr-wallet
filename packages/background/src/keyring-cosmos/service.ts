@@ -428,7 +428,7 @@ export class KeyRingCosmosService {
         throw new Error("Invalid msg type");
       }
       const action = msg.type.slice(i + 1);
-      if (action !== "MsgWithdrawDelegationReward") {
+      if (action !== "MsgWithdrawDelegationReward" && action !== "ClaimYield") {
         throw new Error("Invalid msg type");
       }
     }

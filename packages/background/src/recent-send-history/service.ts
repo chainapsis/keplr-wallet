@@ -1157,7 +1157,8 @@ export class RecentSendHistoryService {
       currencies: AppCurrency[];
     },
     routeDurationSeconds: number = 0,
-    txHash: string
+    txHash: string,
+    isOnlyUseBridge?: boolean
   ): string {
     const id = (this.recentIBCHistorySeq++).toString();
 
@@ -1176,6 +1177,7 @@ export class RecentSendHistoryService {
       routeIndex: -1,
       resAmount: [],
       timestamp: Date.now(),
+      isOnlyUseBridge,
     };
 
     this.recentSkipHistoryMap.set(id, history);

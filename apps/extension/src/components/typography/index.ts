@@ -1,5 +1,7 @@
 export * from "./base";
 
+export * from "./mobile-h3";
+
 export * from "./h1";
 export * from "./h2";
 export * from "./h3";

@@ -36,14 +36,15 @@ import SimpleBar from "simplebar-react";
 import { useTheme } from "styled-components";
 import { dispatchGlobalEventExceptSelf } from "../../../utils/global-events";
 import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
+import { checkButtonPositionAndScrollToButton } from "../utils/check-button-position-and-scroll-to-button";
 import { EmbedChainInfos } from "../../../config";
 import { useGetAllNonNativeChain } from "../../../hooks/use-get-all-non-native-chain";
 import { hexToRgba } from "../../../utils";
-import { ChainItem } from "./components/chain-item";
 import { NativeChainSection } from "./components/native-chain-section";
 import { NativeChainSectionIconDM } from "./components/native-chain-section-icon-dm";
 import { NativeChainSectionIconLM } from "./components/native-chain-section-icon-lm";
 import { NextStepChainItem } from "./components/next-step-chain-item";
+import { ChainItem } from "./components/chain-item";
 
 /**
  * EnableChainsScene은 finalize-key scene에서 선택한 chains를 활성화하는 scene이다.
@@ -96,6 +97,8 @@ export const EnableChainsScene: FunctionComponent<{
     const theme = useTheme();
 
     const searchRef = useRef<HTMLInputElement | null>(null);
+    const buttonContainerRef = useRef<HTMLDivElement>(null);
+    useScrollDownWhenCantSeeSaveButton(buttonContainerRef);
 
     const nativeChainIdentifierSet = useMemo(
       () =>
@@ -1473,235 +1476,269 @@ export const EnableChainsScene: FunctionComponent<{
 
         <Gutter size="1.25rem" />
         <Box width="22.5rem" marginX="auto">
-          <Button
-            text={intl.formatMessage({
-              id: "button.save",
-            })}
-            size="large"
-            onClick={async () => {
-              const enables: string[] = [];
-              const disables: string[] = [];
-              const successSuggestChainIdentifiers: string[] = [];
+          <div ref={buttonContainerRef}>
+            <Button
+              text={intl.formatMessage({
+                id: "button.save",
+              })}
+              size="large"
+              onClick={async () => {
+                const enables: string[] = [];
+                const disables: string[] = [];
+                const successSuggestChainIdentifiers: string[] = [];
 
-              if (nonNativeChainListForSuggest.length > 0) {
-                for (const chainInfo of nonNativeChainListForSuggest) {
+                if (nonNativeChainListForSuggest.length > 0) {
+                  for (const chainInfo of nonNativeChainListForSuggest) {
+                    try {
+                      await window.keplr?.experimentalSuggestChain(
+                        chainInfo as ChainInfo
+                      );
+                      successSuggestChainIdentifiers.push(
+                        ChainIdHelper.parse(chainInfo.chainId).identifier
+                      );
+                    } catch {
+                      console.error(
+                        `Failed to suggest chain ${chainInfo.chainId}`
+                      );
+                      continue;
+                    }
+                  }
                   try {
-                    await window.keplr?.experimentalSuggestChain(
-                      chainInfo as ChainInfo
-                    );
-                    successSuggestChainIdentifiers.push(
-                      ChainIdHelper.parse(chainInfo.chainId).identifier
+                    await keyRingStore.refreshKeyRingStatus();
+                    await chainStore.updateChainInfosFromBackground();
+                    await chainStore.updateEnabledChainIdentifiersFromBackground();
+                    dispatchGlobalEventExceptSelf(
+                      "keplr_suggested_chain_added"
                     );
                   } catch {
                     console.error(
-                      `Failed to suggest chain ${chainInfo.chainId}`
-                    );
-                    continue;
-                  }
-                }
-                try {
-                  await keyRingStore.refreshKeyRingStatus();
-                  await chainStore.updateChainInfosFromBackground();
-                  await chainStore.updateEnabledChainIdentifiersFromBackground();
-                  dispatchGlobalEventExceptSelf("keplr_suggested_chain_added");
-                } catch {
-                  console.error(
-                    "Failed to suggest chain",
-                    successSuggestChainIdentifiers
-                  );
-                }
-
-                enables.push(...successSuggestChainIdentifiers);
-              }
-
-              for (const modularChainInfo of chainStore.modularChainInfos) {
-                const chainIdentifier = ChainIdHelper.parse(
-                  modularChainInfo.chainId
-                ).identifier;
-                const enabled =
-                  enabledChainIdentifierMap.get(chainIdentifier) || false;
-
-                if (enabled) {
-                  enables.push(chainIdentifier);
-                } else {
-                  //NOTE - 위에서 suggest 체인이 추가되었으면
-                  //이 체인은 disable 하면 안되기 때문에 무시함
-                  if (
-                    successSuggestChainIdentifiers.some(
-                      (c) => c === chainIdentifier
-                    )
-                  ) {
-                    continue;
-                  }
-
-                  disables.push(chainIdentifier);
-                }
-              }
-
-              const needFinalizeCoinType: string[] = [];
-              for (let i = 0; i < enables.length; i++) {
-                const enable = enables[i];
-                const modularChainInfo = chainStore.getModularChain(enable);
-                if ("cosmos" in modularChainInfo) {
-                  const chainInfo = chainStore.getChain(enable);
-                  if (
-                    keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo)
-                  ) {
-                    // Remove enable from enables
-                    enables.splice(i, 1);
-                    i--;
-                    // And push it disables
-                    disables.push(enable);
-
-                    needFinalizeCoinType.push(enable);
-                  }
-                }
-              }
-
-              const ledgerEthereumAppNeeds: string[] = [];
-              for (let i = 0; i < enables.length; i++) {
-                if (!fallbackEthereumLedgerApp) {
-                  break;
-                }
-
-                const enable = enables[i];
-                const modularChainInfo = chainStore.getModularChain(enable);
-
-                if ("cosmos" in modularChainInfo) {
-                  const chainInfo = chainStore.getChain(enable);
-                  const isEthermintLike =
-                    chainInfo.bip44.coinType === 60 ||
-                    !!chainInfo.features?.includes("eth-address-gen") ||
-                    !!chainInfo.features?.includes("eth-key-sign");
-
-                  if (isEthermintLike) {
-                    // 참고로 위에서 chainInfos memo로 인해서 막혀있기 때문에
-                    // 여기서 throwErrorIfEthermintWithLedgerButNotSupported 확인은 생략한다.
-                    // Remove enable from enables
-                    enables.splice(i, 1);
-                    i--;
-                    // And push it disables
-                    disables.push(enable);
-
-                    ledgerEthereumAppNeeds.push(enable);
-                  }
-                }
-              }
-
-              const ledgerStarknetAppNeeds: string[] = [];
-              for (let i = 0; i < enables.length; i++) {
-                if (!fallbackStarknetLedgerApp) {
-                  break;
-                }
-
-                const enable = enables[i];
-                const modularChainInfo = chainStore.getModularChain(enable);
-
-                if ("starknet" in modularChainInfo) {
-                  // Remove enable from enables
-                  enables.splice(i, 1);
-                  i--;
-                  // And push it disables
-                  disables.push(enable);
-
-                  ledgerStarknetAppNeeds.push(enable);
-                }
-              }
-              await Promise.all([
-                (async () => {
-                  if (enables.length > 0) {
-                    await chainStore.enableChainInfoInUIWithVaultId(
-                      vaultId,
-                      ...enables
+                      "Failed to suggest chain",
+                      successSuggestChainIdentifiers
                     );
                   }
-                })(),
-                (async () => {
-                  if (disables.length > 0) {
-                    await chainStore.disableChainInfoInUIWithVaultId(
-                      vaultId,
-                      ...disables
-                    );
-                  }
-                })(),
-              ]);
 
-              dispatchGlobalEventExceptSelf(
-                "keplr_enabled_chain_changed",
-                vaultId
-              );
+                  enables.push(...successSuggestChainIdentifiers);
+                }
 
-              if (needFinalizeCoinType.length > 0) {
-                sceneMovedToSelectDerivation.current = true;
-                sceneTransition.replace("select-derivation-path", {
-                  vaultId,
-                  chainIds: needFinalizeCoinType,
+                for (const modularChainInfo of chainStore.modularChainInfos) {
+                  const chainIdentifier = ChainIdHelper.parse(
+                    modularChainInfo.chainId
+                  ).identifier;
+                  const enabled =
+                    enabledChainIdentifierMap.get(chainIdentifier) || false;
 
-                  totalCount: needFinalizeCoinType.length,
-
-                  skipWelcome,
-                });
-              } else {
-                // 어차피 bip44 coin type selection과 ethereum ledger app이 동시에 필요한 경우는 없다.
-                // (ledger에서는 coin type이 app당 할당되기 때문에...)
-                if (keyType === "ledger") {
-                  if (fallbackStarknetLedgerApp) {
-                    if (ledgerStarknetAppNeeds.length > 0) {
-                      const keyInfo = keyRingStore.keyInfos.find(
-                        (keyInfo) => keyInfo.id === vaultId
-                      );
-
-                      if (!keyInfo) {
-                        throw new Error("KeyInfo not found");
-                      }
-                      if (keyInfo.insensitive["Starknet"]) {
-                        await chainStore.enableChainInfoInUI(
-                          ...ledgerStarknetAppNeeds
-                        );
-                        dispatchGlobalEventExceptSelf(
-                          "keplr_enabled_chain_changed",
-                          keyInfo.id
-                        );
-                        replaceToWelcomePage();
-                      } else {
-                        const bip44Path = keyInfo.insensitive["bip44Path"];
-                        if (!bip44Path) {
-                          throw new Error("bip44Path not found");
-                        }
-
-                        sceneTransition.push("connect-ledger", {
-                          name: "",
-                          password: "",
-                          app: "Starknet",
-                          bip44Path,
-
-                          appendModeInfo: {
-                            vaultId,
-                            afterEnableChains: ledgerStarknetAppNeeds,
-                          },
-                          stepPrevious: stepPrevious,
-                          stepTotal: stepTotal,
-                        });
-                      }
-                    } else {
-                      replaceToWelcomePage();
+                  if (enabled) {
+                    enables.push(chainIdentifier);
+                  } else {
+                    //NOTE - 위에서 suggest 체인이 추가되었으면
+                    //이 체인은 disable 하면 안되기 때문에 무시함
+                    if (
+                      successSuggestChainIdentifiers.some(
+                        (c) => c === chainIdentifier
+                      )
+                    ) {
+                      continue;
                     }
-                  } else if (fallbackEthereumLedgerApp) {
-                    if (ledgerEthereumAppNeeds.length > 0) {
-                      const keyInfo = keyRingStore.keyInfos.find(
-                        (keyInfo) => keyInfo.id === vaultId
+
+                    disables.push(chainIdentifier);
+                  }
+                }
+
+                const needFinalizeCoinType: string[] = [];
+                for (let i = 0; i < enables.length; i++) {
+                  const enable = enables[i];
+                  const modularChainInfo = chainStore.getModularChain(enable);
+                  if ("cosmos" in modularChainInfo) {
+                    const chainInfo = chainStore.getChain(enable);
+                    if (
+                      keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo)
+                    ) {
+                      // Remove enable from enables
+                      enables.splice(i, 1);
+                      i--;
+                      // And push it disables
+                      disables.push(enable);
+
+                      needFinalizeCoinType.push(enable);
+                    }
+                  }
+                }
+
+                const ledgerEthereumAppNeeds: string[] = [];
+                for (let i = 0; i < enables.length; i++) {
+                  if (!fallbackEthereumLedgerApp) {
+                    break;
+                  }
+
+                  const enable = enables[i];
+                  const modularChainInfo = chainStore.getModularChain(enable);
+
+                  if ("cosmos" in modularChainInfo) {
+                    const chainInfo = chainStore.getChain(enable);
+                    const isEthermintLike =
+                      chainInfo.bip44.coinType === 60 ||
+                      !!chainInfo.features?.includes("eth-address-gen") ||
+                      !!chainInfo.features?.includes("eth-key-sign");
+
+                    if (isEthermintLike) {
+                      // 참고로 위에서 chainInfos memo로 인해서 막혀있기 때문에
+                      // 여기서 throwErrorIfEthermintWithLedgerButNotSupported 확인은 생략한다.
+                      // Remove enable from enables
+                      enables.splice(i, 1);
+                      i--;
+                      // And push it disables
+                      disables.push(enable);
+
+                      ledgerEthereumAppNeeds.push(enable);
+                    }
+                  }
+                }
+
+                const ledgerStarknetAppNeeds: string[] = [];
+                for (let i = 0; i < enables.length; i++) {
+                  if (!fallbackStarknetLedgerApp) {
+                    break;
+                  }
+
+                  const enable = enables[i];
+                  const modularChainInfo = chainStore.getModularChain(enable);
+
+                  if ("starknet" in modularChainInfo) {
+                    // Remove enable from enables
+                    enables.splice(i, 1);
+                    i--;
+                    // And push it disables
+                    disables.push(enable);
+
+                    ledgerStarknetAppNeeds.push(enable);
+                  }
+                }
+
+                await Promise.all([
+                  (async () => {
+                    if (enables.length > 0) {
+                      await chainStore.enableChainInfoInUIWithVaultId(
+                        vaultId,
+                        ...enables
                       );
-                      if (!keyInfo) {
-                        throw new Error("KeyInfo not found");
+                    }
+                  })(),
+                  (async () => {
+                    if (disables.length > 0) {
+                      await chainStore.disableChainInfoInUIWithVaultId(
+                        vaultId,
+                        ...disables
+                      );
+                    }
+                  })(),
+                ]);
+
+                dispatchGlobalEventExceptSelf(
+                  "keplr_enabled_chain_changed",
+                  vaultId
+                );
+
+                if (needFinalizeCoinType.length > 0) {
+                  sceneMovedToSelectDerivation.current = true;
+                  sceneTransition.replace("select-derivation-path", {
+                    vaultId,
+                    chainIds: needFinalizeCoinType,
+
+                    totalCount: needFinalizeCoinType.length,
+
+                    skipWelcome,
+                  });
+                } else {
+                  // 어차피 bip44 coin type selection과 ethereum ledger app이 동시에 필요한 경우는 없다.
+                  // (ledger에서는 coin type이 app당 할당되기 때문에...)
+                  if (keyType === "ledger") {
+                    if (fallbackStarknetLedgerApp) {
+                      if (ledgerStarknetAppNeeds.length > 0) {
+                        const keyInfo = keyRingStore.keyInfos.find(
+                          (keyInfo) => keyInfo.id === vaultId
+                        );
+
+                        if (!keyInfo) {
+                          throw new Error("KeyInfo not found");
+                        }
+                        if (keyInfo.insensitive["Starknet"]) {
+                          await chainStore.enableChainInfoInUI(
+                            ...ledgerStarknetAppNeeds
+                          );
+                          dispatchGlobalEventExceptSelf(
+                            "keplr_enabled_chain_changed",
+                            keyInfo.id
+                          );
+                          replaceToWelcomePage();
+                        } else {
+                          const bip44Path = keyInfo.insensitive["bip44Path"];
+                          if (!bip44Path) {
+                            throw new Error("bip44Path not found");
+                          }
+
+                          sceneTransition.push("connect-ledger", {
+                            name: "",
+                            password: "",
+                            app: "Starknet",
+                            bip44Path,
+
+                            appendModeInfo: {
+                              vaultId,
+                              afterEnableChains: ledgerStarknetAppNeeds,
+                            },
+                            stepPrevious: stepPrevious,
+                            stepTotal: stepTotal,
+                          });
+                        }
+                      } else {
+                        replaceToWelcomePage();
                       }
-                      if (keyInfo.insensitive["Ethereum"]) {
-                        await chainStore.enableChainInfoInUI(
-                          ...ledgerEthereumAppNeeds
+                    } else if (fallbackEthereumLedgerApp) {
+                      if (ledgerEthereumAppNeeds.length > 0) {
+                        const keyInfo = keyRingStore.keyInfos.find(
+                          (keyInfo) => keyInfo.id === vaultId
                         );
-                        dispatchGlobalEventExceptSelf(
-                          "keplr_enabled_chain_changed",
-                          keyInfo.id
-                        );
+                        if (!keyInfo) {
+                          throw new Error("KeyInfo not found");
+                        }
+                        if (keyInfo.insensitive["Ethereum"]) {
+                          await chainStore.enableChainInfoInUI(
+                            ...ledgerEthereumAppNeeds
+                          );
+                          dispatchGlobalEventExceptSelf(
+                            "keplr_enabled_chain_changed",
+                            keyInfo.id
+                          );
+                          sceneTransition.push("enable-chains", {
+                            vaultId,
+                            keyType,
+                            candidateAddresses: [],
+                            isFresh: false,
+                            skipWelcome,
+                            fallbackStarknetLedgerApp: true,
+                            stepPrevious: stepPrevious + 1,
+                            stepTotal: stepTotal,
+                          });
+                        } else {
+                          const bip44Path = keyInfo.insensitive["bip44Path"];
+                          if (!bip44Path) {
+                            throw new Error("bip44Path not found");
+                          }
+                          sceneTransition.push("connect-ledger", {
+                            name: "",
+                            password: "",
+                            app: "Ethereum",
+                            bip44Path,
+
+                            appendModeInfo: {
+                              vaultId,
+                              afterEnableChains: ledgerEthereumAppNeeds,
+                            },
+                            stepPrevious: stepPrevious,
+                            stepTotal: stepTotal,
+                          });
+                        }
+                      } else {
                         sceneTransition.push("enable-chains", {
                           vaultId,
                           keyType,
@@ -1712,24 +1749,6 @@ export const EnableChainsScene: FunctionComponent<{
                           stepPrevious: stepPrevious + 1,
                           stepTotal: stepTotal,
                         });
-                      } else {
-                        const bip44Path = keyInfo.insensitive["bip44Path"];
-                        if (!bip44Path) {
-                          throw new Error("bip44Path not found");
-                        }
-                        sceneTransition.push("connect-ledger", {
-                          name: "",
-                          password: "",
-                          app: "Ethereum",
-                          bip44Path,
-
-                          appendModeInfo: {
-                            vaultId,
-                            afterEnableChains: ledgerEthereumAppNeeds,
-                          },
-                          stepPrevious: stepPrevious,
-                          stepTotal: stepTotal,
-                        });
                       }
                     } else {
                       sceneTransition.push("enable-chains", {
@@ -1738,29 +1757,19 @@ export const EnableChainsScene: FunctionComponent<{
                         candidateAddresses: [],
                         isFresh: false,
                         skipWelcome,
-                        fallbackStarknetLedgerApp: true,
+                        fallbackEthereumLedgerApp: true,
                         stepPrevious: stepPrevious + 1,
                         stepTotal: stepTotal,
                       });
                     }
                   } else {
-                    sceneTransition.push("enable-chains", {
-                      vaultId,
-                      keyType,
-                      candidateAddresses: [],
-                      isFresh: false,
-                      skipWelcome,
-                      fallbackEthereumLedgerApp: true,
-                      stepPrevious: stepPrevious + 1,
-                      stepTotal: stepTotal,
-                    });
+                    replaceToWelcomePage();
                   }
-                } else {
-                  replaceToWelcomePage();
                 }
-              }
-            }}
-          />
+              }}
+            />
+          </div>
+
           {fallbackEthereumLedgerApp || fallbackStarknetLedgerApp ? (
             <React.Fragment>
               <Gutter size="0.75rem" />
@@ -1790,3 +1799,14 @@ export const EnableChainsScene: FunctionComponent<{
     );
   }
 );
+
+function useScrollDownWhenCantSeeSaveButton(
+  ref: React.RefObject<HTMLDivElement>
+) {
+  useEffectOnce(() => {
+    setTimeout(() => {
+      checkButtonPositionAndScrollToButton(ref);
+      // NOTE - the time is set arbitrarily to waiting for chains to be loaded
+    }, 500);
+  });
+}

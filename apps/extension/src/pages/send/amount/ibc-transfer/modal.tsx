@@ -16,15 +16,23 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { EmptyView } from "../../../../components/empty-view";
 import { HomeIcon } from "../../../../components/icon";
 import { WalletStatus } from "@keplr-wallet/stores";
+import { IBCChannel, NoneIBCBridgeInfo } from "@keplr-wallet/stores-internal";
+import { AppCurrency } from "@keplr-wallet/types";
+import { SendType } from "..";
+import { DenomHelper } from "@keplr-wallet/common";
 
 export const IBCTransferSelectDestinationModal: FunctionComponent<{
   chainId: string;
   denom: string;
   recipientConfig: IRecipientConfig;
+  recipientConfigForBridge: IRecipientConfig;
   ibcChannelConfig: IIBCChannelConfig;
-  setIsIBCTransfer: (value: boolean) => void;
+  setSendType: (value: SendType) => void;
   close: () => void;
-
+  setDestinationChainInfoOfBridge: (value: {
+    chainId: string;
+    currency: AppCurrency;
+  }) => void;
   // 이 컴포넌트는 사실 send page에서만 쓰이기 때문에 사용하는 쪽에서 필요한 로직을 위해서 몇몇 이상한(?) prop을 넘겨준다.
   // setAutomaticRecipient는 send page에서 recipient가 자동으로 설정되었을때 유저에게 UI를 보여주기 위해서 필요하다.
   setAutomaticRecipient: (address: string) => void;
@@ -46,16 +54,24 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
     chainId,
     denom,
     recipientConfig,
+    recipientConfigForBridge,
     ibcChannelConfig,
-    setIsIBCTransfer,
+    setSendType,
     close,
     setAutomaticRecipient,
     setIBCChannelsInfoFluent,
+    setDestinationChainInfoOfBridge,
   }) => {
     const { accountStore, chainStore, skipQueriesStore } = useStore();
 
     const theme = useTheme();
     const intl = useIntl();
+
+    const bridgeInfos: (NoneIBCBridgeInfo | IBCChannel)[] =
+      skipQueriesStore.queryIBCPacketForwardingTransfer.getBridges(
+        chainId,
+        denom
+      );
 
     const channels =
       skipQueriesStore.queryIBCPacketForwardingTransfer.getIBCChannels(
@@ -63,11 +79,21 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
         denom
       );
 
+    const bridgeOrIBCList = bridgeInfos.concat(channels).sort((a, b) => {
+      // Sort by chain name.
+      return chainStore
+        .getChain(a.destinationChainId)
+        .chainName.trim()
+        .localeCompare(
+          chainStore.getChain(b.destinationChainId).chainName.trim()
+        );
+    });
+
     const [search, setSearch] = useState("");
 
     const searchRef = useFocusOnMount<HTMLInputElement>();
 
-    const filteredChannels = channels.filter((c) => {
+    const filteredChannels = bridgeOrIBCList.filter((c) => {
       const chainInfo = chainStore.getChain(c.destinationChainId);
       return chainInfo.chainName
         .trim()
@@ -124,8 +150,15 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
           ) : null}
           {filteredChannels
             .sort((a, b) => {
-              const aIsToOrigin = a.destinationChainId === a.originChainId;
-              const bIsToOrigin = b.destinationChainId === b.originChainId;
+              const isIBCChainOfA = "originChainId" in a;
+              const isIBCChainOfB = "originChainId" in b;
+
+              const aIsToOrigin = isIBCChainOfA
+                ? a.destinationChainId === a.originChainId
+                : false;
+              const bIsToOrigin = isIBCChainOfB
+                ? b.destinationChainId === b.originChainId
+                : false;
 
               if (aIsToOrigin && !bIsToOrigin) {
                 return -1;
@@ -137,11 +170,16 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
 
               return 0;
             })
-            .map((channel) => {
-              const isToOrigin =
-                channel.destinationChainId === channel.originChainId;
+            .map((bridgeOrChannel) => {
+              const isIBCChain = "originChainId" in bridgeOrChannel;
+              const isToOrigin = isIBCChain
+                ? bridgeOrChannel.destinationChainId ===
+                  bridgeOrChannel.originChainId
+                : false;
 
-              const chainInfo = chainStore.getChain(channel.destinationChainId);
+              const chainInfo = chainStore.getChain(
+                bridgeOrChannel.destinationChainId
+              );
 
               return (
                 <Box
@@ -160,10 +198,58 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
                   onClick={async (e) => {
                     e.preventDefault();
 
-                    if (channel.channels.length > 0) {
+                    const isIBCChain = "channels" in bridgeOrChannel;
+
+                    if (!isIBCChain) {
+                      const isEVMOnlyChain = chainStore.isEvmOnlyChain(
+                        bridgeOrChannel.destinationChainId
+                      );
+                      const isEvmChain = chainStore.isEvmChain(chainId);
+
+                      const sendingDenomHelper = new DenomHelper(
+                        bridgeOrChannel.denom
+                      );
+                      const isERC20 = sendingDenomHelper.type === "erc20";
+
+                      const isDestinationEvmAddress =
+                        isEVMOnlyChain || (isERC20 && isEvmChain);
+
+                      const account = accountStore.getAccount(
+                        bridgeOrChannel.destinationChainId
+                      );
+
+                      if (account.walletStatus === WalletStatus.NotInit) {
+                        await account.init();
+                      }
+
+                      setDestinationChainInfoOfBridge({
+                        chainId: bridgeOrChannel.destinationChainId,
+                        currency: chainInfo.forceFindCurrency(
+                          bridgeOrChannel.denom
+                        ),
+                      });
+                      setSendType("bridge");
+
+                      if (isDestinationEvmAddress) {
+                        recipientConfigForBridge.setValue(
+                          account.ethereumHexAddress
+                        );
+                        setAutomaticRecipient(account.ethereumHexAddress);
+                      } else {
+                        recipientConfigForBridge.setValue(
+                          account.bech32Address
+                        );
+                        setAutomaticRecipient(account.bech32Address);
+                      }
+                      close();
+                      return;
+                    }
+
+                    if (bridgeOrChannel.channels.length > 0) {
                       const lastChainId =
-                        channel.channels[channel.channels.length - 1]
-                          .counterpartyChainId;
+                        bridgeOrChannel.channels[
+                          bridgeOrChannel.channels.length - 1
+                        ].counterpartyChainId;
 
                       const account = accountStore.getAccount(lastChainId);
 
@@ -171,9 +257,9 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
                         await account.init();
                       }
 
-                      setIsIBCTransfer(true);
-                      ibcChannelConfig.setChannels(channel.channels);
-                      setIBCChannelsInfoFluent(channel);
+                      setSendType("ibc-transfer");
+                      ibcChannelConfig.setChannels(bridgeOrChannel.channels);
+                      setIBCChannelsInfoFluent(bridgeOrChannel);
                       // ledger에서 evmos, injective같은 경우는 유저가 먼저 ethereum app을 init 해놓지 않으면 주소를 가져올 수 없음.
                       // 이런 경우 때문에 채널은 무조건 설정해주고 account는 loaded됐을때만 주소를 설정한다.
                       if (account.walletStatus === WalletStatus.Loaded) {

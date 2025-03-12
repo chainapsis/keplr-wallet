@@ -47,6 +47,13 @@ import {
   DescendantHeightPxRegistry,
   useVerticalSizeInternalContext,
 } from "../../../../components/transition/vertical-size/internal";
+import { NOBLE_CHAIN_ID } from "../../../../config.ui";
+
+const USDN_CURRENCY = {
+  coinDenom: "USDN",
+  coinMinimalDenom: "uusdn",
+  coinDecimals: 6,
+};
 
 interface ViewClaimToken extends Omit<ViewToken, "chainInfo"> {
   modularChainInfo: ModularChainInfo;
@@ -171,6 +178,27 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
           const chainInfo = chainStore.getChain(chainId);
           const accountAddress = accountStore.getAccount(chainId).bech32Address;
           const queries = queriesStore.get(chainId);
+
+          if (chainId === NOBLE_CHAIN_ID) {
+            const queryYield =
+              queries.noble.queryYield.getQueryBech32Address(accountAddress);
+            const usdnCurrency =
+              chainInfo.findCurrency("uusdn") || USDN_CURRENCY;
+            const rawAmount = queryYield.claimableAmount;
+            const amount = new CoinPretty(usdnCurrency, rawAmount);
+            if (amount.toDec().gt(new Dec(0))) {
+              res.push({
+                token: amount,
+                price: priceStore.calculatePrice(amount),
+                modularChainInfo: modularChainInfo,
+                isFetching: queryYield.isFetching,
+                error: queryYield.error,
+                onClaimAll: handleCosmosClaimAllEach,
+                onClaimSingle: handleCosmosClaimSingle,
+              });
+            }
+          }
+
           const queryRewards =
             queries.cosmos.queryRewards.getQueryBech32Address(accountAddress);
 

@@ -28,6 +28,8 @@ import {
   AgoricQueries,
   LSMCurrencyRegistrar,
   TokenFactoryCurrencyRegistrar,
+  NobleQueries,
+  NobleAccount,
 } from "@keplr-wallet/stores";
 import {
   IBCChannelStore,
@@ -129,14 +131,15 @@ export class RootStore {
       KeplrETCQueries,
       ICNSQueries,
       TokenContractsQueries,
-      EthereumQueries
+      EthereumQueries,
+      NobleQueries
     ]
   >;
   public readonly swapUsageQueries: SwapUsageQueries;
   public readonly skipQueriesStore: SkipQueries;
   public readonly starknetQueriesStore: StarknetQueriesStore;
   public readonly accountStore: AccountStore<
-    [CosmosAccount, CosmwasmAccount, SecretAccount]
+    [CosmosAccount, CosmwasmAccount, SecretAccount, NobleAccount]
   >;
   public readonly ethereumAccountStore: EthereumAccountStore;
   public readonly starknetAccountStore: StarknetAccountStore;
@@ -321,7 +324,8 @@ export class RootStore {
       EthereumQueries.use({
         coingeckoAPIBaseURL: CoinGeckoAPIEndPoint,
         coingeckoAPIURI: CoinGeckoCoinDataByTokenAddress,
-      })
+      }),
+      NobleQueries.use()
     );
     this.swapUsageQueries = new SwapUsageQueries(
       this.queriesStore.sharedContext,
@@ -465,6 +469,9 @@ export class RootStore {
             };
           }
         },
+      }),
+      NobleAccount.use({
+        queriesStore: this.queriesStore,
       })
     );
 

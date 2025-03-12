@@ -69,6 +69,7 @@ export const Styles = {
     }};
     
     cursor: ${({ cursor }) => cursor};
+    opacity: ${({ opacity }) => opacity};
     
     ${({ hover }) => {
       if (hover) {
@@ -76,9 +77,11 @@ export const Styles = {
           &:hover {
             color: ${hover.color};
             background-color: ${hover.backgroundColor};
+            background: ${hover.background};
             border-style: ${hover.borderWidth ? "solid" : undefined};
             border-width: ${hover.borderWidth};
             border-color: ${hover.borderColor};
+            opacity: ${hover.opacity};
           }
         `;
       }

@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+package noble.swap.v1;
+
+import "cosmos/base/v1beta1/coin.proto";
+import "cosmos/query/v1/query.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "noble/swap/v1/algorithm.proto";
+import "noble/swap/v1/pool.proto";
+import "noble/swap/v1/rate.proto";
+import "noble/swap/v1/swap.proto";
+import "noble/swap/v1/tx.proto";
+
+option go_package = "swap.noble.xyz/types";
+
+service Query {
+  // Retrieves a list of the currently paused Pools.
+  rpc Paused(QueryPaused) returns (QueryPausedResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/noble/swap/v1/paused";
+  }
+
+  // Retrieves the details of all Pools.
+  rpc Pools(QueryPools) returns (QueryPoolsResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/noble/swap/v1/pools";
+  }
+
+  // Retrieves details of a specific Pool.
+  rpc Pool(QueryPool) returns (QueryPoolResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/noble/swap/v1/pools/{pool_id}";
+  }
+
+  // Simulates a token swap simulation.
+  rpc SimulateSwap(QuerySimulateSwap) returns (MsgSwapResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/noble/swap/v1/simulate_swap";
+  }
+
+  // Retrieves exchange rates for all tokens, with the optionality of filtering by algorithm.
+  rpc Rates(QueryRates) returns (QueryRatesResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/noble/swap/v1/rates";
+  }
+
+  // Retrieves exchange rates for a specific token, with the optionality of filtering by algorithm.
+  rpc Rate(QueryRate) returns (QueryRateResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/noble/swap/v1/rates/{denom}";
+  }
+}
+
+message QueryRates {
+  swap.v1.Algorithm algorithm = 1;
+}
+message QueryRatesResponse {
+  repeated Rate rates = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryRate {
+  string denom = 1;
+  swap.v1.Algorithm algorithm = 2;
+}
+message QueryRateResponse {
+  repeated Rate rates = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryPaused {}
+message QueryPausedResponse {
+  repeated uint64 paused_pools = 1;
+}
+
+message QueryPools {}
+message QueryPoolsResponse {
+  repeated PoolDetails pools = 1;
+}
+
+message QueryPool {
+  uint64 pool_id = 1;
+}
+message QueryPoolResponse {
+  PoolDetails pool = 1;
+}
+
+message QuerySimulateSwap {
+  string signer = 1;
+  cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
+  repeated swap.v1.Route routes = 3 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin min = 4 [(gogoproto.nullable) = false];
+}

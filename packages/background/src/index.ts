@@ -55,6 +55,8 @@ export * from "./recent-send-history";
 export * from "./side-panel";
 export * from "./settings";
 export * from "./manage-view-asset-token";
+export * from "./tx-ethereum";
+
 import { KVStore } from "@keplr-wallet/common";
 import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import { Notification } from "./tx";
@@ -302,7 +304,8 @@ export function init(
   BackgroundTxEthereum.init(
     router,
     backgroundTxEthereumService,
-    permissionInteractiveService
+    permissionInteractiveService,
+    recentSendHistoryService
   );
   PhishingList.init(router, phishingListService);
   AutoLocker.init(router, autoLockAccountService);

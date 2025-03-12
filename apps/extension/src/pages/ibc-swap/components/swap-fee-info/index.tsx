@@ -528,7 +528,7 @@ export const SwapFeeInfo: FunctionComponent<{
                         : ColorPalette["gray-300"]
                     }
                   >
-                    Bridge Fee
+                    <FormattedMessage id="components.fee-info.bridge-fee" />
                   </Subtitle4>
                 </Box>
                 <div

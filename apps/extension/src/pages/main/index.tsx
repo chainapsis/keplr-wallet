@@ -59,6 +59,7 @@ import { DenomHelper } from "@keplr-wallet/common";
 import { NewSidePanelHeaderTop } from "./new-side-panel-header-top";
 import { ModularChainInfo } from "@keplr-wallet/types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { AvailableTabSlideList } from "./components/available-tab-slide-list";
 
 export interface ViewToken {
   token: CoinPretty;
@@ -624,25 +625,9 @@ export const MainPage: FunctionComponent<{
           <Gutter size="0" />
 
           {tabStatus === "available" && !isNotReady ? (
-            <StakeWithKeplrDashboardButton
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                analyticsStore.logEvent("click_keplrDashboard", {
-                  tabName: tabStatus,
-                });
-
-                browser.tabs.create({
-                  url: "https://wallet.keplr.app/?utm_source=keplrextension&utm_medium=button&utm_campaign=permanent&utm_content=manage_portfolio",
-                });
-              }}
-            >
-              <FormattedMessage id="page.main.chart.manage-portfolio-in-keplr-dashboard" />
-              <Box color={ColorPalette["gray-300"]} marginLeft="0.5rem">
-                <ArrowTopRightOnSquareIcon width="1rem" height="1rem" />
-              </Box>
-            </StakeWithKeplrDashboardButton>
+            <AvailableTabSlideList />
           ) : null}
+
           {!isNotReady ? (
             <Stack gutter="0.75rem">
               {tabStatus === "available" ? (
