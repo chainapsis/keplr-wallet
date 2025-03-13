@@ -279,11 +279,11 @@ const UpDownArrowIcon = ({
         fill={
           mode === "light"
             ? isAsc
-              ? ColorPalette["gray-300"]
-              : ColorPalette["blue-400"]
+              ? ColorPalette["blue-400"]
+              : ColorPalette["gray-300"]
             : isAsc
-            ? ColorPalette["gray-300"]
-            : ColorPalette["white"]
+            ? ColorPalette["white"]
+            : ColorPalette["gray-300"]
         }
       />
       <path
@@ -291,11 +291,11 @@ const UpDownArrowIcon = ({
         fill={
           mode === "light"
             ? isAsc
-              ? ColorPalette["blue-400"]
-              : ColorPalette["gray-300"]
+              ? ColorPalette["gray-300"]
+              : ColorPalette["blue-400"]
             : isAsc
-            ? ColorPalette["white"]
-            : ColorPalette["gray-300"]
+            ? ColorPalette["gray-300"]
+            : ColorPalette["white"]
         }
       />
     </svg>
