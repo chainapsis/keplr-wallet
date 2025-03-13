@@ -1,0 +1,137 @@
+syntax = "proto3";
+package initia.move.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/initia-labs/initia/x/move/types";
+option (gogoproto.equal_all) = true;
+option (gogoproto.goproto_getters_all) = false;
+
+// Params defines the set of move parameters.
+message Params {
+  option (amino.name) = "move/Params";
+  option (gogoproto.equal) = true;
+  option (gogoproto.goproto_stringer) = false;
+
+  string base_denom = 1;
+  string base_min_gas_price = 2 [
+    (gogoproto.moretags) = "yaml:\"base_min_gas_price\"",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+
+  // CSR: Percentage of fees distributed to developers
+  string contract_shared_revenue_ratio = 3 [
+    (gogoproto.moretags) = "yaml:\"contract_shared_revenue_ratio\"",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+
+  // flag whether to enable script execution
+  bool script_enabled = 4;
+
+  // It is a list of addresses with permission to distribute contracts,
+  // and an empty list is interpreted as allowing anyone to distribute.
+  repeated string allowed_publishers = 5 [
+    (gogoproto.moretags) = "yaml:\"allowed_publishers\"",
+    (amino.dont_omitempty) = true
+  ];
+}
+
+// RawParams defines the raw params to store.
+message RawParams {
+  string base_denom = 1;
+  string base_min_gas_price = 2 [
+    (gogoproto.moretags) = "yaml:\"base_min_gas_price\"",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+
+  // CSR: Percentage of fees distributed to developers
+  string contract_shared_revenue_ratio = 3 [
+    (gogoproto.moretags) = "yaml:\"contract_shared_revenue_ratio\"",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+
+  // flag whether to enable script execution
+  bool script_enabled = 4;
+}
+
+// Module is data for the uploaded contract move code
+message Module {
+  string address = 1;
+  string module_name = 2;
+  string abi = 3;
+  bytes raw_bytes = 4;
+  UpgradePolicy upgrade_policy = 5;
+}
+
+// Checksum is checksum of the uploaded contract move code
+message Checksum {
+  string address = 1;
+  string module_name = 2;
+  bytes checksum = 3;
+}
+
+// Resource is data for the stored move resource
+message Resource {
+  string address = 1;
+  string struct_tag = 2;
+  string move_resource = 3;
+  bytes raw_bytes = 4;
+}
+
+// TableInfo is data stored under Table address
+message TableInfo {
+  string address = 1;
+  string key_type = 2;
+  string value_type = 3;
+}
+
+// TableEntry is data stored under Table address and the key bytes
+message TableEntry {
+  string address = 1;
+  string key = 2;
+  string value = 3;
+  bytes key_bytes = 4;
+  bytes value_bytes = 5;
+}
+
+// UpgradePolicy is the policy for upgrading a move module.
+enum UpgradePolicy {
+  // UNSPECIFIED: a placeholder for an unspecified upgrade policy.
+  UNSPECIFIED = 0;
+  // COMPATIBLE: Whether a compatibility check should be performed for upgrades. The check only passes if
+  // a new module has (a) the same public functions (b) for existing resources, no layout change.
+  COMPATIBLE = 1;
+  // IMMUTABLE: Whether the modules in the package are immutable and cannot be upgraded.
+  IMMUTABLE = 2;
+}
+
+// proto wrapper to store the value
+message UpgradePolicyProto {
+  UpgradePolicy policy = 1;
+}
+
+// DexPair contains coin metadata address
+// std::dex::Pool and std::dex::Config resources.
+message DexPair {
+  string metadata_quote = 1;
+  string metadata_lp = 2 [(gogoproto.customname) = "MetadataLP"];
+}
+
+// ExecuteAuthorizationItem is the information for granting module execution
+message ExecuteAuthorizationItem {
+  // ModuleAddr is the address of the module deployer
+  string module_address = 1;
+  // ModuleName is the names of module to execute
+  string module_name = 2;
+  // FunctionName is the name of function to execute with wildcard '*' support
+  repeated string function_names = 3 [(gogoproto.nullable) = true];
+}

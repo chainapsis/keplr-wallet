@@ -1,0 +1,39 @@
+syntax = "proto3";
+package initia.reward.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "google/protobuf/duration.proto";
+
+option go_package = "github.com/initia-labs/initia/x/reward/types";
+option (gogoproto.equal_all) = true;
+option (gogoproto.goproto_getters_all) = false;
+
+// Params defines the set of mint parameters.
+message Params {
+  option (amino.name) = "reward/Params";
+  option (gogoproto.equal) = true;
+  option (gogoproto.goproto_stringer) = false;
+
+  string reward_denom = 1;
+  google.protobuf.Duration dilution_period = 2 [
+    (gogoproto.stdduration) = true,
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+  string release_rate = 3 [
+    (gogoproto.moretags) = "yaml:\"release_rate\"",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+  // The dilution rate of release rate.
+  // if `(block.timestamp - last_dilute_timestamp) < dilution_period`:
+  //    `release_rate -= (release_rate * dilution_rate)`
+  //    `last_dilution_timestamp = block.timestamp`
+  string dilution_rate = 4 [
+    (gogoproto.moretags) = "yaml:\"dilution_rate\"",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+  bool release_enabled = 5;
+}

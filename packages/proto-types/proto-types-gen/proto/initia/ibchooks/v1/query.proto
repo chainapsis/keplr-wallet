@@ -1,0 +1,77 @@
+syntax = "proto3";
+package initia.ibchooks.v1;
+
+import "amino/amino.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "initia/ibchooks/v1/types.proto";
+
+option go_package = "github.com/initia-labs/initia/x/ibc-hooks/types";
+option (gogoproto.equal_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+
+// Query provides defines the gRPC querier service
+service Query {
+  // ACL gets ACL entry of an address.
+  rpc ACL(QueryACLRequest) returns (QueryACLResponse) {
+    option (google.api.http).get = "/initia/ibchooks/v1/acls/{address}";
+  }
+
+  // ACLs gets ACL entries.
+  rpc ACLs(QueryACLsRequest) returns (QueryACLsResponse) {
+    option (google.api.http).get = "/initia/ibchooks/v1/acls";
+  }
+
+  // Params queries all parameters.
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/initia/ibchooks/v1/params";
+  }
+}
+
+// QueryACLRequest is the request type for the Query/ACL RPC
+// method
+message QueryACLRequest {
+  // Address is a contract address (wasm, evm) or a contract deployer address (move).
+  string address = 1;
+}
+
+// QueryACLResponse is the response type for the Query/ACL RPC
+// method
+message QueryACLResponse {
+  option (gogoproto.equal) = true;
+  ACL acl = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
+
+// QueryACLsRequest is the request type for the Query/ACLAddrs
+// RPC method
+message QueryACLsRequest {
+  // pagination defines an optional pagination for the request.
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QueryACLsResponse is the response type for the
+// Query/ACLAddrs RPC method
+message QueryACLsResponse {
+  repeated ACL acls = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+  // pagination defines the pagination in the response.
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryParamsRequest is the request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is the response type for the Query/Params RPC method.
+message QueryParamsResponse {
+  // params defines the parameters of the module.
+  Params params = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}

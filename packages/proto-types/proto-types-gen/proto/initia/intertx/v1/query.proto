@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package initia.intertx.v1;
+
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+
+option go_package = "github.com/initia-labs/initia/x/intertx/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // QueryInterchainAccount returns the interchain account for given owner address on a given connection pair
+  rpc InterchainAccount(QueryInterchainAccountRequest) returns (QueryInterchainAccountResponse) {
+    option (google.api.http).get = "/inter-tx/interchain_account/owner/{owner}/connection/{connection_id}";
+  }
+}
+
+// QueryInterchainAccountRequest is the request type for the Query/InterchainAccountAddress RPC
+message QueryInterchainAccountRequest {
+  string owner = 1;
+  string connection_id = 2 [(gogoproto.moretags) = "yaml:\"connection_id\""];
+}
+
+// QueryInterchainAccountResponse the response type for the Query/InterchainAccountAddress RPC
+message QueryInterchainAccountResponse {
+  string interchain_account_address = 1 [(gogoproto.moretags) = "yaml:\"interchain_account_address\""];
+}

@@ -1,0 +1,353 @@
+syntax = "proto3";
+package initia.move.v1;
+
+import "amino/amino.proto";
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "initia/move/v1/types.proto";
+
+option go_package = "github.com/initia-labs/initia/x/move/types";
+option (gogoproto.goproto_getters_all) = false;
+
+// Msg defines the move Msg service.
+service Msg {
+  option (cosmos.msg.v1.service) = true;
+
+  // Publish stores compiled Move module
+  rpc Publish(MsgPublish) returns (MsgPublishResponse);
+  // Deprecated: Use ExecuteJSON instead
+  // Execute runs a entry function with the given message
+  rpc Execute(MsgExecute) returns (MsgExecuteResponse);
+  // ExecuteJSON runs a entry function with the given message
+  rpc ExecuteJSON(MsgExecuteJSON) returns (MsgExecuteJSONResponse);
+  // Deprecated: Use ScriptJSON instead
+  // Script runs a scripts with the given message
+  rpc Script(MsgScript) returns (MsgScriptResponse);
+  // ScriptJSON runs a scripts with the given message
+  rpc ScriptJSON(MsgScriptJSON) returns (MsgScriptJSONResponse);
+  // GovPublish stores compiled Move module via gov proposal
+  rpc GovPublish(MsgGovPublish) returns (MsgGovPublishResponse);
+  // Deprecated: Use GovExecuteJSON instead
+  // GovExecute runs a entry function with the given message via gov proposal
+  rpc GovExecute(MsgGovExecute) returns (MsgGovExecuteResponse);
+  // GovExecuteJSON runs a entry function with the given message via gov proposal
+  rpc GovExecuteJSON(MsgGovExecuteJSON) returns (MsgGovExecuteJSONResponse);
+  // Deprecated: Use GovScriptJSON instead
+  // GovScript runs a scripts with the given message via gov proposal
+  rpc GovScript(MsgGovScript) returns (MsgGovScriptResponse);
+  // GovScriptJSON runs a scripts with the given message via gov proposal
+  rpc GovScriptJSON(MsgGovScriptJSON) returns (MsgGovScriptJSONResponse);
+  // Whitelist registers a dex pair to whitelist of various features.
+  // - whitelist from coin register operation
+  // - allow counter party denom can be used as gas fee
+  // - register lp denom as staking denom
+  rpc Whitelist(MsgWhitelist) returns (MsgWhitelistResponse);
+  // Delist unregisters a dex pair from the whitelist.
+  rpc Delist(MsgDelist) returns (MsgDelistResponse);
+  // UpdateParams defines an operation for updating the x/move module
+  // parameters.
+  rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
+}
+
+// MsgPublish is the message to store compiled Move module
+message MsgPublish {
+  option (cosmos.msg.v1.signer) = "sender";
+  option (amino.name) = "move/MsgPublish";
+
+  // Sender is the that actor that signed the messages
+  string sender = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // CodeBytes is raw move module bytes code
+  repeated bytes code_bytes = 2;
+  // UpgradePolicy defines upgrade rules which will be applied
+  // at next publish message.
+  // Upgrades in the direction of enhancing security are permitted.
+  // `ARBITRARY` => `COMPATIBLE`
+  // `ARBITRARY` => `IMMUTABLE`
+  // `COMPATIBLE` => `IMMUTABLE`
+  // but reverse ways are not allowed (ignored).
+  UpgradePolicy upgrade_policy = 3 [(gogoproto.nullable) = true];
+}
+
+// MsgPublishResponse returns store result data.
+message MsgPublishResponse {}
+
+// MsgExecute is the message to execute the given module function
+message MsgExecute {
+  option (cosmos.msg.v1.signer) = "sender";
+  option (amino.name) = "move/MsgExecute";
+
+  // Sender is the that actor that signed the messages
+  string sender = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // ModuleAddr is the address of the module deployer
+  string module_address = 2;
+  // ModuleName is the name of module to execute
+  string module_name = 3;
+  // FunctionName is the name of a function to execute
+  string function_name = 4;
+  // TypeArgs is the type arguments of a function to execute
+  // ex) "0x1::BasicCoin::Initia", "bool", "u8", "u64"
+  repeated string type_args = 5;
+  // Args is the arguments of a function to execute
+  // - number: little endian
+  // - string: base64 bytes
+  repeated bytes args = 6;
+}
+
+// MsgExecuteResponse returns execution result data.
+message MsgExecuteResponse {}
+
+// MsgExecuteJSON is the message to execute the given module function
+message MsgExecuteJSON {
+  option (cosmos.msg.v1.signer) = "sender";
+  option (amino.name) = "move/MsgExecuteJSON";
+
+  // Sender is the that actor that signed the messages
+  string sender = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // ModuleAddr is the address of the module deployer
+  string module_address = 2;
+  // ModuleName is the name of module to execute
+  string module_name = 3;
+  // FunctionName is the name of a function to execute
+  string function_name = 4;
+  // TypeArgs is the type arguments of a function to execute
+  // ex) "0x1::BasicCoin::Initia", "bool", "u8", "u64"
+  repeated string type_args = 5;
+  // Args is the arguments of a function to execute in json stringify format
+  repeated string args = 6;
+}
+
+// MsgExecuteJSONResponse returns execution result data.
+message MsgExecuteJSONResponse {}
+
+// MsgScript is the message to execute script code with sender as signer
+message MsgScript {
+  option (cosmos.msg.v1.signer) = "sender";
+  option (amino.name) = "move/MsgScript";
+
+  // Sender is the that actor that signed the messages
+  string sender = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // CodeBytes is the script bytes code to execute
+  bytes code_bytes = 2;
+  // TypeArgs is the type arguments of a function to execute
+  // ex) "0x1::BasicCoin::Initia", "bool", "u8", "u64"
+  repeated string type_args = 3;
+  // Args is the arguments of a function to execute
+  // - number: little endian
+  // - string: base64 bytes
+  repeated bytes args = 4;
+}
+
+// MsgScriptResponse returns execution result data.
+message MsgScriptResponse {}
+
+// MsgScriptJSON is the message to execute script code with sender as signer
+message MsgScriptJSON {
+  option (cosmos.msg.v1.signer) = "sender";
+  option (amino.name) = "move/MsgScriptJSON";
+
+  // Sender is the that actor that signed the messages
+  string sender = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // CodeBytes is the script bytes code to execute
+  bytes code_bytes = 2;
+  // TypeArgs is the type arguments of a function to execute
+  // ex) "0x1::BasicCoin::Initia", "bool", "u8", "u64"
+  repeated string type_args = 3;
+  // Args is the arguments of a function to execute in json stringify format
+  repeated string args = 4;
+}
+
+// MsgScriptJSONResponse returns execution result data.
+message MsgScriptJSONResponse {}
+
+////////////////////
+/// Gov Messages ///
+////////////////////
+
+// MsgGovPublish is the message to store compiled Move module via gov proposal
+message MsgGovPublish {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "move/MsgGovPublish";
+
+  // authority is the address that controls the module
+  // (defaults to x/gov unless overwritten).
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // Sender is the that actor that signed the messages
+  string sender = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // CodeBytes is raw move module bytes code
+  repeated bytes code_bytes = 3;
+  // UpgradePolicy defines upgrade rules which will be applied
+  // at next publish message.
+  // Upgrades in the direction of enhancing security are permitted.
+  // `ARBITRARY` => `COMPATIBLE`
+  // `ARBITRARY` => `IMMUTABLE`
+  // `COMPATIBLE` => `IMMUTABLE`
+  // but reverse ways are not allowed (ignored).
+  UpgradePolicy upgrade_policy = 4 [(gogoproto.nullable) = true];
+}
+
+// MsgGovPublishResponse returns execution result data.
+message MsgGovPublishResponse {}
+
+// MsgGovExecute is the message to execute the given module
+// function via gov proposal
+message MsgGovExecute {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "move/MsgGovExecute";
+
+  // authority is the address that controls the module
+  // (defaults to x/gov unless overwritten).
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // Sender is the that actor that signed the messages
+  string sender = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // ModuleAddr is the address of the module deployer
+  string module_address = 3;
+  // ModuleName is the name of module to execute
+  string module_name = 4;
+  // FunctionName is the name of a function to execute
+  string function_name = 5;
+  // TypeArgs is the type arguments of a function to execute
+  // ex) "0x1::BasicCoin::Initia", "bool", "u8", "u64"
+  repeated string type_args = 6;
+  // Args is the arguments of a function to execute
+  // - number: little endian
+  // - string: base64 bytes
+  repeated bytes args = 7;
+}
+
+// MsgGovExecuteResponse returns execution result data.
+message MsgGovExecuteResponse {}
+
+// MsgGovExecuteJSON is the message to execute the given module
+// function via gov proposal
+message MsgGovExecuteJSON {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "move/MsgGovExecuteJSON";
+
+  // authority is the address that controls the module
+  // (defaults to x/gov unless overwritten).
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // Sender is the that actor that signed the messages
+  string sender = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // ModuleAddr is the address of the module deployer
+  string module_address = 3;
+  // ModuleName is the name of module to execute
+  string module_name = 4;
+  // FunctionName is the name of a function to execute
+  string function_name = 5;
+  // TypeArgs is the type arguments of a function to execute
+  // ex) "0x1::BasicCoin::Initia", "bool", "u8", "u64"
+  repeated string type_args = 6;
+  // Args is the arguments of a function to execute in json stringify format
+  repeated string args = 7;
+}
+
+// MsgGovExecuteJSONResponse returns execution result data.
+message MsgGovExecuteJSONResponse {}
+
+// MsgGovScript is the message to execute script code with sender as signer via gov
+message MsgGovScript {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "move/MsgGovScript";
+
+  // authority is the address that controls the module
+  // (defaults to x/gov unless overwritten).
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // Sender is the that actor that signed the messages
+  string sender = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // CodeBytes is the script bytes code to execute
+  bytes code_bytes = 3;
+  // TypeArgs is the type arguments of a function to execute
+  // ex) "0x1::BasicCoin::Initia", "bool", "u8", "u64"
+  repeated string type_args = 4;
+  // Args is the arguments of a function to execute
+  // - number: little endian
+  // - string: base64 bytes
+  repeated bytes args = 5;
+}
+
+// MsgGovScriptResponse returns execution result data.
+message MsgGovScriptResponse {}
+
+// MsgGovScriptJSON is the message to execute script code with sender as signer via gov
+message MsgGovScriptJSON {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "move/MsgGovScriptJSON";
+
+  // authority is the address that controls the module
+  // (defaults to x/gov unless overwritten).
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // Sender is the that actor that signed the messages
+  string sender = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // CodeBytes is the script bytes code to execute
+  bytes code_bytes = 3;
+  // TypeArgs is the type arguments of a function to execute
+  // ex) "0x1::BasicCoin::Initia", "bool", "u8", "u64"
+  repeated string type_args = 4;
+  // Args is the arguments of a function to execute in json stringify format
+  repeated string args = 5;
+}
+
+// MsgGovScriptJSONResponse returns execution result data.
+message MsgGovScriptJSONResponse {}
+
+// MsgWhitelist is a message to register a dex pair to
+// whitelist of various features.
+// - whitelist from coin register operation
+// - allow counter party denom can be used as gas fee
+// - register lp denom as staking denom
+message MsgWhitelist {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "move/MsgWhitelist";
+
+  // authority is the address that controls the module
+  // (defaults to x/gov unless overwritten).
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // Dex coin LP metadata address
+  string metadata_lp = 2 [(gogoproto.customname) = "MetadataLP"];
+  // RewardWeight is registered to distribution's Params
+  string reward_weight = 3 [
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+}
+
+// MsgWhitelistResponse returns result data.
+message MsgWhitelistResponse {}
+
+// MsgDelist is a message to unregister a dex pair
+// from the whitelist of various features.
+message MsgDelist {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "move/MsgDelist";
+
+  // authority is the address that controls the module
+  // (defaults to x/gov unless overwritten).
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // Dex coin LP metadata address
+  string metadata_lp = 2 [(gogoproto.customname) = "MetadataLP"];
+}
+
+// MsgDelistResponse returns result data.
+message MsgDelistResponse {}
+
+// MsgUpdateParams is the Msg/UpdateParams request type.
+message MsgUpdateParams {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "move/MsgUpdateParams";
+
+  // authority is the address that controls the module
+  // (defaults to x/gov unless overwritten).
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // params defines the x/staking parameters to update.
+  //
+  // NOTE: All parameters must be supplied.
+  Params params = 2 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
+
+// MsgUpdateParamsResponse defines the response structure for executing a
+// MsgUpdateParams message.
+message MsgUpdateParamsResponse {}
