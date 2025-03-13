@@ -137,15 +137,6 @@ export const MenuBar: FunctionComponent<{
         <Styles.MenuItem
           onClick={(e) => {
             e.preventDefault();
-            navigate("/manage-view-asset-token-list");
-          }}
-        >
-          <FormattedMessage id="page.main.components.menu-bar.manage-asset-list-title" />
-        </Styles.MenuItem>
-
-        <Styles.MenuItem
-          onClick={(e) => {
-            e.preventDefault();
 
             if (keyRingStore.selectedKeyInfo) {
               analyticsStore.logEvent("click_menu_manageChainVisibility");
@@ -164,6 +155,15 @@ export const MenuBar: FunctionComponent<{
           }}
         >
           <FormattedMessage id="page.main.components.menu-bar.manage-chain-visibility-title" />
+        </Styles.MenuItem>
+
+        <Styles.MenuItem
+          onClick={(e) => {
+            e.preventDefault();
+            navigate("/manage-view-asset-token-list");
+          }}
+        >
+          <FormattedMessage id="page.main.components.menu-bar.manage-asset-list-title" />
         </Styles.MenuItem>
 
         <Gutter size="1.75rem" />
