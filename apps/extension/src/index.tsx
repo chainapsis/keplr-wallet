@@ -102,6 +102,7 @@ import { isRunningInSidePanel } from "./utils";
 import { StarknetSendPage } from "./pages/starknet/send";
 import { SignStarknetTxPage } from "./pages/starknet/sign/tx";
 import { SignStarknetMessagePage } from "./pages/starknet/sign/message";
+import { ManageViewAssetTokenListPage } from "./pages/manage-view-asset-token-list";
 import { TxResultFailedPage } from "./pages/tx-result/failed";
 import { TxResultPendingPage } from "./pages/tx-result/pending";
 import { TxResultSuccessPage } from "./pages/tx-result/success";
@@ -399,6 +400,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
                 element={<IBCSwapDestinationSelectAssetPage />}
               />
               <Route path="/activities" element={<ActivitiesPage />} />
+              <Route
+                path="/manage-view-asset-token-list"
+                element={<ManageViewAssetTokenListPage />}
+              />
               <Route path="/setting" element={<SettingPage />} />
               <Route path="/setting/general" element={<SettingGeneralPage />} />
               <Route

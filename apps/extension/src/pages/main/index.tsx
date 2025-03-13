@@ -58,6 +58,7 @@ import { BottomTabsHeightRem } from "../../bottom-tabs";
 import { DenomHelper } from "@keplr-wallet/common";
 import { NewSidePanelHeaderTop } from "./new-side-panel-header-top";
 import { ModularChainInfo } from "@keplr-wallet/types";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { AvailableTabSlideList } from "./components/available-tab-slide-list";
 
 export interface ViewToken {
@@ -101,10 +102,22 @@ export const MainPage: FunctionComponent<{
 
   const [tabStatus, setTabStatus] = React.useState<TabStatus>("available");
 
+  const disabledViewAssetTokenMap =
+    uiConfigStore.manageViewAssetTokenConfig.getViewAssetTokenMapByVaultId(
+      keyRingStore.selectedKeyInfo?.id ?? ""
+    );
+
   const availableTotalPrice = useMemo(() => {
     let result: PricePretty | undefined;
     for (const bal of hugeQueriesStore.allKnownBalances) {
-      if (bal.price) {
+      const disabledCoinSet = disabledViewAssetTokenMap.get(
+        ChainIdHelper.parse(bal.chainInfo.chainId).identifier
+      );
+
+      if (
+        bal.price &&
+        !disabledCoinSet?.has(bal.token.currency.coinMinimalDenom)
+      ) {
         if (!result) {
           result = bal.price;
         } else {
@@ -113,7 +126,7 @@ export const MainPage: FunctionComponent<{
       }
     }
     return result;
-  }, [hugeQueriesStore.allKnownBalances]);
+  }, [hugeQueriesStore.allKnownBalances, disabledViewAssetTokenMap]);
   const availableTotalPriceEmbedOnlyUSD = useMemo(() => {
     let result: PricePretty | undefined;
     for (const bal of hugeQueriesStore.allKnownBalances) {
