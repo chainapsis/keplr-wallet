@@ -31,6 +31,7 @@ import { Checkbox } from "../../../../components/checkbox";
 import { EnableChainsArrowDownIcon } from "./enable-chains-arrow-down-icon";
 import { IconButton } from "../../../../components/icon-button";
 import { Tag } from "../../../../components/tag";
+import { FormattedMessage } from "react-intl";
 
 export const ChainItem: FunctionComponent<{
   chainInfo: ChainInfo | ModularChainInfo;
@@ -190,7 +191,10 @@ export const ChainItem: FunctionComponent<{
                 <React.Fragment>
                   <Gutter size="0.25rem" />
                   <Subtitle3 color={ColorPalette["gray-300"]}>
-                    {tokens?.length} Tokens
+                    <FormattedMessage
+                      id="pages.register.enable-chains.chain-item-token-count"
+                      values={{ count: tokens?.length }}
+                    />
                   </Subtitle3>
                 </React.Fragment>
               )}
