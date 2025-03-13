@@ -132,8 +132,8 @@ export class ENSNameService implements NameService {
   }
 
   protected async fetchInternal(): Promise<void> {
+    const prevValue = this.value;
     try {
-      const chainInfo = this.base.chainInfo;
       if (!this._ens) {
         throw new Error("ENS or is not set");
       }
@@ -146,21 +146,25 @@ export class ENSNameService implements NameService {
         throw new Error(`Can't find chain: ${this._ens.chainId}`);
       }
 
-      const prevValue = this.value;
-
       const suffix = "eth";
       const domain = this.value;
       const username = domain + "." + suffix;
 
-      const res = await new JsonRpcProvider(chainInfo.rpc).getResolver(
-        username
-      );
+      const resolver = await new JsonRpcProvider(
+        this.chainGetter.getChain(this._ens.chainId).rpc
+      ).getResolver(username);
+
+      if (!resolver) {
+        throw new Error("Can't find resolver");
+      }
+
+      const res = await resolver.getAddress(60);
 
       if (this.value === prevValue) {
-        if (res?.address) {
+        if (res) {
           runInAction(() => {
             this._result = {
-              address: res.address,
+              address: res,
               fullName: username,
               domain,
               suffix,
@@ -176,10 +180,12 @@ export class ENSNameService implements NameService {
       }
     } catch (e) {
       console.log(e);
-      runInAction(() => {
-        this._result = undefined;
-        this._isFetching = false;
-      });
+      if (this.value === prevValue) {
+        runInAction(() => {
+          this._result = undefined;
+          this._isFetching = false;
+        });
+      }
     }
   }
 }

@@ -40,7 +40,22 @@ export class ObservableQueryStarknetERC20MetadataSymbol extends ObservableStarkn
     }
 
     try {
-      return shortString.decodeShortString(this.response.data[0]);
+      let data = this.response.data[0];
+      if (this.response.data.length > 1) {
+        data =
+          "0x" +
+          this.response.data
+            .map((d) => {
+              const hexWithoutPrefix = d.slice(2);
+              if (hexWithoutPrefix.length % 2 === 1) {
+                return "0" + hexWithoutPrefix;
+              }
+              return hexWithoutPrefix;
+            })
+            .join("");
+      }
+
+      return shortString.decodeShortString(data);
     } catch (e) {
       console.log(e);
     }
