@@ -101,11 +101,15 @@ export const useGetUTXOs = (
   })();
 
   const isFetching =
-    isFetchingInscriptions || isFetchingRunesOutputs || queryUTXOs?.isFetching;
+    isFetchingInscriptions ||
+    isFetchingRunesOutputs ||
+    queryUTXOs?.isFetching ||
+    queryAddressTxs?.isFetching;
 
   // Determine if there's an error
   const error =
     queryUTXOs?.error ||
+    queryAddressTxs?.error ||
     (inscriptionsPages?.some((page) => page.error)
       ? inscriptionsPages.find((page) => page.error)?.error
       : undefined) ||
