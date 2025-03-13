@@ -303,7 +303,7 @@ const TokenItem: FunctionComponent<{
         currency={viewToken.token.currency}
         size="1.5rem"
       />
-      <Gutter size="0.5rem" />
+      <Gutter size="0.25rem" />
       <Subtitle3
         color={
           theme.mode === "light"
