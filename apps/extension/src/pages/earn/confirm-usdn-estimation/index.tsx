@@ -16,7 +16,7 @@ import { DescriptionModal } from "../components/description-modal";
 import { useStore } from "../../../stores";
 import { CoinPretty, Dec, DecUtils } from "@keplr-wallet/unit";
 import { Checkbox } from "../../../components/checkbox";
-import { NOBLE_CHAIN_ID } from "../../../config.ui";
+import { KEPLR_EXTS_MEMO, NOBLE_CHAIN_ID } from "../../../config.ui";
 import { FeeType, useTxConfigsValidate } from "@keplr-wallet/hooks";
 import { useNobleEarnAmountConfig } from "@keplr-wallet/hooks-internal";
 import { WarningBox } from "../../../components/warning-box";
@@ -180,10 +180,11 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
 
           await tx.send(
             nobleEarnAmountConfig.feeConfig.toStdFee(),
-            undefined,
+            KEPLR_EXTS_MEMO,
             {
               // max일 경우 서명 페이지에서 수수료를 수정할 수 없게 만든다.
               preferNoSetFee: searchParams.get("isMax") === "true",
+              preferNoSetMemo: true,
             },
             {
               onBroadcasted: (_txHash) => {

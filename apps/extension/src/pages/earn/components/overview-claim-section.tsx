@@ -11,6 +11,7 @@ import { Currency } from "@keplr-wallet/types";
 import { observer } from "mobx-react-lite";
 import { useNavigate } from "react-router";
 import { useTheme } from "styled-components";
+import { KEPLR_EXTS_MEMO } from "../../../config.ui";
 
 export const EarnOverviewClaimSection: FunctionComponent<{
   chainId: string;
@@ -69,8 +70,10 @@ export const EarnOverviewClaimSection: FunctionComponent<{
           gas: gas.toString(),
           amount: [],
         },
-        "",
-        {},
+        KEPLR_EXTS_MEMO,
+        {
+          preferNoSetMemo: true,
+        },
         {
           onBroadcasted: () => {
             navigate("/tx-result/pending");
