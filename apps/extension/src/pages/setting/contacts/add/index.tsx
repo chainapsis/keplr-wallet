@@ -134,20 +134,30 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
       onSubmit={(e) => {
         e.preventDefault();
 
+        const address = (() => {
+          if ("nameServiceResult" in recipientConfig) {
+            // name service fetch가 성공했을 경우 저장할때는 suffix까지 포함된 형태로 저장한다.
+            const r = recipientConfig.nameServiceResult;
+            if (r.length > 0) {
+              return r[0].fullName;
+            }
+          }
+
+          return isStarknet
+            ? recipientConfigForStarknet.value
+            : recipientConfig.value;
+        })();
+
         if (editIndex < 0) {
           uiConfigStore.addressBookConfig.addAddressBook(chainId, {
             name,
-            address: isStarknet
-              ? recipientConfigForStarknet.value
-              : recipientConfig.value,
+            address,
             memo: memoConfig.value,
           });
         } else {
           uiConfigStore.addressBookConfig.setAddressBookAt(chainId, editIndex, {
             name,
-            address: isStarknet
-              ? recipientConfigForStarknet.value
-              : recipientConfig.value,
+            address,
             memo: memoConfig.value,
           });
         }
