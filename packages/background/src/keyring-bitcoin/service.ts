@@ -18,6 +18,7 @@ import { mainnet, signet, testnet } from "./constants";
 import { encodeLegacyMessage, encodeLegacySignature } from "./helper";
 import { toXOnly } from "@keplr-wallet/crypto";
 import { BIP322 } from "./bip322";
+import { simpleFetch } from "@keplr-wallet/simple-fetch";
 
 export class KeyRingBitcoinService {
   constructor(
@@ -436,7 +437,7 @@ export class KeyRingBitcoinService {
       await (async () => {
         switch (method) {
           // This method is not ensured permission in the handler.
-          case "getAccounts":
+          case "getAccounts": {
             const hasPermission = this.permissionService.hasPermission(
               currentBaseChainId,
               getBasicAccessPermissionType(),
@@ -446,16 +447,20 @@ export class KeyRingBitcoinService {
             return hasPermission
               ? [(await this.getBitcoinKeySelected(currentChainId)).address]
               : [];
-          case "requestAccounts":
+          }
+          case "requestAccounts": {
             return [(await this.getBitcoinKeySelected(currentChainId)).address];
-          case "disconnect":
+          }
+          case "disconnect": {
             return this.permissionService.removeAllTypePermissionToChainId(
               currentBaseChainId,
               [origin]
             );
-          case "getNetwork":
+          }
+          case "getNetwork": {
             return this.getNetwork(currentChainId).id;
-          case "switchNetwork":
+          }
+          case "switchNetwork": {
             const network =
               (Array.isArray(params) && (params?.[0] as Network)) || undefined;
             if (
@@ -476,6 +481,50 @@ export class KeyRingBitcoinService {
               origin,
               newCurrentBaseChainId
             );
+          }
+          case "getPublicKey": {
+            const bitcoinKey = await this.getBitcoinKeySelected(currentChainId);
+            return Buffer.from(bitcoinKey.pubKey).toString("hex");
+          }
+          case "getBalance": {
+            const bitcoinKey = await this.getBitcoinKeySelected(currentChainId);
+            const bitcoinChainInfo =
+              this.chainsService.getBitcoinChainInfoOrThrow(currentChainId);
+
+            const res = await simpleFetch<{
+              address: string;
+              chain_stats: {
+                funded_txo_count: number;
+                funded_txo_sum: number;
+                spent_txo_count: number;
+                spent_txo_sum: number;
+                tx_count: number;
+              };
+              mempool_stats: {
+                funded_txo_count: number;
+                funded_txo_sum: number;
+                spent_txo_count: number;
+                spent_txo_sum: number;
+                tx_count: number;
+              };
+            }>(`${bitcoinChainInfo.rest}/address/${bitcoinKey.address}`);
+
+            const confirmed =
+              res.data.chain_stats.funded_txo_sum -
+              res.data.chain_stats.spent_txo_sum;
+            const unconfirmed =
+              res.data.mempool_stats.funded_txo_sum -
+              res.data.mempool_stats.spent_txo_sum;
+
+            return {
+              confirmed,
+              unconfirmed,
+              total: confirmed + unconfirmed,
+            };
+          }
+          case "getInscriptions": {
+            throw new Error("Not implemented.");
+          }
         }
       })
     )() as T;

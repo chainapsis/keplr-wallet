@@ -38,7 +38,11 @@ export interface IBitcoinProvider extends EventEmitter {
   getNetwork: () => Promise<Network>;
   switchNetwork: (network: Network) => Promise<void>;
   getPublicKey: () => Promise<string>;
-  getBalance: () => Promise<string>;
+  getBalance: () => Promise<{
+    confirmed: number;
+    unconfirmed: number;
+    total: number;
+  }>;
   getInscriptions: () => Promise<string[]>;
   signMessage: (
     message: string,

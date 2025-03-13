@@ -1900,7 +1900,11 @@ class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
     });
   }
 
-  async getBalance(): Promise<string> {
+  async getBalance(): Promise<{
+    confirmed: number;
+    unconfirmed: number;
+    total: number;
+  }> {
     return this.protectedRequestMethod({
       method: "getBalance",
       params: [],

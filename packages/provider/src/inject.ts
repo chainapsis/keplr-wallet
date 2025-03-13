@@ -1750,7 +1750,11 @@ export class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
     return this._requestMethod("getPublicKey", []);
   }
 
-  async getBalance(): Promise<string> {
+  async getBalance(): Promise<{
+    confirmed: number;
+    unconfirmed: number;
+    total: number;
+  }> {
     return this._requestMethod("getBalance", []);
   }
 

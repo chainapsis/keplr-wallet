@@ -1270,6 +1270,15 @@ export class ChainsService {
     }
   }
 
+  getBitcoinChainInfoOrThrow(chainId: string): BitcoinChainInfo {
+    const bitcoinChainInfo = this.getBitcoinChainInfo(chainId);
+    if (!bitcoinChainInfo) {
+      throw new Error(`There is no bitcoin chain info for ${chainId}`);
+    }
+
+    return bitcoinChainInfo;
+  }
+
   /**
    * 여러 주소 체계가 존재하는 체인의 경우, chainId에서 주소 체계를 제외한 공통된 부분을 사용하여 하나의 체인으로 취급해야 한다.
    * 예를 들어, Bitcoin의 경우 `bip122:123456:taproot`와 `bip122:123456:native-segwit`를 사용해
