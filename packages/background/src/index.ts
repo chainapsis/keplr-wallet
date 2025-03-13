@@ -29,6 +29,7 @@ import * as TokenScan from "./token-scan/internal";
 import * as RecentSendHistory from "./recent-send-history/internal";
 import * as SidePanel from "./side-panel/internal";
 import * as Settings from "./settings/internal";
+import * as ManageViewAssetToken from "./manage-view-asset-token/internal";
 
 export * from "./chains";
 export * from "./chains-ui";
@@ -53,6 +54,7 @@ export * from "./token-scan";
 export * from "./recent-send-history";
 export * from "./side-panel";
 export * from "./settings";
+export * from "./manage-view-asset-token";
 export * from "./tx-ethereum";
 
 import { KVStore } from "@keplr-wallet/common";
@@ -281,6 +283,15 @@ export function init(
     storeCreator("settings")
   );
 
+  const manageViewAssetTokenService =
+    new ManageViewAssetToken.ManageViewAssetTokenService(
+      storeCreator("manage-view-asset-token"),
+      keyRingV2Service,
+      vaultService,
+      chainsUIService,
+      chainsService
+    );
+
   Interaction.init(router, interactionService);
   Permission.init(router, permissionService);
   Chains.init(
@@ -330,6 +341,7 @@ export function init(
   RecentSendHistory.init(router, recentSendHistoryService);
   SidePanel.init(router, sidePanelService);
   Settings.init(router, settingsService);
+  ManageViewAssetToken.init(router, manageViewAssetTokenService);
 
   return {
     initFn: async () => {
@@ -366,6 +378,8 @@ export function init(
         await vaultAfterInitFn(vaultService);
       }
       await chainsService.afterInit();
+
+      await manageViewAssetTokenService.init();
     },
     keyRingService: keyRingV2Service,
     analyticsService: analyticsService,

@@ -1,0 +1,48 @@
+syntax = "proto3";
+package initia.move.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "initia/move/v1/types.proto";
+
+option go_package = "github.com/initia-labs/initia/x/move/types";
+
+// GenesisState - genesis state of x/move
+message GenesisState {
+  Params params = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+  uint64 execution_counter = 2 [(gogoproto.moretags) = "yaml:\"execution_counter\""];
+  repeated bytes stdlibs = 3 [(gogoproto.jsontag) = "stdlibs,omitempty"];
+  repeated Module modules = 4 [
+    (gogoproto.jsontag) = "modules,omitempty",
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+  repeated Checksum checksums = 5 [
+    (gogoproto.jsontag) = "checksums,omitempty",
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+  repeated Resource resources = 6 [
+    (gogoproto.jsontag) = "resources,omitempty",
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+  repeated TableInfo table_infos = 7 [
+    (gogoproto.jsontag) = "table_infos,omitempty",
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+  repeated TableEntry table_entries = 8 [
+    (gogoproto.jsontag) = "table_entries,omitempty",
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+  repeated DexPair dex_pairs = 9 [
+    (gogoproto.jsontag) = "dex_pairs,omitempty",
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}

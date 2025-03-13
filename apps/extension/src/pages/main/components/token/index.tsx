@@ -51,6 +51,7 @@ const Styles = {
     forChange: boolean | undefined;
     isError: boolean;
     disabled?: boolean;
+    disableHoverStyle?: boolean;
     isNotReady?: boolean;
   }>`
     z-index: 2;
@@ -77,8 +78,8 @@ const Styles = {
         ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
         : "none"};;
     
-    ${({ disabled, theme }) => {
-      if (!disabled) {
+    ${({ disabled, theme, disableHoverStyle }) => {
+      if (!disableHoverStyle && !disabled) {
         return css`
           &:hover {
             background-color: ${theme.mode === "light"
@@ -164,6 +165,8 @@ interface TokenItemProps {
   // swap destination select 페이지에서 balance 숨기기 위한 옵션
   hideBalance?: boolean;
   showPrice24HChange?: boolean;
+  disableHoverStyle?: boolean;
+  right?: React.ReactElement;
 
   bottomTagType?: BottomTagType;
   earnedAssetPrice?: string;
@@ -180,6 +183,8 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
     copyAddress,
     hideBalance,
     showPrice24HChange,
+    disableHoverStyle,
+    right,
     bottomTagType,
     earnedAssetPrice,
   }) => {
@@ -256,6 +261,7 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
         isError={viewToken.error != null}
         disabled={disabled}
         isNotReady={isNotReady}
+        disableHoverStyle={disableHoverStyle}
         onMouseEnter={() => {
           setIsHover(true);
         }}
@@ -509,6 +515,7 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
               </Styles.IconContainer>
             ) : null}
           </Columns>
+          {right}
         </Columns>
       </Styles.Container>
     );

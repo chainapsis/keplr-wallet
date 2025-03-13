@@ -1,0 +1,77 @@
+import { ManageViewAssetTokenService } from "./service";
+import {
+  DisableViewAssetTokenMsg,
+  GetAllDisabledViewAssetTokenMsg,
+  GetDisabledViewAssetTokenListMsg,
+  EnableViewAssetTokenMsg,
+} from "./messages";
+import {
+  Env,
+  Handler,
+  InternalHandler,
+  KeplrError,
+  Message,
+} from "@keplr-wallet/router";
+
+export const getHandler: (service: ManageViewAssetTokenService) => Handler = (
+  service: ManageViewAssetTokenService
+) => {
+  return (env: Env, msg: Message<unknown>) => {
+    switch (msg.constructor) {
+      case GetAllDisabledViewAssetTokenMsg:
+        return handleGetAllDisabledViewAssetTokenMsg(service)(
+          env,
+          msg as GetAllDisabledViewAssetTokenMsg
+        );
+      case GetDisabledViewAssetTokenListMsg:
+        return handleGetDisabledViewAssetTokenListMsg(service)(
+          env,
+          msg as GetDisabledViewAssetTokenListMsg
+        );
+      case DisableViewAssetTokenMsg:
+        return handleDisableViewAssetTokenMsg(service)(
+          env,
+          msg as DisableViewAssetTokenMsg
+        );
+      case EnableViewAssetTokenMsg:
+        return handleEnableViewAssetTokenMsg(service)(
+          env,
+          msg as EnableViewAssetTokenMsg
+        );
+      default:
+        throw new KeplrError("manage-asset", 110, "Unknown msg type");
+    }
+  };
+};
+
+const handleGetDisabledViewAssetTokenListMsg: (
+  service: ManageViewAssetTokenService
+) => InternalHandler<GetDisabledViewAssetTokenListMsg> = (service) => {
+  return (_, msg) => {
+    return service.getDisabledViewAssetTokenList(msg.vaultId);
+  };
+};
+
+const handleDisableViewAssetTokenMsg: (
+  service: ManageViewAssetTokenService
+) => InternalHandler<DisableViewAssetTokenMsg> = (service) => {
+  return (_, msg) => {
+    return service.disableViewAssetToken(msg.vaultId, msg.token);
+  };
+};
+
+const handleGetAllDisabledViewAssetTokenMsg: (
+  service: ManageViewAssetTokenService
+) => InternalHandler<GetAllDisabledViewAssetTokenMsg> = (service) => {
+  return () => {
+    return service.getAllDisabledViewAssetTokenList();
+  };
+};
+
+const handleEnableViewAssetTokenMsg: (
+  service: ManageViewAssetTokenService
+) => InternalHandler<EnableViewAssetTokenMsg> = (service) => {
+  return (_, msg) => {
+    return service.enableViewAssetToken(msg.vaultId, msg.token);
+  };
+};

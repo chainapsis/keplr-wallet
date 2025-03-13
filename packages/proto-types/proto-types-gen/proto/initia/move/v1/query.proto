@@ -1,0 +1,420 @@
+syntax = "proto3";
+package initia.move.v1;
+
+import "amino/amino.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "initia/move/v1/types.proto";
+
+option go_package = "github.com/initia-labs/initia/x/move/types";
+option (gogoproto.equal_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+
+// Query provides defines the gRPC querier service
+service Query {
+  // Module gets the module info
+  rpc Module(QueryModuleRequest) returns (QueryModuleResponse) {
+    option (google.api.http).get = "/initia/move/v1/accounts/{address}/modules/{module_name}";
+  }
+
+  // Modules gets the module infos
+  rpc Modules(QueryModulesRequest) returns (QueryModulesResponse) {
+    option (google.api.http).get = "/initia/move/v1/accounts/{address}/modules";
+  }
+
+  // Resource gets the module info
+  rpc Resource(QueryResourceRequest) returns (QueryResourceResponse) {
+    option (google.api.http).get = "/initia/move/v1/accounts/{address}/resources/by_struct_tag";
+  }
+
+  // Resources gets the module infos
+  rpc Resources(QueryResourcesRequest) returns (QueryResourcesResponse) {
+    option (google.api.http).get = "/initia/move/v1/accounts/{address}/resources";
+  }
+
+  // Query table info of the given address
+  rpc TableInfo(QueryTableInfoRequest) returns (QueryTableInfoResponse) {
+    option (google.api.http).get = "/initia/move/v1/tables/{address}";
+  }
+
+  // Query table entry of the given key
+  rpc TableEntry(QueryTableEntryRequest) returns (QueryTableEntryResponse) {
+    option (google.api.http).get = "/initia/move/v1/tables/{address}/entries/by_key_bytes";
+  }
+
+  // Query table entries with pagination
+  rpc TableEntries(QueryTableEntriesRequest) returns (QueryTableEntriesResponse) {
+    option (google.api.http).get = "/initia/move/v1/tables/{address}/entries";
+  }
+
+  // Deprecated: Use Query/ViewJSON or Query/ViewJSONBatch
+  // LegacyView execute view function and return the view result.
+  rpc LegacyView(QueryLegacyViewRequest) returns (QueryLegacyViewResponse) {
+    option deprecated = true;
+    option (google.api.http) = {
+      post: "/initia/move/v1/accounts/{address}/modules/{module_name}/view_functions/{function_name}"
+      body: "*"
+    };
+  }
+
+  // Deprecated: Use Query/ViewJSON or Query/ViewJSONBatch
+  // View execute view function and return the view result
+  rpc View(QueryViewRequest) returns (QueryViewResponse) {
+    option (google.api.http) = {
+      post: "/initia/move/v1/view"
+      body: "*"
+    };
+  }
+
+  // Deprecated: Use Query/ViewJSON or Query/ViewJSONBatch
+  // ViewBatch execute multiple view functions and return the view results
+  rpc ViewBatch(QueryViewBatchRequest) returns (QueryViewBatchResponse) {
+    option (google.api.http) = {
+      post: "/initia/move/v1/view/batch"
+      body: "*"
+    };
+  }
+
+  // ViewJSON execute view function with json arguments and return the view result
+  rpc ViewJSON(QueryViewJSONRequest) returns (QueryViewJSONResponse) {
+    option (google.api.http) = {
+      post: "/initia/move/v1/view/json"
+      body: "*"
+    };
+  }
+
+  // ViewJSONBatch execute multiple view functions with json arguments and return the view results
+  rpc ViewJSONBatch(QueryViewJSONBatchRequest) returns (QueryViewJSONBatchResponse) {
+    option (google.api.http) = {
+      post: "/initia/move/v1/view/json/batch"
+      body: "*"
+    };
+  }
+
+  // ScriptABI decode script bytes into ABI
+  rpc ScriptABI(QueryScriptABIRequest) returns (QueryScriptABIResponse) {
+    option (google.api.http) = {
+      post: "/initia/move/v1/script/abi"
+      body: "*"
+    };
+  }
+
+  // Params queries all parameters.
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/initia/move/v1/params";
+  }
+
+  // Metadata converts metadata to denom
+  rpc Metadata(QueryMetadataRequest) returns (QueryMetadataResponse) {
+    option (google.api.http).get = "/initia/move/v1/metadata";
+  }
+
+  // Denom converts denom to metadata
+  rpc Denom(QueryDenomRequest) returns (QueryDenomResponse) {
+    option (google.api.http).get = "/initia/move/v1/denom";
+  }
+}
+
+// QueryModuleRequest is the request type for the Query/Module RPC
+// method
+message QueryModuleRequest {
+  // address is the owner address of the module to query
+  string address = 1;
+  // module_name is the module name to query
+  string module_name = 2;
+}
+
+// QueryModuleResponse is the response type for the Query/Module RPC
+// method
+message QueryModuleResponse {
+  option (gogoproto.equal) = true;
+  Module module = 1 [
+    (gogoproto.embed) = true,
+    (gogoproto.nullable) = false,
+    (gogoproto.jsontag) = ""
+  ];
+}
+
+// QueryModulesRequest is the request type for the Query/Modules
+// RPC method
+message QueryModulesRequest {
+  // address is the owner address of the modules to query
+  string address = 1;
+  // pagination defines an optional pagination for the request.
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryModulesResponse is the response type for the
+// Query/Modules RPC method
+message QueryModulesResponse {
+  repeated Module modules = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+  // pagination defines the pagination in the response.
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryResourceRequest is the request type for the Query/Resource RPC
+// method
+message QueryResourceRequest {
+  // address is the owner address of the module to query
+  string address = 1;
+  // struct_tag is the unique identifier of the resource to query
+  string struct_tag = 2;
+}
+
+// QueryResourceResponse is the response type for the Query/Resource RPC
+// method
+message QueryResourceResponse {
+  option (gogoproto.equal) = true;
+  Resource resource = 1 [
+    (gogoproto.embed) = true,
+    (gogoproto.nullable) = false,
+    (gogoproto.jsontag) = ""
+  ];
+}
+
+// QueryResourcesRequest is the request type for the Query/Resources RPC
+// method
+message QueryResourcesRequest {
+  // address is the owner address of the module to query
+  string address = 1;
+  // pagination defines an optional pagination for the request.
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryResourcesResponse is the response type for the Query/Resources RPC
+// method
+message QueryResourcesResponse {
+  repeated Resource resources = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+  // pagination defines the pagination in the response.
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryTableInfoRequest is the request type for the Query/TableInfo RPC
+// method
+message QueryTableInfoRequest {
+  // address is the table handle
+  string address = 1;
+}
+
+// QueryTableInfoResponse is the response type for the Query/TableInfo RPC
+// method
+message QueryTableInfoResponse {
+  TableInfo table_info = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
+
+// QueryTableEntryRequest is the request type for the Query/TableEntry RPC
+// method
+message QueryTableEntryRequest {
+  // address is the table handle
+  string address = 1;
+  // a key of the table entry
+  bytes key_bytes = 2;
+}
+
+// QueryTableEntryResponse is the response type for the Query/TableEntry RPC
+// method
+message QueryTableEntryResponse {
+  TableEntry table_entry = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
+
+// QueryTableEntriesRequest is the request type for the Query/TableEntries RPC
+// method
+message QueryTableEntriesRequest {
+  // address is the table handle
+  string address = 1;
+  // pagination defines an optional pagination for the request.
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryTableEntriesResponse is the response type for the Query/TableEntries RPC
+// method
+message QueryTableEntriesResponse {
+  repeated TableEntry table_entries = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+  // pagination defines the pagination in the response.
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryLegacyViewRequest is the request type for the QueryLegacyView
+// RPC method
+message QueryLegacyViewRequest {
+  // Address is the owner address of the module to query
+  string address = 1;
+  // ModuleName is the module name of the entry function to query
+  string module_name = 2;
+  // FunctionName is the name of a function to query
+  string function_name = 3;
+  // TypeArgs is the type arguments of a function to execute
+  // ex) "0x1::BasicCoin::Initia", "bool", "u8", "u64"
+  repeated string type_args = 4;
+  // Args is the arguments of a function to execute
+  // - number: little endian
+  // - string: base64 bytes
+  repeated bytes args = 5;
+}
+
+// QueryLegacyViewResponse is the response type for the
+// QueryLegacyView RPC method
+message QueryLegacyViewResponse {
+  string data = 1;
+  repeated VMEvent events = 2 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+  uint64 gas_used = 3;
+}
+
+// QueryViewRequest is the request type for the QueryView
+// RPC method
+message QueryViewRequest {
+  // Address is the owner address of the module to query
+  string address = 1;
+  // ModuleName is the module name of the entry function to query
+  string module_name = 2;
+  // FunctionName is the name of a function to query
+  string function_name = 3;
+  // TypeArgs is the type arguments of a function to execute
+  // ex) "0x1::BasicCoin::Initia", "bool", "u8", "u64"
+  repeated string type_args = 4;
+  // Args is the arguments of a function to execute
+  // - number: little endian
+  // - string: base64 bytes
+  repeated bytes args = 5;
+}
+
+// QueryViewResponse is the response type for the
+// QueryView RPC method
+message QueryViewResponse {
+  string data = 1;
+  repeated VMEvent events = 2 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+  uint64 gas_used = 3;
+}
+
+// QueryViewBatchRequest is the request type for the QueryViewBatch
+// RPC method
+message QueryViewBatchRequest {
+  repeated QueryViewRequest requests = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
+
+// QueryViewBatchResponse is the response type for the
+// QueryViewBatch RPC method
+message QueryViewBatchResponse {
+  repeated QueryViewResponse responses = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
+
+// QueryViewJSONRequest is the request type for the QueryViewJSON
+// RPC method
+message QueryViewJSONRequest {
+  // Address is the owner address of the module to query
+  string address = 1;
+  // ModuleName is the module name of the entry function to query
+  string module_name = 2;
+  // FunctionName is the name of a function to query
+  string function_name = 3;
+  // TypeArgs is the type arguments of a function to execute
+  // ex) "0x1::BasicCoin::Initia", "bool", "u8", "u64"
+  repeated string type_args = 4;
+  // Args is the arguments of a function to execute in json stringify format
+  repeated string args = 5;
+}
+
+// QueryViewJSONResponse is the response type for the
+// QueryViewJSON RPC method
+message QueryViewJSONResponse {
+  string data = 1;
+  repeated VMEvent events = 2 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+  uint64 gas_used = 3;
+}
+
+// QueryViewJSONBatchRequest is the request type for the QueryViewJSONBatch
+// RPC method
+message QueryViewJSONBatchRequest {
+  repeated QueryViewJSONRequest requests = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
+
+// QueryViewJSONBatchResponse is the response type for the
+// QueryViewJSONBatch RPC method
+message QueryViewJSONBatchResponse {
+  repeated QueryViewJSONResponse responses = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
+
+// VMEvent is the event emitted from vm.
+message VMEvent {
+  string type_tag = 1;
+  string data = 2;
+}
+
+// QueryScriptABIRequest is the request type for the Query/ScriptABI
+// RPC method
+message QueryScriptABIRequest {
+  // CodeBytes is the script code for query operation
+  bytes code_bytes = 1;
+}
+
+// QueryScriptABIResponse is the response type for the
+// Query/ScriptABI RPC method
+message QueryScriptABIResponse {
+  bytes abi = 1;
+}
+
+// QueryParamsRequest is the request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is the response type for the Query/Params RPC method.
+message QueryParamsResponse {
+  // params defines the parameters of the module.
+  Params params = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryMetadataRequest is the request type for the Query/Metadata RPC method.
+message QueryMetadataRequest {
+  string denom = 1;
+}
+
+// QueryMetadataResponse is the response type for the Query/Metadata RPC method.
+message QueryMetadataResponse {
+  string metadata = 1;
+}
+
+// QueryDenomRequest is the request type for the Query/Denom RPC method.
+message QueryDenomRequest {
+  string metadata = 1;
+}
+
+// QueryDenomResponse is the response type for the Query/Denom RPC method.
+message QueryDenomResponse {
+  string denom = 1;
+}

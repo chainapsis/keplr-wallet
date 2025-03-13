@@ -1,0 +1,47 @@
+syntax = "proto3";
+package initia.tx.v1;
+
+import "cosmos/base/v1beta1/coin.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+
+option go_package = "github.com/initia-labs/initia/tx/types";
+
+// Query provides defines the gRPC querier service.
+service Query {
+  // GasPrices returns the gas prices for the network.
+  rpc GasPrices(QueryGasPricesRequest) returns (QueryGasPricesResponse) {
+    option (google.api.http).get = "/initia/tx/v1/gas_prices";
+  }
+  // GasPrice returns the gas price for the network.
+  rpc GasPrice(QueryGasPriceRequest) returns (QueryGasPriceResponse) {
+    option (google.api.http).get = "/initia/tx/v1/gas_prices/{denom}";
+  }
+}
+
+// QueryGasPricesRequest is the request type for the Query/GasPrices RPC method.
+message QueryGasPricesRequest {}
+
+// QueryGasPricesResponse is the response type for the Query/GasPrices RPC method.
+message QueryGasPricesResponse {
+  repeated cosmos.base.v1beta1.DecCoin gas_prices = 1 [
+    (gogoproto.moretags) = "yaml:\"gas_prices\"",
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins",
+    (gogoproto.nullable) = false
+  ];
+}
+
+// QueryGasPriceRequest is the request type for the Query/GasPrice RPC method.
+message QueryGasPriceRequest {
+  // denom defines the denomination of the gas price to query.
+  string denom = 1;
+}
+
+// QueryGasPriceResponse is the response type for the Query/GasPrice RPC method.
+message QueryGasPriceResponse {
+  cosmos.base.v1beta1.DecCoin gas_price = 1 [
+    (gogoproto.moretags) = "yaml:\"gas_price\"",
+    (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.DecCoin",
+    (gogoproto.nullable) = false
+  ];
+}

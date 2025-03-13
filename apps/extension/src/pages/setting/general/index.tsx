@@ -61,7 +61,6 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/general/language")}
           />
-
           <PageButton
             title={intl.formatMessage({
               id: "page.setting.general.currency-title",
@@ -72,7 +71,6 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/general/fiat")}
           />
-
           <PageButton
             title={intl.formatMessage({
               id: "page.setting.general.contacts-title",
@@ -80,7 +78,6 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/contacts/list")}
           />
-
           <PageButton
             title={intl.formatMessage({
               id: "page.setting.general.theme-title",
@@ -88,7 +85,6 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/general/theme")}
           />
-
           <PageButton
             title={intl.formatMessage({
               id: "page.setting.general.manage-authz-title",
@@ -96,7 +92,6 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/general/authz")}
           />
-
           <PageButton
             title={intl.formatMessage({
               id: "page.setting.general.link-kpelr-mobile-title",
@@ -104,7 +99,6 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/general/link-keplr-mobile")}
           />
-
           {sidePanelSupported ? (
             <PageButton
               title={
@@ -133,7 +127,6 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
               }
             />
           ) : null}
-
           <PageButton
             title={intl.formatMessage({
               id: "page.setting.general.show-24h-price-changes-title",
@@ -147,17 +140,6 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
                 setIsOpen={() => uiConfigStore.toggleShow24HChangesInMagePage()}
               />
             }
-          />
-
-          <PageButton
-            title={intl.formatMessage({
-              id: "page.setting.general.manage-non-native-chains-title",
-            })}
-            paragraph={intl.formatMessage({
-              id: "page.setting.general.manage-non-native-chains-paragraph",
-            })}
-            endIcon={<RightArrowIcon />}
-            onClick={() => navigate("/setting/general/delete-suggest-chain")}
           />
 
           <PageButton

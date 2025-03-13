@@ -1,0 +1,71 @@
+syntax = "proto3";
+package initia.mstaking.v1;
+
+import "amino/amino.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "initia/mstaking/v1/staking.proto";
+
+option go_package = "github.com/initia-labs/initia/x/mstaking/types";
+
+// GenesisState defines the staking module's genesis state.
+message GenesisState {
+  // params defines all the parameters of related to deposit.
+  Params params = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+
+  // last_validator_powers is a special index that provides a historical list
+  // of the last-block's bonded validators.
+  repeated LastValidatorPower last_validator_powers = 2 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true,
+    (gogoproto.moretags) = "yaml:\"last_validator_powers\""
+  ];
+
+  // delegations defines the validator set at genesis.
+  repeated Validator validators = 3 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true,
+    (gogoproto.moretags) = "yaml:\"validators\""
+  ];
+
+  // delegations defines the delegations active at genesis.
+  repeated Delegation delegations = 4 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true,
+    (gogoproto.moretags) = "yaml:\"delegations\""
+  ];
+
+  // unbonding_delegations defines the unbonding delegations active at genesis.
+  repeated UnbondingDelegation unbonding_delegations = 5 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true,
+    (gogoproto.moretags) = "yaml:\"unbonding_delegations\""
+  ];
+
+  // redelegations defines the redelegations active at genesis.
+  repeated Redelegation redelegations = 6 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true,
+    (gogoproto.moretags) = "yaml:\"redelegations\""
+  ];
+
+  bool exported = 7;
+
+  // sdk missed this
+  uint64 next_unbonding_id = 8;
+}
+
+// LastValidatorPower required for validator set update logic.
+message LastValidatorPower {
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  // address is the address of the validator.
+  string address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // power defines the power of the validator.
+  int64 power = 2;
+}

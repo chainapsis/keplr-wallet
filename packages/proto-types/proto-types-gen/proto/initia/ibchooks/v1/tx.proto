@@ -1,0 +1,64 @@
+syntax = "proto3";
+package initia.ibchooks.v1;
+
+import "amino/amino.proto";
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "initia/ibchooks/v1/types.proto";
+
+option go_package = "github.com/initia-labs/initia/x/ibc-hooks/types";
+option (gogoproto.goproto_getters_all) = false;
+
+// Msg defines the hook Msg service.
+service Msg {
+  option (cosmos.msg.v1.service) = true;
+
+  // UpdateACL update ACL of an address.
+  rpc UpdateACL(MsgUpdateACL) returns (MsgUpdateACLResponse);
+  // UpdateParams defines an operation for updating the x/hook module
+  // parameters.
+  rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
+}
+
+////////////////////
+/// Gov Messages ///
+////////////////////
+
+// MsgUpdateACL is the message to update ACL of an address.
+message MsgUpdateACL {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "ibchooks/MsgUpdateACL";
+
+  // authority is the address that controls the module
+  // (defaults to x/gov unless overwritten).
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // Address is a contract address (wasm, evm) or a contract deployer address (move).
+  string address = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // Allowed is the flag whether this address is allowed to use hook or not.
+  bool allowed = 3;
+}
+
+// MsgUpdateACLResponse returns execution result data.
+message MsgUpdateACLResponse {}
+
+// MsgUpdateParams is the Msg/UpdateParams request type.
+message MsgUpdateParams {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "ibchooks/MsgUpdateParams";
+
+  // authority is the address that controls the module
+  // (defaults to x/gov unless overwritten).
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // params defines the x/hook parameters to update.
+  //
+  // NOTE: All parameters must be supplied.
+  Params params = 2 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
+
+// MsgUpdateParamsResponse defines the response structure for executing a
+// MsgUpdateParams message.
+message MsgUpdateParamsResponse {}

@@ -1,0 +1,28 @@
+syntax = "proto3";
+package initia.move.v1;
+
+import "amino/amino.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "initia/move/v1/types.proto";
+
+option go_package = "github.com/initia-labs/initia/x/move/types";
+
+// PublishAuthorization defines authorization for publish a move module.
+message PublishAuthorization {
+  option (cosmos_proto.implements_interface) = "Authorization";
+  option (amino.name) = "move/PublishAuthorization";
+
+  repeated string module_names = 1;
+}
+
+// ExecuteAuthorization defines authorization for execute a move function.
+message ExecuteAuthorization {
+  option (cosmos_proto.implements_interface) = "Authorization";
+  option (amino.name) = "move/ExecuteAuthorization";
+
+  repeated ExecuteAuthorizationItem items = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}

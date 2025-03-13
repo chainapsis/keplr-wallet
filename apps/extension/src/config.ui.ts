@@ -31,6 +31,8 @@ export const TokenContractListRepoURL =
 
 export const NOBLE_CHAIN_ID = "noble-1";
 
+export const KEPLR_EXTS_MEMO = "Keplr Exts";
+
 export const FiatCurrencies: FiatCurrency[] = [
   {
     currency: "usd",

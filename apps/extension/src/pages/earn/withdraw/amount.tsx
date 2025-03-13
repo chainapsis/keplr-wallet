@@ -44,6 +44,7 @@ import {
   useAutoFeeCurrencySelectionOnInit,
   useFeeOptionSelectionOnInit,
 } from "../../../components/input/fee-control";
+import { KEPLR_EXTS_MEMO } from "../../../config.ui";
 
 const NOBLE_EARN_WITHDRAW_OUT_COIN_MINIMAL_DENOM = "uusdc";
 
@@ -245,11 +246,12 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
 
             await tx.send(
               nobleEarnAmountConfig.feeConfig.toStdFee(),
-              undefined,
+              KEPLR_EXTS_MEMO,
               {
                 // max일 경우 서명 페이지에서 수수료를 수정할 수 없게 만든다.
                 preferNoSetFee:
                   nobleEarnAmountConfig.amountConfig.fraction === 1,
+                preferNoSetMemo: true,
               },
               {
                 onBroadcasted: (_txHash) => {
