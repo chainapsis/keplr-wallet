@@ -8,7 +8,7 @@ import { useBitcoinAddresses } from "./use-bitcoin-network-config";
 import { SignBitcoinTxInteractionStore } from "@keplr-wallet/stores-core";
 import { DUST_THRESHOLD } from "@keplr-wallet/stores-bitcoin";
 
-type ValidatedPsbt = {
+export type ValidatedPsbt = {
   psbt: Psbt;
   inputsToSign: number[];
   feeAmount: Dec;
