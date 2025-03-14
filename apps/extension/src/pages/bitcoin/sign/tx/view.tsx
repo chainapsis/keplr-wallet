@@ -104,10 +104,8 @@ export const SignBitcoinTxView: FunctionComponent<{
   // 중요한 오류는 usePsbtsValidate 훅에서 처리한다.
   feeConfig.setDisableBalanceCheck(true);
 
-  const { isInitialized, validatedPsbts, validationError } = usePsbtsValidate(
-    interactionData,
-    feeConfig
-  );
+  const { isInitialized, validatedPsbts, criticalValidationError } =
+    usePsbtsValidate(interactionData, feeConfig);
 
   const [isViewData, setIsViewData] = useState(false);
 
@@ -133,7 +131,9 @@ export const SignBitcoinTxView: FunctionComponent<{
   });
 
   const buttonDisabled =
-    txConfigsValidate.interactionBlocked || !isInitialized || !!validationError;
+    txConfigsValidate.interactionBlocked ||
+    !isInitialized ||
+    !!criticalValidationError;
   const isLoading = signBitcoinTxInteractionStore.isObsoleteInteractionApproved(
     interactionData.id
   );
