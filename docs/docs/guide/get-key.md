@@ -1,6 +1,6 @@
 # Get Address / Public Key
 
-The `getKey` function is used to retrieve addresses and its associated public key. This function is a crucial part of interacting with blockchain accounts, enabling developers to obtain account details securely.
+The `getKey` function is used to retrieve addresses and their associated public key. This function is a crucial part of interacting with blockchain accounts, enabling developers to obtain account details securely.
 
 ---
 
@@ -50,7 +50,7 @@ interface Key {
 
 :::info
 Hardware Wallet Support:
-- Ledger wallets typically use the Amino JSON sign mode due to limited support for Protobuf-based SIGN_MODE_DIRECT. Check more details [here](../use-with/cosmjs#types-of-offline-signers).
+- Ledger wallets typically use the Amino JSON sign mode due to limited support for Protobuf-based SIGN_MODE_DIRECT. For more details, check [here](../use-with/cosmjs#types-of-offline-signers).
 - Use the `isNanoLedger` and `isKeystone` properties to determine the appropriate signing mode for hardware wallets.
 :::
 
