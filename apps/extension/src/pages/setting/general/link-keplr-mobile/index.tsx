@@ -23,48 +23,16 @@ import { BACKGROUND_PORT } from "@keplr-wallet/router";
 // @ts-ignore
 import { QRCodeSVG } from "qrcode.react";
 import { useStore } from "../../../../stores";
-import SignClient from "@walletconnect/sign-client";
-import { useNavigate } from "react-router";
 import AES, { Counter } from "aes-js";
 import { AddressBookData } from "../../../../stores/ui-config/address-book";
 import { toJS } from "mobx";
 import { Box } from "../../../../components/box";
 import { Gutter } from "../../../../components/gutter";
 import { FormattedMessage, useIntl } from "react-intl";
-
-class MemoryKeyValueStorage {
-  protected readonly store: Map<string, string> = new Map();
-
-  getEntries<T = any>(): Promise<[string, T][]> {
-    const entries: [string, T][] = [];
-    for (const [key, value] of this.store.entries()) {
-      entries.push([key, JSON.parse(value)]);
-    }
-    return Promise.resolve(entries);
-  }
-
-  getItem<T = any>(key: string): Promise<T | undefined> {
-    const value = this.store.get(key);
-    if (value != null) {
-      return Promise.resolve(JSON.parse(value));
-    }
-    return Promise.resolve(undefined);
-  }
-
-  getKeys(): Promise<string[]> {
-    return Promise.resolve(Array.from(this.store.keys()));
-  }
-
-  removeItem(key: string): Promise<void> {
-    this.store.delete(key);
-    return Promise.resolve(undefined);
-  }
-
-  setItem<T = any>(key: string, value: T): Promise<void> {
-    this.store.set(key, JSON.stringify(value));
-    return Promise.resolve(undefined);
-  }
-}
+import {
+  exportUpload,
+  exportGenerateQRCodeDataByInterval,
+} from "keplr-wallet-private";
 
 const Styles = {
   Container: styled(Stack)`
@@ -264,11 +232,9 @@ const QRCodeView: FunctionComponent<{
 }> = observer(({ keyRingVaults, cancel }) => {
   const { chainStore, uiConfigStore } = useStore();
 
-  const navigate = useNavigate();
   const confirm = useConfirm();
   const intl = useIntl();
 
-  const [signClient, setSignClient] = useState<SignClient | undefined>();
   const [qrCodeData, setQRCodeData] = useState<string | undefined>();
 
   const cancelRef = useRef(cancel);
@@ -304,156 +270,75 @@ const QRCodeView: FunctionComponent<{
   }, [confirm, intl]);
 
   useEffect(() => {
-    (async () => {
-      const signClient = await SignClient.init({
-        projectId: process.env["WC_PROJECT_ID"],
-        storage: new MemoryKeyValueStorage(),
-      });
-
-      setSignClient(signClient);
-    })();
-  }, []);
-
-  const topic = useRef<string>("");
-  useEffect(() => {
     let intervalId: NodeJS.Timer | undefined;
 
-    if (signClient) {
-      try {
-        (async () => {
-          const { uri, approval } = await signClient.connect({
-            requiredNamespaces: {
-              cosmos: {
-                methods: ["__keplr_export_keyring_vaults"],
-                chains: ["cosmos:cosmoshub-4"],
-                events: [],
-              },
-            },
-          });
+    try {
+      (async () => {
+        const bytes = new Uint8Array(32);
+        crypto.getRandomValues(bytes);
+        const password = Buffer.from(bytes);
 
-          if (uri) {
-            const bytes = new Uint8Array(32);
-            crypto.getRandomValues(bytes);
-            const password = Buffer.from(bytes);
+        const ivBytes = new Uint8Array(16);
+        crypto.getRandomValues(ivBytes);
+        const iv = Buffer.from(ivBytes);
 
-            const ivBytes = new Uint8Array(16);
-            crypto.getRandomValues(ivBytes);
-            const iv = Buffer.from(ivBytes);
+        const counter = new Counter(0);
+        counter.setBytes(iv);
+        const aesCtr = new AES.ModeOfOperation.ctr(password, counter);
 
-            const n = Math.floor(Math.random() * 10000);
-            const len = 5;
-            const data = JSON.stringify({
-              wcURI: uri,
-              password: password.toString("hex"),
-              iv: iv.toString("hex"),
-            });
-            const chunks: string[] = [];
-            for (let i = 0; i < len; i += 1) {
-              const chunk =
-                i === len - 1
-                  ? data.slice((data.length / len) * i)
-                  : data.slice(
-                      (data.length / len) * i,
-                      (data.length / len) * (i + 1)
-                    );
-              chunks.push(chunk);
-            }
-            let i = 0;
-            const setQR = () => {
-              const _i = i % len;
-              const payload = {
-                t: "export",
-                n,
-                len,
-                v: "v2",
-                i: _i,
-                d: chunks[_i],
-              };
+        const addressBooks: {
+          [chainId: string]: AddressBookData[] | undefined;
+        } = {};
 
-              setQRCodeData(JSON.stringify(payload));
+        for (const chainInfo of chainStore.chainInfos) {
+          const addressBookData =
+            uiConfigStore.addressBookConfig.getAddressBook(chainInfo.chainId);
 
-              i++;
-            };
+          addressBooks[chainInfo.chainIdentifier] = toJS(addressBookData);
+        }
 
-            setQR();
-            intervalId = setInterval(() => {
-              setQR();
-            }, 1000);
+        const enabledChainIdentifiers: Record<string, string[] | undefined> =
+          {};
+        for (const vault of keyRingVaults) {
+          enabledChainIdentifiers[vault.id] =
+            await new InExtensionMessageRequester().sendMessage(
+              BACKGROUND_PORT,
+              new GetEnabledChainIdentifiersMsg(vault.id)
+            );
+        }
 
-            const counter = new Counter(0);
-            counter.setBytes(iv);
-            const aesCtr = new AES.ModeOfOperation.ctr(password, counter);
+        const buf = Buffer.from(JSON.stringify(keyRingVaults));
 
-            // Await session approval from the wallet.
-            const session = await approval();
-            topic.current = session.topic;
+        const keyringData: WCExportKeyRingDatasResponse = {
+          encrypted: {
+            ciphertext: Buffer.from(aesCtr.encrypt(buf)).toString("hex"),
+          },
+          addressBooks,
+          enabledChainIdentifiers,
+        };
 
-            await (async () => {
-              const addressBooks: {
-                [chainId: string]: AddressBookData[] | undefined;
-              } = {};
+        const uploadResult = await exportUpload(JSON.stringify(keyringData));
 
-              for (const chainInfo of chainStore.chainInfos) {
-                const addressBookData =
-                  uiConfigStore.addressBookConfig.getAddressBook(
-                    chainInfo.chainId
-                  );
+        const data = JSON.stringify({
+          otp: uploadResult?.otp,
+          encryptionKey: password.toString("hex"),
+          iv: iv.toString("hex"),
+        });
 
-                addressBooks[chainInfo.chainIdentifier] = toJS(addressBookData);
-              }
-
-              const enabledChainIdentifiers: Record<
-                string,
-                string[] | undefined
-              > = {};
-              for (const vault of keyRingVaults) {
-                enabledChainIdentifiers[vault.id] =
-                  await new InExtensionMessageRequester().sendMessage(
-                    BACKGROUND_PORT,
-                    new GetEnabledChainIdentifiersMsg(vault.id)
-                  );
-              }
-
-              const buf = Buffer.from(JSON.stringify(keyRingVaults));
-
-              const response: WCExportKeyRingDatasResponse = {
-                encrypted: {
-                  ciphertext: Buffer.from(aesCtr.encrypt(buf)).toString("hex"),
-                },
-                addressBooks,
-                enabledChainIdentifiers,
-              };
-
-              await signClient.request({
-                topic: session.topic,
-                chainId: "cosmos:cosmoshub-4",
-                request: {
-                  method: "__keplr_export_keyring_vaults",
-                  params: [
-                    `0x${Buffer.from(JSON.stringify(response)).toString(
-                      "hex"
-                    )}`,
-                  ],
-                },
-              });
-
-              navigate("/");
-            })();
+        intervalId = exportGenerateQRCodeDataByInterval(data, setQRCodeData);
+      })();
+    } catch (e) {
+      confirm
+        .confirm(
+          "",
+          `Failed to create qr code data: ${e.message || e.toString()}`,
+          {
+            forceYes: true,
           }
-        })();
-      } catch (e) {
-        confirm
-          .confirm(
-            "",
-            `Failed to create qr code data: ${e.message || e.toString()}`,
-            {
-              forceYes: true,
-            }
-          )
-          .then(() => {
-            cancelRef.current();
-          });
-      }
+        )
+        .then(() => {
+          cancelRef.current();
+        });
     }
 
     return () => {
@@ -462,25 +347,7 @@ const QRCodeView: FunctionComponent<{
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [signClient]);
-
-  useEffect(() => {
-    return () => {
-      if (signClient && topic.current) {
-        signClient
-          .disconnect({
-            topic: topic.current,
-            reason: {
-              code: 1000,
-              message: "Unmounted",
-            },
-          })
-          .catch((e) => {
-            console.log(e);
-          });
-      }
-    };
-  }, [signClient]);
+  }, []);
 
   return (
     <HeaderLayout
