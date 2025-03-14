@@ -82,6 +82,14 @@ export class AddressBookConfig {
           true
         );
       }
+      for (const bitcoinChainInfo of this.chainStore.modularChainInfos.filter(
+        (modularChainInfo) => "bitcoin" in modularChainInfo
+      )) {
+        chainIdentifierMap.set(
+          ChainIdHelper.parse(bitcoinChainInfo.chainId).identifier,
+          true
+        );
+      }
       runInAction(() => {
         const chainIdentifiers = Array.from(this.addressBookMap.keys());
         for (const chainIdentifier of chainIdentifiers) {

@@ -47,6 +47,8 @@ export const AddressBookModal: FunctionComponent<{
     const intl = useIntl();
     const theme = useTheme();
 
+    const [linkedChainIds, setLinkedChainIds] = useState<string[]>([]);
+
     const [type, setType] = useState<Type>("recent");
 
     const [recents, setRecents] = useState<RecentSendHistory[]>([]);
@@ -62,47 +64,73 @@ export const AddressBookModal: FunctionComponent<{
       })[]
     >([]);
 
+    // bitcoin의 linked chain key를 기반으로 여러 주소 체계의 연락처를 함께 받아오기 위해 linkedChainIds를 먼저 가져온다.
     useEffect(() => {
-      uiConfigStore.addressBookConfig
-        .getRecentSendHistory(recipientConfig.chainId, historyType)
-        .then((res) => {
-          setRecents(res);
-        });
-    }, [historyType, recipientConfig.chainId, uiConfigStore.addressBookConfig]);
+      const modularChainInfo = chainStore.getModularChain(
+        recipientConfig.chainId
+      );
+
+      if (!("bitcoin" in modularChainInfo)) {
+        throw new Error(`${recipientConfig.chainId} is not bitcoin chain`);
+      }
+
+      const linkedChainKey = modularChainInfo.linkedChainKey;
+
+      const linkedChainInfos = chainStore.modularChainInfosInUI.filter(
+        (modularChainInfo) =>
+          "bitcoin" in modularChainInfo &&
+          modularChainInfo.linkedChainKey === linkedChainKey
+      );
+
+      setLinkedChainIds(linkedChainInfos.map((info) => info.chainId));
+    }, [chainStore, recipientConfig.chainId]);
+
+    useEffect(() => {
+      const recentSendHistoryPromises = linkedChainIds.map((chainId) => {
+        return uiConfigStore.addressBookConfig.getRecentSendHistory(
+          chainId,
+          historyType
+        );
+      });
+
+      Promise.all(recentSendHistoryPromises).then((res) => {
+        setRecents(res.flat());
+      });
+    }, [historyType, linkedChainIds, uiConfigStore.addressBookConfig]);
 
     useEffect(() => {
       (() => {
-        return uiConfigStore.addressBookConfig.getVaultBitcoinKeysSettled(
-          recipientConfig.chainId,
-          permitSelfKeyInfo ? undefined : keyRingStore.selectedKeyInfo?.id
+        return Promise.all(
+          linkedChainIds.map((chainId) => {
+            return uiConfigStore.addressBookConfig.getVaultBitcoinKeysSettled(
+              chainId,
+              permitSelfKeyInfo ? undefined : keyRingStore.selectedKeyInfo?.id
+            );
+          })
         );
-      })().then((keys) => {
-        setAccounts(
-          keys
-            .filter((res) => {
-              return res.status === "fulfilled";
-            })
-            .map((res) => {
-              if (res.status === "fulfilled") {
-                return res.value;
-              }
-              throw new Error("Unexpected status");
-            })
-        );
+      })().then((results) => {
+        results.map((keys) => {
+          setAccounts((prev) => [
+            ...prev,
+            ...keys
+              .filter((res) => {
+                return res.status === "fulfilled";
+              })
+              .map((res) => {
+                if (res.status === "fulfilled") {
+                  return res.value;
+                }
+                throw new Error("Unexpected status");
+              }),
+          ]);
+        });
       });
     }, [
-      keyRingStore.selectedKeyInfo?.id,
+      linkedChainIds,
       permitSelfKeyInfo,
-      recipientConfig.chainId,
+      keyRingStore.selectedKeyInfo?.id,
       uiConfigStore.addressBookConfig,
     ]);
-
-    const modularChainInfo = chainStore.getModularChain(
-      recipientConfig.chainId
-    );
-    if (!("bitcoin" in modularChainInfo)) {
-      throw new Error(`${recipientConfig.chainId} is not bitcoin chain`);
-    }
 
     const datas: {
       timestamp?: number;
@@ -123,14 +151,24 @@ export const AddressBookModal: FunctionComponent<{
           });
         }
         case "contacts": {
-          return uiConfigStore.addressBookConfig
-            .getAddressBook(recipientConfig.chainId)
-            .map((addressData) => {
-              return {
-                name: addressData.name,
-                address: addressData.address,
-              };
-            });
+          return linkedChainIds.reduce<
+            {
+              name: string;
+              address: string;
+            }[]
+          >((acc, chainId) => {
+            return [
+              ...acc,
+              ...uiConfigStore.addressBookConfig
+                .getAddressBook(chainId)
+                .map((addressData) => {
+                  return {
+                    name: addressData.name,
+                    address: addressData.address,
+                  };
+                }),
+            ];
+          }, []);
         }
         case "accounts": {
           return accounts.reduce<
