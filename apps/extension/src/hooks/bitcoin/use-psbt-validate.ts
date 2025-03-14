@@ -6,6 +6,7 @@ import { useGetNativeSegwitUTXOs, useGetTaprootUTXOs } from "./use-get-utxos";
 import { fromOutputScript } from "bitcoinjs-lib/src/address";
 import { useBitcoinAddresses } from "./use-bitcoin-network-config";
 import { SignBitcoinTxInteractionStore } from "@keplr-wallet/stores-core";
+import { DUST_THRESHOLD } from "@keplr-wallet/stores-bitcoin";
 
 type ValidatedPsbt = {
   psbt: Psbt;
@@ -204,6 +205,12 @@ export const usePsbtsValidate = (
         // CHECK: output은 검증할 것이 있나?
         const outputs = psbt.txOutputs;
         for (const output of outputs) {
+          if (output.value < DUST_THRESHOLD) {
+            warnings.push(
+              "Output amount is less than the minimum amount (0.00000546). Transaction may fail."
+            );
+          }
+
           sumOutputAmount = sumOutputAmount.add(new Dec(output.value));
         }
 

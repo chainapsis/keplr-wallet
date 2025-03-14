@@ -46,6 +46,14 @@ export class ZeroAmountError extends Error {
   }
 }
 
+export class DustAmountError extends Error {
+  constructor(m: string) {
+    super(m);
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, DustAmountError.prototype);
+  }
+}
+
 export class NegativeAmountError extends Error {
   constructor(m: string) {
     super(m);

@@ -9,6 +9,7 @@ import { ChainGetter } from "@keplr-wallet/stores";
 import { action, computed, makeObservable, observable } from "mobx";
 import { AppCurrency } from "@keplr-wallet/types";
 import {
+  DustAmountError,
   EmptyAmountError,
   InsufficientAmountError,
   InvalidNumberAmountError,
@@ -18,7 +19,10 @@ import {
 } from "./errors";
 import { CoinPretty, Dec, DecUtils } from "@keplr-wallet/unit";
 import { useState } from "react";
-import { BitcoinQueriesStore } from "@keplr-wallet/stores-bitcoin";
+import {
+  BitcoinQueriesStore,
+  DUST_THRESHOLD,
+} from "@keplr-wallet/stores-bitcoin";
 
 export class AmountConfig extends TxChainSetter implements IAmountConfig {
   @observable.ref
@@ -194,6 +198,19 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
       if (dec.lt(new Dec(0))) {
         return {
           error: new NegativeAmountError("Amount is negative"),
+        };
+      }
+      if (
+        dec.lt(
+          new Dec(DUST_THRESHOLD).quo(
+            DecUtils.getTenExponentN(this.currency.coinDecimals)
+          )
+        )
+      ) {
+        return {
+          error: new DustAmountError(
+            "Minimum amount is 0.00000546 (546 satoshis)"
+          ),
         };
       }
     } catch {
