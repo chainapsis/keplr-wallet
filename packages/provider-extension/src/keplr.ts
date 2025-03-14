@@ -113,7 +113,9 @@ export class Keplr implements IKeplr {
         return value.toString(16);
       })
       .join("");
-    const proxyRequestType = `proxy-request${metaId ? `-${metaId}` : ""}`;
+    const proxyRequestType = isMobile
+      ? "proxy-request"
+      : `proxy-request${metaId ? `-${metaId}` : ""}`;
 
     const proxyMessage: ProxyRequest = {
       type: proxyRequestType,
@@ -765,7 +767,9 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
         return value.toString(16);
       })
       .join("");
-    const proxyRequestType = `proxy-request${metaId ? `-${metaId}` : ""}`;
+    const proxyRequestType = isMobile
+      ? "proxy-request"
+      : `proxy-request${metaId ? `-${metaId}` : ""}`;
 
     const proxyMessage: ProxyRequest = {
       type: proxyRequestType,
