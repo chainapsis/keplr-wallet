@@ -27,11 +27,46 @@ export interface Fees {
 export interface UTXO {
   txid: string;
   vout: number;
-  status: {
-    confirmed: boolean;
-    block_height: number;
-    block_hash: string;
-    block_time: number;
-  };
+  status: TxStatus;
   value: number;
+}
+
+interface TxVout {
+  scriptpubkey: string;
+  scriptpubkey_asm: string;
+  scriptpubkey_type: string;
+  scriptpubkey_address: string;
+  value: number;
+}
+
+interface TxVin {
+  txid: string;
+  vout: number;
+  prevout: TxVout;
+  scriptsig: string;
+  scriptsig_asm: string;
+  is_coinbase: boolean;
+  sequence: number;
+  witness: string[];
+  inner_redeemscript_asm: string;
+  inner_witnessscript_asm: string;
+}
+
+interface TxStatus {
+  confirmed: boolean;
+  block_height: number;
+  block_hash: string;
+  block_time: number;
+}
+
+export interface BitcoinTx {
+  txid: string;
+  version: number;
+  locktime: number;
+  size: number;
+  weight: number;
+  fee: number;
+  vin: TxVin[];
+  vout: TxVout[];
+  status: TxStatus;
 }

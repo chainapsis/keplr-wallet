@@ -643,6 +643,7 @@
   "components.input.memo-input.optional-placeholder": "Optional",
   "components.input.fee-control.fee": "Tx Fee: {assets}",
   "components.input.fee-control.max-fee": "Max Fee: {assets}",
+  "components.input.fee-control.fee-rate": "Fee Rate: {feeRate} sat/vB",
   "components.input.fee-control.error.insufficient-fee": "Insufficient balance to cover the fees",
   "components.input.fee-control.tooltip.external-fee-set": "Transaction fee was set by website",
   "components.input.fee-control.modal.title": "Fee Options",

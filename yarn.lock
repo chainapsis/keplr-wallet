@@ -9252,6 +9252,7 @@ __metadata:
     "@keplr-wallet/types": 0.12.190
     buffer: ^6.0.3
   peerDependencies:
+    bitcoinjs-lib: ^6
     mobx: ^6
     mobx-utils: ^6
     starknet: ^6

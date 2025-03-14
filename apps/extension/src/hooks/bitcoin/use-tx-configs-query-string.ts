@@ -1,9 +1,9 @@
 import {
   FeeRateType,
   IAmountConfig,
-  IFeeConfig,
   IFeeRateConfig,
   IRecipientConfig,
+  ITxSizeConfig,
 } from "@keplr-wallet/hooks-bitcoin";
 import { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -11,7 +11,7 @@ import { useSearchParams } from "react-router-dom";
 export const useBitcoinTxConfigsQueryString = (configs: {
   amountConfig: IAmountConfig;
   recipientConfig: IRecipientConfig;
-  feeConfig: IFeeConfig;
+  txSizeConfig: ITxSizeConfig;
   feeRateConfig: IFeeRateConfig;
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -33,6 +33,11 @@ export const useBitcoinTxConfigsQueryString = (configs: {
     const initialRecipient = searchParams.get("initialRecipient");
     if (initialRecipient) {
       configs.recipientConfig?.setValue(initialRecipient);
+    }
+
+    const initialTxSize = searchParams.get("initialTxSize");
+    if (initialTxSize) {
+      configs.txSizeConfig.setValue(Number.parseInt(initialTxSize));
     }
 
     const initialFeeRateType = searchParams.get("initialFeeRateType");
@@ -71,6 +76,12 @@ export const useBitcoinTxConfigsQueryString = (configs: {
           prev.delete("initialRecipient");
         }
 
+        if (configs.txSizeConfig.value != null) {
+          prev.set("initialTxSize", configs.txSizeConfig.value.toString());
+        } else {
+          prev.delete("initialTxSize");
+        }
+
         if (configs.feeRateConfig.feeRateType != null) {
           prev.set("initialFeeRateType", configs.feeRateConfig.feeRateType);
         } else {
@@ -93,6 +104,7 @@ export const useBitcoinTxConfigsQueryString = (configs: {
     configs.feeRateConfig.feeRateType,
     configs.feeRateConfig.value,
     configs.recipientConfig.value,
+    configs.txSizeConfig.value,
     setSearchParams,
   ]);
 };

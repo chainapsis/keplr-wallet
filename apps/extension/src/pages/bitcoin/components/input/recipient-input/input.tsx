@@ -7,7 +7,7 @@ import {
 } from "@keplr-wallet/hooks-bitcoin";
 import { ProfileIcon } from "../../../../../components/icon";
 import { Box } from "../../../../../components/box";
-// import { AddressBookModal } from "../../address-book-modal";
+import { AddressBookModal } from "../../address-book-modal";
 import { IconButton } from "../../../../../components/icon-button";
 import { useIntl } from "react-intl";
 import { useTheme } from "styled-components";
@@ -41,7 +41,8 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
     const theme = useTheme();
     const { recipientConfig } = props;
 
-    const [, setIsAddressBookModalOpen] = React.useState(false);
+    const [isAddressBookModalOpen, setIsAddressBookModalOpen] =
+      React.useState(false);
 
     return (
       <Box>
@@ -90,7 +91,7 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
             }
           })()}
         />
-        {/* 
+
         {"historyType" in props ? (
           <AddressBookModal
             isOpen={isAddressBookModalOpen}
@@ -99,7 +100,7 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
             recipientConfig={recipientConfig}
             permitSelfKeyInfo={props.permitAddressBookSelfKeyInfo}
           />
-        ) : null} */}
+        ) : null}
       </Box>
     );
   },

@@ -4,27 +4,30 @@ import {
   GenesisHash,
   Keplr,
 } from "@keplr-wallet/types";
-import { CoinPretty, Dec, DecUtils } from "@keplr-wallet/unit";
-import { simpleFetch } from "@keplr-wallet/simple-fetch";
+import { Dec } from "@keplr-wallet/unit";
 import { action, makeObservable, observable } from "mobx";
 import validate, {
   AddressInfo,
+  AddressType,
   Network,
   getAddressInfo,
 } from "bitcoin-address-validation";
 import { Psbt, networks, address } from "bitcoinjs-lib";
 import { BitcoinTxSizeEstimator } from "./tx-size-estimator";
 import {
+  SelectionParams,
   BuildPsbtParams,
   SelectUTXOsParams,
-  UTXO,
+  SelectionResult,
   UTXOSelection,
 } from "./types";
-import { DUST_RELAY_FEE_RATE, DUST_THRESHOLD } from "./constant";
+import { BRANCH_AND_BOUND_TIMEOUT_MS, DUST_THRESHOLD } from "./constant";
 
 export class BitcoinAccountBase {
   @observable
   protected _isSendingTx: boolean = false;
+
+  protected _txSizeEstimator: BitcoinTxSizeEstimator;
 
   constructor(
     protected readonly chainGetter: ChainGetter,
@@ -32,6 +35,8 @@ export class BitcoinAccountBase {
     protected readonly getKeplr: () => Promise<Keplr | undefined>
   ) {
     makeObservable(this);
+
+    this._txSizeEstimator = new BitcoinTxSizeEstimator();
   }
 
   @action
@@ -49,29 +54,18 @@ export class BitcoinAccountBase {
    * @param utxos UTXOs associated with the sender's address (must be of the same payment type - p2wpkh, p2tr)
    * @param recipients Recipients of the transaction with amount and address
    * @param feeRate Transaction fee rate in sat/vB
-   * @param inscriptionUtxos UTXOs containing inscriptions (for Ordinals)
-   * @param runesUtxos UTXOs containing Runes protocol data
-   * @param dustRelayFeeRate Fee rate for dust outputs
-   * @param discardDust Whether to discard dust outputs
-   * @returns {selectedUtxos, recipients, estimatedFee, txSize} Selected UTXOs, recipients, transaction fee, and transaction size
+   * @param isSendMax Whether to send max amount, do not calculate change output
+   * @returns {selectedUtxos, txSize, hasChange} Selected UTXOs and transaction size, whether there is change output
    */
   selectUTXOs({
     senderAddress,
     utxos,
     recipients,
     feeRate,
-    inscriptionUtxos = [],
-    runesUtxos = [],
-    discardDust = false,
-    dustRelayFeeRate = DUST_RELAY_FEE_RATE,
+    isSendMax = false,
   }: SelectUTXOsParams): UTXOSelection | null {
     // 1. Basic validation
-    if (
-      !utxos.length ||
-      !recipients.length ||
-      feeRate <= 0 ||
-      dustRelayFeeRate <= 0
-    ) {
+    if (!utxos.length || !recipients.length || feeRate <= 0) {
       throw new Error("Invalid parameters");
     }
 
@@ -85,53 +79,25 @@ export class BitcoinAccountBase {
       throw new Error("Invalid chain id");
     }
 
-    const currency = this.chainGetter
-      .getModularChainInfoImpl(this.chainId)
-      .getCurrencies("bitcoin")[0];
-    if (!currency) {
-      throw new Error("Invalid currency");
-    }
-
-    // 3. Filter and sort UTXOs
-    const utxosToExclude = new Set<string>();
-    [...inscriptionUtxos, ...runesUtxos].forEach((utxo) => {
-      utxosToExclude.add(`${utxo.txid}:${utxo.vout}`);
-    });
-
-    const sortedUtxos = utxos
-      .filter((utxo) => !utxosToExclude.has(`${utxo.txid}:${utxo.vout}`))
-      .sort((a, b) => b.value - a.value);
-
-    if (sortedUtxos.length === 0) {
-      throw new Error("No UTXOs found");
-    }
+    // 3. Sort UTXOs by descending order
+    const sortedUtxos = utxos.sort((a, b) => b.value - a.value);
 
     // 4. Validate addresses
-    const validateAndGetAddressInfo = (address: string) => {
-      try {
-        return validate(address, network as unknown as Network, {
-          castTestnetTo: network === "signet" ? Network.signet : undefined,
-        })
-          ? getAddressInfo(address, {
-              castTestnetTo: network === "signet" ? Network.signet : undefined,
-            })
-          : null;
-      } catch (e) {
-        return null;
-      }
-    };
-
-    const senderAddressInfo = validateAndGetAddressInfo(senderAddress);
+    const senderAddressInfo = this.validateAndGetAddressInfo(
+      senderAddress,
+      network as unknown as Network
+    );
     if (!senderAddressInfo) {
       throw new Error("Invalid sender address");
     }
 
     const recipientAddressInfos = recipients
-      .map(({ address }) => validateAndGetAddressInfo(address))
+      .map(({ address }) =>
+        this.validateAndGetAddressInfo(address, network as unknown as Network)
+      )
       .filter(Boolean) as AddressInfo[];
-
     if (!recipientAddressInfos.length) {
-      throw new Error("Invalid recipient address");
+      throw new Error("Invalid recipients");
     }
 
     // 5. Calculate output parameters
@@ -147,166 +113,145 @@ export class BitcoinAccountBase {
       new Dec(0)
     );
 
-    // 7. Initialize tx size estimator
-    const txSizeEstimator = new BitcoinTxSizeEstimator();
+    // 7. Initialize constants and helpers
+    const DUST = new Dec(DUST_THRESHOLD);
 
-    // Helper function for calculating tx size
+    // Helper functions
     const calculateTxSize = (
       inputCount: number,
       outputParams: Record<string, number>,
       includeChange: boolean
     ) => {
-      const outputParamsWithChange = { ...outputParams };
-
-      if (includeChange) {
-        const changeKey = `${senderAddressInfo.type}_output_count`;
-        outputParamsWithChange[changeKey] =
-          (outputParamsWithChange[changeKey] || 0) + 1;
-      }
-
-      return txSizeEstimator.calcTxSize({
-        input_count: inputCount,
-        input_script: senderAddressInfo.type,
-        ...outputParamsWithChange,
-      });
+      return this.calculateTxSize(
+        senderAddressInfo.type,
+        inputCount,
+        outputParams,
+        includeChange
+      );
     };
 
-    // Helper function for calculating fee
     const calculateFee = (size: number) => new Dec(Math.ceil(size * feeRate));
 
-    // 8. Select UTXOs
-    const selectedUtxos: UTXO[] = [];
-    let selectedAmount = new Dec(0);
-    const DUST = new Dec(DUST_THRESHOLD);
+    const isDust = (amount: Dec) => amount.lt(DUST);
 
-    for (const candidate of sortedUtxos) {
-      // Calculate tx size and fee before adding this candidate
-      const currentTxSize = calculateTxSize(
-        selectedUtxos.length,
-        outputParams,
-        false
-      );
-      const currentFee = calculateFee(currentTxSize.txVBytes);
+    // Helper to calculate tx configuration for a given set of UTXOs
+    const calculateTxConfig = (
+      selectedUtxoIds: Set<string>,
+      withChange: boolean
+    ) => {
+      const selectedCount = selectedUtxoIds.size;
+      const txSize = calculateTxSize(selectedCount, outputParams, withChange);
+      const fee = calculateFee(txSize.txVBytes);
 
-      // Calculate tx size and fee after adding this candidate
-      const txSizeWithCandidate = calculateTxSize(
-        selectedUtxos.length + 1,
-        outputParams,
-        false
-      );
-      const feeWithoutChange = calculateFee(txSizeWithCandidate.txVBytes);
+      const selectedAmount = utxos
+        .filter((utxo) => selectedUtxoIds.has(`${utxo.txid}:${utxo.vout}`))
+        .reduce((sum, utxo) => sum.add(new Dec(utxo.value)), new Dec(0));
 
-      // Calculate the fee contribution of this candidate
-      const candidateFeeContribution = feeWithoutChange.sub(currentFee);
-      const candidateValue = new Dec(candidate.value);
+      const remainder = selectedAmount.sub(targetAmount).sub(fee);
 
-      // Skip if candidate doesn't contribute positively
-      if (candidateValue.lte(candidateFeeContribution)) {
-        throw new Error(
-          `Skipping UTXO: value doesn't exceed fee contribution, ${candidate.txid}:${candidate.vout}`
-        );
-      }
+      return {
+        selectedUtxoIds,
+        selectedAmount,
+        txSize,
+        fee,
+        remainder,
+        hasChange: withChange && remainder.gte(DUST),
+      };
+    };
 
-      // Add this candidate to our selection
-      selectedUtxos.push(candidate);
-      selectedAmount = selectedAmount.add(candidateValue);
+    // 8. If send max is true, return all UTXOs and estimated fee
+    // This is for simulation of build psbt when amount fraction is 1
+    if (isSendMax) {
+      const txSize = calculateTxSize(utxos.length, outputParams, false);
 
-      // Calculate the amount we need (target + fee without change)
-      const requiredAmount = targetAmount.add(feeWithoutChange);
-
-      // Check if we have enough without a change output
-      if (selectedAmount.gte(requiredAmount)) {
-        const remainderValue = selectedAmount.sub(requiredAmount);
-
-        // If remainder is dust and we can discard it
-        if (remainderValue.lt(DUST) && discardDust) {
-          return {
-            selectedUtxos,
-            recipients,
-            estimatedFee: new CoinPretty(currency, feeWithoutChange),
-            txSize: txSizeWithCandidate,
-            hasChange: false,
-          };
-        }
-
-        // Calculate tx size and fee with change output
-        const txSizeWithChange = calculateTxSize(
-          selectedUtxos.length,
-          outputParams,
-          true
-        );
-        const feeWithChange = calculateFee(txSizeWithChange.txVBytes);
-
-        // Calculate the amount we need with change
-        const requiredAmountWithChange = targetAmount.add(feeWithChange);
-        const changeAmount = selectedAmount.sub(requiredAmountWithChange);
-
-        // Check if we have enough with a change output
-        if (selectedAmount.gte(requiredAmountWithChange)) {
-          // If change amount is too small (dust)
-          if (changeAmount.lt(DUST)) {
-            // If we can discard dust, use fee without change
-            if (discardDust) {
-              return {
-                selectedUtxos,
-                recipients,
-                estimatedFee: new CoinPretty(currency, feeWithoutChange),
-                txSize: txSizeWithCandidate,
-                hasChange: false,
-              };
-            }
-
-            // Calculate dust relay fee
-            const dustVBytes =
-              senderAddressInfo.type === "p2tr"
-                ? txSizeEstimator.P2TR_OUT_SIZE
-                : txSizeEstimator.P2WPKH_OUT_SIZE;
-            const dustRelayFee = new Dec(DUST_RELAY_FEE_RATE).mul(
-              new Dec(dustVBytes)
-            );
-
-            const requiredAmountWithChangeAndDust =
-              requiredAmountWithChange.add(dustRelayFee);
-
-            // If we have enough with a change output (output is dust)
-            if (selectedAmount.gte(requiredAmountWithChangeAndDust)) {
-              const dustVBytesInTxVBytes = dustRelayFee
-                .quo(new Dec(feeRate))
-                .roundUp()
-                .toBigNumber()
-                .toJSNumber();
-
-              return {
-                selectedUtxos,
-                recipients,
-                estimatedFee: new CoinPretty(currency, feeWithChange),
-                txSize: {
-                  ...txSizeWithChange,
-                  dustVBytes: dustVBytesInTxVBytes,
-                },
-                hasChange: true,
-              };
-            }
-
-            // We need to continue and add more UTXOs to cover the required amount
-            continue;
-          }
-
-          // We have a valid change amount
-          return {
-            selectedUtxos,
-            recipients,
-            estimatedFee: new CoinPretty(currency, feeWithChange),
-            txSize: txSizeWithChange,
-            hasChange: true,
-          };
-        }
-      }
-      // If we haven't returned, we need more UTXOs
+      return {
+        selectedUtxos: utxos,
+        txSize,
+        hasChange: false,
+      };
     }
 
-    // We've used all available UTXOs but still don't have enough
-    return null;
+    // 9. Check if a single UTXO can satisfy the transaction
+    // Try each UTXO in descending order of value
+    for (const utxo of sortedUtxos) {
+      const utxoId = `${utxo.txid}:${utxo.vout}`;
+      const singleUtxoIds = new Set([utxoId]);
+
+      // Calculate with change first
+      const withChangeConfig = calculateTxConfig(singleUtxoIds, true);
+
+      // If this UTXO can cover the target amount plus fee and has non-dust change
+      if (withChangeConfig.remainder.gte(DUST)) {
+        return {
+          selectedUtxos: [utxo],
+          txSize: withChangeConfig.txSize,
+          hasChange: true,
+        };
+      }
+
+      // If this UTXO can cover the target amount plus fee with no change (or dust change)
+      const withoutChangeConfig = calculateTxConfig(singleUtxoIds, false);
+      if (withoutChangeConfig.remainder.gte(new Dec(0))) {
+        return {
+          selectedUtxos: [utxo],
+          txSize: withoutChangeConfig.txSize,
+          hasChange: false,
+        };
+      }
+    }
+
+    let selectedUtxoIds: Set<string>;
+
+    // 10. Select UTXOs using branch and bound algorithm if no single UTXO is sufficient
+    // Always try to avoid dust change by setting discardDustChange to false
+    // This will make the algorithm prioritize selections that result in non-dust change
+    const branchAndBoundResult = this.branchAndBoundSelection({
+      utxos: sortedUtxos,
+      targetAmount,
+      calculateTxSize,
+      calculateFee,
+      isDust,
+      outputParams,
+      timeoutMs: BRANCH_AND_BOUND_TIMEOUT_MS,
+    });
+
+    if (!branchAndBoundResult) {
+      // If branch and bound algorithm fails, use greedy selection
+      // Also prioritize non-dust change
+      selectedUtxoIds = this.greedySelection({
+        utxos: sortedUtxos,
+        targetAmount,
+        calculateTxSize,
+        calculateFee,
+        isDust,
+        outputParams,
+      });
+    } else {
+      selectedUtxoIds = branchAndBoundResult;
+    }
+
+    // If no UTXOs are selected, return null
+    if (selectedUtxoIds.size === 0) {
+      return null;
+    }
+
+    // 11. Calculate final tx configuration
+    const withChangeConfig = calculateTxConfig(selectedUtxoIds, true);
+
+    // Only include change if it's above dust threshold
+    const hasChange = withChangeConfig.remainder.gte(DUST);
+
+    // Final calculations based on whether we have change
+    const finalConfig = calculateTxConfig(selectedUtxoIds, hasChange);
+
+    // 12. Return the selection
+    return {
+      selectedUtxos: utxos.filter((utxo) =>
+        selectedUtxoIds.has(`${utxo.txid}:${utxo.vout}`)
+      ),
+      txSize: finalConfig.txSize,
+      hasChange,
+    };
   }
 
   /**
@@ -323,7 +268,8 @@ export class BitcoinAccountBase {
     senderAddress,
     xonlyPubKey,
     recipients,
-    estimatedFee,
+    feeRate,
+    isSendMax = false,
     hasChange = false,
   }: BuildPsbtParams): string {
     // 1. Basic validation
@@ -331,12 +277,16 @@ export class BitcoinAccountBase {
       throw new Error("No UTXOs provided for transaction");
     }
 
-    if (!recipients.length) {
-      throw new Error("No recipients specified for transaction");
-    }
-
     if (!senderAddress) {
       throw new Error("Sender address is required");
+    }
+
+    if (!recipients.length) {
+      throw new Error("Recipients are required");
+    }
+
+    if (feeRate <= 0) {
+      throw new Error("Invalid fee rate");
     }
 
     // 2. Parse and validate chain configuration
@@ -358,35 +308,87 @@ export class BitcoinAccountBase {
     }
 
     // 3. Validate transaction economics
-    const totalValue = utxos.reduce(
+    const totalInputAmount = utxos.reduce(
       (sum, utxo) => sum.add(new Dec(utxo.value)),
       new Dec(0)
     );
 
-    const amountToSend = recipients.reduce(
+    const totalOutputAmount = recipients.reduce(
       (sum, recipient) => sum.add(new Dec(recipient.amount)),
       new Dec(0)
     );
 
-    const feeInSatoshi = estimatedFee
-      .toDec()
-      .mul(DecUtils.getTenExponentN(estimatedFee.currency.coinDecimals));
-
-    const remainderValue = totalValue.sub(amountToSend).sub(feeInSatoshi);
+    const remainderValue = totalInputAmount.sub(totalOutputAmount);
     const zeroValue = new Dec(0);
 
-    if (remainderValue.lt(zeroValue)) {
+    // If send max is true, it's allowed to simulate build psbt with negative remainder value
+    if (!isSendMax && remainderValue.lt(zeroValue)) {
       throw new Error("Insufficient balance");
     }
+
+    const senderAddressInfo = this.validateAndGetAddressInfo(
+      senderAddress,
+      network as unknown as Network
+    );
+
+    if (!senderAddressInfo) {
+      throw new Error("Invalid sender address");
+    }
+
+    const recipientAddressInfos = recipients
+      .map(({ address }) =>
+        this.validateAndGetAddressInfo(address, network as unknown as Network)
+      )
+      .filter(Boolean) as AddressInfo[];
+    if (!recipientAddressInfos.length) {
+      throw new Error("Invalid recipients");
+    }
+
+    // 5. Calculate output parameters
+    const outputParams: Record<string, number> = {};
+    recipientAddressInfos.forEach((info) => {
+      const key = `${info.type}_output_count`;
+      outputParams[key] = (outputParams[key] || 0) + 1;
+    });
+
+    // Helper functions
+    const calculateTxSize = (
+      inputCount: number,
+      outputParams: Record<string, number>,
+      includeChange: boolean
+    ) => {
+      return this.calculateTxSize(
+        senderAddressInfo.type,
+        inputCount,
+        outputParams,
+        includeChange
+      );
+    };
+
+    const calculateFee = (size: number) => new Dec(Math.ceil(size * feeRate));
+
+    const DUST = new Dec(DUST_THRESHOLD);
 
     const allRecipients = [...recipients];
 
     // 4. Handle change output if needed
-    if (hasChange && remainderValue.gt(zeroValue)) {
-      allRecipients.push({
-        address: senderAddress,
-        amount: remainderValue.truncate().toBigNumber().toJSNumber(),
-      });
+    if (hasChange) {
+      const txSize = calculateTxSize(utxos.length, outputParams, true);
+      const fee = calculateFee(txSize.txVBytes);
+
+      const changeAmount = remainderValue.sub(fee);
+
+      // if change amount is greater than or equal to dust threshold
+      if (changeAmount.gte(DUST)) {
+        // add change output address
+        allRecipients.push({
+          address: senderAddress,
+          amount: changeAmount.truncate().toBigNumber().toJSNumber(),
+        });
+      } else {
+        // hasChange is true but change amount is less than dust threshold, log warning
+        console.warn("Change amount is less than dust threshold");
+      }
     }
 
     // 5. Get network params
@@ -402,18 +404,23 @@ export class BitcoinAccountBase {
       }
     })();
 
-    // 6. Build PSBT
+    // 6. Validate recipients
+    allRecipients.forEach((recipient) =>
+      validate(recipient.address, network as unknown as Network)
+    );
+
+    // 7. Build PSBT
     try {
       const psbt = new Psbt({ network: networkParams });
 
-      // 6.1. Process sender address and script
+      // 7.1. Process sender address and script
       const senderOutputScript = address.toOutputScript(
         senderAddress,
         networkParams
       );
       const internalPubkey = xonlyPubKey ? Buffer.from(xonlyPubKey) : undefined;
 
-      // 6.2. Add sender UTXOs as inputs
+      // 7.2. Add sender UTXOs as inputs (RBF enabled)
       for (const utxo of utxos) {
         if (paymentType === "taproot") {
           psbt.addInput({
@@ -424,6 +431,7 @@ export class BitcoinAccountBase {
               value: utxo.value,
             },
             tapInternalKey: internalPubkey,
+            sequence: 0xfffffffd,
           });
         }
 
@@ -432,11 +440,12 @@ export class BitcoinAccountBase {
             hash: utxo.txid,
             index: utxo.vout,
             witnessUtxo: { script: senderOutputScript, value: utxo.value },
+            sequence: 0xfffffffd,
           });
         }
       }
 
-      // 6.3. Add all outputs (recipients + change if applicable)
+      // 7.3. Add all outputs (recipients + change if applicable)
       for (const recipient of allRecipients) {
         psbt.addOutput({
           address: recipient.address,
@@ -456,47 +465,289 @@ export class BitcoinAccountBase {
 
   /**
    * Sign PSBT
-   * @param psbt PSBT to be signed
+   * @param psbt PSBT to be signed, all inputs must be finalized
    * @returns Signed PSBT in hex format
    */
-  async signPsbt(psbt: Psbt): Promise<string> {
+  async signPsbt(psbtHex: string): Promise<string> {
     const { getKeplr } = this;
     const keplr = await getKeplr();
     if (!keplr) {
       throw new Error("Keplr not found");
     }
 
-    return keplr.signPsbt(this.chainId, psbt.toHex());
+    return keplr.signPsbt(this.chainId, psbtHex);
   }
 
-  /**
-   * Push transaction to network through indexer
-   * @param txHex Transaction in hex format
-   * @returns Transaction hash
-   */
-  async pushTx(txHex: string): Promise<string> {
-    const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
-    if (!("bitcoin" in modularChainInfo)) {
-      throw new Error(`${this.chainId} is not bitcoin chain`);
+  private validateAndGetAddressInfo = (address: string, network?: Network) => {
+    try {
+      return validate(address, network, {
+        castTestnetTo: network === "signet" ? Network.signet : undefined,
+      })
+        ? getAddressInfo(address, {
+            castTestnetTo: network === "signet" ? Network.signet : undefined,
+          })
+        : null;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  private calculateTxSize = (
+    senderAddressType: AddressType,
+    inputCount: number,
+    outputParams: Record<string, number>,
+    includeChange: boolean
+  ) => {
+    const outputParamsWithChange = { ...outputParams };
+
+    if (includeChange) {
+      const changeKey = `${senderAddressType}_output_count`;
+      outputParamsWithChange[changeKey] =
+        (outputParamsWithChange[changeKey] || 0) + 1;
     }
 
-    const indexerUrl = modularChainInfo.bitcoin.rest;
-    const res = await simpleFetch<string>(`${indexerUrl}/tx`, {
-      method: "POST",
-      body: txHex,
-      headers: {
-        "Content-Type": "text/plain",
-      },
+    return this._txSizeEstimator.calcTxSize({
+      input_count: inputCount,
+      input_script: senderAddressType,
+      ...outputParamsWithChange,
     });
-    if (res.status !== 200) {
-      throw new Error("Failed to push tx");
+  };
+
+  private branchAndBoundSelection({
+    utxos,
+    targetAmount,
+    calculateTxSize,
+    calculateFee,
+    isDust,
+    outputParams,
+    timeoutMs,
+  }: SelectionParams): Set<string> | null {
+    // Algorithm execution time limit (ms)
+    const TIMEOUT = timeoutMs ?? BRANCH_AND_BOUND_TIMEOUT_MS;
+    const startTime = Date.now();
+
+    // Calculate total available amount of all UTXOs
+    const totalAvailable = utxos.reduce(
+      (sum, utxo) => sum.add(new Dec(utxo.value)),
+      new Dec(0)
+    );
+
+    // If target amount is greater than total available amount, return null
+    if (targetAmount.gt(totalAvailable)) {
+      return null;
     }
 
-    return res.data;
+    // Function to estimate fee
+    const estimateFee = (selectedIds: Set<string>, withChange: boolean) => {
+      const txSize = calculateTxSize(
+        selectedIds.size,
+        outputParams,
+        withChange
+      );
+      return calculateFee(txSize.txVBytes);
+    };
+
+    // Recursive search function - return value
+    const search = (
+      index: number,
+      currentSelection: Set<string>,
+      currentValue: Dec,
+      remainingValue: Dec,
+      timeoutReached: boolean = false
+    ): SelectionResult | null => {
+      // Check if timeout is reached
+      if (Date.now() - startTime > TIMEOUT) {
+        return null;
+      }
+
+      // Calculate fee for current selected UTXOs with change
+      const withChangeFee = estimateFee(currentSelection, true);
+      const effectiveValueWithChange = currentValue.sub(withChangeFee);
+
+      let currentBest: SelectionResult | null = null;
+
+      // If target amount is satisfied, consider current selection as the best candidate
+      if (effectiveValueWithChange.gte(targetAmount)) {
+        const remainder = effectiveValueWithChange.sub(targetAmount);
+
+        const isDustRemainder = isDust(remainder);
+
+        // Prioritize non-dust change outputs
+        // If remainder is not dust, consider it as a valid solution
+        if (!isDustRemainder) {
+          currentBest = {
+            utxoIds: new Set(currentSelection),
+            totalValue: currentValue,
+            effectiveValue: effectiveValueWithChange,
+            wastage: remainder,
+          };
+        } else {
+          // If remainder is dust, we'll still consider it but with lower priority
+          // We'll only use it if we can't find a better solution
+          currentBest = {
+            utxoIds: new Set(currentSelection),
+            totalValue: currentValue,
+            effectiveValue: effectiveValueWithChange,
+            wastage: remainder,
+          };
+        }
+      }
+
+      // If all UTXOs are considered or timeout is reached, return current best
+      if (index >= utxos.length || timeoutReached) {
+        return currentBest;
+      }
+
+      const utxo = utxos[index];
+      const utxoId = `${utxo.txid}:${utxo.vout}`;
+      const utxoValue = new Dec(utxo.value);
+
+      // Bounding: If adding all remaining UTXOs still cannot reach target amount, return current best
+      if (effectiveValueWithChange.add(remainingValue).lt(targetAmount)) {
+        return currentBest;
+      }
+
+      // If already exceeds target amount and current best is better, return current best
+      if (
+        currentBest &&
+        effectiveValueWithChange.gte(targetAmount) &&
+        effectiveValueWithChange.sub(targetAmount).lt(currentBest.wastage)
+      ) {
+        return currentBest;
+      }
+
+      // Include current UTXO (branch 1)
+      currentSelection.add(utxoId);
+      const newRemaining = remainingValue.sub(utxoValue);
+      const withUtxo = search(
+        index + 1,
+        new Set(currentSelection), // Create new Set object and pass it
+        currentValue.add(utxoValue),
+        newRemaining
+      );
+
+      // Exclude current UTXO (branch 2)
+      currentSelection.delete(utxoId);
+      const withoutUtxo = search(
+        index + 1,
+        new Set(currentSelection), // Create new Set object and pass it
+        currentValue,
+        newRemaining
+      );
+
+      // Select the better result between the two paths
+      if (!withUtxo) return withoutUtxo;
+      if (!withoutUtxo) return withUtxo;
+
+      // Prioritize non-dust change outputs
+      const withUtxoDust = isDust(withUtxo.wastage);
+      const withoutUtxoDust = isDust(withoutUtxo.wastage);
+
+      // If one has non-dust change and the other has dust change, prefer the non-dust one
+      if (!withUtxoDust && withoutUtxoDust) return withUtxo;
+      if (withUtxoDust && !withoutUtxoDust) return withoutUtxo;
+
+      // If both have the same dust status, select the one with less wastage
+      return withUtxo.wastage.lt(withoutUtxo.wastage) ? withUtxo : withoutUtxo;
+    };
+
+    // Start search
+    const result = search(0, new Set<string>(), new Dec(0), totalAvailable);
+
+    if (!result) {
+      return null;
+    }
+
+    return result.utxoIds;
   }
 
-  async signAndPushTx(psbt: Psbt): Promise<string> {
-    const signedPsbt = await this.signPsbt(psbt);
-    return await this.pushTx(signedPsbt);
+  private greedySelection({
+    utxos,
+    targetAmount,
+    calculateTxSize,
+    calculateFee,
+    isDust,
+    outputParams,
+  }: Omit<SelectionParams, "timeoutMs">): Set<string> {
+    const selectedUtxoIds = new Set<string>();
+    let selectedAmount = new Dec(0);
+
+    // 1. Select UTXOs to satisfy target amount
+    for (const utxo of utxos) {
+      const utxoId = `${utxo.txid}:${utxo.vout}`;
+      selectedUtxoIds.add(utxoId);
+      selectedAmount = selectedAmount.add(new Dec(utxo.value));
+
+      // Calculate fee
+      const txSize = calculateTxSize(selectedUtxoIds.size, outputParams, true);
+      const fee = calculateFee(txSize.txVBytes);
+
+      // Calculate remainder
+      const remainder = selectedAmount.sub(targetAmount).sub(fee);
+      const isDustRemainder = isDust(remainder);
+
+      // If target amount is satisfied and remainder is not dust, stop
+      // This prioritizes non-dust change outputs
+      if (selectedAmount.gte(targetAmount) && !isDustRemainder) {
+        break;
+      }
+    }
+
+    // 2. Select additional UTXOs to cover fee
+    let txSize = calculateTxSize(selectedUtxoIds.size, outputParams, true);
+    let fee = calculateFee(txSize.txVBytes);
+    let remainder = selectedAmount.sub(targetAmount).sub(fee);
+
+    if (remainder.lt(new Dec(0))) {
+      for (const utxo of utxos) {
+        const utxoId = `${utxo.txid}:${utxo.vout}`;
+        if (selectedUtxoIds.has(utxoId)) continue;
+
+        selectedUtxoIds.add(utxoId);
+        selectedAmount = selectedAmount.add(new Dec(utxo.value));
+
+        txSize = calculateTxSize(selectedUtxoIds.size, outputParams, true);
+        fee = calculateFee(txSize.txVBytes);
+        remainder = selectedAmount.sub(targetAmount).sub(fee);
+
+        if (remainder.gte(new Dec(0))) {
+          break;
+        }
+      }
+    }
+
+    // 3. If we have a dust remainder, try to find a better combination
+    // that results in a non-dust remainder
+    if (isDust(remainder) && remainder.gt(new Dec(0))) {
+      // Try to find a UTXO that, when added, would result in a non-dust remainder
+      for (const utxo of utxos) {
+        const utxoId = `${utxo.txid}:${utxo.vout}`;
+        if (selectedUtxoIds.has(utxoId)) continue;
+
+        // Add this UTXO
+        selectedUtxoIds.add(utxoId);
+        const newAmount = selectedAmount.add(new Dec(utxo.value));
+
+        // Calculate new fee and remainder
+        const newTxSize = calculateTxSize(
+          selectedUtxoIds.size,
+          outputParams,
+          true
+        );
+        const newFee = calculateFee(newTxSize.txVBytes);
+        const newRemainder = newAmount.sub(targetAmount).sub(newFee);
+
+        // If the new remainder is not dust, keep this UTXO
+        if (!isDust(newRemainder) && newRemainder.gt(new Dec(0))) {
+          selectedAmount = newAmount;
+          break;
+        }
+
+        // Otherwise, remove this UTXO and try another one
+        selectedUtxoIds.delete(utxoId);
+      }
+    }
+
+    return selectedUtxoIds;
   }
 }

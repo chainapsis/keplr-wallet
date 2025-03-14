@@ -6,3 +6,4 @@ export * from "./icns";
 export * from "./eth-sign";
 export * from "./starknet-sign-tx";
 export * from "./starknet-sign-message";
+export * from "./bitcoin-sign-tx";

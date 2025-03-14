@@ -5,18 +5,11 @@ import { action, computed, makeObservable, observable } from "mobx";
 import { useState } from "react";
 
 export class TxSizeConfig extends TxChainSetter implements ITxSizeConfig {
-  @observable.ref
-  protected _txSize:
-    | {
-        txVBytes: number;
-        txBytes: number;
-        txWeight: number;
-        dustVBytes?: number;
-      }
-    | undefined = undefined;
+  @observable
+  protected _value: string = "";
 
   @observable
-  protected _allowZeroTxSize?: boolean = undefined;
+  protected _disallowZeroTxSize: boolean = false;
 
   constructor(chainGetter: ChainGetter, initialChainId: string) {
     super(chainGetter, initialChainId);
@@ -25,36 +18,59 @@ export class TxSizeConfig extends TxChainSetter implements ITxSizeConfig {
   }
 
   @action
-  setTxSize(txSize: {
-    txVBytes: number;
-    txBytes: number;
-    txWeight: number;
-    dustVBytes?: number;
-  }): void {
-    this._txSize = txSize;
+  setValue(value: string | number): void {
+    if (typeof value === "number") {
+      this._value = value.toString();
+    } else {
+      this._value = value;
+    }
   }
 
-  get txVBytes(): number {
-    return this._txSize?.txVBytes ?? 0;
+  get value(): string {
+    return this._value;
   }
 
-  get txBytes(): number {
-    return this._txSize?.txBytes ?? 0;
+  get disallowZeroTxSize(): boolean {
+    return this._disallowZeroTxSize;
   }
 
-  get txWeight(): number {
-    return this._txSize?.txWeight ?? 0;
+  @action
+  setDisallowZeroTxSize(value: boolean): void {
+    this._disallowZeroTxSize = value;
   }
 
-  get dustVBytes(): number | undefined {
-    return this._txSize?.dustVBytes;
+  get txSize(): number | undefined {
+    // return 0 by default to calculate minimum fee
+    if (this._value.trim() === "") {
+      if (this._disallowZeroTxSize) {
+        return undefined;
+      }
+      return 0;
+    }
+
+    const num = Number.parseInt(this._value);
+    if (Number.isNaN(num)) {
+      if (this._disallowZeroTxSize) {
+        return undefined;
+      }
+      return 0;
+    }
+
+    return num;
   }
 
   @computed
   get uiProperties(): UIProperties {
-    if (!this._txSize) {
+    if (this._value.trim() === "") {
       return {
         error: new Error("Tx size not set"),
+      };
+    }
+
+    const num = Number.parseInt(this._value);
+    if (Number.isNaN(num)) {
+      return {
+        error: new Error("Tx size is not valid number"),
       };
     }
 
@@ -62,9 +78,15 @@ export class TxSizeConfig extends TxChainSetter implements ITxSizeConfig {
   }
 }
 
-export const useTxSizeConfig = (chainGetter: ChainGetter, chainId: string) => {
+export const useTxSizeConfig = (
+  chainGetter: ChainGetter,
+  chainId: string,
+  disallowZeroTxSize?: boolean
+) => {
   const [txConfig] = useState(() => new TxSizeConfig(chainGetter, chainId));
   txConfig.setChain(chainId);
-
+  if (disallowZeroTxSize) {
+    txConfig.setDisallowZeroTxSize(disallowZeroTxSize);
+  }
   return txConfig;
 };

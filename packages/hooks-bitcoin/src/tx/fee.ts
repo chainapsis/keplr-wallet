@@ -10,16 +10,16 @@ import { TxChainSetter } from "./chain";
 import { ChainGetter } from "@keplr-wallet/stores";
 import { action, computed, makeObservable, observable } from "mobx";
 import { useState } from "react";
-import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
+import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { InsufficientFeeError } from "./errors";
 import { BitcoinQueriesStore } from "@keplr-wallet/stores-bitcoin";
 
 export class FeeConfig extends TxChainSetter implements IFeeConfig {
-  @observable.ref
-  protected _fee: CoinPretty | null = null;
-
   @observable
   protected _disableBalanceCheck: boolean = false;
+
+  @observable
+  protected _value: string = "";
 
   constructor(
     chainGetter: ChainGetter,
@@ -27,8 +27,8 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     initialChainId: string,
     protected readonly senderConfig: ISenderConfig,
     protected readonly amountConfig: IAmountConfig,
-    protected readonly feeRateConfig: IFeeRateConfig,
-    protected readonly txSizeConfig: ITxSizeConfig
+    protected readonly txSizeConfig: ITxSizeConfig,
+    protected readonly feeRateConfig: IFeeRateConfig
   ) {
     super(chainGetter, initialChainId);
 
@@ -44,23 +44,28 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     return this._disableBalanceCheck;
   }
 
-  get fee(): CoinPretty | undefined {
-    if (!this._fee) {
-      if (!this.txSizeConfig.txVBytes) {
-        return;
-      }
-
-      const fee = this.feeRateConfig.feeRate * this.txSizeConfig.txVBytes;
-      // bitcoin will never? has another fee currency than satoshi. (I think)
-      return new CoinPretty(this.amountConfig.currency, new Dec(fee));
-    }
-
-    return this._fee;
+  get value(): string {
+    return this._value;
   }
 
   @action
-  setFee(fee: CoinPretty | null) {
-    this._fee = fee;
+  setValue(value: string) {
+    this._value = value;
+  }
+
+  get fee(): CoinPretty | undefined {
+    if (this.value.trim() === "") {
+      if (this.txSizeConfig.txSize === undefined) {
+        return undefined;
+      }
+
+      return new CoinPretty(
+        this.amountConfig.currency,
+        this.txSizeConfig.txSize * this.feeRateConfig.feeRate
+      );
+    }
+
+    return new CoinPretty(this.amountConfig.currency, this._value);
   }
 
   @computed
@@ -77,6 +82,8 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         loadingState: "loading-block",
       };
     }
+
+    const amount = this.amountConfig.amount;
 
     // TODO: check available balance rather than total balance
     const bal = this.bitcoinQueriesStore
@@ -108,7 +115,15 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       };
     }
 
-    if (new Int(bal.balance.toCoin().amount).lt(new Int(fee.toCoin().amount))) {
+    const need = amount.reduce((acc, cur) => {
+      return acc.add(new Dec(cur.toCoin().amount));
+    }, new Dec(0));
+
+    if (
+      new Dec(bal.balance.toCoin().amount).lt(
+        new Dec(fee.toCoin().amount).add(need)
+      )
+    ) {
       return {
         error: new InsufficientFeeError("Insufficient fee"),
         loadingState: bal.isFetching ? "loading" : undefined,
@@ -125,8 +140,8 @@ export const useFeeConfig = (
   chainId: string,
   senderConfig: ISenderConfig,
   amountConfig: IAmountConfig,
-  feeRateConfig: IFeeRateConfig,
   txSizeConfig: ITxSizeConfig,
+  feeRateConfig: IFeeRateConfig,
   initialFn?: (config: FeeConfig) => void
 ) => {
   const [config] = useState(() => {
@@ -136,8 +151,8 @@ export const useFeeConfig = (
       chainId,
       senderConfig,
       amountConfig,
-      feeRateConfig,
-      txSizeConfig
+      txSizeConfig,
+      feeRateConfig
     );
 
     if (initialFn) {
