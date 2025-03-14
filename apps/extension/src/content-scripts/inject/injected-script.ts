@@ -5,6 +5,9 @@ import { RpcProvider, WalletAccount } from "starknet";
 import manifest from "../../manifest.v2.json";
 
 const keplr = new InjectedKeplr(
+  process.env.KEPLR_EXT_PROVIDER_META_ID
+    ? process.env.KEPLR_EXT_PROVIDER_META_ID
+    : undefined,
   manifest.version,
   "extension",
   (state) => {

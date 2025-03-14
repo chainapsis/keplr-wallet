@@ -192,6 +192,7 @@ module.exports = {
       KEPLR_EXT_STARKNET_PROVIDER_INFO_ID: "keplr",
       KEPLR_EXT_STARKNET_PROVIDER_INFO_NAME: "Keplr",
       KEPLR_EXT_STARKNET_PROVIDER_INFO_ICON: keplrLogoBase64,
+      KEPLR_EXT_PROVIDER_META_ID: "test",
       SKIP_API_KEY: "",
     }),
     new ForkTsCheckerWebpackPlugin(),
