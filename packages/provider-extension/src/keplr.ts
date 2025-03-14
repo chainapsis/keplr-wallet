@@ -32,7 +32,7 @@ import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from "./cosmjs";
 import { KeplrEnigmaUtils } from "./enigma";
 import { BUILD_VERSION } from "./version";
 import EventEmitter from "events";
-import { KeplrLogoBase64 } from "./constants";
+import { KeplrLogoBase64, metaId } from "./constants";
 import {
   Call,
   DeployAccountSignerDetails,
@@ -40,8 +40,9 @@ import {
 } from "starknet";
 
 export interface ProxyRequest {
-  type: "proxy-request";
+  type: string;
   id: string;
+  metaId?: string;
   method: keyof IKeplr;
   args: any[];
   ethereumProviderMethod?: keyof IEthereumProvider;
@@ -112,9 +113,12 @@ export class Keplr implements IKeplr {
         return value.toString(16);
       })
       .join("");
+    const proxyRequestType = !(window as any).keplrRequestMetaIdSupport
+      ? "proxy-request"
+      : `proxy-request${metaId ? `-${metaId}` : ""}`;
 
     const proxyMessage: ProxyRequest = {
-      type: "proxy-request",
+      type: proxyRequestType,
       id,
       method,
       args: JSONUint8Array.wrap(args),
@@ -763,9 +767,12 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
         return value.toString(16);
       })
       .join("");
+    const proxyRequestType = !(window as any).keplrRequestMetaIdSupport
+      ? "proxy-request"
+      : `proxy-request${metaId ? `-${metaId}` : ""}`;
 
     const proxyMessage: ProxyRequest = {
-      type: "proxy-request",
+      type: proxyRequestType,
       id,
       method: "ethereum",
       args: JSONUint8Array.wrap(args),

@@ -13,7 +13,10 @@ import manifest from "../manifest.v2.json";
 (window as any).__keplr_content_script = true;
 
 InjectedKeplr.startProxy(
-  new Keplr(manifest.version, "core", new InExtensionMessageRequester())
+  new Keplr(manifest.version, "core", new InExtensionMessageRequester()),
+  process.env.KEPLR_EXT_PROVIDER_META_ID
+    ? process.env.KEPLR_EXT_PROVIDER_META_ID
+    : undefined
 );
 
 const router = new ExtensionRouter(ContentScriptEnv.produceEnv);
