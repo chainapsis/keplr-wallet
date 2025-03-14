@@ -281,7 +281,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
         );
 
         let recipientsForTransaction = [];
-        if (amountInSatoshi > MAX_SAFE_OUTPUT) {
+        if (amountInSatoshi.gt(MAX_SAFE_OUTPUT)) {
           // 큰 금액을 여러 출력으로 분할
           let remainingAmount = amountInSatoshi;
           while (!remainingAmount.gt(ZERO)) {
