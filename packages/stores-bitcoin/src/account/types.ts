@@ -1,36 +1,56 @@
-import { CoinPretty } from "@keplr-wallet/unit";
+import { Dec } from "@keplr-wallet/unit";
 
 export interface SelectUTXOsParams {
   senderAddress: string;
   utxos: UTXO[];
   recipients: UTXOSelectionRecipient[];
   feeRate: number;
-  inscriptionUtxos?: Pick<UTXO, "txid" | "vout">[];
-  runesUtxos?: Pick<UTXO, "txid" | "vout">[];
-  discardDust?: boolean;
-  dustRelayFeeRate?: number;
+  isSendMax?: boolean;
+}
+
+export interface SelectionParams {
+  utxos: UTXO[];
+  targetAmount: Dec;
+  calculateTxSize: (
+    inputCount: number,
+    outputParams: Record<string, number>,
+    includeChange: boolean
+  ) => {
+    txVBytes: number;
+    txBytes: number;
+    txWeight: number;
+  };
+  calculateFee: (size: number) => Dec;
+  isDust: (amount: Dec) => boolean;
+  outputParams: Record<string, number>;
+  timeoutMs?: number;
 }
 
 export interface BuildPsbtParams {
   utxos: UTXO[];
   senderAddress: string;
   recipients: UTXOSelectionRecipient[];
-  estimatedFee: CoinPretty;
+  feeRate: number;
   xonlyPubKey?: Uint8Array;
+  isSendMax?: boolean;
   hasChange?: boolean;
 }
 
 export interface UTXOSelection {
   selectedUtxos: UTXO[];
-  recipients: UTXOSelectionRecipient[];
-  estimatedFee: CoinPretty;
   txSize: {
     txVBytes: number;
     txBytes: number;
     txWeight: number;
-    dustVBytes?: number;
   };
   hasChange: boolean;
+}
+
+export interface SelectionResult {
+  utxoIds: Set<string>;
+  totalValue: Dec;
+  effectiveValue: Dec;
+  wastage: Dec;
 }
 
 export interface UTXO {

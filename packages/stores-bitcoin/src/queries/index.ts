@@ -1,9 +1,12 @@
 import { ChainGetter, QuerySharedContext } from "@keplr-wallet/stores";
 import { DeepReadonly } from "utility-types";
-import { ObservableQueryBitcoinBalance } from "./balance";
-import { ObservableQueryBitcoinFeeEstimates } from "./fee-estimates";
-import { ObservableQueryBitcoinUTXOs } from "./utxos";
-import { ObservableQueryBitcoinTx } from "./tx";
+import {
+  ObservableQueryBitcoinBalance,
+  ObservableQueryBitcoinFeeEstimates,
+  ObservableQueryBitcoinUTXOs,
+  ObservableQueryBitcoinTx,
+  ObservableQueryBitcoinAddressTxs,
+} from "./indexer";
 
 export class BitcoinQueriesStore {
   protected map: Map<string, BitcoinQueriesStoreImpl> = new Map();
@@ -34,6 +37,7 @@ class BitcoinQueriesStoreImpl {
   public readonly queryBitcoinBalance: DeepReadonly<ObservableQueryBitcoinBalance>;
   public readonly queryBitcoinUTXOs: DeepReadonly<ObservableQueryBitcoinUTXOs>;
   public readonly queryBitcoinTx: DeepReadonly<ObservableQueryBitcoinTx>;
+  public readonly queryBitcoinAddressTxs: DeepReadonly<ObservableQueryBitcoinAddressTxs>;
   public readonly queryBitcoinFeeEstimates: DeepReadonly<ObservableQueryBitcoinFeeEstimates>;
 
   constructor(
@@ -44,6 +48,9 @@ class BitcoinQueriesStoreImpl {
     this.queryBitcoinBalance = new ObservableQueryBitcoinBalance(sharedContext);
     this.queryBitcoinUTXOs = new ObservableQueryBitcoinUTXOs(sharedContext);
     this.queryBitcoinTx = new ObservableQueryBitcoinTx(sharedContext);
+    this.queryBitcoinAddressTxs = new ObservableQueryBitcoinAddressTxs(
+      sharedContext
+    );
     this.queryBitcoinFeeEstimates = new ObservableQueryBitcoinFeeEstimates(
       sharedContext,
       chainId,

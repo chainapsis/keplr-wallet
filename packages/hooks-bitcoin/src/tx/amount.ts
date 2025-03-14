@@ -67,11 +67,8 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
       if (!result) {
         return "0";
       }
-      // TODO: improve fee handling
-      if (this.feeConfig) {
-        if (this.feeConfig.fee) {
-          result = result.sub(this.feeConfig.fee);
-        }
+      if (this.feeConfig?.fee) {
+        result = result.sub(this.feeConfig.fee);
       }
       if (result.toDec().lte(new Dec(0))) {
         return "0";
@@ -262,10 +259,10 @@ export const useAmountConfig = (
   chainId: string,
   senderConfig: ISenderConfig
 ) => {
-  const [txConfig] = useState(
+  const [config] = useState(
     () => new AmountConfig(chainGetter, queriesStore, chainId, senderConfig)
   );
-  txConfig.setChain(chainId);
+  config.setChain(chainId);
 
-  return txConfig;
+  return config;
 };
