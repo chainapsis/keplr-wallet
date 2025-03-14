@@ -44,7 +44,10 @@ import { useGetUTXOs } from "../../../hooks/bitcoin/use-get-utxos";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { Psbt } from "bitcoinjs-lib";
-import { PushBitcoinTransactionMsg } from "@keplr-wallet/background";
+import {
+  AddRecentSendHistoryMsg,
+  PushBitcoinTransactionMsg,
+} from "@keplr-wallet/background";
 // import {
 //   AddRecentSendHistoryMsg,
 //   SubmitStarknetTxHashMsg,
@@ -427,19 +430,21 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
               console.log(e);
             });
 
-          // TODO: address book 추가 필요
-          //     new InExtensionMessageRequester().sendMessage(
-          //       BACKGROUND_PORT,
-          //       new AddRecentSendHistoryMsg(
-          //         chainId,
-          //         historyType,
-          //         sender,
-          //         recipient,
-          //         [amount],
-          //         "",
-          //         undefined
-          //       )
-          //     );
+          new InExtensionMessageRequester().sendMessage(
+            BACKGROUND_PORT,
+            new AddRecentSendHistoryMsg(
+              chainId,
+              historyType,
+              sender,
+              sendConfigs.recipientConfig.recipient,
+              sendConfigs.amountConfig.amount.map((amount) => ({
+                amount: amount.toCoin().amount,
+                denom: amount.toCoin().denom,
+              })),
+              "",
+              undefined
+            )
+          );
 
           if (!isDetachedMode) {
             navigate("/", {
