@@ -19,10 +19,10 @@ export const useTxConfigsValidate = (configs: {
   memoConfig?: IMemoConfig;
   channelConfig?: IIBCChannelConfig;
   gasSimulator?: IGasSimulator;
-  isIgnoringStarknet?: boolean;
+  isIgnoringModularChain?: boolean;
 }) => {
   const interactionBlocked = (() => {
-    if (configs.isIgnoringStarknet) {
+    if (configs.isIgnoringModularChain) {
       return false;
     }
 
