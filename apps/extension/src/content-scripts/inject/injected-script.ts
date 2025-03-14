@@ -72,6 +72,8 @@ const keplr = new InjectedKeplr(
   }
 );
 injectKeplrToWindow(keplr);
+// provider-extension package에서 개선된 request 형태를 지원하는지 아닌지 알려주기 위한 값
+(window as any).keplrRequestMetaIdSupport = true;
 
 window.addEventListener("beforeunload", () => {
   keplr.__core__webpageClosed();

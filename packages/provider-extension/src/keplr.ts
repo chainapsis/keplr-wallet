@@ -113,7 +113,7 @@ export class Keplr implements IKeplr {
         return value.toString(16);
       })
       .join("");
-    const proxyRequestType = isMobile
+    const proxyRequestType = !(window as any).keplrRequestMetaIdSupport
       ? "proxy-request"
       : `proxy-request${metaId ? `-${metaId}` : ""}`;
 
@@ -767,7 +767,7 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
         return value.toString(16);
       })
       .join("");
-    const proxyRequestType = isMobile
+    const proxyRequestType = !(window as any).keplrRequestMetaIdSupport
       ? "proxy-request"
       : `proxy-request${metaId ? `-${metaId}` : ""}`;
 
