@@ -2,13 +2,18 @@ import { autorun, makeObservable, observable, runInAction, toJS } from "mobx";
 import { KVStore, PrefixKVStore } from "@keplr-wallet/common";
 import { ChainStore } from "../chain";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import { Key, SettledResponses } from "@keplr-wallet/types";
+import {
+  Key,
+  SettledResponses,
+  SupportedPaymentType,
+} from "@keplr-wallet/types";
 import {
   GetCosmosKeysForEachVaultSettledMsg,
   RecentSendHistory,
   GetRecentSendHistoriesMsg,
   GetCosmosKeysForEachVaultWithSearchSettledMsg,
   GetStarknetKeysForEachVaultSettledMsg,
+  GetBitcoinKeysForEachVaultSettledMsg,
 } from "@keplr-wallet/background";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import { KeyRingStore } from "@keplr-wallet/stores-core";
@@ -180,6 +185,34 @@ export class AddressBookConfig {
     }
 
     const msg = new GetStarknetKeysForEachVaultSettledMsg(chainId, vaultIds);
+    return await this.messageRequester.sendMessage(BACKGROUND_PORT, msg);
+  }
+
+  async getVaultBitcoinKeysSettled(
+    chainId: string,
+    exceptVaultId?: string
+  ): Promise<
+    SettledResponses<
+      {
+        name: string;
+        pubKey: Uint8Array;
+        address: string;
+        paymentType: SupportedPaymentType;
+        isNanoLedger: boolean;
+      } & {
+        vaultId: string;
+      }
+    >
+  > {
+    const vaultIds = this.keyRingStore.keyInfos
+      .map((keyInfo) => keyInfo.id)
+      .filter((vault) => vault !== exceptVaultId);
+
+    if (vaultIds.length === 0) {
+      return [];
+    }
+
+    const msg = new GetBitcoinKeysForEachVaultSettledMsg(chainId, vaultIds);
     return await this.messageRequester.sendMessage(BACKGROUND_PORT, msg);
   }
 
