@@ -75,3 +75,31 @@ export class SubmitStarknetTxHashMsg extends Message<GetTransactionReceiptRespon
     return SubmitStarknetTxHashMsg.type();
   }
 }
+
+export class PushBitcoinTransactionMsg extends Message<string> {
+  public static type() {
+    return "push-bitcoin-transaction";
+  }
+
+  constructor(public readonly chainId: string, public readonly txHex: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new KeplrError("tx", 100, "chain id is empty");
+    }
+
+    if (!this.txHex) {
+      throw new KeplrError("tx", 101, "tx hex is empty");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return PushBitcoinTransactionMsg.type();
+  }
+}

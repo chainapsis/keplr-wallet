@@ -1203,7 +1203,12 @@ export class KeyRingService {
     return signature;
   }
 
-  signPsbt(chainId: string, vaultId: string, psbt: Psbt) {
+  signPsbt(
+    chainId: string,
+    vaultId: string,
+    psbt: Psbt,
+    inputsToSign: number[]
+  ) {
     if (this.vaultService.isLocked) {
       throw new Error("KeyRing is locked");
     }
@@ -1228,6 +1233,7 @@ export class KeyRingService {
       vault,
       coinType,
       psbt,
+      inputsToSign,
       modularChainInfo
     );
 
@@ -1297,6 +1303,7 @@ export class KeyRingService {
     vault: Vault,
     coinType: number,
     psbt: Psbt,
+    inputsToSign: number[],
     modularChainInfo: ModularChainInfo
   ) {
     if (this.vaultService.isLocked) {
@@ -1310,7 +1317,7 @@ export class KeyRingService {
     }
 
     return Promise.resolve(
-      keyRing.signPsbt(vault, coinType, psbt, modularChainInfo)
+      keyRing.signPsbt(vault, coinType, psbt, inputsToSign, modularChainInfo)
     );
   }
 

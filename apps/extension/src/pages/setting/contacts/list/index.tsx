@@ -57,8 +57,11 @@ export const SettingContactsList: FunctionComponent = observer(() => {
       };
     })
     .concat(
-      chainStore.modularChainInfos
-        .filter((modularChainInfo) => "starknet" in modularChainInfo)
+      chainStore.groupedModularChainInfos
+        .filter(
+          (modularChainInfo) =>
+            "starknet" in modularChainInfo || "bitcoin" in modularChainInfo
+        )
         .map((modularChainInfo) => {
           return {
             key: modularChainInfo.chainId,

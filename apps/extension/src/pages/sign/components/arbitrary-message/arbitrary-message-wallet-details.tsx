@@ -10,14 +10,13 @@ import { ProfileOutlinedIcon } from "../../../../components/icon";
 import { FormattedMessage } from "react-intl";
 import { hexToRgba } from "../../../../utils";
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import { ChainInfoWithCoreTypes } from "@keplr-wallet/background";
-import { IChainInfoImpl } from "@keplr-wallet/stores";
+import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 
 interface ArbitraryMsgWalletDetailsProps {
   walletName: string;
-  chainInfo: IChainInfoImpl<ChainInfoWithCoreTypes>;
+  chainInfo: ChainInfo | ModularChainInfo;
   addressInfo: {
-    type: "bech32" | "ethereum" | "starknet";
+    type: "bech32" | "ethereum" | "starknet" | "bitcoin";
     address: string;
   };
 }
@@ -41,7 +40,7 @@ export const ArbitraryMsgWalletDetails: FunctionComponent<
         : addressInfo.address;
     }
 
-    if (addressInfo.type === "bech32") {
+    if (addressInfo.type === "bech32" || addressInfo.type === "bitcoin") {
       return Bech32Address.shortenAddress(addressInfo.address, 30);
     }
   })();

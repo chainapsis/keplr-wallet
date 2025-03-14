@@ -8791,6 +8791,7 @@ __metadata:
     "@keplr-wallet/cosmos": 0.12.190
     "@keplr-wallet/crypto": 0.12.190
     "@keplr-wallet/hooks": 0.12.190
+    "@keplr-wallet/hooks-bitcoin": 0.12.190
     "@keplr-wallet/hooks-internal": 0.12.190
     "@keplr-wallet/hooks-starknet": 0.12.190
     "@keplr-wallet/ledger-cosmos": 0.12.190
@@ -8898,12 +8899,39 @@ __metadata:
     "@ledgerhq/hw-transport": ^6
     "@ledgerhq/hw-transport-webhid": ^6
     "@ledgerhq/hw-transport-webusb": ^6
+    bitcoinjs-lib: ^6
     mobx: ^6
     mobx-react-lite: ^3
     mobx-utils: ^6
     react: ^16.8.0 || ^17 || ^18
     react-dom: ^16.8.0 || ^17 || ^18
     starknet: ^6
+  languageName: unknown
+  linkType: soft
+
+"@keplr-wallet/hooks-bitcoin@0.12.190, @keplr-wallet/hooks-bitcoin@workspace:packages/hooks-bitcoin":
+  version: 0.0.0-use.local
+  resolution: "@keplr-wallet/hooks-bitcoin@workspace:packages/hooks-bitcoin"
+  dependencies:
+    "@keplr-wallet/background": 0.12.190
+    "@keplr-wallet/common": 0.12.190
+    "@keplr-wallet/cosmos": 0.12.190
+    "@keplr-wallet/crypto": 0.12.190
+    "@keplr-wallet/proto-types": 0.12.190
+    "@keplr-wallet/simple-fetch": 0.12.190
+    "@keplr-wallet/stores": 0.12.190
+    "@keplr-wallet/stores-bitcoin": 0.12.190
+    "@keplr-wallet/types": 0.12.190
+    "@keplr-wallet/unit": 0.12.190
+    bitcoin-address-validation: ^3.0.0
+    buffer: ^6.0.3
+    long: ^4.0.0
+    utility-types: ^3.10.0
+  peerDependencies:
+    bitcoinjs-lib: ^6
+    mobx: ^6
+    mobx-utils: ^6
+    react: ^16.8.0 || ^17 || ^18
   languageName: unknown
   linkType: soft
 
@@ -9202,6 +9230,7 @@ __metadata:
     "@keplr-wallet/stores": 0.12.190
     "@keplr-wallet/types": 0.12.190
     "@keplr-wallet/unit": 0.12.190
+    bitcoin-address-validation: ^3.0.0
     utility-types: ^3.10.0
   peerDependencies:
     bitcoinjs-lib: ^6
@@ -9223,6 +9252,7 @@ __metadata:
     "@keplr-wallet/types": 0.12.190
     buffer: ^6.0.3
   peerDependencies:
+    bitcoinjs-lib: ^6
     mobx: ^6
     mobx-utils: ^6
     starknet: ^6
@@ -18203,6 +18233,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"base58-js@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "base58-js@npm:3.0.2"
+  checksum: aa09f91a9dbb62a007024c22db83731fce7d82f4273d8870df7421b0b7e2ef6b923f697b55985b288c5726d1c583ac52042fd76e5eebd1136318d7f1c5f69a95
+  languageName: node
+  linkType: hard
+
 "base58check@npm:^2.0.0":
   version: 2.0.0
   resolution: "base58check@npm:2.0.0"
@@ -18412,6 +18449,17 @@ __metadata:
     pbkdf2: ^3.0.9
     randombytes: ^2.0.1
   checksum: 72c8372d503799b14fda6cf14e173ffd75f58a633b86e98eb339e6ad14d9ecda2058bb2853d1d8aff60ded502a8fae7c940b480daeffe5189387f0f3f63e132a
+  languageName: node
+  linkType: hard
+
+"bitcoin-address-validation@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "bitcoin-address-validation@npm:3.0.0"
+  dependencies:
+    base58-js: ^3.0.2
+    bech32: ^2.0.0
+    sha256-uint8array: ^0.10.3
+  checksum: 3703f27501ea9c3bebad2c5a0448850a5c13f4d2df419ae72bfc458ff658283d29cc24e4cb34b99d5c6b5dec4bb58b3897456934213efd7b6f758bc87c81293b
   languageName: node
   linkType: hard
 
@@ -39812,6 +39860,13 @@ __metadata:
   bin:
     sha.js: ./bin.js
   checksum: ebd3f59d4b799000699097dadb831c8e3da3eb579144fd7eb7a19484cbcbb7aca3c68ba2bb362242eb09e33217de3b4ea56e4678184c334323eca24a58e3ad07
+  languageName: node
+  linkType: hard
+
+"sha256-uint8array@npm:^0.10.3":
+  version: 0.10.7
+  resolution: "sha256-uint8array@npm:0.10.7"
+  checksum: ff735efd42664ab3d663cbc71a2e5f58a02637e9d57e072c509b5765f5368a2dc34fafefa390e065ef24415946b780ac72fd4582eeeb745ece42256de5b85e94
   languageName: node
   linkType: hard
 

@@ -927,6 +927,13 @@ export class KeplrWalletConnectV2 implements Keplr {
     throw new Error("Not yet implemented");
   }
 
+  signPsbt(_chainId: string, _psbtHex: string): Promise<string> {
+    throw new Error("Method not implemented.");
+  }
+  signPsbts(_chainId: string, _psbtsHexes: string[]): Promise<string[]> {
+    throw new Error("Method not implemented.");
+  }
+
   public readonly ethereum = new MockEthereumProvider();
 
   // TODO: 이거 마지막에 꼭 구현해야한다.

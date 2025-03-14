@@ -89,6 +89,7 @@ export const EnableChainsScene: FunctionComponent<{
       priceStore,
       keyRingStore,
       starknetQueriesStore,
+      bitcoinQueriesStore,
     } = useStore();
 
     const navigate = useNavigate();
@@ -385,7 +386,26 @@ export const EnableChainsScene: FunctionComponent<{
             }
           }
 
-          // TODO: Add bitcoin
+          if ("bitcoin" in modularChainInfo) {
+            const account = accountStore.getAccount(modularChainInfo.chainId);
+            const mainCurrency = modularChainInfo.bitcoin.currencies[0];
+
+            const queryBalance = bitcoinQueriesStore
+              .get(modularChainInfo.chainId)
+              .queryBitcoinBalance.getBalance(
+                modularChainInfo.chainId,
+                chainStore,
+                account.bitcoinAddress?.bech32Address ?? "",
+                mainCurrency.coinMinimalDenom
+              );
+
+            if (queryBalance && queryBalance.balance.toDec().gt(new Dec(0))) {
+              enableAllChains = false;
+              enabledChainIdentifiers.push(
+                ChainIdHelper.parse(modularChainInfo.chainId).identifier
+              );
+            }
+          }
         }
 
         for (const candidateAddress of candidateAddresses) {
@@ -885,8 +905,69 @@ export const EnableChainsScene: FunctionComponent<{
                   }
 
                   return new CoinPretty(mainCurrency, "0");
+                } else if ("bitcoin" in modularChainInfo) {
+                  const getBitcoinBalance = (
+                    chainId: string,
+                    address: string,
+                    coinMinimalDenom: string
+                  ) => {
+                    return bitcoinQueriesStore
+                      .get(chainId)
+                      .queryBitcoinBalance.getBalance(
+                        chainId,
+                        chainStore,
+                        address,
+                        coinMinimalDenom
+                      );
+                  };
+
+                  const addBalance = (balance: Dec, queryBalance: any) => {
+                    return queryBalance
+                      ? balance.add(queryBalance.balance.toDec())
+                      : balance;
+                  };
+
+                  const mainCurrency = modularChainInfo.bitcoin.currencies[0];
+                  let totalBalance = new Dec(0);
+
+                  const mainBalance = getBitcoinBalance(
+                    modularChainInfo.chainId,
+                    account.bitcoinAddress?.bech32Address ?? "",
+                    mainCurrency.coinMinimalDenom
+                  );
+
+                  totalBalance = addBalance(totalBalance, mainBalance);
+
+                  if (modularChainInfo.linkedModularChainInfos) {
+                    totalBalance =
+                      modularChainInfo.linkedModularChainInfos.reduce(
+                        (acc, linkedChain) => {
+                          if ("bitcoin" in linkedChain) {
+                            const linkedAccount = accountStore.getAccount(
+                              linkedChain.chainId
+                            );
+                            const linkedMainCurrency =
+                              linkedChain.bitcoin.currencies[0];
+                            const linkedBalance = getBitcoinBalance(
+                              linkedChain.chainId,
+                              linkedAccount.bitcoinAddress?.bech32Address ?? "",
+                              linkedMainCurrency.coinMinimalDenom
+                            );
+                            return addBalance(acc, linkedBalance);
+                          }
+                          return acc;
+                        },
+                        totalBalance
+                      );
+                  }
+
+                  // TODO: coinMinimalDenom을 다르게 지정을 해놔서 로직이 복잡하고 직관적이지 않음.
+                  // linked 상태인 체인들은 coinMinimalDenom을 하나로 통일할 필요가 있음.
+                  return new CoinPretty(
+                    mainCurrency,
+                    totalBalance.mul(new Dec(10 ** mainCurrency.coinDecimals))
+                  );
                 }
-                // TODO: support bitcoin
               })();
               const chainIdentifier = ChainIdHelper.parse(
                 modularChainInfo.chainId

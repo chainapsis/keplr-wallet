@@ -289,7 +289,6 @@ export interface Keplr {
     paymentType: SupportedPaymentType;
     isNanoLedger: boolean;
   }>;
-
   getBitcoinKeysSettled(chainIds: string[]): Promise<
     SettledResponses<{
       name: string;
@@ -299,6 +298,8 @@ export interface Keplr {
       isNanoLedger: boolean;
     }>
   >;
+  signPsbt(chainId: string, psbtHex: string): Promise<string>;
+  signPsbts(chainId: string, psbtsHexes: string[]): Promise<string[]>;
 
   // TODO: bitcoin handle
   // readonly bitcoin: IBitcoinProvider;

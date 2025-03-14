@@ -118,7 +118,12 @@ export class KeyRingMnemonicService {
     return privKey.signDigest32(digest);
   }
 
-  signPsbt(vault: Vault, _coinType: number, psbt: Psbt): Promise<Psbt> {
+  signPsbt(
+    vault: Vault,
+    _coinType: number,
+    psbt: Psbt,
+    inputsToSign: number[]
+  ): Promise<Psbt> {
     const privKey = this.getPrivKey(vault, _coinType);
     const signer = privKey.toKeyPair();
     const tapInternalKey = toXOnly(signer.publicKey);
@@ -148,16 +153,18 @@ export class KeyRingMnemonicService {
       return false;
     };
 
-    for (const [index, input] of psbt.data.inputs.entries()) {
+    // Must consider partially signed psbt.
+    // If the input is already signed, skip signing. (in case input index is not in inputsToSign)
+    for (const index of inputsToSign) {
+      const input = psbt.data.inputs[index];
+
       if (isTaprootInput(input)) {
         if (!input.tapInternalKey) {
           input.tapInternalKey = tapInternalKey;
         }
 
-        // CHECK: signInputAsync might be required for hardware wallets
-
         // sign taproot
-        psbt.signInput(index, taprootSigner);
+        psbt.signTaprootInput(index, taprootSigner);
 
         // verify taproot
         const isValid = psbt.validateSignaturesOfInput(
@@ -170,6 +177,9 @@ export class KeyRingMnemonicService {
         if (!isValid) {
           throw new Error("Invalid taproot signature");
         }
+
+        // finalize input signed by this keyring
+        psbt.finalizeTaprootInput(index);
       } else {
         // sign ecdsa
         psbt.signInput(index, signer);
@@ -185,10 +195,13 @@ export class KeyRingMnemonicService {
         if (!isValid) {
           throw new Error("Invalid ecdsa signature");
         }
+
+        // finalize input signed by this keyring
+        psbt.finalizeInput(index);
       }
     }
 
-    return Promise.resolve(psbt.finalizeAllInputs());
+    return Promise.resolve(psbt);
   }
 
   protected getPrivKey(vault: Vault, coinType: number): PrivKeySecp256k1 {
