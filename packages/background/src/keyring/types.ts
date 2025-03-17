@@ -27,6 +27,7 @@ export interface KeyRing {
   }>;
   getPubKey(
     vault: Vault,
+    purpose: number,
     coinType: number,
     modularChainInfo: ModularChainInfo
   ): PubKeySecp256k1 | Promise<PubKeySecp256k1>;
@@ -37,6 +38,7 @@ export interface KeyRing {
   ): PubKeyStarknet | Promise<PubKeyStarknet>;
   sign(
     vault: Vault,
+    purpose: number,
     coinType: number,
     data: Uint8Array,
     digestMethod: "sha256" | "keccak256" | "hash256" | "noop",

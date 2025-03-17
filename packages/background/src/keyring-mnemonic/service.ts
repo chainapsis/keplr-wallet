@@ -63,17 +63,17 @@ export class KeyRingMnemonicService {
     });
   }
 
-  getPubKey(vault: Vault, coinType: number): PubKeySecp256k1 {
+  getPubKey(vault: Vault, purpose: number, coinType: number): PubKeySecp256k1 {
     const bip44Path = this.getBIP44PathFromVault(vault);
 
-    const tag = `pubKey-m/44'/${coinType}'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`;
+    const tag = `pubKey-m/${purpose}'/${coinType}'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`;
 
     if (vault.insensitive[tag]) {
       const pubKey = Buffer.from(vault.insensitive[tag] as string, "hex");
       return new PubKeySecp256k1(pubKey);
     }
 
-    const privKey = this.getPrivKey(vault, coinType);
+    const privKey = this.getPrivKey(vault, purpose, coinType);
 
     const pubKey = privKey.getPubKey();
 
@@ -87,6 +87,7 @@ export class KeyRingMnemonicService {
 
   sign(
     vault: Vault,
+    purpose: number,
     coinType: number,
     data: Uint8Array,
     digestMethod: "sha256" | "keccak256" | "hash256" | "noop"
@@ -95,7 +96,7 @@ export class KeyRingMnemonicService {
     readonly s: Uint8Array;
     readonly v: number | null;
   } {
-    const privKey = this.getPrivKey(vault, coinType);
+    const privKey = this.getPrivKey(vault, purpose, coinType);
 
     let digest = new Uint8Array();
     switch (digestMethod) {
@@ -120,11 +121,11 @@ export class KeyRingMnemonicService {
 
   signPsbt(
     vault: Vault,
-    _coinType: number,
+    coinType: number,
     psbt: Psbt,
-    inputsToSign: number[]
+    inputsToSign: number[] // TODO: purpose, 경로를 주소 형식별로 처리해야 함 (legacy=44, native-segwit=84, taproot=86)
   ): Promise<Psbt> {
-    const privKey = this.getPrivKey(vault, _coinType);
+    const privKey = this.getPrivKey(vault, 84, coinType);
     const signer = privKey.toKeyPair();
     const tapInternalKey = toXOnly(signer.publicKey);
     const taprootSigner = signer.tweak(taggedHash("TapTweak", tapInternalKey));
@@ -204,7 +205,11 @@ export class KeyRingMnemonicService {
     return Promise.resolve(psbt);
   }
 
-  protected getPrivKey(vault: Vault, coinType: number): PrivKeySecp256k1 {
+  protected getPrivKey(
+    vault: Vault,
+    purpose: number,
+    coinType: number
+  ): PrivKeySecp256k1 {
     const bip44Path = this.getBIP44PathFromVault(vault);
 
     const decrypted = this.vaultService.decrypt(vault.sensitive);
@@ -213,12 +218,11 @@ export class KeyRingMnemonicService {
       throw new Error("masterSeedText is null");
     }
 
+    const path = `m/${purpose}'/${coinType}'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`;
+
     const masterSeed = Buffer.from(masterSeedText, "hex");
     return new PrivKeySecp256k1(
-      Mnemonic.generatePrivateKeyFromMasterSeed(
-        masterSeed,
-        `m/44'/${coinType}'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`
-      )
+      Mnemonic.generatePrivateKeyFromMasterSeed(masterSeed, path)
     );
   }
 

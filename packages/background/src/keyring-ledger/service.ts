@@ -39,6 +39,7 @@ export class KeyRingLedgerService {
 
   getPubKey(
     vault: Vault,
+    _purpose: number,
     _coinType: number,
     modularChainInfo: ModularChainInfo
   ): PubKeySecp256k1 {

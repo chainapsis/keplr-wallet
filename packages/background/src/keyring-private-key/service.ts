@@ -54,6 +54,7 @@ export class KeyRingPrivateKeyService {
 
   sign(
     vault: Vault,
+    _purpose: number,
     _coinType: number,
     data: Uint8Array,
     digestMethod: "sha256" | "keccak256" | "hash256" | "noop"
