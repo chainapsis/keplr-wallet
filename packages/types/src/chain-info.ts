@@ -75,7 +75,7 @@ export interface BitcoinChainInfo {
   readonly rpc: string;
   readonly rest: string;
   readonly chainId: string;
-  readonly coinType: number;
+  readonly bip44: BIP44;
   readonly currencies: AppCurrency[];
 }
 
