@@ -657,7 +657,7 @@ const SinglePsbtView: FunctionComponent<{
 }> = observer(({ validatedPsbt, chainId }) => {
   const theme = useTheme();
   const { networkConfig } = useBitcoinNetworkConfig(chainId);
-  const { psbt } = validatedPsbt ?? {};
+  const { psbt, sumInputAmountByAddress } = validatedPsbt ?? {};
 
   const [isViewData, setIsViewData] = useState(false);
 

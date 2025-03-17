@@ -31,6 +31,7 @@ import {
   SupportedPaymentType,
   IBitcoinProvider,
   Network as BitcoinNetwork,
+  BitcoinSignMessageType,
 } from "@keplr-wallet/types";
 import {
   Result,
@@ -1762,8 +1763,11 @@ export class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
     return this._requestMethod("getInscriptions", []);
   }
 
-  async signMessage(): Promise<string> {
-    return this._requestMethod("signMessage", []);
+  async signMessage(
+    message: string,
+    type: BitcoinSignMessageType
+  ): Promise<string> {
+    return this._requestMethod("signMessage", [message, type]);
   }
 
   async sendBitcoin(to: string, amount: string): Promise<string> {

@@ -25,6 +25,7 @@ import {
   SupportedPaymentType,
   IBitcoinProvider,
   Network as BitcoinNetwork,
+  BitcoinSignMessageType,
 } from "@keplr-wallet/types";
 import {
   BACKGROUND_PORT,
@@ -1918,10 +1919,13 @@ class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
     });
   }
 
-  async signMessage(): Promise<string> {
+  async signMessage(
+    message: string,
+    type: BitcoinSignMessageType
+  ): Promise<string> {
     return this.protectedRequestMethod({
       method: "signMessage",
-      params: [],
+      params: [message, type],
     });
   }
 

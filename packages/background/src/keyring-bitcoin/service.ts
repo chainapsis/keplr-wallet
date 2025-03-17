@@ -489,8 +489,9 @@ export class KeyRingBitcoinService {
               (network && !Object.values(Network).includes(network))
             ) {
               throw new Error(
-                "Invalid parameters: must provide a network. available networks: " +
-                  Object.values(Network).join(", ")
+                `Invalid parameters: must provide a valid network. Available networks: ${Object.values(
+                  Network
+                ).join(", ")}`
               );
             }
 
@@ -545,6 +546,75 @@ export class KeyRingBitcoinService {
           }
           case "getInscriptions": {
             throw new Error("Not implemented.");
+          }
+          case "signMessage": {
+            if (
+              !Array.isArray(params) ||
+              (Array.isArray(params) && params.length !== 2)
+            ) {
+              throw new Error("Invalid parameters: must provide 2 parameters.");
+            }
+
+            if (typeof params[0] !== "string") {
+              throw new Error(
+                "Invalid parameters: must provide a message as string."
+              );
+            }
+
+            if (
+              !Object.values(BitcoinSignMessageType).includes(
+                params[1] as BitcoinSignMessageType
+              )
+            ) {
+              throw new Error(
+                `Invalid parameters: must provide a valid sign type: ${Object.values(
+                  BitcoinSignMessageType
+                ).join(", ")}`
+              );
+            }
+
+            return this.signMessageSelected(
+              env,
+              origin,
+              currentChainId,
+              params[0] as string,
+              params[1] as BitcoinSignMessageType
+            );
+          }
+          case "sendBitcoin": {
+            throw new Error("Not implemented.");
+          }
+          case "pushTx": {
+            throw new Error("Not implemented.");
+          }
+          case "signPsbt": {
+            const psbtHex =
+              Array.isArray(params) && params.length > 0
+                ? (params[0] as string)
+                : undefined;
+            if (psbtHex == null) {
+              throw new Error("Invalid parameters: must provide a psbt hex.");
+            }
+
+            return this.signPsbtSelected(env, origin, currentChainId, psbtHex);
+          }
+          case "signPsbts": {
+            const psbtsHexes =
+              Array.isArray(params) && params.length > 0
+                ? (params[0] as string[])
+                : undefined;
+            if (!Array.isArray(psbtsHexes)) {
+              throw new Error(
+                "Invalid parameters: must provide an array of psbt hex."
+              );
+            }
+
+            return this.signPsbtsSelected(
+              env,
+              origin,
+              currentChainId,
+              psbtsHexes
+            );
           }
         }
       })
