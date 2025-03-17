@@ -15,6 +15,7 @@ export * from "./close";
 export * from "./code-bracket";
 export * from "./copy-fill";
 export * from "./copy-outline";
+export * from "./diamond-star";
 export * from "./ellipsis";
 export * from "./exclamation-triangle";
 export * from "./google";
