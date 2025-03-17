@@ -939,6 +939,10 @@ export class KeplrWalletConnectV2 implements Keplr {
   // TODO: 이거 마지막에 꼭 구현해야한다.
   //       일단은 다른게 더 급해서 일단 any로 처리
   public readonly starknet = {} as any;
+
+  // TODO: 이거 마지막에 꼭 구현해야한다.
+  //       일단은 다른게 더 급해서 일단 any로 처리
+  public readonly bitcoin = {} as any;
 }
 
 class MockEthereumProvider extends EventEmitter implements IEthereumProvider {

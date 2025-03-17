@@ -25,6 +25,7 @@ import {
   EIP6963EventNames,
   IStarknetProvider,
   SupportedPaymentType,
+  IBitcoinProvider,
 } from "@keplr-wallet/types";
 import { JSONUint8Array } from "./uint8-array";
 import deepmerge from "deepmerge";
@@ -655,6 +656,10 @@ export class Keplr implements IKeplr {
   // TODO: 이거 마지막에 꼭 구현해야한다.
   //       일단은 다른게 더 급해서 일단 any로 처리
   public readonly starknet: IStarknetProvider = undefined as any;
+
+  // TODO: 이거 마지막에 꼭 구현해야한다.
+  //       일단은 다른게 더 급해서 일단 any로 처리
+  public readonly bitcoin: IBitcoinProvider = undefined as any;
 }
 
 const waitDocumentReady = (): Promise<void> => {
