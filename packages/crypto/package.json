@@ -18,9 +18,9 @@
   "dependencies": {
     "@noble/curves": "^1.4.2",
     "@noble/hashes": "^1.4.0",
-    "bip32": "^2.0.6",
-    "bip39": "^3.0.3",
-    "bs58check": "^2.1.2",
+    "bip32": "^4.0.0",
+    "bip39": "^3.1.0",
+    "bs58check": "^4.0.0",
     "buffer": "^6.0.3",
     "ecpair": "^2.1.0"
   },

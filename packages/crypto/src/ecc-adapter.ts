@@ -207,6 +207,22 @@ export function pointCompress(p: Uint8Array, compressed?: boolean): Uint8Array {
   return fromHex(p).toRawBytes(assumeCompression(compressed, p));
 }
 
+export function pointAddScalar(
+  p: Uint8Array,
+  tweak: Uint8Array,
+  compressed?: boolean
+): Uint8Array | null {
+  if (!isPoint(p)) {
+    throw new Error(THROW_BAD_POINT);
+  }
+  if (!isTweak(tweak)) {
+    throw new Error(THROW_BAD_TWEAK);
+  }
+  return throwToNull(() =>
+    _pointAddScalar(p, tweak, assumeCompression(compressed, p))
+  );
+}
+
 export function privateAdd(
   d: Uint8Array,
   tweak: Uint8Array
