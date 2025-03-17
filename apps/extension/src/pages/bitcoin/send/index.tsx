@@ -48,10 +48,6 @@ import {
   AddRecentSendHistoryMsg,
   PushBitcoinTransactionMsg,
 } from "@keplr-wallet/background";
-// import {
-//   AddRecentSendHistoryMsg,
-//   SubmitStarknetTxHashMsg,
-// } from "@keplr-wallet/background";
 
 const Styles = {
   Flex1: styled.div`
@@ -283,22 +279,22 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
         let recipientsForTransaction = [];
         if (amountInSatoshi.gt(MAX_SAFE_OUTPUT)) {
           // 큰 금액을 여러 출력으로 분할
-          let remainingAmount = amountInSatoshi;
-          while (!remainingAmount.gt(ZERO)) {
-            const chunkAmount = remainingAmount.gt(MAX_SAFE_OUTPUT)
+          let remainingValue = amountInSatoshi;
+          while (!remainingValue.gt(ZERO)) {
+            const chunkValue = remainingValue.gt(MAX_SAFE_OUTPUT)
               ? MAX_SAFE_OUTPUT
-              : remainingAmount;
+              : remainingValue;
             recipientsForTransaction.push({
               address: sendConfigs.recipientConfig.recipient,
-              amount: chunkAmount.truncate().toBigNumber().toJSNumber(),
+              value: chunkValue.truncate().toBigNumber().toJSNumber(),
             });
-            remainingAmount = remainingAmount.sub(chunkAmount);
+            remainingValue = remainingValue.sub(chunkValue);
           }
         } else {
           recipientsForTransaction = [
             {
               address: sendConfigs.recipientConfig.recipient,
-              amount: amountInSatoshi.truncate().toBigNumber().toJSNumber(),
+              value: amountInSatoshi.truncate().toBigNumber().toJSNumber(),
             },
           ];
         }
@@ -317,12 +313,19 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
 
         const { selectedUtxos, txSize, hasChange } = selection;
 
+        // TODO: hardware wallet 사용 시, bip32 derivation path를 명시해줄 필요가 있다.
+
         const psbtHex = bitcoinAccount.buildPsbt({
-          utxos: selectedUtxos,
-          senderAddress,
-          recipients: recipientsForTransaction,
+          inputs: selectedUtxos.map((utxo) => ({
+            txid: utxo.txid,
+            vout: utxo.vout,
+            value: utxo.value,
+            address: senderAddress,
+            tapInternalKey: xonlyPubKey,
+          })),
+          changeAddress: senderAddress,
+          outputs: recipientsForTransaction,
           feeRate,
-          xonlyPubKey,
           isSendMax,
           hasChange,
         });
@@ -407,6 +410,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
 
         try {
           const psbtHex = psbtSimulator.psbtHex;
+
           const signedPsbtHex = await bitcoinAccount.signPsbt(psbtHex);
           const tx = Psbt.fromHex(signedPsbtHex).extractTransaction();
           const txHex = tx.toHex();

@@ -238,12 +238,12 @@ export class BitcoinTxSizeEstimator {
     );
   }
 
-  getSizeBasedOnInputType() {
+  getSizeBasedOnInputType(params?: Partial<TxSizerParams>) {
     // In most cases the input size is predictable. For multisig inputs we need to perform a detailed calculation
     let inputSize = 0; // in virtual bytes
     let inputWitnessSize = 0;
     let redeemScriptSize;
-    switch (this.params.input_script) {
+    switch (params?.input_script || this.params.input_script) {
       case "p2pkh":
         inputSize = this.P2PKH_IN_SIZE;
         break;
@@ -262,13 +262,13 @@ export class BitcoinTxSizeEstimator {
       case "p2sh":
         redeemScriptSize =
           1 + // OP_M
-          this.params.input_n * (1 + this.PUBKEY_SIZE) + // OP_PUSH33 <pubkey>
+          (params?.input_n || this.params.input_n) * (1 + this.PUBKEY_SIZE) + // OP_PUSH33 <pubkey>
           1 + // OP_N
           1; // OP_CHECKMULTISIG
         // eslint-disable-next-line no-case-declarations
         const scriptSigSize =
           1 + // size(0)
-          this.params.input_m * (1 + this.SIGNATURE_SIZE) + // size(SIGNATURE_SIZE) + signature
+          (params?.input_m || this.params.input_m) * (1 + this.SIGNATURE_SIZE) + // size(SIGNATURE_SIZE) + signature
           this.getSizeOfScriptLengthElement(redeemScriptSize) +
           redeemScriptSize;
         inputSize =
@@ -278,12 +278,12 @@ export class BitcoinTxSizeEstimator {
       case "p2wsh":
         redeemScriptSize =
           1 + // OP_M
-          this.params.input_n * (1 + this.PUBKEY_SIZE) + // OP_PUSH33 <pubkey>
+          (params?.input_n || this.params.input_n) * (1 + this.PUBKEY_SIZE) + // OP_PUSH33 <pubkey>
           1 + // OP_N
           1; // OP_CHECKMULTISIG
         inputWitnessSize =
           1 + // size(0)
-          this.params.input_m * (1 + this.SIGNATURE_SIZE) + // size(SIGNATURE_SIZE) + signature
+          (params?.input_m || this.params.input_m) * (1 + this.SIGNATURE_SIZE) + // size(SIGNATURE_SIZE) + signature
           this.getSizeOfScriptLengthElement(redeemScriptSize) +
           redeemScriptSize;
         inputSize =

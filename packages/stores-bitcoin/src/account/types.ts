@@ -3,14 +3,14 @@ import { Dec } from "@keplr-wallet/unit";
 export interface SelectUTXOsParams {
   senderAddress: string;
   utxos: UTXO[];
-  recipients: UTXOSelectionRecipient[];
+  recipients: IPsbtOutput[];
   feeRate: number;
   isSendMax?: boolean;
 }
 
 export interface SelectionParams {
   utxos: UTXO[];
-  targetAmount: Dec;
+  targetValue: Dec;
   calculateTxSize: (
     inputCount: number,
     outputParams: Record<string, number>,
@@ -21,17 +21,17 @@ export interface SelectionParams {
     txWeight: number;
   };
   calculateFee: (size: number) => Dec;
-  isDust: (amount: Dec) => boolean;
+  isDust: (value: Dec) => boolean;
   outputParams: Record<string, number>;
   timeoutMs?: number;
 }
 
 export interface BuildPsbtParams {
-  utxos: UTXO[];
-  senderAddress: string;
-  recipients: UTXOSelectionRecipient[];
+  inputs: IPsbtInput[];
+  outputs: IPsbtOutput[];
   feeRate: number;
-  xonlyPubKey?: Uint8Array;
+  maximumFeeRate?: number;
+  changeAddress?: string;
   isSendMax?: boolean;
   hasChange?: boolean;
 }
@@ -65,7 +65,29 @@ export interface UTXO {
   value: number;
 }
 
-export interface UTXOSelectionRecipient {
-  amount: number;
+export interface Bip32Derivation {
+  masterFingerprint: Buffer;
+  pubkey: Buffer;
+  path: string;
+}
+
+export interface TapBip32Derivation extends Bip32Derivation {
+  leafHashes: Buffer[];
+}
+
+export interface IPsbtInput {
+  txid: string;
+  vout: number;
+  value: number;
   address: string;
+  nonWitnessUtxo?: Buffer;
+  tapInternalKey?: Buffer;
+  bip32Derivation?: Bip32Derivation[];
+  tapBip32Derivation?: TapBip32Derivation[];
+  // no script related fields as of now, we don't support multisig
+}
+
+export interface IPsbtOutput {
+  address: string;
+  value: number;
 }
