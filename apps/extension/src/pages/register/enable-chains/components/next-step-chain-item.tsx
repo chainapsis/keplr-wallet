@@ -1,5 +1,5 @@
-import React, { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
-import { FunctionComponent } from "react";
+import React, { FunctionComponent } from "react";
+import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import { Box } from "../../../../components/box";
 import { Columns } from "../../../../components/column";
 import { XAxis, YAxis } from "../../../../components/axis";
