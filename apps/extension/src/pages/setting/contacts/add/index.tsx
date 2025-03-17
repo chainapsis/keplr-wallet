@@ -60,6 +60,12 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
   const paramChainId = searchParams.get("chainId");
   const paramEditIndex = searchParams.get("editIndex");
 
+  // First it comes with chainId=all, and then when the starknet address comes in, it does a url replace.
+  // get the previous address to make the UI feel like the url hasn't changed
+  const paramPrevisouAddress = searchParams.get("address");
+  const isSelectedAllChain =
+    searchParams.get("isFromAllChain") || paramChainId === "all";
+
   const isStarknet =
     chainStore.hasModularChain(chainId) &&
     "starknet" in chainStore.getModularChain(chainId);
@@ -71,22 +77,43 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
   }, []);
 
   useEffect(() => {
+    if (paramPrevisouAddress) {
+      if (isStarknet) {
+        recipientConfigForStarknet.setValue(paramPrevisouAddress);
+      } else {
+        recipientConfig.setValue(paramPrevisouAddress);
+      }
+    }
+  }, [
+    isStarknet,
+    paramPrevisouAddress,
+    recipientConfig,
+    recipientConfigForStarknet,
+  ]);
+
+  useEffect(() => {
     if (!paramChainId) {
       throw new Error(`Param "chainId" is required`);
     }
 
-    setChainId(paramChainId);
+    const localChainId =
+      paramChainId === "all"
+        ? chainStore.chainInfosInUI[0].chainId
+        : paramChainId;
+    setChainId(localChainId);
+
     if (isStarknet) {
-      recipientConfigForStarknet.setChain(paramChainId);
+      recipientConfigForStarknet.setChain(localChainId);
     } else {
-      recipientConfig.setChain(paramChainId);
+      recipientConfig.setChain(localChainId);
     }
-    memoConfig.setChain(paramChainId);
+
+    memoConfig.setChain(localChainId);
 
     if (paramEditIndex) {
       const index = Number.parseInt(paramEditIndex);
       const addressBook =
-        uiConfigStore.addressBookConfig.getAddressBook(paramChainId);
+        uiConfigStore.addressBookConfig.getAddressBook(localChainId);
       if (addressBook.length > index) {
         setEditIndex(index);
         const data = addressBook[index];
@@ -103,6 +130,7 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
 
     setEditIndex(-1);
   }, [
+    chainStore.chainInfosInUI,
     intl,
     isStarknet,
     memoConfig,
@@ -199,11 +227,98 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
           <RecipientInputForStarknet
             recipientConfig={recipientConfigForStarknet}
             hideAddressBookButton={true}
+            onChangeCallback={
+              isSelectedAllChain
+                ? (str) => {
+                    const bech32Prefix = str.split("1")[0];
+                    const isEvmAddress =
+                      str.startsWith("0x") &&
+                      str.length === 42 &&
+                      str.match(/^0x[0-9a-fA-F]{40}$/);
+
+                    if (isEvmAddress) {
+                      if (isStarknet) {
+                        navigate(
+                          `/setting/contacts/add?chainId=eip155:1&isFromAllChain=${true}&address=${str}`,
+                          { replace: true }
+                        );
+                        return;
+                      }
+                    }
+
+                    if (bech32Prefix) {
+                      for (const chainInfo of chainStore.chainInfosInUI) {
+                        if (
+                          chainInfo.bech32Config?.bech32PrefixAccAddr ===
+                          bech32Prefix
+                        ) {
+                          navigate(
+                            `/setting/contacts/add?chainId=${
+                              chainInfo.chainId
+                            }&isFromAllChain=${true}&address=${str}`,
+                            { replace: true }
+                          );
+                          return;
+                        }
+                      }
+                    }
+                  }
+                : undefined
+            }
           />
         ) : (
           <RecipientInput
             recipientConfig={recipientConfig}
             hideAddressBookButton={true}
+            onChangeCallback={
+              isSelectedAllChain
+                ? (str) => {
+                    if (!str || str.length === 0 || typeof str !== "string") {
+                      return;
+                    }
+                    const icnsOrEnsLabel = str.split(".")[1];
+                    const bech32Prefix = str.split("1")[0];
+                    const isEvmAddress =
+                      str.startsWith("0x") &&
+                      str.length === 42 &&
+                      str.match(/^0x[0-9a-fA-F]{40}$/);
+                    const isStarknetAddress =
+                      str.startsWith("0x") &&
+                      str.length === 66 &&
+                      str.match(/^0x[0-9a-fA-F]{64}$/);
+
+                    if (isEvmAddress) {
+                      recipientConfig.setChain("eip155:1");
+                      setChainId("eip155:1");
+                    }
+
+                    if (isStarknetAddress) {
+                      navigate(
+                        `/setting/contacts/add?chainId=starknet:SN_MAIN&isFromAllChain=${true}&address=${str}`,
+                        { replace: true }
+                      );
+                      return;
+                    }
+
+                    if (bech32Prefix) {
+                      for (const chainInfo of chainStore.chainInfosInUI) {
+                        if (
+                          chainInfo.bech32Config?.bech32PrefixAccAddr ===
+                          bech32Prefix
+                        ) {
+                          recipientConfig.setChain(chainInfo.chainId);
+                          setChainId(chainInfo.chainId);
+                        }
+                      }
+                    }
+
+                    // if (icnsOrEnsLabel === "osmosis") {
+                    //   recipientConfig.setChain(icnsOrEnsLabel);
+                    //   setChainId(icnsOrEnsLabel);
+                    // }
+                  }
+                : undefined
+            }
           />
         )}
         <MemoInput
