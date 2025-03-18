@@ -59,7 +59,7 @@ import { DenomHelper } from "@keplr-wallet/common";
 import { NewSidePanelHeaderTop } from "./new-side-panel-header-top";
 import { ModularChainInfo } from "@keplr-wallet/types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import { AvailableTabSlideList } from "./components/available-tab-slide-list";
+import { AvailableTabLinkButtonList } from "./components/available-tab-link-button-list";
 
 export interface ViewToken {
   token: CoinPretty;
@@ -625,7 +625,7 @@ export const MainPage: FunctionComponent<{
           <Gutter size="0" />
 
           {tabStatus === "available" && !isNotReady ? (
-            <AvailableTabSlideList />
+            <AvailableTabLinkButtonList />
           ) : null}
 
           {!isNotReady ? (
