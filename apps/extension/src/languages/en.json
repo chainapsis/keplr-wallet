@@ -566,7 +566,8 @@
 
   "page.main.chart.available": "Total Available",
   "page.main.chart.staked": "Total Staked",
-  "page.main.chart.earn-apy-button": "Earn up to {apy} APY with {tokenName}",
+  "page.main.chart.earn-button": "Earn with USDC",
+  "page.main.chart.dashboard-button": "Dashboard",
   "page.main.chart.stake-with-keplr-dashboard-button": "Stake with Keplr Dashboard",
   "page.main.chart.manage-portfolio-in-keplr-dashboard": "Manage Portfolio in Keplr Dashboard",
   "page.main.search-placeholder": "Search for asset or chain (i.e. ATOM, Cosmos)",

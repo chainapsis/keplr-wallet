@@ -15,7 +15,9 @@ import { EarnOverviewClaimSection } from "../components/overview-claim-section";
 import { EarnOverviewBalanceSection } from "../components/overview-balance-section";
 import { NOBLE_CHAIN_ID } from "../../../config.ui";
 import { EarnOverviewHistorySection } from "../components/overview-history-section";
+import { EarnOverviewExternalLink } from "../components/overview-external-link";
 
+const NOBLE_POINTS_URL = "https://points.noble.xyz/";
 const USDN_CURRENCY = {
   coinDenom: "USDN",
   coinMinimalDenom: "uusdn",
@@ -67,7 +69,16 @@ export const EarnOverviewPage: FunctionComponent = observer(() => {
         bech32Address={account.bech32Address}
       />
 
-      <Divider direction="horizontal" spacing="1.625rem" />
+      <Gutter size="1.5rem" />
+      <Divider direction="horizontal" />
+
+      <EarnOverviewExternalLink
+        coinDenom={rewardCurrency.coinDenom}
+        url={NOBLE_POINTS_URL}
+      />
+
+      <Divider direction="horizontal" />
+      <Gutter size="1.5rem" />
 
       <EarnOverviewHistorySection chainInfo={chainInfo} />
 
