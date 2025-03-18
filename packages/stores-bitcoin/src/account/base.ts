@@ -479,7 +479,7 @@ export class BitcoinAccountBase {
     input: IPsbtInput & { addressInfo: AddressInfo },
     networkConfig: networks.Network
   ) {
-    const txInput = {
+    const txInput: Parameters<typeof psbt.addInput>[0] = {
       hash: input.txid,
       index: input.vout,
       sequence: 0xfffffffd,
@@ -489,32 +489,48 @@ export class BitcoinAccountBase {
       if (!input.nonWitnessUtxo) {
         throw new Error("Non-witness UTXO is required for p2pkh inputs");
       }
+
+      if (input.bip32Derivation) {
+        txInput.bip32Derivation = input.bip32Derivation;
+      }
+
       psbt.addInput({
         ...txInput,
-        bip32Derivation: input.bip32Derivation,
         nonWitnessUtxo: input.nonWitnessUtxo,
       });
     } else if (input.addressInfo.type === "p2wpkh") {
+      if (input.bip32Derivation) {
+        txInput.bip32Derivation = input.bip32Derivation;
+      }
+
       psbt.addInput({
         ...txInput,
         witnessUtxo: {
           script: address.toOutputScript(input.address, networkConfig),
           value: input.value,
         },
-        bip32Derivation: input.bip32Derivation,
       });
     } else if (input.addressInfo.type === "p2tr") {
-      if (!input.tapInternalKey) {
-        throw new Error("Tap internal key is required for p2tr inputs");
+      if (!input.tapInternalKey && !input.tapBip32Derivation) {
+        throw new Error(
+          "Tap internal key or bip32 derivation is required for p2tr inputs"
+        );
       }
+
+      if (input.tapInternalKey) {
+        txInput.tapInternalKey = input.tapInternalKey;
+      }
+
+      if (input.tapBip32Derivation) {
+        txInput.tapBip32Derivation = input.tapBip32Derivation;
+      }
+
       psbt.addInput({
         ...txInput,
         witnessUtxo: {
           script: address.toOutputScript(input.address, networkConfig),
           value: input.value,
         },
-        tapInternalKey: input.tapInternalKey,
-        tapBip32Derivation: input.tapBip32Derivation,
       });
     }
   }
