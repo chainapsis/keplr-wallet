@@ -4,7 +4,6 @@ import {
   QueryOptions,
   QuerySharedContext,
 } from "@keplr-wallet/stores";
-import { GenesisHash } from "@keplr-wallet/types";
 
 export class ObservableBitcoinIndexerQuery<
   T = unknown,
@@ -31,15 +30,6 @@ export class ObservableBitcoinIndexerQuery<
 
     this._chainId = chainId;
     this.chainGetter = chainGetter;
-  }
-
-  protected override canFetch(): boolean {
-    // TODO: enable for mainnet once indexer setup is done
-    if (this._chainId.startsWith(`bip122:${GenesisHash.MAINNET}`)) {
-      return false;
-    }
-
-    return super.canFetch();
   }
 
   get chainId(): string {
