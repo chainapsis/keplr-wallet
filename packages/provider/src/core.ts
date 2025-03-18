@@ -1948,7 +1948,7 @@ class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
     });
   }
 
-  async sendBitcoin(to: string, amount: string): Promise<string> {
+  async sendBitcoin(to: string, amount: number): Promise<string> {
     return this.protectedRequestMethod({
       method: "sendBitcoin",
       params: [to, amount],

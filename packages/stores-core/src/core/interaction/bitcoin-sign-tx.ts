@@ -21,6 +21,12 @@ export type SignBitcoinTxInteractionData = {
       psbtsHexes: string[];
       signedPsbtsHexes: string[];
     }
+  | {
+      psbtCandidate: {
+        toAddress: string;
+        amount: number;
+      };
+    }
 );
 
 export class SignBitcoinTxInteractionStore {

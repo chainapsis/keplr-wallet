@@ -228,7 +228,8 @@ export function init(
     vaultService,
     keyRingV2Service,
     interactionService,
-    permissionService
+    permissionService,
+    backgroundTxService
   );
 
   const autoLockAccountService = new AutoLocker.AutoLockAccountService(

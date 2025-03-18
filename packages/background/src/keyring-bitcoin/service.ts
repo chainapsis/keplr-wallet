@@ -22,14 +22,20 @@ import { encodeLegacyMessage, encodeLegacySignature } from "./helper";
 import { toXOnly } from "@keplr-wallet/crypto";
 import { BIP322 } from "./bip322";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
+import { BackgroundTxService } from "src/tx";
+import validate, {
+  Network as BitcoinNetwork,
+} from "bitcoin-address-validation";
 
+const DUST_THRESHOLD = 546;
 export class KeyRingBitcoinService {
   constructor(
     protected readonly chainsService: ChainsService,
     protected readonly vaultService: VaultService,
     protected readonly keyRingService: KeyRingService,
     protected readonly interactionService: InteractionService,
-    protected readonly permissionService: PermissionService
+    protected readonly permissionService: PermissionService,
+    protected readonly txService: BackgroundTxService
   ) {}
 
   async init() {
@@ -622,18 +628,139 @@ export class KeyRingBitcoinService {
             );
           }
           case "sendBitcoin": {
-            throw new Error("Not implemented.");
+            if (
+              !Array.isArray(params) ||
+              (Array.isArray(params) && params.length !== 2)
+            ) {
+              throw new Error("Invalid parameters: must provide 2 parameters.");
+            }
+
+            const [toAddress, amount] = params;
+
+            if (typeof toAddress !== "string") {
+              throw new Error(
+                "Invalid parameters: must provide a to address as string."
+              );
+            }
+            let isValidAddress;
+            try {
+              const network = this.getNetwork(currentChainId).id;
+
+              isValidAddress = validate(
+                toAddress,
+                network as unknown as BitcoinNetwork,
+                {
+                  castTestnetTo:
+                    network === "signet" ? BitcoinNetwork.signet : undefined,
+                }
+              );
+            } catch {
+              isValidAddress = false;
+            }
+            if (!isValidAddress) {
+              throw new Error(
+                "Invalid parameters: must provide a valid to address."
+              );
+            }
+
+            if (typeof amount !== "number") {
+              throw new Error(
+                "Invalid parameters: must provide an amount as number."
+              );
+            }
+            if (amount < DUST_THRESHOLD) {
+              throw new Error(
+                "Invalid parameters: must provide an amount greater than 546."
+              );
+            }
+
+            const vaultId = this.keyRingService.selectedVaultId;
+            const keyInfo = this.keyRingService.getKeyInfo(vaultId);
+            if (!keyInfo) {
+              throw new KeplrError("keyring", 221, "Null key info");
+            }
+            const bitcoinPubKey = await this.getBitcoinKeySelected(
+              currentChainId
+            );
+            const network = this.getNetwork(currentChainId);
+            const signedPsbtHex = await this.interactionService.waitApproveV2(
+              env,
+              "/sign-bitcoin-tx",
+              "request-sign-bitcoin-psbt",
+              {
+                origin,
+                vaultId,
+                chainId: currentChainId,
+                address: bitcoinPubKey.address,
+                pubKey: bitcoinPubKey.pubKey,
+                network,
+                keyType: keyInfo.type,
+                keyInsensitive: keyInfo.insensitive,
+                psbtCandidate: {
+                  toAddress,
+                  amount,
+                },
+              },
+              async (res: {
+                psbtSignData: {
+                  psbtHex: string;
+                  inputsToSign: number[];
+                }[];
+                signedPsbtsHexes: string[];
+              }) => {
+                if (res.signedPsbtsHexes && res.signedPsbtsHexes.length > 0) {
+                  return res.signedPsbtsHexes[0];
+                }
+
+                if (res.psbtSignData.length === 0) {
+                  throw new KeplrError("keyring", 221, "No psbt sign data");
+                }
+
+                const psbt = Psbt.fromHex(res.psbtSignData[0].psbtHex, {
+                  network,
+                });
+
+                const signedPsbt = await this.keyRingService.signPsbt(
+                  currentChainId,
+                  vaultId,
+                  psbt,
+                  res.psbtSignData[0].inputsToSign
+                );
+
+                return signedPsbt.toHex();
+              }
+            );
+
+            const tx = Psbt.fromHex(signedPsbtHex).extractTransaction();
+            const txHex = tx.toHex();
+
+            return this.txService.pushBitcoinTransaction(currentChainId, txHex);
           }
           case "pushTx": {
-            throw new Error("Not implemented.");
+            const rawTxHex =
+              Array.isArray(params) && params.length > 0
+                ? (params[0] as string)
+                : undefined;
+            if (typeof rawTxHex !== "string") {
+              throw new Error(
+                "Invalid parameters: must provide a psbt hex as string."
+              );
+            }
+
+            return this.txService.pushBitcoinTransaction(
+              currentChainId,
+              rawTxHex
+            );
           }
           case "signPsbt": {
             const psbtHex =
               Array.isArray(params) && params.length > 0
                 ? (params[0] as string)
                 : undefined;
-            if (psbtHex == null) {
-              throw new Error("Invalid parameters: must provide a psbt hex.");
+            if (typeof psbtHex !== "string") {
+              throw new Error(
+                "Invalid parameters: must provide a psbt hex as a string."
+              );
             }
 
             return this.signPsbtSelected(env, origin, currentChainId, psbtHex);
@@ -643,9 +770,12 @@ export class KeyRingBitcoinService {
               Array.isArray(params) && params.length > 0
                 ? (params[0] as string[])
                 : undefined;
-            if (!Array.isArray(psbtsHexes)) {
+            if (
+              !Array.isArray(psbtsHexes) ||
+              psbtsHexes.some((hex) => typeof hex !== "string")
+            ) {
               throw new Error(
-                "Invalid parameters: must provide an array of psbt hex."
+                "Invalid parameters: must provide an array of psbt hex as a string."
               );
             }
 

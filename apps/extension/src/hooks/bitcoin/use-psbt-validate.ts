@@ -1,11 +1,10 @@
 import { IFeeConfig } from "@keplr-wallet/hooks-bitcoin";
 import { Dec } from "@keplr-wallet/unit";
-import { Psbt, Transaction } from "bitcoinjs-lib";
+import { Network, Psbt, Transaction } from "bitcoinjs-lib";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useGetNativeSegwitUTXOs, useGetTaprootUTXOs } from "./use-get-utxos";
 import { fromOutputScript } from "bitcoinjs-lib/src/address";
 import { useBitcoinAddresses } from "./use-bitcoin-network-config";
-import { SignBitcoinTxInteractionStore } from "@keplr-wallet/stores-core";
 import { DUST_THRESHOLD } from "@keplr-wallet/stores-bitcoin";
 
 export type ValidatedPsbt = {
@@ -36,28 +35,16 @@ export function formatPsbtHex(psbtHex: string) {
 }
 
 export const usePsbtsValidate = (
-  interactionData: NonNullable<SignBitcoinTxInteractionStore["waitingData"]>,
-  feeConfig: IFeeConfig
+  psbtsHexes: string[],
+  feeConfig: IFeeConfig,
+  chainId: string,
+  networkConfig: Network
 ) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [validatedPsbts, setValidatedPsbts] = useState<ValidatedPsbt[]>([]);
   const [criticalValidationError, setCriticalValidationError] = useState<
     Error | undefined
   >(undefined);
-
-  const {
-    chainId,
-    network: networkConfig,
-    // origin
-    // address
-    // pubKey
-  } = interactionData.data;
-
-  const psbtsHexes = useMemo(() => {
-    return "psbtHex" in interactionData.data
-      ? [interactionData.data.psbtHex]
-      : interactionData.data.psbtsHexes;
-  }, [interactionData.data]);
 
   const { legacyAddress, nativeSegwitAddress, taprootAddress } =
     useBitcoinAddresses(chainId);
