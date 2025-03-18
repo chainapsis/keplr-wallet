@@ -1,10 +1,10 @@
-import * as bip32 from "bip32";
-import * as bip39 from "bip39";
-import bs58check from "bs58check";
-import * as ecc from "./ecc-adapter";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const bip39 = require("bip39");
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const bip32 = require("bip32");
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const bs58check = require("bs58check");
 import { Buffer } from "buffer/";
-
-const bip32Factory = bip32.BIP32Factory(ecc);
 
 export type RNG = <
   T extends
@@ -62,7 +62,7 @@ export class Mnemonic {
     password: string = ""
   ): Uint8Array {
     const seed = bip39.mnemonicToSeedSync(mnemonic, password);
-    const masterSeed = bip32Factory.fromSeed(seed);
+    const masterSeed = bip32.fromSeed(seed);
     const hd = masterSeed.derivePath(path);
 
     const privateKey = hd.privateKey;
@@ -77,7 +77,7 @@ export class Mnemonic {
     password: string = ""
   ): Uint8Array {
     const seed = bip39.mnemonicToSeedSync(mnemonic, password);
-    const masterKey = bip32Factory.fromSeed(seed);
+    const masterKey = bip32.fromSeed(seed);
 
     return Buffer.from(bs58check.decode(masterKey.toBase58()));
   }
@@ -89,7 +89,7 @@ export class Mnemonic {
     privateKey: Uint8Array;
     masterFingerprint: string;
   } {
-    const masterSeed = bip32Factory.fromBase58(bs58check.encode(seed));
+    const masterSeed = bip32.fromBase58(bs58check.encode(seed));
     const hd = masterSeed.derivePath(path);
 
     const privateKey = hd.privateKey;
