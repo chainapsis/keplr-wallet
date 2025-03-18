@@ -1105,7 +1105,7 @@ export class KeyRingService {
   getPubKeyBitcoin(
     chainId: string,
     vaultId: string
-  ): Promise<PubKeyBitcoinCompatible | PubKeySecp256k1> {
+  ): Promise<PubKeyBitcoinCompatible> {
     if (this.vaultService.isLocked) {
       throw new Error("KeyRing is locked");
     }
@@ -1359,7 +1359,7 @@ export class KeyRingService {
     purpose: number,
     coinType: number,
     modularChainInfo: ModularChainInfo
-  ): Promise<PubKeyBitcoinCompatible | PubKeySecp256k1> {
+  ): Promise<PubKeyBitcoinCompatible> {
     if (this.vaultService.isLocked) {
       throw new Error("KeyRing is locked");
     }
@@ -1368,7 +1368,10 @@ export class KeyRingService {
 
     if (typeof keyRing.getPubKeyBitcoin !== "function") {
       return Promise.resolve(
-        keyRing.getPubKey(vault, purpose, coinType, modularChainInfo)
+        (async () =>
+          (
+            await keyRing.getPubKey(vault, purpose, coinType, modularChainInfo)
+          ).toBitcoinPubKey())()
       );
     }
 

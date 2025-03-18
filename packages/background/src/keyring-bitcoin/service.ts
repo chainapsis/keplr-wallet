@@ -111,11 +111,10 @@ export class KeyRingBitcoinService {
     // TODO: Ledger support
     // const isLedger = vault.insensitive["keyRingType"] === "ledger";
 
-    const pubKey = await this.keyRingService.getPubKeyBitcoin(chainId, vaultId);
-    const bitcoinPubKey =
-      typeof pubKey === "object" && "toBitcoinPubKey" in pubKey
-        ? pubKey.toBitcoinPubKey()
-        : pubKey;
+    const bitcoinPubKey = await this.keyRingService.getPubKeyBitcoin(
+      chainId,
+      vaultId
+    );
 
     const network = this.getNetwork(chainId);
 
