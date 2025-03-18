@@ -85,7 +85,10 @@ export class Mnemonic {
   static generatePrivateKeyFromMasterSeed(
     seed: Uint8Array,
     path: string = `m/44'/118'/0'/0/0`
-  ): Uint8Array {
+  ): {
+    privateKey: Uint8Array;
+    masterFingerprint: string;
+  } {
     const masterSeed = bip32Factory.fromBase58(bs58check.encode(seed));
     const hd = masterSeed.derivePath(path);
 
@@ -93,6 +96,9 @@ export class Mnemonic {
     if (!privateKey) {
       throw new Error("null hd key");
     }
-    return privateKey;
+    return {
+      privateKey,
+      masterFingerprint: masterSeed.fingerprint.toString("hex"),
+    };
   }
 }

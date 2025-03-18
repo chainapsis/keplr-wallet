@@ -17,7 +17,11 @@ export class PrivKeySecp256k1 {
     return new PrivKeySecp256k1(secp256k1.utils.randomPrivateKey());
   }
 
-  constructor(protected readonly privKey: Uint8Array) {}
+  constructor(
+    protected readonly privKey: Uint8Array,
+    protected readonly masterFingerprint?: string,
+    protected readonly path?: string
+  ) {}
 
   toBytes(): Uint8Array {
     return new Uint8Array(this.privKey);
@@ -33,7 +37,12 @@ export class PrivKeySecp256k1 {
 
   getBitcoinPubKey(): PubKeyBitcoinCompatible {
     const pubKey = secp256k1.getPublicKey(this.toBytes(), false);
-    return new PubKeyBitcoinCompatible(pubKey);
+
+    return new PubKeyBitcoinCompatible(
+      pubKey,
+      this.masterFingerprint,
+      this.path
+    );
   }
 
   signDigest32(digest: Uint8Array): {
@@ -232,6 +241,22 @@ export class PubKeySecp256k1 {
 }
 
 export class PubKeyBitcoinCompatible extends PubKeySecp256k1 {
+  constructor(
+    protected override readonly pubKey: Uint8Array,
+    protected readonly masterFingerprint?: string,
+    protected readonly path?: string
+  ) {
+    super(pubKey);
+  }
+
+  getMasterFingerprint(): string | undefined {
+    return this.masterFingerprint;
+  }
+
+  getPath(): string | undefined {
+    return this.path;
+  }
+
   /**
    * returns the legacy address of the public key compatible with Bitcoin.
    * both compressed and uncompressed are supported.
