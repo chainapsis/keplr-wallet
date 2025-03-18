@@ -22,7 +22,7 @@ import { encodeLegacyMessage, encodeLegacySignature } from "./helper";
 import { toXOnly } from "@keplr-wallet/crypto";
 import { BIP322 } from "./bip322";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
-import { BackgroundTxService } from "src/tx";
+import { BackgroundTxService } from "../tx";
 import validate, {
   Network as BitcoinNetwork,
 } from "bitcoin-address-validation";
