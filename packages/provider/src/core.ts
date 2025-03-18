@@ -1788,10 +1788,12 @@ class StarknetProvider implements IStarknetProvider {
 
 const sidePanelOpenNeededBitcoinMethods = [
   "switchNetwork",
+  "switchChain",
   "signMessage",
   "sendBitcoin",
   "pushTx",
   "signPsbt",
+  "signPsbts",
 ];
 
 class BitcoinProvider extends EventEmitter implements IBitcoinProvider {

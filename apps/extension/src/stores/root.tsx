@@ -46,6 +46,7 @@ import {
   SignStarknetTxInteractionStore,
   SignStarknetMessageInteractionStore,
   SignBitcoinTxInteractionStore,
+  SignBitcoinMessageInteractionStore,
 } from "@keplr-wallet/stores-core";
 import {
   KeplrETCQueries,
@@ -122,6 +123,7 @@ export class RootStore {
   public readonly signStarknetTxInteractionStore: SignStarknetTxInteractionStore;
   public readonly signStarknetMessageInteractionStore: SignStarknetMessageInteractionStore;
   public readonly signBitcoinTxInteractionStore: SignBitcoinTxInteractionStore;
+  public readonly signBitcoinMessageInteractionStore: SignBitcoinMessageInteractionStore;
 
   public readonly chainSuggestStore: ChainSuggestStore;
   public readonly icnsInteractionStore: ICNSInteractionStore;
@@ -304,6 +306,8 @@ export class RootStore {
     this.signBitcoinTxInteractionStore = new SignBitcoinTxInteractionStore(
       this.interactionStore
     );
+    this.signBitcoinMessageInteractionStore =
+      new SignBitcoinMessageInteractionStore(this.interactionStore);
     this.chainSuggestStore = new ChainSuggestStore(
       this.interactionStore,
       CommunityChainInfoRepo

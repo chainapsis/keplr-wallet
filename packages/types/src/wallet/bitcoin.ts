@@ -1,8 +1,8 @@
 import EventEmitter from "events";
 
 export enum BitcoinSignMessageType {
-  MESSAGE = "message",
-  BIP322 = "bip-322",
+  ECDSA = "ecdsa",
+  BIP322_SIMPLE = "bip322-simple",
 }
 
 export enum GenesisHash {
