@@ -1,5 +1,4 @@
 import { useStore } from "../../stores";
-import { useBitcoinAddresses } from "./use-bitcoin-network-config";
 import { useGetInscriptionsByAddress } from "./use-get-inscriptions";
 import { useGetRunesOutputsByAddress } from "./use-get-runes-outputs";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
@@ -127,15 +126,4 @@ export const useGetUTXOs = (
     availableUTXOs,
     availableBalance,
   };
-};
-
-export const useGetNativeSegwitUTXOs = (chainId: string) => {
-  const { nativeSegwitAddress } = useBitcoinAddresses(chainId);
-
-  return useGetUTXOs(chainId, nativeSegwitAddress ?? "", false, true);
-};
-
-export const useGetTaprootUTXOs = (chainId: string) => {
-  const { taprootAddress } = useBitcoinAddresses(chainId);
-  return useGetUTXOs(chainId, taprootAddress ?? "", true, true);
 };
