@@ -14,6 +14,8 @@ import {
   UpdateCurrentChainIdForEVMMsg,
   GetCurrentChainIdForStarknetMsg,
   UpdateCurrentChainIdForStarknetMsg,
+  GetCurrentChainIdForBitcoinMsg,
+  UpdateCurrentChainIdForBitcoinMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -32,6 +34,8 @@ export function init(router: Router, service: PermissionService): void {
   router.registerMessage(UpdateCurrentChainIdForEVMMsg);
   router.registerMessage(GetCurrentChainIdForStarknetMsg);
   router.registerMessage(UpdateCurrentChainIdForStarknetMsg);
+  router.registerMessage(GetCurrentChainIdForBitcoinMsg);
+  router.registerMessage(UpdateCurrentChainIdForBitcoinMsg);
 
   router.addHandler(ROUTE, getHandler(service));
 }
