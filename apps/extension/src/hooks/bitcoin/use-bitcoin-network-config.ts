@@ -1,12 +1,14 @@
-import { useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useStore } from "../../stores";
 import {
   GENESIS_HASH_TO_NETWORK,
   GenesisHash,
   SupportedPaymentType,
 } from "@keplr-wallet/types";
-import { Network, networks, payments } from "bitcoinjs-lib";
-import { toXOnly } from "@keplr-wallet/crypto";
+import { Network, networks } from "bitcoinjs-lib";
+import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
+import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { GetBitcoinKeysSettledMsg } from "@keplr-wallet/background";
 
 enum BestInSlotApiUrl {
   MAINNET = "https://api.bestinslot.xyz/v3",
@@ -56,55 +58,57 @@ export const useBitcoinNetworkConfig = (chainId: string) => {
   }, [chainId]);
 };
 
-export const useBitcoinAddresses = (chainId: string) => {
-  const { accountStore } = useStore();
-  const { networkConfig } = useBitcoinNetworkConfig(chainId);
+export const useGetBitcoinKeys = (chainId: string) => {
+  const { chainStore } = useStore();
+  const [bitcoinKeys, setBitcoinKeys] = useState<
+    {
+      name: string;
+      pubKey: Uint8Array;
+      address: string;
+      paymentType: SupportedPaymentType;
+      isNanoLedger: boolean;
+      masterFingerprintHex?: string | undefined;
+      derivationPath?: string | undefined;
+    }[]
+  >([]);
 
-  const legacyAddress = useMemo(() => {
-    const pubkey = accountStore.getAccount(chainId).pubKey;
-    if (!pubkey) {
-      return undefined;
+  const getBitcoinKeys = useCallback(async () => {
+    const modularChainInfo = chainStore.getModularChain(chainId);
+    if (!("bitcoin" in modularChainInfo)) {
+      throw new Error("Not a bitcoin chain");
     }
 
-    const { address } = payments.p2pkh({
-      pubkey: Buffer.from(pubkey),
-      network: networkConfig,
-    });
+    const linkedChainKey = modularChainInfo.linkedChainKey;
 
-    return address;
-  }, [accountStore, chainId, networkConfig]);
+    const linkedChainInfos = chainStore.modularChainInfosInUI.filter(
+      (modularChainInfo) =>
+        "bitcoin" in modularChainInfo &&
+        modularChainInfo.linkedChainKey === linkedChainKey
+    );
 
-  const nativeSegwitAddress = useMemo(() => {
-    const pubkey = accountStore.getAccount(chainId).pubKey;
-    if (!pubkey) {
-      return undefined;
-    }
+    const linkedChainIds = linkedChainInfos.map((info) => info.chainId);
 
-    const { address } = payments.p2wpkh({
-      pubkey: Buffer.from(pubkey),
-      network: networkConfig,
-    });
+    const res = await new InExtensionMessageRequester().sendMessage(
+      BACKGROUND_PORT,
+      new GetBitcoinKeysSettledMsg(linkedChainIds)
+    );
 
-    return address;
-  }, [accountStore, chainId, networkConfig]);
+    setBitcoinKeys([
+      ...res
+        .filter((key) => key.status === "fulfilled")
+        .map((key) => {
+          if (key.status === "fulfilled") {
+            return key.value;
+          }
+          throw new Error("Unexpected status");
+        }),
+    ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chainId, chainStore, chainStore.modularChainInfosInUI]);
 
-  const taprootAddress = useMemo(() => {
-    const pubkey = accountStore.getAccount(chainId).pubKey;
-    if (!pubkey) {
-      return undefined;
-    }
+  useEffect(() => {
+    getBitcoinKeys();
+  }, [getBitcoinKeys]);
 
-    const { address } = payments.p2tr({
-      internalPubkey: toXOnly(Buffer.from(pubkey)),
-      network: networkConfig,
-    });
-
-    return address;
-  }, [accountStore, chainId, networkConfig]);
-
-  return {
-    legacyAddress,
-    nativeSegwitAddress,
-    taprootAddress,
-  };
+  return bitcoinKeys;
 };
