@@ -16,8 +16,7 @@ import {
   CHAIN_TYPE_TO_GENESIS_HASH,
 } from "@keplr-wallet/types";
 import { Env, KeplrError } from "@keplr-wallet/router";
-import { Psbt, payments } from "bitcoinjs-lib";
-import { mainnet, signet, testnet } from "./constants";
+import { Psbt, payments, networks } from "bitcoinjs-lib";
 import { encodeLegacyMessage, encodeLegacySignature } from "./helper";
 import { toXOnly } from "@keplr-wallet/crypto";
 import { BIP322 } from "./bip322";
@@ -51,6 +50,8 @@ export class KeyRingBitcoinService {
     address: string;
     paymentType: SupportedPaymentType;
     isNanoLedger: boolean;
+    masterFingerprintHex?: string;
+    derivationPath?: string;
   }> {
     const keyInfo = this.keyRingService.getKeyInfo(vaultId);
     if (!keyInfo) {
@@ -65,6 +66,8 @@ export class KeyRingBitcoinService {
       address: params.address,
       paymentType: params.paymentType,
       isNanoLedger: keyInfo.type === "ledger",
+      masterFingerprintHex: params.masterFingerprintHex,
+      derivationPath: params.derivationPath,
     };
   }
 
@@ -74,6 +77,8 @@ export class KeyRingBitcoinService {
     address: string;
     paymentType: SupportedPaymentType;
     isNanoLedger: boolean;
+    masterFingerprintHex?: string;
+    derivationPath?: string;
   }> {
     return await this.getBitcoinKey(
       this.keyRingService.selectedVaultId,
@@ -88,6 +93,8 @@ export class KeyRingBitcoinService {
     pubKey: Uint8Array;
     address: string;
     paymentType: SupportedPaymentType;
+    masterFingerprintHex?: string;
+    derivationPath?: string;
   }> {
     const chainInfo = this.chainsService.getModularChainInfoOrThrow(chainId);
     if (!("bitcoin" in chainInfo)) {
@@ -104,9 +111,11 @@ export class KeyRingBitcoinService {
     // TODO: Ledger support
     // const isLedger = vault.insensitive["keyRingType"] === "ledger";
 
-    const bitcoinPubKey = (
-      await this.keyRingService.getPubKey(chainId, vaultId)
-    ).toBitcoinPubKey();
+    const pubKey = await this.keyRingService.getPubKeyBitcoin(chainId, vaultId);
+    const bitcoinPubKey =
+      typeof pubKey === "object" && "toBitcoinPubKey" in pubKey
+        ? pubKey.toBitcoinPubKey()
+        : pubKey;
 
     const network = this.getNetwork(chainId);
 
@@ -132,6 +141,9 @@ export class KeyRingBitcoinService {
       pubKey: bitcoinPubKey.toBytes(),
       address,
       paymentType,
+      // only mnemonic key ring has master fingerprint and derivation path at this moment
+      masterFingerprintHex: bitcoinPubKey.getMasterFingerprint(),
+      derivationPath: bitcoinPubKey.getPath(),
     };
   }
 
@@ -404,11 +416,11 @@ export class KeyRingBitcoinService {
 
     switch (network) {
       case Network.MAINNET:
-        return mainnet;
+        return networks.bitcoin;
       case Network.TESTNET:
-        return testnet;
+        return networks.testnet;
       case Network.SIGNET:
-        return signet;
+        return networks.testnet;
     }
   }
 

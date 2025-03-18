@@ -5,6 +5,7 @@ import {
   Hash,
   Mnemonic,
   PrivKeySecp256k1,
+  PubKeyBitcoinCompatible,
   PubKeySecp256k1,
   toXOnly,
 } from "@keplr-wallet/crypto";
@@ -85,6 +86,40 @@ export class KeyRingMnemonicService {
     return pubKey;
   }
 
+  getPubKeyBitcoin(
+    vault: Vault,
+    purpose: number,
+    coinType: number
+  ): PubKeyBitcoinCompatible {
+    const bip44Path = this.getBIP44PathFromVault(vault);
+
+    const path = `m/${purpose}'/${coinType}'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`;
+    const pubKeyTag = `pubKey-${path}`;
+    const masterFingerprintTag = `masterFingerprint-${path}`;
+
+    if (
+      vault.insensitive[pubKeyTag] &&
+      vault.insensitive[masterFingerprintTag]
+    ) {
+      const pubKey = Buffer.from(vault.insensitive[pubKeyTag] as string, "hex");
+      const masterFingerprint = vault.insensitive[
+        masterFingerprintTag
+      ] as string;
+
+      return new PubKeyBitcoinCompatible(pubKey, masterFingerprint, path);
+    }
+
+    const privKey = this.getPrivKey(vault, purpose, coinType);
+    const pubKey = privKey.getBitcoinPubKey();
+
+    this.vaultService.setAndMergeInsensitiveToVault("keyRing", vault.id, {
+      [pubKeyTag]: Buffer.from(pubKey.toBytes()).toString("hex"),
+      [masterFingerprintTag]: pubKey.getMasterFingerprint(),
+    });
+
+    return pubKey;
+  }
+
   sign(
     vault: Vault,
     purpose: number,
@@ -154,6 +189,38 @@ export class KeyRingMnemonicService {
       return false;
     };
 
+    // // P2TR taproot
+    // if (isTaprootInput(input)) {
+    //   let needTweak =
+    //     typeof useTweakedSigner === "boolean" ? useTweakedSigner : true;
+
+    //   if (!disableTweakSigner) {
+    //     // script path spend
+    //     if (
+    //       input.tapLeafScript &&
+    //       input.tapLeafScript?.length > 0 &&
+    //       !input.tapMerkleRoot
+    //     ) {
+    //       input.tapLeafScript.forEach((e) => {
+    //         if (e.controlBlock && e.script) {
+    //           needTweak = false;
+    //         }
+    //       });
+    //     }
+    //   } else {
+    //     needTweak = false;
+    //   }
+
+    //   if (input.tapInternalKey) {
+    //     const privateKey = await signer.getPrvkey();
+    //     const tweakedSigner = tweakSigner(privateKey, publicKey, {
+    //       network,
+    //       needTweak,
+    //     });
+    //     return tweakedSigner;
+    //   }
+    // }
+
     // Must consider partially signed psbt.
     // If the input is already signed, skip signing. (in case input index is not in inputsToSign)
     for (const index of inputsToSign) {
@@ -221,9 +288,10 @@ export class KeyRingMnemonicService {
     const path = `m/${purpose}'/${coinType}'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`;
 
     const masterSeed = Buffer.from(masterSeedText, "hex");
-    return new PrivKeySecp256k1(
-      Mnemonic.generatePrivateKeyFromMasterSeed(masterSeed, path)
-    );
+    const { privateKey, masterFingerprint } =
+      Mnemonic.generatePrivateKeyFromMasterSeed(masterSeed, path);
+
+    return new PrivKeySecp256k1(privateKey, masterFingerprint, path);
   }
 
   protected getBIP44PathFromVault(vault: Vault): {

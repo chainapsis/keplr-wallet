@@ -51,6 +51,8 @@ export class AccountSetBase {
     | {
         bech32Address: string;
         paymentType: SupportedPaymentType;
+        masterFingerprintHex?: string;
+        derivationPath?: string;
       }
     | undefined = undefined;
   @observable
@@ -199,6 +201,8 @@ export class AccountSetBase {
             this._bitcoinAddress = {
               bech32Address: key.address,
               paymentType: key.paymentType,
+              masterFingerprintHex: key.masterFingerprintHex,
+              derivationPath: key.derivationPath,
             };
             this._isNanoLedger = key.isNanoLedger;
             this._isKeystone = false;
@@ -362,6 +366,8 @@ export class AccountSetBase {
     | {
         bech32Address: string;
         paymentType: SupportedPaymentType;
+        masterFingerprintHex?: string;
+        derivationPath?: string;
       }
     | undefined {
     return this._bitcoinAddress;

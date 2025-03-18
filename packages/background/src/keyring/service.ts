@@ -7,7 +7,11 @@ import {
   KeyRingStatus,
 } from "./types";
 import { Env, WEBPAGE_PORT } from "@keplr-wallet/router";
-import { PubKeySecp256k1, PubKeyStarknet } from "@keplr-wallet/crypto";
+import {
+  PubKeyBitcoinCompatible,
+  PubKeySecp256k1,
+  PubKeyStarknet,
+} from "@keplr-wallet/crypto";
 import { ChainsService } from "../chains";
 import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 import { KVStore } from "@keplr-wallet/common";
@@ -1098,6 +1102,53 @@ export class KeyRingService {
     return this.getStarknetPubKeyWithVault(vault, modularChainInfo);
   }
 
+  getPubKeyBitcoin(
+    chainId: string,
+    vaultId: string
+  ): Promise<PubKeyBitcoinCompatible | PubKeySecp256k1> {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
+    const modularChainInfo =
+      this.chainsService.getModularChainInfoOrThrow(chainId);
+
+    const vault = this.vaultService.getVault("keyRing", vaultId);
+    if (!vault) {
+      throw new Error("Vault is null");
+    }
+
+    const purpose =
+      (() => {
+        if ("bitcoin" in modularChainInfo) {
+          return modularChainInfo.bitcoin.bip44.purpose;
+        }
+      })() ?? DEFAULT_BIP44_PURPOSE;
+
+    const coinTypeTag = `keyRing-${
+      ChainIdHelper.parse(chainId).identifier
+    }-coinType`;
+
+    const coinType = (() => {
+      if (vault.insensitive[coinTypeTag]) {
+        return vault.insensitive[coinTypeTag] as number;
+      }
+
+      if ("bitcoin" in modularChainInfo) {
+        return modularChainInfo.bitcoin.bip44.coinType;
+      }
+
+      throw new Error("Can't determine default coin type");
+    })();
+
+    return this.getPubKeyBitcoinWithVault(
+      vault,
+      purpose,
+      coinType,
+      modularChainInfo
+    );
+  }
+
   getPubKeyWithNotFinalizedCoinType(
     chainId: string,
     vaultId: string,
@@ -1303,6 +1354,26 @@ export class KeyRingService {
     );
   }
 
+  getPubKeyBitcoinWithVault(
+    vault: Vault,
+    purpose: number,
+    coinType: number,
+    modularChainInfo: ModularChainInfo
+  ): Promise<PubKeyBitcoinCompatible | PubKeySecp256k1> {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
+    const keyRing = this.getVaultKeyRing(vault);
+
+    if (typeof keyRing.getPubKeyBitcoin !== "function") {
+      return Promise.resolve(
+        keyRing.getPubKey(vault, purpose, coinType, modularChainInfo)
+      );
+    }
+
+    return Promise.resolve(keyRing.getPubKeyBitcoin(vault, purpose, coinType));
+  }
   signWithVault(
     vault: Vault,
     purpose: number,

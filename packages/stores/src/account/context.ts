@@ -267,6 +267,8 @@ export class AccountSharedContext {
             address: string;
             paymentType: SupportedPaymentType;
             isNanoLedger: boolean;
+            masterFingerprintHex?: string;
+            derivationPath?: string;
           }
       >
     ) => void

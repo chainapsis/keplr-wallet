@@ -1,5 +1,9 @@
 import { PlainObject, Vault } from "../vault";
-import { PubKeySecp256k1, PubKeyStarknet } from "@keplr-wallet/crypto";
+import {
+  PubKeyBitcoinCompatible,
+  PubKeySecp256k1,
+  PubKeyStarknet,
+} from "@keplr-wallet/crypto";
 import { ModularChainInfo } from "@keplr-wallet/types";
 import { Psbt } from "bitcoinjs-lib";
 
@@ -36,6 +40,11 @@ export interface KeyRing {
     vault: Vault,
     modularChainInfo: ModularChainInfo
   ): PubKeyStarknet | Promise<PubKeyStarknet>;
+  getPubKeyBitcoin?(
+    vault: Vault,
+    purpose: number,
+    coinType: number
+  ): PubKeyBitcoinCompatible | Promise<PubKeyBitcoinCompatible>;
   sign(
     vault: Vault,
     purpose: number,
