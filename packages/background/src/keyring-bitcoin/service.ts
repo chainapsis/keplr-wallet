@@ -210,7 +210,11 @@ export class KeyRingBitcoinService {
       async (res: {
         psbtSignData: {
           psbtHex: string;
-          inputsToSign: number[];
+          inputsToSign: {
+            index: number;
+            address: string;
+            path?: string;
+          }[];
         }[];
         signedPsbtsHexes: string[];
       }) => {
@@ -224,7 +228,8 @@ export class KeyRingBitcoinService {
               chainId,
               vaultId,
               Psbt.fromHex(psbtSignData.psbtHex),
-              psbtSignData.inputsToSign
+              psbtSignData.inputsToSign,
+              network
             )
           )
         );
@@ -268,7 +273,11 @@ export class KeyRingBitcoinService {
       async (res: {
         psbtSignData: {
           psbtHex: string;
-          inputsToSign: number[];
+          inputsToSign: {
+            index: number;
+            address: string;
+            path?: string;
+          }[];
         }[];
         signedPsbtsHexes: string[];
       }) => {
@@ -286,7 +295,8 @@ export class KeyRingBitcoinService {
           chainId,
           vaultId,
           psbt,
-          res.psbtSignData[0].inputsToSign
+          res.psbtSignData[0].inputsToSign,
+          network
         );
 
         return signedPsbt.toHex();
@@ -392,7 +402,12 @@ export class KeyRingBitcoinService {
           chainId,
           vaultId,
           txToSign,
-          Array.from({ length: txToSign.data.inputs.length }, (_, i) => i)
+          Array.from({ length: txToSign.data.inputs.length }, (_, i) => ({
+            index: i,
+            address: bitcoinPubKey.address,
+            path: bitcoinPubKey.derivationPath,
+          })),
+          network
         );
 
         return BIP322.encodeWitness(signedPsbt);

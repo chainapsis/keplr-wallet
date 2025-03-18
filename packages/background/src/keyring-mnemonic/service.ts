@@ -156,14 +156,21 @@ export class KeyRingMnemonicService {
 
   signPsbt(
     vault: Vault,
+    purpose: number,
     coinType: number,
     psbt: Psbt,
-    inputsToSign: number[] // TODO: purpose, 경로를 주소 형식별로 처리해야 함 (legacy=44, native-segwit=84, taproot=86)
+    inputsToSign: {
+      index: number;
+      address: string;
+      path?: string;
+    }[]
   ): Promise<Psbt> {
-    const privKey = this.getPrivKey(vault, 84, coinType);
-    const signer = privKey.toKeyPair();
-    const tapInternalKey = toXOnly(signer.publicKey);
-    const taprootSigner = signer.tweak(taggedHash("TapTweak", tapInternalKey));
+    const bitcoinPubkey = this.getPrivKey(
+      vault,
+      purpose,
+      coinType
+    ).getBitcoinPubKey();
+    const masterFingerprint = bitcoinPubkey.getMasterFingerprint();
 
     const isP2TR = (script: NodeBuffer): boolean => {
       try {
@@ -189,44 +196,97 @@ export class KeyRingMnemonicService {
       return false;
     };
 
-    // // P2TR taproot
-    // if (isTaprootInput(input)) {
-    //   let needTweak =
-    //     typeof useTweakedSigner === "boolean" ? useTweakedSigner : true;
-
-    //   if (!disableTweakSigner) {
-    //     // script path spend
-    //     if (
-    //       input.tapLeafScript &&
-    //       input.tapLeafScript?.length > 0 &&
-    //       !input.tapMerkleRoot
-    //     ) {
-    //       input.tapLeafScript.forEach((e) => {
-    //         if (e.controlBlock && e.script) {
-    //           needTweak = false;
-    //         }
-    //       });
-    //     }
-    //   } else {
-    //     needTweak = false;
-    //   }
-
-    //   if (input.tapInternalKey) {
-    //     const privateKey = await signer.getPrvkey();
-    //     const tweakedSigner = tweakSigner(privateKey, publicKey, {
-    //       network,
-    //       needTweak,
-    //     });
-    //     return tweakedSigner;
-    //   }
-    // }
+    const masterSeed = this.getMasterSeedFromVault(vault);
 
     // Must consider partially signed psbt.
     // If the input is already signed, skip signing. (in case input index is not in inputsToSign)
-    for (const index of inputsToSign) {
+    for (const { index, path } of inputsToSign) {
       const input = psbt.data.inputs[index];
 
+      const signers: PrivKeySecp256k1[] = [];
+
+      if (path) {
+        const { privateKey } = Mnemonic.generatePrivateKeyFromMasterSeed(
+          masterSeed,
+          path
+        );
+        signers.push(new PrivKeySecp256k1(privateKey));
+      } else if (input.bip32Derivation) {
+        for (const bip32Derivation of input.bip32Derivation) {
+          if (
+            masterFingerprint &&
+            NodeBuffer.from(masterFingerprint, "hex").equals(
+              bip32Derivation.masterFingerprint
+            )
+          ) {
+            const { privateKey } = Mnemonic.generatePrivateKeyFromMasterSeed(
+              masterSeed,
+              bip32Derivation.path
+            );
+
+            const signer = new PrivKeySecp256k1(privateKey);
+
+            if (
+              NodeBuffer.from(signer.getPubKey().toBytes()).equals(
+                bip32Derivation.pubkey
+              )
+            )
+              signers.push(signer);
+          }
+        }
+      } else if (input.tapBip32Derivation) {
+        for (const tapBip32Derivation of input.tapBip32Derivation) {
+          if (
+            masterFingerprint &&
+            NodeBuffer.from(masterFingerprint, "hex").equals(
+              tapBip32Derivation.masterFingerprint
+            )
+          ) {
+            const { privateKey } = Mnemonic.generatePrivateKeyFromMasterSeed(
+              masterSeed,
+              tapBip32Derivation.path
+            );
+
+            const signer = new PrivKeySecp256k1(privateKey);
+
+            if (
+              toXOnly(NodeBuffer.from(signer.getPubKey().toBytes())).equals(
+                tapBip32Derivation.pubkey
+              )
+            )
+              signers.push(signer);
+          }
+        }
+      }
+
+      if (signers.length === 0) {
+        throw new Error(`No signer found for input ${index}`);
+      }
+
+      // CHECK: signer가 여러 개이면 어떡함? 일단 배제
+      const signer = signers[0].toKeyPair();
+
       if (isTaprootInput(input)) {
+        let needTweak = true;
+
+        if (
+          input.tapLeafScript &&
+          input.tapLeafScript?.length > 0 &&
+          !input.tapMerkleRoot
+        ) {
+          // script path spending: 키 tweak 필요 없음
+          input.tapLeafScript.forEach((e) => {
+            if (e.controlBlock && e.script) {
+              needTweak = false;
+            }
+          });
+        }
+
+        const tapInternalKey = toXOnly(signer.publicKey);
+        const taprootSigner = needTweak
+          ? signer.tweak(taggedHash("TapTweak", tapInternalKey))
+          : signer;
+
         if (!input.tapInternalKey) {
           input.tapInternalKey = tapInternalKey;
         }
@@ -238,7 +298,9 @@ export class KeyRingMnemonicService {
         const isValid = psbt.validateSignaturesOfInput(
           index,
           (_, msgHash, signature) => {
-            return taprootSigner.verifySchnorr(msgHash, signature);
+            return needTweak
+              ? taprootSigner.verifySchnorr(msgHash, signature)
+              : signer.verifySchnorr(msgHash, signature);
           }
         );
 
@@ -278,16 +340,10 @@ export class KeyRingMnemonicService {
     coinType: number
   ): PrivKeySecp256k1 {
     const bip44Path = this.getBIP44PathFromVault(vault);
-
-    const decrypted = this.vaultService.decrypt(vault.sensitive);
-    const masterSeedText = decrypted["masterSeedText"] as string | undefined;
-    if (!masterSeedText) {
-      throw new Error("masterSeedText is null");
-    }
+    const masterSeed = this.getMasterSeedFromVault(vault);
 
     const path = `m/${purpose}'/${coinType}'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`;
 
-    const masterSeed = Buffer.from(masterSeedText, "hex");
     const { privateKey, masterFingerprint } =
       Mnemonic.generatePrivateKeyFromMasterSeed(masterSeed, path);
 
@@ -304,5 +360,15 @@ export class KeyRingMnemonicService {
       change: number;
       addressIndex: number;
     };
+  }
+
+  protected getMasterSeedFromVault(vault: Vault): Buffer {
+    const decrypted = this.vaultService.decrypt(vault.sensitive);
+    const masterSeedText = decrypted["masterSeedText"] as string | undefined;
+    if (!masterSeedText) {
+      throw new Error("masterSeedText is null");
+    }
+
+    return Buffer.from(masterSeedText, "hex");
   }
 }

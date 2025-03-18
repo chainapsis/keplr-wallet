@@ -5,7 +5,7 @@ import {
   PubKeyStarknet,
 } from "@keplr-wallet/crypto";
 import { ModularChainInfo } from "@keplr-wallet/types";
-import { Psbt } from "bitcoinjs-lib";
+import { Psbt, Network as BitcoinJSNetwork } from "bitcoinjs-lib";
 
 export type KeyRingStatus = "empty" | "locked" | "unlocked";
 
@@ -65,9 +65,15 @@ export interface KeyRing {
       }>;
   signPsbt?(
     vault: Vault,
+    purpose: number,
     coinType: number,
     psbt: Psbt,
-    inputsToSign: number[],
+    inputsToSign: {
+      index: number;
+      address: string;
+      path?: string;
+    }[],
+    network: BitcoinJSNetwork,
     modularChainInfo: ModularChainInfo
   ): Promise<Psbt>;
 }

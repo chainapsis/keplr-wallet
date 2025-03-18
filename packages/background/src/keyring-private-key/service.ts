@@ -7,7 +7,7 @@ import {
   PubKeySecp256k1,
   toXOnly,
 } from "@keplr-wallet/crypto";
-import { Psbt, payments } from "bitcoinjs-lib";
+import { Psbt, payments, Network as BitcoinJSNetwork } from "bitcoinjs-lib";
 import { taggedHash } from "bitcoinjs-lib/src/crypto";
 
 export class KeyRingPrivateKeyService {
@@ -91,15 +91,29 @@ export class KeyRingPrivateKeyService {
 
   signPsbt(
     vault: Vault,
+    _purpose: number,
     _coinType: number,
     psbt: Psbt,
-    inputsToSign: number[]
+    inputsToSign: {
+      index: number;
+      address: string;
+      path?: string;
+    }[],
+    network: BitcoinJSNetwork
   ): Promise<Psbt> {
     const privateKeyText = this.vaultService.decrypt(vault.sensitive)[
       "privateKey"
     ] as string;
     const privateKey = new PrivKeySecp256k1(Buffer.from(privateKeyText, "hex"));
+    const bitcoinPubkey = privateKey.getBitcoinPubKey();
+
+    const nativeSegwitAddress = bitcoinPubkey.getNativeSegwitAddress(network);
+    const taprootAddress = bitcoinPubkey.getTaprootAddress(network);
+
+    // private key를 사용하는 경우는 HD키 파생이 불가능하므로,
+    // derivation path를 별도로 검증하지 않고 주소가 일치하는 경우에만 서명할 수 있도록 한다.
     const signer = privateKey.toKeyPair();
+
     const tapInternalKey = toXOnly(signer.publicKey);
     const taprootSigner = signer.tweak(taggedHash("TapTweak", tapInternalKey));
 
@@ -127,24 +141,47 @@ export class KeyRingPrivateKeyService {
       return false;
     };
 
+    console.log(nativeSegwitAddress, taprootAddress, inputsToSign);
+
     // Must consider partially signed psbt.
     // If the input is already signed, skip signing. (in case input index is not in inputsToSign)
-    for (const index of inputsToSign) {
+    for (const { index, address } of inputsToSign) {
+      if (address !== nativeSegwitAddress && address !== taprootAddress) {
+        throw new Error(`No matching address for input ${index}`);
+      }
+
       const input = psbt.data.inputs[index];
 
       if (isTaprootInput(input)) {
+        let needTweak = true;
+
+        if (
+          input.tapLeafScript &&
+          input.tapLeafScript?.length > 0 &&
+          !input.tapMerkleRoot
+        ) {
+          // script path spending: 키 tweak 필요 없음
+          input.tapLeafScript.forEach((e) => {
+            if (e.controlBlock && e.script) {
+              needTweak = false;
+            }
+          });
+        }
+
         if (!input.tapInternalKey) {
           input.tapInternalKey = tapInternalKey;
         }
 
         // sign taproot
-        psbt.signTaprootInput(index, taprootSigner);
+        psbt.signTaprootInput(index, needTweak ? taprootSigner : signer);
 
         // verify taproot
         const isValid = psbt.validateSignaturesOfInput(
           index,
           (_, msgHash, signature) => {
-            return taprootSigner.verifySchnorr(msgHash, signature);
+            return needTweak
+              ? taprootSigner.verifySchnorr(msgHash, signature)
+              : signer.verifySchnorr(msgHash, signature);
           }
         );
 

@@ -25,7 +25,7 @@ import { MultiAccounts } from "../keyring-keystone";
 import { AnalyticsService } from "../analytics";
 import { Primitive } from "utility-types";
 import { runIfOnlyAppStart } from "../utils";
-import { Psbt } from "bitcoinjs-lib";
+import { Network as BitcoinJSNetwork, Psbt } from "bitcoinjs-lib";
 import { DEFAULT_BIP44_PURPOSE } from "./constants";
 
 export class KeyRingService {
@@ -1283,7 +1283,12 @@ export class KeyRingService {
     chainId: string,
     vaultId: string,
     psbt: Psbt,
-    inputsToSign: number[]
+    inputsToSign: {
+      index: number;
+      address: string;
+      path?: string;
+    }[],
+    network: BitcoinJSNetwork
   ) {
     if (this.vaultService.isLocked) {
       throw new Error("KeyRing is locked");
@@ -1297,6 +1302,13 @@ export class KeyRingService {
       throw new Error("Vault is null");
     }
 
+    const purpose =
+      (() => {
+        if ("bitcoin" in modularChainInfo) {
+          return modularChainInfo.bitcoin.bip44.purpose;
+        }
+      })() ?? DEFAULT_BIP44_PURPOSE;
+
     const coinType = (() => {
       if ("bitcoin" in modularChainInfo) {
         return modularChainInfo.bitcoin.bip44.coinType;
@@ -1307,9 +1319,11 @@ export class KeyRingService {
 
     const signedPsbt = this.signPsbtWithVault(
       vault,
+      purpose,
       coinType,
       psbt,
       inputsToSign,
+      network,
       modularChainInfo
     );
 
@@ -1409,9 +1423,15 @@ export class KeyRingService {
 
   signPsbtWithVault(
     vault: Vault,
+    purpose: number,
     coinType: number,
     psbt: Psbt,
-    inputsToSign: number[],
+    inputsToSign: {
+      index: number;
+      address: string;
+      path?: string;
+    }[],
+    network: BitcoinJSNetwork,
     modularChainInfo: ModularChainInfo
   ) {
     if (this.vaultService.isLocked) {
@@ -1425,7 +1445,15 @@ export class KeyRingService {
     }
 
     return Promise.resolve(
-      keyRing.signPsbt(vault, coinType, psbt, inputsToSign, modularChainInfo)
+      keyRing.signPsbt(
+        vault,
+        purpose,
+        coinType,
+        psbt,
+        inputsToSign,
+        network,
+        modularChainInfo
+      )
     );
   }
 
