@@ -17,6 +17,12 @@ export enum Network {
   SIGNET = "signet",
 }
 
+export enum ChainType {
+  BITCOIN_MAINNET = "BITCOIN_MAINNET",
+  BITCOIN_TESTNET = "BITCOIN_TESTNET",
+  BITCOIN_SIGNET = "BITCOIN_SIGNET",
+}
+
 export type SupportedPaymentType = "native-segwit" | "taproot";
 
 export const GENESIS_HASH_TO_NETWORK: Record<GenesisHash, Network> = {
@@ -31,12 +37,30 @@ export const NETWORK_TO_GENESIS_HASH: Record<Network, GenesisHash> = {
   [Network.SIGNET]: GenesisHash.SIGNET,
 };
 
+export const GENESIS_HASH_TO_CHAIN_TYPE: Record<GenesisHash, ChainType> = {
+  [GenesisHash.MAINNET]: ChainType.BITCOIN_MAINNET,
+  [GenesisHash.TESTNET]: ChainType.BITCOIN_TESTNET,
+  [GenesisHash.SIGNET]: ChainType.BITCOIN_SIGNET,
+};
+
+export const CHAIN_TYPE_TO_GENESIS_HASH: Record<ChainType, GenesisHash> = {
+  [ChainType.BITCOIN_MAINNET]: GenesisHash.MAINNET,
+  [ChainType.BITCOIN_TESTNET]: GenesisHash.TESTNET,
+  [ChainType.BITCOIN_SIGNET]: GenesisHash.SIGNET,
+};
+
 export interface IBitcoinProvider extends EventEmitter {
   getAccounts: () => Promise<string[]>;
   requestAccounts: () => Promise<string[]>;
   disconnect: () => Promise<void>;
   getNetwork: () => Promise<Network>;
   switchNetwork: (network: Network) => Promise<void>;
+  getChain: () => Promise<{
+    enum: ChainType;
+    name: string;
+    network: Network;
+  }>;
+  switchChain: (chain: ChainType) => Promise<void>;
   getPublicKey: () => Promise<string>;
   getBalance: () => Promise<{
     confirmed: number;

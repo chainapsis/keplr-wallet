@@ -32,6 +32,7 @@ import {
   IBitcoinProvider,
   Network as BitcoinNetwork,
   BitcoinSignMessageType,
+  ChainType,
 } from "@keplr-wallet/types";
 import {
   Result,
@@ -1745,6 +1746,18 @@ export class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
 
   async switchNetwork(network: BitcoinNetwork): Promise<void> {
     return this._requestMethod("switchNetwork", [network]);
+  }
+
+  async getChain(): Promise<{
+    enum: ChainType;
+    name: string;
+    network: BitcoinNetwork;
+  }> {
+    return this._requestMethod("getChain", []);
+  }
+
+  async switchChain(chain: ChainType): Promise<void> {
+    return this._requestMethod("switchChain", [chain]);
   }
 
   async getPublicKey(): Promise<string> {

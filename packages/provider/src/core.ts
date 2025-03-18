@@ -26,6 +26,7 @@ import {
   IBitcoinProvider,
   Network as BitcoinNetwork,
   BitcoinSignMessageType,
+  ChainType,
 } from "@keplr-wallet/types";
 import {
   BACKGROUND_PORT,
@@ -1891,6 +1892,24 @@ class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
     return this.protectedRequestMethod({
       method: "switchNetwork",
       params: [network],
+    });
+  }
+
+  async getChain(): Promise<{
+    enum: ChainType;
+    name: string;
+    network: BitcoinNetwork;
+  }> {
+    return this.protectedRequestMethod({
+      method: "getChain",
+      params: [],
+    });
+  }
+
+  async switchChain(chain: ChainType): Promise<void> {
+    return this.protectedRequestMethod({
+      method: "switchChain",
+      params: [chain],
     });
   }
 

@@ -11,6 +11,9 @@ import {
   IBitcoinProvider,
   Network,
   SupportedPaymentType,
+  ChainType,
+  GENESIS_HASH_TO_CHAIN_TYPE,
+  CHAIN_TYPE_TO_GENESIS_HASH,
 } from "@keplr-wallet/types";
 import { Env, KeplrError } from "@keplr-wallet/router";
 import { Psbt, payments } from "bitcoinjs-lib";
@@ -496,6 +499,43 @@ export class KeyRingBitcoinService {
             }
 
             const genesisHash = NETWORK_TO_GENESIS_HASH[network];
+            const newCurrentBaseChainId = `bip122:${genesisHash}`;
+
+            return this.permissionService.updateCurrentBaseChainIdForBitcoin(
+              env,
+              origin,
+              newCurrentBaseChainId
+            );
+          }
+          case "getChain": {
+            const { genesisHash } = this.parseChainId(currentChainId);
+            const chainType = GENESIS_HASH_TO_CHAIN_TYPE[genesisHash];
+            const currentChainInfo =
+              this.chainsService.getModularChainInfoOrThrow(currentChainId);
+            const network = this.getNetwork(currentChainId).id;
+
+            return {
+              enum: chainType,
+              name: currentChainInfo.chainName,
+              network,
+            };
+          }
+          case "switchChain": {
+            const chain =
+              (Array.isArray(params) && (params?.[0] as ChainType)) ||
+              undefined;
+            if (
+              !chain ||
+              (chain && !Object.values(ChainType).includes(chain))
+            ) {
+              throw new Error(
+                `Invalid parameters: must provide a valid chain. Available chains: ${Object.values(
+                  ChainType
+                ).join(", ")}`
+              );
+            }
+
+            const genesisHash = CHAIN_TYPE_TO_GENESIS_HASH[chain];
             const newCurrentBaseChainId = `bip122:${genesisHash}`;
 
             return this.permissionService.updateCurrentBaseChainIdForBitcoin(
