@@ -2,20 +2,23 @@ import { IFeeConfig } from "@keplr-wallet/hooks-bitcoin";
 import { Dec } from "@keplr-wallet/unit";
 import { Network, Psbt, Transaction } from "bitcoinjs-lib";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useGetNativeSegwitUTXOs, useGetTaprootUTXOs } from "./use-get-utxos";
 import { fromOutputScript } from "bitcoinjs-lib/src/address";
-import { useBitcoinAddresses } from "./use-bitcoin-network-config";
-import { DUST_THRESHOLD } from "@keplr-wallet/stores-bitcoin";
+import { useGetBitcoinKeys } from "./use-bitcoin-network-config";
+import { SignBitcoinTxInteractionStore } from "@keplr-wallet/stores-core";
+import {
+  Bip32Derivation,
+  DUST_THRESHOLD,
+  TapBip32Derivation,
+} from "@keplr-wallet/stores-bitcoin";
 
 export type ValidatedPsbt = {
   psbt: Psbt;
   inputsToSign: number[];
-  feeAmount: Dec;
-  sumInputAmountByAddress: {
+  fee: Dec;
+  sumInputValueByAddress: {
     address: string;
-    amount: Dec;
+    value: Dec;
   }[];
-  warnings: string[];
 };
 
 export function formatPsbtHex(psbtHex: string) {
@@ -46,76 +49,85 @@ export const usePsbtsValidate = (
     Error | undefined
   >(undefined);
 
-  const { legacyAddress, nativeSegwitAddress, taprootAddress } =
-    useBitcoinAddresses(chainId);
+  const { chainId, network: networkConfig } = interactionData.data;
 
-  // extension 내부적으로는 각 주소 유형에 따른 utxo만을 사용하지만,
-  // 외부에서 서명 요청이 들어온 경우 동일한 공개키에서 생선된 native segwit 주소와 taproot 주소의
-  // utxo가 섞여 들어올 가능성이 있다. 따라서 모든 utxo를 조회하여 유효한 psbt인지 검증한다.
-  // legacy 주소의 utxo는 무시한다.
-  const {
-    isFetching: isFetchingNativeSegwitUTXOs,
-    error: nativeSegwitUtxosError,
-    availableUTXOs: nativeSegwitAvailableUTXOs,
-  } = useGetNativeSegwitUTXOs(chainId);
-  const {
-    isFetching: isFetchingTaprootUTXOs,
-    error: taprootUtxosError,
-    availableUTXOs: taprootAvailableUTXOs,
-  } = useGetTaprootUTXOs(chainId);
+  const psbtsHexes = useMemo(() => {
+    return "psbtHex" in interactionData.data
+      ? [interactionData.data.psbtHex]
+      : interactionData.data.psbtsHexes;
+  }, [interactionData.data]);
 
-  const availableUTXOsSet = useMemo(() => {
-    const utxoSet = new Set<string>();
-    [...nativeSegwitAvailableUTXOs, ...taprootAvailableUTXOs].forEach(
-      (utxo) => {
-        utxoSet.add(`${utxo.txid}:${utxo.vout}`);
-      }
-    );
-    return utxoSet;
-  }, [nativeSegwitAvailableUTXOs, taprootAvailableUTXOs]);
+  const bitcoinKeys = useGetBitcoinKeys(chainId);
 
-  const isUserAddress = useCallback(
-    (address: string) => {
-      return (
-        address === legacyAddress ||
-        address === nativeSegwitAddress ||
-        address === taprootAddress
-      );
-    },
-    [legacyAddress, nativeSegwitAddress, taprootAddress]
-  );
-
-  const sortAddressesByPriority = useCallback(
-    (a: { address: string }, b: { address: string }) => {
-      const isAMine = isUserAddress(a.address);
-      const isBMine = isUserAddress(b.address);
-
-      if (isAMine && isBMine) {
-        if (a.address === taprootAddress) return -1;
-        if (b.address === taprootAddress) return 1;
-        if (a.address === nativeSegwitAddress) return -1;
-        if (b.address === nativeSegwitAddress) return 1;
-        return 0;
-      }
-
-      if (isAMine) return -1;
-      if (isBMine) return 1;
-
-      return 0;
-    },
-    [isUserAddress, taprootAddress, nativeSegwitAddress]
-  );
-
-  const processInputAmountsByAddress = useCallback(
-    (sumInputAmountByAddressRecord: Record<string, Dec>) => {
-      return Object.entries(sumInputAmountByAddressRecord)
-        .map(([address, amount]) => ({
+  const processInputValuesByAddress = useMemo(() => {
+    return (
+      sumInputValueByAddressRecord: Record<string, Dec>,
+      inputsToSign: { index: number; address: string }[]
+    ) => {
+      return Object.entries(sumInputValueByAddressRecord)
+        .map(([address, value]) => ({
           address,
-          amount,
+          value,
         }))
-        .sort(sortAddressesByPriority);
+        .sort((a, b) => {
+          // 1차로 소유한 계정순 -> inputsToSign에 포함되어 있는지 여부
+          const isAMine = inputsToSign.some(
+            (input) => input.address === a.address
+          );
+          const isBMine = inputsToSign.some(
+            (input) => input.address === b.address
+          );
+
+          if (isAMine && isBMine) {
+            // 둘 다 소유한 계정인 경우, value 순으로 정렬
+            if (a.value.gt(b.value)) {
+              return -1;
+            } else if (a.value.lt(b.value)) {
+              return 1;
+            } else {
+              return 0;
+            }
+          }
+
+          if (isAMine) {
+            return -1;
+          }
+
+          return 1;
+        });
+    };
+  }, []);
+
+  const isInputMine = useCallback(
+    (
+      address: string,
+      bip32Derivation?: Bip32Derivation[] | TapBip32Derivation[]
+    ) => {
+      for (const key of bitcoinKeys) {
+        if (key.address === address) {
+          return true;
+        }
+
+        if (bip32Derivation) {
+          for (const derivation of bip32Derivation) {
+            // 이 값을 사용하는 경우는 내부에서 mnemonic으로 생성된 키를 사용하거나 하드웨어 지갑에서 생성된 키를 사용하는 경우이다.
+            // 이 시점에서는 파생된 키가 올바른지 검증(비밀키를 받아와서 하드닝 경로를 포함한 파생 키를 생성 및 검증하는 것은 안전하지 않음)은
+            // 어려우므로 마스터 키의 지문만 검증한다. (백그라운드로 보내서 검증해야 할 수도 있음)
+            if (
+              key.masterFingerprintHex &&
+              Buffer.from(key.masterFingerprintHex, "hex").equals(
+                derivation.masterFingerprint
+              )
+            ) {
+              return true;
+            }
+          }
+        }
+      }
+
+      return false;
     },
-    [sortAddressesByPriority]
+    [bitcoinKeys]
   );
 
   const validatePsbts = useCallback(() => {
@@ -128,20 +140,19 @@ export const usePsbtsValidate = (
           network: networkConfig,
         })
       );
-      let totalInputAmount = new Dec(0);
-      let totalOutputAmount = new Dec(0);
+      let totalInputValue = new Dec(0);
+      let totalOutputValue = new Dec(0);
       const validatedPsbtResults: ValidatedPsbt[] = [];
 
       for (const psbt of psbts) {
         const txInputs = psbt.txInputs;
         const rawInputs = psbt.data.inputs;
 
-        let sumInputAmount = new Dec(0);
-        let sumOutputAmount = new Dec(0);
-        const sumInputAmountByAddressRecord: Record<string, Dec> = {};
+        let sumInputValue = new Dec(0);
+        let sumOutputValue = new Dec(0);
+        const sumInputValueByAddressRecord: Record<string, Dec> = {};
 
-        const inputsToSign: number[] = [];
-        const warnings: string[] = [];
+        const inputsToSign: { index: number; address: string }[] = [];
 
         for (const [index, input] of rawInputs.entries()) {
           let script: any = null;
@@ -162,76 +173,67 @@ export const usePsbtsValidate = (
 
           if (script && !isSigned) {
             // 사용자의 주소와 일치하는 input인 경우 서명 대상으로 추가
-            if (isUserAddress(address)) {
-              inputsToSign.push(index);
 
-              const txInput = psbt.txInputs[index];
-              const key = `${txInput.hash.reverse().toString("hex")}:${
-                txInput.index
-              }`;
-
-              // 소유하고 있지 않은 또는 소유하고 있는지 확인이 어려운 input을 사용하는 psbt는
-              // 여러 개의 서명이 필요하거나, 다른 주소의 utxo를 사용하는 경우,
-              // 또는 쿼리 결과의 제한으로 인해 확인이 어려운 경우(+ 쿼리 오류난 경우)가 있다.
-              // 따라서 오류를 반환하지 않고 경고를 반환한다. 사실 이렇게까지 해야할까 싶긴 한데...
-              if (!availableUTXOsSet.has(key)) {
-                warnings.push(
-                  `UTXO ${key} may be non-standard (inscription/runes). Verify before signing.`
-                );
-              }
+            const isMine = isInputMine(
+              address,
+              input.bip32Derivation ?? input.tapBip32Derivation
+            );
+            if (isMine) {
+              inputsToSign.push({ index, address });
             }
           }
 
-          sumInputAmount = sumInputAmount.add(new Dec(value));
-          sumInputAmountByAddressRecord[address] =
-            sumInputAmountByAddressRecord[address]
-              ? sumInputAmountByAddressRecord[address].add(new Dec(value))
-              : new Dec(value);
+          sumInputValue = sumInputValue.add(new Dec(value));
+          sumInputValueByAddressRecord[address] = sumInputValueByAddressRecord[
+            address
+          ]
+            ? sumInputValueByAddressRecord[address].add(new Dec(value))
+            : new Dec(value);
         }
 
         // CHECK: output은 검증할 것이 있나?
         const outputs = psbt.txOutputs;
         for (const output of outputs) {
           if (output.value < DUST_THRESHOLD) {
-            warnings.push(
+            console.warn(
               "Output amount is less than the minimum amount (0.00000546). Transaction may fail."
             );
           }
 
-          sumOutputAmount = sumOutputAmount.add(new Dec(output.value));
+          sumOutputValue = sumOutputValue.add(new Dec(output.value));
         }
 
-        const feeAmount = sumInputAmount.sub(sumOutputAmount);
+        const fee = sumInputValue.sub(sumOutputValue);
 
         // 수수료가 0보다 작으면 유효하지 않은 psbt이다.
-        if (feeAmount.lte(new Dec(0))) {
+        if (fee.lte(new Dec(0))) {
           throw new Error(
             "Insufficient fee: inputs must be greater than outputs"
           );
         } else {
           validatedPsbtResults.push({
             psbt,
-            inputsToSign,
-            feeAmount,
-            sumInputAmountByAddress: processInputAmountsByAddress(
-              sumInputAmountByAddressRecord
+            inputsToSign: inputsToSign.map((input) => input.index),
+            fee,
+            sumInputValueByAddress: processInputValuesByAddress(
+              sumInputValueByAddressRecord,
+              inputsToSign
             ),
-            warnings,
           });
 
-          totalInputAmount = totalInputAmount.add(sumInputAmount);
-          totalOutputAmount = totalOutputAmount.add(sumOutputAmount);
+          totalInputValue = totalInputValue.add(sumInputValue);
+          totalOutputValue = totalOutputValue.add(sumOutputValue);
         }
       }
 
-      const feeAmount = totalInputAmount.sub(totalOutputAmount);
-      if (feeAmount.lte(new Dec(0))) {
+      const totalFee = totalInputValue.sub(totalOutputValue);
+      if (totalFee.lte(new Dec(0))) {
         throw new Error("Insufficient fee for transaction");
       }
 
       // 각 psbt의 유효성 검증 결과를 저장하고 계산된 수수료를 설정한다.
       setValidatedPsbts(validatedPsbtResults);
-      feeConfig.setValue(feeAmount.truncate().toString());
+      feeConfig.setValue(totalFee.truncate().toString());
       setIsInitialized(true);
     } catch (e) {
       // psbt deserialize 오류 또는 입력의 합이 출력의 합보다 작은 psbt가 있는 경우
@@ -241,31 +243,22 @@ export const usePsbtsValidate = (
   }, [
     networkConfig,
     psbtsHexes,
-    availableUTXOsSet,
-    isUserAddress,
-    processInputAmountsByAddress,
+    isInputMine,
+    processInputValuesByAddress,
     feeConfig,
   ]);
 
   useEffect(() => {
-    if (isFetchingNativeSegwitUTXOs || isFetchingTaprootUTXOs) {
-      setIsInitialized(false);
-    }
-  }, [isFetchingNativeSegwitUTXOs, isFetchingTaprootUTXOs]);
-
-  useEffect(() => {
-    if (psbtsHexes.length === 0 || isInitialized) {
+    if (bitcoinKeys.length === 0 || psbtsHexes.length === 0 || isInitialized) {
       return;
     }
 
     validatePsbts();
-  }, [validatePsbts, isInitialized, psbtsHexes.length]);
+  }, [validatePsbts, isInitialized, psbtsHexes.length, bitcoinKeys.length]);
 
   return {
     isInitialized,
     validatedPsbts,
     criticalValidationError,
-    queryError: nativeSegwitUtxosError || taprootUtxosError,
-    validatePsbts,
   };
 };

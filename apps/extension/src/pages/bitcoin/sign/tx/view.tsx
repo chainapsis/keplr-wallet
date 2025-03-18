@@ -33,7 +33,7 @@ import { ViewDataButton } from "../../../sign/components/view-data-button";
 import { useNavigate } from "react-router";
 import { ApproveIcon, CancelIcon } from "../../../../components/button";
 import { FeeSummary } from "../../components/input/fee-summary";
-import { Psbt, Transaction } from "bitcoinjs-lib";
+import { Transaction } from "bitcoinjs-lib";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { ChainImageFallback } from "../../../../components/image";
 import { Gutter } from "../../../../components/gutter";
@@ -565,18 +565,18 @@ const InternalSendBitcoinTxReview: FunctionComponent<{
 }> = observer(({ validatedPsbt, chainId }) => {
   const theme = useTheme();
   const { chainStore } = useStore();
-  const { psbt, sumInputAmountByAddress } = validatedPsbt ?? {};
+  const { psbt, sumInputValueByAddress } = validatedPsbt ?? {};
 
   const [isViewData, setIsViewData] = useState(false);
 
-  const sender = sumInputAmountByAddress?.[0].address;
+  const sender = sumInputValueByAddress?.[0].address;
   const recipient = psbt?.txOutputs.find(
     (output) => output.address !== sender
   )?.address;
   const sendToken = new CoinPretty(
     chainStore.getModularChainInfoImpl(chainId).getCurrencies("bitcoin")[0],
-    sumInputAmountByAddress?.reduce((acc, curr) => {
-      return acc.add(curr.amount);
+    sumInputValueByAddress?.reduce((acc, curr) => {
+      return acc.add(curr.value);
     }, new Dec(0)) ?? new Dec(0)
   );
 
@@ -810,7 +810,7 @@ const SinglePsbtView: FunctionComponent<{
 }> = observer(({ validatedPsbt, chainId }) => {
   const theme = useTheme();
   const { networkConfig } = useBitcoinNetworkConfig(chainId);
-  const { psbt, sumInputAmountByAddress } = validatedPsbt ?? {};
+  const { psbt, sumInputValueByAddress } = validatedPsbt ?? {};
 
   const [isViewData, setIsViewData] = useState(false);
 
@@ -887,8 +887,8 @@ const SinglePsbtView: FunctionComponent<{
                     : ColorPalette["gray-50"],
               }}
             >
-              {sumInputAmountByAddress && sumInputAmountByAddress.length > 1
-                ? `${sumInputAmountByAddress.length} Input(s)`
+              {sumInputValueByAddress && sumInputValueByAddress.length > 1
+                ? `${sumInputValueByAddress.length} Input(s)`
                 : `${psbt?.txOutputs.length ?? 0} Output(s)`}
             </H5>
           </XAxis>
@@ -947,11 +947,7 @@ const SinglePsbtView: FunctionComponent<{
 
 const PsbtsView: FunctionComponent<{
   chainId: string;
-  validatedPsbts: {
-    psbt: Psbt;
-    feeAmount: Dec;
-    warnings: string[];
-  }[];
+  validatedPsbts: ValidatedPsbt[];
 }> = observer(({ validatedPsbts, chainId }) => {
   const theme = useTheme();
   const { networkConfig } = useBitcoinNetworkConfig(chainId);
