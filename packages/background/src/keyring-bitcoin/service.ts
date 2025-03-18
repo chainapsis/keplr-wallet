@@ -333,7 +333,7 @@ export class KeyRingBitcoinService {
         keyType: keyInfo.type,
         keyInsensitive: keyInfo.insensitive,
       },
-      async (res: { message: string; signatureHex: string }) => {
+      async (res: { signMessage: string; signatureHex: string }) => {
         const { signatureHex } = res;
         if (signatureHex) {
           return signatureHex;
