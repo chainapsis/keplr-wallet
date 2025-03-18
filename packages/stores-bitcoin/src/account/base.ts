@@ -384,6 +384,7 @@ export class BitcoinAccountBase {
       const changeValue = this.calculateChangeValue(
         remainderValue,
         feeRate,
+        changeAddressInfo,
         inputAddressInfos,
         outputAddressInfos
       );
@@ -404,6 +405,7 @@ export class BitcoinAccountBase {
   private calculateChangeValue(
     remainderValue: Dec,
     feeRate: number,
+    changeAddressInfo: AddressInfo,
     inputAddressInfos: AddressInfo[],
     outputAddressInfos: AddressInfo[]
   ): Dec {
@@ -412,6 +414,10 @@ export class BitcoinAccountBase {
       const key = `${info.type}_output_count`;
       outputParams[key] = (outputParams[key] || 0) + 1;
     });
+
+    // Consider change output
+    const changeKey = `${changeAddressInfo.type}_output_count`;
+    outputParams[changeKey] = (outputParams[changeKey] || 0) + 1;
 
     // Get initial transaction size estimation with a single p2wpkh input
     const { txVBytes } = this.calculateTxSize(
@@ -426,10 +432,11 @@ export class BitcoinAccountBase {
     // Adjust transaction size by replacing the default p2wpkh input size
     // with the actual input sizes based on their types
     for (const info of inputAddressInfos) {
-      const inputSize = this._txSizeEstimator.getSizeBasedOnInputType({
-        input_script: info.type,
-      });
-      adjustedTxVBytes += inputSize.inputWitnessSize;
+      const { inputWitnessSize } =
+        this._txSizeEstimator.getSizeBasedOnInputType({
+          input_script: info.type,
+        });
+      adjustedTxVBytes += inputWitnessSize;
     }
 
     // Subtract the default p2wpkh input size that was included in initial estimation
