@@ -171,7 +171,159 @@ export class KeyRingMnemonicService {
       coinType
     ).getBitcoinPubKey();
     const masterFingerprint = bitcoinPubkey.getMasterFingerprint();
+    const masterSeed = this.getMasterSeedFromVault(vault);
 
+    // Must consider partially signed psbt.
+    for (const { index, path } of inputsToSign) {
+      const input = psbt.data.inputs[index];
+
+      const privKey = this.findSignerForInput(
+        psbt,
+        index,
+        masterSeed,
+        masterFingerprint,
+        path
+      );
+      if (!privKey) {
+        throw new Error(`No signer found for input ${index}`);
+      }
+
+      const signer = privKey.toKeyPair();
+
+      if (this.isTaprootInput(input)) {
+        let needTweak = true;
+
+        // script path spending인 경우 키 트윅이 필요 없음
+        if (
+          input.tapLeafScript &&
+          input.tapLeafScript.length > 0 &&
+          !input.tapMerkleRoot
+        ) {
+          for (const leaf of input.tapLeafScript) {
+            if (leaf.controlBlock && leaf.script) {
+              needTweak = false;
+              break;
+            }
+          }
+        }
+
+        const tapInternalKey = toXOnly(signer.publicKey);
+        if (!input.tapInternalKey) {
+          input.tapInternalKey = tapInternalKey;
+        }
+
+        const taprootSigner = needTweak
+          ? signer.tweak(taggedHash("TapTweak", tapInternalKey))
+          : signer;
+
+        psbt.signTaprootInput(index, taprootSigner);
+
+        const isValid = psbt.validateSignaturesOfInput(
+          index,
+          (_, msgHash, signature) =>
+            taprootSigner.verifySchnorr(msgHash, signature)
+        );
+
+        if (!isValid) {
+          throw new Error("Invalid taproot signature");
+        }
+
+        psbt.finalizeTaprootInput(index);
+      } else {
+        psbt.signInput(index, signer);
+
+        const isValid = psbt.validateSignaturesOfInput(
+          index,
+          (_, msgHash, signature) => signer.verify(msgHash, signature)
+        );
+
+        if (!isValid) {
+          throw new Error("Invalid ecdsa signature");
+        }
+
+        psbt.finalizeInput(index);
+      }
+    }
+
+    return Promise.resolve(psbt);
+  }
+
+  private findSignerForInput(
+    psbt: Psbt,
+    index: number,
+    masterSeed: Buffer,
+    masterFingerprint: string | undefined,
+    explicitPath?: string
+  ): PrivKeySecp256k1 | null {
+    // 1. 명시적 경로가 있는 경우
+    if (explicitPath) {
+      const { privateKey } = Mnemonic.generatePrivateKeyFromMasterSeed(
+        masterSeed,
+        explicitPath
+      );
+      return new PrivKeySecp256k1(privateKey);
+    }
+
+    const input = psbt.data.inputs[index];
+
+    // 2. BIP32 파생 정보가 있는 경우
+    if (input.bip32Derivation && masterFingerprint) {
+      for (const derivation of input.bip32Derivation) {
+        if (
+          !NodeBuffer.from(masterFingerprint, "hex").equals(
+            derivation.masterFingerprint
+          )
+        ) {
+          continue;
+        }
+
+        const { privateKey } = Mnemonic.generatePrivateKeyFromMasterSeed(
+          masterSeed,
+          derivation.path
+        );
+        const signer = new PrivKeySecp256k1(privateKey);
+
+        if (
+          NodeBuffer.from(signer.getPubKey().toBytes()).equals(
+            derivation.pubkey
+          )
+        ) {
+          return signer;
+        }
+      }
+    }
+
+    // 3. Taproot BIP32 파생 정보가 있는 경우
+    if (input.tapBip32Derivation && masterFingerprint) {
+      for (const derivation of input.tapBip32Derivation) {
+        if (
+          !NodeBuffer.from(masterFingerprint, "hex").equals(
+            derivation.masterFingerprint
+          )
+        ) {
+          continue;
+        }
+
+        const { privateKey } = Mnemonic.generatePrivateKeyFromMasterSeed(
+          masterSeed,
+          derivation.path
+        );
+        const signer = new PrivKeySecp256k1(privateKey);
+
+        if (
+          toXOnly(NodeBuffer.from(signer.getPubKey().toBytes())).equals(
+            derivation.pubkey
+          )
+        ) {
+          return signer;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  private isTaprootInput(input: any): boolean {
     const isP2TR = (script: NodeBuffer): boolean => {
       try {
         payments.p2tr({ output: script });
@@ -181,157 +333,13 @@ export class KeyRingMnemonicService {
       }
     };
 
-    const isTaprootInput = (input: any) => {
-      if (
-        !!(
-          input.tapInternalKey ||
-          input.tapMerkleRoot ||
-          (input.tapLeafScript && input.tapLeafScript.length) ||
-          (input.tapBip32Derivation && input.tapBip32Derivation.length) ||
-          (input.witnessUtxo && isP2TR(input.witnessUtxo.script))
-        )
-      ) {
-        return true;
-      }
-      return false;
-    };
-
-    const masterSeed = this.getMasterSeedFromVault(vault);
-
-    // Must consider partially signed psbt.
-    // If the input is already signed, skip signing. (in case input index is not in inputsToSign)
-    for (const { index, path } of inputsToSign) {
-      const input = psbt.data.inputs[index];
-
-      const signers: PrivKeySecp256k1[] = [];
-
-      if (path) {
-        const { privateKey } = Mnemonic.generatePrivateKeyFromMasterSeed(
-          masterSeed,
-          path
-        );
-        signers.push(new PrivKeySecp256k1(privateKey));
-      } else if (input.bip32Derivation) {
-        for (const bip32Derivation of input.bip32Derivation) {
-          if (
-            masterFingerprint &&
-            NodeBuffer.from(masterFingerprint, "hex").equals(
-              bip32Derivation.masterFingerprint
-            )
-          ) {
-            const { privateKey } = Mnemonic.generatePrivateKeyFromMasterSeed(
-              masterSeed,
-              bip32Derivation.path
-            );
-
-            const signer = new PrivKeySecp256k1(privateKey);
-
-            if (
-              NodeBuffer.from(signer.getPubKey().toBytes()).equals(
-                bip32Derivation.pubkey
-              )
-            )
-              signers.push(signer);
-          }
-        }
-      } else if (input.tapBip32Derivation) {
-        for (const tapBip32Derivation of input.tapBip32Derivation) {
-          if (
-            masterFingerprint &&
-            NodeBuffer.from(masterFingerprint, "hex").equals(
-              tapBip32Derivation.masterFingerprint
-            )
-          ) {
-            const { privateKey } = Mnemonic.generatePrivateKeyFromMasterSeed(
-              masterSeed,
-              tapBip32Derivation.path
-            );
-
-            const signer = new PrivKeySecp256k1(privateKey);
-
-            if (
-              toXOnly(NodeBuffer.from(signer.getPubKey().toBytes())).equals(
-                tapBip32Derivation.pubkey
-              )
-            )
-              signers.push(signer);
-          }
-        }
-      }
-
-      if (signers.length === 0) {
-        throw new Error(`No signer found for input ${index}`);
-      }
-
-      // CHECK: signer가 여러 개이면 어떡함? 일단 배제
-      const signer = signers[0].toKeyPair();
-
-      if (isTaprootInput(input)) {
-        let needTweak = true;
-
-        if (
-          input.tapLeafScript &&
-          input.tapLeafScript?.length > 0 &&
-          !input.tapMerkleRoot
-        ) {
-          // script path spending: 키 tweak 필요 없음
-          input.tapLeafScript.forEach((e) => {
-            if (e.controlBlock && e.script) {
-              needTweak = false;
-            }
-          });
-        }
-
-        const tapInternalKey = toXOnly(signer.publicKey);
-        const taprootSigner = needTweak
-          ? signer.tweak(taggedHash("TapTweak", tapInternalKey))
-          : signer;
-
-        if (!input.tapInternalKey) {
-          input.tapInternalKey = tapInternalKey;
-        }
-
-        // sign taproot
-        psbt.signTaprootInput(index, taprootSigner);
-
-        // verify taproot
-        const isValid = psbt.validateSignaturesOfInput(
-          index,
-          (_, msgHash, signature) => {
-            return needTweak
-              ? taprootSigner.verifySchnorr(msgHash, signature)
-              : signer.verifySchnorr(msgHash, signature);
-          }
-        );
-
-        if (!isValid) {
-          throw new Error("Invalid taproot signature");
-        }
-
-        // finalize input signed by this keyring
-        psbt.finalizeTaprootInput(index);
-      } else {
-        // sign ecdsa
-        psbt.signInput(index, signer);
-
-        // verify ecdsa
-        const isValid = psbt.validateSignaturesOfInput(
-          index,
-          (_, msgHash, signature) => {
-            return signer.verify(msgHash, signature);
-          }
-        );
-
-        if (!isValid) {
-          throw new Error("Invalid ecdsa signature");
-        }
-
-        // finalize input signed by this keyring
-        psbt.finalizeInput(index);
-      }
-    }
-
-    return Promise.resolve(psbt);
+    return !!(
+      input.tapInternalKey ||
+      input.tapMerkleRoot ||
+      (input.tapLeafScript && input.tapLeafScript.length) ||
+      (input.tapBip32Derivation && input.tapBip32Derivation.length) ||
+      (input.witnessUtxo && isP2TR(input.witnessUtxo.script))
+    );
   }
 
   protected getPrivKey(

@@ -106,13 +106,6 @@ export class KeyRingPrivateKeyService {
     ] as string;
     const privateKey = new PrivKeySecp256k1(Buffer.from(privateKeyText, "hex"));
     const bitcoinPubkey = privateKey.getBitcoinPubKey();
-
-    const nativeSegwitAddress = bitcoinPubkey.getBitcoinAddress(
-      "native-segwit",
-      network
-    );
-    const taprootAddress = bitcoinPubkey.getBitcoinAddress("taproot", network);
-
     // private key를 사용하는 경우는 HD키 파생이 불가능하므로,
     // derivation path를 별도로 검증하지 않고 주소가 일치하는 경우에만 서명할 수 있도록 한다.
     const signer = privateKey.toKeyPair();
@@ -120,29 +113,11 @@ export class KeyRingPrivateKeyService {
     const tapInternalKey = toXOnly(signer.publicKey);
     const taprootSigner = signer.tweak(taggedHash("TapTweak", tapInternalKey));
 
-    const isP2TR = (script: NodeBuffer): boolean => {
-      try {
-        payments.p2tr({ output: script });
-        return true;
-      } catch (err) {
-        return false;
-      }
-    };
-
-    const isTaprootInput = (input: any) => {
-      if (
-        !!(
-          input.tapInternalKey ||
-          input.tapMerkleRoot ||
-          (input.tapLeafScript && input.tapLeafScript.length) ||
-          (input.tapBip32Derivation && input.tapBip32Derivation.length) ||
-          (input.witnessUtxo && isP2TR(input.witnessUtxo.script))
-        )
-      ) {
-        return true;
-      }
-      return false;
-    };
+    const nativeSegwitAddress = bitcoinPubkey.getBitcoinAddress(
+      "native-segwit",
+      network
+    );
+    const taprootAddress = bitcoinPubkey.getBitcoinAddress("taproot", network);
 
     // Must consider partially signed psbt.
     // If the input is already signed, skip signing. (in case input index is not in inputsToSign)
@@ -153,36 +128,37 @@ export class KeyRingPrivateKeyService {
 
       const input = psbt.data.inputs[index];
 
-      if (isTaprootInput(input)) {
+      if (this.isTaprootInput(input)) {
         let needTweak = true;
 
         if (
           input.tapLeafScript &&
-          input.tapLeafScript?.length > 0 &&
+          input.tapLeafScript.length > 0 &&
           !input.tapMerkleRoot
         ) {
           // script path spending: 키 tweak 필요 없음
-          input.tapLeafScript.forEach((e) => {
-            if (e.controlBlock && e.script) {
+          for (const leaf of input.tapLeafScript) {
+            if (leaf.controlBlock && leaf.script) {
               needTweak = false;
+              break;
             }
-          });
+          }
         }
 
         if (!input.tapInternalKey) {
           input.tapInternalKey = tapInternalKey;
         }
 
+        const actualSigner = needTweak ? taprootSigner : signer;
+
         // sign taproot
-        psbt.signTaprootInput(index, needTweak ? taprootSigner : signer);
+        psbt.signTaprootInput(index, actualSigner);
 
         // verify taproot
         const isValid = psbt.validateSignaturesOfInput(
           index,
           (_, msgHash, signature) => {
-            return needTweak
-              ? taprootSigner.verifySchnorr(msgHash, signature)
-              : signer.verifySchnorr(msgHash, signature);
+            return actualSigner.verifySchnorr(msgHash, signature);
           }
         );
 
@@ -214,5 +190,24 @@ export class KeyRingPrivateKeyService {
     }
 
     return Promise.resolve(psbt);
+  }
+
+  private isTaprootInput(input: any): boolean {
+    const isP2TR = (script: NodeBuffer): boolean => {
+      try {
+        payments.p2tr({ output: script });
+        return true;
+      } catch (err) {
+        return false;
+      }
+    };
+
+    return !!(
+      input.tapInternalKey ||
+      input.tapMerkleRoot ||
+      (input.tapLeafScript && input.tapLeafScript.length) ||
+      (input.tapBip32Derivation && input.tapBip32Derivation.length) ||
+      (input.witnessUtxo && isP2TR(input.witnessUtxo.script))
+    );
   }
 }

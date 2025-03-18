@@ -368,11 +368,24 @@ export class KeyRingBitcoinService {
           return encodedSignature.toString("base64");
         }
 
-        const internalPubkey = toXOnly(Buffer.from(bitcoinPubKey.pubKey));
-        const { output: scriptPubKey } = payments.p2tr({
-          internalPubkey,
-          network,
-        });
+        const { scriptPubKey, internalPubkey } = (() => {
+          if (bitcoinPubKey.paymentType === "taproot") {
+            const internalPubkey = toXOnly(Buffer.from(bitcoinPubKey.pubKey));
+            const { output: scriptPubKey } = payments.p2tr({
+              internalPubkey,
+              network,
+            });
+
+            return { scriptPubKey, internalPubkey };
+          }
+
+          const { output: scriptPubKey } = payments.p2wpkh({
+            pubkey: Buffer.from(bitcoinPubKey.pubKey),
+            network,
+          });
+
+          return { scriptPubKey, internalPubkey: undefined };
+        })();
         if (!scriptPubKey) {
           throw new KeplrError("keyring", 221, "Invalid pubkey");
         }
