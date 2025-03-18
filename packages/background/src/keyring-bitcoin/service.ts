@@ -339,7 +339,7 @@ export class KeyRingBitcoinService {
           return signatureHex;
         }
 
-        if (signType === "message") {
+        if (signType === BitcoinSignMessageType.ECDSA) {
           const data = encodeLegacyMessage(network.messagePrefix, message);
 
           const sig = await this.keyRingService.sign(
@@ -357,7 +357,7 @@ export class KeyRingBitcoinService {
             "p2wpkh"
           );
 
-          return encodedSignature.toString("hex");
+          return encodedSignature.toString("base64");
         }
 
         const internalPubkey = toXOnly(Buffer.from(bitcoinPubKey.pubKey));
