@@ -7,7 +7,7 @@ import { Buffer as NodeBuffer } from "buffer";
 import { Hash } from "./hash";
 import { hash as starknetHash } from "starknet";
 import { ECPairInterface, ECPairFactory } from "ecpair";
-import { Network, payments } from "bitcoinjs-lib";
+import { Network as BitcoinJSNetwork, payments } from "bitcoinjs-lib";
 import * as ecc from "./ecc-adapter";
 import * as bitcoin from "bitcoinjs-lib";
 
@@ -240,13 +240,30 @@ export class PubKeySecp256k1 {
   }
 }
 
-export class PubKeyBitcoinCompatible extends PubKeySecp256k1 {
+export class PubKeyBitcoinCompatible {
   constructor(
-    protected override readonly pubKey: Uint8Array,
+    protected readonly pubKey: Uint8Array,
     protected readonly masterFingerprint?: string,
     protected readonly path?: string
-  ) {
-    super(pubKey);
+  ) {}
+
+  toBytes(uncompressed?: boolean): Uint8Array {
+    if (uncompressed && this.pubKey.length === 65) {
+      return this.pubKey;
+    }
+    if (!uncompressed && this.pubKey.length === 33) {
+      return this.pubKey;
+    }
+
+    if (uncompressed) {
+      return secp256k1.ProjectivePoint.fromHex(
+        Buffer.from(this.pubKey).toString("hex")
+      ).toRawBytes(false);
+    } else {
+      return secp256k1.ProjectivePoint.fromHex(
+        Buffer.from(this.pubKey).toString("hex")
+      ).toRawBytes(true);
+    }
   }
 
   getMasterFingerprint(): string | undefined {
@@ -257,48 +274,66 @@ export class PubKeyBitcoinCompatible extends PubKeySecp256k1 {
     return this.path;
   }
 
-  /**
-   * returns the legacy address of the public key compatible with Bitcoin.
-   * both compressed and uncompressed are supported.
-   * CAUTION: the returned address can be differ between compressed and uncompressed.
-   */
-  getLegacyAddress(
-    uncompressed?: boolean,
-    network?: Network
+  getBitcoinAddress(
+    paymentType?: "legacy" | "native-segwit" | "taproot",
+    network?: BitcoinJSNetwork
   ): string | undefined {
-    const pubKey = this.toBytes(uncompressed);
-    const paymentPkh = payments.p2pkh({
-      pubkey: NodeBuffer.from(pubKey),
-      network,
-    });
-    return paymentPkh.address;
-  }
-
-  /**
-   * returns the native segwit address of the public key compatible with Bitcoin.
-   * only compressed public key is supported.
-   */
-  getNativeSegwitAddress(network?: Network): string | undefined {
     const pubKey = this.toBytes(false);
-    const paymentWpk = payments.p2wpkh({
-      pubkey: NodeBuffer.from(pubKey),
-      network,
-    });
-    return paymentWpk.address;
-  }
 
-  /**
-   * returns the taproot address of the public key compatible with Bitcoin.
-   * only compressed public key is supported.
-   */
-  getTaprootAddress(network?: Network): string | undefined {
-    const pubKey = this.toBytes(false);
-    const internalPubkey = toXOnly(NodeBuffer.from(pubKey)); // remove y coordinate.
-    const paymentTr = payments.p2tr({
-      internalPubkey,
-      network,
-    });
-    return paymentTr.address;
+    const getLegacyAddress = () => {
+      return payments.p2pkh({
+        pubkey: NodeBuffer.from(pubKey),
+        network,
+      }).address;
+    };
+
+    const getNativeSegwitAddress = () => {
+      return payments.p2wpkh({
+        pubkey: NodeBuffer.from(pubKey),
+        network,
+      }).address;
+    };
+
+    const getTaprootAddress = () => {
+      return payments.p2tr({
+        internalPubkey: toXOnly(NodeBuffer.from(pubKey)),
+        network,
+      }).address;
+    };
+
+    switch (paymentType) {
+      case "legacy":
+        return getLegacyAddress();
+      case "native-segwit":
+        return getNativeSegwitAddress();
+      case "taproot":
+        return getTaprootAddress();
+      default:
+        const path = this.getPath();
+        if (path) {
+          const segments = path.split("/").filter(Boolean);
+          // Check if this is a BIP44 compatible path
+          const purposeIndex = segments[0] === "m" ? 1 : 0;
+
+          if (segments.length >= purposeIndex + 5) {
+            const purposeSegment = segments[purposeIndex];
+            const purpose = parseInt(
+              purposeSegment.endsWith("'")
+                ? purposeSegment.slice(0, -1)
+                : purposeSegment
+            );
+
+            // Determine payment type based on purpose
+            if (purpose === 44) {
+              return getLegacyAddress();
+            } else if (purpose === 84) {
+              return getNativeSegwitAddress();
+            } else if (purpose === 86) {
+              return getTaprootAddress();
+            }
+          }
+        }
+    }
   }
 }
 

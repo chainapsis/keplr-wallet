@@ -107,8 +107,11 @@ export class KeyRingPrivateKeyService {
     const privateKey = new PrivKeySecp256k1(Buffer.from(privateKeyText, "hex"));
     const bitcoinPubkey = privateKey.getBitcoinPubKey();
 
-    const nativeSegwitAddress = bitcoinPubkey.getNativeSegwitAddress(network);
-    const taprootAddress = bitcoinPubkey.getTaprootAddress(network);
+    const nativeSegwitAddress = bitcoinPubkey.getBitcoinAddress(
+      "native-segwit",
+      network
+    );
+    const taprootAddress = bitcoinPubkey.getBitcoinAddress("taproot", network);
 
     // private key를 사용하는 경우는 HD키 파생이 불가능하므로,
     // derivation path를 별도로 검증하지 않고 주소가 일치하는 경우에만 서명할 수 있도록 한다.
@@ -140,8 +143,6 @@ export class KeyRingPrivateKeyService {
       }
       return false;
     };
-
-    console.log(nativeSegwitAddress, taprootAddress, inputsToSign);
 
     // Must consider partially signed psbt.
     // If the input is already signed, skip signing. (in case input index is not in inputsToSign)

@@ -118,20 +118,7 @@ export class KeyRingBitcoinService {
 
     const network = this.getNetwork(chainId);
 
-    let address: string | undefined;
-
-    if (paymentType === "native-segwit") {
-      const nativeSegwitAddress = bitcoinPubKey.getNativeSegwitAddress(network);
-      if (nativeSegwitAddress) {
-        address = nativeSegwitAddress;
-      }
-    } else {
-      const taprootAddress = bitcoinPubKey.getTaprootAddress(network);
-      if (taprootAddress) {
-        address = taprootAddress;
-      }
-    }
-
+    const address = bitcoinPubKey.getBitcoinAddress(paymentType, network);
     if (!address) {
       throw new KeplrError("keyring", 221, "No payment address found");
     }
