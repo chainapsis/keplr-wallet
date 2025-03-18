@@ -333,10 +333,10 @@ export class KeyRingBitcoinService {
         keyType: keyInfo.type,
         keyInsensitive: keyInfo.insensitive,
       },
-      async (res: { signMessage: string; signatureHex: string }) => {
-        const { signatureHex } = res;
-        if (signatureHex) {
-          return signatureHex;
+      async (res: { message: string; signature: string }) => {
+        const { signature } = res;
+        if (signature) {
+          return signature;
         }
 
         if (signType === BitcoinSignMessageType.ECDSA) {

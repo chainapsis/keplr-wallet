@@ -143,7 +143,7 @@ export const SignBitcoinMessageView: FunctionComponent<{
       typeof interactionData.data.keyInsensitive["keyRingName"] === "string"
         ? interactionData.data.keyInsensitive["keyRingName"]
         : "",
-    address: interactionData.data.signer || "",
+    address: interactionData.data.address || "",
   };
 
   return (
@@ -225,7 +225,7 @@ export const SignBitcoinMessageView: FunctionComponent<{
       >
         <ArbitraryMsgSignHeader />
         <Gutter size="0.75rem" />
-        <ArbitraryMsgRequestOrigin origin={origin} />
+        <ArbitraryMsgRequestOrigin origin={interactionData.data.origin} />
         <Gutter size="0.75rem" />
         <ArbitraryMsgWalletDetails
           walletName={signerInfo.name}

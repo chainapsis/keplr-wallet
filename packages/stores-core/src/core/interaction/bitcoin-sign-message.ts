@@ -2,14 +2,17 @@ import { PlainObject } from "@keplr-wallet/background";
 import { InteractionStore } from "./interaction";
 import { computed, makeObservable } from "mobx";
 import { BitcoinSignMessageType } from "@keplr-wallet/types";
+import { Network } from "bitcoinjs-lib";
 
 export type SignBitcoinMessageInteractionData = {
   origin: string;
   vaultId: string;
   chainId: string;
-  signer: string;
+  address: string;
   pubKey: Uint8Array;
-  message: BitcoinSignMessageType;
+  network: Network;
+  message: string;
+  signType: BitcoinSignMessageType;
   keyType: string;
   keyInsensitive: PlainObject;
 };
@@ -38,8 +41,8 @@ export class SignBitcoinMessageInteractionStore {
 
   async approveWithProceedNext(
     id: string,
-    message: BitcoinSignMessageType,
-    signature: string[] | undefined,
+    message: string,
+    signature: string | undefined,
     afterFn: (proceedNext: boolean) => void | Promise<void>,
     options: {
       preDelay?: number;
