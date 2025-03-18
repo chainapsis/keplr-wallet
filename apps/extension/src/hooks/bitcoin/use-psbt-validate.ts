@@ -13,7 +13,11 @@ import {
 
 export type ValidatedPsbt = {
   psbt: Psbt;
-  inputsToSign: number[];
+  inputsToSign: {
+    index: number;
+    address: string;
+    path?: string;
+  }[];
   fee: Dec;
   sumInputValueByAddress: {
     address: string;
@@ -99,13 +103,17 @@ export const usePsbtsValidate = (
   }, []);
 
   const isInputMine = useCallback(
-    (
+    async (
       address: string,
-      bip32Derivation?: Bip32Derivation[] | TapBip32Derivation[]
+      bip32Derivation?: Bip32Derivation[] | TapBip32Derivation[],
+      isValidDerivationFn?: (path: string, pubkey: Buffer) => Promise<boolean>
     ) => {
       for (const key of bitcoinKeys) {
         if (key.address === address) {
-          return true;
+          return {
+            isMine: true,
+            path: key.derivationPath, // mnemonic, 하드웨어 지갑은 경로를 포함하고 있어야 한다.
+          };
         }
 
         if (bip32Derivation) {
@@ -119,18 +127,38 @@ export const usePsbtsValidate = (
                 derivation.masterFingerprint
               )
             ) {
-              return true;
+              return {
+                isMine: true,
+                path: derivation.path,
+              };
+            }
+
+            // 하드웨어 지갑에서 파생된 키의 경우, 파생 경로와 공개키를 검증하는 함수를 제공한다.
+            if (isValidDerivationFn) {
+              const isValid = await isValidDerivationFn(
+                derivation.path,
+                derivation.pubkey
+              );
+              if (isValid) {
+                return {
+                  isMine: true,
+                  path: derivation.path,
+                };
+              }
             }
           }
         }
       }
 
-      return false;
+      return {
+        isMine: false,
+        path: undefined,
+      };
     },
     [bitcoinKeys]
   );
 
-  const validatePsbts = useCallback(() => {
+  const validatePsbts = useCallback(async () => {
     // 검증 파라미터가 변경되어서 재검증이 필요하면 오류를 초기화한다.
     setCriticalValidationError(undefined);
 
@@ -140,6 +168,7 @@ export const usePsbtsValidate = (
           network: networkConfig,
         })
       );
+
       let totalInputValue = new Dec(0);
       let totalOutputValue = new Dec(0);
       const validatedPsbtResults: ValidatedPsbt[] = [];
@@ -151,21 +180,24 @@ export const usePsbtsValidate = (
         let sumInputValue = new Dec(0);
         let sumOutputValue = new Dec(0);
         const sumInputValueByAddressRecord: Record<string, Dec> = {};
-
-        const inputsToSign: { index: number; address: string }[] = [];
+        const inputsToSign: {
+          index: number;
+          address: string;
+          path?: string;
+        }[] = [];
 
         for (const [index, input] of rawInputs.entries()) {
           let script: any = null;
-          let value = 0;
+          let value = new Dec(0);
 
           if (input.witnessUtxo) {
             script = input.witnessUtxo.script;
-            value = Number(input.witnessUtxo.value);
+            value = new Dec(input.witnessUtxo.value);
           } else if (input.nonWitnessUtxo) {
             const tx = Transaction.fromBuffer(input.nonWitnessUtxo);
             const output = tx.outs[txInputs[index].index];
             script = output.script;
-            value = Number(output.value);
+            value = new Dec(output.value);
           }
 
           const isSigned = input.finalScriptSig || input.finalScriptWitness;
@@ -174,21 +206,21 @@ export const usePsbtsValidate = (
           if (script && !isSigned) {
             // 사용자의 주소와 일치하는 input인 경우 서명 대상으로 추가
 
-            const isMine = isInputMine(
+            const { isMine, path } = await isInputMine(
               address,
               input.bip32Derivation ?? input.tapBip32Derivation
             );
             if (isMine) {
-              inputsToSign.push({ index, address });
+              inputsToSign.push({ index, address, path });
             }
           }
 
-          sumInputValue = sumInputValue.add(new Dec(value));
+          sumInputValue = sumInputValue.add(value);
           sumInputValueByAddressRecord[address] = sumInputValueByAddressRecord[
             address
           ]
-            ? sumInputValueByAddressRecord[address].add(new Dec(value))
-            : new Dec(value);
+            ? sumInputValueByAddressRecord[address].add(value)
+            : value;
         }
 
         // CHECK: output은 검증할 것이 있나?
@@ -213,7 +245,7 @@ export const usePsbtsValidate = (
         } else {
           validatedPsbtResults.push({
             psbt,
-            inputsToSign: inputsToSign.map((input) => input.index),
+            inputsToSign,
             fee,
             sumInputValueByAddress: processInputValuesByAddress(
               sumInputValueByAddressRecord,

@@ -70,7 +70,7 @@ export const useGetBitcoinKeys = (chainId: string) => {
       masterFingerprintHex?: string | undefined;
       derivationPath?: string | undefined;
     }[]
-  >([]);
+  >([]); // TODO: 하드웨어 지갑을 사용하는 경우, 키 정보를 하드웨어 지갑에서 가져오도록 해야 함.
 
   const getBitcoinKeys = useCallback(async () => {
     const modularChainInfo = chainStore.getModularChain(chainId);

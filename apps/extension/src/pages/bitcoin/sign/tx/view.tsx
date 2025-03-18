@@ -332,7 +332,11 @@ export const SignBitcoinTxView: FunctionComponent<{
 
       const psbtSignData: {
         psbtHex: string;
-        inputsToSign: number[];
+        inputsToSign: {
+          index: number;
+          address: string;
+          path?: string;
+        }[];
       }[] = [];
 
       for (const psbt of validatedPsbts) {
