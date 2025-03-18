@@ -19,6 +19,7 @@ export * from "./diamond-star";
 export * from "./ellipsis";
 export * from "./exclamation-triangle";
 export * from "./google";
+export * from "./graph-rising";
 export * from "./information";
 export * from "./information-plain";
 export * from "./key";
