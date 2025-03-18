@@ -9,7 +9,7 @@ import { XAxis } from "../../../../components/axis";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Button2 } from "../../../../components/typography";
 import { ColorPalette } from "../../../../styles";
-import { useTheme } from "styled-components";
+import styled, { useTheme } from "styled-components";
 import {
   ArrowTopRightOnSquareIcon,
   GraphRisingIcon,
@@ -106,7 +106,7 @@ export const AvailableTabLinkButtonList = observer(() => {
                 }
               />
             )}
-            <Box
+            <StyledBox
               alignY="center"
               alignX="center"
               onClick={button.onClick}
@@ -123,6 +123,7 @@ export const AvailableTabLinkButtonList = observer(() => {
                   }
                 />
                 <Button2
+                  className="link-button-label"
                   color={
                     theme.mode === "light"
                       ? ColorPalette["gray-700"]
@@ -132,10 +133,25 @@ export const AvailableTabLinkButtonList = observer(() => {
                   {button.label}
                 </Button2>
               </XAxis>
-            </Box>
+            </StyledBox>
           </Fragment>
         ))}
       </XAxis>
     </Box>
   );
 });
+
+const StyledBox = styled(Box)`
+  &:hover,
+  &:has(*:hover) {
+    svg * {
+      stroke: ${({ theme }) =>
+        theme.mode === "light"
+          ? ColorPalette["green-500"]
+          : ColorPalette["green-600"]};
+    }
+    .link-button-label {
+      opacity: 0.7;
+    }
+  }
+`;
