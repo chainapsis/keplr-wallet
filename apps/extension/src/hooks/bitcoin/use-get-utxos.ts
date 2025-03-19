@@ -1,3 +1,4 @@
+import { DUST_THRESHOLD } from "@keplr-wallet/stores-bitcoin";
 import { useStore } from "../../stores";
 import { useGetInscriptionsByAddress } from "./use-get-inscriptions";
 import { useGetRunesOutputsByAddress } from "./use-get-runes-outputs";
@@ -32,22 +33,6 @@ export const useGetUTXOs = (
 
   const confirmedUTXOs = queryUTXOs?.confirmedUTXOs || [];
 
-  const queryAddressTxs = bitcoinQueriesStore
-    .get(chainId)
-    .queryBitcoinAddressTxs.getTxs(chainId, chainStore, address);
-
-  const txs = queryAddressTxs?.response?.data ?? [];
-
-  // Get recently used UTXOs
-  const recentlyUsedUTXOs = txs.flatMap((tx) => {
-    return tx.vin.map((input) => {
-      return {
-        txid: input.txid,
-        vout: input.vout,
-      };
-    });
-  });
-
   // Extract inscribed UTXOs
   const inscribedUTXOs = inscriptionsPages
     ?.flatMap((page) => page.response?.data ?? [])
@@ -75,7 +60,7 @@ export const useGetUTXOs = (
 
   // Create lookup maps for faster filtering
   const protectedUTXOs = new Set(
-    [...inscribedUTXOs, ...runesUTXOs, ...recentlyUsedUTXOs].map(
+    [...inscribedUTXOs, ...runesUTXOs].map(
       (utxo) => `${utxo.txid}:${utxo.vout}`
     )
   );
@@ -84,7 +69,7 @@ export const useGetUTXOs = (
   const { availableUTXOs, availableBalance } = (() => {
     const availableUTXOs = confirmedUTXOs.filter((utxo) => {
       const key = `${utxo.txid}:${utxo.vout}`;
-      return !protectedUTXOs.has(key);
+      return !protectedUTXOs.has(key) && utxo.value >= DUST_THRESHOLD;
     });
 
     const availableBalance = new CoinPretty(
@@ -101,15 +86,11 @@ export const useGetUTXOs = (
   })();
 
   const isFetching =
-    isFetchingInscriptions ||
-    isFetchingRunesOutputs ||
-    queryUTXOs?.isFetching ||
-    queryAddressTxs?.isFetching;
+    isFetchingInscriptions || isFetchingRunesOutputs || queryUTXOs?.isFetching;
 
   // Determine if there's an error
   const error =
     queryUTXOs?.error ||
-    queryAddressTxs?.error ||
     (inscriptionsPages?.some((page) => page.error)
       ? inscriptionsPages.find((page) => page.error)?.error
       : undefined) ||
