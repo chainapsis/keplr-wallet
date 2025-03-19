@@ -126,7 +126,7 @@ export const SignBitcoinTxView: FunctionComponent<{
   );
 
   // 외부에서 Bitcoin send 요청이 들어온 경우
-  const isSendExternal = "psbtCandidate" in interactionData.data;
+  const hasPsbtCandidate = "psbtCandidate" in interactionData.data;
 
   const [_, _genesisHash, paymentType] = chainId.split(":");
 
@@ -137,8 +137,8 @@ export const SignBitcoinTxView: FunctionComponent<{
   const { availableUTXOs } = useGetUTXOs(
     chainId,
     senderConfig.sender,
-    isSendExternal && paymentType === "taproot",
-    isSendExternal
+    hasPsbtCandidate && paymentType === "taproot",
+    hasPsbtCandidate
   );
 
   // bitcoin tx size는 amount, fee rate, recipient address type에 따라 달라진다.
