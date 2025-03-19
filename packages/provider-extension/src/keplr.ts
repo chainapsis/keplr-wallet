@@ -175,6 +175,21 @@ export class Keplr implements IKeplr {
   ): Promise<Keplr | undefined> {
     await waitDocumentReady();
 
+    const isMobile = "ReactNativeWebView" in window;
+    const isFirefox = (() => {
+      if (typeof navigator !== "undefined" && "userAgent" in navigator) {
+        return navigator.userAgent.includes("Firefox");
+      }
+      return false;
+    })();
+    if (
+      !isMobile &&
+      !isFirefox &&
+      (window as any).keplrRequestMetaIdSupport == null
+    ) {
+      return undefined;
+    }
+
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
         resolve(undefined);
