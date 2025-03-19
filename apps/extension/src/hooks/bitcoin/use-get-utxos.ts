@@ -7,7 +7,8 @@ import { CoinPretty, Dec } from "@keplr-wallet/unit";
 export const useGetUTXOs = (
   chainId: string,
   address: string,
-  inscriptionProtected: boolean
+  inscriptionProtected: boolean,
+  runesProtected: boolean
 ) => {
   const { chainStore, bitcoinQueriesStore } = useStore();
 
@@ -24,7 +25,7 @@ export const useGetUTXOs = (
   const { isFetching: isFetchingInscriptions, pages: inscriptionsPages } =
     useGetInscriptionsByAddress(chainId, inscriptionProtected ? address : "");
   const { isFetching: isFetchingRunesOutputs, pages: runesPages } =
-    useGetRunesOutputsByAddress(chainId, address);
+    useGetRunesOutputsByAddress(chainId, runesProtected ? address : "");
 
   const queryUTXOs = bitcoinQueriesStore
     .get(chainId)
@@ -131,10 +132,10 @@ export const useGetUTXOs = (
 export const useGetNativeSegwitUTXOs = (chainId: string) => {
   const { nativeSegwitAddress } = useBitcoinAddresses(chainId);
 
-  return useGetUTXOs(chainId, nativeSegwitAddress ?? "", false);
+  return useGetUTXOs(chainId, nativeSegwitAddress ?? "", false, true);
 };
 
 export const useGetTaprootUTXOs = (chainId: string) => {
   const { taprootAddress } = useBitcoinAddresses(chainId);
-  return useGetUTXOs(chainId, taprootAddress ?? "", true);
+  return useGetUTXOs(chainId, taprootAddress ?? "", true, true);
 };

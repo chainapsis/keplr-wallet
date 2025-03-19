@@ -159,7 +159,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
     error: availableUTXOsError,
     availableUTXOs,
     // availableBalance, // TODO: send page에서 balance, fee check할 때 사용해야 함 - 어떻게 해야 할지 고민중
-  } = useGetUTXOs(chainId, sender, paymentType === "taproot");
+  } = useGetUTXOs(chainId, sender, paymentType === "taproot", true);
 
   const sendConfigs = useSendTxConfig(
     chainStore,

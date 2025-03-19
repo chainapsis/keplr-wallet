@@ -13,6 +13,7 @@ import {
   GetBitcoinKeysForEachVaultSettledMsg,
   GetBitcoinKeysSettledMsg,
   GetSupportedPaymentTypesMsg,
+  RequestMethodToBitcoinMsg,
   RequestSignBitcoinMessageMsg,
   RequestSignBitcoinPsbtMsg,
   RequestSignBitcoinPsbtsMsg,
@@ -63,6 +64,11 @@ export const getHandler: (
           env,
           msg as GetSupportedPaymentTypesMsg
         );
+      case RequestMethodToBitcoinMsg:
+        return handleRequestMethodToBitcoinMsg(
+          _service,
+          _permissionInteractionService
+        )(env, msg as RequestMethodToBitcoinMsg);
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
     }
@@ -180,5 +186,30 @@ const handleGetSupportedPaymentTypesMsg: (
 ) => InternalHandler<GetSupportedPaymentTypesMsg> = (service) => {
   return async (_) => {
     return service.getSupportedPaymentTypes();
+  };
+};
+
+const handleRequestMethodToBitcoinMsg: (
+  service: KeyRingBitcoinService,
+  permissionInteractionService: PermissionInteractiveService
+) => InternalHandler<RequestMethodToBitcoinMsg> = (
+  service,
+  permissionInteractionService
+) => {
+  return async (env, msg) => {
+    if (msg.method !== "getAccounts") {
+      await permissionInteractionService.ensureEnabledForBitcoin(
+        env,
+        msg.origin
+      );
+    }
+
+    return await service.requestMethod(
+      env,
+      msg.origin,
+      msg.method,
+      msg.params,
+      msg.chainId
+    );
   };
 };

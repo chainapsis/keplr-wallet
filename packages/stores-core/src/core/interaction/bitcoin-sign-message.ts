@@ -1,42 +1,30 @@
 import { PlainObject } from "@keplr-wallet/background";
 import { InteractionStore } from "./interaction";
 import { computed, makeObservable } from "mobx";
+import { BitcoinSignMessageType } from "@keplr-wallet/types";
 import { Network } from "bitcoinjs-lib";
 
-export type SignBitcoinTxInteractionData = {
+export type SignBitcoinMessageInteractionData = {
   origin: string;
   vaultId: string;
   chainId: string;
   address: string;
   pubKey: Uint8Array;
   network: Network;
+  message: string;
+  signType: BitcoinSignMessageType;
   keyType: string;
   keyInsensitive: PlainObject;
-} & (
-  | {
-      psbtHex: string;
-      signedPsbtHex: string;
-    }
-  | {
-      psbtsHexes: string[];
-      signedPsbtsHexes: string[];
-    }
-  | {
-      psbtCandidate: {
-        toAddress: string;
-        amount: number;
-      };
-    }
-);
+};
 
-export class SignBitcoinTxInteractionStore {
+export class SignBitcoinMessageInteractionStore {
   constructor(protected readonly interactionStore: InteractionStore) {
     makeObservable(this);
   }
 
   get waitingDatas() {
-    return this.interactionStore.getAllData<SignBitcoinTxInteractionData>(
-      "request-sign-bitcoin-psbt"
+    return this.interactionStore.getAllData<SignBitcoinMessageInteractionData>(
+      "request-sign-bitcoin-message"
     );
   }
 
@@ -53,11 +41,8 @@ export class SignBitcoinTxInteractionStore {
 
   async approveWithProceedNext(
     id: string,
-    psbtSignData: {
-      psbtHex: string;
-      inputsToSign: number[];
-    }[],
-    signedPsbtsHexes: string[],
+    message: string,
+    signature: string | undefined,
     afterFn: (proceedNext: boolean) => void | Promise<void>,
     options: {
       preDelay?: number;
@@ -66,8 +51,8 @@ export class SignBitcoinTxInteractionStore {
     await this.interactionStore.approveWithProceedNextV2(
       id,
       {
-        psbtSignData,
-        signedPsbtsHexes,
+        message,
+        signature,
       },
       afterFn,
       options
@@ -82,7 +67,7 @@ export class SignBitcoinTxInteractionStore {
   }
 
   async rejectAll() {
-    await this.interactionStore.rejectAll("request-sign-bitcoin-psbt");
+    await this.interactionStore.rejectAll("request-sign-bitcoin-message");
   }
 
   isObsoleteInteraction(id: string | undefined): boolean {

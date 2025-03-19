@@ -32,6 +32,8 @@ import {
   UpdateCurrentChainIdForEVMMsg,
   GetCurrentChainIdForStarknetMsg,
   UpdateCurrentChainIdForStarknetMsg,
+  GetCurrentChainIdForBitcoinMsg,
+  UpdateCurrentChainIdForBitcoinMsg,
 } from "@keplr-wallet/background";
 import { autoUpdate, offset, shift, useFloating } from "@floating-ui/react-dom";
 import SimpleBar from "simplebar-react";
@@ -90,11 +92,55 @@ export const MainHeaderLayout = observer<
     const [currentChainIdForEVM, setCurrentChainIdForEVM] = React.useState<
       string | undefined
     >();
+    const [
+      isOpenCurrentChainSelectorForEVM,
+      setIsOpenCurrentChainSelectorForEVM,
+    ] = React.useState(false);
+    const [
+      isHoveredCurrenctChainIconForEVM,
+      setIsHoveredCurrenctChainIconForEVM,
+    ] = React.useState(false);
+    const evmChainInfos = chainStore.chainInfos.filter((chainInfo) =>
+      chainStore.isEvmChain(chainInfo.chainId)
+    );
+
     const [currentChainIdForStarknet, setCurrentChainIdForStarknet] =
       React.useState<string | undefined>();
+    const [
+      isOpenCurrentChainSelectorForStarknet,
+      setIsOpenCurrentChainSelectorForStarknet,
+    ] = React.useState(false);
+    const [
+      isHoveredCurrenctChainIconForStarknet,
+      setIsHoveredCurrenctChainIconForStarknet,
+    ] = React.useState(false);
+    const starknetChainInfos = chainStore.modularChainInfos.filter(
+      (modularChainInfo) => "starknet" in modularChainInfo
+    );
+
+    const [currentChainIdForBitcoin, setCurrentChainIdForBitcoin] =
+      React.useState<string | undefined>();
+    const [
+      isOpenCurrentChainSelectorForBitcoin,
+      setIsOpenCurrentChainSelectorForBitcoin,
+    ] = React.useState(false);
+    const [
+      isHoveredCurrenctChainIconForBitcoin,
+      setIsHoveredCurrenctChainIconForBitcoin,
+    ] = React.useState(false);
+    const bitcoinChainInfos = chainStore.groupedModularChainInfos.filter(
+      (modularChainInfo) => "bitcoin" in modularChainInfo
+    );
+    const currentBitcoinChainInfo = bitcoinChainInfos.find(
+      (chainInfo) =>
+        "bitcoin" in chainInfo &&
+        chainInfo.bitcoin.chainId === currentChainIdForBitcoin
+    );
+
     const [activeTabOrigin, setActiveTabOrigin] = React.useState<
       string | undefined
     >();
+
     useEffect(() => {
       const updateCurrentChainId = async () => {
         const activeTabOrigin = await getActiveTabOrigin();
@@ -102,6 +148,9 @@ export const MainHeaderLayout = observer<
         if (activeTabOrigin) {
           const msgForEVM = new GetCurrentChainIdForEVMMsg(activeTabOrigin);
           const msgForStarknet = new GetCurrentChainIdForStarknetMsg(
+            activeTabOrigin
+          );
+          const msgForBitcoin = new GetCurrentChainIdForBitcoinMsg(
             activeTabOrigin
           );
           const newCurrentChainIdForEVM =
@@ -114,12 +163,19 @@ export const MainHeaderLayout = observer<
               BACKGROUND_PORT,
               msgForStarknet
             );
+          const newCurrentChainIdForBitcoin =
+            await new InExtensionMessageRequester().sendMessage(
+              BACKGROUND_PORT,
+              msgForBitcoin
+            );
           setCurrentChainIdForEVM(newCurrentChainIdForEVM);
           setCurrentChainIdForStarknet(newCurrentChainIdForStarknet);
+          setCurrentChainIdForBitcoin(newCurrentChainIdForBitcoin);
           setActiveTabOrigin(activeTabOrigin);
         } else {
           setCurrentChainIdForEVM(undefined);
           setCurrentChainIdForStarknet(undefined);
+          setCurrentChainIdForBitcoin(undefined);
           setActiveTabOrigin(undefined);
         }
       };
@@ -135,31 +191,6 @@ export const MainHeaderLayout = observer<
         clearInterval(intervalId);
       };
     }, []);
-    const [
-      isOpenCurrentChainSelectorForEVM,
-      setIsOpenCurrentChainSelectorForEVM,
-    ] = React.useState(false);
-    const [
-      isHoveredCurrenctChainIconForEVM,
-      setIsHoveredCurrenctChainIconForEVM,
-    ] = React.useState(false);
-
-    const evmChainInfos = chainStore.chainInfos.filter((chainInfo) =>
-      chainStore.isEvmChain(chainInfo.chainId)
-    );
-
-    const [
-      isOpenCurrentChainSelectorForStarknet,
-      setIsOpenCurrentChainSelectorForStarknet,
-    ] = React.useState(false);
-    const [
-      isHoveredCurrenctChainIconForStarknet,
-      setIsHoveredCurrenctChainIconForStarknet,
-    ] = React.useState(false);
-
-    const starknetChainInfos = chainStore.modularChainInfos.filter(
-      (modularChainInfo) => "starknet" in modularChainInfo
-    );
 
     const [isOpenMenu, setIsOpenMenu] = React.useState(false);
 
@@ -374,6 +405,79 @@ export const MainHeaderLayout = observer<
         }
         right={
           <Columns sum={1} alignY="center" gutter="0.875rem">
+            {currentChainIdForBitcoin != null &&
+              currentBitcoinChainInfo != null &&
+              activeTabOrigin != null && (
+                <ChainSelector
+                  isOpen={isOpenCurrentChainSelectorForBitcoin}
+                  close={() => setIsOpenCurrentChainSelectorForBitcoin(false)}
+                  items={bitcoinChainInfos.map((chainInfo) => ({
+                    key:
+                      "bitcoin" in chainInfo
+                        ? chainInfo.bitcoin.chainId
+                        : chainInfo.chainId,
+                    content: (
+                      <Columns sum={1} alignY="center" gutter="0.5rem">
+                        <ChainImageFallback chainInfo={chainInfo} size="2rem" />
+                        <Subtitle3>{chainInfo.chainName}</Subtitle3>
+                      </Columns>
+                    ),
+                    onSelect: async (key) => {
+                      const msg = new UpdateCurrentChainIdForBitcoinMsg(
+                        activeTabOrigin,
+                        key
+                      );
+                      await new InExtensionMessageRequester().sendMessage(
+                        BACKGROUND_PORT,
+                        msg
+                      );
+                      setCurrentChainIdForBitcoin(key);
+                    },
+                  }))}
+                  selectedItemKey={currentChainIdForBitcoin}
+                  activeTabOrigin={activeTabOrigin}
+                  isForBitcoin={true}
+                >
+                  <Box
+                    borderRadius="99999px"
+                    position="relative"
+                    cursor="pointer"
+                    onHoverStateChange={setIsHoveredCurrenctChainIconForBitcoin}
+                    onClick={() =>
+                      setIsOpenCurrentChainSelectorForBitcoin(true)
+                    }
+                  >
+                    <ChainImageFallback
+                      chainInfo={currentBitcoinChainInfo}
+                      size="1.25rem"
+                      style={{
+                        opacity: isHoveredCurrenctChainIconForBitcoin ? 0.8 : 1,
+                      }}
+                    />
+                    <Box
+                      backgroundColor={
+                        theme.mode === "light"
+                          ? ColorPalette["light-gradient"]
+                          : ColorPalette["gray-700"]
+                      }
+                      width="0.625rem"
+                      height="0.625rem"
+                      borderRadius="99999px"
+                      position="absolute"
+                      style={{ right: "-3px", bottom: "-2px" }}
+                      alignX="center"
+                      alignY="center"
+                    >
+                      <Box
+                        backgroundColor={ColorPalette["green-400"]}
+                        width="0.375rem"
+                        height="0.375rem"
+                        borderRadius="99999px"
+                      />
+                    </Box>
+                  </Box>
+                </ChainSelector>
+              )}
             {currentChainIdForStarknet != null && activeTabOrigin != null && (
               <ChainSelector
                 isOpen={isOpenCurrentChainSelectorForStarknet}
@@ -547,6 +651,7 @@ const ChainSelector: FunctionComponent<
     selectedItemKey: string;
     activeTabOrigin: string;
     isForStarknet?: boolean;
+    isForBitcoin?: boolean;
   }>
 > = observer(
   ({
@@ -557,6 +662,7 @@ const ChainSelector: FunctionComponent<
     selectedItemKey,
     activeTabOrigin,
     isForStarknet,
+    isForBitcoin,
   }) => {
     const { x, y, strategy, refs } = useFloating({
       placement: "bottom-end",
@@ -692,7 +798,7 @@ const ChainSelector: FunctionComponent<
             >
               <Body2>
                 {`${
-                  isForStarknet ? "Starknet" : "EVM"
+                  isForStarknet ? "Starknet" : isForBitcoin ? "Bitcoin" : "EVM"
                 } compatible chains require users to`}
                 <br /> {"manually switch between networks in"}
                 <br />

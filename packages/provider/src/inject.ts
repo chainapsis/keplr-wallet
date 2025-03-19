@@ -29,6 +29,10 @@ import {
   AccountChangeEventHandler,
   NetworkChangeEventHandler,
   SupportedPaymentType,
+  IBitcoinProvider,
+  Network as BitcoinNetwork,
+  BitcoinSignMessageType,
+  ChainType,
 } from "@keplr-wallet/types";
 import {
   Result,
@@ -56,6 +60,7 @@ export interface ProxyRequest {
   args: any[];
   ethereumProviderMethod?: keyof IEthereumProvider;
   starknetProviderMethod?: keyof IStarknetProvider;
+  bitcoinProviderMethod?: keyof IBitcoinProvider;
 }
 
 export interface ProxyRequestResponse {
@@ -164,6 +169,7 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
           !keplr[message.method] ||
           (message.method !== "ethereum" &&
             message.method !== "starknet" &&
+            message.method !== "bitcoin" &&
             typeof keplr[message.method] !== "function")
         ) {
           throw new Error(`Invalid method: ${message.method}`);
@@ -383,6 +389,32 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
             }
 
             return await keplr.starknet[starknetProviderMethod](
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              ...(typeof messageArgs === "string"
+                ? JSON.parse(messageArgs)
+                : messageArgs)
+            );
+          }
+
+          if (method === "bitcoin") {
+            const bitcoinProviderMethod = message.bitcoinProviderMethod;
+
+            if (bitcoinProviderMethod?.startsWith("protected")) {
+              throw new Error("Rejected");
+            }
+
+            if (
+              bitcoinProviderMethod === undefined ||
+              typeof keplr.bitcoin?.[bitcoinProviderMethod] !== "function"
+            ) {
+              throw new Error(
+                `${message.bitcoinProviderMethod} is not function or invalid Bitcoin provider method`
+              );
+            }
+
+            const messageArgs = JSONUint8Array.unwrap(message.args);
+            return await keplr.bitcoin[bitcoinProviderMethod](
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-ignore
               ...(typeof messageArgs === "string"
@@ -1072,6 +1104,12 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
   );
 
   public readonly starknet = this.generateStarknetProvider();
+
+  public readonly bitcoin = new BitcoinProvider(
+    () => this,
+    this.eventListener,
+    this.parseMessage
+  );
 }
 
 class EthereumProvider extends EventEmitter implements IEthereumProvider {
@@ -1610,4 +1648,154 @@ class StarknetProvider implements IStarknetProvider {
   }
 }
 
-// TODO: Implement bitcoin provider
+export class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
+  protected _selectedAddress: string | undefined;
+
+  constructor(
+    protected readonly _injectedKeplr: () => InjectedKeplr,
+    protected readonly _eventListener: {
+      addMessageListener: (fn: (e: any) => void) => void;
+      removeMessageListener: (fn: (e: any) => void) => void;
+      postMessage: (message: any) => void;
+    } = {
+      addMessageListener: (fn: (e: any) => void) =>
+        window.addEventListener("message", fn),
+      removeMessageListener: (fn: (e: any) => void) =>
+        window.removeEventListener("message", fn),
+      postMessage: (message) =>
+        window.postMessage(message, window.location.origin),
+    },
+
+    protected readonly _parseMessage?: (message: any) => any
+  ) {
+    super();
+  }
+
+  protected async _requestMethod<T = unknown>(
+    method: keyof IBitcoinProvider,
+    args: Record<string, any>
+  ): Promise<T> {
+    const bytes = new Uint8Array(8);
+    const id: string = Array.from(crypto.getRandomValues(bytes))
+      .map((value) => {
+        return value.toString(16);
+      })
+      .join("");
+
+    const proxyMessage: ProxyRequest = {
+      type: "proxy-request",
+      id,
+      method: "bitcoin",
+      args: JSONUint8Array.wrap(args),
+      bitcoinProviderMethod: method,
+    };
+
+    return new Promise<T>((resolve, reject) => {
+      const receiveResponse = (e: any) => {
+        const proxyResponse: ProxyRequestResponse = this._parseMessage
+          ? this._parseMessage(e.data)
+          : e.data;
+
+        if (!proxyResponse || proxyResponse.type !== "proxy-request-response") {
+          return;
+        }
+
+        if (proxyResponse.id !== id) {
+          return;
+        }
+
+        this._eventListener.removeMessageListener(receiveResponse);
+
+        const result = JSONUint8Array.unwrap(proxyResponse.result);
+
+        if (!result) {
+          reject(new Error("Result is null"));
+          return;
+        }
+
+        // TODO: Handle error correctly
+        if (result.error) {
+          reject(new Error(result.error));
+          return;
+        }
+
+        resolve(result.return as T);
+      };
+
+      this._eventListener.addMessageListener(receiveResponse);
+
+      this._eventListener.postMessage(proxyMessage);
+    });
+  }
+
+  getAccounts(): Promise<string[]> {
+    return this._requestMethod("getAccounts", []);
+  }
+
+  async requestAccounts(): Promise<string[]> {
+    return this._requestMethod("requestAccounts", []);
+  }
+
+  async disconnect(): Promise<void> {
+    return this._requestMethod("disconnect", []);
+  }
+
+  async getNetwork(): Promise<BitcoinNetwork> {
+    return this._requestMethod("getNetwork", []);
+  }
+
+  async switchNetwork(network: BitcoinNetwork): Promise<void> {
+    return this._requestMethod("switchNetwork", [network]);
+  }
+
+  async getChain(): Promise<{
+    enum: ChainType;
+    name: string;
+    network: BitcoinNetwork;
+  }> {
+    return this._requestMethod("getChain", []);
+  }
+
+  async switchChain(chain: ChainType): Promise<void> {
+    return this._requestMethod("switchChain", [chain]);
+  }
+
+  async getPublicKey(): Promise<string> {
+    return this._requestMethod("getPublicKey", []);
+  }
+
+  async getBalance(): Promise<{
+    confirmed: number;
+    unconfirmed: number;
+    total: number;
+  }> {
+    return this._requestMethod("getBalance", []);
+  }
+
+  async getInscriptions(): Promise<string[]> {
+    return this._requestMethod("getInscriptions", []);
+  }
+
+  async signMessage(
+    message: string,
+    type: BitcoinSignMessageType
+  ): Promise<string> {
+    return this._requestMethod("signMessage", [message, type]);
+  }
+
+  async sendBitcoin(to: string, amount: number): Promise<string> {
+    return this._requestMethod("sendBitcoin", [to, amount]);
+  }
+
+  async pushTx(rawTxHex: string): Promise<string> {
+    return this._requestMethod("pushTx", [rawTxHex]);
+  }
+
+  async signPsbt(psbtHex: string): Promise<string> {
+    return this._requestMethod("signPsbt", [psbtHex]);
+  }
+
+  async signPsbts(psbtsHexes: string[]): Promise<string[]> {
+    return this._requestMethod("signPsbts", [psbtsHexes]);
+  }
+}

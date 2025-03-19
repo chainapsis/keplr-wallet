@@ -15,6 +15,7 @@ import {
   useZeroAllowedFeeRateConfig,
   useAmountConfig,
   useTxConfigsValidate,
+  usePsbtSimulator,
 } from "@keplr-wallet/hooks-bitcoin";
 import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
@@ -51,11 +52,18 @@ import { ArbitraryMsgSignHeader } from "../../../sign/components/arbitrary-messa
 import { ArbitraryMsgRequestOrigin } from "../../../sign/components/arbitrary-message/arbitrary-message-origin";
 import { ArbitraryMsgWalletDetails } from "../../../sign/components/arbitrary-message/arbitrary-message-wallet-details";
 import { ModularChainInfo } from "@keplr-wallet/types";
+import { ExtensionKVStore } from "@keplr-wallet/common";
+import { toXOnly } from "@keplr-wallet/crypto";
+import { useGetUTXOs } from "../../../../hooks/bitcoin/use-get-utxos";
 
 export const SignBitcoinTxView: FunctionComponent<{
   interactionData: NonNullable<SignBitcoinTxInteractionStore["waitingData"]>;
 }> = observer(({ interactionData }) => {
-  const { signBitcoinTxInteractionStore, bitcoinQueriesStore } = useStore();
+  const {
+    signBitcoinTxInteractionStore,
+    bitcoinQueriesStore,
+    bitcoinAccountStore,
+  } = useStore();
 
   const theme = useTheme();
   const { chainStore } = useStore();
@@ -117,13 +125,158 @@ export const SignBitcoinTxView: FunctionComponent<{
     feeRateConfig
   );
 
+  // 외부에서 Bitcoin send 요청이 들어온 경우
+  const hasPsbtCandidate = "psbtCandidate" in interactionData.data;
+
+  const [_, _genesisHash, paymentType] = chainId.split(":");
+
+  const bitcoinAccount = bitcoinAccountStore.getAccount(chainId);
+
+  // simulate 함수 안에서 불러오지 않고 커스텀 훅으로 대체해서
+  // 페이지가 렌더링될 때 한 번만 호출해도 충분할 것으로 예상된다.
+  const { availableUTXOs } = useGetUTXOs(
+    chainId,
+    senderConfig.sender,
+    hasPsbtCandidate && paymentType === "taproot",
+    hasPsbtCandidate
+  );
+
+  // bitcoin tx size는 amount, fee rate, recipient address type에 따라 달라진다.
+  // 또한 별도의 simulator refresh 로직이 없기 때문에 availableUTXOs의 값이 변경되면
+  // 새로운 key를 생성해서 새로운 simulator를 생성하도록 한다.
+  const psbtSimulatorKey = useMemo(() => {
+    if ("psbtCandidate" in interactionData.data) {
+      const recipientPrefix =
+        interactionData.data.psbtCandidate.toAddress.slice(0, 4);
+      const amountHex = interactionData.data.psbtCandidate.amount.toString(16);
+      return (
+        recipientPrefix +
+        amountHex +
+        feeRateConfig.feeRate.toString() +
+        availableUTXOs.length.toString()
+      );
+    }
+
+    return "";
+  }, [interactionData.data, feeRateConfig.feeRate, availableUTXOs]);
+
+  const psbtSimulator = usePsbtSimulator(
+    new ExtensionKVStore("psbt-simulator.bitcoin.send"),
+    chainStore,
+    chainId,
+    txSizeConfig,
+    psbtSimulatorKey,
+    () => {
+      if (!("psbtCandidate" in interactionData.data)) {
+        throw new Error("Not ready to simulate psbt");
+      }
+
+      const simulate = async (): Promise<{
+        psbtHex: string;
+        txSize: {
+          txVBytes: number;
+          txBytes: number;
+          txWeight: number;
+        };
+      }> => {
+        if (!("psbtCandidate" in interactionData.data)) {
+          throw new Error("Not ready to simulate psbt");
+        }
+
+        // refresh는 필요없다. -> 블록 생성 시간이 10분
+        const senderAddress = interactionData.data.address;
+        const publicKey = interactionData.data.pubKey;
+        const xonlyPubKey = publicKey
+          ? toXOnly(Buffer.from(publicKey))
+          : undefined;
+        const feeRate = feeRateConfig.feeRate;
+        const isSendMax = amountConfig.fraction === 1;
+
+        const MAX_SAFE_OUTPUT = new Dec(2 ** 53 - 1);
+        const ZERO = new Dec(0);
+        const amountInSatoshi = new Dec(
+          interactionData.data.psbtCandidate.amount
+        );
+
+        let recipientsForTransaction = [];
+        if (amountInSatoshi.gt(MAX_SAFE_OUTPUT)) {
+          // 큰 금액을 여러 출력으로 분할
+          let remainingAmount = amountInSatoshi;
+          while (!remainingAmount.gt(ZERO)) {
+            const chunkAmount = remainingAmount.gt(MAX_SAFE_OUTPUT)
+              ? MAX_SAFE_OUTPUT
+              : remainingAmount;
+            recipientsForTransaction.push({
+              address: interactionData.data.psbtCandidate.toAddress,
+              amount: chunkAmount.truncate().toBigNumber().toJSNumber(),
+            });
+            remainingAmount = remainingAmount.sub(chunkAmount);
+          }
+        } else {
+          recipientsForTransaction = [
+            {
+              address: interactionData.data.psbtCandidate.toAddress,
+              amount: amountInSatoshi.truncate().toBigNumber().toJSNumber(),
+            },
+          ];
+        }
+
+        const selection = bitcoinAccount.selectUTXOs({
+          senderAddress,
+          utxos: availableUTXOs,
+          recipients: recipientsForTransaction,
+          feeRate,
+          isSendMax,
+        });
+
+        if (!selection) {
+          throw new Error("Can't find proper utxos selection");
+        }
+
+        const { selectedUtxos, txSize, hasChange } = selection;
+
+        const psbtHex = bitcoinAccount.buildPsbt({
+          utxos: selectedUtxos,
+          senderAddress,
+          recipients: recipientsForTransaction,
+          feeRate,
+          xonlyPubKey,
+          isSendMax,
+          hasChange,
+        });
+
+        return {
+          psbtHex,
+          txSize,
+        };
+      };
+
+      return simulate;
+    }
+  );
+
   // 여러 주소 체계의 utxo를 조합하여 사용하는 경우가 있을 수 있으므로
   // sender address의 balance를 체크하지 않는다.
   // 중요한 오류는 usePsbtsValidate 훅에서 처리한다.
   feeConfig.setDisableBalanceCheck(true);
 
+  const psbtsHexes = useMemo(() => {
+    return "psbtHex" in interactionData.data
+      ? [interactionData.data.psbtHex]
+      : "psbtsHexes" in interactionData.data
+      ? interactionData.data.psbtsHexes
+      : psbtSimulator.psbtHex != null
+      ? [psbtSimulator.psbtHex]
+      : [];
+  }, [interactionData.data, psbtSimulator.psbtHex]);
+
   const { isInitialized, validatedPsbts, criticalValidationError } =
-    usePsbtsValidate(interactionData, feeConfig);
+    usePsbtsValidate(
+      psbtsHexes,
+      feeConfig,
+      chainId,
+      interactionData.data.network
+    );
 
   const [unmountPromise] = useState(() => {
     let resolver: () => void;

@@ -6,6 +6,7 @@ import {
   IsEnabledAccessMsg,
   EnableAccessForEVMMsg,
   EnableAccessForStarknetMsg,
+  EnableAccessForBitcoinMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -17,6 +18,7 @@ export function init(
   router.registerMessage(EnableAccessMsg);
   router.registerMessage(EnableAccessForEVMMsg);
   router.registerMessage(EnableAccessForStarknetMsg);
+  router.registerMessage(EnableAccessForBitcoinMsg);
   router.registerMessage(DisableAccessMsg);
   router.registerMessage(IsEnabledAccessMsg);
 

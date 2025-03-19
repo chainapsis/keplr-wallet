@@ -23,6 +23,10 @@ import {
   IStarknetProvider,
   WalletEvents,
   SupportedPaymentType,
+  IBitcoinProvider,
+  Network as BitcoinNetwork,
+  BitcoinSignMessageType,
+  ChainType,
 } from "@keplr-wallet/types";
 import {
   BACKGROUND_PORT,
@@ -1540,6 +1544,8 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
   public readonly ethereum = new EthereumProvider(this, this.requester);
 
   public readonly starknet = new StarknetProvider(this, this.requester);
+
+  public readonly bitcoin = new BitcoinProvider(this, this.requester);
 }
 
 // IMPORTANT: 사이드 패널을 열어야하는 JSON-RPC 메소드들이 생길 때마다 여기에 추가해야한다.
@@ -1780,4 +1786,195 @@ class StarknetProvider implements IStarknetProvider {
   }
 }
 
-// TODO: Implement bitcoin provider
+const sidePanelOpenNeededBitcoinMethods = [
+  "switchNetwork",
+  "switchChain",
+  "signMessage",
+  "sendBitcoin",
+  "pushTx",
+  "signPsbt",
+  "signPsbts",
+];
+
+class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
+  constructor(
+    protected readonly keplr: Keplr,
+    protected readonly requester: MessageRequester
+  ) {
+    super();
+  }
+
+  protected async protectedEnableAccess(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      let f = false;
+
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "permission-interactive",
+        "enable-access-for-bitcoin",
+        {}
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.keplr.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
+  }
+
+  protected async protectedRequestMethod<T>({
+    method,
+    params,
+  }: {
+    method: string;
+    params: unknown[];
+  }): Promise<T> {
+    if (method !== "getAccounts") {
+      await this.protectedEnableAccess();
+    }
+
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-bitcoin",
+        "request-method-to-bitcoin",
+        {
+          method,
+          params,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f && sidePanelOpenNeededBitcoinMethods.includes(method)) {
+          this.keplr.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
+  }
+
+  async getAccounts(): Promise<string[]> {
+    return this.protectedRequestMethod({
+      method: "getAccounts",
+      params: [],
+    });
+  }
+
+  async requestAccounts(): Promise<string[]> {
+    return this.protectedRequestMethod({
+      method: "requestAccounts",
+      params: [],
+    });
+  }
+
+  async disconnect(): Promise<void> {
+    return this.protectedRequestMethod({
+      method: "disconnect",
+      params: [],
+    });
+  }
+
+  async getNetwork(): Promise<BitcoinNetwork> {
+    return this.protectedRequestMethod({
+      method: "getNetwork",
+      params: [],
+    });
+  }
+
+  async switchNetwork(network: BitcoinNetwork): Promise<void> {
+    return this.protectedRequestMethod({
+      method: "switchNetwork",
+      params: [network],
+    });
+  }
+
+  async getChain(): Promise<{
+    enum: ChainType;
+    name: string;
+    network: BitcoinNetwork;
+  }> {
+    return this.protectedRequestMethod({
+      method: "getChain",
+      params: [],
+    });
+  }
+
+  async switchChain(chain: ChainType): Promise<void> {
+    return this.protectedRequestMethod({
+      method: "switchChain",
+      params: [chain],
+    });
+  }
+
+  async getPublicKey(): Promise<string> {
+    return this.protectedRequestMethod({
+      method: "getPublicKey",
+      params: [],
+    });
+  }
+
+  async getBalance(): Promise<{
+    confirmed: number;
+    unconfirmed: number;
+    total: number;
+  }> {
+    return this.protectedRequestMethod({
+      method: "getBalance",
+      params: [],
+    });
+  }
+
+  async getInscriptions(): Promise<string[]> {
+    return this.protectedRequestMethod({
+      method: "getInscriptions",
+      params: [],
+    });
+  }
+
+  async signMessage(
+    message: string,
+    type: BitcoinSignMessageType
+  ): Promise<string> {
+    return this.protectedRequestMethod({
+      method: "signMessage",
+      params: [message, type],
+    });
+  }
+
+  async sendBitcoin(to: string, amount: number): Promise<string> {
+    return this.protectedRequestMethod({
+      method: "sendBitcoin",
+      params: [to, amount],
+    });
+  }
+
+  async pushTx(rawTxHex: string): Promise<string> {
+    return this.protectedRequestMethod({
+      method: "pushTx",
+      params: [rawTxHex],
+    });
+  }
+
+  async signPsbt(psbtHex: string): Promise<string> {
+    return this.protectedRequestMethod({
+      method: "signPsbt",
+      params: [psbtHex],
+    });
+  }
+
+  async signPsbts(psbtsHexes: string[]): Promise<string[]> {
+    return this.protectedRequestMethod({
+      method: "signPsbts",
+      params: [psbtsHexes],
+    });
+  }
+}

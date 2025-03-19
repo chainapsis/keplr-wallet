@@ -10,6 +10,7 @@ import {
   RequestSignBitcoinMessageMsg,
   RequestSignBitcoinPsbtMsg,
   RequestSignBitcoinPsbtsMsg,
+  RequestMethodToBitcoinMsg,
 } from "./messages";
 
 export function init(
@@ -23,6 +24,7 @@ export function init(
   router.registerMessage(RequestSignBitcoinMessageMsg);
   router.registerMessage(RequestSignBitcoinPsbtMsg);
   router.registerMessage(RequestSignBitcoinPsbtsMsg);
+  router.registerMessage(RequestMethodToBitcoinMsg);
 
   router.addHandler(ROUTE, getHandler(service, permissionInteractionService));
 }
