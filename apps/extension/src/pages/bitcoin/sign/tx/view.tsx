@@ -55,6 +55,7 @@ import { ModularChainInfo } from "@keplr-wallet/types";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import { toXOnly } from "@keplr-wallet/crypto";
 import { useGetUTXOs } from "../../../../hooks/bitcoin/use-get-utxos";
+import { IPsbtInput, IPsbtOutput } from "@keplr-wallet/stores-bitcoin";
 
 export const SignBitcoinTxView: FunctionComponent<{
   interactionData: NonNullable<SignBitcoinTxInteractionStore["waitingData"]>;
@@ -128,7 +129,7 @@ export const SignBitcoinTxView: FunctionComponent<{
   // 외부에서 Bitcoin send 요청이 들어온 경우
   const hasPsbtCandidate = "psbtCandidate" in interactionData.data;
 
-  const [_, _genesisHash, paymentType] = chainId.split(":");
+  const { currentPaymentType } = useBitcoinNetworkConfig(chainId);
 
   const bitcoinAccount = bitcoinAccountStore.getAccount(chainId);
 
@@ -137,7 +138,7 @@ export const SignBitcoinTxView: FunctionComponent<{
   const { availableUTXOs } = useGetUTXOs(
     chainId,
     senderConfig.sender,
-    hasPsbtCandidate && paymentType === "taproot",
+    hasPsbtCandidate && currentPaymentType === "taproot",
     hasPsbtCandidate
   );
 
@@ -186,6 +187,7 @@ export const SignBitcoinTxView: FunctionComponent<{
         // refresh는 필요없다. -> 블록 생성 시간이 10분
         const senderAddress = interactionData.data.address;
         const publicKey = interactionData.data.pubKey;
+
         const xonlyPubKey = publicKey
           ? toXOnly(Buffer.from(publicKey))
           : undefined;
@@ -193,32 +195,29 @@ export const SignBitcoinTxView: FunctionComponent<{
         const isSendMax = amountConfig.fraction === 1;
 
         const MAX_SAFE_OUTPUT = new Dec(2 ** 53 - 1);
-        const ZERO = new Dec(0);
         const amountInSatoshi = new Dec(
           interactionData.data.psbtCandidate.amount
         );
+        const recipientsForTransaction: IPsbtOutput[] = [];
 
-        let recipientsForTransaction = [];
         if (amountInSatoshi.gt(MAX_SAFE_OUTPUT)) {
           // 큰 금액을 여러 출력으로 분할
-          let remainingAmount = amountInSatoshi;
-          while (!remainingAmount.gt(ZERO)) {
-            const chunkAmount = remainingAmount.gt(MAX_SAFE_OUTPUT)
+          let remainingValue = amountInSatoshi;
+          while (!remainingValue.lte(new Dec(0))) {
+            const chunkValue = remainingValue.gt(MAX_SAFE_OUTPUT)
               ? MAX_SAFE_OUTPUT
-              : remainingAmount;
+              : remainingValue;
             recipientsForTransaction.push({
               address: interactionData.data.psbtCandidate.toAddress,
-              amount: chunkAmount.truncate().toBigNumber().toJSNumber(),
+              value: chunkValue.truncate().toBigNumber().toJSNumber(),
             });
-            remainingAmount = remainingAmount.sub(chunkAmount);
+            remainingValue = remainingValue.sub(chunkValue);
           }
         } else {
-          recipientsForTransaction = [
-            {
-              address: interactionData.data.psbtCandidate.toAddress,
-              amount: amountInSatoshi.truncate().toBigNumber().toJSNumber(),
-            },
-          ];
+          recipientsForTransaction.push({
+            address: interactionData.data.psbtCandidate.toAddress,
+            value: amountInSatoshi.truncate().toBigNumber().toJSNumber(),
+          });
         }
 
         const selection = bitcoinAccount.selectUTXOs({
@@ -235,12 +234,19 @@ export const SignBitcoinTxView: FunctionComponent<{
 
         const { selectedUtxos, txSize, hasChange } = selection;
 
+        const inputs: IPsbtInput[] = selectedUtxos.map((utxo) => ({
+          txid: utxo.txid,
+          vout: utxo.vout,
+          value: utxo.value,
+          address: senderAddress,
+          tapInternalKey: xonlyPubKey,
+        }));
+
         const psbtHex = bitcoinAccount.buildPsbt({
-          utxos: selectedUtxos,
-          senderAddress,
-          recipients: recipientsForTransaction,
+          inputs,
+          changeAddress: senderAddress,
+          outputs: recipientsForTransaction,
           feeRate,
-          xonlyPubKey,
           isSendMax,
           hasChange,
         });
@@ -260,23 +266,8 @@ export const SignBitcoinTxView: FunctionComponent<{
   // 중요한 오류는 usePsbtsValidate 훅에서 처리한다.
   feeConfig.setDisableBalanceCheck(true);
 
-  const psbtsHexes = useMemo(() => {
-    return "psbtHex" in interactionData.data
-      ? [interactionData.data.psbtHex]
-      : "psbtsHexes" in interactionData.data
-      ? interactionData.data.psbtsHexes
-      : psbtSimulator.psbtHex != null
-      ? [psbtSimulator.psbtHex]
-      : [];
-  }, [interactionData.data, psbtSimulator.psbtHex]);
-
   const { isInitialized, validatedPsbts, criticalValidationError } =
-    usePsbtsValidate(
-      psbtsHexes,
-      feeConfig,
-      chainId,
-      interactionData.data.network
-    );
+    usePsbtsValidate(interactionData, feeConfig, psbtSimulator);
 
   const [unmountPromise] = useState(() => {
     let resolver: () => void;

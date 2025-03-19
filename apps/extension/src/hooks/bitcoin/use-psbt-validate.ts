@@ -1,6 +1,6 @@
-import { IFeeConfig } from "@keplr-wallet/hooks-bitcoin";
+import { IFeeConfig, IPsbtSimulator } from "@keplr-wallet/hooks-bitcoin";
 import { Dec } from "@keplr-wallet/unit";
-import { Network, Psbt, Transaction } from "bitcoinjs-lib";
+import { Psbt, Transaction } from "bitcoinjs-lib";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { fromOutputScript } from "bitcoinjs-lib/src/address";
 import { useGetBitcoinKeys } from "./use-bitcoin-network-config";
@@ -62,10 +62,9 @@ export function formatPsbtHex(psbtHex: string) {
 }
 
 export const usePsbtsValidate = (
-  psbtsHexes: string[],
+  interactionData: NonNullable<SignBitcoinTxInteractionStore["waitingData"]>,
   feeConfig: IFeeConfig,
-  chainId: string,
-  networkConfig: Network
+  psbtSimulator: IPsbtSimulator
 ) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [validatedPsbts, setValidatedPsbts] = useState<ValidatedPsbt[]>([]);
@@ -78,8 +77,12 @@ export const usePsbtsValidate = (
   const psbtsHexes = useMemo(() => {
     return "psbtHex" in interactionData.data
       ? [interactionData.data.psbtHex]
-      : interactionData.data.psbtsHexes;
-  }, [interactionData.data]);
+      : "psbtsHexes" in interactionData.data
+      ? interactionData.data.psbtsHexes
+      : psbtSimulator.psbtHex != null
+      ? [psbtSimulator.psbtHex]
+      : [];
+  }, [interactionData.data, psbtSimulator.psbtHex]);
 
   const bitcoinKeys = useGetBitcoinKeys(chainId);
 

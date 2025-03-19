@@ -16,7 +16,7 @@ import {
   CHAIN_TYPE_TO_GENESIS_HASH,
 } from "@keplr-wallet/types";
 import { Env, KeplrError } from "@keplr-wallet/router";
-import { Psbt, payments, networks } from "bitcoinjs-lib";
+import { Psbt, payments } from "bitcoinjs-lib";
 import { encodeLegacyMessage, encodeLegacySignature } from "./helper";
 import { toXOnly } from "@keplr-wallet/crypto";
 import { BIP322 } from "./bip322";
@@ -25,6 +25,7 @@ import { BackgroundTxService } from "../tx";
 import validate, {
   Network as BitcoinNetwork,
 } from "bitcoin-address-validation";
+import { mainnet, signet, testnet } from "./constants";
 
 const DUST_THRESHOLD = 546;
 export class KeyRingBitcoinService {
@@ -430,11 +431,11 @@ export class KeyRingBitcoinService {
 
     switch (network) {
       case Network.MAINNET:
-        return networks.bitcoin;
+        return mainnet;
       case Network.TESTNET:
-        return networks.testnet;
+        return testnet;
       case Network.SIGNET:
-        return networks.testnet;
+        return signet;
     }
   }
 
@@ -730,7 +731,11 @@ export class KeyRingBitcoinService {
               async (res: {
                 psbtSignData: {
                   psbtHex: string;
-                  inputsToSign: number[];
+                  inputsToSign: {
+                    index: number;
+                    address: string;
+                    path?: string;
+                  }[];
                 }[];
                 signedPsbtsHexes: string[];
               }) => {
@@ -750,7 +755,8 @@ export class KeyRingBitcoinService {
                   currentChainId,
                   vaultId,
                   psbt,
-                  res.psbtSignData[0].inputsToSign
+                  res.psbtSignData[0].inputsToSign,
+                  network
                 );
 
                 return signedPsbt.toHex();
