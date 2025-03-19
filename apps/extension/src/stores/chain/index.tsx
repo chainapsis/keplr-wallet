@@ -185,9 +185,13 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
    * @returns Grouped modular chain infos.
    */
   @computed
-  get groupedModularChainInfos(): ModularChainInfo[] {
+  get groupedModularChainInfos(): (ModularChainInfo & {
+    linkedModularChainInfos?: ModularChainInfo[];
+  })[] {
     const linkedChainInfosByChainKey = new Map<string, ModularChainInfo[]>();
-    const groupedModularChainInfos: ModularChainInfo[] = [];
+    const groupedModularChainInfos: (ModularChainInfo & {
+      linkedModularChainInfos?: ModularChainInfo[];
+    })[] = [];
 
     for (const modularChainInfo of this.modularChainInfos) {
       if ("linkedChainKey" in modularChainInfo) {
@@ -207,7 +211,10 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
       // 하나의 체인 키에 여러개의 체인이 연결되어 있으면 하나의 체인만 남기고 나머지는 버린다
       // CHECK: 어떤 것이 primary 체인인지 결정할 필요가 있는지? 우선 첫번째 체인을 primary로 설정
       if (linkedChainInfos.length > 1) {
-        groupedModularChainInfos.push(linkedChainInfos[0]);
+        groupedModularChainInfos.push({
+          ...linkedChainInfos[0],
+          linkedModularChainInfos: linkedChainInfos.slice(1),
+        });
       }
     }
 

@@ -642,6 +642,14 @@ export class Keplr implements IKeplr {
     return await Keplr.requestMethod("getBitcoinKeysSettled", [chainIds]);
   }
 
+  async signPsbt(chainId: string, psbtHex: string): Promise<string> {
+    return await Keplr.requestMethod("signPsbt", [chainId, psbtHex]);
+  }
+
+  async signPsbts(chainId: string, psbtsHexes: string[]): Promise<string[]> {
+    return await Keplr.requestMethod("signPsbts", [chainId, psbtsHexes]);
+  }
+
   public readonly ethereum = new EthereumProvider(this);
 
   // TODO: 이거 마지막에 꼭 구현해야한다.

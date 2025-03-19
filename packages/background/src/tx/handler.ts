@@ -5,7 +5,11 @@ import {
   KeplrError,
   Message,
 } from "@keplr-wallet/router";
-import { SendTxMsg, SubmitStarknetTxHashMsg } from "./messages";
+import {
+  PushBitcoinTransactionMsg,
+  SendTxMsg,
+  SubmitStarknetTxHashMsg,
+} from "./messages";
 import { BackgroundTxService } from "./service";
 import { PermissionInteractiveService } from "../permission-interactive";
 
@@ -24,6 +28,11 @@ export const getHandler: (
         return handleSubmitStarknetTxHashMsg(service)(
           env,
           msg as SubmitStarknetTxHashMsg
+        );
+      case PushBitcoinTransactionMsg:
+        return handlePushBitcoinTransactionMsg(service)(
+          env,
+          msg as PushBitcoinTransactionMsg
         );
       default:
         throw new KeplrError("tx", 110, "Unknown msg type");
@@ -53,5 +62,13 @@ const handleSubmitStarknetTxHashMsg: (
 ) => InternalHandler<SubmitStarknetTxHashMsg> = (service) => {
   return async (_, msg) => {
     return service.waitStarknetTransaction(msg.chainId, msg.txHash);
+  };
+};
+
+const handlePushBitcoinTransactionMsg: (
+  service: BackgroundTxService
+) => InternalHandler<PushBitcoinTransactionMsg> = (service) => {
+  return async (_, msg) => {
+    return service.pushBitcoinTransaction(msg.chainId, msg.txHex);
   };
 };
