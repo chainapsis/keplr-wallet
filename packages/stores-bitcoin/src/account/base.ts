@@ -13,7 +13,6 @@ import validate, {
   getAddressInfo,
 } from "bitcoin-address-validation";
 import { Psbt, networks, address } from "bitcoinjs-lib";
-import { BitcoinTxSizeEstimator } from "./tx-size-estimator";
 import {
   SelectionParams,
   BuildPsbtParams,
@@ -24,6 +23,7 @@ import {
   IPsbtOutput,
 } from "./types";
 import { BRANCH_AND_BOUND_TIMEOUT_MS, DUST_THRESHOLD } from "./constant";
+import { BitcoinTxSizeEstimator, InputScriptType } from "./tx-size-estimator";
 
 export class BitcoinAccountBase {
   @observable
@@ -278,11 +278,7 @@ export class BitcoinAccountBase {
     }
 
     // 3. Validate transaction economics
-    const { remainderValue } = this.validateTransactionEconomics(
-      inputs,
-      outputs,
-      isSendMax
-    );
+    this.validateTransactionEconomics(inputs, outputs, isSendMax);
 
     // 4. Process addresses and get network config
     const { inputsWithAddressInfo, outputsWithAddressInfo } =
@@ -292,7 +288,6 @@ export class BitcoinAccountBase {
         changeAddress,
         hasChange,
         network,
-        remainderValue,
         feeRate
       );
 
@@ -322,8 +317,6 @@ export class BitcoinAccountBase {
     if (!isSendMax && remainderValue.lt(new Dec(0))) {
       throw new Error("Insufficient balance");
     }
-
-    return { totalInputValue, totalOutputValue, remainderValue };
   }
 
   private processAddresses(
@@ -332,7 +325,6 @@ export class BitcoinAccountBase {
     changeAddress: string | undefined,
     hasChange: boolean,
     network: string,
-    remainderValue: Dec,
     feeRate: number
   ) {
     const inputAddressSet = new Set(inputs.map(({ address }) => address));
@@ -381,13 +373,59 @@ export class BitcoinAccountBase {
         throw new Error("Invalid change address");
       }
 
-      const changeValue = this.calculateChangeValue(
-        remainderValue,
-        feeRate,
-        changeAddressInfo,
-        inputAddressInfos,
-        outputAddressInfos
+      const totalInputValue = inputs.reduce(
+        (sum, input) => sum.add(new Dec(input.value)),
+        new Dec(0)
       );
+
+      // Calculate outputs total value (excluding change)
+      const totalOutputValue = outputs.reduce(
+        (sum, output) => sum.add(new Dec(output.value)),
+        new Dec(0)
+      );
+
+      // Calculate fee and change value directly from input/output values
+      // using the expected fee rate and actual transaction size from calcTxSize
+      const outputParams: Record<string, number> = {};
+      outputAddressInfos.forEach((info) => {
+        const key = `${info.type}_output_count`;
+        outputParams[key] = (outputParams[key] || 0) + 1;
+      });
+
+      // Consider change output in tx size calculation
+      const changeKey = `${changeAddressInfo.type}_output_count`;
+      outputParams[changeKey] = (outputParams[changeKey] || 0) + 1;
+
+      let inputScript = "p2tr";
+      // For mixed input types, check which one is dominant
+      const typeCounts: Record<string, number> = {};
+      inputs.forEach((input) => {
+        const addressInfo = inputAddressInfos.find(
+          (info) => info.address === input.address
+        );
+        if (addressInfo) {
+          typeCounts[addressInfo.type] =
+            (typeCounts[addressInfo.type] || 0) + 1;
+        }
+      });
+
+      let maxCount = 0;
+      Object.entries(typeCounts).forEach(([type, count]) => {
+        if (count > maxCount) {
+          maxCount = count;
+          inputScript = type;
+        }
+      });
+
+      const { txVBytes } = this._txSizeEstimator.calcTxSize({
+        input_count: inputs.length,
+        input_script: inputScript as InputScriptType,
+        ...outputParams,
+      });
+
+      const fee = new Dec(Math.ceil(txVBytes * feeRate));
+      const changeValue = totalInputValue.sub(totalOutputValue).sub(fee);
+
       if (changeValue.gte(new Dec(DUST_THRESHOLD))) {
         outputsWithAddressInfo.push({
           address: changeAddress,
@@ -400,53 +438,6 @@ export class BitcoinAccountBase {
     }
 
     return { inputsWithAddressInfo, outputsWithAddressInfo };
-  }
-
-  private calculateChangeValue(
-    remainderValue: Dec,
-    feeRate: number,
-    changeAddressInfo: AddressInfo,
-    inputAddressInfos: AddressInfo[],
-    outputAddressInfos: AddressInfo[]
-  ): Dec {
-    const outputParams: Record<string, number> = {};
-    outputAddressInfos.forEach((info) => {
-      const key = `${info.type}_output_count`;
-      outputParams[key] = (outputParams[key] || 0) + 1;
-    });
-
-    // Consider change output
-    const changeKey = `${changeAddressInfo.type}_output_count`;
-    outputParams[changeKey] = (outputParams[changeKey] || 0) + 1;
-
-    // Get initial transaction size estimation with a single p2wpkh input
-    const { txVBytes } = this.calculateTxSize(
-      AddressType.p2wpkh,
-      1,
-      outputParams,
-      true
-    );
-
-    let adjustedTxVBytes = txVBytes;
-
-    // Adjust transaction size by replacing the default p2wpkh input size
-    // with the actual input sizes based on their types
-    for (const info of inputAddressInfos) {
-      const { inputWitnessSize } =
-        this._txSizeEstimator.getSizeBasedOnInputType({
-          input_script: info.type,
-        });
-      adjustedTxVBytes += inputWitnessSize;
-    }
-
-    // Subtract the default p2wpkh input size that was included in initial estimation
-    adjustedTxVBytes -= this._txSizeEstimator.getSizeBasedOnInputType({
-      input_script: AddressType.p2wpkh,
-    }).inputWitnessSize;
-
-    const fee = new Dec(Math.ceil(adjustedTxVBytes * feeRate));
-
-    return remainderValue.sub(fee);
   }
 
   private createPsbt(
