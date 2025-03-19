@@ -569,56 +569,26 @@ const InternalSendBitcoinTxReview: FunctionComponent<{
 }> = observer(({ validatedPsbt, chainId }) => {
   const theme = useTheme();
   const { chainStore } = useStore();
-  const { psbt, sumInputValueByAddress } = validatedPsbt ?? {};
+  const { psbt, sumInputValueByAddress, decodedRawData } = validatedPsbt ?? {};
 
   const [isViewData, setIsViewData] = useState(false);
 
   const sender = sumInputValueByAddress?.[0].address;
-  const recipient = psbt?.txOutputs.find(
+  const recipientOutput = psbt?.txOutputs.find(
     (output) => output.address !== sender
-  )?.address;
+  );
+  const recipient = recipientOutput?.address;
   const sendToken = new CoinPretty(
     chainStore.getModularChainInfoImpl(chainId).getCurrencies("bitcoin")[0],
-    sumInputValueByAddress?.reduce((acc, curr) => {
-      return acc.add(curr.value);
-    }, new Dec(0)) ?? new Dec(0)
+    recipientOutput?.value ?? new Dec(0)
   );
 
   const signingDataText = useMemo(() => {
-    if (!psbt) {
+    if (!decodedRawData) {
       return "";
     }
-
-    const version = psbt.version;
-    const locktime = psbt.locktime;
-    const inputs = psbt.txInputs.map((input, index) => {
-      const txid = input.hash.reverse().toString("hex");
-
-      return {
-        index,
-        txid,
-        vout: input.index,
-        sequence: input.sequence,
-      };
-    });
-
-    const outputs = psbt.txOutputs.map((output, index) => {
-      return {
-        index,
-        address: output.address || "unknown address",
-        value: output.value,
-      };
-    });
-
-    const readableData = {
-      version,
-      locktime,
-      inputs,
-      outputs,
-    };
-
-    return JSON.stringify(readableData, null, 2);
-  }, [psbt]);
+    return JSON.stringify(decodedRawData, null, 2);
+  }, [decodedRawData]);
 
   return (
     <React.Fragment>

@@ -22,7 +22,27 @@ export type ValidatedPsbt = {
   sumInputValueByAddress: {
     address: string;
     value: Dec;
+    isMine: boolean;
   }[];
+  sumOutputValueByAddress: {
+    address: string;
+    value: Dec;
+  }[];
+  decodedRawData: {
+    version: number;
+    locktime: number;
+    inputs: {
+      index: number;
+      txid: string;
+      vout: number;
+      sequence: number | undefined;
+    }[];
+    outputs: {
+      index: number;
+      address: string;
+      value: number;
+    }[];
+  };
 };
 
 export function formatPsbtHex(psbtHex: string) {
@@ -72,17 +92,10 @@ export const usePsbtsValidate = (
         .map(([address, value]) => ({
           address,
           value,
+          isMine: inputsToSign.some((input) => input.address === address),
         }))
         .sort((a, b) => {
-          // 1차로 소유한 계정순 -> inputsToSign에 포함되어 있는지 여부
-          const isAMine = inputsToSign.some(
-            (input) => input.address === a.address
-          );
-          const isBMine = inputsToSign.some(
-            (input) => input.address === b.address
-          );
-
-          if (isAMine && isBMine) {
+          if (a.isMine && b.isMine) {
             // 둘 다 소유한 계정인 경우, value 순으로 정렬
             if (a.value.gt(b.value)) {
               return -1;
@@ -93,11 +106,30 @@ export const usePsbtsValidate = (
             }
           }
 
-          if (isAMine) {
+          if (a.isMine) {
             return -1;
           }
 
           return 1;
+        });
+    };
+  }, []);
+
+  const processOutputValuesByAddress = useMemo(() => {
+    return (sumOutputValueByAddressRecord: Record<string, Dec>) => {
+      return Object.entries(sumOutputValueByAddressRecord)
+        .map(([address, value]) => ({
+          address,
+          value,
+        }))
+        .sort((a, b) => {
+          if (a.value.gt(b.value)) {
+            return -1;
+          } else if (a.value.lt(b.value)) {
+            return 1;
+          } else {
+            return 0;
+          }
         });
     };
   }, []);
@@ -158,6 +190,29 @@ export const usePsbtsValidate = (
     [bitcoinKeys]
   );
 
+  const decodePsbt = useCallback((psbt: Psbt) => {
+    return {
+      version: psbt.version,
+      locktime: psbt.locktime,
+      inputs: psbt.txInputs.map((input, index) => {
+        const txid = input.hash.reverse().toString("hex");
+        return {
+          index,
+          txid,
+          vout: input.index,
+          sequence: input.sequence,
+        };
+      }),
+      outputs: psbt.txOutputs.map((output, index) => {
+        return {
+          index,
+          address: output.address || "unknown address",
+          value: output.value,
+        };
+      }),
+    };
+  }, []);
+
   const validatePsbts = useCallback(async () => {
     // 검증 파라미터가 변경되어서 재검증이 필요하면 오류를 초기화한다.
     setCriticalValidationError(undefined);
@@ -180,6 +235,7 @@ export const usePsbtsValidate = (
         let sumInputValue = new Dec(0);
         let sumOutputValue = new Dec(0);
         const sumInputValueByAddressRecord: Record<string, Dec> = {};
+        const sumOutputValueByAddressRecord: Record<string, Dec> = {};
         const inputsToSign: {
           index: number;
           address: string;
@@ -232,6 +288,14 @@ export const usePsbtsValidate = (
             );
           }
 
+          const address = output.address ?? "unknown";
+          const value = new Dec(output.value);
+
+          sumOutputValueByAddressRecord[address] =
+            sumOutputValueByAddressRecord[address]
+              ? sumOutputValueByAddressRecord[address].add(value)
+              : value;
+
           sumOutputValue = sumOutputValue.add(new Dec(output.value));
         }
 
@@ -251,6 +315,10 @@ export const usePsbtsValidate = (
               sumInputValueByAddressRecord,
               inputsToSign
             ),
+            sumOutputValueByAddress: processOutputValuesByAddress(
+              sumOutputValueByAddressRecord
+            ),
+            decodedRawData: decodePsbt(psbt),
           });
 
           totalInputValue = totalInputValue.add(sumInputValue);
@@ -273,11 +341,13 @@ export const usePsbtsValidate = (
       setCriticalValidationError(e as Error);
     }
   }, [
-    networkConfig,
     psbtsHexes,
+    feeConfig,
+    networkConfig,
     isInputMine,
     processInputValuesByAddress,
-    feeConfig,
+    processOutputValuesByAddress,
+    decodePsbt,
   ]);
 
   useEffect(() => {
