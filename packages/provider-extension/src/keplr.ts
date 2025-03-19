@@ -639,6 +639,36 @@ export class Keplr implements IKeplr {
     ]);
   }
 
+  async __core__getAnalyticsId(): Promise<string> {
+    return await this.requestMethod("__core__getAnalyticsId" as any, []);
+  }
+
+  async __core__privilageSignAminoWithdrawRewards(
+    chainId: string,
+    signer: string,
+    signDoc: StdSignDoc
+  ): Promise<AminoSignResponse> {
+    return await this.requestMethod(
+      "__core__privilageSignAminoWithdrawRewards" as any,
+      [chainId, signer, signDoc]
+    );
+  }
+
+  async __core__privilageSignAminoDelegate(
+    chainId: string,
+    signer: string,
+    signDoc: StdSignDoc
+  ): Promise<AminoSignResponse> {
+    return await this.requestMethod(
+      "__core__privilageSignAminoDelegate" as any,
+      [chainId, signer, signDoc]
+    );
+  }
+
+  async __core__webpageClosed(): Promise<void> {
+    return await this.requestMethod("__core__webpageClosed" as any, []);
+  }
+
   public readonly ethereum = new EthereumProvider(this);
 
   // TODO: 이거 마지막에 꼭 구현해야한다.
