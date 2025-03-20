@@ -195,8 +195,6 @@ describe("Test priv key", () => {
       Mnemonic.generateWalletFromMnemonic(mnemonic)
     );
 
-    const dogecoinPubKey = privKey.getBitcoinPubKey();
-
     const dogecoinMainnet = {
       messagePrefix: "\x19Dogecoin Signed Message:\n",
       bech32: "doge",
@@ -209,10 +207,9 @@ describe("Test priv key", () => {
       wif: 0x9e, // 158
     };
 
-    const legacyAddress = dogecoinPubKey.getBitcoinAddress(
-      "legacy",
-      dogecoinMainnet
-    );
+    const dogecoinPubKey = privKey.getBitcoinPubKey(dogecoinMainnet);
+
+    const legacyAddress = dogecoinPubKey.getBitcoinAddress("legacy");
 
     expect(legacyAddress).not.toBeUndefined();
     expect(legacyAddress?.startsWith("D")).toBe(true);

@@ -35,11 +35,12 @@ export class PrivKeySecp256k1 {
     return new PubKeySecp256k1(secp256k1.getPublicKey(this.privKey, true));
   }
 
-  getBitcoinPubKey(): PubKeyBitcoinCompatible {
+  getBitcoinPubKey(network?: BitcoinNetwork): PubKeyBitcoinCompatible {
     const pubKey = secp256k1.getPublicKey(this.toBytes(), false);
 
     return new PubKeyBitcoinCompatible(
       pubKey,
+      network,
       this.masterFingerprint,
       this.path
     );
@@ -144,8 +145,13 @@ export class PubKeySecp256k1 {
     }
   }
 
-  toBitcoinPubKey(): PubKeyBitcoinCompatible {
-    return new PubKeyBitcoinCompatible(this.toBytes(false));
+  toBitcoinPubKey(network?: BitcoinNetwork): PubKeyBitcoinCompatible {
+    return new PubKeyBitcoinCompatible(
+      this.toBytes(false),
+      network,
+      undefined,
+      undefined
+    );
   }
 
   /**
@@ -243,6 +249,7 @@ export class PubKeySecp256k1 {
 export class PubKeyBitcoinCompatible {
   constructor(
     protected readonly pubKey: Uint8Array,
+    protected readonly network?: BitcoinNetwork,
     protected readonly masterFingerprint?: string,
     protected readonly path?: string
   ) {}
@@ -279,25 +286,26 @@ export class PubKeyBitcoinCompatible {
     network?: BitcoinNetwork
   ): string | undefined {
     const pubKey = this.toBytes(false);
+    const currentNetwork = network ?? this.network;
 
     const getLegacyAddress = () => {
       return payments.p2pkh({
         pubkey: NodeBuffer.from(pubKey),
-        network,
+        network: currentNetwork,
       }).address;
     };
 
     const getNativeSegwitAddress = () => {
       return payments.p2wpkh({
         pubkey: NodeBuffer.from(pubKey),
-        network,
+        network: currentNetwork,
       }).address;
     };
 
     const getTaprootAddress = () => {
       return payments.p2tr({
         internalPubkey: toXOnly(NodeBuffer.from(pubKey)),
-        network,
+        network: currentNetwork,
       }).address;
     };
 
