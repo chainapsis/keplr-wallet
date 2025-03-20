@@ -1,6 +1,7 @@
-import { IFeeConfig, IPsbtSimulator } from "@keplr-wallet/hooks-bitcoin";
+import { IFeeConfig } from "@keplr-wallet/hooks-bitcoin";
 import { Dec } from "@keplr-wallet/unit";
-import { Psbt, Transaction } from "bitcoinjs-lib";
+import { Psbt, Transaction, script as bscript } from "bitcoinjs-lib";
+import { tapleafHash } from "bitcoinjs-lib/src/payments/bip341";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { fromOutputScript } from "bitcoinjs-lib/src/address";
 import { useGetBitcoinKeys } from "./use-bitcoin-network-config";
@@ -10,13 +11,20 @@ import {
   DUST_THRESHOLD,
   TapBip32Derivation,
 } from "@keplr-wallet/stores-bitcoin";
+import { toXOnly } from "@keplr-wallet/crypto";
+
+interface TapLeafScript {
+  leafVersion: number;
+  script: Buffer;
+}
 
 export type ValidatedPsbt = {
   psbt: Psbt;
   inputsToSign: {
     index: number;
     address: string;
-    path?: string;
+    hdPath?: string;
+    tapLeafHashesToSign?: Buffer[];
   }[];
   fee: Dec;
   sumInputValueByAddress: {
@@ -64,7 +72,7 @@ export function formatPsbtHex(psbtHex: string) {
 export const usePsbtsValidate = (
   interactionData: NonNullable<SignBitcoinTxInteractionStore["waitingData"]>,
   feeConfig: IFeeConfig,
-  psbtSimulator: IPsbtSimulator
+  cachedPsbtHex: string | null
 ) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [validatedPsbts, setValidatedPsbts] = useState<ValidatedPsbt[]>([]);
@@ -79,10 +87,10 @@ export const usePsbtsValidate = (
       ? [interactionData.data.psbtHex]
       : "psbtsHexes" in interactionData.data
       ? interactionData.data.psbtsHexes
-      : psbtSimulator.psbtHex != null
-      ? [psbtSimulator.psbtHex]
+      : cachedPsbtHex != null
+      ? [cachedPsbtHex]
       : [];
-  }, [interactionData.data, psbtSimulator.psbtHex]);
+  }, [interactionData.data, cachedPsbtHex]);
 
   const bitcoinKeys = useGetBitcoinKeys(chainId);
 
@@ -137,57 +145,138 @@ export const usePsbtsValidate = (
     };
   }, []);
 
-  const isInputMine = useCallback(
-    async (
+  const getInputToSignInfo = useCallback(
+    (
       address: string,
-      bip32Derivation?: Bip32Derivation[] | TapBip32Derivation[],
-      isValidDerivationFn?: (path: string, pubkey: Buffer) => Promise<boolean>
-    ) => {
-      for (const key of bitcoinKeys) {
-        if (key.address === address) {
-          return {
-            isMine: true,
-            path: key.derivationPath, // mnemonic, 하드웨어 지갑은 경로를 포함하고 있어야 한다.
-          };
+      tapLeafScripts?: TapLeafScript[],
+      bip32Derivation?: Bip32Derivation[] | TapBip32Derivation[]
+    ): {
+      isToSign: boolean;
+      hdPath?: string;
+      tapLeafHashesToSign?: Buffer[];
+    } => {
+      const getTapLeafHashesToSign = (
+        tapLeafScripts: TapLeafScript[],
+        xonlyUserPubKeys: Buffer[]
+      ) => {
+        const tapLeafHashesToSign: Buffer[] = [];
+
+        for (const { script, leafVersion } of tapLeafScripts) {
+          const decompiled = bscript.decompile(script);
+          if (!decompiled) {
+            continue;
+          }
+
+          const containsUserPubKey = decompiled.some(
+            (op) =>
+              Buffer.isBuffer(op) &&
+              xonlyUserPubKeys.some((xonly) => Buffer.from(xonly).equals(op))
+          );
+
+          if (containsUserPubKey) {
+            tapLeafHashesToSign.push(
+              tapleafHash({ output: script, version: leafVersion })
+            );
+          }
         }
 
-        if (bip32Derivation) {
-          for (const derivation of bip32Derivation) {
-            // 이 값을 사용하는 경우는 내부에서 mnemonic으로 생성된 키를 사용하거나 하드웨어 지갑에서 생성된 키를 사용하는 경우이다.
-            // 이 시점에서는 파생된 키가 올바른지 검증(비밀키를 받아와서 하드닝 경로를 포함한 파생 키를 생성 및 검증하는 것은 안전하지 않음)은
-            // 어려우므로 마스터 키의 지문만 검증한다. (백그라운드로 보내서 검증해야 할 수도 있음)
-            if (
-              key.masterFingerprintHex &&
-              Buffer.from(key.masterFingerprintHex, "hex").equals(
-                derivation.masterFingerprint
-              )
-            ) {
-              return {
-                isMine: true,
-                path: derivation.path,
-              };
-            }
+        return tapLeafHashesToSign;
+      };
 
-            // 하드웨어 지갑에서 파생된 키의 경우, 파생 경로와 공개키를 검증하는 함수를 제공한다.
-            if (isValidDerivationFn) {
-              const isValid = await isValidDerivationFn(
-                derivation.path,
-                derivation.pubkey
-              );
-              if (isValid) {
-                return {
-                  isMine: true,
-                  path: derivation.path,
-                };
-              }
-            }
+      // 1. 주소 직접 일치 여부 확인
+      const matchingKey = bitcoinKeys.find((key) => key.address === address);
+      if (matchingKey) {
+        // taproot 스크립트 경로 지출인 경우, 트리노드의 스크립트를 확인하여 서명 대상 여부를 결정
+        if (tapLeafScripts && tapLeafScripts.length > 0) {
+          const xonlyUserPubKeys = bitcoinKeys.map((key) =>
+            toXOnly(Buffer.from(key.pubKey))
+          );
+
+          const tapLeafHashesToSign = getTapLeafHashesToSign(
+            tapLeafScripts,
+            xonlyUserPubKeys
+          );
+
+          if (tapLeafHashesToSign.length > 0) {
+            return {
+              isToSign: true,
+              hdPath: matchingKey.derivationPath,
+              tapLeafHashesToSign,
+            };
           }
+        }
+
+        return {
+          isToSign: true,
+          hdPath: matchingKey.derivationPath,
+        };
+      }
+
+      // 2. 마스터 지문 일치 여부 확인: derivation 데이터의 첫 번째 요소만 사용
+      // (여러 개의 derivation <하나의 키에서 여러 파생 키를 생성하여 하나의 입력에 서명하는 경우> 사용하는 경우는 희박할 것..)
+      if (bip32Derivation && bip32Derivation.length > 0) {
+        const derivation = bip32Derivation[0];
+
+        // mnemonic으로 생성된 키를 사용하거나 하드웨어 지갑에서 생성된 키를 사용하는 경우에만 검증
+        // mnemonic으로 생성된 키의 경우 파생된 키가 올바른지 검증하는 것은 어려우므로 마스터 키의 지문만 검증한다.
+        // (백그라운드에서 비밀키를 받아와서 하드닝 경로를 포함한 파생 키를 생성 및 검증하는 것은 안전하지 않음)
+        // -> 아예 검증 로직을 백그라운드로 보내버리는 것도 고려해야 함
+        const matchingMasterKey = bitcoinKeys.find(
+          (key) =>
+            key.masterFingerprintHex &&
+            Buffer.from(key.masterFingerprintHex, "hex").equals(
+              derivation.masterFingerprint
+            )
+        );
+
+        if (matchingMasterKey) {
+          // TODO: 하드웨어 지갑의 경우, 파생된 키를 직접 검증하는 로직이 필요
+          // ex)
+          // if (isValidDerivationFn) {
+          //   const isValid = await isValidDerivationFn(
+          //     derivation.path,
+          //     derivation.pubkey
+          //   );
+          //   if (isValid) {
+          //     ...
+          //   }
+          // }
+
+          // 스크립트 경로 지출인 경우, leafHashes가 주어진다.
+          let tapLeafHashesToSign: Buffer[] | undefined;
+          if ("leafHashes" in derivation) {
+            tapLeafHashesToSign = derivation.leafHashes;
+          }
+
+          if (tapLeafScripts && tapLeafScripts.length > 0) {
+            const xonlyUserPubKey = toXOnly(
+              Buffer.from(matchingMasterKey.pubKey)
+            );
+
+            const tapLeafHashesToSignFromScript = getTapLeafHashesToSign(
+              tapLeafScripts,
+              [xonlyUserPubKey]
+            );
+
+            tapLeafHashesToSign = tapLeafHashesToSignFromScript.filter(
+              (hash) =>
+                !tapLeafHashesToSign?.some((existingHash) =>
+                  existingHash.equals(hash)
+                )
+            );
+          }
+
+          return {
+            isToSign: true,
+            hdPath: matchingMasterKey.derivationPath,
+            tapLeafHashesToSign,
+          };
         }
       }
 
       return {
-        isMine: false,
-        path: undefined,
+        isToSign: false,
+        hdPath: undefined,
       };
     },
     [bitcoinKeys]
@@ -242,7 +331,8 @@ export const usePsbtsValidate = (
         const inputsToSign: {
           index: number;
           address: string;
-          path?: string;
+          hdPath?: string;
+          tapLeafHashesToSign?: Buffer[];
         }[] = [];
 
         for (const [index, input] of rawInputs.entries()) {
@@ -265,12 +355,22 @@ export const usePsbtsValidate = (
           if (script && !isSigned) {
             // 사용자의 주소와 일치하는 input인 경우 서명 대상으로 추가
 
-            const { isMine, path } = await isInputMine(
-              address,
-              input.bip32Derivation ?? input.tapBip32Derivation
-            );
-            if (isMine) {
-              inputsToSign.push({ index, address, path });
+            // check if the input is key path spending
+            const { isToSign, hdPath, tapLeafHashesToSign } =
+              getInputToSignInfo(
+                address,
+                input.tapLeafScript,
+                input.bip32Derivation ?? input.tapBip32Derivation
+              );
+
+            // 소유한 주소이거나 서명할 트리노드가 있는 경우 서명 대상으로 추가
+            if (isToSign) {
+              inputsToSign.push({
+                index,
+                address,
+                hdPath,
+                tapLeafHashesToSign,
+              });
             }
           }
 
@@ -347,7 +447,7 @@ export const usePsbtsValidate = (
     psbtsHexes,
     feeConfig,
     networkConfig,
-    isInputMine,
+    getInputToSignInfo,
     processInputValuesByAddress,
     processOutputValuesByAddress,
     decodePsbt,

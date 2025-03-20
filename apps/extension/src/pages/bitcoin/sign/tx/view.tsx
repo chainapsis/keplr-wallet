@@ -261,13 +261,13 @@ export const SignBitcoinTxView: FunctionComponent<{
     }
   );
 
-  // 여러 주소 체계의 utxo를 조합하여 사용하는 경우가 있을 수 있으므로
-  // sender address의 balance를 체크하지 않는다.
+  // sendBitcoin 요청이 들어오는 경우를 제외하고는 balance를 체크하지 않는다.
+  // (여러 주소 체계의 utxo를 조합하여 사용하는 경우가 있을 수 있으므로)
   // 중요한 오류는 usePsbtsValidate 훅에서 처리한다.
-  feeConfig.setDisableBalanceCheck(true);
+  feeConfig.setDisableBalanceCheck(hasPsbtCandidate);
 
   const { isInitialized, validatedPsbts, criticalValidationError } =
-    usePsbtsValidate(interactionData, feeConfig, psbtSimulator);
+    usePsbtsValidate(interactionData, feeConfig, psbtSimulator.psbtHex);
 
   const [unmountPromise] = useState(() => {
     let resolver: () => void;
@@ -326,7 +326,8 @@ export const SignBitcoinTxView: FunctionComponent<{
         inputsToSign: {
           index: number;
           address: string;
-          path?: string;
+          hdPath?: string;
+          tapLeafHashesToSign?: Buffer[];
         }[];
       }[] = [];
 

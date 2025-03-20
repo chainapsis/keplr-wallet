@@ -269,6 +269,10 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
         const isSendMax = sendConfigs.amountConfig.fraction === 1;
 
         // Prepare BIP32 derivation data based on payment type
+        // hardware wallet을 사용할 때 참고용.
+        // 내부적으로 send 요청을 처리할 때 mnemonic이나 private key를 사용하는 경우에는 사실상 필요가 없다.
+        // 왜냐하면 내부적으로 처리하는 경우에는 주소만으로 서명할 입력을 매칭할 수 있기 때문이다.
+        // 다만 psbt validation할 때는 mnemonic을 사용해 hd키를 생성할 수 있는 경우가 있기 때문에 필요하다.
         const { bip32Derivation, tapBip32Derivation } = (() => {
           if (
             !bitcoinAddress?.masterFingerprintHex ||

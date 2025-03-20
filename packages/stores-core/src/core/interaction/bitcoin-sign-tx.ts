@@ -58,7 +58,8 @@ export class SignBitcoinTxInteractionStore {
       inputsToSign: {
         index: number;
         address: string;
-        path?: string;
+        hdPath?: string;
+        tapLeafHashesToSign?: Buffer[];
       }[];
     }[],
     signedPsbtsHexes: string[],

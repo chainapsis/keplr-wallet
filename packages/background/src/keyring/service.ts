@@ -27,6 +27,7 @@ import { Primitive } from "utility-types";
 import { runIfOnlyAppStart } from "../utils";
 import { Network as BitcoinJSNetwork, Psbt } from "bitcoinjs-lib";
 import { DEFAULT_BIP44_PURPOSE } from "./constants";
+import { Buffer as NodeBuffer } from "buffer";
 
 export class KeyRingService {
   protected _needMigration = false;
@@ -1286,7 +1287,8 @@ export class KeyRingService {
     inputsToSign: {
       index: number;
       address: string;
-      path?: string;
+      hdPath?: string;
+      tapLeafHashesToSign?: NodeBuffer[];
     }[],
     network: BitcoinJSNetwork
   ) {
@@ -1429,7 +1431,8 @@ export class KeyRingService {
     inputsToSign: {
       index: number;
       address: string;
-      path?: string;
+      hdPath?: string;
+      tapLeafHashesToSign?: NodeBuffer[];
     }[],
     network: BitcoinJSNetwork,
     modularChainInfo: ModularChainInfo

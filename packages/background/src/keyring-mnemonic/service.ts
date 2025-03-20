@@ -162,7 +162,8 @@ export class KeyRingMnemonicService {
     inputsToSign: {
       index: number;
       address: string;
-      path?: string;
+      hdPath?: string;
+      tapLeafHashesToSign?: NodeBuffer[];
     }[]
   ): Promise<Psbt> {
     const bitcoinPubkey = this.getPrivKey(
@@ -174,7 +175,7 @@ export class KeyRingMnemonicService {
     const masterSeed = this.getMasterSeedFromVault(vault);
 
     // Must consider partially signed psbt.
-    for (const { index, path } of inputsToSign) {
+    for (const { index, hdPath } of inputsToSign) {
       const input = psbt.data.inputs[index];
 
       const privKey = this.findSignerForInput(
@@ -182,7 +183,7 @@ export class KeyRingMnemonicService {
         index,
         masterSeed,
         masterFingerprint,
-        path
+        hdPath
       );
       if (!privKey) {
         throw new Error(`No signer found for input ${index}`);

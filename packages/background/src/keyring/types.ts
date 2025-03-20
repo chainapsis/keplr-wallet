@@ -71,7 +71,8 @@ export interface KeyRing {
     inputsToSign: {
       index: number;
       address: string;
-      path?: string;
+      hdPath?: string;
+      tapLeafHashesToSign?: Buffer[];
     }[],
     network: BitcoinJSNetwork,
     modularChainInfo: ModularChainInfo

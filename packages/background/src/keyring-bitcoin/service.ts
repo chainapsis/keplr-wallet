@@ -201,7 +201,8 @@ export class KeyRingBitcoinService {
           inputsToSign: {
             index: number;
             address: string;
-            path?: string;
+            hdPath?: string;
+            tapLeafHashesToSign?: Buffer[];
           }[];
         }[];
         signedPsbtsHexes: string[];
@@ -264,7 +265,8 @@ export class KeyRingBitcoinService {
           inputsToSign: {
             index: number;
             address: string;
-            path?: string;
+            hdPath?: string;
+            tapLeafHashesToSign?: Buffer[];
           }[];
         }[];
         signedPsbtsHexes: string[];
@@ -734,7 +736,8 @@ export class KeyRingBitcoinService {
                   inputsToSign: {
                     index: number;
                     address: string;
-                    path?: string;
+                    hdPath?: string;
+                    tapLeafHashesToSign?: Buffer[];
                   }[];
                 }[];
                 signedPsbtsHexes: string[];

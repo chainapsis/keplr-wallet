@@ -97,7 +97,8 @@ export class KeyRingPrivateKeyService {
     inputsToSign: {
       index: number;
       address: string;
-      path?: string;
+      hdPath?: string;
+      tapLeafHashesToSign?: NodeBuffer[];
     }[],
     network: BitcoinJSNetwork
   ): Promise<Psbt> {
