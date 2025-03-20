@@ -108,18 +108,16 @@ export class KeyRingBitcoinService {
     }
 
     const { paymentType } = this.parseChainId(chainId);
-
-    // TODO: Ledger support
-    // const isLedger = vault.insensitive["keyRingType"] === "ledger";
+    const network = this.getNetwork(chainId);
 
     const bitcoinPubKey = await this.keyRingService.getPubKeyBitcoin(
       chainId,
-      vaultId
+      vaultId,
+      network
     );
 
-    const network = this.getNetwork(chainId);
+    const address = bitcoinPubKey.getBitcoinAddress(paymentType);
 
-    const address = bitcoinPubKey.getBitcoinAddress(paymentType, network);
     if (!address) {
       throw new KeplrError("keyring", 221, "No payment address found");
     }

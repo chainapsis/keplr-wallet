@@ -9,7 +9,7 @@ import {
   PubKeySecp256k1,
   toXOnly,
 } from "@keplr-wallet/crypto";
-import { Psbt, payments } from "bitcoinjs-lib";
+import { Psbt, payments, Network as BitcoinNetwork } from "bitcoinjs-lib";
 import { taggedHash } from "bitcoinjs-lib/src/crypto";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
@@ -89,7 +89,8 @@ export class KeyRingMnemonicService {
   getPubKeyBitcoin(
     vault: Vault,
     purpose: number,
-    coinType: number
+    coinType: number,
+    network: BitcoinNetwork
   ): PubKeyBitcoinCompatible {
     const bip44Path = this.getBIP44PathFromVault(vault);
 
@@ -106,7 +107,12 @@ export class KeyRingMnemonicService {
         masterFingerprintTag
       ] as string;
 
-      return new PubKeyBitcoinCompatible(pubKey, masterFingerprint, path);
+      return new PubKeyBitcoinCompatible(
+        pubKey,
+        network,
+        masterFingerprint,
+        path
+      );
     }
 
     const privKey = this.getPrivKey(vault, purpose, coinType);
@@ -164,38 +170,49 @@ export class KeyRingMnemonicService {
       address: string;
       hdPath?: string;
       tapLeafHashesToSign?: NodeBuffer[];
-    }[]
+    }[],
+    network: BitcoinNetwork
   ): Promise<Psbt> {
     const bitcoinPubkey = this.getPrivKey(
       vault,
       purpose,
       coinType
-    ).getBitcoinPubKey();
-    const masterFingerprint = bitcoinPubkey.getMasterFingerprint();
+    ).getBitcoinPubKey(network);
+    const userAddress = bitcoinPubkey.getBitcoinAddress();
     const masterSeed = this.getMasterSeedFromVault(vault);
 
-    // Must consider partially signed psbt.
-    for (const { index, hdPath } of inputsToSign) {
-      const input = psbt.data.inputs[index];
-
-      const privKey = this.findSignerForInput(
-        psbt,
-        index,
-        masterSeed,
-        masterFingerprint,
-        hdPath
-      );
-      if (!privKey) {
-        throw new Error(`No signer found for input ${index}`);
+    for (const {
+      index,
+      address,
+      hdPath,
+      tapLeafHashesToSign,
+    } of inputsToSign) {
+      // default address와 일치하거나, hdPath를 통해 파생 키를 생성할 수 있는 경우에만 서명한다.
+      if (
+        (address !== userAddress && !hdPath) ||
+        (hdPath && !this.validateHdPath(hdPath, coinType))
+      ) {
+        throw new Error("Unable to sign psbt");
       }
 
+      const { privateKey } = Mnemonic.generatePrivateKeyFromMasterSeed(
+        masterSeed,
+        hdPath
+      );
+      const privKey = new PrivKeySecp256k1(privateKey);
       const signer = privKey.toKeyPair();
+
+      const input = psbt.data.inputs[index];
+      const isScriptPathSpending =
+        tapLeafHashesToSign && tapLeafHashesToSign.length > 0;
 
       if (this.isTaprootInput(input)) {
         let needTweak = true;
 
         // script path spending인 경우 키 트윅이 필요 없음
-        if (
+        if (isScriptPathSpending) {
+          needTweak = false;
+        } else if (
           input.tapLeafScript &&
           input.tapLeafScript.length > 0 &&
           !input.tapMerkleRoot
@@ -217,7 +234,15 @@ export class KeyRingMnemonicService {
           ? signer.tweak(taggedHash("TapTweak", tapInternalKey))
           : signer;
 
-        psbt.signTaprootInput(index, taprootSigner);
+        if (isScriptPathSpending) {
+          for (const leafHash of tapLeafHashesToSign) {
+            // 트리의 특정 리프에 대해서만 서명
+            // 스크립트 서명은 tapScriptSig에 순서대로 추가된다.
+            psbt.signTaprootInput(index, taprootSigner, leafHash);
+          }
+        } else {
+          psbt.signTaprootInput(index, taprootSigner);
+        }
 
         const isValid = psbt.validateSignaturesOfInput(
           index,
@@ -249,81 +274,6 @@ export class KeyRingMnemonicService {
     return Promise.resolve(psbt);
   }
 
-  private findSignerForInput(
-    psbt: Psbt,
-    index: number,
-    masterSeed: Buffer,
-    masterFingerprint: string | undefined,
-    explicitPath?: string
-  ): PrivKeySecp256k1 | null {
-    // 1. 명시적 경로가 있는 경우
-    if (explicitPath) {
-      const { privateKey } = Mnemonic.generatePrivateKeyFromMasterSeed(
-        masterSeed,
-        explicitPath
-      );
-      return new PrivKeySecp256k1(privateKey);
-    }
-
-    const input = psbt.data.inputs[index];
-
-    // 2. BIP32 파생 정보가 있는 경우
-    if (input.bip32Derivation && masterFingerprint) {
-      for (const derivation of input.bip32Derivation) {
-        if (
-          !NodeBuffer.from(masterFingerprint, "hex").equals(
-            derivation.masterFingerprint
-          )
-        ) {
-          continue;
-        }
-
-        const { privateKey } = Mnemonic.generatePrivateKeyFromMasterSeed(
-          masterSeed,
-          derivation.path
-        );
-        const signer = new PrivKeySecp256k1(privateKey);
-
-        if (
-          NodeBuffer.from(signer.getPubKey().toBytes()).equals(
-            derivation.pubkey
-          )
-        ) {
-          return signer;
-        }
-      }
-    }
-
-    // 3. Taproot BIP32 파생 정보가 있는 경우
-    if (input.tapBip32Derivation && masterFingerprint) {
-      for (const derivation of input.tapBip32Derivation) {
-        if (
-          !NodeBuffer.from(masterFingerprint, "hex").equals(
-            derivation.masterFingerprint
-          )
-        ) {
-          continue;
-        }
-
-        const { privateKey } = Mnemonic.generatePrivateKeyFromMasterSeed(
-          masterSeed,
-          derivation.path
-        );
-        const signer = new PrivKeySecp256k1(privateKey);
-
-        if (
-          toXOnly(NodeBuffer.from(signer.getPubKey().toBytes())).equals(
-            derivation.pubkey
-          )
-        ) {
-          return signer;
-        }
-      }
-    }
-
-    return null;
-  }
-
   private isTaprootInput(input: any): boolean {
     const isP2TR = (script: NodeBuffer): boolean => {
       try {
@@ -341,6 +291,28 @@ export class KeyRingMnemonicService {
       (input.tapBip32Derivation && input.tapBip32Derivation.length) ||
       (input.witnessUtxo && isP2TR(input.witnessUtxo.script))
     );
+  }
+
+  private validateHdPath(hdPath: string, coinType: number): boolean {
+    const segments = hdPath.split("/");
+
+    // 기본 형식 검증 (m/purpose'/coinType'/account'/change/index)
+    if (segments.length !== 6 || segments[0] !== "m") {
+      return false;
+    }
+
+    // purpose는 84' 또는 86'만 허용 (native segwit 또는 taproot)
+    if (segments[1] !== "84'" && segments[1] !== "86'") {
+      return false;
+    }
+
+    // coinType이 일치해야 한다.
+    if (segments[2] !== `${coinType}'`) {
+      return false;
+    }
+
+    // account, change, addressIndex는 일단 생략
+    return true;
   }
 
   protected getPrivKey(

@@ -106,7 +106,7 @@ export class KeyRingPrivateKeyService {
       "privateKey"
     ] as string;
     const privateKey = new PrivKeySecp256k1(Buffer.from(privateKeyText, "hex"));
-    const bitcoinPubkey = privateKey.getBitcoinPubKey();
+    const bitcoinPubkey = privateKey.getBitcoinPubKey(network);
     // private key를 사용하는 경우는 HD키 파생이 불가능하므로,
     // derivation path를 별도로 검증하지 않고 주소가 일치하는 경우에만 서명할 수 있도록 한다.
     const signer = privateKey.toKeyPair();
@@ -114,30 +114,34 @@ export class KeyRingPrivateKeyService {
     const tapInternalKey = toXOnly(signer.publicKey);
     const taprootSigner = signer.tweak(taggedHash("TapTweak", tapInternalKey));
 
-    const nativeSegwitAddress = bitcoinPubkey.getBitcoinAddress(
-      "native-segwit",
-      network
-    );
-    const taprootAddress = bitcoinPubkey.getBitcoinAddress("taproot", network);
+    const nativeSegwitAddress =
+      bitcoinPubkey.getBitcoinAddress("native-segwit");
+    const taprootAddress = bitcoinPubkey.getBitcoinAddress("taproot");
 
-    // Must consider partially signed psbt.
-    // If the input is already signed, skip signing. (in case input index is not in inputsToSign)
-    for (const { index, address } of inputsToSign) {
-      if (address !== nativeSegwitAddress && address !== taprootAddress) {
+    for (const { index, address, tapLeafHashesToSign } of inputsToSign) {
+      // 주소가 일치하지 않은데 스크립트 경로 지출도 아니면 서명이 불가능하다.
+      if (
+        address !== nativeSegwitAddress &&
+        address !== taprootAddress &&
+        !tapLeafHashesToSign
+      ) {
         throw new Error(`No matching address for input ${index}`);
       }
 
       const input = psbt.data.inputs[index];
+      const isScriptPathSpending =
+        tapLeafHashesToSign && tapLeafHashesToSign.length > 0;
 
       if (this.isTaprootInput(input)) {
         let needTweak = true;
 
-        if (
+        if (isScriptPathSpending) {
+          needTweak = false;
+        } else if (
           input.tapLeafScript &&
           input.tapLeafScript.length > 0 &&
           !input.tapMerkleRoot
         ) {
-          // script path spending: 키 tweak 필요 없음
           for (const leaf of input.tapLeafScript) {
             if (leaf.controlBlock && leaf.script) {
               needTweak = false;
@@ -146,16 +150,16 @@ export class KeyRingPrivateKeyService {
           }
         }
 
-        if (!input.tapInternalKey) {
-          input.tapInternalKey = tapInternalKey;
-        }
-
         const actualSigner = needTweak ? taprootSigner : signer;
 
-        // sign taproot
-        psbt.signTaprootInput(index, actualSigner);
+        if (isScriptPathSpending) {
+          for (const leafHash of tapLeafHashesToSign) {
+            psbt.signTaprootInput(index, actualSigner, leafHash);
+          }
+        } else {
+          psbt.signTaprootInput(index, actualSigner);
+        }
 
-        // verify taproot
         const isValid = psbt.validateSignaturesOfInput(
           index,
           (_, msgHash, signature) => {
@@ -167,13 +171,10 @@ export class KeyRingPrivateKeyService {
           throw new Error("Invalid taproot signature");
         }
 
-        // finalize input signed by this keyring
         psbt.finalizeTaprootInput(index);
       } else {
-        // sign ecdsa
         psbt.signInput(index, signer);
 
-        // verify ecdsa
         const isValid = psbt.validateSignaturesOfInput(
           index,
           (_, msgHash, signature) => {
@@ -185,7 +186,6 @@ export class KeyRingPrivateKeyService {
           throw new Error("Invalid ecdsa signature");
         }
 
-        // finalize input signed by this keyring
         psbt.finalizeInput(index);
       }
     }

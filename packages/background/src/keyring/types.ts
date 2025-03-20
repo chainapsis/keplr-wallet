@@ -43,7 +43,8 @@ export interface KeyRing {
   getPubKeyBitcoin?(
     vault: Vault,
     purpose: number,
-    coinType: number
+    coinType: number,
+    network: BitcoinNetwork
   ): PubKeyBitcoinCompatible | Promise<PubKeyBitcoinCompatible>;
   sign(
     vault: Vault,
