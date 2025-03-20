@@ -7,7 +7,7 @@ import {
   PubKeySecp256k1,
   toXOnly,
 } from "@keplr-wallet/crypto";
-import { Psbt, payments, Network as BitcoinJSNetwork } from "bitcoinjs-lib";
+import { Psbt, payments, Network as BitcoinNetwork } from "bitcoinjs-lib";
 import { taggedHash } from "bitcoinjs-lib/src/crypto";
 
 export class KeyRingPrivateKeyService {
@@ -100,7 +100,7 @@ export class KeyRingPrivateKeyService {
       hdPath?: string;
       tapLeafHashesToSign?: NodeBuffer[];
     }[],
-    network: BitcoinJSNetwork
+    network: BitcoinNetwork
   ): Promise<Psbt> {
     const privateKeyText = this.vaultService.decrypt(vault.sensitive)[
       "privateKey"

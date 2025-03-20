@@ -7,7 +7,7 @@ import { Buffer as NodeBuffer } from "buffer";
 import { Hash } from "./hash";
 import { hash as starknetHash } from "starknet";
 import { ECPairInterface, ECPairFactory } from "ecpair";
-import { Network as BitcoinJSNetwork, payments } from "bitcoinjs-lib";
+import { Network as BitcoinNetwork, payments } from "bitcoinjs-lib";
 import * as ecc from "./ecc-adapter";
 import * as bitcoin from "bitcoinjs-lib";
 
@@ -276,7 +276,7 @@ export class PubKeyBitcoinCompatible {
 
   getBitcoinAddress(
     paymentType?: "legacy" | "native-segwit" | "taproot",
-    network?: BitcoinJSNetwork
+    network?: BitcoinNetwork
   ): string | undefined {
     const pubKey = this.toBytes(false);
 

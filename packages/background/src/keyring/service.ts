@@ -25,7 +25,7 @@ import { MultiAccounts } from "../keyring-keystone";
 import { AnalyticsService } from "../analytics";
 import { Primitive } from "utility-types";
 import { runIfOnlyAppStart } from "../utils";
-import { Network as BitcoinJSNetwork, Psbt } from "bitcoinjs-lib";
+import { Network as BitcoinNetwork, Psbt } from "bitcoinjs-lib";
 import { DEFAULT_BIP44_PURPOSE } from "./constants";
 import { Buffer as NodeBuffer } from "buffer";
 
@@ -1290,7 +1290,7 @@ export class KeyRingService {
       hdPath?: string;
       tapLeafHashesToSign?: NodeBuffer[];
     }[],
-    network: BitcoinJSNetwork
+    network: BitcoinNetwork
   ) {
     if (this.vaultService.isLocked) {
       throw new Error("KeyRing is locked");
@@ -1434,7 +1434,7 @@ export class KeyRingService {
       hdPath?: string;
       tapLeafHashesToSign?: NodeBuffer[];
     }[],
-    network: BitcoinJSNetwork,
+    network: BitcoinNetwork,
     modularChainInfo: ModularChainInfo
   ) {
     if (this.vaultService.isLocked) {
