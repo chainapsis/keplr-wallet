@@ -3,11 +3,13 @@ import {
   ObservableChainQueryMap,
 } from "../../chain-query";
 import { ChainGetter } from "../../../chain";
-import { DenomTraceResponse } from "./types";
+import { DenomTraceResponse, DenomTraceV2Response } from "./types";
 import { autorun, computed } from "mobx";
 import { QuerySharedContext } from "../../../common";
 
-export class ObservableChainQueryDenomTrace extends ObservableChainQuery<DenomTraceResponse> {
+export class ObservableChainQueryDenomTrace extends ObservableChainQuery<
+  DenomTraceResponse | DenomTraceV2Response
+> {
   protected disposer?: () => void;
 
   constructor(
@@ -29,8 +31,12 @@ export class ObservableChainQueryDenomTrace extends ObservableChainQuery<DenomTr
 
     this.disposer = autorun(() => {
       const chainInfo = this.chainGetter.getChain(this.chainId);
-      if (chainInfo.features && chainInfo.features.includes("ibc-go")) {
-        this.setUrl(`/ibc/apps/transfer/v1/denom_traces/${this.hash}`);
+      if (chainInfo.features) {
+        if (chainInfo.features.includes("ibc-v2")) {
+          this.setUrl(`/ibc/apps/transfer/v1/denoms/${this.hash}`);
+        } else if (chainInfo.features.includes("ibc-go")) {
+          this.setUrl(`/ibc/apps/transfer/v1/denom_traces/${this.hash}`);
+        }
       }
     });
   }
@@ -50,6 +56,15 @@ export class ObservableChainQueryDenomTrace extends ObservableChainQuery<DenomTr
   }[] {
     if (!this.response) {
       return [];
+    }
+
+    if ("denom" in this.response.data) {
+      return this.response.data.denom.trace.map((t) => {
+        return {
+          portId: t.port_id,
+          channelId: t.channel_id,
+        };
+      });
     }
 
     const rawPaths = this.response.data.denom_trace.path.split("/");
@@ -77,6 +92,10 @@ export class ObservableChainQueryDenomTrace extends ObservableChainQuery<DenomTr
       return undefined;
     }
 
+    if ("denom" in this.response.data) {
+      return this.response.data.denom.base;
+    }
+
     return this.response.data.denom_trace.base_denom;
   }
 
@@ -101,7 +120,9 @@ export class ObservableChainQueryDenomTrace extends ObservableChainQuery<DenomTr
   }
 }
 
-export class ObservableQueryDenomTrace extends ObservableChainQueryMap<DenomTraceResponse> {
+export class ObservableQueryDenomTrace extends ObservableChainQueryMap<
+  DenomTraceResponse | DenomTraceV2Response
+> {
   constructor(
     sharedContext: QuerySharedContext,
     chainId: string,
