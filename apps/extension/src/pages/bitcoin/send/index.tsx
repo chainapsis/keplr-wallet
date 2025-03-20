@@ -159,7 +159,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
     isFetching: isFetchingAvailableUTXOs,
     error: availableUTXOsError,
     availableUTXOs,
-    // availableBalance, // TODO: send page에서 balance, fee check할 때 사용해야 함 - 어떻게 해야 할지 고민중
+    availableBalance,
   } = useGetUTXOs(chainId, sender, paymentType === "taproot", true);
 
   const sendConfigs = useSendTxConfig(
@@ -170,6 +170,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
     initialFeeRate
   );
   sendConfigs.amountConfig.setCurrency(currency);
+  sendConfigs.amountConfig.setAvailableBalance(availableBalance);
 
   // bitcoin tx size는 amount, fee rate, recipient address type에 따라 달라진다.
   // 또한 별도의 simulator refresh 로직이 없기 때문에 availableUTXOs의 값이 변경되면
@@ -574,7 +575,10 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
             historyType={historyType}
             recipientConfig={sendConfigs.recipientConfig}
           />
-          <AmountInput amountConfig={sendConfigs.amountConfig} />
+          <AmountInput
+            amountConfig={sendConfigs.amountConfig}
+            availableBalance={availableBalance}
+          />
 
           <Styles.Flex1 />
           <Gutter size="0" />

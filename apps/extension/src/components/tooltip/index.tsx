@@ -27,6 +27,7 @@ export const Tooltip: FunctionComponent<
     allowedPlacements?: ("top" | "bottom" | "left" | "right")[];
 
     forceWidth?: string;
+    hideArrow?: boolean;
 
     backgroundColor?: string;
     hideBorder?: boolean;
@@ -43,6 +44,8 @@ export const Tooltip: FunctionComponent<
   borderColor: propBorderColor,
   filter,
   children,
+  forceWidth,
+  hideArrow,
 }) => {
   const [_isOpen, setIsOpen] = useState(false);
   const isOpen = _isOpen || isAlwaysOpen;
@@ -127,6 +130,7 @@ export const Tooltip: FunctionComponent<
 
             filter,
             zIndex: 9999999,
+            width: forceWidth,
           }}
           {...getFloatingProps()}
         >
@@ -136,6 +140,9 @@ export const Tooltip: FunctionComponent<
             fill={backgroundColor}
             stroke={hideBorder ? backgroundColor : borderColor}
             strokeWidth={1}
+            style={{
+              display: hideArrow ? "none" : "block",
+            }}
           />
           <Caption2
             style={{
