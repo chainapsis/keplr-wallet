@@ -4,6 +4,9 @@ import { ChainGetter } from "@keplr-wallet/stores";
 import { action, computed, makeObservable, observable } from "mobx";
 import { useState } from "react";
 import { BitcoinQueriesStore } from "@keplr-wallet/stores-bitcoin";
+
+const DEFAULT_MAXIMUM_FEE_RATE = 1000;
+
 export class FeeRateConfig extends TxChainSetter implements IFeeRateConfig {
   // average by default as initialFeeRate is not reliable at the first time
   @observable
@@ -73,7 +76,7 @@ export class FeeRateConfig extends TxChainSetter implements IFeeRateConfig {
         return 0;
       }
 
-      return num;
+      return Math.floor(num * 1000) / 1000;
     }
 
     const feeRate = this.queriesStore.get(this.chainId).queryBitcoinFeeEstimates
@@ -103,6 +106,12 @@ export class FeeRateConfig extends TxChainSetter implements IFeeRateConfig {
     if (Number.isNaN(parsed)) {
       return {
         error: new Error("Fee rate is not valid number"),
+      };
+    }
+
+    if (parsed > DEFAULT_MAXIMUM_FEE_RATE) {
+      return {
+        error: new Error("Maximum fee rate is 1000"),
       };
     }
 
