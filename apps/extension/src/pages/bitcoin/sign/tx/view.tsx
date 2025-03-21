@@ -60,6 +60,7 @@ import {
   RemainderStatus,
 } from "@keplr-wallet/stores-bitcoin";
 import { Bech32Address } from "@keplr-wallet/cosmos";
+import { WarningBox } from "../../components/warning-box";
 
 export const SignBitcoinTxView: FunctionComponent<{
   interactionData: NonNullable<SignBitcoinTxInteractionStore["waitingData"]>;
@@ -139,7 +140,11 @@ export const SignBitcoinTxView: FunctionComponent<{
 
   // simulate 함수 안에서 불러오지 않고 커스텀 훅으로 대체해서
   // 페이지가 렌더링될 때 한 번만 호출해도 충분할 것으로 예상된다.
-  const { availableUTXOs } = useGetUTXOs(
+  const {
+    availableUTXOs,
+    isFetching: isFetchingUTXOs,
+    error: utxoError,
+  } = useGetUTXOs(
     chainId,
     senderConfig.sender,
     hasPsbtCandidate && currentPaymentType === "taproot",
@@ -307,12 +312,15 @@ export const SignBitcoinTxView: FunctionComponent<{
   const isUnableToSign = validatedPsbts.some(
     (data) => data.inputsToSign.length === 0
   );
+  const isUnableToGetUTXOs =
+    hasPsbtCandidate && !isFetchingUTXOs && !!utxoError;
 
   const buttonDisabled =
     txConfigsValidate.interactionBlocked ||
     !isInitialized ||
     !!criticalValidationError ||
-    isUnableToSign;
+    isUnableToSign ||
+    isUnableToGetUTXOs;
   const isLoading = signBitcoinTxInteractionStore.isObsoleteInteractionApproved(
     interactionData.id
   );
@@ -471,8 +479,17 @@ export const SignBitcoinTxView: FunctionComponent<{
           modularChainInfo={modularChainInfo}
           signerInfo={signerInfo}
           hasMultiplePsbts={validatedPsbts.length > 1}
+          origin={interactionData.data.origin}
         />
         <Gutter size="0.75rem" />
+        <WarningBox
+          isUnableToGetUTXOs={isUnableToGetUTXOs}
+          isPartialSign={isPartialSign}
+          isUnableToSign={isUnableToSign}
+        />
+        {isUnableToGetUTXOs || isPartialSign || isUnableToSign ? (
+          <Gutter size="0.75rem" />
+        ) : null}
         {isExternal ? (
           validatedPsbts.length > 1 ? null : (
             // TODO: 여러 psbt 처리 로직 추가 필요
@@ -501,7 +518,7 @@ const NetworkInfoBadge: FunctionComponent<{
   const theme = useTheme();
 
   return (
-    <Box marginBottom="0.5rem" alignX="center" alignY="center">
+    <Box marginY="0.25rem" alignX="center" alignY="center">
       <Box
         padding="0.375rem 0.625rem 0.375rem 0.75rem"
         backgroundColor={
@@ -544,8 +561,9 @@ const SignBitcoinTxViewHeader: FunctionComponent<{
     address: string;
   };
   hasMultiplePsbts: boolean;
+  origin: string;
 }> = observer(
-  ({ isExternal, modularChainInfo, signerInfo, hasMultiplePsbts }) => {
+  ({ isExternal, modularChainInfo, signerInfo, hasMultiplePsbts, origin }) => {
     return isExternal ? (
       <React.Fragment>
         <ArbitraryMsgSignHeader />
@@ -832,8 +850,8 @@ const SinglePsbtView: FunctionComponent<{
     };
   }, [sumInputValueByAddress, currency, fee]);
 
-  const hasMultipleInputAddresses = true;
-  // sumInputValueByAddress && sumInputValueByAddress.length > 1;
+  const hasMultipleInputAddresses =
+    sumInputValueByAddress && sumInputValueByAddress.length > 1;
 
   return (
     <React.Fragment>

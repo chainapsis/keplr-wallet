@@ -53,6 +53,7 @@ import {
   IPsbtOutput,
   RemainderStatus,
 } from "@keplr-wallet/stores-bitcoin";
+import { WarningBox } from "../components/warning-box";
 
 const Styles = {
   Flex1: styled.div`
@@ -418,6 +419,8 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
 
   const historyType = "basic-send/bitcoin";
 
+  const isUnableToGetUTXOs = !isFetchingAvailableUTXOs && !!availableUTXOsError;
+
   return (
     <HeaderLayout
       title={intl.formatMessage({ id: "page.send.amount.title" })}
@@ -446,7 +449,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
       }
       bottomButtons={[
         {
-          disabled: txConfigsValidate.interactionBlocked,
+          disabled: txConfigsValidate.interactionBlocked || isUnableToGetUTXOs,
           text: intl.formatMessage({ id: "button.next" }),
           color: "primary",
           size: "large",
@@ -578,6 +581,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
             amountConfig={sendConfigs.amountConfig}
             availableBalance={availableBalance}
           />
+          <WarningBox isUnableToGetUTXOs={isUnableToGetUTXOs} />
 
           <Styles.Flex1 />
           <Gutter size="0" />
