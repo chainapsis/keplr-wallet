@@ -18,7 +18,7 @@ import { TokenInfos } from "./token-info";
 import { RenderMessages } from "./messages";
 import { Modal } from "../../../components/modal";
 import { BuyCryptoModal } from "../components";
-import { useBuy } from "../../../hooks/use-buy";
+import { useBuySupportServiceInfos } from "../../../hooks/use-buy-support-service-infos";
 import { CoinPretty, Dec, DecUtils } from "@keplr-wallet/unit";
 import { CircleButton } from "./circle-button";
 import { AddressChip, QRCodeChip } from "./address-chip";
@@ -125,7 +125,10 @@ export const TokenDetailModal: FunctionComponent<{
   const [isReceiveOpen, setIsReceiveOpen] = React.useState(false);
   const [isOpenBuy, setIsOpenBuy] = React.useState(false);
 
-  const buySupportServiceInfos = useBuy({ chainId, currency });
+  const buySupportServiceInfos = useBuySupportServiceInfos({
+    chainId,
+    currency,
+  });
   const isSomeBuySupport = buySupportServiceInfos.some(
     (serviceInfo) => !!serviceInfo.buyUrl
   );

@@ -53,7 +53,7 @@ import {
   LogAnalyticsEventMsg,
 } from "@keplr-wallet/background";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
-import { useBuy } from "../../hooks/use-buy";
+import { useBuySupportServiceInfos } from "../../hooks/use-buy-support-service-infos";
 import { BottomTabsHeightRem } from "../../bottom-tabs";
 import { DenomHelper } from "@keplr-wallet/common";
 import { NewSidePanelHeaderTop } from "./new-side-panel-header-top";
@@ -276,7 +276,7 @@ export const MainPage: FunctionComponent<{
   const [isOpenDepositModal, setIsOpenDepositModal] = React.useState(false);
   const [isOpenBuy, setIsOpenBuy] = React.useState(false);
 
-  const buySupportServiceInfos = useBuy();
+  const buySupportServiceInfos = useBuySupportServiceInfos();
 
   const searchRef = useRef<HTMLInputElement | null>(null);
   const [search, setSearch] = useState("");
