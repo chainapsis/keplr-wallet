@@ -144,7 +144,10 @@ export class StarknetIdNameService implements NameService {
     if (
       !this.isEnabled ||
       this.value.trim().length === 0 ||
-      !this._starknetID
+      !this._starknetID ||
+      // 글자수가 길어지면 공격자가 실제 온체인 상의 주소로 이름을 생성해서
+      // 사용자가 실수로 그 주소로 트랜잭션을 보내게 할 수 있으므로 글자수를 제한한다.
+      this.value.length > 20
     ) {
       runInAction(() => {
         this._result = undefined;
