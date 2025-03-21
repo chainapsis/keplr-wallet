@@ -88,6 +88,16 @@ export class AddressBookConfig {
     });
   }
 
+  getAllAddressBook(): (AddressBookData & { chainId: string })[] {
+    const result: (AddressBookData & { chainId: string })[] = [];
+    for (const [chainId, addressBook] of this.addressBookMap.entries()) {
+      for (const data of addressBook) {
+        result.push({ ...data, chainId });
+      }
+    }
+    return result;
+  }
+
   getAddressBook(chainId: string): AddressBookData[] {
     const identifier = ChainIdHelper.parse(chainId).identifier;
     return this.addressBookMap.get(identifier) ?? [];

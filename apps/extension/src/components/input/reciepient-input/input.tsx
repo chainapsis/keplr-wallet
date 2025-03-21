@@ -38,6 +38,7 @@ export type RecipientInputProps = (
   | RecipientInputWithoutAddressBookProps
 ) & {
   bottom?: React.ReactNode;
+  onChangeCallback?: (chainId: string) => void;
 };
 
 export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
@@ -45,7 +46,7 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
     const { analyticsStore, chainStore } = useStore();
     const intl = useIntl();
     const theme = useTheme();
-    const { recipientConfig, memoConfig } = props;
+    const { recipientConfig, memoConfig, onChangeCallback } = props;
 
     const [isAddressBookModalOpen, setIsAddressBookModalOpen] =
       React.useState(false);
@@ -109,8 +110,8 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
           })()}
           autoComplete="off"
           onChange={(e) => {
+            onChangeCallback?.(e.target.value);
             recipientConfig.setValue(e.target.value);
-
             e.preventDefault();
           }}
           right={

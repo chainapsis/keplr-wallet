@@ -35,7 +35,7 @@ export const SettingContactsList: FunctionComponent = observer(() => {
   // Handle "chainId" state by search params to persist the state between page changes.
   const paramChainId = searchParams.get("chainId");
 
-  const chainId = paramChainId || chainStore.chainInfos[0].chainId;
+  const chainIdOrAll = paramChainId || "all";
   const confirm = useConfirm();
 
   useLayoutEffect(() => {
@@ -49,25 +49,35 @@ export const SettingContactsList: FunctionComponent = observer(() => {
     }
   }, [chainStore.chainInfos, paramChainId, setSearchParams]);
 
-  const items = chainStore.chainInfos
-    .map((chainInfo) => {
-      return {
-        key: chainInfo.chainId,
-        label: chainInfo.chainName,
-      };
-    })
-    .concat(
-      chainStore.modularChainInfos
-        .filter((modularChainInfo) => "starknet" in modularChainInfo)
-        .map((modularChainInfo) => {
-          return {
-            key: modularChainInfo.chainId,
-            label: modularChainInfo.chainName,
-          };
-        })
-    );
+  const items = [
+    {
+      key: "all",
+      label: "All",
+    },
+  ].concat(
+    chainStore.chainInfos
+      .map((chainInfo) => {
+        return {
+          key: chainInfo.chainId,
+          label: chainInfo.chainName,
+        };
+      })
+      .concat(
+        chainStore.modularChainInfos
+          .filter((modularChainInfo) => "starknet" in modularChainInfo)
+          .map((modularChainInfo) => {
+            return {
+              key: modularChainInfo.chainId,
+              label: modularChainInfo.chainName,
+            };
+          })
+      )
+  );
 
-  const addresses = uiConfigStore.addressBookConfig.getAddressBook(chainId);
+  const addresses =
+    chainIdOrAll === "all"
+      ? uiConfigStore.addressBookConfig.getAllAddressBook()
+      : uiConfigStore.addressBookConfig.getAddressBook(chainIdOrAll);
 
   return (
     <HeaderLayout
@@ -79,7 +89,7 @@ export const SettingContactsList: FunctionComponent = observer(() => {
           <Box width="13rem">
             <Dropdown
               items={items}
-              selectedItemKey={chainId}
+              selectedItemKey={chainIdOrAll}
               onSelect={(key) => {
                 setSearchParams(
                   { chainId: key },
@@ -100,13 +110,20 @@ export const SettingContactsList: FunctionComponent = observer(() => {
             text={intl.formatMessage({
               id: "page.setting.contacts.list.add-new-button",
             })}
-            onClick={() => navigate(`/setting/contacts/add?chainId=${chainId}`)}
+            onClick={() =>
+              navigate(`/setting/contacts/add?chainId=${chainIdOrAll}`)
+            }
           />
         </Columns>
 
         <Styles.ItemList gutter="0.5rem">
           {addresses.length > 0 ? (
             addresses.map((data, i) => {
+              const chainId =
+                "chainId" in data && chainIdOrAll === "all"
+                  ? (data.chainId as string)
+                  : data.address;
+
               return (
                 <AddressItem
                   key={i}
