@@ -300,10 +300,19 @@ export const SignBitcoinTxView: FunctionComponent<{
     feeConfig,
   });
 
+  // 입력의 일부를 서명하지 않는 경우 / 하나라도 서명할 수 없는 psbt가 있는 경우
+  const isPartialSign = validatedPsbts.some((data) =>
+    data.sumInputValueByAddress.some((input) => !input.isMine)
+  );
+  const isUnableToSign = validatedPsbts.some(
+    (data) => data.inputsToSign.length === 0
+  );
+
   const buttonDisabled =
     txConfigsValidate.interactionBlocked ||
     !isInitialized ||
-    !!criticalValidationError;
+    !!criticalValidationError ||
+    isUnableToSign;
   const isLoading = signBitcoinTxInteractionStore.isObsoleteInteractionApproved(
     interactionData.id
   );
@@ -439,7 +448,8 @@ export const SignBitcoinTxView: FunctionComponent<{
           },
         },
         {
-          isSpecial: true,
+          isSpecial: !isPartialSign, // 부분 서명하는 경우 버튼 색상 변경이 필요하므로 isSpecial을 false로 설정
+          color: isPartialSign ? "warning" : "primary",
           text: intl.formatMessage({ id: "button.approve" }),
           size: "large",
           left: !isLoading && <ApproveIcon />,
@@ -792,7 +802,6 @@ const SinglePsbtView: FunctionComponent<{
 }> = observer(({ validatedPsbt, chainId }) => {
   const theme = useTheme();
   const {
-    psbt,
     sumInputValueByAddress,
     sumOutputValueByAddress,
     decodedRawData,
@@ -823,28 +832,35 @@ const SinglePsbtView: FunctionComponent<{
     };
   }, [sumInputValueByAddress, currency, fee]);
 
-  const hasMultipleInputAddresses =
-    sumInputValueByAddress && sumInputValueByAddress.length > 1;
+  const hasMultipleInputAddresses = true;
+  // sumInputValueByAddress && sumInputValueByAddress.length > 1;
 
   return (
     <React.Fragment>
       <Box marginBottom="0.5625rem" paddingX="0.5rem">
         <Columns sum={1} alignY="center">
           <XAxis>
-            <H5
-              style={{
-                color:
-                  theme.mode === "light"
-                    ? ColorPalette["gray-500"]
-                    : ColorPalette["gray-50"],
-              }}
-            >
-              {isViewData
-                ? "PSBT Data"
-                : hasMultipleInputAddresses
-                ? `${sumInputValueByAddress?.length ?? 0} Input(s)`
-                : `${psbt?.txOutputs.length ?? 0} Output(s)`}
-            </H5>
+            {isViewData ? (
+              <H5
+                style={{
+                  color:
+                    theme.mode === "light"
+                      ? ColorPalette["gray-500"]
+                      : ColorPalette["gray-50"],
+                }}
+              >
+                PSBT Data
+              </H5>
+            ) : (
+              <AddressesWithValuesLabel
+                length={
+                  hasMultipleInputAddresses
+                    ? sumInputValueByAddress?.length ?? 0
+                    : sumOutputValueByAddress?.length ?? 0
+                }
+                suffix={hasMultipleInputAddresses ? `Input(s)` : `Output(s)`}
+              />
+            )}
           </XAxis>
           <Column weight={1} />
           <ViewDataButton
@@ -861,20 +877,17 @@ const SinglePsbtView: FunctionComponent<{
           flex: !isViewData ? "0 1 auto" : 1,
           overflowY: "auto",
           overflowX: "hidden",
-          borderRadius:
-            hasMultipleInputAddresses && !isViewData ? "0.375rem" : undefined,
-          backgroundColor:
-            hasMultipleInputAddresses && !isViewData
-              ? undefined
-              : theme.mode === "light"
+          borderRadius: isViewData ? "0.375rem" : undefined,
+          backgroundColor: isViewData
+            ? theme.mode === "light"
               ? ColorPalette.white
-              : ColorPalette["gray-600"],
-          boxShadow:
-            hasMultipleInputAddresses && !isViewData
-              ? "none"
-              : theme.mode === "light"
+              : ColorPalette["gray-600"]
+            : undefined,
+          boxShadow: isViewData
+            ? theme.mode === "light"
               ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
-              : "none",
+              : "none"
+            : undefined,
         }}
       >
         {
@@ -907,18 +920,10 @@ const SinglePsbtView: FunctionComponent<{
                   />
                   <Gutter size="0.75rem" />
                   <Box marginBottom="0.5625rem" paddingX="0.5rem">
-                    <Columns sum={1} alignY="center">
-                      <H5
-                        style={{
-                          color:
-                            theme.mode === "light"
-                              ? ColorPalette["gray-500"]
-                              : ColorPalette["gray-50"],
-                        }}
-                      >
-                        {`${psbt?.txOutputs.length ?? 0} Output(s)`}
-                      </H5>
-                    </Columns>
+                    <AddressesWithValuesLabel
+                      length={sumOutputValueByAddress?.length ?? 0}
+                      suffix="Output(s)"
+                    />
                   </Box>
                 </React.Fragment>
               )}
@@ -939,6 +944,40 @@ const SinglePsbtView: FunctionComponent<{
       <TotalSpend totalSpend={totalSpend} />
       <Gutter size="0.25rem" />
     </React.Fragment>
+  );
+});
+
+const AddressesWithValuesLabel: FunctionComponent<{
+  length: number;
+  suffix: string;
+  warn?: boolean;
+}> = observer(({ length, suffix, warn }) => {
+  const theme = useTheme();
+  return (
+    <Columns sum={1} alignY="center">
+      <H5
+        style={{
+          color: warn
+            ? ColorPalette["yellow-400"]
+            : theme.mode === "light"
+            ? ColorPalette["blue-400"]
+            : ColorPalette["blue-300"],
+        }}
+      >
+        {length}
+      </H5>
+      <Gutter size="0.25rem" />
+      <H5
+        style={{
+          color:
+            theme.mode === "light"
+              ? ColorPalette["gray-500"]
+              : ColorPalette["gray-50"],
+        }}
+      >
+        {suffix}
+      </H5>
+    </Columns>
   );
 });
 
@@ -970,6 +1009,7 @@ const AddressesWithValues: FunctionComponent<{
           theme.mode === "light"
             ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
             : "none",
+        maxHeight: sumValueByAddress.length >= 4 ? "7.875rem" : undefined,
       }}
     >
       <Box
@@ -991,10 +1031,10 @@ const AddressesWithValues: FunctionComponent<{
               <Subtitle3
                 style={{
                   color: isUnsignable
-                    ? ColorPalette["yellow-300"]
+                    ? ColorPalette["yellow-400"]
                     : theme.mode === "light"
-                    ? ColorPalette["gray-500"]
-                    : ColorPalette["gray-50"],
+                    ? ColorPalette["gray-400"]
+                    : ColorPalette["white"],
                 }}
               >
                 {Bech32Address.shortenAddress(data.address, 20)}
@@ -1003,8 +1043,8 @@ const AddressesWithValues: FunctionComponent<{
               <Body2
                 color={
                   theme.mode === "light"
-                    ? ColorPalette["gray-400"]
-                    : ColorPalette["gray-50"]
+                    ? ColorPalette["gray-300"]
+                    : ColorPalette["gray-200"]
                 }
               >
                 {new CoinPretty(currency, data.value)
