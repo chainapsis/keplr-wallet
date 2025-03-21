@@ -7,7 +7,7 @@ import {
   PubKeySecp256k1,
   toXOnly,
 } from "@keplr-wallet/crypto";
-import { Psbt, payments } from "bitcoinjs-lib";
+import { Psbt, payments, Network as BitcoinNetwork } from "bitcoinjs-lib";
 import { taggedHash } from "bitcoinjs-lib/src/crypto";
 
 export class KeyRingPrivateKeyService {
@@ -54,6 +54,7 @@ export class KeyRingPrivateKeyService {
 
   sign(
     vault: Vault,
+    _purpose: number,
     _coinType: number,
     data: Uint8Array,
     digestMethod: "sha256" | "keccak256" | "hash256" | "noop"
@@ -90,60 +91,79 @@ export class KeyRingPrivateKeyService {
 
   signPsbt(
     vault: Vault,
+    _purpose: number,
     _coinType: number,
     psbt: Psbt,
-    inputsToSign: number[]
+    inputsToSign: {
+      index: number;
+      address: string;
+      hdPath?: string;
+      tapLeafHashesToSign?: NodeBuffer[];
+    }[],
+    network: BitcoinNetwork
   ): Promise<Psbt> {
     const privateKeyText = this.vaultService.decrypt(vault.sensitive)[
       "privateKey"
     ] as string;
     const privateKey = new PrivKeySecp256k1(Buffer.from(privateKeyText, "hex"));
+    const bitcoinPubkey = privateKey.getBitcoinPubKey(network);
+    // private key를 사용하는 경우는 HD키 파생이 불가능하므로,
+    // derivation path를 별도로 검증하지 않고 주소가 일치하는 경우에만 서명할 수 있도록 한다.
     const signer = privateKey.toKeyPair();
+
     const tapInternalKey = toXOnly(signer.publicKey);
     const taprootSigner = signer.tweak(taggedHash("TapTweak", tapInternalKey));
 
-    const isP2TR = (script: NodeBuffer): boolean => {
-      try {
-        payments.p2tr({ output: script });
-        return true;
-      } catch (err) {
-        return false;
-      }
-    };
+    const nativeSegwitAddress =
+      bitcoinPubkey.getBitcoinAddress("native-segwit");
+    const taprootAddress = bitcoinPubkey.getBitcoinAddress("taproot");
 
-    const isTaprootInput = (input: any) => {
+    for (const { index, address, tapLeafHashesToSign } of inputsToSign) {
+      // 주소가 일치하지 않은데 스크립트 경로 지출도 아니면 서명이 불가능하다.
       if (
-        !!(
-          input.tapInternalKey ||
-          input.tapMerkleRoot ||
-          (input.tapLeafScript && input.tapLeafScript.length) ||
-          (input.tapBip32Derivation && input.tapBip32Derivation.length) ||
-          (input.witnessUtxo && isP2TR(input.witnessUtxo.script))
-        )
+        address !== nativeSegwitAddress &&
+        address !== taprootAddress &&
+        !tapLeafHashesToSign
       ) {
-        return true;
+        throw new Error(`No matching address for input ${index}`);
       }
-      return false;
-    };
 
-    // Must consider partially signed psbt.
-    // If the input is already signed, skip signing. (in case input index is not in inputsToSign)
-    for (const index of inputsToSign) {
       const input = psbt.data.inputs[index];
+      const isScriptPathSpending =
+        tapLeafHashesToSign && tapLeafHashesToSign.length > 0;
 
-      if (isTaprootInput(input)) {
-        if (!input.tapInternalKey) {
-          input.tapInternalKey = tapInternalKey;
+      if (this.isTaprootInput(input)) {
+        let needTweak = true;
+
+        if (isScriptPathSpending) {
+          needTweak = false;
+        } else if (
+          input.tapLeafScript &&
+          input.tapLeafScript.length > 0 &&
+          !input.tapMerkleRoot
+        ) {
+          for (const leaf of input.tapLeafScript) {
+            if (leaf.controlBlock && leaf.script) {
+              needTweak = false;
+              break;
+            }
+          }
         }
 
-        // sign taproot
-        psbt.signTaprootInput(index, taprootSigner);
+        const actualSigner = needTweak ? taprootSigner : signer;
 
-        // verify taproot
+        if (isScriptPathSpending) {
+          for (const leafHash of tapLeafHashesToSign) {
+            psbt.signTaprootInput(index, actualSigner, leafHash);
+          }
+        } else {
+          psbt.signTaprootInput(index, actualSigner);
+        }
+
         const isValid = psbt.validateSignaturesOfInput(
           index,
           (_, msgHash, signature) => {
-            return taprootSigner.verifySchnorr(msgHash, signature);
+            return actualSigner.verifySchnorr(msgHash, signature);
           }
         );
 
@@ -151,13 +171,10 @@ export class KeyRingPrivateKeyService {
           throw new Error("Invalid taproot signature");
         }
 
-        // finalize input signed by this keyring
         psbt.finalizeTaprootInput(index);
       } else {
-        // sign ecdsa
         psbt.signInput(index, signer);
 
-        // verify ecdsa
         const isValid = psbt.validateSignaturesOfInput(
           index,
           (_, msgHash, signature) => {
@@ -169,11 +186,29 @@ export class KeyRingPrivateKeyService {
           throw new Error("Invalid ecdsa signature");
         }
 
-        // finalize input signed by this keyring
         psbt.finalizeInput(index);
       }
     }
 
     return Promise.resolve(psbt);
+  }
+
+  private isTaprootInput(input: any): boolean {
+    const isP2TR = (script: NodeBuffer): boolean => {
+      try {
+        payments.p2tr({ output: script });
+        return true;
+      } catch (err) {
+        return false;
+      }
+    };
+
+    return !!(
+      input.tapInternalKey ||
+      input.tapMerkleRoot ||
+      (input.tapLeafScript && input.tapLeafScript.length) ||
+      (input.tapBip32Derivation && input.tapBip32Derivation.length) ||
+      (input.witnessUtxo && isP2TR(input.witnessUtxo.script))
+    );
   }
 }

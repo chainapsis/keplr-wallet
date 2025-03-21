@@ -20,49 +20,9 @@ import { Box } from "../../../../../components/box";
 import { VerticalResizeTransition } from "../../../../../components/transition";
 import { FormattedMessage, useIntl } from "react-intl";
 import { XAxis, YAxis } from "../../../../../components/axis";
-import { UIConfigStore } from "../../../../../stores/ui-config";
 import { Tooltip } from "../../../../../components/tooltip";
 import { Modal } from "../../../../../components/modal";
 import { TransactionFeeModal } from "../../transaction-fee-modal";
-
-// 기본적으로 `FeeControl` 안에 있는 로직이였지만 `FeeControl` 말고도 다른 UI를 가진 똑같은 기능의 component가
-// 여러개 생기게 되면서 공통적으로 사용하기 위해서 custom hook으로 분리함
-export const useFeeOptionSelectionOnInit = (
-  _uiConfigStore: UIConfigStore,
-  _feeConfig: IFeeConfig,
-  _disableAutomaticFeeSet: boolean | undefined
-) => {
-  // TODO
-  // useLayoutEffect(() => {
-  //   if (disableAutomaticFeeSet) {
-  //     return;
-  //   }
-  //
-  //   if (
-  //     feeConfig.fees.length === 0 &&
-  //     feeConfig.selectableFeeCurrencies.length > 0
-  //   ) {
-  //     if (uiConfigStore.rememberLastFeeOption && uiConfigStore.lastFeeOption) {
-  //       feeConfig.setFee({
-  //         type: uiConfigStore.lastFeeOption,
-  //         currency: feeConfig.selectableFeeCurrencies[0],
-  //       });
-  //     } else {
-  //       feeConfig.setFee({
-  //         type: "average",
-  //         currency: feeConfig.selectableFeeCurrencies[0],
-  //       });
-  //     }
-  //   }
-  // }, [
-  //   disableAutomaticFeeSet,
-  //   feeConfig,
-  //   feeConfig.fees,
-  //   feeConfig.selectableFeeCurrencies,
-  //   uiConfigStore.lastFeeOption,
-  //   uiConfigStore.rememberLastFeeOption,
-  // ]);
-};
 
 export const FeeControl: FunctionComponent<{
   senderConfig: ISenderConfig;
@@ -81,16 +41,10 @@ export const FeeControl: FunctionComponent<{
     disableAutomaticFeeSet,
     disableClick,
   }) => {
-    const { analyticsStore, priceStore, uiConfigStore } = useStore();
+    const { analyticsStore, priceStore } = useStore();
 
     const intl = useIntl();
     const theme = useTheme();
-
-    useFeeOptionSelectionOnInit(
-      uiConfigStore,
-      feeConfig,
-      disableAutomaticFeeSet
-    );
 
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -360,7 +314,3 @@ export const FeeControl: FunctionComponent<{
     );
   }
 );
-
-// const noop = (..._args: any[]) => {
-//   // noop
-// };

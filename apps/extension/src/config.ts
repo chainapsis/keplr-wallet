@@ -3183,9 +3183,12 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     bitcoin: {
       chainId:
         "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
-      rpc: "http://37.27.229.203:50001",
-      rest: "http://37.27.229.203:50011",
-      coinType: 0,
+      rpc: "",
+      rest: "https://api-indexer-bitcoin.keplr.app",
+      bip44: {
+        coinType: 0,
+        purpose: 86,
+      },
       currencies: [
         {
           coinDenom: "BTC",
@@ -3209,9 +3212,12 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     bitcoin: {
       chainId:
         "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
-      rpc: "http://37.27.229.203:50001",
-      rest: "http://37.27.229.203:50001",
-      coinType: 0,
+      rpc: "",
+      rest: "https://api-indexer-bitcoin.keplr.app",
+      bip44: {
+        coinType: 0,
+        purpose: 84,
+      },
       currencies: [
         {
           coinDenom: "BTC",
@@ -3237,7 +3243,10 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943",
       rpc: "",
       rest: "https://blockstream.info/testnet/api",
-      coinType: 1,
+      bip44: {
+        coinType: 1,
+        purpose: 86,
+      },
       currencies: [
         {
           coinDenom: "tBTC",
@@ -3262,7 +3271,10 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943",
       rpc: "",
       rest: "https://blockstream.info/testnet/api",
-      coinType: 1,
+      bip44: {
+        coinType: 1,
+        purpose: 84,
+      },
       currencies: [
         {
           coinDenom: "tBTC",
@@ -3287,7 +3299,10 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6",
       rpc: "",
       rest: "https://explorer.bc-2.jp/api",
-      coinType: 1,
+      bip44: {
+        coinType: 1,
+        purpose: 86,
+      },
       currencies: [
         {
           coinDenom: "sBTC",
@@ -3313,7 +3328,10 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6",
       rpc: "",
       rest: "https://explorer.bc-2.jp/api",
-      coinType: 1,
+      bip44: {
+        coinType: 1,
+        purpose: 84,
+      },
       currencies: [
         {
           coinDenom: "sBTC",

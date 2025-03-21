@@ -7,7 +7,11 @@ import {
   KeyRingStatus,
 } from "./types";
 import { Env, WEBPAGE_PORT } from "@keplr-wallet/router";
-import { PubKeySecp256k1, PubKeyStarknet } from "@keplr-wallet/crypto";
+import {
+  PubKeyBitcoinCompatible,
+  PubKeySecp256k1,
+  PubKeyStarknet,
+} from "@keplr-wallet/crypto";
 import { ChainsService } from "../chains";
 import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 import { KVStore } from "@keplr-wallet/common";
@@ -21,7 +25,9 @@ import { MultiAccounts } from "../keyring-keystone";
 import { AnalyticsService } from "../analytics";
 import { Primitive } from "utility-types";
 import { runIfOnlyAppStart } from "../utils";
-import { Psbt } from "bitcoinjs-lib";
+import { Network as BitcoinNetwork, Psbt } from "bitcoinjs-lib";
+import { DEFAULT_BIP44_PURPOSE } from "./constants";
+import { Buffer as NodeBuffer } from "buffer";
 
 export class KeyRingService {
   protected _needMigration = false;
@@ -639,7 +645,7 @@ export class KeyRingService {
     }
     if ("bitcoin" in modularChainInfo) {
       const chainInfo = modularChainInfo.bitcoin;
-      if (chainInfo.coinType !== coinType) {
+      if (chainInfo.bip44.coinType !== coinType) {
         throw new Error("Coin type is not associated to chain");
       }
     }
@@ -1041,6 +1047,17 @@ export class KeyRingService {
       throw new Error("Vault is null");
     }
 
+    const purpose =
+      (() => {
+        if ("cosmos" in modularChainInfo) {
+          return modularChainInfo.cosmos.bip44.purpose;
+        }
+
+        if ("bitcoin" in modularChainInfo) {
+          return modularChainInfo.bitcoin.bip44.purpose;
+        }
+      })() ?? DEFAULT_BIP44_PURPOSE;
+
     const coinTypeTag = `keyRing-${
       ChainIdHelper.parse(chainId).identifier
     }-coinType`;
@@ -1061,13 +1078,13 @@ export class KeyRingService {
       }
 
       if ("bitcoin" in modularChainInfo) {
-        return modularChainInfo.bitcoin.coinType;
+        return modularChainInfo.bitcoin.bip44.coinType;
       }
 
       throw new Error("Can't determine default coin type");
     })();
 
-    return this.getPubKeyWithVault(vault, coinType, modularChainInfo);
+    return this.getPubKeyWithVault(vault, purpose, coinType, modularChainInfo);
   }
 
   getPubKeyStarknet(chainId: string, vaultId: string): Promise<PubKeyStarknet> {
@@ -1086,9 +1103,59 @@ export class KeyRingService {
     return this.getStarknetPubKeyWithVault(vault, modularChainInfo);
   }
 
+  getPubKeyBitcoin(
+    chainId: string,
+    vaultId: string,
+    network: BitcoinNetwork
+  ): Promise<PubKeyBitcoinCompatible> {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
+    const modularChainInfo =
+      this.chainsService.getModularChainInfoOrThrow(chainId);
+
+    const vault = this.vaultService.getVault("keyRing", vaultId);
+    if (!vault) {
+      throw new Error("Vault is null");
+    }
+
+    const purpose =
+      (() => {
+        if ("bitcoin" in modularChainInfo) {
+          return modularChainInfo.bitcoin.bip44.purpose;
+        }
+      })() ?? DEFAULT_BIP44_PURPOSE;
+
+    const coinTypeTag = `keyRing-${
+      ChainIdHelper.parse(chainId).identifier
+    }-coinType`;
+
+    const coinType = (() => {
+      if (vault.insensitive[coinTypeTag]) {
+        return vault.insensitive[coinTypeTag] as number;
+      }
+
+      if ("bitcoin" in modularChainInfo) {
+        return modularChainInfo.bitcoin.bip44.coinType;
+      }
+
+      throw new Error("Can't determine default coin type");
+    })();
+
+    return this.getPubKeyBitcoinWithVault(
+      vault,
+      purpose,
+      coinType,
+      network,
+      modularChainInfo
+    );
+  }
+
   getPubKeyWithNotFinalizedCoinType(
     chainId: string,
     vaultId: string,
+    purpose: number,
     coinType: number
   ): Promise<PubKeySecp256k1> {
     if (this.vaultService.isLocked) {
@@ -1114,7 +1181,7 @@ export class KeyRingService {
         throw new Error("Coin type is not associated to chain");
       }
     } else if ("bitcoin" in modularChainInfo) {
-      if (modularChainInfo.bitcoin.coinType !== coinType) {
+      if (modularChainInfo.bitcoin.bip44.coinType !== coinType) {
         throw new Error("Coin type is not associated to chain");
       }
     } else {
@@ -1141,7 +1208,7 @@ export class KeyRingService {
       throw new Error("Coin type is already finalized");
     }
 
-    return this.getPubKeyWithVault(vault, coinType, modularChainInfo);
+    return this.getPubKeyWithVault(vault, purpose, coinType, modularChainInfo);
   }
 
   sign(
@@ -1166,6 +1233,17 @@ export class KeyRingService {
       throw new Error("Vault is null");
     }
 
+    const purpose =
+      (() => {
+        if ("cosmos" in modularChainInfo) {
+          return modularChainInfo.cosmos.bip44.purpose;
+        }
+
+        if ("bitcoin" in modularChainInfo) {
+          return modularChainInfo.bitcoin.bip44.purpose;
+        }
+      })() ?? DEFAULT_BIP44_PURPOSE;
+
     const coinType = (() => {
       if ("cosmos" in modularChainInfo) {
         const coinTypeTag = `keyRing-${
@@ -1182,7 +1260,7 @@ export class KeyRingService {
         //       일단은 임시조치인데 나중에 다른 방식으로 바뀔수도 있다.
         return 9004;
       } else if ("bitcoin" in modularChainInfo) {
-        return modularChainInfo.bitcoin.coinType;
+        return modularChainInfo.bitcoin.bip44.coinType;
       } else {
         throw new Error("Can't determine default coin type");
       }
@@ -1190,6 +1268,7 @@ export class KeyRingService {
 
     const signature = this.signWithVault(
       vault,
+      purpose,
       coinType,
       data,
       digestMethod,
@@ -1207,7 +1286,13 @@ export class KeyRingService {
     chainId: string,
     vaultId: string,
     psbt: Psbt,
-    inputsToSign: number[]
+    inputsToSign: {
+      index: number;
+      address: string;
+      hdPath?: string;
+      tapLeafHashesToSign?: NodeBuffer[];
+    }[],
+    network: BitcoinNetwork
   ) {
     if (this.vaultService.isLocked) {
       throw new Error("KeyRing is locked");
@@ -1221,9 +1306,16 @@ export class KeyRingService {
       throw new Error("Vault is null");
     }
 
+    const purpose =
+      (() => {
+        if ("bitcoin" in modularChainInfo) {
+          return modularChainInfo.bitcoin.bip44.purpose;
+        }
+      })() ?? DEFAULT_BIP44_PURPOSE;
+
     const coinType = (() => {
       if ("bitcoin" in modularChainInfo) {
-        return modularChainInfo.bitcoin.coinType;
+        return modularChainInfo.bitcoin.bip44.coinType;
       }
 
       throw new Error("Can't determine default coin type");
@@ -1231,9 +1323,11 @@ export class KeyRingService {
 
     const signedPsbt = this.signPsbtWithVault(
       vault,
+      purpose,
       coinType,
       psbt,
       inputsToSign,
+      network,
       modularChainInfo
     );
 
@@ -1263,6 +1357,7 @@ export class KeyRingService {
 
   getPubKeyWithVault(
     vault: Vault,
+    purpose: number,
     coinType: number,
     modularChainInfo: ModularChainInfo
   ): Promise<PubKeySecp256k1> {
@@ -1273,12 +1368,41 @@ export class KeyRingService {
     const keyRing = this.getVaultKeyRing(vault);
 
     return Promise.resolve(
-      keyRing.getPubKey(vault, coinType, modularChainInfo)
+      keyRing.getPubKey(vault, purpose, coinType, modularChainInfo)
     );
   }
 
+  getPubKeyBitcoinWithVault(
+    vault: Vault,
+    purpose: number,
+    coinType: number,
+    network: BitcoinNetwork,
+    modularChainInfo: ModularChainInfo
+  ): Promise<PubKeyBitcoinCompatible> {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
+    const keyRing = this.getVaultKeyRing(vault);
+
+    if (typeof keyRing.getPubKeyBitcoin !== "function") {
+      console.log("getPubKeyBitcoin using getPubKey");
+
+      return Promise.resolve(
+        (async () =>
+          (
+            await keyRing.getPubKey(vault, purpose, coinType, modularChainInfo)
+          ).toBitcoinPubKey(network))()
+      );
+    }
+
+    return Promise.resolve(
+      keyRing.getPubKeyBitcoin(vault, purpose, coinType, network)
+    );
+  }
   signWithVault(
     vault: Vault,
+    purpose: number,
     coinType: number,
     data: Uint8Array,
     digestMethod: "sha256" | "keccak256" | "hash256" | "noop",
@@ -1295,15 +1419,29 @@ export class KeyRingService {
     const keyRing = this.getVaultKeyRing(vault);
 
     return Promise.resolve(
-      keyRing.sign(vault, coinType, data, digestMethod, modularChainInfo)
+      keyRing.sign(
+        vault,
+        purpose,
+        coinType,
+        data,
+        digestMethod,
+        modularChainInfo
+      )
     );
   }
 
   signPsbtWithVault(
     vault: Vault,
+    purpose: number,
     coinType: number,
     psbt: Psbt,
-    inputsToSign: number[],
+    inputsToSign: {
+      index: number;
+      address: string;
+      hdPath?: string;
+      tapLeafHashesToSign?: NodeBuffer[];
+    }[],
+    network: BitcoinNetwork,
     modularChainInfo: ModularChainInfo
   ) {
     if (this.vaultService.isLocked) {
@@ -1317,7 +1455,15 @@ export class KeyRingService {
     }
 
     return Promise.resolve(
-      keyRing.signPsbt(vault, coinType, psbt, inputsToSign, modularChainInfo)
+      keyRing.signPsbt(
+        vault,
+        purpose,
+        coinType,
+        psbt,
+        inputsToSign,
+        network,
+        modularChainInfo
+      )
     );
   }
 
@@ -1750,6 +1896,7 @@ export class KeyRingService {
       key.startsWith("pubKey-m/")
     ) {
       // if mnemonic
+      const purpose = DEFAULT_BIP44_PURPOSE; // modularChainInfo(bitcoin 등)가 아닌 경우, 기본적으로 44' 경로를 사용
       const coinType = (() => {
         const coinTypeTag = `keyRing-${
           ChainIdHelper.parse(chainInfo.chainId).identifier
@@ -1768,7 +1915,7 @@ export class KeyRingService {
       if (
         bip44Path &&
         key ===
-          `pubKey-m/44'/${coinType}'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`
+          `pubKey-m/${purpose}'/${coinType}'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`
       ) {
         publicKeyText = value;
       }
@@ -1786,21 +1933,23 @@ export class KeyRingService {
   }
 
   static parseBIP44Path(bip44Path: string): {
+    purpose: number;
     coinType: number;
     path: BIP44HDPath;
   } {
-    const metches = RegExp(/^m\/44'\/(\d+)'\/(\d+)'\/(\d+)\/(\d+)$/i).exec(
+    const metches = RegExp(/^m\/(\d+)'\/(\d+)'\/(\d+)'\/(\d+)\/(\d+)$/i).exec(
       bip44Path
     );
     if (!metches) {
       throw new Error("Invalid BIP44 hd path");
     }
     return {
-      coinType: +metches[1],
+      purpose: +metches[1],
+      coinType: +metches[2],
       path: {
-        account: +metches[2],
-        change: +metches[3],
-        addressIndex: +metches[4],
+        account: +metches[3],
+        change: +metches[4],
+        addressIndex: +metches[5],
       },
     };
   }

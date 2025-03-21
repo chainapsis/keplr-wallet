@@ -135,25 +135,32 @@ describe("Test priv key", () => {
   it("test bitcoin address", () => {
     const mnemonic =
       "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about";
+    const path = `m/44'/118'/0'/0/0`;
 
-    const privKey = new PrivKeySecp256k1(
-      Mnemonic.generateWalletFromMnemonic(mnemonic)
-    );
+    const { privateKey, masterFingerprint } =
+      Mnemonic.generatePrivateKeyFromMasterSeed(
+        Mnemonic.generateMasterSeedFromMnemonic(mnemonic),
+        path
+      );
+
+    const privKey = new PrivKeySecp256k1(privateKey, masterFingerprint, path);
 
     const bitcoinPubKey = privKey.getBitcoinPubKey();
 
-    const legacyAddressUncompressed = bitcoinPubKey.getLegacyAddress(true);
+    expect(bitcoinPubKey.getMasterFingerprint()).not.toBeUndefined();
+    expect(bitcoinPubKey.getMasterFingerprint()).toBe(masterFingerprint);
 
-    expect(legacyAddressUncompressed).not.toBeUndefined();
-    expect(legacyAddressUncompressed?.startsWith("1")).toBe(true);
-    expect(legacyAddressUncompressed).toBe("1z5bFTcS7zfCHHKk3kXjvBNr6hMMNQYjh");
-    const legacyAddressCompressed = bitcoinPubKey.getLegacyAddress(false);
+    expect(bitcoinPubKey.getPath()).not.toBeUndefined();
+    expect(bitcoinPubKey.getPath()).toBe(path);
 
-    expect(legacyAddressCompressed).not.toBeUndefined();
-    expect(legacyAddressCompressed?.startsWith("1")).toBe(true);
-    expect(legacyAddressCompressed).toBe("14jmwUEdEZ7Bn3ksbhceZryVdkbbdSCsMU");
+    const legacyAddress = bitcoinPubKey.getBitcoinAddress("legacy");
 
-    const nativeSegwitAddress = bitcoinPubKey.getNativeSegwitAddress();
+    expect(legacyAddress).not.toBeUndefined();
+    expect(legacyAddress?.startsWith("1")).toBe(true);
+    expect(legacyAddress).toBe("14jmwUEdEZ7Bn3ksbhceZryVdkbbdSCsMU");
+
+    const nativeSegwitAddress =
+      bitcoinPubKey.getBitcoinAddress("native-segwit");
 
     expect(nativeSegwitAddress).not.toBeUndefined();
     expect(nativeSegwitAddress?.startsWith("bc1q")).toBe(true);
@@ -161,13 +168,23 @@ describe("Test priv key", () => {
       "bc1q9rl4cm2hmr8afy4kldpxz3fka4jguq0a26nkmc"
     );
 
-    const taprootAddress = bitcoinPubKey.getTaprootAddress();
+    const taprootAddress = bitcoinPubKey.getBitcoinAddress("taproot");
 
     expect(taprootAddress).not.toBeUndefined();
     expect(taprootAddress?.startsWith("bc1p")).toBe(true);
     expect(taprootAddress).toBe(
       "bc1ps0m23ua63lejktfq0vf9dp603q4h7l4tkcc4n644uph5ccjkjs8suu99pl"
     );
+
+    const defaultAddress = bitcoinPubKey.getBitcoinAddress(); // 44 for legacy
+
+    expect(defaultAddress).not.toBeUndefined();
+    expect(defaultAddress?.startsWith("1")).toBe(true);
+    expect(defaultAddress).toBe("14jmwUEdEZ7Bn3ksbhceZryVdkbbdSCsMU");
+
+    const noDefaultAddressPubKey = privKey.getPubKey().toBitcoinPubKey();
+
+    expect(noDefaultAddressPubKey.getBitcoinAddress()).toBeUndefined();
   });
 
   it("test dogecoin address", () => {
@@ -177,8 +194,6 @@ describe("Test priv key", () => {
     const privKey = new PrivKeySecp256k1(
       Mnemonic.generateWalletFromMnemonic(mnemonic)
     );
-
-    const dogecoinPubKey = privKey.getBitcoinPubKey();
 
     const dogecoinMainnet = {
       messagePrefix: "\x19Dogecoin Signed Message:\n",
@@ -192,24 +207,12 @@ describe("Test priv key", () => {
       wif: 0x9e, // 158
     };
 
-    const legacyAddressUncompressed = dogecoinPubKey.getLegacyAddress(
-      true,
-      dogecoinMainnet
-    );
+    const dogecoinPubKey = privKey.getBitcoinPubKey(dogecoinMainnet);
 
-    expect(legacyAddressUncompressed).not.toBeUndefined();
-    expect(legacyAddressUncompressed?.startsWith("D")).toBe(true);
-    expect(legacyAddressUncompressed).toBe(
-      "D68B8WQFjXtwjHTvUdk6HgLyjERecjVEYX"
-    );
+    const legacyAddress = dogecoinPubKey.getBitcoinAddress("legacy");
 
-    const legacyAddressCompressed = dogecoinPubKey.getLegacyAddress(
-      false,
-      dogecoinMainnet
-    );
-
-    expect(legacyAddressCompressed).not.toBeUndefined();
-    expect(legacyAddressCompressed?.startsWith("D")).toBe(true);
-    expect(legacyAddressCompressed).toBe("D8ssUjBGXy1UK3wULHcD7d96WtKtus5My3");
+    expect(legacyAddress).not.toBeUndefined();
+    expect(legacyAddress?.startsWith("D")).toBe(true);
+    expect(legacyAddress).toBe("D8ssUjBGXy1UK3wULHcD7d96WtKtus5My3");
   });
 });

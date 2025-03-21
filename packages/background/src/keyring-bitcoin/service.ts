@@ -17,7 +17,6 @@ import {
 } from "@keplr-wallet/types";
 import { Env, KeplrError } from "@keplr-wallet/router";
 import { Psbt, payments } from "bitcoinjs-lib";
-import { mainnet, signet, testnet } from "./constants";
 import { encodeLegacyMessage, encodeLegacySignature } from "./helper";
 import { toXOnly } from "@keplr-wallet/crypto";
 import { BIP322 } from "./bip322";
@@ -26,6 +25,7 @@ import { BackgroundTxService } from "../tx";
 import validate, {
   Network as BitcoinNetwork,
 } from "bitcoin-address-validation";
+import { mainnet, signet, testnet } from "./constants";
 
 const DUST_THRESHOLD = 546;
 export class KeyRingBitcoinService {
@@ -51,6 +51,8 @@ export class KeyRingBitcoinService {
     address: string;
     paymentType: SupportedPaymentType;
     isNanoLedger: boolean;
+    masterFingerprintHex?: string;
+    derivationPath?: string;
   }> {
     const keyInfo = this.keyRingService.getKeyInfo(vaultId);
     if (!keyInfo) {
@@ -65,6 +67,8 @@ export class KeyRingBitcoinService {
       address: params.address,
       paymentType: params.paymentType,
       isNanoLedger: keyInfo.type === "ledger",
+      masterFingerprintHex: params.masterFingerprintHex,
+      derivationPath: params.derivationPath,
     };
   }
 
@@ -74,6 +78,8 @@ export class KeyRingBitcoinService {
     address: string;
     paymentType: SupportedPaymentType;
     isNanoLedger: boolean;
+    masterFingerprintHex?: string;
+    derivationPath?: string;
   }> {
     return await this.getBitcoinKey(
       this.keyRingService.selectedVaultId,
@@ -88,6 +94,8 @@ export class KeyRingBitcoinService {
     pubKey: Uint8Array;
     address: string;
     paymentType: SupportedPaymentType;
+    masterFingerprintHex?: string;
+    derivationPath?: string;
   }> {
     const chainInfo = this.chainsService.getModularChainInfoOrThrow(chainId);
     if (!("bitcoin" in chainInfo)) {
@@ -100,29 +108,15 @@ export class KeyRingBitcoinService {
     }
 
     const { paymentType } = this.parseChainId(chainId);
-
-    // TODO: Ledger support
-    // const isLedger = vault.insensitive["keyRingType"] === "ledger";
-
-    const bitcoinPubKey = (
-      await this.keyRingService.getPubKey(chainId, vaultId)
-    ).toBitcoinPubKey();
-
     const network = this.getNetwork(chainId);
 
-    let address: string | undefined;
+    const bitcoinPubKey = await this.keyRingService.getPubKeyBitcoin(
+      chainId,
+      vaultId,
+      network
+    );
 
-    if (paymentType === "native-segwit") {
-      const nativeSegwitAddress = bitcoinPubKey.getNativeSegwitAddress(network);
-      if (nativeSegwitAddress) {
-        address = nativeSegwitAddress;
-      }
-    } else {
-      const taprootAddress = bitcoinPubKey.getTaprootAddress(network);
-      if (taprootAddress) {
-        address = taprootAddress;
-      }
-    }
+    const address = bitcoinPubKey.getBitcoinAddress(paymentType);
 
     if (!address) {
       throw new KeplrError("keyring", 221, "No payment address found");
@@ -132,6 +126,9 @@ export class KeyRingBitcoinService {
       pubKey: bitcoinPubKey.toBytes(),
       address,
       paymentType,
+      // only mnemonic key ring has master fingerprint and derivation path at this moment
+      masterFingerprintHex: bitcoinPubKey.getMasterFingerprint(),
+      derivationPath: bitcoinPubKey.getPath(),
     };
   }
 
@@ -199,7 +196,12 @@ export class KeyRingBitcoinService {
       async (res: {
         psbtSignData: {
           psbtHex: string;
-          inputsToSign: number[];
+          inputsToSign: {
+            index: number;
+            address: string;
+            hdPath?: string;
+            tapLeafHashesToSign?: Buffer[];
+          }[];
         }[];
         signedPsbtsHexes: string[];
       }) => {
@@ -213,7 +215,8 @@ export class KeyRingBitcoinService {
               chainId,
               vaultId,
               Psbt.fromHex(psbtSignData.psbtHex),
-              psbtSignData.inputsToSign
+              psbtSignData.inputsToSign,
+              network
             )
           )
         );
@@ -257,7 +260,12 @@ export class KeyRingBitcoinService {
       async (res: {
         psbtSignData: {
           psbtHex: string;
-          inputsToSign: number[];
+          inputsToSign: {
+            index: number;
+            address: string;
+            hdPath?: string;
+            tapLeafHashesToSign?: Buffer[];
+          }[];
         }[];
         signedPsbtsHexes: string[];
       }) => {
@@ -275,7 +283,8 @@ export class KeyRingBitcoinService {
           chainId,
           vaultId,
           psbt,
-          res.psbtSignData[0].inputsToSign
+          res.psbtSignData[0].inputsToSign,
+          network
         );
 
         return signedPsbt.toHex();
@@ -360,11 +369,24 @@ export class KeyRingBitcoinService {
           return encodedSignature.toString("base64");
         }
 
-        const internalPubkey = toXOnly(Buffer.from(bitcoinPubKey.pubKey));
-        const { output: scriptPubKey } = payments.p2tr({
-          internalPubkey,
-          network,
-        });
+        const { scriptPubKey, internalPubkey } = (() => {
+          if (bitcoinPubKey.paymentType === "taproot") {
+            const internalPubkey = toXOnly(Buffer.from(bitcoinPubKey.pubKey));
+            const { output: scriptPubKey } = payments.p2tr({
+              internalPubkey,
+              network,
+            });
+
+            return { scriptPubKey, internalPubkey };
+          }
+
+          const { output: scriptPubKey } = payments.p2wpkh({
+            pubkey: Buffer.from(bitcoinPubKey.pubKey),
+            network,
+          });
+
+          return { scriptPubKey, internalPubkey: undefined };
+        })();
         if (!scriptPubKey) {
           throw new KeplrError("keyring", 221, "Invalid pubkey");
         }
@@ -381,7 +403,12 @@ export class KeyRingBitcoinService {
           chainId,
           vaultId,
           txToSign,
-          Array.from({ length: txToSign.data.inputs.length }, (_, i) => i)
+          Array.from({ length: txToSign.data.inputs.length }, (_, i) => ({
+            index: i,
+            address: bitcoinPubKey.address,
+            path: bitcoinPubKey.derivationPath,
+          })),
+          network
         );
 
         return BIP322.encodeWitness(signedPsbt);
@@ -704,7 +731,12 @@ export class KeyRingBitcoinService {
               async (res: {
                 psbtSignData: {
                   psbtHex: string;
-                  inputsToSign: number[];
+                  inputsToSign: {
+                    index: number;
+                    address: string;
+                    hdPath?: string;
+                    tapLeafHashesToSign?: Buffer[];
+                  }[];
                 }[];
                 signedPsbtsHexes: string[];
               }) => {
@@ -724,7 +756,8 @@ export class KeyRingBitcoinService {
                   currentChainId,
                   vaultId,
                   psbt,
-                  res.psbtSignData[0].inputsToSign
+                  res.psbtSignData[0].inputsToSign,
+                  network
                 );
 
                 return signedPsbt.toHex();

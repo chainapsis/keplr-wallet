@@ -18441,7 +18441,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bip39@npm:^3.0.2, bip39@npm:^3.0.3":
+"bip39@npm:^3.0.2":
   version: 3.0.3
   resolution: "bip39@npm:3.0.3"
   dependencies:
@@ -18450,6 +18450,15 @@ __metadata:
     pbkdf2: ^3.0.9
     randombytes: ^2.0.1
   checksum: 72c8372d503799b14fda6cf14e173ffd75f58a633b86e98eb339e6ad14d9ecda2058bb2853d1d8aff60ded502a8fae7c940b480daeffe5189387f0f3f63e132a
+  languageName: node
+  linkType: hard
+
+"bip39@npm:^3.0.3":
+  version: 3.1.0
+  resolution: "bip39@npm:3.1.0"
+  dependencies:
+    "@noble/hashes": ^1.2.0
+  checksum: 1224e763ffc6b097052ed8abd57f0e521ad6d31f1645be0d0a15f4417c13f8461f00e47e9cf7c8c784bd533f4fb1ee3ab020f258c7df45ee5dc722b4b0336cfc
   languageName: node
   linkType: hard
 

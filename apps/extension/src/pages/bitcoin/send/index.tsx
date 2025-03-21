@@ -48,10 +48,7 @@ import {
   AddRecentSendHistoryMsg,
   PushBitcoinTransactionMsg,
 } from "@keplr-wallet/background";
-// import {
-//   AddRecentSendHistoryMsg,
-//   SubmitStarknetTxHashMsg,
-// } from "@keplr-wallet/background";
+import { IPsbtInput, IPsbtOutput } from "@keplr-wallet/stores-bitcoin";
 
 const Styles = {
   Flex1: styled.div`
@@ -265,44 +262,92 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
           txWeight: number;
         };
       }> => {
-        // refresh는 필요없다. -> 블록 생성 시간이 10분
         const senderAddress = sendConfigs.senderConfig.sender;
         const publicKey = account.pubKey;
-        const xonlyPubKey = publicKey
-          ? toXOnly(Buffer.from(publicKey))
-          : undefined;
+        const bitcoinAddress = account.bitcoinAddress;
         const feeRate = sendConfigs.feeRateConfig.feeRate;
         const isSendMax = sendConfigs.amountConfig.fraction === 1;
 
+        // Prepare BIP32 derivation data based on payment type
+        // hardware wallet을 사용할 때 참고용.
+        // 내부적으로 send 요청을 처리할 때 mnemonic이나 private key를 사용하는 경우에는 사실상 필요가 없다.
+        // 왜냐하면 내부적으로 처리하는 경우에는 주소만으로 서명할 입력을 매칭할 수 있기 때문이다.
+        // 다만 psbt validation할 때는 mnemonic을 사용해 hd키를 생성할 수 있는 경우가 있기 때문에 필요하다.
+        const { bip32Derivation, tapBip32Derivation } = (() => {
+          if (
+            !bitcoinAddress?.masterFingerprintHex ||
+            !bitcoinAddress.derivationPath
+          ) {
+            return {
+              bip32Derivation: undefined,
+              tapBip32Derivation: undefined,
+            };
+          }
+
+          const masterFingerprint = Buffer.from(
+            bitcoinAddress.masterFingerprintHex,
+            "hex"
+          );
+
+          if (bitcoinAddress.paymentType === "taproot") {
+            const xonlyPubKey = toXOnly(Buffer.from(publicKey));
+            return {
+              bip32Derivation: undefined,
+              tapBip32Derivation: [
+                {
+                  masterFingerprint,
+                  pubkey: xonlyPubKey,
+                  path: bitcoinAddress.derivationPath,
+                  leafHashes: [] as Buffer[],
+                },
+              ],
+            };
+          }
+
+          if (bitcoinAddress.paymentType === "native-segwit") {
+            return {
+              bip32Derivation: [
+                {
+                  masterFingerprint,
+                  pubkey: Buffer.from(publicKey),
+                  path: bitcoinAddress.derivationPath,
+                },
+              ],
+              tapBip32Derivation: undefined,
+            };
+          }
+
+          return { bip32Derivation: undefined, tapBip32Derivation: undefined };
+        })();
+
+        // Prepare transaction outputs
         const MAX_SAFE_OUTPUT = new Dec(2 ** 53 - 1);
-        const ZERO = new Dec(0);
         const amountInSatoshi = new Dec(
           sendConfigs.amountConfig.amount[0].toCoin().amount
         );
+        const recipientsForTransaction: IPsbtOutput[] = [];
 
-        let recipientsForTransaction = [];
         if (amountInSatoshi.gt(MAX_SAFE_OUTPUT)) {
-          // 큰 금액을 여러 출력으로 분할
-          let remainingAmount = amountInSatoshi;
-          while (!remainingAmount.gt(ZERO)) {
-            const chunkAmount = remainingAmount.gt(MAX_SAFE_OUTPUT)
+          // Split large amounts into multiple outputs
+          let remainingValue = amountInSatoshi;
+          while (!remainingValue.lte(new Dec(0))) {
+            const chunkValue = remainingValue.gt(MAX_SAFE_OUTPUT)
               ? MAX_SAFE_OUTPUT
-              : remainingAmount;
+              : remainingValue;
             recipientsForTransaction.push({
               address: sendConfigs.recipientConfig.recipient,
-              amount: chunkAmount.truncate().toBigNumber().toJSNumber(),
+              value: chunkValue.truncate().toBigNumber().toJSNumber(),
             });
-            remainingAmount = remainingAmount.sub(chunkAmount);
+            remainingValue = remainingValue.sub(chunkValue);
           }
         } else {
-          recipientsForTransaction = [
-            {
-              address: sendConfigs.recipientConfig.recipient,
-              amount: amountInSatoshi.truncate().toBigNumber().toJSNumber(),
-            },
-          ];
+          recipientsForTransaction.push({
+            address: sendConfigs.recipientConfig.recipient,
+            value: amountInSatoshi.truncate().toBigNumber().toJSNumber(),
+          });
         }
 
+        // Select UTXOs and prepare transaction
         const selection = bitcoinAccount.selectUTXOs({
           senderAddress,
           utxos: availableUTXOs,
@@ -316,13 +361,26 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
         }
 
         const { selectedUtxos, txSize, hasChange } = selection;
+        const xonlyPubKey =
+          bitcoinAddress?.paymentType === "taproot"
+            ? toXOnly(Buffer.from(publicKey))
+            : undefined;
+
+        const inputs: IPsbtInput[] = selectedUtxos.map((utxo) => ({
+          txid: utxo.txid,
+          vout: utxo.vout,
+          value: utxo.value,
+          address: senderAddress,
+          tapInternalKey: xonlyPubKey,
+          bip32Derivation,
+          tapBip32Derivation,
+        }));
 
         const psbtHex = bitcoinAccount.buildPsbt({
-          utxos: selectedUtxos,
-          senderAddress,
-          recipients: recipientsForTransaction,
+          inputs,
+          changeAddress: senderAddress,
+          outputs: recipientsForTransaction,
           feeRate,
-          xonlyPubKey,
           isSendMax,
           hasChange,
         });
@@ -407,6 +465,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
 
         try {
           const psbtHex = psbtSimulator.psbtHex;
+
           const signedPsbtHex = await bitcoinAccount.signPsbt(psbtHex);
           const tx = Psbt.fromHex(signedPsbtHex).extractTransaction();
           const txHex = tx.toHex();

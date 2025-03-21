@@ -13,15 +13,17 @@ import validate, {
   getAddressInfo,
 } from "bitcoin-address-validation";
 import { Psbt, networks, address } from "bitcoinjs-lib";
-import { BitcoinTxSizeEstimator } from "./tx-size-estimator";
 import {
   SelectionParams,
   BuildPsbtParams,
   SelectUTXOsParams,
   SelectionResult,
   UTXOSelection,
+  IPsbtInput,
+  IPsbtOutput,
 } from "./types";
 import { BRANCH_AND_BOUND_TIMEOUT_MS, DUST_THRESHOLD } from "./constant";
+import { BitcoinTxSizeEstimator, InputScriptType } from "./tx-size-estimator";
 
 export class BitcoinAccountBase {
   @observable
@@ -52,9 +54,9 @@ export class BitcoinAccountBase {
    * Select UTXOs for transaction targets
    * @param senderAddress Address of the sender
    * @param utxos UTXOs associated with the sender's address (must be of the same payment type - p2wpkh, p2tr)
-   * @param recipients Recipients of the transaction with amount and address
+   * @param recipients Recipients of the transaction with value and address
    * @param feeRate Transaction fee rate in sat/vB
-   * @param isSendMax Whether to send max amount, do not calculate change output
+   * @param isSendMax Whether to send max value, do not calculate change output
    * @returns {selectedUtxos, txSize, hasChange} Selected UTXOs and transaction size, whether there is change output
    */
   selectUTXOs({
@@ -69,7 +71,7 @@ export class BitcoinAccountBase {
       throw new Error("Invalid parameters");
     }
 
-    // 2. Get network config
+    // 2. Get network config and validate addresses
     const [, genesisHash, paymentType] = this.chainId.split(":");
     const network = GENESIS_HASH_TO_NETWORK[genesisHash as GenesisHash];
     if (
@@ -79,10 +81,6 @@ export class BitcoinAccountBase {
       throw new Error("Invalid chain id");
     }
 
-    // 3. Sort UTXOs by descending order
-    const sortedUtxos = utxos.sort((a, b) => b.value - a.value);
-
-    // 4. Validate addresses
     const senderAddressInfo = this.validateAndGetAddressInfo(
       senderAddress,
       network as unknown as Network
@@ -100,23 +98,15 @@ export class BitcoinAccountBase {
       throw new Error("Invalid recipients");
     }
 
-    // 5. Calculate output parameters
-    const outputParams: Record<string, number> = {};
-    recipientAddressInfos.forEach((info) => {
-      const key = `${info.type}_output_count`;
-      outputParams[key] = (outputParams[key] || 0) + 1;
-    });
-
-    // 6. Calculate target amount
-    const targetAmount = recipients.reduce(
-      (sum, recipient) => sum.add(new Dec(recipient.amount)),
+    // 3. Calculate output parameters and target value
+    const outputParams = this.calculateOutputParams(recipientAddressInfos);
+    const targetValue = recipients.reduce(
+      (sum, recipient) => sum.add(new Dec(recipient.value)),
       new Dec(0)
     );
-
-    // 7. Initialize constants and helpers
     const DUST = new Dec(DUST_THRESHOLD);
 
-    // Helper functions
+    // 4. Setup helper functions
     const calculateTxSize = (
       inputCount: number,
       outputParams: Record<string, number>,
@@ -131,83 +121,32 @@ export class BitcoinAccountBase {
     };
 
     const calculateFee = (size: number) => new Dec(Math.ceil(size * feeRate));
+    const isDust = (value: Dec) => value.lt(DUST);
 
-    const isDust = (amount: Dec) => amount.lt(DUST);
-
-    // Helper to calculate tx configuration for a given set of UTXOs
-    const calculateTxConfig = (
-      selectedUtxoIds: Set<string>,
-      withChange: boolean
-    ) => {
-      const selectedCount = selectedUtxoIds.size;
-      const txSize = calculateTxSize(selectedCount, outputParams, withChange);
-      const fee = calculateFee(txSize.txVBytes);
-
-      const selectedAmount = utxos
-        .filter((utxo) => selectedUtxoIds.has(`${utxo.txid}:${utxo.vout}`))
-        .reduce((sum, utxo) => sum.add(new Dec(utxo.value)), new Dec(0));
-
-      const remainder = selectedAmount.sub(targetAmount).sub(fee);
-
-      return {
-        selectedUtxoIds,
-        selectedAmount,
-        txSize,
-        fee,
-        remainder,
-        hasChange: withChange && remainder.gte(DUST),
-      };
-    };
-
-    // 8. If send max is true, return all UTXOs and estimated fee
-    // This is for simulation of build psbt when amount fraction is 1
+    // 5. Handle send max case
     if (isSendMax) {
       const txSize = calculateTxSize(utxos.length, outputParams, false);
-
-      return {
-        selectedUtxos: utxos,
-        txSize,
-        hasChange: false,
-      };
+      return { selectedUtxos: utxos, txSize, hasChange: false };
     }
 
-    // 9. Check if a single UTXO can satisfy the transaction
-    // Try each UTXO in descending order of value
-    for (const utxo of sortedUtxos) {
-      const utxoId = `${utxo.txid}:${utxo.vout}`;
-      const singleUtxoIds = new Set([utxoId]);
-
-      // Calculate with change first
-      const withChangeConfig = calculateTxConfig(singleUtxoIds, true);
-
-      // If this UTXO can cover the target amount plus fee and has non-dust change
-      if (withChangeConfig.remainder.gte(DUST)) {
-        return {
-          selectedUtxos: [utxo],
-          txSize: withChangeConfig.txSize,
-          hasChange: true,
-        };
-      }
-
-      // If this UTXO can cover the target amount plus fee with no change (or dust change)
-      const withoutChangeConfig = calculateTxConfig(singleUtxoIds, false);
-      if (withoutChangeConfig.remainder.gte(new Dec(0))) {
-        return {
-          selectedUtxos: [utxo],
-          txSize: withoutChangeConfig.txSize,
-          hasChange: false,
-        };
-      }
-    }
-
-    let selectedUtxoIds: Set<string>;
-
-    // 10. Select UTXOs using branch and bound algorithm if no single UTXO is sufficient
-    // Always try to avoid dust change by setting discardDustChange to false
-    // This will make the algorithm prioritize selections that result in non-dust change
-    const branchAndBoundResult = this.branchAndBoundSelection({
+    // 6. Try single UTXO selection first
+    const sortedUtxos = utxos.sort((a, b) => b.value - a.value);
+    const singleUtxoResult = this.trySingleUtxoSelection({
       utxos: sortedUtxos,
-      targetAmount,
+      targetValue,
+      calculateTxSize,
+      calculateFee,
+      isDust,
+      outputParams,
+    });
+    if (singleUtxoResult) {
+      return singleUtxoResult;
+    }
+
+    // 7. Use branch and bound or greedy selection for multiple UTXOs
+    const selectedUtxoIds = this.selectMultipleUtxos({
+      utxos: sortedUtxos,
+      targetValue,
       calculateTxSize,
       calculateFee,
       isDust,
@@ -215,243 +154,320 @@ export class BitcoinAccountBase {
       timeoutMs: BRANCH_AND_BOUND_TIMEOUT_MS,
     });
 
-    if (!branchAndBoundResult) {
-      // If branch and bound algorithm fails, use greedy selection
-      // Also prioritize non-dust change
-      selectedUtxoIds = this.greedySelection({
-        utxos: sortedUtxos,
-        targetAmount,
-        calculateTxSize,
-        calculateFee,
-        isDust,
-        outputParams,
-      });
-    } else {
-      selectedUtxoIds = branchAndBoundResult;
-    }
-
-    // If no UTXOs are selected, return null
-    if (selectedUtxoIds.size === 0) {
+    if (!selectedUtxoIds || selectedUtxoIds.size === 0) {
       return null;
     }
 
-    // 11. Calculate final tx configuration
-    const withChangeConfig = calculateTxConfig(selectedUtxoIds, true);
+    // 8. Calculate final configuration
+    const selectedUtxos = utxos.filter((utxo) =>
+      selectedUtxoIds.has(`${utxo.txid}:${utxo.vout}`)
+    );
+    const txSize = calculateTxSize(selectedUtxos.length, outputParams, true);
+    const fee = calculateFee(txSize.txVBytes);
+    const totalValue = selectedUtxos.reduce(
+      (sum, utxo) => sum.add(new Dec(utxo.value)),
+      new Dec(0)
+    );
+    const remainder = totalValue.sub(targetValue).sub(fee);
+    const hasChange = remainder.gte(DUST);
 
-    // Only include change if it's above dust threshold
-    const hasChange = withChangeConfig.remainder.gte(DUST);
+    return { selectedUtxos, txSize, hasChange };
+  }
 
-    // Final calculations based on whether we have change
-    const finalConfig = calculateTxConfig(selectedUtxoIds, hasChange);
+  private calculateOutputParams(
+    addressInfos: AddressInfo[]
+  ): Record<string, number> {
+    const outputParams: Record<string, number> = {};
+    addressInfos.forEach((info) => {
+      const key = `${info.type}_output_count`;
+      outputParams[key] = (outputParams[key] || 0) + 1;
+    });
+    return outputParams;
+  }
 
-    // 12. Return the selection
-    return {
-      selectedUtxos: utxos.filter((utxo) =>
-        selectedUtxoIds.has(`${utxo.txid}:${utxo.vout}`)
-      ),
-      txSize: finalConfig.txSize,
-      hasChange,
-    };
+  private trySingleUtxoSelection({
+    utxos,
+    targetValue,
+    calculateTxSize,
+    calculateFee,
+    outputParams,
+  }: SelectionParams): UTXOSelection | null {
+    for (const utxo of utxos) {
+      const utxoValue = new Dec(utxo.value);
+
+      // Try with change first
+      const withChangeTxSize = calculateTxSize(1, outputParams, true);
+      const withChangeFee = calculateFee(withChangeTxSize.txVBytes);
+      const withChangeRemainder = utxoValue.sub(targetValue).sub(withChangeFee);
+
+      if (withChangeRemainder.gte(new Dec(DUST_THRESHOLD))) {
+        return {
+          selectedUtxos: [utxo],
+          txSize: withChangeTxSize,
+          hasChange: true,
+        };
+      }
+
+      // Try without change
+      const withoutChangeTxSize = calculateTxSize(1, outputParams, false);
+      const withoutChangeFee = calculateFee(withoutChangeTxSize.txVBytes);
+      const withoutChangeRemainder = utxoValue
+        .sub(targetValue)
+        .sub(withoutChangeFee);
+
+      if (withoutChangeRemainder.gte(new Dec(0))) {
+        return {
+          selectedUtxos: [utxo],
+          txSize: withoutChangeTxSize,
+          hasChange: false,
+        };
+      }
+    }
+    return null;
+  }
+
+  private selectMultipleUtxos(params: SelectionParams): Set<string> | null {
+    const branchAndBoundResult = this.branchAndBoundSelection(params);
+    if (branchAndBoundResult) {
+      return branchAndBoundResult;
+    }
+    return this.greedySelection(params);
   }
 
   /**
    * Build PSBT for transaction
-   * @param utxos UTXOs to be used for the transaction
-   * @param senderAddress Address of the sender
-   * @param xonlyPubKey Internal public key of the sender for taproot (optional)
-   * @param recipients Recipients of the transaction with amount and address
-   * @param estimatedFee Estimated fee for the transaction
+   * @param inputs UTXOs to be used for the transaction
+   * @param outputs Recipients of the transaction with value and address
+   * @param changeAddress Address of the sender to receive change
+   * @param feeRate Transaction fee rate in sat/vB
+   * @param maximumFeeRate Maximum fee rate in sat/vB
+   * @param isSendMax Whether to send max value, do not calculate change output
    * @param hasChange Whether to include a change output
    */
   buildPsbt({
-    utxos,
-    senderAddress,
-    xonlyPubKey,
-    recipients,
+    inputs,
+    outputs,
+    changeAddress,
     feeRate,
+    maximumFeeRate = 1000,
     isSendMax = false,
     hasChange = false,
   }: BuildPsbtParams): string {
     // 1. Basic validation
-    if (!utxos.length) {
-      throw new Error("No UTXOs provided for transaction");
+    if (!inputs.length) {
+      throw new Error(
+        "No inputs provided for transaction, at least one input is required"
+      );
     }
 
-    if (!senderAddress) {
-      throw new Error("Sender address is required");
+    if (hasChange && !changeAddress) {
+      throw new Error("Change address is required when change is enabled");
     }
 
-    if (!recipients.length) {
-      throw new Error("Recipients are required");
+    if (feeRate <= 0 || feeRate > maximumFeeRate) {
+      throw new Error(
+        `Invalid fee rate: ${feeRate}, must be between 0 and ${maximumFeeRate}`
+      );
     }
 
-    if (feeRate <= 0) {
-      throw new Error("Invalid fee rate");
-    }
-
-    // 2. Parse and validate chain configuration
-    const [, genesisHash, paymentType] = this.chainId.split(":");
+    // 2. Get network config and validate addresses
+    const [, genesisHash] = this.chainId.split(":");
     const network = GENESIS_HASH_TO_NETWORK[genesisHash as GenesisHash];
     if (!network) {
       throw new Error(`Unsupported network: ${genesisHash}`);
     }
 
-    if (paymentType !== "native-segwit" && paymentType !== "taproot") {
-      throw new Error(`Unsupported payment type: ${paymentType}`);
-    }
-
-    if (
-      paymentType === "taproot" &&
-      (!xonlyPubKey || xonlyPubKey.length !== 32)
-    ) {
-      throw new Error("Taproot PSBT requires internal pubkey of 32 bytes");
-    }
-
     // 3. Validate transaction economics
-    const totalInputAmount = utxos.reduce(
-      (sum, utxo) => sum.add(new Dec(utxo.value)),
+    this.validateTransactionEconomics(inputs, outputs, isSendMax);
+
+    // 4. Process addresses and get network config
+    const { inputsWithAddressInfo, outputsWithAddressInfo } =
+      this.processAddresses(
+        inputs,
+        outputs,
+        changeAddress,
+        hasChange,
+        network,
+        feeRate
+      );
+
+    // 5. Build PSBT
+    return this.createPsbt(
+      inputsWithAddressInfo,
+      outputsWithAddressInfo,
+      network,
+      maximumFeeRate
+    );
+  }
+
+  private validateTransactionEconomics(
+    inputs: IPsbtInput[],
+    outputs: IPsbtOutput[],
+    isSendMax: boolean
+  ): void {
+    const totalInputValue = inputs.reduce(
+      (sum, input) => sum.add(new Dec(input.value)),
       new Dec(0)
     );
-
-    const totalOutputAmount = recipients.reduce(
-      (sum, recipient) => sum.add(new Dec(recipient.amount)),
+    const totalOutputValue = outputs.reduce(
+      (sum, output) => sum.add(new Dec(output.value)),
       new Dec(0)
     );
+    const remainderValue = totalInputValue.sub(totalOutputValue);
 
-    const remainderValue = totalInputAmount.sub(totalOutputAmount);
-    const zeroValue = new Dec(0);
-
-    // If send max is true, it's allowed to simulate build psbt with negative remainder value
-    if (!isSendMax && remainderValue.lt(zeroValue)) {
+    if (!isSendMax && remainderValue.lt(new Dec(0))) {
       throw new Error("Insufficient balance");
     }
+  }
 
-    const senderAddressInfo = this.validateAndGetAddressInfo(
-      senderAddress,
-      network as unknown as Network
-    );
+  private processAddresses(
+    inputs: IPsbtInput[],
+    outputs: IPsbtOutput[],
+    changeAddress: string | undefined,
+    hasChange: boolean,
+    network: string,
+    feeRate: number
+  ): {
+    inputsWithAddressInfo: (IPsbtInput & { addressInfo: AddressInfo })[];
+    outputsWithAddressInfo: (IPsbtOutput & { addressInfo: AddressInfo })[];
+  } {
+    const inputAddressSet = new Set(inputs.map(({ address }) => address));
+    const inputAddressInfos = Array.from(inputAddressSet)
+      .map((address) =>
+        this.validateAndGetAddressInfo(address, network as unknown as Network)
+      )
+      .filter(Boolean) as AddressInfo[];
 
-    if (!senderAddressInfo) {
+    if (!inputAddressInfos.length) {
       throw new Error("Invalid sender address");
     }
 
-    const recipientAddressInfos = recipients
+    const inputsWithAddressInfo = inputs.map((input) => {
+      const addressInfo = inputAddressInfos.find(
+        (info) => info.address === input.address
+      );
+      if (!addressInfo) {
+        throw new Error("Invalid sender address");
+      }
+      return { ...input, addressInfo };
+    });
+
+    const outputAddressInfos = outputs
       .map(({ address }) =>
         this.validateAndGetAddressInfo(address, network as unknown as Network)
       )
       .filter(Boolean) as AddressInfo[];
-    if (!recipientAddressInfos.length) {
-      throw new Error("Invalid recipients");
-    }
 
-    // 5. Calculate output parameters
-    const outputParams: Record<string, number> = {};
-    recipientAddressInfos.forEach((info) => {
-      const key = `${info.type}_output_count`;
-      outputParams[key] = (outputParams[key] || 0) + 1;
+    const outputsWithAddressInfo = outputs.map((output) => {
+      const addressInfo = outputAddressInfos.find(
+        (info) => info.address === output.address
+      );
+      if (!addressInfo) {
+        throw new Error("Invalid recipient address");
+      }
+      return { ...output, addressInfo };
     });
 
-    // Helper functions
-    const calculateTxSize = (
-      inputCount: number,
-      outputParams: Record<string, number>,
-      includeChange: boolean
-    ) => {
-      return this.calculateTxSize(
-        senderAddressInfo.type,
-        inputCount,
-        outputParams,
-        includeChange
+    if (hasChange && changeAddress) {
+      const changeAddressInfo = this.validateAndGetAddressInfo(
+        changeAddress,
+        network as unknown as Network
       );
-    };
+      if (!changeAddressInfo) {
+        throw new Error("Invalid change address");
+      }
 
-    const calculateFee = (size: number) => new Dec(Math.ceil(size * feeRate));
+      const totalInputValue = inputs.reduce(
+        (sum, input) => sum.add(new Dec(input.value)),
+        new Dec(0)
+      );
 
-    const DUST = new Dec(DUST_THRESHOLD);
+      // Calculate outputs total value (excluding change)
+      const totalOutputValue = outputs.reduce(
+        (sum, output) => sum.add(new Dec(output.value)),
+        new Dec(0)
+      );
 
-    const allRecipients = [...recipients];
+      // Calculate fee and change value directly from input/output values
+      // using the expected fee rate and actual transaction size from calcTxSize
+      const outputParams: Record<string, number> = {};
+      outputAddressInfos.forEach((info) => {
+        const key = `${info.type}_output_count`;
+        outputParams[key] = (outputParams[key] || 0) + 1;
+      });
 
-    // 4. Handle change output if needed
-    if (hasChange) {
-      const txSize = calculateTxSize(utxos.length, outputParams, true);
-      const fee = calculateFee(txSize.txVBytes);
+      // Consider change output in tx size calculation
+      const changeKey = `${changeAddressInfo.type}_output_count`;
+      outputParams[changeKey] = (outputParams[changeKey] || 0) + 1;
 
-      const changeAmount = remainderValue.sub(fee);
+      let inputScript = "p2tr";
+      // For mixed input types, check which one is dominant
+      const typeCounts: Record<string, number> = {};
+      inputs.forEach((input) => {
+        const addressInfo = inputAddressInfos.find(
+          (info) => info.address === input.address
+        );
+        if (addressInfo) {
+          typeCounts[addressInfo.type] =
+            (typeCounts[addressInfo.type] || 0) + 1;
+        }
+      });
 
-      // if change amount is greater than or equal to dust threshold
-      if (changeAmount.gte(DUST)) {
-        // add change output address
-        allRecipients.push({
-          address: senderAddress,
-          amount: changeAmount.truncate().toBigNumber().toJSNumber(),
+      let maxCount = 0;
+      Object.entries(typeCounts).forEach(([type, count]) => {
+        if (count > maxCount) {
+          maxCount = count;
+          inputScript = type;
+        }
+      });
+
+      const { txVBytes } = this._txSizeEstimator.calcTxSize({
+        input_count: inputs.length,
+        input_script: inputScript as InputScriptType,
+        ...outputParams,
+      });
+
+      const fee = new Dec(Math.ceil(txVBytes * feeRate));
+      const changeValue = totalInputValue.sub(totalOutputValue).sub(fee);
+
+      if (changeValue.gte(new Dec(DUST_THRESHOLD))) {
+        outputsWithAddressInfo.push({
+          address: changeAddress,
+          value: changeValue.truncate().toBigNumber().toJSNumber(),
+          addressInfo: changeAddressInfo,
         });
       } else {
-        // hasChange is true but change amount is less than dust threshold, log warning
         console.warn("Change amount is less than dust threshold");
       }
     }
 
-    // 5. Get network params
-    const networkParams = (() => {
-      switch (network) {
-        case "mainnet":
-          return networks.bitcoin;
-        case "testnet":
-        case "signet":
-          return networks.testnet;
-        default:
-          throw new Error(`Invalid network: ${network}`);
-      }
-    })();
+    return { inputsWithAddressInfo, outputsWithAddressInfo };
+  }
 
-    // 6. Validate recipients
-    allRecipients.forEach((recipient) =>
-      validate(recipient.address, network as unknown as Network)
-    );
+  private createPsbt(
+    inputsWithAddressInfo: (IPsbtInput & { addressInfo: AddressInfo })[],
+    outputsWithAddressInfo: (IPsbtOutput & { addressInfo: AddressInfo })[],
+    network: string,
+    maximumFeeRate: number
+  ): string {
+    const networkConfig =
+      network === "mainnet" ? networks.bitcoin : networks.testnet;
 
-    // 7. Build PSBT
     try {
-      const psbt = new Psbt({ network: networkParams });
+      const psbt = new Psbt({ network: networkConfig });
 
-      // 7.1. Process sender address and script
-      const senderOutputScript = address.toOutputScript(
-        senderAddress,
-        networkParams
-      );
-      const internalPubkey = xonlyPubKey ? Buffer.from(xonlyPubKey) : undefined;
-
-      // 7.2. Add sender UTXOs as inputs (RBF enabled)
-      for (const utxo of utxos) {
-        if (paymentType === "taproot") {
-          psbt.addInput({
-            hash: utxo.txid,
-            index: utxo.vout,
-            witnessUtxo: {
-              script: senderOutputScript,
-              value: utxo.value,
-            },
-            tapInternalKey: internalPubkey,
-            sequence: 0xfffffffd,
-          });
-        }
-
-        if (paymentType === "native-segwit") {
-          psbt.addInput({
-            hash: utxo.txid,
-            index: utxo.vout,
-            witnessUtxo: { script: senderOutputScript, value: utxo.value },
-            sequence: 0xfffffffd,
-          });
-        }
+      for (const input of inputsWithAddressInfo) {
+        this.addInputToPsbt(psbt, input, networkConfig);
       }
 
-      // 7.3. Add all outputs (recipients + change if applicable)
-      for (const recipient of allRecipients) {
+      for (const output of outputsWithAddressInfo) {
         psbt.addOutput({
-          address: recipient.address,
-          value: recipient.amount,
+          address: output.address,
+          value: output.value,
         });
       }
+
+      psbt.setMaximumFeeRate(maximumFeeRate);
 
       return psbt.toHex();
     } catch (error) {
@@ -460,6 +476,67 @@ export class BitcoinAccountBase {
         throw new Error(`Failed to build PSBT: ${error.message}`);
       }
       throw new Error("Failed to build PSBT: Unknown error");
+    }
+  }
+
+  private addInputToPsbt(
+    psbt: Psbt,
+    input: IPsbtInput & { addressInfo: AddressInfo },
+    networkConfig: networks.Network
+  ): void {
+    const txInput: Parameters<typeof psbt.addInput>[0] = {
+      hash: input.txid,
+      index: input.vout,
+      sequence: 0xfffffffd,
+    };
+
+    if (input.addressInfo.type === "p2pkh") {
+      if (!input.nonWitnessUtxo) {
+        throw new Error("Non-witness UTXO is required for p2pkh inputs");
+      }
+
+      if (input.bip32Derivation) {
+        txInput.bip32Derivation = input.bip32Derivation;
+      }
+
+      psbt.addInput({
+        ...txInput,
+        nonWitnessUtxo: input.nonWitnessUtxo,
+      });
+    } else if (input.addressInfo.type === "p2wpkh") {
+      if (input.bip32Derivation) {
+        txInput.bip32Derivation = input.bip32Derivation;
+      }
+
+      psbt.addInput({
+        ...txInput,
+        witnessUtxo: {
+          script: address.toOutputScript(input.address, networkConfig),
+          value: input.value,
+        },
+      });
+    } else if (input.addressInfo.type === "p2tr") {
+      if (!input.tapInternalKey && !input.tapBip32Derivation) {
+        throw new Error(
+          "Tap internal key or bip32 derivation is required for p2tr inputs"
+        );
+      }
+
+      if (input.tapInternalKey) {
+        txInput.tapInternalKey = input.tapInternalKey;
+      }
+
+      if (input.tapBip32Derivation) {
+        txInput.tapBip32Derivation = input.tapBip32Derivation;
+      }
+
+      psbt.addInput({
+        ...txInput,
+        witnessUtxo: {
+          script: address.toOutputScript(input.address, networkConfig),
+          value: input.value,
+        },
+      });
     }
   }
 
@@ -478,7 +555,10 @@ export class BitcoinAccountBase {
     return keplr.signPsbt(this.chainId, psbtHex);
   }
 
-  private validateAndGetAddressInfo = (address: string, network?: Network) => {
+  private validateAndGetAddressInfo = (
+    address: string,
+    network?: Network
+  ): AddressInfo | null => {
     try {
       return validate(address, network, {
         castTestnetTo: network === "signet" ? Network.signet : undefined,
@@ -497,7 +577,7 @@ export class BitcoinAccountBase {
     inputCount: number,
     outputParams: Record<string, number>,
     includeChange: boolean
-  ) => {
+  ): { txVBytes: number; txBytes: number; txWeight: number } => {
     const outputParamsWithChange = { ...outputParams };
 
     if (includeChange) {
@@ -515,7 +595,7 @@ export class BitcoinAccountBase {
 
   private branchAndBoundSelection({
     utxos,
-    targetAmount,
+    targetValue,
     calculateTxSize,
     calculateFee,
     isDust,
@@ -526,14 +606,14 @@ export class BitcoinAccountBase {
     const TIMEOUT = timeoutMs ?? BRANCH_AND_BOUND_TIMEOUT_MS;
     const startTime = Date.now();
 
-    // Calculate total available amount of all UTXOs
+    // Calculate total available value of all UTXOs
     const totalAvailable = utxos.reduce(
       (sum, utxo) => sum.add(new Dec(utxo.value)),
       new Dec(0)
     );
 
-    // If target amount is greater than total available amount, return null
-    if (targetAmount.gt(totalAvailable)) {
+    // If target value is greater than total available value, return null
+    if (targetValue.gt(totalAvailable)) {
       return null;
     }
 
@@ -566,9 +646,9 @@ export class BitcoinAccountBase {
 
       let currentBest: SelectionResult | null = null;
 
-      // If target amount is satisfied, consider current selection as the best candidate
-      if (effectiveValueWithChange.gte(targetAmount)) {
-        const remainder = effectiveValueWithChange.sub(targetAmount);
+      // If target value is satisfied, consider current selection as the best candidate
+      if (effectiveValueWithChange.gte(targetValue)) {
+        const remainder = effectiveValueWithChange.sub(targetValue);
 
         const isDustRemainder = isDust(remainder);
 
@@ -602,16 +682,16 @@ export class BitcoinAccountBase {
       const utxoId = `${utxo.txid}:${utxo.vout}`;
       const utxoValue = new Dec(utxo.value);
 
-      // Bounding: If adding all remaining UTXOs still cannot reach target amount, return current best
-      if (effectiveValueWithChange.add(remainingValue).lt(targetAmount)) {
+      // Bounding: If adding all remaining UTXOs still cannot reach target value, return current best
+      if (effectiveValueWithChange.add(remainingValue).lt(targetValue)) {
         return currentBest;
       }
 
       // If already exceeds target amount and current best is better, return current best
       if (
         currentBest &&
-        effectiveValueWithChange.gte(targetAmount) &&
-        effectiveValueWithChange.sub(targetAmount).lt(currentBest.wastage)
+        effectiveValueWithChange.gte(targetValue) &&
+        effectiveValueWithChange.sub(targetValue).lt(currentBest.wastage)
       ) {
         return currentBest;
       }
@@ -663,32 +743,32 @@ export class BitcoinAccountBase {
 
   private greedySelection({
     utxos,
-    targetAmount,
+    targetValue,
     calculateTxSize,
     calculateFee,
     isDust,
     outputParams,
   }: Omit<SelectionParams, "timeoutMs">): Set<string> {
     const selectedUtxoIds = new Set<string>();
-    let selectedAmount = new Dec(0);
+    let selectedValue = new Dec(0);
 
-    // 1. Select UTXOs to satisfy target amount
+    // 1. Select UTXOs to satisfy target value
     for (const utxo of utxos) {
       const utxoId = `${utxo.txid}:${utxo.vout}`;
       selectedUtxoIds.add(utxoId);
-      selectedAmount = selectedAmount.add(new Dec(utxo.value));
+      selectedValue = selectedValue.add(new Dec(utxo.value));
 
       // Calculate fee
       const txSize = calculateTxSize(selectedUtxoIds.size, outputParams, true);
       const fee = calculateFee(txSize.txVBytes);
 
       // Calculate remainder
-      const remainder = selectedAmount.sub(targetAmount).sub(fee);
+      const remainder = selectedValue.sub(targetValue).sub(fee);
       const isDustRemainder = isDust(remainder);
 
-      // If target amount is satisfied and remainder is not dust, stop
+      // If target value is satisfied and remainder is not dust, stop
       // This prioritizes non-dust change outputs
-      if (selectedAmount.gte(targetAmount) && !isDustRemainder) {
+      if (selectedValue.gte(targetValue) && !isDustRemainder) {
         break;
       }
     }
@@ -696,7 +776,7 @@ export class BitcoinAccountBase {
     // 2. Select additional UTXOs to cover fee
     let txSize = calculateTxSize(selectedUtxoIds.size, outputParams, true);
     let fee = calculateFee(txSize.txVBytes);
-    let remainder = selectedAmount.sub(targetAmount).sub(fee);
+    let remainder = selectedValue.sub(targetValue).sub(fee);
 
     if (remainder.lt(new Dec(0))) {
       for (const utxo of utxos) {
@@ -704,11 +784,11 @@ export class BitcoinAccountBase {
         if (selectedUtxoIds.has(utxoId)) continue;
 
         selectedUtxoIds.add(utxoId);
-        selectedAmount = selectedAmount.add(new Dec(utxo.value));
+        selectedValue = selectedValue.add(new Dec(utxo.value));
 
         txSize = calculateTxSize(selectedUtxoIds.size, outputParams, true);
         fee = calculateFee(txSize.txVBytes);
-        remainder = selectedAmount.sub(targetAmount).sub(fee);
+        remainder = selectedValue.sub(targetValue).sub(fee);
 
         if (remainder.gte(new Dec(0))) {
           break;
@@ -726,7 +806,7 @@ export class BitcoinAccountBase {
 
         // Add this UTXO
         selectedUtxoIds.add(utxoId);
-        const newAmount = selectedAmount.add(new Dec(utxo.value));
+        const newValue = selectedValue.add(new Dec(utxo.value));
 
         // Calculate new fee and remainder
         const newTxSize = calculateTxSize(
@@ -735,11 +815,11 @@ export class BitcoinAccountBase {
           true
         );
         const newFee = calculateFee(newTxSize.txVBytes);
-        const newRemainder = newAmount.sub(targetAmount).sub(newFee);
+        const newRemainder = newValue.sub(targetValue).sub(newFee);
 
         // If the new remainder is not dust, keep this UTXO
         if (!isDust(newRemainder) && newRemainder.gt(new Dec(0))) {
-          selectedAmount = newAmount;
+          selectedValue = newValue;
           break;
         }
 

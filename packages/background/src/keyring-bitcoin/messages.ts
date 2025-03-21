@@ -14,6 +14,8 @@ export class GetBitcoinKeyMsg extends Message<{
   address: string;
   paymentType: SupportedPaymentType;
   isNanoLedger: boolean;
+  masterFingerprintHex?: string;
+  derivationPath?: string;
 }> {
   public static type() {
     return "get-bitcoin-key";
@@ -49,6 +51,8 @@ export class GetBitcoinKeysSettledMsg extends Message<
     address: string;
     paymentType: SupportedPaymentType;
     isNanoLedger: boolean;
+    masterFingerprintHex?: string;
+    derivationPath?: string;
   }>
 > {
   public static type() {
@@ -94,6 +98,8 @@ export class GetBitcoinKeysForEachVaultSettledMsg extends Message<
       address: string;
       paymentType: SupportedPaymentType;
       isNanoLedger: boolean;
+      masterFingerprintHex?: string;
+      derivationPath?: string;
     } & {
       vaultId: string;
     }
