@@ -194,6 +194,7 @@ module.exports = {
       KEPLR_EXT_STARKNET_PROVIDER_INFO_ICON: keplrLogoBase64,
       SKIP_API_KEY: "",
       KEPLR_EXT_PROVIDER_META_ID: "",
+      KEPLR_EXT_MOONPAY_SIGN_API_BASE_URL: "",
     }),
     new ForkTsCheckerWebpackPlugin(),
     new CopyWebpackPlugin({
