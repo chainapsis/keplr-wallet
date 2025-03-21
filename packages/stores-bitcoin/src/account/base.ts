@@ -295,7 +295,8 @@ export class BitcoinAccountBase {
     return this.createPsbt(
       inputsWithAddressInfo,
       outputsWithAddressInfo,
-      network
+      network,
+      maximumFeeRate
     );
   }
 
@@ -303,7 +304,7 @@ export class BitcoinAccountBase {
     inputs: IPsbtInput[],
     outputs: IPsbtOutput[],
     isSendMax: boolean
-  ) {
+  ): void {
     const totalInputValue = inputs.reduce(
       (sum, input) => sum.add(new Dec(input.value)),
       new Dec(0)
@@ -326,7 +327,10 @@ export class BitcoinAccountBase {
     hasChange: boolean,
     network: string,
     feeRate: number
-  ) {
+  ): {
+    inputsWithAddressInfo: (IPsbtInput & { addressInfo: AddressInfo })[];
+    outputsWithAddressInfo: (IPsbtOutput & { addressInfo: AddressInfo })[];
+  } {
     const inputAddressSet = new Set(inputs.map(({ address }) => address));
     const inputAddressInfos = Array.from(inputAddressSet)
       .map((address) =>
@@ -443,7 +447,8 @@ export class BitcoinAccountBase {
   private createPsbt(
     inputsWithAddressInfo: (IPsbtInput & { addressInfo: AddressInfo })[],
     outputsWithAddressInfo: (IPsbtOutput & { addressInfo: AddressInfo })[],
-    network: string
+    network: string,
+    maximumFeeRate: number
   ): string {
     const networkConfig =
       network === "mainnet" ? networks.bitcoin : networks.testnet;
@@ -462,6 +467,8 @@ export class BitcoinAccountBase {
         });
       }
 
+      psbt.setMaximumFeeRate(maximumFeeRate);
+
       return psbt.toHex();
     } catch (error) {
       console.error("Error creating PSBT:", error);
@@ -476,7 +483,7 @@ export class BitcoinAccountBase {
     psbt: Psbt,
     input: IPsbtInput & { addressInfo: AddressInfo },
     networkConfig: networks.Network
-  ) {
+  ): void {
     const txInput: Parameters<typeof psbt.addInput>[0] = {
       hash: input.txid,
       index: input.vout,
@@ -548,7 +555,10 @@ export class BitcoinAccountBase {
     return keplr.signPsbt(this.chainId, psbtHex);
   }
 
-  private validateAndGetAddressInfo = (address: string, network?: Network) => {
+  private validateAndGetAddressInfo = (
+    address: string,
+    network?: Network
+  ): AddressInfo | null => {
     try {
       return validate(address, network, {
         castTestnetTo: network === "signet" ? Network.signet : undefined,
@@ -567,7 +577,7 @@ export class BitcoinAccountBase {
     inputCount: number,
     outputParams: Record<string, number>,
     includeChange: boolean
-  ) => {
+  ): { txVBytes: number; txBytes: number; txWeight: number } => {
     const outputParamsWithChange = { ...outputParams };
 
     if (includeChange) {
