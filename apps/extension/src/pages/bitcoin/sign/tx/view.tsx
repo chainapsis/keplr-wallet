@@ -61,6 +61,7 @@ import {
 } from "@keplr-wallet/stores-bitcoin";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { WarningBox } from "../../components/warning-box";
+import { InformationPlainIcon } from "../../../../components/icon";
 
 export const SignBitcoinTxView: FunctionComponent<{
   interactionData: NonNullable<SignBitcoinTxInteractionStore["waitingData"]>;
@@ -958,6 +959,8 @@ const SinglePsbtView: FunctionComponent<{
       </SimpleBar>
       <Gutter size="0.75rem" />
       <ExpectedFee expectedFee={expectedFee} />
+      <Gutter size="1.25rem" />
+      <UTXOWarning />
       <div style={{ flex: 1, minHeight: "1.25rem" }} />
       <TotalSpend totalSpend={totalSpend} />
       <Gutter size="0.25rem" />
@@ -1135,3 +1138,41 @@ const TotalSpend: FunctionComponent<{
     </XAxis>
   );
 });
+
+const UTXOWarning: FunctionComponent = () => {
+  const theme = useTheme();
+  return (
+    <Columns sum={1} columnAlign="right" alignY="center">
+      <XAxis alignY="center">
+        <Box
+          width="1rem"
+          height="1rem"
+          padding="0.0625rem"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <InformationPlainIcon
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-400"]
+                : ColorPalette["gray-200"]
+            }
+          />
+        </Box>
+        <Gutter size="0.25rem" />
+        <Subtitle4
+          color={
+            theme.mode === "light"
+              ? ColorPalette["gray-400"]
+              : ColorPalette["gray-200"]
+          }
+        >
+          UTXOs may inlude Inscriptions or Runes.
+        </Subtitle4>
+      </XAxis>
+    </Columns>
+  );
+};

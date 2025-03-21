@@ -53,7 +53,7 @@ export const Tooltip: FunctionComponent<
   const arrowRef = useRef(null);
   const { x, y, strategy, refs, context } = useFloating({
     middleware: [
-      offset(9),
+      offset(hideArrow ? -1 : 9),
       autoPlacement({
         allowedPlacements: allowedPlacements ?? ["top", "bottom"],
       }),
