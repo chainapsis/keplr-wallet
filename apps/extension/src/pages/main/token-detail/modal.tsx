@@ -4,7 +4,11 @@ import styled, { useTheme } from "styled-components";
 import { Box } from "../../../components/box";
 import { XAxis, YAxis } from "../../../components/axis";
 import { useStore } from "../../../stores";
-import { Body1, Subtitle3 } from "../../../components/typography";
+import {
+  BaseTypography,
+  Body1,
+  Subtitle3,
+} from "../../../components/typography";
 import { ColorPalette } from "../../../styles";
 import { Gutter } from "../../../components/gutter";
 import { usePaginatedCursorQuery } from "./hook";
@@ -441,6 +445,39 @@ export const TokenDetailModal: FunctionComponent<{
                 {modularChainInfo.chainName}
               </Body1>
             </span>
+            {/* TODO: 여기에 비트코인 타입 추가 */}
+            {account.bitcoinAddress && (
+              <Box
+                alignX="center"
+                alignY="center"
+                backgroundColor={
+                  theme.mode === "light"
+                    ? ColorPalette["blue-50"]
+                    : ColorPalette["gray-600"]
+                }
+                borderRadius="0.375rem"
+                paddingY="0.125rem"
+                paddingX="0.375rem"
+                marginLeft="0.25rem"
+              >
+                <BaseTypography
+                  style={{
+                    fontWeight: 400,
+                    fontSize: "0.6875rem",
+                  }}
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["blue-400"]
+                      : ColorPalette["gray-200"]
+                  }
+                >
+                  {account.bitcoinAddress.paymentType
+                    .replace("-", " ")
+                    .replace(/\b\w/g, (char) => char.toUpperCase())}
+                </BaseTypography>
+              </Box>
+            )}
+
             <div style={{ flex: 1 }} />
             {/* 뒤로가기 버튼과 좌우를 맞추기 위해서 존재... */}
             <Box width="1.5rem" height="1.5rem" />

@@ -21,6 +21,7 @@ import {
   UTXOSelection,
   IPsbtInput,
   IPsbtOutput,
+  RemainderStatus,
 } from "./types";
 import { BRANCH_AND_BOUND_TIMEOUT_MS, DUST_THRESHOLD } from "./constant";
 import { BitcoinTxSizeEstimator, InputScriptType } from "./tx-size-estimator";
@@ -126,7 +127,12 @@ export class BitcoinAccountBase {
     // 5. Handle send max case
     if (isSendMax) {
       const txSize = calculateTxSize(utxos.length, outputParams, false);
-      return { selectedUtxos: utxos, txSize, hasChange: false };
+      return {
+        selectedUtxos: utxos,
+        txSize,
+        remainderStatus: RemainderStatus.None,
+        remainderValue: "0",
+      };
     }
 
     // 6. Try single UTXO selection first
@@ -162,16 +168,48 @@ export class BitcoinAccountBase {
     const selectedUtxos = utxos.filter((utxo) =>
       selectedUtxoIds.has(`${utxo.txid}:${utxo.vout}`)
     );
-    const txSize = calculateTxSize(selectedUtxos.length, outputParams, true);
-    const fee = calculateFee(txSize.txVBytes);
     const totalValue = selectedUtxos.reduce(
       (sum, utxo) => sum.add(new Dec(utxo.value)),
       new Dec(0)
     );
-    const remainder = totalValue.sub(targetValue).sub(fee);
-    const hasChange = remainder.gte(DUST);
 
-    return { selectedUtxos, txSize, hasChange };
+    const withChangeTxSize = calculateTxSize(
+      selectedUtxos.length,
+      outputParams,
+      true
+    );
+    const withChangeFee = calculateFee(withChangeTxSize.txVBytes);
+    const withChangeRemainder = totalValue.sub(targetValue).sub(withChangeFee);
+
+    if (withChangeRemainder.gte(DUST)) {
+      return {
+        selectedUtxos,
+        txSize: withChangeTxSize,
+        remainderStatus: RemainderStatus.UsedAsChange,
+        remainderValue: withChangeRemainder.truncate().toString(),
+      };
+    }
+
+    const withoutChangeTxSize = calculateTxSize(
+      selectedUtxos.length,
+      outputParams,
+      false
+    );
+    const withoutChangeFee = calculateFee(withoutChangeTxSize.txVBytes);
+    const withoutChangeRemainder = totalValue
+      .sub(targetValue)
+      .sub(withoutChangeFee);
+
+    if (withoutChangeRemainder.gte(new Dec(0))) {
+      return {
+        selectedUtxos,
+        txSize: withoutChangeTxSize,
+        remainderStatus: RemainderStatus.AddedToFee,
+        remainderValue: withoutChangeRemainder.truncate().toString(),
+      };
+    }
+
+    return null;
   }
 
   private calculateOutputParams(
@@ -200,15 +238,17 @@ export class BitcoinAccountBase {
       const withChangeFee = calculateFee(withChangeTxSize.txVBytes);
       const withChangeRemainder = utxoValue.sub(targetValue).sub(withChangeFee);
 
+      // remainder를 change로 고려한 경우, dust보다 큰 경우에만 change로 고려
       if (withChangeRemainder.gte(new Dec(DUST_THRESHOLD))) {
         return {
           selectedUtxos: [utxo],
           txSize: withChangeTxSize,
-          hasChange: true,
+          remainderStatus: RemainderStatus.UsedAsChange,
+          remainderValue: withChangeRemainder.truncate().toString(),
         };
       }
 
-      // Try without change
+      // remainder를 change로 고려했을 때 dust보다 작아서 수수료로 추가하는 경우
       const withoutChangeTxSize = calculateTxSize(1, outputParams, false);
       const withoutChangeFee = calculateFee(withoutChangeTxSize.txVBytes);
       const withoutChangeRemainder = utxoValue
@@ -219,7 +259,8 @@ export class BitcoinAccountBase {
         return {
           selectedUtxos: [utxo],
           txSize: withoutChangeTxSize,
-          hasChange: false,
+          remainderStatus: RemainderStatus.AddedToFee,
+          remainderValue: withoutChangeRemainder.truncate().toString(),
         };
       }
     }

@@ -19,11 +19,12 @@ interface ArbitraryMsgWalletDetailsProps {
     type: "bech32" | "ethereum" | "starknet" | "bitcoin";
     address: string;
   };
+  onlyWalletName?: boolean;
 }
 
 export const ArbitraryMsgWalletDetails: FunctionComponent<
   ArbitraryMsgWalletDetailsProps
-> = ({ walletName, chainInfo, addressInfo }) => {
+> = ({ walletName, chainInfo, addressInfo, onlyWalletName }) => {
   const theme = useTheme();
   const shortenAddress = (() => {
     if (addressInfo.type === "starknet") {
@@ -56,7 +57,7 @@ export const ArbitraryMsgWalletDetails: FunctionComponent<
             : ColorPalette["gray-600"],
       }}
     >
-      <Box position="relative" height="5.5rem">
+      <Box position="relative" height={onlyWalletName ? "4rem" : "5.5rem"}>
         <Box
           position="absolute"
           width="100%"
@@ -110,16 +111,20 @@ export const ArbitraryMsgWalletDetails: FunctionComponent<
         </Box>
         <Box position="relative" zIndex={1} paddingTop="1.623rem">
           <YAxis alignX="center">
-            <Subtitle4
-              color={
-                theme.mode === "light"
-                  ? hexToRgba(ColorPalette["black"], 0.7)
-                  : hexToRgba(ColorPalette["white"], 0.7)
-              }
-            >
-              <FormattedMessage id="page.sign.adr36.signing-with" />
-            </Subtitle4>
-            <Gutter size="0.25rem" />
+            {!onlyWalletName && (
+              <React.Fragment>
+                <Subtitle4
+                  color={
+                    theme.mode === "light"
+                      ? hexToRgba(ColorPalette["black"], 0.7)
+                      : hexToRgba(ColorPalette["white"], 0.7)
+                  }
+                >
+                  <FormattedMessage id="page.sign.adr36.signing-with" />
+                </Subtitle4>
+                <Gutter size="0.25rem" />
+              </React.Fragment>
+            )}
             <Body1
               style={{
                 lineHeight: "140%",

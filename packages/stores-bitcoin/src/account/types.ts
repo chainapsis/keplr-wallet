@@ -36,6 +36,12 @@ export interface BuildPsbtParams {
   hasChange?: boolean;
 }
 
+export enum RemainderStatus {
+  UsedAsChange = "used_as_change",
+  AddedToFee = "added_to_fee",
+  None = "none",
+}
+
 export interface UTXOSelection {
   selectedUtxos: UTXO[];
   txSize: {
@@ -43,7 +49,8 @@ export interface UTXOSelection {
     txBytes: number;
     txWeight: number;
   };
-  hasChange: boolean;
+  remainderStatus: RemainderStatus;
+  remainderValue: string;
 }
 
 export interface SelectionResult {

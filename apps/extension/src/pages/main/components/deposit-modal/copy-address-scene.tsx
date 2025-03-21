@@ -645,7 +645,14 @@ const CopyAddressItem: FunctionComponent<{
               />
               <Gutter size="0.5rem" />
               <YAxis>
-                <XAxis>
+                <Box
+                  style={{
+                    flex: 1,
+                    flexDirection: "row",
+                    flexWrap: "wrap",
+                    gap: "0.25rem",
+                  }}
+                >
                   <Subtitle3
                     color={
                       theme.mode === "light"
@@ -656,40 +663,39 @@ const CopyAddressItem: FunctionComponent<{
                     {address.modularChainInfo.chainName}
                   </Subtitle3>
                   {address.bitcoinAddress && (
-                    <React.Fragment>
-                      <Gutter size="0.25rem" />
-                      <Box
-                        alignX="center"
-                        alignY="center"
-                        backgroundColor={
+                    <Box
+                      alignX="center"
+                      alignY="center"
+                      backgroundColor={
+                        theme.mode === "light"
+                          ? ColorPalette["blue-50"]
+                          : ColorPalette["gray-500"]
+                      }
+                      borderRadius="0.375rem"
+                      paddingY="0.125rem"
+                      paddingX="0.375rem"
+                      style={{
+                        flexShrink: 0,
+                      }}
+                    >
+                      <BaseTypography
+                        style={{
+                          fontWeight: 400,
+                          fontSize: "0.6875rem",
+                        }}
+                        color={
                           theme.mode === "light"
-                            ? ColorPalette["blue-50"]
-                            : ColorPalette["gray-500"]
+                            ? ColorPalette["blue-400"]
+                            : ColorPalette["gray-200"]
                         }
-                        borderRadius="0.375rem"
-                        height="1rem"
-                        paddingX="0.375rem"
                       >
-                        <BaseTypography
-                          style={{
-                            fontWeight: 400,
-                            fontSize: "0.6875rem",
-                          }}
-                          color={
-                            theme.mode === "light"
-                              ? ColorPalette["blue-400"]
-                              : ColorPalette["gray-200"]
-                          }
-                        >
-                          {address.bitcoinAddress.paymentType ===
-                          "native-segwit"
-                            ? "NSW"
-                            : "TR"}
-                        </BaseTypography>
-                      </Box>
-                    </React.Fragment>
+                        {address.bitcoinAddress.paymentType
+                          .replace("-", " ")
+                          .replace(/\b\w/g, (char) => char.toUpperCase())}
+                      </BaseTypography>
+                    </Box>
                   )}
-                </XAxis>
+                </Box>
                 <Gutter size="0.25rem" />
                 <Caption1 color={ColorPalette["gray-300"]}>
                   {(() => {

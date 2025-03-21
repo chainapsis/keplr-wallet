@@ -16,10 +16,15 @@ import { Columns } from "../../../../../components/column";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useLanguage } from "../../../../../languages";
 import { useTheme } from "styled-components";
-
+import { BaseTypography } from "../../../../../components/typography/base";
+import { InformationPlainIcon } from "../../../../../components/icon";
+import { XAxis } from "../../../../../components/axis";
+import { Gutter } from "../../../../../components/gutter";
+import { Tooltip } from "../../../../../components/tooltip";
 export const AmountInput: FunctionComponent<{
   amountConfig: IAmountConfig;
-}> = observer(({ amountConfig }) => {
+  availableBalance: CoinPretty | undefined; // TODO: amountConfig 안에 넣으려고 했는데 쉽지 않음; 일단 디자인 먼저
+}> = observer(({ amountConfig, availableBalance }) => {
   if (amountConfig.amount.length !== 1) {
     throw new Error(
       `Amount input component only handles single amount: ${amountConfig.amount
@@ -29,6 +34,7 @@ export const AmountInput: FunctionComponent<{
   }
 
   const { priceStore } = useStore();
+  const theme = useTheme();
   const intl = useIntl();
 
   const price = (() => {
@@ -73,6 +79,58 @@ export const AmountInput: FunctionComponent<{
       label={intl.formatMessage({
         id: "components.input.amount-input.amount-label",
       })}
+      labelAlignment={<Gutter size="0.25rem" />}
+      rightLabel={
+        availableBalance ? (
+          <XAxis alignY="center">
+            <BaseTypography
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-400"]
+                  : ColorPalette["gray-200"]
+              }
+              style={{
+                fontWeight: 400,
+                fontSize: "0.75rem",
+                marginBottom: "0.375rem",
+              }}
+            >
+              (Available: {availableBalance.toString()})
+            </BaseTypography>
+            <Gutter size="0.25rem" />
+            <Tooltip
+              enabled={!!availableBalance}
+              content={
+                "Amount you can use right now after accounting for pending transactions or any holds on your wallet by the protocol."
+              }
+              forceWidth="15.875rem"
+              hideArrow={true}
+              allowedPlacements={["bottom"]}
+            >
+              <Box
+                width="1rem"
+                height="1rem"
+                cursor="pointer"
+                padding="0.0625rem"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: "0.375rem",
+                }}
+              >
+                <InformationPlainIcon
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-400"]
+                      : ColorPalette["gray-300"]
+                  }
+                />
+              </Box>
+            </Tooltip>
+          </XAxis>
+        ) : null
+      }
       type="number"
       value={(() => {
         if (isPriceBased) {
