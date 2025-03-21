@@ -1386,8 +1386,6 @@ export class KeyRingService {
     const keyRing = this.getVaultKeyRing(vault);
 
     if (typeof keyRing.getPubKeyBitcoin !== "function") {
-      console.log("getPubKeyBitcoin using getPubKey");
-
       return Promise.resolve(
         (async () =>
           (
