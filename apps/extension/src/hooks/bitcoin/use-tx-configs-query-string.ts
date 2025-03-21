@@ -1,6 +1,7 @@
 import {
   FeeRateType,
   IAmountConfig,
+  IFeeConfig,
   IFeeRateConfig,
   IRecipientConfig,
   ITxSizeConfig,
@@ -13,6 +14,7 @@ export const useBitcoinTxConfigsQueryString = (configs: {
   recipientConfig: IRecipientConfig;
   txSizeConfig: ITxSizeConfig;
   feeRateConfig: IFeeRateConfig;
+  feeConfig: IFeeConfig;
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -48,6 +50,11 @@ export const useBitcoinTxConfigsQueryString = (configs: {
     const initialFeeRate = searchParams.get("initialFeeRate");
     if (initialFeeRate) {
       configs.feeRateConfig.setValue(initialFeeRate);
+    }
+
+    const initialRemainderValue = searchParams.get("initialRemainderValue");
+    if (initialRemainderValue) {
+      configs.feeConfig.setRemainderValue(initialRemainderValue);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -92,6 +99,12 @@ export const useBitcoinTxConfigsQueryString = (configs: {
           prev.set("initialFeeRate", configs.feeRateConfig.value.toString());
         }
 
+        if (configs.feeConfig.remainderValue != null) {
+          prev.set("initialRemainderValue", configs.feeConfig.remainderValue);
+        } else {
+          prev.delete("initialRemainderValue");
+        }
+
         return prev;
       },
       {
@@ -105,6 +118,7 @@ export const useBitcoinTxConfigsQueryString = (configs: {
     configs.feeRateConfig.value,
     configs.recipientConfig.value,
     configs.txSizeConfig.value,
+    configs.feeConfig.remainderValue,
     setSearchParams,
   ]);
 };

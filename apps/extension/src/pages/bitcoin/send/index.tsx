@@ -48,7 +48,11 @@ import {
   AddRecentSendHistoryMsg,
   PushBitcoinTransactionMsg,
 } from "@keplr-wallet/background";
-import { IPsbtInput, IPsbtOutput } from "@keplr-wallet/stores-bitcoin";
+import {
+  IPsbtInput,
+  IPsbtOutput,
+  RemainderStatus,
+} from "@keplr-wallet/stores-bitcoin";
 
 const Styles = {
   Flex1: styled.div`
@@ -212,6 +216,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
     chainStore,
     chainId,
     sendConfigs.txSizeConfig,
+    sendConfigs.feeConfig,
     psbtSimulatorKey,
     () => {
       if (!sendConfigs.amountConfig.currency) {
@@ -261,6 +266,8 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
           txBytes: number;
           txWeight: number;
         };
+        remainderStatus: RemainderStatus;
+        remainderValue: string;
       }> => {
         const senderAddress = sendConfigs.senderConfig.sender;
         const publicKey = account.pubKey;
@@ -360,7 +367,8 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
           throw new Error("Can't find proper utxos selection");
         }
 
-        const { selectedUtxos, txSize, hasChange } = selection;
+        const { selectedUtxos, txSize, remainderStatus, remainderValue } =
+          selection;
         const xonlyPubKey =
           bitcoinAddress?.paymentType === "taproot"
             ? toXOnly(Buffer.from(publicKey))
@@ -382,12 +390,14 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
           outputs: recipientsForTransaction,
           feeRate,
           isSendMax,
-          hasChange,
+          hasChange: remainderStatus === "used_as_change",
         });
 
         return {
           psbtHex,
           txSize,
+          remainderStatus,
+          remainderValue,
         };
       };
 

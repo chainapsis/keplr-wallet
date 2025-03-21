@@ -1,4 +1,9 @@
-import { IPsbtSimulator, ITxSizeConfig, UIProperties } from "./types";
+import {
+  IFeeConfig,
+  IPsbtSimulator,
+  ITxSizeConfig,
+  UIProperties,
+} from "./types";
 import {
   action,
   autorun,
@@ -15,6 +20,7 @@ import { TxChainSetter } from "./chain";
 import { ChainGetter } from "@keplr-wallet/stores";
 import { isSimpleFetchError } from "@keplr-wallet/simple-fetch";
 import { Psbt } from "bitcoinjs-lib";
+import { RemainderStatus } from "@keplr-wallet/stores-bitcoin";
 
 type PsbtSimulate = () => Promise<{
   psbtHex: string;
@@ -23,6 +29,8 @@ type PsbtSimulate = () => Promise<{
     txBytes: number;
     txWeight: number;
   };
+  remainderStatus: RemainderStatus;
+  remainderValue: string;
 }>;
 export type SimulatePsbtFn = () => PsbtSimulate;
 
@@ -35,11 +43,15 @@ class PsbtSimulatorState {
   protected _initialPsbtHex: string | null = null;
   @observable
   protected _initialTxSize: number | null = null;
+  @observable
+  protected _initialRemainderValue: string | null = null;
 
   @observable
   protected _recentPsbtHex: string | null = null;
   @observable
   protected _recentTxSize: number | null = null;
+  @observable
+  protected _recentRemainderValue: string | null = null;
 
   @observable
   protected _psbtSimulate: PsbtSimulate | undefined = undefined;
@@ -73,12 +85,21 @@ class PsbtSimulatorState {
     this._initialTxSize = value;
   }
 
+  @action
+  setInitialRemainderValue(value: string) {
+    this._initialRemainderValue = value;
+  }
+
   get initialPsbtHex(): string | null {
     return this._initialPsbtHex;
   }
 
   get initialTxSize(): number | null {
     return this._initialTxSize;
+  }
+
+  get initialRemainderValue(): string | null {
+    return this._initialRemainderValue;
   }
 
   @action
@@ -95,8 +116,17 @@ class PsbtSimulatorState {
     this._recentPsbtHex = value;
   }
 
+  @action
+  setRecentRemainderValue(value: string) {
+    this._recentRemainderValue = value;
+  }
+
   get recentPsbtHex(): string | null {
     return this._recentPsbtHex;
+  }
+
+  get recentRemainderValue(): string | null {
+    return this._recentRemainderValue;
   }
 
   @action
@@ -147,6 +177,7 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
     chainGetter: ChainGetter,
     initialChainId: string,
     protected readonly txSizeConfig: ITxSizeConfig,
+    protected readonly feeConfig: IFeeConfig,
     protected readonly initialKey: string,
     protected simulatePsbtFn: SimulatePsbtFn
   ) {
@@ -252,6 +283,12 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
     return state.initialTxSize;
   }
 
+  get remainderValue(): string | null {
+    const key = this.storeKey;
+    const state = this.getState(key);
+    return state.recentRemainderValue;
+  }
+
   protected init() {
     // init psbt if it exists
     this._disposers.push(
@@ -266,11 +303,12 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
         this.kvStore.get<string>(key).then((saved) => {
           if (saved) {
             try {
-              const [psbtHex, txSize] = saved.split("/");
+              const [psbtHex, txSize, remainderValue] = saved.split("/");
 
               Psbt.fromHex(psbtHex); // validate the psbt hex
               state.setInitialPsbtHex(psbtHex);
               state.setInitialTxSize(txSize);
+              state.setInitialRemainderValue(remainderValue);
             } catch (e) {
               // initial psbt is not critical,
               // just log the error and delete the psbt from the store.
@@ -334,19 +372,33 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
           });
 
           promise
-            .then(({ psbtHex, txSize }) => {
+            .then(({ psbtHex, txSize, remainderValue, remainderStatus }) => {
               if (
                 state.recentTxSize === null ||
                 state.recentTxSize > txSize.txVBytes
               ) {
                 state.setRecentPsbtHex(psbtHex);
                 state.setRecentTxSize(txSize.txVBytes);
+
+                if (remainderStatus === RemainderStatus.AddedToFee) {
+                  state.setRecentRemainderValue(remainderValue);
+                } else {
+                  // 잔돈으로 처리되는 경우 0으로 설정
+                  state.setRecentRemainderValue("0");
+                }
               }
 
               state.setError(undefined);
 
               this.kvStore
-                .set(key, `${psbtHex}/${txSize.txVBytes}`)
+                .set(
+                  key,
+                  `${psbtHex}/${txSize.txVBytes}/${
+                    remainderStatus === RemainderStatus.AddedToFee
+                      ? remainderValue
+                      : "0"
+                  }`
+                )
                 .catch((e) => {
                   console.log(e);
                 });
@@ -396,6 +448,14 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
       autorun(() => {
         if (this.enabled && this.txSize != null) {
           this.txSizeConfig.setValue(this.txSize);
+        }
+      })
+    );
+
+    this._disposers.push(
+      autorun(() => {
+        if (this.enabled && this.remainderValue != null) {
+          this.feeConfig.setRemainderValue(this.remainderValue);
         }
       })
     );
@@ -462,6 +522,7 @@ export const usePsbtSimulator = (
   chainGetter: ChainGetter,
   chainId: string,
   txSizeConfig: ITxSizeConfig,
+  feeConfig: IFeeConfig,
   key: string,
   simulatePsbtFn: SimulatePsbtFn,
   initialDisabled?: boolean
@@ -472,6 +533,7 @@ export const usePsbtSimulator = (
       chainGetter,
       chainId,
       txSizeConfig,
+      feeConfig,
       key,
       simulatePsbtFn
     );

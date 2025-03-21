@@ -21,6 +21,10 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   @observable
   protected _value: string = "";
 
+  // dust threshold보다 작아서 잔돈으로 처리되지 않는 값을 수수료로 처리하기 위해 사용
+  @observable
+  protected _remainderValue: string = "";
+
   constructor(
     chainGetter: ChainGetter,
     protected readonly bitcoinQueriesStore: BitcoinQueriesStore,
@@ -53,6 +57,29 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     this._value = value;
   }
 
+  get remainderValue(): string {
+    return this._remainderValue;
+  }
+
+  @action
+  setRemainderValue(value: string) {
+    this._remainderValue = value;
+  }
+
+  get remainder(): number {
+    if (this.remainderValue.trim() === "") {
+      return 0;
+    }
+
+    const num = Number.parseInt(this.remainderValue);
+
+    if (Number.isNaN(num)) {
+      return 0;
+    }
+
+    return num;
+  }
+
   get fee(): CoinPretty | undefined {
     if (this.value.trim() === "") {
       if (this.txSizeConfig.txSize === undefined) {
@@ -61,7 +88,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
       return new CoinPretty(
         this.amountConfig.currency,
-        this.txSizeConfig.txSize * this.feeRateConfig.feeRate
+        this.txSizeConfig.txSize * this.feeRateConfig.feeRate + this.remainder
       );
     }
 

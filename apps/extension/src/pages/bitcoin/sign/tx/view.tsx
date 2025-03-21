@@ -55,7 +55,11 @@ import { ModularChainInfo } from "@keplr-wallet/types";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import { toXOnly } from "@keplr-wallet/crypto";
 import { useGetUTXOs } from "../../../../hooks/bitcoin/use-get-utxos";
-import { IPsbtInput, IPsbtOutput } from "@keplr-wallet/stores-bitcoin";
+import {
+  IPsbtInput,
+  IPsbtOutput,
+  RemainderStatus,
+} from "@keplr-wallet/stores-bitcoin";
 
 export const SignBitcoinTxView: FunctionComponent<{
   interactionData: NonNullable<SignBitcoinTxInteractionStore["waitingData"]>;
@@ -166,6 +170,7 @@ export const SignBitcoinTxView: FunctionComponent<{
     chainStore,
     chainId,
     txSizeConfig,
+    feeConfig,
     psbtSimulatorKey,
     () => {
       if (!("psbtCandidate" in interactionData.data)) {
@@ -179,6 +184,8 @@ export const SignBitcoinTxView: FunctionComponent<{
           txBytes: number;
           txWeight: number;
         };
+        remainderValue: string;
+        remainderStatus: RemainderStatus;
       }> => {
         if (!("psbtCandidate" in interactionData.data)) {
           throw new Error("Not ready to simulate psbt");
@@ -232,7 +239,8 @@ export const SignBitcoinTxView: FunctionComponent<{
           throw new Error("Can't find proper utxos selection");
         }
 
-        const { selectedUtxos, txSize, hasChange } = selection;
+        const { selectedUtxos, txSize, remainderStatus, remainderValue } =
+          selection;
 
         const inputs: IPsbtInput[] = selectedUtxos.map((utxo) => ({
           txid: utxo.txid,
@@ -248,12 +256,14 @@ export const SignBitcoinTxView: FunctionComponent<{
           outputs: recipientsForTransaction,
           feeRate,
           isSendMax,
-          hasChange,
+          hasChange: remainderStatus === "used_as_change",
         });
 
         return {
           psbtHex,
           txSize,
+          remainderStatus,
+          remainderValue,
         };
       };
 
