@@ -68,6 +68,11 @@ const createMockServer = (
       resp.writeHead(501);
       resp.end();
     }
+
+    if (req.url === "/ibc/apps/transfer/v1/denoms/test") {
+      resp.writeHead(501);
+      resp.end();
+    }
   });
 
   server.listen();
@@ -189,7 +194,7 @@ describe("The chain server supports all features(체인 서버가 모든 기능�
       "query:/cosmos/bank/v1beta1/spendable_balances",
     ]);
 
-    expect(getQueryCount!()).toEqual(5);
+    expect(getQueryCount!()).toEqual(6);
   });
 
   /**

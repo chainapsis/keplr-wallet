@@ -25,6 +25,7 @@ export const SupportedChainFeatures = [
   "feemarket",
   "op-stack-l1-data-fee",
   "force-enable-evm-ledger",
+  "ibc-v2",
 ];
 
 /**
@@ -164,6 +165,34 @@ export const RecognizableChainFeaturesMethod: {
       }>(rest, "/feemarket/v1/params");
 
       return result.data.params.enabled;
+    },
+  },
+  {
+    feature: "ibc-v2",
+    fetch: async (features, _rpc, rest) => {
+      if (!features.includes("ibc-go")) {
+        return false;
+      }
+      const result = await simpleFetch<{
+        code: number;
+        message: string;
+        details: string[];
+      }>(rest, "/ibc/apps/transfer/v1/denoms/test", {
+        validateStatus: (status) => {
+          return status === 400;
+        },
+      });
+
+      if (
+        result.status === 400 &&
+        result.data?.message &&
+        typeof result.data.message === "string" &&
+        result.data.message.includes("invalid denom trace hash")
+      ) {
+        return true;
+      }
+
+      return false;
     },
   },
 ];
