@@ -16,7 +16,7 @@ import {
   CHAIN_TYPE_TO_GENESIS_HASH,
 } from "@keplr-wallet/types";
 import { Env, KeplrError } from "@keplr-wallet/router";
-import { Psbt, payments } from "bitcoinjs-lib";
+import { Psbt, address } from "bitcoinjs-lib";
 import { encodeLegacyMessage, encodeLegacySignature } from "./helper";
 import { toXOnly } from "@keplr-wallet/crypto";
 import { BIP322 } from "./bip322";
@@ -369,45 +369,37 @@ export class KeyRingBitcoinService {
           return encodedSignature.toString("base64");
         }
 
-        const { scriptPubKey, internalPubkey } = (() => {
-          if (bitcoinPubKey.paymentType === "taproot") {
-            const internalPubkey = toXOnly(Buffer.from(bitcoinPubKey.pubKey));
-            const { output: scriptPubKey } = payments.p2tr({
-              internalPubkey,
-              network,
-            });
-
-            return { scriptPubKey, internalPubkey };
-          }
-
-          const { output: scriptPubKey } = payments.p2wpkh({
-            pubkey: Buffer.from(bitcoinPubKey.pubKey),
-            network,
-          });
-
-          return { scriptPubKey, internalPubkey: undefined };
-        })();
-        if (!scriptPubKey) {
-          throw new KeplrError("keyring", 221, "Invalid pubkey");
-        }
+        const scriptPubKey = address.toOutputScript(
+          bitcoinPubKey.address,
+          network
+        );
+        const internalPubKey =
+          bitcoinPubKey.paymentType === "taproot"
+            ? toXOnly(Buffer.from(bitcoinPubKey.pubKey))
+            : undefined;
 
         const txToSpend = BIP322.buildToSpendTx(message, scriptPubKey);
         const txToSign = BIP322.buildToSignTx(
           txToSpend.getId(),
           scriptPubKey,
           false,
-          internalPubkey
+          internalPubKey
+        );
+
+        const inputsToSign = Array.from(
+          { length: txToSign.data.inputs.length },
+          (_, i) => ({
+            index: i,
+            address: bitcoinPubKey.address,
+            hdPath: bitcoinPubKey.derivationPath,
+          })
         );
 
         const signedPsbt = await this.keyRingService.signPsbt(
           chainId,
           vaultId,
           txToSign,
-          Array.from({ length: txToSign.data.inputs.length }, (_, i) => ({
-            index: i,
-            address: bitcoinPubKey.address,
-            path: bitcoinPubKey.derivationPath,
-          })),
+          inputsToSign,
           network
         );
 
