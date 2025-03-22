@@ -169,6 +169,17 @@
   "pages.register.enable-chains.guide.can-select-starknet-later-step": "您可以在稍後的步驟中選擇Starknet鏈。",
   "pages.register.enable-chains.guide.starknet.title": "致StarkNet用户的注意事项",
   "pages.register.enable-chains.guide.starknet.paragraph": "通过其他钱包（如Argent、Braavos）导入时，系统将在Keplr中创建全新的独立账户。",
+  "pages.register.enable-chains.guide.non-native-chain.title": "启用自定义链",
+  "pages.register.enable-chains.guide.non-native-chain.paragraph": "无绿色标记的链是非原生链。你可以在Keplr中随时使用，但Keplr不为自定义链提供直接支持。",
+  "pages.register.enable-chains.native-chain-view.title": "所有原生链",
+  "pages.register.enable-chains.native-chain-view.paragraph": "Cosmos, Ethereum, Osmosis..",
+  "pages.register.enable-chains.chain-item-token-count": "{count} {count, plural, one {Token} other {Tokens}}",
+
+  "pages.register.enable-chains.native-chain-view.ledger-cosmos-title": "所有原生Cosmos链",
+  "pages.register.enable-chains.native-chain-view.ledger-evm-title": "所有EVM Cosmos链",
+  "pages.register.enable-chains.native-chain-view.ledger-evm-paragraph": "Ethereum, Arbitrum, Base...",
+  "pages.register.enable-chains.native-chain-view.ledger-starknet-title": "所有原生Starknet链",
+  "pages.register.enable-chains.native-chain-view.ledger-starknet-paragraph": "Starknet, Starknet Sepolia",
   "pages.register.enable-chains.guide.can-select-bitcoin-later-step": "你可以在下一步中选择比特币链。",
 
   "pages.manage-chains.title": "添加/删除链",
@@ -231,8 +242,9 @@
   "page.setting.manage-token-list-title": "添加/删除自定义令牌",
   "page.setting.manage-token-list-paragraph": "仅适用于可通过合约地址手动添加的币种",
   "page.setting.search-placeholder": "搜索设置",
-  "page.setting.advanced.developer-mode-title": "高级 IBC 转账",
-  "page.setting.advanced.endpoints": "端点",
+
+  "page.setting.advanced.developer-mode-title": "开发者模式",
+  "page.setting.advanced.endpoints": "连接点",
   "page.setting.advanced.change-endpoints-title": "修改连接点",
 
   "page.setting.advanced.endpoint.confirm-title": "设置连接点",
@@ -601,6 +613,7 @@
   "page.main.chart.available": "可用总额",
   "page.main.chart.staked": "质押总额",
   "page.main.chart.earn-apy-button": "通过 {tokenName} 可赚取高达 {apy} APY",
+  "page.main.chart.dashboard-button": "Dashboard",
   "page.main.chart.stake-with-keplr-dashboard-button": "使用Keplr Dashboard进行质押",
   "page.main.chart.manage-portfolio-in-keplr-dashboard": "在Keplr Dashboard中管理投资组合",
   "page.main.search-placeholder": "搜索资产或链（如ATOM、Cosmos）",
@@ -609,6 +622,9 @@
   "page.main.spendable.hide-low-balance": "隐藏低余额",
   "page.main.spendable.search-empty-view-title": "哦哦！",
   "page.main.spendable.search-empty-view-paragraph": "未找到结果",
+  "page.main.available.search-show-check-manage-asset-view-guide-title": "找不到币种？",
+  "page.main.available.search-show-check-manage-asset-view-guide-paragraph": "检查“隐藏低余额”是否启用或在“管理资产列表”中隐藏。",
+
   "page.main.spendable.empty-view-title": "准备好探索跨链了吗？",
   "page.main.spendable.empty-view-paragraph": "装满钱包，为迎接未知的征程做好准备吧！",
   "page.main.spendable.get-started-button": "开始",
@@ -751,6 +767,8 @@
 
   "page.earn.transfer.amount.tx.paragraph": "请保持本窗口开启{br}以继续后续步骤！",
   "page.send.select-asset.earn.title": "选择要转移至Noble链的{br}资产",
+  "page.send.select-asset.earn.no-token-found": "哎哟！{br}你在其他链上也没有USDC。",
+  "page.send.select-asset.earn.go-back-button": "返回",
 
   "page.tx-result.pending.title": "交易处理中",
   "page.tx-result.pending.paragraph": "交易已广播至区块链，等待确认中。",
