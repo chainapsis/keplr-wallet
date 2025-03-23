@@ -276,7 +276,8 @@ export function init(
     vaultService,
     keyRingV2Service,
     keyRingCosmosService,
-    keyRingStarknetService
+    keyRingStarknetService,
+    keyRingBitcoinService
   );
 
   const recentSendHistoryService =
