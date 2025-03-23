@@ -81,12 +81,20 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
     },
   });
 
-  const chainList = chainStore.modularChainInfosInUI.map((chainInfo) => {
-    return {
-      key: chainInfo.chainId,
-      label: chainInfo.chainName,
-    };
-  });
+  const chainList = chainStore.modularChainInfosInUI
+    .filter((chainInfo) => {
+      if ("bitcoin" in chainInfo) {
+        return false;
+      }
+
+      return true;
+    })
+    .map((chainInfo) => {
+      return {
+        key: chainInfo.chainId,
+        label: chainInfo.chainName,
+      };
+    });
 
   useEffect(() => {
     setValue("rpc", chainInfo.rpc);
