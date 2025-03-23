@@ -16,6 +16,7 @@ import {
   useAmountConfig,
   useTxConfigsValidate,
   usePsbtSimulator,
+  useAvailableBalanceConfig,
 } from "@keplr-wallet/hooks-bitcoin";
 import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
@@ -115,11 +116,14 @@ export const SignBitcoinTxView: FunctionComponent<{
   // disallow zero tx size to display fee error
   const txSizeConfig = useTxSizeConfig(chainStore, chainId, true);
 
+  const availableBalanceConfig = useAvailableBalanceConfig(chainStore, chainId);
+
   const amountConfig = useAmountConfig(
     chainStore,
     bitcoinQueriesStore,
     chainId,
-    senderConfig
+    senderConfig,
+    availableBalanceConfig
   );
 
   const feeConfig = useFeeConfig(
@@ -129,7 +133,8 @@ export const SignBitcoinTxView: FunctionComponent<{
     senderConfig,
     amountConfig,
     txSizeConfig,
-    feeRateConfig
+    feeRateConfig,
+    availableBalanceConfig
   );
 
   // 외부에서 Bitcoin send 요청이 들어온 경우

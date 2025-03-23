@@ -17,14 +17,18 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { useLanguage } from "../../../../../languages";
 import { useTheme } from "styled-components";
 import { BaseTypography } from "../../../../../components/typography/base";
-import { InformationPlainIcon } from "../../../../../components/icon";
+import {
+  InformationPlainIcon,
+  LoadingIcon,
+} from "../../../../../components/icon";
 import { XAxis } from "../../../../../components/axis";
 import { Gutter } from "../../../../../components/gutter";
 import { Tooltip } from "../../../../../components/tooltip";
 export const AmountInput: FunctionComponent<{
   amountConfig: IAmountConfig;
-  availableBalance: CoinPretty | undefined; // TODO: amountConfig 안에 넣으려고 했는데 쉽지 않음; 일단 디자인 먼저
-}> = observer(({ amountConfig, availableBalance }) => {
+  availableBalance: CoinPretty | undefined;
+  isLoading: boolean;
+}> = observer(({ amountConfig, availableBalance, isLoading }) => {
   if (amountConfig.amount.length !== 1) {
     throw new Error(
       `Amount input component only handles single amount: ${amountConfig.amount
@@ -81,7 +85,11 @@ export const AmountInput: FunctionComponent<{
       })}
       labelAlignment={<Gutter size="0.25rem" />}
       rightLabel={
-        availableBalance ? (
+        isLoading ? (
+          <Box alignY="center" marginBottom="0.375rem">
+            <LoadingIcon width="0.75rem" height="0.75rem" />
+          </Box>
+        ) : availableBalance ? (
           <XAxis alignY="center">
             <BaseTypography
               color={

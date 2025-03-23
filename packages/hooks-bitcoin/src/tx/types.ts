@@ -75,6 +75,16 @@ export interface IAmountConfig extends ITxChainSetter {
   uiProperties: UIProperties;
 }
 
+export interface IAvailableBalanceConfig extends ITxChainSetter {
+  availableBalanceByAddress(address: string): CoinPretty | undefined;
+  setAvailableBalanceByAddress(
+    address: string,
+    availableBalance: CoinPretty | undefined
+  ): void;
+
+  uiProperties: UIProperties;
+}
+
 export interface IFeeConfig extends ITxChainSetter {
   value: string;
   setValue(value: string): void;

@@ -172,6 +172,32 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
   );
   sendConfigs.amountConfig.setCurrency(currency);
 
+  const [isAvailableBalanceInitialized, setIsAvailableBalanceInitialized] =
+    useState<boolean>(false);
+
+  useEffect(() => {
+    if (
+      isFetchingAvailableUTXOs ||
+      availableUTXOsError ||
+      isAvailableBalanceInitialized
+    ) {
+      return;
+    }
+
+    sendConfigs.availableBalanceConfig.setAvailableBalanceByAddress(
+      sender,
+      availableBalance
+    );
+    setIsAvailableBalanceInitialized(true);
+  }, [
+    sender,
+    availableBalance,
+    sendConfigs.availableBalanceConfig,
+    isFetchingAvailableUTXOs,
+    availableUTXOsError,
+    isAvailableBalanceInitialized,
+  ]);
+
   // bitcoin tx size는 amount, fee rate, recipient address type에 따라 달라진다.
   // 또한 별도의 simulator refresh 로직이 없기 때문에 availableUTXOs의 값이 변경되면
   // 새로운 key를 생성해서 새로운 simulator를 생성하도록 한다.
@@ -579,7 +605,12 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
           />
           <AmountInput
             amountConfig={sendConfigs.amountConfig}
-            availableBalance={availableBalance}
+            availableBalance={sendConfigs.availableBalanceConfig.availableBalanceByAddress(
+              sender
+            )}
+            isLoading={
+              isFetchingAvailableUTXOs || !isAvailableBalanceInitialized
+            }
           />
           <WarningBox isUnableToGetUTXOs={isUnableToGetUTXOs} />
 

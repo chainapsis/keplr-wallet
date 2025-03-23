@@ -1,5 +1,6 @@
 import {
   IAmountConfig,
+  IAvailableBalanceConfig,
   IFeeConfig,
   IFeeRateConfig,
   ISenderConfig,
@@ -32,7 +33,8 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     protected readonly senderConfig: ISenderConfig,
     protected readonly amountConfig: IAmountConfig,
     protected readonly txSizeConfig: ITxSizeConfig,
-    protected readonly feeRateConfig: IFeeRateConfig
+    protected readonly feeRateConfig: IFeeRateConfig,
+    protected readonly availableBalanceConfig: IAvailableBalanceConfig
   ) {
     super(chainGetter, initialChainId);
 
@@ -112,7 +114,26 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
     const amount = this.amountConfig.amount;
 
-    // TODO: check available balance rather than total balance
+    const need = amount.reduce((acc, cur) => {
+      return acc.add(new Dec(cur.toCoin().amount));
+    }, new Dec(0));
+
+    const availableBalance =
+      this.availableBalanceConfig.availableBalanceByAddress(
+        this.senderConfig.value
+      );
+
+    // available balance가 설정되어 있으면 별도로 balance 조회를 하지 않도록 한다.
+    if (availableBalance) {
+      if (availableBalance.sub(need).toDec().lt(new Dec(0))) {
+        return {
+          error: new InsufficientFeeError("Insufficient fee"),
+        };
+      }
+
+      return {};
+    }
+
     const bal = this.bitcoinQueriesStore
       .get(this.chainId)
       .queryBitcoinBalance.getBalance(
@@ -142,10 +163,6 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       };
     }
 
-    const need = amount.reduce((acc, cur) => {
-      return acc.add(new Dec(cur.toCoin().amount));
-    }, new Dec(0));
-
     if (
       new Dec(bal.balance.toCoin().amount).lt(
         new Dec(fee.toCoin().amount).add(need)
@@ -169,6 +186,7 @@ export const useFeeConfig = (
   amountConfig: IAmountConfig,
   txSizeConfig: ITxSizeConfig,
   feeRateConfig: IFeeRateConfig,
+  availableBalanceConfig: IAvailableBalanceConfig,
   initialFn?: (config: FeeConfig) => void
 ) => {
   const [config] = useState(() => {
@@ -179,7 +197,8 @@ export const useFeeConfig = (
       senderConfig,
       amountConfig,
       txSizeConfig,
-      feeRateConfig
+      feeRateConfig,
+      availableBalanceConfig
     );
 
     if (initialFn) {
