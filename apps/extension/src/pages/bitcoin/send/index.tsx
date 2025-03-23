@@ -30,6 +30,7 @@ import {
   EmptyAddressError,
   EmptyAmountError,
   ZeroAmountError,
+  UnableToFindProperUtxosError,
 } from "@keplr-wallet/hooks-bitcoin";
 import { FormattedMessage, useIntl } from "react-intl";
 import { isRunningInSidePanel } from "../../../utils";
@@ -391,7 +392,9 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
         });
 
         if (!selection) {
-          throw new Error("Can't find proper utxos selection");
+          throw new UnableToFindProperUtxosError(
+            "Can't find proper utxos selection"
+          );
         }
 
         const { selectedUtxos, txSize, remainderStatus, remainderValue } =

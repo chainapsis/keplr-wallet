@@ -607,6 +607,7 @@
   "components.input.fee-control.max-fee": "最高费用: {assets}",
   "components.input.fee-control.fee-rate": "费用标准: {feeRate} sat/vB",
   "components.input.fee-control.error.insufficient-fee": "费用不足",
+  "components.input.fee-control.error.unable-to-find-proper-utxos": "无法找到合适的UTXO组合",
   "components.input.fee-control.modal.title": "费用选项",
   "components.input.fee-control.modal.fee-title": "费用",
   "components.input.fee-control.modal.fee-token-dropdown-label": "费用币种",

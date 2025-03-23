@@ -6,6 +6,7 @@ import {
   IPsbtSimulator,
   InsufficientFeeError,
   ISenderConfig,
+  UnableToFindProperUtxosError,
 } from "@keplr-wallet/hooks-bitcoin";
 import { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../../styles";
@@ -230,7 +231,11 @@ export const FeeControl: FunctionComponent<{
         <VerticalResizeTransition transitionAlign="top">
           {(feeConfig.uiProperties.error &&
             feeConfig.uiProperties.error.message !== "Fee is not set") ||
-          feeConfig.uiProperties.warning ? (
+          feeConfig.uiProperties.warning ||
+          feeRateConfig.uiProperties.error ||
+          feeRateConfig.uiProperties.warning ||
+          psbtSimulator?.uiProperties.error ||
+          psbtSimulator?.uiProperties.warning ? (
             <Box
               marginTop="1.04rem"
               borderRadius="0.5rem"
@@ -287,6 +292,29 @@ export const FeeControl: FunctionComponent<{
                       feeRateConfig.uiProperties.warning.toString()
                     );
                   }
+
+                  if (psbtSimulator?.uiProperties.error) {
+                    if (
+                      psbtSimulator.uiProperties.error instanceof
+                      UnableToFindProperUtxosError
+                    ) {
+                      return intl.formatMessage({
+                        id: "components.input.fee-control.error.unable-to-find-proper-utxos",
+                      });
+                    }
+
+                    return (
+                      psbtSimulator.uiProperties.error.message ||
+                      psbtSimulator.uiProperties.error.toString()
+                    );
+                  }
+
+                  if (psbtSimulator?.uiProperties.warning) {
+                    return (
+                      psbtSimulator.uiProperties.warning.message ||
+                      psbtSimulator.uiProperties.warning.toString()
+                    );
+                  }
                 })()}
               </Subtitle4>
             </Box>
@@ -306,7 +334,6 @@ export const FeeControl: FunctionComponent<{
             senderConfig={senderConfig}
             feeConfig={feeConfig}
             feeRateConfig={feeRateConfig}
-            psbtSimulator={psbtSimulator}
             disableAutomaticFeeSet={disableAutomaticFeeSet}
           />
         </Modal>

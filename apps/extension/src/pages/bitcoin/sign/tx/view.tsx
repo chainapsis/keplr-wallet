@@ -17,6 +17,7 @@ import {
   useTxConfigsValidate,
   usePsbtSimulator,
   useAvailableBalanceConfig,
+  UnableToFindProperUtxosError,
 } from "@keplr-wallet/hooks-bitcoin";
 import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
@@ -247,7 +248,9 @@ export const SignBitcoinTxView: FunctionComponent<{
         });
 
         if (!selection) {
-          throw new Error("Can't find proper utxos selection");
+          throw new UnableToFindProperUtxosError(
+            "Can't find proper utxos selection"
+          );
         }
 
         const { selectedUtxos, txSize, remainderStatus, remainderValue } =

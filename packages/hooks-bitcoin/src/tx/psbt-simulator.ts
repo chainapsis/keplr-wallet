@@ -469,13 +469,14 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
 
   get uiProperties(): UIProperties {
     return {
+      error: (() => {
+        if (this.error) {
+          return this.error;
+        }
+      })(),
       warning: (() => {
         if (this.forceDisableReason) {
           return this.forceDisableReason;
-        }
-
-        if (this.error) {
-          return this.error;
         }
       })(),
       loadingState: (() => {
