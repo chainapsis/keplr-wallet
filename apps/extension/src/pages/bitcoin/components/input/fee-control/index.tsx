@@ -302,18 +302,6 @@ export const FeeControl: FunctionComponent<{
                         id: "components.input.fee-control.error.unable-to-find-proper-utxos",
                       });
                     }
-
-                    return (
-                      psbtSimulator.uiProperties.error.message ||
-                      psbtSimulator.uiProperties.error.toString()
-                    );
-                  }
-
-                  if (psbtSimulator?.uiProperties.warning) {
-                    return (
-                      psbtSimulator.uiProperties.warning.message ||
-                      psbtSimulator.uiProperties.warning.toString()
-                    );
                   }
                 })()}
               </Subtitle4>

@@ -21,6 +21,7 @@ import { ChainGetter } from "@keplr-wallet/stores";
 import { isSimpleFetchError } from "@keplr-wallet/simple-fetch";
 import { Psbt } from "bitcoinjs-lib";
 import { RemainderStatus } from "@keplr-wallet/stores-bitcoin";
+import { UnableToFindProperUtxosError } from "./errors";
 
 type PsbtSimulate = () => Promise<{
   psbtHex: string;
@@ -471,12 +472,20 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
     return {
       error: (() => {
         if (this.error) {
-          return this.error;
+          if (this.error instanceof UnableToFindProperUtxosError) {
+            return this.error;
+          }
         }
       })(),
       warning: (() => {
         if (this.forceDisableReason) {
           return this.forceDisableReason;
+        }
+
+        if (this.error) {
+          if (!(this.error instanceof UnableToFindProperUtxosError)) {
+            return this.error;
+          }
         }
       })(),
       loadingState: (() => {
