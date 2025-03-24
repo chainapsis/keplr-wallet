@@ -61,6 +61,7 @@ export const WrapperwithBottomTag = observer(function ({
         zIndex={1}
         position="relative"
         style={{
+          zIndex: -1,
           top: "-0.5rem",
           left: 0,
           display: "flex",
