@@ -205,7 +205,10 @@ export class KeyRingBitcoinService {
         }[];
         signedPsbtsHexes: string[];
       }) => {
-        if (res.signedPsbtsHexes) {
+        if (
+          res.signedPsbtsHexes &&
+          res.signedPsbtsHexes.length === psbtsHexes.length
+        ) {
           return res.signedPsbtsHexes;
         }
 

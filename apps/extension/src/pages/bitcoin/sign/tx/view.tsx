@@ -35,7 +35,11 @@ import { Column, Columns } from "../../../../components/column";
 import { XAxis, YAxis } from "../../../../components/axis";
 import { ViewDataButton } from "../../../sign/components/view-data-button";
 import { useNavigate } from "react-router";
-import { ApproveIcon, CancelIcon } from "../../../../components/button";
+import {
+  ApproveIcon,
+  CancelIcon,
+  PrevIcon,
+} from "../../../../components/button";
 import { FeeSummary } from "../../components/input/fee-summary";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { ChainImageFallback } from "../../../../components/image";
@@ -65,6 +69,7 @@ import { Bech32Address } from "@keplr-wallet/cosmos";
 import { InformationPlainIcon } from "../../../../components/icon";
 import { Tooltip } from "../../../../components/tooltip";
 import { WarningBox } from "../../components/warning-box";
+import { HeaderProps } from "../../../../layouts/header/types";
 
 export const SignBitcoinTxView: FunctionComponent<{
   interactionData: NonNullable<SignBitcoinTxInteractionStore["waitingData"]>;
@@ -315,7 +320,7 @@ export const SignBitcoinTxView: FunctionComponent<{
     feeConfig,
   });
 
-  // 입력의 일부를 서명하지 않는 경우 / 하나라도 서명할 수 없는 psbt가 있는 경우
+  // 입력의 일부를 서명하지 않는 psbt가 있는 경우 / 하나라도 서명할 수 없는 psbt가 있는 경우
   const isPartialSign = validatedPsbts.some((data) =>
     data.sumInputValueByAddress.some((input) => !input.isMine)
   );
@@ -414,19 +419,34 @@ export const SignBitcoinTxView: FunctionComponent<{
     }
   };
 
-  return (
-    <HeaderLayout
-      title={
-        isExternal
-          ? ""
-          : intl.formatMessage({
-              id: "page.sign.cosmos.tx.title",
-            })
+  const reject = async () => {
+    await signBitcoinTxInteractionStore.rejectWithProceedNext(
+      interactionData.id,
+      (proceedNext) => {
+        if (!proceedNext) {
+          if (
+            interactionInfo.interaction &&
+            !interactionInfo.interactionInternal
+          ) {
+            handleExternalInteractionWithNoProceedNext();
+          } else if (
+            interactionInfo.interaction &&
+            interactionInfo.interactionInternal
+          ) {
+            window.history.length > 1 ? navigate(-1) : navigate("/");
+          } else {
+            navigate("/", { replace: true });
+          }
+        }
       }
-      fixedHeight={true}
-      left={<BackButton hidden={isExternal} />}
-      // 유저가 enter를 눌러서 우발적으로(?) approve를 누르지 않도록 onSubmit을 의도적으로 사용하지 않았음.
-      bottomButtons={[
+    );
+  };
+
+  const [currentPsbtIndex, setCurrentPsbtIndex] = useState(0);
+
+  const getBottomButtons = (): HeaderProps["bottomButtons"] => {
+    if (validatedPsbts.length <= 1) {
+      return [
         {
           textOverrideIcon: (
             <CancelIcon
@@ -442,28 +462,7 @@ export const SignBitcoinTxView: FunctionComponent<{
           style: {
             width: "3.25rem",
           },
-          onClick: async () => {
-            await signBitcoinTxInteractionStore.rejectWithProceedNext(
-              interactionData.id,
-              (proceedNext) => {
-                if (!proceedNext) {
-                  if (
-                    interactionInfo.interaction &&
-                    !interactionInfo.interactionInternal
-                  ) {
-                    handleExternalInteractionWithNoProceedNext();
-                  } else if (
-                    interactionInfo.interaction &&
-                    interactionInfo.interactionInternal
-                  ) {
-                    window.history.length > 1 ? navigate(-1) : navigate("/");
-                  } else {
-                    navigate("/", { replace: true });
-                  }
-                }
-              }
-            );
-          },
+          onClick: reject,
         },
         {
           isSpecial: !isPartialSign, // 부분 서명하는 경우 버튼 색상 변경이 필요하므로 isSpecial을 false로 설정
@@ -475,14 +474,109 @@ export const SignBitcoinTxView: FunctionComponent<{
           isLoading,
           onClick: approve,
         },
-      ]}
+      ];
+    }
+
+    const buttons: HeaderProps["bottomButtons"] = [];
+
+    // Add back/cancel button
+    if (currentPsbtIndex === 0) {
+      buttons.push({
+        textOverrideIcon: (
+          <CancelIcon
+            color={
+              theme.mode === "light"
+                ? ColorPalette["blue-400"]
+                : ColorPalette["gray-200"]
+            }
+          />
+        ),
+        size: "large",
+        color: "secondary",
+        style: {
+          width: "3.25rem",
+        },
+        onClick: reject,
+      });
+    } else {
+      buttons.push({
+        textOverrideIcon: (
+          <PrevIcon
+            color={
+              theme.mode === "light"
+                ? ColorPalette["blue-400"]
+                : ColorPalette["gray-200"]
+            }
+          />
+        ),
+        size: "large",
+        color: "secondary",
+        style: {
+          width: "3.25rem",
+        },
+        onClick: () => {
+          setCurrentPsbtIndex(currentPsbtIndex - 1);
+        },
+      });
+    }
+
+    // Add next/approve button
+    if (currentPsbtIndex < validatedPsbts.length - 1) {
+      buttons.push({
+        text: `${intl.formatMessage({ id: "button.next" })} (${
+          currentPsbtIndex + 1
+        }/${validatedPsbts.length})`,
+        size: "large",
+        color: "secondary",
+        onClick: () => {
+          setCurrentPsbtIndex(currentPsbtIndex + 1);
+        },
+      });
+    } else {
+      buttons.push({
+        isSpecial: !isPartialSign,
+        color: isPartialSign ? "warning" : "primary",
+        text: intl.formatMessage({ id: "button.approve" }),
+        size: "large",
+        left: !isLoading && <ApproveIcon />,
+        disabled: buttonDisabled,
+        isLoading,
+        onClick: approve,
+      });
+    }
+
+    return buttons;
+  };
+
+  return (
+    <HeaderLayout
+      title={
+        isExternal
+          ? ""
+          : intl.formatMessage({
+              id: "page.sign.cosmos.tx.title",
+            })
+      }
+      fixedHeight={true}
+      left={<BackButton hidden={isExternal} />}
+      // 유저가 enter를 눌러서 우발적으로(?) approve를 누르지 않도록 onSubmit을 의도적으로 사용하지 않았음.
+      bottomButtons={getBottomButtons()}
     >
       {isExternal ? (
-        validatedPsbts.length > 1 ? null : (
-          // TODO: 여러 psbt 처리 로직 추가 필요
-          <SinglePsbtView
+        validatedPsbts.length > 1 ? (
+          // Show current PSBT based on index
+          <PsbtDetailsView
             isUnableToGetUTXOs={isUnableToGetUTXOs}
-            hasMultiplePsbts={validatedPsbts.length > 1}
+            signerInfo={signerInfo}
+            chainId={chainId}
+            origin={interactionData.data.origin}
+            validatedPsbt={validatedPsbts[currentPsbtIndex]}
+            totalPsbts={validatedPsbts.length}
+            currentPsbtIndex={currentPsbtIndex}
+          />
+        ) : (
+          <PsbtDetailsView
+            isUnableToGetUTXOs={isUnableToGetUTXOs}
             signerInfo={signerInfo}
             chainId={chainId}
             origin={interactionData.data.origin}
@@ -745,7 +839,7 @@ const InternalSendBitcoinTxReview: FunctionComponent<{
   );
 });
 
-const SinglePsbtView: FunctionComponent<{
+const PsbtDetailsView: FunctionComponent<{
   chainId: string;
   signerInfo: {
     name: string;
@@ -753,16 +847,18 @@ const SinglePsbtView: FunctionComponent<{
   };
   origin: string;
   isUnableToGetUTXOs: boolean;
-  hasMultiplePsbts: boolean;
   validatedPsbt?: ValidatedPsbt;
+  totalPsbts?: number;
+  currentPsbtIndex?: number;
 }> = observer(
   ({
     validatedPsbt,
     chainId,
-    hasMultiplePsbts,
     signerInfo,
     origin,
     isUnableToGetUTXOs,
+    totalPsbts,
+    currentPsbtIndex,
   }) => {
     const theme = useTheme();
     const {
@@ -826,9 +922,23 @@ const SinglePsbtView: FunctionComponent<{
         <Gutter size="0.75rem" />
         <ArbitraryMsgRequestOrigin origin={origin} />
         <Gutter size="0.75rem" />
-        {hasMultiplePsbts || !singleInputAddressAndIsToSign ? (
-          <NetworkInfoBadge chainInfo={modularChainInfo} />
-        ) : (
+        {totalPsbts && totalPsbts > 1 && currentPsbtIndex !== undefined && (
+          <React.Fragment>
+            <Box padding="0.5rem" alignX="center">
+              <Subtitle3
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-400"]
+                    : ColorPalette["gray-200"]
+                }
+              >
+                PSBT {currentPsbtIndex + 1} of {totalPsbts}
+              </Subtitle3>
+            </Box>
+            <Gutter size="0.75rem" />
+          </React.Fragment>
+        )}
+        {singleInputAddressAndIsToSign ? (
           <ArbitraryMsgWalletDetails
             walletName={signerInfo.name}
             chainInfo={modularChainInfo}
@@ -860,6 +970,8 @@ const SinglePsbtView: FunctionComponent<{
               </Box>
             }
           />
+        ) : (
+          <NetworkInfoBadge chainInfo={modularChainInfo} />
         )}
         <Gutter size="0.75rem" />
         <WarningBox
