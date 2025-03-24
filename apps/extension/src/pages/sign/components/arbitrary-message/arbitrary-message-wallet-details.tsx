@@ -19,12 +19,19 @@ interface ArbitraryMsgWalletDetailsProps {
     type: "bech32" | "ethereum" | "starknet" | "bitcoin";
     address: string;
   };
-  onlyWalletName?: boolean;
+  hideSigningLabel?: boolean;
+  addressAdditionalContent?: React.ReactNode;
 }
 
 export const ArbitraryMsgWalletDetails: FunctionComponent<
   ArbitraryMsgWalletDetailsProps
-> = ({ walletName, chainInfo, addressInfo, onlyWalletName }) => {
+> = ({
+  walletName,
+  chainInfo,
+  addressInfo,
+  hideSigningLabel,
+  addressAdditionalContent,
+}) => {
   const theme = useTheme();
   const shortenAddress = (() => {
     if (addressInfo.type === "starknet") {
@@ -41,7 +48,14 @@ export const ArbitraryMsgWalletDetails: FunctionComponent<
         : addressInfo.address;
     }
 
-    if (addressInfo.type === "bech32" || addressInfo.type === "bitcoin") {
+    if (addressInfo.type === "bech32") {
+      return Bech32Address.shortenAddress(addressInfo.address, 30);
+    }
+
+    if (addressInfo.type === "bitcoin") {
+      if (addressAdditionalContent) {
+        return Bech32Address.shortenAddress(addressInfo.address, 20);
+      }
       return Bech32Address.shortenAddress(addressInfo.address, 30);
     }
   })();
@@ -57,7 +71,7 @@ export const ArbitraryMsgWalletDetails: FunctionComponent<
             : ColorPalette["gray-600"],
       }}
     >
-      <Box position="relative" height={onlyWalletName ? "4rem" : "5.5rem"}>
+      <Box position="relative" height={hideSigningLabel ? "4rem" : "5.5rem"}>
         <Box
           position="absolute"
           width="100%"
@@ -111,7 +125,7 @@ export const ArbitraryMsgWalletDetails: FunctionComponent<
         </Box>
         <Box position="relative" zIndex={1} paddingTop="1.623rem">
           <YAxis alignX="center">
-            {!onlyWalletName && (
+            {!hideSigningLabel && (
               <React.Fragment>
                 <Subtitle4
                   color={
@@ -194,6 +208,7 @@ export const ArbitraryMsgWalletDetails: FunctionComponent<
             >
               {shortenAddress}
             </Body1>
+            {addressAdditionalContent}
           </XAxis>
         </YAxis>
       </Box>

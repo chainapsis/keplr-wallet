@@ -62,8 +62,9 @@ import {
   RemainderStatus,
 } from "@keplr-wallet/stores-bitcoin";
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import { WarningBox } from "../../components/warning-box";
 import { InformationPlainIcon } from "../../../../components/icon";
+import { Tooltip } from "../../../../components/tooltip";
+import { WarningBox } from "../../components/warning-box";
 
 export const SignBitcoinTxView: FunctionComponent<{
   interactionData: NonNullable<SignBitcoinTxInteractionStore["waitingData"]>;
@@ -476,134 +477,38 @@ export const SignBitcoinTxView: FunctionComponent<{
         },
       ]}
     >
-      <Box
-        height="100%"
-        padding="0.75rem 0.75rem 0"
-        style={{
-          overflow: "auto",
-        }}
-      >
-        <SignBitcoinTxViewHeader
-          isExternal={isExternal}
-          modularChainInfo={modularChainInfo}
-          signerInfo={signerInfo}
-          hasMultiplePsbts={validatedPsbts.length > 1}
-          origin={interactionData.data.origin}
-        />
-        <Gutter size="0.75rem" />
-        <WarningBox
-          isUnableToGetUTXOs={isUnableToGetUTXOs}
-          isPartialSign={isPartialSign}
-          isUnableToSign={isUnableToSign}
-        />
-        {isUnableToGetUTXOs || isPartialSign || isUnableToSign ? (
-          <Gutter size="0.75rem" />
-        ) : null}
-        {isExternal ? (
-          validatedPsbts.length > 1 ? null : (
-            // TODO: 여러 psbt 처리 로직 추가 필요
-            <SinglePsbtView
-              chainId={chainId}
-              validatedPsbt={validatedPsbts?.[0]}
-            />
-          )
-        ) : (
-          <InternalSendBitcoinTxReview
-            validatedPsbt={validatedPsbts?.[0]}
+      {isExternal ? (
+        validatedPsbts.length > 1 ? null : (
+          // TODO: 여러 psbt 처리 로직 추가 필요
+          <SinglePsbtView
+            isUnableToGetUTXOs={isUnableToGetUTXOs}
+            hasMultiplePsbts={validatedPsbts.length > 1}
+            signerInfo={signerInfo}
             chainId={chainId}
-            feeDetails={
-              <FeeSummary feeConfig={feeConfig} isInitialized={isInitialized} />
-            }
+            origin={interactionData.data.origin}
+            validatedPsbt={validatedPsbts?.[0]}
           />
-        )}
-      </Box>
+        )
+      ) : (
+        <InternalSendBitcoinTxReview
+          isUnableToGetUTXOs={isUnableToGetUTXOs}
+          validatedPsbt={validatedPsbts?.[0]}
+          chainId={chainId}
+          feeSummary={
+            <FeeSummary feeConfig={feeConfig} isInitialized={isInitialized} />
+          }
+        />
+      )}
     </HeaderLayout>
   );
 });
 
-const NetworkInfoBadge: FunctionComponent<{
-  chainInfo: ModularChainInfo;
-}> = observer(({ chainInfo }) => {
-  const theme = useTheme();
-
-  return (
-    <Box marginY="0.25rem" alignX="center" alignY="center">
-      <Box
-        padding="0.375rem 0.625rem 0.375rem 0.75rem"
-        backgroundColor={
-          theme.mode === "light" ? ColorPalette.white : ColorPalette["gray-600"]
-        }
-        borderRadius="20rem"
-      >
-        <XAxis alignY="center">
-          <Body3
-            color={
-              theme.mode === "light"
-                ? ColorPalette["gray-500"]
-                : ColorPalette["gray-200"]
-            }
-          >
-            <FormattedMessage
-              id="page.sign.ethereum.requested-network" // TODO: 텍스트 관련 id를 비트코인용으로 변경 또는 추가 필요
-              values={{
-                network: chainInfo.chainName,
-              }}
-            />
-          </Body3>
-          <Gutter direction="horizontal" size="0.5rem" />
-          <ChainImageFallback
-            size="1.25rem"
-            chainInfo={chainInfo}
-            alt={chainInfo.chainName}
-          />
-        </XAxis>
-      </Box>
-    </Box>
-  );
-});
-
-const SignBitcoinTxViewHeader: FunctionComponent<{
-  isExternal: boolean;
-  modularChainInfo: ModularChainInfo;
-  signerInfo: {
-    name: string;
-    address: string;
-  };
-  hasMultiplePsbts: boolean;
-  origin: string;
-}> = observer(
-  ({ isExternal, modularChainInfo, signerInfo, hasMultiplePsbts, origin }) => {
-    return isExternal ? (
-      <React.Fragment>
-        <ArbitraryMsgSignHeader />
-        <Gutter size="0.75rem" />
-        <ArbitraryMsgRequestOrigin origin={origin} />
-        <Gutter size="0.75rem" />
-        {hasMultiplePsbts ? (
-          <NetworkInfoBadge chainInfo={modularChainInfo} />
-        ) : (
-          <ArbitraryMsgWalletDetails
-            walletName={signerInfo.name}
-            chainInfo={modularChainInfo}
-            addressInfo={{
-              type: "bitcoin",
-              address: signerInfo.address,
-            }}
-            onlyWalletName={true}
-          />
-        )}
-      </React.Fragment>
-    ) : (
-      <NetworkInfoBadge chainInfo={modularChainInfo} />
-    );
-  }
-);
-
 const InternalSendBitcoinTxReview: FunctionComponent<{
   validatedPsbt?: ValidatedPsbt;
+  isUnableToGetUTXOs: boolean;
   chainId: string;
-  feeDetails: React.ReactNode;
-}> = observer(({ validatedPsbt, chainId, feeDetails }) => {
+  feeSummary: React.ReactNode;
+}> = observer(({ validatedPsbt, chainId, feeSummary, isUnableToGetUTXOs }) => {
   const theme = useTheme();
   const { chainStore } = useStore();
   const { sumInputValueByAddress, sumOutputValueByAddress, decodedRawData } =
@@ -618,6 +523,7 @@ const InternalSendBitcoinTxReview: FunctionComponent<{
       ? sumOutputValueByAddress?.find((output) => output.address !== sender)
       : sumOutputValueByAddress?.[0];
   const recipient = recipientOutput?.address;
+  const modularChainInfo = chainStore.getModularChain(chainId);
   const currency = chainStore
     .getModularChainInfoImpl(chainId)
     .getCurrencies("bitcoin")[0];
@@ -633,8 +539,19 @@ const InternalSendBitcoinTxReview: FunctionComponent<{
     return JSON.stringify(decodedRawData, null, 2);
   }, [decodedRawData]);
 
+  const isPartialSign = sumInputValueByAddress?.some((input) => !input.isMine);
+  const isUnableToSign = validatedPsbt?.inputsToSign.length === 0;
+
   return (
-    <React.Fragment>
+    <Box
+      height="100%"
+      padding="0.75rem 0.75rem 0"
+      style={{
+        overflow: "auto",
+      }}
+    >
+      <NetworkInfoBadge chainInfo={modularChainInfo} />
+      <Gutter size="0.75rem" />
       <Box marginBottom="0.5rem">
         <Columns sum={1} alignY="center">
           <XAxis>
@@ -817,108 +734,194 @@ const InternalSendBitcoinTxReview: FunctionComponent<{
           )}
         </Box>
       </SimpleBar>
+      <WarningBox
+        isPartialSign={isPartialSign}
+        isUnableToGetUTXOs={isUnableToGetUTXOs}
+        isUnableToSign={isUnableToSign}
+      />
       <div style={{ marginTop: "0.75rem", flex: 1 }} />
-      {feeDetails}
-    </React.Fragment>
+      {feeSummary}
+    </Box>
   );
 });
 
 const SinglePsbtView: FunctionComponent<{
   chainId: string;
+  signerInfo: {
+    name: string;
+    address: string;
+  };
+  origin: string;
+  isUnableToGetUTXOs: boolean;
+  hasMultiplePsbts: boolean;
   validatedPsbt?: ValidatedPsbt;
-}> = observer(({ validatedPsbt, chainId }) => {
-  const theme = useTheme();
-  const {
-    sumInputValueByAddress,
-    sumOutputValueByAddress,
-    decodedRawData,
-    fee,
-  } = validatedPsbt ?? {};
-  const { chainStore } = useStore();
-  const [isViewData, setIsViewData] = useState(false);
+}> = observer(
+  ({
+    validatedPsbt,
+    chainId,
+    hasMultiplePsbts,
+    signerInfo,
+    origin,
+    isUnableToGetUTXOs,
+  }) => {
+    const theme = useTheme();
+    const {
+      sumInputValueByAddress,
+      sumOutputValueByAddress,
+      decodedRawData,
+      fee,
+    } = validatedPsbt ?? {};
+    const { chainStore } = useStore();
+    const [isViewData, setIsViewData] = useState(false);
 
-  const signingDataText = useMemo(() => {
-    if (!decodedRawData) {
-      return "";
-    }
-    return JSON.stringify(decodedRawData, null, 2);
-  }, [decodedRawData]);
+    const signingDataText = useMemo(() => {
+      if (!decodedRawData) {
+        return "";
+      }
+      return JSON.stringify(decodedRawData, null, 2);
+    }, [decodedRawData]);
 
-  const currency = chainStore
-    .getModularChainInfoImpl(chainId)
-    .getCurrencies("bitcoin")[0];
+    const modularChainInfo = chainStore.getModularChain(chainId);
+    const currency = chainStore
+      .getModularChainInfoImpl(chainId)
+      .getCurrencies("bitcoin")[0];
 
-  const { totalSpend, expectedFee } = useMemo(() => {
-    const total = sumInputValueByAddress?.reduce((acc, curr) => {
-      return acc.add(curr.value);
-    }, new Dec(0));
+    const { totalSpend, expectedFee } = useMemo(() => {
+      const total = sumInputValueByAddress?.reduce((acc, curr) => {
+        return acc.add(curr.value);
+      }, new Dec(0));
 
-    return {
-      totalSpend: new CoinPretty(currency, total ?? new Dec(0)),
-      expectedFee: new CoinPretty(currency, fee ?? new Dec(0)),
-    };
-  }, [sumInputValueByAddress, currency, fee]);
+      return {
+        totalSpend: new CoinPretty(currency, total ?? new Dec(0)),
+        expectedFee: new CoinPretty(currency, fee ?? new Dec(0)),
+      };
+    }, [sumInputValueByAddress, currency, fee]);
 
-  const hasMultipleInputAddresses =
-    sumInputValueByAddress && sumInputValueByAddress.length > 1;
+    const isPartialSign = sumInputValueByAddress?.some(
+      (input) => !input.isMine
+    );
+    const isUnableToSign = validatedPsbt?.inputsToSign.length === 0;
+    const hasWarning = isUnableToGetUTXOs || isPartialSign || isUnableToSign;
 
-  return (
-    <React.Fragment>
-      <Box marginBottom="0.5625rem" paddingX="0.5rem">
-        <Columns sum={1} alignY="center">
-          <XAxis>
-            {isViewData ? (
-              <H5
-                style={{
-                  color:
-                    theme.mode === "light"
-                      ? ColorPalette["gray-500"]
-                      : ColorPalette["gray-50"],
-                }}
-              >
-                PSBT Data
-              </H5>
-            ) : (
-              <AddressesWithValuesLabel
-                length={
-                  hasMultipleInputAddresses
-                    ? sumInputValueByAddress?.length ?? 0
-                    : sumOutputValueByAddress?.length ?? 0
-                }
-                suffix={hasMultipleInputAddresses ? `Input(s)` : `Output(s)`}
-              />
-            )}
-          </XAxis>
-          <Column weight={1} />
-          <ViewDataButton
-            isViewData={isViewData}
-            setIsViewData={setIsViewData}
-          />
-        </Columns>
-      </Box>
-      <SimpleBar
-        autoHide={false}
+    const hasMultipleInputAddresses =
+      sumInputValueByAddress && sumInputValueByAddress.length > 1;
+
+    const singleInputAddressAndIsToSign =
+      sumInputValueByAddress &&
+      sumInputValueByAddress.length === 1 &&
+      sumInputValueByAddress[0].isMine;
+
+    const showInputsAndOutputs =
+      hasMultipleInputAddresses || !singleInputAddressAndIsToSign;
+
+    return (
+      <Box
+        height="100%"
+        padding="0.75rem 0.75rem 0"
         style={{
-          display: "flex",
-          flexDirection: "column",
-          flex: !isViewData ? "0 1 auto" : 1,
-          overflowY: "auto",
-          overflowX: "hidden",
-          borderRadius: isViewData ? "0.375rem" : undefined,
-          backgroundColor: isViewData
-            ? theme.mode === "light"
-              ? ColorPalette.white
-              : ColorPalette["gray-600"]
-            : undefined,
-          boxShadow: isViewData
-            ? theme.mode === "light"
-              ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
-              : "none"
-            : undefined,
+          overflow: "auto",
         }}
       >
-        {
-          isViewData ? (
+        <ArbitraryMsgSignHeader />
+        <Gutter size="0.75rem" />
+        <ArbitraryMsgRequestOrigin origin={origin} />
+        <Gutter size="0.75rem" />
+        {hasMultiplePsbts || !singleInputAddressAndIsToSign ? (
+          <NetworkInfoBadge chainInfo={modularChainInfo} />
+        ) : (
+          <ArbitraryMsgWalletDetails
+            walletName={signerInfo.name}
+            chainInfo={modularChainInfo}
+            addressInfo={{
+              type: "bitcoin",
+              address: signerInfo.address,
+            }}
+            hideSigningLabel={true}
+            addressAdditionalContent={
+              <Box width="100%">
+                <XAxis alignY="center">
+                  <Gutter size="0.25rem" />
+                  <UTXOWarningIcon />
+                  <Box style={{ flex: 1 }} />
+                  <Body2
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-300"]
+                        : ColorPalette["gray-200"]
+                    }
+                  >
+                    {new CoinPretty(currency, sumInputValueByAddress[0].value)
+                      .trim(true)
+                      .maxDecimals(8)
+                      .hideDenom(true)
+                      .toString()}
+                  </Body2>
+                </XAxis>
+              </Box>
+            }
+          />
+        )}
+        <Gutter size="0.75rem" />
+        <WarningBox
+          isPartialSign={isPartialSign}
+          isUnableToGetUTXOs={isUnableToGetUTXOs}
+          isUnableToSign={isUnableToSign}
+        />
+        {hasWarning && <Gutter size="0.75rem" />}
+        <Box marginBottom="0.5625rem" paddingX="0.5rem">
+          <Columns sum={1} alignY="center">
+            <XAxis>
+              {isViewData ? (
+                <H5
+                  style={{
+                    color:
+                      theme.mode === "light"
+                        ? ColorPalette["gray-500"]
+                        : ColorPalette["gray-50"],
+                  }}
+                >
+                  PSBT Data
+                </H5>
+              ) : (
+                <AddressesWithValuesLabel
+                  length={
+                    showInputsAndOutputs
+                      ? sumInputValueByAddress?.length ?? 0
+                      : sumOutputValueByAddress?.length ?? 0
+                  }
+                  isOutput={!showInputsAndOutputs}
+                />
+              )}
+            </XAxis>
+            <Column weight={1} />
+            <ViewDataButton
+              isViewData={isViewData}
+              setIsViewData={setIsViewData}
+            />
+          </Columns>
+        </Box>
+        <SimpleBar
+          autoHide={false}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            flex: !isViewData ? "0 1 auto" : 1,
+            overflowY: "auto",
+            overflowX: "hidden",
+            borderRadius: isViewData ? "0.375rem" : undefined,
+            backgroundColor: isViewData
+              ? theme.mode === "light"
+                ? ColorPalette.white
+                : ColorPalette["gray-600"]
+              : undefined,
+            boxShadow: isViewData
+              ? theme.mode === "light"
+                ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+                : "none"
+              : undefined,
+          }}
+        >
+          {isViewData ? (
             <Box
               as={"pre"}
               padding="1rem"
@@ -938,7 +941,7 @@ const SinglePsbtView: FunctionComponent<{
             </Box>
           ) : (
             <React.Fragment>
-              {hasMultipleInputAddresses && (
+              {showInputsAndOutputs && (
                 <React.Fragment>
                   <AddressesWithValues
                     sumValueByAddress={sumInputValueByAddress ?? []}
@@ -949,7 +952,7 @@ const SinglePsbtView: FunctionComponent<{
                   <Box marginBottom="0.5625rem" paddingX="0.5rem">
                     <AddressesWithValuesLabel
                       length={sumOutputValueByAddress?.length ?? 0}
-                      suffix="Output(s)"
+                      isOutput={true}
                     />
                   </Box>
                 </React.Fragment>
@@ -960,27 +963,64 @@ const SinglePsbtView: FunctionComponent<{
                 currency={currency}
               />
             </React.Fragment>
-          )
-          // 여러 input 주소가 있는 경우, SimpleBar로 보여줌
-          // output은 기본적으로 SimpleBar로 보여줌
+          )}
+        </SimpleBar>
+        <Gutter size="0.75rem" />
+        <ExpectedFee expectedFee={expectedFee} />
+        <div style={{ flex: 1, minHeight: "1.25rem" }} />
+        <TotalSpend totalSpend={totalSpend} />
+        <Gutter size="0.25rem" />
+      </Box>
+    );
+  }
+);
+
+const NetworkInfoBadge: FunctionComponent<{
+  chainInfo: ModularChainInfo;
+}> = observer(({ chainInfo }) => {
+  const theme = useTheme();
+
+  return (
+    <Box marginY="0.25rem" alignX="center" alignY="center">
+      <Box
+        padding="0.375rem 0.625rem 0.375rem 0.75rem"
+        backgroundColor={
+          theme.mode === "light" ? ColorPalette.white : ColorPalette["gray-600"]
         }
-      </SimpleBar>
-      <Gutter size="0.75rem" />
-      <ExpectedFee expectedFee={expectedFee} />
-      <Gutter size="1.25rem" />
-      <UTXOWarning />
-      <div style={{ flex: 1, minHeight: "1.25rem" }} />
-      <TotalSpend totalSpend={totalSpend} />
-      <Gutter size="0.25rem" />
-    </React.Fragment>
+        borderRadius="20rem"
+      >
+        <XAxis alignY="center">
+          <Body3
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-500"]
+                : ColorPalette["gray-200"]
+            }
+          >
+            <FormattedMessage
+              id="page.sign.ethereum.requested-network" // TODO: 텍스트 관련 id를 비트코인용으로 변경 또는 추가 필요
+              values={{
+                network: chainInfo.chainName,
+              }}
+            />
+          </Body3>
+          <Gutter direction="horizontal" size="0.5rem" />
+          <ChainImageFallback
+            size="1.25rem"
+            chainInfo={chainInfo}
+            alt={chainInfo.chainName}
+          />
+        </XAxis>
+      </Box>
+    </Box>
   );
 });
 
 const AddressesWithValuesLabel: FunctionComponent<{
   length: number;
-  suffix: string;
+  isOutput?: boolean;
   warn?: boolean;
-}> = observer(({ length, suffix, warn }) => {
+}> = observer(({ length, isOutput, warn }) => {
   const theme = useTheme();
   return (
     <Columns sum={1} alignY="center">
@@ -1004,8 +1044,10 @@ const AddressesWithValuesLabel: FunctionComponent<{
               : ColorPalette["gray-50"],
         }}
       >
-        {suffix}
+        {isOutput ? "Output(s)" : "Input(s)"}
       </H5>
+      <Gutter size="0.25rem" />
+      {!isOutput && <UTXOWarningIcon />}
     </Columns>
   );
 });
@@ -1147,40 +1189,32 @@ const TotalSpend: FunctionComponent<{
   );
 });
 
-const UTXOWarning: FunctionComponent = () => {
+const UTXOWarningIcon: FunctionComponent = () => {
   const theme = useTheme();
   return (
-    <Columns sum={1} columnAlign="right" alignY="center">
-      <XAxis alignY="center">
-        <Box
-          width="1rem"
-          height="1rem"
-          padding="0.0625rem"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <InformationPlainIcon
-            color={
-              theme.mode === "light"
-                ? ColorPalette["gray-400"]
-                : ColorPalette["gray-200"]
-            }
-          />
-        </Box>
-        <Gutter size="0.25rem" />
-        <Subtitle4
+    <Tooltip
+      content={"UTXOs may include Inscriptions or Runes."}
+      forceWidth="15.875rem"
+      allowedPlacements={["bottom"]}
+    >
+      <Box
+        width="1rem"
+        height="1rem"
+        padding="0.0625rem"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <InformationPlainIcon
           color={
             theme.mode === "light"
               ? ColorPalette["gray-400"]
               : ColorPalette["gray-200"]
           }
-        >
-          UTXOs may inlude Inscriptions or Runes.
-        </Subtitle4>
-      </XAxis>
-    </Columns>
+        />
+      </Box>
+    </Tooltip>
   );
 };
