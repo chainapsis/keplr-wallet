@@ -202,7 +202,18 @@ export const CopyAddressScene: FunctionComponent<{
             return true;
           }
         }
-      } // TODO: Add bitcoin search (set currencies for bitcoin first)
+      } else if (
+        "bitcoin" in modularChainInfo &&
+        modularChainInfo.bitcoin != null
+      ) {
+        const bitcoinChainInfo = modularChainInfo.bitcoin;
+        if (bitcoinChainInfo.currencies.length > 0) {
+          const currency = bitcoinChainInfo.currencies[0];
+          if (currency.coinDenom.toLowerCase().includes(s)) {
+            return true;
+          }
+        }
+      }
     })
     .sort((a, b) => {
       const aChainIdentifier = ChainIdHelper.parse(
