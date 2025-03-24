@@ -17,6 +17,8 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
     BuySupportServiceInfo[]
   >([]);
 
+  const selectedTokenInfoKey = JSON.stringify(selectedTokenInfo);
+
   useEffect(() => {
     (async () => {
       try {
@@ -268,7 +270,10 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
         console.log(e);
       }
     })();
-  }, [accountStore, chainStore, selectedTokenInfo]);
+    // selectedTokenInfo는 오브젝트라서 쉽게 ref이 변경될 수 있기 때문에
+    // JSON.stringify를 사용해서 string으로 변경해서 의존성을 줌.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accountStore, chainStore, selectedTokenInfoKey]);
 
   return buySupportServiceInfos;
 };
