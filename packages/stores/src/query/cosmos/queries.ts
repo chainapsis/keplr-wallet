@@ -24,6 +24,7 @@ import { ObservableQueryRPCStatus } from "./status";
 import { ObservableQueryAuthZGranter } from "./authz";
 import { QuerySharedContext } from "../../common";
 import { ObservableQueryFeeMarketGasPrices } from "./feemarket";
+import { ObservableQueryIBCClientStateV2 } from "./ibc/client-state-v2";
 
 export interface CosmosQueries {
   cosmos: CosmosQueriesImpl;
@@ -68,6 +69,7 @@ export class CosmosQueriesImpl {
   public readonly queryValidators: DeepReadonly<ObservableQueryValidators>;
 
   public readonly queryIBCClientState: DeepReadonly<ObservableQueryIBCClientState>;
+  public readonly queryIBCClientStateV2: DeepReadonly<ObservableQueryIBCClientStateV2>;
   public readonly queryIBCChannel: DeepReadonly<ObservableQueryIBCChannel>;
   public readonly queryIBCDenomTrace: DeepReadonly<ObservableQueryDenomTrace>;
 
@@ -140,6 +142,11 @@ export class CosmosQueriesImpl {
     );
 
     this.queryIBCClientState = new ObservableQueryIBCClientState(
+      sharedContext,
+      chainId,
+      chainGetter
+    );
+    this.queryIBCClientStateV2 = new ObservableQueryIBCClientStateV2(
       sharedContext,
       chainId,
       chainGetter
