@@ -54,7 +54,6 @@ const Styles = {
     disableHoverStyle?: boolean;
     isNotReady?: boolean;
   }>`
-    z-index: 2;
     background-color: ${(props) =>
       props.theme.mode === "light"
         ? props.isNotReady
