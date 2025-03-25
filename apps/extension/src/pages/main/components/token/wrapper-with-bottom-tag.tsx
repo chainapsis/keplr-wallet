@@ -55,13 +55,12 @@ export const WrapperwithBottomTag = observer(function ({
 
   return (
     <Box position="relative" style={{ cursor: "pointer" }}>
-      {children}
+      <Box zIndex={1}>{children}</Box>
       <Box
         onClick={onClick}
-        zIndex={1}
+        zIndex={0}
         position="relative"
         style={{
-          zIndex: -1,
           top: "-0.5rem",
           left: 0,
           display: "flex",
