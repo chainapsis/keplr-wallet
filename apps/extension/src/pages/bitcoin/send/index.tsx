@@ -54,7 +54,7 @@ import {
   IPsbtOutput,
   RemainderStatus,
 } from "@keplr-wallet/stores-bitcoin";
-import { WarningBox } from "../components/warning-box";
+import { BitcoinGuideBox } from "../components/guide-box";
 
 const Styles = {
   Flex1: styled.div`
@@ -611,11 +611,9 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
             availableBalance={sendConfigs.availableBalanceConfig.availableBalanceByAddress(
               sender
             )}
-            isLoading={
-              isFetchingAvailableUTXOs || !isAvailableBalanceInitialized
-            }
+            isLoading={!!isFetchingAvailableUTXOs}
           />
-          <WarningBox isUnableToGetUTXOs={isUnableToGetUTXOs} />
+          <BitcoinGuideBox isUnableToGetUTXOs={isUnableToGetUTXOs} />
 
           <Styles.Flex1 />
           <Gutter size="0" />

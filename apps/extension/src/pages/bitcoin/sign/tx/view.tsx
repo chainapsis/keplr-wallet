@@ -38,7 +38,8 @@ import { useNavigate } from "react-router";
 import {
   ApproveIcon,
   CancelIcon,
-  PrevIcon,
+  LeftArrowIcon,
+  RightArrowIcon,
 } from "../../../../components/button";
 import { FeeSummary } from "../../components/input/fee-summary";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
@@ -68,7 +69,7 @@ import {
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { InformationPlainIcon } from "../../../../components/icon";
 import { Tooltip } from "../../../../components/tooltip";
-import { WarningBox } from "../../components/warning-box";
+import { BitcoinGuideBox } from "../../components/guide-box";
 import { HeaderProps } from "../../../../layouts/header/types";
 
 export const SignBitcoinTxView: FunctionComponent<{
@@ -320,11 +321,7 @@ export const SignBitcoinTxView: FunctionComponent<{
     feeConfig,
   });
 
-  // 입력의 일부를 서명하지 않는 psbt가 있는 경우 / 하나라도 서명할 수 없는 psbt가 있는 경우
-  const isPartialSign = validatedPsbts.some((data) =>
-    data.sumInputValueByAddress.some((input) => !input.isMine)
-  );
-  const isUnableToSign = validatedPsbts.some(
+  const hasUnableToSignPsbt = validatedPsbts.some(
     (data) => data.inputsToSign.length === 0
   );
   const isUnableToGetUTXOs =
@@ -334,7 +331,7 @@ export const SignBitcoinTxView: FunctionComponent<{
     txConfigsValidate.interactionBlocked ||
     !isInitialized ||
     !!criticalValidationError ||
-    isUnableToSign ||
+    hasUnableToSignPsbt ||
     isUnableToGetUTXOs;
   const isLoading = signBitcoinTxInteractionStore.isObsoleteInteractionApproved(
     interactionData.id
@@ -465,8 +462,7 @@ export const SignBitcoinTxView: FunctionComponent<{
           onClick: reject,
         },
         {
-          isSpecial: !isPartialSign, // 부분 서명하는 경우 버튼 색상 변경이 필요하므로 isSpecial을 false로 설정
-          color: isPartialSign ? "warning" : "primary",
+          isSpecial: true,
           text: intl.formatMessage({ id: "button.approve" }),
           size: "large",
           left: !isLoading && <ApproveIcon />,
@@ -501,7 +497,7 @@ export const SignBitcoinTxView: FunctionComponent<{
     } else {
       buttons.push({
         textOverrideIcon: (
-          <PrevIcon
+          <LeftArrowIcon
             color={
               theme.mode === "light"
                 ? ColorPalette["blue-400"]
@@ -521,11 +517,23 @@ export const SignBitcoinTxView: FunctionComponent<{
     }
 
     // Add next/approve button
+    // 첫번째 psbt는 review 버튼
+    // 그 다음부터 next 버튼
+    // 마지막 psbt는 approve 버튼
     if (currentPsbtIndex < validatedPsbts.length - 1) {
       buttons.push({
-        text: `${intl.formatMessage({ id: "button.next" })} (${
-          currentPsbtIndex + 1
-        }/${validatedPsbts.length})`,
+        text: `${intl.formatMessage({
+          id: currentPsbtIndex === 0 ? "button.review" : "button.next",
+        })} (${currentPsbtIndex + 1}/${validatedPsbts.length})`,
+        right: (
+          <RightArrowIcon
+            color={
+              theme.mode === "light"
+                ? ColorPalette["blue-400"]
+                : ColorPalette["gray-200"]
+            }
+          />
+        ),
         size: "large",
         color: "secondary",
         onClick: () => {
@@ -534,11 +542,12 @@ export const SignBitcoinTxView: FunctionComponent<{
       });
     } else {
       buttons.push({
-        isSpecial: !isPartialSign,
-        color: isPartialSign ? "warning" : "primary",
-        text: intl.formatMessage({ id: "button.approve" }),
+        isSpecial: true,
+        text: `${intl.formatMessage({
+          id: "button.approve",
+        })} (${currentPsbtIndex + 1}/${validatedPsbts.length})`,
         size: "large",
-        left: !isLoading && <ApproveIcon />,
+        right: !isLoading && <ApproveIcon />,
         disabled: buttonDisabled,
         isLoading,
         onClick: approve,
@@ -557,6 +566,12 @@ export const SignBitcoinTxView: FunctionComponent<{
               id: "page.sign.cosmos.tx.title",
             })
       }
+      headerContainerStyle={{
+        height: isExternal ? "0" : undefined,
+      }}
+      contentContainerStyle={{
+        paddingTop: isExternal ? "1.75rem" : undefined,
+      }}
       fixedHeight={true}
       left={<BackButton hidden={isExternal} />}
       // 유저가 enter를 눌러서 우발적으로(?) approve를 누르지 않도록 onSubmit을 의도적으로 사용하지 않았음.
@@ -828,7 +843,7 @@ const InternalSendBitcoinTxReview: FunctionComponent<{
           )}
         </Box>
       </SimpleBar>
-      <WarningBox
+      <BitcoinGuideBox
         isPartialSign={isPartialSign}
         isUnableToGetUTXOs={isUnableToGetUTXOs}
         isUnableToSign={isUnableToSign}
@@ -883,13 +898,33 @@ const PsbtDetailsView: FunctionComponent<{
       .getCurrencies("bitcoin")[0];
 
     const { totalSpend, expectedFee } = useMemo(() => {
-      const total = sumInputValueByAddress?.reduce((acc, curr) => {
-        return acc.add(curr.value);
-      }, new Dec(0));
+      if (!sumInputValueByAddress?.length) {
+        return {
+          totalSpend: new CoinPretty(currency, new Dec(0)),
+          expectedFee: new CoinPretty(currency, new Dec(0)),
+        };
+      }
+
+      let totalInputs = new Dec(0);
+      let myInputs = new Dec(0);
+
+      for (const input of sumInputValueByAddress) {
+        totalInputs = totalInputs.add(input.value);
+        if (input.isMine) {
+          myInputs = myInputs.add(input.value);
+        }
+      }
+
+      const totalFee = fee ?? new Dec(0);
+
+      const myUtxoRatio = totalInputs.gt(new Dec(0))
+        ? myInputs.quo(totalInputs)
+        : new Dec(0);
+      const proportionalFee = totalFee.mul(myUtxoRatio);
 
       return {
-        totalSpend: new CoinPretty(currency, total ?? new Dec(0)),
-        expectedFee: new CoinPretty(currency, fee ?? new Dec(0)),
+        totalSpend: new CoinPretty(currency, myInputs.add(proportionalFee)),
+        expectedFee: new CoinPretty(currency, proportionalFee),
       };
     }, [sumInputValueByAddress, currency, fee]);
 
@@ -897,23 +932,13 @@ const PsbtDetailsView: FunctionComponent<{
       (input) => !input.isMine
     );
     const isUnableToSign = validatedPsbt?.inputsToSign.length === 0;
-    const hasWarning = isUnableToGetUTXOs || isPartialSign || isUnableToSign;
-
-    const hasMultipleInputAddresses =
-      sumInputValueByAddress && sumInputValueByAddress.length > 1;
-
-    const singleInputAddressAndIsToSign =
-      sumInputValueByAddress &&
-      sumInputValueByAddress.length === 1 &&
-      sumInputValueByAddress[0].isMine;
-
-    const showInputsAndOutputs =
-      hasMultipleInputAddresses || !singleInputAddressAndIsToSign;
+    const hasGuideBox = isUnableToGetUTXOs || isPartialSign || isUnableToSign;
 
     return (
       <Box
         height="100%"
-        padding="0.75rem 0.75rem 0"
+        // 좌우 패딩 0.75rem, 상단 패딩 0
+        padding="0 0.75rem"
         style={{
           overflow: "auto",
         }}
@@ -922,9 +947,15 @@ const PsbtDetailsView: FunctionComponent<{
         <Gutter size="0.75rem" />
         <ArbitraryMsgRequestOrigin origin={origin} />
         <Gutter size="0.75rem" />
+        <BitcoinGuideBox
+          isPartialSign={isPartialSign}
+          isUnableToGetUTXOs={isUnableToGetUTXOs}
+          isUnableToSign={isUnableToSign}
+        />
+        {hasGuideBox && <Gutter size="0.75rem" />}
         {totalPsbts && totalPsbts > 1 && currentPsbtIndex !== undefined && (
           <React.Fragment>
-            <Box padding="0.5rem" alignX="center">
+            <Box padding="0.25rem" alignX="center">
               <Subtitle3
                 color={
                   theme.mode === "light"
@@ -932,54 +963,24 @@ const PsbtDetailsView: FunctionComponent<{
                     : ColorPalette["gray-200"]
                 }
               >
-                PSBT {currentPsbtIndex + 1} of {totalPsbts}
+                {/* TODO: intl 적용 필요 */}
+                {`${currentPsbtIndex + 1}/${totalPsbts} Review Transaction`}
               </Subtitle3>
             </Box>
             <Gutter size="0.75rem" />
           </React.Fragment>
         )}
-        {singleInputAddressAndIsToSign ? (
-          <ArbitraryMsgWalletDetails
-            walletName={signerInfo.name}
-            chainInfo={modularChainInfo}
-            addressInfo={{
-              type: "bitcoin",
-              address: signerInfo.address,
-            }}
-            hideSigningLabel={true}
-            addressAdditionalContent={
-              <Box width="100%">
-                <XAxis alignY="center">
-                  <Gutter size="0.25rem" />
-                  <UTXOWarningIcon />
-                  <Box style={{ flex: 1 }} />
-                  <Body2
-                    color={
-                      theme.mode === "light"
-                        ? ColorPalette["gray-300"]
-                        : ColorPalette["gray-200"]
-                    }
-                  >
-                    {new CoinPretty(currency, sumInputValueByAddress[0].value)
-                      .trim(true)
-                      .maxDecimals(8)
-                      .hideDenom(true)
-                      .toString()}
-                  </Body2>
-                </XAxis>
-              </Box>
-            }
-          />
-        ) : (
-          <NetworkInfoBadge chainInfo={modularChainInfo} />
-        )}
-        <Gutter size="0.75rem" />
-        <WarningBox
-          isPartialSign={isPartialSign}
-          isUnableToGetUTXOs={isUnableToGetUTXOs}
-          isUnableToSign={isUnableToSign}
+        <ArbitraryMsgWalletDetails
+          walletName={signerInfo.name}
+          chainInfo={modularChainInfo}
+          addressInfo={{
+            type: "bitcoin",
+            address: signerInfo.address,
+          }}
+          hideSigningLabel={true}
+          hideAddress={true}
         />
-        {hasWarning && <Gutter size="0.75rem" />}
+        <Gutter size="0.75rem" />
         <Box marginBottom="0.5625rem" paddingX="0.5rem">
           <Columns sum={1} alignY="center">
             <XAxis>
@@ -992,16 +993,12 @@ const PsbtDetailsView: FunctionComponent<{
                         : ColorPalette["gray-50"],
                   }}
                 >
-                  PSBT Data
+                  Transaction Data
                 </H5>
               ) : (
                 <AddressesWithValuesLabel
-                  length={
-                    showInputsAndOutputs
-                      ? sumInputValueByAddress?.length ?? 0
-                      : sumOutputValueByAddress?.length ?? 0
-                  }
-                  isOutput={!showInputsAndOutputs}
+                  length={decodedRawData?.inputs.length ?? 0}
+                  isInput={true}
                 />
               )}
             </XAxis>
@@ -1012,28 +1009,28 @@ const PsbtDetailsView: FunctionComponent<{
             />
           </Columns>
         </Box>
-        <SimpleBar
-          autoHide={false}
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            flex: !isViewData ? "0 1 auto" : 1,
-            overflowY: "auto",
-            overflowX: "hidden",
-            borderRadius: isViewData ? "0.375rem" : undefined,
-            backgroundColor: isViewData
-              ? theme.mode === "light"
-                ? ColorPalette.white
-                : ColorPalette["gray-600"]
-              : undefined,
-            boxShadow: isViewData
-              ? theme.mode === "light"
-                ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
-                : "none"
-              : undefined,
-          }}
-        >
-          {isViewData ? (
+        {isViewData ? (
+          <SimpleBar
+            autoHide={false}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              flex: !isViewData ? "0 1 auto" : 1,
+              overflowY: "auto",
+              overflowX: "hidden",
+              borderRadius: isViewData ? "0.375rem" : undefined,
+              backgroundColor: isViewData
+                ? theme.mode === "light"
+                  ? ColorPalette.white
+                  : ColorPalette["gray-600"]
+                : undefined,
+              boxShadow: isViewData
+                ? theme.mode === "light"
+                  ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+                  : "none"
+                : undefined,
+            }}
+          >
             <Box
               as={"pre"}
               padding="1rem"
@@ -1051,32 +1048,29 @@ const PsbtDetailsView: FunctionComponent<{
             >
               {signingDataText}
             </Box>
-          ) : (
-            <React.Fragment>
-              {showInputsAndOutputs && (
-                <React.Fragment>
-                  <AddressesWithValues
-                    sumValueByAddress={sumInputValueByAddress ?? []}
-                    isOutput={false}
-                    currency={currency}
-                  />
-                  <Gutter size="0.75rem" />
-                  <Box marginBottom="0.5625rem" paddingX="0.5rem">
-                    <AddressesWithValuesLabel
-                      length={sumOutputValueByAddress?.length ?? 0}
-                      isOutput={true}
-                    />
-                  </Box>
-                </React.Fragment>
-              )}
-              <AddressesWithValues
-                sumValueByAddress={sumOutputValueByAddress ?? []}
-                isOutput={true}
-                currency={currency}
+          </SimpleBar>
+        ) : (
+          <React.Fragment>
+            <AddressesWithValues
+              sumValueByAddress={sumInputValueByAddress ?? []}
+              isInput={true}
+              currency={currency}
+            />
+            <Gutter size="0.75rem" />
+            <Box marginBottom="0.5625rem" paddingX="0.5rem">
+              <AddressesWithValuesLabel
+                length={decodedRawData?.outputs.length ?? 0}
+                isInput={false}
               />
-            </React.Fragment>
-          )}
-        </SimpleBar>
+            </Box>
+            <AddressesWithValues
+              sumValueByAddress={sumOutputValueByAddress ?? []}
+              isInput={false}
+              currency={currency}
+            />
+          </React.Fragment>
+        )}
+
         <Gutter size="0.75rem" />
         <ExpectedFee expectedFee={expectedFee} />
         <div style={{ flex: 1, minHeight: "1.25rem" }} />
@@ -1130,19 +1124,17 @@ const NetworkInfoBadge: FunctionComponent<{
 
 const AddressesWithValuesLabel: FunctionComponent<{
   length: number;
-  isOutput?: boolean;
-  warn?: boolean;
-}> = observer(({ length, isOutput, warn }) => {
+  isInput?: boolean;
+}> = observer(({ length, isInput }) => {
   const theme = useTheme();
   return (
     <Columns sum={1} alignY="center">
       <H5
         style={{
-          color: warn
-            ? ColorPalette["yellow-400"]
-            : theme.mode === "light"
-            ? ColorPalette["blue-400"]
-            : ColorPalette["blue-300"],
+          color:
+            theme.mode === "light"
+              ? ColorPalette["blue-400"]
+              : ColorPalette["blue-300"],
         }}
       >
         {length}
@@ -1156,10 +1148,10 @@ const AddressesWithValuesLabel: FunctionComponent<{
               : ColorPalette["gray-50"],
         }}
       >
-        {isOutput ? "Output(s)" : "Input(s)"}
+        {isInput ? "Input(s)" : "Output(s)"}
       </H5>
       <Gutter size="0.25rem" />
-      {!isOutput && <UTXOWarningIcon />}
+      {isInput && <UTXOWarningIcon />}
     </Columns>
   );
 });
@@ -1170,9 +1162,9 @@ const AddressesWithValues: FunctionComponent<{
     value: Dec;
     isMine?: boolean;
   }[];
-  isOutput?: boolean;
+  isInput?: boolean;
   currency: AppCurrency;
-}> = observer(({ sumValueByAddress, isOutput, currency }) => {
+}> = observer(({ sumValueByAddress, isInput, currency }) => {
   const theme = useTheme();
 
   return (
@@ -1207,14 +1199,14 @@ const AddressesWithValues: FunctionComponent<{
         }}
       >
         {sumValueByAddress.map((data) => {
-          const isUnsignable = !isOutput && !data.isMine;
+          const isUnsignable = isInput && !data.isMine;
 
           return (
             <Columns sum={1} alignY="center" key={data.address}>
               <Subtitle3
                 style={{
                   color: isUnsignable
-                    ? ColorPalette["yellow-400"]
+                    ? ColorPalette["gray-300"]
                     : theme.mode === "light"
                     ? ColorPalette["gray-400"]
                     : ColorPalette["white"],
@@ -1225,7 +1217,11 @@ const AddressesWithValues: FunctionComponent<{
               <Column weight={1} />
               <Body2
                 color={
-                  theme.mode === "light"
+                  isUnsignable
+                    ? theme.mode === "light"
+                      ? ColorPalette["gray-200"]
+                      : ColorPalette["gray-300"]
+                    : theme.mode === "light"
                     ? ColorPalette["gray-300"]
                     : ColorPalette["gray-200"]
                 }
@@ -1305,9 +1301,13 @@ const UTXOWarningIcon: FunctionComponent = () => {
   const theme = useTheme();
   return (
     <Tooltip
-      content={"UTXOs may include Inscriptions or Runes."}
-      forceWidth="15.875rem"
+      content={
+        "UTXOs may include assets other than BTC (e.g. inscriptions, runes)."
+      }
+      forceWidth="14.5rem"
+      hideArrow={true}
       allowedPlacements={["bottom"]}
+      floatingOffset={6}
     >
       <Box
         width="1rem"

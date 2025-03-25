@@ -20,18 +20,12 @@ interface ArbitraryMsgWalletDetailsProps {
     address: string;
   };
   hideSigningLabel?: boolean;
-  addressAdditionalContent?: React.ReactNode;
+  hideAddress?: boolean;
 }
 
 export const ArbitraryMsgWalletDetails: FunctionComponent<
   ArbitraryMsgWalletDetailsProps
-> = ({
-  walletName,
-  chainInfo,
-  addressInfo,
-  hideSigningLabel,
-  addressAdditionalContent,
-}) => {
+> = ({ walletName, chainInfo, addressInfo, hideSigningLabel, hideAddress }) => {
   const theme = useTheme();
   const shortenAddress = (() => {
     if (addressInfo.type === "starknet") {
@@ -53,9 +47,6 @@ export const ArbitraryMsgWalletDetails: FunctionComponent<
     }
 
     if (addressInfo.type === "bitcoin") {
-      if (addressAdditionalContent) {
-        return Bech32Address.shortenAddress(addressInfo.address, 20);
-      }
       return Bech32Address.shortenAddress(addressInfo.address, 30);
     }
   })();
@@ -71,7 +62,7 @@ export const ArbitraryMsgWalletDetails: FunctionComponent<
             : ColorPalette["gray-600"],
       }}
     >
-      <Box position="relative" height={hideSigningLabel ? "4rem" : "5.5rem"}>
+      <Box position="relative" height={hideSigningLabel ? "3.75rem" : "5.5rem"}>
         <Box
           position="absolute"
           width="100%"
@@ -123,7 +114,11 @@ export const ArbitraryMsgWalletDetails: FunctionComponent<
             />
           </Box>
         </Box>
-        <Box position="relative" zIndex={1} paddingTop="1.623rem">
+        <Box
+          position="relative"
+          zIndex={1}
+          paddingTop={hideSigningLabel ? "1.25rem" : "1.623rem"}
+        >
           <YAxis alignX="center">
             {!hideSigningLabel && (
               <React.Fragment>
@@ -187,29 +182,32 @@ export const ArbitraryMsgWalletDetails: FunctionComponent<
               {chainInfo.chainName}
             </Body1>
           </XAxis>
-          <Gutter size="0.5rem" />
-          <XAxis alignY="center">
-            <Subtitle4
-              color={
-                theme.mode === "light"
-                  ? ColorPalette["gray-300"]
-                  : ColorPalette["gray-200"]
-              }
-            >
-              with
-            </Subtitle4>
-            <Gutter size="0.5rem" />
-            <Body1
-              color={
-                theme.mode === "light"
-                  ? ColorPalette["gray-400"]
-                  : ColorPalette["white"]
-              }
-            >
-              {shortenAddress}
-            </Body1>
-            {addressAdditionalContent}
-          </XAxis>
+          {!hideAddress && (
+            <React.Fragment>
+              <Gutter size="0.5rem" />
+              <XAxis alignY="center">
+                <Subtitle4
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-300"]
+                      : ColorPalette["gray-200"]
+                  }
+                >
+                  with
+                </Subtitle4>
+                <Gutter size="0.5rem" />
+                <Body1
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-400"]
+                      : ColorPalette["white"]
+                  }
+                >
+                  {shortenAddress}
+                </Body1>
+              </XAxis>
+            </React.Fragment>
+          )}
         </YAxis>
       </Box>
     </Box>

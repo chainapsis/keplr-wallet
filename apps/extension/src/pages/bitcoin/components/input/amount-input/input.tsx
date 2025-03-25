@@ -113,6 +113,7 @@ export const AmountInput: FunctionComponent<{
               }
               forceWidth="15.875rem"
               hideArrow={true}
+              floatingOffset={-1}
               allowedPlacements={["bottom"]}
             >
               <Box

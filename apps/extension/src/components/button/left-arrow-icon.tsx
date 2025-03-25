@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 import { IconProps } from "../icon/types";
 
-export const PrevIcon: FunctionComponent<IconProps> = ({
+export const LeftArrowIcon: FunctionComponent<IconProps> = ({
   width = "1.5rem",
   height = "1.5rem",
   color,
