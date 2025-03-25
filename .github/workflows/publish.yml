@@ -47,6 +47,7 @@ jobs:
           KEPLR_EXT_CONFIG_SERVER: ${{ secrets.KEPLR_EXT_CONFIG_SERVER }}
           WC_PROJECT_ID: ${{ secrets.WC_PROJECT_ID }}
           SKIP_API_KEY: ${{ secrets.SKIP_API_KEY }}
+          BEST_IN_SLOT_API_KEY: ${{ secrets.BEST_IN_SLOT_API_KEY }}
       - run: sudo apt-get install gh
       - run: npx zx ./scripts/publish.mjs
         env:
@@ -93,6 +94,7 @@ jobs:
         KEPLR_EXT_CONFIG_SERVER: ${{ secrets.KEPLR_EXT_CONFIG_SERVER }}
         WC_PROJECT_ID: ${{ secrets.WC_PROJECT_ID }}
         SKIP_API_KEY: ${{ secrets.SKIP_API_KEY }}
+        BEST_IN_SLOT_API_KEY: ${{ secrets.BEST_IN_SLOT_API_KEY }}
     - run: docker run -v $(pwd):/data builder
       working-directory: ../temp
     - run: sudo apt-get update
