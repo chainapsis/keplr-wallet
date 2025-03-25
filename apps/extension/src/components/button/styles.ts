@@ -43,8 +43,6 @@ export const getLoadingColor = (
       return ColorPalette["gray-200"];
     case "danger":
       return ColorPalette["red-400"];
-    case "warning":
-      return ColorPalette["yellow-400"];
     default:
       return ColorPalette["blue-200"];
   }
@@ -216,57 +214,6 @@ const buttonStyleFromColorAndMode: Record<
           }
 
           ${makeTextAndSvgColor(ColorPalette["white"])}
-        `,
-      },
-    },
-  },
-  // TODO: 디자인 확정 안나서 임시로 색상 지정했음
-  warning: {
-    light: {
-      fill: {
-        enabled: css`
-          background-color: ${ColorPalette["yellow-200"]};
-
-          ${makeTextAndSvgColor(ColorPalette["yellow-800"])}
-
-          :hover {
-            ::after {
-              background-color: ${ColorPalette["gray-500"]};
-              opacity: 0.05;
-            }
-          }
-        `,
-        disabled: css`
-          background-color: ${ColorPalette["yellow-200"]};
-
-          ${makeTextAndSvgColor(ColorPalette["yellow-500"])}
-        `,
-      },
-    },
-    dark: {
-      fill: {
-        enabled: css`
-          background-color: ${ColorPalette["yellow-500"]};
-
-          ${makeTextAndSvgColor(ColorPalette["yellow-800"])}
-
-          :hover {
-            ::after {
-              background-color: ${ColorPalette["gray-500"]};
-              opacity: 0.2;
-            }
-          }
-        `,
-
-        disabled: css`
-          background-color: ${ColorPalette["yellow-500"]};
-
-          ::after {
-            background-color: ${ColorPalette["yellow-800"]};
-            opacity: 0.5;
-          }
-
-          ${makeTextAndSvgColor(ColorPalette["yellow-800"])}
         `,
       },
     },

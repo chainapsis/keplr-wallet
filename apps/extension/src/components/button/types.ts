@@ -1,6 +1,6 @@
 import React, { CSSProperties } from "react";
 
-export type ButtonColor = "primary" | "secondary" | "danger" | "warning";
+export type ButtonColor = "primary" | "secondary" | "danger";
 export type ButtonTheme = "dark" | "light";
 export type ButtonMode = "fill";
 export type ButtonType = "button" | "submit" | "reset";

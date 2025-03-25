@@ -426,6 +426,13 @@
   "page.sign.ethereum.message.title": "标志信息",
   "page.sign.ethereum.eip-712.title": "签署键入数据",
 
+  "page.sign.bitcoin.transaction.data": "交易数据",
+  "page.sign.bitcoin.transaction.input": "输入",
+  "page.sign.bitcoin.transaction.output": "输出",
+  "page.sign.bitcoin.transaction.expected-network-fee": "预期网络费用",
+  "page.sign.bitcoin.transaction.total-spend": "总花费",
+  "page.sign.bitcoin.transaction.utxo-warning": "UTXOs可能包含除{coinDenom}以外的资产（例如铭文、符文）。",
+  "page.sign.bitcoin.transaction.review-progress": "{index}/{total} 审查交易",
   "page.sign.components.messages.agoric.provision.title": "配置智能钱包",
   "page.sign.components.messages.agoric.provision.message": "为地址<b>{address}</b>配置智能钱包",
   "page.sign.components.messages.agoric.wallet-spend-action.execute-offer": "使用以下参数执行报价：",
@@ -601,6 +608,8 @@
   "components.input.recipient-input.wallet-address-label-icns-ens": "钱包地址或者ICNS或者ENS",
   "components.input.amount-input.amount-label": "金额",
   "components.input.amount-input.max-button": "最大",
+  "components.input.amount-input.available-balance-label": "可用余额：{balance}",
+  "components.input.amount-input.available-balance-tooltip": "已考虑待处理交易和协议限制后的实际可用金额",
   "components.input.memo-input.memo-label": "备注",
   "components.input.memo-input.optional-placeholder": "选填",
   "components.input.fee-control.fee": "交易费: {assets}",
@@ -635,6 +644,13 @@
 
   "components.collapsible-list.view-more-tokens": "查看 {remain} 的更多币种",
   "components.collapsible-list.collapse": "折叠",
+
+  "components.bitcoin-guide-box.title.unable-to-get-utxos": "无法获取UTXO",
+  "components.bitcoin-guide-box.paragraph.unable-to-get-utxos": "UTXO暂时不可用，请稍后重试。",
+  "components.bitcoin-guide-box.title.partial-signing": "部分签名",
+  "components.bitcoin-guide-box.paragraph.partial-signing": "您正在对交易进行部分签名，仅对该钱包的输入进行签名。",
+  "components.bitcoin-guide-box.title.none-of-the-inputs-belong-to-this-wallet": "没有属于该钱包的输入",
+  "components.bitcoin-guide-box.paragraph.none-of-the-inputs-belong-to-this-wallet": "出于安全考虑，只能对属于该钱包的输入进行签名。",
 
   "button.confirm": "确定",
   "button.ok": "好的",

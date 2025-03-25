@@ -964,7 +964,13 @@ const PsbtDetailsView: FunctionComponent<{
                 }
               >
                 {/* TODO: intl 적용 필요 */}
-                {`${currentPsbtIndex + 1}/${totalPsbts} Review Transaction`}
+                <FormattedMessage
+                  id="page.sign.bitcoin.transaction.review-progress"
+                  values={{
+                    index: currentPsbtIndex + 1,
+                    total: totalPsbts,
+                  }}
+                />
               </Subtitle3>
             </Box>
             <Gutter size="0.75rem" />
@@ -993,7 +999,7 @@ const PsbtDetailsView: FunctionComponent<{
                         : ColorPalette["gray-50"],
                   }}
                 >
-                  Transaction Data
+                  <FormattedMessage id="page.sign.bitcoin.transaction.data" />
                 </H5>
               ) : (
                 <AddressesWithValuesLabel
@@ -1104,7 +1110,7 @@ const NetworkInfoBadge: FunctionComponent<{
             }
           >
             <FormattedMessage
-              id="page.sign.ethereum.requested-network" // TODO: 텍스트 관련 id를 비트코인용으로 변경 또는 추가 필요
+              id="page.sign.ethereum.requested-network"
               values={{
                 network: chainInfo.chainName,
               }}
@@ -1148,7 +1154,9 @@ const AddressesWithValuesLabel: FunctionComponent<{
               : ColorPalette["gray-50"],
         }}
       >
-        {isInput ? "Input(s)" : "Output(s)"}
+        <FormattedMessage
+          id={`page.sign.bitcoin.transaction.${isInput ? "input" : "output"}`}
+        />
       </H5>
       <Gutter size="0.25rem" />
       {isInput && <UTXOWarningIcon />}
@@ -1254,7 +1262,7 @@ const ExpectedFee: FunctionComponent<{
         }
         style={{ padding: "0 0.375rem" }}
       >
-        Expected Network Fee
+        <FormattedMessage id="page.sign.bitcoin.transaction.expected-network-fee" />
       </Subtitle3>
       <div style={{ flex: 1 }} />
       <Body2
@@ -1279,7 +1287,9 @@ const TotalSpend: FunctionComponent<{
     <XAxis alignY="center">
       <div style={{ flex: 1 }} />
       <YAxis alignX="right">
-        <Subtitle3 color={ColorPalette["gray-300"]}>Total Spend</Subtitle3>
+        <Subtitle3 color={ColorPalette["gray-300"]}>
+          <FormattedMessage id="page.sign.bitcoin.transaction.total-spend" />
+        </Subtitle3>
         <Gutter size="0.5rem" />
         <BaseTypography
           color={
@@ -1302,7 +1312,7 @@ const UTXOWarningIcon: FunctionComponent = () => {
   return (
     <Tooltip
       content={
-        "UTXOs may include assets other than BTC (e.g. inscriptions, runes)."
+        <FormattedMessage id="page.sign.bitcoin.transaction.utxo-warning" />
       }
       forceWidth="14.5rem"
       hideArrow={true}

@@ -103,13 +103,18 @@ export const AmountInput: FunctionComponent<{
                 marginBottom: "0.375rem",
               }}
             >
-              (Available: {availableBalance.toString()})
+              <FormattedMessage
+                id="components.input.amount-input.available-balance-label"
+                values={{
+                  balance: availableBalance.toString(),
+                }}
+              />
             </BaseTypography>
             <Gutter size="0.25rem" />
             <Tooltip
               enabled={!!availableBalance}
               content={
-                "Amount you can use right now after accounting for pending transactions or any holds on your wallet by the protocol."
+                <FormattedMessage id="components.input.amount-input.available-balance-tooltip" />
               }
               forceWidth="15.875rem"
               hideArrow={true}
