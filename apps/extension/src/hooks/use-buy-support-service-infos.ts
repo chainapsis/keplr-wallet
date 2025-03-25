@@ -194,20 +194,21 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
   const moonpayServiceInfo = buySupportServiceInfos?.find(
     (serviceInfo) => serviceInfo.serviceId === "moonpay"
   );
-  const moonpaySignResult = queriesStore.simpleQuery.queryGet<string>(
-    process.env["KEPLR_EXT_CONFIG_SERVER"] ?? "https://__noop__",
-    `/api/moonpay-sign?url=${encodeURIComponent(
-      moonpayServiceInfo?.buyUrl ?? ""
-    )}`
-  );
-  const moonpaySignedUrl = moonpaySignResult.response?.data;
+  const moonpaySignResult = moonpayServiceInfo?.buyUrl
+    ? queriesStore.simpleQuery.queryGet<string>(
+        process.env["KEPLR_EXT_CONFIG_SERVER"] ?? "https://__noop__",
+        `/api/moonpay-sign?url=${encodeURIComponent(moonpayServiceInfo.buyUrl)}`
+      )
+    : undefined;
+  const moonpaySignedUrl = moonpaySignResult?.response?.data;
 
   return (
     buySupportServiceInfos?.map((serviceInfo) => ({
       ...serviceInfo,
       ...(serviceInfo.serviceId === "moonpay" &&
-        moonpaySignedUrl &&
-        !moonpaySignResult.error && {
+        moonpaySignResult &&
+        !moonpaySignResult.error &&
+        moonpaySignedUrl && {
           buyUrl: moonpaySignedUrl,
         }),
     })) ?? []
