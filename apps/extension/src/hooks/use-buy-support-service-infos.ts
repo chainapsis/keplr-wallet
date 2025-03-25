@@ -243,16 +243,21 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
           const moonpayServiceInfo = preBuySupportServiceInfos.find(
             (serviceInfo) => serviceInfo.serviceId === "moonpay"
           );
+          if (!moonpayServiceInfo?.buyUrl) {
+            throw new Error("Moonpay service info is not found");
+          }
           const moonpaySignResponse = await simpleFetch<string>(
             process.env["KEPLR_EXT_MOONPAY_SIGN_API_BASE_URL"] ?? "",
             `/api/moonpay-sign?url=${encodeURIComponent(
-              moonpayServiceInfo?.buyUrl ?? ""
+              moonpayServiceInfo.buyUrl
             )}`
           );
           moonpayBuyUrlWithSignature = moonpaySignResponse.data;
         } catch (e) {
           // If something wrong on the request, just ignore it.
-          console.log(e);
+          if (e && e.message !== "Moonpay service info is not found") {
+            console.log(e);
+          }
         }
 
         const newBuySupportServiceInfos = preBuySupportServiceInfos.map(
