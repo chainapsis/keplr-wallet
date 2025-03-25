@@ -195,7 +195,7 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
     (serviceInfo) => serviceInfo.serviceId === "moonpay"
   );
   const moonpaySignResult = queriesStore.simpleQuery.queryGet<string>(
-    process.env["KEPLR_EXT_MOONPAY_SIGN_API_BASE_URL"] ?? "https://__noop__",
+    process.env["KEPLR_EXT_CONFIG_SERVER"] ?? "https://__noop__",
     `/api/moonpay-sign?url=${encodeURIComponent(
       moonpayServiceInfo?.buyUrl ?? ""
     )}`
