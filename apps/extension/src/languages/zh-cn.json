@@ -431,7 +431,7 @@
   "page.sign.bitcoin.transaction.output": "输出",
   "page.sign.bitcoin.transaction.expected-network-fee": "预期网络费用",
   "page.sign.bitcoin.transaction.total-spend": "总花费",
-  "page.sign.bitcoin.transaction.utxo-warning": "UTXOs可能包含除{coinDenom}以外的资产（例如铭文、符文）。",
+  "page.sign.bitcoin.transaction.utxo-warning": "UTXOs可能包含除{coinDenom}以外的资产（例如inscription, runes）。",
   "page.sign.bitcoin.transaction.review-progress": "{index}/{total} 审查交易",
   "page.sign.components.messages.agoric.provision.title": "配置智能钱包",
   "page.sign.components.messages.agoric.provision.message": "为地址<b>{address}</b>配置智能钱包",

@@ -1,6 +1,9 @@
 import React, { FunctionComponent, useMemo, useState } from "react";
 import { SignBitcoinTxInteractionStore } from "@keplr-wallet/stores-core";
-import { handleExternalInteractionWithNoProceedNext } from "../../../../utils";
+import {
+  handleExternalInteractionWithNoProceedNext,
+  isRunningInSidePanel,
+} from "../../../../utils";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { useInteractionInfo } from "../../../../hooks";
@@ -934,10 +937,11 @@ const PsbtDetailsView: FunctionComponent<{
     const isUnableToSign = validatedPsbt?.inputsToSign.length === 0;
     const hasGuideBox = isUnableToGetUTXOs || isPartialSign || isUnableToSign;
 
+    const isSidePanel = isRunningInSidePanel();
+
     return (
       <Box
         height="100%"
-        // 좌우 패딩 0.75rem, 상단 패딩 0
         padding="0 0.75rem"
         style={{
           overflow: "auto",
@@ -963,7 +967,6 @@ const PsbtDetailsView: FunctionComponent<{
                     : ColorPalette["gray-200"]
                 }
               >
-                {/* TODO: intl 적용 필요 */}
                 <FormattedMessage
                   id="page.sign.bitcoin.transaction.review-progress"
                   values={{
@@ -976,107 +979,108 @@ const PsbtDetailsView: FunctionComponent<{
             <Gutter size="0.75rem" />
           </React.Fragment>
         )}
-        <ArbitraryMsgWalletDetails
-          walletName={signerInfo.name}
-          chainInfo={modularChainInfo}
-          addressInfo={{
-            type: "bitcoin",
-            address: signerInfo.address,
-          }}
-          hideSigningLabel={true}
-          hideAddress={true}
-        />
-        <Gutter size="0.75rem" />
-        <Box marginBottom="0.5625rem" paddingX="0.5rem">
-          <Columns sum={1} alignY="center">
-            <XAxis>
-              {isViewData ? (
-                <H5
-                  style={{
-                    color:
-                      theme.mode === "light"
-                        ? ColorPalette["gray-500"]
-                        : ColorPalette["gray-50"],
-                  }}
-                >
-                  <FormattedMessage id="page.sign.bitcoin.transaction.data" />
-                </H5>
-              ) : (
-                <AddressesWithValuesLabel
-                  length={decodedRawData?.inputs.length ?? 0}
-                  isInput={true}
-                />
-              )}
-            </XAxis>
-            <Column weight={1} />
-            <ViewDataButton
-              isViewData={isViewData}
-              setIsViewData={setIsViewData}
-            />
-          </Columns>
-        </Box>
-        {isViewData ? (
-          <SimpleBar
-            autoHide={false}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              flex: !isViewData ? "0 1 auto" : 1,
-              overflowY: "auto",
-              overflowX: "hidden",
-              borderRadius: isViewData ? "0.375rem" : undefined,
-              backgroundColor: isViewData
-                ? theme.mode === "light"
-                  ? ColorPalette.white
-                  : ColorPalette["gray-600"]
-                : undefined,
-              boxShadow: isViewData
-                ? theme.mode === "light"
-                  ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
-                  : "none"
-                : undefined,
+        <ContentWrapper isSidePanel={isSidePanel}>
+          <ArbitraryMsgWalletDetails
+            walletName={signerInfo.name}
+            chainInfo={modularChainInfo}
+            addressInfo={{
+              type: "bitcoin",
+              address: signerInfo.address,
             }}
-          >
-            <Box
-              as={"pre"}
-              padding="1rem"
-              // Remove normalized style of pre tag
-              margin="0"
+            hideSigningLabel={true}
+            hideAddress={true}
+          />
+          <Gutter size="0.75rem" />
+          <Box marginBottom="0.5625rem" paddingX="0.5rem">
+            <Columns sum={1} alignY="center">
+              <XAxis>
+                {isViewData ? (
+                  <H5
+                    style={{
+                      color:
+                        theme.mode === "light"
+                          ? ColorPalette["gray-500"]
+                          : ColorPalette["gray-50"],
+                    }}
+                  >
+                    <FormattedMessage id="page.sign.bitcoin.transaction.data" />
+                  </H5>
+                ) : (
+                  <AddressesWithValuesLabel
+                    length={decodedRawData?.inputs.length ?? 0}
+                    isInput={true}
+                    currency={currency}
+                  />
+                )}
+              </XAxis>
+              <Column weight={1} />
+              <ViewDataButton
+                isViewData={isViewData}
+                setIsViewData={setIsViewData}
+              />
+            </Columns>
+          </Box>
+          {isViewData ? (
+            <SimpleBar
+              autoHide={false}
               style={{
-                width: "fit-content",
-                color:
+                display: "flex",
+                flexDirection: "column",
+                flex: "0 1 auto",
+                overflowY: "auto",
+                overflowX: "hidden",
+                borderRadius: "0.375rem",
+                backgroundColor:
                   theme.mode === "light"
-                    ? ColorPalette["gray-400"]
-                    : ColorPalette["gray-200"],
-                whiteSpace: "pre-wrap",
-                wordBreak: "break-all",
+                    ? ColorPalette.white
+                    : ColorPalette["gray-600"],
+                boxShadow:
+                  theme.mode === "light"
+                    ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+                    : "none",
               }}
             >
-              {signingDataText}
-            </Box>
-          </SimpleBar>
-        ) : (
-          <React.Fragment>
-            <AddressesWithValues
-              sumValueByAddress={sumInputValueByAddress ?? []}
-              isInput={true}
-              currency={currency}
-            />
-            <Gutter size="0.75rem" />
-            <Box marginBottom="0.5625rem" paddingX="0.5rem">
-              <AddressesWithValuesLabel
-                length={decodedRawData?.outputs.length ?? 0}
-                isInput={false}
+              <Box
+                as={"pre"}
+                padding="1rem"
+                // Remove normalized style of pre tag
+                margin="0"
+                style={{
+                  width: "fit-content",
+                  color:
+                    theme.mode === "light"
+                      ? ColorPalette["gray-400"]
+                      : ColorPalette["gray-200"],
+                  whiteSpace: "pre-wrap",
+                  wordBreak: "break-all",
+                }}
+              >
+                {signingDataText}
+              </Box>
+            </SimpleBar>
+          ) : (
+            <React.Fragment>
+              <AddressesWithValues
+                sumValueByAddress={sumInputValueByAddress ?? []}
+                isInput={true}
+                currency={currency}
               />
-            </Box>
-            <AddressesWithValues
-              sumValueByAddress={sumOutputValueByAddress ?? []}
-              isInput={false}
-              currency={currency}
-            />
-          </React.Fragment>
-        )}
-
+              <Gutter size="0.75rem" />
+              <Box marginBottom="0.5625rem" paddingX="0.5rem">
+                <AddressesWithValuesLabel
+                  length={decodedRawData?.outputs.length ?? 0}
+                  isInput={false}
+                  currency={currency}
+                />
+              </Box>
+              <AddressesWithValues
+                sumValueByAddress={sumOutputValueByAddress ?? []}
+                isInput={false}
+                currency={currency}
+              />
+            </React.Fragment>
+          )}
+        </ContentWrapper>
         <Gutter size="0.75rem" />
         <ExpectedFee expectedFee={expectedFee} />
         <div style={{ flex: 1, minHeight: "1.25rem" }} />
@@ -1086,6 +1090,31 @@ const PsbtDetailsView: FunctionComponent<{
     );
   }
 );
+
+const ContentWrapper: FunctionComponent<{
+  children: React.ReactNode;
+  isSidePanel: boolean;
+}> = ({ children, isSidePanel }) => {
+  if (isSidePanel) {
+    return <React.Fragment>{children}</React.Fragment>;
+  }
+
+  // classic 모드일 때는 높이가 낮은데 화면에 요소들이 너무 많아서
+  // 도메인 정보, 예상 수수료, 총 지출 정보만 고정해두고 나머지는 스크롤이 적용되도록 함
+  return (
+    <SimpleBar
+      autoHide={true}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        overflowY: "auto",
+        overflowX: "hidden",
+      }}
+    >
+      {children}
+    </SimpleBar>
+  );
+};
 
 const NetworkInfoBadge: FunctionComponent<{
   chainInfo: ModularChainInfo;
@@ -1131,7 +1160,8 @@ const NetworkInfoBadge: FunctionComponent<{
 const AddressesWithValuesLabel: FunctionComponent<{
   length: number;
   isInput?: boolean;
-}> = observer(({ length, isInput }) => {
+  currency: AppCurrency;
+}> = observer(({ length, isInput, currency }) => {
   const theme = useTheme();
   return (
     <Columns sum={1} alignY="center">
@@ -1159,7 +1189,7 @@ const AddressesWithValuesLabel: FunctionComponent<{
         />
       </H5>
       <Gutter size="0.25rem" />
-      {isInput && <UTXOWarningIcon />}
+      {isInput && <UTXOWarningIcon currency={currency} />}
     </Columns>
   );
 });
@@ -1192,6 +1222,7 @@ const AddressesWithValues: FunctionComponent<{
           theme.mode === "light"
             ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
             : "none",
+        minHeight: "fit-content",
         maxHeight: sumValueByAddress.length >= 4 ? "7.875rem" : undefined,
       }}
     >
@@ -1307,12 +1338,19 @@ const TotalSpend: FunctionComponent<{
   );
 });
 
-const UTXOWarningIcon: FunctionComponent = () => {
+const UTXOWarningIcon: FunctionComponent<{
+  currency: AppCurrency;
+}> = ({ currency }) => {
   const theme = useTheme();
   return (
     <Tooltip
       content={
-        <FormattedMessage id="page.sign.bitcoin.transaction.utxo-warning" />
+        <FormattedMessage
+          id="page.sign.bitcoin.transaction.utxo-warning"
+          values={{
+            coinDenom: currency.coinDenom,
+          }}
+        />
       }
       forceWidth="14.5rem"
       hideArrow={true}

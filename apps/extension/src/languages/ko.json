@@ -454,7 +454,7 @@
   "page.sign.bitcoin.transaction.output": "출력",
   "page.sign.bitcoin.transaction.expected-network-fee": "예상 네트워크 수수료",
   "page.sign.bitcoin.transaction.total-spend": "총 지출",
-  "page.sign.bitcoin.transaction.utxo-warning": "{coinDenom}를 제외한 자산이 포함될 수 있습니다. (e.g. 인크립션, 룬즈)",
+  "page.sign.bitcoin.transaction.utxo-warning": "{coinDenom}를 제외한 자산이 포함될 수 있습니다. (e.g. inscription, runes)",
   "page.sign.bitcoin.transaction.review-progress": "{index}/{total} 트랜잭션 검토",
 
   "page.sign.components.fee-summary.fee": "수수료",
