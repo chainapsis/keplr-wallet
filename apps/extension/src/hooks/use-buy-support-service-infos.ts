@@ -196,7 +196,7 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
   );
   const moonpaySignResult = moonpayServiceInfo?.buyUrl
     ? queriesStore.simpleQuery.queryGet<string>(
-        process.env["KEPLR_EXT_CONFIG_SERVER"] ?? "https://__noop__",
+        process.env["KEPLR_EXT_CONFIG_SERVER"] || "",
         `/api/moonpay-sign?url=${encodeURIComponent(moonpayServiceInfo.buyUrl)}`
       )
     : undefined;
