@@ -926,7 +926,7 @@ const PsbtDetailsView: FunctionComponent<{
       const proportionalFee = totalFee.mul(myUtxoRatio);
 
       return {
-        totalSpend: new CoinPretty(currency, myInputs.add(proportionalFee)),
+        totalSpend: new CoinPretty(currency, myInputs),
         expectedFee: new CoinPretty(currency, proportionalFee),
       };
     }, [sumInputValueByAddress, currency, fee]);
