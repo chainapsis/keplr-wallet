@@ -352,24 +352,19 @@ export class KeyRingBitcoinService {
         }
 
         if (signType === BitcoinSignMessageType.ECDSA) {
-          const data = encodeLegacyMessage(network.messagePrefix, message);
-
           const sig = await this.keyRingService.sign(
             chainId,
             vaultId,
-            data,
+            encodeLegacyMessage(message),
             "hash256"
           );
 
-          const encodedSignature = encodeLegacySignature(
+          return encodeLegacySignature(
             sig.r,
             sig.s,
             sig.v!,
-            true, // @noble/curves/secp256k1 is using compressed pubkey
-            "p2wpkh"
+            true // @noble/curves/secp256k1 is using compressed pubkey
           );
-
-          return encodedSignature.toString("base64");
         }
 
         const scriptPubKey = address.toOutputScript(
