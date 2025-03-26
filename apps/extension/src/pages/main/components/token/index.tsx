@@ -221,11 +221,10 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
       if (denomHelper.type !== "native") {
         if (viewToken.chainInfo.chainId.startsWith("bip122:")) {
           return {
-            text:
-              denomHelper.type
-                .split(/(?=[A-Z])/)
-                .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
-                .join(" ") + "testest",
+            text: denomHelper.type
+              .split(/(?=[A-Z])/)
+              .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+              .join(" "),
           };
         }
 
