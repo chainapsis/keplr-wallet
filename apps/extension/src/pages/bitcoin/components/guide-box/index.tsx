@@ -15,15 +15,15 @@ export const BitcoinGuideBox: FunctionComponent<{
 
   const titleId = isUnableToGetUTXOs
     ? "components.bitcoin-guide-box.title.unable-to-get-utxos"
-    : isPartialSign
-    ? "components.bitcoin-guide-box.title.partial-signing"
-    : "components.bitcoin-guide-box.title.none-of-the-inputs-belong-to-this-wallet";
+    : isUnableToSign
+    ? "components.bitcoin-guide-box.title.none-of-the-inputs-belong-to-this-wallet"
+    : "components.bitcoin-guide-box.title.partial-signing";
 
   const paragraphId = isUnableToGetUTXOs
     ? "components.bitcoin-guide-box.paragraph.unable-to-get-utxos"
-    : isPartialSign
-    ? "components.bitcoin-guide-box.paragraph.partial-signing"
-    : "components.bitcoin-guide-box.paragraph.none-of-the-inputs-belong-to-this-wallet";
+    : isUnableToSign
+    ? "components.bitcoin-guide-box.paragraph.none-of-the-inputs-belong-to-this-wallet"
+    : "components.bitcoin-guide-box.paragraph.partial-signing";
 
   return (
     <GuideBox
