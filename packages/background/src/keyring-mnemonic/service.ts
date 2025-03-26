@@ -238,7 +238,11 @@ export class KeyRingMnemonicService {
           for (const leafHash of tapLeafHashesToSign) {
             // 트리의 특정 리프에 대해서만 서명
             // 스크립트 서명은 tapScriptSig에 순서대로 추가된다.
-            psbt.signTaprootInput(index, taprootSigner, leafHash);
+            psbt.signTaprootInput(
+              index,
+              taprootSigner,
+              NodeBuffer.from(leafHash) // error: tapleafhashtosign.equals is not a function -> wrap with NodeBuffer
+            );
           }
         } else {
           psbt.signTaprootInput(index, taprootSigner);
