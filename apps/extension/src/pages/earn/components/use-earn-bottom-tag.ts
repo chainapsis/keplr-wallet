@@ -40,6 +40,17 @@ export function useEarnBottomTag(balances: ViewToken[]) {
       )?.token ??
       null;
 
+    const isUsdcOnTop =
+      isUsdcFromNoble &&
+      (!topUsdcFound.current || topUsdcFound.current === key);
+
+    if (isUsdcOnTop) {
+      topUsdcFound.current = key;
+      if (token.toDec().isZero()) {
+        return {};
+      }
+    }
+
     if (!usdnAsset.current) {
       return {
         bottomTagType: "nudgeEarn",
@@ -50,16 +61,7 @@ export function useEarnBottomTag(balances: ViewToken[]) {
       .calculatePrice(usdnAsset.current)
       ?.toString();
 
-    if (isUsdn) {
-      return {
-        bottomTagType: "showEarnSavings",
-        earnedAssetPrice,
-      };
-    }
-
-    if (!topUsdcFound.current || topUsdcFound.current === key) {
-      topUsdcFound.current = key;
-
+    if (isUsdcOnTop || isUsdn) {
       return {
         bottomTagType: "showEarnSavings",
         earnedAssetPrice,
