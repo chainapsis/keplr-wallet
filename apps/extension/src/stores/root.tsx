@@ -47,6 +47,8 @@ import {
   SignEthereumInteractionStore,
   SignStarknetTxInteractionStore,
   SignStarknetMessageInteractionStore,
+  SignBitcoinTxInteractionStore,
+  SignBitcoinMessageInteractionStore,
 } from "@keplr-wallet/stores-core";
 import {
   KeplrETCQueries,
@@ -85,6 +87,10 @@ import {
   StarknetAccountStore,
   StarknetQueriesStore,
 } from "@keplr-wallet/stores-starknet";
+import {
+  BitcoinAccountStore,
+  BitcoinQueriesStore,
+} from "@keplr-wallet/stores-bitcoin";
 
 let _sidePanelWindowId: number | undefined;
 async function getSidePanelWindowId(): Promise<number | undefined> {
@@ -118,6 +124,9 @@ export class RootStore {
   public readonly signEthereumInteractionStore: SignEthereumInteractionStore;
   public readonly signStarknetTxInteractionStore: SignStarknetTxInteractionStore;
   public readonly signStarknetMessageInteractionStore: SignStarknetMessageInteractionStore;
+  public readonly signBitcoinTxInteractionStore: SignBitcoinTxInteractionStore;
+  public readonly signBitcoinMessageInteractionStore: SignBitcoinMessageInteractionStore;
+
   public readonly chainSuggestStore: ChainSuggestStore;
   public readonly icnsInteractionStore: ICNSInteractionStore;
 
@@ -138,11 +147,13 @@ export class RootStore {
   public readonly swapUsageQueries: SwapUsageQueries;
   public readonly skipQueriesStore: SkipQueries;
   public readonly starknetQueriesStore: StarknetQueriesStore;
+  public readonly bitcoinQueriesStore: BitcoinQueriesStore;
   public readonly accountStore: AccountStore<
     [CosmosAccount, CosmwasmAccount, SecretAccount, NobleAccount]
   >;
   public readonly ethereumAccountStore: EthereumAccountStore;
   public readonly starknetAccountStore: StarknetAccountStore;
+  public readonly bitcoinAccountStore: BitcoinAccountStore;
   public readonly priceStore: CoinGeckoPriceStore;
   public readonly price24HChangesStore: Price24HChangesStore;
   public readonly hugeQueriesStore: HugeQueriesStore;
@@ -295,6 +306,11 @@ export class RootStore {
     );
     this.signStarknetMessageInteractionStore =
       new SignStarknetMessageInteractionStore(this.interactionStore);
+    this.signBitcoinTxInteractionStore = new SignBitcoinTxInteractionStore(
+      this.interactionStore
+    );
+    this.signBitcoinMessageInteractionStore =
+      new SignBitcoinMessageInteractionStore(this.interactionStore);
     this.chainSuggestStore = new ChainSuggestStore(
       this.interactionStore,
       CommunityChainInfoRepo
@@ -341,6 +357,11 @@ export class RootStore {
       this.queriesStore.sharedContext,
       this.chainStore,
       TokenContractListURL
+    );
+
+    this.bitcoinQueriesStore = new BitcoinQueriesStore(
+      this.queriesStore.sharedContext,
+      this.chainStore
     );
 
     this.accountStore = new AccountStore(
@@ -483,6 +504,10 @@ export class RootStore {
       this.chainStore,
       getKeplrFromWindow
     );
+    this.bitcoinAccountStore = new BitcoinAccountStore(
+      this.chainStore,
+      getKeplrFromWindow
+    );
 
     this.priceStore = new CoinGeckoPriceStore(
       new ExtensionKVStore("store_prices"),
@@ -522,6 +547,7 @@ export class RootStore {
       this.chainStore,
       this.queriesStore,
       this.starknetQueriesStore,
+      this.bitcoinQueriesStore,
       this.accountStore,
       this.priceStore,
       this.uiConfigStore,

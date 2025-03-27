@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { simpleFetch } from "@keplr-wallet/simple-fetch";
+import {
+  SimpleFetchRequestOptions,
+  simpleFetch,
+} from "@keplr-wallet/simple-fetch";
 
 export const usePaginatedCursorQuery = <R>(
   baseURL: string,
@@ -7,7 +10,9 @@ export const usePaginatedCursorQuery = <R>(
   nextCursorQueryString: (page: number, prev: R) => Record<string, string>,
   isEndedFn: (prev: R) => boolean,
   refreshKey?: string,
-  isValidKey?: (key: string) => boolean
+  isValidKey?: (key: string) => boolean,
+  options?: SimpleFetchRequestOptions,
+  replaceQueryParams?: boolean
 ): {
   isFetching: boolean;
   pages: {
@@ -55,7 +60,7 @@ export const usePaginatedCursorQuery = <R>(
       }
 
       const querySeq = currentQuerySeq.current;
-      simpleFetch<R>(baseURLRef.current, initialUriFnRef.current())
+      simpleFetch<R>(baseURLRef.current, initialUriFnRef.current(), options)
         .then((r) => {
           if (querySeq === currentQuerySeq.current) {
             setPages([
@@ -136,12 +141,16 @@ export const usePaginatedCursorQuery = <R>(
     if (uri.length === 0 || uri === "/") {
       uri = `?${params.toString()}`;
     } else {
-      uri += `&${params.toString()}`;
+      if (replaceQueryParams) {
+        uri = uri.split("?")[0] + `?${params.toString()}`;
+      } else {
+        uri += `&${params.toString()}`;
+      }
     }
 
     setIsFetching(true);
     const querySeq = currentQuerySeq.current;
-    simpleFetch<R>(baseURLRef.current, uri)
+    simpleFetch<R>(baseURLRef.current, uri, options)
       .then((r) => {
         if (querySeq === currentQuerySeq.current) {
           setPages((prev) => {

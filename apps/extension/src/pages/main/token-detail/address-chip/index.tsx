@@ -84,9 +84,14 @@ export const AddressChip: FunctionComponent<{
           navigator.clipboard.writeText(
             isEVMOnlyChain ? account.ethereumHexAddress : account.bech32Address
           );
-        } else {
+        } else if ("starknet" in modularChainInfo) {
           // copy address
           navigator.clipboard.writeText(account.starknetHexAddress);
+        } else if ("bitcoin" in modularChainInfo) {
+          // copy address
+          navigator.clipboard.writeText(
+            account.bitcoinAddress?.bech32Address ?? ""
+          );
         }
         setAnimCheck(true);
       }}
@@ -108,11 +113,17 @@ export const AddressChip: FunctionComponent<{
                     10
                   )}...${account.ethereumHexAddress.slice(32)}`
                 : Bech32Address.shortenAddress(account.bech32Address, 16);
+            } else if ("starknet" in modularChainInfo) {
+              return `${account.starknetHexAddress.slice(
+                0,
+                10
+              )}...${account.starknetHexAddress.slice(56)}`;
+            } else if ("bitcoin" in modularChainInfo) {
+              return Bech32Address.shortenAddress(
+                account.bitcoinAddress?.bech32Address ?? "",
+                16
+              );
             }
-            return `${account.starknetHexAddress.slice(
-              0,
-              10
-            )}...${account.starknetHexAddress.slice(56)}`;
           })()}
         </Body3>
         <Gutter size="0.4rem" />

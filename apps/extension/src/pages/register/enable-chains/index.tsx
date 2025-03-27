@@ -68,6 +68,7 @@ export const EnableChainsScene: FunctionComponent<{
   initialSearchValue?: string;
   fallbackEthereumLedgerApp?: boolean;
   fallbackStarknetLedgerApp?: boolean;
+  // fallbackBitcoinLedgerApp?: boolean;
   stepPrevious: number;
   stepTotal: number;
 }> = observer(
@@ -89,6 +90,7 @@ export const EnableChainsScene: FunctionComponent<{
       priceStore,
       keyRingStore,
       starknetQueriesStore,
+      bitcoinQueriesStore,
       hugeQueriesStore,
     } = useStore();
 
@@ -233,7 +235,7 @@ export const EnableChainsScene: FunctionComponent<{
                   }
                 })()
               );
-            }
+            } // TODO: Add bitcoin
           }
 
           await Promise.allSettled(promises);
@@ -410,6 +412,27 @@ export const EnableChainsScene: FunctionComponent<{
               );
             }
           }
+
+          if ("bitcoin" in modularChainInfo) {
+            const account = accountStore.getAccount(modularChainInfo.chainId);
+            const mainCurrency = modularChainInfo.bitcoin.currencies[0];
+
+            const queryBalance = bitcoinQueriesStore
+              .get(modularChainInfo.chainId)
+              .queryBitcoinBalance.getBalance(
+                modularChainInfo.chainId,
+                chainStore,
+                account.bitcoinAddress?.bech32Address ?? "",
+                mainCurrency.coinMinimalDenom
+              );
+
+            if (queryBalance && queryBalance.balance.toDec().gt(new Dec(0))) {
+              enableAllChains = false;
+              enabledChainIdentifiers.push(
+                ChainIdHelper.parse(modularChainInfo.chainId).identifier
+              );
+            }
+          }
         }
 
         for (const candidateAddress of candidateAddresses) {
@@ -536,7 +559,8 @@ export const EnableChainsScene: FunctionComponent<{
     // 그래서 이를 위한 변수로 따로 둔다.
     // 실제로는 modularChainInfos를 사용하면 된다.
     const preSortModularChainInfos = useMemo(() => {
-      let modularChainInfos = chainStore.modularChainInfosInListUI.slice();
+      let modularChainInfos =
+        chainStore.groupedModularChainInfosInListUI.slice();
 
       if (keyType === "ledger") {
         modularChainInfos = modularChainInfos.filter((modularChainInfo) => {
@@ -832,7 +856,7 @@ export const EnableChainsScene: FunctionComponent<{
 
     const numSelected = useMemo(() => {
       const modularChainInfoMap = new Map<string, ModularChainInfo>();
-      for (const modularChainInfo of chainStore.modularChainInfos) {
+      for (const modularChainInfo of chainStore.groupedModularChainInfos) {
         modularChainInfoMap.set(
           ChainIdHelper.parse(modularChainInfo.chainId).identifier,
           modularChainInfo
@@ -876,7 +900,7 @@ export const EnableChainsScene: FunctionComponent<{
       }
       return numSelected;
     }, [
-      chainStore.modularChainInfos,
+      chainStore.groupedModularChainInfos,
       enabledChainIdentifiers,
       fallbackEthereumLedgerApp,
       fallbackStarknetLedgerApp,
@@ -1255,18 +1279,41 @@ export const EnableChainsScene: FunctionComponent<{
                   blockInteraction={blockInteraction}
                   isFresh={isFresh ?? false}
                   onClick={() => {
-                    if (enabledChainIdentifierMap.get(chainIdentifier)) {
-                      setEnabledChainIdentifiers(
-                        enabledChainIdentifiers.filter(
-                          (ci) => ci !== chainIdentifier
-                        )
+                    const isEnabled =
+                      enabledChainIdentifierMap.get(chainIdentifier);
+                    const linkedChainIdentifiers = new Set<string>([
+                      chainIdentifier,
+                    ]);
+
+                    if ("linkedChainKey" in modularChainInfo) {
+                      const linkedChainKey = modularChainInfo.linkedChainKey;
+                      chainStore.modularChainInfos.forEach(
+                        (modularChainInfo) => {
+                          if (
+                            "linkedChainKey" in modularChainInfo &&
+                            modularChainInfo.linkedChainKey === linkedChainKey
+                          ) {
+                            linkedChainIdentifiers.add(
+                              modularChainInfo.chainId
+                            );
+                          }
+                        }
                       );
-                    } else {
-                      setEnabledChainIdentifiers([
-                        ...enabledChainIdentifiers,
-                        chainIdentifier,
-                      ]);
                     }
+
+                    setEnabledChainIdentifiers((prev) => {
+                      const result = new Set(prev);
+
+                      // If selected chain is enabled, disable all linked chains.
+                      // Otherwise, enable all linked chains including selected chain.
+                      const shouldEnable = !isEnabled;
+
+                      linkedChainIdentifiers.forEach((id) =>
+                        shouldEnable ? result.add(id) : result.delete(id)
+                      );
+
+                      return Array.from(result);
+                    });
                   }}
                   tokens={tokens}
                 />

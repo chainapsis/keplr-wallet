@@ -280,4 +280,51 @@ export class BackgroundTxService {
       throw e;
     }
   }
+
+  async pushBitcoinTransaction(
+    chainId: string,
+    txHex: string
+  ): Promise<string> {
+    const modularChainInfo = this.chainsService.getModularChainInfo(chainId);
+    if (!modularChainInfo) {
+      throw new Error("Invalid chain id");
+    }
+
+    if (!("bitcoin" in modularChainInfo)) {
+      throw new Error("Chain is not for bitcoin");
+    }
+
+    const indexerUrl = modularChainInfo.bitcoin.rest;
+
+    try {
+      const res = await simpleFetch<string>(`${indexerUrl}/tx`, {
+        method: "POST",
+        body: txHex,
+        headers: {
+          "Content-Type": "text/plain",
+        },
+      });
+
+      if (res.status !== 200) {
+        const message = res.data;
+        throw new Error(message);
+      }
+
+      this.notification.create({
+        iconRelativeUrl: "assets/logo-256.png",
+        title: "Tx succeeds",
+        message: "Congratulations!",
+      });
+
+      return res.data;
+    } catch (e) {
+      this.notification.create({
+        iconRelativeUrl: "assets/logo-256.png",
+        title: "Tx failed",
+        message: "",
+      });
+
+      throw e;
+    }
+  }
 }

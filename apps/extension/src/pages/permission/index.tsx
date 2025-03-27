@@ -9,6 +9,7 @@ import { useInteractionInfo } from "../../hooks";
 import { FormattedMessage } from "react-intl";
 import { PermissionBasicAccessForEVMPage } from "./basic-access-for-evm";
 import { PermissionBasicAccessForStarknetPage } from "./basic-access-for-starknet";
+import { PermissionBasicAccessForBitcoinPage } from "./basic-access-for-bitcoin";
 
 const UnknownPermissionPage: FunctionComponent<{
   data: {
@@ -52,12 +53,15 @@ export const PermissionPage: FunctionComponent = observer(() => {
   const mergedDataForEVM = permissionStore.waitingPermissionMergedDataForEVM;
   const mergedDataForStarknet =
     permissionStore.waitingPermissionMergedDataForStarknet;
+  const mergedDataForBitcoin =
+    permissionStore.waitingPermissionMergedDataForBitcoin;
   const globalPermissionData = permissionStore.waitingGlobalPermissionData;
 
   if (
     !mergedData &&
     !mergedDataForEVM &&
     !mergedDataForStarknet &&
+    !mergedDataForBitcoin &&
     !globalPermissionData
   ) {
     return <Splash />;
@@ -94,6 +98,16 @@ export const PermissionPage: FunctionComponent = observer(() => {
       }
       default: {
         return <UnknownPermissionPage data={mergedDataForStarknet} />;
+      }
+    }
+  }
+
+  if (mergedDataForBitcoin) {
+    switch (mergedDataForBitcoin.type) {
+      case "basic-access": {
+        return (
+          <PermissionBasicAccessForBitcoinPage data={mergedDataForBitcoin} />
+        );
       }
     }
   }

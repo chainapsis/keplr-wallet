@@ -4,6 +4,7 @@ import { PermissionService } from "../permission";
 import { ChainsService } from "../chains";
 import { KVStore } from "@keplr-wallet/common";
 import { autorun, makeObservable, observable, runInAction } from "mobx";
+import { GenesisHash } from "@keplr-wallet/types";
 
 export class PermissionInteractiveService {
   @observable
@@ -158,6 +159,26 @@ export class PermissionInteractiveService {
       origin,
       {
         isForStarknet: true,
+      }
+    );
+  }
+
+  async ensureEnabledForBitcoin(env: Env, origin: string): Promise<void> {
+    await this.keyRingService.ensureUnlockInteractive(env);
+
+    // TODO: support ledger
+    // await this.ensureKeyRingLedgerAppConnected(env, "Bitcoin");
+
+    const currentBaseChainIdForBitcoin =
+      this.permissionService.getCurrentBaseChainIdForBitcoin(origin) ??
+      `bip122:${GenesisHash.MAINNET}`;
+
+    await this.permissionService.checkOrGrantBasicAccessPermission(
+      env,
+      currentBaseChainIdForBitcoin,
+      origin,
+      {
+        isForBitcoin: true,
       }
     );
   }

@@ -1,5 +1,5 @@
 import { ChainsService } from "../chains";
-import { KeyRingService } from "../keyring";
+import { KeyRingService, DEFAULT_BIP44_PURPOSE } from "../keyring";
 import {
   AminoSignResponse,
   ChainInfo,
@@ -170,6 +170,7 @@ export class KeyRingCosmosService {
         pubKey = await this.keyRingService.getPubKeyWithNotFinalizedCoinType(
           chainId,
           vaultId,
+          DEFAULT_BIP44_PURPOSE,
           coinType
         );
       } catch (e) {

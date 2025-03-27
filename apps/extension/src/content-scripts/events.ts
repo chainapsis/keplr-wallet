@@ -64,6 +64,20 @@ export function initEvents(router: Router) {
                 },
               })
             );
+          case "keplr_bitcoinChainChanged":
+            return window.dispatchEvent(
+              new CustomEvent("keplr_bitcoinChainChanged", {
+                detail: {
+                  ...(
+                    msg as PushEventDataMsg<{
+                      origin: string;
+                      bitcoinChainId: string;
+                      network: string;
+                    }>
+                  ).data.data,
+                },
+              })
+            );
           case "keplr_ethSubscription":
             return window.dispatchEvent(
               new CustomEvent("keplr_ethSubscription", {

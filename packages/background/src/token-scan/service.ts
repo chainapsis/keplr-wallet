@@ -3,7 +3,7 @@ import { KeyRingCosmosService } from "../keyring-cosmos";
 import { KeyRingService } from "../keyring";
 import { ChainsUIService } from "../chains-ui";
 import { autorun, makeObservable, observable, runInAction, toJS } from "mobx";
-import { AppCurrency } from "@keplr-wallet/types";
+import { AppCurrency, SupportedPaymentType } from "@keplr-wallet/types";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { Dec } from "@keplr-wallet/unit";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
@@ -11,6 +11,7 @@ import { VaultService } from "../vault";
 import { KVStore } from "@keplr-wallet/common";
 import { KeyRingStarknetService } from "../keyring-starknet";
 import { CairoUint256 } from "starknet";
+import { KeyRingBitcoinService } from "../keyring-bitcoin";
 
 export type TokenScan = {
   chainId: string;
@@ -18,12 +19,17 @@ export type TokenScan = {
     bech32Address?: string;
     ethereumHexAddress?: string;
     starknetHexAddress?: string;
+    bitcoinAddress?: {
+      bech32Address: string;
+      paymentType: SupportedPaymentType;
+    };
     coinType?: number;
     assets: {
       currency: AppCurrency;
       amount: string;
     }[];
   }[];
+  linkedChainKey?: string;
 };
 
 export class TokenScanService {
@@ -37,7 +43,8 @@ export class TokenScanService {
     protected readonly vaultService: VaultService,
     protected readonly keyRingService: KeyRingService,
     protected readonly keyRingCosmosService: KeyRingCosmosService,
-    protected readonly keyRingStarknetService: KeyRingStarknetService
+    protected readonly keyRingStarknetService: KeyRingStarknetService,
+    protected readonly keyRingBitcoinService: KeyRingBitcoinService
   ) {
     makeObservable(this);
   }
@@ -89,24 +96,50 @@ export class TokenScanService {
   }
 
   getTokenScans(vaultId: string): TokenScan[] {
-    return (this.vaultToMap.get(vaultId) ?? [])
-      .filter((tokenScan) => {
+    const allTokenScans = (this.vaultToMap.get(vaultId) ?? []).filter(
+      (tokenScan) => {
         return (
           this.chainsService.hasChainInfo(tokenScan.chainId) ||
           this.chainsService.hasModularChainInfo(tokenScan.chainId)
         );
-      })
-      .sort((a, b) => {
-        // Sort by chain name
-        const aChainInfo = this.chainsService.hasChainInfo(a.chainId)
-          ? this.chainsService.getChainInfoOrThrow(a.chainId)
-          : this.chainsService.getModularChainInfoOrThrow(a.chainId);
-        const bModualrChainInfo = this.chainsService.hasChainInfo(b.chainId)
-          ? this.chainsService.getChainInfoOrThrow(b.chainId)
-          : this.chainsService.getModularChainInfoOrThrow(b.chainId);
+      }
+    );
 
-        return aChainInfo.chainName.localeCompare(bModualrChainInfo.chainName);
-      });
+    const tokenScansByLinkedChainKey = allTokenScans
+      .filter((tokenScan) => tokenScan.linkedChainKey)
+      .reduce((acc, tokenScan) => {
+        const linkedChainKey = tokenScan.linkedChainKey as string;
+        acc[linkedChainKey] = [...(acc[linkedChainKey] ?? []), tokenScan];
+        return acc;
+      }, {} as Record<string, TokenScan[]>);
+
+    const tokensWithoutLinkedChainKey = allTokenScans.filter(
+      (tokenScan) => !tokenScan.linkedChainKey
+    );
+
+    const mergedLinkedTokenScans = Object.values(
+      tokenScansByLinkedChainKey
+    ).map((tokenScans) => ({
+      ...tokenScans[0],
+      // tokenScan.infos.assets가 동일한 토큰들을 모아서 하나의 토큰으로 만들어야 함.
+      infos: tokenScans.flatMap((tokenScan) => tokenScan.infos),
+    }));
+
+    const allMergedTokenScans = [
+      ...mergedLinkedTokenScans,
+      ...tokensWithoutLinkedChainKey,
+    ];
+
+    return allMergedTokenScans.sort((a, b) => {
+      const aChainInfo = this.chainsService.hasChainInfo(a.chainId)
+        ? this.chainsService.getChainInfoOrThrow(a.chainId)
+        : this.chainsService.getModularChainInfoOrThrow(a.chainId);
+      const bChainInfo = this.chainsService.hasChainInfo(b.chainId)
+        ? this.chainsService.getChainInfoOrThrow(b.chainId)
+        : this.chainsService.getModularChainInfoOrThrow(b.chainId);
+
+      return aChainInfo.chainName.localeCompare(bChainInfo.chainName);
+    });
   }
 
   protected async scanWithAllVaults(chainId: string): Promise<void> {
@@ -257,6 +290,10 @@ export class TokenScanService {
     const modularChainInfo = this.chainsService.getModularChainInfo(chainId);
     if (modularChainInfo == null) {
       return;
+    }
+
+    if ("linkedChainKey" in modularChainInfo) {
+      tokenScan.linkedChainKey = modularChainInfo.linkedChainKey;
     }
 
     if ("cosmos" in modularChainInfo) {
@@ -440,6 +477,51 @@ export class TokenScanService {
           }
         })
       );
+    } else if ("bitcoin" in modularChainInfo) {
+      const { address: bitcoinAddress, paymentType } =
+        await this.keyRingBitcoinService.getBitcoinKey(vaultId, chainId);
+
+      const bitcoinChainInfo =
+        this.chainsService.getBitcoinChainInfoOrThrow(chainId);
+
+      const res = await simpleFetch<{
+        address: string;
+        chain_stats: {
+          funded_txo_count: number;
+          funded_txo_sum: number;
+          spent_txo_count: number;
+          spent_txo_sum: number;
+          tx_count: number;
+        };
+        mempool_stats: {
+          funded_txo_count: number;
+          funded_txo_sum: number;
+          spent_txo_count: number;
+          spent_txo_sum: number;
+          tx_count: number;
+        };
+      }>(`${bitcoinChainInfo.rest}/address/${bitcoinAddress}`);
+
+      if (res.status === 200) {
+        const confirmed =
+          res.data.chain_stats.funded_txo_sum -
+          res.data.chain_stats.spent_txo_sum;
+
+        if (confirmed > 0) {
+          tokenScan.infos.push({
+            bitcoinAddress: {
+              bech32Address: bitcoinAddress,
+              paymentType,
+            },
+            assets: [
+              {
+                currency: bitcoinChainInfo.currencies[0],
+                amount: confirmed.toString(10),
+              },
+            ],
+          });
+        }
+      }
     }
 
     if (tokenScan.infos.length > 0) {

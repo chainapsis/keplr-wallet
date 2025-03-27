@@ -1,5 +1,5 @@
 import { action, computed, flow, makeObservable, observable } from "mobx";
-import { AppCurrency, Keplr } from "@keplr-wallet/types";
+import { AppCurrency, Keplr, SupportedPaymentType } from "@keplr-wallet/types";
 import { ChainGetter } from "../chain";
 import { DenomHelper, toGenerator } from "@keplr-wallet/common";
 import { MakeTxResponse } from "./types";
@@ -46,6 +46,15 @@ export class AccountSetBase {
   protected _ethereumHexAddress: string = "";
   @observable
   protected _starknetHexAddress: string = "";
+  @observable
+  protected _bitcoinAddress:
+    | {
+        bech32Address: string;
+        paymentType: SupportedPaymentType;
+        masterFingerprintHex?: string;
+        derivationPath?: string;
+      }
+    | undefined = undefined;
   @observable
   protected _isNanoLedger: boolean = false;
   @observable
@@ -167,50 +176,71 @@ export class AccountSetBase {
 
     const isStarknet =
       "starknet" in this.chainGetter.getModularChain(this.chainId);
+    const isBitcoin =
+      "bitcoin" in this.chainGetter.getModularChain(this.chainId);
 
-    yield this.sharedContext.getKeyMixed(this.chainId, isStarknet, (res) => {
-      if (res.status === "fulfilled") {
-        const key = res.value;
-        if ("bech32Address" in key) {
-          this._bech32Address = key.bech32Address;
-          this._ethereumHexAddress = key.ethereumHexAddress;
-          this._starknetHexAddress = "";
-          this._isNanoLedger = key.isNanoLedger;
-          this._isKeystone = key.isKeystone;
-          this._name = key.name;
-          this._pubKey = key.pubKey;
+    yield this.sharedContext.getKeyMixed(
+      this.chainId,
+      isStarknet,
+      isBitcoin,
+      (res) => {
+        if (res.status === "fulfilled") {
+          const key = res.value;
+          if ("bech32Address" in key) {
+            this._bech32Address = key.bech32Address;
+            this._ethereumHexAddress = key.ethereumHexAddress;
+            this._starknetHexAddress = "";
+            this._isNanoLedger = key.isNanoLedger;
+            this._isKeystone = key.isKeystone;
+            this._name = key.name;
+            this._pubKey = key.pubKey;
+          } else if ("paymentType" in key) {
+            this._bech32Address = "";
+            this._ethereumHexAddress = "";
+            this._starknetHexAddress = "";
+            this._bitcoinAddress = {
+              bech32Address: key.address,
+              paymentType: key.paymentType,
+              masterFingerprintHex: key.masterFingerprintHex,
+              derivationPath: key.derivationPath,
+            };
+            this._isNanoLedger = key.isNanoLedger;
+            this._isKeystone = false;
+            this._name = key.name;
+            this._pubKey = key.pubKey;
+          } else {
+            this._bech32Address = "";
+            this._ethereumHexAddress = "";
+            this._starknetHexAddress = key.hexAddress;
+            this._isNanoLedger = key.isNanoLedger;
+            this._isKeystone = false;
+            this._name = key.name;
+            this._pubKey = key.pubKey;
+          }
+
+          // Set the wallet status as loaded after getting all necessary infos.
+          this._walletStatus = WalletStatus.Loaded;
         } else {
+          // Caught error loading key
+          // Reset properties, and set status to Rejected
           this._bech32Address = "";
           this._ethereumHexAddress = "";
-          this._starknetHexAddress = key.hexAddress;
-          this._isNanoLedger = key.isNanoLedger;
+          this._starknetHexAddress = "";
+          this._isNanoLedger = false;
           this._isKeystone = false;
-          this._name = key.name;
-          this._pubKey = key.pubKey;
+          this._name = "";
+          this._pubKey = new Uint8Array(0);
+
+          this._walletStatus = WalletStatus.Rejected;
+          this._rejectionReason = res.reason;
         }
 
-        // Set the wallet status as loaded after getting all necessary infos.
-        this._walletStatus = WalletStatus.Loaded;
-      } else {
-        // Caught error loading key
-        // Reset properties, and set status to Rejected
-        this._bech32Address = "";
-        this._ethereumHexAddress = "";
-        this._starknetHexAddress = "";
-        this._isNanoLedger = false;
-        this._isKeystone = false;
-        this._name = "";
-        this._pubKey = new Uint8Array(0);
-
-        this._walletStatus = WalletStatus.Rejected;
-        this._rejectionReason = res.reason;
+        if (this._walletStatus !== WalletStatus.Rejected) {
+          // Reset previous rejection error message
+          this._rejectionReason = undefined;
+        }
       }
-
-      if (this._walletStatus !== WalletStatus.Rejected) {
-        // Reset previous rejection error message
-        this._rejectionReason = undefined;
-      }
-    });
+    );
   }
 
   @action
@@ -330,6 +360,17 @@ export class AccountSetBase {
 
   get starknetHexAddress(): string {
     return this._starknetHexAddress;
+  }
+
+  get bitcoinAddress():
+    | {
+        bech32Address: string;
+        paymentType: SupportedPaymentType;
+        masterFingerprintHex?: string;
+        derivationPath?: string;
+      }
+    | undefined {
+    return this._bitcoinAddress;
   }
 }
 

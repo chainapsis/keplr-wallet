@@ -24,6 +24,8 @@ import {
   EIP6963ProviderDetail,
   EIP6963EventNames,
   IStarknetProvider,
+  SupportedPaymentType,
+  IBitcoinProvider,
 } from "@keplr-wallet/types";
 import { JSONUint8Array } from "./uint8-array";
 import deepmerge from "deepmerge";
@@ -639,6 +641,36 @@ export class Keplr implements IKeplr {
     ]);
   }
 
+  async getBitcoinKey(chainId: string): Promise<{
+    name: string;
+    pubKey: Uint8Array;
+    address: string;
+    paymentType: SupportedPaymentType;
+    isNanoLedger: boolean;
+  }> {
+    return await this.requestMethod("getBitcoinKey", [chainId]);
+  }
+
+  async getBitcoinKeysSettled(chainIds: string[]): Promise<
+    SettledResponses<{
+      name: string;
+      pubKey: Uint8Array;
+      address: string;
+      paymentType: SupportedPaymentType;
+      isNanoLedger: boolean;
+    }>
+  > {
+    return await this.requestMethod("getBitcoinKeysSettled", [chainIds]);
+  }
+
+  async signPsbt(chainId: string, psbtHex: string): Promise<string> {
+    return await this.requestMethod("signPsbt", [chainId, psbtHex]);
+  }
+
+  async signPsbts(chainId: string, psbtsHexes: string[]): Promise<string[]> {
+    return await this.requestMethod("signPsbts", [chainId, psbtsHexes]);
+  }
+
   async __core__getAnalyticsId(): Promise<string> {
     return await this.requestMethod("__core__getAnalyticsId" as any, []);
   }
@@ -674,6 +706,10 @@ export class Keplr implements IKeplr {
   // TODO: 이거 마지막에 꼭 구현해야한다.
   //       일단은 다른게 더 급해서 일단 any로 처리
   public readonly starknet: IStarknetProvider = undefined as any;
+
+  // TODO: 이거 마지막에 꼭 구현해야한다.
+  //       일단은 다른게 더 급해서 일단 any로 처리
+  public readonly bitcoin: IBitcoinProvider = undefined as any;
 }
 
 const waitDocumentReady = (): Promise<void> => {

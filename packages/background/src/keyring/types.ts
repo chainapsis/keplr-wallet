@@ -1,6 +1,11 @@
 import { PlainObject, Vault } from "../vault";
-import { PubKeySecp256k1, PubKeyStarknet } from "@keplr-wallet/crypto";
+import {
+  PubKeyBitcoinCompatible,
+  PubKeySecp256k1,
+  PubKeyStarknet,
+} from "@keplr-wallet/crypto";
 import { ModularChainInfo } from "@keplr-wallet/types";
+import { Psbt, Network as BitcoinNetwork } from "bitcoinjs-lib";
 
 export type KeyRingStatus = "empty" | "locked" | "unlocked";
 
@@ -26,6 +31,7 @@ export interface KeyRing {
   }>;
   getPubKey(
     vault: Vault,
+    purpose: number,
     coinType: number,
     modularChainInfo: ModularChainInfo
   ): PubKeySecp256k1 | Promise<PubKeySecp256k1>;
@@ -34,11 +40,18 @@ export interface KeyRing {
     vault: Vault,
     modularChainInfo: ModularChainInfo
   ): PubKeyStarknet | Promise<PubKeyStarknet>;
+  getPubKeyBitcoin?(
+    vault: Vault,
+    purpose: number,
+    coinType: number,
+    network: BitcoinNetwork
+  ): PubKeyBitcoinCompatible | Promise<PubKeyBitcoinCompatible>;
   sign(
     vault: Vault,
+    purpose: number,
     coinType: number,
     data: Uint8Array,
-    digestMethod: "sha256" | "keccak256" | "noop",
+    digestMethod: "sha256" | "keccak256" | "hash256" | "noop",
     modularChainInfo: ModularChainInfo
   ):
     | {
@@ -51,6 +64,20 @@ export interface KeyRing {
         readonly s: Uint8Array;
         readonly v: number | null;
       }>;
+  signPsbt?(
+    vault: Vault,
+    purpose: number,
+    coinType: number,
+    psbt: Psbt,
+    inputsToSign: {
+      index: number;
+      address: string;
+      hdPath?: string;
+      tapLeafHashesToSign?: Buffer[];
+    }[],
+    network: BitcoinNetwork,
+    modularChainInfo: ModularChainInfo
+  ): Promise<Psbt>;
 }
 
 export interface ExportedKeyRingVault {

@@ -22,7 +22,7 @@ export const EthereumArbitrarySignPage: FunctionComponent<{
   walletName: string;
   chainInfo: IChainInfoImpl<ChainInfoWithCoreTypes>;
   addressInfo: {
-    type: "bech32" | "ethereum" | "starknet";
+    type: "bech32" | "ethereum" | "starknet" | "bitcoin";
     address: string;
   };
   messageData: {

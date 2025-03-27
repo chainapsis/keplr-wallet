@@ -3,6 +3,7 @@ import {
   Key,
   SettledResponse,
   SettledResponses,
+  SupportedPaymentType,
 } from "@keplr-wallet/types";
 import { DebounceActionTimer } from "@keplr-wallet/mobx-utils";
 
@@ -94,13 +95,20 @@ export class AccountSharedContext {
     return requests.map((req) => settledMap.get(req.args[0])!);
   });
   protected getKeyMixedDebounceTimer = new DebounceActionTimer<
-    [chainId: string, isStarknet: boolean],
+    [chainId: string, isStarknet: boolean, isBitcoin: boolean],
     | Key
     | {
         name: string;
         hexAddress: string;
         pubKey: Uint8Array;
         address: Uint8Array;
+        isNanoLedger: boolean;
+      }
+    | {
+        name: string;
+        pubKey: Uint8Array;
+        address: string;
+        paymentType: SupportedPaymentType;
         isNanoLedger: boolean;
       }
   >(0, async (requests) => {
@@ -115,8 +123,10 @@ export class AccountSharedContext {
       });
     }
 
-    const cosmosReqs = requests.filter((req) => !req.args[1]);
-    const starknetReqs = requests.filter((req) => req.args[1]);
+    const cosmosReqs = requests.filter((req) => !req.args[1] && !req.args[2]);
+    const starknetReqs = requests.filter((req) => req.args[1] && !req.args[2]);
+    const bitcoinReqs = requests.filter((req) => !req.args[1] && req.args[2]);
+
     const cosmosChainIdSet = new Set<string>(
       cosmosReqs.map((req) => req.args[0])
     );
@@ -125,6 +135,10 @@ export class AccountSharedContext {
       starknetReqs.map((req) => req.args[0])
     );
     const starknetChainIds = Array.from(starknetChainIdSet);
+    const bitcoinChainIdSet = new Set<string>(
+      bitcoinReqs.map((req) => req.args[0])
+    );
+    const bitcoinChainIds = Array.from(bitcoinChainIdSet);
 
     const settledMap = new Map<
       string,
@@ -135,6 +149,13 @@ export class AccountSharedContext {
             hexAddress: string;
             pubKey: Uint8Array;
             address: Uint8Array;
+            isNanoLedger: boolean;
+          }
+        | {
+            name: string;
+            pubKey: Uint8Array;
+            address: string;
+            paymentType: SupportedPaymentType;
             isNanoLedger: boolean;
           }
       >
@@ -156,6 +177,15 @@ export class AccountSharedContext {
       for (let i = 0; i < starknetChainIds.length; i++) {
         const chainId = starknetChainIds[i];
         const res = starknetSettled[i];
+        settledMap.set(chainId, res);
+      }
+    }
+
+    if (bitcoinChainIds.length > 0) {
+      const bitcoinSettled = await keplr.getBitcoinKeysSettled(bitcoinChainIds);
+      for (let i = 0; i < bitcoinChainIds.length; i++) {
+        const chainId = bitcoinChainIds[i];
+        const res = bitcoinSettled[i];
         settledMap.set(chainId, res);
       }
     }
@@ -220,6 +250,7 @@ export class AccountSharedContext {
   getKeyMixed(
     chainId: string,
     isStarknet: boolean,
+    isBitcoin: boolean,
     action: (
       res: SettledResponse<
         | Key
@@ -230,9 +261,21 @@ export class AccountSharedContext {
             address: Uint8Array;
             isNanoLedger: boolean;
           }
+        | {
+            name: string;
+            pubKey: Uint8Array;
+            address: string;
+            paymentType: SupportedPaymentType;
+            isNanoLedger: boolean;
+            masterFingerprintHex?: string;
+            derivationPath?: string;
+          }
       >
     ) => void
   ): Promise<void> {
-    return this.getKeyMixedDebounceTimer.call([chainId, isStarknet], action);
+    return this.getKeyMixedDebounceTimer.call(
+      [chainId, isStarknet, isBitcoin],
+      action
+    );
   }
 }

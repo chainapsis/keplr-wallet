@@ -38,15 +38,17 @@ export class KeyRingKeystoneService {
     });
   }
 
-  getPubKey(vault: Vault, coinType: number): PubKeySecp256k1 {
+  getPubKey(vault: Vault, purpose: number, coinType: number): PubKeySecp256k1 {
     let bytes;
     if (vault.insensitive["keys"]) {
       const path = Object.keys(vault.insensitive["keys"]).find((path) => {
         const result = KeyRingService.parseBIP44Path(path);
-        return result.coinType === coinType;
+        return result.purpose === purpose && result.coinType === coinType;
       });
       if (!path) {
-        throw new Error(`CoinType ${coinType} is not supported.`);
+        throw new Error(
+          `Purpose ${purpose} and CoinType ${coinType} is not supported.`
+        );
       }
       bytes = Buffer.from(
         ((vault.insensitive["keys"] as PlainObject)[path] as PlainObject)[

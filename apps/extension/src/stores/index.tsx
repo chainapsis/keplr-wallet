@@ -62,6 +62,12 @@ export const StoreProvider: FunctionComponent<PropsWithChildren> = ({
             ) {
               stores.accountStore.getAccount(modularChainInfo.chainId).init();
             }
+          } else if ("bitcoin" in modularChainInfo) {
+            if (
+              stores.bitcoinAccountStore.getAccount(modularChainInfo.chainId)
+            ) {
+              stores.accountStore.getAccount(modularChainInfo.chainId).init();
+            }
           }
         }
       }
@@ -85,6 +91,12 @@ export const StoreProvider: FunctionComponent<PropsWithChildren> = ({
             } else if ("starknet" in modularChainInfo) {
               if (
                 stores.starknetAccountStore.getAccount(modularChainInfo.chainId)
+              ) {
+                stores.accountStore.getAccount(modularChainInfo.chainId).init();
+              }
+            } else if ("bitcoin" in modularChainInfo) {
+              if (
+                stores.bitcoinAccountStore.getAccount(modularChainInfo.chainId)
               ) {
                 stores.accountStore.getAccount(modularChainInfo.chainId).init();
               }

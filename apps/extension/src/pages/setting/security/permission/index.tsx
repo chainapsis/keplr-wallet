@@ -119,6 +119,8 @@ const OriginStyle = {
         : ColorPalette["gray-500"]};
 
     border-radius: 0.375rem;
+
+    min-width: 0;
   `,
   Count: styled(Box)`
     cursor: pointer;
@@ -138,7 +140,7 @@ const OriginView: FunctionComponent<{
       }
     | undefined;
 }> = observer(({ origin, value }) => {
-  const { permissionManagerStore } = useStore();
+  const { permissionManagerStore, chainStore } = useStore();
   const theme = useTheme();
 
   const [isCollapsed, setIsCollapsed] = useState(true);
@@ -152,7 +154,15 @@ const OriginView: FunctionComponent<{
       <Columns sum={1} alignY="center">
         <OriginStyle.Item>
           <Columns sum={1} gutter="0.75rem" alignY="center">
-            <Body2>{origin}</Body2>
+            <Body2
+              style={{
+                textOverflow: "ellipsis",
+                overflow: "hidden",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {origin}
+            </Body2>
             <Box
               cursor="pointer"
               onClick={async (e) => {
@@ -194,6 +204,14 @@ const OriginView: FunctionComponent<{
       {isCollapsed ? null : (
         <Stack gutter="0.75rem">
           {value.permissions.map((permission) => {
+            const ci = permission.chainIdentifier.startsWith("bip122:")
+              ? `${permission.chainIdentifier}:taproot`
+              : permission.chainIdentifier;
+            const hasModularChain = chainStore.hasModularChain(ci);
+            const chain = hasModularChain
+              ? chainStore.getModularChain(ci).chainName
+              : permission.chainIdentifier;
+
             return (
               <Columns
                 sum={1}
@@ -226,9 +244,12 @@ const OriginView: FunctionComponent<{
                           theme.mode === "light"
                             ? ColorPalette["gray-700"]
                             : ColorPalette["gray-100"],
+                        textOverflow: "ellipsis",
+                        overflow: "hidden",
+                        whiteSpace: "nowrap",
                       }}
                     >
-                      {permission.chainIdentifier}
+                      {chain}
                     </Body2>
                     <Box
                       cursor="pointer"

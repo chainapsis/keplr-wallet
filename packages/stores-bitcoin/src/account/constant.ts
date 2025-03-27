@@ -1,0 +1,2 @@
+export const DUST_THRESHOLD = 546;
+export const BRANCH_AND_BOUND_TIMEOUT_MS = 1000;

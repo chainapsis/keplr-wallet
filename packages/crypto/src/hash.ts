@@ -10,6 +10,10 @@ export class Hash {
     return keccak_256(data);
   }
 
+  static hash256(data: Uint8Array): Uint8Array {
+    return sha256(sha256(data));
+  }
+
   static truncHashPortion(
     str: string,
     firstCharCount = str.length,

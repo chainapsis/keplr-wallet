@@ -13,6 +13,7 @@ export interface PermissionOptions {
   isUnableToChangeChainInUI?: boolean;
   isForEVM?: boolean;
   isForStarknet?: boolean;
+  isForBitcoin?: boolean;
 }
 
 export interface PermissionData {

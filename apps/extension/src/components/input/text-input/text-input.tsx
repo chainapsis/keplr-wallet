@@ -35,6 +35,7 @@ export const TextInput = forwardRef<
       textSuffix,
       isLoading,
       autoComplete,
+      labelAlignment = "space-between",
       inputStyle,
       ...props
     },
@@ -113,7 +114,11 @@ export const TextInput = forwardRef<
         </div>
         <Columns sum={1} alignY="center">
           {label ? <Label content={label} isLoading={isLoading} /> : null}
-          <Column weight={1} />
+          {typeof labelAlignment === "string" ? (
+            <Column weight={labelAlignment === "space-between" ? 1 : 0} />
+          ) : (
+            labelAlignment
+          )}
           {rightLabel ? <Box>{rightLabel}</Box> : null}
         </Columns>
 

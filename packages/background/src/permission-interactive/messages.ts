@@ -81,6 +81,31 @@ export class EnableAccessForStarknetMsg extends Message<void> {
   }
 }
 
+export class EnableAccessForBitcoinMsg extends Message<void> {
+  public static type() {
+    return "enable-access-for-bitcoin";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  type(): string {
+    return EnableAccessForBitcoinMsg.type();
+  }
+}
 export class DisableAccessMsg extends Message<void> {
   public static type() {
     return "disable-access";

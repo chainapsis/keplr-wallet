@@ -3,6 +3,7 @@ import {
   ClearAllPermissionsMsg,
   ClearOriginPermissionMsg,
   GetAllPermissionDataPerOriginMsg,
+  GetCurrentChainIdForBitcoinMsg,
   GetCurrentChainIdForEVMMsg,
   GetCurrentChainIdForStarknetMsg,
   GetGlobalPermissionOriginsMsg,
@@ -10,6 +11,7 @@ import {
   GetPermissionOriginsMsg,
   RemoveGlobalPermissionOriginMsg,
   RemovePermissionOrigin,
+  UpdateCurrentChainIdForBitcoinMsg,
   UpdateCurrentChainIdForEVMMsg,
   UpdateCurrentChainIdForStarknetMsg,
 } from "./messages";
@@ -91,6 +93,16 @@ export const getHandler: (service: PermissionService) => Handler = (
         return handleUpdateCurrentChainIdForStarknetMsg(service)(
           env,
           msg as UpdateCurrentChainIdForStarknetMsg
+        );
+      case GetCurrentChainIdForBitcoinMsg:
+        return handleGetCurrentChainIdForBitcoinMsg(service)(
+          env,
+          msg as GetCurrentChainIdForBitcoinMsg
+        );
+      case UpdateCurrentChainIdForBitcoinMsg:
+        return handleUpdateCurrentChainIdForBitcoinMsg(service)(
+          env,
+          msg as UpdateCurrentChainIdForBitcoinMsg
         );
       default:
         throw new KeplrError("permission", 120, "Unknown msg type");
@@ -209,6 +221,26 @@ const handleUpdateCurrentChainIdForStarknetMsg: (
 ) => InternalHandler<UpdateCurrentChainIdForStarknetMsg> = (service) => {
   return (env, msg) => {
     service.updateCurrentChainIdForStarknet(
+      env,
+      msg.permissionOrigin,
+      msg.chainId
+    );
+  };
+};
+
+const handleGetCurrentChainIdForBitcoinMsg: (
+  service: PermissionService
+) => InternalHandler<GetCurrentChainIdForBitcoinMsg> = (service) => {
+  return (_, msg) => {
+    return service.getCurrentBaseChainIdForBitcoin(msg.permissionOrigin);
+  };
+};
+
+const handleUpdateCurrentChainIdForBitcoinMsg: (
+  service: PermissionService
+) => InternalHandler<UpdateCurrentChainIdForBitcoinMsg> = (service) => {
+  return (env, msg) => {
+    service.updateCurrentBaseChainIdForBitcoin(
       env,
       msg.permissionOrigin,
       msg.chainId

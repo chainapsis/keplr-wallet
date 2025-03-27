@@ -6,7 +6,7 @@ import { BackButton } from "../../../../layouts/header/components";
 import { HeaderLayout } from "../../../../layouts/header";
 import { RecipientInput, TextInput } from "../../../../components/input";
 import { RecipientInput as RecipientInputForStarknet } from "../../../starknet/components/input/reciepient-input";
-
+import { RecipientInput as RecipientInputForBitcoin } from "../../../bitcoin/components/input/recipient-input";
 import { useSearchParams } from "react-router-dom";
 import {
   useMemoConfig,
@@ -17,6 +17,10 @@ import {
   useRecipientConfig as useRecipientConfigForStarknet,
   useTxConfigsValidate as useTxConfigsValidateForStarknet,
 } from "@keplr-wallet/hooks-starknet";
+import {
+  useRecipientConfig as useRecipientConfigForBitcoin,
+  useTxConfigsValidate as useTxConfigsValidateForBitcoin,
+} from "@keplr-wallet/hooks-bitcoin";
 import { useStore } from "../../../../stores";
 import { MemoInput } from "../../../../components/input/memo-input";
 import { useNavigate } from "react-router";
@@ -35,6 +39,7 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
   const navigate = useNavigate();
   const intl = useIntl();
 
+  // CHECK: starknet, bitcoin만 활성화되어 있는 경우 chainInfosInUI의 길이가 0이 됨으로 인해 참조 오류 발생
   const [chainId, setChainId] = useState(chainStore.chainInfosInUI[0].chainId);
   // If edit mode, this will be equal or greater than 0.
   const [editIndex, setEditIndex] = useState(-1);
@@ -52,6 +57,10 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
     chainStore,
     chainId
   );
+  const recipientConfigForBitcoin = useRecipientConfigForBitcoin(
+    chainStore,
+    chainId
+  );
 
   const memoConfig = useMemoConfig(chainStore, chainId);
 
@@ -63,6 +72,10 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
   const isStarknet =
     chainStore.hasModularChain(chainId) &&
     "starknet" in chainStore.getModularChain(chainId);
+
+  const isBitcoin =
+    chainStore.hasModularChain(chainId) &&
+    "bitcoin" in chainStore.getModularChain(chainId);
 
   useEffect(() => {
     if (labelRef.current) {
@@ -78,6 +91,8 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
     setChainId(paramChainId);
     if (isStarknet) {
       recipientConfigForStarknet.setChain(paramChainId);
+    } else if (isBitcoin) {
+      recipientConfigForBitcoin.setChain(paramChainId);
     } else {
       recipientConfig.setChain(paramChainId);
     }
@@ -93,6 +108,8 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
         setName(data.name);
         if (isStarknet) {
           recipientConfigForStarknet.setValue(data.address);
+        } else if (isBitcoin) {
+          recipientConfigForBitcoin.setValue(data.address);
         } else {
           recipientConfig.setValue(data.address);
         }
@@ -104,11 +121,13 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
     setEditIndex(-1);
   }, [
     intl,
+    isBitcoin,
     isStarknet,
     memoConfig,
     paramChainId,
     paramEditIndex,
     recipientConfig,
+    recipientConfigForBitcoin,
     recipientConfigForStarknet,
     uiConfigStore.addressBookConfig,
   ]);
@@ -116,11 +135,15 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
   const txConfigsValidate = useTxConfigsValidate({
     recipientConfig,
     memoConfig,
-    isIgnoringStarknet: isStarknet,
+    isIgnoringModularChain: isStarknet || isBitcoin,
   });
 
   const txConfigsValidateForStarknet = useTxConfigsValidateForStarknet({
     recipientConfig: recipientConfigForStarknet,
+  });
+
+  const txConfigsValidateForBitcoin = useTxConfigsValidateForBitcoin({
+    recipientConfig: recipientConfigForBitcoin,
   });
 
   return (
@@ -145,6 +168,8 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
 
           return isStarknet
             ? recipientConfigForStarknet.value
+            : isBitcoin
+            ? recipientConfigForBitcoin.value
             : recipientConfig.value;
         })();
 
@@ -175,7 +200,11 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
           disabled:
             (isStarknet
               ? txConfigsValidateForStarknet.interactionBlocked
-              : txConfigsValidate.interactionBlocked) || name === "",
+              : txConfigsValidate.interactionBlocked) ||
+            (isBitcoin
+              ? txConfigsValidateForBitcoin.interactionBlocked
+              : txConfigsValidate.interactionBlocked) ||
+            name === "",
         },
       ]}
     >
@@ -198,6 +227,11 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
         {isStarknet ? (
           <RecipientInputForStarknet
             recipientConfig={recipientConfigForStarknet}
+            hideAddressBookButton={true}
+          />
+        ) : isBitcoin ? (
+          <RecipientInputForBitcoin
+            recipientConfig={recipientConfigForBitcoin}
             hideAddressBookButton={true}
           />
         ) : (

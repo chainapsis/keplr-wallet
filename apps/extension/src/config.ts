@@ -3125,6 +3125,178 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     features: [],
   },
   {
+    chainId:
+      "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:taproot",
+    chainName: "Bitcoin",
+    chainSymbolImageUrl:
+      "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+    linkedChainKey:
+      "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
+    bitcoin: {
+      chainId:
+        "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
+      rpc: "",
+      rest: "https://api-indexer-bitcoin.keplr.app",
+      bip44: {
+        coinType: 0,
+        purpose: 86,
+      },
+      currencies: [
+        {
+          coinDenom: "BTC",
+          coinMinimalDenom: "taproot:bitcoinMainnet", // TODO: 추후 변경 필요
+          coinDecimals: 8,
+          coinGeckoId: "bitcoin",
+          coinImageUrl:
+            "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+        },
+      ],
+    },
+  },
+  {
+    chainId:
+      "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:native-segwit",
+    chainName: "Bitcoin",
+    chainSymbolImageUrl:
+      "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+    linkedChainKey:
+      "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
+    bitcoin: {
+      chainId:
+        "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
+      rpc: "",
+      rest: "https://api-indexer-bitcoin.keplr.app",
+      bip44: {
+        coinType: 0,
+        purpose: 84,
+      },
+      currencies: [
+        {
+          coinDenom: "BTC",
+          coinMinimalDenom: "nativeSegwit:bitcoinMainnet",
+          coinDecimals: 8,
+          coinGeckoId: "bitcoin",
+          coinImageUrl:
+            "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+        },
+      ],
+    },
+  },
+  {
+    chainId:
+      "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943:taproot",
+    chainName: "Bitcoin Testnet",
+    chainSymbolImageUrl:
+      "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+    linkedChainKey:
+      "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943",
+    bitcoin: {
+      chainId:
+        "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943",
+      rpc: "",
+      rest: "https://blockstream.info/testnet/api",
+      bip44: {
+        coinType: 1,
+        purpose: 86,
+      },
+      currencies: [
+        {
+          coinDenom: "tBTC",
+          coinMinimalDenom: "taproot:bitcoinTestnet",
+          coinDecimals: 8,
+          coinImageUrl:
+            "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+        },
+      ],
+    },
+  },
+  {
+    chainId:
+      "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943:native-segwit",
+    chainName: "Bitcoin Testnet",
+    chainSymbolImageUrl:
+      "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+    linkedChainKey:
+      "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943",
+    bitcoin: {
+      chainId:
+        "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943",
+      rpc: "",
+      rest: "https://blockstream.info/testnet/api",
+      bip44: {
+        coinType: 1,
+        purpose: 84,
+      },
+      currencies: [
+        {
+          coinDenom: "tBTC",
+          coinMinimalDenom: "nativeSegwit:bitcoinTestnet",
+          coinDecimals: 8,
+          coinImageUrl:
+            "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+        },
+      ],
+    },
+  },
+  {
+    chainId:
+      "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6:taproot",
+    chainName: "Bitcoin Signet",
+    chainSymbolImageUrl:
+      "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+    linkedChainKey:
+      "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6",
+    bitcoin: {
+      chainId:
+        "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6",
+      rpc: "",
+      rest: "https://explorer.bc-2.jp/api",
+      bip44: {
+        coinType: 1,
+        purpose: 86,
+      },
+      currencies: [
+        {
+          coinDenom: "sBTC",
+          coinMinimalDenom: "taproot:bitcoinSignet",
+          coinDecimals: 8,
+          coinGeckoId: "bitcoin", // TODO: temporal value for query price test
+          coinImageUrl:
+            "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+        },
+      ],
+    },
+  },
+  {
+    chainId:
+      "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6:native-segwit",
+    chainName: "Bitcoin Signet",
+    chainSymbolImageUrl:
+      "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+    linkedChainKey:
+      "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6",
+    bitcoin: {
+      chainId:
+        "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6",
+      rpc: "",
+      rest: "https://explorer.bc-2.jp/api",
+      bip44: {
+        coinType: 1,
+        purpose: 84,
+      },
+      currencies: [
+        {
+          coinDenom: "sBTC",
+          coinMinimalDenom: "nativeSegwit:bitcoinSignet",
+          coinDecimals: 8,
+          coinGeckoId: "bitcoin",
+          coinImageUrl:
+            "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+        },
+      ],
+    },
+  },
+  {
     rpc: "https://rpc-nillion.keplr.app",
     rest: "https://lcd-nillion.keplr.app",
     chainId: "nillion-1",

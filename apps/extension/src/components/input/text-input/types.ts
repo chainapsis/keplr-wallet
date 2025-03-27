@@ -3,6 +3,7 @@ import React, { CSSProperties } from "react";
 export interface TextInputProps {
   label?: string;
   rightLabel?: React.ReactNode;
+  labelAlignment?: "space-between" | "compact" | React.ReactNode;
 
   paragraph?: string;
   error?: string;
