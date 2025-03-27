@@ -277,11 +277,20 @@ const TokenItem: FunctionComponent<{
       };
     }
     if (denomHelper.type !== "native") {
+      if (viewToken.chainInfo.chainId.startsWith("bip122:")) {
+        return {
+          text: denomHelper.type
+            .split(/(?=[A-Z])/)
+            .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+            .join(" "),
+        };
+      }
+
       return {
         text: denomHelper.type,
       };
     }
-  }, [viewToken.token.currency]);
+  }, [viewToken.chainInfo.chainId, viewToken.token.currency]);
   const coinDenom = useMemo(() => {
     if (
       "originCurrency" in viewToken.token.currency &&
@@ -375,7 +384,7 @@ const TokenView: FunctionComponent<{
   );
 };
 
-const TokenTag: FunctionComponent<{
+export const TokenTag: FunctionComponent<{
   text: string;
   tooltip?: string;
 }> = ({ text, tooltip }) => {

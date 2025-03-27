@@ -650,6 +650,10 @@ export const EnableChainsScene: FunctionComponent<{
             return modularChainInfo.starknet.currencies[0].coinDenom.includes(
               trimSearch
             );
+          } else if ("bitcoin" in modularChainInfo) {
+            return modularChainInfo.bitcoin.currencies[0].coinDenom.includes(
+              trimSearch
+            );
           }
         });
       }
@@ -721,11 +725,16 @@ export const EnableChainsScene: FunctionComponent<{
           return 1;
         }
 
-        const aBalance = (() => {
-          if ("cosmos" in aModularChainInfo) {
-            const addresses = candidateAddressesMap.get(aChainIdentifier);
-            const chainInfo = chainStore.getChain(aModularChainInfo.chainId);
-            const queries = queriesStore.get(aModularChainInfo.chainId);
+        const getBalance = (
+          modularChainInfo: ModularChainInfo & {
+            linkedModularChainInfos?: ModularChainInfo[];
+          },
+          chainIdentifier: string
+        ) => {
+          if ("cosmos" in modularChainInfo) {
+            const addresses = candidateAddressesMap.get(chainIdentifier);
+            const chainInfo = chainStore.getChain(modularChainInfo.chainId);
+            const queries = queriesStore.get(modularChainInfo.chainId);
 
             const mainCurrency =
               chainInfo.stakeCurrency || chainInfo.currencies[0];
@@ -747,58 +756,14 @@ export const EnableChainsScene: FunctionComponent<{
             }
 
             return new CoinPretty(mainCurrency, "0");
-          } else if ("starknet" in aModularChainInfo) {
-            const account = accountStore.getAccount(aModularChainInfo.chainId);
-            const mainCurrency = aModularChainInfo.starknet.currencies[0];
-
-            const queryBalance = starknetQueriesStore
-              .get(aModularChainInfo.chainId)
-              .queryStarknetERC20Balance.getBalance(
-                aModularChainInfo.chainId,
-                chainStore,
-                account.starknetHexAddress,
-                mainCurrency.coinMinimalDenom
-              );
-
-            if (queryBalance) {
-              return queryBalance.balance;
-            }
-          }
-        })();
-        const bBalance = (() => {
-          if ("cosmos" in bModularChainInfo) {
-            const addresses = candidateAddressesMap.get(bChainIdentifier);
-            const chainInfo = chainStore.getChain(bModularChainInfo.chainId);
-            const queries = queriesStore.get(bModularChainInfo.chainId);
-
-            const mainCurrency =
-              chainInfo.stakeCurrency || chainInfo.currencies[0];
-            const account = accountStore.getAccount(chainInfo.chainId);
-
-            if (addresses && addresses.length > 0) {
-              const queryBalance = chainStore.isEvmOnlyChain(chainInfo.chainId)
-                ? queries.queryBalances.getQueryEthereumHexAddress(
-                    account.ethereumHexAddress
-                  )
-                : queries.queryBalances.getQueryBech32Address(
-                    addresses[0].address
-                  );
-              const balance = queryBalance.getBalance(mainCurrency)?.balance;
-
-              if (balance) {
-                return balance;
-              }
-            }
-
-            return new CoinPretty(mainCurrency, "0");
-          } else if ("starknet" in bModularChainInfo) {
-            const account = accountStore.getAccount(bModularChainInfo.chainId);
-            const mainCurrency = bModularChainInfo.starknet.currencies[0];
+          } else if ("starknet" in modularChainInfo) {
+            const account = accountStore.getAccount(modularChainInfo.chainId);
+            const mainCurrency = modularChainInfo.starknet.currencies[0];
 
             const balance = starknetQueriesStore
-              .get(bModularChainInfo.chainId)
+              .get(modularChainInfo.chainId)
               .queryStarknetERC20Balance.getBalance(
-                bModularChainInfo.chainId,
+                modularChainInfo.chainId,
                 chainStore,
                 account.starknetHexAddress,
                 mainCurrency.coinMinimalDenom
@@ -807,8 +772,71 @@ export const EnableChainsScene: FunctionComponent<{
             if (balance) {
               return balance;
             }
+          } else if ("bitcoin" in modularChainInfo) {
+            const account = accountStore.getAccount(modularChainInfo.chainId);
+            const getBitcoinBalance = (
+              chainId: string,
+              address: string,
+              coinMinimalDenom: string
+            ) => {
+              return bitcoinQueriesStore
+                .get(chainId)
+                .queryBitcoinBalance.getBalance(
+                  chainId,
+                  chainStore,
+                  address,
+                  coinMinimalDenom
+                );
+            };
+
+            const addBalance = (balance: Dec, queryBalance: any) => {
+              return queryBalance
+                ? balance.add(queryBalance.balance.toDec())
+                : balance;
+            };
+
+            const mainCurrency = modularChainInfo.bitcoin.currencies[0];
+            let totalBalance = new Dec(0);
+
+            const mainBalance = getBitcoinBalance(
+              modularChainInfo.chainId,
+              account.bitcoinAddress?.bech32Address ?? "",
+              mainCurrency.coinMinimalDenom
+            );
+
+            totalBalance = addBalance(totalBalance, mainBalance);
+
+            if (modularChainInfo.linkedModularChainInfos) {
+              totalBalance = modularChainInfo.linkedModularChainInfos.reduce(
+                (acc, linkedChain) => {
+                  if ("bitcoin" in linkedChain) {
+                    const linkedAccount = accountStore.getAccount(
+                      linkedChain.chainId
+                    );
+                    const linkedMainCurrency =
+                      linkedChain.bitcoin.currencies[0];
+                    const linkedBalance = getBitcoinBalance(
+                      linkedChain.chainId,
+                      linkedAccount.bitcoinAddress?.bech32Address ?? "",
+                      linkedMainCurrency.coinMinimalDenom
+                    );
+                    return addBalance(acc, linkedBalance);
+                  }
+                  return acc;
+                },
+                totalBalance
+              );
+            }
+
+            return new CoinPretty(
+              mainCurrency,
+              totalBalance.mul(new Dec(10 ** mainCurrency.coinDecimals))
+            );
           }
-        })();
+        };
+
+        const aBalance = getBalance(aModularChainInfo, aChainIdentifier);
+        const bBalance = getBalance(bModularChainInfo, bChainIdentifier);
 
         const aPrice = aBalance
           ? priceStore.calculatePrice(aBalance)?.toDec() ?? new Dec(0)
@@ -834,6 +862,7 @@ export const EnableChainsScene: FunctionComponent<{
         queriesStore,
         accountStore,
         starknetQueriesStore,
+        bitcoinQueriesStore,
         priceStore,
       ]
     );
@@ -953,9 +982,14 @@ export const EnableChainsScene: FunctionComponent<{
         }
       ) => {
         const account = accountStore.getAccount(modularChainInfo.chainId);
+        const baseChainId =
+          "bitcoin" in modularChainInfo
+            ? modularChainInfo.bitcoin.chainId
+            : modularChainInfo.chainId;
+
         const tokens =
           tokensByChainIdentifier.get(
-            ChainIdHelper.parse(modularChainInfo.chainId).identifier
+            ChainIdHelper.parse(baseChainId).identifier
           ) ?? [];
 
         const balance = (() => {
@@ -1084,6 +1118,7 @@ export const EnableChainsScene: FunctionComponent<{
         enabledChainIdentifierMap,
         queriesStore,
         starknetQueriesStore,
+        bitcoinQueriesStore,
         tokensByChainIdentifier,
       ]
     );
@@ -1310,18 +1345,41 @@ export const EnableChainsScene: FunctionComponent<{
                       chainIdentifier
                     )}
                     onClick={() => {
-                      if (enabledChainIdentifierMap.get(chainIdentifier)) {
-                        setEnabledChainIdentifiers(
-                          enabledChainIdentifiers.filter(
-                            (ci) => ci !== chainIdentifier
-                          )
+                      const isEnabled =
+                        enabledChainIdentifierMap.get(chainIdentifier);
+                      const linkedChainIdentifiers = new Set<string>([
+                        chainIdentifier,
+                      ]);
+
+                      if ("linkedChainKey" in modularChainInfo) {
+                        const linkedChainKey = modularChainInfo.linkedChainKey;
+                        chainStore.modularChainInfos.forEach(
+                          (modularChainInfo) => {
+                            if (
+                              "linkedChainKey" in modularChainInfo &&
+                              modularChainInfo.linkedChainKey === linkedChainKey
+                            ) {
+                              linkedChainIdentifiers.add(
+                                modularChainInfo.chainId
+                              );
+                            }
+                          }
                         );
-                      } else {
-                        setEnabledChainIdentifiers([
-                          ...enabledChainIdentifiers,
-                          chainIdentifier,
-                        ]);
                       }
+
+                      setEnabledChainIdentifiers((prev) => {
+                        const result = new Set(prev);
+
+                        // If selected chain is enabled, disable all linked chains.
+                        // Otherwise, enable all linked chains including selected chain.
+                        const shouldEnable = !isEnabled;
+
+                        linkedChainIdentifiers.forEach((id) =>
+                          shouldEnable ? result.add(id) : result.delete(id)
+                        );
+
+                        return Array.from(result);
+                      });
                     }}
                   />
                 );
