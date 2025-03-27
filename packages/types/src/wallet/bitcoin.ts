@@ -54,13 +54,13 @@ export interface IBitcoinProvider extends EventEmitter {
   requestAccounts: () => Promise<string[]>;
   disconnect: () => Promise<void>;
   getNetwork: () => Promise<Network>;
-  switchNetwork: (network: Network) => Promise<void>;
+  switchNetwork: (network: Network) => Promise<Network>;
   getChain: () => Promise<{
     enum: ChainType;
     name: string;
     network: Network;
   }>;
-  switchChain: (chain: ChainType) => Promise<void>;
+  switchChain: (chain: ChainType) => Promise<ChainType>;
   getPublicKey: () => Promise<string>;
   getBalance: () => Promise<{
     confirmed: number;
@@ -76,4 +76,6 @@ export interface IBitcoinProvider extends EventEmitter {
   pushTx: (rawTxHex: string) => Promise<string>;
   signPsbt: (psbtHex: string) => Promise<string>;
   signPsbts: (psbtsHexes: string[]) => Promise<string[]>;
+  getAddress: () => Promise<string>;
+  connectWallet: () => Promise<string[]>;
 }

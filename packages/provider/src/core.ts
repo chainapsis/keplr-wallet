@@ -1890,7 +1890,7 @@ class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
     });
   }
 
-  async switchNetwork(network: BitcoinNetwork): Promise<void> {
+  async switchNetwork(network: BitcoinNetwork): Promise<BitcoinNetwork> {
     return this.protectedRequestMethod({
       method: "switchNetwork",
       params: [network],
@@ -1908,7 +1908,7 @@ class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
     });
   }
 
-  async switchChain(chain: ChainType): Promise<void> {
+  async switchChain(chain: ChainType): Promise<ChainType> {
     return this.protectedRequestMethod({
       method: "switchChain",
       params: [chain],
@@ -1976,5 +1976,13 @@ class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
       method: "signPsbts",
       params: [psbtsHexes],
     });
+  }
+
+  async getAddress(): Promise<string> {
+    throw new Error("This method should not be called");
+  }
+
+  async connectWallet(): Promise<string[]> {
+    throw new Error("This method should not be called");
   }
 }

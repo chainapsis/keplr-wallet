@@ -1764,7 +1764,7 @@ export class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
     return this._requestMethod("getNetwork", []);
   }
 
-  async switchNetwork(network: BitcoinNetwork): Promise<void> {
+  async switchNetwork(network: BitcoinNetwork): Promise<BitcoinNetwork> {
     return this._requestMethod("switchNetwork", [network]);
   }
 
@@ -1776,7 +1776,7 @@ export class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
     return this._requestMethod("getChain", []);
   }
 
-  async switchChain(chain: ChainType): Promise<void> {
+  async switchChain(chain: ChainType): Promise<ChainType> {
     return this._requestMethod("switchChain", [chain]);
   }
 
@@ -1817,5 +1817,14 @@ export class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
 
   async signPsbts(psbtsHexes: string[]): Promise<string[]> {
     return this._requestMethod("signPsbts", [psbtsHexes]);
+  }
+
+  async getAddress(): Promise<string> {
+    const accounts = await this.getAccounts();
+    return accounts[0];
+  }
+
+  async connectWallet(): Promise<string[]> {
+    return this.requestAccounts();
   }
 }

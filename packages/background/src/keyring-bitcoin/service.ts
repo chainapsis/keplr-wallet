@@ -524,11 +524,13 @@ export class KeyRingBitcoinService {
             const genesisHash = NETWORK_TO_GENESIS_HASH[network];
             const newCurrentBaseChainId = `bip122:${genesisHash}`;
 
-            return this.permissionService.updateCurrentBaseChainIdForBitcoin(
+            await this.permissionService.updateCurrentBaseChainIdForBitcoin(
               env,
               origin,
               newCurrentBaseChainId
             );
+
+            return network;
           }
           case "getChain": {
             const { genesisHash } = this.parseChainId(currentChainId);
@@ -561,11 +563,13 @@ export class KeyRingBitcoinService {
             const genesisHash = CHAIN_TYPE_TO_GENESIS_HASH[chain];
             const newCurrentBaseChainId = `bip122:${genesisHash}`;
 
-            return this.permissionService.updateCurrentBaseChainIdForBitcoin(
+            await this.permissionService.updateCurrentBaseChainIdForBitcoin(
               env,
               origin,
               newCurrentBaseChainId
             );
+
+            return chain;
           }
           case "getPublicKey": {
             const bitcoinKey = await this.getBitcoinKeySelected(currentChainId);
