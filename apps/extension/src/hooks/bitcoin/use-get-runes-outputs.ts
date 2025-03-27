@@ -30,7 +30,7 @@ export const useGetRunesOutputsByAddress = (
     count?: number;
   } = {}
 ) => {
-  const { bestInSlotApiUrl } = useBitcoinNetworkConfig(chainId);
+  const { bitcoinInscriptionApiUrl } = useBitcoinNetworkConfig(chainId);
 
   const {
     sortBy: initialSortBy,
@@ -95,7 +95,7 @@ export const useGetRunesOutputsByAddress = (
   }, [initialSortBy, initialOrder, initialOffset, initialCount]);
 
   return usePaginatedCursorQuery<RunesOutputsByAddressResponse>(
-    bestInSlotApiUrl,
+    bitcoinInscriptionApiUrl,
     () => {
       const params = new URLSearchParams();
 
@@ -128,7 +128,6 @@ export const useGetRunesOutputsByAddress = (
     {
       headers: {
         "Content-Type": "application/json",
-        "X-API-KEY": process.env["BEST_IN_SLOT_API_KEY"] || "",
       },
     },
     true // 기존의 쿼리 파라미터 대체
