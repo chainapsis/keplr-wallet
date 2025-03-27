@@ -13,12 +13,14 @@ export enum GenesisHash {
 
 export enum Network {
   MAINNET = "mainnet",
+  LIVENET = "livenet",
   TESTNET = "testnet",
   SIGNET = "signet",
 }
 
 export enum ChainType {
   BITCOIN_MAINNET = "BITCOIN_MAINNET",
+  BITCOIN_LIVENET = "BITCOIN_LIVENET",
   BITCOIN_TESTNET = "BITCOIN_TESTNET",
   BITCOIN_SIGNET = "BITCOIN_SIGNET",
 }
@@ -33,6 +35,7 @@ export const GENESIS_HASH_TO_NETWORK: Record<GenesisHash, Network> = {
 
 export const NETWORK_TO_GENESIS_HASH: Record<Network, GenesisHash> = {
   [Network.MAINNET]: GenesisHash.MAINNET,
+  [Network.LIVENET]: GenesisHash.MAINNET,
   [Network.TESTNET]: GenesisHash.TESTNET,
   [Network.SIGNET]: GenesisHash.SIGNET,
 };
@@ -45,6 +48,7 @@ export const GENESIS_HASH_TO_CHAIN_TYPE: Record<GenesisHash, ChainType> = {
 
 export const CHAIN_TYPE_TO_GENESIS_HASH: Record<ChainType, GenesisHash> = {
   [ChainType.BITCOIN_MAINNET]: GenesisHash.MAINNET,
+  [ChainType.BITCOIN_LIVENET]: GenesisHash.MAINNET,
   [ChainType.BITCOIN_TESTNET]: GenesisHash.TESTNET,
   [ChainType.BITCOIN_SIGNET]: GenesisHash.SIGNET,
 };

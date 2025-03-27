@@ -426,6 +426,8 @@ export class KeyRingBitcoinService {
         return testnet;
       case Network.SIGNET:
         return signet;
+      case Network.LIVENET:
+        return mainnet;
     }
   }
 
