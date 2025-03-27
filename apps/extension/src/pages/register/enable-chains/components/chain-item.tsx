@@ -277,6 +277,15 @@ const TokenItem: FunctionComponent<{
       };
     }
     if (denomHelper.type !== "native") {
+      if (viewToken.chainInfo.chainId.startsWith("bip122:")) {
+        return {
+          text: denomHelper.type
+            .split(/(?=[A-Z])/)
+            .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+            .join(" "),
+        };
+      }
+
       return {
         text: denomHelper.type,
       };

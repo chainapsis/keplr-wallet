@@ -375,7 +375,7 @@ export class HugeQueriesStore {
   @action
   protected getAllTokenMapByChainIdentifier() {
     const tokensByChainId = new Map<string, ViewToken[]>();
-    const modularChainInfos = this.chainStore.modularChainInfos.filter(
+    const modularChainInfos = this.chainStore.groupedModularChainInfos.filter(
       (chainInfo) => {
         if ("cosmos" in chainInfo && chainInfo.cosmos.hideInUI) {
           return false;
@@ -385,9 +385,12 @@ export class HugeQueriesStore {
     );
 
     for (const modularChainInfo of modularChainInfos) {
-      const chainIdentifier = ChainIdHelper.parse(
-        modularChainInfo.chainId
-      ).identifier;
+      const baseChainId =
+        "bitcoin" in modularChainInfo
+          ? modularChainInfo.bitcoin.chainId
+          : modularChainInfo.chainId;
+
+      const chainIdentifier = ChainIdHelper.parse(baseChainId).identifier;
 
       if (!tokensByChainId.has(chainIdentifier)) {
         tokensByChainId.set(chainIdentifier, []);
@@ -539,6 +542,66 @@ export class HugeQueriesStore {
           });
         }
       }
+
+      if ("bitcoin" in modularChainInfo) {
+        // 하나로 합쳐진 view에서 주소 형식별로 나눠서 보여줄 수 있도록 main currency를 토큰으로 취급.
+        // 이 경우 주소 형식별로 나눠서 보여줄 수 있도록 해야함.
+        if (account.bitcoinAddress) {
+          const currency = modularChainInfo.bitcoin.currencies[0];
+          const balance = this.bitcoinQueriesStore
+            .get(modularChainInfo.chainId)
+            .queryBitcoinBalance.getBalance(
+              modularChainInfo.chainId,
+              this.chainStore,
+              account.bitcoinAddress.bech32Address,
+              currency.coinMinimalDenom
+            );
+          if (balance) {
+            tokensByChainId.get(chainIdentifier)!.push({
+              chainInfo: modularChainInfo,
+              token: balance.balance,
+              price: this.priceStore.calculatePrice(balance.balance),
+              isFetching: balance.isFetching,
+              error: balance.error,
+            });
+          }
+
+          if (modularChainInfo.linkedModularChainInfos) {
+            for (const linkedChain of modularChainInfo.linkedModularChainInfos) {
+              const linkedAccount = this.accountStore.getAccount(
+                linkedChain.chainId
+              );
+              if (!linkedAccount.bitcoinAddress) {
+                continue;
+              }
+
+              if (!("bitcoin" in linkedChain)) {
+                continue;
+              }
+
+              const linkedCurrency = linkedChain.bitcoin.currencies[0];
+
+              const balance = this.bitcoinQueriesStore
+                .get(linkedChain.chainId)
+                .queryBitcoinBalance.getBalance(
+                  linkedChain.chainId,
+                  this.chainStore,
+                  linkedAccount.bitcoinAddress.bech32Address,
+                  linkedCurrency.coinMinimalDenom
+                );
+              if (balance) {
+                tokensByChainId.get(chainIdentifier)!.push({
+                  chainInfo: linkedChain,
+                  token: balance.balance,
+                  price: this.priceStore.calculatePrice(balance.balance),
+                  isFetching: balance.isFetching,
+                  error: balance.error,
+                });
+              }
+            }
+          }
+        }
+      }
     }
 
     for (const [chainId, tokens] of tokensByChainId.entries()) {
@@ -547,6 +610,8 @@ export class HugeQueriesStore {
         tokens.sort((a, b) => this.sortByPrice(a, b))
       );
     }
+
+    console.log("updated tokensByChainId", tokensByChainId);
 
     runInAction(() => {
       this.allTokenMapByChainIdentifierState.map = tokensByChainId;
