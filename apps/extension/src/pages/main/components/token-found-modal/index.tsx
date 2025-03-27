@@ -34,6 +34,8 @@ import { FormattedMessage, useIntl } from "react-intl";
 import SimpleBar from "simplebar-react";
 import { XAxis, YAxis } from "../../../../components/axis";
 import { EmbedChainInfos } from "../../../../config";
+import { DenomHelper } from "@keplr-wallet/common";
+import { TokenTag } from "../../../register/enable-chains/components/chain-item";
 
 export const TokenFoundModal: FunctionComponent<{
   close: () => void;
@@ -473,6 +475,21 @@ const FoundTokenView: FunctionComponent<{
   const { chainStore, uiConfigStore } = useStore();
   const theme = useTheme();
 
+  const addressTag = useMemo(() => {
+    const currency = asset.currency;
+    const denomHelper = new DenomHelper(currency.coinMinimalDenom);
+    if (denomHelper.type !== "native") {
+      if (chainId.startsWith("bip122:")) {
+        return {
+          text: denomHelper.type
+            .split(/(?=[A-Z])/)
+            .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+            .join(" "),
+        };
+      }
+    }
+  }, [asset.currency, chainId]);
+
   return (
     <Columns sum={1} gutter="0.5rem" alignY="center">
       <Box width="1.5rem" height="1.5rem">
@@ -487,43 +504,51 @@ const FoundTokenView: FunctionComponent<{
           alt="Token Found Modal Token Image"
         />
       </Box>
-
-      <Subtitle3
-        color={
-          theme.mode === "light"
-            ? ColorPalette["gray-400"]
-            : ColorPalette["gray-50"]
-        }
+      <Box
+        style={{
+          flexDirection: "row",
+          flexWrap: "wrap",
+          gap: "0.25rem",
+        }}
       >
-        {(() => {
-          if (chainStore.hasChain(chainId)) {
-            return chainStore
-              .getChain(chainId)
-              .forceFindCurrency(asset.currency.coinMinimalDenom).coinDenom;
-          } else {
-            const modularChainInfo = chainStore.getModularChain(chainId);
-            const isBitcoin = "bitcoin" in modularChainInfo;
-            const isStarknet = "starknet" in modularChainInfo;
-            const isCosmos = "cosmos" in modularChainInfo;
-
-            if (isBitcoin || isStarknet || isCosmos) {
-              return (
-                chainStore
-                  .getModularChainInfoImpl(chainId)
-                  .getCurrencies(
-                    isBitcoin ? "bitcoin" : isStarknet ? "starknet" : "cosmos"
-                  )
-                  .find(
-                    (cur) =>
-                      cur.coinMinimalDenom === asset.currency.coinMinimalDenom
-                  )?.coinDenom ?? asset.currency.coinDenom
-              );
-            } else {
-              return asset.currency.coinDenom;
-            }
+        <Subtitle3
+          color={
+            theme.mode === "light"
+              ? ColorPalette["gray-400"]
+              : ColorPalette["gray-50"]
           }
-        })()}
-      </Subtitle3>
+        >
+          {(() => {
+            if (chainStore.hasChain(chainId)) {
+              return chainStore
+                .getChain(chainId)
+                .forceFindCurrency(asset.currency.coinMinimalDenom).coinDenom;
+            } else {
+              const modularChainInfo = chainStore.getModularChain(chainId);
+              const isBitcoin = "bitcoin" in modularChainInfo;
+              const isStarknet = "starknet" in modularChainInfo;
+              const isCosmos = "cosmos" in modularChainInfo;
+
+              if (isBitcoin || isStarknet || isCosmos) {
+                return (
+                  chainStore
+                    .getModularChainInfoImpl(chainId)
+                    .getCurrencies(
+                      isBitcoin ? "bitcoin" : isStarknet ? "starknet" : "cosmos"
+                    )
+                    .find(
+                      (cur) =>
+                        cur.coinMinimalDenom === asset.currency.coinMinimalDenom
+                    )?.coinDenom ?? asset.currency.coinDenom
+                );
+              } else {
+                return asset.currency.coinDenom;
+              }
+            }
+          })()}
+        </Subtitle3>
+        {addressTag ? <TokenTag text={addressTag.text} /> : null}
+      </Box>
 
       <Column weight={1} />
 

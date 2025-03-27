@@ -544,8 +544,6 @@ export class HugeQueriesStore {
       }
 
       if ("bitcoin" in modularChainInfo) {
-        // 하나로 합쳐진 view에서 주소 형식별로 나눠서 보여줄 수 있도록 main currency를 토큰으로 취급.
-        // 이 경우 주소 형식별로 나눠서 보여줄 수 있도록 해야함.
         if (account.bitcoinAddress) {
           const currency = modularChainInfo.bitcoin.currencies[0];
           const balance = this.bitcoinQueriesStore
@@ -610,8 +608,6 @@ export class HugeQueriesStore {
         tokens.sort((a, b) => this.sortByPrice(a, b))
       );
     }
-
-    console.log("updated tokensByChainId", tokensByChainId);
 
     runInAction(() => {
       this.allTokenMapByChainIdentifierState.map = tokensByChainId;

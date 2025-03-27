@@ -290,7 +290,7 @@ const TokenItem: FunctionComponent<{
         text: denomHelper.type,
       };
     }
-  }, [viewToken.token.currency]);
+  }, [viewToken.chainInfo.chainId, viewToken.token.currency]);
   const coinDenom = useMemo(() => {
     if (
       "originCurrency" in viewToken.token.currency &&
@@ -384,7 +384,7 @@ const TokenView: FunctionComponent<{
   );
 };
 
-const TokenTag: FunctionComponent<{
+export const TokenTag: FunctionComponent<{
   text: string;
   tooltip?: string;
 }> = ({ text, tooltip }) => {
