@@ -33,7 +33,7 @@ import { KeplrEnigmaUtils } from "./enigma";
 import { BUILD_VERSION } from "./version";
 import EventEmitter from "events";
 import { KeplrLogoBase64, metaId } from "./constants";
-import {
+import type {
   Call,
   DeployAccountSignerDetails,
   InvocationsSignerDetails,

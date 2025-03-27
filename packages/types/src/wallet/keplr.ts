@@ -15,7 +15,7 @@ import { SettledResponses } from "../settled";
 import { DirectAuxSignResponse } from "../cosmjs-alt";
 import { IEthereumProvider } from "./ethereum";
 import { IStarknetProvider } from "./starknet";
-import {
+import type {
   Call,
   DeployAccountSignerDetails,
   InvocationsSignerDetails,

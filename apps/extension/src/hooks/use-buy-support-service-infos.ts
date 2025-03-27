@@ -1,8 +1,6 @@
 import { AppCurrency } from "@keplr-wallet/types";
-import { useStore } from "../stores";
-import { useEffect, useState } from "react";
 import { FiatOnRampServiceInfo } from "../config.ui";
-import { simpleFetch } from "@keplr-wallet/simple-fetch";
+import { useStore } from "../stores";
 
 interface BuySupportServiceInfo extends FiatOnRampServiceInfo {
   buyUrl?: string;
@@ -12,273 +10,222 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
   chainId: string;
   currency: AppCurrency;
 }): BuySupportServiceInfo[] => {
-  const { accountStore, chainStore } = useStore();
-  const [buySupportServiceInfos, setBuySupportServiceInfos] = useState<
-    BuySupportServiceInfo[]
-  >([]);
+  const { accountStore, chainStore, queriesStore } = useStore();
 
-  const selectedTokenInfoKey = JSON.stringify(selectedTokenInfo);
+  const response = queriesStore.simpleQuery.queryGet<{
+    list: FiatOnRampServiceInfo[];
+  }>(
+    "https://raw.githubusercontent.com/chainapsis/keplr-fiat-on-off-ramp-registry/main/fiat-on-off-ramp-list.json"
+  ).response;
+  const fiatOnRampServiceInfos = response?.data.list;
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const fiatonoffRampResponse = await simpleFetch<{
-          list: FiatOnRampServiceInfo[];
-        }>(
-          "https://raw.githubusercontent.com/chainapsis/keplr-fiat-on-off-ramp-registry/main/fiat-on-off-ramp-list.json"
-        );
+  const buySupportServiceInfos = fiatOnRampServiceInfos?.map((serviceInfo) => {
+    const buySupportCoinDenoms = [
+      ...new Set(
+        selectedTokenInfo
+          ? Object.entries(serviceInfo.buySupportCoinDenomsByChainId)
+              .filter(
+                ([chainId, coinDenoms]) =>
+                  chainId === selectedTokenInfo.chainId &&
+                  coinDenoms?.some((coinDenom) =>
+                    coinDenom === "USDC"
+                      ? selectedTokenInfo.currency.coinDenom.includes("USDC")
+                      : coinDenom === selectedTokenInfo.currency.coinDenom
+                  )
+              )
+              .map(([_, coinDenoms]) => coinDenoms)
+              .flat()
+          : Object.values(serviceInfo.buySupportCoinDenomsByChainId).flat()
+      ),
+    ];
 
-        const preBuySupportServiceInfos = fiatonoffRampResponse.data.list.map(
-          (serviceInfo) => {
-            const buySupportCoinDenoms = [
-              ...new Set(
-                selectedTokenInfo
-                  ? Object.entries(serviceInfo.buySupportCoinDenomsByChainId)
-                      .filter(
-                        ([chainId, coinDenoms]) =>
-                          chainId === selectedTokenInfo.chainId &&
-                          coinDenoms?.some((coinDenom) =>
-                            coinDenom === "USDC"
-                              ? selectedTokenInfo.currency.coinDenom.includes(
-                                  "USDC"
-                                )
-                              : coinDenom ===
-                                selectedTokenInfo.currency.coinDenom
-                          )
-                      )
-                      .map(([_, coinDenoms]) => coinDenoms)
-                      .flat()
-                  : Object.values(
-                      serviceInfo.buySupportCoinDenomsByChainId
-                    ).flat()
-              ),
-            ];
+    const selectedCoinDenom = selectedTokenInfo
+      ? buySupportCoinDenoms.find((coinDenom) =>
+          coinDenom === "USDC"
+            ? selectedTokenInfo.currency.coinDenom.includes("USDC")
+            : coinDenom === selectedTokenInfo.currency.coinDenom
+        )
+      : undefined;
 
-            const selectedCoinDenom = selectedTokenInfo
-              ? buySupportCoinDenoms.find((coinDenom) =>
-                  coinDenom === "USDC"
-                    ? selectedTokenInfo.currency.coinDenom.includes("USDC")
-                    : coinDenom === selectedTokenInfo.currency.coinDenom
-                )
-              : undefined;
+    const buyUrlParams = (() => {
+      if (buySupportCoinDenoms.length === 0) {
+        return undefined;
+      }
 
-            const buyUrlParams = (() => {
-              if (buySupportCoinDenoms.length === 0) {
-                return undefined;
-              }
+      switch (serviceInfo.serviceId) {
+        case "moonpay":
+          return {
+            apiKey:
+              process.env["KEPLR_EXT_MOONPAY_API_KEY"] ?? serviceInfo.apiKey,
+            walletAddresses: encodeURIComponent(
+              JSON.stringify(
+                Object.entries(
+                  serviceInfo.buySupportCoinDenomsByChainId
+                ).reduce((finalAcc, [chainId, coinDenoms]) => {
+                  if (chainStore.hasChain(chainId)) {
+                    const currencyCodeMap = coinDenoms?.reduce(
+                      (acc, coinDenom) => {
+                        const chainInfo = chainStore.getChain(chainId);
+                        const matchedCurrency = chainInfo.currencies.find(
+                          (currency) => currency.coinDenom === coinDenom
+                        );
+                        const currencyCode = getCurrencyCodeForMoonpay(
+                          matchedCurrency?.coinDenom
+                        );
 
-              switch (serviceInfo.serviceId) {
-                case "moonpay":
-                  return {
-                    apiKey:
-                      process.env["KEPLR_EXT_MOONPAY_API_KEY"] ??
-                      serviceInfo.apiKey,
-                    walletAddresses: encodeURIComponent(
-                      JSON.stringify(
-                        Object.entries(
-                          serviceInfo.buySupportCoinDenomsByChainId
-                        ).reduce((finalAcc, [chainId, coinDenoms]) => {
-                          if (chainStore.hasModularChain(chainId)) {
-                            const currencyCodeMap = coinDenoms?.reduce(
-                              (acc, coinDenom) => {
-                                const modularChainInfo =
-                                  chainStore.getModularChain(chainId);
-                                const matchedCurrency = (() => {
-                                  if ("cosmos" in modularChainInfo) {
-                                    return modularChainInfo.cosmos.currencies.find(
-                                      (currency) =>
-                                        currency.coinDenom === coinDenom
-                                    );
-                                  }
-                                })();
+                        if (currencyCode) {
+                          acc[currencyCode] = accountStore.getAccount(
+                            chainInfo.chainId
+                          ).bech32Address;
+                        }
+                        return acc;
+                      },
+                      finalAcc as Record<string, string>
+                    );
 
-                                if (matchedCurrency) {
-                                  const currencyCode = (() => {
-                                    switch (matchedCurrency.coinDenom) {
-                                      case "DYDX":
-                                        return "dydx_dydx";
-                                      case "INJ":
-                                        return "inj_inj";
-                                      default:
-                                        return matchedCurrency.coinDenom.toLowerCase();
-                                    }
-                                  })();
+                    return {
+                      ...finalAcc,
+                      ...currencyCodeMap,
+                    };
+                  }
 
-                                  acc[currencyCode] = accountStore.getAccount(
-                                    modularChainInfo.chainId
-                                  ).bech32Address;
-                                }
-                                return acc;
-                              },
-                              finalAcc as Record<string, string>
-                            );
+                  return finalAcc;
+                }, {})
+              )
+            ),
+            defaultCurrencyCode: getCurrencyCodeForMoonpay(
+              selectedCoinDenom ?? buySupportCoinDenoms[0]
+            ),
+          };
+        case "transak":
+          return {
+            apiKey:
+              process.env["KEPLR_EXT_TRANSAK_API_KEY"] ?? serviceInfo.apiKey,
+            hideMenu: "true",
+            walletAddressesData: encodeURIComponent(
+              JSON.stringify(
+                Object.entries(
+                  serviceInfo.buySupportCoinDenomsByChainId
+                ).reduce(
+                  (finalAcc, [chainId, coinDenoms]) => {
+                    if (chainStore.hasChain(chainId)) {
+                      const chainInfo = chainStore.getChain(chainId);
+                      const coins = coinDenoms?.reduce(
+                        (coinsAcc, coinDenom) => {
+                          const matchedCurrency = chainInfo.currencies.find(
+                            (currency) => currency.coinDenom === coinDenom
+                          );
 
-                            return {
-                              ...finalAcc,
-                              ...currencyCodeMap,
+                          if (matchedCurrency) {
+                            const currencyCode = matchedCurrency.coinDenom;
+                            coinsAcc[currencyCode] = {
+                              address: chainStore.isEvmChain(chainId)
+                                ? accountStore.getAccount(chainId)
+                                    .ethereumHexAddress
+                                : accountStore.getAccount(chainId)
+                                    .bech32Address,
                             };
                           }
 
-                          return finalAcc;
-                        }, {})
-                      )
-                    ),
-                    defaultCurrencyCode:
-                      selectedCoinDenom ?? buySupportCoinDenoms[0],
-                  };
-                case "transak":
-                  return {
-                    apiKey:
-                      process.env["KEPLR_EXT_TRANSAK_API_KEY"] ??
-                      serviceInfo.apiKey,
-                    hideMenu: "true",
-                    walletAddressesData: encodeURIComponent(
-                      JSON.stringify(
-                        Object.entries(
-                          serviceInfo.buySupportCoinDenomsByChainId
-                        ).reduce(
-                          (finalAcc, [chainId, coinDenoms]) => {
-                            if (chainStore.hasModularChain(chainId)) {
-                              const modularChainInfo =
-                                chainStore.getModularChain(chainId);
-                              const coins = coinDenoms?.reduce(
-                                (coinsAcc, coinDenom) => {
-                                  const matchedCurrency = (() => {
-                                    if ("cosmos" in modularChainInfo) {
-                                      return modularChainInfo.cosmos.currencies.find(
-                                        (currency) =>
-                                          currency.coinDenom === coinDenom
-                                      );
-                                    }
-                                  })();
+                          return coinsAcc;
+                        },
+                        {} as Record<string, { address: string }>
+                      );
 
-                                  if (matchedCurrency) {
-                                    const currencyCode =
-                                      matchedCurrency.coinDenom;
-                                    coinsAcc[currencyCode] = {
-                                      address: chainStore.isEvmOnlyChain(
-                                        modularChainInfo.chainId
-                                      )
-                                        ? accountStore.getAccount(
-                                            modularChainInfo.chainId
-                                          ).ethereumHexAddress
-                                        : accountStore.getAccount(
-                                            modularChainInfo.chainId
-                                          ).bech32Address,
-                                    };
-                                  }
+                      return {
+                        coins: {
+                          ...finalAcc.coins,
+                          ...coins,
+                        },
+                      };
+                    }
 
-                                  return coinsAcc;
-                                },
-                                {} as Record<string, { address: string }>
-                              );
+                    return finalAcc;
+                  },
+                  {
+                    coins: {},
+                  }
+                )
+              )
+            ),
+            cryptoCurrencyList: buySupportCoinDenoms,
+            defaultCryptoCurrency: selectedCoinDenom ?? buySupportCoinDenoms[0],
+          };
+        case "kado":
+          const kadoBuySupportModularChainInfos = Object.keys(
+            serviceInfo.buySupportCoinDenomsByChainId
+          )
+            .filter((chainId) => chainStore.hasChain(chainId))
+            .map((chainId) => chainStore.getChain(chainId));
+          const selectedChainName = selectedTokenInfo
+            ? kadoBuySupportModularChainInfos.find(
+                (chainInfo) => chainInfo.chainId === selectedTokenInfo.chainId
+              )?.chainName
+            : undefined;
 
-                              return {
-                                coins: {
-                                  ...finalAcc.coins,
-                                  ...coins,
-                                },
-                              };
-                            }
-
-                            return finalAcc;
-                          },
-                          {
-                            coins: {},
-                          }
-                        )
-                      )
-                    ),
-                    cryptoCurrencyList: buySupportCoinDenoms,
-                    defaultCryptoCurrency:
-                      selectedCoinDenom ?? buySupportCoinDenoms[0],
-                  };
-                case "kado":
-                  const kadoBuySupportModularChainInfos = Object.keys(
-                    serviceInfo.buySupportCoinDenomsByChainId
-                  )
-                    .filter((chainId) => chainStore.hasModularChain(chainId))
-                    .map((chainId) => chainStore.getModularChain(chainId));
-                  const selectedChainName = selectedTokenInfo
-                    ? kadoBuySupportModularChainInfos.find(
-                        (chainInfo) =>
-                          chainInfo.chainId === selectedTokenInfo.chainId
-                      )?.chainName
-                    : undefined;
-
-                  return {
-                    apiKey:
-                      process.env["KEPLR_EXT_KADO_API_KEY"] ??
-                      serviceInfo.apiKey,
-                    product: "BUY",
-                    networkList: kadoBuySupportModularChainInfos.map(
-                      (chainInfo) => chainInfo.chainName.toUpperCase()
-                    ),
-                    cryptoList: buySupportCoinDenoms,
-                    onRevCurrency: selectedCoinDenom ?? buySupportCoinDenoms[0],
-                    network:
-                      selectedChainName ??
-                      kadoBuySupportModularChainInfos[0].chainName.toUpperCase(),
-                  };
-                default:
-                  return;
-              }
-            })();
-            const buyUrl = buyUrlParams
-              ? `${serviceInfo.buyOrigin}?${Object.entries(buyUrlParams)
-                  .map((paramKeyValue) => paramKeyValue.join("="))
-                  .join("&")}`
-              : undefined;
-
-            return {
-              ...serviceInfo,
-              buyUrl,
-            };
-          }
-        );
-
-        // Moonpay buy url should be with signature from server side.
-        let moonpayBuyUrlWithSignature: string = "";
-        try {
-          const moonpayServiceInfo = preBuySupportServiceInfos.find(
-            (serviceInfo) => serviceInfo.serviceId === "moonpay"
-          );
-          if (!moonpayServiceInfo?.buyUrl) {
-            throw new Error("Moonpay service info is not found");
-          }
-          const moonpaySignResponse = await simpleFetch<string>(
-            process.env["KEPLR_EXT_MOONPAY_SIGN_API_BASE_URL"] ?? "",
-            `/api/moonpay-sign?url=${encodeURIComponent(
-              moonpayServiceInfo.buyUrl
-            )}`
-          );
-          moonpayBuyUrlWithSignature = moonpaySignResponse.data;
-        } catch (e) {
-          // If something wrong on the request, just ignore it.
-          if (e && e.message !== "Moonpay service info is not found") {
-            console.log(e);
-          }
-        }
-
-        const newBuySupportServiceInfos = preBuySupportServiceInfos.map(
-          (serviceInfo) => ({
-            ...serviceInfo,
-            ...(serviceInfo.serviceId === "moonpay" &&
-              moonpayBuyUrlWithSignature && {
-                buyUrl: moonpayBuyUrlWithSignature,
-              }),
-          })
-        );
-
-        setBuySupportServiceInfos(newBuySupportServiceInfos);
-      } catch (e) {
-        console.log(e);
+          return {
+            apiKey: process.env["KEPLR_EXT_KADO_API_KEY"] ?? serviceInfo.apiKey,
+            product: "BUY",
+            networkList: kadoBuySupportModularChainInfos.map((chainInfo) =>
+              chainInfo.chainName.toUpperCase()
+            ),
+            cryptoList: buySupportCoinDenoms,
+            onRevCurrency: selectedCoinDenom ?? buySupportCoinDenoms[0],
+            network:
+              selectedChainName ??
+              kadoBuySupportModularChainInfos[0].chainName.toUpperCase(),
+          };
+        default:
+          return;
       }
     })();
-    // selectedTokenInfo는 오브젝트라서 쉽게 ref이 변경될 수 있기 때문에
-    // JSON.stringify를 사용해서 string으로 변경해서 의존성을 줌.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accountStore, chainStore, selectedTokenInfoKey]);
+    const buyUrl = buyUrlParams
+      ? `${serviceInfo.buyOrigin}?${Object.entries(buyUrlParams)
+          .map((paramKeyValue) => paramKeyValue.join("="))
+          .join("&")}`
+      : undefined;
 
-  return buySupportServiceInfos;
+    return {
+      ...serviceInfo,
+      buyUrl,
+    };
+  });
+
+  const moonpayServiceInfo = buySupportServiceInfos?.find(
+    (serviceInfo) => serviceInfo.serviceId === "moonpay"
+  );
+  const moonpaySignResult = moonpayServiceInfo?.buyUrl
+    ? queriesStore.simpleQuery.queryGet<string>(
+        process.env["KEPLR_EXT_CONFIG_SERVER"] || "",
+        `/api/moonpay-sign?url=${encodeURIComponent(moonpayServiceInfo.buyUrl)}`
+      )
+    : undefined;
+  const moonpaySignedUrl = moonpaySignResult?.response?.data;
+
+  return (
+    buySupportServiceInfos?.map((serviceInfo) => ({
+      ...serviceInfo,
+      ...(serviceInfo.serviceId === "moonpay" &&
+        moonpaySignResult &&
+        !moonpaySignResult.error &&
+        moonpaySignedUrl && {
+          buyUrl: moonpaySignedUrl,
+        }),
+    })) ?? []
+  );
+};
+
+const getCurrencyCodeForMoonpay = (coinDenom: string | undefined) => {
+  if (!coinDenom) {
+    return undefined;
+  }
+
+  switch (coinDenom) {
+    case "DYDX":
+      return "dydx_dydx";
+    case "INJ":
+      return "inj_inj";
+    default:
+      return coinDenom.toLowerCase();
+  }
 };

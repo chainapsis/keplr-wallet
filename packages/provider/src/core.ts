@@ -37,7 +37,7 @@ import Long from "long";
 import { Buffer } from "buffer/";
 import { KeplrCoreTypes } from "./core-types";
 import EventEmitter from "events";
-import {
+import type {
   AccountInterface,
   Call,
   DeployAccountSignerDetails,

@@ -103,17 +103,19 @@ export class RecipientConfig
 
   @action
   setENS(options?: { chainId: string }) {
+    const i = this.nameServices.findIndex(
+      (nameService) => nameService.type === "ens"
+    );
+
     if (!options) {
-      this.nameServices = this.nameServices.filter(
-        (nameService) => nameService.type !== "ens"
-      );
+      if (i >= 0) {
+        this.nameServices.splice(i, 1);
+      }
       return;
     }
 
-    const found = this.nameServices.find(
-      (nameService) => nameService.type === "ens"
-    );
-    if (found) {
+    if (i >= 0) {
+      const found = this.nameServices[i];
       (found as ENSNameService).setENS(options);
     } else {
       this.nameServices.push(
@@ -131,17 +133,19 @@ export class RecipientConfig
         }
       | undefined
   ) {
+    const i = this.nameServices.findIndex(
+      (nameService) => nameService.type === "icns"
+    );
+
     if (!options) {
-      this.nameServices = this.nameServices.filter(
-        (nameService) => nameService.type !== "icns"
-      );
+      if (i >= 0) {
+        this.nameServices.splice(i, 1);
+      }
       return;
     }
 
-    const found = this.nameServices.find(
-      (nameService) => nameService.type === "icns"
-    );
-    if (found) {
+    if (i >= 0) {
+      const found = this.nameServices[i];
       (found as ICNSNameService).setICNS(options);
     } else {
       this.nameServices.push(

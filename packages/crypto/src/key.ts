@@ -4,7 +4,35 @@ import { sha256 } from "@noble/hashes/sha2";
 import { ripemd160 } from "@noble/hashes/ripemd160";
 import { Buffer } from "buffer/";
 import { Hash } from "./hash";
-import { hash as starknetHash } from "starknet";
+
+let _starknetHash: {
+  calculateContractAddressFromHash(
+    salt: string | number | bigint,
+    classHash: string | number | bigint,
+    constructorCalldata: string[],
+    deployerAddress: string | number | bigint
+  ): string;
+} | null = null;
+const getStarknetHash = (): {
+  calculateContractAddressFromHash(
+    salt: string | number | bigint,
+    classHash: string | number | bigint,
+    constructorCalldata: string[],
+    deployerAddress: string | number | bigint
+  ): string;
+} => {
+  if (_starknetHash) {
+    return _starknetHash;
+  }
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { hash: starknetHash } = require("starknet");
+    _starknetHash = starknetHash;
+    return starknetHash;
+  } catch (e) {
+    throw new Error("Starknet library not found");
+  }
+};
 
 export class PrivKeySecp256k1 {
   static generateRandomKey(): PrivKeySecp256k1 {
@@ -60,7 +88,7 @@ export class PubKeyStarknet {
   getStarknetAddress(salt: Uint8Array, classHash: Uint8Array): Uint8Array {
     const starknetPubKey = this.getStarknetPubKey();
 
-    let calculated = starknetHash
+    let calculated = getStarknetHash()
       .calculateContractAddressFromHash(
         "0x" + Buffer.from(salt).toString("hex"),
         "0x" + Buffer.from(classHash).toString("hex"),
@@ -146,7 +174,7 @@ export class PubKeySecp256k1 {
     const yLow = pubBytes.slice(48, 64);
     const yHigh = pubBytes.slice(32, 48);
 
-    let calculated = starknetHash
+    let calculated = getStarknetHash()
       .calculateContractAddressFromHash(
         "0x" + Buffer.from(salt).toString("hex"),
         "0x" + Buffer.from(classHash).toString("hex"),

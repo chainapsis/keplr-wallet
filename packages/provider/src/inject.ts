@@ -40,7 +40,7 @@ import deepmerge from "deepmerge";
 import Long from "long";
 import { KeplrCoreTypes } from "./core-types";
 import EventEmitter from "events";
-import {
+import type {
   AccountInterface,
   Call,
   DeployAccountSignerDetails,
