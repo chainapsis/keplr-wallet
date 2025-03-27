@@ -478,14 +478,17 @@ const FoundTokenView: FunctionComponent<{
   const addressTag = useMemo(() => {
     const currency = asset.currency;
     const denomHelper = new DenomHelper(currency.coinMinimalDenom);
-    if (denomHelper.type !== "native") {
+    if (denomHelper.type === "native") {
       if (chainId.startsWith("bip122:")) {
-        return {
-          text: denomHelper.type
-            .split(/(?=[A-Z])/)
-            .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
-            .join(" "),
-        };
+        const paymentType = chainId.split(":")[2] as string | undefined;
+        if (paymentType) {
+          return {
+            text: paymentType
+              .split("-")
+              .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+              .join(" "),
+          };
+        }
       }
     }
   }, [asset.currency, chainId]);

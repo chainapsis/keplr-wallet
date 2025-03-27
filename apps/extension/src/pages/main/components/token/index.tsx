@@ -213,36 +213,40 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
     const tag = useMemo(() => {
       const currency = viewToken.token.currency;
       const denomHelper = new DenomHelper(currency.coinMinimalDenom);
-      if (
-        denomHelper.type === "native" &&
-        currency.coinMinimalDenom.startsWith("ibc/")
-      ) {
-        return {
-          text: "IBC",
-          tooltip: (() => {
-            const start = currency.coinDenom.indexOf("(");
-            const end = currency.coinDenom.lastIndexOf(")");
 
-            if (start < 0 || end < 0) {
-              return "Unknown";
-            }
-
-            return currency.coinDenom.slice(start + 1, end);
-          })(),
-        };
-      }
-      if (denomHelper.type !== "native") {
-        if (viewToken.chainInfo.chainId.startsWith("bip122:")) {
+      if (denomHelper.type === "native") {
+        if (currency.coinMinimalDenom.startsWith("ibc/")) {
           return {
-            text: denomHelper.type
-              .split(/(?=[A-Z])/)
-              .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
-              .join(" "),
+            text: "IBC",
+            tooltip: (() => {
+              const start = currency.coinDenom.indexOf("(");
+              const end = currency.coinDenom.lastIndexOf(")");
+
+              if (start < 0 || end < 0) {
+                return "Unknown";
+              }
+
+              return currency.coinDenom.slice(start + 1, end);
+            })(),
           };
         }
 
+        if (viewToken.chainInfo.chainId.startsWith("bip122:")) {
+          const paymentType = viewToken.chainInfo.chainId.split(":")[2] as
+            | string
+            | undefined;
+          if (paymentType) {
+            return {
+              text: paymentType
+                .split("-")
+                .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+                .join(" "),
+            };
+          }
+        }
+      } else {
         return {
-          text: denomHelper.type,
+          text: denomHelper.type.toUpperCase(),
         };
       }
     }, [viewToken.token.currency, viewToken.chainInfo.chainId]);
