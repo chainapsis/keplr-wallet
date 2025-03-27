@@ -8,7 +8,7 @@ import {
   QueryError,
 } from "@keplr-wallet/stores";
 import { CoinPretty, Dec, PricePretty } from "@keplr-wallet/unit";
-import { action, autorun, computed } from "mobx";
+import { action, autorun, computed, runInAction } from "mobx";
 import { DenomHelper } from "@keplr-wallet/common";
 import { computedFn } from "mobx-utils";
 import { BinarySortArray } from "./sort";
@@ -16,6 +16,9 @@ import { StarknetQueriesStore } from "@keplr-wallet/stores-starknet";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { ModularChainInfo } from "@keplr-wallet/types";
 import { BitcoinQueriesStore } from "@keplr-wallet/stores-bitcoin";
+import { UIConfigStore } from "../ui-config";
+import { KeyRingStore } from "@keplr-wallet/stores-core";
+import { AllTokenMapByChainIdentifierState } from "./all-token-map-state";
 
 interface ViewToken {
   chainInfo: IChainInfoImpl | ModularChainInfo;
@@ -51,13 +54,16 @@ export class HugeQueriesStore {
   protected unbondingBinarySort: BinarySortArray<ViewUnbondingToken>;
   protected claimableRewardsBinarySort: BinarySortArray<ViewRewardToken>;
 
+  protected allTokenMapByChainIdentifierState: AllTokenMapByChainIdentifierState;
   constructor(
     protected readonly chainStore: ChainStore,
     protected readonly queriesStore: IQueriesStore<CosmosQueries>,
     protected readonly starknetQueriesStore: StarknetQueriesStore,
     protected readonly bitcoinQueriesStore: BitcoinQueriesStore,
     protected readonly accountStore: IAccountStore,
-    protected readonly priceStore: CoinGeckoPriceStore
+    protected readonly priceStore: CoinGeckoPriceStore,
+    protected readonly uiConfigStore: UIConfigStore,
+    protected readonly keyRingStore: KeyRingStore
   ) {
     let balanceDisposal: (() => void) | undefined;
     this.balanceBinarySort = new BinarySortArray<ViewToken>(
@@ -117,6 +123,21 @@ export class HugeQueriesStore {
         }
       }
     );
+
+    let allTokenMapByChainIdentifierDisposal: (() => void) | undefined;
+    this.allTokenMapByChainIdentifierState =
+      new AllTokenMapByChainIdentifierState(
+        () => {
+          allTokenMapByChainIdentifierDisposal = autorun(() => {
+            this.getAllTokenMapByChainIdentifier();
+          });
+        },
+        () => {
+          if (allTokenMapByChainIdentifierDisposal) {
+            allTokenMapByChainIdentifierDisposal();
+          }
+        }
+      );
   }
 
   @action
@@ -154,6 +175,21 @@ export class HugeQueriesStore {
               : queries.queryBalances.getQueryBech32Address(
                   account.bech32Address
                 );
+
+          if (this.chainStore.getChain(chainInfo.chainId).bech32Config) {
+            // ethermint 계열의 체인인 경우 ibc token을 보여주기 위해서 native 토큰에 대해서
+            // cosmos 방식의 쿼리를 꼭 발생시켜야 한다.
+            for (const bal of queries.queryBalances.getQueryBech32Address(
+              account.bech32Address
+            ).balances) {
+              if (
+                new DenomHelper(bal.currency.coinMinimalDenom).type === "native"
+              ) {
+                bal.balance;
+                break;
+              }
+            }
+          }
 
           const key = `${chainInfo.chainIdentifier}/${currency.coinMinimalDenom}`;
           if (!keysUsed.get(key)) {
@@ -332,14 +368,210 @@ export class HugeQueriesStore {
     }
   }
 
+  get allTokenMapByChainIdentifier(): Map<string, ViewToken[]> {
+    return this.allTokenMapByChainIdentifierState.map;
+  }
+
+  @action
+  protected getAllTokenMapByChainIdentifier() {
+    const tokensByChainId = new Map<string, ViewToken[]>();
+    const modularChainInfos = this.chainStore.modularChainInfos.filter(
+      (chainInfo) => {
+        if ("cosmos" in chainInfo && chainInfo.cosmos.hideInUI) {
+          return false;
+        }
+        return true;
+      }
+    );
+
+    for (const modularChainInfo of modularChainInfos) {
+      const chainIdentifier = ChainIdHelper.parse(
+        modularChainInfo.chainId
+      ).identifier;
+
+      if (!tokensByChainId.has(chainIdentifier)) {
+        tokensByChainId.set(chainIdentifier, []);
+      }
+
+      const account = this.accountStore.getAccount(modularChainInfo.chainId);
+      if ("cosmos" in modularChainInfo) {
+        const chainInfo = this.chainStore.getChain(modularChainInfo.chainId);
+
+        const mainCurrency = chainInfo.stakeCurrency || chainInfo.currencies[0];
+
+        if (account.bech32Address === "") {
+          continue;
+        }
+        const queries = this.queriesStore.get(chainInfo.chainId);
+
+        const currencies = [...chainInfo.currencies];
+        if (chainInfo.stakeCurrency) {
+          currencies.push(chainInfo.stakeCurrency);
+        }
+
+        for (const currency of currencies) {
+          const denomHelper = new DenomHelper(currency.coinMinimalDenom);
+          const isERC20 = denomHelper.type === "erc20";
+          const isMainCurrency =
+            mainCurrency.coinMinimalDenom === currency.coinMinimalDenom;
+          const queryBalance =
+            this.chainStore.isEvmChain(chainInfo.chainId) &&
+            (isMainCurrency || isERC20)
+              ? queries.queryBalances.getQueryEthereumHexAddress(
+                  account.ethereumHexAddress
+                )
+              : queries.queryBalances.getQueryBech32Address(
+                  account.bech32Address
+                );
+
+          if (
+            chainInfo.stakeCurrency?.coinMinimalDenom ===
+            currency.coinMinimalDenom
+          ) {
+            const balance = queryBalance.stakable?.balance;
+            if (!balance) {
+              continue;
+            }
+
+            if (
+              tokensByChainId
+                .get(chainIdentifier)!
+                .find(
+                  (token) =>
+                    token.token.currency.coinMinimalDenom ===
+                    currency.coinMinimalDenom
+                )
+            ) {
+              continue;
+            }
+
+            tokensByChainId.get(chainIdentifier)!.push({
+              chainInfo,
+              token: balance,
+              price: currency.coinGeckoId
+                ? this.priceStore.calculatePrice(balance)
+                : undefined,
+              isFetching: queryBalance.stakable.isFetching,
+              error: queryBalance.stakable.error,
+            });
+          } else {
+            const balance = queryBalance.getBalance(currency);
+            if (balance) {
+              if (balance.balance.toDec().equals(HugeQueriesStore.zeroDec)) {
+                const denomHelper = new DenomHelper(currency.coinMinimalDenom);
+                // If the balance is zero and currency is "native" or "erc20", don't show it.
+                if (
+                  denomHelper.type === "native" ||
+                  denomHelper.type === "erc20"
+                ) {
+                  // However, if currency is native currency and not ibc, and same with currencies[0],
+                  // just show it as 0 balance.
+                  if (
+                    chainInfo.currencies.length > 0 &&
+                    chainInfo.currencies[0].coinMinimalDenom ===
+                      currency.coinMinimalDenom &&
+                    !currency.coinMinimalDenom.startsWith("ibc/")
+                  ) {
+                    // 위의 if 문을 뒤집기(?) 귀찮아서 그냥 빈 if-else로 처리한다...
+                  } else {
+                    continue;
+                  }
+                }
+              }
+
+              tokensByChainId.get(chainIdentifier)!.push({
+                chainInfo,
+                token: balance.balance,
+                price: currency.coinGeckoId
+                  ? this.priceStore.calculatePrice(balance.balance)
+                  : undefined,
+                isFetching: balance.isFetching,
+                error: balance.error,
+              });
+            }
+          }
+        }
+      }
+
+      if ("starknet" in modularChainInfo) {
+        if (account.starknetHexAddress === "") {
+          continue;
+        }
+
+        const modularChainInfoImpl = this.chainStore.getModularChainInfoImpl(
+          modularChainInfo.chainId
+        );
+        const queries = this.starknetQueriesStore.get(modularChainInfo.chainId);
+        const currencies = modularChainInfoImpl.getCurrencies("starknet");
+
+        for (const currency of currencies) {
+          const queryBalance = queries.queryStarknetERC20Balance.getBalance(
+            modularChainInfo.chainId,
+            this.chainStore,
+            account.starknetHexAddress,
+            currency.coinMinimalDenom
+          );
+
+          if (!queryBalance) {
+            continue;
+          }
+
+          const isNative =
+            currency.coinMinimalDenom ===
+              `erc20:${modularChainInfo.starknet.strkContractAddress}` ||
+            currency.coinMinimalDenom ===
+              `erc20:${modularChainInfo.starknet.ethContractAddress}`;
+          if (
+            !isNative &&
+            queryBalance.balance.toDec().equals(HugeQueriesStore.zeroDec)
+          ) {
+            continue;
+          }
+
+          tokensByChainId.get(chainIdentifier)!.push({
+            chainInfo: modularChainInfo,
+            token: queryBalance.balance,
+            price: currency.coinGeckoId
+              ? this.priceStore.calculatePrice(queryBalance.balance)
+              : undefined,
+            isFetching: queryBalance.isFetching,
+            error: queryBalance.error,
+          });
+        }
+      }
+    }
+
+    for (const [chainId, tokens] of tokensByChainId.entries()) {
+      tokensByChainId.set(
+        chainId,
+        tokens.sort((a, b) => this.sortByPrice(a, b))
+      );
+    }
+
+    runInAction(() => {
+      this.allTokenMapByChainIdentifierState.map = tokensByChainId;
+    });
+  }
+
   @computed
   get allKnownBalances(): ReadonlyArray<ViewToken> {
     return this.balanceBinarySort.arr;
   }
 
   getAllBalances = computedFn(
-    (allowIBCToken: boolean): ReadonlyArray<ViewToken> => {
+    ({
+      allowIBCToken,
+      enableFilterDisabledAssetToken = true,
+    }: {
+      allowIBCToken?: boolean;
+      enableFilterDisabledAssetToken?: boolean;
+    }): ReadonlyArray<ViewToken> => {
       const keys: Map<string, boolean> = new Map();
+
+      const disabledViewAssetTokenMap =
+        this.uiConfigStore.manageViewAssetTokenConfig.getViewAssetTokenMapByVaultId(
+          this.keyRingStore.selectedKeyInfo?.id ?? ""
+        );
       for (const modularChainInfo of this.chainStore.modularChainInfosInUI) {
         if ("cosmos" in modularChainInfo) {
           const chainInfo = this.chainStore.getChain(modularChainInfo.chainId);
@@ -374,35 +606,67 @@ export class HugeQueriesStore {
       }
       return this.balanceBinarySort.arr.filter((viewToken) => {
         const key = viewToken[BinarySortArray.SymbolKey];
+        if (enableFilterDisabledAssetToken) {
+          const chainIdentifier = ChainIdHelper.parse(
+            viewToken.chainInfo.chainId
+          ).identifier;
+          const disabledCoinSet =
+            disabledViewAssetTokenMap.get(chainIdentifier);
+          const isDisabled = disabledCoinSet?.has(
+            viewToken.token.currency.coinMinimalDenom
+          );
+
+          if (isDisabled) return false;
+        }
         return keys.get(key);
       });
     }
   );
 
   filterLowBalanceTokens = computedFn(
-    (viewTokens: ReadonlyArray<ViewToken>): ViewToken[] => {
-      return viewTokens.filter((viewToken) => {
+    (
+      viewTokens: ReadonlyArray<ViewToken>
+    ): {
+      filteredTokens: ViewToken[];
+      lowBalanceTokens: ViewToken[];
+    } => {
+      const lowBalanceTokens: ViewToken[] = [];
+      const filteredTokens = viewTokens.filter((viewToken) => {
         // Hide the unknown ibc tokens.
         if (
           "paths" in viewToken.token.currency &&
           !viewToken.token.currency.originCurrency
         ) {
+          lowBalanceTokens.push(viewToken);
           return false;
         }
 
         // If currency has coinGeckoId, hide the low price tokens (under $1)
         if (viewToken.token.currency.coinGeckoId != null) {
-          return (
+          const isNotLowPrice =
             this.priceStore
               .calculatePrice(viewToken.token, "usd")
               ?.toDec()
-              .gte(new Dec("1")) ?? false
-          );
+              .gte(new Dec("1")) ?? false;
+
+          if (!isNotLowPrice) {
+            lowBalanceTokens.push(viewToken);
+          }
+          return isNotLowPrice;
         }
 
         // Else, hide the low balance tokens (under 0.001)
-        return viewToken.token.toDec().gte(new Dec("0.001"));
+        const isNotLowBalance = viewToken.token.toDec().gte(new Dec("0.001"));
+        if (!isNotLowBalance) {
+          lowBalanceTokens.push(viewToken);
+        }
+        return isNotLowBalance;
       });
+
+      return {
+        filteredTokens,
+        lowBalanceTokens,
+      };
     }
   );
 

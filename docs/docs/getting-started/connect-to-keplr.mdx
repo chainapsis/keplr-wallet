@@ -68,7 +68,7 @@ async getKeplr(): Promise<Keplr | undefined> {
 
 For a more modular approach, you can use the Keplr client by using the JavaScript SDK. This allows you to connect your dApp to Keplr by installing the SDK via package managers. The client provides an easy-to-use interface for interacting with Keplr, making integration simpler and more scalable for complex projects.
 
-#### Installation Steps
+### Installation Steps
 
 1. Install `@keplr-wallet/provider-extension` via package managers.
 
@@ -98,3 +98,34 @@ For a more modular approach, you can use the Keplr client by using the JavaScrip
      return await Keplr.getKeplr();
    };
    ```
+
+---
+
+## Keplr Fallback
+
+Multiple wallets may inject a `window.keplr` object into the browser, making it difficult to determine whether the real Keplr is available.
+
+To address this, use KeplrFallback as the Keplr instance. This utility, provided in Keplr Wallet SDK, first attempts to route requests through the SDK and defaults to `window.keplr` if neccessary. It ensures secure wallet interactions while enabling developers to detect and handle cases where another wallet might be mimicking Keplr. 
+
+```typescript
+import { KeplrFallback } from "@keplr-wallet/provider-extension";
+import { Keplr } from "@keplr-wallet/types";
+
+export const getKeplr = (): Keplr | undefined => {
+  if (typeof window === "undefined") {
+    return undefined;
+  }
+
+  if ((window as any).keplr) {
+    return new KeplrFallback(() => {
+      // Handler called when real Keplr is not installed.
+      // Show appropriate warning to users.
+    });
+  }
+
+  return undefined;
+};
+```
+
+- The handler function passed to the constructor provides an opportunity to warn users when they're not interacting with the real Keplr wallet.
+- From a user experience perspective, this approach ensures that requests are directed to Keplr when it is installed. If Keplr is unavailable but another compatible wallet is present, the request is seamlessly routed there, allowing users to interact with their preferred wallet without disruption.

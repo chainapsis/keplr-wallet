@@ -1,0 +1,53 @@
+syntax = "proto3";
+package initia.mstaking.v1;
+
+import "amino/amino.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/initia-labs/initia/x/mstaking/types";
+
+// StakeAuthorization defines authorization for delegate/undelegate/redelegate.
+message StakeAuthorization {
+  option (cosmos_proto.implements_interface) = "cosmos.authz.v1beta1.Authorization";
+  option (amino.name) = "mstaking/StakeAuthorization";
+
+  // max_tokens specifies the maximum amount of tokens can be delegate to a validator. If it is
+  // empty, there is no spend limit and any amount of coins can be delegated.
+  repeated cosmos.base.v1beta1.Coin max_tokens = 1 [
+    (gogoproto.moretags) = "yaml:\"max_tokens\"",
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false
+  ];
+  // validators is the oneof that represents either allow_list or deny_list
+  oneof validators {
+    // allow_list specifies list of validator addresses to whom grantee can delegate tokens on behalf of granter's
+    // account.
+    Validators allow_list = 2 [(amino.oneof_name) = "mstaking/StakeAuthorization/AllowList"];
+    // deny_list specifies list of validator addresses to whom grantee can not delegate tokens.
+    Validators deny_list = 3 [(amino.oneof_name) = "mstaking/StakeAuthorization/DenyList"];
+  }
+  // Validators defines list of validator addresses.
+  message Validators {
+    repeated string address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  }
+  // authorization_type defines one of AuthorizationType.
+  AuthorizationType authorization_type = 4;
+}
+
+// AuthorizationType defines the type of staking module authorization type
+//
+// Since: cosmos-sdk 0.43
+enum AuthorizationType {
+  // AUTHORIZATION_TYPE_UNSPECIFIED specifies an unknown authorization type
+  AUTHORIZATION_TYPE_UNSPECIFIED = 0;
+  // AUTHORIZATION_TYPE_DELEGATE defines an authorization type for Msg/Delegate
+  AUTHORIZATION_TYPE_DELEGATE = 1;
+  // AUTHORIZATION_TYPE_UNDELEGATE defines an authorization type for Msg/Undelegate
+  AUTHORIZATION_TYPE_UNDELEGATE = 2;
+  // AUTHORIZATION_TYPE_REDELEGATE defines an authorization type for Msg/BeginRedelegate
+  AUTHORIZATION_TYPE_REDELEGATE = 3;
+  // AUTHORIZATION_TYPE_CANCEL_UNBONDING_DELEGATION defines an authorization type for Msg/MsgCancelUnbondingDelegation
+  AUTHORIZATION_TYPE_CANCEL_UNBONDING_DELEGATION = 4;
+}

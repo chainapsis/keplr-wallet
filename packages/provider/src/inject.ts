@@ -45,7 +45,7 @@ import deepmerge from "deepmerge";
 import Long from "long";
 import { KeplrCoreTypes } from "./core-types";
 import EventEmitter from "events";
-import {
+import type {
   AccountInterface,
   Call,
   DeployAccountSignerDetails,
@@ -54,7 +54,7 @@ import {
 } from "starknet";
 
 export interface ProxyRequest {
-  type: "proxy-request";
+  type: string;
   id: string;
   method: keyof (Keplr & KeplrCoreTypes);
   args: any[];
@@ -122,6 +122,7 @@ export function injectKeplrToWindow(keplr: IKeplr): void {
 export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
   static startProxy(
     keplr: IKeplr & KeplrCoreTypes,
+    metaId: string | undefined,
     eventListener: {
       addMessageListener: (fn: (e: any) => void) => void;
       removeMessageListener: (fn: (e: any) => void) => void;
@@ -136,11 +137,16 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     },
     parseMessage?: (message: any) => any
   ): () => void {
+    const proxyRequestType = `proxy-request${metaId ? `-${metaId}` : ""}`;
     const fn = async (e: any) => {
       const message: ProxyRequest = parseMessage
         ? parseMessage(e.data)
         : e.data;
-      if (!message || message.type !== "proxy-request") {
+      if (
+        !message ||
+        // "proxy-request"는 legacy support를 위한 것임.
+        (message.type !== proxyRequestType && message.type !== "proxy-request")
+      ) {
         return;
       }
 
@@ -476,9 +482,12 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
         return value.toString(16);
       })
       .join("");
+    const proxyRequestType = `proxy-request${
+      this.metaId ? `-${this.metaId}` : ""
+    }`;
 
     const proxyMessage: ProxyRequest = {
-      type: "proxy-request",
+      type: proxyRequestType,
       id,
       method,
       args: JSONUint8Array.wrap(args),
@@ -526,6 +535,7 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
   public defaultOptions: KeplrIntereactionOptions = {};
 
   constructor(
+    protected readonly metaId: string | undefined,
     public readonly version: string,
     public readonly mode: KeplrMode,
     protected readonly onStarknetStateChange: (state: {
@@ -1054,6 +1064,7 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
 
   generateStarknetProvider(): IStarknetProvider {
     return new StarknetProvider(
+      this.metaId,
       this.starknetProviderInfo.id,
       this.starknetProviderInfo.name,
       this.version,
@@ -1097,6 +1108,7 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
   }
 
   public readonly ethereum = new EthereumProvider(
+    this.metaId,
     () => this,
     this.eventListener,
     this.parseMessage,
@@ -1127,6 +1139,7 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
   protected _currentChainId: string | null = null;
 
   constructor(
+    protected readonly metaId: string | undefined,
     protected readonly injectedKeplr: () => InjectedKeplr,
     protected readonly eventListener: {
       addMessageListener: (fn: (e: any) => void) => void;
@@ -1214,9 +1227,12 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
         return value.toString(16);
       })
       .join("");
+    const proxyRequestType = `proxy-request${
+      this.metaId ? `-${this.metaId}` : ""
+    }`;
 
     const proxyMessage: ProxyRequest = {
-      type: "proxy-request",
+      type: proxyRequestType,
       id,
       method: "ethereum",
       args: JSONUint8Array.wrap(args),
@@ -1402,6 +1418,7 @@ class StarknetProvider implements IStarknetProvider {
   protected _userWalletEvents: WalletEvents[] = [];
 
   constructor(
+    protected readonly metaId: string | undefined,
     public readonly id: string,
     public readonly name: string,
     public readonly version: string,
@@ -1479,9 +1496,12 @@ class StarknetProvider implements IStarknetProvider {
         return value.toString(16);
       })
       .join("");
+    const proxyRequestType = `proxy-request${
+      this.metaId ? `-${this.metaId}` : ""
+    }`;
 
     const proxyMessage: ProxyRequest = {
-      type: "proxy-request",
+      type: proxyRequestType,
       id,
       method: "starknet",
       args: JSONUint8Array.wrap(args),

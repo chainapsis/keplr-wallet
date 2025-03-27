@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package noble.dollar.portal.ntt.v1;
+
+option go_package = "dollar.noble.xyz/types/portal/ntt";
+
+// ManagerMessage is the type that stores information about a manager message.
+//
+// The wire format of the message is as follows:
+//   - id - 32 bytes
+//   - sender - 32 bytes
+//   - payloadLength - 2 bytes
+//   - payload - `payloadLength` bytes
+//
+// https://github.com/wormhole-foundation/native-token-transfers/blob/67df54701e0f4b3793b6c621719911804c9875a3/evm/src/libraries/TransceiverStructs.sol#L41-L56
+message ManagerMessage {
+  bytes id = 1;
+  bytes sender = 2;
+  bytes payload = 3;
+}

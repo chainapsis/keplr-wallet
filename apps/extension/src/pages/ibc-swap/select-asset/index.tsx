@@ -47,7 +47,10 @@ class IBCSwapDestinationState {
     const destinationMap = this.queryIBCSwap.swapDestinationCurrenciesMap;
 
     // Swap destination은 ibc currency는 보여주지 않는다.
-    let tokens = this.hugeQueriesStore.getAllBalances(false);
+    let tokens = this.hugeQueriesStore.getAllBalances({
+      allowIBCToken: false,
+      enableFilterDisabledAssetToken: false,
+    });
     let remaining: {
       currency: Currency;
       chainInfo: IChainInfoImpl;

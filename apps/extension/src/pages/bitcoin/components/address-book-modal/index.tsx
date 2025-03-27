@@ -13,7 +13,7 @@ import { YAxis } from "../../../../components/axis";
 import { Stack } from "../../../../components/stack";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
-import { IRecipientConfig } from "@keplr-wallet/hooks";
+import { IRecipientConfig } from "@keplr-wallet/hooks-bitcoin";
 import { Bleed } from "../../../../components/bleed";
 import { RecentSendHistory } from "@keplr-wallet/background";
 import { AddressItem } from "../address-item";

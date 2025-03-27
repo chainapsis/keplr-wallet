@@ -1,4 +1,4 @@
-import { AccountInterface, ProviderInterface } from "starknet";
+import type { AccountInterface, ProviderInterface } from "starknet";
 
 export type AccountChangeEventHandler = (accounts: string[]) => void;
 

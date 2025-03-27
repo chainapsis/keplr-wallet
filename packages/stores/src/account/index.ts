@@ -7,3 +7,4 @@ export * from "./store";
 export * from "./cosmwasm";
 export * from "./utils";
 export * from "./context";
+export * from "./noble";

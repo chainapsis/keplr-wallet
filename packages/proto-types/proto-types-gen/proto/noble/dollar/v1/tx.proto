@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package noble.dollar.v1;
+
+import "amino/amino.proto";
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "dollar.noble.xyz/types";
+
+service Msg {
+  option (cosmos.msg.v1.service) = true;
+
+  rpc ClaimYield(MsgClaimYield) returns (MsgClaimYieldResponse);
+  rpc SetPausedState(MsgSetPausedState) returns (MsgSetPausedStateResponse);
+}
+
+// MsgClaimYield is a message holders of the Noble Dollar can use to claim their yield.
+message MsgClaimYield {
+  option (cosmos.msg.v1.signer) = "signer";
+  option (amino.name) = "dollar/ClaimYield";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string signer = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+}
+
+// MsgClaimYieldResponse is the response of the ClaimYield message.
+message MsgClaimYieldResponse {}
+
+// MsgSetPausedState allows the authority to configure the Noble Dollar Portal paused state.
+message MsgSetPausedState {
+  option (cosmos.msg.v1.signer) = "signer";
+  option (amino.name) = "dollar/SetPausedState";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string signer = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  bool paused = 2;
+}
+
+// MsgSetPausedStateResponse is the response of the SetPausedState message.
+message MsgSetPausedStateResponse {}

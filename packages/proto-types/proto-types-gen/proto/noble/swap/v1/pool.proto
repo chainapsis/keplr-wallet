@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package noble.swap.v1;
+
+import "amino/amino.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "google/protobuf/any.proto";
+import "noble/swap/v1/algorithm.proto";
+
+option go_package = "swap.noble.xyz/types";
+
+message Pool {
+  // ID of the Pool.
+  uint64 id = 1;
+
+  // Address of the Pool.
+  string address = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // Algorithm of the pool.
+  Algorithm algorithm = 3;
+
+  // Pair asset denom in the pool.
+  string pair = 4;
+}
+
+message PoolDetails {
+  // ID of the Pool.
+  uint64 id = 1;
+
+  // Address of the Pool.
+  string address = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // Algorithm of the pool.
+  Algorithm algorithm = 3;
+
+  // Pair asset denom in the pool.
+  string pair = 4;
+
+  // Details of the Underlying Pool with the specific custom attributes.
+  google.protobuf.Any details = 5 [(cosmos_proto.accepts_interface) = "swap.v1.Pool"];
+
+  // Amount of liquidity in the Pool.
+  repeated cosmos.base.v1beta1.Coin liquidity = 6 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true,
+    (amino.encoding) = "legacy_coins",
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+
+  // Amount of protocol fees currently collected.
+  repeated cosmos.base.v1beta1.Coin protocol_fees = 7 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true,
+    (amino.encoding) = "legacy_coins",
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+
+  // Amount of rewards fees currently collected.
+  repeated cosmos.base.v1beta1.Coin reward_fees = 8 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true,
+    (amino.encoding) = "legacy_coins",
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}

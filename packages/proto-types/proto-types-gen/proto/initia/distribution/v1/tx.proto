@@ -1,0 +1,74 @@
+syntax = "proto3";
+package initia.distribution.v1;
+
+import "amino/amino.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "initia/distribution/v1/distribution.proto";
+
+option go_package = "github.com/initia-labs/initia/x/distribution/types";
+option (gogoproto.equal_all) = true;
+
+// Msg defines the distribution Msg service.
+service Msg {
+  option (cosmos.msg.v1.service) = true;
+
+  // UpdateParams defines a governance operation for updating the x/distribution
+  // module parameters. The authority is defined in the keeper.
+  rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
+
+  // DepositValidatorRewardsPool defines a method to provide additional rewards
+  // to delegators to a specific validator.
+  rpc DepositValidatorRewardsPool(MsgDepositValidatorRewardsPool) returns (MsgDepositValidatorRewardsPoolResponse);
+}
+
+// MsgUpdateParams is the Msg/UpdateParams request type.
+message MsgUpdateParams {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "distribution/MsgUpdateParams";
+
+  // authority is the address that controls the module (defaults to x/gov unless overwritten).
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // params defines the x/distribution parameters to update.
+  //
+  // NOTE: All parameters must be supplied.
+  Params params = 2 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
+
+// MsgUpdateParamsResponse defines the response structure for executing a
+// MsgUpdateParams message.
+message MsgUpdateParamsResponse {}
+
+// DepositValidatorRewardsPool defines the request structure to provide
+// additional rewards to delegators from a specific validator.
+//
+// Since: cosmos-sdk 0.50
+message MsgDepositValidatorRewardsPool {
+  option (amino.name) = "distr/MsgDepositValidatorRewardsPool";
+  option (cosmos.msg.v1.signer) = "depositor";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string depositor = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string validator_address = 2 [(cosmos_proto.scalar) = "cosmos.ValidatorAddressString"];
+  string denom = 3;
+  repeated cosmos.base.v1beta1.Coin amount = 4 [
+    (gogoproto.nullable) = false,
+    (amino.encoding) = "legacy_coins",
+    (amino.dont_omitempty) = true,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
+
+// MsgDepositValidatorRewardsPoolResponse defines the response to executing a
+// MsgDepositValidatorRewardsPool message.
+//
+// Since: cosmos-sdk 0.50
+message MsgDepositValidatorRewardsPoolResponse {}

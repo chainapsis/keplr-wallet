@@ -183,6 +183,7 @@ module.exports = {
       KEPLR_EXT_TOKEN_FACTORY_BASE_URL: "",
       KEPLR_EXT_TOKEN_FACTORY_URI: "",
       KEPLR_EXT_TX_HISTORY_BASE_URL: "",
+      KEPLR_EXT_TX_HISTORY_TEST_BASE_URL: "https://satellite-develop.keplr.app",
       KEPLR_EXT_CONFIG_SERVER: "",
       WC_PROJECT_ID: "",
       KEPLR_EXT_EIP6963_PROVIDER_INFO_NAME: "Keplr",
@@ -192,6 +193,8 @@ module.exports = {
       KEPLR_EXT_STARKNET_PROVIDER_INFO_NAME: "Keplr",
       KEPLR_EXT_STARKNET_PROVIDER_INFO_ICON: keplrLogoBase64,
       SKIP_API_KEY: "",
+      KEPLR_EXT_PROVIDER_META_ID: "",
+      KEPLR_EXT_MOONPAY_SIGN_API_BASE_URL: "",
     }),
     new ForkTsCheckerWebpackPlugin(),
     new CopyWebpackPlugin({
@@ -246,6 +249,11 @@ module.exports = {
       template: "./src/index.html",
       filename: "ledger-grant.html",
       chunks: ["ledgerGrant"],
+    }),
+    new HtmlWebpackPlugin({
+      template: "./src/keplr-earn-product-terms.html",
+      filename: "keplr-earn-product-terms.html",
+      chunks: ["keplrEarnProductTerms"],
     }),
     ...(() => {
       if (isBuildManifestV2) {

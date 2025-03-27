@@ -36,7 +36,7 @@ export const AddressBookModal: FunctionComponent<{
   close: () => void;
 
   historyType: string;
-  recipientConfig: IRecipientConfig;
+  recipientConfig: Pick<IRecipientConfig, "chainId" | "setValue">;
 
   permitSelfKeyInfo?: boolean;
 }> = observer(

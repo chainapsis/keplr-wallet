@@ -192,54 +192,6 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     features: ["ibc-transfer"],
   },
   {
-    rpc: "https://rpc-mars.keplr.app",
-    rest: "https://lcd-mars.keplr.app",
-    chainId: "mars-1",
-    chainName: "Mars Hub",
-    stakeCurrency: {
-      coinDenom: "MARS",
-      coinMinimalDenom: "umars",
-      coinDecimals: 6,
-    },
-    walletUrl:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/mars"
-        : "http://localhost:8080/chains/mars",
-    walletUrlForStaking:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/mars"
-        : "http://localhost:8080/chains/mars",
-    bip44: {
-      coinType: 118,
-    },
-    alternativeBIP44s: [
-      {
-        coinType: 330,
-      },
-    ],
-    bech32Config: Bech32Address.defaultBech32Config("mars"),
-    currencies: [
-      {
-        coinDenom: "MARS",
-        coinMinimalDenom: "umars",
-        coinDecimals: 6,
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "MARS",
-        coinMinimalDenom: "umars",
-        coinDecimals: 6,
-        gasPriceStep: {
-          low: 0,
-          average: 0,
-          high: 0.01,
-        },
-      },
-    ],
-    features: [],
-  },
-  {
     rpc: "https://rpc-crypto-org.keplr.app",
     rest: "https://lcd-crypto-org.keplr.app",
     chainId: "crypto-org-chain-mainnet-1",
@@ -3343,6 +3295,58 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         },
       ],
     },
+  },
+  {
+    rpc: "https://rpc-nillion.keplr.app",
+    rest: "https://lcd-nillion.keplr.app",
+    chainId: "nillion-1",
+    chainName: "Nillion",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/nillion/nil.png",
+    stakeCurrency: {
+      coinDenom: "NIL",
+      coinMinimalDenom: "unil",
+      coinDecimals: 6,
+      coinGeckoId: "nillion",
+      coinImageUrl:
+        "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/nillion/nil.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "nillion",
+      bech32PrefixAccPub: "nillionpub",
+      bech32PrefixValAddr: "nillionvaloper",
+      bech32PrefixValPub: "nillionvaloperpub",
+      bech32PrefixConsAddr: "nillionvalcons",
+      bech32PrefixConsPub: "nillionvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "NIL",
+        coinMinimalDenom: "unil",
+        coinDecimals: 6,
+        coinGeckoId: "nillion",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/nillion/nil.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "NIL",
+        coinMinimalDenom: "unil",
+        coinDecimals: 6,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/nillion/nil.png",
+        gasPriceStep: {
+          low: 0.001,
+          average: 0.001,
+          high: 0.01,
+        },
+      },
+    ],
+    features: [],
   },
 ];
 

@@ -24,12 +24,6 @@ const sidebars: SidebarsConfig = {
         "getting-started/typescript-support",
       ],
     },
-    // {
-    //   type: "category",
-    //   label: "Use with",
-    //   collapsed: false,
-    //   items: ["use-with/cosmjs", "use-with/secretjs"],
-    // },
     "use-with/cosmjs",
     "use-with/secretjs",
     {
@@ -54,6 +48,12 @@ const sidebars: SidebarsConfig = {
         "multi-ecosystem-support/evm",
         "multi-ecosystem-support/starknet",
       ],
+    },
+    {
+      type: "category",
+      label: "Keplr Mobile",
+      collapsed: false,
+      items: ["mobile/deeplink", "mobile/wallet-connect"],
     },
   ],
 };

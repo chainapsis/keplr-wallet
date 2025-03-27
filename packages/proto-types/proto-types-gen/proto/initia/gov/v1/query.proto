@@ -1,0 +1,120 @@
+syntax = "proto3";
+package initia.gov.v1;
+
+import "amino/amino.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "cosmos/gov/v1/gov.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "initia/gov/v1/gov.proto";
+
+option go_package = "github.com/initia-labs/initia/x/gov/types";
+
+// Query defines the gRPC querier service for gov module.
+service Query {
+  // Params queries params of the gov module.
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/initia/gov/v1/params";
+  }
+
+  // EmergencyProposals queries emergency proposals.
+  rpc EmergencyProposals(QueryEmergencyProposalsRequest) returns (QueryEmergencyProposalsResponse) {
+    option (google.api.http).get = "/initia/gov/v1/emergency_proposals";
+  }
+
+  // Proposal queries proposal details based on ProposalID.
+  rpc Proposal(QueryProposalRequest) returns (QueryProposalResponse) {
+    option (google.api.http).get = "/initia/gov/v1/proposals/{proposal_id}";
+  }
+
+  // Proposals queries all proposals based on given status.
+  rpc Proposals(QueryProposalsRequest) returns (QueryProposalsResponse) {
+    option (google.api.http).get = "/initia/gov/v1/proposals";
+  }
+
+  // TallyResult queries the tally of a proposal vote.
+  rpc TallyResult(QueryTallyResultRequest) returns (QueryTallyResultResponse) {
+    option (google.api.http).get = "/initia/gov/v1/proposals/{proposal_id}/tally";
+  }
+}
+
+// QueryParamsRequest is the request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is the response type for the Query/Params RPC method.
+message QueryParamsResponse {
+  // params defines the parameters of the module.
+  Params params = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryEmergencyProposalsRequest is the request type for the
+// Query/EmergencyProposals RPC method
+message QueryEmergencyProposalsRequest {
+  option (gogoproto.goproto_getters) = false;
+  option (gogoproto.goproto_stringer) = true;
+
+  // pagination defines an optional pagination for the request.
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QueryEmergencyProposalsResponse is the response type for the
+// Query/EmergencyProposals RPC method.
+message QueryEmergencyProposalsResponse {
+  repeated Proposal proposals = 1 [(gogoproto.nullable) = false];
+
+  // pagination defines the pagination in the response.
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryProposalRequest is the request type for the Query/Proposal RPC method.
+message QueryProposalRequest {
+  // proposal_id defines the unique id of the proposal.
+  uint64 proposal_id = 1;
+}
+
+// QueryProposalResponse is the response type for the Query/Proposal RPC method.
+message QueryProposalResponse {
+  // proposal is the requested governance proposal.
+  Proposal proposal = 1;
+}
+
+// QueryProposalsRequest is the request type for the Query/Proposals RPC method.
+message QueryProposalsRequest {
+  // proposal_status defines the status of the proposals.
+  cosmos.gov.v1.ProposalStatus proposal_status = 1;
+
+  // voter defines the voter address for the proposals.
+  string voter = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // depositor defines the deposit addresses from the proposals.
+  string depositor = 3 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // pagination defines an optional pagination for the request.
+  cosmos.base.query.v1beta1.PageRequest pagination = 4;
+}
+
+// QueryProposalsResponse is the response type for the Query/Proposals RPC
+// method.
+message QueryProposalsResponse {
+  // proposals defines all the requested governance proposals.
+  repeated Proposal proposals = 1;
+
+  // pagination defines the pagination in the response.
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryTallyResultRequest is the request type for the Query/Tally RPC method.
+message QueryTallyResultRequest {
+  // proposal_id defines the unique id of the proposal.
+  uint64 proposal_id = 1;
+}
+
+// QueryTallyResultResponse is the response type for the Query/Tally RPC method.
+message QueryTallyResultResponse {
+  // tally defines the requested tally.
+  TallyResult tally_result = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}

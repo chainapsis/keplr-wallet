@@ -15,3 +15,18 @@ export const onGoogleSignInClick:
       replace(name: string, props?: Record<string, any>): void;
     }) => void)
   | undefined = undefined;
+
+export const exportGenerateQRCodeDataByInterval = (
+  _data: string,
+  _setQRCodeData: (data: string) => void
+): NodeJS.Timer => {
+  throw new Error("Method not implemented.");
+};
+
+export const exportUpload = (
+  _encryptedData: string
+): Promise<{
+  otp: string;
+} | null> => {
+  throw new Error("Method not implemented.");
+};

@@ -1,6 +1,7 @@
 import {
   CosmosQueriesImpl,
   IQueriesStore,
+  NobleQueries,
   OsmosisQueries,
 } from "@keplr-wallet/stores";
 import { KeplrETCQueriesImpl } from "@keplr-wallet/stores-etc";
@@ -18,5 +19,5 @@ export type QueriesStore = IQueriesStore<
         KeplrETCQueriesImpl,
         "queryTerraClassicTaxRate" | "queryTerraClassicTaxCaps"
       >;
-    }
+    } & Partial<NobleQueries>
 >;

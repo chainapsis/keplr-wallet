@@ -1,5 +1,6 @@
 import React, {
   FunctionComponent,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -14,36 +15,36 @@ import {
   useSceneEvents,
   useSceneTransition,
 } from "../../../components/transition";
-import { ModularChainInfo } from "@keplr-wallet/types";
+import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { Box } from "../../../components/box";
-import { Column, Columns } from "../../../components/column";
-import { XAxis, YAxis } from "../../../components/axis";
+import { XAxis } from "../../../components/axis";
 import { Gutter } from "../../../components/gutter";
 import { SearchTextInput } from "../../../components/input";
-import {
-  Body2,
-  Body3,
-  Subtitle2,
-  Subtitle3,
-  Subtitle4,
-} from "../../../components/typography";
+import { Body3, Subtitle3, Subtitle4 } from "../../../components/typography";
 import { Button } from "../../../components/button";
 import { ColorPalette } from "../../../styles";
 import { useEffectOnce } from "../../../hooks/use-effect-once";
 import { useNavigate } from "react-router";
 import { ChainImageFallback } from "../../../components/image";
-import { Checkbox } from "../../../components/checkbox";
 import { KeyRingCosmosService } from "@keplr-wallet/background";
 import { WalletStatus } from "@keplr-wallet/stores";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { TextButton } from "../../../components/button-text";
 import { FormattedMessage, useIntl } from "react-intl";
-import { Tag } from "../../../components/tag";
 import SimpleBar from "simplebar-react";
 import { useTheme } from "styled-components";
 import { dispatchGlobalEventExceptSelf } from "../../../utils/global-events";
 import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
+import { checkButtonPositionAndScrollToButton } from "../utils/check-button-position-and-scroll-to-button";
+import { EmbedChainInfos } from "../../../config";
+import { useGetAllNonNativeChain } from "../../../hooks/use-get-all-non-native-chain";
+import { hexToRgba } from "../../../utils";
+import { NativeChainSection } from "./components/native-chain-section";
+import { NativeChainSectionIconDM } from "./components/native-chain-section-icon-dm";
+import { NativeChainSectionIconLM } from "./components/native-chain-section-icon-lm";
+import { NextStepChainItem } from "./components/next-step-chain-item";
+import { ChainItem } from "./components/chain-item";
 
 /**
  * EnableChainsScene은 finalize-key scene에서 선택한 chains를 활성화하는 scene이다.
@@ -90,6 +91,7 @@ export const EnableChainsScene: FunctionComponent<{
       keyRingStore,
       starknetQueriesStore,
       bitcoinQueriesStore,
+      hugeQueriesStore,
     } = useStore();
 
     const navigate = useNavigate();
@@ -97,6 +99,26 @@ export const EnableChainsScene: FunctionComponent<{
     const theme = useTheme();
 
     const searchRef = useRef<HTMLInputElement | null>(null);
+    const buttonContainerRef = useRef<HTMLDivElement>(null);
+    useScrollDownWhenCantSeeSaveButton(buttonContainerRef);
+
+    const nativeChainIdentifierSet = useMemo(
+      () =>
+        new Set(
+          EmbedChainInfos.filter((chainInfo) => {
+            if ("hideInUI" in chainInfo && chainInfo.hideInUI) {
+              return false;
+            }
+            return true;
+          }).map(
+            (chainInfo) => ChainIdHelper.parse(chainInfo.chainId).identifier
+          )
+        ),
+      []
+    );
+
+    const tokensByChainIdentifier =
+      hugeQueriesStore.allTokenMapByChainIdentifier;
 
     const header = useRegisterHeader();
     useSceneEvents({
@@ -335,6 +357,11 @@ export const EnableChainsScene: FunctionComponent<{
     ]);
 
     const sceneTransition = useSceneTransition();
+    const [isCollapsedNativeChainView, setIsCollapsedNativeChainView] =
+      useState(false);
+
+    const [nonNativeChainListForSuggest, setNonNativeChainListForSuggest] =
+      useState<(ChainInfo | ModularChainInfo)[]>([]);
 
     const [enabledChainIdentifiers, setEnabledChainIdentifiers] = useState(
       () => {
@@ -491,13 +518,21 @@ export const EnableChainsScene: FunctionComponent<{
         }
 
         if (enableAllChains) {
-          return chainStore.modularChainInfosInListUI.map(
+          // enableAllChains일때는 native chain만 활성화한다.
+          return EmbedChainInfos.map(
             (chainInfo) => ChainIdHelper.parse(chainInfo.chainId).identifier
           );
         }
 
         return [...new Set(enabledChainIdentifiers)];
       }
+    );
+
+    const enabledNativeChainIdentifiers = enabledChainIdentifiers.filter(
+      (chainIdentifier) => nativeChainIdentifierSet.has(chainIdentifier)
+    );
+    const enabledSuggestChainIdentifiers = enabledChainIdentifiers.filter(
+      (chainIdentifier) => !nativeChainIdentifierSet.has(chainIdentifier)
     );
 
     const enabledChainIdentifierMap = useMemo(() => {
@@ -617,14 +652,53 @@ export const EnableChainsScene: FunctionComponent<{
       search,
     ]);
 
-    const modularChainInfos = preSortModularChainInfos.sort(
-      (aModularChainInfo, bModularChainInfo) => {
+    const chainSort = useCallback(
+      (
+        aModularChainInfo: ModularChainInfo,
+        bModularChainInfo: ModularChainInfo
+      ) => {
         const aChainIdentifier = ChainIdHelper.parse(
           aModularChainInfo.chainId
         ).identifier;
         const bChainIdentifier = ChainIdHelper.parse(
           bModularChainInfo.chainId
         ).identifier;
+
+        // Cosmos Hub를 먼저 배치
+        if (
+          aChainIdentifier.startsWith("cosmoshub") &&
+          !bChainIdentifier.startsWith("cosmoshub")
+        ) {
+          return -1;
+        }
+
+        if (
+          !aChainIdentifier.startsWith("cosmoshub") &&
+          bChainIdentifier.startsWith("cosmoshub")
+        ) {
+          return 1;
+        }
+
+        // Ethereum을 두 번째로 배치
+        const isNotCosmosHub =
+          !aChainIdentifier.startsWith("cosmoshub") &&
+          !bChainIdentifier.startsWith("cosmoshub");
+        if (isNotCosmosHub) {
+          if (
+            aChainIdentifier === "eip155:1" &&
+            !bChainIdentifier.startsWith("eip155:1")
+          ) {
+            return -1;
+          }
+
+          if (
+            !aChainIdentifier.startsWith("eip155:1") &&
+            bChainIdentifier === "eip155:1"
+          ) {
+            return 1;
+          }
+        }
+
         const aHasPriority =
           sortPriorityChainIdentifierMap.has(aChainIdentifier);
         const bHasPriority =
@@ -743,8 +817,42 @@ export const EnableChainsScene: FunctionComponent<{
         return aModularChainInfo.chainName.localeCompare(
           bModularChainInfo.chainName
         );
-      }
+      },
+      [
+        sortPriorityChainIdentifierMap,
+        candidateAddressesMap,
+        chainStore,
+        queriesStore,
+        accountStore,
+        starknetQueriesStore,
+        priceStore,
+      ]
     );
+
+    const nativeModularChainInfos = preSortModularChainInfos
+      .filter((modularChainInfo) =>
+        nativeChainIdentifierSet.has(
+          ChainIdHelper.parse(modularChainInfo.chainId).identifier
+        )
+      )
+      .sort(chainSort);
+
+    const suggestModularChainInfos = preSortModularChainInfos
+      .filter(
+        (modularChainInfo) =>
+          !nativeChainIdentifierSet.has(
+            ChainIdHelper.parse(modularChainInfo.chainId).identifier
+          )
+      )
+      .sort(chainSort);
+
+    const { chains: searchedNonNativeChainInfos, infiniteScrollTriggerRef } =
+      useGetAllNonNativeChain({
+        search,
+        fallbackEthereumLedgerApp,
+        fallbackStarknetLedgerApp,
+        keyType,
+      });
 
     const numSelected = useMemo(() => {
       const modularChainInfoMap = new Map<string, ModularChainInfo>();
@@ -809,18 +917,194 @@ export const EnableChainsScene: FunctionComponent<{
       }
     };
 
-    const enabledChainIdentifiersInPage = useMemo(() => {
-      return enabledChainIdentifiers.filter((chainIdentifier) =>
-        modularChainInfos.some(
-          (modularChainInfo) =>
-            chainIdentifier ===
-            ChainIdHelper.parse(modularChainInfo.chainId).identifier
-        )
+    const enabledNativeChainIdentifiersInPage = useMemo(() => {
+      return enabledChainIdentifiers.filter(
+        (chainIdentifier) =>
+          nativeModularChainInfos.some(
+            (modularChainInfo) =>
+              chainIdentifier ===
+              ChainIdHelper.parse(modularChainInfo.chainId).identifier
+          ) && nativeChainIdentifierSet.has(chainIdentifier)
       );
-    }, [enabledChainIdentifiers, modularChainInfos]);
+    }, [
+      nativeChainIdentifierSet,
+      enabledChainIdentifiers,
+      nativeModularChainInfos,
+    ]);
 
-    const [preSelectedChainIdentifiers, setPreSelectedChainIdentifiers] =
-      useState<string[]>([]);
+    const [
+      preSelectedNativeChainIdentifiers,
+      setPreSelectedNativeChainIdentifiers,
+    ] = useState<string[]>([]);
+
+    const getChainItemInfoForView = useCallback(
+      (modularChainInfo: ModularChainInfo) => {
+        const account = accountStore.getAccount(modularChainInfo.chainId);
+        const tokens =
+          tokensByChainIdentifier.get(
+            ChainIdHelper.parse(modularChainInfo.chainId).identifier
+          ) ?? [];
+
+        const balance = (() => {
+          if ("cosmos" in modularChainInfo) {
+            const chainInfo = chainStore.getChain(
+              modularChainInfo.cosmos.chainId
+            );
+            const queries = queriesStore.get(modularChainInfo.chainId);
+            const mainCurrency =
+              chainInfo.stakeCurrency || chainInfo.currencies[0];
+
+            const queryBalance = chainStore.isEvmOnlyChain(chainInfo.chainId)
+              ? queries.queryBalances.getQueryEthereumHexAddress(
+                  account.ethereumHexAddress
+                )
+              : queries.queryBalances.getQueryBech32Address(
+                  account.bech32Address
+                );
+            const balance = queryBalance.getBalance(mainCurrency);
+
+            if (balance) {
+              return balance.balance;
+            }
+
+            return new CoinPretty(mainCurrency, "0");
+          } else if ("starknet" in modularChainInfo) {
+            const mainCurrency = modularChainInfo.starknet.currencies[0];
+            const queryBalance = starknetQueriesStore
+              .get(modularChainInfo.chainId)
+              .queryStarknetERC20Balance.getBalance(
+                modularChainInfo.chainId,
+                chainStore,
+                account.starknetHexAddress,
+                mainCurrency.coinMinimalDenom
+              );
+
+            if (queryBalance) {
+              return queryBalance.balance;
+            }
+
+            return new CoinPretty(mainCurrency, "0");
+          }
+        })();
+        const chainIdentifier = ChainIdHelper.parse(
+          modularChainInfo.chainId
+        ).identifier;
+
+        const enabled = enabledChainIdentifierMap.get(chainIdentifier) || false;
+
+        // At least, one chain should be enabled.
+        const blockInteraction = enabledChainIdentifiers.length <= 1 && enabled;
+
+        return {
+          balance,
+          enabled,
+          blockInteraction,
+          tokens,
+          chainIdentifier,
+        };
+      },
+      [
+        accountStore,
+        chainStore,
+        enabledChainIdentifiers,
+        enabledChainIdentifierMap,
+        queriesStore,
+        starknetQueriesStore,
+        tokensByChainIdentifier,
+      ]
+    );
+
+    const titleChainImage = (() => {
+      if (keyType === "ledger") {
+        if (fallbackEthereumLedgerApp) {
+          return (
+            <ChainImageFallback
+              chainInfo={chainStore.getChain("eip155:1")}
+              size="3rem"
+            />
+          );
+        }
+
+        if (fallbackStarknetLedgerApp) {
+          return (
+            <ChainImageFallback
+              chainInfo={chainStore.getModularChain("starknet:SN_MAIN")}
+              size="3rem"
+            />
+          );
+        }
+      }
+
+      return (
+        <div
+          style={{
+            width: "2.75rem",
+            height: "2.75rem",
+            borderRadius: "1000000px",
+            backgroundColor:
+              theme.mode === "light"
+                ? hexToRgba(ColorPalette["gray-100"], 0.5)
+                : ColorPalette["gray-650"],
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          {theme.mode === "light" ? (
+            <NativeChainSectionIconLM />
+          ) : (
+            <NativeChainSectionIconDM />
+          )}
+        </div>
+      );
+    })();
+
+    const nativeChainViewTitle = (() => {
+      if (keyType === "ledger") {
+        if (fallbackEthereumLedgerApp) {
+          return intl.formatMessage({
+            id: "pages.register.enable-chains.native-chain-view.ledger-evm-title",
+          });
+        }
+
+        if (fallbackStarknetLedgerApp) {
+          return intl.formatMessage({
+            id: "pages.register.enable-chains.native-chain-view.ledger-starknet-title",
+          });
+        }
+
+        return intl.formatMessage({
+          id: "pages.register.enable-chains.native-chain-view.ledger-cosmos-title",
+        });
+      }
+
+      return intl.formatMessage({
+        id: "pages.register.enable-chains.native-chain-view.title",
+      });
+    })();
+    const nativeChainViewParagraph = (() => {
+      if (keyType === "ledger") {
+        if (fallbackEthereumLedgerApp) {
+          return intl.formatMessage({
+            id: "pages.register.enable-chains.native-chain-view.ledger-evm-paragraph",
+          });
+        }
+
+        if (fallbackStarknetLedgerApp) {
+          return intl.formatMessage({
+            id: "pages.register.enable-chains.native-chain-view.ledger-starknet-paragraph",
+          });
+        }
+
+        return intl.formatMessage({
+          id: "pages.register.enable-chains.native-chain-view.paragraph",
+        });
+      }
+
+      return intl.formatMessage({
+        id: "pages.register.enable-chains.native-chain-view.paragraph",
+      });
+    })();
 
     return (
       <RegisterSceneBox>
@@ -862,128 +1146,134 @@ export const EnableChainsScene: FunctionComponent<{
           }}
         >
           <Stack gutter="0.5rem">
-            {modularChainInfos.map((modularChainInfo) => {
-              const account = accountStore.getAccount(modularChainInfo.chainId);
-              const balance = (() => {
-                if ("cosmos" in modularChainInfo) {
-                  const chainInfo = chainStore.getChain(
-                    modularChainInfo.cosmos.chainId
-                  );
-                  const queries = queriesStore.get(modularChainInfo.chainId);
-                  const mainCurrency =
-                    chainInfo.stakeCurrency || chainInfo.currencies[0];
-
-                  const queryBalance = chainStore.isEvmOnlyChain(
-                    chainInfo.chainId
-                  )
-                    ? queries.queryBalances.getQueryEthereumHexAddress(
-                        account.ethereumHexAddress
-                      )
-                    : queries.queryBalances.getQueryBech32Address(
-                        account.bech32Address
-                      );
-                  const balance = queryBalance.getBalance(mainCurrency);
-
-                  if (balance) {
-                    return balance.balance;
+            <NativeChainSection
+              title={nativeChainViewTitle}
+              titleChainImage={titleChainImage}
+              paragraph={nativeChainViewParagraph}
+              showTitleBox={search.trim().length < 1}
+              isCollapsed={isCollapsedNativeChainView}
+              isSelectAll={
+                nativeModularChainInfos.length ===
+                enabledNativeChainIdentifiersInPage.length
+              }
+              onClick={() => {
+                if (
+                  nativeModularChainInfos.length ===
+                  enabledNativeChainIdentifiersInPage.length
+                ) {
+                  if (preSelectedNativeChainIdentifiers.length > 0) {
+                    setEnabledChainIdentifiers([
+                      ...enabledSuggestChainIdentifiers,
+                      ...preSelectedNativeChainIdentifiers,
+                    ]);
+                  } else {
+                    if (nativeModularChainInfos.length > 0) {
+                      setEnabledChainIdentifiers([
+                        ChainIdHelper.parse(nativeModularChainInfos[0].chainId)
+                          .identifier,
+                        ...enabledSuggestChainIdentifiers,
+                      ]);
+                    }
                   }
+                } else {
+                  setPreSelectedNativeChainIdentifiers([
+                    ...enabledNativeChainIdentifiers,
+                  ]);
 
-                  return new CoinPretty(mainCurrency, "0");
-                } else if ("starknet" in modularChainInfo) {
-                  const mainCurrency = modularChainInfo.starknet.currencies[0];
-                  const queryBalance = starknetQueriesStore
-                    .get(modularChainInfo.chainId)
-                    .queryStarknetERC20Balance.getBalance(
-                      modularChainInfo.chainId,
-                      chainStore,
-                      account.starknetHexAddress,
-                      mainCurrency.coinMinimalDenom
-                    );
+                  const newEnabledNativeChainIdentifiers: string[] =
+                    enabledNativeChainIdentifiers.slice();
 
-                  if (queryBalance) {
-                    return queryBalance.balance;
+                  for (const modularChainInfo of nativeModularChainInfos) {
+                    const chainIdentifier = ChainIdHelper.parse(
+                      modularChainInfo.chainId
+                    ).identifier;
+
+                    if (
+                      !enabledNativeChainIdentifiers.includes(chainIdentifier)
+                    ) {
+                      newEnabledNativeChainIdentifiers.push(chainIdentifier);
+                    }
                   }
-
-                  return new CoinPretty(mainCurrency, "0");
-                } else if ("bitcoin" in modularChainInfo) {
-                  const getBitcoinBalance = (
-                    chainId: string,
-                    address: string,
-                    coinMinimalDenom: string
-                  ) => {
-                    return bitcoinQueriesStore
-                      .get(chainId)
-                      .queryBitcoinBalance.getBalance(
-                        chainId,
-                        chainStore,
-                        address,
-                        coinMinimalDenom
-                      );
-                  };
-
-                  const addBalance = (balance: Dec, queryBalance: any) => {
-                    return queryBalance
-                      ? balance.add(queryBalance.balance.toDec())
-                      : balance;
-                  };
-
-                  const mainCurrency = modularChainInfo.bitcoin.currencies[0];
-                  let totalBalance = new Dec(0);
-
-                  const mainBalance = getBitcoinBalance(
-                    modularChainInfo.chainId,
-                    account.bitcoinAddress?.bech32Address ?? "",
-                    mainCurrency.coinMinimalDenom
-                  );
-
-                  totalBalance = addBalance(totalBalance, mainBalance);
-
-                  if (modularChainInfo.linkedModularChainInfos) {
-                    totalBalance =
-                      modularChainInfo.linkedModularChainInfos.reduce(
-                        (acc, linkedChain) => {
-                          if ("bitcoin" in linkedChain) {
-                            const linkedAccount = accountStore.getAccount(
-                              linkedChain.chainId
-                            );
-                            const linkedMainCurrency =
-                              linkedChain.bitcoin.currencies[0];
-                            const linkedBalance = getBitcoinBalance(
-                              linkedChain.chainId,
-                              linkedAccount.bitcoinAddress?.bech32Address ?? "",
-                              linkedMainCurrency.coinMinimalDenom
-                            );
-                            return addBalance(acc, linkedBalance);
-                          }
-                          return acc;
-                        },
-                        totalBalance
-                      );
-                  }
-
-                  // TODO: coinMinimalDenom을 다르게 지정을 해놔서 로직이 복잡하고 직관적이지 않음.
-                  // linked 상태인 체인들은 coinMinimalDenom을 하나로 통일할 필요가 있음.
-                  return new CoinPretty(
-                    mainCurrency,
-                    totalBalance.mul(new Dec(10 ** mainCurrency.coinDecimals))
-                  );
+                  setEnabledChainIdentifiers([
+                    ...enabledSuggestChainIdentifiers,
+                    ...newEnabledNativeChainIdentifiers,
+                  ]);
                 }
-              })();
-              const chainIdentifier = ChainIdHelper.parse(
-                modularChainInfo.chainId
-              ).identifier;
+              }}
+              enabledNativeChainIdentifierList={
+                enabledNativeChainIdentifiersInPage
+              }
+              onClickCollapse={() => {
+                setIsCollapsedNativeChainView(!isCollapsedNativeChainView);
+              }}
+            >
+              {nativeModularChainInfos.map((modularChainInfo) => {
+                const {
+                  balance,
+                  enabled,
+                  blockInteraction,
+                  tokens,
+                  chainIdentifier,
+                } = getChainItemInfoForView(modularChainInfo);
 
-              const enabled =
-                enabledChainIdentifierMap.get(chainIdentifier) || false;
+                return (
+                  <ChainItem
+                    showTagText={
+                      fallbackEthereumLedgerApp
+                        ? "EVM"
+                        : fallbackStarknetLedgerApp
+                        ? "Starknet"
+                        : undefined
+                    }
+                    tokens={tokens}
+                    key={chainIdentifier}
+                    chainInfo={modularChainInfo}
+                    balance={balance}
+                    enabled={enabled}
+                    blockInteraction={blockInteraction}
+                    isFresh={isFresh ?? false}
+                    isNativeChain={nativeChainIdentifierSet.has(
+                      chainIdentifier
+                    )}
+                    onClick={() => {
+                      if (enabledChainIdentifierMap.get(chainIdentifier)) {
+                        setEnabledChainIdentifiers(
+                          enabledChainIdentifiers.filter(
+                            (ci) => ci !== chainIdentifier
+                          )
+                        );
+                      } else {
+                        setEnabledChainIdentifiers([
+                          ...enabledChainIdentifiers,
+                          chainIdentifier,
+                        ]);
+                      }
+                    }}
+                  />
+                );
+              })}
+            </NativeChainSection>
 
-              // At least, one chain should be enabled.
-              const blockInteraction =
-                enabledChainIdentifiers.length <= 1 && enabled;
+            {suggestModularChainInfos.map((modularChainInfo) => {
+              const {
+                balance,
+                enabled,
+                blockInteraction,
+                tokens,
+                chainIdentifier,
+              } = getChainItemInfoForView(modularChainInfo);
 
               return (
                 <ChainItem
+                  showTagText={
+                    fallbackEthereumLedgerApp
+                      ? "EVM"
+                      : fallbackStarknetLedgerApp
+                      ? "Starknet"
+                      : undefined
+                  }
                   key={chainIdentifier}
-                  modularChainInfo={modularChainInfo}
+                  chainInfo={modularChainInfo}
                   balance={balance}
                   enabled={enabled}
                   blockInteraction={blockInteraction}
@@ -1025,6 +1315,7 @@ export const EnableChainsScene: FunctionComponent<{
                       return Array.from(result);
                     });
                   }}
+                  tokens={tokens}
                 />
               );
             })}
@@ -1106,83 +1397,75 @@ export const EnableChainsScene: FunctionComponent<{
 
                   return null;
                 })}
+
+            {!fallbackStarknetLedgerApp &&
+              searchedNonNativeChainInfos.map((modularChainInfo) => {
+                const chainIdentifier = ChainIdHelper.parse(
+                  modularChainInfo.chainId
+                ).identifier;
+                const isChecked =
+                  nonNativeChainListForSuggest.includes(modularChainInfo);
+                const isChainInfoType = "bip44" in modularChainInfo;
+
+                const isNextStepChain =
+                  !fallbackEthereumLedgerApp &&
+                  keyType === "ledger" &&
+                  isChainInfoType &&
+                  (modularChainInfo.bip44.coinType === 60 ||
+                    !!modularChainInfo.features?.includes("eth-address-gen") ||
+                    !!modularChainInfo.features?.includes("eth-key-sign"));
+                if (isNextStepChain) {
+                  return (
+                    <NextStepChainItem
+                      key={chainIdentifier}
+                      modularChainInfo={modularChainInfo}
+                      tagText="EVM"
+                    />
+                  );
+                }
+
+                return (
+                  <ChainItem
+                    showTagText={
+                      fallbackEthereumLedgerApp
+                        ? "EVM"
+                        : fallbackStarknetLedgerApp
+                        ? "Starknet"
+                        : undefined
+                    }
+                    key={chainIdentifier}
+                    chainInfo={modularChainInfo}
+                    enabled={isChecked}
+                    isFresh={true}
+                    blockInteraction={false}
+                    onClick={() => {
+                      if (isChecked) {
+                        setNonNativeChainListForSuggest(
+                          nonNativeChainListForSuggest.filter(
+                            (ci) => ci.chainId !== modularChainInfo.chainId
+                          )
+                        );
+                      } else {
+                        setNonNativeChainListForSuggest([
+                          ...nonNativeChainListForSuggest,
+                          modularChainInfo,
+                        ]);
+                      }
+                    }}
+                  />
+                );
+              })}
+
+            <div ref={infiniteScrollTriggerRef} />
           </Stack>
         </SimpleBar>
-        <React.Fragment>
-          <Gutter size="1.25rem" />
-
-          <YAxis alignX="center">
-            <Box
-              alignX="center"
-              cursor="pointer"
-              onClick={(e) => {
-                e.preventDefault();
-
-                if (
-                  modularChainInfos.length ===
-                  enabledChainIdentifiersInPage.length
-                ) {
-                  if (preSelectedChainIdentifiers.length > 0) {
-                    setEnabledChainIdentifiers(preSelectedChainIdentifiers);
-                  } else {
-                    if (modularChainInfos.length > 0) {
-                      setEnabledChainIdentifiers([
-                        ChainIdHelper.parse(modularChainInfos[0].chainId)
-                          .identifier,
-                      ]);
-                    }
-                  }
-                } else {
-                  setPreSelectedChainIdentifiers([...enabledChainIdentifiers]);
-                  const newEnabledChainIdentifiers: string[] =
-                    enabledChainIdentifiers.slice();
-                  for (const modularChainInfo of modularChainInfos) {
-                    const chainIdentifier = ChainIdHelper.parse(
-                      modularChainInfo.chainId
-                    ).identifier;
-                    if (!newEnabledChainIdentifiers.includes(chainIdentifier)) {
-                      newEnabledChainIdentifiers.push(chainIdentifier);
-                    }
-                  }
-                  setEnabledChainIdentifiers(newEnabledChainIdentifiers);
-                }
-              }}
-            >
-              <XAxis alignY="center">
-                <Body2
-                  color={
-                    theme.mode === "light"
-                      ? ColorPalette["gray-200"]
-                      : ColorPalette["gray-300"]
-                  }
-                >
-                  <FormattedMessage id="text-button.select-all" />
-                </Body2>
-
-                <Gutter size="0.25rem" />
-
-                <Checkbox
-                  size="small"
-                  checked={
-                    modularChainInfos.length ===
-                    enabledChainIdentifiersInPage.length
-                  }
-                  onChange={() => {}}
-                />
-              </XAxis>
-            </Box>
-          </YAxis>
-        </React.Fragment>
 
         <VerticalCollapseTransition
           collapsed={(() => {
-            for (const chainIdentifier of enabledChainIdentifiersInPage) {
-              const modularChainInfo =
-                chainStore.getModularChain(chainIdentifier);
-              if ("starknet" in modularChainInfo) {
-                return false;
-              }
+            if (nonNativeChainListForSuggest.length > 0) {
+              return false;
             }
+
             return true;
           })()}
         >
@@ -1222,7 +1505,7 @@ export const EnableChainsScene: FunctionComponent<{
                     : ColorPalette["gray-100"]
                 }
               >
-                <FormattedMessage id="pages.register.enable-chains.guide.starknet.title" />
+                <FormattedMessage id="pages.register.enable-chains.guide.non-native-chain.title" />
               </Subtitle4>
             </XAxis>
             <Gutter size="0.35rem" />
@@ -1233,201 +1516,276 @@ export const EnableChainsScene: FunctionComponent<{
                   : ColorPalette["gray-200"]
               }
             >
-              <FormattedMessage id="pages.register.enable-chains.guide.starknet.paragraph" />
+              <FormattedMessage id="pages.register.enable-chains.guide.non-native-chain.paragraph" />
             </Body3>
           </Box>
         </VerticalCollapseTransition>
 
         <Gutter size="1.25rem" />
         <Box width="22.5rem" marginX="auto">
-          <Button
-            text={intl.formatMessage({
-              id: "button.save",
-            })}
-            size="large"
-            onClick={async () => {
-              const enables: string[] = [];
-              const disables: string[] = [];
+          <div ref={buttonContainerRef}>
+            <Button
+              text={intl.formatMessage({
+                id: "button.save",
+              })}
+              size="large"
+              onClick={async () => {
+                const enables: string[] = [];
+                const disables: string[] = [];
+                const successSuggestChainIdentifiers: string[] = [];
 
-              for (const modularChainInfo of chainStore.modularChainInfos) {
-                const chainIdentifier = ChainIdHelper.parse(
-                  modularChainInfo.chainId
-                ).identifier;
-                const enabled =
-                  enabledChainIdentifierMap.get(chainIdentifier) || false;
-
-                if (enabled) {
-                  enables.push(chainIdentifier);
-                } else {
-                  disables.push(chainIdentifier);
-                }
-              }
-
-              const needFinalizeCoinType: string[] = [];
-              for (let i = 0; i < enables.length; i++) {
-                const enable = enables[i];
-                const modularChainInfo = chainStore.getModularChain(enable);
-                if ("cosmos" in modularChainInfo) {
-                  const chainInfo = chainStore.getChain(enable);
-                  if (
-                    keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo)
-                  ) {
-                    // Remove enable from enables
-                    enables.splice(i, 1);
-                    i--;
-                    // And push it disables
-                    disables.push(enable);
-
-                    needFinalizeCoinType.push(enable);
-                  }
-                }
-              }
-
-              const ledgerEthereumAppNeeds: string[] = [];
-              for (let i = 0; i < enables.length; i++) {
-                if (!fallbackEthereumLedgerApp) {
-                  break;
-                }
-
-                const enable = enables[i];
-                const modularChainInfo = chainStore.getModularChain(enable);
-
-                if ("cosmos" in modularChainInfo) {
-                  const chainInfo = chainStore.getChain(enable);
-                  const isEthermintLike =
-                    chainInfo.bip44.coinType === 60 ||
-                    !!chainInfo.features?.includes("eth-address-gen") ||
-                    !!chainInfo.features?.includes("eth-key-sign");
-
-                  if (isEthermintLike) {
-                    // 참고로 위에서 chainInfos memo로 인해서 막혀있기 때문에
-                    // 여기서 throwErrorIfEthermintWithLedgerButNotSupported 확인은 생략한다.
-                    // Remove enable from enables
-                    enables.splice(i, 1);
-                    i--;
-                    // And push it disables
-                    disables.push(enable);
-
-                    ledgerEthereumAppNeeds.push(enable);
-                  }
-                }
-              }
-
-              const ledgerStarknetAppNeeds: string[] = [];
-              for (let i = 0; i < enables.length; i++) {
-                if (!fallbackStarknetLedgerApp) {
-                  break;
-                }
-
-                const enable = enables[i];
-                const modularChainInfo = chainStore.getModularChain(enable);
-
-                if ("starknet" in modularChainInfo) {
-                  // Remove enable from enables
-                  enables.splice(i, 1);
-                  i--;
-                  // And push it disables
-                  disables.push(enable);
-
-                  ledgerStarknetAppNeeds.push(enable);
-                }
-              }
-
-              await Promise.all([
-                (async () => {
-                  if (enables.length > 0) {
-                    await chainStore.enableChainInfoInUIWithVaultId(
-                      vaultId,
-                      ...enables
-                    );
-                  }
-                })(),
-                (async () => {
-                  if (disables.length > 0) {
-                    await chainStore.disableChainInfoInUIWithVaultId(
-                      vaultId,
-                      ...disables
-                    );
-                  }
-                })(),
-              ]);
-
-              dispatchGlobalEventExceptSelf(
-                "keplr_enabled_chain_changed",
-                vaultId
-              );
-
-              if (needFinalizeCoinType.length > 0) {
-                sceneMovedToSelectDerivation.current = true;
-                sceneTransition.replace("select-derivation-path", {
-                  vaultId,
-                  chainIds: needFinalizeCoinType,
-
-                  totalCount: needFinalizeCoinType.length,
-
-                  skipWelcome,
-                });
-              } else {
-                // 어차피 bip44 coin type selection과 ethereum ledger app이 동시에 필요한 경우는 없다.
-                // (ledger에서는 coin type이 app당 할당되기 때문에...)
-                if (keyType === "ledger") {
-                  if (fallbackStarknetLedgerApp) {
-                    if (ledgerStarknetAppNeeds.length > 0) {
-                      const keyInfo = keyRingStore.keyInfos.find(
-                        (keyInfo) => keyInfo.id === vaultId
+                if (nonNativeChainListForSuggest.length > 0) {
+                  for (const chainInfo of nonNativeChainListForSuggest) {
+                    try {
+                      await window.keplr?.experimentalSuggestChain(
+                        chainInfo as ChainInfo
                       );
-
-                      if (!keyInfo) {
-                        throw new Error("KeyInfo not found");
-                      }
-                      if (keyInfo.insensitive["Starknet"]) {
-                        await chainStore.enableChainInfoInUI(
-                          ...ledgerStarknetAppNeeds
-                        );
-                        dispatchGlobalEventExceptSelf(
-                          "keplr_enabled_chain_changed",
-                          keyInfo.id
-                        );
-                        replaceToWelcomePage();
-                      } else {
-                        const bip44Path = keyInfo.insensitive["bip44Path"];
-                        if (!bip44Path) {
-                          throw new Error("bip44Path not found");
-                        }
-
-                        sceneTransition.push("connect-ledger", {
-                          name: "",
-                          password: "",
-                          app: "Starknet",
-                          bip44Path,
-
-                          appendModeInfo: {
-                            vaultId,
-                            afterEnableChains: ledgerStarknetAppNeeds,
-                          },
-                          stepPrevious: stepPrevious,
-                          stepTotal: stepTotal,
-                        });
-                      }
-                    } else {
-                      replaceToWelcomePage();
+                      successSuggestChainIdentifiers.push(
+                        ChainIdHelper.parse(chainInfo.chainId).identifier
+                      );
+                    } catch {
+                      console.error(
+                        `Failed to suggest chain ${chainInfo.chainId}`
+                      );
+                      continue;
                     }
-                  } else if (fallbackEthereumLedgerApp) {
-                    if (ledgerEthereumAppNeeds.length > 0) {
-                      const keyInfo = keyRingStore.keyInfos.find(
-                        (keyInfo) => keyInfo.id === vaultId
+                  }
+                  try {
+                    await keyRingStore.refreshKeyRingStatus();
+                    await chainStore.updateChainInfosFromBackground();
+                    await chainStore.updateEnabledChainIdentifiersFromBackground();
+                    dispatchGlobalEventExceptSelf(
+                      "keplr_suggested_chain_added"
+                    );
+                  } catch {
+                    console.error(
+                      "Failed to suggest chain",
+                      successSuggestChainIdentifiers
+                    );
+                  }
+
+                  enables.push(...successSuggestChainIdentifiers);
+                }
+
+                for (const modularChainInfo of chainStore.modularChainInfos) {
+                  const chainIdentifier = ChainIdHelper.parse(
+                    modularChainInfo.chainId
+                  ).identifier;
+                  const enabled =
+                    enabledChainIdentifierMap.get(chainIdentifier) || false;
+
+                  if (enabled) {
+                    enables.push(chainIdentifier);
+                  } else {
+                    //NOTE - 위에서 suggest 체인이 추가되었으면
+                    //이 체인은 disable 하면 안되기 때문에 무시함
+                    if (
+                      successSuggestChainIdentifiers.some(
+                        (c) => c === chainIdentifier
+                      )
+                    ) {
+                      continue;
+                    }
+
+                    disables.push(chainIdentifier);
+                  }
+                }
+
+                const needFinalizeCoinType: string[] = [];
+                for (let i = 0; i < enables.length; i++) {
+                  const enable = enables[i];
+                  const modularChainInfo = chainStore.getModularChain(enable);
+                  if ("cosmos" in modularChainInfo) {
+                    const chainInfo = chainStore.getChain(enable);
+                    if (
+                      keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo)
+                    ) {
+                      // Remove enable from enables
+                      enables.splice(i, 1);
+                      i--;
+                      // And push it disables
+                      disables.push(enable);
+
+                      needFinalizeCoinType.push(enable);
+                    }
+                  }
+                }
+
+                const ledgerEthereumAppNeeds: string[] = [];
+                for (let i = 0; i < enables.length; i++) {
+                  if (!fallbackEthereumLedgerApp) {
+                    break;
+                  }
+
+                  const enable = enables[i];
+                  const modularChainInfo = chainStore.getModularChain(enable);
+
+                  if ("cosmos" in modularChainInfo) {
+                    const chainInfo = chainStore.getChain(enable);
+                    const isEthermintLike =
+                      chainInfo.bip44.coinType === 60 ||
+                      !!chainInfo.features?.includes("eth-address-gen") ||
+                      !!chainInfo.features?.includes("eth-key-sign");
+
+                    if (isEthermintLike) {
+                      // 참고로 위에서 chainInfos memo로 인해서 막혀있기 때문에
+                      // 여기서 throwErrorIfEthermintWithLedgerButNotSupported 확인은 생략한다.
+                      // Remove enable from enables
+                      enables.splice(i, 1);
+                      i--;
+                      // And push it disables
+                      disables.push(enable);
+
+                      ledgerEthereumAppNeeds.push(enable);
+                    }
+                  }
+                }
+
+                const ledgerStarknetAppNeeds: string[] = [];
+                for (let i = 0; i < enables.length; i++) {
+                  if (!fallbackStarknetLedgerApp) {
+                    break;
+                  }
+
+                  const enable = enables[i];
+                  const modularChainInfo = chainStore.getModularChain(enable);
+
+                  if ("starknet" in modularChainInfo) {
+                    // Remove enable from enables
+                    enables.splice(i, 1);
+                    i--;
+                    // And push it disables
+                    disables.push(enable);
+
+                    ledgerStarknetAppNeeds.push(enable);
+                  }
+                }
+
+                await Promise.all([
+                  (async () => {
+                    if (enables.length > 0) {
+                      await chainStore.enableChainInfoInUIWithVaultId(
+                        vaultId,
+                        ...enables
                       );
-                      if (!keyInfo) {
-                        throw new Error("KeyInfo not found");
+                    }
+                  })(),
+                  (async () => {
+                    if (disables.length > 0) {
+                      await chainStore.disableChainInfoInUIWithVaultId(
+                        vaultId,
+                        ...disables
+                      );
+                    }
+                  })(),
+                ]);
+
+                dispatchGlobalEventExceptSelf(
+                  "keplr_enabled_chain_changed",
+                  vaultId
+                );
+
+                if (needFinalizeCoinType.length > 0) {
+                  sceneMovedToSelectDerivation.current = true;
+                  sceneTransition.replace("select-derivation-path", {
+                    vaultId,
+                    chainIds: needFinalizeCoinType,
+
+                    totalCount: needFinalizeCoinType.length,
+
+                    skipWelcome,
+                  });
+                } else {
+                  // 어차피 bip44 coin type selection과 ethereum ledger app이 동시에 필요한 경우는 없다.
+                  // (ledger에서는 coin type이 app당 할당되기 때문에...)
+                  if (keyType === "ledger") {
+                    if (fallbackStarknetLedgerApp) {
+                      if (ledgerStarknetAppNeeds.length > 0) {
+                        const keyInfo = keyRingStore.keyInfos.find(
+                          (keyInfo) => keyInfo.id === vaultId
+                        );
+
+                        if (!keyInfo) {
+                          throw new Error("KeyInfo not found");
+                        }
+                        if (keyInfo.insensitive["Starknet"]) {
+                          await chainStore.enableChainInfoInUI(
+                            ...ledgerStarknetAppNeeds
+                          );
+                          dispatchGlobalEventExceptSelf(
+                            "keplr_enabled_chain_changed",
+                            keyInfo.id
+                          );
+                          replaceToWelcomePage();
+                        } else {
+                          const bip44Path = keyInfo.insensitive["bip44Path"];
+                          if (!bip44Path) {
+                            throw new Error("bip44Path not found");
+                          }
+
+                          sceneTransition.push("connect-ledger", {
+                            name: "",
+                            password: "",
+                            app: "Starknet",
+                            bip44Path,
+
+                            appendModeInfo: {
+                              vaultId,
+                              afterEnableChains: ledgerStarknetAppNeeds,
+                            },
+                            stepPrevious: stepPrevious,
+                            stepTotal: stepTotal,
+                          });
+                        }
+                      } else {
+                        replaceToWelcomePage();
                       }
-                      if (keyInfo.insensitive["Ethereum"]) {
-                        await chainStore.enableChainInfoInUI(
-                          ...ledgerEthereumAppNeeds
+                    } else if (fallbackEthereumLedgerApp) {
+                      if (ledgerEthereumAppNeeds.length > 0) {
+                        const keyInfo = keyRingStore.keyInfos.find(
+                          (keyInfo) => keyInfo.id === vaultId
                         );
-                        dispatchGlobalEventExceptSelf(
-                          "keplr_enabled_chain_changed",
-                          keyInfo.id
-                        );
+                        if (!keyInfo) {
+                          throw new Error("KeyInfo not found");
+                        }
+                        if (keyInfo.insensitive["Ethereum"]) {
+                          await chainStore.enableChainInfoInUI(
+                            ...ledgerEthereumAppNeeds
+                          );
+                          dispatchGlobalEventExceptSelf(
+                            "keplr_enabled_chain_changed",
+                            keyInfo.id
+                          );
+                          sceneTransition.push("enable-chains", {
+                            vaultId,
+                            keyType,
+                            candidateAddresses: [],
+                            isFresh: false,
+                            skipWelcome,
+                            fallbackStarknetLedgerApp: true,
+                            stepPrevious: stepPrevious + 1,
+                            stepTotal: stepTotal,
+                          });
+                        } else {
+                          const bip44Path = keyInfo.insensitive["bip44Path"];
+                          if (!bip44Path) {
+                            throw new Error("bip44Path not found");
+                          }
+                          sceneTransition.push("connect-ledger", {
+                            name: "",
+                            password: "",
+                            app: "Ethereum",
+                            bip44Path,
+
+                            appendModeInfo: {
+                              vaultId,
+                              afterEnableChains: ledgerEthereumAppNeeds,
+                            },
+                            stepPrevious: stepPrevious,
+                            stepTotal: stepTotal,
+                          });
+                        }
+                      } else {
                         sceneTransition.push("enable-chains", {
                           vaultId,
                           keyType,
@@ -1438,24 +1796,6 @@ export const EnableChainsScene: FunctionComponent<{
                           stepPrevious: stepPrevious + 1,
                           stepTotal: stepTotal,
                         });
-                      } else {
-                        const bip44Path = keyInfo.insensitive["bip44Path"];
-                        if (!bip44Path) {
-                          throw new Error("bip44Path not found");
-                        }
-                        sceneTransition.push("connect-ledger", {
-                          name: "",
-                          password: "",
-                          app: "Ethereum",
-                          bip44Path,
-
-                          appendModeInfo: {
-                            vaultId,
-                            afterEnableChains: ledgerEthereumAppNeeds,
-                          },
-                          stepPrevious: stepPrevious,
-                          stepTotal: stepTotal,
-                        });
                       }
                     } else {
                       sceneTransition.push("enable-chains", {
@@ -1464,29 +1804,19 @@ export const EnableChainsScene: FunctionComponent<{
                         candidateAddresses: [],
                         isFresh: false,
                         skipWelcome,
-                        fallbackStarknetLedgerApp: true,
+                        fallbackEthereumLedgerApp: true,
                         stepPrevious: stepPrevious + 1,
                         stepTotal: stepTotal,
                       });
                     }
                   } else {
-                    sceneTransition.push("enable-chains", {
-                      vaultId,
-                      keyType,
-                      candidateAddresses: [],
-                      isFresh: false,
-                      skipWelcome,
-                      fallbackEthereumLedgerApp: true,
-                      stepPrevious: stepPrevious + 1,
-                      stepTotal: stepTotal,
-                    });
+                    replaceToWelcomePage();
                   }
-                } else {
-                  replaceToWelcomePage();
                 }
-              }
-            }}
-          />
+              }}
+            />
+          </div>
+
           {fallbackEthereumLedgerApp || fallbackStarknetLedgerApp ? (
             <React.Fragment>
               <Gutter size="0.75rem" />
@@ -1517,152 +1847,13 @@ export const EnableChainsScene: FunctionComponent<{
   }
 );
 
-const ChainItem: FunctionComponent<{
-  modularChainInfo: ModularChainInfo;
-  balance?: CoinPretty;
-
-  enabled: boolean;
-  blockInteraction: boolean;
-
-  onClick: () => void;
-
-  isFresh: boolean;
-}> = observer(
-  ({
-    modularChainInfo,
-    balance,
-    enabled,
-    blockInteraction,
-    onClick,
-    isFresh,
-  }) => {
-    const { priceStore } = useStore();
-    const theme = useTheme();
-
-    const price = balance ? priceStore.calculatePrice(balance) : undefined;
-
-    const chainIdentifier = ChainIdHelper.parse(
-      modularChainInfo.chainId
-    ).identifier;
-
-    return (
-      <Box
-        borderRadius="0.375rem"
-        paddingX="1rem"
-        paddingY="0.75rem"
-        backgroundColor={
-          enabled
-            ? theme.mode === "light"
-              ? ColorPalette["gray-10"]
-              : ColorPalette["gray-500"]
-            : theme.mode === "light"
-            ? ColorPalette.white
-            : ColorPalette["gray-600"]
-        }
-        cursor={blockInteraction ? "not-allowed" : "pointer"}
-        onClick={() => {
-          if (!blockInteraction) {
-            onClick();
-          }
-        }}
-      >
-        <Columns sum={1}>
-          <XAxis alignY="center">
-            <ChainImageFallback chainInfo={modularChainInfo} size="3rem" />
-
-            <Gutter size="0.5rem" />
-
-            <YAxis>
-              <Subtitle2>
-                {(() => {
-                  // Noble의 경우만 약간 특수하게 표시해줌
-                  if (chainIdentifier === "noble") {
-                    return `${modularChainInfo.chainName} (USDC)`;
-                  }
-
-                  return modularChainInfo.chainName;
-                })()}
-              </Subtitle2>
-            </YAxis>
-          </XAxis>
-          <Column weight={1} />
-          <XAxis alignY="center">
-            {isFresh || balance == null ? null : (
-              <YAxis alignX="right">
-                <Subtitle3
-                  color={
-                    theme.mode === "light"
-                      ? ColorPalette["gray-600"]
-                      : ColorPalette.white
-                  }
-                >
-                  {balance
-                    .maxDecimals(6)
-                    .shrink(true)
-                    .inequalitySymbol(true)
-                    .toString()}
-                </Subtitle3>
-                <Gutter size="0.25rem" />
-                <Subtitle3 color={ColorPalette["gray-300"]}>
-                  {price ? price.toString() : "-"}
-                </Subtitle3>
-              </YAxis>
-            )}
-
-            <Gutter size="1rem" />
-            <Checkbox
-              checked={enabled}
-              onChange={() => {
-                if (!blockInteraction) {
-                  onClick();
-                }
-              }}
-            />
-          </XAxis>
-        </Columns>
-      </Box>
-    );
-  }
-);
-
-const NextStepChainItem: FunctionComponent<{
-  modularChainInfo: ModularChainInfo;
-  tagText: string;
-}> = ({ modularChainInfo, tagText }) => {
-  return (
-    <Box
-      paddingX="1rem"
-      paddingY="0.75rem"
-      cursor="not-allowed"
-      style={{ opacity: 0.5 }}
-    >
-      <Columns sum={1}>
-        <XAxis alignY="center">
-          <ChainImageFallback chainInfo={modularChainInfo} size="3rem" />
-
-          <Gutter size="0.5rem" />
-
-          <YAxis>
-            <XAxis alignY="center">
-              <Subtitle2>{modularChainInfo.chainName}</Subtitle2>
-
-              <Gutter size="0.375rem" />
-
-              <Tag text={tagText} />
-            </XAxis>
-
-            <Gutter size="0.25rem" />
-
-            <Subtitle4 color={ColorPalette["gray-300"]}>
-              {"starknet" in modularChainInfo ? (
-                <FormattedMessage id="pages.register.enable-chains.guide.can-select-starknet-later-step" />
-              ) : (
-                <FormattedMessage id="pages.register.enable-chains.guide.can-select-evm-next-step" />
-              )}
-            </Subtitle4>
-          </YAxis>
-        </XAxis>
-      </Columns>
-    </Box>
-  );
-};
+function useScrollDownWhenCantSeeSaveButton(
+  ref: React.RefObject<HTMLDivElement>
+) {
+  useEffectOnce(() => {
+    setTimeout(() => {
+      checkButtonPositionAndScrollToButton(ref);
+      // NOTE - the time is set arbitrarily to waiting for chains to be loaded
+    }, 500);
+  });
+}

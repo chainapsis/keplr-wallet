@@ -1,0 +1,24 @@
+syntax = "proto3";
+package initia.move.v1;
+
+import "amino/amino.proto";
+import "cosmos/auth/v1beta1/auth.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/initia-labs/initia/x/move/types";
+
+// ObjectAccount defines an account for objects that holds coins without pubkey.
+message ObjectAccount {
+  option (amino.name) = "move/ObjectAccount";
+  option (gogoproto.goproto_getters) = false;
+
+  cosmos.auth.v1beta1.BaseAccount base_account = 1 [(gogoproto.embed) = true];
+}
+
+// TableAccount defines an account for tables that holds items without pubkey.
+message TableAccount {
+  option (amino.name) = "move/TableAccount";
+  option (gogoproto.goproto_getters) = false;
+
+  cosmos.auth.v1beta1.BaseAccount base_account = 1 [(gogoproto.embed) = true];
+}

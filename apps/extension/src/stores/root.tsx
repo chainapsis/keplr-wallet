@@ -28,6 +28,8 @@ import {
   AgoricQueries,
   LSMCurrencyRegistrar,
   TokenFactoryCurrencyRegistrar,
+  NobleQueries,
+  NobleAccount,
 } from "@keplr-wallet/stores";
 import {
   IBCChannelStore,
@@ -138,7 +140,8 @@ export class RootStore {
       KeplrETCQueries,
       ICNSQueries,
       TokenContractsQueries,
-      EthereumQueries
+      EthereumQueries,
+      NobleQueries
     ]
   >;
   public readonly swapUsageQueries: SwapUsageQueries;
@@ -146,7 +149,7 @@ export class RootStore {
   public readonly starknetQueriesStore: StarknetQueriesStore;
   public readonly bitcoinQueriesStore: BitcoinQueriesStore;
   public readonly accountStore: AccountStore<
-    [CosmosAccount, CosmwasmAccount, SecretAccount]
+    [CosmosAccount, CosmwasmAccount, SecretAccount, NobleAccount]
   >;
   public readonly ethereumAccountStore: EthereumAccountStore;
   public readonly starknetAccountStore: StarknetAccountStore;
@@ -337,7 +340,8 @@ export class RootStore {
       EthereumQueries.use({
         coingeckoAPIBaseURL: CoinGeckoAPIEndPoint,
         coingeckoAPIURI: CoinGeckoCoinDataByTokenAddress,
-      })
+      }),
+      NobleQueries.use()
     );
     this.swapUsageQueries = new SwapUsageQueries(
       this.queriesStore.sharedContext,
@@ -486,6 +490,9 @@ export class RootStore {
             };
           }
         },
+      }),
+      NobleAccount.use({
+        queriesStore: this.queriesStore,
       })
     );
 
@@ -524,15 +531,6 @@ export class RootStore {
       }
     );
 
-    this.hugeQueriesStore = new HugeQueriesStore(
-      this.chainStore,
-      this.queriesStore,
-      this.starknetQueriesStore,
-      this.bitcoinQueriesStore,
-      this.accountStore,
-      this.priceStore
-    );
-
     this.uiConfigStore = new UIConfigStore(
       {
         kvStore: new ExtensionKVStore("store_ui_config"),
@@ -543,6 +541,17 @@ export class RootStore {
       this.keyRingStore,
       this.priceStore,
       ICNSInfo
+    );
+
+    this.hugeQueriesStore = new HugeQueriesStore(
+      this.chainStore,
+      this.queriesStore,
+      this.starknetQueriesStore,
+      this.bitcoinQueriesStore,
+      this.accountStore,
+      this.priceStore,
+      this.uiConfigStore,
+      this.keyRingStore
     );
 
     this.tokensStore = new TokensStore(

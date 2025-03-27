@@ -18,7 +18,9 @@ export const Buttons: FunctionComponent<{
   const navigate = useNavigate();
   const intl = useIntl();
 
-  const balances = hugeQueriesStore.getAllBalances(true);
+  const balances = hugeQueriesStore.getAllBalances({
+    allowIBCToken: true,
+  });
   const hasBalance = useMemo(() => {
     return balances.find((bal) => bal.token.toDec().gt(new Dec(0))) != null;
   }, [balances]);

@@ -1,8 +1,11 @@
 import { AppCurrency, FeeCurrency, StdFee } from "@keplr-wallet/types";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
+import { NameService } from "./name-service";
+import { IChainInfoImpl } from "@keplr-wallet/stores";
 
 export interface ITxChainSetter {
   chainId: string;
+  chainInfo: IChainInfoImpl;
   setChain(chainId: string): void;
 }
 
@@ -82,18 +85,21 @@ export interface IRecipientConfig extends ITxChainSetter {
   uiProperties: UIProperties;
 }
 
-export interface IRecipientConfigWithICNS extends IRecipientConfig {
-  readonly isICNSEnabled: boolean;
-  readonly isICNSName: boolean;
-  readonly icnsExpectedBech32Prefix: string;
-  readonly isICNSFetching: boolean;
-}
-
-export interface IRecipientConfigWithENS extends IRecipientConfig {
-  readonly isENSEnabled: boolean;
-  readonly isENSName: boolean;
-  readonly ensExpectedDomain: string;
-  readonly isENSFetching: boolean;
+export interface IRecipientConfigWithNameServices extends IRecipientConfig {
+  preferredNameService: string | undefined;
+  setPreferredNameService(nameService: string | undefined): void;
+  getNameService(type: string): NameService | undefined;
+  getNameServices(): NameService[];
+  // address를 반환하는 name service의 결과를 반환한다.
+  // preferredNameService가 설정되어 있지 않으면 모든 name service의 결과를 반환한다.
+  // preferredNameService가 설정되어 있으면 해당 name service의 결과를 반환한다.
+  nameServiceResult: {
+    type: string;
+    address: string;
+    fullName: string;
+    domain: string;
+    suffix: string;
+  }[];
 }
 
 export interface IBaseAmountConfig extends ITxChainSetter {

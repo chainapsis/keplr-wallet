@@ -1,20 +1,14 @@
 import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import styled, { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
-import { CloseIcon, LinkIcon } from "../../../../components/icon";
+import { CloseIcon } from "../../../../components/icon";
 import { Box } from "../../../../components/box";
 import { Stack } from "../../../../components/stack";
 import { useNavigate } from "react-router";
 import { Gutter } from "../../../../components/gutter";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
-import {
-  Button2,
-  Caption1,
-  H3,
-  H5,
-  Subtitle4,
-} from "../../../../components/typography";
+import { Caption1, H3, H5, Subtitle4 } from "../../../../components/typography";
 import { XAxis } from "../../../../components/axis";
 import { Bleed } from "../../../../components/bleed";
 import { FormattedMessage } from "react-intl";
@@ -38,6 +32,12 @@ const Styles = {
         : ColorPalette["white"]};
 
     cursor: pointer;
+    &:hover {
+      color: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-300"]
+          : ColorPalette["gray-200"]};
+    }
   `,
   Flex1: styled.div`
     flex: 1;
@@ -133,7 +133,7 @@ export const MenuBar: FunctionComponent<{
       </Bleed>
       <Gutter size="1.25rem" />
 
-      <Stack gutter="1.5rem">
+      <Stack gutter="1rem">
         <Styles.MenuItem
           onClick={(e) => {
             e.preventDefault();
@@ -157,8 +157,16 @@ export const MenuBar: FunctionComponent<{
           <FormattedMessage id="page.main.components.menu-bar.manage-chain-visibility-title" />
         </Styles.MenuItem>
 
-        <Gutter size="1rem" />
+        <Styles.MenuItem
+          onClick={(e) => {
+            e.preventDefault();
+            navigate("/manage-view-asset-token-list");
+          }}
+        >
+          <FormattedMessage id="page.main.components.menu-bar.manage-asset-list-title" />
+        </Styles.MenuItem>
 
+        <Gutter size="1.75rem" />
         <Box
           width="6.5rem"
           style={{
@@ -169,15 +177,10 @@ export const MenuBar: FunctionComponent<{
             }`,
           }}
         />
-
-        <Gutter size="1rem" />
+        <Gutter size="1.75rem" />
 
         <Styles.MenuItem onClick={() => navigate("/setting/contacts/list")}>
           <FormattedMessage id="page.main.components.menu-bar.my-contacts-title" />
-        </Styles.MenuItem>
-
-        <Styles.MenuItem onClick={() => navigate("/setting/token/list")}>
-          <FormattedMessage id="page.main.components.menu-bar.add-token-title" />
         </Styles.MenuItem>
 
         {location.pathname !== "/setting" ? (
@@ -193,6 +196,19 @@ export const MenuBar: FunctionComponent<{
 
       <Styles.Flex1 />
 
+      <Styles.MenuItem
+        onClick={async (e) => {
+          e.preventDefault();
+
+          await keyRingStore.lock();
+
+          dispatchGlobalEventExceptSelf("keplr_keyring_locked");
+        }}
+      >
+        <FormattedMessage id="page.main.components.menu-bar.lock-wallet-title" />
+      </Styles.MenuItem>
+
+      <Gutter size="1.75rem" />
       <Box width="100%" minWidth="14rem">
         <Bleed horizontal="0.5rem">
           {sidePanelSupported ? (
@@ -322,68 +338,6 @@ export const MenuBar: FunctionComponent<{
           ) : null}
 
           <Gutter size="1rem" />
-
-          <Styles.MenuItem
-            onClick={async (e) => {
-              e.preventDefault();
-
-              await keyRingStore.lock();
-
-              dispatchGlobalEventExceptSelf("keplr_keyring_locked");
-            }}
-          >
-            <FormattedMessage id="page.main.components.menu-bar.lock-wallet-title" />
-          </Styles.MenuItem>
-
-          <Gutter size="1rem" />
-
-          <Box
-            width="6.5rem"
-            style={{
-              border: `1px solid ${
-                theme.mode === "light"
-                  ? ColorPalette["gray-100"]
-                  : ColorPalette["gray-400"]
-              }`,
-            }}
-          />
-
-          <Gutter size="1rem" />
-
-          <Box
-            cursor="pointer"
-            onClick={(e) => {
-              e.preventDefault();
-
-              browser.tabs.create({
-                url: "https://chains.keplr.app/",
-              });
-            }}
-          >
-            <XAxis alignY="center">
-              <Button2
-                color={
-                  theme.mode === "light"
-                    ? ColorPalette["gray-200"]
-                    : ColorPalette["gray-300"]
-                }
-              >
-                <FormattedMessage id="page.main.components.menu-bar.go-to-keplr-chain-registry" />
-              </Button2>
-
-              <Gutter size="0.25rem" />
-
-              <LinkIcon
-                width="1.125rem"
-                height="1.125rem"
-                color={
-                  theme.mode === "light"
-                    ? ColorPalette["gray-200"]
-                    : ColorPalette["gray-300"]
-                }
-              />
-            </XAxis>
-          </Box>
         </Bleed>
       </Box>
     </Box>

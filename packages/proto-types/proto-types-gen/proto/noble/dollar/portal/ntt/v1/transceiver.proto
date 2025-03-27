@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package noble.dollar.portal.ntt.v1;
+
+option go_package = "dollar.noble.xyz/types/portal/ntt";
+
+// TransceiverMessage is the type that stores information about a transceiver message.
+//
+// The wire format of the message is as follows:
+//   - prefix - 4 bytes
+//   - sourceManagerAddress - 32 bytes
+//   - recipientManagerAddress - 32 bytes
+//   - managerPayloadLength - 2 bytes
+//   - managerPayload - `managerPayloadLength` bytes
+//   - transceiverPayloadLength - 2 bytes
+//   - transceiverPayload - `transceiverPayloadLength` bytes
+//
+// https://github.com/wormhole-foundation/native-token-transfers/blob/67df54701e0f4b3793b6c621719911804c9875a3/evm/src/libraries/TransceiverStructs.sol#L97-L119
+message TransceiverMessage {
+  bytes source_manager_address = 1;
+  bytes recipient_manager_address = 2;
+  bytes manager_payload = 3;
+  bytes transceiver_payload = 4;
+}

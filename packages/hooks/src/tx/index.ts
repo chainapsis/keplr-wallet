@@ -13,3 +13,4 @@ export * from "./validate";
 export * from "./delegate-tx";
 export * from "./undelegate-tx";
 export * from "./redelegate-tx";
+export * from "./name-service";

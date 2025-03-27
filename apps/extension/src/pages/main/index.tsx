@@ -53,11 +53,13 @@ import {
   LogAnalyticsEventMsg,
 } from "@keplr-wallet/background";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
-import { useBuy } from "../../hooks/use-buy";
+import { useBuySupportServiceInfos } from "../../hooks/use-buy-support-service-infos";
 import { BottomTabsHeightRem } from "../../bottom-tabs";
 import { DenomHelper } from "@keplr-wallet/common";
 import { NewSidePanelHeaderTop } from "./new-side-panel-header-top";
 import { ModularChainInfo } from "@keplr-wallet/types";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { AvailableTabLinkButtonList } from "./components/available-tab-link-button-list";
 
 export interface ViewToken {
   token: CoinPretty;
@@ -100,10 +102,22 @@ export const MainPage: FunctionComponent<{
 
   const [tabStatus, setTabStatus] = React.useState<TabStatus>("available");
 
+  const disabledViewAssetTokenMap =
+    uiConfigStore.manageViewAssetTokenConfig.getViewAssetTokenMapByVaultId(
+      keyRingStore.selectedKeyInfo?.id ?? ""
+    );
+
   const availableTotalPrice = useMemo(() => {
     let result: PricePretty | undefined;
     for (const bal of hugeQueriesStore.allKnownBalances) {
-      if (bal.price) {
+      const disabledCoinSet = disabledViewAssetTokenMap.get(
+        ChainIdHelper.parse(bal.chainInfo.chainId).identifier
+      );
+
+      if (
+        bal.price &&
+        !disabledCoinSet?.has(bal.token.currency.coinMinimalDenom)
+      ) {
         if (!result) {
           result = bal.price;
         } else {
@@ -112,7 +126,7 @@ export const MainPage: FunctionComponent<{
       }
     }
     return result;
-  }, [hugeQueriesStore.allKnownBalances]);
+  }, [hugeQueriesStore.allKnownBalances, disabledViewAssetTokenMap]);
   const availableTotalPriceEmbedOnlyUSD = useMemo(() => {
     let result: PricePretty | undefined;
     for (const bal of hugeQueriesStore.allKnownBalances) {
@@ -262,7 +276,7 @@ export const MainPage: FunctionComponent<{
   const [isOpenDepositModal, setIsOpenDepositModal] = React.useState(false);
   const [isOpenBuy, setIsOpenBuy] = React.useState(false);
 
-  const buySupportServiceInfos = useBuy();
+  const buySupportServiceInfos = useBuySupportServiceInfos();
 
   const searchRef = useRef<HTMLInputElement | null>(null);
   const [search, setSearch] = useState("");
@@ -611,25 +625,9 @@ export const MainPage: FunctionComponent<{
           <Gutter size="0" />
 
           {tabStatus === "available" && !isNotReady ? (
-            <StakeWithKeplrDashboardButton
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                analyticsStore.logEvent("click_keplrDashboard", {
-                  tabName: tabStatus,
-                });
-
-                browser.tabs.create({
-                  url: "https://wallet.keplr.app/?utm_source=keplrextension&utm_medium=button&utm_campaign=permanent&utm_content=manage_portfolio",
-                });
-              }}
-            >
-              <FormattedMessage id="page.main.chart.manage-portfolio-in-keplr-dashboard" />
-              <Box color={ColorPalette["gray-300"]} marginLeft="0.5rem">
-                <ArrowTopRightOnSquareIcon width="1rem" height="1rem" />
-              </Box>
-            </StakeWithKeplrDashboardButton>
+            <AvailableTabLinkButtonList />
           ) : null}
+
           {!isNotReady ? (
             <Stack gutter="0.75rem">
               {tabStatus === "available" ? (

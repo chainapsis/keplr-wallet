@@ -108,6 +108,10 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
     const route = searchParams.get("route");
     const vaultId = searchParams.get("vaultId");
     const skipWelcome = searchParams.get("skipWelcome") === "true";
+    const fallbackStarknetLedgerApp =
+      searchParams.get("fallbackStarknetLedgerApp") === "true";
+    const fallbackEthereumLedgerApp =
+      searchParams.get("fallbackEthereumLedgerApp") === "true";
 
     if (vaultId) {
       // 이 시점에서 chainStore가 초기화 되어있는게 보장된다.
@@ -136,6 +140,8 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
             stepTotal: 0,
             skipWelcome,
             initialSearchValue,
+            fallbackStarknetLedgerApp,
+            fallbackEthereumLedgerApp,
           },
         },
       };
