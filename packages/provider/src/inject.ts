@@ -1798,7 +1798,7 @@ export class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
 
   async signMessage(
     message: string,
-    type: BitcoinSignMessageType
+    type?: BitcoinSignMessageType
   ): Promise<string> {
     return this._requestMethod("signMessage", [message, type]);
   }

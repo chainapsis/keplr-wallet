@@ -1942,11 +1942,12 @@ class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
 
   async signMessage(
     message: string,
-    type: BitcoinSignMessageType
+    type?: BitcoinSignMessageType
   ): Promise<string> {
+    // Default to ECDSA if type is not provided
     return this.protectedRequestMethod({
       method: "signMessage",
-      params: [message, type],
+      params: [message, type ?? BitcoinSignMessageType.ECDSA],
     });
   }
 

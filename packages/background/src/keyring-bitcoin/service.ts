@@ -617,9 +617,12 @@ export class KeyRingBitcoinService {
           case "signMessage": {
             if (
               !Array.isArray(params) ||
-              (Array.isArray(params) && params.length !== 2)
+              (Array.isArray(params) &&
+                (params.length === 1 || params.length === 2))
             ) {
-              throw new Error("Invalid parameters: must provide 2 parameters.");
+              throw new Error(
+                "Invalid parameters: must provide 1 or 2 parameters."
+              );
             }
 
             if (typeof params[0] !== "string") {
