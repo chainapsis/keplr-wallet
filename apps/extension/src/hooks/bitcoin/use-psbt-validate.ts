@@ -12,6 +12,7 @@ import {
   TapBip32Derivation,
 } from "@keplr-wallet/stores-bitcoin";
 import { toXOnly } from "@keplr-wallet/crypto";
+import { toASM } from "bitcoinjs-lib/src/script";
 
 interface TapLeafScript {
   leafVersion: number;
@@ -35,6 +36,7 @@ export type ValidatedPsbt = {
   sumOutputValueByAddress: {
     address: string;
     value: Dec;
+    isMine: boolean;
   }[];
   decodedRawData: {
     version: number;
@@ -127,20 +129,33 @@ export const usePsbtsValidate = (
   }, []);
 
   const processOutputValuesByAddress = useMemo(() => {
-    return (sumOutputValueByAddressRecord: Record<string, Dec>) => {
+    return (
+      sumOutputValueByAddressRecord: Record<string, Dec>,
+      inputsToSign: { index: number; address: string }[]
+    ) => {
       return Object.entries(sumOutputValueByAddressRecord)
         .map(([address, value]) => ({
           address,
           value,
+          isMine: inputsToSign.some((input) => input.address === address),
         }))
         .sort((a, b) => {
-          if (a.value.gt(b.value)) {
-            return -1;
-          } else if (a.value.lt(b.value)) {
-            return 1;
-          } else {
-            return 0;
+          if (a.isMine && b.isMine) {
+            // 둘 다 소유한 계정인 경우, value 순으로 정렬
+            if (a.value.gt(b.value)) {
+              return -1;
+            } else if (a.value.lt(b.value)) {
+              return 1;
+            } else {
+              return 0;
+            }
           }
+
+          if (a.isMine) {
+            return -1;
+          }
+
+          return 1;
         });
     };
   }, []);
@@ -393,7 +408,18 @@ export const usePsbtsValidate = (
             );
           }
 
-          const address = output.address ?? "unknown";
+          let address: string = "unknown";
+          try {
+            address =
+              output.address ??
+              (output.script
+                ? fromOutputScript(output.script, networkConfig)
+                : "unknown");
+          } catch (e) {
+            // 스크립트 경로 지출인 경우, 주소를 추출할 수 없어서 어셈블리 문자열로 반환한다
+            address = toASM(output.script);
+          }
+
           const value = new Dec(output.value);
 
           sumOutputValueByAddressRecord[address] =
@@ -421,7 +447,8 @@ export const usePsbtsValidate = (
               inputsToSign
             ),
             sumOutputValueByAddress: processOutputValuesByAddress(
-              sumOutputValueByAddressRecord
+              sumOutputValueByAddressRecord,
+              inputsToSign
             ),
             decodedRawData: decodePsbt(psbt),
           });
