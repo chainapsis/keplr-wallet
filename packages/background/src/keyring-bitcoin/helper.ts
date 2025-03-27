@@ -1,21 +1,22 @@
-export function encodeLegacyMessage(
-  message: string,
-  messagePrefix?: string
-): Uint8Array {
-  const encoder = new TextEncoder();
+const MAGIC_BYTES = new TextEncoder().encode("Bitcoin Signed Message:\n");
 
-  const magicBytes = encoder.encode(
-    messagePrefix || "\u0018Bitcoin Signed Message:\n"
-  );
-  const messageBytes = encoder.encode(message);
-
+export function encodeLegacyMessage(message: string, prefix?: string) {
+  const magicBytes = prefix ? new TextEncoder().encode(prefix) : MAGIC_BYTES;
+  const magicLength = encodeVarInt(magicBytes.length);
+  const messageBytes = new TextEncoder().encode(message);
   const messageLength = encodeVarInt(messageBytes.length);
 
   const totalLength =
-    magicBytes.length + messageLength.length + messageBytes.length;
-  const buffer = new Uint8Array(totalLength);
+    magicLength.length +
+    magicBytes.length +
+    messageLength.length +
+    messageBytes.length;
+
+  const buffer = Buffer.alloc(totalLength);
 
   let offset = 0;
+  buffer.set(magicLength, offset);
+  offset += magicLength.length;
   buffer.set(magicBytes, offset);
   offset += magicBytes.length;
   buffer.set(messageLength, offset);
@@ -25,21 +26,22 @@ export function encodeLegacyMessage(
   return buffer;
 }
 
-// https://github.com/bitcoinjs/bitcoinjs-message
 export function encodeLegacySignature(
   r: Uint8Array,
   s: Uint8Array,
   recovery: number,
-  compressed: boolean,
-  segwitType: "p2wpkh" | "p2sh-p2wpkh"
+  compressed?: boolean
 ) {
-  if (segwitType !== undefined) {
-    recovery += 8;
-    if (segwitType === "p2wpkh") recovery += 4;
-  } else {
-    if (compressed) recovery += 4;
+  if (!(recovery === 0 || recovery === 1 || recovery === 2 || recovery === 3)) {
+    throw new Error("recovery must be 0, 1, 2, or 3");
   }
-  return Buffer.concat([Buffer.alloc(1, recovery + 27), r, s]);
+
+  const headerByte = recovery + 27 + (compressed ? 4 : 0);
+  return Buffer.concat([
+    Uint8Array.of(headerByte),
+    Uint8Array.from(r),
+    Uint8Array.from(s),
+  ]).toString("base64");
 }
 
 function encodeVarInt(value: number): Uint8Array {

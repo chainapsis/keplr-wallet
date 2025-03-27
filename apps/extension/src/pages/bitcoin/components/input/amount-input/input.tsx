@@ -16,10 +16,19 @@ import { Columns } from "../../../../../components/column";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useLanguage } from "../../../../../languages";
 import { useTheme } from "styled-components";
-
+import { BaseTypography } from "../../../../../components/typography/base";
+import {
+  InformationPlainIcon,
+  LoadingIcon,
+} from "../../../../../components/icon";
+import { XAxis } from "../../../../../components/axis";
+import { Gutter } from "../../../../../components/gutter";
+import { Tooltip } from "../../../../../components/tooltip";
 export const AmountInput: FunctionComponent<{
   amountConfig: IAmountConfig;
-}> = observer(({ amountConfig }) => {
+  availableBalance: CoinPretty | undefined;
+  isLoading: boolean;
+}> = observer(({ amountConfig, availableBalance, isLoading }) => {
   if (amountConfig.amount.length !== 1) {
     throw new Error(
       `Amount input component only handles single amount: ${amountConfig.amount
@@ -29,6 +38,7 @@ export const AmountInput: FunctionComponent<{
   }
 
   const { priceStore } = useStore();
+  const theme = useTheme();
   const intl = useIntl();
 
   const price = (() => {
@@ -73,6 +83,68 @@ export const AmountInput: FunctionComponent<{
       label={intl.formatMessage({
         id: "components.input.amount-input.amount-label",
       })}
+      labelAlignment={<Gutter size="0.25rem" />}
+      rightLabel={
+        isLoading ? (
+          <Box alignY="center" marginBottom="0.375rem">
+            <LoadingIcon width="0.75rem" height="0.75rem" />
+          </Box>
+        ) : availableBalance ? (
+          <XAxis alignY="center">
+            <BaseTypography
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-400"]
+                  : ColorPalette["gray-200"]
+              }
+              style={{
+                fontWeight: 400,
+                fontSize: "0.75rem",
+                marginBottom: "0.375rem",
+              }}
+            >
+              <FormattedMessage
+                id="components.input.amount-input.available-balance-label"
+                values={{
+                  balance: availableBalance.toString(),
+                }}
+              />
+            </BaseTypography>
+            <Gutter size="0.25rem" />
+            <Tooltip
+              enabled={!!availableBalance}
+              content={
+                <FormattedMessage id="components.input.amount-input.available-balance-tooltip" />
+              }
+              forceWidth="15.875rem"
+              hideArrow={true}
+              floatingOffset={-1}
+              allowedPlacements={["bottom"]}
+            >
+              <Box
+                width="1rem"
+                height="1rem"
+                cursor="pointer"
+                padding="0.0625rem"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: "0.375rem",
+                }}
+              >
+                <InformationPlainIcon
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-400"]
+                      : ColorPalette["gray-300"]
+                  }
+                />
+              </Box>
+            </Tooltip>
+          </XAxis>
+        ) : null
+      }
       type="number"
       value={(() => {
         if (isPriceBased) {

@@ -6,6 +6,7 @@ import { BitcoinQueriesStore } from "@keplr-wallet/stores-bitcoin";
 import { useFeeRateConfig } from "./fee-rate";
 import { useFeeConfig } from "./fee";
 import { useTxSizeConfig } from "./tx-size";
+import { useAvailableBalanceConfig } from "./available-balance";
 
 export const useSendTxConfig = (
   chainGetter: ChainGetter,
@@ -16,11 +17,16 @@ export const useSendTxConfig = (
 ) => {
   const senderConfig = useSenderConfig(chainGetter, chainId, sender);
   const recipientConfig = useRecipientConfig(chainGetter, chainId);
+  const availableBalanceConfig = useAvailableBalanceConfig(
+    chainGetter,
+    chainId
+  );
   const amountConfig = useAmountConfig(
     chainGetter,
     queriesStore,
     chainId,
-    senderConfig
+    senderConfig,
+    availableBalanceConfig
   );
   const txSizeConfig = useTxSizeConfig(chainGetter, chainId);
 
@@ -38,7 +44,8 @@ export const useSendTxConfig = (
     senderConfig,
     amountConfig,
     txSizeConfig,
-    feeRateConfig
+    feeRateConfig,
+    availableBalanceConfig
   );
 
   amountConfig.setFeeConfig(feeConfig);
@@ -47,6 +54,7 @@ export const useSendTxConfig = (
     senderConfig,
     recipientConfig,
     amountConfig,
+    availableBalanceConfig,
     txSizeConfig,
     feeRateConfig,
     feeConfig,

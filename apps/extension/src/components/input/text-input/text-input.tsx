@@ -24,6 +24,7 @@ export const TextInput = forwardRef<
       bottom,
       isLoading,
       autoComplete,
+      labelAlignment = "space-between",
       ...props
     },
     ref
@@ -32,7 +33,11 @@ export const TextInput = forwardRef<
       <Styles.Container className={className} style={style}>
         <Columns sum={1} alignY="center">
           {label ? <Label content={label} isLoading={isLoading} /> : null}
-          <Column weight={1} />
+          {typeof labelAlignment === "string" ? (
+            <Column weight={labelAlignment === "space-between" ? 1 : 0} />
+          ) : (
+            labelAlignment
+          )}
           {rightLabel ? <Box>{rightLabel}</Box> : null}
         </Columns>
 

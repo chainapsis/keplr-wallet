@@ -1,5 +1,6 @@
 import {
   IAmountConfig,
+  IAvailableBalanceConfig,
   IFeeConfig,
   IFeeRateConfig,
   IPsbtSimulator,
@@ -16,6 +17,7 @@ export const useTxConfigsValidate = (configs: {
   feeRateConfig?: IFeeRateConfig;
   feeConfig?: IFeeConfig;
   txSizeConfig?: ITxSizeConfig;
+  availableBalanceConfig?: IAvailableBalanceConfig;
   psbtSimulator?: IPsbtSimulator;
 }) => {
   const interactionBlocked = (() => {
@@ -40,6 +42,8 @@ export const useTxConfigsValidate = (configs: {
     const feeRateConfigUIProperties = configs.feeRateConfig?.uiProperties;
     const feeConfigUIProperties = configs.feeConfig?.uiProperties;
     const txSizeConfigUIProperties = configs.txSizeConfig?.uiProperties;
+    const availableBalanceConfigUIProperties =
+      configs.availableBalanceConfig?.uiProperties;
     const psbtSimulatorUIProperties = configs.psbtSimulator?.uiProperties;
     if (
       amountConfigUIProperties?.error ||
@@ -48,6 +52,7 @@ export const useTxConfigsValidate = (configs: {
       feeRateConfigUIProperties?.error ||
       feeConfigUIProperties?.error ||
       txSizeConfigUIProperties?.error ||
+      availableBalanceConfigUIProperties?.error ||
       psbtSimulatorUIProperties?.error
     ) {
       return true;
@@ -60,6 +65,7 @@ export const useTxConfigsValidate = (configs: {
       feeRateConfigUIProperties?.loadingState === "loading-block" ||
       feeConfigUIProperties?.loadingState === "loading-block" ||
       txSizeConfigUIProperties?.loadingState === "loading-block" ||
+      availableBalanceConfigUIProperties?.loadingState === "loading-block" ||
       psbtSimulatorUIProperties?.loadingState === "loading-block"
     ) {
       return true;

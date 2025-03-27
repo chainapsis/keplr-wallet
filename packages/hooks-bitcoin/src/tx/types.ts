@@ -75,9 +75,22 @@ export interface IAmountConfig extends ITxChainSetter {
   uiProperties: UIProperties;
 }
 
+export interface IAvailableBalanceConfig extends ITxChainSetter {
+  availableBalanceByAddress(address: string): CoinPretty | undefined;
+  setAvailableBalanceByAddress(
+    address: string,
+    availableBalance: CoinPretty | undefined
+  ): void;
+
+  uiProperties: UIProperties;
+}
+
 export interface IFeeConfig extends ITxChainSetter {
   value: string;
   setValue(value: string): void;
+
+  remainderValue: string;
+  setRemainderValue(value: string): void;
 
   fee: CoinPretty | undefined;
   uiProperties: UIProperties;
@@ -90,6 +103,7 @@ export interface IPsbtSimulator {
   isSimulating: boolean;
   psbtHex: string | null;
   txSize: number | null;
+  remainderValue: string | null;
   uiProperties: UIProperties;
 }
 

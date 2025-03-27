@@ -10,10 +10,10 @@ import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { GetBitcoinKeysSettledMsg } from "@keplr-wallet/background";
 
-enum BestInSlotApiUrl {
-  MAINNET = "https://api.bestinslot.xyz/v3",
-  TESTNET = "https://testnet.api.bestinslot.xyz/v3",
-  SIGNET = "https://signet_api.bestinslot.xyz/v3",
+enum BitcoinInscriptionsApiUrl {
+  MAINNET = "https://mainnet-btc-inscriptions.keplr.app",
+  TESTNET = "https://testnet-btc-inscriptions.keplr.app",
+  SIGNET = "https://signet-btc-inscriptions.keplr.app",
 }
 
 export const useBitcoinNetworkConfig = (chainId: string) => {
@@ -29,20 +29,20 @@ export const useBitcoinNetworkConfig = (chainId: string) => {
 
     const currentNetwork = GENESIS_HASH_TO_NETWORK[genesisHash as GenesisHash];
 
-    let bestInSlotApiUrl = "";
+    let bitcoinInscriptionApiUrl = "";
     let networkConfig: Network | undefined;
 
     switch (currentNetwork) {
       case "mainnet":
-        bestInSlotApiUrl = BestInSlotApiUrl.MAINNET;
+        bitcoinInscriptionApiUrl = BitcoinInscriptionsApiUrl.MAINNET;
         networkConfig = networks.bitcoin;
         break;
       case "testnet":
-        bestInSlotApiUrl = BestInSlotApiUrl.TESTNET;
+        bitcoinInscriptionApiUrl = BitcoinInscriptionsApiUrl.TESTNET;
         networkConfig = networks.testnet;
         break;
       case "signet":
-        bestInSlotApiUrl = BestInSlotApiUrl.SIGNET;
+        bitcoinInscriptionApiUrl = BitcoinInscriptionsApiUrl.SIGNET;
         networkConfig = networks.testnet;
         break;
       default:
@@ -52,7 +52,7 @@ export const useBitcoinNetworkConfig = (chainId: string) => {
     return {
       currentNetwork,
       currentPaymentType: paymentType as SupportedPaymentType,
-      bestInSlotApiUrl,
+      bitcoinInscriptionApiUrl,
       networkConfig,
     };
   }, [chainId]);

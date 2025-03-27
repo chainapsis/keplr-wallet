@@ -1,5 +1,6 @@
 import {
   IAmountConfig,
+  IAvailableBalanceConfig,
   IFeeConfig,
   ISenderConfig,
   UIProperties,
@@ -41,7 +42,8 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
     chainGetter: ChainGetter,
     protected readonly bitcoinQueriesStore: BitcoinQueriesStore,
     initialChainId: string,
-    protected readonly senderConfig: ISenderConfig
+    protected readonly senderConfig: ISenderConfig,
+    protected readonly availableBalanceConfig: IAvailableBalanceConfig
   ) {
     super(chainGetter, initialChainId);
 
@@ -60,14 +62,21 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
   @computed
   get value(): string {
     if (this.fraction > 0) {
-      let result = this.bitcoinQueriesStore
-        .get(this.chainId)
-        .queryBitcoinBalance.getBalance(
-          this.chainId,
-          this.chainGetter,
-          this.senderConfig.sender,
-          this.currency.coinMinimalDenom
-        )?.balance;
+      const availableBalance =
+        this.availableBalanceConfig.availableBalanceByAddress(
+          this.senderConfig.sender
+        );
+
+      let result = availableBalance
+        ? availableBalance
+        : this.bitcoinQueriesStore
+            .get(this.chainId)
+            .queryBitcoinBalance.getBalance(
+              this.chainId,
+              this.chainGetter,
+              this.senderConfig.sender,
+              this.currency.coinMinimalDenom
+            )?.balance;
       if (!result) {
         return "0";
       }
@@ -228,7 +237,21 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
         };
       }
 
-      // TODO: check available balance rather than total balance
+      const availableBalance =
+        this.availableBalanceConfig.availableBalanceByAddress(
+          this.senderConfig.sender
+        );
+
+      if (availableBalance) {
+        if (availableBalance.sub(amount).toDec().lt(new Dec(0))) {
+          return {
+            error: new InsufficientAmountError("Insufficient amount"),
+          };
+        }
+
+        return {};
+      }
+
       const bal = this.bitcoinQueriesStore
         .get(this.chainId)
         .queryBitcoinBalance.getBalance(
@@ -274,10 +297,18 @@ export const useAmountConfig = (
   chainGetter: ChainGetter,
   queriesStore: BitcoinQueriesStore,
   chainId: string,
-  senderConfig: ISenderConfig
+  senderConfig: ISenderConfig,
+  availableBalanceConfig: IAvailableBalanceConfig
 ) => {
   const [config] = useState(
-    () => new AmountConfig(chainGetter, queriesStore, chainId, senderConfig)
+    () =>
+      new AmountConfig(
+        chainGetter,
+        queriesStore,
+        chainId,
+        senderConfig,
+        availableBalanceConfig
+      )
   );
   config.setChain(chainId);
 

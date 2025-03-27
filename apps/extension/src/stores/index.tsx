@@ -63,7 +63,11 @@ export const StoreProvider: FunctionComponent<PropsWithChildren> = ({
               stores.accountStore.getAccount(modularChainInfo.chainId).init();
             }
           } else if ("bitcoin" in modularChainInfo) {
-            // TODO: bitcoin 계정 초기화
+            if (
+              stores.bitcoinAccountStore.getAccount(modularChainInfo.chainId)
+            ) {
+              stores.accountStore.getAccount(modularChainInfo.chainId).init();
+            }
           }
         }
       }
@@ -91,7 +95,11 @@ export const StoreProvider: FunctionComponent<PropsWithChildren> = ({
                 stores.accountStore.getAccount(modularChainInfo.chainId).init();
               }
             } else if ("bitcoin" in modularChainInfo) {
-              // TODO: bitcoin 계정 초기화
+              if (
+                stores.bitcoinAccountStore.getAccount(modularChainInfo.chainId)
+              ) {
+                stores.accountStore.getAccount(modularChainInfo.chainId).init();
+              }
             }
           }
         }

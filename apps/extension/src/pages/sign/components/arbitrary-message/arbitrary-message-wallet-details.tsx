@@ -19,11 +19,13 @@ interface ArbitraryMsgWalletDetailsProps {
     type: "bech32" | "ethereum" | "starknet" | "bitcoin";
     address: string;
   };
+  hideSigningLabel?: boolean;
+  hideAddress?: boolean;
 }
 
 export const ArbitraryMsgWalletDetails: FunctionComponent<
   ArbitraryMsgWalletDetailsProps
-> = ({ walletName, chainInfo, addressInfo }) => {
+> = ({ walletName, chainInfo, addressInfo, hideSigningLabel, hideAddress }) => {
   const theme = useTheme();
   const shortenAddress = (() => {
     if (addressInfo.type === "starknet") {
@@ -40,7 +42,11 @@ export const ArbitraryMsgWalletDetails: FunctionComponent<
         : addressInfo.address;
     }
 
-    if (addressInfo.type === "bech32" || addressInfo.type === "bitcoin") {
+    if (addressInfo.type === "bech32") {
+      return Bech32Address.shortenAddress(addressInfo.address, 30);
+    }
+
+    if (addressInfo.type === "bitcoin") {
       return Bech32Address.shortenAddress(addressInfo.address, 30);
     }
   })();
@@ -56,7 +62,7 @@ export const ArbitraryMsgWalletDetails: FunctionComponent<
             : ColorPalette["gray-600"],
       }}
     >
-      <Box position="relative" height="5.5rem">
+      <Box position="relative" height={hideSigningLabel ? "3.75rem" : "5.5rem"}>
         <Box
           position="absolute"
           width="100%"
@@ -108,18 +114,26 @@ export const ArbitraryMsgWalletDetails: FunctionComponent<
             />
           </Box>
         </Box>
-        <Box position="relative" zIndex={1} paddingTop="1.623rem">
+        <Box
+          position="relative"
+          zIndex={1}
+          paddingTop={hideSigningLabel ? "1.25rem" : "1.623rem"}
+        >
           <YAxis alignX="center">
-            <Subtitle4
-              color={
-                theme.mode === "light"
-                  ? hexToRgba(ColorPalette["black"], 0.7)
-                  : hexToRgba(ColorPalette["white"], 0.7)
-              }
-            >
-              <FormattedMessage id="page.sign.adr36.signing-with" />
-            </Subtitle4>
-            <Gutter size="0.25rem" />
+            {!hideSigningLabel && (
+              <React.Fragment>
+                <Subtitle4
+                  color={
+                    theme.mode === "light"
+                      ? hexToRgba(ColorPalette["black"], 0.7)
+                      : hexToRgba(ColorPalette["white"], 0.7)
+                  }
+                >
+                  <FormattedMessage id="page.sign.adr36.signing-with" />
+                </Subtitle4>
+                <Gutter size="0.25rem" />
+              </React.Fragment>
+            )}
             <Body1
               style={{
                 lineHeight: "140%",
@@ -168,28 +182,32 @@ export const ArbitraryMsgWalletDetails: FunctionComponent<
               {chainInfo.chainName}
             </Body1>
           </XAxis>
-          <Gutter size="0.5rem" />
-          <XAxis alignY="center">
-            <Subtitle4
-              color={
-                theme.mode === "light"
-                  ? ColorPalette["gray-300"]
-                  : ColorPalette["gray-200"]
-              }
-            >
-              with
-            </Subtitle4>
-            <Gutter size="0.5rem" />
-            <Body1
-              color={
-                theme.mode === "light"
-                  ? ColorPalette["gray-400"]
-                  : ColorPalette["white"]
-              }
-            >
-              {shortenAddress}
-            </Body1>
-          </XAxis>
+          {!hideAddress && (
+            <React.Fragment>
+              <Gutter size="0.5rem" />
+              <XAxis alignY="center">
+                <Subtitle4
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-300"]
+                      : ColorPalette["gray-200"]
+                  }
+                >
+                  with
+                </Subtitle4>
+                <Gutter size="0.5rem" />
+                <Body1
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-400"]
+                      : ColorPalette["white"]
+                  }
+                >
+                  {shortenAddress}
+                </Body1>
+              </XAxis>
+            </React.Fragment>
+          )}
         </YAxis>
       </Box>
     </Box>

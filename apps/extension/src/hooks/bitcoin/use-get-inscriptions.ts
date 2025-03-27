@@ -50,7 +50,7 @@ export const useGetInscriptionsByAddress = (
     cursedOnly?: boolean;
   } = {}
 ) => {
-  const { bestInSlotApiUrl } = useBitcoinNetworkConfig(chainId);
+  const { bitcoinInscriptionApiUrl } = useBitcoinNetworkConfig(chainId);
 
   const {
     order: initialOrder,
@@ -109,7 +109,7 @@ export const useGetInscriptionsByAddress = (
   }, [initialOrder, initialOffset, initialCount, excludeBrc20, cursedOnly]);
 
   return usePaginatedCursorQuery<InscriptionsByAddressResponse>(
-    bestInSlotApiUrl,
+    bitcoinInscriptionApiUrl,
     () => {
       const params = new URLSearchParams();
 
@@ -152,7 +152,6 @@ export const useGetInscriptionsByAddress = (
     {
       headers: {
         "Content-Type": "application/json",
-        "X-API-KEY": process.env["BEST_IN_SLOT_API_KEY"] || "",
       },
     },
     true // 기존의 쿼리 파라미터 대체

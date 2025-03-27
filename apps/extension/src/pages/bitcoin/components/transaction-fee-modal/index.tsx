@@ -22,7 +22,6 @@ import {
   ISenderConfig,
   IFeeConfig,
   IFeeRateConfig,
-  IPsbtSimulator,
 } from "@keplr-wallet/hooks-bitcoin";
 import { TextInput } from "../../../../components/input";
 
@@ -49,146 +48,108 @@ export const TransactionFeeModal: FunctionComponent<{
   senderConfig: ISenderConfig;
   feeConfig: IFeeConfig;
   feeRateConfig: IFeeRateConfig;
-  psbtSimulator?: IPsbtSimulator;
   disableAutomaticFeeSet?: boolean;
-}> = observer(
-  ({ close, senderConfig, feeConfig, feeRateConfig, psbtSimulator }) => {
-    const { chainStore } = useStore();
-    const intl = useIntl();
-    const theme = useTheme();
+}> = observer(({ close, senderConfig, feeConfig, feeRateConfig }) => {
+  const { chainStore } = useStore();
+  const intl = useIntl();
+  const theme = useTheme();
 
-    const modularChainInfo = chainStore.getModularChain(senderConfig.chainId);
-    if (!("bitcoin" in modularChainInfo)) {
-      throw new Error("This chain doesn't support bitcoin");
+  const modularChainInfo = chainStore.getModularChain(senderConfig.chainId);
+  if (!("bitcoin" in modularChainInfo)) {
+    throw new Error("This chain doesn't support bitcoin");
+  }
+
+  const [showChangesApplied, setShowChangesApplied] = useState(false);
+  const prevFeeRateType = useRef(feeRateConfig.feeRateType);
+  const prevFeeRate = useRef(feeRateConfig.feeRate);
+  const lastShowChangesAppliedTimeout = useRef<NodeJS.Timeout | undefined>(
+    undefined
+  );
+
+  useEffect(() => {
+    if (
+      prevFeeRateType.current !== feeRateConfig.feeRateType ||
+      prevFeeRate.current !== feeRateConfig.feeRate
+    ) {
+      if (lastShowChangesAppliedTimeout.current) {
+        clearTimeout(lastShowChangesAppliedTimeout.current);
+        lastShowChangesAppliedTimeout.current = undefined;
+      }
+      setShowChangesApplied(true);
+      lastShowChangesAppliedTimeout.current = setTimeout(() => {
+        setShowChangesApplied(false);
+        lastShowChangesAppliedTimeout.current = undefined;
+      }, 2500);
     }
 
-    const [showChangesApplied, setShowChangesApplied] = useState(false);
-    const prevFeeRateType = useRef(feeRateConfig.feeRateType);
-    const prevFeeRate = useRef(feeRateConfig.feeRate);
-    const lastShowChangesAppliedTimeout = useRef<NodeJS.Timeout | undefined>(
-      undefined
-    );
+    prevFeeRateType.current = feeRateConfig.feeRateType;
+    prevFeeRate.current = feeRateConfig.feeRate;
+  }, [feeRateConfig.feeRate, feeRateConfig.feeRateType]);
 
-    useEffect(() => {
-      if (
-        prevFeeRateType.current !== feeRateConfig.feeRateType ||
-        prevFeeRate.current !== feeRateConfig.feeRate
-      ) {
-        if (lastShowChangesAppliedTimeout.current) {
-          clearTimeout(lastShowChangesAppliedTimeout.current);
-          lastShowChangesAppliedTimeout.current = undefined;
-        }
-        setShowChangesApplied(true);
-        lastShowChangesAppliedTimeout.current = setTimeout(() => {
-          setShowChangesApplied(false);
-          lastShowChangesAppliedTimeout.current = undefined;
-        }, 2500);
-      }
+  return (
+    <Styles.Container>
+      <Box marginBottom="1.25rem" marginLeft="0.5rem" paddingY="0.4rem">
+        <Subtitle1>
+          <FormattedMessage id="components.input.fee-control.modal.title" />
+        </Subtitle1>
+      </Box>
 
-      prevFeeRateType.current = feeRateConfig.feeRateType;
-      prevFeeRate.current = feeRateConfig.feeRate;
-    }, [feeRateConfig.feeRate, feeRateConfig.feeRateType]);
-
-    return (
-      <Styles.Container>
-        <Box marginBottom="1.25rem" marginLeft="0.5rem" paddingY="0.4rem">
-          <Subtitle1>
-            <FormattedMessage id="components.input.fee-control.modal.title" />
-          </Subtitle1>
-        </Box>
-
-        <Stack gutter="0.75rem">
-          <Stack gutter="0.375rem">
-            <Box marginLeft="0.5rem">
-              <Subtitle3
-                color={
-                  theme.mode === "light"
-                    ? ColorPalette["gray-400"]
-                    : ColorPalette["gray-100"]
-                }
-              >
-                <FormattedMessage id="components.input.fee-control.modal.fee-title" />
-              </Subtitle3>
-            </Box>
-
-            <FeeSelector feeConfig={feeConfig} feeRateConfig={feeRateConfig} />
-          </Stack>
-
-          {feeRateConfig.feeRateType === "manual" ? (
-            <TextInput
-              label={intl.formatMessage({
-                id: "components.input.fee-control.modal.fee-rate-label",
-              })}
-              disabled={feeRateConfig.feeRateType !== "manual"}
-              value={feeRateConfig.value}
-              onChange={(e) => {
-                e.preventDefault();
-                feeRateConfig.setValue(e.target.value);
-              }}
-            />
-          ) : null}
-
-          {(() => {
-            if (psbtSimulator) {
-              if (psbtSimulator.uiProperties.error) {
-                return (
-                  <GuideBox
-                    color="danger"
-                    title={intl.formatMessage({
-                      id: "components.input.fee-control.modal.guide-title",
-                    })}
-                    paragraph={
-                      psbtSimulator.uiProperties.error.message ||
-                      psbtSimulator.uiProperties.error.toString()
-                    }
-                  />
-                );
+      <Stack gutter="0.75rem">
+        <Stack gutter="0.375rem">
+          <Box marginLeft="0.5rem">
+            <Subtitle3
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-400"]
+                  : ColorPalette["gray-100"]
               }
+            >
+              <FormattedMessage id="components.input.fee-control.modal.fee-title" />
+            </Subtitle3>
+          </Box>
 
-              if (psbtSimulator.uiProperties.warning) {
-                return (
-                  <GuideBox
-                    color="warning"
-                    title={intl.formatMessage({
-                      id: "components.input.fee-control.modal.guide-title",
-                    })}
-                    paragraph={
-                      psbtSimulator.uiProperties.warning.message ||
-                      psbtSimulator.uiProperties.warning.toString()
-                    }
-                  />
-                );
-              }
-            }
-          })()}
+          <FeeSelector feeConfig={feeConfig} feeRateConfig={feeRateConfig} />
+        </Stack>
 
-          <VerticalCollapseTransition collapsed={!showChangesApplied}>
-            <GuideBox
-              color="safe"
-              title={intl.formatMessage({
-                id: "components.input.fee-control.modal.notification.changes-applied",
-              })}
-            />
-            <Gutter size="0.75rem" />
-          </VerticalCollapseTransition>
-          <Gutter size="0" />
-
-          <Button
-            type="button"
-            text={intl.formatMessage({
-              id: "button.close",
+        {feeRateConfig.feeRateType === "manual" ? (
+          <TextInput
+            label={intl.formatMessage({
+              id: "components.input.fee-control.modal.fee-rate-label",
             })}
-            color="secondary"
-            size="large"
-            onClick={() => {
-              close();
+            disabled={feeRateConfig.feeRateType !== "manual"}
+            value={feeRateConfig.value}
+            onChange={(e) => {
+              e.preventDefault();
+              feeRateConfig.setValue(e.target.value);
             }}
           />
-        </Stack>
-      </Styles.Container>
-    );
-  }
-);
+        ) : null}
+        <VerticalCollapseTransition collapsed={!showChangesApplied}>
+          <GuideBox
+            color="safe"
+            title={intl.formatMessage({
+              id: "components.input.fee-control.modal.notification.changes-applied",
+            })}
+          />
+          <Gutter size="0.75rem" />
+        </VerticalCollapseTransition>
+        <Gutter size="0" />
+
+        <Button
+          type="button"
+          text={intl.formatMessage({
+            id: "button.close",
+          })}
+          color="secondary"
+          size="large"
+          onClick={() => {
+            close();
+          }}
+        />
+      </Stack>
+    </Styles.Container>
+  );
+});
 
 const FeeRateSelectorStyle = {
   Item: styled.div<{ selected: boolean }>`

@@ -109,3 +109,11 @@ export class MemoSuspectMnemonicInclusion extends Error {
     Object.setPrototypeOf(this, MemoSuspectMnemonicInclusion.prototype);
   }
 }
+
+export class UnableToFindProperUtxosError extends Error {
+  constructor(m: string) {
+    super(m);
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, UnableToFindProperUtxosError.prototype);
+  }
+}

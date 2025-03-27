@@ -154,7 +154,11 @@ export class KeyRingPrivateKeyService {
 
         if (isScriptPathSpending) {
           for (const leafHash of tapLeafHashesToSign) {
-            psbt.signTaprootInput(index, actualSigner, leafHash);
+            psbt.signTaprootInput(
+              index,
+              actualSigner,
+              NodeBuffer.from(leafHash)
+            );
           }
         } else {
           psbt.signTaprootInput(index, actualSigner);

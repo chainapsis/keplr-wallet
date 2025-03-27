@@ -457,6 +457,14 @@
 
   "page.sign.starknet.tx.calls": "Calls",
 
+  "page.sign.bitcoin.transaction.data": "Transaction Data",
+  "page.sign.bitcoin.transaction.input": "Input(s)",
+  "page.sign.bitcoin.transaction.output": "Output(s)",
+  "page.sign.bitcoin.transaction.expected-network-fee": "Expected Network Fee",
+  "page.sign.bitcoin.transaction.total-spend": "Total Spend",
+  "page.sign.bitcoin.transaction.utxo-warning": "UTXOs may include assets other than {coinDenom} (e.g. inscriptions, runes).",
+  "page.sign.bitcoin.transaction.review-progress": "{index}/{total} Review Transaction",
+
   "page.sign.components.fee-summary.fee": "Tx Fee",
 
   "page.sign.components.messages.agoric.provision.title": "Provision Smart Wallet",
@@ -639,12 +647,15 @@
   "components.input.recipient-input.wallet-address-label-icns-ens": "Wallet Address or ICNS or ENS",
   "components.input.amount-input.amount-label": "Amount",
   "components.input.amount-input.max-button": "Max",
+  "components.input.amount-input.available-balance-label": "Available: {balance}",
+  "components.input.amount-input.available-balance-tooltip": "The amount of your assets that are available for use or transfer immediately, except for those that are currently staked or locked in LP pools.",
   "components.input.memo-input.memo-label": "Memo",
   "components.input.memo-input.optional-placeholder": "Optional",
   "components.input.fee-control.fee": "Tx Fee: {assets}",
   "components.input.fee-control.max-fee": "Max Fee: {assets}",
   "components.input.fee-control.fee-rate": "Fee Rate: {feeRate} sat/vB",
   "components.input.fee-control.error.insufficient-fee": "Insufficient balance to cover the fees",
+  "components.input.fee-control.error.unable-to-find-proper-utxos": "Can't find proper utxos selection",
   "components.input.fee-control.tooltip.external-fee-set": "Transaction fee was set by website",
   "components.input.fee-control.modal.title": "Fee Options",
   "components.input.fee-control.modal.fee-title": "Fee tier",
@@ -679,9 +690,17 @@
   "components.collapsible-list.collapse": "Collapse",
   "components.collapsible-list.view-more": "View {remain} more",
 
+  "components.bitcoin-guide-box.title.unable-to-get-utxos": "Unable to get UTXOs",
+  "components.bitcoin-guide-box.paragraph.unable-to-get-utxos": "UTXOs are temporarily unavailable. Please try again later.",
+  "components.bitcoin-guide-box.title.partial-signing": "Partial Signing",
+  "components.bitcoin-guide-box.paragraph.partial-signing": "You are signing part of the transaction. Only the inputs from this wallet will be signed.",
+  "components.bitcoin-guide-box.title.none-of-the-inputs-belong-to-this-wallet": "None of the inputs belong to this wallet",
+  "components.bitcoin-guide-box.paragraph.none-of-the-inputs-belong-to-this-wallet": "For security reasons, signing is allowed only if an input belongs to this wallet.",
+
   "button.confirm": "Confirm",
   "button.ok": "OK",
   "button.next": "Next",
+  "button.review": "Review",
   "button.advanced": "Advanced",
   "button.approve": "Approve",
   "button.save": "Save",

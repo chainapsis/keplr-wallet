@@ -6,6 +6,7 @@ import {
   IPsbtSimulator,
   InsufficientFeeError,
   ISenderConfig,
+  UnableToFindProperUtxosError,
 } from "@keplr-wallet/hooks-bitcoin";
 import { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../../styles";
@@ -230,7 +231,10 @@ export const FeeControl: FunctionComponent<{
         <VerticalResizeTransition transitionAlign="top">
           {(feeConfig.uiProperties.error &&
             feeConfig.uiProperties.error.message !== "Fee is not set") ||
-          feeConfig.uiProperties.warning ? (
+          feeConfig.uiProperties.warning ||
+          feeRateConfig.uiProperties.error ||
+          feeRateConfig.uiProperties.warning ||
+          psbtSimulator?.uiProperties.error ? (
             <Box
               marginTop="1.04rem"
               borderRadius="0.5rem"
@@ -252,6 +256,10 @@ export const FeeControl: FunctionComponent<{
               >
                 {(() => {
                   if (feeConfig.uiProperties.error) {
+                    console.log(
+                      "feeConfig.uiProperties.error",
+                      feeConfig.uiProperties.error
+                    );
                     if (
                       feeConfig.uiProperties.error instanceof
                       InsufficientFeeError
@@ -268,6 +276,10 @@ export const FeeControl: FunctionComponent<{
                   }
 
                   if (feeConfig.uiProperties.warning) {
+                    console.log(
+                      "feeConfig.uiProperties.warning",
+                      feeConfig.uiProperties.warning
+                    );
                     return (
                       feeConfig.uiProperties.warning.message ||
                       feeConfig.uiProperties.warning.toString()
@@ -275,6 +287,10 @@ export const FeeControl: FunctionComponent<{
                   }
 
                   if (feeRateConfig.uiProperties.error) {
+                    console.log(
+                      "feeRateConfig.uiProperties.error",
+                      feeRateConfig.uiProperties.error
+                    );
                     return (
                       feeRateConfig.uiProperties.error.message ||
                       feeRateConfig.uiProperties.error.toString()
@@ -282,10 +298,29 @@ export const FeeControl: FunctionComponent<{
                   }
 
                   if (feeRateConfig.uiProperties.warning) {
+                    console.log(
+                      "feeRateConfig.uiProperties.warning",
+                      feeRateConfig.uiProperties.warning
+                    );
                     return (
                       feeRateConfig.uiProperties.warning.message ||
                       feeRateConfig.uiProperties.warning.toString()
                     );
+                  }
+
+                  if (psbtSimulator?.uiProperties.error) {
+                    console.log(
+                      "psbtSimulator?.uiProperties.error",
+                      psbtSimulator?.uiProperties.error
+                    );
+                    if (
+                      psbtSimulator.uiProperties.error instanceof
+                      UnableToFindProperUtxosError
+                    ) {
+                      return intl.formatMessage({
+                        id: "components.input.fee-control.error.unable-to-find-proper-utxos",
+                      });
+                    }
                   }
                 })()}
               </Subtitle4>
@@ -306,7 +341,6 @@ export const FeeControl: FunctionComponent<{
             senderConfig={senderConfig}
             feeConfig={feeConfig}
             feeRateConfig={feeRateConfig}
-            psbtSimulator={psbtSimulator}
             disableAutomaticFeeSet={disableAutomaticFeeSet}
           />
         </Modal>
