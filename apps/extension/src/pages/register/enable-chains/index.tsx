@@ -1490,7 +1490,7 @@ export const EnableChainsScene: FunctionComponent<{
               !fallbackEthereumLedgerApp &&
               !fallbackBitcoinLedgerApp &&
               keyType === "ledger" &&
-              chainStore.modularChainInfos
+              chainStore.groupedModularChainInfos
                 .filter((modularChainInfo) => {
                   const trimSearch = search.trim();
                   const trimSearchLowerCase = trimSearch.toLowerCase();
@@ -1516,10 +1516,7 @@ export const EnableChainsScene: FunctionComponent<{
                         .toLowerCase()
                         .includes(trimSearchLowerCase);
                     } else if ("bitcoin" in modularChainInfo) {
-                      return (
-                        modularChainInfo.bitcoin.currencies[0] ||
-                        modularChainInfo.bitcoin.currencies[1]
-                      ).coinDenom
+                      return modularChainInfo.bitcoin.currencies[0].coinDenom
                         .toLowerCase()
                         .includes(trimSearchLowerCase);
                     }
@@ -1903,10 +1900,7 @@ export const EnableChainsScene: FunctionComponent<{
                 } else {
                   // 어차피 bip44 coin type selection과 ethereum ledger app이 동시에 필요한 경우는 없다.
                   // (ledger에서는 coin type이 app당 할당되기 때문에...)
-                  // 어차피 bip44 coin type selection과 ethereum ledger app이 동시에 필요한 경우는 없다.
-                  // (ledger에서는 coin type이 app당 할당되기 때문에...)
                   if (keyType === "ledger") {
-                    // TODO: Implement Bitcoin support
                     if (fallbackBitcoinLedgerApp) {
                       if (ledgerBitcoinAppNeeds.length > 0) {
                         const keyInfo = keyRingStore.keyInfos.find(
