@@ -1013,7 +1013,7 @@ const PsbtDetailsView: FunctionComponent<{
                   </H5>
                 ) : (
                   <AddressesWithValuesLabel
-                    length={decodedRawData?.inputs.length ?? 0}
+                    length={sumInputValueByAddress?.length ?? 0}
                     isInput={true}
                     currency={currency}
                   />
