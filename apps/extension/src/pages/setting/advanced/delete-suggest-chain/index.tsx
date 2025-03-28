@@ -29,7 +29,7 @@ export const SettingGeneralDeleteSuggestChainPage: FunctionComponent = observer(
     return (
       <HeaderLayout
         title={intl.formatMessage({
-          id: "page.setting.general.manage-non-native-chains-title",
+          id: "page.setting.advanced.manage-non-native-chains-title",
         })}
         left={<BackButton />}
         right={
