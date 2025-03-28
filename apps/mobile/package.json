@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/mobile",
-  "version": "0.12.210",
+  "version": "0.12.211-rc.0",
   "private": true,
   "installConfig": {
     "hoistingLimits": "workspaces"
