@@ -422,6 +422,14 @@ export const AvailableTabView: FunctionComponent<{
                               const account = accountStore.getAccount(
                                 viewToken.chainInfo.chainId
                               );
+                              if ("bitcoin" in viewToken.chainInfo) {
+                                return account.bitcoinAddress?.bech32Address;
+                              }
+
+                              if ("starknet" in viewToken.chainInfo) {
+                                return account.starknetHexAddress;
+                              }
+
                               const isEVMOnlyChain = chainStore.isEvmOnlyChain(
                                 viewToken.chainInfo.chainId
                               );

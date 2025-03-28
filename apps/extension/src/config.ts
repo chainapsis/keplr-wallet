@@ -3144,7 +3144,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       currencies: [
         {
           coinDenom: "BTC",
-          coinMinimalDenom: "taproot:bitcoinMainnet", // TODO: 추후 변경 필요
+          coinMinimalDenom: "sats",
           coinDecimals: 8,
           coinGeckoId: "bitcoin",
           coinImageUrl:
@@ -3173,7 +3173,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       currencies: [
         {
           coinDenom: "BTC",
-          coinMinimalDenom: "nativeSegwit:bitcoinMainnet",
+          coinMinimalDenom: "sats",
           coinDecimals: 8,
           coinGeckoId: "bitcoin",
           coinImageUrl:
@@ -3202,7 +3202,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       currencies: [
         {
           coinDenom: "tBTC",
-          coinMinimalDenom: "taproot:bitcoinTestnet",
+          coinMinimalDenom: "sats-testnet",
           coinDecimals: 8,
           coinImageUrl:
             "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
@@ -3230,7 +3230,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       currencies: [
         {
           coinDenom: "tBTC",
-          coinMinimalDenom: "nativeSegwit:bitcoinTestnet",
+          coinMinimalDenom: "sats-testnet",
           coinDecimals: 8,
           coinImageUrl:
             "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
@@ -3258,7 +3258,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       currencies: [
         {
           coinDenom: "sBTC",
-          coinMinimalDenom: "taproot:bitcoinSignet",
+          coinMinimalDenom: "sats-signet",
           coinDecimals: 8,
           coinGeckoId: "bitcoin", // TODO: temporal value for query price test
           coinImageUrl:
@@ -3287,7 +3287,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       currencies: [
         {
           coinDenom: "sBTC",
-          coinMinimalDenom: "nativeSegwit:bitcoinSignet",
+          coinMinimalDenom: "sats-signet",
           coinDecimals: 8,
           coinGeckoId: "bitcoin",
           coinImageUrl:

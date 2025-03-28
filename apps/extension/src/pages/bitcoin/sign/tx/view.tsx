@@ -918,18 +918,24 @@ const PsbtDetailsView: FunctionComponent<{
         }
       }
 
+      let totalOutputs = new Dec(0);
+      let myOutputs = new Dec(0);
+      if (sumOutputValueByAddress?.length) {
+        for (const output of sumOutputValueByAddress) {
+          totalOutputs = totalOutputs.add(output.value);
+          if (output.isMine) {
+            myOutputs = myOutputs.add(output.value);
+          }
+        }
+      }
+
       const totalFee = fee ?? new Dec(0);
 
-      const myUtxoRatio = totalInputs.gt(new Dec(0))
-        ? myInputs.quo(totalInputs)
-        : new Dec(0);
-      const proportionalFee = totalFee.mul(myUtxoRatio);
-
       return {
-        totalSpend: new CoinPretty(currency, myInputs),
-        expectedFee: new CoinPretty(currency, proportionalFee),
+        totalSpend: new CoinPretty(currency, myInputs.sub(myOutputs)),
+        expectedFee: new CoinPretty(currency, totalFee),
       };
-    }, [sumInputValueByAddress, currency, fee]);
+    }, [sumInputValueByAddress, sumOutputValueByAddress, currency, fee]);
 
     const isPartialSign = sumInputValueByAddress?.some(
       (input) => !input.isMine
@@ -1007,7 +1013,7 @@ const PsbtDetailsView: FunctionComponent<{
                   </H5>
                 ) : (
                   <AddressesWithValuesLabel
-                    length={decodedRawData?.inputs.length ?? 0}
+                    length={sumInputValueByAddress?.length ?? 0}
                     isInput={true}
                     currency={currency}
                   />
@@ -1068,7 +1074,7 @@ const PsbtDetailsView: FunctionComponent<{
               <Gutter size="0.75rem" />
               <Box marginBottom="0.5625rem" paddingX="0.5rem">
                 <AddressesWithValuesLabel
-                  length={decodedRawData?.outputs.length ?? 0}
+                  length={sumOutputValueByAddress?.length ?? 0}
                   isInput={false}
                   currency={currency}
                 />
