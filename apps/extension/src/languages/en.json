@@ -756,7 +756,7 @@
   "components.input.amount-input.amount-label": "Amount",
   "components.input.amount-input.max-button": "Max",
   "components.input.amount-input.available-balance-label": "Available: {balance}",
-  "components.input.amount-input.available-balance-tooltip": "The amount of your assets that are available for use or transfer immediately, except for those that are currently staked or locked in LP pools.",
+  "components.input.amount-input.available-balance-tooltip": "Amount you can use right now after accounting for pending transactions or any holds on your wallet by the protocol.",
   "components.input.memo-input.memo-label": "Memo",
   "components.input.memo-input.optional-placeholder": "Optional",
   "components.input.fee-control.fee": "Tx Fee: {assets}",
