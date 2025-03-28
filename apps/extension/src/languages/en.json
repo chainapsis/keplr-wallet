@@ -168,7 +168,7 @@
   "pages.register.enable-chains.guide.non-native-chain.title": "Enabling Custom Chain",
   "pages.register.enable-chains.guide.non-native-chain.paragraph": "Chains without green check mark are custom (non-native) chains. You can add and use them anytime with Keplr, but Keplr doesn’t offer direct support for custom chain issues.",
   "pages.register.enable-chains.native-chain-view.title": "All Native Chains",
-  "pages.register.enable-chains.native-chain-view.paragraph": "Cosmos, Ethereum, Osmosis..",
+  "pages.register.enable-chains.native-chain-view.paragraph": "Cosmos, Ethereum, Bitcoin..",
   "pages.register.enable-chains.chain-item-token-count": "{count} {count, plural, one {Token} other {Tokens}}",
 
   "pages.register.enable-chains.native-chain-view.ledger-cosmos-title": "All Native Cosmos Chains",

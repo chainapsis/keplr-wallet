@@ -419,12 +419,6 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                 </Caption1>
               </Skeleton>
 
-              {tag ? (
-                <Box alignY="center">
-                  <TokenTag text={tag.text} tooltip={tag.tooltip} />
-                </Box>
-              ) : null}
-
               {!isNotReady && copyAddress ? (
                 <Box alignY="center">
                   <XAxis alignY="center">
@@ -434,6 +428,12 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                       parentIsHover={isHover}
                     />
                   </XAxis>
+                </Box>
+              ) : null}
+
+              {tag ? (
+                <Box alignY="center">
+                  <TokenTag text={tag.text} tooltip={tag.tooltip} />
                 </Box>
               ) : null}
             </Box>
@@ -1002,8 +1002,9 @@ const TokenTag: FunctionComponent<{
             : ColorPalette["gray-500"]
         }
         borderRadius="0.375rem"
-        height="1rem"
         paddingX="0.375rem"
+        paddingTop="0.125rem"
+        paddingBottom="0.1875rem"
       >
         <BaseTypography
           style={{

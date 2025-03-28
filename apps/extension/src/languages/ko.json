@@ -169,7 +169,7 @@
   "pages.register.enable-chains.guide.non-native-chain.title": "선택형 체인 설정 안내",
   "pages.register.enable-chains.guide.non-native-chain.paragraph": "녹색 선택 아이콘이 없는 체인은 선택형(기본 체인이 아닌) 체인입니다. 케플러에서 언제든지 추가하여 사용할 수 있지만, 케플러는 선택형 체인 문제에 대한 직접적인 지원을 제공하지 않습니다.",
   "pages.register.enable-chains.native-chain-view.title": "모든 네이티브 체인",
-  "pages.register.enable-chains.native-chain-view.paragraph": "Cosmos, Ethereum, Osmosis..",
+  "pages.register.enable-chains.native-chain-view.paragraph": "Cosmos, Ethereum, Bitcoin..",
 
   "pages.register.enable-chains.native-chain-view.ledger-cosmos-title": "모든 네이티브 코스모스 체인",
   "pages.register.enable-chains.native-chain-view.ledger-evm-title": "모든 네이티브 EVM 체인",

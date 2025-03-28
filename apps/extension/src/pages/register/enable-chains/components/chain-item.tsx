@@ -405,8 +405,9 @@ export const TokenTag: FunctionComponent<{
             : ColorPalette["gray-550"]
         }
         borderRadius="0.375rem"
-        height="1rem"
         paddingX="0.375rem"
+        paddingTop="0.125rem"
+        paddingBottom="0.1875rem"
       >
         <BaseTypography
           style={{
