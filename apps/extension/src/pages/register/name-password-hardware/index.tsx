@@ -37,7 +37,7 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
           }),
         ],
         stepCurrent: 1,
-        stepTotal: type === "keystone" ? 4 : 5,
+        stepTotal: type === "keystone" ? 4 : 6,
       });
       setHeaderHasSet(true);
     },
@@ -76,7 +76,7 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
               app: connectTo,
               bip44Path: bip44PathState.getPath(),
               stepPrevious: 1,
-              stepTotal: 5,
+              stepTotal: 6,
             });
           } else if (type === "keystone") {
             if (isKeystoneUSB) {
