@@ -172,7 +172,9 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
     const addressIndex = searchParams.get("addressIndex");
     if (
       route === "connect-ledger" &&
-      (ledgerApp === "Starknet" || ledgerApp === "Ethereum")
+      (ledgerApp === "Starknet" ||
+        ledgerApp === "Ethereum" ||
+        ledgerApp === "Bitcoin")
     ) {
       return {
         header: {
@@ -192,10 +194,17 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
             appendModeInfo: {
               vaultId,
               // 이더리움 렛저 앱을 연결하면 이더리움 메인넷을 자동으로 enable 하고
-              // 스타크넷 렛저 앱을 연결하면 스타크넷 메인넷을 자동으로 enable 한다.
-              afterEnableChains: [
-                ledgerApp === "Ethereum" ? "eip155:1" : "starknet:SN_MAIN",
-              ],
+              // 스타크넷 렛저 앱을 연결하면 스타크넷 메인넷을 자동으로 enable 하고
+              // 비트코인 렛저 앱을 연결하면 비트코인 메인넷을 자동으로 enable 한다.
+              afterEnableChains:
+                ledgerApp === "Ethereum"
+                  ? ["eip155:1"]
+                  : ledgerApp === "Starknet"
+                  ? ["starknet:SN_MAIN"]
+                  : [
+                      "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:taproot",
+                      "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:native-segwit",
+                    ],
             },
           },
         },

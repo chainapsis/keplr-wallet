@@ -20,6 +20,7 @@ import { useStore } from "../../../stores";
 import { useNavigate } from "react-router";
 import Eth from "@ledgerhq/hw-app-eth";
 import { LedgerError, StarknetClient } from "@ledgerhq/hw-app-starknet";
+import Btc from "@ledgerhq/hw-app-btc";
 import { Buffer } from "buffer/";
 import { PubKeySecp256k1, PubKeyStarknet } from "@keplr-wallet/crypto";
 import { LedgerUtils } from "../../../utils";
@@ -36,7 +37,7 @@ type Step = "unknown" | "connected" | "app";
 export const ConnectLedgerScene: FunctionComponent<{
   name: string;
   password: string;
-  app: App | "Ethereum" | "Starknet";
+  app: App | "Ethereum" | "Starknet" | "Bitcoin";
   bip44Path: {
     account: number;
     change: number;
@@ -67,7 +68,8 @@ export const ConnectLedgerScene: FunctionComponent<{
     if (
       !Object.keys(AppHRP).includes(propApp) &&
       propApp !== "Ethereum" &&
-      propApp !== "Starknet"
+      propApp !== "Starknet" &&
+      propApp !== "Bitcoin"
     ) {
       throw new Error(`Unsupported app: ${propApp}`);
     }
@@ -353,8 +355,15 @@ export const ConnectLedgerScene: FunctionComponent<{
                 );
 
                 if (isStepMode) {
-                  navigate("/welcome", {
-                    replace: true,
+                  sceneTransition.push("enable-chains", {
+                    vaultId: appendModeInfo.vaultId,
+                    keyType: "ledger",
+                    candidateAddresses: [],
+                    isFresh: false,
+                    skipWelcome: true,
+                    fallbackBitcoinLedgerApp: true,
+                    stepPrevious: stepPrevious,
+                    stepTotal: stepTotal,
                   });
                 } else {
                   window.close();
@@ -368,6 +377,36 @@ export const ConnectLedgerScene: FunctionComponent<{
               await transport.close();
 
               return;
+          }
+        }
+        case "Bitcoin": {
+          // TODO: Implement Bitcoin support
+          transport = await LedgerUtils.tryAppOpen(transport, propApp);
+          const btcApp = new Btc({ transport });
+
+          try {
+            await btcApp.getWalletPublicKey("44'/0'/0'/0/0");
+
+            setStep("app");
+
+            // appendLedgerKeyApp할 때 Bitcoin:Taproot, Bitcoin:NativeSegwit 두 개의 앱을 추가해야 한다.
+            // 이거 마즘??
+
+            if (appendModeInfo) {
+              if (isStepMode) {
+                navigate("/welcome", {
+                  replace: true,
+                });
+              } else {
+                window.close();
+              }
+            }
+          } catch (e) {
+            console.log(e);
+            setStep("unknown");
+            await transport.close();
+
+            return;
           }
         }
       }
@@ -418,6 +457,9 @@ export const ConnectLedgerScene: FunctionComponent<{
                       return <SecretIcon />;
                     case "Starknet":
                       return <StarknetIcon />;
+                    case "Bitcoin":
+                    // TODO: Implement Bitcoin support
+                    // return <BitcoinIcon />;
                     default:
                       return <CosmosIcon />;
                   }

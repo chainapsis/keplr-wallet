@@ -176,6 +176,8 @@
   "pages.register.enable-chains.native-chain-view.ledger-evm-paragraph": "Ethereum, Arbitrum, Base...",
   "pages.register.enable-chains.native-chain-view.ledger-starknet-title": "All Native Starknet Chains",
   "pages.register.enable-chains.native-chain-view.ledger-starknet-paragraph": "Starknet, Starknet Sepolia",
+  "pages.register.enable-chains.native-chain-view.ledger-bitcoin-title": "All Native Bitcoin Chains",
+  "pages.register.enable-chains.native-chain-view.ledger-bitcoin-paragraph": "Bitcoin, Bitcoin Signet, Bitcoin Testnet",
 
   "pages.register.select-derivation-path.title": "Select Account Derivation Path",
   "pages.register.select-derivation-path.paragraph": "To use both paths, you need to go through the import process twice.",

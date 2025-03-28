@@ -143,6 +143,7 @@
     "webpack-cli": "^5.0.1"
   },
   "peerDependencies": {
+    "@ledgerhq/hw-app-btc": "^10",
     "@ledgerhq/hw-app-eth": "^6",
     "@ledgerhq/hw-app-starknet": "^2",
     "@ledgerhq/hw-transport": "^6",

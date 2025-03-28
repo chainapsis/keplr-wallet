@@ -44,7 +44,7 @@ export const ChainItem: FunctionComponent<{
 
   isFresh: boolean;
   tokens?: ViewToken[];
-  showTagText?: "EVM" | "Starknet";
+  showTagText?: "EVM" | "Starknet" | "Bitcoin";
 }> = observer(
   ({
     chainInfo,
