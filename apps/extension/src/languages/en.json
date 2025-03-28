@@ -163,6 +163,7 @@
   "pages.register.enable-chains.skip-button": "Skip",
   "pages.register.enable-chains.guide.can-select-evm-next-step": "You can select EVM chains in the next step.",
   "pages.register.enable-chains.guide.can-select-starknet-later-step": "You can select Starknet chains in a later step.",
+  "pages.register.enable-chains.guide.can-select-bitcoin-later-step": "You can select Bitcoin chains in a later step.",
   "pages.register.enable-chains.guide.starknet.title": "Note for Starknet Users",
   "pages.register.enable-chains.guide.starknet.paragraph": "Importing from other wallets (e.g. Argent, Braavos) will create a new, different account in Keplr.",
   "pages.register.enable-chains.guide.non-native-chain.title": "Enabling Custom Chain",

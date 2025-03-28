@@ -39,7 +39,9 @@ export const NextStepChainItem: FunctionComponent<{
             <Gutter size="0.25rem" />
 
             <Subtitle4 color={ColorPalette["gray-300"]}>
-              {"starknet" in modularChainInfo ? (
+              {"bitcoin" in modularChainInfo ? (
+                <FormattedMessage id="pages.register.enable-chains.guide.can-select-bitcoin-later-step" />
+              ) : "starknet" in modularChainInfo ? (
                 <FormattedMessage id="pages.register.enable-chains.guide.can-select-starknet-later-step" />
               ) : (
                 <FormattedMessage id="pages.register.enable-chains.guide.can-select-evm-next-step" />
