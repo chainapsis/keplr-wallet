@@ -563,6 +563,9 @@ export const EnableChainsScene: FunctionComponent<{
               }
 
               try {
+                if (chainInfo.features?.includes("force-enable-evm-ledger")) {
+                  return true;
+                }
                 // 처리가능한 체인만 true를 반환한다.
                 KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
                   chainInfo.chainId
@@ -1319,6 +1322,13 @@ export const EnableChainsScene: FunctionComponent<{
 
                     const isLedgerSupported = (() => {
                       try {
+                        if (
+                          chainInfo.features?.includes(
+                            "force-enable-evm-ledger"
+                          )
+                        ) {
+                          return true;
+                        }
                         // 처리가능한 체인만 true를 반환한다.
                         KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
                           chainInfo.chainId
