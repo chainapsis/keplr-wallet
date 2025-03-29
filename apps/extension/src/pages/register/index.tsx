@@ -112,6 +112,8 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
       searchParams.get("fallbackStarknetLedgerApp") === "true";
     const fallbackEthereumLedgerApp =
       searchParams.get("fallbackEthereumLedgerApp") === "true";
+    const fallbackBitcoinLedgerApp =
+      searchParams.get("fallbackBitcoinLedgerApp") === "true";
 
     if (vaultId) {
       // 이 시점에서 chainStore가 초기화 되어있는게 보장된다.
@@ -142,6 +144,7 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
             initialSearchValue,
             fallbackStarknetLedgerApp,
             fallbackEthereumLedgerApp,
+            fallbackBitcoinLedgerApp,
           },
         },
       };
