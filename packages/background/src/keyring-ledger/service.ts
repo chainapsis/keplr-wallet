@@ -127,11 +127,11 @@ export class KeyRingLedgerService {
       throw new Error("'modularChainInfo' should have Bitcoin chain info");
     }
 
-    const xpub = (vault.insensitive["Bitcoin"] as any)[
+    const value = (vault.insensitive["Bitcoin"] as any)[
       `${purpose}-${coinType}`
     ];
 
-    if (!xpub) {
+    if (!value) {
       throw new KeplrError(
         "keyring",
         901,
@@ -141,9 +141,24 @@ export class KeyRingLedgerService {
 
     const { account, change, addressIndex } = this.getBIP44PathFromVault(vault);
 
-    const hdPath = `m/${purpose}'/${coinType}'/${account}'/${change}/${addressIndex}`;
+    // coin type is restricted to 0, thus actual hd path uses 0 instead of coin type
+    const hdPath = `m/${purpose}'/0'/${account}'/${change}/${addressIndex}`;
 
-    return PubKeyBitcoinCompatible.fromBase58(xpub, hdPath, network);
+    let pubKey: PubKeyBitcoinCompatible;
+
+    try {
+      pubKey = PubKeyBitcoinCompatible.fromBase58(value, hdPath, network);
+    } catch (e) {
+      // value is pubkey hex
+      pubKey = new PubKeyBitcoinCompatible(
+        Buffer.from(value, "hex"),
+        network,
+        undefined,
+        hdPath
+      );
+    }
+
+    return pubKey;
   }
 
   sign(): {

@@ -20,6 +20,7 @@ export const LedgerGuideBox: FunctionComponent<{
     keyInsensitive: PlainObject;
     isEthereum?: boolean;
     isStarknet?: boolean;
+    isBitcoin?: boolean; // TODO: Implement Bitcoin support
   };
   isLedgerInteracting: boolean;
   ledgerInteractingError: Error | undefined;

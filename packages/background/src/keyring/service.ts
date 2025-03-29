@@ -923,25 +923,25 @@ export class KeyRingService {
       throw new Error("Key is not from ledger");
     }
 
+    const keyValues: Record<string, string> = {};
+
     for (const extendedKey of extendedKeys) {
-      if (
-        vault.insensitive[app] &&
-        typeof vault.insensitive[app] === "object" &&
-        (vault.insensitive[app] as PlainObject)[
-          `${extendedKey.purpose}-${extendedKey.coinType}`
-        ]
-      ) {
-        continue;
-      }
+      const key = `${extendedKey.purpose}-${extendedKey.coinType}`;
+      const value =
+        "xpub" in extendedKey
+          ? extendedKey.xpub
+          : Buffer.from(extendedKey.pubKey).toString("hex");
 
-      this.vaultService.setAndMergeInsensitiveToVault("keyRing", vaultId, {
-        [app]: {
-          [`${extendedKey.purpose}-${extendedKey.coinType}`]: extendedKey.xpub,
-        },
-      });
+      keyValues[key] = value;
     }
-  }
 
+    this.vaultService.setAndMergeInsensitiveToVault("keyRing", vaultId, {
+      [app]: {
+        ...(vault.insensitive[app] as any),
+        ...keyValues,
+      },
+    });
+  }
   getPubKeySelected(chainId: string): Promise<PubKeySecp256k1> {
     return this.getPubKey(chainId, this.selectedVaultId);
   }
