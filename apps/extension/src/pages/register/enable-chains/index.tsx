@@ -1299,6 +1299,7 @@ export const EnableChainsScene: FunctionComponent<{
                 enabledNativeChainIdentifiersInPage.length
               }
               onClick={() => {
+                // TODO: select all 했을 때 비트코인 linked chain들도 같이 선택되도록 처리 필요
                 if (
                   nativeModularChainInfos.length ===
                   enabledNativeChainIdentifiersInPage.length
@@ -1911,7 +1912,34 @@ export const EnableChainsScene: FunctionComponent<{
                           throw new Error("KeyInfo not found");
                         }
 
-                        if (keyInfo.insensitive["Bitcoin"]) {
+                        const keysForBitcoin = ledgerBitcoinAppNeeds.map(
+                          (chainId) => {
+                            const modularChainInfo =
+                              chainStore.getModularChain(chainId);
+                            if (!("bitcoin" in modularChainInfo)) {
+                              throw new Error("Bitcoin not found");
+                            }
+
+                            const bip44 = modularChainInfo.bitcoin.bip44;
+                            if (!bip44.purpose) {
+                              throw new Error("Purpose not found");
+                            }
+
+                            return `${bip44.purpose}-${bip44.coinType}`;
+                          }
+                        );
+
+                        const hasBitcoinExtendedKeys = keysForBitcoin.every(
+                          (key) => {
+                            const bitcoinKeys = keyInfo.insensitive[
+                              "Bitcoin"
+                            ] as any;
+                            if (!bitcoinKeys) return false;
+                            return !!bitcoinKeys[key];
+                          }
+                        );
+
+                        if (hasBitcoinExtendedKeys) {
                           await chainStore.enableChainInfoInUI(
                             ...ledgerBitcoinAppNeeds
                           );

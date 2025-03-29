@@ -31,6 +31,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
 import { STARKNET_LEDGER_DERIVATION_PATH } from "../../sign/utils/handle-starknet-sign";
 import { GuideBox } from "../../../components/guide-box";
+import { ExtendedKey } from "@keplr-wallet/background";
 
 type Step = "unknown" | "connected" | "app";
 
@@ -380,19 +381,117 @@ export const ConnectLedgerScene: FunctionComponent<{
           }
         }
         case "Bitcoin": {
-          // TODO: Implement Bitcoin support
           transport = await LedgerUtils.tryAppOpen(transport, propApp);
-          const btcApp = new Btc({ transport });
+          let btcApp = new Btc({ transport });
+
+          // ensure that the ledger is connected
+          try {
+            await btcApp.getWalletPublicKey(`44'/0'/0'/0/0`, {
+              format: "legacy",
+            });
+          } catch (e) {
+            // TODO: Improve error handling
+            console.log(e);
+            setStep("unknown");
+            await transport.close();
+
+            return;
+          }
+
+          await LedgerUtils.tryAppOpen(transport, propApp);
+          btcApp = new Btc({ transport });
 
           try {
-            await btcApp.getWalletPublicKey("44'/0'/0'/0/0");
-
             setStep("app");
 
-            // appendLedgerKeyApp할 때 Bitcoin:Taproot, Bitcoin:NativeSegwit 두 개의 앱을 추가해야 한다.
-            // 이거 마즘??
-
             if (appendModeInfo) {
+              const keysForBitcoin: Record<
+                string,
+                {
+                  xpubVersion: number;
+                  purpose: number;
+                  coinType: number;
+                }
+              > = {};
+
+              appendModeInfo.afterEnableChains.forEach((chainId) => {
+                const modularChainInfo = chainStore.getModularChain(chainId);
+                if (!("bitcoin" in modularChainInfo)) {
+                  throw new Error("Bitcoin not found");
+                }
+
+                const bip44 = modularChainInfo.bitcoin.bip44;
+
+                if (!bip44.purpose) {
+                  throw new Error("Purpose not found");
+                }
+
+                if (!bip44.xpubVersion) {
+                  throw new Error("xpubVersion not found");
+                }
+
+                const key = `${bip44.purpose}-${bip44.coinType}-${bip44.xpubVersion}`;
+                keysForBitcoin[key] = {
+                  xpubVersion: bip44.xpubVersion,
+                  purpose: bip44.purpose,
+                  coinType: bip44.coinType,
+                };
+              });
+
+              const extendedKeys: ExtendedKey[] = [];
+              for (const key of Object.values(keysForBitcoin)) {
+                // Add delay between requests (transportstatuserror: ledger device: unknown_error (0x6a82))
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+
+                if (key.coinType === 0) {
+                  const hdPath = `${key.purpose}'/${key.coinType}'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`;
+
+                  extendedKeys.push({
+                    xpub: await btcApp.getWalletXpub({
+                      path: hdPath,
+                      xpubVersion: key.xpubVersion,
+                    }),
+                    purpose: key.purpose,
+                    coinType: key.coinType,
+                  });
+                } else {
+                  // coin type is restricted to 0, thus actual hd path uses 0 instead of coin type
+                  const hdPath = `${key.purpose}'/0'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`;
+
+                  const res = await btcApp.getWalletPublicKey(hdPath, {
+                    format:
+                      key.purpose === 86
+                        ? "bech32m"
+                        : key.purpose === 84
+                        ? "bech32"
+                        : "legacy",
+                  });
+
+                  const pubKey = new PubKeySecp256k1(
+                    Buffer.from(res.publicKey, "hex")
+                  );
+
+                  extendedKeys.push({
+                    pubKey: pubKey.toBytes(true),
+                    purpose: key.purpose,
+                    coinType: key.coinType,
+                  });
+                }
+              }
+
+              if (extendedKeys.length > 0) {
+                await keyRingStore.appendLedgerExtendedKeys(
+                  appendModeInfo.vaultId,
+                  extendedKeys,
+                  propApp
+                );
+                await chainStore.enableChainInfoInUI(
+                  ...appendModeInfo.afterEnableChains
+                );
+              }
+
+              await transport.close();
+
               if (isStepMode) {
                 navigate("/welcome", {
                   replace: true,
