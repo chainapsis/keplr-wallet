@@ -41,13 +41,27 @@ export class RecipientConfig
   @observable.ref
   protected nameServices: NameService[] = [];
 
-  constructor(chainGetter: ChainGetter, initialChainId: string) {
+  protected _option:
+    | {
+        enableNameserviceWhenPrefixEntered?: boolean;
+      }
+    | undefined = undefined;
+
+  constructor(
+    chainGetter: ChainGetter,
+    initialChainId: string,
+    option?: {
+      enableNameserviceWhenPrefixEntered?: boolean;
+    }
+  ) {
     super(chainGetter, initialChainId);
 
     this.nameServices.push(new ICNSNameService(this, chainGetter));
     this.nameServices.push(new ENSNameService(this, chainGetter));
 
     makeObservable(this);
+
+    this._option = option;
   }
 
   get preferredNameService(): string | undefined {
@@ -268,6 +282,31 @@ export class RecipientConfig
   setValue(value: string): void {
     this._value = value;
 
+    if (this._option?.enableNameserviceWhenPrefixEntered) {
+      const name = value.split(".")[0];
+      const prefix = value.split(".")[1];
+      if (this.bech32Prefix === prefix && prefix.length > 0) {
+        for (const nameService of this.nameServices) {
+          nameService.setValue(name);
+        }
+        return;
+      }
+
+      if (prefix === "eth") {
+        for (const nameService of this.nameServices) {
+          nameService.setValue(name);
+        }
+        return;
+      }
+
+      if (value.includes(".")) {
+        for (const nameService of this.nameServices) {
+          nameService.setValue("");
+        }
+      }
+      return;
+    }
+
     for (const nameService of this.nameServices) {
       nameService.setValue(value);
     }
@@ -292,9 +331,16 @@ export const useRecipientConfig = (
     ens?: {
       chainId: string;
     };
+    enableNameserviceWhenPrefixEntered?: boolean;
   } = {}
 ) => {
-  const [config] = useState(() => new RecipientConfig(chainGetter, chainId));
+  const [config] = useState(
+    () =>
+      new RecipientConfig(chainGetter, chainId, {
+        enableNameserviceWhenPrefixEntered:
+          options.enableNameserviceWhenPrefixEntered,
+      })
+  );
   config.setChain(chainId);
   config.setAllowHexAddressToBech32Address(
     options.allowHexAddressToBech32Address
