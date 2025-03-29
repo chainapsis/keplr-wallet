@@ -50,7 +50,8 @@ export interface KeyRing {
     vault: Vault,
     purpose: number,
     coinType: number,
-    network: BitcoinNetwork
+    network: BitcoinNetwork,
+    modularChainInfo: ModularChainInfo
   ): PubKeyBitcoinCompatible | Promise<PubKeyBitcoinCompatible>;
   sign(
     vault: Vault,

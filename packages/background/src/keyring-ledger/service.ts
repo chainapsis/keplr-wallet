@@ -4,6 +4,8 @@ import { PubKeySecp256k1, PubKeyStarknet } from "@keplr-wallet/crypto";
 import { KeplrError } from "@keplr-wallet/router";
 import { ModularChainInfo } from "@keplr-wallet/types";
 import { KeyRingService } from "../keyring";
+import { Network as BitcoinNetwork } from "bitcoinjs-lib";
+import { PubKeyBitcoinCompatible } from "@keplr-wallet/crypto";
 
 export class KeyRingLedgerService {
   async init(): Promise<void> {
@@ -114,6 +116,36 @@ export class KeyRingLedgerService {
     return new PubKeyStarknet(bytes);
   }
 
+  getPubKeyBitcoin(
+    vault: Vault,
+    purpose: number,
+    coinType: number,
+    network: BitcoinNetwork,
+    modularChainInfo: ModularChainInfo
+  ): PubKeyBitcoinCompatible {
+    if (!("bitcoin" in modularChainInfo)) {
+      throw new Error("'modularChainInfo' should have Bitcoin chain info");
+    }
+
+    const xpub = (vault.insensitive["Bitcoin"] as any)[
+      `${purpose}-${coinType}`
+    ];
+
+    if (!xpub) {
+      throw new KeplrError(
+        "keyring",
+        901,
+        "No Bitcoin extended public key. Initialize Bitcoin app on Ledger by selecting the chain in the extension"
+      );
+    }
+
+    const { account, change, addressIndex } = this.getBIP44PathFromVault(vault);
+
+    const hdPath = `m/${purpose}'/${coinType}'/${account}'/${change}/${addressIndex}`;
+
+    return PubKeyBitcoinCompatible.fromBase58(xpub, hdPath, network);
+  }
+
   sign(): {
     readonly r: Uint8Array;
     readonly s: Uint8Array;
@@ -122,5 +154,17 @@ export class KeyRingLedgerService {
     throw new Error(
       "Ledger can't sign message in background. You should provide the signature from frontend."
     );
+  }
+
+  protected getBIP44PathFromVault(vault: Vault): {
+    account: number;
+    change: number;
+    addressIndex: number;
+  } {
+    return vault.insensitive["bip44Path"] as {
+      account: number;
+      change: number;
+      addressIndex: number;
+    };
   }
 }

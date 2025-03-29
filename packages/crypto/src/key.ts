@@ -9,6 +9,7 @@ import { ECPairInterface, ECPairFactory } from "ecpair";
 import { Network as BitcoinNetwork, payments } from "bitcoinjs-lib";
 import * as ecc from "./ecc-adapter";
 import * as bitcoin from "bitcoinjs-lib";
+import { fromBase58 } from "bip32";
 
 let _starknetHash: {
   calculateContractAddressFromHash(
@@ -370,6 +371,30 @@ export class PubKeyBitcoinCompatible {
           }
         }
     }
+  }
+
+  static fromBase58(
+    base58: string,
+    hdPath: string,
+    network?: BitcoinNetwork
+  ): PubKeyBitcoinCompatible {
+    const bip32 = fromBase58(base58, network);
+
+    const depth = bip32.depth;
+
+    const hdPathSegments = hdPath.split("/").filter(Boolean);
+    const purposeIndex = hdPathSegments[0] === "m" ? 1 : 0;
+
+    if (depth !== hdPathSegments.length - purposeIndex) {
+      throw new Error("Invalid depth");
+    }
+
+    return new PubKeyBitcoinCompatible(
+      bip32.publicKey,
+      network,
+      bip32.parentFingerprint.toString(16),
+      hdPath
+    );
   }
 }
 

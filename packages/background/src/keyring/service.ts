@@ -1429,7 +1429,13 @@ export class KeyRingService {
     }
 
     return Promise.resolve(
-      keyRing.getPubKeyBitcoin(vault, purpose, coinType, network)
+      keyRing.getPubKeyBitcoin(
+        vault,
+        purpose,
+        coinType,
+        network,
+        modularChainInfo
+      )
     );
   }
   signWithVault(
