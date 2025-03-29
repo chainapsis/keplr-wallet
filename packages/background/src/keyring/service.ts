@@ -2,6 +2,7 @@ import { PlainObject, Vault, VaultService } from "../vault";
 import {
   BIP44HDPath,
   ExportedKeyRingVault,
+  ExtendedKey,
   KeyInfo,
   KeyRing,
   KeyRingStatus,
@@ -906,6 +907,39 @@ export class KeyRingService {
         pubKey: Buffer.from(pubKey).toString("hex"),
       },
     });
+  }
+
+  appendLedgerExtendedKeyRings(
+    vaultId: string,
+    extendedKeys: ExtendedKey[],
+    app: string
+  ) {
+    const vault = this.vaultService.getVault("keyRing", vaultId);
+    if (!vault) {
+      throw new Error("Vault is null");
+    }
+
+    if (vault.insensitive["keyRingType"] !== "ledger") {
+      throw new Error("Key is not from ledger");
+    }
+
+    for (const extendedKey of extendedKeys) {
+      if (
+        vault.insensitive[app] &&
+        typeof vault.insensitive[app] === "object" &&
+        (vault.insensitive[app] as PlainObject)[
+          `${extendedKey.purpose}-${extendedKey.coinType}`
+        ]
+      ) {
+        continue;
+      }
+
+      this.vaultService.setAndMergeInsensitiveToVault("keyRing", vaultId, {
+        [app]: {
+          [`${extendedKey.purpose}-${extendedKey.coinType}`]: extendedKey.xpub,
+        },
+      });
+    }
   }
 
   getPubKeySelected(chainId: string): Promise<PubKeySecp256k1> {

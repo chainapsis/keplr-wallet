@@ -15,6 +15,12 @@ export type BIP44HDPath = {
   addressIndex: number;
 };
 
+export type ExtendedKey = {
+  xpub: string;
+  purpose: number;
+  coinType: number;
+};
+
 export interface KeyInfo {
   readonly id: string;
   readonly name: string;
