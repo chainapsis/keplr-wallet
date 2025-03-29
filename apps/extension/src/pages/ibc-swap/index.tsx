@@ -182,7 +182,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
       ? inChainAccount.ethereumHexAddress
       : inChainAccount.bech32Address,
     // TODO: config로 빼기
-    200000,
+    300000,
     outChainId,
     outCurrency,
     swapFeeBps
@@ -378,7 +378,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         }
       }
 
-      return `${ibcSwapConfigs.amountConfig.outChainId}/${ibcSwapConfigs.amountConfig.outCurrency.coinMinimalDenom}/${type}`;
+      return `${ibcSwapConfigs.amountConfig.chainId}/${ibcSwapConfigs.amountConfig.outChainId}/${ibcSwapConfigs.amountConfig.currency.coinMinimalDenom}/${ibcSwapConfigs.amountConfig.outCurrency.coinMinimalDenom}/${type}`;
     })(),
     () => {
       if (!ibcSwapConfigs.amountConfig.currency) {

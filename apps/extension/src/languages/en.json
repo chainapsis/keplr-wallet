@@ -239,8 +239,8 @@
   "page.setting.general.side-panel-paragraph": "Open Keplr in a sidebar on your screen",
   "page.setting.general.show-24h-price-changes-title": "Show 24H price change",
   "page.setting.general.show-24h-price-changes-paragraph": "Enable or disable the display of 24H token price change",
-  "page.setting.general.manage-non-native-chains-title": "Add/Remove Non-Native Chains",
-  "page.setting.general.manage-non-native-chains-paragraph": "Non-native chains should be first added to Keplr to manage their visibility.",
+  "page.setting.advanced.manage-non-native-chains-title": "Add/Remove Non-Native Chains",
+  "page.setting.advanced.manage-non-native-chains-paragraph": "Non-native chains should be first added to Keplr to manage their visibility.",
   "page.setting.general.manage-chain-visibility-title": "Add/Remove Chains",
   "page.setting.general.manage-chain-visibility-paragraph": "Select chains (and their assets) to be displayed on your current account",
 

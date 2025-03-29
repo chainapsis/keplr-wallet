@@ -214,8 +214,8 @@
   "page.setting.general.theme-title": "主题",
   "page.setting.general.manage-authz-title": "管理AuthZ",
   "page.setting.general.link-kpelr-mobile-title": "连接Keplr移动端",
-  "page.setting.general.manage-non-native-chains-title": "添加/删除非原生链",
-  "page.setting.general.manage-non-native-chains-paragraph": "应首先将非原生链添加到Keplr以管理其可见性。",
+  "page.setting.advanced.manage-non-native-chains-title": "添加/删除非原生链",
+  "page.setting.advanced.manage-non-native-chains-paragraph": "应首先将非原生链添加到Keplr以管理其可见性。",
   "page.setting.general.manage-chain-visibility-title": "添加/删除链",
   "page.setting.general.manage-chain-visibility-paragraph": "选择要显示在你当前帐户里的链（及其资产）",
 
