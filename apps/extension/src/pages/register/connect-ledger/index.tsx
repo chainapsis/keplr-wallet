@@ -440,9 +440,6 @@ export const ConnectLedgerScene: FunctionComponent<{
 
               const extendedKeys: ExtendedKey[] = [];
               for (const key of Object.values(keysForBitcoin)) {
-                // Add delay between requests (transportstatuserror: ledger device: unknown_error (0x6a82))
-                await new Promise((resolve) => setTimeout(resolve, 1000));
-
                 if (key.coinType === 0) {
                   const hdPath = `${key.purpose}'/${key.coinType}'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`;
 

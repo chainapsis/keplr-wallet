@@ -22,6 +22,7 @@ import { ArbitraryMsgSignHeader } from "../../../sign/components/arbitrary-messa
 import { ArbitraryMsgRequestOrigin } from "../../../sign/components/arbitrary-message/arbitrary-message-origin";
 import { ArbitraryMsgWalletDetails } from "../../../sign/components/arbitrary-message/arbitrary-message-wallet-details";
 import { Box } from "../../../../components/box";
+import { connectAndSignMessageWithLedger } from "../../../sign/utils/handle-bitcoin-sgin";
 
 export const SignBitcoinMessageView: FunctionComponent<{
   interactionData: NonNullable<
@@ -74,16 +75,25 @@ export const SignBitcoinMessageView: FunctionComponent<{
   });
 
   const approve = async () => {
-    const signature: string[] | undefined = undefined;
+    let signature: string | undefined = undefined;
     if (interactionData.data.keyType === "ledger") {
       setIsLedgerInteracting(true);
       setLedgerInteractingError(undefined);
-      // TODO: 렛저 서명 지원
-      // signature = await connectAndSignMessageWithLedger(
-      //   interactionData.data.pubKey,
-      //   interactionData.data.message,
-      //   interactionData.data.signer
-      // );
+
+      const bip44 = modularChainInfo.bitcoin.bip44;
+
+      if (!bip44.purpose) {
+        throw new Error("BIP44 purpose is not set");
+      }
+
+      signature = await connectAndSignMessageWithLedger(
+        interactionData,
+        bip44.purpose,
+        bip44.coinType,
+        {
+          useWebHID: false, // TODO: useWebHID 추가
+        }
+      );
     }
 
     try {
