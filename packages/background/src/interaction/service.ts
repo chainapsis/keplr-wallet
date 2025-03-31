@@ -431,6 +431,11 @@ export class InteractionService {
         wasPingSucceeded = true;
       }
 
+      const data = this.waitingMap.get(interactionId);
+      if (!data) {
+        break;
+      }
+
       i++;
     }
   }
