@@ -143,13 +143,13 @@
     "webpack-cli": "^5.0.1"
   },
   "peerDependencies": {
-    "@ledgerhq/hw-app-btc": "^10",
     "@ledgerhq/hw-app-eth": "^6",
     "@ledgerhq/hw-app-starknet": "^2",
     "@ledgerhq/hw-transport": "^6",
     "@ledgerhq/hw-transport-webhid": "^6",
     "@ledgerhq/hw-transport-webusb": "^6",
     "bitcoinjs-lib": "^6",
+    "ledger-bitcoin": "^0.2.3",
     "mobx": "^6",
     "mobx-react-lite": "^3",
     "mobx-utils": "^6",

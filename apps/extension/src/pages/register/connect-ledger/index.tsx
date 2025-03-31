@@ -20,7 +20,6 @@ import { useStore } from "../../../stores";
 import { useNavigate } from "react-router";
 import Eth from "@ledgerhq/hw-app-eth";
 import { LedgerError, StarknetClient } from "@ledgerhq/hw-app-starknet";
-import Btc from "@ledgerhq/hw-app-btc";
 import { Buffer } from "buffer/";
 import { PubKeySecp256k1, PubKeyStarknet } from "@keplr-wallet/crypto";
 import { LedgerUtils } from "../../../utils";
@@ -32,6 +31,7 @@ import { useTheme } from "styled-components";
 import { STARKNET_LEDGER_DERIVATION_PATH } from "../../sign/utils/handle-starknet-sign";
 import { GuideBox } from "../../../components/guide-box";
 import { ExtendedKey } from "@keplr-wallet/background";
+import AppClient from "ledger-bitcoin";
 
 type Step = "unknown" | "connected" | "app";
 
@@ -384,15 +384,13 @@ export const ConnectLedgerScene: FunctionComponent<{
         case "Bitcoin":
         case "Bitcoin Test": {
           transport = await LedgerUtils.tryAppOpen(transport, propApp);
-          let btcApp = new Btc({ transport });
+          let btcApp = new AppClient(transport as any);
 
           // ensure that the ledger is connected
           try {
             const coinType = propApp === "Bitcoin" ? 0 : 1;
 
-            await btcApp.getWalletPublicKey(`44'/${coinType}'/0'/0/0`, {
-              format: "legacy",
-            });
+            await btcApp.getExtendedPubkey(`m/44'/${coinType}'/0'/0/0`);
           } catch (e) {
             // TODO: Improve error handling
             console.log(e);
@@ -403,7 +401,7 @@ export const ConnectLedgerScene: FunctionComponent<{
           }
 
           await LedgerUtils.tryAppOpen(transport, propApp);
-          btcApp = new Btc({ transport });
+          btcApp = new AppClient(transport as any);
 
           try {
             setStep("app");
@@ -459,13 +457,10 @@ export const ConnectLedgerScene: FunctionComponent<{
                   (propApp === "Bitcoin" && key.coinType === 0) ||
                   (propApp === "Bitcoin Test" && key.coinType === 1)
                 ) {
-                  const hdPath = `${key.purpose}'/${key.coinType}'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`;
+                  const hdPath = `m/${key.purpose}'/${key.coinType}'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`;
 
                   extendedKeys.push({
-                    xpub: await btcApp.getWalletXpub({
-                      path: hdPath,
-                      xpubVersion: key.xpubVersion,
-                    }),
+                    xpub: await btcApp.getExtendedPubkey(hdPath),
                     purpose: key.purpose,
                     coinType: key.coinType,
                   });
