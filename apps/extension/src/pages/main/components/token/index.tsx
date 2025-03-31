@@ -267,6 +267,24 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
       );
     })();
 
+    const isTokenTagTooLong =
+      viewToken.chainInfo.chainName.length + (tag?.text.length ?? 0) > 24;
+    const TokenTagAndCopyAddressComponents = [
+      tag ? (
+        <Box alignY="center">
+          <TokenTag text={tag.text} tooltip={tag.tooltip} />
+        </Box>
+      ) : null,
+      !isNotReady && copyAddress ? (
+        <Box alignY="center">
+          <XAxis alignY="center">
+            <Gutter size="-0.125rem" />
+            <CopyAddressButton address={copyAddress} parentIsHover={isHover} />
+          </XAxis>
+        </Box>
+      ) : null,
+    ];
+
     const TokenItemContent = () => (
       <Styles.Container
         forChange={forChange}
@@ -418,24 +436,10 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                     : viewToken.chainInfo.chainName}
                 </Caption1>
               </Skeleton>
-
-              {!isNotReady && copyAddress ? (
-                <Box alignY="center">
-                  <XAxis alignY="center">
-                    <Gutter size="-0.125rem" />
-                    <CopyAddressButton
-                      address={copyAddress}
-                      parentIsHover={isHover}
-                    />
-                  </XAxis>
-                </Box>
-              ) : null}
-
-              {tag ? (
-                <Box alignY="center">
-                  <TokenTag text={tag.text} tooltip={tag.tooltip} />
-                </Box>
-              ) : null}
+              {/** 토큰 태그가 너무 길면 주소 복사 버튼이 줄바꿈 되는데, 복사 버튼 대신 토큰 태그가 줄바꿈 되게 하기 위해 대충 이렇게 처리한다.. */}
+              {isTokenTagTooLong
+                ? TokenTagAndCopyAddressComponents.reverse()
+                : TokenTagAndCopyAddressComponents}
             </Box>
           </Stack>
 
