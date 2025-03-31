@@ -3,6 +3,7 @@ import {
   PushInteractionDataMsg,
   PushEventDataMsg,
   InteractionPingMsg,
+  InteractionIdPingMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -15,6 +16,7 @@ export function interactionForegroundInit(
   router.registerMessage(PushInteractionDataMsg);
   router.registerMessage(PushEventDataMsg);
   router.registerMessage(InteractionPingMsg);
+  router.registerMessage(InteractionIdPingMsg);
 
   router.addHandler(ROUTE, getHandler(service));
 }

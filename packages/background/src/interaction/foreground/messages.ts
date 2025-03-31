@@ -9,7 +9,6 @@ export class InteractionPingMsg extends Message<boolean> {
 
   constructor(
     public readonly windowId: number | undefined,
-    public readonly interactionId: string | undefined,
     public readonly ignoreWindowIdAndForcePing: boolean
   ) {
     super();
@@ -25,6 +24,28 @@ export class InteractionPingMsg extends Message<boolean> {
 
   type(): string {
     return InteractionPingMsg.type();
+  }
+}
+
+export class InteractionIdPingMsg extends Message<boolean> {
+  public static type() {
+    return "interaction-ping-id";
+  }
+
+  constructor(public readonly interactionId: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return InteractionIdPingMsg.type();
   }
 }
 

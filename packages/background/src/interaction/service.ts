@@ -7,6 +7,7 @@ import {
   MessageRequester,
 } from "@keplr-wallet/router";
 import {
+  InteractionIdPingMsg,
   InteractionPingMsg,
   PushEventDataMsg,
   PushInteractionDataMsg,
@@ -363,7 +364,6 @@ export class InteractionService {
             // XXX: popup에서는 위에 로직에서 window id를 -1로 대충 처리 했었다.
             new InteractionPingMsg(
               windowId === -1 ? undefined : windowId,
-              undefined,
               false
             )
           );
@@ -408,7 +408,7 @@ export class InteractionService {
       try {
         const res = await this.extensionMessageRequesterToUI!.sendMessage(
           APP_PORT,
-          new InteractionPingMsg(0, interactionId, true)
+          new InteractionIdPingMsg(interactionId)
         );
         if (res) {
           succeeded = true;
@@ -487,7 +487,7 @@ export class InteractionService {
       // 그 부분에 trick이 들어가 있다.
       return await this.extensionMessageRequesterToUI.sendMessage(
         APP_PORT,
-        new InteractionPingMsg(tab.windowId, undefined, false)
+        new InteractionPingMsg(tab.windowId, false)
       );
     } catch {
       return false;

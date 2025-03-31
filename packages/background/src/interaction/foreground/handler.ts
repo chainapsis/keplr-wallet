@@ -6,6 +6,7 @@ import {
   Message,
 } from "@keplr-wallet/router";
 import {
+  InteractionIdPingMsg,
   InteractionPingMsg,
   PushEventDataMsg,
   PushInteractionDataMsg,
@@ -26,6 +27,11 @@ export const getHandler: (service: InteractionForegroundService) => Handler = (
         return handlePushEventDataMsg(service)(env, msg as PushEventDataMsg);
       case InteractionPingMsg:
         return handleInteractionPing(service)(env, msg as InteractionPingMsg);
+      case InteractionIdPingMsg:
+        return handleInteractionIdPing(service)(
+          env,
+          msg as InteractionIdPingMsg
+        );
       default:
         throw new KeplrError("interaction", 110, "Unknown msg type");
     }
@@ -55,10 +61,17 @@ const handleInteractionPing: (
     if (!service.pingHandler) {
       return false;
     }
-    return service.pingHandler(
-      msg.windowId,
-      msg.interactionId,
-      msg.ignoreWindowIdAndForcePing
-    );
+    return service.pingHandler(msg.windowId, msg.ignoreWindowIdAndForcePing);
+  };
+};
+
+const handleInteractionIdPing: (
+  service: InteractionForegroundService
+) => InternalHandler<InteractionIdPingMsg> = (service) => {
+  return (_env, msg) => {
+    if (!service.interactionIdPingHandler) {
+      return false;
+    }
+    return service.interactionIdPingHandler(msg.interactionId);
   };
 };
