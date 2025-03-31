@@ -60,6 +60,7 @@ export class InteractionStore implements InteractionForegroundHandler {
     ) => void,
     protected readonly pingHandler?: (
       windowId: number | undefined,
+      interactionId: string | undefined,
       ignoreWindowIdAndForcePing: boolean
     ) => Promise<boolean>
   ) {

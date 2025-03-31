@@ -302,7 +302,7 @@ export class InteractionService {
       if (this.sidePanelService.getIsEnabled()) {
         this.startCheckPingOnUIWithWindowId();
       }
-      this.startCheckPingOnUI();
+      this.startCheckPingOnUI(interactionWaitingData.id);
     }
 
     return interactionWaitingData;
@@ -363,6 +363,7 @@ export class InteractionService {
             // XXX: popup에서는 위에 로직에서 window id를 -1로 대충 처리 했었다.
             new InteractionPingMsg(
               windowId === -1 ? undefined : windowId,
+              undefined,
               false
             )
           );
@@ -394,17 +395,20 @@ export class InteractionService {
     }
   }
 
-  protected async startCheckPingOnUI() {
+  protected async startCheckPingOnUI(interactionId: string) {
     let wasPingSucceeded = false;
+    let i = 0;
 
     while (this.waitingMap.size > 0 && this.extensionMessageRequesterToUI) {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) =>
+        setTimeout(resolve, Math.min((i + 1) * 100), 500)
+      );
 
       let succeeded = false;
       try {
         const res = await this.extensionMessageRequesterToUI!.sendMessage(
           APP_PORT,
-          new InteractionPingMsg(0, true)
+          new InteractionPingMsg(0, interactionId, true)
         );
         if (res) {
           succeeded = true;
@@ -414,11 +418,11 @@ export class InteractionService {
       }
 
       if (wasPingSucceeded && !succeeded) {
-        const data = this.waitingMap.values();
+        const data = this.waitingMap.get(interactionId);
         // UI가 꺼진 것으로 판단한다.
         // 그래서 모든 interaction을 reject한다.
-        for (const d of data) {
-          this.rejectV2(d.id);
+        if (data) {
+          this.rejectV2(data.id);
         }
         break;
       }
@@ -426,6 +430,8 @@ export class InteractionService {
       if (!wasPingSucceeded && succeeded) {
         wasPingSucceeded = true;
       }
+
+      i++;
     }
   }
 
@@ -476,7 +482,7 @@ export class InteractionService {
       // 그 부분에 trick이 들어가 있다.
       return await this.extensionMessageRequesterToUI.sendMessage(
         APP_PORT,
-        new InteractionPingMsg(tab.windowId, false)
+        new InteractionPingMsg(tab.windowId, undefined, false)
       );
     } catch {
       return false;

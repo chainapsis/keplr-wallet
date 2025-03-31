@@ -195,6 +195,15 @@ export class RootStore {
         }
       }
 
+      // popup 상태일때 interaction에 대한 ping이 있을때
+      // 해당 interaction id를 가지고 있지 않으면 응답 자체를 안해야한다.
+      if (msg instanceof InteractionPingMsg && msg.interactionId != null) {
+        const interaction = this.interactionStore.getData(msg.interactionId);
+        if (!interaction) {
+          return true;
+        }
+      }
+
       return false;
     });
     router.addGuard(ContentScriptGuards.checkMessageIsInternal);
@@ -249,7 +258,11 @@ export class RootStore {
           setInteractionDataHref(fresh[0]);
         }
       },
-      async (windowId: number | undefined, ignoreWindowIdAndForcePing) => {
+      async (
+        windowId: number | undefined,
+        interactionId: string | undefined,
+        ignoreWindowIdAndForcePing
+      ) => {
         const url = new URL(window.location.href);
         // popup 또는 side panel에서만 interaction을 처리할 수 있다...
         // interaction을 처리할 수 있는 UI가 존재하는 경우
@@ -257,6 +270,12 @@ export class RootStore {
         // XXX: register.html 등에서는 interaction을 처리할 수 없기 때문에
         //      이러한 경우를 막기 위해서 여기서 pathname을 확실하게 확인해야한다.
         if (url.pathname === "/popup.html") {
+          if (interactionId != null) {
+            const interaction = this.interactionStore.getData(interactionId);
+            if (!interaction) {
+              return false;
+            }
+          }
           return true;
         }
         if (url.pathname === "/sidePanel.html") {

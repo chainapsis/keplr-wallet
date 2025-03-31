@@ -55,6 +55,10 @@ const handleInteractionPing: (
     if (!service.pingHandler) {
       return false;
     }
-    return service.pingHandler(msg.windowId, msg.ignoreWindowIdAndForcePing);
+    return service.pingHandler(
+      msg.windowId,
+      msg.interactionId,
+      msg.ignoreWindowIdAndForcePing
+    );
   };
 };
