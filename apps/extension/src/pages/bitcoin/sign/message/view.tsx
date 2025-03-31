@@ -80,16 +80,9 @@ export const SignBitcoinMessageView: FunctionComponent<{
       setIsLedgerInteracting(true);
       setLedgerInteractingError(undefined);
 
-      const bip44 = modularChainInfo.bitcoin.bip44;
-
-      if (!bip44.purpose) {
-        throw new Error("BIP44 purpose is not set");
-      }
-
       signature = await connectAndSignMessageWithLedger(
         interactionData,
-        bip44.purpose,
-        bip44.coinType,
+        modularChainInfo,
         {
           useWebHID: false, // TODO: useWebHID 추가
         }
