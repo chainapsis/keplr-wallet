@@ -114,9 +114,11 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
     const amount = this.amountConfig.amount;
 
-    const need = amount.reduce((acc, cur) => {
-      return acc.add(new Dec(cur.toCoin().amount));
-    }, new Dec(0));
+    const need = amount
+      .reduce((acc, cur) => {
+        return acc.add(new Dec(cur.toCoin().amount));
+      }, new Dec(0))
+      .add(new Dec(fee.toCoin().amount));
 
     const availableBalance =
       this.availableBalanceConfig.availableBalanceByAddress(
