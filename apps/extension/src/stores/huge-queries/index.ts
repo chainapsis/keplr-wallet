@@ -344,10 +344,6 @@ export class HugeQueriesStore {
           ChainIdHelper.parse(modularChainInfo.chainId).identifier
         }/${currency.coinMinimalDenom}`;
         if (!keysUsed.get(key)) {
-          if (queryBalance.balance.toDec().equals(HugeQueriesStore.zeroDec)) {
-            continue;
-          }
-
           keysUsed.set(key, true);
           prevKeyMap.delete(key);
           this.balanceBinarySort.pushAndSort(key, {

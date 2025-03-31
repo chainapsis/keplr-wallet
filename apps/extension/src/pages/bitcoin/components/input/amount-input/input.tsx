@@ -5,7 +5,7 @@ import {
   IAmountConfig,
   ZeroAmountError,
 } from "@keplr-wallet/hooks-bitcoin";
-import { TextInput } from "../../../../../components/input";
+import { TextInput } from "../../../../../components/input/text-input";
 import { useStore } from "../../../../../stores";
 import { CoinPretty, Dec, DecUtils } from "@keplr-wallet/unit";
 import { Box } from "../../../../../components/box";

@@ -418,24 +418,24 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                     : viewToken.chainInfo.chainName}
                 </Caption1>
               </Skeleton>
-
-              {!isNotReady && copyAddress ? (
-                <Box alignY="center">
-                  <XAxis alignY="center">
-                    <Gutter size="-0.125rem" />
-                    <CopyAddressButton
-                      address={copyAddress}
-                      parentIsHover={isHover}
-                    />
-                  </XAxis>
-                </Box>
-              ) : null}
-
-              {tag ? (
-                <Box alignY="center">
-                  <TokenTag text={tag.text} tooltip={tag.tooltip} />
-                </Box>
-              ) : null}
+              <XAxis>
+                {tag ? (
+                  <Box alignY="center" key="token-tag">
+                    <TokenTag text={tag.text} tooltip={tag.tooltip} />
+                  </Box>
+                ) : null}
+                {!isNotReady && copyAddress ? (
+                  <Box alignY="center" key="copy-address">
+                    <XAxis alignY="center">
+                      <Gutter size="-0.125rem" />
+                      <CopyAddressButton
+                        address={copyAddress}
+                        parentIsHover={isHover}
+                      />
+                    </XAxis>
+                  </Box>
+                ) : null}
+              </XAxis>
             </Box>
           </Stack>
 
