@@ -77,6 +77,7 @@ import { HeaderProps } from "../../../../layouts/header/types";
 import { KeplrError } from "@keplr-wallet/router";
 import { ErrModuleLedgerSign } from "../../../sign/utils/ledger-types";
 import { LedgerGuideBox } from "../../../sign/components/ledger-guide-box";
+import { connectAndSignPsbtsWithLedger } from "../../../sign/utils/handle-bitcoin-sgin";
 
 export const SignBitcoinTxView: FunctionComponent<{
   interactionData: NonNullable<SignBitcoinTxInteractionStore["waitingData"]>;
@@ -361,6 +362,8 @@ export const SignBitcoinTxView: FunctionComponent<{
     address: interactionData.data.address,
   };
 
+  console.log("validatedPsbts", validatedPsbts);
+
   const approve = async () => {
     try {
       const feeCurrency = chainStore
@@ -385,27 +388,31 @@ export const SignBitcoinTxView: FunctionComponent<{
         }[];
       }[] = [];
 
-      for (const psbt of validatedPsbts) {
+      for (const validated of validatedPsbts) {
         psbtSignData.push({
-          psbtBase64: psbt.psbt.toBase64(),
-          psbtHex: psbt.psbt.toHex(),
-          inputsToSign: psbt.inputsToSign,
+          psbtBase64: validated.psbt.toBase64(),
+          psbtHex: validated.psbt.toHex(),
+          inputsToSign: validated.inputsToSign,
         });
       }
 
-      const signedPsbtsHexes: string[] = [];
+      let signedPsbtsHexes: string[] | undefined;
       if (interactionData.data.keyType === "ledger") {
         setIsLedgerInteracting(true);
         setLedgerInteractingError(undefined);
 
-        throw new KeplrError(ErrModuleLedgerSign, 4, "test");
-        // TODO: ledger로 서명
+        signedPsbtsHexes = await connectAndSignPsbtsWithLedger(
+          interactionData,
+          psbtSignData,
+          modularChainInfo,
+          { useWebHID: false }
+        );
       }
 
       await signBitcoinTxInteractionStore.approveWithProceedNext(
         interactionData.id,
         psbtSignData,
-        signedPsbtsHexes,
+        signedPsbtsHexes ?? [],
         async (proceedNext) => {
           if (!proceedNext) {
             if (
@@ -1033,9 +1040,8 @@ const PsbtDetailsView: FunctionComponent<{
           isUnableToGetUTXOs={isUnableToGetUTXOs}
           isUnableToSign={isUnableToSign}
         />
-        {hasGuideBox && <Gutter size="0.75rem" />}
         {ledgerGuideBox}
-        {hasLedgerGuideBox && <Gutter size="0.75rem" />}
+        {(hasGuideBox || hasLedgerGuideBox) && <Gutter size="0.75rem" />}
         {totalPsbts && totalPsbts > 1 && currentPsbtIndex !== undefined && (
           <React.Fragment>
             <Box padding="0.25rem" alignX="center">
