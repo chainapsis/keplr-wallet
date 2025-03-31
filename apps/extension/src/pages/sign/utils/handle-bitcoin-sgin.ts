@@ -1,5 +1,6 @@
 import { SignBitcoinMessageInteractionStore } from "@keplr-wallet/stores-core";
 import {
+  ErrFailedGetPublicKey,
   ErrFailedInit,
   ErrModuleLedgerSign,
   ErrPublicKeyUnmatched,
@@ -230,7 +231,7 @@ async function checkBitcoinPubKey(
       );
     }
   } catch (e) {
-    throw new KeplrError(ErrModuleLedgerSign, 9999, e.message);
+    throw new KeplrError(ErrModuleLedgerSign, ErrFailedGetPublicKey, e.message);
   } finally {
     await transport.close();
   }
