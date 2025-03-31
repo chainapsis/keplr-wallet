@@ -8,12 +8,13 @@ import {
 import Transport from "@ledgerhq/hw-transport";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
-import Btc from "@ledgerhq/hw-app-btc";
-import { PubKeyBitcoinCompatible } from "@keplr-wallet/crypto";
+import { PubKeyBitcoinCompatible, toXOnly } from "@keplr-wallet/crypto";
 import { KeplrError } from "@keplr-wallet/router";
-import { encodeLegacySignature } from "@keplr-wallet/background";
 import { ModularChainInfo } from "@keplr-wallet/types";
-
+import AppClient, { DefaultWalletPolicy } from "ledger-bitcoin";
+import { Network } from "bitcoinjs-lib";
+import { toOutputScript } from "bitcoinjs-lib/src/address";
+import { BIP322 } from "@keplr-wallet/background";
 export const connectAndSignMessageWithLedger = async (
   interactionData: NonNullable<
     SignBitcoinMessageInteractionStore["waitingData"]
@@ -49,8 +50,9 @@ export const connectAndSignMessageWithLedger = async (
     addressIndex: number;
   };
 
-  const isTestnet = coinType === 1;
+  const network = interactionData.data.network;
 
+  // 여기서 이미 Bitcoin 또는 Bitcoin Testnet 중 하나의 앱이 열려있어야 한다.
   await checkBitcoinPubKey(
     interactionData.data.pubKey,
     {
@@ -60,6 +62,7 @@ export const connectAndSignMessageWithLedger = async (
       change,
       addressIndex,
     },
+    network,
     options
   );
 
@@ -76,34 +79,99 @@ export const connectAndSignMessageWithLedger = async (
     );
   }
 
-  const hdPath = `${purpose}'/${coinType}'/${account}'/${change}/${addressIndex}`;
+  const btcApp = new AppClient(transport as any);
+
+  const derivationPath = `m/${purpose}'/${coinType}'/${account}'`;
+
+  const fullPath = `${derivationPath}/${change}/${addressIndex}`;
 
   try {
     const message = interactionData.data.message;
     const signType = interactionData.data.signType;
 
     if (signType === "bip322-simple") {
-      // TODO: implement bip322-simple
-      throw new KeplrError(
-        ErrModuleLedgerSign,
-        9999,
-        "BIP322-simple is not supported yet"
+      const address = interactionData.data.address;
+      const network = interactionData.data.network;
+      const masterFp = await btcApp.getMasterFingerprint();
+      const scriptPubKey = toOutputScript(address, network);
+      const internalPubKey =
+        purpose === 86
+          ? toXOnly(Buffer.from(interactionData.data.pubKey))
+          : undefined;
+      const txToSpend = BIP322.buildToSpendTx(message, scriptPubKey);
+      const txToSign = BIP322.buildToSignTx(
+        txToSpend.getId(),
+        scriptPubKey,
+        false,
+        internalPubKey
       );
+
+      if (purpose === 86) {
+        txToSign.updateInput(0, {
+          tapBip32Derivation: [
+            {
+              masterFingerprint: Buffer.from(masterFp, "hex"),
+              pubkey: toXOnly(Buffer.from(interactionData.data.pubKey)),
+              path: fullPath,
+              leafHashes: [],
+            },
+          ],
+        });
+      } else {
+        txToSign.updateInput(0, {
+          bip32Derivation: [
+            {
+              masterFingerprint: Buffer.from(masterFp, "hex"),
+              pubkey: Buffer.from(interactionData.data.pubKey),
+              path: fullPath,
+            },
+          ],
+        });
+      }
+
+      const xpub = await btcApp.getExtendedPubkey(derivationPath);
+
+      const descriptorTemplate =
+        purpose === 86
+          ? "tr(@0/**)"
+          : purpose === 84
+          ? "wpkh(@0/**)"
+          : "pkh(@0/**)";
+
+      const policy = new DefaultWalletPolicy(
+        descriptorTemplate,
+        `[${derivationPath.replace("m", masterFp)}]${xpub}`
+      );
+
+      const signatures = await btcApp.signPsbt(
+        txToSign.toBase64(),
+        policy,
+        null
+      );
+
+      for (const [index, partialSignature] of signatures) {
+        if (purpose === 86) {
+          txToSign.updateInput(index, {
+            tapKeySig: partialSignature.signature,
+          });
+        } else {
+          txToSign.updateInput(index, {
+            partialSig: [
+              {
+                pubkey: partialSignature.pubkey,
+                signature: partialSignature.signature,
+              },
+            ],
+          });
+        }
+      }
+
+      txToSign.finalizeAllInputs();
+
+      return BIP322.encodeWitness(txToSign);
     }
 
-    const btcApp = new Btc({ transport });
-
-    // ecdsa
-    const { v, r, s } = await btcApp.signMessage(
-      hdPath,
-      Buffer.from(message).toString("hex")
-    );
-
-    return encodeLegacySignature(
-      Buffer.from(r, "hex"),
-      Buffer.from(s, "hex"),
-      v
-    );
+    return await btcApp.signMessage(Buffer.from(message), fullPath);
   } catch (e) {
     console.log("error", e);
     throw new KeplrError(ErrModuleLedgerSign, 9999, e.message);
@@ -121,8 +189,9 @@ async function checkBitcoinPubKey(
     change: number;
     addressIndex: number;
   },
+  network: Network,
   options: LedgerOptions
-): Promise<string> {
+): Promise<void> {
   let transport: Transport;
 
   const { purpose, coinType, account, change, addressIndex } = bip44Path;
@@ -142,21 +211,16 @@ async function checkBitcoinPubKey(
   }
 
   try {
-    const btcApp = new Btc({
-      transport,
-      currency: coinType === 1 ? "bitcoin_testnet" : "bitcoin",
-    });
+    const btcApp = new AppClient(transport as any);
 
-    const { publicKey } = await btcApp.getWalletPublicKey(hdPath, {
-      format: purpose === 86 ? "bech32m" : purpose === 84 ? "bech32" : "legacy",
-    });
+    const xpub = await btcApp.getExtendedPubkey(hdPath);
 
     if (
       Buffer.from(
         new PubKeyBitcoinCompatible(Buffer.from(expectedPubKey)).toBytes()
       ).toString("hex") !==
       Buffer.from(
-        new PubKeyBitcoinCompatible(Buffer.from(publicKey, "hex")).toBytes()
+        PubKeyBitcoinCompatible.fromBase58(xpub, hdPath, network).toBytes()
       ).toString("hex")
     ) {
       throw new KeplrError(
@@ -164,8 +228,6 @@ async function checkBitcoinPubKey(
         ErrPublicKeyUnmatched,
         "Public key unmatched"
       );
-    } else {
-      return publicKey;
     }
   } catch (e) {
     throw new KeplrError(ErrModuleLedgerSign, 9999, e.message);
@@ -173,3 +235,15 @@ async function checkBitcoinPubKey(
     await transport.close();
   }
 }
+
+// function getWalletPolicy(
+//   descriptorTemplate: string,
+//   masterFingerprint: Buffer,
+//   pathElements: number[],
+//   xpub: string
+// ) {
+//   const key = createKey(masterFingerprint, pathElements, xpub);
+
+//   console.log("key", key);
+//   return new WalletPolicy(descriptorTemplate as DefaultDescriptorTemplate, key);
+// }
