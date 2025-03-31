@@ -16,7 +16,7 @@ import { PubKeyBitcoinCompatible, toXOnly } from "@keplr-wallet/crypto";
 import { KeplrError } from "@keplr-wallet/router";
 import { ModularChainInfo } from "@keplr-wallet/types";
 import AppClient, { DefaultWalletPolicy } from "ledger-bitcoin";
-import { Network } from "bitcoinjs-lib";
+import { Network, Psbt } from "bitcoinjs-lib";
 import { toOutputScript } from "bitcoinjs-lib/src/address";
 import { BIP322 } from "@keplr-wallet/background";
 
@@ -136,17 +136,7 @@ export const connectAndSignMessageWithLedger = async (
 
       const xpub = await btcApp.getExtendedPubkey(derivationPath);
 
-      const descriptorTemplate =
-        purpose === 86
-          ? "tr(@0/**)"
-          : purpose === 84
-          ? "wpkh(@0/**)"
-          : "pkh(@0/**)";
-
-      const policy = new DefaultWalletPolicy(
-        descriptorTemplate,
-        `[${derivationPath.replace("m", masterFp)}]${xpub}`
-      );
+      const policy = getWalletPolicy(masterFp, purpose, derivationPath, xpub);
 
       const signatures = await btcApp.signPsbt(
         txToSign.toBase64(),
@@ -187,7 +177,7 @@ export const connectAndSignMessageWithLedger = async (
 
 export const connectAndSignPsbtsWithLedger = async (
   interactionData: NonNullable<SignBitcoinTxInteractionStore["waitingData"]>,
-  _psbtSignData: {
+  psbtSignData: {
     psbtBase64: string;
     inputsToSign: {
       index: number;
@@ -201,6 +191,10 @@ export const connectAndSignPsbtsWithLedger = async (
 ): Promise<string[]> => {
   if (!("bitcoin" in modularChainInfo)) {
     throw new Error("Bitcoin not found");
+  }
+
+  if (psbtSignData.length === 0) {
+    throw new Error("No psbt sign data");
   }
 
   const appData = interactionData.data.keyInsensitive;
@@ -255,83 +249,47 @@ export const connectAndSignPsbtsWithLedger = async (
     );
   }
 
-  // const btcApp = new AppClient(transport as any);
+  const btcApp = new AppClient(transport as any);
 
-  // const derivationPath = `m/${purpose}'/${coinType}'/${account}'`;
+  const derivationPath = `m/${purpose}'/${coinType}'/${account}'`;
 
   try {
-    // const masterFp = await btcApp.getMasterFingerprint();
+    const masterFp = await btcApp.getMasterFingerprint();
+    const xpub = await btcApp.getExtendedPubkey(derivationPath);
+
+    const result = [];
 
     // 우선 send transaction만 지원 -> descriptor의 구성이 문제...
+    for (const data of psbtSignData) {
+      const psbt = Psbt.fromBase64(data.psbtBase64);
 
-    //   if (purpose === 86) {
-    //     txToSign.updateInput(0, {
-    //       tapBip32Derivation: [
-    //         {
-    //           masterFingerprint: Buffer.from(masterFp, "hex"),
-    //           pubkey: toXOnly(Buffer.from(interactionData.data.pubKey)),
-    //           path: fullPath,
-    //           leafHashes: [],
-    //         },
-    //       ],
-    //     });
-    //   } else {
-    //     txToSign.updateInput(0, {
-    //       bip32Derivation: [
-    //         {
-    //           masterFingerprint: Buffer.from(masterFp, "hex"),
-    //           pubkey: Buffer.from(interactionData.data.pubKey),
-    //           path: fullPath,
-    //         },
-    //       ],
-    //     });
-    //   }
+      const policy = getWalletPolicy(masterFp, purpose, derivationPath, xpub);
 
-    //   const xpub = await btcApp.getExtendedPubkey(derivationPath);
+      const signatures = await btcApp.signPsbt(data.psbtBase64, policy, null);
 
-    //   const descriptorTemplate =
-    //     purpose === 86
-    //       ? "tr(@0/**)"
-    //       : purpose === 84
-    //       ? "wpkh(@0/**)"
-    //       : "pkh(@0/**)";
+      for (const [index, partialSignature] of signatures) {
+        if (purpose === 86) {
+          psbt.updateInput(index, {
+            tapKeySig: partialSignature.signature,
+          });
+        } else {
+          psbt.updateInput(index, {
+            partialSig: [
+              {
+                pubkey: partialSignature.pubkey,
+                signature: partialSignature.signature,
+              },
+            ],
+          });
+        }
+      }
 
-    //   const policy = new DefaultWalletPolicy(
-    //     descriptorTemplate,
-    //     `[${derivationPath.replace("m", masterFp)}]${xpub}`
-    //   );
+      psbt.finalizeAllInputs();
 
-    //   const signatures = await btcApp.signPsbt(
-    //     txToSign.toBase64(),
-    //     policy,
-    //     null
-    //   );
+      result.push(psbt.toHex());
+    }
 
-    //   for (const [index, partialSignature] of signatures) {
-    //     if (purpose === 86) {
-    //       txToSign.updateInput(index, {
-    //         tapKeySig: partialSignature.signature,
-    //       });
-    //     } else {
-    //       txToSign.updateInput(index, {
-    //         partialSig: [
-    //           {
-    //             pubkey: partialSignature.pubkey,
-    //             signature: partialSignature.signature,
-    //           },
-    //         ],
-    //       });
-    //     }
-    //   }
-
-    //   txToSign.finalizeAllInputs();
-
-    //   return BIP322.encodeWitness(txToSign);
-    // }
-
-    // return await btcApp.signMessage(Buffer.from(message), fullPath);
-
-    return [];
+    return result;
   } catch (e) {
     console.log("error", e);
     throw new KeplrError(ErrModuleLedgerSign, 9999, e.message);
@@ -396,14 +354,20 @@ async function checkBitcoinPubKey(
   }
 }
 
-// function getWalletPolicy(
-//   descriptorTemplate: string,
-//   masterFingerprint: Buffer,
-//   pathElements: number[],
-//   xpub: string
-// ) {
-//   const key = createKey(masterFingerprint, pathElements, xpub);
-
-//   console.log("key", key);
-//   return new WalletPolicy(descriptorTemplate as DefaultDescriptorTemplate, key);
-// }
+function getWalletPolicy(
+  masterFingerprint: string,
+  purpose: number,
+  derivationPath: string,
+  xpub: string
+): DefaultWalletPolicy {
+  const descriptorTemplate =
+    purpose === 86
+      ? "tr(@0/**)"
+      : purpose === 84
+      ? "wpkh(@0/**)"
+      : "pkh(@0/**)";
+  return new DefaultWalletPolicy(
+    descriptorTemplate,
+    `[${derivationPath.replace("m", masterFingerprint)}]${xpub}`
+  );
+}
