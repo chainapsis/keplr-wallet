@@ -927,10 +927,7 @@ export class KeyRingService {
 
     for (const extendedKey of extendedKeys) {
       const key = `${extendedKey.purpose}-${extendedKey.coinType}`;
-      const value =
-        "xpub" in extendedKey
-          ? extendedKey.xpub
-          : Buffer.from(extendedKey.pubKey).toString("hex");
+      const value = extendedKey.xpub;
 
       keyValues[key] = value;
     }

@@ -1912,34 +1912,94 @@ export const EnableChainsScene: FunctionComponent<{
                           throw new Error("KeyInfo not found");
                         }
 
-                        const keysForBitcoin = ledgerBitcoinAppNeeds.map(
-                          (chainId) => {
-                            const modularChainInfo =
-                              chainStore.getModularChain(chainId);
-                            if (!("bitcoin" in modularChainInfo)) {
-                              throw new Error("Bitcoin not found");
+                        const { mainnet, testnet } =
+                          ledgerBitcoinAppNeeds.reduce<{
+                            mainnet: {
+                              purpose: number;
+                              coinType: number;
+                              chainId: string;
+                            }[];
+                            testnet: {
+                              purpose: number;
+                              coinType: number;
+                              chainId: string;
+                            }[];
+                          }>(
+                            (acc, chainId) => {
+                              const modularChainInfo =
+                                chainStore.getModularChain(chainId);
+                              if (!("bitcoin" in modularChainInfo)) {
+                                throw new Error("Bitcoin not found");
+                              }
+
+                              const bip44 = modularChainInfo.bitcoin.bip44;
+                              if (!bip44.purpose) {
+                                throw new Error("Purpose not found");
+                              }
+
+                              return {
+                                mainnet:
+                                  bip44.coinType === 0
+                                    ? [
+                                        ...acc.mainnet,
+                                        {
+                                          purpose: bip44.purpose,
+                                          coinType: bip44.coinType,
+                                          chainId,
+                                        },
+                                      ]
+                                    : acc.mainnet,
+                                testnet:
+                                  bip44.coinType === 1
+                                    ? [
+                                        ...acc.testnet,
+                                        {
+                                          purpose: bip44.purpose,
+                                          coinType: bip44.coinType,
+                                          chainId,
+                                        },
+                                      ]
+                                    : acc.testnet,
+                              };
+                            },
+                            {
+                              mainnet: [],
+                              testnet: [],
                             }
+                          );
 
-                            const bip44 = modularChainInfo.bitcoin.bip44;
-                            if (!bip44.purpose) {
-                              throw new Error("Purpose not found");
-                            }
-
-                            return `${bip44.purpose}-${bip44.coinType}`;
-                          }
-                        );
-
-                        const hasBitcoinExtendedKeys = keysForBitcoin.every(
+                        const hasBitcoinMainnetExtendedKeys = mainnet.every(
                           (key) => {
                             const bitcoinKeys = keyInfo.insensitive[
                               "Bitcoin"
                             ] as any;
-                            if (!bitcoinKeys) return false;
-                            return !!bitcoinKeys[key];
+                            if (!bitcoinKeys) {
+                              return false;
+                            }
+                            return !!bitcoinKeys[
+                              `${key.purpose}-${key.coinType}`
+                            ];
                           }
                         );
 
-                        if (hasBitcoinExtendedKeys) {
+                        const hasBitcoinTestnetExtendedKeys = testnet.every(
+                          (key) => {
+                            const bitcoinKeys = keyInfo.insensitive[
+                              "Bitcoin Test"
+                            ] as any;
+                            if (!bitcoinKeys) {
+                              return false;
+                            }
+                            return !!bitcoinKeys[
+                              `${key.purpose}-${key.coinType}`
+                            ];
+                          }
+                        );
+
+                        if (
+                          hasBitcoinMainnetExtendedKeys &&
+                          hasBitcoinTestnetExtendedKeys
+                        ) {
                           await chainStore.enableChainInfoInUI(
                             ...ledgerBitcoinAppNeeds
                           );
@@ -1948,7 +2008,7 @@ export const EnableChainsScene: FunctionComponent<{
                             keyInfo.id
                           );
                           replaceToWelcomePage();
-                        } else {
+                        } else if (!hasBitcoinMainnetExtendedKeys) {
                           const bip44Path = keyInfo.insensitive["bip44Path"];
                           if (!bip44Path) {
                             throw new Error("bip44Path not found");
@@ -1963,6 +2023,27 @@ export const EnableChainsScene: FunctionComponent<{
                             appendModeInfo: {
                               vaultId,
                               afterEnableChains: ledgerBitcoinAppNeeds,
+                            },
+                            stepPrevious: stepPrevious,
+                            stepTotal: stepTotal,
+                          });
+                        } else if (!hasBitcoinTestnetExtendedKeys) {
+                          const bip44Path = keyInfo.insensitive["bip44Path"];
+                          if (!bip44Path) {
+                            throw new Error("bip44Path not found");
+                          }
+
+                          sceneTransition.push("connect-ledger", {
+                            name: "",
+                            password: "",
+                            app: "Bitcoin Test",
+                            bip44Path,
+
+                            appendModeInfo: {
+                              vaultId,
+                              afterEnableChains: testnet.map(
+                                (key) => key.chainId
+                              ),
                             },
                             stepPrevious: stepPrevious,
                             stepTotal: stepTotal,

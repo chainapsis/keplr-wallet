@@ -177,7 +177,8 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
       route === "connect-ledger" &&
       (ledgerApp === "Starknet" ||
         ledgerApp === "Ethereum" ||
-        ledgerApp === "Bitcoin")
+        ledgerApp === "Bitcoin" ||
+        ledgerApp === "Bitcoin Test")
     ) {
       return {
         header: {
@@ -204,10 +205,15 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
                   ? ["eip155:1"]
                   : ledgerApp === "Starknet"
                   ? ["starknet:SN_MAIN"]
-                  : [
+                  : ledgerApp === "Bitcoin"
+                  ? [
                       "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:taproot",
                       "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:native-segwit",
-                    ],
+                    ]
+                  : [
+                      "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6:taproot",
+                      "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6:native-segwit",
+                    ], // bitcoin signet
             },
           },
         },

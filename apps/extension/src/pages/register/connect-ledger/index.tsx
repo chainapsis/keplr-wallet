@@ -38,7 +38,7 @@ type Step = "unknown" | "connected" | "app";
 export const ConnectLedgerScene: FunctionComponent<{
   name: string;
   password: string;
-  app: App | "Ethereum" | "Starknet" | "Bitcoin";
+  app: App | "Ethereum" | "Starknet" | "Bitcoin" | "Bitcoin Test";
   bip44Path: {
     account: number;
     change: number;
@@ -70,7 +70,8 @@ export const ConnectLedgerScene: FunctionComponent<{
       !Object.keys(AppHRP).includes(propApp) &&
       propApp !== "Ethereum" &&
       propApp !== "Starknet" &&
-      propApp !== "Bitcoin"
+      propApp !== "Bitcoin" &&
+      propApp !== "Bitcoin Test"
     ) {
       throw new Error(`Unsupported app: ${propApp}`);
     }
@@ -380,13 +381,16 @@ export const ConnectLedgerScene: FunctionComponent<{
               return;
           }
         }
-        case "Bitcoin": {
+        case "Bitcoin":
+        case "Bitcoin Test": {
           transport = await LedgerUtils.tryAppOpen(transport, propApp);
           let btcApp = new Btc({ transport });
 
           // ensure that the ledger is connected
           try {
-            await btcApp.getWalletPublicKey(`44'/0'/0'/0/0`, {
+            const coinType = propApp === "Bitcoin" ? 0 : 1;
+
+            await btcApp.getWalletPublicKey(`44'/${coinType}'/0'/0/0`, {
               format: "legacy",
             });
           } catch (e) {
@@ -411,11 +415,13 @@ export const ConnectLedgerScene: FunctionComponent<{
                   xpubVersion: number;
                   purpose: number;
                   coinType: number;
+                  chainId: string;
                 }
               > = {};
 
-              appendModeInfo.afterEnableChains.forEach((chainId) => {
+              for (const chainId of appendModeInfo.afterEnableChains) {
                 const modularChainInfo = chainStore.getModularChain(chainId);
+
                 if (!("bitcoin" in modularChainInfo)) {
                   throw new Error("Bitcoin not found");
                 }
@@ -435,12 +441,24 @@ export const ConnectLedgerScene: FunctionComponent<{
                   xpubVersion: bip44.xpubVersion,
                   purpose: bip44.purpose,
                   coinType: bip44.coinType,
+                  chainId,
                 };
-              });
+              }
+
+              const mainnetKeys = Object.values(keysForBitcoin).filter(
+                (key) => key.coinType === 0
+              );
+              const testnetKeys = Object.values(keysForBitcoin).filter(
+                (key) => key.coinType === 1
+              );
 
               const extendedKeys: ExtendedKey[] = [];
+
               for (const key of Object.values(keysForBitcoin)) {
-                if (key.coinType === 0) {
+                if (
+                  (propApp === "Bitcoin" && key.coinType === 0) ||
+                  (propApp === "Bitcoin Test" && key.coinType === 1)
+                ) {
                   const hdPath = `${key.purpose}'/${key.coinType}'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`;
 
                   extendedKeys.push({
@@ -448,28 +466,6 @@ export const ConnectLedgerScene: FunctionComponent<{
                       path: hdPath,
                       xpubVersion: key.xpubVersion,
                     }),
-                    purpose: key.purpose,
-                    coinType: key.coinType,
-                  });
-                } else {
-                  // coin type is restricted to 0, thus actual hd path uses 0 instead of coin type
-                  const hdPath = `${key.purpose}'/0'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`;
-
-                  const res = await btcApp.getWalletPublicKey(hdPath, {
-                    format:
-                      key.purpose === 86
-                        ? "bech32m"
-                        : key.purpose === 84
-                        ? "bech32"
-                        : "legacy",
-                  });
-
-                  const pubKey = new PubKeySecp256k1(
-                    Buffer.from(res.publicKey, "hex")
-                  );
-
-                  extendedKeys.push({
-                    pubKey: pubKey.toBytes(true),
                     purpose: key.purpose,
                     coinType: key.coinType,
                   });
@@ -490,6 +486,41 @@ export const ConnectLedgerScene: FunctionComponent<{
               await transport.close();
 
               if (isStepMode) {
+                if (propApp === "Bitcoin" && testnetKeys.length > 0) {
+                  sceneTransition.push("connect-ledger", {
+                    name: "",
+                    password: "",
+                    app: "Bitcoin Test",
+                    bip44Path,
+
+                    appendModeInfo: {
+                      vaultId: appendModeInfo.vaultId,
+                      afterEnableChains: testnetKeys.map((key) => key.chainId),
+                    },
+                    stepPrevious: stepPrevious,
+                    stepTotal: stepTotal,
+                  });
+                  return;
+                } else if (
+                  propApp === "Bitcoin Test" &&
+                  mainnetKeys.length > 0
+                ) {
+                  sceneTransition.push("connect-ledger", {
+                    name: "",
+                    password: "",
+                    app: "Bitcoin",
+                    bip44Path,
+
+                    appendModeInfo: {
+                      vaultId: appendModeInfo.vaultId,
+                      afterEnableChains: mainnetKeys.map((key) => key.chainId),
+                    },
+                    stepPrevious: stepPrevious,
+                    stepTotal: stepTotal,
+                  });
+                  return;
+                }
+
                 navigate("/welcome", {
                   replace: true,
                 });
