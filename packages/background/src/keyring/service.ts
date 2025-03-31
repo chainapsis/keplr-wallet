@@ -925,9 +925,19 @@ export class KeyRingService {
 
     const keyValues: Record<string, string> = {};
 
-    for (const extendedKey of extendedKeys) {
-      const key = `${extendedKey.purpose}-${extendedKey.coinType}`;
-      const value = extendedKey.xpub;
+    for (const {
+      xpub,
+      derivationPath,
+      masterFingerprint,
+      type,
+    } of extendedKeys) {
+      const key = derivationPath;
+      const value = PubKeyBitcoinCompatible.createDescriptor(
+        type,
+        masterFingerprint,
+        derivationPath,
+        xpub
+      );
 
       keyValues[key] = value;
     }

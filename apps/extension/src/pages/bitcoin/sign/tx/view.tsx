@@ -362,8 +362,6 @@ export const SignBitcoinTxView: FunctionComponent<{
     address: interactionData.data.address,
   };
 
-  console.log("validatedPsbts", validatedPsbts);
-
   const approve = async () => {
     try {
       const feeCurrency = chainStore

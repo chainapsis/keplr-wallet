@@ -417,6 +417,8 @@ export const ConnectLedgerScene: FunctionComponent<{
                 }
               > = {};
 
+              const masterFingerprint = await btcApp.getMasterFingerprint();
+
               for (const chainId of appendModeInfo.afterEnableChains) {
                 const modularChainInfo = chainStore.getModularChain(chainId);
 
@@ -457,12 +459,13 @@ export const ConnectLedgerScene: FunctionComponent<{
                   (propApp === "Bitcoin" && key.coinType === 0) ||
                   (propApp === "Bitcoin Test" && key.coinType === 1)
                 ) {
-                  const hdPath = `m/${key.purpose}'/${key.coinType}'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`;
+                  const derivationPath = `m/${key.purpose}'/${key.coinType}'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`;
 
                   extendedKeys.push({
-                    xpub: await btcApp.getExtendedPubkey(hdPath),
-                    purpose: key.purpose,
-                    coinType: key.coinType,
+                    xpub: await btcApp.getExtendedPubkey(derivationPath),
+                    masterFingerprint,
+                    derivationPath,
+                    type: key.purpose === 86 ? "tr" : "wpkh",
                   });
                 }
               }

@@ -16,9 +16,10 @@ export type BIP44HDPath = {
 };
 
 export type ExtendedKey = {
+  type: "wpkh" | "tr";
+  masterFingerprint: string;
   xpub: string;
-  purpose: number;
-  coinType: number;
+  derivationPath: string;
 };
 
 export interface KeyInfo {

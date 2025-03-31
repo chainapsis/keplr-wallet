@@ -127,11 +127,15 @@ export class KeyRingLedgerService {
       throw new Error("'modularChainInfo' should have Bitcoin chain info");
     }
 
-    const value = (
-      vault.insensitive[coinType === 0 ? "Bitcoin" : "Bitcoin Test"] as any
-    )[`${purpose}-${coinType}`];
+    const { account, change, addressIndex } = this.getBIP44PathFromVault(vault);
 
-    if (!value) {
+    const derivationPath = `m/${purpose}'/${coinType}'/${account}'/${change}/${addressIndex}`;
+
+    const descriptor = (
+      vault.insensitive[coinType === 0 ? "Bitcoin" : "Bitcoin Test"] as any
+    )[derivationPath];
+
+    if (!descriptor) {
       throw new KeplrError(
         "keyring",
         901,
@@ -139,11 +143,7 @@ export class KeyRingLedgerService {
       );
     }
 
-    const { account, change, addressIndex } = this.getBIP44PathFromVault(vault);
-
-    const hdPath = `m/${purpose}'/${coinType}'/${account}'/${change}/${addressIndex}`;
-
-    return PubKeyBitcoinCompatible.fromBase58(value, hdPath, network);
+    return PubKeyBitcoinCompatible.fromDescriptor(descriptor, network);
   }
 
   sign(): {

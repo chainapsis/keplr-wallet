@@ -1912,16 +1912,25 @@ export const EnableChainsScene: FunctionComponent<{
                           throw new Error("KeyInfo not found");
                         }
 
+                        const bip44Path = keyInfo.insensitive["bip44Path"] as {
+                          account: number;
+                          change: number;
+                          addressIndex: number;
+                        };
+                        if (!bip44Path) {
+                          throw new Error("bip44Path not found");
+                        }
+
+                        const { account, change, addressIndex } = bip44Path;
+
                         const { mainnet, testnet } =
                           ledgerBitcoinAppNeeds.reduce<{
                             mainnet: {
-                              purpose: number;
-                              coinType: number;
+                              derivationPath: string;
                               chainId: string;
                             }[];
                             testnet: {
-                              purpose: number;
-                              coinType: number;
+                              derivationPath: string;
                               chainId: string;
                             }[];
                           }>(
@@ -1932,30 +1941,31 @@ export const EnableChainsScene: FunctionComponent<{
                                 throw new Error("Bitcoin not found");
                               }
 
-                              const bip44 = modularChainInfo.bitcoin.bip44;
-                              if (!bip44.purpose) {
+                              const { purpose, coinType } =
+                                modularChainInfo.bitcoin.bip44;
+                              if (!purpose) {
                                 throw new Error("Purpose not found");
                               }
 
+                              const derivationPath = `m/${purpose}'/${coinType}'/${account}'/${change}'/${addressIndex}`;
+
                               return {
                                 mainnet:
-                                  bip44.coinType === 0
+                                  coinType === 0
                                     ? [
                                         ...acc.mainnet,
                                         {
-                                          purpose: bip44.purpose,
-                                          coinType: bip44.coinType,
+                                          derivationPath,
                                           chainId,
                                         },
                                       ]
                                     : acc.mainnet,
                                 testnet:
-                                  bip44.coinType === 1
+                                  coinType === 1
                                     ? [
                                         ...acc.testnet,
                                         {
-                                          purpose: bip44.purpose,
-                                          coinType: bip44.coinType,
+                                          derivationPath,
                                           chainId,
                                         },
                                       ]
@@ -1976,9 +1986,7 @@ export const EnableChainsScene: FunctionComponent<{
                             if (!bitcoinKeys) {
                               return false;
                             }
-                            return !!bitcoinKeys[
-                              `${key.purpose}-${key.coinType}`
-                            ];
+                            return !!bitcoinKeys[key.derivationPath];
                           }
                         );
 
@@ -1990,9 +1998,7 @@ export const EnableChainsScene: FunctionComponent<{
                             if (!bitcoinKeys) {
                               return false;
                             }
-                            return !!bitcoinKeys[
-                              `${key.purpose}-${key.coinType}`
-                            ];
+                            return !!bitcoinKeys[key.derivationPath];
                           }
                         );
 

@@ -220,13 +220,24 @@ describe("Test priv key", () => {
     expect(legacyAddress).toBe("D8ssUjBGXy1UK3wULHcD7d96WtKtus5My3");
   });
 
-  it("test from base58", () => {
+  it("test bitcoin pubkey from descriptor", () => {
     const xpub =
       "xpub6Fd2f6TiHNAWkKxDNxvLfRgE6m1Xos1pgfMcLDQX7jHrNyR2RzpHGQE1rCPNqhxSZnMS2G37Ht1DvukVNpWC3gUCx62mzaWdxxy4h8BYCUz";
-    const hdPath = "m/86'/1'/0'/0/0";
+    const hdPath = "m/86'/0'/0'/0/0";
     const masterFingerprint = "1c1fbbc3";
 
-    const pubKey = PubKeyBitcoinCompatible.fromBase58(xpub, hdPath);
+    const descriptor = PubKeyBitcoinCompatible.createDescriptor(
+      "tr",
+      masterFingerprint,
+      hdPath,
+      xpub
+    );
+
+    expect(descriptor).toBe(
+      "tr([1c1fbbc3/86'/0'/0'/0/0]xpub6Fd2f6TiHNAWkKxDNxvLfRgE6m1Xos1pgfMcLDQX7jHrNyR2RzpHGQE1rCPNqhxSZnMS2G37Ht1DvukVNpWC3gUCx62mzaWdxxy4h8BYCUz)"
+    );
+
+    const pubKey = PubKeyBitcoinCompatible.fromDescriptor(descriptor);
 
     expect(pubKey.getBitcoinAddress()).toBe(
       "bc1p6tc2uwrwy2yjtzsfjrjugm2d5q6rkvjuylnnrk62xa4fzfpfwn0q9k3qq8"
@@ -241,6 +252,25 @@ describe("Test priv key", () => {
 
     expect(Buffer.from(pubKey.toBytes(true)).toString("hex")).toBe(
       "0488496b304f490c5466cc60c3d82cc40835f474a6ba17b056e588bf49d1290ff6f157c79efa77687d6e4d06d7e4a3a0af3db5c516d6d75be6ab74234bf7b89a11"
+    );
+  });
+
+  it("test bitcoin pubkey from base58", () => {
+    const xpub =
+      "xpub6Fd2f6TiHNAWkKxDNxvLfRgE6m1Xos1pgfMcLDQX7jHrNyR2RzpHGQE1rCPNqhxSZnMS2G37Ht1DvukVNpWC3gUCx62mzaWdxxy4h8BYCUz";
+
+    const hdPath = "m/86'/0'/0'/0/0";
+
+    const pubKey = PubKeyBitcoinCompatible.fromBase58(xpub, hdPath);
+
+    expect(pubKey.getBitcoinAddress()).toBe(
+      "bc1p6tc2uwrwy2yjtzsfjrjugm2d5q6rkvjuylnnrk62xa4fzfpfwn0q9k3qq8"
+    );
+    expect(pubKey.getMasterFingerprint()).toBeUndefined();
+    expect(pubKey.getPath()).not.toBeUndefined();
+    expect(pubKey.getPath()).toBe(hdPath);
+    expect(Buffer.from(pubKey.toBytes()).toString("hex")).toBe(
+      "0388496b304f490c5466cc60c3d82cc40835f474a6ba17b056e588bf49d1290ff6"
     );
   });
 });
