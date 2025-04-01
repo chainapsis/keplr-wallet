@@ -73,6 +73,7 @@ export function init(
   privilegedOrigins: string[],
   analyticsPrivilegedOrigins: string[],
   msgPrivilegedOrigins: string[],
+  msgPrivilegedCosmwasmContractMap: Record<string, Record<string, string[]>>,
   suggestChainPrivilegedOrigins: string[],
   communityChainInfoRepo: {
     readonly organizationName: string;
@@ -211,7 +212,8 @@ export function init(
     interactionService,
     chainsUIService,
     analyticsService,
-    msgPrivilegedOrigins
+    msgPrivilegedOrigins,
+    msgPrivilegedCosmwasmContractMap
   );
 
   const keyRingStarknetService = new KeyRingStarknet.KeyRingStarknetService(

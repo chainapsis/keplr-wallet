@@ -43,7 +43,11 @@ export class KeyRingCosmosService {
     protected readonly interactionService: InteractionService,
     protected readonly chainsUIService: ChainsUIService,
     protected readonly analyticsService: AnalyticsService,
-    protected readonly msgPrivilegedOrigins: string[]
+    protected readonly msgPrivilegedOrigins: string[],
+    protected readonly msgPrivilegedCosmwasmContractMap: Record<
+      string,
+      Record<string, string[]>
+    >
   ) {}
 
   async init() {

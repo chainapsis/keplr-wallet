@@ -3187,6 +3187,17 @@ export const PrivilegedOrigins: string[] = [
   "https://multisig.keplr.app",
 ];
 
+export const MsgPrivilegedContractMap: Record<
+  string,
+  Record<string, string[]>
+> = {
+  pion: {
+    neutron1h62p45vv3fg2q6sm00r93gqgmhqt9tfgq5hz33qyrhq8f0pqqj0s36wgc3: [
+      "claim_rewards",
+    ],
+  },
+};
+
 export const CommunityChainInfoRepo = {
   organizationName: "chainapsis",
   repoName: "keplr-chain-registry",
