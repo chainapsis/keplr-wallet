@@ -410,7 +410,6 @@ export const ConnectLedgerScene: FunctionComponent<{
               const keysForBitcoin: Record<
                 string,
                 {
-                  xpubVersion: number;
                   purpose: number;
                   coinType: number;
                   chainId: string;
@@ -432,13 +431,8 @@ export const ConnectLedgerScene: FunctionComponent<{
                   throw new Error("Purpose not found");
                 }
 
-                if (!bip44.xpubVersion) {
-                  throw new Error("xpubVersion not found");
-                }
-
-                const key = `${bip44.purpose}-${bip44.coinType}-${bip44.xpubVersion}`;
+                const key = `${bip44.purpose}-${bip44.coinType}`;
                 keysForBitcoin[key] = {
-                  xpubVersion: bip44.xpubVersion,
                   purpose: bip44.purpose,
                   coinType: bip44.coinType,
                   chainId,

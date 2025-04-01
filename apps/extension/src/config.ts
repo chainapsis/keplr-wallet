@@ -3140,7 +3140,6 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       bip44: {
         coinType: 0,
         purpose: 86,
-        xpubVersion: 0x0488b21e,
       },
       currencies: [
         {
@@ -3170,7 +3169,6 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       bip44: {
         coinType: 0,
         purpose: 84,
-        xpubVersion: 0x0488b21e,
       },
       currencies: [
         {
@@ -3200,7 +3198,6 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       bip44: {
         coinType: 1,
         purpose: 86,
-        xpubVersion: 0x043587cf,
       },
       currencies: [
         {
@@ -3229,7 +3226,6 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       bip44: {
         coinType: 1,
         purpose: 84,
-        xpubVersion: 0x043587cf,
       },
       currencies: [
         {
@@ -3258,7 +3254,6 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       bip44: {
         coinType: 1,
         purpose: 86,
-        xpubVersion: 0x043587cf,
       },
       currencies: [
         {
@@ -3288,7 +3283,6 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       bip44: {
         coinType: 1,
         purpose: 84,
-        xpubVersion: 0x043587cf,
       },
       currencies: [
         {
