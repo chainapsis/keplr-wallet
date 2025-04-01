@@ -339,13 +339,15 @@ export const TokenDetailModal: FunctionComponent<{
         if ("cosmos" in modularChainInfo) {
           return accountStore.getAccount(chainId).bech32Address;
         }
-        // TODO: handle bitcoin tx history
-        // if ("bitcoin" in modularChainInfo) {
-        //   return (
-        //     accountStore.getAccount(chainId).bitcoinAddress?.bech32Address ?? ""
-        //   );
-        // }
-        return accountStore.getAccount(chainId).starknetHexAddress;
+        if ("starknet" in modularChainInfo) {
+          return accountStore.getAccount(chainId).starknetHexAddress;
+        }
+        if ("bitcoin" in modularChainInfo) {
+          return (
+            accountStore.getAccount(chainId).bitcoinAddress?.bech32Address ?? ""
+          );
+        }
+        return "";
       })()}?relations=${Relations.join(",")}&denoms=${encodeURIComponent(
         currency.coinMinimalDenom
       )}&vsCurrencies=${priceStore.defaultVsCurrency}&limit=${PaginationLimit}`;
@@ -456,7 +458,6 @@ export const TokenDetailModal: FunctionComponent<{
                 {modularChainInfo.chainName}
               </Body1>
             </span>
-            {/* TODO: 여기에 비트코인 타입 추가 */}
             {account.bitcoinAddress && (
               <Box
                 alignX="center"
@@ -786,7 +787,8 @@ export const TokenDetailModal: FunctionComponent<{
               if (
                 ("cosmos" in modularChainInfo &&
                   chainStore.getChain(chainId).embedded.embedded) ||
-                "starknet" in modularChainInfo
+                "starknet" in modularChainInfo ||
+                "bitcoin" in modularChainInfo
               ) {
                 return (
                   <EmptyView>
