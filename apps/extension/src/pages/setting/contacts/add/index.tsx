@@ -156,21 +156,26 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
       left={<BackButton />}
       onSubmit={(e) => {
         e.preventDefault();
+        const internalRecipientConfig = (() => {
+          if (isStarknet) {
+            return recipientConfigForStarknet;
+          } else if (isBitcoin) {
+            return recipientConfigForBitcoin;
+          }
+
+          return recipientConfig;
+        })();
 
         const address = (() => {
-          if ("nameServiceResult" in recipientConfig) {
+          if ("nameServiceResult" in internalRecipientConfig) {
             // name service fetch가 성공했을 경우 저장할때는 suffix까지 포함된 형태로 저장한다.
-            const r = recipientConfig.nameServiceResult;
+            const r = internalRecipientConfig.nameServiceResult;
             if (r.length > 0) {
               return r[0].fullName;
             }
           }
 
-          return isStarknet
-            ? recipientConfigForStarknet.value
-            : isBitcoin
-            ? recipientConfigForBitcoin.value
-            : recipientConfig.value;
+          return internalRecipientConfig.value;
         })();
 
         if (editIndex < 0) {

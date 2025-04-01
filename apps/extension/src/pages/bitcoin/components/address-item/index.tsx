@@ -2,7 +2,7 @@ import React, { FunctionComponent, useState } from "react";
 
 import { Box } from "../../../../components/box";
 import { Column, Columns } from "../../../../components/column";
-import { Body2, H5 } from "../../../../components/typography";
+import { BaseTypography, Body2, H5 } from "../../../../components/typography";
 import { EllipsisIcon, ProfileIcon } from "../../../../components/icon";
 import {
   FloatingDropdown,
@@ -20,12 +20,21 @@ export const AddressItem: FunctionComponent<{
   timestamp?: number;
   name?: string;
   address: string;
+  paymentType?: string;
   onClick?: () => void;
 
   dropdownItems?: FloatingDropdownItem[];
   // true면 border를 추가함.
   highlight?: boolean;
-}> = ({ timestamp, name, address, onClick, dropdownItems, highlight }) => {
+}> = ({
+  timestamp,
+  name,
+  address,
+  paymentType,
+  onClick,
+  dropdownItems,
+  highlight,
+}) => {
   const intl = useIntl();
   const theme = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
@@ -84,25 +93,60 @@ export const AddressItem: FunctionComponent<{
               </React.Fragment>
             ) : null}
 
-            {name ? (
-              <React.Fragment>
-                <H5
-                  style={{
-                    color:
-                      theme.mode === "light"
-                        ? ColorPalette["gray-700"]
-                        : ColorPalette["gray-10"],
-                    width: "16rem",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
+            <XAxis alignY="center">
+              {name ? (
+                <React.Fragment>
+                  <H5
+                    style={{
+                      color:
+                        theme.mode === "light"
+                          ? ColorPalette["gray-700"]
+                          : ColorPalette["gray-10"],
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {name}
+                  </H5>
+                  <Gutter size="0.25rem" />
+                </React.Fragment>
+              ) : null}
+              {paymentType ? (
+                <Box
+                  alignX="center"
+                  alignY="center"
+                  backgroundColor={
+                    theme.mode === "light"
+                      ? ColorPalette["blue-50"]
+                      : ColorPalette["gray-500"]
+                  }
+                  borderRadius="0.375rem"
+                  paddingX="0.375rem"
+                  paddingTop="0.125rem"
+                  paddingBottom="0.1875rem"
                 >
-                  {name}
-                </H5>
-                <Gutter size="0.5rem" />
-              </React.Fragment>
-            ) : null}
+                  <BaseTypography
+                    style={{
+                      fontWeight: 400,
+                      fontSize: "0.6875rem",
+                    }}
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["blue-400"]
+                        : ColorPalette["gray-200"]
+                    }
+                  >
+                    {paymentType
+                      .split("-")
+                      .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+                      .join(" ")}
+                  </BaseTypography>
+                </Box>
+              ) : null}
+            </XAxis>
+
+            <Gutter size="0.5rem" />
 
             <XAxis alignY="center">
               <ProfileIcon

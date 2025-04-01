@@ -1098,7 +1098,27 @@ export const EnableChainsScene: FunctionComponent<{
           modularChainInfo.chainId
         ).identifier;
 
-        const enabled = enabledChainIdentifierMap.get(chainIdentifier) || false;
+        const enabled = (() => {
+          if ("bitcoin" in modularChainInfo) {
+            const paymentType = modularChainInfo.chainId.split(":")[2];
+            const chainIdentifierWithAnotherPaymentType = ChainIdHelper.parse(
+              modularChainInfo.chainId.replace(
+                paymentType,
+                paymentType === "taproot" ? "native-segwit" : "taproot"
+              )
+            ).identifier;
+
+            return (
+              enabledChainIdentifierMap.get(chainIdentifier) ||
+              enabledChainIdentifierMap.get(
+                chainIdentifierWithAnotherPaymentType
+              ) ||
+              false
+            );
+          }
+
+          return enabledChainIdentifierMap.get(chainIdentifier) || false;
+        })();
 
         // At least, one chain should be enabled.
         const blockInteraction = enabledChainIdentifiers.length <= 1 && enabled;
