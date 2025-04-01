@@ -15,7 +15,7 @@ import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
 import { PubKeyBitcoinCompatible, toXOnly } from "@keplr-wallet/crypto";
 import { KeplrError } from "@keplr-wallet/router";
 import { ModularChainInfo } from "@keplr-wallet/types";
-import AppClient, { DefaultWalletPolicy } from "ledger-bitcoin";
+import AppClient, { DefaultWalletPolicy, WalletPolicy } from "ledger-bitcoin";
 import { Network, Psbt } from "bitcoinjs-lib";
 import { toOutputScript } from "bitcoinjs-lib/src/address";
 import { BIP322 } from "@keplr-wallet/background";
@@ -136,7 +136,12 @@ export const connectAndSignMessageWithLedger = async (
 
       const xpub = await btcApp.getExtendedPubkey(derivationPath);
 
-      const policy = getWalletPolicy(masterFp, purpose, derivationPath, xpub);
+      const policy = getDefaultWalletPolicy(
+        masterFp,
+        purpose,
+        derivationPath,
+        xpub
+      );
 
       const signatures = await btcApp.signPsbt(
         txToSign.toBase64(),
@@ -254,18 +259,88 @@ export const connectAndSignPsbtsWithLedger = async (
   const derivationPath = `m/${purpose}'/${coinType}'/${account}'`;
 
   try {
-    const masterFp = await btcApp.getMasterFingerprint();
-    const xpub = await btcApp.getExtendedPubkey(derivationPath);
-
     const result = [];
 
-    // 우선 send transaction만 지원 -> descriptor의 구성이 문제...
     for (const data of psbtSignData) {
+      let policy: WalletPolicy | undefined | void;
+      let hmac: Buffer | undefined;
+      // 먼저 script path spending 여부를 확인
+      try {
+        // policy = await tryParsePsbt(transport, data.psbtBase64, coinType === 1);
+        // const masterFp = await btcApp.getMasterFingerprint();
+        // const xpub = await btcApp.getExtendedPubkey(derivationPath);
+        // tr(@0/**,{multi_a(6,@1,@2,@3,@4,@5,@6,@7,@8,@9)})
+        // policy = new WalletPolicy(
+        //   "Test",
+        //   "tr(@0/**,{sortedmulti_a(1,@0/<2;3>/*,@1/**),or_b(pk(@2/**),s:pk(@3/**))})",
+        //   [
+        //     `[${derivationPath.replace("m", masterFp)}]${xpub}`,
+        //     "tpub6Fc2TRaCWNgfT49nRGG2G78d1dPnjhW66gEXi7oYZML7qEFN8e21b2DLDipTZZnfV6V7ivrMkvh4VbnHY2ChHTS9qM3XVLJiAgcfagYQk6K",
+        //     "tpub6GxHB9kRdFfTqYka8tgtX9Gh3Td3A9XS8uakUGVcJ9NGZ1uLrGZrRVr67DjpMNCHprZmVmceFTY4X4wWfksy8nVwPiNvzJ5pjLxzPtpnfEM",
+        //     "tpub6GjFUVVYewLj5no5uoNKCWuyWhQ1rKGvV8DgXBG9Uc6DvAKxt2dhrj1EZFrTNB5qxAoBkVW3wF8uCS3q1ri9fueAa6y7heFTcf27Q4gyeh6",
+        //   ]
+        // );
+      } catch (e) {
+        console.log("error", e);
+      }
+
+      if (policy) {
+        console.log("policy", policy, policy.serialize());
+
+        [, hmac] = await btcApp.registerWallet(policy);
+      } else {
+        const masterFp = await btcApp.getMasterFingerprint();
+        const xpub = await btcApp.getExtendedPubkey(derivationPath);
+
+        policy = getDefaultWalletPolicy(
+          masterFp,
+          purpose,
+          derivationPath,
+          xpub
+        );
+      }
+
       const psbt = Psbt.fromBase64(data.psbtBase64);
 
-      const policy = getWalletPolicy(masterFp, purpose, derivationPath, xpub);
+      // 외부에서 들어온 요청의 경우 추가적으로 bip32 derivation을 처리해줘야 레저에서 서명이 가능하다.
+      if (!interactionData.isInternal) {
+        const masterFp = await btcApp.getMasterFingerprint();
 
-      const signatures = await btcApp.signPsbt(data.psbtBase64, policy, null);
+        for (const input of data.inputsToSign) {
+          if (purpose === 86) {
+            psbt.updateInput(input.index, {
+              tapBip32Derivation: [
+                {
+                  masterFingerprint: Buffer.from(masterFp, "hex"),
+                  pubkey: toXOnly(Buffer.from(interactionData.data.pubKey)),
+                  path:
+                    input.hdPath ??
+                    `${derivationPath}/${change}/${addressIndex}`,
+                  leafHashes: input.tapLeafHashesToSign ?? [],
+                },
+              ],
+            });
+          } else {
+            psbt.updateInput(input.index, {
+              bip32Derivation: [
+                {
+                  masterFingerprint: Buffer.from(masterFp, "hex"),
+                  pubkey: Buffer.from(interactionData.data.pubKey),
+                  path:
+                    input.hdPath ??
+                    `${derivationPath}/${change}/${addressIndex}`,
+                },
+              ],
+            });
+          }
+        }
+      }
+
+      const signatures = await btcApp.signPsbt(
+        psbt.toBase64(),
+        policy,
+        hmac ?? null
+      );
 
       for (const [index, partialSignature] of signatures) {
         if (purpose === 86) {
@@ -354,7 +429,7 @@ async function checkBitcoinPubKey(
   }
 }
 
-function getWalletPolicy(
+function getDefaultWalletPolicy(
   masterFingerprint: string,
   purpose: number,
   derivationPath: string,
