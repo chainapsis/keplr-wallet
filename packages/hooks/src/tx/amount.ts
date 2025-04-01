@@ -104,14 +104,18 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
       amount = new Dec(0);
     }
 
-    return [
-      new CoinPretty(
-        this.currency,
-        amount
-          .mul(DecUtils.getTenExponentN(this.currency.coinDecimals))
-          .truncate()
-      ),
-    ];
+    try {
+      return [
+        new CoinPretty(
+          this.currency,
+          amount
+            .mul(DecUtils.getTenExponentN(this.currency.coinDecimals))
+            .truncate()
+        ),
+      ];
+    } catch {
+      return [new CoinPretty(this.currency, new Dec(0))];
+    }
   }
 
   @computed
@@ -181,6 +185,12 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
           error: new NegativeAmountError("Amount is negative"),
         };
       }
+
+      // For checking if the amount is valid
+      new CoinPretty(
+        this.currency,
+        dec.mul(DecUtils.getTenExponentN(this.currency.coinDecimals)).truncate()
+      );
     } catch {
       return {
         error: new InvalidNumberAmountError("Invalid form of number"),

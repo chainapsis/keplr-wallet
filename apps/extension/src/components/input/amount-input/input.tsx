@@ -157,6 +157,12 @@ export const AmountInput: FunctionComponent<{
             }
           }
         } else {
+          try {
+            new Dec(e.target.value);
+          } catch (e) {
+            console.log(e);
+            return;
+          }
           amountConfig.setValue(e.target.value);
         }
       }}
