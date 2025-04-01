@@ -956,6 +956,24 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     );
   }
 
+  async __core__privilageSignAminoExecuteCosmWasm(
+    chainId: string,
+    signer: string,
+    signDoc: StdSignDoc
+  ): Promise<AminoSignResponse> {
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-cosmos",
+      "PrivilegeCosmosSignAminoExecuteCosmWasm",
+      {
+        chainId,
+        signer,
+        signDoc,
+      }
+    );
+  }
+
   async sendEthereumTx(chainId: string, tx: Uint8Array): Promise<string> {
     // XXX: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
     //      side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
