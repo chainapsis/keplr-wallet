@@ -798,6 +798,7 @@
   "components.collapsible-list.collapse": "Collapse",
   "components.collapsible-list.view-more": "View {remain} more",
 
+  "components.bitcoin-guide-box.title.critical-validation-error": "Unable to sign the transaction",
   "components.bitcoin-guide-box.title.unable-to-get-utxos": "Unable to get UTXOs",
   "components.bitcoin-guide-box.paragraph.unable-to-get-utxos": "UTXOs are temporarily unavailable. Please try again later.",
   "components.bitcoin-guide-box.title.partial-signing": "Partial Signing",

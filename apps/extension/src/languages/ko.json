@@ -699,6 +699,7 @@
   "components.collapsible-list.collapse": "접기",
   "components.collapsible-list.view-more": "{remain}개 더보기",
 
+  "components.bitcoin-guide-box.title.critical-validation-error": "트랜잭션 서명 불가",
   "components.bitcoin-guide-box.title.unable-to-get-utxos": "UTXO 조회 불가",
   "components.bitcoin-guide-box.paragraph.unable-to-get-utxos": "일시적으로 UTXO 정보를 가져올 수 없습니다. 잠시 후 다시 시도해 주세요.",
   "components.bitcoin-guide-box.title.partial-signing": "부분 서명",

@@ -591,6 +591,7 @@ export const SignBitcoinTxView: FunctionComponent<{
             validatedPsbt={validatedPsbts[currentPsbtIndex]}
             totalPsbts={validatedPsbts.length}
             currentPsbtIndex={currentPsbtIndex}
+            criticalValidationError={criticalValidationError}
           />
         ) : (
           <PsbtDetailsView
@@ -599,6 +600,7 @@ export const SignBitcoinTxView: FunctionComponent<{
             chainId={chainId}
             origin={interactionData.data.origin}
             validatedPsbt={validatedPsbts?.[0]}
+            criticalValidationError={criticalValidationError}
           />
         )
       ) : (
@@ -868,6 +870,7 @@ const PsbtDetailsView: FunctionComponent<{
   validatedPsbt?: ValidatedPsbt;
   totalPsbts?: number;
   currentPsbtIndex?: number;
+  criticalValidationError?: Error;
 }> = observer(
   ({
     validatedPsbt,
@@ -877,6 +880,7 @@ const PsbtDetailsView: FunctionComponent<{
     isUnableToGetUTXOs,
     totalPsbts,
     currentPsbtIndex,
+    criticalValidationError,
   }) => {
     const theme = useTheme();
     const {
@@ -961,6 +965,7 @@ const PsbtDetailsView: FunctionComponent<{
           isPartialSign={isPartialSign}
           isUnableToGetUTXOs={isUnableToGetUTXOs}
           isUnableToSign={isUnableToSign}
+          criticalValidationError={criticalValidationError}
         />
         {hasGuideBox && <Gutter size="0.75rem" />}
         {totalPsbts && totalPsbts > 1 && currentPsbtIndex !== undefined && (

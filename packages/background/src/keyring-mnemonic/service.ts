@@ -186,7 +186,6 @@ export class KeyRingMnemonicService {
     ).getBitcoinPubKey(network);
     const userAddress = bitcoinPubkey.getBitcoinAddress();
     const masterSeed = this.getMasterSeedFromVault(vault);
-    console.log("options", options);
     const autoFinalized = options?.autoFinalized ?? true;
 
     for (const {

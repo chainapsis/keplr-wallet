@@ -416,7 +416,9 @@ export const usePsbtsValidate = (
         if (signPsbtOptions?.toSignInputs) {
           for (const input of signPsbtOptions.toSignInputs) {
             const index = Number(input.index);
-            if (isNaN(index)) throw new Error("Invalid index in toSignInput");
+            if (isNaN(index)) {
+              throw new Error("Invalid index in toSignInput");
+            }
 
             if (!input.address && !input.publicKey) {
               throw new Error("No address or public key in toSignInput");
@@ -437,13 +439,17 @@ export const usePsbtsValidate = (
               throw new Error("Invalid sighash type in toSignInput");
             }
 
-            inputsToSign.push({
-              index,
-              address: myKey.address,
-              sighashTypes,
-              disableTweakSigner: input.disableTweakSigner,
-              useTweakedSigner: input.useTweakedSigner,
-            });
+            const { isToSign, hdPath } = getInputToSignInfo(myKey.address);
+            if (isToSign) {
+              inputsToSign.push({
+                index,
+                address: myKey.address,
+                hdPath,
+                sighashTypes,
+                disableTweakSigner: input.disableTweakSigner,
+                useTweakedSigner: input.useTweakedSigner,
+              });
+            }
           }
         }
 
@@ -519,12 +525,15 @@ export const usePsbtsValidate = (
       // psbt deserialize 오류 또는 입력의 합이 출력의 합보다 작은 psbt가 있는 경우
       // 이는 더 이상 검증을 진행할 수 없는 치명적인 오류이다.
       setCriticalValidationError(e as Error);
+      console.error(e);
     }
   }, [
     psbtsHexes,
     feeConfig,
     networkConfig,
+    signPsbtOptions?.toSignInputs,
     getInputToSignInfo,
+    bitcoinKeys,
     processInputValuesByAddress,
     processOutputValuesByAddress,
     decodePsbt,

@@ -659,6 +659,7 @@
   "components.collapsible-list.view-more-tokens": "查看 {remain} 的更多币种",
   "components.collapsible-list.collapse": "折叠",
 
+  "components.bitcoin-guide-box.title.critical-validation-error": "无法签名交易",
   "components.bitcoin-guide-box.title.unable-to-get-utxos": "无法获取UTXO",
   "components.bitcoin-guide-box.paragraph.unable-to-get-utxos": "UTXO暂时不可用，请稍后重试。",
   "components.bitcoin-guide-box.title.partial-signing": "部分签名",
