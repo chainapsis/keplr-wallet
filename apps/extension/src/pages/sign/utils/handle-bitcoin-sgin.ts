@@ -15,10 +15,86 @@ import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
 import { PubKeyBitcoinCompatible, toXOnly } from "@keplr-wallet/crypto";
 import { KeplrError } from "@keplr-wallet/router";
 import { ModularChainInfo } from "@keplr-wallet/types";
-import AppClient, { DefaultWalletPolicy, WalletPolicy } from "ledger-bitcoin";
+import AppClient, {
+  DefaultWalletPolicy,
+  WalletPolicy,
+  DefaultDescriptorTemplate,
+} from "ledger-bitcoin";
 import { Network, Psbt } from "bitcoinjs-lib";
 import { toOutputScript } from "bitcoinjs-lib/src/address";
 import { BIP322 } from "@keplr-wallet/background";
+
+export const BABYLON_SCRIPT_TYPES = {
+  SLASHING: "slashing",
+  UNBONDING: "unbonding",
+  TIMELOCK: "timelock",
+};
+
+export const BABYLON_SCRIPT_TYPES_REGEX = {
+  [BABYLON_SCRIPT_TYPES.SLASHING]:
+    /^([a-f0-9]{64}) OP_CHECKSIGVERIFY ([a-f0-9]{64}) OP_CHECKSIGVERIFY ([a-f0-9]{64}) OP_CHECKSIG/,
+  [BABYLON_SCRIPT_TYPES.UNBONDING]:
+    /^([a-f0-9]{64}) OP_CHECKSIGVERIFY ([a-f0-9]{64}) OP_CHECKSIG/,
+  [BABYLON_SCRIPT_TYPES.TIMELOCK]:
+    /^([a-f0-9]{64}) OP_CHECKSIGVERIFY ([a-f0-9]{2,6}) OP_CHECKSEQUENCEVERIFY$/,
+};
+
+/**
+ * Bitcoin descriptor templates for different script types
+ */
+export const DESCRIPTOR_TEMPLATES = {
+  /**
+   * Basic descriptor templates based on BIP purpose
+   * - 86: Taproot (tr)
+   * - 84: Native SegWit (wpkh)
+   * - other: Legacy (pkh)
+   */
+  DEFAULT: (purpose: number): DefaultDescriptorTemplate => {
+    switch (purpose) {
+      case 86:
+        return "tr(@0/**)";
+      case 84:
+        return "wpkh(@0/**)";
+      default:
+        return "pkh(@0/**)";
+    }
+  },
+
+  /**
+   * Babylon Slashing policy descriptor template
+   * Script Format: staker_pk OP_CHECKSIGVERIFY finalityprovider_pk OP_CHECKSIGVERIFY, n of m multi-sig
+   * Template Format: tr(@0/**,and_v(v:pk(staker_pk), and_v(v:pk(finalityprovider_pk),multi_a(covenant_threshold, covenant_pk1, ..., covenant_pkn))))
+   * @param covenantThreshold - Number of required signatures
+   * @param numKeys - Number of covenant public keys
+   */
+  BABYLON_SLASHING: (covenantThreshold: number, numKeys: number) =>
+    `tr(@0/**,and_v(v:pk(@1/**),and_v(v:pk(@2/**),multi_a(${covenantThreshold},${Array.from(
+      { length: numKeys },
+      (_, index) => `@${3 + index}/**`
+    ).join(",")}))))`,
+
+  /**
+   * Babylon Unbonding policy descriptor template
+   * Script Format: staker_pk OP_CHECKSIGVERIFY, n of m multi-sig
+   * Template Format: tr(@0/**,and_v(v:pk(staker_pk),multi_a(covenant_threshold, covenant_pk1, ..., covenant_pkn)))
+   * @param covenantThreshold - Number of required signatures
+   * @param numKeys - Number of covenant public keys
+   */
+  BABYLON_UNBONDING: (covenantThreshold: number, numKeys: number) =>
+    `tr(@0/**,and_v(v:pk(@1/**),multi_a(${covenantThreshold},${Array.from(
+      { length: numKeys },
+      (_, index) => `@${2 + index}/**`
+    ).join(",")})))`,
+
+  /**
+   * Babylon Timelock policy descriptor template
+   * Script Format: staker_pk OP_CHECKSIGVERIFY, timelock_blocks OP_CHECKSEQUENCEVERIFY
+   * Template Format: tr(@0/**,and_v(v:pk(staker_pk),older(timelock_blocks)))
+   * @param timelockBlocks - Number of blocks to wait before spending
+   */
+  BABYLON_TIMELOCK: (timelockBlocks: number) =>
+    `tr(@0/**,and_v(v:pk(@1/**),older(${timelockBlocks})))`,
+};
 
 export const connectAndSignMessageWithLedger = async (
   interactionData: NonNullable<
@@ -266,7 +342,7 @@ export const connectAndSignPsbtsWithLedger = async (
       let hmac: Buffer | undefined;
       // 먼저 script path spending 여부를 확인
       try {
-        // policy = await tryParsePsbt(transport, data.psbtBase64, coinType === 1);
+        policy = await tryParsePsbt(transport, data.psbtBase64, coinType === 1);
         // const masterFp = await btcApp.getMasterFingerprint();
         // const xpub = await btcApp.getExtendedPubkey(derivationPath);
         // tr(@0/**,{multi_a(6,@1,@2,@3,@4,@5,@6,@7,@8,@9)})
@@ -302,10 +378,11 @@ export const connectAndSignPsbtsWithLedger = async (
 
       const psbt = Psbt.fromBase64(data.psbtBase64);
 
-      // 외부에서 들어온 요청의 경우 추가적으로 bip32 derivation을 처리해줘야 레저에서 서명이 가능하다.
+      // 외부에서 들어온 요청의 경우 추가적으로 bip32 derivation을 처리해줘야 한다.
       if (!interactionData.isInternal) {
         const masterFp = await btcApp.getMasterFingerprint();
 
+        // bip32 derivation path 추가
         for (const input of data.inputsToSign) {
           if (purpose === 86) {
             psbt.updateInput(input.index, {
@@ -336,8 +413,12 @@ export const connectAndSignPsbtsWithLedger = async (
         }
       }
 
+      const newPsbtBase64 = psbt.toBase64();
+
+      console.log("newPsbtBase64", newPsbtBase64);
+
       const signatures = await btcApp.signPsbt(
-        psbt.toBase64(),
+        newPsbtBase64,
         policy,
         hmac ?? null
       );
@@ -435,14 +516,8 @@ function getDefaultWalletPolicy(
   derivationPath: string,
   xpub: string
 ): DefaultWalletPolicy {
-  const descriptorTemplate =
-    purpose === 86
-      ? "tr(@0/**)"
-      : purpose === 84
-      ? "wpkh(@0/**)"
-      : "pkh(@0/**)";
   return new DefaultWalletPolicy(
-    descriptorTemplate,
+    DESCRIPTOR_TEMPLATES.DEFAULT(purpose),
     `[${derivationPath.replace("m", masterFingerprint)}]${xpub}`
   );
 }
