@@ -17,7 +17,11 @@ import { isSimpleFetchError } from "@keplr-wallet/simple-fetch";
 import { ClaimAllEachState } from "./use-claim-all-each-state";
 import { useNotification } from "../notification";
 import { useNavigate } from "react-router";
-import { NOBLE_CHAIN_ID } from "../../config.ui";
+import {
+  NEUTRON_CHAIN_ID,
+  NeutronStakingRewardsContractAddress,
+  NOBLE_CHAIN_ID,
+} from "../../config.ui";
 import { MakeTxResponse } from "@keplr-wallet/stores";
 import { findFeeCurrency } from "../../utils";
 
@@ -51,6 +55,19 @@ export const useCosmosClaimRewards = () => {
         rewardToken.currency.coinMinimalDenom === "uusdn"
       ) {
         return account.noble.makeClaimYieldTx("withdrawRewards");
+      } else if (chainId === NEUTRON_CHAIN_ID) {
+        const msg = {
+          claim_rewards: {
+            to_address: account.bech32Address,
+          },
+        };
+        return account.cosmwasm.makeExecuteContractTx(
+          "executeWasm",
+          NeutronStakingRewardsContractAddress,
+          msg,
+          [],
+          {}
+        );
       } else {
         const queryRewards = queries.cosmos.queryRewards.getQueryBech32Address(
           account.bech32Address
@@ -320,6 +337,16 @@ export const useCosmosClaimRewards = () => {
                 });
               },
               onFulfill: (tx: any) => {
+                if (
+                  (tx.code === 0 || tx.code === null) &&
+                  chainId === NEUTRON_CHAIN_ID
+                ) {
+                  //neutron의 경우 컨트랙트에서 reward 다시 가져옴
+                  queries.cosmwasm.queryNeutronStakingRewards
+                    .getRewardFor(account.bech32Address)
+                    .fetch();
+                }
+
                 // Tx가 성공한 이후에 rewards가 다시 쿼리되면서 여기서 빠지는게 의도인데...
                 // 쿼리하는 동안 시간차가 있기 때문에 훼이크로 그냥 1초 더 기다린다.
                 setTimeout(() => {
@@ -403,6 +430,28 @@ export const useCosmosClaimRewards = () => {
             tx,
             gas: new Int(100000),
           };
+        } else if (chainId === NEUTRON_CHAIN_ID) {
+          const msg = {
+            claim_rewards: {
+              to_address: account.bech32Address,
+            },
+          };
+
+          const tx = account.cosmwasm.makeExecuteContractTx(
+            "executeWasm",
+            NeutronStakingRewardsContractAddress,
+            msg,
+            [],
+            {}
+          );
+          state.setIsLoading(true);
+
+          return {
+            tx,
+            //현재 ext 코드에는 wasm/MsgExecuteContract에 대한 기본 Gas 값이 없는 듯해서
+            //KD에서 가져온 값 사용
+            gas: new Int(250000),
+          };
         } else {
           const queryRewards =
             queries.cosmos.queryRewards.getQueryBech32Address(
@@ -478,6 +527,16 @@ export const useCosmosClaimRewards = () => {
               );
               return;
             }
+
+            if (chainId === NEUTRON_CHAIN_ID) {
+              //neutron의 경우 컨트랙트에서 reward 다시 가져옴
+              queries.cosmwasm.queryNeutronStakingRewards
+                .getRewardFor(account.bech32Address)
+                .fetch();
+
+              state.setIsLoading(false);
+            }
+
             notification.show(
               "success",
               intl.formatMessage({
@@ -508,6 +567,9 @@ export const useCosmosClaimRewards = () => {
       });
     } finally {
       state.setIsSimulating(false);
+      if (chainId === NEUTRON_CHAIN_ID) {
+        state.setIsLoading(false);
+      }
     }
   };
 
