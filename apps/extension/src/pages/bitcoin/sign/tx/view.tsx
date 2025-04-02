@@ -86,6 +86,7 @@ export const SignBitcoinTxView: FunctionComponent<{
     signBitcoinTxInteractionStore,
     bitcoinQueriesStore,
     bitcoinAccountStore,
+    uiConfigStore,
   } = useStore();
 
   const theme = useTheme();
@@ -403,7 +404,7 @@ export const SignBitcoinTxView: FunctionComponent<{
           interactionData,
           psbtSignData,
           modularChainInfo,
-          { useWebHID: false }
+          { useWebHID: uiConfigStore.useWebHIDLedger }
         );
       }
 

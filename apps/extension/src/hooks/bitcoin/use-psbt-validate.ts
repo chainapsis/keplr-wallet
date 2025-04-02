@@ -226,17 +226,8 @@ export const usePsbtsValidate = (
         );
 
         if (matchingMasterKey) {
-          // TODO: 하드웨어 지갑의 경우, 파생된 키를 직접 검증하는 로직이 필요
-          // ex)
-          // if (isValidDerivationFn) {
-          //   const isValid = await isValidDerivationFn(
-          //     derivation.path,
-          //     derivation.pubkey
-          //   );
-          //   if (isValid) {
-          //     ...
-          //   }
-          // }
+          // CHECK: master fingerprint 일치 여부 이상으로 검증이 필요할까?
+          // 이 훅 내부에서 렛저 연결하고 파생키를 검증하는 것은 좀 비효율 + 번거로움
 
           // 스크립트 경로 지출인 경우, leafHashes가 주어진다. (taproot)
           let tapLeafHashesToSign: Buffer[] | undefined;

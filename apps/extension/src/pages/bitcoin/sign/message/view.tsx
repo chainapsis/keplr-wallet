@@ -29,7 +29,7 @@ export const SignBitcoinMessageView: FunctionComponent<{
     SignBitcoinMessageInteractionStore["waitingData"]
   >;
 }> = observer(({ interactionData }) => {
-  const { signBitcoinMessageInteractionStore } = useStore();
+  const { signBitcoinMessageInteractionStore, uiConfigStore } = useStore();
 
   const theme = useTheme();
   const navigate = useNavigate();
@@ -87,7 +87,7 @@ export const SignBitcoinMessageView: FunctionComponent<{
           interactionData,
           modularChainInfo,
           {
-            useWebHID: false, // TODO: useWebHID 추가
+            useWebHID: uiConfigStore.useWebHIDLedger,
           }
         );
       }

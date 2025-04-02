@@ -2265,7 +2265,6 @@ export const EnableChainsScene: FunctionComponent<{
                 text={intl.formatMessage({
                   id: "pages.register.enable-chains.skip-button",
                 })}
-                // TODO: 페이지 순서 조정 필요 (현재는 cosmos -> evm -> starknet -> bitcoin 순서)
                 onClick={() =>
                   fallbackEthereumLedgerApp
                     ? sceneTransition.push("enable-chains", {
