@@ -36,6 +36,7 @@ import { XAxis, YAxis } from "../../../../components/axis";
 import { EmbedChainInfos } from "../../../../config";
 import { DenomHelper } from "@keplr-wallet/common";
 import { TokenTag } from "../../../register/enable-chains/components/chain-item";
+import { SupportedPaymentType } from "@keplr-wallet/types";
 
 export const TokenFoundModal: FunctionComponent<{
   close: () => void;
@@ -369,7 +370,15 @@ const FoundChainView: FunctionComponent<{
     return Array.from(set).length;
   }, [tokenScan]);
 
-  const tokenInfos = tokenScan.infos.flatMap((info) => info.assets);
+  const tokenInfos = tokenScan.infos.reduce((acc, cur) => {
+    return [
+      ...acc,
+      ...cur.assets.map((asset) => ({
+        ...asset,
+        paymentType: cur.bitcoinAddress?.paymentType,
+      })),
+    ];
+  }, [] as (TokenScan["infos"][0]["assets"][0] & { paymentType?: SupportedPaymentType })[]);
 
   return (
     <Box
@@ -470,7 +479,9 @@ const FoundChainView: FunctionComponent<{
 
 const FoundTokenView: FunctionComponent<{
   chainId: string;
-  asset: TokenScan["infos"][0]["assets"][0];
+  asset: TokenScan["infos"][0]["assets"][0] & {
+    paymentType?: SupportedPaymentType;
+  };
 }> = observer(({ chainId, asset }) => {
   const { chainStore, uiConfigStore } = useStore();
   const theme = useTheme();
@@ -480,7 +491,7 @@ const FoundTokenView: FunctionComponent<{
     const denomHelper = new DenomHelper(currency.coinMinimalDenom);
     if (denomHelper.type === "native") {
       if (chainId.startsWith("bip122:")) {
-        const paymentType = chainId.split(":")[2] as string | undefined;
+        const paymentType = asset.paymentType;
         if (paymentType) {
           return {
             text: paymentType
@@ -491,7 +502,7 @@ const FoundTokenView: FunctionComponent<{
         }
       }
     }
-  }, [asset.currency, chainId]);
+  }, [asset.currency, chainId, asset.paymentType]);
 
   return (
     <Columns sum={1} gutter="0.5rem" alignY="center">
