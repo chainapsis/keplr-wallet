@@ -724,6 +724,7 @@
   "text-button.select-all": "전체 선택",
 
   "notification.transaction-success": "트랜잭션 성공",
+  "notification.transaction-sent": "트랜잭션 전송됌",
 
   "hooks.confirm.cancel-button": "취소",
   "hooks.confirm.yes-button": "예"

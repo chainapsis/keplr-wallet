@@ -517,14 +517,14 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
               BACKGROUND_PORT,
               new PushBitcoinTransactionMsg(chainId, txHex)
             )
-            .then((txHash) => {
+            .then((_txHash) => {
               // balance refresh를 바로 해도 반영이 안될 수 있으므로 딜레이를 주거나
               // 비트코인은 refresh를 하지 않고 넘어간다.
 
               notification.show(
                 "success",
-                intl.formatMessage({ id: "notification.transaction-success" }),
-                txHash
+                intl.formatMessage({ id: "notification.transaction-sent" }),
+                ""
               );
             })
             .catch((e) => {

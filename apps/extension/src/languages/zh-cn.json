@@ -680,6 +680,7 @@
   "text-button.select-all": "全选",
 
   "notification.transaction-success": "交易成功",
+  "notification.transaction-sent": "交易已发送",
 
   "hooks.confirm.cancel-button": "取消",
   "hooks.confirm.yes-button": "是的"

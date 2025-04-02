@@ -827,6 +827,7 @@
   "text-button.select-all": "Select All",
 
   "notification.transaction-success": "Transaction Success",
+  "notification.transaction-sent": "Transaction Sent",
 
   "hooks.confirm.cancel-button": "Cancel",
   "hooks.confirm.yes-button": "Yes"
