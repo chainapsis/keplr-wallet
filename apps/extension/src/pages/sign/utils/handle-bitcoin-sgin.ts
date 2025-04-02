@@ -24,25 +24,26 @@ import { Network, Psbt } from "bitcoinjs-lib";
 import { toOutputScript } from "bitcoinjs-lib/src/address";
 import { BIP322 } from "@keplr-wallet/background";
 
-export const BABYLON_SCRIPT_TYPES = {
-  SLASHING: "slashing",
-  UNBONDING: "unbonding",
-  TIMELOCK: "timelock",
-};
+// TODO: Support babylon staking with script path spending
+// const BABYLON_SCRIPT_TYPES = {
+//   SLASHING: "slashing",
+//   UNBONDING: "unbonding",
+//   TIMELOCK: "timelock",
+// };
 
-export const BABYLON_SCRIPT_TYPES_REGEX = {
-  [BABYLON_SCRIPT_TYPES.SLASHING]:
-    /^([a-f0-9]{64}) OP_CHECKSIGVERIFY ([a-f0-9]{64}) OP_CHECKSIGVERIFY ([a-f0-9]{64}) OP_CHECKSIG/,
-  [BABYLON_SCRIPT_TYPES.UNBONDING]:
-    /^([a-f0-9]{64}) OP_CHECKSIGVERIFY ([a-f0-9]{64}) OP_CHECKSIG/,
-  [BABYLON_SCRIPT_TYPES.TIMELOCK]:
-    /^([a-f0-9]{64}) OP_CHECKSIGVERIFY ([a-f0-9]{2,6}) OP_CHECKSEQUENCEVERIFY$/,
-};
+// const BABYLON_SCRIPT_TYPES_REGEX = {
+//   [BABYLON_SCRIPT_TYPES.SLASHING]:
+//     /^([a-f0-9]{64}) OP_CHECKSIGVERIFY ([a-f0-9]{64}) OP_CHECKSIGVERIFY ([a-f0-9]{64}) OP_CHECKSIG/,
+//   [BABYLON_SCRIPT_TYPES.UNBONDING]:
+//     /^([a-f0-9]{64}) OP_CHECKSIGVERIFY ([a-f0-9]{64}) OP_CHECKSIG/,
+//   [BABYLON_SCRIPT_TYPES.TIMELOCK]:
+//     /^([a-f0-9]{64}) OP_CHECKSIGVERIFY ([a-f0-9]{2,6}) OP_CHECKSEQUENCEVERIFY$/,
+// };
 
 /**
  * Bitcoin descriptor templates for different script types
  */
-export const DESCRIPTOR_TEMPLATES = {
+const DESCRIPTOR_TEMPLATES = {
   /**
    * Basic descriptor templates based on BIP purpose
    * - 86: Taproot (tr)
@@ -133,7 +134,6 @@ export const connectAndSignMessageWithLedger = async (
 
   const network = interactionData.data.network;
 
-  // 여기서 이미 Bitcoin 또는 Bitcoin Testnet 중 하나의 앱이 열려있어야 한다.
   await checkBitcoinPubKey(
     interactionData.data.pubKey,
     {
@@ -340,31 +340,32 @@ export const connectAndSignPsbtsWithLedger = async (
     for (const data of psbtSignData) {
       let policy: WalletPolicy | undefined | void;
       let hmac: Buffer | undefined;
-      // 먼저 script path spending 여부를 확인
+
+      // TODO:먼저 script path spending 여부를 확인
       try {
-        policy = await tryParsePsbt(transport, data.psbtBase64, coinType === 1);
-        // const masterFp = await btcApp.getMasterFingerprint();
-        // const xpub = await btcApp.getExtendedPubkey(derivationPath);
-        // tr(@0/**,{multi_a(6,@1,@2,@3,@4,@5,@6,@7,@8,@9)})
-        // policy = new WalletPolicy(
-        //   "Test",
-        //   "tr(@0/**,{sortedmulti_a(1,@0/<2;3>/*,@1/**),or_b(pk(@2/**),s:pk(@3/**))})",
-        //   [
-        //     `[${derivationPath.replace("m", masterFp)}]${xpub}`,
-        //     "tpub6Fc2TRaCWNgfT49nRGG2G78d1dPnjhW66gEXi7oYZML7qEFN8e21b2DLDipTZZnfV6V7ivrMkvh4VbnHY2ChHTS9qM3XVLJiAgcfagYQk6K",
-        //     "tpub6GxHB9kRdFfTqYka8tgtX9Gh3Td3A9XS8uakUGVcJ9NGZ1uLrGZrRVr67DjpMNCHprZmVmceFTY4X4wWfksy8nVwPiNvzJ5pjLxzPtpnfEM",
-        //     "tpub6GjFUVVYewLj5no5uoNKCWuyWhQ1rKGvV8DgXBG9Uc6DvAKxt2dhrj1EZFrTNB5qxAoBkVW3wF8uCS3q1ri9fueAa6y7heFTcf27Q4gyeh6",
-        //   ]
-        // );
+        // policy = await tryParsePsbt(transport, data.psbtBase64, coinType === 1);
       } catch (e) {
         console.log("error", e);
       }
 
       if (policy) {
-        console.log("policy", policy, policy.serialize());
-
         [, hmac] = await btcApp.registerWallet(policy);
       } else {
+        // 현재 스크립트 경로 지출은 지원하지 않는다.
+        for (const toSign of data.inputsToSign) {
+          if (
+            (toSign.hdPath && !toSign.hdPath.startsWith(derivationPath)) ||
+            (toSign.tapLeafHashesToSign &&
+              toSign.tapLeafHashesToSign.length > 0)
+          ) {
+            throw new KeplrError(
+              ErrModuleLedgerSign,
+              9999,
+              "Script path spending is not supported for Ledger."
+            );
+          }
+        }
+
         const masterFp = await btcApp.getMasterFingerprint();
         const xpub = await btcApp.getExtendedPubkey(derivationPath);
 
@@ -382,7 +383,6 @@ export const connectAndSignPsbtsWithLedger = async (
       if (!interactionData.isInternal) {
         const masterFp = await btcApp.getMasterFingerprint();
 
-        // bip32 derivation path 추가
         for (const input of data.inputsToSign) {
           if (purpose === 86) {
             psbt.updateInput(input.index, {
@@ -414,8 +414,6 @@ export const connectAndSignPsbtsWithLedger = async (
       }
 
       const newPsbtBase64 = psbt.toBase64();
-
-      console.log("newPsbtBase64", newPsbtBase64);
 
       const signatures = await btcApp.signPsbt(
         newPsbtBase64,
