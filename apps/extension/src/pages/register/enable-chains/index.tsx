@@ -1299,7 +1299,6 @@ export const EnableChainsScene: FunctionComponent<{
                 enabledNativeChainIdentifiersInPage.length
               }
               onClick={() => {
-                // TODO: select all 했을 때 비트코인 linked chain들도 같이 선택되도록 처리 필요
                 if (
                   nativeModularChainInfos.length ===
                   enabledNativeChainIdentifiersInPage.length
@@ -1713,8 +1712,10 @@ export const EnableChainsScene: FunctionComponent<{
               })}
               size="large"
               onClick={async () => {
-                const enables: string[] = [];
-                const disables: string[] = [];
+                const enablesSet: Set<string> = new Set();
+                const disablesSet: Set<string> = new Set();
+                const enableLinkedChainKeys: Set<string> = new Set();
+
                 const successSuggestChainIdentifiers: string[] = [];
 
                 if (nonNativeChainListForSuggest.length > 0) {
@@ -1747,7 +1748,9 @@ export const EnableChainsScene: FunctionComponent<{
                     );
                   }
 
-                  enables.push(...successSuggestChainIdentifiers);
+                  successSuggestChainIdentifiers.forEach((chainIdentifier) => {
+                    enablesSet.add(chainIdentifier);
+                  });
                 }
 
                 for (const modularChainInfo of chainStore.modularChainInfos) {
@@ -1758,7 +1761,13 @@ export const EnableChainsScene: FunctionComponent<{
                     enabledChainIdentifierMap.get(chainIdentifier) || false;
 
                   if (enabled) {
-                    enables.push(chainIdentifier);
+                    enablesSet.add(chainIdentifier);
+
+                    if ("linkedChainKey" in modularChainInfo) {
+                      enableLinkedChainKeys.add(
+                        modularChainInfo.linkedChainKey
+                      );
+                    }
                   } else {
                     //NOTE - 위에서 suggest 체인이 추가되었으면
                     //이 체인은 disable 하면 안되기 때문에 무시함
@@ -1770,9 +1779,34 @@ export const EnableChainsScene: FunctionComponent<{
                       continue;
                     }
 
-                    disables.push(chainIdentifier);
+                    disablesSet.add(chainIdentifier);
                   }
                 }
+
+                // 페이지가 로드되었을 때 간혹 체인이 선택되어 있는 경우 또는 전체 선택을 눌렀을 때
+                // 이 경우 바로 저장 버튼을 누르면 linkedChainKey에 대한 처리가 이루어지지 않아서
+                // 일부만 활성화되는 경우가 있다. 따라서 linkedChainKey에 대한 처리를 먼저 한다.
+                // disable로 분류되어 있더라도 활성화된 체인이면 활성화 처리해야 한다.
+                for (const linkedChainKey of enableLinkedChainKeys) {
+                  for (const modularChainInfo of chainStore.modularChainInfos) {
+                    if (
+                      "linkedChainKey" in modularChainInfo &&
+                      modularChainInfo.linkedChainKey === linkedChainKey
+                    ) {
+                      const chainIdentifier = ChainIdHelper.parse(
+                        modularChainInfo.chainId
+                      ).identifier;
+                      enablesSet.add(chainIdentifier);
+
+                      if (disablesSet.has(chainIdentifier)) {
+                        disablesSet.delete(chainIdentifier);
+                      }
+                    }
+                  }
+                }
+
+                const enables = Array.from(enablesSet);
+                const disables = Array.from(disablesSet);
 
                 const needFinalizeCoinType: string[] = [];
                 for (let i = 0; i < enables.length; i++) {
