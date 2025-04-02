@@ -78,7 +78,20 @@ export interface IBitcoinProvider extends EventEmitter {
   ) => Promise<string>;
   sendBitcoin: (to: string, amount: number) => Promise<string>;
   pushTx: (rawTxHex: string) => Promise<string>;
-  signPsbt: (psbtHex: string) => Promise<string>;
+  signPsbt: (
+    psbtHex: string,
+    options?: {
+      autoFinalized?: boolean;
+      toSignInputs?: Array<{
+        index: number;
+        address?: string;
+        publicKey?: string;
+        sighashTypes?: number[];
+        disableTweakSigner?: boolean;
+        useTweakedSigner?: boolean;
+      }>;
+    }
+  ) => Promise<string>;
   signPsbts: (psbtsHexes: string[]) => Promise<string[]>;
   getAddress: () => Promise<string>;
   connectWallet: () => Promise<string[]>;

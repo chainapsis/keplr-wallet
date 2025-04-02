@@ -111,6 +111,8 @@ export function injectKeplrToWindow(keplr: IKeplr): void {
   );
 
   defineUnwritablePropertyIfPossible(window, "starknet_keplr", keplr.starknet);
+  defineUnwritablePropertyIfPossible(window, "unisat", keplr.bitcoin);
+  defineUnwritablePropertyIfPossible(window, "tomo_btc", keplr.bitcoin);
 }
 
 /**
@@ -1695,6 +1697,8 @@ export class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
     method: keyof IBitcoinProvider,
     args: Record<string, any>
   ): Promise<T> {
+    console.log("method args", method, args);
+
     const bytes = new Uint8Array(8);
     const id: string = Array.from(crypto.getRandomValues(bytes))
       .map((value) => {

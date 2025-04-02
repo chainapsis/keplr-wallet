@@ -258,7 +258,7 @@ export class KeyRingMnemonicService {
           throw new Error("Invalid taproot signature");
         }
 
-        psbt.finalizeTaprootInput(index);
+        // psbt.finalizeTaprootInput(index);
       } else {
         psbt.signInput(index, signer);
 
