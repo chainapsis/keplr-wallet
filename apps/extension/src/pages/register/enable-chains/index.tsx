@@ -699,14 +699,40 @@ export const EnableChainsScene: FunctionComponent<{
         if (isNotCosmosHub) {
           if (
             aChainIdentifier === "eip155:1" &&
-            !bChainIdentifier.startsWith("eip155:1")
+            bChainIdentifier !== "eip155:1"
           ) {
             return -1;
           }
 
           if (
-            !aChainIdentifier.startsWith("eip155:1") &&
+            aChainIdentifier !== "eip155:1" &&
             bChainIdentifier === "eip155:1"
+          ) {
+            return 1;
+          }
+        }
+
+        const isNotEthereum =
+          aChainIdentifier !== "eip155:1" && bChainIdentifier !== "eip155:1";
+        if (isNotCosmosHub && isNotEthereum) {
+          if (
+            aChainIdentifier.startsWith(
+              "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"
+            ) &&
+            !bChainIdentifier.startsWith(
+              "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"
+            )
+          ) {
+            return -1;
+          }
+
+          if (
+            !aChainIdentifier.startsWith(
+              "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"
+            ) &&
+            bChainIdentifier.startsWith(
+              "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"
+            )
           ) {
             return 1;
           }
