@@ -28,8 +28,12 @@ export const TokenContractListURL =
   "https://opbaqquqruxn7fdsgcncrtfrwa0qxnoj.lambda-url.us-west-2.on.aws/";
 export const TokenContractListRepoURL =
   "https://github.com/chainapsis/keplr-contract-registry";
+export const NeutronStakingRewardsContractAddress =
+  "neutron1h62p45vv3fg2q6sm00r93gqgmhqt9tfgq5hz33qyrhq8f0pqqj0s36wgc3";
 
 export const NOBLE_CHAIN_ID = "noble-1";
+//FIXME - main net 전 수정 필요
+export const NEUTRON_CHAIN_ID = "pion-1";
 
 export const KEPLR_EXTS_MEMO = "Keplr Exts";
 
