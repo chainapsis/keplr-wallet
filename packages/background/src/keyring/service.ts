@@ -17,7 +17,11 @@ import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 import { KVStore } from "@keplr-wallet/common";
 import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import { InteractionService } from "../interaction";
-import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
+import {
+  ChainInfo,
+  ModularChainInfo,
+  SignPsbtOptions,
+} from "@keplr-wallet/types";
 import { Buffer } from "buffer/";
 import * as Legacy from "./legacy";
 import { ChainsUIService } from "../chains-ui";
@@ -1292,7 +1296,8 @@ export class KeyRingService {
       hdPath?: string;
       tapLeafHashesToSign?: NodeBuffer[];
     }[],
-    network: BitcoinNetwork
+    network: BitcoinNetwork,
+    options?: SignPsbtOptions
   ) {
     if (this.vaultService.isLocked) {
       throw new Error("KeyRing is locked");
@@ -1328,7 +1333,8 @@ export class KeyRingService {
       psbt,
       inputsToSign,
       network,
-      modularChainInfo
+      modularChainInfo,
+      options
     );
 
     if (this.needKeyCoinTypeFinalize(vault.id, chainId)) {
@@ -1440,7 +1446,8 @@ export class KeyRingService {
       tapLeafHashesToSign?: NodeBuffer[];
     }[],
     network: BitcoinNetwork,
-    modularChainInfo: ModularChainInfo
+    modularChainInfo: ModularChainInfo,
+    options?: SignPsbtOptions
   ) {
     if (this.vaultService.isLocked) {
       throw new Error("KeyRing is locked");
@@ -1460,7 +1467,8 @@ export class KeyRingService {
         psbt,
         inputsToSign,
         network,
-        modularChainInfo
+        modularChainInfo,
+        options
       )
     );
   }

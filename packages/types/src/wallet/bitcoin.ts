@@ -53,6 +53,18 @@ export const CHAIN_TYPE_TO_GENESIS_HASH: Record<ChainType, GenesisHash> = {
   [ChainType.BITCOIN_SIGNET]: GenesisHash.SIGNET,
 };
 
+export type SignPsbtOptions = {
+  autoFinalized?: boolean;
+  toSignInputs?: Array<{
+    index: number;
+    address?: string;
+    publicKey?: string;
+    sighashTypes?: number[];
+    disableTweakSigner?: boolean;
+    useTweakedSigner?: boolean;
+  }>;
+};
+
 export interface IBitcoinProvider extends EventEmitter {
   getAccounts: () => Promise<string[]>;
   requestAccounts: () => Promise<string[]>;
@@ -78,21 +90,11 @@ export interface IBitcoinProvider extends EventEmitter {
   ) => Promise<string>;
   sendBitcoin: (to: string, amount: number) => Promise<string>;
   pushTx: (rawTxHex: string) => Promise<string>;
-  signPsbt: (
-    psbtHex: string,
-    options?: {
-      autoFinalized?: boolean;
-      toSignInputs?: Array<{
-        index: number;
-        address?: string;
-        publicKey?: string;
-        sighashTypes?: number[];
-        disableTweakSigner?: boolean;
-        useTweakedSigner?: boolean;
-      }>;
-    }
-  ) => Promise<string>;
-  signPsbts: (psbtsHexes: string[]) => Promise<string[]>;
+  signPsbt: (psbtHex: string, options?: SignPsbtOptions) => Promise<string>;
+  signPsbts: (
+    psbtsHexes: string[],
+    options?: SignPsbtOptions
+  ) => Promise<string[]>;
   getAddress: () => Promise<string>;
   connectWallet: () => Promise<string[]>;
 }
