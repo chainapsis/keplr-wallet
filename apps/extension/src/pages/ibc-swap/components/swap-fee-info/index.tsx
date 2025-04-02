@@ -223,14 +223,9 @@ export const SwapFeeInfo: FunctionComponent<{
                 }}
               >
                 <XAxis gap="0.25rem" alignY="center">
-                  <Subtitle4
-                    style={{
-                      textUnderlineOffset: "0.2rem",
-                    }}
-                    color={txFeeColor}
-                  >
+                  <Body3 color={txFeeColor}>
                     <FormattedMessage id="page.ibc-swap.components.swap-fee-info.button.transaction-fee" />
-                  </Subtitle4>
+                  </Body3>
                   <AdjustmentIcon
                     width="1rem"
                     height="1rem"
@@ -297,7 +292,7 @@ export const SwapFeeInfo: FunctionComponent<{
               <Body3
                 color={
                   theme.mode === "light"
-                    ? ColorPalette["gray-300"]
+                    ? ColorPalette["gray-200"]
                     : ColorPalette["gray-300"]
                 }
               >
@@ -328,7 +323,7 @@ export const SwapFeeInfo: FunctionComponent<{
               <Body3
                 color={
                   theme.mode === "light"
-                    ? ColorPalette["gray-600"]
+                    ? ColorPalette["gray-200"]
                     : ColorPalette["gray-300"]
                 }
               >
@@ -341,8 +336,8 @@ export const SwapFeeInfo: FunctionComponent<{
                     <Body3
                       color={
                         theme.mode === "light"
-                          ? ColorPalette["gray-600"]
-                          : ColorPalette["gray-100"]
+                          ? ColorPalette["gray-300"]
+                          : ColorPalette["gray-200"]
                       }
                       key={fee.currency.coinMinimalDenom}
                     >
