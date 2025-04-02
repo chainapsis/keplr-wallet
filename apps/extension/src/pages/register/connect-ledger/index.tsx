@@ -407,16 +407,13 @@ export const ConnectLedgerScene: FunctionComponent<{
             setStep("app");
 
             if (appendModeInfo) {
-              const keysForBitcoin: Record<
-                string,
-                {
-                  purpose: number;
-                  coinType: number;
-                  chainId: string;
-                }
-              > = {};
+              const keysForBitcoin: {
+                chainId: string;
+                derivationPath: string;
+                isTestnet: boolean;
+              }[] = [];
 
-              const masterFingerprint = await btcApp.getMasterFingerprint();
+              const { account, change, addressIndex } = bip44Path;
 
               for (const chainId of appendModeInfo.afterEnableChains) {
                 const modularChainInfo = chainStore.getModularChain(chainId);
@@ -431,35 +428,41 @@ export const ConnectLedgerScene: FunctionComponent<{
                   throw new Error("Purpose not found");
                 }
 
-                const key = `${bip44.purpose}-${bip44.coinType}`;
-                keysForBitcoin[key] = {
-                  purpose: bip44.purpose,
-                  coinType: bip44.coinType,
+                const derivationPath = `m/${bip44.purpose}'/${bip44.coinType}'/${account}'/${change}/${addressIndex}`;
+
+                keysForBitcoin.push({
                   chainId,
-                };
+                  derivationPath,
+                  isTestnet: bip44.coinType === 1,
+                });
               }
 
-              const mainnetKeys = Object.values(keysForBitcoin).filter(
-                (key) => key.coinType === 0
+              const mainnetKeys = keysForBitcoin.filter(
+                (key) => !key.isTestnet
               );
-              const testnetKeys = Object.values(keysForBitcoin).filter(
-                (key) => key.coinType === 1
-              );
+              const testnetKeys = keysForBitcoin.filter((key) => key.isTestnet);
 
               const extendedKeys: ExtendedKey[] = [];
+              const derivationPathSet: Set<string> = new Set();
 
-              for (const key of Object.values(keysForBitcoin)) {
+              const masterFingerprint = await btcApp.getMasterFingerprint();
+
+              for (let i = 0; i < keysForBitcoin.length; i++) {
+                const key = keysForBitcoin[i];
                 if (
-                  (propApp === "Bitcoin" && key.coinType === 0) ||
-                  (propApp === "Bitcoin Test" && key.coinType === 1)
+                  (propApp === "Bitcoin" && !key.isTestnet) ||
+                  (propApp === "Bitcoin Test" && key.isTestnet)
                 ) {
-                  const derivationPath = `m/${key.purpose}'/${key.coinType}'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`;
+                  if (derivationPathSet.has(key.derivationPath)) {
+                    continue;
+                  }
 
+                  derivationPathSet.add(key.derivationPath);
                   extendedKeys.push({
-                    xpub: await btcApp.getExtendedPubkey(derivationPath),
+                    xpub: await btcApp.getExtendedPubkey(key.derivationPath),
                     masterFingerprint,
-                    derivationPath,
-                    type: key.purpose === 86 ? "tr" : "wpkh",
+                    derivationPath: key.derivationPath,
+                    type: key.isTestnet ? "tr" : "wpkh",
                   });
                 }
               }
@@ -577,8 +580,9 @@ export const ConnectLedgerScene: FunctionComponent<{
                     case "Starknet":
                       return <StarknetIcon />;
                     case "Bitcoin":
-                    // TODO: Implement Bitcoin support
-                    // return <BitcoinIcon />;
+                      return <BitcoinIcon />;
+                    case "Bitcoin Test":
+                      return <BitcoinTestIcon />;
                     default:
                       return <CosmosIcon />;
                   }
@@ -1054,6 +1058,42 @@ const StarknetIcon: FunctionComponent = () => {
         fillRule="evenodd"
         clipRule="evenodd"
         d="M51.4692 50.9081C51.4692 52.6039 52.8453 53.9795 54.5415 53.9795C56.2381 53.9795 57.6121 52.6039 57.6121 50.9081C57.6121 49.2123 56.2381 47.8367 54.5415 47.8367C52.8453 47.8367 51.4692 49.2123 51.4692 50.9081Z"
+        fill="white"
+      />
+    </svg>
+  );
+};
+
+const BitcoinIcon = () => {
+  return (
+    <svg
+      width="80"
+      height="80"
+      viewBox="0 0 80 80"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <rect x="9" y="9" width="62" height="62" rx="15.6962" fill="#F7931A" />
+      <path
+        d="M53.534 36.291C54.171 32.033 50.929 29.744 46.496 28.217L47.934 22.449L44.423 21.574L43.023 27.19C42.1 26.96 41.152 26.743 40.21 26.528L41.62 20.875L38.111 20L36.672 25.766C35.908 25.592 35.158 25.42 34.43 25.239L34.434 25.221L29.592 24.012L28.658 27.762C28.658 27.762 31.263 28.359 31.208 28.396C32.63 28.751 32.887 29.692 32.844 30.438L31.206 37.009C31.304 37.034 31.431 37.07 31.571 37.126C31.454 37.097 31.329 37.065 31.2 37.034L28.904 46.239C28.73 46.671 28.289 47.319 27.295 47.073C27.33 47.124 24.743 46.436 24.743 46.436L23 50.455L27.569 51.594C28.419 51.807 29.252 52.03 30.072 52.24L28.619 58.074L32.126 58.949L33.565 53.177C34.523 53.437 35.453 53.677 36.363 53.903L34.929 59.648L38.44 60.523L39.893 54.7C45.88 55.833 50.382 55.376 52.277 49.961C53.804 45.601 52.201 43.086 49.051 41.446C51.345 40.917 53.073 39.408 53.534 36.291ZM45.512 47.54C44.427 51.9 37.086 49.543 34.706 48.952L36.634 41.223C39.014 41.817 46.646 42.993 45.512 47.54ZM46.598 36.228C45.608 40.194 39.498 38.179 37.516 37.685L39.264 30.675C41.246 31.169 47.629 32.091 46.598 36.228Z"
+        fill="white"
+      />
+    </svg>
+  );
+};
+
+const BitcoinTestIcon = () => {
+  return (
+    <svg
+      width="80"
+      height="80"
+      viewBox="0 0 80 80"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <rect x="9" y="9" width="62" height="62" rx="15.6962" fill="#7ECE6A" />
+      <path
+        d="M53.534 36.291C54.171 32.033 50.929 29.744 46.496 28.217L47.934 22.449L44.423 21.574L43.023 27.19C42.1 26.96 41.152 26.743 40.21 26.528L41.62 20.875L38.111 20L36.672 25.766C35.908 25.592 35.158 25.42 34.43 25.239L34.434 25.221L29.592 24.012L28.658 27.762C28.658 27.762 31.263 28.359 31.208 28.396C32.63 28.751 32.887 29.692 32.844 30.438L31.206 37.009C31.304 37.034 31.431 37.07 31.571 37.126C31.454 37.097 31.329 37.065 31.2 37.034L28.904 46.239C28.73 46.671 28.289 47.319 27.295 47.073C27.33 47.124 24.743 46.436 24.743 46.436L23 50.455L27.569 51.594C28.419 51.807 29.252 52.03 30.072 52.24L28.619 58.074L32.126 58.949L33.565 53.177C34.523 53.437 35.453 53.677 36.363 53.903L34.929 59.648L38.44 60.523L39.893 54.7C45.88 55.833 50.382 55.376 52.277 49.961C53.804 45.601 52.201 43.086 49.051 41.446C51.345 40.917 53.073 39.408 53.534 36.291ZM45.512 47.54C44.427 51.9 37.086 49.543 34.706 48.952L36.634 41.223C39.014 41.817 46.646 42.993 45.512 47.54ZM46.598 36.228C45.608 40.194 39.498 38.179 37.516 37.685L39.264 30.675C41.246 31.169 47.629 32.091 46.598 36.228Z"
         fill="white"
       />
     </svg>
