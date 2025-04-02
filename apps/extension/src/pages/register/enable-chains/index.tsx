@@ -423,8 +423,8 @@ export const EnableChainsScene: FunctionComponent<{
           }
 
           if ("bitcoin" in modularChainInfo) {
-            const account = accountStore.getAccount(modularChainInfo.chainId);
             const mainCurrency = modularChainInfo.bitcoin.currencies[0];
+            const account = accountStore.getAccount(modularChainInfo.chainId);
 
             const queryBalance = bitcoinQueriesStore
               .get(modularChainInfo.chainId)
@@ -440,6 +440,38 @@ export const EnableChainsScene: FunctionComponent<{
               enabledChainIdentifiers.push(
                 ChainIdHelper.parse(modularChainInfo.chainId).identifier
               );
+            } else {
+              // Taproot 혹은 Native Segwit 중 하나라도 밸런스가 있으면 둘 다 enable한다.
+              const paymentType = modularChainInfo.chainId.split(":")[2];
+              const chainIdWithAnotherPaymentType =
+                modularChainInfo.chainId.replace(
+                  paymentType,
+                  paymentType === "taproot" ? "native-segwit" : "taproot"
+                );
+              const accountWithAnotherPaymentType = accountStore.getAccount(
+                chainIdWithAnotherPaymentType
+              );
+
+              const queryBalanceWithAnotherPaymentType = bitcoinQueriesStore
+                .get(chainIdWithAnotherPaymentType)
+                .queryBitcoinBalance.getBalance(
+                  chainIdWithAnotherPaymentType,
+                  chainStore,
+                  accountWithAnotherPaymentType.bitcoinAddress?.bech32Address ??
+                    "",
+                  mainCurrency.coinMinimalDenom
+                );
+              if (
+                queryBalanceWithAnotherPaymentType &&
+                queryBalanceWithAnotherPaymentType.balance
+                  .toDec()
+                  .gt(new Dec(0))
+              ) {
+                enableAllChains = false;
+                enabledChainIdentifiers.push(
+                  ChainIdHelper.parse(modularChainInfo.chainId).identifier
+                );
+              }
             }
           }
         }
@@ -986,8 +1018,12 @@ export const EnableChainsScene: FunctionComponent<{
         (chainIdentifier) =>
           nativeModularChainInfos.some(
             (modularChainInfo) =>
+              modularChainInfo.linkedModularChainInfos?.some(
+                (linkedModularChainInfo) =>
+                  linkedModularChainInfo.chainId === chainIdentifier
+              ) ||
               chainIdentifier ===
-              ChainIdHelper.parse(modularChainInfo.chainId).identifier
+                ChainIdHelper.parse(modularChainInfo.chainId).identifier
           ) && nativeChainIdentifierSet.has(chainIdentifier)
       );
     }, [
@@ -1124,27 +1160,7 @@ export const EnableChainsScene: FunctionComponent<{
           modularChainInfo.chainId
         ).identifier;
 
-        const enabled = (() => {
-          if ("bitcoin" in modularChainInfo) {
-            const paymentType = modularChainInfo.chainId.split(":")[2];
-            const chainIdentifierWithAnotherPaymentType = ChainIdHelper.parse(
-              modularChainInfo.chainId.replace(
-                paymentType,
-                paymentType === "taproot" ? "native-segwit" : "taproot"
-              )
-            ).identifier;
-
-            return (
-              enabledChainIdentifierMap.get(chainIdentifier) ||
-              enabledChainIdentifierMap.get(
-                chainIdentifierWithAnotherPaymentType
-              ) ||
-              false
-            );
-          }
-
-          return enabledChainIdentifierMap.get(chainIdentifier) || false;
-        })();
+        const enabled = enabledChainIdentifierMap.get(chainIdentifier) || false;
 
         // At least, one chain should be enabled.
         const blockInteraction = enabledChainIdentifiers.length <= 1 && enabled;
