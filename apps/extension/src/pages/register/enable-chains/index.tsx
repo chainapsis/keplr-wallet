@@ -1947,7 +1947,7 @@ export const EnableChainsScene: FunctionComponent<{
                                 throw new Error("Purpose not found");
                               }
 
-                              const derivationPath = `m/${purpose}'/${coinType}'/${account}'/${change}'/${addressIndex}`;
+                              const derivationPath = `m/${purpose}'/${coinType}'/${account}'/${change}/${addressIndex}`;
 
                               return {
                                 mainnet:
@@ -2020,6 +2020,20 @@ export const EnableChainsScene: FunctionComponent<{
                             throw new Error("bip44Path not found");
                           }
 
+                          // 테스트넷 키가 존재하고, 메인넷 키가 존재하지 않으면 테스트넷을 먼저 활성화하고 메인넷 연결 페이지로 이동
+                          if (
+                            hasBitcoinTestnetExtendedKeys &&
+                            testnet.length > 0
+                          ) {
+                            await chainStore.enableChainInfoInUI(
+                              ...testnet.map((key) => key.chainId)
+                            );
+                            dispatchGlobalEventExceptSelf(
+                              "keplr_enabled_chain_changed",
+                              keyInfo.id
+                            );
+                          }
+
                           sceneTransition.push("connect-ledger", {
                             name: "",
                             password: "",
@@ -2037,6 +2051,20 @@ export const EnableChainsScene: FunctionComponent<{
                           const bip44Path = keyInfo.insensitive["bip44Path"];
                           if (!bip44Path) {
                             throw new Error("bip44Path not found");
+                          }
+
+                          // 메인넷 키가 존재하고, 테스트넷 키가 존재하지 않으면 테스트넷을 먼저 활성화하고 메인넷 연결 페이지로 이동
+                          if (
+                            hasBitcoinMainnetExtendedKeys &&
+                            mainnet.length > 0
+                          ) {
+                            await chainStore.enableChainInfoInUI(
+                              ...mainnet.map((key) => key.chainId)
+                            );
+                            dispatchGlobalEventExceptSelf(
+                              "keplr_enabled_chain_changed",
+                              keyInfo.id
+                            );
                           }
 
                           sceneTransition.push("connect-ledger", {
