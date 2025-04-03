@@ -199,7 +199,8 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
               vaultId,
               // 이더리움 렛저 앱을 연결하면 이더리움 메인넷을 자동으로 enable 하고
               // 스타크넷 렛저 앱을 연결하면 스타크넷 메인넷을 자동으로 enable 하고
-              // 비트코인 렛저 앱을 연결하면 비트코인 메인넷을 자동으로 enable 한다.
+              // 비트코인 렛저 앱을 연결하면 비트코인 메인넷을 자동으로 enable 하고
+              // 비트코인 테스트넷 렛저 앱을 연결하면 비트코인 시그넷을 자동으로 enable 한다.
               afterEnableChains:
                 ledgerApp === "Ethereum"
                   ? ["eip155:1"]
@@ -210,10 +211,12 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
                       "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:taproot",
                       "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:native-segwit",
                     ]
-                  : [
+                  : ledgerApp === "Bitcoin Test"
+                  ? [
                       "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6:taproot",
                       "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6:native-segwit",
-                    ], // bitcoin signet
+                    ]
+                  : [],
             },
           },
         },
