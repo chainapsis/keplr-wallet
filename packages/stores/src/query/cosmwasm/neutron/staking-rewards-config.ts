@@ -3,7 +3,6 @@ import { ChainGetter } from "../../../chain";
 import { ObservableCosmwasmContractChainQuery } from "../contract-query";
 import { QuerySharedContext } from "../../../common";
 
-// Neutron 보상 쿼리 응답 타입 정의
 interface NeutronStakingRewardsConfigResponse {
   owner: string;
   dao_address: string;
