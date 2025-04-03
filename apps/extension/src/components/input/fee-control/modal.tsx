@@ -154,6 +154,15 @@ export const TransactionFeeModal: FunctionComponent<{
     const isShowingFeeWithGasEstimated =
       !!isGasSimulatorEnabled && !!gasSimulator?.gasEstimated && isFeeSetByUser;
 
+    const swapFeeRate = amountConfig
+      ? new IntPretty(amountConfig.swapFeeBps)
+          .moveDecimalPointLeft(2)
+          .trim(true)
+          .maxDecimals(4)
+          .inequalitySymbol(true)
+          .toString()
+      : undefined;
+
     return (
       <Styles.Container>
         <Box marginBottom="1.25rem" marginLeft="0.5rem" paddingY="0.4rem">
@@ -459,13 +468,14 @@ export const TransactionFeeModal: FunctionComponent<{
                 <Subtitle4
                   color={
                     theme.mode === "light"
-                      ? ColorPalette["gray-200"]
-                      : ColorPalette["gray-300"]
+                      ? ColorPalette["gray-300"]
+                      : ColorPalette["gray-200"]
                   }
                 >
                   {intl.formatMessage({
                     id: "page.ibc-swap.components.swap-fee-info.button.service-fee",
-                  })}
+                  })}{" "}
+                  {swapFeeRate ? `${swapFeeRate}%` : ""}
                 </Subtitle4>
                 <Tooltip
                   content={intl.formatMessage(
@@ -476,12 +486,7 @@ export const TransactionFeeModal: FunctionComponent<{
                           : "page.ibc-swap.components.swap-fee-info.button.service-fee.paragraph",
                     },
                     {
-                      rate: new IntPretty(amountConfig.swapFeeBps)
-                        .moveDecimalPointLeft(2)
-                        .trim(true)
-                        .maxDecimals(4)
-                        .inequalitySymbol(true)
-                        .toString(),
+                      rate: swapFeeRate,
                     }
                   )}
                 >

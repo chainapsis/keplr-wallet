@@ -7,7 +7,7 @@ import {
   ISenderConfig,
 } from "@keplr-wallet/hooks";
 import { autorun } from "mobx";
-import { Dec, PricePretty } from "@keplr-wallet/unit";
+import { Dec, IntPretty, PricePretty } from "@keplr-wallet/unit";
 import { useStore } from "../../../../stores";
 import { IBCSwapAmountConfig } from "@keplr-wallet/hooks-internal";
 import { Box } from "../../../../components/box";
@@ -186,7 +186,10 @@ export const SwapFeeInfo: FunctionComponent<{
     const isShowingEstimatedFee = isForEVMTx && !!gasSimulator.gasEstimated;
 
     const txFeeColor = (() => {
-      const hasError = !!feeConfig.uiProperties.error;
+      const hasError =
+        !!feeConfig.uiProperties.error ||
+        !!senderConfig.uiProperties.error ||
+        !!amountConfig.uiProperties.error;
       const isLightTheme = theme.mode === "light";
 
       if (!isLightTheme && !hasError && !isHovered)
@@ -289,46 +292,6 @@ export const SwapFeeInfo: FunctionComponent<{
                 }}
               />
 
-              <Body3
-                color={
-                  theme.mode === "light"
-                    ? ColorPalette["gray-200"]
-                    : ColorPalette["gray-300"]
-                }
-              >
-                {(() => {
-                  let totalPrice: PricePretty | undefined;
-                  if (feeConfig.fees.length > 0) {
-                    const fee = feeConfig.fees[0];
-                    const price = priceStore.calculatePrice(fee);
-                    if (price) {
-                      if (totalPrice) {
-                        totalPrice = totalPrice.add(price);
-                      } else {
-                        totalPrice = price;
-                      }
-                    } else {
-                      return "-";
-                    }
-                  }
-
-                  if (totalPrice) {
-                    return totalPrice.toString();
-                  }
-                  return "-";
-                })()}
-              </Body3>
-
-              <Gutter size="0.25rem" />
-              <Body3
-                color={
-                  theme.mode === "light"
-                    ? ColorPalette["gray-200"]
-                    : ColorPalette["gray-300"]
-                }
-              >
-                =
-              </Body3>
               <Gutter size="0.25rem" />
               <YAxis>
                 {feeConfig.fees.map((fee) => {
@@ -364,6 +327,23 @@ export const SwapFeeInfo: FunctionComponent<{
                   );
                 })}
               </YAxis>
+              <Gutter size="0.25rem" />
+              <Body3
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-300"]
+                    : ColorPalette["gray-200"]
+                }
+              >
+                +{" "}
+                {new IntPretty(amountConfig.swapFeeBps)
+                  .moveDecimalPointLeft(2)
+                  .trim(true)
+                  .maxDecimals(4)
+                  .inequalitySymbol(true)
+                  .toString()}
+                %
+              </Body3>
             </XAxis>
           ) : null}
 
