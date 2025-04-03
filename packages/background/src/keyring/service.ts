@@ -29,6 +29,7 @@ import { runIfOnlyAppStart } from "../utils";
 import { Network as BitcoinNetwork, Psbt } from "bitcoinjs-lib";
 import { DEFAULT_BIP44_PURPOSE } from "./constants";
 import { Buffer as NodeBuffer } from "buffer";
+import { Descriptor } from "../keyring-bitcoin";
 
 export class KeyRingService {
   protected _needMigration = false;
@@ -923,7 +924,7 @@ export class KeyRingService {
       throw new Error("Key is not from ledger");
     }
 
-    const keyValues: Record<string, string> = {};
+    const pathToDescriptor: Record<string, string> = {};
 
     for (const {
       xpub,
@@ -931,21 +932,62 @@ export class KeyRingService {
       masterFingerprint,
       type,
     } of extendedKeys) {
-      const key = derivationPath;
-      const value = PubKeyBitcoinCompatible.createDescriptor(
+      // Parse and validate derivation path (`m/purpose'/coinType'/account'`)
+      const segments = derivationPath.split("/").filter(Boolean);
+      const purposeIndex = segments[0] === "m" ? 1 : 0;
+
+      if (segments.length !== purposeIndex + 3) {
+        throw new Error("Invalid derivation path");
+      }
+
+      const purpose = parseInt(
+        segments[purposeIndex].endsWith("'")
+          ? segments[purposeIndex].slice(0, -1)
+          : segments[purposeIndex]
+      );
+      const coinType = parseInt(
+        segments[purposeIndex + 1].endsWith("'")
+          ? segments[purposeIndex + 1].slice(0, -1)
+          : segments[purposeIndex + 1]
+      );
+      const account = parseInt(
+        segments[purposeIndex + 2].endsWith("'")
+          ? segments[purposeIndex + 2].slice(0, -1)
+          : segments[purposeIndex + 2]
+      );
+
+      if (app === "Bitcoin" || app === "Bitcoin Test") {
+        if (purpose === 44 || type === "pkh") {
+          throw new Error("Legacy address is not supported for Bitcoin");
+        }
+      }
+
+      if (
+        (purpose === 86 && type !== "tr") ||
+        (purpose === 84 && type !== "wpkh") ||
+        (purpose === 44 && type !== "pkh")
+      ) {
+        throw new Error(
+          `Address type is not matching with purpose ${purpose} and type ${type}`
+        );
+      }
+
+      // Use account path as key for descriptor
+      const accountPath = `m/${purpose}'/${coinType}'/${account}'`;
+      const descriptor = Descriptor.create(
         type,
         masterFingerprint,
-        derivationPath,
+        accountPath,
         xpub
       );
 
-      keyValues[key] = value;
+      pathToDescriptor[accountPath] = descriptor;
     }
 
     this.vaultService.setAndMergeInsensitiveToVault("keyRing", vaultId, {
       [app]: {
         ...(vault.insensitive[app] as any),
-        ...keyValues,
+        ...pathToDescriptor,
       },
     });
   }

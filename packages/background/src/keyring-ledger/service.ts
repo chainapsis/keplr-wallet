@@ -6,6 +6,7 @@ import { ModularChainInfo } from "@keplr-wallet/types";
 import { KeyRingService } from "../keyring";
 import { Network as BitcoinNetwork } from "bitcoinjs-lib";
 import { PubKeyBitcoinCompatible } from "@keplr-wallet/crypto";
+import { Descriptor } from "../keyring-bitcoin";
 
 export class KeyRingLedgerService {
   async init(): Promise<void> {
@@ -129,11 +130,16 @@ export class KeyRingLedgerService {
 
     const { account, change, addressIndex } = this.getBIP44PathFromVault(vault);
 
-    const derivationPath = `m/${purpose}'/${coinType}'/${account}'/${change}/${addressIndex}`;
+    const accountPath = `${purpose}'/${coinType}'/${account}'`;
+    const additionalPath = `${change}/${addressIndex}`;
 
-    const descriptor = (
-      vault.insensitive[coinType === 0 ? "Bitcoin" : "Bitcoin Test"] as any
-    )[derivationPath];
+    const descriptor =
+      (vault.insensitive[coinType === 0 ? "Bitcoin" : "Bitcoin Test"] as any)[
+        accountPath
+      ] ||
+      (vault.insensitive[coinType === 0 ? "Bitcoin" : "Bitcoin Test"] as any)[
+        `m/${accountPath}`
+      ];
 
     if (!descriptor) {
       throw new KeplrError(
@@ -143,7 +149,15 @@ export class KeyRingLedgerService {
       );
     }
 
-    return PubKeyBitcoinCompatible.fromDescriptor(descriptor, network);
+    const { masterFingerprint, xpub } = Descriptor.parse(descriptor);
+
+    return PubKeyBitcoinCompatible.fromExtendedKey(
+      xpub,
+      accountPath,
+      masterFingerprint,
+      additionalPath,
+      network
+    );
   }
 
   sign(): {

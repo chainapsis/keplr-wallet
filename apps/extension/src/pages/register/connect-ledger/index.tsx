@@ -407,13 +407,12 @@ export const ConnectLedgerScene: FunctionComponent<{
             setStep("app");
 
             if (appendModeInfo) {
-              const keysForBitcoin: {
+              const bitcoinKeys: {
                 chainId: string;
                 derivationPath: string;
+                type: "wpkh" | "tr";
                 isTestnet: boolean;
               }[] = [];
-
-              const { account, change, addressIndex } = bip44Path;
 
               for (const chainId of appendModeInfo.afterEnableChains) {
                 const modularChainInfo = chainStore.getModularChain(chainId);
@@ -428,27 +427,26 @@ export const ConnectLedgerScene: FunctionComponent<{
                   throw new Error("Purpose not found");
                 }
 
-                const derivationPath = `m/${bip44.purpose}'/${bip44.coinType}'/${account}'/${change}/${addressIndex}`;
+                const derivationPath = `m/${bip44.purpose}'/${bip44.coinType}'/${bip44Path.account}'`;
 
-                keysForBitcoin.push({
+                bitcoinKeys.push({
                   chainId,
                   derivationPath,
+                  type: bip44.purpose === 86 ? "tr" : "wpkh",
                   isTestnet: bip44.coinType === 1,
                 });
               }
 
-              const mainnetKeys = keysForBitcoin.filter(
-                (key) => !key.isTestnet
-              );
-              const testnetKeys = keysForBitcoin.filter((key) => key.isTestnet);
+              const mainnetKeys = bitcoinKeys.filter((key) => !key.isTestnet);
+              const testnetKeys = bitcoinKeys.filter((key) => key.isTestnet);
 
               const extendedKeys: ExtendedKey[] = [];
               const derivationPathSet: Set<string> = new Set();
 
               const masterFingerprint = await btcApp.getMasterFingerprint();
 
-              for (let i = 0; i < keysForBitcoin.length; i++) {
-                const key = keysForBitcoin[i];
+              for (let i = 0; i < bitcoinKeys.length; i++) {
+                const key = bitcoinKeys[i];
                 if (
                   (propApp === "Bitcoin" && !key.isTestnet) ||
                   (propApp === "Bitcoin Test" && key.isTestnet)
@@ -462,7 +460,7 @@ export const ConnectLedgerScene: FunctionComponent<{
                     xpub: await btcApp.getExtendedPubkey(key.derivationPath),
                     masterFingerprint,
                     derivationPath: key.derivationPath,
-                    type: key.isTestnet ? "tr" : "wpkh",
+                    type: key.type,
                   });
                 }
               }

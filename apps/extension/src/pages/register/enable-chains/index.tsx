@@ -1955,8 +1955,6 @@ export const EnableChainsScene: FunctionComponent<{
                           throw new Error("bip44Path not found");
                         }
 
-                        const { account, change, addressIndex } = bip44Path;
-
                         const { mainnet, testnet } =
                           ledgerBitcoinAppNeeds.reduce<{
                             mainnet: {
@@ -1981,7 +1979,7 @@ export const EnableChainsScene: FunctionComponent<{
                                 throw new Error("Purpose not found");
                               }
 
-                              const derivationPath = `m/${purpose}'/${coinType}'/${account}'/${change}/${addressIndex}`;
+                              const derivationPath = `${purpose}'/${coinType}'/${bip44Path.account}'`;
 
                               return {
                                 mainnet:
@@ -2012,34 +2010,33 @@ export const EnableChainsScene: FunctionComponent<{
                             }
                           );
 
-                        const hasBitcoinMainnetExtendedKeys = mainnet.every(
-                          (key) => {
-                            const bitcoinKeys = keyInfo.insensitive[
-                              "Bitcoin"
-                            ] as any;
-                            if (!bitcoinKeys) {
-                              return false;
-                            }
-                            return !!bitcoinKeys[key.derivationPath];
+                        const hasMainnetExtendedKeys = mainnet.every((key) => {
+                          const bitcoinKeys = keyInfo.insensitive[
+                            "Bitcoin"
+                          ] as any;
+                          if (!bitcoinKeys) {
+                            return false;
                           }
-                        );
+                          return (
+                            !!bitcoinKeys[`m/${key.derivationPath}`] ||
+                            !!bitcoinKeys[key.derivationPath]
+                          );
+                        });
 
-                        const hasBitcoinTestnetExtendedKeys = testnet.every(
-                          (key) => {
-                            const bitcoinKeys = keyInfo.insensitive[
-                              "Bitcoin Test"
-                            ] as any;
-                            if (!bitcoinKeys) {
-                              return false;
-                            }
-                            return !!bitcoinKeys[key.derivationPath];
+                        const hasTestnetExtendedKeys = testnet.every((key) => {
+                          const bitcoinKeys = keyInfo.insensitive[
+                            "Bitcoin Test"
+                          ] as any;
+                          if (!bitcoinKeys) {
+                            return false;
                           }
-                        );
+                          return (
+                            !!bitcoinKeys[`m/${key.derivationPath}`] ||
+                            !!bitcoinKeys[key.derivationPath]
+                          );
+                        });
 
-                        if (
-                          hasBitcoinMainnetExtendedKeys &&
-                          hasBitcoinTestnetExtendedKeys
-                        ) {
+                        if (hasMainnetExtendedKeys && hasTestnetExtendedKeys) {
                           await chainStore.enableChainInfoInUI(
                             ...ledgerBitcoinAppNeeds
                           );
@@ -2048,17 +2045,14 @@ export const EnableChainsScene: FunctionComponent<{
                             keyInfo.id
                           );
                           replaceToWelcomePage();
-                        } else if (!hasBitcoinMainnetExtendedKeys) {
+                        } else if (!hasMainnetExtendedKeys) {
                           const bip44Path = keyInfo.insensitive["bip44Path"];
                           if (!bip44Path) {
                             throw new Error("bip44Path not found");
                           }
 
                           // 테스트넷 키가 존재하고, 메인넷 키가 존재하지 않으면 테스트넷을 먼저 활성화하고 메인넷 연결 페이지로 이동
-                          if (
-                            hasBitcoinTestnetExtendedKeys &&
-                            testnet.length > 0
-                          ) {
+                          if (hasTestnetExtendedKeys && testnet.length > 0) {
                             await chainStore.enableChainInfoInUI(
                               ...testnet.map((key) => key.chainId)
                             );
@@ -2081,17 +2075,14 @@ export const EnableChainsScene: FunctionComponent<{
                             stepPrevious: stepPrevious,
                             stepTotal: stepTotal,
                           });
-                        } else if (!hasBitcoinTestnetExtendedKeys) {
+                        } else if (!hasTestnetExtendedKeys) {
                           const bip44Path = keyInfo.insensitive["bip44Path"];
                           if (!bip44Path) {
                             throw new Error("bip44Path not found");
                           }
 
                           // 메인넷 키가 존재하고, 테스트넷 키가 존재하지 않으면 테스트넷을 먼저 활성화하고 메인넷 연결 페이지로 이동
-                          if (
-                            hasBitcoinMainnetExtendedKeys &&
-                            mainnet.length > 0
-                          ) {
+                          if (hasMainnetExtendedKeys && mainnet.length > 0) {
                             await chainStore.enableChainInfoInUI(
                               ...mainnet.map((key) => key.chainId)
                             );

@@ -492,7 +492,13 @@ async function checkBitcoinPubKey(
         new PubKeyBitcoinCompatible(Buffer.from(expectedPubKey)).toBytes()
       ).toString("hex") !==
       Buffer.from(
-        PubKeyBitcoinCompatible.fromBase58(xpub, hdPath, network).toBytes()
+        PubKeyBitcoinCompatible.fromExtendedKey(
+          xpub,
+          hdPath,
+          undefined,
+          undefined,
+          network
+        ).toBytes()
       ).toString("hex")
     ) {
       throw new KeplrError(
