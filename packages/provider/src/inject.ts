@@ -33,6 +33,7 @@ import {
   Network as BitcoinNetwork,
   BitcoinSignMessageType,
   ChainType,
+  SignPsbtOptions,
 } from "@keplr-wallet/types";
 import {
   Result,
@@ -1099,12 +1100,24 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     return await this.requestMethod("getBitcoinKeysSettled", [chainIds]);
   }
 
-  async signPsbt(chainId: string, psbtHex: string): Promise<string> {
-    return await this.requestMethod("signPsbt", [chainId, psbtHex]);
+  async signPsbt(
+    chainId: string,
+    psbtHex: string,
+    options?: SignPsbtOptions
+  ): Promise<string> {
+    return await this.requestMethod("signPsbt", [chainId, psbtHex, options]);
   }
 
-  async signPsbts(chainId: string, psbtsHexes: string[]): Promise<string[]> {
-    return await this.requestMethod("signPsbts", [chainId, psbtsHexes]);
+  async signPsbts(
+    chainId: string,
+    psbtsHexes: string[],
+    options?: SignPsbtOptions
+  ): Promise<string[]> {
+    return await this.requestMethod("signPsbts", [
+      chainId,
+      psbtsHexes,
+      options,
+    ]);
   }
 
   public readonly ethereum = new EthereumProvider(
@@ -1811,12 +1824,15 @@ export class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
     return this._requestMethod("pushTx", [rawTxHex]);
   }
 
-  async signPsbt(psbtHex: string): Promise<string> {
-    return this._requestMethod("signPsbt", [psbtHex]);
+  async signPsbt(psbtHex: string, options?: SignPsbtOptions): Promise<string> {
+    return this._requestMethod("signPsbt", [psbtHex, options]);
   }
 
-  async signPsbts(psbtsHexes: string[]): Promise<string[]> {
-    return this._requestMethod("signPsbts", [psbtsHexes]);
+  async signPsbts(
+    psbtsHexes: string[],
+    options?: SignPsbtOptions
+  ): Promise<string[]> {
+    return this._requestMethod("signPsbts", [psbtsHexes, options]);
   }
 
   async getAddress(): Promise<string> {

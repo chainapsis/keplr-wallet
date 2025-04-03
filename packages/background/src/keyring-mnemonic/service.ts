@@ -11,6 +11,7 @@ import {
 } from "@keplr-wallet/crypto";
 import { Psbt, payments, Network as BitcoinNetwork } from "bitcoinjs-lib";
 import { taggedHash } from "bitcoinjs-lib/src/crypto";
+import { SignPsbtOptions, ModularChainInfo } from "@keplr-wallet/types";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
 
@@ -170,8 +171,13 @@ export class KeyRingMnemonicService {
       address: string;
       hdPath?: string;
       tapLeafHashesToSign?: NodeBuffer[];
+      sighashTypes?: number[];
+      disableTweakSigner?: boolean;
+      useTweakedSigner?: boolean;
     }[],
-    network: BitcoinNetwork
+    network: BitcoinNetwork,
+    _modularChainInfo: ModularChainInfo,
+    options?: SignPsbtOptions
   ): Promise<Psbt> {
     const bitcoinPubkey = this.getPrivKey(
       vault,
@@ -180,12 +186,16 @@ export class KeyRingMnemonicService {
     ).getBitcoinPubKey(network);
     const userAddress = bitcoinPubkey.getBitcoinAddress();
     const masterSeed = this.getMasterSeedFromVault(vault);
+    const autoFinalized = options?.autoFinalized ?? true;
 
     for (const {
       index,
       address,
       hdPath,
       tapLeafHashesToSign,
+      sighashTypes,
+      disableTweakSigner,
+      useTweakedSigner,
     } of inputsToSign) {
       // default address와 일치하거나, hdPath를 통해 파생 키를 생성할 수 있는 경우에만 서명한다.
       if (
@@ -207,7 +217,8 @@ export class KeyRingMnemonicService {
         tapLeafHashesToSign && tapLeafHashesToSign.length > 0;
 
       if (this.isTaprootInput(input)) {
-        let needTweak = true;
+        // useTweakedSigner가 disableTweakSigner 보다 우세
+        let needTweak = useTweakedSigner ?? disableTweakSigner ?? true;
 
         // script path spending인 경우 키 트윅이 필요 없음
         if (isScriptPathSpending) {
@@ -241,11 +252,12 @@ export class KeyRingMnemonicService {
             psbt.signTaprootInput(
               index,
               taprootSigner,
-              NodeBuffer.from(leafHash) // error: tapleafhashtosign.equals is not a function -> wrap with NodeBuffer
+              NodeBuffer.from(leafHash), // error: tapleafhashtosign.equals is not a function -> wrap with NodeBuffer
+              sighashTypes
             );
           }
         } else {
-          psbt.signTaprootInput(index, taprootSigner);
+          psbt.signTaprootInput(index, taprootSigner, undefined, sighashTypes);
         }
 
         const isValid = psbt.validateSignaturesOfInput(
@@ -258,7 +270,9 @@ export class KeyRingMnemonicService {
           throw new Error("Invalid taproot signature");
         }
 
-        psbt.finalizeTaprootInput(index);
+        if (autoFinalized) {
+          psbt.finalizeTaprootInput(index);
+        }
       } else {
         psbt.signInput(index, signer);
 
@@ -271,7 +285,9 @@ export class KeyRingMnemonicService {
           throw new Error("Invalid ecdsa signature");
         }
 
-        psbt.finalizeInput(index);
+        if (autoFinalized) {
+          psbt.finalizeInput(index);
+        }
       }
     }
 

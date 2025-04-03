@@ -3,6 +3,7 @@ import {
   BitcoinSignMessageType,
   IBitcoinProvider,
   SettledResponses,
+  SignPsbtOptions,
   SupportedPaymentType,
 } from "@keplr-wallet/types";
 import { ROUTE } from "./constants";
@@ -150,7 +151,8 @@ export class RequestSignBitcoinPsbtMsg extends Message<string> {
 
   constructor(
     public readonly chainId: string,
-    public readonly psbtHex: string
+    public readonly psbtHex: string,
+    public readonly options?: SignPsbtOptions
   ) {
     super();
   }
@@ -190,7 +192,8 @@ export class RequestSignBitcoinPsbtsMsg extends Message<string[]> {
 
   constructor(
     public readonly chainId: string,
-    public readonly psbtsHexes: string[]
+    public readonly psbtsHexes: string[],
+    public readonly options?: SignPsbtOptions
   ) {
     super();
   }

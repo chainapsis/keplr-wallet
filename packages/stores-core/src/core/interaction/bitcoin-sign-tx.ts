@@ -2,6 +2,7 @@ import { PlainObject } from "@keplr-wallet/background";
 import { InteractionStore } from "./interaction";
 import { computed, makeObservable } from "mobx";
 import { Network } from "bitcoinjs-lib";
+import { SignPsbtOptions } from "@keplr-wallet/types";
 
 export type SignBitcoinTxInteractionData = {
   origin: string;
@@ -12,6 +13,7 @@ export type SignBitcoinTxInteractionData = {
   network: Network;
   keyType: string;
   keyInsensitive: PlainObject;
+  signPsbtOptions?: SignPsbtOptions;
 } & (
   | {
       psbtHex: string;

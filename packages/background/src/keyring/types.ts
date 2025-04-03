@@ -4,7 +4,7 @@ import {
   PubKeySecp256k1,
   PubKeyStarknet,
 } from "@keplr-wallet/crypto";
-import { ModularChainInfo } from "@keplr-wallet/types";
+import { ModularChainInfo, SignPsbtOptions } from "@keplr-wallet/types";
 import { Psbt, Network as BitcoinNetwork } from "bitcoinjs-lib";
 
 export type KeyRingStatus = "empty" | "locked" | "unlocked";
@@ -84,7 +84,8 @@ export interface KeyRing {
       tapLeafHashesToSign?: Buffer[];
     }[],
     network: BitcoinNetwork,
-    modularChainInfo: ModularChainInfo
+    modularChainInfo: ModularChainInfo,
+    options?: SignPsbtOptions
   ): Promise<Psbt>;
 }
 

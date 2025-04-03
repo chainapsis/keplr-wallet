@@ -26,6 +26,7 @@ import {
   IStarknetProvider,
   SupportedPaymentType,
   IBitcoinProvider,
+  SignPsbtOptions,
 } from "@keplr-wallet/types";
 import { JSONUint8Array } from "./uint8-array";
 import deepmerge from "deepmerge";
@@ -663,12 +664,24 @@ export class Keplr implements IKeplr {
     return await this.requestMethod("getBitcoinKeysSettled", [chainIds]);
   }
 
-  async signPsbt(chainId: string, psbtHex: string): Promise<string> {
-    return await this.requestMethod("signPsbt", [chainId, psbtHex]);
+  async signPsbt(
+    chainId: string,
+    psbtHex: string,
+    options?: SignPsbtOptions
+  ): Promise<string> {
+    return await this.requestMethod("signPsbt", [chainId, psbtHex, options]);
   }
 
-  async signPsbts(chainId: string, psbtsHexes: string[]): Promise<string[]> {
-    return await this.requestMethod("signPsbts", [chainId, psbtsHexes]);
+  async signPsbts(
+    chainId: string,
+    psbtsHexes: string[],
+    options?: SignPsbtOptions
+  ): Promise<string[]> {
+    return await this.requestMethod("signPsbts", [
+      chainId,
+      psbtsHexes,
+      options,
+    ]);
   }
 
   async __core__getAnalyticsId(): Promise<string> {

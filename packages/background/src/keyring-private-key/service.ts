@@ -9,6 +9,7 @@ import {
 } from "@keplr-wallet/crypto";
 import { Psbt, payments, Network as BitcoinNetwork } from "bitcoinjs-lib";
 import { taggedHash } from "bitcoinjs-lib/src/crypto";
+import { ModularChainInfo, SignPsbtOptions } from "@keplr-wallet/types";
 
 export class KeyRingPrivateKeyService {
   constructor(protected readonly vaultService: VaultService) {}
@@ -99,8 +100,13 @@ export class KeyRingPrivateKeyService {
       address: string;
       hdPath?: string;
       tapLeafHashesToSign?: NodeBuffer[];
+      sighashTypes?: number[];
+      disableTweakSigner?: boolean;
+      useTweakedSigner?: boolean;
     }[],
-    network: BitcoinNetwork
+    network: BitcoinNetwork,
+    _modularChainInfo: ModularChainInfo,
+    options?: SignPsbtOptions
   ): Promise<Psbt> {
     const privateKeyText = this.vaultService.decrypt(vault.sensitive)[
       "privateKey"
@@ -117,8 +123,16 @@ export class KeyRingPrivateKeyService {
     const nativeSegwitAddress =
       bitcoinPubkey.getBitcoinAddress("native-segwit");
     const taprootAddress = bitcoinPubkey.getBitcoinAddress("taproot");
+    const autoFinalized = options?.autoFinalized ?? true;
 
-    for (const { index, address, tapLeafHashesToSign } of inputsToSign) {
+    for (const {
+      index,
+      address,
+      tapLeafHashesToSign,
+      sighashTypes,
+      disableTweakSigner,
+      useTweakedSigner,
+    } of inputsToSign) {
       // 주소가 일치하지 않은데 스크립트 경로 지출도 아니면 서명이 불가능하다.
       if (
         address !== nativeSegwitAddress &&
@@ -133,7 +147,8 @@ export class KeyRingPrivateKeyService {
         tapLeafHashesToSign && tapLeafHashesToSign.length > 0;
 
       if (this.isTaprootInput(input)) {
-        let needTweak = true;
+        // useTweakedSigner가 disableTweakSigner 보다 우세
+        let needTweak = useTweakedSigner ?? disableTweakSigner ?? true;
 
         if (isScriptPathSpending) {
           needTweak = false;
@@ -157,11 +172,12 @@ export class KeyRingPrivateKeyService {
             psbt.signTaprootInput(
               index,
               actualSigner,
-              NodeBuffer.from(leafHash)
+              NodeBuffer.from(leafHash),
+              sighashTypes
             );
           }
         } else {
-          psbt.signTaprootInput(index, actualSigner);
+          psbt.signTaprootInput(index, actualSigner, undefined, sighashTypes);
         }
 
         const isValid = psbt.validateSignaturesOfInput(
@@ -175,7 +191,9 @@ export class KeyRingPrivateKeyService {
           throw new Error("Invalid taproot signature");
         }
 
-        psbt.finalizeTaprootInput(index);
+        if (autoFinalized) {
+          psbt.finalizeTaprootInput(index);
+        }
       } else {
         psbt.signInput(index, signer);
 
@@ -190,7 +208,9 @@ export class KeyRingPrivateKeyService {
           throw new Error("Invalid ecdsa signature");
         }
 
-        psbt.finalizeInput(index);
+        if (autoFinalized) {
+          psbt.finalizeInput(index);
+        }
       }
     }
 

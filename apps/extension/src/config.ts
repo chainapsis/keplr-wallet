@@ -3260,7 +3260,6 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
           coinDenom: "sBTC",
           coinMinimalDenom: "sats-signet",
           coinDecimals: 8,
-          coinGeckoId: "bitcoin", // TODO: temporal value for query price test
           coinImageUrl:
             "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
         },
@@ -3289,7 +3288,6 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
           coinDenom: "sBTC",
           coinMinimalDenom: "sats-signet",
           coinDecimals: 8,
-          coinGeckoId: "bitcoin",
           coinImageUrl:
             "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
         },

@@ -209,7 +209,13 @@ export class BitcoinAccountBase {
       };
     }
 
-    return null;
+    // isSendMax는 아니지만 수량이 max 근처(?)인 경우
+    return {
+      selectedUtxos,
+      txSize: withoutChangeTxSize,
+      remainderStatus: RemainderStatus.None,
+      remainderValue: "0",
+    };
   }
 
   private calculateOutputParams(

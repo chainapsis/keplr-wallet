@@ -20,7 +20,11 @@ import type {
   DeployAccountSignerDetails,
   InvocationsSignerDetails,
 } from "starknet";
-import { IBitcoinProvider, SupportedPaymentType } from "./bitcoin";
+import {
+  IBitcoinProvider,
+  SignPsbtOptions,
+  SupportedPaymentType,
+} from "./bitcoin";
 
 export interface Key {
   // Name of the selected key store.
@@ -298,9 +302,16 @@ export interface Keplr {
       isNanoLedger: boolean;
     }>
   >;
-  signPsbt(chainId: string, psbtHex: string): Promise<string>;
-  signPsbts(chainId: string, psbtsHexes: string[]): Promise<string[]>;
-
+  signPsbt(
+    chainId: string,
+    psbtHex: string,
+    options?: SignPsbtOptions
+  ): Promise<string>;
+  signPsbts(
+    chainId: string,
+    psbtsHexes: string[],
+    options?: SignPsbtOptions
+  ): Promise<string[]>;
   readonly ethereum: IEthereumProvider;
 
   readonly starknet: IStarknetProvider;

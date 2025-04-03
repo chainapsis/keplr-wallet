@@ -14,6 +14,7 @@ import {
   ChainType,
   GENESIS_HASH_TO_CHAIN_TYPE,
   CHAIN_TYPE_TO_GENESIS_HASH,
+  SignPsbtOptions,
 } from "@keplr-wallet/types";
 import { Env, KeplrError } from "@keplr-wallet/router";
 import { Psbt, address } from "bitcoinjs-lib";
@@ -136,14 +137,16 @@ export class KeyRingBitcoinService {
     env: Env,
     origin: string,
     chainId: string,
-    psbtHex: string
+    psbtHex: string,
+    options?: SignPsbtOptions
   ) {
     return await this.signPsbt(
       env,
       origin,
       this.keyRingService.selectedVaultId,
       chainId,
-      psbtHex
+      psbtHex,
+      options
     );
   }
 
@@ -151,14 +154,16 @@ export class KeyRingBitcoinService {
     env: Env,
     origin: string,
     chainId: string,
-    psbtsHexes: string[]
+    psbtsHexes: string[],
+    options?: SignPsbtOptions
   ) {
     return await this.signPsbts(
       env,
       origin,
       this.keyRingService.selectedVaultId,
       chainId,
-      psbtsHexes
+      psbtsHexes,
+      options
     );
   }
 
@@ -167,7 +172,8 @@ export class KeyRingBitcoinService {
     origin: string,
     vaultId: string,
     chainId: string,
-    psbtsHexes: string[]
+    psbtsHexes: string[],
+    options?: SignPsbtOptions
   ) {
     const keyInfo = this.keyRingService.getKeyInfo(vaultId);
     if (!keyInfo) {
@@ -190,6 +196,7 @@ export class KeyRingBitcoinService {
         pubKey: bitcoinPubKey.pubKey,
         network,
         psbtsHexes,
+        signPsbtOptions: options,
         keyType: keyInfo.type,
         keyInsensitive: keyInfo.insensitive,
       },
@@ -201,6 +208,9 @@ export class KeyRingBitcoinService {
             address: string;
             hdPath?: string;
             tapLeafHashesToSign?: Buffer[];
+            sighashTypes?: number[];
+            disableTweakSigner?: boolean;
+            useTweakedSigner?: boolean;
           }[];
         }[];
         signedPsbtsHexes: string[];
@@ -219,7 +229,8 @@ export class KeyRingBitcoinService {
               vaultId,
               Psbt.fromHex(psbtSignData.psbtHex),
               psbtSignData.inputsToSign,
-              network
+              network,
+              options
             )
           )
         );
@@ -234,7 +245,8 @@ export class KeyRingBitcoinService {
     origin: string,
     vaultId: string,
     chainId: string,
-    psbtHex: string
+    psbtHex: string,
+    options?: SignPsbtOptions
   ) {
     const keyInfo = this.keyRingService.getKeyInfo(vaultId);
     if (!keyInfo) {
@@ -257,6 +269,7 @@ export class KeyRingBitcoinService {
         pubKey: bitcoinPubKey.pubKey,
         network,
         psbtHex,
+        signPsbtOptions: options,
         keyType: keyInfo.type,
         keyInsensitive: keyInfo.insensitive,
       },
@@ -287,7 +300,8 @@ export class KeyRingBitcoinService {
           vaultId,
           psbt,
           res.psbtSignData[0].inputsToSign,
-          network
+          network,
+          options
         );
 
         return signedPsbt.toHex();
@@ -782,23 +796,44 @@ export class KeyRingBitcoinService {
             );
           }
           case "signPsbt": {
-            const psbtHex =
-              Array.isArray(params) && params.length > 0
-                ? (params[0] as string)
-                : undefined;
+            if (
+              !Array.isArray(params) ||
+              (Array.isArray(params) &&
+                params.length !== 2 &&
+                params.length !== 1)
+            ) {
+              throw new Error(
+                "Invalid parameters: must provide 1 or 2 parameters."
+              );
+            }
+
+            const psbtHex = params[0] as string;
             if (typeof psbtHex !== "string") {
               throw new Error(
                 "Invalid parameters: must provide a psbt hex as a string."
               );
             }
 
-            return this.signPsbtSelected(env, origin, currentChainId, psbtHex);
+            return this.signPsbtSelected(
+              env,
+              origin,
+              currentChainId,
+              psbtHex,
+              params[1] as SignPsbtOptions
+            );
           }
           case "signPsbts": {
-            const psbtsHexes =
-              Array.isArray(params) && params.length > 0
-                ? (params[0] as string[])
-                : undefined;
+            if (
+              !Array.isArray(params) ||
+              (Array.isArray(params) &&
+                (params.length === 2 || params.length === 1))
+            ) {
+              throw new Error(
+                "Invalid parameters: must provide 1 or 2 parameters."
+              );
+            }
+
+            const psbtsHexes = params[0] as string[];
             if (
               !Array.isArray(psbtsHexes) ||
               psbtsHexes.some((hex) => typeof hex !== "string")
@@ -812,7 +847,8 @@ export class KeyRingBitcoinService {
               env,
               origin,
               currentChainId,
-              psbtsHexes
+              psbtsHexes,
+              params[1] as SignPsbtOptions
             );
           }
         }

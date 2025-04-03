@@ -268,6 +268,7 @@ export const AddressBookModal: FunctionComponent<{
                           timestamp={data.timestamp}
                           name={data.name}
                           address={data.address}
+                          paymentType={data.paymentType}
                           onClick={() => {
                             recipientConfig.setValue(data.address);
                             close();

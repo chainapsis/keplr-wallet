@@ -82,7 +82,10 @@ import {
   SwapUsageQueries,
 } from "@keplr-wallet/stores-internal";
 import { setInteractionDataHref } from "../utils";
-import { InteractionPingMsg } from "@keplr-wallet/background";
+import {
+  InteractionIdPingMsg,
+  InteractionPingMsg,
+} from "@keplr-wallet/background";
 import {
   StarknetAccountStore,
   StarknetQueriesStore,
@@ -195,6 +198,15 @@ export class RootStore {
         }
       }
 
+      // popup 상태일때 interaction에 대한 ping이 있을때
+      // 해당 interaction id를 가지고 있지 않으면 응답 자체를 안해야한다.
+      if (msg instanceof InteractionIdPingMsg) {
+        const interaction = this.interactionStore.getData(msg.interactionId);
+        if (!interaction) {
+          return true;
+        }
+      }
+
       return false;
     });
     router.addGuard(ContentScriptGuards.checkMessageIsInternal);
@@ -269,6 +281,10 @@ export class RootStore {
         }
 
         return false;
+      },
+      async (interactionId: string) => {
+        const interaction = this.interactionStore.getData(interactionId);
+        return !!interaction;
       }
     );
 

@@ -17,6 +17,7 @@ import {
   OfflineDirectSigner,
   SecretUtils,
   SettledResponses,
+  SignPsbtOptions,
   StdSignature,
   StdSignDoc,
   SupportedPaymentType,
@@ -927,10 +928,18 @@ export class KeplrWalletConnectV2 implements Keplr {
     throw new Error("Not yet implemented");
   }
 
-  signPsbt(_chainId: string, _psbtHex: string): Promise<string> {
+  signPsbt(
+    _chainId: string,
+    _psbtHex: string,
+    _options?: SignPsbtOptions
+  ): Promise<string> {
     throw new Error("Method not implemented.");
   }
-  signPsbts(_chainId: string, _psbtsHexes: string[]): Promise<string[]> {
+  signPsbts(
+    _chainId: string,
+    _psbtsHexes: string[],
+    _options?: SignPsbtOptions
+  ): Promise<string[]> {
     throw new Error("Method not implemented.");
   }
 

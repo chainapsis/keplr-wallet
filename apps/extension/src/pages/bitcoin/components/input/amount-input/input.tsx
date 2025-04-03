@@ -5,7 +5,7 @@ import {
   IAmountConfig,
   ZeroAmountError,
 } from "@keplr-wallet/hooks-bitcoin";
-import { TextInput } from "../../../../../components/input";
+import { TextInput } from "../../../../../components/input/text-input";
 import { useStore } from "../../../../../stores";
 import { CoinPretty, Dec, DecUtils } from "@keplr-wallet/unit";
 import { Box } from "../../../../../components/box";
@@ -24,6 +24,7 @@ import {
 import { XAxis } from "../../../../../components/axis";
 import { Gutter } from "../../../../../components/gutter";
 import { Tooltip } from "../../../../../components/tooltip";
+
 export const AmountInput: FunctionComponent<{
   amountConfig: IAmountConfig;
   availableBalance: CoinPretty | undefined;
@@ -146,6 +147,11 @@ export const AmountInput: FunctionComponent<{
         ) : null
       }
       type="number"
+      onKeyDown={(e) => {
+        if (["e", "E", "-", "+"].includes(e.key)) {
+          e.preventDefault();
+        }
+      }}
       value={(() => {
         if (isPriceBased) {
           if (amountConfig.fraction != 0) {

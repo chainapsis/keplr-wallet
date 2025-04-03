@@ -645,6 +645,7 @@ export const SignBitcoinTxView: FunctionComponent<{
             totalPsbts={validatedPsbts.length}
             currentPsbtIndex={currentPsbtIndex}
             ledgerGuideBox={ledgerGuideBox}
+            criticalValidationError={criticalValidationError}
           />
         ) : (
           <PsbtDetailsView
@@ -654,6 +655,7 @@ export const SignBitcoinTxView: FunctionComponent<{
             origin={interactionData.data.origin}
             validatedPsbt={validatedPsbts?.[0]}
             ledgerGuideBox={ledgerGuideBox}
+            criticalValidationError={criticalValidationError}
           />
         )
       ) : (
@@ -940,6 +942,7 @@ const PsbtDetailsView: FunctionComponent<{
   totalPsbts?: number;
   currentPsbtIndex?: number;
   ledgerGuideBox?: React.ReactNode;
+  criticalValidationError?: Error;
 }> = observer(
   ({
     validatedPsbt,
@@ -950,6 +953,7 @@ const PsbtDetailsView: FunctionComponent<{
     totalPsbts,
     currentPsbtIndex,
     ledgerGuideBox,
+    criticalValidationError,
   }) => {
     const theme = useTheme();
     const {
@@ -1038,6 +1042,7 @@ const PsbtDetailsView: FunctionComponent<{
           isPartialSign={isPartialSign}
           isUnableToGetUTXOs={isUnableToGetUTXOs}
           isUnableToSign={isUnableToSign}
+          criticalValidationError={criticalValidationError}
         />
         {ledgerGuideBox}
         {(hasGuideBox || hasLedgerGuideBox) && <Gutter size="0.75rem" />}
