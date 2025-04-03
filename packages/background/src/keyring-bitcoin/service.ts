@@ -27,8 +27,16 @@ import validate, {
   Network as BitcoinNetwork,
 } from "bitcoin-address-validation";
 import { mainnet, signet, testnet } from "./constants";
+import { AnalyticsService } from "../analytics";
 
 const DUST_THRESHOLD = 546;
+enum BitcoinSignType {
+  MessageECDSA = "message-ecdsa",
+  MessageBIP322 = "message-bip322",
+  PSBT = "psbt",
+  PSBTS = "psbts",
+}
+
 export class KeyRingBitcoinService {
   constructor(
     protected readonly chainsService: ChainsService,
@@ -36,7 +44,8 @@ export class KeyRingBitcoinService {
     protected readonly keyRingService: KeyRingService,
     protected readonly interactionService: InteractionService,
     protected readonly permissionService: PermissionService,
-    protected readonly txService: BackgroundTxService
+    protected readonly txService: BackgroundTxService,
+    protected readonly analyticsService: AnalyticsService
   ) {}
 
   async init() {
@@ -235,6 +244,16 @@ export class KeyRingBitcoinService {
           )
         );
 
+        this.analyticsService.logEventIgnoreError("bitcoin_tx_signed", {
+          chainId,
+          bitcoinNetwork: network.id,
+          isInternal: env.isInternalMsg,
+          origin,
+          keyType: keyInfo.type,
+          bitcoinSignType: BitcoinSignType.PSBTS,
+          bitcoinPaymentType: bitcoinPubKey.paymentType,
+        });
+
         return signedPsbts.map((psbt) => psbt.toHex());
       }
     );
@@ -303,6 +322,16 @@ export class KeyRingBitcoinService {
           network,
           options
         );
+
+        this.analyticsService.logEventIgnoreError("bitcoin_tx_signed", {
+          chainId,
+          bitcoinNetwork: network.id,
+          isInternal: env.isInternalMsg,
+          origin,
+          keyType: keyInfo.type,
+          bitcoinSignType: BitcoinSignType.PSBT,
+          bitcoinPaymentType: bitcoinPubKey.paymentType,
+        });
 
         return signedPsbt.toHex();
       }
@@ -414,6 +443,19 @@ export class KeyRingBitcoinService {
           inputsToSign,
           network
         );
+
+        this.analyticsService.logEventIgnoreError("bitcoin_tx_signed", {
+          chainId,
+          bitcoinNetwork: network.id,
+          isInternal: env.isInternalMsg,
+          origin,
+          keyType: keyInfo.type,
+          bitcoinSignType:
+            signType === BitcoinSignMessageType.BIP322_SIMPLE
+              ? BitcoinSignType.MessageBIP322
+              : BitcoinSignType.MessageECDSA,
+          bitcoinPaymentType: bitcoinPubKey.paymentType,
+        });
 
         return BIP322.encodeWitness(signedPsbt);
       }
