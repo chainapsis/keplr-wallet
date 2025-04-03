@@ -392,12 +392,21 @@ export const ConnectLedgerScene: FunctionComponent<{
 
             await btcApp.getExtendedPubkey(`m/44'/${coinType}'/0'/0/0`);
           } catch (e) {
-            // TODO: Improve error handling
-            console.log(e);
-            setStep("unknown");
-            await transport.close();
+            // Device is locked or user is in home sceen or other app.
+            if (
+              e?.message.includes("(0x6b0c)") ||
+              e?.message.includes("(0x6511)") ||
+              e?.message.includes("(0x6e00)")
+            ) {
+              setStep("connected");
+            } else {
+              console.log(e);
+              setStep("unknown");
+              await transport.close();
 
-            return;
+              setIsLoading(false);
+              return;
+            }
           }
 
           await LedgerUtils.tryAppOpen(transport, propApp);
@@ -523,11 +532,12 @@ export const ConnectLedgerScene: FunctionComponent<{
             }
           } catch (e) {
             console.log(e);
-            setStep("unknown");
-            await transport.close();
-
-            return;
+            setStep("connected");
           }
+
+          await transport.close();
+          setIsLoading(false);
+          return;
         }
       }
     };
