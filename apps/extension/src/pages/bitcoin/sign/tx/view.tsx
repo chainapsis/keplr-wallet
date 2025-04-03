@@ -77,7 +77,7 @@ import { HeaderProps } from "../../../../layouts/header/types";
 import { KeplrError } from "@keplr-wallet/router";
 import { ErrModuleLedgerSign } from "../../../sign/utils/ledger-types";
 import { LedgerGuideBox } from "../../../sign/components/ledger-guide-box";
-import { connectAndSignPsbtsWithLedger } from "../../../sign/utils/handle-bitcoin-sgin";
+import { connectAndSignPsbtsWithLedger } from "../../../sign/utils/handle-bitcoin-sign";
 
 export const SignBitcoinTxView: FunctionComponent<{
   interactionData: NonNullable<SignBitcoinTxInteractionStore["waitingData"]>;

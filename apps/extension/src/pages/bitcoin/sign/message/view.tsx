@@ -22,7 +22,7 @@ import { ArbitraryMsgSignHeader } from "../../../sign/components/arbitrary-messa
 import { ArbitraryMsgRequestOrigin } from "../../../sign/components/arbitrary-message/arbitrary-message-origin";
 import { ArbitraryMsgWalletDetails } from "../../../sign/components/arbitrary-message/arbitrary-message-wallet-details";
 import { Box } from "../../../../components/box";
-import { connectAndSignMessageWithLedger } from "../../../sign/utils/handle-bitcoin-sgin";
+import { connectAndSignMessageWithLedger } from "../../../sign/utils/handle-bitcoin-sign";
 
 export const SignBitcoinMessageView: FunctionComponent<{
   interactionData: NonNullable<
