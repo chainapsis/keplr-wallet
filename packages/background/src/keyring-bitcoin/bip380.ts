@@ -5,6 +5,8 @@ const GENERATOR = [
   0xf5dee51989, 0xa9fdca3312, 0x1bab10e32d, 0x3706b1677a, 0x644d626ffd,
 ];
 
+// https://github.com/bitcoin/bips/blob/master/bip-0380.mediawiki
+// ref: https://github.com/darosior/python-bip380
 export class Descriptor {
   public static calculateChecksum(desc: string): string {
     const symbols = this.descsumExpand(desc);
@@ -69,9 +71,18 @@ export class Descriptor {
     xpub: string;
     branch?: string;
   } {
+    const [descNoChecksum, providedChecksum] = descriptor.split("#");
+
+    if (providedChecksum) {
+      const calculatedChecksum = this.calculateChecksum(descNoChecksum);
+      if (calculatedChecksum !== providedChecksum) {
+        throw new Error("Invalid checksum");
+      }
+    }
+
     const regex =
-      /^(wpkh|tr|pkh)\(\[([0-9a-f]{8})\/(.+?)\]([A-Za-z0-9]+)(\/([01])\/\*)?\)(?:#[0-9a-z]{8})?$/;
-    const match = descriptor.match(regex);
+      /^(wpkh|tr|pkh)\(\[([0-9a-f]{8})\/(.+?)\]([A-Za-z0-9]+)(\/([01])\/\*)?\)$/;
+    const match = descNoChecksum.match(regex);
     if (!match) {
       throw new Error("Invalid descriptor format");
     }
