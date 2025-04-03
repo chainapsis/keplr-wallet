@@ -958,7 +958,7 @@ export const EnableChainsScene: FunctionComponent<{
 
     const numSelected = useMemo(() => {
       const modularChainInfoMap = new Map<string, ModularChainInfo>();
-      for (const modularChainInfo of chainStore.groupedModularChainInfos) {
+      for (const modularChainInfo of chainStore.groupedModularChainInfosInListUI) {
         modularChainInfoMap.set(
           ChainIdHelper.parse(modularChainInfo.chainId).identifier,
           modularChainInfo
@@ -1016,7 +1016,7 @@ export const EnableChainsScene: FunctionComponent<{
       }
       return numSelected;
     }, [
-      chainStore.groupedModularChainInfos,
+      chainStore.groupedModularChainInfosInListUI,
       enabledChainIdentifiers,
       fallbackEthereumLedgerApp,
       fallbackStarknetLedgerApp,
@@ -1905,11 +1905,18 @@ export const EnableChainsScene: FunctionComponent<{
                 const disables = Array.from(disablesSet);
 
                 const needFinalizeCoinType: string[] = [];
+                const ledgerCosmosChainIds: string[] = [];
+
                 for (let i = 0; i < enables.length; i++) {
                   const enable = enables[i];
                   const modularChainInfo = chainStore.getModularChain(enable);
                   if ("cosmos" in modularChainInfo) {
                     const chainInfo = chainStore.getChain(enable);
+                    const isEthermintLike =
+                      chainInfo.bip44.coinType === 60 ||
+                      !!chainInfo.features?.includes("eth-address-gen") ||
+                      !!chainInfo.features?.includes("eth-key-sign");
+
                     if (
                       keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo)
                     ) {
@@ -1920,6 +1927,13 @@ export const EnableChainsScene: FunctionComponent<{
                       disables.push(enable);
 
                       needFinalizeCoinType.push(enable);
+                    } else if (!isEthermintLike) {
+                      enables.splice(i, 1);
+                      i--;
+
+                      // disable로 넣어버리면 enable/disable 동시에 처리되는 문제가 발생할 수 있으므로
+                      // disable에 넣지 않는다.
+                      ledgerCosmosChainIds.push(enable);
                     }
                   }
                 }
@@ -1996,7 +2010,17 @@ export const EnableChainsScene: FunctionComponent<{
 
                 await Promise.all([
                   (async () => {
-                    if (enables.length > 0) {
+                    // 현재 ledger의 경우 cosmos 앱은 지갑을 등록할 때 반드시 연결해야 하므로
+                    // 활성화/비활성화해도 문제가 없지만, 다른 앱은 연결이 되어 있지 않을 수 있기 때문에
+                    // cosmos 체인만 활성화/비활성화 처리하고 나머지는 아래에서 단계별로 처리한다.
+                    if (keyType === "ledger") {
+                      if (ledgerCosmosChainIds.length > 0) {
+                        await chainStore.enableChainInfoInUIWithVaultId(
+                          vaultId,
+                          ...ledgerCosmosChainIds
+                        );
+                      }
+                    } else if (enables.length > 0) {
                       await chainStore.enableChainInfoInUIWithVaultId(
                         vaultId,
                         ...enables
@@ -2004,7 +2028,34 @@ export const EnableChainsScene: FunctionComponent<{
                     }
                   })(),
                   (async () => {
-                    if (disables.length > 0) {
+                    if (keyType === "ledger") {
+                      const ledgerCosmosChainIds = disables.filter(
+                        (chainId) => {
+                          const modularChainInfo =
+                            chainStore.getModularChain(chainId);
+                          if ("cosmos" in modularChainInfo) {
+                            const isEthermintLike =
+                              modularChainInfo.cosmos.bip44.coinType === 60 ||
+                              !!modularChainInfo.cosmos.features?.includes(
+                                "eth-address-gen"
+                              ) ||
+                              !!modularChainInfo.cosmos.features?.includes(
+                                "eth-key-sign"
+                              );
+
+                            return !isEthermintLike;
+                          }
+                          return false;
+                        }
+                      );
+
+                      if (ledgerCosmosChainIds.length > 0) {
+                        await chainStore.disableChainInfoInUIWithVaultId(
+                          vaultId,
+                          ...ledgerCosmosChainIds
+                        );
+                      }
+                    } else if (disables.length > 0) {
                       await chainStore.disableChainInfoInUIWithVaultId(
                         vaultId,
                         ...disables
@@ -2023,9 +2074,7 @@ export const EnableChainsScene: FunctionComponent<{
                   sceneTransition.replace("select-derivation-path", {
                     vaultId,
                     chainIds: needFinalizeCoinType,
-
                     totalCount: needFinalizeCoinType.length,
-
                     skipWelcome,
                   });
                 } else {
