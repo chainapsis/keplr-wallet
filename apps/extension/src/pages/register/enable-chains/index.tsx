@@ -600,7 +600,8 @@ export const EnableChainsScene: FunctionComponent<{
     // queries store의 구조 문제로 useMemo 안에서 balance에 따른 sort를 진행하긴 힘들다.
     // 그래서 이를 위한 변수로 따로 둔다.
     // 실제로는 modularChainInfos를 사용하면 된다.
-    const preSortModularChainInfos = useMemo(() => {
+    // linkedChainKey를 기반으로 그룹화된 체인을 `linkedModularChainInfos`로 가지고 있다.
+    const preSortGroupedModularChainInfos = useMemo(() => {
       let modularChainInfos =
         chainStore.groupedModularChainInfosInListUI.slice();
 
@@ -930,7 +931,7 @@ export const EnableChainsScene: FunctionComponent<{
       ]
     );
 
-    const nativeModularChainInfos = preSortModularChainInfos
+    const nativeGroupedModularChainInfos = preSortGroupedModularChainInfos
       .filter((modularChainInfo) =>
         nativeChainIdentifierSet.has(
           ChainIdHelper.parse(modularChainInfo.chainId).identifier
@@ -938,7 +939,7 @@ export const EnableChainsScene: FunctionComponent<{
       )
       .sort(chainSort);
 
-    const suggestModularChainInfos = preSortModularChainInfos
+    const suggestGroupedModularChainInfos = preSortGroupedModularChainInfos
       .filter(
         (modularChainInfo) =>
           !nativeChainIdentifierSet.has(
@@ -964,15 +965,25 @@ export const EnableChainsScene: FunctionComponent<{
         );
       }
 
+      // Grouped chain의 여러 체인 Identifier를 하나의 체인으로 묶어서 인식하기 위해서 사용
+      const linkedChainKeySet = new Set<string>();
+
       let numSelected = 0;
       for (const enabledChainIdentifier of enabledChainIdentifiers) {
         const enabledModularChainInfo = modularChainInfoMap.get(
           enabledChainIdentifier
         );
         if (enabledModularChainInfo) {
+          if (linkedChainKeySet.has(enabledChainIdentifier)) {
+            continue;
+          }
+
+          linkedChainKeySet.add(enabledChainIdentifier);
+
           if (keyType === "ledger") {
+            const isCosmosAppNeed = "cosmos" in enabledModularChainInfo;
             const isEthereumAppNeed =
-              "cosmos" in enabledModularChainInfo &&
+              isCosmosAppNeed &&
               (enabledModularChainInfo.cosmos.bip44.coinType === 60 ||
                 !!enabledModularChainInfo.cosmos.features?.includes(
                   "eth-address-gen"
@@ -980,23 +991,23 @@ export const EnableChainsScene: FunctionComponent<{
                 !!enabledModularChainInfo.cosmos.features?.includes(
                   "eth-key-sign"
                 ));
+            const isStarknetAppNeed = "starknet" in enabledModularChainInfo;
+            const isBitcoinAppNeed = "bitcoin" in enabledModularChainInfo;
 
             if (fallbackStarknetLedgerApp) {
-              if ("starknet" in enabledModularChainInfo) {
+              if (isStarknetAppNeed) {
                 numSelected++;
               }
             } else if (fallbackBitcoinLedgerApp) {
-              if ("bitcoin" in enabledModularChainInfo) {
+              if (isBitcoinAppNeed) {
                 numSelected++;
               }
             } else if (fallbackEthereumLedgerApp) {
               if (isEthereumAppNeed) {
                 numSelected++;
               }
-            } else {
-              if (!isEthereumAppNeed) {
-                numSelected++;
-              }
+            } else if (isCosmosAppNeed && !isEthereumAppNeed) {
+              numSelected++;
             }
           } else {
             numSelected++;
@@ -1023,28 +1034,26 @@ export const EnableChainsScene: FunctionComponent<{
       }
     };
 
+    // 사용자에게 보여지는 요소 (선택된 체인의 수, 체인 목록)는 그룹화된 체인 목록을 기준으로 처리한다.
+    // linked 상태인 체인의 선택 여부 등을 함께 보여주지 않는다.
     const enabledNativeChainIdentifiersInPage = useMemo(() => {
       return enabledChainIdentifiers.filter(
         (chainIdentifier) =>
-          nativeModularChainInfos.some(
+          nativeGroupedModularChainInfos.some(
             (modularChainInfo) =>
-              modularChainInfo.linkedModularChainInfos?.some(
-                (linkedModularChainInfo) =>
-                  linkedModularChainInfo.chainId === chainIdentifier
-              ) ||
               chainIdentifier ===
-                ChainIdHelper.parse(modularChainInfo.chainId).identifier
+              ChainIdHelper.parse(modularChainInfo.chainId).identifier
           ) && nativeChainIdentifierSet.has(chainIdentifier)
       );
     }, [
       nativeChainIdentifierSet,
       enabledChainIdentifiers,
-      nativeModularChainInfos,
+      nativeGroupedModularChainInfos,
     ]);
 
     const [
-      preSelectedNativeChainIdentifiers,
-      setPreSelectedNativeChainIdentifiers,
+      backupSelectedNativeChainIdentifiers,
+      setBackupSelectedNativeChainIdentifiers,
     ] = useState<string[]>([]);
 
     const getChainItemInfoForView = useCallback(
@@ -1357,45 +1366,70 @@ export const EnableChainsScene: FunctionComponent<{
               showTitleBox={search.trim().length < 1}
               isCollapsed={isCollapsedNativeChainView}
               isSelectAll={
-                nativeModularChainInfos.length ===
+                nativeGroupedModularChainInfos.length ===
                 enabledNativeChainIdentifiersInPage.length
               }
               onClick={() => {
                 if (
-                  nativeModularChainInfos.length ===
+                  nativeGroupedModularChainInfos.length ===
                   enabledNativeChainIdentifiersInPage.length
                 ) {
-                  if (preSelectedNativeChainIdentifiers.length > 0) {
+                  if (backupSelectedNativeChainIdentifiers.length > 0) {
                     setEnabledChainIdentifiers([
                       ...enabledSuggestChainIdentifiers,
-                      ...preSelectedNativeChainIdentifiers,
+                      ...backupSelectedNativeChainIdentifiers,
                     ]);
                   } else {
-                    if (nativeModularChainInfos.length > 0) {
-                      setEnabledChainIdentifiers([
-                        ChainIdHelper.parse(nativeModularChainInfos[0].chainId)
+                    if (nativeGroupedModularChainInfos.length > 0) {
+                      const firstNativeChainInfo =
+                        nativeGroupedModularChainInfos[0];
+
+                      const chainIdentifiers: string[] = [
+                        ChainIdHelper.parse(firstNativeChainInfo.chainId)
                           .identifier,
+                      ];
+
+                      if (firstNativeChainInfo.linkedModularChainInfos) {
+                        for (const linkedChain of firstNativeChainInfo.linkedModularChainInfos) {
+                          chainIdentifiers.push(
+                            ChainIdHelper.parse(linkedChain.chainId).identifier
+                          );
+                        }
+                      }
+
+                      setEnabledChainIdentifiers([
+                        ...chainIdentifiers,
                         ...enabledSuggestChainIdentifiers,
                       ]);
                     }
                   }
                 } else {
-                  setPreSelectedNativeChainIdentifiers([
+                  setBackupSelectedNativeChainIdentifiers([
                     ...enabledNativeChainIdentifiers,
                   ]);
 
                   const newEnabledNativeChainIdentifiers: string[] =
                     enabledNativeChainIdentifiers.slice();
 
-                  for (const modularChainInfo of nativeModularChainInfos) {
-                    const chainIdentifier = ChainIdHelper.parse(
-                      modularChainInfo.chainId
-                    ).identifier;
+                  for (const modularChainInfo of nativeGroupedModularChainInfos) {
+                    const chainIdentifiers: string[] = [
+                      ChainIdHelper.parse(modularChainInfo.chainId).identifier,
+                    ];
 
-                    if (
-                      !enabledNativeChainIdentifiers.includes(chainIdentifier)
-                    ) {
-                      newEnabledNativeChainIdentifiers.push(chainIdentifier);
+                    if (modularChainInfo.linkedModularChainInfos) {
+                      for (const linkedChain of modularChainInfo.linkedModularChainInfos) {
+                        chainIdentifiers.push(
+                          ChainIdHelper.parse(linkedChain.chainId).identifier
+                        );
+                      }
+                    }
+
+                    for (const chainIdentifier of chainIdentifiers) {
+                      if (
+                        !enabledNativeChainIdentifiers.includes(chainIdentifier)
+                      ) {
+                        newEnabledNativeChainIdentifiers.push(chainIdentifier);
+                      }
                     }
                   }
                   setEnabledChainIdentifiers([
@@ -1411,7 +1445,7 @@ export const EnableChainsScene: FunctionComponent<{
                 setIsCollapsedNativeChainView(!isCollapsedNativeChainView);
               }}
             >
-              {nativeModularChainInfos.map((modularChainInfo) => {
+              {nativeGroupedModularChainInfos.map((modularChainInfo) => {
                 const {
                   balance,
                   enabled,
@@ -1483,7 +1517,7 @@ export const EnableChainsScene: FunctionComponent<{
               })}
             </NativeChainSection>
 
-            {suggestModularChainInfos.map((modularChainInfo) => {
+            {suggestGroupedModularChainInfos.map((modularChainInfo) => {
               const {
                 balance,
                 enabled,
