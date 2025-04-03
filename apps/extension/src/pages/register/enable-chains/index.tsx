@@ -1310,7 +1310,7 @@ export const EnableChainsScene: FunctionComponent<{
         }
 
         return intl.formatMessage({
-          id: "pages.register.enable-chains.native-chain-view.paragraph",
+          id: "pages.register.enable-chains.native-chain-view.ledger-cosmos-paragraph",
         });
       }
 

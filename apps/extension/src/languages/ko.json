@@ -173,6 +173,7 @@
   "pages.register.enable-chains.native-chain-view.paragraph": "Cosmos, Ethereum, Bitcoin..",
 
   "pages.register.enable-chains.native-chain-view.ledger-cosmos-title": "모든 네이티브 코스모스 체인",
+  "pages.register.enable-chains.native-chain-view.ledger-cosmos-paragraph": "Cosmos, Osmosis, Celestia...",
   "pages.register.enable-chains.native-chain-view.ledger-evm-title": "모든 네이티브 EVM 체인",
   "pages.register.enable-chains.native-chain-view.ledger-evm-paragraph": "Ethereum, Arbitrum, Base...",
   "pages.register.enable-chains.native-chain-view.ledger-starknet-title": "모든 네이티브 Starknet 체인",

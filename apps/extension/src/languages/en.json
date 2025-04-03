@@ -173,7 +173,8 @@
   "pages.register.enable-chains.chain-item-token-count": "{count} {count, plural, one {Token} other {Tokens}}",
 
   "pages.register.enable-chains.native-chain-view.ledger-cosmos-title": "All Native Cosmos Chains",
-  "pages.register.enable-chains.native-chain-view.ledger-evm-title": "All EVM Cosmos Chains",
+  "pages.register.enable-chains.native-chain-view.ledger-cosmos-paragraph": "Cosmos, Osmosis, Celestia...",
+  "pages.register.enable-chains.native-chain-view.ledger-evm-title": "All Native EVM Chains",
   "pages.register.enable-chains.native-chain-view.ledger-evm-paragraph": "Ethereum, Arbitrum, Base...",
   "pages.register.enable-chains.native-chain-view.ledger-starknet-title": "All Native Starknet Chains",
   "pages.register.enable-chains.native-chain-view.ledger-starknet-paragraph": "Starknet, Starknet Sepolia",
