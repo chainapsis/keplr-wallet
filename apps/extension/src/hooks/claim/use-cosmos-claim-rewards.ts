@@ -9,6 +9,7 @@ import {
 } from "@keplr-wallet/types";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import {
+  PrivilegeCosmosSignAminoExecuteCosmWasmMsg,
   PrivilegeCosmosSignAminoWithdrawRewardsMsg,
   SendTxMsg,
 } from "@keplr-wallet/background";
@@ -307,14 +308,25 @@ export const useCosmosClaimRewards = () => {
               ): Promise<AminoSignResponse> => {
                 const requester = new InExtensionMessageRequester();
 
-                return await requester.sendMessage(
-                  BACKGROUND_PORT,
-                  new PrivilegeCosmosSignAminoWithdrawRewardsMsg(
-                    chainId,
-                    signer,
-                    signDoc
-                  )
-                );
+                if (chainId === NEUTRON_CHAIN_ID) {
+                  return await requester.sendMessage(
+                    BACKGROUND_PORT,
+                    new PrivilegeCosmosSignAminoExecuteCosmWasmMsg(
+                      chainId,
+                      signer,
+                      signDoc
+                    )
+                  );
+                } else {
+                  return await requester.sendMessage(
+                    BACKGROUND_PORT,
+                    new PrivilegeCosmosSignAminoWithdrawRewardsMsg(
+                      chainId,
+                      signer,
+                      signDoc
+                    )
+                  );
+                }
               },
               sendTx: async (
                 chainId: string,
