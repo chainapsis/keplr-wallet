@@ -468,43 +468,22 @@ export const TransactionFeeModal: FunctionComponent<{
                   })}
                 </Subtitle4>
                 <Tooltip
-                  content={
-                    amountConfig.swapFeeBps === 10
-                      ? intl.formatMessage(
-                          {
-                            id: "page.ibc-swap.components.swap-fee-info.button.service-fee-stable-coin.paragraph",
-                          },
-                          {
-                            rate: (() => {
-                              const feeRatioPretty = new IntPretty(
-                                amountConfig.swapFeeBps
-                              ).moveDecimalPointLeft(2);
-                              return feeRatioPretty
-                                .trim(true)
-                                .maxDecimals(4)
-                                .inequalitySymbol(true)
-                                .toString();
-                            })(),
-                          }
-                        )
-                      : intl.formatMessage(
-                          {
-                            id: "page.ibc-swap.components.swap-fee-info.button.service-fee.paragraph",
-                          },
-                          {
-                            rate: (() => {
-                              const feeRatioPretty = new IntPretty(
-                                amountConfig.swapFeeBps
-                              ).moveDecimalPointLeft(2);
-                              return feeRatioPretty
-                                .trim(true)
-                                .maxDecimals(4)
-                                .inequalitySymbol(true)
-                                .toString();
-                            })(),
-                          }
-                        )
-                  }
+                  content={intl.formatMessage(
+                    {
+                      id:
+                        amountConfig.swapFeeBps === 10
+                          ? "page.ibc-swap.components.swap-fee-info.button.service-fee-stable-coin.paragraph"
+                          : "page.ibc-swap.components.swap-fee-info.button.service-fee.paragraph",
+                    },
+                    {
+                      rate: new IntPretty(amountConfig.swapFeeBps)
+                        .moveDecimalPointLeft(2)
+                        .trim(true)
+                        .maxDecimals(4)
+                        .inequalitySymbol(true)
+                        .toString(),
+                    }
+                  )}
                 >
                   <InformationPlainIcon
                     width="1rem"
