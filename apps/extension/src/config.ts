@@ -1552,6 +1552,10 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         coinDecimals: 6,
       },
     ],
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/chains/neutron"
+        : "http://localhost:8080/chains/neutron",
     features: [],
   },
   {

@@ -14,6 +14,7 @@ import {
   StarknetChainInfo,
 } from "@keplr-wallet/types";
 import { ThemeOption } from "../../../theme";
+import { NEUTRON_CHAIN_ID } from "../../../config.ui";
 
 export const StakedBalance: FunctionComponent<{
   modularChainInfo: ModularChainInfo;
@@ -51,13 +52,27 @@ const CosmosStakedBalance: FunctionComponent<{
     `/apr/${chain.chainIdentifier}`
   );
 
-  const cosmosAPR =
-    queryAPR.response &&
-    "apr" in queryAPR.response.data &&
-    typeof queryAPR.response.data.apr === "number" &&
-    queryAPR.response.data.apr > 0
-      ? new Dec(queryAPR.response.data.apr).mul(new Dec(100)).toString(2)
-      : null;
+  const cosmosAPR = (() => {
+    if (chainId === NEUTRON_CHAIN_ID) {
+      const config =
+        queriesStore.get(chainId).cosmwasm.queryNeutronStakingRewardsConfig
+          .config;
+
+      return new Dec(config.annual_reward_rate_bps)
+        .quo(new Dec(100))
+        .toString(2);
+    }
+
+    if (
+      queryAPR.response &&
+      "apr" in queryAPR.response.data &&
+      typeof queryAPR.response.data.apr === "number" &&
+      queryAPR.response.data.apr > 0
+    ) {
+      return new Dec(queryAPR.response.data.apr).mul(new Dec(100)).toString(2);
+    }
+    return null;
+  })();
 
   const queryDelegation = queriesStore
     .get(chainId)
