@@ -349,10 +349,10 @@ export class PubKeyBitcoinCompatible {
         const path = this.getPath();
         if (path) {
           const segments = path.split("/").filter(Boolean);
-          // Check if this is a BIP44 compatible path
+          // Check if this is a BIP44 compatible path (m/purpose'/coinType'/account')
           const purposeIndex = segments[0] === "m" ? 1 : 0;
 
-          if (segments.length >= purposeIndex + 5) {
+          if (segments.length >= purposeIndex + 3) {
             const purposeSegment = segments[purposeIndex];
             const purpose = parseInt(
               purposeSegment.endsWith("'")
@@ -373,72 +373,45 @@ export class PubKeyBitcoinCompatible {
     }
   }
 
-  static createDescriptor(
-    type: "wpkh" | "tr",
-    masterFingerprint: string,
-    path: string,
-    xpub: string
-  ): string {
-    const pathSegments = path.split("/").filter(Boolean);
-    const purposeIndex = pathSegments[0] === "m" ? 1 : 0;
-    const derivationPath = pathSegments.slice(purposeIndex).join("/");
-    const keyOrigin = `[${masterFingerprint}/${derivationPath}]`;
-
-    return `${type}(${keyOrigin}${xpub})`;
-  }
-
-  static fromDescriptor(
-    descriptor: string,
+  static fromExtendedKey(
+    xpub: string,
+    basePath: string,
+    masterFingerprint?: string,
+    additionalPath?: string,
     network?: BitcoinNetwork
   ): PubKeyBitcoinCompatible {
-    const match = descriptor.match(
-      /^(wpkh|tr)\(\[([0-9a-f]{8})\/(.+?)\](.+?)\)$/
-    );
-    if (!match) {
-      throw new Error("Invalid descriptor format");
-    }
+    const root = fromBase58(xpub, network);
 
-    const [, , fingerprint, derivationPath, xpub] = match;
-    const path = "m/" + derivationPath;
-
-    const bip32 = fromBase58(xpub, network);
-
-    const depth = bip32.depth;
-    const pathSegments = path.split("/").filter(Boolean);
-    const purposeIndex = pathSegments[0] === "m" ? 1 : 0;
-
-    if (depth !== pathSegments.length - purposeIndex) {
-      throw new Error("Invalid depth");
-    }
-
-    return new PubKeyBitcoinCompatible(
-      bip32.publicKey,
-      network,
-      fingerprint,
-      path
-    );
-  }
-
-  static fromBase58(
-    base58: string,
-    hdPath: string,
-    network?: BitcoinNetwork
-  ): PubKeyBitcoinCompatible {
-    const bip32 = fromBase58(base58, network);
-
-    const depth = bip32.depth;
-    const hdPathSegments = hdPath.split("/").filter(Boolean);
+    const depth = root.depth;
+    const hdPathSegments = basePath.split("/").filter(Boolean);
     const purposeIndex = hdPathSegments[0] === "m" ? 1 : 0;
 
     if (depth !== hdPathSegments.length - purposeIndex) {
-      throw new Error("Invalid depth");
+      throw new Error("Invalid depth with base path");
+    }
+
+    if (additionalPath) {
+      const additionalPathSegments = additionalPath.split("/").filter(Boolean);
+      if (additionalPathSegments[0] === "m") {
+        throw new Error("Additional path should not include m");
+      }
+
+      const child = root.derivePath(additionalPath);
+      return new PubKeyBitcoinCompatible(
+        child.publicKey,
+        network,
+        masterFingerprint,
+        purposeIndex === 0
+          ? `m/${basePath}/${additionalPath}`
+          : `${basePath}/${additionalPath}`
+      );
     }
 
     return new PubKeyBitcoinCompatible(
-      bip32.publicKey,
+      root.publicKey,
       network,
-      undefined,
-      hdPath
+      masterFingerprint,
+      purposeIndex === 0 ? `m/${basePath}` : basePath
     );
   }
 }
