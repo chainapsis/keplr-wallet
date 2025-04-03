@@ -384,6 +384,9 @@ export const SignBitcoinTxView: FunctionComponent<{
           address: string;
           hdPath?: string;
           tapLeafHashesToSign?: Buffer[];
+          sighashTypes?: number[];
+          disableTweakSigner?: boolean;
+          useTweakedSigner?: boolean;
         }[];
       }[] = [];
 

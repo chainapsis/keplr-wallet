@@ -265,6 +265,9 @@ export const connectAndSignPsbtsWithLedger = async (
       address: string;
       hdPath?: string;
       tapLeafHashesToSign?: Buffer[];
+      sighashTypes?: number[];
+      disableTweakSigner?: boolean;
+      useTweakedSigner?: boolean;
     }[];
   }[],
   modularChainInfo: ModularChainInfo,
@@ -336,6 +339,8 @@ export const connectAndSignPsbtsWithLedger = async (
 
   try {
     const result = [];
+    const { signPsbtOptions } = interactionData.data;
+    const autoFinalized = signPsbtOptions?.autoFinalized ?? true;
 
     for (const data of psbtSignData) {
       let policy: WalletPolicy | undefined | void;
@@ -438,7 +443,9 @@ export const connectAndSignPsbtsWithLedger = async (
         }
       }
 
-      psbt.finalizeAllInputs();
+      if (autoFinalized) {
+        psbt.finalizeAllInputs();
+      }
 
       result.push(psbt.toHex());
     }
