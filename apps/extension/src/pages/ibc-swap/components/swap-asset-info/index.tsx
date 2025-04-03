@@ -23,7 +23,10 @@ import { AppCurrency } from "@keplr-wallet/types";
 import { IBCSwapAmountConfig } from "@keplr-wallet/hooks-internal";
 import { useNavigate } from "react-router";
 import { useSearchParams } from "react-router-dom";
-import { LoadingIcon, InformationPlainIcon } from "../../../../components/icon";
+import {
+  LoadingIcon,
+  InformationOutlineIcon,
+} from "../../../../components/icon";
 import { CoinPretty, Dec, DecUtils } from "@keplr-wallet/unit";
 import { useEffectOnce } from "../../../../hooks/use-effect-once";
 import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse";
@@ -173,7 +176,7 @@ export const SwapAssetInfo: FunctionComponent<{
                   })}
                 >
                   <Box width="1rem" height="1rem">
-                    <InformationPlainIcon
+                    <InformationOutlineIcon
                       width="1rem"
                       height="1rem"
                       color={

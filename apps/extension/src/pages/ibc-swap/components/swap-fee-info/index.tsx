@@ -446,7 +446,7 @@ export const SwapFeeInfo: FunctionComponent<{
               gasConfig={gasConfig}
               gasSimulator={gasSimulator}
               isForEVMTx={isForEVMTx}
-              amountConfig={amountConfig}
+              ibcSwapAmountConfig={amountConfig}
             />
           </Modal>
         </Box>

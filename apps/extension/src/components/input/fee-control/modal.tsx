@@ -32,7 +32,7 @@ import { XAxis, YAxis } from "../../axis";
 import { Gutter } from "../../gutter";
 import { VerticalCollapseTransition } from "../../transition/vertical-collapse";
 import { Tooltip } from "../../tooltip";
-import { InformationPlainIcon } from "../../icon";
+import { InformationOutlineIcon } from "../../icon";
 import { IBCSwapAmountConfig } from "@keplr-wallet/hooks-internal";
 
 const Styles = {
@@ -58,7 +58,7 @@ export const TransactionFeeModal: FunctionComponent<{
   senderConfig: ISenderConfig;
   feeConfig: IFeeConfig;
   gasConfig: IGasConfig;
-  amountConfig?: IBCSwapAmountConfig;
+  ibcSwapAmountConfig?: IBCSwapAmountConfig;
   gasSimulator?: IGasSimulator;
   disableAutomaticFeeSet?: boolean;
   isForEVMTx?: boolean;
@@ -68,7 +68,7 @@ export const TransactionFeeModal: FunctionComponent<{
     senderConfig,
     feeConfig,
     gasConfig,
-    amountConfig,
+    ibcSwapAmountConfig,
     gasSimulator,
     disableAutomaticFeeSet,
     isForEVMTx,
@@ -154,8 +154,8 @@ export const TransactionFeeModal: FunctionComponent<{
     const isShowingFeeWithGasEstimated =
       !!isGasSimulatorEnabled && !!gasSimulator?.gasEstimated && isFeeSetByUser;
 
-    const swapFeeRate = amountConfig
-      ? new IntPretty(amountConfig.swapFeeBps)
+    const swapFeeRate = ibcSwapAmountConfig
+      ? new IntPretty(ibcSwapAmountConfig.swapFeeBps)
           .moveDecimalPointLeft(2)
           .trim(true)
           .maxDecimals(4)
@@ -462,7 +462,7 @@ export const TransactionFeeModal: FunctionComponent<{
           </VerticalCollapseTransition>
           <Gutter size="0" />
 
-          {amountConfig?.swapFeeBps ? (
+          {ibcSwapAmountConfig?.swapFeeBps ? (
             <YAxis alignX="center">
               <XAxis alignY="center" gap="0.25rem">
                 <Subtitle4
@@ -481,7 +481,7 @@ export const TransactionFeeModal: FunctionComponent<{
                   content={intl.formatMessage(
                     {
                       id:
-                        amountConfig.swapFeeBps === 10
+                        ibcSwapAmountConfig.swapFeeBps === 10
                           ? "page.ibc-swap.components.swap-fee-info.button.service-fee-stable-coin.paragraph"
                           : "page.ibc-swap.components.swap-fee-info.button.service-fee.paragraph",
                     },
@@ -490,7 +490,7 @@ export const TransactionFeeModal: FunctionComponent<{
                     }
                   )}
                 >
-                  <InformationPlainIcon
+                  <InformationOutlineIcon
                     width="1rem"
                     height="1rem"
                     color={
