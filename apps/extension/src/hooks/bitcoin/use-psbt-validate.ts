@@ -26,6 +26,9 @@ export type ValidatedPsbt = {
     address: string;
     hdPath?: string;
     tapLeafHashesToSign?: Buffer[];
+    sighashTypes?: number[];
+    disableTweakSigner?: boolean;
+    useTweakedSigner?: boolean;
   }[];
   fee: Dec;
   sumInputValueByAddress: {
@@ -82,7 +85,11 @@ export const usePsbtsValidate = (
     Error | undefined
   >(undefined);
 
-  const { chainId, network: networkConfig } = interactionData.data;
+  const {
+    chainId,
+    network: networkConfig,
+    signPsbtOptions,
+  } = interactionData.data;
 
   const psbtsHexes = useMemo(() => {
     return "psbtHex" in interactionData.data
@@ -350,6 +357,11 @@ export const usePsbtsValidate = (
           address: string;
           hdPath?: string;
           tapLeafHashesToSign?: Buffer[];
+
+          publicKey?: string;
+          sighashTypes?: number[];
+          disableTweakSigner?: boolean;
+          useTweakedSigner?: boolean;
         }[] = [];
 
         for (const [index, input] of rawInputs.entries()) {
@@ -371,7 +383,8 @@ export const usePsbtsValidate = (
             ? fromOutputScript(script, networkConfig)
             : "unknown";
 
-          if (script && !isSigned) {
+          // 서명할 입력이 따로 지정되지 않은 경우, 서명할 입력을 생성한다.
+          if (script && !isSigned && !signPsbtOptions?.toSignInputs) {
             // check if the input is key path spending
             const { isToSign, hdPath, tapLeafHashesToSign } =
               getInputToSignInfo(
@@ -397,6 +410,47 @@ export const usePsbtsValidate = (
           ]
             ? sumInputValueByAddressRecord[address].add(value)
             : value;
+        }
+
+        // 서명할 입력이 따로 지정된 경우
+        if (signPsbtOptions?.toSignInputs) {
+          for (const input of signPsbtOptions.toSignInputs) {
+            const index = Number(input.index);
+            if (isNaN(index)) {
+              throw new Error("Invalid index in toSignInput");
+            }
+
+            if (!input.address && !input.publicKey) {
+              throw new Error("No address or public key in toSignInput");
+            }
+
+            const myKey = bitcoinKeys.find(
+              (key) =>
+                (input.address && key.address === input.address) ||
+                (input.publicKey &&
+                  Buffer.from(key.pubKey).toString("hex") === input.publicKey)
+            );
+            if (!myKey) {
+              throw new Error("Invalid address or public key in toSignInput");
+            }
+
+            const sighashTypes = input.sighashTypes?.map(Number);
+            if (sighashTypes?.some(isNaN)) {
+              throw new Error("Invalid sighash type in toSignInput");
+            }
+
+            const { isToSign, hdPath } = getInputToSignInfo(myKey.address);
+            if (isToSign) {
+              inputsToSign.push({
+                index,
+                address: myKey.address,
+                hdPath,
+                sighashTypes,
+                disableTweakSigner: input.disableTweakSigner,
+                useTweakedSigner: input.useTweakedSigner,
+              });
+            }
+          }
         }
 
         // CHECK: output은 검증할 것이 있나?
@@ -471,12 +525,15 @@ export const usePsbtsValidate = (
       // psbt deserialize 오류 또는 입력의 합이 출력의 합보다 작은 psbt가 있는 경우
       // 이는 더 이상 검증을 진행할 수 없는 치명적인 오류이다.
       setCriticalValidationError(e as Error);
+      console.error(e);
     }
   }, [
     psbtsHexes,
     feeConfig,
     networkConfig,
+    signPsbtOptions?.toSignInputs,
     getInputToSignInfo,
+    bitcoinKeys,
     processInputValuesByAddress,
     processOutputValuesByAddress,
     decodePsbt,

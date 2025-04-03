@@ -137,7 +137,8 @@ const handleRequestSignBitcoinPsbtMsg: (
       env,
       msg.origin,
       msg.chainId,
-      msg.psbtHex
+      msg.psbtHex,
+      msg.options
     );
   };
 };
@@ -156,7 +157,8 @@ const handleRequestSignBitcoinPsbtsMsg: (
       env,
       msg.origin,
       msg.chainId,
-      msg.psbtsHexes
+      msg.psbtsHexes,
+      msg.options
     );
   };
 };

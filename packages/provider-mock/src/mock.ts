@@ -19,6 +19,7 @@ import {
   DirectAuxSignResponse,
   IEthereumProvider,
   SupportedPaymentType,
+  SignPsbtOptions,
 } from "@keplr-wallet/types";
 import {
   Bech32Address,
@@ -453,11 +454,19 @@ export class MockKeplr implements Keplr {
     throw new Error("Not yet implemented");
   }
 
-  signPsbt(_chainId: string, _psbtHex: string): Promise<string> {
+  signPsbt(
+    _chainId: string,
+    _psbtHex: string,
+    _options?: SignPsbtOptions
+  ): Promise<string> {
     throw new Error("Not yet implemented");
   }
 
-  signPsbts(_chainId: string, _psbtsHexes: string[]): Promise<string[]> {
+  signPsbts(
+    _chainId: string,
+    _psbtsHexes: string[],
+    _options?: SignPsbtOptions
+  ): Promise<string[]> {
     throw new Error("Not yet implemented");
   }
 

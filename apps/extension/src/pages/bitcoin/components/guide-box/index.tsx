@@ -6,14 +6,27 @@ export const BitcoinGuideBox: FunctionComponent<{
   isUnableToGetUTXOs?: boolean;
   isPartialSign?: boolean;
   isUnableToSign?: boolean;
-}> = ({ isUnableToGetUTXOs, isPartialSign, isUnableToSign }) => {
+  criticalValidationError?: Error;
+}> = ({
+  isUnableToGetUTXOs,
+  isPartialSign,
+  isUnableToSign,
+  criticalValidationError,
+}) => {
   const intl = useIntl();
 
-  if (!isPartialSign && !isUnableToSign && !isUnableToGetUTXOs) {
+  if (
+    !isPartialSign &&
+    !isUnableToSign &&
+    !isUnableToGetUTXOs &&
+    !criticalValidationError
+  ) {
     return null;
   }
 
-  const titleId = isUnableToGetUTXOs
+  const titleId = criticalValidationError
+    ? "components.bitcoin-guide-box.title.critical-validation-error"
+    : isUnableToGetUTXOs
     ? "components.bitcoin-guide-box.title.unable-to-get-utxos"
     : isUnableToSign
     ? "components.bitcoin-guide-box.title.none-of-the-inputs-belong-to-this-wallet"
@@ -27,9 +40,15 @@ export const BitcoinGuideBox: FunctionComponent<{
 
   return (
     <GuideBox
-      color={isUnableToGetUTXOs ? "warning" : "default"}
+      color={
+        isUnableToGetUTXOs || criticalValidationError ? "warning" : "default"
+      }
       title={intl.formatMessage({ id: titleId })}
-      paragraph={intl.formatMessage({ id: paragraphId })}
+      paragraph={
+        criticalValidationError
+          ? criticalValidationError.message
+          : intl.formatMessage({ id: paragraphId })
+      }
     />
   );
 };
