@@ -186,10 +186,7 @@ export const SwapFeeInfo: FunctionComponent<{
     const isShowingEstimatedFee = isForEVMTx && !!gasSimulator.gasEstimated;
 
     const txFeeColor = (() => {
-      const hasError =
-        !!feeConfig.uiProperties.error ||
-        !!senderConfig.uiProperties.error ||
-        !!amountConfig.uiProperties.error;
+      const hasError = !!feeConfig.uiProperties.error;
       const isLightTheme = theme.mode === "light";
 
       if (!isLightTheme && !hasError && !isHovered)
