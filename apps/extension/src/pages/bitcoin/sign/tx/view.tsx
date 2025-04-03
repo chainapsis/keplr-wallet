@@ -377,7 +377,6 @@ export const SignBitcoinTxView: FunctionComponent<{
       }
 
       const psbtSignData: {
-        psbtBase64: string;
         psbtHex: string;
         inputsToSign: {
           index: number;
@@ -389,7 +388,6 @@ export const SignBitcoinTxView: FunctionComponent<{
 
       for (const validated of validatedPsbts) {
         psbtSignData.push({
-          psbtBase64: validated.psbt.toBase64(),
           psbtHex: validated.psbt.toHex(),
           inputsToSign: validated.inputsToSign,
         });

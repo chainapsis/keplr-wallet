@@ -259,7 +259,7 @@ export const connectAndSignMessageWithLedger = async (
 export const connectAndSignPsbtsWithLedger = async (
   interactionData: NonNullable<SignBitcoinTxInteractionStore["waitingData"]>,
   psbtSignData: {
-    psbtBase64: string;
+    psbtHex: string;
     inputsToSign: {
       index: number;
       address: string;
@@ -377,7 +377,7 @@ export const connectAndSignPsbtsWithLedger = async (
         );
       }
 
-      const psbt = Psbt.fromBase64(data.psbtBase64);
+      const psbt = Psbt.fromHex(data.psbtHex);
 
       // 외부에서 들어온 요청의 경우 추가적으로 bip32 derivation을 처리해줘야 한다.
       if (!interactionData.isInternal) {
@@ -413,10 +413,8 @@ export const connectAndSignPsbtsWithLedger = async (
         }
       }
 
-      const newPsbtBase64 = psbt.toBase64();
-
       const signatures = await btcApp.signPsbt(
-        newPsbtBase64,
+        psbt.toBase64(),
         policy,
         hmac ?? null
       );
