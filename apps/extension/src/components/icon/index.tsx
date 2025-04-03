@@ -22,6 +22,7 @@ export * from "./google";
 export * from "./graph-rising";
 export * from "./information";
 export * from "./information-plain";
+export * from "./information-outline";
 export * from "./key";
 export * from "./link";
 export * from "./loading";
