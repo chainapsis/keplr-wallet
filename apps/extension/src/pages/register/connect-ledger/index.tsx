@@ -489,7 +489,7 @@ export const ConnectLedgerScene: FunctionComponent<{
 
               if (isStepMode) {
                 if (propApp === "Bitcoin" && testnetKeys.length > 0) {
-                  sceneTransition.push("connect-ledger", {
+                  sceneTransition.replace("connect-ledger", {
                     name: "",
                     password: "",
                     app: "Bitcoin Test",
@@ -502,17 +502,15 @@ export const ConnectLedgerScene: FunctionComponent<{
                     stepPrevious: stepPrevious,
                     stepTotal: stepTotal,
                   });
-                  return;
                 } else if (
                   propApp === "Bitcoin Test" &&
                   mainnetKeys.length > 0
                 ) {
-                  sceneTransition.push("connect-ledger", {
+                  sceneTransition.replace("connect-ledger", {
                     name: "",
                     password: "",
                     app: "Bitcoin",
                     bip44Path,
-
                     appendModeInfo: {
                       vaultId: appendModeInfo.vaultId,
                       afterEnableChains: mainnetKeys.map((key) => key.chainId),
@@ -520,12 +518,17 @@ export const ConnectLedgerScene: FunctionComponent<{
                     stepPrevious: stepPrevious,
                     stepTotal: stepTotal,
                   });
-                  return;
+                } else {
+                  // add/remove chains를 통해 register 페이지로 진입한 경우,
+                  // stepMode이기는 하나, stepTotal이 0으로 주어지므로 welcome 페이지로 이동하지 않고 창을 닫는다.
+                  if (stepTotal === 0) {
+                    window.close();
+                  } else {
+                    navigate("/welcome", {
+                      replace: true,
+                    });
+                  }
                 }
-
-                navigate("/welcome", {
-                  replace: true,
-                });
               } else {
                 window.close();
               }
