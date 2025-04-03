@@ -22,13 +22,14 @@ import { ArbitraryMsgSignHeader } from "../../../sign/components/arbitrary-messa
 import { ArbitraryMsgRequestOrigin } from "../../../sign/components/arbitrary-message/arbitrary-message-origin";
 import { ArbitraryMsgWalletDetails } from "../../../sign/components/arbitrary-message/arbitrary-message-wallet-details";
 import { Box } from "../../../../components/box";
+import { connectAndSignMessageWithLedger } from "../../../sign/utils/handle-bitcoin-sign";
 
 export const SignBitcoinMessageView: FunctionComponent<{
   interactionData: NonNullable<
     SignBitcoinMessageInteractionStore["waitingData"]
   >;
 }> = observer(({ interactionData }) => {
-  const { signBitcoinMessageInteractionStore } = useStore();
+  const { signBitcoinMessageInteractionStore, uiConfigStore } = useStore();
 
   const theme = useTheme();
   const navigate = useNavigate();
@@ -52,6 +53,8 @@ export const SignBitcoinMessageView: FunctionComponent<{
     throw new Error(`${modularChainInfo.chainId} is not bitcoin chain`);
   }
 
+  const isTestnet = modularChainInfo.bitcoin.bip44.coinType === 1;
+
   const [unmountPromise] = useState(() => {
     let resolver: () => void;
     const promise = new Promise<void>((resolve) => {
@@ -74,19 +77,21 @@ export const SignBitcoinMessageView: FunctionComponent<{
   });
 
   const approve = async () => {
-    const signature: string[] | undefined = undefined;
-    if (interactionData.data.keyType === "ledger") {
-      setIsLedgerInteracting(true);
-      setLedgerInteractingError(undefined);
-      // TODO: 렛저 서명 지원
-      // signature = await connectAndSignMessageWithLedger(
-      //   interactionData.data.pubKey,
-      //   interactionData.data.message,
-      //   interactionData.data.signer
-      // );
-    }
-
     try {
+      let signature: string | undefined = undefined;
+      if (interactionData.data.keyType === "ledger") {
+        setIsLedgerInteracting(true);
+        setLedgerInteractingError(undefined);
+
+        signature = await connectAndSignMessageWithLedger(
+          interactionData,
+          modularChainInfo,
+          {
+            useWebHID: uiConfigStore.useWebHIDLedger,
+          }
+        );
+      }
+
       await signBitcoinMessageInteractionStore.approveWithProceedNext(
         interactionData.id,
         interactionData.data.message,
@@ -241,6 +246,8 @@ export const SignBitcoinMessageView: FunctionComponent<{
         <LedgerGuideBox
           data={{
             keyInsensitive: interactionData.data.keyInsensitive,
+            isBitcoin: !isTestnet,
+            isBitcoinTest: isTestnet,
           }}
           isLedgerInteracting={isLedgerInteracting}
           ledgerInteractingError={ledgerInteractingError}

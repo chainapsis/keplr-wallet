@@ -9,6 +9,7 @@ import { ECPairInterface, ECPairFactory } from "ecpair";
 import { Network as BitcoinNetwork, payments } from "bitcoinjs-lib";
 import * as ecc from "./ecc-adapter";
 import * as bitcoin from "bitcoinjs-lib";
+import { fromBase58 } from "bip32";
 
 let _starknetHash: {
   calculateContractAddressFromHash(
@@ -348,10 +349,10 @@ export class PubKeyBitcoinCompatible {
         const path = this.getPath();
         if (path) {
           const segments = path.split("/").filter(Boolean);
-          // Check if this is a BIP44 compatible path
+          // Check if this is a BIP44 compatible path (m/purpose'/coinType'/account')
           const purposeIndex = segments[0] === "m" ? 1 : 0;
 
-          if (segments.length >= purposeIndex + 5) {
+          if (segments.length >= purposeIndex + 3) {
             const purposeSegment = segments[purposeIndex];
             const purpose = parseInt(
               purposeSegment.endsWith("'")
@@ -370,6 +371,48 @@ export class PubKeyBitcoinCompatible {
           }
         }
     }
+  }
+
+  static fromExtendedKey(
+    xpub: string,
+    basePath: string,
+    masterFingerprint?: string,
+    additionalPath?: string,
+    network?: BitcoinNetwork
+  ): PubKeyBitcoinCompatible {
+    const root = fromBase58(xpub, network);
+
+    const depth = root.depth;
+    const hdPathSegments = basePath.split("/").filter(Boolean);
+    const purposeIndex = hdPathSegments[0] === "m" ? 1 : 0;
+
+    if (depth !== hdPathSegments.length - purposeIndex) {
+      throw new Error("Invalid depth with base path");
+    }
+
+    if (additionalPath) {
+      const additionalPathSegments = additionalPath.split("/").filter(Boolean);
+      if (additionalPathSegments[0] === "m") {
+        throw new Error("Additional path should not include m");
+      }
+
+      const child = root.derivePath(additionalPath);
+      return new PubKeyBitcoinCompatible(
+        child.publicKey,
+        network,
+        masterFingerprint,
+        purposeIndex === 0
+          ? `m/${basePath}/${additionalPath}`
+          : `${basePath}/${additionalPath}`
+      );
+    }
+
+    return new PubKeyBitcoinCompatible(
+      root.publicKey,
+      network,
+      masterFingerprint,
+      purposeIndex === 0 ? `m/${basePath}` : basePath
+    );
   }
 }
 

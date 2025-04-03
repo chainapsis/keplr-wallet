@@ -15,6 +15,13 @@ export type BIP44HDPath = {
   addressIndex: number;
 };
 
+export type ExtendedKey = {
+  type: "pkh" | "wpkh" | "tr";
+  masterFingerprint: string;
+  xpub: string;
+  derivationPath: string; // `m/purpose'/coinType'/account'` or `purpose'/coinType'/account'`
+};
+
 export interface KeyInfo {
   readonly id: string;
   readonly name: string;
@@ -44,7 +51,8 @@ export interface KeyRing {
     vault: Vault,
     purpose: number,
     coinType: number,
-    network: BitcoinNetwork
+    network: BitcoinNetwork,
+    modularChainInfo: ModularChainInfo
   ): PubKeyBitcoinCompatible | Promise<PubKeyBitcoinCompatible>;
   sign(
     vault: Vault,

@@ -1,5 +1,9 @@
 import { Mnemonic } from "./mnemonic";
-import { PrivKeySecp256k1, PubKeySecp256k1 } from "./key";
+import {
+  PrivKeySecp256k1,
+  PubKeyBitcoinCompatible,
+  PubKeySecp256k1,
+} from "./key";
 import { Hash } from "./hash";
 import * as ecc from "./ecc-adapter";
 import * as bitcoin from "bitcoinjs-lib";
@@ -214,5 +218,61 @@ describe("Test priv key", () => {
     expect(legacyAddress).not.toBeUndefined();
     expect(legacyAddress?.startsWith("D")).toBe(true);
     expect(legacyAddress).toBe("D8ssUjBGXy1UK3wULHcD7d96WtKtus5My3");
+  });
+
+  it("test bitcoin pubkey from xpub", () => {
+    const xpub =
+      "xpub6BgBgsespWvERF3LHQu6CnqdvfEvtMcQjYrcRzx53QJjSxarj2afYWcLteoGVky7D3UKDP9QyrLprQ3VCECoY49yfdDEHGCtMMj92pReUsQ";
+    const hdPath = "m/86'/0'/0'";
+    const masterFingerprint = "73c5da0a";
+
+    const pubKey = PubKeyBitcoinCompatible.fromExtendedKey(
+      xpub,
+      hdPath,
+      masterFingerprint
+    );
+
+    expect(pubKey.getBitcoinAddress()).toBe(
+      "bc1pw992htk2pwsg09y9ww2m569p9pte0h0x29dap6rsp450dyjnq98q07u8gu"
+    );
+    expect(pubKey.getMasterFingerprint()).not.toBeUndefined();
+    expect(pubKey.getMasterFingerprint()).toBe(masterFingerprint);
+    expect(pubKey.getPath()).not.toBeUndefined();
+    expect(pubKey.getPath()).toBe(hdPath);
+    expect(Buffer.from(pubKey.toBytes()).toString("hex")).toBe(
+      "03418278a2885c8bb98148158d1474634097a179c642f23cf1cc04da629ac6f0fb"
+    );
+    expect(Buffer.from(pubKey.toBytes(true)).toString("hex")).toBe(
+      "04418278a2885c8bb98148158d1474634097a179c642f23cf1cc04da629ac6f0fb7d772ca0939497d3c25302c2ece5110b71826de66e8a104fd1b9d7a94315658d"
+    );
+  });
+
+  it("test bitcoin pubkey from xpub with additional path", () => {
+    const xpub =
+      "xpub6BgBgsespWvERF3LHQu6CnqdvfEvtMcQjYrcRzx53QJjSxarj2afYWcLteoGVky7D3UKDP9QyrLprQ3VCECoY49yfdDEHGCtMMj92pReUsQ";
+    const basePath = "m/86'/0'/0'";
+    const additionalPath = "0/0";
+    const masterFingerprint = "73c5da0a";
+
+    const pubKey = PubKeyBitcoinCompatible.fromExtendedKey(
+      xpub,
+      basePath,
+      masterFingerprint,
+      additionalPath
+    );
+
+    expect(pubKey.getBitcoinAddress()).toBe(
+      "bc1p5cyxnuxmeuwuvkwfem96lqzszd02n6xdcjrs20cac6yqjjwudpxqkedrcr"
+    );
+    expect(pubKey.getMasterFingerprint()).not.toBeUndefined();
+    expect(pubKey.getMasterFingerprint()).toBe(masterFingerprint);
+    expect(pubKey.getPath()).not.toBeUndefined();
+    expect(pubKey.getPath()).toBe(`${basePath}/${additionalPath}`);
+    expect(Buffer.from(pubKey.toBytes()).toString("hex")).toBe(
+      "03cc8a4bc64d897bddc5fbc2f670f7a8ba0b386779106cf1223c6fc5d7cd6fc115"
+    );
+    expect(Buffer.from(pubKey.toBytes(true)).toString("hex")).toBe(
+      "04cc8a4bc64d897bddc5fbc2f670f7a8ba0b386779106cf1223c6fc5d7cd6fc1158190abf51fae206f0a1c825717ed512366620dad8c82b09807e7f27986e5c3fb"
+    );
   });
 });

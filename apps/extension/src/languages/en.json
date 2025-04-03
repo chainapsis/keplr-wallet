@@ -163,6 +163,7 @@
   "pages.register.enable-chains.skip-button": "Skip",
   "pages.register.enable-chains.guide.can-select-evm-next-step": "You can select EVM chains in the next step.",
   "pages.register.enable-chains.guide.can-select-starknet-later-step": "You can select Starknet chains in a later step.",
+  "pages.register.enable-chains.guide.can-select-bitcoin-later-step": "You can select Bitcoin chains in a later step.",
   "pages.register.enable-chains.guide.starknet.title": "Note for Starknet Users",
   "pages.register.enable-chains.guide.starknet.paragraph": "Importing from other wallets (e.g. Argent, Braavos) will create a new, different account in Keplr.",
   "pages.register.enable-chains.guide.non-native-chain.title": "Enabling Custom Chain",
@@ -172,10 +173,13 @@
   "pages.register.enable-chains.chain-item-token-count": "{count} {count, plural, one {Token} other {Tokens}}",
 
   "pages.register.enable-chains.native-chain-view.ledger-cosmos-title": "All Native Cosmos Chains",
-  "pages.register.enable-chains.native-chain-view.ledger-evm-title": "All EVM Cosmos Chains",
+  "pages.register.enable-chains.native-chain-view.ledger-cosmos-paragraph": "Cosmos, Osmosis, Celestia...",
+  "pages.register.enable-chains.native-chain-view.ledger-evm-title": "All Native EVM Chains",
   "pages.register.enable-chains.native-chain-view.ledger-evm-paragraph": "Ethereum, Arbitrum, Base...",
   "pages.register.enable-chains.native-chain-view.ledger-starknet-title": "All Native Starknet Chains",
   "pages.register.enable-chains.native-chain-view.ledger-starknet-paragraph": "Starknet, Starknet Sepolia",
+  "pages.register.enable-chains.native-chain-view.ledger-bitcoin-title": "All Native Bitcoin Chains",
+  "pages.register.enable-chains.native-chain-view.ledger-bitcoin-paragraph": "Bitcoin, Bitcoin Signet, Bitcoin Testnet",
 
   "pages.register.select-derivation-path.title": "Select Account Derivation Path",
   "pages.register.select-derivation-path.paragraph": "To use both paths, you need to go through the import process twice.",

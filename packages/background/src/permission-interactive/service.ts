@@ -61,7 +61,7 @@ export class PermissionInteractiveService {
 
   async ensureKeyRingLedgerAppConnected(
     env: Env,
-    app: "Ethereum" | "Starknet"
+    app: "Ethereum" | "Starknet" | "Bitcoin" | "Bitcoin Test"
   ): Promise<void> {
     if (typeof browser !== "undefined") {
       const selectedKeyInfo = this.keyRingService.getKeyInfo(
@@ -166,12 +166,18 @@ export class PermissionInteractiveService {
   async ensureEnabledForBitcoin(env: Env, origin: string): Promise<void> {
     await this.keyRingService.ensureUnlockInteractive(env);
 
-    // TODO: support ledger
-    // await this.ensureKeyRingLedgerAppConnected(env, "Bitcoin");
-
     const currentBaseChainIdForBitcoin =
       this.permissionService.getCurrentBaseChainIdForBitcoin(origin) ??
       `bip122:${GenesisHash.MAINNET}`;
+
+    const isTestnet = !currentBaseChainIdForBitcoin.includes(
+      GenesisHash.MAINNET
+    );
+
+    await this.ensureKeyRingLedgerAppConnected(
+      env,
+      isTestnet ? "Bitcoin Test" : "Bitcoin"
+    );
 
     await this.permissionService.checkOrGrantBasicAccessPermission(
       env,

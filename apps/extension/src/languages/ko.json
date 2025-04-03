@@ -164,6 +164,7 @@
   "pages.register.enable-chains.skip-button": "스킵",
   "pages.register.enable-chains.guide.can-select-evm-next-step": "EVM 체인 선택은 다음 단계에서 진행할 수 있습니다.",
   "pages.register.enable-chains.guide.can-select-starknet-later-step": "Starknet 체인 선택은 추후의 단계에서 진행할 수 있습니다.",
+  "pages.register.enable-chains.guide.can-select-bitcoin-later-step": "비트코인 체인 선택은 추후의 단계에서 진행할 수 있습니다.",
   "pages.register.enable-chains.guide.starknet.title": "스타크넷 유저를 위한 안내",
   "pages.register.enable-chains.guide.starknet.paragraph": "Argent, Braavos 등의 타 지갑 서비스에서 계정을 불러와도 서로 다른 새로운 계정이 생성됩니다.",
   "pages.register.enable-chains.guide.non-native-chain.title": "선택형 체인 설정 안내",
@@ -172,10 +173,13 @@
   "pages.register.enable-chains.native-chain-view.paragraph": "Cosmos, Ethereum, Bitcoin..",
 
   "pages.register.enable-chains.native-chain-view.ledger-cosmos-title": "모든 네이티브 코스모스 체인",
+  "pages.register.enable-chains.native-chain-view.ledger-cosmos-paragraph": "Cosmos, Osmosis, Celestia...",
   "pages.register.enable-chains.native-chain-view.ledger-evm-title": "모든 네이티브 EVM 체인",
   "pages.register.enable-chains.native-chain-view.ledger-evm-paragraph": "Ethereum, Arbitrum, Base...",
   "pages.register.enable-chains.native-chain-view.ledger-starknet-title": "모든 네이티브 Starknet 체인",
   "pages.register.enable-chains.native-chain-view.ledger-starknet-paragraph": "Starknet, Starknet Sepolia",
+  "pages.register.enable-chains.native-chain-view.ledger-bitcoin-title": "모든 네이티브 비트코인 체인",
+  "pages.register.enable-chains.native-chain-view.ledger-bitcoin-paragraph": "비트코인, 비트코인 시그넷, 비트코인 테스트넷",
 
   "pages.register.select-derivation-path.title": "계정 파생 경로(Derivation Path) 선택하기",
   "pages.register.select-derivation-path.paragraph": "두 가지 경로를 모두 사용하려면, 각각에 대해 불러오기 과정을 한번씩 거쳐야 합니다.",

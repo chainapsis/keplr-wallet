@@ -149,6 +149,7 @@
     "@ledgerhq/hw-transport-webhid": "^6",
     "@ledgerhq/hw-transport-webusb": "^6",
     "bitcoinjs-lib": "^6",
+    "ledger-bitcoin": "^0.2.3",
     "mobx": "^6",
     "mobx-react-lite": "^3",
     "mobx-utils": "^6",

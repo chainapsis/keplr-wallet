@@ -53,6 +53,7 @@
     "curve25519-js": "0.0.4",
     "delay": "^4.4.0",
     "joi": "^17.5.0",
+    "ledger-bitcoin": "^0.2.3",
     "long": "^4.0.0",
     "miscreant": "0.3.2",
     "pbkdf2": "^3.1.2",

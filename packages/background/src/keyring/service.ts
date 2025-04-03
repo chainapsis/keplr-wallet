@@ -2,6 +2,7 @@ import { PlainObject, Vault, VaultService } from "../vault";
 import {
   BIP44HDPath,
   ExportedKeyRingVault,
+  ExtendedKey,
   KeyInfo,
   KeyRing,
   KeyRingStatus,
@@ -32,6 +33,7 @@ import { runIfOnlyAppStart } from "../utils";
 import { Network as BitcoinNetwork, Psbt } from "bitcoinjs-lib";
 import { DEFAULT_BIP44_PURPOSE } from "./constants";
 import { Buffer as NodeBuffer } from "buffer";
+import { Descriptor } from "../keyring-bitcoin";
 
 export class KeyRingService {
   protected _needMigration = false;
@@ -912,6 +914,87 @@ export class KeyRingService {
     });
   }
 
+  appendLedgerExtendedKeyRings(
+    vaultId: string,
+    extendedKeys: ExtendedKey[],
+    app: string
+  ) {
+    const vault = this.vaultService.getVault("keyRing", vaultId);
+    if (!vault) {
+      throw new Error("Vault is null");
+    }
+
+    if (vault.insensitive["keyRingType"] !== "ledger") {
+      throw new Error("Key is not from ledger");
+    }
+
+    const pathToDescriptor: Record<string, string> = {};
+
+    for (const {
+      xpub,
+      derivationPath,
+      masterFingerprint,
+      type,
+    } of extendedKeys) {
+      // Parse and validate derivation path (`m/purpose'/coinType'/account'`)
+      const segments = derivationPath.split("/").filter(Boolean);
+      const purposeIndex = segments[0] === "m" ? 1 : 0;
+
+      if (segments.length !== purposeIndex + 3) {
+        throw new Error("Invalid derivation path");
+      }
+
+      const purpose = parseInt(
+        segments[purposeIndex].endsWith("'")
+          ? segments[purposeIndex].slice(0, -1)
+          : segments[purposeIndex]
+      );
+      const coinType = parseInt(
+        segments[purposeIndex + 1].endsWith("'")
+          ? segments[purposeIndex + 1].slice(0, -1)
+          : segments[purposeIndex + 1]
+      );
+      const account = parseInt(
+        segments[purposeIndex + 2].endsWith("'")
+          ? segments[purposeIndex + 2].slice(0, -1)
+          : segments[purposeIndex + 2]
+      );
+
+      if (app === "Bitcoin" || app === "Bitcoin Test") {
+        if (purpose === 44 || type === "pkh") {
+          throw new Error("Legacy address is not supported for Bitcoin");
+        }
+      }
+
+      if (
+        (purpose === 86 && type !== "tr") ||
+        (purpose === 84 && type !== "wpkh") ||
+        (purpose === 44 && type !== "pkh")
+      ) {
+        throw new Error(
+          `Address type is not matching with purpose ${purpose} and type ${type}`
+        );
+      }
+
+      // Use account path as key for descriptor
+      const accountPath = `m/${purpose}'/${coinType}'/${account}'`;
+      const descriptor = Descriptor.create(
+        type,
+        masterFingerprint,
+        accountPath,
+        xpub
+      );
+
+      pathToDescriptor[accountPath] = descriptor;
+    }
+
+    this.vaultService.setAndMergeInsensitiveToVault("keyRing", vaultId, {
+      [app]: {
+        ...(vault.insensitive[app] as any),
+        ...pathToDescriptor,
+      },
+    });
+  }
   getPubKeySelected(chainId: string): Promise<PubKeySecp256k1> {
     return this.getPubKey(chainId, this.selectedVaultId);
   }
@@ -1401,7 +1484,13 @@ export class KeyRingService {
     }
 
     return Promise.resolve(
-      keyRing.getPubKeyBitcoin(vault, purpose, coinType, network)
+      keyRing.getPubKeyBitcoin(
+        vault,
+        purpose,
+        coinType,
+        network,
+        modularChainInfo
+      )
     );
   }
   signWithVault(

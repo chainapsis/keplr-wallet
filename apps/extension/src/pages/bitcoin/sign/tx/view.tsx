@@ -74,6 +74,10 @@ import { InformationPlainIcon } from "../../../../components/icon";
 import { Tooltip } from "../../../../components/tooltip";
 import { BitcoinGuideBox } from "../../components/guide-box";
 import { HeaderProps } from "../../../../layouts/header/types";
+import { KeplrError } from "@keplr-wallet/router";
+import { ErrModuleLedgerSign } from "../../../sign/utils/ledger-types";
+import { LedgerGuideBox } from "../../../sign/components/ledger-guide-box";
+import { connectAndSignPsbtsWithLedger } from "../../../sign/utils/handle-bitcoin-sign";
 
 export const SignBitcoinTxView: FunctionComponent<{
   interactionData: NonNullable<SignBitcoinTxInteractionStore["waitingData"]>;
@@ -82,6 +86,7 @@ export const SignBitcoinTxView: FunctionComponent<{
     signBitcoinTxInteractionStore,
     bitcoinQueriesStore,
     bitcoinAccountStore,
+    uiConfigStore,
   } = useStore();
 
   const theme = useTheme();
@@ -319,6 +324,13 @@ export const SignBitcoinTxView: FunctionComponent<{
     unmountPromise.resolver();
   });
 
+  const [isLedgerInteracting, setIsLedgerInteracting] = useState(false);
+  const [ledgerInteractingError, setLedgerInteractingError] = useState<
+    Error | undefined
+  >(undefined);
+
+  const isTestnet = modularChainInfo.bitcoin.bip44.coinType === 1;
+
   // 이 페이지에서는 다른 config들이 사용되지 않으므로 feeConfig만 검증한다.
   const txConfigsValidate = useTxConfigsValidate({
     feeConfig,
@@ -336,9 +348,10 @@ export const SignBitcoinTxView: FunctionComponent<{
     !!criticalValidationError ||
     hasUnableToSignPsbt ||
     isUnableToGetUTXOs;
-  const isLoading = signBitcoinTxInteractionStore.isObsoleteInteractionApproved(
-    interactionData.id
-  );
+  const isLoading =
+    signBitcoinTxInteractionStore.isObsoleteInteractionApproved(
+      interactionData.id
+    ) || isLedgerInteracting;
   const isExternal =
     interactionInfo.interaction && !interactionInfo.interactionInternal;
 
@@ -370,20 +383,36 @@ export const SignBitcoinTxView: FunctionComponent<{
           address: string;
           hdPath?: string;
           tapLeafHashesToSign?: Buffer[];
+          sighashTypes?: number[];
+          disableTweakSigner?: boolean;
+          useTweakedSigner?: boolean;
         }[];
       }[] = [];
 
-      for (const psbt of validatedPsbts) {
+      for (const validated of validatedPsbts) {
         psbtSignData.push({
-          psbtHex: psbt.psbt.toHex(),
-          inputsToSign: psbt.inputsToSign,
+          psbtHex: validated.psbt.toHex(),
+          inputsToSign: validated.inputsToSign,
         });
+      }
+
+      let signedPsbtsHexes: string[] | undefined;
+      if (interactionData.data.keyType === "ledger") {
+        setIsLedgerInteracting(true);
+        setLedgerInteractingError(undefined);
+
+        signedPsbtsHexes = await connectAndSignPsbtsWithLedger(
+          interactionData,
+          psbtSignData,
+          modularChainInfo,
+          { useWebHID: uiConfigStore.useWebHIDLedger }
+        );
       }
 
       await signBitcoinTxInteractionStore.approveWithProceedNext(
         interactionData.id,
         psbtSignData,
-        [], // ledger로 서명된 signedPsbtHexes가 들어감
+        signedPsbtsHexes ?? [],
         async (proceedNext) => {
           if (!proceedNext) {
             if (
@@ -416,6 +445,18 @@ export const SignBitcoinTxView: FunctionComponent<{
       );
     } catch (e) {
       console.log(e);
+
+      if (e instanceof KeplrError) {
+        if (e.module === ErrModuleLedgerSign) {
+          setLedgerInteractingError(e);
+        } else {
+          setLedgerInteractingError(undefined);
+        }
+      } else {
+        setLedgerInteractingError(undefined);
+      }
+    } finally {
+      setIsLedgerInteracting(false);
     }
   };
 
@@ -560,6 +601,19 @@ export const SignBitcoinTxView: FunctionComponent<{
     return buttons;
   };
 
+  const ledgerGuideBox = (
+    <LedgerGuideBox
+      data={{
+        keyInsensitive: interactionData.data.keyInsensitive,
+        isBitcoin: !isTestnet,
+        isBitcoinTest: isTestnet,
+      }}
+      isLedgerInteracting={isLedgerInteracting}
+      ledgerInteractingError={ledgerInteractingError}
+      isInternal={interactionData.isInternal}
+    />
+  );
+
   return (
     <HeaderLayout
       title={
@@ -591,6 +645,7 @@ export const SignBitcoinTxView: FunctionComponent<{
             validatedPsbt={validatedPsbts[currentPsbtIndex]}
             totalPsbts={validatedPsbts.length}
             currentPsbtIndex={currentPsbtIndex}
+            ledgerGuideBox={ledgerGuideBox}
             criticalValidationError={criticalValidationError}
           />
         ) : (
@@ -600,6 +655,7 @@ export const SignBitcoinTxView: FunctionComponent<{
             chainId={chainId}
             origin={interactionData.data.origin}
             validatedPsbt={validatedPsbts?.[0]}
+            ledgerGuideBox={ledgerGuideBox}
             criticalValidationError={criticalValidationError}
           />
         )
@@ -611,6 +667,7 @@ export const SignBitcoinTxView: FunctionComponent<{
           feeSummary={
             <FeeSummary feeConfig={feeConfig} isInitialized={isInitialized} />
           }
+          ledgerGuideBox={ledgerGuideBox}
         />
       )}
     </HeaderLayout>
@@ -622,242 +679,257 @@ const InternalSendBitcoinTxReview: FunctionComponent<{
   isUnableToGetUTXOs: boolean;
   chainId: string;
   feeSummary: React.ReactNode;
-}> = observer(({ validatedPsbt, chainId, feeSummary, isUnableToGetUTXOs }) => {
-  const theme = useTheme();
-  const { chainStore } = useStore();
-  const { sumInputValueByAddress, sumOutputValueByAddress, decodedRawData } =
-    validatedPsbt ?? {};
+  ledgerGuideBox?: React.ReactNode;
+}> = observer(
+  ({
+    validatedPsbt,
+    chainId,
+    feeSummary,
+    isUnableToGetUTXOs,
+    ledgerGuideBox,
+  }) => {
+    const theme = useTheme();
+    const { chainStore } = useStore();
+    const { sumInputValueByAddress, sumOutputValueByAddress, decodedRawData } =
+      validatedPsbt ?? {};
 
-  const [isViewData, setIsViewData] = useState(false);
+    const [isViewData, setIsViewData] = useState(false);
 
-  const sender = sumInputValueByAddress?.[0].address;
-  // 자기 자신한테 보내는 경우도 있으므로, 이 경우 받는 주소와 잔돈 주소가 자신의 주소와 같을 수 있음.
-  const recipientOutput =
-    sumOutputValueByAddress?.length && sumOutputValueByAddress.length > 1
-      ? sumOutputValueByAddress?.find((output) => output.address !== sender)
-      : sumOutputValueByAddress?.[0];
-  const recipient = recipientOutput?.address;
-  const modularChainInfo = chainStore.getModularChain(chainId);
-  const currency = chainStore
-    .getModularChainInfoImpl(chainId)
-    .getCurrencies("bitcoin")[0];
-  const sendToken = new CoinPretty(
-    currency,
-    recipientOutput?.value ?? new Dec(0)
-  );
+    const sender = sumInputValueByAddress?.[0].address;
+    // 자기 자신한테 보내는 경우도 있으므로, 이 경우 받는 주소와 잔돈 주소가 자신의 주소와 같을 수 있음.
+    const recipientOutput =
+      sumOutputValueByAddress?.length && sumOutputValueByAddress.length > 1
+        ? sumOutputValueByAddress?.find((output) => output.address !== sender)
+        : sumOutputValueByAddress?.[0];
+    const recipient = recipientOutput?.address;
+    const modularChainInfo = chainStore.getModularChain(chainId);
+    const currency = chainStore
+      .getModularChainInfoImpl(chainId)
+      .getCurrencies("bitcoin")[0];
+    const sendToken = new CoinPretty(
+      currency,
+      recipientOutput?.value ?? new Dec(0)
+    );
 
-  const signingDataText = useMemo(() => {
-    if (!decodedRawData) {
-      return "";
-    }
-    return JSON.stringify(decodedRawData, null, 2);
-  }, [decodedRawData]);
+    const signingDataText = useMemo(() => {
+      if (!decodedRawData) {
+        return "";
+      }
+      return JSON.stringify(decodedRawData, null, 2);
+    }, [decodedRawData]);
 
-  const isPartialSign = sumInputValueByAddress?.some((input) => !input.isMine);
-  const isUnableToSign = validatedPsbt?.inputsToSign.length === 0;
+    const isPartialSign = sumInputValueByAddress?.some(
+      (input) => !input.isMine
+    );
+    const isUnableToSign = validatedPsbt?.inputsToSign.length === 0;
 
-  return (
-    <Box
-      height="100%"
-      padding="0.75rem 0.75rem 0"
-      style={{
-        overflow: "auto",
-      }}
-    >
-      <NetworkInfoBadge chainInfo={modularChainInfo} />
-      <Gutter size="0.75rem" />
-      <Box marginBottom="0.5rem">
-        <Columns sum={1} alignY="center">
-          <XAxis>
-            <H5
-              style={{
-                color:
-                  theme.mode === "light"
-                    ? ColorPalette["gray-500"]
-                    : ColorPalette["gray-50"],
-              }}
-            >
-              <FormattedMessage id={"page.sign.ethereum.transaction.summary"} />
-            </H5>
-          </XAxis>
-          <Column weight={1} />
-
-          <ViewDataButton
-            isViewData={isViewData}
-            setIsViewData={setIsViewData}
-          />
-        </Columns>
-      </Box>
-      <SimpleBar
-        autoHide={false}
+    return (
+      <Box
+        height="100%"
+        padding="0.75rem 0.75rem 0"
         style={{
-          display: "flex",
-          flexDirection: "column",
-          flex: !isViewData ? "0 1 auto" : 1,
-          overflowY: "auto",
-          overflowX: "hidden",
-          borderRadius: "0.375rem",
-          backgroundColor:
-            theme.mode === "light"
-              ? ColorPalette.white
-              : ColorPalette["gray-600"],
-          boxShadow:
-            theme.mode === "light"
-              ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
-              : "none",
+          overflow: "auto",
         }}
       >
-        <Box>
-          {isViewData ? (
-            <Box
-              as={"pre"}
-              padding="1rem"
-              // Remove normalized style of pre tag
-              margin="0"
-              style={{
-                width: "fit-content",
-                color:
-                  theme.mode === "light"
-                    ? ColorPalette["gray-400"]
-                    : ColorPalette["gray-200"],
-                whiteSpace: "pre-wrap",
-                wordBreak: "break-all",
-              }}
-            >
-              {signingDataText}
-            </Box>
-          ) : (
-            <Box padding="1rem">
-              <Body2
-                color={
-                  theme.mode === "light"
-                    ? ColorPalette["gray-300"]
-                    : ColorPalette["gray-100"]
-                }
+        <NetworkInfoBadge chainInfo={modularChainInfo} />
+        <Gutter size="0.75rem" />
+        <Box marginBottom="0.5rem">
+          <Columns sum={1} alignY="center">
+            <XAxis>
+              <H5
+                style={{
+                  color:
+                    theme.mode === "light"
+                      ? ColorPalette["gray-500"]
+                      : ColorPalette["gray-50"],
+                }}
               >
-                <EthTxBase
-                  icon={
-                    <ItemLogo
-                      center={
-                        <svg
-                          width="22"
-                          height="22"
-                          viewBox="0 0 22 22"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M4.125 17.875L17.875 4.125M17.875 4.125L7.5625 4.125M17.875 4.125V14.4375"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      }
-                      width="2.75rem"
-                      height="2.75rem"
-                    />
-                  }
-                  title={
-                    <FormattedMessage id="page.sign.ethereum.transaction.send.title" />
-                  }
-                  content={
-                    <React.Fragment>
-                      <Box
-                        padding="0.25rem 0.625rem"
-                        backgroundColor={ColorPalette["gray-400"]}
-                        borderRadius="20rem"
-                        width="fit-content"
-                      >
-                        <Body2 color={ColorPalette["white"]}>
-                          {sendToken?.trim(true).toString()}
-                        </Body2>
-                      </Box>
-
-                      <Gutter size="0.75rem" />
-
-                      <Columns sum={1} gutter="1.125rem" alignY="center">
-                        <Stack alignX="center" gutter="0.375rem">
-                          <Box
-                            backgroundColor={ColorPalette["gray-300"]}
-                            borderRadius="20rem"
-                            width="0.5rem"
-                            height="0.5rem"
-                          />
-                          <Box
-                            backgroundColor={ColorPalette["gray-300"]}
-                            width="1px"
-                            height="3rem"
-                          />
-                          <Box
-                            backgroundColor={ColorPalette["gray-300"]}
-                            borderRadius="20rem"
-                            width="0.5rem"
-                            height="0.5rem"
-                          />
-                        </Stack>
-                        <Stack gutter="1.625rem">
-                          <Stack gutter="0.25rem">
-                            <Subtitle4
-                              color={
-                                theme.mode === "light"
-                                  ? ColorPalette["gray-400"]
-                                  : ColorPalette["gray-200"]
-                              }
-                            >
-                              <FormattedMessage id="page.sign.ethereum.transaction.send.from" />
-                            </Subtitle4>
-                            <Body1
-                              color={
-                                theme.mode === "light"
-                                  ? ColorPalette["gray-500"]
-                                  : ColorPalette["white"]
-                              }
-                            >{`${sender?.slice(0, 10)}...${sender?.slice(
-                              -8
-                            )}`}</Body1>
-                          </Stack>
-                          <Stack gutter="0.25rem">
-                            <Subtitle4
-                              color={
-                                theme.mode === "light"
-                                  ? ColorPalette["gray-400"]
-                                  : ColorPalette["gray-200"]
-                              }
-                            >
-                              <FormattedMessage id="page.sign.ethereum.transaction.send.to" />
-                            </Subtitle4>
-                            <Body1
-                              color={
-                                theme.mode === "light"
-                                  ? ColorPalette["gray-500"]
-                                  : ColorPalette["white"]
-                              }
-                            >{`${recipient?.slice(0, 10)}...${recipient?.slice(
-                              -8
-                            )}`}</Body1>
-                          </Stack>
-                        </Stack>
-                      </Columns>
-                    </React.Fragment>
-                  }
+                <FormattedMessage
+                  id={"page.sign.ethereum.transaction.summary"}
                 />
-              </Body2>
-            </Box>
-          )}
+              </H5>
+            </XAxis>
+            <Column weight={1} />
+
+            <ViewDataButton
+              isViewData={isViewData}
+              setIsViewData={setIsViewData}
+            />
+          </Columns>
         </Box>
-      </SimpleBar>
-      <BitcoinGuideBox
-        isPartialSign={isPartialSign}
-        isUnableToGetUTXOs={isUnableToGetUTXOs}
-        isUnableToSign={isUnableToSign}
-      />
-      <div style={{ marginTop: "0.75rem", flex: 1 }} />
-      {feeSummary}
-    </Box>
-  );
-});
+        <SimpleBar
+          autoHide={false}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            flex: !isViewData ? "0 1 auto" : 1,
+            overflowY: "auto",
+            overflowX: "hidden",
+            borderRadius: "0.375rem",
+            backgroundColor:
+              theme.mode === "light"
+                ? ColorPalette.white
+                : ColorPalette["gray-600"],
+            boxShadow:
+              theme.mode === "light"
+                ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+                : "none",
+          }}
+        >
+          <Box>
+            {isViewData ? (
+              <Box
+                as={"pre"}
+                padding="1rem"
+                // Remove normalized style of pre tag
+                margin="0"
+                style={{
+                  width: "fit-content",
+                  color:
+                    theme.mode === "light"
+                      ? ColorPalette["gray-400"]
+                      : ColorPalette["gray-200"],
+                  whiteSpace: "pre-wrap",
+                  wordBreak: "break-all",
+                }}
+              >
+                {signingDataText}
+              </Box>
+            ) : (
+              <Box padding="1rem">
+                <Body2
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-300"]
+                      : ColorPalette["gray-100"]
+                  }
+                >
+                  <EthTxBase
+                    icon={
+                      <ItemLogo
+                        center={
+                          <svg
+                            width="22"
+                            height="22"
+                            viewBox="0 0 22 22"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M4.125 17.875L17.875 4.125M17.875 4.125L7.5625 4.125M17.875 4.125V14.4375"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        }
+                        width="2.75rem"
+                        height="2.75rem"
+                      />
+                    }
+                    title={
+                      <FormattedMessage id="page.sign.ethereum.transaction.send.title" />
+                    }
+                    content={
+                      <React.Fragment>
+                        <Box
+                          padding="0.25rem 0.625rem"
+                          backgroundColor={ColorPalette["gray-400"]}
+                          borderRadius="20rem"
+                          width="fit-content"
+                        >
+                          <Body2 color={ColorPalette["white"]}>
+                            {sendToken?.trim(true).toString()}
+                          </Body2>
+                        </Box>
+
+                        <Gutter size="0.75rem" />
+
+                        <Columns sum={1} gutter="1.125rem" alignY="center">
+                          <Stack alignX="center" gutter="0.375rem">
+                            <Box
+                              backgroundColor={ColorPalette["gray-300"]}
+                              borderRadius="20rem"
+                              width="0.5rem"
+                              height="0.5rem"
+                            />
+                            <Box
+                              backgroundColor={ColorPalette["gray-300"]}
+                              width="1px"
+                              height="3rem"
+                            />
+                            <Box
+                              backgroundColor={ColorPalette["gray-300"]}
+                              borderRadius="20rem"
+                              width="0.5rem"
+                              height="0.5rem"
+                            />
+                          </Stack>
+                          <Stack gutter="1.625rem">
+                            <Stack gutter="0.25rem">
+                              <Subtitle4
+                                color={
+                                  theme.mode === "light"
+                                    ? ColorPalette["gray-400"]
+                                    : ColorPalette["gray-200"]
+                                }
+                              >
+                                <FormattedMessage id="page.sign.ethereum.transaction.send.from" />
+                              </Subtitle4>
+                              <Body1
+                                color={
+                                  theme.mode === "light"
+                                    ? ColorPalette["gray-500"]
+                                    : ColorPalette["white"]
+                                }
+                              >{`${sender?.slice(0, 10)}...${sender?.slice(
+                                -8
+                              )}`}</Body1>
+                            </Stack>
+                            <Stack gutter="0.25rem">
+                              <Subtitle4
+                                color={
+                                  theme.mode === "light"
+                                    ? ColorPalette["gray-400"]
+                                    : ColorPalette["gray-200"]
+                                }
+                              >
+                                <FormattedMessage id="page.sign.ethereum.transaction.send.to" />
+                              </Subtitle4>
+                              <Body1
+                                color={
+                                  theme.mode === "light"
+                                    ? ColorPalette["gray-500"]
+                                    : ColorPalette["white"]
+                                }
+                              >{`${recipient?.slice(
+                                0,
+                                10
+                              )}...${recipient?.slice(-8)}`}</Body1>
+                            </Stack>
+                          </Stack>
+                        </Columns>
+                      </React.Fragment>
+                    }
+                  />
+                </Body2>
+              </Box>
+            )}
+          </Box>
+        </SimpleBar>
+        <BitcoinGuideBox
+          isPartialSign={isPartialSign}
+          isUnableToGetUTXOs={isUnableToGetUTXOs}
+          isUnableToSign={isUnableToSign}
+        />
+        <div style={{ marginTop: "0.75rem", flex: 1 }} />
+        {feeSummary}
+        {ledgerGuideBox}
+      </Box>
+    );
+  }
+);
 
 const PsbtDetailsView: FunctionComponent<{
   chainId: string;
@@ -870,6 +942,7 @@ const PsbtDetailsView: FunctionComponent<{
   validatedPsbt?: ValidatedPsbt;
   totalPsbts?: number;
   currentPsbtIndex?: number;
+  ledgerGuideBox?: React.ReactNode;
   criticalValidationError?: Error;
 }> = observer(
   ({
@@ -880,6 +953,7 @@ const PsbtDetailsView: FunctionComponent<{
     isUnableToGetUTXOs,
     totalPsbts,
     currentPsbtIndex,
+    ledgerGuideBox,
     criticalValidationError,
   }) => {
     const theme = useTheme();
@@ -946,6 +1020,10 @@ const PsbtDetailsView: FunctionComponent<{
     );
     const isUnableToSign = validatedPsbt?.inputsToSign.length === 0;
     const hasGuideBox = isUnableToGetUTXOs || isPartialSign || isUnableToSign;
+    const hasLedgerGuideBox =
+      totalPsbts && currentPsbtIndex !== undefined
+        ? currentPsbtIndex === totalPsbts - 1 && ledgerGuideBox
+        : ledgerGuideBox;
 
     const isSidePanel = isRunningInSidePanel();
 
@@ -967,7 +1045,8 @@ const PsbtDetailsView: FunctionComponent<{
           isUnableToSign={isUnableToSign}
           criticalValidationError={criticalValidationError}
         />
-        {hasGuideBox && <Gutter size="0.75rem" />}
+        {ledgerGuideBox}
+        {(hasGuideBox || hasLedgerGuideBox) && <Gutter size="0.75rem" />}
         {totalPsbts && totalPsbts > 1 && currentPsbtIndex !== undefined && (
           <React.Fragment>
             <Box padding="0.25rem" alignX="center">
