@@ -2015,9 +2015,13 @@ export const EnableChainsScene: FunctionComponent<{
                 }
 
                 // ledger 연결시, 각 생태계의 페이지에서 해당 생태계의 체인만을 활성화/비활성화 처리하도록 필터링하는 함수
-                // ledger의 경우 coin type finalization은 cosmos chain에만 적용되기 때문에
-                // 다른 앱(Ethereum, Bitcoin 등)의 활성화/비활성화 여부가 불분명하므로 cosmos chain만 활성화/비활성화 처리한다.
-                const filterChainIdsForLedger = (chainIds: string[]) => {
+                // ledger의 경우 최초 연결, needFinalizeCoinType 처리 시 cosmos 앱은 반드시 연결이 되어 있지만,
+                // 다른 앱(Ethereum, Bitcoin 등)의 활성화/비활성화 여부는 불분명하므로 cosmos chain만 활성화/비활성화 처리한다.
+                // 나머지 체인은 아래에서 ledger**AppNeeds를 통해 각 단계에서 처리된다.
+                const filterChainIdsForLedger = (
+                  chainIds: string[],
+                  isEnable?: boolean
+                ) => {
                   return chainIds.filter((chainId) => {
                     if (fallbackBitcoinLedgerApp) {
                       return isBitcoinChainId(chainId);
@@ -2025,7 +2029,7 @@ export const EnableChainsScene: FunctionComponent<{
                       return isStarknetChainId(chainId);
                     } else if (fallbackEthereumLedgerApp) {
                       return isEthereumChainId(chainId);
-                    } else if (needFinalizeCoinType.length > 0) {
+                    } else if (needFinalizeCoinType.length > 0 || isEnable) {
                       return isCosmosChainId(chainId);
                     }
                     return true;
@@ -2036,7 +2040,7 @@ export const EnableChainsScene: FunctionComponent<{
                   (async () => {
                     const adjustedEnables =
                       keyType === "ledger"
-                        ? filterChainIdsForLedger(enables)
+                        ? filterChainIdsForLedger(enables, true)
                         : enables;
                     if (adjustedEnables.length > 0) {
                       await chainStore.enableChainInfoInUIWithVaultId(
