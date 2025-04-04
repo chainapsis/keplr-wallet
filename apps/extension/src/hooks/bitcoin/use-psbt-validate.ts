@@ -390,6 +390,9 @@ export const usePsbtsValidate = (
                 index,
                 address,
                 hdPath,
+                sighashTypes: input.sighashType
+                  ? [input.sighashType]
+                  : undefined,
                 tapLeafHashesToSign,
               });
             }
@@ -477,36 +480,26 @@ export const usePsbtsValidate = (
 
         const fee = sumInputValue.sub(sumOutputValue);
 
-        // 수수료가 0보다 작으면 유효하지 않은 psbt이다.
-        if (fee.lte(new Dec(0))) {
-          throw new Error(
-            "Insufficient fee: inputs must be greater than outputs"
-          );
-        } else {
-          validatedPsbtResults.push({
-            psbt,
-            inputsToSign,
-            fee,
-            sumInputValueByAddress: processInputValuesByAddress(
-              sumInputValueByAddressRecord,
-              inputsToSign
-            ),
-            sumOutputValueByAddress: processOutputValuesByAddress(
-              sumOutputValueByAddressRecord,
-              inputsToSign
-            ),
-            decodedRawData: decodePsbt(psbt),
-          });
+        validatedPsbtResults.push({
+          psbt,
+          inputsToSign,
+          fee,
+          sumInputValueByAddress: processInputValuesByAddress(
+            sumInputValueByAddressRecord,
+            inputsToSign
+          ),
+          sumOutputValueByAddress: processOutputValuesByAddress(
+            sumOutputValueByAddressRecord,
+            inputsToSign
+          ),
+          decodedRawData: decodePsbt(psbt),
+        });
 
-          totalInputValue = totalInputValue.add(sumInputValue);
-          totalOutputValue = totalOutputValue.add(sumOutputValue);
-        }
+        totalInputValue = totalInputValue.add(sumInputValue);
+        totalOutputValue = totalOutputValue.add(sumOutputValue);
       }
 
       const totalFee = totalInputValue.sub(totalOutputValue);
-      if (totalFee.lte(new Dec(0))) {
-        throw new Error("Insufficient fee for transaction");
-      }
 
       // 각 psbt의 유효성 검증 결과를 저장하고 계산된 수수료를 설정한다.
       setValidatedPsbts(validatedPsbtResults);
