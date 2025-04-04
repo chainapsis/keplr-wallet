@@ -1905,18 +1905,12 @@ export const EnableChainsScene: FunctionComponent<{
                 const disables = Array.from(disablesSet);
 
                 const needFinalizeCoinType: string[] = [];
-                const ledgerCosmosChainIds: string[] = [];
 
                 for (let i = 0; i < enables.length; i++) {
                   const enable = enables[i];
                   const modularChainInfo = chainStore.getModularChain(enable);
                   if ("cosmos" in modularChainInfo) {
                     const chainInfo = chainStore.getChain(enable);
-                    const isEthermintLike =
-                      chainInfo.bip44.coinType === 60 ||
-                      !!chainInfo.features?.includes("eth-address-gen") ||
-                      !!chainInfo.features?.includes("eth-key-sign");
-
                     if (
                       keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo)
                     ) {
@@ -1927,16 +1921,42 @@ export const EnableChainsScene: FunctionComponent<{
                       disables.push(enable);
 
                       needFinalizeCoinType.push(enable);
-                    } else if (!isEthermintLike) {
-                      enables.splice(i, 1);
-                      i--;
-
-                      // disable로 넣어버리면 enable/disable 동시에 처리되는 문제가 발생할 수 있으므로
-                      // disable에 넣지 않는다.
-                      ledgerCosmosChainIds.push(enable);
                     }
                   }
                 }
+
+                const isCosmosChainId = (chainId: string) => {
+                  const modularChainInfo = chainStore.getModularChain(chainId);
+                  if ("cosmos" in modularChainInfo) {
+                    const chainInfo = chainStore.getChain(chainId);
+                    const isEthermintLike =
+                      chainInfo.bip44.coinType === 60 ||
+                      !!chainInfo.features?.includes("eth-address-gen") ||
+                      !!chainInfo.features?.includes("eth-key-sign");
+                    return !isEthermintLike;
+                  }
+                  return false;
+                };
+                const isEthereumChainId = (chainId: string) => {
+                  const modularChainInfo = chainStore.getModularChain(chainId);
+                  if ("cosmos" in modularChainInfo) {
+                    const chainInfo = chainStore.getChain(chainId);
+                    const isEthermintLike =
+                      chainInfo.bip44.coinType === 60 ||
+                      !!chainInfo.features?.includes("eth-address-gen") ||
+                      !!chainInfo.features?.includes("eth-key-sign");
+                    return isEthermintLike;
+                  }
+                  return false;
+                };
+                const isStarknetChainId = (chainId: string) => {
+                  const modularChainInfo = chainStore.getModularChain(chainId);
+                  return "starknet" in modularChainInfo;
+                };
+                const isBitcoinChainId = (chainId: string) => {
+                  const modularChainInfo = chainStore.getModularChain(chainId);
+                  return "bitcoin" in modularChainInfo;
+                };
 
                 const ledgerEthereumAppNeeds: string[] = [];
                 for (let i = 0; i < enables.length; i++) {
@@ -1945,26 +1965,16 @@ export const EnableChainsScene: FunctionComponent<{
                   }
 
                   const enable = enables[i];
-                  const modularChainInfo = chainStore.getModularChain(enable);
+                  if (isEthereumChainId(enable)) {
+                    // 참고로 위에서 chainInfos memo로 인해서 막혀있기 때문에
+                    // 여기서 throwErrorIfEthermintWithLedgerButNotSupported 확인은 생략한다.
+                    // Remove enable from enables
+                    enables.splice(i, 1);
+                    i--;
+                    // And push it disables
+                    disables.push(enable);
 
-                  if ("cosmos" in modularChainInfo) {
-                    const chainInfo = chainStore.getChain(enable);
-                    const isEthermintLike =
-                      chainInfo.bip44.coinType === 60 ||
-                      !!chainInfo.features?.includes("eth-address-gen") ||
-                      !!chainInfo.features?.includes("eth-key-sign");
-
-                    if (isEthermintLike) {
-                      // 참고로 위에서 chainInfos memo로 인해서 막혀있기 때문에
-                      // 여기서 throwErrorIfEthermintWithLedgerButNotSupported 확인은 생략한다.
-                      // Remove enable from enables
-                      enables.splice(i, 1);
-                      i--;
-                      // And push it disables
-                      disables.push(enable);
-
-                      ledgerEthereumAppNeeds.push(enable);
-                    }
+                    ledgerEthereumAppNeeds.push(enable);
                   }
                 }
 
@@ -1975,9 +1985,7 @@ export const EnableChainsScene: FunctionComponent<{
                   }
 
                   const enable = enables[i];
-                  const modularChainInfo = chainStore.getModularChain(enable);
-
-                  if ("starknet" in modularChainInfo) {
+                  if (isStarknetChainId(enable)) {
                     // Remove enable from enables
                     enables.splice(i, 1);
                     i--;
@@ -1995,9 +2003,7 @@ export const EnableChainsScene: FunctionComponent<{
                   }
 
                   const enable = enables[i];
-                  const modularChainInfo = chainStore.getModularChain(enable);
-
-                  if ("bitcoin" in modularChainInfo) {
+                  if (isBitcoinChainId(enable)) {
                     // Remove enable from enables
                     enables.splice(i, 1);
                     i--;
@@ -2008,57 +2014,46 @@ export const EnableChainsScene: FunctionComponent<{
                   }
                 }
 
+                // ledger 연결시, 각 생태계의 페이지에서 해당 생태계의 체인만을 활성화/비활성화 처리하도록 필터링하는 함수
+                // ledger의 경우 coin type finalization은 cosmos chain에만 적용되기 때문에
+                // 다른 앱(Ethereum, Bitcoin 등)의 활성화/비활성화 여부가 불분명하므로 cosmos chain만 활성화/비활성화 처리한다.
+                const filterChainIdsForLedger = (chainIds: string[]) => {
+                  return chainIds.filter((chainId) => {
+                    if (fallbackBitcoinLedgerApp) {
+                      return isBitcoinChainId(chainId);
+                    } else if (fallbackStarknetLedgerApp) {
+                      return isStarknetChainId(chainId);
+                    } else if (fallbackEthereumLedgerApp) {
+                      return isEthereumChainId(chainId);
+                    } else if (needFinalizeCoinType.length > 0) {
+                      return isCosmosChainId(chainId);
+                    }
+                    return true;
+                  });
+                };
+
                 await Promise.all([
                   (async () => {
-                    // 현재 ledger의 경우 cosmos 앱은 지갑을 등록할 때 반드시 연결해야 하므로
-                    // 활성화/비활성화해도 문제가 없지만, 다른 앱은 연결이 되어 있지 않을 수 있기 때문에
-                    // cosmos 체인만 활성화/비활성화 처리하고 나머지는 아래에서 단계별로 처리한다.
-                    if (keyType === "ledger") {
-                      if (ledgerCosmosChainIds.length > 0) {
-                        await chainStore.enableChainInfoInUIWithVaultId(
-                          vaultId,
-                          ...ledgerCosmosChainIds
-                        );
-                      }
-                    } else if (enables.length > 0) {
+                    const adjustedEnables =
+                      keyType === "ledger"
+                        ? filterChainIdsForLedger(enables)
+                        : enables;
+                    if (adjustedEnables.length > 0) {
                       await chainStore.enableChainInfoInUIWithVaultId(
                         vaultId,
-                        ...enables
+                        ...adjustedEnables
                       );
                     }
                   })(),
                   (async () => {
-                    if (keyType === "ledger") {
-                      const ledgerCosmosChainIds = disables.filter(
-                        (chainId) => {
-                          const modularChainInfo =
-                            chainStore.getModularChain(chainId);
-                          if ("cosmos" in modularChainInfo) {
-                            const isEthermintLike =
-                              modularChainInfo.cosmos.bip44.coinType === 60 ||
-                              !!modularChainInfo.cosmos.features?.includes(
-                                "eth-address-gen"
-                              ) ||
-                              !!modularChainInfo.cosmos.features?.includes(
-                                "eth-key-sign"
-                              );
-
-                            return !isEthermintLike;
-                          }
-                          return false;
-                        }
-                      );
-
-                      if (ledgerCosmosChainIds.length > 0) {
-                        await chainStore.disableChainInfoInUIWithVaultId(
-                          vaultId,
-                          ...ledgerCosmosChainIds
-                        );
-                      }
-                    } else if (disables.length > 0) {
+                    const adjustedDisables =
+                      keyType === "ledger"
+                        ? filterChainIdsForLedger(disables)
+                        : disables;
+                    if (adjustedDisables.length > 0) {
                       await chainStore.disableChainInfoInUIWithVaultId(
                         vaultId,
-                        ...disables
+                        ...adjustedDisables
                       );
                     }
                   })(),
