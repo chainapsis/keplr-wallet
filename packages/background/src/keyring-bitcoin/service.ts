@@ -868,7 +868,8 @@ export class KeyRingBitcoinService {
             if (
               !Array.isArray(params) ||
               (Array.isArray(params) &&
-                (params.length === 2 || params.length === 1))
+                params.length !== 2 &&
+                params.length !== 1)
             ) {
               throw new Error(
                 "Invalid parameters: must provide 1 or 2 parameters."
