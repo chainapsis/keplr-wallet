@@ -26,7 +26,7 @@ import { BackgroundTxService } from "../tx";
 import validate, {
   Network as BitcoinNetwork,
 } from "bitcoin-address-validation";
-import { mainnet, signet, testnet } from "./constants";
+import { livenet, signet, testnet } from "./constants";
 import { AnalyticsService } from "../analytics";
 
 const DUST_THRESHOLD = 546;
@@ -476,14 +476,14 @@ export class KeyRingBitcoinService {
     const network = GENESIS_HASH_TO_NETWORK[genesisHash];
 
     switch (network) {
-      case Network.MAINNET:
-        return mainnet;
+      case Network.LIVENET:
+        return livenet;
       case Network.TESTNET:
         return testnet;
       case Network.SIGNET:
         return signet;
-      case Network.LIVENET:
-        return mainnet;
+      case Network.MAINNET:
+        return livenet;
     }
   }
 
