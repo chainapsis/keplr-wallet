@@ -23,7 +23,11 @@ import {
   IPsbtOutput,
   RemainderStatus,
 } from "./types";
-import { BRANCH_AND_BOUND_TIMEOUT_MS, DUST_THRESHOLD } from "./constant";
+import {
+  BRANCH_AND_BOUND_TIMEOUT_MS,
+  DUST_THRESHOLD,
+  MIN_RELAY_FEE,
+} from "./constant";
 import { BitcoinTxSizeEstimator, InputScriptType } from "./tx-size-estimator";
 
 export class BitcoinAccountBase {
@@ -121,7 +125,14 @@ export class BitcoinAccountBase {
       );
     };
 
-    const calculateFee = (size: number) => new Dec(Math.ceil(size * feeRate));
+    const calculateFee = (size: number) => {
+      const calculatedFee = new Dec(Math.ceil(size * feeRate));
+      // Ensure fee meets minimum relay fee requirement
+      if (calculatedFee.lt(new Dec(MIN_RELAY_FEE))) {
+        return new Dec(MIN_RELAY_FEE);
+      }
+      return calculatedFee;
+    };
     const isDust = (value: Dec) => value.lt(DUST);
 
     // 5. Handle send max case
@@ -474,7 +485,11 @@ export class BitcoinAccountBase {
         ...outputParams,
       });
 
-      const fee = new Dec(Math.ceil(txVBytes * feeRate));
+      const calculatedFee = new Dec(Math.ceil(txVBytes * feeRate));
+      const fee = calculatedFee.lt(new Dec(MIN_RELAY_FEE))
+        ? new Dec(MIN_RELAY_FEE)
+        : calculatedFee;
+
       const changeValue = totalInputValue.sub(totalOutputValue).sub(fee);
 
       if (changeValue.gte(new Dec(DUST_THRESHOLD))) {

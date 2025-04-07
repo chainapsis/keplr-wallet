@@ -341,6 +341,8 @@ export const SignBitcoinTxView: FunctionComponent<{
   );
   const isUnableToGetUTXOs =
     hasPsbtCandidate && !isFetchingUTXOs && !!utxoError;
+  const isUnableToSendBitcoin =
+    hasPsbtCandidate && !isFetchingUTXOs && availableUTXOs.length === 0;
 
   const buttonDisabled =
     txConfigsValidate.interactionBlocked ||
@@ -639,6 +641,7 @@ export const SignBitcoinTxView: FunctionComponent<{
           // Show current PSBT based on index
           <PsbtDetailsView
             isUnableToGetUTXOs={isUnableToGetUTXOs}
+            isUnableToSendBitcoin={isUnableToSendBitcoin}
             signerInfo={signerInfo}
             chainId={chainId}
             origin={interactionData.data.origin}
@@ -651,6 +654,7 @@ export const SignBitcoinTxView: FunctionComponent<{
         ) : (
           <PsbtDetailsView
             isUnableToGetUTXOs={isUnableToGetUTXOs}
+            isUnableToSendBitcoin={isUnableToSendBitcoin}
             signerInfo={signerInfo}
             chainId={chainId}
             origin={interactionData.data.origin}
@@ -939,6 +943,7 @@ const PsbtDetailsView: FunctionComponent<{
   };
   origin: string;
   isUnableToGetUTXOs: boolean;
+  isUnableToSendBitcoin: boolean;
   validatedPsbt?: ValidatedPsbt;
   totalPsbts?: number;
   currentPsbtIndex?: number;
@@ -951,6 +956,7 @@ const PsbtDetailsView: FunctionComponent<{
     signerInfo,
     origin,
     isUnableToGetUTXOs,
+    isUnableToSendBitcoin,
     totalPsbts,
     currentPsbtIndex,
     ledgerGuideBox,
@@ -1019,7 +1025,11 @@ const PsbtDetailsView: FunctionComponent<{
       (input) => !input.isMine
     );
     const isUnableToSign = validatedPsbt?.inputsToSign.length === 0;
-    const hasGuideBox = isUnableToGetUTXOs || isPartialSign || isUnableToSign;
+    const hasGuideBox =
+      isUnableToGetUTXOs ||
+      isUnableToSendBitcoin ||
+      isPartialSign ||
+      isUnableToSign;
     const hasLedgerGuideBox =
       totalPsbts && currentPsbtIndex !== undefined
         ? currentPsbtIndex === totalPsbts - 1 && ledgerGuideBox
@@ -1043,6 +1053,7 @@ const PsbtDetailsView: FunctionComponent<{
           isPartialSign={isPartialSign}
           isUnableToGetUTXOs={isUnableToGetUTXOs}
           isUnableToSign={isUnableToSign}
+          isUnableToSendBitcoin={isUnableToSendBitcoin}
           criticalValidationError={criticalValidationError}
         />
         {ledgerGuideBox}

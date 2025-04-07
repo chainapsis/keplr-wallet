@@ -805,6 +805,8 @@
   "components.bitcoin-guide-box.title.critical-validation-error": "Unable to sign the transaction",
   "components.bitcoin-guide-box.title.unable-to-get-utxos": "Unable to get UTXOs",
   "components.bitcoin-guide-box.paragraph.unable-to-get-utxos": "UTXOs are temporarily unavailable. Please try again later.",
+  "components.bitcoin-guide-box.title.unable-to-send-bitcoin": "No available UTXOs to send",
+  "components.bitcoin-guide-box.paragraph.unable-to-send-bitcoin": "There are no available UTXOs to send Bitcoin. Please make sure you have sufficient balance that is not locked or pending in other transactions.",
   "components.bitcoin-guide-box.title.partial-signing": "Partial Signing",
   "components.bitcoin-guide-box.paragraph.partial-signing": "You are signing part of the transaction. Only the inputs from this wallet will be signed.",
   "components.bitcoin-guide-box.title.none-of-the-inputs-belong-to-this-wallet": "None of the inputs belong to this wallet",
