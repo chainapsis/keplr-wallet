@@ -1,4 +1,10 @@
-import React, { FunctionComponent, useEffect, useRef, useState } from "react";
+import React, {
+  FunctionComponent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { observer } from "mobx-react-lite";
 import styled from "styled-components";
 import { Stack } from "../../../../components/stack";
@@ -41,13 +47,6 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
 
   const [name, setName] = useState("");
 
-  const recipientConfig = useRecipientConfig(chainStore, chainId, {
-    allowHexAddressToBech32Address:
-      chainStore.hasChain(chainId) &&
-      !chainStore.getChain(chainId).chainId.startsWith("injective"),
-    icns: uiConfigStore.icnsInfo,
-    ens: ENSInfo,
-  });
   const recipientConfigForStarknet = useRecipientConfigForStarknet(
     chainStore,
     chainId
@@ -60,9 +59,35 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
   const paramChainId = searchParams.get("chainId");
   const paramEditIndex = searchParams.get("editIndex");
 
+  // First it comes with chainId=all, and then when the starknet address comes in, it does a url replace.
+  // get the previous address to make the UI feel like the url hasn't changed
+  const paramPrevisouAddress = searchParams.get("address");
+  const isSelectedAllChain =
+    searchParams.get("isFromAllChain") === "true" || paramChainId === "all";
+
+  const recipientConfig = useRecipientConfig(chainStore, chainId, {
+    allowHexAddressToBech32Address:
+      chainStore.hasChain(chainId) &&
+      !chainStore.getChain(chainId).chainId.startsWith("injective"),
+    icns: uiConfigStore.icnsInfo,
+    ens: ENSInfo,
+    enableNameserviceWhenPrefixEntered: isSelectedAllChain,
+  });
   const isStarknet =
     chainStore.hasModularChain(chainId) &&
     "starknet" in chainStore.getModularChain(chainId);
+
+  const chainIdByPrefixMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const chainInfo of chainStore.chainInfosInUI) {
+      if (chainInfo.bech32Config?.bech32PrefixAccAddr) {
+        map.set(chainInfo.bech32Config?.bech32PrefixAccAddr, chainInfo.chainId);
+      }
+    }
+    map.set("eth", "eip155:1");
+    map.set("stark", "starknet:SN_MAIN");
+    return map;
+  }, [chainStore.chainInfosInUI]);
 
   useEffect(() => {
     if (labelRef.current) {
@@ -71,22 +96,43 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
   }, []);
 
   useEffect(() => {
+    if (paramPrevisouAddress) {
+      if (isStarknet) {
+        recipientConfigForStarknet.setValue(paramPrevisouAddress);
+      } else {
+        recipientConfig.setValue(paramPrevisouAddress);
+      }
+    }
+  }, [
+    isStarknet,
+    paramPrevisouAddress,
+    recipientConfig,
+    recipientConfigForStarknet,
+  ]);
+
+  useEffect(() => {
     if (!paramChainId) {
       throw new Error(`Param "chainId" is required`);
     }
 
-    setChainId(paramChainId);
+    const localChainId =
+      paramChainId === "all"
+        ? chainStore.chainInfosInUI[0].chainId
+        : paramChainId;
+    setChainId(localChainId);
+
     if (isStarknet) {
-      recipientConfigForStarknet.setChain(paramChainId);
+      recipientConfigForStarknet.setChain(localChainId);
     } else {
-      recipientConfig.setChain(paramChainId);
+      recipientConfig.setChain(localChainId);
     }
-    memoConfig.setChain(paramChainId);
+
+    memoConfig.setChain(localChainId);
 
     if (paramEditIndex) {
       const index = Number.parseInt(paramEditIndex);
       const addressBook =
-        uiConfigStore.addressBookConfig.getAddressBook(paramChainId);
+        uiConfigStore.addressBookConfig.getAddressBook(localChainId);
       if (addressBook.length > index) {
         setEditIndex(index);
         const data = addressBook[index];
@@ -103,6 +149,7 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
 
     setEditIndex(-1);
   }, [
+    chainStore.chainInfosInUI,
     intl,
     isStarknet,
     memoConfig,
@@ -199,11 +246,53 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
           <RecipientInputForStarknet
             recipientConfig={recipientConfigForStarknet}
             hideAddressBookButton={true}
+            onChangeCallback={
+              isSelectedAllChain
+                ? (str) => {
+                    const { chainPrefix } = parseAddressForAll(str);
+                    const chainId = chainIdByPrefixMap.get(chainPrefix);
+
+                    if (chainPrefix !== "stark" && chainId) {
+                      navigate(
+                        `/setting/contacts/add?chainId=${chainId}&isFromAllChain=${true}&address=${str}`,
+                        { replace: true }
+                      );
+                    }
+                  }
+                : undefined
+            }
           />
         ) : (
           <RecipientInput
             recipientConfig={recipientConfig}
             hideAddressBookButton={true}
+            onChangeCallback={
+              isSelectedAllChain
+                ? (str) => {
+                    if (!str || str.length === 0 || typeof str !== "string") {
+                      return;
+                    }
+
+                    const { chainPrefix } = parseAddressForAll(str);
+                    const chainId = chainIdByPrefixMap.get(chainPrefix);
+
+                    if (!chainId) {
+                      return;
+                    }
+
+                    if (chainPrefix === "stark") {
+                      navigate(
+                        `/setting/contacts/add?chainId=${chainId}&isFromAllChain=${true}&address=${str}`,
+                        { replace: true }
+                      );
+                      return;
+                    }
+
+                    recipientConfig.setChain(chainId);
+                    setChainId(chainId);
+                  }
+                : undefined
+            }
           />
         )}
         <MemoInput
@@ -219,3 +308,50 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
     </HeaderLayout>
   );
 });
+
+const parseAddressForAll = (str: string) => {
+  const icnsOrEnsLabel = str.split(".")[1];
+  const bech32Prefix = str.split("1")[0];
+  const isEvmAddress =
+    str.startsWith("0x") &&
+    str.length === 42 &&
+    str.match(/^0x[0-9a-fA-F]{40}$/);
+  const isStarknetAddress =
+    str.startsWith("0x") &&
+    str.length === 66 &&
+    str.match(/^0x[0-9a-fA-F]{64}$/);
+
+  if (isEvmAddress) {
+    return { form: "address", chainPrefix: "eth", value: str };
+  }
+
+  if (icnsOrEnsLabel === "eth") {
+    return { form: "name-service", chainPrefix: "eth", value: str };
+  }
+
+  if (isStarknetAddress) {
+    return { form: "address", chainPrefix: "stark", value: str };
+  }
+
+  if (icnsOrEnsLabel) {
+    return {
+      form: "name-service",
+      chainPrefix: icnsOrEnsLabel,
+      value: str,
+    };
+  }
+
+  if (bech32Prefix) {
+    return {
+      form: "address",
+      chainPrefix: bech32Prefix,
+      value: str,
+    };
+  }
+
+  return {
+    form: "none",
+    chainPrefix: "",
+    value: "str",
+  };
+};
