@@ -24,9 +24,13 @@ export const StakedBalance: FunctionComponent<{
     );
   }
 
+  if ("cosmos" in modularChainInfo) {
+    return <CosmosStakedBalance chainInfo={modularChainInfo.cosmos} />;
+  }
+
   // modularChainInfo가 추가됨에 따라 새로운 분기 처리가 필요할 수 있음
 
-  return <CosmosStakedBalance chainInfo={modularChainInfo.cosmos} />;
+  return null;
 });
 
 const CosmosStakedBalance: FunctionComponent<{

@@ -112,6 +112,8 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
       searchParams.get("fallbackStarknetLedgerApp") === "true";
     const fallbackEthereumLedgerApp =
       searchParams.get("fallbackEthereumLedgerApp") === "true";
+    const fallbackBitcoinLedgerApp =
+      searchParams.get("fallbackBitcoinLedgerApp") === "true";
 
     if (vaultId) {
       // 이 시점에서 chainStore가 초기화 되어있는게 보장된다.
@@ -142,6 +144,7 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
             initialSearchValue,
             fallbackStarknetLedgerApp,
             fallbackEthereumLedgerApp,
+            fallbackBitcoinLedgerApp,
           },
         },
       };
@@ -172,7 +175,10 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
     const addressIndex = searchParams.get("addressIndex");
     if (
       route === "connect-ledger" &&
-      (ledgerApp === "Starknet" || ledgerApp === "Ethereum")
+      (ledgerApp === "Starknet" ||
+        ledgerApp === "Ethereum" ||
+        ledgerApp === "Bitcoin" ||
+        ledgerApp === "Bitcoin Test")
     ) {
       return {
         header: {
@@ -191,11 +197,29 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
             },
             appendModeInfo: {
               vaultId,
-              // 이더리움 렛저 앱을 연결하면 이더리움 메인넷을 자동으로 enable 하고
-              // 스타크넷 렛저 앱을 연결하면 스타크넷 메인넷을 자동으로 enable 한다.
-              afterEnableChains: [
-                ledgerApp === "Ethereum" ? "eip155:1" : "starknet:SN_MAIN",
-              ],
+              // 각 ledger 앱을 연결하면 자동으로 해당 앱에 맞는 체인을 enable 한다.
+              // Ethereum - mainnet
+              // Starknet - mainnet
+              // Bitcoin - mainnet
+              // Bitcoin Test - signet, testnet
+              afterEnableChains:
+                ledgerApp === "Ethereum"
+                  ? ["eip155:1"]
+                  : ledgerApp === "Starknet"
+                  ? ["starknet:SN_MAIN"]
+                  : ledgerApp === "Bitcoin"
+                  ? [
+                      "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:taproot",
+                      "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:native-segwit",
+                    ]
+                  : ledgerApp === "Bitcoin Test"
+                  ? [
+                      "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6:taproot",
+                      "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6:native-segwit",
+                      "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943:taproot",
+                      "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943:native-segwit",
+                    ]
+                  : [],
             },
           },
         },

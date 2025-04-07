@@ -4,7 +4,11 @@ import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
 import { useTheme } from "styled-components";
 import { Gutter } from "../../../../components/gutter";
-import { H4, Subtitle3 } from "../../../../components/typography";
+import {
+  BaseTypography,
+  H4,
+  Subtitle3,
+} from "../../../../components/typography";
 import { XAxis } from "../../../../components/axis";
 import { useStore } from "../../../../stores";
 import { ChainImageFallback } from "../../../../components/image";
@@ -28,6 +32,8 @@ export const ReceiveModal: FunctionComponent<{
     "cosmos" in modularChainInfo &&
     modularChainInfo.cosmos != null &&
     chainStore.isEvmOnlyChain(chainId);
+  const isBitcoin =
+    "bitcoin" in modularChainInfo && modularChainInfo.bitcoin != null;
 
   return (
     <Box
@@ -61,6 +67,39 @@ export const ReceiveModal: FunctionComponent<{
           </Subtitle3>
         </XAxis>
         <Gutter size="0.875rem" />
+        {account.bitcoinAddress && (
+          <React.Fragment>
+            <Box
+              alignX="center"
+              alignY="center"
+              backgroundColor={
+                theme.mode === "light"
+                  ? ColorPalette["blue-50"]
+                  : ColorPalette["gray-500"]
+              }
+              borderRadius="0.375rem"
+              paddingY="0.125rem"
+              paddingX="0.375rem"
+            >
+              <BaseTypography
+                style={{
+                  fontWeight: 400,
+                  fontSize: "0.6875rem",
+                }}
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["blue-400"]
+                    : ColorPalette["gray-200"]
+                }
+              >
+                {account.bitcoinAddress.paymentType
+                  .replace("-", " ")
+                  .replace(/\b\w/g, (char) => char.toUpperCase())}
+              </BaseTypography>
+            </Box>
+            <Gutter size="0.875rem" />
+          </React.Fragment>
+        )}
         <Box
           alignX="center"
           alignY="center"
@@ -74,6 +113,8 @@ export const ReceiveModal: FunctionComponent<{
                 ? account.starknetHexAddress
                 : isEVMOnlyChain
                 ? account.ethereumHexAddress
+                : isBitcoin
+                ? account.bitcoinAddress!.bech32Address
                 : account.bech32Address
             }
             size={176}

@@ -237,6 +237,15 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
           );
           const isStarknet =
             "starknet" in modularChainInfo && modularChainInfo.starknet != null;
+          const isBitcoin =
+            "bitcoin" in modularChainInfo && modularChainInfo.bitcoin != null;
+
+          const sendRoute = isBitcoin
+            ? "/bitcoin/send"
+            : isStarknet
+            ? "/starknet/send"
+            : "/send";
+
           return (
             <TokenItem
               viewToken={viewToken}
@@ -245,7 +254,7 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
                 if (paramNavigateTo) {
                   navigate(
                     paramNavigateTo
-                      .replace("/send", isStarknet ? "/starknet/send" : "/send")
+                      .replace("/send", sendRoute)
                       .replace("{chainId}", viewToken.chainInfo.chainId)
                       .replace(
                         "{coinMinimalDenom}",

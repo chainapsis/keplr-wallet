@@ -177,6 +177,50 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     });
   }
 
+  /**
+   * Group modular chain infos by linked chain ids.
+   * For example, bitcoin has separated chain for native segwit and taproot,
+   * but they have to be shown as a same chain in some cases.
+   *
+   * @returns Grouped modular chain infos.
+   */
+  @computed
+  get groupedModularChainInfos(): (ModularChainInfo & {
+    linkedModularChainInfos?: ModularChainInfo[];
+  })[] {
+    const linkedChainInfosByChainKey = new Map<string, ModularChainInfo[]>();
+    const groupedModularChainInfos: (ModularChainInfo & {
+      linkedModularChainInfos?: ModularChainInfo[];
+    })[] = [];
+
+    for (const modularChainInfo of this.modularChainInfos) {
+      if ("linkedChainKey" in modularChainInfo) {
+        const linkedChainKey = modularChainInfo.linkedChainKey;
+        const linkedChainInfos = linkedChainInfosByChainKey.get(linkedChainKey);
+        if (linkedChainInfos) {
+          linkedChainInfos.push(modularChainInfo);
+        } else {
+          linkedChainInfosByChainKey.set(linkedChainKey, [modularChainInfo]);
+        }
+      } else {
+        groupedModularChainInfos.push(modularChainInfo);
+      }
+    }
+
+    for (const linkedChainInfos of linkedChainInfosByChainKey.values()) {
+      // 하나의 체인 키에 여러개의 체인이 연결되어 있으면 하나의 체인만 남기고 나머지는 버린다
+      // CHECK: 어떤 것이 primary 체인인지 결정할 필요가 있는지? 우선 첫번째 체인을 primary로 설정
+      if (linkedChainInfos.length > 1) {
+        groupedModularChainInfos.push({
+          ...linkedChainInfos[0],
+          linkedModularChainInfos: linkedChainInfos.slice(1),
+        });
+      }
+    }
+
+    return groupedModularChainInfos;
+  }
+
   get enabledChainIdentifiers(): string[] {
     return this._enabledChainIdentifiers;
   }
@@ -206,6 +250,21 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     });
   }
 
+  @computed
+  get groupedModularChainInfosInUI() {
+    return this.groupedModularChainInfos.filter((modularChainInfo) => {
+      if ("cosmos" in modularChainInfo && modularChainInfo.cosmos.hideInUI) {
+        return false;
+      }
+
+      const chainIdentifier = ChainIdHelper.parse(
+        modularChainInfo.chainId
+      ).identifier;
+
+      return this.enabledChainIdentifiesMap.get(chainIdentifier);
+    });
+  }
+
   // chain info들을 list로 보여줄때 hideInUI인 얘들은 빼고 보여줘야한다
   // property 이름이 얘매해서 일단 이렇게 지었다.
   @computed
@@ -218,6 +277,17 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   @computed
   get modularChainInfosInListUI() {
     return this.modularChainInfos.filter((modularChainInfo) => {
+      if ("cosmos" in modularChainInfo && modularChainInfo.cosmos.hideInUI) {
+        return false;
+      }
+
+      return true;
+    });
+  }
+
+  @computed
+  get groupedModularChainInfosInListUI() {
+    return this.groupedModularChainInfos.filter((modularChainInfo) => {
       if ("cosmos" in modularChainInfo && modularChainInfo.cosmos.hideInUI) {
         return false;
       }

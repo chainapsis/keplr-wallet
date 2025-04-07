@@ -160,18 +160,20 @@ export const AvailableTabView: FunctionComponent<{
           (chainInfo) => !chainStore.isEnabledChain(chainInfo.chainId)
         );
 
-      const disabledStarknetChainInfos = chainStore.modularChainInfos.filter(
-        (modularChainInfo) =>
-          "starknet" in modularChainInfo &&
-          !chainStore.isEnabledChain(modularChainInfo.chainId) &&
-          trimSearch.length >= 3 &&
-          (modularChainInfo.chainId.toLowerCase().includes(trimSearch) ||
-            modularChainInfo.chainName.toLowerCase().includes(trimSearch) ||
-            trimSearch === "eth")
-      );
+      const disabledModularChainInfos =
+        chainStore.groupedModularChainInfos.filter(
+          (modularChainInfo) =>
+            ("starknet" in modularChainInfo || "bitcoin" in modularChainInfo) &&
+            !chainStore.isEnabledChain(modularChainInfo.chainId) &&
+            trimSearch.length >= 3 &&
+            (modularChainInfo.chainId.toLowerCase().includes(trimSearch) ||
+              modularChainInfo.chainName.toLowerCase().includes(trimSearch) ||
+              trimSearch === "eth" ||
+              trimSearch === "btc")
+        );
 
       disabledChainInfos = [
-        ...new Set([...disabledChainInfos, ...disabledStarknetChainInfos]),
+        ...new Set([...disabledChainInfos, ...disabledModularChainInfos]),
       ].sort((a, b) => a.chainName.localeCompare(b.chainName));
 
       return disabledChainInfos.reduce(
@@ -179,10 +181,10 @@ export const AvailableTabView: FunctionComponent<{
           let embedded: boolean | undefined = false;
           let stored: boolean = true;
 
-          const isStarknet = "starknet" in chainInfo;
+          const isModular = "starknet" in chainInfo || "bitcoin" in chainInfo;
 
           try {
-            if (isStarknet) {
+            if (isModular) {
               embedded = true;
             } else {
               const chainInfoInStore = chainStore.getChain(chainInfo.chainId);
@@ -420,6 +422,14 @@ export const AvailableTabView: FunctionComponent<{
                               const account = accountStore.getAccount(
                                 viewToken.chainInfo.chainId
                               );
+                              if ("bitcoin" in viewToken.chainInfo) {
+                                return account.bitcoinAddress?.bech32Address;
+                              }
+
+                              if ("starknet" in viewToken.chainInfo) {
+                                return account.starknetHexAddress;
+                              }
+
                               const isEVMOnlyChain = chainStore.isEvmOnlyChain(
                                 viewToken.chainInfo.chainId
                               );

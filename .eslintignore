@@ -11,6 +11,7 @@
 **/*.md
 **/*.mdx
 **/*.webm
+**/*.gif
 .DS_Store
 
 node_modules

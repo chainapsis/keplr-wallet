@@ -7,6 +7,9 @@ export class InteractionForegroundService {
     public readonly pingHandler?: (
       windowId: number | undefined,
       ignoreWindowIdAndForcePing: boolean
+    ) => Promise<boolean>,
+    public readonly interactionIdPingHandler?: (
+      interactionId: string
     ) => Promise<boolean>
   ) {}
 

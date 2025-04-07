@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/crypto",
-  "version": "0.12.212",
+  "version": "0.12.213-rc.0",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -21,9 +21,11 @@
     "bip32": "^2.0.6",
     "bip39": "^3.0.3",
     "bs58check": "^2.1.2",
-    "buffer": "^6.0.3"
+    "buffer": "^6.0.3",
+    "ecpair": "^2.1.0"
   },
   "peerDependencies": {
+    "bitcoinjs-lib": "^6",
     "starknet": "^6"
   }
 }
