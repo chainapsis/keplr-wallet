@@ -2,8 +2,8 @@ import { Network } from "@keplr-wallet/types";
 
 export const ROUTE = "keyring-bitcoin";
 
-export const mainnet = {
-  id: Network.MAINNET,
+export const livenet = {
+  id: Network.LIVENET,
   messagePrefix: "\x18Bitcoin Signed Message:\n",
   bech32: "bc",
   bip32: {

@@ -33,6 +33,7 @@ export const useBitcoinNetworkConfig = (chainId: string) => {
     let networkConfig: Network | undefined;
 
     switch (currentNetwork) {
+      case "livenet":
       case "mainnet":
         bitcoinInscriptionApiUrl = BitcoinInscriptionsApiUrl.MAINNET;
         networkConfig = networks.bitcoin;
