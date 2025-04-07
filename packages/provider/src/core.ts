@@ -26,7 +26,7 @@ import {
   IBitcoinProvider,
   Network as BitcoinNetwork,
   BitcoinSignMessageType,
-  ChainType,
+  ChainType as BitcoinChainType,
   SignPsbtOptions,
 } from "@keplr-wallet/types";
 import {
@@ -1909,7 +1909,7 @@ class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
   }
 
   async getChain(): Promise<{
-    enum: ChainType;
+    enum: BitcoinChainType;
     name: string;
     network: BitcoinNetwork;
   }> {
@@ -1919,7 +1919,7 @@ class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
     });
   }
 
-  async switchChain(chain: ChainType): Promise<ChainType> {
+  async switchChain(chain: BitcoinChainType): Promise<BitcoinChainType> {
     return this.protectedRequestMethod({
       method: "switchChain",
       params: [chain],

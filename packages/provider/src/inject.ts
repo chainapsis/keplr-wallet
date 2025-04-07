@@ -32,7 +32,7 @@ import {
   IBitcoinProvider,
   Network as BitcoinNetwork,
   BitcoinSignMessageType,
-  ChainType,
+  ChainType as BitcoinChainType,
   SignPsbtOptions,
 } from "@keplr-wallet/types";
 import {
@@ -112,6 +112,8 @@ export function injectKeplrToWindow(keplr: IKeplr): void {
   );
 
   defineUnwritablePropertyIfPossible(window, "starknet_keplr", keplr.starknet);
+
+  defineUnwritablePropertyIfPossible(window, "bitcoin_keplr", keplr.bitcoin);
 }
 
 /**
@@ -1682,8 +1684,6 @@ class StarknetProvider implements IStarknetProvider {
 }
 
 export class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
-  protected _selectedAddress: string | undefined;
-
   constructor(
     protected readonly _injectedKeplr: () => InjectedKeplr,
     protected readonly _eventListener: {
@@ -1782,14 +1782,14 @@ export class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
   }
 
   async getChain(): Promise<{
-    enum: ChainType;
+    enum: BitcoinChainType;
     name: string;
     network: BitcoinNetwork;
   }> {
     return this._requestMethod("getChain", []);
   }
 
-  async switchChain(chain: ChainType): Promise<ChainType> {
+  async switchChain(chain: BitcoinChainType): Promise<BitcoinChainType> {
     return this._requestMethod("switchChain", [chain]);
   }
 
