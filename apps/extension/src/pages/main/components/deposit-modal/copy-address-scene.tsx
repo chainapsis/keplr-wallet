@@ -8,6 +8,7 @@ import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
 import { XAxis, YAxis } from "../../../../components/axis";
 import {
+  BaseTypography,
   Caption1,
   Subtitle1,
   Subtitle3,
@@ -30,7 +31,11 @@ import {
   useSceneEvents,
   useSceneTransition,
 } from "../../../../components/transition";
-import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
+import {
+  ChainInfo,
+  ModularChainInfo,
+  SupportedPaymentType,
+} from "@keplr-wallet/types";
 import { isRunningInSidePanel } from "../../../../utils";
 import { useGetSearchChains } from "../../../../hooks/use-get-search-chains";
 import { LookingForChainItem } from "../looking-for-chains";
@@ -89,6 +94,10 @@ export const CopyAddressScene: FunctionComponent<{
     bech32Address?: string;
     ethereumAddress?: string;
     starknetAddress?: string;
+    bitcoinAddress?: {
+      bech32Address: string;
+      paymentType: SupportedPaymentType;
+    };
   }[] = chainStore.modularChainInfosInUI
     .map((modularChainInfo) => {
       const accountInfo = accountStore.getAccount(modularChainInfo.chainId);
@@ -125,11 +134,20 @@ export const CopyAddressScene: FunctionComponent<{
         return accountInfo.starknetHexAddress;
       })();
 
+      const bitcoinAddress = (() => {
+        if (!("bitcoin" in modularChainInfo)) {
+          return undefined;
+        }
+
+        return accountInfo.bitcoinAddress;
+      })();
+
       return {
         modularChainInfo,
         bech32Address,
         ethereumAddress,
         starknetAddress,
+        bitcoinAddress,
       };
     })
     .filter(({ modularChainInfo, bech32Address }) => {
@@ -183,6 +201,17 @@ export const CopyAddressScene: FunctionComponent<{
             return true;
           }
         }
+      } else if (
+        "bitcoin" in modularChainInfo &&
+        modularChainInfo.bitcoin != null
+      ) {
+        const bitcoinChainInfo = modularChainInfo.bitcoin;
+        if (bitcoinChainInfo.currencies.length > 0) {
+          const currency = bitcoinChainInfo.currencies[0];
+          if (currency.coinDenom.toLowerCase().includes(s)) {
+            return true;
+          }
+        }
       }
     })
     .sort((a, b) => {
@@ -212,12 +241,12 @@ export const CopyAddressScene: FunctionComponent<{
 
   const initialLookingForChains = useMemo(
     () =>
-      chainStore.modularChainInfosInListUI.filter(
+      chainStore.groupedModularChainInfosInListUI.filter(
         (modularChainInfo) =>
           !chainStore.isEnabledChain(modularChainInfo.chainId)
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [chainStore.modularChainInfosInListUI]
+    [chainStore.groupedModularChainInfosInListUI]
   );
 
   const { trimSearch, searchedChainInfos } = useGetSearchChains({
@@ -234,17 +263,18 @@ export const CopyAddressScene: FunctionComponent<{
         (chainInfo) => !chainStore.isEnabledChain(chainInfo.chainId)
       );
 
-    const disabledStarknetChainInfos = chainStore.modularChainInfos.filter(
-      (modularChainInfo) =>
-        "starknet" in modularChainInfo &&
-        !chainStore.isEnabledChain(modularChainInfo.chainId) &&
-        (trimSearch.length === 0 ||
-          modularChainInfo.chainId.toLowerCase().includes(trimSearch) ||
-          modularChainInfo.chainName.toLowerCase().includes(trimSearch))
-    );
+    const disabledModularChainInfos =
+      chainStore.groupedModularChainInfos.filter(
+        (modularChainInfo) =>
+          ("starknet" in modularChainInfo || "bitcoin" in modularChainInfo) &&
+          !chainStore.isEnabledChain(modularChainInfo.chainId) &&
+          (trimSearch.length === 0 ||
+            modularChainInfo.chainId.toLowerCase().includes(trimSearch) ||
+            modularChainInfo.chainName.toLowerCase().includes(trimSearch))
+      );
 
     disabledChainInfos = [
-      ...new Set([...disabledChainInfos, ...disabledStarknetChainInfos]),
+      ...new Set([...disabledChainInfos, ...disabledModularChainInfos]),
     ].sort((a, b) => a.chainName.localeCompare(b.chainName));
 
     return disabledChainInfos.reduce(
@@ -252,10 +282,10 @@ export const CopyAddressScene: FunctionComponent<{
         let embedded: boolean | undefined = false;
         let stored: boolean = true;
 
-        const isStarknet = "starknet" in chainInfo;
+        const isModular = "starknet" in chainInfo || "bitcoin" in chainInfo;
 
         try {
-          if (isStarknet) {
+          if (isModular) {
             embedded = true;
           } else {
             const chainInfoInStore = chainStore.getChain(chainInfo.chainId);
@@ -382,7 +412,8 @@ export const CopyAddressScene: FunctionComponent<{
                     ChainIdHelper.parse(address.modularChainInfo.chainId)
                       .identifier +
                     address.bech32Address +
-                    (address.ethereumAddress || "")
+                    (address.ethereumAddress || "") +
+                    (address.bitcoinAddress?.bech32Address || "")
                   }
                   address={address}
                   close={close}
@@ -432,6 +463,10 @@ const CopyAddressItem: FunctionComponent<{
     bech32Address?: string;
     ethereumAddress?: string;
     starknetAddress?: string;
+    bitcoinAddress?: {
+      bech32Address: string;
+      paymentType: SupportedPaymentType;
+    };
   };
   close: () => void;
   blockInteraction: boolean;
@@ -514,6 +549,7 @@ const CopyAddressItem: FunctionComponent<{
                 address.starknetAddress ||
                   address.ethereumAddress ||
                   address.bech32Address ||
+                  address.bitcoinAddress?.bech32Address ||
                   ""
               );
               setHasCopied(true);
@@ -621,15 +657,57 @@ const CopyAddressItem: FunctionComponent<{
               />
               <Gutter size="0.5rem" />
               <YAxis>
-                <Subtitle3
-                  color={
-                    theme.mode === "light"
-                      ? ColorPalette["gray-700"]
-                      : ColorPalette["gray-10"]
-                  }
+                <Box
+                  style={{
+                    flex: 1,
+                    flexDirection: "row",
+                    flexWrap: "wrap",
+                    gap: "0.25rem",
+                  }}
                 >
-                  {address.modularChainInfo.chainName}
-                </Subtitle3>
+                  <Subtitle3
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-700"]
+                        : ColorPalette["gray-10"]
+                    }
+                  >
+                    {address.modularChainInfo.chainName}
+                  </Subtitle3>
+                  {address.bitcoinAddress && (
+                    <Box
+                      alignX="center"
+                      alignY="center"
+                      backgroundColor={
+                        theme.mode === "light"
+                          ? ColorPalette["blue-50"]
+                          : ColorPalette["gray-500"]
+                      }
+                      borderRadius="0.375rem"
+                      paddingY="0.125rem"
+                      paddingX="0.375rem"
+                      style={{
+                        flexShrink: 0,
+                      }}
+                    >
+                      <BaseTypography
+                        style={{
+                          fontWeight: 400,
+                          fontSize: "0.6875rem",
+                        }}
+                        color={
+                          theme.mode === "light"
+                            ? ColorPalette["blue-400"]
+                            : ColorPalette["gray-200"]
+                        }
+                      >
+                        {address.bitcoinAddress.paymentType
+                          .replace("-", " ")
+                          .replace(/\b\w/g, (char) => char.toUpperCase())}
+                      </BaseTypography>
+                    </Box>
+                  )}
+                </Box>
                 <Gutter size="0.25rem" />
                 <Caption1 color={ColorPalette["gray-300"]}>
                   {(() => {
@@ -652,6 +730,13 @@ const CopyAddressItem: FunctionComponent<{
                     if (address.bech32Address) {
                       return Bech32Address.shortenAddress(
                         address.bech32Address,
+                        20
+                      );
+                    }
+
+                    if (address.bitcoinAddress?.bech32Address) {
+                      return Bech32Address.shortenAddress(
+                        address.bitcoinAddress.bech32Address,
                         20
                       );
                     }
@@ -704,7 +789,8 @@ const CopyAddressItem: FunctionComponent<{
                   address:
                     address.starknetAddress ||
                     address.ethereumAddress ||
-                    address.bech32Address,
+                    address.bech32Address ||
+                    address.bitcoinAddress?.bech32Address,
                 });
               }}
             >

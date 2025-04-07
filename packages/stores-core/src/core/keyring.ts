@@ -9,6 +9,7 @@ import {
 } from "mobx";
 import { toGenerator } from "@keplr-wallet/common";
 import {
+  AppendLedgerExtendedKeysMsg,
   AppendLedgerKeyAppMsg,
   BIP44HDPath,
   ChangeKeyRingNameMsg,
@@ -17,6 +18,7 @@ import {
   CheckPasswordMsg,
   ComputeNotFinalizedKeyAddressesMsg,
   DeleteKeyRingMsg,
+  ExtendedKey,
   FinalizeKeyCoinTypeMsg,
   GetKeyRingStatusMsg,
   GetKeyRingStatusOnlyMsg,
@@ -246,6 +248,19 @@ export class KeyRingStore {
   @flow
   *appendLedgerKeyApp(vaultId: string, pubKey: Uint8Array, app: string) {
     const msg = new AppendLedgerKeyAppMsg(vaultId, pubKey, app);
+    const result = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+    this._status = result.status;
+    this._keyInfos = result.keyInfos;
+
+    this.eventDispatcher.dispatchEvent("keplr_keystorechange");
+  }
+
+  @flow
+  *appendLedgerExtendedKeys(vaultId: string, keys: ExtendedKey[], app: string) {
+    const msg = new AppendLedgerExtendedKeysMsg(vaultId, keys, app);
+
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );

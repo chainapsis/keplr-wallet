@@ -213,30 +213,43 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
     const tag = useMemo(() => {
       const currency = viewToken.token.currency;
       const denomHelper = new DenomHelper(currency.coinMinimalDenom);
-      if (
-        denomHelper.type === "native" &&
-        currency.coinMinimalDenom.startsWith("ibc/")
-      ) {
+
+      if (denomHelper.type === "native") {
+        if (currency.coinMinimalDenom.startsWith("ibc/")) {
+          return {
+            text: "IBC",
+            tooltip: (() => {
+              const start = currency.coinDenom.indexOf("(");
+              const end = currency.coinDenom.lastIndexOf(")");
+
+              if (start < 0 || end < 0) {
+                return "Unknown";
+              }
+
+              return currency.coinDenom.slice(start + 1, end);
+            })(),
+          };
+        }
+
+        if (viewToken.chainInfo.chainId.startsWith("bip122:")) {
+          const paymentType = viewToken.chainInfo.chainId.split(":")[2] as
+            | string
+            | undefined;
+          if (paymentType) {
+            return {
+              text: paymentType
+                .split("-")
+                .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+                .join(" "),
+            };
+          }
+        }
+      } else {
         return {
-          text: "IBC",
-          tooltip: (() => {
-            const start = currency.coinDenom.indexOf("(");
-            const end = currency.coinDenom.lastIndexOf(")");
-
-            if (start < 0 || end < 0) {
-              return "Unknown";
-            }
-
-            return currency.coinDenom.slice(start + 1, end);
-          })(),
+          text: denomHelper.type.toUpperCase(),
         };
       }
-      if (denomHelper.type !== "native") {
-        return {
-          text: denomHelper.type,
-        };
-      }
-    }, [viewToken.token.currency]);
+    }, [viewToken.token.currency, viewToken.chainInfo.chainId]);
 
     // 얘가 값이 있냐 없냐에 따라서 price change를 보여줄지 말지를 결정한다.
     // prop에서 showPrice24HChange가 null 또는 false거나
@@ -385,7 +398,15 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                 </Box>
               ) : undefined}
             </XAxis>
-            <XAxis alignY="center">
+            <Box
+              style={{
+                flex: 1,
+                flexDirection: "row",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: "0.25rem",
+              }}
+            >
               <Skeleton
                 layer={1}
                 isNotReady={isNotReady}
@@ -397,28 +418,25 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                     : viewToken.chainInfo.chainName}
                 </Caption1>
               </Skeleton>
-
-              {tag ? (
-                <React.Fragment>
-                  <Gutter size="0.25rem" />
-                  <Box alignY="center" height="1px">
+              <XAxis>
+                {tag ? (
+                  <Box alignY="center" key="token-tag">
                     <TokenTag text={tag.text} tooltip={tag.tooltip} />
                   </Box>
-                </React.Fragment>
-              ) : null}
-
-              {!isNotReady && copyAddress ? (
-                <Box alignY="center" height="1px">
-                  <XAxis alignY="center">
-                    <Gutter size="0.125rem" />
-                    <CopyAddressButton
-                      address={copyAddress}
-                      parentIsHover={isHover}
-                    />
-                  </XAxis>
-                </Box>
-              ) : null}
-            </XAxis>
+                ) : null}
+                {!isNotReady && copyAddress ? (
+                  <Box alignY="center" key="copy-address">
+                    <XAxis alignY="center">
+                      <Gutter size="-0.125rem" />
+                      <CopyAddressButton
+                        address={copyAddress}
+                        parentIsHover={isHover}
+                      />
+                    </XAxis>
+                  </Box>
+                ) : null}
+              </XAxis>
+            </Box>
           </Stack>
 
           <Column weight={1} />
@@ -984,8 +1002,9 @@ const TokenTag: FunctionComponent<{
             : ColorPalette["gray-500"]
         }
         borderRadius="0.375rem"
-        height="1rem"
         paddingX="0.375rem"
+        paddingTop="0.125rem"
+        paddingBottom="0.1875rem"
       >
         <BaseTypography
           style={{

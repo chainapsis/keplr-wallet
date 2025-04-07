@@ -92,6 +92,11 @@ export const AmountInput: FunctionComponent<{
         id: "components.input.amount-input.amount-label",
       })}
       type="number"
+      onKeyDown={(e) => {
+        if (["e", "E", "-", "+"].includes(e.key)) {
+          e.preventDefault();
+        }
+      }}
       inputStyle={{
         color: error ? ColorPalette["yellow-400"] : undefined,
       }}

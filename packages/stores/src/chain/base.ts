@@ -547,6 +547,8 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
   protected registeredCosmosCurrencies: AppCurrency[] = [];
   @observable.shallow
   protected registeredStarkentCurrencies: ERC20Currency[] = [];
+  @observable.shallow
+  protected registeredBitcoinCurrencies: AppCurrency[] = [];
 
   constructor(
     embedded: M,
@@ -560,6 +562,7 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
 
     keepAlive(this, "cosmosCurrencyMap");
     keepAlive(this, "starknetCurrencyMap");
+    keepAlive(this, "bitcoinCurrencyMap");
   }
 
   get embedded(): M {
@@ -593,6 +596,15 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
         return this._embedded.starknet.currencies.concat(
           this.registeredStarkentCurrencies
         );
+      case "bitcoin":
+        if (!("bitcoin" in this._embedded)) {
+          throw new Error(`No bitcoin module for this chain: ${this.chainId}`);
+        }
+
+        return this._embedded.bitcoin.currencies.concat(
+          this.registeredBitcoinCurrencies
+        );
+
       default:
         throw new Error(`Unknown module: ${module}`);
     }
@@ -628,6 +640,17 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
             currency.type === "erc20"
           ) {
             this.registeredStarkentCurrencies.push(currency);
+          }
+        }
+        break;
+      case "bitcoin":
+        if (!("bitcoin" in this._embedded)) {
+          throw new Error(`No bitcoin module for this chain: ${this.chainId}`);
+        }
+
+        for (const currency of currencies) {
+          if (!this.bitcoinCurrencyMap.has(currency.coinMinimalDenom)) {
+            this.registeredBitcoinCurrencies.push(currency);
           }
         }
         break;
@@ -668,6 +691,16 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
             (currency) => !map.get(currency.coinMinimalDenom)
           );
         break;
+      case "bitcoin":
+        if (!("bitcoin" in this._embedded)) {
+          throw new Error(`No bitcoin module for this chain: ${this.chainId}`);
+        }
+
+        this.registeredBitcoinCurrencies =
+          this.registeredBitcoinCurrencies.filter(
+            (currency) => !map.get(currency.coinMinimalDenom)
+          );
+        break;
       default:
         throw new Error(`Unknown module: ${module}`);
     }
@@ -690,6 +723,18 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
     const result: Map<string, AppCurrency> = new Map();
     if ("starknet" in this._embedded) {
       for (const currency of this._embedded.starknet.currencies) {
+        result.set(currency.coinMinimalDenom, currency);
+      }
+    }
+
+    return result;
+  }
+
+  @computed
+  protected get bitcoinCurrencyMap(): Map<string, AppCurrency> {
+    const result: Map<string, AppCurrency> = new Map();
+    if ("bitcoin" in this._embedded) {
+      for (const currency of this._embedded.bitcoin.currencies) {
         result.set(currency.coinMinimalDenom, currency);
       }
     }

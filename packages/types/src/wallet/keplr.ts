@@ -20,6 +20,11 @@ import type {
   DeployAccountSignerDetails,
   InvocationsSignerDetails,
 } from "starknet";
+import {
+  IBitcoinProvider,
+  SignPsbtOptions,
+  SupportedPaymentType,
+} from "./bitcoin";
 
 export interface Key {
   // Name of the selected key store.
@@ -281,8 +286,35 @@ export interface Keplr {
     details: InvocationsSignerDetails;
     signature: string[];
   }>;
-
+  getBitcoinKey(chainId: string): Promise<{
+    name: string;
+    pubKey: Uint8Array;
+    address: string;
+    paymentType: SupportedPaymentType;
+    isNanoLedger: boolean;
+  }>;
+  getBitcoinKeysSettled(chainIds: string[]): Promise<
+    SettledResponses<{
+      name: string;
+      pubKey: Uint8Array;
+      address: string;
+      paymentType: SupportedPaymentType;
+      isNanoLedger: boolean;
+    }>
+  >;
+  signPsbt(
+    chainId: string,
+    psbtHex: string,
+    options?: SignPsbtOptions
+  ): Promise<string>;
+  signPsbts(
+    chainId: string,
+    psbtsHexes: string[],
+    options?: SignPsbtOptions
+  ): Promise<string[]>;
   readonly ethereum: IEthereumProvider;
 
   readonly starknet: IStarknetProvider;
+
+  readonly bitcoin: IBitcoinProvider;
 }

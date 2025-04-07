@@ -74,6 +74,11 @@ export const AmountInput: FunctionComponent<{
         id: "components.input.amount-input.amount-label",
       })}
       type="number"
+      onKeyDown={(e) => {
+        if (["e", "E", "-", "+"].includes(e.key)) {
+          e.preventDefault();
+        }
+      }}
       value={(() => {
         if (isPriceBased) {
           if (amountConfig.fraction != 0) {

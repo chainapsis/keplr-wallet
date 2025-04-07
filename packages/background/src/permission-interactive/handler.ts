@@ -2,6 +2,7 @@ import { PermissionInteractiveService } from "./service";
 import { Env, Handler, InternalHandler, Message } from "@keplr-wallet/router";
 import {
   DisableAccessMsg,
+  EnableAccessForBitcoinMsg,
   EnableAccessForEVMMsg,
   EnableAccessForStarknetMsg,
   EnableAccessMsg,
@@ -24,6 +25,11 @@ export const getHandler: (service: PermissionInteractiveService) => Handler = (
         return handleEnableAccessForStarknetMsg(service)(
           env,
           msg as EnableAccessForEVMMsg
+        );
+      case EnableAccessForBitcoinMsg:
+        return handleEnableAccessForBitcoinMsg(service)(
+          env,
+          msg as EnableAccessForBitcoinMsg
         );
       case DisableAccessMsg:
         return handleDisableAccessMsg(service)(env, msg as DisableAccessMsg);
@@ -57,6 +63,14 @@ const handleEnableAccessForStarknetMsg: (
 ) => InternalHandler<EnableAccessForStarknetMsg> = (service) => {
   return async (env, msg) => {
     return await service.ensureEnabledForStarknet(env, msg.origin);
+  };
+};
+
+const handleEnableAccessForBitcoinMsg: (
+  service: PermissionInteractiveService
+) => InternalHandler<EnableAccessForBitcoinMsg> = (service) => {
+  return async (env, msg) => {
+    return await service.ensureEnabledForBitcoin(env, msg.origin);
   };
 };
 

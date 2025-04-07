@@ -15,6 +15,7 @@ import { BinarySortArray } from "./sort";
 import { StarknetQueriesStore } from "@keplr-wallet/stores-starknet";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { ModularChainInfo } from "@keplr-wallet/types";
+import { BitcoinQueriesStore } from "@keplr-wallet/stores-bitcoin";
 import { UIConfigStore } from "../ui-config";
 import { KeyRingStore } from "@keplr-wallet/stores-core";
 import { AllTokenMapByChainIdentifierState } from "./all-token-map-state";
@@ -58,6 +59,7 @@ export class HugeQueriesStore {
     protected readonly chainStore: ChainStore,
     protected readonly queriesStore: IQueriesStore<CosmosQueries>,
     protected readonly starknetQueriesStore: StarknetQueriesStore,
+    protected readonly bitcoinQueriesStore: BitcoinQueriesStore,
     protected readonly accountStore: IAccountStore,
     protected readonly priceStore: CoinGeckoPriceStore,
     protected readonly uiConfigStore: UIConfigStore,
@@ -313,6 +315,48 @@ export class HugeQueriesStore {
           }
         }
       }
+
+      if ("bitcoin" in modularChainInfo) {
+        if (!account.bitcoinAddress) {
+          continue;
+        }
+
+        const modularChainInfoImpl = this.chainStore.getModularChainInfoImpl(
+          modularChainInfo.chainId
+        );
+        const queries = this.bitcoinQueriesStore.get(modularChainInfo.chainId);
+        const currencies = modularChainInfoImpl.getCurrencies("bitcoin");
+
+        const currency = currencies[0];
+
+        const queryBalance = queries.queryBitcoinBalance.getBalance(
+          modularChainInfo.chainId,
+          this.chainStore,
+          account.bitcoinAddress.bech32Address,
+          currency.coinMinimalDenom
+        );
+
+        if (!queryBalance) {
+          continue;
+        }
+
+        const key = `${
+          ChainIdHelper.parse(modularChainInfo.chainId).identifier
+        }/${currency.coinMinimalDenom}`;
+        if (!keysUsed.get(key)) {
+          keysUsed.set(key, true);
+          prevKeyMap.delete(key);
+          this.balanceBinarySort.pushAndSort(key, {
+            chainInfo: modularChainInfo,
+            token: queryBalance.balance,
+            price: currency.coinGeckoId
+              ? this.priceStore.calculatePrice(queryBalance.balance)
+              : undefined,
+            isFetching: queryBalance.isFetching,
+            error: queryBalance.error,
+          });
+        }
+      }
     }
 
     for (const removedKey of prevKeyMap.keys()) {
@@ -327,7 +371,7 @@ export class HugeQueriesStore {
   @action
   protected getAllTokenMapByChainIdentifier() {
     const tokensByChainId = new Map<string, ViewToken[]>();
-    const modularChainInfos = this.chainStore.modularChainInfos.filter(
+    const modularChainInfos = this.chainStore.groupedModularChainInfos.filter(
       (chainInfo) => {
         if ("cosmos" in chainInfo && chainInfo.cosmos.hideInUI) {
           return false;
@@ -337,9 +381,12 @@ export class HugeQueriesStore {
     );
 
     for (const modularChainInfo of modularChainInfos) {
-      const chainIdentifier = ChainIdHelper.parse(
-        modularChainInfo.chainId
-      ).identifier;
+      const baseChainId =
+        "bitcoin" in modularChainInfo
+          ? modularChainInfo.bitcoin.chainId
+          : modularChainInfo.chainId;
+
+      const chainIdentifier = ChainIdHelper.parse(baseChainId).identifier;
 
       if (!tokensByChainId.has(chainIdentifier)) {
         tokensByChainId.set(chainIdentifier, []);
@@ -491,6 +538,64 @@ export class HugeQueriesStore {
           });
         }
       }
+
+      if ("bitcoin" in modularChainInfo) {
+        if (account.bitcoinAddress) {
+          const currency = modularChainInfo.bitcoin.currencies[0];
+          const balance = this.bitcoinQueriesStore
+            .get(modularChainInfo.chainId)
+            .queryBitcoinBalance.getBalance(
+              modularChainInfo.chainId,
+              this.chainStore,
+              account.bitcoinAddress.bech32Address,
+              currency.coinMinimalDenom
+            );
+          if (balance) {
+            tokensByChainId.get(chainIdentifier)!.push({
+              chainInfo: modularChainInfo,
+              token: balance.balance,
+              price: this.priceStore.calculatePrice(balance.balance),
+              isFetching: balance.isFetching,
+              error: balance.error,
+            });
+          }
+
+          if (modularChainInfo.linkedModularChainInfos) {
+            for (const linkedChain of modularChainInfo.linkedModularChainInfos) {
+              const linkedAccount = this.accountStore.getAccount(
+                linkedChain.chainId
+              );
+              if (!linkedAccount.bitcoinAddress) {
+                continue;
+              }
+
+              if (!("bitcoin" in linkedChain)) {
+                continue;
+              }
+
+              const linkedCurrency = linkedChain.bitcoin.currencies[0];
+
+              const balance = this.bitcoinQueriesStore
+                .get(linkedChain.chainId)
+                .queryBitcoinBalance.getBalance(
+                  linkedChain.chainId,
+                  this.chainStore,
+                  linkedAccount.bitcoinAddress.bech32Address,
+                  linkedCurrency.coinMinimalDenom
+                );
+              if (balance) {
+                tokensByChainId.get(chainIdentifier)!.push({
+                  chainInfo: linkedChain,
+                  token: balance.balance,
+                  price: this.priceStore.calculatePrice(balance.balance),
+                  isFetching: balance.isFetching,
+                  error: balance.error,
+                });
+              }
+            }
+          }
+        }
+      }
     }
 
     for (const [chainId, tokens] of tokensByChainId.entries()) {
@@ -541,13 +646,14 @@ export class HugeQueriesStore {
             keys.set(key, true);
           }
         }
-        if ("starknet" in modularChainInfo) {
+        if ("starknet" in modularChainInfo || "bitcoin" in modularChainInfo) {
+          const module =
+            "starknet" in modularChainInfo ? "starknet" : "bitcoin";
+
           const modularChainInfoImpl = this.chainStore.getModularChainInfoImpl(
             modularChainInfo.chainId
           );
-          for (const currency of modularChainInfoImpl.getCurrencies(
-            "starknet"
-          )) {
+          for (const currency of modularChainInfoImpl.getCurrencies(module)) {
             const key = `${
               ChainIdHelper.parse(modularChainInfo.chainId).identifier
             }/${currency.coinMinimalDenom}`;

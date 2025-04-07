@@ -44,7 +44,7 @@ export const ChainItem: FunctionComponent<{
 
   isFresh: boolean;
   tokens?: ViewToken[];
-  showTagText?: "EVM" | "Starknet";
+  showTagText?: "EVM" | "Starknet" | "Bitcoin";
 }> = observer(
   ({
     chainInfo,
@@ -258,30 +258,43 @@ const TokenItem: FunctionComponent<{
   const tag = useMemo(() => {
     const currency = viewToken.token.currency;
     const denomHelper = new DenomHelper(currency.coinMinimalDenom);
-    if (
-      denomHelper.type === "native" &&
-      currency.coinMinimalDenom.startsWith("ibc/")
-    ) {
+
+    if (denomHelper.type === "native") {
+      if (currency.coinMinimalDenom.startsWith("ibc/")) {
+        return {
+          text: "IBC",
+          tooltip: (() => {
+            const start = currency.coinDenom.indexOf("(");
+            const end = currency.coinDenom.lastIndexOf(")");
+
+            if (start < 0 || end < 0) {
+              return "Unknown";
+            }
+
+            return currency.coinDenom.slice(start + 1, end);
+          })(),
+        };
+      }
+
+      if (viewToken.chainInfo.chainId.startsWith("bip122:")) {
+        const paymentType = viewToken.chainInfo.chainId.split(":")[2] as
+          | string
+          | undefined;
+        if (paymentType) {
+          return {
+            text: paymentType
+              .split("-")
+              .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+              .join(" "),
+          };
+        }
+      }
+    } else {
       return {
-        text: "IBC",
-        tooltip: (() => {
-          const start = currency.coinDenom.indexOf("(");
-          const end = currency.coinDenom.lastIndexOf(")");
-
-          if (start < 0 || end < 0) {
-            return "Unknown";
-          }
-
-          return currency.coinDenom.slice(start + 1, end);
-        })(),
+        text: denomHelper.type.toUpperCase(),
       };
     }
-    if (denomHelper.type !== "native") {
-      return {
-        text: denomHelper.type,
-      };
-    }
-  }, [viewToken.token.currency]);
+  }, [viewToken.token.currency, viewToken.chainInfo.chainId]);
   const coinDenom = useMemo(() => {
     if (
       "originCurrency" in viewToken.token.currency &&
@@ -375,7 +388,7 @@ const TokenView: FunctionComponent<{
   );
 };
 
-const TokenTag: FunctionComponent<{
+export const TokenTag: FunctionComponent<{
   text: string;
   tooltip?: string;
 }> = ({ text, tooltip }) => {
@@ -392,8 +405,9 @@ const TokenTag: FunctionComponent<{
             : ColorPalette["gray-550"]
         }
         borderRadius="0.375rem"
-        height="1rem"
         paddingX="0.375rem"
+        paddingTop="0.125rem"
+        paddingBottom="0.1875rem"
       >
         <BaseTypography
           style={{
