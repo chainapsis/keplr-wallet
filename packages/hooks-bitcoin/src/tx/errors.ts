@@ -117,3 +117,11 @@ export class UnableToFindProperUtxosError extends Error {
     Object.setPrototypeOf(this, UnableToFindProperUtxosError.prototype);
   }
 }
+
+export class MaximumFeeRateReachedError extends Error {
+  constructor(m: string) {
+    super(m);
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, MaximumFeeRateReachedError.prototype);
+  }
+}

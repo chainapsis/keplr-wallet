@@ -256,10 +256,6 @@ export const FeeControl: FunctionComponent<{
               >
                 {(() => {
                   if (feeConfig.uiProperties.error) {
-                    console.log(
-                      "feeConfig.uiProperties.error",
-                      feeConfig.uiProperties.error
-                    );
                     if (
                       feeConfig.uiProperties.error instanceof
                       InsufficientFeeError
@@ -276,10 +272,6 @@ export const FeeControl: FunctionComponent<{
                   }
 
                   if (feeConfig.uiProperties.warning) {
-                    console.log(
-                      "feeConfig.uiProperties.warning",
-                      feeConfig.uiProperties.warning
-                    );
                     return (
                       feeConfig.uiProperties.warning.message ||
                       feeConfig.uiProperties.warning.toString()
@@ -287,10 +279,6 @@ export const FeeControl: FunctionComponent<{
                   }
 
                   if (feeRateConfig.uiProperties.error) {
-                    console.log(
-                      "feeRateConfig.uiProperties.error",
-                      feeRateConfig.uiProperties.error
-                    );
                     return (
                       feeRateConfig.uiProperties.error.message ||
                       feeRateConfig.uiProperties.error.toString()

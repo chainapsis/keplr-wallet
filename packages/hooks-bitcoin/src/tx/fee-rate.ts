@@ -4,6 +4,7 @@ import { ChainGetter } from "@keplr-wallet/stores";
 import { action, computed, makeObservable, observable } from "mobx";
 import { useState } from "react";
 import { BitcoinQueriesStore } from "@keplr-wallet/stores-bitcoin";
+import { MaximumFeeRateReachedError } from "./errors";
 
 const DEFAULT_MAXIMUM_FEE_RATE = 1000;
 
@@ -111,7 +112,9 @@ export class FeeRateConfig extends TxChainSetter implements IFeeRateConfig {
 
     if (parsed > DEFAULT_MAXIMUM_FEE_RATE) {
       return {
-        error: new Error("Maximum fee rate is 1000"),
+        error: new MaximumFeeRateReachedError(
+          `Maximum fee rate is ${DEFAULT_MAXIMUM_FEE_RATE}`
+        ),
       };
     }
 

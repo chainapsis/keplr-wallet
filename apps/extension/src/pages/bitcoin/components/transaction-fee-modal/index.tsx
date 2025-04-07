@@ -5,6 +5,7 @@ import {
   H5,
   Subtitle1,
   Subtitle3,
+  Subtitle4,
 } from "../../../../components/typography";
 import { ColorPalette } from "../../../../styles";
 import styled, { useTheme } from "styled-components";
@@ -22,8 +23,10 @@ import {
   ISenderConfig,
   IFeeConfig,
   IFeeRateConfig,
+  MaximumFeeRateReachedError,
 } from "@keplr-wallet/hooks-bitcoin";
 import { TextInput } from "../../../../components/input";
+import { VerticalResizeTransition } from "../../../../components/transition";
 
 const Styles = {
   Container: styled.div`
@@ -112,18 +115,55 @@ export const TransactionFeeModal: FunctionComponent<{
         </Stack>
 
         {feeRateConfig.feeRateType === "manual" ? (
-          <TextInput
-            label={intl.formatMessage({
-              id: "components.input.fee-control.modal.fee-rate-label",
-            })}
-            disabled={feeRateConfig.feeRateType !== "manual"}
-            value={feeRateConfig.value}
-            onChange={(e) => {
-              e.preventDefault();
-              feeRateConfig.setValue(e.target.value);
-            }}
-          />
+          <React.Fragment>
+            <TextInput
+              label={intl.formatMessage({
+                id: "components.input.fee-control.modal.fee-rate-label",
+              })}
+              disabled={feeRateConfig.feeRateType !== "manual"}
+              value={feeRateConfig.value}
+              onKeyDown={(e) => {
+                const error = feeRateConfig.uiProperties.error;
+                if (error && error instanceof MaximumFeeRateReachedError) {
+                  if (e.key !== "Backspace") {
+                    e.preventDefault();
+                  }
+                }
+              }}
+              onChange={(e) => {
+                e.preventDefault();
+                feeRateConfig.setValue(e.target.value);
+              }}
+            />
+            <VerticalResizeTransition transitionAlign="top">
+              {feeRateConfig.uiProperties.error ? (
+                <Box
+                  marginTop="1.04rem"
+                  borderRadius="0.5rem"
+                  alignX="center"
+                  alignY="center"
+                  paddingY="1.125rem"
+                  backgroundColor={
+                    theme.mode === "light"
+                      ? ColorPalette["orange-50"]
+                      : ColorPalette["yellow-800"]
+                  }
+                >
+                  <Subtitle4
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["orange-400"]
+                        : ColorPalette["yellow-400"]
+                    }
+                  >
+                    {feeRateConfig.uiProperties.error.message}
+                  </Subtitle4>
+                </Box>
+              ) : null}
+            </VerticalResizeTransition>
+          </React.Fragment>
         ) : null}
+
         <VerticalCollapseTransition collapsed={!showChangesApplied}>
           <GuideBox
             color="safe"
