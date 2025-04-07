@@ -168,10 +168,10 @@ export class PermissionInteractiveService {
 
     const currentBaseChainIdForBitcoin =
       this.permissionService.getCurrentBaseChainIdForBitcoin(origin) ??
-      `bip122:${GenesisHash.LIVENET}`;
+      `bip122:${GenesisHash.MAINNET}`;
 
     const isTestnet = !currentBaseChainIdForBitcoin.includes(
-      GenesisHash.LIVENET
+      GenesisHash.MAINNET
     );
 
     await this.ensureKeyRingLedgerAppConnected(
