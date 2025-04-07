@@ -40,6 +40,10 @@ export class ObservableQueryValidators extends ObservableQuery<StarknetValidator
       return [];
     }
 
+    if (!Array.isArray(this.response.data.validators)) {
+      return [];
+    }
+
     return this.response.data.validators;
   }
 }

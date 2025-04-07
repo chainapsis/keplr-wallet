@@ -4,7 +4,6 @@ import {
   IFeeConfig,
   IGasConfig,
   IGasSimulator,
-  InsufficientFeeError,
   ISenderConfig,
 } from "@keplr-wallet/hooks";
 import { autorun } from "mobx";
@@ -15,13 +14,13 @@ import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
 import { Gutter } from "../../../../components/gutter";
 import { XAxis, YAxis } from "../../../../components/axis";
-import { Body3, Caption2, Subtitle4 } from "../../../../components/typography";
-import { LoadingIcon } from "../../../../components/icon";
+import { Body3, Subtitle4 } from "../../../../components/typography";
+import { LoadingIcon, AdjustmentIcon } from "../../../../components/icon";
 import { TransactionFeeModal } from "../../../../components/input/fee-control/modal";
 import { Modal } from "../../../../components/modal";
-import { FormattedMessage, useIntl } from "react-intl";
+import { FormattedMessage } from "react-intl";
 import { useTheme } from "styled-components";
-import { Tooltip } from "../../../../components/tooltip";
+import { getTitleColor } from "../../../../components/guide-box";
 
 export const SwapFeeInfo: FunctionComponent<{
   senderConfig: ISenderConfig;
@@ -182,148 +181,107 @@ export const SwapFeeInfo: FunctionComponent<{
     ]);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
-
-    const intl = useIntl();
-
-    const error = (() => {
-      if (feeConfig.uiProperties.error) {
-        if (feeConfig.uiProperties.error instanceof InsufficientFeeError) {
-          return intl.formatMessage({
-            id: "components.input.fee-control.error.insufficient-fee",
-          });
-        }
-
-        return (
-          feeConfig.uiProperties.error.message ||
-          feeConfig.uiProperties.error.toString()
-        );
-      }
-
-      if (feeConfig.uiProperties.warning) {
-        return (
-          feeConfig.uiProperties.warning.message ||
-          feeConfig.uiProperties.warning.toString()
-        );
-      }
-
-      if (gasConfig.uiProperties.error) {
-        return (
-          gasConfig.uiProperties.error.message ||
-          gasConfig.uiProperties.error.toString()
-        );
-      }
-
-      if (gasConfig.uiProperties.warning) {
-        return (
-          gasConfig.uiProperties.warning.message ||
-          gasConfig.uiProperties.warning.toString()
-        );
-      }
-    })();
+    const [isHovered, setIsHovered] = useState(false);
 
     const isShowingEstimatedFee = isForEVMTx && !!gasSimulator.gasEstimated;
 
+    const txFeeColor = (() => {
+      const hasError = !!feeConfig.uiProperties.error;
+      const isLightTheme = theme.mode === "light";
+
+      if (!isLightTheme && !hasError && !isHovered)
+        return ColorPalette["gray-200"];
+      if (!isLightTheme && !hasError && isHovered)
+        return ColorPalette["gray-300"];
+      if (!isLightTheme && hasError && !isHovered)
+        return getTitleColor(theme, "warning");
+      if (!isLightTheme && hasError && isHovered)
+        return ColorPalette["yellow-600"];
+      if (isLightTheme && !hasError && !isHovered)
+        return ColorPalette["gray-300"];
+      if (isLightTheme && !hasError && isHovered)
+        return ColorPalette["gray-200"];
+      if (isLightTheme && hasError && !isHovered)
+        return getTitleColor(theme, "warning");
+      if (isLightTheme && hasError && isHovered)
+        return ColorPalette["orange-200"];
+    })();
+
     return (
       <React.Fragment>
-        <Box
-          padding="1rem"
-          backgroundColor={
-            theme.mode === "light"
-              ? ColorPalette.white
-              : ColorPalette["gray-600"]
-          }
-          style={{
-            boxShadow:
-              theme.mode === "light"
-                ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
-                : undefined,
-          }}
-          borderRadius="0.375rem"
-          borderWidth="1px"
-          borderColor={
-            error != null
-              ? theme.mode === "light"
-                ? ColorPalette["orange-400"]
-                : ColorPalette["yellow-400"]
-              : "transparent"
-          }
-        >
+        <Box paddingX="0.5rem" paddingY="0.25rem">
           {feeConfig.fees.length > 0 ? (
             <XAxis alignY="center">
               <Box
                 cursor="pointer"
                 onClick={(e) => {
                   e.preventDefault();
-
                   setIsModalOpen(true);
                 }}
+                onHoverStateChange={(isHovered) => {
+                  setIsHovered(isHovered);
+                }}
               >
-                <Subtitle4
-                  style={{
-                    textDecoration: "underline",
-                    textUnderlineOffset: "0.2rem",
-                  }}
-                  color={
-                    theme.mode === "light"
-                      ? ColorPalette["gray-400"]
-                      : ColorPalette["gray-200"]
-                  }
-                >
-                  <FormattedMessage id="page.ibc-swap.components.swap-fee-info.button.transaction-fee" />
-                </Subtitle4>
-              </Box>
-              {(() => {
-                if (
-                  feeConfig.uiProperties.loadingState ||
-                  gasSimulator.uiProperties.loadingState
-                ) {
-                  return (
-                    <Box
-                      height="1px"
-                      alignX="center"
-                      alignY="center"
-                      marginLeft="0.2rem"
-                    >
-                      <Box width="1rem" height="1rem">
-                        <LoadingIcon
-                          width="1rem"
-                          height="1rem"
-                          color={
-                            theme.mode === "light"
-                              ? ColorPalette["gray-200"]
-                              : ColorPalette["gray-300"]
-                          }
-                        />
-                      </Box>
-                    </Box>
-                  );
-                }
+                <XAxis gap="0.25rem" alignY="center">
+                  <Body3 color={txFeeColor}>
+                    <FormattedMessage id="page.ibc-swap.components.swap-fee-info.button.transaction-fee" />
+                  </Body3>
+                  <AdjustmentIcon
+                    width="1rem"
+                    height="1rem"
+                    color={txFeeColor}
+                  />
 
-                if (uiConfigStore.rememberLastFeeOption) {
-                  return (
-                    <Box
-                      height="1px"
-                      width="0.375rem"
-                      alignY="center"
-                      marginLeft="0.3rem"
-                    >
-                      <Box alignX="center" alignY="center">
-                        <div
-                          style={{
-                            width: "0.375rem",
-                            height: "0.375rem",
-                            borderRadius: "99999px",
-                            backgroundColor:
-                              theme.mode === "light"
-                                ? ColorPalette["blue-400"]
-                                : ColorPalette["blue-400"],
-                          }}
-                        />
-                      </Box>
-                    </Box>
-                  );
-                }
-              })()}
+                  {(() => {
+                    if (uiConfigStore.rememberLastFeeOption) {
+                      return (
+                        <Box height="1px" width="0.375rem" alignY="center">
+                          <Box alignX="center" alignY="center">
+                            <div
+                              style={{
+                                width: "0.375rem",
+                                height: "0.375rem",
+                                borderRadius: "99999px",
+                                backgroundColor:
+                                  theme.mode === "light"
+                                    ? ColorPalette["blue-400"]
+                                    : ColorPalette["blue-400"],
+                              }}
+                            />
+                          </Box>
+                        </Box>
+                      );
+                    }
+                  })()}
+                  {(() => {
+                    if (
+                      feeConfig.uiProperties.loadingState ||
+                      gasSimulator.uiProperties.loadingState
+                    ) {
+                      return (
+                        <Box
+                          height="1px"
+                          alignX="center"
+                          alignY="center"
+                          marginLeft="0.2rem"
+                        >
+                          <Box width="1rem" height="1rem">
+                            <LoadingIcon
+                              width="1rem"
+                              height="1rem"
+                              color={
+                                theme.mode === "light"
+                                  ? ColorPalette["gray-200"]
+                                  : ColorPalette["gray-300"]
+                              }
+                            />
+                          </Box>
+                        </Box>
+                      );
+                    }
+                  })()}
+                </XAxis>
+              </Box>
 
               <div
                 style={{
@@ -331,46 +289,6 @@ export const SwapFeeInfo: FunctionComponent<{
                 }}
               />
 
-              <Body3
-                color={
-                  theme.mode === "light"
-                    ? ColorPalette["gray-300"]
-                    : ColorPalette["gray-300"]
-                }
-              >
-                {(() => {
-                  let totalPrice: PricePretty | undefined;
-                  if (feeConfig.fees.length > 0) {
-                    const fee = feeConfig.fees[0];
-                    const price = priceStore.calculatePrice(fee);
-                    if (price) {
-                      if (totalPrice) {
-                        totalPrice = totalPrice.add(price);
-                      } else {
-                        totalPrice = price;
-                      }
-                    } else {
-                      return "-";
-                    }
-                  }
-
-                  if (totalPrice) {
-                    return totalPrice.toString();
-                  }
-                  return "-";
-                })()}
-              </Body3>
-
-              <Gutter size="0.25rem" />
-              <Body3
-                color={
-                  theme.mode === "light"
-                    ? ColorPalette["gray-600"]
-                    : ColorPalette["gray-100"]
-                }
-              >
-                =
-              </Body3>
               <Gutter size="0.25rem" />
               <YAxis>
                 {feeConfig.fees.map((fee) => {
@@ -378,8 +296,8 @@ export const SwapFeeInfo: FunctionComponent<{
                     <Body3
                       color={
                         theme.mode === "light"
-                          ? ColorPalette["gray-600"]
-                          : ColorPalette["gray-100"]
+                          ? ColorPalette["gray-300"]
+                          : ColorPalette["gray-200"]
                       }
                       key={fee.currency.coinMinimalDenom}
                     >
@@ -406,115 +324,25 @@ export const SwapFeeInfo: FunctionComponent<{
                   );
                 })}
               </YAxis>
-            </XAxis>
-          ) : null}
-
-          <Gutter size="0.62rem" />
-
-          <XAxis alignY="center">
-            <Subtitle4
-              color={
-                theme.mode === "light"
-                  ? ColorPalette["gray-300"]
-                  : ColorPalette["gray-300"]
-              }
-            >
-              <FormattedMessage id="page.ibc-swap.components.swap-fee-info.button.service-fee" />
-            </Subtitle4>
-            <Gutter size="0.2rem" />
-            <Tooltip
-              content={
-                amountConfig.swapFeeBps === 10
-                  ? intl.formatMessage(
-                      {
-                        id: "page.ibc-swap.components.swap-fee-info.button.service-fee-stable-coin.paragraph",
-                      },
-                      {
-                        rate: (() => {
-                          const feeRatioPretty = new IntPretty(
-                            amountConfig.swapFeeBps
-                          ).moveDecimalPointLeft(2);
-                          return feeRatioPretty
-                            .trim(true)
-                            .maxDecimals(4)
-                            .inequalitySymbol(true)
-                            .toString();
-                        })(),
-                      }
-                    )
-                  : intl.formatMessage(
-                      {
-                        id: "page.ibc-swap.components.swap-fee-info.button.service-fee.paragraph",
-                      },
-                      {
-                        rate: (() => {
-                          const feeRatioPretty = new IntPretty(
-                            amountConfig.swapFeeBps
-                          ).moveDecimalPointLeft(2);
-                          return feeRatioPretty
-                            .trim(true)
-                            .maxDecimals(4)
-                            .inequalitySymbol(true)
-                            .toString();
-                        })(),
-                      }
-                    )
-              }
-            >
-              <InfoIcon
-                width="1rem"
-                height="1rem"
+              <Gutter size="0.25rem" />
+              <Body3
                 color={
                   theme.mode === "light"
-                    ? ColorPalette["gray-200"]
-                    : ColorPalette["gray-300"]
+                    ? ColorPalette["gray-300"]
+                    : ColorPalette["gray-200"]
                 }
-              />
-            </Tooltip>
-            {amountConfig.isFetching ? (
-              <Box
-                height="1px"
-                alignX="center"
-                alignY="center"
-                marginLeft="0.2rem"
               >
-                {/* 로딩 아이콘이 부모의 height에 영향을 끼치지 않게 하기 위한 트릭 구조임 */}
-                <Box width="1rem" height="1rem">
-                  <LoadingIcon
-                    width="1rem"
-                    height="1rem"
-                    color={
-                      theme.mode === "light"
-                        ? ColorPalette["gray-200"]
-                        : ColorPalette["gray-300"]
-                    }
-                  />
-                </Box>
-              </Box>
-            ) : null}
-
-            <div style={{ flex: 1 }} />
-
-            <Subtitle4
-              color={
-                theme.mode === "light"
-                  ? ColorPalette["gray-300"]
-                  : ColorPalette["gray-300"]
-              }
-            >
-              {amountConfig.swapFee
-                .map((fee) =>
-                  fee
-                    .maxDecimals(6)
-                    .trim(true)
-                    .shrink(true)
-                    .inequalitySymbol(true)
-                    .hideIBCMetadata(true)
-                    .toString()
-                )
-                .join(", ")}
-            </Subtitle4>
-          </XAxis>
+                +{" "}
+                {new IntPretty(amountConfig.swapFeeBps)
+                  .moveDecimalPointLeft(2)
+                  .trim(true)
+                  .maxDecimals(4)
+                  .inequalitySymbol(true)
+                  .toString()}
+                %
+              </Body3>
+            </XAxis>
+          ) : null}
 
           {amountConfig.otherFees.length > 0 ? (
             <React.Fragment>
@@ -618,52 +446,14 @@ export const SwapFeeInfo: FunctionComponent<{
               gasConfig={gasConfig}
               gasSimulator={gasSimulator}
               isForEVMTx={isForEVMTx}
+              ibcSwapAmountConfig={amountConfig}
             />
           </Modal>
         </Box>
-
-        {error != null ? (
-          <React.Fragment>
-            <Gutter size="0.25rem" />
-            <Box marginLeft="0.25rem">
-              <Caption2
-                color={
-                  theme.mode === "light"
-                    ? ColorPalette["orange-400"]
-                    : ColorPalette["yellow-400"]
-                }
-              >
-                {error}
-              </Caption2>
-            </Box>
-          </React.Fragment>
-        ) : null}
       </React.Fragment>
     );
   }
 );
-
-const InfoIcon: FunctionComponent<{
-  width: string;
-  height: string;
-  color: string;
-}> = ({ width, height, color }) => {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={width}
-      height={height}
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="none"
-    >
-      <path
-        d="M7.33325 4.66665H8.66659V5.99998H7.33325V4.66665ZM7.33325 7.33331H8.66659V11.3333H7.33325V7.33331ZM7.99992 1.33331C4.31992 1.33331 1.33325 4.31998 1.33325 7.99998C1.33325 11.68 4.31992 14.6666 7.99992 14.6666C11.6799 14.6666 14.6666 11.68 14.6666 7.99998C14.6666 4.31998 11.6799 1.33331 7.99992 1.33331ZM7.99992 13.3333C5.05992 13.3333 2.66659 10.94 2.66659 7.99998C2.66659 5.05998 5.05992 2.66665 7.99992 2.66665C10.9399 2.66665 13.3333 5.05998 13.3333 7.99998C13.3333 10.94 10.9399 13.3333 7.99992 13.3333Z"
-        fill={color || "currentColor"}
-      />
-    </svg>
-  );
-};
 
 const noop = (..._args: any[]) => {
   // noop

@@ -386,7 +386,7 @@
   "page.ibc-swap.components.swap-asset-info.on-chain-name": "在 {chainName}",
   "page.ibc-swap.components.swap-asset-info.modal.select-destination-chain.title": "选择目标链",
   "page.ibc-swap.components.swap-asset-info.modal.search.placeholder": "搜索链",
-  "page.ibc-swap.components.swap-fee-info.button.transaction-fee": "交易费",
+  "page.ibc-swap.components.swap-fee-info.button.transaction-fee": "费用",
   "page.ibc-swap.components.swap-fee-info.button.service-fee": "Keplr兑换费",
   "page.ibc-swap.components.slippage-modal.title": "滑价设置",
   "page.ibc-swap.components.slippage-modal.label.slippage-tolerance": "滑价容差",
