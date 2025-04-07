@@ -277,7 +277,7 @@ const FeeSelector: FunctionComponent<{
             <FeeRateSelectorStyle.FeeRate
               selected={feeRateConfig.feeRateType === "low"}
             >
-              {`${feeRate.hourFee} sat/vB`}
+              {`${feeRate.hourFee.toFixed(3)} sat/vB`}
             </FeeRateSelectorStyle.FeeRate>
             <FeeRateSelectorStyle.Description
               selected={feeRateConfig.feeRateType === "low"}
@@ -312,7 +312,7 @@ const FeeSelector: FunctionComponent<{
             <FeeRateSelectorStyle.FeeRate
               selected={feeRateConfig.feeRateType === "average"}
             >
-              {`${feeRate.halfHourFee} sat/vB`}
+              {`${feeRate.halfHourFee.toFixed(3)} sat/vB`}
             </FeeRateSelectorStyle.FeeRate>
             <FeeRateSelectorStyle.Description
               selected={feeRateConfig.feeRateType === "average"}
@@ -340,7 +340,7 @@ const FeeSelector: FunctionComponent<{
             <FeeRateSelectorStyle.FeeRate
               selected={feeRateConfig.feeRateType === "high"}
             >
-              {`${feeRate.fastestFee} sat/vB`}
+              {`${feeRate.fastestFee.toFixed(3)} sat/vB`}
             </FeeRateSelectorStyle.FeeRate>
             <FeeRateSelectorStyle.Description
               selected={feeRateConfig.feeRateType === "high"}

@@ -221,7 +221,7 @@ export const FeeControl: FunctionComponent<{
                 <FormattedMessage
                   id="components.input.fee-control.fee-rate"
                   values={{
-                    feeRate: feeRateConfig.feeRate,
+                    feeRate: feeRateConfig.feeRate.toFixed(3),
                   }}
                 />
               </Caption1>

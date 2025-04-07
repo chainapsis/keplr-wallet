@@ -15,8 +15,8 @@ export class ObservableQueryBitcoinFeeEstimates extends ObservableBitcoinIndexer
 
   get fees(): Fees {
     const DEFAULT_FEES = {
-      fastestFee: 10,
-      halfHourFee: 5,
+      fastestFee: 5,
+      halfHourFee: 4,
       hourFee: 3,
       economyFee: 2,
       minimumFee: 1,
@@ -36,13 +36,9 @@ export class ObservableQueryBitcoinFeeEstimates extends ObservableBitcoinIndexer
       return DEFAULT_FEES;
     }
 
-    const toFixed = (num: number): number => {
-      return Math.floor(num * 1000) / 1000;
-    };
-
     const getFeeForTarget = (target: number): number => {
       if (data[target.toString()]) {
-        return toFixed(data[target.toString()]);
+        return data[target.toString()];
       }
 
       if (sortedKeys.length === 0) {
@@ -56,12 +52,12 @@ export class ObservableQueryBitcoinFeeEstimates extends ObservableBitcoinIndexer
         }
       }
 
-      return toFixed(data[closest.toString()]);
+      return data[closest.toString()];
     };
 
     const minimumFee =
       sortedKeys.length > 0
-        ? toFixed(data[sortedKeys[sortedKeys.length - 1].toString()])
+        ? data[sortedKeys[sortedKeys.length - 1].toString()]
         : 1;
 
     return {
