@@ -1,3 +1,9 @@
+export enum AnalyticsTarget {
+  GA = "ga",
+  AMPLITUDE = "amplitude",
+  ALL = "all",
+}
+
 export type Properties = Record<
   string,
   string | number | boolean | Array<string | number> | undefined | null
@@ -5,7 +11,11 @@ export type Properties = Record<
 
 export interface AnalyticsClient {
   setUserId(userId: string | null): void;
-  logEvent(eventName: string, eventProperties?: Properties): void;
+  logEvent(
+    eventName: string,
+    eventProperties?: Properties,
+    target?: AnalyticsTarget
+  ): void;
   setUserProperties(properties: Properties): void;
 }
 
@@ -32,10 +42,12 @@ export class AnalyticsStore<
     protected readonly middleware: {
       logEvent?: (
         eventName: string,
-        eventProperties?: E
+        eventProperties?: E,
+        target?: AnalyticsTarget
       ) => {
         eventName: string;
         eventProperties?: E;
+        target?: AnalyticsTarget;
       };
     } = {}
   ) {}
@@ -48,13 +60,18 @@ export class AnalyticsStore<
     this.analyticsClient.setUserProperties(userProperties);
   }
 
-  logEvent(eventName: string, eventProperties?: E): void {
+  logEvent(
+    eventName: string,
+    eventProperties?: E,
+    target: AnalyticsTarget = AnalyticsTarget.GA
+  ): void {
     if (this.middleware.logEvent) {
-      const res = this.middleware.logEvent(eventName, eventProperties);
+      const res = this.middleware.logEvent(eventName, eventProperties, target);
       eventName = res.eventName;
       eventProperties = res.eventProperties;
+      target = res.target || target;
     }
 
-    this.analyticsClient.logEvent(eventName, eventProperties);
+    this.analyticsClient.logEvent(eventName, eventProperties, target);
   }
 }

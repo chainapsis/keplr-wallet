@@ -21,7 +21,7 @@
     "chromatic": "chromatic --project-token=${CHROMATIC_PROJECT_TOKEN}"
   },
   "dependencies": {
-    "@amplitude/analytics-browser": "^1.10.3",
+    "@amplitude/analytics-browser": "^2.13.0",
     "@ethersproject/bignumber": "^5.7.0",
     "@ethersproject/transactions": "^5.7.0",
     "@floating-ui/react": "^0.23.0",

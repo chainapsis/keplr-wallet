@@ -11,6 +11,7 @@ import {
   GoogleAPIKeyForMeasurement,
   CoinGeckoCoinDataByTokenAddress,
   SwapVenues,
+  AmplitudeAPIKey,
 } from "../config.ui";
 import {
   AccountStore,
@@ -592,7 +593,8 @@ export class RootStore {
           return new ExtensionAnalyticsClient(
             new ExtensionKVStore("store_google_analytics_client"),
             GoogleAPIKeyForMeasurement,
-            GoogleMeasurementId
+            GoogleMeasurementId,
+            AmplitudeAPIKey
           );
         }
       })(),

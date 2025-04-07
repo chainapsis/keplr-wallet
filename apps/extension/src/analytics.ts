@@ -1,4 +1,8 @@
-import { AnalyticsClient, Properties } from "@keplr-wallet/analytics";
+import {
+  AnalyticsClient,
+  Properties,
+  AnalyticsTarget,
+} from "@keplr-wallet/analytics";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import {
   action,
@@ -10,6 +14,7 @@ import {
 } from "mobx";
 import { KVStore } from "@keplr-wallet/common";
 import { Buffer } from "buffer/";
+import * as amplitude from "@amplitude/analytics-browser";
 
 // https://developer.chrome.com/docs/extensions/mv3/tut_analytics/
 export class ExtensionAnalyticsClient implements AnalyticsClient {
@@ -29,11 +34,16 @@ export class ExtensionAnalyticsClient implements AnalyticsClient {
 
   constructor(
     protected readonly kvStore: KVStore,
-    protected readonly apiKey: string,
-    protected readonly measurementId: string
+    protected readonly gaApiKey: string,
+    protected readonly measurementId: string,
+    protected readonly amplitudeApiKey: string
   ) {
     makeObservable(this);
-
+    if (this.amplitudeApiKey) {
+      amplitude.init(this.amplitudeApiKey, undefined, {
+        defaultTracking: false,
+      });
+    }
     this.init();
   }
 
@@ -171,9 +181,16 @@ export class ExtensionAnalyticsClient implements AnalyticsClient {
     }
 
     this._userId = userId;
+    if (this.amplitudeApiKey) {
+      amplitude.setUserId(userId);
+    }
   }
 
-  public logEvent(eventName: string, eventProperties?: Properties): void {
+  public logEvent(
+    eventName: string,
+    eventProperties?: Properties,
+    target: AnalyticsTarget = AnalyticsTarget.GA
+  ): void {
     // Disable on firefox
     if (this.isFirefox) {
       return;
@@ -185,52 +202,79 @@ export class ExtensionAnalyticsClient implements AnalyticsClient {
         return;
       }
 
-      simpleFetch(
-        `https://www.google-analytics.com`,
-        `/mp/collect?measurement_id=${this.measurementId}&api_secret=${this.apiKey}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            client_id: this._userId,
-            user_id: this._userId,
-            events: [
-              {
-                name: eventName,
-                params: {
-                  ...eventProperties,
-                  session_id: this.getAndUpdateSessionId(),
-                  engagement_time_msec: 100,
-                },
+      if (target === AnalyticsTarget.GA || target === AnalyticsTarget.ALL) {
+        this.logGAEvent(eventName, eventProperties);
+      }
+
+      if (
+        (target === AnalyticsTarget.AMPLITUDE ||
+          target === AnalyticsTarget.ALL) &&
+        this.amplitudeApiKey
+      ) {
+        this.logAmplitudeEvent(eventName, eventProperties);
+      }
+    });
+  }
+
+  protected logGAEvent(eventName: string, eventProperties?: Properties): void {
+    simpleFetch(
+      `https://www.google-analytics.com`,
+      `/mp/collect?measurement_id=${this.measurementId}&api_secret=${this.gaApiKey}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          client_id: this._userId,
+          user_id: this._userId,
+          events: [
+            {
+              name: eventName,
+              params: {
+                ...eventProperties,
+                session_id: this.getAndUpdateSessionId(),
+                engagement_time_msec: 100,
               },
-            ],
-            user_properties: (() => {
-              const res: Record<
-                string,
-                {
-                  value:
-                    | string
-                    | number
-                    | boolean
-                    | Array<string | number>
-                    | undefined
-                    | null;
-                }
-              > = {};
-              for (const key in this._userProperties) {
-                res[key] = {
-                  value: this._userProperties[key],
-                };
+            },
+          ],
+          user_properties: (() => {
+            const res: Record<
+              string,
+              {
+                value:
+                  | string
+                  | number
+                  | boolean
+                  | Array<string | number>
+                  | undefined
+                  | null;
               }
-              return res;
-            })(),
-          }),
-        }
-      ).catch((e) => {
-        console.log(e);
-      });
+            > = {};
+            for (const key in this._userProperties) {
+              res[key] = {
+                value: this._userProperties[key],
+              };
+            }
+            return res;
+          })(),
+        }),
+      }
+    ).catch((e) => {
+      console.log(e);
+    });
+  }
+
+  protected logAmplitudeEvent(
+    eventName: string,
+    eventProperties?: Properties
+  ): void {
+    if (!this.amplitudeApiKey) return;
+
+    amplitude.track(eventName, {
+      ...eventProperties,
+      session_id: this.getAndUpdateSessionId(),
+      user_properties: this._userProperties,
     });
   }
 
@@ -245,5 +289,15 @@ export class ExtensionAnalyticsClient implements AnalyticsClient {
       ...this._userProperties,
       ...properties,
     };
+
+    if (this.amplitudeApiKey) {
+      const identify = new amplitude.Identify();
+      Object.entries(properties).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          identify.set(key, value);
+        }
+      });
+      amplitude.identify(identify);
+    }
   }
 }

@@ -35,83 +35,85 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@amplitude/analytics-browser@npm:^1.10.3":
-  version: 1.10.3
-  resolution: "@amplitude/analytics-browser@npm:1.10.3"
+"@amplitude/analytics-browser@npm:^2.13.0":
+  version: 2.13.0
+  resolution: "@amplitude/analytics-browser@npm:2.13.0"
   dependencies:
-    "@amplitude/analytics-client-common": ^0.7.0
-    "@amplitude/analytics-core": ^0.13.3
-    "@amplitude/analytics-types": ^0.20.0
-    "@amplitude/plugin-page-view-tracking-browser": ^0.8.0
-    "@amplitude/plugin-web-attribution-browser": ^0.7.0
-    "@amplitude/ua-parser-js": ^0.7.31
+    "@amplitude/analytics-core": ^2.7.0
+    "@amplitude/analytics-remote-config": ^0.4.0
+    "@amplitude/plugin-autocapture-browser": ^1.1.3
+    "@amplitude/plugin-page-view-tracking-browser": ^2.3.13
     tslib: ^2.4.1
-  checksum: b5c6cfb2604c9d1babc62647903d4b92a1910d936806b400c693346a326f7b9c6970f57f40685749ee811c4094279c7bcf4b2646583f586d02f250fcb7c5d8d8
+  checksum: ee9bfd8c5e883f48de456297c72f482e303a6bd9e1df017d3b6bf71182f9bc926b967ace94989cdf463a99b05023ab98f5c3fd6c09d1e8e3cb859adee83be69b
   languageName: node
   linkType: hard
 
-"@amplitude/analytics-client-common@npm:^0.7.0":
-  version: 0.7.0
-  resolution: "@amplitude/analytics-client-common@npm:0.7.0"
+"@amplitude/analytics-client-common@npm:>=1 <3, @amplitude/analytics-client-common@npm:^2.3.12":
+  version: 2.3.12
+  resolution: "@amplitude/analytics-client-common@npm:2.3.12"
   dependencies:
-    "@amplitude/analytics-connector": ^1.4.5
-    "@amplitude/analytics-core": ^0.13.3
-    "@amplitude/analytics-types": ^0.20.0
+    "@amplitude/analytics-connector": ^1.4.8
+    "@amplitude/analytics-core": ^2.7.0
+    "@amplitude/analytics-types": ^2.9.1
     tslib: ^2.4.1
-  checksum: 710509aaddafdaf456471858280e7a08044390259ca68f89beee475e4f7c9c36aa2fcaa90b3dafc038b04bb342b45bfeca2ee7a5daaef020262756e03fbb2ec6
+  checksum: 7af21f3f4a1f86c48fa1a71012c9b69deaa36df7810fad3685da9801f7aa3f978c58fa598c670e3a9e5ff67a92359758fbacf3d4a22c11e0fd7e9660ceaf44fc
   languageName: node
   linkType: hard
 
-"@amplitude/analytics-connector@npm:^1.4.5":
-  version: 1.4.8
-  resolution: "@amplitude/analytics-connector@npm:1.4.8"
-  checksum: 72b94cc2018af4d7bec48acf2129a933bee8268fee53d737408a058eef98ac84e7239265d53885f0d8fc73774657a6620db401a44674137486ebc550b320d6e4
+"@amplitude/analytics-connector@npm:^1.4.8":
+  version: 1.6.4
+  resolution: "@amplitude/analytics-connector@npm:1.6.4"
+  checksum: 2651e296c39a0fee687e7ce4315e671ed52aab513a00ea00fd45d8199c3cda945da1a23d37de255926830a268a4135bd31a16fb45118ebdbda58615b48037005
   languageName: node
   linkType: hard
 
-"@amplitude/analytics-core@npm:^0.13.3":
-  version: 0.13.3
-  resolution: "@amplitude/analytics-core@npm:0.13.3"
+"@amplitude/analytics-core@npm:>=1 <3, @amplitude/analytics-core@npm:^2.7.0":
+  version: 2.7.0
+  resolution: "@amplitude/analytics-core@npm:2.7.0"
   dependencies:
-    "@amplitude/analytics-types": ^0.20.0
     tslib: ^2.4.1
-  checksum: c41179d42a0113c0ca75161687ba125f83ed3569c124a0ed7c62ddb74be230f03cdeefcc755edb4458bb9713a2018a674d2ed304ad2c5fc1f6be636bfffbc0d3
+  checksum: 573e42ae72ded451a53ab29d65ce9b3c903a74babe13d348319a65f12a1c0d8afac421e451c218d77ba65adc2fc8901883d49ec2d4c77df2a51eff4b2f694a52
   languageName: node
   linkType: hard
 
-"@amplitude/analytics-types@npm:^0.20.0":
-  version: 0.20.0
-  resolution: "@amplitude/analytics-types@npm:0.20.0"
-  checksum: e9c8c5e42483850ef8896efd6452a8737f2ad1a16f76e0f7c2d6c6388bd194c5ede7df7a4b373c139952ab37e4f9abedc72fe6dca565842e022a59e28289d0a3
-  languageName: node
-  linkType: hard
-
-"@amplitude/plugin-page-view-tracking-browser@npm:^0.8.0":
-  version: 0.8.0
-  resolution: "@amplitude/plugin-page-view-tracking-browser@npm:0.8.0"
+"@amplitude/analytics-remote-config@npm:^0.4.0":
+  version: 0.4.1
+  resolution: "@amplitude/analytics-remote-config@npm:0.4.1"
   dependencies:
-    "@amplitude/analytics-client-common": ^0.7.0
-    "@amplitude/analytics-types": ^0.20.0
+    "@amplitude/analytics-client-common": ">=1 <3"
+    "@amplitude/analytics-core": ">=1 <3"
+    "@amplitude/analytics-types": ">=1 <3"
     tslib: ^2.4.1
-  checksum: fd7dd556f080802554d3978f50d710a354f58a94a38059d814923a390100c8d9e765eb7145f4691b5510550cfac3b2a2cf15ba25a20f68341d6b62f320bf1260
+  checksum: faeca85d10cb61f3856480bd97b64a3c3a8c39b071f5cf21d9f6fd29bca2e0c7f660cbeb0c8e458753fba07346c60084b66a8bfdbef578a7f3159c138c6a5d03
   languageName: node
   linkType: hard
 
-"@amplitude/plugin-web-attribution-browser@npm:^0.7.0":
-  version: 0.7.0
-  resolution: "@amplitude/plugin-web-attribution-browser@npm:0.7.0"
+"@amplitude/analytics-types@npm:>=1 <3, @amplitude/analytics-types@npm:^2.9.1":
+  version: 2.9.1
+  resolution: "@amplitude/analytics-types@npm:2.9.1"
+  checksum: 82415f53714e7d459f0cac1cc72c6fb8b1d386ed726a144e693ec7a835cc6e0f7e15bd958d795dd0b843363227cb4188b4d346f7d9850819f9d3ae44828888f5
+  languageName: node
+  linkType: hard
+
+"@amplitude/plugin-autocapture-browser@npm:^1.1.3":
+  version: 1.1.3
+  resolution: "@amplitude/plugin-autocapture-browser@npm:1.1.3"
   dependencies:
-    "@amplitude/analytics-client-common": ^0.7.0
-    "@amplitude/analytics-types": ^0.20.0
+    "@amplitude/analytics-core": ^2.7.0
+    rxjs: ^7.8.1
     tslib: ^2.4.1
-  checksum: a6b5a8cf8bc09c11598544e0b97fb6a826008c876211766a8b3917301b531b4da5d1f6923e801d536c3fcdb1306171578c79e640389c0c26aad93a3d463ab1bb
+  checksum: d6470ef745ec3d23578ddf287cbc57355354e551a92367da84c320a09c2682076ba85d3e17098dff7918ded83a1fa4ffd1e84c845a122dd7a79a6299908ea178
   languageName: node
   linkType: hard
 
-"@amplitude/ua-parser-js@npm:^0.7.31":
-  version: 0.7.33
-  resolution: "@amplitude/ua-parser-js@npm:0.7.33"
-  checksum: b08ce4cd4e96fed9eebffadb4060d24751cea80caf4265e6b829b7cfdb6561431386015674b3ac330a8987b990e2ca70725d4298eb1438beccb85264848b0b34
+"@amplitude/plugin-page-view-tracking-browser@npm:^2.3.13":
+  version: 2.3.13
+  resolution: "@amplitude/plugin-page-view-tracking-browser@npm:2.3.13"
+  dependencies:
+    "@amplitude/analytics-client-common": ^2.3.12
+    "@amplitude/analytics-types": ^2.9.1
+    tslib: ^2.4.1
+  checksum: ded961c26aa62502e1ded79ca6793254b00dcc79438a613619bf187c4e04a20d6250fc2a2f65744dbe68ecdbc03450d083db74352ed5db69b0d580ddeeaf117a
   languageName: node
   linkType: hard
 
@@ -8772,7 +8774,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/extension@workspace:apps/extension"
   dependencies:
-    "@amplitude/analytics-browser": ^1.10.3
+    "@amplitude/analytics-browser": ^2.13.0
     "@babel/core": ^7.19.3
     "@babel/preset-env": ^7.24.5
     "@babel/preset-react": ^7.24.1
