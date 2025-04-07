@@ -6,11 +6,13 @@ export const BitcoinGuideBox: FunctionComponent<{
   isUnableToGetUTXOs?: boolean;
   isPartialSign?: boolean;
   isUnableToSign?: boolean;
+  isUnableToSendBitcoin?: boolean;
   criticalValidationError?: Error;
 }> = ({
   isUnableToGetUTXOs,
   isPartialSign,
   isUnableToSign,
+  isUnableToSendBitcoin,
   criticalValidationError,
 }) => {
   const intl = useIntl();
@@ -19,6 +21,7 @@ export const BitcoinGuideBox: FunctionComponent<{
     !isPartialSign &&
     !isUnableToSign &&
     !isUnableToGetUTXOs &&
+    !isUnableToSendBitcoin &&
     !criticalValidationError
   ) {
     return null;
@@ -28,12 +31,16 @@ export const BitcoinGuideBox: FunctionComponent<{
     ? "components.bitcoin-guide-box.title.critical-validation-error"
     : isUnableToGetUTXOs
     ? "components.bitcoin-guide-box.title.unable-to-get-utxos"
+    : isUnableToSendBitcoin
+    ? "components.bitcoin-guide-box.title.unable-to-send-bitcoin"
     : isUnableToSign
     ? "components.bitcoin-guide-box.title.none-of-the-inputs-belong-to-this-wallet"
     : "components.bitcoin-guide-box.title.partial-signing";
 
   const paragraphId = isUnableToGetUTXOs
     ? "components.bitcoin-guide-box.paragraph.unable-to-get-utxos"
+    : isUnableToSendBitcoin
+    ? "components.bitcoin-guide-box.paragraph.unable-to-send-bitcoin"
     : isUnableToSign
     ? "components.bitcoin-guide-box.paragraph.none-of-the-inputs-belong-to-this-wallet"
     : "components.bitcoin-guide-box.paragraph.partial-signing";

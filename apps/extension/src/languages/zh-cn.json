@@ -662,6 +662,8 @@
   "components.bitcoin-guide-box.title.critical-validation-error": "无法签名交易",
   "components.bitcoin-guide-box.title.unable-to-get-utxos": "无法获取UTXO",
   "components.bitcoin-guide-box.paragraph.unable-to-get-utxos": "UTXO暂时不可用，请稍后重试。",
+  "components.bitcoin-guide-box.title.unable-to-send-bitcoin": "没有可用的UTXO",
+  "components.bitcoin-guide-box.paragraph.unable-to-send-bitcoin": "没有可用的比特币进行转账。请确认余额充足，且没有被锁定或正在进行其他交易。",
   "components.bitcoin-guide-box.title.partial-signing": "部分签名",
   "components.bitcoin-guide-box.paragraph.partial-signing": "您正在对交易进行部分签名，仅对该钱包的输入进行签名。",
   "components.bitcoin-guide-box.title.none-of-the-inputs-belong-to-this-wallet": "没有属于该钱包的输入",
