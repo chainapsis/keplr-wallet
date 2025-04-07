@@ -241,11 +241,20 @@ const CarouselPage: FunctionComponent<{
       {notePageData.image ? (
         <CompImage
           alt={notePageData.title}
-          src={
-            theme.mode === "light"
+          src={(() => {
+            if (theme.mode === "light") {
+              if (notePageData.image.light.endsWith("ext_btc-light.gif")) {
+                return require("../../../../public/assets/img/ext_btc-light.gif");
+              }
+            }
+            if (notePageData.image.default.endsWith("ext_btc-dark.gif")) {
+              return require("../../../../public/assets/img/ext_btc-dark.gif");
+            }
+
+            return theme.mode === "light"
               ? notePageData.image.light
-              : notePageData.image.default
-          }
+              : notePageData.image.default;
+          })()}
           style={{
             aspectRatio: notePageData.image.aspectRatio,
             width: "100%",
