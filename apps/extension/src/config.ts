@@ -3129,7 +3129,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:taproot",
     chainName: "Bitcoin",
     chainSymbolImageUrl:
-      "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bitcoin/mainnet.png",
     linkedChainKey:
       "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
     bitcoin: {
@@ -3148,7 +3148,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
           coinDecimals: 8,
           coinGeckoId: "bitcoin",
           coinImageUrl:
-            "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+            "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bitcoin/mainnet.png",
         },
       ],
     },
@@ -3158,7 +3158,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:native-segwit",
     chainName: "Bitcoin",
     chainSymbolImageUrl:
-      "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bitcoin/mainnet.png",
     linkedChainKey:
       "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
     bitcoin: {
@@ -3177,7 +3177,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
           coinDecimals: 8,
           coinGeckoId: "bitcoin",
           coinImageUrl:
-            "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+            "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bitcoin/mainnet.png",
         },
       ],
     },
@@ -3187,7 +3187,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943:taproot",
     chainName: "Bitcoin Testnet",
     chainSymbolImageUrl:
-      "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bitcoin/testnet.png",
     linkedChainKey:
       "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943",
     bitcoin: {
@@ -3205,7 +3205,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
           coinMinimalDenom: "sats-testnet",
           coinDecimals: 8,
           coinImageUrl:
-            "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+            "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bitcoin/testnet.png",
         },
       ],
     },
@@ -3215,7 +3215,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943:native-segwit",
     chainName: "Bitcoin Testnet",
     chainSymbolImageUrl:
-      "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bitcoin/testnet.png",
     linkedChainKey:
       "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943",
     bitcoin: {
@@ -3233,7 +3233,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
           coinMinimalDenom: "sats-testnet",
           coinDecimals: 8,
           coinImageUrl:
-            "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+            "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bitcoin/testnet.png",
         },
       ],
     },
@@ -3243,7 +3243,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6:taproot",
     chainName: "Bitcoin Signet",
     chainSymbolImageUrl:
-      "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bitcoin/signet.png",
     linkedChainKey:
       "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6",
     bitcoin: {
@@ -3261,7 +3261,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
           coinMinimalDenom: "sats-signet",
           coinDecimals: 8,
           coinImageUrl:
-            "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+            "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bitcoin/signet.png",
         },
       ],
     },
@@ -3271,7 +3271,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6:native-segwit",
     chainName: "Bitcoin Signet",
     chainSymbolImageUrl:
-      "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bitcoin/signet.png",
     linkedChainKey:
       "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6",
     bitcoin: {
@@ -3289,7 +3289,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
           coinMinimalDenom: "sats-signet",
           coinDecimals: 8,
           coinImageUrl:
-            "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040",
+            "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bitcoin/signet.png",
         },
       ],
     },
