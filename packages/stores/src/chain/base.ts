@@ -28,6 +28,8 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { keepAlive } from "mobx-utils";
 import { sortedJsonByKeyStringify } from "@keplr-wallet/common";
 
+const forceFindCurrencyCache: Map<string, AppCurrency> = new Map();
+
 export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
   implements IChainInfoImpl<C>
 {
@@ -378,11 +380,17 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
   forceFindCurrency(coinMinimalDenom: string): AppCurrency {
     const currency = this.findCurrency(coinMinimalDenom);
     if (!currency) {
-      return {
+      // ref을 유지하기 위해서 cache를 사용한다.
+      if (forceFindCurrencyCache.has(coinMinimalDenom)) {
+        return forceFindCurrencyCache.get(coinMinimalDenom)!;
+      }
+      const cur = {
         coinMinimalDenom,
         coinDenom: coinMinimalDenom,
         coinDecimals: 0,
       };
+      forceFindCurrencyCache.set(coinMinimalDenom, cur);
+      return cur;
     }
     return currency;
   }
@@ -390,11 +398,17 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
   forceFindCurrencyWithoutReaction(coinMinimalDenom: string): AppCurrency {
     const currency = this.findCurrencyWithoutReaction(coinMinimalDenom);
     if (!currency) {
-      return {
+      // ref을 유지하기 위해서 cache를 사용한다.
+      if (forceFindCurrencyCache.has(coinMinimalDenom)) {
+        return forceFindCurrencyCache.get(coinMinimalDenom)!;
+      }
+      const cur = {
         coinMinimalDenom,
         coinDenom: coinMinimalDenom,
         coinDecimals: 0,
       };
+      forceFindCurrencyCache.set(coinMinimalDenom, cur);
+      return cur;
     }
     return currency;
   }

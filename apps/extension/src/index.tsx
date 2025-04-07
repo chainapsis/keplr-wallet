@@ -46,8 +46,8 @@ import { SettingGeneralFiatPage } from "./pages/setting/general/fiat";
 import { SettingGeneralThemePage } from "./pages/setting/general/theme";
 import { SettingGeneralAuthZPage } from "./pages/setting/general/authz";
 import { SettingGeneralAuthZRevokePage } from "./pages/setting/general/authz/revoke";
-import { SettingGeneralDeleteSuggestChainPage } from "./pages/setting/general/delete-suggest-chain";
 import { SettingAdvancedPage } from "./pages/setting/advanced";
+import { SettingGeneralDeleteSuggestChainPage } from "./pages/setting/advanced/delete-suggest-chain";
 import { SettingSecurityPage } from "./pages/setting/security";
 import { SettingSecurityPermissionPage } from "./pages/setting/security/permission";
 import { PermissionPage } from "./pages/permission";
@@ -435,12 +435,12 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
                 element={<SettingGeneralLinkKeplrMobilePage />}
               />
               <Route
-                path="setting/general/delete-suggest-chain"
-                element={<SettingGeneralDeleteSuggestChainPage />}
-              />
-              <Route
                 path="/setting/advanced"
                 element={<SettingAdvancedPage />}
+              />
+              <Route
+                path="setting/advanced/delete-suggest-chain"
+                element={<SettingGeneralDeleteSuggestChainPage />}
               />
               <Route
                 path="/setting/advanced/endpoint"

@@ -19,6 +19,8 @@ import { ColorPalette } from "../../styles";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import {
   EmptyAmountError,
+  IFeeConfig,
+  IGasConfig,
   useGasSimulator,
   useTxConfigsValidate,
   ZeroAmountError,
@@ -58,6 +60,7 @@ import {
   UnsignedEVMTransactionWithErc20Approvals,
 } from "@keplr-wallet/stores-eth";
 import { EthTxStatus } from "@keplr-wallet/types";
+import { InsufficientFeeError } from "@keplr-wallet/hooks";
 
 const TextButtonStyles = {
   Container: styled.div`
@@ -182,7 +185,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
       ? inChainAccount.ethereumHexAddress
       : inChainAccount.bech32Address,
     // TODO: config로 빼기
-    200000,
+    300000,
     outChainId,
     outCurrency,
     swapFeeBps
@@ -378,7 +381,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         }
       }
 
-      return `${ibcSwapConfigs.amountConfig.outChainId}/${ibcSwapConfigs.amountConfig.outCurrency.coinMinimalDenom}/${type}`;
+      return `${ibcSwapConfigs.amountConfig.chainId}/${ibcSwapConfigs.amountConfig.outChainId}/${ibcSwapConfigs.amountConfig.currency.coinMinimalDenom}/${ibcSwapConfigs.amountConfig.outCurrency.coinMinimalDenom}/${type}`;
     })(),
     () => {
       if (!ibcSwapConfigs.amountConfig.currency) {
@@ -1789,6 +1792,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
         <WarningGuideBox
           amountConfig={ibcSwapConfigs.amountConfig}
+          feeConfig={ibcSwapConfigs.feeConfig}
+          gasConfig={ibcSwapConfigs.gasConfig}
           title={
             isHighPriceImpact &&
             !calculatingTxError &&
@@ -1895,106 +1900,147 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
 const WarningGuideBox: FunctionComponent<{
   amountConfig: IBCSwapAmountConfig;
+  feeConfig: IFeeConfig;
+  gasConfig: IGasConfig;
 
   forceError?: Error;
   forceWarning?: Error;
   title?: string;
-}> = observer(({ amountConfig, forceError, forceWarning, title }) => {
-  const error: string | undefined = (() => {
-    if (forceError) {
-      return forceError.message || forceError.toString();
-    }
+}> = observer(
+  ({ amountConfig, feeConfig, gasConfig, forceError, forceWarning, title }) => {
+    const intl = useIntl();
 
-    const uiProperties = amountConfig.uiProperties;
-
-    const err = uiProperties.error || uiProperties.warning;
-
-    if (err instanceof EmptyAmountError) {
-      return;
-    }
-
-    if (err instanceof ZeroAmountError) {
-      return;
-    }
-
-    if (err) {
-      return err.message || err.toString();
-    }
-
-    const queryError = amountConfig.getQueryIBCSwap()?.getQueryRoute()?.error;
-    if (queryError) {
-      return queryError.message || queryError.toString();
-    }
-
-    if (forceWarning) {
-      return forceWarning.message || forceWarning.toString();
-    }
-  })();
-
-  // Collapse됐을때는 이미 error가 없어졌기 때문이다.
-  // 그러면 트랜지션 중에 이미 내용은 사라져있기 때문에
-  // 이 문제를 해결하기 위해서 마지막 오류를 기억해야 한다.
-  const [lastError, setLastError] = useState("");
-  useLayoutEffect(() => {
-    if (error != null) {
-      setLastError(error);
-    }
-  }, [error]);
-
-  const collapsed = error == null;
-
-  const globalSimpleBar = useGlobarSimpleBar();
-  useEffect(() => {
-    if (!collapsed) {
-      const timeoutId = setTimeout(() => {
-        const el = globalSimpleBar.ref.current?.getScrollElement();
-        if (el) {
-          // 오류 메세지가 가장 밑에 있는 관계로 유저가 잘 못볼수도 있기 때문에
-          // 트랜지션 종료 이후에 스크롤을 맨 밑으로 내린다.
-          // 어차피 높이는 대충 정해져있기 때문에 대충 큰 값을 넣으면 가장 밑으로 스크롤 된다.
-          el.scrollTo({
-            top: 1000,
-            behavior: "smooth",
+    const error: string | undefined = (() => {
+      if (feeConfig.uiProperties.error) {
+        if (feeConfig.uiProperties.error instanceof InsufficientFeeError) {
+          return intl.formatMessage({
+            id: "components.input.fee-control.error.insufficient-fee",
           });
         }
-      }, 300);
-      return () => {
-        clearTimeout(timeoutId);
-      };
-    }
-  }, [collapsed, globalSimpleBar.ref]);
 
-  const intl = useIntl();
+        return (
+          feeConfig.uiProperties.error.message ||
+          feeConfig.uiProperties.error.toString()
+        );
+      }
 
-  const errorText = (() => {
-    const err = error || lastError;
+      if (feeConfig.uiProperties.warning) {
+        return (
+          feeConfig.uiProperties.warning.message ||
+          feeConfig.uiProperties.warning.toString()
+        );
+      }
 
-    if (err && err === "could not find a path to execute the requested swap") {
-      return intl.formatMessage({
-        id: "page.ibc-swap.error.no-route-found",
-      });
-    }
+      if (gasConfig.uiProperties.error) {
+        return (
+          gasConfig.uiProperties.error.message ||
+          gasConfig.uiProperties.error.toString()
+        );
+      }
 
-    return err;
-  })();
+      if (gasConfig.uiProperties.warning) {
+        return (
+          gasConfig.uiProperties.warning.message ||
+          gasConfig.uiProperties.warning.toString()
+        );
+      }
 
-  return (
-    <React.Fragment>
-      {/* 별 차이는 없기는한데 gutter와 실제 컴포넌트의 트랜지션을 분리하는게 아주 약간 더 자연스러움 */}
-      <VerticalCollapseTransition collapsed={collapsed}>
-        <Gutter size="0.75rem" />
-      </VerticalCollapseTransition>
-      <VerticalCollapseTransition collapsed={collapsed}>
-        <GuideBox
-          color="warning"
-          title={title || errorText}
-          paragraph={title ? errorText : undefined}
-          hideInformationIcon={!title}
-        />
-      </VerticalCollapseTransition>
-    </React.Fragment>
-  );
-});
+      if (forceError) {
+        return forceError.message || forceError.toString();
+      }
+
+      const uiProperties = amountConfig.uiProperties;
+
+      const err = uiProperties.error || uiProperties.warning;
+
+      if (err instanceof EmptyAmountError) {
+        return;
+      }
+
+      if (err instanceof ZeroAmountError) {
+        return;
+      }
+
+      if (err) {
+        return err.message || err.toString();
+      }
+
+      const queryError = amountConfig.getQueryIBCSwap()?.getQueryRoute()?.error;
+      if (queryError) {
+        return queryError.message || queryError.toString();
+      }
+
+      if (forceWarning) {
+        return forceWarning.message || forceWarning.toString();
+      }
+    })();
+
+    // Collapse됐을때는 이미 error가 없어졌기 때문이다.
+    // 그러면 트랜지션 중에 이미 내용은 사라져있기 때문에
+    // 이 문제를 해결하기 위해서 마지막 오류를 기억해야 한다.
+    const [lastError, setLastError] = useState("");
+    useLayoutEffect(() => {
+      if (error != null) {
+        setLastError(error);
+      }
+    }, [error]);
+
+    const collapsed = error == null;
+
+    const globalSimpleBar = useGlobarSimpleBar();
+    useEffect(() => {
+      if (!collapsed) {
+        const timeoutId = setTimeout(() => {
+          const el = globalSimpleBar.ref.current?.getScrollElement();
+          if (el) {
+            // 오류 메세지가 가장 밑에 있는 관계로 유저가 잘 못볼수도 있기 때문에
+            // 트랜지션 종료 이후에 스크롤을 맨 밑으로 내린다.
+            // 어차피 높이는 대충 정해져있기 때문에 대충 큰 값을 넣으면 가장 밑으로 스크롤 된다.
+            el.scrollTo({
+              top: 1000,
+              behavior: "smooth",
+            });
+          }
+        }, 300);
+        return () => {
+          clearTimeout(timeoutId);
+        };
+      }
+    }, [collapsed, globalSimpleBar.ref]);
+
+    const errorText = (() => {
+      const err = error || lastError;
+
+      if (
+        err &&
+        err === "could not find a path to execute the requested swap"
+      ) {
+        return intl.formatMessage({
+          id: "page.ibc-swap.error.no-route-found",
+        });
+      }
+
+      return err;
+    })();
+
+    return (
+      <React.Fragment>
+        {/* 별 차이는 없기는한데 gutter와 실제 컴포넌트의 트랜지션을 분리하는게 아주 약간 더 자연스러움 */}
+        <VerticalCollapseTransition collapsed={collapsed}>
+          <Gutter size="0.75rem" />
+        </VerticalCollapseTransition>
+        <VerticalCollapseTransition collapsed={collapsed}>
+          <GuideBox
+            color="warning"
+            title={title || errorText}
+            paragraph={title ? errorText : undefined}
+            hideInformationIcon={!title}
+          />
+        </VerticalCollapseTransition>
+      </React.Fragment>
+    );
+  }
+);
 
 const SettingIcon: FunctionComponent<{
   width: string;

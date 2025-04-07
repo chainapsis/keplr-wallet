@@ -48,6 +48,17 @@ export const SettingAdvancedPage: FunctionComponent = observer(() => {
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/advanced/endpoint")}
           />
+
+          <PageButton
+            title={intl.formatMessage({
+              id: "page.setting.advanced.manage-non-native-chains-title",
+            })}
+            paragraph={intl.formatMessage({
+              id: "page.setting.advanced.manage-non-native-chains-paragraph",
+            })}
+            endIcon={<RightArrowIcon />}
+            onClick={() => navigate("/setting/advanced/delete-suggest-chain")}
+          />
         </Stack>
       </Box>
     </HeaderLayout>

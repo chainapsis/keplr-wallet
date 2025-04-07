@@ -6,6 +6,7 @@ import {
   H5,
   Subtitle1,
   Subtitle3,
+  Subtitle4,
 } from "../../typography";
 import { ColorPalette } from "../../../styles";
 import styled, { useTheme } from "styled-components";
@@ -24,12 +25,15 @@ import {
 } from "@keplr-wallet/hooks";
 import { useStore } from "../../../stores";
 import { GuideBox } from "../../guide-box";
-import { Dec, PricePretty } from "@keplr-wallet/unit";
+import { Dec, PricePretty, IntPretty } from "@keplr-wallet/unit";
 import { Box } from "../../box";
 import { FormattedMessage, useIntl } from "react-intl";
-import { XAxis } from "../../axis";
+import { XAxis, YAxis } from "../../axis";
 import { Gutter } from "../../gutter";
 import { VerticalCollapseTransition } from "../../transition/vertical-collapse";
+import { Tooltip } from "../../tooltip";
+import { InformationOutlineIcon } from "../../icon";
+import { IBCSwapAmountConfig } from "@keplr-wallet/hooks-internal";
 
 const Styles = {
   Container: styled.div`
@@ -54,6 +58,7 @@ export const TransactionFeeModal: FunctionComponent<{
   senderConfig: ISenderConfig;
   feeConfig: IFeeConfig;
   gasConfig: IGasConfig;
+  ibcSwapAmountConfig?: IBCSwapAmountConfig;
   gasSimulator?: IGasSimulator;
   disableAutomaticFeeSet?: boolean;
   isForEVMTx?: boolean;
@@ -63,6 +68,7 @@ export const TransactionFeeModal: FunctionComponent<{
     senderConfig,
     feeConfig,
     gasConfig,
+    ibcSwapAmountConfig,
     gasSimulator,
     disableAutomaticFeeSet,
     isForEVMTx,
@@ -147,6 +153,15 @@ export const TransactionFeeModal: FunctionComponent<{
     const isFeeSetByUser = isForEVMTx && feeConfig.type !== "manual";
     const isShowingFeeWithGasEstimated =
       !!isGasSimulatorEnabled && !!gasSimulator?.gasEstimated && isFeeSetByUser;
+
+    const swapFeeRate = ibcSwapAmountConfig
+      ? new IntPretty(ibcSwapAmountConfig.swapFeeBps)
+          .moveDecimalPointLeft(2)
+          .trim(true)
+          .maxDecimals(4)
+          .inequalitySymbol(true)
+          .toString()
+      : undefined;
 
     return (
       <Styles.Container>
@@ -446,6 +461,48 @@ export const TransactionFeeModal: FunctionComponent<{
             <Gutter size="0.75rem" />
           </VerticalCollapseTransition>
           <Gutter size="0" />
+
+          {ibcSwapAmountConfig?.swapFeeBps ? (
+            <YAxis alignX="center">
+              <XAxis alignY="center" gap="0.25rem">
+                <Subtitle4
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-300"]
+                      : ColorPalette["gray-200"]
+                  }
+                >
+                  {intl.formatMessage({
+                    id: "page.ibc-swap.components.swap-fee-info.button.service-fee",
+                  })}{" "}
+                  {swapFeeRate ? `${swapFeeRate}%` : ""}
+                </Subtitle4>
+                <Tooltip
+                  content={intl.formatMessage(
+                    {
+                      id:
+                        ibcSwapAmountConfig.swapFeeBps === 10
+                          ? "page.ibc-swap.components.swap-fee-info.button.service-fee-stable-coin.paragraph"
+                          : "page.ibc-swap.components.swap-fee-info.button.service-fee.paragraph",
+                    },
+                    {
+                      rate: swapFeeRate,
+                    }
+                  )}
+                >
+                  <InformationOutlineIcon
+                    width="1rem"
+                    height="1rem"
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-200"]
+                        : ColorPalette["gray-300"]
+                    }
+                  />
+                </Tooltip>
+              </XAxis>
+            </YAxis>
+          ) : null}
 
           <Button
             type="button"

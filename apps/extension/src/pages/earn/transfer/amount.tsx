@@ -241,7 +241,41 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
     console.log(e);
   }
 
+  // skip으로부터 channel 정보를 불러올 수 없을때 사용된다.
+  // skipQueriesStore.queryIBCPacketForwardingTransfer.getIBCChannels와 관련되어있는데
+  // 위의 메소드에서 주요한 쿼리는 queryAssetsFromSource이므로
+  // queryAssetsFromSource가 쿼리가 끝났는데도 channel 정보가 없다면 skip으로부터 불러오지 못한 것으로 생각한다.
+  // 하지만 추가적인 쿼리 또는 로직이 있므므로 약간의 delay를 준다.
+  const [failedToFetchSkipChannel, setFailedToFetchSkipChannel] =
+    useState(false);
+  const assetFromSourceIsFetching =
+    skipQueriesStore.queryAssetsFromSource.getSourceAsset(
+      chainId,
+      currency.coinMinimalDenom
+    ).isFetching;
+  useEffect(() => {
+    let timer: NodeJS.Timeout | undefined;
+
+    if (!assetFromSourceIsFetching && !ibcChannelFluent) {
+      timer = setTimeout(() => {
+        setFailedToFetchSkipChannel(true);
+      }, 1000);
+    } else {
+      setFailedToFetchSkipChannel(false);
+    }
+
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
+  }, [assetFromSourceIsFetching, ibcChannelFluent]);
+
   const error = useMemo(() => {
+    if (failedToFetchSkipChannel) {
+      return "This USDC is from an unsupported IBC channel and can't be used for Earn";
+    }
+
     const uiProperties = sendConfigs.amountConfig.uiProperties;
 
     const err =
@@ -264,6 +298,7 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
   }, [
     sendConfigs.amountConfig.uiProperties,
     sendConfigs.feeConfig.uiProperties,
+    failedToFetchSkipChannel,
   ]);
 
   useFeeOptionSelectionOnInit(uiConfigStore, sendConfigs.feeConfig, false);

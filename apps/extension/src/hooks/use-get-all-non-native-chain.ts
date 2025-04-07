@@ -118,6 +118,10 @@ export const useGetAllNonNativeChain = ({
 
           const isLedgerSupported = (() => {
             try {
+              if (chainInfo.features?.includes("force-enable-evm-ledger")) {
+                return true;
+              }
+
               KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
                 chainInfo.chainId
               );

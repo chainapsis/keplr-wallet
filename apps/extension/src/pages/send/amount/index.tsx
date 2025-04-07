@@ -1004,7 +1004,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                     swapFeeBpsReceiver[0],
                     priorOutAmount,
                     convertToBech32IfNeed(
-                      ibcSwapConfigsForBridge.recipientConfig.value,
+                      ibcSwapConfigsForBridge.recipientConfig.recipient,
                       chainStore.getChain(
                         ibcSwapConfigsForBridge.recipientConfig.chainId
                       ),
@@ -2486,7 +2486,7 @@ function useGetGasSimulationForBridge(
         // 코스모스 스왑은 스왑베뉴가 무조건 하나라고 해서 일단 처음걸 쓰기로 한다.
         swapFeeBpsReceiver[0],
         convertToBech32IfNeed(
-          ibcSwapConfigsForBridge.recipientConfig.value,
+          ibcSwapConfigsForBridge.recipientConfig.recipient,
           chainStore.getChain(ibcSwapConfigsForBridge.recipientConfig.chainId),
           chainStore.isEvmChain(
             ibcSwapConfigsForBridge.recipientConfig.chainId
