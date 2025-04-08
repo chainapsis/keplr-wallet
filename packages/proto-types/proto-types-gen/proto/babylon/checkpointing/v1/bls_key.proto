@@ -1,0 +1,62 @@
+syntax = "proto3";
+package babylon.checkpointing.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/babylonlabs-io/babylon/x/checkpointing/types";
+
+// BlsKey wraps BLS public key with PoP
+message BlsKey {
+  // pubkey is the BLS public key of a validator
+  bytes pubkey = 1
+      [ (gogoproto.customtype) =
+            "github.com/babylonlabs-io/babylon/crypto/bls12381.PublicKey" ];
+
+  // pop is the proof-of-possession of the BLS key
+  ProofOfPossession pop = 2;
+}
+
+// ProofOfPossession defines proof for the ownership of Ed25519 and BLS private
+// keys
+message ProofOfPossession {
+  // ed25519_sig is used for verification, ed25519_sig = sign(key = Ed25519_sk,
+  // data = BLS_pk)
+  bytes ed25519_sig = 1;
+  // bls_sig is the result of PoP, bls_sig = sign(key = BLS_sk, data =
+  // ed25519_sig)
+  bytes bls_sig = 2
+      [ (gogoproto.customtype) =
+            "github.com/babylonlabs-io/babylon/crypto/bls12381.Signature" ];
+}
+
+// ValidatorWithBLSSet defines a set of validators with their BLS public keys
+message ValidatorWithBlsKeySet { repeated ValidatorWithBlsKey val_set = 1; }
+
+// ValidatorWithBlsKey couples validator address, voting power, and its bls
+// public key
+message ValidatorWithBlsKey {
+  // validator_address is the address of the validator
+  string validator_address = 1;
+  // bls_pub_key is the BLS public key of the validator
+  bytes bls_pub_key = 2;
+  // voting_power is the voting power of the validator at the given epoch
+  uint64 voting_power = 3;
+}
+
+// VoteExtension defines the structure used to create a BLS vote extension.
+message VoteExtension {
+  // signer is the address of the vote extension signer
+  string signer = 1;
+  // validator_address is the address of the validator
+  string validator_address = 2;
+  // block_hash is the hash of the block that the vote extension is signed over
+  bytes block_hash = 3 [ (gogoproto.customtype) = "BlockHash" ];
+  // epoch_num is the epoch number of the vote extension
+  uint64 epoch_num = 4;
+  // height is the height of the vote extension
+  uint64 height =5;
+  // bls_sig is the BLS signature
+  bytes bls_sig = 6
+  [ (gogoproto.customtype) =
+    "github.com/babylonlabs-io/babylon/crypto/bls12381.Signature" ];
+}

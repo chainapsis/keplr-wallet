@@ -1,0 +1,10 @@
+syntax = "proto3";
+package babylon.btccheckpoint.v1;
+
+import "gogoproto/gogo.proto";
+import "babylon/btccheckpoint/v1/params.proto";
+
+option go_package = "github.com/babylonlabs-io/babylon/x/btccheckpoint/types";
+
+// GenesisState defines the btccheckpoint module's genesis state.
+message GenesisState { Params params = 1 [ (gogoproto.nullable) = false ]; }

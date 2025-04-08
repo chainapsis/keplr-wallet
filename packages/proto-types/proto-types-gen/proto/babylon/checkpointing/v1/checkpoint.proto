@@ -1,0 +1,108 @@
+syntax = "proto3";
+package babylon.checkpointing.v1;
+
+import "google/protobuf/timestamp.proto";
+import "gogoproto/gogo.proto";
+import "tendermint/abci/types.proto";
+
+option go_package = "github.com/babylonlabs-io/babylon/x/checkpointing/types";
+
+// RawCheckpoint wraps the BLS multi sig with metadata
+message RawCheckpoint {
+  option (gogoproto.equal) = true;
+
+  // epoch_num defines the epoch number the raw checkpoint is for
+  uint64 epoch_num = 1;
+  // block_hash defines the 'BlockID.Hash', which is the hash of
+  // the block that individual BLS sigs are signed on
+  bytes block_hash = 2 [ (gogoproto.customtype) = "BlockHash" ];
+  // bitmap defines the bitmap that indicates the signers of the BLS multi sig
+  bytes bitmap = 3;
+  // bls_multi_sig defines the multi sig that is aggregated from individual BLS
+  // sigs
+  bytes bls_multi_sig = 4
+      [ (gogoproto.customtype) =
+            "github.com/babylonlabs-io/babylon/crypto/bls12381.Signature" ];
+}
+
+// RawCheckpointWithMeta wraps the raw checkpoint with metadata.
+message RawCheckpointWithMeta {
+  option (gogoproto.equal) = true;
+
+  RawCheckpoint ckpt = 1;
+  // status defines the status of the checkpoint
+  CheckpointStatus status = 2;
+  // bls_aggr_pk defines the aggregated BLS public key
+  bytes bls_aggr_pk = 3
+      [ (gogoproto.customtype) =
+            "github.com/babylonlabs-io/babylon/crypto/bls12381.PublicKey" ];
+  // power_sum defines the accumulated voting power for the checkpoint
+  uint64 power_sum = 4;
+  // lifecycle defines the lifecycle of this checkpoint, i.e., each state
+  // transition and the time (in both timestamp and block height) of this
+  // transition.
+  repeated CheckpointStateUpdate lifecycle = 5;
+}
+
+// MsgInjectedCheckpoint wraps the checkpoint and the extended votes
+// Note: this is a special message type that is only for internal ABCI++ usage
+// for inserting checkpoint into the block
+message MsgInjectedCheckpoint {
+  RawCheckpointWithMeta ckpt = 1;
+  // extended_commit_info is the commit info including the vote extensions
+  // from the previous proposal
+  tendermint.abci.ExtendedCommitInfo extended_commit_info = 2;
+}
+
+// CheckpointStatus is the status of a checkpoint.
+enum CheckpointStatus {
+  option (gogoproto.goproto_enum_prefix) = false;
+
+  // ACCUMULATING defines a checkpoint that is awaiting for BLS signatures.
+  CKPT_STATUS_ACCUMULATING = 0
+      [ (gogoproto.enumvalue_customname) = "Accumulating" ];
+  // SEALED defines a checkpoint that has accumulated sufficient BLS signatures.
+  CKPT_STATUS_SEALED = 1 [ (gogoproto.enumvalue_customname) = "Sealed" ];
+  // SUBMITTED defines a checkpoint that is included on BTC.
+  CKPT_STATUS_SUBMITTED = 2 [ (gogoproto.enumvalue_customname) = "Submitted" ];
+  // CONFIRMED defines a checkpoint that is k-deep on BTC.
+  CKPT_STATUS_CONFIRMED = 3 [ (gogoproto.enumvalue_customname) = "Confirmed" ];
+  // FINALIZED defines a checkpoint that is w-deep on BTC.
+  CKPT_STATUS_FINALIZED = 4 [ (gogoproto.enumvalue_customname) = "Finalized" ];
+}
+
+// CheckpointStateUpdate defines a state transition on the checkpoint.
+message CheckpointStateUpdate {
+  option (gogoproto.equal) = true;
+
+  // state defines the event of a state transition towards this state
+  CheckpointStatus state = 1;
+  // block_height is the height of the Babylon block that triggers the state
+  // update
+  uint64 block_height = 2;
+  // block_time is the timestamp in the Babylon block that triggers the state
+  // update
+  google.protobuf.Timestamp block_time = 3 [ (gogoproto.stdtime) = true ];
+}
+
+// BlsSig wraps the BLS sig with metadata.
+message BlsSig {
+  option (gogoproto.equal) = false;
+
+  // epoch_num defines the epoch number that the BLS sig is signed on
+  uint64 epoch_num = 1;
+  // block_hash defines the 'BlockID.Hash', which is the hash of
+  // the block that individual BLS sigs are signed on
+  bytes block_hash = 2 [ (gogoproto.customtype) = "BlockHash" ];
+  bytes bls_sig = 3
+      [ (gogoproto.customtype) =
+            "github.com/babylonlabs-io/babylon/crypto/bls12381.Signature" ];
+  // can't find cosmos_proto.scalar when compiling due to cosmos v0.45.4 does
+  // not support scalar string signer_address = 4 [(cosmos_proto.scalar) =
+  // "cosmos.AddressString"]
+  // the signer_address defines the address of the
+  // signer
+  string signer_address = 4;
+  // validator_address defines the validator's consensus address
+  string validator_address = 5;
+}

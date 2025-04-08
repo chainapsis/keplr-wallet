@@ -1,0 +1,100 @@
+syntax = "proto3";
+package babylon.epoching.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/babylonlabs-io/babylon/x/epoching/types";
+
+// EventBeginEpoch is the event emitted when an epoch has started
+message EventBeginEpoch { uint64 epoch_number = 1; }
+
+// EventEndEpoch is the event emitted when an epoch has ended
+message EventEndEpoch { uint64 epoch_number = 1; }
+
+// EventHandleQueuedMsg is the event emitted when a queued message has been
+// handled
+message EventHandleQueuedMsg {
+  string original_event_type = 1;
+  uint64 epoch_number = 2;
+  uint64 height = 3;
+  bytes tx_id = 4;
+  bytes msg_id = 5;
+  repeated bytes original_attributes = 6
+      [ (gogoproto.customtype) =
+            "github.com/cometbft/cometbft/abci/types.EventAttribute" ];
+  string error = 7;
+}
+
+// EventSlashThreshold is the event emitted when a set of validators have been
+// slashed
+message EventSlashThreshold {
+  int64 slashed_voting_power = 1;
+  int64 total_voting_power = 2;
+  repeated bytes slashed_validators = 3;
+}
+
+// EventWrappedDelegate is the event emitted when a MsgWrappedDelegate has been
+// queued
+message EventWrappedDelegate {
+  string delegator_address = 1;
+  string validator_address = 2;
+  uint64 amount = 3;
+  string denom = 4;
+  uint64 epoch_boundary = 5;
+}
+
+// EventWrappedUndelegate is the event emitted when a MsgWrappedUndelegate has
+// been queued
+message EventWrappedUndelegate {
+  string delegator_address = 1;
+  string validator_address = 2;
+  uint64 amount = 3;
+  string denom = 4;
+  uint64 epoch_boundary = 5;
+}
+
+// EventWrappedBeginRedelegate is the event emitted when a
+// MsgWrappedBeginRedelegate has been queued
+message EventWrappedBeginRedelegate {
+  string delegator_address = 1;
+  string source_validator_address = 2;
+  string destination_validator_address = 3;
+  uint64 amount = 4;
+  string denom = 5;
+  uint64 epoch_boundary = 6;
+}
+
+// EventWrappedCancelUnbondingDelegation is the event emitted when a
+// MsgWrappedCancelUnbondingDelegation has been queued
+message EventWrappedCancelUnbondingDelegation {
+  string delegator_address = 1;
+  string validator_address = 2;
+  uint64 amount = 3;
+  int64 creation_height = 4;
+  uint64 epoch_boundary = 5;
+}
+
+// EventWrappedEditValidator is the event emitted when a
+// MsgWrappedEditValidator has been queued
+message EventWrappedEditValidator {
+  string validator_address = 1;
+  uint64 epoch_boundary = 2;
+}
+
+// EventWrappedStakingUpdateParams is the event emitted when a
+// MsgWrappedStakingUpdateParams has been queued
+message EventWrappedStakingUpdateParams {
+  // unbonding_time is the time duration of unbonding.
+  string unbonding_time = 1;
+  // max_validators is the maximum number of validators.
+  uint32 max_validators = 2;
+  // max_entries is the max entries for either unbonding delegation or redelegation (per pair/trio).
+  uint32 max_entries = 3;
+  // historical_entries is the number of historical entries to persist.
+  uint32 historical_entries = 4;
+  // bond_denom defines the bondable coin denomination.
+  string bond_denom = 5;
+  // min_commission_rate is the chain-wide minimum commission rate that a validator can charge their delegators
+  string min_commission_rate = 6;
+  uint64 epoch_boundary = 7;
+}

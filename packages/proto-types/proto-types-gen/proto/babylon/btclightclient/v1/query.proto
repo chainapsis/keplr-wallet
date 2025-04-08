@@ -1,0 +1,156 @@
+syntax = "proto3";
+package babylon.btclightclient.v1;
+
+import "gogoproto/gogo.proto";
+import "cosmos_proto/cosmos.proto";
+import "google/api/annotations.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "babylon/btclightclient/v1/params.proto";
+
+option go_package = "github.com/babylonlabs-io/babylon/x/btclightclient/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Params queries the parameters of the module.
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/babylon/btclightclient/v1/params";
+  }
+
+  // Hashes retrieves the hashes maintained by the module.
+  rpc Hashes(QueryHashesRequest) returns (QueryHashesResponse) {
+    option (google.api.http).get = "/babylon/btclightclient/v1/hashes";
+  }
+
+  // Contains checks whether a hash is maintained by the module.
+  rpc Contains(QueryContainsRequest) returns (QueryContainsResponse) {
+    option (google.api.http).get = "/babylon/btclightclient/v1/contains";
+  }
+
+  // ContainsBytes is a temporary method that
+  // checks whether a hash is maintained by the module.
+  // See discussion at https://github.com/babylonlabs-io/babylon/pull/132
+  // for more details.
+  rpc ContainsBytes(QueryContainsBytesRequest)
+      returns (QueryContainsBytesResponse) {
+    option (google.api.http).get = "/babylon/btclightclient/v1/containsBytes";
+  }
+
+  // MainChain returns the canonical chain
+  rpc MainChain(QueryMainChainRequest) returns (QueryMainChainResponse) {
+    option (google.api.http).get = "/babylon/btclightclient/v1/mainchain";
+  }
+
+  // Tip return best header on canonical chain
+  rpc Tip(QueryTipRequest) returns (QueryTipResponse) {
+    option (google.api.http).get = "/babylon/btclightclient/v1/tip";
+  }
+
+  // BaseHeader returns the base BTC header of the chain. This header is defined
+  // on genesis.
+  rpc BaseHeader(QueryBaseHeaderRequest) returns (QueryBaseHeaderResponse) {
+    option (google.api.http).get = "/babylon/btclightclient/v1/baseheader";
+  }
+
+  // HeaderDepth returns the depth of the header in main chain or error if the
+  // block is not found or it exists on fork
+  rpc HeaderDepth(QueryHeaderDepthRequest) returns(QueryHeaderDepthResponse) {
+    option (google.api.http).get = "/babylon/btclightclient/v1/depth/{hash}";
+  }
+}
+
+// QueryParamsRequest is the request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is the response type for the Query/Params RPC method.
+message QueryParamsResponse {
+  // params holds all the parameters of this module.
+  babylon.btclightclient.v1.Params params = 1 [ (gogoproto.nullable) = false ];
+}
+
+// QueryHashesRequest is request type for the Query/Hashes RPC method.
+// It involves retrieving all hashes that are maintained by the module.
+message QueryHashesRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QueryHashesResponse is response type for the Query/Hashes RPC method.
+message QueryHashesResponse {
+  repeated bytes hashes = 1
+      [ (gogoproto.customtype) =
+            "github.com/babylonlabs-io/babylon/types.BTCHeaderHashBytes" ];
+
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+// QueryContainsRequest is request type for the Query/Contains RPC method.
+// It involves checking whether a hash is maintained by the module.
+message QueryContainsRequest {
+  bytes hash = 1
+      [ (gogoproto.customtype) =
+            "github.com/babylonlabs-io/babylon/types.BTCHeaderHashBytes" ];
+}
+
+// QueryContainsResponse is response type for the Query/Contains RPC method.
+message QueryContainsResponse { bool contains = 1; }
+
+// QueryContainsRequest is request type for the temporary Query/ContainsBytes
+// RPC method. It involves checking whether a hash is maintained by the module.
+message QueryContainsBytesRequest { bytes hash = 1; }
+
+// QueryContainsResponse is response type for the temporary Query/ContainsBytes
+// RPC method.
+message QueryContainsBytesResponse { bool contains = 1; }
+
+// QueryMainChainRequest is request type for the Query/MainChain RPC method.
+// It involves retrieving the canonical chain maintained by the module.
+message QueryMainChainRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QueryMainChainResponse is response type for the Query/MainChain RPC method.
+message QueryMainChainResponse {
+  repeated BTCHeaderInfoResponse headers = 1;
+
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryTipRequest is the request type for the Query/Tip RPC method.
+message QueryTipRequest {}
+
+// QueryTipResponse is the response type for the Query/Tip RPC method.
+message QueryTipResponse { BTCHeaderInfoResponse header = 1; }
+
+// QueryBaseHeaderRequest is the request type for the Query/BaseHeader RPC
+// method.
+message QueryBaseHeaderRequest {}
+
+// QueryBaseHeaderResponse is the response type for the Query/BaseHeader RPC
+// method.
+message QueryBaseHeaderResponse { BTCHeaderInfoResponse header = 1; }
+
+// QueryMainChainDepthRequest is the request type for the Query/MainChainDepth RPC
+// it contains hex encoded hash of btc block header as parameter
+message QueryHeaderDepthRequest { string hash = 1; }
+
+// QueryMainChainDepthResponse is the response type for the Query/MainChainDepth RPC
+// it contains depth of the block in main chain
+message QueryHeaderDepthResponse { uint32 depth = 1; }
+
+// BTCHeaderInfoResponse is a structure that contains all relevant information about a
+// BTC header response
+//  - Full header as string hex.
+//  - Header hash for easy retrieval as string hex.
+//  - Height of the header in the BTC chain.
+//  - Total work spent on the header. This is the sum of the work corresponding
+//  to the header Bits field
+//    and the total work of the header.
+message BTCHeaderInfoResponse {
+  string header_hex = 1;
+  string hash_hex = 2;
+  uint32 height = 3;
+  // Work is the sdkmath.Uint as string.
+  string work = 4 [
+    (cosmos_proto.scalar)  = "cosmos.Uint",
+    (gogoproto.customtype) = "cosmossdk.io/math.Uint",
+    (gogoproto.nullable)   = false
+  ];
+}

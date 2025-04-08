@@ -1,0 +1,113 @@
+syntax = "proto3";
+package babylon.finality.v1;
+
+option go_package = "github.com/babylonlabs-io/babylon/x/finality/types";
+
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "amino/amino.proto";
+import "google/protobuf/timestamp.proto";
+
+// VotingPowerDistCache is the cache for voting power distribution of finality providers
+// and their BTC delegations at a height
+message VotingPowerDistCache {
+    option (gogoproto.goproto_getters) = false;
+    // total_voting_power is the total voting power of all (active) finality providers
+    // in the cache
+    uint64 total_voting_power = 1;
+    // finality_providers is a list of finality providers' voting power information
+    repeated FinalityProviderDistInfo finality_providers = 2;
+    // num_active_fps is the number of finality providers that have active BTC
+    // delegations as well as timestamped public randomness
+    uint32 num_active_fps = 3;
+}
+
+// FinalityProviderDistInfo is the reward distribution of a finality provider and its BTC delegations
+message FinalityProviderDistInfo {
+    // btc_pk is the Bitcoin secp256k1 PK of this finality provider
+    // the PK follows encoding in BIP-340 spec
+    bytes btc_pk = 1 [ (gogoproto.customtype) = "github.com/babylonlabs-io/babylon/types.BIP340PubKey" ];
+    // addr is the bytes of the address to receive commission from delegations.
+    bytes addr = 2;
+    // commission defines the commission rate of finality provider
+    string commission = 3  [
+        (cosmos_proto.scalar)  = "cosmos.Dec",
+        (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec"
+    ];
+    // total_bonded_sat is the total amount of bonded BTC stake (in Satoshi) of the finality provider
+    uint64 total_bonded_sat = 4;
+    // is_timestamped indicates whether the finality provider
+    // has timestamped public randomness committed
+    // if no, it should not be assigned voting power
+    bool is_timestamped = 5;
+    // is_jailed indicates whether the finality provider
+    // is jailed, if so, it should not be assigned voting power
+    bool is_jailed = 6;
+    // is_slashed indicates whether the finality provider
+    // is slashed, if so, it should not be assigned voting power
+    bool is_slashed = 7;
+}
+
+// IndexedBlock is the necessary metadata and finalization status of a block
+message IndexedBlock {
+    // height is the height of the block
+    uint64 height = 1;
+    // app_hash is the AppHash of the block
+    bytes app_hash = 2;
+    // finalized indicates whether the IndexedBlock is finalised by 2/3
+    // finality providers or not
+    bool finalized = 3;
+}
+
+// PubRandCommit is a commitment to a series of public randomness
+// currently, the commitment is a root of a Merkle tree that includes
+// a series of public randomness
+message PubRandCommit {
+    // start_height is the height of the first commitment
+    uint64 start_height = 1;
+    // num_pub_rand is the number of committed public randomness
+    uint64 num_pub_rand = 2;
+    // commitment is the value of the commitment
+    // currently, it is the root of the merkle tree constructed by the public randomness
+    bytes commitment = 3;
+    // epoch_num defines the epoch number that the commit falls into
+    uint64 epoch_num = 4;
+}
+
+// Evidence is the evidence that a finality provider has signed finality
+// signatures with correct public randomness on two conflicting Babylon headers
+message Evidence {
+    // fp_btc_pk is the BTC PK of the finality provider that casts this vote
+    bytes fp_btc_pk = 1 [ (gogoproto.customtype) = "github.com/babylonlabs-io/babylon/types.BIP340PubKey" ];
+    // block_height is the height of the conflicting blocks
+    uint64 block_height = 2;
+    // pub_rand is the public randomness the finality provider has committed to
+    bytes pub_rand = 3 [ (gogoproto.customtype) = "github.com/babylonlabs-io/babylon/types.SchnorrPubRand" ];
+    // canonical_app_hash is the AppHash of the canonical block
+    bytes canonical_app_hash = 4;
+    // fork_app_hash is the AppHash of the fork block
+    bytes fork_app_hash = 5;
+    // canonical_finality_sig is the finality signature to the canonical block
+    // where finality signature is an EOTS signature, i.e.,
+    // the `s` in a Schnorr signature `(r, s)`
+    // `r` is the public randomness that is already committed by the finality provider
+    bytes canonical_finality_sig = 6 [ (gogoproto.customtype) = "github.com/babylonlabs-io/babylon/types.SchnorrEOTSSig" ];
+    // fork_finality_sig is the finality signature to the fork block
+    // where finality signature is an EOTS signature
+    bytes fork_finality_sig = 7 [ (gogoproto.customtype) = "github.com/babylonlabs-io/babylon/types.SchnorrEOTSSig" ];
+}
+
+// FinalityProviderSigningInfo defines a finality provider's signing info for monitoring their
+// liveness activity.
+message FinalityProviderSigningInfo {
+    // fp_btc_pk is the BTC PK of the finality provider that casts this vote
+    bytes fp_btc_pk = 1 [ (gogoproto.customtype) = "github.com/babylonlabs-io/babylon/types.BIP340PubKey" ];
+    // start_height is the block height at which finality provider become active
+    int64 start_height = 2;
+    // missed_blocks_counter defines a counter to avoid unnecessary array reads.
+    // Note that `Sum(MissedBlocksBitArray)` always equals `MissedBlocksCounter`.
+    int64 missed_blocks_counter = 3;
+    // Timestamp until which the validator is jailed due to liveness downtime.
+    google.protobuf.Timestamp jailed_until = 4
+    [(gogoproto.stdtime) = true, (gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+}

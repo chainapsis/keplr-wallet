@@ -1,0 +1,128 @@
+syntax = "proto3";
+package babylon.epoching.v1;
+
+import "gogoproto/gogo.proto";
+import "cosmos/staking/v1beta1/tx.proto";
+import "babylon/epoching/v1/params.proto";
+
+import "cosmos_proto/cosmos.proto";
+import "cosmos/msg/v1/msg.proto";
+
+option go_package = "github.com/babylonlabs-io/babylon/x/epoching/types";
+
+// Msg defines the Msg service.
+service Msg {
+  option (cosmos.msg.v1.service) = true;
+
+  // WrappedDelegate defines a method for performing a delegation of coins from
+  // a delegator to a validator.
+  rpc WrappedDelegate(MsgWrappedDelegate) returns (MsgWrappedDelegateResponse);
+
+  // WrappedUndelegate defines a method for performing an undelegation from a
+  // delegate and a validator.
+  rpc WrappedUndelegate(MsgWrappedUndelegate)
+    returns (MsgWrappedUndelegateResponse);
+
+  // WrappedBeginRedelegate defines a method for performing a redelegation of
+  // coins from a delegator and source validator to a destination validator.
+  rpc WrappedBeginRedelegate(MsgWrappedBeginRedelegate)
+    returns (MsgWrappedBeginRedelegateResponse);
+
+  // WrappedCancelUnbondingDelegation defines a method for cancelling unbonding of
+  // coins from a delegator and source validator to a destination validator.
+  rpc WrappedCancelUnbondingDelegation(MsgWrappedCancelUnbondingDelegation)
+    returns (MsgWrappedCancelUnbondingDelegationResponse);
+
+  // WrappedEditValidator defines a method for editing the validator
+  // information.
+  rpc WrappedEditValidator(MsgWrappedEditValidator)
+    returns (MsgWrappedEditValidatorResponse);
+
+  // UpdateParams defines a method for updating epoching module parameters.
+  rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
+}
+
+// MsgWrappedDelegate is the message for delegating stakes
+message MsgWrappedDelegate {
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+  option (cosmos.msg.v1.signer) = "msg";
+
+  cosmos.staking.v1beta1.MsgDelegate msg = 1;
+}
+
+// MsgWrappedDelegate is the response to the MsgWrappedDelegate message
+message MsgWrappedDelegateResponse {}
+
+// MsgWrappedUndelegate is the message for undelegating stakes
+message MsgWrappedUndelegate {
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+  option (cosmos.msg.v1.signer) = "msg";
+
+  cosmos.staking.v1beta1.MsgUndelegate msg = 1;
+}
+
+// MsgWrappedUndelegateResponse is the response to the MsgWrappedUndelegate
+// message
+message MsgWrappedUndelegateResponse {}
+
+// MsgWrappedDelegate is the message for moving bonded stakes from a
+// validator to another validator
+message MsgWrappedBeginRedelegate {
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+  option (cosmos.msg.v1.signer) = "msg";
+
+  cosmos.staking.v1beta1.MsgBeginRedelegate msg = 1;
+}
+
+// MsgWrappedBeginRedelegateResponse is the response to the
+// MsgWrappedBeginRedelegate message
+message MsgWrappedBeginRedelegateResponse {}
+
+// MsgWrappedCancelUnbondingDelegation is the message for cancelling
+// an unbonding delegation
+message MsgWrappedCancelUnbondingDelegation {
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+  option (cosmos.msg.v1.signer) = "msg";
+
+  cosmos.staking.v1beta1.MsgCancelUnbondingDelegation msg = 1;
+}
+
+// MsgWrappedCancelUnbondingDelegationResponse is the response to the
+// MsgWrappedCancelUnbondingDelegation message
+message MsgWrappedCancelUnbondingDelegationResponse {}
+
+// MsgWrappedEditValidator defines a message for updating validator description
+// and commission rate.
+message MsgWrappedEditValidator {
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+  option (cosmos.msg.v1.signer) = "msg";
+
+  cosmos.staking.v1beta1.MsgEditValidator msg = 1;
+}
+
+// MsgWrappedEditValidatorResponse is the response to the MsgWrappedEditValidator message.
+message MsgWrappedEditValidatorResponse {}
+
+// MsgUpdateParams defines a message for updating epoching module parameters.
+message MsgUpdateParams {
+  option (cosmos.msg.v1.signer) = "authority";
+
+  // authority is the address of the governance account.
+  // just FYI: cosmos.AddressString marks that this field should use type alias
+  // for AddressString instead of string, but the functionality is not yet implemented
+  // in cosmos-proto
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // params defines the epoching parameters to update.
+  //
+  // NOTE: All parameters must be supplied.
+  Params params = 2 [(gogoproto.nullable) = false];
+}
+
+// MsgUpdateParamsResponse is the response to the MsgUpdateParams message.
+message MsgUpdateParamsResponse {}
