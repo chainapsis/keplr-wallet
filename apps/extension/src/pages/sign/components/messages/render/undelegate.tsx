@@ -10,6 +10,7 @@ import { CoinPretty } from "@keplr-wallet/unit";
 import { FormattedMessage } from "react-intl";
 import { ItemLogo } from "../../../../main/token-detail/msg-items/logo";
 import { MessageUndelegateIcon } from "../../../../../components/icon";
+import { MsgWrappedUndelegate } from "@keplr-wallet/proto-types/babylon/epoching/v1/tx";
 
 export const UndelegateMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -22,12 +23,34 @@ export const UndelegateMessage: IMessageRenderer = {
       }
 
       if (
+        "type" in msg &&
+        msg.type === "/babylon.epoching.v1.MsgWrappedUndelegate"
+      ) {
+        return {
+          validatorAddress: msg.value.msg.validator_address,
+          amount: msg.value.msg.amount,
+        };
+      }
+
+      if (
         "unpacked" in msg &&
         msg.typeUrl === "/cosmos.staking.v1beta1.MsgUndelegate"
       ) {
         return {
           validatorAddress: (msg.unpacked as MsgUndelegate).validatorAddress,
           amount: (msg.unpacked as MsgUndelegate).amount,
+        };
+      }
+
+      if (
+        "unpacked" in msg &&
+        msg.typeUrl === "/babylon.epoching.v1.MsgWrappedUndelegate" &&
+        (msg.unpacked as MsgWrappedUndelegate).msg
+      ) {
+        return {
+          validatorAddress: (msg.unpacked as MsgWrappedUndelegate).msg!
+            .validatorAddress,
+          amount: (msg.unpacked as MsgWrappedUndelegate).msg!.amount,
         };
       }
     })();

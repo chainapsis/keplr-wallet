@@ -1,0 +1,78 @@
+syntax = "proto3";
+package babylon.incentive;
+
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "cosmos_proto/cosmos.proto";
+
+option go_package = "github.com/babylonlabs-io/babylon/x/incentive/types";
+
+// FinalityProviderHistoricalRewards represents the cumulative rewards ratio of
+// the finality provider per sat in that period. The period is ommited here and
+// should be part of the key used to store this structure. Key: Prefix +
+// Finality provider bech32 address + Period.
+message FinalityProviderHistoricalRewards {
+  // The cumulative rewards of that finality provider per sat until that period
+  // This coins will aways increase the value, never be reduced due to keep
+  // acumulation and when the cumulative rewards will be used to distribute
+  // rewards, 2 periods will be loaded, calculate the difference and multiplied
+  // by the total sat amount delegated
+  // https://github.com/cosmos/cosmos-sdk/blob/e76102f885b71fd6e1c1efb692052173c4b3c3a3/x/distribution/keeper/delegation.go#L47
+  repeated cosmos.base.v1beta1.Coin cumulative_rewards_per_sat = 1 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  // TODO(rafilx): add reference count for state prunning
+  // https://github.com/cosmos/cosmos-sdk/blob/d9c53bfefc1e75a3c6b09065ea8b3a836cda0d18/x/distribution/types/distribution.pb.go#L98
+}
+
+// FinalityProviderCurrentRewards represents the current rewards of the pool of
+// BTC delegations that delegated for this finality provider is entitled to.
+// Note: This rewards are for the BTC delegators that delegated to this FP
+// the FP itself is not the owner or can withdraw this rewards.
+// If a slash event happens with this finality provider, all the delegations
+// need to withdraw to the RewardGauge and the related scrutures should be
+// deleted. Key: Prefix + Finality provider bech32 address.
+message FinalityProviderCurrentRewards {
+  // CurrentRewards is the current rewards that the finality provider have and
+  // it was not yet stored inside the FinalityProviderHistoricalRewards. Once
+  // something happens that modifies the amount of satoshis delegated to this
+  // finality provider or the delegators starting period (activation, unbonding
+  // or btc rewards withdraw) a new period must be created, accumulate this
+  // rewards to FinalityProviderHistoricalRewards with a new period and zero out
+  // the Current Rewards.
+  repeated cosmos.base.v1beta1.Coin current_rewards = 1 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  // Period stores the current period that serves as a reference for
+  // creating new historical rewards and correlate with
+  // BTCDelegationRewardsTracker StartPeriodCumulativeReward.
+  uint64 period = 2;
+  // TotalActiveSat is the total amount of active satoshi delegated
+  // to this finality provider.
+  bytes total_active_sat = 3 [
+    (cosmos_proto.scalar) = "cosmos.Int",
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.nullable) = false
+  ];
+}
+
+// BTCDelegationRewardsTracker represents the structure that holds information
+// from the last time this BTC delegator withdraw the rewards or modified his
+// active staked amount to one finality provider.
+// The finality provider address is ommitted here but should be part of the
+// key used to store this structure together with the BTC delegator address.
+message BTCDelegationRewardsTracker {
+  // StartPeriodCumulativeReward the starting period the the BTC delegator
+  // made his last withdraw of rewards or modified his active staking amount
+  // of satoshis.
+  uint64 start_period_cumulative_reward = 1;
+  // TotalActiveSat is the total amount of active satoshi delegated
+  // to one specific finality provider.
+  bytes total_active_sat = 2 [
+    (cosmos_proto.scalar) = "cosmos.Int",
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.nullable) = false
+  ];
+}

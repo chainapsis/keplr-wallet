@@ -1,0 +1,26 @@
+syntax = "proto3";
+package babylon.btclightclient.v1;
+
+import "babylon/btclightclient/v1/btclightclient.proto";
+
+option go_package = "github.com/babylonlabs-io/babylon/x/btclightclient/types";
+
+// The header included in the event is the block in the history
+// of the current mainchain to which we are rolling back to.
+// In other words, there is one rollback event emitted per re-org, to the
+// greatest common ancestor of the old and the new fork.
+message EventBTCRollBack {
+  BTCHeaderInfo header = 1;
+  BTCHeaderInfo rollback_from = 2;
+}
+
+// EventBTCRollForward is emitted on Msg/InsertHeader
+// The header included in the event is the one the main chain is extended with.
+// In the event of a reorg, each block on the new fork that comes after
+// the greatest common ancestor will have a corresponding roll forward event.
+message EventBTCRollForward { BTCHeaderInfo header = 1; }
+
+// EventBTCHeaderInserted is emitted on Msg/InsertHeader
+// The header included in the event is the one that was added to the
+// on chain BTC storage.
+message EventBTCHeaderInserted { BTCHeaderInfo header = 1; }

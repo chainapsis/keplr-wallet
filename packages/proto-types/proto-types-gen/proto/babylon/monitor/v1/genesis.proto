@@ -1,0 +1,7 @@
+syntax = "proto3";
+package babylon.monitor.v1;
+
+option go_package = "github.com/babylonlabs-io/babylon/x/monitor/types";
+
+// GenesisState defines the monitor module's genesis state.
+message GenesisState {}

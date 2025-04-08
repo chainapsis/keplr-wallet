@@ -1,0 +1,16 @@
+syntax = "proto3";
+package babylon.btclightclient.v1;
+
+import "gogoproto/gogo.proto";
+
+
+option go_package = "github.com/babylonlabs-io/babylon/x/btclightclient/types";
+
+// Params defines the parameters for the module.
+message Params {
+  option (gogoproto.equal) = true;
+
+  // List of addresses which are allowed to insert headers to btc light client
+  // if the list is empty, any address can insert headers
+  repeated string insert_headers_allow_list = 1;
+}

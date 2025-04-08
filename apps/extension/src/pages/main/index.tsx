@@ -808,6 +808,7 @@ const RefreshButton: FunctionComponent<{
     chainStore,
     queriesStore,
     starknetQueriesStore,
+    bitcoinQueriesStore,
     accountStore,
     priceStore,
   } = useStore();
@@ -920,6 +921,23 @@ const RefreshButton: FunctionComponent<{
               account.starknetHexAddress
             );
             promises.push(stakingInfo.waitFreshResponse());
+          }
+        } else if ("bitcoin" in modularChainInfo) {
+          const account = accountStore.getAccount(modularChainInfo.chainId);
+          const currency = modularChainInfo.bitcoin.currencies[0];
+
+          if (account.bitcoinAddress) {
+            const queries = bitcoinQueriesStore.get(modularChainInfo.chainId);
+            const queryBalance = queries.queryBitcoinBalance.getBalance(
+              modularChainInfo.chainId,
+              chainStore,
+              account.bitcoinAddress.bech32Address,
+              currency.coinMinimalDenom
+            );
+
+            if (queryBalance) {
+              queryBalance.fetch();
+            }
           }
         }
       }

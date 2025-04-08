@@ -1,0 +1,151 @@
+syntax = "proto3";
+package babylon.btccheckpoint.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/babylonlabs-io/babylon/x/btccheckpoint/types";
+
+// Consider we have a Merkle tree with following structure:
+//            ROOT
+//           /    \
+//      H1234      H5555
+//     /     \       \
+//   H12     H34      H55
+//  /  \    /  \     /
+// H1  H2  H3  H4  H5
+// L1  L2  L3  L4  L5
+// To prove L3 was part of ROOT we need:
+// - btc_transaction_index = 2 which in binary is 010
+// (where 0 means going left, 1 means going right in the tree)
+// - merkle_nodes we'd have H4 || H12 || H5555
+// By looking at 010 we would know that H4 is a right sibling,
+// H12 is left, H5555 is right again.
+message BTCSpvProof {
+  // Valid bitcoin transaction containing OP_RETURN opcode.
+  bytes btc_transaction = 1;
+  // Index of transaction within the block. Index is needed to determine if
+  // currently hashed node is left or right.
+  uint32 btc_transaction_index = 2;
+  // List of concatenated intermediate merkle tree nodes, without root node and
+  // leaf node against which we calculate the proof. Each node has 32 byte
+  // length. Example proof can look like: 32_bytes_of_node1 || 32_bytes_of_node2
+  // ||  32_bytes_of_node3 so the length of the proof will always be divisible
+  // by 32.
+  bytes merkle_nodes = 3;
+  // Valid btc header which confirms btc_transaction.
+  // Should have exactly 80 bytes
+  bytes confirming_btc_header = 4
+      [ (gogoproto.customtype) =
+            "github.com/babylonlabs-io/babylon/types.BTCHeaderBytes" ];
+}
+
+// Each provided OP_RETURN transaction can be identified by hash of block in
+// which transaction was included and transaction index in the block
+message TransactionKey {
+  uint32 index = 1;
+  bytes hash = 2
+      [ (gogoproto.customtype) =
+            "github.com/babylonlabs-io/babylon/types.BTCHeaderHashBytes" ];
+}
+
+// Checkpoint can be composed from multiple transactions, so to identify whole
+// submission we need list of transaction keys.
+// Each submission can generally be identified by this list of (txIdx,
+// blockHash) tuples. Note: this could possibly be optimized as if transactions
+// were in one block they would have the same block hash and different indexes,
+// but each blockhash is only 33 (1  byte for prefix encoding and 32 byte hash),
+// so there should be other strong arguments for this optimization
+message SubmissionKey { repeated TransactionKey key = 1; }
+
+// BtcStatus is an enum describing the current btc status of the checkpoint
+enum BtcStatus {
+  option (gogoproto.goproto_enum_prefix) = false;
+  // SUBMITTED Epoch has Submitted btc status if there ever was at least one
+  // known submission on btc main chain
+  EPOCH_STATUS_SUBMITTED = 0 [ (gogoproto.enumvalue_customname) = "Submitted" ];
+  // CONFIRMED Epoch has Confirmed btc status if there ever was at least one
+  // known submission on btc main chain which was k-deep
+  EPOCH_STATUS_CONFIRMED = 1 [ (gogoproto.enumvalue_customname) = "Confirmed" ];
+  // CONFIRMED Epoch has Finalized btc status if there is was at exactly one
+  // knon submission on btc main chain which is w-deep
+  EPOCH_STATUS_FINALIZED = 2 [ (gogoproto.enumvalue_customname) = "Finalized" ];
+}
+
+// TransactionInfo is the info of a tx on Bitcoin,
+// including
+// - the position of the tx on BTC blockchain
+// - the full tx content
+// - the Merkle proof that this tx is on the above position
+message TransactionInfo {
+  // key is the position (txIdx, blockHash) of this tx on BTC blockchain
+  // Although it is already a part of SubmissionKey, we store it here again
+  // to make TransactionInfo self-contained.
+  // For example, storing the key allows TransactionInfo to not relay on
+  // the fact that TransactionInfo will be ordered in the same order as
+  // TransactionKeys in SubmissionKey.
+  TransactionKey key = 1;
+  // transaction is the full transaction in bytes
+  bytes transaction = 2;
+  // proof is the Merkle proof that this tx is included in the position in `key`
+  // TODO: maybe it could use here better format as we already processed and
+  // validated the proof?
+  bytes proof = 3;
+}
+
+// TODO: Determine if we should keep any block number or depth info.
+// On one hand it may be useful to determine if block is stable or not, on
+// other depth/block number info, without context (i.e info about chain) is
+// pretty useless and blockhash in enough to retrieve is from lightclient
+message SubmissionData {
+  // address of the submitter and reporter
+  CheckpointAddresses vigilante_addresses = 1;
+  // txs_info is the two `TransactionInfo`s corresponding to the submission
+  // It is used for
+  // - recovering address of sender of btc transaction to payup the reward.
+  // - allowing the ZoneConcierge module to prove the checkpoint is submitted to
+  // BTC
+  repeated TransactionInfo txs_info = 2;
+  uint64 epoch = 3;
+}
+
+// Data stored in db and indexed by epoch number
+// TODO: Add btc blockheight at epoch end, when adding handling of epoching
+// callbacks
+message EpochData {
+  // keys is the list of all received checkpoints during this epoch, sorted by
+  // order of submission.
+  repeated SubmissionKey keys = 1;
+
+  // status is the current btc status of the epoch
+  BtcStatus status = 2;
+}
+
+// CheckpointAddresses contains the addresses of the submitter and reporter of a
+// given checkpoint
+message CheckpointAddresses {
+  // TODO: this could probably be better typed
+  // submitter is the address of the checkpoint submitter to BTC, extracted from
+  // the checkpoint itself.
+  bytes submitter = 1;
+  // reporter is the address of the reporter who reported the submissions,
+  // calculated from submission message MsgInsertBTCSpvProof itself
+  bytes reporter = 2;
+}
+
+// BTCCheckpointInfo contains all data about best submission of checkpoint for
+// given epoch. Best submission is the submission which is deeper in btc ledger
+message BTCCheckpointInfo {
+  // epoch number of this checkpoint
+  uint64 epoch_number = 1;
+  // btc height of the best submission of the epoch
+  uint32 best_submission_btc_block_height = 2;
+  // hash of the btc block which determines checkpoint btc block height i.e.
+  // youngest block of best submission
+  bytes best_submission_btc_block_hash = 3
+      [ (gogoproto.customtype) =
+            "github.com/babylonlabs-io/babylon/types.BTCHeaderHashBytes" ];
+  // the BTC checkpoint transactions of the best submission
+  repeated TransactionInfo best_submission_transactions = 4;
+  // list of vigilantes' addresses of the best submission
+  repeated CheckpointAddresses best_submission_vigilante_address_list = 5;
+}

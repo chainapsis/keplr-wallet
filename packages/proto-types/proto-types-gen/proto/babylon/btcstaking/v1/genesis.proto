@@ -1,0 +1,53 @@
+syntax = "proto3";
+package babylon.btcstaking.v1;
+
+import "gogoproto/gogo.proto";
+import "babylon/btcstaking/v1/params.proto";
+import "babylon/btcstaking/v1/btcstaking.proto";
+import "babylon/btcstaking/v1/events.proto";
+
+option go_package = "github.com/babylonlabs-io/babylon/x/btcstaking/types";
+
+// GenesisState defines the btcstaking module's genesis state.
+message GenesisState {
+  // different versions of params used through the history of the chain
+  repeated Params params = 1;
+  // finality_providers all the finality providers registered.
+  repeated FinalityProvider finality_providers = 2;
+  // btc_delegations all the btc delegations in the state.
+  repeated BTCDelegation btc_delegations = 3;
+  // block_height_chains the block height of babylon and bitcoin.
+  repeated BlockHeightBbnToBtc block_height_chains = 5;
+  // btc_delegators contains all the btc delegators with the associated finality provider.
+  repeated BTCDelegator btc_delegators = 6;
+  // all the events and its indexes.
+  repeated EventIndex events = 7;
+}
+
+// BlockHeightBbnToBtc stores the btc <-> bbn block.
+message BlockHeightBbnToBtc {
+  // block_height_bbn is the height of the block in the babylon chain.
+  uint64 block_height_bbn = 1;
+  // block_height_btc is the height of the block in the BTC.
+  uint32 block_height_btc = 2;
+}
+
+// BTCDelegator BTC delegator information with the associated finality provider.
+message BTCDelegator {
+  // idx the btc delegator index.
+  BTCDelegatorDelegationIndex idx = 1;
+  // fp_btc_pk the finality provider btc public key.
+  bytes fp_btc_pk = 2 [ (gogoproto.customtype) = "github.com/babylonlabs-io/babylon/types.BIP340PubKey" ];
+  // del_btc_pk the delegator btc public key.
+  bytes del_btc_pk = 3 [ (gogoproto.customtype) = "github.com/babylonlabs-io/babylon/types.BIP340PubKey" ];
+}
+
+// EventIndex contains the event and its index.
+message EventIndex {
+  // idx is the index the event was stored.
+  uint64 idx = 1;
+  // block_height_btc is the height of the block in the BTC chain.
+  uint32 block_height_btc = 2;
+  // event the event stored.
+  EventPowerDistUpdate event = 3;
+}

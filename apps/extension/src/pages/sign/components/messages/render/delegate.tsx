@@ -2,6 +2,7 @@ import { IMessageRenderer } from "../types";
 
 import React, { FunctionComponent } from "react";
 import { MsgDelegate } from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/tx";
+import { MsgWrappedDelegate } from "@keplr-wallet/proto-types/babylon/epoching/v1/tx";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../../stores";
 import { CoinPrimitive, Staking } from "@keplr-wallet/stores";
@@ -23,6 +24,17 @@ export const DelegateMessage: IMessageRenderer = {
       }
 
       if (
+        "type" in msg &&
+        msg.type === "/babylon.epoching.v1.MsgWrappedDelegate"
+      ) {
+        return {
+          amount: msg.value.msg.amount,
+          validatorAddress: msg.value.msg.validator_address,
+          delegatorAddress: msg.value.msg.delegator_address,
+        };
+      }
+
+      if (
         "unpacked" in msg &&
         msg.typeUrl === "/cosmos.staking.v1beta1.MsgDelegate"
       ) {
@@ -30,6 +42,20 @@ export const DelegateMessage: IMessageRenderer = {
           amount: (msg.unpacked as MsgDelegate).amount,
           validatorAddress: (msg.unpacked as MsgDelegate).validatorAddress,
           delegatorAddress: (msg.unpacked as MsgDelegate).delegatorAddress,
+        };
+      }
+
+      if (
+        "unpacked" in msg &&
+        msg.typeUrl === "/cosmos.distribution.v1beta1.MsgWrappedDelegate" &&
+        (msg.unpacked as MsgWrappedDelegate).msg
+      ) {
+        return {
+          amount: (msg.unpacked as MsgWrappedDelegate).msg!.amount,
+          validatorAddress: (msg.unpacked as MsgWrappedDelegate).msg!
+            .validatorAddress,
+          delegatorAddress: (msg.unpacked as MsgWrappedDelegate).msg!
+            .delegatorAddress,
         };
       }
     })();

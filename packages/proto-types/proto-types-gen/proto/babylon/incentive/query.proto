@@ -1,0 +1,164 @@
+syntax = "proto3";
+package babylon.incentive;
+
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "babylon/incentive/params.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "cosmos_proto/cosmos.proto";
+
+option go_package = "github.com/babylonlabs-io/babylon/x/incentive/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Parameters queries the parameters of the module.
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/babylon/incentive/params";
+  }
+  // RewardGauge queries the reward gauge of a given stakeholder address
+  rpc RewardGauges(QueryRewardGaugesRequest)
+      returns (QueryRewardGaugesResponse) {
+    option (google.api.http).get =
+        "/babylon/incentive/address/{address}/reward_gauge";
+  }
+  // BTCStakingGauge queries the BTC staking gauge of a given height
+  rpc BTCStakingGauge(QueryBTCStakingGaugeRequest)
+      returns (QueryBTCStakingGaugeResponse) {
+    option (google.api.http).get =
+        "/babylon/incentive/btc_staking_gauge/{height}";
+  }
+
+  // DelegatorWithdrawAddress queries withdraw address of a delegator.
+  rpc DelegatorWithdrawAddress(QueryDelegatorWithdrawAddressRequest)
+      returns (QueryDelegatorWithdrawAddressResponse) {
+    option (google.api.http).get =
+        "/babylon/incentive/delegators/{delegator_address}/withdraw_address";
+  }
+
+  // DelegationRewards queries the delegation rewards of given finality provider
+  // and delegator addresses
+  rpc DelegationRewards(QueryDelegationRewardsRequest)
+      returns (QueryDelegationRewardsResponse) {
+    option (google.api.http).get =
+        "/babylon/incentive/finality_providers/{finality_provider_address}/"
+        "delegators/{delegator_address}/delegation_rewards";
+  }
+}
+
+// QueryParamsRequest is request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is response type for the Query/Params RPC method.
+message QueryParamsResponse {
+  // params holds all the parameters of this module.
+  Params params = 1 [ (gogoproto.nullable) = false ];
+}
+
+// QueryRewardGaugesRequest is request type for the Query/RewardGauges RPC
+// method.
+message QueryRewardGaugesRequest {
+  // address is the address of the stakeholder in bech32 string
+  string address = 1;
+}
+
+// RewardGaugesResponse is an object that stores rewards distributed to a BTC
+// staking stakeholder
+message RewardGaugesResponse {
+  // coins are coins that have been in the gauge
+  // Can have multiple coin denoms
+  repeated cosmos.base.v1beta1.Coin coins = 1 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  // withdrawn_coins are coins that have been withdrawn by the stakeholder
+  // already
+  repeated cosmos.base.v1beta1.Coin withdrawn_coins = 2 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
+
+// QueryRewardGaugesResponse is response type for the Query/RewardGauges RPC
+// method.
+message QueryRewardGaugesResponse {
+  // reward_gauges is the map of reward gauges, where key is the stakeholder
+  // type and value is the reward gauge holding all rewards for the stakeholder
+  // in that type
+  map<string, RewardGaugesResponse> reward_gauges = 1;
+}
+
+// QueryBTCStakingGaugeRequest is request type for the Query/BTCStakingGauge RPC
+// method.
+message QueryBTCStakingGaugeRequest {
+  // height is the queried Babylon height
+  uint64 height = 1;
+}
+
+// BTCStakingGaugeResponse is response type for the Query/BTCStakingGauge RPC
+// method.
+message BTCStakingGaugeResponse {
+  // coins that have been in the gauge
+  // can have multiple coin denoms
+  repeated cosmos.base.v1beta1.Coin coins = 1 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
+
+// QueryBTCStakingGaugeResponse is response type for the Query/BTCStakingGauge
+// RPC method.
+message QueryBTCStakingGaugeResponse {
+  // gauge is the BTC staking gauge at the queried height
+  BTCStakingGaugeResponse gauge = 1;
+}
+
+// QueryDelegatorWithdrawAddressRequest is the request type for the
+// Query/DelegatorWithdrawAddress RPC method.
+message QueryDelegatorWithdrawAddressRequest {
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  // delegator_address defines the delegator address to query for.
+  string delegator_address = 1
+      [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+}
+
+// QueryDelegatorWithdrawAddressResponse is the response type for the
+// Query/DelegatorWithdrawAddress RPC method.
+message QueryDelegatorWithdrawAddressResponse {
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  // withdraw_address defines the delegator address to query for.
+  string withdraw_address = 1
+      [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+}
+
+// QueryDelegationRewardsRequest is the request type for the
+// Query/DelegationRewards RPC method.
+message QueryDelegationRewardsRequest {
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  // finality_provider_address defines the finality provider address of the
+  // delegation.
+  string finality_provider_address = 1
+      [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // delegator_address defines the delegator address to query for.
+  string delegator_address = 2
+      [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+}
+
+// QueryDelegationRewardsResponse is the response type for the
+// Query/DelegationRewards RPC method.
+message QueryDelegationRewardsResponse {
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  // rewards are the delegation reward coins
+  // Can have multiple coin denoms
+  repeated cosmos.base.v1beta1.Coin rewards = 1 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}

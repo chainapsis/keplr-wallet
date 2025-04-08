@@ -1,0 +1,242 @@
+syntax = "proto3";
+package babylon.epoching.v1;
+
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "babylon/epoching/v1/params.proto";
+import "babylon/epoching/v1/epoching.proto";
+
+option go_package = "github.com/babylonlabs-io/babylon/x/epoching/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Params queries the parameters of the module.
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/babylon/epoching/v1/params";
+  }
+
+  // EpochInfo queries the information of a given epoch
+  rpc EpochInfo(QueryEpochInfoRequest) returns (QueryEpochInfoResponse) {
+    option (google.api.http).get = "/babylon/epoching/v1/epochs/{epoch_num=*}";
+  }
+
+  // EpochsInfo queries the metadata of epochs in a given range, depending on
+  // the parameters in the pagination request. Th main use case will be querying
+  // the latest epochs in time order.
+  rpc EpochsInfo(QueryEpochsInfoRequest) returns (QueryEpochsInfoResponse) {
+    option (google.api.http).get = "/babylon/epoching/v1/epochs";
+  }
+
+  // CurrentEpoch queries the current epoch
+  rpc CurrentEpoch(QueryCurrentEpochRequest)
+      returns (QueryCurrentEpochResponse) {
+    option (google.api.http).get = "/babylon/epoching/v1/current_epoch";
+  }
+
+  // EpochMsgs queries the messages of a given epoch
+  rpc EpochMsgs(QueryEpochMsgsRequest) returns (QueryEpochMsgsResponse) {
+    option (google.api.http).get =
+        "/babylon/epoching/v1/epochs/{epoch_num=*}/messages";
+  }
+
+  // LatestEpochMsgs queries the messages within a given number of most recent
+  // epochs
+  rpc LatestEpochMsgs(QueryLatestEpochMsgsRequest)
+      returns (QueryLatestEpochMsgsResponse) {
+    option (google.api.http).get =
+        "/babylon/epoching/v1/epochs:latest/messages";
+  }
+
+  // ValidatorLifecycle queries the lifecycle of a given validator
+  rpc ValidatorLifecycle(QueryValidatorLifecycleRequest)
+      returns (QueryValidatorLifecycleResponse) {
+    option (google.api.http).get =
+        "/babylon/epoching/v1/validator_lifecycle/{val_addr}";
+  }
+
+  // DelegationLifecycle queries the lifecycle of a given delegation
+  rpc DelegationLifecycle(QueryDelegationLifecycleRequest)
+      returns (QueryDelegationLifecycleResponse) {
+    option (google.api.http).get =
+        "/babylon/epoching/v1/delegation_lifecycle/{del_addr}";
+  }
+
+  // EpochValSet queries the validator set of a given epoch
+  rpc EpochValSet(QueryEpochValSetRequest) returns (QueryEpochValSetResponse) {
+    option (google.api.http).get =
+        "/babylon/epoching/v1/epochs/{epoch_num=*}/validator_set";
+  }
+}
+
+// QueryParamsRequest is the request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is the response type for the Query/Params RPC method.
+message QueryParamsResponse {
+  // params holds all the parameters of this module.
+  babylon.epoching.v1.Params params = 1 [ (gogoproto.nullable) = false ];
+}
+
+// QueryEpochInfoRequest is the request type for the Query/EpochInfo method
+message QueryEpochInfoRequest { uint64 epoch_num = 1; }
+
+// QueryEpochInfoRequest is the response type for the Query/EpochInfo method
+message QueryEpochInfoResponse { EpochResponse epoch = 1; }
+
+// QueryEpochInfosRequest is the request type for the Query/EpochInfos method
+message QueryEpochsInfoRequest {
+  // pagination defines whether to have the pagination in the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QueryEpochsInfoResponse is the response type for the Query/EpochInfos method
+message QueryEpochsInfoResponse {
+  repeated EpochResponse epochs = 1;
+
+  // pagination defines the pagination in the response
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryCurrentEpochRequest is the request type for the Query/CurrentEpoch RPC
+// method
+message QueryCurrentEpochRequest {}
+
+// QueryCurrentEpochResponse is the response type for the Query/CurrentEpoch RPC
+// method
+message QueryCurrentEpochResponse {
+  // current_epoch is the current epoch number
+  uint64 current_epoch = 1;
+  // epoch_boundary is the height of this epoch's last block
+  uint64 epoch_boundary = 2;
+}
+
+// QueryEpochMsgsRequest is the request type for the Query/EpochMsgs RPC method
+message QueryEpochMsgsRequest {
+  // epoch_num is the number of epoch of the requested msg queue
+  uint64 epoch_num = 1;
+
+  // pagination defines whether to have the pagination in the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryEpochMsgsResponse is the response type for the Query/EpochMsgs RPC
+// method
+message QueryEpochMsgsResponse {
+  // msgs is the list of messages queued in the current epoch
+  repeated QueuedMessageResponse msgs = 1;
+  // pagination defines the pagination in the response
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryLatestEpochMsgsRequest is the request type for the Query/LatestEpochMsgs
+// RPC method it returns epoch msgs within epoch [max(1,
+// end_epoch-epoch_count+1), end_epoch]
+message QueryLatestEpochMsgsRequest {
+  // end_epoch is the number of the last epoch to query
+  uint64 end_epoch = 1;
+  // epoch_count is the number of epochs to query
+  uint64 epoch_count = 2;
+
+  cosmos.base.query.v1beta1.PageRequest pagination = 3;
+}
+
+// QueryLatestEpochMsgsResponse is the response type for the
+// Query/LatestEpochMsgs RPC method
+message QueryLatestEpochMsgsResponse {
+  // latest_epoch_msgs is a list of QueuedMessageList
+  // each QueuedMessageList has a field identifying the epoch number
+  repeated QueuedMessageList latest_epoch_msgs = 1;
+
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryValidatorLifecycleRequest is the request type for the
+// Query/ValidatorLifecycle RPC method
+message QueryValidatorLifecycleRequest { string val_addr = 1; }
+
+// QueryValidatorLifecycleResponse is the response type for the
+// Query/ValidatorLifecycle RPC method
+message QueryValidatorLifecycleResponse {
+  string val_addr = 1;
+  repeated ValStateUpdateResponse val_life = 2;
+}
+
+// QueryDelegationLifecycleRequest is the request type for the
+// Query/DelegationLifecycle RPC method
+message QueryDelegationLifecycleRequest { string del_addr = 1; }
+
+// QueryDelegationLifecycleRequest is the response type for the
+// Query/DelegationLifecycle RPC method
+message QueryDelegationLifecycleResponse { DelegationLifecycle del_life = 1; }
+
+// QueryEpochValSetRequest is the request type for the Query/EpochValSet RPC
+// method
+message QueryEpochValSetRequest {
+  uint64 epoch_num = 1;
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryEpochValSetRequest is the response type for the Query/EpochValSet RPC
+// method
+message QueryEpochValSetResponse {
+  repeated babylon.epoching.v1.Validator validators = 1;
+  int64 total_voting_power = 2;
+  cosmos.base.query.v1beta1.PageResponse pagination = 3;
+}
+
+// EpochResponse is a structure that contains the metadata of an epoch
+message EpochResponse {
+  // epoch_number is the number of this epoch
+  uint64 epoch_number = 1;
+  // current_epoch_interval is the epoch interval at the time of this epoch
+  uint64 current_epoch_interval = 2;
+  // first_block_height is the height of the first block in this epoch
+  uint64 first_block_height = 3;
+  // last_block_time is the time of the last block in this epoch.
+  // Babylon needs to remember the last header's time of each epoch to complete
+  // unbonding validators/delegations when a previous epoch's checkpoint is
+  // finalised. The last_block_time field is nil in the epoch's beginning, and
+  // is set upon the end of this epoch.
+  google.protobuf.Timestamp last_block_time = 4 [ (gogoproto.stdtime) = true ];
+  // sealer is the last block of the sealed epoch
+  // sealer_app_hash points to the sealer but stored in the 1st header
+  // of the next epoch as hex string.
+  string sealer_app_hash_hex = 5;
+  // sealer_block_hash is the hash of the sealer
+  // the validator set has generated a BLS multisig on the hash,
+  // i.e., hash of the last block in the epoch as hex string.
+  string sealer_block_hash = 6;
+}
+
+// QueuedMessageResponse is a message that can change the validator set and is delayed
+// to the end of an epoch
+message QueuedMessageResponse {
+  // tx_id is the ID of the tx that contains the message as hex.
+  string tx_id = 1;
+  // msg_id is the original message ID, i.e., hash of the marshaled message as hex.
+  string msg_id = 2;
+  // block_height is the height when this msg is submitted to Babylon
+  uint64 block_height = 3;
+  // block_time is the timestamp when this msg is submitted to Babylon
+  google.protobuf.Timestamp block_time = 4 [ (gogoproto.stdtime) = true ];
+  // msg is the actual message that is sent by a user and is queued by the
+  // epoching module as string.
+  string msg = 5;
+}
+
+// QueuedMessageList is a message that contains a list of staking-related
+// messages queued for an epoch
+message QueuedMessageList {
+  uint64 epoch_number = 1;
+  repeated QueuedMessageResponse msgs = 2;
+}
+
+// ValStateUpdateResponse is a message response that records a state update of a validator.
+message ValStateUpdateResponse {
+  // StateDesc defines the descriptive state.
+  string state_desc = 1;
+  uint64 block_height = 2;
+  google.protobuf.Timestamp block_time = 3 [ (gogoproto.stdtime) = true ];
+}

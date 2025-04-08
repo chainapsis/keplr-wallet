@@ -1,0 +1,31 @@
+syntax = "proto3";
+package babylon.btccheckpoint.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/babylonlabs-io/babylon/x/btccheckpoint/types";
+
+// Params defines the parameters for the module.
+message Params {
+  option (gogoproto.equal) = true;
+
+  // btc_confirmation_depth is the confirmation depth in BTC.
+  // A block is considered irreversible only when it is at least k-deep in BTC
+  // (k in research paper)
+  uint32 btc_confirmation_depth = 1
+      [ (gogoproto.moretags) = "yaml:\"btc_confirmation_depth\"" ];
+
+  // checkpoint_finalization_timeout is the maximum time window (measured in BTC
+  // blocks) between a checkpoint
+  // - being submitted to BTC, and
+  // - being reported back to BBN
+  // If a checkpoint has not been reported back within w BTC blocks, then BBN
+  // has dishonest majority and is stalling checkpoints (w in research paper)
+  uint32 checkpoint_finalization_timeout = 2
+      [ (gogoproto.moretags) = "yaml:\"checkpoint_finalization_timeout\"" ];
+
+  // 4byte tag in hex format, required to be present in the OP_RETURN transaction
+  // related to babylon
+  string checkpoint_tag = 3
+      [ (gogoproto.moretags) = "yaml:\"checkpoint_tag\"" ];
+}

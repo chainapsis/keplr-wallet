@@ -1,0 +1,108 @@
+syntax = "proto3";
+package babylon.finality.v1;
+
+import "gogoproto/gogo.proto";
+import "babylon/finality/v1/params.proto";
+import "babylon/finality/v1/finality.proto";
+
+option go_package = "github.com/babylonlabs-io/babylon/x/finality/types";
+
+// GenesisState defines the finality module's genesis state.
+message GenesisState {
+  // params the current params of the state.
+  Params params = 1 [(gogoproto.nullable) = false];
+  // indexed_blocks all the btc blocks and if their status are finalized.
+  repeated IndexedBlock indexed_blocks = 2;
+  // evidences all the evidences ever registered.
+  repeated Evidence evidences = 3;
+  // votes_sigs contains all the votes of finality providers ever registered.
+  repeated VoteSig vote_sigs = 4;
+  // public_randomness contains all the public randomness ever committed from the finality providers.
+  repeated PublicRandomness public_randomness = 5;
+  // pub_rand_commit contains all the public randomness commitment ever committed from the finality providers.
+  repeated PubRandCommitWithPK pub_rand_commit = 6;
+  // signing_infos represents a map between finality provider public key and their
+  // signing infos.
+  repeated SigningInfo signing_infos = 7 [(gogoproto.nullable) = false];
+  // missed_blocks represents a map between finality provider public key and their
+  // missed blocks.
+  repeated FinalityProviderMissedBlocks missed_blocks = 8 [(gogoproto.nullable) = false];
+  // voting_powers the voting power of every finality provider at every block height.
+  repeated VotingPowerFP voting_powers = 9;
+  // vp_dst_cache is the table of all providers voting power with the total at one specific block.
+  repeated VotingPowerDistCacheBlkHeight vp_dst_cache = 10;
+}
+
+// VoteSig the vote of an finality provider
+// with the block of the vote, the finality provider btc public key and the vote signature.
+message VoteSig {
+  // block_height is the height of the voted block.
+  uint64 block_height = 1;
+	// fp_btc_pk is the BTC PK of the finality provider that casts this vote
+  bytes fp_btc_pk = 2 [ (gogoproto.customtype) = "github.com/babylonlabs-io/babylon/types.BIP340PubKey" ];
+	// finality_sig is the finality signature to this block
+	// where finality signature is an EOTS signature, i.e.
+  bytes finality_sig = 3 [ (gogoproto.customtype) = "github.com/babylonlabs-io/babylon/types.SchnorrEOTSSig" ];
+}
+
+// PublicRandomness the block height and public randomness that the finality provider has submitted.
+message PublicRandomness {
+  // block_height is the height of block which the finality provider submitted public randomness.
+  uint64 block_height = 1;
+  // fp_btc_pk is the BTC PK of the finality provider that casts this vote.
+  bytes fp_btc_pk = 2 [ (gogoproto.customtype) = "github.com/babylonlabs-io/babylon/types.BIP340PubKey" ];
+  // pub_rand is the public randomness the finality provider has committed to.
+  bytes pub_rand = 3 [ (gogoproto.customtype) = "github.com/babylonlabs-io/babylon/types.SchnorrPubRand" ];
+}
+
+// PubRandCommitWithPK is the public randomness commitment with the finality provider's BTC public key
+message PubRandCommitWithPK {
+  // fp_btc_pk is the BTC PK of the finality provider that commits the public randomness
+  bytes fp_btc_pk = 1 [ (gogoproto.customtype) = "github.com/babylonlabs-io/babylon/types.BIP340PubKey" ];
+  // pub_rand_commit is the public randomness commitment
+  PubRandCommit pub_rand_commit = 2;
+}
+
+// SigningInfo stores finality provider signing info of corresponding BTC public key.
+message SigningInfo {
+  // fp_btc_pk is the BTC PK of the finality provider
+  bytes fp_btc_pk = 1 [ (gogoproto.customtype) = "github.com/babylonlabs-io/babylon/types.BIP340PubKey" ];
+  // fp_signing_info represents the signing info of this finality provider.
+  FinalityProviderSigningInfo fp_signing_info = 2 [(gogoproto.nullable) = false];
+}
+
+// FinalityProviderMissedBlocks contains array of missed blocks of corresponding
+// BTC public key.
+message FinalityProviderMissedBlocks {
+  // fp_btc_pk is the BTC PK of the finality provider
+  bytes fp_btc_pk = 1 [ (gogoproto.customtype) = "github.com/babylonlabs-io/babylon/types.BIP340PubKey" ];
+  // missed_blocks is an array of missed blocks by the finality provider.
+  repeated MissedBlock missed_blocks = 2 [(gogoproto.nullable) = false];
+}
+
+// MissedBlock contains height and missed status as boolean.
+message MissedBlock {
+  // index is the height at which the block was missed.
+  int64 index = 1;
+  // missed is the missed status.
+  bool missed = 2;
+}
+
+// VotingPowerFP contains the information about the voting power
+// of an finality provider in a specific block height.
+message VotingPowerFP {
+  // block_height is the height of the block the voting power was stored.
+  uint64 block_height = 1;
+  // fp_btc_pk the finality provider btc public key.
+  bytes fp_btc_pk = 2 [ (gogoproto.customtype) = "github.com/babylonlabs-io/babylon/types.BIP340PubKey" ];
+  // voting_power is the power of the finality provider at this specific block height.
+  uint64 voting_power = 3;
+}
+
+// VotingPowerDistCacheBlkHeight the total voting power of the finality providers at one specific block height
+message VotingPowerDistCacheBlkHeight {
+  // block_height is the height of the block the voting power distribution cached was stored.
+  uint64 block_height = 1;
+  // vp_distribution the finality providers distribution cache at that height.
+  VotingPowerDistCache vp_distribution = 2;
+}
