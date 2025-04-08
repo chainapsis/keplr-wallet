@@ -493,7 +493,6 @@ export const usePsbtsValidate = (
           sumOutputValueByAddress: processOutputValuesByAddress(
             sumOutputValueByAddressRecord,
             inputsToSign
-            // 사용자의 주소
           ),
           decodedRawData: decodePsbt(psbt),
         });
