@@ -202,14 +202,16 @@ export class ExtensionAnalyticsClient implements AnalyticsClient {
         return;
       }
 
-      if (target === AnalyticsTarget.GA || target === AnalyticsTarget.ALL) {
+      if (
+        this.gaApiKey &&
+        (target === AnalyticsTarget.GA || target === AnalyticsTarget.ALL)
+      ) {
         this.logGAEvent(eventName, eventProperties);
       }
 
       if (
-        (target === AnalyticsTarget.AMPLITUDE ||
-          target === AnalyticsTarget.ALL) &&
-        this.amplitudeApiKey
+        this.amplitudeApiKey &&
+        (target === AnalyticsTarget.AMPLITUDE || target === AnalyticsTarget.ALL)
       ) {
         this.logAmplitudeEvent(eventName, eventProperties);
       }

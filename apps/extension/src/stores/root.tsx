@@ -584,8 +584,8 @@ export class RootStore {
     this.analyticsStore = new AnalyticsStore(
       (() => {
         if (
-          !GoogleAPIKeyForMeasurement ||
-          !GoogleMeasurementId ||
+          ((!GoogleAPIKeyForMeasurement || !GoogleMeasurementId) &&
+            !AmplitudeAPIKey) ||
           localStorage.getItem("disable-analytics") === "true"
         ) {
           return new NoopAnalyticsClient();
