@@ -64,11 +64,7 @@ import { AppCurrency, ModularChainInfo } from "@keplr-wallet/types";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import { toXOnly } from "@keplr-wallet/crypto";
 import { useGetUTXOs } from "../../../../hooks/bitcoin/use-get-utxos";
-import {
-  IPsbtInput,
-  IPsbtOutput,
-  RemainderStatus,
-} from "@keplr-wallet/stores-bitcoin";
+import { IPsbtInput, RemainderStatus } from "@keplr-wallet/stores-bitcoin";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { InformationPlainIcon } from "../../../../components/icon";
 import { Tooltip } from "../../../../components/tooltip";
@@ -218,8 +214,8 @@ export const SignBitcoinTxView: FunctionComponent<{
           throw new Error("Not ready to simulate psbt");
         }
 
-        // refresh는 필요없다. -> 블록 생성 시간이 10분
         const senderAddress = interactionData.data.address;
+        const recipientAddress = interactionData.data.psbtCandidate.toAddress;
         const publicKey = interactionData.data.pubKey;
 
         const xonlyPubKey = publicKey
@@ -228,38 +224,20 @@ export const SignBitcoinTxView: FunctionComponent<{
         const feeRate = feeRateConfig.feeRate;
         const isSendMax = amountConfig.fraction === 1;
 
-        const MAX_SAFE_OUTPUT = new Dec(2 ** 53 - 1);
-        const amountInSatoshi = new Dec(
-          interactionData.data.psbtCandidate.amount
-        );
-        const recipientsForTransaction: IPsbtOutput[] = [];
-
-        if (amountInSatoshi.gt(MAX_SAFE_OUTPUT)) {
-          // 큰 금액을 여러 출력으로 분할
-          let remainingValue = amountInSatoshi;
-          while (!remainingValue.lte(new Dec(0))) {
-            const chunkValue = remainingValue.gt(MAX_SAFE_OUTPUT)
-              ? MAX_SAFE_OUTPUT
-              : remainingValue;
-            recipientsForTransaction.push({
-              address: interactionData.data.psbtCandidate.toAddress,
-              value: chunkValue.truncate().toBigNumber().toJSNumber(),
-            });
-            remainingValue = remainingValue.sub(chunkValue);
-          }
-        } else {
-          recipientsForTransaction.push({
-            address: interactionData.data.psbtCandidate.toAddress,
-            value: amountInSatoshi.truncate().toBigNumber().toJSNumber(),
-          });
-        }
+        const { outputs, recipientAddressInfo } =
+          bitcoinAccount.prepareOutputsForSingleRecipient(
+            new Dec(interactionData.data.psbtCandidate.amount),
+            recipientAddress,
+            chainId
+          );
 
         const selection = bitcoinAccount.selectUTXOs({
           senderAddress,
           utxos: availableUTXOs,
-          recipients: recipientsForTransaction,
+          outputs,
           feeRate,
           isSendMax,
+          prevalidatedAddressInfos: [recipientAddressInfo],
         });
 
         if (!selection) {
@@ -282,10 +260,11 @@ export const SignBitcoinTxView: FunctionComponent<{
         const psbtHex = bitcoinAccount.buildPsbt({
           inputs,
           changeAddress: senderAddress,
-          outputs: recipientsForTransaction,
+          outputs,
           feeRate,
           isSendMax,
           hasChange: remainderStatus === "used_as_change",
+          prevalidatedAddressInfos: [recipientAddressInfo],
         });
 
         return {

@@ -1,11 +1,13 @@
 import { Dec } from "@keplr-wallet/unit";
+import { AddressInfo } from "bitcoin-address-validation";
 
 export interface SelectUTXOsParams {
   senderAddress: string;
   utxos: UTXO[];
-  recipients: IPsbtOutput[];
+  outputs: IPsbtOutput[];
   feeRate: number;
   isSendMax?: boolean;
+  prevalidatedAddressInfos?: AddressInfo[];
 }
 
 export interface SelectionParams {
@@ -34,6 +36,7 @@ export interface BuildPsbtParams {
   changeAddress?: string;
   isSendMax?: boolean;
   hasChange?: boolean;
+  prevalidatedAddressInfos?: AddressInfo[];
 }
 
 export enum RemainderStatus {

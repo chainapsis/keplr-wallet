@@ -144,7 +144,9 @@ export const usePsbtsValidate = (
         .map(([address, value]) => ({
           address,
           value,
-          isMine: inputsToSign.some((input) => input.address === address),
+          isMine:
+            inputsToSign.some((input) => input.address === address) ||
+            bitcoinKeys.some((key) => key.address === address),
         }))
         .sort((a, b) => {
           if (a.isMine && b.isMine) {
@@ -165,7 +167,7 @@ export const usePsbtsValidate = (
           return 1;
         });
     };
-  }, []);
+  }, [bitcoinKeys]);
 
   const getInputToSignInfo = useCallback(
     (
@@ -506,8 +508,7 @@ export const usePsbtsValidate = (
       feeConfig.setValue(totalFee.truncate().toString());
       setIsInitialized(true);
     } catch (e) {
-      // psbt deserialize 오류 또는 입력의 합이 출력의 합보다 작은 psbt가 있는 경우
-      // 이는 더 이상 검증을 진행할 수 없는 치명적인 오류이다.
+      // psbt deserialize가 실패하는 경우, 이는 더 이상 검증을 진행할 수 없는 치명적인 오류이다.
       setCriticalValidationError(e as Error);
       console.error(e);
     }

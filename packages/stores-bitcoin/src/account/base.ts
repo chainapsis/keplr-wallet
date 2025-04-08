@@ -26,6 +26,8 @@ import {
 import {
   BRANCH_AND_BOUND_TIMEOUT_MS,
   DUST_THRESHOLD,
+  MAX_BITCOIN_SUPPLY,
+  MAX_SAFE_OUTPUT,
   MIN_RELAY_FEE,
 } from "./constant";
 import { BitcoinTxSizeEstimator, InputScriptType } from "./tx-size-estimator";
@@ -62,21 +64,23 @@ export class BitcoinAccountBase {
    * @param recipients Recipients of the transaction with value and address
    * @param feeRate Transaction fee rate in sat/vB
    * @param isSendMax Whether to send max value, do not calculate change output
+   * @param prevalidatedAddressInfos Prevalidated address infos, removed duplicates, can be used for both inputs and outputs
    * @returns {selectedUtxos, txSize, hasChange} Selected UTXOs and transaction size, whether there is change output
    */
   selectUTXOs({
     senderAddress,
     utxos,
-    recipients,
+    outputs,
     feeRate,
     isSendMax = false,
+    prevalidatedAddressInfos,
   }: SelectUTXOsParams): UTXOSelection | null {
     // 1. Basic validation
-    if (!utxos.length || !recipients.length || feeRate <= 0) {
+    if (!utxos.length || !outputs.length || feeRate <= 0) {
       throw new Error("Invalid parameters");
     }
 
-    // 2. Get network config and validate addresses
+    // 2. Get network config and validate utxos and addresses
     const [, genesisHash, paymentType] = this.chainId.split(":");
     const network = GENESIS_HASH_TO_NETWORK[genesisHash as GenesisHash];
     if (
@@ -86,30 +90,75 @@ export class BitcoinAccountBase {
       throw new Error("Invalid chain id");
     }
 
-    const senderAddressInfo = this.validateAndGetAddressInfo(
-      senderAddress,
-      network as unknown as Network
-    );
-    if (!senderAddressInfo) {
-      throw new Error("Invalid sender address");
-    }
-
-    const recipientAddressInfos = recipients
-      .map(({ address }) =>
-        this.validateAndGetAddressInfo(address, network as unknown as Network)
-      )
-      .filter(Boolean) as AddressInfo[];
-    if (!recipientAddressInfos.length) {
-      throw new Error("Invalid recipients");
-    }
-
-    // 3. Calculate output parameters and target value
-    const outputParams = this.calculateOutputParams(recipientAddressInfos);
-    const targetValue = recipients.reduce(
+    // 2-1. Calculate target value and validate
+    const targetValue = outputs.reduce(
       (sum, recipient) => sum.add(new Dec(recipient.value)),
       new Dec(0)
     );
     const DUST = new Dec(DUST_THRESHOLD);
+
+    // send max 더라도 dust와 max supply를 초과하는 경우 예외 처리가 필요하다.
+    if (targetValue.lt(DUST)) {
+      throw new Error("Target value is less than dust threshold");
+    }
+
+    if (targetValue.gt(new Dec(MAX_BITCOIN_SUPPLY))) {
+      throw new Error(
+        `Amount exceeds maximum Bitcoin supply (${MAX_BITCOIN_SUPPLY} BTC)`
+      );
+    }
+
+    // 2-2. Get prevalidated or validate address info
+    const addressInfoMap = new Map<string, AddressInfo>();
+
+    const getAddressInfo = (address: string): AddressInfo => {
+      if (addressInfoMap.has(address)) {
+        return addressInfoMap.get(address)!;
+      }
+
+      if (prevalidatedAddressInfos) {
+        const prevalidatedInfo = prevalidatedAddressInfos.find(
+          (info) => info.address === address
+        );
+        if (prevalidatedInfo) {
+          addressInfoMap.set(address, prevalidatedInfo);
+          return prevalidatedInfo;
+        }
+      }
+
+      const validatedInfo = this.validateAndGetAddressInfo(
+        address,
+        network as unknown as Network
+      );
+
+      if (!validatedInfo) {
+        throw new Error(`Invalid address: ${address}`);
+      }
+
+      addressInfoMap.set(address, validatedInfo);
+      return validatedInfo;
+    };
+
+    const senderAddressInfo = getAddressInfo(senderAddress);
+    if (!senderAddressInfo) {
+      throw new Error("Invalid sender address");
+    }
+
+    const recipientAddressInfos = outputs
+      .map(({ address }) => {
+        try {
+          return getAddressInfo(address);
+        } catch (error) {
+          throw new Error(`Invalid recipient address: ${address}`);
+        }
+      })
+      .filter(Boolean) as AddressInfo[];
+    if (recipientAddressInfos.length !== outputs.length) {
+      throw new Error("Outputs include invalid addresses");
+    }
+
+    // 3. Calculate output parameters
+    const outputParams = this.calculateOutputParams(recipientAddressInfos);
 
     // 4. Setup helper functions
     const calculateTxSize = (
@@ -229,6 +278,75 @@ export class BitcoinAccountBase {
     };
   }
 
+  /**
+   * Prepares and validates transaction outputs for single recipient
+   * @param amount Amount in satoshis
+   * @param recipientAddress Recipient address
+   * @param chainId Chain ID
+   * @param maxOutputCount Optional maximum number of outputs to create for large amounts
+   * @returns Validated recipient address info and outputs ready for transaction
+   */
+  prepareOutputsForSingleRecipient(
+    amount: Dec,
+    recipientAddress: string,
+    chainId: string
+  ): {
+    recipientAddressInfo: AddressInfo;
+    outputs: IPsbtOutput[];
+  } {
+    const [, genesisHash] = chainId.split(":");
+    const network = GENESIS_HASH_TO_NETWORK[genesisHash as GenesisHash];
+    if (!network) {
+      throw new Error(`Unsupported network: ${genesisHash}`);
+    }
+
+    const recipientAddressInfo = this.validateAndGetAddressInfo(
+      recipientAddress,
+      network as unknown as Network
+    );
+
+    if (!recipientAddressInfo) {
+      throw new Error("Invalid recipient address");
+    }
+
+    if (amount.gt(new Dec(MAX_BITCOIN_SUPPLY))) {
+      throw new Error(
+        `Amount exceeds maximum Bitcoin supply (${MAX_BITCOIN_SUPPLY} BTC)`
+      );
+    }
+
+    const maxSafeOutput = new Dec(MAX_SAFE_OUTPUT);
+    const outputs: IPsbtOutput[] = [];
+
+    const ZERO = new Dec(0);
+
+    if (amount.gt(maxSafeOutput)) {
+      let remainingValue = amount;
+
+      while (remainingValue.gt(ZERO)) {
+        const chunkValue = remainingValue.gt(maxSafeOutput)
+          ? maxSafeOutput
+          : remainingValue;
+
+        outputs.push({
+          address: recipientAddress,
+          value: chunkValue.truncate().toBigNumber().toJSNumber(),
+        });
+        remainingValue = remainingValue.sub(chunkValue);
+      }
+    } else {
+      outputs.push({
+        address: recipientAddress,
+        value: amount.truncate().toBigNumber().toJSNumber(),
+      });
+    }
+
+    return {
+      recipientAddressInfo,
+      outputs,
+    };
+  }
+
   private calculateOutputParams(
     addressInfos: AddressInfo[]
   ): Record<string, number> {
@@ -310,6 +428,7 @@ export class BitcoinAccountBase {
     maximumFeeRate = 1000,
     isSendMax = false,
     hasChange = false,
+    prevalidatedAddressInfos,
   }: BuildPsbtParams): string {
     // 1. Basic validation
     if (!inputs.length) {
@@ -346,7 +465,8 @@ export class BitcoinAccountBase {
         changeAddress,
         hasChange,
         network,
-        feeRate
+        feeRate,
+        prevalidatedAddressInfos
       );
 
     // 5. Build PSBT
@@ -384,122 +504,127 @@ export class BitcoinAccountBase {
     changeAddress: string | undefined,
     hasChange: boolean,
     network: string,
-    feeRate: number
+    feeRate: number,
+    prevalidatedAddressInfos?: AddressInfo[]
   ): {
     inputsWithAddressInfo: (IPsbtInput & { addressInfo: AddressInfo })[];
     outputsWithAddressInfo: (IPsbtOutput & { addressInfo: AddressInfo })[];
   } {
-    const inputAddressSet = new Set(inputs.map(({ address }) => address));
-    const inputAddressInfos = Array.from(inputAddressSet)
-      .map((address) =>
-        this.validateAndGetAddressInfo(address, network as unknown as Network)
-      )
-      .filter(Boolean) as AddressInfo[];
+    const addressInfoMap = new Map<string, AddressInfo>();
 
-    if (!inputAddressInfos.length) {
-      throw new Error("Invalid sender address");
-    }
+    const getAddressInfo = (address: string): AddressInfo => {
+      if (addressInfoMap.has(address)) {
+        return addressInfoMap.get(address)!;
+      }
+
+      if (prevalidatedAddressInfos) {
+        const prevalidatedInfo = prevalidatedAddressInfos.find(
+          (info) => info.address === address
+        );
+        if (prevalidatedInfo) {
+          addressInfoMap.set(address, prevalidatedInfo);
+          return prevalidatedInfo;
+        }
+      }
+
+      const validatedInfo = this.validateAndGetAddressInfo(
+        address,
+        network as unknown as Network
+      );
+
+      if (!validatedInfo) {
+        throw new Error(`Invalid address: ${address}`);
+      }
+
+      addressInfoMap.set(address, validatedInfo);
+      return validatedInfo;
+    };
 
     const inputsWithAddressInfo = inputs.map((input) => {
-      const addressInfo = inputAddressInfos.find(
-        (info) => info.address === input.address
-      );
-      if (!addressInfo) {
-        throw new Error("Invalid sender address");
+      try {
+        const addressInfo = getAddressInfo(input.address);
+        return { ...input, addressInfo };
+      } catch (error) {
+        throw new Error(`Invalid sender address: ${input.address}`);
       }
-      return { ...input, addressInfo };
     });
 
-    const outputAddressInfos = outputs
-      .map(({ address }) =>
-        this.validateAndGetAddressInfo(address, network as unknown as Network)
-      )
-      .filter(Boolean) as AddressInfo[];
-
     const outputsWithAddressInfo = outputs.map((output) => {
-      const addressInfo = outputAddressInfos.find(
-        (info) => info.address === output.address
-      );
-      if (!addressInfo) {
-        throw new Error("Invalid recipient address");
+      try {
+        const addressInfo = getAddressInfo(output.address);
+        return { ...output, addressInfo };
+      } catch (error) {
+        throw new Error(`Invalid recipient address: ${output.address}`);
       }
-      return { ...output, addressInfo };
     });
 
     if (hasChange && changeAddress) {
-      const changeAddressInfo = this.validateAndGetAddressInfo(
-        changeAddress,
-        network as unknown as Network
-      );
-      if (!changeAddressInfo) {
-        throw new Error("Invalid change address");
-      }
+      try {
+        const changeAddressInfo = getAddressInfo(changeAddress);
 
-      const totalInputValue = inputs.reduce(
-        (sum, input) => sum.add(new Dec(input.value)),
-        new Dec(0)
-      );
-
-      // Calculate outputs total value (excluding change)
-      const totalOutputValue = outputs.reduce(
-        (sum, output) => sum.add(new Dec(output.value)),
-        new Dec(0)
-      );
-
-      // Calculate fee and change value directly from input/output values
-      // using the expected fee rate and actual transaction size from calcTxSize
-      const outputParams: Record<string, number> = {};
-      outputAddressInfos.forEach((info) => {
-        const key = `${info.type}_output_count`;
-        outputParams[key] = (outputParams[key] || 0) + 1;
-      });
-
-      // Consider change output in tx size calculation
-      const changeKey = `${changeAddressInfo.type}_output_count`;
-      outputParams[changeKey] = (outputParams[changeKey] || 0) + 1;
-
-      let inputScript = "p2tr";
-      // For mixed input types, check which one is dominant
-      const typeCounts: Record<string, number> = {};
-      inputs.forEach((input) => {
-        const addressInfo = inputAddressInfos.find(
-          (info) => info.address === input.address
+        const totalInputValue = inputs.reduce(
+          (sum, input) => sum.add(new Dec(input.value)),
+          new Dec(0)
         );
-        if (addressInfo) {
-          typeCounts[addressInfo.type] =
-            (typeCounts[addressInfo.type] || 0) + 1;
-        }
-      });
 
-      let maxCount = 0;
-      Object.entries(typeCounts).forEach(([type, count]) => {
-        if (count > maxCount) {
-          maxCount = count;
-          inputScript = type;
-        }
-      });
+        // Calculate outputs total value (excluding change)
+        const totalOutputValue = outputs.reduce(
+          (sum, output) => sum.add(new Dec(output.value)),
+          new Dec(0)
+        );
 
-      const { txVBytes } = this._txSizeEstimator.calcTxSize({
-        input_count: inputs.length,
-        input_script: inputScript as InputScriptType,
-        ...outputParams,
-      });
-
-      const calculatedFee = new Dec(Math.ceil(txVBytes * feeRate));
-      const fee = calculatedFee.lt(new Dec(MIN_RELAY_FEE))
-        ? new Dec(MIN_RELAY_FEE)
-        : calculatedFee;
-
-      const changeValue = totalInputValue.sub(totalOutputValue).sub(fee);
-
-      if (changeValue.gte(new Dec(DUST_THRESHOLD))) {
-        outputsWithAddressInfo.push({
-          address: changeAddress,
-          value: changeValue.truncate().toBigNumber().toJSNumber(),
-          addressInfo: changeAddressInfo,
+        // Calculate fee and change value directly from input/output values
+        // using the expected fee rate and actual transaction size from calcTxSize
+        const outputParams: Record<string, number> = {};
+        outputsWithAddressInfo.forEach((output) => {
+          const key = `${output.addressInfo.type}_output_count`;
+          outputParams[key] = (outputParams[key] || 0) + 1;
         });
-      } else {
-        console.warn("Change amount is less than dust threshold");
+
+        // Consider change output in tx size calculation
+        const changeKey = `${changeAddressInfo.type}_output_count`;
+        outputParams[changeKey] = (outputParams[changeKey] || 0) + 1;
+
+        // Determine dominant input script type
+        const typeCounts: Record<string, number> = {};
+        inputsWithAddressInfo.forEach((input) => {
+          typeCounts[input.addressInfo.type] =
+            (typeCounts[input.addressInfo.type] || 0) + 1;
+        });
+
+        let inputScript = "p2tr";
+        let maxCount = 0;
+        Object.entries(typeCounts).forEach(([type, count]) => {
+          if (count > maxCount) {
+            maxCount = count;
+            inputScript = type;
+          }
+        });
+
+        const { txVBytes } = this._txSizeEstimator.calcTxSize({
+          input_count: inputs.length,
+          input_script: inputScript as InputScriptType,
+          ...outputParams,
+        });
+
+        const calculatedFee = new Dec(Math.ceil(txVBytes * feeRate));
+        const fee = calculatedFee.lt(new Dec(MIN_RELAY_FEE))
+          ? new Dec(MIN_RELAY_FEE)
+          : calculatedFee;
+
+        const changeValue = totalInputValue.sub(totalOutputValue).sub(fee);
+
+        if (changeValue.gte(new Dec(DUST_THRESHOLD))) {
+          outputsWithAddressInfo.push({
+            address: changeAddress,
+            value: changeValue.truncate().toBigNumber().toJSNumber(),
+            addressInfo: changeAddressInfo,
+          });
+        } else {
+          console.warn("Change amount is less than dust threshold");
+        }
+      } catch (error) {
+        throw new Error("Invalid change address");
       }
     }
 

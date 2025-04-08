@@ -81,7 +81,7 @@ export const useGetBitcoinKeys = (chainId: string) => {
 
     const linkedChainKey = modularChainInfo.linkedChainKey;
 
-    const linkedChainInfos = chainStore.modularChainInfosInUI.filter(
+    const linkedChainInfos = chainStore.modularChainInfos.filter(
       (modularChainInfo) =>
         "bitcoin" in modularChainInfo &&
         modularChainInfo.linkedChainKey === linkedChainKey

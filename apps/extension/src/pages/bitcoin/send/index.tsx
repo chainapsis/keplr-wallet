@@ -49,11 +49,7 @@ import {
   AddRecentSendHistoryMsg,
   PushBitcoinTransactionMsg,
 } from "@keplr-wallet/background";
-import {
-  IPsbtInput,
-  IPsbtOutput,
-  RemainderStatus,
-} from "@keplr-wallet/stores-bitcoin";
+import { IPsbtInput, RemainderStatus } from "@keplr-wallet/stores-bitcoin";
 import { BitcoinGuideBox } from "../components/guide-box";
 
 const Styles = {
@@ -298,6 +294,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
         remainderValue: string;
       }> => {
         const senderAddress = sendConfigs.senderConfig.sender;
+        const recipientAddress = sendConfigs.recipientConfig.recipient;
         const publicKey = account.pubKey;
         const bitcoinAddress = account.bitcoinAddress;
         const feeRate = sendConfigs.feeRateConfig.feeRate;
@@ -355,40 +352,21 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
           return { bip32Derivation: undefined, tapBip32Derivation: undefined };
         })();
 
-        // Prepare transaction outputs
-        const MAX_SAFE_OUTPUT = new Dec(2 ** 53 - 1);
-        const amountInSatoshi = new Dec(
-          sendConfigs.amountConfig.amount[0].toCoin().amount
-        );
-        const recipientsForTransaction: IPsbtOutput[] = [];
-
-        if (amountInSatoshi.gt(MAX_SAFE_OUTPUT)) {
-          // Split large amounts into multiple outputs
-          let remainingValue = amountInSatoshi;
-          while (!remainingValue.lte(new Dec(0))) {
-            const chunkValue = remainingValue.gt(MAX_SAFE_OUTPUT)
-              ? MAX_SAFE_OUTPUT
-              : remainingValue;
-            recipientsForTransaction.push({
-              address: sendConfigs.recipientConfig.recipient,
-              value: chunkValue.truncate().toBigNumber().toJSNumber(),
-            });
-            remainingValue = remainingValue.sub(chunkValue);
-          }
-        } else {
-          recipientsForTransaction.push({
-            address: sendConfigs.recipientConfig.recipient,
-            value: amountInSatoshi.truncate().toBigNumber().toJSNumber(),
-          });
-        }
+        const { outputs, recipientAddressInfo } =
+          bitcoinAccount.prepareOutputsForSingleRecipient(
+            new Dec(sendConfigs.amountConfig.amount[0].toCoin().amount),
+            recipientAddress,
+            chainId
+          );
 
         // Select UTXOs and prepare transaction
         const selection = bitcoinAccount.selectUTXOs({
           senderAddress,
           utxos: availableUTXOs,
-          recipients: recipientsForTransaction,
+          outputs,
           feeRate,
           isSendMax,
+          prevalidatedAddressInfos: [recipientAddressInfo],
         });
 
         if (!selection) {
@@ -417,10 +395,11 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
         const psbtHex = bitcoinAccount.buildPsbt({
           inputs,
           changeAddress: senderAddress,
-          outputs: recipientsForTransaction,
+          outputs,
           feeRate,
           isSendMax,
           hasChange: remainderStatus === "used_as_change",
+          prevalidatedAddressInfos: [recipientAddressInfo],
         });
 
         return {
