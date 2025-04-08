@@ -60,11 +60,11 @@ const Styles = {
           ? ColorPalette["skeleton-layer-0"]
           : ColorPalette.white
         : ColorPalette["gray-650"]};
-    padding ${({ forChange }) =>
+    padding: ${({ forChange }) =>
       forChange ? "0.875rem 0.25rem 0.875rem 1rem" : "1rem 0.875rem"};
     border-radius: 0.375rem;
     cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
-    
+
     border: ${({ isError }) =>
       isError
         ? `1.5px solid ${Color(ColorPalette["yellow-400"])
@@ -75,8 +75,7 @@ const Styles = {
     box-shadow: ${(props) =>
       props.theme.mode === "light" && !props.isNotReady
         ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
-        : "none"};;
-    
+        : "none"};
     ${({ disabled, theme, disableHoverStyle }) => {
       if (!disableHoverStyle && !disabled) {
         return css`
@@ -88,7 +87,6 @@ const Styles = {
         `;
       }
     }}
-    
   `,
   IconContainer: styled.div`
     color: ${ColorPalette["gray-300"]};
@@ -245,6 +243,9 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
           }
         }
       } else {
+        if (denomHelper.type === "erc20") {
+          return undefined;
+        }
         return {
           text: denomHelper.type.toUpperCase(),
         };
