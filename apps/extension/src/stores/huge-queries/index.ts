@@ -1024,4 +1024,35 @@ export class HugeQueriesStore {
       return 1;
     }
   }
+
+  @computed
+  get combinedTokensMap(): Map<string, ViewToken[]> {
+    const tokensMap = new Map<string, ViewToken[]>();
+
+    for (const viewToken of this.allKnownBalances) {
+      const currency = viewToken.token.currency;
+
+      if (
+        "paths" in currency &&
+        currency.originChainId &&
+        currency.originCurrency?.coinMinimalDenom
+      ) {
+        // IBC
+        const originChainId = currency.originChainId;
+        const coinMinimalDenom = currency.originCurrency.coinMinimalDenom;
+
+        const combineKey = `${originChainId}/${coinMinimalDenom}`;
+
+        if (!tokensMap.has(combineKey)) {
+          tokensMap.set(combineKey, []);
+        }
+
+        tokensMap.get(combineKey)!.push(viewToken);
+      }
+
+      // TODO: EVM 토큰 처리
+    }
+
+    return tokensMap;
+  }
 }
