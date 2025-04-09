@@ -18,8 +18,6 @@ export class ManageViewAssetTokenConfig {
     ReadonlyMap<string, ReadonlySet<string>>
   > = new Map();
 
-  protected searchSet = new Set<string>();
-
   constructor(
     protected readonly requester: MessageRequester,
     protected readonly chainStore: ChainStore,
