@@ -362,6 +362,21 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
             text: intl.formatMessage({
               id: "bottom-tabs.swap",
             }),
+            ...(() => {
+              for (const modularChainInfo of chainStore.modularChainInfosInUI) {
+                if ("cosmos" in modularChainInfo) {
+                  return {
+                    disabled: false,
+                  };
+                }
+              }
+              return {
+                disabled: true,
+                tooltip: intl.formatMessage({
+                  id: "bottom-tabs.swap.disabled",
+                }),
+              };
+            })(),
           },
           {
             pathname: "/activities",
