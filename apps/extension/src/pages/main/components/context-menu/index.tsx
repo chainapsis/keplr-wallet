@@ -15,7 +15,7 @@ import { VerticalCollapseTransition } from "../../../../components/transition/ve
 import { Body3 } from "../../../../components/typography";
 import { SceneTransition } from "../../../../components/transition/scene/scene";
 import { ColorPalette } from "../../../../styles";
-// import { useIntl } from "react-intl";
+import { useIntl } from "react-intl";
 import { Toggle } from "../../../../components/toggle/toggle";
 import {
   ArrowLeftIcon,
@@ -113,6 +113,7 @@ const MainMenuScene: React.FC<MainMenuSceneProps> = observer(
     const { uiConfigStore } = useStore();
     const { hideLowBalance, showFiatValue } = uiConfigStore.options;
     const theme = useTheme();
+    const intl = useIntl();
 
     const handleToggleClick = (e: React.MouseEvent, toggleFn: () => void) => {
       if (!(e.target as HTMLElement).closest(".toggle-component")) {
@@ -150,7 +151,11 @@ const MainMenuScene: React.FC<MainMenuSceneProps> = observer(
                     : ColorPalette["white"]
                 }
               />
-              <Body3>Asset View</Body3>
+              <Body3>
+                {intl.formatMessage({
+                  id: "page.main.components.context-menu.asset-view",
+                })}
+              </Body3>
             </MenuItemXAxis>
             <RightArrowIcon width="1rem" height="1rem" />
           </Box>
@@ -165,7 +170,9 @@ const MainMenuScene: React.FC<MainMenuSceneProps> = observer(
               }
             />
             <Body3 color={textColorByCondition(hideLowBalance)}>
-              Hide Low Balances
+              {intl.formatMessage({
+                id: "page.main.components.context-menu.hide-low-balance",
+              })}
             </Body3>
           </MenuItemXAxis>
           <div
@@ -189,7 +196,9 @@ const MainMenuScene: React.FC<MainMenuSceneProps> = observer(
               }
             />
             <Body3 color={textColorByCondition(showFiatValue)}>
-              Show Fiat Value Per Chain
+              {intl.formatMessage({
+                id: "page.main.components.context-menu.show-fiat-value",
+              })}
             </Body3>
           </MenuItemXAxis>
           <div
@@ -218,6 +227,8 @@ interface AssetViewSceneProps {
 const AssetViewScene: React.FC<AssetViewSceneProps> = observer(
   ({ assetViewMode, onGroupByAssetsClick, onFlatViewClick, onBackClick }) => {
     const theme = useTheme();
+    const intl = useIntl();
+
     const textColorByCondition = (condition: boolean) => {
       return theme.mode === "light"
         ? condition
@@ -270,7 +281,9 @@ const AssetViewScene: React.FC<AssetViewSceneProps> = observer(
                 }
               />
               <Body3 color={textColorByCondition(assetViewMode === "grouped")}>
-                Group by Assets
+                {intl.formatMessage({
+                  id: "page.main.components.context-menu.group-by-assets",
+                })}
               </Body3>
             </MenuItemXAxis>
             {assetViewMode === "grouped" ? (
@@ -297,7 +310,9 @@ const AssetViewScene: React.FC<AssetViewSceneProps> = observer(
                 }
               />
               <Body3 color={textColorByCondition(assetViewMode === "flat")}>
-                Flat
+                {intl.formatMessage({
+                  id: "page.main.components.context-menu.flat",
+                })}
               </Body3>
             </MenuItemXAxis>
             {assetViewMode === "flat" ? (
@@ -318,7 +333,7 @@ const CustomTextButton = styled(TextButton)`
 
 export const ViewOptionsContextMenu: FunctionComponent = observer(() => {
   const { uiConfigStore } = useStore();
-  // import { useIntl } from "react-intl";
+  const intl = useIntl();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneTransitionRef = useRef<any>(null);
@@ -431,7 +446,9 @@ export const ViewOptionsContextMenu: FunctionComponent = observer(() => {
       {(isOpen || renderMenu) && <MenuBackdrop onClick={closeMenu} />}
 
       <CustomTextButton
-        text={"View Options"}
+        text={intl.formatMessage({
+          id: "page.main.components.context-menu.title",
+        })}
         size="small"
         right={
           <MenuItemXAxis alignY="center">
