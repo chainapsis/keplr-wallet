@@ -3125,6 +3125,176 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     features: [],
   },
   {
+    chainId:
+      "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:taproot",
+    chainName: "Bitcoin",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bitcoin/mainnet.png",
+    linkedChainKey:
+      "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
+    bitcoin: {
+      chainId:
+        "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
+      rpc: "",
+      rest: "https://api-indexer-bitcoin.keplr.app",
+      bip44: {
+        coinType: 0,
+        purpose: 86,
+      },
+      currencies: [
+        {
+          coinDenom: "BTC",
+          coinMinimalDenom: "sats",
+          coinDecimals: 8,
+          coinGeckoId: "bitcoin",
+          coinImageUrl:
+            "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bitcoin/mainnet.png",
+        },
+      ],
+    },
+  },
+  {
+    chainId:
+      "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:native-segwit",
+    chainName: "Bitcoin",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bitcoin/mainnet.png",
+    linkedChainKey:
+      "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
+    bitcoin: {
+      chainId:
+        "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
+      rpc: "",
+      rest: "https://api-indexer-bitcoin.keplr.app",
+      bip44: {
+        coinType: 0,
+        purpose: 84,
+      },
+      currencies: [
+        {
+          coinDenom: "BTC",
+          coinMinimalDenom: "sats",
+          coinDecimals: 8,
+          coinGeckoId: "bitcoin",
+          coinImageUrl:
+            "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bitcoin/mainnet.png",
+        },
+      ],
+    },
+  },
+  {
+    chainId:
+      "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943:taproot",
+    chainName: "Bitcoin Testnet",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bitcoin/testnet.png",
+    linkedChainKey:
+      "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943",
+    bitcoin: {
+      chainId:
+        "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943",
+      rpc: "",
+      rest: "https://blockstream.info/testnet/api",
+      bip44: {
+        coinType: 1,
+        purpose: 86,
+      },
+      currencies: [
+        {
+          coinDenom: "tBTC",
+          coinMinimalDenom: "sats-testnet",
+          coinDecimals: 8,
+          coinImageUrl:
+            "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bitcoin/testnet.png",
+        },
+      ],
+    },
+  },
+  {
+    chainId:
+      "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943:native-segwit",
+    chainName: "Bitcoin Testnet",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bitcoin/testnet.png",
+    linkedChainKey:
+      "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943",
+    bitcoin: {
+      chainId:
+        "bip122:000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943",
+      rpc: "",
+      rest: "https://blockstream.info/testnet/api",
+      bip44: {
+        coinType: 1,
+        purpose: 84,
+      },
+      currencies: [
+        {
+          coinDenom: "tBTC",
+          coinMinimalDenom: "sats-testnet",
+          coinDecimals: 8,
+          coinImageUrl:
+            "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bitcoin/testnet.png",
+        },
+      ],
+    },
+  },
+  {
+    chainId:
+      "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6:taproot",
+    chainName: "Bitcoin Signet",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bitcoin/signet.png",
+    linkedChainKey:
+      "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6",
+    bitcoin: {
+      chainId:
+        "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6",
+      rpc: "",
+      rest: "https://explorer.bc-2.jp/api",
+      bip44: {
+        coinType: 1,
+        purpose: 86,
+      },
+      currencies: [
+        {
+          coinDenom: "sBTC",
+          coinMinimalDenom: "sats-signet",
+          coinDecimals: 8,
+          coinImageUrl:
+            "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bitcoin/signet.png",
+        },
+      ],
+    },
+  },
+  {
+    chainId:
+      "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6:native-segwit",
+    chainName: "Bitcoin Signet",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bitcoin/signet.png",
+    linkedChainKey:
+      "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6",
+    bitcoin: {
+      chainId:
+        "bip122:00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6",
+      rpc: "",
+      rest: "https://explorer.bc-2.jp/api",
+      bip44: {
+        coinType: 1,
+        purpose: 84,
+      },
+      currencies: [
+        {
+          coinDenom: "sBTC",
+          coinMinimalDenom: "sats-signet",
+          coinDecimals: 8,
+          coinImageUrl:
+            "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bitcoin/signet.png",
+        },
+      ],
+    },
+  },
+  {
     rpc: "https://rpc-nillion.keplr.app",
     rest: "https://lcd-nillion.keplr.app",
     chainId: "nillion-1",
@@ -3175,6 +3345,57 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       },
     ],
     features: [],
+  },
+  {
+    chainId: "bbn-1",
+    chainName: "Babylon Genesis",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bbn/chain.png",
+    rpc: "https://rpc-babylon.keplr.app",
+    rest: "https://lcd-babylon.keplr.app",
+    walletUrlForStaking: "https://wallet.keplr.app/chains/babylon-genesis",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "bbn",
+      bech32PrefixAccPub: "bbnpub",
+      bech32PrefixValAddr: "bbnvaloper",
+      bech32PrefixValPub: "bbnvaloperpub",
+      bech32PrefixConsAddr: "bbnvalcons",
+      bech32PrefixConsPub: "bbnvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "BABY",
+        coinMinimalDenom: "ubbn",
+        coinDecimals: 6,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bbn/chain.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "BABY",
+        coinMinimalDenom: "ubbn",
+        coinDecimals: 6,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bbn/chain.png",
+        gasPriceStep: {
+          low: 0.007,
+          average: 0.007,
+          high: 0.01,
+        },
+      },
+    ],
+    stakeCurrency: {
+      coinDenom: "BABY",
+      coinMinimalDenom: "ubbn",
+      coinDecimals: 6,
+      coinImageUrl:
+        "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bbn/chain.png",
+    },
+    features: ["cosmwasm"],
   },
 ];
 

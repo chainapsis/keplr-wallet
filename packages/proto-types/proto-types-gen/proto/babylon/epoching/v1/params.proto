@@ -1,0 +1,15 @@
+syntax = "proto3";
+package babylon.epoching.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/babylonlabs-io/babylon/x/epoching/types";
+
+// Params defines the parameters for the module.
+message Params {
+  option (gogoproto.equal) = true;
+
+  // epoch_interval is the number of consecutive blocks to form an epoch
+  uint64 epoch_interval = 1
+      [ (gogoproto.moretags) = "yaml:\"epoch_interval\"" ];
+}

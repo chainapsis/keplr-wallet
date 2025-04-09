@@ -251,10 +251,11 @@ const HeaderStep: FunctionComponent<{
 }> = ({ title, paragraphs, stepCurrent, stepTotal }) => {
   const intl = useIntl();
   const theme = useTheme();
+
   return (
     <Box position="relative">
       <YAxis alignX="center">
-        {stepCurrent <= 0 && stepTotal <= 0 ? null : (
+        {stepCurrent <= 0 || stepTotal <= 0 ? null : (
           <React.Fragment>
             <Subtitle3
               color={

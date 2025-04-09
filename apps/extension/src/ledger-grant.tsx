@@ -38,6 +38,7 @@ import { useTheme } from "styled-components";
 import { RoutePageAnalytics } from "./route-page-analytics";
 import { LedgerError, StarknetClient } from "@ledgerhq/hw-app-starknet";
 import { STARKNET_LEDGER_DERIVATION_PATH } from "./pages/sign/utils/handle-starknet-sign";
+import AppClient from "ledger-bitcoin";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -420,6 +421,106 @@ const LedgerGrantPage: FunctionComponent = observer(() => {
 
                           setStatus("failed");
                         } finally {
+                          setAppIsLoading("");
+                        }
+                      }}
+                    />
+                    <Button
+                      color="secondary"
+                      text="Bitcoin app"
+                      isLoading={appIsLoading === "Bitcoin"}
+                      disabled={!!appIsLoading && appIsLoading !== "Bitcoin"}
+                      onClick={async () => {
+                        if (appIsLoading) {
+                          return;
+                        }
+                        setAppIsLoading("Bitcoin");
+
+                        let transport: Transport | undefined = undefined;
+                        try {
+                          transport = uiConfigStore.useWebHIDLedger
+                            ? await TransportWebHID.create()
+                            : await TransportWebUSB.create();
+
+                          let app = new AppClient(transport as any);
+
+                          try {
+                            await app.getExtendedPubkey(`m/44'/0'/0'/0/0`);
+
+                            setStatus("success");
+                            return;
+                          } catch (e) {
+                            console.log(e);
+                            // noop
+                          }
+
+                          transport = await LedgerUtils.tryAppOpen(
+                            transport,
+                            "Bitcoin"
+                          );
+                          app = new AppClient(transport as any);
+
+                          await app.getExtendedPubkey(`m/44'/0'/0'/0/0`);
+                          setStatus("success");
+                          return;
+                        } catch (e) {
+                          console.log(e);
+
+                          setStatus("failed");
+                        } finally {
+                          transport?.close().catch(console.log);
+
+                          setAppIsLoading("");
+                        }
+                      }}
+                    />
+                    <Button
+                      color="secondary"
+                      text="Bitcoin Test app"
+                      isLoading={appIsLoading === "Bitcoin Test"}
+                      disabled={
+                        !!appIsLoading && appIsLoading !== "Bitcoin Test"
+                      }
+                      onClick={async () => {
+                        if (appIsLoading) {
+                          return;
+                        }
+                        setAppIsLoading("Bitcoin Test");
+
+                        let transport: Transport | undefined = undefined;
+                        try {
+                          transport = uiConfigStore.useWebHIDLedger
+                            ? await TransportWebHID.create()
+                            : await TransportWebUSB.create();
+
+                          let app = new AppClient(transport as any);
+
+                          try {
+                            await app.getExtendedPubkey(`m/44'/1'/0'/0/0`);
+
+                            setStatus("success");
+                            return;
+                          } catch (e) {
+                            console.log(e);
+                            // noop
+                          }
+
+                          transport = await LedgerUtils.tryAppOpen(
+                            transport,
+                            "Bitcoin Test"
+                          );
+                          app = new AppClient(transport as any);
+
+                          await app.getExtendedPubkey(`m/44'/1'/0'/0/0`);
+                          setStatus("success");
+                          return;
+                        } catch (e) {
+                          console.log(e);
+
+                          setStatus("failed");
+                        } finally {
+                          transport?.close().catch(console.log);
+
                           setAppIsLoading("");
                         }
                       }}

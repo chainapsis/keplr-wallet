@@ -1,0 +1,35 @@
+syntax = "proto3";
+package babylon.btcstaking.v1;
+
+option go_package = "github.com/babylonlabs-io/babylon/x/btcstaking/types";
+
+// BTCSigType indicates the type of btc_sig in a pop
+enum BTCSigType {
+    // BIP340 means the btc_sig will follow the BIP-340 encoding
+    BIP340 = 0;
+    // BIP322 means the btc_sig will follow the BIP-322 encoding
+    BIP322 = 1;
+    // ECDSA means the btc_sig will follow the ECDSA encoding
+    // ref: https://github.com/okx/js-wallet-sdk/blob/a57c2acbe6ce917c0aa4e951d96c4e562ad58444/packages/coin-bitcoin/src/BtcWallet.ts#L331
+    ECDSA = 2;
+}
+
+// ProofOfPossessionBTC is the proof of possession that a Babylon
+// address and a Bitcoin secp256k1 secret key are held by the same
+// person
+message ProofOfPossessionBTC {
+    // btc_sig_type indicates the type of btc_sig in the pop
+    BTCSigType btc_sig_type = 1;
+    // btc_sig is the signature generated via sign(sk_btc, babylon_staker_address)
+    // the signature follows encoding in either BIP-340 spec or BIP-322 spec
+    bytes btc_sig = 2;
+}
+
+// BIP322Sig is a BIP-322 signature together with the address corresponding to
+// the signer
+message BIP322Sig {
+    // address is the signer's address
+    string address = 1;
+    // sig is the actual signature in BIP-322 format
+    bytes sig = 2;
+}

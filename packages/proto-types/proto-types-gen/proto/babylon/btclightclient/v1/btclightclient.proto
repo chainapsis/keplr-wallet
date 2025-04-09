@@ -1,0 +1,26 @@
+syntax = "proto3";
+package babylon.btclightclient.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/babylonlabs-io/babylon/x/btclightclient/types";
+
+// BTCHeaderInfo is a structure that contains all relevant information about a
+// BTC header
+//  - Full header bytes
+//  - Header hash for easy retrieval
+//  - Height of the header in the BTC chain
+//  - Total work spent on the header. This is the sum of the work corresponding
+//  to the header Bits field
+//    and the total work of the header.
+message BTCHeaderInfo {
+  bytes header = 1
+      [ (gogoproto.customtype) =
+            "github.com/babylonlabs-io/babylon/types.BTCHeaderBytes" ];
+  bytes hash = 2
+      [ (gogoproto.customtype) =
+            "github.com/babylonlabs-io/babylon/types.BTCHeaderHashBytes" ];
+  uint32 height = 3;
+  bytes work = 4
+      [ (gogoproto.customtype) = "cosmossdk.io/math.Uint" ];
+}

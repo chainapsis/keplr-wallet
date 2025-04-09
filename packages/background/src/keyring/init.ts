@@ -25,6 +25,7 @@ import {
   ShowSensitiveLegacyKeyRingDataMsg,
   ExportKeyRingVaultsMsg,
   SearchKeyRingsMsg,
+  AppendLedgerExtendedKeysMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -40,6 +41,7 @@ export function init(router: Router, service: KeyRingService): void {
   router.registerMessage(NewKeystoneKeyMsg);
   router.registerMessage(NewPrivateKeyKeyMsg);
   router.registerMessage(AppendLedgerKeyAppMsg);
+  router.registerMessage(AppendLedgerExtendedKeysMsg);
   router.registerMessage(LockKeyRingMsg);
   router.registerMessage(UnlockKeyRingMsg);
   router.registerMessage(ChangeKeyRingNameMsg);

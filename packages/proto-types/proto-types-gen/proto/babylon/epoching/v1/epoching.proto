@@ -1,0 +1,110 @@
+syntax = "proto3";
+package babylon.epoching.v1;
+
+import "google/protobuf/timestamp.proto";
+import "gogoproto/gogo.proto";
+import "cosmos/staking/v1beta1/tx.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "github.com/babylonlabs-io/babylon/x/epoching/types";
+
+// Epoch is a structure that contains the metadata of an epoch
+message Epoch {
+  // epoch_number is the number of this epoch
+  uint64 epoch_number = 1;
+  // current_epoch_interval is the epoch interval at the time of this epoch
+  uint64 current_epoch_interval = 2;
+  // first_block_height is the height of the first block in this epoch
+  uint64 first_block_height = 3;
+  // last_block_time is the time of the last block in this epoch.
+  // Babylon needs to remember the last header's time of each epoch to complete
+  // unbonding validators/delegations when a previous epoch's checkpoint is
+  // finalised. The last_block_time field is nil in the epoch's beginning, and
+  // is set upon the end of this epoch.
+  google.protobuf.Timestamp last_block_time = 4 [ (gogoproto.stdtime) = true ];
+  // sealer is the last block of the sealed epoch
+  // sealer_app_hash points to the sealer but stored in the 1st header
+  // of the next epoch
+  bytes sealer_app_hash = 5;
+  // sealer_block_hash is the hash of the sealer
+  // the validator set has generated a BLS multisig on the hash,
+  // i.e., hash of the last block in the epoch
+  bytes sealer_block_hash = 6;
+}
+
+// QueuedMessage is a message that can change the validator set and is delayed
+// to the end of an epoch
+message QueuedMessage {
+  // tx_id is the ID of the tx that contains the message
+  bytes tx_id = 1;
+  // msg_id is the original message ID, i.e., hash of the marshaled message
+  bytes msg_id = 2;
+  // block_height is the height when this msg is submitted to Babylon
+  uint64 block_height = 3;
+  // block_time is the timestamp when this msg is submitted to Babylon
+  google.protobuf.Timestamp block_time = 4 [ (gogoproto.stdtime) = true ];
+  // msg is the actual message that is sent by a user and is queued by the
+  // epoching module
+  oneof msg {
+    cosmos.staking.v1beta1.MsgCreateValidator msg_create_validator = 5;
+    cosmos.staking.v1beta1.MsgDelegate msg_delegate = 6;
+    cosmos.staking.v1beta1.MsgUndelegate msg_undelegate = 7;
+    cosmos.staking.v1beta1.MsgBeginRedelegate msg_begin_redelegate = 8;
+    cosmos.staking.v1beta1.MsgCancelUnbondingDelegation msg_cancel_unbonding_delegation = 9;
+    cosmos.staking.v1beta1.MsgEditValidator msg_edit_validator = 10;
+    cosmos.staking.v1beta1.MsgUpdateParams msg_update_params = 11;
+  }
+}
+
+// BondState is the bond state of a validator or delegation
+enum BondState {
+  // CREATED is when the validator/delegation has been created
+  CREATED = 0;
+  // CREATED is when the validator/delegation has become bonded
+  BONDED = 1;
+  // CREATED is when the validator/delegation has become unbonding
+  UNBONDING = 2;
+  // CREATED is when the validator/delegation has become unbonded
+  UNBONDED = 3;
+  // CREATED is when the validator/delegation has been removed
+  REMOVED = 4;
+}
+
+// ValStateUpdate is a message that records a state update of a validator
+message ValStateUpdate {
+  BondState state = 1;
+  uint64 block_height = 2;
+  google.protobuf.Timestamp block_time = 3 [ (gogoproto.stdtime) = true ];
+}
+
+// ValidatorLifecycle is a message that records the lifecycle of
+// a validator
+message ValidatorLifecycle {
+  string val_addr = 1;
+  repeated ValStateUpdate val_life = 2;
+}
+
+// DelegationStateUpdate is the message that records a state update of a
+// delegation
+message DelegationStateUpdate {
+  BondState state = 1;
+  string val_addr = 2;
+  cosmos.base.v1beta1.Coin amount = 3;
+  uint64 block_height = 4;
+  google.protobuf.Timestamp block_time = 5 [ (gogoproto.stdtime) = true ];
+}
+
+// ValidatorLifecycle is a message that records the lifecycle of
+// a delegation
+message DelegationLifecycle {
+  string del_addr = 1;
+  repeated DelegationStateUpdate del_life = 2;
+}
+
+// Validator is a message that denotes a validator
+message Validator {
+  // addr is the validator's address (in sdk.ValAddress)
+  bytes addr = 1;
+  // power is the validator's voting power
+  int64 power = 2;
+}

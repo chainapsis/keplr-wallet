@@ -95,6 +95,13 @@ import {
 } from "@keplr-wallet/proto-types/stride/stakedym/tx";
 import { Buffer } from "buffer/";
 import { MsgSend as ThorMsgSend } from "@keplr-wallet/proto-types/thorchain/v1/types/msg_send";
+import {
+  MsgWrappedDelegate,
+  MsgWrappedUndelegate,
+  MsgWrappedCancelUnbondingDelegation,
+  MsgWrappedBeginRedelegate,
+} from "@keplr-wallet/proto-types/babylon/epoching/v1/tx";
+import { MsgWithdrawReward as BabylonMsgWithdrawReward } from "@keplr-wallet/proto-types/babylon/incentive/tx";
 
 export * from "./unknown";
 
@@ -515,3 +522,23 @@ defaultProtoCodec.registerAny(
   MsgSetOperatorAddressStakeDym
 );
 defaultProtoCodec.registerAny("/types.MsgSend", ThorMsgSend);
+defaultProtoCodec.registerAny(
+  "/babylon.epoching.v1.MsgWrappedDelegate",
+  MsgWrappedDelegate
+);
+defaultProtoCodec.registerAny(
+  "/babylon.epoching.v1.MsgWrappedUndelegate",
+  MsgWrappedUndelegate
+);
+defaultProtoCodec.registerAny(
+  "/babylon.epoching.v1.MsgWrappedCancelUnbondingDelegation",
+  MsgWrappedCancelUnbondingDelegation
+);
+defaultProtoCodec.registerAny(
+  "/babylon.epoching.v1.MsgWrappedBeginRedelegate",
+  MsgWrappedBeginRedelegate
+);
+defaultProtoCodec.registerAny(
+  "/babylon.incentive.MsgWithdrawReward",
+  BabylonMsgWithdrawReward
+);

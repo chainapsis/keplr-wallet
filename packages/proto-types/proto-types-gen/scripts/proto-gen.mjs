@@ -126,6 +126,8 @@ function setOutputHash(root, hash) {
       "noble/swap/v1/tx.proto",
       "noble/dollar/v1/tx.proto",
       "initia/mstaking/v1/tx.proto",
+      "babylon/epoching/v1/tx.proto",
+      "babylon/incentive/tx.proto",
     ];
 
     const thirdPartyInputs = ["tendermint/crypto/keys.proto"];

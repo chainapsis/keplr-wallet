@@ -1,0 +1,48 @@
+syntax = "proto3";
+package babylon.monitor.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/babylonlabs-io/babylon/x/monitor/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // EndedEpochBtcHeight returns the BTC light client height at provided epoch
+  // finish
+  rpc EndedEpochBtcHeight(QueryEndedEpochBtcHeightRequest)
+      returns (QueryEndedEpochBtcHeightResponse) {
+    option (google.api.http).get = "/babylon/monitor/v1/epochs/{epoch_num}";
+  }
+
+  // ReportedCheckpointBtcHeight returns the BTC light client height at which
+  // the checkpoint with the given hash is reported back to Babylon
+  rpc ReportedCheckpointBtcHeight(QueryReportedCheckpointBtcHeightRequest)
+      returns (QueryReportedCheckpointBtcHeightResponse) {
+    option (google.api.http).get =
+        "/babylon/monitor/v1/checkpoints/{ckpt_hash}";
+  }
+}
+// QueryEndedEpochBtcHeightRequest defines a query type for EndedEpochBtcHeight
+// RPC method
+message QueryEndedEpochBtcHeightRequest { uint64 epoch_num = 1; }
+
+// QueryEndedEpochBtcHeightResponse defines a response type for
+// EndedEpochBtcHeight RPC method
+message QueryEndedEpochBtcHeightResponse {
+  // height of btc light client when epoch ended
+  uint32 btc_light_client_height = 1;
+}
+
+// QueryReportedCheckpointBtcHeightRequest defines a query type for
+// ReportedCheckpointBtcHeight RPC method
+message QueryReportedCheckpointBtcHeightRequest {
+  // ckpt_hash is hex encoded byte string of the hash of the checkpoint
+  string ckpt_hash = 1;
+}
+
+// QueryReportedCheckpointBtcHeightResponse defines a response type for
+// ReportedCheckpointBtcHeight RPC method
+message QueryReportedCheckpointBtcHeightResponse {
+  // height of btc light client when checkpoint is reported
+  uint32 btc_light_client_height = 1;
+}

@@ -27,6 +27,28 @@ export class InteractionPingMsg extends Message<boolean> {
   }
 }
 
+export class InteractionIdPingMsg extends Message<boolean> {
+  public static type() {
+    return "interaction-ping-id";
+  }
+
+  constructor(public readonly interactionId: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return InteractionIdPingMsg.type();
+  }
+}
+
 export class PushInteractionDataMsg extends Message<void> {
   public static type() {
     return "push-interaction-data";

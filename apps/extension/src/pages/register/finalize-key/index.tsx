@@ -83,6 +83,7 @@ export const FinalizeKeyScene: FunctionComponent<{
       priceStore,
       analyticsStore,
       starknetQueriesStore,
+      bitcoinQueriesStore,
     } = useStore();
 
     const sceneTransition = useSceneTransition();
@@ -271,6 +272,15 @@ export const FinalizeKeyScene: FunctionComponent<{
                 }
               })()
             );
+          } else if ("bitcoin" in modularChainInfo) {
+            const account = accountStore.getAccount(modularChainInfo.chainId);
+            promises.push(
+              (async () => {
+                if (account.walletStatus !== WalletStatus.Loaded) {
+                  await account.init();
+                }
+              })()
+            );
           }
         }
 
@@ -287,7 +297,7 @@ export const FinalizeKeyScene: FunctionComponent<{
         (async () => {
           const promises: Promise<unknown>[] = [];
 
-          // 스타크넷 관련 체인들은 `candidateAddresses`에 추가되지 않으므로 여기서 처리한다.
+          // 스타크넷, 비트코인 관련 체인들은 `candidateAddresses`에 추가되지 않으므로 여기서 처리한다.
           for (const modularChainInfo of chainStore.modularChainInfosInListUI) {
             if ("starknet" in modularChainInfo) {
               const account = accountStore.getAccount(modularChainInfo.chainId);
@@ -299,6 +309,27 @@ export const FinalizeKeyScene: FunctionComponent<{
                   modularChainInfo.chainId,
                   chainStore,
                   account.starknetHexAddress,
+                  mainCurrency.coinMinimalDenom
+                );
+
+              if (queryBalance) {
+                promises.push(queryBalance.waitFreshResponse());
+
+                if (mainCurrency.coinGeckoId) {
+                  // Push coingecko id to priceStore.
+                  priceStore.getPrice(mainCurrency.coinGeckoId);
+                }
+              }
+            } else if ("bitcoin" in modularChainInfo) {
+              const account = accountStore.getAccount(modularChainInfo.chainId);
+              const mainCurrency = modularChainInfo.bitcoin.currencies[0];
+
+              const queryBalance = bitcoinQueriesStore
+                .get(modularChainInfo.chainId)
+                .queryBitcoinBalance.getBalance(
+                  modularChainInfo.chainId,
+                  chainStore,
+                  account.bitcoinAddress?.bech32Address ?? "",
                   mainCurrency.coinMinimalDenom
                 );
 

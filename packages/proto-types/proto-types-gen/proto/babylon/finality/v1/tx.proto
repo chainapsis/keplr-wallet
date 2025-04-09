@@ -1,0 +1,126 @@
+syntax = "proto3";
+package babylon.finality.v1;
+
+option go_package = "github.com/babylonlabs-io/babylon/x/finality/types";
+
+import "gogoproto/gogo.proto";
+import "tendermint/crypto/proof.proto";
+import "cosmos_proto/cosmos.proto";
+import "cosmos/msg/v1/msg.proto";
+import "babylon/finality/v1/params.proto";
+
+// Msg defines the Msg service.
+service Msg {
+    option (cosmos.msg.v1.service) = true;
+
+    // CommitPubRandList commits a list of public randomness for EOTS
+    rpc CommitPubRandList(MsgCommitPubRandList) returns (MsgCommitPubRandListResponse);
+    // AddFinalitySig adds a finality signature to a given block
+    rpc AddFinalitySig(MsgAddFinalitySig) returns (MsgAddFinalitySigResponse);
+    // TODO: msg for evidence of equivocation. this is not specified yet
+    // UpdateParams updates the finality module parameters.
+    rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
+    // UnjailFinalityProvider defines a method for unjailing a jailed
+    // finality provider, thus it can receive voting power
+    rpc UnjailFinalityProvider(MsgUnjailFinalityProvider) returns (MsgUnjailFinalityProviderResponse);
+    // ResumeFinalityProposal handles the proposal of resuming finality.
+    rpc ResumeFinalityProposal(MsgResumeFinalityProposal) returns (MsgResumeFinalityProposalResponse);
+}
+
+// MsgCommitPubRandList defines a message for committing a list of public randomness for EOTS
+message MsgCommitPubRandList {
+    option (cosmos.msg.v1.signer) = "signer";
+
+    string signer = 1;
+    // fp_btc_pk is the BTC PK of the finality provider that commits the public randomness
+    bytes fp_btc_pk = 2 [ (gogoproto.customtype) = "github.com/babylonlabs-io/babylon/types.BIP340PubKey" ];
+    // start_height is the start block height of the list of public randomness
+    uint64 start_height = 3;
+    // num_pub_rand is the number of public randomness committed
+    uint64 num_pub_rand = 4;
+    // commitment is the commitment of these public randomness
+    // currently it's the root of the Merkle tree that includes these public randomness
+    bytes commitment = 5;
+    // sig is the signature on (start_height || num_pub_rand || commitment) signed by
+    // SK corresponding to fp_btc_pk. This prevents others to commit public
+    // randomness on behalf of fp_btc_pk
+    // TODO: another option is to restrict signer to correspond to fp_btc_pk. This restricts
+    // the tx submitter to be the holder of fp_btc_pk. Decide this later
+    bytes sig = 6 [ (gogoproto.customtype) = "github.com/babylonlabs-io/babylon/types.BIP340Signature" ];
+}
+// MsgCommitPubRandListResponse is the response to the MsgCommitPubRandList message
+message MsgCommitPubRandListResponse{}
+
+// MsgAddFinalitySig defines a message for adding a finality vote
+message MsgAddFinalitySig {
+    option (cosmos.msg.v1.signer) = "signer";
+
+    string signer = 1;
+    // fp_btc_pk is the BTC PK of the finality provider that casts this vote
+    bytes fp_btc_pk = 2 [ (gogoproto.customtype) = "github.com/babylonlabs-io/babylon/types.BIP340PubKey" ];
+    // block_height is the height of the voted block
+    uint64 block_height = 3;
+    // pub_rand is the public randomness committed at this height
+    bytes pub_rand = 4 [ (gogoproto.customtype) = "github.com/babylonlabs-io/babylon/types.SchnorrPubRand" ];
+    // proof is the proof that the given public randomness is committed under the commitment
+    tendermint.crypto.Proof proof = 5;
+    // block_app_hash is the AppHash of the voted block
+    bytes block_app_hash = 6;
+    // finality_sig is the finality signature to this block
+    // where finality signature is an EOTS signature, i.e.,
+    // the `s` in a Schnorr signature `(r, s)`
+    // `r` is the public randomness that is already committed by the finality provider
+    bytes finality_sig = 7 [ (gogoproto.customtype) = "github.com/babylonlabs-io/babylon/types.SchnorrEOTSSig" ];
+}
+// MsgAddFinalitySigResponse is the response to the MsgAddFinalitySig message
+message MsgAddFinalitySigResponse{}
+
+// MsgUpdateParams defines a message for updating finality module parameters.
+message MsgUpdateParams {
+    option (cosmos.msg.v1.signer) = "authority";
+
+    // authority is the address of the governance account.
+    // just FYI: cosmos.AddressString marks that this field should use type alias
+    // for AddressString instead of string, but the functionality is not yet implemented
+    // in cosmos-proto
+    string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+    // params defines the finality parameters to update.
+    //
+    // NOTE: All parameters must be supplied.
+    Params params = 2 [(gogoproto.nullable) = false];
+}
+// MsgUpdateParamsResponse is the response to the MsgUpdateParams message.
+message MsgUpdateParamsResponse {}
+
+// MsgUnjailFinalityProvider defines the Msg/UnjailFinalityProvider request type
+message MsgUnjailFinalityProvider {
+    option (gogoproto.goproto_getters) = false;
+    option (cosmos.msg.v1.signer) = "signer";
+
+    string signer = 1;
+    // fp_btc_pk is the BTC PK of the finality provider that commits the public randomness
+    bytes fp_btc_pk = 2 [ (gogoproto.customtype) = "github.com/babylonlabs-io/babylon/types.BIP340PubKey" ];
+}
+
+// MsgUnjailFinalityProviderResponse defines the Msg/UnjailFinalityProvider response type
+message MsgUnjailFinalityProviderResponse {}
+
+// MsgResumeFinalityProposal is a governance proposal to resume finality from halting
+message MsgResumeFinalityProposal {
+    option (cosmos.msg.v1.signer) = "authority";
+
+    // authority is the address of the governance account.
+    // just FYI: cosmos.AddressString marks that this field should use type alias
+    // for AddressString instead of string, but the functionality is not yet implemented
+    // in cosmos-proto
+    string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+    // fp_pks_hex is a list of finality provider public keys to jail
+    // the public key follows encoding in BIP-340 spec
+    repeated string fp_pks_hex = 2;
+    // halting_height is the height where the finality halting begins
+    uint32 halting_height = 3;
+}
+
+// MsgResumeFinalityProposalResponse is the response to the MsgResumeFinalityProposal message.
+message MsgResumeFinalityProposalResponse {}

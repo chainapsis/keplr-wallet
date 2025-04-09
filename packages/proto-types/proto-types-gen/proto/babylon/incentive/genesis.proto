@@ -1,0 +1,127 @@
+syntax = "proto3";
+package babylon.incentive;
+
+import "gogoproto/gogo.proto";
+import "babylon/incentive/params.proto";
+import "babylon/incentive/incentive.proto";
+import "babylon/incentive/rewards.proto";
+import "cosmos_proto/cosmos.proto";
+
+option go_package = "github.com/babylonlabs-io/babylon/x/incentive/types";
+
+// GenesisState defines the incentive module's genesis state.
+message GenesisState {
+  // params the current params of the state.
+  Params params = 1 [ (gogoproto.nullable) = false ];
+  // BTC staking gauge on every height
+  repeated BTCStakingGaugeEntry btc_staking_gauges = 2
+      [ (gogoproto.nullable) = false ];
+  // RewardGauges the reward gauge for each BTC staker and finality provider
+  repeated RewardGaugeEntry reward_gauges = 3 [ (gogoproto.nullable) = false ];
+  // Withdraw addresses of the delegators
+  repeated WithdrawAddressEntry withdraw_addresses = 4
+      [ (gogoproto.nullable) = false ];
+  // refundable_msg_hashes is the set of hashes of messages that can be refunded
+  repeated string refundable_msg_hashes = 5;
+  // finality_providers_current_rewards are the current rewards of finality
+  // providers by addr
+  repeated FinalityProviderCurrentRewardsEntry
+      finality_providers_current_rewards = 6 [ (gogoproto.nullable) = false ];
+  // finality_providers_historical_rewards are the historical rewards of
+  // finality providers by addr and period
+  repeated FinalityProviderHistoricalRewardsEntry
+      finality_providers_historical_rewards = 7
+      [ (gogoproto.nullable) = false ];
+  // btc_delegation_rewards_trackers are the btc delegation rewards trackers
+  // stored by finality provider and delegator addresses
+  repeated BTCDelegationRewardsTrackerEntry btc_delegation_rewards_trackers = 8
+      [ (gogoproto.nullable) = false ];
+  // btc_delegators_to_fps are all the records of the delegators and the
+  // finality providers to which it delegated some BTC
+  repeated BTCDelegatorToFpEntry btc_delegators_to_fps = 9
+      [ (gogoproto.nullable) = false ];
+}
+
+// BTCStakingGaugeEntry represents a gauge for BTC staking rewards at a specific
+// height.
+message BTCStakingGaugeEntry {
+  // Block height at which this gauge is set
+  uint64 height = 1;
+  // The gauge object storing rewards info
+  Gauge gauge = 2;
+}
+
+// RewardGaugeEntry represents a reward gauge for a specific stakeholder.
+message RewardGaugeEntry {
+  // Type of stakeholder
+  StakeholderType stakeholder_type = 1;
+  // Address of the stakeholder
+  string address = 2 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // The reward gauge object
+  RewardGauge reward_gauge = 3;
+}
+
+// WithdrawAddressEntry holds the record of a withdraw address belonging to a
+// delegator address.
+message WithdrawAddressEntry {
+  // Address of the delegator
+  string delegator_address = 1
+      [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // Withdraw address
+  string withdraw_address = 2
+      [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+}
+
+// FinalityProviderCurrentRewardsEntry represents a finality provider
+// current rewards.
+message FinalityProviderCurrentRewardsEntry {
+  // Address of the finality provider
+  string address = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // The finality provider current rewards
+  FinalityProviderCurrentRewards rewards = 2;
+}
+
+// FinalityProviderHistoricalRewardsEntry represents a finality provider
+// historical rewards by address and period.
+message FinalityProviderHistoricalRewardsEntry {
+  // Address of the finality provider
+  string address = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // Period of the historical reward
+  uint64 period = 2;
+  // The finality provider historical rewards
+  FinalityProviderHistoricalRewards rewards = 3;
+}
+
+// BTCDelegationRewardsTrackerEntry represents a BTC delegation
+// tracker entry based on the finality provider address, the delegator address
+// and a BTCDelegationTracker
+message BTCDelegationRewardsTrackerEntry {
+  // Address of the finality provider
+  string finality_provider_address = 1
+      [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // Address of the delegator
+  string delegator_address = 2
+      [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // BTC delegation tracking information
+  BTCDelegationRewardsTracker tracker = 3;
+}
+
+// BTCDelegatorToFpEntry holds an entry of a delegator
+// and a finality provider to which it delegated
+message BTCDelegatorToFpEntry {
+  // Address of the delegator
+  string delegator_address = 1
+      [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // Address of the finality provider
+  string finality_provider_address = 2
+      [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+}
+
+// StakeholderType represents the different types of stakeholders.
+enum StakeholderType {
+  option (gogoproto.goproto_enum_prefix) = false;
+  // Finality provider stakeholder type
+  FINALITY_PROVIDER = 0;
+  // BTC staker stakeholder type
+  BTC_STAKER = 1;
+}

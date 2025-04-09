@@ -102,6 +102,9 @@ import { isRunningInSidePanel } from "./utils";
 import { StarknetSendPage } from "./pages/starknet/send";
 import { SignStarknetTxPage } from "./pages/starknet/sign/tx";
 import { SignStarknetMessagePage } from "./pages/starknet/sign/message";
+import { BitcoinSendPage } from "./pages/bitcoin/send";
+import { SignBitcoinTxPage } from "./pages/bitcoin/sign/tx";
+import { SignBitcoinMessagePage } from "./pages/bitcoin/sign/message";
 import { ManageViewAssetTokenListPage } from "./pages/manage-view-asset-token-list";
 import { TxResultFailedPage } from "./pages/tx-result/failed";
 import { TxResultPendingPage } from "./pages/tx-result/pending";
@@ -359,6 +362,21 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
             text: intl.formatMessage({
               id: "bottom-tabs.swap",
             }),
+            ...(() => {
+              for (const modularChainInfo of chainStore.modularChainInfosInUI) {
+                if ("cosmos" in modularChainInfo) {
+                  return {
+                    disabled: false,
+                  };
+                }
+              }
+              return {
+                disabled: true,
+                tooltip: intl.formatMessage({
+                  id: "bottom-tabs.swap.disabled",
+                }),
+              };
+            })(),
           },
           {
             pathname: "/activities",
@@ -390,6 +408,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               />
               <Route path="/send" element={<SendAmountPage />} />
               <Route path="/starknet/send" element={<StarknetSendPage />} />
+              <Route path="/bitcoin/send" element={<BitcoinSendPage />} />
               <Route path="/ibc-swap" element={<IBCSwapPage />} />
               <Route
                 path="/send/select-asset"
@@ -492,6 +511,11 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               <Route
                 path="/sign-starknet-message"
                 element={<SignStarknetMessagePage />}
+              />
+              <Route path="/sign-bitcoin-tx" element={<SignBitcoinTxPage />} />
+              <Route
+                path="/sign-bitcoin-message"
+                element={<SignBitcoinMessagePage />}
               />
               <Route path="/wallet/select" element={<WalletSelectPage />} />
               <Route path="/wallet/delete" element={<WalletDeletePage />} />

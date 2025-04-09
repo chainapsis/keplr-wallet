@@ -7,6 +7,7 @@ import {
   BIP44HDPath,
   KeyInfo,
   ExportedKeyRingVault,
+  ExtendedKey,
 } from "./types";
 import { PlainObject } from "../vault";
 import * as Legacy from "./legacy";
@@ -359,6 +360,45 @@ export class AppendLedgerKeyAppMsg extends Message<{
 
   type(): string {
     return AppendLedgerKeyAppMsg.type();
+  }
+}
+
+export class AppendLedgerExtendedKeysMsg extends Message<{
+  status: KeyRingStatus;
+  keyInfos: KeyInfo[];
+}> {
+  public static type() {
+    return "append-ledger-key-with-derivation";
+  }
+
+  constructor(
+    public readonly vaultId: string,
+    public readonly extendedKeys: ExtendedKey[],
+    public readonly app: string
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.vaultId) {
+      throw new Error("vault id not set");
+    }
+
+    if (!this.extendedKeys || this.extendedKeys.length === 0) {
+      throw new Error("extended keys not set");
+    }
+
+    if (!this.app) {
+      throw new Error("app not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return AppendLedgerExtendedKeysMsg.type();
   }
 }
 

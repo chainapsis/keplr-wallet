@@ -62,9 +62,33 @@ async function openPopupWindow(
   channel: string = "default",
   options: { ignoreURIReplacement?: boolean } = {}
 ): Promise<number> {
-  return await openPopupQueue.enqueue(() =>
-    openPopupWindowInner(url, channel, options)
-  );
+  const MAX_RETRY = 4;
+  return await openPopupQueue.enqueue(async () => {
+    let windowId = await openPopupWindowInner(url, channel, options);
+    let i = 0;
+    while (i < MAX_RETRY) {
+      if (typeof browser === "undefined" || !browser.windows) {
+        break;
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, i === 0 ? 100 : 500));
+
+      try {
+        const window = await browser.windows.get(windowId);
+        if (window) {
+          break;
+        }
+      } catch (e) {
+        console.log("Failed to get window", e);
+        // Ignore
+      }
+
+      windowId = await openPopupWindowInner(url, channel, options);
+      i++;
+    }
+
+    return windowId;
+  });
 }
 
 const MAX_RETRIES_TO_OPEN_WINDOW_AND_GET_TAB_ID = 2;

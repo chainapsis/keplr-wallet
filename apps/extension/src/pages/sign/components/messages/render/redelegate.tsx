@@ -10,6 +10,7 @@ import { CoinPretty } from "@keplr-wallet/unit";
 import { FormattedMessage } from "react-intl";
 import { MessageRedelegateIcon } from "../../../../../components/icon";
 import { ItemLogo } from "../../../../main/token-detail/msg-items/logo";
+import { MsgWrappedBeginRedelegate } from "@keplr-wallet/proto-types/babylon/epoching/v1/tx";
 
 export const RedelegateMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -23,6 +24,17 @@ export const RedelegateMessage: IMessageRenderer = {
       }
 
       if (
+        "type" in msg &&
+        msg.type === "/babylon.epoching.v1.MsgWrappedBeginRedelegate"
+      ) {
+        return {
+          validatorSrcAddress: msg.value.msg.validator_src_address,
+          validatorDstAddress: msg.value.msg.validator_dst_address,
+          amount: msg.value.msg.amount,
+        };
+      }
+
+      if (
         "unpacked" in msg &&
         msg.typeUrl === "/cosmos.staking.v1beta1.MsgBeginRedelegate"
       ) {
@@ -32,6 +44,20 @@ export const RedelegateMessage: IMessageRenderer = {
           validatorDstAddress: (msg.unpacked as MsgBeginRedelegate)
             .validatorDstAddress,
           amount: (msg.unpacked as MsgBeginRedelegate).amount,
+        };
+      }
+
+      if (
+        "unpacked" in msg &&
+        msg.typeUrl === "/babylon.epoching.v1.MsgWrappedBeginRedelegate" &&
+        (msg.unpacked as MsgWrappedBeginRedelegate).msg
+      ) {
+        return {
+          validatorSrcAddress: (msg.unpacked as MsgWrappedBeginRedelegate).msg!
+            .validatorSrcAddress,
+          validatorDstAddress: (msg.unpacked as MsgWrappedBeginRedelegate).msg!
+            .validatorDstAddress,
+          amount: (msg.unpacked as MsgWrappedBeginRedelegate).msg!.amount,
         };
       }
     })();
