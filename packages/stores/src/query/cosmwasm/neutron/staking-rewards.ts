@@ -46,35 +46,12 @@ class ObservableQueryNeutronStakingRewardsInner extends ObservableCosmwasmContra
       const defaultCurrency =
         chainInfo.stakeCurrency || chainInfo.currencies[0];
 
-      if (!defaultCurrency) {
-        console.error(`No currency found for chain ${this.chainId}`);
-        const tempCurrency: AppCurrency = {
-          coinDenom: "UNKNOWN",
-          coinMinimalDenom: "unknown",
-          coinDecimals: 0,
-        };
-        return new CoinPretty(tempCurrency, new Int(0)).ready(false);
-      }
       return new CoinPretty(defaultCurrency, new Int(0)).ready(false);
     }
 
     const reward = this.response.data.pending_rewards;
     const chainInfo = this.chainGetter.getChain(this.chainId);
-    const currency = chainInfo.findCurrency(reward.denom);
-
-    if (!currency) {
-      console.warn(
-        `Unknown currency ${reward.denom} for chain ${this.chainId}`
-      );
-      const tempCurrency: AppCurrency = {
-        coinDenom: reward.denom.toUpperCase(),
-        coinMinimalDenom: reward.denom,
-        coinDecimals: 0,
-      };
-      return new CoinPretty(tempCurrency, new Int(reward.amount)).ready(
-        !this.isFetching
-      );
-    }
+    const currency = chainInfo.forceFindCurrency(reward.denom);
 
     return new CoinPretty(currency, new Int(reward.amount)).ready(
       !this.isFetching
