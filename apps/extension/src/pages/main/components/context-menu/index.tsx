@@ -328,6 +328,14 @@ const AssetViewScene: React.FC<AssetViewSceneProps> = observer(
 const CustomTextButton = styled(TextButton)`
   && button {
     padding: 0.25rem 0 !important;
+    color: ${ColorPalette["gray-300"]};
+
+    &:hover {
+      color: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-500"]
+          : ColorPalette["gray-200"]};
+    }
   }
 `;
 
@@ -339,6 +347,8 @@ export const ViewOptionsContextMenu: FunctionComponent = observer(() => {
   const sceneTransitionRef = useRef<any>(null);
   const [renderMenu, setRenderMenu] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const theme = useTheme();
+  const [isHovered, setIsHovered] = useState(false);
 
   useLayoutEffect(() => {
     if (!initialized) {
@@ -445,23 +455,33 @@ export const ViewOptionsContextMenu: FunctionComponent = observer(() => {
     <MenuContainer ref={containerRef}>
       {(isOpen || renderMenu) && <MenuBackdrop onClick={closeMenu} />}
 
-      <CustomTextButton
-        text={intl.formatMessage({
-          id: "page.main.components.context-menu.title",
-        })}
-        size="small"
-        right={
-          <MenuItemXAxis alignY="center">
-            <ViewOptionsIcon
-              width="1rem"
-              height="1rem"
-              color={ColorPalette["gray-200"]}
-            />
-          </MenuItemXAxis>
-        }
-        color="faint"
-        onClick={toggleMenu}
-      />
+      <div
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <CustomTextButton
+          text={intl.formatMessage({
+            id: "page.main.components.context-menu.title",
+          })}
+          size="small"
+          right={
+            <MenuItemXAxis alignY="center">
+              <ViewOptionsIcon
+                width="1rem"
+                height="1rem"
+                color={
+                  isHovered
+                    ? theme.mode === "light"
+                      ? ColorPalette["gray-500"]
+                      : ColorPalette["gray-200"]
+                    : ColorPalette["gray-300"]
+                }
+              />
+            </MenuItemXAxis>
+          }
+          onClick={toggleMenu}
+        />
+      </div>
 
       <MenuWrapper>
         <VerticalCollapseTransition collapsed={!isOpen} width="100%">
@@ -489,6 +509,7 @@ const ViewOptionsIcon: FunctionComponent<IconProps> = ({ color }) => {
         height="16"
         viewBox="0 0 16 16"
         fill="none"
+        style={{ stroke: "none" }}
       >
         <mask
           id="mask0_17569_10438"
