@@ -92,62 +92,59 @@ export class ManageViewAssetTokenConfig {
     const viewAssetTokenMap = this.getViewAssetTokenMapByVaultId(vaultId);
     const searchLower = search.trim().toLowerCase();
 
+    if (searchLower.length === 0) {
+      return false;
+    }
+
     for (const [
       chainIdentifier,
       coinMinimaldenomSet,
     ] of viewAssetTokenMap.entries()) {
-      const isFindToken = (() => {
-        if (!this.chainStore.hasModularChain(chainIdentifier)) {
-          return false;
-        }
+      if (!this.chainStore.hasModularChain(chainIdentifier)) {
+        continue;
+      }
 
-        const modularChainInfo =
-          this.chainStore.getModularChain(chainIdentifier);
-        if (modularChainInfo.chainName.toLowerCase().includes(searchLower)) {
-          return true;
-        }
+      const modularChainInfo = this.chainStore.getModularChain(chainIdentifier);
+      if (modularChainInfo.chainName.toLowerCase().includes(searchLower)) {
+        return true;
+      }
 
-        if (this.chainStore.hasChain(chainIdentifier)) {
-          const chainInfo = this.chainStore.getChain(chainIdentifier);
+      if (this.chainStore.hasChain(chainIdentifier)) {
+        const chainInfo = this.chainStore.getChain(chainIdentifier);
+        for (const coinMinimalDenom of coinMinimaldenomSet.values()) {
+          const currency = chainInfo.findCurrency(coinMinimalDenom);
+          if (currency) {
+            if (currency.coinDenom.toLowerCase().includes(searchLower)) {
+              return true;
+            }
+          }
+        }
+      } else {
+        if ("bitcoin" in modularChainInfo) {
           for (const coinMinimalDenom of coinMinimaldenomSet.values()) {
-            const currency = chainInfo.findCurrency(coinMinimalDenom);
+            const currency = modularChainInfo.bitcoin.currencies.find(
+              (currency) => currency.coinMinimalDenom === coinMinimalDenom
+            );
             if (currency) {
-              if (currency.coinDenom.toLowerCase().includes(searchLower)) {
+              if (currency.coinDenom.toLowerCase().includes(search)) {
                 return true;
               }
             }
           }
-        } else {
-          if ("bitcoin" in modularChainInfo) {
-            for (const coinMinimalDenom of coinMinimaldenomSet.values()) {
-              const currency = modularChainInfo.bitcoin.currencies.find(
-                (currency) => currency.coinMinimalDenom === coinMinimalDenom
-              );
-              if (currency) {
-                if (currency.coinDenom.toLowerCase().includes(search)) {
-                  return true;
-                }
-              }
-            }
-          }
-          if ("starknet" in modularChainInfo) {
-            for (const coinMinimalDenom of coinMinimaldenomSet.values()) {
-              const currency = modularChainInfo.starknet.currencies.find(
-                (currency) => currency.coinMinimalDenom === coinMinimalDenom
-              );
+        }
+        if ("starknet" in modularChainInfo) {
+          for (const coinMinimalDenom of coinMinimaldenomSet.values()) {
+            const currency = modularChainInfo.starknet.currencies.find(
+              (currency) => currency.coinMinimalDenom === coinMinimalDenom
+            );
 
-              if (currency) {
-                if (currency.coinDenom.toLowerCase().includes(search)) {
-                  return true;
-                }
+            if (currency) {
+              if (currency.coinDenom.toLowerCase().includes(search)) {
+                return true;
               }
             }
           }
         }
-      })();
-
-      if (isFindToken) {
-        return true;
       }
     }
 
