@@ -281,26 +281,31 @@ export const AddressBookModal: FunctionComponent<{
                     });
                   }
 
-                  const selfAccount = datas.find((data) => data.isSelf);
+                  const selfAccounts = datas.filter((data) => data.isSelf);
                   const otherAccounts = datas.filter((data) => !data.isSelf);
 
                   return (
                     <React.Fragment>
-                      {selfAccount ? (
+                      {selfAccounts.length > 0 ? (
                         <React.Fragment>
                           <AltTypography>
                             <FormattedMessage id="components.address-book-modal.current-wallet" />
                           </AltTypography>
-                          <AddressItem
-                            name={selfAccount.name}
-                            address={selfAccount.address}
-                            paymentType={selfAccount.paymentType}
-                            onClick={() => {
-                              recipientConfig.setValue(selfAccount.address);
-                              close();
-                            }}
-                            highlight={true}
-                          />
+                          {selfAccounts.map((data, i) => {
+                            return (
+                              <AddressItem
+                                key={i}
+                                name={data.name}
+                                address={data.address}
+                                paymentType={data.paymentType}
+                                onClick={() => {
+                                  recipientConfig.setValue(data.address);
+                                  close();
+                                }}
+                                highlight={true}
+                              />
+                            );
+                          })}
                           <Gutter size="1.375rem" />
                         </React.Fragment>
                       ) : null}
