@@ -9,6 +9,7 @@ import {
 import { KeyRingStore } from "@keplr-wallet/stores-core";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { computedFn } from "mobx-utils";
 
 export class ManageViewAssetTokenConfig {
   @observable.ref
@@ -84,27 +85,69 @@ export class ManageViewAssetTokenConfig {
     });
   }
 
-  isDisabledTokenSearched(search: string) {
+  isDisabledTokenSearched = computedFn((search: string) => {
     const vaultId = this.keyRingStore.selectedKeyInfo?.id ?? "";
     const viewAssetTokenMap = this.getViewAssetTokenMapByVaultId(vaultId);
+    const searchLower = search.trim().toLowerCase();
 
-    if (search.length === 0) {
+    if (searchLower.length === 0) {
       return false;
     }
 
-    for (const [chainIdentifier, coinSet] of viewAssetTokenMap.entries()) {
-      if (chainIdentifier.toLowerCase().includes(search)) {
+    for (const [
+      chainIdentifier,
+      coinMinimaldenomSet,
+    ] of viewAssetTokenMap.entries()) {
+      if (!this.chainStore.hasModularChain(chainIdentifier)) {
+        continue;
+      }
+
+      const modularChainInfo = this.chainStore.getModularChain(chainIdentifier);
+      if (modularChainInfo.chainName.toLowerCase().includes(searchLower)) {
         return true;
       }
 
-      for (const coinMinimalDenom of coinSet.values()) {
-        if (coinMinimalDenom.toLowerCase().includes(search)) {
-          return true;
+      if (this.chainStore.hasChain(chainIdentifier)) {
+        const chainInfo = this.chainStore.getChain(chainIdentifier);
+        for (const coinMinimalDenom of coinMinimaldenomSet.values()) {
+          const currency = chainInfo.findCurrency(coinMinimalDenom);
+          if (currency) {
+            if (currency.coinDenom.toLowerCase().includes(searchLower)) {
+              return true;
+            }
+          }
+        }
+      } else {
+        if ("bitcoin" in modularChainInfo) {
+          for (const coinMinimalDenom of coinMinimaldenomSet.values()) {
+            const currency = modularChainInfo.bitcoin.currencies.find(
+              (currency) => currency.coinMinimalDenom === coinMinimalDenom
+            );
+            if (currency) {
+              if (currency.coinDenom.toLowerCase().includes(search)) {
+                return true;
+              }
+            }
+          }
+        }
+        if ("starknet" in modularChainInfo) {
+          for (const coinMinimalDenom of coinMinimaldenomSet.values()) {
+            const currency = modularChainInfo.starknet.currencies.find(
+              (currency) => currency.coinMinimalDenom === coinMinimalDenom
+            );
+
+            if (currency) {
+              if (currency.coinDenom.toLowerCase().includes(search)) {
+                return true;
+              }
+            }
+          }
         }
       }
     }
+
     return false;
-  }
+  });
 
   async enableViewAssetToken(vaultId: string, token: ViewAssetToken) {
     const msg = new EnableViewAssetTokenMsg(vaultId, token);

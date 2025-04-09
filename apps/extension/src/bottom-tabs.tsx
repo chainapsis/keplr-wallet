@@ -6,6 +6,7 @@ import { useTheme } from "styled-components";
 import { YAxis } from "./components/axis";
 import { Caption2 } from "./components/typography";
 import { Box } from "./components/box";
+import { Tooltip } from "./components/tooltip";
 
 export const BottomTabsHeightRem = "3.75rem";
 
@@ -25,6 +26,9 @@ export const BottomTabsRouteProvider: FunctionComponent<
       pathname: string;
       icon: React.ReactNode;
       text: string;
+
+      disabled?: boolean;
+      tooltip?: string;
     }[];
 
     forceHideBottomTabs?: boolean;
@@ -80,6 +84,7 @@ export const BottomTabsRouteProvider: FunctionComponent<
           }}
         >
           {tabs.map((tab, i) => {
+            const disabled = !!tab.disabled;
             const isActive = tab.pathname === location.pathname;
 
             return (
@@ -90,11 +95,10 @@ export const BottomTabsRouteProvider: FunctionComponent<
                   width: "1px",
                 }}
               >
-                <Link
-                  to={tab.pathname}
-                  style={{
-                    textDecoration: "none",
-                  }}
+                <LinkComp
+                  pathname={tab.pathname}
+                  disabled={disabled}
+                  tooltip={tab.tooltip}
                 >
                   <div
                     style={{
@@ -103,8 +107,14 @@ export const BottomTabsRouteProvider: FunctionComponent<
                       flexDirection: "column",
                       alignItems: "center",
                       justifyContent: "center",
-                      opacity: isNotReady ? 0 : 1,
+                      opacity: isNotReady ? 0 : disabled ? 0.6 : 1,
                       color: (() => {
+                        if (disabled) {
+                          return theme.mode === "light"
+                            ? ColorPalette["gray-100"]
+                            : ColorPalette["gray-400"];
+                        }
+
                         if (theme.mode === "light") {
                           return isActive
                             ? ColorPalette["blue-400"]
@@ -138,6 +148,12 @@ export const BottomTabsRouteProvider: FunctionComponent<
                             wordBreak: "keep-all",
                           }}
                           color={(() => {
+                            if (disabled) {
+                              return theme.mode === "light"
+                                ? ColorPalette["gray-200"]
+                                : ColorPalette["gray-300"];
+                            }
+
                             if (theme.mode === "light") {
                               return isActive
                                 ? ColorPalette["blue-400"]
@@ -154,7 +170,7 @@ export const BottomTabsRouteProvider: FunctionComponent<
                       </BottomTabActiveStateContext.Provider>
                     </YAxis>
                   </div>
-                </Link>
+                </LinkComp>
               </Box>
             );
           })}
@@ -162,6 +178,42 @@ export const BottomTabsRouteProvider: FunctionComponent<
       ) : null}
     </div>
   );
+};
+
+const LinkComp: FunctionComponent<
+  PropsWithChildren<{
+    pathname: string;
+    disabled: boolean;
+    tooltip?: string;
+  }>
+> = ({ children, pathname, disabled, tooltip }) => {
+  if (!disabled) {
+    return (
+      <Tooltip content={tooltip}>
+        <Link
+          to={pathname}
+          style={{
+            textDecoration: "none",
+          }}
+        >
+          {children}
+        </Link>
+      </Tooltip>
+    );
+  } else {
+    return (
+      <Tooltip content={tooltip}>
+        <div
+          style={{
+            textDecoration: "none",
+            cursor: "not-allowed",
+          }}
+        >
+          {children}
+        </div>
+      </Tooltip>
+    );
+  }
 };
 
 const useIsTabActive = () => {
