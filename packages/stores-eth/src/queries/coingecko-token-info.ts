@@ -8,20 +8,13 @@ import { makeObservable } from "mobx";
 export class ObservableQueryCoingeckoTokenInfoInner extends ObservableQuery<{
   id: string;
   symbol: string;
-  name: string;
-  web_slug: string;
-  asset_platform_id: string;
   image: {
-    thumb: string;
     small: string;
-    large: string;
   };
-  contract_address: string;
   detail_platforms: Record<
     string,
     {
       decimal_place: number;
-      contract_address: string;
     }
   >;
 }> {
