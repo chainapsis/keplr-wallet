@@ -103,8 +103,7 @@ export const AddressBookModal: FunctionComponent<{
         return Promise.all(
           linkedChainIds.map((chainId) => {
             return uiConfigStore.addressBookConfig.getVaultBitcoinKeysSettled(
-              chainId,
-              permitSelfKeyInfo ? undefined : keyRingStore.selectedKeyInfo?.id
+              chainId
             );
           })
         );
@@ -142,8 +141,6 @@ export const AddressBookModal: FunctionComponent<{
       switch (type) {
         case "recent": {
           return recents.map((recent) => {
-            // TODO:recipient의 주소는 native segwit, taproot가 아닐 수 있으므로
-            // 주소 타입을 따로 체크해야 한다.
             return {
               timestamp: recent.timestamp,
               address: recent.recipient,
@@ -260,8 +257,14 @@ export const AddressBookModal: FunctionComponent<{
             >
               <Stack gutter="0.75rem">
                 {(() => {
+                  const [, , paymentType] = recipientConfig.chainId.split(":");
+
                   if (type !== "accounts" || !permitSelfKeyInfo) {
                     return datas.map((data, i) => {
+                      if (data.isSelf && data.paymentType === paymentType) {
+                        return null;
+                      }
+
                       return (
                         <AddressItem
                           key={i}
@@ -291,6 +294,7 @@ export const AddressBookModal: FunctionComponent<{
                           <AddressItem
                             name={selfAccount.name}
                             address={selfAccount.address}
+                            paymentType={selfAccount.paymentType}
                             onClick={() => {
                               recipientConfig.setValue(selfAccount.address);
                               close();
@@ -312,6 +316,7 @@ export const AddressBookModal: FunctionComponent<{
                                 key={i}
                                 name={data.name}
                                 address={data.address}
+                                paymentType={data.paymentType}
                                 onClick={() => {
                                   recipientConfig.setValue(data.address);
                                   close();
