@@ -1026,7 +1026,7 @@ export class HugeQueriesStore {
   }
 
   @computed
-  get combinedTokensMap(): Map<string, ViewToken[]> {
+  get groupedTokensMap(): Map<string, ViewToken[]> {
     const tokensMap = new Map<string, ViewToken[]>();
 
     for (const viewToken of this.allKnownBalances) {
@@ -1041,13 +1041,13 @@ export class HugeQueriesStore {
         const originChainId = currency.originChainId;
         const coinMinimalDenom = currency.originCurrency.coinMinimalDenom;
 
-        const combineKey = `${originChainId}/${coinMinimalDenom}`;
+        const groupKey = `${originChainId}/${coinMinimalDenom}`;
 
-        if (!tokensMap.has(combineKey)) {
-          tokensMap.set(combineKey, []);
+        if (!tokensMap.has(groupKey)) {
+          tokensMap.set(groupKey, []);
         }
 
-        tokensMap.get(combineKey)!.push(viewToken);
+        tokensMap.get(groupKey)!.push(viewToken);
       }
 
       // TODO: EVM 토큰 처리
