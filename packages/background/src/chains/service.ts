@@ -1286,6 +1286,8 @@ export class ChainsService {
    * TODO: 비트 코인 외에도 여러 주소 체계가 존재하는 체인이 추가될 경우, 이 메서드의 부분적인 수정이 필요하다.
    */
   getBaseChainId(chainId: string): string | undefined {
+    chainId = ChainIdHelper.parse(chainId).identifier;
+
     const modularChainInfos = this.getModularChainInfos();
 
     const directMatch = modularChainInfos.find(
