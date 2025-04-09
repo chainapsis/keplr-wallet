@@ -67,7 +67,19 @@ export const useCosmosClaimRewards = () => {
           NeutronStakingRewardsContractAddress,
           msg,
           [],
-          {}
+          {
+            onFulfill: (tx: any) => {
+              if (
+                (tx.code === 0 || tx.code === null) &&
+                chainId === NEUTRON_CHAIN_ID
+              ) {
+                //neutron의 경우 컨트랙트에서 reward 다시 가져옴
+                queries.cosmwasm.queryNeutronStakingRewards
+                  .getRewardFor(account.bech32Address)
+                  .fetch();
+              }
+            },
+          }
         );
       } else {
         const queryRewards = queries.cosmos.queryRewards.getQueryBech32Address(
@@ -349,16 +361,6 @@ export const useCosmosClaimRewards = () => {
                 });
               },
               onFulfill: (tx: any) => {
-                if (
-                  (tx.code === 0 || tx.code === null) &&
-                  chainId === NEUTRON_CHAIN_ID
-                ) {
-                  //neutron의 경우 컨트랙트에서 reward 다시 가져옴
-                  queries.cosmwasm.queryNeutronStakingRewards
-                    .getRewardFor(account.bech32Address)
-                    .fetch();
-                }
-
                 // Tx가 성공한 이후에 rewards가 다시 쿼리되면서 여기서 빠지는게 의도인데...
                 // 쿼리하는 동안 시간차가 있기 때문에 훼이크로 그냥 1초 더 기다린다.
                 setTimeout(() => {
@@ -454,7 +456,19 @@ export const useCosmosClaimRewards = () => {
             NeutronStakingRewardsContractAddress,
             msg,
             [],
-            {}
+            {
+              onFulfill: (tx: any) => {
+                if (
+                  (tx.code === 0 || tx.code === null) &&
+                  chainId === NEUTRON_CHAIN_ID
+                ) {
+                  //neutron의 경우 컨트랙트에서 reward 다시 가져옴
+                  queries.cosmwasm.queryNeutronStakingRewards
+                    .getRewardFor(account.bech32Address)
+                    .fetch();
+                }
+              },
+            }
           );
           state.setIsLoading(true);
 
@@ -538,15 +552,6 @@ export const useCosmosClaimRewards = () => {
                 ""
               );
               return;
-            }
-
-            if (chainId === NEUTRON_CHAIN_ID) {
-              //neutron의 경우 컨트랙트에서 reward 다시 가져옴
-              queries.cosmwasm.queryNeutronStakingRewards
-                .getRewardFor(account.bech32Address)
-                .fetch();
-
-              state.setIsLoading(false);
             }
 
             notification.show(
