@@ -541,10 +541,6 @@ export const SignBitcoinTxView: FunctionComponent<{
       });
     }
 
-    // Add next/approve button
-    // 첫번째 psbt는 review 버튼
-    // 그 다음부터 next 버튼
-    // 마지막 psbt는 approve 버튼
     if (currentPsbtIndex < validatedPsbts.length - 1) {
       buttons.push({
         text: `${intl.formatMessage({
@@ -555,7 +551,7 @@ export const SignBitcoinTxView: FunctionComponent<{
             color={
               theme.mode === "light"
                 ? ColorPalette["blue-400"]
-                : ColorPalette["gray-200"]
+                : ColorPalette["gray-10"]
             }
           />
         ),
@@ -582,18 +578,19 @@ export const SignBitcoinTxView: FunctionComponent<{
     return buttons;
   };
 
-  const ledgerGuideBox = (
-    <LedgerGuideBox
-      data={{
-        keyInsensitive: interactionData.data.keyInsensitive,
-        isBitcoin: !isTestnet,
-        isBitcoinTest: isTestnet,
-      }}
-      isLedgerInteracting={isLedgerInteracting}
-      ledgerInteractingError={ledgerInteractingError}
-      isInternal={interactionData.isInternal}
-    />
-  );
+  const ledgerGuideBox =
+    interactionData.data.keyType === "ledger" ? (
+      <LedgerGuideBox
+        data={{
+          keyInsensitive: interactionData.data.keyInsensitive,
+          isBitcoin: !isTestnet,
+          isBitcoinTest: isTestnet,
+        }}
+        isLedgerInteracting={isLedgerInteracting}
+        ledgerInteractingError={ledgerInteractingError}
+        isInternal={interactionData.isInternal}
+      />
+    ) : undefined;
 
   return (
     <HeaderLayout
