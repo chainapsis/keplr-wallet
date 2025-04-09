@@ -20,8 +20,6 @@ import { Gutter } from "../../components/gutter";
 import { EmptyView } from "../../components/empty-view";
 import { Body2, Subtitle1, Subtitle3 } from "../../components/typography";
 import { XAxis, YAxis } from "../../components/axis";
-import { Checkbox } from "../../components/checkbox";
-import { Caption2 } from "../../components/typography";
 import { ColorPalette } from "../../styles";
 import { FormattedMessage, useIntl } from "react-intl";
 import styled, { css, useTheme } from "styled-components";
@@ -32,6 +30,7 @@ import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import { useGetSearchChains } from "../../hooks/use-get-search-chains";
 import { useEarnBottomTag } from "../earn/components/use-earn-bottom-tag";
 import { AdjustmentIcon } from "../../components/icon/adjustment";
+import { ViewOptionsContextMenu } from "./components/context-menu";
 
 const zeroDec = new Dec(0);
 
@@ -352,35 +351,7 @@ export const AvailableTabView: FunctionComponent<{
                         <TokenTitleView
                           title={title}
                           tooltip={tooltip}
-                          right={
-                            hasLowBalanceTokens ? (
-                              <React.Fragment>
-                                <Caption2
-                                  style={{ cursor: "pointer" }}
-                                  onClick={() => {
-                                    uiConfigStore.setHideLowBalance(
-                                      !uiConfigStore.isHideLowBalance
-                                    );
-                                  }}
-                                  color={ColorPalette["gray-300"]}
-                                >
-                                  <FormattedMessage id="page.main.available.hide-low-balance" />
-                                </Caption2>
-
-                                <Gutter size="0.25rem" />
-
-                                <Checkbox
-                                  size="extra-small"
-                                  checked={uiConfigStore.isHideLowBalance}
-                                  onChange={() => {
-                                    uiConfigStore.setHideLowBalance(
-                                      !uiConfigStore.isHideLowBalance
-                                    );
-                                  }}
-                                />
-                              </React.Fragment>
-                            ) : undefined
-                          }
+                          right={<ViewOptionsContextMenu />}
                         />
                       }
                       lenAlwaysShown={lenAlwaysShown}
