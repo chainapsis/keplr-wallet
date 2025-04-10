@@ -419,6 +419,13 @@ export class PermissionService {
     }
   }
 
+  isPrivilegedOrigins(origin: string): boolean {
+    if (this.privilegedOrigins.get(origin)) {
+      return true;
+    }
+    return false;
+  }
+
   hasPermission(chainId: string, type: string, origin: string): boolean {
     // Privileged origin can pass the any permission.
     if (this.privilegedOrigins.get(origin)) {
