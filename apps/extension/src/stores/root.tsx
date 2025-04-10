@@ -618,7 +618,8 @@ export class RootStore {
       new ExtensionKVStore("store_erc20_currency_registrar"),
       24 * 3600 * 1000,
       this.chainStore,
-      this.queriesStore
+      this.queriesStore,
+      this.skipQueriesStore
     );
 
     // XXX: Remember that userId would be set by `StoreProvider`

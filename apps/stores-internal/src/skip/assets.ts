@@ -24,6 +24,8 @@ const Schema = Joi.object<AssetsResponse>({
           token_contract: Joi.string().optional(),
           recommended_symbol: Joi.string().optional(),
           decimals: Joi.number().required(),
+          logo_uri: Joi.string().optional(),
+          coingecko_id: Joi.string().optional(),
         }).unknown(true)
       ),
     }).unknown(true)
@@ -59,6 +61,9 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
     isEvm: boolean;
     tokenContract?: string;
     recommendedSymbol?: string;
+    logoURI?: string;
+    coingeckoId?: string;
+    decimals: number;
   }[] {
     if (
       !this.response ||
@@ -90,13 +95,16 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
         isEvm: boolean;
         tokenContract?: string;
         recommendedSymbol?: string;
+        logoURI?: string;
+        coingeckoId?: string;
+        decimals: number;
       }[] = [];
 
       for (const asset of assetsInResponse.assets) {
-        const chainId = asset.is_evm
+        const chainId = !Number.isNaN(parseInt(asset.chain_id))
           ? `eip155:${asset.chain_id}`
           : asset.chain_id;
-        const originChainId = asset.is_evm
+        const originChainId = !Number.isNaN(parseInt(asset.origin_chain_id))
           ? `eip155:${asset.origin_chain_id}`
           : asset.origin_chain_id;
         if (
@@ -115,16 +123,20 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
               originChainId: originChainId,
               isEvm: false,
               recommendedSymbol: asset.recommended_symbol,
+              logoURI: asset.logo_uri,
+              coingeckoId: asset.coingecko_id,
+              decimals: asset.decimals,
             });
           } else {
             const coinMinimalDenom =
-              asset.is_evm && asset.token_contract != null
-                ? `erc20:${asset.denom.toLowerCase()}`
+              asset.is_evm &&
+              asset.token_contract != null &&
+              asset.token_contract.startsWith("0x")
+                ? `erc20:${asset.token_contract.toLowerCase()}`
                 : asset.denom;
-            const originCoinMinimalDenom =
-              asset.is_evm && asset.token_contract != null
-                ? `erc20:${asset.origin_denom.toLowerCase()}`
-                : asset.denom;
+            const originCoinMinimalDenom = asset.origin_denom.startsWith("0x")
+              ? `erc20:${asset.origin_denom.toLowerCase()}`
+              : asset.denom;
             // TODO: Dec, Int 같은 곳에서 18 이상인 경우도 고려하도록 수정
             if (asset.decimals <= 18) {
               res.push({
@@ -135,6 +147,9 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
                 isEvm: asset.is_evm,
                 tokenContract: asset.token_contract,
                 recommendedSymbol: asset.recommended_symbol,
+                logoURI: asset.logo_uri,
+                coingeckoId: asset.coingecko_id,
+                decimals: asset.decimals,
               });
             }
           }
@@ -156,6 +171,9 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
     isEvm: boolean;
     tokenContract?: string;
     recommendedSymbol?: string;
+    logoURI?: string;
+    coingeckoId?: string;
+    decimals: number;
   }[] {
     if (
       !this.response ||
@@ -187,13 +205,16 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
         isEvm: boolean;
         tokenContract?: string;
         recommendedSymbol?: string;
+        logoURI?: string;
+        coingeckoId?: string;
+        decimals: number;
       }[] = [];
 
       for (const asset of assetsInResponse.assets) {
-        const chainId = asset.is_evm
+        const chainId = !Number.isNaN(parseInt(asset.chain_id))
           ? `eip155:${asset.chain_id}`
           : asset.chain_id;
-        const originChainId = asset.is_evm
+        const originChainId = !Number.isNaN(parseInt(asset.origin_chain_id))
           ? `eip155:${asset.origin_chain_id}`
           : asset.origin_chain_id;
         if (
@@ -209,17 +230,21 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
               originChainId: originChainId,
               isEvm: false,
               recommendedSymbol: asset.recommended_symbol,
+              logoURI: asset.logo_uri,
+              coingeckoId: asset.coingecko_id,
+              decimals: asset.decimals,
             });
             // IBC asset이 아니라면 알고있는 currency만 넣는다.
           } else {
             const coinMinimalDenom =
-              asset.is_evm && asset.token_contract != null
-                ? `erc20:${asset.denom.toLowerCase()}`
+              asset.is_evm &&
+              asset.token_contract != null &&
+              asset.token_contract.startsWith("0x")
+                ? `erc20:${asset.token_contract.toLowerCase()}`
                 : asset.denom;
-            const originCoinMinimalDenom =
-              asset.is_evm && asset.token_contract != null
-                ? `erc20:${asset.origin_denom.toLowerCase()}`
-                : asset.denom;
+            const originCoinMinimalDenom = asset.origin_denom.startsWith("0x")
+              ? `erc20:${asset.origin_denom.toLowerCase()}`
+              : asset.denom;
             const currencyFound =
               chainInfo.findCurrencyWithoutReaction(coinMinimalDenom);
             // decimals이 18 이하인 경우만을 고려해서 짜여진 코드가 많아서 임시로 18 이하인 경우만 고려한다.
@@ -233,6 +258,9 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
                 isEvm: asset.is_evm,
                 tokenContract: asset.token_contract,
                 recommendedSymbol: asset.recommended_symbol,
+                logoURI: asset.logo_uri,
+                coingeckoId: asset.coingecko_id,
+                decimals: asset.decimals,
               });
             }
           }

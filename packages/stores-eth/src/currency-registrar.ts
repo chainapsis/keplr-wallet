@@ -3,6 +3,7 @@ import { ChainStore, IQueriesStore } from "@keplr-wallet/stores";
 import { DenomHelper, KVStore } from "@keplr-wallet/common";
 import { autorun, makeObservable, observable, runInAction, toJS } from "mobx";
 import { EthereumQueries } from "./queries";
+import { SkipQueries } from "@keplr-wallet/stores-internal";
 
 interface CurrencyCache {
   symbol: string;
@@ -22,7 +23,8 @@ export class ERC20CurrencyRegistrar {
     protected readonly kvStore: KVStore,
     protected readonly cacheDuration: number = 24 * 3600 * 1000, // 1 days
     protected readonly chainStore: ChainStore,
-    protected readonly queriesStore: IQueriesStore<EthereumQueries>
+    protected readonly queriesStore: IQueriesStore<EthereumQueries>,
+    protected readonly skipQueriesStore: SkipQueries
   ) {
     this.chainStore.registerCurrencyRegistrar(
       this.currencyRegistrar.bind(this)
@@ -79,8 +81,6 @@ export class ERC20CurrencyRegistrar {
       return;
     }
 
-    const queries = this.queriesStore.get(chainId);
-
     const contractAddress = denomHelper.denom.replace("erc20:", "");
 
     const cached = this.cacheERC20Metadata.get(contractAddress);
@@ -103,10 +103,12 @@ export class ERC20CurrencyRegistrar {
       }
     }
 
+    const queries = this.queriesStore.get(chainId);
     const tokenInfoQuery =
       queries.ethereum.queryEthereumCoingeckoTokenInfo.getQueryContract(
         contractAddress
       );
+
     if (tokenInfoQuery?.symbol != null && tokenInfoQuery?.decimals != null) {
       if (!tokenInfoQuery.isFetching) {
         runInAction(() => {
@@ -133,6 +135,42 @@ export class ERC20CurrencyRegistrar {
     }
 
     if (tokenInfoQuery?.isFetching) {
+      return {
+        value: undefined,
+        done: false,
+      };
+    }
+
+    const skipAssetsQuery =
+      this.skipQueriesStore.queryAssets.getAssets(chainId);
+    const asset = skipAssetsQuery.assetsRaw.find(
+      (asset) =>
+        asset.tokenContract?.toLowerCase() === contractAddress.toLowerCase()
+    );
+    if (asset) {
+      runInAction(() => {
+        this.cacheERC20Metadata.set(contractAddress, {
+          symbol: asset.recommendedSymbol!,
+          decimals: asset.decimals,
+          coingeckoId: asset.coingeckoId,
+          logoURI: asset.logoURI,
+          timestamp: Date.now(),
+        });
+      });
+
+      return {
+        value: {
+          coinMinimalDenom: denomHelper.denom,
+          coinDenom: asset.recommendedSymbol!,
+          coinDecimals: asset.decimals,
+          coinGeckoId: asset.coingeckoId,
+          coinImageUrl: asset.logoURI,
+        },
+        done: !skipAssetsQuery.isFetching,
+      };
+    }
+
+    if (skipAssetsQuery?.isFetching) {
       return {
         value: undefined,
         done: false,
