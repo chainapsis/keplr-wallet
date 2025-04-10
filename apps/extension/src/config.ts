@@ -3200,6 +3200,11 @@ export const MsgPrivilegedContractMap: Record<
       "claim_rewards",
     ],
   },
+  neutron: {
+    neutron1mygmlglvg9w45n3s6m6d4txneantmupy0sa0vy63angpvj0qp7usep7kdz: [
+      "claim_rewards",
+    ],
+  },
 };
 
 export const CommunityChainInfoRepo = {

@@ -14,9 +14,8 @@ interface NeutronStakingRewardsResponse {
 }
 
 class ObservableQueryNeutronStakingRewardsInner extends ObservableCosmwasmContractChainQuery<NeutronStakingRewardsResponse> {
-  //FIXME- mainnet 런칭시 해당 주소를 mainnet 주소로 변경
   public static readonly NEUTRON_REWARDS_CONTRACT_ADDRESS =
-    "neutron1h62p45vv3fg2q6sm00r93gqgmhqt9tfgq5hz33qyrhq8f0pqqj0s36wgc3";
+    "neutron1mygmlglvg9w45n3s6m6d4txneantmupy0sa0vy63angpvj0qp7usep7kdz";
 
   constructor(
     sharedContext: QuerySharedContext,
