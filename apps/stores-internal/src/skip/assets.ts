@@ -136,7 +136,7 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
                 : asset.denom;
             const originCoinMinimalDenom = asset.origin_denom.startsWith("0x")
               ? `erc20:${asset.origin_denom.toLowerCase()}`
-              : asset.denom;
+              : asset.origin_denom;
             // TODO: Dec, Int 같은 곳에서 18 이상인 경우도 고려하도록 수정
             if (asset.decimals <= 18) {
               res.push({
@@ -244,7 +244,7 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
                 : asset.denom;
             const originCoinMinimalDenom = asset.origin_denom.startsWith("0x")
               ? `erc20:${asset.origin_denom.toLowerCase()}`
-              : asset.denom;
+              : asset.origin_denom;
             const currencyFound =
               chainInfo.findCurrencyWithoutReaction(coinMinimalDenom);
             // decimals이 18 이하인 경우만을 고려해서 짜여진 코드가 많아서 임시로 18 이하인 경우만 고려한다.
