@@ -14,7 +14,7 @@ interface NeutronStakingRewardsConfigResponse {
 
 export class ObservableQueryNeutronStakingRewardsConfig extends ObservableCosmwasmContractChainQuery<NeutronStakingRewardsConfigResponse> {
   public static readonly NEUTRON_REWARDS_CONTRACT_ADDRESS =
-    "neutron1mygmlglvg9w45n3s6m6d4txneantmupy0sa0vy63angpvj0qp7usep7kdz";
+    "neutron1gqq3c735pj6ese3yru5xr6ud0fvxgltxesygvyyzpsrt74v6yg4sgkrgwq";
 
   constructor(
     sharedContext: QuerySharedContext,
