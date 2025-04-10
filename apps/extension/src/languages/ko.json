@@ -126,7 +126,7 @@
 
   "pages.register.connect-ledger.title": "하드웨어 지갑을 연결해주세요.",
   "pages.register.connect-ledger.direct.title": "렛저 {app} 앱에 케플러를 연결하세요.",
-  "pages.register.connect-ledger.paragraph": "케플러는 코스모스 앱체인, Ethereum, Injective와 Evmos를 포함한 모든 EVM 호환 체인, 그리고 Starknet을 지원합니다. Ledger 연결은 코스모스, EVM, Starknet 순서로 진행됩니다.",
+  "pages.register.connect-ledger.paragraph": "케플러는 코스모스 기반 체인, 이더리움, 인젝티브, 이브모스를 포함한 모든 EVM 호환 체인, 스타크넷, 그리고 비트코인을 지원합니다. 렛저 연결은 코스모스, EVM, 스타크넷, 비트코인 순서로 진행됩니다.",
   "pages.register.connect-ledger.direct.paragraph": "이 창은 렛저 계정이지만 {app} 앱을 연결하지 않은 사용자에게만 표시됩니다. 다른 사용자에게는 표시되지 않습니다.",
   "pages.register.connect-ledger.step-text": "{step} 단계",
   "pages.register.connect-ledger.connect-ledger-step-paragraph": "렛저를 연결하고 잠금을 해제하세요.",
