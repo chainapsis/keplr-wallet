@@ -668,7 +668,7 @@
   "page.main.components.token-item.earn-savings-button": "{balance} in Savings",
 
   "page.main.layouts.header.new-chain.title": "✨ {chains} Now Integrated!",
-  "page.main.layouts.header.new-chain.paragraph": "To show the {count, plural, one {chain} other {chains}} and {count, plural, one {its} other {their}} assets on this account, visit \"Manage Chain Visibility\".",
+  "page.main.layouts.header.new-chain.paragraph": "To show the {count, plural, one {chain} other {chains}} and {count, plural, one {its} other {their}} assets on this account, visit \"Add/Remove Chains\".",
   "page.main.layouts.header.new-chain.button": "Got it!",
 
   "page.ledger-grant.title": "Allow Browser to Connect to Ledger",

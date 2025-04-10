@@ -645,7 +645,7 @@
   "page.main.components.token-item.copy-address.copied": "복사됨",
 
   "page.main.layouts.header.new-chain.title": "{chains} 체인이 추가되었습니다!",
-  "page.main.layouts.header.new-chain.paragraph": "\"체인 표시\"에서 신규 체인을 활성화하면 이 계정에서 사용할 수 있습니다.",
+  "page.main.layouts.header.new-chain.paragraph": "\"체인 추가/제거\"에서 신규 체인을 활성화하면 이 계정에서 사용할 수 있습니다.",
   "page.main.layouts.header.new-chain.button": "좋아요!",
 
   "page.ledger-grant.title": "렛저와 브라우저 간의 연결을 재허용합니다",
