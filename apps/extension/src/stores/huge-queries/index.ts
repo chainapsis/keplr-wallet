@@ -1051,6 +1051,13 @@ export class HugeQueriesStore {
       }
 
       // TODO: EVM 토큰 처리
+      else {
+        const groupKey = `${viewToken.chainInfo.chainId}/${currency.coinMinimalDenom}`;
+
+        if (!tokensMap.has(groupKey)) {
+          tokensMap.set(groupKey, [viewToken]);
+        }
+      }
     }
 
     return tokensMap;

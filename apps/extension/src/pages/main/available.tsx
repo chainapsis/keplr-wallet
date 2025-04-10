@@ -6,6 +6,7 @@ import {
   TokenItem,
   TokenTitleView,
 } from "./components";
+import { GroupedTokenItem } from "./components/token/grouped";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { ViewToken } from "./index";
 import { observer } from "mobx-react-lite";
@@ -152,6 +153,56 @@ export const AvailableTabView: FunctionComponent<{
       uiConfigStore.isHideLowBalance && hasLowBalanceTokens
         ? lowBalanceFilteredAllBalancesSearchFiltered
         : _allBalancesSearchFiltered;
+
+    const groupedTokensMap = useMemo(() => {
+      if (uiConfigStore.assetViewMode === "grouped") {
+        const filteredMap = new Map<string, ViewToken[]>();
+
+        const originalMap = hugeQueriesStore.groupedTokensMap;
+
+        originalMap.forEach((tokens, groupKey) => {
+          const filteredTokens = tokens.filter(
+            (token) =>
+              token.chainInfo.chainName.toLowerCase().includes(trimSearch) ||
+              token.token.currency.coinDenom.toLowerCase().includes(trimSearch)
+          );
+
+          if (filteredTokens.length > 0) {
+            if (uiConfigStore.isHideLowBalance) {
+              const { lowBalanceTokens } =
+                hugeQueriesStore.filterLowBalanceTokens(filteredTokens);
+
+              if (lowBalanceTokens.length === filteredTokens.length) {
+                return;
+              }
+
+              const nonLowBalanceTokens = filteredTokens.filter(
+                (token) =>
+                  !lowBalanceTokens.some(
+                    (lowToken) =>
+                      lowToken.chainInfo.chainId === token.chainInfo.chainId &&
+                      lowToken.token.currency.coinMinimalDenom ===
+                        token.token.currency.coinMinimalDenom
+                  )
+              );
+
+              filteredMap.set(groupKey, nonLowBalanceTokens);
+            } else {
+              filteredMap.set(groupKey, filteredTokens);
+            }
+          }
+        });
+
+        return filteredMap;
+      }
+
+      return new Map<string, ViewToken[]>();
+    }, [
+      trimSearch,
+      uiConfigStore.assetViewMode,
+      uiConfigStore.isHideLowBalance,
+      hugeQueriesStore,
+    ]);
 
     const lookingForChains = useMemo(() => {
       let disabledChainInfos: (ChainInfo | ModularChainInfo)[] =
@@ -331,93 +382,130 @@ export const AvailableTabView: FunctionComponent<{
         ) : (
           <React.Fragment>
             <Stack gutter="0.5rem">
-              {TokenViewData.map(
-                ({ title, balance, lenAlwaysShown, tooltip }) => {
-                  if (balance.length === 0) {
-                    return null;
+              {uiConfigStore.assetViewMode === "grouped" &&
+              groupedTokensMap.size > 0 ? (
+                <CollapsibleList
+                  key="grouped-tokens"
+                  hideNumInTitle={uiConfigStore.isPrivacyMode}
+                  notRenderHiddenItems={true}
+                  onCollapse={(isCollapsed) => {
+                    if (isCollapsed) {
+                      onMoreTokensClosed();
+                    }
+                  }}
+                  title={
+                    <TokenTitleView
+                      title={intl.formatMessage({
+                        id: "page.main.available.available-balance-title",
+                      })}
+                      tooltip={intl.formatMessage({
+                        id: "page.main.available.available-balance-tooltip",
+                      })}
+                      right={<ViewOptionsContextMenu />}
+                    />
                   }
-
-                  return (
-                    <CollapsibleList
-                      key={title}
-                      hideNumInTitle={uiConfigStore.isPrivacyMode}
-                      notRenderHiddenItems={true}
-                      onCollapse={(isCollapsed) => {
-                        if (isCollapsed) {
-                          onMoreTokensClosed();
-                        }
-                      }}
-                      title={
-                        <TokenTitleView
-                          title={title}
-                          tooltip={tooltip}
-                          right={<ViewOptionsContextMenu />}
+                  lenAlwaysShown={10}
+                  items={Array.from(groupedTokensMap.entries()).map(
+                    ([groupKey, tokens]) => {
+                      return (
+                        <GroupedTokenItem
+                          key={groupKey}
+                          tokens={tokens}
+                          {...getBottomTagInfoProps(tokens[0], groupKey)}
                         />
-                      }
-                      lenAlwaysShown={lenAlwaysShown}
-                      items={balance.map((viewToken) => {
-                        const key = `${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`;
-                        return (
-                          <TokenItem
-                            key={key}
-                            viewToken={viewToken}
-                            {...getBottomTagInfoProps(viewToken, key)}
-                            onClick={() => {
-                              setSearchParams((prev) => {
-                                prev.set(
-                                  "tokenChainId",
+                      );
+                    }
+                  )}
+                />
+              ) : (
+                TokenViewData.map(
+                  ({ title, balance, lenAlwaysShown, tooltip }) => {
+                    if (balance.length === 0) {
+                      return null;
+                    }
+
+                    return (
+                      <CollapsibleList
+                        key={title}
+                        hideNumInTitle={uiConfigStore.isPrivacyMode}
+                        notRenderHiddenItems={true}
+                        onCollapse={(isCollapsed) => {
+                          if (isCollapsed) {
+                            onMoreTokensClosed();
+                          }
+                        }}
+                        title={
+                          <TokenTitleView
+                            title={title}
+                            tooltip={tooltip}
+                            right={<ViewOptionsContextMenu />}
+                          />
+                        }
+                        lenAlwaysShown={lenAlwaysShown}
+                        items={balance.map((viewToken) => {
+                          const key = `${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`;
+                          return (
+                            <TokenItem
+                              key={key}
+                              viewToken={viewToken}
+                              {...getBottomTagInfoProps(viewToken, key)}
+                              onClick={() => {
+                                setSearchParams((prev) => {
+                                  prev.set(
+                                    "tokenChainId",
+                                    viewToken.chainInfo.chainId
+                                  );
+                                  prev.set(
+                                    "tokenCoinMinimalDenom",
+                                    viewToken.token.currency.coinMinimalDenom
+                                  );
+                                  prev.set("isTokenDetailModalOpen", "true");
+
+                                  return prev;
+                                });
+                              }}
+                              copyAddress={(() => {
+                                if (
+                                  new DenomHelper(
+                                    viewToken.token.currency.coinMinimalDenom
+                                  ).type !== "native" ||
+                                  viewToken.token.currency.coinMinimalDenom.startsWith(
+                                    "ibc/"
+                                  )
+                                ) {
+                                  return undefined;
+                                }
+
+                                const account = accountStore.getAccount(
                                   viewToken.chainInfo.chainId
                                 );
-                                prev.set(
-                                  "tokenCoinMinimalDenom",
-                                  viewToken.token.currency.coinMinimalDenom
-                                );
-                                prev.set("isTokenDetailModalOpen", "true");
+                                if ("bitcoin" in viewToken.chainInfo) {
+                                  return account.bitcoinAddress?.bech32Address;
+                                }
 
-                                return prev;
-                              });
-                            }}
-                            copyAddress={(() => {
-                              // For only native tokens, show copy address button
-                              if (
-                                new DenomHelper(
-                                  viewToken.token.currency.coinMinimalDenom
-                                ).type !== "native" ||
-                                viewToken.token.currency.coinMinimalDenom.startsWith(
-                                  "ibc/"
-                                )
-                              ) {
-                                return undefined;
+                                if ("starknet" in viewToken.chainInfo) {
+                                  return account.starknetHexAddress;
+                                }
+
+                                const isEVMOnlyChain =
+                                  chainStore.isEvmOnlyChain(
+                                    viewToken.chainInfo.chainId
+                                  );
+
+                                return isEVMOnlyChain
+                                  ? account.ethereumHexAddress
+                                  : account.bech32Address;
+                              })()}
+                              showPrice24HChange={
+                                uiConfigStore.show24HChangesInMagePage
                               }
-
-                              const account = accountStore.getAccount(
-                                viewToken.chainInfo.chainId
-                              );
-                              if ("bitcoin" in viewToken.chainInfo) {
-                                return account.bitcoinAddress?.bech32Address;
-                              }
-
-                              if ("starknet" in viewToken.chainInfo) {
-                                return account.starknetHexAddress;
-                              }
-
-                              const isEVMOnlyChain = chainStore.isEvmOnlyChain(
-                                viewToken.chainInfo.chainId
-                              );
-
-                              return isEVMOnlyChain
-                                ? account.ethereumHexAddress
-                                : account.bech32Address;
-                            })()}
-                            showPrice24HChange={
-                              uiConfigStore.show24HChangesInMagePage
-                            }
-                          />
-                        );
-                      })}
-                    />
-                  );
-                }
+                            />
+                          );
+                        })}
+                      />
+                    );
+                  }
+                )
               )}
             </Stack>
             {lookingForChains.length > 0 && (

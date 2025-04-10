@@ -144,7 +144,7 @@ export const TokenTitleView: FunctionComponent<{
   );
 };
 
-type BottomTagType = "nudgeEarn" | "showEarnSavings";
+export type BottomTagType = "nudgeEarn" | "showEarnSavings";
 
 interface TokenItemProps {
   viewToken: ViewToken;

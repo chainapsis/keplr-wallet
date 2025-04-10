@@ -1,17 +1,13 @@
 import Color from "color";
 import React, { Fragment, PropsWithChildren } from "react";
-import { useIntl } from "react-intl";
-import { useNavigate } from "react-router";
 import { Box } from "../../../../components/box";
 import { ArrowRightIcon } from "../../../../components/icon";
 import { Body2 } from "../../../../components/typography";
-import { useGetEarnApy } from "../../../../hooks/use-get-apy";
 import { ColorPalette } from "../../../../styles";
 import { observer } from "mobx-react-lite";
-import { NOBLE_CHAIN_ID } from "../../../../config.ui";
 import { useTheme } from "styled-components";
-
-type BottomTagType = "nudgeEarn" | "showEarnSavings";
+import { BottomTagType } from "./index";
+import { useEarnFeature } from "../../../../hooks/use-earn-feature";
 
 export const WrapperwithBottomTag = observer(function ({
   children,
@@ -21,43 +17,22 @@ export const WrapperwithBottomTag = observer(function ({
   bottomTagType?: BottomTagType;
   earnedAssetPrice?: string;
 }>) {
-  const isNudgeEarn = bottomTagType === "nudgeEarn";
-
-  const intl = useIntl();
-  const navigate = useNavigate();
-  const { apy } = useGetEarnApy(NOBLE_CHAIN_ID);
-
   const theme = useTheme();
   const isLightMode = theme.mode === "light";
-
-  function onClick() {
-    if (isNudgeEarn) {
-      navigate(`/earn/intro?chainId=${NOBLE_CHAIN_ID}`);
-    } else {
-      navigate(`/earn/overview?chainId=${NOBLE_CHAIN_ID}`);
-    }
-  }
+  const { message, handleClick, textColor } = useEarnFeature(
+    bottomTagType,
+    earnedAssetPrice
+  );
 
   if (!bottomTagType) {
     return <Fragment>{children}</Fragment>;
   }
 
-  const message =
-    bottomTagType === "nudgeEarn"
-      ? intl.formatMessage(
-          { id: "page.main.components.token-item.earn-nudge-button" },
-          { apy: apy }
-        )
-      : intl.formatMessage(
-          { id: "page.main.components.token-item.earn-savings-button" },
-          { balance: earnedAssetPrice }
-        );
-
   return (
     <Box position="relative" style={{ cursor: "pointer" }}>
       <Box zIndex={1}>{children}</Box>
       <Box
-        onClick={onClick}
+        onClick={handleClick}
         zIndex={0}
         position="relative"
         style={{
@@ -91,21 +66,10 @@ export const WrapperwithBottomTag = observer(function ({
         }
         borderRadius="0 0 0.5rem 0.5rem"
       >
-        <Body2
-          color={
-            isLightMode ? ColorPalette["green-600"] : ColorPalette["green-400"]
-          }
-          style={{ textAlign: "center" }}
-        >
+        <Body2 color={textColor} style={{ textAlign: "center" }}>
           {message}
         </Body2>
-        <ArrowRightIcon
-          width="1rem"
-          height="1rem"
-          color={
-            isLightMode ? ColorPalette["green-600"] : ColorPalette["green-400"]
-          }
-        />
+        <ArrowRightIcon width="1rem" height="1rem" color={textColor} />
       </Box>
     </Box>
   );

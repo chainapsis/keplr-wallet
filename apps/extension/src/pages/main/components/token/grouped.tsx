@@ -1,0 +1,488 @@
+import React, { FunctionComponent, useState, useMemo } from "react";
+import styled, { useTheme } from "styled-components";
+import { observer } from "mobx-react-lite";
+import { Box } from "../../../../components/box";
+import { Stack } from "../../../../components/stack";
+import { Column, Columns } from "../../../../components/column";
+import { Gutter } from "../../../../components/gutter";
+import { XAxis } from "../../../../components/axis";
+import { ViewToken } from "../../index";
+import { ColorPalette } from "../../../../styles";
+import {
+  ChainImageFallback,
+  CurrencyImageFallback,
+} from "../../../../components/image";
+import {
+  Subtitle2,
+  Subtitle3,
+  Caption1,
+  Body2,
+} from "../../../../components/typography";
+import { BottomTagType, TokenItem } from "./index";
+import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse/collapse";
+import { ArrowRightIcon } from "../../../../components/icon";
+import { useStore } from "../../../../stores";
+import { useSearchParams } from "react-router-dom";
+import { WrapperwithBottomTag } from "./wrapper-with-bottom-tag";
+import { useEarnFeature } from "../../../../hooks/use-earn-feature";
+import Color from "color";
+import { IconProps } from "../../../../components/icon/types";
+
+const Styles = {
+  Container: styled.div<{
+    disabled?: boolean;
+    isOpen: boolean;
+  }>`
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette.white
+        : ColorPalette["gray-650"]};
+    padding: 1rem 0.875rem;
+    border-radius: 0.375rem;
+    cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
+    box-shadow: ${(props) =>
+      props.theme.mode === "light"
+        ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+        : "none"};
+    position: relative;
+
+    &:hover {
+      background-color: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-10"]
+          : ColorPalette["gray-600"]};
+    }
+  `,
+  ChainIconsContainer: styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-left: -0.09375rem;
+  `,
+  ChainIcon: styled.div<{ zIndex: number }>`
+    width: 1.1875rem;
+    height: 1.1875rem;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-right: -0.25rem;
+    border: 1px solid
+      ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette.white
+          : ColorPalette["gray-650"]};
+    z-index: ${(props) => props.zIndex};
+    border: ${(props) =>
+      `0.09375rem solid ${
+        props.theme.mode === "light"
+          ? ColorPalette.white
+          : ColorPalette["gray-650"]
+      }`};
+    margin-left: ${(props) => (props.zIndex !== 0 ? "-0.25rem" : "0")};
+    margin-top: -0.09375rem;
+    margin-bottom: -0.09375rem;
+  `,
+  TokenOverlay: styled.div`
+    position: absolute;
+    bottom: -0.25rem;
+    right: -0.25rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background-color: ${ColorPalette["gray-700"]};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.2);
+  `,
+  TokenImageWrapper: styled.div`
+    position: relative;
+    width: 2rem;
+    height: 2rem;
+  `,
+  ExpandIcon: styled.div<{ isOpen: boolean }>`
+    transition: transform 0.2s ease-in-out;
+    transform: ${(props) => (props.isOpen ? "rotate(180deg)" : "rotate(0deg)")};
+    height: 1rem;
+  `,
+  ChildrenContainer: styled.div`
+    background-color: transparent;
+  `,
+  TransparentTokenItem: styled.div`
+    > div {
+      background-color: transparent !important;
+      box-shadow: none !important;
+
+      &:hover {
+        background-color: ${(props) =>
+          props.theme.mode === "light"
+            ? ColorPalette["gray-10"]
+            : ColorPalette["gray-650"]} !important;
+      }
+    }
+  `,
+};
+
+const StyledEarningsBox = styled.div`
+  display: flex;
+  height: 40px;
+  padding: 6px 0px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  align-self: stretch;
+  border-radius: 6px;
+  background: rgba(24, 146, 94, 0.2);
+  cursor: pointer;
+
+  &:hover {
+    background-color: ${({ theme }) =>
+      theme.mode === "light"
+        ? Color(ColorPalette["green-200"]).alpha(0.5).toString()
+        : Color(ColorPalette["green-600"]).alpha(0.15).toString()};
+  }
+`;
+
+const StandaloneEarnBox: FunctionComponent<{
+  bottomTagType?: BottomTagType;
+  earnedAssetPrice?: string;
+}> = observer(({ bottomTagType, earnedAssetPrice }) => {
+  const { message, handleClick, textColor } = useEarnFeature(
+    bottomTagType,
+    earnedAssetPrice
+  );
+
+  return (
+    <StyledEarningsBox onClick={handleClick}>
+      <Body2 color={textColor} style={{ textAlign: "center" }}>
+        {message}
+      </Body2>
+      <ArrowRightIcon width="1rem" height="1rem" color={textColor} />
+    </StyledEarningsBox>
+  );
+});
+
+export const GroupedTokenItem: FunctionComponent<{
+  tokens: ViewToken[];
+  onClick?: () => void;
+  disabled?: boolean;
+  bottomTagType?: BottomTagType;
+  earnedAssetPrice?: string;
+}> = observer(
+  ({ tokens, onClick, disabled, bottomTagType, earnedAssetPrice }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const theme = useTheme();
+    const { uiConfigStore, priceStore } = useStore();
+    const [, setSearchParams] = useSearchParams();
+
+    const mainToken = tokens[0];
+
+    const totalBalance = useMemo(() => {
+      let sum = tokens[0].token.clone();
+      for (let i = 1; i < tokens.length; i++) {
+        console.log(tokens[i].token.denom);
+        sum = sum.addDifferentDenoms(tokens[i].token);
+      }
+      return sum;
+    }, [tokens]);
+
+    const totalPrice = useMemo(() => {
+      return priceStore.calculatePrice(totalBalance);
+    }, [priceStore, totalBalance]);
+
+    const uniqueChainIds = useMemo(() => {
+      return [...new Set(tokens.map((token) => token.chainInfo.chainId))];
+    }, [tokens]);
+
+    const coinDenom = useMemo(() => {
+      if (
+        "originCurrency" in mainToken.token.currency &&
+        mainToken.token.currency.originCurrency
+      ) {
+        return mainToken.token.currency.originCurrency.coinDenom;
+      }
+      return mainToken.token.currency.coinDenom;
+    }, [mainToken.token.currency]);
+
+    const hasAnyBottomTag = useMemo(() => {
+      return (
+        bottomTagType ||
+        tokens.some((token) =>
+          "bottomTagType" in token ? token.bottomTagType : false
+        )
+      );
+    }, [tokens, bottomTagType]);
+
+    const effectiveBottomTagType = useMemo(() => {
+      if (bottomTagType) return bottomTagType;
+      const tokenWithTag = tokens.find(
+        (token) => "bottomTagType" in token && token.bottomTagType
+      );
+      return tokenWithTag && "bottomTagType" in tokenWithTag
+        ? (tokenWithTag.bottomTagType as BottomTagType)
+        : undefined;
+    }, [tokens, bottomTagType]);
+
+    const effectiveEarnedAssetPrice = useMemo(() => {
+      if (earnedAssetPrice) return earnedAssetPrice;
+      const tokenWithPrice = tokens.find(
+        (token) => "earnedAssetPrice" in token && token.earnedAssetPrice
+      );
+      return tokenWithPrice && "earnedAssetPrice" in tokenWithPrice
+        ? (tokenWithPrice.earnedAssetPrice as string)
+        : undefined;
+    }, [tokens, earnedAssetPrice]);
+
+    const handleClick = () => {
+      if (disabled) return;
+      setIsOpen(!isOpen);
+      if (onClick) onClick();
+    };
+
+    const openTokenDetail = (token: ViewToken) => {
+      setSearchParams((prev) => {
+        prev.set("tokenChainId", token.chainInfo.chainId);
+        prev.set(
+          "tokenCoinMinimalDenom",
+          token.token.currency.coinMinimalDenom
+        );
+        prev.set("isTokenDetailModalOpen", "true");
+        return prev;
+      });
+    };
+
+    if (tokens.length === 1) {
+      return (
+        <TokenItem
+          viewToken={{ ...tokens[0], isFetching: false }}
+          onClick={() => {
+            if (onClick) onClick();
+            openTokenDetail(tokens[0]);
+          }}
+          disabled={disabled}
+          bottomTagType={bottomTagType}
+          earnedAssetPrice={earnedAssetPrice}
+        />
+      );
+    }
+
+    const mainContainer = (
+      <Styles.Container
+        disabled={disabled}
+        isOpen={isOpen}
+        onClick={handleClick}
+      >
+        <Columns sum={1} gutter="0.5rem" alignY="center">
+          <Styles.TokenImageWrapper>
+            <CurrencyImageFallback
+              chainInfo={mainToken.chainInfo}
+              currency={mainToken.token.currency}
+              size="2rem"
+            />
+            <StackIcon />
+          </Styles.TokenImageWrapper>
+
+          <Gutter size="0.75rem" />
+
+          <Stack gutter="0.25rem">
+            <XAxis alignY="center">
+              <Subtitle2
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-700"]
+                    : ColorPalette["gray-10"]
+                }
+              >
+                {coinDenom}
+              </Subtitle2>
+            </XAxis>
+            <Box
+              style={{
+                flex: 1,
+                flexDirection: "row",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: "0.25rem",
+              }}
+            >
+              <Styles.ChainIconsContainer>
+                {uniqueChainIds.slice(0, 3).map((chainId, index) => {
+                  const token = tokens.find(
+                    (t) => t.chainInfo.chainId === chainId
+                  );
+                  if (!token) return null;
+
+                  return (
+                    <Styles.ChainIcon key={chainId} zIndex={index}>
+                      <ChainImageFallback
+                        chainInfo={token.chainInfo}
+                        size="1rem"
+                      />
+                    </Styles.ChainIcon>
+                  );
+                })}
+                {uniqueChainIds.length > 3 && (
+                  <Caption1
+                    style={{
+                      display: "flex",
+                      height: "1rem",
+                      padding: "0rem 0.375rem 0rem 0.25rem",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      color: ColorPalette["gray-100"],
+                      marginLeft: "-0.25rem",
+                      marginTop: "-0.09375rem",
+                      marginBottom: "-0.09375rem",
+                      backgroundColor: ColorPalette["gray-450"],
+                      borderRadius: "1.25rem",
+                      border: `0.09375rem solid ${
+                        theme.mode === "light"
+                          ? ColorPalette["gray-10"]
+                          : ColorPalette["gray-650"]
+                      }`,
+                      zIndex: 999,
+                      fontSize: "0.6875rem",
+                      fontStyle: "normal",
+                      fontWeight: 400,
+                    }}
+                  >
+                    +{uniqueChainIds.length - 3}
+                  </Caption1>
+                )}
+              </Styles.ChainIconsContainer>
+              <Styles.ExpandIcon isOpen={isOpen}>
+                <ArrowIcon />
+              </Styles.ExpandIcon>
+            </Box>
+          </Stack>
+
+          <Column weight={1} />
+
+          <Columns sum={1} gutter="0.25rem" alignY="center">
+            <Stack gutter="0.25rem" alignX="right">
+              <Subtitle3
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-700"]
+                    : ColorPalette["gray-10"]
+                }
+              >
+                {uiConfigStore.hideStringIfPrivacyMode(
+                  totalBalance
+                    .hideDenom(true)
+                    .maxDecimals(6)
+                    .inequalitySymbol(true)
+                    .shrink(true)
+                    .toString(),
+                  2
+                )}
+              </Subtitle3>
+              <Subtitle3 color={ColorPalette["gray-300"]}>
+                {uiConfigStore.hideStringIfPrivacyMode(
+                  totalPrice
+                    ? totalPrice.inequalitySymbol(true).toString()
+                    : "-",
+                  2
+                )}
+              </Subtitle3>
+            </Stack>
+          </Columns>
+        </Columns>
+      </Styles.Container>
+    );
+
+    return (
+      <div>
+        {!isOpen && hasAnyBottomTag ? (
+          <WrapperwithBottomTag
+            bottomTagType={effectiveBottomTagType}
+            earnedAssetPrice={effectiveEarnedAssetPrice}
+          >
+            {mainContainer}
+          </WrapperwithBottomTag>
+        ) : (
+          mainContainer
+        )}
+
+        <VerticalCollapseTransition collapsed={!isOpen}>
+          <Styles.ChildrenContainer>
+            {tokens.map((token, index) => (
+              <Box
+                key={token.chainInfo.chainId}
+                marginTop={index > 0 ? "0.375rem" : "0.75rem"}
+              >
+                <Styles.TransparentTokenItem>
+                  <TokenItem
+                    viewToken={{ ...token, isFetching: false }}
+                    disableHoverStyle
+                    onClick={() => openTokenDetail(token)}
+                  />
+                </Styles.TransparentTokenItem>
+              </Box>
+            ))}
+
+            {isOpen && hasAnyBottomTag && (
+              <Box marginTop="0.375rem">
+                <StandaloneEarnBox
+                  bottomTagType={effectiveBottomTagType}
+                  earnedAssetPrice={effectiveEarnedAssetPrice}
+                />
+              </Box>
+            )}
+          </Styles.ChildrenContainer>
+        </VerticalCollapseTransition>
+      </div>
+    );
+  }
+);
+
+const StackIcon: FunctionComponent<IconProps> = () => {
+  return (
+    <div
+      style={{
+        width: "1rem",
+        height: "1rem",
+        position: "absolute",
+        top: "1.6875rem",
+        left: "0.1875rem",
+      }}
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="26"
+        height="13"
+        viewBox="0 0 26 13"
+        fill="none"
+      >
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M21.2859 8.02551C18.9217 9.6137 16.0699 10.5413 12.9999 10.5413C9.92962 10.5413 7.07773 9.61358 4.71338 8.02521C6.47131 10.7178 9.52586 12.4993 12.9998 12.4993C16.4735 12.4993 19.528 10.7179 21.2859 8.02551Z"
+          fill="#353539"
+        />
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M26.0001 0.499672C22.9245 4.23865 18.2432 6.62598 13 6.62598C7.757 6.62598 3.07589 4.23886 0.000244141 0.500161C1.91748 5.78461 7.01411 9.56302 13.0001 9.56302C18.9863 9.56302 24.083 5.78437 26.0001 0.499672Z"
+          fill="#424247"
+        />
+      </svg>
+    </div>
+  );
+};
+
+const ArrowIcon: FunctionComponent<IconProps> = () => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+    >
+      <path
+        d="M7.05288 5.21786C7.53331 4.60016 8.46689 4.60016 8.94732 5.21786L12.0938 9.26327C12.7068 10.0515 12.1451 11.2 11.1465 11.2L4.85366 11.2C3.85509 11.2 3.29338 10.0515 3.90644 9.26327L7.05288 5.21786Z"
+        fill="#72747B"
+      />
+    </svg>
+  );
+};
