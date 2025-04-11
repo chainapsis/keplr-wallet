@@ -385,7 +385,7 @@ export const ViewOptionsContextMenu: FunctionComponent<{
       }, 300);
       return () => clearTimeout(timer);
     }
-  }, [isOpen, globalSimpleBar.ref]);
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen && sceneTransitionRef.current) {

@@ -2593,7 +2593,7 @@ const WarningGuideBox: FunctionComponent<{
         clearTimeout(timeoutId);
       };
     }
-  }, [collapsed, globalSimpleBar.ref]);
+  }, [collapsed]);
 
   const errorText = (() => {
     const err = error || lastError;
