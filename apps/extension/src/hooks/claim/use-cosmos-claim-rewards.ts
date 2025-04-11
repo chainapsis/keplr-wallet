@@ -187,6 +187,12 @@ export const useCosmosClaimRewards = () => {
             const result: FeeCurrency[] = [];
 
             for (const gasPrice of queryFeeMarketGasPrices.gasPrices) {
+              //현재 findCurrencyAsync 내부에서 모르는 체인과 관련 된 토큰이 들어 올시 비동기가 끝나지 않는 문제가 존재함
+              //해서 일단 임시방편으로 ibc 토큰은 무시하도록 처리
+              if (gasPrice.denom.split("/")[0] === "ibc") {
+                continue;
+              }
+
               const currency = await chainInfo.findCurrencyAsync(
                 gasPrice.denom
               );
@@ -209,6 +215,7 @@ export const useCosmosClaimRewards = () => {
                   "https://gjsttg7mkgtqhjpt3mv5aeuszi0zblbb.lambda-url.us-west-2.on.aws",
                   "/feemarket/info.json"
                 );
+                await multificationConfig.waitFreshResponse();
 
                 if (multificationConfig.response) {
                   const _default =
