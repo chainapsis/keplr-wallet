@@ -7,9 +7,9 @@ import { ObservableChainQueryMap } from "../../chain-query";
 import { computed } from "mobx";
 
 interface NeutronStakingRewardsResponse {
-  pending_rewards: {
-    denom: string;
-    amount: string;
+  pending_rewards?: {
+    denom?: string;
+    amount?: string;
   };
 }
 
@@ -49,6 +49,13 @@ class ObservableQueryNeutronStakingRewardsInner extends ObservableCosmwasmContra
     }
 
     const reward = this.response.data.pending_rewards;
+    if (!reward.denom || !reward.amount) {
+      const chainInfo = this.chainGetter.getChain(this.chainId);
+      const defaultCurrency =
+        chainInfo.stakeCurrency || chainInfo.currencies[0];
+
+      return new CoinPretty(defaultCurrency, new Int(0)).ready(false);
+    }
     const chainInfo = this.chainGetter.getChain(this.chainId);
     const currency = chainInfo.forceFindCurrency(reward.denom);
 
@@ -63,6 +70,9 @@ class ObservableQueryNeutronStakingRewardsInner extends ObservableCosmwasmContra
       return undefined;
     }
     const reward = this.response.data.pending_rewards;
+    if (!reward.denom || !reward.amount) {
+      return undefined;
+    }
     const chainInfo = this.chainGetter.getChain(this.chainId);
     return chainInfo.findCurrency(reward.denom);
   }

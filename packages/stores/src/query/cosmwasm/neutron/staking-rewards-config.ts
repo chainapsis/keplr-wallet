@@ -4,12 +4,12 @@ import { ObservableCosmwasmContractChainQuery } from "../contract-query";
 import { QuerySharedContext } from "../../../common";
 
 interface NeutronStakingRewardsConfigResponse {
-  owner: string;
-  dao_address: string;
-  staking_info_proxy: string;
-  annual_reward_rate_bps: number; // APR in basis points (e.g., 500 = 5%)
-  blocks_per_year: number;
-  staking_denom: string;
+  owner?: string;
+  dao_address?: string;
+  staking_info_proxy?: string;
+  annual_reward_rate_bps?: number; // APR in basis points (e.g., 500 = 5%)
+  blocks_per_year?: number;
+  staking_denom?: string;
 }
 
 export class ObservableQueryNeutronStakingRewardsConfig extends ObservableCosmwasmContractChainQuery<NeutronStakingRewardsConfigResponse> {
