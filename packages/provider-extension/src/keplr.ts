@@ -714,6 +714,17 @@ export class Keplr implements IKeplr {
     );
   }
 
+  async __core__privilageSignAminoExecuteCosmWasm(
+    chainId: string,
+    signer: string,
+    signDoc: StdSignDoc
+  ): Promise<AminoSignResponse> {
+    return await this.requestMethod(
+      "__core__privilageSignAminoExecuteCosmWasm" as any,
+      [chainId, signer, signDoc]
+    );
+  }
+
   async __core__webpageClosed(): Promise<void> {
     return await this.requestMethod("__core__webpageClosed" as any, []);
   }
