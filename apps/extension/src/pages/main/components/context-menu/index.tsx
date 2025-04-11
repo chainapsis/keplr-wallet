@@ -25,81 +25,78 @@ import {
 import { IconProps } from "../../../../components/icon/types";
 import { useGlobarSimpleBar } from "../../../../hooks/global-simplebar";
 
-const MenuContainer = styled.div`
-  position: relative;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  background-color: transparent;
-`;
-
-const MenuWrapper = styled.div`
-  position: absolute;
-  right: 0;
-  top: calc(100% + 0.5rem);
-  z-index: 9999;
-  min-width: 15.625rem;
-  overflow: visible;
-  box-shadow: ${(props) =>
-    props.theme.mode === "light"
-      ? "0px 1px 3px 0px rgba(43, 39, 55, 0.10), 0px 5px 30px 0px rgba(43, 39, 55, 0.05), 0px 10px 50px 0px rgba(43, 39, 55, 0.05)"
-      : "none"};
-`;
-
-const ContextMenuContent = styled.div`
-  border-radius: 0.5rem;
-  background-color: ${(props) =>
-    props.theme.mode === "light"
-      ? ColorPalette.white
-      : ColorPalette["gray-500"]};
-  box-shadow: 0 0.25rem 1.25rem rgba(0, 0, 0, 0.15);
-  overflow: hidden;
-`;
-
-const MenuBackdrop = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 9998;
-  background-color: transparent;
-`;
-
-const MenuItem = styled.div`
-  padding: 0.75rem 0.75rem 0.75rem 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: pointer;
-  background-color: ${(props) =>
-    props.theme.mode === "light"
-      ? ColorPalette.white
-      : ColorPalette["gray-500"]};
-  border-bottom: 1px solid
-    ${(props) =>
+const Styles = {
+  MenuContainer: styled.div`
+    position: relative;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background-color: transparent;
+  `,
+  MenuWrapper: styled.div`
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.5rem);
+    z-index: 9999;
+    min-width: 15.625rem;
+    overflow: visible;
+    box-shadow: ${(props) =>
       props.theme.mode === "light"
-        ? ColorPalette["gray-100"]
-        : ColorPalette["gray-400"]};
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  &:hover {
+        ? "0px 1px 3px 0px rgba(43, 39, 55, 0.10), 0px 5px 30px 0px rgba(43, 39, 55, 0.05), 0px 10px 50px 0px rgba(43, 39, 55, 0.05)"
+        : "none"};
+  `,
+  ContextMenuContent: styled.div`
+    border-radius: 0.5rem;
     background-color: ${(props) =>
       props.theme.mode === "light"
-        ? ColorPalette["gray-50"]
-        : ColorPalette["gray-450"]};
-  }
-`;
+        ? ColorPalette.white
+        : ColorPalette["gray-500"]};
+    box-shadow: 0 0.25rem 1.25rem rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+  `,
+  MenuBackdrop: styled.div`
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9998;
+    background-color: transparent;
+  `,
+  MenuItem: styled.div`
+    padding: 0.75rem 0.75rem 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette.white
+        : ColorPalette["gray-500"]};
+    border-bottom: 1px solid
+      ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-100"]
+          : ColorPalette["gray-400"]};
 
-const MenuItemXAxis = styled(XAxis)`
-  height: 100%;
-  display: flex;
-  align-items: center;
-`;
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover {
+      background-color: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-50"]
+          : ColorPalette["gray-450"]};
+    }
+  `,
+  MenuItemXAxis: styled(XAxis)`
+    height: 100%;
+    display: flex;
+    align-items: center;
+  `,
+};
 
 interface MainMenuSceneProps {
   hideLowBalance: boolean;
@@ -134,7 +131,7 @@ const MainMenuScene: React.FC<MainMenuSceneProps> = observer(
 
     return (
       <YAxis>
-        <MenuItem onClick={onAssetViewClick}>
+        <Styles.MenuItem onClick={onAssetViewClick}>
           <Box
             style={{
               display: "flex",
@@ -144,7 +141,7 @@ const MainMenuScene: React.FC<MainMenuSceneProps> = observer(
               width: "100%",
             }}
           >
-            <MenuItemXAxis alignY="center" gap="0.5rem">
+            <Styles.MenuItemXAxis alignY="center" gap="0.5rem">
               <AssetViewIcon
                 color={
                   theme.mode === "light"
@@ -157,12 +154,14 @@ const MainMenuScene: React.FC<MainMenuSceneProps> = observer(
                   id: "page.main.components.context-menu.asset-view",
                 })}
               </Body3>
-            </MenuItemXAxis>
+            </Styles.MenuItemXAxis>
             <RightArrowIcon width="1rem" height="1rem" />
           </Box>
-        </MenuItem>
-        <MenuItem onClick={(e) => handleToggleClick(e, onToggleHideLowBalance)}>
-          <MenuItemXAxis alignY="center" gap="0.5rem">
+        </Styles.MenuItem>
+        <Styles.MenuItem
+          onClick={(e) => handleToggleClick(e, onToggleHideLowBalance)}
+        >
+          <Styles.MenuItemXAxis alignY="center" gap="0.5rem">
             <HideLowBalanceIcon
               color={
                 theme.mode === "light"
@@ -175,7 +174,7 @@ const MainMenuScene: React.FC<MainMenuSceneProps> = observer(
                 id: "page.main.components.context-menu.hide-low-balance",
               })}
             </Body3>
-          </MenuItemXAxis>
+          </Styles.MenuItemXAxis>
           <div
             className="toggle-component"
             onClick={(e) => e.stopPropagation()}
@@ -186,9 +185,11 @@ const MainMenuScene: React.FC<MainMenuSceneProps> = observer(
               size="extra-small"
             />
           </div>
-        </MenuItem>
-        <MenuItem onClick={(e) => handleToggleClick(e, onToggleShowFiatValue)}>
-          <MenuItemXAxis alignY="center" gap="0.5rem">
+        </Styles.MenuItem>
+        <Styles.MenuItem
+          onClick={(e) => handleToggleClick(e, onToggleShowFiatValue)}
+        >
+          <Styles.MenuItemXAxis alignY="center" gap="0.5rem">
             <ShowFiatValueIcon
               color={
                 theme.mode === "light"
@@ -201,7 +202,7 @@ const MainMenuScene: React.FC<MainMenuSceneProps> = observer(
                 id: "page.main.components.context-menu.show-fiat-value",
               })}
             </Body3>
-          </MenuItemXAxis>
+          </Styles.MenuItemXAxis>
           <div
             className="toggle-component"
             onClick={(e) => e.stopPropagation()}
@@ -212,7 +213,7 @@ const MainMenuScene: React.FC<MainMenuSceneProps> = observer(
               size="extra-small"
             />
           </div>
-        </MenuItem>
+        </Styles.MenuItem>
       </YAxis>
     );
   }
@@ -241,8 +242,8 @@ const AssetViewScene: React.FC<AssetViewSceneProps> = observer(
     };
     return (
       <YAxis>
-        <MenuItem onClick={onBackClick}>
-          <MenuItemXAxis alignY="center" gap="0.5rem">
+        <Styles.MenuItem onClick={onBackClick}>
+          <Styles.MenuItemXAxis alignY="center" gap="0.5rem">
             <ArrowLeftIcon
               width="1rem"
               height="1rem"
@@ -261,9 +262,9 @@ const AssetViewScene: React.FC<AssetViewSceneProps> = observer(
             >
               Back
             </Body3>
-          </MenuItemXAxis>
-        </MenuItem>
-        <MenuItem onClick={onGroupByAssetsClick}>
+          </Styles.MenuItemXAxis>
+        </Styles.MenuItem>
+        <Styles.MenuItem onClick={onGroupByAssetsClick}>
           <Box
             style={{
               display: "flex",
@@ -273,7 +274,7 @@ const AssetViewScene: React.FC<AssetViewSceneProps> = observer(
               width: "100%",
             }}
           >
-            <MenuItemXAxis alignY="center" gap="0.5rem">
+            <Styles.MenuItemXAxis alignY="center" gap="0.5rem">
               <GroupByAssetsIcon
                 color={
                   theme.mode === "light"
@@ -286,13 +287,13 @@ const AssetViewScene: React.FC<AssetViewSceneProps> = observer(
                   id: "page.main.components.context-menu.group-by-assets",
                 })}
               </Body3>
-            </MenuItemXAxis>
+            </Styles.MenuItemXAxis>
             {assetViewMode === "grouped" ? (
               <CheckIcon width="1rem" height="1rem" />
             ) : null}
           </Box>
-        </MenuItem>
-        <MenuItem onClick={onFlatViewClick}>
+        </Styles.MenuItem>
+        <Styles.MenuItem onClick={onFlatViewClick}>
           <Box
             style={{
               display: "flex",
@@ -302,7 +303,7 @@ const AssetViewScene: React.FC<AssetViewSceneProps> = observer(
               width: "100%",
             }}
           >
-            <MenuItemXAxis alignY="center" gap="0.5rem">
+            <Styles.MenuItemXAxis alignY="center" gap="0.5rem">
               <FlatIcon
                 color={
                   theme.mode === "light"
@@ -315,12 +316,12 @@ const AssetViewScene: React.FC<AssetViewSceneProps> = observer(
                   id: "page.main.components.context-menu.flat",
                 })}
               </Body3>
-            </MenuItemXAxis>
+            </Styles.MenuItemXAxis>
             {assetViewMode === "flat" ? (
               <CheckIcon width="1rem" height="1rem" />
             ) : null}
           </Box>
-        </MenuItem>
+        </Styles.MenuItem>
       </YAxis>
     );
   }
@@ -442,7 +443,7 @@ export const ViewOptionsContextMenu: FunctionComponent<{
   };
 
   const menuContent = (
-    <ContextMenuContent ref={menuContentRef}>
+    <Styles.ContextMenuContent ref={menuContentRef}>
       <SceneTransition
         ref={sceneTransitionRef}
         scenes={[
@@ -474,12 +475,12 @@ export const ViewOptionsContextMenu: FunctionComponent<{
           name: "main-menu",
         }}
       />
-    </ContextMenuContent>
+    </Styles.ContextMenuContent>
   );
 
   return (
-    <MenuContainer ref={containerRef}>
-      {(isOpen || renderMenu) && <MenuBackdrop onClick={closeMenu} />}
+    <Styles.MenuContainer ref={containerRef}>
+      {(isOpen || renderMenu) && <Styles.MenuBackdrop onClick={closeMenu} />}
 
       <div
         onMouseEnter={() => setIsHovered(true)}
@@ -491,7 +492,7 @@ export const ViewOptionsContextMenu: FunctionComponent<{
           })}
           size="small"
           right={
-            <MenuItemXAxis alignY="center">
+            <Styles.MenuItemXAxis alignY="center">
               <ViewOptionsIcon
                 width="1rem"
                 height="1rem"
@@ -503,18 +504,18 @@ export const ViewOptionsContextMenu: FunctionComponent<{
                     : ColorPalette["gray-300"]
                 }
               />
-            </MenuItemXAxis>
+            </Styles.MenuItemXAxis>
           }
           onClick={toggleMenu}
         />
       </div>
 
-      <MenuWrapper>
+      <Styles.MenuWrapper>
         <VerticalCollapseTransition collapsed={!isOpen} width="100%">
           {menuContent}
         </VerticalCollapseTransition>
-      </MenuWrapper>
-    </MenuContainer>
+      </Styles.MenuWrapper>
+    </Styles.MenuContainer>
   );
 });
 
