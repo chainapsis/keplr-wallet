@@ -286,14 +286,16 @@ const NestedTokenItem: FunctionComponent<{
                 2
               )}
             </Subtitle3>
-            <Subtitle3 color={ColorPalette["gray-300"]}>
-              {uiConfigStore.hideStringIfPrivacyMode(
-                pricePretty
-                  ? pricePretty.inequalitySymbol(true).toString()
-                  : "-",
-                2
-              )}
-            </Subtitle3>
+            {uiConfigStore.showFiatValue ? (
+              <Subtitle3 color={ColorPalette["gray-300"]}>
+                {uiConfigStore.hideStringIfPrivacyMode(
+                  pricePretty
+                    ? pricePretty.inequalitySymbol(true).toString()
+                    : "-",
+                  2
+                )}
+              </Subtitle3>
+            ) : null}
           </Stack>
         </Columns>
       </Columns>
