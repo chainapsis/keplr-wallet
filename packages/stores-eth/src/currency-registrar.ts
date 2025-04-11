@@ -3,7 +3,7 @@ import { ChainStore, IQueriesStore } from "@keplr-wallet/stores";
 import { DenomHelper, KVStore } from "@keplr-wallet/common";
 import { autorun, makeObservable, observable, runInAction, toJS } from "mobx";
 import { EthereumQueries } from "./queries";
-import { SkipQueries } from "@keplr-wallet/stores-internal";
+import { KeplrETCQueries } from "@keplr-wallet/stores-etc";
 
 interface CurrencyCache {
   symbol: string;
@@ -23,8 +23,9 @@ export class ERC20CurrencyRegistrar {
     protected readonly kvStore: KVStore,
     protected readonly cacheDuration: number = 24 * 3600 * 1000, // 1 days
     protected readonly chainStore: ChainStore,
-    protected readonly queriesStore: IQueriesStore<EthereumQueries>,
-    protected readonly skipQueriesStore: SkipQueries
+    protected readonly queriesStore: IQueriesStore<
+      EthereumQueries & KeplrETCQueries
+    >
   ) {
     this.chainStore.registerCurrencyRegistrar(
       this.currencyRegistrar.bind(this)
@@ -141,36 +142,28 @@ export class ERC20CurrencyRegistrar {
       };
     }
 
-    const skipAssetsQuery =
-      this.skipQueriesStore.queryAssets.getAssets(chainId);
-    const asset = skipAssetsQuery.assetsRaw.find(
-      (asset) =>
-        asset.tokenContract?.toLowerCase() === contractAddress.toLowerCase()
-    );
-    if (asset) {
+    const skipTokenInfoQuery =
+      queries.keplrETC.querySkipTokenInfo.getQueryCoinMinimalDenom(
+        coinMinimalDenom
+      );
+    if (skipTokenInfoQuery?.currency) {
       runInAction(() => {
         this.cacheERC20Metadata.set(contractAddress, {
-          symbol: asset.recommendedSymbol!,
-          decimals: asset.decimals,
-          coingeckoId: asset.coingeckoId,
-          logoURI: asset.logoURI,
+          symbol: skipTokenInfoQuery.currency!.coinDenom,
+          decimals: skipTokenInfoQuery.currency!.coinDecimals,
+          coingeckoId: skipTokenInfoQuery.currency!.coinGeckoId,
+          logoURI: skipTokenInfoQuery.currency!.coinImageUrl,
           timestamp: Date.now(),
         });
       });
 
       return {
-        value: {
-          coinMinimalDenom: denomHelper.denom,
-          coinDenom: asset.recommendedSymbol!,
-          coinDecimals: asset.decimals,
-          coinGeckoId: asset.coingeckoId,
-          coinImageUrl: asset.logoURI,
-        },
-        done: !skipAssetsQuery.isFetching,
+        value: skipTokenInfoQuery.currency,
+        done: !skipTokenInfoQuery.isFetching,
       };
     }
 
-    if (skipAssetsQuery?.isFetching) {
+    if (skipTokenInfoQuery?.isFetching) {
       return {
         value: undefined,
         done: false,

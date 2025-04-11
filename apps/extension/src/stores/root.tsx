@@ -11,6 +11,8 @@ import {
   GoogleAPIKeyForMeasurement,
   CoinGeckoCoinDataByTokenAddress,
   SwapVenues,
+  SkipTokenInfoBaseURL,
+  SkipTokenInfoAPIURI,
 } from "../config.ui";
 import {
   AccountStore,
@@ -348,6 +350,8 @@ export class RootStore {
       OsmosisQueries.use(),
       KeplrETCQueries.use({
         ethereumURL: EthereumEndpoint,
+        skipTokenInfoBaseURL: SkipTokenInfoBaseURL,
+        skipTokenInfoAPIURI: SkipTokenInfoAPIURI,
       }),
       ICNSQueries.use(),
       TokenContractsQueries.use({
@@ -618,8 +622,7 @@ export class RootStore {
       new ExtensionKVStore("store_erc20_currency_registrar"),
       24 * 3600 * 1000,
       this.chainStore,
-      this.queriesStore,
-      this.skipQueriesStore
+      this.queriesStore
     );
 
     // XXX: Remember that userId would be set by `StoreProvider`
