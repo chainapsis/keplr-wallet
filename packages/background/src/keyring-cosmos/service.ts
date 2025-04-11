@@ -583,7 +583,7 @@ export class KeyRingCosmosService {
 
       const msgs = signDoc.msgs;
 
-      const inValidMsgs = msgs.filter((msg) => {
+      const invalidMsgs = msgs.filter((msg) => {
         const { value } = msg;
         const callableVariants = privilegedContractAddressMap[value.contract];
         if (!callableVariants || callableVariants.length === 0) {
@@ -596,17 +596,22 @@ export class KeyRingCosmosService {
             return true;
           }
         }
+
+        if (runVariants.length === 0) {
+          return true;
+        }
+
         return false;
       });
 
-      return inValidMsgs.length === 0;
+      return invalidMsgs.length === 0;
     })();
 
-    if (
-      !env.isInternalMsg &&
-      !this.msgPrivilegedOrigins.includes(origin) &&
-      !isValidExecute
-    ) {
+    if (!isValidExecute) {
+      throw new Error("This msg is invalid ");
+    }
+
+    if (!env.isInternalMsg && !this.msgPrivilegedOrigins.includes(origin)) {
       throw new Error("Permission Rejected");
     }
 
