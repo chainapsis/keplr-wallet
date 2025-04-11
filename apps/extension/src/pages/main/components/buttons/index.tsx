@@ -61,7 +61,7 @@ export const Buttons: FunctionComponent<{
               disabled={!hasBalance}
               onClick={() => {
                 navigate(
-                  `/send/select-asset?navigateTo=${encodeURIComponent(
+                  `/send/select-asset?navigateReplace=true&navigateTo=${encodeURIComponent(
                     "/send?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}"
                   )}`
                 );
