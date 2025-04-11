@@ -23,6 +23,7 @@ import {
   RightArrowIcon,
 } from "../../../../components/icon";
 import { IconProps } from "../../../../components/icon/types";
+import { useGlobarSimpleBar } from "../../../../hooks/global-simplebar";
 
 const MenuContainer = styled.div`
   position: relative;
@@ -343,11 +344,13 @@ export const ViewOptionsContextMenu: FunctionComponent = observer(() => {
   const { uiConfigStore } = useStore();
   const intl = useIntl();
   const containerRef = useRef<HTMLDivElement>(null);
+  const menuContentRef = useRef<HTMLDivElement>(null);
   const sceneTransitionRef = useRef<any>(null);
   const [renderMenu, setRenderMenu] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const theme = useTheme();
   const [isHovered, setIsHovered] = useState(false);
+  const globalSimpleBar = useGlobarSimpleBar();
 
   useLayoutEffect(() => {
     if (!initialized) {
@@ -358,13 +361,28 @@ export const ViewOptionsContextMenu: FunctionComponent = observer(() => {
   useEffect(() => {
     if (uiConfigStore.isContextMenuOpen) {
       setRenderMenu(true);
+
+      const scrollElement = globalSimpleBar.ref.current?.getScrollElement();
+      if (scrollElement) {
+        const currentScrollTop = scrollElement.scrollTop;
+        const targetScrollTop =
+          (menuContentRef.current?.offsetHeight || 0) + 60;
+
+        if (currentScrollTop < targetScrollTop) {
+          scrollElement.scrollTo({
+            top: targetScrollTop,
+            left: 0,
+            behavior: "smooth",
+          });
+        }
+      }
     } else {
       const timer = setTimeout(() => {
         setRenderMenu(false);
       }, 300);
       return () => clearTimeout(timer);
     }
-  }, [uiConfigStore.isContextMenuOpen]);
+  }, [uiConfigStore.isContextMenuOpen, globalSimpleBar.ref]);
 
   useEffect(() => {
     if (!uiConfigStore.isContextMenuOpen && sceneTransitionRef.current) {
@@ -421,7 +439,7 @@ export const ViewOptionsContextMenu: FunctionComponent = observer(() => {
   };
 
   const menuContent = (
-    <ContextMenuContent>
+    <ContextMenuContent ref={menuContentRef}>
       <SceneTransition
         ref={sceneTransitionRef}
         scenes={[
