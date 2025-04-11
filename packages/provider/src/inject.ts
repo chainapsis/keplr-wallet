@@ -1002,6 +1002,17 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     ]);
   }
 
+  async __core__privilageSignAminoExecuteCosmWasm(
+    chainId: string,
+    signer: string,
+    signDoc: StdSignDoc
+  ): Promise<AminoSignResponse> {
+    return await this.requestMethod(
+      "__core__privilageSignAminoExecuteCosmWasm",
+      [chainId, signer, signDoc]
+    );
+  }
+
   async sendEthereumTx(chainId: string, tx: Uint8Array): Promise<string> {
     return await this.requestMethod("sendEthereumTx", [chainId, tx]);
   }

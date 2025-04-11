@@ -1552,6 +1552,10 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         coinDecimals: 6,
       },
     ],
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/chains/neutron"
+        : "http://localhost:8080/chains/neutron",
     features: [],
   },
   {
@@ -3407,6 +3411,22 @@ export const PrivilegedOrigins: string[] = [
   "https://testnet.keplr.app",
   "https://multisig.keplr.app",
 ];
+
+export const MsgPrivilegedContractMap: Record<
+  string,
+  Record<string, string[]>
+> = {
+  pion: {
+    neutron1h62p45vv3fg2q6sm00r93gqgmhqt9tfgq5hz33qyrhq8f0pqqj0s36wgc3: [
+      "claim_rewards",
+    ],
+  },
+  neutron: {
+    neutron1gqq3c735pj6ese3yru5xr6ud0fvxgltxesygvyyzpsrt74v6yg4sgkrgwq: [
+      "claim_rewards",
+    ],
+  },
+};
 
 export const CommunityChainInfoRepo = {
   organizationName: "chainapsis",

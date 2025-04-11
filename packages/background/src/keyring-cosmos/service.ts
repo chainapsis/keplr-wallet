@@ -13,6 +13,7 @@ import {
 import { APP_PORT, Env, KeplrError } from "@keplr-wallet/router";
 import {
   Bech32Address,
+  ChainIdHelper,
   checkAndValidateADR36AminoSignDoc,
   encodeSecp256k1Pubkey,
   encodeSecp256k1Signature,
@@ -43,7 +44,11 @@ export class KeyRingCosmosService {
     protected readonly interactionService: InteractionService,
     protected readonly chainsUIService: ChainsUIService,
     protected readonly analyticsService: AnalyticsService,
-    protected readonly msgPrivilegedOrigins: string[]
+    protected readonly msgPrivilegedOrigins: string[],
+    protected readonly msgPrivilegedCosmwasmContractMap: Record<
+      string,
+      Record<string, string[]>
+    >
   ) {}
 
   async init() {
@@ -552,6 +557,144 @@ export class KeyRingCosmosService {
         origin,
         signMode: "amino",
         privileged: "delegate",
+      });
+
+      return {
+        signed: signDoc,
+        signature: encodeSecp256k1Signature(key.pubKey, signature),
+      };
+    } finally {
+      this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
+    }
+  }
+
+  async privilegeSignAminoExecuteCosmWasm(
+    env: Env,
+    origin: string,
+    chainId: string,
+    signer: string,
+    signDoc: StdSignDoc
+  ): Promise<AminoSignResponse> {
+    // TODO: 이 기능은 ledger에서는 사용할 수 없고 어케 이 문제를 해결할지도 아직 명확하지 않음.
+    const isValidExecute = (() => {
+      const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
+      const privilegedContractAddressMap =
+        this.msgPrivilegedCosmwasmContractMap[chainIdentifier];
+
+      const msgs = signDoc.msgs;
+
+      const invalidMsgs = msgs.filter((msg) => {
+        const { value } = msg;
+        const callableVariants = privilegedContractAddressMap[value.contract];
+        if (!callableVariants || callableVariants.length === 0) {
+          return true;
+        }
+
+        const runVariants = Object.keys(value.msg);
+        for (const runVariant of runVariants) {
+          if (!callableVariants.includes(runVariant)) {
+            return true;
+          }
+        }
+
+        if (runVariants.length === 0) {
+          return true;
+        }
+
+        return false;
+      });
+
+      return invalidMsgs.length === 0;
+    })();
+
+    if (!isValidExecute) {
+      throw new Error("This msg is invalid ");
+    }
+
+    if (!env.isInternalMsg && !this.msgPrivilegedOrigins.includes(origin)) {
+      throw new Error("Permission Rejected");
+    }
+
+    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    if (chainInfo.hideInUI) {
+      throw new Error("Can't sign for hidden chain");
+    }
+
+    const vaultId = this.keyRingService.selectedVaultId;
+
+    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
+    const forceEVMLedger = chainInfo.features?.includes(
+      "force-enable-evm-ledger"
+    );
+
+    const keyInfo = this.keyRingService.getKeyInfo(vaultId);
+    if (!keyInfo) {
+      throw new Error("Null key info");
+    }
+
+    if (isEthermintLike && keyInfo.type === "ledger" && !forceEVMLedger) {
+      KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
+        chainId
+      );
+    }
+
+    signDoc = {
+      ...signDoc,
+      memo: escapeHTML(signDoc.memo),
+    };
+
+    signDoc = trimAminoSignDoc(signDoc);
+    signDoc = sortObjectByKey(signDoc);
+
+    const key = await this.getKey(vaultId, chainId);
+    const bech32Prefix =
+      this.chainsService.getChainInfoOrThrow(chainId).bech32Config
+        ?.bech32PrefixAccAddr ?? "";
+    const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
+    if (signer !== bech32Address) {
+      throw new Error("Signer mismatched");
+    }
+
+    const isADR36SignDoc = checkAndValidateADR36AminoSignDoc(
+      signDoc,
+      bech32Prefix
+    );
+    if (isADR36SignDoc) {
+      throw new Error("Can't use ADR-36 sign doc");
+    }
+
+    if (!signDoc.msgs || signDoc.msgs.length === 0) {
+      throw new Error("No msgs");
+    }
+
+    for (const msg of signDoc.msgs) {
+      // Some chains modify types for obscure reasons. For now, treat it like this:
+      const i = msg.type.indexOf("/");
+      if (i < 0) {
+        throw new Error("Invalid msg type");
+      }
+      const action = msg.type.slice(i + 1);
+      // Check if the message type is for executing Wasm contract
+      if (action !== "MsgExecuteContract") {
+        throw new Error("Invalid msg type");
+      }
+    }
+
+    try {
+      const _sig = await this.keyRingService.sign(
+        chainId,
+        vaultId,
+        serializeSignDoc(signDoc),
+        isEthermintLike ? "keccak256" : "sha256"
+      );
+      const signature = new Uint8Array([..._sig.r, ..._sig.s]);
+
+      this.analyticsService.logEventIgnoreError("tx_signed", {
+        chainId,
+        isInternal: env.isInternalMsg,
+        origin,
+        signMode: "amino",
+        privileged: "executeWasm",
       });
 
       return {

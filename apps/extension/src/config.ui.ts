@@ -35,8 +35,11 @@ export const TokenContractListURL =
   "https://opbaqquqruxn7fdsgcncrtfrwa0qxnoj.lambda-url.us-west-2.on.aws/";
 export const TokenContractListRepoURL =
   "https://github.com/chainapsis/keplr-contract-registry";
+export const NeutronStakingRewardsContractAddress =
+  "neutron1gqq3c735pj6ese3yru5xr6ud0fvxgltxesygvyyzpsrt74v6yg4sgkrgwq";
 
 export const NOBLE_CHAIN_ID = "noble-1";
+export const NEUTRON_CHAIN_ID = "neutron-1";
 
 export const KEPLR_EXTS_MEMO = "Keplr Exts";
 

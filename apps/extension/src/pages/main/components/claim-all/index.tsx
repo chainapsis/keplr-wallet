@@ -47,7 +47,7 @@ import {
   DescendantHeightPxRegistry,
   useVerticalSizeInternalContext,
 } from "../../../../components/transition/vertical-size/internal";
-import { NOBLE_CHAIN_ID } from "../../../../config.ui";
+import { NEUTRON_CHAIN_ID, NOBLE_CHAIN_ID } from "../../../../config.ui";
 
 const USDN_CURRENCY = {
   coinDenom: "USDN",
@@ -173,10 +173,31 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
       const res: ViewClaimToken[] = [];
       for (const modularChainInfo of chainStore.modularChainInfosInUI) {
         const chainId = modularChainInfo.chainId;
+        const account = accountStore.getAccount(chainId);
+        const isNeutron = chainId === NEUTRON_CHAIN_ID;
 
-        if ("cosmos" in modularChainInfo) {
+        if (isNeutron && account.bech32Address) {
+          const queries = queriesStore.get(chainId);
+          const queryNeutronRewardInner =
+            queries.cosmwasm.queryNeutronStakingRewards.getRewardFor(
+              account.bech32Address
+            );
+          const reward = queryNeutronRewardInner.pendingReward;
+
+          if (reward && reward.toDec().gt(zeroDec)) {
+            res.push({
+              token: reward,
+              price: priceStore.calculatePrice(reward),
+              modularChainInfo: modularChainInfo,
+              isFetching: queryNeutronRewardInner.isFetching,
+              error: queryNeutronRewardInner.error,
+              onClaimAll: handleCosmosClaimAllEach,
+              onClaimSingle: handleCosmosClaimSingle,
+            });
+          }
+        } else if ("cosmos" in modularChainInfo) {
+          const accountAddress = account.bech32Address;
           const chainInfo = chainStore.getChain(chainId);
-          const accountAddress = accountStore.getAccount(chainId).bech32Address;
           const queries = queriesStore.get(chainId);
 
           if (chainId === NOBLE_CHAIN_ID) {
