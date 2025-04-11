@@ -340,7 +340,10 @@ const CustomTextButton = styled(TextButton)`
   }
 `;
 
-export const ViewOptionsContextMenu: FunctionComponent = observer(() => {
+export const ViewOptionsContextMenu: FunctionComponent<{
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+}> = observer(({ isOpen, setIsOpen }) => {
   const { uiConfigStore } = useStore();
   const intl = useIntl();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -359,7 +362,7 @@ export const ViewOptionsContextMenu: FunctionComponent = observer(() => {
   }, [initialized]);
 
   useEffect(() => {
-    if (uiConfigStore.isContextMenuOpen) {
+    if (isOpen) {
       setRenderMenu(true);
 
       const scrollElement = globalSimpleBar.ref.current?.getScrollElement();
@@ -382,20 +385,20 @@ export const ViewOptionsContextMenu: FunctionComponent = observer(() => {
       }, 300);
       return () => clearTimeout(timer);
     }
-  }, [uiConfigStore.isContextMenuOpen, globalSimpleBar.ref]);
+  }, [isOpen, globalSimpleBar.ref]);
 
   useEffect(() => {
-    if (!uiConfigStore.isContextMenuOpen && sceneTransitionRef.current) {
+    if (!isOpen && sceneTransitionRef.current) {
       sceneTransitionRef.current.replaceAll("main-menu");
     }
-  }, [uiConfigStore.isContextMenuOpen]);
+  }, [isOpen]);
 
   const closeMenu = () => {
-    uiConfigStore.setContextMenuOpen(false);
+    setIsOpen(false);
   };
 
   const toggleMenu = () => {
-    uiConfigStore.setContextMenuOpen(!uiConfigStore.isContextMenuOpen);
+    setIsOpen(!isOpen);
   };
 
   const handleAssetViewClick = () => {
@@ -476,9 +479,7 @@ export const ViewOptionsContextMenu: FunctionComponent = observer(() => {
 
   return (
     <MenuContainer ref={containerRef}>
-      {(uiConfigStore.isContextMenuOpen || renderMenu) && (
-        <MenuBackdrop onClick={closeMenu} />
-      )}
+      {(isOpen || renderMenu) && <MenuBackdrop onClick={closeMenu} />}
 
       <div
         onMouseEnter={() => setIsHovered(true)}
@@ -509,10 +510,7 @@ export const ViewOptionsContextMenu: FunctionComponent = observer(() => {
       </div>
 
       <MenuWrapper>
-        <VerticalCollapseTransition
-          collapsed={!uiConfigStore.isContextMenuOpen}
-          width="100%"
-        >
+        <VerticalCollapseTransition collapsed={!isOpen} width="100%">
           {menuContent}
         </VerticalCollapseTransition>
       </MenuWrapper>

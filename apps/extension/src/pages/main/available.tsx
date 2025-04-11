@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useMemo } from "react";
+import React, { FunctionComponent, useMemo, useState } from "react";
 import { CollapsibleList } from "../../components/collapsible-list";
 import {
   LookingForChains,
@@ -109,6 +109,7 @@ export const AvailableTabView: FunctionComponent<{
     const intl = useIntl();
     const theme = useTheme();
     const navigate = useNavigate();
+    const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
 
     const { trimSearch, searchedChainInfos } = useGetSearchChains({
       search,
@@ -401,7 +402,12 @@ export const AvailableTabView: FunctionComponent<{
                       tooltip={intl.formatMessage({
                         id: "page.main.available.available-balance-tooltip",
                       })}
-                      right={<ViewOptionsContextMenu />}
+                      right={
+                        <ViewOptionsContextMenu
+                          isOpen={isContextMenuOpen}
+                          setIsOpen={setIsContextMenuOpen}
+                        />
+                      }
                     />
                   }
                   lenAlwaysShown={10}
@@ -441,7 +447,12 @@ export const AvailableTabView: FunctionComponent<{
                           <TokenTitleView
                             title={title}
                             tooltip={tooltip}
-                            right={<ViewOptionsContextMenu />}
+                            right={
+                              <ViewOptionsContextMenu
+                                isOpen={isContextMenuOpen}
+                                setIsOpen={setIsContextMenuOpen}
+                              />
+                            }
                           />
                         }
                         lenAlwaysShown={lenAlwaysShown}

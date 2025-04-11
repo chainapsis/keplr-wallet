@@ -36,7 +36,6 @@ export interface UIConfigOptions {
   rememberLastFeeOption: boolean;
   lastFeeOption: "low" | "average" | "high" | false;
   show24HChangesInMagePage: boolean;
-  isContextMenuOpen: boolean;
 
   useWebHIDLedger: boolean;
 }
@@ -64,7 +63,6 @@ export class UIConfigStore {
     rememberLastFeeOption: false,
     lastFeeOption: false,
     show24HChangesInMagePage: true,
-    isContextMenuOpen: false,
 
     useWebHIDLedger: false,
   };
@@ -431,15 +429,5 @@ export class UIConfigStore {
   async removeStatesWhenErrorOccurredDuringRending() {
     await this.ibcSwapConfig.removeStatesWhenErrorOccurredDuringRendering();
     await this.newChainSuggestionConfig.removeStatesWhenErrorOccurredDuringRendering();
-  }
-
-  @computed
-  get isContextMenuOpen(): boolean {
-    return this._options.isContextMenuOpen;
-  }
-
-  @action
-  setContextMenuOpen(isOpen: boolean) {
-    this._options.isContextMenuOpen = isOpen;
   }
 }
