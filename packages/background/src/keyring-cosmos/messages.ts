@@ -412,6 +412,59 @@ export class PrivilegeCosmosSignAminoDelegateMsg extends Message<AminoSignRespon
   }
 }
 
+export class PrivilegeCosmosSignAminoExecuteCosmWasmMsg extends Message<AminoSignResponse> {
+  public static type() {
+    return "PrivilegeCosmosSignAminoExecuteCosmWasm";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly signer: string,
+    public readonly signDoc: StdSignDoc
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new KeplrError("keyring", 270, "chain id not set");
+    }
+
+    if (!this.signer) {
+      throw new KeplrError("keyring", 230, "signer not set");
+    }
+
+    // Validate bech32 address.
+    Bech32Address.validate(this.signer);
+
+    // Check and validate the ADR-36 sign doc.
+    // ADR-36 sign doc doesn't have the chain id
+    if (!checkAndValidateADR36AminoSignDoc(this.signDoc)) {
+      if (this.signDoc.chain_id !== this.chainId) {
+        throw new KeplrError(
+          "keyring",
+          234,
+          "Chain id in the message is not matched with the requested chain id"
+        );
+      }
+    } else {
+      throw new Error("Can't use ADR-36 sign doc");
+    }
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return PrivilegeCosmosSignAminoExecuteCosmWasmMsg.type();
+  }
+}
+
 export class RequestCosmosSignAminoADR36Msg extends Message<StdSignature> {
   public static type() {
     return "request-cosmos-sign-amino-adr-36";

@@ -21,6 +21,7 @@ import {
   PrivilegeCosmosSignAminoDelegateMsg,
   RequestCosmosSignDirectAuxMsg,
   GetCosmosKeysForEachVaultWithSearchSettledMsg,
+  PrivilegeCosmosSignAminoExecuteCosmWasmMsg,
 } from "./messages";
 import { KeyRingCosmosService } from "./service";
 import { PermissionInteractiveService } from "../permission-interactive";
@@ -113,6 +114,11 @@ export const getHandler: (
           service,
           permissionInteractionService
         )(env, msg as RequestCosmosSignDirectAuxMsg);
+      case PrivilegeCosmosSignAminoExecuteCosmWasmMsg:
+        return handlePrivilegeCosmosSignAminoExecuteCosmWasmMsg(service)(
+          env,
+          msg as PrivilegeCosmosSignAminoExecuteCosmWasmMsg
+        );
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
     }
@@ -303,6 +309,22 @@ const handlePrivilegeCosmosSignAminoDelegateMsg: (
 ) => InternalHandler<PrivilegeCosmosSignAminoDelegateMsg> = (service) => {
   return async (env, msg) => {
     return await service.privilegeSignAminoDelegate(
+      env,
+      msg.origin,
+      msg.chainId,
+      msg.signer,
+      msg.signDoc
+    );
+  };
+};
+
+const handlePrivilegeCosmosSignAminoExecuteCosmWasmMsg: (
+  service: KeyRingCosmosService
+) => InternalHandler<PrivilegeCosmosSignAminoExecuteCosmWasmMsg> = (
+  service
+) => {
+  return async (env, msg) => {
+    return await service.privilegeSignAminoExecuteCosmWasm(
       env,
       msg.origin,
       msg.chainId,

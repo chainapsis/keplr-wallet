@@ -22,6 +22,7 @@ import { Bech32Address } from "@keplr-wallet/cosmos";
 import {
   CommunityChainInfoRepo,
   EmbedChainInfos,
+  MsgPrivilegedContractMap,
   PrivilegedOrigins,
 } from "../config";
 
@@ -38,6 +39,7 @@ const { initFn, keyRingService, analyticsService } = init(
   PrivilegedOrigins,
   PrivilegedOrigins,
   PrivilegedOrigins,
+  MsgPrivilegedContractMap,
   ["https://testnet.keplr.app", "https://multisig.keplr.app"],
   CommunityChainInfoRepo,
   {

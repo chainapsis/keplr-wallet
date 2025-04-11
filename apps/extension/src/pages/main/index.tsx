@@ -60,6 +60,7 @@ import { NewSidePanelHeaderTop } from "./new-side-panel-header-top";
 import { ModularChainInfo } from "@keplr-wallet/types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { AvailableTabLinkButtonList } from "./components/available-tab-link-button-list";
+import { NEUTRON_CHAIN_ID } from "../../config.ui";
 
 export interface ViewToken {
   token: CoinPretty;
@@ -846,7 +847,17 @@ const RefreshButton: FunctionComponent<{
 
       promises.push(priceStore.waitFreshResponse());
       for (const modularChainInfo of chainStore.modularChainInfosInUI) {
-        if ("cosmos" in modularChainInfo) {
+        const isNeutron = modularChainInfo.chainId === NEUTRON_CHAIN_ID;
+
+        if (isNeutron) {
+          const account = accountStore.getAccount(modularChainInfo.chainId);
+          const queries = queriesStore.get(modularChainInfo.chainId);
+          const queryNeutronRewardInner =
+            queries.cosmwasm.queryNeutronStakingRewards.getRewardFor(
+              account.bech32Address
+            );
+          promises.push(queryNeutronRewardInner.waitFreshResponse());
+        } else if ("cosmos" in modularChainInfo) {
           const chainInfo = chainStore.getChain(modularChainInfo.chainId);
           const account = accountStore.getAccount(chainInfo.chainId);
 
