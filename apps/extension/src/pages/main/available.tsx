@@ -412,6 +412,9 @@ export const AvailableTabView: FunctionComponent<{
                           key={groupKey}
                           tokens={tokens}
                           {...getBottomTagInfoProps(tokens[0], groupKey)}
+                          showPrice24HChange={
+                            uiConfigStore.show24HChangesInMagePage
+                          }
                         />
                       );
                     }

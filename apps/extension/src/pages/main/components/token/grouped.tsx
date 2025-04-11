@@ -19,6 +19,7 @@ import {
   Body2,
 } from "../../../../components/typography";
 import { BottomTagType, TokenItem } from "./index";
+import { PriceChangeTag } from "./price-change-tag";
 import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse/collapse";
 import { ArrowRightIcon } from "../../../../components/icon";
 import { useStore } from "../../../../stores";
@@ -27,6 +28,7 @@ import { WrapperwithBottomTag } from "./wrapper-with-bottom-tag";
 import { useEarnFeature } from "../../../../hooks/use-earn-feature";
 import Color from "color";
 import { IconProps } from "../../../../components/icon/types";
+import { usePriceChange } from "../../../../hooks/use-price-change";
 
 const Styles = {
   Container: styled.div<{
@@ -167,8 +169,16 @@ export const GroupedTokenItem: FunctionComponent<{
   disabled?: boolean;
   bottomTagType?: BottomTagType;
   earnedAssetPrice?: string;
+  showPrice24HChange?: boolean;
 }> = observer(
-  ({ tokens, onClick, disabled, bottomTagType, earnedAssetPrice }) => {
+  ({
+    tokens,
+    onClick,
+    disabled,
+    bottomTagType,
+    earnedAssetPrice,
+    showPrice24HChange,
+  }) => {
     const [isOpen, setIsOpen] = useState(false);
     const theme = useTheme();
     const { uiConfigStore, priceStore } = useStore();
@@ -232,6 +242,11 @@ export const GroupedTokenItem: FunctionComponent<{
         : undefined;
     }, [tokens, earnedAssetPrice]);
 
+    const price24HChange = usePriceChange(
+      showPrice24HChange,
+      mainToken.token.currency.coinGeckoId
+    );
+
     const handleClick = () => {
       if (disabled) return;
       setIsOpen(!isOpen);
@@ -261,6 +276,7 @@ export const GroupedTokenItem: FunctionComponent<{
           disabled={disabled}
           bottomTagType={bottomTagType}
           earnedAssetPrice={earnedAssetPrice}
+          showPrice24HChange={showPrice24HChange}
         />
       );
     }
@@ -294,6 +310,15 @@ export const GroupedTokenItem: FunctionComponent<{
               >
                 {coinDenom}
               </Subtitle2>
+
+              {price24HChange ? (
+                <React.Fragment>
+                  <Gutter size="0.25rem" />
+                  <Box alignY="center" height="1px">
+                    <PriceChangeTag rate={price24HChange} />
+                  </Box>
+                </React.Fragment>
+              ) : null}
             </XAxis>
             <Box
               style={{
