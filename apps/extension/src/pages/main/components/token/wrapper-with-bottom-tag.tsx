@@ -19,10 +19,14 @@ export const WrapperwithBottomTag = observer(function ({
 }>) {
   const theme = useTheme();
   const isLightMode = theme.mode === "light";
-  const { message, handleClick, textColor } = useEarnFeature(
+  const { message, handleClick } = useEarnFeature(
     bottomTagType,
     earnedAssetPrice
   );
+
+  const textColor = isLightMode
+    ? ColorPalette["green-600"]
+    : ColorPalette["green-400"];
 
   if (!bottomTagType) {
     return <Fragment>{children}</Fragment>;

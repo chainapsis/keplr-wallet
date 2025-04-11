@@ -148,10 +148,17 @@ const StandaloneEarnBox: FunctionComponent<{
   bottomTagType?: BottomTagType;
   earnedAssetPrice?: string;
 }> = observer(({ bottomTagType, earnedAssetPrice }) => {
-  const { message, handleClick, textColor } = useEarnFeature(
+  const { message, handleClick } = useEarnFeature(
     bottomTagType,
     earnedAssetPrice
   );
+
+  const theme = useTheme();
+
+  const textColor =
+    theme.mode === "light"
+      ? ColorPalette["green-600"]
+      : ColorPalette["green-400"];
 
   return (
     <StyledEarningsBox onClick={handleClick}>

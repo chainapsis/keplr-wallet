@@ -1,9 +1,7 @@
 import { useIntl } from "react-intl";
 import { useNavigate } from "react-router-dom";
-import { useTheme } from "styled-components";
 import { useGetEarnApy } from "./use-get-apy";
 import { NOBLE_CHAIN_ID } from "../config.ui";
-import { ColorPalette } from "../styles";
 import { BottomTagType } from "../pages/main/components/token/index";
 
 export const useEarnFeature = (
@@ -12,9 +10,7 @@ export const useEarnFeature = (
 ) => {
   const intl = useIntl();
   const navigate = useNavigate();
-  const theme = useTheme();
   const { apy } = useGetEarnApy(NOBLE_CHAIN_ID);
-  const isLightMode = theme.mode === "light";
   const isNudgeEarn = bottomTagType === "nudgeEarn";
 
   const message = isNudgeEarn
@@ -35,14 +31,8 @@ export const useEarnFeature = (
     }
   };
 
-  const textColor = isLightMode
-    ? ColorPalette["green-600"]
-    : ColorPalette["green-400"];
-
   return {
     message,
     handleClick,
-    textColor,
-    isLightMode,
   };
 };
