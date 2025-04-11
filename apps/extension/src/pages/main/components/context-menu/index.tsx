@@ -342,7 +342,6 @@ const CustomTextButton = styled(TextButton)`
 export const ViewOptionsContextMenu: FunctionComponent = observer(() => {
   const { uiConfigStore } = useStore();
   const intl = useIntl();
-  const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneTransitionRef = useRef<any>(null);
   const [renderMenu, setRenderMenu] = useState(false);
@@ -357,7 +356,7 @@ export const ViewOptionsContextMenu: FunctionComponent = observer(() => {
   }, [initialized]);
 
   useEffect(() => {
-    if (isOpen) {
+    if (uiConfigStore.isContextMenuOpen) {
       setRenderMenu(true);
     } else {
       const timer = setTimeout(() => {
@@ -365,20 +364,20 @@ export const ViewOptionsContextMenu: FunctionComponent = observer(() => {
       }, 300);
       return () => clearTimeout(timer);
     }
-  }, [isOpen]);
+  }, [uiConfigStore.isContextMenuOpen]);
 
   useEffect(() => {
-    if (!isOpen && sceneTransitionRef.current) {
+    if (!uiConfigStore.isContextMenuOpen && sceneTransitionRef.current) {
       sceneTransitionRef.current.replaceAll("main-menu");
     }
-  }, [isOpen]);
+  }, [uiConfigStore.isContextMenuOpen]);
 
   const closeMenu = () => {
-    setIsOpen(false);
+    uiConfigStore.setContextMenuOpen(false);
   };
 
   const toggleMenu = () => {
-    setIsOpen(!isOpen);
+    uiConfigStore.setContextMenuOpen(!uiConfigStore.isContextMenuOpen);
   };
 
   const handleAssetViewClick = () => {
@@ -402,16 +401,22 @@ export const ViewOptionsContextMenu: FunctionComponent = observer(() => {
   };
 
   const handleGroupByAssetsClick = () => {
-    uiConfigStore.setAssetViewMode("grouped");
     if (sceneTransitionRef.current) {
       sceneTransitionRef.current.pop();
+
+      setTimeout(() => {
+        uiConfigStore.setAssetViewMode("grouped");
+      }, 300);
     }
   };
 
   const handleFlatViewClick = () => {
-    uiConfigStore.setAssetViewMode("flat");
     if (sceneTransitionRef.current) {
       sceneTransitionRef.current.pop();
+
+      setTimeout(() => {
+        uiConfigStore.setAssetViewMode("flat");
+      }, 300);
     }
   };
 
@@ -453,7 +458,9 @@ export const ViewOptionsContextMenu: FunctionComponent = observer(() => {
 
   return (
     <MenuContainer ref={containerRef}>
-      {(isOpen || renderMenu) && <MenuBackdrop onClick={closeMenu} />}
+      {(uiConfigStore.isContextMenuOpen || renderMenu) && (
+        <MenuBackdrop onClick={closeMenu} />
+      )}
 
       <div
         onMouseEnter={() => setIsHovered(true)}
@@ -484,7 +491,10 @@ export const ViewOptionsContextMenu: FunctionComponent = observer(() => {
       </div>
 
       <MenuWrapper>
-        <VerticalCollapseTransition collapsed={!isOpen} width="100%">
+        <VerticalCollapseTransition
+          collapsed={!uiConfigStore.isContextMenuOpen}
+          width="100%"
+        >
           {menuContent}
         </VerticalCollapseTransition>
       </MenuWrapper>

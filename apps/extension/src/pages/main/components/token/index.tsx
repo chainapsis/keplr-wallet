@@ -62,7 +62,7 @@ const Styles = {
           : ColorPalette.white
         : ColorPalette["gray-650"]};
     padding: ${({ forChange }) =>
-      forChange ? "0.875rem 0.25rem 0.875rem 1rem" : "1rem 0.875rem"};
+      forChange ? "0.875rem 0.25rem 0.875rem 1rem" : "0.875rem 1rem"};
     border-radius: 0.375rem;
     cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
 

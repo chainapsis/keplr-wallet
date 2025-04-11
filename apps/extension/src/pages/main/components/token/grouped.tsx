@@ -39,7 +39,7 @@ const Styles = {
       props.theme.mode === "light"
         ? ColorPalette.white
         : ColorPalette["gray-650"]};
-    padding: 1rem 0.875rem;
+    padding: 0.875rem 1rem;
     border-radius: 0.375rem;
     cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
     box-shadow: ${(props) =>
@@ -326,7 +326,7 @@ export const GroupedTokenItem: FunctionComponent<{
                 flexDirection: "row",
                 alignItems: "center",
                 flexWrap: "wrap",
-                gap: "0.25rem",
+                gap: "0.125rem",
               }}
             >
               <Styles.ChainIconsContainer>
