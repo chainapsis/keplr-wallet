@@ -29,6 +29,10 @@ import { useEarnFeature } from "../../../../hooks/use-earn-feature";
 import Color from "color";
 import { IconProps } from "../../../../components/icon/types";
 import { usePriceChange } from "../../../../hooks/use-price-change";
+import { useTokenTag } from "../../../../hooks/use-token-tag";
+import { TokenTag } from "./token-tag";
+import { CopyAddressButton } from "./copy-address-button";
+import { useCopyAddress } from "../../../../hooks/use-copy-address";
 
 const Styles = {
   Container: styled.div<{
@@ -170,6 +174,133 @@ const StandaloneEarnBox: FunctionComponent<{
   );
 });
 
+const NestedTokenItemContainer = styled.div`
+  background-color: transparent;
+  padding: 0.875rem 1rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  box-shadow: none;
+
+  &:hover {
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-10"]
+        : ColorPalette["gray-650"]};
+  }
+`;
+
+const NestedTokenItem: FunctionComponent<{
+  viewToken: ViewToken;
+  onClick?: () => void;
+  copyAddress?: string;
+}> = observer(({ viewToken, onClick, copyAddress }) => {
+  const { priceStore, uiConfigStore } = useStore();
+  const theme = useTheme();
+  const [isHover, setIsHover] = useState(false);
+
+  const pricePretty = priceStore.calculatePrice(viewToken.token);
+
+  const tag = useTokenTag(viewToken);
+
+  return (
+    <NestedTokenItemContainer
+      onClick={onClick}
+      onMouseEnter={() => setIsHover(true)}
+      onMouseLeave={() => setIsHover(false)}
+    >
+      <Columns sum={1} gutter="0.5rem" alignY="center">
+        <CurrencyImageFallback
+          chainInfo={viewToken.chainInfo}
+          currency={viewToken.token.currency}
+          size="2rem"
+        />
+
+        <Gutter size="0.75rem" />
+
+        <Stack gutter="0.25rem">
+          <XAxis alignY="center">
+            <Subtitle2
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-700"]
+                  : ColorPalette["gray-10"]
+              }
+              style={{
+                wordBreak: "break-all",
+              }}
+            >
+              {copyAddress
+                ? viewToken.chainInfo.chainName
+                : `on ${viewToken.chainInfo.chainName}`}
+            </Subtitle2>
+          </XAxis>
+          <Box
+            style={{
+              flex: 1,
+              flexDirection: "row",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: "0.125rem",
+            }}
+          >
+            <XAxis>
+              {tag ? (
+                <Box alignY="center" key="token-tag">
+                  <TokenTag text={tag.text} tooltip={tag.tooltip} />
+                </Box>
+              ) : null}
+            </XAxis>
+          </Box>
+        </Stack>
+
+        {copyAddress ? (
+          <Box alignY="center" key="copy-address">
+            <XAxis alignY="center">
+              <Gutter size="-0.125rem" />
+              <CopyAddressButton
+                address={copyAddress}
+                parentIsHover={isHover}
+              />
+            </XAxis>
+          </Box>
+        ) : null}
+
+        <Column weight={1} />
+
+        <Columns sum={1} gutter="0.25rem" alignY="center">
+          <Stack gutter="0.25rem" alignX="right">
+            <Subtitle3
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-700"]
+                  : ColorPalette["gray-10"]
+              }
+            >
+              {uiConfigStore.hideStringIfPrivacyMode(
+                viewToken.token
+                  .hideDenom(true)
+                  .maxDecimals(6)
+                  .inequalitySymbol(true)
+                  .shrink(true)
+                  .toString(),
+                2
+              )}
+            </Subtitle3>
+            <Subtitle3 color={ColorPalette["gray-300"]}>
+              {uiConfigStore.hideStringIfPrivacyMode(
+                pricePretty
+                  ? pricePretty.inequalitySymbol(true).toString()
+                  : "-",
+                2
+              )}
+            </Subtitle3>
+          </Stack>
+        </Columns>
+      </Columns>
+    </NestedTokenItemContainer>
+  );
+});
+
 export const GroupedTokenItem: FunctionComponent<{
   tokens: ViewToken[];
   onClick?: () => void;
@@ -196,7 +327,6 @@ export const GroupedTokenItem: FunctionComponent<{
     const totalBalance = useMemo(() => {
       let sum = tokens[0].token.clone();
       for (let i = 1; i < tokens.length; i++) {
-        console.log(tokens[i].token.denom);
         sum = sum.addDifferentDenoms(tokens[i].token);
       }
       return sum;
@@ -437,18 +567,13 @@ export const GroupedTokenItem: FunctionComponent<{
 
         <VerticalCollapseTransition collapsed={!isOpen}>
           <Styles.ChildrenContainer>
-            {tokens.map((token, index) => (
-              <Box
-                key={token.chainInfo.chainId}
-                marginTop={index > 0 ? "0.375rem" : "0.75rem"}
-              >
-                <Styles.TransparentTokenItem>
-                  <TokenItem
-                    viewToken={{ ...token, isFetching: false }}
-                    disableHoverStyle
-                    onClick={() => openTokenDetail(token)}
-                  />
-                </Styles.TransparentTokenItem>
+            {tokens.map((token) => (
+              <Box key={token.chainInfo.chainId} marginTop={"0.375rem"}>
+                <NestedTokenItem
+                  viewToken={{ ...token }}
+                  onClick={() => openTokenDetail(token)}
+                  copyAddress={useCopyAddress({ ...token })}
+                />
               </Box>
             ))}
 

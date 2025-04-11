@@ -24,7 +24,6 @@ import { XAxis, YAxis } from "../../components/axis";
 import { ColorPalette } from "../../styles";
 import { FormattedMessage, useIntl } from "react-intl";
 import styled, { css, useTheme } from "styled-components";
-import { DenomHelper } from "@keplr-wallet/common";
 import { TokenDetailModal } from "./token-detail";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
@@ -32,6 +31,7 @@ import { useGetSearchChains } from "../../hooks/use-get-search-chains";
 import { useEarnBottomTag } from "../earn/components/use-earn-bottom-tag";
 import { AdjustmentIcon } from "../../components/icon/adjustment";
 import { ViewOptionsContextMenu } from "./components/context-menu";
+import { useCopyAddress } from "../../hooks/use-copy-address";
 
 const zeroDec = new Dec(0);
 
@@ -104,8 +104,7 @@ export const AvailableTabView: FunctionComponent<{
   onMoreTokensClosed: () => void;
 }> = observer(
   ({ search, isNotReady, onClickGetStarted, onMoreTokensClosed }) => {
-    const { hugeQueriesStore, chainStore, accountStore, uiConfigStore } =
-      useStore();
+    const { hugeQueriesStore, chainStore, uiConfigStore } = useStore();
     const intl = useIntl();
     const theme = useTheme();
     const navigate = useNavigate();
@@ -478,38 +477,7 @@ export const AvailableTabView: FunctionComponent<{
                                   return prev;
                                 });
                               }}
-                              copyAddress={(() => {
-                                if (
-                                  new DenomHelper(
-                                    viewToken.token.currency.coinMinimalDenom
-                                  ).type !== "native" ||
-                                  viewToken.token.currency.coinMinimalDenom.startsWith(
-                                    "ibc/"
-                                  )
-                                ) {
-                                  return undefined;
-                                }
-
-                                const account = accountStore.getAccount(
-                                  viewToken.chainInfo.chainId
-                                );
-                                if ("bitcoin" in viewToken.chainInfo) {
-                                  return account.bitcoinAddress?.bech32Address;
-                                }
-
-                                if ("starknet" in viewToken.chainInfo) {
-                                  return account.starknetHexAddress;
-                                }
-
-                                const isEVMOnlyChain =
-                                  chainStore.isEvmOnlyChain(
-                                    viewToken.chainInfo.chainId
-                                  );
-
-                                return isEVMOnlyChain
-                                  ? account.ethereumHexAddress
-                                  : account.bech32Address;
-                              })()}
+                              copyAddress={useCopyAddress(viewToken)}
                               showPrice24HChange={
                                 uiConfigStore.show24HChangesInMagePage
                               }
