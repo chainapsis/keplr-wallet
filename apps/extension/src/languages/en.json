@@ -643,6 +643,8 @@
   "page.main.components.claim-all.button": "Claim All",
   "page.main.components.claim-all.claim-button": "Claim",
   "page.main.components.context-menu.title": "View Options",
+  "page.main.components.context-menu.tooltip-title": "New",
+  "page.main.components.context-menu.tooltip-paragraph": "Try switching between grouped and individual asset views!",
   "page.main.components.context-menu.asset-view": "Asset View",
   "page.main.components.context-menu.group-by-assets": "Group by Assets",
   "page.main.components.context-menu.hide-low-balance": "Hide Low Balances",

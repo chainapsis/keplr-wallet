@@ -12,7 +12,7 @@ import { Box } from "../../../../components/box";
 import { TextButton } from "../../../../components/button-text";
 import { XAxis, YAxis } from "../../../../components/axis";
 import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse/collapse";
-import { Body3 } from "../../../../components/typography";
+import { Body2, Body3 } from "../../../../components/typography";
 import { SceneTransition } from "../../../../components/transition/scene/scene";
 import { ColorPalette } from "../../../../styles";
 import { useIntl } from "react-intl";
@@ -20,10 +20,13 @@ import { Toggle } from "../../../../components/toggle/toggle";
 import {
   ArrowLeftIcon,
   CheckIcon,
+  CloseIcon,
   RightArrowIcon,
 } from "../../../../components/icon";
 import { IconProps } from "../../../../components/icon/types";
 import { useGlobarSimpleBar } from "../../../../hooks/global-simplebar";
+import { Tooltip } from "../../../../components/tooltip";
+import { Gutter } from "../../../../components/gutter";
 
 const Styles = {
   MenuContainer: styled.div`
@@ -399,6 +402,7 @@ export const ViewOptionsContextMenu: FunctionComponent<{
   };
 
   const toggleMenu = () => {
+    handleCloseTooltip();
     setIsOpen(!isOpen);
   };
 
@@ -442,6 +446,10 @@ export const ViewOptionsContextMenu: FunctionComponent<{
     }
   };
 
+  const handleCloseTooltip = () => {
+    uiConfigStore.turnOffSwitchAssetViewModeSuggestion();
+  };
+
   const menuContent = (
     <Styles.ContextMenuContent ref={menuContentRef}>
       <SceneTransition
@@ -482,33 +490,110 @@ export const ViewOptionsContextMenu: FunctionComponent<{
     <Styles.MenuContainer ref={containerRef}>
       {(isOpen || renderMenu) && <Styles.MenuBackdrop onClick={closeMenu} />}
 
-      <div
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        <CustomTextButton
-          text={intl.formatMessage({
-            id: "page.main.components.context-menu.title",
-          })}
-          size="small"
-          right={
-            <Styles.MenuItemXAxis alignY="center">
-              <ViewOptionsIcon
-                width="1rem"
-                height="1rem"
+      <Tooltip
+        content={
+          <Box width="17rem" padding="0.125rem 0.375rem">
+            <YAxis>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <XAxis gap="0.25rem" alignY="center">
+                  <FireIcon color={ColorPalette["blue-400"]} />
+                  <Body3
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-500"]
+                        : ColorPalette["white"]
+                    }
+                  >
+                    {intl.formatMessage({
+                      id: "page.main.components.context-menu.tooltip-title",
+                    })}
+                  </Body3>
+                </XAxis>
+                <Box
+                  onClick={handleCloseTooltip}
+                  cursor="pointer"
+                  alignX="right"
+                >
+                  <CloseIcon
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-200"]
+                        : ColorPalette["gray-300"]
+                    }
+                    width="1.25rem"
+                    height="1.25rem"
+                  />
+                </Box>
+              </div>
+              <Gutter size="0.4375rem" />
+              <Body2
                 color={
-                  isHovered
-                    ? theme.mode === "light"
-                      ? ColorPalette["gray-500"]
-                      : ColorPalette["gray-200"]
-                    : ColorPalette["gray-300"]
+                  theme.mode === "light"
+                    ? ColorPalette["gray-300"]
+                    : ColorPalette["gray-200"]
                 }
-              />
-            </Styles.MenuItemXAxis>
-          }
-          onClick={toggleMenu}
-        />
-      </div>
+                style={{ lineHeight: "140%" }}
+              >
+                {intl.formatMessage({
+                  id: "page.main.components.context-menu.tooltip-paragraph",
+                })}
+              </Body2>
+            </YAxis>
+          </Box>
+        }
+        backgroundColor={
+          theme.mode === "light"
+            ? ColorPalette["white"]
+            : ColorPalette["gray-600"]
+        }
+        borderColor={
+          theme.mode === "light"
+            ? ColorPalette["gray-50"]
+            : ColorPalette["gray-500"]
+        }
+        filter={
+          theme.mode === "light"
+            ? "drop-shadow(0px 20px 60px rgba(43, 39, 55, 0.08))"
+            : undefined
+        }
+        enabled={uiConfigStore.switchAssetViewModeSuggestion}
+        isAlwaysOpen={uiConfigStore.switchAssetViewModeSuggestion}
+      >
+        <div
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          <CustomTextButton
+            text={intl.formatMessage({
+              id: "page.main.components.context-menu.title",
+            })}
+            size="small"
+            right={
+              <Styles.MenuItemXAxis alignY="center">
+                <ViewOptionsIcon
+                  width="1rem"
+                  height="1rem"
+                  color={
+                    isHovered
+                      ? theme.mode === "light"
+                        ? ColorPalette["gray-500"]
+                        : ColorPalette["gray-200"]
+                      : ColorPalette["gray-300"]
+                  }
+                />
+              </Styles.MenuItemXAxis>
+            }
+            onClick={toggleMenu}
+          />
+        </div>
+      </Tooltip>
 
       <Styles.MenuWrapper>
         <VerticalCollapseTransition collapsed={!isOpen} width="100%">
@@ -704,6 +789,35 @@ const FlatIcon: FunctionComponent<IconProps> = ({ color }) => {
           fillRule="evenodd"
           clipRule="evenodd"
           d="M0.325195 8.17494C0.325195 7.24986 1.07512 6.49994 2.0002 6.49994H10.0002C10.9253 6.49994 11.6752 7.24986 11.6752 8.17494V10.0001C11.6752 10.9252 10.9253 11.6751 10.0002 11.6751H2.0002C1.07512 11.6751 0.325195 10.9252 0.325195 10.0001V8.17494ZM2.0002 7.84994C1.8207 7.84994 1.6752 7.99545 1.6752 8.17494V10.0001C1.6752 10.1796 1.8207 10.3251 2.0002 10.3251H10.0002C10.1797 10.3251 10.3252 10.1796 10.3252 10.0001V8.17494C10.3252 7.99545 10.1797 7.84994 10.0002 7.84994H2.0002Z"
+          fill={color}
+        />
+      </svg>
+    </div>
+  );
+};
+
+const FireIcon: FunctionComponent<IconProps> = ({ color }) => {
+  return (
+    <div
+      style={{
+        width: "1rem",
+        height: "1rem",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+        fill="none"
+      >
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M10.7999 3.95005C13.4783 5.49645 14.396 8.92136 12.8496 11.5998C11.3032 14.2782 7.8783 15.1959 5.19986 13.6495C2.52142 12.1031 1.60372 8.67823 3.15012 5.99979C3.28484 5.76646 3.43381 5.54648 3.59531 5.34033C3.7566 5.13445 4.0678 5.16558 4.22981 5.3709C4.45199 5.65247 4.70505 5.90857 4.98387 6.13406C5.24998 6.34928 5.61327 6.0955 5.60253 5.75342C5.60093 5.70245 5.60012 5.65128 5.60012 5.59993C5.60012 4.86509 5.76524 4.16883 6.06041 3.54621C6.48693 2.64652 7.18499 1.90062 8.04873 1.41434C8.24632 1.3031 8.4891 1.40171 8.5903 1.60463C9.06387 2.55411 9.81214 3.37979 10.7999 3.95005ZM11.2001 9.59995C11.2001 11.3673 9.76743 12.8 8.00012 12.8C6.46949 12.8 5.18338 11.6812 4.87223 10.2546C4.79738 9.91143 5.22383 9.73988 5.52326 9.92352C5.91209 10.162 6.34994 10.3171 6.8044 10.3747C7.0465 10.4054 7.22897 10.1831 7.21195 9.93966C7.2041 9.82744 7.20012 9.71416 7.20012 9.59995C7.20012 8.45843 7.59859 7.40998 8.26403 6.58611C8.34708 6.48328 8.47927 6.43281 8.60905 6.45782C10.0851 6.74219 11.2001 8.04086 11.2001 9.59995Z"
           fill={color}
         />
       </svg>

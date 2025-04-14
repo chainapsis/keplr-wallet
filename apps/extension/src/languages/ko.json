@@ -620,6 +620,8 @@
   "page.main.components.claim-all.button": "한번에 받기",
   "page.main.components.claim-all.claim-button": "받기",
   "page.main.components.context-menu.title": "자산 보기 설정",
+  "page.main.components.context-menu.tooltip-title": "신규",
+  "page.main.components.context-menu.tooltip-paragraph": "이제 같은 자산은 묶어서 볼 수 있어요!",
   "page.main.components.context-menu.asset-view": "뷰 모드",
   "page.main.components.context-menu.group-by-assets": "같은 자산 묶기",
   "page.main.components.context-menu.hide-low-balance": "소액 숨기기",

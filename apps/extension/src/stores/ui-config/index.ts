@@ -32,6 +32,7 @@ export interface UIConfigOptions {
   assetViewMode: "grouped" | "flat";
   hideLowBalance: boolean;
   showFiatValue: boolean;
+  switchAssetViewModeSuggestion: boolean;
   isPrivacyMode: boolean;
   rememberLastFeeOption: boolean;
   lastFeeOption: "low" | "average" | "high" | false;
@@ -63,6 +64,7 @@ export class UIConfigStore {
     rememberLastFeeOption: false,
     lastFeeOption: false,
     show24HChangesInMagePage: true,
+    switchAssetViewModeSuggestion: true,
 
     useWebHIDLedger: false,
   };
@@ -298,6 +300,15 @@ export class UIConfigStore {
   @action
   toggleHideLowBalance() {
     this.options.hideLowBalance = !this.options.hideLowBalance;
+  }
+
+  get switchAssetViewModeSuggestion(): boolean {
+    return this.options.switchAssetViewModeSuggestion;
+  }
+
+  @action
+  turnOffSwitchAssetViewModeSuggestion() {
+    this.options.switchAssetViewModeSuggestion = false;
   }
 
   get useWebHIDLedger(): boolean {
