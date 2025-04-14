@@ -297,7 +297,12 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
           }
         }}
       >
-        <Columns sum={1} gutter="0.5rem" alignY="center">
+        <Columns
+          sum={1}
+          gutter="0.5rem"
+          alignY="center"
+          style={{ height: "2.4375rem" }}
+        >
           <Skeleton type="circle" layer={1} isNotReady={isNotReady}>
             <CurrencyImageFallback
               chainInfo={viewToken.chainInfo}

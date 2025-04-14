@@ -107,10 +107,16 @@ interface MainMenuSceneProps {
   onToggleHideLowBalance: () => void;
   onToggleShowFiatValue: () => void;
   onAssetViewClick: () => void;
+  showFiatValueVisible: boolean;
 }
 
 const MainMenuScene: React.FC<MainMenuSceneProps> = observer(
-  ({ onToggleHideLowBalance, onToggleShowFiatValue, onAssetViewClick }) => {
+  ({
+    onToggleHideLowBalance,
+    onToggleShowFiatValue,
+    onAssetViewClick,
+    showFiatValueVisible,
+  }) => {
     const { uiConfigStore } = useStore();
     const { hideLowBalance, showFiatValue } = uiConfigStore.options;
     const theme = useTheme();
@@ -189,34 +195,36 @@ const MainMenuScene: React.FC<MainMenuSceneProps> = observer(
             />
           </div>
         </Styles.MenuItem>
-        <Styles.MenuItem
-          onClick={(e) => handleToggleClick(e, onToggleShowFiatValue)}
-        >
-          <Styles.MenuItemXAxis alignY="center" gap="0.5rem">
-            <ShowFiatValueIcon
-              color={
-                theme.mode === "light"
-                  ? ColorPalette["gray-700"]
-                  : ColorPalette["white"]
-              }
-            />
-            <Body3 color={textColorByCondition(showFiatValue)}>
-              {intl.formatMessage({
-                id: "page.main.components.context-menu.show-fiat-value",
-              })}
-            </Body3>
-          </Styles.MenuItemXAxis>
-          <div
-            className="toggle-component"
-            onClick={(e) => e.stopPropagation()}
+        {showFiatValueVisible && (
+          <Styles.MenuItem
+            onClick={(e) => handleToggleClick(e, onToggleShowFiatValue)}
           >
-            <Toggle
-              isOpen={showFiatValue}
-              setIsOpen={onToggleShowFiatValue}
-              size="extra-small"
-            />
-          </div>
-        </Styles.MenuItem>
+            <Styles.MenuItemXAxis alignY="center" gap="0.5rem">
+              <ShowFiatValueIcon
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-700"]
+                    : ColorPalette["white"]
+                }
+              />
+              <Body3 color={textColorByCondition(showFiatValue)}>
+                {intl.formatMessage({
+                  id: "page.main.components.context-menu.show-fiat-value",
+                })}
+              </Body3>
+            </Styles.MenuItemXAxis>
+            <div
+              className="toggle-component"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Toggle
+                isOpen={showFiatValue}
+                setIsOpen={onToggleShowFiatValue}
+                size="extra-small"
+              />
+            </div>
+          </Styles.MenuItem>
+        )}
       </YAxis>
     );
   }
@@ -347,262 +355,271 @@ const CustomTextButton = styled(TextButton)`
 export const ViewOptionsContextMenu: FunctionComponent<{
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-}> = observer(({ isOpen, setIsOpen }) => {
-  const { uiConfigStore } = useStore();
-  const intl = useIntl();
-  const containerRef = useRef<HTMLDivElement>(null);
-  const menuContentRef = useRef<HTMLDivElement>(null);
-  const sceneTransitionRef = useRef<any>(null);
-  const [renderMenu, setRenderMenu] = useState(false);
-  const [initialized, setInitialized] = useState(false);
-  const theme = useTheme();
-  const [isHovered, setIsHovered] = useState(false);
-  const globalSimpleBar = useGlobarSimpleBar();
+  showFiatValueVisible: boolean;
+  setShowFiatValueVisible: (showFiatValueVisible: boolean) => void;
+}> = observer(
+  ({ isOpen, setIsOpen, showFiatValueVisible, setShowFiatValueVisible }) => {
+    const { uiConfigStore } = useStore();
+    const intl = useIntl();
+    const containerRef = useRef<HTMLDivElement>(null);
+    const menuContentRef = useRef<HTMLDivElement>(null);
+    const sceneTransitionRef = useRef<any>(null);
+    const [renderMenu, setRenderMenu] = useState(false);
+    const [initialized, setInitialized] = useState(false);
+    const theme = useTheme();
+    const [isHovered, setIsHovered] = useState(false);
+    const globalSimpleBar = useGlobarSimpleBar();
 
-  useLayoutEffect(() => {
-    if (!initialized) {
-      setInitialized(true);
-    }
-  }, [initialized]);
-
-  useEffect(() => {
-    if (isOpen) {
-      setRenderMenu(true);
-
-      const scrollElement = globalSimpleBar.ref.current?.getScrollElement();
-      if (scrollElement) {
-        const currentScrollTop = scrollElement.scrollTop;
-        const targetScrollTop =
-          (menuContentRef.current?.offsetHeight || 0) + 60;
-
-        if (currentScrollTop < targetScrollTop) {
-          scrollElement.scrollTo({
-            top: targetScrollTop,
-            left: 0,
-            behavior: "smooth",
-          });
-        }
+    useLayoutEffect(() => {
+      if (!initialized) {
+        setInitialized(true);
       }
-    } else {
-      const timer = setTimeout(() => {
-        setRenderMenu(false);
-      }, 300);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen]);
+    }, [initialized]);
 
-  useEffect(() => {
-    if (!isOpen && sceneTransitionRef.current) {
-      sceneTransitionRef.current.replaceAll("main-menu");
-    }
-  }, [isOpen]);
+    useEffect(() => {
+      if (isOpen) {
+        setRenderMenu(true);
 
-  const closeMenu = () => {
-    setIsOpen(false);
-  };
+        const scrollElement = globalSimpleBar.ref.current?.getScrollElement();
+        if (scrollElement) {
+          const currentScrollTop = scrollElement.scrollTop;
+          const targetScrollTop =
+            (menuContentRef.current?.offsetHeight || 0) + 60;
 
-  const toggleMenu = () => {
-    handleCloseTooltip();
-    setIsOpen(!isOpen);
-  };
+          if (currentScrollTop < targetScrollTop) {
+            scrollElement.scrollTo({
+              top: targetScrollTop,
+              left: 0,
+              behavior: "smooth",
+            });
+          }
+        }
+      } else {
+        const timer = setTimeout(() => {
+          setRenderMenu(false);
+        }, 300);
+        return () => clearTimeout(timer);
+      }
+    }, [isOpen]);
 
-  const handleAssetViewClick = () => {
-    if (sceneTransitionRef.current) {
-      sceneTransitionRef.current.push("asset-view-menu");
-    }
-  };
+    useEffect(() => {
+      if (!isOpen && sceneTransitionRef.current) {
+        setTimeout(() => {
+          sceneTransitionRef.current.replaceAll("main-menu");
+        }, 300);
+      }
+    }, [isOpen]);
 
-  const handleBackClick = () => {
-    if (sceneTransitionRef.current) {
-      sceneTransitionRef.current.pop();
-    }
-  };
+    const closeMenu = () => {
+      setIsOpen(false);
+    };
 
-  const handleToggleHideLowBalance = () => {
-    uiConfigStore.toggleHideLowBalance();
-  };
+    const toggleMenu = () => {
+      handleCloseTooltip();
+      setIsOpen(!isOpen);
+    };
 
-  const handleToggleShowFiatValue = () => {
-    uiConfigStore.toggleShowFiatValue();
-  };
+    const handleAssetViewClick = () => {
+      if (sceneTransitionRef.current) {
+        sceneTransitionRef.current.push("asset-view-menu");
+      }
+    };
 
-  const handleGroupByAssetsClick = () => {
-    if (sceneTransitionRef.current) {
-      sceneTransitionRef.current.pop();
+    const handleBackClick = () => {
+      if (sceneTransitionRef.current) {
+        sceneTransitionRef.current.pop();
+      }
+    };
 
-      setTimeout(() => {
-        uiConfigStore.setAssetViewMode("grouped");
-      }, 300);
-    }
-  };
+    const handleToggleHideLowBalance = () => {
+      uiConfigStore.toggleHideLowBalance();
+    };
 
-  const handleFlatViewClick = () => {
-    if (sceneTransitionRef.current) {
-      sceneTransitionRef.current.pop();
+    const handleToggleShowFiatValue = () => {
+      uiConfigStore.toggleShowFiatValue();
+    };
 
-      setTimeout(() => {
-        uiConfigStore.setAssetViewMode("flat");
-      }, 300);
-    }
-  };
+    const handleGroupByAssetsClick = () => {
+      setShowFiatValueVisible(true);
+      if (sceneTransitionRef.current) {
+        sceneTransitionRef.current.pop();
 
-  const handleCloseTooltip = () => {
-    uiConfigStore.turnOffSwitchAssetViewModeSuggestion();
-  };
+        setTimeout(() => {
+          uiConfigStore.setAssetViewMode("grouped");
+        }, 300);
+      }
+    };
 
-  const menuContent = (
-    <Styles.ContextMenuContent ref={menuContentRef}>
-      <SceneTransition
-        ref={sceneTransitionRef}
-        scenes={[
-          {
+    const handleFlatViewClick = () => {
+      setShowFiatValueVisible(false);
+      if (sceneTransitionRef.current) {
+        sceneTransitionRef.current.pop();
+
+        setTimeout(() => {
+          uiConfigStore.setAssetViewMode("flat");
+        }, 300);
+      }
+    };
+
+    const handleCloseTooltip = () => {
+      uiConfigStore.turnOffSwitchAssetViewModeSuggestion();
+    };
+
+    const menuContent = (
+      <Styles.ContextMenuContent ref={menuContentRef}>
+        <SceneTransition
+          ref={sceneTransitionRef}
+          scenes={[
+            {
+              name: "main-menu",
+              element: () => (
+                <MainMenuScene
+                  onAssetViewClick={handleAssetViewClick}
+                  hideLowBalance={uiConfigStore.options.hideLowBalance}
+                  showFiatValue={uiConfigStore.options.showFiatValue}
+                  onToggleHideLowBalance={handleToggleHideLowBalance}
+                  onToggleShowFiatValue={handleToggleShowFiatValue}
+                  showFiatValueVisible={showFiatValueVisible}
+                />
+              ),
+            },
+            {
+              name: "asset-view-menu",
+              element: () => (
+                <AssetViewScene
+                  onBackClick={handleBackClick}
+                  onGroupByAssetsClick={handleGroupByAssetsClick}
+                  onFlatViewClick={handleFlatViewClick}
+                  assetViewMode={uiConfigStore.options.assetViewMode}
+                />
+              ),
+            },
+          ]}
+          initialSceneProps={{
             name: "main-menu",
-            element: () => (
-              <MainMenuScene
-                onAssetViewClick={handleAssetViewClick}
-                hideLowBalance={uiConfigStore.options.hideLowBalance}
-                showFiatValue={uiConfigStore.options.showFiatValue}
-                onToggleHideLowBalance={handleToggleHideLowBalance}
-                onToggleShowFiatValue={handleToggleShowFiatValue}
-              />
-            ),
-          },
-          {
-            name: "asset-view-menu",
-            element: () => (
-              <AssetViewScene
-                onBackClick={handleBackClick}
-                onGroupByAssetsClick={handleGroupByAssetsClick}
-                onFlatViewClick={handleFlatViewClick}
-                assetViewMode={uiConfigStore.options.assetViewMode}
-              />
-            ),
-          },
-        ]}
-        initialSceneProps={{
-          name: "main-menu",
-        }}
-      />
-    </Styles.ContextMenuContent>
-  );
+          }}
+        />
+      </Styles.ContextMenuContent>
+    );
 
-  return (
-    <Styles.MenuContainer ref={containerRef}>
-      {(isOpen || renderMenu) && <Styles.MenuBackdrop onClick={closeMenu} />}
+    return (
+      <Styles.MenuContainer ref={containerRef}>
+        {(isOpen || renderMenu) && <Styles.MenuBackdrop onClick={closeMenu} />}
 
-      <Tooltip
-        content={
-          <Box width="17rem" padding="0.125rem 0.375rem">
-            <YAxis>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <XAxis gap="0.25rem" alignY="center">
-                  <FireIcon color={ColorPalette["blue-400"]} />
-                  <Body3
-                    color={
-                      theme.mode === "light"
-                        ? ColorPalette["gray-500"]
-                        : ColorPalette["white"]
-                    }
-                  >
-                    {intl.formatMessage({
-                      id: "page.main.components.context-menu.tooltip-title",
-                    })}
-                  </Body3>
-                </XAxis>
-                <Box
-                  onClick={handleCloseTooltip}
-                  cursor="pointer"
-                  alignX="right"
+        <Tooltip
+          content={
+            <Box width="17rem" padding="0.125rem 0.375rem">
+              <YAxis>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
                 >
-                  <CloseIcon
+                  <XAxis gap="0.25rem" alignY="center">
+                    <FireIcon color={ColorPalette["blue-400"]} />
+                    <Body3
+                      color={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-500"]
+                          : ColorPalette["white"]
+                      }
+                    >
+                      {intl.formatMessage({
+                        id: "page.main.components.context-menu.tooltip-title",
+                      })}
+                    </Body3>
+                  </XAxis>
+                  <Box
+                    onClick={handleCloseTooltip}
+                    cursor="pointer"
+                    alignX="right"
+                  >
+                    <CloseIcon
+                      color={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-200"]
+                          : ColorPalette["gray-300"]
+                      }
+                      width="1.25rem"
+                      height="1.25rem"
+                    />
+                  </Box>
+                </div>
+                <Gutter size="0.4375rem" />
+                <Body2
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-300"]
+                      : ColorPalette["gray-200"]
+                  }
+                  style={{ lineHeight: "140%" }}
+                >
+                  {intl.formatMessage({
+                    id: "page.main.components.context-menu.tooltip-paragraph",
+                  })}
+                </Body2>
+              </YAxis>
+            </Box>
+          }
+          backgroundColor={
+            theme.mode === "light"
+              ? ColorPalette["white"]
+              : ColorPalette["gray-600"]
+          }
+          borderColor={
+            theme.mode === "light"
+              ? ColorPalette["gray-50"]
+              : ColorPalette["gray-500"]
+          }
+          filter={
+            theme.mode === "light"
+              ? "drop-shadow(0px 20px 60px rgba(43, 39, 55, 0.08))"
+              : undefined
+          }
+          enabled={uiConfigStore.switchAssetViewModeSuggestion}
+          isAlwaysOpen={uiConfigStore.switchAssetViewModeSuggestion}
+        >
+          <div
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
+            <CustomTextButton
+              text={intl.formatMessage({
+                id: "page.main.components.context-menu.title",
+              })}
+              size="small"
+              right={
+                <Styles.MenuItemXAxis alignY="center">
+                  <ViewOptionsIcon
+                    width="1rem"
+                    height="1rem"
                     color={
-                      theme.mode === "light"
-                        ? ColorPalette["gray-200"]
+                      isHovered
+                        ? theme.mode === "light"
+                          ? ColorPalette["gray-500"]
+                          : ColorPalette["gray-200"]
                         : ColorPalette["gray-300"]
                     }
-                    width="1.25rem"
-                    height="1.25rem"
                   />
-                </Box>
-              </div>
-              <Gutter size="0.4375rem" />
-              <Body2
-                color={
-                  theme.mode === "light"
-                    ? ColorPalette["gray-300"]
-                    : ColorPalette["gray-200"]
-                }
-                style={{ lineHeight: "140%" }}
-              >
-                {intl.formatMessage({
-                  id: "page.main.components.context-menu.tooltip-paragraph",
-                })}
-              </Body2>
-            </YAxis>
-          </Box>
-        }
-        backgroundColor={
-          theme.mode === "light"
-            ? ColorPalette["white"]
-            : ColorPalette["gray-600"]
-        }
-        borderColor={
-          theme.mode === "light"
-            ? ColorPalette["gray-50"]
-            : ColorPalette["gray-500"]
-        }
-        filter={
-          theme.mode === "light"
-            ? "drop-shadow(0px 20px 60px rgba(43, 39, 55, 0.08))"
-            : undefined
-        }
-        enabled={uiConfigStore.switchAssetViewModeSuggestion}
-        isAlwaysOpen={uiConfigStore.switchAssetViewModeSuggestion}
-      >
-        <div
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-        >
-          <CustomTextButton
-            text={intl.formatMessage({
-              id: "page.main.components.context-menu.title",
-            })}
-            size="small"
-            right={
-              <Styles.MenuItemXAxis alignY="center">
-                <ViewOptionsIcon
-                  width="1rem"
-                  height="1rem"
-                  color={
-                    isHovered
-                      ? theme.mode === "light"
-                        ? ColorPalette["gray-500"]
-                        : ColorPalette["gray-200"]
-                      : ColorPalette["gray-300"]
-                  }
-                />
-              </Styles.MenuItemXAxis>
-            }
-            onClick={toggleMenu}
-          />
-        </div>
-      </Tooltip>
+                </Styles.MenuItemXAxis>
+              }
+              onClick={toggleMenu}
+            />
+          </div>
+        </Tooltip>
 
-      <Styles.MenuWrapper>
-        <VerticalCollapseTransition collapsed={!isOpen} width="100%">
-          {menuContent}
-        </VerticalCollapseTransition>
-      </Styles.MenuWrapper>
-    </Styles.MenuContainer>
-  );
-});
+        <Styles.MenuWrapper>
+          <VerticalCollapseTransition collapsed={!isOpen} width="100%">
+            {menuContent}
+          </VerticalCollapseTransition>
+        </Styles.MenuWrapper>
+      </Styles.MenuContainer>
+    );
+  }
+);
 
 const ViewOptionsIcon: FunctionComponent<IconProps> = ({ color }) => {
   return (

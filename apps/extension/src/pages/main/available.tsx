@@ -109,6 +109,7 @@ export const AvailableTabView: FunctionComponent<{
     const theme = useTheme();
     const navigate = useNavigate();
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
+    const [showFiatValueVisible, setShowFiatValueVisible] = useState(false);
 
     const { trimSearch, searchedChainInfos } = useGetSearchChains({
       search,
@@ -405,6 +406,8 @@ export const AvailableTabView: FunctionComponent<{
                         <ViewOptionsContextMenu
                           isOpen={isContextMenuOpen}
                           setIsOpen={setIsContextMenuOpen}
+                          showFiatValueVisible={showFiatValueVisible}
+                          setShowFiatValueVisible={setShowFiatValueVisible}
                         />
                       }
                     />
@@ -450,6 +453,10 @@ export const AvailableTabView: FunctionComponent<{
                               <ViewOptionsContextMenu
                                 isOpen={isContextMenuOpen}
                                 setIsOpen={setIsContextMenuOpen}
+                                showFiatValueVisible={showFiatValueVisible}
+                                setShowFiatValueVisible={
+                                  setShowFiatValueVisible
+                                }
                               />
                             }
                           />

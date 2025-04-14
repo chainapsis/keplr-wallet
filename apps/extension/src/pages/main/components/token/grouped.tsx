@@ -126,6 +126,28 @@ const Styles = {
       }
     }
   `,
+  PlusChainBadge: styled(Caption1)`
+    display: flex;
+    height: 1rem;
+    padding: 0rem 0.375rem 0rem 0.25rem;
+    justify-content: center;
+    align-items: center;
+    color: ${ColorPalette["gray-100"]};
+    margin-left: -0.25rem;
+    margin-top: -0.09375rem;
+    margin-bottom: -0.09375rem;
+    background-color: ${ColorPalette["gray-450"]};
+    border-radius: 1.25rem;
+    border: 0.09375rem solid
+      ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-10"]
+          : ColorPalette["gray-650"]};
+    z-index: 999;
+    font-size: 0.6875rem;
+    font-style: normal;
+    font-weight: 400;
+  `,
 };
 
 const StyledEarningsBox = styled.div`
@@ -495,32 +517,9 @@ export const GroupedTokenItem: FunctionComponent<{
                   );
                 })}
                 {uniqueChainIds.length > 3 && (
-                  <Caption1
-                    style={{
-                      display: "flex",
-                      height: "1rem",
-                      padding: "0rem 0.375rem 0rem 0.25rem",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      color: ColorPalette["gray-100"],
-                      marginLeft: "-0.25rem",
-                      marginTop: "-0.09375rem",
-                      marginBottom: "-0.09375rem",
-                      backgroundColor: ColorPalette["gray-450"],
-                      borderRadius: "1.25rem",
-                      border: `0.09375rem solid ${
-                        theme.mode === "light"
-                          ? ColorPalette["gray-10"]
-                          : ColorPalette["gray-650"]
-                      }`,
-                      zIndex: 999,
-                      fontSize: "0.6875rem",
-                      fontStyle: "normal",
-                      fontWeight: 400,
-                    }}
-                  >
+                  <Styles.PlusChainBadge>
                     +{uniqueChainIds.length - 3}
-                  </Caption1>
+                  </Styles.PlusChainBadge>
                 )}
               </Styles.ChainIconsContainer>
               <Styles.ExpandIcon isOpen={isOpen}>
