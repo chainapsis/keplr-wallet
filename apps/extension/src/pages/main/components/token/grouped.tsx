@@ -176,7 +176,12 @@ const StandaloneEarnBox: FunctionComponent<{
 
 const NestedTokenItemContainer = styled.div`
   background-color: transparent;
-  padding: 0.875rem 1rem;
+  padding: 0rem 1rem;
+  width: 100%;
+  height: 56px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   border-radius: 0.375rem;
   cursor: pointer;
   box-shadow: none;
@@ -208,7 +213,12 @@ const NestedTokenItem: FunctionComponent<{
       onMouseEnter={() => setIsHover(true)}
       onMouseLeave={() => setIsHover(false)}
     >
-      <Columns sum={1} gutter="0.5rem" alignY="center">
+      <Columns
+        sum={1}
+        gutter="0.5rem"
+        alignY="center"
+        style={{ width: "100%" }}
+      >
         <CurrencyImageFallback
           chainInfo={viewToken.chainInfo}
           currency={viewToken.token.currency}
@@ -234,23 +244,23 @@ const NestedTokenItem: FunctionComponent<{
                 : `on ${viewToken.chainInfo.chainName}`}
             </Subtitle2>
           </XAxis>
-          <Box
-            style={{
-              flex: 1,
-              flexDirection: "row",
-              alignItems: "center",
-              flexWrap: "wrap",
-              gap: "0.125rem",
-            }}
-          >
-            <XAxis>
-              {tag ? (
+          {tag ? (
+            <Box
+              style={{
+                flex: 1,
+                flexDirection: "row",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: "0.125rem",
+              }}
+            >
+              <XAxis>
                 <Box alignY="center" key="token-tag">
                   <TokenTag text={tag.text} tooltip={tag.tooltip} />
                 </Box>
-              ) : null}
-            </XAxis>
-          </Box>
+              </XAxis>
+            </Box>
+          ) : null}
         </Stack>
 
         {copyAddress ? (
