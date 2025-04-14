@@ -26,6 +26,9 @@ export interface AssetsResponse {
             token_contract?: string;
             recommended_symbol?: string;
             decimals: number;
+            symbol: string;
+            logo_uri?: string;
+            coingecko_id?: string;
           }[];
         }
       | undefined;
@@ -233,6 +236,30 @@ export interface RouteResponse {
           };
           bridge_id: string;
           smart_relay: boolean;
+        };
+      }
+    | {
+        eureka_transfer: {
+          bridge_id: string;
+          callback_adapter_contract_address: string;
+          destination_port: string;
+          entry_contract_address: string;
+          denom_in: string;
+          denom_out: string;
+          source_client: string;
+          from_chain_id: string;
+          to_chain_id: string;
+          to_chain_callback_contract_address: string;
+          to_chain_entry_contract_address: string;
+          pfm_enabled: boolean;
+          smart_relay: boolean;
+          smart_relay_fee_quote: {
+            fee_amount: string;
+            fee_denom: string;
+            relayer_address: string;
+            expiration: string;
+          };
+          supports_memo: boolean;
         };
       }
   )[];

@@ -13,6 +13,13 @@ export const CoinGeckoCoinDataByTokenAddress =
   process.env["KEPLR_EXT_COINGECKO_COIN_DATA_BY_TOKEN_ADDRESS"] ||
   "/coins/{coingeckoChainId}/contract/{contractAddress}";
 
+// 일단 CoinGecko API와 같은 base url을 사용함
+export const SkipTokenInfoBaseURL =
+  process.env["KEPLR_EXT_COINGECKO_ENDPOINT"] || "";
+export const SkipTokenInfoAPIURI =
+  process.env["KEPLR_EXT_SKIP_TOKEN_INFO_API_URI"] ||
+  "/coingecko-token-info/skip/assets/{chainId}/{coinMinimalDenom}";
+
 export const AutoFetchingFiatValueInterval = 300 * 1000; // 5min
 
 export const AutoFetchingAssetsInterval = 15 * 1000; // 15sec
@@ -28,8 +35,11 @@ export const TokenContractListURL =
   "https://opbaqquqruxn7fdsgcncrtfrwa0qxnoj.lambda-url.us-west-2.on.aws/";
 export const TokenContractListRepoURL =
   "https://github.com/chainapsis/keplr-contract-registry";
+export const NeutronStakingRewardsContractAddress =
+  "neutron1gqq3c735pj6ese3yru5xr6ud0fvxgltxesygvyyzpsrt74v6yg4sgkrgwq";
 
 export const NOBLE_CHAIN_ID = "noble-1";
+export const NEUTRON_CHAIN_ID = "neutron-1";
 
 export const KEPLR_EXTS_MEMO = "Keplr Exts";
 

@@ -10,6 +10,7 @@ import {
   ObservableQueryTaxCaps,
   ObservableQueryTaxRate,
 } from "./terra-classic/treasury";
+import { ObservableQuerySkipTokenInfo } from "./token-info";
 
 export interface KeplrETCQueries {
   keplrETC: KeplrETCQueriesImpl;
@@ -18,6 +19,8 @@ export interface KeplrETCQueries {
 export const KeplrETCQueries = {
   use(options: {
     ethereumURL: string;
+    skipTokenInfoBaseURL: string;
+    skipTokenInfoAPIURI: string;
   }): (
     queriesSetBase: QueriesSetBase,
     sharedContext: QuerySharedContext,
@@ -36,7 +39,9 @@ export const KeplrETCQueries = {
           sharedContext,
           chainId,
           chainGetter,
-          options.ethereumURL
+          options.ethereumURL,
+          options.skipTokenInfoBaseURL,
+          options.skipTokenInfoAPIURI
         ),
       };
     };
@@ -46,6 +51,7 @@ export const KeplrETCQueries = {
 export class KeplrETCQueriesImpl {
   public readonly queryERC20Metadata: DeepReadonly<ObservableQueryERC20Metadata>;
   public readonly queryEVMTokenInfo: DeepReadonly<ObservableQueryEVMTokenInfo>;
+  public readonly querySkipTokenInfo: DeepReadonly<ObservableQuerySkipTokenInfo>;
 
   public readonly queryTerraClassicTaxRate: DeepReadonly<ObservableQueryTaxRate>;
   public readonly queryTerraClassicTaxCaps: DeepReadonly<ObservableQueryTaxCaps>;
@@ -55,7 +61,9 @@ export class KeplrETCQueriesImpl {
     sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
-    ethereumURL: string
+    ethereumURL: string,
+    skipTokenInfoBaseURL: string,
+    skipTokenInfoAPIURI: string
   ) {
     this.queryERC20Metadata = new ObservableQueryERC20Metadata(
       sharedContext,
@@ -65,6 +73,13 @@ export class KeplrETCQueriesImpl {
       sharedContext,
       chainId,
       chainGetter
+    );
+    this.querySkipTokenInfo = new ObservableQuerySkipTokenInfo(
+      sharedContext,
+      chainId,
+      chainGetter,
+      skipTokenInfoBaseURL,
+      skipTokenInfoAPIURI
     );
 
     this.queryTerraClassicTaxRate = new ObservableQueryTaxRate(

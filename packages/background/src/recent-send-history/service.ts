@@ -1687,7 +1687,7 @@ export class RecentSendHistoryService {
                   transfer.go_fast_transfer.txs.order_filled_tx?.tx_hash;
                 break;
             }
-          } else if (transfer.stargate_transfer) {
+          } else if ("stargate_transfer" in transfer) {
             const {
               state: sgState,
               from_chain_id,
@@ -1707,6 +1707,33 @@ export class RecentSendHistoryService {
                 break;
               case "STARGATE_TRANSFER_RECEIVED":
                 targetChainId = to_chain_id;
+                break;
+            }
+          } else if ("eureka_transfer" in transfer) {
+            const {
+              state: eurekaState,
+              from_chain_id,
+              to_chain_id,
+            } = transfer.eureka_transfer;
+            switch (eurekaState) {
+              case "TRANSFER_UNKNOWN":
+                targetChainId = from_chain_id;
+                errorMsg = "Unknown Eureka transfer error";
+                break;
+              case "TRANSFER_PENDING":
+                targetChainId = from_chain_id;
+                break;
+              case "TRANSFER_RECEIVED":
+                targetChainId = to_chain_id;
+                break;
+              case "TRANSFER_SUCCESS":
+                targetChainId = to_chain_id;
+                receiveTxHash =
+                  transfer.eureka_transfer.packet_txs.receive_tx?.tx_hash;
+                break;
+              case "TRANSFER_FAILURE":
+                targetChainId = from_chain_id;
+                errorMsg = "Eureka transfer failed";
                 break;
             }
           }

@@ -16,6 +16,7 @@ import {
   EnableVaultsWithCosmosAddressMsg,
   PrivilegeCosmosSignAminoDelegateMsg,
   RequestCosmosSignDirectAuxMsg,
+  PrivilegeCosmosSignAminoExecuteCosmWasmMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -35,6 +36,7 @@ export function init(
   router.registerMessage(ComputeNotFinalizedKeyAddressesMsg);
   router.registerMessage(PrivilegeCosmosSignAminoWithdrawRewardsMsg);
   router.registerMessage(PrivilegeCosmosSignAminoDelegateMsg);
+  router.registerMessage(PrivilegeCosmosSignAminoExecuteCosmWasmMsg);
   router.registerMessage(GetCosmosKeysForEachVaultSettledMsg);
   router.registerMessage(GetCosmosKeysForEachVaultWithSearchSettledMsg);
   router.registerMessage(RequestSignEIP712CosmosTxMsg_v0);

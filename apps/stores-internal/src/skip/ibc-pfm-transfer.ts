@@ -38,8 +38,8 @@ export class ObservableQueryIbcPfmTransfer {
             .getAssets(candidateChain.chainInfo.chainId)
             .assetsRaw.find(
               (a) =>
-                a.recommendedSymbol &&
-                a.recommendedSymbol === assetForBridge?.recommendedSymbol
+                a.originDenom === assetForBridge?.originDenom &&
+                a.originChainId === assetForBridge?.originChainId
             );
 
           if (candidateAsset) {

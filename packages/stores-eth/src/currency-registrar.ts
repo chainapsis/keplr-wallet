@@ -3,6 +3,7 @@ import { ChainStore, IQueriesStore } from "@keplr-wallet/stores";
 import { DenomHelper, KVStore } from "@keplr-wallet/common";
 import { autorun, makeObservable, observable, runInAction, toJS } from "mobx";
 import { EthereumQueries } from "./queries";
+import { KeplrETCQueries } from "@keplr-wallet/stores-etc";
 
 interface CurrencyCache {
   symbol: string;
@@ -22,7 +23,9 @@ export class ERC20CurrencyRegistrar {
     protected readonly kvStore: KVStore,
     protected readonly cacheDuration: number = 24 * 3600 * 1000, // 1 days
     protected readonly chainStore: ChainStore,
-    protected readonly queriesStore: IQueriesStore<EthereumQueries>
+    protected readonly queriesStore: IQueriesStore<
+      EthereumQueries & KeplrETCQueries
+    >
   ) {
     this.chainStore.registerCurrencyRegistrar(
       this.currencyRegistrar.bind(this)
@@ -79,8 +82,6 @@ export class ERC20CurrencyRegistrar {
       return;
     }
 
-    const queries = this.queriesStore.get(chainId);
-
     const contractAddress = denomHelper.denom.replace("erc20:", "");
 
     const cached = this.cacheERC20Metadata.get(contractAddress);
@@ -103,10 +104,12 @@ export class ERC20CurrencyRegistrar {
       }
     }
 
+    const queries = this.queriesStore.get(chainId);
     const tokenInfoQuery =
       queries.ethereum.queryEthereumCoingeckoTokenInfo.getQueryContract(
         contractAddress
       );
+
     if (tokenInfoQuery?.symbol != null && tokenInfoQuery?.decimals != null) {
       if (!tokenInfoQuery.isFetching) {
         runInAction(() => {
@@ -133,6 +136,34 @@ export class ERC20CurrencyRegistrar {
     }
 
     if (tokenInfoQuery?.isFetching) {
+      return {
+        value: undefined,
+        done: false,
+      };
+    }
+
+    const skipTokenInfoQuery =
+      queries.keplrETC.querySkipTokenInfo.getQueryCoinMinimalDenom(
+        coinMinimalDenom
+      );
+    if (skipTokenInfoQuery?.currency) {
+      runInAction(() => {
+        this.cacheERC20Metadata.set(contractAddress, {
+          symbol: skipTokenInfoQuery.currency!.coinDenom,
+          decimals: skipTokenInfoQuery.currency!.coinDecimals,
+          coingeckoId: skipTokenInfoQuery.currency!.coinGeckoId,
+          logoURI: skipTokenInfoQuery.currency!.coinImageUrl,
+          timestamp: Date.now(),
+        });
+      });
+
+      return {
+        value: skipTokenInfoQuery.currency,
+        done: !skipTokenInfoQuery.isFetching,
+      };
+    }
+
+    if (skipTokenInfoQuery?.isFetching) {
       return {
         value: undefined,
         done: false,

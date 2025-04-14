@@ -11,6 +11,8 @@ import {
   GoogleAPIKeyForMeasurement,
   CoinGeckoCoinDataByTokenAddress,
   SwapVenues,
+  SkipTokenInfoBaseURL,
+  SkipTokenInfoAPIURI,
 } from "../config.ui";
 import {
   AccountStore,
@@ -348,6 +350,8 @@ export class RootStore {
       OsmosisQueries.use(),
       KeplrETCQueries.use({
         ethereumURL: EthereumEndpoint,
+        skipTokenInfoBaseURL: SkipTokenInfoBaseURL,
+        skipTokenInfoAPIURI: SkipTokenInfoAPIURI,
       }),
       ICNSQueries.use(),
       TokenContractsQueries.use({
