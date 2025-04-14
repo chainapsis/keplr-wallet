@@ -21,6 +21,7 @@ import { MsgRelationCancelUndelegate } from "./cancel-undelegate";
 import { MsgRelationIBCSwapRefunded } from "./ibc-swap-refunded";
 import { MsgRelationNobleWithdrawUsdc } from "./noble-withdraw-usdc";
 import { MsgRelationNobleDepositUsdc } from "./noble-deposit-usdc";
+import { MsgRelationBbnClaimRewardFromBTCStaking } from "./bbn-claim-reward-from-btc-staking";
 
 export const MsgItemRender: FunctionComponent<{
   msg: MsgHistory;
@@ -281,6 +282,16 @@ const MsgItemRenderInner: FunctionComponent<{
     case "noble-deposit-usdc": {
       return (
         <MsgRelationNobleDepositUsdc
+          msg={msg}
+          prices={prices}
+          targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
+        />
+      );
+    }
+    case "bbn-claim-reward-from-btc-staking": {
+      return (
+        <MsgRelationBbnClaimRewardFromBTCStaking
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
