@@ -69,7 +69,10 @@ const handleRequestJsonRpcToEvmMsg: (
   permissionInteractionService
 ) => {
   return async (env, msg) => {
-    if (msg.method !== "keplr_initProviderState") {
+    if (
+      msg.method !== "keplr_initProviderState" &&
+      msg.method !== "eth_accounts"
+    ) {
       await permissionInteractionService.ensureEnabledForEVM(env, msg.origin);
     }
 

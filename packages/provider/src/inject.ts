@@ -1401,10 +1401,6 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
       await this._initProviderState();
     }
 
-    if (method === "eth_accounts") {
-      return (this.selectedAddress ? [this.selectedAddress] : []) as T;
-    }
-
     return await this._requestMethod<T>("request", {
       method,
       params,
