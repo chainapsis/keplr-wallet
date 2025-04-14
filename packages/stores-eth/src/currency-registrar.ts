@@ -47,13 +47,9 @@ export class ERC20CurrencyRegistrar {
     const key = `cacheERC20Metadata-v2`;
     const saved = await this.kvStore.get<Record<string, CurrencyCache>>(key);
     if (saved) {
-      runInAction(() => {
-        for (const [key, value] of Object.entries(saved)) {
-          if (Date.now() - value.timestamp < this.cacheDuration) {
-            this.cacheERC20Metadata.set(key, value);
-          }
-        }
-      });
+      for (const [key, value] of Object.entries(saved)) {
+        this.cacheERC20Metadata.set(key, value);
+      }
     }
 
     runInAction(() => {
@@ -156,7 +152,10 @@ export class ERC20CurrencyRegistrar {
     fromCache: boolean;
     notFound: boolean;
   } {
-    const cached = this.getCacheERC20Metadata(chainId, contractAddress);
+    const { res: cached, staled } = this.getCacheERC20Metadata(
+      chainId,
+      contractAddress
+    );
     if (cached) {
       if (cached.notFound) {
         return {
@@ -166,17 +165,19 @@ export class ERC20CurrencyRegistrar {
           notFound: true,
         };
       }
-      return {
-        res: {
-          coinDenom: cached.symbol,
-          decimals: cached.decimals,
-          coingeckoId: cached.coingeckoId,
-          coinImageUrl: cached.logoURI,
-        },
-        isFetching: false,
-        fromCache: true,
-        notFound: false,
-      };
+      if (!staled) {
+        return {
+          res: {
+            coinDenom: cached.symbol,
+            decimals: cached.decimals,
+            coingeckoId: cached.coingeckoId,
+            coinImageUrl: cached.logoURI,
+          },
+          isFetching: false,
+          fromCache: true,
+          notFound: false,
+        };
+      }
     }
 
     const queries = this.queriesStore.get(chainId);
@@ -189,6 +190,22 @@ export class ERC20CurrencyRegistrar {
           contractAddress
         );
       if (contractInfo) {
+        const cachedRes:
+          | {
+              coinDenom: string;
+              decimals: number;
+              coingeckoId: string | undefined;
+              coinImageUrl: string | undefined;
+            }
+          | undefined = cached
+          ? {
+              coinDenom: cached.symbol,
+              decimals: cached.decimals,
+              coingeckoId: cached.coingeckoId,
+              coinImageUrl: cached.logoURI,
+            }
+          : undefined;
+
         if (contractInfo.isFetching) {
           isGlobalFetching = true;
         }
@@ -228,7 +245,10 @@ export class ERC20CurrencyRegistrar {
               };
             } else {
               return {
-                res: undefined,
+                res:
+                  skipTokenInfoQuery?.error?.status === 404
+                    ? undefined
+                    : cachedRes,
                 isFetching: isGlobalFetching,
                 fromCache: false,
                 notFound: skipTokenInfoQuery?.error?.status === 404,
@@ -236,7 +256,7 @@ export class ERC20CurrencyRegistrar {
             }
           } else {
             return {
-              res: undefined,
+              res: cachedRes,
               isFetching: isGlobalFetching,
               fromCache: false,
               notFound,
@@ -264,8 +284,9 @@ export class ERC20CurrencyRegistrar {
   protected getCacheERC20Metadata(
     chainId: string,
     contractAddress: string
-  ): CurrencyCache | undefined {
+  ): { res: CurrencyCache | undefined; staled: boolean } {
     let res = this.cacheERC20Metadata.get(`${chainId}/${contractAddress}`);
+    let staled = false;
 
     if (res) {
       if (res.notFound) {
@@ -275,17 +296,21 @@ export class ERC20CurrencyRegistrar {
           const obj = Object.fromEntries(this.cacheERC20Metadata);
           this.kvStore.set<Record<string, CurrencyCache>>(key, obj);
           res = undefined;
+          staled = false;
         }
       } else if (Date.now() - res.timestamp > this.cacheDuration) {
         this.cacheERC20Metadata.delete(`${chainId}/${contractAddress}`);
         const key = `cacheERC20Metadata-v2`;
         const obj = Object.fromEntries(this.cacheERC20Metadata);
         this.kvStore.set<Record<string, CurrencyCache>>(key, obj);
-        res = undefined;
+        staled = true;
       }
     }
 
-    return res;
+    return {
+      res,
+      staled,
+    };
   }
 
   protected setCacheERC20Metadata(
