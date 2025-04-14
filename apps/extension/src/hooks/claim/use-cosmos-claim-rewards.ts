@@ -10,6 +10,7 @@ import {
 } from "@keplr-wallet/types";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import {
+  PrivilegeCosmosSignAminoExecuteCosmWasmMsg,
   PrivilegeCosmosSignAminoWithdrawRewardsMsg,
   SendTxMsg,
 } from "@keplr-wallet/background";
@@ -18,7 +19,11 @@ import { isSimpleFetchError } from "@keplr-wallet/simple-fetch";
 import { ClaimAllEachState } from "./use-claim-all-each-state";
 import { useNotification } from "../notification";
 import { useNavigate } from "react-router";
-import { NOBLE_CHAIN_ID } from "../../config.ui";
+import {
+  NEUTRON_CHAIN_ID,
+  NeutronStakingRewardsContractAddress,
+  NOBLE_CHAIN_ID,
+} from "../../config.ui";
 import { MakeTxResponse } from "@keplr-wallet/stores";
 
 const zeroDec = new Dec(0);
@@ -51,6 +56,31 @@ export const useCosmosClaimRewards = () => {
         rewardToken.currency.coinMinimalDenom === "uusdn"
       ) {
         return account.noble.makeClaimYieldTx("withdrawRewards");
+      } else if (chainId === NEUTRON_CHAIN_ID) {
+        const msg = {
+          claim_rewards: {
+            to_address: account.bech32Address,
+          },
+        };
+        return account.cosmwasm.makeExecuteContractTx(
+          "executeWasm",
+          NeutronStakingRewardsContractAddress,
+          msg,
+          [],
+          {
+            onFulfill: (tx: any) => {
+              if (
+                (tx.code === 0 || tx.code === null) &&
+                chainId === NEUTRON_CHAIN_ID
+              ) {
+                //neutron의 경우 컨트랙트에서 reward 다시 가져옴
+                queries.cosmwasm.queryNeutronStakingRewards
+                  .getRewardFor(account.bech32Address)
+                  .fetch();
+              }
+            },
+          }
+        );
       } else {
         const queryRewards = queries.cosmos.queryRewards.getQueryBech32Address(
           account.bech32Address
@@ -157,6 +187,12 @@ export const useCosmosClaimRewards = () => {
             const result: FeeCurrency[] = [];
 
             for (const gasPrice of queryFeeMarketGasPrices.gasPrices) {
+              //현재 findCurrencyAsync 내부에서 모르는 체인과 관련 된 토큰이 들어 올시 비동기가 끝나지 않는 문제가 존재함
+              //해서 일단 임시방편으로 ibc 토큰은 무시하도록 처리
+              if (gasPrice.denom.split("/")[0] === "ibc") {
+                continue;
+              }
+
               const currency = await chainInfo.findCurrencyAsync(
                 gasPrice.denom
               );
@@ -179,6 +215,7 @@ export const useCosmosClaimRewards = () => {
                   "https://gjsttg7mkgtqhjpt3mv5aeuszi0zblbb.lambda-url.us-west-2.on.aws",
                   "/feemarket/info.json"
                 );
+                await multificationConfig.waitFreshResponse();
 
                 if (multificationConfig.response) {
                   const _default =
@@ -444,14 +481,25 @@ export const useCosmosClaimRewards = () => {
               ): Promise<AminoSignResponse> => {
                 const requester = new InExtensionMessageRequester();
 
-                return await requester.sendMessage(
-                  BACKGROUND_PORT,
-                  new PrivilegeCosmosSignAminoWithdrawRewardsMsg(
-                    chainId,
-                    signer,
-                    signDoc
-                  )
-                );
+                if (chainId === NEUTRON_CHAIN_ID) {
+                  return await requester.sendMessage(
+                    BACKGROUND_PORT,
+                    new PrivilegeCosmosSignAminoExecuteCosmWasmMsg(
+                      chainId,
+                      signer,
+                      signDoc
+                    )
+                  );
+                } else {
+                  return await requester.sendMessage(
+                    BACKGROUND_PORT,
+                    new PrivilegeCosmosSignAminoWithdrawRewardsMsg(
+                      chainId,
+                      signer,
+                      signDoc
+                    )
+                  );
+                }
               },
               sendTx: async (
                 chainId: string,
@@ -557,6 +605,40 @@ export const useCosmosClaimRewards = () => {
             tx,
             gas: new Int(100000),
           };
+        } else if (chainId === NEUTRON_CHAIN_ID) {
+          const msg = {
+            claim_rewards: {
+              to_address: account.bech32Address,
+            },
+          };
+
+          const tx = account.cosmwasm.makeExecuteContractTx(
+            "executeWasm",
+            NeutronStakingRewardsContractAddress,
+            msg,
+            [],
+            {
+              onFulfill: (tx: any) => {
+                if (
+                  (tx.code === 0 || tx.code === null) &&
+                  chainId === NEUTRON_CHAIN_ID
+                ) {
+                  //neutron의 경우 컨트랙트에서 reward 다시 가져옴
+                  queries.cosmwasm.queryNeutronStakingRewards
+                    .getRewardFor(account.bech32Address)
+                    .fetch();
+                }
+              },
+            }
+          );
+          state.setIsLoading(true);
+
+          return {
+            tx,
+            //현재 ext 코드에는 wasm/MsgExecuteContract에 대한 기본 Gas 값이 없는 듯해서
+            //KD에서 가져온 값 사용
+            gas: new Int(250000),
+          };
         } else {
           const queryRewards =
             queries.cosmos.queryRewards.getQueryBech32Address(
@@ -632,6 +714,7 @@ export const useCosmosClaimRewards = () => {
               );
               return;
             }
+
             notification.show(
               "success",
               intl.formatMessage({
@@ -662,6 +745,9 @@ export const useCosmosClaimRewards = () => {
       });
     } finally {
       state.setIsSimulating(false);
+      if (chainId === NEUTRON_CHAIN_ID) {
+        state.setIsLoading(false);
+      }
     }
   };
 

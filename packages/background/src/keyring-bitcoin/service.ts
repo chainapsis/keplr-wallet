@@ -521,7 +521,7 @@ export class KeyRingBitcoinService {
       );
     }
 
-    const currentBaseChainId =
+    let currentBaseChainId =
       this.permissionService.getCurrentBaseChainIdForBitcoin(origin) ??
       (chainId ? this.chainsService.getBaseChainId(chainId) : undefined);
 
@@ -530,6 +530,12 @@ export class KeyRingBitcoinService {
         return [] as T;
       }
 
+      if (this.permissionService.isPrivilegedOrigins(origin)) {
+        currentBaseChainId =
+          "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f";
+      }
+    }
+    if (currentBaseChainId == null) {
       throw new Error(
         `${origin} is not permitted. Please disconnect and reconnect to the website.`
       );
@@ -544,7 +550,7 @@ export class KeyRingBitcoinService {
           // This method is not ensured permission in the handler.
           case "getAccounts": {
             const hasPermission = this.permissionService.hasPermission(
-              currentBaseChainId,
+              currentBaseChainId!,
               getBasicAccessPermissionType(),
               origin
             );
@@ -558,7 +564,7 @@ export class KeyRingBitcoinService {
           }
           case "disconnect": {
             return this.permissionService.removeAllTypePermissionToChainId(
-              currentBaseChainId,
+              currentBaseChainId!,
               [origin]
             );
           }

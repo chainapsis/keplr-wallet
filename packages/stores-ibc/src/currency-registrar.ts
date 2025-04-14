@@ -385,10 +385,47 @@ export class IBCCurrencyRegistrar {
             done: true,
           };
         } else if (originQueries.ethereum) {
-          const queryCoingecko =
-            originQueries.ethereum.queryEthereumCoingeckoTokenInfo.getQueryContract(
+          const queryCoingecko:
+            | {
+                symbol?: string;
+                decimals?: number;
+                coingeckoId?: string;
+                logoURI?: string;
+                isFetching: boolean;
+              }
+            | undefined = (() => {
+            if (originChainInfo.chainId === "eip155:1") {
+              // XXX: 바빌론 측의 요청으로 밑의 컨트랙트는 일단 하드코딩
+              //      밑의 컨트랙트는 코인겍코에 없어서 불러올 수 없음.
+              //      0xf6718b2701d4a6498ef77d7c152b2137ab28b8a3
+              //      0x09def5abc67e967d54e8233a4b5ebbc1b3fbe34b
+              //      밑의 얘도 존재하는데 얘는 이더스캔에도 안떠서 일단 패스
+              //      0x9356f6d95b8e109f4b7ce3e49d672967d3b48383
+              if (
+                denomTrace.denom ===
+                "0xf6718b2701d4a6498ef77d7c152b2137ab28b8a3"
+              ) {
+                return {
+                  symbol: "stBTC",
+                  decimals: 18,
+                  isFetching: false,
+                };
+              }
+              if (
+                denomTrace.denom ===
+                "0x09def5abc67e967d54e8233a4b5ebbc1b3fbe34b"
+              ) {
+                return {
+                  symbol: "waBTC",
+                  decimals: 18,
+                  isFetching: false,
+                };
+              }
+            }
+            return originQueries.ethereum.queryEthereumCoingeckoTokenInfo.getQueryContract(
               denomTrace.denom
             );
+          })();
           if (
             queryCoingecko &&
             queryCoingecko.symbol != null &&

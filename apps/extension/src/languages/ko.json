@@ -126,7 +126,7 @@
 
   "pages.register.connect-ledger.title": "하드웨어 지갑을 연결해주세요.",
   "pages.register.connect-ledger.direct.title": "렛저 {app} 앱에 케플러를 연결하세요.",
-  "pages.register.connect-ledger.paragraph": "케플러는 코스모스 앱체인, Ethereum, Injective와 Evmos를 포함한 모든 EVM 호환 체인, 그리고 Starknet을 지원합니다. Ledger 연결은 코스모스, EVM, Starknet 순서로 진행됩니다.",
+  "pages.register.connect-ledger.paragraph": "케플러는 코스모스 기반 체인, 이더리움, 인젝티브, 이브모스를 포함한 모든 EVM 호환 체인, 스타크넷, 그리고 비트코인을 지원합니다. 렛저 연결은 코스모스, EVM, 스타크넷, 비트코인 순서로 진행됩니다.",
   "pages.register.connect-ledger.direct.paragraph": "이 창은 렛저 계정이지만 {app} 앱을 연결하지 않은 사용자에게만 표시됩니다. 다른 사용자에게는 표시되지 않습니다.",
   "pages.register.connect-ledger.step-text": "{step} 단계",
   "pages.register.connect-ledger.connect-ledger-step-paragraph": "렛저를 연결하고 잠금을 해제하세요.",
@@ -243,6 +243,8 @@
   "page.setting.general.side-panel-paragraph": "케플러 지갑을 브라우저의 사이드 패널에서 사용할 수 있습니다.",
   "page.setting.general.show-24h-price-changes-title": "24시간 가격변동률 표시",
   "page.setting.general.show-24h-price-changes-paragraph": "각 토큰의 24시간 가격변동률을 표시하는 기능입니다.",
+  "page.setting.advanced.manage-non-native-chains-title": "선택형 체인 추가/제거",
+  "page.setting.advanced.manage-non-native-chains-paragraph": "선택형 체인을 추가하거나 완전히 제거할 수 있습니다. 추가 후에는 체인을 활성화해주세요.",
   "page.setting.general.manage-chain-visibility-title": "체인 추가/제거",
   "page.setting.general.manage-chain-visibility-paragraph": "현재 계정에 표시될 체인(해당 체인의 자산 포함)을 선택해주세요.",
 
@@ -650,7 +652,7 @@
   "page.main.components.token-item.copy-address.copied": "복사됨",
 
   "page.main.layouts.header.new-chain.title": "{chains} 체인이 추가되었습니다!",
-  "page.main.layouts.header.new-chain.paragraph": "\"체인 표시\"에서 신규 체인을 활성화하면 이 계정에서 사용할 수 있습니다.",
+  "page.main.layouts.header.new-chain.paragraph": "\"체인 추가/제거\"에서 신규 체인을 활성화하면 이 계정에서 사용할 수 있습니다.",
   "page.main.layouts.header.new-chain.button": "좋아요!",
 
   "page.ledger-grant.title": "렛저와 브라우저 간의 연결을 재허용합니다",

@@ -575,7 +575,10 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
                 navigate(
                   `/send/select-asset?navigateReplace=true&navigateTo=${encodeURIComponent(
                     "/send?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}"
-                  )}`
+                  )}`,
+                  {
+                    replace: true,
+                  }
                 );
               }}
             />

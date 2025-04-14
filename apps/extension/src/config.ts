@@ -1552,6 +1552,10 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         coinDecimals: 6,
       },
     ],
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/chains/neutron"
+        : "http://localhost:8080/chains/neutron",
     features: [],
   },
   {
@@ -3346,6 +3350,57 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     ],
     features: [],
   },
+  {
+    chainId: "bbn-1",
+    chainName: "Babylon Genesis",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bbn/chain.png",
+    rpc: "https://rpc-babylon.keplr.app",
+    rest: "https://lcd-babylon.keplr.app",
+    walletUrlForStaking: "https://wallet.keplr.app/chains/babylon-genesis",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "bbn",
+      bech32PrefixAccPub: "bbnpub",
+      bech32PrefixValAddr: "bbnvaloper",
+      bech32PrefixValPub: "bbnvaloperpub",
+      bech32PrefixConsAddr: "bbnvalcons",
+      bech32PrefixConsPub: "bbnvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "BABY",
+        coinMinimalDenom: "ubbn",
+        coinDecimals: 6,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bbn/chain.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "BABY",
+        coinMinimalDenom: "ubbn",
+        coinDecimals: 6,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bbn/chain.png",
+        gasPriceStep: {
+          low: 0.007,
+          average: 0.007,
+          high: 0.01,
+        },
+      },
+    ],
+    stakeCurrency: {
+      coinDenom: "BABY",
+      coinMinimalDenom: "ubbn",
+      coinDecimals: 6,
+      coinImageUrl:
+        "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bbn/chain.png",
+    },
+    features: ["cosmwasm"],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
@@ -3356,6 +3411,22 @@ export const PrivilegedOrigins: string[] = [
   "https://testnet.keplr.app",
   "https://multisig.keplr.app",
 ];
+
+export const MsgPrivilegedContractMap: Record<
+  string,
+  Record<string, string[]>
+> = {
+  pion: {
+    neutron1h62p45vv3fg2q6sm00r93gqgmhqt9tfgq5hz33qyrhq8f0pqqj0s36wgc3: [
+      "claim_rewards",
+    ],
+  },
+  neutron: {
+    neutron1gqq3c735pj6ese3yru5xr6ud0fvxgltxesygvyyzpsrt74v6yg4sgkrgwq: [
+      "claim_rewards",
+    ],
+  },
+};
 
 export const CommunityChainInfoRepo = {
   organizationName: "chainapsis",
