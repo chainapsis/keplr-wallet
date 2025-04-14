@@ -109,7 +109,9 @@ export const AvailableTabView: FunctionComponent<{
     const theme = useTheme();
     const navigate = useNavigate();
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
-    const [showFiatValueVisible, setShowFiatValueVisible] = useState(false);
+    const [showFiatValueVisible, setShowFiatValueVisible] = useState(
+      uiConfigStore.assetViewMode === "grouped"
+    );
 
     const { trimSearch, searchedChainInfos } = useGetSearchChains({
       search,
@@ -202,7 +204,8 @@ export const AvailableTabView: FunctionComponent<{
       trimSearch,
       uiConfigStore.assetViewMode,
       uiConfigStore.isHideLowBalance,
-      hugeQueriesStore,
+      hugeQueriesStore.groupedTokensMap,
+      hugeQueriesStore.filterLowBalanceTokens,
     ]);
 
     const lookingForChains = useMemo(() => {
