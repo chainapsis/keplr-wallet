@@ -46,6 +46,54 @@ const MsgItemRenderInner: FunctionComponent<{
   targetDenom: string;
   isInAllActivitiesPage?: boolean;
 }> = ({ msg, prices, targetDenom, isInAllActivitiesPage }) => {
+  if (msg.relation.startsWith("bbn-wrapped-")) {
+    const innerMsg = msg.msg as { msg: unknown };
+    const msgHistory: MsgHistory = { ...msg, msg: innerMsg.msg };
+
+    switch (msg.relation) {
+      case "bbn-wrapped-delegate": {
+        return (
+          <MsgRelationDelegate
+            msg={msgHistory}
+            prices={prices}
+            targetDenom={targetDenom}
+            isInAllActivitiesPage={isInAllActivitiesPage}
+          />
+        );
+      }
+      case "bbn-wrapped-undelegate": {
+        return (
+          <MsgRelationUndelegate
+            msg={msgHistory}
+            prices={prices}
+            targetDenom={targetDenom}
+            isInAllActivitiesPage={isInAllActivitiesPage}
+          />
+        );
+      }
+      case "bbn-wrapped-redelegate": {
+        return (
+          <MsgRelationRedelegate
+            msg={msgHistory}
+            prices={prices}
+            targetDenom={targetDenom}
+            isInAllActivitiesPage={isInAllActivitiesPage}
+          />
+        );
+      }
+      case "bbn-wrapped-cancel-undelegate": {
+        return (
+          <MsgRelationCancelUndelegate
+            msg={msgHistory}
+            prices={prices}
+            targetDenom={targetDenom}
+            isInAllActivitiesPage={isInAllActivitiesPage}
+          />
+        );
+      }
+    }
+  }
+
   switch (msg.relation) {
     case "send": {
       return (
