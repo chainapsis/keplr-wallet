@@ -714,6 +714,126 @@ export class IBCCurrencyRegistrar {
 
   protected getERC20TokenInfo(
     chainId: string,
+    contractAddress: string
+  ): {
+    res:
+      | {
+          coinDenom: string;
+          decimals: number;
+          coingeckoId: string | undefined;
+          coinImageUrl: string | undefined;
+        }
+      | undefined;
+    isFetching: boolean;
+    fromCache: boolean;
+    notFound: boolean;
+  } {
+    const cached = this.getCacheTokenInfo(chainId, contractAddress);
+    if (cached) {
+      if (cached.notFound) {
+        return {
+          res: undefined,
+          isFetching: false,
+          fromCache: true,
+          notFound: true,
+        };
+      }
+      return {
+        res: {
+          coinDenom: cached.coinDenom,
+          decimals: cached.coinDecimals,
+          coingeckoId: cached.coinGeckoId,
+          coinImageUrl: cached.coinImageUrl,
+        },
+        isFetching: false,
+        fromCache: true,
+        notFound: false,
+      };
+    }
+
+    const queries = this.queriesStore.get(chainId);
+    if (chainId === "eip155:1") {
+      // XXX: 바빌론 측의 요청으로 밑의 컨트랙트는 일단 하드코딩
+      //      밑의 컨트랙트는 코인겍코에 없어서 불러올 수 없음.
+      //      0xf6718b2701d4a6498ef77d7c152b2137ab28b8a3
+      //      0x09def5abc67e967d54e8233a4b5ebbc1b3fbe34b
+      //      밑의 얘도 존재하는데 얘는 이더스캔에도 안떠서 일단 패스
+      //      0x9356f6d95b8e109f4b7ce3e49d672967d3b48383
+      if (contractAddress === "0xf6718b2701d4a6498ef77d7c152b2137ab28b8a3") {
+        return {
+          res: {
+            coinDenom: "stBTC",
+            decimals: 18,
+            coingeckoId: undefined,
+            coinImageUrl: undefined,
+          },
+          isFetching: false,
+          fromCache: false,
+          notFound: false,
+        };
+      }
+      if (contractAddress === "0x09def5abc67e967d54e8233a4b5ebbc1b3fbe34b") {
+        return {
+          res: {
+            coinDenom: "waBTC",
+            decimals: 18,
+            coingeckoId: undefined,
+            coinImageUrl: undefined,
+          },
+          isFetching: false,
+          fromCache: false,
+          notFound: false,
+        };
+      }
+    }
+
+    if (queries.ethereum) {
+      const contractInfo =
+        queries.ethereum.queryEthereumCoingeckoTokenInfo.getQueryContract(
+          contractAddress
+        );
+      if (contractInfo) {
+        const isFetching = contractInfo.isFetching;
+        if (contractInfo.symbol != null && contractInfo.decimals != null) {
+          return {
+            res: {
+              coinDenom: contractInfo.symbol,
+              decimals: contractInfo.decimals,
+              coingeckoId: contractInfo.coingeckoId,
+              coinImageUrl: contractInfo.logoURI,
+            },
+            isFetching,
+            fromCache: false,
+            notFound: false,
+          };
+        } else {
+          return {
+            res: undefined,
+            isFetching,
+            fromCache: false,
+            notFound: contractInfo?.error?.status === 404,
+          };
+        }
+      } else {
+        return {
+          res: undefined,
+          isFetching: false,
+          fromCache: false,
+          notFound: false,
+        };
+      }
+    } else {
+      return {
+        res: undefined,
+        isFetching: false,
+        fromCache: false,
+        notFound: false,
+      };
+    }
+  }
+
+  protected getERC20TokenMetadata(
+    chainId: string,
     coinMinimalDenom: string
   ): {
     res:
@@ -752,71 +872,32 @@ export class IBCCurrencyRegistrar {
     }
 
     const queries = this.queriesStore.get(chainId);
-    if (chainId === "eip155:1") {
-      // XXX: 바빌론 측의 요청으로 밑의 컨트랙트는 일단 하드코딩
-      //      밑의 컨트랙트는 코인겍코에 없어서 불러올 수 없음.
-      //      0xf6718b2701d4a6498ef77d7c152b2137ab28b8a3
-      //      0x09def5abc67e967d54e8233a4b5ebbc1b3fbe34b
-      //      밑의 얘도 존재하는데 얘는 이더스캔에도 안떠서 일단 패스
-      //      0x9356f6d95b8e109f4b7ce3e49d672967d3b48383
-      // if (coinMinimalDenom === "0xf6718b2701d4a6498ef77d7c152b2137ab28b8a3") {
-      //   return {
-      //     res: {
-      //       coinDenom: "stBTC",
-      //       decimals: 18,
-      //       coingeckoId: undefined,
-      //       coinImageUrl: undefined,
-      //     },
-      //     isFetching: false,
-      //     fromCache: false,
-      //   };
-      // }
-      // if (coinMinimalDenom === "0x09def5abc67e967d54e8233a4b5ebbc1b3fbe34b") {
-      //   return {
-      //     res: {
-      //       coinDenom: "waBTC",
-      //       decimals: 18,
-      //       coingeckoId: undefined,
-      //       coinImageUrl: undefined,
-      //     },
-      //     isFetching: false,
-      //     fromCache: false,
-      //   };
-      // }
-    }
 
     if (queries.ethereum) {
+      const contractAddress = coinMinimalDenom.replace("erc20/", "");
       const contractInfo =
-        queries.ethereum.queryEthereumCoingeckoTokenInfo.getQueryContract(
-          coinMinimalDenom
+        queries.ethereum.queryEthereumERC20ContractInfo.getQueryContract(
+          contractAddress
         );
-      if (contractInfo) {
-        const isFetching = contractInfo.isFetching;
-        if (contractInfo.symbol != null && contractInfo.decimals != null) {
-          return {
-            res: {
-              coinDenom: contractInfo.symbol,
-              decimals: contractInfo.decimals,
-              coingeckoId: contractInfo.coingeckoId,
-              coinImageUrl: contractInfo.logoURI,
-            },
-            isFetching,
-            fromCache: false,
-            notFound: false,
-          };
-        } else {
-          return {
-            res: undefined,
-            isFetching,
-            fromCache: false,
-            notFound: contractInfo?.error?.status === 404,
-          };
-        }
+      const isFetching = contractInfo.isFetching;
+      if (contractInfo.tokenInfo) {
+        return {
+          res: {
+            coinDenom: contractInfo.tokenInfo.symbol,
+            decimals: contractInfo.tokenInfo.decimals,
+            coingeckoId: undefined,
+            coinImageUrl: undefined,
+          },
+          isFetching,
+          fromCache: false,
+          notFound: false,
+        };
       } else {
         return {
           res: undefined,
-          isFetching: false,
+          isFetching,
           fromCache: false,
+          // XXX: not found에 대해서는 현재 딱히 감지할 방법이 없다.
           notFound: false,
         };
       }
