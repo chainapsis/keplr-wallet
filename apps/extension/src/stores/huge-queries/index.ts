@@ -1030,11 +1030,12 @@ export class HugeQueriesStore {
   @computed
   // 그룹화 로직
   // 1. 먼저 IBC 토큰들을 originChainId와 originCurrency.coinMinimalDenom으로 그룹화
-  // 2. 다음 단계에서 ERC20 토큰 처리:
-  //    - 토큰의 recommendedSymbol이 이미 존재하는 그룹의 originCurrency.coinDenom과 일치하거나
-  //    - 토큰의 recommendedSymbol이 이미 존재하는 그룹의 coinDenom과 일치하면 해당 그룹에 추가
+  // 2. ERC20 토큰 처리:
+  //    - 토큰의 minimalDenom이 erc20:으로 시작하고, 그 뒤의 contractAddress가 skip asset의 contractAddress와 일치하면 정상 ERC20 토큰으로 간주
+  //    - 토큰의 recommendedSymbol이 이미 존재하는 그룹의 originCurrency.coinDenom과 일치하거나(ERC20 & IBC 혼합 그룹),
+  //    - 토큰의 recommendedSymbol이 이미 존재하는 그룹의 coinDenom과 일치하면(ERC20 그룹) 해당 그룹에 추가
   //    - 일치하는 그룹이 없으면 recommendedSymbol을 키로 새 그룹 생성
-  // 3. 나머지 토큰들은 chainId와 coinMinimalDenom으로 그룹화
+  // 3. 나머지 Unknown 토큰들은 단일 그룹으로 처리
   get groupedTokensMap(): Map<string, ViewToken[]> {
     const tokensMap = new Map<string, ViewToken[]>();
     const processedTokens = new Map<ViewToken, boolean>();
