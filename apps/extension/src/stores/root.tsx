@@ -622,6 +622,7 @@ export class RootStore {
     this.erc20CurrencyRegistrar = new ERC20CurrencyRegistrar(
       new ExtensionKVStore("store_erc20_currency_registrar"),
       24 * 3600 * 1000,
+      1 * 3600 * 1000,
       this.chainStore,
       this.queriesStore
     );

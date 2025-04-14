@@ -897,8 +897,7 @@ export class IBCCurrencyRegistrar {
           res: undefined,
           isFetching,
           fromCache: false,
-          // XXX: not found에 대해서는 현재 딱히 감지할 방법이 없다.
-          notFound: false,
+          notFound: contractInfo.notFound,
         };
       }
     } else {

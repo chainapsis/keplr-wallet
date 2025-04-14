@@ -113,7 +113,7 @@ export async function simpleFetch<R>(
   };
 
   const validateStatusFn = options?.validateStatus || defaultValidateStatusFn;
-  if (!validateStatusFn(fetched.status)) {
+  if (!validateStatusFn(res.status)) {
     throw new SimpleFetchError(baseURL, url, res);
   }
 

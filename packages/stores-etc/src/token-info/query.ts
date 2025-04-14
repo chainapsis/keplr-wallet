@@ -31,9 +31,7 @@ export class ObservableQuerySkipTokenInfoInner extends ObservableQuery<AppCurren
   }
 }
 
-export class ObservableQuerySkipTokenInfo extends HasMapStore<
-  ObservableQuerySkipTokenInfoInner | undefined
-> {
+export class ObservableQuerySkipTokenInfo extends HasMapStore<ObservableQuerySkipTokenInfoInner> {
   constructor(
     protected readonly sharedContext: QuerySharedContext,
     protected readonly chainId: string,
@@ -54,7 +52,7 @@ export class ObservableQuerySkipTokenInfo extends HasMapStore<
 
   getQueryCoinMinimalDenom(
     coinMinimalDenom: string
-  ): ObservableQuerySkipTokenInfoInner | undefined {
+  ): ObservableQuerySkipTokenInfoInner {
     return this.get(coinMinimalDenom) as ObservableQuerySkipTokenInfoInner;
   }
 }
