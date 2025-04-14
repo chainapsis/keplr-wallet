@@ -24,6 +24,7 @@ export class ERC20CurrencyRegistrar {
   public _isInitialized = false;
 
   protected cacheERC20Metadata: Map<string, CurrencyCache> = new Map();
+  protected staledERC20Metadata: Map<string, CurrencyCache> = new Map();
 
   constructor(
     protected readonly kvStore: KVStore,
@@ -44,8 +45,8 @@ export class ERC20CurrencyRegistrar {
   }
 
   async init(): Promise<void> {
-    const key = `cacheERC20Metadata-v2`;
-    const saved = await this.kvStore.get<Record<string, CurrencyCache>>(key);
+    const dbKey = `cacheERC20Metadata-v2`;
+    const saved = await this.kvStore.get<Record<string, CurrencyCache>>(dbKey);
     if (saved) {
       for (const [key, value] of Object.entries(saved)) {
         this.cacheERC20Metadata.set(key, value);
@@ -285,24 +286,36 @@ export class ERC20CurrencyRegistrar {
     chainId: string,
     contractAddress: string
   ): { res: CurrencyCache | undefined; staled: boolean } {
-    let res = this.cacheERC20Metadata.get(`${chainId}/${contractAddress}`);
+    const key = `${chainId}/${contractAddress}`;
+
+    let res =
+      this.cacheERC20Metadata.get(key) || this.staledERC20Metadata.get(key);
     let staled = false;
 
     if (res) {
       if (res.notFound) {
         if (Date.now() - res.timestamp > this.failedCacheDuration) {
-          this.cacheERC20Metadata.delete(`${chainId}/${contractAddress}`);
-          const key = `cacheERC20Metadata-v2`;
-          const obj = Object.fromEntries(this.cacheERC20Metadata);
-          this.kvStore.set<Record<string, CurrencyCache>>(key, obj);
+          this.cacheERC20Metadata.delete(key);
+          {
+            const dbKey = `cacheERC20Metadata-v2`;
+            const obj = Object.fromEntries(this.cacheERC20Metadata);
+            this.kvStore.set<Record<string, CurrencyCache>>(dbKey, obj);
+          }
           res = undefined;
           staled = false;
         }
       } else if (Date.now() - res.timestamp > this.cacheDuration) {
-        this.cacheERC20Metadata.delete(`${chainId}/${contractAddress}`);
-        const key = `cacheERC20Metadata-v2`;
-        const obj = Object.fromEntries(this.cacheERC20Metadata);
-        this.kvStore.set<Record<string, CurrencyCache>>(key, obj);
+        this.cacheERC20Metadata.delete(key);
+
+        const savedStaled = this.staledERC20Metadata.has(key);
+        if (!savedStaled) {
+          const dbKey = `cacheERC20Metadata-v2`;
+          const obj = Object.fromEntries(this.cacheERC20Metadata);
+          this.kvStore.set<Record<string, CurrencyCache>>(dbKey, obj);
+
+          this.staledERC20Metadata.set(key, res);
+        }
+
         staled = true;
       }
     }
@@ -318,9 +331,17 @@ export class ERC20CurrencyRegistrar {
     contractAddress: string,
     cache: CurrencyCache
   ): void {
-    this.cacheERC20Metadata.set(`${chainId}/${contractAddress}`, cache);
-    const key = `cacheERC20Metadata-v2`;
-    const obj = Object.fromEntries(this.cacheERC20Metadata);
-    this.kvStore.set<Record<string, CurrencyCache>>(key, obj);
+    const key = `${chainId}/${contractAddress}`;
+
+    this.cacheERC20Metadata.set(key, cache);
+    {
+      const dbKey = `cacheERC20Metadata-v2`;
+      const obj = Object.fromEntries(this.cacheERC20Metadata);
+      this.kvStore.set<Record<string, CurrencyCache>>(dbKey, obj);
+    }
+
+    if (this.staledERC20Metadata.has(key)) {
+      this.staledERC20Metadata.set(key, cache);
+    }
   }
 }

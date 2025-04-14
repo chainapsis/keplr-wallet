@@ -83,7 +83,9 @@ export class IBCCurrencyRegistrar {
   }
 
   protected cacheDenomTracePaths: Map<string, CacheIBCDenomData> = new Map();
+  protected staledDenomTracePaths: Map<string, CacheIBCDenomData> = new Map();
   protected cacheTokenInfoMetadata: Map<string, CacheTokenInfo> = new Map();
+  protected staledTokenInfoMetadata: Map<string, CacheTokenInfo> = new Map();
 
   @observable
   public isInitialized = false;
@@ -136,27 +138,25 @@ export class IBCCurrencyRegistrar {
     // v2: Add "clientChainId", "counterpartyPortId", "counterpartyChannelId" fields to the paths.
     // v3: raw response의 값들을 저장하도록 수정
     {
-      const key = `cache-ibc-denom-trace-paths-v3`;
+      const dbKey = `cache-ibc-denom-trace-paths-v3`;
       const saved = await this.kvStore.get<Record<string, CacheIBCDenomData>>(
-        key
+        dbKey
       );
       if (saved) {
         for (const [key, value] of Object.entries(saved)) {
-          if (Date.now() - value.timestamp < this.cacheDuration) {
-            this.cacheDenomTracePaths.set(key, value);
-          }
+          this.cacheDenomTracePaths.set(key, value);
         }
       }
     }
 
     {
-      const key = `cache-token-info`;
-      const saved = await this.kvStore.get<Record<string, CacheTokenInfo>>(key);
+      const dbKey = `cache-token-info`;
+      const saved = await this.kvStore.get<Record<string, CacheTokenInfo>>(
+        dbKey
+      );
       if (saved) {
         for (const [key, value] of Object.entries(saved)) {
-          if (Date.now() - value.timestamp < this.cacheDuration) {
-            this.cacheTokenInfoMetadata.set(key, value);
-          }
+          this.cacheTokenInfoMetadata.set(key, value);
         }
       }
     }
@@ -217,7 +217,7 @@ export class IBCCurrencyRegistrar {
 
     let isGlobalFetching = false;
     let fromCache = false;
-    let cached = this.getCacheIBCDenomData(chainId, hash);
+    let { res: cached, staled } = this.getCacheIBCDenomData(chainId, hash);
     if (cached) {
       if (
         !cached.denomTrace.paths.some((path) => {
@@ -249,15 +249,16 @@ export class IBCCurrencyRegistrar {
         if (originChainInfo && cached.originChainUnknown) {
           cached = undefined;
           fromCache = false;
+          staled = false;
           this.removeCacheIBCDenomData(chainId, hash);
         }
         if (counterpartyChainInfo && cached?.counterpartyChainUnknown) {
           cached = undefined;
           fromCache = false;
+          staled = false;
           this.removeCacheIBCDenomData(chainId, hash);
         }
       } else {
-        // If cache has unresolved paths, do nothing.
         return {
           value: undefined,
           done: true,
@@ -265,7 +266,7 @@ export class IBCCurrencyRegistrar {
       }
     }
 
-    if (!fromCache) {
+    if (!fromCache || staled) {
       let isFetching = false;
 
       const queryDenomTrace =
@@ -274,6 +275,7 @@ export class IBCCurrencyRegistrar {
 
       if (queryDenomTrace.isFetching) {
         isFetching = true;
+        isGlobalFetching = true;
       }
 
       if (denomTrace) {
@@ -395,6 +397,28 @@ export class IBCCurrencyRegistrar {
           });
         }
       }
+
+      if (isGlobalFetching && staled && cached) {
+        if (!denomTrace) {
+          denomTrace = cached.denomTrace;
+        }
+        if (
+          !originChainInfo &&
+          cached.originChainId &&
+          this.chainStore.hasChain(cached.originChainId)
+        ) {
+          originChainInfo = this.chainStore.getChain(cached.originChainId);
+        }
+        if (
+          !counterpartyChainInfo &&
+          cached.counterpartyChainId &&
+          this.chainStore.hasChain(cached.counterpartyChainId)
+        ) {
+          counterpartyChainInfo = this.chainStore.getChain(
+            cached.counterpartyChainId
+          );
+        }
+      }
     }
 
     if (originChainInfo && denomTrace) {
@@ -421,7 +445,7 @@ export class IBCCurrencyRegistrar {
               originChainId: originChainInfo.chainId,
               originCurrency: currency,
             },
-            done: true,
+            done: !isGlobalFetching,
           };
         }
 
@@ -662,7 +686,11 @@ export class IBCCurrencyRegistrar {
             break;
           default:
             const currency = originChainInfo.findCurrency(denomTrace.denom);
-
+            if (
+              originChainInfo.isCurrencyRegistrationInProgress(denomTrace.denom)
+            ) {
+              isGlobalFetching = true;
+            }
             if (currency && !("paths" in currency)) {
               return {
                 value: {
@@ -680,17 +708,7 @@ export class IBCCurrencyRegistrar {
                   originChainId: originChainInfo.chainId,
                   originCurrency: currency,
                 },
-                done: (() => {
-                  if (
-                    originChainInfo.isCurrencyRegistrationInProgress(
-                      currency.coinMinimalDenom
-                    )
-                  ) {
-                    return false;
-                  }
-
-                  return fromCache;
-                })(),
+                done: !isGlobalFetching,
               };
             }
             break;
@@ -728,7 +746,10 @@ export class IBCCurrencyRegistrar {
     fromCache: boolean;
     notFound: boolean;
   } {
-    const cached = this.getCacheTokenInfo(chainId, contractAddress);
+    const { res: cached, staled } = this.getCacheTokenInfo(
+      chainId,
+      contractAddress
+    );
     if (cached) {
       if (cached.notFound) {
         return {
@@ -738,17 +759,19 @@ export class IBCCurrencyRegistrar {
           notFound: true,
         };
       }
-      return {
-        res: {
-          coinDenom: cached.coinDenom,
-          decimals: cached.coinDecimals,
-          coingeckoId: cached.coinGeckoId,
-          coinImageUrl: cached.coinImageUrl,
-        },
-        isFetching: false,
-        fromCache: true,
-        notFound: false,
-      };
+      if (!staled) {
+        return {
+          res: {
+            coinDenom: cached.coinDenom,
+            decimals: cached.coinDecimals,
+            coingeckoId: cached.coinGeckoId,
+            coinImageUrl: cached.coinImageUrl,
+          },
+          isFetching: false,
+          fromCache: true,
+          notFound: false,
+        };
+      }
     }
 
     const queries = this.queriesStore.get(chainId);
@@ -808,7 +831,17 @@ export class IBCCurrencyRegistrar {
           };
         } else {
           return {
-            res: undefined,
+            res:
+              contractInfo?.error?.status === 404
+                ? undefined
+                : cached
+                ? {
+                    coinDenom: cached.coinDenom,
+                    decimals: cached.coinDecimals,
+                    coingeckoId: cached.coinGeckoId,
+                    coinImageUrl: cached.coinImageUrl,
+                  }
+                : undefined,
             isFetching,
             fromCache: false,
             notFound: contractInfo?.error?.status === 404,
@@ -832,105 +865,39 @@ export class IBCCurrencyRegistrar {
     }
   }
 
-  protected getERC20TokenMetadata(
-    chainId: string,
-    coinMinimalDenom: string
-  ): {
-    res:
-      | {
-          coinDenom: string;
-          decimals: number;
-          coingeckoId: string | undefined;
-          coinImageUrl: string | undefined;
-        }
-      | undefined;
-    isFetching: boolean;
-    fromCache: boolean;
-    notFound: boolean;
-  } {
-    const cached = this.getCacheTokenInfo(chainId, coinMinimalDenom);
-    if (cached) {
-      if (cached.notFound) {
-        return {
-          res: undefined,
-          isFetching: false,
-          fromCache: true,
-          notFound: true,
-        };
-      }
-      return {
-        res: {
-          coinDenom: cached.coinDenom,
-          decimals: cached.coinDecimals,
-          coingeckoId: cached.coinGeckoId,
-          coinImageUrl: cached.coinImageUrl,
-        },
-        isFetching: false,
-        fromCache: true,
-        notFound: false,
-      };
-    }
-
-    const queries = this.queriesStore.get(chainId);
-
-    if (queries.ethereum) {
-      const contractAddress = coinMinimalDenom.replace("erc20/", "");
-      const contractInfo =
-        queries.ethereum.queryEthereumERC20ContractInfo.getQueryContract(
-          contractAddress
-        );
-      const isFetching = contractInfo.isFetching;
-      if (contractInfo.tokenInfo) {
-        return {
-          res: {
-            coinDenom: contractInfo.tokenInfo.symbol,
-            decimals: contractInfo.tokenInfo.decimals,
-            coingeckoId: undefined,
-            coinImageUrl: undefined,
-          },
-          isFetching,
-          fromCache: false,
-          notFound: false,
-        };
-      } else {
-        return {
-          res: undefined,
-          isFetching,
-          fromCache: false,
-          notFound: contractInfo.notFound,
-        };
-      }
-    } else {
-      return {
-        res: undefined,
-        isFetching: false,
-        fromCache: false,
-        notFound: false,
-      };
-    }
-  }
-
   protected getCacheIBCDenomData(
     chainId: string,
     denomTraceHash: string
-  ): CacheIBCDenomData | undefined {
-    let res = this.cacheDenomTracePaths.get(
-      `${ChainIdHelper.parse(chainId).identifier}/${denomTraceHash}`
-    );
+  ): { res: CacheIBCDenomData | undefined; staled: boolean } {
+    const key = `${ChainIdHelper.parse(chainId).identifier}/${denomTraceHash}`;
+
+    const res =
+      this.cacheDenomTracePaths.get(key) || this.staledDenomTracePaths.get(key);
+    let staled = false;
 
     if (res) {
       if (Date.now() - res.timestamp > this.cacheDuration) {
-        this.cacheDenomTracePaths.delete(
-          `${ChainIdHelper.parse(chainId).identifier}/${denomTraceHash}`
-        );
-        const key = `cache-ibc-denom-trace-paths-v3`;
-        const obj = Object.fromEntries(this.cacheDenomTracePaths);
-        this.kvStore.set<Record<string, CacheIBCDenomData>>(key, obj);
-        res = undefined;
+        this.cacheDenomTracePaths.delete(key);
+
+        const savedStaled = this.staledDenomTracePaths.has(key);
+        if (!savedStaled) {
+          {
+            const dbKey = `cache-ibc-denom-trace-paths-v3`;
+            const obj = Object.fromEntries(this.cacheDenomTracePaths);
+            this.kvStore.set<Record<string, CacheIBCDenomData>>(dbKey, obj);
+          }
+
+          this.staledDenomTracePaths.set(key, res);
+        }
+
+        staled = true;
       }
     }
 
-    return res;
+    return {
+      res,
+      staled,
+    };
   }
 
   protected setCacheIBCDenomData(
@@ -938,55 +905,77 @@ export class IBCCurrencyRegistrar {
     denomTraceHash: string,
     data: CacheIBCDenomData
   ) {
-    this.cacheDenomTracePaths.set(
-      `${ChainIdHelper.parse(chainId).identifier}/${denomTraceHash}`,
-      data
-    );
-    const key = `cache-ibc-denom-trace-paths-v3`;
-    const obj = Object.fromEntries(this.cacheDenomTracePaths);
-    this.kvStore.set<Record<string, CacheIBCDenomData>>(key, obj);
+    const key = `${ChainIdHelper.parse(chainId).identifier}/${denomTraceHash}`;
+    this.cacheDenomTracePaths.set(key, data);
+    {
+      const dbKey = `cache-ibc-denom-trace-paths-v3`;
+      const obj = Object.fromEntries(this.cacheDenomTracePaths);
+      this.kvStore.set<Record<string, CacheIBCDenomData>>(dbKey, obj);
+    }
+
+    if (this.staledDenomTracePaths.has(key)) {
+      this.staledDenomTracePaths.set(key, data);
+    }
   }
 
   protected removeCacheIBCDenomData(chainId: string, denomTraceHash: string) {
-    this.cacheDenomTracePaths.delete(
-      `${ChainIdHelper.parse(chainId).identifier}/${denomTraceHash}`
-    );
-    const key = `cache-ibc-denom-trace-paths-v3`;
-    const obj = Object.fromEntries(this.cacheDenomTracePaths);
-    this.kvStore.set<Record<string, CacheIBCDenomData>>(key, obj);
+    const key = `${ChainIdHelper.parse(chainId).identifier}/${denomTraceHash}`;
+    this.cacheDenomTracePaths.delete(key);
+    {
+      const dbKey = `cache-ibc-denom-trace-paths-v3`;
+      const obj = Object.fromEntries(this.cacheDenomTracePaths);
+      this.kvStore.set<Record<string, CacheIBCDenomData>>(dbKey, obj);
+    }
+
+    this.staledDenomTracePaths.delete(key);
   }
 
   protected getCacheTokenInfo(
     chainId: string,
     coinMinimalDenom: string
-  ): CacheTokenInfo | undefined {
-    let res = this.cacheTokenInfoMetadata.get(
-      `${ChainIdHelper.parse(chainId).identifier}/${coinMinimalDenom}`
-    );
+  ): { res: CacheTokenInfo | undefined; staled: boolean } {
+    const key = `${
+      ChainIdHelper.parse(chainId).identifier
+    }/${coinMinimalDenom}`;
+
+    let res =
+      this.cacheTokenInfoMetadata.get(key) ||
+      this.staledTokenInfoMetadata.get(key);
+    let staled = false;
 
     if (res) {
       if (res.notFound) {
         if (Date.now() - res.timestamp > this.failedCacheDuration) {
-          this.cacheTokenInfoMetadata.delete(
-            `${ChainIdHelper.parse(chainId).identifier}/${coinMinimalDenom}`
-          );
-          const key = `cache-token-info`;
-          const obj = Object.fromEntries(this.cacheTokenInfoMetadata);
-          this.kvStore.set<Record<string, CacheTokenInfo>>(key, obj);
+          this.cacheTokenInfoMetadata.delete(key);
+          {
+            const dbKey = `cache-token-info`;
+            const obj = Object.fromEntries(this.cacheTokenInfoMetadata);
+            this.kvStore.set<Record<string, CacheTokenInfo>>(dbKey, obj);
+          }
           res = undefined;
         }
       } else if (Date.now() - res.timestamp > this.cacheDuration) {
-        this.cacheTokenInfoMetadata.delete(
-          `${ChainIdHelper.parse(chainId).identifier}/${coinMinimalDenom}`
-        );
-        const key = `cache-token-info`;
-        const obj = Object.fromEntries(this.cacheTokenInfoMetadata);
-        this.kvStore.set<Record<string, CacheTokenInfo>>(key, obj);
-        res = undefined;
+        this.cacheTokenInfoMetadata.delete(key);
+
+        const savedStaled = this.staledTokenInfoMetadata.has(key);
+        if (savedStaled) {
+          {
+            const dbKey = `cache-token-info`;
+            const obj = Object.fromEntries(this.cacheTokenInfoMetadata);
+            this.kvStore.set<Record<string, CacheTokenInfo>>(dbKey, obj);
+          }
+
+          this.staledTokenInfoMetadata.set(key, res);
+        }
+
+        staled = true;
       }
     }
 
-    return res;
+    return {
+      res,
+      staled,
+    };
   }
 
   protected setCacheTokenInfo(
@@ -994,12 +983,19 @@ export class IBCCurrencyRegistrar {
     coinMinimalDenom: string,
     data: CacheTokenInfo
   ) {
-    this.cacheTokenInfoMetadata.set(
-      `${ChainIdHelper.parse(chainId).identifier}/${coinMinimalDenom}`,
-      data
-    );
-    const key = `cache-token-info`;
-    const obj = Object.fromEntries(this.cacheTokenInfoMetadata);
-    this.kvStore.set<Record<string, CacheTokenInfo>>(key, obj);
+    const key = `${
+      ChainIdHelper.parse(chainId).identifier
+    }/${coinMinimalDenom}`;
+
+    this.cacheTokenInfoMetadata.set(key, data);
+    {
+      const dbKey = `cache-token-info`;
+      const obj = Object.fromEntries(this.cacheTokenInfoMetadata);
+      this.kvStore.set<Record<string, CacheTokenInfo>>(dbKey, obj);
+    }
+
+    if (this.staledTokenInfoMetadata.has(key)) {
+      this.staledTokenInfoMetadata.set(key, data);
+    }
   }
 }
