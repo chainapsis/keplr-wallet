@@ -81,6 +81,8 @@ export async function simpleFetch<R>(
     ...otherOptions,
   });
 
+  const isGETMethod = (otherOptions?.method || "GET").toUpperCase() === "GET";
+
   let data: R;
 
   if (fetched.status === 204) {
@@ -105,12 +107,13 @@ export async function simpleFetch<R>(
     url: actualURL,
     data,
     headers: fetched.headers,
-    status: fetched.status,
+    // GET이면서 204인 경우는 404로 처리
+    status: isGETMethod && fetched.status === 204 ? 404 : fetched.status,
     statusText: fetched.statusText,
   };
 
   const validateStatusFn = options?.validateStatus || defaultValidateStatusFn;
-  if (!validateStatusFn(fetched.status)) {
+  if (!validateStatusFn(res.status)) {
     throw new SimpleFetchError(baseURL, url, res);
   }
 

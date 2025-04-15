@@ -250,9 +250,8 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     keyRingStore.status,
     isFontLoaded,
     chainStore.isInitializing,
-    chainStore.chainInfos,
+    chainStore.modularChainInfos,
     tokenFactoryRegistrar.isInitialized,
-    erc20CurrencyRegistrar.isInitialized,
     ibcCurrencyRegistrar.isInitialized,
     lsmCurrencyRegistrar.isInitialized,
     priceStore.isInitialized,
@@ -262,6 +261,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     gravityBridgeCurrencyRegistrar.isInitialized,
     axelarEVMBridgeCurrencyRegistrar.isInitialized,
     interactionStore.isInitialized,
+    erc20CurrencyRegistrar.isInitialized,
     accountStore,
     ibcChannelStore.isInitialized,
   ]);

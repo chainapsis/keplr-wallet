@@ -9,4 +9,5 @@ export const ErrSignRejected = 7;
 
 export interface LedgerOptions {
   useWebHID: boolean;
+  signEthPlainJSON?: boolean;
 }

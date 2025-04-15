@@ -1,5 +1,6 @@
 import { EthermintChainIdHelper } from "@keplr-wallet/cosmos";
 import { ProtoMsgsOrWithAminoMsgs } from "./types";
+import { ChainInfo } from "@keplr-wallet/types";
 
 export function txEventsWithPreOnFulfill(
   onTxEvents:
@@ -78,16 +79,19 @@ export function txEventsWithPreOnFulfill(
   };
 }
 
-export const getEip712TypedDataBasedOnChainId = (
-  chainId: string,
+export const getEip712TypedDataBasedOnChainInfo = (
+  chainInfo: ChainInfo,
   msgs: ProtoMsgsOrWithAminoMsgs
 ): {
   types: Record<string, { name: string; type: string }[] | undefined>;
   domain: Record<string, any>;
   primaryType: string;
 } => {
+  const chainId = chainInfo.chainId;
   const chainIsInjective = chainId.startsWith("injective");
-  const { ethChainId } = EthermintChainIdHelper.parse(chainId);
+  const signPlainJSON =
+    chainInfo.features &&
+    chainInfo.features.includes("evm-ledger-sign-plain-json");
 
   const types = {
     types: {
@@ -109,7 +113,7 @@ export const getEip712TypedDataBasedOnChainId = (
         { name: "sequence", type: "string" },
       ],
       Fee: [
-        { name: "feePayer", type: "string" },
+        ...(signPlainJSON ? [] : [{ name: "feePayer", type: "string" }]),
         { name: "amount", type: "Coin[]" },
         { name: "gas", type: "string" },
       ],
@@ -126,7 +130,10 @@ export const getEip712TypedDataBasedOnChainId = (
     domain: {
       name: "Cosmos Web3",
       version: "1.0.0",
-      chainId: ethChainId.toString(),
+      // signPlainJSON일때 밑의 값은 사실 사용되지 않으므로 대강 처리
+      chainId: signPlainJSON
+        ? 9999
+        : EthermintChainIdHelper.parse(chainId).ethChainId.toString(),
       verifyingContract: "cosmos",
       salt: "0",
     },
@@ -141,7 +148,8 @@ export const getEip712TypedDataBasedOnChainId = (
       { name: "timeout_height", type: "string" },
     ];
     types.domain.name = "Injective Web3";
-    types.domain.chainId = "0x" + ethChainId.toString(16);
+    types.domain.chainId =
+      "0x" + EthermintChainIdHelper.parse(chainId).ethChainId.toString(16);
     types.types.Fee = [
       { name: "amount", type: "Coin[]" },
       { name: "gas", type: "string" },

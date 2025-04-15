@@ -252,6 +252,9 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
                 setLedgerInteractingError(undefined);
                 presignOptions = {
                   useWebHID: uiConfigStore.useWebHIDLedger,
+                  signEthPlainJSON: chainStore
+                    .getChain(signInteractionStore.waitingData.data.chainId)
+                    .hasFeature("evm-ledger-sign-plain-json"),
                 };
               } else if (
                 signInteractionStore.waitingData.data.keyType === "keystone"

@@ -395,6 +395,9 @@ export const CosmosTxView: FunctionComponent<{
         setLedgerInteractingError(undefined);
         presignOptions = {
           useWebHID: uiConfigStore.useWebHIDLedger,
+          signEthPlainJSON: chainStore
+            .getChain(signInteractionStore.waitingData!.data.chainId)
+            .hasFeature("evm-ledger-sign-plain-json"),
         };
       } else if (interactionData.data.keyType === "keystone") {
         setIsKeystoneInteracting(true);
