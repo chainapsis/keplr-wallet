@@ -508,61 +508,7 @@ export const ViewOptionsContextMenu: FunctionComponent<{
 
         <Tooltip
           content={
-            <Box width="17rem" padding="0.125rem 0.375rem">
-              <YAxis>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <XAxis gap="0.25rem" alignY="center">
-                    <FireIcon color={ColorPalette["blue-400"]} />
-                    <Body3
-                      color={
-                        theme.mode === "light"
-                          ? ColorPalette["gray-500"]
-                          : ColorPalette["white"]
-                      }
-                    >
-                      {intl.formatMessage({
-                        id: "page.main.components.context-menu.tooltip-title",
-                      })}
-                    </Body3>
-                  </XAxis>
-                  <Box
-                    onClick={handleCloseTooltip}
-                    cursor="pointer"
-                    alignX="right"
-                  >
-                    <CloseIcon
-                      color={
-                        theme.mode === "light"
-                          ? ColorPalette["gray-200"]
-                          : ColorPalette["gray-300"]
-                      }
-                      width="1.25rem"
-                      height="1.25rem"
-                    />
-                  </Box>
-                </div>
-                <Gutter size="0.4375rem" />
-                <Body2
-                  color={
-                    theme.mode === "light"
-                      ? ColorPalette["gray-300"]
-                      : ColorPalette["gray-200"]
-                  }
-                  style={{ lineHeight: "140%" }}
-                >
-                  {intl.formatMessage({
-                    id: "page.main.components.context-menu.tooltip-paragraph",
-                  })}
-                </Body2>
-              </YAxis>
-            </Box>
+            <SuggestionTooltipContent handleCloseTooltip={handleCloseTooltip} />
           }
           backgroundColor={
             theme.mode === "light"
@@ -620,6 +566,67 @@ export const ViewOptionsContextMenu: FunctionComponent<{
     );
   }
 );
+
+const SuggestionTooltipContent: FunctionComponent<{
+  handleCloseTooltip: () => void;
+}> = ({ handleCloseTooltip }) => {
+  const intl = useIntl();
+  const theme = useTheme();
+
+  return (
+    <Box width="17rem" padding="0.125rem 0.375rem">
+      <YAxis>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <XAxis gap="0.25rem" alignY="center">
+            <FireIcon color={ColorPalette["blue-400"]} />
+            <Body3
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-500"]
+                  : ColorPalette["white"]
+              }
+            >
+              {intl.formatMessage({
+                id: "page.main.components.context-menu.tooltip-title",
+              })}
+            </Body3>
+          </XAxis>
+          <Box onClick={handleCloseTooltip} cursor="pointer" alignX="right">
+            <CloseIcon
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-200"]
+                  : ColorPalette["gray-300"]
+              }
+              width="1.25rem"
+              height="1.25rem"
+            />
+          </Box>
+        </div>
+        <Gutter size="0.4375rem" />
+        <Body2
+          color={
+            theme.mode === "light"
+              ? ColorPalette["gray-300"]
+              : ColorPalette["gray-200"]
+          }
+          style={{ lineHeight: "140%" }}
+        >
+          {intl.formatMessage({
+            id: "page.main.components.context-menu.tooltip-paragraph",
+          })}
+        </Body2>
+      </YAxis>
+    </Box>
+  );
+};
 
 const ViewOptionsIcon: FunctionComponent<IconProps> = ({ color }) => {
   return (
