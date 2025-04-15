@@ -1034,7 +1034,8 @@ export class HugeQueriesStore {
   //    - 토큰의 recommendedSymbol이 이미 존재하는 그룹의 originCurrency.coinDenom과 일치하거나(ERC20 & IBC 혼합 그룹),
   //    - 토큰의 recommendedSymbol이 이미 존재하는 그룹의 coinDenom과 일치하면(ERC20 그룹) 해당 그룹에 추가
   //    - 일치하는 그룹이 없으면 recommendedSymbol을 키로 새 그룹 생성
-  // 3. 나머지 Unknown 토큰들은 단일 그룹으로 처리
+  // 3. BTC 토큰들은 linkedChainKey를 키로 그룹화
+  // 4. 나머지 Unknown 토큰들은 단일 그룹으로 처리
   @computed
   get groupedTokensMap(): Map<string, ViewToken[]> {
     const tokensMap = new Map<string, ViewToken[]>();
@@ -1043,6 +1044,7 @@ export class HugeQueriesStore {
       allowIBCToken: true,
     });
 
+    // IBC
     for (const viewToken of allKnownBalances) {
       const currency = viewToken.token.currency;
 
@@ -1051,7 +1053,6 @@ export class HugeQueriesStore {
         currency.originChainId &&
         currency.originCurrency?.coinMinimalDenom
       ) {
-        // IBC
         const originChainId = currency.originChainId;
         const coinMinimalDenom = currency.originCurrency.coinMinimalDenom;
 
@@ -1066,6 +1067,65 @@ export class HugeQueriesStore {
       }
     }
 
+    // ERC20
+    for (const viewToken of allKnownBalances) {
+      if (processedTokens.has(viewToken)) {
+        continue;
+      }
+
+      const currency = viewToken.token.currency;
+      const chainId = viewToken.chainInfo.chainId;
+
+      const erc20Asset = this.getErc20AssetForToken(chainId, currency);
+
+      if (erc20Asset && erc20Asset.recommendedSymbol) {
+        const groupKey =
+          this.findGroupKeyForAsset(erc20Asset.recommendedSymbol, tokensMap) ||
+          `erc20:${erc20Asset.recommendedSymbol}`;
+
+        this.addTokenToGroup(groupKey, viewToken, tokensMap);
+        processedTokens.set(viewToken, true);
+      }
+    }
+
+    // BTC
+    for (const viewToken of allKnownBalances) {
+      if (processedTokens.has(viewToken)) {
+        continue;
+      }
+
+      const modularChainInfo = viewToken.chainInfo;
+      if ("bitcoin" in modularChainInfo) {
+        const groupedModularChainInfo =
+          this.chainStore.groupedModularChainInfos.find(
+            (group) =>
+              "linkedChainKey" in group &&
+              group.linkedChainKey &&
+              (group.chainId === modularChainInfo.chainId ||
+                (group.linkedModularChainInfos &&
+                  group.linkedModularChainInfos.some(
+                    (linkedChain) =>
+                      linkedChain.chainId === modularChainInfo.chainId
+                  )))
+          );
+
+        if (
+          groupedModularChainInfo &&
+          "linkedChainKey" in groupedModularChainInfo
+        ) {
+          const groupKey = `btc:${groupedModularChainInfo.linkedChainKey}`;
+
+          if (!tokensMap.has(groupKey)) {
+            tokensMap.set(groupKey, []);
+          }
+
+          tokensMap.get(groupKey)!.push(viewToken);
+          processedTokens.set(viewToken, true);
+        }
+      }
+    }
+
+    // Unknown
     for (const viewToken of allKnownBalances) {
       if (processedTokens.has(viewToken)) {
         continue;
@@ -1075,23 +1135,11 @@ export class HugeQueriesStore {
       const chainId = viewToken.chainInfo.chainId;
       const coinMinimalDenom = currency.coinMinimalDenom;
 
-      const erc20Asset = this.getErc20AssetForToken(chainId, currency);
-
-      if (erc20Asset && erc20Asset.recommendedSymbol) {
-        // ERC20
-        const groupKey =
-          this.findGroupKeyForAsset(erc20Asset.recommendedSymbol, tokensMap) ||
-          `erc20:${erc20Asset.recommendedSymbol}`;
-
-        this.addTokenToGroup(groupKey, viewToken, tokensMap);
-      } else {
-        // Unknown token
-        this.addTokenToGroup(
-          `${chainId}/${coinMinimalDenom}`,
-          viewToken,
-          tokensMap
-        );
-      }
+      this.addTokenToGroup(
+        `${chainId}/${coinMinimalDenom}`,
+        viewToken,
+        tokensMap
+      );
     }
 
     for (const tokens of tokensMap.values()) {
