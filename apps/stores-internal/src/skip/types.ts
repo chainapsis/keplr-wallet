@@ -286,3 +286,13 @@ export type IBCChannel = {
 
   denom: string;
 };
+
+export type SkipAsset = {
+  denom: string;
+  chainId: string;
+  originDenom: string;
+  originChainId: string;
+  isEvm: boolean;
+  tokenContract?: string;
+  recommendedSymbol?: string;
+};

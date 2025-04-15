@@ -14,12 +14,12 @@ import { computedFn } from "mobx-utils";
 import { BinarySortArray } from "./sort";
 import { StarknetQueriesStore } from "@keplr-wallet/stores-starknet";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import { ModularChainInfo } from "@keplr-wallet/types";
+import { AppCurrency, ModularChainInfo } from "@keplr-wallet/types";
 import { BitcoinQueriesStore } from "@keplr-wallet/stores-bitcoin";
 import { UIConfigStore } from "../ui-config";
 import { KeyRingStore } from "@keplr-wallet/stores-core";
 import { AllTokenMapByChainIdentifierState } from "./all-token-map-state";
-import { SkipQueries } from "@keplr-wallet/stores-internal";
+import { SkipAsset, SkipQueries } from "@keplr-wallet/stores-internal";
 
 interface ViewToken {
   chainInfo: IChainInfoImpl | ModularChainInfo;
@@ -1027,7 +1027,6 @@ export class HugeQueriesStore {
     }
   }
 
-  @computed
   // 그룹화 로직
   // 1. 먼저 IBC 토큰들을 originChainId와 originCurrency.coinMinimalDenom으로 그룹화
   // 2. ERC20 토큰 처리:
@@ -1036,6 +1035,7 @@ export class HugeQueriesStore {
   //    - 토큰의 recommendedSymbol이 이미 존재하는 그룹의 coinDenom과 일치하면(ERC20 그룹) 해당 그룹에 추가
   //    - 일치하는 그룹이 없으면 recommendedSymbol을 키로 새 그룹 생성
   // 3. 나머지 Unknown 토큰들은 단일 그룹으로 처리
+  @computed
   get groupedTokensMap(): Map<string, ViewToken[]> {
     const tokensMap = new Map<string, ViewToken[]>();
     const processedTokens = new Map<ViewToken, boolean>();
@@ -1077,22 +1077,21 @@ export class HugeQueriesStore {
 
       const erc20Asset = this.getErc20AssetForToken(chainId, currency);
 
-      if (!erc20Asset || !erc20Asset.recommendedSymbol) {
+      if (erc20Asset && erc20Asset.recommendedSymbol) {
+        // ERC20
+        const groupKey =
+          this.findGroupKeyForAsset(erc20Asset.recommendedSymbol, tokensMap) ||
+          `erc20:${erc20Asset.recommendedSymbol}`;
+
+        this.addTokenToGroup(groupKey, viewToken, tokensMap);
+      } else {
         // Unknown token
         this.addTokenToGroup(
           `${chainId}/${coinMinimalDenom}`,
           viewToken,
           tokensMap
         );
-        continue;
       }
-
-      // ERC20
-      const groupKey =
-        this.findGroupKeyForAsset(erc20Asset.recommendedSymbol, tokensMap) ||
-        `erc20:${erc20Asset.recommendedSymbol}`;
-
-      this.addTokenToGroup(groupKey, viewToken, tokensMap);
     }
 
     for (const tokens of tokensMap.values()) {
@@ -1100,54 +1099,86 @@ export class HugeQueriesStore {
     }
 
     const sortedEntries = Array.from(tokensMap.entries()).sort(
-      ([, tokensA], [, tokensB]) => {
-        const valueA = this.calculateGroupValue(tokensA);
-        const valueB = this.calculateGroupValue(tokensB);
-
-        if (valueA.equals(valueB)) {
-          return 0;
-        } else if (valueA.gt(valueB)) {
-          return -1;
-        } else {
-          return 1;
-        }
-      }
+      ([, tokensA], [, tokensB]) => this.sortTokenGroups(tokensA, tokensB)
     );
 
     return new Map(sortedEntries);
   }
 
-  private calculateGroupValue(tokens: ViewToken[]): Dec {
-    let totalValue = new Dec(0);
+  protected sortTokenGroups = (
+    tokensA: ViewToken[],
+    tokensB: ViewToken[]
+  ): number => {
+    let valueA = new Dec(0);
+    let valueB = new Dec(0);
 
-    for (const token of tokens) {
+    let aHasBalance = false;
+    let bHasBalance = false;
+
+    for (const token of tokensA) {
       if (token.price) {
-        totalValue = totalValue.add(token.price.toDec());
+        valueA = valueA.add(token.price.toDec());
+      }
+
+      if (
+        (!token.price ||
+          token.price.toDec().equals(HugeQueriesStore.zeroDec)) &&
+        token.token.toDec().gt(HugeQueriesStore.zeroDec)
+      ) {
+        aHasBalance = true;
       }
     }
 
-    return totalValue;
-  }
+    for (const token of tokensB) {
+      if (token.price) {
+        valueB = valueB.add(token.price.toDec());
+      }
 
-  private getErc20AssetForToken(
-    chainId: string,
-    currency: any
-  ): any | undefined {
-    if (!currency.coinMinimalDenom.startsWith("erc20:")) {
-      return undefined;
+      if (
+        (!token.price ||
+          token.price.toDec().equals(HugeQueriesStore.zeroDec)) &&
+        token.token.toDec().gt(HugeQueriesStore.zeroDec)
+      ) {
+        bHasBalance = true;
+      }
     }
 
-    return this.skipQueriesStore.queryAssets
-      .getAssets(chainId)
-      .assetsRaw.find(
-        (asset) =>
-          asset.recommendedSymbol === currency.coinDenom &&
-          asset.tokenContract?.toLowerCase() ===
-            currency.coinMinimalDenom.split(":")[1].toLowerCase()
-      );
-  }
+    if (valueA.equals(valueB)) {
+      if (valueA.equals(HugeQueriesStore.zeroDec)) {
+        if (aHasBalance && !bHasBalance) {
+          return -1;
+        } else if (!aHasBalance && bHasBalance) {
+          return 1;
+        } else {
+          return 0;
+        }
+      }
+      return 0;
+    } else if (valueA.gt(valueB)) {
+      return -1;
+    } else {
+      return 1;
+    }
+  };
 
-  private findGroupKeyForAsset(
+  protected getErc20AssetForToken = computedFn(
+    (chainId: string, currency: AppCurrency): SkipAsset | undefined => {
+      if (!currency.coinMinimalDenom.startsWith("erc20:")) {
+        return undefined;
+      }
+
+      return this.skipQueriesStore.queryAssets
+        .getAssets(chainId)
+        .assetsRaw.find(
+          (asset) =>
+            asset.recommendedSymbol === currency.coinDenom &&
+            asset.tokenContract?.toLowerCase() ===
+              currency.coinMinimalDenom.split(":")[1].toLowerCase()
+        );
+    }
+  );
+
+  protected findGroupKeyForAsset(
     symbol: string,
     tokensMap: Map<string, ViewToken[]>
   ): string | undefined {
@@ -1171,7 +1202,7 @@ export class HugeQueriesStore {
     return undefined;
   }
 
-  private addTokenToGroup(
+  protected addTokenToGroup(
     groupKey: string,
     token: ViewToken,
     tokensMap: Map<string, ViewToken[]>
