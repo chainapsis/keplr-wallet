@@ -1080,8 +1080,10 @@ export class HugeQueriesStore {
 
       if (erc20Asset && erc20Asset.recommendedSymbol) {
         const groupKey =
-          this.findGroupKeyForAsset(erc20Asset.recommendedSymbol, tokensMap) ||
-          `erc20:${erc20Asset.recommendedSymbol}`;
+          this.findERC20GroupKeyBySymbol(
+            erc20Asset.recommendedSymbol,
+            tokensMap
+          ) || `erc20:${erc20Asset.recommendedSymbol}`;
 
         this.addTokenToGroup(groupKey, viewToken, tokensMap);
         processedTokens.set(viewToken, true);
@@ -1096,25 +1098,9 @@ export class HugeQueriesStore {
 
       const modularChainInfo = viewToken.chainInfo;
       if ("bitcoin" in modularChainInfo) {
-        const groupedModularChainInfo =
-          this.chainStore.groupedModularChainInfos.find(
-            (group) =>
-              "linkedChainKey" in group &&
-              group.linkedChainKey &&
-              (group.chainId === modularChainInfo.chainId ||
-                (group.linkedModularChainInfos &&
-                  group.linkedModularChainInfos.some(
-                    (linkedChain) =>
-                      linkedChain.chainId === modularChainInfo.chainId
-                  )))
-          );
+        const groupKey = this.findBitcoinGroupKey(modularChainInfo.chainId);
 
-        if (
-          groupedModularChainInfo &&
-          "linkedChainKey" in groupedModularChainInfo
-        ) {
-          const groupKey = `btc:${groupedModularChainInfo.linkedChainKey}`;
-
+        if (groupKey) {
           if (!tokensMap.has(groupKey)) {
             tokensMap.set(groupKey, []);
           }
@@ -1226,7 +1212,32 @@ export class HugeQueriesStore {
     }
   );
 
-  protected findGroupKeyForAsset(
+  protected findBitcoinGroupKey = computedFn(
+    (chainId: string): string | undefined => {
+      const groupedModularChainInfo =
+        this.chainStore.groupedModularChainInfos.find(
+          (group) =>
+            "linkedChainKey" in group &&
+            group.linkedChainKey &&
+            (group.chainId === chainId ||
+              (group.linkedModularChainInfos &&
+                group.linkedModularChainInfos.some(
+                  (linkedChain) => linkedChain.chainId === chainId
+                )))
+        );
+
+      if (
+        groupedModularChainInfo &&
+        "linkedChainKey" in groupedModularChainInfo
+      ) {
+        return `btc:${groupedModularChainInfo.linkedChainKey}`;
+      }
+
+      return undefined;
+    }
+  );
+
+  protected findERC20GroupKeyBySymbol(
     symbol: string,
     tokensMap: Map<string, ViewToken[]>
   ): string | undefined {
