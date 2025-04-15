@@ -11,6 +11,8 @@ import {
   GoogleAPIKeyForMeasurement,
   CoinGeckoCoinDataByTokenAddress,
   SwapVenues,
+  SkipTokenInfoBaseURL,
+  SkipTokenInfoAPIURI,
 } from "../config.ui";
 import {
   AccountStore,
@@ -348,6 +350,8 @@ export class RootStore {
       OsmosisQueries.use(),
       KeplrETCQueries.use({
         ethereumURL: EthereumEndpoint,
+        skipTokenInfoBaseURL: SkipTokenInfoBaseURL,
+        skipTokenInfoAPIURI: SkipTokenInfoAPIURI,
       }),
       ICNSQueries.use(),
       TokenContractsQueries.use({
@@ -581,7 +585,8 @@ export class RootStore {
 
     this.tokenFactoryRegistrar = new TokenFactoryCurrencyRegistrar(
       new ExtensionKVStore("store_token_factory_currency_registrar"),
-      24 * 3600 * 1000,
+      3 * 24 * 3600 * 1000,
+      1 * 3600 * 1000,
       process.env["KEPLR_EXT_TOKEN_FACTORY_BASE_URL"] || "",
       process.env["KEPLR_EXT_TOKEN_FACTORY_URI"] || "",
       this.chainStore,
@@ -589,7 +594,8 @@ export class RootStore {
     );
     this.ibcCurrencyRegistrar = new IBCCurrencyRegistrar(
       new ExtensionKVStore("store_ibc_curreny_registrar"),
-      24 * 3600 * 1000,
+      3 * 24 * 3600 * 1000,
+      1 * 3600 * 1000,
       this.chainStore,
       this.accountStore,
       this.queriesStore
@@ -616,7 +622,8 @@ export class RootStore {
       );
     this.erc20CurrencyRegistrar = new ERC20CurrencyRegistrar(
       new ExtensionKVStore("store_erc20_currency_registrar"),
-      24 * 3600 * 1000,
+      3 * 24 * 3600 * 1000,
+      1 * 3600 * 1000,
       this.chainStore,
       this.queriesStore
     );
