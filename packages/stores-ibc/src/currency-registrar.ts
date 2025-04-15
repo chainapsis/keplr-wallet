@@ -247,23 +247,43 @@ export class IBCCurrencyRegistrar {
 
           // 만약 이전의 cache에서 originChainId와 counterpartyChainId를 몰랐던 상태였는데
           // 현재는 알게된 경우에는 cache를 사용하지않고 지운다.
-          if (originChainInfo && cached.originChainUnknown) {
-            cached = undefined;
-            fromCache = false;
-            staled = false;
-            this.removeCacheIBCDenomData(chainId, hash);
-          }
-          if (counterpartyChainInfo && cached?.counterpartyChainUnknown) {
+          if (
+            (originChainInfo && cached.originChainUnknown) ||
+            (counterpartyChainInfo && cached.counterpartyChainUnknown)
+          ) {
             cached = undefined;
             fromCache = false;
             staled = false;
             this.removeCacheIBCDenomData(chainId, hash);
           }
         } else {
-          return {
-            value: undefined,
-            done: true,
-          };
+          if (!staled) {
+            // 만약 이전의 cache에서 originChainId와 counterpartyChainId를 몰랐던 상태였는데
+            // 현재는 알게된 경우에는 cache를 사용하지않고 지운다.
+            if (
+              (cached.originChainId &&
+                this.chainStore.hasChain(cached.originChainId) &&
+                cached.originChainUnknown) ||
+              (cached.counterpartyChainId &&
+                this.chainStore.hasChain(cached.counterpartyChainId) &&
+                cached.counterpartyChainUnknown)
+            ) {
+              cached = undefined;
+              fromCache = false;
+              staled = false;
+              this.removeCacheIBCDenomData(chainId, hash);
+            } else {
+              return {
+                value: undefined,
+                done: true,
+              };
+            }
+          } else {
+            cached = undefined;
+            fromCache = false;
+            staled = false;
+            this.removeCacheIBCDenomData(chainId, hash);
+          }
         }
       }
 
