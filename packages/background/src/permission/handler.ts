@@ -9,8 +9,10 @@ import {
   GetGlobalPermissionOriginsMsg,
   GetOriginPermittedChainsMsg,
   GetPermissionOriginsMsg,
+  GetPreferredBitcoinPaymentTypeMsg,
   RemoveGlobalPermissionOriginMsg,
   RemovePermissionOrigin,
+  SetPreferredBitcoinPaymentTypeMsg,
   UpdateCurrentChainIdForBitcoinMsg,
   UpdateCurrentChainIdForEVMMsg,
   UpdateCurrentChainIdForStarknetMsg,
@@ -103,6 +105,16 @@ export const getHandler: (service: PermissionService) => Handler = (
         return handleUpdateCurrentChainIdForBitcoinMsg(service)(
           env,
           msg as UpdateCurrentChainIdForBitcoinMsg
+        );
+      case GetPreferredBitcoinPaymentTypeMsg:
+        return handleGetPreferredBitcoinPaymentTypeMsg(service)(
+          env,
+          msg as GetPreferredBitcoinPaymentTypeMsg
+        );
+      case SetPreferredBitcoinPaymentTypeMsg:
+        return handleSetPreferredBitcoinPaymentTypeMsg(service)(
+          env,
+          msg as SetPreferredBitcoinPaymentTypeMsg
         );
       default:
         throw new KeplrError("permission", 120, "Unknown msg type");
@@ -245,5 +257,21 @@ const handleUpdateCurrentChainIdForBitcoinMsg: (
       msg.permissionOrigin,
       msg.chainId
     );
+  };
+};
+
+const handleGetPreferredBitcoinPaymentTypeMsg: (
+  service: PermissionService
+) => InternalHandler<GetPreferredBitcoinPaymentTypeMsg> = (service) => {
+  return () => {
+    return service.getPreferredBitcoinPaymentType();
+  };
+};
+
+const handleSetPreferredBitcoinPaymentTypeMsg: (
+  service: PermissionService
+) => InternalHandler<SetPreferredBitcoinPaymentTypeMsg> = (service) => {
+  return (_, msg) => {
+    service.setPreferredBitcoinPaymentType(msg.paymentType);
   };
 };

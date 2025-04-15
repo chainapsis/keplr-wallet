@@ -15,6 +15,7 @@ import {
   ChainInfo,
   GENESIS_HASH_TO_NETWORK,
   GenesisHash,
+  SupportedPaymentType as BitcoinPaymentType,
 } from "@keplr-wallet/types";
 import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 import { migrate } from "./migrate";
@@ -37,6 +38,9 @@ export class PermissionService {
   @observable
   protected currentBaseChainIdForBitcoinByOriginMap: Map<string, string> =
     new Map();
+
+  @observable
+  protected preferredBitcoinPaymentType: BitcoinPaymentType | undefined;
 
   constructor(
     protected readonly kvStore: KVStore,
@@ -127,6 +131,16 @@ export class PermissionService {
             }
           });
         }
+
+        const savedPreferredBitcoinPaymentType =
+          await this.kvStore.get<BitcoinPaymentType>(
+            "preferredBitcoinPaymentType/v1"
+          );
+        if (savedPreferredBitcoinPaymentType) {
+          runInAction(() => {
+            this.preferredBitcoinPaymentType = savedPreferredBitcoinPaymentType;
+          });
+        }
       }
     }
 
@@ -146,6 +160,10 @@ export class PermissionService {
       this.kvStore.set(
         "currentBaseChainIdForBitcoinByOriginMap/v1",
         Object.fromEntries(this.currentBaseChainIdForBitcoinByOriginMap)
+      );
+      this.kvStore.set(
+        "preferredBitcoinPaymentType/v1",
+        this.preferredBitcoinPaymentType
       );
     });
   }
@@ -896,5 +914,15 @@ export class PermissionService {
     } else {
       this.setCurrentBaseChainIdForBitcoin(origins, chainId);
     }
+  }
+
+  getPreferredBitcoinPaymentType(): BitcoinPaymentType | undefined {
+    return this.preferredBitcoinPaymentType;
+  }
+
+  @action
+  setPreferredBitcoinPaymentType(paymentType: BitcoinPaymentType) {
+    // CHECK: origin permission 확인 필요 여부
+    this.preferredBitcoinPaymentType = paymentType;
   }
 }

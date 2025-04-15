@@ -541,8 +541,11 @@ export class KeyRingBitcoinService {
       );
     }
 
+    const preferredBitcoinPaymentType =
+      this.permissionService.getPreferredBitcoinPaymentType() ?? "taproot";
+
     // Taproot is default so specify the chain id.
-    const currentChainId = `${currentBaseChainId}:taproot`;
+    const currentChainId = `${currentBaseChainId}:${preferredBitcoinPaymentType}`;
 
     const result = (
       await (async () => {
