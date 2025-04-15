@@ -26,6 +26,7 @@ export const SupportedChainFeatures = [
   "op-stack-l1-data-fee",
   "force-enable-evm-ledger",
   "ibc-v2",
+  "evm-ledger-sign-plain-json",
 ];
 
 /**

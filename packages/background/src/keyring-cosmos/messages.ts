@@ -11,14 +11,11 @@ import { ROUTE } from "./constants";
 import {
   Bech32Address,
   checkAndValidateADR36AminoSignDoc,
-  EthermintChainIdHelper,
 } from "@keplr-wallet/cosmos";
 import {
   SignDoc,
   SignDocDirectAux,
 } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
-import { Int } from "@keplr-wallet/unit";
-import bigInteger from "big-integer";
 
 export class GetCosmosKeyMsg extends Message<Key> {
   public static type() {
@@ -724,21 +721,6 @@ export class RequestSignEIP712CosmosTxMsg_v0 extends Message<AminoSignResponse> 
           "keyring",
           234,
           "Chain id in the message is not matched with the requested chain id"
-        );
-      }
-
-      const { ethChainId } = EthermintChainIdHelper.parse(this.chainId);
-
-      const ethChainIdInMsg: Int = (() => {
-        const value = this.eip712.domain["chainId"];
-        if (typeof value === "string" && value.startsWith("0x")) {
-          return new Int(bigInteger(value.replace("0x", ""), 16).toString());
-        }
-        return new Int(value);
-      })();
-      if (!ethChainIdInMsg.equals(new Int(ethChainId))) {
-        throw new Error(
-          `Unmatched chain id for eth (expected: ${ethChainId}, actual: ${this.eip712.domain["chainId"]})`
         );
       }
     } else {
