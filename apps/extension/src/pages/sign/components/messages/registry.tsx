@@ -16,6 +16,7 @@ import {
   UndelegateMessage,
   VoteMessage,
   PayPacketFeeMessage,
+  CreateBtcDelegationMessage,
 } from "./render";
 import { FormattedMessage } from "react-intl";
 import { useTheme } from "styled-components";
@@ -107,3 +108,4 @@ defaultRegistry.register(TransferMessage);
 defaultRegistry.register(UndelegateMessage);
 defaultRegistry.register(VoteMessage);
 defaultRegistry.register(PayPacketFeeMessage);
+defaultRegistry.register(CreateBtcDelegationMessage);

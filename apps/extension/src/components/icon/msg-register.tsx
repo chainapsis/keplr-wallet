@@ -17,8 +17,8 @@ export const MessageRegisterIcon: FunctionComponent<IconProps> = ({
       }}
     >
       <svg
-        width="12"
-        height="14"
+        width={`calc(0.375 * ${width})`}
+        height={`calc(0.4375 * ${height})`}
         viewBox="0 0 12 14"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
