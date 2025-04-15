@@ -381,18 +381,18 @@ export const ViewOptionsContextMenu: FunctionComponent<{
         setRenderMenu(true);
 
         const scrollElement = globalSimpleBar.ref.current?.getScrollElement();
-        if (scrollElement) {
-          const currentScrollTop = scrollElement.scrollTop;
-          const targetScrollTop =
-            (menuContentRef.current?.offsetHeight || 0) + 60;
+        if (scrollElement && containerRef.current) {
+          const containerRect = containerRef.current.getBoundingClientRect();
+          const scrollRect = scrollElement.getBoundingClientRect();
 
-          if (currentScrollTop < targetScrollTop) {
-            scrollElement.scrollTo({
-              top: targetScrollTop,
-              left: 0,
-              behavior: "smooth",
-            });
-          }
+          const relativeTop =
+            containerRect.top - scrollRect.top + scrollElement.scrollTop;
+
+          scrollElement.scrollTo({
+            top: relativeTop - 60,
+            left: 0,
+            behavior: "smooth",
+          });
         }
       } else {
         const timer = setTimeout(() => {
