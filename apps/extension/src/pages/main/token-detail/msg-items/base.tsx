@@ -168,6 +168,7 @@ export const MsgItemBase: FunctionComponent<{
                           ? ColorPalette["black"]
                           : ColorPalette["gray-10"]
                       }
+                      style={{ lineHeight: "normal" }}
                     >
                       {title}
                     </Subtitle3>
@@ -177,6 +178,7 @@ export const MsgItemBase: FunctionComponent<{
                         <Body3
                           color={ColorPalette["gray-300"]}
                           style={{
+                            lineHeight: "normal",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",

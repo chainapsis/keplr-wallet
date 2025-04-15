@@ -42,7 +42,7 @@ export const MsgRelationBbnClaimRewardFromBTCStaking: FunctionComponent<{
       }
       chainId={msg.chainId}
       title="Claim Reward"
-      paragraph="from BTC Staking"
+      paragraph="From BTC Staking"
       amount={amountPretty}
       prices={prices || {}}
       msg={msg}
