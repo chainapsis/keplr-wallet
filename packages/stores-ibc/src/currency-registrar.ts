@@ -255,6 +255,10 @@ export class IBCCurrencyRegistrar {
             fromCache = false;
             staled = false;
             this.removeCacheIBCDenomData(chainId, hash);
+
+            denomTrace = undefined;
+            originChainInfo = undefined;
+            counterpartyChainInfo = undefined;
           }
         } else {
           if (!staled) {
