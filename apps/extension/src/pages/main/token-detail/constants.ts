@@ -23,7 +23,7 @@ export const Relations = [
   "bbn-wrapped-undelegate",
   "bbn-wrapped-redelegate",
   "bbn-wrapped-cancel-undelegate",
-  // "bbn-create-btc-delegation",
+  "bbn-create-btc-delegation",
   "bbn-claim-reward-from-btc-staking",
 ];
 
