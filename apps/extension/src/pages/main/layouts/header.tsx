@@ -459,7 +459,13 @@ export const MainHeaderLayout = observer<
 
                             return (
                               <Box>
-                                <Subtitle3 color={ColorPalette["white"]}>
+                                <Subtitle3
+                                  color={
+                                    theme.mode === "light"
+                                      ? ColorPalette["gray-700"]
+                                      : ColorPalette["white"]
+                                  }
+                                >
                                   {key === "native-segwit"
                                     ? "Native SegWit"
                                     : "Taproot"}
@@ -568,7 +574,13 @@ export const MainHeaderLayout = observer<
                         </Caption1>
                         <Gutter size="0.75rem" />
                         <Columns sum={1} alignY="center" gutter="0.5rem">
-                          <Subtitle3 color={ColorPalette["white"]}>
+                          <Subtitle3
+                            color={
+                              theme.mode === "light"
+                                ? ColorPalette["gray-700"]
+                                : ColorPalette["white"]
+                            }
+                          >
                             {preferredPaymentTypeForBitcoin === "native-segwit"
                               ? "Native SegWit"
                               : "Taproot"}
@@ -605,6 +617,10 @@ export const MainHeaderLayout = observer<
                                 <Body2
                                   color={
                                     addressConfigHover
+                                      ? theme.mode === "light"
+                                        ? ColorPalette["gray-200"]
+                                        : ColorPalette["gray-300"]
+                                      : theme.mode === "light"
                                       ? ColorPalette["gray-300"]
                                       : ColorPalette["gray-200"]
                                   }
@@ -616,7 +632,11 @@ export const MainHeaderLayout = observer<
                                   height="1rem"
                                   color={
                                     addressConfigHover
-                                      ? ColorPalette["gray-400"]
+                                      ? theme.mode === "light"
+                                        ? ColorPalette["gray-100"]
+                                        : ColorPalette["gray-400"]
+                                      : theme.mode === "light"
+                                      ? ColorPalette["gray-200"]
                                       : ColorPalette["gray-300"]
                                   }
                                 />
@@ -888,6 +908,7 @@ const ChainSelector: FunctionComponent<
     footerContent,
     footerBoxPropsOverride,
   }) => {
+    const theme = useTheme();
     const { x, y, strategy, refs } = useFloating({
       placement: "bottom-end",
       middleware: [
@@ -933,11 +954,17 @@ const ChainSelector: FunctionComponent<
               left: x ?? 0,
 
               minWidth: "19rem",
-              backgroundColor: ColorPalette["gray-600"],
+              backgroundColor:
+                theme.mode === "light"
+                  ? ColorPalette["white"]
+                  : ColorPalette["gray-600"],
               borderRadius: "0.375rem",
               borderStyle: "solid",
               borderWidth: "1px",
-              borderColor: ColorPalette["gray-500"],
+              borderColor:
+                theme.mode === "light"
+                  ? ColorPalette["gray-100"]
+                  : ColorPalette["gray-500"],
             }}
           >
             <Box
@@ -945,14 +972,25 @@ const ChainSelector: FunctionComponent<
               alignY="center"
               paddingX="1rem"
               paddingY="1.25rem"
-              color={ColorPalette["gray-200"]}
-              backgroundColor={ColorPalette["gray-600"]}
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-400"]
+                  : ColorPalette["gray-200"]
+              }
+              backgroundColor={
+                theme.mode === "light"
+                  ? ColorPalette["white"]
+                  : ColorPalette["gray-600"]
+              }
               style={{
                 borderTopLeftRadius: "0.375rem",
                 borderTopRightRadius: "0.375rem",
                 borderBottomStyle: "solid",
                 borderBottomWidth: "1px",
-                borderBottomColor: ColorPalette["gray-500"],
+                borderBottomColor:
+                  theme.mode === "light"
+                    ? ColorPalette["gray-100"]
+                    : ColorPalette["gray-500"],
               }}
             >
               <Columns sum={1} alignY="center" gutter="0.5rem">
@@ -971,14 +1009,15 @@ const ChainSelector: FunctionComponent<
                 alignY="center"
                 paddingX="1rem"
                 paddingY="1.25rem"
-                color={ColorPalette["gray-200"]}
-                backgroundColor={ColorPalette["gray-600"]}
                 style={{
                   borderTopLeftRadius: "0.375rem",
                   borderTopRightRadius: "0.375rem",
                   borderBottomStyle: "solid",
                   borderBottomWidth: "1px",
-                  borderBottomColor: ColorPalette["gray-500"],
+                  borderBottomColor:
+                    theme.mode === "light"
+                      ? ColorPalette["gray-100"]
+                      : ColorPalette["gray-500"],
                 }}
                 {...headerBoxPropsOverride}
               >
@@ -1010,14 +1049,26 @@ const ChainSelector: FunctionComponent<
                     color={
                       item.isDisabled
                         ? ColorPalette["gray-300"]
+                        : theme.mode === "light"
+                        ? ColorPalette["gray-700"]
                         : ColorPalette["white"]
                     }
                     backgroundColor={
-                      ColorPalette[isSelectedItem ? "gray-650" : "gray-600"]
+                      ColorPalette[
+                        isSelectedItem
+                          ? theme.mode === "light"
+                            ? "gray-100"
+                            : "gray-650"
+                          : theme.mode === "light"
+                          ? "white"
+                          : "gray-600"
+                      ]
                     }
                     hover={{
                       backgroundColor: item.isDisabled
                         ? "transparent"
+                        : theme.mode === "light"
+                        ? ColorPalette["gray-50"]
                         : ColorPalette["gray-550"],
                     }}
                     onClick={(e) => {
@@ -1033,7 +1084,15 @@ const ChainSelector: FunctionComponent<
                     }}
                   >
                     {item.content}
-                    {isSelectedItem && <CheckIcon />}
+                    {isSelectedItem && (
+                      <CheckIcon
+                        color={
+                          theme.mode === "light"
+                            ? ColorPalette["blue-400"]
+                            : ColorPalette["gray-200"]
+                        }
+                      />
+                    )}
                   </Box>
                 );
               })}
@@ -1043,8 +1102,11 @@ const ChainSelector: FunctionComponent<
               alignY="center"
               paddingX="1rem"
               paddingY="1.25rem"
-              color={ColorPalette["gray-200"]}
-              backgroundColor={ColorPalette["gray-600"]}
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-300"]
+                  : ColorPalette["gray-200"]
+              }
               style={{
                 borderBottomLeftRadius: "0.375rem",
                 borderBottomRightRadius: "0.375rem",
