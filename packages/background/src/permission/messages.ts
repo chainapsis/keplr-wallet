@@ -428,9 +428,7 @@ export class UpdateCurrentChainIdForBitcoinMsg extends Message<void> {
   }
 }
 
-export class GetPreferredBitcoinPaymentTypeMsg extends Message<
-  BitcoinPaymentType | undefined
-> {
+export class GetPreferredBitcoinPaymentTypeMsg extends Message<BitcoinPaymentType> {
   public static type() {
     return "get-preferred-bitcoin-payment-type";
   }

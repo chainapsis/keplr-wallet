@@ -916,8 +916,8 @@ export class PermissionService {
     }
   }
 
-  getPreferredBitcoinPaymentType(): BitcoinPaymentType | undefined {
-    return this.preferredBitcoinPaymentType;
+  getPreferredBitcoinPaymentType(): BitcoinPaymentType {
+    return this.preferredBitcoinPaymentType ?? "taproot";
   }
 
   @action
