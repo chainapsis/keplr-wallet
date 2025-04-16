@@ -806,25 +806,28 @@ export class KeyRingEthereumService {
           return result;
         }
         case "wallet_switchEthereumChain": {
-          const param =
-            (Array.isArray(params) && (params?.[0] as { chainId: string })) ||
-            undefined;
-          if (!param?.chainId) {
-            throw new Error("Invalid parameters: must provide a chain id.");
-          }
-
-          const currentChainId = this.forceGetCurrentChainId(origin, chainId);
-          const newEvmChainId = validateEVMChainId(parseInt(param.chainId, 16));
-          if (newEvmChainId === this.parseChainId(currentChainId).evmChainId) {
+          const newCurrentChainId = this.getNewCurrentChainIdFromRequest(
+            method,
+            params
+          );
+          const currentChainId = this.getCurrentChainId(origin, chainId);
+          if (
+            // If the new current chain id is not set or the current chain id is the same as the new current chain id, do nothing.
+            newCurrentChainId == null ||
+            currentChainId === newCurrentChainId
+          ) {
             return null;
           }
 
           const newCurrentChainInfo =
-            this.chainsService.getChainInfoByEVMChainId(newEvmChainId);
+            this.chainsService.getChainInfo(newCurrentChainId);
           if (!newCurrentChainInfo) {
             throw new EthereumProviderRpcError(
               4902,
-              `Unrecognized chain ID "${param.chainId}". Try adding the chain using wallet_addEthereumChain first.`
+              `Unrecognized chain ID "${newCurrentChainId.replace(
+                "eip155:",
+                ""
+              )}". Try adding the chain using wallet_addEthereumChain first.`
             );
           }
 
@@ -1054,6 +1057,29 @@ export class KeyRingEthereumService {
     })()) as T;
 
     return result;
+  }
+
+  getNewCurrentChainIdFromRequest(
+    method: string,
+    params?: unknown[] | Record<string, unknown>
+  ): string | undefined {
+    switch (method) {
+      case "wallet_switchEthereumChain": {
+        const param =
+          (Array.isArray(params) && (params?.[0] as { chainId: string })) ||
+          undefined;
+        if (!param?.chainId) {
+          throw new Error("Invalid parameters: must provide a chain id.");
+        }
+
+        const newEvmChainId = validateEVMChainId(parseInt(param.chainId, 16));
+
+        return `eip155:${newEvmChainId}`;
+      }
+      default: {
+        return;
+      }
+    }
   }
 
   private getCurrentChainId(origin: string, chainId?: string) {

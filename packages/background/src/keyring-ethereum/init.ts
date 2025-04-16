@@ -1,6 +1,10 @@
 import { Router } from "@keplr-wallet/router";
 import { KeyRingEthereumService } from "./service";
-import { RequestJsonRpcToEvmMsg, RequestSignEthereumMsg } from "./messages";
+import {
+  RequestJsonRpcToEvmMsg,
+  RequestSignEthereumMsg,
+  GetNewCurrentChainIdForEVMMsg,
+} from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
 import { PermissionInteractiveService } from "../permission-interactive";
@@ -12,6 +16,7 @@ export function init(
 ): void {
   router.registerMessage(RequestSignEthereumMsg);
   router.registerMessage(RequestJsonRpcToEvmMsg);
+  router.registerMessage(GetNewCurrentChainIdForEVMMsg);
 
   router.addHandler(ROUTE, getHandler(service, permissionInteractionService));
 }

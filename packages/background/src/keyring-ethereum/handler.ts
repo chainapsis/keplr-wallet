@@ -5,9 +5,14 @@ import {
   KeplrError,
   Message,
 } from "@keplr-wallet/router";
-import { RequestSignEthereumMsg, RequestJsonRpcToEvmMsg } from "./messages";
+import {
+  RequestSignEthereumMsg,
+  RequestJsonRpcToEvmMsg,
+  GetNewCurrentChainIdForEVMMsg,
+} from "./messages";
 import { KeyRingEthereumService } from "./service";
 import { PermissionInteractiveService } from "../permission-interactive";
+import { enableAccessSkippedJSONRPCMethods } from "./constants";
 
 export const getHandler: (
   service: KeyRingEthereumService,
@@ -28,6 +33,11 @@ export const getHandler: (
           service,
           permissionInteractionService
         )(env, msg as RequestJsonRpcToEvmMsg);
+      case GetNewCurrentChainIdForEVMMsg:
+        return handleGetNewCurrentChainIdForEVMMsg(service)(
+          env,
+          msg as GetNewCurrentChainIdForEVMMsg
+        );
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
     }
@@ -69,11 +79,17 @@ const handleRequestJsonRpcToEvmMsg: (
   permissionInteractionService
 ) => {
   return async (env, msg) => {
-    if (
-      msg.method !== "keplr_initProviderState" &&
-      msg.method !== "eth_accounts"
-    ) {
-      await permissionInteractionService.ensureEnabledForEVM(env, msg.origin);
+    if (!enableAccessSkippedJSONRPCMethods.includes(msg.method)) {
+      const newCurrentChainId = service.getNewCurrentChainIdFromRequest(
+        msg.method,
+        msg.params
+      );
+
+      await permissionInteractionService.ensureEnabledForEVM(
+        env,
+        msg.origin,
+        newCurrentChainId
+      );
     }
 
     return await service.request(
@@ -84,5 +100,13 @@ const handleRequestJsonRpcToEvmMsg: (
       msg.providerId,
       msg.chainId
     );
+  };
+};
+
+const handleGetNewCurrentChainIdForEVMMsg: (
+  service: KeyRingEthereumService
+) => InternalHandler<GetNewCurrentChainIdForEVMMsg> = (service) => {
+  return async (_, msg) => {
+    return service.getNewCurrentChainIdFromRequest(msg.method, msg.params);
   };
 };

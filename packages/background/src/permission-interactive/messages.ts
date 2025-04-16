@@ -34,7 +34,7 @@ export class EnableAccessForEVMMsg extends Message<void> {
     return "enable-access-for-evm";
   }
 
-  constructor() {
+  constructor(public readonly chainId?: string) {
     super();
   }
 

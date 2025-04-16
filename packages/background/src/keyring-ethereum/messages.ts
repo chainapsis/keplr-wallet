@@ -83,3 +83,30 @@ export class RequestJsonRpcToEvmMsg extends Message<void> {
     return RequestJsonRpcToEvmMsg.type();
   }
 }
+
+export class GetNewCurrentChainIdForEVMMsg extends Message<string | undefined> {
+  public static type() {
+    return "get-new-current-chain-id-for-evm";
+  }
+
+  constructor(
+    public readonly method: string,
+    public readonly params?: unknown[] | Record<string, unknown>
+  ) {
+    super();
+  }
+
+  validateBasic(): void {}
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetNewCurrentChainIdForEVMMsg.type();
+  }
+}

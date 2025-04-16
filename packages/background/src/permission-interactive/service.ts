@@ -112,31 +112,24 @@ export class PermissionInteractiveService {
     );
   }
 
-  async ensureEnabledForEVM(env: Env, origin: string): Promise<void> {
+  async ensureEnabledForEVM(
+    env: Env,
+    origin: string,
+    newCurrentChainId?: string
+  ): Promise<void> {
     await this.keyRingService.ensureUnlockInteractive(env);
 
     await this.ensureKeyRingLedgerAppConnected(env, "Ethereum");
 
-    const currentChainIdForEVM =
-      this.permissionService.getCurrentChainIdForEVM(origin) ??
-      (() => {
-        const chainInfos = this.chainsService.getChainInfos();
-        // If currentChainId is not saved, Make Ethereum current chain.
-        const ethereumChainId = chainInfos.find(
-          (chainInfo) =>
-            chainInfo.evm !== undefined && chainInfo.chainId === "eip155:1"
-        )?.chainId;
-
-        if (!ethereumChainId) {
-          throw new Error("The Ethereum chain info is not found");
-        }
-
-        return ethereumChainId;
-      })();
+    const newCurrentChainIdForEVM =
+      newCurrentChainId ||
+      this.permissionService.getCurrentChainIdForEVM(origin) ||
+      // If the current chain id is not set, use Ethereum mainnet as the default chain id.
+      "eip155:1";
 
     await this.permissionService.checkOrGrantBasicAccessPermission(
       env,
-      [currentChainIdForEVM],
+      [newCurrentChainIdForEVM],
       origin,
       {
         isForEVM: true,

@@ -1588,6 +1588,11 @@ const sidePanelOpenNeededJSONRPCMethods = [
   "wallet_watchAsset",
 ];
 
+const enableAccessSkippedJSONRPCMethods = [
+  "keplr_initProviderState",
+  "eth_accounts",
+];
+
 class EthereumProvider extends EventEmitter implements IEthereumProvider {
   chainId: string | null = null;
   selectedAddress: string | null = null;
@@ -1603,7 +1608,9 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     super();
   }
 
-  protected async protectedEnableAccess(): Promise<void> {
+  protected async protectedEnableAccess(
+    newCurrentChainId?: string
+  ): Promise<void> {
     return new Promise((resolve, reject) => {
       let f = false;
 
@@ -1612,7 +1619,9 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
         BACKGROUND_PORT,
         "permission-interactive",
         "enable-access-for-evm",
-        {}
+        {
+          chainId: newCurrentChainId,
+        }
       )
         .then(resolve)
         .catch(reject)
@@ -1623,6 +1632,26 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
           this.keplr.protectedTryOpenSidePanelIfEnabled();
         }
       }, 100);
+    });
+  }
+
+  protected async protectedGetNewCurrentChainIdFromRequest(
+    method: string,
+    params?: readonly unknown[] | Record<string, unknown>
+  ): Promise<string | undefined> {
+    return new Promise((resolve, reject) => {
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-ethereum",
+        "get-new-current-chain-id-for-evm",
+        {
+          method,
+          params,
+        }
+      )
+        .then(resolve)
+        .catch(reject);
     });
   }
 
@@ -1648,8 +1677,12 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     // XXX: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
     //      side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
     //      request의 경우는 일종의 쿼리이기 때문에 언제 결과가 올지 알 수 없다. 그러므로 미리 권한 처리를 해야한다.
-    if (method !== "keplr_initProviderState" && method !== "eth_accounts") {
-      await this.protectedEnableAccess();
+    if (!enableAccessSkippedJSONRPCMethods.includes(method)) {
+      // 활성화할 체인을 변경하는 요청인 경우, 권한 승인하는 UI에서 변경할 체인 아이디가 기본으로 선택되도록 하기 위함이다.
+      // 로직이 파편화 되는 것을 막기 위해 백그라운드에서 처리해서 값을 받아오는 방식으로 구현한다.
+      const newCurrentChainId =
+        await this.protectedGetNewCurrentChainIdFromRequest(method, params);
+      await this.protectedEnableAccess(newCurrentChainId);
     }
 
     return new Promise((resolve, reject) => {
