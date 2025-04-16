@@ -722,7 +722,9 @@ export class PermissionService {
         origin
       )
     ) {
-      this.currentChainIdForEVMByOriginMap.delete(origin);
+      runInAction(() => {
+        this.currentChainIdForEVMByOriginMap.delete(origin);
+      });
       return;
     }
 
@@ -779,7 +781,9 @@ export class PermissionService {
         origin
       )
     ) {
-      this.currentChainIdForStarknetByOriginMap.delete(origin);
+      runInAction(() => {
+        this.currentChainIdForStarknetByOriginMap.delete(origin);
+      });
       return;
     }
 
@@ -841,7 +845,9 @@ export class PermissionService {
         origin
       )
     ) {
-      this.currentBaseChainIdForBitcoinByOriginMap.delete(origin);
+      runInAction(() => {
+        this.currentBaseChainIdForBitcoinByOriginMap.delete(origin);
+      });
       return;
     }
 
