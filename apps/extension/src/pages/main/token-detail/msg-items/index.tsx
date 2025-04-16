@@ -21,6 +21,8 @@ import { MsgRelationCancelUndelegate } from "./cancel-undelegate";
 import { MsgRelationIBCSwapRefunded } from "./ibc-swap-refunded";
 import { MsgRelationNobleWithdrawUsdc } from "./noble-withdraw-usdc";
 import { MsgRelationNobleDepositUsdc } from "./noble-deposit-usdc";
+import { MsgRelationBbnClaimRewardFromBTCStaking } from "./bbn-claim-reward-from-btc-staking";
+import { MsgRelationBbnCreateBTCDelegation } from "./bbn-create-btc-delegation";
 
 export const MsgItemRender: FunctionComponent<{
   msg: MsgHistory;
@@ -46,6 +48,54 @@ const MsgItemRenderInner: FunctionComponent<{
   targetDenom: string;
   isInAllActivitiesPage?: boolean;
 }> = ({ msg, prices, targetDenom, isInAllActivitiesPage }) => {
+  if (msg.relation.startsWith("bbn-wrapped-")) {
+    const innerMsg = msg.msg as { msg: unknown };
+    const msgHistory: MsgHistory = { ...msg, msg: innerMsg.msg };
+
+    switch (msg.relation) {
+      case "bbn-wrapped-delegate": {
+        return (
+          <MsgRelationDelegate
+            msg={msgHistory}
+            prices={prices}
+            targetDenom={targetDenom}
+            isInAllActivitiesPage={isInAllActivitiesPage}
+          />
+        );
+      }
+      case "bbn-wrapped-undelegate": {
+        return (
+          <MsgRelationUndelegate
+            msg={msgHistory}
+            prices={prices}
+            targetDenom={targetDenom}
+            isInAllActivitiesPage={isInAllActivitiesPage}
+          />
+        );
+      }
+      case "bbn-wrapped-redelegate": {
+        return (
+          <MsgRelationRedelegate
+            msg={msgHistory}
+            prices={prices}
+            targetDenom={targetDenom}
+            isInAllActivitiesPage={isInAllActivitiesPage}
+          />
+        );
+      }
+      case "bbn-wrapped-cancel-undelegate": {
+        return (
+          <MsgRelationCancelUndelegate
+            msg={msgHistory}
+            prices={prices}
+            targetDenom={targetDenom}
+            isInAllActivitiesPage={isInAllActivitiesPage}
+          />
+        );
+      }
+    }
+  }
+
   switch (msg.relation) {
     case "send": {
       return (
@@ -233,6 +283,26 @@ const MsgItemRenderInner: FunctionComponent<{
     case "noble-deposit-usdc": {
       return (
         <MsgRelationNobleDepositUsdc
+          msg={msg}
+          prices={prices}
+          targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
+        />
+      );
+    }
+    case "bbn-create-btc-delegation": {
+      return (
+        <MsgRelationBbnCreateBTCDelegation
+          msg={msg}
+          prices={prices}
+          targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
+        />
+      );
+    }
+    case "bbn-claim-reward-from-btc-staking": {
+      return (
+        <MsgRelationBbnClaimRewardFromBTCStaking
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}

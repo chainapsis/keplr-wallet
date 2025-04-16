@@ -39,7 +39,7 @@ export const MessageItem: FunctionComponent<{
             >
               {title}
             </H5>
-            <Gutter size="2px" />
+            <Gutter size="4px" />
             <Body3
               color={
                 theme.mode === "light"

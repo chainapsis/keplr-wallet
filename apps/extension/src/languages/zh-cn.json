@@ -478,6 +478,8 @@
   "page.sign.components.messages.vote.paragraph": "对提案{proposalId}投{textualOption}票",
   "page.sign.components.messages.wasm-message-view.close-button": "关闭",
   "page.sign.components.messages.wasm-message-view.details-button": "详情",
+  "page.sign.components.messages.create-btc-delegation.title": "注册 BTC 质押",
+  "page.sign.components.messages.create-btc-delegation.paragraph": "提交相关数据至 Babylon Genesis 链。",
 
   "page.sign.components.ledger-guide.box.error-title": "错误",
   "page.sign.components.ledger-guide.box.connect-and-unlock-ledger-paragraph": "连接并解锁你的Ledger设备。",
