@@ -6,10 +6,15 @@ import React, {
   useRef,
 } from "react";
 import { Columns } from "../../../components/column";
-import { Box } from "../../../components/box";
+import { Box, BoxProps } from "../../../components/box";
 import { Tooltip } from "../../../components/tooltip";
 import { ChainImageFallback, Image } from "../../../components/image";
-import { CheckIcon, MenuIcon } from "../../../components/icon";
+import {
+  ArrowLeftIcon,
+  CheckIcon,
+  MenuIcon,
+  RightArrowIcon,
+} from "../../../components/icon";
 import { ProfileButton } from "../../../layouts/header/components";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
@@ -20,7 +25,12 @@ import { MenuBar } from "../components";
 import { HeaderProps } from "../../../layouts/header/types";
 import { ColorPalette } from "../../../styles";
 import { YAxis } from "../../../components/axis";
-import { Body2, Subtitle3 } from "../../../components/typography";
+import {
+  Body2,
+  Body3,
+  Caption1,
+  Subtitle3,
+} from "../../../components/typography";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Gutter } from "../../../components/gutter";
 import { Button } from "../../../components/button";
@@ -34,10 +44,14 @@ import {
   UpdateCurrentChainIdForStarknetMsg,
   GetCurrentChainIdForBitcoinMsg,
   UpdateCurrentChainIdForBitcoinMsg,
+  GetPreferredBitcoinPaymentTypeMsg,
+  SetPreferredBitcoinPaymentTypeMsg,
 } from "@keplr-wallet/background";
 import { autoUpdate, offset, shift, useFloating } from "@floating-ui/react-dom";
 import SimpleBar from "simplebar-react";
 import { ExtensionKVStore } from "@keplr-wallet/common";
+import { SupportedPaymentType as BitcoinPaymentType } from "@keplr-wallet/types";
+import { Bech32Address } from "@keplr-wallet/cosmos";
 
 export interface MainHeaderLayoutRef {
   toggleSideMenu: () => void;
@@ -137,9 +151,16 @@ export const MainHeaderLayout = observer<
         chainInfo.bitcoin.chainId === currentChainIdForBitcoin
     );
 
+    const [preferredPaymentTypeForBitcoin, setPreferredPaymentTypeForBitcoin] =
+      React.useState<BitcoinPaymentType | undefined>();
+
     const [activeTabOrigin, setActiveTabOrigin] = React.useState<
       string | undefined
     >();
+
+    const [addressConfigHover, setAddressConfigHover] = React.useState(false);
+    const [displayAddressTypeSelector, setDisplayAddressTypeSelector] =
+      React.useState(false);
 
     useEffect(() => {
       const updateCurrentChainId = async () => {
@@ -153,6 +174,9 @@ export const MainHeaderLayout = observer<
           const msgForBitcoin = new GetCurrentChainIdForBitcoinMsg(
             activeTabOrigin
           );
+          const msgForBitcoinPaymentType =
+            new GetPreferredBitcoinPaymentTypeMsg();
+
           const newCurrentChainIdForEVM =
             await new InExtensionMessageRequester().sendMessage(
               BACKGROUND_PORT,
@@ -168,14 +192,23 @@ export const MainHeaderLayout = observer<
               BACKGROUND_PORT,
               msgForBitcoin
             );
+
+          const newPreferredPaymentTypeForBitcoin =
+            await new InExtensionMessageRequester().sendMessage(
+              BACKGROUND_PORT,
+              msgForBitcoinPaymentType
+            );
+
           setCurrentChainIdForEVM(newCurrentChainIdForEVM);
           setCurrentChainIdForStarknet(newCurrentChainIdForStarknet);
           setCurrentChainIdForBitcoin(newCurrentChainIdForBitcoin);
+          setPreferredPaymentTypeForBitcoin(newPreferredPaymentTypeForBitcoin);
           setActiveTabOrigin(activeTabOrigin);
         } else {
           setCurrentChainIdForEVM(undefined);
           setCurrentChainIdForStarknet(undefined);
           setCurrentChainIdForBitcoin(undefined);
+          setPreferredPaymentTypeForBitcoin(undefined);
           setActiveTabOrigin(undefined);
         }
       };
@@ -410,33 +443,206 @@ export const MainHeaderLayout = observer<
               activeTabOrigin != null && (
                 <ChainSelector
                   isOpen={isOpenCurrentChainSelectorForBitcoin}
-                  close={() => setIsOpenCurrentChainSelectorForBitcoin(false)}
-                  items={bitcoinChainInfos.map((chainInfo) => ({
-                    key:
-                      "bitcoin" in chainInfo
-                        ? chainInfo.bitcoin.chainId
-                        : chainInfo.chainId,
-                    content: (
-                      <Columns sum={1} alignY="center" gutter="0.5rem">
-                        <ChainImageFallback chainInfo={chainInfo} size="2rem" />
-                        <Subtitle3>{chainInfo.chainName}</Subtitle3>
-                      </Columns>
-                    ),
-                    onSelect: async (key) => {
-                      const msg = new UpdateCurrentChainIdForBitcoinMsg(
-                        activeTabOrigin,
-                        key
-                      );
-                      await new InExtensionMessageRequester().sendMessage(
-                        BACKGROUND_PORT,
-                        msg
-                      );
-                      setCurrentChainIdForBitcoin(key);
-                    },
-                  }))}
-                  selectedItemKey={currentChainIdForBitcoin}
+                  close={() => {
+                    setIsOpenCurrentChainSelectorForBitcoin(false);
+                    setAddressConfigHover(false);
+                    setDisplayAddressTypeSelector(false);
+                  }}
+                  items={
+                    displayAddressTypeSelector
+                      ? ["taproot", "native-segwit"].map((key) => ({
+                          key,
+                          content: (() => {
+                            const address = accountStore.getAccount(
+                              `${currentChainIdForBitcoin}:${key}`
+                            )?.bitcoinAddress?.bech32Address;
+
+                            return (
+                              <Box>
+                                <Subtitle3 color={ColorPalette["white"]}>
+                                  {key === "native-segwit"
+                                    ? "Native SegWit"
+                                    : "Taproot"}
+                                </Subtitle3>
+                                <Gutter size="0.25rem" />
+                                {address && (
+                                  <Body3 color={ColorPalette["gray-300"]}>
+                                    {Bech32Address.shortenAddress(address, 15)}
+                                  </Body3>
+                                )}
+                              </Box>
+                            );
+                          })(),
+                          onSelect: async (key: string) => {
+                            if (key !== "taproot" && key !== "native-segwit") {
+                              return;
+                            }
+
+                            const msg = new SetPreferredBitcoinPaymentTypeMsg(
+                              key as BitcoinPaymentType
+                            );
+                            await new InExtensionMessageRequester().sendMessage(
+                              BACKGROUND_PORT,
+                              msg
+                            );
+
+                            // TODO: emit accounts changed event
+
+                            setPreferredPaymentTypeForBitcoin(key);
+                          },
+                        }))
+                      : [
+                          {
+                            key: "label",
+                            content: (
+                              <Columns sum={1} alignY="center" gutter="0.5rem">
+                                <Caption1>on</Caption1>
+                              </Columns>
+                            ),
+                            onSelect: async () => {},
+                            isDisabled: true,
+                          },
+                          ...bitcoinChainInfos.map((chainInfo) => ({
+                            key:
+                              "bitcoin" in chainInfo
+                                ? chainInfo.bitcoin.chainId
+                                : chainInfo.chainId,
+                            content: (
+                              <Columns sum={1} alignY="center" gutter="0.5rem">
+                                <ChainImageFallback
+                                  chainInfo={chainInfo}
+                                  size="2rem"
+                                />
+                                <Subtitle3>{chainInfo.chainName}</Subtitle3>
+                              </Columns>
+                            ),
+                            onSelect: async (key: string) => {
+                              const msg = new UpdateCurrentChainIdForBitcoinMsg(
+                                activeTabOrigin,
+                                key
+                              );
+                              await new InExtensionMessageRequester().sendMessage(
+                                BACKGROUND_PORT,
+                                msg
+                              );
+
+                              // TODO: emit network changed event
+
+                              setCurrentChainIdForBitcoin(key);
+                            },
+                          })),
+                        ]
+                  }
+                  selectedItemKey={
+                    displayAddressTypeSelector
+                      ? preferredPaymentTypeForBitcoin ?? "taproot"
+                      : currentChainIdForBitcoin
+                  }
                   activeTabOrigin={activeTabOrigin}
-                  isForBitcoin={true}
+                  headerContent={
+                    displayAddressTypeSelector ? (
+                      <Box
+                        alignY="center"
+                        alignX="center"
+                        style={{
+                          display: "flex",
+                          flexDirection: "row",
+                          gap: "0.375rem",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => {
+                          setDisplayAddressTypeSelector(false);
+                        }}
+                      >
+                        <ArrowLeftIcon
+                          width="1rem"
+                          height="1rem"
+                          color={ColorPalette["gray-200"]}
+                        />
+                        <Body2 color={ColorPalette["gray-300"]}>Back</Body2>
+                      </Box>
+                    ) : (
+                      <Box width="100%">
+                        <Caption1 color={ColorPalette["gray-300"]}>
+                          Connected as
+                        </Caption1>
+                        <Gutter size="0.75rem" />
+                        <Columns sum={1} alignY="center" gutter="0.5rem">
+                          <Subtitle3 color={ColorPalette["white"]}>
+                            {preferredPaymentTypeForBitcoin === "native-segwit"
+                              ? "Native SegWit"
+                              : "Taproot"}
+                          </Subtitle3>
+                          <div
+                            style={{
+                              flex: 1,
+                            }}
+                          />
+                          {(() => {
+                            const address = accountStore.getAccount(
+                              `${currentChainIdForBitcoin}:${preferredPaymentTypeForBitcoin}`
+                            )?.bitcoinAddress?.bech32Address;
+
+                            if (address == null) {
+                              return null;
+                            }
+
+                            return (
+                              <Box
+                                alignY="center"
+                                alignX="center"
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  gap: "0.375rem",
+                                  cursor: "pointer",
+                                }}
+                                onHoverStateChange={setAddressConfigHover}
+                                onClick={() => {
+                                  setDisplayAddressTypeSelector(true);
+                                }}
+                              >
+                                <Body2
+                                  color={
+                                    addressConfigHover
+                                      ? ColorPalette["gray-300"]
+                                      : ColorPalette["gray-200"]
+                                  }
+                                >
+                                  {Bech32Address.shortenAddress(address, 15)}
+                                </Body2>
+                                <RightArrowIcon
+                                  width="1rem"
+                                  height="1rem"
+                                  color={
+                                    addressConfigHover
+                                      ? ColorPalette["gray-400"]
+                                      : ColorPalette["gray-300"]
+                                  }
+                                />
+                              </Box>
+                            );
+                          })()}
+                        </Columns>
+                      </Box>
+                    )
+                  }
+                  footerContent={
+                    displayAddressTypeSelector ? (
+                      <Body2>
+                        Select the address type you&apos;d like to use
+                        <br />
+                        with the web application.
+                      </Body2>
+                    ) : null
+                  }
+                  footerBoxPropsOverride={
+                    displayAddressTypeSelector
+                      ? undefined
+                      : {
+                          paddingY: "0.5rem",
+                        }
+                  }
                 >
                   <Box
                     borderRadius="99999px"
@@ -481,7 +687,11 @@ export const MainHeaderLayout = observer<
             {currentChainIdForStarknet != null && activeTabOrigin != null && (
               <ChainSelector
                 isOpen={isOpenCurrentChainSelectorForStarknet}
-                close={() => setIsOpenCurrentChainSelectorForStarknet(false)}
+                close={() => {
+                  setIsOpenCurrentChainSelectorForStarknet(false);
+                  setAddressConfigHover(false);
+                  setDisplayAddressTypeSelector(false);
+                }}
                 items={starknetChainInfos.map((chainInfo) => ({
                   key: chainInfo.chainId,
                   content: (
@@ -504,7 +714,9 @@ export const MainHeaderLayout = observer<
                 }))}
                 selectedItemKey={currentChainIdForStarknet}
                 activeTabOrigin={activeTabOrigin}
-                isForStarknet={true}
+                footerContent={
+                  <Body2>Select a Starknet-compatible chain to connect.</Body2>
+                }
               >
                 <Box
                   borderRadius="99999px"
@@ -549,7 +761,11 @@ export const MainHeaderLayout = observer<
             {currentChainIdForEVM != null && activeTabOrigin != null && (
               <ChainSelector
                 isOpen={isOpenCurrentChainSelectorForEVM}
-                close={() => setIsOpenCurrentChainSelectorForEVM(false)}
+                close={() => {
+                  setIsOpenCurrentChainSelectorForEVM(false);
+                  setAddressConfigHover(false);
+                  setDisplayAddressTypeSelector(false);
+                }}
                 items={evmChainInfos.map((chainInfo) => ({
                   key: chainInfo.chainId,
                   content: (
@@ -572,6 +788,9 @@ export const MainHeaderLayout = observer<
                 }))}
                 selectedItemKey={currentChainIdForEVM}
                 activeTabOrigin={activeTabOrigin}
+                footerContent={
+                  <Body2>Select an EVM-compatible chain to connect.</Body2>
+                }
               >
                 <Box
                   borderRadius="99999px"
@@ -647,11 +866,14 @@ const ChainSelector: FunctionComponent<
       key: string;
       content: React.ReactNode;
       onSelect: (key: string) => void;
+      isDisabled?: boolean;
     }[];
     selectedItemKey: string;
     activeTabOrigin: string;
-    isForStarknet?: boolean;
-    isForBitcoin?: boolean;
+    headerContent?: React.ReactNode;
+    headerBoxPropsOverride?: BoxProps;
+    footerContent?: React.ReactNode;
+    footerBoxPropsOverride?: BoxProps;
   }>
 > = observer(
   ({
@@ -661,8 +883,10 @@ const ChainSelector: FunctionComponent<
     items,
     selectedItemKey,
     activeTabOrigin,
-    isForStarknet,
-    isForBitcoin,
+    headerContent,
+    headerBoxPropsOverride,
+    footerContent,
+    footerBoxPropsOverride,
   }) => {
     const { x, y, strategy, refs } = useFloating({
       placement: "bottom-end",
@@ -741,6 +965,26 @@ const ChainSelector: FunctionComponent<
                 <Body2>{activeTabOrigin}</Body2>
               </Columns>
             </Box>
+            {headerContent && (
+              <Box
+                alignX="left"
+                alignY="center"
+                paddingX="1rem"
+                paddingY="1.25rem"
+                color={ColorPalette["gray-200"]}
+                backgroundColor={ColorPalette["gray-600"]}
+                style={{
+                  borderTopLeftRadius: "0.375rem",
+                  borderTopRightRadius: "0.375rem",
+                  borderBottomStyle: "solid",
+                  borderBottomWidth: "1px",
+                  borderBottomColor: ColorPalette["gray-500"],
+                }}
+                {...headerBoxPropsOverride}
+              >
+                {headerContent}
+              </Box>
+            )}
             <SimpleBar
               style={{
                 display: "flex",
@@ -762,16 +1006,26 @@ const ChainSelector: FunctionComponent<
                     }}
                     paddingX="1rem"
                     paddingY="0.75rem"
-                    cursor="pointer"
-                    color={ColorPalette["white"]}
+                    cursor={item.isDisabled ? undefined : "pointer"}
+                    color={
+                      item.isDisabled
+                        ? ColorPalette["gray-300"]
+                        : ColorPalette["white"]
+                    }
                     backgroundColor={
                       ColorPalette[isSelectedItem ? "gray-650" : "gray-600"]
                     }
                     hover={{
-                      backgroundColor: ColorPalette["gray-550"],
+                      backgroundColor: item.isDisabled
+                        ? "transparent"
+                        : ColorPalette["gray-550"],
                     }}
                     onClick={(e) => {
                       e.preventDefault();
+
+                      if (item.isDisabled) {
+                        return;
+                      }
 
                       item.onSelect(item.key);
 
@@ -795,15 +1049,9 @@ const ChainSelector: FunctionComponent<
                 borderBottomLeftRadius: "0.375rem",
                 borderBottomRightRadius: "0.375rem",
               }}
+              {...footerBoxPropsOverride}
             >
-              <Body2>
-                {`${
-                  isForStarknet ? "Starknet" : isForBitcoin ? "Bitcoin" : "EVM"
-                } compatible chains require users to`}
-                <br /> {"manually switch between networks in"}
-                <br />
-                {"their wallets."}
-              </Body2>
+              {footerContent}
             </Box>
           </div>
         )}
