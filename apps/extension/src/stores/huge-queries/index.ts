@@ -14,7 +14,11 @@ import { computedFn } from "mobx-utils";
 import { BinarySortArray } from "./sort";
 import { StarknetQueriesStore } from "@keplr-wallet/stores-starknet";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import { AppCurrency, ModularChainInfo } from "@keplr-wallet/types";
+import {
+  AppCurrency,
+  IBCCurrency,
+  ModularChainInfo,
+} from "@keplr-wallet/types";
 import { BitcoinQueriesStore } from "@keplr-wallet/stores-bitcoin";
 import { UIConfigStore } from "../ui-config";
 import { KeyRingStore } from "@keplr-wallet/stores-core";
@@ -1062,7 +1066,7 @@ export class HugeQueriesStore {
           tokensMap.set(groupKey, []);
         }
 
-        tokensMap.get(groupKey)!.push(viewToken);
+        this.addTokenToGroup(groupKey, viewToken, tokensMap);
         processedTokens.set(viewToken, true);
       }
     }
@@ -1078,13 +1082,27 @@ export class HugeQueriesStore {
 
       const erc20Asset = this.getErc20AssetForToken(chainId, currency);
 
-      if (erc20Asset && erc20Asset.recommendedSymbol) {
-        const groupKey =
-          this.findERC20GroupKeyBySymbol(
-            erc20Asset.recommendedSymbol,
-            tokensMap
-          ) || `erc20:${erc20Asset.recommendedSymbol}`;
+      if (erc20Asset && erc20Asset.recommendedSymbol && currency.coinGeckoId) {
+        const groupKey = this.findERC20GroupKey(
+          erc20Asset.recommendedSymbol,
+          currency.coinGeckoId,
+          tokensMap
+        );
 
+        this.addTokenToGroup(groupKey, viewToken, tokensMap);
+        processedTokens.set(viewToken, true);
+      }
+    }
+
+    // ETH
+    for (const viewToken of allKnownBalances) {
+      if (processedTokens.has(viewToken)) {
+        continue;
+      }
+
+      const currency = viewToken.token.currency;
+      if (currency.coinDenom === "ETH" && currency.coinGeckoId === "ethereum") {
+        const groupKey = `${currency.coinGeckoId}`;
         this.addTokenToGroup(groupKey, viewToken, tokensMap);
         processedTokens.set(viewToken, true);
       }
@@ -1105,7 +1123,7 @@ export class HugeQueriesStore {
             tokensMap.set(groupKey, []);
           }
 
-          tokensMap.get(groupKey)!.push(viewToken);
+          this.addTokenToGroup(groupKey, viewToken, tokensMap);
           processedTokens.set(viewToken, true);
         }
       }
@@ -1195,6 +1213,21 @@ export class HugeQueriesStore {
     }
   };
 
+  protected getIBCAssetForToken = computedFn(
+    (currency: IBCCurrency): SkipAsset | undefined => {
+      const originChainId = currency.originChainId;
+      const coinMinimalDenom = currency.originCurrency?.coinMinimalDenom;
+
+      if (!originChainId || !coinMinimalDenom) {
+        return undefined;
+      }
+
+      return this.skipQueriesStore.queryAssets
+        .getAssets(originChainId)
+        .assetsRaw.find((asset) => asset.originDenom === coinMinimalDenom);
+    }
+  );
+
   protected getErc20AssetForToken = computedFn(
     (chainId: string, currency: AppCurrency): SkipAsset | undefined => {
       if (!currency.coinMinimalDenom.startsWith("erc20:")) {
@@ -1205,9 +1238,8 @@ export class HugeQueriesStore {
         .getAssets(chainId)
         .assetsRaw.find(
           (asset) =>
-            asset.recommendedSymbol === currency.coinDenom &&
             asset.tokenContract?.toLowerCase() ===
-              currency.coinMinimalDenom.split(":")[1].toLowerCase()
+            currency.coinMinimalDenom.split(":")[1].toLowerCase()
         );
     }
   );
@@ -1237,28 +1269,29 @@ export class HugeQueriesStore {
     }
   );
 
-  protected findERC20GroupKeyBySymbol(
-    symbol: string,
+  protected findERC20GroupKey(
+    recommendedSymbol: string,
+    coinGeckoId: string,
     tokensMap: Map<string, ViewToken[]>
-  ): string | undefined {
+  ): string {
     for (const [key, viewTokens] of tokensMap.entries()) {
       if (viewTokens.length === 0) continue;
 
       const tokenCurrency = viewTokens[0].token.currency;
 
-      if (
-        "originCurrency" in tokenCurrency &&
-        tokenCurrency.originCurrency?.coinDenom === symbol
-      ) {
-        return key;
-      }
+      if ("paths" in tokenCurrency) {
+        const ibcAsset = this.getIBCAssetForToken(tokenCurrency);
 
-      if (tokenCurrency.coinDenom === symbol) {
-        return key;
+        if (
+          ibcAsset?.recommendedSymbol === recommendedSymbol &&
+          tokenCurrency.coinGeckoId === coinGeckoId
+        ) {
+          return key;
+        }
       }
     }
 
-    return undefined;
+    return `erc20:${recommendedSymbol}/${coinGeckoId}`;
   }
 
   protected addTokenToGroup(
