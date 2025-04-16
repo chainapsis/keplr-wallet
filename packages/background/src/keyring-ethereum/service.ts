@@ -327,8 +327,7 @@ export class KeyRingEthereumService {
     const result = (await (async () => {
       switch (method) {
         case "keplr_initProviderState": {
-          const currentChainId =
-            chainId ?? this.permissionService.getCurrentChainIdForEVM(origin);
+          const currentChainId = this.getCurrentChainId(origin, chainId);
           if (currentChainId == null) {
             return {
               currentEvmChainId: null,
@@ -357,7 +356,7 @@ export class KeyRingEthereumService {
         }
         case "keplr_connect": {
           try {
-            const currentChainId = this.getCurrentChainId(origin, chainId);
+            const currentChainId = this.forceGetCurrentChainId(origin, chainId);
             const pubkey = await this.keyRingService.getPubKeySelected(
               currentChainId
             );
@@ -379,18 +378,17 @@ export class KeyRingEthereumService {
           return this.permissionService.removeAllTypePermission([origin]);
         }
         case "eth_chainId": {
-          const currentChainId = this.getCurrentChainId(origin, chainId);
+          const currentChainId = this.forceGetCurrentChainId(origin, chainId);
           return `0x${this.parseChainId(currentChainId).evmChainId.toString(
             16
           )}`;
         }
         case "net_version": {
-          const currentChainId = this.getCurrentChainId(origin, chainId);
+          const currentChainId = this.forceGetCurrentChainId(origin, chainId);
           return this.parseChainId(currentChainId).evmChainId.toString();
         }
         case "eth_accounts": {
-          const currentChainId =
-            chainId ?? this.permissionService.getCurrentChainIdForEVM(origin);
+          const currentChainId = this.getCurrentChainId(origin, chainId);
           if (currentChainId == null) {
             return [] as T;
           }
@@ -405,7 +403,7 @@ export class KeyRingEthereumService {
           return [selectedAddress];
         }
         case "eth_requestAccounts": {
-          const currentChainId = this.getCurrentChainId(origin, chainId);
+          const currentChainId = this.forceGetCurrentChainId(origin, chainId);
           const pubkey = await this.keyRingService.getPubKeySelected(
             currentChainId
           );
@@ -429,7 +427,7 @@ export class KeyRingEthereumService {
             throw new Error("Invalid parameters: must provide a transaction.");
           }
 
-          const currentChainId = this.getCurrentChainId(origin, chainId);
+          const currentChainId = this.forceGetCurrentChainId(origin, chainId);
           if (tx.chainId) {
             const evmChainIdFromTx: number = validateEVMChainId(
               (() => {
@@ -523,7 +521,7 @@ export class KeyRingEthereumService {
             throw new Error("Invalid parameters: must provide a transaction.");
           }
 
-          const currentChainId = this.getCurrentChainId(origin, chainId);
+          const currentChainId = this.forceGetCurrentChainId(origin, chainId);
           if (tx.chainId) {
             const evmChainIdFromTx: number = validateEVMChainId(
               (() => {
@@ -610,7 +608,7 @@ export class KeyRingEthereumService {
             );
           }
 
-          const currentChainId = this.getCurrentChainId(origin, chainId);
+          const currentChainId = this.forceGetCurrentChainId(origin, chainId);
           const { signature } = await this.signEthereumSelected(
             env,
             origin,
@@ -637,7 +635,7 @@ export class KeyRingEthereumService {
           const typedData =
             (Array.isArray(params) && (params?.[1] as any)) || undefined;
 
-          const currentChainId = this.getCurrentChainId(origin, chainId);
+          const currentChainId = this.forceGetCurrentChainId(origin, chainId);
           const { signature } = await this.signEthereumSelected(
             env,
             origin,
@@ -654,7 +652,7 @@ export class KeyRingEthereumService {
           return `0x${Buffer.from(signature).toString("hex")}`;
         }
         case "eth_subscribe": {
-          const currentChainId = this.getCurrentChainId(origin, chainId);
+          const currentChainId = this.forceGetCurrentChainId(origin, chainId);
           const currentChainEVMInfo =
             this.chainsService.getEVMInfoOrThrow(currentChainId);
           if (!currentChainEVMInfo.websocket) {
@@ -741,7 +739,7 @@ export class KeyRingEthereumService {
             );
           }
 
-          const currentChainId = this.getCurrentChainId(origin, chainId);
+          const currentChainId = this.forceGetCurrentChainId(origin, chainId);
           const currentChainEVMInfo =
             this.chainsService.getEVMInfoOrThrow(currentChainId);
           if (!currentChainEVMInfo.websocket) {
@@ -815,7 +813,7 @@ export class KeyRingEthereumService {
             throw new Error("Invalid parameters: must provide a chain id.");
           }
 
-          const currentChainId = this.getCurrentChainId(origin, chainId);
+          const currentChainId = this.forceGetCurrentChainId(origin, chainId);
           const newEvmChainId = validateEVMChainId(parseInt(param.chainId, 16));
           if (newEvmChainId === this.parseChainId(currentChainId).evmChainId) {
             return null;
@@ -992,7 +990,7 @@ export class KeyRingEthereumService {
 
           const contractAddress = param?.options.address;
 
-          const currentChainId = this.getCurrentChainId(origin, chainId);
+          const currentChainId = this.forceGetCurrentChainId(origin, chainId);
 
           await this.tokenERC20Service.suggestERC20Token(
             env,
@@ -1024,7 +1022,7 @@ export class KeyRingEthereumService {
         case "eth_gasPrice":
         case "eth_feeHistory":
         case "eth_maxPriorityFeePerGas": {
-          const currentChainId = this.getCurrentChainId(origin, chainId);
+          const currentChainId = this.forceGetCurrentChainId(origin, chainId);
           const currentChainEVMInfo =
             this.chainsService.getEVMInfoOrThrow(currentChainId);
 
@@ -1059,9 +1057,13 @@ export class KeyRingEthereumService {
   }
 
   private getCurrentChainId(origin: string, chainId?: string) {
+    return chainId || this.permissionService.getCurrentChainIdForEVM(origin);
+  }
+
+  private forceGetCurrentChainId(origin: string, chainId?: string) {
     return (
-      chainId ??
-      this.permissionService.getCurrentChainIdForEVM(origin) ??
+      this.getCurrentChainId(origin, chainId) ||
+      // If the current chain id is not set, use Ethereum mainnet as the default chain id.
       "eip155:1"
     );
   }
