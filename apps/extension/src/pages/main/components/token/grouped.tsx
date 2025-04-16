@@ -384,25 +384,6 @@ export const GroupedTokenItem: FunctionComponent<{
       return mainToken.token.currency.coinDenom;
     }, [mainToken.token.currency]);
 
-    const hasAnyBottomTag = useMemo(() => {
-      return (
-        bottomTagType ||
-        tokens.some((token) =>
-          "bottomTagType" in token ? token.bottomTagType : false
-        )
-      );
-    }, [tokens, bottomTagType]);
-
-    const effectiveBottomTagType = useMemo(() => {
-      if (bottomTagType) return bottomTagType;
-      const tokenWithTag = tokens.find(
-        (token) => "bottomTagType" in token && token.bottomTagType
-      );
-      return tokenWithTag && "bottomTagType" in tokenWithTag
-        ? (tokenWithTag.bottomTagType as BottomTagType)
-        : undefined;
-    }, [tokens, bottomTagType]);
-
     const effectiveEarnedAssetPrice = useMemo(() => {
       if (earnedAssetPrice) return earnedAssetPrice;
       const tokenWithPrice = tokens.find(
@@ -565,9 +546,9 @@ export const GroupedTokenItem: FunctionComponent<{
 
     return (
       <div>
-        {!isOpen && hasAnyBottomTag ? (
+        {!isOpen && bottomTagType ? (
           <WrapperwithBottomTag
-            bottomTagType={effectiveBottomTagType}
+            bottomTagType={bottomTagType}
             earnedAssetPrice={effectiveEarnedAssetPrice}
           >
             {mainContainer}
@@ -588,10 +569,10 @@ export const GroupedTokenItem: FunctionComponent<{
               </Box>
             ))}
 
-            {isOpen && hasAnyBottomTag && (
+            {isOpen && bottomTagType && (
               <Box marginTop="0.375rem">
                 <StandaloneEarnBox
-                  bottomTagType={effectiveBottomTagType}
+                  bottomTagType={bottomTagType}
                   earnedAssetPrice={effectiveEarnedAssetPrice}
                 />
               </Box>

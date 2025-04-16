@@ -1,6 +1,7 @@
 import React, { FunctionComponent, useMemo, useState } from "react";
 import { CollapsibleList } from "../../components/collapsible-list";
 import {
+  BottomTagType,
   LookingForChains,
   MainEmptyView,
   TokenItem,
@@ -418,11 +419,24 @@ export const AvailableTabView: FunctionComponent<{
                   lenAlwaysShown={10}
                   items={Array.from(groupedTokensMap.entries()).map(
                     ([groupKey, tokens]) => {
+                      let bottomTagType: BottomTagType | undefined;
+                      let earnedAssetPrice: string | undefined;
+                      for (const token of tokens) {
+                        const {
+                          bottomTagType: newBottomTagType,
+                          earnedAssetPrice: newEarnedAssetPrice,
+                        } = getBottomTagInfoProps(token, groupKey);
+                        if (newBottomTagType && newEarnedAssetPrice) {
+                          bottomTagType = newBottomTagType;
+                          earnedAssetPrice = newEarnedAssetPrice;
+                        }
+                      }
                       return (
                         <GroupedTokenItem
                           key={groupKey}
                           tokens={tokens}
-                          {...getBottomTagInfoProps(tokens[0], groupKey)}
+                          bottomTagType={bottomTagType}
+                          earnedAssetPrice={earnedAssetPrice}
                           showPrice24HChange={
                             uiConfigStore.show24HChangesInMagePage
                           }
