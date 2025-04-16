@@ -159,7 +159,10 @@ const StyledEarningsBox = styled.div`
   gap: 8px;
   align-self: stretch;
   border-radius: 6px;
-  background: rgba(24, 146, 94, 0.2);
+  background: ${({ theme }) =>
+    theme.mode === "light"
+      ? ColorPalette["green-100"]
+      : Color(ColorPalette["green-600"]).alpha(0.2).toString()};
   cursor: pointer;
 
   &:hover {
@@ -261,9 +264,7 @@ const NestedTokenItem: FunctionComponent<{
                 wordBreak: "break-all",
               }}
             >
-              {copyAddress
-                ? viewToken.chainInfo.chainName
-                : `on ${viewToken.chainInfo.chainName}`}
+              on {viewToken.chainInfo.chainName}
             </Subtitle2>
           </XAxis>
           {tag ? (
