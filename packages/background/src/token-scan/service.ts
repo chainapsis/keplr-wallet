@@ -96,50 +96,24 @@ export class TokenScanService {
   }
 
   getTokenScans(vaultId: string): TokenScan[] {
-    const allTokenScans = (this.vaultToMap.get(vaultId) ?? []).filter(
-      (tokenScan) => {
+    return (this.vaultToMap.get(vaultId) ?? [])
+      .filter((tokenScan) => {
         return (
           this.chainsService.hasChainInfo(tokenScan.chainId) ||
           this.chainsService.hasModularChainInfo(tokenScan.chainId)
         );
-      }
-    );
+      })
+      .sort((a, b) => {
+        // Sort by chain name
+        const aChainInfo = this.chainsService.hasChainInfo(a.chainId)
+          ? this.chainsService.getChainInfoOrThrow(a.chainId)
+          : this.chainsService.getModularChainInfoOrThrow(a.chainId);
+        const bModualrChainInfo = this.chainsService.hasChainInfo(b.chainId)
+          ? this.chainsService.getChainInfoOrThrow(b.chainId)
+          : this.chainsService.getModularChainInfoOrThrow(b.chainId);
 
-    const tokenScansByLinkedChainKey = allTokenScans
-      .filter((tokenScan) => tokenScan.linkedChainKey)
-      .reduce((acc, tokenScan) => {
-        const linkedChainKey = tokenScan.linkedChainKey as string;
-        acc[linkedChainKey] = [...(acc[linkedChainKey] ?? []), tokenScan];
-        return acc;
-      }, {} as Record<string, TokenScan[]>);
-
-    const tokensWithoutLinkedChainKey = allTokenScans.filter(
-      (tokenScan) => !tokenScan.linkedChainKey
-    );
-
-    const mergedLinkedTokenScans = Object.values(
-      tokenScansByLinkedChainKey
-    ).map((tokenScans) => ({
-      ...tokenScans[0],
-      // tokenScan.infos.assets가 동일한 토큰들을 모아서 하나의 토큰으로 만들어야 함.
-      infos: tokenScans.flatMap((tokenScan) => tokenScan.infos),
-    }));
-
-    const allMergedTokenScans = [
-      ...mergedLinkedTokenScans,
-      ...tokensWithoutLinkedChainKey,
-    ];
-
-    return allMergedTokenScans.sort((a, b) => {
-      const aChainInfo = this.chainsService.hasChainInfo(a.chainId)
-        ? this.chainsService.getChainInfoOrThrow(a.chainId)
-        : this.chainsService.getModularChainInfoOrThrow(a.chainId);
-      const bChainInfo = this.chainsService.hasChainInfo(b.chainId)
-        ? this.chainsService.getChainInfoOrThrow(b.chainId)
-        : this.chainsService.getModularChainInfoOrThrow(b.chainId);
-
-      return aChainInfo.chainName.localeCompare(bChainInfo.chainName);
-    });
+        return aChainInfo.chainName.localeCompare(bModualrChainInfo.chainName);
+      });
   }
 
   protected async scanWithAllVaults(chainId: string): Promise<void> {
@@ -224,8 +198,17 @@ export class TokenScanService {
       );
 
     const tokenScans: TokenScan[] = [];
+    const processedLinkedChainKeys = new Set<string>();
     const promises: Promise<void>[] = [];
+
     for (const modularChainInfo of modularChainInfos) {
+      if ("linkedChainKey" in modularChainInfo) {
+        if (processedLinkedChainKeys.has(modularChainInfo.linkedChainKey)) {
+          continue;
+        }
+        processedLinkedChainKeys.add(modularChainInfo.linkedChainKey);
+      }
+
       promises.push(
         (async () => {
           const tokenScan = await this.calculateTokenScan(
@@ -478,37 +461,43 @@ export class TokenScanService {
         })
       );
     } else if ("bitcoin" in modularChainInfo) {
-      const { address: bitcoinAddress, paymentType } =
-        await this.keyRingBitcoinService.getBitcoinKey(vaultId, chainId);
+      const getBitcoinScanInfo = async (
+        vaultId: string,
+        chainId: string,
+        allowZeroAmount: boolean
+      ) => {
+        const { address: bitcoinAddress, paymentType } =
+          await this.keyRingBitcoinService.getBitcoinKey(vaultId, chainId);
 
-      const bitcoinChainInfo =
-        this.chainsService.getBitcoinChainInfoOrThrow(chainId);
+        const bitcoinChainInfo =
+          this.chainsService.getBitcoinChainInfoOrThrow(chainId);
 
-      const res = await simpleFetch<{
-        address: string;
-        chain_stats: {
-          funded_txo_count: number;
-          funded_txo_sum: number;
-          spent_txo_count: number;
-          spent_txo_sum: number;
-          tx_count: number;
-        };
-        mempool_stats: {
-          funded_txo_count: number;
-          funded_txo_sum: number;
-          spent_txo_count: number;
-          spent_txo_sum: number;
-          tx_count: number;
-        };
-      }>(`${bitcoinChainInfo.rest}/address/${bitcoinAddress}`);
+        const res = await simpleFetch<{
+          address: string;
+          chain_stats: {
+            funded_txo_count: number;
+            funded_txo_sum: number;
+            spent_txo_count: number;
+            spent_txo_sum: number;
+            tx_count: number;
+          };
+          mempool_stats: {
+            funded_txo_count: number;
+            funded_txo_sum: number;
+            spent_txo_count: number;
+            spent_txo_sum: number;
+            tx_count: number;
+          };
+        }>(`${bitcoinChainInfo.rest}/address/${bitcoinAddress}`);
 
-      if (res.status === 200) {
         const confirmed =
-          res.data.chain_stats.funded_txo_sum -
-          res.data.chain_stats.spent_txo_sum;
+          res.status === 200
+            ? res.data.chain_stats.funded_txo_sum -
+              res.data.chain_stats.spent_txo_sum
+            : 0;
 
-        if (confirmed > 0) {
-          tokenScan.infos.push({
+        if (confirmed > 0 || (confirmed === 0 && allowZeroAmount)) {
+          return {
             bitcoinAddress: {
               bech32Address: bitcoinAddress,
               paymentType,
@@ -519,7 +508,68 @@ export class TokenScanService {
                 amount: confirmed.toString(10),
               },
             ],
+          };
+        }
+
+        return undefined;
+      };
+
+      // TODO: 향후 여러 주소체계를 지원하는 체인이 추가되면 linkedChainKey와 관련된 로직은 별도의 함수로 분리가 필요할 것
+      if ("linkedChainKey" in modularChainInfo) {
+        const linkedBitcoinChains = this.chainsService
+          .getModularChainInfos()
+          .filter((chainInfo) => {
+            return (
+              "bitcoin" in chainInfo &&
+              chainInfo.linkedChainKey === modularChainInfo.linkedChainKey
+            );
           });
+
+        const bitcoinScanInfos: TokenScan["infos"] = [];
+
+        for (const chainInfo of linkedBitcoinChains) {
+          const info = await getBitcoinScanInfo(
+            vaultId,
+            chainInfo.chainId,
+            true
+          );
+          if (info) {
+            bitcoinScanInfos.push(info);
+          }
+        }
+
+        if (bitcoinScanInfos.length !== linkedBitcoinChains.length) {
+          throw new Error(
+            "Invalid bitcoin scan info: length mismatch between linked bitcoin chains and bitcoin scan infos"
+          );
+        }
+
+        let hasNonZeroAmount = false;
+
+        for (const bitcoinScanInfo of bitcoinScanInfos) {
+          // 우선 main currency만 처리한다.
+          if (
+            bitcoinScanInfo.assets.length > 0 &&
+            bitcoinScanInfo.assets[0].amount !== "0"
+          ) {
+            hasNonZeroAmount = true;
+            break;
+          }
+        }
+
+        // 하나라도 0이 아닌 값이 있으면 연결된 모든 체인에 대해 토큰 스캔 정보를 추가한다.
+        if (hasNonZeroAmount) {
+          tokenScan.infos.push(...bitcoinScanInfos);
+        }
+      } else {
+        const bitcoinScanInfo = await getBitcoinScanInfo(
+          vaultId,
+          chainId,
+          false
+        );
+
+        if (bitcoinScanInfo) {
+          tokenScan.infos.push(bitcoinScanInfo);
         }
       }
     }
