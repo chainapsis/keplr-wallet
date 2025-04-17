@@ -16,8 +16,6 @@ import {
   UpdateCurrentChainIdForStarknetMsg,
   GetCurrentChainIdForBitcoinMsg,
   UpdateCurrentChainIdForBitcoinMsg,
-  GetPreferredBitcoinPaymentTypeMsg,
-  SetPreferredBitcoinPaymentTypeMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -38,9 +36,6 @@ export function init(router: Router, service: PermissionService): void {
   router.registerMessage(UpdateCurrentChainIdForStarknetMsg);
   router.registerMessage(GetCurrentChainIdForBitcoinMsg);
   router.registerMessage(UpdateCurrentChainIdForBitcoinMsg);
-
-  router.registerMessage(GetPreferredBitcoinPaymentTypeMsg);
-  router.registerMessage(SetPreferredBitcoinPaymentTypeMsg);
 
   router.addHandler(ROUTE, getHandler(service));
 }

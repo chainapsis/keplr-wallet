@@ -1,7 +1,7 @@
 import { KeplrError, Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
 import { AllPermissionDataPerOrigin } from "./types";
-import { SupportedPaymentType as BitcoinPaymentType } from "@keplr-wallet/types";
+
 export class GetPermissionOriginsMsg extends Message<string[]> {
   public static type() {
     return "get-permission-origins";
@@ -425,49 +425,5 @@ export class UpdateCurrentChainIdForBitcoinMsg extends Message<void> {
 
   type(): string {
     return UpdateCurrentChainIdForBitcoinMsg.type();
-  }
-}
-
-export class GetPreferredBitcoinPaymentTypeMsg extends Message<BitcoinPaymentType> {
-  public static type() {
-    return "get-preferred-bitcoin-payment-type";
-  }
-
-  constructor() {
-    super();
-  }
-
-  validateBasic(): void {
-    // noop
-  }
-
-  route(): string {
-    return ROUTE;
-  }
-
-  type(): string {
-    return GetPreferredBitcoinPaymentTypeMsg.type();
-  }
-}
-
-export class SetPreferredBitcoinPaymentTypeMsg extends Message<void> {
-  public static type() {
-    return "set-preferred-bitcoin-payment-type";
-  }
-
-  constructor(public readonly paymentType: BitcoinPaymentType) {
-    super();
-  }
-
-  validateBasic(): void {
-    // noop
-  }
-
-  route(): string {
-    return ROUTE;
-  }
-
-  type(): string {
-    return SetPreferredBitcoinPaymentTypeMsg.type();
   }
 }

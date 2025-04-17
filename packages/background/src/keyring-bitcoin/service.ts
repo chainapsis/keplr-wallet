@@ -16,7 +16,7 @@ import {
   CHAIN_TYPE_TO_GENESIS_HASH,
   SignPsbtOptions,
 } from "@keplr-wallet/types";
-import { Env, KeplrError } from "@keplr-wallet/router";
+import { Env, KeplrError, WEBPAGE_PORT } from "@keplr-wallet/router";
 import { Psbt, address } from "bitcoinjs-lib";
 import { encodeLegacyMessage, encodeLegacySignature } from "./helper";
 import { toXOnly } from "@keplr-wallet/crypto";
@@ -28,6 +28,8 @@ import validate, {
 } from "bitcoin-address-validation";
 import { mainnet, signet, testnet } from "./constants";
 import { AnalyticsService } from "../analytics";
+import { KVStore } from "@keplr-wallet/common";
+import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 
 const DUST_THRESHOLD = 546;
 enum BitcoinSignType {
@@ -38,7 +40,11 @@ enum BitcoinSignType {
 }
 
 export class KeyRingBitcoinService {
+  @observable
+  protected preferredBitcoinPaymentType: SupportedPaymentType | undefined;
+
   constructor(
+    protected readonly kvStore: KVStore,
     protected readonly chainsService: ChainsService,
     protected readonly vaultService: VaultService,
     protected readonly keyRingService: KeyRingService,
@@ -46,10 +52,27 @@ export class KeyRingBitcoinService {
     protected readonly permissionService: PermissionService,
     protected readonly txService: BackgroundTxService,
     protected readonly analyticsService: AnalyticsService
-  ) {}
+  ) {
+    makeObservable(this);
+  }
 
   async init() {
-    // noop
+    const savedPreferredBitcoinPaymentType =
+      await this.kvStore.get<SupportedPaymentType>(
+        "preferredBitcoinPaymentType/v1"
+      );
+    if (savedPreferredBitcoinPaymentType) {
+      runInAction(() => {
+        this.preferredBitcoinPaymentType = savedPreferredBitcoinPaymentType;
+      });
+    }
+
+    autorun(() => {
+      this.kvStore.set(
+        "preferredBitcoinPaymentType/v1",
+        this.preferredBitcoinPaymentType
+      );
+    });
   }
 
   async getBitcoinKey(
@@ -541,8 +564,7 @@ export class KeyRingBitcoinService {
       );
     }
 
-    const preferredBitcoinPaymentType =
-      this.permissionService.getPreferredBitcoinPaymentType();
+    const preferredBitcoinPaymentType = this.getPreferredBitcoinPaymentType();
 
     // Taproot is default so specify the chain id.
     const currentChainId = `${currentBaseChainId}:${preferredBitcoinPaymentType}`;
@@ -911,5 +933,23 @@ export class KeyRingBitcoinService {
     )() as T;
 
     return result;
+  }
+
+  getPreferredBitcoinPaymentType(): SupportedPaymentType {
+    return this.preferredBitcoinPaymentType ?? "taproot";
+  }
+
+  @action
+  setPreferredBitcoinPaymentType(paymentType: SupportedPaymentType) {
+    this.preferredBitcoinPaymentType = paymentType;
+
+    this.interactionService.dispatchEvent(
+      WEBPAGE_PORT,
+      "keplr_bitcoinAccountsChanged",
+      {
+        paymentType,
+        origin: undefined,
+      }
+    );
   }
 }
