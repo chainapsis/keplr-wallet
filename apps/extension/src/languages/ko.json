@@ -432,6 +432,13 @@
   "page.permission.requesting-connection-title": "연결 요청",
   "page.permission.paragraph": "승인시 해당 웹사이트에서 아래와 같은 권한을 받습니다 :{br}• 유저의 케플러 지갑에 있는 모든 체인 리스트 조회, 사용",
 
+  "page.permission.basic-access.select-chain-title": "연결",
+  "page.permission.basic-access-for-bitcoin.select-chain-paragraph": "연결할 비트코인 체인 선택",
+  "page.permission.basic-access-for-bitcoin.address-type-guide-title": "{addressType} 주소 연결",
+  "page.permission.basic-access-for-bitcoin.address-type-guide-paragraph": "케플러 확장 프로그램에서 네트워크와 주소 유형을 변경할 수 있습니다.",
+
+  "page.permission.basic-access-for-evm.select-chain-paragraph": "연결할 EVM 호환 체인 선택",
+
   "page.sign.cosmos.tx.title": "트랜잭션 확인",
   "page.sign.cosmos.tx.messages": "메세지",
   "page.sign.cosmos.tx.authz-send-grant.warning-title": "다른 계정에게 자산 인출 권한을 부여하는 트랜잭션입니다. 신종금융사기 사례가 많으니 유의하시길 바랍니다.",

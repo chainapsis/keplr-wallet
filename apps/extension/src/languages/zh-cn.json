@@ -396,6 +396,13 @@
   "page.permission.requesting-connection-title": "请求连接",
   "page.permission.paragraph": "通过允许此请求，网站将：{br}• 获取你的Keplr钱包上的所有链的列表",
 
+  "page.permission.basic-access.select-chain-title": "连接",
+  "page.permission.basic-access-for-bitcoin.select-chain-paragraph": "选择要连接的比特币链。",
+  "page.permission.basic-access-for-bitcoin.address-type-guide-title": "使用您的{addressType}地址进行连接",
+  "page.permission.basic-access-for-bitcoin.address-type-guide-paragraph": "您可以稍后在 Keplr 扩展中切换网络和地址类型。",
+
+  "page.permission.basic-access-for-evm.select-chain-paragraph": "选择一个与 EVM 兼容的链进行连接。",
+
   "page.sign.cosmos.tx.title": "确认交易",
   "page.sign.cosmos.tx.messages": "消息",
   "page.sign.cosmos.tx.authz-send-grant.warning-title": "你允许另一个账户在指定的时间内从你的钱包转移资产，谨防骗子并谨慎授权。",
