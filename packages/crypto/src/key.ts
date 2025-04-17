@@ -3,7 +3,13 @@ import * as utils from "@noble/curves/abstract/utils";
 import { sha256 } from "@noble/hashes/sha2";
 import { ripemd160 } from "@noble/hashes/ripemd160";
 import { Buffer } from "buffer/";
+import { Buffer as NodeBuffer } from "buffer";
 import { Hash } from "./hash";
+import { ECPairInterface, ECPairFactory } from "ecpair";
+import { Network as BitcoinNetwork, payments } from "bitcoinjs-lib";
+import * as ecc from "./ecc-adapter";
+import * as bitcoin from "bitcoinjs-lib";
+import { fromBase58 } from "bip32";
 
 let _starknetHash: {
   calculateContractAddressFromHash(
@@ -34,19 +40,39 @@ const getStarknetHash = (): {
   }
 };
 
+bitcoin.initEccLib(ecc);
 export class PrivKeySecp256k1 {
   static generateRandomKey(): PrivKeySecp256k1 {
     return new PrivKeySecp256k1(secp256k1.utils.randomPrivateKey());
   }
 
-  constructor(protected readonly privKey: Uint8Array) {}
+  constructor(
+    protected readonly privKey: Uint8Array,
+    protected readonly masterFingerprint?: string,
+    protected readonly path?: string
+  ) {}
 
   toBytes(): Uint8Array {
     return new Uint8Array(this.privKey);
   }
 
+  toKeyPair(): ECPairInterface {
+    return ECPairFactory(ecc).fromPrivateKey(NodeBuffer.from(this.privKey));
+  }
+
   getPubKey(): PubKeySecp256k1 {
     return new PubKeySecp256k1(secp256k1.getPublicKey(this.privKey, true));
+  }
+
+  getBitcoinPubKey(network?: BitcoinNetwork): PubKeyBitcoinCompatible {
+    const pubKey = secp256k1.getPublicKey(this.toBytes(), false);
+
+    return new PubKeyBitcoinCompatible(
+      pubKey,
+      network,
+      this.masterFingerprint,
+      this.path
+    );
   }
 
   signDigest32(digest: Uint8Array): {
@@ -148,6 +174,15 @@ export class PubKeySecp256k1 {
     }
   }
 
+  toBitcoinPubKey(network?: BitcoinNetwork): PubKeyBitcoinCompatible {
+    return new PubKeyBitcoinCompatible(
+      this.toBytes(false),
+      network,
+      undefined,
+      undefined
+    );
+  }
+
   /**
    * @deprecated Use `getCosmosAddress()` instead.
    */
@@ -239,3 +274,152 @@ export class PubKeySecp256k1 {
     );
   }
 }
+
+export class PubKeyBitcoinCompatible {
+  constructor(
+    protected readonly pubKey: Uint8Array,
+    protected readonly network?: BitcoinNetwork,
+    protected readonly masterFingerprint?: string,
+    protected readonly path?: string
+  ) {}
+
+  toBytes(uncompressed?: boolean): Uint8Array {
+    if (uncompressed && this.pubKey.length === 65) {
+      return this.pubKey;
+    }
+    if (!uncompressed && this.pubKey.length === 33) {
+      return this.pubKey;
+    }
+
+    if (uncompressed) {
+      return secp256k1.ProjectivePoint.fromHex(
+        Buffer.from(this.pubKey).toString("hex")
+      ).toRawBytes(false);
+    } else {
+      return secp256k1.ProjectivePoint.fromHex(
+        Buffer.from(this.pubKey).toString("hex")
+      ).toRawBytes(true);
+    }
+  }
+
+  getMasterFingerprint(): string | undefined {
+    return this.masterFingerprint;
+  }
+
+  getPath(): string | undefined {
+    return this.path;
+  }
+
+  getBitcoinAddress(
+    paymentType?: "legacy" | "native-segwit" | "taproot",
+    network?: BitcoinNetwork
+  ): string | undefined {
+    const pubKey = this.toBytes(false);
+    const currentNetwork = network ?? this.network;
+
+    const getLegacyAddress = () => {
+      return payments.p2pkh({
+        pubkey: NodeBuffer.from(pubKey),
+        network: currentNetwork,
+      }).address;
+    };
+
+    const getNativeSegwitAddress = () => {
+      return payments.p2wpkh({
+        pubkey: NodeBuffer.from(pubKey),
+        network: currentNetwork,
+      }).address;
+    };
+
+    const getTaprootAddress = () => {
+      return payments.p2tr({
+        internalPubkey: toXOnly(NodeBuffer.from(pubKey)),
+        network: currentNetwork,
+      }).address;
+    };
+
+    switch (paymentType) {
+      case "legacy":
+        return getLegacyAddress();
+      case "native-segwit":
+        return getNativeSegwitAddress();
+      case "taproot":
+        return getTaprootAddress();
+      default:
+        const path = this.getPath();
+        if (path) {
+          const segments = path.split("/").filter(Boolean);
+          // Check if this is a BIP44 compatible path (m/purpose'/coinType'/account')
+          const purposeIndex = segments[0] === "m" ? 1 : 0;
+
+          if (segments.length >= purposeIndex + 3) {
+            const purposeSegment = segments[purposeIndex];
+            const purpose = parseInt(
+              purposeSegment.endsWith("'")
+                ? purposeSegment.slice(0, -1)
+                : purposeSegment
+            );
+
+            // Determine payment type based on purpose
+            if (purpose === 44) {
+              return getLegacyAddress();
+            } else if (purpose === 84) {
+              return getNativeSegwitAddress();
+            } else if (purpose === 86) {
+              return getTaprootAddress();
+            }
+          }
+        }
+    }
+  }
+
+  static fromExtendedKey(
+    xpub: string,
+    basePath: string,
+    masterFingerprint?: string,
+    additionalPath?: string,
+    network?: BitcoinNetwork
+  ): PubKeyBitcoinCompatible {
+    const root = fromBase58(xpub, network);
+
+    const depth = root.depth;
+    const hdPathSegments = basePath.split("/").filter(Boolean);
+    const purposeIndex = hdPathSegments[0] === "m" ? 1 : 0;
+
+    if (depth !== hdPathSegments.length - purposeIndex) {
+      throw new Error("Invalid depth with base path");
+    }
+
+    if (additionalPath) {
+      const additionalPathSegments = additionalPath.split("/").filter(Boolean);
+      if (additionalPathSegments[0] === "m") {
+        throw new Error("Additional path should not include m");
+      }
+
+      const child = root.derivePath(additionalPath);
+      return new PubKeyBitcoinCompatible(
+        child.publicKey,
+        network,
+        masterFingerprint,
+        purposeIndex === 0
+          ? `m/${basePath}/${additionalPath}`
+          : `${basePath}/${additionalPath}`
+      );
+    }
+
+    return new PubKeyBitcoinCompatible(
+      root.publicKey,
+      network,
+      masterFingerprint,
+      purposeIndex === 0 ? `m/${basePath}` : basePath
+    );
+  }
+}
+
+/**
+ * Converts a public key to an X-only public key.
+ * @param pubKey The public key to convert.
+ * @returns The X-only public key.
+ */
+export const toXOnly = (pubKey: NodeBuffer) =>
+  pubKey.length === 32 ? pubKey : pubKey.slice(1, 33);

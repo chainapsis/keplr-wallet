@@ -61,11 +61,18 @@ export class InteractionStore implements InteractionForegroundHandler {
     protected readonly pingHandler?: (
       windowId: number | undefined,
       ignoreWindowIdAndForcePing: boolean
+    ) => Promise<boolean>,
+    protected readonly interactionIdPingHandler?: (
+      interactionId: string
     ) => Promise<boolean>
   ) {
     makeObservable(this);
 
-    const service = new InteractionForegroundService(this, pingHandler);
+    const service = new InteractionForegroundService(
+      this,
+      pingHandler,
+      interactionIdPingHandler
+    );
     interactionForegroundInit(router, service);
 
     this.init();

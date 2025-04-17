@@ -149,11 +149,24 @@ export const LookingForChainItem: FunctionComponent<{
                 chainName: chainInfo.chainName,
               });
 
-              if (keyType === "ledger" && "starknet" in chainInfo) {
-                browser.tabs.create({
-                  url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&skipWelcome=true&initialSearchValue=${chainInfo.chainName}&fallbackStarknetLedgerApp=true`,
-                });
-                return;
+              if (keyType === "ledger") {
+                const isStarknet = "starknet" in chainInfo;
+                const isBitcoin = "bitcoin" in chainInfo;
+
+                if (isStarknet || isBitcoin) {
+                  browser.tabs.create({
+                    url: `/register.html#?route=enable-chains&vaultId=${
+                      keyRingStore.selectedKeyInfo.id
+                    }&skipWelcome=true&initialSearchValue=${
+                      chainInfo.chainName
+                    }&${
+                      isStarknet
+                        ? "fallbackStarknetLedgerApp=true"
+                        : "fallbackBitcoinLedgerApp=true"
+                    }`,
+                  });
+                  return;
+                }
               }
 
               const isEthereumChain =

@@ -1,6 +1,6 @@
 import { Env } from "@keplr-wallet/router";
 import { ChainsService } from "../chains";
-import { KeyRingService } from "../keyring";
+import { KeyRingService, DEFAULT_BIP44_PURPOSE } from "../keyring";
 import { Buffer } from "buffer/";
 import { TokenERC20Service } from "../token-erc20";
 import { WatchAssetParameters } from "@keplr-wallet/types";
@@ -190,6 +190,7 @@ export class KeyRingStarknetService {
       } else {
         const sig = await this.keyRingService.signWithVault(
           vault,
+          DEFAULT_BIP44_PURPOSE,
           9004,
           Buffer.from("starknet_key_salt"),
           "sha256",

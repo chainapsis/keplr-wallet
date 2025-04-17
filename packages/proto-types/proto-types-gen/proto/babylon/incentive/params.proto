@@ -1,0 +1,26 @@
+syntax = "proto3";
+package babylon.incentive;
+
+import "gogoproto/gogo.proto";
+import "cosmos_proto/cosmos.proto";
+
+option go_package = "github.com/babylonlabs-io/babylon/x/incentive/types";
+
+// Params defines the parameters for the module, including portions of rewards
+// distributed to each type of stakeholder. Note that sum of the portions should
+// be strictly less than 1 so that the rest will go to Comet
+// validators/delegations adapted from
+// https://github.com/cosmos/cosmos-sdk/blob/release/v0.47.x/proto/cosmos/distribution/v1beta1/distribution.proto
+message Params {
+  option (gogoproto.goproto_stringer) = false;
+
+  // btc_staking_portion is the portion of rewards that goes to Finality
+  // Providers/delegations NOTE: the portion of each Finality
+  // Provider/delegation is calculated by using its voting power and finality
+  // provider's commission
+  string btc_staking_portion = 1 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+}

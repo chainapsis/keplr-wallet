@@ -34,6 +34,9 @@ import { FormattedMessage, useIntl } from "react-intl";
 import SimpleBar from "simplebar-react";
 import { XAxis, YAxis } from "../../../../components/axis";
 import { EmbedChainInfos } from "../../../../config";
+import { DenomHelper } from "@keplr-wallet/common";
+import { TokenTag } from "../../../register/enable-chains/components/chain-item";
+import { SupportedPaymentType } from "@keplr-wallet/types";
 
 export const TokenFoundModal: FunctionComponent<{
   close: () => void;
@@ -91,8 +94,17 @@ export const TokenFoundModal: FunctionComponent<{
     // 그래서 일단 얇은 복사를 하고 이 값을 사용한다.
     const tokenScans = chainStore.tokenScans.slice();
 
-    for (const enable of enables) {
+    const linkedEnables = new Set<string>();
+
+    for (const enable of enables.slice()) {
       const modularChainInfo = chainStore.getModularChain(enable);
+      const tokenScan = tokenScans.find(
+        (tokenScan) =>
+          ChainIdHelper.parse(tokenScan.chainId).identifier === enable
+      );
+
+      if (!tokenScan) continue;
+
       if ("cosmos" in modularChainInfo) {
         if (
           keyRingStore.needKeyCoinTypeFinalize(
@@ -100,17 +112,12 @@ export const TokenFoundModal: FunctionComponent<{
             chainStore.getChain(enable)
           )
         ) {
-          const tokenScan = tokenScans.find((tokenScan) => {
-            return ChainIdHelper.parse(tokenScan.chainId).identifier === enable;
-          });
-
-          if (tokenScan && tokenScan.infos.length > 1) {
+          if (tokenScan.infos.length > 1) {
             needBIP44Selects.push(enable);
             enables.splice(enables.indexOf(enable), 1);
           }
 
           if (
-            tokenScan &&
             tokenScan.infos.length === 1 &&
             tokenScan.infos[0].coinType != null
           ) {
@@ -122,18 +129,49 @@ export const TokenFoundModal: FunctionComponent<{
           }
         }
       } else if ("starknet" in modularChainInfo) {
-        const tokenScan = tokenScans.find((tokenScan) => {
-          return ChainIdHelper.parse(tokenScan.chainId).identifier === enable;
-        });
-
-        if (tokenScan && tokenScan.infos.length > 1) {
+        if (tokenScan.infos.length > 1) {
           enables.splice(enables.indexOf(enable), 1);
+        }
+      } else if ("bitcoin" in modularChainInfo) {
+        // 비트코인은 최대 2개의 info (taproot, native segwit)만 가질 수 있다.
+        if (tokenScan.infos.length > 2) {
+          enables.splice(enables.indexOf(enable), 1);
+          continue;
+        }
+
+        const linkedChainKey = tokenScan.linkedChainKey;
+        if (linkedChainKey) {
+          const groupedModularChainInfo =
+            chainStore.groupedModularChainInfos.find(
+              (group) =>
+                "linkedChainKey" in group &&
+                group.linkedChainKey === linkedChainKey
+            );
+
+          if (groupedModularChainInfo?.linkedModularChainInfos) {
+            const chainIdsToAdd = new Set([
+              groupedModularChainInfo.chainId,
+              ...groupedModularChainInfo.linkedModularChainInfos.map(
+                (info) => info.chainId
+              ),
+            ]);
+
+            for (const chainId of chainIdsToAdd) {
+              const identifier = ChainIdHelper.parse(chainId).identifier;
+
+              if (!linkedEnables.has(identifier)) {
+                linkedEnables.add(identifier);
+              }
+            }
+          }
         }
       }
     }
 
-    if (enables.length > 0) {
-      await chainStore.enableChainInfoInUI(...enables);
+    const finalEnables = Array.from(new Set([...enables, ...linkedEnables]));
+
+    if (finalEnables.length > 0) {
+      await chainStore.enableChainInfoInUI(...finalEnables);
     }
 
     if (needBIP44Selects.length > 0) {
@@ -342,6 +380,16 @@ const FoundChainView: FunctionComponent<{
     return Array.from(set).length;
   }, [tokenScan]);
 
+  const tokenInfos = tokenScan.infos.reduce((acc, cur) => {
+    return [
+      ...acc,
+      ...cur.assets.map((asset) => ({
+        ...asset,
+        paymentType: cur.bitcoinAddress?.paymentType,
+      })),
+    ];
+  }, [] as (TokenScan["infos"][0]["assets"][0] & { paymentType?: SupportedPaymentType })[]);
+
   return (
     <Box
       paddingY="0.875rem"
@@ -419,10 +467,9 @@ const FoundChainView: FunctionComponent<{
           marginTop="0.625rem"
         >
           <Stack gutter="0.5rem">
-            {tokenScan.infos.length > 0 &&
-            tokenScan.infos[0].assets.length > 0 ? (
+            {tokenInfos.length > 0 ? (
               <React.Fragment>
-                {tokenScan.infos[0].assets.map((asset) => {
+                {tokenInfos.map((asset) => {
                   return (
                     <FoundTokenView
                       key={asset.currency.coinMinimalDenom}
@@ -442,10 +489,30 @@ const FoundChainView: FunctionComponent<{
 
 const FoundTokenView: FunctionComponent<{
   chainId: string;
-  asset: TokenScan["infos"][0]["assets"][0];
+  asset: TokenScan["infos"][0]["assets"][0] & {
+    paymentType?: SupportedPaymentType;
+  };
 }> = observer(({ chainId, asset }) => {
   const { chainStore, uiConfigStore } = useStore();
   const theme = useTheme();
+
+  const addressTag = useMemo(() => {
+    const currency = asset.currency;
+    const denomHelper = new DenomHelper(currency.coinMinimalDenom);
+    if (denomHelper.type === "native") {
+      if (chainId.startsWith("bip122:")) {
+        const paymentType = asset.paymentType;
+        if (paymentType) {
+          return {
+            text: paymentType
+              .split("-")
+              .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+              .join(" "),
+          };
+        }
+      }
+    }
+  }, [asset.currency, chainId, asset.paymentType]);
 
   return (
     <Columns sum={1} gutter="0.5rem" alignY="center">
@@ -461,47 +528,51 @@ const FoundTokenView: FunctionComponent<{
           alt="Token Found Modal Token Image"
         />
       </Box>
-
-      <Subtitle3
-        color={
-          theme.mode === "light"
-            ? ColorPalette["gray-400"]
-            : ColorPalette["gray-50"]
-        }
+      <Box
+        style={{
+          flexDirection: "row",
+          flexWrap: "wrap",
+          gap: "0.25rem",
+        }}
       >
-        {(() => {
-          if (chainStore.hasChain(chainId)) {
-            return chainStore
-              .getChain(chainId)
-              .forceFindCurrency(asset.currency.coinMinimalDenom).coinDenom;
-          } else {
-            const modularChainInfo = chainStore.getModularChain(chainId);
-            if ("starknet" in modularChainInfo) {
-              return (
-                chainStore
-                  .getModularChainInfoImpl(chainId)
-                  .getCurrencies("starknet")
-                  .find(
-                    (cur) =>
-                      cur.coinMinimalDenom === asset.currency.coinMinimalDenom
-                  )?.coinDenom ?? asset.currency.coinDenom
-              );
-            } else if ("cosmos" in modularChainInfo) {
-              return (
-                chainStore
-                  .getModularChainInfoImpl(chainId)
-                  .getCurrencies("cosmos")
-                  .find(
-                    (cur) =>
-                      cur.coinMinimalDenom === asset.currency.coinMinimalDenom
-                  )?.coinDenom ?? asset.currency.coinDenom
-              );
-            } else {
-              return asset.currency.coinDenom;
-            }
+        <Subtitle3
+          color={
+            theme.mode === "light"
+              ? ColorPalette["gray-400"]
+              : ColorPalette["gray-50"]
           }
-        })()}
-      </Subtitle3>
+        >
+          {(() => {
+            if (chainStore.hasChain(chainId)) {
+              return chainStore
+                .getChain(chainId)
+                .forceFindCurrency(asset.currency.coinMinimalDenom).coinDenom;
+            } else {
+              const modularChainInfo = chainStore.getModularChain(chainId);
+              const isBitcoin = "bitcoin" in modularChainInfo;
+              const isStarknet = "starknet" in modularChainInfo;
+              const isCosmos = "cosmos" in modularChainInfo;
+
+              if (isBitcoin || isStarknet || isCosmos) {
+                return (
+                  chainStore
+                    .getModularChainInfoImpl(chainId)
+                    .getCurrencies(
+                      isBitcoin ? "bitcoin" : isStarknet ? "starknet" : "cosmos"
+                    )
+                    .find(
+                      (cur) =>
+                        cur.coinMinimalDenom === asset.currency.coinMinimalDenom
+                    )?.coinDenom ?? asset.currency.coinDenom
+                );
+              } else {
+                return asset.currency.coinDenom;
+              }
+            }
+          })()}
+        </Subtitle3>
+        {addressTag ? <TokenTag text={addressTag.text} /> : null}
+      </Box>
 
       <Column weight={1} />
 
@@ -520,21 +591,17 @@ const FoundTokenView: FunctionComponent<{
                 .forceFindCurrency(asset.currency.coinMinimalDenom);
             } else {
               const modularChainInfo = chainStore.getModularChain(chainId);
-              if ("starknet" in modularChainInfo) {
+              const isBitcoin = "bitcoin" in modularChainInfo;
+              const isStarknet = "starknet" in modularChainInfo;
+              const isCosmos = "cosmos" in modularChainInfo;
+
+              if (isBitcoin || isStarknet || isCosmos) {
                 return (
                   chainStore
                     .getModularChainInfoImpl(chainId)
-                    .getCurrencies("starknet")
-                    .find(
-                      (cur) =>
-                        cur.coinMinimalDenom === asset.currency.coinMinimalDenom
-                    ) ?? asset.currency
-                );
-              } else if ("cosmos" in modularChainInfo) {
-                return (
-                  chainStore
-                    .getModularChainInfoImpl(chainId)
-                    .getCurrencies("cosmos")
+                    .getCurrencies(
+                      isBitcoin ? "bitcoin" : isStarknet ? "starknet" : "cosmos"
+                    )
                     .find(
                       (cur) =>
                         cur.coinMinimalDenom === asset.currency.coinMinimalDenom

@@ -27,6 +27,7 @@
   "bottom-tabs.swap": "스왑",
   "bottom-tabs.activity": "활동내역",
   "bottom-tabs.settings": "설정",
+  "bottom-tabs.swap.disabled": "스왑은 현재 코스모스, 이더리움 계열 체인들만 지원하고 있습니다. 사용하려면 코스모스나 이더리움 계열 체인을 추가해주세요",
 
   "pages.register.components.header.intro-title": "내 손 안의 인터체인",
   "pages.register.components.header.header-step.title": "단계",
@@ -40,6 +41,7 @@
   "pages.register.components.bip-44-path.paragraph-lost": "경로 정보를 분실하시면 경로를 다시 복구할 수 없습니다.",
   "pages.register.components.bip-44-path.paragraph-unfamiliar": "이 기능에 대해 자세히 알지 못하는 경우, 해당 절차를 스킵하거나 철회하시길 바랍니다. -> <reset>환경설정 초기화</reset>",
   "pages.register.components.bip-44-path.hd-path-subtitle": "BIP44 HD 경로",
+  "pages.register.components.bip-44-path.hd-path-tooltip": "체인과 주소 유형에 따라 접두사(예: m/44', m/84', m/86')가 자동으로 설정됩니다. 필요한 경우 나머지 경로를 채워주세요.",
   "pages.register.components.form.name-password.wallet-name-label": "지갑 이름",
   "pages.register.components.form.name-password.wallet-name-placeholder": "예시) 트레이딩, NFT 보관용, 투자용",
   "pages.register.components.form.name-password.password-label": "새로운 비밀번호",
@@ -125,7 +127,7 @@
 
   "pages.register.connect-ledger.title": "하드웨어 지갑을 연결해주세요.",
   "pages.register.connect-ledger.direct.title": "렛저 {app} 앱에 케플러를 연결하세요.",
-  "pages.register.connect-ledger.paragraph": "케플러는 코스모스 앱체인, Ethereum, Injective와 Evmos를 포함한 모든 EVM 호환 체인, 그리고 Starknet을 지원합니다. Ledger 연결은 코스모스, EVM, Starknet 순서로 진행됩니다.",
+  "pages.register.connect-ledger.paragraph": "케플러는 코스모스 기반 체인, 이더리움, 인젝티브, 이브모스를 포함한 모든 EVM 호환 체인, 스타크넷, 그리고 비트코인을 지원합니다. 렛저 연결은 코스모스, EVM, 스타크넷, 비트코인 순서로 진행됩니다.",
   "pages.register.connect-ledger.direct.paragraph": "이 창은 렛저 계정이지만 {app} 앱을 연결하지 않은 사용자에게만 표시됩니다. 다른 사용자에게는 표시되지 않습니다.",
   "pages.register.connect-ledger.step-text": "{step} 단계",
   "pages.register.connect-ledger.connect-ledger-step-paragraph": "렛저를 연결하고 잠금을 해제하세요.",
@@ -164,18 +166,22 @@
   "pages.register.enable-chains.skip-button": "스킵",
   "pages.register.enable-chains.guide.can-select-evm-next-step": "EVM 체인 선택은 다음 단계에서 진행할 수 있습니다.",
   "pages.register.enable-chains.guide.can-select-starknet-later-step": "Starknet 체인 선택은 추후의 단계에서 진행할 수 있습니다.",
+  "pages.register.enable-chains.guide.can-select-bitcoin-later-step": "비트코인 체인 선택은 추후의 단계에서 진행할 수 있습니다.",
   "pages.register.enable-chains.guide.starknet.title": "스타크넷 유저를 위한 안내",
   "pages.register.enable-chains.guide.starknet.paragraph": "Argent, Braavos 등의 타 지갑 서비스에서 계정을 불러와도 서로 다른 새로운 계정이 생성됩니다.",
   "pages.register.enable-chains.guide.non-native-chain.title": "선택형 체인 설정 안내",
   "pages.register.enable-chains.guide.non-native-chain.paragraph": "녹색 선택 아이콘이 없는 체인은 선택형(기본 체인이 아닌) 체인입니다. 케플러에서 언제든지 추가하여 사용할 수 있지만, 케플러는 선택형 체인 문제에 대한 직접적인 지원을 제공하지 않습니다.",
   "pages.register.enable-chains.native-chain-view.title": "모든 네이티브 체인",
-  "pages.register.enable-chains.native-chain-view.paragraph": "Cosmos, Ethereum, Osmosis..",
+  "pages.register.enable-chains.native-chain-view.paragraph": "Cosmos, Ethereum, Bitcoin..",
 
   "pages.register.enable-chains.native-chain-view.ledger-cosmos-title": "모든 네이티브 코스모스 체인",
+  "pages.register.enable-chains.native-chain-view.ledger-cosmos-paragraph": "Cosmos, Osmosis, Celestia...",
   "pages.register.enable-chains.native-chain-view.ledger-evm-title": "모든 네이티브 EVM 체인",
   "pages.register.enable-chains.native-chain-view.ledger-evm-paragraph": "Ethereum, Arbitrum, Base...",
   "pages.register.enable-chains.native-chain-view.ledger-starknet-title": "모든 네이티브 Starknet 체인",
   "pages.register.enable-chains.native-chain-view.ledger-starknet-paragraph": "Starknet, Starknet Sepolia",
+  "pages.register.enable-chains.native-chain-view.ledger-bitcoin-title": "모든 네이티브 비트코인 체인",
+  "pages.register.enable-chains.native-chain-view.ledger-bitcoin-paragraph": "비트코인, 비트코인 시그넷, 비트코인 테스트넷",
 
   "pages.register.select-derivation-path.title": "계정 파생 경로(Derivation Path) 선택하기",
   "pages.register.select-derivation-path.paragraph": "두 가지 경로를 모두 사용하려면, 각각에 대해 불러오기 과정을 한번씩 거쳐야 합니다.",
@@ -238,6 +244,8 @@
   "page.setting.general.side-panel-paragraph": "케플러 지갑을 브라우저의 사이드 패널에서 사용할 수 있습니다.",
   "page.setting.general.show-24h-price-changes-title": "24시간 가격변동률 표시",
   "page.setting.general.show-24h-price-changes-paragraph": "각 토큰의 24시간 가격변동률을 표시하는 기능입니다.",
+  "page.setting.advanced.manage-non-native-chains-title": "선택형 체인 추가/제거",
+  "page.setting.advanced.manage-non-native-chains-paragraph": "선택형 체인을 추가하거나 완전히 제거할 수 있습니다. 추가 후에는 체인을 활성화해주세요.",
   "page.setting.general.manage-chain-visibility-title": "체인 추가/제거",
   "page.setting.general.manage-chain-visibility-paragraph": "현재 계정에 표시될 체인(해당 체인의 자산 포함)을 선택해주세요.",
 
@@ -462,6 +470,14 @@
 
   "page.sign.starknet.tx.calls": "실행할 호출",
 
+  "page.sign.bitcoin.transaction.data": "트랜잭션 데이터",
+  "page.sign.bitcoin.transaction.input": "입력",
+  "page.sign.bitcoin.transaction.output": "출력",
+  "page.sign.bitcoin.transaction.expected-network-fee": "예상 네트워크 수수료",
+  "page.sign.bitcoin.transaction.total-spend": "총 지출",
+  "page.sign.bitcoin.transaction.utxo-warning": "{coinDenom}를 제외한 자산이 포함될 수 있습니다. (e.g. inscription, runes)",
+  "page.sign.bitcoin.transaction.review-progress": "{index}/{total} 트랜잭션 검토",
+
   "page.sign.components.fee-summary.fee": "수수료",
 
   "page.sign.components.messages.custom.title": "커스텀",
@@ -495,6 +511,8 @@
   "page.sign.components.messages.vote.paragraph": "<b>프로포절 {proposalId}</b>에 <b>{textualOption}</b> 표를 행사합니다.",
   "page.sign.components.messages.wasm-message-view.close-button": "접기",
   "page.sign.components.messages.wasm-message-view.details-button": "상세보기",
+  "page.sign.components.messages.create-btc-delegation.title": "BTC 스테이킹 등록하기",
+  "page.sign.components.messages.create-btc-delegation.paragraph": "스테이킹에 관련된 데이터를 Babylon Genesis 체인에 제출 및 등록합니다.",
 
   "page.sign.components.ledger-guide.box.error-title": "오류",
   "page.sign.components.ledger-guide.box.connect-and-unlock-ledger-paragraph": "렛저 장치를 연결하고 잠금을 해제하세요.",
@@ -630,7 +648,7 @@
   "page.main.components.token-item.copy-address.copied": "복사됨",
 
   "page.main.layouts.header.new-chain.title": "{chains} 체인이 추가되었습니다!",
-  "page.main.layouts.header.new-chain.paragraph": "\"체인 표시\"에서 신규 체인을 활성화하면 이 계정에서 사용할 수 있습니다.",
+  "page.main.layouts.header.new-chain.paragraph": "\"체인 추가/제거\"에서 신규 체인을 활성화하면 이 계정에서 사용할 수 있습니다.",
   "page.main.layouts.header.new-chain.button": "좋아요!",
 
   "page.ledger-grant.title": "렛저와 브라우저 간의 연결을 재허용합니다",
@@ -647,12 +665,16 @@
   "components.input.recipient-input.wallet-address-label-icns-ens": "지갑 주소 혹은 ICNS 혹은 ENS",
   "components.input.amount-input.amount-label": "수량",
   "components.input.amount-input.max-button": "최대",
+  "components.input.amount-input.available-balance-label": "사용 가능한 자산: {balance}",
+  "components.input.amount-input.available-balance-tooltip": "현재 진행 중인 거래와 프로토콜이 제한하는 금액을 제외하고 실제 사용 가능한 잔액입니다.",
   "components.input.memo-input.memo-label": "메모",
   "components.input.memo-input.optional-placeholder": "선택사항",
   "components.input.fee-control.title": "트랜잭션 수수료",
   "components.input.fee-control.fee": "수수료: {assets}",
   "components.input.fee-control.max-fee": "최대 수수료: {assets}",
+  "components.input.fee-control.fee-rate": "수수료 비율: {feeRate} sat/vB",
   "components.input.fee-control.error.insufficient-fee": "수수료를 낼 잔고가 부족합니다.",
+  "components.input.fee-control.error.unable-to-find-proper-utxos": "적절한 UTXO 조합을 찾을 수 없습니다.",
   "components.input.fee-control.tooltip.external-fee-set": "웹사이트에 의해 설정된 수수료입니다.",
   "components.input.fee-control.modal.title": "수수료 옵션",
   "components.input.fee-control.modal.fee-title": "수수료 선택",
@@ -662,9 +684,11 @@
   "components.input.fee-control.modal.guide-title": "Tx simulation failed",
   "components.input.fee-control.modal.gas-adjustment-label": "가스 조정",
   "components.input.fee-control.modal.gas-amount-label": "가스량",
+  "components.input.fee-control.modal.fee-rate-label": "수수료 비율",
   "components.input.fee-control.modal.fee-selector.low": "느림",
   "components.input.fee-control.modal.fee-selector.average": "평균",
   "components.input.fee-control.modal.fee-selector.high": "빠름",
+  "components.input.fee-control.modal.fee-selector.manual": "수동",
   "components.input.fee-control.modal.guide.external-fee-set": "웹사이트/어플리케이션에 의해 설정된 수수료입니다. 임의로 변경할 경우 트랜잭션이 처리되지 않을 수 있습니다.",
   "components.input.fee-control.modal.notification.changes-applied": "변경사항이 적용되었습니다.",
   "components.input.fee-control.modal.max-fee": "최대 수수료",
@@ -685,12 +709,23 @@
   "components.collapsible-list.collapse": "접기",
   "components.collapsible-list.view-more": "{remain}개 더보기",
 
+  "components.bitcoin-guide-box.title.critical-validation-error": "트랜잭션 서명 불가",
+  "components.bitcoin-guide-box.title.unable-to-get-utxos": "UTXO 조회 불가",
+  "components.bitcoin-guide-box.paragraph.unable-to-send-bitcoin": "전송 가능한 비트코인이 없습니다. 잔액이 충분한지, 또는 다른 거래에 잠겨있거나 대기 중인 상태가 아닌지 확인해주세요.",
+  "components.bitcoin-guide-box.title.unable-to-send-bitcoin": "보낼 수 있는 UTXO가 없음",
+  "components.bitcoin-guide-box.paragraph.unable-to-get-utxos": "일시적으로 UTXO 정보를 가져올 수 없습니다. 잠시 후 다시 시도해 주세요.",
+  "components.bitcoin-guide-box.title.partial-signing": "부분 서명",
+  "components.bitcoin-guide-box.paragraph.partial-signing": "이 지갑에 속한 입력값에 대해서만 서명이 진행됩니다.",
+  "components.bitcoin-guide-box.title.none-of-the-inputs-belong-to-this-wallet": "서명 가능한 입력값이 없음",
+  "components.bitcoin-guide-box.paragraph.none-of-the-inputs-belong-to-this-wallet": "보안상의 이유로 이 지갑에 속한 입력값에 대해서만 서명이 가능합니다.",
+
   "components.fee-info.bridge-fee": "브릿지 수수료",
 
   "button.confirm": "확인",
   "button.ok": "확인",
   "button.next": "다음",
-  "button.advanced": "고급",
+  "button.review": "검토",
+  "button.advanced": "파생 경로 설정 (고급)",
   "button.approve": "승인",
   "button.save": "저장",
   "button.close": "닫기",
@@ -701,6 +736,7 @@
   "text-button.select-all": "전체 선택",
 
   "notification.transaction-success": "트랜잭션 성공",
+  "notification.transaction-sent": "트랜잭션 전송됌",
 
   "hooks.confirm.cancel-button": "취소",
   "hooks.confirm.yes-button": "예"

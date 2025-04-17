@@ -4,6 +4,7 @@ import {
   sortedJsonByKeyStringify,
 } from "@keplr-wallet/common";
 import {
+  BitcoinChainInfo,
   ChainInfo,
   ChainInfoWithoutEndpoints,
   EVMInfo,
@@ -1249,5 +1250,72 @@ export class ChainsService {
     }
 
     return starknetChainInfo;
+  }
+
+  getBitcoinChainInfo(chainId: string): BitcoinChainInfo | undefined {
+    const modularChainInfos = this.getModularChainInfos();
+
+    const directMatch = modularChainInfos.find(
+      (info) => info.chainId === chainId
+    );
+    if (directMatch && "bitcoin" in directMatch) {
+      return directMatch.bitcoin;
+    }
+
+    const baseChainMatch = modularChainInfos.find(
+      (info) => "bitcoin" in info && info.bitcoin.chainId === chainId
+    );
+    if (baseChainMatch && "bitcoin" in baseChainMatch) {
+      return baseChainMatch.bitcoin;
+    }
+  }
+
+  getBitcoinChainInfoOrThrow(chainId: string): BitcoinChainInfo {
+    const bitcoinChainInfo = this.getBitcoinChainInfo(chainId);
+    if (!bitcoinChainInfo) {
+      throw new Error(`There is no bitcoin chain info for ${chainId}`);
+    }
+
+    return bitcoinChainInfo;
+  }
+
+  /**
+   * 여러 주소 체계가 존재하는 체인의 경우, chainId에서 주소 체계를 제외한 공통된 부분을 사용하여 하나의 체인으로 취급해야 한다.
+   * 예를 들어, Bitcoin의 경우 `bip122:123456:taproot`와 `bip122:123456:native-segwit`를 사용해
+   * 각 주소 체계를 구분하고 있지만, 공통된 `bip122:123456`을 사용하여 하나의 체인으로 취급되어야 한다.
+   * TODO: 비트 코인 외에도 여러 주소 체계가 존재하는 체인이 추가될 경우, 이 메서드의 부분적인 수정이 필요하다.
+   */
+  getBaseChainId(chainId: string): string | undefined {
+    chainId = ChainIdHelper.parse(chainId).identifier;
+
+    const modularChainInfos = this.getModularChainInfos();
+
+    const directMatch = modularChainInfos.find(
+      (info) => ChainIdHelper.parse(info.chainId).identifier === chainId
+    );
+    if (directMatch) {
+      if ("bitcoin" in directMatch) {
+        return directMatch.bitcoin.chainId;
+      }
+      return chainId;
+    }
+
+    const baseChainMatch = modularChainInfos.find(
+      (info) => "bitcoin" in info && info.bitcoin.chainId === chainId
+    );
+    if (baseChainMatch) {
+      return chainId;
+    }
+
+    return undefined;
+  }
+
+  getBaseChainIdOrThrow(chainId: string): string {
+    const baseChainId = this.getBaseChainId(chainId);
+    if (!baseChainId) {
+      throw new Error(`There is no modular chain info for ${chainId}`);
+    }
+
+    return baseChainId;
   }
 }

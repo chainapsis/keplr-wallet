@@ -24,6 +24,7 @@ import * as KeyRingPrivateKey from "./keyring-private-key/internal";
 import * as KeyRingCosmos from "./keyring-cosmos/internal";
 import * as KeyRingEthereum from "./keyring-ethereum/internal";
 import * as KeyRingStarknet from "./keyring-starknet/internal";
+import * as KeyRingBitcoin from "./keyring-bitcoin/internal";
 import * as PermissionInteractive from "./permission-interactive/internal";
 import * as TokenScan from "./token-scan/internal";
 import * as RecentSendHistory from "./recent-send-history/internal";
@@ -50,6 +51,7 @@ export * from "./keyring-cosmos";
 export * from "./keyring-ethereum";
 export * from "./keyring-starknet";
 export * from "./keyring-keystone";
+export * from "./keyring-bitcoin";
 export * from "./token-scan";
 export * from "./recent-send-history";
 export * from "./side-panel";
@@ -73,6 +75,7 @@ export function init(
   privilegedOrigins: string[],
   analyticsPrivilegedOrigins: string[],
   msgPrivilegedOrigins: string[],
+  msgPrivilegedCosmwasmContractMap: Record<string, Record<string, string[]>>,
   suggestChainPrivilegedOrigins: string[],
   communityChainInfoRepo: {
     readonly organizationName: string;
@@ -211,7 +214,8 @@ export function init(
     interactionService,
     chainsUIService,
     analyticsService,
-    msgPrivilegedOrigins
+    msgPrivilegedOrigins,
+    msgPrivilegedCosmwasmContractMap
   );
 
   const keyRingStarknetService = new KeyRingStarknet.KeyRingStarknetService(
@@ -222,6 +226,16 @@ export function init(
     tokenERC20Service,
     interactionService,
     backgroundTxService
+  );
+
+  const keyRingBitcoinService = new KeyRingBitcoin.KeyRingBitcoinService(
+    chainsService,
+    vaultService,
+    keyRingV2Service,
+    interactionService,
+    permissionService,
+    backgroundTxService,
+    analyticsService
   );
 
   const autoLockAccountService = new AutoLocker.AutoLockAccountService(
@@ -268,7 +282,8 @@ export function init(
     vaultService,
     keyRingV2Service,
     keyRingCosmosService,
-    keyRingStarknetService
+    keyRingStarknetService,
+    keyRingBitcoinService
   );
 
   const recentSendHistoryService =
@@ -326,6 +341,11 @@ export function init(
     keyRingStarknetService,
     permissionInteractiveService
   );
+  KeyRingBitcoin.init(
+    router,
+    keyRingBitcoinService,
+    permissionInteractiveService
+  );
   PermissionInteractive.init(router, permissionInteractiveService);
   ChainsUI.init(router, chainsUIService);
   ChainsUpdate.init(router, chainsUpdateService);
@@ -357,6 +377,7 @@ export function init(
       await keyRingCosmosService.init();
       await keyRingEthereumService.init();
       await keyRingStarknetService.init();
+      await keyRingBitcoinService.init();
       await permissionService.init();
       await tokenCW20Service.init();
       await tokenERC20Service.init();

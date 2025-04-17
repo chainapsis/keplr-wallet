@@ -96,7 +96,7 @@ export const MsgRelationMergedClaimRewards: FunctionComponent<{
         if (isInAllActivitiesPage) {
           if (msg.code === 0 && otherKnownCurrencies.length > 0) {
             return (
-              <BottomExpandableOtherRewarsOnAllActivitiesPage
+              <BottomExpandableOtherRewardsOnAllActivitiesPage
                 msg={msg}
                 prices={prices}
                 currencies={otherKnownCurrencies}
@@ -149,7 +149,7 @@ const Styles = {
   `,
 };
 
-const BottomExpandableOtherRewarsOnAllActivitiesPage: FunctionComponent<{
+const BottomExpandableOtherRewardsOnAllActivitiesPage: FunctionComponent<{
   msg: MsgHistory;
   prices?: Record<string, Record<string, number | undefined> | undefined>;
   currencies: AppCurrency[];

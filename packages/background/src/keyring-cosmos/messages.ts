@@ -11,14 +11,11 @@ import { ROUTE } from "./constants";
 import {
   Bech32Address,
   checkAndValidateADR36AminoSignDoc,
-  EthermintChainIdHelper,
 } from "@keplr-wallet/cosmos";
 import {
   SignDoc,
   SignDocDirectAux,
 } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
-import { Int } from "@keplr-wallet/unit";
-import bigInteger from "big-integer";
 
 export class GetCosmosKeyMsg extends Message<Key> {
   public static type() {
@@ -412,6 +409,59 @@ export class PrivilegeCosmosSignAminoDelegateMsg extends Message<AminoSignRespon
   }
 }
 
+export class PrivilegeCosmosSignAminoExecuteCosmWasmMsg extends Message<AminoSignResponse> {
+  public static type() {
+    return "PrivilegeCosmosSignAminoExecuteCosmWasm";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly signer: string,
+    public readonly signDoc: StdSignDoc
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new KeplrError("keyring", 270, "chain id not set");
+    }
+
+    if (!this.signer) {
+      throw new KeplrError("keyring", 230, "signer not set");
+    }
+
+    // Validate bech32 address.
+    Bech32Address.validate(this.signer);
+
+    // Check and validate the ADR-36 sign doc.
+    // ADR-36 sign doc doesn't have the chain id
+    if (!checkAndValidateADR36AminoSignDoc(this.signDoc)) {
+      if (this.signDoc.chain_id !== this.chainId) {
+        throw new KeplrError(
+          "keyring",
+          234,
+          "Chain id in the message is not matched with the requested chain id"
+        );
+      }
+    } else {
+      throw new Error("Can't use ADR-36 sign doc");
+    }
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return PrivilegeCosmosSignAminoExecuteCosmWasmMsg.type();
+  }
+}
+
 export class RequestCosmosSignAminoADR36Msg extends Message<StdSignature> {
   public static type() {
     return "request-cosmos-sign-amino-adr-36";
@@ -671,21 +721,6 @@ export class RequestSignEIP712CosmosTxMsg_v0 extends Message<AminoSignResponse> 
           "keyring",
           234,
           "Chain id in the message is not matched with the requested chain id"
-        );
-      }
-
-      const { ethChainId } = EthermintChainIdHelper.parse(this.chainId);
-
-      const ethChainIdInMsg: Int = (() => {
-        const value = this.eip712.domain["chainId"];
-        if (typeof value === "string" && value.startsWith("0x")) {
-          return new Int(bigInteger(value.replace("0x", ""), 16).toString());
-        }
-        return new Int(value);
-      })();
-      if (!ethChainIdInMsg.equals(new Int(ethChainId))) {
-        throw new Error(
-          `Unmatched chain id for eth (expected: ${ethChainId}, actual: ${this.eip712.domain["chainId"]})`
         );
       }
     } else {

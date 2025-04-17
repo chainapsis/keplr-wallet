@@ -11,7 +11,11 @@ import {
 } from "./types";
 import { KVStore } from "@keplr-wallet/common";
 import { ChainsService } from "../chains";
-import { ChainInfo } from "@keplr-wallet/types";
+import {
+  ChainInfo,
+  GENESIS_HASH_TO_NETWORK,
+  GenesisHash,
+} from "@keplr-wallet/types";
 import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 import { migrate } from "./migrate";
 import { computedFn } from "mobx-utils";
@@ -28,6 +32,10 @@ export class PermissionService {
 
   @observable
   protected currentChainIdForStarknetByOriginMap: Map<string, string> =
+    new Map();
+
+  @observable
+  protected currentBaseChainIdForBitcoinByOriginMap: Map<string, string> =
     new Map();
 
   constructor(
@@ -102,6 +110,23 @@ export class PermissionService {
             }
           });
         }
+
+        const savedCurrentBaseChainIdForBitcoinByOriginMap =
+          await this.kvStore.get<Record<string, string>>(
+            "currentBaseChainIdForBitcoinByOriginMap/v1"
+          );
+        if (savedCurrentBaseChainIdForBitcoinByOriginMap) {
+          runInAction(() => {
+            for (const key of Object.keys(
+              savedCurrentBaseChainIdForBitcoinByOriginMap
+            )) {
+              this.currentBaseChainIdForBitcoinByOriginMap.set(
+                key,
+                savedCurrentBaseChainIdForBitcoinByOriginMap[key]
+              );
+            }
+          });
+        }
       }
     }
 
@@ -117,6 +142,10 @@ export class PermissionService {
       this.kvStore.set(
         "currentChainIdForStarknetByOriginMap/v1",
         Object.fromEntries(this.currentChainIdForStarknetByOriginMap)
+      );
+      this.kvStore.set(
+        "currentBaseChainIdForBitcoinByOriginMap/v1",
+        Object.fromEntries(this.currentBaseChainIdForBitcoinByOriginMap)
       );
     });
   }
@@ -161,6 +190,8 @@ export class PermissionService {
   clearAllPermissions() {
     this.permissionMap.clear();
     this.currentChainIdForEVMByOriginMap.clear();
+    this.currentChainIdForStarknetByOriginMap.clear();
+    this.currentBaseChainIdForBitcoinByOriginMap.clear();
   }
 
   async checkOrGrantBasicAccessPermission(
@@ -191,9 +222,13 @@ export class PermissionService {
       );
     }
 
-    // Skip the permission check `chainIds` if the permission for EVM chain.
+    // Skip the permission check `chainIds` if the permission is for EVM, Starknet, or Bitcoin.
     // Because the chain id for this permission can be changed, so it may not be the same as `chainIds`.
-    if (!options?.isForEVM && !options?.isForStarknet) {
+    if (
+      !options?.isForEVM &&
+      !options?.isForStarknet &&
+      !options?.isForBitcoin
+    ) {
       this.checkBasicAccessPermission(env, chainIds, origin);
     }
   }
@@ -269,6 +304,10 @@ export class PermissionService {
           const chainId = newChainId ?? chainIds[0];
           this.addPermission([chainId], type, origins);
           this.setCurrentChainIdForStarknet(origins, chainId);
+        } else if (options?.isForBitcoin) {
+          const chainId = newChainId ?? chainIds[0];
+          this.addPermission([chainId], type, origins);
+          this.setCurrentBaseChainIdForBitcoin(origins, chainId);
         } else {
           this.addPermission(chainIds, type, origins);
         }
@@ -284,7 +323,7 @@ export class PermissionService {
   ) {
     for (const chainId of chainIds) {
       // Make sure that the chain info is registered.
-      this.chainsService.getModularChainInfoOrThrow(chainId);
+      this.chainsService.getBaseChainIdOrThrow(chainId);
     }
 
     await this.grantPermission(
@@ -333,8 +372,7 @@ export class PermissionService {
     }
 
     for (const chainId of chainIds) {
-      // Make sure that the chain info is registered.
-      this.chainsService.getModularChainInfoOrThrow(chainId);
+      this.chainsService.getBaseChainIdOrThrow(chainId);
 
       this.checkPermission(
         env,
@@ -360,7 +398,7 @@ export class PermissionService {
 
     for (const chainId of chainIds) {
       // Make sure that the chain info is registered.
-      this.chainsService.getModularChainInfoOrThrow(chainId);
+      this.chainsService.getBaseChainIdOrThrow(chainId);
 
       if (
         !this.hasPermission(chainId, getBasicAccessPermissionType(), origin)
@@ -381,15 +419,27 @@ export class PermissionService {
     }
   }
 
+  isPrivilegedOrigins(origin: string): boolean {
+    if (this.privilegedOrigins.get(origin)) {
+      return true;
+    }
+    return false;
+  }
+
   hasPermission(chainId: string, type: string, origin: string): boolean {
     // Privileged origin can pass the any permission.
     if (this.privilegedOrigins.get(origin)) {
       return true;
     }
 
+    const baseChainId = this.chainsService.getBaseChainId(chainId);
+    if (!baseChainId) {
+      return false;
+    }
+
     return (
       this.permissionMap.get(
-        PermissionKeyHelper.getPermissionKey(chainId, type, origin)
+        PermissionKeyHelper.getPermissionKey(baseChainId, type, origin)
       ) ?? false
     );
   }
@@ -409,11 +459,15 @@ export class PermissionService {
 
   getPermissionOrigins = computedFn(
     (chainId: string, type: string): string[] => {
+      const baseChainId = this.chainsService.getBaseChainId(chainId);
+      if (!baseChainId) {
+        return [];
+      }
       const origins = [];
 
       for (const key of this.permissionMap.keys()) {
         const origin = PermissionKeyHelper.getOriginFromPermissionKey(
-          chainId,
+          baseChainId,
           type,
           key
         );
@@ -477,7 +531,11 @@ export class PermissionService {
     for (const chainId of chainIds) {
       for (const origin of origins) {
         this.permissionMap.set(
-          PermissionKeyHelper.getPermissionKey(chainId, type, origin),
+          PermissionKeyHelper.getPermissionKey(
+            this.chainsService.getBaseChainIdOrThrow(chainId),
+            type,
+            origin
+          ),
           true
         );
       }
@@ -498,7 +556,11 @@ export class PermissionService {
   removePermission(chainId: string, type: string, origins: string[]) {
     for (const origin of origins) {
       this.permissionMap.delete(
-        PermissionKeyHelper.getPermissionKey(chainId, type, origin)
+        PermissionKeyHelper.getPermissionKey(
+          this.chainsService.getBaseChainIdOrThrow(chainId),
+          type,
+          origin
+        )
       );
 
       const currentChainIdForEVM = this.getCurrentChainIdForEVM(origin);
@@ -542,6 +604,8 @@ export class PermissionService {
         }
 
         this.currentChainIdForEVMByOriginMap.delete(origin);
+        this.currentChainIdForStarknetByOriginMap.delete(origin);
+        this.currentBaseChainIdForBitcoinByOriginMap.delete(origin);
       }
     }
 
@@ -552,11 +616,16 @@ export class PermissionService {
 
   @action
   removeAllTypePermissionToChainId(chainId: string, origins: string[]) {
+    const baseChainId = this.chainsService.getBaseChainId(chainId);
+    if (!baseChainId) {
+      return;
+    }
+
     const deletes: string[] = [];
 
     for (const key of this.permissionMap.keys()) {
       const typeAndOrigin =
-        PermissionKeyHelper.getTypeAndOriginFromPermissionKey(chainId, key);
+        PermissionKeyHelper.getTypeAndOriginFromPermissionKey(baseChainId, key);
       if (typeAndOrigin && origins.includes(typeAndOrigin.origin)) {
         deletes.push(key);
       }
@@ -568,8 +637,20 @@ export class PermissionService {
 
     for (const origin of origins) {
       const currentChainIdForEVM = this.getCurrentChainIdForEVM(origin);
-      if (chainId === currentChainIdForEVM) {
+      if (baseChainId === currentChainIdForEVM) {
         this.currentChainIdForEVMByOriginMap.delete(origin);
+      }
+
+      const currentChainIdForStarknet =
+        this.getCurrentChainIdForStarknet(origin);
+      if (baseChainId === currentChainIdForStarknet) {
+        this.currentChainIdForStarknetByOriginMap.delete(origin);
+      }
+
+      const currentBaseChainIdForBitcoin =
+        this.getCurrentBaseChainIdForBitcoin(origin);
+      if (baseChainId === currentBaseChainIdForBitcoin) {
+        this.currentBaseChainIdForBitcoinByOriginMap.delete(origin);
       }
     }
   }
@@ -627,6 +708,8 @@ export class PermissionService {
     }
 
     this.currentChainIdForEVMByOriginMap.clear();
+    this.currentChainIdForStarknetByOriginMap.clear();
+    this.currentBaseChainIdForBitcoinByOriginMap.clear();
   }
 
   getCurrentChainIdForEVM(origin: string): string | undefined {
@@ -744,6 +827,74 @@ export class PermissionService {
       }
     } else {
       this.setCurrentChainIdForStarknet(origins, chainId);
+    }
+  }
+
+  getCurrentBaseChainIdForBitcoin(origin: string): string | undefined {
+    const currentBaseChainId =
+      this.currentBaseChainIdForBitcoinByOriginMap.get(origin);
+    if (
+      currentBaseChainId &&
+      !this.hasPermission(
+        currentBaseChainId,
+        getBasicAccessPermissionType(),
+        origin
+      )
+    ) {
+      this.currentBaseChainIdForBitcoinByOriginMap.delete(origin);
+      return;
+    }
+
+    return currentBaseChainId;
+  }
+
+  @action
+  setCurrentBaseChainIdForBitcoin(origins: string[], chainId: string) {
+    const baseChainId = this.chainsService.getBaseChainIdOrThrow(chainId);
+
+    // {bip122}:{genesis_hash} -> 0x{genesis_hash}
+    const genesisHash = baseChainId.replace("bip122:", "");
+    const network = GENESIS_HASH_TO_NETWORK[genesisHash as GenesisHash];
+
+    for (const origin of origins) {
+      this.currentBaseChainIdForBitcoinByOriginMap.set(origin, baseChainId);
+
+      this.interactionService.dispatchEvent(
+        WEBPAGE_PORT,
+        "keplr_bitcoinChainChanged",
+        {
+          origin,
+          bitcoinChainId: "0x" + genesisHash,
+          network,
+        }
+      );
+    }
+  }
+
+  @action
+  async updateCurrentBaseChainIdForBitcoin(
+    env: Env,
+    origin: string,
+    chainId: string
+  ) {
+    const type = getBasicAccessPermissionType();
+    const chainIds = [chainId];
+    const origins = [origin];
+
+    if (!this.hasPermission(chainId, type, origin)) {
+      if (env.isInternalMsg) {
+        // addPermission 및 setCurrentBaseChainIdForBitcoin 내부에서
+        // 체인 정보를 확인하기 때문에 여기서는 따로 확인하지 않는다.
+        this.addPermission(chainIds, type, origins);
+        this.setCurrentBaseChainIdForBitcoin(origins, chainId);
+      } else {
+        await this.grantPermission(env, chainIds, type, origins, {
+          isForBitcoin: true,
+          isUnableToChangeChainInUI: true,
+        });
+      }
+    } else {
+      this.setCurrentBaseChainIdForBitcoin(origins, chainId);
     }
   }
 }

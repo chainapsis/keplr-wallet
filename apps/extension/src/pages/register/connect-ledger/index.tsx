@@ -30,13 +30,15 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
 import { STARKNET_LEDGER_DERIVATION_PATH } from "../../sign/utils/handle-starknet-sign";
 import { GuideBox } from "../../../components/guide-box";
+import { ExtendedKey } from "@keplr-wallet/background";
+import AppClient from "ledger-bitcoin";
 
 type Step = "unknown" | "connected" | "app";
 
 export const ConnectLedgerScene: FunctionComponent<{
   name: string;
   password: string;
-  app: App | "Ethereum" | "Starknet";
+  app: App | "Ethereum" | "Starknet" | "Bitcoin" | "Bitcoin Test";
   bip44Path: {
     account: number;
     change: number;
@@ -67,7 +69,9 @@ export const ConnectLedgerScene: FunctionComponent<{
     if (
       !Object.keys(AppHRP).includes(propApp) &&
       propApp !== "Ethereum" &&
-      propApp !== "Starknet"
+      propApp !== "Starknet" &&
+      propApp !== "Bitcoin" &&
+      propApp !== "Bitcoin Test"
     ) {
       throw new Error(`Unsupported app: ${propApp}`);
     }
@@ -353,8 +357,15 @@ export const ConnectLedgerScene: FunctionComponent<{
                 );
 
                 if (isStepMode) {
-                  navigate("/welcome", {
-                    replace: true,
+                  sceneTransition.push("enable-chains", {
+                    vaultId: appendModeInfo.vaultId,
+                    keyType: "ledger",
+                    candidateAddresses: [],
+                    isFresh: false,
+                    skipWelcome: true,
+                    fallbackBitcoinLedgerApp: true,
+                    stepPrevious: stepPrevious,
+                    stepTotal: stepTotal,
                   });
                 } else {
                   window.close();
@@ -369,6 +380,167 @@ export const ConnectLedgerScene: FunctionComponent<{
 
               return;
           }
+        }
+        case "Bitcoin":
+        case "Bitcoin Test": {
+          transport = await LedgerUtils.tryAppOpen(transport, propApp);
+          let btcApp = new AppClient(transport as any);
+
+          // ensure that the ledger is connected
+          try {
+            const coinType = propApp === "Bitcoin" ? 0 : 1;
+
+            await btcApp.getExtendedPubkey(`m/44'/${coinType}'/0'/0/0`);
+          } catch (e) {
+            // Device is locked or user is in home sceen or other app.
+            if (
+              e?.message.includes("(0x6b0c)") ||
+              e?.message.includes("(0x6511)") ||
+              e?.message.includes("(0x6e00)")
+            ) {
+              setStep("connected");
+            } else {
+              console.log(e);
+              setStep("unknown");
+              await transport.close();
+
+              setIsLoading(false);
+              return;
+            }
+          }
+
+          await LedgerUtils.tryAppOpen(transport, propApp);
+          btcApp = new AppClient(transport as any);
+
+          try {
+            setStep("app");
+
+            if (appendModeInfo) {
+              const bitcoinKeys: {
+                chainId: string;
+                derivationPath: string;
+                type: "wpkh" | "tr";
+                isTestnet: boolean;
+              }[] = [];
+
+              for (const chainId of appendModeInfo.afterEnableChains) {
+                const modularChainInfo = chainStore.getModularChain(chainId);
+
+                if (!("bitcoin" in modularChainInfo)) {
+                  throw new Error("Bitcoin not found");
+                }
+
+                const bip44 = modularChainInfo.bitcoin.bip44;
+
+                if (!bip44.purpose) {
+                  throw new Error("Purpose not found");
+                }
+
+                const derivationPath = `m/${bip44.purpose}'/${bip44.coinType}'/${bip44Path.account}'`;
+
+                bitcoinKeys.push({
+                  chainId,
+                  derivationPath,
+                  type: bip44.purpose === 86 ? "tr" : "wpkh",
+                  isTestnet: bip44.coinType === 1,
+                });
+              }
+
+              const mainnetKeys = bitcoinKeys.filter((key) => !key.isTestnet);
+              const testnetKeys = bitcoinKeys.filter((key) => key.isTestnet);
+
+              const extendedKeys: ExtendedKey[] = [];
+              const derivationPathSet: Set<string> = new Set();
+
+              const masterFingerprint = await btcApp.getMasterFingerprint();
+
+              for (let i = 0; i < bitcoinKeys.length; i++) {
+                const key = bitcoinKeys[i];
+                if (
+                  (propApp === "Bitcoin" && !key.isTestnet) ||
+                  (propApp === "Bitcoin Test" && key.isTestnet)
+                ) {
+                  if (derivationPathSet.has(key.derivationPath)) {
+                    continue;
+                  }
+
+                  derivationPathSet.add(key.derivationPath);
+                  extendedKeys.push({
+                    xpub: await btcApp.getExtendedPubkey(key.derivationPath),
+                    masterFingerprint,
+                    derivationPath: key.derivationPath,
+                    type: key.type,
+                  });
+                }
+              }
+
+              if (extendedKeys.length > 0) {
+                await keyRingStore.appendLedgerExtendedKeys(
+                  appendModeInfo.vaultId,
+                  extendedKeys,
+                  propApp
+                );
+                await chainStore.enableChainInfoInUI(
+                  ...appendModeInfo.afterEnableChains
+                );
+              }
+
+              await transport.close();
+
+              if (isStepMode) {
+                if (propApp === "Bitcoin" && testnetKeys.length > 0) {
+                  sceneTransition.replace("connect-ledger", {
+                    name: "",
+                    password: "",
+                    app: "Bitcoin Test",
+                    bip44Path,
+
+                    appendModeInfo: {
+                      vaultId: appendModeInfo.vaultId,
+                      afterEnableChains: testnetKeys.map((key) => key.chainId),
+                    },
+                    stepPrevious: stepPrevious,
+                    stepTotal: stepTotal,
+                  });
+                } else if (
+                  propApp === "Bitcoin Test" &&
+                  mainnetKeys.length > 0
+                ) {
+                  sceneTransition.replace("connect-ledger", {
+                    name: "",
+                    password: "",
+                    app: "Bitcoin",
+                    bip44Path,
+                    appendModeInfo: {
+                      vaultId: appendModeInfo.vaultId,
+                      afterEnableChains: mainnetKeys.map((key) => key.chainId),
+                    },
+                    stepPrevious: stepPrevious,
+                    stepTotal: stepTotal,
+                  });
+                } else {
+                  // add/remove chains를 통해 register 페이지로 진입한 경우,
+                  // stepMode이기는 하나, stepTotal이 0으로 주어지므로 welcome 페이지로 이동하지 않고 창을 닫는다.
+                  if (stepTotal === 0) {
+                    window.close();
+                  } else {
+                    navigate("/welcome", {
+                      replace: true,
+                    });
+                  }
+                }
+              } else {
+                window.close();
+              }
+            }
+          } catch (e) {
+            console.log(e);
+            setStep("connected");
+          }
+
+          await transport.close();
+          setIsLoading(false);
+          return;
         }
       }
     };
@@ -418,6 +590,10 @@ export const ConnectLedgerScene: FunctionComponent<{
                       return <SecretIcon />;
                     case "Starknet":
                       return <StarknetIcon />;
+                    case "Bitcoin":
+                      return <BitcoinIcon />;
+                    case "Bitcoin Test":
+                      return <BitcoinTestIcon />;
                     default:
                       return <CosmosIcon />;
                   }
@@ -893,6 +1069,42 @@ const StarknetIcon: FunctionComponent = () => {
         fillRule="evenodd"
         clipRule="evenodd"
         d="M51.4692 50.9081C51.4692 52.6039 52.8453 53.9795 54.5415 53.9795C56.2381 53.9795 57.6121 52.6039 57.6121 50.9081C57.6121 49.2123 56.2381 47.8367 54.5415 47.8367C52.8453 47.8367 51.4692 49.2123 51.4692 50.9081Z"
+        fill="white"
+      />
+    </svg>
+  );
+};
+
+const BitcoinIcon = () => {
+  return (
+    <svg
+      width="80"
+      height="80"
+      viewBox="0 0 80 80"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <rect x="9" y="9" width="62" height="62" rx="15.6962" fill="#F7931A" />
+      <path
+        d="M53.534 36.291C54.171 32.033 50.929 29.744 46.496 28.217L47.934 22.449L44.423 21.574L43.023 27.19C42.1 26.96 41.152 26.743 40.21 26.528L41.62 20.875L38.111 20L36.672 25.766C35.908 25.592 35.158 25.42 34.43 25.239L34.434 25.221L29.592 24.012L28.658 27.762C28.658 27.762 31.263 28.359 31.208 28.396C32.63 28.751 32.887 29.692 32.844 30.438L31.206 37.009C31.304 37.034 31.431 37.07 31.571 37.126C31.454 37.097 31.329 37.065 31.2 37.034L28.904 46.239C28.73 46.671 28.289 47.319 27.295 47.073C27.33 47.124 24.743 46.436 24.743 46.436L23 50.455L27.569 51.594C28.419 51.807 29.252 52.03 30.072 52.24L28.619 58.074L32.126 58.949L33.565 53.177C34.523 53.437 35.453 53.677 36.363 53.903L34.929 59.648L38.44 60.523L39.893 54.7C45.88 55.833 50.382 55.376 52.277 49.961C53.804 45.601 52.201 43.086 49.051 41.446C51.345 40.917 53.073 39.408 53.534 36.291ZM45.512 47.54C44.427 51.9 37.086 49.543 34.706 48.952L36.634 41.223C39.014 41.817 46.646 42.993 45.512 47.54ZM46.598 36.228C45.608 40.194 39.498 38.179 37.516 37.685L39.264 30.675C41.246 31.169 47.629 32.091 46.598 36.228Z"
+        fill="white"
+      />
+    </svg>
+  );
+};
+
+const BitcoinTestIcon = () => {
+  return (
+    <svg
+      width="80"
+      height="80"
+      viewBox="0 0 80 80"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <rect x="9" y="9" width="62" height="62" rx="15.6962" fill="#7ECE6A" />
+      <path
+        d="M53.534 36.291C54.171 32.033 50.929 29.744 46.496 28.217L47.934 22.449L44.423 21.574L43.023 27.19C42.1 26.96 41.152 26.743 40.21 26.528L41.62 20.875L38.111 20L36.672 25.766C35.908 25.592 35.158 25.42 34.43 25.239L34.434 25.221L29.592 24.012L28.658 27.762C28.658 27.762 31.263 28.359 31.208 28.396C32.63 28.751 32.887 29.692 32.844 30.438L31.206 37.009C31.304 37.034 31.431 37.07 31.571 37.126C31.454 37.097 31.329 37.065 31.2 37.034L28.904 46.239C28.73 46.671 28.289 47.319 27.295 47.073C27.33 47.124 24.743 46.436 24.743 46.436L23 50.455L27.569 51.594C28.419 51.807 29.252 52.03 30.072 52.24L28.619 58.074L32.126 58.949L33.565 53.177C34.523 53.437 35.453 53.677 36.363 53.903L34.929 59.648L38.44 60.523L39.893 54.7C45.88 55.833 50.382 55.376 52.277 49.961C53.804 45.601 52.201 43.086 49.051 41.446C51.345 40.917 53.073 39.408 53.534 36.291ZM45.512 47.54C44.427 51.9 37.086 49.543 34.706 48.952L36.634 41.223C39.014 41.817 46.646 42.993 45.512 47.54ZM46.598 36.228C45.608 40.194 39.498 38.179 37.516 37.685L39.264 30.675C41.246 31.169 47.629 32.091 46.598 36.228Z"
         fill="white"
       />
     </svg>

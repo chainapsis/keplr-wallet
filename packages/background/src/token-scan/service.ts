@@ -3,7 +3,7 @@ import { KeyRingCosmosService } from "../keyring-cosmos";
 import { KeyRingService } from "../keyring";
 import { ChainsUIService } from "../chains-ui";
 import { autorun, makeObservable, observable, runInAction, toJS } from "mobx";
-import { AppCurrency } from "@keplr-wallet/types";
+import { AppCurrency, SupportedPaymentType } from "@keplr-wallet/types";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { Dec } from "@keplr-wallet/unit";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
@@ -11,6 +11,7 @@ import { VaultService } from "../vault";
 import { KVStore } from "@keplr-wallet/common";
 import { KeyRingStarknetService } from "../keyring-starknet";
 import { CairoUint256 } from "starknet";
+import { KeyRingBitcoinService } from "../keyring-bitcoin";
 
 export type TokenScan = {
   chainId: string;
@@ -18,12 +19,17 @@ export type TokenScan = {
     bech32Address?: string;
     ethereumHexAddress?: string;
     starknetHexAddress?: string;
+    bitcoinAddress?: {
+      bech32Address: string;
+      paymentType: SupportedPaymentType;
+    };
     coinType?: number;
     assets: {
       currency: AppCurrency;
       amount: string;
     }[];
   }[];
+  linkedChainKey?: string;
 };
 
 export class TokenScanService {
@@ -37,7 +43,8 @@ export class TokenScanService {
     protected readonly vaultService: VaultService,
     protected readonly keyRingService: KeyRingService,
     protected readonly keyRingCosmosService: KeyRingCosmosService,
-    protected readonly keyRingStarknetService: KeyRingStarknetService
+    protected readonly keyRingStarknetService: KeyRingStarknetService,
+    protected readonly keyRingBitcoinService: KeyRingBitcoinService
   ) {
     makeObservable(this);
   }
@@ -191,8 +198,17 @@ export class TokenScanService {
       );
 
     const tokenScans: TokenScan[] = [];
+    const processedLinkedChainKeys = new Set<string>();
     const promises: Promise<void>[] = [];
+
     for (const modularChainInfo of modularChainInfos) {
+      if ("linkedChainKey" in modularChainInfo) {
+        if (processedLinkedChainKeys.has(modularChainInfo.linkedChainKey)) {
+          continue;
+        }
+        processedLinkedChainKeys.add(modularChainInfo.linkedChainKey);
+      }
+
       promises.push(
         (async () => {
           const tokenScan = await this.calculateTokenScan(
@@ -257,6 +273,10 @@ export class TokenScanService {
     const modularChainInfo = this.chainsService.getModularChainInfo(chainId);
     if (modularChainInfo == null) {
       return;
+    }
+
+    if ("linkedChainKey" in modularChainInfo) {
+      tokenScan.linkedChainKey = modularChainInfo.linkedChainKey;
     }
 
     if ("cosmos" in modularChainInfo) {
@@ -440,6 +460,118 @@ export class TokenScanService {
           }
         })
       );
+    } else if ("bitcoin" in modularChainInfo) {
+      const getBitcoinScanInfo = async (
+        vaultId: string,
+        chainId: string,
+        allowZeroAmount: boolean
+      ) => {
+        const { address: bitcoinAddress, paymentType } =
+          await this.keyRingBitcoinService.getBitcoinKey(vaultId, chainId);
+
+        const bitcoinChainInfo =
+          this.chainsService.getBitcoinChainInfoOrThrow(chainId);
+
+        const res = await simpleFetch<{
+          address: string;
+          chain_stats: {
+            funded_txo_count: number;
+            funded_txo_sum: number;
+            spent_txo_count: number;
+            spent_txo_sum: number;
+            tx_count: number;
+          };
+          mempool_stats: {
+            funded_txo_count: number;
+            funded_txo_sum: number;
+            spent_txo_count: number;
+            spent_txo_sum: number;
+            tx_count: number;
+          };
+        }>(`${bitcoinChainInfo.rest}/address/${bitcoinAddress}`);
+
+        const confirmed =
+          res.status === 200
+            ? res.data.chain_stats.funded_txo_sum -
+              res.data.chain_stats.spent_txo_sum
+            : 0;
+
+        if (confirmed > 0 || (confirmed === 0 && allowZeroAmount)) {
+          return {
+            bitcoinAddress: {
+              bech32Address: bitcoinAddress,
+              paymentType,
+            },
+            assets: [
+              {
+                currency: bitcoinChainInfo.currencies[0],
+                amount: confirmed.toString(10),
+              },
+            ],
+          };
+        }
+
+        return undefined;
+      };
+
+      // TODO: 향후 여러 주소체계를 지원하는 체인이 추가되면 linkedChainKey와 관련된 로직은 별도의 함수로 분리가 필요할 것
+      if ("linkedChainKey" in modularChainInfo) {
+        const linkedBitcoinChains = this.chainsService
+          .getModularChainInfos()
+          .filter((chainInfo) => {
+            return (
+              "bitcoin" in chainInfo &&
+              chainInfo.linkedChainKey === modularChainInfo.linkedChainKey
+            );
+          });
+
+        const bitcoinScanInfos: TokenScan["infos"] = [];
+
+        for (const chainInfo of linkedBitcoinChains) {
+          const info = await getBitcoinScanInfo(
+            vaultId,
+            chainInfo.chainId,
+            true
+          );
+          if (info) {
+            bitcoinScanInfos.push(info);
+          }
+        }
+
+        if (bitcoinScanInfos.length !== linkedBitcoinChains.length) {
+          throw new Error(
+            "Invalid bitcoin scan info: length mismatch between linked bitcoin chains and bitcoin scan infos"
+          );
+        }
+
+        let hasNonZeroAmount = false;
+
+        for (const bitcoinScanInfo of bitcoinScanInfos) {
+          // 우선 main currency만 처리한다.
+          if (
+            bitcoinScanInfo.assets.length > 0 &&
+            bitcoinScanInfo.assets[0].amount !== "0"
+          ) {
+            hasNonZeroAmount = true;
+            break;
+          }
+        }
+
+        // 하나라도 0이 아닌 값이 있으면 연결된 모든 체인에 대해 토큰 스캔 정보를 추가한다.
+        if (hasNonZeroAmount) {
+          tokenScan.infos.push(...bitcoinScanInfos);
+        }
+      } else {
+        const bitcoinScanInfo = await getBitcoinScanInfo(
+          vaultId,
+          chainId,
+          false
+        );
+
+        if (bitcoinScanInfo) {
+          tokenScan.infos.push(bitcoinScanInfo);
+        }
+      }
     }
 
     if (tokenScan.infos.length > 0) {

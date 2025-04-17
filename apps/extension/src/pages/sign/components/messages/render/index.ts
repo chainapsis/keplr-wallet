@@ -12,3 +12,5 @@ export * from "./pay-packet-fee";
 
 export * from "./wasm-message-view";
 export * from "./custom-icon";
+
+export * from "./create-btc-delegation";

@@ -1,0 +1,147 @@
+syntax = "proto3";
+package babylon.btccheckpoint.v1;
+
+import "gogoproto/gogo.proto";
+import "cosmos_proto/cosmos.proto";
+import "google/api/annotations.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "babylon/btccheckpoint/v1/params.proto";
+
+option go_package = "github.com/babylonlabs-io/babylon/x/btccheckpoint/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Parameters queries the parameters of the module.
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/babylon/btccheckpoint/v1/params";
+  }
+
+  // BtcCheckpointInfo returns checkpoint info for a given epoch
+  rpc BtcCheckpointInfo(QueryBtcCheckpointInfoRequest)
+      returns (QueryBtcCheckpointInfoResponse) {
+    option (google.api.http).get = "/babylon/btccheckpoint/v1/{epoch_num}";
+  }
+
+  // BtcCheckpointsInfo returns checkpoint info for a range of epochs
+  rpc BtcCheckpointsInfo(QueryBtcCheckpointsInfoRequest)
+      returns (QueryBtcCheckpointsInfoResponse) {
+    option (google.api.http).get = "/babylon/btccheckpoint/v1";
+  }
+
+  // EpochSubmissions returns all submissions for a given epoch
+  rpc EpochSubmissions(QueryEpochSubmissionsRequest)
+      returns (QueryEpochSubmissionsResponse) {
+    option (google.api.http).get =
+        "/babylon/btccheckpoint/v1/{epoch_num}/submissions";
+  }
+}
+
+// QueryParamsRequest is request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is response type for the Query/Params RPC method.
+message QueryParamsResponse {
+  // params holds all the parameters of this module.
+  Params params = 1 [ (gogoproto.nullable) = false ];
+}
+
+// QueryBtcCheckpointInfoRequest defines the query to get the best checkpoint
+// for a given epoch
+message QueryBtcCheckpointInfoRequest {
+  // Number of epoch for which the earliest checkpointing btc height is
+  // requested
+  uint64 epoch_num = 1;
+}
+
+// QueryBtcCheckpointInfoResponse is response type for the
+// Query/BtcCheckpointInfo RPC method
+message QueryBtcCheckpointInfoResponse { BTCCheckpointInfoResponse info = 1; }
+
+// QueryBtcCheckpointsInfoRequest is request type for the
+// Query/BtcCheckpointsInfo RPC method
+message QueryBtcCheckpointsInfoRequest {
+  // pagination defines whether to have the pagination in the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QueryBtcCheckpointsInfoResponse is response type for the
+// Query/BtcCheckpointsInfo RPC method
+message QueryBtcCheckpointsInfoResponse {
+  repeated BTCCheckpointInfoResponse info_list = 1;
+  // pagination defines the pagination in the response
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryEpochSubmissionsRequest defines a request to get all submissions in
+// given epoch
+message QueryEpochSubmissionsRequest {
+  // Number of epoch for which submissions are requested
+  uint64 epoch_num = 1;
+}
+
+// QueryEpochSubmissionsResponse defines a response to get all submissions in
+// given epoch (QueryEpochSubmissionsRequest)
+message QueryEpochSubmissionsResponse {
+  // Keys All submissions transactions key saved during an epoch.
+  repeated SubmissionKeyResponse keys = 1;
+}
+
+// BTCCheckpointInfoResponse contains all data about best submission of checkpoint for
+// given epoch. Best submission is the submission which is deeper in btc ledger.
+message BTCCheckpointInfoResponse {
+  // EpochNumber of this checkpoint.
+  uint64 epoch_number = 1;
+  // btc height of the best submission of the epoch
+  uint32 best_submission_btc_block_height = 2;
+  // hash of the btc block which determines checkpoint btc block height i.e.
+  // youngest block of best submission Hexadecimal
+  string best_submission_btc_block_hash = 3;
+  // the BTC checkpoint transactions of the best submission
+  repeated TransactionInfoResponse best_submission_transactions = 4;
+  // list of vigilantes' addresses of the best submission
+  repeated CheckpointAddressesResponse best_submission_vigilante_address_list = 5;
+}
+
+// TransactionInfoResponse is the info of a tx on Bitcoin,
+// including
+// - the position of the tx on BTC blockchain
+// - the full tx content
+// - the Merkle proof that this tx is on the above position
+message TransactionInfoResponse {
+  // Index Bitcoin Transaction index in block.
+  uint32 index = 1;
+  // Hash BTC Header hash as hex.
+  string hash = 2;
+  // transaction is the full transaction data as str hex.
+  string transaction = 3;
+  // proof is the Merkle proof that this tx is included in the position in `key`
+  string proof = 4;
+}
+
+// CheckpointAddressesResponse contains the addresses of the submitter and reporter of a
+// given checkpoint
+message CheckpointAddressesResponse {
+  // submitter is the address of the checkpoint submitter to BTC, extracted from
+  // the checkpoint itself.
+  string submitter = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // reporter is the address of the reporter who reported the submissions,
+  // calculated from submission message MsgInsertBTCSpvProof itself
+  string reporter = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+}
+
+// SubmissionKeyResponse Checkpoint can be composed from multiple transactions,
+// so to identify whole submission we need list of transaction keys.
+// Each submission can generally be identified by this list of (txIdx,
+// blockHash) tuples. Note: this could possibly be optimized as if transactions
+// were in one block they would have the same block hash and different indexes,
+// but each blockhash is only 33 (1  byte for prefix encoding and 32 byte hash),
+// so there should be other strong arguments for this optimization
+message SubmissionKeyResponse {
+  // FirstTxBlockHash is the BTCHeaderHashBytes in hex.
+  string first_tx_block_hash  = 1;
+  uint32 first_tx_index = 2;
+
+  // SecondBlockHash is the BTCHeaderHashBytes in hex.
+  string second_tx_block_hash = 3;
+  uint32 second_tx_index = 4;
+}

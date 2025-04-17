@@ -1,0 +1,67 @@
+syntax = "proto3";
+package babylon.mint.v1;
+
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/babylonlabs-io/babylon/x/mint/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // InflationRate returns the current inflation rate.
+  rpc InflationRate(QueryInflationRateRequest)
+      returns (QueryInflationRateResponse) {
+    option (google.api.http).get = "/cosmos/mint/v1beta1/inflation_rate";
+  }
+
+  // AnnualProvisions returns the current annual provisions.
+  rpc AnnualProvisions(QueryAnnualProvisionsRequest)
+      returns (QueryAnnualProvisionsResponse) {
+    option (google.api.http).get = "/cosmos/mint/v1beta1/annual_provisions";
+  }
+
+  // GenesisTime returns the genesis time.
+  rpc GenesisTime(QueryGenesisTimeRequest) returns (QueryGenesisTimeResponse) {
+    option (google.api.http).get = "/cosmos/mint/v1beta1/genesis_time";
+  }
+}
+
+// QueryInflationRateRequest is the request type for the Query/InflationRate RPC
+// method.
+message QueryInflationRateRequest {}
+
+// QueryInflationRateResponse is the response type for the Query/InflationRate
+// RPC method.
+message QueryInflationRateResponse {
+  // InflationRate is the current inflation rate.
+  bytes inflation_rate = 1 [
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+}
+
+// QueryAnnualProvisionsRequest is the request type for the
+// Query/AnnualProvisions RPC method.
+message QueryAnnualProvisionsRequest {}
+
+// QueryAnnualProvisionsResponse is the response type for the
+// Query/AnnualProvisions RPC method.
+message QueryAnnualProvisionsResponse {
+  // AnnualProvisions is the current annual provisions.
+  bytes annual_provisions = 1 [
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+}
+
+// QueryGenesisTimeRequest is the request type for the Query/GenesisTime RPC
+// method.
+message QueryGenesisTimeRequest {}
+
+// QueryGenesisTimeResponse is the response type for the Query/GenesisTime RPC
+// method.
+message QueryGenesisTimeResponse {
+  // GenesisTime is the timestamp associated with the first block.
+  google.protobuf.Timestamp genesis_time = 1 [ (gogoproto.stdtime) = true ];
+}

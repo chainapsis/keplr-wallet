@@ -1,0 +1,37 @@
+syntax = "proto3";
+package babylon.incentive;
+
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "github.com/babylonlabs-io/babylon/x/incentive/types";
+
+// Gauge is an object that stores rewards to be distributed
+// code adapted from
+// https://github.com/osmosis-labs/osmosis/blob/v18.0.0/proto/osmosis/incentives/gauge.proto
+message Gauge {
+  // coins are coins that have been in the gauge
+  // Can have multiple coin denoms
+  repeated cosmos.base.v1beta1.Coin coins = 1 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
+
+// RewardGauge is an object that stores rewards distributed to a BTC staking
+// stakeholder code adapted from
+// https://github.com/osmosis-labs/osmosis/blob/v18.0.0/proto/osmosis/incentives/gauge.proto
+message RewardGauge {
+  // coins are coins that have been in the gauge
+  // Can have multiple coin denoms
+  repeated cosmos.base.v1beta1.Coin coins = 1 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  // withdrawn_coins are coins that have been withdrawn by the stakeholder
+  // already
+  repeated cosmos.base.v1beta1.Coin withdrawn_coins = 2 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}

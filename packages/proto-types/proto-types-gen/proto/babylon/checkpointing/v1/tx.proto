@@ -1,0 +1,32 @@
+syntax = "proto3";
+package babylon.checkpointing.v1;
+
+import "gogoproto/gogo.proto";
+import "babylon/checkpointing/v1/bls_key.proto";
+import "cosmos/staking/v1beta1/tx.proto";
+import "cosmos/msg/v1/msg.proto";
+
+option go_package = "github.com/babylonlabs-io/babylon/x/checkpointing/types";
+
+// Msg defines the checkpointing Msg service.
+service Msg {
+  option (cosmos.msg.v1.service) = true;
+
+  // WrappedCreateValidator defines a method for registering a new validator
+  rpc WrappedCreateValidator(MsgWrappedCreateValidator)
+      returns (MsgWrappedCreateValidatorResponse);
+}
+
+// MsgWrappedCreateValidator defines a wrapped message to create a validator
+message MsgWrappedCreateValidator {
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+  option (cosmos.msg.v1.signer) = "msg_create_validator";
+
+  BlsKey key = 1;
+  cosmos.staking.v1beta1.MsgCreateValidator msg_create_validator = 2;
+}
+
+// MsgWrappedCreateValidatorResponse defines the MsgWrappedCreateValidator
+// response type
+message MsgWrappedCreateValidatorResponse {}

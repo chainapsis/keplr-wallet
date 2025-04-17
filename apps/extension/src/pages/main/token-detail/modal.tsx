@@ -4,7 +4,11 @@ import styled, { useTheme } from "styled-components";
 import { Box } from "../../../components/box";
 import { XAxis, YAxis } from "../../../components/axis";
 import { useStore } from "../../../stores";
-import { Body1, Subtitle3 } from "../../../components/typography";
+import {
+  BaseTypography,
+  Body1,
+  Subtitle3,
+} from "../../../components/typography";
 import { ColorPalette } from "../../../styles";
 import { Gutter } from "../../../components/gutter";
 import { usePaginatedCursorQuery } from "./hook";
@@ -78,6 +82,7 @@ export const TokenDetailModal: FunctionComponent<{
     accountStore,
     queriesStore,
     starknetQueriesStore,
+    bitcoinQueriesStore,
     priceStore,
     price24HChangesStore,
     skipQueriesStore,
@@ -95,9 +100,13 @@ export const TokenDetailModal: FunctionComponent<{
     // TODO: 일단 cosmos가 아니면 대충에기에다가 force currency 로직을 박아놓는다...
     //       나중에 이런 기능을 chain store 자체에다가 만들어야한다.
     const modularChainInfoImpl = chainStore.getModularChainInfoImpl(chainId);
-    const res = modularChainInfoImpl
-      .getCurrencies("starknet")
-      .find((cur) => cur.coinMinimalDenom === coinMinimalDenom);
+    const currencies =
+      "bitcoin" in modularChainInfo
+        ? modularChainInfoImpl.getCurrencies("bitcoin")
+        : modularChainInfoImpl.getCurrencies("starknet");
+    const res = currencies.find(
+      (cur) => cur.coinMinimalDenom === coinMinimalDenom
+    );
     if (res) {
       return res;
     }
@@ -143,14 +152,30 @@ export const TokenDetailModal: FunctionComponent<{
             .getQueryBech32Address(account.bech32Address)
             .getBalance(currency);
     }
-    return starknetQueriesStore
-      .get(chainId)
-      .queryStarknetERC20Balance.getBalance(
-        chainId,
-        chainStore,
-        account.starknetHexAddress,
-        currency.coinMinimalDenom
-      );
+
+    if ("starknet" in modularChainInfo) {
+      return starknetQueriesStore
+        .get(chainId)
+        .queryStarknetERC20Balance.getBalance(
+          chainId,
+          chainStore,
+          account.starknetHexAddress,
+          currency.coinMinimalDenom
+        );
+    }
+
+    if ("bitcoin" in modularChainInfo) {
+      return bitcoinQueriesStore
+        .get(chainId)
+        .queryBitcoinBalance.getBalance(
+          chainId,
+          chainStore,
+          account.bitcoinAddress?.bech32Address ?? "",
+          currency.coinMinimalDenom
+        );
+    }
+
+    return undefined;
   })();
 
   const price24HChange = (() => {
@@ -296,6 +321,11 @@ export const TokenDetailModal: FunctionComponent<{
             `/starknet/send?chainId=${chainId}&coinMinimalDenom=${coinMinimalDenom}`
           );
         }
+        if ("bitcoin" in modularChainInfo) {
+          navigate(
+            `/bitcoin/send?chainId=${chainId}&coinMinimalDenom=${coinMinimalDenom}`
+          );
+        }
       },
     },
   ];
@@ -309,7 +339,15 @@ export const TokenDetailModal: FunctionComponent<{
         if ("cosmos" in modularChainInfo) {
           return accountStore.getAccount(chainId).bech32Address;
         }
-        return accountStore.getAccount(chainId).starknetHexAddress;
+        if ("starknet" in modularChainInfo) {
+          return accountStore.getAccount(chainId).starknetHexAddress;
+        }
+        if ("bitcoin" in modularChainInfo) {
+          return (
+            accountStore.getAccount(chainId).bitcoinAddress?.bech32Address ?? ""
+          );
+        }
+        return "";
       })()}?relations=${Relations.join(",")}&denoms=${encodeURIComponent(
         currency.coinMinimalDenom
       )}&vsCurrencies=${priceStore.defaultVsCurrency}&limit=${PaginationLimit}`;
@@ -420,6 +458,38 @@ export const TokenDetailModal: FunctionComponent<{
                 {modularChainInfo.chainName}
               </Body1>
             </span>
+            {account.bitcoinAddress && (
+              <Box
+                alignX="center"
+                alignY="center"
+                backgroundColor={
+                  theme.mode === "light"
+                    ? ColorPalette["blue-50"]
+                    : ColorPalette["gray-600"]
+                }
+                borderRadius="0.375rem"
+                paddingY="0.125rem"
+                paddingX="0.375rem"
+                marginLeft="0.25rem"
+              >
+                <BaseTypography
+                  style={{
+                    fontWeight: 400,
+                    fontSize: "0.6875rem",
+                  }}
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["blue-400"]
+                      : ColorPalette["gray-200"]
+                  }
+                >
+                  {account.bitcoinAddress.paymentType
+                    .replace("-", " ")
+                    .replace(/\b\w/g, (char) => char.toUpperCase())}
+                </BaseTypography>
+              </Box>
+            )}
+
             <div style={{ flex: 1 }} />
             {/* 뒤로가기 버튼과 좌우를 맞추기 위해서 존재... */}
             <Box width="1.5rem" height="1.5rem" />
@@ -717,7 +787,8 @@ export const TokenDetailModal: FunctionComponent<{
               if (
                 ("cosmos" in modularChainInfo &&
                   chainStore.getChain(chainId).embedded.embedded) ||
-                "starknet" in modularChainInfo
+                "starknet" in modularChainInfo ||
+                "bitcoin" in modularChainInfo
               ) {
                 return (
                   <EmptyView>

@@ -11,6 +11,7 @@
 **/*.log
 **/*.webm
 **/*.txt
+**/*.gif
 .DS_Store
 
 .gitignore

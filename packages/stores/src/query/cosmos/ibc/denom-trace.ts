@@ -79,6 +79,20 @@ export class ObservableChainQueryDenomTrace extends ObservableChainQuery<
       rawPathChunks.push(rawPaths.slice(i, i + 2));
     }
 
+    // 기존 ibc-go랑 ibc v2랑 섞이면 base denom 안에 path가 포함되어 버린다...;;
+    const rawPathsInBaseDenom =
+      this.response.data.denom_trace.base_denom.split("/");
+    if (rawPathsInBaseDenom.length % 2 === 1) {
+      for (let i = 0; i < rawPathsInBaseDenom.length; i += 2) {
+        if (
+          rawPathsInBaseDenom[i] === "transfer" &&
+          i + 1 < rawPathsInBaseDenom.length
+        ) {
+          rawPathChunks.push(rawPathsInBaseDenom.slice(i, i + 2));
+        }
+      }
+    }
+
     return rawPathChunks.map((chunk) => {
       return {
         portId: chunk[0],
@@ -94,6 +108,24 @@ export class ObservableChainQueryDenomTrace extends ObservableChainQuery<
 
     if ("denom" in this.response.data) {
       return this.response.data.denom.base;
+    }
+
+    // 기존 ibc-go랑 ibc v2랑 섞이면 base denom 안에 path가 포함되어 버린다...;;
+    const rawPathsInBaseDenom =
+      this.response.data.denom_trace.base_denom.split("/");
+    if (rawPathsInBaseDenom.length % 2 === 1) {
+      for (let i = 0; i < rawPathsInBaseDenom.length; i += 2) {
+        if (
+          rawPathsInBaseDenom[i] === "transfer" &&
+          i + 1 < rawPathsInBaseDenom.length
+        ) {
+          rawPathsInBaseDenom.shift();
+          rawPathsInBaseDenom.shift();
+        }
+      }
+      if (rawPathsInBaseDenom.length === 1 && rawPathsInBaseDenom[0]) {
+        return rawPathsInBaseDenom[0];
+      }
     }
 
     return this.response.data.denom_trace.base_denom;

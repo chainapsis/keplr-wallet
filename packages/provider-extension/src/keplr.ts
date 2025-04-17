@@ -24,6 +24,12 @@ import {
   EIP6963ProviderDetail,
   EIP6963EventNames,
   IStarknetProvider,
+  SupportedPaymentType,
+  IBitcoinProvider,
+  SignPsbtOptions,
+  ChainType as BitcoinChainType,
+  Network as BitcoinNetwork,
+  BitcoinSignMessageType,
 } from "@keplr-wallet/types";
 import { JSONUint8Array } from "./uint8-array";
 import deepmerge from "deepmerge";
@@ -46,6 +52,7 @@ export interface ProxyRequest {
   method: keyof IKeplr;
   args: any[];
   ethereumProviderMethod?: keyof IEthereumProvider;
+  bitcoinProviderMethod?: keyof IBitcoinProvider;
 }
 
 export interface Result {
@@ -639,6 +646,48 @@ export class Keplr implements IKeplr {
     ]);
   }
 
+  async getBitcoinKey(chainId: string): Promise<{
+    name: string;
+    pubKey: Uint8Array;
+    address: string;
+    paymentType: SupportedPaymentType;
+    isNanoLedger: boolean;
+  }> {
+    return await this.requestMethod("getBitcoinKey", [chainId]);
+  }
+
+  async getBitcoinKeysSettled(chainIds: string[]): Promise<
+    SettledResponses<{
+      name: string;
+      pubKey: Uint8Array;
+      address: string;
+      paymentType: SupportedPaymentType;
+      isNanoLedger: boolean;
+    }>
+  > {
+    return await this.requestMethod("getBitcoinKeysSettled", [chainIds]);
+  }
+
+  async signPsbt(
+    chainId: string,
+    psbtHex: string,
+    options?: SignPsbtOptions
+  ): Promise<string> {
+    return await this.requestMethod("signPsbt", [chainId, psbtHex, options]);
+  }
+
+  async signPsbts(
+    chainId: string,
+    psbtsHexes: string[],
+    options?: SignPsbtOptions
+  ): Promise<string[]> {
+    return await this.requestMethod("signPsbts", [
+      chainId,
+      psbtsHexes,
+      options,
+    ]);
+  }
+
   async __core__getAnalyticsId(): Promise<string> {
     return await this.requestMethod("__core__getAnalyticsId" as any, []);
   }
@@ -665,6 +714,17 @@ export class Keplr implements IKeplr {
     );
   }
 
+  async __core__privilageSignAminoExecuteCosmWasm(
+    chainId: string,
+    signer: string,
+    signDoc: StdSignDoc
+  ): Promise<AminoSignResponse> {
+    return await this.requestMethod(
+      "__core__privilageSignAminoExecuteCosmWasm" as any,
+      [chainId, signer, signDoc]
+    );
+  }
+
   async __core__webpageClosed(): Promise<void> {
     return await this.requestMethod("__core__webpageClosed" as any, []);
   }
@@ -674,6 +734,8 @@ export class Keplr implements IKeplr {
   // TODO: 이거 마지막에 꼭 구현해야한다.
   //       일단은 다른게 더 급해서 일단 any로 처리
   public readonly starknet: IStarknetProvider = undefined as any;
+
+  public readonly bitcoin: IBitcoinProvider = new BitcoinProvider(this);
 }
 
 const waitDocumentReady = (): Promise<void> => {
@@ -958,5 +1020,177 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     return await EthereumProvider.requestMethod("request", {
       method: "net_version",
     });
+  }
+}
+
+export class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
+  constructor(protected readonly keplr: Keplr) {
+    super();
+  }
+
+  protected static async _requestMethod(
+    method: keyof IBitcoinProvider,
+    args: Record<string, any>
+  ): Promise<any> {
+    const isMobile = "ReactNativeWebView" in window;
+    const postMessage: (message: any) => void = isMobile
+      ? (message) => {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          window.ReactNativeWebView.postMessage(JSON.stringify(message));
+        }
+      : (message) => {
+          window.postMessage(message, window.location.origin);
+        };
+    const parseMessage: (message: any) => any = isMobile
+      ? (message) => {
+          if (message && typeof message === "string") {
+            try {
+              return JSON.parse(message);
+            } catch {
+              // noop
+            }
+          }
+
+          return message;
+        }
+      : (message) => {
+          return message;
+        };
+
+    const bytes = new Uint8Array(8);
+    const id: string = Array.from(crypto.getRandomValues(bytes))
+      .map((value) => {
+        return value.toString(16);
+      })
+      .join("");
+    const proxyRequestType = !(window as any).keplrRequestMetaIdSupport
+      ? "proxy-request"
+      : `proxy-request${metaId ? `-${metaId}` : ""}`;
+
+    const proxyMessage: ProxyRequest = {
+      type: proxyRequestType,
+      id,
+      method: "bitcoin",
+      args: JSONUint8Array.wrap(args),
+      bitcoinProviderMethod: method,
+    };
+
+    return new Promise((resolve, reject) => {
+      const receiveResponse = (e: any) => {
+        const proxyResponse: ProxyRequestResponse = parseMessage(e.data);
+
+        if (!proxyResponse || proxyResponse.type !== "proxy-request-response") {
+          return;
+        }
+
+        if (proxyResponse.id !== id) {
+          return;
+        }
+
+        window.removeEventListener("message", receiveResponse);
+
+        const result = JSONUint8Array.unwrap(proxyResponse.result);
+
+        if (!result) {
+          reject(new Error("Result is null"));
+          return;
+        }
+
+        if (result.error) {
+          reject(new Error(result.error));
+          return;
+        }
+
+        resolve(result.return);
+      };
+
+      window.addEventListener("message", receiveResponse);
+
+      postMessage(proxyMessage);
+    });
+  }
+
+  getAccounts(): Promise<string[]> {
+    return BitcoinProvider._requestMethod("getAccounts", []);
+  }
+
+  async requestAccounts(): Promise<string[]> {
+    return BitcoinProvider._requestMethod("requestAccounts", []);
+  }
+
+  async disconnect(): Promise<void> {
+    return BitcoinProvider._requestMethod("disconnect", []);
+  }
+
+  async getNetwork(): Promise<BitcoinNetwork> {
+    return BitcoinProvider._requestMethod("getNetwork", []);
+  }
+
+  async switchNetwork(network: BitcoinNetwork): Promise<BitcoinNetwork> {
+    return BitcoinProvider._requestMethod("switchNetwork", [network]);
+  }
+
+  async getChain(): Promise<{
+    enum: BitcoinChainType;
+    name: string;
+    network: BitcoinNetwork;
+  }> {
+    return BitcoinProvider._requestMethod("getChain", []);
+  }
+
+  async switchChain(chain: BitcoinChainType): Promise<BitcoinChainType> {
+    return BitcoinProvider._requestMethod("switchChain", [chain]);
+  }
+
+  async getPublicKey(): Promise<string> {
+    return BitcoinProvider._requestMethod("getPublicKey", []);
+  }
+
+  async getBalance(): Promise<{
+    confirmed: number;
+    unconfirmed: number;
+    total: number;
+  }> {
+    return BitcoinProvider._requestMethod("getBalance", []);
+  }
+
+  async getInscriptions(): Promise<string[]> {
+    return BitcoinProvider._requestMethod("getInscriptions", []);
+  }
+
+  async signMessage(
+    message: string,
+    type?: BitcoinSignMessageType
+  ): Promise<string> {
+    return BitcoinProvider._requestMethod("signMessage", [message, type]);
+  }
+
+  async sendBitcoin(to: string, amount: number): Promise<string> {
+    return BitcoinProvider._requestMethod("sendBitcoin", [to, amount]);
+  }
+
+  async pushTx(rawTxHex: string): Promise<string> {
+    return BitcoinProvider._requestMethod("pushTx", [rawTxHex]);
+  }
+
+  async signPsbt(psbtHex: string, options?: SignPsbtOptions): Promise<string> {
+    return BitcoinProvider._requestMethod("signPsbt", [psbtHex, options]);
+  }
+
+  async signPsbts(
+    psbtsHexes: string[],
+    options?: SignPsbtOptions
+  ): Promise<string[]> {
+    return BitcoinProvider._requestMethod("signPsbts", [psbtsHexes, options]);
+  }
+
+  async getAddress(): Promise<string> {
+    const accounts = await this.getAccounts();
+    return accounts[0];
+  }
+
+  async connectWallet(): Promise<string[]> {
+    return this.requestAccounts();
   }
 }

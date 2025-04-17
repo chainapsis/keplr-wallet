@@ -1,0 +1,74 @@
+syntax = "proto3";
+package babylon.incentive;
+
+import "gogoproto/gogo.proto";
+import "cosmos_proto/cosmos.proto";
+import "cosmos/msg/v1/msg.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "babylon/incentive/params.proto";
+
+option go_package = "github.com/babylonlabs-io/babylon/x/incentive/types";
+
+// Msg defines the Msg service.
+service Msg {
+  option (cosmos.msg.v1.service) = true;
+
+  // WithdrawReward defines a method to withdraw rewards of a stakeholder
+  rpc WithdrawReward(MsgWithdrawReward) returns (MsgWithdrawRewardResponse);
+  // UpdateParams updates the incentive module parameters.
+  rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
+  // SetWithdrawAddress defines a method to change the withdraw address of a
+  // stakeholder
+  rpc SetWithdrawAddress(MsgSetWithdrawAddress)
+      returns (MsgSetWithdrawAddressResponse);
+}
+
+// MsgWithdrawReward defines a message for withdrawing reward of a stakeholder.
+message MsgWithdrawReward {
+  option (cosmos.msg.v1.signer) = "address";
+  // type is the stakeholder type {finality_provider, btc_staker}
+  string type = 1;
+  // address is the address of the stakeholder in bech32 string
+  // signer of this msg has to be this address
+  string address = 2;
+}
+
+// MsgWithdrawRewardResponse is the response to the MsgWithdrawReward message
+message MsgWithdrawRewardResponse {
+  // coins is the withdrawed coins
+  repeated cosmos.base.v1beta1.Coin coins = 1 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
+
+// MsgUpdateParams defines a message for updating incentive module parameters.
+message MsgUpdateParams {
+  option (cosmos.msg.v1.signer) = "authority";
+
+  // authority is the address of the governance account.
+  // just FYI: cosmos.AddressString marks that this field should use type alias
+  // for AddressString instead of string, but the functionality is not yet
+  // implemented in cosmos-proto
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+
+  // params defines the incentive parameters to update.
+  //
+  // NOTE: All parameters must be supplied.
+  Params params = 2 [ (gogoproto.nullable) = false ];
+}
+// MsgUpdateParamsResponse is the response to the MsgUpdateParams message.
+message MsgUpdateParamsResponse {}
+
+// MsgSetWithdrawAddress sets the withdraw address
+message MsgSetWithdrawAddress {
+  option (cosmos.msg.v1.signer) = "delegator_address";
+
+  string delegator_address = 1
+      [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  string withdraw_address = 2
+      [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+}
+// MsgSetWithdrawAddressResponse defines the Msg/SetWithdrawAddress response
+// type.
+message MsgSetWithdrawAddressResponse {}

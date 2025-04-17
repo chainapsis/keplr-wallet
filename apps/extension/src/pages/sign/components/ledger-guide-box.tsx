@@ -20,6 +20,8 @@ export const LedgerGuideBox: FunctionComponent<{
     keyInsensitive: PlainObject;
     isEthereum?: boolean;
     isStarknet?: boolean;
+    isBitcoin?: boolean;
+    isBitcoinTest?: boolean;
   };
   isLedgerInteracting: boolean;
   ledgerInteractingError: Error | undefined;
@@ -196,6 +198,14 @@ export const LedgerGuideBox: FunctionComponent<{
 
                 if (data.isStarknet && appData["Starknet"]) {
                   app = "Starknet";
+                }
+
+                if (data.isBitcoin && appData["Bitcoin"]) {
+                  app = "Bitcoin";
+                }
+
+                if (data.isBitcoinTest && appData["Bitcoin Test"]) {
+                  app = "Bitcoin Testnet";
                 }
 
                 return (
