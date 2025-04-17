@@ -9,6 +9,7 @@ import {
   RequestSignEthereumMsg,
   RequestJsonRpcToEvmMsg,
   GetNewCurrentChainIdForEVMMsg,
+  CheckNeedEnableAccessForEVMMsg,
 } from "./messages";
 import { KeyRingEthereumService } from "./service";
 import { PermissionInteractiveService } from "../permission-interactive";
@@ -37,6 +38,11 @@ export const getHandler: (
         return handleGetNewCurrentChainIdForEVMMsg(service)(
           env,
           msg as GetNewCurrentChainIdForEVMMsg
+        );
+      case CheckNeedEnableAccessForEVMMsg:
+        return handleCheckNeedEnableAccessForEVMMsg(service)(
+          env,
+          msg as CheckNeedEnableAccessForEVMMsg
         );
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
@@ -106,7 +112,15 @@ const handleRequestJsonRpcToEvmMsg: (
 const handleGetNewCurrentChainIdForEVMMsg: (
   service: KeyRingEthereumService
 ) => InternalHandler<GetNewCurrentChainIdForEVMMsg> = (service) => {
-  return async (_, msg) => {
+  return (_, msg) => {
     return service.getNewCurrentChainIdFromRequest(msg.method, msg.params);
+  };
+};
+
+const handleCheckNeedEnableAccessForEVMMsg: (
+  service: KeyRingEthereumService
+) => InternalHandler<CheckNeedEnableAccessForEVMMsg> = (service) => {
+  return (_, msg) => {
+    return service.checkNeedEnableAccess(msg.method);
   };
 };

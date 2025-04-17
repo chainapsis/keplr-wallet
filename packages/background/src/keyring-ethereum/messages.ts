@@ -110,3 +110,27 @@ export class GetNewCurrentChainIdForEVMMsg extends Message<string | undefined> {
     return GetNewCurrentChainIdForEVMMsg.type();
   }
 }
+
+export class CheckNeedEnableAccessForEVMMsg extends Message<boolean> {
+  public static type() {
+    return "check-need-enable-access-for-evm";
+  }
+
+  constructor(public readonly method: string) {
+    super();
+  }
+
+  validateBasic(): void {}
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return CheckNeedEnableAccessForEVMMsg.type();
+  }
+}

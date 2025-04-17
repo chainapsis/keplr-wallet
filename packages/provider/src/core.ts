@@ -1588,11 +1588,6 @@ const sidePanelOpenNeededJSONRPCMethods = [
   "wallet_watchAsset",
 ];
 
-const enableAccessSkippedJSONRPCMethods = [
-  "keplr_initProviderState",
-  "eth_accounts",
-];
-
 class EthereumProvider extends EventEmitter implements IEthereumProvider {
   chainId: string | null = null;
   selectedAddress: string | null = null;
@@ -1655,6 +1650,24 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     });
   }
 
+  protected async protectedCheckNeedEnableAccess(
+    method: string
+  ): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-ethereum",
+        "check-need-enable-access-for-evm",
+        {
+          method,
+        }
+      )
+        .then(resolve)
+        .catch(reject);
+    });
+  }
+
   isConnected(): boolean {
     return true;
   }
@@ -1677,7 +1690,7 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     // XXX: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
     //      side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
     //      request의 경우는 일종의 쿼리이기 때문에 언제 결과가 올지 알 수 없다. 그러므로 미리 권한 처리를 해야한다.
-    if (!enableAccessSkippedJSONRPCMethods.includes(method)) {
+    if (await this.protectedCheckNeedEnableAccess(method)) {
       // 활성화할 체인을 변경하는 요청인 경우, 권한 승인하는 UI에서 변경할 체인 아이디가 기본으로 선택되도록 하기 위함이다.
       // 로직이 파편화 되는 것을 막기 위해 백그라운드에서 처리해서 값을 받아오는 방식으로 구현한다.
       const newCurrentChainId =

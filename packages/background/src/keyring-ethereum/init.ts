@@ -4,6 +4,7 @@ import {
   RequestJsonRpcToEvmMsg,
   RequestSignEthereumMsg,
   GetNewCurrentChainIdForEVMMsg,
+  CheckNeedEnableAccessForEVMMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -17,6 +18,7 @@ export function init(
   router.registerMessage(RequestSignEthereumMsg);
   router.registerMessage(RequestJsonRpcToEvmMsg);
   router.registerMessage(GetNewCurrentChainIdForEVMMsg);
+  router.registerMessage(CheckNeedEnableAccessForEVMMsg);
 
   router.addHandler(ROUTE, getHandler(service, permissionInteractionService));
 }

@@ -32,6 +32,7 @@ import { TokenERC20Service } from "../token-erc20";
 import { validateEVMChainId } from "./helper";
 import { runInAction } from "mobx";
 import { PermissionInteractiveService } from "../permission-interactive";
+import { enableAccessSkippedJSONRPCMethods } from "./constants";
 
 export class KeyRingEthereumService {
   protected websocketSubscriptionMap = new Map<string, WebSocket>();
@@ -1080,6 +1081,14 @@ export class KeyRingEthereumService {
         return;
       }
     }
+  }
+
+  checkNeedEnableAccess(method: string) {
+    if (enableAccessSkippedJSONRPCMethods.includes(method)) {
+      return false;
+    }
+
+    return true;
   }
 
   private getCurrentChainId(origin: string, chainId?: string) {
