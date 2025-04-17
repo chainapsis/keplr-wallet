@@ -104,10 +104,8 @@ export const EarnOverviewClaimSection: FunctionComponent<{
 
   const debouncedLogging = useMemo(
     () =>
-      debounce(() => {
-        const amount = Number(
-          totalYield.shrink(true).hideDenom(true).toString()
-        );
+      debounce((totalYield: CoinPretty) => {
+        const amount = Number(totalYield.toDec());
         analyticsStore.logEvent(
           "view_earn_overview",
           {
@@ -119,16 +117,16 @@ export const EarnOverviewClaimSection: FunctionComponent<{
           noble_earn_total_claimed_amount: amount,
         });
       }, 500),
-    [analyticsStore, totalYield]
+    [analyticsStore]
   );
 
   useEffect(() => {
-    debouncedLogging();
+    debouncedLogging(totalYield);
 
     return () => {
       debouncedLogging.cancel();
     };
-  }, [debouncedLogging]);
+  }, [debouncedLogging, totalYield]);
 
   return (
     <Box paddingX="1.25rem">
