@@ -882,7 +882,7 @@ export class PermissionService {
         "keplr_bitcoinChainChanged",
         {
           origin,
-          bitcoinChainId: "0x" + genesisHash,
+          bitcoinChainId: `bip122:${genesisHash}`,
           network,
         }
       );
@@ -922,7 +922,18 @@ export class PermissionService {
 
   @action
   setPreferredBitcoinPaymentType(paymentType: BitcoinPaymentType) {
-    // CHECK: origin permission 확인 필요 여부
+    // CHECK: origin permission 확인 필요 여부, keyring service로 옮겨야 할 지..
     this.preferredBitcoinPaymentType = paymentType;
+
+    console.log("dispatchEvent keplr_bitcoinAccountsChanged...", paymentType);
+
+    this.interactionService.dispatchEvent(
+      WEBPAGE_PORT,
+      "keplr_bitcoinAccountsChanged",
+      {
+        paymentType,
+        origin: undefined,
+      }
+    );
   }
 }

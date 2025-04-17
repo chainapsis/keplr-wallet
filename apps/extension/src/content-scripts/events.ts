@@ -91,6 +91,15 @@ export function initEvents(router: Router) {
                 },
               })
             );
+          case "keplr_bitcoinAccountsChanged":
+            return window.dispatchEvent(
+              new CustomEvent("keplr_bitcoinAccountsChanged", {
+                detail: {
+                  ...(msg as PushEventDataMsg<{ paymentType: string }>).data
+                    .data,
+                },
+              })
+            );
         }
         return;
       default:

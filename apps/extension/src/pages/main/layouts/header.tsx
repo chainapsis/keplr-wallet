@@ -492,8 +492,6 @@ export const MainHeaderLayout = observer<
                               msg
                             );
 
-                            // TODO: emit accounts changed event
-
                             setPreferredPaymentTypeForBitcoin(key);
                           },
                         }))
@@ -531,8 +529,6 @@ export const MainHeaderLayout = observer<
                                 BACKGROUND_PORT,
                                 msg
                               );
-
-                              // TODO: emit network changed event
 
                               setCurrentChainIdForBitcoin(key);
                             },
@@ -707,11 +703,7 @@ export const MainHeaderLayout = observer<
             {currentChainIdForStarknet != null && activeTabOrigin != null && (
               <ChainSelector
                 isOpen={isOpenCurrentChainSelectorForStarknet}
-                close={() => {
-                  setIsOpenCurrentChainSelectorForStarknet(false);
-                  setAddressConfigHover(false);
-                  setDisplayAddressTypeSelector(false);
-                }}
+                close={() => setIsOpenCurrentChainSelectorForStarknet(false)}
                 items={starknetChainInfos.map((chainInfo) => ({
                   key: chainInfo.chainId,
                   content: (
@@ -781,11 +773,7 @@ export const MainHeaderLayout = observer<
             {currentChainIdForEVM != null && activeTabOrigin != null && (
               <ChainSelector
                 isOpen={isOpenCurrentChainSelectorForEVM}
-                close={() => {
-                  setIsOpenCurrentChainSelectorForEVM(false);
-                  setAddressConfigHover(false);
-                  setDisplayAddressTypeSelector(false);
-                }}
+                close={() => setIsOpenCurrentChainSelectorForEVM(false)}
                 items={evmChainInfos.map((chainInfo) => ({
                   key: chainInfo.chainId,
                   content: (
