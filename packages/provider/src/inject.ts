@@ -1716,8 +1716,9 @@ export class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
 
     window.addEventListener("keplr_keystorechange", async () => {
       const accounts = await this.getAccounts();
-
-      this._handleAccountsChanged(accounts[0]);
+      if (accounts && accounts.length > 0) {
+        this._handleAccountsChanged(accounts[0]);
+      }
     });
 
     window.addEventListener("keplr_bitcoinChainChanged", async (event) => {
@@ -1884,6 +1885,7 @@ export class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
   };
 
   protected _handleAccountsChanged = async (selectedAddress: string) => {
+    this.emit("accountChanged", [selectedAddress]);
     this.emit("accountsChanged", [selectedAddress]);
   };
 }
