@@ -1,8 +1,4 @@
-export enum AnalyticsTarget {
-  GA = "ga",
-  AMPLITUDE = "amplitude",
-  ALL = "all",
-}
+export type AnalyticsTarget = "ga" | "amplitude" | "all";
 
 export type Properties = Record<
   string,
@@ -17,6 +13,7 @@ export interface AnalyticsClient {
     target?: AnalyticsTarget
   ): void;
   setUserProperties(properties: Properties): void;
+  incrementUserProperty(propertyName: string, incrementValue: number): void;
 }
 
 export class NoopAnalyticsClient implements AnalyticsClient {
@@ -29,6 +26,10 @@ export class NoopAnalyticsClient implements AnalyticsClient {
   }
 
   setUserProperties(): void {
+    // noop
+  }
+
+  incrementUserProperty(): void {
     // noop
   }
 }
@@ -60,10 +61,14 @@ export class AnalyticsStore<
     this.analyticsClient.setUserProperties(userProperties);
   }
 
+  incrementUserProperty(propertyName: string, incrementValue: number): void {
+    this.analyticsClient.incrementUserProperty(propertyName, incrementValue);
+  }
+
   logEvent(
     eventName: string,
     eventProperties?: E,
-    target: AnalyticsTarget = AnalyticsTarget.GA
+    target: AnalyticsTarget = "ga"
   ): void {
     if (this.middleware.logEvent) {
       const res = this.middleware.logEvent(eventName, eventProperties, target);

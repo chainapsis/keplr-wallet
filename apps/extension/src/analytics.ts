@@ -189,7 +189,7 @@ export class ExtensionAnalyticsClient implements AnalyticsClient {
   public logEvent(
     eventName: string,
     eventProperties?: Properties,
-    target: AnalyticsTarget = AnalyticsTarget.GA
+    target: AnalyticsTarget = "ga"
   ): void {
     // Disable on firefox
     if (this.isFirefox) {
@@ -202,16 +202,13 @@ export class ExtensionAnalyticsClient implements AnalyticsClient {
         return;
       }
 
-      if (
-        this.gaApiKey &&
-        (target === AnalyticsTarget.GA || target === AnalyticsTarget.ALL)
-      ) {
+      if (this.gaApiKey && (target === "ga" || target === "all")) {
         this.logGAEvent(eventName, eventProperties);
       }
 
       if (
         this.amplitudeApiKey &&
-        (target === AnalyticsTarget.AMPLITUDE || target === AnalyticsTarget.ALL)
+        (target === "amplitude" || target === "all")
       ) {
         this.logAmplitudeEvent(eventName, eventProperties);
       }
@@ -277,6 +274,28 @@ export class ExtensionAnalyticsClient implements AnalyticsClient {
       ...eventProperties,
       session_id: this.getAndUpdateSessionId(),
       user_properties: this._userProperties,
+    });
+  }
+
+  @action
+  public incrementUserProperty(
+    propertyName: string,
+    incrementValue: number
+  ): void {
+    // Disable on firefox
+    if (this.isFirefox) {
+      return;
+    }
+
+    const currentValue =
+      typeof this._userProperties[propertyName] === "number"
+        ? (this._userProperties[propertyName] as number)
+        : 0;
+
+    const newValue = currentValue + incrementValue;
+
+    this.setUserProperties({
+      [propertyName]: newValue,
     });
   }
 
