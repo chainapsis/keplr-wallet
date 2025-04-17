@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useState, useMemo } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useStore } from "../../../stores";
 import { Box } from "../../../components/box";
@@ -12,6 +12,7 @@ import { observer } from "mobx-react-lite";
 import { useNavigate } from "react-router";
 import { useTheme } from "styled-components";
 import { KEPLR_EXTS_MEMO } from "../../../config.ui";
+import debounce from "lodash.debounce";
 
 export const EarnOverviewClaimSection: FunctionComponent<{
   chainId: string;
@@ -22,7 +23,7 @@ export const EarnOverviewClaimSection: FunctionComponent<{
 
   const intl = useIntl();
   const navigate = useNavigate();
-  const { queriesStore, accountStore } = useStore();
+  const { queriesStore, accountStore, analyticsStore } = useStore();
 
   const account = accountStore.getAccount(chainId);
 
@@ -100,6 +101,34 @@ export const EarnOverviewClaimSection: FunctionComponent<{
       navigate("/tx-result/failed");
     }
   }
+
+  const debouncedLogging = useMemo(
+    () =>
+      debounce(() => {
+        const amount = Number(
+          totalYield.shrink(true).hideDenom(true).toString()
+        );
+        analyticsStore.logEvent(
+          "view_earn_overview",
+          {
+            nobleEarnTotalClaimedAmount: amount,
+          },
+          "amplitude"
+        );
+        analyticsStore.setUserProperties({
+          noble_earn_total_claimed_amount: amount,
+        });
+      }, 500),
+    [analyticsStore, totalYield]
+  );
+
+  useEffect(() => {
+    debouncedLogging();
+
+    return () => {
+      debouncedLogging.cancel();
+    };
+  }, [debouncedLogging]);
 
   return (
     <Box paddingX="1.25rem">
