@@ -71,6 +71,7 @@ export const WrapperwithBottomTag = observer(function ({
         }}
         paddingTop="0.875rem"
         paddingBottom="0.375rem"
+        marginBottom="-0.5rem"
         backgroundColor={
           isLightMode
             ? ColorPalette["green-100"]
