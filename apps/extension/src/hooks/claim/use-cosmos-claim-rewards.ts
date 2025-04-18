@@ -520,6 +520,26 @@ export const useCosmosClaimRewards = () => {
                   chainId: chainInfo.chainId,
                   chainName: chainInfo.chainName,
                 });
+
+                if (chainId === NOBLE_CHAIN_ID) {
+                  const claimableAmount =
+                    queries.noble.queryYield.getQueryBech32Address(
+                      account.bech32Address
+                    ).claimableAmount;
+
+                  analyticsStore.logEvent(
+                    "click_claim_all_btn_claim_reward",
+                    {
+                      itemKind: "button",
+                      nobleEarnClaimAmount: claimableAmount,
+                    },
+                    "amplitude"
+                  );
+                  analyticsStore.incrementUserProperty(
+                    "noble_earn_claim_amount",
+                    Number(claimableAmount)
+                  );
+                }
               },
               onFulfill: (tx: any) => {
                 // Tx가 성공한 이후에 rewards가 다시 쿼리되면서 여기서 빠지는게 의도인데...
@@ -703,6 +723,26 @@ export const useCosmosClaimRewards = () => {
               chainId: cosmosChainInfo.chainId,
               chainName: cosmosChainInfo.chainName,
             });
+
+            if (chainId === NOBLE_CHAIN_ID) {
+              const claimableAmount =
+                queries.noble.queryYield.getQueryBech32Address(
+                  account.bech32Address
+                ).claimableAmount;
+
+              analyticsStore.logEvent(
+                "click_token_list_claim_reward",
+                {
+                  itemKind: "button",
+                  nobleEarnClaimAmount: claimableAmount,
+                },
+                "amplitude"
+              );
+              analyticsStore.incrementUserProperty(
+                "noble_earn_claim_amount",
+                Number(claimableAmount)
+              );
+            }
           },
           onFulfill: (tx: any) => {
             if (tx.code != null && tx.code !== 0) {

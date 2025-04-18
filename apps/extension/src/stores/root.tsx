@@ -11,6 +11,7 @@ import {
   GoogleAPIKeyForMeasurement,
   CoinGeckoCoinDataByTokenAddress,
   SwapVenues,
+  AmplitudeAPIKey,
   SkipTokenInfoBaseURL,
   SkipTokenInfoAPIURI,
 } from "../config.ui";
@@ -632,8 +633,8 @@ export class RootStore {
     this.analyticsStore = new AnalyticsStore(
       (() => {
         if (
-          !GoogleAPIKeyForMeasurement ||
-          !GoogleMeasurementId ||
+          ((!GoogleAPIKeyForMeasurement || !GoogleMeasurementId) &&
+            !AmplitudeAPIKey) ||
           localStorage.getItem("disable-analytics") === "true"
         ) {
           return new NoopAnalyticsClient();
@@ -641,7 +642,8 @@ export class RootStore {
           return new ExtensionAnalyticsClient(
             new ExtensionKVStore("store_google_analytics_client"),
             GoogleAPIKeyForMeasurement,
-            GoogleMeasurementId
+            GoogleMeasurementId,
+            AmplitudeAPIKey
           );
         }
       })(),

@@ -1,3 +1,5 @@
+export type AnalyticsTarget = "ga" | "amplitude" | "all";
+
 export type Properties = Record<
   string,
   string | number | boolean | Array<string | number> | undefined | null
@@ -5,8 +7,13 @@ export type Properties = Record<
 
 export interface AnalyticsClient {
   setUserId(userId: string | null): void;
-  logEvent(eventName: string, eventProperties?: Properties): void;
+  logEvent(
+    eventName: string,
+    eventProperties?: Properties,
+    target?: AnalyticsTarget
+  ): void;
   setUserProperties(properties: Properties): void;
+  incrementUserProperty(propertyName: string, incrementValue: number): void;
 }
 
 export class NoopAnalyticsClient implements AnalyticsClient {
@@ -21,6 +28,10 @@ export class NoopAnalyticsClient implements AnalyticsClient {
   setUserProperties(): void {
     // noop
   }
+
+  incrementUserProperty(): void {
+    // noop
+  }
 }
 
 export class AnalyticsStore<
@@ -32,10 +43,12 @@ export class AnalyticsStore<
     protected readonly middleware: {
       logEvent?: (
         eventName: string,
-        eventProperties?: E
+        eventProperties?: E,
+        target?: AnalyticsTarget
       ) => {
         eventName: string;
         eventProperties?: E;
+        target?: AnalyticsTarget;
       };
     } = {}
   ) {}
@@ -48,13 +61,22 @@ export class AnalyticsStore<
     this.analyticsClient.setUserProperties(userProperties);
   }
 
-  logEvent(eventName: string, eventProperties?: E): void {
+  incrementUserProperty(propertyName: string, incrementValue: number): void {
+    this.analyticsClient.incrementUserProperty(propertyName, incrementValue);
+  }
+
+  logEvent(
+    eventName: string,
+    eventProperties?: E,
+    target: AnalyticsTarget = "ga"
+  ): void {
     if (this.middleware.logEvent) {
-      const res = this.middleware.logEvent(eventName, eventProperties);
+      const res = this.middleware.logEvent(eventName, eventProperties, target);
       eventName = res.eventName;
       eventProperties = res.eventProperties;
+      target = res.target || target;
     }
 
-    this.analyticsClient.logEvent(eventName, eventProperties);
+    this.analyticsClient.logEvent(eventName, eventProperties, target);
   }
 }
