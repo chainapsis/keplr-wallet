@@ -13,7 +13,6 @@ import {
 } from "./messages";
 import { KeyRingEthereumService } from "./service";
 import { PermissionInteractiveService } from "../permission-interactive";
-import { enableAccessSkippedJSONRPCMethods } from "./constants";
 
 export const getHandler: (
   service: KeyRingEthereumService,
@@ -85,7 +84,7 @@ const handleRequestJsonRpcToEvmMsg: (
   permissionInteractionService
 ) => {
   return async (env, msg) => {
-    if (!enableAccessSkippedJSONRPCMethods.includes(msg.method)) {
+    if (service.checkNeedEnableAccess(msg.method)) {
       const newCurrentChainId = service.getNewCurrentChainIdFromRequest(
         msg.method,
         msg.params

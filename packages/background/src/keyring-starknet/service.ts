@@ -35,6 +35,7 @@ import { AccountImpl } from "./account-impl";
 import { BackgroundTxService } from "../tx";
 import { VaultService } from "../vault";
 import { Hash } from "@keplr-wallet/crypto";
+import { enableAccessSkippedStarknetJSONRPCMethods } from "./constants";
 
 const EthAccountUpgradeableClassHash =
   "06cc43e9a4a0036cd09d8a997c61df18d7e4fa9459c907a4664b4e56b679d187";
@@ -233,39 +234,47 @@ export class KeyRingStarknetService {
         "The chain id must be provided for the internal message."
       );
     }
-    const currentChainId =
-      this.permissionService.getCurrentChainIdForStarknet(origin) ?? chainId;
-
-    if (currentChainId == null) {
-      if (type === "keplr_initStarknetProviderState") {
-        return {
-          currentChainId: null,
-          selectedAddress: null,
-          rpc: null,
-        } as T;
-      } else if (type === "wallet_getPermissions") {
-        // wallet_getPermissions는 permission 요청없이 처리되어야한다.
-        // handler.ts에서 permissino 요청이 생략되어있다는 점을 참고하자.
-        return [] as T;
-      } else {
-        throw new Error(
-          `${origin} is not permitted. Please disconnect and reconnect to the website.`
-        );
-      }
-    }
-    const selectedAddress = (await this.getStarknetKeySelected(currentChainId))
-      .hexAddress;
-
-    const modularChainInfo =
-      this.chainsService.getModularChainInfoOrThrow(currentChainId);
-    if (!("starknet" in modularChainInfo)) {
-      throw new Error("Chain is not a starknet chain");
-    }
 
     const result = (await (async () => {
       switch (type) {
-        case "keplr_initStarknetProviderState":
+        case "keplr_initStarknetProviderState": {
+          const currentChainId = this.getCurrentChainId(origin, chainId);
+          if (currentChainId == null) {
+            return {
+              currentChainId: null,
+              selectedAddress: null,
+              rpc: null,
+            };
+          }
+
+          const selectedAddress = (
+            await this.getStarknetKeySelected(currentChainId)
+          ).hexAddress;
+
+          const modularChainInfo =
+            this.chainsService.getModularChainInfoOrThrow(currentChainId);
+          if (!("starknet" in modularChainInfo)) {
+            throw new Error("Chain is not a starknet chain");
+          }
+
+          return {
+            currentChainId,
+            selectedAddress,
+            rpc: modularChainInfo.starknet.rpc,
+          };
+        }
         case "keplr_enableStarknetProvider": {
+          const currentChainId = this.forceGetCurrentChainId(origin, chainId);
+          const selectedAddress = (
+            await this.getStarknetKeySelected(currentChainId)
+          ).hexAddress;
+
+          const modularChainInfo =
+            this.chainsService.getModularChainInfoOrThrow(currentChainId);
+          if (!("starknet" in modularChainInfo)) {
+            throw new Error("Chain is not a starknet chain");
+          }
+
           return {
             currentChainId,
             selectedAddress,
@@ -280,6 +289,8 @@ export class KeyRingStarknetService {
 
           const contractAddress = param.options.address;
 
+          const currentChainId = this.forceGetCurrentChainId(origin, chainId);
+
           await this.tokenERC20Service.suggestERC20Token(
             env,
             currentChainId,
@@ -289,11 +300,17 @@ export class KeyRingStarknetService {
           return;
         }
         case "wallet_requestAccounts": {
+          const currentChainId = this.forceGetCurrentChainId(origin, chainId);
           return [
             (await this.getStarknetKeySelected(currentChainId)).hexAddress,
           ];
         }
         case "wallet_getPermissions": {
+          const currentChainId = this.getCurrentChainId(origin, chainId);
+          if (currentChainId == null) {
+            return [];
+          }
+
           if (
             this.permissionService.hasPermission(
               currentChainId,
@@ -306,33 +323,35 @@ export class KeyRingStarknetService {
           return [""];
         }
         case "wallet_switchStarknetChain": {
-          const param =
-            (Array.isArray(params) && (params?.[0] as { chainId: string })) ||
-            undefined;
-          if (!param?.chainId) {
+          const newCurrentChainId = this.getNewCurrentChainIdFromRequest(
+            type,
+            params
+          );
+          if (newCurrentChainId == null) {
             throw new Error("Invalid parameters: must provide a chain id.");
           }
 
-          const newChainId = param.chainId;
+          const currentChainId = this.getCurrentChainId(origin, chainId);
+          if (currentChainId === newCurrentChainId) {
+            return true;
+          }
 
-          // TODO: 인터페이스 상 얘는 boolean을 반환한다.
-          //       바꿀 체인을 찾을 수 없거나 바꿀 체인이 starknet이 아닌 경우
-          //       false를 반환할지 오류를 던질지 정해야한다.
           const newCurrentChainInfo =
-            this.chainsService.getModularChainInfoOrThrow(newChainId);
-          if (!("starknet" in newCurrentChainInfo)) {
-            throw new Error("Chain is not a starknet chain");
+            this.chainsService.getModularChainInfo(newCurrentChainId);
+          if (!newCurrentChainInfo || !("starknet" in newCurrentChainInfo)) {
+            return false;
           }
 
           await this.permissionService.updateCurrentChainIdForStarknet(
             env,
             origin,
-            newCurrentChainInfo.chainId
+            newCurrentChainId
           );
 
           return true;
         }
         case "wallet_requestChainId": {
+          const currentChainId = this.forceGetCurrentChainId(origin, chainId);
           return shortString.encodeShortString(
             currentChainId.replace("starknet:", "")
           );
@@ -341,6 +360,11 @@ export class KeyRingStarknetService {
           throw new Error("Not implemented");
         }
         case "wallet_addInvokeTransaction": {
+          const currentChainId = this.forceGetCurrentChainId(origin, chainId);
+          const selectedAddress = (
+            await this.getStarknetKeySelected(currentChainId)
+          ).hexAddress;
+
           const account = this.generateAccountInterface(
             env,
             origin,
@@ -382,6 +406,7 @@ export class KeyRingStarknetService {
           throw new Error("Not implemented");
         }
         case "wallet_signTypedData": {
+          const currentChainId = this.forceGetCurrentChainId(origin, chainId);
           return await this.signStarknetMessageSelected(
             env,
             origin,
@@ -393,6 +418,13 @@ export class KeyRingStarknetService {
           );
         }
         case "wallet_supportedSpecs": {
+          const currentChainId = this.forceGetCurrentChainId(origin, chainId);
+          const modularChainInfo =
+            this.chainsService.getModularChainInfoOrThrow(currentChainId);
+          if (!("starknet" in modularChainInfo)) {
+            throw new Error("Chain is not a starknet chain");
+          }
+
           return [
             (
               (
@@ -437,6 +469,13 @@ export class KeyRingStarknetService {
         case "starknet_simulateTransactions":
         case "starknet_specVersion":
         case "starknet_syncing": {
+          const currentChainId = this.forceGetCurrentChainId(origin, chainId);
+          const modularChainInfo =
+            this.chainsService.getModularChainInfoOrThrow(currentChainId);
+          if (!("starknet" in modularChainInfo)) {
+            throw new Error("Chain is not a starknet chain");
+          }
+
           return (
             (
               await simpleFetch(modularChainInfo.starknet.rpc, {
@@ -461,6 +500,61 @@ export class KeyRingStarknetService {
     })()) as T;
 
     return result;
+  }
+
+  getNewCurrentChainIdFromRequest(
+    method: string,
+    params?: unknown[] | Record<string, unknown>
+  ): string | undefined {
+    switch (method) {
+      case "wallet_switchStarknetChain": {
+        const param = params as { chainId: string } | undefined;
+        if (!param?.chainId) {
+          throw new Error("Invalid parameters: must provide a chain id.");
+        }
+
+        const newChainId = `starknet:${shortString.decodeShortString(
+          param.chainId
+        )}`;
+
+        return newChainId;
+      }
+      default: {
+        return;
+      }
+    }
+  }
+
+  checkNeedEnableAccess(
+    method: string,
+    params?: unknown[] | Record<string, unknown>
+  ) {
+    if (enableAccessSkippedStarknetJSONRPCMethods.includes(method)) {
+      if (
+        method === "wallet_requestAccounts" &&
+        (Array.isArray(params) || !params?.["silent_mode"])
+      ) {
+        return true;
+      }
+
+      return false;
+    }
+
+    return true;
+  }
+
+  private getCurrentChainId(origin: string, chainId?: string) {
+    return (
+      chainId || this.permissionService.getCurrentChainIdForStarknet(origin)
+    );
+  }
+
+  private forceGetCurrentChainId(origin: string, chainId?: string) {
+    return (
+      this.getCurrentChainId(origin, chainId) ||
+      // If the current chain id is not set, use Starknet mainnet as the default chain id.
+      "starknet:SN_MAIN"
+    );
   }
 
   async signStarknetMessageSelected(

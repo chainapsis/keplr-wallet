@@ -32,7 +32,7 @@ import { TokenERC20Service } from "../token-erc20";
 import { validateEVMChainId } from "./helper";
 import { runInAction } from "mobx";
 import { PermissionInteractiveService } from "../permission-interactive";
-import { enableAccessSkippedJSONRPCMethods } from "./constants";
+import { enableAccessSkippedEVMJSONRPCMethods } from "./constants";
 
 export class KeyRingEthereumService {
   protected websocketSubscriptionMap = new Map<string, WebSocket>();
@@ -1084,7 +1084,7 @@ export class KeyRingEthereumService {
   }
 
   checkNeedEnableAccess(method: string) {
-    if (enableAccessSkippedJSONRPCMethods.includes(method)) {
+    if (enableAccessSkippedEVMJSONRPCMethods.includes(method)) {
       return false;
     }
 

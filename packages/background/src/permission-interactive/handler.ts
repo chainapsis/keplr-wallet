@@ -62,7 +62,7 @@ const handleEnableAccessForStarknetMsg: (
   service: PermissionInteractiveService
 ) => InternalHandler<EnableAccessForStarknetMsg> = (service) => {
   return async (env, msg) => {
-    return await service.ensureEnabledForStarknet(env, msg.origin);
+    return await service.ensureEnabledForStarknet(env, msg.origin, msg.chainId);
   };
 };
 

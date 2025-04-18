@@ -241,6 +241,62 @@ export class RequestJsonRpcToStarknetMsg extends Message<void> {
   }
 }
 
+export class GetNewCurrentChainIdForStarknetMsg extends Message<
+  string | undefined
+> {
+  public static type() {
+    return "get-new-current-chain-id-for-starknet";
+  }
+
+  constructor(
+    public readonly method: string,
+    public readonly params?: unknown[] | Record<string, unknown>
+  ) {
+    super();
+  }
+
+  validateBasic(): void {}
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetNewCurrentChainIdForStarknetMsg.type();
+  }
+}
+
+export class CheckNeedEnableAccessForStarknetMsg extends Message<boolean> {
+  public static type() {
+    return "check-need-enable-access-for-starknet";
+  }
+
+  constructor(
+    public readonly method: string,
+    public readonly params?: unknown[] | Record<string, unknown>
+  ) {
+    super();
+  }
+
+  validateBasic(): void {}
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return CheckNeedEnableAccessForStarknetMsg.type();
+  }
+}
+
 export class GetStarknetKeysForEachVaultSettledMsg extends Message<
   SettledResponses<
     {

@@ -60,7 +60,7 @@ export class EnableAccessForStarknetMsg extends Message<void> {
     return "enable-access-for-starknet";
   }
 
-  constructor() {
+  constructor(public readonly chainId?: string) {
     super();
   }
 

@@ -1767,7 +1767,9 @@ class StarknetProvider implements IStarknetProvider {
     protected readonly requester: MessageRequester
   ) {}
 
-  protected async protectedEnableAccess(): Promise<void> {
+  protected async protectedEnableAccess(
+    newCurrentChainId?: string
+  ): Promise<void> {
     return new Promise((resolve, reject) => {
       let f = false;
 
@@ -1776,7 +1778,9 @@ class StarknetProvider implements IStarknetProvider {
         BACKGROUND_PORT,
         "permission-interactive",
         "enable-access-for-starknet",
-        {}
+        {
+          chainId: newCurrentChainId,
+        }
       )
         .then(resolve)
         .catch(reject)
@@ -1787,6 +1791,46 @@ class StarknetProvider implements IStarknetProvider {
           this.keplr.protectedTryOpenSidePanelIfEnabled();
         }
       }, 100);
+    });
+  }
+
+  protected async protectedGetNewCurrentChainIdFromRequest(
+    method: string,
+    params?: readonly unknown[] | Record<string, unknown>
+  ): Promise<string | undefined> {
+    return new Promise((resolve, reject) => {
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-starknet",
+        "get-new-current-chain-id-for-starknet",
+        {
+          method,
+          params,
+        }
+      )
+        .then(resolve)
+        .catch(reject);
+    });
+  }
+
+  protected async protectedCheckNeedEnableAccess(
+    method: string,
+    params?: readonly unknown[] | Record<string, unknown>
+  ): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-starknet",
+        "check-need-enable-access-for-starknet",
+        {
+          method,
+          params,
+        }
+      )
+        .then(resolve)
+        .catch(reject);
     });
   }
 
@@ -1804,21 +1848,10 @@ class StarknetProvider implements IStarknetProvider {
     // XXX: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
     //      side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
     //      request의 경우는 일종의 쿼리이기 때문에 언제 결과가 올지 알 수 없다. 그러므로 미리 권한 처리를 해야한다.
-    let skipEnable = false;
-    if (type === "keplr_initStarknetProviderState") {
-      skipEnable = true;
-    }
-    if (type === "wallet_getPermissions") {
-      skipEnable = true;
-    }
-    if (type === "wallet_requestAccounts") {
-      if (!Array.isArray(params) && params?.["silent_mode"]) {
-        skipEnable = true;
-      }
-    }
-
-    if (!skipEnable) {
-      await this.protectedEnableAccess();
+    if (await this.protectedCheckNeedEnableAccess(type, params)) {
+      const newCurrentChainId =
+        await this.protectedGetNewCurrentChainIdFromRequest(type, params);
+      await this.protectedEnableAccess(newCurrentChainId);
     }
 
     return new Promise((resolve, reject) => {

@@ -137,13 +137,19 @@ export class PermissionInteractiveService {
     );
   }
 
-  async ensureEnabledForStarknet(env: Env, origin: string): Promise<void> {
+  async ensureEnabledForStarknet(
+    env: Env,
+    origin: string,
+    newCurrentChainId?: string
+  ): Promise<void> {
     await this.keyRingService.ensureUnlockInteractive(env);
 
     await this.ensureKeyRingLedgerAppConnected(env, "Starknet");
 
     const currentChainIdForStarknet =
-      this.permissionService.getCurrentChainIdForStarknet(origin) ??
+      newCurrentChainId ||
+      this.permissionService.getCurrentChainIdForStarknet(origin) ||
+      // If the current chain id is not set, use Starknet mainnet as the default chain id.
       "starknet:SN_MAIN";
 
     await this.permissionService.checkOrGrantBasicAccessPermission(
