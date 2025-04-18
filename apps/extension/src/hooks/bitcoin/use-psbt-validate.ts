@@ -203,7 +203,6 @@ export const usePsbtsValidate = (
 
         return tapLeafHashesToSign;
       };
-
       // 키 경로 지출과 스크립트 경로 지출이 동시에 존재하는 경우는 이론상 가능하지만,
       // 거의 발생하지 않을 것으로 예상되므로 무시한다.
 
@@ -216,66 +215,10 @@ export const usePsbtsValidate = (
         };
       }
 
-      // 2. bip32 derivation 일치 여부 확인
-      // 마스터 지문 일치 여부 확인: derivation 데이터의 첫 번째 요소만 사용
-      // (여러 개의 derivation <하나의 키에서 여러 파생 키를 생성하여 하나의 입력에 서명하는 경우> 사용하는 경우는 희박할 것..)
-      if (bip32Derivation && bip32Derivation.length > 0) {
-        const derivation = bip32Derivation[0];
-
-        // mnemonic으로 생성된 키를 사용하거나 하드웨어 지갑에서 생성된 키를 사용하는 경우에만 검증
-        // mnemonic으로 생성된 키의 경우 파생된 키가 올바른지 검증하는 것은 어려우므로 마스터 키의 지문만 검증한다.
-        // (백그라운드에서 비밀키를 받아와서 하드닝 경로를 포함한 파생 키를 생성 및 검증하는 것은 안전하지 않음)
-        // -> 아예 검증 로직을 백그라운드로 보내버리는 것도 고려해야 함
-        const matchingMasterKey = bitcoinKeys.find(
-          (key) =>
-            key.masterFingerprintHex &&
-            Buffer.from(key.masterFingerprintHex, "hex").equals(
-              derivation.masterFingerprint
-            )
-        );
-
-        if (matchingMasterKey) {
-          // CHECK: master fingerprint 일치 여부 이상으로 검증이 필요할까?
-          // 이 훅 내부에서 렛저 연결하고 파생키를 검증하는 것은 좀 비효율 + 번거로움
-
-          // 스크립트 경로 지출인 경우, leafHashes가 주어진다. (taproot)
-          let tapLeafHashesToSign: Buffer[] | undefined;
-          if ("leafHashes" in derivation) {
-            tapLeafHashesToSign = derivation.leafHashes;
-          }
-
-          if (tapLeafScripts && tapLeafScripts.length > 0) {
-            const xonlyUserPubKey = toXOnly(derivation.pubkey); // 파생 키의 xonly 공개키 사용
-
-            const tapLeafHashesToSignFromScript = getTapLeafHashesToSign(
-              xonlyUserPubKey,
-              tapLeafScripts
-            );
-
-            tapLeafHashesToSign = tapLeafHashesToSignFromScript.filter(
-              (hash) =>
-                !tapLeafHashesToSign?.some((existingHash) =>
-                  existingHash.equals(hash)
-                )
-            );
-          }
-
-          return {
-            isToSign: true,
-            hdPath: derivation.path,
-            tapLeafHashesToSign,
-          };
-        }
-      }
-
-      // 3. 일치하지 않더라도 script 경로 지출인 경우 서명 대상으로 추가
+      // 2. taproot script 경로 지출 매칭 여부 확인
       if (tapLeafScripts && tapLeafScripts.length > 0) {
-        // taproot 키가 여러 개 존재할 가능성?
-        const taprootKey = bitcoinKeys.find(
-          (key) => key.paymentType === "taproot"
-        );
-        if (taprootKey) {
-          const xOnlyUserPubKey = toXOnly(Buffer.from(taprootKey.pubKey));
+        for (const key of bitcoinKeys) {
+          const xOnlyUserPubKey = toXOnly(Buffer.from(key.pubKey));
           const tapLeafHashesToSignFromScript = getTapLeafHashesToSign(
             xOnlyUserPubKey,
             tapLeafScripts
@@ -284,8 +227,53 @@ export const usePsbtsValidate = (
           if (tapLeafHashesToSignFromScript.length > 0) {
             return {
               isToSign: true,
-              hdPath: taprootKey.derivationPath,
+              hdPath: key.derivationPath,
               tapLeafHashesToSign: tapLeafHashesToSignFromScript,
+            };
+          }
+        }
+      }
+
+      // 3. bip32 derivation 마스터 지문 일치 여부 확인
+      // 1, 2번 검증에서 일반적으로 걸리지 않는 경우에만 거치는 검증
+      // (하드웨어 지갑, 또는 현재 연결된 계정의 키가 아닌 다른 파생 키의 경로가 주어진 경우)
+      if (bip32Derivation && bip32Derivation.length > 0) {
+        for (const derivation of bip32Derivation) {
+          const matchingKey = bitcoinKeys.find(
+            (key) =>
+              key.masterFingerprintHex &&
+              Buffer.from(key.masterFingerprintHex, "hex").equals(
+                derivation.masterFingerprint
+              )
+          );
+
+          if (matchingKey) {
+            // taproot 스크립트 경로 지출인 경우, leafHashes가 주어진다.
+            let tapLeafHashesToSign: Buffer[] | undefined;
+            if ("leafHashes" in derivation) {
+              tapLeafHashesToSign = derivation.leafHashes;
+            }
+
+            if (tapLeafScripts && tapLeafScripts.length > 0) {
+              const xonlyUserPubKey = toXOnly(derivation.pubkey);
+
+              const tapLeafHashesToSignFromScript = getTapLeafHashesToSign(
+                xonlyUserPubKey,
+                tapLeafScripts
+              );
+
+              tapLeafHashesToSign = tapLeafHashesToSignFromScript.filter(
+                (hash) =>
+                  !tapLeafHashesToSign?.some((existingHash) =>
+                    existingHash.equals(hash)
+                  )
+              );
+            }
+
+            return {
+              isToSign: true,
+              hdPath: derivation.path,
+              tapLeafHashesToSign,
             };
           }
         }
@@ -372,13 +360,24 @@ export const usePsbtsValidate = (
           }
 
           const isSigned = input.finalScriptSig || input.finalScriptWitness;
-          const address = script
-            ? fromOutputScript(script, networkConfig)
-            : "unknown";
+          let address: string;
+          try {
+            address = script
+              ? fromOutputScript(script, networkConfig)
+              : "unknown";
+          } catch (e) {
+            if (
+              e instanceof Error &&
+              e.message.toLowerCase().includes("has no matching address")
+            ) {
+              address = "unknown";
+            } else {
+              throw new Error("Invalid script to get address");
+            }
+          }
 
           // 서명할 입력이 따로 지정되지 않은 경우, 서명할 입력을 생성한다.
           if (script && !isSigned && !signPsbtOptions?.toSignInputs) {
-            // check if the input is key path spending
             const { isToSign, hdPath, tapLeafHashesToSign } =
               getInputToSignInfo(
                 address,

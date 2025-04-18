@@ -171,7 +171,7 @@ export const PermissionBasicAccessForEVMPage: FunctionComponent<{
                 }
                 style={{ paddingLeft: "0.5rem", paddingBottom: "0.5rem" }}
               >
-                Connect
+                <FormattedMessage id="page.permission.basic-access.select-chain-title" />
               </Body2>
               <Dropdown
                 items={chainStore.chainInfos
@@ -194,16 +194,11 @@ export const PermissionBasicAccessForEVMPage: FunctionComponent<{
                     : ColorPalette["gray-200"]
                 }
                 style={{
-                  marginTop: "2.375rem",
+                  marginTop: "1.188rem",
                   textAlign: "center",
                 }}
               >
-                {"You are connecting to an EVM compatible chain."}
-                <br />
-                <br />
-                {
-                  "Please select from the dropdown which chain you'd like to connect for the application."
-                }
+                <FormattedMessage id="page.permission.basic-access-for-evm.select-chain-paragraph" />
               </Body2>
             </Box>
           ) : (

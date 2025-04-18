@@ -325,3 +325,47 @@ export class RequestMethodToBitcoinMsg extends Message<void> {
     return RequestMethodToBitcoinMsg.type();
   }
 }
+
+export class GetPreferredBitcoinPaymentTypeMsg extends Message<SupportedPaymentType> {
+  public static type() {
+    return "get-preferred-bitcoin-payment-type";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetPreferredBitcoinPaymentTypeMsg.type();
+  }
+}
+
+export class SetPreferredBitcoinPaymentTypeMsg extends Message<void> {
+  public static type() {
+    return "set-preferred-bitcoin-payment-type";
+  }
+
+  constructor(public readonly paymentType: SupportedPaymentType) {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return SetPreferredBitcoinPaymentTypeMsg.type();
+  }
+}
