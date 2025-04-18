@@ -1,5 +1,5 @@
 import { CoinPretty } from "@keplr-wallet/unit";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { ViewToken } from "../../main";
 import { validateIsUsdcFromNoble } from "../utils";
 import { useStore } from "../../../stores";
@@ -10,6 +10,11 @@ export function useEarnBottomTag(balances: ViewToken[]) {
   const usdnAsset = useRef<CoinPretty | null>(null);
 
   const { priceStore } = useStore();
+
+  useEffect(() => {
+    topUsdcFound.current = "";
+    usdnAsset.current = null;
+  }, [balances]);
 
   function getBottomTagInfoProps(
     { token, chainInfo }: ViewToken,
@@ -31,14 +36,14 @@ export function useEarnBottomTag(balances: ViewToken[]) {
       return {};
     }
 
-    usdnAsset.current =
-      usdnAsset.current ??
-      balances.find(
-        ({ token, chainInfo }) =>
-          chainInfo.chainId === NOBLE_CHAIN_ID &&
-          token.currency.coinMinimalDenom === "uusdn"
-      )?.token ??
-      null;
+    if (usdnAsset.current === null) {
+      usdnAsset.current =
+        balances.find(
+          ({ token, chainInfo }) =>
+            chainInfo.chainId === NOBLE_CHAIN_ID &&
+            token.currency.coinMinimalDenom === "uusdn"
+        )?.token ?? null;
+    }
 
     const isUsdcOnTop =
       isUsdcFromNoble &&
