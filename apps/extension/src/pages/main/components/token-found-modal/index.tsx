@@ -94,6 +94,8 @@ export const TokenFoundModal: FunctionComponent<{
     // 그래서 일단 얇은 복사를 하고 이 값을 사용한다.
     const tokenScans = chainStore.tokenScans.slice();
 
+    const linkedEnables = new Set<string>();
+
     for (const enable of enables.slice()) {
       const modularChainInfo = chainStore.getModularChain(enable);
       const tokenScan = tokenScans.find(
@@ -131,28 +133,34 @@ export const TokenFoundModal: FunctionComponent<{
           enables.splice(enables.indexOf(enable), 1);
         }
       } else if ("bitcoin" in modularChainInfo) {
-        if (tokenScan.infos.length > 1) {
-          const linkedChainKey = tokenScan.linkedChainKey;
-          if (linkedChainKey) {
-            const groupedModularChainInfo =
-              chainStore.groupedModularChainInfos.find(
-                (group) =>
-                  "linkedChainKey" in group &&
-                  group.linkedChainKey === linkedChainKey
-              );
+        // 비트코인은 최대 2개의 info (taproot, native segwit)만 가질 수 있다.
+        if (tokenScan.infos.length > 2) {
+          enables.splice(enables.indexOf(enable), 1);
+          continue;
+        }
 
-            if (groupedModularChainInfo?.linkedModularChainInfos) {
-              const chainIdsToAdd = new Set([
-                groupedModularChainInfo.chainId,
-                ...groupedModularChainInfo.linkedModularChainInfos.map(
-                  (info) => info.chainId
-                ),
-              ]);
+        const linkedChainKey = tokenScan.linkedChainKey;
+        if (linkedChainKey) {
+          const groupedModularChainInfo =
+            chainStore.groupedModularChainInfos.find(
+              (group) =>
+                "linkedChainKey" in group &&
+                group.linkedChainKey === linkedChainKey
+            );
 
-              for (const chainId of chainIdsToAdd) {
-                if (!enables.includes(chainId)) {
-                  enables.push(chainId);
-                }
+          if (groupedModularChainInfo?.linkedModularChainInfos) {
+            const chainIdsToAdd = new Set([
+              groupedModularChainInfo.chainId,
+              ...groupedModularChainInfo.linkedModularChainInfos.map(
+                (info) => info.chainId
+              ),
+            ]);
+
+            for (const chainId of chainIdsToAdd) {
+              const identifier = ChainIdHelper.parse(chainId).identifier;
+
+              if (!linkedEnables.has(identifier)) {
+                linkedEnables.add(identifier);
               }
             }
           }
@@ -160,8 +168,10 @@ export const TokenFoundModal: FunctionComponent<{
       }
     }
 
-    if (enables.length > 0) {
-      await chainStore.enableChainInfoInUI(...enables);
+    const finalEnables = Array.from(new Set([...enables, ...linkedEnables]));
+
+    if (finalEnables.length > 0) {
+      await chainStore.enableChainInfoInUI(...finalEnables);
     }
 
     if (needBIP44Selects.length > 0) {

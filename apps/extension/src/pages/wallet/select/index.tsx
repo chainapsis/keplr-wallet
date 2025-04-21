@@ -810,14 +810,29 @@ const KeyringItem = observer<
         // -1 means it can be multiple coin type.
         let coinType = -1;
         if (keyInfo.type === "ledger") {
-          const ledgerAppCandidate: (App | "Ethereum")[] = [
+          const ledgerAppCandidate: (
+            | App
+            | "Ethereum"
+            | "Starknet"
+            | "Bitcoin"
+            | "Bitcoin Test"
+          )[] = [
             "Cosmos",
             "Terra",
             "Secret",
             "Ethereum",
+            "Starknet",
+            "Bitcoin",
+            "Bitcoin Test",
           ];
 
-          const app: (App | "Ethereum")[] = [];
+          const app: (
+            | App
+            | "Ethereum"
+            | "Starknet"
+            | "Bitcoin"
+            | "Bitcoin Test"
+          )[] = [];
           for (const ledgerApp of ledgerAppCandidate) {
             if (keyInfo.insensitive[ledgerApp] != null) {
               app.push(ledgerApp);
@@ -828,6 +843,12 @@ const KeyringItem = observer<
             coinType = -1;
           } else if (app[0] === "Ethereum") {
             coinType = 60;
+          } else if (app[0] === "Starknet") {
+            coinType = 9004;
+          } else if (app[0] === "Bitcoin") {
+            coinType = 0;
+          } else if (app[0] === "Bitcoin Test") {
+            coinType = 1;
           } else {
             const c = AppCoinType[app[0]];
             if (c != null) {
@@ -847,11 +868,17 @@ const KeyringItem = observer<
             return;
           }
 
-          return `m/44'/${coinType >= 0 ? coinType : "-"}'/${
+          return `m/-'/${coinType >= 0 ? coinType : "-"}'/${
             bip44Path.account
           }'/${bip44Path.change}/${bip44Path.addressIndex}${(() => {
             if (app.length === 1) {
-              if (app[0] !== "Cosmos" && app[0] !== "Ethereum") {
+              if (
+                app[0] !== "Cosmos" &&
+                app[0] !== "Ethereum" &&
+                app[0] !== "Starknet" &&
+                app[0] !== "Bitcoin" &&
+                app[0] !== "Bitcoin Test"
+              ) {
                 return ` ${intl.formatMessage({
                   id: `page.wallet.keyring-item.bip44-path-${app[0]}-text`,
                 })}`;
@@ -870,9 +897,9 @@ const KeyringItem = observer<
           return;
         }
 
-        return `m/44'/${coinType >= 0 ? coinType : "-"}'/${
-          bip44Path.account
-        }'/${bip44Path.change}/${bip44Path.addressIndex}`;
+        return `m/-'/${coinType >= 0 ? coinType : "-"}'/${bip44Path.account}'/${
+          bip44Path.change
+        }/${bip44Path.addressIndex}`;
       }
 
       if (

@@ -170,7 +170,7 @@ export const PermissionBasicAccessForStarknetPage: FunctionComponent<{
                 }
                 style={{ paddingLeft: "0.5rem", paddingBottom: "0.5rem" }}
               >
-                Connect
+                <FormattedMessage id="page.permission.basic-access.select-chain-title" />
               </Body2>
               <Dropdown
                 items={chainStore.modularChainInfos

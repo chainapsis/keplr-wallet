@@ -12,11 +12,13 @@ import {
   GetBitcoinKeyMsg,
   GetBitcoinKeysForEachVaultSettledMsg,
   GetBitcoinKeysSettledMsg,
+  GetPreferredBitcoinPaymentTypeMsg,
   GetSupportedPaymentTypesMsg,
   RequestMethodToBitcoinMsg,
   RequestSignBitcoinMessageMsg,
   RequestSignBitcoinPsbtMsg,
   RequestSignBitcoinPsbtsMsg,
+  SetPreferredBitcoinPaymentTypeMsg,
 } from "./messages";
 
 export const getHandler: (
@@ -69,6 +71,16 @@ export const getHandler: (
           _service,
           _permissionInteractionService
         )(env, msg as RequestMethodToBitcoinMsg);
+      case GetPreferredBitcoinPaymentTypeMsg:
+        return handleGetPreferredBitcoinPaymentTypeMsg(_service)(
+          env,
+          msg as GetPreferredBitcoinPaymentTypeMsg
+        );
+      case SetPreferredBitcoinPaymentTypeMsg:
+        return handleSetPreferredBitcoinPaymentTypeMsg(_service)(
+          env,
+          msg as SetPreferredBitcoinPaymentTypeMsg
+        );
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
     }
@@ -213,5 +225,21 @@ const handleRequestMethodToBitcoinMsg: (
       msg.params,
       msg.chainId
     );
+  };
+};
+
+const handleGetPreferredBitcoinPaymentTypeMsg: (
+  service: KeyRingBitcoinService
+) => InternalHandler<GetPreferredBitcoinPaymentTypeMsg> = (service) => {
+  return () => {
+    return service.getPreferredBitcoinPaymentType();
+  };
+};
+
+const handleSetPreferredBitcoinPaymentTypeMsg: (
+  service: KeyRingBitcoinService
+) => InternalHandler<SetPreferredBitcoinPaymentTypeMsg> = (service) => {
+  return (_, msg) => {
+    service.setPreferredBitcoinPaymentType(msg.paymentType);
   };
 };
