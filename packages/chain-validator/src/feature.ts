@@ -27,6 +27,8 @@ export const SupportedChainFeatures = [
   "force-enable-evm-ledger",
   "ibc-v2",
   "evm-ledger-sign-plain-json",
+  "initia-dynamicfee",
+  "eth-secp256k1-initia",
 ];
 
 /**

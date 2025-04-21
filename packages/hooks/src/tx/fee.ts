@@ -451,6 +451,23 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         ) != null
       );
     }
+    if (this.chainInfo.hasFeature("initia-dynamicfee")) {
+      const queries = this.queriesStore.get(this.chainId);
+      if (!queries.keplrETC) {
+        console.log(
+          "Chain has initia-dynamicfee feature. But no initia queries provided."
+        );
+        return false;
+      }
+
+      const queryInitiaDynamicFee = queries.keplrETC.queryInitiaDynamicFee;
+
+      if (!queryInitiaDynamicFee.baseGasPrice) {
+        return false;
+      }
+
+      return true;
+    }
 
     return false;
   }
@@ -648,77 +665,154 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
           }
         }
       } else if (this.canFeeMarketTxFeesAndReady()) {
-        const queryCosmos = this.queriesStore.get(this.chainId).cosmos;
-        if (queryCosmos) {
-          const gasPrices = queryCosmos.queryFeeMarketGasPrices.gasPrices;
+        if (this.chainInfo.hasFeature("initia-dynamicfee")) {
+          const queryEtc = this.queriesStore.get(this.chainId).keplrETC;
+          if (queryEtc) {
+            const gasPrice = queryEtc.queryInitiaDynamicFee.baseGasPrice;
+            if (gasPrice) {
+              let multiplication = {
+                low: 1.1,
+                average: 1.2,
+                high: 1.3,
+              };
 
-          const gasPrice = gasPrices.find(
-            (gasPrice) => gasPrice.denom === feeCurrency.coinMinimalDenom
-          );
-          if (gasPrice) {
-            let multiplication = {
-              low: 1.1,
-              average: 1.2,
-              high: 1.3,
-            };
+              const multificationConfig =
+                this.queriesStore.simpleQuery.queryGet<{
+                  [str: string]:
+                    | {
+                        low: number;
+                        average: number;
+                        high: number;
+                      }
+                    | undefined;
+                }>(
+                  "https://gjsttg7mkgtqhjpt3mv5aeuszi0zblbb.lambda-url.us-west-2.on.aws",
+                  "/feemarket/info.json"
+                );
 
-            const multificationConfig = this.queriesStore.simpleQuery.queryGet<{
-              [str: string]:
-                | {
-                    low: number;
-                    average: number;
-                    high: number;
-                  }
-                | undefined;
-            }>(
-              "https://gjsttg7mkgtqhjpt3mv5aeuszi0zblbb.lambda-url.us-west-2.on.aws",
-              "/feemarket/info.json"
-            );
-
-            if (multificationConfig.response) {
-              const _default = multificationConfig.response.data["__default__"];
-              if (
-                _default &&
-                _default.low != null &&
-                typeof _default.low === "number" &&
-                _default.average != null &&
-                typeof _default.average === "number" &&
-                _default.high != null &&
-                typeof _default.high === "number"
-              ) {
-                multiplication = {
-                  low: _default.low,
-                  average: _default.average,
-                  high: _default.high,
-                };
+              if (multificationConfig.response) {
+                const _default =
+                  multificationConfig.response.data["__default__"];
+                if (
+                  _default &&
+                  _default.low != null &&
+                  typeof _default.low === "number" &&
+                  _default.average != null &&
+                  typeof _default.average === "number" &&
+                  _default.high != null &&
+                  typeof _default.high === "number"
+                ) {
+                  multiplication = {
+                    low: _default.low,
+                    average: _default.average,
+                    high: _default.high,
+                  };
+                }
+                const specific =
+                  multificationConfig.response.data[
+                    this.chainInfo.chainIdentifier
+                  ];
+                if (
+                  specific &&
+                  specific.low != null &&
+                  typeof specific.low === "number" &&
+                  specific.average != null &&
+                  typeof specific.average === "number" &&
+                  specific.high != null &&
+                  typeof specific.high === "number"
+                ) {
+                  multiplication = {
+                    low: specific.low,
+                    average: specific.average,
+                    high: specific.high,
+                  };
+                }
               }
-              const specific =
-                multificationConfig.response.data[
-                  this.chainInfo.chainIdentifier
-                ];
-              if (
-                specific &&
-                specific.low != null &&
-                typeof specific.low === "number" &&
-                specific.average != null &&
-                typeof specific.average === "number" &&
-                specific.high != null &&
-                typeof specific.high === "number"
-              ) {
-                multiplication = {
-                  low: specific.low,
-                  average: specific.average,
-                  high: specific.high,
-                };
+              switch (feeType) {
+                case "low":
+                  return new Dec(multiplication.low).mul(new Dec(gasPrice));
+                case "average":
+                  return new Dec(multiplication.average).mul(new Dec(gasPrice));
+                case "high":
+                  return new Dec(multiplication.high).mul(new Dec(gasPrice));
               }
             }
-            switch (feeType) {
-              case "low":
-                return new Dec(multiplication.low).mul(gasPrice.amount);
-              case "average":
-                return new Dec(multiplication.average).mul(gasPrice.amount);
-              case "high":
-                return new Dec(multiplication.high).mul(gasPrice.amount);
+          }
+        } else {
+          const queryCosmos = this.queriesStore.get(this.chainId).cosmos;
+          if (queryCosmos) {
+            const gasPrices = queryCosmos.queryFeeMarketGasPrices.gasPrices;
+
+            const gasPrice = gasPrices.find(
+              (gasPrice) => gasPrice.denom === feeCurrency.coinMinimalDenom
+            );
+            if (gasPrice) {
+              let multiplication = {
+                low: 1.1,
+                average: 1.2,
+                high: 1.3,
+              };
+
+              const multificationConfig =
+                this.queriesStore.simpleQuery.queryGet<{
+                  [str: string]:
+                    | {
+                        low: number;
+                        average: number;
+                        high: number;
+                      }
+                    | undefined;
+                }>(
+                  "https://gjsttg7mkgtqhjpt3mv5aeuszi0zblbb.lambda-url.us-west-2.on.aws",
+                  "/feemarket/info.json"
+                );
+
+              if (multificationConfig.response) {
+                const _default =
+                  multificationConfig.response.data["__default__"];
+                if (
+                  _default &&
+                  _default.low != null &&
+                  typeof _default.low === "number" &&
+                  _default.average != null &&
+                  typeof _default.average === "number" &&
+                  _default.high != null &&
+                  typeof _default.high === "number"
+                ) {
+                  multiplication = {
+                    low: _default.low,
+                    average: _default.average,
+                    high: _default.high,
+                  };
+                }
+                const specific =
+                  multificationConfig.response.data[
+                    this.chainInfo.chainIdentifier
+                  ];
+                if (
+                  specific &&
+                  specific.low != null &&
+                  typeof specific.low === "number" &&
+                  specific.average != null &&
+                  typeof specific.average === "number" &&
+                  specific.high != null &&
+                  typeof specific.high === "number"
+                ) {
+                  multiplication = {
+                    low: specific.low,
+                    average: specific.average,
+                    high: specific.high,
+                  };
+                }
+              }
+              switch (feeType) {
+                case "low":
+                  return new Dec(multiplication.low).mul(gasPrice.amount);
+                case "average":
+                  return new Dec(multiplication.average).mul(gasPrice.amount);
+                case "high":
+                  return new Dec(multiplication.high).mul(gasPrice.amount);
+              }
             }
           }
         }
@@ -956,23 +1050,45 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         }
       }
     } else if (this.canFeeMarketTxFeesAndReady()) {
-      const queryCosmos = this.queriesStore.get(this.chainId).cosmos;
-      if (queryCosmos) {
-        const queryFeeMarketGasPrices = queryCosmos.queryFeeMarketGasPrices;
-        if (queryFeeMarketGasPrices.error) {
-          return {
-            warning: new Error("Failed to fetch gas prices"),
-          };
+      if (this.chainInfo.hasFeature("initia-dynamicfee")) {
+        const queryEtc = this.queriesStore.get(this.chainId).keplrETC;
+        if (queryEtc) {
+          const queryInitiaDynamicFee = queryEtc.queryInitiaDynamicFee;
+          if (queryInitiaDynamicFee.error) {
+            return {
+              warning: new Error("Failed to fetch gas prices"),
+            };
+          }
+          if (!queryInitiaDynamicFee.response) {
+            return {
+              loadingState: "loading-block",
+            };
+          }
+          if (queryInitiaDynamicFee.isFetching) {
+            return {
+              loadingState: "loading",
+            };
+          }
         }
-        if (!queryFeeMarketGasPrices.response) {
-          return {
-            loadingState: "loading-block",
-          };
-        }
-        if (queryFeeMarketGasPrices.isFetching) {
-          return {
-            loadingState: "loading",
-          };
+      } else {
+        const queryCosmos = this.queriesStore.get(this.chainId).cosmos;
+        if (queryCosmos) {
+          const queryFeeMarketGasPrices = queryCosmos.queryFeeMarketGasPrices;
+          if (queryFeeMarketGasPrices.error) {
+            return {
+              warning: new Error("Failed to fetch gas prices"),
+            };
+          }
+          if (!queryFeeMarketGasPrices.response) {
+            return {
+              loadingState: "loading-block",
+            };
+          }
+          if (queryFeeMarketGasPrices.isFetching) {
+            return {
+              loadingState: "loading",
+            };
+          }
         }
       }
     }

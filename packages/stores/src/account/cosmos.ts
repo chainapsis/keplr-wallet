@@ -590,7 +590,7 @@ export class CosmosAccountImpl {
                         return "/stratos.crypto.v1.ethsecp256k1.PubKey";
                       }
 
-                      if (ethSignPlainJson) {
+                      if (chainInfo.hasFeature("eth-secp256k1-initia")) {
                         return "/initia.crypto.v1beta1.ethsecp256k1.PubKey";
                       }
                       return "/ethermint.crypto.v1.ethsecp256k1.PubKey";
@@ -698,6 +698,13 @@ export class CosmosAccountImpl {
                     return "/stratos.crypto.v1.ethsecp256k1.PubKey";
                   }
 
+                  if (
+                    this.chainGetter
+                      .getChain(this.chainId)
+                      .hasFeature("eth-secp256k1-initia")
+                  ) {
+                    return "/initia.crypto.v1beta1.ethsecp256k1.PubKey";
+                  }
                   return "/ethermint.crypto.v1.ethsecp256k1.PubKey";
                 })(),
                 value: PubKey.encode({

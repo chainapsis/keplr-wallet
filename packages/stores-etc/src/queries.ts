@@ -11,6 +11,7 @@ import {
   ObservableQueryTaxRate,
 } from "./terra-classic/treasury";
 import { ObservableQuerySkipTokenInfo } from "./token-info";
+import { ObservableQueryInitiaDynamicFee } from "./initia/dynamicfee";
 
 export interface KeplrETCQueries {
   keplrETC: KeplrETCQueriesImpl;
@@ -56,6 +57,8 @@ export class KeplrETCQueriesImpl {
   public readonly queryTerraClassicTaxRate: DeepReadonly<ObservableQueryTaxRate>;
   public readonly queryTerraClassicTaxCaps: DeepReadonly<ObservableQueryTaxCaps>;
 
+  public readonly queryInitiaDynamicFee: DeepReadonly<ObservableQueryInitiaDynamicFee>;
+
   constructor(
     _base: QueriesSetBase,
     sharedContext: QuerySharedContext,
@@ -88,6 +91,12 @@ export class KeplrETCQueriesImpl {
       chainGetter
     );
     this.queryTerraClassicTaxCaps = new ObservableQueryTaxCaps(
+      sharedContext,
+      chainId,
+      chainGetter
+    );
+
+    this.queryInitiaDynamicFee = new ObservableQueryInitiaDynamicFee(
       sharedContext,
       chainId,
       chainGetter
