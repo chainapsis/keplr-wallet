@@ -33,7 +33,7 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
   const [searchParams] = useSearchParams();
   const intl = useIntl();
   const navigate = useNavigate();
-  const { chainStore, queriesStore, accountStore, analyticsStore } = useStore();
+  const { chainStore, queriesStore, accountStore } = useStore();
 
   const [isTermAgreed, setIsTermAgreed] = useState(false);
   const [isUsdnDescriptionModalOpen, setIsUsdnDescriptionModalOpen] =
@@ -190,30 +190,7 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
               onBroadcasted: (_txHash) => {
                 navigate("/tx-result/pending");
 
-                const nobleEarnDepositAmount = Number(
-                  nobleEarnAmountConfig.amountConfig.amount[0].toDec()
-                );
-                const nobleEarnDepositExpectedReceiveAmount = Number(
-                  nobleEarnAmountConfig.amountConfig.expectedOutAmount.toDec()
-                );
-
-                analyticsStore.logEvent(
-                  "click_approve_btn_usdn_deposit_tx_sign",
-                  {
-                    itemKind: "button",
-                    nobleEarnDepositAmount,
-                    nobleEarnDepositExpectedReceiveAmount,
-                  },
-                  "amplitude"
-                );
-                analyticsStore.incrementUserProperty(
-                  "noble_earn_deposit_amount",
-                  nobleEarnDepositAmount
-                );
-                analyticsStore.incrementUserProperty(
-                  "noble_earn_deposit_expected_receive_amount",
-                  nobleEarnDepositExpectedReceiveAmount
-                );
+                // TODO: Log analytics
               },
               onFulfill: (tx: any) => {
                 if (tx.code != null && tx.code !== 0) {
