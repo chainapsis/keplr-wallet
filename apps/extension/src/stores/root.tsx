@@ -9,6 +9,7 @@ import {
   TokenContractListURL,
   GoogleMeasurementId,
   GoogleAPIKeyForMeasurement,
+  AmplitudeAPIKey,
   CoinGeckoCoinDataByTokenAddress,
   SwapVenues,
   SkipTokenInfoBaseURL,
@@ -73,10 +74,16 @@ import {
 import { APP_PORT } from "@keplr-wallet/router";
 import { FiatCurrency } from "@keplr-wallet/types";
 import { UIConfigStore } from "./ui-config";
-import { AnalyticsStore, NoopAnalyticsClient } from "@keplr-wallet/analytics";
+import {
+  AnalyticsStore,
+  NoopAnalyticsClient,
+  AnalyticsAmplitudeStore,
+  NoopAnalyticsClientV2,
+} from "@keplr-wallet/analytics";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { HugeQueriesStore } from "./huge-queries";
 import { ExtensionAnalyticsClient } from "../analytics";
+import { AmplitudeAnalyticsClient } from "../analytics-amplitude";
 import { TokenContractsQueries } from "./token-contracts";
 import {
   SkipQueries,
@@ -173,6 +180,7 @@ export class RootStore {
   public readonly erc20CurrencyRegistrar: ERC20CurrencyRegistrar;
 
   public readonly analyticsStore: AnalyticsStore;
+  public readonly analyticsAmplitudeStore: AnalyticsAmplitudeStore;
 
   constructor() {
     const router = new ExtensionRouter(ContentScriptEnv.produceEnv, (msg) => {
@@ -642,6 +650,49 @@ export class RootStore {
             new ExtensionKVStore("store_google_analytics_client"),
             GoogleAPIKeyForMeasurement,
             GoogleMeasurementId
+          );
+        }
+      })(),
+      {
+        logEvent: (eventName, eventProperties) => {
+          if (eventProperties?.["chainId"] || eventProperties?.["chainIds"]) {
+            eventProperties = {
+              ...eventProperties,
+            };
+
+            if (eventProperties["chainId"]) {
+              eventProperties["chainIdentifier"] = ChainIdHelper.parse(
+                eventProperties["chainId"] as string
+              ).identifier;
+            }
+
+            if (eventProperties["chainIds"]) {
+              eventProperties["chainIdentifiers"] = (
+                eventProperties["chainIds"] as string[]
+              ).map((chainId) => ChainIdHelper.parse(chainId).identifier);
+            }
+          }
+
+          return {
+            eventName,
+            eventProperties,
+          };
+        },
+      }
+    );
+
+    this.analyticsAmplitudeStore = new AnalyticsAmplitudeStore(
+      (() => {
+        if (
+          !AmplitudeAPIKey ||
+          localStorage.getItem("disable-analytics") === "true"
+        ) {
+          return new NoopAnalyticsClientV2();
+        } else {
+          return new AmplitudeAnalyticsClient(
+            new ExtensionKVStore("store_amplitude_analytics_client"),
+            this.keyRingStore,
+            AmplitudeAPIKey
           );
         }
       })(),

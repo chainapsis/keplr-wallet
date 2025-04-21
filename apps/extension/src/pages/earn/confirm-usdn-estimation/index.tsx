@@ -33,7 +33,8 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
   const [searchParams] = useSearchParams();
   const intl = useIntl();
   const navigate = useNavigate();
-  const { chainStore, queriesStore, accountStore } = useStore();
+  const { chainStore, queriesStore, accountStore, analyticsAmplitudeStore } =
+    useStore();
 
   const [isTermAgreed, setIsTermAgreed] = useState(false);
   const [isUsdnDescriptionModalOpen, setIsUsdnDescriptionModalOpen] =
@@ -190,7 +191,29 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
               onBroadcasted: (_txHash) => {
                 navigate("/tx-result/pending");
 
-                // TODO: Log analytics
+                const nobleEarnDepositAmount = Number(
+                  nobleEarnAmountConfig.amountConfig.amount[0].toDec()
+                );
+                const nobleEarnDepositExpectedReceiveAmount = Number(
+                  nobleEarnAmountConfig.amountConfig.expectedOutAmount.toDec()
+                );
+
+                analyticsAmplitudeStore.logEvent(
+                  "click_approve_btn_usdn_deposit_tx_sign",
+                  {
+                    itemKind: "button",
+                    nobleEarnDepositAmount,
+                    nobleEarnDepositExpectedReceiveAmount,
+                  }
+                );
+                analyticsAmplitudeStore.incrementUserProperty(
+                  "noble_earn_deposit_amount",
+                  nobleEarnDepositAmount
+                );
+                analyticsAmplitudeStore.incrementUserProperty(
+                  "noble_earn_deposit_expected_receive_amount",
+                  nobleEarnDepositExpectedReceiveAmount
+                );
               },
               onFulfill: (tx: any) => {
                 if (tx.code != null && tx.code !== 0) {
