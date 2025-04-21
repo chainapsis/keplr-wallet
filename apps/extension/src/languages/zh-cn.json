@@ -30,6 +30,7 @@
   "bottom-tabs.swap": "兑换",
   "bottom-tabs.activity": "活动",
   "bottom-tabs.settings": "设置",
+  "bottom-tabs.swap.disabled": "兑换仅支持Cosmos或基于以太坊的链。请添加一个以便使用兑换。",
 
   "pages.register.components.header.intro-title": "你的跨链网关",
   "pages.register.components.header.header-step.title": "步骤",
@@ -167,6 +168,7 @@
   "pages.register.enable-chains.skip-button": "跳过",
   "pages.register.enable-chains.guide.can-select-evm-next-step": "你可以在下一步中选择EVM链。",
   "pages.register.enable-chains.guide.can-select-starknet-later-step": "您可以在稍後的步驟中選擇Starknet鏈。",
+  "pages.register.enable-chains.guide.can-select-bitcoin-later-step": "你可以在下一步中选择比特币链。",
   "pages.register.enable-chains.guide.starknet.title": "致StarkNet用户的注意事项",
   "pages.register.enable-chains.guide.starknet.paragraph": "通过其他钱包（如Argent、Braavos）导入时，系统将在Keplr中创建全新的独立账户。",
   "pages.register.enable-chains.guide.non-native-chain.title": "启用自定义链",
@@ -176,11 +178,14 @@
   "pages.register.enable-chains.chain-item-token-count": "{count} {count, plural, one {Token} other {Tokens}}",
 
   "pages.register.enable-chains.native-chain-view.ledger-cosmos-title": "所有原生Cosmos链",
+  "pages.register.enable-chains.native-chain-view.ledger-cosmos-paragraph": "Cosmos, Osmosis, Celestia...",
   "pages.register.enable-chains.native-chain-view.ledger-evm-title": "所有EVM Cosmos链",
   "pages.register.enable-chains.native-chain-view.ledger-evm-paragraph": "Ethereum, Arbitrum, Base...",
   "pages.register.enable-chains.native-chain-view.ledger-starknet-title": "所有原生Starknet链",
   "pages.register.enable-chains.native-chain-view.ledger-starknet-paragraph": "Starknet, Starknet Sepolia",
-  "pages.register.enable-chains.guide.can-select-bitcoin-later-step": "你可以在下一步中选择比特币链。",
+  "pages.register.enable-chains.native-chain-view.ledger-bitcoin-title": "所有原生比特币链",
+  "pages.register.enable-chains.native-chain-view.ledger-bitcoin-paragraph": "Bitcoin, Bitcoin Signet, Bitcoin Testnet",
+
 
   "pages.manage-chains.title": "添加/删除链",
   "pages.manage-chains.search-input-placeholder": "搜索网络",
@@ -506,8 +511,6 @@
 
   "page.sign.starknet.tx.calls": "调用",
 
-  "page.sign.components.fee-summary.fee": "交易费",
-
   "page.sign.bitcoin.transaction.data": "交易数据",
   "page.sign.bitcoin.transaction.input": "输入",
   "page.sign.bitcoin.transaction.output": "输出",
@@ -515,6 +518,9 @@
   "page.sign.bitcoin.transaction.total-spend": "总花费",
   "page.sign.bitcoin.transaction.utxo-warning": "UTXOs可能包含除{coinDenom}以外的资产（例如inscription, runes）。",
   "page.sign.bitcoin.transaction.review-progress": "{index}/{total} 审查交易",
+
+  "page.sign.components.fee-summary.fee": "交易费",
+
   "page.sign.components.messages.agoric.provision.title": "配置智能钱包",
   "page.sign.components.messages.agoric.provision.message": "为地址<b>{address}</b>配置智能钱包",
   "page.sign.components.messages.agoric.wallet-spend-action.execute-offer": "使用以下参数执行报价：",
@@ -817,8 +823,8 @@
   "components.input.fee-control.max-fee": "最高费用: {assets}",
   "components.input.fee-control.fee-rate": "费用率: {feeRate} sat/vB",
   "components.input.fee-control.error.insufficient-fee": "费用不足",
-  "components.input.fee-control.tooltip.external-fee-set": "交易费用由网站设定",
   "components.input.fee-control.error.unable-to-find-proper-utxos": "无法找到合适的UTXO组合",
+  "components.input.fee-control.tooltip.external-fee-set": "交易费用由网站设定",
   "components.input.fee-control.modal.title": "费用选项",
   "components.input.fee-control.modal.fee-title": "费用",
   "components.input.fee-control.modal.remember-last-fee-option": "记住我的选择",
@@ -833,9 +839,9 @@
   "components.input.fee-control.modal.fee-selector.low": "低",
   "components.input.fee-control.modal.fee-selector.average": "中",
   "components.input.fee-control.modal.fee-selector.high": "高",
+  "components.input.fee-control.modal.fee-selector.manual": "手动",
   "components.input.fee-control.modal.guide.external-fee-set": "交易手续费由网站/dApp设定。若修改设置可能导致交易无法处理。",
   "components.input.fee-control.modal.notification.changes-applied": "修改已生效",
-  "components.input.fee-control.modal.fee-selector.manual": "手动",
   "components.input.fee-control.modal.max-fee": "最高交易费",
   "components.input.password-text-input.label": "密码",
   "components.input.password-text-input.placeholder": "请输入密码",
