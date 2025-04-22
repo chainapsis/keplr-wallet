@@ -1634,38 +1634,30 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     method: string,
     params?: readonly unknown[] | Record<string, unknown>
   ): Promise<string | undefined> {
-    return new Promise((resolve, reject) => {
-      sendSimpleMessage(
-        this.requester,
-        BACKGROUND_PORT,
-        "keyring-ethereum",
-        "get-new-current-chain-id-for-evm",
-        {
-          method,
-          params,
-        }
-      )
-        .then(resolve)
-        .catch(reject);
-    });
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-ethereum",
+      "get-new-current-chain-id-for-evm",
+      {
+        method,
+        params,
+      }
+    );
   }
 
   protected async protectedCheckNeedEnableAccess(
     method: string
   ): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      sendSimpleMessage(
-        this.requester,
-        BACKGROUND_PORT,
-        "keyring-ethereum",
-        "check-need-enable-access-for-evm",
-        {
-          method,
-        }
-      )
-        .then(resolve)
-        .catch(reject);
-    });
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-ethereum",
+      "check-need-enable-access-for-evm",
+      {
+        method,
+      }
+    );
   }
 
   isConnected(): boolean {
@@ -1798,40 +1790,32 @@ class StarknetProvider implements IStarknetProvider {
     method: string,
     params?: readonly unknown[] | Record<string, unknown>
   ): Promise<string | undefined> {
-    return new Promise((resolve, reject) => {
-      sendSimpleMessage(
-        this.requester,
-        BACKGROUND_PORT,
-        "keyring-starknet",
-        "get-new-current-chain-id-for-starknet",
-        {
-          method,
-          params,
-        }
-      )
-        .then(resolve)
-        .catch(reject);
-    });
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-starknet",
+      "get-new-current-chain-id-for-starknet",
+      {
+        method,
+        params,
+      }
+    );
   }
 
   protected async protectedCheckNeedEnableAccess(
     method: string,
     params?: readonly unknown[] | Record<string, unknown>
   ): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      sendSimpleMessage(
-        this.requester,
-        BACKGROUND_PORT,
-        "keyring-starknet",
-        "check-need-enable-access-for-starknet",
-        {
-          method,
-          params,
-        }
-      )
-        .then(resolve)
-        .catch(reject);
-    });
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-starknet",
+      "check-need-enable-access-for-starknet",
+      {
+        method,
+        params,
+      }
+    );
   }
 
   async request<T = unknown>({

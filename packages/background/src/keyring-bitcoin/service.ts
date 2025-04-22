@@ -25,12 +25,7 @@ import { BackgroundTxService } from "../tx";
 import validate, {
   Network as BitcoinNetwork,
 } from "bitcoin-address-validation";
-import {
-  enableAccessSkippedBitcoinJSONRPCMethods,
-  mainnet,
-  signet,
-  testnet,
-} from "./constants";
+import { mainnet, signet, testnet } from "./constants";
 import { AnalyticsService } from "../analytics";
 
 const DUST_THRESHOLD = 546;
@@ -510,14 +505,6 @@ export class KeyRingBitcoinService {
       genesisHash: split[1] as GenesisHash,
       paymentType: split[2] as SupportedPaymentType,
     };
-  }
-
-  checkNeedEnableAccess(method: string) {
-    if (enableAccessSkippedBitcoinJSONRPCMethods.includes(method)) {
-      return false;
-    }
-
-    return true;
   }
 
   getCurrentChainId(origin: string, chainId?: string) {

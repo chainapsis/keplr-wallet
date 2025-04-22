@@ -35,7 +35,6 @@ export const PermissionBasicAccessForBitcoinPage: FunctionComponent<{
   const [currentChainIdForBitcoin, setCurrentChainIdForBitcoin] =
     useState<string>(data.chainIds[0]);
 
-  console.log("currentChainIdForBitcoin", currentChainIdForBitcoin);
   const isLoading = (() => {
     const obsolete = data.ids.find((id) => {
       return permissionStore.isObsoleteInteractionApproved(id);
