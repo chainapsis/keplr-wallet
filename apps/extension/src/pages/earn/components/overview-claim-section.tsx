@@ -115,7 +115,7 @@ export const EarnOverviewClaimSection: FunctionComponent<{
       debounce((totalYield: CoinPretty) => {
         const amount = Number(totalYield.toDec());
         analyticsAmplitudeStore.logEvent("view_earn_overview", {
-          nobleEarnTotalClaimAmount: amount,
+          nobleEarnClaimAmount: amount,
         });
         analyticsAmplitudeStore.setUserProperties({
           noble_earn_claim_amount: amount,
