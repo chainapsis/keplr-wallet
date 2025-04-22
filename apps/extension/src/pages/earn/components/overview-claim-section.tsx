@@ -110,27 +110,28 @@ export const EarnOverviewClaimSection: FunctionComponent<{
     }
   }
 
+  const totalYieldDec = Number(totalYield.toDec());
+
   const debouncedLogging = useMemo(
     () =>
-      debounce((totalYield: CoinPretty) => {
-        const amount = Number(totalYield.toDec());
+      debounce((yieldDec: number) => {
         analyticsAmplitudeStore.logEvent("view_earn_overview", {
-          nobleEarnClaimAmount: amount,
+          nobleEarnClaimAmount: yieldDec,
         });
         analyticsAmplitudeStore.setUserProperties({
-          noble_earn_claim_amount: amount,
+          noble_earn_claim_amount: yieldDec,
         });
       }, 500),
     [analyticsAmplitudeStore]
   );
 
   useEffect(() => {
-    debouncedLogging(totalYield);
+    debouncedLogging(totalYieldDec);
 
     return () => {
       debouncedLogging.cancel();
     };
-  }, [debouncedLogging, totalYield]);
+  }, [debouncedLogging, totalYieldDec]);
 
   return (
     <Box paddingX="1.25rem">
