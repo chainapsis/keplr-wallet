@@ -45,6 +45,7 @@ import { NativeChainSectionIconDM } from "./components/native-chain-section-icon
 import { NativeChainSectionIconLM } from "./components/native-chain-section-icon-lm";
 import { NextStepChainItem } from "./components/next-step-chain-item";
 import { ChainItem } from "./components/chain-item";
+import { useSearch } from "../../../hooks/use-search";
 
 /**
  * EnableChainsScene은 finalize-key scene에서 선택한 chains를 활성화하는 scene이다.
@@ -670,40 +671,13 @@ export const EnableChainsScene: FunctionComponent<{
         });
       }
 
-      const trimSearch = search.trim().toLowerCase();
-      if (!trimSearch) {
-        return modularChainInfos;
-      } else {
-        return modularChainInfos.filter((modularChainInfo) => {
-          if (modularChainInfo.chainName.toLowerCase().includes(trimSearch)) {
-            return true;
-          }
-
-          if ("cosmos" in modularChainInfo) {
-            const chainInfo = chainStore.getChain(
-              modularChainInfo.cosmos.chainId
-            );
-            return (
-              chainInfo.stakeCurrency || chainInfo.currencies[0]
-            ).coinDenom.includes(trimSearch);
-          } else if ("starknet" in modularChainInfo) {
-            return modularChainInfo.starknet.currencies[0].coinDenom.includes(
-              trimSearch
-            );
-          } else if ("bitcoin" in modularChainInfo) {
-            return modularChainInfo.bitcoin.currencies[0].coinDenom.includes(
-              trimSearch
-            );
-          }
-        });
-      }
+      return modularChainInfos;
     }, [
       chainStore,
       fallbackEthereumLedgerApp,
       fallbackStarknetLedgerApp,
       fallbackBitcoinLedgerApp,
       keyType,
-      search,
     ]);
 
     const chainSort = useCallback(
@@ -950,6 +924,39 @@ export const EnableChainsScene: FunctionComponent<{
           )
       )
       .sort(chainSort);
+
+    const searchFields = useMemo(
+      () => [
+        "chainName",
+        (modularChainInfo: ModularChainInfo) => {
+          if ("cosmos" in modularChainInfo) {
+            const chainInfo = chainStore.getChain(
+              modularChainInfo.cosmos.chainId
+            );
+            return (chainInfo.stakeCurrency || chainInfo.currencies[0])
+              .coinDenom;
+          } else if ("starknet" in modularChainInfo) {
+            return modularChainInfo.starknet.currencies[0].coinDenom;
+          } else if ("bitcoin" in modularChainInfo) {
+            return modularChainInfo.bitcoin.currencies[0].coinDenom;
+          }
+          return "";
+        },
+      ],
+      [chainStore]
+    );
+
+    const filteredNativeGroupedModularChainInfos = useSearch<ModularChainInfo>(
+      nativeGroupedModularChainInfos,
+      search,
+      searchFields
+    );
+
+    const filteredSuggestGroupedModularChainInfos = useSearch<ModularChainInfo>(
+      suggestGroupedModularChainInfos,
+      search,
+      searchFields
+    );
 
     const { chains: searchedNonNativeChainInfos, infiniteScrollTriggerRef } =
       useGetAllNonNativeChain({
@@ -1448,79 +1455,83 @@ export const EnableChainsScene: FunctionComponent<{
                 setIsCollapsedNativeChainView(!isCollapsedNativeChainView);
               }}
             >
-              {nativeGroupedModularChainInfos.map((modularChainInfo) => {
-                const {
-                  balance,
-                  enabled,
-                  blockInteraction,
-                  tokens,
-                  chainIdentifier,
-                } = getChainItemInfoForView(modularChainInfo);
+              {filteredNativeGroupedModularChainInfos.map(
+                (modularChainInfo) => {
+                  const {
+                    balance,
+                    enabled,
+                    blockInteraction,
+                    tokens,
+                    chainIdentifier,
+                  } = getChainItemInfoForView(modularChainInfo);
 
-                return (
-                  <ChainItem
-                    showTagText={
-                      fallbackEthereumLedgerApp
-                        ? "EVM"
-                        : fallbackStarknetLedgerApp
-                        ? "Starknet"
-                        : fallbackBitcoinLedgerApp
-                        ? "Bitcoin"
-                        : undefined
-                    }
-                    tokens={tokens}
-                    key={chainIdentifier}
-                    chainInfo={modularChainInfo}
-                    balance={balance}
-                    enabled={enabled}
-                    blockInteraction={blockInteraction}
-                    isFresh={isFresh ?? false}
-                    isNativeChain={nativeChainIdentifierSet.has(
-                      chainIdentifier
-                    )}
-                    onClick={() => {
-                      const isEnabled =
-                        enabledChainIdentifierMap.get(chainIdentifier);
-                      const linkedChainIdentifiers = new Set<string>([
-                        chainIdentifier,
-                      ]);
-
-                      if ("linkedChainKey" in modularChainInfo) {
-                        const linkedChainKey = modularChainInfo.linkedChainKey;
-                        chainStore.modularChainInfos.forEach(
-                          (modularChainInfo) => {
-                            if (
-                              "linkedChainKey" in modularChainInfo &&
-                              modularChainInfo.linkedChainKey === linkedChainKey
-                            ) {
-                              linkedChainIdentifiers.add(
-                                modularChainInfo.chainId
-                              );
-                            }
-                          }
-                        );
+                  return (
+                    <ChainItem
+                      showTagText={
+                        fallbackEthereumLedgerApp
+                          ? "EVM"
+                          : fallbackStarknetLedgerApp
+                          ? "Starknet"
+                          : fallbackBitcoinLedgerApp
+                          ? "Bitcoin"
+                          : undefined
                       }
+                      tokens={tokens}
+                      key={chainIdentifier}
+                      chainInfo={modularChainInfo}
+                      balance={balance}
+                      enabled={enabled}
+                      blockInteraction={blockInteraction}
+                      isFresh={isFresh ?? false}
+                      isNativeChain={nativeChainIdentifierSet.has(
+                        chainIdentifier
+                      )}
+                      onClick={() => {
+                        const isEnabled =
+                          enabledChainIdentifierMap.get(chainIdentifier);
+                        const linkedChainIdentifiers = new Set<string>([
+                          chainIdentifier,
+                        ]);
 
-                      setEnabledChainIdentifiers((prev) => {
-                        const result = new Set(prev);
+                        if ("linkedChainKey" in modularChainInfo) {
+                          const linkedChainKey =
+                            modularChainInfo.linkedChainKey;
+                          chainStore.modularChainInfos.forEach(
+                            (modularChainInfo) => {
+                              if (
+                                "linkedChainKey" in modularChainInfo &&
+                                modularChainInfo.linkedChainKey ===
+                                  linkedChainKey
+                              ) {
+                                linkedChainIdentifiers.add(
+                                  modularChainInfo.chainId
+                                );
+                              }
+                            }
+                          );
+                        }
 
-                        // If selected chain is enabled, disable all linked chains.
-                        // Otherwise, enable all linked chains including selected chain.
-                        const shouldEnable = !isEnabled;
+                        setEnabledChainIdentifiers((prev) => {
+                          const result = new Set(prev);
 
-                        linkedChainIdentifiers.forEach((id) =>
-                          shouldEnable ? result.add(id) : result.delete(id)
-                        );
+                          // If selected chain is enabled, disable all linked chains.
+                          // Otherwise, enable all linked chains including selected chain.
+                          const shouldEnable = !isEnabled;
 
-                        return Array.from(result);
-                      });
-                    }}
-                  />
-                );
-              })}
+                          linkedChainIdentifiers.forEach((id) =>
+                            shouldEnable ? result.add(id) : result.delete(id)
+                          );
+
+                          return Array.from(result);
+                        });
+                      }}
+                    />
+                  );
+                }
+              )}
             </NativeChainSection>
 
-            {suggestGroupedModularChainInfos.map((modularChainInfo) => {
+            {filteredSuggestGroupedModularChainInfos.map((modularChainInfo) => {
               const {
                 balance,
                 enabled,
