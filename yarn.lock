@@ -8870,6 +8870,7 @@ __metadata:
     "@types/color": ^3.0.3
     "@types/firefox-webext-browser": ^120.0.3
     "@types/js-yaml": ^4
+    "@types/lodash.throttle": ^4
     "@types/react-is": ^18.2.0
     "@types/react-window": ^1
     "@types/resize-observer-browser": ^0.1.7
@@ -8898,6 +8899,7 @@ __metadata:
     joi: ^17.5.0
     js-yaml: ^4.1.0
     keplr-wallet-private: "file:./noop-keplr-wallet-private"
+    lodash.throttle: ^4.1.1
     lottie-web: ^5.10.2
     os-browserify: ^0.3.0
     process: ^0.11.10
@@ -15026,6 +15028,15 @@ __metadata:
   dependencies:
     "@types/lodash": "*"
   checksum: 4b1f39fd1d921311c37a846c0e0df9d1fa23e27448a6ad1efd7574e703abd2b2fa5e8f3b5037146000f167ba231d0d01e52747d902654151b4ceeff9f2a9b380
+  languageName: node
+  linkType: hard
+
+"@types/lodash.throttle@npm:^4":
+  version: 4.1.9
+  resolution: "@types/lodash.throttle@npm:4.1.9"
+  dependencies:
+    "@types/lodash": "*"
+  checksum: 6d330072387f062d408747f0dbe62869820ee3f3fbec43965f703ce9c9083e4ff9082faa4fe92aea000d6367b7645955e9c8db6a4e04e6bd769697fdd19c12b1
   languageName: node
   linkType: hard
 

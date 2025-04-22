@@ -32,6 +32,7 @@ import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import { useGetSearchChains } from "../../hooks/use-get-search-chains";
 import { useEarnBottomTag } from "../earn/components/use-earn-bottom-tag";
 import { AdjustmentIcon } from "../../components/icon/adjustment";
+import { useSearch } from "../../hooks/use-search";
 
 const zeroDec = new Dec(0);
 
@@ -94,6 +95,17 @@ const ManageViewAssetTokenPageButton = styled(TextButton)`
   }
 `;
 
+const fields = [
+  (item: ViewToken) => {
+    const currency = item.token.currency;
+    if ("originCurrency" in currency) {
+      return currency.originCurrency?.coinDenom || "";
+    }
+    return currency.coinDenom;
+  },
+  "chainInfo.chainName",
+];
+
 export const AvailableTabView: FunctionComponent<{
   search: string;
   isNotReady?: boolean;
@@ -129,14 +141,11 @@ export const AvailableTabView: FunctionComponent<{
 
     const isFirstTime = allBalancesNonZero.length === 0;
 
-    const _allBalancesSearchFiltered = useMemo(() => {
-      return allBalances.filter((token) => {
-        return (
-          token.chainInfo.chainName.toLowerCase().includes(trimSearch) ||
-          token.token.currency.coinDenom.toLowerCase().includes(trimSearch)
-        );
-      });
-    }, [allBalances, trimSearch]);
+    const _allBalancesSearchFiltered = useSearch(
+      [...allBalances],
+      trimSearch,
+      fields
+    );
 
     const hasLowBalanceTokens =
       hugeQueriesStore.filterLowBalanceTokens(allBalances).filteredTokens
