@@ -271,22 +271,6 @@ const handleGetSupportedPaymentTypesMsg: (
   };
 };
 
-const handleGetPreferredBitcoinPaymentTypeMsg: (
-  service: KeyRingBitcoinService
-) => InternalHandler<GetPreferredBitcoinPaymentTypeMsg> = (service) => {
-  return () => {
-    return service.getPreferredBitcoinPaymentType();
-  };
-};
-
-const handleSetPreferredBitcoinPaymentTypeMsg: (
-  service: KeyRingBitcoinService
-) => InternalHandler<SetPreferredBitcoinPaymentTypeMsg> = (service) => {
-  return (_, msg) => {
-    service.setPreferredBitcoinPaymentType(msg.paymentType);
-  };
-};
-
 const handleRequestBitcoinGetAccountsMsg: (
   service: KeyRingBitcoinService
 ) => InternalHandler<RequestBitcoinGetAccountsMsg> = (service) => {
@@ -303,11 +287,7 @@ const handleRequestBitcoinRequestAccountsMsg: (
   permissionInteractionService
 ) => {
   return async (env, msg) => {
-    await permissionInteractionService.ensureEnabledForBitcoin(
-      env,
-      msg.origin,
-      service.getPreferredBitcoinPaymentType()
-    );
+    await permissionInteractionService.ensureEnabledForBitcoin(env, msg.origin);
 
     return await service.requestAccounts(msg.origin);
   };
@@ -329,11 +309,7 @@ const handleRequestBitcoinGetNetworkMsg: (
   permissionInteractionService
 ) => {
   return async (env, msg) => {
-    await permissionInteractionService.ensureEnabledForBitcoin(
-      env,
-      msg.origin,
-      service.getPreferredBitcoinPaymentType()
-    );
+    await permissionInteractionService.ensureEnabledForBitcoin(env, msg.origin);
 
     return service.getNetwork(msg.origin);
   };
@@ -353,7 +329,6 @@ const handleRequestBitcoinSwitchNetworkMsg: (
     await permissionInteractionService.ensureEnabledForBitcoin(
       env,
       msg.origin,
-      service.getPreferredBitcoinPaymentType(),
       newCurrentChainId
     );
 
@@ -369,11 +344,7 @@ const handleRequestBitcoinGetChainMsg: (
   permissionInteractionService
 ) => {
   return async (env, msg) => {
-    await permissionInteractionService.ensureEnabledForBitcoin(
-      env,
-      msg.origin,
-      service.getPreferredBitcoinPaymentType()
-    );
+    await permissionInteractionService.ensureEnabledForBitcoin(env, msg.origin);
 
     return service.getChain(msg.origin);
   };
@@ -393,7 +364,6 @@ const handleRequestBitcoinSwitchChainMsg: (
     await permissionInteractionService.ensureEnabledForBitcoin(
       env,
       msg.origin,
-      service.getPreferredBitcoinPaymentType(),
       newCurrentChainId
     );
 
@@ -409,11 +379,7 @@ const handleRequestBitcoinGetPublicKeyMsg: (
   permissionInteractionService
 ) => {
   return async (env, msg) => {
-    await permissionInteractionService.ensureEnabledForBitcoin(
-      env,
-      msg.origin,
-      service.getPreferredBitcoinPaymentType()
-    );
+    await permissionInteractionService.ensureEnabledForBitcoin(env, msg.origin);
 
     return await service.getPublicKey(msg.origin);
   };
@@ -427,11 +393,7 @@ const handleRequestBitcoinGetBalanceMsg: (
   permissionInteractionService
 ) => {
   return async (env, msg) => {
-    await permissionInteractionService.ensureEnabledForBitcoin(
-      env,
-      msg.origin,
-      service.getPreferredBitcoinPaymentType()
-    );
+    await permissionInteractionService.ensureEnabledForBitcoin(env, msg.origin);
 
     return await service.getBalance(msg.origin);
   };
@@ -445,11 +407,7 @@ const handleRequestBitcoinGetInscriptionsMsg: (
   permissionInteractionService
 ) => {
   return async (env, msg) => {
-    await permissionInteractionService.ensureEnabledForBitcoin(
-      env,
-      msg.origin,
-      service.getPreferredBitcoinPaymentType()
-    );
+    await permissionInteractionService.ensureEnabledForBitcoin(env, msg.origin);
 
     return await service.getInscriptions();
   };
@@ -463,11 +421,7 @@ const handleRequestBitcoinSendBitcoinMsg: (
   permissionInteractionService
 ) => {
   return async (env, msg) => {
-    await permissionInteractionService.ensureEnabledForBitcoin(
-      env,
-      msg.origin,
-      service.getPreferredBitcoinPaymentType()
-    );
+    await permissionInteractionService.ensureEnabledForBitcoin(env, msg.origin);
 
     return await service.sendBitcoin(env, msg.origin, msg.to, msg.amount);
   };
@@ -481,12 +435,24 @@ const handleRequestBitcoinPushTxMsg: (
   permissionInteractionService
 ) => {
   return async (env, msg) => {
-    await permissionInteractionService.ensureEnabledForBitcoin(
-      env,
-      msg.origin,
-      service.getPreferredBitcoinPaymentType()
-    );
+    await permissionInteractionService.ensureEnabledForBitcoin(env, msg.origin);
 
     return await service.pushTx(msg.origin, msg.rawTxHex);
+  };
+};
+
+const handleGetPreferredBitcoinPaymentTypeMsg: (
+  service: KeyRingBitcoinService
+) => InternalHandler<GetPreferredBitcoinPaymentTypeMsg> = (service) => {
+  return () => {
+    return service.getPreferredBitcoinPaymentType();
+  };
+};
+
+const handleSetPreferredBitcoinPaymentTypeMsg: (
+  service: KeyRingBitcoinService
+) => InternalHandler<SetPreferredBitcoinPaymentTypeMsg> = (service) => {
+  return (_, msg) => {
+    service.setPreferredBitcoinPaymentType(msg.paymentType);
   };
 };
