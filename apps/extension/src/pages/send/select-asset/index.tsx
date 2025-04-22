@@ -21,6 +21,8 @@ import { Gutter } from "../../../components/gutter";
 import { NOBLE_CHAIN_ID } from "../../../config.ui";
 import { YAxis } from "../../../components/axis";
 import { StackIcon } from "../../../components/icon/stack";
+import { useSearch } from "../../../hooks/use-search";
+import { ViewToken } from "../../main";
 
 const Styles = {
   Container: styled(Stack)<{ isNobleEarn: boolean }>`
@@ -28,6 +30,17 @@ const Styles = {
       isNobleEarn ? "0.75rem 1.25rem" : "0.75rem"};
   `,
 };
+
+const searchFields = [
+  (item: ViewToken) => {
+    const currency = item.token.currency;
+    if ("originCurrency" in currency) {
+      return currency.originCurrency?.coinDenom || "";
+    }
+    return currency.coinDenom;
+  },
+  "chainInfo.chainName",
+];
 
 export const SendSelectAssetPage: FunctionComponent = observer(() => {
   const { hugeQueriesStore, skipQueriesStore, chainStore } = useStore();
@@ -62,31 +75,19 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
     enableFilterDisabledAssetToken: paramIsIBCSwap,
   });
 
-  const _filteredTokens = useMemo(() => {
+  const nonZeroTokens = useMemo(() => {
     const zeroDec = new Dec(0);
-    const newTokens = tokens.filter((token) => {
+    return tokens.filter((token) => {
       return token.token.toDec().gt(zeroDec);
     });
+  }, [tokens]);
 
-    const trimSearch = search.trim();
+  const trimSearch = search.trim();
+  const searchedTokens = useSearch(nonZeroTokens, trimSearch, searchFields);
 
-    if (!trimSearch) {
-      return newTokens;
-    }
-
-    const filtered = newTokens.filter((token) => {
-      return (
-        token.chainInfo.chainName
-          .toLowerCase()
-          .includes(trimSearch.toLowerCase()) ||
-        token.token.currency.coinDenom
-          .toLowerCase()
-          .includes(trimSearch.toLowerCase())
-      );
-    });
-
+  const _filteredTokens = useMemo(() => {
     if (paramIsIBCTransfer) {
-      return filtered.filter((token) => {
+      return searchedTokens.filter((token) => {
         if (!("currencies" in token.chainInfo)) {
           return false;
         }
@@ -95,8 +96,8 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
       });
     }
 
-    return filtered;
-  }, [paramIsIBCTransfer, search, tokens]);
+    return searchedTokens;
+  }, [paramIsIBCTransfer, searchedTokens]);
 
   const filteredTokens = _filteredTokens.filter((token) => {
     if (paramIsIBCSwap) {

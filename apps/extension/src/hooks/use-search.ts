@@ -110,11 +110,13 @@ export function useSearch<T>(
     return () => {
       throttledSearch.cancel();
     };
-  }, [throttledSearch, isFetchingCount]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [throttledSearch, isFetchingCount, data.length]);
 
   useEffect(() => {
     performSearch(data, query, fields);
-  }, [query, fields, performSearch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [performSearch, query, fields]);
 
   return searchResults;
 }
