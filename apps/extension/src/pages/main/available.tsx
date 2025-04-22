@@ -173,12 +173,7 @@ export const AvailableTabView: FunctionComponent<{
         chainStore.groupedModularChainInfos.filter(
           (modularChainInfo) =>
             ("starknet" in modularChainInfo || "bitcoin" in modularChainInfo) &&
-            !chainStore.isEnabledChain(modularChainInfo.chainId) &&
-            trimSearch.length >= 3 &&
-            (modularChainInfo.chainId.toLowerCase().includes(trimSearch) ||
-              modularChainInfo.chainName.toLowerCase().includes(trimSearch) ||
-              trimSearch === "eth" ||
-              trimSearch === "btc")
+            !chainStore.isEnabledChain(modularChainInfo.chainId)
         );
 
       disabledChainInfos = [
@@ -232,12 +227,35 @@ export const AvailableTabView: FunctionComponent<{
         }[]
       );
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [
-      chainStore,
-      chainStore.modularChainInfosInUI,
-      searchedChainInfos,
+    }, [chainStore, chainStore.modularChainInfosInUI, searchedChainInfos]);
+
+    const chainSearchFields = useMemo(
+      () => [
+        "chainInfo.chainName",
+        (item: { chainInfo: ChainInfo | ModularChainInfo }) => {
+          if (
+            "starknet" in item.chainInfo ||
+            item.chainInfo.chainName.toLowerCase().includes("ethereum")
+          ) {
+            return "eth";
+          }
+          if (
+            "bitcoin" in item.chainInfo ||
+            item.chainInfo.chainName.toLowerCase().includes("bitcoin")
+          ) {
+            return "btc";
+          }
+          return "";
+        },
+      ],
+      []
+    );
+
+    const searchedLookingForChains = useSearch(
+      trimSearch.length >= 2 ? lookingForChains : [],
       trimSearch,
-    ]);
+      chainSearchFields
+    );
 
     const TokenViewData: {
       title: string;
@@ -281,7 +299,7 @@ export const AvailableTabView: FunctionComponent<{
     const isShowNotFound =
       allBalancesSearchFiltered.length === 0 &&
       trimSearch.length > 0 &&
-      lookingForChains.length === 0;
+      searchedLookingForChains.length === 0;
 
     const isShowCheckMangeAssetViewGuide =
       isShowNotFound &&
@@ -458,12 +476,12 @@ export const AvailableTabView: FunctionComponent<{
                 }
               )}
             </Stack>
-            {lookingForChains.length > 0 && (
+            {searchedLookingForChains.length > 0 && (
               <React.Fragment>
                 {allBalancesSearchFiltered.length > 0 && (
                   <Gutter size="1rem" direction="vertical" />
                 )}
-                <LookingForChains lookingForChains={lookingForChains} />
+                <LookingForChains lookingForChains={searchedLookingForChains} />
               </React.Fragment>
             )}
 
