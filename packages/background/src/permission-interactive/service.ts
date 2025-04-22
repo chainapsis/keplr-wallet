@@ -162,16 +162,22 @@ export class PermissionInteractiveService {
     );
   }
 
-  async ensureEnabledForBitcoin(env: Env, origin: string): Promise<void> {
+  async ensureEnabledForBitcoin(
+    env: Env,
+    origin: string,
+    newCurrentChainId?: string
+  ): Promise<void> {
     await this.keyRingService.ensureUnlockInteractive(env);
 
-    const currentBaseChainIdForBitcoin =
-      this.permissionService.getCurrentBaseChainIdForBitcoin(origin) ??
-      `bip122:${GenesisHash.MAINNET}`;
+    const currentChainIdForBitcoin =
+      newCurrentChainId ||
+      `${
+        this.permissionService.getCurrentBaseChainIdForBitcoin(origin) ||
+        // If the current chain id is not set, use Bitcoin mainnet as the default chain id.
+        `bip122:${GenesisHash.MAINNET}`
+      }:taproot`;
 
-    const isTestnet = !currentBaseChainIdForBitcoin.includes(
-      GenesisHash.MAINNET
-    );
+    const isTestnet = !currentChainIdForBitcoin.includes(GenesisHash.MAINNET);
 
     await this.ensureKeyRingLedgerAppConnected(
       env,
@@ -180,7 +186,7 @@ export class PermissionInteractiveService {
 
     await this.permissionService.checkOrGrantBasicAccessPermission(
       env,
-      currentBaseChainIdForBitcoin,
+      [currentChainIdForBitcoin],
       origin,
       {
         isForBitcoin: true,

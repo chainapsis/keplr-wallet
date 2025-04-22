@@ -206,10 +206,11 @@ export class PermissionService {
 
     const ungrantedChainIds: string[] = [];
     for (const chainId of chainIds) {
+      const baseChainId = this.chainsService.getBaseChainIdOrThrow(chainId);
       if (
-        !this.hasPermission(chainId, getBasicAccessPermissionType(), origin)
+        !this.hasPermission(baseChainId, getBasicAccessPermissionType(), origin)
       ) {
-        ungrantedChainIds.push(chainId);
+        ungrantedChainIds.push(baseChainId);
       }
     }
 

@@ -32,3 +32,5 @@ export const signet = {
   ...testnet,
   id: Network.SIGNET,
 };
+
+export const enableAccessSkippedBitcoinJSONRPCMethods = ["getAccounts"];
