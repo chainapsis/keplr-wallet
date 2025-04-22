@@ -345,7 +345,7 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
           allow_unsafe: true,
           smart_relay: true,
           go_fast: true,
-          experimental_features: ["hyperlane"],
+          experimental_features: ["hyperlane", "eureka"],
           smart_swap_options: {
             evm_swaps:
               this.smartSwapOptions?.evmSwaps === undefined

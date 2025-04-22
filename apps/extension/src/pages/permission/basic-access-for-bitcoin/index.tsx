@@ -1,6 +1,9 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { PermissionData } from "@keplr-wallet/background";
+import {
+  GetPreferredBitcoinPaymentTypeMsg,
+  PermissionData,
+} from "@keplr-wallet/background";
 import { useStore } from "../../../stores";
 import { useInteractionInfo } from "../../../hooks";
 import { HeaderLayout } from "../../../layouts/header";
@@ -15,6 +18,10 @@ import { Dropdown } from "../../../components/dropdown";
 import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
 import { useNavigate } from "react-router";
 import { ApproveIcon, CancelIcon } from "../../../components/button";
+import { SupportedPaymentType } from "@keplr-wallet/types";
+import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
+import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { GuideBox } from "../../../components/guide-box";
 
 export const PermissionBasicAccessForBitcoinPage: FunctionComponent<{
   data: {
@@ -34,6 +41,9 @@ export const PermissionBasicAccessForBitcoinPage: FunctionComponent<{
 
   const [currentChainIdForBitcoin, setCurrentChainIdForBitcoin] =
     useState<string>(data.chainIds[0]);
+  const [preferredPaymentType, setPreferredPaymentType] = useState<
+    SupportedPaymentType | undefined
+  >(undefined);
 
   const isLoading = (() => {
     const obsolete = data.ids.find((id) => {
@@ -46,6 +56,22 @@ export const PermissionBasicAccessForBitcoinPage: FunctionComponent<{
   useEffect(() => {
     setCurrentChainIdForBitcoin(data.chainIds[0]);
   }, [data.chainIds]);
+
+  useEffect(() => {
+    const getPreferredPaymentType = async () => {
+      const msgForBitcoinPaymentType = new GetPreferredBitcoinPaymentTypeMsg();
+
+      const newPreferredPaymentTypeForBitcoin =
+        await new InExtensionMessageRequester().sendMessage(
+          BACKGROUND_PORT,
+          msgForBitcoinPaymentType
+        );
+
+      setPreferredPaymentType(newPreferredPaymentTypeForBitcoin);
+    };
+
+    getPreferredPaymentType();
+  }, []);
 
   return (
     <HeaderLayout
@@ -170,7 +196,7 @@ export const PermissionBasicAccessForBitcoinPage: FunctionComponent<{
                 }
                 style={{ paddingLeft: "0.5rem", paddingBottom: "0.5rem" }}
               >
-                Connect
+                <FormattedMessage id="page.permission.basic-access.select-chain-title" />
               </Body2>
               <Dropdown
                 items={chainStore.groupedModularChainInfos
@@ -189,6 +215,19 @@ export const PermissionBasicAccessForBitcoinPage: FunctionComponent<{
                 selectedItemKey={currentChainIdForBitcoin}
                 style={{ padding: "1rem", height: "auto" }}
               />
+              <Body2
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-300"]
+                    : ColorPalette["gray-200"]
+                }
+                style={{
+                  marginTop: "1.188rem",
+                  textAlign: "center",
+                }}
+              >
+                <FormattedMessage id="page.permission.basic-access-for-bitcoin.select-chain-paragraph" />
+              </Body2>
             </Box>
           ) : (
             <Box
@@ -231,6 +270,22 @@ export const PermissionBasicAccessForBitcoinPage: FunctionComponent<{
             </Box>
           )}
         </Box>
+        <GuideBox
+          title={intl.formatMessage(
+            {
+              id: "page.permission.basic-access-for-bitcoin.address-type-guide-title",
+            },
+            {
+              addressType:
+                preferredPaymentType === "native-segwit"
+                  ? "Native SegWit"
+                  : "Taproot",
+            }
+          )}
+          paragraph={intl.formatMessage({
+            id: "page.permission.basic-access-for-bitcoin.address-type-guide-paragraph",
+          })}
+        />
       </Box>
     </HeaderLayout>
   );

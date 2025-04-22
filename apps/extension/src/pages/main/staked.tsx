@@ -40,10 +40,9 @@ const useViewStakingTokens = () => {
 
           return {
             unbonding,
-            altSentence: intl.formatRelativeTime(
-              relativeTime.value,
-              relativeTime.unit
-            ),
+            altSentence: unbonding.completeTime
+              ? intl.formatRelativeTime(relativeTime.value, relativeTime.unit)
+              : "Caculating",
           };
         }),
     [hugeQueriesStore.unbondings, intl]

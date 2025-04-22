@@ -17,7 +17,9 @@ export type QueriesStore = IQueriesStore<
     } & {
       keplrETC?: Pick<
         KeplrETCQueriesImpl,
-        "queryTerraClassicTaxRate" | "queryTerraClassicTaxCaps"
+        | "queryTerraClassicTaxRate"
+        | "queryTerraClassicTaxCaps"
+        | "queryInitiaDynamicFee"
       >;
     } & Partial<NobleQueries>
 >;

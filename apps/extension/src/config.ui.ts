@@ -13,6 +13,13 @@ export const CoinGeckoCoinDataByTokenAddress =
   process.env["KEPLR_EXT_COINGECKO_COIN_DATA_BY_TOKEN_ADDRESS"] ||
   "/coins/{coingeckoChainId}/contract/{contractAddress}";
 
+// 일단 CoinGecko API와 같은 base url을 사용함
+export const SkipTokenInfoBaseURL =
+  process.env["KEPLR_EXT_COINGECKO_ENDPOINT"] || "";
+export const SkipTokenInfoAPIURI =
+  process.env["KEPLR_EXT_SKIP_TOKEN_INFO_API_URI"] ||
+  "/coingecko-token-info/skip/assets/{chainId}/{coinMinimalDenom}";
+
 export const AutoFetchingFiatValueInterval = 300 * 1000; // 5min
 
 export const AutoFetchingAssetsInterval = 15 * 1000; // 15sec

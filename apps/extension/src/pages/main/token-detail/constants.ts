@@ -19,6 +19,12 @@ export const Relations = [
   "noble-claim-yield",
   "noble-deposit-usdc",
   "noble-withdraw-usdc",
+  "bbn-wrapped-delegate",
+  "bbn-wrapped-undelegate",
+  "bbn-wrapped-redelegate",
+  "bbn-wrapped-cancel-undelegate",
+  "bbn-create-btc-delegation",
+  "bbn-claim-reward-from-btc-staking",
 ];
 
 export const PaginationLimit = 20;

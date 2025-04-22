@@ -375,6 +375,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             type = "hyperlane_transfer";
           }
 
+          if ("eureka_transfer" in firstOperation) {
+            type = "eureka_transfer";
+          }
+
           if ("evm_swap" in firstOperation) {
             type = "evm_swap";
           }

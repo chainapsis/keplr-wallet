@@ -871,7 +871,7 @@ export class PermissionService {
         "keplr_bitcoinChainChanged",
         {
           origin,
-          bitcoinChainId: "0x" + genesisHash,
+          bitcoinChainId: `bip122:${genesisHash}`,
           network,
         }
       );

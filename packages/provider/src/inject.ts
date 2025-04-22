@@ -1709,6 +1709,31 @@ export class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
     protected readonly _parseMessage?: (message: any) => any
   ) {
     super();
+
+    window.addEventListener("keplr_keystorechange", async () => {
+      const accounts = await this.getAccounts();
+      if (accounts && accounts.length > 0) {
+        this._handleAccountsChanged(accounts[0]);
+      }
+    });
+
+    window.addEventListener("keplr_bitcoinChainChanged", async (event) => {
+      const origin = (event as CustomEvent).detail.origin;
+
+      if (origin === window.location.origin) {
+        const network = (event as CustomEvent).detail.network;
+        const accounts = await this.getAccounts();
+        this._handleNetworkChanged(network);
+        this._handleAccountsChanged(accounts[0]);
+      }
+    });
+
+    window.addEventListener("keplr_bitcoinAccountsChanged", async () => {
+      const accounts = await this.getAccounts();
+      if (accounts && accounts.length > 0) {
+        this._handleAccountsChanged(accounts[0]);
+      }
+    });
   }
 
   protected async _requestMethod<T = unknown>(
@@ -1850,4 +1875,13 @@ export class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
   async connectWallet(): Promise<string[]> {
     return this.requestAccounts();
   }
+
+  protected _handleNetworkChanged = async (network: BitcoinNetwork) => {
+    this.emit("networkChanged", network);
+  };
+
+  protected _handleAccountsChanged = async (selectedAddress: string) => {
+    this.emit("accountChanged", [selectedAddress]);
+    this.emit("accountsChanged", [selectedAddress]);
+  };
 }

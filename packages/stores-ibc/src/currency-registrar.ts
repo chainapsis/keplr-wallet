@@ -1,11 +1,4 @@
-import {
-  action,
-  autorun,
-  makeObservable,
-  observable,
-  runInAction,
-  toJS,
-} from "mobx";
+import { makeObservable, observable, runInAction } from "mobx";
 import { AppCurrency, ChainInfo, ERC20Currency } from "@keplr-wallet/types";
 import {
   IChainInfoImpl,
@@ -32,9 +25,25 @@ type CacheIBCDenomData = {
     }[];
   };
   originChainId: string | undefined;
+  originChainUnknown: boolean;
   counterpartyChainId: string | undefined;
+  counterpartyChainUnknown: boolean;
   timestamp: number;
 };
+
+type CacheTokenInfo =
+  | {
+      notFound: undefined;
+      coinDenom: string;
+      coinDecimals: number;
+      coinGeckoId: string | undefined;
+      coinImageUrl: string | undefined;
+      timestamp: number;
+    }
+  | {
+      notFound: true;
+      timestamp: number;
+    };
 
 /**
  * IBCCurrencyRegistrar gets the native balances that exist on the chain itself (ex. atom, scrt...)
@@ -73,17 +82,10 @@ export class IBCCurrencyRegistrar {
     }
   }
 
-  /**
-   * Because the `QueryStore` returns the response from cache first if the last response exists, it takes the IO.
-   * But, if many unknown currencies requested, this make many IO and queries occur at the same time.
-   * This can make the performance issue, so to reduce this problem, use the alternative caching logic
-   * and the denom trace shouldn't be changed in the normal case.
-   * To decrease the number of IO, make sure that reading from storage should happen when the unknown currencies exist
-   * and don't split the data with keys and as posible as combine them to one data structure and key.
-   * @protected
-   */
-  @observable.shallow
   protected cacheDenomTracePaths: Map<string, CacheIBCDenomData> = new Map();
+  protected staledDenomTracePaths: Map<string, CacheIBCDenomData> = new Map();
+  protected cacheTokenInfoMetadata: Map<string, CacheTokenInfo> = new Map();
+  protected staledTokenInfoMetadata: Map<string, CacheTokenInfo> = new Map();
 
   @observable
   public isInitialized = false;
@@ -91,6 +93,7 @@ export class IBCCurrencyRegistrar {
   constructor(
     protected readonly kvStore: KVStore,
     protected readonly cacheDuration: number = 24 * 3600 * 1000, // 1 days
+    protected readonly failedCacheDuration: number = 1 * 3600 * 1000, // 1 hours
     protected readonly chainStore: ChainStore,
     protected readonly accountStore: {
       hasAccount(chainId: string): boolean;
@@ -131,27 +134,32 @@ export class IBCCurrencyRegistrar {
   }
 
   protected async init() {
-    // "cache-ibc-denom-trace-paths" is already used.
+    // "cache-ibc-denom-trace-paths" and "cache-ibc-denom-trace-paths-v3" is already used.
     // v2: Add "clientChainId", "counterpartyPortId", "counterpartyChannelId" fields to the paths.
-    const key = `cache-ibc-denom-trace-paths-v2`;
-    const saved = await this.kvStore.get<Record<string, CacheIBCDenomData>>(
-      key
-    );
-    if (saved) {
-      runInAction(() => {
+    // v3: raw response의 값들을 저장하도록 수정
+    {
+      const dbKey = `cache-ibc-denom-trace-paths-v3`;
+      const saved = await this.kvStore.get<Record<string, CacheIBCDenomData>>(
+        dbKey
+      );
+      if (saved) {
         for (const [key, value] of Object.entries(saved)) {
-          if (Date.now() - value.timestamp < this.cacheDuration) {
-            this.cacheDenomTracePaths.set(key, value);
-          }
+          this.cacheDenomTracePaths.set(key, value);
         }
-      });
+      }
     }
 
-    autorun(() => {
-      const js = toJS(this.cacheDenomTracePaths);
-      const obj = Object.fromEntries(js);
-      this.kvStore.set<Record<string, CacheIBCDenomData>>(key, obj);
-    });
+    {
+      const dbKey = `cache-token-info`;
+      const saved = await this.kvStore.get<Record<string, CacheTokenInfo>>(
+        dbKey
+      );
+      if (saved) {
+        for (const [key, value] of Object.entries(saved)) {
+          this.cacheTokenInfoMetadata.set(key, value);
+        }
+      }
+    }
 
     runInAction(() => {
       this.isInitialized = true;
@@ -187,259 +195,329 @@ export class IBCCurrencyRegistrar {
       };
     }
 
-    const queries = this.queriesStore.get(chainId);
+    try {
+      const queries = this.queriesStore.get(chainId);
 
-    const hash = denomHelper.denom.replace("ibc/", "");
+      const hash = denomHelper.denom.replace("ibc/", "");
 
-    let counterpartyChainInfo: IChainInfoImpl | undefined;
-    let originChainInfo: IChainInfoImpl | undefined;
-    let denomTrace:
-      | {
-          denom: string;
-          paths: {
-            portId: string;
-            channelId: string;
+      let counterpartyChainInfo: IChainInfoImpl | undefined;
+      let originChainInfo: IChainInfoImpl | undefined;
+      let denomTrace:
+        | {
+            denom: string;
+            paths: {
+              portId: string;
+              channelId: string;
 
-            counterpartyChannelId?: string;
-            counterpartyPortId?: string;
-            clientChainId?: string;
-          }[];
-        }
-      | undefined;
-
-    let fromCache = false;
-
-    const cached = this.getCacheIBCDenomData(chainId, hash);
-    if (cached) {
-      if (
-        Date.now() - cached.timestamp < this.cacheDuration &&
-        !cached.denomTrace.paths.some((path) => {
-          if (!path.clientChainId) {
-            return true;
+              counterpartyChannelId?: string;
+              counterpartyPortId?: string;
+              clientChainId?: string;
+            }[];
           }
-          return !this.chainStore.hasChain(path.clientChainId);
-        })
-      ) {
-        denomTrace = cached.denomTrace;
+        | undefined;
+
+      let isGlobalFetching = false;
+      let fromCache = false;
+      let { res: cached, staled } = this.getCacheIBCDenomData(chainId, hash);
+      if (cached) {
         if (
-          cached.originChainId &&
-          this.chainStore.hasChain(cached.originChainId)
+          !cached.denomTrace.paths.some((path) => {
+            if (!path.clientChainId) {
+              return true;
+            }
+            return !this.chainStore.hasChain(path.clientChainId);
+          })
         ) {
-          originChainInfo = this.chainStore.getChain(cached.originChainId);
-        }
-        if (
-          cached.counterpartyChainId &&
-          this.chainStore.hasChain(cached.counterpartyChainId)
-        ) {
-          counterpartyChainInfo = this.chainStore.getChain(
-            cached.counterpartyChainId
-          );
-        }
-
-        fromCache = true;
-      } else {
-        runInAction(() => {
-          this.cacheDenomTracePaths.delete(hash);
-        });
-      }
-    } else {
-      let isFetching = false;
-
-      const queryDenomTrace =
-        queries.cosmos.queryIBCDenomTrace.getDenomTrace(hash);
-      denomTrace = queryDenomTrace.denomTrace;
-
-      if (queryDenomTrace.isFetching) {
-        isFetching = true;
-      }
-
-      if (denomTrace) {
-        const paths = denomTrace.paths;
-        // The previous chain id from current path.
-        let chainIdBefore = chainId;
-        for (let i = 0; i < paths.length; i++) {
-          const path = paths[i];
-          const isLast = i === paths.length - 1;
+          fromCache = true;
+          denomTrace = cached.denomTrace;
           if (
-            // 현재 ethereum ibc의 경우 ethereum까지 타고 들어가서 nested하게 처리할 방법은 없다.
-            // 마지막 path일 경우만 처리한다.
-            isLast &&
-            this.chainStore.getChain(chainIdBefore).hasFeature("ibc-v2") &&
-            denomTrace.denom.startsWith("0x")
+            cached.originChainId &&
+            this.chainStore.hasChain(cached.originChainId)
           ) {
+            originChainInfo = this.chainStore.getChain(cached.originChainId);
+          }
+          if (
+            cached.counterpartyChainId &&
+            this.chainStore.hasChain(cached.counterpartyChainId)
+          ) {
+            counterpartyChainInfo = this.chainStore.getChain(
+              cached.counterpartyChainId
+            );
+          }
+
+          // 만약 이전의 cache에서 originChainId와 counterpartyChainId를 몰랐던 상태였는데
+          // 현재는 알게된 경우에는 cache를 사용하지않고 지운다.
+          if (
+            (originChainInfo && cached.originChainUnknown) ||
+            (counterpartyChainInfo && cached.counterpartyChainUnknown)
+          ) {
+            cached = undefined;
+            fromCache = false;
+            staled = false;
+            this.removeCacheIBCDenomData(chainId, hash);
+
+            denomTrace = undefined;
+            originChainInfo = undefined;
+            counterpartyChainInfo = undefined;
+          }
+        } else {
+          if (!staled) {
+            // 만약 이전의 cache에서 originChainId와 counterpartyChainId를 몰랐던 상태였는데
+            // 현재는 알게된 경우에는 cache를 사용하지않고 지운다.
+            if (
+              (cached.originChainId &&
+                this.chainStore.hasChain(cached.originChainId) &&
+                cached.originChainUnknown) ||
+              (cached.counterpartyChainId &&
+                this.chainStore.hasChain(cached.counterpartyChainId) &&
+                cached.counterpartyChainUnknown)
+            ) {
+              cached = undefined;
+              fromCache = false;
+              staled = false;
+              this.removeCacheIBCDenomData(chainId, hash);
+            } else {
+              return {
+                value: undefined,
+                done: true,
+              };
+            }
+          } else {
+            cached = undefined;
+            fromCache = false;
+            staled = false;
+            this.removeCacheIBCDenomData(chainId, hash);
+          }
+        }
+      }
+
+      if (!fromCache || staled) {
+        let isFetching = false;
+
+        const queryDenomTrace =
+          queries.cosmos.queryIBCDenomTrace.getDenomTrace(hash);
+        denomTrace = queryDenomTrace.denomTrace;
+
+        if (queryDenomTrace.isFetching) {
+          isFetching = true;
+          isGlobalFetching = true;
+        }
+
+        if (denomTrace) {
+          let rawOriginChainId: string | undefined = undefined;
+          let rawCounterpartyChainId: string | undefined = undefined;
+
+          const paths = denomTrace.paths;
+          // The previous chain id from current path.
+          let chainIdBefore = chainId;
+          for (let i = 0; i < paths.length; i++) {
+            const path = paths[i];
+            const isLast = i === paths.length - 1;
+            if (
+              // 현재 ethereum ibc의 경우 ethereum까지 타고 들어가서 nested하게 처리할 방법은 없다.
+              // 마지막 path일 경우만 처리한다.
+              isLast &&
+              this.chainStore.getChain(chainIdBefore).hasFeature("ibc-v2") &&
+              denomTrace.denom.startsWith("0x")
+            ) {
+              const clientState = this.queriesStore
+                .get(chainIdBefore)
+                .cosmos.queryIBCClientStateV2.getClientState(path.channelId);
+              if (clientState.isFetching) {
+                isFetching = true;
+              }
+              if (
+                clientState.clientChainId &&
+                !Number.isNaN(parseInt(clientState.clientChainId))
+              ) {
+                const ethereumChainId = `eip155:${clientState.clientChainId}`;
+                rawOriginChainId = ethereumChainId;
+                if (!rawCounterpartyChainId) {
+                  rawCounterpartyChainId = ethereumChainId;
+                }
+                if (this.chainStore.hasChain(ethereumChainId)) {
+                  // TODO: counterparty channel id를 구해야할듯한데
+                  //       https://github.com/cosmos/ibc-go/blob/a8b4af9c757f5235a965718597f73f039c4a5708/proto/ibc/core/client/v2/query.proto#L15
+                  //       이것으로 추정되지만 현재 cosmos testnet에서 해당 쿼리가 501 not implemented로 반환되기 때문에 일단 패스...
+
+                  path.clientChainId = ethereumChainId;
+
+                  chainIdBefore = ethereumChainId;
+                  originChainInfo = this.chainStore.getChain(ethereumChainId);
+                  if (!counterpartyChainInfo) {
+                    counterpartyChainInfo =
+                      this.chainStore.getChain(ethereumChainId);
+                  }
+                } else {
+                  originChainInfo = undefined;
+                  rawOriginChainId = undefined;
+                }
+                break;
+              }
+            }
+
             const clientState = this.queriesStore
               .get(chainIdBefore)
-              .cosmos.queryIBCClientStateV2.getClientState(path.channelId);
+              .cosmos.queryIBCClientState.getClientState(
+                path.portId,
+                path.channelId
+              );
+
             if (clientState.isFetching) {
               isFetching = true;
             }
+
+            const queryChannel = this.queriesStore
+              .get(chainIdBefore)
+              .cosmos.queryIBCChannel.getChannel(path.portId, path.channelId);
+            if (queryChannel.isFetching) {
+              isFetching = true;
+            }
+            if (queryChannel.response) {
+              path.counterpartyChannelId =
+                queryChannel.response.data.channel.counterparty.channel_id;
+              path.counterpartyPortId =
+                queryChannel.response.data.channel.counterparty.port_id;
+            }
+
+            if (clientState.clientChainId) {
+              rawOriginChainId = clientState.clientChainId;
+              if (!rawCounterpartyChainId) {
+                rawCounterpartyChainId = clientState.clientChainId;
+              }
+            }
             if (
               clientState.clientChainId &&
-              !Number.isNaN(parseInt(clientState.clientChainId))
+              this.chainStore.hasChain(clientState.clientChainId)
             ) {
-              if (
-                this.chainStore.hasChain(`eip155:${clientState.clientChainId}`)
-              ) {
-                const ethereumChainId = `eip155:${clientState.clientChainId}`;
+              path.clientChainId = clientState.clientChainId;
 
-                // TODO: counterparty channel id를 구해야할듯한데
-                //       https://github.com/cosmos/ibc-go/blob/a8b4af9c757f5235a965718597f73f039c4a5708/proto/ibc/core/client/v2/query.proto#L15
-                //       이것으로 추정되지만 현재 cosmos testnet에서 해당 쿼리가 501 not implemented로 반환되기 때문에 일단 패스...
-
-                path.clientChainId = ethereumChainId;
-
-                chainIdBefore = ethereumChainId;
-                originChainInfo = this.chainStore.getChain(ethereumChainId);
-                if (!counterpartyChainInfo) {
-                  counterpartyChainInfo =
-                    this.chainStore.getChain(ethereumChainId);
-                }
-              } else {
-                originChainInfo = undefined;
+              chainIdBefore = clientState.clientChainId;
+              originChainInfo = this.chainStore.getChain(
+                clientState.clientChainId
+              );
+              if (!counterpartyChainInfo) {
+                counterpartyChainInfo = this.chainStore.getChain(
+                  clientState.clientChainId
+                );
               }
+            } else {
+              originChainInfo = undefined;
+              rawOriginChainId = undefined;
               break;
             }
           }
 
-          const clientState = this.queriesStore
-            .get(chainIdBefore)
-            .cosmos.queryIBCClientState.getClientState(
-              path.portId,
-              path.channelId
-            );
-
-          if (clientState.isFetching) {
-            isFetching = true;
+          if (isFetching) {
+            isGlobalFetching = true;
           }
-
-          const queryChannel = this.queriesStore
-            .get(chainIdBefore)
-            .cosmos.queryIBCChannel.getChannel(path.portId, path.channelId);
-          if (queryChannel.isFetching) {
-            isFetching = true;
-          }
-          if (queryChannel.response) {
-            path.counterpartyChannelId =
-              queryChannel.response.data.channel.counterparty.channel_id;
-            path.counterpartyPortId =
-              queryChannel.response.data.channel.counterparty.port_id;
-          }
-
-          if (
-            clientState.clientChainId &&
-            this.chainStore.hasChain(clientState.clientChainId)
-          ) {
-            path.clientChainId = clientState.clientChainId;
-
-            chainIdBefore = clientState.clientChainId;
-            originChainInfo = this.chainStore.getChain(
-              clientState.clientChainId
-            );
-            if (!counterpartyChainInfo) {
-              counterpartyChainInfo = this.chainStore.getChain(
-                clientState.clientChainId
-              );
-            }
-          } else {
-            originChainInfo = undefined;
-            break;
+          if (!isFetching) {
+            this.setCacheIBCDenomData(chainId, hash, {
+              denomTrace,
+              originChainId: rawOriginChainId,
+              originChainUnknown: !originChainInfo,
+              counterpartyChainId: rawCounterpartyChainId,
+              counterpartyChainUnknown: !counterpartyChainInfo,
+              timestamp: Date.now(),
+            });
           }
         }
 
-        if (originChainInfo && !isFetching) {
-          this.setCacheIBCDenomData(chainId, hash, {
-            counterpartyChainId: counterpartyChainInfo?.chainId,
-            denomTrace,
-            originChainId: originChainInfo.chainId,
-            timestamp: Date.now(),
-          });
+        if (isGlobalFetching && staled && cached) {
+          if (!denomTrace) {
+            denomTrace = cached.denomTrace;
+          }
+          if (
+            !originChainInfo &&
+            cached.originChainId &&
+            this.chainStore.hasChain(cached.originChainId)
+          ) {
+            originChainInfo = this.chainStore.getChain(cached.originChainId);
+          }
+          if (
+            !counterpartyChainInfo &&
+            cached.counterpartyChainId &&
+            this.chainStore.hasChain(cached.counterpartyChainId)
+          ) {
+            counterpartyChainInfo = this.chainStore.getChain(
+              cached.counterpartyChainId
+            );
+          }
         }
       }
-    }
 
-    if (originChainInfo && denomTrace) {
-      // 이 경우 ethereum 계열이기 때문에 다르게 처리해야한다.
-      if (this.chainStore.isEvmOnlyChain(originChainInfo.chainId)) {
-        // 유저가 Add Token을 통해서 추가했을 경우
-        const currency = originChainInfo.currencies.find((cur) => {
-          return cur.coinMinimalDenom === `erc20:${denomTrace!.denom}`;
-        });
-        const originQueries = this.queriesStore.get(originChainInfo.chainId);
-        if (currency) {
-          return {
-            value: {
-              coinDecimals: currency.coinDecimals,
-              coinGeckoId: currency.coinGeckoId,
-              coinImageUrl: currency.coinImageUrl,
-              coinMinimalDenom: denomHelper.denom,
-              coinDenom: this.coinDenomGenerator(
-                denomTrace,
-                originChainInfo,
-                counterpartyChainInfo,
-                currency
-              ),
-              paths: denomTrace.paths,
-              originChainId: originChainInfo.chainId,
-              originCurrency: currency,
-            },
-            done: true,
-          };
-        } else if (originQueries.ethereum) {
-          const queryCoingecko:
-            | {
-                symbol?: string;
-                decimals?: number;
-                coingeckoId?: string;
-                logoURI?: string;
-                isFetching: boolean;
-              }
-            | undefined = (() => {
-            if (originChainInfo.chainId === "eip155:1") {
-              // XXX: 바빌론 측의 요청으로 밑의 컨트랙트는 일단 하드코딩
-              //      밑의 컨트랙트는 코인겍코에 없어서 불러올 수 없음.
-              //      0xf6718b2701d4a6498ef77d7c152b2137ab28b8a3
-              //      0x09def5abc67e967d54e8233a4b5ebbc1b3fbe34b
-              //      밑의 얘도 존재하는데 얘는 이더스캔에도 안떠서 일단 패스
-              //      0x9356f6d95b8e109f4b7ce3e49d672967d3b48383
-              if (
-                denomTrace.denom ===
-                "0xf6718b2701d4a6498ef77d7c152b2137ab28b8a3"
-              ) {
-                return {
-                  symbol: "stBTC",
-                  decimals: 18,
-                  isFetching: false,
-                };
-              }
-              if (
-                denomTrace.denom ===
-                "0x09def5abc67e967d54e8233a4b5ebbc1b3fbe34b"
-              ) {
-                return {
-                  symbol: "waBTC",
-                  decimals: 18,
-                  isFetching: false,
-                };
-              }
-            }
-            return originQueries.ethereum.queryEthereumCoingeckoTokenInfo.getQueryContract(
-              denomTrace.denom
-            );
-          })();
-          if (
-            queryCoingecko &&
-            queryCoingecko.symbol != null &&
-            queryCoingecko.decimals != null
-          ) {
-            const erc20Currency: ERC20Currency = {
-              type: "erc20",
-              coinMinimalDenom: `erc20:${denomTrace!.denom}`,
-              contractAddress: denomTrace.denom,
-              coinDenom: queryCoingecko.symbol,
-              coinDecimals: queryCoingecko.decimals,
-              coinGeckoId: queryCoingecko.coingeckoId,
-              coinImageUrl: queryCoingecko.logoURI,
+      if (originChainInfo && denomTrace) {
+        // 이 경우 ethereum 계열이기 때문에 다르게 처리해야한다.
+        if (this.chainStore.isEvmOnlyChain(originChainInfo.chainId)) {
+          // 유저가 Add Token을 통해서 추가했을 경우
+          const currency = originChainInfo.currencies.find((cur) => {
+            return cur.coinMinimalDenom === `erc20:${denomTrace!.denom}`;
+          });
+          if (currency) {
+            return {
+              value: {
+                coinDecimals: currency.coinDecimals,
+                coinGeckoId: currency.coinGeckoId,
+                coinImageUrl: currency.coinImageUrl,
+                coinMinimalDenom: denomHelper.denom,
+                coinDenom: this.coinDenomGenerator(
+                  denomTrace,
+                  originChainInfo,
+                  counterpartyChainInfo,
+                  currency
+                ),
+                paths: denomTrace.paths,
+                originChainId: originChainInfo.chainId,
+                originCurrency: currency,
+              },
+              done: !isGlobalFetching,
             };
+          }
+
+          const erc20CurrencyRes = this.getERC20TokenInfo(
+            originChainInfo.chainId,
+            denomTrace.denom
+          );
+          if (erc20CurrencyRes.isFetching) {
+            isGlobalFetching = true;
+          }
+          const erc20Currency: ERC20Currency | undefined = erc20CurrencyRes.res
+            ? {
+                type: "erc20",
+                coinMinimalDenom: `erc20:${denomTrace!.denom}`,
+                contractAddress: denomTrace.denom,
+                coinDenom: erc20CurrencyRes.res.coinDenom,
+                coinDecimals: erc20CurrencyRes.res.decimals,
+                coinGeckoId: erc20CurrencyRes.res.coingeckoId,
+                coinImageUrl: erc20CurrencyRes.res.coinImageUrl,
+              }
+            : undefined;
+          if (!erc20CurrencyRes.isFetching && !erc20CurrencyRes.fromCache) {
+            if (erc20Currency) {
+              this.setCacheTokenInfo(
+                originChainInfo.chainId,
+                denomTrace.denom,
+                {
+                  notFound: undefined,
+                  coinDenom: erc20Currency.coinDenom,
+                  coinDecimals: erc20Currency.coinDecimals,
+                  coinGeckoId: erc20Currency.coinGeckoId,
+                  coinImageUrl: erc20Currency.coinImageUrl,
+                  timestamp: Date.now(),
+                }
+              );
+            } else if (erc20CurrencyRes.notFound) {
+              this.setCacheTokenInfo(
+                originChainInfo.chainId,
+                denomTrace.denom,
+                {
+                  notFound: true,
+                  timestamp: Date.now(),
+                }
+              );
+            }
+          }
+          if (erc20Currency) {
             return {
               value: {
                 coinDecimals: erc20Currency.coinDecimals,
@@ -456,267 +534,522 @@ export class IBCCurrencyRegistrar {
                 originChainId: originChainInfo.chainId,
                 originCurrency: erc20Currency,
               },
-              done: fromCache && !queryCoingecko.isFetching,
+              done: !isGlobalFetching,
+            };
+          } else {
+            return {
+              value: undefined,
+              done: !isGlobalFetching,
             };
           }
-        }
-      } else {
-        const isCW20Currency =
-          denomTrace.denom.split(/^(cw20):(\w+)$/).length === 4;
-        const isERC20Currency =
-          denomTrace.denom.split(/^(erc20)\/(\w+)$/).length === 4;
-        switch (true) {
-          case isCW20Currency:
-            const isSecret20Currency =
-              originChainInfo.features?.includes("secretwasm");
+        } else {
+          const isCW20Currency =
+            denomTrace.denom.split(/^(cw20):(\w+)$/).length === 4;
+          const isERC20Currency =
+            denomTrace.denom.split(/^(erc20)\/(\w+)$/).length === 4;
+          switch (true) {
+            case isCW20Currency:
+              const isSecret20Currency =
+                originChainInfo.features?.includes("secretwasm");
 
-            if (!isSecret20Currency) {
-              let isFetching = false;
-              // If the origin currency is ics20-cw20.
-              let cw20Currency = originChainInfo.currencies.find(
-                (cur) =>
-                  denomTrace &&
-                  cur.coinMinimalDenom.startsWith(denomTrace.denom)
-              );
-              if (
-                !cw20Currency &&
-                this.chainStore.hasChain(originChainInfo.chainId)
-              ) {
-                const originQueries = this.queriesStore.get(
-                  originChainInfo.chainId
+              if (!isSecret20Currency) {
+                let isFetching = false;
+                // If the origin currency is ics20-cw20.
+                let cw20Currency = originChainInfo.currencies.find(
+                  (cur) =>
+                    denomTrace &&
+                    cur.coinMinimalDenom.startsWith(denomTrace.denom)
                 );
-                if (originQueries.cosmwasm) {
-                  const contractAddress = denomTrace.denom.replace("cw20:", "");
-                  const contractInfo =
-                    originQueries.cosmwasm.querycw20ContractInfo.getQueryContract(
-                      contractAddress
-                    );
-                  isFetching = contractInfo.isFetching;
-                  if (contractInfo.response) {
-                    cw20Currency = {
-                      type: "cw20",
-                      contractAddress,
-                      coinDecimals: contractInfo.response.data.decimals,
-                      coinDenom: contractInfo.response.data.symbol,
-                      coinMinimalDenom: `cw20:${contractAddress}:${contractInfo.response.data.name}`,
-                    };
-                  }
-                }
-              }
-
-              if (cw20Currency) {
-                return {
-                  value: {
-                    coinDecimals: cw20Currency.coinDecimals,
-                    coinGeckoId: cw20Currency.coinGeckoId,
-                    coinImageUrl: cw20Currency.coinImageUrl,
-                    coinMinimalDenom: denomHelper.denom,
-                    coinDenom: this.coinDenomGenerator(
-                      denomTrace,
-                      originChainInfo,
-                      counterpartyChainInfo,
-                      cw20Currency
-                    ),
-                    paths: denomTrace.paths,
-                    originChainId: originChainInfo.chainId,
-                    originCurrency: cw20Currency,
-                  },
-                  done: fromCache && !isFetching,
-                };
-              }
-            } else {
-              let isSecret20Fetching = false;
-              // If the origin currency is ics20-cw20.
-              let secret20Currency = originChainInfo.currencies.find(
-                (cur) =>
-                  denomTrace &&
-                  cur.coinMinimalDenom.startsWith(denomTrace.denom)
-              );
-              if (
-                !secret20Currency &&
-                this.chainStore.hasChain(originChainInfo.chainId)
-              ) {
-                const originQueries = this.queriesStore.get(
-                  originChainInfo.chainId
-                );
-                if (originQueries.secret) {
-                  const contractAddress = denomTrace.denom.replace("cw20:", "");
-                  const contractInfo =
-                    originQueries.secret.querySecret20ContractInfo.getQueryContract(
-                      contractAddress
-                    );
-                  isSecret20Fetching = contractInfo.isFetching;
-                  if (contractInfo.response) {
-                    secret20Currency = {
-                      type: "secret20",
-                      contractAddress,
-                      coinDecimals:
-                        contractInfo.response.data.token_info.decimals,
-                      coinDenom: contractInfo.response.data.token_info.symbol,
-                      coinMinimalDenom: `secret20:${contractAddress}:${contractInfo.response.data.token_info.name}`,
-                    };
-                  }
-                }
-              }
-
-              if (secret20Currency) {
-                return {
-                  value: {
-                    coinDecimals: secret20Currency.coinDecimals,
-                    coinGeckoId: secret20Currency.coinGeckoId,
-                    coinImageUrl: secret20Currency.coinImageUrl,
-                    coinMinimalDenom: denomHelper.denom,
-                    coinDenom: this.coinDenomGenerator(
-                      denomTrace,
-                      originChainInfo,
-                      counterpartyChainInfo,
-                      secret20Currency
-                    ),
-                    paths: denomTrace.paths,
-                    originChainId: originChainInfo.chainId,
-                    originCurrency: secret20Currency,
-                  },
-                  done: fromCache && !isSecret20Fetching,
-                };
-              }
-            }
-            break;
-          case isERC20Currency:
-            let isERC20Fetching = false;
-            // If the origin currency is ics20-erc20.
-            let erc20Currency = originChainInfo.currencies.find(
-              (cur) =>
-                denomTrace && cur.coinMinimalDenom.startsWith(denomTrace.denom)
-            );
-            if (
-              !erc20Currency &&
-              this.chainStore.hasChain(originChainInfo.chainId)
-            ) {
-              const originQueries = this.queriesStore.get(
-                originChainInfo.chainId
-              );
-              if (originQueries.ethereum) {
-                const contractAddress = denomTrace.denom.replace("erc20/", "");
-                const contractInfo =
-                  originQueries.ethereum.queryEthereumERC20ContractInfo.getQueryContract(
-                    contractAddress
+                if (
+                  !cw20Currency &&
+                  this.chainStore.hasChain(originChainInfo.chainId)
+                ) {
+                  const originQueries = this.queriesStore.get(
+                    originChainInfo.chainId
                   );
-                isERC20Fetching = contractInfo.isFetching;
-                if (contractInfo.tokenInfo) {
-                  erc20Currency = {
-                    type: "erc20",
-                    contractAddress,
-                    coinDecimals: contractInfo.tokenInfo.decimals,
-                    coinDenom: contractInfo.tokenInfo.symbol,
-                    coinMinimalDenom: `erc20:${contractAddress}`,
+                  if (originQueries.cosmwasm) {
+                    const contractAddress = denomTrace.denom.replace(
+                      "cw20:",
+                      ""
+                    );
+                    const contractInfo =
+                      originQueries.cosmwasm.querycw20ContractInfo.getQueryContract(
+                        contractAddress
+                      );
+                    isFetching = contractInfo.isFetching;
+                    if (contractInfo.response) {
+                      cw20Currency = {
+                        type: "cw20",
+                        contractAddress,
+                        coinDecimals: contractInfo.response.data.decimals,
+                        coinDenom: contractInfo.response.data.symbol,
+                        coinMinimalDenom: `cw20:${contractAddress}:${contractInfo.response.data.name}`,
+                      };
+                    }
+                  }
+                }
+
+                if (cw20Currency) {
+                  return {
+                    value: {
+                      coinDecimals: cw20Currency.coinDecimals,
+                      coinGeckoId: cw20Currency.coinGeckoId,
+                      coinImageUrl: cw20Currency.coinImageUrl,
+                      coinMinimalDenom: denomHelper.denom,
+                      coinDenom: this.coinDenomGenerator(
+                        denomTrace,
+                        originChainInfo,
+                        counterpartyChainInfo,
+                        cw20Currency
+                      ),
+                      paths: denomTrace.paths,
+                      originChainId: originChainInfo.chainId,
+                      originCurrency: cw20Currency,
+                    },
+                    done: fromCache && !isFetching,
+                  };
+                }
+              } else {
+                let isSecret20Fetching = false;
+                // If the origin currency is ics20-cw20.
+                let secret20Currency = originChainInfo.currencies.find(
+                  (cur) =>
+                    denomTrace &&
+                    cur.coinMinimalDenom.startsWith(denomTrace.denom)
+                );
+                if (
+                  !secret20Currency &&
+                  this.chainStore.hasChain(originChainInfo.chainId)
+                ) {
+                  const originQueries = this.queriesStore.get(
+                    originChainInfo.chainId
+                  );
+                  if (originQueries.secret) {
+                    const contractAddress = denomTrace.denom.replace(
+                      "cw20:",
+                      ""
+                    );
+                    const contractInfo =
+                      originQueries.secret.querySecret20ContractInfo.getQueryContract(
+                        contractAddress
+                      );
+                    isSecret20Fetching = contractInfo.isFetching;
+                    if (contractInfo.response) {
+                      secret20Currency = {
+                        type: "secret20",
+                        contractAddress,
+                        coinDecimals:
+                          contractInfo.response.data.token_info.decimals,
+                        coinDenom: contractInfo.response.data.token_info.symbol,
+                        coinMinimalDenom: `secret20:${contractAddress}:${contractInfo.response.data.token_info.name}`,
+                      };
+                    }
+                  }
+                }
+
+                if (secret20Currency) {
+                  return {
+                    value: {
+                      coinDecimals: secret20Currency.coinDecimals,
+                      coinGeckoId: secret20Currency.coinGeckoId,
+                      coinImageUrl: secret20Currency.coinImageUrl,
+                      coinMinimalDenom: denomHelper.denom,
+                      coinDenom: this.coinDenomGenerator(
+                        denomTrace,
+                        originChainInfo,
+                        counterpartyChainInfo,
+                        secret20Currency
+                      ),
+                      paths: denomTrace.paths,
+                      originChainId: originChainInfo.chainId,
+                      originCurrency: secret20Currency,
+                    },
+                    done: fromCache && !isSecret20Fetching,
                   };
                 }
               }
-            }
-
-            if (erc20Currency) {
-              return {
-                value: {
-                  coinDecimals: erc20Currency.coinDecimals,
-                  coinGeckoId: erc20Currency.coinGeckoId,
-                  coinImageUrl: erc20Currency.coinImageUrl,
-                  coinMinimalDenom: denomHelper.denom,
-                  coinDenom: this.coinDenomGenerator(
-                    denomTrace,
-                    originChainInfo,
-                    counterpartyChainInfo,
-                    erc20Currency
-                  ),
-                  paths: denomTrace.paths,
-                  originChainId: originChainInfo.chainId,
-                  originCurrency: erc20Currency,
-                },
-                done: fromCache && !isERC20Fetching,
-              };
-            }
-            break;
-          default:
-            const currency = originChainInfo.findCurrency(denomTrace.denom);
-
-            if (currency && !("paths" in currency)) {
-              return {
-                value: {
-                  coinDecimals: currency.coinDecimals,
-                  coinGeckoId: currency.coinGeckoId,
-                  coinImageUrl: currency.coinImageUrl,
-                  coinMinimalDenom: denomHelper.denom,
-                  coinDenom: this.coinDenomGenerator(
-                    denomTrace,
-                    originChainInfo,
-                    counterpartyChainInfo,
-                    currency
-                  ),
-                  paths: denomTrace.paths,
-                  originChainId: originChainInfo.chainId,
-                  originCurrency: currency,
-                },
-                done: (() => {
-                  if (
-                    originChainInfo.isCurrencyRegistrationInProgress(
-                      currency.coinMinimalDenom
-                    )
-                  ) {
-                    return false;
+              break;
+            case isERC20Currency:
+              let isERC20Fetching = false;
+              // If the origin currency is ics20-erc20.
+              let erc20Currency = originChainInfo.currencies.find(
+                (cur) =>
+                  denomTrace &&
+                  cur.coinMinimalDenom.startsWith(denomTrace.denom)
+              );
+              if (
+                !erc20Currency &&
+                this.chainStore.hasChain(originChainInfo.chainId)
+              ) {
+                const originQueries = this.queriesStore.get(
+                  originChainInfo.chainId
+                );
+                if (originQueries.ethereum) {
+                  const contractAddress = denomTrace.denom.replace(
+                    "erc20/",
+                    ""
+                  );
+                  const contractInfo =
+                    originQueries.ethereum.queryEthereumERC20ContractInfo.getQueryContract(
+                      contractAddress
+                    );
+                  isERC20Fetching = contractInfo.isFetching;
+                  if (contractInfo.tokenInfo) {
+                    erc20Currency = {
+                      type: "erc20",
+                      contractAddress,
+                      coinDecimals: contractInfo.tokenInfo.decimals,
+                      coinDenom: contractInfo.tokenInfo.symbol,
+                      coinMinimalDenom: `erc20:${contractAddress}`,
+                    };
                   }
+                }
+              }
 
-                  return fromCache;
-                })(),
-              };
-            }
-            break;
+              if (erc20Currency) {
+                return {
+                  value: {
+                    coinDecimals: erc20Currency.coinDecimals,
+                    coinGeckoId: erc20Currency.coinGeckoId,
+                    coinImageUrl: erc20Currency.coinImageUrl,
+                    coinMinimalDenom: denomHelper.denom,
+                    coinDenom: this.coinDenomGenerator(
+                      denomTrace,
+                      originChainInfo,
+                      counterpartyChainInfo,
+                      erc20Currency
+                    ),
+                    paths: denomTrace.paths,
+                    originChainId: originChainInfo.chainId,
+                    originCurrency: erc20Currency,
+                  },
+                  done: fromCache && !isERC20Fetching,
+                };
+              }
+              break;
+            default:
+              const currency = originChainInfo.findCurrency(denomTrace.denom);
+              if (
+                originChainInfo.isCurrencyRegistrationInProgress(
+                  denomTrace.denom
+                )
+              ) {
+                isGlobalFetching = true;
+              }
+              if (currency && !("paths" in currency)) {
+                return {
+                  value: {
+                    coinDecimals: currency.coinDecimals,
+                    coinGeckoId: currency.coinGeckoId,
+                    coinImageUrl: currency.coinImageUrl,
+                    coinMinimalDenom: denomHelper.denom,
+                    coinDenom: this.coinDenomGenerator(
+                      denomTrace,
+                      originChainInfo,
+                      counterpartyChainInfo,
+                      currency
+                    ),
+                    paths: denomTrace.paths,
+                    originChainId: originChainInfo.chainId,
+                    originCurrency: currency,
+                  },
+                  done: !isGlobalFetching,
+                };
+              }
+              break;
+          }
+
+          // In this case, just not show the currency.
+          // But, it is possible to know the currency from query later.
+          // So, let them to be observed.
+          return {
+            value: undefined,
+            done: false,
+          };
         }
+      }
 
-        // In this case, just show the raw currency.
-        // But, it is possible to know the currency from query later.
-        // So, let them to be observed.
+      return {
+        value: undefined,
+        done: false,
+      };
+    } catch (e) {
+      console.log("Error in IBC currency registrar", e);
+      const hash = denomHelper.denom.replace("ibc/", "");
+      this.removeCacheIBCDenomData(chainId, hash);
+      return {
+        value: undefined,
+        done: true,
+      };
+    }
+  }
+
+  protected getERC20TokenInfo(
+    chainId: string,
+    contractAddress: string
+  ): {
+    res:
+      | {
+          coinDenom: string;
+          decimals: number;
+          coingeckoId: string | undefined;
+          coinImageUrl: string | undefined;
+        }
+      | undefined;
+    isFetching: boolean;
+    fromCache: boolean;
+    notFound: boolean;
+  } {
+    const { res: cached, staled } = this.getCacheTokenInfo(
+      chainId,
+      contractAddress
+    );
+    if (cached) {
+      if (cached.notFound) {
         return {
-          value: {
-            coinDecimals: 0,
-            coinMinimalDenom: denomHelper.denom,
-            coinDenom: this.coinDenomGenerator(
-              denomTrace,
-              originChainInfo,
-              counterpartyChainInfo,
-              undefined
-            ),
-            paths: denomTrace.paths,
-            originChainId: undefined,
-            originCurrency: undefined,
+          res: undefined,
+          isFetching: false,
+          fromCache: true,
+          notFound: true,
+        };
+      }
+      if (!staled) {
+        return {
+          res: {
+            coinDenom: cached.coinDenom,
+            decimals: cached.coinDecimals,
+            coingeckoId: cached.coinGeckoId,
+            coinImageUrl: cached.coinImageUrl,
           },
-          done: false,
+          isFetching: false,
+          fromCache: true,
+          notFound: false,
         };
       }
     }
 
-    return {
-      value: undefined,
-      done: false,
-    };
+    const queries = this.queriesStore.get(chainId);
+    if (chainId === "eip155:1") {
+      // XXX: 바빌론 측의 요청으로 밑의 컨트랙트는 일단 하드코딩
+      //      밑의 컨트랙트는 코인겍코에 없어서 불러올 수 없음.
+      //      0xf6718b2701d4a6498ef77d7c152b2137ab28b8a3
+      //      0x09def5abc67e967d54e8233a4b5ebbc1b3fbe34b
+      //      밑의 얘도 존재하는데 얘는 이더스캔에도 안떠서 일단 패스
+      //      0x9356f6d95b8e109f4b7ce3e49d672967d3b48383
+      if (contractAddress === "0xf6718b2701d4a6498ef77d7c152b2137ab28b8a3") {
+        return {
+          res: {
+            coinDenom: "stBTC",
+            decimals: 18,
+            coingeckoId: undefined,
+            coinImageUrl: undefined,
+          },
+          isFetching: false,
+          fromCache: false,
+          notFound: false,
+        };
+      }
+      if (contractAddress === "0x09def5abc67e967d54e8233a4b5ebbc1b3fbe34b") {
+        return {
+          res: {
+            coinDenom: "waBTC",
+            decimals: 18,
+            coingeckoId: undefined,
+            coinImageUrl: undefined,
+          },
+          isFetching: false,
+          fromCache: false,
+          notFound: false,
+        };
+      }
+    }
+
+    if (queries.ethereum) {
+      const contractInfo =
+        queries.ethereum.queryEthereumCoingeckoTokenInfo.getQueryContract(
+          contractAddress
+        );
+      if (contractInfo) {
+        const isFetching = contractInfo.isFetching;
+        if (contractInfo.symbol != null && contractInfo.decimals != null) {
+          return {
+            res: {
+              coinDenom: contractInfo.symbol,
+              decimals: contractInfo.decimals,
+              coingeckoId: contractInfo.coingeckoId,
+              coinImageUrl: contractInfo.logoURI,
+            },
+            isFetching,
+            fromCache: false,
+            notFound: false,
+          };
+        } else {
+          return {
+            res:
+              contractInfo?.error?.status === 404
+                ? undefined
+                : cached
+                ? {
+                    coinDenom: cached.coinDenom,
+                    decimals: cached.coinDecimals,
+                    coingeckoId: cached.coinGeckoId,
+                    coinImageUrl: cached.coinImageUrl,
+                  }
+                : undefined,
+            isFetching,
+            fromCache: false,
+            notFound: contractInfo?.error?.status === 404,
+          };
+        }
+      } else {
+        return {
+          res: undefined,
+          isFetching: false,
+          fromCache: false,
+          notFound: false,
+        };
+      }
+    } else {
+      return {
+        res: undefined,
+        isFetching: false,
+        fromCache: false,
+        notFound: false,
+      };
+    }
   }
 
   protected getCacheIBCDenomData(
     chainId: string,
     denomTraceHash: string
-  ): CacheIBCDenomData | undefined {
-    return this.cacheDenomTracePaths.get(
-      `${ChainIdHelper.parse(chainId).identifier}/${denomTraceHash}`
-    );
+  ): { res: CacheIBCDenomData | undefined; staled: boolean } {
+    const key = `${ChainIdHelper.parse(chainId).identifier}/${denomTraceHash}`;
+
+    const res =
+      this.cacheDenomTracePaths.get(key) || this.staledDenomTracePaths.get(key);
+    let staled = false;
+
+    if (res) {
+      if (Date.now() - res.timestamp > this.cacheDuration) {
+        this.cacheDenomTracePaths.delete(key);
+
+        const savedStaled = this.staledDenomTracePaths.has(key);
+        if (!savedStaled) {
+          {
+            const dbKey = `cache-ibc-denom-trace-paths-v3`;
+            const obj = Object.fromEntries(this.cacheDenomTracePaths);
+            this.kvStore.set<Record<string, CacheIBCDenomData>>(dbKey, obj);
+          }
+
+          this.staledDenomTracePaths.set(key, res);
+        }
+
+        staled = true;
+      }
+    }
+
+    return {
+      res,
+      staled,
+    };
   }
 
-  @action
   protected setCacheIBCDenomData(
     chainId: string,
     denomTraceHash: string,
     data: CacheIBCDenomData
   ) {
-    this.cacheDenomTracePaths.set(
-      `${ChainIdHelper.parse(chainId).identifier}/${denomTraceHash}`,
-      data
-    );
+    const key = `${ChainIdHelper.parse(chainId).identifier}/${denomTraceHash}`;
+    this.cacheDenomTracePaths.set(key, data);
+    {
+      const dbKey = `cache-ibc-denom-trace-paths-v3`;
+      const obj = Object.fromEntries(this.cacheDenomTracePaths);
+      this.kvStore.set<Record<string, CacheIBCDenomData>>(dbKey, obj);
+    }
+
+    if (this.staledDenomTracePaths.has(key)) {
+      this.staledDenomTracePaths.set(key, data);
+    }
+  }
+
+  protected removeCacheIBCDenomData(chainId: string, denomTraceHash: string) {
+    const key = `${ChainIdHelper.parse(chainId).identifier}/${denomTraceHash}`;
+    this.cacheDenomTracePaths.delete(key);
+    {
+      const dbKey = `cache-ibc-denom-trace-paths-v3`;
+      const obj = Object.fromEntries(this.cacheDenomTracePaths);
+      this.kvStore.set<Record<string, CacheIBCDenomData>>(dbKey, obj);
+    }
+
+    this.staledDenomTracePaths.delete(key);
+  }
+
+  protected getCacheTokenInfo(
+    chainId: string,
+    coinMinimalDenom: string
+  ): { res: CacheTokenInfo | undefined; staled: boolean } {
+    const key = `${
+      ChainIdHelper.parse(chainId).identifier
+    }/${coinMinimalDenom}`;
+
+    let res =
+      this.cacheTokenInfoMetadata.get(key) ||
+      this.staledTokenInfoMetadata.get(key);
+    let staled = false;
+
+    if (res) {
+      if (res.notFound) {
+        if (Date.now() - res.timestamp > this.failedCacheDuration) {
+          this.cacheTokenInfoMetadata.delete(key);
+          {
+            const dbKey = `cache-token-info`;
+            const obj = Object.fromEntries(this.cacheTokenInfoMetadata);
+            this.kvStore.set<Record<string, CacheTokenInfo>>(dbKey, obj);
+          }
+          res = undefined;
+        }
+      } else if (Date.now() - res.timestamp > this.cacheDuration) {
+        this.cacheTokenInfoMetadata.delete(key);
+
+        const savedStaled = this.staledTokenInfoMetadata.has(key);
+        if (savedStaled) {
+          {
+            const dbKey = `cache-token-info`;
+            const obj = Object.fromEntries(this.cacheTokenInfoMetadata);
+            this.kvStore.set<Record<string, CacheTokenInfo>>(dbKey, obj);
+          }
+
+          this.staledTokenInfoMetadata.set(key, res);
+        }
+
+        staled = true;
+      }
+    }
+
+    return {
+      res,
+      staled,
+    };
+  }
+
+  protected setCacheTokenInfo(
+    chainId: string,
+    coinMinimalDenom: string,
+    data: CacheTokenInfo
+  ) {
+    const key = `${
+      ChainIdHelper.parse(chainId).identifier
+    }/${coinMinimalDenom}`;
+
+    this.cacheTokenInfoMetadata.set(key, data);
+    {
+      const dbKey = `cache-token-info`;
+      const obj = Object.fromEntries(this.cacheTokenInfoMetadata);
+      this.kvStore.set<Record<string, CacheTokenInfo>>(dbKey, obj);
+    }
+
+    if (this.staledTokenInfoMetadata.has(key)) {
+      this.staledTokenInfoMetadata.set(key, data);
+    }
   }
 }

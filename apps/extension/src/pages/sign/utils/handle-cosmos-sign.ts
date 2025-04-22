@@ -82,7 +82,8 @@ export const handleCosmosPreSign = async (
           publicKey,
           bip44Path,
           signDocWrapper.aminoSignDoc,
-          interactionData.data.eip712
+          interactionData.data.eip712,
+          (options as LedgerOptions).signEthPlainJSON || false
         );
       }
 

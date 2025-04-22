@@ -440,6 +440,27 @@ export type OPInitTransferInfo = {
   txs: OPInitTransferTransactions;
 };
 
+export type EurekaTransferState =
+  | "TRANSFER_UNKNOWN"
+  | "TRANSFER_PENDING"
+  | "TRANSFER_RECEIVED"
+  | "TRANSFER_SUCCESS" // Desirable state
+  | "TRANSFER_FAILURE";
+
+export type EurekaTransferTransactions = {
+  send_tx: ChainTransaction | null;
+  acknowledge_tx: ChainTransaction | null;
+  receive_tx: ChainTransaction | null;
+  timeout_tx: ChainTransaction | null;
+};
+
+export type EurekaTransferInfo = {
+  from_chain_id: string;
+  to_chain_id: string;
+  state: EurekaTransferState;
+  packet_txs: EurekaTransferTransactions;
+};
+
 export type TransferEvent =
   | {
       ibc_transfer: TransferInfo;
@@ -451,4 +472,5 @@ export type TransferEvent =
   | { hyperlane_transfer: HyperlaneTransferInfo }
   | { op_init_transfer: OPInitTransferInfo }
   | { go_fast_transfer: GoFastTransferInfo }
-  | { stargate_transfer: StargateTransferInfo };
+  | { stargate_transfer: StargateTransferInfo }
+  | { eureka_transfer: EurekaTransferInfo };

@@ -390,7 +390,7 @@ export const AvailableTabView: FunctionComponent<{
                           <TokenItem
                             key={key}
                             viewToken={viewToken}
-                            {...getBottomTagInfoProps(viewToken, key)}
+                            {...getBottomTagInfoProps(viewToken)}
                             onClick={() => {
                               setSearchParams((prev) => {
                                 prev.set(

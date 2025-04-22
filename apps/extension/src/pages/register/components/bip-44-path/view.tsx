@@ -7,6 +7,10 @@ import { BIP44PathState } from "./state";
 import { observer } from "mobx-react-lite";
 import { useConfirm } from "../../../../hooks/confirm";
 import { FormattedMessage, useIntl } from "react-intl";
+import { Tooltip } from "../../../../components/tooltip";
+import { InformationOutlineIcon } from "../../../../components/icon";
+import { XAxis } from "../../../../components/axis";
+import { useTheme } from "styled-components";
 
 const CloseSvg: FunctionComponent<{ size: number | string; color: string }> = ({
   size,
@@ -43,7 +47,7 @@ export const SetBip44PathCard: FunctionComponent<{
 }> = observer(({ coinType, state, isLedger, onClose }) => {
   const confirm = useConfirm();
   const intl = useIntl();
-
+  const theme = useTheme();
   const onClickReset = async (e: MouseEvent) => {
     e.preventDefault();
 
@@ -97,12 +101,31 @@ export const SetBip44PathCard: FunctionComponent<{
         </li>
       </ul>
       <Gutter size="1.5rem" />
-      <Styles.SubTitle>
-        <FormattedMessage id="pages.register.components.bip-44-path.hd-path-subtitle" />
-      </Styles.SubTitle>
+      <XAxis alignY="center" gap="0.5rem">
+        <Styles.SubTitle>
+          <FormattedMessage id="pages.register.components.bip-44-path.hd-path-subtitle" />
+        </Styles.SubTitle>
+        <Tooltip
+          content={
+            <FormattedMessage id="pages.register.components.bip-44-path.hd-path-tooltip" />
+          }
+          forceWidth="15.5rem"
+          backgroundColor={theme.mode === "light" ? "#424247E5" : undefined}
+        >
+          <InformationOutlineIcon
+            width="1.25rem"
+            height="1.25rem"
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-200"]
+                : ColorPalette["gray-300"]
+            }
+          />
+        </Tooltip>
+      </XAxis>
       <Gutter size="0.5rem" />
       <Styles.InputsContainer>
-        <div>{`m/44'/${coinType != null ? coinType : "..."}'`}</div>
+        <div>{`m/-'/${coinType != null ? coinType : "-"}'/`}</div>
         <Gutter size="0.5rem" />
         <Styles.InputContainer>
           <TextInput

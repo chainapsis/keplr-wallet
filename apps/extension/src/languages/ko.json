@@ -41,6 +41,7 @@
   "pages.register.components.bip-44-path.paragraph-lost": "경로 정보를 분실하시면 경로를 다시 복구할 수 없습니다.",
   "pages.register.components.bip-44-path.paragraph-unfamiliar": "이 기능에 대해 자세히 알지 못하는 경우, 해당 절차를 스킵하거나 철회하시길 바랍니다. -> <reset>환경설정 초기화</reset>",
   "pages.register.components.bip-44-path.hd-path-subtitle": "BIP44 HD 경로",
+  "pages.register.components.bip-44-path.hd-path-tooltip": "체인과 주소 유형에 따라 접두사(예: m/44', m/84', m/86')가 자동으로 설정됩니다. 필요한 경우 나머지 경로를 채워주세요.",
   "pages.register.components.form.name-password.wallet-name-label": "지갑 이름",
   "pages.register.components.form.name-password.wallet-name-placeholder": "예시) 트레이딩, NFT 보관용, 투자용",
   "pages.register.components.form.name-password.password-label": "새로운 비밀번호",
@@ -432,6 +433,13 @@
   "page.permission.requesting-connection-title": "연결 요청",
   "page.permission.paragraph": "승인시 해당 웹사이트에서 아래와 같은 권한을 받습니다 :{br}• 유저의 케플러 지갑에 있는 모든 체인 리스트 조회, 사용",
 
+  "page.permission.basic-access.select-chain-title": "연결",
+  "page.permission.basic-access-for-bitcoin.select-chain-paragraph": "연결할 비트코인 체인 선택",
+  "page.permission.basic-access-for-bitcoin.address-type-guide-title": "{addressType} 주소 연결",
+  "page.permission.basic-access-for-bitcoin.address-type-guide-paragraph": "케플러 확장 프로그램에서 네트워크와 주소 유형을 변경할 수 있습니다.",
+
+  "page.permission.basic-access-for-evm.select-chain-paragraph": "연결할 EVM 호환 체인 선택",
+
   "page.sign.cosmos.tx.title": "트랜잭션 확인",
   "page.sign.cosmos.tx.messages": "메세지",
   "page.sign.cosmos.tx.authz-send-grant.warning-title": "다른 계정에게 자산 인출 권한을 부여하는 트랜잭션입니다. 신종금융사기 사례가 많으니 유의하시길 바랍니다.",
@@ -510,6 +518,8 @@
   "page.sign.components.messages.vote.paragraph": "<b>프로포절 {proposalId}</b>에 <b>{textualOption}</b> 표를 행사합니다.",
   "page.sign.components.messages.wasm-message-view.close-button": "접기",
   "page.sign.components.messages.wasm-message-view.details-button": "상세보기",
+  "page.sign.components.messages.create-btc-delegation.title": "BTC 스테이킹 등록하기",
+  "page.sign.components.messages.create-btc-delegation.paragraph": "스테이킹에 관련된 데이터를 Babylon Genesis 체인에 제출 및 등록합니다.",
 
   "page.sign.components.ledger-guide.box.error-title": "오류",
   "page.sign.components.ledger-guide.box.connect-and-unlock-ledger-paragraph": "렛저 장치를 연결하고 잠금을 해제하세요.",
@@ -722,7 +732,7 @@
   "button.ok": "확인",
   "button.next": "다음",
   "button.review": "검토",
-  "button.advanced": "고급",
+  "button.advanced": "파생 경로 설정 (고급)",
   "button.approve": "승인",
   "button.save": "저장",
   "button.close": "닫기",

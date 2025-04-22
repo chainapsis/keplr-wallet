@@ -4,7 +4,7 @@ import { PermissionService } from "../permission";
 import { ChainsService } from "../chains";
 import { KVStore } from "@keplr-wallet/common";
 import { autorun, makeObservable, observable, runInAction } from "mobx";
-import { GenesisHash } from "@keplr-wallet/types";
+import { GenesisHash, SupportedPaymentType } from "@keplr-wallet/types";
 
 export class PermissionInteractiveService {
   @observable
@@ -165,6 +165,7 @@ export class PermissionInteractiveService {
   async ensureEnabledForBitcoin(
     env: Env,
     origin: string,
+    preferredPaymentType?: SupportedPaymentType,
     newCurrentChainId?: string
   ): Promise<void> {
     await this.keyRingService.ensureUnlockInteractive(env);
@@ -175,7 +176,7 @@ export class PermissionInteractiveService {
         this.permissionService.getCurrentBaseChainIdForBitcoin(origin) ||
         // If the current chain id is not set, use Bitcoin mainnet as the default chain id.
         `bip122:${GenesisHash.MAINNET}`
-      }:taproot`;
+      }:${preferredPaymentType ?? "taproot"}`;
 
     const isTestnet = !currentChainIdForBitcoin.includes(GenesisHash.MAINNET);
 
