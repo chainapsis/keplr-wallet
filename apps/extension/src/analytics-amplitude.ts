@@ -50,7 +50,10 @@ export class AmplitudeAnalyticsClient implements AnalyticsClientV2 {
           return;
         }
 
-        if (this.accountStore.hasAccount(this.cosmosHubChainId)) {
+        if (
+          this.accountStore.hasAccount(this.cosmosHubChainId) &&
+          this.keyringStore.status === "unlocked"
+        ) {
           const cosmosAccount = this.accountStore.getAccount(
             this.cosmosHubChainId
           );
