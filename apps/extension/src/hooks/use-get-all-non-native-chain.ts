@@ -4,6 +4,7 @@ import { ChainInfo } from "@keplr-wallet/types";
 import { autorun } from "mobx";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { KeyRingCosmosService } from "@keplr-wallet/background";
+import { useSearch } from "./use-search";
 
 interface UseGetAllNonNativeChainParams {
   pageSize?: number;
@@ -26,6 +27,8 @@ interface UseGetAllNonNativeChainResult {
     React.SetStateAction<Element | null>
   >;
 }
+
+const searchFields = ["chainName"];
 
 /**
  * 모든 체인 정보를 가져오고 페이지네이션과 검색 기능을 제공하는 훅
@@ -57,8 +60,6 @@ export const useGetAllNonNativeChain = ({
   const [ledgerFilteredChains, setLedgerFilteredChains] = useState<ChainInfo[]>(
     []
   );
-  const [filteredChains, setFilteredChains] = useState<ChainInfo[]>([]);
-
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -155,21 +156,15 @@ export const useGetAllNonNativeChain = ({
     setLedgerFilteredChains(chains);
   }, [chains, fallbackEthereumLedgerApp, fallbackStarknetLedgerApp, keyType]);
 
+  const searchedChains = useSearch(ledgerFilteredChains, search, searchFields);
+
   useEffect(() => {
     if (!search.trim()) {
-      setFilteredChains(ledgerFilteredChains);
       return;
     }
 
-    const searchTerm = search.toLowerCase().trim();
-    const filtered = ledgerFilteredChains.filter((chain) => {
-      const chainName = chain.chainName.toLowerCase();
-      return chainName.includes(searchTerm);
-    });
-
-    setFilteredChains(filtered);
     setCurrentPage(1);
-  }, [ledgerFilteredChains, search]);
+  }, [search]);
 
   // 무한 스크롤 처리
   useEffect(() => {
@@ -200,14 +195,14 @@ export const useGetAllNonNativeChain = ({
   const currentPageChains = useMemo(() => {
     const startIndex = 0;
     const endIndex = currentPage * pageSize;
-    return filteredChains.slice(startIndex, endIndex);
-  }, [filteredChains, currentPage, pageSize]);
+    return searchedChains.slice(startIndex, endIndex);
+  }, [searchedChains, currentPage, pageSize]);
 
   return {
     chains: currentPageChains,
-    totalCount: filteredChains.length,
+    totalCount: searchedChains.length,
     currentPage,
-    totalPages: Math.ceil(filteredChains.length / pageSize),
+    totalPages: Math.ceil(searchedChains.length / pageSize),
     setPage: setCurrentPage,
     isLoading,
     error,
