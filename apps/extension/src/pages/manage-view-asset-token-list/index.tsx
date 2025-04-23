@@ -29,7 +29,13 @@ import { useSearch } from "../../hooks/use-search";
 import { ViewToken } from "../main";
 
 const searchFields = [
-  (item: ViewToken) => item.token.currency.coinDenom,
+  (item: ViewToken) => {
+    const currency = item.token.currency;
+    if ("originCurrency" in currency) {
+      return currency.originCurrency?.coinDenom || "";
+    }
+    return currency.coinDenom;
+  },
   "chainInfo.chainName",
 ];
 
