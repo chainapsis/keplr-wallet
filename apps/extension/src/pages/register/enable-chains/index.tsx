@@ -946,14 +946,20 @@ export const EnableChainsScene: FunctionComponent<{
       [chainStore]
     );
 
-    const filteredNativeGroupedModularChainInfos = useSearch<ModularChainInfo>(
+    const searchedNativeGroupedModularChainInfos = useSearch<ModularChainInfo>(
       nativeGroupedModularChainInfos,
       search,
       searchFields
     );
 
-    const filteredSuggestGroupedModularChainInfos = useSearch<ModularChainInfo>(
+    const searchedSuggestGroupedModularChainInfos = useSearch<ModularChainInfo>(
       suggestGroupedModularChainInfos,
+      search,
+      searchFields
+    );
+
+    const searchedLedgerChains = useSearch<ModularChainInfo>(
+      chainStore.groupedModularChainInfos,
       search,
       searchFields
     );
@@ -1455,7 +1461,7 @@ export const EnableChainsScene: FunctionComponent<{
                 setIsCollapsedNativeChainView(!isCollapsedNativeChainView);
               }}
             >
-              {filteredNativeGroupedModularChainInfos.map(
+              {searchedNativeGroupedModularChainInfos.map(
                 (modularChainInfo) => {
                   const {
                     balance,
@@ -1531,7 +1537,7 @@ export const EnableChainsScene: FunctionComponent<{
               )}
             </NativeChainSection>
 
-            {filteredSuggestGroupedModularChainInfos.map((modularChainInfo) => {
+            {searchedSuggestGroupedModularChainInfos.map((modularChainInfo) => {
               const {
                 balance,
                 enabled,
@@ -1600,99 +1606,62 @@ export const EnableChainsScene: FunctionComponent<{
               !fallbackEthereumLedgerApp &&
               !fallbackBitcoinLedgerApp &&
               keyType === "ledger" &&
-              chainStore.groupedModularChainInfos
-                .filter((modularChainInfo) => {
-                  const trimSearch = search.trim();
-                  const trimSearchLowerCase = trimSearch.toLowerCase();
+              searchedLedgerChains.map((modularChainInfo) => {
+                if ("cosmos" in modularChainInfo) {
+                  const chainInfo = chainStore.getChain(
+                    modularChainInfo.chainId
+                  );
+                  const isEthermintLike =
+                    chainInfo.bip44.coinType === 60 ||
+                    !!chainInfo.features?.includes("eth-address-gen") ||
+                    !!chainInfo.features?.includes("eth-key-sign");
 
-                  const isChainNameSearch = modularChainInfo.chainName
-                    .toLowerCase()
-                    .includes(trimSearchLowerCase);
-                  const isCoinDenomSearch = (() => {
-                    if ("cosmos" in modularChainInfo) {
-                      const chainInfo = chainStore.getChain(
-                        modularChainInfo.cosmos.chainId
+                  const isLedgerSupported = (() => {
+                    try {
+                      if (
+                        chainInfo.features?.includes("force-enable-evm-ledger")
+                      ) {
+                        return true;
+                      }
+                      // 처리가능한 체인만 true를 반환한다.
+                      KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
+                        chainInfo.chainId
                       );
-                      return (
-                        chainInfo.stakeCurrency || chainInfo.currencies[0]
-                      ).coinDenom
-                        .toLowerCase()
-                        .includes(trimSearchLowerCase);
-                    } else if ("starknet" in modularChainInfo) {
-                      return (
-                        modularChainInfo.starknet.currencies[0] ||
-                        modularChainInfo.starknet.currencies[1]
-                      ).coinDenom
-                        .toLowerCase()
-                        .includes(trimSearchLowerCase);
-                    } else if ("bitcoin" in modularChainInfo) {
-                      return modularChainInfo.bitcoin.currencies[0].coinDenom
-                        .toLowerCase()
-                        .includes(trimSearchLowerCase);
+                      return true;
+                    } catch {
+                      return false;
                     }
-                    return false;
                   })();
 
-                  return isChainNameSearch || isCoinDenomSearch;
-                })
-                .map((modularChainInfo) => {
-                  if ("cosmos" in modularChainInfo) {
-                    const chainInfo = chainStore.getChain(
-                      modularChainInfo.chainId
-                    );
-                    const isEthermintLike =
-                      chainInfo.bip44.coinType === 60 ||
-                      !!chainInfo.features?.includes("eth-address-gen") ||
-                      !!chainInfo.features?.includes("eth-key-sign");
-
-                    const isLedgerSupported = (() => {
-                      try {
-                        if (
-                          chainInfo.features?.includes(
-                            "force-enable-evm-ledger"
-                          )
-                        ) {
-                          return true;
-                        }
-                        // 처리가능한 체인만 true를 반환한다.
-                        KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
-                          chainInfo.chainId
-                        );
-                        return true;
-                      } catch {
-                        return false;
-                      }
-                    })();
-
-                    if (isEthermintLike && isLedgerSupported) {
-                      return (
-                        <NextStepChainItem
-                          key={modularChainInfo.chainId}
-                          modularChainInfo={modularChainInfo}
-                          tagText="EVM"
-                        />
-                      );
-                    }
-                  } else if ("starknet" in modularChainInfo) {
+                  if (isEthermintLike && isLedgerSupported) {
                     return (
                       <NextStepChainItem
                         key={modularChainInfo.chainId}
                         modularChainInfo={modularChainInfo}
-                        tagText="Starknet"
-                      />
-                    );
-                  } else if ("bitcoin" in modularChainInfo) {
-                    return (
-                      <NextStepChainItem
-                        key={modularChainInfo.chainId}
-                        modularChainInfo={modularChainInfo}
-                        tagText="Bitcoin"
+                        tagText="EVM"
                       />
                     );
                   }
+                } else if ("starknet" in modularChainInfo) {
+                  return (
+                    <NextStepChainItem
+                      key={modularChainInfo.chainId}
+                      modularChainInfo={modularChainInfo}
+                      tagText="Starknet"
+                    />
+                  );
+                } else if ("bitcoin" in modularChainInfo) {
+                  return (
+                    <NextStepChainItem
+                      key={modularChainInfo.chainId}
+                      modularChainInfo={modularChainInfo}
+                      tagText="Bitcoin"
+                    />
+                  );
+                }
 
-                  return null;
-                })}
+                return null;
+              })}
 
             {!fallbackStarknetLedgerApp &&
               !fallbackBitcoinLedgerApp &&
