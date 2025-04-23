@@ -1345,7 +1345,6 @@ const AddressesWithValues: FunctionComponent<{
                 {new CoinPretty(currency, data.value)
                   .trim(true)
                   .maxDecimals(8)
-                  .hideDenom(true)
                   .toString()}
               </Body2>
             </Columns>

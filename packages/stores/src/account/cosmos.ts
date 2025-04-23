@@ -604,9 +604,10 @@ export class CosmosAccountImpl {
                   },
                   modeInfo: {
                     single: {
-                      mode: !ethSignPlainJson
-                        ? SignMode.SIGN_MODE_LEGACY_AMINO_JSON
-                        : SignMode.SIGN_MODE_EIP_191,
+                      mode:
+                        eip712Signing && ethSignPlainJson
+                          ? SignMode.SIGN_MODE_EIP_191
+                          : SignMode.SIGN_MODE_LEGACY_AMINO_JSON,
                     },
                     multi: undefined,
                   },
