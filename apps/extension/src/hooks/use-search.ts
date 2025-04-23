@@ -18,7 +18,7 @@ const SCORE_PREFIX = 2;
 const SCORE_SUBSTRING = 1;
 const SCORE_NONE = -Infinity;
 
-const DEBOUNCE_DELAY = 500;
+const THROTTLE_DELAY = 500;
 
 export function useSearch<T>(
   data: T[],
@@ -99,12 +99,14 @@ export function useSearch<T>(
   );
 
   const throttledSearch = useMemo(() => {
-    return throttle(performSearch, DEBOUNCE_DELAY);
+    return throttle(performSearch, THROTTLE_DELAY);
   }, [performSearch]);
 
   const isFetchingCount = data.filter((d) => (d as any).isFetching).length;
 
   useEffect(() => {
+    // data 변경은 throttle 적용
+    // data 길이가 달라지거나 hugeQueriesStore.getAllBalances의 isFetching 개수가 달라지면 재검색
     throttledSearch(data, query, fields);
 
     return () => {
@@ -114,6 +116,7 @@ export function useSearch<T>(
   }, [throttledSearch, isFetchingCount, data.length]);
 
   useEffect(() => {
+    // query나 fields가 변경되면 즉시 재검색
     performSearch(data, query, fields);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [performSearch, query, fields]);
