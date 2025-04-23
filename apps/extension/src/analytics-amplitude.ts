@@ -18,6 +18,7 @@ import {
   NobleQueries,
 } from "@keplr-wallet/stores";
 import { KVStore } from "@keplr-wallet/common";
+import { Hash } from "@keplr-wallet/crypto";
 
 // https://developer.chrome.com/docs/extensions/mv3/tut_analytics/
 export class AmplitudeAnalyticsClient implements AnalyticsClientV2 {
@@ -32,10 +33,13 @@ export class AmplitudeAnalyticsClient implements AnalyticsClientV2 {
   protected _sessionIdTimestamp: number = 0;
 
   protected isFirefox: boolean = false;
+  protected readonly cosmosHubChainId: string = "cosmoshub-4";
 
   constructor(
     protected readonly kvStore: KVStore,
     protected readonly keyringStore: KeyRingStore,
+    protected readonly accountStore: IAccountStore,
+    protected readonly chainStore: IChainStore,
     protected readonly apiKey: string
   ) {
     makeObservable(this);
@@ -46,9 +50,27 @@ export class AmplitudeAnalyticsClient implements AnalyticsClientV2 {
       });
 
       autorun(() => {
-        if (this.keyringStore.selectedKeyInfo?.id) {
-          amplitude.setUserId(this.keyringStore.selectedKeyInfo.id);
+        if (!this.keyringStore.selectedKeyInfo?.id) {
+          return;
         }
+
+        if (this.accountStore && this.chainStore) {
+          const cosmosAccount = this.accountStore.getAccount(
+            this.cosmosHubChainId
+          );
+          if (cosmosAccount.bech32Address) {
+            const hashedAddress = Buffer.from(
+              Hash.hash256(
+                new TextEncoder().encode(cosmosAccount.bech32Address)
+              )
+            ).toString("hex");
+            amplitude.setUserId(hashedAddress);
+            return;
+          }
+        }
+
+        amplitude.setUserId(this.keyringStore.selectedKeyInfo.id);
+        return;
       });
     }
 

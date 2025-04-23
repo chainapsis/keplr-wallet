@@ -692,6 +692,8 @@ export class RootStore {
           return new AmplitudeAnalyticsClient(
             new ExtensionKVStore("store_amplitude_analytics_client"),
             this.keyRingStore,
+            this.accountStore,
+            this.chainStore,
             AmplitudeAPIKey
           );
         }
