@@ -170,23 +170,25 @@ export const SignBitcoinTxView: FunctionComponent<{
   );
 
   // bitcoin tx size는 amount, fee rate, recipient address type에 따라 달라진다.
-  // 또한 별도의 simulator refresh 로직이 없기 때문에 availableUTXOs의 값이 변경되면
-  // 새로운 key를 생성해서 새로운 simulator를 생성하도록 한다.
+  // 키는 요청의 고유한 값들을 조합하여 이전에 캐시된 psbt를 잘못 불러오는 것을 방지해야 한다.
   const psbtSimulatorKey = useMemo(() => {
     if ("psbtCandidate" in interactionData.data) {
-      const recipientPrefix =
-        interactionData.data.psbtCandidate.toAddress.slice(0, 4);
-      const amountHex = interactionData.data.psbtCandidate.amount.toString(16);
-      return (
-        recipientPrefix +
-        amountHex +
-        feeRateConfig.feeRate.toString() +
-        availableUTXOs.length.toString()
-      );
+      return [
+        `id-${interactionData.id}`,
+        `to-${interactionData.data.psbtCandidate.toAddress}`,
+        `amt-${interactionData.data.psbtCandidate.amount.toString(16)}`,
+        `fee-${feeRateConfig.feeRate.toString()}`,
+        `bal-${availableUTXOs.length.toString()}`,
+      ].join("-");
     }
 
     return "";
-  }, [interactionData.data, feeRateConfig.feeRate, availableUTXOs]);
+  }, [
+    interactionData.id,
+    interactionData.data,
+    feeRateConfig.feeRate,
+    availableUTXOs.length,
+  ]);
 
   const psbtSimulator = usePsbtSimulator(
     new ExtensionKVStore("psbt-simulator.bitcoin.send"),
@@ -1345,6 +1347,7 @@ const AddressesWithValues: FunctionComponent<{
                 {new CoinPretty(currency, data.value)
                   .trim(true)
                   .maxDecimals(8)
+                  .hideDenom(true)
                   .toString()}
               </Body2>
             </Columns>
