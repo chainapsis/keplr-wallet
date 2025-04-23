@@ -130,7 +130,6 @@ const Styles = {
 };
 
 const searchFields = [
-  "chainInfo.chainName",
   (item: ViewToken) => {
     const currency = item.token.currency;
     if ("originCurrency" in currency) {
@@ -138,13 +137,14 @@ const searchFields = [
     }
     return currency.coinDenom;
   },
+  "chainInfo.chainName",
 ];
 
 const remainingSearchFields = [
-  "chainInfo.chainName",
   (item: { currency: Currency; chainInfo: IChainInfoImpl }) => {
     return item.currency.coinDenom;
   },
+  "chainInfo.chainName",
 ];
 
 // /send/select-asset와 기본 로직은 거의 유사한데...
