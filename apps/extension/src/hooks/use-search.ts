@@ -62,7 +62,9 @@ export function useSearch<T>(
             return SCORE_NONE;
           });
 
-          const hasAnyMatch = fieldMatchScores.some((score) => score > 0);
+          const hasAnyMatch = fieldMatchScores.some(
+            (score) => score > SCORE_NONE
+          );
 
           return {
             item,
