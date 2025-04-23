@@ -20,6 +20,7 @@ import { Currency } from "@keplr-wallet/types";
 import { IChainInfoImpl } from "@keplr-wallet/stores";
 import { FixedSizeList } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
+import { useSearch } from "../../../hooks/use-search";
 
 // 계산이 복잡해서 memoize을 적용해야하는데
 // mobx와 useMemo()는 같이 사용이 어려워서
@@ -128,6 +129,24 @@ const Styles = {
   `,
 };
 
+const searchFields = [
+  "chainInfo.chainName",
+  (item: ViewToken) => {
+    const currency = item.token.currency;
+    if ("originCurrency" in currency) {
+      return currency.originCurrency?.coinDenom || "";
+    }
+    return currency.coinDenom;
+  },
+];
+
+const remainingSearchFields = [
+  "chainInfo.chainName",
+  (item: { currency: Currency; chainInfo: IChainInfoImpl }) => {
+    return item.currency.coinDenom;
+  },
+];
+
 // /send/select-asset와 기본 로직은 거의 유사한데...
 // 뷰 쪽이 생각보다 이질적이라서 그냥 분리 시킴...
 // /send/select-asset 페이지와 세트로 관리하셈
@@ -178,23 +197,8 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
         );
       });
 
-      const trimSearch = search.trim();
-
-      if (!trimSearch) {
-        return filtered;
-      }
-
-      return filtered.filter((token) => {
-        return (
-          token.chainInfo.chainName
-            .toLowerCase()
-            .includes(trimSearch.toLowerCase()) ||
-          token.token.currency.coinDenom
-            .toLowerCase()
-            .includes(trimSearch.toLowerCase())
-        );
-      });
-    }, [excludeKey, search, tokens]);
+      return filtered;
+    }, [excludeKey, tokens]);
 
     const filteredRemaining = useMemo(() => {
       const filtered = remaining.filter((r) => {
@@ -205,21 +209,15 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
         );
       });
 
-      const trimSearch = search.trim();
+      return filtered;
+    }, [excludeKey, remaining]);
 
-      if (!trimSearch) {
-        return filtered;
-      }
-
-      return filtered.filter((r) => {
-        return (
-          r.chainInfo.chainName
-            .toLowerCase()
-            .includes(trimSearch.toLowerCase()) ||
-          r.currency.coinDenom.toLowerCase().includes(trimSearch.toLowerCase())
-        );
-      });
-    }, [excludeKey, remaining, search]);
+    const searchedTokens = useSearch(filteredTokens, search, searchFields);
+    const searchedRemaining = useSearch(
+      filteredRemaining,
+      search,
+      remainingSearchFields
+    );
 
     return (
       <HeaderLayout
@@ -244,8 +242,8 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
             {({ height, width }: { height: number; width: number }) => (
               <FixedSizeList
                 itemData={{
-                  filteredTokens,
-                  filteredRemaining,
+                  searchedTokens,
+                  searchedRemaining,
                   onClick: (chainId, coinMinimalDenom) => {
                     if (paramNavigateTo) {
                       navigate(
@@ -263,7 +261,7 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
                 }}
                 width={width}
                 height={height}
-                itemCount={filteredTokens.length + filteredRemaining.length}
+                itemCount={searchedTokens.length + searchedRemaining.length}
                 itemSize={76}
               >
                 {TokenListItem}
@@ -284,8 +282,8 @@ const TokenListItem = ({
   style,
 }: {
   data: {
-    filteredTokens: ViewToken[];
-    filteredRemaining: {
+    searchedTokens: ViewToken[];
+    searchedRemaining: {
       currency: Currency;
       chainInfo: IChainInfoImpl;
     }[];
@@ -294,10 +292,10 @@ const TokenListItem = ({
   index: number;
   style: any;
 }) => {
-  const isFilteredTokens = index < data.filteredTokens.length;
+  const isFilteredTokens = index < data.searchedTokens.length;
   const item = isFilteredTokens
-    ? data.filteredTokens[index]
-    : data.filteredRemaining[index - data.filteredTokens.length];
+    ? data.searchedTokens[index]
+    : data.searchedRemaining[index - data.searchedTokens.length];
   const viewToken =
     "currency" in item
       ? {
