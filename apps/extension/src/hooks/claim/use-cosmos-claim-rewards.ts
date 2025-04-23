@@ -25,14 +25,21 @@ import {
   NOBLE_CHAIN_ID,
 } from "../../config.ui";
 import { MakeTxResponse } from "@keplr-wallet/stores";
+import { logNobleClaimAnalytics } from "../../analytics-amplitude";
 
 const zeroDec = new Dec(0);
 // TODO: Add below property to config.ui.ts
 const defaultGasPerDelegation = 140000;
 
 export const useCosmosClaimRewards = () => {
-  const { accountStore, chainStore, queriesStore, priceStore, analyticsStore } =
-    useStore();
+  const {
+    accountStore,
+    chainStore,
+    queriesStore,
+    priceStore,
+    analyticsStore,
+    analyticsAmplitudeStore,
+  } = useStore();
   const intl = useIntl();
   const navigate = useNavigate();
   const notification = useNotification();
@@ -520,6 +527,16 @@ export const useCosmosClaimRewards = () => {
                   chainId: chainInfo.chainId,
                   chainName: chainInfo.chainName,
                 });
+
+                if (chainId === NOBLE_CHAIN_ID) {
+                  logNobleClaimAnalytics(
+                    chainStore,
+                    queriesStore,
+                    accountStore,
+                    analyticsAmplitudeStore,
+                    "click_claim_all_btn_claim_reward"
+                  );
+                }
               },
               onFulfill: (tx: any) => {
                 // Tx가 성공한 이후에 rewards가 다시 쿼리되면서 여기서 빠지는게 의도인데...
@@ -703,6 +720,16 @@ export const useCosmosClaimRewards = () => {
               chainId: cosmosChainInfo.chainId,
               chainName: cosmosChainInfo.chainName,
             });
+
+            if (chainId === NOBLE_CHAIN_ID) {
+              logNobleClaimAnalytics(
+                chainStore,
+                queriesStore,
+                accountStore,
+                analyticsAmplitudeStore,
+                "click_token_list_claim_reward"
+              );
+            }
           },
           onFulfill: (tx: any) => {
             if (tx.code != null && tx.code !== 0) {

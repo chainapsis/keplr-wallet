@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useState, useMemo } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useStore } from "../../../stores";
 import { Box } from "../../../components/box";
@@ -12,6 +12,8 @@ import { observer } from "mobx-react-lite";
 import { useNavigate } from "react-router";
 import { useTheme } from "styled-components";
 import { KEPLR_EXTS_MEMO } from "../../../config.ui";
+import debounce from "lodash.debounce";
+import { logNobleClaimAnalytics } from "../../../analytics-amplitude";
 
 export const EarnOverviewClaimSection: FunctionComponent<{
   chainId: string;
@@ -22,7 +24,8 @@ export const EarnOverviewClaimSection: FunctionComponent<{
 
   const intl = useIntl();
   const navigate = useNavigate();
-  const { queriesStore, accountStore } = useStore();
+  const { queriesStore, accountStore, analyticsAmplitudeStore, chainStore } =
+    useStore();
 
   const account = accountStore.getAccount(chainId);
 
@@ -78,7 +81,13 @@ export const EarnOverviewClaimSection: FunctionComponent<{
           onBroadcasted: () => {
             navigate("/tx-result/pending");
 
-            // TODO: Log analytics
+            logNobleClaimAnalytics(
+              chainStore,
+              queriesStore,
+              accountStore,
+              analyticsAmplitudeStore,
+              "noble_earn_claim_yield"
+            );
           },
           onFulfill: (tx: any) => {
             if (tx.code != null && tx.code !== 0) {
@@ -100,6 +109,29 @@ export const EarnOverviewClaimSection: FunctionComponent<{
       navigate("/tx-result/failed");
     }
   }
+
+  const totalYieldNum = Number(totalYield.toDec().toString());
+
+  const debouncedLogging = useMemo(
+    () =>
+      debounce((yieldNum: number) => {
+        analyticsAmplitudeStore.logEvent("view_earn_overview", {
+          nobleEarnClaimAmount: yieldNum,
+        });
+        analyticsAmplitudeStore.setUserProperties({
+          noble_earn_claim_amount: yieldNum,
+        });
+      }, 500),
+    [analyticsAmplitudeStore]
+  );
+
+  useEffect(() => {
+    debouncedLogging(totalYieldNum);
+
+    return () => {
+      debouncedLogging.cancel();
+    };
+  }, [debouncedLogging, totalYieldNum]);
 
   return (
     <Box paddingX="1.25rem">
