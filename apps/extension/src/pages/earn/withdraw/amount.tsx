@@ -264,10 +264,14 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
                   navigate("/tx-result/pending");
 
                   const nobleEarnWithdrawAmount = Number(
-                    nobleEarnAmountConfig.amountConfig.amount[0].toDec()
+                    nobleEarnAmountConfig.amountConfig.amount[0]
+                      .toDec()
+                      .toString()
                   );
                   const nobleEarnWithdrawExpectedReceiveAmount = Number(
-                    nobleEarnAmountConfig.amountConfig.expectedOutAmount.toDec()
+                    nobleEarnAmountConfig.amountConfig.expectedOutAmount
+                      .toDec()
+                      .toString()
                   );
 
                   analyticsAmplitudeStore.logEvent(

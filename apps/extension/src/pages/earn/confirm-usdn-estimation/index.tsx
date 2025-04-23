@@ -192,10 +192,14 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
                 navigate("/tx-result/pending");
 
                 const nobleEarnDepositAmount = Number(
-                  nobleEarnAmountConfig.amountConfig.amount[0].toDec()
+                  nobleEarnAmountConfig.amountConfig.amount[0]
+                    .toDec()
+                    .toString()
                 );
                 const nobleEarnDepositExpectedReceiveAmount = Number(
-                  nobleEarnAmountConfig.amountConfig.expectedOutAmount.toDec()
+                  nobleEarnAmountConfig.amountConfig.expectedOutAmount
+                    .toDec()
+                    .toString()
                 );
 
                 analyticsAmplitudeStore.logEvent(
