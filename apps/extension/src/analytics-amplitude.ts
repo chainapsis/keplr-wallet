@@ -61,12 +61,8 @@ export class AmplitudeAnalyticsClient implements AnalyticsClientV2 {
               )
             ).toString("hex");
             amplitude.setUserId(hashedAddress);
-            return;
           }
         }
-
-        amplitude.setUserId(this.keyringStore.selectedKeyInfo.id);
-        return;
       });
     }
 
