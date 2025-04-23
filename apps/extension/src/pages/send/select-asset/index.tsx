@@ -82,8 +82,7 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
     });
   }, [tokens]);
 
-  const trimSearch = search.trim();
-  const searchedTokens = useSearch(nonZeroTokens, trimSearch, searchFields);
+  const searchedTokens = useSearch(nonZeroTokens, search, searchFields);
 
   const _filteredTokens = useMemo(() => {
     if (paramIsIBCTransfer) {
