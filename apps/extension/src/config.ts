@@ -3401,6 +3401,56 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     },
     features: ["cosmwasm"],
   },
+  {
+    rpc: "https://rpc.initia.xyz",
+    rest: "https://rest.initia.xyz",
+    chainId: "interwoven-1",
+    chainName: "Initia",
+    walletUrlForStaking: "https://testnet.keplr.app/chains/initia",
+    bip44: {
+      coinType: 60,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "init",
+      bech32PrefixAccPub: "initpub",
+      bech32PrefixValAddr: "initvaloper",
+      bech32PrefixValPub: "initvaloperpub",
+      bech32PrefixConsAddr: "initvalcons",
+      bech32PrefixConsPub: "initvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "INIT",
+        coinMinimalDenom: "uinit",
+        coinDecimals: 6,
+      },
+    ],
+    stakeCurrency: {
+      coinDenom: "INIT",
+      coinMinimalDenom: "uinit",
+      coinDecimals: 6,
+    },
+    feeCurrencies: [
+      {
+        coinDenom: "INIT",
+        coinMinimalDenom: "uinit",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.015,
+          average: 0.02,
+          high: 0.3,
+        },
+      },
+    ],
+    features: [
+      "force-enable-evm-ledger",
+      "eth-address-gen",
+      "eth-key-sign",
+      "initia-dynamicfee",
+      "eth-secp256k1-initia",
+      "evm-ledger-sign-plain-json",
+    ],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
