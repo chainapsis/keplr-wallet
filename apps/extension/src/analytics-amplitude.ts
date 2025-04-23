@@ -39,7 +39,6 @@ export class AmplitudeAnalyticsClient implements AnalyticsClientV2 {
     protected readonly kvStore: KVStore,
     protected readonly keyringStore: KeyRingStore,
     protected readonly accountStore: IAccountStore,
-    protected readonly chainStore: IChainStore,
     protected readonly apiKey: string
   ) {
     makeObservable(this);
@@ -54,7 +53,7 @@ export class AmplitudeAnalyticsClient implements AnalyticsClientV2 {
           return;
         }
 
-        if (this.accountStore && this.chainStore) {
+        if (this.accountStore.hasAccount(this.cosmosHubChainId)) {
           const cosmosAccount = this.accountStore.getAccount(
             this.cosmosHubChainId
           );
