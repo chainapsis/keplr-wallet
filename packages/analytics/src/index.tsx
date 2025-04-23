@@ -3,8 +3,6 @@ export type Properties = Record<
   string | number | boolean | Array<string | number> | undefined | null
 >;
 
-export type KeyringPropertiesMap = Record<string, Properties>;
-
 export interface AnalyticsClient {
   setUserId(userId: string | null): void;
   logEvent(eventName: string, eventProperties?: Properties): void;

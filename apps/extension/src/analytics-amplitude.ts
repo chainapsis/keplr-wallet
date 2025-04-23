@@ -1,7 +1,6 @@
 import {
   AnalyticsAmplitudeStore,
   AnalyticsClientV2,
-  KeyringPropertiesMap,
   Properties,
 } from "@keplr-wallet/analytics";
 import { action, autorun, makeObservable, observable, runInAction } from "mobx";
@@ -25,8 +24,6 @@ export class AmplitudeAnalyticsClient implements AnalyticsClientV2 {
   @observable
   protected isInitialized: boolean = false;
 
-  @observable.ref
-  protected _userPropertiesMap: KeyringPropertiesMap = {};
   @observable
   protected _sessionId: string = "";
   @observable
