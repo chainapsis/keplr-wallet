@@ -95,7 +95,7 @@ export function useSearch<T>(
   query: string,
   fields: (string | ((item: T) => string))[]
 ) {
-  const [searchResults, setSearchResults] = useState<T[]>(data);
+  const [searchResults, setSearchResults] = useState<T[]>(data.slice());
 
   const updateSearchResults = useCallback(
     (
@@ -129,7 +129,7 @@ export function useSearch<T>(
   useEffect(() => {
     // data 변경은 throttle 적용
     // data 길이가 달라지거나 hugeQueriesStore.getAllBalances의 isFetching 개수가 달라지면 재검색
-    throttledSearch(data, query, fields);
+    throttledSearch(data.slice(), query, fields);
 
     return () => {
       throttledSearch.cancel();
@@ -139,7 +139,7 @@ export function useSearch<T>(
 
   useEffect(() => {
     // query나 fields가 변경되면 즉시 재검색
-    updateSearchResults(data, query, fields);
+    updateSearchResults(data.slice(), query, fields);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [updateSearchResults, query, fields]);
 
