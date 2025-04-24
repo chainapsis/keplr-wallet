@@ -36,6 +36,9 @@ function performSearch<T>(
         const rawValue = getNestedValue(item, field);
         const fieldValue =
           rawValue != null ? String(rawValue).toLowerCase() : "";
+        if (typeof rawValue !== "string") {
+          console.log(`[Warning] field ${field} is not a string: ${rawValue}`);
+        }
 
         if (!fieldValue) {
           return SCORE_NONE;
