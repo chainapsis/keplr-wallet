@@ -171,6 +171,8 @@ export const SignBitcoinTxView: FunctionComponent<{
 
   // bitcoin tx size는 amount, fee rate, recipient address type에 따라 달라진다.
   // 키는 요청의 고유한 값들을 조합하여 이전에 캐시된 psbt를 잘못 불러오는 것을 방지해야 한다.
+  // send 페이지와 달리 사용자가 값을 변경하여 새로운 시뮬레이션을 실행할 수 없으므로
+  // 사용가능한 utxo를 불러오는 것에 반응하여 새로 키를 생성할 수 있도록 fetch 상태를 포함하여 키를 생성한다.
   const psbtSimulatorKey = useMemo(() => {
     if ("psbtCandidate" in interactionData.data) {
       return [
@@ -179,6 +181,7 @@ export const SignBitcoinTxView: FunctionComponent<{
         `amt-${interactionData.data.psbtCandidate.amount.toString(16)}`,
         `fee-${feeRateConfig.feeRate.toString()}`,
         `bal-${availableUTXOs.length.toString()}`,
+        `ext-${isFetchingUTXOs}`,
       ].join("-");
     }
 
@@ -188,6 +191,7 @@ export const SignBitcoinTxView: FunctionComponent<{
     interactionData.data,
     feeRateConfig.feeRate,
     availableUTXOs.length,
+    isFetchingUTXOs,
   ]);
 
   const psbtSimulator = usePsbtSimulator(
@@ -200,6 +204,14 @@ export const SignBitcoinTxView: FunctionComponent<{
     () => {
       if (!("psbtCandidate" in interactionData.data)) {
         throw new Error("Not ready to simulate psbt");
+      }
+
+      if (isFetchingUTXOs) {
+        throw new Error("Fetching available utxos");
+      }
+
+      if (utxoError) {
+        throw new Error("Can't find available utxos");
       }
 
       const simulate = async (): Promise<{
@@ -316,6 +328,10 @@ export const SignBitcoinTxView: FunctionComponent<{
   const txConfigsValidate = useTxConfigsValidate({
     feeConfig,
   });
+
+  const isReadyToSign =
+    (hasPsbtCandidate && !isFetchingUTXOs && !psbtSimulator.isSimulating) ||
+    isInitialized;
 
   const hasUnableToSignPsbt = validatedPsbts.some(
     (data) => data.inputsToSign.length === 0
