@@ -113,7 +113,18 @@ export function useSearch<T>(
     return throttle(updateSearchResults, THROTTLE_DELAY);
   }, [updateSearchResults]);
 
-  const isFetchingCount = data.filter((d) => (d as any).isFetching).length;
+  const isFetchingCount = data.filter((d) => {
+    if (
+      d != null &&
+      typeof d === "object" &&
+      "isFetching" in d &&
+      typeof d.isFetching === "boolean"
+    ) {
+      return d.isFetching;
+    } else {
+      return false;
+    }
+  }).length;
 
   useEffect(() => {
     // data 변경은 throttle 적용
