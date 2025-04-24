@@ -1,12 +1,17 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import throttle from "lodash.throttle";
 
-const getNestedValue = (
-  obj: any,
-  path: string | ((item: any) => string)
-): any => {
-  if (typeof path === "function") {
-    return path(obj);
+// fields가 동적일 경우 너무 잦은 rerender를 방지하기 위해 함수일 경우 key를 넣어주도록 강제
+type SearchField<T> =
+  | string
+  | {
+      key: string;
+      function: (item: T) => string;
+    };
+
+const getNestedValue = (obj: any, path: SearchField<any>): any => {
+  if (typeof path === "object") {
+    return path.function(obj);
   }
   return path.split(".").reduce((currentObject, key) => {
     return currentObject?.[key];
@@ -23,7 +28,7 @@ const THROTTLE_DELAY = 500;
 function performSearch<T>(
   data: T[],
   query: string,
-  fields: (string | ((item: T) => string))[]
+  fields: SearchField<T>[]
 ): T[] {
   const queryLower = query.toLowerCase().trim();
   if (!queryLower) {
@@ -93,7 +98,7 @@ function performSearch<T>(
 export function useSearch<T>(
   data: T[],
   query: string,
-  fields: (string | ((item: T) => string))[]
+  fields: SearchField<T>[]
 ) {
   const [searchResults, setSearchResults] = useState<T[]>(data.slice());
 
@@ -101,7 +106,7 @@ export function useSearch<T>(
     (
       currentData: T[],
       currentQuery: string,
-      currentFields: (string | ((item: T) => string))[]
+      currentFields: SearchField<T>[]
     ) => {
       const results = performSearch(currentData, currentQuery, currentFields);
       setSearchResults(results);
@@ -126,6 +131,15 @@ export function useSearch<T>(
     }
   }).length;
 
+  const fieldKeysJoined = fields
+    .map((field) => {
+      if (typeof field === "string") {
+        return field;
+      }
+      return field.key;
+    })
+    .join(",");
+
   useEffect(() => {
     // data 변경은 throttle 적용
     // data 길이가 달라지거나 hugeQueriesStore.getAllBalances의 isFetching 개수가 달라지면 재검색
@@ -138,10 +152,10 @@ export function useSearch<T>(
   }, [throttledSearch, isFetchingCount, data.length]);
 
   useEffect(() => {
-    // query나 fields가 변경되면 즉시 재검색
+    // query나 fieldKeysJoined가 변경되면 즉시 재검색
     updateSearchResults(data.slice(), query, fields);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [updateSearchResults, query, fields]);
+  }, [updateSearchResults, query, fieldKeysJoined]);
 
   return searchResults;
 }

@@ -29,12 +29,15 @@ import { useSearch } from "../../hooks/use-search";
 import { ViewToken } from "../main";
 
 const searchFields = [
-  (item: ViewToken) => {
-    const currency = item.token.currency;
-    if ("originCurrency" in currency) {
-      return currency.originCurrency?.coinDenom || "";
-    }
-    return currency.coinDenom;
+  {
+    key: "originCurrency.coinDenom",
+    function: (item: ViewToken) => {
+      const currency = item.token.currency;
+      if ("originCurrency" in currency) {
+        return currency.originCurrency?.coinDenom || "";
+      }
+      return currency.coinDenom;
+    },
   },
   "chainInfo.chainName",
 ];

@@ -41,87 +41,89 @@ import { useGetSearchChains } from "../../../../hooks/use-get-search-chains";
 import { LookingForChainItem } from "../looking-for-chains";
 import { useSearch } from "../../../../hooks/use-search";
 
+type Address = {
+  modularChainInfo: ModularChainInfo;
+  bech32Address?: string;
+  ethereumAddress?: string;
+  starknetAddress?: string;
+  bitcoinAddress?: {
+    bech32Address: string;
+    paymentType: SupportedPaymentType;
+  };
+};
+
 const addressSearchFields = [
   "modularChainInfo.chainName",
   "modularChainInfo.chainId",
-  (item: {
-    modularChainInfo: ModularChainInfo;
-    bech32Address?: string;
-    ethereumAddress?: string;
-    starknetAddress?: string;
-    bitcoinAddress?: {
-      bech32Address: string;
-      paymentType: SupportedPaymentType;
-    };
-  }) => {
-    if (item.bech32Address) {
-      const bech32Split = item.bech32Address.split("1");
-      return bech32Split.length > 0 ? bech32Split[0] : "";
-    }
-    return "";
-  },
-  (item: {
-    modularChainInfo: ModularChainInfo;
-    bech32Address?: string;
-    ethereumAddress?: string;
-    starknetAddress?: string;
-    bitcoinAddress?: {
-      bech32Address: string;
-      paymentType: SupportedPaymentType;
-    };
-  }) => {
-    if (
-      "cosmos" in item.modularChainInfo &&
-      item.modularChainInfo.cosmos != null
-    ) {
-      const cosmosChainInfo = item.modularChainInfo.cosmos;
-      if (cosmosChainInfo.stakeCurrency) {
-        return cosmosChainInfo.stakeCurrency.coinDenom;
+  {
+    key: "bech32Address",
+    function: (item: Address) => {
+      if (item.bech32Address) {
+        const bech32Split = item.bech32Address.split("1");
+        return bech32Split.length > 0 ? bech32Split[0] : "";
       }
-      if (cosmosChainInfo.currencies.length > 0) {
-        const currency = cosmosChainInfo.currencies[0];
-        if (!currency.coinMinimalDenom.startsWith("ibc/")) {
-          return currency.coinDenom;
+      return "";
+    },
+  },
+  {
+    key: "modularChainInfo.currency.coinDenom",
+    function: (item: Address) => {
+      if (
+        "cosmos" in item.modularChainInfo &&
+        item.modularChainInfo.cosmos != null
+      ) {
+        const cosmosChainInfo = item.modularChainInfo.cosmos;
+        if (cosmosChainInfo.stakeCurrency) {
+          return cosmosChainInfo.stakeCurrency.coinDenom;
+        }
+        if (cosmosChainInfo.currencies.length > 0) {
+          const currency = cosmosChainInfo.currencies[0];
+          if (!currency.coinMinimalDenom.startsWith("ibc/")) {
+            return currency.coinDenom;
+          }
+        }
+      } else if (
+        "starknet" in item.modularChainInfo &&
+        item.modularChainInfo.starknet != null
+      ) {
+        const starknetChainInfo = item.modularChainInfo.starknet;
+        if (starknetChainInfo.currencies.length > 0) {
+          return starknetChainInfo.currencies[0].coinDenom;
+        }
+      } else if (
+        "bitcoin" in item.modularChainInfo &&
+        item.modularChainInfo.bitcoin != null
+      ) {
+        const bitcoinChainInfo = item.modularChainInfo.bitcoin;
+        if (bitcoinChainInfo.currencies.length > 0) {
+          return bitcoinChainInfo.currencies[0].coinDenom;
         }
       }
-    } else if (
-      "starknet" in item.modularChainInfo &&
-      item.modularChainInfo.starknet != null
-    ) {
-      const starknetChainInfo = item.modularChainInfo.starknet;
-      if (starknetChainInfo.currencies.length > 0) {
-        return starknetChainInfo.currencies[0].coinDenom;
-      }
-    } else if (
-      "bitcoin" in item.modularChainInfo &&
-      item.modularChainInfo.bitcoin != null
-    ) {
-      const bitcoinChainInfo = item.modularChainInfo.bitcoin;
-      if (bitcoinChainInfo.currencies.length > 0) {
-        return bitcoinChainInfo.currencies[0].coinDenom;
-      }
-    }
-    return "";
+      return "";
+    },
   },
 ];
 
 const chainSearchFields = [
   "chainInfo.chainName",
   "chainInfo.chainId",
-  (item: { chainInfo: ChainInfo | ModularChainInfo }) => {
-    if (
-      "starknet" in item.chainInfo ||
-      item.chainInfo.chainName.toLowerCase().includes("ethereum")
-    ) {
-      return "eth";
-    }
-    if (
-      "bitcoin" in item.chainInfo ||
-      item.chainInfo.chainName.toLowerCase().includes("bitcoin")
-    ) {
-      return "btc";
-    }
-    return "";
+  {
+    key: "ethereum-and-bitcoin",
+    function: (item: { chainInfo: ChainInfo | ModularChainInfo }) => {
+      if (
+        "starknet" in item.chainInfo ||
+        item.chainInfo.chainName.toLowerCase().includes("ethereum")
+      ) {
+        return "eth";
+      }
+      if (
+        "bitcoin" in item.chainInfo ||
+        item.chainInfo.chainName.toLowerCase().includes("bitcoin")
+      ) {
+        return "btc";
+      }
+      return "";
+    },
   },
 ];
 
@@ -174,16 +176,7 @@ export const CopyAddressScene: FunctionComponent<{
     return res;
   });
 
-  const addresses: {
-    modularChainInfo: ModularChainInfo;
-    bech32Address?: string;
-    ethereumAddress?: string;
-    starknetAddress?: string;
-    bitcoinAddress?: {
-      bech32Address: string;
-      paymentType: SupportedPaymentType;
-    };
-  }[] = useMemo(() => {
+  const addresses: Address[] = useMemo(() => {
     return chainStore.modularChainInfosInUI.map((modularChainInfo) => {
       const accountInfo = accountStore.getAccount(modularChainInfo.chainId);
 

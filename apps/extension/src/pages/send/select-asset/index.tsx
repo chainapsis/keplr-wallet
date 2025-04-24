@@ -32,12 +32,15 @@ const Styles = {
 };
 
 const searchFields = [
-  (item: ViewToken) => {
-    const currency = item.token.currency;
-    if ("originCurrency" in currency) {
-      return currency.originCurrency?.coinDenom || "";
-    }
-    return currency.coinDenom;
+  {
+    key: "originCurrency.coinDenom",
+    function: (item: ViewToken) => {
+      const currency = item.token.currency;
+      if ("originCurrency" in currency) {
+        return currency.originCurrency?.coinDenom || "";
+      }
+      return currency.coinDenom;
+    },
   },
   "chainInfo.chainName",
 ];

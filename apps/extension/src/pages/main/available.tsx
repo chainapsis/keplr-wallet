@@ -96,32 +96,38 @@ const ManageViewAssetTokenPageButton = styled(TextButton)`
 `;
 
 const tokenSearchFields = [
-  (item: ViewToken) => {
-    const currency = item.token.currency;
-    if ("originCurrency" in currency) {
-      return currency.originCurrency?.coinDenom || "";
-    }
-    return currency.coinDenom;
+  {
+    key: "originCurrency.coinDenom",
+    function: (item: ViewToken) => {
+      const currency = item.token.currency;
+      if ("originCurrency" in currency) {
+        return currency.originCurrency?.coinDenom || "";
+      }
+      return currency.coinDenom;
+    },
   },
   "chainInfo.chainName",
 ];
 
 const chainSearchFields = [
   "chainInfo.chainName",
-  (item: { chainInfo: ChainInfo | ModularChainInfo }) => {
-    if (
-      "starknet" in item.chainInfo ||
-      item.chainInfo.chainName.toLowerCase().includes("ethereum")
-    ) {
-      return "eth";
-    }
-    if (
-      "bitcoin" in item.chainInfo ||
-      item.chainInfo.chainName.toLowerCase().includes("bitcoin")
-    ) {
-      return "btc";
-    }
-    return "";
+  {
+    key: "ethereum-and-bitcoin",
+    function: (item: { chainInfo: ChainInfo | ModularChainInfo }) => {
+      if (
+        "starknet" in item.chainInfo ||
+        item.chainInfo.chainName.toLowerCase().includes("ethereum")
+      ) {
+        return "eth";
+      }
+      if (
+        "bitcoin" in item.chainInfo ||
+        item.chainInfo.chainName.toLowerCase().includes("bitcoin")
+      ) {
+        return "btc";
+      }
+      return "";
+    },
   },
 ];
 

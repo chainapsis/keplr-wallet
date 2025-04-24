@@ -130,19 +130,25 @@ const Styles = {
 };
 
 const searchFields = [
-  (item: ViewToken) => {
-    const currency = item.token.currency;
-    if ("originCurrency" in currency) {
-      return currency.originCurrency?.coinDenom || "";
-    }
-    return currency.coinDenom;
+  {
+    key: "originCurrency.coinDenom",
+    function: (item: ViewToken) => {
+      const currency = item.token.currency;
+      if ("originCurrency" in currency) {
+        return currency.originCurrency?.coinDenom || "";
+      }
+      return currency.coinDenom;
+    },
   },
   "chainInfo.chainName",
 ];
 
 const remainingSearchFields = [
-  (item: { currency: Currency; chainInfo: IChainInfoImpl }) => {
-    return item.currency.coinDenom;
+  {
+    key: "currency.coinDenom",
+    function: (item: { currency: Currency; chainInfo: IChainInfoImpl }) => {
+      return item.currency.coinDenom;
+    },
   },
   "chainInfo.chainName",
 ];
