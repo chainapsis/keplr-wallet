@@ -591,8 +591,13 @@ export class CosmosAccountImpl {
                       }
 
                       if (chainInfo.hasFeature("eth-secp256k1-initia")) {
+                        return "/cosmos.evm.crypto.v1.ethsecp256k1.PubKey";
+                      }
+
+                      if (chainInfo.hasFeature("cosmos-evm")) {
                         return "/initia.crypto.v1beta1.ethsecp256k1.PubKey";
                       }
+
                       return "/ethermint.crypto.v1.ethsecp256k1.PubKey";
                     })(),
                     value: PubKey.encode({
