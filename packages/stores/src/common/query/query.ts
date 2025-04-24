@@ -12,6 +12,7 @@ import { toGenerator } from "@keplr-wallet/common";
 import { HasMapStore } from "../map";
 import { makeURL, simpleFetch } from "@keplr-wallet/simple-fetch";
 import { QuerySharedContext } from "./context";
+import { Buffer } from "buffer/";
 
 export type QueryOptions = {
   // millisec
@@ -758,7 +759,15 @@ export abstract class ObservableQuery<T = unknown, E = unknown>
   }
 
   protected getCacheKey(): string {
-    return makeURL(this.baseURL, this.url);
+    try {
+      return makeURL(this.baseURL, this.url);
+    } catch (e) {
+      console.log("Failed to make URL", this.baseURL, this.url, e);
+      // just return random.
+      const random = new Uint8Array(32);
+      crypto.getRandomValues(random);
+      return Buffer.from(random).toString("hex");
+    }
   }
 
   protected async fetchResponse(
