@@ -15,6 +15,8 @@ import {
   GetStarknetKeyParamsSelectedMsg,
   RequestSignStarknetMessage,
   PrivilegeStarknetSignClaimRewardsMsg,
+  CheckNeedEnableAccessForStarknetMsg,
+  GetNewCurrentChainIdForStarknetMsg,
 } from "./messages";
 import { KeyRingStarknetService } from "./service";
 import { PermissionInteractiveService } from "../permission-interactive";
@@ -58,6 +60,16 @@ export const getHandler: (
           service,
           permissionInteractionService
         )(env, msg as RequestJsonRpcToStarknetMsg);
+      case GetNewCurrentChainIdForStarknetMsg:
+        return handleGetNewCurrentChainIdForStarknetMsg(service)(
+          env,
+          msg as GetNewCurrentChainIdForStarknetMsg
+        );
+      case CheckNeedEnableAccessForStarknetMsg:
+        return handleCheckNeedEnableAccessForStarknetMsg(service)(
+          env,
+          msg as CheckNeedEnableAccessForStarknetMsg
+        );
       case GetStarknetKeysForEachVaultSettledMsg:
         return handleGetStarknetKeysForEachVaultSettledMsg(service)(
           env,
@@ -192,23 +204,16 @@ const handleRequestJsonRpcToStarknetMsg: (
   permissionInteractionService
 ) => {
   return async (env, msg) => {
-    let skipEnable = false;
-    if (msg.method === "keplr_initStarknetProviderState") {
-      skipEnable = true;
-    }
-    if (msg.method === "wallet_getPermissions") {
-      skipEnable = true;
-    }
-    if (msg.method === "wallet_requestAccounts") {
-      if (!Array.isArray(msg.params) && msg.params?.["silent_mode"]) {
-        skipEnable = true;
-      }
-    }
+    if (service.checkNeedEnableAccess(msg.method, msg.params)) {
+      const newCurrentChainId = service.getNewCurrentChainIdFromRequest(
+        msg.method,
+        msg.params
+      );
 
-    if (!skipEnable) {
       await permissionInteractionService.ensureEnabledForStarknet(
         env,
-        msg.origin
+        msg.origin,
+        newCurrentChainId
       );
     }
 
@@ -220,6 +225,20 @@ const handleRequestJsonRpcToStarknetMsg: (
       msg.chainId
     );
   };
+};
+
+const handleGetNewCurrentChainIdForStarknetMsg: (
+  service: KeyRingStarknetService
+) => InternalHandler<GetNewCurrentChainIdForStarknetMsg> = (service) => {
+  return (_, msg) => {
+    return service.getNewCurrentChainIdFromRequest(msg.method, msg.params);
+  };
+};
+
+const handleCheckNeedEnableAccessForStarknetMsg: (
+  service: KeyRingStarknetService
+) => InternalHandler<CheckNeedEnableAccessForStarknetMsg> = (service) => {
+  return (_, msg) => service.checkNeedEnableAccess(msg.method, msg.params);
 };
 
 const handleGetStarknetKeysForEachVaultSettledMsg: (

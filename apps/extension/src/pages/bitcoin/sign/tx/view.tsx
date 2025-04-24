@@ -170,23 +170,29 @@ export const SignBitcoinTxView: FunctionComponent<{
   );
 
   // bitcoin tx size는 amount, fee rate, recipient address type에 따라 달라진다.
-  // 또한 별도의 simulator refresh 로직이 없기 때문에 availableUTXOs의 값이 변경되면
-  // 새로운 key를 생성해서 새로운 simulator를 생성하도록 한다.
+  // 키는 요청의 고유한 값들을 조합하여 이전에 캐시된 psbt를 잘못 불러오는 것을 방지해야 한다.
+  // send 페이지와 달리 사용자가 값을 변경하여 새로운 시뮬레이션을 실행할 수 없으므로
+  // 사용가능한 utxo를 불러오는 것에 반응하여 새로 키를 생성할 수 있도록 fetch 상태를 포함하여 키를 생성한다.
   const psbtSimulatorKey = useMemo(() => {
     if ("psbtCandidate" in interactionData.data) {
-      const recipientPrefix =
-        interactionData.data.psbtCandidate.toAddress.slice(0, 4);
-      const amountHex = interactionData.data.psbtCandidate.amount.toString(16);
-      return (
-        recipientPrefix +
-        amountHex +
-        feeRateConfig.feeRate.toString() +
-        availableUTXOs.length.toString()
-      );
+      return [
+        `id-${interactionData.id}`,
+        `to-${interactionData.data.psbtCandidate.toAddress}`,
+        `amt-${interactionData.data.psbtCandidate.amount.toString(16)}`,
+        `fee-${feeRateConfig.feeRate.toString()}`,
+        `bal-${availableUTXOs.length.toString()}`,
+        `ext-${isFetchingUTXOs}`,
+      ].join("-");
     }
 
     return "";
-  }, [interactionData.data, feeRateConfig.feeRate, availableUTXOs]);
+  }, [
+    interactionData.id,
+    interactionData.data,
+    feeRateConfig.feeRate,
+    availableUTXOs.length,
+    isFetchingUTXOs,
+  ]);
 
   const psbtSimulator = usePsbtSimulator(
     new ExtensionKVStore("psbt-simulator.bitcoin.send"),
@@ -198,6 +204,14 @@ export const SignBitcoinTxView: FunctionComponent<{
     () => {
       if (!("psbtCandidate" in interactionData.data)) {
         throw new Error("Not ready to simulate psbt");
+      }
+
+      if (isFetchingUTXOs) {
+        throw new Error("Fetching available utxos");
+      }
+
+      if (utxoError) {
+        throw new Error("Can't find available utxos");
       }
 
       const simulate = async (): Promise<{

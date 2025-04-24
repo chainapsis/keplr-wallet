@@ -1603,7 +1603,9 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     super();
   }
 
-  protected async protectedEnableAccess(): Promise<void> {
+  protected async protectedEnableAccess(
+    newCurrentChainId?: string
+  ): Promise<void> {
     return new Promise((resolve, reject) => {
       let f = false;
 
@@ -1612,7 +1614,9 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
         BACKGROUND_PORT,
         "permission-interactive",
         "enable-access-for-evm",
-        {}
+        {
+          chainId: newCurrentChainId,
+        }
       )
         .then(resolve)
         .catch(reject)
@@ -1624,6 +1628,36 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
         }
       }, 100);
     });
+  }
+
+  protected async protectedGetNewCurrentChainIdFromRequest(
+    method: string,
+    params?: readonly unknown[] | Record<string, unknown>
+  ): Promise<string | undefined> {
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-ethereum",
+      "get-new-current-chain-id-for-evm",
+      {
+        method,
+        params,
+      }
+    );
+  }
+
+  protected async protectedCheckNeedEnableAccess(
+    method: string
+  ): Promise<boolean> {
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-ethereum",
+      "check-need-enable-access-for-evm",
+      {
+        method,
+      }
+    );
   }
 
   isConnected(): boolean {
@@ -1648,8 +1682,12 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     // XXX: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
     //      side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
     //      request의 경우는 일종의 쿼리이기 때문에 언제 결과가 올지 알 수 없다. 그러므로 미리 권한 처리를 해야한다.
-    if (method !== "keplr_initProviderState") {
-      await this.protectedEnableAccess();
+    if (await this.protectedCheckNeedEnableAccess(method)) {
+      // 활성화할 체인을 변경하는 요청인 경우, 권한 승인하는 UI에서 변경할 체인 아이디가 기본으로 선택되도록 하기 위함이다.
+      // 로직이 파편화 되는 것을 막기 위해 백그라운드에서 처리해서 값을 받아오는 방식으로 구현한다.
+      const newCurrentChainId =
+        await this.protectedGetNewCurrentChainIdFromRequest(method, params);
+      await this.protectedEnableAccess(newCurrentChainId);
     }
 
     return new Promise((resolve, reject) => {
@@ -1721,7 +1759,9 @@ class StarknetProvider implements IStarknetProvider {
     protected readonly requester: MessageRequester
   ) {}
 
-  protected async protectedEnableAccess(): Promise<void> {
+  protected async protectedEnableAccess(
+    newCurrentChainId?: string
+  ): Promise<void> {
     return new Promise((resolve, reject) => {
       let f = false;
 
@@ -1730,7 +1770,9 @@ class StarknetProvider implements IStarknetProvider {
         BACKGROUND_PORT,
         "permission-interactive",
         "enable-access-for-starknet",
-        {}
+        {
+          chainId: newCurrentChainId,
+        }
       )
         .then(resolve)
         .catch(reject)
@@ -1742,6 +1784,38 @@ class StarknetProvider implements IStarknetProvider {
         }
       }, 100);
     });
+  }
+
+  protected async protectedGetNewCurrentChainIdFromRequest(
+    method: string,
+    params?: readonly unknown[] | Record<string, unknown>
+  ): Promise<string | undefined> {
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-starknet",
+      "get-new-current-chain-id-for-starknet",
+      {
+        method,
+        params,
+      }
+    );
+  }
+
+  protected async protectedCheckNeedEnableAccess(
+    method: string,
+    params?: readonly unknown[] | Record<string, unknown>
+  ): Promise<boolean> {
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-starknet",
+      "check-need-enable-access-for-starknet",
+      {
+        method,
+        params,
+      }
+    );
   }
 
   async request<T = unknown>({
@@ -1758,21 +1832,10 @@ class StarknetProvider implements IStarknetProvider {
     // XXX: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
     //      side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
     //      request의 경우는 일종의 쿼리이기 때문에 언제 결과가 올지 알 수 없다. 그러므로 미리 권한 처리를 해야한다.
-    let skipEnable = false;
-    if (type === "keplr_initStarknetProviderState") {
-      skipEnable = true;
-    }
-    if (type === "wallet_getPermissions") {
-      skipEnable = true;
-    }
-    if (type === "wallet_requestAccounts") {
-      if (!Array.isArray(params) && params?.["silent_mode"]) {
-        skipEnable = true;
-      }
-    }
-
-    if (!skipEnable) {
-      await this.protectedEnableAccess();
+    if (await this.protectedCheckNeedEnableAccess(type, params)) {
+      const newCurrentChainId =
+        await this.protectedGetNewCurrentChainIdFromRequest(type, params);
+      await this.protectedEnableAccess(newCurrentChainId);
     }
 
     return new Promise((resolve, reject) => {
@@ -1815,16 +1878,6 @@ class StarknetProvider implements IStarknetProvider {
   }
 }
 
-const sidePanelOpenNeededBitcoinMethods = [
-  "switchNetwork",
-  "switchChain",
-  "signMessage",
-  "sendBitcoin",
-  "pushTx",
-  "signPsbt",
-  "signPsbts",
-];
-
 class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
   constructor(
     protected readonly keplr: Keplr,
@@ -1856,27 +1909,61 @@ class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
     });
   }
 
-  protected async protectedRequestMethod<T>({
-    method,
-    params,
-  }: {
-    method: string;
-    params: unknown[];
-  }): Promise<T> {
-    if (method !== "getAccounts") {
-      await this.protectedEnableAccess();
-    }
+  async getAccounts(): Promise<string[]> {
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-bitcoin",
+      "request-bitcoin-get-accounts",
+      {}
+    );
+  }
 
+  async requestAccounts(): Promise<string[]> {
+    await this.protectedEnableAccess();
+
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-bitcoin",
+      "request-bitcoin-request-accounts",
+      {}
+    );
+  }
+
+  async disconnect(): Promise<void> {
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-bitcoin",
+      "request-bitcoin-disconnect",
+      {}
+    );
+  }
+
+  async getNetwork(): Promise<BitcoinNetwork> {
+    await this.protectedEnableAccess();
+
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-bitcoin",
+      "request-bitcoin-get-network",
+      {}
+    );
+  }
+
+  async switchNetwork(network: BitcoinNetwork): Promise<BitcoinNetwork> {
+    // Side panel을 어차피 열어야 하는 메소드이므로 여기선 권한 체크 요청을 생략한다.
     return new Promise((resolve, reject) => {
       let f = false;
       sendSimpleMessage(
         this.requester,
         BACKGROUND_PORT,
         "keyring-bitcoin",
-        "request-method-to-bitcoin",
+        "request-bitcoin-switch-network",
         {
-          method,
-          params,
+          network,
         }
       )
         .then(resolve)
@@ -1884,45 +1971,10 @@ class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
         .finally(() => (f = true));
 
       setTimeout(() => {
-        if (!f && sidePanelOpenNeededBitcoinMethods.includes(method)) {
+        if (!f) {
           this.keplr.protectedTryOpenSidePanelIfEnabled();
         }
       }, 100);
-    });
-  }
-
-  async getAccounts(): Promise<string[]> {
-    return this.protectedRequestMethod({
-      method: "getAccounts",
-      params: [],
-    });
-  }
-
-  async requestAccounts(): Promise<string[]> {
-    return this.protectedRequestMethod({
-      method: "requestAccounts",
-      params: [],
-    });
-  }
-
-  async disconnect(): Promise<void> {
-    return this.protectedRequestMethod({
-      method: "disconnect",
-      params: [],
-    });
-  }
-
-  async getNetwork(): Promise<BitcoinNetwork> {
-    return this.protectedRequestMethod({
-      method: "getNetwork",
-      params: [],
-    });
-  }
-
-  async switchNetwork(network: BitcoinNetwork): Promise<BitcoinNetwork> {
-    return this.protectedRequestMethod({
-      method: "switchNetwork",
-      params: [network],
     });
   }
 
@@ -1931,24 +1983,52 @@ class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
     name: string;
     network: BitcoinNetwork;
   }> {
-    return this.protectedRequestMethod({
-      method: "getChain",
-      params: [],
-    });
+    await this.protectedEnableAccess();
+
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-bitcoin",
+      "request-bitcoin-get-chain",
+      {}
+    );
   }
 
   async switchChain(chain: BitcoinChainType): Promise<BitcoinChainType> {
-    return this.protectedRequestMethod({
-      method: "switchChain",
-      params: [chain],
+    // Side panel을 어차피 열어야 하는 메소드이므로 여기선 권한 체크 요청을 생략한다.
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-bitcoin",
+        "request-bitcoin-switch-chain",
+        {
+          chainType: chain,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.keplr.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
     });
   }
 
   async getPublicKey(): Promise<string> {
-    return this.protectedRequestMethod({
-      method: "getPublicKey",
-      params: [],
-    });
+    await this.protectedEnableAccess();
+
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-bitcoin",
+      "request-bitcoin-get-public-key",
+      {}
+    );
   }
 
   async getBalance(): Promise<{
@@ -1956,48 +2036,121 @@ class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
     unconfirmed: number;
     total: number;
   }> {
-    return this.protectedRequestMethod({
-      method: "getBalance",
-      params: [],
-    });
+    await this.protectedEnableAccess();
+
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-bitcoin",
+      "request-bitcoin-get-balance",
+      {}
+    );
   }
 
   async getInscriptions(): Promise<string[]> {
-    return this.protectedRequestMethod({
-      method: "getInscriptions",
-      params: [],
-    });
+    await this.protectedEnableAccess();
+
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-bitcoin",
+      "request-bitcoin-get-inscriptions",
+      {}
+    );
   }
 
   async signMessage(
     message: string,
-    type?: BitcoinSignMessageType
+    signType?: BitcoinSignMessageType
   ): Promise<string> {
-    // Default to ECDSA if type is not provided
-    return this.protectedRequestMethod({
-      method: "signMessage",
-      params: [message, type ?? BitcoinSignMessageType.ECDSA],
+    // Side panel을 어차피 열어야 하는 메소드이므로 여기선 권한 체크 요청을 생략한다.
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-bitcoin",
+        "request-sign-bitcoin-message",
+        {
+          message,
+          signType,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.keplr.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
     });
   }
 
   async sendBitcoin(to: string, amount: number): Promise<string> {
-    return this.protectedRequestMethod({
-      method: "sendBitcoin",
-      params: [to, amount],
+    // Side panel을 어차피 열어야 하는 메소드이므로 여기선 권한 체크 요청을 생략한다.
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-bitcoin",
+        "request-bitcoin-send-bitcoin",
+        {
+          to,
+          amount,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.keplr.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
     });
   }
 
   async pushTx(rawTxHex: string): Promise<string> {
-    return this.protectedRequestMethod({
-      method: "pushTx",
-      params: [rawTxHex],
-    });
+    await this.protectedEnableAccess();
+
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-bitcoin",
+      "request-bitcoin-push-tx",
+      {
+        rawTxHex,
+      }
+    );
   }
 
   async signPsbt(psbtHex: string, options?: SignPsbtOptions): Promise<string> {
-    return this.protectedRequestMethod({
-      method: "signPsbt",
-      params: [psbtHex, options],
+    // Side panel을 어차피 열어야 하는 메소드이므로 여기선 권한 체크 요청을 생략한다.
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-bitcoin",
+        "request-sign-bitcoin-psbt",
+        {
+          psbtHex,
+          options,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.keplr.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
     });
   }
 
@@ -2005,9 +2158,28 @@ class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
     psbtsHexes: string[],
     options?: SignPsbtOptions
   ): Promise<string[]> {
-    return this.protectedRequestMethod({
-      method: "signPsbts",
-      params: [psbtsHexes, options],
+    // Side panel을 어차피 열어야 하는 메소드이므로 여기선 권한 체크 요청을 생략한다.
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-bitcoin",
+        "request-sign-bitcoin-psbts",
+        {
+          psbtsHexes,
+          options,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.keplr.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
     });
   }
 

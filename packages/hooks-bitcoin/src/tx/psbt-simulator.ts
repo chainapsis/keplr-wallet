@@ -375,6 +375,7 @@ export class PsbtSimulator extends TxChainSetter implements IPsbtSimulator {
           promise
             .then(({ psbtHex, txSize, remainderValue, remainderStatus }) => {
               if (
+                state.recentPsbtHex === null ||
                 state.recentTxSize === null ||
                 state.recentTxSize > txSize.txVBytes
               ) {

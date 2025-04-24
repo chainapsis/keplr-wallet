@@ -196,15 +196,12 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
   ]);
 
   // bitcoin tx size는 amount, fee rate, recipient address type에 따라 달라진다.
-  // 또한 별도의 simulator refresh 로직이 없기 때문에 availableUTXOs의 값이 변경되면
-  // 새로운 key를 생성해서 새로운 simulator를 생성하도록 한다.
+  // 키는 요청의 고유한 값들을 조합하여 이전에 캐시된 psbt를 잘못 불러오는 것을 방지해야 한다.
   const psbtSimulatorKey = useMemo(() => {
-    const recipientPrefix = (() => {
+    const recipient = (() => {
       if (!sendConfigs.recipientConfig.uiProperties.error) {
-        // return leading 4 string of recipient address if recipient is valid (bc1p, bc1q, tb1p, tb1q)
-        return sendConfigs.recipientConfig.recipient.slice(0, 4);
+        return sendConfigs.recipientConfig.recipient;
       }
-
       return "invalid";
     })();
 
@@ -215,18 +212,18 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
           new Dec(0)
         );
 
-        return totalAmount.toString(16);
+        return totalAmount.round().toBigNumber().toString(16);
       }
 
       return "0";
     })();
 
-    return (
-      recipientPrefix +
-      amountHex +
-      sendConfigs.feeRateConfig.feeRate.toString() +
-      availableUTXOs.length.toString()
-    );
+    return [
+      `to-${recipient}`,
+      `amt-${amountHex}`,
+      `fee-${sendConfigs.feeRateConfig.feeRate.toString()}`,
+      `bal-${availableUTXOs.length.toString()}`,
+    ].join("-");
   }, [
     sendConfigs.amountConfig.amount,
     sendConfigs.feeRateConfig.feeRate,
@@ -471,6 +468,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
         if (
           txConfigsValidate.interactionBlocked ||
           !sendConfigs.feeConfig.fee ||
+          psbtSimulator.isSimulating ||
           !psbtSimulator.psbtHex
         ) {
           return;
