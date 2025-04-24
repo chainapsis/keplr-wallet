@@ -95,7 +95,7 @@ const ManageViewAssetTokenPageButton = styled(TextButton)`
   }
 `;
 
-const fields = [
+const tokenSearchFields = [
   (item: ViewToken) => {
     const currency = item.token.currency;
     if ("originCurrency" in currency) {
@@ -163,7 +163,7 @@ export const AvailableTabView: FunctionComponent<{
     const _allBalancesSearchFiltered = useSearch(
       [...allBalances],
       trimSearch,
-      fields
+      tokenSearchFields
     );
 
     const hasLowBalanceTokens =
