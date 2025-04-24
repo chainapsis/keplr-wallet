@@ -32,6 +32,7 @@ import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import { useGetSearchChains } from "../../hooks/use-get-search-chains";
 import { useEarnBottomTag } from "../earn/components/use-earn-bottom-tag";
 import { AdjustmentIcon } from "../../components/icon/adjustment";
+import { useSearch } from "../../hooks/use-search";
 
 const zeroDec = new Dec(0);
 
@@ -94,6 +95,42 @@ const ManageViewAssetTokenPageButton = styled(TextButton)`
   }
 `;
 
+const tokenSearchFields = [
+  {
+    key: "originCurrency.coinDenom",
+    function: (item: ViewToken) => {
+      const currency = item.token.currency;
+      if ("originCurrency" in currency) {
+        return currency.originCurrency?.coinDenom || "";
+      }
+      return currency.coinDenom;
+    },
+  },
+  "chainInfo.chainName",
+];
+
+const chainSearchFields = [
+  "chainInfo.chainName",
+  {
+    key: "ethereum-and-bitcoin",
+    function: (item: { chainInfo: ChainInfo | ModularChainInfo }) => {
+      if (
+        "starknet" in item.chainInfo ||
+        item.chainInfo.chainName.toLowerCase().includes("ethereum")
+      ) {
+        return "eth";
+      }
+      if (
+        "bitcoin" in item.chainInfo ||
+        item.chainInfo.chainName.toLowerCase().includes("bitcoin")
+      ) {
+        return "btc";
+      }
+      return "";
+    },
+  },
+];
+
 export const AvailableTabView: FunctionComponent<{
   search: string;
   isNotReady?: boolean;
@@ -129,14 +166,11 @@ export const AvailableTabView: FunctionComponent<{
 
     const isFirstTime = allBalancesNonZero.length === 0;
 
-    const _allBalancesSearchFiltered = useMemo(() => {
-      return allBalances.filter((token) => {
-        return (
-          token.chainInfo.chainName.toLowerCase().includes(trimSearch) ||
-          token.token.currency.coinDenom.toLowerCase().includes(trimSearch)
-        );
-      });
-    }, [allBalances, trimSearch]);
+    const _allBalancesSearchFiltered = useSearch(
+      [...allBalances],
+      trimSearch,
+      tokenSearchFields
+    );
 
     const hasLowBalanceTokens =
       hugeQueriesStore.filterLowBalanceTokens(allBalances).filteredTokens
@@ -164,12 +198,7 @@ export const AvailableTabView: FunctionComponent<{
         chainStore.groupedModularChainInfos.filter(
           (modularChainInfo) =>
             ("starknet" in modularChainInfo || "bitcoin" in modularChainInfo) &&
-            !chainStore.isEnabledChain(modularChainInfo.chainId) &&
-            trimSearch.length >= 3 &&
-            (modularChainInfo.chainId.toLowerCase().includes(trimSearch) ||
-              modularChainInfo.chainName.toLowerCase().includes(trimSearch) ||
-              trimSearch === "eth" ||
-              trimSearch === "btc")
+            !chainStore.isEnabledChain(modularChainInfo.chainId)
         );
 
       disabledChainInfos = [
@@ -223,12 +252,13 @@ export const AvailableTabView: FunctionComponent<{
         }[]
       );
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [
-      chainStore,
-      chainStore.modularChainInfosInUI,
-      searchedChainInfos,
+    }, [chainStore, chainStore.modularChainInfosInUI, searchedChainInfos]);
+
+    const searchedLookingForChains = useSearch(
+      trimSearch.length >= 2 ? lookingForChains : [],
       trimSearch,
-    ]);
+      chainSearchFields
+    );
 
     const TokenViewData: {
       title: string;
@@ -272,7 +302,7 @@ export const AvailableTabView: FunctionComponent<{
     const isShowNotFound =
       allBalancesSearchFiltered.length === 0 &&
       trimSearch.length > 0 &&
-      lookingForChains.length === 0;
+      searchedLookingForChains.length === 0;
 
     const isShowCheckMangeAssetViewGuide =
       isShowNotFound &&
@@ -449,12 +479,12 @@ export const AvailableTabView: FunctionComponent<{
                 }
               )}
             </Stack>
-            {lookingForChains.length > 0 && (
+            {searchedLookingForChains.length > 0 && (
               <React.Fragment>
                 {allBalancesSearchFiltered.length > 0 && (
                   <Gutter size="1rem" direction="vertical" />
                 )}
-                <LookingForChains lookingForChains={lookingForChains} />
+                <LookingForChains lookingForChains={searchedLookingForChains} />
               </React.Fragment>
             )}
 
