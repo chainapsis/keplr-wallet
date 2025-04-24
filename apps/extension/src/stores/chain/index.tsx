@@ -30,6 +30,7 @@ import {
   SetChainEndpointsMsg,
   ToggleChainsMsg,
   TokenScan,
+  TryUpdateAllChainInfosMsg,
   TryUpdateEnabledChainInfosMsg,
 } from "@keplr-wallet/background";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
@@ -51,7 +52,8 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   constructor(
     protected readonly embedChainInfos: (ModularChainInfo | ChainInfo)[],
     protected readonly keyRingStore: KeyRingStore,
-    protected readonly requester: MessageRequester
+    protected readonly requester: MessageRequester,
+    protected readonly updateAllChainInfo: boolean
   ) {
     super(
       embedChainInfos.map((chainInfo) => {
@@ -412,11 +414,23 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     this._isInitializing = false;
 
     // Must not wait!!
-    this.tryUpdateEnabledChainInfos();
+    if (!this.updateAllChainInfo) {
+      this.tryUpdateEnabledChainInfos();
+    } else {
+      this.tryUpdateAllChainInfos();
+    }
   }
 
   async tryUpdateEnabledChainInfos(): Promise<void> {
     const msg = new TryUpdateEnabledChainInfosMsg();
+    const updated = await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    if (updated) {
+      await this.updateChainInfosFromBackground();
+    }
+  }
+
+  async tryUpdateAllChainInfos(): Promise<void> {
+    const msg = new TryUpdateAllChainInfosMsg();
     const updated = await this.requester.sendMessage(BACKGROUND_PORT, msg);
     if (updated) {
       await this.updateChainInfosFromBackground();
