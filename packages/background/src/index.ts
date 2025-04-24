@@ -229,6 +229,7 @@ export function init(
   );
 
   const keyRingBitcoinService = new KeyRingBitcoin.KeyRingBitcoinService(
+    storeCreator("keyring-bitcoin"),
     chainsService,
     vaultService,
     keyRingV2Service,

@@ -22,6 +22,7 @@ import {
   ErrFailedSign,
   ErrSignRejected,
 } from "./ledger-types";
+import { sortObjectByKey } from "@keplr-wallet/common";
 
 export const connectAndSignEIP712WithLedger = async (
   useWebHID: boolean,
@@ -36,7 +37,8 @@ export const connectAndSignEIP712WithLedger = async (
     types: Record<string, { name: string; type: string }[] | undefined>;
     domain: Record<string, any>;
     primaryType: string;
-  }
+  },
+  signPlainJSON: boolean
 ): Promise<Uint8Array> => {
   let transport: Transport;
   try {
@@ -136,14 +138,25 @@ export const connectAndSignEIP712WithLedger = async (
     }
 
     try {
-      // Unfortunately, signEIP712Message not works on ledger yet.
-      return ethSignatureToBytes(
-        await ethApp.signEIP712HashedMessage(
-          `m/44'/60'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`,
-          domainHash(data),
-          messageHash(data)
-        )
-      );
+      if (!signPlainJSON) {
+        // Unfortunately, signEIP712Message not works on ledger yet.
+        return ethSignatureToBytes(
+          await ethApp.signEIP712HashedMessage(
+            `m/44'/60'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`,
+            domainHash(data),
+            messageHash(data)
+          )
+        );
+      } else {
+        return ethSignatureToBytes(
+          await ethApp.signPersonalMessage(
+            `m/44'/60'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`,
+            Buffer.from(JSON.stringify(sortObjectByKey(signDoc))).toString(
+              "hex"
+            )
+          )
+        );
+      }
     } catch (e) {
       if (e?.message.includes("(0x6985)")) {
         throw new KeplrError(

@@ -112,31 +112,24 @@ export class PermissionInteractiveService {
     );
   }
 
-  async ensureEnabledForEVM(env: Env, origin: string): Promise<void> {
+  async ensureEnabledForEVM(
+    env: Env,
+    origin: string,
+    newCurrentChainId?: string
+  ): Promise<void> {
     await this.keyRingService.ensureUnlockInteractive(env);
 
     await this.ensureKeyRingLedgerAppConnected(env, "Ethereum");
 
-    const currentChainIdForEVM =
-      this.permissionService.getCurrentChainIdForEVM(origin) ??
-      (() => {
-        const chainInfos = this.chainsService.getChainInfos();
-        // If currentChainId is not saved, Make Ethereum current chain.
-        const ethereumChainId = chainInfos.find(
-          (chainInfo) =>
-            chainInfo.evm !== undefined && chainInfo.chainId === "eip155:1"
-        )?.chainId;
-
-        if (!ethereumChainId) {
-          throw new Error("The Ethereum chain info is not found");
-        }
-
-        return ethereumChainId;
-      })();
+    const newCurrentChainIdForEVM =
+      newCurrentChainId ||
+      this.permissionService.getCurrentChainIdForEVM(origin) ||
+      // If the current chain id is not set, use Ethereum mainnet as the default chain id.
+      "eip155:1";
 
     await this.permissionService.checkOrGrantBasicAccessPermission(
       env,
-      [currentChainIdForEVM],
+      [newCurrentChainIdForEVM],
       origin,
       {
         isForEVM: true,
@@ -144,13 +137,19 @@ export class PermissionInteractiveService {
     );
   }
 
-  async ensureEnabledForStarknet(env: Env, origin: string): Promise<void> {
+  async ensureEnabledForStarknet(
+    env: Env,
+    origin: string,
+    newCurrentChainId?: string
+  ): Promise<void> {
     await this.keyRingService.ensureUnlockInteractive(env);
 
     await this.ensureKeyRingLedgerAppConnected(env, "Starknet");
 
     const currentChainIdForStarknet =
-      this.permissionService.getCurrentChainIdForStarknet(origin) ??
+      newCurrentChainId ||
+      this.permissionService.getCurrentChainIdForStarknet(origin) ||
+      // If the current chain id is not set, use Starknet mainnet as the default chain id.
       "starknet:SN_MAIN";
 
     await this.permissionService.checkOrGrantBasicAccessPermission(
@@ -163,16 +162,22 @@ export class PermissionInteractiveService {
     );
   }
 
-  async ensureEnabledForBitcoin(env: Env, origin: string): Promise<void> {
+  async ensureEnabledForBitcoin(
+    env: Env,
+    origin: string,
+    newCurrentChainId?: string
+  ): Promise<void> {
     await this.keyRingService.ensureUnlockInteractive(env);
 
-    const currentBaseChainIdForBitcoin =
-      this.permissionService.getCurrentBaseChainIdForBitcoin(origin) ??
-      `bip122:${GenesisHash.MAINNET}`;
+    const currentChainIdForBitcoin =
+      newCurrentChainId ||
+      `${
+        this.permissionService.getCurrentBaseChainIdForBitcoin(origin) ||
+        // If the current chain id is not set, use Bitcoin mainnet as the default chain id.
+        `bip122:${GenesisHash.MAINNET}`
+      }:taproot`;
 
-    const isTestnet = !currentBaseChainIdForBitcoin.includes(
-      GenesisHash.MAINNET
-    );
+    const isTestnet = !currentChainIdForBitcoin.includes(GenesisHash.MAINNET);
 
     await this.ensureKeyRingLedgerAppConnected(
       env,
@@ -181,7 +186,7 @@ export class PermissionInteractiveService {
 
     await this.permissionService.checkOrGrantBasicAccessPermission(
       env,
-      currentBaseChainIdForBitcoin,
+      [currentChainIdForBitcoin],
       origin,
       {
         isForBitcoin: true,

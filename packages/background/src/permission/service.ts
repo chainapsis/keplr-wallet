@@ -206,10 +206,11 @@ export class PermissionService {
 
     const ungrantedChainIds: string[] = [];
     for (const chainId of chainIds) {
+      const baseChainId = this.chainsService.getBaseChainIdOrThrow(chainId);
       if (
-        !this.hasPermission(chainId, getBasicAccessPermissionType(), origin)
+        !this.hasPermission(baseChainId, getBasicAccessPermissionType(), origin)
       ) {
-        ungrantedChainIds.push(chainId);
+        ungrantedChainIds.push(baseChainId);
       }
     }
 
@@ -722,7 +723,9 @@ export class PermissionService {
         origin
       )
     ) {
-      this.currentChainIdForEVMByOriginMap.delete(origin);
+      runInAction(() => {
+        this.currentChainIdForEVMByOriginMap.delete(origin);
+      });
       return;
     }
 
@@ -779,7 +782,9 @@ export class PermissionService {
         origin
       )
     ) {
-      this.currentChainIdForStarknetByOriginMap.delete(origin);
+      runInAction(() => {
+        this.currentChainIdForStarknetByOriginMap.delete(origin);
+      });
       return;
     }
 
@@ -841,7 +846,9 @@ export class PermissionService {
         origin
       )
     ) {
-      this.currentBaseChainIdForBitcoinByOriginMap.delete(origin);
+      runInAction(() => {
+        this.currentBaseChainIdForBitcoinByOriginMap.delete(origin);
+      });
       return;
     }
 
@@ -864,7 +871,7 @@ export class PermissionService {
         "keplr_bitcoinChainChanged",
         {
           origin,
-          bitcoinChainId: "0x" + genesisHash,
+          bitcoinChainId: `bip122:${genesisHash}`,
           network,
         }
       );

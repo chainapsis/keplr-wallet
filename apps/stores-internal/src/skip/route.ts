@@ -205,6 +205,34 @@ const Schema = Joi.object<RouteResponse>({
           bridge_id: Joi.string().required(),
           smart_relay: Joi.boolean().required(),
         }).unknown(true),
+      }).unknown(true),
+      Joi.object({
+        eureka_transfer: Joi.object({
+          bridge_id: Joi.string().required(),
+          callback_adapter_contract_address: Joi.string().required(),
+          destination_port: Joi.string().required(),
+          entry_contract_address: Joi.string().required(),
+          denom_in: Joi.string().required(),
+          denom_out: Joi.string().required(),
+          source_client: Joi.string().required(),
+          from_chain_id: Joi.string().required(),
+          to_chain_id: Joi.string().required(),
+          to_chain_callback_contract_address: Joi.string().required(),
+          to_chain_entry_contract_address: Joi.string().required(),
+          pfm_enabled: Joi.boolean().required(),
+          smart_relay: Joi.boolean().required(),
+          smart_relay_fee_quote: Joi.object({
+            fee_amount: Joi.string().required(),
+            fee_denom: Joi.string().required(),
+            relayer_address: Joi.string().required(),
+            expiration: Joi.string().required(),
+          })
+            .required()
+            .unknown(true),
+          supports_memo: Joi.boolean().required(),
+        })
+          .required()
+          .unknown(true),
       }).unknown(true)
     )
     .required(),
@@ -413,7 +441,7 @@ export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
         allow_unsafe: true,
         smart_relay: true,
         go_fast: true,
-        experimental_features: ["hyperlane"],
+        experimental_features: ["hyperlane", "eureka"],
         smart_swap_options: {
           evm_swaps:
             this.smartSwapOptions?.evmSwaps === undefined

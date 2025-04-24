@@ -274,7 +274,7 @@ export class KeyRingMnemonicService {
           psbt.finalizeTaprootInput(index);
         }
       } else {
-        psbt.signInput(index, signer);
+        psbt.signInput(index, signer, sighashTypes);
 
         const isValid = psbt.validateSignaturesOfInput(
           index,

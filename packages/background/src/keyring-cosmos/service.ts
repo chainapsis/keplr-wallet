@@ -17,6 +17,7 @@ import {
   checkAndValidateADR36AminoSignDoc,
   encodeSecp256k1Pubkey,
   encodeSecp256k1Signature,
+  EthermintChainIdHelper,
   makeADR36AminoSignDoc,
   serializeSignDoc,
   TendermintTxTracer,
@@ -36,6 +37,8 @@ import Long from "long";
 import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
 import { AnalyticsService } from "../analytics";
 import { ChainsUIService } from "../chains-ui";
+import { Int } from "@keplr-wallet/unit";
+import bigInteger from "big-integer";
 
 export class KeyRingCosmosService {
   constructor(
@@ -1213,6 +1216,26 @@ export class KeyRingCosmosService {
     if (isEthermintLike && keyInfo.type === "ledger" && !forceEVMLedger) {
       KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
         chainId
+      );
+    }
+
+    let ethChainId: number;
+    if (chainInfo.features?.includes("evm-ledger-sign-plain-json")) {
+      ethChainId = 9999;
+    } else {
+      ethChainId = EthermintChainIdHelper.parse(chainId).ethChainId;
+    }
+
+    const ethChainIdInMsg: Int = (() => {
+      const value = eip712.domain["chainId"];
+      if (typeof value === "string" && value.startsWith("0x")) {
+        return new Int(bigInteger(value.replace("0x", ""), 16).toString());
+      }
+      return new Int(value);
+    })();
+    if (!ethChainIdInMsg.equals(new Int(ethChainId))) {
+      throw new Error(
+        `Unmatched chain id for eth (expected: ${ethChainId}, actual: ${eip712.domain["chainId"]})`
       );
     }
 

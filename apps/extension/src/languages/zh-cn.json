@@ -34,6 +34,7 @@
   "pages.register.components.bip-44-path.paragraph-lost": "丢失的路径无法恢复",
   "pages.register.components.bip-44-path.paragraph-unfamiliar": "如果你不熟悉此功能，请跳过或撤消此步骤 -> <reset>重置设置</reset>",
   "pages.register.components.bip-44-path.hd-path-subtitle": "HD派生路径",
+  "pages.register.components.bip-44-path.hd-path-tooltip": "前缀（例如 m/44'、m/84'、m/86'）会根据链和地址类型自动设置。请根据需要填写剩余路径.",
   "pages.register.components.form.name-password.wallet-name-label": "钱包名称",
   "pages.register.components.form.name-password.wallet-name-placeholder": "例如：交易、NFT保险柜、投资",
   "pages.register.components.form.name-password.password-label": "创建Keplr密码",
@@ -396,6 +397,13 @@
   "page.permission.requesting-connection-title": "请求连接",
   "page.permission.paragraph": "通过允许此请求，网站将：{br}• 获取你的Keplr钱包上的所有链的列表",
 
+  "page.permission.basic-access.select-chain-title": "连接",
+  "page.permission.basic-access-for-bitcoin.select-chain-paragraph": "选择要连接的比特币链。",
+  "page.permission.basic-access-for-bitcoin.address-type-guide-title": "使用您的{addressType}地址进行连接",
+  "page.permission.basic-access-for-bitcoin.address-type-guide-paragraph": "您可以稍后在 Keplr 扩展中切换网络和地址类型。",
+
+  "page.permission.basic-access-for-evm.select-chain-paragraph": "选择一个与 EVM 兼容的链进行连接。",
+
   "page.sign.cosmos.tx.title": "确认交易",
   "page.sign.cosmos.tx.messages": "消息",
   "page.sign.cosmos.tx.authz-send-grant.warning-title": "你允许另一个账户在指定的时间内从你的钱包转移资产，谨防骗子并谨慎授权。",
@@ -477,6 +485,8 @@
   "page.sign.components.messages.vote.paragraph": "对提案{proposalId}投{textualOption}票",
   "page.sign.components.messages.wasm-message-view.close-button": "关闭",
   "page.sign.components.messages.wasm-message-view.details-button": "详情",
+  "page.sign.components.messages.create-btc-delegation.title": "注册 BTC 质押",
+  "page.sign.components.messages.create-btc-delegation.paragraph": "提交相关数据至 Babylon Genesis 链。",
 
   "page.sign.components.ledger-guide.box.error-title": "错误",
   "page.sign.components.ledger-guide.box.connect-and-unlock-ledger-paragraph": "连接并解锁你的Ledger设备。",
@@ -675,7 +685,7 @@
   "button.ok": "好的",
   "button.next": "下一步",
   "button.review": "审查",
-  "button.advanced": "高级",
+  "button.advanced": "设置派生路径 (高级)",
   "button.approve": "确认",
   "button.save": "保存",
   "button.close": "关闭",

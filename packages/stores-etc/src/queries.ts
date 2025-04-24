@@ -10,6 +10,8 @@ import {
   ObservableQueryTaxCaps,
   ObservableQueryTaxRate,
 } from "./terra-classic/treasury";
+import { ObservableQuerySkipTokenInfo } from "./token-info";
+import { ObservableQueryInitiaDynamicFee } from "./initia/dynamicfee";
 
 export interface KeplrETCQueries {
   keplrETC: KeplrETCQueriesImpl;
@@ -18,6 +20,8 @@ export interface KeplrETCQueries {
 export const KeplrETCQueries = {
   use(options: {
     ethereumURL: string;
+    skipTokenInfoBaseURL: string;
+    skipTokenInfoAPIURI: string;
   }): (
     queriesSetBase: QueriesSetBase,
     sharedContext: QuerySharedContext,
@@ -36,7 +40,9 @@ export const KeplrETCQueries = {
           sharedContext,
           chainId,
           chainGetter,
-          options.ethereumURL
+          options.ethereumURL,
+          options.skipTokenInfoBaseURL,
+          options.skipTokenInfoAPIURI
         ),
       };
     };
@@ -46,16 +52,21 @@ export const KeplrETCQueries = {
 export class KeplrETCQueriesImpl {
   public readonly queryERC20Metadata: DeepReadonly<ObservableQueryERC20Metadata>;
   public readonly queryEVMTokenInfo: DeepReadonly<ObservableQueryEVMTokenInfo>;
+  public readonly querySkipTokenInfo: DeepReadonly<ObservableQuerySkipTokenInfo>;
 
   public readonly queryTerraClassicTaxRate: DeepReadonly<ObservableQueryTaxRate>;
   public readonly queryTerraClassicTaxCaps: DeepReadonly<ObservableQueryTaxCaps>;
+
+  public readonly queryInitiaDynamicFee: DeepReadonly<ObservableQueryInitiaDynamicFee>;
 
   constructor(
     _base: QueriesSetBase,
     sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
-    ethereumURL: string
+    ethereumURL: string,
+    skipTokenInfoBaseURL: string,
+    skipTokenInfoAPIURI: string
   ) {
     this.queryERC20Metadata = new ObservableQueryERC20Metadata(
       sharedContext,
@@ -66,6 +77,13 @@ export class KeplrETCQueriesImpl {
       chainId,
       chainGetter
     );
+    this.querySkipTokenInfo = new ObservableQuerySkipTokenInfo(
+      sharedContext,
+      chainId,
+      chainGetter,
+      skipTokenInfoBaseURL,
+      skipTokenInfoAPIURI
+    );
 
     this.queryTerraClassicTaxRate = new ObservableQueryTaxRate(
       sharedContext,
@@ -73,6 +91,12 @@ export class KeplrETCQueriesImpl {
       chainGetter
     );
     this.queryTerraClassicTaxCaps = new ObservableQueryTaxCaps(
+      sharedContext,
+      chainId,
+      chainGetter
+    );
+
+    this.queryInitiaDynamicFee = new ObservableQueryInitiaDynamicFee(
       sharedContext,
       chainId,
       chainGetter

@@ -2,7 +2,7 @@ import { IFeeConfig } from "@keplr-wallet/hooks-bitcoin";
 import { Dec } from "@keplr-wallet/unit";
 import { Psbt, Transaction, script as bscript } from "bitcoinjs-lib";
 import { tapleafHash } from "bitcoinjs-lib/src/payments/bip341";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { fromOutputScript } from "bitcoinjs-lib/src/address";
 import { useGetBitcoinKeys } from "./use-bitcoin-network-config";
 import { SignBitcoinTxInteractionStore } from "@keplr-wallet/stores-core";
@@ -11,7 +11,7 @@ import {
   DUST_THRESHOLD,
   TapBip32Derivation,
 } from "@keplr-wallet/stores-bitcoin";
-import { toXOnly } from "@keplr-wallet/crypto";
+import { Hash, toXOnly } from "@keplr-wallet/crypto";
 import { toASM } from "bitcoinjs-lib/src/script";
 
 interface TapLeafScript {
@@ -85,6 +85,8 @@ export const usePsbtsValidate = (
     Error | undefined
   >(undefined);
 
+  const prevPsbtsHashRef = useRef<string | null>(null);
+
   const {
     chainId,
     network: networkConfig,
@@ -100,6 +102,15 @@ export const usePsbtsValidate = (
       ? [cachedPsbtHex]
       : [];
   }, [interactionData.data, cachedPsbtHex]);
+
+  const psbtsHash = useMemo(() => {
+    if (psbtsHexes.length === 0) {
+      return null;
+    }
+
+    const hash = Hash.sha256(new TextEncoder().encode(psbtsHexes.join(",")));
+    return Buffer.from(hash).toString("hex");
+  }, [psbtsHexes]);
 
   const bitcoinKeys = useGetBitcoinKeys(chainId);
 
@@ -203,7 +214,6 @@ export const usePsbtsValidate = (
 
         return tapLeafHashesToSign;
       };
-
       // 키 경로 지출과 스크립트 경로 지출이 동시에 존재하는 경우는 이론상 가능하지만,
       // 거의 발생하지 않을 것으로 예상되므로 무시한다.
 
@@ -216,66 +226,10 @@ export const usePsbtsValidate = (
         };
       }
 
-      // 2. bip32 derivation 일치 여부 확인
-      // 마스터 지문 일치 여부 확인: derivation 데이터의 첫 번째 요소만 사용
-      // (여러 개의 derivation <하나의 키에서 여러 파생 키를 생성하여 하나의 입력에 서명하는 경우> 사용하는 경우는 희박할 것..)
-      if (bip32Derivation && bip32Derivation.length > 0) {
-        const derivation = bip32Derivation[0];
-
-        // mnemonic으로 생성된 키를 사용하거나 하드웨어 지갑에서 생성된 키를 사용하는 경우에만 검증
-        // mnemonic으로 생성된 키의 경우 파생된 키가 올바른지 검증하는 것은 어려우므로 마스터 키의 지문만 검증한다.
-        // (백그라운드에서 비밀키를 받아와서 하드닝 경로를 포함한 파생 키를 생성 및 검증하는 것은 안전하지 않음)
-        // -> 아예 검증 로직을 백그라운드로 보내버리는 것도 고려해야 함
-        const matchingMasterKey = bitcoinKeys.find(
-          (key) =>
-            key.masterFingerprintHex &&
-            Buffer.from(key.masterFingerprintHex, "hex").equals(
-              derivation.masterFingerprint
-            )
-        );
-
-        if (matchingMasterKey) {
-          // CHECK: master fingerprint 일치 여부 이상으로 검증이 필요할까?
-          // 이 훅 내부에서 렛저 연결하고 파생키를 검증하는 것은 좀 비효율 + 번거로움
-
-          // 스크립트 경로 지출인 경우, leafHashes가 주어진다. (taproot)
-          let tapLeafHashesToSign: Buffer[] | undefined;
-          if ("leafHashes" in derivation) {
-            tapLeafHashesToSign = derivation.leafHashes;
-          }
-
-          if (tapLeafScripts && tapLeafScripts.length > 0) {
-            const xonlyUserPubKey = toXOnly(derivation.pubkey); // 파생 키의 xonly 공개키 사용
-
-            const tapLeafHashesToSignFromScript = getTapLeafHashesToSign(
-              xonlyUserPubKey,
-              tapLeafScripts
-            );
-
-            tapLeafHashesToSign = tapLeafHashesToSignFromScript.filter(
-              (hash) =>
-                !tapLeafHashesToSign?.some((existingHash) =>
-                  existingHash.equals(hash)
-                )
-            );
-          }
-
-          return {
-            isToSign: true,
-            hdPath: derivation.path,
-            tapLeafHashesToSign,
-          };
-        }
-      }
-
-      // 3. 일치하지 않더라도 script 경로 지출인 경우 서명 대상으로 추가
+      // 2. taproot script 경로 지출 매칭 여부 확인
       if (tapLeafScripts && tapLeafScripts.length > 0) {
-        // taproot 키가 여러 개 존재할 가능성?
-        const taprootKey = bitcoinKeys.find(
-          (key) => key.paymentType === "taproot"
-        );
-        if (taprootKey) {
-          const xOnlyUserPubKey = toXOnly(Buffer.from(taprootKey.pubKey));
+        for (const key of bitcoinKeys) {
+          const xOnlyUserPubKey = toXOnly(Buffer.from(key.pubKey));
           const tapLeafHashesToSignFromScript = getTapLeafHashesToSign(
             xOnlyUserPubKey,
             tapLeafScripts
@@ -284,8 +238,53 @@ export const usePsbtsValidate = (
           if (tapLeafHashesToSignFromScript.length > 0) {
             return {
               isToSign: true,
-              hdPath: taprootKey.derivationPath,
+              hdPath: key.derivationPath,
               tapLeafHashesToSign: tapLeafHashesToSignFromScript,
+            };
+          }
+        }
+      }
+
+      // 3. bip32 derivation 마스터 지문 일치 여부 확인
+      // 1, 2번 검증에서 일반적으로 걸리지 않는 경우에만 거치는 검증
+      // (하드웨어 지갑, 또는 현재 연결된 계정의 키가 아닌 다른 파생 키의 경로가 주어진 경우)
+      if (bip32Derivation && bip32Derivation.length > 0) {
+        for (const derivation of bip32Derivation) {
+          const matchingKey = bitcoinKeys.find(
+            (key) =>
+              key.masterFingerprintHex &&
+              Buffer.from(key.masterFingerprintHex, "hex").equals(
+                derivation.masterFingerprint
+              )
+          );
+
+          if (matchingKey) {
+            // taproot 스크립트 경로 지출인 경우, leafHashes가 주어진다.
+            let tapLeafHashesToSign: Buffer[] | undefined;
+            if ("leafHashes" in derivation) {
+              tapLeafHashesToSign = derivation.leafHashes;
+            }
+
+            if (tapLeafScripts && tapLeafScripts.length > 0) {
+              const xonlyUserPubKey = toXOnly(derivation.pubkey);
+
+              const tapLeafHashesToSignFromScript = getTapLeafHashesToSign(
+                xonlyUserPubKey,
+                tapLeafScripts
+              );
+
+              tapLeafHashesToSign = tapLeafHashesToSignFromScript.filter(
+                (hash) =>
+                  !tapLeafHashesToSign?.some((existingHash) =>
+                    existingHash.equals(hash)
+                  )
+              );
+            }
+
+            return {
+              isToSign: true,
+              hdPath: derivation.path,
+              tapLeafHashesToSign,
             };
           }
         }
@@ -322,7 +321,7 @@ export const usePsbtsValidate = (
     };
   }, []);
 
-  const validatePsbts = useCallback(async () => {
+  const validatePsbts = useCallback(() => {
     // 검증 파라미터가 변경되어서 재검증이 필요하면 오류를 초기화한다.
     setCriticalValidationError(undefined);
 
@@ -372,13 +371,24 @@ export const usePsbtsValidate = (
           }
 
           const isSigned = input.finalScriptSig || input.finalScriptWitness;
-          const address = script
-            ? fromOutputScript(script, networkConfig)
-            : "unknown";
+          let address: string;
+          try {
+            address = script
+              ? fromOutputScript(script, networkConfig)
+              : "unknown";
+          } catch (e) {
+            if (
+              e instanceof Error &&
+              e.message.toLowerCase().includes("has no matching address")
+            ) {
+              address = "unknown";
+            } else {
+              throw new Error("Invalid script to get address");
+            }
+          }
 
           // 서명할 입력이 따로 지정되지 않은 경우, 서명할 입력을 생성한다.
           if (script && !isSigned && !signPsbtOptions?.toSignInputs) {
-            // check if the input is key path spending
             const { isToSign, hdPath, tapLeafHashesToSign } =
               getInputToSignInfo(
                 address,
@@ -506,6 +516,8 @@ export const usePsbtsValidate = (
       // 각 psbt의 유효성 검증 결과를 저장하고 계산된 수수료를 설정한다.
       setValidatedPsbts(validatedPsbtResults);
       feeConfig.setValue(totalFee.truncate().toString());
+      prevPsbtsHashRef.current = psbtsHash;
+
       setIsInitialized(true);
     } catch (e) {
       // psbt deserialize가 실패하는 경우, 이는 더 이상 검증을 진행할 수 없는 치명적인 오류이다.
@@ -514,6 +526,7 @@ export const usePsbtsValidate = (
     }
   }, [
     psbtsHexes,
+    psbtsHash,
     feeConfig,
     networkConfig,
     signPsbtOptions?.toSignInputs,
@@ -525,12 +538,26 @@ export const usePsbtsValidate = (
   ]);
 
   useEffect(() => {
-    if (bitcoinKeys.length === 0 || psbtsHexes.length === 0 || isInitialized) {
-      return;
-    }
+    // 검증이 필요한 경우:
+    // 1. 아직 초기화되지 않은 상태이면서 필요한 데이터가 모두 있는 경우
+    // 2. PSBT 해시값이 변경된 경우 (psbt의 값 또는 순서가 변경된 경우)
+    const isReady = bitcoinKeys.length > 0 && psbtsHexes.length > 0;
+    const detectedChange =
+      prevPsbtsHashRef.current !== null &&
+      prevPsbtsHashRef.current !== psbtsHash;
 
-    validatePsbts();
-  }, [validatePsbts, isInitialized, psbtsHexes.length, bitcoinKeys.length]);
+    const needValidation = isReady && (!isInitialized || detectedChange);
+
+    if (needValidation) {
+      validatePsbts();
+    }
+  }, [
+    validatePsbts,
+    isInitialized,
+    psbtsHexes.length,
+    bitcoinKeys.length,
+    psbtsHash,
+  ]);
 
   return {
     isInitialized,

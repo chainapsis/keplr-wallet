@@ -40,6 +40,14 @@ export class ObservableQueryERC20ContactInfoInner extends ObservableQueryEVMChai
   get error() {
     return this._querySymbol.error || this._queryDecimals.error;
   }
+
+  get notFound(): boolean {
+    return (
+      !this._querySymbol.isFetching &&
+      this._querySymbol.error == null &&
+      this._querySymbol.response?.data === "0x0"
+    );
+  }
 }
 
 export class ObservableQueryERC20ContractInfo extends HasMapStore<ObservableQueryERC20ContactInfoInner> {

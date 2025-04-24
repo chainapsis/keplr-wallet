@@ -41,6 +41,7 @@
   "pages.register.components.bip-44-path.paragraph-lost": "A lost path cannot be recovered",
   "pages.register.components.bip-44-path.paragraph-unfamiliar": "If you're unfamiliar with this feature, skip or undo this step -> <reset>Reset Settings</reset>",
   "pages.register.components.bip-44-path.hd-path-subtitle": "HD Derivation Path",
+  "pages.register.components.bip-44-path.hd-path-tooltip": "The prefix (e.g. m/44', m/84', m/86') is automatically set based on the chain and address type. Please fill in the rest of the path as needed.",
   "pages.register.components.form.name-password.wallet-name-label": "Wallet Name",
   "pages.register.components.form.name-password.wallet-name-placeholder": "e.g. Trading, NFT Vault, Investment",
   "pages.register.components.form.name-password.password-label": "Create Keplr Password",
@@ -438,6 +439,13 @@
   "page.permission.requesting-connection-title": "Requesting Connection",
   "page.permission.paragraph": "By approving this request, the website will:{br}• Get the list of all chain on your Keplr Wallet",
 
+  "page.permission.basic-access.select-chain-title": "Connect",
+  "page.permission.basic-access-for-bitcoin.select-chain-paragraph": "Select a Bitcoin chain to connect.",
+  "page.permission.basic-access-for-bitcoin.address-type-guide-title": "Connecting with your {addressType} address",
+  "page.permission.basic-access-for-bitcoin.address-type-guide-paragraph": "You can switch the network and address type later in Keplr Extension.",
+
+  "page.permission.basic-access-for-evm.select-chain-paragraph": "Select an EVM-compatible chain to connect.",
+
   "page.sign.cosmos.tx.title": "Confirm Transaction",
   "page.sign.cosmos.tx.messages": "Messages",
   "page.sign.cosmos.tx.authz-send-grant.warning-title": "You are allowing another account to transfer assets from your wallet for the specified period of time. Beware of scammers and approve with caution.",
@@ -528,6 +536,8 @@
   "page.sign.components.messages.vote.paragraph": "Vote <b>{textualOption}</b> on <b>Proposal {proposalId}</b>",
   "page.sign.components.messages.wasm-message-view.close-button": "Close",
   "page.sign.components.messages.wasm-message-view.details-button": "Details",
+  "page.sign.components.messages.create-btc-delegation.title": "Register BTC Stake",
+  "page.sign.components.messages.create-btc-delegation.paragraph": "Submit all relevant staking data to the Babylon Genesis chain.",
 
   "page.sign.components.ledger-guide.box.error-title": "Error",
   "page.sign.components.ledger-guide.box.connect-and-unlock-ledger-paragraph": "Connect and unlock your Ledger device.",
@@ -826,7 +836,7 @@
   "button.ok": "OK",
   "button.next": "Next",
   "button.review": "Review",
-  "button.advanced": "Advanced",
+  "button.advanced": "Set Derivation Path (Advanced)",
   "button.approve": "Approve",
   "button.agree": "Agree",
   "button.save": "Save",

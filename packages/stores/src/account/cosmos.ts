@@ -50,7 +50,7 @@ import {
   ProtoMsgsOrWithAminoMsgs,
 } from "./types";
 import {
-  getEip712TypedDataBasedOnChainId,
+  getEip712TypedDataBasedOnChainInfo,
   txEventsWithPreOnFulfill,
 } from "./utils";
 import { ExtensionOptionsWeb3Tx } from "@keplr-wallet/proto-types/ethermint/types/v1/web3";
@@ -465,8 +465,12 @@ export class CosmosAccountImpl {
           memo: escapeHTML(memo),
         };
 
+        const chainInfo = this.chainGetter.getChain(this.chainId);
         const chainIsInjective = this.chainId.startsWith("injective");
         const chainIsStratos = this.chainId.startsWith("stratos");
+        const ethSignPlainJson: boolean =
+          chainInfo.features &&
+          chainInfo.features.includes("evm-ledger-sign-plain-json");
 
         if (eip712Signing) {
           if (chainIsInjective) {
@@ -480,7 +484,14 @@ export class CosmosAccountImpl {
             //      That means this part is not standard.
             (signDocRaw as Mutable<StdSignDoc>).fee = {
               ...signDocRaw.fee,
-              feePayer: this.base.bech32Address,
+              ...(() => {
+                if (ethSignPlainJson) {
+                  return {};
+                }
+                return {
+                  feePayer: this.base.bech32Address,
+                };
+              })(),
             };
           }
         }
@@ -514,7 +525,10 @@ export class CosmosAccountImpl {
           return await experimentalSignEIP712CosmosTx_v0(
             this.chainId,
             this.base.bech32Address,
-            getEip712TypedDataBasedOnChainId(this.chainId, msgs),
+            getEip712TypedDataBasedOnChainInfo(
+              this.chainGetter.getChain(this.chainId),
+              msgs
+            ),
             signDoc,
             signOptions
           );
@@ -527,35 +541,36 @@ export class CosmosAccountImpl {
                 messages: protoMsgs,
                 timeoutHeight: signResponse.signed.timeout_height,
                 memo: signResponse.signed.memo,
-                extensionOptions: eip712Signing
-                  ? [
-                      {
-                        typeUrl: (() => {
-                          if (chainIsInjective) {
-                            return "/injective.types.v1beta1.ExtensionOptionsWeb3Tx";
-                          }
+                extensionOptions:
+                  eip712Signing && !ethSignPlainJson
+                    ? [
+                        {
+                          typeUrl: (() => {
+                            if (chainIsInjective) {
+                              return "/injective.types.v1beta1.ExtensionOptionsWeb3Tx";
+                            }
 
-                          return "/ethermint.types.v1.ExtensionOptionsWeb3Tx";
-                        })(),
-                        value: ExtensionOptionsWeb3Tx.encode(
-                          ExtensionOptionsWeb3Tx.fromPartial({
-                            typedDataChainId: EthermintChainIdHelper.parse(
-                              this.chainId
-                            ).ethChainId.toString(),
-                            feePayer: !chainIsInjective
-                              ? signResponse.signed.fee.feePayer
-                              : undefined,
-                            feePayerSig: !chainIsInjective
-                              ? Buffer.from(
-                                  signResponse.signature.signature,
-                                  "base64"
-                                )
-                              : undefined,
-                          })
-                        ).finish(),
-                      },
-                    ]
-                  : undefined,
+                            return "/ethermint.types.v1.ExtensionOptionsWeb3Tx";
+                          })(),
+                          value: ExtensionOptionsWeb3Tx.encode(
+                            ExtensionOptionsWeb3Tx.fromPartial({
+                              typedDataChainId: EthermintChainIdHelper.parse(
+                                this.chainId
+                              ).ethChainId.toString(),
+                              feePayer: !chainIsInjective
+                                ? signResponse.signed.fee.feePayer
+                                : undefined,
+                              feePayerSig: !chainIsInjective
+                                ? Buffer.from(
+                                    signResponse.signature.signature,
+                                    "base64"
+                                  )
+                                : undefined,
+                            })
+                          ).finish(),
+                        },
+                      ]
+                    : undefined,
               })
             ).finish(),
             authInfoBytes: AuthInfo.encode({
@@ -575,6 +590,9 @@ export class CosmosAccountImpl {
                         return "/stratos.crypto.v1.ethsecp256k1.PubKey";
                       }
 
+                      if (chainInfo.hasFeature("eth-secp256k1-initia")) {
+                        return "/initia.crypto.v1beta1.ethsecp256k1.PubKey";
+                      }
                       return "/ethermint.crypto.v1.ethsecp256k1.PubKey";
                     })(),
                     value: PubKey.encode({
@@ -586,7 +604,10 @@ export class CosmosAccountImpl {
                   },
                   modeInfo: {
                     single: {
-                      mode: SignMode.SIGN_MODE_LEGACY_AMINO_JSON,
+                      mode:
+                        eip712Signing && ethSignPlainJson
+                          ? SignMode.SIGN_MODE_EIP_191
+                          : SignMode.SIGN_MODE_LEGACY_AMINO_JSON,
                     },
                     multi: undefined,
                   },
@@ -597,7 +618,7 @@ export class CosmosAccountImpl {
                 amount: signResponse.signed.fee.amount as Coin[],
                 gasLimit: signResponse.signed.fee.gas,
                 payer:
-                  eip712Signing && !chainIsInjective
+                  eip712Signing && !chainIsInjective && !ethSignPlainJson
                     ? // Fee delegation feature not yet supported. But, for eip712 ethermint signing, we must set fee payer.
                       signResponse.signed.fee.feePayer
                     : undefined,
@@ -605,7 +626,7 @@ export class CosmosAccountImpl {
             }).finish(),
             signatures:
               // Injective needs the signature in the signatures list even if eip712
-              !eip712Signing || chainIsInjective
+              !eip712Signing || chainIsInjective || ethSignPlainJson
                 ? [Buffer.from(signResponse.signature.signature, "base64")]
                 : [new Uint8Array(0)],
           }).finish(),
@@ -678,6 +699,13 @@ export class CosmosAccountImpl {
                     return "/stratos.crypto.v1.ethsecp256k1.PubKey";
                   }
 
+                  if (
+                    this.chainGetter
+                      .getChain(this.chainId)
+                      .hasFeature("eth-secp256k1-initia")
+                  ) {
+                    return "/initia.crypto.v1beta1.ethsecp256k1.PubKey";
+                  }
                   return "/ethermint.crypto.v1.ethsecp256k1.PubKey";
                 })(),
                 value: PubKey.encode({

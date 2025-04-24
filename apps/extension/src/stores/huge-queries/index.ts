@@ -24,6 +24,7 @@ import { UIConfigStore } from "../ui-config";
 import { KeyRingStore } from "@keplr-wallet/stores-core";
 import { AllTokenMapByChainIdentifierState } from "./all-token-map-state";
 import { SkipAsset, SkipQueries } from "@keplr-wallet/stores-internal";
+import { getBabylonUnbondingRemainingTime } from "../../utils/get-babylon-unbonding-remaining-time";
 
 interface ViewToken {
   chainInfo: IChainInfoImpl | ModularChainInfo;
@@ -888,6 +889,8 @@ export class HugeQueriesStore {
         }
 
         const chainInfo = this.chainStore.getChain(modularChainInfo.chainId);
+        const isBabylon =
+          ChainIdHelper.parse(chainInfo.chainId).identifier === "bbn";
 
         const queries = this.queriesStore.get(modularChainInfo.chainId);
         const queryUnbonding =
@@ -915,7 +918,13 @@ export class HugeQueriesStore {
               price: this.priceStore.calculatePrice(balance),
               isFetching: queryUnbonding.isFetching,
               error: queryUnbonding.error,
-              completeTime: entry.completion_time,
+              completeTime: isBabylon
+                ? getBabylonUnbondingRemainingTime(
+                    this.queriesStore.simpleQuery,
+                    chainInfo.rest,
+                    entry.creation_height
+                  )
+                : entry.completion_time,
               stakingUrl: chainInfo.walletUrlForStaking,
             });
           }

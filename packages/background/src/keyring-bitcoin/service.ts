@@ -2,13 +2,12 @@ import { ChainsService } from "../chains";
 import { VaultService } from "../vault";
 import { KeyRingService } from "../keyring";
 import { InteractionService } from "../interaction";
-import { getBasicAccessPermissionType, PermissionService } from "../permission";
+import { PermissionService } from "../permission";
 import {
   BitcoinSignMessageType,
   GENESIS_HASH_TO_NETWORK,
   NETWORK_TO_GENESIS_HASH,
   GenesisHash,
-  IBitcoinProvider,
   Network,
   SupportedPaymentType,
   ChainType,
@@ -16,7 +15,7 @@ import {
   CHAIN_TYPE_TO_GENESIS_HASH,
   SignPsbtOptions,
 } from "@keplr-wallet/types";
-import { Env, KeplrError } from "@keplr-wallet/router";
+import { Env, KeplrError, WEBPAGE_PORT } from "@keplr-wallet/router";
 import { Psbt, address } from "bitcoinjs-lib";
 import { encodeLegacyMessage, encodeLegacySignature } from "./helper";
 import { toXOnly } from "@keplr-wallet/crypto";
@@ -28,6 +27,8 @@ import validate, {
 } from "bitcoin-address-validation";
 import { mainnet, signet, testnet } from "./constants";
 import { AnalyticsService } from "../analytics";
+import { KVStore } from "@keplr-wallet/common";
+import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 
 const DUST_THRESHOLD = 546;
 enum BitcoinSignType {
@@ -38,7 +39,11 @@ enum BitcoinSignType {
 }
 
 export class KeyRingBitcoinService {
+  @observable
+  protected preferredBitcoinPaymentType: SupportedPaymentType | undefined;
+
   constructor(
+    protected readonly kvStore: KVStore,
     protected readonly chainsService: ChainsService,
     protected readonly vaultService: VaultService,
     protected readonly keyRingService: KeyRingService,
@@ -46,10 +51,27 @@ export class KeyRingBitcoinService {
     protected readonly permissionService: PermissionService,
     protected readonly txService: BackgroundTxService,
     protected readonly analyticsService: AnalyticsService
-  ) {}
+  ) {
+    makeObservable(this);
+  }
 
   async init() {
-    // noop
+    const savedPreferredBitcoinPaymentType =
+      await this.kvStore.get<SupportedPaymentType>(
+        "preferredBitcoinPaymentType/v1"
+      );
+    if (savedPreferredBitcoinPaymentType) {
+      runInAction(() => {
+        this.preferredBitcoinPaymentType = savedPreferredBitcoinPaymentType;
+      });
+    }
+
+    autorun(() => {
+      this.kvStore.set(
+        "preferredBitcoinPaymentType/v1",
+        this.preferredBitcoinPaymentType
+      );
+    });
   }
 
   async getBitcoinKey(
@@ -118,7 +140,7 @@ export class KeyRingBitcoinService {
     }
 
     const { paymentType } = this.parseChainId(chainId);
-    const network = this.getNetwork(chainId);
+    const network = this.getNetworkConfig(chainId);
 
     const bitcoinPubKey = await this.keyRingService.getPubKeyBitcoin(
       chainId,
@@ -191,7 +213,7 @@ export class KeyRingBitcoinService {
 
     const bitcoinPubKey = await this.getBitcoinKeySelected(chainId);
 
-    const network = this.getNetwork(chainId);
+    const network = this.getNetworkConfig(chainId);
 
     return await this.interactionService.waitApproveV2(
       env,
@@ -274,7 +296,7 @@ export class KeyRingBitcoinService {
 
     const bitcoinPubKey = await this.getBitcoinKeySelected(chainId);
 
-    const network = this.getNetwork(chainId);
+    const network = this.getNetworkConfig(chainId);
 
     return await this.interactionService.waitApproveV2(
       env,
@@ -343,7 +365,7 @@ export class KeyRingBitcoinService {
     origin: string,
     chainId: string,
     message: string,
-    signType: BitcoinSignMessageType
+    signType?: BitcoinSignMessageType
   ) {
     return await this.signMessage(
       env,
@@ -361,7 +383,7 @@ export class KeyRingBitcoinService {
     vaultId: string,
     chainId: string,
     message: string,
-    signType: BitcoinSignMessageType
+    signType: BitcoinSignMessageType = BitcoinSignMessageType.ECDSA
   ) {
     const keyInfo = this.keyRingService.getKeyInfo(vaultId);
     if (!keyInfo) {
@@ -370,7 +392,7 @@ export class KeyRingBitcoinService {
 
     const bitcoinPubKey = await this.getBitcoinKey(vaultId, chainId);
 
-    const network = this.getNetwork(chainId);
+    const network = this.getNetworkConfig(chainId);
 
     return await this.interactionService.waitApproveV2(
       env,
@@ -466,7 +488,7 @@ export class KeyRingBitcoinService {
     return ["native-segwit", "taproot"];
   }
 
-  private getNetwork(chainId: string) {
+  private getNetworkConfig(chainId: string) {
     const chainInfo = this.chainsService.getModularChainInfoOrThrow(chainId);
     if (!("bitcoin" in chainInfo)) {
       throw new KeplrError("keyring", 221, "Chain is not a bitcoin chain");
@@ -508,405 +530,312 @@ export class KeyRingBitcoinService {
     };
   }
 
-  async requestMethod<T = any>(
+  getCurrentChainId(origin: string, chainId?: string) {
+    const currentBaseChainId =
+      this.permissionService.getCurrentBaseChainIdForBitcoin(origin);
+    if (currentBaseChainId == null) {
+      return;
+    }
+
+    return (
+      chainId ||
+      `${currentBaseChainId}:${this.getPreferredBitcoinPaymentType()}`
+    );
+  }
+
+  forceGetCurrentChainId(origin: string, chainId?: string) {
+    return (
+      this.getCurrentChainId(origin, chainId) ||
+      // If the current chain id is not set, use Bitcoin mainnet as the default chain id.
+      `bip122:${GenesisHash.MAINNET}:${this.getPreferredBitcoinPaymentType()}`
+    );
+  }
+
+  getNewCurrentChainIdFromNetwork(network: Network) {
+    if (!network || (network && !Object.values(Network).includes(network))) {
+      throw new Error(
+        `Invalid parameters: must provide a valid network. Available networks: ${Object.values(
+          Network
+        ).join(", ")}`
+      );
+    }
+
+    return `bip122:${
+      NETWORK_TO_GENESIS_HASH[network]
+    }:${this.getPreferredBitcoinPaymentType()}`;
+  }
+
+  getNewCurrentChainIdFromChainType(chainType: ChainType) {
+    if (
+      !chainType ||
+      (chainType && !Object.values(ChainType).includes(chainType))
+    ) {
+      throw new Error(
+        `Invalid parameters: must provide a valid chain. Available chains: ${Object.values(
+          ChainType
+        ).join(", ")}`
+      );
+    }
+
+    return `bip122:${
+      CHAIN_TYPE_TO_GENESIS_HASH[chainType]
+    }:${this.getPreferredBitcoinPaymentType()}`;
+  }
+
+  getPreferredBitcoinPaymentType(): SupportedPaymentType {
+    return this.preferredBitcoinPaymentType ?? "taproot";
+  }
+
+  @action
+  setPreferredBitcoinPaymentType(paymentType: SupportedPaymentType) {
+    this.preferredBitcoinPaymentType = paymentType;
+
+    this.interactionService.dispatchEvent(
+      WEBPAGE_PORT,
+      "keplr_bitcoinAccountsChanged",
+      {
+        paymentType,
+        origin: undefined,
+      }
+    );
+  }
+
+  async getAccounts(origin: string) {
+    const currentChainId = this.getCurrentChainId(origin);
+    if (!currentChainId) {
+      return [];
+    }
+
+    const bitcoinKey = await this.getBitcoinKeySelected(currentChainId);
+
+    return [bitcoinKey.address];
+  }
+
+  async requestAccounts(origin: string) {
+    const currentChainId = this.forceGetCurrentChainId(origin);
+    const bitcoinKey = await this.getBitcoinKeySelected(currentChainId);
+
+    return [bitcoinKey.address];
+  }
+
+  async disconnect(origin: string) {
+    const currentChainId = this.forceGetCurrentChainId(origin);
+
+    return this.permissionService.removeAllTypePermissionToChainId(
+      currentChainId,
+      [origin]
+    );
+  }
+
+  getNetwork(origin: string) {
+    const currentChainId = this.forceGetCurrentChainId(origin);
+    return this.getNetworkConfig(currentChainId).id.replace(
+      Network.MAINNET,
+      Network.LIVENET
+    ) as Network;
+  }
+
+  async switchNetwork(env: Env, origin: string, network: Network) {
+    const currentChainId = this.getCurrentChainId(origin);
+    const newCurrentChainId = this.getNewCurrentChainIdFromNetwork(network);
+    if (currentChainId === newCurrentChainId) {
+      return network;
+    }
+
+    await this.permissionService.updateCurrentBaseChainIdForBitcoin(
+      env,
+      origin,
+      newCurrentChainId
+    );
+
+    return network;
+  }
+
+  getChain(origin: string) {
+    const currentChainId = this.forceGetCurrentChainId(origin);
+    const { genesisHash } = this.parseChainId(currentChainId);
+    const chainType = GENESIS_HASH_TO_CHAIN_TYPE[genesisHash];
+    const currentChainInfo =
+      this.chainsService.getModularChainInfoOrThrow(currentChainId);
+    const network = this.getNetworkConfig(currentChainId).id;
+
+    return {
+      enum: chainType,
+      name: currentChainInfo.chainName,
+      network,
+    };
+  }
+
+  async switchChain(env: Env, origin: string, chainType: ChainType) {
+    const currentChainId = this.forceGetCurrentChainId(origin);
+    const newCurrentChainId = this.getNewCurrentChainIdFromChainType(chainType);
+    if (currentChainId === newCurrentChainId) {
+      return chainType;
+    }
+
+    await this.permissionService.updateCurrentBaseChainIdForBitcoin(
+      env,
+      origin,
+      newCurrentChainId
+    );
+
+    return chainType;
+  }
+
+  async getPublicKey(origin: string) {
+    const currentChainId = this.forceGetCurrentChainId(origin);
+    const bitcoinKey = await this.getBitcoinKeySelected(currentChainId);
+
+    return Buffer.from(bitcoinKey.pubKey).toString("hex");
+  }
+
+  async getBalance(origin: string) {
+    const currentChainId = this.forceGetCurrentChainId(origin);
+    const bitcoinKey = await this.getBitcoinKeySelected(currentChainId);
+    const bitcoinChainInfo =
+      this.chainsService.getBitcoinChainInfoOrThrow(currentChainId);
+
+    const res = await simpleFetch<{
+      address: string;
+      chain_stats: {
+        funded_txo_count: number;
+        funded_txo_sum: number;
+        spent_txo_count: number;
+        spent_txo_sum: number;
+        tx_count: number;
+      };
+      mempool_stats: {
+        funded_txo_count: number;
+        funded_txo_sum: number;
+        spent_txo_count: number;
+        spent_txo_sum: number;
+        tx_count: number;
+      };
+    }>(`${bitcoinChainInfo.rest}/address/${bitcoinKey.address}`);
+
+    const confirmed =
+      res.data.chain_stats.funded_txo_sum - res.data.chain_stats.spent_txo_sum;
+    const unconfirmed =
+      res.data.mempool_stats.funded_txo_sum -
+      res.data.mempool_stats.spent_txo_sum;
+
+    return {
+      confirmed,
+      unconfirmed,
+      total: confirmed + unconfirmed,
+    };
+  }
+
+  async getInscriptions() {
+    throw new Error("Not implemented.");
+  }
+
+  async sendBitcoin(
     env: Env,
     origin: string,
-    method: keyof IBitcoinProvider,
-    params?: unknown[],
-    chainId?: string
+    toAddress: string,
+    amount: number
   ) {
-    if (env.isInternalMsg && chainId == null) {
-      throw new Error(
-        "The chain id must be provided for the internal message."
-      );
-    }
+    const currentChainId = this.forceGetCurrentChainId(origin);
 
-    let currentBaseChainId =
-      this.permissionService.getCurrentBaseChainIdForBitcoin(origin) ??
-      (chainId ? this.chainsService.getBaseChainId(chainId) : undefined);
+    let isValidAddress;
+    try {
+      const network = this.getNetworkConfig(currentChainId).id;
 
-    if (currentBaseChainId == null) {
-      if (method === "getAccounts") {
-        return [] as T;
-      }
-
-      if (this.permissionService.isPrivilegedOrigins(origin)) {
-        currentBaseChainId =
-          "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f";
-      }
-    }
-    if (currentBaseChainId == null) {
-      throw new Error(
-        `${origin} is not permitted. Please disconnect and reconnect to the website.`
-      );
-    }
-
-    // Taproot is default so specify the chain id.
-    const currentChainId = `${currentBaseChainId}:taproot`;
-
-    const result = (
-      await (async () => {
-        switch (method) {
-          // This method is not ensured permission in the handler.
-          case "getAccounts": {
-            const hasPermission = this.permissionService.hasPermission(
-              currentBaseChainId!,
-              getBasicAccessPermissionType(),
-              origin
-            );
-
-            return hasPermission
-              ? [(await this.getBitcoinKeySelected(currentChainId)).address]
-              : [];
-          }
-          case "requestAccounts": {
-            return [(await this.getBitcoinKeySelected(currentChainId)).address];
-          }
-          case "disconnect": {
-            return this.permissionService.removeAllTypePermissionToChainId(
-              currentBaseChainId!,
-              [origin]
-            );
-          }
-          case "getNetwork": {
-            return this.getNetwork(currentChainId).id.replace(
-              Network.MAINNET,
-              Network.LIVENET
-            );
-          }
-          case "switchNetwork": {
-            const network =
-              (Array.isArray(params) && (params?.[0] as Network)) || undefined;
-            if (
-              !network ||
-              (network && !Object.values(Network).includes(network))
-            ) {
-              throw new Error(
-                `Invalid parameters: must provide a valid network. Available networks: ${Object.values(
-                  Network
-                ).join(", ")}`
-              );
-            }
-
-            const genesisHash = NETWORK_TO_GENESIS_HASH[network];
-            const newCurrentBaseChainId = `bip122:${genesisHash}`;
-
-            await this.permissionService.updateCurrentBaseChainIdForBitcoin(
-              env,
-              origin,
-              newCurrentBaseChainId
-            );
-
-            return network;
-          }
-          case "getChain": {
-            const { genesisHash } = this.parseChainId(currentChainId);
-            const chainType = GENESIS_HASH_TO_CHAIN_TYPE[genesisHash];
-            const currentChainInfo =
-              this.chainsService.getModularChainInfoOrThrow(currentChainId);
-            const network = this.getNetwork(currentChainId).id;
-
-            return {
-              enum: chainType,
-              name: currentChainInfo.chainName,
-              network,
-            };
-          }
-          case "switchChain": {
-            const chain =
-              (Array.isArray(params) && (params?.[0] as ChainType)) ||
-              undefined;
-            if (
-              !chain ||
-              (chain && !Object.values(ChainType).includes(chain))
-            ) {
-              throw new Error(
-                `Invalid parameters: must provide a valid chain. Available chains: ${Object.values(
-                  ChainType
-                ).join(", ")}`
-              );
-            }
-
-            const genesisHash = CHAIN_TYPE_TO_GENESIS_HASH[chain];
-            const newCurrentBaseChainId = `bip122:${genesisHash}`;
-
-            await this.permissionService.updateCurrentBaseChainIdForBitcoin(
-              env,
-              origin,
-              newCurrentBaseChainId
-            );
-
-            return chain;
-          }
-          case "getPublicKey": {
-            const bitcoinKey = await this.getBitcoinKeySelected(currentChainId);
-            return Buffer.from(bitcoinKey.pubKey).toString("hex");
-          }
-          case "getBalance": {
-            const bitcoinKey = await this.getBitcoinKeySelected(currentChainId);
-            const bitcoinChainInfo =
-              this.chainsService.getBitcoinChainInfoOrThrow(currentChainId);
-
-            const res = await simpleFetch<{
-              address: string;
-              chain_stats: {
-                funded_txo_count: number;
-                funded_txo_sum: number;
-                spent_txo_count: number;
-                spent_txo_sum: number;
-                tx_count: number;
-              };
-              mempool_stats: {
-                funded_txo_count: number;
-                funded_txo_sum: number;
-                spent_txo_count: number;
-                spent_txo_sum: number;
-                tx_count: number;
-              };
-            }>(`${bitcoinChainInfo.rest}/address/${bitcoinKey.address}`);
-
-            const confirmed =
-              res.data.chain_stats.funded_txo_sum -
-              res.data.chain_stats.spent_txo_sum;
-            const unconfirmed =
-              res.data.mempool_stats.funded_txo_sum -
-              res.data.mempool_stats.spent_txo_sum;
-
-            return {
-              confirmed,
-              unconfirmed,
-              total: confirmed + unconfirmed,
-            };
-          }
-          case "getInscriptions": {
-            throw new Error("Not implemented.");
-          }
-          case "signMessage": {
-            if (
-              !Array.isArray(params) ||
-              (Array.isArray(params) && params.length !== 2)
-            ) {
-              throw new Error("Invalid parameters: must provide 2 parameters.");
-            }
-
-            if (typeof params[0] !== "string") {
-              throw new Error(
-                "Invalid parameters: must provide a message as string."
-              );
-            }
-
-            if (
-              !Object.values(BitcoinSignMessageType).includes(
-                params[1] as BitcoinSignMessageType
-              )
-            ) {
-              throw new Error(
-                `Invalid parameters: must provide a valid sign type: ${Object.values(
-                  BitcoinSignMessageType
-                ).join(", ")}`
-              );
-            }
-
-            return this.signMessageSelected(
-              env,
-              origin,
-              currentChainId,
-              params[0] as string,
-              params[1] as BitcoinSignMessageType
-            );
-          }
-          case "sendBitcoin": {
-            if (
-              !Array.isArray(params) ||
-              (Array.isArray(params) && params.length !== 2)
-            ) {
-              throw new Error("Invalid parameters: must provide 2 parameters.");
-            }
-
-            const [toAddress, amount] = params;
-
-            if (typeof toAddress !== "string") {
-              throw new Error(
-                "Invalid parameters: must provide a to address as string."
-              );
-            }
-            let isValidAddress;
-            try {
-              const network = this.getNetwork(currentChainId).id;
-
-              isValidAddress = validate(
-                toAddress,
-                network as unknown as BitcoinNetwork,
-                {
-                  castTestnetTo:
-                    network === "signet" ? BitcoinNetwork.signet : undefined,
-                }
-              );
-            } catch {
-              isValidAddress = false;
-            }
-            if (!isValidAddress) {
-              throw new Error(
-                "Invalid parameters: must provide a valid to address."
-              );
-            }
-
-            if (typeof amount !== "number") {
-              throw new Error(
-                "Invalid parameters: must provide an amount as number."
-              );
-            }
-            if (amount < DUST_THRESHOLD) {
-              throw new Error(
-                "Invalid parameters: must provide an amount greater than 546."
-              );
-            }
-
-            const vaultId = this.keyRingService.selectedVaultId;
-            const keyInfo = this.keyRingService.getKeyInfo(vaultId);
-            if (!keyInfo) {
-              throw new KeplrError("keyring", 221, "Null key info");
-            }
-            const bitcoinPubKey = await this.getBitcoinKeySelected(
-              currentChainId
-            );
-            const network = this.getNetwork(currentChainId);
-            const signedPsbtHex = await this.interactionService.waitApproveV2(
-              env,
-              "/sign-bitcoin-tx",
-              "request-sign-bitcoin-psbt",
-              {
-                origin,
-                vaultId,
-                chainId: currentChainId,
-                address: bitcoinPubKey.address,
-                pubKey: bitcoinPubKey.pubKey,
-                network,
-                keyType: keyInfo.type,
-                keyInsensitive: keyInfo.insensitive,
-                psbtCandidate: {
-                  toAddress,
-                  amount,
-                },
-              },
-              async (res: {
-                psbtSignData: {
-                  psbtHex: string;
-                  inputsToSign: {
-                    index: number;
-                    address: string;
-                    hdPath?: string;
-                    tapLeafHashesToSign?: Buffer[];
-                  }[];
-                }[];
-                signedPsbtsHexes: string[];
-              }) => {
-                if (res.signedPsbtsHexes && res.signedPsbtsHexes.length > 0) {
-                  return res.signedPsbtsHexes[0];
-                }
-
-                if (res.psbtSignData.length === 0) {
-                  throw new KeplrError("keyring", 221, "No psbt sign data");
-                }
-
-                const psbt = Psbt.fromHex(res.psbtSignData[0].psbtHex, {
-                  network,
-                });
-
-                const signedPsbt = await this.keyRingService.signPsbt(
-                  currentChainId,
-                  vaultId,
-                  psbt,
-                  res.psbtSignData[0].inputsToSign,
-                  network
-                );
-
-                return signedPsbt.toHex();
-              }
-            );
-
-            const tx = Psbt.fromHex(signedPsbtHex).extractTransaction();
-            const txHex = tx.toHex();
-
-            return this.txService.pushBitcoinTransaction(currentChainId, txHex);
-          }
-          case "pushTx": {
-            const rawTxHex =
-              Array.isArray(params) && params.length > 0
-                ? (params[0] as string)
-                : undefined;
-            if (typeof rawTxHex !== "string") {
-              throw new Error(
-                "Invalid parameters: must provide a psbt hex as string."
-              );
-            }
-
-            return this.txService.pushBitcoinTransaction(
-              currentChainId,
-              rawTxHex
-            );
-          }
-          case "signPsbt": {
-            if (
-              !Array.isArray(params) ||
-              (Array.isArray(params) &&
-                params.length !== 2 &&
-                params.length !== 1)
-            ) {
-              throw new Error(
-                "Invalid parameters: must provide 1 or 2 parameters."
-              );
-            }
-
-            const psbtHex = params[0] as string;
-            if (typeof psbtHex !== "string") {
-              throw new Error(
-                "Invalid parameters: must provide a psbt hex as a string."
-              );
-            }
-
-            return this.signPsbtSelected(
-              env,
-              origin,
-              currentChainId,
-              psbtHex,
-              params[1] as SignPsbtOptions
-            );
-          }
-          case "signPsbts": {
-            if (
-              !Array.isArray(params) ||
-              (Array.isArray(params) &&
-                params.length !== 2 &&
-                params.length !== 1)
-            ) {
-              throw new Error(
-                "Invalid parameters: must provide 1 or 2 parameters."
-              );
-            }
-
-            const psbtsHexes = params[0] as string[];
-            if (
-              !Array.isArray(psbtsHexes) ||
-              psbtsHexes.some((hex) => typeof hex !== "string")
-            ) {
-              throw new Error(
-                "Invalid parameters: must provide an array of psbt hex as a string."
-              );
-            }
-
-            return this.signPsbtsSelected(
-              env,
-              origin,
-              currentChainId,
-              psbtsHexes,
-              params[1] as SignPsbtOptions
-            );
-          }
+      isValidAddress = validate(
+        toAddress,
+        network as unknown as BitcoinNetwork,
+        {
+          castTestnetTo:
+            network === "signet" ? BitcoinNetwork.signet : undefined,
         }
-      })
-    )() as T;
+      );
+    } catch {
+      isValidAddress = false;
+    }
+    if (!isValidAddress) {
+      throw new Error("Invalid parameters: must provide a valid to address.");
+    }
 
-    return result;
+    if (typeof amount !== "number") {
+      throw new Error("Invalid parameters: must provide an amount as number.");
+    }
+    if (amount < DUST_THRESHOLD) {
+      throw new Error(
+        "Invalid parameters: must provide an amount greater than 546."
+      );
+    }
+
+    const vaultId = this.keyRingService.selectedVaultId;
+    const keyInfo = this.keyRingService.getKeyInfo(vaultId);
+    if (!keyInfo) {
+      throw new KeplrError("keyring", 221, "Null key info");
+    }
+    const bitcoinPubKey = await this.getBitcoinKeySelected(currentChainId);
+    const network = this.getNetworkConfig(currentChainId);
+    const signedPsbtHex = await this.interactionService.waitApproveV2(
+      env,
+      "/sign-bitcoin-tx",
+      "request-sign-bitcoin-psbt",
+      {
+        origin,
+        vaultId,
+        chainId: currentChainId,
+        address: bitcoinPubKey.address,
+        pubKey: bitcoinPubKey.pubKey,
+        network,
+        keyType: keyInfo.type,
+        keyInsensitive: keyInfo.insensitive,
+        psbtCandidate: {
+          toAddress,
+          amount,
+        },
+      },
+      async (res: {
+        psbtSignData: {
+          psbtHex: string;
+          inputsToSign: {
+            index: number;
+            address: string;
+            hdPath?: string;
+            tapLeafHashesToSign?: Buffer[];
+          }[];
+        }[];
+        signedPsbtsHexes: string[];
+      }) => {
+        if (res.signedPsbtsHexes && res.signedPsbtsHexes.length > 0) {
+          return res.signedPsbtsHexes[0];
+        }
+
+        if (res.psbtSignData.length === 0) {
+          throw new KeplrError("keyring", 221, "No psbt sign data");
+        }
+
+        const psbt = Psbt.fromHex(res.psbtSignData[0].psbtHex, {
+          network,
+        });
+
+        const signedPsbt = await this.keyRingService.signPsbt(
+          currentChainId,
+          vaultId,
+          psbt,
+          res.psbtSignData[0].inputsToSign,
+          network
+        );
+
+        return signedPsbt.toHex();
+      }
+    );
+
+    const tx = Psbt.fromHex(signedPsbtHex).extractTransaction();
+    const txHex = tx.toHex();
+
+    return this.txService.pushBitcoinTransaction(currentChainId, txHex);
+  }
+
+  async pushTx(origin: string, rawTxHex: string) {
+    const currentChainId = this.forceGetCurrentChainId(origin);
+
+    return this.txService.pushBitcoinTransaction(currentChainId, rawTxHex);
   }
 }

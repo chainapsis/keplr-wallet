@@ -9,8 +9,11 @@ import {
   TokenContractListURL,
   GoogleMeasurementId,
   GoogleAPIKeyForMeasurement,
+  AmplitudeAPIKey,
   CoinGeckoCoinDataByTokenAddress,
   SwapVenues,
+  SkipTokenInfoBaseURL,
+  SkipTokenInfoAPIURI,
 } from "../config.ui";
 import {
   AccountStore,
@@ -71,10 +74,16 @@ import {
 import { APP_PORT } from "@keplr-wallet/router";
 import { FiatCurrency } from "@keplr-wallet/types";
 import { UIConfigStore } from "./ui-config";
-import { AnalyticsStore, NoopAnalyticsClient } from "@keplr-wallet/analytics";
+import {
+  AnalyticsStore,
+  NoopAnalyticsClient,
+  AnalyticsAmplitudeStore,
+  NoopAnalyticsClientV2,
+} from "@keplr-wallet/analytics";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { HugeQueriesStore } from "./huge-queries";
 import { ExtensionAnalyticsClient } from "../analytics";
+import { AmplitudeAnalyticsClient } from "../analytics-amplitude";
 import { TokenContractsQueries } from "./token-contracts";
 import {
   SkipQueries,
@@ -171,6 +180,7 @@ export class RootStore {
   public readonly erc20CurrencyRegistrar: ERC20CurrencyRegistrar;
 
   public readonly analyticsStore: AnalyticsStore;
+  public readonly analyticsAmplitudeStore: AnalyticsAmplitudeStore;
 
   constructor() {
     const router = new ExtensionRouter(ContentScriptEnv.produceEnv, (msg) => {
@@ -348,6 +358,8 @@ export class RootStore {
       OsmosisQueries.use(),
       KeplrETCQueries.use({
         ethereumURL: EthereumEndpoint,
+        skipTokenInfoBaseURL: SkipTokenInfoBaseURL,
+        skipTokenInfoAPIURI: SkipTokenInfoAPIURI,
       }),
       ICNSQueries.use(),
       TokenContractsQueries.use({
@@ -582,7 +594,8 @@ export class RootStore {
 
     this.tokenFactoryRegistrar = new TokenFactoryCurrencyRegistrar(
       new ExtensionKVStore("store_token_factory_currency_registrar"),
-      24 * 3600 * 1000,
+      3 * 24 * 3600 * 1000,
+      1 * 3600 * 1000,
       process.env["KEPLR_EXT_TOKEN_FACTORY_BASE_URL"] || "",
       process.env["KEPLR_EXT_TOKEN_FACTORY_URI"] || "",
       this.chainStore,
@@ -590,7 +603,8 @@ export class RootStore {
     );
     this.ibcCurrencyRegistrar = new IBCCurrencyRegistrar(
       new ExtensionKVStore("store_ibc_curreny_registrar"),
-      24 * 3600 * 1000,
+      3 * 24 * 3600 * 1000,
+      1 * 3600 * 1000,
       this.chainStore,
       this.accountStore,
       this.queriesStore
@@ -617,7 +631,8 @@ export class RootStore {
       );
     this.erc20CurrencyRegistrar = new ERC20CurrencyRegistrar(
       new ExtensionKVStore("store_erc20_currency_registrar"),
-      24 * 3600 * 1000,
+      3 * 24 * 3600 * 1000,
+      1 * 3600 * 1000,
       this.chainStore,
       this.queriesStore
     );
@@ -636,6 +651,50 @@ export class RootStore {
             new ExtensionKVStore("store_google_analytics_client"),
             GoogleAPIKeyForMeasurement,
             GoogleMeasurementId
+          );
+        }
+      })(),
+      {
+        logEvent: (eventName, eventProperties) => {
+          if (eventProperties?.["chainId"] || eventProperties?.["chainIds"]) {
+            eventProperties = {
+              ...eventProperties,
+            };
+
+            if (eventProperties["chainId"]) {
+              eventProperties["chainIdentifier"] = ChainIdHelper.parse(
+                eventProperties["chainId"] as string
+              ).identifier;
+            }
+
+            if (eventProperties["chainIds"]) {
+              eventProperties["chainIdentifiers"] = (
+                eventProperties["chainIds"] as string[]
+              ).map((chainId) => ChainIdHelper.parse(chainId).identifier);
+            }
+          }
+
+          return {
+            eventName,
+            eventProperties,
+          };
+        },
+      }
+    );
+
+    this.analyticsAmplitudeStore = new AnalyticsAmplitudeStore(
+      (() => {
+        if (
+          !AmplitudeAPIKey ||
+          localStorage.getItem("disable-analytics") === "true"
+        ) {
+          return new NoopAnalyticsClientV2();
+        } else {
+          return new AmplitudeAnalyticsClient(
+            new ExtensionKVStore("store_amplitude_analytics_client"),
+            this.keyRingStore,
+            this.accountStore,
+            AmplitudeAPIKey
           );
         }
       })(),

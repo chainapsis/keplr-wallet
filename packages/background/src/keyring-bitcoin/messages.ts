@@ -1,10 +1,11 @@
 import { Message } from "@keplr-wallet/router";
 import {
   BitcoinSignMessageType,
-  IBitcoinProvider,
   SettledResponses,
   SignPsbtOptions,
   SupportedPaymentType,
+  Network as BitcoinNetwork,
+  ChainType as BitcoinChainType,
 } from "@keplr-wallet/types";
 import { ROUTE } from "./constants";
 import { Psbt } from "bitcoinjs-lib";
@@ -150,17 +151,14 @@ export class RequestSignBitcoinPsbtMsg extends Message<string> {
   }
 
   constructor(
-    public readonly chainId: string,
     public readonly psbtHex: string,
-    public readonly options?: SignPsbtOptions
+    public readonly options?: SignPsbtOptions,
+    public readonly chainId?: string
   ) {
     super();
   }
 
   validateBasic(): void {
-    if (!this.chainId) {
-      throw new Error("chainId is not set");
-    }
     if (!this.psbtHex) {
       throw new Error("psbtHex is not set");
     }
@@ -191,17 +189,14 @@ export class RequestSignBitcoinPsbtsMsg extends Message<string[]> {
   }
 
   constructor(
-    public readonly chainId: string,
     public readonly psbtsHexes: string[],
-    public readonly options?: SignPsbtOptions
+    public readonly options?: SignPsbtOptions,
+    public readonly chainId?: string
   ) {
     super();
   }
 
   validateBasic(): void {
-    if (!this.chainId) {
-      throw new Error("chainId is not set");
-    }
     if (!this.psbtsHexes || this.psbtsHexes.length === 0) {
       throw new Error("psbtsHexes are not set or empty");
     }
@@ -234,22 +229,16 @@ export class RequestSignBitcoinMessageMsg extends Message<string> {
   }
 
   constructor(
-    public readonly chainId: string,
     public readonly message: string,
-    public readonly signType: BitcoinSignMessageType
+    public readonly signType?: BitcoinSignMessageType,
+    public readonly chainId?: string
   ) {
     super();
   }
 
   validateBasic(): void {
-    if (!this.chainId) {
-      throw new Error("chainId is not set");
-    }
     if (!this.message) {
       throw new Error("message is not set");
-    }
-    if (!this.signType) {
-      throw new Error("signType is not set");
     }
   }
 
@@ -294,22 +283,122 @@ export class GetSupportedPaymentTypesMsg extends Message<
   }
 }
 
-export class RequestMethodToBitcoinMsg extends Message<void> {
+export class RequestBitcoinGetAccountsMsg extends Message<string[]> {
   public static type() {
-    return "request-method-to-bitcoin";
+    return "request-bitcoin-get-accounts";
   }
 
-  constructor(
-    public readonly method: keyof IBitcoinProvider,
-    public readonly params?: unknown[],
-    public readonly chainId?: string
-  ) {
+  constructor() {
     super();
   }
 
   validateBasic(): void {
-    if (!this.method) {
-      throw new Error("method is not set");
+    // noop
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestBitcoinGetAccountsMsg.type();
+  }
+}
+
+export class RequestBitcoinRequestAccountsMsg extends Message<string[]> {
+  public static type() {
+    return "request-bitcoin-request-accounts";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestBitcoinRequestAccountsMsg.type();
+  }
+}
+
+export class RequestBitcoinDisconnectMsg extends Message<void> {
+  public static type() {
+    return "request-bitcoin-disconnect";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestBitcoinDisconnectMsg.type();
+  }
+}
+
+export class RequestBitcoinGetNetworkMsg extends Message<BitcoinNetwork> {
+  public static type() {
+    return "request-bitcoin-get-network";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestBitcoinGetNetworkMsg.type();
+  }
+}
+
+export class RequestBitcoinSwitchNetworkMsg extends Message<BitcoinNetwork> {
+  public static type() {
+    return "request-bitcoin-switch-network";
+  }
+
+  constructor(public readonly network: BitcoinNetwork) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.network) {
+      throw new Error("network is not set");
     }
   }
 
@@ -322,6 +411,249 @@ export class RequestMethodToBitcoinMsg extends Message<void> {
   }
 
   type(): string {
-    return RequestMethodToBitcoinMsg.type();
+    return RequestBitcoinSwitchNetworkMsg.type();
+  }
+}
+
+export class RequestBitcoinGetChainMsg extends Message<{
+  enum: BitcoinChainType;
+  name: string;
+  network: BitcoinNetwork;
+}> {
+  public static type() {
+    return "request-bitcoin-get-chain";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestBitcoinGetChainMsg.type();
+  }
+}
+
+export class RequestBitcoinSwitchChainMsg extends Message<BitcoinChainType> {
+  public static type() {
+    return "request-bitcoin-switch-chain";
+  }
+
+  constructor(public readonly chainType: BitcoinChainType) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainType) {
+      throw new Error("chainType is not set");
+    }
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestBitcoinSwitchChainMsg.type();
+  }
+}
+
+export class RequestBitcoinGetPublicKeyMsg extends Message<string> {
+  public static type() {
+    return "request-bitcoin-get-public-key";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestBitcoinGetPublicKeyMsg.type();
+  }
+}
+
+export class RequestBitcoinGetBalanceMsg extends Message<{
+  confirmed: number;
+  unconfirmed: number;
+  total: number;
+}> {
+  public static type() {
+    return "request-bitcoin-get-balance";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestBitcoinGetBalanceMsg.type();
+  }
+}
+
+export class RequestBitcoinGetInscriptionsMsg extends Message<void> {
+  public static type() {
+    return "request-bitcoin-get-inscriptions";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestBitcoinGetInscriptionsMsg.type();
+  }
+}
+
+export class RequestBitcoinSendBitcoinMsg extends Message<string> {
+  public static type() {
+    return "request-bitcoin-send-bitcoin";
+  }
+
+  constructor(public readonly to: string, public readonly amount: number) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.to) {
+      throw new Error("to is not set");
+    }
+    if (!this.amount) {
+      throw new Error("amount is not set");
+    }
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestBitcoinSendBitcoinMsg.type();
+  }
+}
+
+export class RequestBitcoinPushTxMsg extends Message<string> {
+  public static type() {
+    return "request-bitcoin-push-tx";
+  }
+
+  constructor(public readonly rawTxHex: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.rawTxHex) {
+      throw new Error("rawTxHex is not set");
+    }
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestBitcoinPushTxMsg.type();
+  }
+}
+
+export class GetPreferredBitcoinPaymentTypeMsg extends Message<SupportedPaymentType> {
+  public static type() {
+    return "get-preferred-bitcoin-payment-type";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetPreferredBitcoinPaymentTypeMsg.type();
+  }
+}
+
+export class SetPreferredBitcoinPaymentTypeMsg extends Message<void> {
+  public static type() {
+    return "set-preferred-bitcoin-payment-type";
+  }
+
+  constructor(public readonly paymentType: SupportedPaymentType) {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return SetPreferredBitcoinPaymentTypeMsg.type();
   }
 }
