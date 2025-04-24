@@ -79,6 +79,7 @@ export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
   const searchedBalances = useSearch([...allBalances], search, searchFields);
   const sortedBalances = useMemo(() => {
     const searchedBalancesSliced = [...searchedBalances];
+    // TODO: hugeQueriesStore.sortByPrice 로직을 공통화해서 사용하는 방식 고려
     if (sortMode === "asc") {
       return searchedBalancesSliced.sort((a, b) => {
         const aPrice = a.price?.toDec() ?? new Dec(0);
