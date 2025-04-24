@@ -71,7 +71,9 @@ async function openPopupWindow(
         break;
       }
 
-      await new Promise((resolve) => setTimeout(resolve, i === 0 ? 100 : 500));
+      if (i !== 0) {
+        await new Promise((resolve) => setTimeout(resolve, 200));
+      }
 
       try {
         const window = await browser.windows.get(windowId);
