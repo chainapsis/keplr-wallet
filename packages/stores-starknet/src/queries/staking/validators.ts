@@ -17,7 +17,7 @@ export class ObservableQueryValidators extends ObservableQuery<StarknetValidator
   ) {
     super(
       sharedContext,
-      "https://prod-staking-api.karnot.xyz/api/",
+      "https://api.dashboard.endur.fi/api/",
       "validators" // CHECK: query params are not working for now
     );
     makeObservable(this);
