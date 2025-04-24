@@ -106,6 +106,25 @@ const fields = [
   "chainInfo.chainName",
 ];
 
+const chainSearchFields = [
+  "chainInfo.chainName",
+  (item: { chainInfo: ChainInfo | ModularChainInfo }) => {
+    if (
+      "starknet" in item.chainInfo ||
+      item.chainInfo.chainName.toLowerCase().includes("ethereum")
+    ) {
+      return "eth";
+    }
+    if (
+      "bitcoin" in item.chainInfo ||
+      item.chainInfo.chainName.toLowerCase().includes("bitcoin")
+    ) {
+      return "btc";
+    }
+    return "";
+  },
+];
+
 export const AvailableTabView: FunctionComponent<{
   search: string;
   isNotReady?: boolean;
@@ -228,28 +247,6 @@ export const AvailableTabView: FunctionComponent<{
       );
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [chainStore, chainStore.modularChainInfosInUI, searchedChainInfos]);
-
-    const chainSearchFields = useMemo(
-      () => [
-        "chainInfo.chainName",
-        (item: { chainInfo: ChainInfo | ModularChainInfo }) => {
-          if (
-            "starknet" in item.chainInfo ||
-            item.chainInfo.chainName.toLowerCase().includes("ethereum")
-          ) {
-            return "eth";
-          }
-          if (
-            "bitcoin" in item.chainInfo ||
-            item.chainInfo.chainName.toLowerCase().includes("bitcoin")
-          ) {
-            return "btc";
-          }
-          return "";
-        },
-      ],
-      []
-    );
 
     const searchedLookingForChains = useSearch(
       trimSearch.length >= 2 ? lookingForChains : [],
