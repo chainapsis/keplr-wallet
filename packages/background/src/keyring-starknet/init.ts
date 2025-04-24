@@ -10,6 +10,8 @@ import {
   GetStarknetKeyParamsSelectedMsg,
   RequestSignStarknetMessage,
   PrivilegeStarknetSignClaimRewardsMsg,
+  GetNewCurrentChainIdForStarknetMsg,
+  CheckNeedEnableAccessForStarknetMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -29,6 +31,8 @@ export function init(
   router.registerMessage(GetStarknetKeysForEachVaultSettledMsg);
   router.registerMessage(GetStarknetKeyParamsSelectedMsg);
   router.registerMessage(PrivilegeStarknetSignClaimRewardsMsg);
+  router.registerMessage(GetNewCurrentChainIdForStarknetMsg);
+  router.registerMessage(CheckNeedEnableAccessForStarknetMsg);
 
   router.addHandler(ROUTE, getHandler(service, permissionInteractionService));
 }
