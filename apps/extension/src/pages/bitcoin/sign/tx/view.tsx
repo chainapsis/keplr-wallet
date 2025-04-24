@@ -329,10 +329,6 @@ export const SignBitcoinTxView: FunctionComponent<{
     feeConfig,
   });
 
-  const isReadyToSign =
-    (hasPsbtCandidate && !isFetchingUTXOs && !psbtSimulator.isSimulating) ||
-    isInitialized;
-
   const hasUnableToSignPsbt = validatedPsbts.some(
     (data) => data.inputsToSign.length === 0
   );
