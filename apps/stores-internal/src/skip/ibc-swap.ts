@@ -5,15 +5,8 @@ import {
   Currency,
   ERC20Currency,
 } from "@keplr-wallet/types";
-import { Asset, ObservableQueryAssetsBatch, SwapAsset } from "./assets";
-import {
-  comparer,
-  computed,
-  makeObservable,
-  observable,
-  action,
-  runInAction,
-} from "mobx";
+import { Asset, SwapAsset } from "./assets";
+import { comparer, computed, makeObservable } from "mobx";
 import { ObservableQueryChains } from "./chains";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { ObservableQueryRoute, ObservableQueryRouteInner } from "./route";
@@ -26,6 +19,7 @@ import { ObservableQueryIbcPfmTransfer } from "./ibc-pfm-transfer";
 import { ObservableQueryAssetsFromSource } from "./assets-from-source";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { InternalChainStore } from "../internal";
+import { ObservableAssetsCache } from "./assets-cache";
 
 export class ObservableQueryIBCSwapInner {
   constructor(
@@ -97,17 +91,9 @@ export class ObservableQueryIBCSwapInner {
 }
 
 export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapInner> {
-  private readonly ASSETS_CACHE_TTL = 3 * 60 * 1000; // 3 minutes
-
-  @observable
-  private assetsByChainIdCache = new Map<
-    string,
-    { data: Asset[] | SwapAsset[]; timestamp: number }
-  >();
-
   constructor(
     protected readonly chainStore: InternalChainStore,
-    protected readonly queryAssetsBatch: ObservableQueryAssetsBatch,
+    protected readonly assetsCache: ObservableAssetsCache,
     protected readonly queryAssetsFromSource: ObservableQueryAssetsFromSource,
     protected readonly queryChains: ObservableQueryChains,
     protected readonly queryRoute: ObservableQueryRoute,
@@ -407,18 +393,12 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
   @computed
   get cachedAssetsByChain(): Map<string, Asset[] | SwapAsset[]> {
     const result = new Map<string, Asset[] | SwapAsset[]>();
-    // swap venue chain id와 기존에 캐시에 있는 chain id를 함께 처리
-    const chainIds = Array.from(
-      new Set([
-        ...this.swapVenues.map((v) => v.chainId),
-        ...this.assetsByChainIdCache.keys(),
-      ])
-    );
+    const chainIds = this.swapVenues.map((v) => v.chainId);
 
-    this.ensureAssetsLoaded(chainIds);
+    this.assetsCache.ensureAssetsLoaded(chainIds, true);
 
     for (const chainId of chainIds) {
-      const cached = this.getCachedAssetsForChain(chainId);
+      const cached = this.assetsCache.getCachedAssetsForChain(chainId);
       if (cached) {
         result.set(chainId, cached);
       }
@@ -690,7 +670,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
         }
       }
 
-      this.ensureAssetsLoaded(Array.from(chainIdsToEnsure));
+      this.assetsCache.ensureAssetsLoaded(Array.from(chainIdsToEnsure));
 
       const res: { denom: string; chainId: string }[] =
         !this.chainStore.isInChainInfosInListUI(originOutChainId)
@@ -785,64 +765,4 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
       });
     }
   );
-
-  private getCachedAssetsForChain(
-    chainId: string
-  ): Asset[] | SwapAsset[] | null {
-    const cachedItem = this.assetsByChainIdCache.get(chainId);
-
-    if (
-      !cachedItem ||
-      Date.now() - cachedItem.timestamp > this.ASSETS_CACHE_TTL
-    ) {
-      return null;
-    }
-
-    return cachedItem.data;
-  }
-
-  @action
-  clearAssetCache(chainId?: string) {
-    if (chainId) {
-      this.assetsByChainIdCache.delete(chainId);
-    } else {
-      this.assetsByChainIdCache.clear();
-    }
-  }
-
-  ensureAssetsLoaded(chainIds: string[]): boolean {
-    const missingOrExpiredChainIds = chainIds.filter((chainId) => {
-      const cachedItem = this.assetsByChainIdCache.get(chainId);
-      return (
-        !cachedItem || Date.now() - cachedItem.timestamp > this.ASSETS_CACHE_TTL // 1분 미만으로 남은 것들도 같이 처리
-      );
-    });
-
-    if (missingOrExpiredChainIds.length === 0) {
-      return true;
-    }
-
-    const isMobile = "ReactNativeWebView" in window; // CHECK: 더 이상 react native를 사용하지 않음
-
-    const queryAssetsBatch = this.queryAssetsBatch.getAssetsBatch(
-      missingOrExpiredChainIds
-    );
-
-    const assetsBatch = isMobile
-      ? queryAssetsBatch.assetsOnlySwapUsages
-      : queryAssetsBatch.assetsBatch;
-
-    runInAction(() => {
-      for (const entry of assetsBatch) {
-        this.assetsByChainIdCache.set(entry.chainId, {
-          data: [...entry.assets],
-          timestamp: Date.now(),
-        });
-      }
-    });
-
-    return missingOrExpiredChainIds.every((chainId) =>
-      this.assetsByChainIdCache.has(chainId)
-    );
-  }
 }

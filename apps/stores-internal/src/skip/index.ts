@@ -6,3 +6,4 @@ export * from "./route";
 export * from "./chains";
 export * from "./ibc-pfm-transfer";
 export * from "./ibc-swap";
+export * from "./assets-cache";
