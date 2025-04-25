@@ -9,7 +9,6 @@ import Joi from "joi";
 import { InternalChainStore } from "../internal";
 import { SwapUsageQueries } from "../swap-usage";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
-import { computedFn } from "mobx-utils";
 
 export interface Asset {
   denom: string;
@@ -493,10 +492,6 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
     return result;
   }
 
-  getAssetsRawByChainId = computedFn((chainId: string): Asset[] => {
-    return this.assetsRawBatch.find((a) => a.chainId === chainId)?.assets ?? [];
-  });
-
   @computed
   get assetsBatch(): {
     chainId: string;
@@ -599,10 +594,6 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
     return result;
   }
 
-  getAssetsByChainId = computedFn((chainId: string): Asset[] => {
-    return this.assetsBatch.find((a) => a.chainId === chainId)?.assets ?? [];
-  });
-
   @computed
   get assetsOnlySwapUsages(): {
     chainId: string;
@@ -680,15 +671,6 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
 
     return result;
   }
-
-  getAssetsOnlySwapUsagesByChainId = computedFn(
-    (chainId: string): SwapAsset[] => {
-      return (
-        this.assetsOnlySwapUsages.find((a) => a.chainId === chainId)?.assets ??
-        []
-      );
-    }
-  );
 
   protected override async fetchResponse(
     abortController: AbortController

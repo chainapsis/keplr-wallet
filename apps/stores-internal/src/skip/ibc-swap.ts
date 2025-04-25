@@ -1,7 +1,19 @@
 import { HasMapStore, IChainInfoImpl } from "@keplr-wallet/stores";
-import { AppCurrency, Currency, ERC20Currency } from "@keplr-wallet/types";
-import { ObservableQueryAssetsBatch } from "./assets";
-import { computed, makeObservable } from "mobx";
+import {
+  AppCurrency,
+  ChainInfo,
+  Currency,
+  ERC20Currency,
+} from "@keplr-wallet/types";
+import { Asset, ObservableQueryAssetsBatch, SwapAsset } from "./assets";
+import {
+  comparer,
+  computed,
+  makeObservable,
+  observable,
+  action,
+  runInAction,
+} from "mobx";
 import { ObservableQueryChains } from "./chains";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { ObservableQueryRoute, ObservableQueryRouteInner } from "./route";
@@ -85,6 +97,14 @@ export class ObservableQueryIBCSwapInner {
 }
 
 export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapInner> {
+  private readonly ASSETS_CACHE_TTL = 3 * 60 * 1000; // 3 minutes
+
+  @observable
+  private assetsByChainIdCache = new Map<
+    string,
+    { data: Asset[] | SwapAsset[]; timestamp: number }
+  >();
+
   constructor(
     protected readonly chainStore: InternalChainStore,
     protected readonly queryAssetsBatch: ObservableQueryAssetsBatch,
@@ -384,9 +404,30 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
     return false;
   }
 
-  // CHECK: swap 페이지 초기 렌더링 시에 리렌더링이 빈번함. 이후 swapDestinationCurrenciesMap가 재사용되는 경우에는 빈번하지 않음.
-  // Key is chain identifier
   @computed
+  get cachedAssetsByChain(): Map<string, Asset[] | SwapAsset[]> {
+    const result = new Map<string, Asset[] | SwapAsset[]>();
+    // swap venue chain id와 기존에 캐시에 있는 chain id를 함께 처리
+    const chainIds = Array.from(
+      new Set([
+        ...this.swapVenues.map((v) => v.chainId),
+        ...this.assetsByChainIdCache.keys(),
+      ])
+    );
+
+    this.ensureAssetsLoaded(chainIds);
+
+    for (const chainId of chainIds) {
+      const cached = this.getCachedAssetsForChain(chainId);
+      if (cached) {
+        result.set(chainId, cached);
+      }
+    }
+
+    return result;
+  }
+
+  @computed({ equals: comparer.structural })
   get swapDestinationCurrenciesMap(): Map<
     string,
     {
@@ -403,33 +444,25 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
       }
     >();
 
-    // CHECK: 왜 이 computed 값이 빈번하게 호출되는지 확인해야 한다.
-    console.log("get swap destination currencies map");
+    const assetsByChain = this.cachedAssetsByChain;
 
-    const isMobile = "ReactNativeWebView" in window;
-
-    const chainIds = this.swapVenues.map((v) => v.chainId).sort();
-
-    const queryAssetsBatch = this.queryAssetsBatch.getAssetsBatch(chainIds);
-
-    const assetsBatch = isMobile
-      ? queryAssetsBatch.assetsOnlySwapUsages
-      : queryAssetsBatch.assetsBatch;
+    const chainInfoCache: Map<string, IChainInfoImpl<ChainInfo>> = new Map();
+    const getChainInfo = (chainId: string) => {
+      if (!chainInfoCache.has(chainId)) {
+        chainInfoCache.set(chainId, this.chainStore.getChain(chainId));
+      }
+      return chainInfoCache.get(chainId)!;
+    };
 
     for (const swapVenue of this.swapVenues) {
-      const swapChainInfo = this.chainStore.getChain(swapVenue.chainId);
-
-      const assets =
-        assetsBatch.find((a) => a.chainId === swapChainInfo.chainId)?.assets ??
-        [];
+      const assets = assetsByChain.get(swapVenue.chainId) || [];
 
       const getMap = (chainId: string) => {
-        const chainIdentifier =
-          this.chainStore.getChain(chainId).chainIdentifier;
+        const chainIdentifier = getChainInfo(chainId).chainIdentifier;
         let inner = res.get(chainIdentifier);
         if (!inner) {
           inner = {
-            chainInfo: this.chainStore.getChain(chainId),
+            chainInfo: getChainInfo(chainId),
             currencies: [],
           };
           res.set(chainIdentifier, inner);
@@ -441,9 +474,9 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
       for (const asset of assets) {
         const chainId = asset.chainId;
 
-        const currency = this.chainStore
-          .getChain(chainId)
-          .findCurrencyWithoutReaction(asset.denom);
+        const currency = getChainInfo(chainId).findCurrencyWithoutReaction(
+          asset.denom
+        );
 
         if (currency) {
           // If ibc currency is well known.
@@ -636,6 +669,29 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
         return currency;
       })();
 
+      const chainIdsToEnsure = new Set<string>([chainInfo.chainId]);
+      if (originOutChainId !== chainInfo.chainId) {
+        chainIdsToEnsure.add(originOutChainId);
+      }
+
+      const candidateChains: IChainInfoImpl<ChainInfo>[] = [];
+
+      // Skip에서 내려주는 응답에서 origin denom과 origin chain id가 같다면 해당 토큰의 도착 체인 후보가 될 수 있는 걸로 간주한다.
+      const isEVMOnlyChain = chainInfo.chainId.startsWith("eip155:");
+      for (const chain of this.queryChains.chains) {
+        const isCandidateChainEVMOnlyChain =
+          chain.chainInfo.chainId.startsWith("eip155:");
+        const isCandidateChain =
+          chain.chainInfo.chainId !== chainInfo.chainId &&
+          (isEVMOnlyChain ? true : isCandidateChainEVMOnlyChain);
+        if (isCandidateChain) {
+          candidateChains.push(chain.chainInfo);
+          chainIdsToEnsure.add(chain.chainInfo.chainId);
+        }
+      }
+
+      this.ensureAssetsLoaded(Array.from(chainIdsToEnsure));
+
       const res: { denom: string; chainId: string }[] =
         !this.chainStore.isInChainInfosInListUI(originOutChainId)
           ? []
@@ -647,42 +703,31 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
               },
             ];
 
-      // Skip에서 내려주는 응답에서 origin denom과 origin chain id가 같다면 해당 토큰의 도착 체인 후보가 될 수 있는 걸로 간주한다.
+      const assetsByChain = this.cachedAssetsByChain;
 
-      // CHECK: swap 페이지에서 자산 새로 선택하고 swap페이지로 돌아오면 getSwapDestinationCurrencyAlternativeChains가 먼저 호출되는 경우가 있다.
-      // ~swapDestinationCurrenciesMap에서 배치로 이미 조회를 해두었기 때문에 여기서는 각각에 대해서 처리한다.~
-      const isEVMOnlyChain = chainInfo.chainId.startsWith("eip155:");
-      const asset = this.queryAssetsBatch
-        .getAssetsBatchForChainId(chainInfo.chainId)
-        .getAssetsRawByChainId(chainInfo.chainId)
-        .find((asset) => asset.denom === currency.coinMinimalDenom);
-      for (const candidateChain of this.queryChains.chains) {
-        const isCandidateChainEVMOnlyChain =
-          candidateChain.chainInfo.chainId.startsWith("eip155:");
-        const isCandidateChain =
-          candidateChain.chainInfo.chainId !== chainInfo.chainId &&
-          (isEVMOnlyChain ? true : isCandidateChainEVMOnlyChain);
-        if (isCandidateChain) {
-          const candidateAsset = this.queryAssetsBatch
-            .getAssetsBatchForChainId(candidateChain.chainInfo.chainId)
-            .getAssetsRawByChainId(chainInfo.chainId)
-            .find(
-              (a) =>
-                a.originDenom === asset?.originDenom &&
-                a.originChainId === asset?.originChainId
-            );
+      const asset = assetsByChain
+        .get(chainInfo.chainId)
+        ?.find((asset) => asset.denom === currency.coinMinimalDenom);
 
-          if (candidateAsset) {
-            const currencyFound = this.chainStore
-              .getChain(candidateChain.chainInfo.chainId)
-              .findCurrencyWithoutReaction(candidateAsset.denom);
+      for (const candidateChain of candidateChains) {
+        const candidateAsset = assetsByChain
+          .get(candidateChain.chainId)
+          ?.find(
+            (a) =>
+              a.originDenom === asset?.originDenom &&
+              a.originChainId === asset?.originChainId
+          );
 
-            if (currencyFound) {
-              res.push({
-                denom: candidateAsset.denom,
-                chainId: candidateChain.chainInfo.chainId,
-              });
-            }
+        if (candidateAsset) {
+          const currencyFound = candidateChain.findCurrencyWithoutReaction(
+            candidateAsset.denom
+          );
+
+          if (currencyFound) {
+            res.push({
+              denom: candidateAsset.denom,
+              chainId: candidateChain.chainId,
+            });
           }
         }
       }
@@ -740,4 +785,64 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
       });
     }
   );
+
+  private getCachedAssetsForChain(
+    chainId: string
+  ): Asset[] | SwapAsset[] | null {
+    const cachedItem = this.assetsByChainIdCache.get(chainId);
+
+    if (
+      !cachedItem ||
+      Date.now() - cachedItem.timestamp > this.ASSETS_CACHE_TTL
+    ) {
+      return null;
+    }
+
+    return cachedItem.data;
+  }
+
+  @action
+  clearAssetCache(chainId?: string) {
+    if (chainId) {
+      this.assetsByChainIdCache.delete(chainId);
+    } else {
+      this.assetsByChainIdCache.clear();
+    }
+  }
+
+  ensureAssetsLoaded(chainIds: string[]): boolean {
+    const missingOrExpiredChainIds = chainIds.filter((chainId) => {
+      const cachedItem = this.assetsByChainIdCache.get(chainId);
+      return (
+        !cachedItem || Date.now() - cachedItem.timestamp > this.ASSETS_CACHE_TTL // 1분 미만으로 남은 것들도 같이 처리
+      );
+    });
+
+    if (missingOrExpiredChainIds.length === 0) {
+      return true;
+    }
+
+    const isMobile = "ReactNativeWebView" in window; // CHECK: 더 이상 react native를 사용하지 않음
+
+    const queryAssetsBatch = this.queryAssetsBatch.getAssetsBatch(
+      missingOrExpiredChainIds
+    );
+
+    const assetsBatch = isMobile
+      ? queryAssetsBatch.assetsOnlySwapUsages
+      : queryAssetsBatch.assetsBatch;
+
+    runInAction(() => {
+      for (const entry of assetsBatch) {
+        this.assetsByChainIdCache.set(entry.chainId, {
+          data: [...entry.assets],
+          timestamp: Date.now(),
+        });
+      }
+    });
+
+    return missingOrExpiredChainIds.every((chainId) =>
+      this.assetsByChainIdCache.has(chainId)
+    );
+  }
 }
