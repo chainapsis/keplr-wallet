@@ -2,7 +2,7 @@ import { IFeeConfig } from "@keplr-wallet/hooks-bitcoin";
 import { Dec } from "@keplr-wallet/unit";
 import { Psbt, Transaction, script as bscript } from "bitcoinjs-lib";
 import { tapleafHash } from "bitcoinjs-lib/src/payments/bip341";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { fromOutputScript } from "bitcoinjs-lib/src/address";
 import { useGetBitcoinKeys } from "./use-bitcoin-network-config";
 import { SignBitcoinTxInteractionStore } from "@keplr-wallet/stores-core";
@@ -11,7 +11,7 @@ import {
   DUST_THRESHOLD,
   TapBip32Derivation,
 } from "@keplr-wallet/stores-bitcoin";
-import { toXOnly } from "@keplr-wallet/crypto";
+import { Hash, toXOnly } from "@keplr-wallet/crypto";
 import { toASM } from "bitcoinjs-lib/src/script";
 
 interface TapLeafScript {
@@ -85,6 +85,8 @@ export const usePsbtsValidate = (
     Error | undefined
   >(undefined);
 
+  const prevPsbtsHashRef = useRef<string | null>(null);
+
   const {
     chainId,
     network: networkConfig,
@@ -100,6 +102,15 @@ export const usePsbtsValidate = (
       ? [cachedPsbtHex]
       : [];
   }, [interactionData.data, cachedPsbtHex]);
+
+  const psbtsHash = useMemo(() => {
+    if (psbtsHexes.length === 0) {
+      return null;
+    }
+
+    const hash = Hash.sha256(new TextEncoder().encode(psbtsHexes.join(",")));
+    return Buffer.from(hash).toString("hex");
+  }, [psbtsHexes]);
 
   const bitcoinKeys = useGetBitcoinKeys(chainId);
 
@@ -310,7 +321,7 @@ export const usePsbtsValidate = (
     };
   }, []);
 
-  const validatePsbts = useCallback(async () => {
+  const validatePsbts = useCallback(() => {
     // 검증 파라미터가 변경되어서 재검증이 필요하면 오류를 초기화한다.
     setCriticalValidationError(undefined);
 
@@ -505,6 +516,8 @@ export const usePsbtsValidate = (
       // 각 psbt의 유효성 검증 결과를 저장하고 계산된 수수료를 설정한다.
       setValidatedPsbts(validatedPsbtResults);
       feeConfig.setValue(totalFee.truncate().toString());
+      prevPsbtsHashRef.current = psbtsHash;
+
       setIsInitialized(true);
     } catch (e) {
       // psbt deserialize가 실패하는 경우, 이는 더 이상 검증을 진행할 수 없는 치명적인 오류이다.
@@ -513,6 +526,7 @@ export const usePsbtsValidate = (
     }
   }, [
     psbtsHexes,
+    psbtsHash,
     feeConfig,
     networkConfig,
     signPsbtOptions?.toSignInputs,
@@ -524,12 +538,26 @@ export const usePsbtsValidate = (
   ]);
 
   useEffect(() => {
-    if (bitcoinKeys.length === 0 || psbtsHexes.length === 0 || isInitialized) {
-      return;
-    }
+    // 검증이 필요한 경우:
+    // 1. 아직 초기화되지 않은 상태이면서 필요한 데이터가 모두 있는 경우
+    // 2. PSBT 해시값이 변경된 경우 (psbt의 값 또는 순서가 변경된 경우)
+    const isReady = bitcoinKeys.length > 0 && psbtsHexes.length > 0;
+    const detectedChange =
+      prevPsbtsHashRef.current !== null &&
+      prevPsbtsHashRef.current !== psbtsHash;
 
-    validatePsbts();
-  }, [validatePsbts, isInitialized, psbtsHexes.length, bitcoinKeys.length]);
+    const needValidation = isReady && (!isInitialized || detectedChange);
+
+    if (needValidation) {
+      validatePsbts();
+    }
+  }, [
+    validatePsbts,
+    isInitialized,
+    psbtsHexes.length,
+    bitcoinKeys.length,
+    psbtsHash,
+  ]);
 
   return {
     isInitialized,

@@ -52,7 +52,13 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
   const theme = useTheme();
   const isLightMode = theme.mode === "light";
 
-  const { accountStore, chainStore, queriesStore, uiConfigStore } = useStore();
+  const {
+    accountStore,
+    chainStore,
+    queriesStore,
+    uiConfigStore,
+    analyticsAmplitudeStore,
+  } = useStore();
   const [searchParams] = useSearchParams();
   const intl = useIntl();
   const navigate = useNavigate();
@@ -257,7 +263,33 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
                 onBroadcasted: (_txHash) => {
                   navigate("/tx-result/pending");
 
-                  // TODO: Log analytics
+                  const nobleEarnWithdrawAmount = Number(
+                    nobleEarnAmountConfig.amountConfig.amount[0]
+                      .toDec()
+                      .toString()
+                  );
+                  const nobleEarnWithdrawExpectedReceiveAmount = Number(
+                    nobleEarnAmountConfig.amountConfig.expectedOutAmount
+                      .toDec()
+                      .toString()
+                  );
+
+                  analyticsAmplitudeStore.logEvent(
+                    "click_approve_btn_usdn_withdraw_tx_sign",
+                    {
+                      itemKind: "button",
+                      nobleEarnWithdrawAmount,
+                      nobleEarnWithdrawExpectedReceiveAmount,
+                    }
+                  );
+                  analyticsAmplitudeStore.incrementUserProperty(
+                    "noble_earn_withdraw_amount",
+                    nobleEarnWithdrawAmount
+                  );
+                  analyticsAmplitudeStore.incrementUserProperty(
+                    "noble_earn_withdraw_expected_receive_amount",
+                    nobleEarnWithdrawExpectedReceiveAmount
+                  );
                 },
                 onFulfill: (tx: any) => {
                   if (tx.code != null && tx.code !== 0) {

@@ -10,7 +10,18 @@ import {
   RequestSignBitcoinMessageMsg,
   RequestSignBitcoinPsbtMsg,
   RequestSignBitcoinPsbtsMsg,
-  RequestMethodToBitcoinMsg,
+  RequestBitcoinGetAccountsMsg,
+  RequestBitcoinRequestAccountsMsg,
+  RequestBitcoinDisconnectMsg,
+  RequestBitcoinGetNetworkMsg,
+  RequestBitcoinSwitchNetworkMsg,
+  RequestBitcoinGetChainMsg,
+  RequestBitcoinSwitchChainMsg,
+  RequestBitcoinGetPublicKeyMsg,
+  RequestBitcoinGetBalanceMsg,
+  RequestBitcoinGetInscriptionsMsg,
+  RequestBitcoinSendBitcoinMsg,
+  RequestBitcoinPushTxMsg,
   GetPreferredBitcoinPaymentTypeMsg,
   SetPreferredBitcoinPaymentTypeMsg,
 } from "./messages";
@@ -26,7 +37,18 @@ export function init(
   router.registerMessage(RequestSignBitcoinMessageMsg);
   router.registerMessage(RequestSignBitcoinPsbtMsg);
   router.registerMessage(RequestSignBitcoinPsbtsMsg);
-  router.registerMessage(RequestMethodToBitcoinMsg);
+  router.registerMessage(RequestBitcoinGetAccountsMsg);
+  router.registerMessage(RequestBitcoinDisconnectMsg);
+  router.registerMessage(RequestBitcoinRequestAccountsMsg);
+  router.registerMessage(RequestBitcoinGetNetworkMsg);
+  router.registerMessage(RequestBitcoinSwitchNetworkMsg);
+  router.registerMessage(RequestBitcoinGetChainMsg);
+  router.registerMessage(RequestBitcoinSwitchChainMsg);
+  router.registerMessage(RequestBitcoinGetPublicKeyMsg);
+  router.registerMessage(RequestBitcoinGetBalanceMsg);
+  router.registerMessage(RequestBitcoinGetInscriptionsMsg);
+  router.registerMessage(RequestBitcoinSendBitcoinMsg);
+  router.registerMessage(RequestBitcoinPushTxMsg);
   router.registerMessage(GetPreferredBitcoinPaymentTypeMsg);
   router.registerMessage(SetPreferredBitcoinPaymentTypeMsg);
 

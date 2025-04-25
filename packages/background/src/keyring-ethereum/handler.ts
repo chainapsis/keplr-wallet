@@ -5,7 +5,12 @@ import {
   KeplrError,
   Message,
 } from "@keplr-wallet/router";
-import { RequestSignEthereumMsg, RequestJsonRpcToEvmMsg } from "./messages";
+import {
+  RequestSignEthereumMsg,
+  RequestJsonRpcToEvmMsg,
+  GetNewCurrentChainIdForEVMMsg,
+  CheckNeedEnableAccessForEVMMsg,
+} from "./messages";
 import { KeyRingEthereumService } from "./service";
 import { PermissionInteractiveService } from "../permission-interactive";
 
@@ -28,6 +33,16 @@ export const getHandler: (
           service,
           permissionInteractionService
         )(env, msg as RequestJsonRpcToEvmMsg);
+      case GetNewCurrentChainIdForEVMMsg:
+        return handleGetNewCurrentChainIdForEVMMsg(service)(
+          env,
+          msg as GetNewCurrentChainIdForEVMMsg
+        );
+      case CheckNeedEnableAccessForEVMMsg:
+        return handleCheckNeedEnableAccessForEVMMsg(service)(
+          env,
+          msg as CheckNeedEnableAccessForEVMMsg
+        );
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
     }
@@ -69,8 +84,17 @@ const handleRequestJsonRpcToEvmMsg: (
   permissionInteractionService
 ) => {
   return async (env, msg) => {
-    if (msg.method !== "keplr_initProviderState") {
-      await permissionInteractionService.ensureEnabledForEVM(env, msg.origin);
+    if (service.checkNeedEnableAccess(msg.method)) {
+      const newCurrentChainId = service.getNewCurrentChainIdFromRequest(
+        msg.method,
+        msg.params
+      );
+
+      await permissionInteractionService.ensureEnabledForEVM(
+        env,
+        msg.origin,
+        newCurrentChainId
+      );
     }
 
     return await service.request(
@@ -81,5 +105,21 @@ const handleRequestJsonRpcToEvmMsg: (
       msg.providerId,
       msg.chainId
     );
+  };
+};
+
+const handleGetNewCurrentChainIdForEVMMsg: (
+  service: KeyRingEthereumService
+) => InternalHandler<GetNewCurrentChainIdForEVMMsg> = (service) => {
+  return (_, msg) => {
+    return service.getNewCurrentChainIdFromRequest(msg.method, msg.params);
+  };
+};
+
+const handleCheckNeedEnableAccessForEVMMsg: (
+  service: KeyRingEthereumService
+) => InternalHandler<CheckNeedEnableAccessForEVMMsg> = (service) => {
+  return (_, msg) => {
+    return service.checkNeedEnableAccess(msg.method);
   };
 };
