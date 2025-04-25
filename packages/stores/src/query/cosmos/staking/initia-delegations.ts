@@ -8,7 +8,6 @@ import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
 import { computed, makeObservable } from "mobx";
 import { computedFn } from "mobx-utils";
 import { QuerySharedContext } from "../../../common";
-import { ENDPOINT_BY_CHAIN_ID } from "./endpoint-by-chain-id";
 import { Coin } from "@keplr-wallet/types";
 
 export class ObservableQueryInitiaDelegationsInner extends ObservableChainQuery<InitiaDelegations> {
@@ -25,10 +24,7 @@ export class ObservableQueryInitiaDelegationsInner extends ObservableChainQuery<
       sharedContext,
       chainId,
       chainGetter,
-      ENDPOINT_BY_CHAIN_ID[chainId]?.["delegations"]?.replace(
-        "{bech32Address}",
-        bech32Address
-      )
+      `/initia/mstaking/v1/delegations/${bech32Address}`
     );
     makeObservable(this);
 
