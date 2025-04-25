@@ -590,7 +590,7 @@ export class CosmosAccountImpl {
                         return "/stratos.crypto.v1.ethsecp256k1.PubKey";
                       }
 
-                      if (chainInfo.hasFeature("cosmos-evm")) {
+                      if (chainInfo.hasFeature("eth-secp256k1-cosmos")) {
                         return "/cosmos.evm.crypto.v1.ethsecp256k1.PubKey";
                       }
 
