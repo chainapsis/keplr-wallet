@@ -736,19 +736,6 @@ export class ObservableQueryAssetsBatch extends HasMapStore<ObservableQueryAsset
     return this.get(ObservableQueryAssetsBatch.serializeChainIds(chainIds));
   }
 
-  getAssetsBatchForChainId(chainId: string): ObservableQueryAssetsBatchInner {
-    // Find an existing batch that contains this chainId
-    for (const [serializedChainIds, batchInner] of this.map.entries()) {
-      const chainIds =
-        ObservableQueryAssetsBatch.deserializeChainIds(serializedChainIds);
-      if (chainIds.includes(chainId)) {
-        return batchInner;
-      }
-    }
-
-    return this.get(ObservableQueryAssetsBatch.serializeChainIds([chainId]));
-  }
-
   static serializeChainIds(chainIds: string[]): string {
     return JSON.stringify(chainIds);
   }
