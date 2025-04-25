@@ -324,3 +324,19 @@ export function getTokenSearchResultClickAnalyticsProperties(
       ),
   };
 }
+
+export function getChainSearchResultClickAnalyticsProperties(
+  chainName: string,
+  search: string,
+  chainNames: string[],
+  index: number
+): Properties {
+  return {
+    chainName,
+    query: search.trim(),
+    searchResultCount: chainNames.length,
+    index,
+    upperItems: chainNames.slice(0, index).slice(-3),
+    lowerItems: chainNames.slice(index + 1).slice(0, 3),
+  };
+}

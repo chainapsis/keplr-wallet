@@ -501,7 +501,10 @@ export const AvailableTabView: FunctionComponent<{
                 {allBalancesSearchFiltered.length > 0 && (
                   <Gutter size="1rem" direction="vertical" />
                 )}
-                <LookingForChains lookingForChains={searchedLookingForChains} />
+                <LookingForChains
+                  lookingForChains={searchedLookingForChains}
+                  search={search}
+                />
               </React.Fragment>
             )}
 
