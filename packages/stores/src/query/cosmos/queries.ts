@@ -25,6 +25,8 @@ import { ObservableQueryAuthZGranter } from "./authz";
 import { QuerySharedContext } from "../../common";
 import { ObservableQueryFeeMarketGasPrices } from "./feemarket";
 import { ObservableQueryIBCClientStateV2 } from "./ibc/client-state-v2";
+import { ObservableQueryInitiaUnbondingDelegations } from "./staking/initia-unbonding-delegations";
+import { ObservableQueryInitiaDelegations } from "./staking/initia-delegations";
 
 export interface CosmosQueries {
   cosmos: CosmosQueriesImpl;
@@ -65,7 +67,9 @@ export class CosmosQueriesImpl {
   public readonly queryDistributionParams: DeepReadonly<ObservableQueryDistributionParams>;
   public readonly queryRewards: DeepReadonly<ObservableQueryRewards>;
   public readonly queryDelegations: DeepReadonly<ObservableQueryDelegations>;
+  public readonly queryInitiaDelegations: DeepReadonly<ObservableQueryInitiaDelegations>;
   public readonly queryUnbondingDelegations: DeepReadonly<ObservableQueryUnbondingDelegations>;
+  public readonly queryInitiaUnbondingDelegations: DeepReadonly<ObservableQueryInitiaUnbondingDelegations>;
   public readonly queryValidators: DeepReadonly<ObservableQueryValidators>;
 
   public readonly queryIBCClientState: DeepReadonly<ObservableQueryIBCClientState>;
@@ -130,11 +134,22 @@ export class CosmosQueriesImpl {
       chainId,
       chainGetter
     );
+    this.queryInitiaDelegations = new ObservableQueryInitiaDelegations(
+      sharedContext,
+      chainId,
+      chainGetter
+    );
     this.queryUnbondingDelegations = new ObservableQueryUnbondingDelegations(
       sharedContext,
       chainId,
       chainGetter
     );
+    this.queryInitiaUnbondingDelegations =
+      new ObservableQueryInitiaUnbondingDelegations(
+        sharedContext,
+        chainId,
+        chainGetter
+      );
     this.queryValidators = new ObservableQueryValidators(
       sharedContext,
       chainId,

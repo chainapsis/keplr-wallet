@@ -20,6 +20,7 @@ import { UIConfigStore } from "../ui-config";
 import { KeyRingStore } from "@keplr-wallet/stores-core";
 import { AllTokenMapByChainIdentifierState } from "./all-token-map-state";
 import { getBabylonUnbondingRemainingTime } from "../../utils/get-babylon-unbonding-remaining-time";
+import { INITIA_CHAIN_ID } from "../../config.ui";
 
 interface ViewToken {
   chainInfo: IChainInfoImpl | ModularChainInfo;
@@ -810,10 +811,14 @@ export class HugeQueriesStore {
         }
 
         const queries = this.queriesStore.get(modularChainInfo.chainId);
-        const queryDelegation =
-          queries.cosmos.queryDelegations.getQueryBech32Address(
-            account.bech32Address
-          );
+        const isInitia = modularChainInfo.chainId === INITIA_CHAIN_ID;
+        const queryDelegation = isInitia
+          ? queries.cosmos.queryInitiaDelegations.getQueryBech32Address(
+              account.bech32Address
+            )
+          : queries.cosmos.queryDelegations.getQueryBech32Address(
+              account.bech32Address
+            );
         if (!queryDelegation.total) {
           continue;
         }
@@ -888,9 +893,13 @@ export class HugeQueriesStore {
 
         const queries = this.queriesStore.get(modularChainInfo.chainId);
         const queryUnbonding =
-          queries.cosmos.queryUnbondingDelegations.getQueryBech32Address(
-            account.bech32Address
-          );
+          chainInfo.chainId === INITIA_CHAIN_ID
+            ? queries.cosmos.queryInitiaUnbondingDelegations.getQueryBech32Address(
+                account.bech32Address
+              )
+            : queries.cosmos.queryUnbondingDelegations.getQueryBech32Address(
+                account.bech32Address
+              );
 
         for (let i = 0; i < queryUnbonding.unbondings.length; i++) {
           const unbonding = queryUnbonding.unbondings[i];

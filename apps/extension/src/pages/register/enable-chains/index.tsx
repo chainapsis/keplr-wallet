@@ -45,6 +45,7 @@ import { NativeChainSectionIconDM } from "./components/native-chain-section-icon
 import { NativeChainSectionIconLM } from "./components/native-chain-section-icon-lm";
 import { NextStepChainItem } from "./components/next-step-chain-item";
 import { ChainItem } from "./components/chain-item";
+import { INITIA_CHAIN_ID } from "../../../config.ui";
 import { useSearch } from "../../../hooks/use-search";
 
 /**
@@ -547,10 +548,14 @@ export const EnableChainsScene: FunctionComponent<{
             }
 
             if (!isEVMOnlyChain) {
-              const queryDelegations =
-                queries.cosmos.queryDelegations.getQueryBech32Address(
-                  bech32Address.address
-                );
+              const isInitia = chainInfo.chainId === INITIA_CHAIN_ID;
+              const queryDelegations = isInitia
+                ? queries.cosmos.queryInitiaDelegations.getQueryBech32Address(
+                    bech32Address.address
+                  )
+                : queries.cosmos.queryDelegations.getQueryBech32Address(
+                    bech32Address.address
+                  );
               if (queryDelegations.delegationBalances.length > 0) {
                 enableAllChains = false;
                 enabledChainIdentifiers.push(chainInfo.chainIdentifier);

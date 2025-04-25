@@ -14,6 +14,7 @@ import {
   StarknetChainInfo,
 } from "@keplr-wallet/types";
 import { ThemeOption } from "../../../theme";
+import { INITIA_CHAIN_ID } from "../../../config.ui";
 
 export const StakedBalance: FunctionComponent<{
   modularChainInfo: ModularChainInfo;
@@ -63,11 +64,14 @@ const CosmosStakedBalance: FunctionComponent<{
       ? new Dec(queryAPR.response.data.apr).mul(new Dec(100)).toString(2)
       : null;
 
-  const queryDelegation = queriesStore
-    .get(chainId)
-    .cosmos.queryDelegations.getQueryBech32Address(
-      accountStore.getAccount(chainId).bech32Address
-    );
+  const isInitia = chainId === INITIA_CHAIN_ID;
+
+  const queries = queriesStore.get(chainId);
+  const queryDelegation = (
+    isInitia
+      ? queries.cosmos.queryInitiaDelegations
+      : queries.cosmos.queryDelegations
+  ).getQueryBech32Address(accountStore.getAccount(chainId).bech32Address);
 
   const stakeBalanceIsZero =
     !queryDelegation.total || queryDelegation.total.toDec().equals(new Dec(0));

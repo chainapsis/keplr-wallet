@@ -40,6 +40,7 @@ export const NeutronStakingRewardsContractAddress =
 
 export const NOBLE_CHAIN_ID = "noble-1";
 export const NEUTRON_CHAIN_ID = "neutron-1";
+export const INITIA_CHAIN_ID = "interwoven-1";
 
 export const KEPLR_EXTS_MEMO = "Keplr Exts";
 

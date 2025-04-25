@@ -25,6 +25,10 @@ export const Relations = [
   "bbn-wrapped-cancel-undelegate",
   "bbn-create-btc-delegation",
   "bbn-claim-reward-from-btc-staking",
+  "initia-delegate",
+  "initia-undelegate",
+  "initia-redelegate",
+  "initia-cancel-undelegate",
 ];
 
 export const PaginationLimit = 20;

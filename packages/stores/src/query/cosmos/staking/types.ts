@@ -1,3 +1,4 @@
+import { Coin } from "@keplr-wallet/types";
 import { CoinPrimitive } from "../../../common";
 
 export type Rewards = {
@@ -28,6 +29,23 @@ export type Delegation = {
   };
 };
 
+export type InitiaDelegations = {
+  delegation_responses: InitiaDelegation[];
+};
+
+export type InitiaDelegation = {
+  delegation: {
+    delegator_address: string;
+    validator_address: string;
+    // Dec
+    shares: string;
+  };
+  balance: {
+    denom: string;
+    amount: string;
+  }[];
+};
+
 export type UnbondingDelegations = {
   unbonding_responses: UnbondingDelegation[];
   // pagination: {}
@@ -41,6 +59,21 @@ export type UnbondingDelegation = {
     completion_time: string;
     initial_balance: string;
     balance: string;
+  }[];
+};
+
+export type InitiaUnbondingDelegations = {
+  unbonding_responses: InitiaUnbondingDelegation[];
+};
+
+export type InitiaUnbondingDelegation = {
+  delegator_address: string;
+  validator_address: string;
+  entries: {
+    creation_height: string;
+    completion_time: string;
+    initial_balance: string;
+    balance: Coin[];
   }[];
 };
 
