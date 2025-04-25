@@ -9,6 +9,27 @@ import Joi from "joi";
 import { InternalChainStore } from "../internal";
 import { SwapUsageQueries } from "../swap-usage";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
+import { computedFn } from "mobx-utils";
+
+export interface Asset {
+  denom: string;
+  chainId: string;
+  originDenom: string;
+  originChainId: string;
+  isEvm: boolean;
+  tokenContract?: string;
+  recommendedSymbol?: string;
+  logoURI?: string;
+  coingeckoId?: string;
+  decimals: number;
+}
+
+export interface SwapAsset {
+  denom: string;
+  chainId: string;
+  originDenom: string;
+  originChainId: string;
+}
 
 const Schema = Joi.object<AssetsResponse>({
   chain_to_assets_map: Joi.object().pattern(
@@ -53,18 +74,7 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
   }
 
   @computed
-  get assetsRaw(): {
-    denom: string;
-    chainId: string;
-    originDenom: string;
-    originChainId: string;
-    isEvm: boolean;
-    tokenContract?: string;
-    recommendedSymbol?: string;
-    logoURI?: string;
-    coingeckoId?: string;
-    decimals: number;
-  }[] {
+  get assetsRaw(): Asset[] {
     if (
       !this.response ||
       !this.response.data ||
@@ -87,18 +97,7 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
         this.chainId.replace("eip155:", "")
       ];
     if (assetsInResponse) {
-      const res: {
-        denom: string;
-        chainId: string;
-        originDenom: string;
-        originChainId: string;
-        isEvm: boolean;
-        tokenContract?: string;
-        recommendedSymbol?: string;
-        logoURI?: string;
-        coingeckoId?: string;
-        decimals: number;
-      }[] = [];
+      const res: Asset[] = [];
 
       for (const asset of assetsInResponse.assets) {
         const chainId = !Number.isNaN(parseInt(asset.chain_id))
@@ -163,18 +162,7 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
   }
 
   @computed
-  get assets(): {
-    denom: string;
-    chainId: string;
-    originDenom: string;
-    originChainId: string;
-    isEvm: boolean;
-    tokenContract?: string;
-    recommendedSymbol?: string;
-    logoURI?: string;
-    coingeckoId?: string;
-    decimals: number;
-  }[] {
+  get assets(): Asset[] {
     if (
       !this.response ||
       !this.response.data ||
@@ -197,18 +185,7 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
         this.chainId.replace("eip155:", "")
       ];
     if (assetsInResponse) {
-      const res: {
-        denom: string;
-        chainId: string;
-        originDenom: string;
-        originChainId: string;
-        isEvm: boolean;
-        tokenContract?: string;
-        recommendedSymbol?: string;
-        logoURI?: string;
-        coingeckoId?: string;
-        decimals: number;
-      }[] = [];
+      const res: Asset[] = [];
 
       for (const asset of assetsInResponse.assets) {
         const chainId = !Number.isNaN(parseInt(asset.chain_id))
@@ -274,12 +251,7 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
   }
 
   @computed
-  get assetsOnlySwapUsages(): {
-    denom: string;
-    chainId: string;
-    originDenom: string;
-    originChainId: string;
-  }[] {
+  get assetsOnlySwapUsages(): SwapAsset[] {
     if (
       !this.response ||
       !this.response.data ||
@@ -300,12 +272,7 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
     const assetsInResponse =
       this.response.data.chain_to_assets_map[chainInfo.chainId];
     if (assetsInResponse) {
-      const res: {
-        denom: string;
-        chainId: string;
-        originDenom: string;
-        originChainId: string;
-      }[] = [];
+      const res: SwapAsset[] = [];
 
       for (const asset of assetsInResponse.assets) {
         if (
@@ -403,5 +370,408 @@ export class ObservableQueryAssets extends HasMapStore<ObservableQueryAssetsInne
 
   getAssets(chainId: string): ObservableQueryAssetsInner {
     return this.get(chainId);
+  }
+}
+
+export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsResponse> {
+  constructor(
+    sharedContext: QuerySharedContext,
+    protected readonly chainStore: InternalChainStore,
+    protected readonly swapUsageQueries: SwapUsageQueries,
+    skipURL: string,
+    public readonly chainIds: string[]
+  ) {
+    super(
+      sharedContext,
+      skipURL,
+      `/v2/fungible/assets?${chainIds
+        .map((chainId) => `chain_ids=${chainId.replace("eip155:", "")}`)
+        .join("&")}&native_only=false&include_evm_assets=true`
+    );
+
+    makeObservable(this);
+  }
+
+  @computed
+  get assetsRawBatch(): {
+    chainId: string;
+    assets: Asset[];
+  }[] {
+    if (
+      !this.response ||
+      !this.response.data ||
+      !this.response.data.chain_to_assets_map
+    ) {
+      return [];
+    }
+
+    const result: {
+      chainId: string;
+      assets: Asset[];
+    }[] = [];
+
+    for (const chainId of this.chainIds) {
+      if (!this.chainStore.hasChain(chainId)) {
+        continue;
+      }
+
+      const chainInfo = this.chainStore.getChain(chainId);
+      if (!this.chainStore.isInChainInfosInListUI(chainInfo.chainId)) {
+        continue;
+      }
+
+      const assetsInResponse =
+        this.response.data.chain_to_assets_map[chainId.replace("eip155:", "")];
+      if (assetsInResponse) {
+        const assets: Asset[] = [];
+
+        for (const asset of assetsInResponse.assets) {
+          const assetChainId = !Number.isNaN(parseInt(asset.chain_id))
+            ? `eip155:${asset.chain_id}`
+            : asset.chain_id;
+          const originChainId = !Number.isNaN(parseInt(asset.origin_chain_id))
+            ? `eip155:${asset.origin_chain_id}`
+            : asset.origin_chain_id;
+          if (
+            this.chainStore.hasChain(assetChainId) &&
+            (this.chainStore.hasChain(originChainId) ||
+              (asset.chain_id === "osmosis-1" &&
+                asset.denom ===
+                  "ibc/0FA9232B262B89E77D1335D54FB1E1F506A92A7E4B51524B400DC69C68D28372"))
+          ) {
+            // IBC asset일 경우 그냥 넣는다.
+            if (asset.denom.startsWith("ibc/")) {
+              assets.push({
+                denom: asset.denom,
+                chainId: assetChainId,
+                originDenom: asset.origin_denom,
+                originChainId: originChainId,
+                isEvm: false,
+                recommendedSymbol: asset.recommended_symbol,
+                logoURI: asset.logo_uri,
+                coingeckoId: asset.coingecko_id,
+                decimals: asset.decimals,
+              });
+            } else {
+              const coinMinimalDenom =
+                asset.is_evm &&
+                asset.token_contract != null &&
+                asset.token_contract.startsWith("0x")
+                  ? `erc20:${asset.token_contract.toLowerCase()}`
+                  : asset.denom;
+              const originCoinMinimalDenom = asset.origin_denom.startsWith("0x")
+                ? `erc20:${asset.origin_denom.toLowerCase()}`
+                : asset.origin_denom;
+              // TODO: Dec, Int 같은 곳에서 18 이상인 경우도 고려하도록 수정
+              if (asset.decimals <= 18) {
+                assets.push({
+                  denom: coinMinimalDenom,
+                  chainId: assetChainId,
+                  originDenom: originCoinMinimalDenom,
+                  originChainId: originChainId,
+                  isEvm: asset.is_evm,
+                  tokenContract: asset.token_contract,
+                  recommendedSymbol: asset.recommended_symbol,
+                  logoURI: asset.logo_uri,
+                  coingeckoId: asset.coingecko_id,
+                  decimals: asset.decimals,
+                });
+              }
+            }
+          }
+        }
+
+        if (assets.length > 0) {
+          result.push({
+            chainId,
+            assets,
+          });
+        }
+      }
+    }
+
+    return result;
+  }
+
+  getAssetsRawByChainId = computedFn((chainId: string): Asset[] => {
+    return this.assetsRawBatch.find((a) => a.chainId === chainId)?.assets ?? [];
+  });
+
+  @computed
+  get assetsBatch(): {
+    chainId: string;
+    assets: Asset[];
+  }[] {
+    if (
+      !this.response ||
+      !this.response.data ||
+      !this.response.data.chain_to_assets_map
+    ) {
+      return [];
+    }
+
+    const result: {
+      chainId: string;
+      assets: Asset[];
+    }[] = [];
+
+    for (const chainId of this.chainIds) {
+      if (!this.chainStore.hasChain(chainId)) {
+        continue;
+      }
+
+      const chainInfo = this.chainStore.getChain(chainId);
+      if (!this.chainStore.isInChainInfosInListUI(chainInfo.chainId)) {
+        continue;
+      }
+
+      const assetsInResponse =
+        this.response.data.chain_to_assets_map[chainId.replace("eip155:", "")];
+      if (assetsInResponse) {
+        const assets: Asset[] = [];
+
+        for (const asset of assetsInResponse.assets) {
+          const assetChainId = !Number.isNaN(parseInt(asset.chain_id))
+            ? `eip155:${asset.chain_id}`
+            : asset.chain_id;
+          const originChainId = !Number.isNaN(parseInt(asset.origin_chain_id))
+            ? `eip155:${asset.origin_chain_id}`
+            : asset.origin_chain_id;
+          if (
+            this.chainStore.hasChain(assetChainId) &&
+            this.chainStore.hasChain(originChainId)
+          ) {
+            // IBC asset일 경우 그냥 넣는다.
+            if (asset.denom.startsWith("ibc/")) {
+              assets.push({
+                denom: asset.denom,
+                chainId: assetChainId,
+                originDenom: asset.origin_denom,
+                originChainId: originChainId,
+                isEvm: false,
+                recommendedSymbol: asset.recommended_symbol,
+                logoURI: asset.logo_uri,
+                coingeckoId: asset.coingecko_id,
+                decimals: asset.decimals,
+              });
+              // IBC asset이 아니라면 알고있는 currency만 넣는다.
+            } else {
+              const coinMinimalDenom =
+                asset.is_evm &&
+                asset.token_contract != null &&
+                asset.token_contract.startsWith("0x")
+                  ? `erc20:${asset.token_contract.toLowerCase()}`
+                  : asset.denom;
+              const originCoinMinimalDenom = asset.origin_denom.startsWith("0x")
+                ? `erc20:${asset.origin_denom.toLowerCase()}`
+                : asset.origin_denom;
+              const currencyFound =
+                chainInfo.findCurrencyWithoutReaction(coinMinimalDenom);
+              // decimals이 18 이하인 경우만을 고려해서 짜여진 코드가 많아서 임시로 18 이하인 경우만 고려한다.
+              // TODO: Dec, Int 같은 곳에서 18 이상인 경우도 고려하도록 수정
+              if (currencyFound && currencyFound.coinDecimals <= 18) {
+                assets.push({
+                  denom: coinMinimalDenom,
+                  chainId: assetChainId,
+                  originDenom: originCoinMinimalDenom,
+                  originChainId: originChainId,
+                  isEvm: asset.is_evm,
+                  tokenContract: asset.token_contract,
+                  recommendedSymbol: asset.recommended_symbol,
+                  logoURI: asset.logo_uri,
+                  coingeckoId: asset.coingecko_id,
+                  decimals: asset.decimals,
+                });
+              }
+            }
+          }
+        }
+
+        if (assets.length > 0) {
+          result.push({
+            chainId,
+            assets,
+          });
+        }
+      }
+    }
+
+    return result;
+  }
+
+  getAssetsByChainId = computedFn((chainId: string): Asset[] => {
+    return this.assetsBatch.find((a) => a.chainId === chainId)?.assets ?? [];
+  });
+
+  @computed
+  get assetsOnlySwapUsages(): {
+    chainId: string;
+    assets: SwapAsset[];
+  }[] {
+    if (
+      !this.response ||
+      !this.response.data ||
+      !this.response.data.chain_to_assets_map
+    ) {
+      return [];
+    }
+
+    const result: {
+      chainId: string;
+      assets: SwapAsset[];
+    }[] = [];
+
+    for (const chainId of this.chainIds) {
+      if (!this.chainStore.hasChain(chainId)) {
+        continue;
+      }
+
+      const chainInfo = this.chainStore.getChain(chainId);
+      if (!this.chainStore.isInChainInfosInListUI(chainInfo.chainId)) {
+        continue;
+      }
+
+      const assetsInResponse =
+        this.response.data.chain_to_assets_map[chainInfo.chainId];
+      if (assetsInResponse) {
+        const assets: SwapAsset[] = [];
+
+        for (const asset of assetsInResponse.assets) {
+          if (
+            this.chainStore.hasChain(asset.chain_id) &&
+            this.chainStore.hasChain(asset.origin_chain_id)
+          ) {
+            if (
+              !this.swapUsageQueries.querySwapUsage
+                .getSwapUsage(chainId)
+                .isSwappable(asset.denom)
+            ) {
+              continue;
+            }
+
+            // IBC asset일 경우 그냥 넣는다.
+            if (asset.denom.startsWith("ibc/")) {
+              assets.push({
+                denom: asset.denom,
+                chainId: asset.chain_id,
+                originDenom: asset.origin_denom,
+                originChainId: asset.origin_chain_id,
+              });
+              // IBC asset이 아니라면 알고있는 currency만 넣는다.
+            } else if (chainInfo.findCurrencyWithoutReaction(asset.denom)) {
+              assets.push({
+                denom: asset.denom,
+                chainId: asset.chain_id,
+                originDenom: asset.origin_denom,
+                originChainId: asset.origin_chain_id,
+              });
+            }
+          }
+        }
+
+        if (assets.length > 0) {
+          result.push({
+            chainId,
+            assets,
+          });
+        }
+      }
+    }
+
+    return result;
+  }
+
+  getAssetsOnlySwapUsagesByChainId = computedFn(
+    (chainId: string): SwapAsset[] => {
+      return (
+        this.assetsOnlySwapUsages.find((a) => a.chainId === chainId)?.assets ??
+        []
+      );
+    }
+  );
+
+  protected override async fetchResponse(
+    abortController: AbortController
+  ): Promise<{ headers: any; data: AssetsResponse }> {
+    const _result = await simpleFetch(this.baseURL, this.url, {
+      signal: abortController.signal,
+      headers: {
+        ...(() => {
+          const res: { authorization?: string } = {};
+          if (process.env["SKIP_API_KEY"]) {
+            res.authorization = process.env["SKIP_API_KEY"];
+          }
+
+          return res;
+        })(),
+      },
+    });
+    const result = {
+      headers: _result.headers,
+      data: _result.data,
+    };
+
+    const validated = Schema.validate(result.data);
+    if (validated.error) {
+      console.log(
+        "Failed to validate assets from source response",
+        validated.error
+      );
+      throw validated.error;
+    }
+
+    return {
+      headers: result.headers,
+      data: validated.value,
+    };
+  }
+}
+
+export class ObservableQueryAssetsBatch extends HasMapStore<ObservableQueryAssetsBatchInner> {
+  constructor(
+    protected readonly sharedContext: QuerySharedContext,
+    protected readonly chainStore: InternalChainStore,
+    protected readonly swapUsageQueries: SwapUsageQueries,
+    protected readonly skipURL: string
+  ) {
+    super((key) => {
+      const chainIds = ObservableQueryAssetsBatch.deserializeChainIds(key);
+      if (chainIds.length === 0) {
+        throw new Error("Chain IDs cannot be empty");
+      }
+
+      return new ObservableQueryAssetsBatchInner(
+        this.sharedContext,
+        this.chainStore,
+        this.swapUsageQueries,
+        this.skipURL,
+        chainIds
+      );
+    });
+  }
+
+  getAssetsBatch(chainIds: string[]): ObservableQueryAssetsBatchInner {
+    return this.get(ObservableQueryAssetsBatch.serializeChainIds(chainIds));
+  }
+
+  getAssetsBatchForChainId(chainId: string): ObservableQueryAssetsBatchInner {
+    // Find an existing batch that contains this chainId
+    for (const [serializedChainIds, batchInner] of this.map.entries()) {
+      const chainIds =
+        ObservableQueryAssetsBatch.deserializeChainIds(serializedChainIds);
+      if (chainIds.includes(chainId)) {
+        return batchInner;
+      }
+    }
+
+    return this.get(ObservableQueryAssetsBatch.serializeChainIds([chainId]));
+  }
+
+  static serializeChainIds(chainIds: string[]): string {
+    return JSON.stringify(chainIds);
+  }
+
+  static deserializeChainIds(key: string): string[] {
+    return JSON.parse(key) as string[];
   }
 }

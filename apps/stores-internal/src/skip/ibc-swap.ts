@@ -1,6 +1,6 @@
 import { HasMapStore, IChainInfoImpl } from "@keplr-wallet/stores";
 import { AppCurrency, Currency, ERC20Currency } from "@keplr-wallet/types";
-import { ObservableQueryAssets } from "./assets";
+import { ObservableQueryAssetsBatch } from "./assets";
 import { computed, makeObservable } from "mobx";
 import { ObservableQueryChains } from "./chains";
 import { CoinPretty } from "@keplr-wallet/unit";
@@ -87,7 +87,7 @@ export class ObservableQueryIBCSwapInner {
 export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapInner> {
   constructor(
     protected readonly chainStore: InternalChainStore,
-    protected readonly queryAssets: ObservableQueryAssets,
+    protected readonly queryAssetsBatch: ObservableQueryAssetsBatch,
     protected readonly queryAssetsFromSource: ObservableQueryAssetsFromSource,
     protected readonly queryChains: ObservableQueryChains,
     protected readonly queryRoute: ObservableQueryRoute,
@@ -384,6 +384,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
     return false;
   }
 
+  // CHECK: swap 페이지 초기 렌더링 시에 리렌더링이 빈번함. 이후 swapDestinationCurrenciesMap가 재사용되는 경우에는 빈번하지 않음.
   // Key is chain identifier
   @computed
   get swapDestinationCurrenciesMap(): Map<
@@ -402,15 +403,25 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
       }
     >();
 
+    // CHECK: 왜 이 computed 값이 빈번하게 호출되는지 확인해야 한다.
+    console.log("get swap destination currencies map");
+
     const isMobile = "ReactNativeWebView" in window;
+
+    const chainIds = this.swapVenues.map((v) => v.chainId).sort();
+
+    const queryAssetsBatch = this.queryAssetsBatch.getAssetsBatch(chainIds);
+
+    const assetsBatch = isMobile
+      ? queryAssetsBatch.assetsOnlySwapUsages
+      : queryAssetsBatch.assetsBatch;
 
     for (const swapVenue of this.swapVenues) {
       const swapChainInfo = this.chainStore.getChain(swapVenue.chainId);
 
-      const queryAssets = this.queryAssets.getAssets(swapChainInfo.chainId);
-      const assets = isMobile
-        ? queryAssets.assetsOnlySwapUsages
-        : queryAssets.assets;
+      const assets =
+        assetsBatch.find((a) => a.chainId === swapChainInfo.chainId)?.assets ??
+        [];
 
       const getMap = (chainId: string) => {
         const chainIdentifier =
@@ -637,10 +648,14 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
             ];
 
       // Skip에서 내려주는 응답에서 origin denom과 origin chain id가 같다면 해당 토큰의 도착 체인 후보가 될 수 있는 걸로 간주한다.
+
+      // CHECK: swap 페이지에서 자산 새로 선택하고 swap페이지로 돌아오면 getSwapDestinationCurrencyAlternativeChains가 먼저 호출되는 경우가 있다.
+      // ~swapDestinationCurrenciesMap에서 배치로 이미 조회를 해두었기 때문에 여기서는 각각에 대해서 처리한다.~
       const isEVMOnlyChain = chainInfo.chainId.startsWith("eip155:");
-      const asset = this.queryAssets
-        .getAssets(chainInfo.chainId)
-        .assets.find((asset) => asset.denom === currency.coinMinimalDenom);
+      const asset = this.queryAssetsBatch
+        .getAssetsBatchForChainId(chainInfo.chainId)
+        .getAssetsRawByChainId(chainInfo.chainId)
+        .find((asset) => asset.denom === currency.coinMinimalDenom);
       for (const candidateChain of this.queryChains.chains) {
         const isCandidateChainEVMOnlyChain =
           candidateChain.chainInfo.chainId.startsWith("eip155:");
@@ -648,9 +663,10 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
           candidateChain.chainInfo.chainId !== chainInfo.chainId &&
           (isEVMOnlyChain ? true : isCandidateChainEVMOnlyChain);
         if (isCandidateChain) {
-          const candidateAsset = this.queryAssets
-            .getAssets(candidateChain.chainInfo.chainId)
-            .assetsRaw.find(
+          const candidateAsset = this.queryAssetsBatch
+            .getAssetsBatchForChainId(candidateChain.chainInfo.chainId)
+            .getAssetsRawByChainId(chainInfo.chainId)
+            .find(
               (a) =>
                 a.originDenom === asset?.originDenom &&
                 a.originChainId === asset?.originChainId
