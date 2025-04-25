@@ -11,7 +11,7 @@ export const CoinGeckoGetPrice =
   process.env["KEPLR_EXT_COINGECKO_GETPRICE"] || "/simple/price";
 export const CoinGeckoCoinDataByTokenAddress =
   process.env["KEPLR_EXT_COINGECKO_COIN_DATA_BY_TOKEN_ADDRESS"] ||
-  "/coins/{coingeckoChainId}/contract/{contractAddress}";
+  "/onchain/networks/{coingeckoChainId}/tokens/{contractAddress}";
 
 // 일단 CoinGecko API와 같은 base url을 사용함
 export const SkipTokenInfoBaseURL =
