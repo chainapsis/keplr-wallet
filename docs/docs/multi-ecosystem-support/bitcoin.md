@@ -327,7 +327,7 @@ await window.bitcoin_keplr.signPsbt(psbtHex, {
 
 ### signMessage
 
-Signing psbts: this will traverse all inputs that match the current address to sign.
+Sign a message using either ECDSA or BIP322-Simple signing method.
 
 #### Interface
 
