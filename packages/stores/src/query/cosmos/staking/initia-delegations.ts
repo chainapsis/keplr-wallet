@@ -12,7 +12,6 @@ import { Coin } from "@keplr-wallet/types";
 
 export class ObservableQueryInitiaDelegationsInner extends ObservableChainQuery<InitiaDelegations> {
   protected bech32Address: string;
-  protected isInitia = this.chainId === "interwoven-1";
 
   constructor(
     sharedContext: QuerySharedContext,
@@ -42,9 +41,13 @@ export class ObservableQueryInitiaDelegationsInner extends ObservableChainQuery<
   // a function to extract amount from delegation balance
   // For Initia chain, the balance is an array of Coin
   protected getAmountFromBalanceArray(balance: Coin[]): string {
-    const stakeDenom =
-      this.chainGetter.getChain(this.chainId).stakeCurrency?.coinMinimalDenom ??
-      "unit";
+    const stakeDenom = this.chainGetter.getChain(this.chainId).stakeCurrency
+      ?.coinMinimalDenom;
+
+    if (!stakeDenom) {
+      return "0";
+    }
+
     const coin = (balance as Coin[]).find((coin) => coin.denom === stakeDenom);
     return coin?.amount ?? "0";
   }

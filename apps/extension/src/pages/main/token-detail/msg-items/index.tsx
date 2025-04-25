@@ -96,7 +96,7 @@ const MsgItemRenderInner: FunctionComponent<{
     }
   }
 
-  if (msg.relation.startsWith("initia")) {
+  if (msg.relation.startsWith("initia-")) {
     const amounts = (msg.msg as any)["amount"] as {
       denom: string;
       amount: string;

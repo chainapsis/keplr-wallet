@@ -40,9 +40,13 @@ export class ObservableQueryInitiaUnbondingDelegationsInner extends ObservableCh
   // a function to extract amount from unbonding balance
   // For Initia chain, the balance is an array of Coin
   protected getAmountFromBalanceArray(balance: Coin[]): string {
-    const stakeDenom =
-      this.chainGetter.getChain(this.chainId).stakeCurrency?.coinMinimalDenom ??
-      "unit";
+    const stakeDenom = this.chainGetter.getChain(this.chainId).stakeCurrency
+      ?.coinMinimalDenom;
+
+    if (!stakeDenom) {
+      return "0";
+    }
+
     const coin = (balance as Coin[]).find((coin) => coin.denom === stakeDenom);
     return coin?.amount ?? "0";
   }
