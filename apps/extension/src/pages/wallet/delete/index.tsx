@@ -7,7 +7,7 @@ import { Subtitle3, Subtitle4 } from "../../../components/typography";
 import styled from "styled-components";
 import { Stack } from "../../../components/stack";
 import { ColorPalette } from "../../../styles";
-import { TextInput } from "../../../components/input";
+import { PasswordTextInput } from "../../../components/input/text-input/password-text-input";
 import { useStore } from "../../../stores";
 import { useSearchParams, Link } from "react-router-dom";
 import { useNavigate } from "react-router";
@@ -171,11 +171,7 @@ export const WalletDeletePage: FunctionComponent = observer(() => {
 
         <Styles.Flex1 />
 
-        <TextInput
-          label={intl.formatMessage({
-            id: "page.wallet.delete.password-input-label",
-          })}
-          type="password"
+        <PasswordTextInput
           error={errors.password && errors.password.message}
           {...register("password", { required: true })}
         />

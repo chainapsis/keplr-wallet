@@ -275,7 +275,6 @@
   "page.setting.general.link-keplr-mobile.enter-password-view.guide-title": "케플러 모바일 앱으로만 스캔하세요!",
   "page.setting.general.link-keplr-mobile.enter-password-view.guide-paragraph": "케플러 모바일이 아닌 다른 앱으로 QR 코드를 스캔하면 자산을 잃을 수 있습니다.",
   "page.setting.general.link-keplr-mobile.enter-password-view.paragraph": "QR 코드를 스캔해서 케플러 모바일에 계정을 내보낼 수 있습니다. 이 프로세스는 몇 분 정도 걸릴 수 있습니다.",
-  "page.setting.general.link-keplr-mobile.enter-password-view.password-label": "비밀번호",
 
   "page.setting.general.link-keplr-mobile.qr-code-view.session-expired": "세션 만료",
   "page.setting.general.link-keplr-mobile.qr-code-view.paragraph": "QR 코드를 스캔해서 케플러 모바일과 싱크할 수 있습니다. 이 프로세스는 몇 분 정도 걸릴 수 있습니다.",
@@ -357,8 +356,6 @@
   "page.unlock.paragraph-section.enter-password-to-upgrade": "업그레이드하려면 비밀번호를 입력해주세요.",
   "page.unlock.paragraph-section.welcome-back": "👋 안녕하세요!",
   "page.unlock.bottom-section.capslock-tooltip": "CapsLock이 켜져 있습니다.",
-  "page.unlock.bottom-section.password-input-label": "비밀번호",
-  "page.unlock.bottom-section.password-input-placeholder": "비밀번호를 입력하세요",
   "page.unlock.bottom-section.guide-title": "업데이트 중에 브라우저를 종료하지 마세요.",
   "page.unlock.bottom-section.guide-paragraph": "계정이 여러 개인 경우 몇 분 이상 소요될 수 있습니다.",
 
@@ -386,10 +383,8 @@
   "page.wallet.delete.warning-paragraph": "지갑을 삭제하기 전에 복구 문구와 프라이빗키를 반드시 백업해두세요.",
   "page.wallet.delete.warning-link-text": "백업하러 가기",
   "page.wallet.delete.paragraph": "삭제하고 나면 지갑을 다시 불러오기 전까지 지갑을 사용할 수 없습니다.",
-  "page.wallet.delete.password-input-label": "비밀번호",
 
   "page.wallet.show-sensitive.paragraph": "계속 진행하려면 비밀번호를 입력해주세요.",
-  "page.wallet.show-sensitive.password-label": "비밀번호",
 
   "page.ibc-transfer.title": "고급 IBC 전송",
 
@@ -700,6 +695,8 @@
   "components.input.fee-control.modal.guide.external-fee-set": "웹사이트/어플리케이션에 의해 설정된 수수료입니다. 임의로 변경할 경우 트랜잭션이 처리되지 않을 수 있습니다.",
   "components.input.fee-control.modal.notification.changes-applied": "변경사항이 적용되었습니다.",
   "components.input.fee-control.modal.max-fee": "최대 수수료",
+  "components.input.password-text-input.label": "비밀번호",
+  "components.input.password-text-input.placeholder": "비밀번호를 입력하세요",
 
   "components.address-book-modal.title": "주소록",
   "components.address-book-modal.recent-tab": "최근",

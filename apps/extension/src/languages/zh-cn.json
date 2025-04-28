@@ -246,7 +246,6 @@
   "page.setting.general.link-keplr-mobile.enter-password-view.guide-title": "仅可使用Keplr移动端扫描",
   "page.setting.general.link-keplr-mobile.enter-password-view.guide-paragraph": "使用Keplr移动端之外的设备扫描二维码可能会导致资产丢失。",
   "page.setting.general.link-keplr-mobile.enter-password-view.paragraph": "扫描二维码将账户导出到Keplr移动端，该过程可能需要几分钟。",
-  "page.setting.general.link-keplr-mobile.enter-password-view.password-label": "密码",
 
   "page.setting.general.link-keplr-mobile.qr-code-view.session-expired": "会话已过期",
   "page.setting.general.link-keplr-mobile.qr-code-view.paragraph": "扫描二维码与Keplr移动端同步，该过程可能需要几分钟。",
@@ -330,8 +329,6 @@
   "page.unlock.paragraph-section.enter-password-to-upgrade": "输入你的密码进行升级。",
   "page.unlock.paragraph-section.welcome-back": "欢迎回来",
   "page.unlock.bottom-section.capslock-tooltip": "大写锁定已打开",
-  "page.unlock.bottom-section.password-input-label": "密码",
-  "page.unlock.bottom-section.password-input-placeholder": "请输入密码",
   "page.unlock.bottom-section.guide-title": "更新期间不要关闭浏览器",
   "page.unlock.bottom-section.guide-paragraph": "拥有多个帐户的用户的迁移过程可能需要几分钟的时间。",
 
@@ -356,10 +353,8 @@
   "page.wallet.delete.warning-paragraph": "确保你已备份助记词和私钥。",
   "page.wallet.delete.warning-link-text": "备份我的钱包",
   "page.wallet.delete.paragraph": "删除后，你将需要重新导入钱包才能恢复对它的访问。",
-  "page.wallet.delete.password-input-label": "密码",
 
   "page.wallet.show-sensitive.paragraph": "请输入你的密码以继续",
-  "page.wallet.show-sensitive.password-label": "密码",
 
   "page.ibc-transfer.title": "高级IBC转账",
 
@@ -655,6 +650,8 @@
   "components.input.fee-control.modal.fee-selector.high": "高",
   "components.input.fee-control.modal.fee-selector.manual": "手动",
   "components.input.fee-control.modal.max-fee": "最高收费",
+  "components.input.password-text-input.label": "密码",
+  "components.input.password-text-input.placeholder": "请输入密码",
 
   "components.address-book-modal.title": "地址目录",
   "components.address-book-modal.recent-tab": "最近",

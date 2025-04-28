@@ -1,6 +1,6 @@
 import React, { FunctionComponent, PropsWithChildren, useRef } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
-import { TextInput } from "../../../../components/input";
+import { PasswordTextInput, TextInput } from "../../../../components/input";
 import { Gutter } from "../../../../components/gutter";
 import { Button } from "../../../../components/button";
 import { Stack } from "../../../../components/stack";
@@ -89,11 +89,10 @@ export const FormNamePassword: FunctionComponent<
         />
         {needPassword ? (
           <React.Fragment>
-            <TextInput
+            <PasswordTextInput
               label={intl.formatMessage({
                 id: "pages.register.components.form.name-password.password-label",
               })}
-              type="password"
               placeholder={intl.formatMessage({
                 id: "pages.register.components.form.name-password.password-placeholder",
               })}
@@ -109,11 +108,10 @@ export const FormNamePassword: FunctionComponent<
               })}
               error={formState.errors.password?.message}
             />
-            <TextInput
+            <PasswordTextInput
               label={intl.formatMessage({
                 id: "pages.register.components.form.name-password.confirm-password-label",
               })}
-              type="password"
               placeholder={intl.formatMessage({
                 id: "pages.register.components.form.name-password.confirm-password-placeholder",
               })}

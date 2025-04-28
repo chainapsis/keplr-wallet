@@ -4,7 +4,7 @@ import { ColorPalette } from "../../../styles";
 import { Button1, Subtitle3 } from "../../../components/typography";
 import { HeaderLayout } from "../../../layouts/header";
 import { BackButton } from "../../../layouts/header/components";
-import { TextInput } from "../../../components/input";
+import { PasswordTextInput } from "../../../components/input";
 import { useForm } from "react-hook-form";
 import { useStore } from "../../../stores";
 import { useSearchParams } from "react-router-dom";
@@ -167,11 +167,7 @@ export const WalletShowSensitivePage: FunctionComponent = observer(() => {
                 <FormattedMessage id="page.wallet.show-sensitive.paragraph" />
               </Subtitle3>
             </Box>
-            <TextInput
-              label={intl.formatMessage({
-                id: "page.wallet.show-sensitive.password-label",
-              })}
-              type="password"
+            <PasswordTextInput
               error={errors.password && errors.password.message}
               {...register("password", { required: true })}
             />
