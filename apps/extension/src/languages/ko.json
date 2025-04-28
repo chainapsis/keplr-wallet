@@ -358,6 +358,7 @@
   "page.unlock.paragraph-section.welcome-back": "👋 안녕하세요!",
   "page.unlock.bottom-section.capslock-tooltip": "CapsLock이 켜져 있습니다.",
   "page.unlock.bottom-section.password-input-label": "비밀번호",
+  "page.unlock.bottom-section.password-input-placeholder": "비밀번호를 입력하세요",
   "page.unlock.bottom-section.guide-title": "업데이트 중에 브라우저를 종료하지 마세요.",
   "page.unlock.bottom-section.guide-paragraph": "계정이 여러 개인 경우 몇 분 이상 소요될 수 있습니다.",
 

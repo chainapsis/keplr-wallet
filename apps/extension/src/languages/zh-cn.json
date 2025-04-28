@@ -331,6 +331,7 @@
   "page.unlock.paragraph-section.welcome-back": "欢迎回来",
   "page.unlock.bottom-section.capslock-tooltip": "大写锁定已打开",
   "page.unlock.bottom-section.password-input-label": "密码",
+  "page.unlock.bottom-section.password-input-placeholder": "请输入密码",
   "page.unlock.bottom-section.guide-title": "更新期间不要关闭浏览器",
   "page.unlock.bottom-section.guide-paragraph": "拥有多个帐户的用户的迁移过程可能需要几分钟的时间。",
 

@@ -364,6 +364,7 @@
   "page.unlock.paragraph-section.welcome-back": "Welcome Back",
   "page.unlock.bottom-section.capslock-tooltip": "CapsLock is on",
   "page.unlock.bottom-section.password-input-label": "Password",
+  "page.unlock.bottom-section.password-input-placeholder": "Type your password",
   "page.unlock.bottom-section.guide-title": "Don’t close your browser during update",
   "page.unlock.bottom-section.guide-paragraph": "Migration for users with many accounts can take up to several minutes.",
 
