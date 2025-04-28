@@ -9,7 +9,6 @@ import { ObservableQueryIbcSwap } from "./ibc-swap";
 import { ObservableQueryMsgsDirect } from "./msgs-direct";
 import { InternalChainStore } from "../internal";
 import { SwapUsageQueries } from "../swap-usage";
-import { ObservableAssetsCache } from "./assets-cache";
 
 export class SkipQueries {
   public readonly queryChains: DeepReadonly<ObservableQueryChains>;
@@ -22,8 +21,6 @@ export class SkipQueries {
 
   public readonly queryIBCPacketForwardingTransfer: DeepReadonly<ObservableQueryIbcPfmTransfer>;
   public readonly queryIBCSwap: DeepReadonly<ObservableQueryIbcSwap>;
-
-  public readonly assetsCache: DeepReadonly<ObservableAssetsCache>;
 
   constructor(
     sharedContext: QuerySharedContext,
@@ -53,8 +50,6 @@ export class SkipQueries {
       "https://api.skip.money"
     );
 
-    this.assetsCache = new ObservableAssetsCache(this.queryAssetsBatch);
-
     this.queryAssetsFromSource = new ObservableQueryAssetsFromSource(
       sharedContext,
       chainStore,
@@ -75,12 +70,12 @@ export class SkipQueries {
     this.queryIBCPacketForwardingTransfer = new ObservableQueryIbcPfmTransfer(
       chainStore,
       this.queryChains,
-      this.assetsCache,
+      this.queryAssetsBatch,
       this.queryAssetsFromSource
     );
     this.queryIBCSwap = new ObservableQueryIbcSwap(
       chainStore,
-      this.assetsCache,
+      this.queryAssetsBatch,
       this.queryAssetsFromSource,
       this.queryChains,
       this.queryRoute,
