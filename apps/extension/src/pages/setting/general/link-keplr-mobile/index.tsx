@@ -7,7 +7,7 @@ import { Stack } from "../../../../components/stack";
 import styled, { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
 import { Subtitle3 } from "../../../../components/typography";
-import { TextInput } from "../../../../components/input";
+import { PasswordTextInput } from "../../../../components/input";
 import lottie from "lottie-web";
 import AnimScan from "../../../../public/assets/lottie/wallet/scan.json";
 import { YAxis } from "../../../../components/axis";
@@ -190,11 +190,7 @@ const EnterPasswordView: FunctionComponent<{
           <FormattedMessage id="page.setting.general.link-keplr-mobile.enter-password-view.paragraph" />
         </Styles.Paragraph>
 
-        <TextInput
-          label={intl.formatMessage({
-            id: "page.setting.general.link-keplr-mobile.enter-password-view.password-label",
-          })}
-          type="password"
+        <PasswordTextInput
           value={password}
           error={
             isFailed

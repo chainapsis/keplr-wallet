@@ -9,6 +9,7 @@ import { ObservableQuery, QuerySharedContext } from "../../../common";
 import PQueue from "p-queue";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { computedFn } from "mobx-utils";
+import { ENDPOINT_BY_CHAIN_ID } from "./endpoint-by-chain-id";
 
 interface KeybaseResult {
   status: {
@@ -88,25 +89,9 @@ export class ObservableQueryValidatorsInner extends ObservableChainQuery<Validat
     sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
-    protected readonly status: BondStatus
+    endpoint: string
   ) {
-    super(
-      sharedContext,
-      chainId,
-      chainGetter,
-      `/cosmos/staking/v1beta1/validators?pagination.limit=1000&status=${(() => {
-        switch (status) {
-          case BondStatus.Bonded:
-            return "BOND_STATUS_BONDED";
-          case BondStatus.Unbonded:
-            return "BOND_STATUS_UNBONDED";
-          case BondStatus.Unbonding:
-            return "BOND_STATUS_UNBONDING";
-          default:
-            return "BOND_STATUS_UNSPECIFIED";
-        }
-      })()}`
-    );
+    super(sharedContext, chainId, chainGetter, endpoint);
     makeObservable(this);
   }
 
@@ -220,12 +205,32 @@ export class ObservableQueryValidators extends ObservableChainQueryMap<Validator
     chainId: string,
     chainGetter: ChainGetter
   ) {
+    const getEndpoint = (status: BondStatus) => {
+      const path =
+        ENDPOINT_BY_CHAIN_ID[chainId]?.["validators"] ??
+        "/cosmos/staking/v1beta1/validators";
+      const search = `?pagination.limit=1000&status=${(() => {
+        switch (status) {
+          case BondStatus.Bonded:
+            return "BOND_STATUS_BONDED";
+          case BondStatus.Unbonded:
+            return "BOND_STATUS_UNBONDED";
+          case BondStatus.Unbonding:
+            return "BOND_STATUS_UNBONDING";
+          default:
+            return "BOND_STATUS_UNSPECIFIED";
+        }
+      })()}`;
+
+      return path + search;
+    };
+
     super(sharedContext, chainId, chainGetter, (status: string) => {
       return new ObservableQueryValidatorsInner(
         this.sharedContext,
         this.chainId,
         this.chainGetter,
-        status as BondStatus
+        getEndpoint(status as BondStatus)
       );
     });
   }

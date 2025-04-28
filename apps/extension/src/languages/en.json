@@ -276,7 +276,6 @@
   "page.setting.general.link-keplr-mobile.enter-password-view.guide-title": "Scan on Keplr Mobile Only",
   "page.setting.general.link-keplr-mobile.enter-password-view.guide-paragraph": "Scanning the QR code outside of Keplr Mobile can lead to loss of funds",
   "page.setting.general.link-keplr-mobile.enter-password-view.paragraph": "Scan QR code to export accounts to Keplr Mobile. The process may take several minutes.",
-  "page.setting.general.link-keplr-mobile.enter-password-view.password-label": "Password",
 
   "page.setting.general.link-keplr-mobile.qr-code-view.session-expired": "Session expired",
   "page.setting.general.link-keplr-mobile.qr-code-view.paragraph": "Scan the QR code to sync with Keplr Mobile. The process may take several minutes.",
@@ -363,7 +362,6 @@
   "page.unlock.paragraph-section.enter-password-to-upgrade": "Enter your password to upgrade.",
   "page.unlock.paragraph-section.welcome-back": "Welcome Back",
   "page.unlock.bottom-section.capslock-tooltip": "CapsLock is on",
-  "page.unlock.bottom-section.password-input-label": "Password",
   "page.unlock.bottom-section.guide-title": "Don’t close your browser during update",
   "page.unlock.bottom-section.guide-paragraph": "Migration for users with many accounts can take up to several minutes.",
 
@@ -391,10 +389,8 @@
   "page.wallet.delete.warning-paragraph": "Make sure that you’ve backed up your recovery phrase and private key.",
   "page.wallet.delete.warning-link-text": "Back Up My Wallet",
   "page.wallet.delete.paragraph": "After deletion, you will be required to import your wallet to restore\n  your access to it.",
-  "page.wallet.delete.password-input-label": "Password",
 
   "page.wallet.show-sensitive.paragraph": "Please type in your password to proceed",
-  "page.wallet.show-sensitive.password-label": "Password",
 
   "page.ibc-transfer.title": "Advanced IBC Transfer",
 
@@ -796,6 +792,8 @@
   "components.input.fee-control.modal.guide.external-fee-set": "Transaction fee was set by the website/dApp. The transaction may not be processed if you change the setting.",
   "components.input.fee-control.modal.notification.changes-applied": "Changes have been applied",
   "components.input.fee-control.modal.max-fee": "Max Fee",
+  "components.input.password-text-input.label": "Password",
+  "components.input.password-text-input.placeholder": "Type Your Password",
 
   "components.address-book-modal.title": "Address Book",
   "components.address-book-modal.recent-tab": "Recent",

@@ -96,6 +96,64 @@ const MsgItemRenderInner: FunctionComponent<{
     }
   }
 
+  if (msg.relation.startsWith("initia-")) {
+    const amounts = (msg.msg as any)["amount"] as {
+      denom: string;
+      amount: string;
+    }[];
+
+    const msgHistory: MsgHistory = {
+      ...msg,
+      msg: {
+        ...(msg.msg as any),
+        amount: amounts.find((amount) => amount.denom === targetDenom),
+      },
+    };
+
+    switch (msg.relation) {
+      case "initia-delegate": {
+        return (
+          <MsgRelationDelegate
+            msg={msgHistory}
+            prices={prices}
+            targetDenom={targetDenom}
+            isInAllActivitiesPage={isInAllActivitiesPage}
+          />
+        );
+      }
+      case "initia-undelegate": {
+        return (
+          <MsgRelationUndelegate
+            msg={msgHistory}
+            prices={prices}
+            targetDenom={targetDenom}
+            isInAllActivitiesPage={isInAllActivitiesPage}
+          />
+        );
+      }
+      case "initia-redelegate": {
+        return (
+          <MsgRelationRedelegate
+            msg={msgHistory}
+            prices={prices}
+            targetDenom={targetDenom}
+            isInAllActivitiesPage={isInAllActivitiesPage}
+          />
+        );
+      }
+      case "initia-cancel-undelegate": {
+        return (
+          <MsgRelationCancelUndelegate
+            msg={msgHistory}
+            prices={prices}
+            targetDenom={targetDenom}
+            isInAllActivitiesPage={isInAllActivitiesPage}
+          />
+        );
+      }
+    }
+  }
+
   switch (msg.relation) {
     case "send": {
       return (

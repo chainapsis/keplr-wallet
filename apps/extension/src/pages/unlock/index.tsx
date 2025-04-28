@@ -1,5 +1,6 @@
 import React, { FunctionComponent, useEffect, useRef, useState } from "react";
-import { TextInput } from "../../components/input";
+
+import { PasswordTextInput } from "../../components/input";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { Button } from "../../components/button";
@@ -474,16 +475,12 @@ const BottomFormSection: FunctionComponent<{
 
         <Gutter size="0.75rem" />
         <Box position="relative">
-          <TextInput
+          <PasswordTextInput
             disabled={isMigrationSecondPhase}
             style={{
               opacity: isMigrationSecondPhase ? 0 : 1,
             }}
             ref={inputRef}
-            label={intl.formatMessage({
-              id: "page.unlock.bottom-section.password-input-label",
-            })}
-            type="password"
             value={password}
             onChange={(e) => {
               e.preventDefault();

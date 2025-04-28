@@ -463,8 +463,6 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     setIsIBCTransferDestinationModalOpen,
   ] = useState(false);
 
-  useKeepIBCSwapObservable(skipQueriesStore);
-
   useEffect(() => {
     if (addressRef.current) {
       addressRef.current.focus();
@@ -2292,10 +2290,6 @@ const DetachIcon: FunctionComponent<{
   );
 };
 
-const noopToPreventLintWarning = (..._args: any[]) => {
-  // noop
-};
-
 function useCheckExpectedOutIsTooSmall(
   ibcSwapConfigsForBridge: {
     recipientConfig: IBCRecipientConfig;
@@ -2319,7 +2313,7 @@ function useCheckExpectedOutIsTooSmall(
 
         const diff = (() => {
           if (inputDec.isZero()) {
-            throw new Error("Input amount cannot be zero");
+            return;
           }
 
           const feeAmount = inputDec.sub(outputDec);
@@ -2328,6 +2322,10 @@ function useCheckExpectedOutIsTooSmall(
             .mul(DecUtils.getTenExponentN(2));
           return ratio;
         })();
+        if (!diff) {
+          setIsExpectedAmountTooSmall(false);
+          return;
+        }
 
         if (diff.gt(new Dec(2.5))) {
           setIsExpectedAmountTooSmall(true);
@@ -2344,25 +2342,6 @@ function useCheckExpectedOutIsTooSmall(
       }
     };
   });
-}
-
-//NOTE - Hooks for maintaining the observable state of IBC swap queries
-// when uiProperties of amountConfig of swapConfig is called only inside amount input and an error occurs on amountInput
-// Observable values used in uiProperties had an issue with unobserving, so I fixed it so that we can temporarily keep observers on the page
-function useKeepIBCSwapObservable(skipQueriesStore: SkipQueries) {
-  useEffect(() => {
-    const disposal = autorun(() => {
-      noopToPreventLintWarning(
-        skipQueriesStore.queryIBCSwap.swapDestinationCurrenciesMap
-      );
-    });
-
-    return () => {
-      if (disposal) {
-        disposal();
-      }
-    };
-  }, [skipQueriesStore.queryIBCSwap]);
 }
 
 function useGetGasSimulationForBridge(
