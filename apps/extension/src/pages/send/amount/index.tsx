@@ -2319,7 +2319,7 @@ function useCheckExpectedOutIsTooSmall(
 
         const diff = (() => {
           if (inputDec.isZero()) {
-            throw new Error("Input amount cannot be zero");
+            return;
           }
 
           const feeAmount = inputDec.sub(outputDec);
@@ -2328,6 +2328,10 @@ function useCheckExpectedOutIsTooSmall(
             .mul(DecUtils.getTenExponentN(2));
           return ratio;
         })();
+        if (!diff) {
+          setIsExpectedAmountTooSmall(false);
+          return;
+        }
 
         if (diff.gt(new Dec(2.5))) {
           setIsExpectedAmountTooSmall(true);
