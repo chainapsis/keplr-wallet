@@ -33,6 +33,7 @@ import { useGetSearchChains } from "../../hooks/use-get-search-chains";
 import { useEarnBottomTag } from "../earn/components/use-earn-bottom-tag";
 import { AdjustmentIcon } from "../../components/icon/adjustment";
 import { useSearch } from "../../hooks/use-search";
+import { getTokenSearchResultClickAnalyticsProperties } from "../../analytics-amplitude";
 
 const zeroDec = new Dec(0);
 
@@ -141,8 +142,13 @@ export const AvailableTabView: FunctionComponent<{
   onMoreTokensClosed: () => void;
 }> = observer(
   ({ search, isNotReady, onClickGetStarted, onMoreTokensClosed }) => {
-    const { hugeQueriesStore, chainStore, accountStore, uiConfigStore } =
-      useStore();
+    const {
+      hugeQueriesStore,
+      chainStore,
+      accountStore,
+      uiConfigStore,
+      analyticsAmplitudeStore,
+    } = useStore();
     const intl = useIntl();
     const theme = useTheme();
     const navigate = useNavigate();
@@ -414,7 +420,7 @@ export const AvailableTabView: FunctionComponent<{
                         />
                       }
                       lenAlwaysShown={lenAlwaysShown}
-                      items={balance.map((viewToken) => {
+                      items={balance.map((viewToken, index) => {
                         const key = `${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`;
                         return (
                           <TokenItem
@@ -422,6 +428,17 @@ export const AvailableTabView: FunctionComponent<{
                             viewToken={viewToken}
                             {...getBottomTagInfoProps(viewToken)}
                             onClick={() => {
+                              if (search.trim().length > 0) {
+                                analyticsAmplitudeStore.logEvent(
+                                  "click_token_item_search_results_available_tab",
+                                  getTokenSearchResultClickAnalyticsProperties(
+                                    viewToken,
+                                    search,
+                                    balance,
+                                    index
+                                  )
+                                );
+                              }
                               setSearchParams((prev) => {
                                 prev.set(
                                   "tokenChainId",
@@ -484,7 +501,10 @@ export const AvailableTabView: FunctionComponent<{
                 {allBalancesSearchFiltered.length > 0 && (
                   <Gutter size="1rem" direction="vertical" />
                 )}
-                <LookingForChains lookingForChains={searchedLookingForChains} />
+                <LookingForChains
+                  lookingForChains={searchedLookingForChains}
+                  search={search}
+                />
               </React.Fragment>
             )}
 

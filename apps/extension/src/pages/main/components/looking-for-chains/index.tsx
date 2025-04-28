@@ -17,6 +17,7 @@ import { useTheme } from "styled-components";
 import { dispatchGlobalEventExceptSelf } from "../../../../utils/global-events";
 import { Stack } from "../../../../components/stack";
 import { NativeChainMarkIcon } from "../../../../components/icon";
+import { getChainSearchResultClickAnalyticsProperties } from "../../../../analytics-amplitude";
 
 export const LookingForChains: FunctionComponent<{
   lookingForChains: {
@@ -24,8 +25,10 @@ export const LookingForChains: FunctionComponent<{
     stored: boolean;
     chainInfo: ChainInfo | ModularChainInfo;
   }[];
-}> = ({ lookingForChains }) => {
+  search: string;
+}> = ({ lookingForChains, search }) => {
   const intl = useIntl();
+  const { analyticsAmplitudeStore } = useStore();
 
   return (
     <Box>
@@ -37,12 +40,25 @@ export const LookingForChains: FunctionComponent<{
         />
       </Box>
       <Stack gutter="0.5rem">
-        {lookingForChains.map((chainData) => (
+        {lookingForChains.map((chainData, index) => (
           <LookingForChainItem
             key={chainData.chainInfo.chainId}
             chainInfo={chainData.chainInfo}
             embedded={chainData.embedded}
             stored={chainData.stored}
+            onClick={() => {
+              if (search.trim().length >= 2) {
+                analyticsAmplitudeStore.logEvent(
+                  "click_looking_for_chain_search_results_available_tab",
+                  getChainSearchResultClickAnalyticsProperties(
+                    chainData.chainInfo.chainName,
+                    search,
+                    lookingForChains.map((chain) => chain.chainInfo.chainName),
+                    index
+                  )
+                );
+              }
+            }}
           />
         ))}
       </Stack>
@@ -54,7 +70,8 @@ export const LookingForChainItem: FunctionComponent<{
   chainInfo: ChainInfo | ModularChainInfo;
   embedded: boolean;
   stored: boolean;
-}> = observer(({ chainInfo, embedded, stored }) => {
+  onClick: () => void;
+}> = observer(({ chainInfo, embedded, stored, onClick }) => {
   const { analyticsStore, keyRingStore, chainStore } = useStore();
   const keyType = keyRingStore.selectedKeyInfo?.type;
   const intl = useIntl();
@@ -126,6 +143,8 @@ export const LookingForChainItem: FunctionComponent<{
           size="small"
           color="secondary"
           onClick={async () => {
+            onClick();
+
             // If the chain is not embedded and not added to the store,
             // add the chain internally and refresh the store.
             if (!embedded && !stored) {
