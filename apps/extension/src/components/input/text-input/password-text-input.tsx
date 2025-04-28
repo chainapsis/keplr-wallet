@@ -25,6 +25,7 @@ export const PasswordTextInput = forwardRef<
     <TextInput
       ref={ref}
       type={isPasswordVisible ? "text" : "password"}
+      autoComplete="off"
       right={
         <VisibilityIconButton
           isVisible={isPasswordVisible}
