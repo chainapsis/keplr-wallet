@@ -86,7 +86,7 @@ export const EarnOverviewClaimSection: FunctionComponent<{
               queriesStore,
               accountStore,
               analyticsAmplitudeStore,
-              "noble_earn_claim_yield"
+              "click_approve_btn_usdn_claim_tx_sign"
             );
           },
           onFulfill: (tx: any) => {
