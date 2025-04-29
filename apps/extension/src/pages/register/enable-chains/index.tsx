@@ -1003,12 +1003,6 @@ export const EnableChainsScene: FunctionComponent<{
       !fallbackBitcoinLedgerApp &&
       keyType === "ledger";
 
-    const searchedAllChains = [
-      ...searchedNativeGroupedModularChainInfos,
-      ...searchedSuggestGroupedModularChainInfos,
-      ...(showLedgerChains ? searchedLedgerChains : []),
-    ];
-
     const { chains: searchedNonNativeChainInfos, infiniteScrollTriggerRef } =
       useGetAllNonNativeChain({
         search,
@@ -1016,6 +1010,13 @@ export const EnableChainsScene: FunctionComponent<{
         fallbackStarknetLedgerApp,
         keyType,
       });
+
+    const searchedAllChains = [
+      ...searchedNativeGroupedModularChainInfos,
+      ...searchedSuggestGroupedModularChainInfos,
+      ...(showLedgerChains ? searchedLedgerChains : []),
+      ...searchedNonNativeChainInfos,
+    ];
 
     const numSelected = useMemo(() => {
       const modularChainInfoMap = new Map<string, ModularChainInfo>();

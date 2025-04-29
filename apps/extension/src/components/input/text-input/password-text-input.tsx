@@ -66,8 +66,8 @@ const VisibilityIconButton: FunctionComponent<{
   return (
     <div
       style={{
-        width: "1.75rem",
-        height: "1.75rem",
+        width: "1.5rem",
+        height: "1.5rem",
         cursor: "pointer",
       }}
       onClick={onClick}
@@ -75,11 +75,11 @@ const VisibilityIconButton: FunctionComponent<{
       onMouseLeave={() => setIsHover(false)}
     >
       {isVisible ? (
-        <VisibleIcon width="1.75rem" height="1.75rem" color={fillColor} />
+        <VisibleIcon width="1.5rem" height="1.5rem" color={fillColor} />
       ) : (
         <InvisibleIcon
-          width="1.75rem"
-          height="1.75rem"
+          width="1.5rem"
+          height="1.5rem"
           fillColor={fillColor}
           strokeColor={strokeColor}
         />
@@ -98,8 +98,8 @@ const InvisibleIcon: FunctionComponent<{
     <div style={{ width, height }}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="28"
-        height="28"
+        width={width}
+        height={height}
         viewBox="0 0 28 28"
         fill="none"
       >
@@ -137,8 +137,8 @@ const VisibleIcon: FunctionComponent<{
     <div style={{ width, height }}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="28"
-        height="28"
+        width={width}
+        height={height}
         viewBox="0 0 28 28"
         fill="none"
       >
