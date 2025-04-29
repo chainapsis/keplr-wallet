@@ -105,10 +105,7 @@ export class ObservableQueryIbcPfmTransfer {
             if (
               asset.chainId === assetChainId &&
               this.chainStore.hasChain(asset.chainId) &&
-              this.chainStore.hasChain(asset.originChainId) &&
-              ChainIdHelper.parse(asset.originChainId).identifier ===
-                ChainIdHelper.parse(chainId).identifier &&
-              asset.originDenom === denom
+              this.chainStore.hasChain(asset.originChainId)
             ) {
               if (!this.chainStore.isInChainInfosInListUI(asset.chainId)) {
                 continue;
