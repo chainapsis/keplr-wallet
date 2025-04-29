@@ -346,7 +346,7 @@ export class KeyRingEthereumService {
             ).toString("hex")}`;
 
             return {
-              currentEvmChainId: this.getEVMChainId(currentChainId),
+              currentEvmChainId: this.parseChainId(currentChainId).evmChainId,
               currentChainId: currentChainId,
               selectedAddress,
             };
@@ -366,7 +366,7 @@ export class KeyRingEthereumService {
             ).toString("hex")}`;
 
             return {
-              currentEvmChainId: this.getEVMChainId(currentChainId),
+              currentEvmChainId: this.parseChainId(currentChainId).evmChainId,
               currentChainId: currentChainId,
               selectedAddress,
             };
@@ -380,11 +380,13 @@ export class KeyRingEthereumService {
         }
         case "eth_chainId": {
           const currentChainId = this.forceGetCurrentChainId(origin, chainId);
-          return `0x${this.getEVMChainId(currentChainId).toString(16)}`;
+          return `0x${this.parseChainId(currentChainId).evmChainId.toString(
+            16
+          )}`;
         }
         case "net_version": {
           const currentChainId = this.forceGetCurrentChainId(origin, chainId);
-          return this.getEVMChainId(currentChainId).toString();
+          return this.parseChainId(currentChainId).evmChainId.toString();
         }
         case "eth_accounts": {
           const currentChainId = this.getCurrentChainId(origin, chainId);
@@ -441,7 +443,9 @@ export class KeyRingEthereumService {
                 }
               })()
             );
-            if (evmChainIdFromTx !== this.getEVMChainId(currentChainId)) {
+            if (
+              evmChainIdFromTx !== this.parseChainId(currentChainId).evmChainId
+            ) {
               throw new Error(
                 "The current active chain id does not match the one in the transaction."
               );
@@ -469,7 +473,7 @@ export class KeyRingEthereumService {
           const unsignedTx: UnsignedTransaction = {
             ...restTx,
             gasLimit: restTx?.gasLimit ?? gas,
-            chainId: this.getEVMChainId(currentChainId),
+            chainId: this.parseChainId(currentChainId).evmChainId,
             nonce,
           };
 
@@ -533,7 +537,9 @@ export class KeyRingEthereumService {
                 }
               })()
             );
-            if (evmChainIdFromTx !== this.getEVMChainId(currentChainId)) {
+            if (
+              evmChainIdFromTx !== this.parseChainId(currentChainId).evmChainId
+            ) {
               throw new Error(
                 "The current active chain id does not match the one in the transaction."
               );
@@ -561,7 +567,7 @@ export class KeyRingEthereumService {
           const unsignedTx: UnsignedTransaction = {
             ...restTx,
             gasLimit: restTx?.gasLimit ?? gas,
-            chainId: this.getEVMChainId(currentChainId),
+            chainId: this.parseChainId(currentChainId).evmChainId,
             nonce,
           };
 
@@ -1068,10 +1074,8 @@ export class KeyRingEthereumService {
         }
 
         const newEvmChainId = validateEVMChainId(parseInt(param.chainId, 16));
-        const chainInfo =
-          this.chainsService.getChainInfoByEVMChainIdOrThrow(newEvmChainId);
 
-        return chainInfo.chainId;
+        return `eip155:${newEvmChainId}`;
       }
       default: {
         return;
@@ -1099,9 +1103,12 @@ export class KeyRingEthereumService {
     );
   }
 
-  private getEVMChainId(chainId: string) {
-    const evmInfo = this.chainsService.getEVMInfoOrThrow(chainId);
+  private parseChainId(chainId: string) {
+    const [, evmChainId] = chainId.split(":");
+    const validEVMChainId = validateEVMChainId(parseInt(evmChainId, 10));
 
-    return evmInfo.chainId;
+    return {
+      evmChainId: validEVMChainId,
+    };
   }
 }

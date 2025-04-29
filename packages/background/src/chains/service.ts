@@ -404,16 +404,6 @@ export class ChainsService {
     }
   );
 
-  getChainInfoByEVMChainIdOrThrow = computedFn(
-    (evmChainId: number): ChainInfo => {
-      const chainInfo = this.getChainInfoByEVMChainId(evmChainId);
-      if (!chainInfo) {
-        throw new Error(`There is no chain info for ${evmChainId}`);
-      }
-      return chainInfo;
-    }
-  );
-
   hasChainInfo(chainId: string): boolean {
     return this.getChainInfo(chainId) != null;
   }
