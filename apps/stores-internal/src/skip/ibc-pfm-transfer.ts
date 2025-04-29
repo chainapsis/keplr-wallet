@@ -4,12 +4,12 @@ import { computedFn } from "mobx-utils";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { InternalChainStore } from "../internal";
 import { IBCChannel, NoneIBCBridgeInfo } from "./types";
-import { ObservableAssetsCache } from "./assets-cache";
+import { ObservableQueryAssetsBatch } from "./assets";
 export class ObservableQueryIbcPfmTransfer {
   constructor(
     protected readonly chainStore: InternalChainStore,
     protected readonly queryChains: ObservableQueryChains,
-    protected readonly assetsCache: ObservableAssetsCache,
+    protected readonly assetsBatch: ObservableQueryAssetsBatch,
     protected readonly queryAssetsFromSource: ObservableQueryAssetsFromSource
   ) {}
 
@@ -32,18 +32,18 @@ export class ObservableQueryIbcPfmTransfer {
         })
         .map((c) => c.chainInfo.chainId);
 
-      this.assetsCache.ensureAssetsLoaded([
+      const assets = this.assetsBatch.findCachedAssetsBatch([
         chainInfo.chainId,
         ...candidateChainIds,
       ]);
 
-      const assetForBridge = this.assetsCache
-        .getCachedAssetsForChain(chainInfo.chainId)
+      const assetForBridge = assets
+        .get(chainInfo.chainId)
         ?.find((a) => a.denom === coinMinimalDenom);
 
       for (const chainId of candidateChainIds) {
-        const candidateAsset = this.assetsCache
-          .getCachedAssetsForChain(chainId)
+        const candidateAsset = assets
+          .get(chainId)
           ?.find(
             (a) =>
               a.originDenom === assetForBridge?.originDenom &&

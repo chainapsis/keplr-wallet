@@ -5,7 +5,7 @@ import {
   Currency,
   ERC20Currency,
 } from "@keplr-wallet/types";
-import { Asset, SwapAsset } from "./assets";
+import { ObservableQueryAssetsBatch } from "./assets";
 import { comparer, computed, makeObservable } from "mobx";
 import { ObservableQueryChains } from "./chains";
 import { CoinPretty } from "@keplr-wallet/unit";
@@ -19,7 +19,6 @@ import { ObservableQueryIbcPfmTransfer } from "./ibc-pfm-transfer";
 import { ObservableQueryAssetsFromSource } from "./assets-from-source";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { InternalChainStore } from "../internal";
-import { ObservableAssetsCache } from "./assets-cache";
 
 export class ObservableQueryIBCSwapInner {
   constructor(
@@ -93,7 +92,7 @@ export class ObservableQueryIBCSwapInner {
 export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapInner> {
   constructor(
     protected readonly chainStore: InternalChainStore,
-    protected readonly assetsCache: ObservableAssetsCache,
+    protected readonly assetsBatch: ObservableQueryAssetsBatch,
     protected readonly queryAssetsFromSource: ObservableQueryAssetsFromSource,
     protected readonly queryChains: ObservableQueryChains,
     protected readonly queryRoute: ObservableQueryRoute,
@@ -390,23 +389,6 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
     return false;
   }
 
-  @computed
-  get cachedAssetsByChain(): Map<string, Asset[] | SwapAsset[]> {
-    const result = new Map<string, Asset[] | SwapAsset[]>();
-    const chainIds = this.swapVenues.map((v) => v.chainId);
-
-    this.assetsCache.ensureAssetsLoaded(chainIds, true);
-
-    for (const chainId of chainIds) {
-      const cached = this.assetsCache.getCachedAssetsForChain(chainId);
-      if (cached) {
-        result.set(chainId, cached);
-      }
-    }
-
-    return result;
-  }
-
   @computed({ equals: comparer.structural })
   get swapDestinationCurrenciesMap(): Map<
     string,
@@ -424,25 +406,25 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
       }
     >();
 
-    const assetsByChain = this.cachedAssetsByChain;
+    const swapVenueChainIds = this.swapVenues.map((v) => v.chainId).sort();
+    const assetsBatch =
+      this.assetsBatch.findCachedAssetsBatch(swapVenueChainIds);
 
-    const chainInfoCache: Map<string, IChainInfoImpl<ChainInfo>> = new Map();
-    const getChainInfo = (chainId: string) => {
-      if (!chainInfoCache.has(chainId)) {
-        chainInfoCache.set(chainId, this.chainStore.getChain(chainId));
-      }
-      return chainInfoCache.get(chainId)!;
-    };
+    if (assetsBatch.size === 0) {
+      return res;
+    }
 
-    for (const swapVenue of this.swapVenues) {
-      const assets = assetsByChain.get(swapVenue.chainId) || [];
+    for (const chainId of swapVenueChainIds) {
+      const assets = assetsBatch.get(chainId) ?? [];
+      if (assets.length === 0) continue;
 
       const getMap = (chainId: string) => {
-        const chainIdentifier = getChainInfo(chainId).chainIdentifier;
+        const chainIdentifier =
+          this.chainStore.getChain(chainId).chainIdentifier;
         let inner = res.get(chainIdentifier);
         if (!inner) {
           inner = {
-            chainInfo: getChainInfo(chainId),
+            chainInfo: this.chainStore.getChain(chainId),
             currencies: [],
           };
           res.set(chainIdentifier, inner);
@@ -454,81 +436,78 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
       for (const asset of assets) {
         const chainId = asset.chainId;
 
-        const currency = getChainInfo(chainId).findCurrencyWithoutReaction(
-          asset.denom
-        );
+        const currency = this.chainStore
+          .getChain(chainId)
+          .findCurrencyWithoutReaction(asset.denom);
 
-        if (currency) {
-          // If ibc currency is well known.
+        if (!currency) continue;
+
+        // If ibc currency is well known.
+        if (
+          "originCurrency" in currency &&
+          currency.originCurrency &&
+          "originChainId" in currency &&
+          currency.originChainId &&
+          // XXX: multi-hop ibc currency는 getSwapDestinationCurrencyAlternativeChains에서 처리한다.
+          currency.paths.length === 1
+        ) {
           if (
-            "originCurrency" in currency &&
-            currency.originCurrency &&
-            "originChainId" in currency &&
-            currency.originChainId &&
-            // XXX: multi-hop ibc currency는 getSwapDestinationCurrencyAlternativeChains에서 처리한다.
-            currency.paths.length === 1
+            currency.originChainId.startsWith("gravity-bridge-") &&
+            currency.originCurrency.coinMinimalDenom !== "ugraviton"
           ) {
+            continue;
+          }
+          if (!this.chainStore.isInChainInfosInListUI(currency.originChainId)) {
+            continue;
+          }
+
+          // 현재 CW20같은 얘들은 처리할 수 없다.
+          if (!("type" in currency.originCurrency)) {
+            // 일단 현재는 복잡한 케이스는 생각하지 않는다.
+            // 오스모시스를 거쳐서 오기 때문에 ibc 모듈만 있다면 자산을 받을 수 있다.
+            const originCurrency = currency.originCurrency;
+            const inner = getMap(currency.originChainId);
+
             if (
-              currency.originChainId.startsWith("gravity-bridge-") &&
-              currency.originCurrency.coinMinimalDenom !== "ugraviton"
+              !inner.currencies.some(
+                (c) => c.coinMinimalDenom === originCurrency.coinMinimalDenom
+              )
             ) {
-              continue;
+              inner.currencies.push(originCurrency);
             }
+          }
+        } else if (!("paths" in currency)) {
+          if (
+            chainId === "osmosis-1" &&
+            currency.coinMinimalDenom ===
+              "ibc/0FA9232B262B89E77D1335D54FB1E1F506A92A7E4B51524B400DC69C68D28372"
+          ) {
+            const inner = getMap(chainId);
+
             if (
-              !this.chainStore.isInChainInfosInListUI(currency.originChainId)
+              !inner.currencies.some(
+                (c) => c.coinMinimalDenom === currency.coinMinimalDenom
+              )
             ) {
-              continue;
-            }
-
-            // 현재 CW20같은 얘들은 처리할 수 없다.
-            if (!("type" in currency.originCurrency)) {
-              // 일단 현재는 복잡한 케이스는 생각하지 않는다.
-              // 오스모시스를 거쳐서 오기 때문에 ibc 모듈만 있다면 자산을 받을 수 있다.
-              const originCurrency = currency.originCurrency;
-              const inner = getMap(currency.originChainId);
-
-              if (
-                !inner.currencies.some(
-                  (c) => c.coinMinimalDenom === originCurrency.coinMinimalDenom
-                )
-              ) {
-                inner.currencies.push(originCurrency);
-              }
-            }
-          } else if (!("paths" in currency)) {
-            if (
-              swapVenue.chainId === "osmosis-1" &&
-              currency.coinMinimalDenom ===
-                "ibc/0FA9232B262B89E77D1335D54FB1E1F506A92A7E4B51524B400DC69C68D28372"
-            ) {
-              const inner = getMap(swapVenue.chainId);
-
-              if (
-                !inner.currencies.some(
-                  (c) => c.coinMinimalDenom === currency.coinMinimalDenom
-                )
-              ) {
-                inner.currencies.push(currency);
-              }
-
-              continue;
+              inner.currencies.push(currency);
             }
 
-            // 현재 CW20같은 얘들은 처리할 수 없다.
+            continue;
+          }
+
+          // 현재 CW20같은 얘들은 처리할 수 없다.
+          if (
+            !("type" in currency) ||
+            ("type" in currency && (currency as ERC20Currency).type === "erc20")
+          ) {
+            // if currency is not ibc currency
+            const inner = getMap(chainId);
             if (
-              !("type" in currency) ||
-              ("type" in currency &&
-                (currency as ERC20Currency).type === "erc20")
+              !inner.currencies.some(
+                (c) => c.coinMinimalDenom === currency.coinMinimalDenom
+              )
             ) {
-              // if currency is not ibc currency
-              const inner = getMap(chainId);
-              if (
-                !inner.currencies.some(
-                  (c) => c.coinMinimalDenom === currency.coinMinimalDenom
-                )
-              ) {
-                inner.currencies.push(currency);
-              }
+              inner.currencies.push(currency);
             }
           }
         }
@@ -670,8 +649,6 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
         }
       }
 
-      this.assetsCache.ensureAssetsLoaded(Array.from(chainIdsToEnsure));
-
       const res: { denom: string; chainId: string }[] =
         !this.chainStore.isInChainInfosInListUI(originOutChainId)
           ? []
@@ -683,14 +660,16 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
               },
             ];
 
-      const assetsByChain = this.cachedAssetsByChain;
+      const assetsBatch = this.assetsBatch.findCachedAssetsBatch(
+        Array.from(chainIdsToEnsure)
+      );
 
-      const asset = assetsByChain
+      const asset = assetsBatch
         .get(chainInfo.chainId)
         ?.find((asset) => asset.denom === currency.coinMinimalDenom);
 
       for (const candidateChain of candidateChains) {
-        const candidateAsset = assetsByChain
+        const candidateAsset = assetsBatch
           .get(candidateChain.chainId)
           ?.find(
             (a) =>
