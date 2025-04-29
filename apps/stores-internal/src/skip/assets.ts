@@ -1,6 +1,7 @@
 import {
   HasMapStore,
   ObservableQuery,
+  QueryOptions,
   QuerySharedContext,
 } from "@keplr-wallet/stores";
 import { AssetsResponse } from "./types";
@@ -379,7 +380,8 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
     protected readonly chainStore: InternalChainStore,
     protected readonly swapUsageQueries: SwapUsageQueries,
     skipURL: string,
-    public readonly chainIds: string[]
+    public readonly chainIds: string[],
+    options?: Partial<QueryOptions>
   ) {
     super(
       sharedContext,
@@ -387,9 +389,7 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
       `/v2/fungible/assets?${chainIds
         .map((chainId) => `chain_ids=${chainId.replace("eip155:", "")}`)
         .join("&")}&native_only=false&include_evm_assets=true`,
-      {
-        cacheMaxAge: 3 * 60 * 1000,
-      }
+      options
     );
 
     makeObservable(this);
@@ -721,7 +721,8 @@ export class ObservableQueryAssetsBatch extends HasMapStore<ObservableQueryAsset
     protected readonly sharedContext: QuerySharedContext,
     protected readonly chainStore: InternalChainStore,
     protected readonly swapUsageQueries: SwapUsageQueries,
-    protected readonly skipURL: string
+    protected readonly skipURL: string,
+    protected readonly options?: Partial<QueryOptions>
   ) {
     super((key) => {
       const chainIds = ObservableQueryAssetsBatch.deserializeChainIds(key);
@@ -743,7 +744,8 @@ export class ObservableQueryAssetsBatch extends HasMapStore<ObservableQueryAsset
         this.chainStore,
         this.swapUsageQueries,
         this.skipURL,
-        chainIds
+        chainIds,
+        this.options
       );
     });
   }

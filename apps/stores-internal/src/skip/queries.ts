@@ -47,7 +47,10 @@ export class SkipQueries {
       sharedContext,
       chainStore,
       swapUsageQueries,
-      "https://api.skip.money"
+      "https://api.skip.money",
+      {
+        cacheMaxAge: 3 * 60 * 1000,
+      }
     );
 
     this.queryAssetsFromSource = new ObservableQueryAssetsFromSource(
