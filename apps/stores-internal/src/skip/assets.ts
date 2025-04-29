@@ -722,12 +722,16 @@ export class ObservableQueryAssetsBatch extends HasMapStore<ObservableQueryAsset
     protected readonly chainStore: InternalChainStore,
     protected readonly swapUsageQueries: SwapUsageQueries,
     protected readonly skipURL: string,
-    protected readonly options?: Partial<QueryOptions>
+    protected readonly options?: Partial<QueryOptions & { batchSize: number }>
   ) {
     super((key) => {
       const chainIds = ObservableQueryAssetsBatch.deserializeChainIds(key);
       if (chainIds.length === 0) {
         throw new Error("Chain IDs cannot be empty");
+      }
+
+      if (this.options?.batchSize && this.options.batchSize < 1) {
+        throw new Error("Batch size must be greater than 0");
       }
 
       runInAction(() => {
@@ -756,7 +760,7 @@ export class ObservableQueryAssetsBatch extends HasMapStore<ObservableQueryAsset
 
   findCachedAssetsBatch = computedFn((chainIds: string[]) => {
     const missingChainIds = new Set<string>();
-    const assets = new Map<string, Asset[] | SwapAsset[]>();
+    const assets = new Map<string, Asset[]>();
 
     const relevantKeys = new Set<string>();
     for (const chainId of chainIds) {
@@ -793,9 +797,31 @@ export class ObservableQueryAssetsBatch extends HasMapStore<ObservableQueryAsset
     }
 
     if (missingChainIds.size > 0) {
-      const result = this.getAssetsBatch(Array.from(missingChainIds));
-      for (const { chainId, assets: chainAssets } of result.assetsRawBatch) {
-        assets.set(chainId, chainAssets);
+      const missingChainIdsArray = Array.from(missingChainIds);
+
+      const batches = [];
+
+      if (this.options?.batchSize) {
+        for (
+          let i = 0;
+          i < missingChainIdsArray.length;
+          i += this.options.batchSize
+        ) {
+          batches.push(
+            missingChainIdsArray.slice(i, i + this.options.batchSize)
+          );
+        }
+      } else {
+        batches.push(missingChainIdsArray);
+      }
+
+      for (const batchChainIds of batches) {
+        const batchQuery = this.getAssetsBatch(batchChainIds);
+        const batchResults = batchQuery.assetsRawBatch;
+
+        for (const { chainId, assets: chainAssets } of batchResults) {
+          assets.set(chainId, chainAssets);
+        }
       }
     }
 

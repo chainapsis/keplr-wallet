@@ -50,6 +50,7 @@ export class SkipQueries {
       "https://api.skip.money",
       {
         cacheMaxAge: 3 * 60 * 1000,
+        batchSize: 5,
       }
     );
 
