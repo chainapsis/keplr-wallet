@@ -3451,6 +3451,68 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       "evm-ledger-sign-plain-json",
     ],
   },
+  {
+    rpc: "https://rpc.mainnet.milkyway.zone",
+    rest: "https://lcd.mainnet.milkyway.zone",
+    chainId: "milkyway",
+    chainName: "MilkyWay",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/milkyway/chain.png",
+    nodeProvider: {
+      name: "MilkyWay Labs",
+      email: "development@milkyway.zone",
+    },
+    stakeCurrency: {
+      coinDenom: "MILK",
+      coinMinimalDenom: "umilk",
+      coinDecimals: 6,
+      coinImageUrl:
+        "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/milkyway/umilk.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "milk",
+      bech32PrefixAccPub: "milkpub",
+      bech32PrefixValAddr: "milkvaloper",
+      bech32PrefixValPub: "milkvaloperpub",
+      bech32PrefixConsAddr: "milkvalcons",
+      bech32PrefixConsPub: "milkvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "MILK",
+        coinMinimalDenom: "umilk",
+        coinDecimals: 6,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/milkyway/umilk.png",
+      },
+      {
+        coinDenom: "milkBABY",
+        coinMinimalDenom:
+          "factory/milk1qg5ega6dykkxc307y25pecuufrjkxkaggkkxh7nad0vhyhtuhw3ssgcye4/umilkBBN",
+        coinDecimals: 6,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/milkyway/milkbaby.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "MILK",
+        coinMinimalDenom: "umilk",
+        coinDecimals: 6,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/milkyway/milk.png",
+        gasPriceStep: {
+          low: 0.01,
+          average: 0.015,
+          high: 0.02,
+        },
+      },
+    ],
+    features: ["cosmwasm"],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
