@@ -4,11 +4,12 @@ import {
   QuerySharedContext,
 } from "@keplr-wallet/stores";
 import { AssetsResponse } from "./types";
-import { computed, makeObservable } from "mobx";
+import { computed, makeObservable, observable, runInAction } from "mobx";
 import Joi from "joi";
 import { InternalChainStore } from "../internal";
 import { SwapUsageQueries } from "../swap-usage";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
+import { computedFn } from "mobx-utils";
 
 export interface Asset {
   denom: string;
@@ -385,7 +386,10 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
       skipURL,
       `/v2/fungible/assets?${chainIds
         .map((chainId) => `chain_ids=${chainId.replace("eip155:", "")}`)
-        .join("&")}&native_only=false&include_evm_assets=true`
+        .join("&")}&native_only=false&include_evm_assets=true`,
+      {
+        cacheMaxAge: 3 * 60 * 1000,
+      }
     );
 
     makeObservable(this);
@@ -710,6 +714,9 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
 }
 
 export class ObservableQueryAssetsBatch extends HasMapStore<ObservableQueryAssetsBatchInner> {
+  @observable
+  private chainIdToBatchKeysMap: Map<string, Set<string>> = new Map();
+
   constructor(
     protected readonly sharedContext: QuerySharedContext,
     protected readonly chainStore: InternalChainStore,
@@ -721,6 +728,15 @@ export class ObservableQueryAssetsBatch extends HasMapStore<ObservableQueryAsset
       if (chainIds.length === 0) {
         throw new Error("Chain IDs cannot be empty");
       }
+
+      runInAction(() => {
+        for (const chainId of chainIds) {
+          if (!this.chainIdToBatchKeysMap.has(chainId)) {
+            this.chainIdToBatchKeysMap.set(chainId, new Set());
+          }
+          this.chainIdToBatchKeysMap.get(chainId)?.add(key);
+        }
+      });
 
       return new ObservableQueryAssetsBatchInner(
         this.sharedContext,
@@ -735,6 +751,58 @@ export class ObservableQueryAssetsBatch extends HasMapStore<ObservableQueryAsset
   getAssetsBatch(chainIds: string[]): ObservableQueryAssetsBatchInner {
     return this.get(ObservableQueryAssetsBatch.serializeChainIds(chainIds));
   }
+
+  findCachedAssetsBatch = computedFn((chainIds: string[]) => {
+    const missingChainIds = new Set<string>();
+    const assets = new Map<string, Asset[] | SwapAsset[]>();
+
+    const relevantKeys = new Set<string>();
+    for (const chainId of chainIds) {
+      const keys = this.chainIdToBatchKeysMap.get(chainId);
+      if (keys) {
+        for (const key of keys) {
+          relevantKeys.add(key);
+        }
+      } else {
+        missingChainIds.add(chainId);
+      }
+    }
+
+    for (const key of relevantKeys) {
+      const instance = this.get(key);
+      if (instance) {
+        for (const {
+          chainId,
+          assets: chainAssets,
+        } of instance.assetsRawBatch) {
+          if (chainIds.includes(chainId)) {
+            assets.set(chainId, chainAssets);
+          }
+        }
+      } else {
+        const cachedChainIds =
+          ObservableQueryAssetsBatch.deserializeChainIds(key);
+        for (const chainId of cachedChainIds) {
+          if (chainIds.includes(chainId)) {
+            missingChainIds.add(chainId);
+          }
+        }
+      }
+    }
+
+    if (missingChainIds.size > 0) {
+      const result = this.getAssetsBatch(Array.from(missingChainIds));
+      for (const { chainId, assets: chainAssets } of result.assetsRawBatch) {
+        assets.set(chainId, chainAssets);
+      }
+    }
+
+    const sortedAssets = new Map(
+      Array.from(assets.entries()).sort(([a], [b]) => a.localeCompare(b))
+    );
+
+    return sortedAssets;
+  });
 
   static serializeChainIds(chainIds: string[]): string {
     return JSON.stringify(chainIds);
