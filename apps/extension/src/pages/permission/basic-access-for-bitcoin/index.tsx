@@ -39,8 +39,14 @@ export const PermissionBasicAccessForBitcoinPage: FunctionComponent<{
     },
   });
 
+  const defaultModularChainInfo = chainStore.getModularChain(data.chainIds[0]);
+  const defaultChainId =
+    "bitcoin" in defaultModularChainInfo
+      ? defaultModularChainInfo.bitcoin.chainId
+      : defaultModularChainInfo.chainId;
+
   const [currentChainIdForBitcoin, setCurrentChainIdForBitcoin] =
-    useState<string>(data.chainIds[0]);
+    useState<string>(defaultChainId);
   const [preferredPaymentType, setPreferredPaymentType] = useState<
     SupportedPaymentType | undefined
   >(undefined);
@@ -54,8 +60,8 @@ export const PermissionBasicAccessForBitcoinPage: FunctionComponent<{
 
   // 페이지가 언마운트 되지 않고 data만 바뀌는 경우가 있어서 이렇게 처리함
   useEffect(() => {
-    setCurrentChainIdForBitcoin(data.chainIds[0]);
-  }, [data.chainIds]);
+    setCurrentChainIdForBitcoin(defaultChainId);
+  }, [defaultChainId]);
 
   useEffect(() => {
     const getPreferredPaymentType = async () => {
@@ -254,7 +260,7 @@ export const PermissionBasicAccessForBitcoinPage: FunctionComponent<{
                     chainStore.groupedModularChainInfos.find(
                       (chainInfo) =>
                         "bitcoin" in chainInfo &&
-                        chainInfo.bitcoin.chainId === data.chainIds[0]
+                        chainInfo.bitcoin.chainId === currentChainIdForBitcoin
                     )?.chainName
                   }
                 </Subtitle3>
