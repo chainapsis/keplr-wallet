@@ -24,7 +24,9 @@ import {
 import { computedFn } from "mobx-utils";
 import { TokenInfo } from "./types";
 import { Buffer } from "buffer/";
+import { simpleFetch } from "@keplr-wallet/simple-fetch";
 
+const REFRESH_TIME_INTERVAL = 1000 * 30 * 60 * 24; // 24 hours
 export class TokenCW20Service {
   protected readonly legacyKVStore: KVStore;
   protected readonly kvStore: KVStore;
@@ -35,7 +37,8 @@ export class TokenCW20Service {
   constructor(
     kvStore: KVStore,
     protected chainsService: ChainsService,
-    protected interactionService: InteractionService
+    protected interactionService: InteractionService,
+    protected tokenContractListURL: string
   ) {
     this.legacyKVStore = kvStore;
     this.kvStore = new PrefixKVStore(kvStore, "v2");
@@ -93,8 +96,23 @@ export class TokenCW20Service {
         "tokenMap"
       );
       if (saved) {
+        const refreshInInitTimestamp = await this.kvStore.get<number>(
+          "refreshInInitTimestamp"
+        );
+        const now = Date.now();
+        const shouldRefresh =
+          !refreshInInitTimestamp ||
+          refreshInInitTimestamp + REFRESH_TIME_INTERVAL < now;
+
         for (const [key, value] of Object.entries(saved)) {
           this.tokenMap.set(key, value);
+          if (shouldRefresh) {
+            this.refreshTokenInfo(key);
+          }
+        }
+
+        if (shouldRefresh) {
+          this.kvStore.set<number>("refreshInInitTimestamp", now);
         }
       }
       autorun(() => {
@@ -113,6 +131,53 @@ export class TokenCW20Service {
       this.tokenMap.delete(chainIdentifier);
     });
   };
+
+  protected async refreshTokenInfo(chainIdentifier: string) {
+    const tokenContracts = await simpleFetch<
+      {
+        contractAddress: string;
+        imageUrl?: string;
+        metadata: {
+          name: string;
+          symbol: string;
+          decimals: number;
+        };
+        coinGeckoId?: string;
+      }[]
+    >(`${this.tokenContractListURL}/tokens/${chainIdentifier}`);
+
+    const tokens = this.tokenMap.get(chainIdentifier);
+    if (!tokens) {
+      return;
+    }
+
+    runInAction(() => {
+      const refreshedTokens = tokens.map((token) => {
+        if ("contractAddress" in token.currency) {
+          const tokenContractFound = tokenContracts.data?.find(
+            (tokenContract) =>
+              "contractAddress" in token.currency &&
+              token.currency.contractAddress === tokenContract.contractAddress
+          );
+
+          if (tokenContractFound) {
+            return {
+              ...token,
+              currency: {
+                ...token.currency,
+                coinImageUrl: tokenContractFound.imageUrl,
+                coinGeckoId: tokenContractFound.coinGeckoId,
+              },
+            };
+          }
+        }
+
+        return token;
+      });
+
+      this.tokenMap.set(chainIdentifier, refreshedTokens);
+    });
+  }
 
   getAllTokenInfos = computedFn((): Record<string, TokenInfo[] | undefined> => {
     const js = toJS(this.tokenMap);
@@ -294,6 +359,8 @@ export class TokenCW20Service {
         });
       }
     });
+
+    this.refreshTokenInfo(chainIdentifier);
   }
 
   @action

@@ -8,7 +8,7 @@ export class ObservableQueryTokenContracts extends ObservableQuery<
     chainId: string,
     tokenContractListURL: string
   ) {
-    super(sharedContext, tokenContractListURL, `tokens/${chainId}`);
+    super(sharedContext, tokenContractListURL, `/tokens/${chainId}`);
   }
 
   get tokenContracts(): TokenContract[] {

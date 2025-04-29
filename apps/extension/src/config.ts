@@ -3486,3 +3486,6 @@ export const CommunityChainInfoRepo = {
     ? process.env["KEPLR_EXT_CHAIN_REGISTRY_URL"]
     : undefined,
 };
+
+export const TokenContractListURL =
+  "https://opbaqquqruxn7fdsgcncrtfrwa0qxnoj.lambda-url.us-west-2.on.aws";
