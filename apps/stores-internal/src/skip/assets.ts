@@ -18,6 +18,9 @@ export interface Asset {
   originDenom: string;
   originChainId: string;
   isEvm: boolean;
+  isCw20: boolean;
+  isSvm: boolean;
+  trace: string;
   tokenContract?: string;
   recommendedSymbol?: string;
   logoURI?: string;
@@ -45,9 +48,12 @@ const Schema = Joi.object<AssetsResponse>({
           is_evm: Joi.boolean().required(),
           token_contract: Joi.string().optional(),
           recommended_symbol: Joi.string().optional(),
-          decimals: Joi.number().required(),
+          decimals: Joi.number().optional(),
           logo_uri: Joi.string().optional(),
           coingecko_id: Joi.string().optional(),
+          is_cw20: Joi.boolean().optional(),
+          is_svm: Joi.boolean().optional(),
+          trace: Joi.string().optional().allow(""),
         }).unknown(true)
       ),
     }).unknown(true)
@@ -125,7 +131,10 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
               recommendedSymbol: asset.recommended_symbol,
               logoURI: asset.logo_uri,
               coingeckoId: asset.coingecko_id,
-              decimals: asset.decimals,
+              decimals: asset.decimals ?? 0,
+              isCw20: asset.is_cw20,
+              isSvm: asset.is_svm,
+              trace: asset.trace,
             });
           } else {
             const coinMinimalDenom =
@@ -138,7 +147,7 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
               ? `erc20:${asset.origin_denom.toLowerCase()}`
               : asset.origin_denom;
             // TODO: Dec, Int 같은 곳에서 18 이상인 경우도 고려하도록 수정
-            if (asset.decimals <= 18) {
+            if (asset.decimals && asset.decimals <= 18) {
               res.push({
                 denom: coinMinimalDenom,
                 chainId: chainId,
@@ -150,6 +159,9 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
                 logoURI: asset.logo_uri,
                 coingeckoId: asset.coingecko_id,
                 decimals: asset.decimals,
+                isCw20: asset.is_cw20,
+                isSvm: asset.is_svm,
+                trace: asset.trace,
               });
             }
           }
@@ -210,7 +222,10 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
               recommendedSymbol: asset.recommended_symbol,
               logoURI: asset.logo_uri,
               coingeckoId: asset.coingecko_id,
-              decimals: asset.decimals,
+              decimals: asset.decimals ?? 0,
+              isCw20: asset.is_cw20,
+              isSvm: asset.is_svm,
+              trace: asset.trace,
             });
             // IBC asset이 아니라면 알고있는 currency만 넣는다.
           } else {
@@ -238,7 +253,10 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
                 recommendedSymbol: asset.recommended_symbol,
                 logoURI: asset.logo_uri,
                 coingeckoId: asset.coingecko_id,
-                decimals: asset.decimals,
+                decimals: currencyFound.coinDecimals,
+                isCw20: asset.is_cw20,
+                isSvm: asset.is_svm,
+                trace: asset.trace,
               });
             }
           }
@@ -453,7 +471,10 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
                 recommendedSymbol: asset.recommended_symbol,
                 logoURI: asset.logo_uri,
                 coingeckoId: asset.coingecko_id,
-                decimals: asset.decimals,
+                decimals: asset.decimals ?? 0,
+                isCw20: asset.is_cw20,
+                isSvm: asset.is_svm,
+                trace: asset.trace,
               });
             } else {
               const coinMinimalDenom =
@@ -466,7 +487,7 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
                 ? `erc20:${asset.origin_denom.toLowerCase()}`
                 : asset.origin_denom;
               // TODO: Dec, Int 같은 곳에서 18 이상인 경우도 고려하도록 수정
-              if (asset.decimals <= 18) {
+              if (asset.decimals && asset.decimals <= 18) {
                 assets.push({
                   denom: coinMinimalDenom,
                   chainId: assetChainId,
@@ -478,6 +499,9 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
                   logoURI: asset.logo_uri,
                   coingeckoId: asset.coingecko_id,
                   decimals: asset.decimals,
+                  isCw20: asset.is_cw20,
+                  isSvm: asset.is_svm,
+                  trace: asset.trace,
                 });
               }
             }
@@ -551,7 +575,10 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
                 recommendedSymbol: asset.recommended_symbol,
                 logoURI: asset.logo_uri,
                 coingeckoId: asset.coingecko_id,
-                decimals: asset.decimals,
+                decimals: asset.decimals ?? 0,
+                isCw20: asset.is_cw20,
+                isSvm: asset.is_svm,
+                trace: asset.trace,
               });
               // IBC asset이 아니라면 알고있는 currency만 넣는다.
             } else {
@@ -579,7 +606,10 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
                   recommendedSymbol: asset.recommended_symbol,
                   logoURI: asset.logo_uri,
                   coingeckoId: asset.coingecko_id,
-                  decimals: asset.decimals,
+                  decimals: currencyFound.coinDecimals,
+                  isCw20: asset.is_cw20,
+                  isSvm: asset.is_svm,
+                  trace: asset.trace,
                 });
               }
             }
