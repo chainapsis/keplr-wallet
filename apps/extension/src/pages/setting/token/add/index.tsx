@@ -32,6 +32,7 @@ import { ContractAddressBookModal } from "../../../../components/contract-addres
 import { IconButton } from "../../../../components/icon-button";
 import { MenuIcon } from "../../../../components/icon";
 import { handleExternalInteractionWithNoProceedNext } from "../../../../utils";
+import { TokenContract } from "../../../../stores/token-contracts";
 
 const Styles = {
   Container: styled(Stack)`
@@ -43,6 +44,8 @@ interface FormData {
   contractAddress: string;
   // For the secret20
   viewingKey: string;
+
+  tokenContractFromAddressBook?: TokenContract;
 }
 
 export const SettingTokenAddPage: FunctionComponent = observer(() => {
@@ -255,6 +258,8 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
         if (queryContract.tokenInfo) {
           let currency: AppCurrency;
 
+          const tokenContract = data.tokenContractFromAddressBook;
+
           if (
             !("name" in queryContract.tokenInfo) ||
             isEvmChain ||
@@ -266,6 +271,8 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
               coinMinimalDenom: `erc20:${contractAddress}`,
               coinDenom: queryContract.tokenInfo.symbol,
               coinDecimals: queryContract.tokenInfo.decimals,
+              coinImageUrl: tokenContract?.imageUrl,
+              coinGeckoId: tokenContract?.coinGeckoId,
             };
           } else if (isSecretWasm) {
             let viewingKey = data.viewingKey;
@@ -297,6 +304,8 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
               coinMinimalDenom: queryContract.tokenInfo.name,
               coinDenom: queryContract.tokenInfo.symbol,
               coinDecimals: queryContract.tokenInfo.decimals,
+              coinImageUrl: tokenContract?.imageUrl,
+              coinGeckoId: tokenContract?.coinGeckoId,
             };
           } else {
             currency = {
@@ -305,6 +314,8 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
               coinMinimalDenom: queryContract.tokenInfo.name,
               coinDenom: queryContract.tokenInfo.symbol,
               coinDecimals: queryContract.tokenInfo.decimals,
+              coinImageUrl: tokenContract?.imageUrl,
+              coinGeckoId: tokenContract?.coinGeckoId,
             };
           }
 
@@ -493,8 +504,9 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
       <ContractAddressBookModal
         isOpen={isAddressBookModalOpen}
         chainId={chainId}
-        onSelect={(address: string) => {
-          setValue("contractAddress", address);
+        onSelect={(tokenContract: TokenContract) => {
+          setValue("contractAddress", tokenContract.contractAddress);
+          setValue("tokenContractFromAddressBook", tokenContract);
           setIsAddressBookModalOpen(false);
         }}
         close={() => setIsAddressBookModalOpen(false)}
