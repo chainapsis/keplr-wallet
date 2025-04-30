@@ -95,6 +95,7 @@ export function init(
     mobileOS: string;
   },
   disableUpdateLoop: boolean,
+  tokenContractListURL: string,
   chainsAfterInitFn?: (
     service: Chains.ChainsService,
     lastEmbedChainInfos: ChainInfoWithCoreTypes[]
@@ -139,7 +140,8 @@ export function init(
   const tokenCW20Service = new TokenCW20.TokenCW20Service(
     storeCreator("tokens"),
     chainsService,
-    interactionService
+    interactionService,
+    tokenContractListURL
   );
 
   const tokenERC20Service = new TokenERC20.TokenERC20Service(

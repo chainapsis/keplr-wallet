@@ -1,12 +1,15 @@
 import { ChainStore } from "./chain";
-import { CommunityChainInfoRepo, EmbedChainInfos } from "../config";
+import {
+  CommunityChainInfoRepo,
+  EmbedChainInfos,
+  TokenContractListURL,
+} from "../config";
 import {
   CoinGeckoAPIEndPoint,
   CoinGeckoGetPrice,
   EthereumEndpoint,
   FiatCurrencies,
   ICNSInfo,
-  TokenContractListURL,
   GoogleMeasurementId,
   GoogleAPIKeyForMeasurement,
   AmplitudeAPIKey,
