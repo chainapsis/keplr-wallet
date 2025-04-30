@@ -150,7 +150,7 @@ export class IBCCurrencyRegistrar {
     }
 
     {
-      const dbKey = `cache-token-info`;
+      const dbKey = `cache-token-info-2`;
       const saved = await this.kvStore.get<Record<string, CacheTokenInfo>>(
         dbKey
       );
@@ -1002,7 +1002,7 @@ export class IBCCurrencyRegistrar {
         if (Date.now() - res.timestamp > this.failedCacheDuration) {
           this.cacheTokenInfoMetadata.delete(key);
           {
-            const dbKey = `cache-token-info`;
+            const dbKey = `cache-token-info-2`;
             const obj = Object.fromEntries(this.cacheTokenInfoMetadata);
             this.kvStore.set<Record<string, CacheTokenInfo>>(dbKey, obj);
           }
@@ -1014,7 +1014,7 @@ export class IBCCurrencyRegistrar {
         const savedStaled = this.staledTokenInfoMetadata.has(key);
         if (savedStaled) {
           {
-            const dbKey = `cache-token-info`;
+            const dbKey = `cache-token-info-2`;
             const obj = Object.fromEntries(this.cacheTokenInfoMetadata);
             this.kvStore.set<Record<string, CacheTokenInfo>>(dbKey, obj);
           }
@@ -1043,7 +1043,7 @@ export class IBCCurrencyRegistrar {
 
     this.cacheTokenInfoMetadata.set(key, data);
     {
-      const dbKey = `cache-token-info`;
+      const dbKey = `cache-token-info-2`;
       const obj = Object.fromEntries(this.cacheTokenInfoMetadata);
       this.kvStore.set<Record<string, CacheTokenInfo>>(dbKey, obj);
     }
