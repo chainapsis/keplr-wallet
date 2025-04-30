@@ -13,16 +13,10 @@ import { TextButton } from "../../../../components/button-text";
 import { XAxis, YAxis } from "../../../../components/axis";
 import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse/collapse";
 import { Body2, Body3 } from "../../../../components/typography";
-import { SceneTransition } from "../../../../components/transition/scene/scene";
 import { ColorPalette } from "../../../../styles";
 import { useIntl } from "react-intl";
 import { Toggle } from "../../../../components/toggle/toggle";
-import {
-  ArrowLeftIcon,
-  CheckIcon,
-  CloseIcon,
-  RightArrowIcon,
-} from "../../../../components/icon";
+import { CloseIcon } from "../../../../components/icon";
 import { IconProps } from "../../../../components/icon/types";
 import { useGlobarSimpleBar } from "../../../../hooks/global-simplebar";
 import { Tooltip } from "../../../../components/tooltip";
@@ -101,21 +95,23 @@ const Styles = {
   `,
 };
 
-interface MainMenuSceneProps {
+interface MainMenuProps {
   hideLowBalance: boolean;
   showFiatValue: boolean;
+  assetViewMode: string;
   onToggleHideLowBalance: () => void;
   onToggleShowFiatValue: () => void;
-  onAssetViewClick: () => void;
+  onToggleAssetViewMode: () => void;
   showFiatValueVisible: boolean;
 }
 
-const MainMenuScene: React.FC<MainMenuSceneProps> = observer(
+const MainMenu: React.FC<MainMenuProps> = observer(
   ({
     onToggleHideLowBalance,
     onToggleShowFiatValue,
-    onAssetViewClick,
+    onToggleAssetViewMode,
     showFiatValueVisible,
+    assetViewMode,
   }) => {
     const { uiConfigStore } = useStore();
     const { hideLowBalance, showFiatValue } = uiConfigStore.options;
@@ -140,33 +136,6 @@ const MainMenuScene: React.FC<MainMenuSceneProps> = observer(
 
     return (
       <YAxis>
-        <Styles.MenuItem onClick={onAssetViewClick}>
-          <Box
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              width: "100%",
-            }}
-          >
-            <Styles.MenuItemXAxis alignY="center" gap="0.5rem">
-              <AssetViewIcon
-                color={
-                  theme.mode === "light"
-                    ? ColorPalette["gray-700"]
-                    : ColorPalette["white"]
-                }
-              />
-              <Body3>
-                {intl.formatMessage({
-                  id: "page.main.components.context-menu.asset-view",
-                })}
-              </Body3>
-            </Styles.MenuItemXAxis>
-            <RightArrowIcon width="1rem" height="1rem" />
-          </Box>
-        </Styles.MenuItem>
         <Styles.MenuItem
           onClick={(e) => handleToggleClick(e, onToggleHideLowBalance)}
         >
@@ -195,7 +164,50 @@ const MainMenuScene: React.FC<MainMenuSceneProps> = observer(
             />
           </div>
         </Styles.MenuItem>
-        {showFiatValueVisible && (
+        <Styles.MenuItem onClick={onToggleAssetViewMode}>
+          <Box
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "100%",
+            }}
+          >
+            <Styles.MenuItemXAxis alignY="center" gap="0.5rem">
+              {assetViewMode === "grouped" ? (
+                <GroupByAssetsIcon
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-700"]
+                      : ColorPalette["white"]
+                  }
+                />
+              ) : (
+                <FlatIcon
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-700"]
+                      : ColorPalette["white"]
+                  }
+                />
+              )}
+              <Body3>
+                {intl.formatMessage({
+                  id: "page.main.components.context-menu.smart-grouping",
+                })}
+              </Body3>
+            </Styles.MenuItemXAxis>
+            <div>
+              <Toggle
+                isOpen={showFiatValueVisible}
+                setIsOpen={onToggleAssetViewMode}
+                size="extra-small"
+              />
+            </div>
+          </Box>
+        </Styles.MenuItem>
+        <VerticalCollapseTransition collapsed={!showFiatValueVisible}>
           <Styles.MenuItem
             onClick={(e) => handleToggleClick(e, onToggleShowFiatValue)}
           >
@@ -224,115 +236,7 @@ const MainMenuScene: React.FC<MainMenuSceneProps> = observer(
               />
             </div>
           </Styles.MenuItem>
-        )}
-      </YAxis>
-    );
-  }
-);
-
-interface AssetViewSceneProps {
-  assetViewMode: string;
-  onGroupByAssetsClick: () => void;
-  onFlatViewClick: () => void;
-  onBackClick: () => void;
-}
-
-const AssetViewScene: React.FC<AssetViewSceneProps> = observer(
-  ({ assetViewMode, onGroupByAssetsClick, onFlatViewClick, onBackClick }) => {
-    const theme = useTheme();
-    const intl = useIntl();
-
-    const textColorByCondition = (condition: boolean) => {
-      return theme.mode === "light"
-        ? condition
-          ? ColorPalette["gray-700"]
-          : ColorPalette["gray-300"]
-        : condition
-        ? ColorPalette["white"]
-        : ColorPalette["gray-200"];
-    };
-    return (
-      <YAxis>
-        <Styles.MenuItem onClick={onBackClick}>
-          <Styles.MenuItemXAxis alignY="center" gap="0.5rem">
-            <ArrowLeftIcon
-              width="1rem"
-              height="1rem"
-              color={
-                theme.mode === "light"
-                  ? ColorPalette["gray-400"]
-                  : ColorPalette["gray-300"]
-              }
-            />
-            <Body3
-              color={
-                theme.mode === "light"
-                  ? ColorPalette["gray-300"]
-                  : ColorPalette["gray-200"]
-              }
-            >
-              Back
-            </Body3>
-          </Styles.MenuItemXAxis>
-        </Styles.MenuItem>
-        <Styles.MenuItem onClick={onGroupByAssetsClick}>
-          <Box
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              width: "100%",
-            }}
-          >
-            <Styles.MenuItemXAxis alignY="center" gap="0.5rem">
-              <GroupByAssetsIcon
-                color={
-                  theme.mode === "light"
-                    ? ColorPalette["gray-700"]
-                    : ColorPalette["white"]
-                }
-              />
-              <Body3 color={textColorByCondition(assetViewMode === "grouped")}>
-                {intl.formatMessage({
-                  id: "page.main.components.context-menu.group-by-assets",
-                })}
-              </Body3>
-            </Styles.MenuItemXAxis>
-            {assetViewMode === "grouped" ? (
-              <CheckIcon width="1rem" height="1rem" />
-            ) : null}
-          </Box>
-        </Styles.MenuItem>
-        <Styles.MenuItem onClick={onFlatViewClick}>
-          <Box
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              width: "100%",
-            }}
-          >
-            <Styles.MenuItemXAxis alignY="center" gap="0.5rem">
-              <FlatIcon
-                color={
-                  theme.mode === "light"
-                    ? ColorPalette["gray-700"]
-                    : ColorPalette["white"]
-                }
-              />
-              <Body3 color={textColorByCondition(assetViewMode === "flat")}>
-                {intl.formatMessage({
-                  id: "page.main.components.context-menu.flat",
-                })}
-              </Body3>
-            </Styles.MenuItemXAxis>
-            {assetViewMode === "flat" ? (
-              <CheckIcon width="1rem" height="1rem" />
-            ) : null}
-          </Box>
-        </Styles.MenuItem>
+        </VerticalCollapseTransition>
       </YAxis>
     );
   }
@@ -363,7 +267,6 @@ export const ViewOptionsContextMenu: FunctionComponent<{
     const intl = useIntl();
     const containerRef = useRef<HTMLDivElement>(null);
     const menuContentRef = useRef<HTMLDivElement>(null);
-    const sceneTransitionRef = useRef<any>(null);
     const [renderMenu, setRenderMenu] = useState(false);
     const [initialized, setInitialized] = useState(false);
     const theme = useTheme();
@@ -400,14 +303,7 @@ export const ViewOptionsContextMenu: FunctionComponent<{
         }, 300);
         return () => clearTimeout(timer);
       }
-    }, [isOpen]);
-
-    useEffect(() => {
-      if (!isOpen && sceneTransitionRef.current) {
-        setTimeout(() => {
-          sceneTransitionRef.current.replaceAll("main-menu");
-        }, 300);
-      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen]);
 
     const closeMenu = () => {
@@ -419,18 +315,6 @@ export const ViewOptionsContextMenu: FunctionComponent<{
       setIsOpen(!isOpen);
     };
 
-    const handleAssetViewClick = () => {
-      if (sceneTransitionRef.current) {
-        sceneTransitionRef.current.push("asset-view-menu");
-      }
-    };
-
-    const handleBackClick = () => {
-      if (sceneTransitionRef.current) {
-        sceneTransitionRef.current.pop();
-      }
-    };
-
     const handleToggleHideLowBalance = () => {
       uiConfigStore.toggleHideLowBalance();
     };
@@ -439,24 +323,16 @@ export const ViewOptionsContextMenu: FunctionComponent<{
       uiConfigStore.toggleShowFiatValue();
     };
 
-    const handleGroupByAssetsClick = () => {
-      setShowFiatValueVisible(true);
-      if (sceneTransitionRef.current) {
-        sceneTransitionRef.current.pop();
-
-        setTimeout(() => {
-          uiConfigStore.setAssetViewMode("grouped");
-        }, 300);
-      }
-    };
-
-    const handleFlatViewClick = () => {
-      setShowFiatValueVisible(false);
-      if (sceneTransitionRef.current) {
-        sceneTransitionRef.current.pop();
-
+    const handleToggleAssetViewMode = () => {
+      if (uiConfigStore.options.assetViewMode === "grouped") {
+        setShowFiatValueVisible(false);
         setTimeout(() => {
           uiConfigStore.setAssetViewMode("flat");
+        }, 300);
+      } else {
+        setShowFiatValueVisible(true);
+        setTimeout(() => {
+          uiConfigStore.setAssetViewMode("grouped");
         }, 300);
       }
     };
@@ -464,43 +340,6 @@ export const ViewOptionsContextMenu: FunctionComponent<{
     const handleCloseTooltip = () => {
       uiConfigStore.turnOffSwitchAssetViewModeSuggestion();
     };
-
-    const menuContent = (
-      <Styles.ContextMenuContent ref={menuContentRef}>
-        <SceneTransition
-          ref={sceneTransitionRef}
-          scenes={[
-            {
-              name: "main-menu",
-              element: () => (
-                <MainMenuScene
-                  onAssetViewClick={handleAssetViewClick}
-                  hideLowBalance={uiConfigStore.options.hideLowBalance}
-                  showFiatValue={uiConfigStore.options.showFiatValue}
-                  onToggleHideLowBalance={handleToggleHideLowBalance}
-                  onToggleShowFiatValue={handleToggleShowFiatValue}
-                  showFiatValueVisible={showFiatValueVisible}
-                />
-              ),
-            },
-            {
-              name: "asset-view-menu",
-              element: () => (
-                <AssetViewScene
-                  onBackClick={handleBackClick}
-                  onGroupByAssetsClick={handleGroupByAssetsClick}
-                  onFlatViewClick={handleFlatViewClick}
-                  assetViewMode={uiConfigStore.options.assetViewMode}
-                />
-              ),
-            },
-          ]}
-          initialSceneProps={{
-            name: "main-menu",
-          }}
-        />
-      </Styles.ContextMenuContent>
-    );
 
     return (
       <Styles.MenuContainer ref={containerRef}>
@@ -559,7 +398,17 @@ export const ViewOptionsContextMenu: FunctionComponent<{
 
         <Styles.MenuWrapper>
           <VerticalCollapseTransition collapsed={!isOpen} width="100%">
-            {menuContent}
+            <Styles.ContextMenuContent ref={menuContentRef}>
+              <MainMenu
+                onToggleAssetViewMode={handleToggleAssetViewMode}
+                hideLowBalance={uiConfigStore.options.hideLowBalance}
+                showFiatValue={uiConfigStore.options.showFiatValue}
+                onToggleHideLowBalance={handleToggleHideLowBalance}
+                onToggleShowFiatValue={handleToggleShowFiatValue}
+                showFiatValueVisible={showFiatValueVisible}
+                assetViewMode={uiConfigStore.options.assetViewMode}
+              />
+            </Styles.ContextMenuContent>
           </VerticalCollapseTransition>
         </Styles.MenuWrapper>
       </Styles.MenuContainer>
@@ -664,39 +513,6 @@ const ViewOptionsIcon: FunctionComponent<IconProps> = ({ color }) => {
             fill={color}
           />
         </g>
-      </svg>
-    </div>
-  );
-};
-
-const AssetViewIcon: FunctionComponent<IconProps> = ({ color }) => {
-  return (
-    <div
-      style={{
-        width: "1rem",
-        height: "1rem",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="12"
-        viewBox="0 0 16 12"
-        fill="none"
-      >
-        <path
-          fillRule="evenodd"
-          clipRule="evenodd"
-          d="M10.0001 0.224915C6.81065 0.224915 4.2251 2.81047 4.2251 5.99991C4.2251 9.18936 6.81065 11.7749 10.0001 11.7749C13.1895 11.7749 15.7751 9.18936 15.7751 5.99991C15.7751 2.81047 13.1895 0.224915 10.0001 0.224915ZM5.7751 5.99991C5.7751 3.66651 7.66669 1.77491 10.0001 1.77491C12.3335 1.77491 14.2251 3.66651 14.2251 5.99991C14.2251 8.33332 12.3335 10.2249 10.0001 10.2249C7.66669 10.2249 5.7751 8.33332 5.7751 5.99991Z"
-          fill={color}
-        />
-        <path
-          d="M3.88816 2.33983C4.25866 2.12551 4.38526 1.65142 4.17094 1.28093C3.95662 0.910429 3.48253 0.783823 3.11203 0.998144C1.38791 1.9955 0.225098 3.86154 0.225098 6.00008C0.225098 8.13862 1.38791 10.0047 3.11203 11.002C3.48253 11.2163 3.95662 11.0897 4.17094 10.7192C4.38526 10.3487 4.25866 9.87464 3.88816 9.66032C2.62328 8.92863 1.7751 7.56295 1.7751 6.00008C1.7751 4.43721 2.62328 3.07153 3.88816 2.33983Z"
-          fill={color}
-        />
       </svg>
     </div>
   );
