@@ -707,6 +707,13 @@ export class CosmosAccountImpl {
                   if (
                     this.chainGetter
                       .getChain(this.chainId)
+                      .hasFeature("eth-secp256k1-cosmos")
+                  ) {
+                    return "/cosmos.evm.crypto.v1.ethsecp256k1.PubKey";
+                  }
+                  if (
+                    this.chainGetter
+                      .getChain(this.chainId)
                       .hasFeature("eth-secp256k1-initia")
                   ) {
                     return "/initia.crypto.v1beta1.ethsecp256k1.PubKey";
