@@ -23,6 +23,10 @@ import { MsgRelationNobleWithdrawUsdc } from "./noble-withdraw-usdc";
 import { MsgRelationNobleDepositUsdc } from "./noble-deposit-usdc";
 import { MsgRelationBbnClaimRewardFromBTCStaking } from "./bbn-claim-reward-from-btc-staking";
 import { MsgRelationBbnCreateBTCDelegation } from "./bbn-create-btc-delegation";
+import { MsgRelationEvmContractCall } from "./evm-contract-call";
+import { MsgRelationEvmApprove } from "./evm-approve";
+import { MsgRelationEvmSend } from "./evm-send";
+import { MsgRelationEvmReceive } from "./evm-receive";
 
 export const MsgItemRender: FunctionComponent<{
   msg: MsgHistory;
@@ -145,6 +149,55 @@ const MsgItemRenderInner: FunctionComponent<{
         return (
           <MsgRelationCancelUndelegate
             msg={msgHistory}
+            prices={prices}
+            targetDenom={targetDenom}
+            isInAllActivitiesPage={isInAllActivitiesPage}
+          />
+        );
+      }
+    }
+  }
+
+  if (msg.relation.startsWith("evm/")) {
+    console.log(msg.relation, msg.msg, msg.meta);
+    switch (msg.relation) {
+      case "evm/send":
+      case "evm/erc20-send": {
+        return (
+          <MsgRelationEvmSend
+            msg={msg}
+            prices={prices}
+            targetDenom={targetDenom}
+            isInAllActivitiesPage={isInAllActivitiesPage}
+          />
+        );
+      }
+      case "evm/receive":
+      case "evm/erc20-receive": {
+        return (
+          <MsgRelationEvmReceive
+            msg={msg}
+            prices={prices}
+            targetDenom={targetDenom}
+            isInAllActivitiesPage={isInAllActivitiesPage}
+          />
+        );
+      }
+      case "evm/contract-call": {
+        return (
+          <MsgRelationEvmContractCall
+            msg={msg}
+            prices={prices}
+            targetDenom={targetDenom}
+            isInAllActivitiesPage={isInAllActivitiesPage}
+          />
+        );
+      }
+
+      case "evm/erc20-approve": {
+        return (
+          <MsgRelationEvmApprove
+            msg={msg}
             prices={prices}
             targetDenom={targetDenom}
             isInAllActivitiesPage={isInAllActivitiesPage}

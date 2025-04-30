@@ -9,7 +9,7 @@ export interface ResMsgsHistory {
 
 export interface MsgHistory {
   txHash: string;
-  code: number;
+  code?: number;
 
   height: number;
   time: string;
