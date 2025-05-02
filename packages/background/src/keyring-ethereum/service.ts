@@ -108,6 +108,13 @@ export class KeyRingEthereumService {
       );
     }
 
+    if (signType === EthSignType.TRANSACTION) {
+      const unsignedTx = JSON.parse(Buffer.from(message).toString());
+      if (unsignedTx.authorizationList) {
+        throw new Error("EIP-7702 transactions are not supported.");
+      }
+    }
+
     try {
       Bech32Address.validate(signer);
     } catch {
