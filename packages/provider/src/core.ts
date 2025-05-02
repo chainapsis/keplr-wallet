@@ -2128,6 +2128,20 @@ class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
     );
   }
 
+  async pushPsbt(psbtHex: string): Promise<string> {
+    await this.protectedEnableAccess();
+
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-bitcoin",
+      "request-bitcoin-push-psbt",
+      {
+        psbtHex,
+      }
+    );
+  }
+
   async signPsbt(psbtHex: string, options?: SignPsbtOptions): Promise<string> {
     // Side panel을 어차피 열어야 하는 메소드이므로 여기선 권한 체크 요청을 생략한다.
     return new Promise((resolve, reject) => {
