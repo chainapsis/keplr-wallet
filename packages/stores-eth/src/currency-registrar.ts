@@ -4,6 +4,7 @@ import { DenomHelper, KVStore } from "@keplr-wallet/common";
 import { makeObservable, observable, runInAction } from "mobx";
 import { EthereumQueries } from "./queries";
 import { KeplrETCQueries } from "@keplr-wallet/stores-etc";
+import debounce from "lodash.debounce";
 
 type CurrencyCache =
   | {
@@ -25,6 +26,11 @@ export class ERC20CurrencyRegistrar {
 
   protected cacheERC20Metadata: Map<string, CurrencyCache> = new Map();
   protected staledERC20Metadata: Map<string, CurrencyCache> = new Map();
+
+  protected debouncedSetCacheERC20MetadataToDB = debounce(
+    this.setCacheERC20MetadataToDB.bind(this),
+    1000
+  );
 
   constructor(
     protected readonly kvStore: KVStore,
@@ -296,11 +302,9 @@ export class ERC20CurrencyRegistrar {
       if (res.notFound) {
         if (Date.now() - res.timestamp > this.failedCacheDuration) {
           this.cacheERC20Metadata.delete(key);
-          {
-            const dbKey = `cacheERC20Metadata-v2`;
-            const obj = Object.fromEntries(this.cacheERC20Metadata);
-            this.kvStore.set<Record<string, CurrencyCache>>(dbKey, obj);
-          }
+
+          this.debouncedSetCacheERC20MetadataToDB();
+
           res = undefined;
           staled = false;
         }
@@ -309,9 +313,7 @@ export class ERC20CurrencyRegistrar {
 
         const savedStaled = this.staledERC20Metadata.has(key);
         if (!savedStaled) {
-          const dbKey = `cacheERC20Metadata-v2`;
-          const obj = Object.fromEntries(this.cacheERC20Metadata);
-          this.kvStore.set<Record<string, CurrencyCache>>(dbKey, obj);
+          this.debouncedSetCacheERC20MetadataToDB();
 
           this.staledERC20Metadata.set(key, res);
         }
@@ -334,14 +336,17 @@ export class ERC20CurrencyRegistrar {
     const key = `${chainId}/${contractAddress}`;
 
     this.cacheERC20Metadata.set(key, cache);
-    {
-      const dbKey = `cacheERC20Metadata-v2`;
-      const obj = Object.fromEntries(this.cacheERC20Metadata);
-      this.kvStore.set<Record<string, CurrencyCache>>(dbKey, obj);
-    }
+
+    this.debouncedSetCacheERC20MetadataToDB();
 
     if (this.staledERC20Metadata.has(key)) {
       this.staledERC20Metadata.set(key, cache);
     }
+  }
+
+  protected setCacheERC20MetadataToDB() {
+    const dbKey = `cacheERC20Metadata-v2`;
+    const obj = Object.fromEntries(this.cacheERC20Metadata);
+    this.kvStore.set<Record<string, CurrencyCache>>(dbKey, obj);
   }
 }
