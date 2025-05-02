@@ -390,6 +390,28 @@ interface KeplrBitcoinProvider {
 
 ```typescript
 const rawTxHex = "0200000000010135bd7d..."
-await window.bitcoin_keplr.pushTx(rawTxHex, 10000)
+await window.bitcoin_keplr.pushTx(rawTxHex)
+// "acc16b5e9e69ea8f1de96d839a0e2cb9bc2ddc6dd8d19115f6bbfca81852aac2"
+```
+
+### pushPsbt
+
+Push PSBT
+
+#### Interface
+
+```typescript
+interface KeplrBitcoinProvider {
+  pushPsbt: (
+    psbtHex: string // hex string of psbt to push
+  ) => Promise<string>; // return the tx id
+}
+```
+
+#### Example
+
+```typescript
+const psbtHex = "70736274ff01007d..."
+await window.bitcoin_keplr.pushPsbt(rawTxHex)
 // "acc16b5e9e69ea8f1de96d839a0e2cb9bc2ddc6dd8d19115f6bbfca81852aac2"
 ```
