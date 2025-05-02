@@ -108,6 +108,13 @@ export class KeyRingEthereumService {
       );
     }
 
+    if (signType === EthSignType.TRANSACTION) {
+      const unsignedTx = JSON.parse(Buffer.from(message).toString());
+      if (unsignedTx.authorizationList) {
+        throw new Error("EIP-7702 transactions are not supported.");
+      }
+    }
+
     try {
       Bech32Address.validate(signer);
     } catch {
@@ -420,6 +427,14 @@ export class KeyRingEthereumService {
                 from: string;
                 gas?: string;
                 gasLimit?: string;
+                authorizationList?: {
+                  address: string;
+                  chainId: string;
+                  nonce: string;
+                  r: string;
+                  s: string;
+                  yParity: string;
+                }[];
               })) ||
             null;
           if (!tx) {
@@ -427,6 +442,13 @@ export class KeyRingEthereumService {
           }
 
           const currentChainId = this.forceGetCurrentChainId(origin, chainId);
+
+          const { from: sender, gas, authorizationList, ...restTx } = tx;
+
+          if (authorizationList) {
+            throw new Error("EIP-7702 transactions are not supported.");
+          }
+
           if (tx.chainId) {
             const evmChainIdFromTx: number = validateEVMChainId(
               (() => {
@@ -465,7 +487,6 @@ export class KeyRingEthereumService {
           );
           const nonce = parseInt(transactionCount, 16);
 
-          const { from: sender, gas, ...restTx } = tx;
           const unsignedTx: UnsignedTransaction = {
             ...restTx,
             gasLimit: restTx?.gasLimit ?? gas,
@@ -512,6 +533,14 @@ export class KeyRingEthereumService {
                 from: string;
                 gas?: string;
                 gasLimit?: string;
+                authorizationList?: {
+                  address: string;
+                  chainId: string;
+                  nonce: string;
+                  r: string;
+                  s: string;
+                  yParity: string;
+                }[];
               })) ||
             null;
           if (!tx) {
@@ -519,6 +548,13 @@ export class KeyRingEthereumService {
           }
 
           const currentChainId = this.forceGetCurrentChainId(origin, chainId);
+
+          const { from: sender, gas, authorizationList, ...restTx } = tx;
+
+          if (authorizationList) {
+            throw new Error("EIP-7702 transactions are not supported.");
+          }
+
           if (tx.chainId) {
             const evmChainIdFromTx: number = validateEVMChainId(
               (() => {
@@ -557,7 +593,6 @@ export class KeyRingEthereumService {
           );
           const nonce = parseInt(transactionCount, 16);
 
-          const { from: sender, gas, ...restTx } = tx;
           const unsignedTx: UnsignedTransaction = {
             ...restTx,
             gasLimit: restTx?.gasLimit ?? gas,
