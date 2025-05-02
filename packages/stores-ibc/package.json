@@ -20,10 +20,14 @@
     "@keplr-wallet/cosmos": "0.12.229",
     "@keplr-wallet/stores": "0.12.229",
     "@keplr-wallet/stores-eth": "0.12.229",
-    "@keplr-wallet/types": "0.12.229"
+    "@keplr-wallet/types": "0.12.229",
+    "lodash.debounce": "^4.0.8"
   },
   "peerDependencies": {
     "mobx": "^6",
     "mobx-utils": "^6"
+  },
+  "devDependencies": {
+    "@types/lodash.debounce": "^4"
   }
 }

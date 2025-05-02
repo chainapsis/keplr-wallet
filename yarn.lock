@@ -9334,7 +9334,9 @@ __metadata:
     "@keplr-wallet/stores-etc": 0.12.229
     "@keplr-wallet/types": 0.12.229
     "@keplr-wallet/unit": 0.12.229
+    "@types/lodash.debounce": ^4
     big-integer: ^1.6.48
+    lodash.debounce: ^4.0.8
     utility-types: ^3.10.0
   peerDependencies:
     mobx: ^6
@@ -9351,6 +9353,8 @@ __metadata:
     "@keplr-wallet/stores": 0.12.229
     "@keplr-wallet/stores-eth": 0.12.229
     "@keplr-wallet/types": 0.12.229
+    "@types/lodash.debounce": ^4
+    lodash.debounce: ^4.0.8
   peerDependencies:
     mobx: ^6
     mobx-utils: ^6
