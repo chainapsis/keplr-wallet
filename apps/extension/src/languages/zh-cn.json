@@ -858,9 +858,9 @@
   "components.address-item.empty-memo": "（备注为空）",
   "components.address-book-modal.my-account-tab.input.search.placeholder": "搜索钱包名称或地址",
 
-  "components.collapsible-list.view-more-tokens": "查看 {remain} 的更多币种",
+  "components.collapsible-list.view-more-tokens": "查看更多 {remain} 个币种",
   "components.collapsible-list.collapse": "折叠",
-  "components.collapsible-list.view-more": "查看 {remain} 更多",
+  "components.collapsible-list.view-more": "查看更多 {remain} 个",
 
   "components.bitcoin-guide-box.title.critical-validation-error": "无法签名交易",
   "components.bitcoin-guide-box.title.unable-to-get-utxos": "无法获取UTXO",
