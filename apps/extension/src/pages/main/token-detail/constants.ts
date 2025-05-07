@@ -29,6 +29,12 @@ export const Relations = [
   "initia-undelegate",
   "initia-redelegate",
   "initia-cancel-undelegate",
+  "evm/send",
+  "evm/receive",
+  "evm/contract-call",
+  "evm/erc20-send",
+  "evm/erc20-receive",
+  "evm/erc20-approve",
 ];
 
 export const PaginationLimit = 20;

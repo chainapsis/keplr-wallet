@@ -62,6 +62,7 @@ export * from "./msg-receive";
 export * from "./msg-swap";
 export * from "./msg-cancel-undelegate";
 export * from "./msg-register";
+export * from "./msg-approve";
 export * from "./message-icon";
 export * from "./folder-minus";
 export * from "./article-outline";
