@@ -45,7 +45,32 @@ import { NativeChainSectionIconDM } from "./components/native-chain-section-icon
 import { NativeChainSectionIconLM } from "./components/native-chain-section-icon-lm";
 import { NextStepChainItem } from "./components/next-step-chain-item";
 import { ChainItem } from "./components/chain-item";
+import { INITIA_CHAIN_ID } from "../../../config.ui";
 import { useSearch } from "../../../hooks/use-search";
+import { getChainSearchResultClickAnalyticsProperties } from "../../../analytics-amplitude";
+import { AnalyticsAmplitudeStore } from "@keplr-wallet/analytics";
+import debounce from "lodash.debounce";
+
+const logChainSearchClick = (
+  analyticsStore: AnalyticsAmplitudeStore,
+  chainInfo: { chainName: string; chainId: string },
+  search: string,
+  allSearchResults: { chainName: string; chainId: string }[]
+) => {
+  if (!search?.trim()) return;
+
+  analyticsStore.logEvent(
+    "click_chain_item_search_results_register",
+    getChainSearchResultClickAnalyticsProperties(
+      chainInfo.chainName,
+      search,
+      allSearchResults.map((chain) => chain.chainName),
+      allSearchResults.findIndex((chain) => chain.chainId === chainInfo.chainId)
+    )
+  );
+};
+
+const debouncedLogChainSearchClick = debounce(logChainSearchClick, 100);
 
 /**
  * EnableChainsScene은 finalize-key scene에서 선택한 chains를 활성화하는 scene이다.
@@ -94,6 +119,7 @@ export const EnableChainsScene: FunctionComponent<{
       starknetQueriesStore,
       bitcoinQueriesStore,
       hugeQueriesStore,
+      analyticsAmplitudeStore,
     } = useStore();
 
     const navigate = useNavigate();
@@ -547,10 +573,14 @@ export const EnableChainsScene: FunctionComponent<{
             }
 
             if (!isEVMOnlyChain) {
-              const queryDelegations =
-                queries.cosmos.queryDelegations.getQueryBech32Address(
-                  bech32Address.address
-                );
+              const isInitia = chainInfo.chainId === INITIA_CHAIN_ID;
+              const queryDelegations = isInitia
+                ? queries.cosmos.queryInitiaDelegations.getQueryBech32Address(
+                    bech32Address.address
+                  )
+                : queries.cosmos.queryDelegations.getQueryBech32Address(
+                    bech32Address.address
+                  );
               if (queryDelegations.delegationBalances.length > 0) {
                 enableAllChains = false;
                 enabledChainIdentifiers.push(chainInfo.chainIdentifier);
@@ -967,6 +997,12 @@ export const EnableChainsScene: FunctionComponent<{
       searchFields
     );
 
+    const showLedgerChains =
+      !fallbackStarknetLedgerApp &&
+      !fallbackEthereumLedgerApp &&
+      !fallbackBitcoinLedgerApp &&
+      keyType === "ledger";
+
     const { chains: searchedNonNativeChainInfos, infiniteScrollTriggerRef } =
       useGetAllNonNativeChain({
         search,
@@ -974,6 +1010,13 @@ export const EnableChainsScene: FunctionComponent<{
         fallbackStarknetLedgerApp,
         keyType,
       });
+
+    const searchedAllChains = [
+      ...searchedNativeGroupedModularChainInfos,
+      ...searchedSuggestGroupedModularChainInfos,
+      ...(showLedgerChains ? searchedLedgerChains : []),
+      ...searchedNonNativeChainInfos,
+    ];
 
     const numSelected = useMemo(() => {
       const modularChainInfoMap = new Map<string, ModularChainInfo>();
@@ -1496,6 +1539,13 @@ export const EnableChainsScene: FunctionComponent<{
                         chainIdentifier
                       )}
                       onClick={() => {
+                        debouncedLogChainSearchClick(
+                          analyticsAmplitudeStore,
+                          modularChainInfo,
+                          search,
+                          searchedAllChains
+                        );
+
                         const isEnabled =
                           enabledChainIdentifierMap.get(chainIdentifier);
                         const linkedChainIdentifiers = new Set<string>([
@@ -1565,6 +1615,13 @@ export const EnableChainsScene: FunctionComponent<{
                   blockInteraction={blockInteraction}
                   isFresh={isFresh ?? false}
                   onClick={() => {
+                    debouncedLogChainSearchClick(
+                      analyticsAmplitudeStore,
+                      modularChainInfo,
+                      search,
+                      searchedAllChains
+                    );
+
                     const isEnabled =
                       enabledChainIdentifierMap.get(chainIdentifier);
                     const linkedChainIdentifiers = new Set<string>([
@@ -1605,10 +1662,7 @@ export const EnableChainsScene: FunctionComponent<{
                 />
               );
             })}
-            {!fallbackStarknetLedgerApp &&
-              !fallbackEthereumLedgerApp &&
-              !fallbackBitcoinLedgerApp &&
-              keyType === "ledger" &&
+            {showLedgerChains &&
               searchedLedgerChains.map((modularChainInfo) => {
                 if ("cosmos" in modularChainInfo) {
                   const chainInfo = chainStore.getChain(
@@ -1710,6 +1764,13 @@ export const EnableChainsScene: FunctionComponent<{
                     isFresh={true}
                     blockInteraction={false}
                     onClick={() => {
+                      debouncedLogChainSearchClick(
+                        analyticsAmplitudeStore,
+                        modularChainInfo,
+                        search,
+                        searchedAllChains
+                      );
+
                       if (isChecked) {
                         setNonNativeChainListForSuggest(
                           nonNativeChainListForSuggest.filter(

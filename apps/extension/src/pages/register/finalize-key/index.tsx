@@ -21,6 +21,7 @@ import { PlainObject } from "@keplr-wallet/background";
 import { MultiAccounts } from "@keystonehq/keystone-sdk";
 import { useTheme } from "styled-components";
 import { dispatchGlobalEventExceptSelf } from "../../../utils/global-events";
+import { INITIA_CHAIN_ID } from "../../../config.ui";
 
 /**
  * FinalizeKeyScene is used to create the key (account).
@@ -382,10 +383,15 @@ export const FinalizeKeyScene: FunctionComponent<{
                 })()
               );
               if (!isEVMOnlyChain) {
+                const isInitia = candidateAddress.chainId === INITIA_CHAIN_ID;
                 promises.push(
-                  queries.cosmos.queryDelegations
-                    .getQueryBech32Address(bech32Address.address)
-                    .waitFreshResponse()
+                  isInitia
+                    ? queries.cosmos.queryInitiaDelegations
+                        .getQueryBech32Address(bech32Address.address)
+                        .waitFreshResponse()
+                    : queries.cosmos.queryDelegations
+                        .getQueryBech32Address(bech32Address.address)
+                        .waitFreshResponse()
                 );
               }
             }

@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 import { BackButton } from "../../../../layouts/header/components";
 import { HeaderLayout } from "../../../../layouts/header";
 import { Box } from "../../../../components/box";
-import { TextInput } from "../../../../components/input";
+import { PasswordTextInput } from "../../../../components/input";
 import { Stack } from "../../../../components/stack";
 import { useForm } from "react-hook-form";
 import { useStore } from "../../../../stores";
@@ -80,22 +80,20 @@ export const SettingSecurityChangePasswordPage: FunctionComponent = observer(
       >
         <Box paddingX="0.75rem">
           <Stack gutter="1rem">
-            <TextInput
+            <PasswordTextInput
               label={intl.formatMessage({
                 id: "page.setting.security.change-password.current-password-label",
               })}
-              type="password"
               {...form.register("password", {
                 required: true,
               })}
               error={form.formState.errors.password?.message}
             />
 
-            <TextInput
+            <PasswordTextInput
               label={intl.formatMessage({
                 id: "page.setting.security.change-password.new-password-label",
               })}
-              type="password"
               {...form.register("newPassword", {
                 required: true,
                 validate: (password: string): string | undefined => {
@@ -109,11 +107,10 @@ export const SettingSecurityChangePasswordPage: FunctionComponent = observer(
               error={form.formState.errors.newPassword?.message}
             />
 
-            <TextInput
+            <PasswordTextInput
               label={intl.formatMessage({
                 id: "page.setting.security.change-password.confirm-password-label",
               })}
-              type="password"
               {...form.register("confirmNewPassword", {
                 required: true,
                 validate: (confirmPassword: string): string | undefined => {

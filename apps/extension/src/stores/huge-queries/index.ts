@@ -25,6 +25,7 @@ import { KeyRingStore } from "@keplr-wallet/stores-core";
 import { AllTokenMapByChainIdentifierState } from "./all-token-map-state";
 import { SkipAsset, SkipQueries } from "@keplr-wallet/stores-internal";
 import { getBabylonUnbondingRemainingTime } from "../../utils/get-babylon-unbonding-remaining-time";
+import { INITIA_CHAIN_ID } from "../../config.ui";
 
 interface ViewToken {
   chainInfo: IChainInfoImpl | ModularChainInfo;
@@ -811,15 +812,22 @@ export class HugeQueriesStore {
       const account = this.accountStore.getAccount(modularChainInfo.chainId);
 
       if ("cosmos" in modularChainInfo) {
-        if (account.bech32Address === "") {
+        const isEVMOnly = this.chainStore.isEvmOnlyChain(
+          modularChainInfo.chainId
+        );
+        if (isEVMOnly || account.bech32Address === "") {
           continue;
         }
 
         const queries = this.queriesStore.get(modularChainInfo.chainId);
-        const queryDelegation =
-          queries.cosmos.queryDelegations.getQueryBech32Address(
-            account.bech32Address
-          );
+        const isInitia = modularChainInfo.chainId === INITIA_CHAIN_ID;
+        const queryDelegation = isInitia
+          ? queries.cosmos.queryInitiaDelegations.getQueryBech32Address(
+              account.bech32Address
+            )
+          : queries.cosmos.queryDelegations.getQueryBech32Address(
+              account.bech32Address
+            );
         if (!queryDelegation.total) {
           continue;
         }
@@ -884,7 +892,10 @@ export class HugeQueriesStore {
       const account = this.accountStore.getAccount(modularChainInfo.chainId);
 
       if ("cosmos" in modularChainInfo) {
-        if (account.bech32Address === "") {
+        const isEVMOnly = this.chainStore.isEvmOnlyChain(
+          modularChainInfo.chainId
+        );
+        if (isEVMOnly || account.bech32Address === "") {
           continue;
         }
 
@@ -894,9 +905,13 @@ export class HugeQueriesStore {
 
         const queries = this.queriesStore.get(modularChainInfo.chainId);
         const queryUnbonding =
-          queries.cosmos.queryUnbondingDelegations.getQueryBech32Address(
-            account.bech32Address
-          );
+          chainInfo.chainId === INITIA_CHAIN_ID
+            ? queries.cosmos.queryInitiaUnbondingDelegations.getQueryBech32Address(
+                account.bech32Address
+              )
+            : queries.cosmos.queryUnbondingDelegations.getQueryBech32Address(
+                account.bech32Address
+              );
 
         for (let i = 0; i < queryUnbonding.unbondings.length; i++) {
           const unbonding = queryUnbonding.unbondings[i];
@@ -981,7 +996,8 @@ export class HugeQueriesStore {
 
     for (const chainInfo of this.chainStore.chainInfosInUI) {
       const account = this.accountStore.getAccount(chainInfo.chainId);
-      if (account.bech32Address === "") {
+      const isEVMOnly = this.chainStore.isEvmOnlyChain(chainInfo.chainId);
+      if (isEVMOnly || account.bech32Address === "") {
         continue;
       }
       const queries = this.queriesStore.get(chainInfo.chainId);

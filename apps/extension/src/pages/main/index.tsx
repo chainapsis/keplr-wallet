@@ -60,7 +60,7 @@ import { NewSidePanelHeaderTop } from "./new-side-panel-header-top";
 import { ModularChainInfo } from "@keplr-wallet/types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { AvailableTabLinkButtonList } from "./components/available-tab-link-button-list";
-import { NEUTRON_CHAIN_ID } from "../../config.ui";
+import { INITIA_CHAIN_ID, NEUTRON_CHAIN_ID } from "../../config.ui";
 
 export interface ViewToken {
   token: CoinPretty;
@@ -955,19 +955,26 @@ const RefreshButton: FunctionComponent<{
 
       for (const chainInfo of chainStore.chainInfosInUI) {
         const account = accountStore.getAccount(chainInfo.chainId);
+        const isInitia = chainInfo.chainId === INITIA_CHAIN_ID;
 
         if (account.bech32Address === "") {
           continue;
         }
         const queries = queriesStore.get(chainInfo.chainId);
-        const queryUnbonding =
-          queries.cosmos.queryUnbondingDelegations.getQueryBech32Address(
-            account.bech32Address
-          );
-        const queryDelegation =
-          queries.cosmos.queryDelegations.getQueryBech32Address(
-            account.bech32Address
-          );
+        const queryUnbonding = isInitia
+          ? queries.cosmos.queryInitiaUnbondingDelegations.getQueryBech32Address(
+              account.bech32Address
+            )
+          : queries.cosmos.queryUnbondingDelegations.getQueryBech32Address(
+              account.bech32Address
+            );
+        const queryDelegation = isInitia
+          ? queries.cosmos.queryInitiaDelegations.getQueryBech32Address(
+              account.bech32Address
+            )
+          : queries.cosmos.queryDelegations.getQueryBech32Address(
+              account.bech32Address
+            );
 
         promises.push(queryUnbonding.waitFreshResponse());
         promises.push(queryDelegation.waitFreshResponse());

@@ -4,6 +4,7 @@ import { ChainGetter } from "../../../chain";
 import { computed, makeObservable } from "mobx";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { QuerySharedContext } from "../../../common";
+import { ENDPOINT_BY_CHAIN_ID } from "./endpoint-by-chain-id";
 
 export class ObservableQueryStakingPool extends ObservableChainQuery<StakingPool> {
   constructor(
@@ -11,7 +12,12 @@ export class ObservableQueryStakingPool extends ObservableChainQuery<StakingPool
     chainId: string,
     chainGetter: ChainGetter
   ) {
-    super(sharedContext, chainId, chainGetter, "/cosmos/staking/v1beta1/pool");
+    super(
+      sharedContext,
+      chainId,
+      chainGetter,
+      ENDPOINT_BY_CHAIN_ID[chainId]?.["pool"] ?? "/cosmos/staking/v1beta1/pool"
+    );
 
     makeObservable(this);
   }

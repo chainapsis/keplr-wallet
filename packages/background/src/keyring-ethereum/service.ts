@@ -108,6 +108,13 @@ export class KeyRingEthereumService {
       );
     }
 
+    if (signType === EthSignType.TRANSACTION) {
+      const unsignedTx = JSON.parse(Buffer.from(message).toString());
+      if (unsignedTx.authorizationList) {
+        throw new Error("EIP-7702 transactions are not supported.");
+      }
+    }
+
     try {
       Bech32Address.validate(signer);
     } catch {
@@ -346,7 +353,7 @@ export class KeyRingEthereumService {
             ).toString("hex")}`;
 
             return {
-              currentEvmChainId: this.parseChainId(currentChainId).evmChainId,
+              currentEvmChainId: this.getEVMChainId(currentChainId),
               currentChainId: currentChainId,
               selectedAddress,
             };
@@ -366,7 +373,7 @@ export class KeyRingEthereumService {
             ).toString("hex")}`;
 
             return {
-              currentEvmChainId: this.parseChainId(currentChainId).evmChainId,
+              currentEvmChainId: this.getEVMChainId(currentChainId),
               currentChainId: currentChainId,
               selectedAddress,
             };
@@ -380,13 +387,11 @@ export class KeyRingEthereumService {
         }
         case "eth_chainId": {
           const currentChainId = this.forceGetCurrentChainId(origin, chainId);
-          return `0x${this.parseChainId(currentChainId).evmChainId.toString(
-            16
-          )}`;
+          return `0x${this.getEVMChainId(currentChainId).toString(16)}`;
         }
         case "net_version": {
           const currentChainId = this.forceGetCurrentChainId(origin, chainId);
-          return this.parseChainId(currentChainId).evmChainId.toString();
+          return this.getEVMChainId(currentChainId).toString();
         }
         case "eth_accounts": {
           const currentChainId = this.getCurrentChainId(origin, chainId);
@@ -422,6 +427,14 @@ export class KeyRingEthereumService {
                 from: string;
                 gas?: string;
                 gasLimit?: string;
+                authorizationList?: {
+                  address: string;
+                  chainId: string;
+                  nonce: string;
+                  r: string;
+                  s: string;
+                  yParity: string;
+                }[];
               })) ||
             null;
           if (!tx) {
@@ -429,6 +442,13 @@ export class KeyRingEthereumService {
           }
 
           const currentChainId = this.forceGetCurrentChainId(origin, chainId);
+
+          const { from: sender, gas, authorizationList, ...restTx } = tx;
+
+          if (authorizationList) {
+            throw new Error("EIP-7702 transactions are not supported.");
+          }
+
           if (tx.chainId) {
             const evmChainIdFromTx: number = validateEVMChainId(
               (() => {
@@ -443,9 +463,7 @@ export class KeyRingEthereumService {
                 }
               })()
             );
-            if (
-              evmChainIdFromTx !== this.parseChainId(currentChainId).evmChainId
-            ) {
+            if (evmChainIdFromTx !== this.getEVMChainId(currentChainId)) {
               throw new Error(
                 "The current active chain id does not match the one in the transaction."
               );
@@ -469,11 +487,10 @@ export class KeyRingEthereumService {
           );
           const nonce = parseInt(transactionCount, 16);
 
-          const { from: sender, gas, ...restTx } = tx;
           const unsignedTx: UnsignedTransaction = {
             ...restTx,
             gasLimit: restTx?.gasLimit ?? gas,
-            chainId: this.parseChainId(currentChainId).evmChainId,
+            chainId: this.getEVMChainId(currentChainId),
             nonce,
           };
 
@@ -516,6 +533,14 @@ export class KeyRingEthereumService {
                 from: string;
                 gas?: string;
                 gasLimit?: string;
+                authorizationList?: {
+                  address: string;
+                  chainId: string;
+                  nonce: string;
+                  r: string;
+                  s: string;
+                  yParity: string;
+                }[];
               })) ||
             null;
           if (!tx) {
@@ -523,6 +548,13 @@ export class KeyRingEthereumService {
           }
 
           const currentChainId = this.forceGetCurrentChainId(origin, chainId);
+
+          const { from: sender, gas, authorizationList, ...restTx } = tx;
+
+          if (authorizationList) {
+            throw new Error("EIP-7702 transactions are not supported.");
+          }
+
           if (tx.chainId) {
             const evmChainIdFromTx: number = validateEVMChainId(
               (() => {
@@ -537,9 +569,7 @@ export class KeyRingEthereumService {
                 }
               })()
             );
-            if (
-              evmChainIdFromTx !== this.parseChainId(currentChainId).evmChainId
-            ) {
+            if (evmChainIdFromTx !== this.getEVMChainId(currentChainId)) {
               throw new Error(
                 "The current active chain id does not match the one in the transaction."
               );
@@ -563,11 +593,10 @@ export class KeyRingEthereumService {
           );
           const nonce = parseInt(transactionCount, 16);
 
-          const { from: sender, gas, ...restTx } = tx;
           const unsignedTx: UnsignedTransaction = {
             ...restTx,
             gasLimit: restTx?.gasLimit ?? gas,
-            chainId: this.parseChainId(currentChainId).evmChainId,
+            chainId: this.getEVMChainId(currentChainId),
             nonce,
           };
 
@@ -1074,8 +1103,10 @@ export class KeyRingEthereumService {
         }
 
         const newEvmChainId = validateEVMChainId(parseInt(param.chainId, 16));
+        const chainInfo =
+          this.chainsService.getChainInfoByEVMChainIdOrThrow(newEvmChainId);
 
-        return `eip155:${newEvmChainId}`;
+        return chainInfo.chainId;
       }
       default: {
         return;
@@ -1103,12 +1134,9 @@ export class KeyRingEthereumService {
     );
   }
 
-  private parseChainId(chainId: string) {
-    const [, evmChainId] = chainId.split(":");
-    const validEVMChainId = validateEVMChainId(parseInt(evmChainId, 10));
+  private getEVMChainId(chainId: string) {
+    const evmInfo = this.chainsService.getEVMInfoOrThrow(chainId);
 
-    return {
-      evmChainId: validEVMChainId,
-    };
+    return evmInfo.chainId;
   }
 }

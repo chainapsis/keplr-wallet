@@ -13,7 +13,7 @@ export class ObservableQueryTokenContracts extends ObservableQuery<
     super(
       sharedContext,
       tokenContractListURL,
-      `tokens/${ChainIdHelper.parse(chainId).identifier}`
+      `/tokens/${ChainIdHelper.parse(chainId).identifier}`
     );
   }
 

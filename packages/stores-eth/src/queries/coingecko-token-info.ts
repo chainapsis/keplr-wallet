@@ -6,17 +6,16 @@ import {
 } from "@keplr-wallet/stores";
 import { makeObservable } from "mobx";
 export class ObservableQueryCoingeckoTokenInfoInner extends ObservableQuery<{
+  networkId: string;
+  contractAddress: string;
   id: string;
+  type: string;
+  name: string;
   symbol: string;
-  image: {
-    small: string;
-  };
-  detail_platforms: Record<
-    string,
-    {
-      decimal_place: number;
-    }
-  >;
+  image_url: string;
+  coingecko_coin_id: string;
+  decimals: number;
+  timestamp: string;
 }> {
   constructor(
     sharedContext: QuerySharedContext,
@@ -37,20 +36,19 @@ export class ObservableQueryCoingeckoTokenInfoInner extends ObservableQuery<{
   }
 
   get symbol(): string | undefined {
-    return this.response?.data?.symbol.toUpperCase();
+    return this.response?.data?.symbol;
   }
 
   get decimals(): number | undefined {
-    return this.response?.data?.detail_platforms[this.coingeckoChainId]
-      ?.decimal_place;
+    return this.response?.data?.decimals;
   }
 
   get coingeckoId(): string | undefined {
-    return this.response?.data?.id;
+    return this.response?.data?.coingecko_coin_id;
   }
 
   get logoURI(): string | undefined {
-    return this.response?.data?.image.small;
+    return this.response?.data?.image_url;
   }
 }
 
@@ -87,9 +85,11 @@ export class ObservableQueryCoingeckoTokenInfo extends HasMapStore<
 }
 
 const coingeckoChainIdMap: Record<string, string> = {
-  "eip155:1": "ethereum",
-  "eip155:10": "optimistic-ethereum",
-  "eip155:137": "polygon-pos",
+  "eip155:1": "eth",
+  "eip155:10": "optimism",
+  "eip155:137": "polygon_pos",
   "eip155:8453": "base",
-  "eip155:42161": "arbitrum-one",
+  "eip155:42161": "arbitrum",
+  "eip155:56": "bsc",
+  "eip155:43114": "avax",
 };

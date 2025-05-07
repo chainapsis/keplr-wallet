@@ -3,6 +3,7 @@ import { StakingParams } from "./types";
 import { ChainGetter } from "../../../chain";
 import { computed, makeObservable } from "mobx";
 import { QuerySharedContext } from "../../../common";
+import { ENDPOINT_BY_CHAIN_ID } from "./endpoint-by-chain-id";
 
 export class ObservableQueryStakingParams extends ObservableChainQuery<StakingParams> {
   constructor(
@@ -14,7 +15,8 @@ export class ObservableQueryStakingParams extends ObservableChainQuery<StakingPa
       sharedContext,
       chainId,
       chainGetter,
-      "/cosmos/staking/v1beta1/params"
+      ENDPOINT_BY_CHAIN_ID[chainId]?.["params"] ??
+        "/cosmos/staking/v1beta1/params"
     );
 
     makeObservable(this);

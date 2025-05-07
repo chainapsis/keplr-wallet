@@ -21,6 +21,7 @@ import { IChainInfoImpl } from "@keplr-wallet/stores";
 import { FixedSizeList } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { useSearch } from "../../../hooks/use-search";
+import { getTokenSearchResultClickAnalyticsProperties } from "../../../analytics-amplitude";
 
 // 계산이 복잡해서 memoize을 적용해야하는데
 // mobx와 useMemo()는 같이 사용이 어려워서
@@ -158,7 +159,8 @@ const remainingSearchFields = [
 // /send/select-asset 페이지와 세트로 관리하셈
 export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
   () => {
-    const { hugeQueriesStore, skipQueriesStore } = useStore();
+    const { hugeQueriesStore, skipQueriesStore, analyticsAmplitudeStore } =
+      useStore();
     const navigate = useNavigate();
     const intl = useIntl();
     const [searchParams] = useSearchParams();
@@ -250,12 +252,26 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
                 itemData={{
                   searchedTokens,
                   searchedRemaining,
-                  onClick: (chainId, coinMinimalDenom) => {
+                  onClick: (viewToken, index) => {
+                    if (search.trim().length > 0) {
+                      analyticsAmplitudeStore.logEvent(
+                        "click_token_item_search_results_select_asset_ibc_swap",
+                        getTokenSearchResultClickAnalyticsProperties(
+                          viewToken,
+                          search,
+                          [...searchedTokens, ...searchedRemaining],
+                          index
+                        )
+                      );
+                    }
                     if (paramNavigateTo) {
                       navigate(
                         paramNavigateTo
-                          .replace("{chainId}", chainId)
-                          .replace("{coinMinimalDenom}", coinMinimalDenom),
+                          .replace("{chainId}", viewToken.chainInfo.chainId)
+                          .replace(
+                            "{coinMinimalDenom}",
+                            viewToken.token.currency.coinMinimalDenom
+                          ),
                         {
                           replace: paramNavigateReplace === "true",
                         }
@@ -293,7 +309,7 @@ const TokenListItem = ({
       currency: Currency;
       chainInfo: IChainInfoImpl;
     }[];
-    onClick: (chainId: string, coinMinimalDenom: string) => void;
+    onClick: (viewToken: ViewToken, index: number) => void;
   };
   index: number;
   style: any;
@@ -325,12 +341,7 @@ const TokenListItem = ({
       <TokenItem
         viewToken={viewToken}
         hideBalance={isFilteredTokens ? false : true}
-        onClick={() =>
-          data.onClick(
-            viewToken.chainInfo.chainId,
-            viewToken.token.currency.coinMinimalDenom
-          )
-        }
+        onClick={() => data.onClick(viewToken, index)}
       />
     </div>
   );

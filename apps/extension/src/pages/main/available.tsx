@@ -51,6 +51,7 @@ import { SceneTransitionRef } from "../../components/transition/scene/internal";
 import { VerticalCollapseTransition } from "../../components/transition/vertical-collapse";
 import { ArrowDownIcon, ArrowUpIcon } from "../../components/icon";
 import { Styles as AvailableCollapsibleListStyles } from "../../components/collapsible-list";
+import { getTokenSearchResultClickAnalyticsProperties } from "../../analytics-amplitude";
 
 type TokenViewData = {
   title: string;
@@ -528,7 +529,10 @@ export const AvailableTabView: FunctionComponent<{
                 {allBalancesSearchFiltered.length > 0 && (
                   <Gutter size="1rem" direction="vertical" />
                 )}
-                <LookingForChains lookingForChains={searchedLookingForChains} />
+                <LookingForChains
+                  lookingForChains={searchedLookingForChains}
+                  search={search}
+                />
               </React.Fragment>
             )}
 
@@ -703,7 +707,7 @@ const TokensFlatViewScene = observer(
     onMoreTokensClosed: () => void;
     setSearchParams: Dispatch<SetStateAction<URLSearchParams>>;
   }) => {
-    const { uiConfigStore } = useStore();
+    const { uiConfigStore, analyticsAmplitudeStore } = useStore();
 
     const { TokenViewData } = useAllBalances(trimSearch);
 
@@ -720,7 +724,7 @@ const TokensFlatViewScene = observer(
               }
             }}
             lenAlwaysShown={TokenViewData.lenAlwaysShown}
-            items={TokenViewData.balance.map((viewToken) => {
+            items={TokenViewData.balance.map((viewToken, index) => {
               const key = `${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`;
               return (
                 <TokenItem
@@ -728,6 +732,17 @@ const TokensFlatViewScene = observer(
                   {...getBottomTagInfoProps(viewToken)}
                   viewToken={viewToken}
                   onClick={() => {
+                    if (trimSearch.length > 0) {
+                      analyticsAmplitudeStore.logEvent(
+                        "click_token_item_search_results_available_tab",
+                        getTokenSearchResultClickAnalyticsProperties(
+                          viewToken,
+                          trimSearch,
+                          TokenViewData.balance,
+                          index
+                        )
+                      );
+                    }
                     setSearchParams((prev) => {
                       prev.set("tokenChainId", viewToken.chainInfo.chainId);
                       prev.set(

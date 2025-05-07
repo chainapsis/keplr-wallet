@@ -10,13 +10,12 @@ import { RawImageFallback } from "../image";
 import { TextButton } from "../button-text";
 import { useTheme } from "styled-components";
 import { useIntl } from "react-intl";
+import { TokenContract } from "../../stores/token-contracts";
 
 export const ContractAddressItem: FunctionComponent<{
-  name: string;
-  address: string;
-  imageUrl: string | undefined;
-  afterSelect: (address: string) => void;
-}> = ({ name, address, imageUrl, afterSelect }) => {
+  tokenContract: TokenContract;
+  afterSelect: (contract: TokenContract) => void;
+}> = ({ tokenContract, afterSelect }) => {
   const theme = useTheme();
   const intl = useIntl();
 
@@ -37,12 +36,16 @@ export const ContractAddressItem: FunctionComponent<{
       }}
       onClick={async (e) => {
         e.preventDefault();
-        afterSelect(address);
+        afterSelect(tokenContract);
       }}
     >
       <Columns sum={1} alignY="center" gutter="0.5rem">
         <Box>
-          <RawImageFallback size="2rem" src={imageUrl} alt="chain icon" />
+          <RawImageFallback
+            size="2rem"
+            src={tokenContract.imageUrl}
+            alt="chain icon"
+          />
         </Box>
         <YAxis>
           <Subtitle3
@@ -52,11 +55,11 @@ export const ContractAddressItem: FunctionComponent<{
                 : ColorPalette["gray-10"]
             }
           >
-            {name}
+            {tokenContract.metadata.name}
           </Subtitle3>
           <Gutter size="0.25rem" />
           <Caption1 color={ColorPalette["gray-300"]}>
-            {Bech32Address.shortenAddress(address, 20)}
+            {Bech32Address.shortenAddress(tokenContract.contractAddress, 20)}
           </Caption1>
         </YAxis>
         <Column weight={2} />

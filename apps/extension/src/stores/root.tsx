@@ -1,12 +1,15 @@
 import { ChainStore } from "./chain";
-import { CommunityChainInfoRepo, EmbedChainInfos } from "../config";
+import {
+  CommunityChainInfoRepo,
+  EmbedChainInfos,
+  TokenContractListURL,
+} from "../config";
 import {
   CoinGeckoAPIEndPoint,
   CoinGeckoGetPrice,
   EthereumEndpoint,
   FiatCurrencies,
   ICNSInfo,
-  TokenContractListURL,
   GoogleMeasurementId,
   GoogleAPIKeyForMeasurement,
   AmplitudeAPIKey,
@@ -308,9 +311,13 @@ export class RootStore {
     );
 
     this.chainStore = new ChainStore(
+      new ExtensionKVStore("store_chains"),
       EmbedChainInfos,
       this.keyRingStore,
-      new InExtensionMessageRequester()
+      new InExtensionMessageRequester(),
+      // register 페이지에서는 enable되지 않은 체인도 쉽게 등장(?)하기 때문에
+      // 모든 체인에 대한 정보 업데이트를 시도해야함
+      window.location.pathname === "/register.html"
     );
 
     this.ibcChannelStore = new IBCChannelStore(

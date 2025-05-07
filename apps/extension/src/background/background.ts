@@ -24,6 +24,7 @@ import {
   EmbedChainInfos,
   MsgPrivilegedContractMap,
   PrivilegedOrigins,
+  TokenContractListURL,
 } from "../config";
 
 const router = new ExtensionRouter(ExtensionEnv.produceEnv);
@@ -100,6 +101,7 @@ const { initFn, keyRingService, analyticsService } = init(
     mobileOS: "nono",
   },
   false,
+  TokenContractListURL,
   async (chainsService, lastEmbedChainInfos) => {
     try {
       if (lastEmbedChainInfos.find((c) => c.chainId === "ixo-4")) {

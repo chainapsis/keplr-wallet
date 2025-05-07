@@ -11,7 +11,7 @@ export const CoinGeckoGetPrice =
   process.env["KEPLR_EXT_COINGECKO_GETPRICE"] || "/simple/price";
 export const CoinGeckoCoinDataByTokenAddress =
   process.env["KEPLR_EXT_COINGECKO_COIN_DATA_BY_TOKEN_ADDRESS"] ||
-  "/coins/{coingeckoChainId}/contract/{contractAddress}";
+  "/onchain/networks/{coingeckoChainId}/tokens/{contractAddress}";
 
 // 일단 CoinGecko API와 같은 base url을 사용함
 export const SkipTokenInfoBaseURL =
@@ -31,8 +31,6 @@ export const DefaultGasMsgWithdrawRewards = 240000; // Gas per messages.
 export const EthereumEndpoint =
   process.env["KEPLR_EXT_ETHEREUM_ENDPOINT"] || "";
 
-export const TokenContractListURL =
-  "https://opbaqquqruxn7fdsgcncrtfrwa0qxnoj.lambda-url.us-west-2.on.aws/";
 export const TokenContractListRepoURL =
   "https://github.com/chainapsis/keplr-contract-registry";
 export const NeutronStakingRewardsContractAddress =
@@ -40,6 +38,7 @@ export const NeutronStakingRewardsContractAddress =
 
 export const NOBLE_CHAIN_ID = "noble-1";
 export const NEUTRON_CHAIN_ID = "neutron-1";
+export const INITIA_CHAIN_ID = "interwoven-1";
 
 export const KEPLR_EXTS_MEMO = "Keplr Exts";
 

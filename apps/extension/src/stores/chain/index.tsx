@@ -5,6 +5,7 @@ import {
   makeObservable,
   observable,
   runInAction,
+  toJS,
 } from "mobx";
 
 import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
@@ -30,10 +31,11 @@ import {
   SetChainEndpointsMsg,
   ToggleChainsMsg,
   TokenScan,
+  TryUpdateAllChainInfosMsg,
   TryUpdateEnabledChainInfosMsg,
 } from "@keplr-wallet/background";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
-import { toGenerator } from "@keplr-wallet/common";
+import { KVStore, toGenerator } from "@keplr-wallet/common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
@@ -48,10 +50,15 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   @observable.ref
   protected _tokenScans: TokenScan[] = [];
 
+  @observable
+  protected _lastTokenScanRevalidateTimestamp: Map<string, number> = new Map();
+
   constructor(
+    protected readonly kvStore: KVStore,
     protected readonly embedChainInfos: (ModularChainInfo | ChainInfo)[],
     protected readonly keyRingStore: KeyRingStore,
-    protected readonly requester: MessageRequester
+    protected readonly requester: MessageRequester,
+    protected readonly updateAllChainInfo: boolean
   ) {
     super(
       embedChainInfos.map((chainInfo) => {
@@ -391,6 +398,31 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
     yield this.keyRingStore.waitUntilInitialized();
 
+    const lastTokenScanRevalidateTimestamp = yield* toGenerator(
+      this.kvStore.get<Record<string, number>>(
+        "lastTokenScanRevalidateTimestamp"
+      )
+    );
+    if (lastTokenScanRevalidateTimestamp) {
+      for (const [key, value] of Object.entries(
+        lastTokenScanRevalidateTimestamp
+      )) {
+        runInAction(() => {
+          this._lastTokenScanRevalidateTimestamp.set(key, value);
+        });
+      }
+    }
+    autorun(() => {
+      autorun(() => {
+        const js = toJS(this._lastTokenScanRevalidateTimestamp);
+        const obj = Object.fromEntries(js);
+        this.kvStore.set<Record<string, number>>(
+          "lastTokenScanRevalidateTimestamp",
+          obj
+        );
+      });
+    });
+
     yield Promise.all([
       this.updateChainInfosFromBackground(),
       this.updateEnabledChainIdentifiersFromBackground(),
@@ -412,11 +444,23 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     this._isInitializing = false;
 
     // Must not wait!!
-    this.tryUpdateEnabledChainInfos();
+    if (!this.updateAllChainInfo) {
+      this.tryUpdateEnabledChainInfos();
+    } else {
+      this.tryUpdateAllChainInfos();
+    }
   }
 
   async tryUpdateEnabledChainInfos(): Promise<void> {
     const msg = new TryUpdateEnabledChainInfosMsg();
+    const updated = await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    if (updated) {
+      await this.updateChainInfosFromBackground();
+    }
+  }
+
+  async tryUpdateAllChainInfos(): Promise<void> {
+    const msg = new TryUpdateAllChainInfosMsg();
     const updated = await this.requester.sendMessage(BACKGROUND_PORT, msg);
     if (updated) {
       await this.updateChainInfosFromBackground();
@@ -479,15 +523,25 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
         });
       });
 
-      const res = await this.requester.sendMessage(
-        BACKGROUND_PORT,
-        new RevalidateTokenScansMsg(id)
-      );
-
-      if (res.vaultId === this.keyRingStore.selectedKeyInfo?.id) {
+      const lastTimestamp = this._lastTokenScanRevalidateTimestamp.get(id);
+      if (
+        lastTimestamp == null ||
+        Date.now() - lastTimestamp > 5 * 60 * 60 * 1000
+      ) {
         runInAction(() => {
-          this._tokenScans = res.tokenScans;
+          this._lastTokenScanRevalidateTimestamp.set(id, Date.now());
         });
+
+        const res = await this.requester.sendMessage(
+          BACKGROUND_PORT,
+          new RevalidateTokenScansMsg(id)
+        );
+
+        if (res.vaultId === this.keyRingStore.selectedKeyInfo?.id) {
+          runInAction(() => {
+            this._tokenScans = res.tokenScans;
+          });
+        }
       }
     })();
 
