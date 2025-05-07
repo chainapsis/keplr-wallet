@@ -159,7 +159,6 @@ const MsgItemRenderInner: FunctionComponent<{
   }
 
   if (msg.relation.startsWith("evm/")) {
-    console.log(msg.relation, msg.msg, msg.meta);
     switch (msg.relation) {
       case "evm/send":
       case "evm/erc20-send": {
