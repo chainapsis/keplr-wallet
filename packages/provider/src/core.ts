@@ -96,7 +96,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         if (!f) {
           this.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -141,7 +141,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         if (!f) {
           this.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -223,7 +223,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
           if (!f) {
             this.protectedTryOpenSidePanelIfEnabled();
           }
-        }, 100);
+        }, 300);
       });
     });
   }
@@ -248,7 +248,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         if (!f) {
           this.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -272,7 +272,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         if (!f) {
           this.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -294,7 +294,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         if (!f) {
           this.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -320,7 +320,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         if (!f) {
           this.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -375,7 +375,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         if (!f) {
           this.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -429,7 +429,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         if (!f) {
           this.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -497,7 +497,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         if (!f) {
           this.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -530,7 +530,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         if (!f) {
           this.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -566,7 +566,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         if (!f) {
           this.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -598,7 +598,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         if (!f) {
           this.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -632,7 +632,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         if (!f) {
           this.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -687,7 +687,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         if (!f) {
           this.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -715,7 +715,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         if (!f) {
           this.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -739,7 +739,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         if (!f) {
           this.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -767,7 +767,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         if (!f) {
           this.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -798,7 +798,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         if (!f) {
           this.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -832,7 +832,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         if (!f) {
           this.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -881,7 +881,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         if (!f) {
           this.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -922,7 +922,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         if (!f) {
           this.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -1019,7 +1019,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         if (!f) {
           this.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -1059,7 +1059,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         if (!f) {
           this.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -1091,7 +1091,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         if (!f) {
           this.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -1125,7 +1125,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         if (!f) {
           this.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -1186,7 +1186,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         if (!f) {
           this.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -1218,7 +1218,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         if (!f) {
           this.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -1626,7 +1626,7 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
         if (!f) {
           this.keplr.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -1712,7 +1712,7 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
         if (!f && sidePanelOpenNeededJSONRPCMethods.includes(method)) {
           this.keplr.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -1782,7 +1782,7 @@ class StarknetProvider implements IStarknetProvider {
         if (!f) {
           this.keplr.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -1859,7 +1859,7 @@ class StarknetProvider implements IStarknetProvider {
         if (!f && sidePanelOpenNeededStarknetJSONRPCMethods.includes(type)) {
           this.keplr.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
   async enable(_options?: {
@@ -1905,7 +1905,7 @@ class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
         if (!f) {
           this.keplr.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -1974,7 +1974,7 @@ class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
         if (!f) {
           this.keplr.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -2015,7 +2015,7 @@ class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
         if (!f) {
           this.keplr.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -2084,7 +2084,7 @@ class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
         if (!f) {
           this.keplr.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -2110,7 +2110,7 @@ class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
         if (!f) {
           this.keplr.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -2150,7 +2150,7 @@ class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
         if (!f) {
           this.keplr.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 
@@ -2179,7 +2179,7 @@ class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
         if (!f) {
           this.keplr.protectedTryOpenSidePanelIfEnabled();
         }
-      }, 100);
+      }, 300);
     });
   }
 

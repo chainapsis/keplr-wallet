@@ -210,7 +210,7 @@ export class PermissionService {
       if (
         !this.hasPermission(baseChainId, getBasicAccessPermissionType(), origin)
       ) {
-        ungrantedChainIds.push(baseChainId);
+        ungrantedChainIds.push(chainId);
       }
     }
 

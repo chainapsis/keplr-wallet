@@ -29,6 +29,7 @@ export const SupportedChainFeatures = [
   "evm-ledger-sign-plain-json",
   "initia-dynamicfee",
   "eth-secp256k1-initia",
+  "eth-secp256k1-cosmos",
 ];
 
 /**

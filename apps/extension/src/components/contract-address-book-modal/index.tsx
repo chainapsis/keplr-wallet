@@ -14,6 +14,7 @@ import { EmptyView } from "../empty-view";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useStore } from "../../stores";
 import { TokenContractListRepoURL } from "../../config.ui";
+import { TokenContract } from "../../stores/token-contracts";
 
 const Styles = {
   Container: styled.div`
@@ -43,7 +44,7 @@ export const ContractAddressBookModal: FunctionComponent<{
   isOpen: boolean;
 
   chainId: string;
-  onSelect: (address: string) => void;
+  onSelect: (tokenContract: TokenContract) => void;
   close: () => void;
 }> = observer(({ isOpen, chainId, onSelect, close }) => {
   const { chainStore, queriesStore, starknetQueriesStore } = useStore();
@@ -109,14 +110,12 @@ export const ContractAddressBookModal: FunctionComponent<{
             </React.Fragment>
           ) : (
             <React.Fragment>
-              {filtered.map((contract, index) => (
+              {filtered.map((tokenContract, index) => (
                 <ContractAddressItem
                   key={index}
-                  name={contract.metadata.name}
-                  address={contract.contractAddress}
-                  imageUrl={contract.imageUrl}
-                  afterSelect={(address) => {
-                    onSelect(address);
+                  tokenContract={tokenContract}
+                  afterSelect={(tokenContract) => {
+                    onSelect(tokenContract);
                   }}
                 />
               ))}

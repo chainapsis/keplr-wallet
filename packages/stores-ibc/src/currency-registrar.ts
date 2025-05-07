@@ -11,6 +11,7 @@ import {
 import { DenomHelper, KVStore } from "@keplr-wallet/common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { EthereumQueries } from "@keplr-wallet/stores-eth";
+import debounce from "lodash.debounce";
 
 type CacheIBCDenomData = {
   denomTrace: {
@@ -90,6 +91,15 @@ export class IBCCurrencyRegistrar {
   @observable
   public isInitialized = false;
 
+  protected debouncedSetCacheTokenInfoToDB = debounce(
+    this.setCacheTokenInfoToDB.bind(this),
+    1000
+  );
+  protected debouncedSetCacheDenomTracePathsToDB = debounce(
+    this.setCacheDenomTracePathsToDB.bind(this),
+    1000
+  );
+
   constructor(
     protected readonly kvStore: KVStore,
     protected readonly cacheDuration: number = 24 * 3600 * 1000, // 1 days
@@ -150,7 +160,7 @@ export class IBCCurrencyRegistrar {
     }
 
     {
-      const dbKey = `cache-token-info`;
+      const dbKey = `cache-token-info-2`;
       const saved = await this.kvStore.get<Record<string, CacheTokenInfo>>(
         dbKey
       );
@@ -935,11 +945,7 @@ export class IBCCurrencyRegistrar {
 
         const savedStaled = this.staledDenomTracePaths.has(key);
         if (!savedStaled) {
-          {
-            const dbKey = `cache-ibc-denom-trace-paths-v3`;
-            const obj = Object.fromEntries(this.cacheDenomTracePaths);
-            this.kvStore.set<Record<string, CacheIBCDenomData>>(dbKey, obj);
-          }
+          this.debouncedSetCacheDenomTracePathsToDB();
 
           this.staledDenomTracePaths.set(key, res);
         }
@@ -961,11 +967,8 @@ export class IBCCurrencyRegistrar {
   ) {
     const key = `${ChainIdHelper.parse(chainId).identifier}/${denomTraceHash}`;
     this.cacheDenomTracePaths.set(key, data);
-    {
-      const dbKey = `cache-ibc-denom-trace-paths-v3`;
-      const obj = Object.fromEntries(this.cacheDenomTracePaths);
-      this.kvStore.set<Record<string, CacheIBCDenomData>>(dbKey, obj);
-    }
+
+    this.debouncedSetCacheDenomTracePathsToDB();
 
     if (this.staledDenomTracePaths.has(key)) {
       this.staledDenomTracePaths.set(key, data);
@@ -975,11 +978,8 @@ export class IBCCurrencyRegistrar {
   protected removeCacheIBCDenomData(chainId: string, denomTraceHash: string) {
     const key = `${ChainIdHelper.parse(chainId).identifier}/${denomTraceHash}`;
     this.cacheDenomTracePaths.delete(key);
-    {
-      const dbKey = `cache-ibc-denom-trace-paths-v3`;
-      const obj = Object.fromEntries(this.cacheDenomTracePaths);
-      this.kvStore.set<Record<string, CacheIBCDenomData>>(dbKey, obj);
-    }
+
+    this.debouncedSetCacheDenomTracePathsToDB();
 
     this.staledDenomTracePaths.delete(key);
   }
@@ -1001,11 +1001,8 @@ export class IBCCurrencyRegistrar {
       if (res.notFound) {
         if (Date.now() - res.timestamp > this.failedCacheDuration) {
           this.cacheTokenInfoMetadata.delete(key);
-          {
-            const dbKey = `cache-token-info`;
-            const obj = Object.fromEntries(this.cacheTokenInfoMetadata);
-            this.kvStore.set<Record<string, CacheTokenInfo>>(dbKey, obj);
-          }
+          this.debouncedSetCacheTokenInfoToDB();
+
           res = undefined;
         }
       } else if (Date.now() - res.timestamp > this.cacheDuration) {
@@ -1013,11 +1010,7 @@ export class IBCCurrencyRegistrar {
 
         const savedStaled = this.staledTokenInfoMetadata.has(key);
         if (savedStaled) {
-          {
-            const dbKey = `cache-token-info`;
-            const obj = Object.fromEntries(this.cacheTokenInfoMetadata);
-            this.kvStore.set<Record<string, CacheTokenInfo>>(dbKey, obj);
-          }
+          this.debouncedSetCacheTokenInfoToDB();
 
           this.staledTokenInfoMetadata.set(key, res);
         }
@@ -1042,14 +1035,22 @@ export class IBCCurrencyRegistrar {
     }/${coinMinimalDenom}`;
 
     this.cacheTokenInfoMetadata.set(key, data);
-    {
-      const dbKey = `cache-token-info`;
-      const obj = Object.fromEntries(this.cacheTokenInfoMetadata);
-      this.kvStore.set<Record<string, CacheTokenInfo>>(dbKey, obj);
-    }
+    this.debouncedSetCacheTokenInfoToDB();
 
     if (this.staledTokenInfoMetadata.has(key)) {
       this.staledTokenInfoMetadata.set(key, data);
     }
+  }
+
+  protected setCacheTokenInfoToDB() {
+    const dbKey = `cache-token-info-2`;
+    const obj = Object.fromEntries(this.cacheTokenInfoMetadata);
+    this.kvStore.set<Record<string, CacheTokenInfo>>(dbKey, obj);
+  }
+
+  protected setCacheDenomTracePathsToDB() {
+    const dbKey = `cache-ibc-denom-trace-paths-v3`;
+    const obj = Object.fromEntries(this.cacheDenomTracePaths);
+    this.kvStore.set<Record<string, CacheIBCDenomData>>(dbKey, obj);
   }
 }

@@ -47,6 +47,7 @@ const sidebars: SidebarsConfig = {
       items: [
         "multi-ecosystem-support/evm",
         "multi-ecosystem-support/starknet",
+        "multi-ecosystem-support/bitcoin",
       ],
     },
     {

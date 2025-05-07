@@ -196,6 +196,11 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
             });
           }
         } else if ("cosmos" in modularChainInfo) {
+          const isEVMOnly = chainStore.isEvmOnlyChain(chainId);
+          if (isEVMOnly) {
+            continue;
+          }
+
           const accountAddress = account.bech32Address;
           const chainInfo = chainStore.getChain(chainId);
           const queries = queriesStore.get(chainId);
