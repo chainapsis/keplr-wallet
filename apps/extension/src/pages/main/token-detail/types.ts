@@ -55,3 +55,18 @@ export interface MsgHistory {
     originPacket: string;
   };
 }
+
+export interface NativeTransferRelMeta {
+  [key: string]: string;
+  sender: string;
+  receiver: string;
+  value: string;
+}
+
+export interface ERC20TransferRelMeta {
+  [key: string]: string;
+  sender: string;
+  receiver: string;
+  value: string;
+  contract: string;
+}

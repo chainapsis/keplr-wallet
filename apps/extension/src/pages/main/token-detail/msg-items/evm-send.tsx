@@ -1,18 +1,15 @@
 import React, { FunctionComponent, useMemo } from "react";
-import { MsgHistory } from "../types";
+import {
+  ERC20TransferRelMeta,
+  MsgHistory,
+  NativeTransferRelMeta,
+} from "../types";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { MsgItemBase } from "./base";
 import { ItemLogo } from "./logo";
 import { MessageSendIcon } from "../../../../components/icon";
-
-interface NativeTransferRelMeta {
-  [key: string]: string;
-  sender: string;
-  receiver: string;
-  value: string;
-}
 
 export const MsgRelationEvmSend: FunctionComponent<{
   msg: MsgHistory;
@@ -24,15 +21,17 @@ export const MsgRelationEvmSend: FunctionComponent<{
 
   const chainInfo = chainStore.getChain(msg.chainId);
 
-  const meta = msg.meta as NativeTransferRelMeta;
+  const meta = msg.meta as NativeTransferRelMeta | ERC20TransferRelMeta;
 
   const sendAmountPretty = useMemo(() => {
-    const currency = chainInfo.forceFindCurrency(targetDenom);
+    const currency = chainInfo.forceFindCurrency(
+      meta.contract ? `erc20:${meta.contract}` : targetDenom
+    );
 
     const val = meta.value;
 
     return new CoinPretty(currency, val);
-  }, [chainInfo, meta.value, targetDenom]);
+  }, [chainInfo, meta.value, targetDenom, meta.contract]);
 
   const toAddress = (() => {
     try {
@@ -54,7 +53,7 @@ export const MsgRelationEvmSend: FunctionComponent<{
       amount={sendAmountPretty}
       prices={prices || {}}
       msg={msg}
-      targetDenom={targetDenom}
+      targetDenom={sendAmountPretty.denom}
       amountDeco={{
         prefix: "minus",
         color: "none",

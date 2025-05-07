@@ -1,18 +1,15 @@
 import React, { FunctionComponent, useMemo } from "react";
-import { MsgHistory } from "../types";
+import {
+  ERC20TransferRelMeta,
+  MsgHistory,
+  NativeTransferRelMeta,
+} from "../types";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { MsgItemBase } from "./base";
 import { ItemLogo } from "./logo";
 import { MessageReceiveIcon } from "../../../../components/icon";
-
-interface NativeTransferRelMeta {
-  [key: string]: string;
-  sender: string;
-  receiver: string;
-  value: string;
-}
 
 export const MsgRelationEvmReceive: FunctionComponent<{
   msg: MsgHistory;
@@ -24,19 +21,21 @@ export const MsgRelationEvmReceive: FunctionComponent<{
 
   const chainInfo = chainStore.getChain(msg.chainId);
 
-  const meta = msg.meta as NativeTransferRelMeta;
+  const meta = msg.meta as NativeTransferRelMeta | ERC20TransferRelMeta;
 
-  const sendAmountPretty = useMemo(() => {
-    const currency = chainInfo.forceFindCurrency(targetDenom);
+  const receiveAmountPretty = useMemo(() => {
+    const currency = chainInfo.forceFindCurrency(
+      meta.contract ? `erc20:${meta.contract}` : targetDenom
+    );
 
     const val = meta.value;
 
     return new CoinPretty(currency, val);
-  }, [chainInfo, meta.value, targetDenom]);
+  }, [chainInfo, meta.value, targetDenom, meta.contract]);
 
-  const toAddress = (() => {
+  const fromAddress = (() => {
     try {
-      return `${meta.receiver.slice(0, 12)}...${meta.receiver.slice(-10)}`;
+      return `${meta.sender.slice(0, 12)}...${meta.sender.slice(-10)}`;
     } catch (e) {
       console.log(e);
       return "Unknown";
@@ -50,11 +49,11 @@ export const MsgRelationEvmReceive: FunctionComponent<{
       }
       chainId={msg.chainId}
       title="Receive"
-      paragraph={`From ${toAddress}`}
-      amount={sendAmountPretty}
+      paragraph={`From ${fromAddress}`}
+      amount={receiveAmountPretty}
       prices={prices || {}}
       msg={msg}
-      targetDenom={targetDenom}
+      targetDenom={receiveAmountPretty.denom}
       amountDeco={{
         prefix: "plus",
         color: "green",
