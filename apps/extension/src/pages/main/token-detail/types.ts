@@ -70,3 +70,11 @@ export interface ERC20TransferRelMeta {
   value: string;
   contract: string;
 }
+
+export interface ERC20ApproveRelMeta {
+  [key: string]: string;
+  owner: string;
+  spender: string;
+  value: string;
+  contract: string;
+}
