@@ -83,11 +83,12 @@ const NestedTokenItemContainer = styled.div<{ tagPosition: string }>`
 const NestedTokenItem: FunctionComponent<{
   viewToken: ViewToken;
   onClick?: () => void;
-  copyAddress?: string;
-}> = observer(({ viewToken, onClick, copyAddress }) => {
+}> = observer(({ viewToken, onClick }) => {
   const { priceStore, uiConfigStore } = useStore();
   const theme = useTheme();
   const [isHover, setIsHover] = useState(false);
+
+  const copyAddress = useCopyAddress(viewToken);
 
   const pricePretty = priceStore.calculatePrice(viewToken.token);
 
@@ -445,7 +446,6 @@ export const GroupedTokenItem: FunctionComponent<{
                 <NestedTokenItem
                   viewToken={{ ...token }}
                   onClick={() => openTokenDetail(token)}
-                  copyAddress={useCopyAddress({ ...token })}
                 />
               </Box>
             ))}

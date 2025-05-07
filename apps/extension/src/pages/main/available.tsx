@@ -240,6 +240,36 @@ const AvailableCollapsibleList: FunctionComponent<{
   );
 };
 
+const TokenItemWithCopyAddress: FunctionComponent<{
+  viewToken: ViewToken;
+  bottomTagType?: BottomTagType;
+  earnedAssetPrice?: string;
+  onClick: () => void;
+  showPrice24HChange: boolean;
+}> = observer(
+  ({
+    viewToken,
+    bottomTagType,
+    earnedAssetPrice,
+    onClick,
+    showPrice24HChange,
+  }) => {
+    const copyAddress = useCopyAddress(viewToken);
+
+    return (
+      <TokenItem
+        key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
+        bottomTagType={bottomTagType}
+        earnedAssetPrice={earnedAssetPrice}
+        viewToken={viewToken}
+        onClick={onClick}
+        copyAddress={copyAddress}
+        showPrice24HChange={showPrice24HChange}
+      />
+    );
+  }
+);
+
 export const AvailableTabView: FunctionComponent<{
   search: string;
   isNotReady?: boolean;
@@ -706,10 +736,9 @@ const TokensFlatViewScene = observer(
             }}
             lenAlwaysShown={TokenViewData.lenAlwaysShown}
             items={TokenViewData.balance.map((viewToken, index) => {
-              const key = `${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`;
               return (
-                <TokenItem
-                  key={key}
+                <TokenItemWithCopyAddress
+                  key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
                   {...getBottomTagInfoProps(viewToken)}
                   viewToken={viewToken}
                   onClick={() => {
@@ -735,8 +764,6 @@ const TokensFlatViewScene = observer(
                       return prev;
                     });
                   }}
-                  // eslint-disable-next-line react-hooks/rules-of-hooks
-                  copyAddress={useCopyAddress(viewToken)}
                   showPrice24HChange={uiConfigStore.show24HChangesInMagePage}
                 />
               );
