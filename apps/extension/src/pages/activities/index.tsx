@@ -119,6 +119,7 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
     });
   }, [chainStore.chainInfosInListUI, querySupported.response?.data]);
 
+  // TODO: Remove
   const tempSupportedChainList = useMemo(() => {
     return [
       ...supportedChainList,
@@ -165,18 +166,19 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
     ];
   }, [supportedChainList, chainStore]);
 
-  otherHexAddresses.setSupportedChainList(tempSupportedChainList);
+  otherHexAddresses.setSupportedChainList(tempSupportedChainList); // TODO: Remove
   // otherHexAddresses.setSupportedChainList(supportedChainList);
 
   const msgHistory = usePaginatedCursorQuery<ResMsgsHistory>(
     // process.env["KEPLR_EXT_TX_HISTORY_BASE_URL"],
-    "https://satellite-develop.keplr.app/",
+    "https://satellite-develop.keplr.app/", // TODO: Remove
     () => {
       const baseHexAddress = account.hasEthereumHexAddress
         ? account.ethereumHexAddress
         : Bech32Address.fromBech32(account.bech32Address).toHex();
       return `/history/v2/msgs/keplr-multi-chain?baseHexAddress=${baseHexAddress}&chainIdentifiers=${(() => {
         if (selectedKey === "__all__") {
+          // TODO: Change below to supportedChainList
           return tempSupportedChainList
             .map((chainInfo) => chainInfo.chainId)
             .join(",");
@@ -206,6 +208,7 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
       }
       return false;
     },
+    // TODO: Change below to supportedChainList
     `${selectedKey}/${tempSupportedChainList
       .map((chainInfo) => chainInfo.chainId)
       .join(",")}/${otherHexAddresses.otherHexAddresses
@@ -288,7 +291,8 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
                 key: "__all__",
                 label: "All",
               },
-              ...supportedChainList.map((chainInfo) => {
+              // TODO: Change below to supportedChainList
+              ...tempSupportedChainList.map((chainInfo) => {
                 return {
                   key: chainInfo.chainId,
                   label: chainInfo.chainName,
