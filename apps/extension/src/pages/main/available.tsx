@@ -274,27 +274,10 @@ export const AvailableTabView: FunctionComponent<{
     const theme = useTheme();
     const navigate = useNavigate();
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
-    const [showFiatValueVisible, setShowFiatValueVisible] = useState(false);
+    const [showFiatValueVisible, setShowFiatValueVisible] = useState(
+      uiConfigStore.assetViewMode === "grouped"
+    );
     const sceneTransitionRef = useRef<SceneTransitionRef>(null);
-
-    useEffect(() => {
-      if (sceneTransitionRef.current) {
-        if (showFiatValueVisible) {
-          sceneTransitionRef.current.push("grouped-view");
-        } else if (sceneTransitionRef.current.canPop()) {
-          sceneTransitionRef.current.pop();
-        }
-      }
-
-      if (showFiatValueVisible && uiConfigStore.assetViewMode !== "grouped") {
-        uiConfigStore.setAssetViewMode("grouped");
-      } else if (
-        !showFiatValueVisible &&
-        uiConfigStore.assetViewMode !== "flat"
-      ) {
-        uiConfigStore.setAssetViewMode("flat");
-      }
-    }, [showFiatValueVisible, uiConfigStore]);
 
     const { trimSearch, searchedChainInfos } = useGetSearchChains({
       search,
@@ -472,10 +455,27 @@ export const AvailableTabView: FunctionComponent<{
 
     const initialSceneProps = useMemo(
       () => ({
-        name: "flat-view",
+        name:
+          uiConfigStore.assetViewMode === "grouped"
+            ? "grouped-view"
+            : "flat-view",
       }),
       []
     );
+
+    useEffect(() => {
+      if (
+        uiConfigStore.assetViewMode === "grouped" &&
+        sceneTransitionRef.current?.currentScene !== "grouped-view"
+      ) {
+        sceneTransitionRef.current?.replace("grouped-view");
+      } else if (
+        uiConfigStore.assetViewMode === "flat" &&
+        sceneTransitionRef.current?.currentScene !== "flat-view"
+      ) {
+        sceneTransitionRef.current?.replace("flat-view");
+      }
+    }, [uiConfigStore.assetViewMode]);
 
     return (
       <React.Fragment>
@@ -521,7 +521,7 @@ export const AvailableTabView: FunctionComponent<{
                 ref={sceneTransitionRef}
                 scenes={scenes}
                 initialSceneProps={initialSceneProps}
-                transitionMode="x-axis"
+                transitionMode="opacity"
               />
             </Stack>
             {searchedLookingForChains.length > 0 && (

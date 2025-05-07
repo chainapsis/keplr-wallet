@@ -325,15 +325,11 @@ export const ViewOptionsContextMenu: FunctionComponent<{
 
     const handleToggleAssetViewMode = () => {
       if (uiConfigStore.options.assetViewMode === "grouped") {
+        uiConfigStore.setAssetViewMode("flat");
         setShowFiatValueVisible(false);
-        setTimeout(() => {
-          uiConfigStore.setAssetViewMode("flat");
-        }, 300);
       } else {
+        uiConfigStore.setAssetViewMode("grouped");
         setShowFiatValueVisible(true);
-        setTimeout(() => {
-          uiConfigStore.setAssetViewMode("grouped");
-        }, 300);
       }
     };
 
