@@ -1,5 +1,5 @@
 import Color from "color";
-import React, { Fragment, PropsWithChildren } from "react";
+import React, { Fragment, PropsWithChildren, useEffect, useState } from "react";
 import { Box } from "../../../../components/box";
 import { ArrowRightIcon } from "../../../../components/icon";
 import { Body2 } from "../../../../components/typography";
@@ -13,9 +13,11 @@ export const WrapperwithBottomTag = observer(function ({
   children,
   bottomTagType,
   earnedAssetPrice,
+  hideBottomTag = false,
 }: PropsWithChildren<{
   bottomTagType?: BottomTagType;
   earnedAssetPrice?: string;
+  hideBottomTag?: boolean;
 }>) {
   const theme = useTheme();
   const isLightMode = theme.mode === "light";
@@ -23,6 +25,15 @@ export const WrapperwithBottomTag = observer(function ({
     bottomTagType,
     earnedAssetPrice
   );
+  const [isVisible, setIsVisible] = useState(!hideBottomTag);
+
+  useEffect(() => {
+    if (hideBottomTag) {
+      setIsVisible(false);
+    } else {
+      setIsVisible(true);
+    }
+  }, [hideBottomTag]);
 
   const textColor = isLightMode
     ? ColorPalette["green-600"]
@@ -47,9 +58,16 @@ export const WrapperwithBottomTag = observer(function ({
           alignItems: "center",
           justifyContent: "center",
           gap: "0.5rem",
+          transition:
+            "opacity 0.3s ease, transform 0.3s ease, max-height 0.3s ease, padding 0.3s ease",
+          opacity: isVisible ? 1 : 0,
+          transform: isVisible ? "translateY(0)" : "translateY(-10px)",
+          pointerEvents: isVisible ? "auto" : "none",
+          overflow: "hidden",
+          maxHeight: isVisible ? "none" : "0",
+          paddingTop: isVisible ? "0.875rem" : "0",
+          paddingBottom: isVisible ? "0.375rem" : "0",
         }}
-        paddingTop="0.875rem"
-        paddingBottom="0.375rem"
         marginBottom="-0.5rem"
         backgroundColor={
           isLightMode

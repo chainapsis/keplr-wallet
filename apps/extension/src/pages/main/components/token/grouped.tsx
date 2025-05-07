@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState, useMemo } from "react";
+import React, { FunctionComponent, useState, useMemo, useEffect } from "react";
 import styled, { useTheme } from "styled-components";
 import { observer } from "mobx-react-lite";
 import { Box } from "../../../../components/box";
@@ -33,145 +33,6 @@ import { useTokenTag } from "../../../../hooks/use-token-tag";
 import { TokenTag } from "./token-tag";
 import { CopyAddressButton } from "./copy-address-button";
 import { useCopyAddress } from "../../../../hooks/use-copy-address";
-
-const Styles = {
-  Container: styled.div<{
-    disabled?: boolean;
-    isOpen: boolean;
-  }>`
-    background-color: ${(props) =>
-      props.theme.mode === "light"
-        ? ColorPalette.white
-        : ColorPalette["gray-650"]};
-    padding: 0.875rem 1rem;
-    border-radius: 0.375rem;
-    cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
-    box-shadow: ${(props) =>
-      props.theme.mode === "light"
-        ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
-        : "none"};
-    position: relative;
-
-    &:hover {
-      background-color: ${(props) =>
-        props.theme.mode === "light"
-          ? ColorPalette["gray-10"]
-          : ColorPalette["gray-600"]};
-    }
-  `,
-  ChainIconsContainer: styled.div`
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    margin-left: -0.09375rem;
-  `,
-  ChainIcon: styled.div<{ zIndex: number }>`
-    width: 1.1875rem;
-    height: 1.1875rem;
-    border-radius: 50%;
-    overflow: hidden;
-    margin-right: -0.25rem;
-    border: 1px solid
-      ${(props) =>
-        props.theme.mode === "light"
-          ? ColorPalette.white
-          : ColorPalette["gray-650"]};
-    z-index: ${(props) => props.zIndex};
-    border: ${(props) =>
-      `0.09375rem solid ${
-        props.theme.mode === "light"
-          ? ColorPalette.white
-          : ColorPalette["gray-650"]
-      }`};
-    margin-left: ${(props) => (props.zIndex !== 0 ? "-0.25rem" : "0")};
-    margin-top: -0.09375rem;
-    margin-bottom: -0.09375rem;
-  `,
-  TokenOverlay: styled.div`
-    position: absolute;
-    bottom: -0.25rem;
-    right: -0.25rem;
-    width: 1rem;
-    height: 1rem;
-    border-radius: 50%;
-    background-color: ${ColorPalette["gray-700"]};
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.2);
-  `,
-  TokenImageWrapper: styled.div`
-    position: relative;
-    width: 2rem;
-    height: 2rem;
-  `,
-  ExpandIcon: styled.div<{ isOpen: boolean }>`
-    transition: transform 0.2s ease-in-out;
-    transform: ${(props) => (props.isOpen ? "rotate(180deg)" : "rotate(0deg)")};
-    height: 1rem;
-  `,
-  ChildrenContainer: styled.div`
-    background-color: transparent;
-  `,
-  TransparentTokenItem: styled.div`
-    > div {
-      background-color: transparent !important;
-      box-shadow: none !important;
-
-      &:hover {
-        background-color: ${(props) =>
-          props.theme.mode === "light"
-            ? ColorPalette["gray-10"]
-            : ColorPalette["gray-650"]} !important;
-      }
-    }
-  `,
-  PlusChainBadge: styled(Caption1)`
-    display: flex;
-    height: 1rem;
-    padding: 0rem 0.375rem 0rem 0.25rem;
-    justify-content: center;
-    align-items: center;
-    color: ${ColorPalette["gray-100"]};
-    margin-left: -0.25rem;
-    margin-top: -0.09375rem;
-    margin-bottom: -0.09375rem;
-    background-color: ${ColorPalette["gray-450"]};
-    border-radius: 1.25rem;
-    border: 0.09375rem solid
-      ${(props) =>
-        props.theme.mode === "light"
-          ? ColorPalette["gray-10"]
-          : ColorPalette["gray-650"]};
-    z-index: 999;
-    font-size: 0.6875rem;
-    font-style: normal;
-    font-weight: 400;
-  `,
-};
-
-const StyledEarningsBox = styled.div`
-  display: flex;
-  height: 40px;
-  padding: 6px 0px;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  align-self: stretch;
-  border-radius: 6px;
-  background: ${({ theme }) =>
-    theme.mode === "light"
-      ? ColorPalette["green-100"]
-      : Color(ColorPalette["green-600"]).alpha(0.2).toString()};
-  cursor: pointer;
-
-  &:hover {
-    background-color: ${({ theme }) =>
-      theme.mode === "light"
-        ? Color(ColorPalette["green-200"]).alpha(0.5).toString()
-        : Color(ColorPalette["green-600"]).alpha(0.15).toString()};
-  }
-`;
 
 const StandaloneEarnBox: FunctionComponent<{
   bottomTagType?: BottomTagType;
@@ -418,6 +279,18 @@ export const GroupedTokenItem: FunctionComponent<{
       });
     };
 
+    const [delayedIsOpen, setDelayedIsOpen] = useState(isOpen);
+
+    useEffect(() => {
+      if (isOpen && bottomTagType) {
+        setTimeout(() => {
+          setDelayedIsOpen(isOpen);
+        }, 300);
+      } else {
+        setDelayedIsOpen(isOpen);
+      }
+    }, [isOpen, bottomTagType]);
+
     if (tokens.length === 1) {
       return (
         <TokenItem
@@ -547,18 +420,15 @@ export const GroupedTokenItem: FunctionComponent<{
 
     return (
       <div>
-        {!isOpen && bottomTagType ? (
-          <WrapperwithBottomTag
-            bottomTagType={bottomTagType}
-            earnedAssetPrice={effectiveEarnedAssetPrice}
-          >
-            {mainContainer}
-          </WrapperwithBottomTag>
-        ) : (
-          mainContainer
-        )}
+        <WrapperwithBottomTag
+          bottomTagType={bottomTagType}
+          earnedAssetPrice={effectiveEarnedAssetPrice}
+          hideBottomTag={isOpen && !!bottomTagType}
+        >
+          {mainContainer}
+        </WrapperwithBottomTag>
 
-        <VerticalCollapseTransition collapsed={!isOpen}>
+        <VerticalCollapseTransition collapsed={!delayedIsOpen}>
           <Styles.ChildrenContainer>
             {tokens.map((token) => (
               <Box key={token.chainInfo.chainId} marginTop={"0.375rem"}>
@@ -636,3 +506,142 @@ const ArrowIcon: FunctionComponent<IconProps> = () => {
     </svg>
   );
 };
+
+const Styles = {
+  Container: styled.div<{
+    disabled?: boolean;
+    isOpen: boolean;
+  }>`
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette.white
+        : ColorPalette["gray-650"]};
+    padding: 0.875rem 1rem;
+    border-radius: 0.375rem;
+    cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
+    box-shadow: ${(props) =>
+      props.theme.mode === "light"
+        ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+        : "none"};
+    position: relative;
+
+    &:hover {
+      background-color: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-10"]
+          : ColorPalette["gray-600"]};
+    }
+  `,
+  ChainIconsContainer: styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-left: -0.09375rem;
+  `,
+  ChainIcon: styled.div<{ zIndex: number }>`
+    width: 1.1875rem;
+    height: 1.1875rem;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-right: -0.25rem;
+    border: 1px solid
+      ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette.white
+          : ColorPalette["gray-650"]};
+    z-index: ${(props) => props.zIndex};
+    border: ${(props) =>
+      `0.09375rem solid ${
+        props.theme.mode === "light"
+          ? ColorPalette.white
+          : ColorPalette["gray-650"]
+      }`};
+    margin-left: ${(props) => (props.zIndex !== 0 ? "-0.25rem" : "0")};
+    margin-top: -0.09375rem;
+    margin-bottom: -0.09375rem;
+  `,
+  TokenOverlay: styled.div`
+    position: absolute;
+    bottom: -0.25rem;
+    right: -0.25rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background-color: ${ColorPalette["gray-700"]};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.2);
+  `,
+  TokenImageWrapper: styled.div`
+    position: relative;
+    width: 2rem;
+    height: 2rem;
+  `,
+  ExpandIcon: styled.div<{ isOpen: boolean }>`
+    transition: transform 0.2s ease-in-out;
+    transform: ${(props) => (props.isOpen ? "rotate(180deg)" : "rotate(0deg)")};
+    height: 1rem;
+  `,
+  ChildrenContainer: styled.div`
+    background-color: transparent;
+  `,
+  TransparentTokenItem: styled.div`
+    > div {
+      background-color: transparent !important;
+      box-shadow: none !important;
+
+      &:hover {
+        background-color: ${(props) =>
+          props.theme.mode === "light"
+            ? ColorPalette["gray-10"]
+            : ColorPalette["gray-650"]} !important;
+      }
+    }
+  `,
+  PlusChainBadge: styled(Caption1)`
+    display: flex;
+    height: 1rem;
+    padding: 0rem 0.375rem 0rem 0.25rem;
+    justify-content: center;
+    align-items: center;
+    color: ${ColorPalette["gray-100"]};
+    margin-left: -0.25rem;
+    margin-top: -0.09375rem;
+    margin-bottom: -0.09375rem;
+    background-color: ${ColorPalette["gray-450"]};
+    border-radius: 1.25rem;
+    border: 0.09375rem solid
+      ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-10"]
+          : ColorPalette["gray-650"]};
+    z-index: 999;
+    font-size: 0.6875rem;
+    font-style: normal;
+    font-weight: 400;
+  `,
+};
+
+const StyledEarningsBox = styled.div`
+  display: flex;
+  height: 40px;
+  padding: 6px 0px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  align-self: stretch;
+  border-radius: 6px;
+  background: ${({ theme }) =>
+    theme.mode === "light"
+      ? ColorPalette["green-100"]
+      : Color(ColorPalette["green-600"]).alpha(0.2).toString()};
+  cursor: pointer;
+
+  &:hover {
+    background-color: ${({ theme }) =>
+      theme.mode === "light"
+        ? Color(ColorPalette["green-200"]).alpha(0.5).toString()
+        : Color(ColorPalette["green-600"]).alpha(0.15).toString()};
+  }
+`;
