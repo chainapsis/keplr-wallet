@@ -814,7 +814,6 @@ const TokensGroupedViewScene = observer(
 
       return new Map<string, ViewToken[]>();
     }, [
-      trimSearch,
       uiConfigStore.assetViewMode,
       uiConfigStore.isHideLowBalance,
       hugeQueriesStore.groupedTokensMap,
@@ -842,7 +841,7 @@ const TokensGroupedViewScene = observer(
 
     return (
       <React.Fragment>
-        {groupedTokensMap.size === 0 ? null : (
+        {searchedGroupedTokensMap.size === 0 ? null : (
           <AvailableCollapsibleList
             notRenderHiddenItems={true}
             onCollapse={(isCollapsed) => {

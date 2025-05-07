@@ -60,11 +60,11 @@ const StandaloneEarnBox: FunctionComponent<{
   );
 });
 
-const NestedTokenItemContainer = styled.div`
+const NestedTokenItemContainer = styled.div<{ tagPosition: string }>`
   background-color: transparent;
-  padding: 0rem 1rem;
+  padding: 0rem 1rem 0rem 2rem;
   width: 100%;
-  height: 56px;
+  height: ${({ tagPosition }) => (tagPosition === "bottom" ? "56px" : "36px")};
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -93,8 +93,38 @@ const NestedTokenItem: FunctionComponent<{
 
   const tag = useTokenTag(viewToken);
 
+  const tagPosition = useMemo(() => {
+    if (uiConfigStore.showFiatValue) {
+      return "bottom";
+    }
+    return "right";
+  }, [uiConfigStore.showFiatValue]);
+
+  const TagItem = useMemo(
+    () =>
+      tag ? (
+        <Box
+          style={{
+            flex: 1,
+            flexDirection: "row",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: "0.125rem",
+          }}
+        >
+          <XAxis>
+            <Box alignY="center" key="token-tag">
+              <TokenTag text={tag.text} tooltip={tag.tooltip} />
+            </Box>
+          </XAxis>
+        </Box>
+      ) : null,
+    [tag]
+  );
+
   return (
     <NestedTokenItemContainer
+      tagPosition={tagPosition}
       onClick={onClick}
       onMouseEnter={() => setIsHover(true)}
       onMouseLeave={() => setIsHover(false)}
@@ -105,14 +135,6 @@ const NestedTokenItem: FunctionComponent<{
         alignY="center"
         style={{ width: "100%" }}
       >
-        <CurrencyImageFallback
-          chainInfo={viewToken.chainInfo}
-          currency={viewToken.token.currency}
-          size="2rem"
-        />
-
-        <Gutter size="0.75rem" />
-
         <Stack gutter="0.25rem">
           <XAxis alignY="center">
             <Subtitle2
@@ -128,24 +150,9 @@ const NestedTokenItem: FunctionComponent<{
               on {viewToken.chainInfo.chainName}
             </Subtitle2>
           </XAxis>
-          {tag ? (
-            <Box
-              style={{
-                flex: 1,
-                flexDirection: "row",
-                alignItems: "center",
-                flexWrap: "wrap",
-                gap: "0.125rem",
-              }}
-            >
-              <XAxis>
-                <Box alignY="center" key="token-tag">
-                  <TokenTag text={tag.text} tooltip={tag.tooltip} />
-                </Box>
-              </XAxis>
-            </Box>
-          ) : null}
+          {tagPosition === "bottom" ? TagItem : null}
         </Stack>
+        {tagPosition === "right" ? TagItem : null}
 
         {copyAddress ? (
           <Box alignY="center" key="copy-address">
@@ -431,7 +438,10 @@ export const GroupedTokenItem: FunctionComponent<{
         <VerticalCollapseTransition collapsed={!delayedIsOpen}>
           <Styles.ChildrenContainer>
             {tokens.map((token) => (
-              <Box key={token.chainInfo.chainId} marginTop={"0.375rem"}>
+              <Box
+                key={`${token.chainInfo.chainId}-${token.token.currency.coinMinimalDenom}`}
+                marginTop={"0.375rem"}
+              >
                 <NestedTokenItem
                   viewToken={{ ...token }}
                   onClick={() => openTokenDetail(token)}
