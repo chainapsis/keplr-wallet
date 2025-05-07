@@ -806,7 +806,10 @@ export class HugeQueriesStore {
       const account = this.accountStore.getAccount(modularChainInfo.chainId);
 
       if ("cosmos" in modularChainInfo) {
-        if (account.bech32Address === "") {
+        const isEVMOnly = this.chainStore.isEvmOnlyChain(
+          modularChainInfo.chainId
+        );
+        if (isEVMOnly || account.bech32Address === "") {
           continue;
         }
 
@@ -883,7 +886,10 @@ export class HugeQueriesStore {
       const account = this.accountStore.getAccount(modularChainInfo.chainId);
 
       if ("cosmos" in modularChainInfo) {
-        if (account.bech32Address === "") {
+        const isEVMOnly = this.chainStore.isEvmOnlyChain(
+          modularChainInfo.chainId
+        );
+        if (isEVMOnly || account.bech32Address === "") {
           continue;
         }
 
@@ -984,7 +990,8 @@ export class HugeQueriesStore {
 
     for (const chainInfo of this.chainStore.chainInfosInUI) {
       const account = this.accountStore.getAccount(chainInfo.chainId);
-      if (account.bech32Address === "") {
+      const isEVMOnly = this.chainStore.isEvmOnlyChain(chainInfo.chainId);
+      if (isEVMOnly || account.bech32Address === "") {
         continue;
       }
       const queries = this.queriesStore.get(chainInfo.chainId);
