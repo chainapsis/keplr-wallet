@@ -64,7 +64,7 @@ export const WrapperwithBottomTag = observer(function ({
           transform: isVisible ? "translateY(0)" : "translateY(-10px)",
           pointerEvents: isVisible ? "auto" : "none",
           overflow: "hidden",
-          maxHeight: isVisible ? "none" : "0",
+          maxHeight: isVisible ? "none" : "0.375rem",
           paddingTop: isVisible ? "0.875rem" : "0",
           paddingBottom: isVisible ? "0.375rem" : "0",
         }}
