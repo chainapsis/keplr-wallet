@@ -838,4 +838,13 @@ export class KeyRingBitcoinService {
 
     return this.txService.pushBitcoinTransaction(currentChainId, rawTxHex);
   }
+
+  async pushPsbt(origin: string, psbtHex: string) {
+    const currentChainId = this.forceGetCurrentChainId(origin);
+
+    const tx = Psbt.fromHex(psbtHex).extractTransaction();
+    const txHex = tx.toHex();
+
+    return this.txService.pushBitcoinTransaction(currentChainId, txHex);
+  }
 }

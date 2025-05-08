@@ -1174,6 +1174,10 @@ export class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
     return BitcoinProvider._requestMethod("pushTx", [rawTxHex]);
   }
 
+  async pushPsbt(psbtHex: string): Promise<string> {
+    return BitcoinProvider._requestMethod("pushPsbt", [psbtHex]);
+  }
+
   async signPsbt(psbtHex: string, options?: SignPsbtOptions): Promise<string> {
     return BitcoinProvider._requestMethod("signPsbt", [psbtHex, options]);
   }
