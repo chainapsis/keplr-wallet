@@ -9,8 +9,10 @@ import { MessageRegisterIcon } from "../../../../../components/icon";
 export const CreateBtcDelegationMessage: IMessageRenderer = {
   process(_chainId: string, msg) {
     if (
-      "type" in msg &&
-      msg.type === "/babylon.btcstaking.v1.MsgCreateBTCDelegation"
+      ("type" in msg &&
+        msg.type === "/babylon.btcstaking.v1.MsgCreateBTCDelegation") ||
+      ("unpacked" in msg &&
+        msg.typeUrl === "/babylon.btcstaking.v1.MsgCreateBTCDelegation")
     ) {
       return {
         icon: (
