@@ -40,7 +40,7 @@
     "@keplr-wallet/types": "0.12.231",
     "@keplr-wallet/unit": "0.12.231",
     "@ledgerhq/hw-app-eth": "^6.40.3",
-    "@ledgerhq/hw-app-starknet": "^2.4.0",
+    "@ledgerhq/hw-app-starknet": "^2.5.2",
     "@ledgerhq/hw-transport": "^6.31.4",
     "@ledgerhq/hw-transport-webhid": "^6.29.4",
     "@ledgerhq/hw-transport-webusb": "^6.29.4",
