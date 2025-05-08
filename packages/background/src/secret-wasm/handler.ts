@@ -1,62 +1,38 @@
-import {
-  Env,
-  Handler,
-  InternalHandler,
-  KeplrError,
-  Message,
-} from "@keplr-wallet/router";
+import { Handler, InternalHandler, Env, Message } from "@keplr-wallet/router";
+import { SecretWasmService } from "./service";
+import { PermissionService } from "../permission";
 import {
   GetPubkeyMsg,
   GetTxEncryptionKeyMsg,
+  IsNewApiMsg,
   ReqeustEncryptMsg,
   RequestDecryptMsg,
 } from "./messages";
-import { SecretWasmService } from "./service";
-import { PermissionInteractiveService } from "../permission-interactive";
 
 export const getHandler: (
   service: SecretWasmService,
-  permissionInteractionService: PermissionInteractiveService
-) => Handler = (service, permissionInteractionService) => {
-  return (env: Env, msg: Message<unknown>) => {
-    switch (msg.constructor) {
-      case GetPubkeyMsg:
-        return handleGetPubkeyMsg(service, permissionInteractionService)(
-          env,
-          msg as GetPubkeyMsg
-        );
-      case ReqeustEncryptMsg:
-        return handleReqeustEncryptMsg(service, permissionInteractionService)(
-          env,
-          msg as ReqeustEncryptMsg
-        );
-      case RequestDecryptMsg:
-        return handleRequestDecryptMsg(service, permissionInteractionService)(
-          env,
-          msg as RequestDecryptMsg
-        );
-      case GetTxEncryptionKeyMsg:
-        return handleGetTxEncryptionKeyMsg(
-          service,
-          permissionInteractionService
-        )(env, msg as GetTxEncryptionKeyMsg);
-      default:
-        throw new KeplrError("secret-wasm", 120, "Unknown msg type");
-    }
+  permissionService: PermissionService
+) => Handler = (service, permissionService) => {
+  return {
+    getPubkey: handleGetPubkeyMsg(service, permissionService),
+    encrypt: handleReqeustEncryptMsg(service, permissionService),
+    decrypt: handleRequestDecryptMsg(service, permissionService),
+    getTxEncryptionKey: handleGetTxEncryptionKeyMsg(
+      service,
+      permissionService
+    ),
+    isNewApi: handleIsNewApiMsg(service, permissionService),
   };
 };
 
 const handleGetPubkeyMsg: (
   service: SecretWasmService,
-  permissionInteractionService: PermissionInteractiveService
-) => InternalHandler<GetPubkeyMsg> = (
-  service,
-  permissionInteractionService
-) => {
-  return async (env, msg) => {
-    await permissionInteractionService.ensureEnabled(
+  permissionService: PermissionService
+) => InternalHandler<GetPubkeyMsg> = (service, permissionService) => {
+  return async (env: Env, msg: GetPubkeyMsg & { origin: string }) => {
+    await permissionService.checkOrGrantBasicAccessPermission(
       env,
-      [msg.chainId],
+      msg.chainId,
       msg.origin
     );
 
@@ -64,59 +40,69 @@ const handleGetPubkeyMsg: (
   };
 };
 
-const handleReqeustEncryptMsg: (
+const handleIsNewApiMsg: (
   service: SecretWasmService,
-  permissionInteractionService: PermissionInteractiveService
-) => InternalHandler<ReqeustEncryptMsg> = (
-  service,
-  permissionInteractionService
-) => {
-  return async (env, msg) => {
-    await permissionInteractionService.ensureEnabled(
+  permissionService: PermissionService
+) => InternalHandler<IsNewApiMsg> = (service, permissionService) => {
+  return async (env: Env, msg: IsNewApiMsg & { origin: string }) => {
+    await permissionService.checkOrGrantBasicAccessPermission(
       env,
-      [msg.chainId],
+      msg.chainId,
       msg.origin
     );
 
-    // TODO: Should ask for user whether approve or reject to encrypt.
+    return await service.isNewApi(msg.chainId);
+  };
+};
+
+const handleReqeustEncryptMsg: (
+  service: SecretWasmService,
+  permissionService: PermissionService
+) => InternalHandler<ReqeustEncryptMsg> = (service, permissionService) => {
+  return async (env: Env, msg: ReqeustEncryptMsg & { origin: string }) => {
+    await permissionService.checkOrGrantBasicAccessPermission(
+      env,
+      msg.chainId,
+      msg.origin
+    );
+
+    await permissionService.checkOrGrantPermission(
+      env,
+      [msg.chainId],
+      "secret-wasm-encryption",
+      msg.origin
+    );
+
     return await service.encrypt(msg.chainId, msg.contractCodeHash, msg.msg);
   };
 };
 
 const handleRequestDecryptMsg: (
   service: SecretWasmService,
-  permissionInteractionService: PermissionInteractiveService
-) => InternalHandler<RequestDecryptMsg> = (
-  service,
-  permissionInteractionService
-) => {
-  return async (env, msg) => {
-    await permissionInteractionService.ensureEnabled(
+  permissionService: PermissionService
+) => InternalHandler<RequestDecryptMsg> = (service, permissionService) => {
+  return async (env: Env, msg: RequestDecryptMsg & { origin: string }) => {
+    await permissionService.checkOrGrantBasicAccessPermission(
       env,
-      [msg.chainId],
+      msg.chainId,
       msg.origin
     );
 
-    // XXX: Is there need to ask for user whether approve or reject to decrypt?
     return await service.decrypt(msg.chainId, msg.cipherText, msg.nonce);
   };
 };
 
 const handleGetTxEncryptionKeyMsg: (
   service: SecretWasmService,
-  permissionInteractionService: PermissionInteractiveService
-) => InternalHandler<GetTxEncryptionKeyMsg> = (
-  service,
-  permissionInteractionService
-) => {
-  return async (env, msg) => {
-    await permissionInteractionService.ensureEnabled(
+  permissionService: PermissionService
+) => InternalHandler<GetTxEncryptionKeyMsg> = (service, permissionService) => {
+  return async (env: Env, msg: GetTxEncryptionKeyMsg & { origin: string }) => {
+    await permissionService.checkOrGrantBasicAccessPermission(
       env,
-      [msg.chainId],
+      msg.chainId,
       msg.origin
     );
 
-    // XXX: Is there need to ask for user whether approve or reject to getting tx encryption key?
     return await service.getTxEncryptionKey(msg.chainId, msg.nonce);
   };
 };
