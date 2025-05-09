@@ -2,6 +2,7 @@ import { QueriesSetBase } from "../queries";
 import { ChainGetter } from "../../chain";
 import { ObservableQueryAccount } from "./account";
 import {
+  ObservableQueryBabylonBtcDelegationReward,
   ObservableQueryDelegations,
   ObservableQueryRewards,
   ObservableQueryStakingParams,
@@ -71,6 +72,7 @@ export class CosmosQueriesImpl {
   public readonly queryUnbondingDelegations: DeepReadonly<ObservableQueryUnbondingDelegations>;
   public readonly queryInitiaUnbondingDelegations: DeepReadonly<ObservableQueryInitiaUnbondingDelegations>;
   public readonly queryValidators: DeepReadonly<ObservableQueryValidators>;
+  public readonly queryBabylonBtcDelegationReward: DeepReadonly<ObservableQueryBabylonBtcDelegationReward>;
 
   public readonly queryIBCClientState: DeepReadonly<ObservableQueryIBCClientState>;
   public readonly queryIBCClientStateV2: DeepReadonly<ObservableQueryIBCClientStateV2>;
@@ -155,6 +157,12 @@ export class CosmosQueriesImpl {
       chainId,
       chainGetter
     );
+    this.queryBabylonBtcDelegationReward =
+      new ObservableQueryBabylonBtcDelegationReward(
+        sharedContext,
+        chainId,
+        chainGetter
+      );
 
     this.queryIBCClientState = new ObservableQueryIBCClientState(
       sharedContext,

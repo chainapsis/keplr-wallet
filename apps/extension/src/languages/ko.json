@@ -515,7 +515,9 @@
   "page.sign.components.messages.wasm-message-view.close-button": "접기",
   "page.sign.components.messages.wasm-message-view.details-button": "상세보기",
   "page.sign.components.messages.create-btc-delegation.title": "BTC 스테이킹 등록하기",
-  "page.sign.components.messages.create-btc-delegation.paragraph": "스테이킹에 관련된 데이터를 Babylon Genesis 체인에 제출 및 등록합니다.",
+  "page.sign.components.messages.create-btc-delegation.paragraph": "스테이킹에 관련된 데이터를 {chainName} 체인에 제출 및 등록합니다.",
+  "page.sign.components.messages.claim-btc-delegation-reward.title": "BTC 스테이킹 리워드 받기",
+  "page.sign.components.messages.claim-btc-delegation-reward.paragraph": "{amount}를 받습니다.",
 
   "page.sign.components.ledger-guide.box.error-title": "오류",
   "page.sign.components.ledger-guide.box.connect-and-unlock-ledger-paragraph": "렛저 장치를 연결하고 잠금을 해제하세요.",
