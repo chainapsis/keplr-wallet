@@ -636,37 +636,37 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
               },
             ];
 
-      // Skip에서 내려주는 응답에서 origin denom과 origin chain id가 같다면 해당 토큰의 도착 체인 후보가 될 수 있는 걸로 간주한다.
-      const isEVMOnlyChain = chainInfo.chainId.startsWith("eip155:");
       const asset = this.queryAssets
         .getAssets(chainInfo.chainId)
         .assets.find((asset) => asset.denom === currency.coinMinimalDenom);
-      for (const candidateChain of this.queryChains.chains) {
-        const isCandidateChainEVMOnlyChain =
-          candidateChain.chainInfo.chainId.startsWith("eip155:");
-        const isCandidateChain =
-          candidateChain.chainInfo.chainId !== chainInfo.chainId &&
-          (isEVMOnlyChain ? true : isCandidateChainEVMOnlyChain);
-        if (isCandidateChain) {
-          const candidateAsset = this.queryAssets
-            .getAssets(candidateChain.chainInfo.chainId)
-            .assetsRaw.find(
-              (a) =>
-                a.originDenom === asset?.originDenom &&
-                a.originChainId === asset?.originChainId
-            );
+      // 밑에서 IBC 경로에 대한 처리를 하기 때문에 여기선 EVM 체인이 포함된 경우만 다룬다.
+      const candidateChains = this.queryChains.chains.filter((c) => {
+        const isSameChain = c.chainInfo.chainId === chainInfo.chainId;
+        const containsEVMOnlyChain =
+          c.chainInfo.chainId.startsWith("eip155:") ||
+          chainInfo.chainId.startsWith("eip155:");
+        return !isSameChain && containsEVMOnlyChain;
+      });
+      for (const candidateChain of candidateChains) {
+        // Skip에서 내려주는 응답에서 recommended symbol 혹은 origin denom과 origin chain id가 같다면 해당 토큰의 도착 체인 후보가 될 수 있는 걸로 간주한다.
+        const candidateAsset = this.queryAssets
+          .getAssets(candidateChain.chainInfo.chainId)
+          .assetsRaw.find(
+            (a) =>
+              a.recommendedSymbol === asset?.recommendedSymbol ||
+              (a.originDenom === asset?.originDenom &&
+                a.originChainId === asset?.originChainId)
+          );
+        if (candidateAsset) {
+          const currencyFound = this.chainStore
+            .getChain(candidateChain.chainInfo.chainId)
+            .findCurrencyWithoutReaction(candidateAsset.denom);
 
-          if (candidateAsset) {
-            const currencyFound = this.chainStore
-              .getChain(candidateChain.chainInfo.chainId)
-              .findCurrencyWithoutReaction(candidateAsset.denom);
-
-            if (currencyFound) {
-              res.push({
-                denom: candidateAsset.denom,
-                chainId: candidateChain.chainInfo.chainId,
-              });
-            }
+          if (currencyFound) {
+            res.push({
+              denom: candidateAsset.denom,
+              chainId: candidateChain.chainInfo.chainId,
+            });
           }
         }
       }

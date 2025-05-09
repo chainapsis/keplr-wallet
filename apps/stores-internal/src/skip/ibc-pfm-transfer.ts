@@ -20,39 +20,36 @@ export class ObservableQueryIbcPfmTransfer {
 
       const chainInfo = this.chainStore.getChain(chainId);
 
-      const isEVMOnlyChain = chainInfo.chainId.startsWith("eip155:");
-
       const assetForBridge = this.queryAssets
         .getAssets(chainInfo.chainId)
         .assetsRaw.find((asset) => asset.denom === coinMinimalDenom);
+      // getIBCChannels에서 IBC 경로에 대한 처리를 하기 때문에 여기선 EVM 체인이 경로에 포함된 경우만 다룬다.
+      const candidateChains = this.queryChains.chains.filter((c) => {
+        const isSameChain = c.chainInfo.chainId === chainId;
+        const containsEVMOnlyChain =
+          c.chainInfo.chainId.startsWith("eip155:") ||
+          chainId.startsWith("eip155:");
+        return !isSameChain && containsEVMOnlyChain;
+      });
+      for (const candidateChain of candidateChains) {
+        const candidateAsset = this.queryAssets
+          .getAssets(candidateChain.chainInfo.chainId)
+          .assetsRaw.find(
+            (a) =>
+              a.recommendedSymbol === assetForBridge?.recommendedSymbol ||
+              (a.originDenom === assetForBridge?.originDenom &&
+                a.originChainId === assetForBridge?.originChainId)
+          );
+        if (candidateAsset) {
+          const currencyFound = this.chainStore
+            .getChain(candidateChain.chainInfo.chainId)
+            .findCurrencyWithoutReaction(candidateAsset.denom);
 
-      for (const candidateChain of this.queryChains.chains) {
-        const isCandidateChainEVMOnlyChain =
-          candidateChain.chainInfo.chainId.startsWith("eip155:");
-        const isCandidateChain =
-          candidateChain.chainInfo.chainId !== chainInfo.chainId &&
-          (isEVMOnlyChain || isCandidateChainEVMOnlyChain);
-
-        if (isCandidateChain) {
-          const candidateAsset = this.queryAssets
-            .getAssets(candidateChain.chainInfo.chainId)
-            .assetsRaw.find(
-              (a) =>
-                a.originDenom === assetForBridge?.originDenom &&
-                a.originChainId === assetForBridge?.originChainId
-            );
-
-          if (candidateAsset) {
-            const currencyFound = this.chainStore
-              .getChain(candidateChain.chainInfo.chainId)
-              .findCurrencyWithoutReaction(candidateAsset.denom);
-
-            if (currencyFound) {
-              res.push({
-                destinationChainId: candidateChain.chainInfo.chainId,
-                denom: candidateAsset.denom,
-              });
-            }
+          if (currencyFound) {
+            res.push({
+              destinationChainId: candidateChain.chainInfo.chainId,
+              denom: candidateAsset.denom,
+            });
           }
         }
       }
