@@ -560,6 +560,17 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           allowIBCToken: true,
         })
       );
+    });
+
+    return () => {
+      if (disposal) {
+        disposal();
+      }
+    };
+  }, [hugeQueriesStore]);
+
+  useEffect(() => {
+    const disposal = autorun(() => {
       noop(skipQueriesStore.queryIBCSwap.swapDestinationCurrenciesMap);
     });
 
@@ -568,7 +579,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         disposal();
       }
     };
-  }, [hugeQueriesStore, skipQueriesStore.queryIBCSwap]);
+  }, [skipQueriesStore.queryIBCSwap]);
+
   useEffect(() => {
     const disposal = autorun(() => {
       noop(
