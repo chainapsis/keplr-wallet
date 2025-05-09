@@ -452,7 +452,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
           const originCurrency = {
             coinDecimals: asset.decimals,
             coinMinimalDenom: asset.originDenom,
-            coinDenom: asset.symbol,
+            coinDenom: asset.recommendedSymbol ?? asset.symbol,
             coinGeckoId: asset.coingeckoId,
             coinImageUrl: asset.logoURI,
           };
@@ -472,7 +472,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
         const currency = {
           coinDecimals: asset.decimals,
           coinMinimalDenom: asset.denom,
-          coinDenom: asset.symbol,
+          coinDenom: asset.recommendedSymbol ?? asset.symbol,
           coinGeckoId: asset.coingeckoId,
           coinImageUrl: asset.logoURI,
         };

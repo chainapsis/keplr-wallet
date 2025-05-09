@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import React, { FunctionComponent, useMemo, useState } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { BackButton } from "../../../layouts/header/components";
 import { HeaderLayout } from "../../../layouts/header";
 import styled from "styled-components";
@@ -231,6 +231,43 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
       remainingSearchFields
     );
 
+    const [selectedAssetWithTimer, setSelectedAssetWithTimer] = useState<{
+      coinMinimalDenom: string;
+      chainId: string;
+      timeout: NodeJS.Timeout;
+    } | null>(null);
+    const selectedCurrency = selectedAssetWithTimer
+      ? chainStore
+          .getChain(selectedAssetWithTimer.chainId)
+          .findCurrency(selectedAssetWithTimer.coinMinimalDenom)
+      : null;
+
+    useEffect(() => {
+      if (selectedAssetWithTimer && selectedCurrency) {
+        clearTimeout(selectedAssetWithTimer.timeout);
+
+        if (paramNavigateTo) {
+          navigate(
+            paramNavigateTo
+              .replace("{chainId}", selectedAssetWithTimer.chainId)
+              .replace("{coinMinimalDenom}", selectedCurrency.coinMinimalDenom),
+            {
+              replace: paramNavigateReplace === "true",
+            }
+          );
+        } else {
+          console.error("Empty navigateTo param");
+        }
+      }
+    }, [
+      selectedAssetWithTimer,
+      paramNavigateTo,
+      paramNavigateReplace,
+      chainStore,
+      navigate,
+      selectedCurrency,
+    ]);
+
     return (
       <HeaderLayout
         title={intl.formatMessage({ id: "page.send.select-asset.title" })}
@@ -268,34 +305,15 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
                         )
                       );
                     }
-
-                    const currency = chainStore
-                      .getChain(viewToken.chainInfo.chainId)
-                      .findCurrencyWithoutReaction(
-                        viewToken.token.currency.coinMinimalDenom
-                      );
-
-                    if (!currency) {
-                      throw new Error(
-                        `Currency not found: ${viewToken.chainInfo.chainId}/${viewToken.token.currency.coinMinimalDenom}`
-                      );
-                    }
-
-                    if (paramNavigateTo) {
-                      navigate(
-                        paramNavigateTo
-                          .replace("{chainId}", viewToken.chainInfo.chainId)
-                          .replace(
-                            "{coinMinimalDenom}",
-                            viewToken.token.currency.coinMinimalDenom
-                          ),
-                        {
-                          replace: paramNavigateReplace === "true",
-                        }
-                      );
-                    } else {
-                      console.error("Empty navigateTo param");
-                    }
+                    const currencyNotFoundTimeout = setTimeout(() => {
+                      alert("Currency not found");
+                    }, 3000);
+                    setSelectedAssetWithTimer({
+                      coinMinimalDenom:
+                        viewToken.token.currency.coinMinimalDenom,
+                      chainId: viewToken.chainInfo.chainId,
+                      timeout: currencyNotFoundTimeout,
+                    });
                   },
                 }}
                 width={width}
