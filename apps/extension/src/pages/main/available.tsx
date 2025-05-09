@@ -135,6 +135,25 @@ const tokenSearchFields = [
   "chainInfo.chainName",
 ];
 
+const groupedTokensSearchFields = [
+  {
+    key: "originCurrency.coinDenom",
+    function: (entries: [groupKey: string, tokens: ViewToken[]]) => {
+      const currency = entries[1][0].token.currency;
+      if ("originCurrency" in currency) {
+        return currency.originCurrency?.coinDenom || "";
+      }
+      return currency.coinDenom;
+    },
+  },
+  {
+    key: "chainInfo.chainName",
+    function: (entries: [groupKey: string, tokens: ViewToken[]]) => {
+      return entries[1][0].chainInfo.chainName;
+    },
+  },
+];
+
 const chainSearchFields = [
   "chainInfo.chainName",
   {
@@ -829,8 +848,14 @@ const TokensGroupedViewScene = observer(
     ]);
 
     const searchedGroupedTokensMap = useMemo(() => {
+      const sortedEntries = performSearch(
+        Array.from(groupedTokensMap.entries()),
+        trimSearch,
+        groupedTokensSearchFields
+      );
+
       const resultMap = new Map<string, ViewToken[]>();
-      for (const [groupKey, tokens] of groupedTokensMap.entries()) {
+      for (const [groupKey, tokens] of sortedEntries) {
         const searchResults = performSearch(
           tokens,
           trimSearch,
