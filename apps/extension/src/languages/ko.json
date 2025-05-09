@@ -515,7 +515,7 @@
   "page.sign.components.messages.wasm-message-view.close-button": "접기",
   "page.sign.components.messages.wasm-message-view.details-button": "상세보기",
   "page.sign.components.messages.create-btc-delegation.title": "BTC 스테이킹 등록하기",
-  "page.sign.components.messages.create-btc-delegation.paragraph": "스테이킹에 관련된 데이터를 Babylon Genesis 체인에 제출 및 등록합니다.",
+  "page.sign.components.messages.create-btc-delegation.paragraph": "스테이킹에 관련된 데이터를 {chainName} 체인에 제출 및 등록합니다.",
   "page.sign.components.messages.claim-btc-delegation-reward.title": "BTC 스테이킹 리워드 받기",
   "page.sign.components.messages.claim-btc-delegation-reward.paragraph": "{amount}를 받습니다.",
 

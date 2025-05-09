@@ -62,13 +62,11 @@ const ClaimBtcDelegationRewardMessagePretty: FunctionComponent<{
     ).claimable;
 
   return (
-    <React.Fragment>
-      <FormattedMessage
-        id="page.sign.components.messages.claim-btc-delegation-reward.paragraph"
-        values={{
-          amount: claimable?.trim(true).toString() || "0",
-        }}
-      />
-    </React.Fragment>
+    <FormattedMessage
+      id="page.sign.components.messages.claim-btc-delegation-reward.paragraph"
+      values={{
+        amount: claimable?.trim(true).toString() || "0",
+      }}
+    />
   );
 });

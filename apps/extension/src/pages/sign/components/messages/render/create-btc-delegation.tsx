@@ -1,10 +1,12 @@
 import { IMessageRenderer } from "../types";
 
-import React from "react";
+import React, { FunctionComponent } from "react";
 
 import { FormattedMessage } from "react-intl";
 import { ItemLogo } from "../../../../main/token-detail/msg-items/logo";
 import { MessageRegisterIcon } from "../../../../../components/icon";
+import { observer } from "mobx-react-lite";
+import { useStore } from "../../../../../stores";
 
 export const CreateBtcDelegationMessage: IMessageRenderer = {
   process(_chainId: string, msg) {
@@ -25,10 +27,25 @@ export const CreateBtcDelegationMessage: IMessageRenderer = {
         title: (
           <FormattedMessage id="page.sign.components.messages.create-btc-delegation.title" />
         ),
-        content: (
-          <FormattedMessage id="page.sign.components.messages.create-btc-delegation.paragraph" />
-        ),
+        content: <CreateBtcDelegationMessagePretty chainId={_chainId} />,
       };
     }
   },
 };
+
+const CreateBtcDelegationMessagePretty: FunctionComponent<{
+  chainId: string;
+}> = observer(({ chainId }) => {
+  const { chainStore } = useStore();
+
+  const chainName = chainStore.getChain(chainId).chainName;
+
+  return (
+    <FormattedMessage
+      id="page.sign.components.messages.create-btc-delegation.paragraph"
+      values={{
+        chainName,
+      }}
+    />
+  );
+});
