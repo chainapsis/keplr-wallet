@@ -21,6 +21,7 @@ import {
 import { FormattedMessage } from "react-intl";
 import { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
+import { ClaimBtcDelegationRewardMessage } from "./render/claim-btc-delegation-reward";
 
 export class MessageRenderRegistry implements IMessageRenderRegistry {
   protected renderers: IMessageRenderer[] = [];
@@ -109,3 +110,4 @@ defaultRegistry.register(UndelegateMessage);
 defaultRegistry.register(VoteMessage);
 defaultRegistry.register(PayPacketFeeMessage);
 defaultRegistry.register(CreateBtcDelegationMessage);
+defaultRegistry.register(ClaimBtcDelegationRewardMessage);

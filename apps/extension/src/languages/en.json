@@ -534,6 +534,8 @@
   "page.sign.components.messages.wasm-message-view.details-button": "Details",
   "page.sign.components.messages.create-btc-delegation.title": "Register BTC Stake",
   "page.sign.components.messages.create-btc-delegation.paragraph": "Submit all relevant staking data to the Babylon Genesis chain.",
+  "page.sign.components.messages.claim-btc-delegation-reward.title": "Claim reward from BTC staking",
+  "page.sign.components.messages.claim-btc-delegation-reward.paragraph": "Claim {amount}",
 
   "page.sign.components.ledger-guide.box.error-title": "Error",
   "page.sign.components.ledger-guide.box.connect-and-unlock-ledger-paragraph": "Connect and unlock your Ledger device.",

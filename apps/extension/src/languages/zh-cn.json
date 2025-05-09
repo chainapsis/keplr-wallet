@@ -483,6 +483,8 @@
   "page.sign.components.messages.wasm-message-view.details-button": "详情",
   "page.sign.components.messages.create-btc-delegation.title": "注册 BTC 质押",
   "page.sign.components.messages.create-btc-delegation.paragraph": "提交相关数据至 Babylon Genesis 链。",
+  "page.sign.components.messages.claim-btc-delegation-reward.title": "提取BTC质押奖励",
+  "page.sign.components.messages.claim-btc-delegation-reward.paragraph": "提取{amount}",
 
   "page.sign.components.ledger-guide.box.error-title": "错误",
   "page.sign.components.ledger-guide.box.connect-and-unlock-ledger-paragraph": "连接并解锁你的Ledger设备。",
