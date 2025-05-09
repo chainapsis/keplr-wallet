@@ -1,5 +1,10 @@
 import { observer } from "mobx-react-lite";
-import React, { FunctionComponent, useMemo, useState } from "react";
+import React, {
+  FunctionComponent,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
 import { BackButton } from "../../../layouts/header/components";
 import { HeaderLayout } from "../../../layouts/header";
 import styled from "styled-components";
@@ -16,12 +21,15 @@ import { HugeQueriesStore } from "../../../stores/huge-queries";
 import { ViewToken } from "../../main";
 import { computed, makeObservable } from "mobx";
 import { ObservableQueryIbcSwap } from "@keplr-wallet/stores-internal";
-import { Currency } from "@keplr-wallet/types";
+import { ChainInfo, Currency } from "@keplr-wallet/types";
 import { IChainInfoImpl } from "@keplr-wallet/stores";
 import { FixedSizeList } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { useSearch } from "../../../hooks/use-search";
 import { getTokenSearchResultClickAnalyticsProperties } from "../../../analytics-amplitude";
+import { useGroupedTokensMap } from "../../../hooks/use-grouped-tokens-map";
+import { GroupedTokenItem } from "../../main/components/token/grouped";
+import { YAxis } from "../../../components/axis";
 
 // 계산이 복잡해서 memoize을 적용해야하는데
 // mobx와 useMemo()는 같이 사용이 어려워서
@@ -159,8 +167,12 @@ const remainingSearchFields = [
 // /send/select-asset 페이지와 세트로 관리하셈
 export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
   () => {
-    const { hugeQueriesStore, skipQueriesStore, analyticsAmplitudeStore } =
-      useStore();
+    const {
+      hugeQueriesStore,
+      skipQueriesStore,
+      analyticsAmplitudeStore,
+      uiConfigStore,
+    } = useStore();
     const navigate = useNavigate();
     const intl = useIntl();
     const [searchParams] = useSearchParams();
@@ -192,8 +204,8 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
 
     const { tokens, remaining } = state.tokens;
 
-    const filteredTokens = useMemo(() => {
-      const filtered = tokens.filter((token) => {
+    const filterTokens = useCallback(
+      (token: ViewToken) => {
         if (!("currencies" in token.chainInfo)) {
           return false;
         }
@@ -203,22 +215,32 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
           `${token.chainInfo.chainIdentifier}/${token.token.currency.coinMinimalDenom}` !==
             excludeKey
         );
-      });
+      },
+      [excludeKey]
+    );
 
-      return filtered;
-    }, [excludeKey, tokens]);
-
-    const filteredRemaining = useMemo(() => {
-      const filtered = remaining.filter((r) => {
+    const filterRemaining = useCallback(
+      (r: { currency: Currency; chainInfo: IChainInfoImpl }) => {
         return (
           !excludeKey ||
           `${r.chainInfo.chainIdentifier}/${r.currency.coinMinimalDenom}` !==
             excludeKey
         );
-      });
+      },
+      [excludeKey]
+    );
+
+    const filteredTokens = useMemo(() => {
+      const filtered = tokens.filter(filterTokens);
 
       return filtered;
-    }, [excludeKey, remaining]);
+    }, [tokens, filterTokens]);
+
+    const filteredRemaining = useMemo(() => {
+      const filtered = remaining.filter(filterRemaining);
+
+      return filtered;
+    }, [remaining, filterRemaining]);
 
     const searchedTokens = useSearch(filteredTokens, search, searchFields);
     const searchedRemaining = useSearch(
@@ -226,6 +248,36 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
       search,
       remainingSearchFields
     );
+
+    const { searchedGroupedTokensMap } = useGroupedTokensMap(search);
+    const filteredGroupedTokensMap = useMemo(() => {
+      return new Map(
+        Array.from(searchedGroupedTokensMap.entries())
+          .map<[string, ViewToken[]]>(([groupKey, tokens]) => {
+            const filteredTokens = tokens.filter(filterTokens);
+
+            return [groupKey, filteredTokens];
+          })
+          .filter(([, tokens]) => tokens.length > 0)
+      );
+    }, [searchedGroupedTokensMap, filterTokens]);
+
+    const filteredRemainingGroupedTokensMap = useMemo(() => {
+      return new Map(
+        Array.from(filteredGroupedTokensMap.entries())
+          .map<[string, ViewToken[]]>(([groupKey, tokens]) => {
+            const filteredRemainings = tokens.filter((token) => {
+              return filterRemaining({
+                currency: token.token.currency,
+                chainInfo: token.chainInfo as IChainInfoImpl<ChainInfo>,
+              });
+            });
+
+            return [groupKey, filteredRemainings];
+          })
+          .filter(([, tokens]) => tokens.length > 0)
+      );
+    }, [filteredGroupedTokensMap, filterRemaining]);
 
     return (
       <HeaderLayout
@@ -246,50 +298,107 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
               setSearch(e.target.value);
             }}
           />
-          <AutoSizer>
-            {({ height, width }: { height: number; width: number }) => (
-              <FixedSizeList
-                itemData={{
-                  searchedTokens,
-                  searchedRemaining,
-                  onClick: (viewToken, index) => {
-                    if (search.trim().length > 0) {
-                      analyticsAmplitudeStore.logEvent(
-                        "click_token_item_search_results_select_asset_ibc_swap",
-                        getTokenSearchResultClickAnalyticsProperties(
-                          viewToken,
-                          search,
-                          [...searchedTokens, ...searchedRemaining],
-                          index
-                        )
-                      );
-                    }
-                    if (paramNavigateTo) {
-                      navigate(
-                        paramNavigateTo
-                          .replace("{chainId}", viewToken.chainInfo.chainId)
-                          .replace(
-                            "{coinMinimalDenom}",
-                            viewToken.token.currency.coinMinimalDenom
-                          ),
-                        {
-                          replace: paramNavigateReplace === "true",
-                        }
-                      );
-                    } else {
-                      console.error("Empty navigateTo param");
-                    }
-                  },
-                }}
-                width={width}
-                height={height}
-                itemCount={searchedTokens.length + searchedRemaining.length}
-                itemSize={76}
-              >
-                {TokenListItem}
-              </FixedSizeList>
-            )}
-          </AutoSizer>
+          {uiConfigStore.assetViewMode === "grouped" ? (
+            <YAxis gap="0.5rem">
+              {Array.from(filteredGroupedTokensMap.entries()).map(
+                ([groupKey, tokens]) => (
+                  <GroupedTokenItem
+                    key={groupKey}
+                    tokens={tokens}
+                    alwaysOpen={true}
+                    onTokenClick={(viewToken) => {
+                      if (paramNavigateTo) {
+                        navigate(
+                          paramNavigateTo
+                            .replace("{chainId}", viewToken.chainInfo.chainId)
+                            .replace(
+                              "{coinMinimalDenom}",
+                              viewToken.token.currency.coinMinimalDenom
+                            ),
+                          {
+                            replace: paramNavigateReplace === "true",
+                          }
+                        );
+                      } else {
+                        console.error("Empty navigateTo param");
+                      }
+                    }}
+                  />
+                )
+              )}
+              {Array.from(filteredRemainingGroupedTokensMap.entries()).map(
+                ([groupKey, tokens]) => (
+                  <GroupedTokenItem
+                    key={groupKey}
+                    tokens={tokens}
+                    alwaysOpen={true}
+                    onTokenClick={(viewToken) => {
+                      if (paramNavigateTo) {
+                        navigate(
+                          paramNavigateTo
+                            .replace("{chainId}", viewToken.chainInfo.chainId)
+                            .replace(
+                              "{coinMinimalDenom}",
+                              viewToken.token.currency.coinMinimalDenom
+                            ),
+                          {
+                            replace: paramNavigateReplace === "true",
+                          }
+                        );
+                      } else {
+                        console.error("Empty navigateTo param");
+                      }
+                    }}
+                  />
+                )
+              )}
+            </YAxis>
+          ) : (
+            <AutoSizer>
+              {({ height, width }: { height: number; width: number }) => (
+                <FixedSizeList
+                  itemData={{
+                    searchedTokens,
+                    searchedRemaining,
+                    onClick: (viewToken, index) => {
+                      if (search.trim().length > 0) {
+                        analyticsAmplitudeStore.logEvent(
+                          "click_token_item_search_results_select_asset_ibc_swap",
+                          getTokenSearchResultClickAnalyticsProperties(
+                            viewToken,
+                            search,
+                            [...searchedTokens, ...searchedRemaining],
+                            index
+                          )
+                        );
+                      }
+                      if (paramNavigateTo) {
+                        navigate(
+                          paramNavigateTo
+                            .replace("{chainId}", viewToken.chainInfo.chainId)
+                            .replace(
+                              "{coinMinimalDenom}",
+                              viewToken.token.currency.coinMinimalDenom
+                            ),
+                          {
+                            replace: paramNavigateReplace === "true",
+                          }
+                        );
+                      } else {
+                        console.error("Empty navigateTo param");
+                      }
+                    },
+                  }}
+                  width={width}
+                  height={height}
+                  itemCount={searchedTokens.length + searchedRemaining.length}
+                  itemSize={76}
+                >
+                  {TokenListItem}
+                </FixedSizeList>
+              )}
+            </AutoSizer>
+          )}
         </Styles.Container>
       </HeaderLayout>
     );

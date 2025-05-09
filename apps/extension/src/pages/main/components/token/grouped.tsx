@@ -208,10 +208,12 @@ const NestedTokenItem: FunctionComponent<{
 export const GroupedTokenItem: FunctionComponent<{
   tokens: ViewToken[];
   onClick?: () => void;
+  onTokenClick?: (token: ViewToken) => void;
   disabled?: boolean;
   bottomTagType?: BottomTagType;
   earnedAssetPrice?: string;
   showPrice24HChange?: boolean;
+  alwaysOpen?: boolean;
 }> = observer(
   ({
     tokens,
@@ -220,8 +222,10 @@ export const GroupedTokenItem: FunctionComponent<{
     bottomTagType,
     earnedAssetPrice,
     showPrice24HChange,
+    alwaysOpen,
+    onTokenClick,
   }) => {
-    const [isOpen, setIsOpen] = useState(false);
+    const [isOpen, setIsOpen] = useState(!!alwaysOpen);
     const theme = useTheme();
     const { uiConfigStore, priceStore } = useStore();
     const [, setSearchParams] = useSearchParams();
@@ -271,6 +275,7 @@ export const GroupedTokenItem: FunctionComponent<{
 
     const handleClick = () => {
       if (disabled) return;
+      if (alwaysOpen) return;
       setIsOpen(!isOpen);
       if (onClick) onClick();
     };
@@ -438,14 +443,20 @@ export const GroupedTokenItem: FunctionComponent<{
 
         <VerticalCollapseTransition collapsed={!delayedIsOpen}>
           <Styles.ChildrenContainer>
-            {tokens.map((token) => (
+            {tokens.map((token, index) => (
               <Box
                 key={`${token.chainInfo.chainId}-${token.token.currency.coinMinimalDenom}`}
                 marginTop={"0.375rem"}
+                marginBottom={
+                  alwaysOpen && index === tokens.length - 1 ? "1rem" : "none"
+                }
               >
                 <NestedTokenItem
                   viewToken={{ ...token }}
-                  onClick={() => openTokenDetail(token)}
+                  onClick={() => {
+                    if (onTokenClick) onTokenClick(token);
+                    else openTokenDetail(token);
+                  }}
                 />
               </Box>
             ))}

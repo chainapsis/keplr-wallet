@@ -45,13 +45,14 @@ import { useEarnBottomTag } from "../earn/components/use-earn-bottom-tag";
 import { AdjustmentIcon } from "../../components/icon/adjustment";
 import { ViewOptionsContextMenu } from "./components/context-menu";
 import { useCopyAddress } from "../../hooks/use-copy-address";
-import { performSearch, useSearch } from "../../hooks/use-search";
+import { useSearch } from "../../hooks/use-search";
 import { SceneTransition } from "../../components/transition/scene";
 import { SceneTransitionRef } from "../../components/transition/scene/internal";
 import { VerticalCollapseTransition } from "../../components/transition/vertical-collapse";
 import { ArrowDownIcon, ArrowUpIcon } from "../../components/icon";
 import { Styles as AvailableCollapsibleListStyles } from "../../components/collapsible-list";
 import { getTokenSearchResultClickAnalyticsProperties } from "../../analytics-amplitude";
+import { useGroupedTokensMap } from "../../hooks/use-grouped-tokens-map";
 
 type TokenViewData = {
   title: string;
@@ -133,25 +134,6 @@ const tokenSearchFields = [
     },
   },
   "chainInfo.chainName",
-];
-
-const groupedTokensSearchFields = [
-  {
-    key: "originCurrency.coinDenom",
-    function: (entries: [groupKey: string, tokens: ViewToken[]]) => {
-      const currency = entries[1][0].token.currency;
-      if ("originCurrency" in currency) {
-        return currency.originCurrency?.coinDenom || "";
-      }
-      return currency.coinDenom;
-    },
-  },
-  {
-    key: "chainInfo.chainName",
-    function: (entries: [groupKey: string, tokens: ViewToken[]]) => {
-      return entries[1][0].chainInfo.chainName;
-    },
-  },
 ];
 
 const chainSearchFields = [
@@ -802,74 +784,8 @@ const TokensGroupedViewScene = observer(
     trimSearch: string;
     onMoreTokensClosed: () => void;
   }) => {
-    const { hugeQueriesStore, uiConfigStore } = useStore();
-    const groupedTokensMap = useMemo(() => {
-      if (uiConfigStore.assetViewMode === "grouped") {
-        const filteredMap = new Map<string, ViewToken[]>();
-
-        const originalMap = hugeQueriesStore.groupedTokensMap;
-
-        originalMap.forEach((tokens, groupKey) => {
-          if (tokens.length > 0) {
-            if (uiConfigStore.isHideLowBalance) {
-              const { lowBalanceTokens } =
-                hugeQueriesStore.filterLowBalanceTokens(tokens);
-
-              if (lowBalanceTokens.length === tokens.length) {
-                return;
-              }
-
-              const nonLowBalanceTokens = tokens.filter(
-                (token) =>
-                  !lowBalanceTokens.some(
-                    (lowToken) =>
-                      lowToken.chainInfo.chainId === token.chainInfo.chainId &&
-                      lowToken.token.currency.coinMinimalDenom ===
-                        token.token.currency.coinMinimalDenom
-                  )
-              );
-
-              filteredMap.set(groupKey, nonLowBalanceTokens);
-            } else {
-              filteredMap.set(groupKey, tokens);
-            }
-          }
-        });
-
-        return filteredMap;
-      }
-
-      return new Map<string, ViewToken[]>();
-    }, [
-      uiConfigStore.assetViewMode,
-      uiConfigStore.isHideLowBalance,
-      hugeQueriesStore.groupedTokensMap,
-      hugeQueriesStore.filterLowBalanceTokens,
-    ]);
-
-    const searchedGroupedTokensMap = useMemo(() => {
-      const sortedEntries = performSearch(
-        Array.from(groupedTokensMap.entries()),
-        trimSearch,
-        groupedTokensSearchFields
-      );
-
-      const resultMap = new Map<string, ViewToken[]>();
-      for (const [groupKey, tokens] of sortedEntries) {
-        const searchResults = performSearch(
-          tokens,
-          trimSearch,
-          tokenSearchFields
-        );
-
-        if (searchResults.length > 0) {
-          resultMap.set(groupKey, searchResults);
-        }
-      }
-
-      return resultMap;
-    }, [groupedTokensMap, trimSearch]);
-
+    const { uiConfigStore } = useStore();
+    const { searchedGroupedTokensMap } = useGroupedTokensMap(trimSearch);
     const { getBottomTagInfoProps } = useEarnBottomTag(
       Array.from(searchedGroupedTokensMap.values()).flat()
     );
