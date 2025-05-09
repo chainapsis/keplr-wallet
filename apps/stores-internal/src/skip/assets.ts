@@ -23,6 +23,7 @@ export interface Asset {
   trace: string;
   tokenContract?: string;
   recommendedSymbol?: string;
+  symbol: string;
   logoURI?: string;
   coingeckoId?: string;
   decimals: number;
@@ -129,6 +130,7 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
               originChainId: originChainId,
               isEvm: false,
               recommendedSymbol: asset.recommended_symbol,
+              symbol: asset.symbol,
               logoURI: asset.logo_uri,
               coingeckoId: asset.coingecko_id,
               decimals: asset.decimals ?? 0,
@@ -156,6 +158,7 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
                 isEvm: asset.is_evm,
                 tokenContract: asset.token_contract,
                 recommendedSymbol: asset.recommended_symbol,
+                symbol: asset.symbol,
                 logoURI: asset.logo_uri,
                 coingeckoId: asset.coingecko_id,
                 decimals: asset.decimals,
@@ -220,6 +223,7 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
               originChainId: originChainId,
               isEvm: false,
               recommendedSymbol: asset.recommended_symbol,
+              symbol: asset.symbol,
               logoURI: asset.logo_uri,
               coingeckoId: asset.coingecko_id,
               decimals: asset.decimals ?? 0,
@@ -251,6 +255,7 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
                 isEvm: asset.is_evm,
                 tokenContract: asset.token_contract,
                 recommendedSymbol: asset.recommended_symbol,
+                symbol: asset.symbol,
                 logoURI: asset.logo_uri,
                 coingeckoId: asset.coingecko_id,
                 decimals: currencyFound.coinDecimals,
@@ -469,6 +474,7 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
                 originChainId: originChainId,
                 isEvm: false,
                 recommendedSymbol: asset.recommended_symbol,
+                symbol: asset.symbol,
                 logoURI: asset.logo_uri,
                 coingeckoId: asset.coingecko_id,
                 decimals: asset.decimals ?? 0,
@@ -496,6 +502,7 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
                   isEvm: asset.is_evm,
                   tokenContract: asset.token_contract,
                   recommendedSymbol: asset.recommended_symbol,
+                  symbol: asset.symbol,
                   logoURI: asset.logo_uri,
                   coingeckoId: asset.coingecko_id,
                   decimals: asset.decimals,
@@ -573,6 +580,7 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
                 originChainId: originChainId,
                 isEvm: false,
                 recommendedSymbol: asset.recommended_symbol,
+                symbol: asset.symbol,
                 logoURI: asset.logo_uri,
                 coingeckoId: asset.coingecko_id,
                 decimals: asset.decimals ?? 0,
@@ -604,6 +612,7 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
                   isEvm: asset.is_evm,
                   tokenContract: asset.token_contract,
                   recommendedSymbol: asset.recommended_symbol,
+                  symbol: asset.symbol,
                   logoURI: asset.logo_uri,
                   coingeckoId: asset.coingecko_id,
                   decimals: currencyFound.coinDecimals,
