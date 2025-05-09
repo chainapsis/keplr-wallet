@@ -1,63 +1,53 @@
 import Color from "color";
-import React, { Fragment, PropsWithChildren } from "react";
-import { useIntl } from "react-intl";
-import { useNavigate } from "react-router";
+import React, { Fragment, PropsWithChildren, useEffect, useState } from "react";
 import { Box } from "../../../../components/box";
 import { ArrowRightIcon } from "../../../../components/icon";
 import { Body2 } from "../../../../components/typography";
-import { useGetEarnApy } from "../../../../hooks/use-get-apy";
 import { ColorPalette } from "../../../../styles";
 import { observer } from "mobx-react-lite";
-import { NOBLE_CHAIN_ID } from "../../../../config.ui";
 import { useTheme } from "styled-components";
-
-type BottomTagType = "nudgeEarn" | "showEarnSavings";
+import { BottomTagType } from "./index";
+import { useEarnFeature } from "../../../../hooks/use-earn-feature";
 
 export const WrapperwithBottomTag = observer(function ({
   children,
   bottomTagType,
   earnedAssetPrice,
+  hideBottomTag = false,
 }: PropsWithChildren<{
   bottomTagType?: BottomTagType;
   earnedAssetPrice?: string;
+  hideBottomTag?: boolean;
 }>) {
-  const isNudgeEarn = bottomTagType === "nudgeEarn";
-
-  const intl = useIntl();
-  const navigate = useNavigate();
-  const { apy } = useGetEarnApy(NOBLE_CHAIN_ID);
-
   const theme = useTheme();
   const isLightMode = theme.mode === "light";
+  const { message, handleClick } = useEarnFeature(
+    bottomTagType,
+    earnedAssetPrice
+  );
+  const [isVisible, setIsVisible] = useState(!hideBottomTag);
 
-  function onClick() {
-    if (isNudgeEarn) {
-      navigate(`/earn/intro?chainId=${NOBLE_CHAIN_ID}`);
+  useEffect(() => {
+    if (hideBottomTag) {
+      setIsVisible(false);
     } else {
-      navigate(`/earn/overview?chainId=${NOBLE_CHAIN_ID}`);
+      setIsVisible(true);
     }
-  }
+  }, [hideBottomTag]);
+
+  const textColor = isLightMode
+    ? ColorPalette["green-600"]
+    : ColorPalette["green-400"];
 
   if (!bottomTagType) {
     return <Fragment>{children}</Fragment>;
   }
 
-  const message =
-    bottomTagType === "nudgeEarn"
-      ? intl.formatMessage(
-          { id: "page.main.components.token-item.earn-nudge-button" },
-          { apy: apy }
-        )
-      : intl.formatMessage(
-          { id: "page.main.components.token-item.earn-savings-button" },
-          { balance: earnedAssetPrice }
-        );
-
   return (
     <Box position="relative" style={{ cursor: "pointer" }}>
       <Box zIndex={1}>{children}</Box>
       <Box
-        onClick={onClick}
+        onClick={handleClick}
         zIndex={0}
         position="relative"
         style={{
@@ -68,9 +58,16 @@ export const WrapperwithBottomTag = observer(function ({
           alignItems: "center",
           justifyContent: "center",
           gap: "0.5rem",
+          transition:
+            "opacity 0.3s ease, transform 0.3s ease, max-height 0.3s ease, padding 0.3s ease",
+          opacity: isVisible ? 1 : 0,
+          transform: isVisible ? "translateY(0)" : "translateY(-10px)",
+          pointerEvents: isVisible ? "auto" : "none",
+          overflow: "hidden",
+          maxHeight: isVisible ? "none" : "0.375rem",
+          paddingTop: isVisible ? "0.875rem" : "0",
+          paddingBottom: isVisible ? "0.375rem" : "0",
         }}
-        paddingTop="0.875rem"
-        paddingBottom="0.375rem"
         marginBottom="-0.5rem"
         backgroundColor={
           isLightMode
@@ -92,21 +89,10 @@ export const WrapperwithBottomTag = observer(function ({
         }
         borderRadius="0 0 0.5rem 0.5rem"
       >
-        <Body2
-          color={
-            isLightMode ? ColorPalette["green-600"] : ColorPalette["green-400"]
-          }
-          style={{ textAlign: "center" }}
-        >
+        <Body2 color={textColor} style={{ textAlign: "center" }}>
           {message}
         </Body2>
-        <ArrowRightIcon
-          width="1rem"
-          height="1rem"
-          color={
-            isLightMode ? ColorPalette["green-600"] : ColorPalette["green-400"]
-          }
-        />
+        <ArrowRightIcon width="1rem" height="1rem" color={textColor} />
       </Box>
     </Box>
   );

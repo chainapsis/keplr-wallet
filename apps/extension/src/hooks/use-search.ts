@@ -25,7 +25,7 @@ const SCORE_NONE = -Infinity;
 
 const THROTTLE_DELAY = 500;
 
-function performSearch<T>(
+export function performSearch<T>(
   data: T[],
   query: string,
   fields: SearchField<T>[]

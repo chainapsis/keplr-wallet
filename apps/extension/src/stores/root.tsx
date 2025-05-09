@@ -586,7 +586,8 @@ export class RootStore {
       this.accountStore,
       this.priceStore,
       this.uiConfigStore,
-      this.keyRingStore
+      this.keyRingStore,
+      this.skipQueriesStore
     );
 
     this.tokensStore = new TokensStore(

@@ -3,7 +3,7 @@ import {
   ObservableQuery,
   QuerySharedContext,
 } from "@keplr-wallet/stores";
-import { AssetsResponse } from "./types";
+import { AssetsResponse, SkipAsset } from "./types";
 import { computed, makeObservable } from "mobx";
 import Joi from "joi";
 import { InternalChainStore } from "../internal";
@@ -53,18 +53,7 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
   }
 
   @computed
-  get assetsRaw(): {
-    denom: string;
-    chainId: string;
-    originDenom: string;
-    originChainId: string;
-    isEvm: boolean;
-    tokenContract?: string;
-    recommendedSymbol?: string;
-    logoURI?: string;
-    coingeckoId?: string;
-    decimals: number;
-  }[] {
+  get assetsRaw(): SkipAsset[] {
     if (
       !this.response ||
       !this.response.data ||
@@ -87,18 +76,7 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
         this.chainId.replace("eip155:", "")
       ];
     if (assetsInResponse) {
-      const res: {
-        denom: string;
-        chainId: string;
-        originDenom: string;
-        originChainId: string;
-        isEvm: boolean;
-        tokenContract?: string;
-        recommendedSymbol?: string;
-        logoURI?: string;
-        coingeckoId?: string;
-        decimals: number;
-      }[] = [];
+      const res: SkipAsset[] = [];
 
       for (const asset of assetsInResponse.assets) {
         const chainId = !Number.isNaN(parseInt(asset.chain_id))
@@ -163,18 +141,7 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
   }
 
   @computed
-  get assets(): {
-    denom: string;
-    chainId: string;
-    originDenom: string;
-    originChainId: string;
-    isEvm: boolean;
-    tokenContract?: string;
-    recommendedSymbol?: string;
-    logoURI?: string;
-    coingeckoId?: string;
-    decimals: number;
-  }[] {
+  get assets(): SkipAsset[] {
     if (
       !this.response ||
       !this.response.data ||
@@ -197,18 +164,7 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
         this.chainId.replace("eip155:", "")
       ];
     if (assetsInResponse) {
-      const res: {
-        denom: string;
-        chainId: string;
-        originDenom: string;
-        originChainId: string;
-        isEvm: boolean;
-        tokenContract?: string;
-        recommendedSymbol?: string;
-        logoURI?: string;
-        coingeckoId?: string;
-        decimals: number;
-      }[] = [];
+      const res: SkipAsset[] = [];
 
       for (const asset of assetsInResponse.assets) {
         const chainId = !Number.isNaN(parseInt(asset.chain_id))
