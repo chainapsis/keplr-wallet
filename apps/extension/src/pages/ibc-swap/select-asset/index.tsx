@@ -159,8 +159,12 @@ const remainingSearchFields = [
 // /send/select-asset 페이지와 세트로 관리하셈
 export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
   () => {
-    const { hugeQueriesStore, skipQueriesStore, analyticsAmplitudeStore } =
-      useStore();
+    const {
+      hugeQueriesStore,
+      chainStore,
+      skipQueriesStore,
+      analyticsAmplitudeStore,
+    } = useStore();
     const navigate = useNavigate();
     const intl = useIntl();
     const [searchParams] = useSearchParams();
@@ -264,6 +268,19 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
                         )
                       );
                     }
+
+                    const currency = chainStore
+                      .getChain(viewToken.chainInfo.chainId)
+                      .findCurrencyWithoutReaction(
+                        viewToken.token.currency.coinMinimalDenom
+                      );
+
+                    if (!currency) {
+                      throw new Error(
+                        `Currency not found: ${viewToken.chainInfo.chainId}/${viewToken.token.currency.coinMinimalDenom}`
+                      );
+                    }
+
                     if (paramNavigateTo) {
                       navigate(
                         paramNavigateTo
