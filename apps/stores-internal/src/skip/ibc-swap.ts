@@ -414,105 +414,174 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
       return res;
     }
 
+    const getMapEntry = (chainId: string) => {
+      const chainIdentifier = this.chainStore.getChain(chainId).chainIdentifier;
+      if (!res.has(chainIdentifier)) {
+        res.set(chainIdentifier, {
+          chainInfo: this.chainStore.getChain(chainId),
+          currencies: [],
+        });
+      }
+      return res.get(chainIdentifier)!;
+    };
+
     for (const chainId of swapVenueChainIds) {
       const assets = assetsBatch.get(chainId) ?? [];
       if (assets.length === 0) continue;
 
-      const getMap = (chainId: string) => {
-        const chainIdentifier =
-          this.chainStore.getChain(chainId).chainIdentifier;
-        let inner = res.get(chainIdentifier);
-        if (!inner) {
-          inner = {
-            chainInfo: this.chainStore.getChain(chainId),
-            currencies: [],
-          };
-          res.set(chainIdentifier, inner);
+      const entry = getMapEntry(chainId);
+
+      // Process each asset
+      for (const asset of assets) {
+        // Skip CW20 and SVM assets
+        if (asset.isCw20 || asset.isSvm) {
+          continue;
         }
 
-        return inner;
-      };
+        // Skip multi-hop IBC currencies (handled by getSwapDestinationCurrencyAlternativeChains)
+        const traceParts = asset.trace.split("/");
+        if (traceParts.length > 2) {
+          continue;
+        }
 
-      for (const asset of assets) {
-        const chainId = asset.chainId;
+        // Skip assets from chains not in the UI list
+        if (!this.chainStore.isInChainInfosInListUI(asset.originChainId)) {
+          continue;
+        }
 
-        const currency = this.chainStore
-          .getChain(chainId)
-          .findCurrencyWithoutReaction(asset.denom);
+        // IBC currency인 경우
+        if (asset.denom.startsWith("ibc/")) {
+          const currency = {
+            coinDecimals: asset.decimals,
+            coinMinimalDenom: asset.denom,
+            coinDenom: asset.recommendedSymbol ?? asset.denom,
+            coinGeckoId: asset.coingeckoId,
+            coinImageUrl: asset.logoURI,
+          };
 
-        if (!currency) continue;
+          if (
+            !entry.currencies.some(
+              (c) => c.coinMinimalDenom === currency.coinMinimalDenom
+            )
+          ) {
+            entry.currencies.push(currency);
+          }
+          continue;
+        }
 
-        // If ibc currency is well known.
+        const currency = {
+          coinDecimals: asset.decimals,
+          coinMinimalDenom: asset.denom,
+          coinDenom: asset.recommendedSymbol ?? asset.denom,
+          coinGeckoId: asset.coingeckoId,
+          coinImageUrl: asset.logoURI,
+        };
+
+        if (asset.isEvm && asset.tokenContract) {
+          const erc20Currency: ERC20Currency = {
+            ...currency,
+            type: "erc20" as const,
+            contractAddress: asset.tokenContract,
+          };
+
+          if (
+            !entry.currencies.some(
+              (c) => c.coinMinimalDenom === erc20Currency.coinMinimalDenom
+            )
+          ) {
+            entry.currencies.push(erc20Currency);
+          }
+          continue;
+        }
+
         if (
-          "originCurrency" in currency &&
-          currency.originCurrency &&
-          "originChainId" in currency &&
-          currency.originChainId &&
-          // XXX: multi-hop ibc currency는 getSwapDestinationCurrencyAlternativeChains에서 처리한다.
-          currency.paths.length === 1
+          !entry.currencies.some(
+            (c) => c.coinMinimalDenom === currency.coinMinimalDenom
+          )
         ) {
-          if (
-            currency.originChainId.startsWith("gravity-bridge-") &&
-            currency.originCurrency.coinMinimalDenom !== "ugraviton"
-          ) {
-            continue;
-          }
-          if (!this.chainStore.isInChainInfosInListUI(currency.originChainId)) {
-            continue;
-          }
-
-          // 현재 CW20같은 얘들은 처리할 수 없다.
-          if (!("type" in currency.originCurrency)) {
-            // 일단 현재는 복잡한 케이스는 생각하지 않는다.
-            // 오스모시스를 거쳐서 오기 때문에 ibc 모듈만 있다면 자산을 받을 수 있다.
-            const originCurrency = currency.originCurrency;
-            const inner = getMap(currency.originChainId);
-
-            if (
-              !inner.currencies.some(
-                (c) => c.coinMinimalDenom === originCurrency.coinMinimalDenom
-              )
-            ) {
-              inner.currencies.push(originCurrency);
-            }
-          }
-        } else if (!("paths" in currency)) {
-          if (
-            chainId === "osmosis-1" &&
-            currency.coinMinimalDenom ===
-              "ibc/0FA9232B262B89E77D1335D54FB1E1F506A92A7E4B51524B400DC69C68D28372"
-          ) {
-            const inner = getMap(chainId);
-
-            if (
-              !inner.currencies.some(
-                (c) => c.coinMinimalDenom === currency.coinMinimalDenom
-              )
-            ) {
-              inner.currencies.push(currency);
-            }
-
-            continue;
-          }
-
-          // 현재 CW20같은 얘들은 처리할 수 없다.
-          if (
-            !("type" in currency) ||
-            ("type" in currency && (currency as ERC20Currency).type === "erc20")
-          ) {
-            // if currency is not ibc currency
-            const inner = getMap(chainId);
-            if (
-              !inner.currencies.some(
-                (c) => c.coinMinimalDenom === currency.coinMinimalDenom
-              )
-            ) {
-              inner.currencies.push(currency);
-            }
-          }
+          entry.currencies.push(currency);
         }
       }
     }
+
+    //   const chainId = asset.chainId;
+
+    //   const currency = this.chainStore
+    //     .getChain(chainId)
+    //     .findCurrencyWithoutReaction(asset.denom);
+
+    //   if (!currency) continue;
+
+    //   // If ibc currency is well known.
+    //   if (
+    //     "originCurrency" in currency &&
+    //     currency.originCurrency &&
+    //     "originChainId" in currency &&
+    //     currency.originChainId &&
+    //     // XXX: multi-hop ibc currency는 getSwapDestinationCurrencyAlternativeChains에서 처리한다.
+    //     currency.paths.length === 1
+    //   ) {
+    //     if (
+    //       currency.originChainId.startsWith("gravity-bridge-") &&
+    //       currency.originCurrency.coinMinimalDenom !== "ugraviton"
+    //     ) {
+    //       continue;
+    //     }
+    //     if (!this.chainStore.isInChainInfosInListUI(currency.originChainId)) {
+    //       continue;
+    //     }
+
+    //     // 현재 CW20같은 얘들은 처리할 수 없다.
+    //     if (!("type" in currency.originCurrency)) {
+    //       // 일단 현재는 복잡한 케이스는 생각하지 않는다.
+    //       // 오스모시스를 거쳐서 오기 때문에 ibc 모듈만 있다면 자산을 받을 수 있다.
+    //       const originCurrency = currency.originCurrency;
+    //       const inner = getMap(currency.originChainId);
+
+    //       if (
+    //         !inner.currencies.some(
+    //           (c) => c.coinMinimalDenom === originCurrency.coinMinimalDenom
+    //         )
+    //       ) {
+    //         inner.currencies.push(originCurrency);
+    //       }
+    //     }
+    //   } else if (!("paths" in currency)) {
+    //     if (
+    //       chainId === "osmosis-1" &&
+    //       currency.coinMinimalDenom ===
+    //         "ibc/0FA9232B262B89E77D1335D54FB1E1F506A92A7E4B51524B400DC69C68D28372"
+    //     ) {
+    //       const inner = getMap(chainId);
+
+    //       if (
+    //         !inner.currencies.some(
+    //           (c) => c.coinMinimalDenom === currency.coinMinimalDenom
+    //         )
+    //       ) {
+    //         inner.currencies.push(currency);
+    //       }
+
+    //       continue;
+    //     }
+
+    //     // 현재 CW20같은 얘들은 처리할 수 없다.
+    //     if (
+    //       !("type" in currency) ||
+    //       ("type" in currency && (currency as ERC20Currency).type === "erc20")
+    //     ) {
+    //       // if currency is not ibc currency
+    //       const inner = getMap(chainId);
+    //       if (
+    //         !inner.currencies.some(
+    //           (c) => c.coinMinimalDenom === currency.coinMinimalDenom
+    //         )
+    //       ) {
+    //         inner.currencies.push(currency);
+    //       }
+    //     }
+    //   }
+    // }
 
     return res;
   }
