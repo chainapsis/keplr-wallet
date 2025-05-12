@@ -170,6 +170,9 @@ interface TokenItemProps {
 
   // If this prop is provided, the token tag will not be shown.
   noTokenTag?: boolean;
+
+  // If this prop is provided, the token item will be shown with loading state.
+  isLoading?: boolean;
 }
 
 export const TokenItem: FunctionComponent<TokenItemProps> = observer(
@@ -188,6 +191,7 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
     bottomTagType,
     earnedAssetPrice,
     noTokenTag,
+    isLoading,
   }) => {
     const { priceStore, price24HChangesStore, uiConfigStore } = useStore();
     const navigate = useNavigate();
@@ -297,6 +301,7 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
         pricePretty={pricePretty}
         price24HChange={price24HChange}
         tag={tokenTag}
+        isLoading={isLoading}
       />
     );
 
@@ -341,6 +346,7 @@ interface TokenItemContentProps {
     text: string;
     tooltip?: string;
   };
+  isLoading?: boolean;
 }
 
 const TokenItemContent: FunctionComponent<TokenItemContentProps> = ({
