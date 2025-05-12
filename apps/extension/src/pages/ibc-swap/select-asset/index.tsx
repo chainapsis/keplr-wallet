@@ -22,6 +22,7 @@ import { FixedSizeList } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { useSearch } from "../../../hooks/use-search";
 import { getTokenSearchResultClickAnalyticsProperties } from "../../../analytics-amplitude";
+import { DenomHelper } from "@keplr-wallet/common";
 
 // 계산이 복잡해서 memoize을 적용해야하는데
 // mobx와 useMemo()는 같이 사용이 어려워서
@@ -202,6 +203,13 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
           return false;
         }
 
+        const denomHelper = new DenomHelper(
+          token.token.currency.coinMinimalDenom
+        );
+        if (denomHelper.type === "lp") {
+          return false;
+        }
+
         return (
           !excludeKey ||
           `${token.chainInfo.chainIdentifier}/${token.token.currency.coinMinimalDenom}` !==
@@ -214,6 +222,11 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
 
     const filteredRemaining = useMemo(() => {
       const filtered = remaining.filter((r) => {
+        const denomHelper = new DenomHelper(r.currency.coinMinimalDenom);
+        if (denomHelper.type === "lp") {
+          return false;
+        }
+
         return (
           !excludeKey ||
           `${r.chainInfo.chainIdentifier}/${r.currency.coinMinimalDenom}` !==
@@ -306,6 +319,7 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
                       );
                     }
                     const currencyNotFoundTimeout = setTimeout(() => {
+                      // TODO: UI에서 잘 보여주도록 변경해야 함
                       alert("Currency not found");
                     }, 3000);
                     setSelectedAssetWithTimer({
@@ -377,6 +391,7 @@ const TokenListItem = ({
         viewToken={viewToken}
         hideBalance={isFilteredTokens ? false : true}
         onClick={() => data.onClick(viewToken, index)}
+        noTokenTag
       />
     </div>
   );
