@@ -1,4 +1,5 @@
 export * from "./types";
+export * from "./assets";
 export * from "./assets-from-source";
 export * from "./queries";
 export * from "./route";
