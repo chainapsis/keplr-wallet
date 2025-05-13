@@ -507,6 +507,15 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
     return res;
   }
 
+  get isLoadingSwapDestinationCurrenciesMap(): boolean {
+    const swapVenueChainIds = this.swapVenues.map((v) => v.chainId).sort();
+    const assetBatchCache =
+      this.assetsBatch.findCachedAssetsBatch(swapVenueChainIds);
+    const assetsBatch = this.assetsBatch.getAssetsBatch(swapVenueChainIds);
+
+    return assetBatchCache.size === 0 && assetsBatch.isFetching;
+  }
+
   @computed
   get swapDestinationCurrencies(): {
     chainInfo: IChainInfoImpl;
