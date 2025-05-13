@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
+import React, { FunctionComponent, useMemo, useState } from "react";
 import { BackButton } from "../../../layouts/header/components";
 import { HeaderLayout } from "../../../layouts/header";
 import styled from "styled-components";
@@ -14,7 +14,7 @@ import { useNavigate } from "react-router";
 import { useIntl } from "react-intl";
 import { HugeQueriesStore } from "../../../stores/huge-queries";
 import { ViewToken } from "../../main";
-import { computed, makeObservable } from "mobx";
+import { autorun, computed, IReactionDisposer, makeObservable } from "mobx";
 import { ObservableQueryIbcSwap } from "@keplr-wallet/stores-internal";
 import { Currency } from "@keplr-wallet/types";
 import { IChainInfoImpl } from "@keplr-wallet/stores";
@@ -244,49 +244,10 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
       remainingSearchFields
     );
 
-    // findCurrency가 동기적이기 때문에 currency를 찾는 동안에도 undefined를 리턴한다.
-    // findCurrencyAsync를 쓰면 되지만 현재 의도대로 동작하지 않는다.
-    // 따라서 findCurrency를 쓰되 정해진 timeout 동안에도 찾지 못하면 찾지 못했다고 판단하도록 한다.
-    const [selectedAssetWithTimeout, setSelectedAssetWithTimeout] = useState<{
-      coinMinimalDenom: string;
-      chainId: string;
-      timeout: NodeJS.Timeout;
-    }>();
-    const selectedCurrency = selectedAssetWithTimeout
-      ? chainStore
-          .getChain(selectedAssetWithTimeout.chainId)
-          .findCurrency(selectedAssetWithTimeout.coinMinimalDenom)
-      : null;
-
+    const [selectedCoinMinimalDenom, setSelectedCoinMinimalDenom] =
+      useState<string>();
     const [unsupportedCoinMinimalDenoms, setUnsupportedCoinMinimalDenoms] =
       useState<Set<string>>(new Set());
-
-    useEffect(() => {
-      if (selectedAssetWithTimeout && selectedCurrency) {
-        clearTimeout(selectedAssetWithTimeout.timeout);
-        setSelectedAssetWithTimeout(undefined);
-
-        if (paramNavigateTo) {
-          navigate(
-            paramNavigateTo
-              .replace("{chainId}", selectedAssetWithTimeout.chainId)
-              .replace("{coinMinimalDenom}", selectedCurrency.coinMinimalDenom),
-            {
-              replace: paramNavigateReplace === "true",
-            }
-          );
-        } else {
-          console.error("Empty navigateTo param");
-        }
-      }
-    }, [
-      selectedAssetWithTimeout,
-      paramNavigateTo,
-      paramNavigateReplace,
-      chainStore,
-      navigate,
-      selectedCurrency,
-    ]);
 
     return (
       <HeaderLayout
@@ -313,9 +274,9 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
                 itemData={{
                   searchedTokens,
                   searchedRemaining,
-                  selectedAssetWithTimeout,
+                  selectedCoinMinimalDenom,
                   unsupportedCoinMinimalDenoms,
-                  onClick: (viewToken, index) => {
+                  onClick: async (viewToken, index) => {
                     if (search.trim().length > 0) {
                       analyticsAmplitudeStore.logEvent(
                         "click_token_item_search_results_select_asset_ibc_swap",
@@ -327,20 +288,68 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
                         )
                       );
                     }
-                    const currencyNotFoundTimeout = setTimeout(() => {
-                      // TODO: UI에서 잘 보여주도록 변경해야 함
-                      alert("Currency not found");
-                      const newSet = new Set(unsupportedCoinMinimalDenoms);
-                      newSet.add(viewToken.token.currency.coinMinimalDenom);
-                      setUnsupportedCoinMinimalDenoms(newSet);
-                      setSelectedAssetWithTimeout(undefined);
-                    }, 3000);
-                    setSelectedAssetWithTimeout({
-                      coinMinimalDenom:
-                        viewToken.token.currency.coinMinimalDenom,
-                      chainId: viewToken.chainInfo.chainId,
-                      timeout: currencyNotFoundTimeout,
-                    });
+
+                    let timer: NodeJS.Timeout | undefined;
+                    let disposal: IReactionDisposer | undefined;
+                    await Promise.race([
+                      new Promise((resolve) => {
+                        timer = setTimeout(resolve, 3000);
+                      }),
+                      new Promise((resolve) => {
+                        // findCurrency가 동기적이기 때문에 currency를 찾는 동안에도 undefined를 리턴한다.
+                        // findCurrencyAsync를 쓰면 되지만 현재 의도대로 동작하지 않는다.
+                        // 따라서 findCurrency를 쓰되 정해진 timeout 동안에도 찾지 못하면 찾지 못했다고 판단하도록 한다.
+                        disposal = autorun(() => {
+                          const currency = chainStore
+                            .getChain(viewToken.chainInfo.chainId)
+                            .findCurrency(
+                              viewToken.token.currency.coinMinimalDenom
+                            );
+                          setSelectedCoinMinimalDenom(
+                            viewToken.token.currency.coinMinimalDenom
+                          );
+                          if (currency) {
+                            if (paramNavigateTo) {
+                              navigate(
+                                paramNavigateTo
+                                  .replace(
+                                    "{chainId}",
+                                    viewToken.chainInfo.chainId
+                                  )
+                                  .replace(
+                                    "{coinMinimalDenom}",
+                                    viewToken.token.currency.coinMinimalDenom
+                                  ),
+                                {
+                                  replace: paramNavigateReplace === "true",
+                                }
+                              );
+                            } else {
+                              console.error("Empty navigateTo param");
+                            }
+                            resolve(null);
+                          }
+                        });
+                      }),
+                    ]);
+
+                    setSelectedCoinMinimalDenom(undefined);
+                    const newUnsupportedCoinMinimalDenoms = new Set(
+                      unsupportedCoinMinimalDenoms
+                    );
+                    newUnsupportedCoinMinimalDenoms.add(
+                      viewToken.token.currency.coinMinimalDenom
+                    );
+                    setUnsupportedCoinMinimalDenoms(
+                      newUnsupportedCoinMinimalDenoms
+                    );
+
+                    if (timer) {
+                      clearTimeout(timer);
+                    }
+                    if (disposal) {
+                      disposal();
+                    }
                   },
                 }}
                 width={width}
@@ -371,11 +380,7 @@ const TokenListItem = ({
       currency: Currency;
       chainInfo: IChainInfoImpl;
     }[];
-    selectedAssetWithTimeout?: {
-      coinMinimalDenom: string;
-      chainId: string;
-      timeout: NodeJS.Timeout;
-    };
+    selectedCoinMinimalDenom?: string;
     unsupportedCoinMinimalDenoms: Set<string>;
     onClick: (viewToken: ViewToken, index: number) => void;
   };
@@ -388,7 +393,7 @@ const TokenListItem = ({
     : data.searchedRemaining[index - data.searchedTokens.length];
 
   const isFindingCurrency =
-    data.selectedAssetWithTimeout?.coinMinimalDenom ===
+    data.selectedCoinMinimalDenom ===
     ("currency" in item
       ? item.currency.coinMinimalDenom
       : item.token.currency.coinMinimalDenom);
