@@ -149,7 +149,7 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
               ? `erc20:${asset.origin_denom.toLowerCase()}`
               : asset.origin_denom;
             // TODO: Dec, Int 같은 곳에서 18 이상인 경우도 고려하도록 수정
-            if (asset.decimals && asset.decimals <= 18) {
+            if (asset.decimals != null && asset.decimals <= 18) {
               res.push({
                 denom: coinMinimalDenom,
                 chainId: chainId,
@@ -493,7 +493,7 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
                 ? `erc20:${asset.origin_denom.toLowerCase()}`
                 : asset.origin_denom;
               // TODO: Dec, Int 같은 곳에서 18 이상인 경우도 고려하도록 수정
-              if (asset.decimals && asset.decimals <= 18) {
+              if (asset.decimals != null && asset.decimals <= 18) {
                 assets.push({
                   denom: coinMinimalDenom,
                   chainId: assetChainId,

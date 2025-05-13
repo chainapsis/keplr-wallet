@@ -6,7 +6,7 @@ import {
   ERC20Currency,
 } from "@keplr-wallet/types";
 import { ObservableQueryAssetsBatch } from "./assets";
-import { comparer, computed, makeObservable } from "mobx";
+import { computed, makeObservable } from "mobx";
 import { ObservableQueryChains } from "./chains";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { ObservableQueryRoute, ObservableQueryRouteInner } from "./route";
@@ -389,7 +389,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
     return false;
   }
 
-  @computed({ equals: comparer.structural })
+  @computed
   get swapDestinationCurrenciesMap(): Map<
     string,
     {
