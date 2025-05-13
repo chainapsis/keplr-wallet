@@ -23,6 +23,7 @@ import AutoSizer from "react-virtualized-auto-sizer";
 import { useSearch } from "../../../hooks/use-search";
 import { getTokenSearchResultClickAnalyticsProperties } from "../../../analytics-amplitude";
 import { DenomHelper } from "@keplr-wallet/common";
+import { SwapNotAvailableModal } from "../components/swap-not-available-modal";
 
 // 계산이 복잡해서 memoize을 적용해야하는데
 // mobx와 useMemo()는 같이 사용이 어려워서
@@ -248,6 +249,8 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
       useState<string>();
     const [unsupportedCoinMinimalDenoms, setUnsupportedCoinMinimalDenoms] =
       useState<Set<string>>(new Set());
+    const [isSwapNotAvailableModalOpen, setIsSwapNotAvailableModalOpen] =
+      useState(false);
 
     return (
       <HeaderLayout
@@ -343,6 +346,7 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
                     setUnsupportedCoinMinimalDenoms(
                       newUnsupportedCoinMinimalDenoms
                     );
+                    setIsSwapNotAvailableModalOpen(true);
 
                     if (timer) {
                       clearTimeout(timer);
@@ -362,6 +366,10 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
             )}
           </AutoSizer>
         </Styles.Container>
+        <SwapNotAvailableModal
+          isOpen={isSwapNotAvailableModalOpen}
+          close={() => setIsSwapNotAvailableModalOpen(false)}
+        />
       </HeaderLayout>
     );
   }
