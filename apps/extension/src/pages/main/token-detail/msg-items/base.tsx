@@ -79,7 +79,19 @@ export const MsgItemBase: FunctionComponent<{
       `/tx-history/explorer/${chainInfo.chainIdentifier}`
     );
 
-    const explorerUrl = queryExplorer.response?.data.link || "";
+    // const explorerUrl = queryExplorer.response?.data.link || "";
+    const explorerUrl = (() => {
+      // TODO: Remove
+      if (queryExplorer.response?.data.link) {
+        return queryExplorer.response?.data.link;
+      }
+
+      if (msg.chainId === "eip155:1") {
+        return "https://etherscan.io/tx/0x{txHash}";
+      }
+
+      return "";
+    })();
 
     const clickable = !!explorerUrl;
 
