@@ -306,7 +306,6 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
     const [isSwapNotAvailableModalOpen, setIsSwapNotAvailableModalOpen] =
       useState(false);
 
-    // Unified click handler merging logic from both branches
     const handleTokenClick = useCallback(
       async (viewToken: ViewToken, index?: number) => {
         if (search.trim().length > 0 && index != null) {
@@ -328,7 +327,9 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
             timer = setTimeout(resolve, 3000);
           }),
           new Promise((resolve) => {
-            // Try to find currency – if found immediately navigate, otherwise wait until timeout.
+            // findCurrency가 동기적이기 때문에 currency를 찾는 동안에도 undefined를 리턴한다.
+            // findCurrencyAsync를 쓰면 되지만 현재 의도대로 동작하지 않는다.
+            // 따라서 findCurrency를 쓰되 정해진 timeout 동안에도 찾지 못하면 찾지 못했다고 판단하도록 한다.
             disposal = autorun(() => {
               const currency = chainStore
                 .getChain(viewToken.chainInfo.chainId)
