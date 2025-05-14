@@ -163,6 +163,12 @@ interface TokenItemProps {
 
   bottomTagType?: BottomTagType;
   earnedAssetPrice?: string;
+
+  // If this prop is provided, the token tag will not be shown.
+  noTokenTag?: boolean;
+
+  // If this prop is provided, the token item will be shown with loading state.
+  isLoading?: boolean;
 }
 
 export const TokenItem: FunctionComponent<TokenItemProps> = observer(
@@ -180,6 +186,8 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
     right,
     bottomTagType,
     earnedAssetPrice,
+    noTokenTag,
+    isLoading,
   }) => {
     const { priceStore, uiConfigStore } = useStore();
     const navigate = useNavigate();
@@ -204,7 +212,11 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
       return viewToken.token.currency.coinDenom;
     }, [viewToken.token.currency]);
 
-    const tag = useMemo(() => {
+    const tokenTag = useMemo(() => {
+      if (noTokenTag) {
+        return;
+      }
+
       const currency = viewToken.token.currency;
       const denomHelper = new DenomHelper(currency.coinMinimalDenom);
 
@@ -246,7 +258,7 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
           text: denomHelper.type.toUpperCase(),
         };
       }
-    }, [viewToken.token.currency, viewToken.chainInfo.chainId]);
+    }, [noTokenTag, viewToken.token.currency, viewToken.chainInfo.chainId]);
 
     const price24HChange = usePriceChange(
       showPrice24HChange,
@@ -276,7 +288,8 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
         isIBC={isIBC}
         pricePretty={pricePretty}
         price24HChange={price24HChange}
-        tag={tag}
+        tag={tokenTag}
+        isLoading={isLoading}
       />
     );
 
@@ -321,6 +334,7 @@ interface TokenItemContentProps {
     text: string;
     tooltip?: string;
   };
+  isLoading?: boolean;
 }
 
 const TokenItemContent: FunctionComponent<TokenItemContentProps> = ({

@@ -24,6 +24,7 @@ import {
   RequestBitcoinPushTxMsg,
   GetPreferredBitcoinPaymentTypeMsg,
   SetPreferredBitcoinPaymentTypeMsg,
+  RequestBitcoinPushPsbtMsg,
 } from "./messages";
 
 export function init(
@@ -49,6 +50,7 @@ export function init(
   router.registerMessage(RequestBitcoinGetInscriptionsMsg);
   router.registerMessage(RequestBitcoinSendBitcoinMsg);
   router.registerMessage(RequestBitcoinPushTxMsg);
+  router.registerMessage(RequestBitcoinPushPsbtMsg);
   router.registerMessage(GetPreferredBitcoinPaymentTypeMsg);
   router.registerMessage(SetPreferredBitcoinPaymentTypeMsg);
 

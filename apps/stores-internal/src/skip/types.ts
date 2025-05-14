@@ -22,10 +22,13 @@ export interface AssetsResponse {
             chain_id: string;
             origin_denom: string;
             origin_chain_id: string;
+            trace: string;
+            is_cw20: boolean;
             is_evm: boolean;
+            is_svm: boolean;
             token_contract?: string;
             recommended_symbol?: string;
-            decimals: number;
+            decimals?: number;
             symbol: string;
             logo_uri?: string;
             coingecko_id?: string;
@@ -312,17 +315,4 @@ export type IBCChannel = {
   }[];
 
   denom: string;
-};
-
-export type SkipAsset = {
-  denom: string;
-  chainId: string;
-  originDenom: string;
-  originChainId: string;
-  isEvm: boolean;
-  tokenContract?: string;
-  recommendedSymbol?: string;
-  logoURI?: string;
-  coingeckoId?: string;
-  decimals: number;
 };

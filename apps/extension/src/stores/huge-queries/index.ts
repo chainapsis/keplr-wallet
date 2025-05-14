@@ -23,7 +23,7 @@ import { BitcoinQueriesStore } from "@keplr-wallet/stores-bitcoin";
 import { UIConfigStore } from "../ui-config";
 import { KeyRingStore } from "@keplr-wallet/stores-core";
 import { AllTokenMapByChainIdentifierState } from "./all-token-map-state";
-import { SkipAsset, SkipQueries } from "@keplr-wallet/stores-internal";
+import { Asset, SkipQueries } from "@keplr-wallet/stores-internal";
 import { getBabylonUnbondingRemainingTime } from "../../utils/get-babylon-unbonding-remaining-time";
 import { INITIA_CHAIN_ID } from "../../config.ui";
 
@@ -1239,7 +1239,7 @@ export class HugeQueriesStore {
   };
 
   protected getIBCAssetForToken = computedFn(
-    (currency: IBCCurrency): SkipAsset | undefined => {
+    (currency: IBCCurrency): Asset | undefined => {
       const originChainId = currency.originChainId;
       const coinMinimalDenom = currency.originCurrency?.coinMinimalDenom;
 
@@ -1254,7 +1254,7 @@ export class HugeQueriesStore {
   );
 
   protected getErc20AssetForToken = computedFn(
-    (chainId: string, currency: AppCurrency): SkipAsset | undefined => {
+    (chainId: string, currency: AppCurrency): Asset | undefined => {
       if (!currency.coinMinimalDenom.startsWith("erc20:")) {
         return undefined;
       }
