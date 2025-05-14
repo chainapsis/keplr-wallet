@@ -33,6 +33,7 @@ import { useTokenTag } from "../../../../hooks/use-token-tag";
 import { TokenTag } from "./token-tag";
 import { CopyAddressButton } from "./copy-address-button";
 import { useCopyAddress } from "../../../../hooks/use-copy-address";
+import { CoinPretty, PricePretty } from "@keplr-wallet/unit";
 
 const StandaloneEarnBox: FunctionComponent<{
   bottomTagType?: BottomTagType;
@@ -205,127 +206,37 @@ const NestedTokenItem: FunctionComponent<{
   );
 });
 
-export const GroupedTokenItem: FunctionComponent<{
-  tokens: ViewToken[];
-  onClick?: () => void;
-  onTokenClick?: (token: ViewToken) => void;
+interface TokenGroupHeaderProps {
   disabled?: boolean;
-  bottomTagType?: BottomTagType;
-  earnedAssetPrice?: string;
-  showPrice24HChange?: boolean;
-  alwaysOpen?: boolean;
-}> = observer(
+  isOpen: boolean;
+  onClick: () => void;
+  mainToken: ViewToken;
+  tokens: ViewToken[];
+  uniqueChainIds: string[];
+  coinDenom: string;
+  price24HChange?: ReturnType<typeof usePriceChange>;
+  totalBalance: CoinPretty;
+  totalPrice: PricePretty | undefined;
+}
+
+const TokenGroupHeader: FunctionComponent<TokenGroupHeaderProps> = observer(
   ({
-    tokens,
-    onClick,
     disabled,
-    bottomTagType,
-    earnedAssetPrice,
-    showPrice24HChange,
-    alwaysOpen,
-    onTokenClick,
+    isOpen,
+    onClick,
+    mainToken,
+    tokens,
+    uniqueChainIds,
+    coinDenom,
+    price24HChange,
+    totalBalance,
+    totalPrice,
   }) => {
-    const [isOpen, setIsOpen] = useState(!!alwaysOpen);
+    const { uiConfigStore } = useStore();
     const theme = useTheme();
-    const { uiConfigStore, priceStore } = useStore();
-    const [, setSearchParams] = useSearchParams();
 
-    const mainToken = tokens[0];
-
-    const totalBalance = useMemo(() => {
-      let sum = tokens[0].token.clone();
-      for (let i = 1; i < tokens.length; i++) {
-        sum = sum.addDifferentDenoms(tokens[i].token);
-      }
-      return sum;
-    }, [tokens]);
-
-    const totalPrice = useMemo(() => {
-      return priceStore.calculatePrice(totalBalance);
-    }, [priceStore, totalBalance]);
-
-    const uniqueChainIds = useMemo(() => {
-      return [...new Set(tokens.map((token) => token.chainInfo.chainId))];
-    }, [tokens]);
-
-    const coinDenom = useMemo(() => {
-      if (
-        "originCurrency" in mainToken.token.currency &&
-        mainToken.token.currency.originCurrency
-      ) {
-        return mainToken.token.currency.originCurrency.coinDenom;
-      }
-      return mainToken.token.currency.coinDenom;
-    }, [mainToken.token.currency]);
-
-    const effectiveEarnedAssetPrice = useMemo(() => {
-      if (earnedAssetPrice) return earnedAssetPrice;
-      const tokenWithPrice = tokens.find(
-        (token) => "earnedAssetPrice" in token && token.earnedAssetPrice
-      );
-      return tokenWithPrice && "earnedAssetPrice" in tokenWithPrice
-        ? (tokenWithPrice.earnedAssetPrice as string)
-        : undefined;
-    }, [tokens, earnedAssetPrice]);
-
-    const price24HChange = usePriceChange(
-      showPrice24HChange,
-      mainToken.token.currency.coinGeckoId
-    );
-
-    const handleClick = () => {
-      if (disabled) return;
-      if (alwaysOpen) return;
-      setIsOpen(!isOpen);
-      if (onClick) onClick();
-    };
-
-    const openTokenDetail = (token: ViewToken) => {
-      setSearchParams((prev) => {
-        prev.set("tokenChainId", token.chainInfo.chainId);
-        prev.set(
-          "tokenCoinMinimalDenom",
-          token.token.currency.coinMinimalDenom
-        );
-        prev.set("isTokenDetailModalOpen", "true");
-        return prev;
-      });
-    };
-
-    const [delayedIsOpen, setDelayedIsOpen] = useState(isOpen);
-
-    useEffect(() => {
-      if (isOpen && bottomTagType) {
-        setTimeout(() => {
-          setDelayedIsOpen(isOpen);
-        }, 300);
-      } else {
-        setDelayedIsOpen(isOpen);
-      }
-    }, [isOpen, bottomTagType]);
-
-    if (tokens.length === 1) {
-      return (
-        <TokenItem
-          viewToken={{ ...tokens[0], isFetching: false }}
-          onClick={() => {
-            if (onClick) onClick();
-            openTokenDetail(tokens[0]);
-          }}
-          disabled={disabled}
-          bottomTagType={bottomTagType}
-          earnedAssetPrice={earnedAssetPrice}
-          showPrice24HChange={showPrice24HChange}
-        />
-      );
-    }
-
-    const mainContainer = (
-      <Styles.Container
-        disabled={disabled}
-        isOpen={isOpen}
-        onClick={handleClick}
-      >
+    return (
+      <Styles.Container disabled={disabled} isOpen={isOpen} onClick={onClick}>
         <Columns sum={1} gutter="0.5rem" alignY="center">
           <Styles.TokenImageWrapper>
             <CurrencyImageFallback
@@ -430,6 +341,122 @@ export const GroupedTokenItem: FunctionComponent<{
         </Columns>
       </Styles.Container>
     );
+  }
+);
+
+export const GroupedTokenItem: FunctionComponent<{
+  tokens: ViewToken[];
+  onClick?: () => void;
+  onTokenClick?: (token: ViewToken) => void;
+  disabled?: boolean;
+  bottomTagType?: BottomTagType;
+  earnedAssetPrice?: string;
+  showPrice24HChange?: boolean;
+  alwaysOpen?: boolean;
+}> = observer(
+  ({
+    tokens,
+    onClick,
+    disabled,
+    bottomTagType,
+    earnedAssetPrice,
+    showPrice24HChange,
+    alwaysOpen,
+    onTokenClick,
+  }) => {
+    const [isOpen, setIsOpen] = useState(!!alwaysOpen);
+    const { priceStore } = useStore();
+    const [, setSearchParams] = useSearchParams();
+
+    const mainToken = tokens[0];
+
+    const totalBalance = useMemo(() => {
+      let sum = tokens[0].token.clone();
+      for (let i = 1; i < tokens.length; i++) {
+        sum = sum.addDifferentDenoms(tokens[i].token);
+      }
+      return sum;
+    }, [tokens]);
+
+    const totalPrice = useMemo(() => {
+      return priceStore.calculatePrice(totalBalance);
+    }, [priceStore, totalBalance]);
+
+    const uniqueChainIds = useMemo(() => {
+      return [...new Set(tokens.map((token) => token.chainInfo.chainId))];
+    }, [tokens]);
+
+    const coinDenom = useMemo(() => {
+      if (
+        "originCurrency" in mainToken.token.currency &&
+        mainToken.token.currency.originCurrency
+      ) {
+        return mainToken.token.currency.originCurrency.coinDenom;
+      }
+      return mainToken.token.currency.coinDenom;
+    }, [mainToken.token.currency]);
+
+    const effectiveEarnedAssetPrice = useMemo(() => {
+      if (earnedAssetPrice) return earnedAssetPrice;
+      const tokenWithPrice = tokens.find(
+        (token) => "earnedAssetPrice" in token && token.earnedAssetPrice
+      );
+      return tokenWithPrice && "earnedAssetPrice" in tokenWithPrice
+        ? (tokenWithPrice.earnedAssetPrice as string)
+        : undefined;
+    }, [tokens, earnedAssetPrice]);
+
+    const price24HChange = usePriceChange(
+      showPrice24HChange,
+      mainToken.token.currency.coinGeckoId
+    );
+
+    const handleClick = () => {
+      if (disabled) return;
+      if (alwaysOpen) return;
+      setIsOpen(!isOpen);
+      if (onClick) onClick();
+    };
+
+    const openTokenDetail = (token: ViewToken) => {
+      setSearchParams((prev) => {
+        prev.set("tokenChainId", token.chainInfo.chainId);
+        prev.set(
+          "tokenCoinMinimalDenom",
+          token.token.currency.coinMinimalDenom
+        );
+        prev.set("isTokenDetailModalOpen", "true");
+        return prev;
+      });
+    };
+
+    const [delayedIsOpen, setDelayedIsOpen] = useState(isOpen);
+
+    useEffect(() => {
+      if (isOpen && bottomTagType) {
+        setTimeout(() => {
+          setDelayedIsOpen(isOpen);
+        }, 300);
+      } else {
+        setDelayedIsOpen(isOpen);
+      }
+    }, [isOpen, bottomTagType]);
+
+    if (tokens.length === 1) {
+      return (
+        <TokenItem
+          viewToken={{ ...tokens[0], isFetching: false }}
+          onClick={() => {
+            if (onClick) onClick();
+            openTokenDetail(tokens[0]);
+          }}
+          disabled={disabled}
+          bottomTagType={bottomTagType}
+          earnedAssetPrice={earnedAssetPrice}
+          showPrice24HChange={showPrice24HChange}
+        />
+      );
+    }
 
     return (
       <div>
@@ -438,7 +465,18 @@ export const GroupedTokenItem: FunctionComponent<{
           earnedAssetPrice={effectiveEarnedAssetPrice}
           hideBottomTag={isOpen && !!bottomTagType}
         >
-          {mainContainer}
+          <TokenGroupHeader
+            disabled={disabled}
+            isOpen={isOpen}
+            onClick={handleClick}
+            mainToken={mainToken}
+            tokens={tokens}
+            uniqueChainIds={uniqueChainIds}
+            coinDenom={coinDenom}
+            price24HChange={price24HChange}
+            totalBalance={totalBalance}
+            totalPrice={totalPrice}
+          />
         </WrapperwithBottomTag>
 
         <VerticalCollapseTransition collapsed={!delayedIsOpen}>
