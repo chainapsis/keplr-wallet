@@ -3,7 +3,11 @@ import { AppCurrency, ChainInfo, ERC20Currency } from "@keplr-wallet/types";
 import { ERC20CurrencySchema } from "@keplr-wallet/chain-validator";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { ChainsService } from "../chains";
-import { KVStore, PrefixKVStore } from "@keplr-wallet/common";
+import {
+  KVStore,
+  makeSureUTF8String,
+  PrefixKVStore,
+} from "@keplr-wallet/common";
 import { InteractionService } from "../interaction";
 import {
   action,
@@ -237,15 +241,3 @@ export class TokenERC20Service {
     return currency;
   }
 }
-
-const makeSureUTF8String = (string: string) => {
-  const isHexString = /^[0-9A-Fa-f]+$/.test(string) && string.length % 2 === 0;
-  if (isHexString) {
-    try {
-      return Buffer.from(string, "hex").toString("utf8");
-    } catch (e) {
-      return string;
-    }
-  }
-  return string;
-};

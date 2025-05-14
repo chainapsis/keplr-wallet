@@ -33,6 +33,7 @@ import { IconButton } from "../../../../components/icon-button";
 import { MenuIcon } from "../../../../components/icon";
 import { handleExternalInteractionWithNoProceedNext } from "../../../../utils";
 import { TokenContract } from "../../../../stores/token-contracts";
+import { makeSureUTF8String } from "@keplr-wallet/common";
 
 const Styles = {
   Container: styled(Stack)`
@@ -514,15 +515,3 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
     </HeaderLayout>
   );
 });
-
-const makeSureUTF8String = (string: string) => {
-  const isHexString = /^[0-9A-Fa-f]+$/.test(string) && string.length % 2 === 0;
-  if (isHexString) {
-    try {
-      return Buffer.from(string, "hex").toString("utf8");
-    } catch (e) {
-      return string;
-    }
-  }
-  return string;
-};

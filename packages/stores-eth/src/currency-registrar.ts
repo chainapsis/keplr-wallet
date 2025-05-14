@@ -1,6 +1,6 @@
 import { AppCurrency, ERC20Currency } from "@keplr-wallet/types";
 import { ChainStore, IQueriesStore } from "@keplr-wallet/stores";
-import { DenomHelper, KVStore } from "@keplr-wallet/common";
+import { DenomHelper, KVStore, makeSureUTF8String } from "@keplr-wallet/common";
 import { makeObservable, observable, runInAction } from "mobx";
 import { EthereumQueries } from "./queries";
 import { KeplrETCQueries } from "@keplr-wallet/stores-etc";
@@ -357,15 +357,3 @@ export class ERC20CurrencyRegistrar {
     this.kvStore.set<Record<string, CurrencyCache>>(dbKey, obj);
   }
 }
-
-const makeSureUTF8String = (string: string) => {
-  const isHexString = /^[0-9A-Fa-f]+$/.test(string) && string.length % 2 === 0;
-  if (isHexString) {
-    try {
-      return Buffer.from(string, "hex").toString("utf8");
-    } catch (e) {
-      return string;
-    }
-  }
-  return string;
-};
