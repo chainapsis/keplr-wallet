@@ -38,7 +38,16 @@ export class TokenERC20Service {
     );
     if (saved) {
       for (const [key, value] of Object.entries(saved)) {
-        this.tokenMap.set(key, value);
+        const tokens = value.map((token) => {
+          return {
+            ...token,
+            currency: {
+              ...token.currency,
+              coinDenom: makeSureUTF8String(token.currency.coinDenom),
+            },
+          };
+        });
+        this.tokenMap.set(key, tokens);
       }
     }
     autorun(() => {
@@ -228,3 +237,15 @@ export class TokenERC20Service {
     return currency;
   }
 }
+
+const makeSureUTF8String = (string: string) => {
+  const isHexString = /^[0-9A-Fa-f]+$/.test(string) && string.length % 2 === 0;
+  if (isHexString) {
+    try {
+      return Buffer.from(string, "hex").toString("utf8");
+    } catch (e) {
+      return string;
+    }
+  }
+  return string;
+};

@@ -269,7 +269,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
               type: "erc20",
               contractAddress: contractAddress,
               coinMinimalDenom: `erc20:${contractAddress}`,
-              coinDenom: queryContract.tokenInfo.symbol,
+              coinDenom: makeSureUTF8String(queryContract.tokenInfo.symbol),
               coinDecimals: queryContract.tokenInfo.decimals,
               coinImageUrl: tokenContract?.imageUrl,
               coinGeckoId: tokenContract?.coinGeckoId,
@@ -429,7 +429,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
           label={intl.formatMessage({
             id: "page.setting.token.add.symbol-label",
           })}
-          value={queryContract.tokenInfo?.symbol || "-"}
+          value={makeSureUTF8String(queryContract.tokenInfo?.symbol || "-")}
           disabled
         />
         <TextInput
@@ -514,3 +514,15 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
     </HeaderLayout>
   );
 });
+
+const makeSureUTF8String = (string: string) => {
+  const isHexString = /^[0-9A-Fa-f]+$/.test(string) && string.length % 2 === 0;
+  if (isHexString) {
+    try {
+      return Buffer.from(string, "hex").toString("utf8");
+    } catch (e) {
+      return string;
+    }
+  }
+  return string;
+};
