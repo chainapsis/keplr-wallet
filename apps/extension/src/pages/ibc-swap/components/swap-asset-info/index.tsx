@@ -253,12 +253,22 @@ export const SwapAssetInfo: FunctionComponent<{
                         .getBalance(amountConfig.currency);
 
                       if (!bal) {
+                        const coinDenomLength =
+                          amountConfig.currency.coinDenom.length;
+                        if (coinDenomLength > 15) {
+                          return `0 ${amountConfig.currency.coinDenom.slice(
+                            0,
+                            15
+                          )}...`;
+                        }
+
                         return `0 ${amountConfig.currency.coinDenom}`;
                       }
 
                       return uiConfigStore.hideStringIfPrivacyMode(
                         bal.balance
                           .maxDecimals(6)
+                          .maxCoinDenomLength(15)
                           .trim(true)
                           .shrink(true)
                           .inequalitySymbol(true)
@@ -513,6 +523,11 @@ export const SwapAssetInfo: FunctionComponent<{
                           ) {
                             // XXX: 솔직히 이거 왜 타입 추론 제대로 안되는지 모르겠다... 일단 대충 처리
                             return (currency.originCurrency as any).coinDenom;
+                          }
+
+                          const coinDenomLength = currency.coinDenom.length;
+                          if (coinDenomLength > 15) {
+                            return `${currency.coinDenom.slice(0, 15)}...`;
                           }
 
                           return currency.coinDenom;

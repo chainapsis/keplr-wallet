@@ -173,6 +173,7 @@ interface TokenItemProps {
 
   // If this prop is provided, the token item will be shown with loading state.
   isLoading?: boolean;
+  maxCoinDenomLength?: number;
 }
 
 export const TokenItem: FunctionComponent<TokenItemProps> = observer(
@@ -192,6 +193,7 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
     earnedAssetPrice,
     noTokenTag,
     isLoading,
+    maxCoinDenomLength,
   }) => {
     const { priceStore, price24HChangesStore, uiConfigStore } = useStore();
     const navigate = useNavigate();
@@ -207,14 +209,22 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
     }, [viewToken.token.currency]);
 
     const coinDenom = useMemo(() => {
-      if (
-        "originCurrency" in viewToken.token.currency &&
-        viewToken.token.currency.originCurrency
-      ) {
-        return viewToken.token.currency.originCurrency.coinDenom;
+      const coinDenom = (() => {
+        if (
+          "originCurrency" in viewToken.token.currency &&
+          viewToken.token.currency.originCurrency
+        ) {
+          return viewToken.token.currency.originCurrency.coinDenom;
+        }
+        return viewToken.token.currency.coinDenom;
+      })();
+
+      if (maxCoinDenomLength != null && coinDenom.length > maxCoinDenomLength) {
+        return `${coinDenom.slice(0, maxCoinDenomLength)}...`;
       }
-      return viewToken.token.currency.coinDenom;
-    }, [viewToken.token.currency]);
+
+      return coinDenom;
+    }, [viewToken.token.currency, maxCoinDenomLength]);
 
     const tokenTag = useMemo(() => {
       if (noTokenTag) {
