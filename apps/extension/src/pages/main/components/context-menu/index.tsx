@@ -200,7 +200,7 @@ const MainMenu: React.FC<MainMenuProps> = observer(
               <Gutter size="0.125rem" />
               <BetaIcon />
             </Styles.MenuItemXAxis>
-            <div>
+            <div onClick={(e) => e.stopPropagation()}>
               <Toggle
                 isOpen={showFiatValueVisible}
                 setIsOpen={onToggleAssetViewMode}
