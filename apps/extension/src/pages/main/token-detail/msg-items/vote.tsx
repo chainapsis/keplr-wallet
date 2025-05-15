@@ -5,6 +5,7 @@ import { MsgItemBase } from "./base";
 import { ItemLogo } from "./logo";
 import { ColorPalette } from "../../../../styles";
 import { MessageVoteIcon } from "../../../../components/icon";
+import { useTheme } from "styled-components";
 
 export const MsgRelationVote: FunctionComponent<{
   msg: MsgHistory;
@@ -12,6 +13,8 @@ export const MsgRelationVote: FunctionComponent<{
   targetDenom: string;
   isInAllActivitiesPage: boolean | undefined;
 }> = observer(({ msg, prices, targetDenom, isInAllActivitiesPage }) => {
+  const theme = useTheme();
+
   const proposal: {
     proposalId: string;
   } = useMemo(() => {
@@ -24,16 +27,21 @@ export const MsgRelationVote: FunctionComponent<{
     text: string;
     color: string;
   } = useMemo(() => {
+    const optionTextColor =
+      theme.mode === "light"
+        ? ColorPalette["gray-700"]
+        : ColorPalette["gray-10"];
+
     switch ((msg.msg as any)["option"]) {
       case "VOTE_OPTION_YES":
         return {
           text: "Yes",
-          color: ColorPalette["gray-10"],
+          color: optionTextColor,
         };
       case "VOTE_OPTION_NO":
         return {
           text: "No",
-          color: ColorPalette["gray-10"],
+          color: optionTextColor,
         };
       case "VOTE_OPTION_NO_WITH_VETO":
         return {
@@ -43,15 +51,15 @@ export const MsgRelationVote: FunctionComponent<{
       case "VOTE_OPTION_ABSTAIN":
         return {
           text: "Abstain",
-          color: ColorPalette["gray-10"],
+          color: optionTextColor,
         };
       default:
         return {
           text: "Unknown",
-          color: ColorPalette["gray-10"],
+          color: optionTextColor,
         };
     }
-  }, [msg.msg]);
+  }, [msg.msg, theme.mode]);
 
   return (
     <MsgItemBase
