@@ -9,7 +9,10 @@ import { ItemLogo } from "../../../../main/token-detail/msg-items/logo";
 export const VoteMessage: IMessageRenderer = {
   process(chainId: string, msg) {
     const d = (() => {
-      if ("type" in msg && msg.type === "cosmos-sdk/MsgVote") {
+      if (
+        "type" in msg &&
+        ["cosmos-sdk/MsgVote", "atomone/v1/MsgVote"].includes(msg.type)
+      ) {
         return {
           proposalId: msg.value.proposal_id,
           voter: msg.value.voter,
@@ -17,7 +20,12 @@ export const VoteMessage: IMessageRenderer = {
         };
       }
 
-      if ("unpacked" in msg && msg.typeUrl === "/cosmos.gov.v1beta1.MsgVote") {
+      if (
+        "unpacked" in msg &&
+        ["/cosmos.gov.v1beta1.MsgVote", "/atomone.gov.v1.MsgVote"].includes(
+          msg.typeUrl
+        )
+      ) {
         return {
           proposalId: (msg.unpacked as MsgVote).proposalId,
           voter: (msg.unpacked as MsgVote).voter,
