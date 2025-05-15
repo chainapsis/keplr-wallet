@@ -1,10 +1,5 @@
 import { observer } from "mobx-react-lite";
-import React, {
-  FunctionComponent,
-  useCallback,
-  useMemo,
-  useState,
-} from "react";
+import React, { FunctionComponent, useMemo, useState } from "react";
 import { BackButton } from "../../../layouts/header/components";
 import { HeaderLayout } from "../../../layouts/header";
 import styled, { useTheme } from "styled-components";
@@ -29,8 +24,6 @@ import { StackIcon } from "../../../components/icon/stack";
 import { useSearch } from "../../../hooks/use-search";
 import { ViewToken } from "../../main";
 import { getTokenSearchResultClickAnalyticsProperties } from "../../../analytics-amplitude";
-import { useGroupedTokensMap } from "../../../hooks/use-grouped-tokens-map";
-import { GroupedTokenItem } from "../../main/components/token/grouped";
 
 const Styles = {
   Container: styled(Stack)<{ isNobleEarn: boolean }>`
@@ -59,7 +52,6 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
     skipQueriesStore,
     chainStore,
     analyticsAmplitudeStore,
-    uiConfigStore,
   } = useStore();
   const navigate = useNavigate();
   const intl = useIntl();
@@ -101,114 +93,43 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
 
   const searchedTokens = useSearch(nonZeroTokens, search, searchFields);
 
-  const filterByChainInfoIfIBCTransfer = useCallback((token: ViewToken) => {
-    if (!("currencies" in token.chainInfo)) {
-      return false;
-    }
-
-    return token.chainInfo.hasFeature("ibc-transfer");
-  }, []);
-
-  const filterByCurrency = useCallback(
-    (token: ViewToken) => {
-      if (paramIsIBCSwap) {
-        // skipQueriesStore.queryIBCSwap.isSwappableCurrency는 useMemo 안에 들어가면 observation이 안되서 따로 빼야한다...
-        return skipQueriesStore.queryIBCSwap.isSwappableCurrency(
-          token.chainInfo.chainId,
-          token.token.currency
-        );
-      }
-
-      if (paramIsNobleEarn) {
-        if (
-          "originChainId" in token.token.currency &&
-          token.token.currency.originChainId === NOBLE_CHAIN_ID &&
-          token.token.currency.originCurrency &&
-          token.token.currency.originCurrency.coinMinimalDenom === "uusdc"
-        ) {
-          return true;
-        }
-        return false;
-      }
-
-      return true;
-    },
-    [paramIsIBCSwap, paramIsNobleEarn, skipQueriesStore.queryIBCSwap]
-  );
-
   const _filteredTokens = useMemo(() => {
     if (paramIsIBCTransfer) {
-      return searchedTokens.filter(filterByChainInfoIfIBCTransfer);
+      return searchedTokens.filter((token) => {
+        if (!("currencies" in token.chainInfo)) {
+          return false;
+        }
+
+        return token.chainInfo.hasFeature("ibc-transfer");
+      });
     }
 
     return searchedTokens;
-  }, [paramIsIBCTransfer, searchedTokens, filterByChainInfoIfIBCTransfer]);
+  }, [paramIsIBCTransfer, searchedTokens]);
 
-  const filteredTokens = _filteredTokens.filter(filterByCurrency);
-
-  const { searchedGroupedTokensMap } = useGroupedTokensMap(search);
-
-  const filteredGroupedTokensMap = useMemo(() => {
-    return new Map(
-      Array.from(searchedGroupedTokensMap.entries())
-        .map<[string, ViewToken[]]>(([groupKey, tokens]) => {
-          let filteredTokens = tokens;
-          if (paramIsIBCTransfer) {
-            filteredTokens = filteredTokens.filter(
-              filterByChainInfoIfIBCTransfer
-            );
-          }
-          filteredTokens = filteredTokens.filter(filterByCurrency);
-          if (hideIBCToken) {
-            filteredTokens = filteredTokens.filter((token) => {
-              return !token.token.currency.coinMinimalDenom.startsWith("ibc/");
-            });
-          }
-
-          return [groupKey, filteredTokens];
-        })
-        .filter(([, tokens]) => tokens.length > 0)
-    );
-  }, [
-    searchedGroupedTokensMap,
-    filterByChainInfoIfIBCTransfer,
-    filterByCurrency,
-    hideIBCToken,
-    paramIsIBCTransfer,
-  ]);
-
-  const onTokenClick = (viewToken: ViewToken) => {
-    const modularChainInfo = chainStore.getModularChain(
-      viewToken.chainInfo.chainId
-    );
-    const isStarknet =
-      "starknet" in modularChainInfo && modularChainInfo.starknet != null;
-    const isBitcoin =
-      "bitcoin" in modularChainInfo && modularChainInfo.bitcoin != null;
-
-    const sendRoute = isBitcoin
-      ? "/bitcoin/send"
-      : isStarknet
-      ? "/starknet/send"
-      : "/send";
-
-    if (paramNavigateTo) {
-      navigate(
-        paramNavigateTo
-          .replace("/send", sendRoute)
-          .replace("{chainId}", viewToken.chainInfo.chainId)
-          .replace(
-            "{coinMinimalDenom}",
-            viewToken.token.currency.coinMinimalDenom
-          ),
-        {
-          replace: paramNavigateReplace === "true",
-        }
+  const filteredTokens = _filteredTokens.filter((token) => {
+    if (paramIsIBCSwap) {
+      // skipQueriesStore.queryIBCSwap.isSwappableCurrency는 useMemo 안에 들어가면 observation이 안되서 따로 빼야한다...
+      return skipQueriesStore.queryIBCSwap.isSwappableCurrency(
+        token.chainInfo.chainId,
+        token.token.currency
       );
-    } else {
-      console.error("Empty navigateTo param");
     }
-  };
+
+    if (paramIsNobleEarn) {
+      if (
+        "originChainId" in token.token.currency &&
+        token.token.currency.originChainId === NOBLE_CHAIN_ID &&
+        token.token.currency.originCurrency &&
+        token.token.currency.originCurrency.coinMinimalDenom === "uusdc"
+      ) {
+        return true;
+      }
+      return false;
+    }
+
+    return true;
+  });
 
   return (
     <HeaderLayout
@@ -319,43 +240,57 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
           </Box>
         ) : null}
 
-        {uiConfigStore.assetViewMode === "grouped" ? (
-          <YAxis gap="0.5rem">
-            {Array.from(filteredGroupedTokensMap.entries()).map(
-              ([groupKey, tokens]) => (
-                <GroupedTokenItem
-                  key={groupKey}
-                  tokens={tokens}
-                  alwaysOpen={true}
-                  onTokenClick={onTokenClick}
-                />
-              )
-            )}
-          </YAxis>
-        ) : (
-          filteredTokens.map((viewToken, index) => {
-            return (
-              <TokenItem
-                viewToken={viewToken}
-                key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
-                onClick={() => {
-                  if (search.trim().length > 0) {
-                    analyticsAmplitudeStore.logEvent(
-                      "click_token_item_search_results_select_asset_send",
-                      getTokenSearchResultClickAnalyticsProperties(
-                        viewToken,
-                        search,
-                        filteredTokens,
-                        index
-                      )
-                    );
-                  }
-                  onTokenClick(viewToken);
-                }}
-              />
-            );
-          })
-        )}
+        {filteredTokens.map((viewToken, index) => {
+          const modularChainInfo = chainStore.getModularChain(
+            viewToken.chainInfo.chainId
+          );
+          const isStarknet =
+            "starknet" in modularChainInfo && modularChainInfo.starknet != null;
+          const isBitcoin =
+            "bitcoin" in modularChainInfo && modularChainInfo.bitcoin != null;
+
+          const sendRoute = isBitcoin
+            ? "/bitcoin/send"
+            : isStarknet
+            ? "/starknet/send"
+            : "/send";
+
+          return (
+            <TokenItem
+              viewToken={viewToken}
+              key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
+              onClick={() => {
+                if (search.trim().length > 0) {
+                  analyticsAmplitudeStore.logEvent(
+                    "click_token_item_search_results_select_asset_send",
+                    getTokenSearchResultClickAnalyticsProperties(
+                      viewToken,
+                      search,
+                      filteredTokens,
+                      index
+                    )
+                  );
+                }
+                if (paramNavigateTo) {
+                  navigate(
+                    paramNavigateTo
+                      .replace("/send", sendRoute)
+                      .replace("{chainId}", viewToken.chainInfo.chainId)
+                      .replace(
+                        "{coinMinimalDenom}",
+                        viewToken.token.currency.coinMinimalDenom
+                      ),
+                    {
+                      replace: paramNavigateReplace === "true",
+                    }
+                  );
+                } else {
+                  console.error("Empty navigateTo param");
+                }
+              }}
+            />
+          );
+        })}
       </Styles.Container>
     </HeaderLayout>
   );

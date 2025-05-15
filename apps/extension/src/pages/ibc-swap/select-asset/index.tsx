@@ -1,10 +1,5 @@
 import { observer } from "mobx-react-lite";
-import React, {
-  FunctionComponent,
-  useCallback,
-  useMemo,
-  useState,
-} from "react";
+import React, { FunctionComponent, useMemo, useState } from "react";
 import { BackButton } from "../../../layouts/header/components";
 import { HeaderLayout } from "../../../layouts/header";
 import styled from "styled-components";
@@ -21,15 +16,12 @@ import { HugeQueriesStore } from "../../../stores/huge-queries";
 import { ViewToken } from "../../main";
 import { autorun, computed, IReactionDisposer, makeObservable } from "mobx";
 import { ObservableQueryIbcSwap } from "@keplr-wallet/stores-internal";
-import { ChainInfo, Currency } from "@keplr-wallet/types";
+import { Currency } from "@keplr-wallet/types";
 import { IChainInfoImpl } from "@keplr-wallet/stores";
 import { FixedSizeList } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { useSearch } from "../../../hooks/use-search";
 import { getTokenSearchResultClickAnalyticsProperties } from "../../../analytics-amplitude";
-import { useGroupedTokensMap } from "../../../hooks/use-grouped-tokens-map";
-import { GroupedTokenItem } from "../../main/components/token/grouped";
-import { YAxis } from "../../../components/axis";
 import { DenomHelper } from "@keplr-wallet/common";
 import { SwapNotAvailableModal } from "../components/swap-not-available-modal";
 import { MsgItemSkeleton } from "../../main/token-detail/msg-items/skeleton";
@@ -174,10 +166,9 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
   () => {
     const {
       hugeQueriesStore,
+      chainStore,
       skipQueriesStore,
       analyticsAmplitudeStore,
-      uiConfigStore,
-      chainStore,
     } = useStore();
     const navigate = useNavigate();
     const intl = useIntl();
@@ -210,8 +201,8 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
 
     const { tokens, remaining, isLoading } = state.tokens;
 
-    const filterTokens = useCallback(
-      (token: ViewToken) => {
+    const filteredTokens = useMemo(() => {
+      const filtered = tokens.filter((token) => {
         if (!("currencies" in token.chainInfo)) {
           return false;
         }
@@ -228,39 +219,27 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
           `${token.chainInfo.chainIdentifier}/${token.token.currency.coinMinimalDenom}` !==
             excludeKey
         );
-      },
-      [excludeKey]
-    );
-
-    const filterRemaining = useCallback(
-      (r: { currency: Currency; chainInfo: IChainInfoImpl }) => {
-        {
-          const denomHelper = new DenomHelper(r.currency.coinMinimalDenom);
-          if (denomHelper.type === "lp") {
-            return false;
-          }
-
-          return (
-            !excludeKey ||
-            `${r.chainInfo.chainIdentifier}/${r.currency.coinMinimalDenom}` !==
-              excludeKey
-          );
-        }
-      },
-      [excludeKey]
-    );
-
-    const filteredTokens = useMemo(() => {
-      const filtered = tokens.filter(filterTokens);
+      });
 
       return filtered;
-    }, [tokens, filterTokens]);
+    }, [excludeKey, tokens]);
 
     const filteredRemaining = useMemo(() => {
-      const filtered = remaining.filter(filterRemaining);
+      const filtered = remaining.filter((r) => {
+        const denomHelper = new DenomHelper(r.currency.coinMinimalDenom);
+        if (denomHelper.type === "lp") {
+          return false;
+        }
+
+        return (
+          !excludeKey ||
+          `${r.chainInfo.chainIdentifier}/${r.currency.coinMinimalDenom}` !==
+            excludeKey
+        );
+      });
 
       return filtered;
-    }, [remaining, filterRemaining]);
+    }, [excludeKey, remaining]);
 
     const searchedTokens = useSearch(filteredTokens, search, searchFields);
     const searchedRemaining = useSearch(
@@ -269,127 +248,12 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
       remainingSearchFields
     );
 
-    const { searchedGroupedTokensMap } = useGroupedTokensMap(search);
-    const filteredGroupedTokensMap = useMemo(() => {
-      return new Map(
-        Array.from(searchedGroupedTokensMap.entries())
-          .map<[string, ViewToken[]]>(([groupKey, tokens]) => {
-            const filteredTokens = tokens.filter(filterTokens);
-
-            return [groupKey, filteredTokens];
-          })
-          .filter(([, tokens]) => tokens.length > 0)
-      );
-    }, [searchedGroupedTokensMap, filterTokens]);
-
-    const filteredRemainingGroupedTokensMap = useMemo(() => {
-      return new Map(
-        Array.from(filteredGroupedTokensMap.entries())
-          .map<[string, ViewToken[]]>(([groupKey, tokens]) => {
-            const filteredRemainings = tokens.filter((token) => {
-              return filterRemaining({
-                currency: token.token.currency,
-                chainInfo: token.chainInfo as IChainInfoImpl<ChainInfo>,
-              });
-            });
-
-            return [groupKey, filteredRemainings];
-          })
-          .filter(([, tokens]) => tokens.length > 0)
-      );
-    }, [filteredGroupedTokensMap, filterRemaining]);
-
     const [selectedCoinMinimalDenom, setSelectedCoinMinimalDenom] =
       useState<string>();
     const [unsupportedCoinMinimalDenoms, setUnsupportedCoinMinimalDenoms] =
       useState<Set<string>>(new Set());
     const [isSwapNotAvailableModalOpen, setIsSwapNotAvailableModalOpen] =
       useState(false);
-
-    const handleTokenClick = useCallback(
-      async (viewToken: ViewToken, index?: number) => {
-        if (search.trim().length > 0 && index != null) {
-          analyticsAmplitudeStore.logEvent(
-            "click_token_item_search_results_select_asset_ibc_swap",
-            getTokenSearchResultClickAnalyticsProperties(
-              viewToken,
-              search,
-              [...searchedTokens, ...searchedRemaining],
-              index
-            )
-          );
-        }
-
-        let timer: NodeJS.Timeout | undefined;
-        let disposal: IReactionDisposer | undefined;
-        await Promise.race([
-          new Promise((resolve) => {
-            timer = setTimeout(resolve, 3000);
-          }),
-          new Promise((resolve) => {
-            // findCurrency가 동기적이기 때문에 currency를 찾는 동안에도 undefined를 리턴한다.
-            // findCurrencyAsync를 쓰면 되지만 현재 의도대로 동작하지 않는다.
-            // 따라서 findCurrency를 쓰되 정해진 timeout 동안에도 찾지 못하면 찾지 못했다고 판단하도록 한다.
-            disposal = autorun(() => {
-              const currency = chainStore
-                .getChain(viewToken.chainInfo.chainId)
-                .findCurrency(viewToken.token.currency.coinMinimalDenom);
-
-              setSelectedCoinMinimalDenom(
-                viewToken.token.currency.coinMinimalDenom
-              );
-
-              if (currency) {
-                if (paramNavigateTo) {
-                  navigate(
-                    paramNavigateTo
-                      .replace("{chainId}", viewToken.chainInfo.chainId)
-                      .replace(
-                        "{coinMinimalDenom}",
-                        viewToken.token.currency.coinMinimalDenom
-                      ),
-                    {
-                      replace: paramNavigateReplace === "true",
-                    }
-                  );
-                } else {
-                  console.error("Empty navigateTo param");
-                }
-                resolve(null);
-              }
-            });
-          }),
-        ]);
-
-        setSelectedCoinMinimalDenom(undefined);
-        const newUnsupportedCoinMinimalDenoms = new Set(
-          unsupportedCoinMinimalDenoms
-        );
-        newUnsupportedCoinMinimalDenoms.add(
-          viewToken.token.currency.coinMinimalDenom
-        );
-        setUnsupportedCoinMinimalDenoms(newUnsupportedCoinMinimalDenoms);
-        setIsSwapNotAvailableModalOpen(true);
-
-        if (timer) {
-          clearTimeout(timer);
-        }
-        if (disposal) {
-          disposal();
-        }
-      },
-      [
-        search,
-        analyticsAmplitudeStore,
-        searchedTokens,
-        searchedRemaining,
-        unsupportedCoinMinimalDenoms,
-        chainStore,
-        paramNavigateTo,
-        paramNavigateReplace,
-        navigate,
-      ]
-    );
 
     return (
       <HeaderLayout
@@ -415,29 +279,6 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
               <MsgItemSkeleton />
               <MsgItemSkeleton />
             </Stack>
-          ) : uiConfigStore.assetViewMode === "grouped" ? (
-            <YAxis gap="0.5rem">
-              {Array.from(filteredGroupedTokensMap.entries()).map(
-                ([groupKey, tokens]) => (
-                  <GroupedTokenItem
-                    key={groupKey}
-                    tokens={tokens}
-                    alwaysOpen={true}
-                    onTokenClick={(viewToken) => handleTokenClick(viewToken)}
-                  />
-                )
-              )}
-              {Array.from(filteredRemainingGroupedTokensMap.entries()).map(
-                ([groupKey, tokens]) => (
-                  <GroupedTokenItem
-                    key={groupKey}
-                    tokens={tokens}
-                    alwaysOpen={true}
-                    onTokenClick={(viewToken) => handleTokenClick(viewToken)}
-                  />
-                )
-              )}
-            </YAxis>
           ) : (
             <AutoSizer>
               {({ height, width }: { height: number; width: number }) => (
@@ -447,12 +288,87 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
                     searchedRemaining,
                     selectedCoinMinimalDenom,
                     unsupportedCoinMinimalDenoms,
-                    onClick: handleTokenClick,
+                    onClick: async (viewToken, index) => {
+                      if (search.trim().length > 0) {
+                        analyticsAmplitudeStore.logEvent(
+                          "click_token_item_search_results_select_asset_ibc_swap",
+                          getTokenSearchResultClickAnalyticsProperties(
+                            viewToken,
+                            search,
+                            [...searchedTokens, ...searchedRemaining],
+                            index
+                          )
+                        );
+                      }
+
+                      let timer: NodeJS.Timeout | undefined;
+                      let disposal: IReactionDisposer | undefined;
+                      await Promise.race([
+                        new Promise((resolve) => {
+                          timer = setTimeout(resolve, 3000);
+                        }),
+                        new Promise((resolve) => {
+                          // findCurrency가 동기적이기 때문에 currency를 찾는 동안에도 undefined를 리턴한다.
+                          // findCurrencyAsync를 쓰면 되지만 현재 의도대로 동작하지 않는다.
+                          // 따라서 findCurrency를 쓰되 정해진 timeout 동안에도 찾지 못하면 찾지 못했다고 판단하도록 한다.
+                          disposal = autorun(() => {
+                            const currency = chainStore
+                              .getChain(viewToken.chainInfo.chainId)
+                              .findCurrency(
+                                viewToken.token.currency.coinMinimalDenom
+                              );
+                            setSelectedCoinMinimalDenom(
+                              viewToken.token.currency.coinMinimalDenom
+                            );
+                            if (currency) {
+                              if (paramNavigateTo) {
+                                navigate(
+                                  paramNavigateTo
+                                    .replace(
+                                      "{chainId}",
+                                      viewToken.chainInfo.chainId
+                                    )
+                                    .replace(
+                                      "{coinMinimalDenom}",
+                                      viewToken.token.currency.coinMinimalDenom
+                                    ),
+                                  {
+                                    replace: paramNavigateReplace === "true",
+                                  }
+                                );
+                              } else {
+                                console.error("Empty navigateTo param");
+                              }
+                              resolve(null);
+                            }
+                          });
+                        }),
+                      ]);
+
+                      setSelectedCoinMinimalDenom(undefined);
+                      const newUnsupportedCoinMinimalDenoms = new Set(
+                        unsupportedCoinMinimalDenoms
+                      );
+                      newUnsupportedCoinMinimalDenoms.add(
+                        viewToken.token.currency.coinMinimalDenom
+                      );
+                      setUnsupportedCoinMinimalDenoms(
+                        newUnsupportedCoinMinimalDenoms
+                      );
+                      setIsSwapNotAvailableModalOpen(true);
+
+                      if (timer) {
+                        clearTimeout(timer);
+                      }
+                      if (disposal) {
+                        disposal();
+                      }
+                    },
                   }}
                   width={width}
                   height={height}
                   itemCount={searchedTokens.length + searchedRemaining.length}
-                  itemSize={72}
+                  itemSize={76}
                 >
                   {TokenListItem}
                 </FixedSizeList>
