@@ -17,7 +17,6 @@ import { EmptyView } from "../../components/empty-view";
 import { H4, Subtitle3 } from "../../components/typography";
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
 import {
-  ChainInfoImpl,
   IAccountStore,
   IChainInfoImpl,
   IChainStore,
@@ -26,7 +25,6 @@ import { action, computed, makeObservable, observable } from "mobx";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
 import { FormattedMessage } from "react-intl";
-import { ChainInfoWithCoreTypes } from "@keplr-wallet/background";
 
 // React hook으로 처리하기 귀찮은 부분이 많아서
 // 그냥 대충 mobx로...
@@ -114,82 +112,16 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
     });
   }, [chainStore.chainInfosInListUI, querySupported.response?.data]);
 
-  // TODO: Remove
-  const tempSupportedChainList = useMemo(() => {
-    return [
-      ...supportedChainList,
-      new ChainInfoImpl<ChainInfoWithCoreTypes>(
-        {
-          rpc: "https://rpc-atomone.keplr.app",
-          rest: "https://lcd-atomone.keplr.app",
-          chainId: "atomone-1",
-          chainName: "AtomOne",
-          chainSymbolImageUrl:
-            "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/atomone/chain.png",
-          bip44: {
-            coinType: 118,
-          },
-          walletUrlForStaking: "https://wallet.keplr.app/chains/atomone",
-          bech32Config: {
-            bech32PrefixAccAddr: "atone",
-            bech32PrefixAccPub: "atonepub",
-            bech32PrefixValAddr: "atonevaloper",
-            bech32PrefixValPub: "atonevaloperpub",
-            bech32PrefixConsAddr: "atonevalcons",
-            bech32PrefixConsPub: "atonevalconspub",
-          },
-          currencies: [
-            {
-              coinDenom: "ATONE",
-              coinMinimalDenom: "uatone",
-              coinDecimals: 6,
-              coinImageUrl:
-                "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/atomone/chain.png",
-              coinGeckoId: "atomone",
-            },
-          ],
-          feeCurrencies: [
-            {
-              coinDenom: "ATONE",
-              coinMinimalDenom: "uatone",
-              coinDecimals: 6,
-              coinImageUrl:
-                "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/atomone/chain.png",
-              gasPriceStep: {
-                low: 0.025,
-                average: 0.04,
-                high: 0.08,
-              },
-              coinGeckoId: "atomone",
-            },
-          ],
-          stakeCurrency: {
-            coinDenom: "ATONE",
-            coinMinimalDenom: "uatone",
-            coinDecimals: 6,
-            coinImageUrl:
-              "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/atomone/chain.png",
-            coinGeckoId: "atomone",
-          },
-          features: [],
-        },
-        chainStore
-      ),
-    ];
-  }, [supportedChainList, chainStore]);
-
-  // otherBech32Addresses.setSupportedChainList(supportedChainList);
-  otherBech32Addresses.setSupportedChainList(tempSupportedChainList); // TODO: Remove
+  otherBech32Addresses.setSupportedChainList(supportedChainList);
 
   const msgHistory = usePaginatedCursorQuery<ResMsgsHistory>(
-    // process.env["KEPLR_EXT_TX_HISTORY_BASE_URL"],
-    "https://satellite-develop.keplr.app/", // TODO: Remove
+    process.env["KEPLR_EXT_TX_HISTORY_BASE_URL"],
     () => {
       return `/history/msgs/keplr-multi-chain?baseBech32Address=${
         account.bech32Address
       }&chainIdentifiers=${(() => {
         if (selectedKey === "__all__") {
-          return tempSupportedChainList // TODO: Change to supportedChainList
+          return supportedChainList
             .map((chainInfo) => chainInfo.chainId)
             .join(",");
         }
@@ -218,7 +150,7 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
       }
       return false;
     },
-    `${selectedKey}/${tempSupportedChainList // TODO: Change to supportedChainList
+    `${selectedKey}/${supportedChainList
       .map((chainInfo) => chainInfo.chainId)
       .join(",")}/${otherBech32Addresses.otherBech32Addresses
       .map((address) => `${address.chainIdentifier}:${address.bech32Address}`)
@@ -300,8 +232,7 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
                 key: "__all__",
                 label: "All",
               },
-              // TODO: Change to supportedChainList
-              ...tempSupportedChainList.map((chainInfo) => {
+              ...supportedChainList.map((chainInfo) => {
                 return {
                   key: chainInfo.chainId,
                   label: chainInfo.chainName,
