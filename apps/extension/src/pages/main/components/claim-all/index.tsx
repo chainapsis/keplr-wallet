@@ -462,7 +462,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
                   text={intl.formatMessage({
                     id: isExpanded
                       ? "page.main.components.hide-all.button"
-                      : "page.main.components.claim-all.button",
+                      : "page.main.components.show-all.button",
                   })}
                   size="small"
                   isLoading={claimAllIsLoading}
@@ -668,6 +668,7 @@ const ViewClaimTokenItemContent: FunctionComponent<{
 
     const theme = useTheme();
     const { uiConfigStore, keyRingStore } = useStore();
+    const intl = useIntl();
 
     const [isHover, setIsHover] = useState(false);
 
@@ -717,6 +718,18 @@ const ViewClaimTokenItemContent: FunctionComponent<{
     const isKeystone =
       keyRingStore.selectedKeyInfo &&
       keyRingStore.selectedKeyInfo.type === "keystone";
+
+    const ClaimCoinIcon = useMemo(() => {
+      return (
+        <CoinsPlusOutlineIcon
+          color={
+            isLedger || isKeystone
+              ? ColorPalette[theme.mode === "light" ? "gray-700" : "white"]
+              : ColorPalette[theme.mode === "light" ? "gray-200" : "gray-300"]
+          }
+        />
+      );
+    }, [isLedger, isKeystone, theme.mode]);
 
     useEffect(() => {
       buttonWrapperRef.start();
@@ -894,22 +907,17 @@ const ViewClaimTokenItemContent: FunctionComponent<{
                               ]
                             }
                           />
+                        ) : isLedger || isKeystone ? (
+                          <Tooltip
+                            content={intl.formatMessage({
+                              id: "page.main.components.claim-all.claim-button",
+                            })}
+                            isAlwaysOpen={isHover}
+                          >
+                            {ClaimCoinIcon}
+                          </Tooltip>
                         ) : (
-                          <CoinsPlusOutlineIcon
-                            color={
-                              isLedger || isKeystone
-                                ? ColorPalette[
-                                    theme.mode === "light"
-                                      ? "gray-700"
-                                      : "white"
-                                  ]
-                                : ColorPalette[
-                                    theme.mode === "light"
-                                      ? "gray-200"
-                                      : "gray-300"
-                                  ]
-                            }
-                          />
+                          ClaimCoinIcon
                         )}
                       </Tooltip>
                     </animated.div>
