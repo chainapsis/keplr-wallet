@@ -154,6 +154,21 @@ const MsgItemRenderInner: FunctionComponent<{
     }
   }
 
+  if (msg.relation.startsWith("atomone-")) {
+    switch (msg.relation) {
+      case "atomone-vote": {
+        return (
+          <MsgRelationVote
+            msg={msg}
+            prices={prices}
+            targetDenom={targetDenom}
+            isInAllActivitiesPage={isInAllActivitiesPage}
+          />
+        );
+      }
+    }
+  }
+
   switch (msg.relation) {
     case "send": {
       return (
