@@ -849,22 +849,10 @@ export class KeyRingEthereumService {
             return null;
           }
 
-          const newCurrentChainInfo =
-            this.chainsService.getChainInfo(newCurrentChainId);
-          if (!newCurrentChainInfo) {
-            throw new EthereumProviderRpcError(
-              4902,
-              `Unrecognized chain ID "${newCurrentChainId.replace(
-                "eip155:",
-                ""
-              )}". Try adding the chain using wallet_addEthereumChain first.`
-            );
-          }
-
           await this.permissionService.updateCurrentChainIdForEVM(
             env,
             origin,
-            newCurrentChainInfo.chainId
+            newCurrentChainId
           );
 
           return null;
@@ -1104,7 +1092,13 @@ export class KeyRingEthereumService {
 
         const newEvmChainId = validateEVMChainId(parseInt(param.chainId, 16));
         const chainInfo =
-          this.chainsService.getChainInfoByEVMChainIdOrThrow(newEvmChainId);
+          this.chainsService.getChainInfoByEVMChainId(newEvmChainId);
+        if (!chainInfo) {
+          throw new EthereumProviderRpcError(
+            4902,
+            `Unrecognized chain ID "${newEvmChainId}". Try adding the chain using wallet_addEthereumChain first.`
+          );
+        }
 
         return chainInfo.chainId;
       }
