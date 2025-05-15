@@ -34,6 +34,7 @@ import { TokenTag } from "./token-tag";
 import { CopyAddressButton } from "./copy-address-button";
 import { useCopyAddress } from "../../../../hooks/use-copy-address";
 import { CoinPretty, PricePretty } from "@keplr-wallet/unit";
+import { Tooltip } from "../../../../components/tooltip";
 
 const StandaloneEarnBox: FunctionComponent<{
   bottomTagType?: BottomTagType;
@@ -124,6 +125,34 @@ const NestedTokenItem: FunctionComponent<{
     [tag]
   );
 
+  const AmountItem = useMemo(() => {
+    return (
+      <Subtitle3
+        color={
+          theme.mode === "light"
+            ? ColorPalette["gray-700"]
+            : ColorPalette["gray-10"]
+        }
+      >
+        {uiConfigStore.hideStringIfPrivacyMode(
+          viewToken.token
+            .hideDenom(true)
+            .maxDecimals(6)
+            .inequalitySymbol(true)
+            .shrink(true)
+            .toString(),
+          2
+        )}
+      </Subtitle3>
+    );
+  }, [uiConfigStore.hideStringIfPrivacyMode, viewToken.token, theme.mode]);
+
+  const pricePrettyString = useMemo(() => {
+    return uiConfigStore.hideStringIfPrivacyMode(
+      pricePretty ? pricePretty.inequalitySymbol(true).toString() : "-",
+      2
+    );
+  }, [uiConfigStore.hideStringIfPrivacyMode, pricePretty]);
   return (
     <NestedTokenItemContainer
       tagPosition={tagPosition}
@@ -139,7 +168,7 @@ const NestedTokenItem: FunctionComponent<{
       >
         <Stack gutter="0.25rem">
           <XAxis alignY="center">
-            <Subtitle2
+            <Subtitle3
               color={
                 theme.mode === "light"
                   ? ColorPalette["gray-700"]
@@ -150,7 +179,7 @@ const NestedTokenItem: FunctionComponent<{
               }}
             >
               on {viewToken.chainInfo.chainName}
-            </Subtitle2>
+            </Subtitle3>
           </XAxis>
           {tagPosition === "bottom" ? TagItem : null}
         </Stack>
@@ -172,31 +201,16 @@ const NestedTokenItem: FunctionComponent<{
 
         <Columns sum={1} gutter="0.25rem" alignY="center">
           <Stack gutter="0.25rem" alignX="right">
-            <Subtitle3
-              color={
-                theme.mode === "light"
-                  ? ColorPalette["gray-700"]
-                  : ColorPalette["gray-10"]
-              }
-            >
-              {uiConfigStore.hideStringIfPrivacyMode(
-                viewToken.token
-                  .hideDenom(true)
-                  .maxDecimals(6)
-                  .inequalitySymbol(true)
-                  .shrink(true)
-                  .toString(),
-                2
-              )}
-            </Subtitle3>
+            {uiConfigStore.showFiatValue ? (
+              AmountItem
+            ) : (
+              <Tooltip content={pricePrettyString} hideArrow={true}>
+                {AmountItem}
+              </Tooltip>
+            )}
             {uiConfigStore.showFiatValue ? (
               <Subtitle3 color={ColorPalette["gray-300"]}>
-                {uiConfigStore.hideStringIfPrivacyMode(
-                  pricePretty
-                    ? pricePretty.inequalitySymbol(true).toString()
-                    : "-",
-                  2
-                )}
+                {pricePrettyString}
               </Subtitle3>
             ) : null}
           </Stack>
