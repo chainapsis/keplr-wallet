@@ -632,6 +632,8 @@
   "page.main.components.claim-all.title": "아직 받지 않은 리워드",
   "page.main.components.claim-all.button": "한번에 받기",
   "page.main.components.claim-all.claim-button": "받기",
+  "page.main.components.show-all.button": "모두 보기",
+  "page.main.components.hide-all.button": "닫기",
   "page.main.components.menu-bar.manage-chain-visibility-title": "체인 추가/제거",
   "page.main.components.menu-bar.manage-asset-list-title": "자산 표시 관리",
   "page.main.components.menu-bar.my-contacts-title": "연락처",
