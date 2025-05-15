@@ -48,6 +48,7 @@ import {
   useVerticalSizeInternalContext,
 } from "../../../../components/transition/vertical-size/internal";
 import { NEUTRON_CHAIN_ID, NOBLE_CHAIN_ID } from "../../../../config.ui";
+import { Gutter } from "../../../../components/gutter";
 
 const USDN_CURRENCY = {
   coinDenom: "USDN",
@@ -357,12 +358,6 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
         setIsExpanded(true);
       }
 
-      if (isLedger || isKeystone) {
-        // Ledger에서 현실적으로 이 기능을 처리해주기 난감하다.
-        // disable하기보다는 일단 눌렀을때 expand를 시켜주고 아무것도 하지 않는다.
-        return;
-      }
-
       for (const viewClaimToken of viewClaimTokens) {
         const state = getClaimAllEachState(
           viewClaimToken.modularChainInfo.chainId
@@ -465,12 +460,16 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
               {isLedger || isKeystone ? (
                 <Button
                   text={intl.formatMessage({
-                    id: "page.main.components.claim-all.button",
+                    id: isExpanded
+                      ? "page.main.components.hide-all.button"
+                      : "page.main.components.claim-all.button",
                   })}
                   size="small"
                   isLoading={claimAllIsLoading}
                   disabled={claimAllDisabled}
-                  onClick={claimAll}
+                  onClick={() => setIsExpanded((prev) => !prev)}
+                  color="secondary"
+                  right={<ChevronIcon direction={isExpanded ? "up" : "down"} />}
                 />
               ) : (
                 <SpecialButton
@@ -487,31 +486,35 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
           </Columns>
         </Box>
 
-        <Styles.ExpandButton
-          paddingX="0.125rem"
-          alignX="center"
-          viewTokenCount={viewClaimTokens.length}
-          onClick={() => {
-            analyticsStore.logEvent("click_claimExpandButton");
-            if (viewClaimTokens.length > 0) {
-              setIsExpanded(!isExpanded);
-            }
-          }}
-        >
-          <Box
-            style={{
-              opacity: isNotReady ? 0 : 1,
+        {isLedger || isKeystone ? (
+          <Gutter size="0.75rem" />
+        ) : (
+          <Styles.ExpandButton
+            paddingX="0.125rem"
+            alignX="center"
+            viewTokenCount={viewClaimTokens.length}
+            onClick={() => {
+              analyticsStore.logEvent("click_claimExpandButton");
+              if (viewClaimTokens.length > 0) {
+                setIsExpanded(!isExpanded);
+              }
             }}
           >
-            <animated.div style={arrowAnimation}>
-              <ArrowDownIcon
-                width="1.25rem"
-                height="1.25rem"
-                color={ColorPalette["gray-300"]}
-              />
-            </animated.div>
-          </Box>
-        </Styles.ExpandButton>
+            <Box
+              style={{
+                opacity: isNotReady ? 0 : 1,
+              }}
+            >
+              <animated.div style={arrowAnimation}>
+                <ArrowDownIcon
+                  width="1.25rem"
+                  height="1.25rem"
+                  color={ColorPalette["gray-300"]}
+                />
+              </animated.div>
+            </Box>
+          </Styles.ExpandButton>
+        )}
 
         <VerticalCollapseTransition
           collapsed={!isExpanded}
@@ -664,7 +667,7 @@ const ViewClaimTokenItemContent: FunctionComponent<{
     })();
 
     const theme = useTheme();
-    const { uiConfigStore } = useStore();
+    const { uiConfigStore, keyRingStore } = useStore();
 
     const [isHover, setIsHover] = useState(false);
 
@@ -706,6 +709,14 @@ const ViewClaimTokenItemContent: FunctionComponent<{
         duration: 250,
       },
     });
+
+    const isLedger =
+      keyRingStore.selectedKeyInfo &&
+      keyRingStore.selectedKeyInfo.type === "ledger";
+
+    const isKeystone =
+      keyRingStore.selectedKeyInfo &&
+      keyRingStore.selectedKeyInfo.type === "keystone";
 
     useEffect(() => {
       buttonWrapperRef.start();
@@ -886,9 +897,17 @@ const ViewClaimTokenItemContent: FunctionComponent<{
                         ) : (
                           <CoinsPlusOutlineIcon
                             color={
-                              ColorPalette[
-                                theme.mode === "light" ? "gray-200" : "gray-300"
-                              ]
+                              isLedger || isKeystone
+                                ? ColorPalette[
+                                    theme.mode === "light"
+                                      ? "gray-700"
+                                      : "white"
+                                  ]
+                                : ColorPalette[
+                                    theme.mode === "light"
+                                      ? "gray-200"
+                                      : "gray-300"
+                                  ]
                             }
                           />
                         )}
@@ -903,3 +922,38 @@ const ViewClaimTokenItemContent: FunctionComponent<{
     );
   }
 );
+
+const ChevronIcon = ({ direction }: { direction: "up" | "down" }) => {
+  return (
+    <div
+      style={{
+        transform: direction === "up" ? "rotate(180deg)" : "rotate(0deg)",
+        transition: "transform 0.3s ease",
+      }}
+    >
+      <ChevronDownIcon />
+    </div>
+  );
+};
+
+const ChevronDownIcon = () => {
+  return (
+    <div>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="12"
+        height="13"
+        viewBox="0 0 12 13"
+        style={{ fill: "none", stroke: "none" }}
+      >
+        <path
+          d="M9.5 5L5.75 8L2 5"
+          stroke={ColorPalette["gray-300"]}
+          strokeWidth="2.08333"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </div>
+  );
+};
