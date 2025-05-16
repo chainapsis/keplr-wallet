@@ -2,14 +2,14 @@
 
 ## Overview
 
-Now that you’ve learned [how to get a signed result](./sign-a-message), let’s explore how to broadcast a signed transaction.
+Now that you’ve learned [how to get a signed result](./sign-a-message.md), let’s explore how to broadcast a signed transaction.
 
 - Cosmos-based Chains
   - Continue from the next section.
 - EVM-based Chains
-  - Continue from the [EVM-based Chains](../multi-ecosystem-support/evm#sending-ethereum-transactions) section.
+  - Continue from the [EVM-based Chains](../multi-ecosystem-support/evm.md#sending-ethereum-transactions) section.
 - Starknet
-  - Continue from the [Starknet](../multi-ecosystem-support/starknet#signing-transactions-on-starknet) section.
+  - Continue from the [Starknet](../multi-ecosystem-support/starknet.md#signing-transactions-on-starknet) section.
 
 ---
 
