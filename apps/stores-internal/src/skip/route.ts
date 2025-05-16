@@ -441,7 +441,7 @@ export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
         allow_unsafe: true,
         smart_relay: true,
         go_fast: true,
-        experimental_features: ["hyperlane", "eureka"],
+        experimental_features: ["hyperlane", "eureka", "stargate"],
         smart_swap_options: {
           evm_swaps:
             this.smartSwapOptions?.evmSwaps === undefined
