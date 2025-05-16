@@ -11,6 +11,7 @@ export type CoinPrettyOptions = {
   lowerCase: boolean;
   hideDenom: boolean;
   hideIBCMetadata: boolean;
+  maxCoinDenomLength?: number;
 };
 
 export class CoinPretty {
@@ -272,6 +273,12 @@ export class CoinPretty {
     };
   }
 
+  maxCoinDenomLength(maxLength: number): CoinPretty {
+    const pretty = this.clone();
+    pretty._options.maxCoinDenomLength = maxLength;
+    return pretty;
+  }
+
   toString(): string {
     let denom = this.denom;
     if (
@@ -286,6 +293,13 @@ export class CoinPretty {
     }
     if (this._options.lowerCase) {
       denom = denom.toLowerCase();
+    }
+
+    if (
+      this._options.maxCoinDenomLength != null &&
+      denom.length > this._options.maxCoinDenomLength
+    ) {
+      denom = `${denom.slice(0, this._options.maxCoinDenomLength)}...`;
     }
 
     let separator = this._options.separator;

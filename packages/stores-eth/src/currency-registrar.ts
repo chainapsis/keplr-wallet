@@ -1,6 +1,6 @@
 import { AppCurrency, ERC20Currency } from "@keplr-wallet/types";
 import { ChainStore, IQueriesStore } from "@keplr-wallet/stores";
-import { DenomHelper, KVStore } from "@keplr-wallet/common";
+import { DenomHelper, KVStore, makeSureUTF8String } from "@keplr-wallet/common";
 import { makeObservable, observable, runInAction } from "mobx";
 import { EthereumQueries } from "./queries";
 import { KeplrETCQueries } from "@keplr-wallet/stores-etc";
@@ -55,7 +55,14 @@ export class ERC20CurrencyRegistrar {
     const saved = await this.kvStore.get<Record<string, CurrencyCache>>(dbKey);
     if (saved) {
       for (const [key, value] of Object.entries(saved)) {
-        this.cacheERC20Metadata.set(key, value);
+        const cache =
+          "symbol" in value
+            ? {
+                ...value,
+                symbol: makeSureUTF8String(value.symbol),
+              }
+            : value;
+        this.cacheERC20Metadata.set(key, cache);
       }
     }
 
@@ -105,7 +112,7 @@ export class ERC20CurrencyRegistrar {
           type: "erc20",
           coinMinimalDenom: denomHelper.denom,
           contractAddress,
-          coinDenom: res.res.coinDenom,
+          coinDenom: makeSureUTF8String(res.res.coinDenom),
           coinImageUrl: res.res.coinImageUrl,
           coinGeckoId: res.res.coingeckoId,
           coinDecimals: res.res.decimals,

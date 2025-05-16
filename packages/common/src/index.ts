@@ -9,4 +9,5 @@ export * from "./retry";
 export * from "./sleep";
 export * from "./mnemonic";
 export * from "./coin";
+export * from "./string";
 export * from "./service-worker";

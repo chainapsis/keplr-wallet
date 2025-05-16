@@ -449,6 +449,7 @@ const TokenListItem = ({
         onClick={() => !isUnsupportedToken && data.onClick(viewToken, index)}
         noTokenTag
         disabled={isUnsupportedToken}
+        maxCoinDenomLength={15}
       />
     </div>
   );

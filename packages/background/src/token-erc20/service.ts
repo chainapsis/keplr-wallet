@@ -3,7 +3,11 @@ import { AppCurrency, ChainInfo, ERC20Currency } from "@keplr-wallet/types";
 import { ERC20CurrencySchema } from "@keplr-wallet/chain-validator";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { ChainsService } from "../chains";
-import { KVStore, PrefixKVStore } from "@keplr-wallet/common";
+import {
+  KVStore,
+  makeSureUTF8String,
+  PrefixKVStore,
+} from "@keplr-wallet/common";
 import { InteractionService } from "../interaction";
 import {
   action,
@@ -38,7 +42,16 @@ export class TokenERC20Service {
     );
     if (saved) {
       for (const [key, value] of Object.entries(saved)) {
-        this.tokenMap.set(key, value);
+        const tokens = value.map((token) => {
+          return {
+            ...token,
+            currency: {
+              ...token.currency,
+              coinDenom: makeSureUTF8String(token.currency.coinDenom),
+            },
+          };
+        });
+        this.tokenMap.set(key, tokens);
       }
     }
     autorun(() => {
