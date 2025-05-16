@@ -12,7 +12,7 @@ import { XAxis } from "../axis";
 import styled, { useTheme } from "styled-components";
 import { useIntl } from "react-intl";
 
-const Styles = {
+export const Styles = {
   MoreViewContainer: styled.div`
     display: flex;
     flex-direction: column;
