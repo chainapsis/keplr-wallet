@@ -11,7 +11,7 @@ import {
   WalletStatus,
 } from "@keplr-wallet/stores";
 import { useState } from "react";
-import { action, makeObservable, observable, override } from "mobx";
+import { action, computed, makeObservable, observable, override } from "mobx";
 import {
   MsgsDirectResponse,
   RouteResponse,
@@ -37,6 +37,8 @@ export class IBCSwapAmountConfig extends AmountConfig {
     evmSwaps?: boolean;
     splitRoutes?: boolean;
   };
+
+  protected _oldValue: string;
 
   constructor(
     chainGetter: ChainGetter,
@@ -64,7 +66,67 @@ export class IBCSwapAmountConfig extends AmountConfig {
     this._swapFeeBps = swapFeeBps;
     this._allowSwaps = allowSwaps;
     this._smartSwapOptions = smartSwapOptions;
+    this._oldValue = this._value;
     makeObservable(this);
+  }
+
+  @computed
+  get maxAmount(): CoinPretty {
+    let result = this.queriesStore
+      .get(this.chainId)
+      .queryBalances.getQueryBech32Address(this.senderConfig.sender)
+      .getBalanceFromCurrency(this.currency);
+    if (this.feeConfig) {
+      for (const fee of this.feeConfig.fees) {
+        result = result.sub(fee);
+      }
+    }
+    if (result.toDec().lte(new Dec(0))) {
+      return new CoinPretty(this.currency, "0");
+    }
+
+    return result;
+  }
+
+  @override
+  override get value(): string {
+    if (this.fraction > 0) {
+      let result = this.maxAmount;
+
+      const queryRoute = this.getQueryIBCSwap(result)?.getQueryRoute();
+      if (queryRoute?.response != null) {
+        const estimatedFees = queryRoute.response.data.estimated_fees;
+        const bridgeFee = estimatedFees?.reduce((acc, fee) => {
+          if (fee.origin_asset.denom === this.currency.coinMinimalDenom) {
+            return acc.add(new CoinPretty(this.currency, new Dec(fee.amount)));
+          }
+          return acc;
+        }, new CoinPretty(this.currency, new Dec(0)));
+        if (bridgeFee) {
+          result = result.sub(bridgeFee);
+        }
+      } else {
+        return this._oldValue;
+      }
+
+      if (result.toDec().lte(new Dec(0))) {
+        return "0";
+      }
+
+      const newValue = result
+        .mul(new Dec(this.fraction))
+        .trim(true)
+        .locale(false)
+        .hideDenom(true)
+        .toString();
+      this._oldValue = newValue;
+
+      return newValue;
+    }
+
+    this._oldValue = this._value;
+
+    return this._value;
   }
 
   get outAmount(): CoinPretty {
@@ -149,11 +211,15 @@ export class IBCSwapAmountConfig extends AmountConfig {
   }
 
   get isFetching(): boolean {
-    const queryIBCSwap = this.getQueryIBCSwap();
-    if (queryIBCSwap) {
-      return queryIBCSwap.getQueryRoute().isFetching;
+    if (this.fraction === 1) {
+      return (
+        this.getQueryIBCSwap(this.maxAmount)?.getQueryRoute().isFetching ??
+        this.getQueryIBCSwap()?.getQueryRoute().isFetching ??
+        false
+      );
     }
-    return false;
+
+    return this.getQueryIBCSwap()?.getQueryRoute().isFetching ?? false;
   }
 
   get type(): "swap" | "transfer" | "not-ready" {
@@ -646,6 +712,89 @@ export class IBCSwapAmountConfig extends AmountConfig {
   @override
   override get uiProperties(): UIProperties {
     const prev = super.uiProperties;
+    // max amount인 경우엔 route를 두 번 쿼리하기 때문에 첫 번째 쿼리도 체크한다.
+    if (this.fraction === 1) {
+      const queryIBCSwap = this.getQueryIBCSwap(this.maxAmount);
+      if (!queryIBCSwap) {
+        return {
+          ...prev,
+          error: new Error("Query IBC Swap is not initialized"),
+        };
+      }
+
+      const routeQuery = queryIBCSwap.getQueryRoute();
+      if (routeQuery.isFetching) {
+        return {
+          ...prev,
+          loadingState: "loading-block",
+        };
+      }
+
+      const routeError = routeQuery.error;
+      if (routeError) {
+        const CCTP_BRIDGE_FEE_ERROR_MESSAGE =
+          "Input amount is too low to cover CCTP bridge relay fee";
+
+        //NOTE For expected error messages, convert the message to be more user-friendly
+        if (routeError.message.includes(CCTP_BRIDGE_FEE_ERROR_MESSAGE)) {
+          return {
+            ...prev,
+            error: new Error("Input amount too low to cover the bridge fees."),
+          };
+        }
+
+        return {
+          ...prev,
+          error: new Error(routeError.message),
+        };
+      }
+
+      //NOTE - 만약 swap을 의도적으로 다 disable 시켰는데
+      //route로 부터 swap을 사용하는 경우가 있으면 에러를 발생시킨다.
+      const routeResponse = routeQuery.response;
+      if (routeResponse) {
+        if (this._isUseSwapInBridge(routeResponse.data)) {
+          return {
+            ...prev,
+            error: new Error("Swap in bridge is not allowed"),
+          };
+        }
+
+        if (routeResponse.data.txs_required !== 1) {
+          return {
+            ...prev,
+            error: new Error("Swap can't be executed with ibc pfm"),
+          };
+        }
+
+        if (
+          routeResponse.data.estimated_fees &&
+          routeResponse.data.estimated_fees.length > 0
+        ) {
+          const bridgeFee = routeResponse.data.estimated_fees.reduce(
+            (acc: CoinPretty, fee: any) => {
+              if (fee.origin_asset.denom === this.currency.coinMinimalDenom) {
+                return acc.add(
+                  new CoinPretty(this.currency, new Dec(fee.amount))
+                );
+              }
+              return acc;
+            },
+            new CoinPretty(this.currency, new Dec(0))
+          );
+
+          if (bridgeFee && bridgeFee.toDec().gte(this.maxAmount.toDec())) {
+            return {
+              ...prev,
+              error: new Error(
+                "Your balance is too low to cover the bridge fees."
+              ),
+            };
+          }
+        }
+      }
+    }
+
     if (prev.error || prev.loadingState) {
       return prev;
     }
@@ -658,14 +807,15 @@ export class IBCSwapAmountConfig extends AmountConfig {
       };
     }
 
-    if (queryIBCSwap.getQueryRoute().isFetching) {
+    const routeQuery = queryIBCSwap.getQueryRoute();
+    if (routeQuery.isFetching) {
       return {
         ...prev,
         loadingState: "loading-block",
       };
     }
 
-    const routeError = queryIBCSwap.getQueryRoute().error;
+    const routeError = routeQuery.error;
     if (routeError) {
       const CCTP_BRIDGE_FEE_ERROR_MESSAGE =
         "Input amount is too low to cover CCTP bridge relay fee";
@@ -686,12 +836,46 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
     //NOTE - 만약 swap을 의도적으로 다 disable 시켰는데
     //route로 부터 swap을 사용하는 경우가 있으면 에러를 발생시킨다.
-    const routeResponse = queryIBCSwap.getQueryRoute().response;
-    if (routeResponse && this._isUseSwapInBridge(routeResponse.data)) {
-      return {
-        ...prev,
-        error: new Error("Swap in bridge is not allowed"),
-      };
+    const routeResponse = routeQuery.response;
+    if (routeResponse) {
+      if (this._isUseSwapInBridge(routeResponse.data)) {
+        return {
+          ...prev,
+          error: new Error("Swap in bridge is not allowed"),
+        };
+      }
+
+      if (routeResponse?.data.txs_required !== 1) {
+        return {
+          ...prev,
+          error: new Error("Swap can't be executed with ibc pfm"),
+        };
+      }
+
+      if (
+        routeResponse.data.estimated_fees &&
+        routeResponse.data.estimated_fees.length > 0
+      ) {
+        const bridgeFee = routeResponse.data.estimated_fees.reduce(
+          (acc: CoinPretty, fee: any) => {
+            if (fee.origin_asset.denom === this.currency.coinMinimalDenom) {
+              return acc.add(
+                new CoinPretty(this.currency, new Dec(fee.amount))
+              );
+            }
+            return acc;
+          },
+          new CoinPretty(this.currency, new Dec(0))
+        );
+        if (bridgeFee && bridgeFee.toDec().gte(this.maxAmount.toDec())) {
+          return {
+            ...prev,
+            error: new Error(
+              "Your balance is too low to cover the bridge fees."
+            ),
+          };
+        }
+      }
     }
 
     if (
@@ -737,26 +921,21 @@ export class IBCSwapAmountConfig extends AmountConfig {
       };
     }
 
-    if (queryIBCSwap.getQueryRoute().response?.data.txs_required !== 1) {
-      return {
-        ...prev,
-        error: new Error("Swap can't be executed with ibc pfm"),
-      };
-    }
-
     return {
       ...prev,
     };
   }
 
-  getQueryIBCSwap(): ObservableQueryIBCSwapInner | undefined {
-    if (this.amount.length === 0) {
+  getQueryIBCSwap(
+    amount?: CoinPretty
+  ): ObservableQueryIBCSwapInner | undefined {
+    if (!amount && this.amount.length === 0) {
       return;
     }
 
     return this.skipQueries.queryIBCSwap.getIBCSwap(
       this.chainId,
-      this.amount[0],
+      amount ?? this.amount[0],
       this.outChainId,
       this.outCurrency.coinMinimalDenom,
       this.swapFeeBps,
