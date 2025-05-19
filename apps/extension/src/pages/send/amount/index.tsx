@@ -2288,10 +2288,15 @@ function useCheckExpectedOutIsTooSmall(
         ibcSwapConfigsForBridge.amountConfig.amount.length > 0 &&
         !ibcSwapConfigsForBridge.amountConfig.isFetching
       ) {
-        const inputDec = ibcSwapConfigsForBridge.amountConfig.amount[0].toDec();
-        const outputDec =
-          ibcSwapConfigsForBridge.amountConfig.outAmount.toDec();
+        const queryRouteResponse = ibcSwapConfigsForBridge.amountConfig
+          .getQueryIBCSwap()
+          ?.getQueryRoute()?.response;
+        if (!queryRouteResponse) {
+          return;
+        }
 
+        const inputDec = new Dec(queryRouteResponse.data.amount_in);
+        const outputDec = new Dec(queryRouteResponse.data.amount_out);
         const diff = (() => {
           if (inputDec.isZero()) {
             return;
