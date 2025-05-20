@@ -17,7 +17,33 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
   }>(
     "https://raw.githubusercontent.com/chainapsis/keplr-fiat-on-off-ramp-registry/main/fiat-on-off-ramp-list.json"
   ).response;
-  const fiatOnRampServiceInfos = response?.data.list;
+  // const fiatOnRampServiceInfos = response?.data.list;
+  const fiatOnRampServiceInfos = [
+    // TODO: Remove
+    {
+      serviceId: "swapped",
+      serviceName: "Swapped.com",
+      buyOrigin: "https://widget.swapped.com",
+      buySupportCoinDenomsByChainId: {
+        "osmosis-1": ["OSMO", "USDC", "ATOM", "stATOM"],
+        "juno-1": ["USDC"],
+        "phoenix-1": ["USDC"],
+        "cosmoshub-4": ["ATOM"],
+        "injective-1": ["INJ"],
+        "regen-1": ["REGEN", "USDC"],
+        "stargaze-1": ["STARS"],
+        "secret-4": ["SCRT"],
+        "agoric-3": ["BLD", "IST"],
+        "noble-1": ["USDC"],
+        "neutron-1": ["NTRN", "USDC", "ATOM", "stATOM"],
+        "dydx-mainnet-1": ["USDC"],
+        "chihuahua-1": ["HUAHUA"],
+        celestia: ["TIA"],
+        "omniflixhub-1": ["FLIX"],
+      },
+    },
+    ...(response?.data.list ?? []),
+  ];
 
   const buySupportServiceInfos = fiatOnRampServiceInfos?.map((serviceInfo) => {
     const buySupportCoinDenoms = [
