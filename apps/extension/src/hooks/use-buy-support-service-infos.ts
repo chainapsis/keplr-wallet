@@ -253,7 +253,7 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
         try {
           const signature = createHmac(
             "sha256",
-            process.env["KEPLR_EXT_SWAPPED_API_SECRET_KEY"] as string
+            process.env["KEPLR_EXT_SWAPPED_API_SECRET"] as string
           )
             .update(new URL(originalUrl).search)
             .digest("base64");
