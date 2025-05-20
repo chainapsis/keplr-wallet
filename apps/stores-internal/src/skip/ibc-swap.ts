@@ -634,14 +634,13 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
 
       const candidateChains: IChainInfoImpl<ChainInfo>[] = [];
 
-      // Skip에서 내려주는 응답에서 origin denom과 origin chain id가 같다면 해당 토큰의 도착 체인 후보가 될 수 있는 걸로 간주한다.
-      const isEVMOnlyChain = chainInfo.chainId.startsWith("eip155:");
+      // 밑에서 따로 IBC 경로에 대한 처리를 하기 때문에 여기선 EVM 체인이 포함된 경우만 다룬다.
       for (const chain of this.queryChains.chains) {
-        const isCandidateChainEVMOnlyChain =
-          chain.chainInfo.chainId.startsWith("eip155:");
-        const isCandidateChain =
-          chain.chainInfo.chainId !== chainInfo.chainId &&
-          (isEVMOnlyChain ? true : isCandidateChainEVMOnlyChain);
+        const isSameChain = chain.chainInfo.chainId === chainInfo.chainId;
+        const containsEVMOnlyChain =
+          chain.chainInfo.chainId.startsWith("eip155:") ||
+          chainInfo.chainId.startsWith("eip155:");
+        const isCandidateChain = !isSameChain && containsEVMOnlyChain;
         if (isCandidateChain) {
           candidateChains.push(chain.chainInfo);
           chainIdsToEnsure.add(chain.chainInfo.chainId);
@@ -666,14 +665,15 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
       const asset = assetsBatch
         .get(chainInfo.chainId)
         ?.find((asset) => asset.denom === currency.coinMinimalDenom);
-
       for (const candidateChain of candidateChains) {
+        // Skip에서 내려주는 응답에서 recommended symbol 혹은 origin denom과 origin chain id가 같다면 해당 토큰의 도착 체인 후보가 될 수 있는 걸로 간주한다.
         const candidateAsset = assetsBatch
           .get(candidateChain.chainId)
           ?.find(
             (a) =>
-              a.originDenom === asset?.originDenom &&
-              a.originChainId === asset?.originChainId
+              a.recommendedSymbol === asset?.recommendedSymbol ||
+              (a.originDenom === asset?.originDenom &&
+                a.originChainId === asset?.originChainId)
           );
 
         if (candidateAsset) {

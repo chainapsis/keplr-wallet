@@ -18,15 +18,14 @@ export class ObservableQueryIbcPfmTransfer {
       const res: NoneIBCBridgeInfo[] = [];
 
       const chainInfo = this.chainStore.getChain(chainId);
-      const isEVMOnlyChain = chainInfo.chainId.startsWith("eip155:");
 
       const candidateChainIds = this.queryChains.chains
         .filter((c) => {
-          const isCandidateChainEVMOnlyChain =
-            c.chainInfo.chainId.startsWith("eip155:");
-          const isCandidateChain =
-            c.chainInfo.chainId !== chainInfo.chainId &&
-            (isEVMOnlyChain || isCandidateChainEVMOnlyChain);
+          const isSameChain = c.chainInfo.chainId === chainInfo.chainId;
+          const containsEVMOnlyChain =
+            c.chainInfo.chainId.startsWith("eip155:") ||
+            chainInfo.chainId.startsWith("eip155:");
+          const isCandidateChain = !isSameChain && containsEVMOnlyChain;
 
           return isCandidateChain;
         })
@@ -46,8 +45,9 @@ export class ObservableQueryIbcPfmTransfer {
           .get(chainId)
           ?.find(
             (a) =>
-              a.originDenom === assetForBridge?.originDenom &&
-              a.originChainId === assetForBridge?.originChainId
+              a.recommendedSymbol === assetForBridge?.recommendedSymbol ||
+              (a.originDenom === assetForBridge?.originDenom &&
+                a.originChainId === assetForBridge?.originChainId)
           );
 
         if (candidateAsset) {
