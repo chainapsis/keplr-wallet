@@ -28,26 +28,27 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
       buySupportCoinDenomsByChainId: {
         "osmosis-1": ["OSMO"],
         "cosmoshub-4": ["ATOM"],
-        "noble-1": ["USDC"],
+        "noble-1": ["USDC_NOBLE"],
         "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:taproot":
           ["BTC"],
         "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:native-segwit":
           ["BTC"],
         "eip155:1": [
           "APE",
-          "DAI",
+          "DAI_ETHEREUM",
           "ETH",
-          "LINK",
+          "LINK_ETHEREUM",
           "SAND",
           "SHIB",
           "UNI",
-          "USDC",
-          "USDT",
+          "USDC_ETHEREUM",
+          "USDT_ETHEREUM",
         ],
-        "eip155:42161": ["ARB", "USDC"],
-        "eip155:43114": ["AVAX", "USDC", "USDT"],
+        "eip155:42161": ["ARB", "USDC_ARBITRUM"],
+        "eip155:43114": ["AVAX", "USDC_AVAX", "USDT_AVAX"],
+        "eip155:8453": ["USDC_BASE"],
         "eip155:10": ["OP"],
-        "eip155:137": ["POL", "USDT"],
+        "eip155:137": ["POLYGON", "USDT_POLYGON"],
       },
     },
     ...(response?.data.list ?? []),
@@ -195,6 +196,10 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
                   return;
                 }
 
+                const modularChainInfo = chainStore.modularChainInfos.find(
+                  (modularChainInfo) => modularChainInfo.chainId === chainId
+                );
+
                 if (chainStore.hasChain(chainId)) {
                   const address = chainStore.isEvmChain(chainId)
                     ? accountStore.getAccount(chainId).ethereumHexAddress
@@ -207,6 +212,15 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
                       pairs.push(`${coinDenom}:${address}`);
                     }
                   });
+                } else if (modularChainInfo && "bitcoin" in modularChainInfo) {
+                  const account = accountStore.getAccount(
+                    modularChainInfo.chainId
+                  );
+                  if (account.bitcoinAddress) {
+                    pairs.push(
+                      `${coinDenoms[0]}:${account.bitcoinAddress.bech32Address}`
+                    );
+                  }
                 }
               }
             );
