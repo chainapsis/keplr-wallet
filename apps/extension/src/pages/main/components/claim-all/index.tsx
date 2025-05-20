@@ -711,25 +711,15 @@ const ViewClaimTokenItemContent: FunctionComponent<{
       },
     });
 
-    const isLedger =
+    const isLedger = !!(
       keyRingStore.selectedKeyInfo &&
-      keyRingStore.selectedKeyInfo.type === "ledger";
+      keyRingStore.selectedKeyInfo.type === "ledger"
+    );
 
-    const isKeystone =
+    const isKeystone = !!(
       keyRingStore.selectedKeyInfo &&
-      keyRingStore.selectedKeyInfo.type === "keystone";
-
-    const ClaimCoinIcon = useMemo(() => {
-      return (
-        <CoinsPlusOutlineIcon
-          color={
-            isLedger || isKeystone
-              ? ColorPalette[theme.mode === "light" ? "gray-700" : "white"]
-              : ColorPalette[theme.mode === "light" ? "gray-200" : "gray-300"]
-          }
-        />
-      );
-    }, [isLedger, isKeystone, theme.mode]);
+      keyRingStore.selectedKeyInfo.type === "keystone"
+    );
 
     useEffect(() => {
       buttonWrapperRef.start();
@@ -914,10 +904,10 @@ const ViewClaimTokenItemContent: FunctionComponent<{
                             })}
                             isAlwaysOpen={isHover}
                           >
-                            {ClaimCoinIcon}
+                            <ClaimCoinIcon isLedgerOrKeystone={true} />
                           </Tooltip>
                         ) : (
-                          ClaimCoinIcon
+                          <ClaimCoinIcon />
                         )}
                       </Tooltip>
                     </animated.div>
@@ -963,5 +953,20 @@ const ChevronDownIcon = () => {
         />
       </svg>
     </div>
+  );
+};
+
+const ClaimCoinIcon: FunctionComponent<{
+  isLedgerOrKeystone?: boolean;
+}> = ({ isLedgerOrKeystone }) => {
+  const theme = useTheme();
+  return (
+    <CoinsPlusOutlineIcon
+      color={
+        isLedgerOrKeystone
+          ? ColorPalette[theme.mode === "light" ? "gray-700" : "white"]
+          : ColorPalette[theme.mode === "light" ? "gray-200" : "gray-300"]
+      }
+    />
   );
 };
