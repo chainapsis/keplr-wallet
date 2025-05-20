@@ -1,6 +1,7 @@
 import { AppCurrency } from "@keplr-wallet/types";
 import { FiatOnRampServiceInfo } from "../config.ui";
 import { useStore } from "../stores";
+import { createHmac } from "crypto";
 
 interface BuySupportServiceInfo extends FiatOnRampServiceInfo {
   buyUrl?: string;
@@ -25,21 +26,28 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
       serviceName: "Swapped.com",
       buyOrigin: "https://widget.swapped.com",
       buySupportCoinDenomsByChainId: {
-        "osmosis-1": ["OSMO", "USDC", "ATOM", "stATOM"],
-        "juno-1": ["USDC"],
-        "phoenix-1": ["USDC"],
+        "osmosis-1": ["OSMO"],
         "cosmoshub-4": ["ATOM"],
-        "injective-1": ["INJ"],
-        "regen-1": ["REGEN", "USDC"],
-        "stargaze-1": ["STARS"],
-        "secret-4": ["SCRT"],
-        "agoric-3": ["BLD", "IST"],
         "noble-1": ["USDC"],
-        "neutron-1": ["NTRN", "USDC", "ATOM", "stATOM"],
-        "dydx-mainnet-1": ["USDC"],
-        "chihuahua-1": ["HUAHUA"],
-        celestia: ["TIA"],
-        "omniflixhub-1": ["FLIX"],
+        "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:taproot":
+          ["BTC"],
+        "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:native-segwit":
+          ["BTC"],
+        "eip155:1": [
+          "APE",
+          "DAI",
+          "ETH",
+          "LINK",
+          "SAND",
+          "SHIB",
+          "UNI",
+          "USDC",
+          "USDT",
+        ],
+        "eip155:42161": ["ARB", "USDC"],
+        "eip155:43114": ["AVAX", "USDC", "USDT"],
+        "eip155:10": ["OP"],
+        "eip155:137": ["POL", "USDT"],
       },
     },
     ...(response?.data.list ?? []),
@@ -177,39 +185,74 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
             cryptoCurrencyList: buySupportCoinDenoms,
             defaultCryptoCurrency: selectedCoinDenom ?? buySupportCoinDenoms[0],
           };
-        case "kado":
-          const kadoBuySupportModularChainInfos = Object.keys(
-            serviceInfo.buySupportCoinDenomsByChainId
-          )
-            .filter((chainId) => chainStore.hasChain(chainId))
-            .map((chainId) => chainStore.getChain(chainId));
-          const selectedChainName = selectedTokenInfo
-            ? kadoBuySupportModularChainInfos.find(
-                (chainInfo) => chainInfo.chainId === selectedTokenInfo.chainId
-              )?.chainName
-            : undefined;
+        case "swapped":
+          const walletAddress = (() => {
+            const pairs: string[] = [];
+
+            Object.entries(serviceInfo.buySupportCoinDenomsByChainId).forEach(
+              ([chainId, coinDenoms]) => {
+                if (!coinDenoms) {
+                  return;
+                }
+
+                if (chainStore.hasChain(chainId)) {
+                  const address = chainStore.isEvmChain(chainId)
+                    ? accountStore.getAccount(chainId).ethereumHexAddress
+                    : accountStore.getAccount(chainId).bech32Address;
+
+                  coinDenoms.forEach((coinDenom) => {
+                    if (
+                      !pairs.some((pair) => pair.startsWith(`${coinDenom}:`))
+                    ) {
+                      pairs.push(`${coinDenom}:${address}`);
+                    }
+                  });
+                }
+              }
+            );
+
+            return pairs.join(",");
+          })();
 
           return {
-            apiKey: process.env["KEPLR_EXT_KADO_API_KEY"] ?? serviceInfo.apiKey,
-            product: "BUY",
-            networkList: kadoBuySupportModularChainInfos.map((chainInfo) =>
-              chainInfo.chainName.toUpperCase()
-            ),
-            cryptoList: buySupportCoinDenoms,
-            onRevCurrency: selectedCoinDenom ?? buySupportCoinDenoms[0],
-            network:
-              selectedChainName ??
-              kadoBuySupportModularChainInfos[0].chainName.toUpperCase(),
+            apiKey:
+              process.env["KEPLR_EXT_SWAPPED_API_KEY"] ?? serviceInfo.apiKey,
+            currencyCode: buySupportCoinDenoms[0],
+            walletAddress,
           };
         default:
           return;
       }
     })();
-    const buyUrl = buyUrlParams
-      ? `${serviceInfo.buyOrigin}?${Object.entries(buyUrlParams)
-          .map((paramKeyValue) => paramKeyValue.join("="))
-          .join("&")}`
-      : undefined;
+    const buyUrl = (() => {
+      if (!buyUrlParams) {
+        return undefined;
+      }
+
+      const originalUrl = `${serviceInfo.buyOrigin}?${Object.entries(
+        buyUrlParams
+      )
+        .map((paramKeyValue) => paramKeyValue.join("="))
+        .join("&")}`;
+
+      if (serviceInfo.serviceId === "swapped") {
+        try {
+          const signature = createHmac(
+            "sha256",
+            process.env["KEPLR_EXT_SWAPPED_API_SECRET_KEY"] as string
+          )
+            .update(new URL(originalUrl).search)
+            .digest("base64");
+
+          return `${originalUrl}&signature=${encodeURIComponent(signature)}`;
+        } catch (e) {
+          console.error(e);
+          return originalUrl;
+        }
+      }
+
+      return originalUrl;
+    })();
 
     return {
       ...serviceInfo,
