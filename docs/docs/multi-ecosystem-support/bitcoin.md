@@ -453,9 +453,11 @@ Listen for changes to the current network.
 #### Interface
 
 ```typescript
+type BitcoinNetwork = "mainnet" | "signet" | "testnet";
+
 interface KeplrBitcoinProvider {
-  on: (event: 'networkChanged', handler: (network: "mainnet" | "signet" | "testnet") => void) => void;
-  off: (event: 'networkChanged', handler: (network: "mainnet" | "signet" | "testnet") => void) => void;
+  on: (event: 'networkChanged', handler: (network: BitcoinNetwork) => void) => void;
+  off: (event: 'networkChanged', handler: (network: BitcoinNetwork) => void) => void;
 }
 ```
 
