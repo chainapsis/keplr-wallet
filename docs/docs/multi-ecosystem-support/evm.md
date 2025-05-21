@@ -173,3 +173,61 @@ window.keplr.ethereum.request({
   ],
 });
 ```
+
+## Events
+
+The EVM provider offers event listeners to track changes in accounts and chain.
+
+### accountsChanged
+
+Listen for changes to the user's exposed account address.
+
+#### Interface
+
+```typescript
+interface KeplrEvmProvider {
+  on: (event: 'accountsChanged', handler: (accounts: Array<string>) => void) => void;
+  off: (event: 'accountsChanged', handler: (accounts: Array<string>) => void) => void;
+}
+```
+
+#### Example
+
+```typescript
+const handleAccountsChanged = (accounts) => {
+  console.log('Accounts changed:', accounts);
+};
+
+// Add listener
+window.keplr.ethereum.on('accountsChanged', handleAccountsChanged);
+
+// Remove listener
+window.keplr.ethereum.off('accountsChanged', handleAccountsChanged);
+```
+
+### chainChanged
+
+Listen for changes to the current chain.
+
+#### Interface
+
+```typescript
+interface KeplrEvmProvider {
+  on: (event: 'chainChanged', handler: (chainIdHexString: string) => void) => void;
+  off: (event: 'chainChanged', handler: (chainIdHexString: string) => void) => void;
+}
+```
+
+#### Example
+
+```typescript
+const handleChainChanged = (chainIdHexString) => {
+  console.log('Chain changed:', chainIdHexString);
+};
+
+// Add listener
+window.keplr.ethereum.on('chainChanged', handleChainChanged);
+
+// Remove listener
+window.keplr.ethereum.off('chainChanged', handleChainChanged);
+```

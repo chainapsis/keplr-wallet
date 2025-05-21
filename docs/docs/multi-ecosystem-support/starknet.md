@@ -150,3 +150,61 @@ window.keplr.starknet.request({
   params: { transactionHash: "0x123456789abcdef" },
 });
 ```
+
+## Events
+
+The Starknet provider offers event listeners to track changes in accounts and network.
+
+### accountsChanged
+
+Listen for changes to the user's exposed account address.
+
+#### Interface
+
+```typescript
+interface KeplrStarknetProvider {
+  on: (event: 'accountsChanged', handler: (accounts: Array<string>) => void) => void;
+  off: (event: 'accountsChanged', handler: (accounts: Array<string>) => void) => void;
+}
+```
+
+#### Example
+
+```typescript
+const handleAccountsChanged = (accounts) => {
+  console.log('Accounts changed:', accounts);
+};
+
+// Add listener
+window.keplr.starknet.on('accountsChanged', handleAccountsChanged);
+
+// Remove listener
+window.keplr.starknet.off('accountsChanged', handleAccountsChanged);
+```
+
+### networkChanged
+
+Listen for changes to the current network.
+
+#### Interface
+
+```typescript
+interface KeplrStarknetProvider {
+  on: (event: 'networkChanged', handler: (network: string) => void) => void;
+  off: (event: 'networkChanged', handler: (network: string) => void) => void;
+}
+```
+
+#### Example
+
+```typescript
+const handleNetworkChanged = (network) => {
+  console.log('Network changed:', network);
+};
+
+// Add listener
+window.keplr.starknet.on('networkChanged', handleNetworkChanged);
+
+// Remove listener
+window.keplr.starknet.off('networkChanged', handleNetworkChanged);
+```
