@@ -112,9 +112,10 @@ export class ObservableQueryThirdpartyERC20BalancesImpl
       return new CoinPretty(currency, new Int(0)).ready(false);
     }
 
-    const contractAddress = this.denomHelper.denom.replace("erc20:", "");
     const tokenBalance = this.response.data.tokenBalances.find(
-      (bal) => bal.contractAddress === contractAddress
+      (bal) =>
+        DenomHelper.normalizeDenom(`erc20:${bal.contractAddress}`) ===
+        DenomHelper.normalizeDenom(this.denomHelper.denom)
     );
     if (tokenBalance?.tokenBalance == null) {
       return new CoinPretty(currency, new Int(0)).ready(false);
