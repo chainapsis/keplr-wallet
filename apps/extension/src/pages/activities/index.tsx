@@ -17,7 +17,6 @@ import { EmptyView } from "../../components/empty-view";
 import { H4, Subtitle3 } from "../../components/typography";
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
 import {
-  ChainInfoImpl,
   IAccountStore,
   IChainInfoImpl,
   IChainStore,
@@ -25,7 +24,6 @@ import {
 import { action, computed, makeObservable, observable } from "mobx";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { FormattedMessage } from "react-intl";
-import { ChainInfoWithCoreTypes } from "@keplr-wallet/background";
 
 // React hook으로 처리하기 귀찮은 부분이 많아서
 // 그냥 대충 mobx로...
@@ -104,7 +102,8 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
   const [selectedKey, setSelectedKey] = useState<string>("__all__");
 
   const querySupported = queriesStore.simpleQuery.queryGet<string[]>(
-    process.env["KEPLR_EXT_CONFIG_SERVER"],
+    // process.env["KEPLR_EXT_CONFIG_SERVER"],
+    "https://2uvwiiaivoz74ugx3d7oish5rm0ihehh.lambda-url.us-west-2.on.aws/",
     "/tx-history/supports"
   );
 
@@ -119,55 +118,7 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
     });
   }, [chainStore.chainInfosInListUI, querySupported.response?.data]);
 
-  // TODO: Remove
-  const tempSupportedChainList = useMemo(() => {
-    return [
-      ...supportedChainList,
-      new ChainInfoImpl<ChainInfoWithCoreTypes>(
-        {
-          rpc: "https://evm-1.keplr.app",
-          rest: "https://evm-1.keplr.app",
-          evm: {
-            chainId: 1,
-            rpc: "https://evm-1.keplr.app",
-            websocket: "wss://evm-1.keplr.app/websocket",
-          },
-          chainId: "eip155:1",
-          chainName: "Ethereum",
-          chainSymbolImageUrl:
-            "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
-          bip44: {
-            coinType: 60,
-          },
-          currencies: [
-            {
-              coinDenom: "ETH",
-              coinMinimalDenom: "ethereum-native",
-              coinDecimals: 18,
-              coinGeckoId: "ethereum",
-              coinImageUrl:
-                "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
-            },
-          ],
-          feeCurrencies: [
-            {
-              coinDenom: "ETH",
-              coinMinimalDenom: "ethereum-native",
-              coinDecimals: 18,
-              coinGeckoId: "ethereum",
-              coinImageUrl:
-                "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
-            },
-          ],
-          features: [],
-        },
-        chainStore
-      ),
-    ];
-  }, [supportedChainList, chainStore]);
-
-  otherHexAddresses.setSupportedChainList(tempSupportedChainList); // TODO: Remove
-  // otherHexAddresses.setSupportedChainList(supportedChainList);
+  otherHexAddresses.setSupportedChainList(supportedChainList);
 
   const msgHistory = usePaginatedCursorQuery<ResMsgsHistory>(
     // process.env["KEPLR_EXT_TX_HISTORY_BASE_URL"],
@@ -179,7 +130,7 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
       return `/history/v2/msgs/keplr-multi-chain?baseHexAddress=${baseHexAddress}&chainIdentifiers=${(() => {
         if (selectedKey === "__all__") {
           // TODO: Change below to supportedChainList
-          return tempSupportedChainList
+          return supportedChainList
             .map((chainInfo) => chainInfo.chainId)
             .join(",");
         }
@@ -209,7 +160,7 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
       return false;
     },
     // TODO: Change below to supportedChainList
-    `${selectedKey}/${tempSupportedChainList
+    `${selectedKey}/${supportedChainList
       .map((chainInfo) => chainInfo.chainId)
       .join(",")}/${otherHexAddresses.otherHexAddresses
       .map((address) => `${address.chainIdentifier}|${address.hexAddress}`)
@@ -292,7 +243,7 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
                 label: "All",
               },
               // TODO: Change below to supportedChainList
-              ...tempSupportedChainList.map((chainInfo) => {
+              ...supportedChainList.map((chainInfo) => {
                 return {
                   key: chainInfo.chainId,
                   label: chainInfo.chainName,
