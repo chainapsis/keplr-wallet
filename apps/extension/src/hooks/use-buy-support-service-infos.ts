@@ -35,7 +35,7 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
           ["BTC"],
         "eip155:1": [
           "APE",
-          "DAI_ETHEREUM",
+          "DAI",
           "ETH",
           "LINK_ETHEREUM",
           "SAND",
@@ -44,10 +44,10 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
           "USDC_ETHEREUM",
           "USDT_ETHEREUM",
         ],
-        "eip155:42161": ["ARB", "USDC_ARBITRUM"],
+        "eip155:42161": ["ARBITRUM", "USDC_ARBITRUM"],
         "eip155:43114": ["AVAX", "USDC_AVAX", "USDT_AVAX"],
         "eip155:8453": ["USDC_BASE"],
-        "eip155:10": ["OP"],
+        "eip155:10": ["OPTIMISM"],
         "eip155:137": ["POLYGON", "USDT_POLYGON"],
       },
     },
@@ -209,7 +209,11 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
                     if (
                       !pairs.some((pair) => pair.startsWith(`${coinDenom}:`))
                     ) {
-                      pairs.push(`${coinDenom}:${address}`);
+                      if (coinDenom.includes("_ETHEREUM")) {
+                        pairs.push(`${coinDenom.split("_")[0]}:${address}`);
+                      } else {
+                        pairs.push(`${coinDenom}:${address}`);
+                      }
                     }
                   });
                 } else if (modularChainInfo && "bitcoin" in modularChainInfo) {
