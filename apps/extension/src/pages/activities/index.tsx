@@ -129,7 +129,6 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
         : Bech32Address.fromBech32(account.bech32Address).toHex();
       return `/history/v2/msgs/keplr-multi-chain?baseHexAddress=${baseHexAddress}&chainIdentifiers=${(() => {
         if (selectedKey === "__all__") {
-          // TODO: Change below to supportedChainList
           return supportedChainList
             .map((chainInfo) => chainInfo.chainId)
             .join(",");
@@ -242,7 +241,6 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
                 key: "__all__",
                 label: "All",
               },
-              // TODO: Change below to supportedChainList
               ...supportedChainList.map((chainInfo) => {
                 return {
                   key: chainInfo.chainId,
