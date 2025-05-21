@@ -148,3 +148,18 @@ export type StakingPool = {
     bonded_tokens: string;
   };
 };
+
+export type BabylonRewardGauges = {
+  reward_gauges: {
+    BTC_STAKER: {
+      coins: {
+        denom: string;
+        amount: string;
+      }[];
+      withdrawn_coins: {
+        denom: string;
+        amount: string;
+      }[];
+    };
+  };
+};

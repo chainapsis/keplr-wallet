@@ -3,14 +3,13 @@ import { ObservableQueryChains } from "./chains";
 import { computedFn } from "mobx-utils";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { InternalChainStore } from "../internal";
-import { ObservableQueryAssets } from "./assets";
 import { IBCChannel, NoneIBCBridgeInfo } from "./types";
-
+import { ObservableQueryAssetsBatch } from "./assets";
 export class ObservableQueryIbcPfmTransfer {
   constructor(
     protected readonly chainStore: InternalChainStore,
     protected readonly queryChains: ObservableQueryChains,
-    protected readonly queryAssets: ObservableQueryAssets,
+    protected readonly assetsBatch: ObservableQueryAssetsBatch,
     protected readonly queryAssetsFromSource: ObservableQueryAssetsFromSource
   ) {}
 
@@ -20,42 +19,51 @@ export class ObservableQueryIbcPfmTransfer {
 
       const chainInfo = this.chainStore.getChain(chainId);
 
-      const isEVMOnlyChain = chainInfo.chainId.startsWith("eip155:");
+      const candidateChainIds = this.queryChains.chains
+        .filter((c) => {
+          const isSameChain = c.chainInfo.chainId === chainInfo.chainId;
+          const containsEVMOnlyChain =
+            c.chainInfo.chainId.startsWith("eip155:") ||
+            chainInfo.chainId.startsWith("eip155:");
+          const isCandidateChain = !isSameChain && containsEVMOnlyChain;
 
-      const assetForBridge = this.queryAssets
-        .getAssets(chainInfo.chainId)
-        .assetsRaw.find((asset) => asset.denom === coinMinimalDenom);
+          return isCandidateChain;
+        })
+        .map((c) => c.chainInfo.chainId);
 
-      for (const candidateChain of this.queryChains.chains) {
-        const isCandidateChainEVMOnlyChain =
-          candidateChain.chainInfo.chainId.startsWith("eip155:");
-        const isCandidateChain =
-          candidateChain.chainInfo.chainId !== chainInfo.chainId &&
-          (isEVMOnlyChain || isCandidateChainEVMOnlyChain);
+      const assets = this.assetsBatch.findCachedAssetsBatch([
+        chainInfo.chainId,
+        ...candidateChainIds,
+      ]);
 
-        if (isCandidateChain) {
-          const candidateAsset = this.queryAssets
-            .getAssets(candidateChain.chainInfo.chainId)
-            .assetsRaw.find(
-              (a) =>
-                a.originDenom === assetForBridge?.originDenom &&
-                a.originChainId === assetForBridge?.originChainId
-            );
+      const assetForBridge = assets
+        .get(chainInfo.chainId)
+        ?.find((a) => a.denom === coinMinimalDenom);
 
-          if (candidateAsset) {
-            const currencyFound = this.chainStore
-              .getChain(candidateChain.chainInfo.chainId)
-              .findCurrencyWithoutReaction(candidateAsset.denom);
+      for (const chainId of candidateChainIds) {
+        const candidateAsset = assets
+          .get(chainId)
+          ?.find(
+            (a) =>
+              a.recommendedSymbol === assetForBridge?.recommendedSymbol ||
+              (a.originDenom === assetForBridge?.originDenom &&
+                a.originChainId === assetForBridge?.originChainId)
+          );
 
-            if (currencyFound) {
-              res.push({
-                destinationChainId: candidateChain.chainInfo.chainId,
-                denom: candidateAsset.denom,
-              });
-            }
+        if (candidateAsset) {
+          const currencyFound = this.chainStore
+            .getChain(chainId)
+            .findCurrencyWithoutReaction(candidateAsset.denom);
+
+          if (currencyFound) {
+            res.push({
+              destinationChainId: chainId,
+              denom: candidateAsset.denom,
+            });
           }
         }
       }
+
       return res;
     }
   );

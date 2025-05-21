@@ -30,6 +30,7 @@ import {
   RequestBitcoinSendBitcoinMsg,
   RequestBitcoinPushTxMsg,
   SetPreferredBitcoinPaymentTypeMsg,
+  RequestBitcoinPushPsbtMsg,
 } from "./messages";
 
 export const getHandler: (
@@ -146,6 +147,11 @@ export const getHandler: (
           env,
           msg as SetPreferredBitcoinPaymentTypeMsg
         );
+      case RequestBitcoinPushPsbtMsg:
+        return handleRequestBitcoinPushPsbtMsg(
+          _service,
+          _permissionInteractionService
+        )(env, msg as RequestBitcoinPushPsbtMsg);
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
     }
@@ -438,6 +444,20 @@ const handleRequestBitcoinPushTxMsg: (
     await permissionInteractionService.ensureEnabledForBitcoin(env, msg.origin);
 
     return await service.pushTx(msg.origin, msg.rawTxHex);
+  };
+};
+
+const handleRequestBitcoinPushPsbtMsg: (
+  service: KeyRingBitcoinService,
+  permissionInteractionService: PermissionInteractiveService
+) => InternalHandler<RequestBitcoinPushPsbtMsg> = (
+  service,
+  permissionInteractionService
+) => {
+  return async (env, msg) => {
+    await permissionInteractionService.ensureEnabledForBitcoin(env, msg.origin);
+
+    return await service.pushPsbt(msg.origin, msg.psbtHex);
   };
 };
 

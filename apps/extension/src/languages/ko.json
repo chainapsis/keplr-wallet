@@ -421,6 +421,8 @@
   "page.ibc-swap.components.slippage-modal.title": "슬리피지 설정",
   "page.ibc-swap.components.slippage-modal.label.slippage-tolerance": "슬리피지 허용치",
   "page.ibc-swap.components.slippage-modal.label.slippage-custom": "커스텀 설정",
+  "page.ibc-swap.components.swap-not-available-modal.title": "스왑 불가능",
+  "page.ibc-swap.components.swap-not-available-modal.paragraph": "현재 이 토큰에 대한 스왑이 불가능합니다.",
   "page.ibc-swap.button.terms-of-use.title": "이용약관",
 
   "page.activity.title": "활동내역",
@@ -515,7 +517,9 @@
   "page.sign.components.messages.wasm-message-view.close-button": "접기",
   "page.sign.components.messages.wasm-message-view.details-button": "상세보기",
   "page.sign.components.messages.create-btc-delegation.title": "BTC 스테이킹 등록하기",
-  "page.sign.components.messages.create-btc-delegation.paragraph": "스테이킹에 관련된 데이터를 Babylon Genesis 체인에 제출 및 등록합니다.",
+  "page.sign.components.messages.create-btc-delegation.paragraph": "스테이킹에 관련된 데이터를 {chainName} 체인에 제출 및 등록합니다.",
+  "page.sign.components.messages.claim-btc-delegation-reward.title": "BTC 스테이킹 리워드 받기",
+  "page.sign.components.messages.claim-btc-delegation-reward.paragraph": "{amount}를 받습니다.",
 
   "page.sign.components.ledger-guide.box.error-title": "오류",
   "page.sign.components.ledger-guide.box.connect-and-unlock-ledger-paragraph": "렛저 장치를 연결하고 잠금을 해제하세요.",
@@ -628,6 +632,8 @@
   "page.main.components.claim-all.title": "아직 받지 않은 리워드",
   "page.main.components.claim-all.button": "한번에 받기",
   "page.main.components.claim-all.claim-button": "받기",
+  "page.main.components.show-all.button": "모두 보기",
+  "page.main.components.hide-all.button": "닫기",
   "page.main.components.menu-bar.manage-chain-visibility-title": "체인 추가/제거",
   "page.main.components.menu-bar.manage-asset-list-title": "자산 표시 관리",
   "page.main.components.menu-bar.my-contacts-title": "연락처",

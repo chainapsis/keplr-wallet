@@ -376,8 +376,6 @@ const useIBCSwapConfigWithRecipientConfig = (
     computeTerraClassicTax?: boolean;
   } = {}
 ) => {
-  const isAllowSwaps = false;
-
   const ibcSwapConfigsForBridge = useIBCSwapConfig(
     chainGetter,
     queriesStore,
@@ -389,11 +387,7 @@ const useIBCSwapConfigWithRecipientConfig = (
     initialGas,
     outChainId,
     outCurrency,
-    swapFeeBps,
-    isAllowSwaps,
-    {
-      evmSwaps: false,
-    }
+    swapFeeBps
   );
   const channelConfig = useIBCChannelConfig(false);
 
@@ -928,19 +922,6 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
                 if (!queryRoute.response) {
                   throw new Error("queryRoute.response is undefined");
-                }
-
-                const operations = queryRoute.response.data.operations;
-                const isContainsSwap = operations.some(
-                  (operation) => "swap" in operation || "evm_swap" in operation
-                );
-                const isUseSwap =
-                  queryRoute.response.data.does_swap || isContainsSwap;
-
-                if (isUseSwap) {
-                  //NOTE - ibcSwapAmountConfig에서 이미 에러를 발생시키만
-                  //어쩌다 여기까지 오면 tx가 실행되지 않게 막음
-                  throw new Error("Swap in bridge is not allowed");
                 }
 
                 routeDurationSeconds =

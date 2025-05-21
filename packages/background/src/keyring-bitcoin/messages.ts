@@ -614,6 +614,34 @@ export class RequestBitcoinPushTxMsg extends Message<string> {
   }
 }
 
+export class RequestBitcoinPushPsbtMsg extends Message<string> {
+  public static type() {
+    return "request-bitcoin-push-psbt";
+  }
+
+  constructor(public readonly psbtHex: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.psbtHex) {
+      throw new Error("psbtHex is not set");
+    }
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestBitcoinPushPsbtMsg.type();
+  }
+}
+
 export class GetPreferredBitcoinPaymentTypeMsg extends Message<SupportedPaymentType> {
   public static type() {
     return "get-preferred-bitcoin-payment-type";

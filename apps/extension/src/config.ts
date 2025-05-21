@@ -1311,71 +1311,6 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     features: ["terra-classic-fee"],
   },
   {
-    rpc: "https://rpc-quasar.keplr.app",
-    rest: "https://lcd-quasar.keplr.app",
-    chainId: "quasar-1",
-    chainName: "Quasar",
-    stakeCurrency: {
-      coinDenom: "QSR",
-      coinMinimalDenom: "uqsr",
-      coinDecimals: 6,
-    },
-    bip44: {
-      coinType: 118,
-    },
-    bech32Config: {
-      bech32PrefixAccAddr: "quasar",
-      bech32PrefixAccPub: "quasarpub",
-      bech32PrefixValAddr: "quasarvaloper",
-      bech32PrefixValPub: "quasarvaloperpub",
-      bech32PrefixConsAddr: "quasarvalcons",
-      bech32PrefixConsPub: "quasarvalconspub",
-    },
-    currencies: [
-      {
-        coinDenom: "QSR",
-        coinMinimalDenom: "uqsr",
-        coinDecimals: 6,
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "OSMO",
-        coinMinimalDenom:
-          "ibc/0471F1C4E7AFD3F07702BEF6DC365268D64570F7C1FDC98EA6098DD6DE59817B",
-        coinDecimals: 6,
-        gasPriceStep: {
-          low: 0.01,
-          average: 0.01,
-          high: 0.02,
-        },
-      },
-      {
-        coinDenom: "ATOM",
-        coinMinimalDenom:
-          "ibc/FA0006F056DB6719B8C16C551FC392B62F5729978FC0B125AC9A432DBB2AA1A5",
-        coinDecimals: 6,
-        gasPriceStep: {
-          low: 0.01,
-          average: 0.01,
-          high: 0.02,
-        },
-      },
-      {
-        coinDenom: "USDC",
-        coinMinimalDenom:
-          "ibc/FA7775734CC73176B7425910DE001A1D2AD9B6D9E93129A5D0750EAD13E4E63A",
-        coinDecimals: 6,
-        gasPriceStep: {
-          low: 0.01,
-          average: 0.01,
-          high: 0.02,
-        },
-      },
-    ],
-    features: [],
-  },
-  {
     rpc: "https://rpc-noble.keplr.app",
     rest: "https://lcd-noble.keplr.app",
     chainId: "noble-1",
@@ -3512,6 +3447,59 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       },
     ],
     features: ["cosmwasm"],
+  },
+  {
+    rpc: "https://rpc-atomone.keplr.app",
+    rest: "https://lcd-atomone.keplr.app",
+    chainId: "atomone-1",
+    chainName: "AtomOne",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/atomone/chain.png",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "atone",
+      bech32PrefixAccPub: "atonepub",
+      bech32PrefixValAddr: "atonevaloper",
+      bech32PrefixValPub: "atonevaloperpub",
+      bech32PrefixConsAddr: "atonevalcons",
+      bech32PrefixConsPub: "atonevalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "ATONE",
+        coinMinimalDenom: "uatone",
+        coinDecimals: 6,
+        coinGeckoId: "atomone",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/atomone/chain.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ATONE",
+        coinMinimalDenom: "uatone",
+        coinDecimals: 6,
+        coinGeckoId: "atomone",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/atomone/chain.png",
+        gasPriceStep: {
+          low: 0.025,
+          average: 0.04,
+          high: 0.08,
+        },
+      },
+    ],
+    stakeCurrency: {
+      coinDenom: "ATONE",
+      coinMinimalDenom: "uatone",
+      coinGeckoId: "atomone",
+      coinDecimals: 6,
+      coinImageUrl:
+        "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/atomone/chain.png",
+    },
+    features: [],
   },
 ];
 

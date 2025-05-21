@@ -167,6 +167,12 @@ interface TokenItemProps {
 
   bottomTagType?: BottomTagType;
   earnedAssetPrice?: string;
+
+  // If this prop is provided, the token tag will not be shown.
+  noTokenTag?: boolean;
+
+  // If this prop is provided, the token item will be shown with loading state.
+  isLoading?: boolean;
 }
 
 export const TokenItem: FunctionComponent<TokenItemProps> = observer(
@@ -184,6 +190,8 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
     right,
     bottomTagType,
     earnedAssetPrice,
+    noTokenTag,
+    isLoading,
   }) => {
     const { priceStore, price24HChangesStore, uiConfigStore } = useStore();
     const navigate = useNavigate();
@@ -208,7 +216,11 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
       return viewToken.token.currency.coinDenom;
     }, [viewToken.token.currency]);
 
-    const tag = useMemo(() => {
+    const tokenTag = useMemo(() => {
+      if (noTokenTag) {
+        return;
+      }
+
       const currency = viewToken.token.currency;
       const denomHelper = new DenomHelper(currency.coinMinimalDenom);
 
@@ -247,7 +259,7 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
           text: denomHelper.type.toUpperCase(),
         };
       }
-    }, [viewToken.token.currency, viewToken.chainInfo.chainId]);
+    }, [noTokenTag, viewToken.token.currency, viewToken.chainInfo.chainId]);
 
     // 얘가 값이 있냐 없냐에 따라서 price change를 보여줄지 말지를 결정한다.
     // prop에서 showPrice24HChange가 null 또는 false거나
@@ -288,7 +300,8 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
         isIBC={isIBC}
         pricePretty={pricePretty}
         price24HChange={price24HChange}
-        tag={tag}
+        tag={tokenTag}
+        isLoading={isLoading}
       />
     );
 
@@ -333,6 +346,7 @@ interface TokenItemContentProps {
     text: string;
     tooltip?: string;
   };
+  isLoading?: boolean;
 }
 
 const TokenItemContent: FunctionComponent<TokenItemContentProps> = ({

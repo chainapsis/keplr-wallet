@@ -29,6 +29,7 @@ export const Relations = [
   "initia-undelegate",
   "initia-redelegate",
   "initia-cancel-undelegate",
+  "atomone-vote",
   "evm/send",
   "evm/receive",
   "evm/contract-call",
