@@ -33,7 +33,7 @@ import { IconButton } from "../../../../components/icon-button";
 import { MenuIcon } from "../../../../components/icon";
 import { handleExternalInteractionWithNoProceedNext } from "../../../../utils";
 import { TokenContract } from "../../../../stores/token-contracts";
-import { makeSureUTF8String } from "@keplr-wallet/common";
+import { CoinPretty } from "@keplr-wallet/unit";
 
 const Styles = {
   Container: styled(Stack)`
@@ -270,7 +270,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
               type: "erc20",
               contractAddress: contractAddress,
               coinMinimalDenom: `erc20:${contractAddress}`,
-              coinDenom: makeSureUTF8String(queryContract.tokenInfo.symbol),
+              coinDenom: queryContract.tokenInfo.symbol,
               coinDecimals: queryContract.tokenInfo.decimals,
               coinImageUrl: tokenContract?.imageUrl,
               coinGeckoId: tokenContract?.coinGeckoId,
@@ -430,7 +430,9 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
           label={intl.formatMessage({
             id: "page.setting.token.add.symbol-label",
           })}
-          value={makeSureUTF8String(queryContract.tokenInfo?.symbol || "-")}
+          value={CoinPretty.makeCoinDenomPretty(
+            queryContract.tokenInfo?.symbol || "-"
+          )}
           disabled
         />
         <TextInput

@@ -10,11 +10,32 @@ export type CoinPrettyOptions = {
   upperCase: boolean;
   lowerCase: boolean;
   hideDenom: boolean;
+  hideAmount: boolean;
   hideIBCMetadata: boolean;
-  maxCoinDenomLength?: number;
+  showRawCoinDenom: boolean;
+  maxCoinDenomLength: number;
 };
 
 export class CoinPretty {
+  static makeCoinDenomPretty(coinDenom: string) {
+    const isHexString = /^(?:0[xX][0-9a-fA-F]+|[0-9][0-9a-fA-F]*)$/.test(
+      coinDenom
+    );
+    if (isHexString) {
+      const buf = Buffer.from(coinDenom.replace(/^0x/, ""), "hex");
+
+      const nullIndex = buf.indexOf(0);
+      const end = nullIndex === -1 ? buf.length : nullIndex;
+
+      return buf
+        .toString("utf8", 0, end)
+        .replace(/\u0000+/g, "")
+        .trim();
+    }
+
+    return coinDenom.replace(/\u0000+/g, "").trim();
+  }
+
   protected intPretty: IntPretty;
 
   protected _options: CoinPrettyOptions = {
@@ -22,7 +43,11 @@ export class CoinPretty {
     upperCase: false,
     lowerCase: false,
     hideDenom: false,
+    hideAmount: false,
+    showRawCoinDenom: false,
     hideIBCMetadata: false,
+    // default max length is 20
+    maxCoinDenomLength: 20,
   };
 
   constructor(
@@ -92,9 +117,21 @@ export class CoinPretty {
     return pretty;
   }
 
+  hideAmount(bool: boolean): CoinPretty {
+    const pretty = this.clone();
+    pretty._options.hideAmount = bool;
+    return pretty;
+  }
+
   hideIBCMetadata(bool: boolean): CoinPretty {
     const pretty = this.clone();
     pretty._options.hideIBCMetadata = bool;
+    return pretty;
+  }
+
+  showRawCoinDenom(bool: boolean): CoinPretty {
+    const pretty = this.clone();
+    pretty._options.showRawCoinDenom = bool;
     return pretty;
   }
 
@@ -295,10 +332,11 @@ export class CoinPretty {
       denom = denom.toLowerCase();
     }
 
-    if (
-      this._options.maxCoinDenomLength != null &&
-      denom.length > this._options.maxCoinDenomLength
-    ) {
+    if (!this._options.showRawCoinDenom) {
+      denom = CoinPretty.makeCoinDenomPretty(denom);
+    }
+
+    if (denom.length > this._options.maxCoinDenomLength) {
       denom = `${denom.slice(0, this._options.maxCoinDenomLength)}...`;
     }
 
@@ -307,6 +345,10 @@ export class CoinPretty {
     if (this._options.hideDenom) {
       denom = "";
       separator = "";
+    }
+
+    if (this._options.hideAmount) {
+      return denom;
     }
 
     return this.intPretty.toStringWithSymbols("", `${separator}${denom}`);

@@ -173,7 +173,6 @@ interface TokenItemProps {
 
   // If this prop is provided, the token item will be shown with loading state.
   isLoading?: boolean;
-  maxCoinDenomLength?: number;
 }
 
 export const TokenItem: FunctionComponent<TokenItemProps> = observer(
@@ -193,7 +192,6 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
     earnedAssetPrice,
     noTokenTag,
     isLoading,
-    maxCoinDenomLength,
   }) => {
     const { priceStore, price24HChangesStore, uiConfigStore } = useStore();
     const navigate = useNavigate();
@@ -207,24 +205,6 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
     const isIBC = useMemo(() => {
       return viewToken.token.currency.coinMinimalDenom.startsWith("ibc/");
     }, [viewToken.token.currency]);
-
-    const coinDenom = useMemo(() => {
-      const coinDenom = (() => {
-        if (
-          "originCurrency" in viewToken.token.currency &&
-          viewToken.token.currency.originCurrency
-        ) {
-          return viewToken.token.currency.originCurrency.coinDenom;
-        }
-        return viewToken.token.currency.coinDenom;
-      })();
-
-      if (maxCoinDenomLength != null && coinDenom.length > maxCoinDenomLength) {
-        return `${coinDenom.slice(0, maxCoinDenomLength)}...`;
-      }
-
-      return coinDenom;
-    }, [viewToken.token.currency, maxCoinDenomLength]);
 
     const tokenTag = useMemo(() => {
       if (noTokenTag) {
@@ -306,7 +286,6 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
         intl={intl}
         uiConfigStore={uiConfigStore}
         navigate={navigate}
-        coinDenom={coinDenom}
         isIBC={isIBC}
         pricePretty={pricePretty}
         price24HChange={price24HChange}
@@ -348,7 +327,6 @@ interface TokenItemContentProps {
   intl: any;
   uiConfigStore: any;
   navigate: any;
-  coinDenom: string;
   isIBC: boolean;
   pricePretty: any;
   price24HChange?: any;
@@ -377,7 +355,6 @@ const TokenItemContent: FunctionComponent<TokenItemContentProps> = ({
   intl,
   uiConfigStore,
   navigate,
-  coinDenom,
   isIBC,
   pricePretty,
   price24HChange,
@@ -451,7 +428,10 @@ const TokenItemContent: FunctionComponent<TokenItemContentProps> = ({
                 wordBreak: "break-all",
               }}
             >
-              {coinDenom}
+              {viewToken.token
+                .hideAmount(true)
+                .hideIBCMetadata(true)
+                .toString()}
             </Subtitle2>
           </Skeleton>
 

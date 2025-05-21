@@ -253,22 +253,14 @@ export const SwapAssetInfo: FunctionComponent<{
                         .getBalance(amountConfig.currency);
 
                       if (!bal) {
-                        const coinDenomLength =
-                          amountConfig.currency.coinDenom.length;
-                        if (coinDenomLength > 15) {
-                          return `0 ${amountConfig.currency.coinDenom.slice(
-                            0,
-                            15
-                          )}...`;
-                        }
-
-                        return `0 ${amountConfig.currency.coinDenom}`;
+                        return new CoinPretty(amountConfig.currency, new Dec(0))
+                          .hideIBCMetadata(true)
+                          .toString();
                       }
 
                       return uiConfigStore.hideStringIfPrivacyMode(
                         bal.balance
                           .maxDecimals(6)
-                          .maxCoinDenomLength(15)
                           .trim(true)
                           .shrink(true)
                           .inequalitySymbol(true)
@@ -517,20 +509,10 @@ export const SwapAssetInfo: FunctionComponent<{
                     >
                       {(() => {
                         if (currency) {
-                          if (
-                            "originCurrency" in currency &&
-                            currency.originCurrency
-                          ) {
-                            // XXX: 솔직히 이거 왜 타입 추론 제대로 안되는지 모르겠다... 일단 대충 처리
-                            return (currency.originCurrency as any).coinDenom;
-                          }
-
-                          const coinDenomLength = currency.coinDenom.length;
-                          if (coinDenomLength > 15) {
-                            return `${currency.coinDenom.slice(0, 15)}...`;
-                          }
-
-                          return currency.coinDenom;
+                          return new CoinPretty(currency, new Dec(0))
+                            .hideAmount(true)
+                            .hideIBCMetadata(true)
+                            .toString();
                         }
                         return "Unknown";
                       })()}
