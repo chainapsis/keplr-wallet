@@ -32,7 +32,7 @@ import { MsgItemSkeleton } from "./msg-items/skeleton";
 import { Stack } from "../../../components/stack";
 import { EmptyView } from "../../../components/empty-view";
 import { DenomHelper } from "@keplr-wallet/common";
-import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import { EarnApyBanner } from "./banners/earn-apy-banner";
 import {
   validateIsUsdcFromNoble,
@@ -339,7 +339,9 @@ export const TokenDetailModal: FunctionComponent<{
       }/${(() => {
         if ("cosmos" in modularChainInfo) {
           if (chainId.startsWith("eip155:")) {
-            return accountStore.getAccount(chainId).ethereumHexAddress;
+            return account.hasEthereumHexAddress
+              ? account.ethereumHexAddress
+              : Bech32Address.fromBech32(account.bech32Address).toHex();
           }
           return accountStore.getAccount(chainId).bech32Address;
         }
