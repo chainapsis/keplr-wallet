@@ -188,7 +188,8 @@ export const TokenDetailModal: FunctionComponent<{
   const navigate = useNavigate();
 
   const querySupported = queriesStore.simpleQuery.queryGet<string[]>(
-    process.env["KEPLR_EXT_CONFIG_SERVER"],
+    // process.env["KEPLR_EXT_CONFIG_SERVER"],
+    "https://2uvwiiaivoz74ugx3d7oish5rm0ihehh.lambda-url.us-west-2.on.aws/", // TODO: Remove
     "/tx-history/supports"
   );
 
@@ -202,7 +203,6 @@ export const TokenDetailModal: FunctionComponent<{
 
       return map.get(chainInfo.chainIdentifier) ?? false;
     }
-    // XXX: 어차피 cosmos 기반이 아니면 backend에서 지원하지 않음...
     return false;
   }, [chainStore, modularChainInfo, querySupported.response]);
 
@@ -331,12 +331,16 @@ export const TokenDetailModal: FunctionComponent<{
   ];
 
   const msgHistory = usePaginatedCursorQuery<ResMsgsHistory>(
-    process.env["KEPLR_EXT_TX_HISTORY_BASE_URL"],
+    // process.env["KEPLR_EXT_TX_HISTORY_BASE_URL"],
+    "https://satellite-develop.keplr.app/", // TODO: Remove
     () => {
-      return `/history/msgs/${
+      return `/history/v2/msgs/${
         ChainIdHelper.parse(chainId).identifier
       }/${(() => {
         if ("cosmos" in modularChainInfo) {
+          if (chainId.startsWith("eip155:")) {
+            return accountStore.getAccount(chainId).ethereumHexAddress;
+          }
           return accountStore.getAccount(chainId).bech32Address;
         }
         if ("starknet" in modularChainInfo) {
