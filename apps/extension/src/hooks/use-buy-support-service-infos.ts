@@ -18,41 +18,7 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
   }>(
     "https://raw.githubusercontent.com/chainapsis/keplr-fiat-on-off-ramp-registry/main/fiat-on-off-ramp-list.json"
   ).response;
-  // const fiatOnRampServiceInfos = response?.data.list;
-  const fiatOnRampServiceInfos = [
-    // TODO: Remove
-    {
-      serviceId: "swapped",
-      serviceName: "Swapped.com",
-      buyOrigin: "https://widget.swapped.com",
-      buySupportCoinDenomsByChainId: {
-        "osmosis-1": ["OSMO"],
-        "cosmoshub-4": ["ATOM"],
-        "noble-1": ["USDC_NOBLE"],
-        "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:taproot":
-          ["BTC"],
-        "bip122:000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f:native-segwit":
-          ["BTC"],
-        "eip155:1": [
-          "APE",
-          "DAI",
-          "ETH",
-          "LINK_ETHEREUM",
-          "SAND",
-          "SHIB",
-          "UNI",
-          "USDC_ETHEREUM",
-          "USDT_ETHEREUM",
-        ],
-        "eip155:42161": ["ARBITRUM", "USDC_ARBITRUM"],
-        "eip155:43114": ["AVAX", "USDC_AVAX", "USDT_AVAX"],
-        "eip155:8453": ["USDC_BASE"],
-        "eip155:10": ["OPTIMISM"],
-        "eip155:137": ["POLYGON", "USDT_POLYGON"],
-      },
-    },
-    ...(response?.data.list ?? []),
-  ];
+  const fiatOnRampServiceInfos = response?.data.list;
 
   const buySupportServiceInfos = fiatOnRampServiceInfos?.map((serviceInfo) => {
     const buySupportCoinDenoms = [
