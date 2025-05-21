@@ -336,8 +336,25 @@ export class CoinPretty {
       denom = CoinPretty.makeCoinDenomPretty(denom);
     }
 
-    if (denom.length > this._options.maxCoinDenomLength) {
-      denom = `${denom.slice(0, this._options.maxCoinDenomLength)}...`;
+    if (!this._options.hideIBCMetadata) {
+      if (
+        "originCurrency" in this.currency &&
+        this.currency.originCurrency &&
+        this.currency.originCurrency.coinDenom.length >
+          this._options.maxCoinDenomLength
+      ) {
+        denom = denom.replace(
+          this.currency.originCurrency.coinDenom,
+          `${this.currency.originCurrency.coinDenom.slice(
+            0,
+            this._options.maxCoinDenomLength
+          )}...`
+        );
+      }
+    } else {
+      if (denom.length > this._options.maxCoinDenomLength) {
+        denom = `${denom.slice(0, this._options.maxCoinDenomLength)}...`;
+      }
     }
 
     let separator = this._options.separator;
