@@ -1,4 +1,5 @@
 import {
+  DenomHelper,
   KVStore,
   PrefixKVStore,
   sortedJsonByKeyStringify,
@@ -1084,7 +1085,49 @@ export class ChainsService {
         };
       }
 
+      // Normalize coinMinimalDenom for all currencies.
+      newChainInfo = {
+        ...newChainInfo,
+        currencies: newChainInfo.currencies.map((currency) => {
+          const coinMinimalDenom = DenomHelper.normalizeDenom(
+            currency.coinMinimalDenom
+          );
+
+          return {
+            ...currency,
+            coinMinimalDenom,
+          };
+        }),
+      };
       return newChainInfo;
+    });
+  }
+
+  protected mergeModularChainInfosWithDynamics(
+    modularChainInfos: ModularChainInfo[]
+  ): ModularChainInfo[] {
+    return modularChainInfos.map((modularChainInfo) => {
+      if (this.hasChainInfo(modularChainInfo.chainId)) {
+        const cosmos = this.getChainInfoOrThrow(modularChainInfo.chainId);
+        return {
+          ...modularChainInfo,
+          cosmos: this.mergeChainInfosWithDynamics([cosmos])[0],
+        };
+      }
+
+      if ("starknet" in modularChainInfo) {
+        const endpoint = this.getEndpoint(modularChainInfo.chainId);
+        return {
+          ...modularChainInfo,
+          starknet: {
+            ...modularChainInfo.starknet,
+            rpc: endpoint?.rpc || modularChainInfo.starknet.rpc,
+          },
+        };
+      }
+
+      // TODO: 나머지 모듈러 체인 정보들에 대해서도 적용하기
+      return modularChainInfo;
     });
   }
 
@@ -1164,44 +1207,20 @@ export class ChainsService {
 
   getModularChainInfos = computedFn(
     (): ModularChainInfo[] => {
-      return this.modularChainInfos
-        .slice()
-        .map((modularChainInfo) => {
-          if (this.hasChainInfo(modularChainInfo.chainId)) {
-            const cosmos = this.getChainInfoOrThrow(modularChainInfo.chainId);
+      return this.mergeModularChainInfosWithDynamics(
+        this.modularChainInfos.slice()
+      ).concat(
+        this.mergeChainInfosWithDynamics(this.suggestedChainInfos).map(
+          (chainInfo) => {
             return {
-              chainId: cosmos.chainId,
-              chainName: cosmos.chainName,
-              chainSymbolImageUrl: cosmos.chainSymbolImageUrl,
-              cosmos,
+              chainId: chainInfo.chainId,
+              chainName: chainInfo.chainName,
+              chainSymbolImageUrl: chainInfo.chainSymbolImageUrl,
+              cosmos: chainInfo,
             };
           }
-
-          // TODO: `mergeModularChainInfosWithDynamics` 같은 메소드로 빼기
-          if ("starknet" in modularChainInfo) {
-            const endpoint = this.getEndpoint(modularChainInfo.chainId);
-            return {
-              ...modularChainInfo,
-              starknet: {
-                ...modularChainInfo.starknet,
-                rpc: endpoint?.rpc || modularChainInfo.starknet.rpc,
-              },
-            };
-          }
-          return modularChainInfo;
-        })
-        .concat(
-          this.mergeChainInfosWithDynamics(this.suggestedChainInfos).map(
-            (chainInfo) => {
-              return {
-                chainId: chainInfo.chainId,
-                chainName: chainInfo.chainName,
-                chainSymbolImageUrl: chainInfo.chainSymbolImageUrl,
-                cosmos: chainInfo,
-              };
-            }
-          )
-        );
+        )
+      );
     },
     {
       keepAlive: true,
