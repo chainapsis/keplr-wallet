@@ -652,6 +652,8 @@
   "page.main.components.claim-all.title": "Claimable Reward",
   "page.main.components.claim-all.button": "Claim All",
   "page.main.components.claim-all.claim-button": "Claim",
+  "page.main.components.show-all.button": "Show All",
+  "page.main.components.hide-all.button": "Hide All",
   "page.main.components.context-menu.title": "View Options",
   "page.main.components.context-menu.tooltip-title": "New",
   "page.main.components.context-menu.tooltip-paragraph": "Try switching between grouped and individual asset views!",

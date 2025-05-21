@@ -3448,6 +3448,59 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     ],
     features: ["cosmwasm"],
   },
+  {
+    rpc: "https://rpc-atomone.keplr.app",
+    rest: "https://lcd-atomone.keplr.app",
+    chainId: "atomone-1",
+    chainName: "AtomOne",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/atomone/chain.png",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "atone",
+      bech32PrefixAccPub: "atonepub",
+      bech32PrefixValAddr: "atonevaloper",
+      bech32PrefixValPub: "atonevaloperpub",
+      bech32PrefixConsAddr: "atonevalcons",
+      bech32PrefixConsPub: "atonevalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "ATONE",
+        coinMinimalDenom: "uatone",
+        coinDecimals: 6,
+        coinGeckoId: "atomone",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/atomone/chain.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ATONE",
+        coinMinimalDenom: "uatone",
+        coinDecimals: 6,
+        coinGeckoId: "atomone",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/atomone/chain.png",
+        gasPriceStep: {
+          low: 0.025,
+          average: 0.04,
+          high: 0.08,
+        },
+      },
+    ],
+    stakeCurrency: {
+      coinDenom: "ATONE",
+      coinMinimalDenom: "uatone",
+      coinGeckoId: "atomone",
+      coinDecimals: 6,
+      coinImageUrl:
+        "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/atomone/chain.png",
+    },
+    features: [],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.

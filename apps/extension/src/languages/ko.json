@@ -631,6 +631,8 @@
   "page.main.components.claim-all.title": "아직 받지 않은 리워드",
   "page.main.components.claim-all.button": "한번에 받기",
   "page.main.components.claim-all.claim-button": "받기",
+  "page.main.components.show-all.button": "모두 보기",
+  "page.main.components.hide-all.button": "닫기",
   "page.main.components.context-menu.title": "자산 보기 설정",
   "page.main.components.context-menu.tooltip-title": "신규",
   "page.main.components.context-menu.tooltip-paragraph": "이제 같은 자산은 묶어서 볼 수 있어요!",
