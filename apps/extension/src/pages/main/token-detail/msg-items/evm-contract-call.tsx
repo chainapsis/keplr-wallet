@@ -3,7 +3,7 @@ import { MsgHistory } from "../types";
 import { observer } from "mobx-react-lite";
 import { MsgItemBase } from "./base";
 import { ItemLogo } from "./logo";
-import { MessageReceiveIcon } from "../../../../components/icon";
+import { MessageRegisterIcon } from "../../../../components/icon";
 
 export const MsgRelationEvmContractCall: FunctionComponent<{
   msg: MsgHistory;
@@ -15,7 +15,7 @@ export const MsgRelationEvmContractCall: FunctionComponent<{
     <MsgItemBase
       amount={""}
       logo={
-        <ItemLogo center={<MessageReceiveIcon width="2rem" height="2rem" />} />
+        <ItemLogo center={<MessageRegisterIcon width="2rem" height="2rem" />} />
       }
       chainId={msg.chainId}
       title="Contract Call"
