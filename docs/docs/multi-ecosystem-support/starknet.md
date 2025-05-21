@@ -138,7 +138,7 @@ window.keplr.starknet.request({
 ```typescript
 window.keplr.starknet.request({
   type: "wallet_switchStarknetChain",
-  params: { chainId: "starknet:SN_SEPOLIA" },
+  params: { chainId: "0x534e5f5345504f4c4941" },
 });
 ```
 
@@ -189,17 +189,21 @@ Listen for changes to the current network.
 #### Interface
 
 ```typescript
+type StarknetChainId = 
+  | "0x534e5f4d41494e"     // SN_MAIN - Starknet Mainnet
+  | "0x534e5f5345504f4c4941"; // SN_SEPOLIA - Starknet Sepolia Testnet
+
 interface KeplrStarknetProvider {
-  on: (event: 'networkChanged', handler: (network: string) => void) => void;
-  off: (event: 'networkChanged', handler: (network: string) => void) => void;
+  on: (event: 'networkChanged', handler: (chainId: StarknetChainId) => void) => void;
+  off: (event: 'networkChanged', handler: (chainId: StarknetChainId) => void) => void;
 }
 ```
 
 #### Example
 
 ```typescript
-const handleNetworkChanged = (network) => {
-  console.log('Network changed:', network);
+const handleNetworkChanged = (chainId) => {
+  console.log('Network changed:', chainId);
 };
 
 // Add listener
