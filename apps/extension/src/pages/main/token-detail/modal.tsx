@@ -195,6 +195,14 @@ export const TokenDetailModal: FunctionComponent<{
 
   const isSupported: boolean = useMemo(() => {
     if ("cosmos" in modularChainInfo) {
+      if (
+        chainId.startsWith("eip155:") &&
+        coinMinimalDenom !== "ethereum-native"
+      ) {
+        // 현재 evm msg들은 denoms에 네이티브 minimal denom값만 저장하고 있어서 erc20 주소로 msg를 필터링하는 기능은 제공되지 않는 상태
+        return false;
+      }
+
       const chainInfo = chainStore.getChain(modularChainInfo.chainId);
       const map = new Map<string, boolean>();
       for (const chainIdentifier of querySupported.response?.data ?? []) {
@@ -204,7 +212,13 @@ export const TokenDetailModal: FunctionComponent<{
       return map.get(chainInfo.chainIdentifier) ?? false;
     }
     return false;
-  }, [chainStore, modularChainInfo, querySupported.response]);
+  }, [
+    chainStore,
+    modularChainInfo,
+    querySupported.response,
+    chainId,
+    coinMinimalDenom,
+  ]);
 
   const buttons: {
     icon: React.ReactElement;
