@@ -415,3 +415,62 @@ const psbtHex = "70736274ff01007d..."
 await window.bitcoin_keplr.pushPsbt(rawTxHex)
 // "acc16b5e9e69ea8f1de96d839a0e2cb9bc2ddc6dd8d19115f6bbfca81852aac2"
 ```
+
+## Events
+
+The Bitcoin provider offers event listeners to track changes in accounts and network.
+### accountsChanged
+
+Listen for changes to the user's exposed account address.
+
+#### Interface
+
+```typescript
+interface KeplrBitcoinProvider {
+  on: (event: 'accountsChanged', handler: (accounts: Array<string>) => void) => void;
+  off: (event: 'accountsChanged', handler: (accounts: Array<string>) => void) => void;
+}
+```
+
+#### Example
+
+```typescript
+const handleAccountsChanged = (accounts) => {
+  console.log('Accounts changed:', accounts);
+};
+
+// Add listener
+window.bitcoin_keplr.on('accountsChanged', handleAccountsChanged);
+
+// Remove listener
+window.bitcoin_keplr.off('accountsChanged', handleAccountsChanged);
+```
+
+### networkChanged
+
+Listen for changes to the current network.
+
+#### Interface
+
+```typescript
+type BitcoinNetwork = "mainnet" | "signet" | "testnet";
+
+interface KeplrBitcoinProvider {
+  on: (event: 'networkChanged', handler: (network: BitcoinNetwork) => void) => void;
+  off: (event: 'networkChanged', handler: (network: BitcoinNetwork) => void) => void;
+}
+```
+
+#### Example
+
+```typescript
+const handleNetworkChanged = (network) => {
+  console.log('Network changed:', network);
+};
+
+// Add listener
+window.bitcoin_keplr.on('networkChanged', handleNetworkChanged);
+
+// Remove listener
+window.bitcoin_keplr.off('networkChanged', handleNetworkChanged);
+```

@@ -138,7 +138,7 @@ window.keplr.starknet.request({
 ```typescript
 window.keplr.starknet.request({
   type: "wallet_switchStarknetChain",
-  params: { chainId: "starknet:SN_SEPOLIA" },
+  params: { chainId: "0x534e5f5345504f4c4941" },
 });
 ```
 
@@ -149,4 +149,66 @@ window.keplr.starknet.request({
   type: "starknet_getTransactionByHash",
   params: { transactionHash: "0x123456789abcdef" },
 });
+```
+
+## Events
+
+The Starknet provider offers event listeners to track changes in accounts and network.
+
+### accountsChanged
+
+Listen for changes to the user's exposed account address.
+
+#### Interface
+
+```typescript
+interface KeplrStarknetProvider {
+  on: (event: 'accountsChanged', handler: (accounts: Array<string>) => void) => void;
+  off: (event: 'accountsChanged', handler: (accounts: Array<string>) => void) => void;
+}
+```
+
+#### Example
+
+```typescript
+const handleAccountsChanged = (accounts) => {
+  console.log('Accounts changed:', accounts);
+};
+
+// Add listener
+window.keplr.starknet.on('accountsChanged', handleAccountsChanged);
+
+// Remove listener
+window.keplr.starknet.off('accountsChanged', handleAccountsChanged);
+```
+
+### networkChanged
+
+Listen for changes to the current network.
+
+#### Interface
+
+```typescript
+type StarknetChainId = 
+  | "0x534e5f4d41494e"     // SN_MAIN - Starknet Mainnet
+  | "0x534e5f5345504f4c4941"; // SN_SEPOLIA - Starknet Sepolia Testnet
+
+interface KeplrStarknetProvider {
+  on: (event: 'networkChanged', handler: (chainId: StarknetChainId) => void) => void;
+  off: (event: 'networkChanged', handler: (chainId: StarknetChainId) => void) => void;
+}
+```
+
+#### Example
+
+```typescript
+const handleNetworkChanged = (chainId) => {
+  console.log('Network changed:', chainId);
+};
+
+// Add listener
+window.keplr.starknet.on('networkChanged', handleNetworkChanged);
+
+// Remove listener
+window.keplr.starknet.off('networkChanged', handleNetworkChanged);
 ```
