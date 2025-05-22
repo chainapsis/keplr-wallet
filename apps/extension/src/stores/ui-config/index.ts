@@ -29,7 +29,10 @@ import { ManageViewAssetTokenConfig } from "./manage-view-asset-token";
 
 export interface UIConfigOptions {
   isDeveloperMode: boolean;
+  assetViewMode: "grouped" | "flat";
   hideLowBalance: boolean;
+  showFiatValue: boolean;
+  switchAssetViewModeSuggestion: boolean;
   isPrivacyMode: boolean;
   rememberLastFeeOption: boolean;
   lastFeeOption: "low" | "average" | "high" | false;
@@ -54,11 +57,14 @@ export class UIConfigStore {
   @observable
   protected _options: UIConfigOptions = {
     isDeveloperMode: false,
+    assetViewMode: "flat",
     hideLowBalance: false,
+    showFiatValue: true,
     isPrivacyMode: false,
     rememberLastFeeOption: false,
     lastFeeOption: false,
     show24HChangesInMagePage: true,
+    switchAssetViewModeSuggestion: true,
 
     useWebHIDLedger: false,
   };
@@ -291,6 +297,20 @@ export class UIConfigStore {
     this.options.hideLowBalance = value;
   }
 
+  @action
+  toggleHideLowBalance() {
+    this.options.hideLowBalance = !this.options.hideLowBalance;
+  }
+
+  get switchAssetViewModeSuggestion(): boolean {
+    return this.options.switchAssetViewModeSuggestion;
+  }
+
+  @action
+  turnOffSwitchAssetViewModeSuggestion() {
+    this.options.switchAssetViewModeSuggestion = false;
+  }
+
   get useWebHIDLedger(): boolean {
     if (!window.navigator.hid) {
       return false;
@@ -323,6 +343,29 @@ export class UIConfigStore {
       return "*".repeat(numStars);
     }
     return str;
+  }
+
+  get assetViewMode(): "grouped" | "flat" {
+    return this.options.assetViewMode;
+  }
+
+  @action
+  setAssetViewMode(value: "grouped" | "flat") {
+    this.options.assetViewMode = value;
+  }
+
+  get showFiatValue(): boolean {
+    return this.options.showFiatValue;
+  }
+
+  @action
+  setShowFiatValue(value: boolean) {
+    this.options.showFiatValue = value;
+  }
+
+  @action
+  toggleShowFiatValue() {
+    this.options.showFiatValue = !this.options.showFiatValue;
   }
 
   @action

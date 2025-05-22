@@ -3,6 +3,7 @@ import React, {
   FunctionComponent,
   isValidElement,
   PropsWithChildren,
+  CSSProperties,
 } from "react";
 import { ColumnsProps } from "./types";
 import styled from "styled-components";
@@ -27,13 +28,9 @@ const Styles = {
   `,
 };
 
-export const Columns: FunctionComponent<PropsWithChildren<ColumnsProps>> = ({
-  children,
-  sum,
-  columnAlign,
-  alignY,
-  gutter,
-}) => {
+export const Columns: FunctionComponent<
+  PropsWithChildren<ColumnsProps & { style?: CSSProperties }>
+> = ({ children, sum, columnAlign, alignY, gutter, style }) => {
   const array = Children.toArray(flattenFragment(children));
 
   let columnWeightSum = 0;
@@ -49,7 +46,7 @@ export const Columns: FunctionComponent<PropsWithChildren<ColumnsProps>> = ({
   const remainingWeight = Math.max(sum - columnWeightSum, 0);
 
   return (
-    <Styles.Container alignY={alignY}>
+    <Styles.Container alignY={alignY} style={style}>
       {remainingWeight > 0
         ? (() => {
             if (columnAlign === "right") {

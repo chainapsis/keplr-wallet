@@ -249,6 +249,12 @@ export class CoinPretty {
     return pretty;
   }
 
+  addDifferentDenoms(target: CoinPretty): CoinPretty {
+    const pretty = this.clone();
+    pretty.intPretty = pretty.intPretty.add(target);
+    return pretty;
+  }
+
   sub(target: Dec | { toDec(): Dec } | CoinPretty): CoinPretty {
     const isCoinPretty = target instanceof CoinPretty;
     if (isCoinPretty) {
