@@ -23,11 +23,12 @@ import {
 } from "@keplr-wallet/stores";
 import { action, computed, makeObservable, observable } from "mobx";
 import { Bech32Address } from "@keplr-wallet/cosmos";
+import { Buffer } from "buffer/";
 import { FormattedMessage } from "react-intl";
 
 // React hook으로 처리하기 귀찮은 부분이 많아서
 // 그냥 대충 mobx로...
-class OtherHexAddresses {
+class OtherBech32Addresses {
   @observable.ref
   protected supportedChainList: IChainInfoImpl[] = [];
 
@@ -45,9 +46,9 @@ class OtherHexAddresses {
   }
 
   @computed
-  get otherHexAddresses(): {
+  get otherBech32Addresses(): {
     chainIdentifier: string;
-    hexAddress: string;
+    bech32Address: string;
   }[] {
     const baseAddress = this.accountStore.getAccount(
       this.baseChainId
@@ -60,29 +61,23 @@ class OtherHexAddresses {
         .filter((chainInfo) => {
           const baseAccount = this.accountStore.getAccount(this.baseChainId);
           const account = this.accountStore.getAccount(chainInfo.chainId);
-
-          if (!account.ethereumHexAddress && !account.bech32Address) {
+          if (!account.bech32Address) {
             return false;
           }
-
-          const baseAccountHexAddress = baseAccount.hasEthereumHexAddress
-            ? baseAccount.ethereumHexAddress
-            : Bech32Address.fromBech32(baseAccount.bech32Address).toHex();
-          const accountHexAddress = account.hasEthereumHexAddress
-            ? account.ethereumHexAddress
-            : Bech32Address.fromBech32(account.bech32Address).toHex();
-
-          return baseAccountHexAddress !== accountHexAddress;
+          return (
+            Buffer.from(
+              Bech32Address.fromBech32(account.bech32Address).address
+            ).toString("hex") !==
+            Buffer.from(
+              Bech32Address.fromBech32(baseAccount.bech32Address).address
+            ).toString("hex")
+          );
         })
         .map((chainInfo) => {
           const account = this.accountStore.getAccount(chainInfo.chainId);
-          const accountHexAddress = account.hasEthereumHexAddress
-            ? account.ethereumHexAddress
-            : Bech32Address.fromBech32(account.bech32Address).toHex();
-
           return {
             chainIdentifier: chainInfo.chainIdentifier,
-            hexAddress: accountHexAddress,
+            bech32Address: account.bech32Address,
           };
         });
     }
@@ -94,8 +89,8 @@ class OtherHexAddresses {
 export const ActivitiesPage: FunctionComponent = observer(() => {
   const { chainStore, accountStore, priceStore, queriesStore } = useStore();
 
-  const [otherHexAddresses] = useState(
-    () => new OtherHexAddresses(chainStore, accountStore, "cosmoshub")
+  const [otherBech32Addresses] = useState(
+    () => new OtherBech32Addresses(chainStore, accountStore, "cosmoshub")
   );
   const account = accountStore.getAccount("cosmoshub");
 
@@ -117,15 +112,14 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
     });
   }, [chainStore.chainInfosInListUI, querySupported.response?.data]);
 
-  otherHexAddresses.setSupportedChainList(supportedChainList);
+  otherBech32Addresses.setSupportedChainList(supportedChainList);
 
   const msgHistory = usePaginatedCursorQuery<ResMsgsHistory>(
     process.env["KEPLR_EXT_TX_HISTORY_BASE_URL"],
     () => {
-      const baseHexAddress = account.hasEthereumHexAddress
-        ? account.ethereumHexAddress
-        : Bech32Address.fromBech32(account.bech32Address).toHex();
-      return `/history/v2/msgs/keplr-multi-chain?baseHexAddress=${baseHexAddress}&chainIdentifiers=${(() => {
+      return `/history/msgs/keplr-multi-chain?baseBech32Address=${
+        account.bech32Address
+      }&chainIdentifiers=${(() => {
         if (selectedKey === "__all__") {
           return supportedChainList
             .map((chainInfo) => chainInfo.chainId)
@@ -135,13 +129,13 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
       })()}&relations=${Relations.join(",")}&vsCurrencies=${
         priceStore.defaultVsCurrency
       }&limit=${PaginationLimit}${(() => {
-        if (otherHexAddresses.otherHexAddresses.length === 0) {
+        if (otherBech32Addresses.otherBech32Addresses.length === 0) {
           return "";
         }
-        return `&otherHexAddresses=${otherHexAddresses.otherHexAddresses
-          .map((address) => {
-            return `${address.chainIdentifier}|${address.hexAddress}`;
-          })
+        return `&otherBech32Addresses=${otherBech32Addresses.otherBech32Addresses
+          .map(
+            (address) => `${address.chainIdentifier}:${address.bech32Address}`
+          )
           .join(",")}`;
       })()}`;
     },
@@ -158,8 +152,8 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
     },
     `${selectedKey}/${supportedChainList
       .map((chainInfo) => chainInfo.chainId)
-      .join(",")}/${otherHexAddresses.otherHexAddresses
-      .map((address) => `${address.chainIdentifier}|${address.hexAddress}`)
+      .join(",")}/${otherBech32Addresses.otherBech32Addresses
+      .map((address) => `${address.chainIdentifier}:${address.bech32Address}`)
       .join(",")}`,
     (key: string) => {
       // key가 아래와 같으면 querySupported나 account 중 하나도 load되지 않은 경우다.

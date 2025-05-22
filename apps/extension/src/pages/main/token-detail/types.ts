@@ -9,7 +9,7 @@ export interface ResMsgsHistory {
 
 export interface MsgHistory {
   txHash: string;
-  code?: number;
+  code: number;
 
   height: number;
   time: string;
@@ -54,27 +54,4 @@ export interface MsgHistory {
     // base64 encoded
     originPacket: string;
   };
-}
-
-export interface NativeTransferRelMeta {
-  [key: string]: string;
-  sender: string;
-  receiver: string;
-  value: string;
-}
-
-export interface ERC20TransferRelMeta {
-  [key: string]: string;
-  sender: string;
-  receiver: string;
-  value: string;
-  contract: string;
-}
-
-export interface ERC20ApproveRelMeta {
-  [key: string]: string;
-  owner: string;
-  spender: string;
-  value: string;
-  contract: string;
 }
