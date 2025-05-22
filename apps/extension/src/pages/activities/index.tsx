@@ -103,7 +103,7 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
 
   const querySupported = queriesStore.simpleQuery.queryGet<string[]>(
     // process.env["KEPLR_EXT_CONFIG_SERVER"],
-    "https://2uvwiiaivoz74ugx3d7oish5rm0ihehh.lambda-url.us-west-2.on.aws/",
+    "https://2uvwiiaivoz74ugx3d7oish5rm0ihehh.lambda-url.us-west-2.on.aws/", // TODO: Remove
     "/tx-history/supports"
   );
 
@@ -158,7 +158,6 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
       }
       return false;
     },
-    // TODO: Change below to supportedChainList
     `${selectedKey}/${supportedChainList
       .map((chainInfo) => chainInfo.chainId)
       .join(",")}/${otherHexAddresses.otherHexAddresses
