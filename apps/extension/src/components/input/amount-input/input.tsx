@@ -19,7 +19,8 @@ import { useTheme } from "styled-components";
 
 export const AmountInput: FunctionComponent<{
   amountConfig: IAmountConfig;
-}> = observer(({ amountConfig }) => {
+  isLoading?: boolean;
+}> = observer(({ amountConfig, isLoading }) => {
   if (amountConfig.amount.length !== 1) {
     throw new Error(
       `Amount input component only handles single amount: ${amountConfig.amount
@@ -110,6 +111,7 @@ export const AmountInput: FunctionComponent<{
           return amountConfig.value;
         }
       })()}
+      isLoading={isLoading}
       onChange={(e) => {
         e.preventDefault();
 

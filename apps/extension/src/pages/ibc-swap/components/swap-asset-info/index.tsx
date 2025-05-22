@@ -192,30 +192,31 @@ export const SwapAssetInfo: FunctionComponent<{
           ) : null}
 
           {(() => {
-            if (type === "to") {
-              if (amountConfig.isFetching) {
-                /* 로딩 아이콘이 부모의 height에 영향을 끼치지 않게 하기 위한 트릭 구조임 */
-                return (
-                  <Box
-                    height="1px"
-                    alignX="center"
-                    alignY="center"
-                    marginLeft="0.25rem"
-                  >
-                    <Box width="1rem" height="1rem">
-                      <LoadingIcon
-                        width="1rem"
-                        height="1rem"
-                        color={
-                          theme.mode === "light"
-                            ? ColorPalette["gray-200"]
-                            : ColorPalette["gray-300"]
-                        }
-                      />
-                    </Box>
+            if (
+              (type === "from" && amountConfig.isFetchingInAmount) ||
+              (type === "to" && amountConfig.isFetchingOutAmount)
+            ) {
+              /* 로딩 아이콘이 부모의 height에 영향을 끼치지 않게 하기 위한 트릭 구조임 */
+              return (
+                <Box
+                  height="1px"
+                  alignX="center"
+                  alignY="center"
+                  marginLeft="0.25rem"
+                >
+                  <Box width="1rem" height="1rem">
+                    <LoadingIcon
+                      width="1rem"
+                      height="1rem"
+                      color={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-200"]
+                          : ColorPalette["gray-300"]
+                      }
+                    />
                   </Box>
-                );
-              }
+                </Box>
+              );
             }
           })()}
           <div

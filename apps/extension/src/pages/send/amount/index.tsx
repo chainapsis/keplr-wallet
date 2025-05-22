@@ -2107,8 +2107,14 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             }
           />
 
-          <AmountInput amountConfig={amountConfig} />
-
+          <AmountInput
+            amountConfig={amountConfig}
+            isLoading={
+              "isFetchingInAmount" in amountConfig
+                ? amountConfig.isFetchingInAmount
+                : false
+            }
+          />
           {!isEvmTx && sendType !== "bridge" && (
             <MemoInput
               memoConfig={sendConfigs.memoConfig}
@@ -2286,12 +2292,18 @@ function useCheckExpectedOutIsTooSmall(
     const disposal = autorun(() => {
       if (
         ibcSwapConfigsForBridge.amountConfig.amount.length > 0 &&
-        !ibcSwapConfigsForBridge.amountConfig.isFetching
+        !ibcSwapConfigsForBridge.amountConfig.isFetchingInAmount &&
+        !ibcSwapConfigsForBridge.amountConfig.isFetchingOutAmount
       ) {
-        const inputDec = ibcSwapConfigsForBridge.amountConfig.amount[0].toDec();
-        const outputDec =
-          ibcSwapConfigsForBridge.amountConfig.outAmount.toDec();
+        const queryRouteResponse = ibcSwapConfigsForBridge.amountConfig
+          .getQueryIBCSwap()
+          ?.getQueryRoute()?.response;
+        if (!queryRouteResponse) {
+          return;
+        }
 
+        const inputDec = new Dec(queryRouteResponse.data.amount_in);
+        const outputDec = new Dec(queryRouteResponse.data.amount_out);
         const diff = (() => {
           if (inputDec.isZero()) {
             return;

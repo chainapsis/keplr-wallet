@@ -66,7 +66,8 @@ export const SwapFeeInfoForBridgeOnSend: FunctionComponent<{
           </Subtitle4>
           <Gutter size="0.2rem" />
 
-          {amountConfig.isFetching ? (
+          {amountConfig.isFetchingInAmount ||
+          amountConfig.isFetchingOutAmount ? (
             <Box
               height="1px"
               alignX="center"
