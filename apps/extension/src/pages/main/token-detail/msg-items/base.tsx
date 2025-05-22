@@ -75,8 +75,7 @@ export const MsgItemBase: FunctionComponent<{
     const queryExplorer = queriesStore.simpleQuery.queryGet<{
       link: string;
     }>(
-      // process.env["KEPLR_EXT_CONFIG_SERVER"],
-      "https://2uvwiiaivoz74ugx3d7oish5rm0ihehh.lambda-url.us-west-2.on.aws/",
+      process.env["KEPLR_EXT_CONFIG_SERVER"],
       `/tx-history/explorer/${chainInfo.chainIdentifier}`
     );
 

@@ -188,8 +188,7 @@ export const TokenDetailModal: FunctionComponent<{
   const navigate = useNavigate();
 
   const querySupported = queriesStore.simpleQuery.queryGet<string[]>(
-    // process.env["KEPLR_EXT_CONFIG_SERVER"],
-    "https://2uvwiiaivoz74ugx3d7oish5rm0ihehh.lambda-url.us-west-2.on.aws/", // TODO: Remove
+    process.env["KEPLR_EXT_CONFIG_SERVER"],
     "/tx-history/supports"
   );
 
@@ -345,8 +344,7 @@ export const TokenDetailModal: FunctionComponent<{
   ];
 
   const msgHistory = usePaginatedCursorQuery<ResMsgsHistory>(
-    // process.env["KEPLR_EXT_TX_HISTORY_BASE_URL"],
-    "https://satellite-develop.keplr.app/", // TODO: Remove
+    process.env["KEPLR_EXT_TX_HISTORY_BASE_URL"],
     () => {
       return `/history/v2/msgs/${
         ChainIdHelper.parse(chainId).identifier
