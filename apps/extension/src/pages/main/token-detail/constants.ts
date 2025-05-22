@@ -30,6 +30,12 @@ export const Relations = [
   "initia-redelegate",
   "initia-cancel-undelegate",
   "atomone-vote",
+  "evm/send",
+  "evm/receive",
+  "evm/contract-call",
+  "evm/erc20-send",
+  "evm/erc20-receive",
+  "evm/erc20-approve",
 ];
 
 export const PaginationLimit = 20;
