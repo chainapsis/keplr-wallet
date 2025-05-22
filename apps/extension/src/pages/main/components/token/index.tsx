@@ -206,16 +206,6 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
       return viewToken.token.currency.coinMinimalDenom.startsWith("ibc/");
     }, [viewToken.token.currency]);
 
-    const coinDenom = useMemo(() => {
-      if (
-        "originCurrency" in viewToken.token.currency &&
-        viewToken.token.currency.originCurrency
-      ) {
-        return viewToken.token.currency.originCurrency.coinDenom;
-      }
-      return viewToken.token.currency.coinDenom;
-    }, [viewToken.token.currency]);
-
     const tokenTag = useMemo(() => {
       if (noTokenTag) {
         return;
@@ -296,7 +286,6 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
         intl={intl}
         uiConfigStore={uiConfigStore}
         navigate={navigate}
-        coinDenom={coinDenom}
         isIBC={isIBC}
         pricePretty={pricePretty}
         price24HChange={price24HChange}
@@ -338,7 +327,6 @@ interface TokenItemContentProps {
   intl: any;
   uiConfigStore: any;
   navigate: any;
-  coinDenom: string;
   isIBC: boolean;
   pricePretty: any;
   price24HChange?: any;
@@ -367,7 +355,6 @@ const TokenItemContent: FunctionComponent<TokenItemContentProps> = ({
   intl,
   uiConfigStore,
   navigate,
-  coinDenom,
   isIBC,
   pricePretty,
   price24HChange,
@@ -441,7 +428,10 @@ const TokenItemContent: FunctionComponent<TokenItemContentProps> = ({
                 wordBreak: "break-all",
               }}
             >
-              {coinDenom}
+              {viewToken.token
+                .hideAmount(true)
+                .hideIBCMetadata(true)
+                .toString()}
             </Subtitle2>
           </Skeleton>
 
