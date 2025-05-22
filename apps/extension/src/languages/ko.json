@@ -553,6 +553,7 @@
   "page.send.select-asset.title": "자산 선택",
   "page.send.select-asset.search-placeholder": "자산이나 체인 이름 검색",
   "page.send.select-asset.hide-ibc-token": "IBC 토큰 숨기기",
+  "page.send.select-asset.empty-view-description": "사용가능한 자산이 없습니다.{br}먼저 지갑에 자산을 채워주세요.",
   "page.send.type.send": "전송",
   "page.send.type.ibc-transfer": "크로스 체인 전송",
   "page.send.amount.ibc-transfer.destination-chain": "수신할 체인",
