@@ -295,7 +295,10 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
         currency.coinMinimalDenom
       );
       if (!currencyMap.has(normalizedCoinMinimalDenom)) {
-        this.registeredCurrencies.push(currency);
+        this.registeredCurrencies.push({
+          ...currency,
+          coinMinimalDenom: normalizedCoinMinimalDenom,
+        });
         this.registeredCurrencies = this.registeredCurrencies.slice();
       }
     }
@@ -309,11 +312,14 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
 
     const map = new Map<string, boolean>();
     for (const coinMinimalDenom of coinMinimalDenoms) {
-      map.set(coinMinimalDenom, true);
+      const normalizedCoinMinimalDenom =
+        DenomHelper.normalizeDenom(coinMinimalDenom);
+      map.set(normalizedCoinMinimalDenom, true);
     }
 
     this.registeredCurrencies = this.registeredCurrencies.filter(
-      (currency) => !map.get(currency.coinMinimalDenom)
+      (currency) =>
+        !map.get(DenomHelper.normalizeDenom(currency.coinMinimalDenom))
     );
   }
 
