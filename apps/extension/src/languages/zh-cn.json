@@ -455,6 +455,8 @@
   "page.ibc-swap.components.slippage-modal.title": "滑价设置",
   "page.ibc-swap.components.slippage-modal.label.slippage-tolerance": "滑价容差",
   "page.ibc-swap.components.slippage-modal.label.slippage-custom": "自定义滑价",
+  "page.ibc-swap.components.swap-not-available-modal.title": "兑换不可用",
+  "page.ibc-swap.components.swap-not-available-modal.paragraph": "这个币种暂无法兑换。",
   "page.ibc-swap.button.terms-of-use.title": "使用条款",
 
   "page.activity.title": "活动",
