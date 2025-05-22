@@ -154,13 +154,11 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
           };
         case "swapped":
           const walletAddress = (() => {
-            const pairs: string[] = [];
+            const seenCoinDenoms = new Set<string>();
 
-            Object.entries(serviceInfo.buySupportCoinDenomsByChainId).forEach(
-              ([chainId, coinDenoms]) => {
-                if (!coinDenoms) {
-                  return;
-                }
+            return Object.entries(serviceInfo.buySupportCoinDenomsByChainId)
+              .reduce<string[]>((pairs, [chainId, coinDenoms]) => {
+                if (!coinDenoms) return pairs;
 
                 const modularChainInfo = chainStore.modularChainInfos.find(
                   (modularChainInfo) => modularChainInfo.chainId === chainId
@@ -172,36 +170,39 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
                     : accountStore.getAccount(chainId).bech32Address;
 
                   coinDenoms.forEach((coinDenom) => {
-                    if (
-                      !pairs.some((pair) => pair.startsWith(`${coinDenom}:`))
-                    ) {
-                      if (coinDenom.includes("_ETHEREUM")) {
-                        pairs.push(`${coinDenom.split("_")[0]}:${address}`);
-                      } else {
-                        pairs.push(`${coinDenom}:${address}`);
-                      }
+                    const normalizedCoinDenom = coinDenom.includes("_ETHEREUM")
+                      ? coinDenom.split("_")[0]
+                      : coinDenom;
+
+                    if (!seenCoinDenoms.has(normalizedCoinDenom)) {
+                      pairs.push(`${normalizedCoinDenom}:${address}`);
+                      seenCoinDenoms.add(normalizedCoinDenom);
                     }
                   });
                 } else if (modularChainInfo && "bitcoin" in modularChainInfo) {
                   const account = accountStore.getAccount(
                     modularChainInfo.chainId
                   );
+                  const coinDenom = coinDenoms[0];
                   if (account.bitcoinAddress) {
-                    pairs.push(
-                      `${coinDenoms[0]}:${account.bitcoinAddress.bech32Address}`
-                    );
+                    if (!seenCoinDenoms.has(coinDenom)) {
+                      pairs.push(
+                        `${coinDenom}:${account.bitcoinAddress.bech32Address}`
+                      );
+                      seenCoinDenoms.add(coinDenom);
+                    }
                   }
                 }
-              }
-            );
 
-            return pairs.join(",");
+                return pairs;
+              }, [])
+              .join(",");
           })();
 
           return {
             apiKey:
               process.env["KEPLR_EXT_SWAPPED_API_KEY"] ?? serviceInfo.apiKey,
-            currencyCode: buySupportCoinDenoms[0],
+            currencyCode: "USDC_NOBLE",
             walletAddress,
           };
         default:
