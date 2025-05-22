@@ -210,7 +210,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
     }
   }
 
-  get isFetching(): boolean {
+  get isFetchingInAmount(): boolean {
     if (this.fraction === 1) {
       return (
         this.getQueryIBCSwap(this.maxAmount)?.getQueryRoute().isFetching ??
@@ -219,6 +219,10 @@ export class IBCSwapAmountConfig extends AmountConfig {
       );
     }
 
+    return false;
+  }
+
+  get isFetchingOutAmount(): boolean {
     return this.getQueryIBCSwap()?.getQueryRoute().isFetching ?? false;
   }
 
