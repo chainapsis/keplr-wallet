@@ -343,8 +343,6 @@ export const ViewOptionsContextMenu: FunctionComponent<{
 
     return (
       <Styles.MenuContainer ref={containerRef}>
-        {(isOpen || renderMenu) && <Styles.MenuBackdrop onClick={closeMenu} />}
-
         <Tooltip
           content={
             <SuggestionTooltipContent handleCloseTooltip={handleCloseTooltip} />
