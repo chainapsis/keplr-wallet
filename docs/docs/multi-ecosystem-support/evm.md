@@ -1,11 +1,23 @@
----
-title: EVM-based Chains
-order: 5
----
+import EnableChainExampleImage from "@site/static/img/guide/enable-chain-evm-example.png";
 
 # EVM-Based Chain Support
 
-Keplr enables seamless interaction with EVM-based chains, allowing users to utilize its features on Ethereum and other compatible networks. Developers can access the `window.keplr` and `window.keplr.ethereum` objects to leverage various methods for EVM-based interactions.
+Keplr enables seamless interaction with EVM-based chains, allowing users to utilize its features on Ethereum and other compatible networks. Developers can access the EVM provider through the `evm` object, which is a member of the Keplr instance object. Throughout this documentation, we refer to these objects as `keplr` and `keplr.ethereum`.
+
+## Enabling Connection
+
+To interact with EVM-based chains, you first need to call the `keplr.ethereum.enable` method, which prompts the user for permission via a popup.
+
+```typescript
+enable(): Promise<void>
+```
+
+<img
+  src={EnableChainExampleImage}
+  width="300"
+  alt="Starknet Enable Chain Example Image"
+/>
+
 
 ## Requesting Ethereum Signatures
 
@@ -30,7 +42,7 @@ signEthereum(
 
 ## Sending Ethereum Transactions
 
-Keplr allows sending Ethereum transactions through the `window.keplr.sendEthereumTx` method. It broadcasts the transaction and returns the transaction hash upon success.
+Keplr allows sending Ethereum transactions through the `keplr.sendEthereumTx` method. It broadcasts the transaction and returns the transaction hash upon success.
 
 ```typescript
 sendEthereumTx(chainId: string, tx: Uint8Array): Promise<string>;
@@ -38,7 +50,7 @@ sendEthereumTx(chainId: string, tx: Uint8Array): Promise<string>;
 
 ## Suggesting ERC20 Tokens
 
-Users can suggest ERC20 tokens to be added to a chain using the `window.keplr.suggestERC20` method. This process requires user approval.
+Users can suggest ERC20 tokens to be added to a chain using the `keplr.suggestERC20` method. This process requires user approval.
 
 ```typescript
 suggestERC20(chainId: string, contractAddress: string);
@@ -46,7 +58,7 @@ suggestERC20(chainId: string, contractAddress: string);
 
 ## EVM JSON-RPC Requests
 
-Keplr handles EVM JSON-RPC requests via the `window.keplr.ethereum` object, enabling dApps to interact with EVM chains. Supported methods include those for managing accounts, transactions, subscriptions, and chain configurations.
+Keplr handles EVM JSON-RPC requests via the `keplr.ethereum` object, enabling dApps to interact with EVM chains. Supported methods include those for managing accounts, transactions, subscriptions, and chain configurations.
 
 ### Supported Request Types
 
@@ -156,7 +168,7 @@ Keplr supports Ethereum-native methods following [EIP-1193](https://eips.ethereu
 ### Requesting Permissions
 
 ```typescript
-window.keplr.ethereum.request({
+keplr.ethereum.request({
   method: "wallet_requestPermissions",
 });
 ```
@@ -164,7 +176,7 @@ window.keplr.ethereum.request({
 ### Revoking Permissions
 
 ```typescript
-window.keplr.ethereum.request({
+keplr.ethereum.request({
   method: "wallet_revokePermissions",
   params: [
     {
