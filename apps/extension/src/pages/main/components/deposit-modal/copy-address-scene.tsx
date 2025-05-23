@@ -850,6 +850,7 @@ const CopyAddressItem: FunctionComponent<{
                     address.ethereumAddress ||
                     address.bech32Address ||
                     address.bitcoinAddress?.bech32Address,
+                  close,
                 });
               }}
             >
