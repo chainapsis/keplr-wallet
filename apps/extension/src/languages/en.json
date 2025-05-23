@@ -572,6 +572,8 @@
   "page.send.select-asset.search-placeholder": "Search for asset or chain",
   "page.send.select-asset.hide-ibc-token": "Hide IBC token",
   "page.send.select-asset.empty-view-description": "No Available Assets{br}Please top up your wallet first",
+  "page.send.select-asset.search-show-check-manage-asset-view-guide-title": "Can't find a token?",
+  "page.send.select-asset.search-show-check-manage-asset-view-guide-paragraph": "Check if it's hidden in 'Manage Asset List'{br}or has no balance.",
   "page.send.type.send": "Send",
   "page.send.type.ibc-transfer": "Cross-Chain Send",
   "page.send.amount.ibc-transfer.destination-chain": "Destination Chain",
@@ -601,7 +603,7 @@
   "page.main.available.search-empty-view-title": "Oops!",
   "page.main.available.search-empty-view-paragraph": "No Result Found",
   "page.main.available.search-show-check-manage-asset-view-guide-title": "Can't find a token?",
-  "page.main.available.search-show-check-manage-asset-view-guide-paragraph": "Check if it's hidden in 'Manage Asset List'{br}or has no balance.",
+  "page.main.available.search-show-check-manage-asset-view-guide-paragraph": "Check if 'Hide Low Balance' is enabled or if it's hidden in 'Manage Asset List'.",
 
   "page.main.available.empty-view-title": "Ready to Explore the Interchain?",
   "page.main.available.empty-view-paragraph": "Gear up yourself by topping up your wallet!",

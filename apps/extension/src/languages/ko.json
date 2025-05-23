@@ -554,6 +554,8 @@
   "page.send.select-asset.search-placeholder": "자산이나 체인 이름 검색",
   "page.send.select-asset.hide-ibc-token": "IBC 토큰 숨기기",
   "page.send.select-asset.empty-view-description": "사용가능한 자산이 없습니다.{br}먼저 지갑에 자산을 채워주세요.",
+  "page.send.select-asset.search-show-check-manage-asset-view-guide-title": "토큰을 찾을 수 없나요?",
+  "page.send.select-asset.search-show-check-manage-asset-view-guide-paragraph": "자산의 잔액이 없거나, 홈의 '자산 표시 관리'에서{br}자산을 숨겨뒀을 수 있습니다.",
   "page.send.type.send": "전송",
   "page.send.type.ibc-transfer": "크로스 체인 전송",
   "page.send.amount.ibc-transfer.destination-chain": "수신할 체인",
@@ -581,7 +583,7 @@
   "page.main.available.search-empty-view-title": "앗!",
   "page.main.available.search-empty-view-paragraph": "검색 결과가 없어요",
   "page.main.available.search-show-check-manage-asset-view-guide-title": "토큰을 찾을 수 없나요?",
-  "page.main.available.search-show-check-manage-asset-view-guide-paragraph": "자산의 잔액이 없거나, 홈의 '자산 표시 관리'에서{br}자산을 숨겨뒀을 수 있습니다.",
+  "page.main.available.search-show-check-manage-asset-view-guide-paragraph": "소액 숨기기가 활성화되어 있는지 확인하거나 '자산 표시 관리'에서 토큰을 확인해보세요.",
 
   "page.main.available.empty-view-title": "인터체인을 탐험할 준비가 되셨나요?",
   "page.main.available.empty-view-paragraph": "지갑에 자산을 채워 탐험을 시작해보세요!",

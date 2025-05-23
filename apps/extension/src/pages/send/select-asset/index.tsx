@@ -355,11 +355,11 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
             >
               <Stack alignX="center" gutter="0.1rem">
                 <Subtitle1>
-                  <FormattedMessage id="page.main.available.search-show-check-manage-asset-view-guide-title" />
+                  <FormattedMessage id="page.send.select-asset.search-show-check-manage-asset-view-guide-title" />
                 </Subtitle1>
                 <Body2 style={{ textAlign: "center", lineHeight: "1.4" }}>
                   <FormattedMessage
-                    id="page.main.available.search-show-check-manage-asset-view-guide-paragraph"
+                    id="page.send.select-asset.search-show-check-manage-asset-view-guide-paragraph"
                     values={{
                       br: <br />,
                     }}
