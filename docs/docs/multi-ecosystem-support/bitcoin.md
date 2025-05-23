@@ -1,8 +1,3 @@
----
-title: Bitcoin
-order: 7
----
-
 # Bitcoin Support
 
 Keplr enables seamless interaction with Bitcoin Mainnet, Bitcoin Signet and Bitcoin Testnet. Dapp developers can access the `window.keplr.bitcoin` and `window.bitcoin_keplr` objects to leverage various methods for interactions.
