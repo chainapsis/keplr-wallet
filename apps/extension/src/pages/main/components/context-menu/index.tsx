@@ -14,7 +14,7 @@ import { XAxis, YAxis } from "../../../../components/axis";
 import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse/collapse";
 import { Body2, Body3 } from "../../../../components/typography";
 import { ColorPalette } from "../../../../styles";
-import { useIntl } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { Toggle } from "../../../../components/toggle/toggle";
 import { CloseIcon } from "../../../../components/icon";
 import { IconProps } from "../../../../components/icon/types";
@@ -423,7 +423,7 @@ const SuggestionTooltipContent: FunctionComponent<{
   const theme = useTheme();
 
   return (
-    <Box width="17rem" padding="0.125rem 0.375rem">
+    <Box width="14.375rem" padding="0.125rem 0.375rem">
       <YAxis>
         <div
           style={{
@@ -468,9 +468,12 @@ const SuggestionTooltipContent: FunctionComponent<{
           }
           style={{ lineHeight: "140%" }}
         >
-          {intl.formatMessage({
-            id: "page.main.components.context-menu.tooltip-paragraph",
-          })}
+          <FormattedMessage
+            id="page.main.components.context-menu.tooltip-paragraph"
+            values={{
+              br: <br />,
+            }}
+          />
         </Body2>
       </YAxis>
     </Box>
