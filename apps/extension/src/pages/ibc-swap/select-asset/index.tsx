@@ -111,9 +111,15 @@ class IBCSwapDestinationState {
     }
 
     remaining = remaining.sort((a, b) => {
-      if (a.currency.coinDenom < b.currency.coinDenom) {
+      if (
+        CoinPretty.makeCoinDenomPretty(a.currency.coinDenom) <
+        CoinPretty.makeCoinDenomPretty(b.currency.coinDenom)
+      ) {
         return -1;
-      } else if (a.currency.coinDenom > b.currency.coinDenom) {
+      } else if (
+        CoinPretty.makeCoinDenomPretty(a.currency.coinDenom) >
+        CoinPretty.makeCoinDenomPretty(b.currency.coinDenom)
+      ) {
         return 1;
       } else {
         return 0;
@@ -141,9 +147,11 @@ const searchFields = [
     function: (item: ViewToken) => {
       const currency = item.token.currency;
       if ("originCurrency" in currency) {
-        return currency.originCurrency?.coinDenom || "";
+        return CoinPretty.makeCoinDenomPretty(
+          currency.originCurrency?.coinDenom || ""
+        );
       }
-      return currency.coinDenom;
+      return CoinPretty.makeCoinDenomPretty(currency.coinDenom);
     },
   },
   "chainInfo.chainName",
@@ -153,7 +161,7 @@ const remainingSearchFields = [
   {
     key: "currency.coinDenom",
     function: (item: { currency: Currency; chainInfo: IChainInfoImpl }) => {
-      return item.currency.coinDenom;
+      return CoinPretty.makeCoinDenomPretty(item.currency.coinDenom);
     },
   },
   "chainInfo.chainName",

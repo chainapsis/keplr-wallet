@@ -435,9 +435,13 @@ export const TokenDetailModal: FunctionComponent<{
                 }
               >
                 {(() => {
-                  let denom = currency.coinDenom;
+                  let denom = CoinPretty.makeCoinDenomPretty(
+                    currency.coinDenom
+                  );
                   if ("originCurrency" in currency && currency.originCurrency) {
-                    denom = currency.originCurrency.coinDenom;
+                    denom = CoinPretty.makeCoinDenomPretty(
+                      currency.originCurrency.coinDenom
+                    );
                   }
 
                   return `${denom} on `;
@@ -539,7 +543,7 @@ export const TokenDetailModal: FunctionComponent<{
                       .shrink(true)
                       .hideIBCMetadata(true)
                       .toString()
-                  : `0 ${currency.coinDenom}`,
+                  : `0 ${CoinPretty.makeCoinDenomPretty(currency.coinDenom)}`,
                 4
               )}
             </Styles.Balance>
@@ -674,13 +678,17 @@ export const TokenDetailModal: FunctionComponent<{
                 }
                 if ("originCurrency" in currency && currency.originCurrency) {
                   infos.push({
-                    title: `${currency.originCurrency.coinDenom} Price`,
+                    title: `${CoinPretty.makeCoinDenomPretty(
+                      currency.originCurrency.coinDenom
+                    )} Price`,
                     text,
                     textDeco,
                   });
                 } else {
                   infos.push({
-                    title: `${currency.coinDenom} Price`,
+                    title: `${CoinPretty.makeCoinDenomPretty(
+                      currency.coinDenom
+                    )} Price`,
                     text,
                     textDeco,
                   });

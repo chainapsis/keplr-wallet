@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useStore } from "../stores";
 import { performSearch } from "./use-search";
 import { ViewToken } from "../pages/main";
+import { CoinPretty } from "@keplr-wallet/unit";
 
 export function useGroupedTokensMap(search: string) {
   const { hugeQueriesStore, uiConfigStore } = useStore();
@@ -79,9 +80,11 @@ const tokenSearchFields = [
     function: (item: ViewToken) => {
       const currency = item.token.currency;
       if ("originCurrency" in currency) {
-        return currency.originCurrency?.coinDenom || "";
+        return CoinPretty.makeCoinDenomPretty(
+          currency.originCurrency?.coinDenom || ""
+        );
       }
-      return currency.coinDenom;
+      return CoinPretty.makeCoinDenomPretty(currency.coinDenom);
     },
   },
   "chainInfo.chainName",
@@ -93,9 +96,11 @@ const groupedTokensSearchFields = [
     function: (entries: [groupKey: string, tokens: ViewToken[]]) => {
       const currency = entries[1][0].token.currency;
       if ("originCurrency" in currency) {
-        return currency.originCurrency?.coinDenom || "";
+        return CoinPretty.makeCoinDenomPretty(
+          currency.originCurrency?.coinDenom || ""
+        );
       }
-      return currency.coinDenom;
+      return CoinPretty.makeCoinDenomPretty(currency.coinDenom);
     },
   },
   {
