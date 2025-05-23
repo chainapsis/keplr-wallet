@@ -495,17 +495,18 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
           if (isRefresh) {
             maxPriorityFeePerGasQuery.waitFreshResponse();
           }
-
-          return true;
-        } else {
-          const gasPriceQuery = queries.ethereum.queryEthereumGasPrice;
-          if (gasPriceQuery.gasPrice != null) {
-            if (isRefresh) {
-              gasPriceQuery.waitFreshResponse();
-            }
-            return true;
-          }
         }
+
+        return true;
+      }
+
+      const gasPriceQuery = queries.ethereum.queryEthereumGasPrice;
+      if (gasPriceQuery.gasPrice != null) {
+        if (isRefresh) {
+          gasPriceQuery.waitFreshResponse();
+        }
+
+        return true;
       }
     }
 
@@ -833,19 +834,18 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
               maxPriorityFeePerGas: maxPriorityFeePerGasDec.truncateDec(),
               maxFeePerGas: maxFeePerGas.truncateDec(),
             };
-          } else {
-            const gasPrice = ethereumQueries.queryEthereumGasPrice.gasPrice;
+          }
+        } else {
+          const gasPrice = ethereumQueries.queryEthereumGasPrice.gasPrice;
 
-            if (gasPrice != null) {
-              const multipliedGasPrice = new Dec(BigInt(gasPrice)).mul(
-                ETH_FEE_SETTINGS_BY_FEE_TYPE[feeType]
-                  .baseFeePercentageMultiplier
-              );
+          if (gasPrice != null) {
+            const multipliedGasPrice = new Dec(BigInt(gasPrice)).mul(
+              ETH_FEE_SETTINGS_BY_FEE_TYPE[feeType].baseFeePercentageMultiplier
+            );
 
-              return {
-                gasPrice: multipliedGasPrice,
-              };
-            }
+            return {
+              gasPrice: multipliedGasPrice,
+            };
           }
         }
       }
@@ -1058,13 +1058,11 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
             ),
           };
         }
-
         if (blockQuery.isFetching) {
           return {
             loadingState: "loading",
           };
         }
-
         if (!blockQuery.response) {
           return {
             loadingState: "loading-block",
@@ -1073,31 +1071,42 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
         const maxPriorityFeePerGasQuery =
           ethereumQueries.queryEthereumMaxPriorityFee;
+        if (maxPriorityFeePerGasQuery.error) {
+          return {
+            warning: new Error(
+              `Failed to fetch max priority fee. chain id: ${this.chainId}`
+            ),
+          };
+        }
         if (maxPriorityFeePerGasQuery.isFetching) {
           return {
             loadingState: "loading",
           };
         }
+        if (!maxPriorityFeePerGasQuery.response) {
+          return {
+            loadingState: "loading-block",
+          };
+        }
 
-        if (
-          maxPriorityFeePerGasQuery.error ||
-          !maxPriorityFeePerGasQuery.response
-        ) {
-          const gasPriceQuery = ethereumQueries.queryEthereumGasPrice;
+        const gasPriceQuery = ethereumQueries.queryEthereumGasPrice;
+        if (maxPriorityFeePerGasQuery.error) {
+          return {
+            warning: new Error(
+              `Failed to fetch gas price. chain id: ${this.chainId}`
+            ),
+          };
+        }
+        if (gasPriceQuery.isFetching) {
+          return {
+            loadingState: "loading",
+          };
+        }
 
-          if (maxPriorityFeePerGasQuery.error || gasPriceQuery.error) {
-            return {
-              warning: new Error(
-                `Failed to fetch max priority fee or gas price. chain id: ${this.chainId}`
-              ),
-            };
-          }
-
-          if (!maxPriorityFeePerGasQuery.response || !gasPriceQuery.response) {
-            return {
-              loadingState: "loading-block",
-            };
-          }
+        if (!gasPriceQuery.response) {
+          return {
+            loadingState: "loading-block",
+          };
         }
       }
     }
