@@ -13,11 +13,14 @@ import { useTheme } from "styled-components";
 import { QRCodeSVG } from "qrcode.react";
 import { IconProps } from "../../../../components/icon/types";
 import { YAxis } from "../../../../components/axis";
+import { AddressChip } from "../../token-detail/address-chip";
+import { Button } from "../../../../components/button";
 
 export const QRCodeScene: FunctionComponent<{
   chainId: string;
+  close: () => void;
   address?: string;
-}> = observer(({ chainId, address }) => {
+}> = observer(({ chainId, close, address }) => {
   const { chainStore } = useStore();
 
   const theme = useTheme();
@@ -96,9 +99,19 @@ export const QRCodeScene: FunctionComponent<{
               }}
             />
           </Box>
-
-          <Gutter size="2.5rem" />
         </YAxis>
+
+        <Gutter size="1.25rem" />
+
+        <Box alignX="center">
+          <AddressChip chainId={chainId} inModal={true} />
+        </Box>
+
+        <Gutter size="1.25rem" />
+      </Box>
+
+      <Box padding="0.75rem" paddingTop="0">
+        <Button color="secondary" text="Close" size="large" onClick={close} />
       </Box>
     </Box>
   );
