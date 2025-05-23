@@ -1,11 +1,23 @@
----
-title: EVM-based Chains
-order: 5
----
+import EnableChainExampleImage from "@site/static/img/guide/enable-chain-evm-example.png";
 
 # EVM-Based Chain Support
 
 Keplr enables seamless interaction with EVM-based chains, allowing users to utilize its features on Ethereum and other compatible networks. Developers can access the `window.keplr` and `window.keplr.ethereum` objects to leverage various methods for EVM-based interactions.
+
+## Enabling Connection
+
+To interact with EVM-based chains, you first need to call the `keplr.ethereum.enable` method, which prompts the user for permission via a popup.
+
+```typescript
+enable(): Promise<void>
+```
+
+<img
+  src={EnableChainExampleImage}
+  width="300"
+  alt="Starknet Enable Chain Example Image"
+/>
+
 
 ## Requesting Ethereum Signatures
 

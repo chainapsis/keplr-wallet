@@ -1,9 +1,21 @@
----
-title: Starknet
-order: 6
----
+import EnableChainExampleImage from "@site/static/img/guide/enable-chain-starknet-example.png";
 
 # Starknet Support
+
+## Enabling Connection
+
+To interact with EVM-based chains, you first need to call the `keplr.starknet.enable` method, which prompts the user for permission via a popup.
+
+```typescript
+enable(): Promise<void>
+```
+
+<img
+  src={EnableChainExampleImage}
+  width="300"
+  alt="Starknet Enable Chain Example Image"
+/>
+
 
 ## Signing Transactions on Starknet
 
