@@ -170,13 +170,9 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
                     : accountStore.getAccount(chainId).bech32Address;
 
                   coinDenoms.forEach((coinDenom) => {
-                    const normalizedCoinDenom = coinDenom.includes("_ETHEREUM")
-                      ? coinDenom.split("_")[0]
-                      : coinDenom;
-
-                    if (!seenCoinDenoms.has(normalizedCoinDenom)) {
-                      pairs.push(`${normalizedCoinDenom}:${address}`);
-                      seenCoinDenoms.add(normalizedCoinDenom);
+                    if (!seenCoinDenoms.has(coinDenom)) {
+                      pairs.push(`${coinDenom}:${address}`);
+                      seenCoinDenoms.add(coinDenom);
                     }
                   });
                 } else if (modularChainInfo && "bitcoin" in modularChainInfo) {
