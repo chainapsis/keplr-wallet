@@ -472,6 +472,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               )
             : undefined;
 
+        delete tx.requiredErc20Approvals;
+
         return {
           simulate: () =>
             ethereumAccount
@@ -1339,6 +1341,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                     )
                   : undefined;
 
+              delete (tx as UnsignedEVMTransactionWithErc20Approvals)
+                .requiredErc20Approvals;
+
               const { maxFeePerGas, maxPriorityFeePerGas, gasPrice } =
                 ibcSwapConfigs.feeConfig.getEIP1559TxFees(
                   ibcSwapConfigs.feeConfig.type
@@ -1472,8 +1477,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       );
 
                       if (erc20ApprovalTx) {
-                        delete (tx as UnsignedEVMTransactionWithErc20Approvals)
-                          .requiredErc20Approvals;
                         ethereumAccount.setIsSendingTx(true);
                         ethereumAccount
                           .simulateGas(sender, tx as UnsignedEVMTransaction)
