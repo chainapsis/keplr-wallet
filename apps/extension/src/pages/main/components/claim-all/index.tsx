@@ -49,6 +49,7 @@ import {
 } from "../../../../components/transition/vertical-size/internal";
 import { NEUTRON_CHAIN_ID, NOBLE_CHAIN_ID } from "../../../../config.ui";
 import { Gutter } from "../../../../components/gutter";
+import { PortalTooltip } from "../../../../components/tooltip/portal";
 
 const USDN_CURRENCY = {
   coinDenom: "USDN",
@@ -898,14 +899,14 @@ const ViewClaimTokenItemContent: FunctionComponent<{
                             }
                           />
                         ) : isLedger || isKeystone ? (
-                          <Tooltip
+                          <PortalTooltip
                             content={intl.formatMessage({
                               id: "page.main.components.claim-all.claim-button",
                             })}
                             isAlwaysOpen={isHover}
                           >
                             <ClaimCoinIcon isLedgerOrKeystone={true} />
-                          </Tooltip>
+                          </PortalTooltip>
                         ) : (
                           <ClaimCoinIcon />
                         )}
