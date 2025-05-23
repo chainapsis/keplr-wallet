@@ -148,41 +148,6 @@ export interface FiatOnRampServiceInfo {
   apiKey?: string;
 }
 
-export const FiatOnRampServiceInfos: FiatOnRampServiceInfo[] = [
-  {
-    serviceId: "kado",
-    serviceName: "Kado",
-    buyOrigin: "https://app.kado.money",
-    buySupportCoinDenomsByChainId: {
-      "osmosis-1": ["USDC"],
-      "juno-1": ["USDC"],
-      "phoenix-1": ["USDC"],
-      "cosmoshub-4": ["ATOM"],
-      "injective-1": ["USDT"],
-    },
-  },
-  {
-    serviceId: "transak",
-    serviceName: "Transak",
-    buyOrigin: "https://global.transak.com",
-    buySupportCoinDenomsByChainId: {
-      "osmosis-1": ["OSMO"],
-      "cosmoshub-4": ["ATOM"],
-      "secret-4": ["SCRT"],
-      "injective-1": ["INJ"],
-    },
-  },
-  {
-    serviceId: "moonpay",
-    serviceName: "Moonpay",
-    buyOrigin: "https://buy.moonpay.com",
-    buySupportCoinDenomsByChainId: {
-      "cosmoshub-4": ["ATOM"],
-      "kava_2222-10": ["KAVA"],
-    },
-  },
-];
-
 export const SwapVenues: {
   name: string;
   chainId: string;
