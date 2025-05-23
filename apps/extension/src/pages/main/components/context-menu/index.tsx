@@ -390,6 +390,7 @@ export const ViewOptionsContextMenu: FunctionComponent<{
                 </Styles.MenuItemXAxis>
               }
               onClick={toggleMenu}
+              style={{ height: "1rem" }}
             />
           </div>
         </Tooltip>
