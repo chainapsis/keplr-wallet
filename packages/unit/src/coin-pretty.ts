@@ -10,10 +10,32 @@ export type CoinPrettyOptions = {
   upperCase: boolean;
   lowerCase: boolean;
   hideDenom: boolean;
+  hideAmount: boolean;
   hideIBCMetadata: boolean;
+  showRawCoinDenom: boolean;
+  maxCoinDenomLength: number;
 };
 
 export class CoinPretty {
+  static makeCoinDenomPretty(coinDenom: string) {
+    const isHexString = /^(?:0[xX][0-9a-fA-F]+|[0-9][0-9a-fA-F]*)$/.test(
+      coinDenom
+    );
+    if (isHexString) {
+      const buf = Buffer.from(coinDenom.replace(/^0x/, ""), "hex");
+
+      const nullIndex = buf.indexOf(0);
+      const end = nullIndex === -1 ? buf.length : nullIndex;
+
+      return buf
+        .toString("utf8", 0, end)
+        .replace(/\u0000+/g, "")
+        .trim();
+    }
+
+    return coinDenom.replace(/\u0000+/g, "").trim();
+  }
+
   protected intPretty: IntPretty;
 
   protected _options: CoinPrettyOptions = {
@@ -21,7 +43,11 @@ export class CoinPretty {
     upperCase: false,
     lowerCase: false,
     hideDenom: false,
+    hideAmount: false,
+    showRawCoinDenom: false,
     hideIBCMetadata: false,
+    // default max length is 20
+    maxCoinDenomLength: 20,
   };
 
   constructor(
@@ -91,9 +117,21 @@ export class CoinPretty {
     return pretty;
   }
 
+  hideAmount(bool: boolean): CoinPretty {
+    const pretty = this.clone();
+    pretty._options.hideAmount = bool;
+    return pretty;
+  }
+
   hideIBCMetadata(bool: boolean): CoinPretty {
     const pretty = this.clone();
     pretty._options.hideIBCMetadata = bool;
+    return pretty;
+  }
+
+  showRawCoinDenom(bool: boolean): CoinPretty {
+    const pretty = this.clone();
+    pretty._options.showRawCoinDenom = bool;
     return pretty;
   }
 
@@ -211,6 +249,12 @@ export class CoinPretty {
     return pretty;
   }
 
+  addDifferentDenoms(target: CoinPretty): CoinPretty {
+    const pretty = this.clone();
+    pretty.intPretty = pretty.intPretty.add(target);
+    return pretty;
+  }
+
   sub(target: Dec | { toDec(): Dec } | CoinPretty): CoinPretty {
     const isCoinPretty = target instanceof CoinPretty;
     if (isCoinPretty) {
@@ -272,6 +316,12 @@ export class CoinPretty {
     };
   }
 
+  maxCoinDenomLength(maxLength: number): CoinPretty {
+    const pretty = this.clone();
+    pretty._options.maxCoinDenomLength = maxLength;
+    return pretty;
+  }
+
   toString(): string {
     let denom = this.denom;
     if (
@@ -288,11 +338,40 @@ export class CoinPretty {
       denom = denom.toLowerCase();
     }
 
+    if (!this._options.showRawCoinDenom) {
+      denom = CoinPretty.makeCoinDenomPretty(denom);
+    }
+
+    if (!this._options.hideIBCMetadata) {
+      if (
+        "originCurrency" in this.currency &&
+        this.currency.originCurrency &&
+        this.currency.originCurrency.coinDenom.length >
+          this._options.maxCoinDenomLength
+      ) {
+        denom = denom.replace(
+          this.currency.originCurrency.coinDenom,
+          `${this.currency.originCurrency.coinDenom.slice(
+            0,
+            this._options.maxCoinDenomLength
+          )}...`
+        );
+      }
+    } else {
+      if (denom.length > this._options.maxCoinDenomLength) {
+        denom = `${denom.slice(0, this._options.maxCoinDenomLength)}...`;
+      }
+    }
+
     let separator = this._options.separator;
 
     if (this._options.hideDenom) {
       denom = "";
       separator = "";
+    }
+
+    if (this._options.hideAmount) {
+      return denom;
     }
 
     return this.intPretty.toStringWithSymbols("", `${separator}${denom}`);

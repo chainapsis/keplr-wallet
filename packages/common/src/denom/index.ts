@@ -24,6 +24,16 @@ export class DenomHelper {
         .toUpperCase()
     );
   }
+  static normalizeDenom(denom: string): string {
+    const denomHelper = new DenomHelper(denom);
+
+    switch (denomHelper.type) {
+      case "erc20":
+        return `erc20:${denomHelper.contractAddress.toLowerCase()}`;
+      default:
+        return denomHelper.denom;
+    }
+  }
 
   protected readonly _type: string;
   protected readonly _contractAddress: string;

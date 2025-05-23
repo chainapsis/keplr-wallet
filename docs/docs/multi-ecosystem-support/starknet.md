@@ -1,15 +1,29 @@
----
-title: Starknet
-order: 6
----
+import EnableChainExampleImage from "@site/static/img/guide/enable-chain-starknet-example.png";
 
 # Starknet Support
+
+Keplr enables seamless interaction with Starknet. Developers can access the Starknet provider through the `starknet` object, which is a member of the Keplr instance object. Also, developers can use the `starknet_keplr` available in the web `window` object. Throughout this documentation, we refer to these objects as `keplr` and `keplr.starknet`.
+
+## Enabling Connection
+
+To interact with EVM-based chains, you first need to call the `keplr.starknet.enable` method, which prompts the user for permission via a popup.
+
+```typescript
+enable(): Promise<void>
+```
+
+<img
+  src={EnableChainExampleImage}
+  width="300"
+  alt="Starknet Enable Chain Example Image"
+/>
+
 
 ## Signing Transactions on Starknet
 
 ### Requesting a Starknet Signature
 
-To request a Starknet signature, use the `window.keplr.signStarknetTx` method. This method returns a promise that resolves to an object containing the signed transactions and signer details.
+To request a Starknet signature, use the `keplr.signStarknetTx` method. This method returns a promise that resolves to an object containing the signed transactions and signer details.
 
 ```typescript
 signStarknetTx(
@@ -25,7 +39,7 @@ signStarknetTx(
 
 ### Signing a Starknet Deploy Account Transaction
 
-To start interacting with Starknet, users must create an account, which requires a signature. Use the `window.keplr.signStarknetDeployAccountTransaction` method to sign a deploy account transaction.
+To start interacting with Starknet, users must create an account, which requires a signature. Use the `keplr.signStarknetDeployAccountTransaction` method to sign a deploy account transaction.
 
 ```typescript
 signStarknetDeployAccountTransaction(
@@ -61,7 +75,7 @@ getStarknetKeysSettled(
 
 ## Starknet JSON-RPC Requests
 
-The `window.keplr.starknet.request` method enables you to send Starknet JSON-RPC requests. This method supports various request types, which may require specific parameters.
+The `keplr.starknet.request` method enables you to send Starknet JSON-RPC requests. This method supports various request types, which may require specific parameters.
 
 ```typescript
 request<T = unknown>({
@@ -122,7 +136,7 @@ For detailed information on Starknet JSON-RPC APIs, refer to the [Starknet API O
 #### Suggesting ERC20 Tokens
 
 ```typescript
-window.keplr.starknet.request({
+keplr.starknet.request({
   type: "wallet_watchAsset",
   params: {
     type: "ERC20",
@@ -136,17 +150,79 @@ window.keplr.starknet.request({
 #### Switching Chains
 
 ```typescript
-window.keplr.starknet.request({
+keplr.starknet.request({
   type: "wallet_switchStarknetChain",
-  params: { chainId: "starknet:SN_SEPOLIA" },
+  params: { chainId: "0x534e5f5345504f4c4941" },
 });
 ```
 
 #### Retrieving Transaction Information
 
 ```typescript
-window.keplr.starknet.request({
+keplr.starknet.request({
   type: "starknet_getTransactionByHash",
   params: { transactionHash: "0x123456789abcdef" },
 });
+```
+
+## Events
+
+The Starknet provider offers event listeners to track changes in accounts and network.
+
+### accountsChanged
+
+Listen for changes to the user's exposed account address.
+
+#### Interface
+
+```typescript
+interface KeplrStarknetProvider {
+  on: (event: 'accountsChanged', handler: (accounts: Array<string>) => void) => void;
+  off: (event: 'accountsChanged', handler: (accounts: Array<string>) => void) => void;
+}
+```
+
+#### Example
+
+```typescript
+const handleAccountsChanged = (accounts) => {
+  console.log('Accounts changed:', accounts);
+};
+
+// Add listener
+window.keplr.starknet.on('accountsChanged', handleAccountsChanged);
+
+// Remove listener
+window.keplr.starknet.off('accountsChanged', handleAccountsChanged);
+```
+
+### networkChanged
+
+Listen for changes to the current network.
+
+#### Interface
+
+```typescript
+type StarknetChainId = 
+  | "0x534e5f4d41494e"     // SN_MAIN - Starknet Mainnet
+  | "0x534e5f5345504f4c4941"; // SN_SEPOLIA - Starknet Sepolia Testnet
+
+interface KeplrStarknetProvider {
+  on: (event: 'networkChanged', handler: (chainId: StarknetChainId) => void) => void;
+  off: (event: 'networkChanged', handler: (chainId: StarknetChainId) => void) => void;
+}
+```
+
+#### Example
+
+```typescript
+const handleNetworkChanged = (chainId) => {
+  console.log('Network changed:', chainId);
+};
+
+// Add listener
+window.keplr.starknet.on('networkChanged', handleNetworkChanged);
+
+// Remove listener
+window.keplr.starknet.off('networkChanged', handleNetworkChanged);
 ```

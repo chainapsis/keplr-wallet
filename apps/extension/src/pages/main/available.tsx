@@ -1,11 +1,20 @@
-import React, { FunctionComponent, useMemo } from "react";
-import { CollapsibleList } from "../../components/collapsible-list";
+import React, {
+  FunctionComponent,
+  useMemo,
+  useState,
+  useRef,
+  useEffect,
+  Dispatch,
+  SetStateAction,
+} from "react";
 import {
+  BottomTagType,
   LookingForChains,
   MainEmptyView,
   TokenItem,
   TokenTitleView,
 } from "./components";
+import { GroupedTokenItem } from "./components/token/grouped";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { ViewToken } from "./index";
 import { observer } from "mobx-react-lite";
@@ -18,22 +27,39 @@ import { Modal } from "../../components/modal";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { Gutter } from "../../components/gutter";
 import { EmptyView } from "../../components/empty-view";
-import { Body2, Subtitle1, Subtitle3 } from "../../components/typography";
+import {
+  Body2,
+  Subtitle1,
+  Subtitle3,
+  Subtitle4,
+} from "../../components/typography";
 import { XAxis, YAxis } from "../../components/axis";
-import { Checkbox } from "../../components/checkbox";
-import { Caption2 } from "../../components/typography";
 import { ColorPalette } from "../../styles";
 import { FormattedMessage, useIntl } from "react-intl";
 import styled, { css, useTheme } from "styled-components";
-import { DenomHelper } from "@keplr-wallet/common";
 import { TokenDetailModal } from "./token-detail";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import { useGetSearchChains } from "../../hooks/use-get-search-chains";
 import { useEarnBottomTag } from "../earn/components/use-earn-bottom-tag";
 import { AdjustmentIcon } from "../../components/icon/adjustment";
+import { ViewOptionsContextMenu } from "./components/context-menu";
+import { useCopyAddress } from "../../hooks/use-copy-address";
 import { useSearch } from "../../hooks/use-search";
+import { SceneTransition } from "../../components/transition/scene";
+import { SceneTransitionRef } from "../../components/transition/scene/internal";
+import { VerticalCollapseTransition } from "../../components/transition/vertical-collapse";
+import { ArrowDownIcon, ArrowUpIcon } from "../../components/icon";
+import { Styles as AvailableCollapsibleListStyles } from "../../components/collapsible-list";
 import { getTokenSearchResultClickAnalyticsProperties } from "../../analytics-amplitude";
+import { useGroupedTokensMap } from "../../hooks/use-grouped-tokens-map";
+
+type TokenViewData = {
+  title: string;
+  balance: ViewToken[];
+  lenAlwaysShown: number;
+  tooltip?: string | React.ReactElement;
+};
 
 const zeroDec = new Dec(0);
 
@@ -132,6 +158,119 @@ const chainSearchFields = [
   },
 ];
 
+const AvailableCollapsibleList: FunctionComponent<{
+  items: React.ReactNode[];
+  lenAlwaysShown: number;
+  onCollapse?: (isCollapsed: boolean) => void;
+  notRenderHiddenItems?: boolean;
+}> = ({ items, lenAlwaysShown, onCollapse, notRenderHiddenItems }) => {
+  const intl = useIntl();
+  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [notRenderHiddenItemsIsClosing, setNotRenderHiddenItemsIsClosing] =
+    useState(false);
+
+  if (!lenAlwaysShown || lenAlwaysShown < 0) {
+    lenAlwaysShown = items.length;
+  }
+
+  const alwaysShown = items.slice(0, lenAlwaysShown);
+  const hidden = items.slice(lenAlwaysShown);
+
+  return (
+    <Stack>
+      <Stack gutter="0.5rem">{alwaysShown}</Stack>
+
+      <VerticalCollapseTransition
+        collapsed={isCollapsed}
+        onTransitionEnd={() => {
+          if (isCollapsed) {
+            setNotRenderHiddenItemsIsClosing(false);
+          }
+        }}
+      >
+        {!notRenderHiddenItems ||
+        notRenderHiddenItemsIsClosing ||
+        !isCollapsed ? (
+          <React.Fragment>
+            <Gutter size="0.5rem" />
+            <Stack gutter="0.5rem">{hidden}</Stack>
+          </React.Fragment>
+        ) : null}
+      </VerticalCollapseTransition>
+
+      {hidden.length > 0 ? (
+        <AvailableCollapsibleListStyles.MoreViewContainer
+          onClick={(e: React.MouseEvent) => {
+            e.preventDefault();
+
+            setIsCollapsed(!isCollapsed);
+            if (onCollapse) {
+              onCollapse(!isCollapsed);
+            }
+            if (!isCollapsed) {
+              setNotRenderHiddenItemsIsClosing(true);
+            }
+          }}
+        >
+          <Gutter size="0.75rem" />
+          <XAxis alignY="center">
+            <Body2>
+              {isCollapsed
+                ? intl.formatMessage(
+                    {
+                      id: "components.collapsible-list.view-more-tokens",
+                    },
+                    { remain: hidden.length }
+                  )
+                : intl.formatMessage({
+                    id: "components.collapsible-list.collapse",
+                  })}
+            </Body2>
+
+            <Gutter size="0.25rem" />
+
+            {isCollapsed ? (
+              <ArrowDownIcon width="1rem" height="1rem" />
+            ) : (
+              <ArrowUpIcon width="1rem" height="1rem" />
+            )}
+          </XAxis>
+        </AvailableCollapsibleListStyles.MoreViewContainer>
+      ) : null}
+    </Stack>
+  );
+};
+
+const TokenItemWithCopyAddress: FunctionComponent<{
+  viewToken: ViewToken;
+  bottomTagType?: BottomTagType;
+  earnedAssetPrice?: string;
+  onClick: () => void;
+  showPrice24HChange: boolean;
+}> = observer(
+  ({
+    viewToken,
+    bottomTagType,
+    earnedAssetPrice,
+    onClick,
+    showPrice24HChange,
+  }) => {
+    const copyAddress = useCopyAddress(viewToken);
+
+    return (
+      <TokenItem
+        key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
+        bottomTagType={bottomTagType}
+        earnedAssetPrice={earnedAssetPrice}
+        viewToken={viewToken}
+        onClick={onClick}
+        copyAddress={copyAddress}
+        showPrice24HChange={showPrice24HChange}
+      />
+    );
+  }
+);
+
 export const AvailableTabView: FunctionComponent<{
   search: string;
   isNotReady?: boolean;
@@ -142,16 +281,15 @@ export const AvailableTabView: FunctionComponent<{
   onMoreTokensClosed: () => void;
 }> = observer(
   ({ search, isNotReady, onClickGetStarted, onMoreTokensClosed }) => {
-    const {
-      hugeQueriesStore,
-      chainStore,
-      accountStore,
-      uiConfigStore,
-      analyticsAmplitudeStore,
-    } = useStore();
+    const { chainStore, uiConfigStore } = useStore();
     const intl = useIntl();
     const theme = useTheme();
     const navigate = useNavigate();
+    const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
+    const [showFiatValueVisible, setShowFiatValueVisible] = useState(
+      uiConfigStore.assetViewMode === "grouped"
+    );
+    const sceneTransitionRef = useRef<SceneTransitionRef>(null);
 
     const { trimSearch, searchedChainInfos } = useGetSearchChains({
       search,
@@ -160,39 +298,6 @@ export const AvailableTabView: FunctionComponent<{
       minSearchLength: 3,
       clearResultsOnEmptyQuery: true,
     });
-
-    const allBalances = hugeQueriesStore.getAllBalances({
-      allowIBCToken: true,
-    });
-    const allBalancesNonZero = useMemo(() => {
-      return allBalances.filter((token) => {
-        return token.token.toDec().gt(zeroDec);
-      });
-    }, [allBalances]);
-
-    const isFirstTime = allBalancesNonZero.length === 0;
-
-    const _allBalancesSearchFiltered = useSearch(
-      [...allBalances],
-      trimSearch,
-      tokenSearchFields
-    );
-
-    const hasLowBalanceTokens =
-      hugeQueriesStore.filterLowBalanceTokens(allBalances).filteredTokens
-        .length > 0;
-    const lowBalanceFilteredAllBalancesSearchFiltered =
-      hugeQueriesStore.filterLowBalanceTokens(
-        _allBalancesSearchFiltered
-      ).filteredTokens;
-
-    const lowBalanceTokens =
-      hugeQueriesStore.filterLowBalanceTokens(allBalances).lowBalanceTokens;
-
-    const allBalancesSearchFiltered =
-      uiConfigStore.isHideLowBalance && hasLowBalanceTokens
-        ? lowBalanceFilteredAllBalancesSearchFiltered
-        : _allBalancesSearchFiltered;
 
     const lookingForChains = useMemo(() => {
       let disabledChainInfos: (ChainInfo | ModularChainInfo)[] =
@@ -266,24 +371,6 @@ export const AvailableTabView: FunctionComponent<{
       chainSearchFields
     );
 
-    const TokenViewData: {
-      title: string;
-      balance: ViewToken[];
-      lenAlwaysShown: number;
-      tooltip?: string | React.ReactElement;
-    }[] = [
-      {
-        title: intl.formatMessage({
-          id: "page.main.available.available-balance-title",
-        }),
-        balance: allBalancesSearchFiltered,
-        lenAlwaysShown: 10,
-        tooltip: intl.formatMessage({
-          id: "page.main.available.available-balance-tooltip",
-        }),
-      },
-    ];
-
     const numFoundToken = useMemo(() => {
       if (chainStore.tokenScans.length === 0) {
         return 0;
@@ -304,6 +391,13 @@ export const AvailableTabView: FunctionComponent<{
 
       return Array.from(set).length;
     }, [chainStore.tokenScans]);
+
+    const {
+      allBalancesSearchFiltered,
+      lowBalanceTokens,
+      isFirstTime,
+      TokenViewData,
+    } = useAllBalances(trimSearch);
 
     const isShowNotFound =
       allBalancesSearchFiltered.length === 0 &&
@@ -346,9 +440,54 @@ export const AvailableTabView: FunctionComponent<{
       };
     })();
 
-    const { getBottomTagInfoProps } = useEarnBottomTag(
-      allBalancesSearchFiltered
+    const scenes = useMemo(
+      () => [
+        {
+          name: "flat-view",
+          element: () => (
+            <TokensFlatViewScene
+              trimSearch={trimSearch}
+              onMoreTokensClosed={onMoreTokensClosed}
+              setSearchParams={setSearchParams}
+            />
+          ),
+        },
+        {
+          name: "grouped-view",
+          element: () => (
+            <TokensGroupedViewScene
+              trimSearch={trimSearch}
+              onMoreTokensClosed={onMoreTokensClosed}
+            />
+          ),
+        },
+      ],
+      [trimSearch]
     );
+
+    const initialSceneProps = useMemo(
+      () => ({
+        name:
+          uiConfigStore.assetViewMode === "grouped"
+            ? "grouped-view"
+            : "flat-view",
+      }),
+      []
+    );
+
+    useEffect(() => {
+      if (
+        uiConfigStore.assetViewMode === "grouped" &&
+        sceneTransitionRef.current?.currentScene !== "grouped-view"
+      ) {
+        sceneTransitionRef.current?.replace("grouped-view");
+      } else if (
+        uiConfigStore.assetViewMode === "flat" &&
+        sceneTransitionRef.current?.currentScene !== "flat-view"
+      ) {
+        sceneTransitionRef.current?.replace("flat-view");
+      }
+    }, [uiConfigStore.assetViewMode]);
 
     return (
       <React.Fragment>
@@ -368,133 +507,34 @@ export const AvailableTabView: FunctionComponent<{
         ) : (
           <React.Fragment>
             <Stack gutter="0.5rem">
-              {TokenViewData.map(
-                ({ title, balance, lenAlwaysShown, tooltip }) => {
-                  if (balance.length === 0) {
-                    return null;
-                  }
+              <Box marginBottom="0.5rem" paddingX="0.375rem">
+                <XAxis alignY="center" gap="0.25rem">
+                  <Subtitle4>{TokenViewData.balance.length}</Subtitle4>
+                  <TokenTitleView
+                    title={intl.formatMessage({
+                      id: "page.main.available.available-balance-title",
+                    })}
+                    tooltip={intl.formatMessage({
+                      id: "page.main.available.available-balance-tooltip",
+                    })}
+                    right={
+                      <ViewOptionsContextMenu
+                        isOpen={isContextMenuOpen}
+                        setIsOpen={setIsContextMenuOpen}
+                        showFiatValueVisible={showFiatValueVisible}
+                        setShowFiatValueVisible={setShowFiatValueVisible}
+                      />
+                    }
+                  />
+                </XAxis>
+              </Box>
 
-                  return (
-                    <CollapsibleList
-                      key={title}
-                      hideNumInTitle={uiConfigStore.isPrivacyMode}
-                      notRenderHiddenItems={true}
-                      onCollapse={(isCollapsed) => {
-                        if (isCollapsed) {
-                          onMoreTokensClosed();
-                        }
-                      }}
-                      title={
-                        <TokenTitleView
-                          title={title}
-                          tooltip={tooltip}
-                          right={
-                            hasLowBalanceTokens ? (
-                              <React.Fragment>
-                                <Caption2
-                                  style={{ cursor: "pointer" }}
-                                  onClick={() => {
-                                    uiConfigStore.setHideLowBalance(
-                                      !uiConfigStore.isHideLowBalance
-                                    );
-                                  }}
-                                  color={ColorPalette["gray-300"]}
-                                >
-                                  <FormattedMessage id="page.main.available.hide-low-balance" />
-                                </Caption2>
-
-                                <Gutter size="0.25rem" />
-
-                                <Checkbox
-                                  size="extra-small"
-                                  checked={uiConfigStore.isHideLowBalance}
-                                  onChange={() => {
-                                    uiConfigStore.setHideLowBalance(
-                                      !uiConfigStore.isHideLowBalance
-                                    );
-                                  }}
-                                />
-                              </React.Fragment>
-                            ) : undefined
-                          }
-                        />
-                      }
-                      lenAlwaysShown={lenAlwaysShown}
-                      items={balance.map((viewToken, index) => {
-                        const key = `${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`;
-                        return (
-                          <TokenItem
-                            key={key}
-                            viewToken={viewToken}
-                            {...getBottomTagInfoProps(viewToken)}
-                            onClick={() => {
-                              if (search.trim().length > 0) {
-                                analyticsAmplitudeStore.logEvent(
-                                  "click_token_item_search_results_available_tab",
-                                  getTokenSearchResultClickAnalyticsProperties(
-                                    viewToken,
-                                    search,
-                                    balance,
-                                    index
-                                  )
-                                );
-                              }
-                              setSearchParams((prev) => {
-                                prev.set(
-                                  "tokenChainId",
-                                  viewToken.chainInfo.chainId
-                                );
-                                prev.set(
-                                  "tokenCoinMinimalDenom",
-                                  viewToken.token.currency.coinMinimalDenom
-                                );
-                                prev.set("isTokenDetailModalOpen", "true");
-
-                                return prev;
-                              });
-                            }}
-                            copyAddress={(() => {
-                              // For only native tokens, show copy address button
-                              if (
-                                new DenomHelper(
-                                  viewToken.token.currency.coinMinimalDenom
-                                ).type !== "native" ||
-                                viewToken.token.currency.coinMinimalDenom.startsWith(
-                                  "ibc/"
-                                )
-                              ) {
-                                return undefined;
-                              }
-
-                              const account = accountStore.getAccount(
-                                viewToken.chainInfo.chainId
-                              );
-                              if ("bitcoin" in viewToken.chainInfo) {
-                                return account.bitcoinAddress?.bech32Address;
-                              }
-
-                              if ("starknet" in viewToken.chainInfo) {
-                                return account.starknetHexAddress;
-                              }
-
-                              const isEVMOnlyChain = chainStore.isEvmOnlyChain(
-                                viewToken.chainInfo.chainId
-                              );
-
-                              return isEVMOnlyChain
-                                ? account.ethereumHexAddress
-                                : account.bech32Address;
-                            })()}
-                            showPrice24HChange={
-                              uiConfigStore.show24HChangesInMagePage
-                            }
-                          />
-                        );
-                      })}
-                    />
-                  );
-                }
-              )}
+              <SceneTransition
+                ref={sceneTransitionRef}
+                scenes={scenes}
+                initialSceneProps={initialSceneProps}
+                transitionMode="opacity"
+              />
             </Stack>
             {searchedLookingForChains.length > 0 && (
               <React.Fragment>
@@ -564,7 +604,12 @@ export const AvailableTabView: FunctionComponent<{
                       <FormattedMessage id="page.main.available.search-show-check-manage-asset-view-guide-title" />
                     </Subtitle1>
                     <Body2 style={{ textAlign: "center", lineHeight: "1.4" }}>
-                      <FormattedMessage id="page.main.available.search-show-check-manage-asset-view-guide-paragraph" />
+                      <FormattedMessage
+                        id="page.main.available.search-show-check-manage-asset-view-guide-paragraph"
+                        values={{
+                          br: <br />,
+                        }}
+                      />
                     </Body2>
                   </Stack>
                 </EmptyView>
@@ -668,3 +713,186 @@ export const AvailableTabView: FunctionComponent<{
     );
   }
 );
+
+const TokensFlatViewScene = observer(
+  ({
+    trimSearch,
+    onMoreTokensClosed,
+    setSearchParams,
+  }: {
+    trimSearch: string;
+    onMoreTokensClosed: () => void;
+    setSearchParams: Dispatch<SetStateAction<URLSearchParams>>;
+  }) => {
+    const { uiConfigStore, analyticsAmplitudeStore } = useStore();
+
+    const { TokenViewData } = useAllBalances(trimSearch);
+
+    const { getBottomTagInfoProps } = useEarnBottomTag(TokenViewData.balance);
+
+    return (
+      <React.Fragment>
+        {TokenViewData.balance.length === 0 ? null : (
+          <AvailableCollapsibleList
+            notRenderHiddenItems={true}
+            onCollapse={(isCollapsed) => {
+              if (isCollapsed) {
+                onMoreTokensClosed();
+              }
+            }}
+            lenAlwaysShown={TokenViewData.lenAlwaysShown}
+            items={TokenViewData.balance.map((viewToken, index) => {
+              return (
+                <TokenItemWithCopyAddress
+                  key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
+                  {...getBottomTagInfoProps(viewToken)}
+                  viewToken={viewToken}
+                  onClick={() => {
+                    if (trimSearch.length > 0) {
+                      analyticsAmplitudeStore.logEvent(
+                        "click_token_item_search_results_available_tab",
+                        getTokenSearchResultClickAnalyticsProperties(
+                          viewToken,
+                          trimSearch,
+                          TokenViewData.balance,
+                          index
+                        )
+                      );
+                    }
+                    setSearchParams((prev) => {
+                      prev.set("tokenChainId", viewToken.chainInfo.chainId);
+                      prev.set(
+                        "tokenCoinMinimalDenom",
+                        viewToken.token.currency.coinMinimalDenom
+                      );
+                      prev.set("isTokenDetailModalOpen", "true");
+
+                      return prev;
+                    });
+                  }}
+                  showPrice24HChange={uiConfigStore.show24HChangesInMagePage}
+                />
+              );
+            })}
+          />
+        )}
+      </React.Fragment>
+    );
+  }
+);
+
+const TokensGroupedViewScene = observer(
+  ({
+    trimSearch,
+    onMoreTokensClosed,
+  }: {
+    trimSearch: string;
+    onMoreTokensClosed: () => void;
+  }) => {
+    const { uiConfigStore } = useStore();
+    const { searchedGroupedTokensMap } = useGroupedTokensMap(trimSearch);
+    const { getBottomTagInfoProps } = useEarnBottomTag(
+      Array.from(searchedGroupedTokensMap.values()).flat()
+    );
+
+    return (
+      <React.Fragment>
+        {searchedGroupedTokensMap.size === 0 ? null : (
+          <AvailableCollapsibleList
+            notRenderHiddenItems={true}
+            onCollapse={(isCollapsed) => {
+              if (isCollapsed) {
+                onMoreTokensClosed();
+              }
+            }}
+            lenAlwaysShown={10}
+            items={Array.from(searchedGroupedTokensMap.entries()).map(
+              ([groupKey, tokens]) => {
+                let bottomTagType: BottomTagType | undefined;
+                let earnedAssetPrice: string | undefined;
+                for (const token of tokens) {
+                  const {
+                    bottomTagType: newBottomTagType,
+                    earnedAssetPrice: newEarnedAssetPrice,
+                  } = getBottomTagInfoProps(token);
+                  if (newBottomTagType && newEarnedAssetPrice) {
+                    bottomTagType = newBottomTagType;
+                    earnedAssetPrice = newEarnedAssetPrice;
+                  }
+                }
+                return (
+                  <GroupedTokenItem
+                    key={groupKey}
+                    tokens={tokens}
+                    bottomTagType={bottomTagType}
+                    earnedAssetPrice={earnedAssetPrice}
+                    showPrice24HChange={uiConfigStore.show24HChangesInMagePage}
+                  />
+                );
+              }
+            )}
+          />
+        )}
+      </React.Fragment>
+    );
+  }
+);
+
+const useAllBalances = (trimSearch: string) => {
+  const { hugeQueriesStore, uiConfigStore } = useStore();
+  const allBalances = hugeQueriesStore.getAllBalances({
+    allowIBCToken: true,
+  });
+
+  const intl = useIntl();
+  const allBalancesNonZero = useMemo(() => {
+    return allBalances.filter((token) => {
+      return token.token.toDec().gt(zeroDec);
+    });
+  }, [allBalances]);
+
+  const isFirstTime = allBalancesNonZero.length === 0;
+
+  const _allBalancesSearchFiltered = useSearch(
+    [...allBalances],
+    trimSearch,
+    tokenSearchFields
+  );
+
+  const hasLowBalanceTokens =
+    hugeQueriesStore.filterLowBalanceTokens(allBalances).filteredTokens.length >
+    0;
+  const lowBalanceFilteredAllBalancesSearchFiltered =
+    hugeQueriesStore.filterLowBalanceTokens(
+      _allBalancesSearchFiltered
+    ).filteredTokens;
+
+  const lowBalanceTokens =
+    hugeQueriesStore.filterLowBalanceTokens(allBalances).lowBalanceTokens;
+
+  const allBalancesSearchFiltered =
+    uiConfigStore.isHideLowBalance && hasLowBalanceTokens
+      ? lowBalanceFilteredAllBalancesSearchFiltered
+      : _allBalancesSearchFiltered;
+
+  const TokenViewData: TokenViewData = useMemo(
+    () => ({
+      title: intl.formatMessage({
+        id: "page.main.available.available-balance-title",
+      }),
+      balance: allBalancesSearchFiltered,
+      lenAlwaysShown: 10,
+      tooltip: intl.formatMessage({
+        id: "page.main.available.available-balance-tooltip",
+      }),
+    }),
+    [intl, allBalancesSearchFiltered]
+  );
+
+  return {
+    TokenViewData,
+    isFirstTime,
+    allBalancesSearchFiltered,
+    lowBalanceTokens,
+  };
+};

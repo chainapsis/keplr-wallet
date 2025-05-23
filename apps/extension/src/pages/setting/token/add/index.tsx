@@ -33,6 +33,7 @@ import { IconButton } from "../../../../components/icon-button";
 import { MenuIcon } from "../../../../components/icon";
 import { handleExternalInteractionWithNoProceedNext } from "../../../../utils";
 import { TokenContract } from "../../../../stores/token-contracts";
+import { CoinPretty } from "@keplr-wallet/unit";
 
 const Styles = {
   Container: styled(Stack)`
@@ -429,7 +430,9 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
           label={intl.formatMessage({
             id: "page.setting.token.add.symbol-label",
           })}
-          value={queryContract.tokenInfo?.symbol || "-"}
+          value={CoinPretty.makeCoinDenomPretty(
+            queryContract.tokenInfo?.symbol || "-"
+          )}
           disabled
         />
         <TextInput
