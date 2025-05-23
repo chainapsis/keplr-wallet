@@ -271,7 +271,6 @@ export const ViewOptionsContextMenu: FunctionComponent<{
     const intl = useIntl();
     const containerRef = useRef<HTMLDivElement>(null);
     const menuContentRef = useRef<HTMLDivElement>(null);
-    const [renderMenu, setRenderMenu] = useState(false);
     const [initialized, setInitialized] = useState(false);
     const theme = useTheme();
     const [isHovered, setIsHovered] = useState(false);
@@ -285,8 +284,6 @@ export const ViewOptionsContextMenu: FunctionComponent<{
 
     useEffect(() => {
       if (isOpen) {
-        setRenderMenu(true);
-
         const scrollElement = globalSimpleBar.ref.current?.getScrollElement();
         if (scrollElement && containerRef.current) {
           const containerRect = containerRef.current.getBoundingClientRect();
@@ -301,11 +298,6 @@ export const ViewOptionsContextMenu: FunctionComponent<{
             behavior: "smooth",
           });
         }
-      } else {
-        const timer = setTimeout(() => {
-          setRenderMenu(false);
-        }, 300);
-        return () => clearTimeout(timer);
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen]);
@@ -341,8 +333,18 @@ export const ViewOptionsContextMenu: FunctionComponent<{
       uiConfigStore.turnOffSwitchAssetViewModeSuggestion();
     };
 
+    const handleBlur = (e: React.FocusEvent<HTMLDivElement>) => {
+      const currentTarget = e.currentTarget;
+
+      requestAnimationFrame(() => {
+        if (!currentTarget.contains(document.activeElement)) {
+          closeMenu();
+        }
+      });
+    };
+
     return (
-      <Styles.MenuContainer ref={containerRef}>
+      <Styles.MenuContainer ref={containerRef} onBlur={handleBlur} tabIndex={0}>
         <Tooltip
           content={
             <SuggestionTooltipContent handleCloseTooltip={handleCloseTooltip} />
