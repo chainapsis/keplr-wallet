@@ -446,6 +446,8 @@ export const GroupedTokenItem: FunctionComponent<{
 
     const [delayedIsOpen, setDelayedIsOpen] = useState(isOpen);
 
+    const copyAddress = useCopyAddress(mainToken);
+
     useEffect(() => {
       if (isOpen && bottomTagType) {
         setTimeout(() => {
@@ -468,6 +470,7 @@ export const GroupedTokenItem: FunctionComponent<{
           bottomTagType={bottomTagType}
           earnedAssetPrice={earnedAssetPrice}
           showPrice24HChange={showPrice24HChange}
+          copyAddress={copyAddress}
         />
       );
     }
