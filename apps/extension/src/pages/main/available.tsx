@@ -604,7 +604,12 @@ export const AvailableTabView: FunctionComponent<{
                       <FormattedMessage id="page.main.available.search-show-check-manage-asset-view-guide-title" />
                     </Subtitle1>
                     <Body2 style={{ textAlign: "center", lineHeight: "1.4" }}>
-                      <FormattedMessage id="page.main.available.search-show-check-manage-asset-view-guide-paragraph" />
+                      <FormattedMessage
+                        id="page.main.available.search-show-check-manage-asset-view-guide-paragraph"
+                        values={{
+                          br: <br />,
+                        }}
+                      />
                     </Body2>
                   </Stack>
                 </EmptyView>
