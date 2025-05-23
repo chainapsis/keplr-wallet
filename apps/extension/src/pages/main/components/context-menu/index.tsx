@@ -248,6 +248,8 @@ const CustomTextButton = styled(TextButton)`
   && button {
     padding: 0.25rem 0 !important;
     color: ${ColorPalette["gray-300"]};
+    height: 1rem;
+    font-size: 0.8125rem;
 
     &:hover {
       color: ${(props) =>
@@ -390,7 +392,6 @@ export const ViewOptionsContextMenu: FunctionComponent<{
                 </Styles.MenuItemXAxis>
               }
               onClick={toggleMenu}
-              style={{ height: "1rem" }}
             />
           </div>
         </Tooltip>
