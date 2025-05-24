@@ -162,7 +162,7 @@ const NestedTokenItem: FunctionComponent<{
     >
       <Columns
         sum={1}
-        gutter="0.5rem"
+        gutter="0.6875rem"
         alignY="center"
         style={{ width: "100%" }}
       >
@@ -446,6 +446,8 @@ export const GroupedTokenItem: FunctionComponent<{
 
     const [delayedIsOpen, setDelayedIsOpen] = useState(isOpen);
 
+    const copyAddress = useCopyAddress(mainToken);
+
     useEffect(() => {
       if (isOpen && bottomTagType) {
         setTimeout(() => {
@@ -468,6 +470,7 @@ export const GroupedTokenItem: FunctionComponent<{
           bottomTagType={bottomTagType}
           earnedAssetPrice={earnedAssetPrice}
           showPrice24HChange={showPrice24HChange}
+          copyAddress={copyAddress}
         />
       );
     }
@@ -653,8 +656,9 @@ const Styles = {
   `,
   ExpandIcon: styled.div<{ isOpen: boolean }>`
     transition: transform 0.2s ease-in-out;
-    transform: ${(props) => (props.isOpen ? "rotate(180deg)" : "rotate(0deg)")};
+    transform: ${(props) => (props.isOpen ? "rotate(0deg)" : "rotate(180deg)")};
     height: 1rem;
+    margin-left: 0.125rem;
   `,
   ChildrenContainer: styled.div`
     background-color: transparent;
@@ -674,14 +678,12 @@ const Styles = {
   `,
   PlusChainBadge: styled(Caption1)`
     display: flex;
-    height: 1rem;
+    height: 1.1875rem;
     padding: 0rem 0.375rem 0rem 0.25rem;
     justify-content: center;
     align-items: center;
     color: ${ColorPalette["gray-100"]};
-    margin-left: -0.25rem;
-    margin-top: -0.09375rem;
-    margin-bottom: -0.09375rem;
+    margin: -0.09375rem -0.25rem -0.09375rem -0.25rem;
     background-color: ${ColorPalette["gray-450"]};
     border-radius: 1.25rem;
     border: 0.09375rem solid

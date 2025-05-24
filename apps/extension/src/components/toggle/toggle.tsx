@@ -17,7 +17,9 @@ export const Toggle: FunctionComponent<ToggleProps> = ({
       size={size}
     >
       <Styles.Circle isOpen={isOpen} disabled={disabled} size={size}>
-        {isOpen ? <CheckToggleIcon width="1rem" height="1rem" /> : null}
+        {isOpen && size !== "extra-small" ? (
+          <CheckToggleIcon width="1rem" height="1rem" />
+        ) : null}
       </Styles.Circle>
     </Styles.Container>
   );

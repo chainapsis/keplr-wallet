@@ -14,7 +14,7 @@ import { XAxis, YAxis } from "../../../../components/axis";
 import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse/collapse";
 import { Body2, Body3 } from "../../../../components/typography";
 import { ColorPalette } from "../../../../styles";
-import { useIntl } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { Toggle } from "../../../../components/toggle/toggle";
 import { CloseIcon } from "../../../../components/icon";
 import { IconProps } from "../../../../components/icon/types";
@@ -248,6 +248,8 @@ const CustomTextButton = styled(TextButton)`
   && button {
     padding: 0.25rem 0 !important;
     color: ${ColorPalette["gray-300"]};
+    height: 1rem;
+    font-size: 0.8125rem;
 
     &:hover {
       color: ${(props) =>
@@ -269,7 +271,6 @@ export const ViewOptionsContextMenu: FunctionComponent<{
     const intl = useIntl();
     const containerRef = useRef<HTMLDivElement>(null);
     const menuContentRef = useRef<HTMLDivElement>(null);
-    const [renderMenu, setRenderMenu] = useState(false);
     const [initialized, setInitialized] = useState(false);
     const theme = useTheme();
     const [isHovered, setIsHovered] = useState(false);
@@ -283,8 +284,6 @@ export const ViewOptionsContextMenu: FunctionComponent<{
 
     useEffect(() => {
       if (isOpen) {
-        setRenderMenu(true);
-
         const scrollElement = globalSimpleBar.ref.current?.getScrollElement();
         if (scrollElement && containerRef.current) {
           const containerRect = containerRef.current.getBoundingClientRect();
@@ -299,11 +298,6 @@ export const ViewOptionsContextMenu: FunctionComponent<{
             behavior: "smooth",
           });
         }
-      } else {
-        const timer = setTimeout(() => {
-          setRenderMenu(false);
-        }, 300);
-        return () => clearTimeout(timer);
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen]);
@@ -339,10 +333,18 @@ export const ViewOptionsContextMenu: FunctionComponent<{
       uiConfigStore.turnOffSwitchAssetViewModeSuggestion();
     };
 
-    return (
-      <Styles.MenuContainer ref={containerRef}>
-        {(isOpen || renderMenu) && <Styles.MenuBackdrop onClick={closeMenu} />}
+    const handleBlur = (e: React.FocusEvent<HTMLDivElement>) => {
+      const currentTarget = e.currentTarget;
 
+      requestAnimationFrame(() => {
+        if (!currentTarget.contains(document.activeElement)) {
+          closeMenu();
+        }
+      });
+    };
+
+    return (
+      <Styles.MenuContainer ref={containerRef} onBlur={handleBlur} tabIndex={0}>
         <Tooltip
           content={
             <SuggestionTooltipContent handleCloseTooltip={handleCloseTooltip} />
@@ -421,7 +423,7 @@ const SuggestionTooltipContent: FunctionComponent<{
   const theme = useTheme();
 
   return (
-    <Box width="17rem" padding="0.125rem 0.375rem">
+    <Box width="14.375rem" padding="0.125rem 0.375rem">
       <YAxis>
         <div
           style={{
@@ -466,9 +468,12 @@ const SuggestionTooltipContent: FunctionComponent<{
           }
           style={{ lineHeight: "140%" }}
         >
-          {intl.formatMessage({
-            id: "page.main.components.context-menu.tooltip-paragraph",
-          })}
+          <FormattedMessage
+            id="page.main.components.context-menu.tooltip-paragraph"
+            values={{
+              br: <br />,
+            }}
+          />
         </Body2>
       </YAxis>
     </Box>
