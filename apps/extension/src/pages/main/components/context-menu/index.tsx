@@ -335,7 +335,6 @@ export const ViewOptionsContextMenu: FunctionComponent<{
 
       analyticsAmplitudeStore.setUserProperties({
         show_fiat_value_enabled: willBeEnabled,
-        show_fiat_value_disabled: !willBeEnabled,
         show_fiat_value_last_toggled_at: Date.now(),
       });
 
@@ -355,7 +354,6 @@ export const ViewOptionsContextMenu: FunctionComponent<{
 
       analyticsAmplitudeStore.setUserProperties({
         smart_grouping_enabled: willBeEnabled,
-        smart_grouping_disabled: !willBeEnabled,
         smart_grouping_last_toggled_at: Date.now(),
       });
 
