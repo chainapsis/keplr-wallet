@@ -396,8 +396,8 @@ export const ViewOptionsContextMenu: FunctionComponent<{
           </div>
         </Tooltip>
 
-        <Styles.MenuWrapper>
-          <VerticalCollapseTransition collapsed={!isOpen} width="100%">
+        {isOpen && (
+          <Styles.MenuWrapper>
             <Styles.ContextMenuContent ref={menuContentRef}>
               <MainMenu
                 onToggleAssetViewMode={handleToggleAssetViewMode}
@@ -409,8 +409,8 @@ export const ViewOptionsContextMenu: FunctionComponent<{
                 assetViewMode={uiConfigStore.options.assetViewMode}
               />
             </Styles.ContextMenuContent>
-          </VerticalCollapseTransition>
-        </Styles.MenuWrapper>
+          </Styles.MenuWrapper>
+        )}
       </Styles.MenuContainer>
     );
   }
