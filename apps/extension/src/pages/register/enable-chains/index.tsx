@@ -965,12 +965,17 @@ export const EnableChainsScene: FunctionComponent<{
               const chainInfo = chainStore.getChain(
                 modularChainInfo.cosmos.chainId
               );
-              return (chainInfo.stakeCurrency || chainInfo.currencies[0])
-                .coinDenom;
+              return CoinPretty.makeCoinDenomPretty(
+                (chainInfo.stakeCurrency || chainInfo.currencies[0]).coinDenom
+              );
             } else if ("starknet" in modularChainInfo) {
-              return modularChainInfo.starknet.currencies[0].coinDenom;
+              return CoinPretty.makeCoinDenomPretty(
+                modularChainInfo.starknet.currencies[0].coinDenom
+              );
             } else if ("bitcoin" in modularChainInfo) {
-              return modularChainInfo.bitcoin.currencies[0].coinDenom;
+              return CoinPretty.makeCoinDenomPretty(
+                modularChainInfo.bitcoin.currencies[0].coinDenom
+              );
             }
             return "";
           },

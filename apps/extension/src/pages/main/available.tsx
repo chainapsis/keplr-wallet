@@ -128,9 +128,11 @@ const tokenSearchFields = [
     function: (item: ViewToken) => {
       const currency = item.token.currency;
       if ("originCurrency" in currency) {
-        return currency.originCurrency?.coinDenom || "";
+        return CoinPretty.makeCoinDenomPretty(
+          currency.originCurrency?.coinDenom || ""
+        );
       }
-      return currency.coinDenom;
+      return CoinPretty.makeCoinDenomPretty(currency.coinDenom);
     },
   },
   "chainInfo.chainName",

@@ -17,6 +17,7 @@ import {
 import { Checkbox } from "../../../components/checkbox";
 import { ColorPalette } from "../../../styles";
 import { Dec } from "@keplr-wallet/unit";
+import { CoinPretty } from "@keplr-wallet/unit";
 import { useFocusOnMount } from "../../../hooks/use-focus-on-mount";
 import { useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router";
@@ -44,9 +45,11 @@ const searchFields = [
     function: (item: ViewToken) => {
       const currency = item.token.currency;
       if ("originCurrency" in currency) {
-        return currency.originCurrency?.coinDenom || "";
+        return CoinPretty.makeCoinDenomPretty(
+          currency.originCurrency?.coinDenom || ""
+        );
       }
-      return currency.coinDenom;
+      return CoinPretty.makeCoinDenomPretty(currency.coinDenom);
     },
   },
   "chainInfo.chainName",
