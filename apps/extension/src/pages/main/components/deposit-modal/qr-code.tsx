@@ -7,7 +7,7 @@ import { Column, Columns } from "../../../../components/column";
 import { IconButton } from "../../../../components/icon-button";
 import { ChainImageFallback } from "../../../../components/image";
 import { Gutter } from "../../../../components/gutter";
-import { Subtitle2 } from "../../../../components/typography";
+import { BaseTypography, Subtitle2 } from "../../../../components/typography";
 import { ColorPalette } from "../../../../styles";
 import { useTheme } from "styled-components";
 import { QRCodeSVG } from "qrcode.react";
@@ -21,11 +21,14 @@ export const QRCodeScene: FunctionComponent<{
   close: () => void;
   address?: string;
 }> = observer(({ chainId, close, address }) => {
-  const { chainStore } = useStore();
+  const { chainStore, accountStore } = useStore();
 
   const theme = useTheme();
 
   const modularChainInfo = chainStore.getModularChain(chainId);
+  const isBitcoin =
+    "bitcoin" in modularChainInfo && modularChainInfo.bitcoin != null;
+  const account = accountStore.getAccount(chainId);
 
   const sceneTransition = useSceneTransition();
 
@@ -75,8 +78,40 @@ export const QRCodeScene: FunctionComponent<{
           {/* 체인 아이콘과 이름을 중앙 정렬시키기 위해서 왼쪽과 맞춰야한다. 이를 위한 mock임 */}
           <Box width="2rem" height="2rem" />
         </Columns>
-
-        <Gutter size="1.5rem" />
+        <Gutter size="0.875rem" />
+        {isBitcoin && account.bitcoinAddress && (
+          <Box alignX="center">
+            <Box
+              alignX="center"
+              alignY="center"
+              backgroundColor={
+                theme.mode === "light"
+                  ? ColorPalette["blue-50"]
+                  : ColorPalette["gray-500"]
+              }
+              borderRadius="0.375rem"
+              paddingY="0.125rem"
+              paddingX="0.375rem"
+            >
+              <BaseTypography
+                style={{
+                  fontWeight: 400,
+                  fontSize: "0.6875rem",
+                }}
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["blue-400"]
+                    : ColorPalette["gray-200"]
+                }
+              >
+                {account.bitcoinAddress.paymentType
+                  .replace("-", " ")
+                  .replace(/\b\w/g, (char) => char.toUpperCase())}
+              </BaseTypography>
+            </Box>
+            <Gutter size="0.875rem" />
+          </Box>
+        )}
         <YAxis alignX="center">
           <Box
             alignX="center"
