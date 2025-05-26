@@ -265,7 +265,7 @@ export const ViewOptionsContextMenu: FunctionComponent<{
   setShowFiatValueVisible: (showFiatValueVisible: boolean) => void;
 }> = observer(
   ({ isOpen, setIsOpen, showFiatValueVisible, setShowFiatValueVisible }) => {
-    const { uiConfigStore } = useStore();
+    const { uiConfigStore, analyticsAmplitudeStore } = useStore();
     const intl = useIntl();
     const containerRef = useRef<HTMLDivElement>(null);
     const menuContentRef = useRef<HTMLDivElement>(null);
@@ -313,6 +313,9 @@ export const ViewOptionsContextMenu: FunctionComponent<{
     };
 
     const toggleMenu = () => {
+      analyticsAmplitudeStore.logEvent("click_view_options_context_menu", {
+        itemKind: "button",
+      });
       handleCloseTooltip();
       setIsOpen(!isOpen);
     };
@@ -322,10 +325,38 @@ export const ViewOptionsContextMenu: FunctionComponent<{
     };
 
     const handleToggleShowFiatValue = () => {
+      const willBeEnabled = !uiConfigStore.options.showFiatValue;
+      analyticsAmplitudeStore.logEvent(
+        willBeEnabled
+          ? "click_toggle_on_show_fiat_value"
+          : "click_toggle_off_show_fiat_value",
+        { itemKind: "toggle" }
+      );
+
+      analyticsAmplitudeStore.setUserProperties({
+        show_fiat_value_enabled: willBeEnabled,
+        show_fiat_value_last_toggled_at: Date.now(),
+      });
+
       uiConfigStore.toggleShowFiatValue();
     };
 
     const handleToggleAssetViewMode = () => {
+      const willBeEnabled = !(
+        uiConfigStore.options.assetViewMode === "grouped"
+      );
+      analyticsAmplitudeStore.logEvent(
+        willBeEnabled
+          ? "click_toggle_on_smart_grouping"
+          : "click_toggle_off_smart_grouping",
+        { itemKind: "toggle" }
+      );
+
+      analyticsAmplitudeStore.setUserProperties({
+        smart_grouping_enabled: willBeEnabled,
+        smart_grouping_last_toggled_at: Date.now(),
+      });
+
       if (uiConfigStore.options.assetViewMode === "grouped") {
         uiConfigStore.setAssetViewMode("flat");
         setShowFiatValueVisible(false);
