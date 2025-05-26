@@ -127,13 +127,13 @@ export const WelcomePage: FunctionComponent = observer(() => {
                     <Column weight={1}>
                       <LinkItem
                         title={intl.formatMessage({
-                          id: "pages.register.pages.welcome.kado-link.title",
+                          id: "pages.register.pages.welcome.swapped-link.title",
                         })}
                         paragraph={intl.formatMessage({
-                          id: "pages.register.pages.welcome.kado-link.paragraph",
+                          id: "pages.register.pages.welcome.swapped-link.paragraph",
                         })}
-                        src={require("../../../../public/assets/img/fiat-on-ramp/kado.svg")}
-                        url="https://www.kado.money/"
+                        src={require("../../../../public/assets/img/fiat-on-ramp/swapped.svg")}
+                        url="https://swapped.com/"
                       />
                     </Column>
                     <Column weight={1}>
