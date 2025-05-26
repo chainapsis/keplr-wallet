@@ -61,6 +61,7 @@ import {
 } from "@keplr-wallet/stores-eth";
 import { EthTxStatus } from "@keplr-wallet/types";
 import { InsufficientFeeError } from "@keplr-wallet/hooks";
+import { useSwapAnalytics } from "./hooks/use-swap-analytics";
 
 const TextButtonStyles = {
   Container: styled.div`
@@ -791,6 +792,15 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
   const [isTxLoading, setIsTxLoading] = useState(false);
 
+  const { logSwapSignOpened, requestId } = useSwapAnalytics({
+    inChainId: inChainId,
+    inCurrency: inCurrency,
+    outChainId: outChainId,
+    outCurrency: outCurrency,
+    ibcSwapConfigs: ibcSwapConfigs,
+    swapFeeBps,
+  });
+
   return (
     <MainHeaderLayout
       additionalPaddingBottom={BottomTabsHeightRem}
@@ -806,6 +816,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         e.preventDefault();
 
         if (!interactionBlocked) {
+          logSwapSignOpened();
+
           setIsTxLoading(true);
 
           let tx: MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals;
@@ -1369,6 +1381,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
               ethereumAccount.setIsSendingTx(true);
 
+              if (erc20ApprovalTx) {
+                analyticsStore.logEvent("erc20_approve_sign_opened", {
+                  request_id: requestId,
+                });
+              }
+
               await ethereumAccount.sendEthereumTx(
                 sender,
                 {
@@ -1377,6 +1395,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 },
                 {
                   onBroadcasted: (txHash) => {
+                    if (erc20ApprovalTx) {
+                      analyticsStore.logEvent("tx_submitted", {
+                        request_id: requestId,
+                      });
+                    }
+
                     if (!erc20ApprovalTx) {
                       ethereumAccount.setIsSendingTx(false);
 
@@ -1442,6 +1466,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                     }
                   },
                   onFulfill: (txReceipt) => {
+                    analyticsStore.logEvent("tx_success", {
+                      request_id: requestId,
+                    });
+
                     const queryBalances = queriesStore.get(
                       ibcSwapConfigs.amountConfig.chainId
                     ).queryBalances;
@@ -1641,8 +1669,17 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             }
           } catch (e) {
             if (e?.message === "Request rejected") {
+              analyticsStore.logEvent("sign_canceled", {
+                request_id: requestId,
+              });
+
               return;
             }
+
+            analyticsStore.logEvent("tx_failed", {
+              request_id: requestId,
+              error_message: e?.message,
+            });
 
             console.log(e);
             notification.show(
