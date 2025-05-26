@@ -507,7 +507,7 @@ export const AvailableTabView: FunctionComponent<{
         ) : (
           <React.Fragment>
             <Stack gutter="0.5rem">
-              <Box marginBottom="0.5rem" paddingX="0.375rem">
+              <Box paddingX="0.375rem" paddingY="0.25rem">
                 <XAxis alignY="center" gap="0.25rem">
                   <Subtitle4>{TokenViewData.balance.length}</Subtitle4>
                   <TokenTitleView
