@@ -125,6 +125,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     keyRingStore,
     hugeQueriesStore,
     priceStore,
+    analyticsStore,
   } = useStore();
 
   const theme = useTheme();
@@ -1295,6 +1296,19 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       BACKGROUND_PORT,
                       new LogAnalyticsEventMsg("ibc_swap", params)
                     );
+
+                    analyticsStore.logEvent("swap_occurred", {
+                      in_chain_id: inChainId,
+                      in_chain_identifier:
+                        ChainIdHelper.parse(inChainId).identifier,
+                      in_currency_minimal_denom: inCurrency.coinMinimalDenom,
+                      in_currency_denom: inCurrency.coinDenom,
+                      out_chain_id: outChainId,
+                      out_chain_identifier:
+                        ChainIdHelper.parse(outChainId).identifier,
+                      out_currency_minimal_denom: outCurrency.coinMinimalDenom,
+                      out_currency_denom: outCurrency.coinDenom,
+                    });
 
                     navigate("/", {
                       replace: true,
