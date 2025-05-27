@@ -803,6 +803,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     swapFeeBps,
   });
 
+  const isSwap = ibcSwapConfigs.amountConfig.type === "swap";
+
   return (
     <MainHeaderLayout
       additionalPaddingBottom={BottomTabsHeightRem}
@@ -1189,7 +1191,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       }
                     }
 
-                    if (ibcSwapConfigs.amountConfig.type === "swap") {
+                    if (isSwap) {
                       logEvent("swap_tx_submitted", {
                         request_id: requestId,
                       });
@@ -1315,7 +1317,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                     });
                   },
                   onFulfill: (tx: any) => {
-                    const isSwap = ibcSwapConfigs.amountConfig.type === "swap";
                     if (tx.code != null && tx.code !== 0) {
                       if (isSwap) {
                         logEvent("swap_tx_failed", {
@@ -1429,7 +1430,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                     }
 
                     if (!erc20ApprovalTx) {
-                      if (ibcSwapConfigs.amountConfig.type === "swap") {
+                      if (isSwap) {
                         logEvent("swap_tx_submitted", {
                           request_id: requestId,
                         });
@@ -1571,9 +1572,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                               },
                               {
                                 onBroadcasted: (txHash) => {
-                                  if (
-                                    ibcSwapConfigs.amountConfig.type === "swap"
-                                  ) {
+                                  if (isSwap) {
                                     logEvent("swap_tx_submitted", {
                                       request_id: requestId,
                                     });
@@ -1736,7 +1735,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             }
           } catch (e) {
             if (e?.message === "Request rejected") {
-              if (ibcSwapConfigs.amountConfig.type === "swap") {
+              if (isSwap) {
                 logEvent("swap_sign_canceled", {
                   request_id: requestId,
                 });
@@ -1745,7 +1744,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               return;
             }
 
-            if (ibcSwapConfigs.amountConfig.type === "swap") {
+            if (isSwap) {
               logEvent("swap_tx_failed", {
                 request_id: requestId,
                 error_message: e?.message,
