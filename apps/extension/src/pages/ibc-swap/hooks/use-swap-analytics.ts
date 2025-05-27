@@ -41,10 +41,13 @@ export const useSwapAnalytics = ({
   const { analyticsAmplitudeStore, keyRingStore, uiConfigStore, priceStore } =
     useStore();
 
-  const generateQuoteId = () =>
-    (crypto as any)?.randomUUID
-      ? (crypto as any).randomUUID()
-      : Math.random().toString(36).substring(2);
+  const generateQuoteId = () => {
+    try {
+      return crypto.randomUUID();
+    } catch (error) {
+      return `${Date.now()}-${Math.random().toString(36).substring(2)}`;
+    }
+  };
 
   const quoteIdRef = useRef<string>(generateQuoteId());
 
