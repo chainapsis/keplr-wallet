@@ -14,6 +14,14 @@ import {
 } from "@keplr-wallet/hooks";
 import debounce from "lodash.debounce";
 
+const generateQuoteId = () => {
+  try {
+    return crypto.randomUUID();
+  } catch (error) {
+    return `${Date.now()}-${Math.random().toString(36).substring(2)}`;
+  }
+};
+
 interface SwapAnalyticsArgs {
   inChainId: string;
   inCurrency: AppCurrency;
@@ -41,14 +49,6 @@ export const useSwapAnalytics = ({
   const { analyticsAmplitudeStore, keyRingStore, uiConfigStore, priceStore } =
     useStore();
 
-  const generateQuoteId = () => {
-    try {
-      return crypto.randomUUID();
-    } catch (error) {
-      return `${Date.now()}-${Math.random().toString(36).substring(2)}`;
-    }
-  };
-
   const quoteIdRef = useRef<string>(generateQuoteId());
 
   const prevInRef = useRef<{ chainIdentifier: string; denom: string }>({
@@ -64,14 +64,17 @@ export const useSwapAnalytics = ({
     uiConfigStore.ibcSwapConfig.slippageNum
   );
   const prevFetchingRef = useRef<boolean>(false);
-  const prevRouteKeyRef = useRef<any>(undefined);
-  const prevQuoteErrorIdRef = useRef<any>(undefined);
+  const prevRouteKeyRef = useRef("");
+  const prevQuoteErrorIdRef = useRef("");
 
   const aggregatedPropsRef = useRef<Record<string, Record<string, any>>>({});
 
   const debouncedEventMapRef = useRef<
     Record<string, ReturnType<typeof debounce>>
   >({});
+
+  const inChainIdentifier = ChainIdHelper.parse(inChainId).identifier;
+  const outChainIdentifier = ChainIdHelper.parse(outChainId).identifier;
 
   const logEvent = useCallback(
     (eventName: string, props: Record<string, any>) => {
@@ -117,11 +120,10 @@ export const useSwapAnalytics = ({
     });
   });
 
-  // source / destination selected
+  // source selected
   useEffect(() => {
     if (entryPoint !== "select_from_asset") return;
 
-    const inChainIdentifier = ChainIdHelper.parse(inChainId).identifier;
     if (
       prevInRef.current.chainIdentifier !== inChainIdentifier ||
       prevInRef.current.denom !== inCurrency.coinDenom
@@ -135,12 +137,12 @@ export const useSwapAnalytics = ({
         denom: inCurrency.coinDenom,
       };
     }
-  }, [inChainId, inCurrency.coinDenom, logEvent, entryPoint]);
+  }, [inChainIdentifier, inCurrency.coinDenom, logEvent, entryPoint]);
 
+  // destination selected
   useEffect(() => {
     if (entryPoint !== "select_to_asset") return;
 
-    const outChainIdentifier = ChainIdHelper.parse(outChainId).identifier;
     if (
       prevOutRef.current.chainIdentifier !== outChainIdentifier ||
       prevOutRef.current.denom !== outCurrency.coinMinimalDenom
@@ -155,7 +157,7 @@ export const useSwapAnalytics = ({
       };
     }
   }, [
-    outChainId,
+    outChainIdentifier,
     outCurrency.coinMinimalDenom,
     outCurrency.coinDenom,
     logEvent,
@@ -197,24 +199,21 @@ export const useSwapAnalytics = ({
   const queryRouteForLog = queryIBCSwapForLog?.getQueryRoute();
 
   useEffect(() => {
-    if (!queryRouteForLog) return;
+    const amount = ibcSwapConfigs.amountConfig.amount[0];
+
+    if (!queryRouteForLog || !amount) {
+      prevFetchingRef.current = false;
+      return;
+    }
+
     if (!prevFetchingRef.current && queryRouteForLog.isFetching) {
       quoteIdRef.current = generateQuoteId();
 
-      const inAmountRaw =
-        ibcSwapConfigs.amountConfig.amount.length > 0
-          ? ibcSwapConfigs.amountConfig.amount[0].toCoin().amount.toString()
-          : "0";
-      const inAmountUsd = (() => {
-        const p = priceStore.calculatePrice(
-          ibcSwapConfigs.amountConfig.amount[0],
-          "usd"
-        );
-        return p ? p.toDec().toString() : undefined;
-      })();
-
-      const inChainIdentifier = ChainIdHelper.parse(inChainId).identifier;
-      const outChainIdentifier = ChainIdHelper.parse(outChainId).identifier;
+      const inAmountRaw = amount.toCoin().amount.toString();
+      const inAmountUsd = priceStore
+        .calculatePrice(amount, "usd")
+        ?.toDec()
+        .toString();
 
       logEvent("swap_quote_requested", {
         quote_id: quoteIdRef.current,
@@ -229,22 +228,22 @@ export const useSwapAnalytics = ({
     }
     prevFetchingRef.current = queryRouteForLog.isFetching;
   }, [
+    queryRouteForLog,
     queryRouteForLog?.isFetching,
-    analyticsAmplitudeStore,
     inCurrency,
     outCurrency,
     swapFeeBps,
     ibcSwapConfigs.amountConfig.amount,
-    priceStore,
-    queryRouteForLog,
+    priceStore.calculatePrice,
     logEvent,
-    inChainId,
-    outChainId,
+    inChainIdentifier,
+    outChainIdentifier,
   ]);
 
   // Quote received
   useEffect(() => {
-    if (!queryRouteForLog || !queryRouteForLog.response) return;
+    if (!queryRouteForLog?.response) return;
+
     const currentKey = queryRouteForLog.response.data.amount_out;
     if (prevRouteKeyRef.current === currentKey) return;
 
@@ -277,8 +276,7 @@ export const useSwapAnalytics = ({
   }, [
     queryRouteForLog?.response,
     outCurrency,
-    priceStore,
-    queryRouteForLog,
+    priceStore.calculatePrice,
     logEvent,
   ]);
 
@@ -315,6 +313,16 @@ export const useSwapAnalytics = ({
     ibcSwapConfigs.gasConfig.gas,
     ibcSwapConfigs.amountConfig.swapPriceImpact,
   ]);
+
+  useEffect(() => {
+    const debouncedFunctions = debouncedEventMapRef.current;
+
+    return () => {
+      Object.values(debouncedFunctions).forEach((debouncedFn) => {
+        debouncedFn.cancel();
+      });
+    };
+  }, []);
 
   return {
     quoteId: quoteIdRef.current,
