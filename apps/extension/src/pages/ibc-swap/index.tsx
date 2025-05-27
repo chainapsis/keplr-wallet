@@ -385,6 +385,13 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         }
       }
 
+      if (isInChainEVMOnly) {
+        // EVM 트랜잭션의 gas estimated는 보낼 토큰 수량에 따라 차이가 꽤 클 수 있다.
+        type = `${type}/${
+          ibcSwapConfigs.amountConfig.amount[0].toCoin().amount
+        }`;
+      }
+
       return `${ibcSwapConfigs.amountConfig.chainId}/${ibcSwapConfigs.amountConfig.outChainId}/${ibcSwapConfigs.amountConfig.currency.coinMinimalDenom}/${ibcSwapConfigs.amountConfig.outCurrency.coinMinimalDenom}/${type}`;
     })(),
     () => {
@@ -465,11 +472,36 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               )
             : undefined;
 
-        // OP Stack L1 Data Fee 계산은 일단 무시하기로 한다.
+        delete tx.requiredErc20Approvals;
 
         return {
           simulate: () =>
-            ethereumAccount.simulateGas(sender, erc20ApprovalTx ?? tx),
+            ethereumAccount
+              .simulateGas(sender, erc20ApprovalTx ?? tx)
+              .then(({ gasUsed }) => {
+                if (
+                  chainStore
+                    .getChain(inChainId)
+                    .features.includes("op-stack-l1-data-fee")
+                ) {
+                  return ethereumAccount
+                    .simulateOpStackL1Fee({
+                      to: tx?.to,
+                      gasLimit: gasUsed,
+                      value: tx?.value,
+                      data: tx?.data,
+                      chainId: tx?.chainId,
+                    })
+                    .then((l1DataFee) => {
+                      ibcSwapConfigs.feeConfig.setL1DataFee(
+                        new Dec(BigInt(l1DataFee))
+                      );
+                      return { gasUsed };
+                    });
+                }
+
+                return { gasUsed };
+              }),
         };
       }
     }
@@ -1309,6 +1341,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                     )
                   : undefined;
 
+              delete (tx as UnsignedEVMTransactionWithErc20Approvals)
+                .requiredErc20Approvals;
+
               const { maxFeePerGas, maxPriorityFeePerGas, gasPrice } =
                 ibcSwapConfigs.feeConfig.getEIP1559TxFees(
                   ibcSwapConfigs.feeConfig.type
@@ -1442,8 +1477,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       );
 
                       if (erc20ApprovalTx) {
-                        delete (tx as UnsignedEVMTransactionWithErc20Approvals)
-                          .requiredErc20Approvals;
                         ethereumAccount.setIsSendingTx(true);
                         ethereumAccount
                           .simulateGas(sender, tx as UnsignedEVMTransaction)
@@ -2022,7 +2055,7 @@ const WarningGuideBox: FunctionComponent<{
           clearTimeout(timeoutId);
         };
       }
-    }, [collapsed, globalSimpleBar.ref]);
+    }, [collapsed]);
 
     const errorText = (() => {
       const err = error || lastError;

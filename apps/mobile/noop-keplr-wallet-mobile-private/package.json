@@ -1,7 +1,0 @@
-{
-  "name": "noop-keplr-wallet-mobile-private",
-  "version": "0.0.1",
-  "main": "build/index.js",
-  "sideEffects": false,
-  "dependencies": {}
-}

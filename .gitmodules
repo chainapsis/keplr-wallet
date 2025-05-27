@@ -1,6 +1,3 @@
 [submodule "apps/extension/src/keplr-wallet-private"]
 	path = apps/extension/src/keplr-wallet-private
 	url = https://github.com/chainapsis/keplr-wallet-private
-[submodule "apps/mobile/src/keplr-wallet-mobile-private"]
-	path = apps/mobile/src/keplr-wallet-mobile-private
-	url = https://github.com/chainapsis/keplr-wallet-mobile-private

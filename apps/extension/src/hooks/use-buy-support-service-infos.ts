@@ -1,6 +1,7 @@
 import { AppCurrency } from "@keplr-wallet/types";
 import { FiatOnRampServiceInfo } from "../config.ui";
 import { useStore } from "../stores";
+import { createHmac } from "crypto";
 
 interface BuySupportServiceInfo extends FiatOnRampServiceInfo {
   buyUrl?: string;
@@ -151,39 +152,88 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
             cryptoCurrencyList: buySupportCoinDenoms,
             defaultCryptoCurrency: selectedCoinDenom ?? buySupportCoinDenoms[0],
           };
-        case "kado":
-          const kadoBuySupportModularChainInfos = Object.keys(
-            serviceInfo.buySupportCoinDenomsByChainId
-          )
-            .filter((chainId) => chainStore.hasChain(chainId))
-            .map((chainId) => chainStore.getChain(chainId));
-          const selectedChainName = selectedTokenInfo
-            ? kadoBuySupportModularChainInfos.find(
-                (chainInfo) => chainInfo.chainId === selectedTokenInfo.chainId
-              )?.chainName
-            : undefined;
+        case "swapped":
+          const walletAddress = (() => {
+            const seenCoinDenoms = new Set<string>();
+
+            return Object.entries(serviceInfo.buySupportCoinDenomsByChainId)
+              .reduce<string[]>((pairs, [chainId, coinDenoms]) => {
+                if (!coinDenoms) return pairs;
+
+                const modularChainInfo = chainStore.modularChainInfos.find(
+                  (modularChainInfo) => modularChainInfo.chainId === chainId
+                );
+
+                if (chainStore.hasChain(chainId)) {
+                  const address = chainStore.isEvmChain(chainId)
+                    ? accountStore.getAccount(chainId).ethereumHexAddress
+                    : accountStore.getAccount(chainId).bech32Address;
+
+                  coinDenoms.forEach((coinDenom) => {
+                    if (!seenCoinDenoms.has(coinDenom)) {
+                      pairs.push(`${coinDenom}:${address}`);
+                      seenCoinDenoms.add(coinDenom);
+                    }
+                  });
+                } else if (modularChainInfo && "bitcoin" in modularChainInfo) {
+                  const account = accountStore.getAccount(
+                    modularChainInfo.chainId
+                  );
+                  const coinDenom = coinDenoms[0];
+                  if (account.bitcoinAddress) {
+                    if (!seenCoinDenoms.has(coinDenom)) {
+                      pairs.push(
+                        `${coinDenom}:${account.bitcoinAddress.bech32Address}`
+                      );
+                      seenCoinDenoms.add(coinDenom);
+                    }
+                  }
+                }
+
+                return pairs;
+              }, [])
+              .join(",");
+          })();
 
           return {
-            apiKey: process.env["KEPLR_EXT_KADO_API_KEY"] ?? serviceInfo.apiKey,
-            product: "BUY",
-            networkList: kadoBuySupportModularChainInfos.map((chainInfo) =>
-              chainInfo.chainName.toUpperCase()
-            ),
-            cryptoList: buySupportCoinDenoms,
-            onRevCurrency: selectedCoinDenom ?? buySupportCoinDenoms[0],
-            network:
-              selectedChainName ??
-              kadoBuySupportModularChainInfos[0].chainName.toUpperCase(),
+            apiKey:
+              process.env["KEPLR_EXT_SWAPPED_API_KEY"] ?? serviceInfo.apiKey,
+            currencyCode: "USDC_NOBLE",
+            walletAddress,
           };
         default:
           return;
       }
     })();
-    const buyUrl = buyUrlParams
-      ? `${serviceInfo.buyOrigin}?${Object.entries(buyUrlParams)
-          .map((paramKeyValue) => paramKeyValue.join("="))
-          .join("&")}`
-      : undefined;
+    const buyUrl = (() => {
+      if (!buyUrlParams) {
+        return undefined;
+      }
+
+      const originalUrl = `${serviceInfo.buyOrigin}?${Object.entries(
+        buyUrlParams
+      )
+        .map((paramKeyValue) => paramKeyValue.join("="))
+        .join("&")}`;
+
+      if (serviceInfo.serviceId === "swapped") {
+        try {
+          const signature = createHmac(
+            "sha256",
+            process.env["KEPLR_EXT_SWAPPED_API_SECRET"] as string
+          )
+            .update(new URL(originalUrl).search)
+            .digest("base64");
+
+          return `${originalUrl}&signature=${encodeURIComponent(signature)}`;
+        } catch (e) {
+          console.error(e);
+          return originalUrl;
+        }
+      }
+
+      return originalUrl;
+    })();
 
     return {
       ...serviceInfo,

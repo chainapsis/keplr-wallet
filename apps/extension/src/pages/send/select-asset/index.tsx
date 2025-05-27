@@ -8,10 +8,16 @@ import { SearchTextInput } from "../../../components/input";
 import { useStore } from "../../../stores";
 import { TokenItem } from "../../main/components";
 import { Column, Columns } from "../../../components/column";
-import { Body2, H2, Subtitle3 } from "../../../components/typography";
+import {
+  Body2,
+  H2,
+  Subtitle1,
+  Subtitle3,
+} from "../../../components/typography";
 import { Checkbox } from "../../../components/checkbox";
 import { ColorPalette } from "../../../styles";
 import { Dec } from "@keplr-wallet/unit";
+import { CoinPretty } from "@keplr-wallet/unit";
 import { useFocusOnMount } from "../../../hooks/use-focus-on-mount";
 import { useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router";
@@ -24,6 +30,7 @@ import { StackIcon } from "../../../components/icon/stack";
 import { useSearch } from "../../../hooks/use-search";
 import { ViewToken } from "../../main";
 import { getTokenSearchResultClickAnalyticsProperties } from "../../../analytics-amplitude";
+import { EmptyView } from "../../../components/empty-view";
 
 const Styles = {
   Container: styled(Stack)<{ isNobleEarn: boolean }>`
@@ -38,9 +45,11 @@ const searchFields = [
     function: (item: ViewToken) => {
       const currency = item.token.currency;
       if ("originCurrency" in currency) {
-        return currency.originCurrency?.coinDenom || "";
+        return CoinPretty.makeCoinDenomPretty(
+          currency.originCurrency?.coinDenom || ""
+        );
       }
-      return currency.coinDenom;
+      return CoinPretty.makeCoinDenomPretty(currency.coinDenom);
     },
   },
   "chainInfo.chainName",
@@ -240,57 +249,129 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
           </Box>
         ) : null}
 
-        {filteredTokens.map((viewToken, index) => {
-          const modularChainInfo = chainStore.getModularChain(
-            viewToken.chainInfo.chainId
-          );
-          const isStarknet =
-            "starknet" in modularChainInfo && modularChainInfo.starknet != null;
-          const isBitcoin =
-            "bitcoin" in modularChainInfo && modularChainInfo.bitcoin != null;
+        {filteredTokens.length > 0 &&
+          filteredTokens.map((viewToken, index) => {
+            const modularChainInfo = chainStore.getModularChain(
+              viewToken.chainInfo.chainId
+            );
+            const isStarknet =
+              "starknet" in modularChainInfo &&
+              modularChainInfo.starknet != null;
+            const isBitcoin =
+              "bitcoin" in modularChainInfo && modularChainInfo.bitcoin != null;
 
-          const sendRoute = isBitcoin
-            ? "/bitcoin/send"
-            : isStarknet
-            ? "/starknet/send"
-            : "/send";
+            const sendRoute = isBitcoin
+              ? "/bitcoin/send"
+              : isStarknet
+              ? "/starknet/send"
+              : "/send";
 
-          return (
-            <TokenItem
-              viewToken={viewToken}
-              key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
-              onClick={() => {
-                if (search.trim().length > 0) {
-                  analyticsAmplitudeStore.logEvent(
-                    "click_token_item_search_results_select_asset_send",
-                    getTokenSearchResultClickAnalyticsProperties(
-                      viewToken,
-                      search,
-                      filteredTokens,
-                      index
-                    )
-                  );
-                }
-                if (paramNavigateTo) {
-                  navigate(
-                    paramNavigateTo
-                      .replace("/send", sendRoute)
-                      .replace("{chainId}", viewToken.chainInfo.chainId)
-                      .replace(
-                        "{coinMinimalDenom}",
-                        viewToken.token.currency.coinMinimalDenom
-                      ),
-                    {
-                      replace: paramNavigateReplace === "true",
-                    }
-                  );
-                } else {
-                  console.error("Empty navigateTo param");
-                }
-              }}
-            />
-          );
-        })}
+            return (
+              <TokenItem
+                viewToken={viewToken}
+                key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
+                onClick={() => {
+                  if (search.trim().length > 0) {
+                    analyticsAmplitudeStore.logEvent(
+                      "click_token_item_search_results_select_asset_send",
+                      getTokenSearchResultClickAnalyticsProperties(
+                        viewToken,
+                        search,
+                        filteredTokens,
+                        index
+                      )
+                    );
+                  }
+                  if (paramNavigateTo) {
+                    navigate(
+                      paramNavigateTo
+                        .replace("/send", sendRoute)
+                        .replace("{chainId}", viewToken.chainInfo.chainId)
+                        .replace(
+                          "{coinMinimalDenom}",
+                          viewToken.token.currency.coinMinimalDenom
+                        ),
+                      {
+                        replace: paramNavigateReplace === "true",
+                      }
+                    );
+                  } else {
+                    console.error("Empty navigateTo param");
+                  }
+                }}
+              />
+            );
+          })}
+
+        {nonZeroTokens.length === 0 && (
+          <Box marginY="2rem">
+            <EmptyView
+              altSvg={
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="72"
+                  height="72"
+                  viewBox="0 0 72 72"
+                  fill="none"
+                >
+                  <path
+                    d="M45 40.5H27M39.182 18.932L32.818 12.568C31.9741 11.7241 30.8295 11.25 29.636 11.25H13.5C9.77208 11.25 6.75 14.2721 6.75 18V54C6.75 57.7279 9.77208 60.75 13.5 60.75H58.5C62.2279 60.75 65.25 57.7279 65.25 54V27C65.25 23.2721 62.2279 20.25 58.5 20.25H42.364C41.1705 20.25 40.0259 19.7759 39.182 18.932Z"
+                    stroke="#ABABB5"
+                    strokeWidth="7.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              }
+            >
+              <Stack alignX="center" gutter="0.1rem">
+                <Subtitle3 style={{ textAlign: "center" }}>
+                  <FormattedMessage
+                    id="page.send.select-asset.empty-view-description"
+                    values={{
+                      br: <br />,
+                    }}
+                  />
+                </Subtitle3>
+              </Stack>
+            </EmptyView>
+          </Box>
+        )}
+
+        {nonZeroTokens.length > 0 && filteredTokens.length === 0 && (
+          <Box marginY="2rem">
+            <EmptyView
+              altSvg={
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="70"
+                  height="70"
+                  viewBox="0 0 70 70"
+                  fill="none"
+                >
+                  <path
+                    d="M55.9 10H15.1C13.7485 10 12.448 10.5355 11.5045 11.5045C10.5355 12.448 10 13.7485 10 15.1V45.7C10 47.0515 10.5355 48.352 11.5045 49.2955C12.448 50.2645 13.7485 50.8 15.1 50.8H25.3L35.5 61L45.7 50.8H55.9C57.2515 50.8 58.552 50.2645 59.4955 49.2955C60.439 48.3265 61 47.0515 61 45.7V15.1C61 13.7485 60.4645 12.448 59.4955 11.5045C58.552 10.5355 57.2515 10 55.9 10ZM15.1 45.7V15.1H55.9V45.7H43.5835L35.5 53.7835L27.4165 45.7M30.5275 20.302C31.9045 19.384 33.715 18.925 35.9845 18.925C38.3815 18.925 40.294 19.4605 41.671 20.506C43.048 21.577 43.7365 23.005 43.7365 24.79C43.7365 25.912 43.354 26.9065 42.6145 27.85C41.875 28.768 40.906 29.482 39.733 30.0175C39.07 30.4 38.6365 30.7825 38.407 31.216C38.1775 31.675 38.05 32.236 38.05 32.95H32.95C32.95 31.675 33.205 30.808 33.6895 30.196C34.225 29.584 35.092 28.87 36.418 28.054C37.081 27.697 37.6165 27.238 38.05 26.677C38.407 26.1415 38.611 25.504 38.611 24.79C38.611 24.025 38.3815 23.464 37.9225 23.0305C37.4635 22.5715 36.775 22.3675 35.9845 22.3675C35.296 22.3675 34.735 22.546 34.225 22.903C33.817 23.26 33.562 23.7955 33.562 24.5095H28.5385C28.411 22.75 29.125 21.22 30.5275 20.302ZM32.95 40.6V35.5H38.05V40.6H32.95Z"
+                    fill="#424247"
+                  />
+                </svg>
+              }
+            >
+              <Stack alignX="center" gutter="0.1rem">
+                <Subtitle1>
+                  <FormattedMessage id="page.send.select-asset.search-show-check-manage-asset-view-guide-title" />
+                </Subtitle1>
+                <Body2 style={{ textAlign: "center", lineHeight: "1.4" }}>
+                  <FormattedMessage
+                    id="page.send.select-asset.search-show-check-manage-asset-view-guide-paragraph"
+                    values={{
+                      br: <br />,
+                    }}
+                  />
+                </Body2>
+              </Stack>
+            </EmptyView>
+          </Box>
+        )}
       </Styles.Container>
     </HeaderLayout>
   );

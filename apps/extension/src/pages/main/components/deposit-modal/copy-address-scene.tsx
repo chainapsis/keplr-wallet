@@ -41,6 +41,7 @@ import { useGetSearchChains } from "../../../../hooks/use-get-search-chains";
 import { LookingForChainItem } from "../looking-for-chains";
 import { useSearch } from "../../../../hooks/use-search";
 import { getChainSearchResultClickAnalyticsProperties } from "../../../../analytics-amplitude";
+import { CoinPretty } from "@keplr-wallet/unit";
 
 type Address = {
   modularChainInfo: ModularChainInfo;
@@ -75,12 +76,14 @@ const addressSearchFields = [
       ) {
         const cosmosChainInfo = item.modularChainInfo.cosmos;
         if (cosmosChainInfo.stakeCurrency) {
-          return cosmosChainInfo.stakeCurrency.coinDenom;
+          return CoinPretty.makeCoinDenomPretty(
+            cosmosChainInfo.stakeCurrency.coinDenom
+          );
         }
         if (cosmosChainInfo.currencies.length > 0) {
           const currency = cosmosChainInfo.currencies[0];
           if (!currency.coinMinimalDenom.startsWith("ibc/")) {
-            return currency.coinDenom;
+            return CoinPretty.makeCoinDenomPretty(currency.coinDenom);
           }
         }
       } else if (
@@ -89,7 +92,9 @@ const addressSearchFields = [
       ) {
         const starknetChainInfo = item.modularChainInfo.starknet;
         if (starknetChainInfo.currencies.length > 0) {
-          return starknetChainInfo.currencies[0].coinDenom;
+          return CoinPretty.makeCoinDenomPretty(
+            starknetChainInfo.currencies[0].coinDenom
+          );
         }
       } else if (
         "bitcoin" in item.modularChainInfo &&
@@ -97,7 +102,9 @@ const addressSearchFields = [
       ) {
         const bitcoinChainInfo = item.modularChainInfo.bitcoin;
         if (bitcoinChainInfo.currencies.length > 0) {
-          return bitcoinChainInfo.currencies[0].coinDenom;
+          return CoinPretty.makeCoinDenomPretty(
+            bitcoinChainInfo.currencies[0].coinDenom
+          );
         }
       }
       return "";
@@ -850,6 +857,7 @@ const CopyAddressItem: FunctionComponent<{
                     address.ethereumAddress ||
                     address.bech32Address ||
                     address.bitcoinAddress?.bech32Address,
+                  close,
                 });
               }}
             >
