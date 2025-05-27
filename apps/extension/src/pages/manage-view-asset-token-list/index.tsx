@@ -28,6 +28,7 @@ import { Subtitle3 } from "../../components/typography";
 import { useSearch } from "../../hooks/use-search";
 import { ViewToken } from "../main";
 import { getTokenSearchResultClickAnalyticsProperties } from "../../analytics-amplitude";
+import { CoinPretty } from "@keplr-wallet/unit";
 
 const searchFields = [
   {
@@ -35,9 +36,11 @@ const searchFields = [
     function: (item: ViewToken) => {
       const currency = item.token.currency;
       if ("originCurrency" in currency) {
-        return currency.originCurrency?.coinDenom || "";
+        return CoinPretty.makeCoinDenomPretty(
+          currency.originCurrency?.coinDenom || ""
+        );
       }
-      return currency.coinDenom;
+      return CoinPretty.makeCoinDenomPretty(currency.coinDenom);
     },
   },
   "chainInfo.chainName",
