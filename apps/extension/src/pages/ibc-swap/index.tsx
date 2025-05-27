@@ -39,7 +39,7 @@ import styled, { useTheme } from "styled-components";
 import { GuideBox } from "../../components/guide-box";
 import { VerticalCollapseTransition } from "../../components/transition/vertical-collapse";
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
-import { Dec, DecUtils, Int } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { MakeTxResponse, WalletStatus } from "@keplr-wallet/stores";
 import { autorun } from "mobx";
 import {
@@ -756,33 +756,41 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     const r: string[] = [];
     if (!inCurrency.coinGeckoId) {
       if ("originCurrency" in inCurrency && inCurrency.originCurrency) {
-        r.push(inCurrency.originCurrency.coinDenom);
+        r.push(
+          CoinPretty.makeCoinDenomPretty(inCurrency.originCurrency.coinDenom)
+        );
       } else {
-        r.push(inCurrency.coinDenom);
+        r.push(CoinPretty.makeCoinDenomPretty(inCurrency.coinDenom));
       }
     } else if (!inOrOutChangedDelay) {
       const price = priceStore.getPrice(inCurrency.coinGeckoId, "usd");
       if (!price) {
         if ("originCurrency" in inCurrency && inCurrency.originCurrency) {
-          r.push(inCurrency.originCurrency.coinDenom);
+          r.push(
+            CoinPretty.makeCoinDenomPretty(inCurrency.originCurrency.coinDenom)
+          );
         } else {
-          r.push(inCurrency.coinDenom);
+          r.push(CoinPretty.makeCoinDenomPretty(inCurrency.coinDenom));
         }
       }
     }
     if (!outCurrency.coinGeckoId) {
       if ("originCurrency" in outCurrency && outCurrency.originCurrency) {
-        r.push(outCurrency.originCurrency.coinDenom);
+        r.push(
+          CoinPretty.makeCoinDenomPretty(outCurrency.originCurrency.coinDenom)
+        );
       } else {
-        r.push(outCurrency.coinDenom);
+        r.push(CoinPretty.makeCoinDenomPretty(outCurrency.coinDenom));
       }
     } else if (!inOrOutChangedDelay) {
       const price = priceStore.getPrice(outCurrency.coinGeckoId, "usd");
       if (!price) {
         if ("originCurrency" in outCurrency && outCurrency.originCurrency) {
-          r.push(outCurrency.originCurrency.coinDenom);
+          r.push(
+            CoinPretty.makeCoinDenomPretty(outCurrency.originCurrency.coinDenom)
+          );
         } else {
-          r.push(outCurrency.coinDenom);
+          r.push(CoinPretty.makeCoinDenomPretty(outCurrency.coinDenom));
         }
       }
     }
