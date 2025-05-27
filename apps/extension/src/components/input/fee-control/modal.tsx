@@ -34,6 +34,7 @@ import { VerticalCollapseTransition } from "../../transition/vertical-collapse";
 import { Tooltip } from "../../tooltip";
 import { InformationOutlineIcon } from "../../icon";
 import { IBCSwapAmountConfig } from "@keplr-wallet/hooks-internal";
+import { useEffectOnce } from "../../../hooks/use-effect-once";
 
 const Styles = {
   Container: styled.div`
@@ -73,7 +74,8 @@ export const TransactionFeeModal: FunctionComponent<{
     disableAutomaticFeeSet,
     isForEVMTx,
   }) => {
-    const { queriesStore, uiConfigStore, priceStore } = useStore();
+    const { queriesStore, uiConfigStore, priceStore, analyticsAmplitudeStore } =
+      useStore();
     const intl = useIntl();
     const theme = useTheme();
 
@@ -162,6 +164,10 @@ export const TransactionFeeModal: FunctionComponent<{
           .inequalitySymbol(true)
           .toString()
       : undefined;
+
+    useEffectOnce(() => {
+      analyticsAmplitudeStore.logEvent("view_fee_modal");
+    });
 
     return (
       <Styles.Container>

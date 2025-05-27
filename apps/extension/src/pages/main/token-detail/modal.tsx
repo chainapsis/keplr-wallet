@@ -283,7 +283,7 @@ export const TokenDetailModal: FunctionComponent<{
         navigate(
           `/ibc-swap?chainId=${chainId}&coinMinimalDenom=${coinMinimalDenom}&outChainId=${
             chainStore.getChain("noble").chainId
-          }&outCoinMinimalDenom=uusdc`
+          }&outCoinMinimalDenom=uusdc&entryPoint=token_detail`
         );
       },
       disabled: !skipQueriesStore.queryIBCSwap.isSwappableCurrency(
