@@ -41,12 +41,12 @@ export const useSwapAnalytics = ({
   const { analyticsAmplitudeStore, keyRingStore, uiConfigStore, priceStore } =
     useStore();
 
-  const generateRequestId = () =>
+  const generateQuoteId = () =>
     (crypto as any)?.randomUUID
       ? (crypto as any).randomUUID()
       : Math.random().toString(36).substring(2);
 
-  const requestIdRef = useRef<string>(generateRequestId());
+  const quoteIdRef = useRef<string>(generateQuoteId());
 
   const prevInRef = useRef<{ chainIdentifier: string; denom: string }>({
     chainIdentifier: "",
@@ -72,7 +72,7 @@ export const useSwapAnalytics = ({
 
   const logEvent = useCallback(
     (eventName: string, props: Record<string, any>) => {
-      const id = props["request_id"];
+      const id = props["quote_id"];
 
       let mergedProps = { ...props };
       if (id) {
@@ -164,7 +164,7 @@ export const useSwapAnalytics = ({
     const currentFraction = ibcSwapConfigs.amountConfig.fraction;
     if (prevFractionRef.current !== currentFraction && currentFraction === 1) {
       logEvent("swap_max_btn_clicked", {
-        request_id: requestIdRef.current,
+        quote_id: quoteIdRef.current,
       });
     }
     prevFractionRef.current = currentFraction;
@@ -196,7 +196,7 @@ export const useSwapAnalytics = ({
   useEffect(() => {
     if (!queryRouteForLog) return;
     if (!prevFetchingRef.current && queryRouteForLog.isFetching) {
-      requestIdRef.current = generateRequestId();
+      quoteIdRef.current = generateQuoteId();
 
       const inAmountRaw =
         ibcSwapConfigs.amountConfig.amount.length > 0
@@ -214,7 +214,7 @@ export const useSwapAnalytics = ({
       const outChainIdentifier = ChainIdHelper.parse(outChainId).identifier;
 
       logEvent("swap_quote_requested", {
-        request_id: requestIdRef.current,
+        quote_id: quoteIdRef.current,
         in_chain_identifier: inChainIdentifier,
         in_coin_denom: inCurrency.coinDenom,
         out_chain_identifier: outChainIdentifier,
@@ -253,7 +253,7 @@ export const useSwapAnalytics = ({
     })();
 
     logEvent("swap_quote_received", {
-      request_id: requestIdRef.current,
+      quote_id: quoteIdRef.current,
       out_amount_est_raw: outAmountRaw,
       out_amount_est_usd: outUsd,
       provider: "skip",
@@ -283,20 +283,20 @@ export const useSwapAnalytics = ({
   useEffect(() => {
     if (!queryRouteForLog || !queryRouteForLog.error) return;
 
-    if (prevQuoteErrorIdRef.current === requestIdRef.current) return;
+    if (prevQuoteErrorIdRef.current === quoteIdRef.current) return;
 
     logEvent("swap_quote_failed", {
-      request_id: requestIdRef.current,
+      quote_id: quoteIdRef.current,
       provider: "skip",
       error_message:
         queryRouteForLog.error.message ?? queryRouteForLog.error.toString(),
     });
-    prevQuoteErrorIdRef.current = requestIdRef.current;
+    prevQuoteErrorIdRef.current = quoteIdRef.current;
   }, [queryRouteForLog?.error, logEvent, queryRouteForLog]);
 
   const logSwapSignOpened = useCallback(() => {
     logEvent("swap_sign_opened", {
-      request_id: requestIdRef.current,
+      quote_id: quoteIdRef.current,
       gas_estimate: ibcSwapConfigs.gasConfig.gas,
       price_impact_pct: ibcSwapConfigs.amountConfig.swapPriceImpact
         ? Number(
@@ -314,7 +314,7 @@ export const useSwapAnalytics = ({
   ]);
 
   return {
-    requestId: requestIdRef.current,
+    quoteId: quoteIdRef.current,
     logSwapSignOpened,
     logEvent,
   };

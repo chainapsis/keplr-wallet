@@ -794,7 +794,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
   const [isTxLoading, setIsTxLoading] = useState(false);
 
-  const { logSwapSignOpened, logEvent, requestId } = useSwapAnalytics({
+  const { logSwapSignOpened, logEvent, quoteId } = useSwapAnalytics({
     inChainId: inChainId,
     inCurrency: inCurrency,
     outChainId: outChainId,
@@ -1103,7 +1103,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   onBroadcasted: (txHash) => {
                     if (isInterchainSwap) {
                       logEvent("swap_tx_submitted", {
-                        request_id: requestId,
+                        quote_id: quoteId,
                       });
 
                       const msg = new RecordTxWithSkipSwapMsg(
@@ -1193,7 +1193,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
                     if (isSwap) {
                       logEvent("swap_tx_submitted", {
-                        request_id: requestId,
+                        quote_id: quoteId,
                       });
                     }
 
@@ -1320,7 +1320,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                     if (tx.code != null && tx.code !== 0) {
                       if (isSwap) {
                         logEvent("swap_tx_failed", {
-                          request_id: requestId,
+                          quote_id: quoteId,
                         });
                       }
                       console.log(tx.log ?? tx.raw_log);
@@ -1335,7 +1335,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
                     if (isSwap) {
                       logEvent("swap_tx_success", {
-                        request_id: requestId,
+                        quote_id: quoteId,
                       });
                     }
 
@@ -1411,7 +1411,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
               if (erc20ApprovalTx) {
                 logEvent("erc20_approve_sign_opened", {
-                  request_id: requestId,
+                  quote_id: quoteId,
                 });
               }
 
@@ -1425,14 +1425,14 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   onBroadcasted: (txHash) => {
                     if (erc20ApprovalTx) {
                       logEvent("erc20_approve_tx_submitted", {
-                        request_id: requestId,
+                        quote_id: quoteId,
                       });
                     }
 
                     if (!erc20ApprovalTx) {
                       if (isSwap) {
                         logEvent("swap_tx_submitted", {
-                          request_id: requestId,
+                          quote_id: quoteId,
                         });
                       }
                       ethereumAccount.setIsSendingTx(false);
@@ -1530,7 +1530,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
                       if (erc20ApprovalTx) {
                         logEvent("erc20_approve_tx_success", {
-                          request_id: requestId,
+                          quote_id: quoteId,
                         });
 
                         ethereumAccount.setIsSendingTx(true);
@@ -1574,7 +1574,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                                 onBroadcasted: (txHash) => {
                                   if (isSwap) {
                                     logEvent("swap_tx_submitted", {
-                                      request_id: requestId,
+                                      quote_id: quoteId,
                                     });
                                   }
 
@@ -1673,7 +1673,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                                       "swap"
                                     ) {
                                       logEvent("swap_tx_success", {
-                                        request_id: requestId,
+                                        quote_id: quoteId,
                                       });
                                     }
 
@@ -1690,7 +1690,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                                       "swap"
                                     ) {
                                       logEvent("swap_tx_failed", {
-                                        request_id: requestId,
+                                        quote_id: quoteId,
                                       });
                                     }
 
@@ -1708,7 +1708,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                           })
                           .catch((e) => {
                             logEvent("swap_tx_client_error", {
-                              request_id: requestId,
+                              quote_id: quoteId,
                               error_message: e?.message,
                             });
 
@@ -1719,7 +1719,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                     } else {
                       if (erc20ApprovalTx) {
                         logEvent("erc20_approve_tx_failed", {
-                          request_id: requestId,
+                          quote_id: quoteId,
                         });
                       }
 
@@ -1737,7 +1737,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             if (e?.message === "Request rejected") {
               if (isSwap) {
                 logEvent("swap_sign_canceled", {
-                  request_id: requestId,
+                  quote_id: quoteId,
                 });
               }
 
@@ -1746,7 +1746,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
             if (isSwap) {
               logEvent("swap_tx_failed", {
-                request_id: requestId,
+                quote_id: quoteId,
                 error_message: e?.message,
               });
             }
