@@ -260,7 +260,7 @@ export const useSwapAnalytics = ({
       out_amount_est_usd: outUsd,
       provider: "skip",
       does_swap: queryRouteForLog.response.data.does_swap,
-      txs_required: queryRouteForLog.response.data.operations?.length ?? 0,
+      txs_required: queryRouteForLog.response.data.txs_required,
       route_duration_estimate_sec:
         queryRouteForLog.response.data.estimated_route_duration_seconds,
       swap_venues: (

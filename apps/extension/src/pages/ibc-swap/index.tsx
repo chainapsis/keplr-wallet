@@ -1102,10 +1102,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 {
                   onBroadcasted: (txHash) => {
                     if (isInterchainSwap) {
-                      logEvent("swap_tx_submitted", {
-                        quote_id: quoteId,
-                      });
-
                       const msg = new RecordTxWithSkipSwapMsg(
                         inChainId,
                         outChainId,
