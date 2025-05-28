@@ -15,8 +15,10 @@ import {
   CallData,
   hash as starknetHash,
   DeployAccountSignerDetails,
+  ETransactionVersion,
 } from "starknet";
 import { Keplr } from "@keplr-wallet/types";
+import { Fee } from "./base";
 
 export class StoreAccount extends Account {
   constructor(
@@ -25,7 +27,10 @@ export class StoreAccount extends Account {
     public readonly keplrChainId: string,
     protected readonly getKeplr: () => Promise<Keplr | undefined>
   ) {
-    super({ nodeUrl: rpc }, address, "", "1");
+    super({ nodeUrl: rpc }, address, "", "1", ETransactionVersion.V3, {
+      // TODO: change to node url
+      nodeUrl: keplrChainId.includes("SN_MAIN") ? "SN_MAIN" : "SN_SEPOLIA",
+    });
   }
 
   public override async deployAccount(
@@ -38,7 +43,7 @@ export class StoreAccount extends Account {
     details: UniversalDetails = {}
   ): Promise<DeployContractResponse> {
     const version = details.version;
-    if (version !== "0x1" && version !== "0x3") {
+    if (version !== ETransactionVersion.V3) {
       throw new Error(`Invalid version: ${version}`);
     }
     const nonce = 0; // DEPLOY_ACCOUNT transaction will have a nonce zero as it is the first transaction in the account
@@ -81,7 +86,6 @@ export class StoreAccount extends Account {
         addressSalt,
         chainId,
         resourceBounds: estimate.resourceBounds,
-        maxFee: estimate.maxFee,
         version,
         nonce,
       });
@@ -102,16 +106,7 @@ export class StoreAccount extends Account {
       addressSalt = 0,
       contractAddress: providedContractAddress,
     }: DeployAccountContractPayload,
-    fee:
-      | {
-          type: "ETH";
-          maxFee: string;
-        }
-      | {
-          type: "STRK";
-          gas: string;
-          maxGasPrice: string;
-        },
+    fee: Fee,
     preSigned?: {
       transaction: DeployAccountSignerDetails;
       signature: string[];
@@ -146,67 +141,32 @@ export class StoreAccount extends Account {
         0
       );
 
-    const signerDetails: DeployAccountSignerDetails = (() => {
-      switch (fee.type) {
-        case "ETH":
-          return {
-            classHash,
-            constructorCalldata: compiledCalldata,
-            contractAddress,
-            addressSalt,
+    const signerDetails: DeployAccountSignerDetails = {
+      classHash,
+      constructorCalldata: compiledCalldata,
+      contractAddress,
+      addressSalt,
 
-            version: "0x1",
-            nonce: nonce,
-            chainId: chainId,
+      version: ETransactionVersion.V3,
+      nonce: nonce,
+      chainId: chainId,
 
-            maxFee: num.toHex(fee.maxFee),
-            resourceBounds: {
-              l1_gas: {
-                max_amount: "0x0",
-                max_price_per_unit: "0x0",
-              },
-              l2_gas: {
-                max_amount: "0x0",
-                max_price_per_unit: "0x0",
-              },
-            },
-            tip: "0x0",
-            paymasterData: [],
-            accountDeploymentData: [],
-            nonceDataAvailabilityMode: "L1",
-            feeDataAvailabilityMode: "L1",
-          };
-        case "STRK":
-          return {
-            classHash,
-            constructorCalldata: compiledCalldata,
-            contractAddress,
-            addressSalt,
-
-            version: "0x3",
-            nonce: nonce,
-            chainId: chainId,
-
-            resourceBounds: {
-              l1_gas: {
-                max_amount: num.toHex(fee.gas),
-                max_price_per_unit: num.toHex(fee.maxGasPrice),
-              },
-              l2_gas: {
-                max_amount: "0x0",
-                max_price_per_unit: "0x0",
-              },
-            },
-            tip: "0x0",
-            paymasterData: [],
-            accountDeploymentData: [],
-            nonceDataAvailabilityMode: "L1",
-            feeDataAvailabilityMode: "L1",
-          };
-        default:
-          throw new Error("Invalid fee type");
-      }
-    })();
+      resourceBounds: {
+        l1_gas: {
+          max_amount: num.toHex(fee.gas),
+          max_price_per_unit: num.toHex(fee.maxGasPrice),
+        },
+        l2_gas: {
+          max_amount: "0x0",
+          max_price_per_unit: "0x0",
+        },
+      },
+      tip: "0x0",
+      paymasterData: [],
+      accountDeploymentData: [],
+      nonceDataAvailabilityMode: "L1",
+      feeDataAvailabilityMode: "L1",
+    };
 
     const keplr = await this.getKeplr();
     if (!keplr) {
@@ -295,16 +255,7 @@ export class StoreAccount extends Account {
 
   public async executeWithFee(
     calls: Call[],
-    fee:
-      | {
-          type: "ETH";
-          maxFee: string;
-        }
-      | {
-          type: "STRK";
-          gas: string;
-          maxGasPrice: string;
-        },
+    fee: Fee,
     signTx?: (
       chainId: string,
       calls: Call[],
@@ -318,46 +269,32 @@ export class StoreAccount extends Account {
     const nonce = await this.getNonce();
     const chainId = await this.getChainId();
 
-    const signerDetails: InvocationsSignerDetails = (() => {
-      switch (fee.type) {
-        case "ETH":
-          return {
-            version: "0x1",
-            walletAddress: this.address,
-            nonce: nonce,
-            chainId: chainId,
-            cairoVersion: this.cairoVersion,
-            skipValidate: false,
-            maxFee: num.toHex(fee.maxFee),
-          };
-        case "STRK":
-          return {
-            version: "0x3",
-            walletAddress: this.address,
-            nonce: nonce,
-            chainId: chainId,
-            cairoVersion: this.cairoVersion,
-            skipValidate: false,
-            resourceBounds: {
-              l1_gas: {
-                max_amount: num.toHex(fee.gas),
-                max_price_per_unit: num.toHex(fee.maxGasPrice),
-              },
-              l2_gas: {
-                max_amount: "0x0",
-                max_price_per_unit: "0x0",
-              },
-            },
-            tip: "0x0",
-            paymasterData: [],
-            accountDeploymentData: [],
-            nonceDataAvailabilityMode: "L1",
-            feeDataAvailabilityMode: "L1",
-          };
-        default:
-          throw new Error("Invalid fee type");
-      }
-    })();
+    // TODO: handle paymaster data
+    // stark.v3Details({});
+
+    const signerDetails: InvocationsSignerDetails = {
+      version: ETransactionVersion.V3,
+      walletAddress: this.address,
+      nonce: nonce,
+      chainId: chainId,
+      cairoVersion: this.cairoVersion,
+      skipValidate: false,
+      resourceBounds: {
+        l1_gas: {
+          max_amount: num.toHex(fee.gas),
+          max_price_per_unit: num.toHex(fee.maxGasPrice),
+        },
+        l2_gas: {
+          max_amount: "0x0",
+          max_price_per_unit: "0x0",
+        },
+      },
+      tip: "0x0",
+      paymasterData: [],
+      accountDeploymentData: [],
+      nonceDataAvailabilityMode: "L1",
+      feeDataAvailabilityMode: "L1",
+    };
 
     let transactions: Call[];
     let details: InvocationsSignerDetails;
