@@ -1110,7 +1110,9 @@ export class ChainsService {
       if (this.hasChainInfo(modularChainInfo.chainId)) {
         const cosmos = this.getChainInfoOrThrow(modularChainInfo.chainId);
         return {
-          ...modularChainInfo,
+          chainId: cosmos.chainId,
+          chainName: cosmos.chainName,
+          chainSymbolImageUrl: cosmos.chainSymbolImageUrl,
           cosmos: this.mergeChainInfosWithDynamics([cosmos])[0],
         };
       }
