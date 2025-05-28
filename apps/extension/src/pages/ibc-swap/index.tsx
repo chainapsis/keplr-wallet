@@ -1422,6 +1422,13 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   ...feeObject,
                 },
                 {
+                  onBroadcastFailed: (e) => {
+                    if (erc20ApprovalTx && e?.message === "Request rejected") {
+                      logEvent("erc20_approve_sign_canceled", {
+                        quote_id: quoteId,
+                      });
+                    }
+                  },
                   onBroadcasted: (txHash) => {
                     if (erc20ApprovalTx) {
                       logEvent("erc20_approve_tx_submitted", {
