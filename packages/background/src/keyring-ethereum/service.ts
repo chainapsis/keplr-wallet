@@ -494,36 +494,47 @@ export class KeyRingEthereumService {
             nonce,
           };
 
-          const { signingData, signature } = await this.signEthereumSelected(
-            env,
-            origin,
-            currentChainId,
-            sender,
-            Buffer.from(JSON.stringify(unsignedTx)),
-            EthSignType.TRANSACTION
-          );
+          try {
+            const { signingData, signature } = await this.signEthereumSelected(
+              env,
+              origin,
+              currentChainId,
+              sender,
+              Buffer.from(JSON.stringify(unsignedTx)),
+              EthSignType.TRANSACTION
+            );
 
-          const signingTx = JSON.parse(Buffer.from(signingData).toString());
+            const signingTx = JSON.parse(Buffer.from(signingData).toString());
 
-          const isEIP1559 =
-            !!signingTx.maxFeePerGas || !!signingTx.maxPriorityFeePerGas;
-          if (isEIP1559) {
-            signingTx.type = TransactionTypes.eip1559;
+            const isEIP1559 =
+              !!signingTx.maxFeePerGas || !!signingTx.maxPriorityFeePerGas;
+            if (isEIP1559) {
+              signingTx.type = TransactionTypes.eip1559;
+            }
+
+            const signedTx = Buffer.from(
+              serialize(signingTx, signature).replace("0x", ""),
+              "hex"
+            );
+
+            const txHash =
+              await this.backgroundTxEthereumService.sendEthereumTx(
+                origin,
+                currentChainId,
+                signedTx,
+                {}
+              );
+
+            return txHash;
+          } catch (e) {
+            if (
+              (e instanceof Error && e.message === "Request rejected") ||
+              e === "Request rejected"
+            ) {
+              throw new EthereumProviderRpcError(4001, "User Rejected Request");
+            }
+            throw e;
           }
-
-          const signedTx = Buffer.from(
-            serialize(signingTx, signature).replace("0x", ""),
-            "hex"
-          );
-
-          const txHash = await this.backgroundTxEthereumService.sendEthereumTx(
-            origin,
-            currentChainId,
-            signedTx,
-            {}
-          );
-
-          return txHash;
         }
         case "eth_signTransaction": {
           const tx =
@@ -600,26 +611,36 @@ export class KeyRingEthereumService {
             nonce,
           };
 
-          const { signingData, signature } = await this.signEthereumSelected(
-            env,
-            origin,
-            currentChainId,
-            sender,
-            Buffer.from(JSON.stringify(unsignedTx)),
-            EthSignType.TRANSACTION
-          );
+          try {
+            const { signingData, signature } = await this.signEthereumSelected(
+              env,
+              origin,
+              currentChainId,
+              sender,
+              Buffer.from(JSON.stringify(unsignedTx)),
+              EthSignType.TRANSACTION
+            );
 
-          const signingTx = JSON.parse(Buffer.from(signingData).toString());
+            const signingTx = JSON.parse(Buffer.from(signingData).toString());
 
-          const isEIP1559 =
-            !!signingTx.maxFeePerGas || !!signingTx.maxPriorityFeePerGas;
-          if (isEIP1559) {
-            signingTx.type = TransactionTypes.eip1559;
+            const isEIP1559 =
+              !!signingTx.maxFeePerGas || !!signingTx.maxPriorityFeePerGas;
+            if (isEIP1559) {
+              signingTx.type = TransactionTypes.eip1559;
+            }
+
+            const signedTx = serialize(signingTx, signature);
+
+            return signedTx;
+          } catch (e) {
+            if (
+              (e instanceof Error && e.message === "Request rejected") ||
+              e === "Request rejected"
+            ) {
+              throw new EthereumProviderRpcError(4001, "User Rejected Request");
+            }
+            throw e;
           }
-
-          const signedTx = serialize(signingTx, signature);
-
-          return signedTx;
         }
         case "personal_sign": {
           const message =
@@ -639,18 +660,28 @@ export class KeyRingEthereumService {
           }
 
           const currentChainId = this.forceGetCurrentChainId(origin, chainId);
-          const { signature } = await this.signEthereumSelected(
-            env,
-            origin,
-            currentChainId,
-            signer,
-            message.startsWith("0x")
-              ? Buffer.from(message.slice(2), "hex")
-              : Buffer.from(message, "utf8"),
-            EthSignType.MESSAGE
-          );
+          try {
+            const { signature } = await this.signEthereumSelected(
+              env,
+              origin,
+              currentChainId,
+              signer,
+              message.startsWith("0x")
+                ? Buffer.from(message.slice(2), "hex")
+                : Buffer.from(message, "utf8"),
+              EthSignType.MESSAGE
+            );
 
-          return `0x${Buffer.from(signature).toString("hex")}`;
+            return `0x${Buffer.from(signature).toString("hex")}`;
+          } catch (e) {
+            if (
+              (e instanceof Error && e.message === "Request rejected") ||
+              e === "Request rejected"
+            ) {
+              throw new EthereumProviderRpcError(4001, "User Rejected Request");
+            }
+            throw e;
+          }
         }
         case "eth_signTypedData_v3":
         case "eth_signTypedData_v4": {
@@ -666,20 +697,30 @@ export class KeyRingEthereumService {
             (Array.isArray(params) && (params?.[1] as any)) || undefined;
 
           const currentChainId = this.forceGetCurrentChainId(origin, chainId);
-          const { signature } = await this.signEthereumSelected(
-            env,
-            origin,
-            currentChainId,
-            signer,
-            Buffer.from(
-              typeof typedData === "string"
-                ? typedData
-                : JSON.stringify(typedData)
-            ),
-            EthSignType.EIP712
-          );
+          try {
+            const { signature } = await this.signEthereumSelected(
+              env,
+              origin,
+              currentChainId,
+              signer,
+              Buffer.from(
+                typeof typedData === "string"
+                  ? typedData
+                  : JSON.stringify(typedData)
+              ),
+              EthSignType.EIP712
+            );
 
-          return `0x${Buffer.from(signature).toString("hex")}`;
+            return `0x${Buffer.from(signature).toString("hex")}`;
+          } catch (e) {
+            if (
+              (e instanceof Error && e.message === "Request rejected") ||
+              e === "Request rejected"
+            ) {
+              throw new EthereumProviderRpcError(4001, "User Rejected Request");
+            }
+            throw e;
+          }
         }
         case "eth_subscribe": {
           const currentChainId = this.forceGetCurrentChainId(origin, chainId);
@@ -849,11 +890,21 @@ export class KeyRingEthereumService {
             return null;
           }
 
-          await this.permissionService.updateCurrentChainIdForEVM(
-            env,
-            origin,
-            newCurrentChainId
-          );
+          try {
+            await this.permissionService.updateCurrentChainIdForEVM(
+              env,
+              origin,
+              newCurrentChainId
+            );
+          } catch (e) {
+            if (
+              (e instanceof Error && e.message === "Request rejected") ||
+              e === "Request rejected"
+            ) {
+              throw new EthereumProviderRpcError(4001, "User Rejected Request");
+            }
+            throw e;
+          }
 
           return null;
         }
@@ -944,11 +995,24 @@ export class KeyRingEthereumService {
                 beta: true,
               } as ChainInfo;
 
-              await this.chainsService.suggestChainInfo(
-                env,
-                addingChainInfo,
-                origin
-              );
+              try {
+                await this.chainsService.suggestChainInfo(
+                  env,
+                  addingChainInfo,
+                  origin
+                );
+              } catch (e) {
+                if (
+                  (e instanceof Error && e.message === "Request rejected") ||
+                  e === "Request rejected"
+                ) {
+                  throw new EthereumProviderRpcError(
+                    4001,
+                    "User Rejected Request"
+                  );
+                }
+                throw e;
+              }
 
               return addingChainInfo;
             })());
@@ -959,11 +1023,21 @@ export class KeyRingEthereumService {
             [origin]
           );
 
-          await this.permissionService.updateCurrentChainIdForEVM(
-            env,
-            origin,
-            chainInfo.chainId
-          );
+          try {
+            await this.permissionService.updateCurrentChainIdForEVM(
+              env,
+              origin,
+              chainInfo.chainId
+            );
+          } catch (e) {
+            if (
+              (e instanceof Error && e.message === "Request rejected") ||
+              e === "Request rejected"
+            ) {
+              throw new EthereumProviderRpcError(4001, "User Rejected Request");
+            }
+            throw e;
+          }
 
           return null;
         }
@@ -1013,11 +1087,21 @@ export class KeyRingEthereumService {
 
           const currentChainId = this.forceGetCurrentChainId(origin, chainId);
 
-          await this.tokenERC20Service.suggestERC20Token(
-            env,
-            currentChainId,
-            contractAddress
-          );
+          try {
+            await this.tokenERC20Service.suggestERC20Token(
+              env,
+              currentChainId,
+              contractAddress
+            );
+          } catch (e) {
+            if (
+              (e instanceof Error && e.message === "Request rejected") ||
+              e === "Request rejected"
+            ) {
+              throw new EthereumProviderRpcError(4001, "User Rejected Request");
+            }
+            throw e;
+          }
 
           return true;
         }
