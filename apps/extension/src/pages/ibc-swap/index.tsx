@@ -1627,8 +1627,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                             );
                           })
                           .catch((e) => {
-                            console.log(e);
+                            console.error(e);
                             ethereumAccount.setIsSendingTx(false);
+                            setCalculatingTxError(e);
+                            setIsTxLoading(false);
                           });
                       }
                     } else {
