@@ -186,7 +186,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
       ? inChainAccount.ethereumHexAddress
       : inChainAccount.bech32Address,
     // TODO: config로 빼기
-    300000,
+    1_500_000,
     outChainId,
     outCurrency,
     swapFeeBps
