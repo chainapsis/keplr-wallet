@@ -1671,10 +1671,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                                   if (
                                     txReceipt.status === EthTxStatus.Success
                                   ) {
-                                    if (
-                                      ibcSwapConfigs.amountConfig.type ===
-                                      "swap"
-                                    ) {
+                                    if (isSwap) {
                                       logEvent("swap_tx_success", {
                                         quote_id: quoteId,
                                       });
@@ -1688,10 +1685,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                                       ""
                                     );
                                   } else {
-                                    if (
-                                      ibcSwapConfigs.amountConfig.type ===
-                                      "swap"
-                                    ) {
+                                    if (isSwap) {
                                       logEvent("swap_tx_failed", {
                                         quote_id: quoteId,
                                       });
