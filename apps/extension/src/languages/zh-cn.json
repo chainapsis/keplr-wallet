@@ -703,7 +703,7 @@
 
   "page.main.components.context-menu.title": "视图选项",
   "page.main.components.context-menu.tooltip-title": "新功能",
-  "page.main.components.context-menu.tooltip-paragraph": "厌倦了杂乱的资产列表？{br}尝试智能分组（测试版）！",
+  "page.main.components.context-menu.tooltip-paragraph": "厌倦了杂乱无章的资产列表？{br}试试智能分组（测试版）吧！",
   "page.main.components.context-menu.hide-low-balance": "隐藏小额资产",
   "page.main.components.context-menu.smart-grouping": "智能分组",
   "page.main.components.context-menu.show-fiat-value": "显示币种价值",
