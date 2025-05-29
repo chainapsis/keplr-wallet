@@ -40,7 +40,6 @@ import { ColorPalette } from "../../../styles";
 import { openPopupWindow } from "@keplr-wallet/popup";
 import { FormattedMessage, useIntl } from "react-intl";
 import { isRunningInSidePanel } from "../../../utils";
-import { num } from "starknet";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import {
@@ -200,6 +199,12 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
     return () => clearInterval(interval);
   }, [gasSimulationRefresher]);
 
+  useEffect(() => {
+    starknetAccount.getOutsideExecutionSupported(sender).then((isSupported) => {
+      console.log("isOutsideExecutionSupported", isSupported);
+    });
+  }, [starknetAccount, sender]);
+
   const gasSimulator = useGasSimulator(
     new ExtensionKVStore("gas-simulator.starknet.send"),
     chainStore,
@@ -273,83 +278,54 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
                 sender: sendConfigs.senderConfig.sender,
                 recipient: sendConfigs.recipientConfig.recipient,
               },
-              type
+              type === "ETH" ? feeContractAddress : undefined
             );
 
           const {
-            gas_consumed,
-            data_gas_consumed,
-            gas_price,
-            overall_fee,
-            resourceBounds,
-            unit,
+            l1_gas_consumed,
+            l1_gas_price,
+            l2_gas_consumed,
+            l2_gas_price,
+            l1_data_gas_consumed,
+            l1_data_gas_price,
+            // resourceBounds,
           } = estimateResult;
+
+          // fee = l1_gas_consumed * l1_gas_price + l2_gas_consumed * l2_gas_price + l1_data_gas_consumed * l1_data_gas_price
+          const l1Fee = new Dec(l1_gas_consumed).mul(new Dec(l1_gas_price));
+          const l2Fee = new Dec(l2_gas_consumed ?? 0).mul(
+            new Dec(l2_gas_price ?? 0)
+          );
+          const l1DataFee = new Dec(l1_data_gas_consumed).mul(
+            new Dec(l1_data_gas_price)
+          );
+
+          const calculatedOverallFee = l1Fee.add(l2Fee).add(l1DataFee);
 
           const gasMargin = new Dec(1.2);
           const gasPriceMargin = new Dec(1.5);
 
-          const isV1Tx = sendConfigs.feeConfig.type === "ETH" && unit === "WEI";
+          const totalGasConsumed = new Dec(l1_gas_consumed)
+            .add(new Dec(l2_gas_consumed ?? 0))
+            .add(new Dec(l1_data_gas_consumed));
 
-          const gasConsumed = new Dec(gas_consumed);
-          const dataGasConsumed = new Dec(data_gas_consumed);
-          const sigVerificationGasConsumed = new Dec(583);
-          const totalGasConsumed = gasConsumed
-            .add(dataGasConsumed)
-            .add(sigVerificationGasConsumed);
+          const adjustedGasPrice = calculatedOverallFee.quo(totalGasConsumed);
 
-          const gasPriceDec = new Dec(gas_price);
-
-          // overall_fee = gas_consumed * gas_price + data_gas_consumed * data_gas_price
-          const overallFee = new Dec(overall_fee);
-
-          const signatureVerificationFee =
-            sigVerificationGasConsumed.mul(gasPriceDec);
-
-          // adjusted_overall_fee = overall_fee + signature_verification_gas_consumed * gas_price
-          const adjustedOverallFee = overallFee.add(signatureVerificationFee);
-
-          // adjusted_gas_price = adjusted_overall_fee / total_gas_consumed
-          const adjustedGasPrice = adjustedOverallFee.quo(totalGasConsumed);
+          // CHECK: It seems onchain verification fee doesn't need to be considered.
+          // const sigVerificationGasConsumed = new Dec(583);
 
           const gasPrice = new CoinPretty(feeCurrency, adjustedGasPrice);
+          const maxGasPrice = gasPrice.mul(gasPriceMargin);
+          const maxGas = totalGasConsumed.mul(gasMargin);
 
-          if (isV1Tx) {
-            const maxGasPrice = gasPrice.mul(gasPriceMargin);
-            const maxGas = totalGasConsumed.mul(gasMargin);
+          sendConfigs.feeConfig.setGasPrice({
+            gasPrice: gasPrice,
+            maxGasPrice: maxGasPrice,
+          });
 
-            sendConfigs.feeConfig.setGasPrice({
-              gasPrice,
-              maxGasPrice,
-            });
-
-            return {
-              gasUsed: parseInt(maxGas.truncate().toString()),
-            };
-          } else {
-            const l1Gas = resourceBounds.l1_gas;
-
-            const maxGas = adjustedOverallFee.quo(gasPriceDec).mul(gasMargin);
-            const maxGasPrice = gasPrice.mul(gasPriceMargin);
-
-            const maxPricePerUnit = new CoinPretty(
-              feeCurrency,
-              num.hexToDecimalString(l1Gas.max_price_per_unit)
-            );
-
-            sendConfigs.feeConfig.setGasPrice({
-              gasPrice: new CoinPretty(feeCurrency, gasPriceDec),
-              maxGasPrice: maxPricePerUnit
-                .sub(maxGasPrice)
-                .toDec()
-                .gt(new Dec(0))
-                ? maxPricePerUnit
-                : maxGasPrice,
-            });
-
-            return {
-              gasUsed: parseInt(maxGas.truncate().toString()),
-            };
-          }
+          return {
+            gasUsed: parseInt(maxGas.truncate().toString()),
+          };
         },
       };
     }
@@ -469,24 +445,20 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
                 amount.amount,
                 currency,
                 recipient,
-                (() => {
-                  if (type === "ETH") {
-                    return {
-                      type: "ETH",
-                      maxFee: sendConfigs.feeConfig.maxFee.toCoin().amount,
-                    };
-                  } else if (type === "STRK") {
-                    return {
-                      type: "STRK",
-                      gas: sendConfigs.gasConfig.gas.toString(),
-                      maxGasPrice: num.toHex(
-                        sendConfigs.feeConfig.maxGasPrice.toCoin().amount
-                      ),
-                    };
-                  } else {
-                    throw new Error("Invalid fee type");
-                  }
-                })()
+                {
+                  l1MaxGas: sendConfigs.gasConfig.gas.toString(),
+                  l1MaxGasPrice:
+                    sendConfigs.feeConfig.maxGasPrice.toCoin().amount,
+                  l1MaxDataGas: "0",
+                  l1MaxDataGasPrice: "0",
+                  paymaster:
+                    type === "ETH"
+                      ? {
+                          mode: "default",
+                          gasToken: feeContractAddress,
+                        }
+                      : undefined,
+                }
               );
 
             if (sendConfigs.recipientConfig.nameServiceResult.length > 0) {
