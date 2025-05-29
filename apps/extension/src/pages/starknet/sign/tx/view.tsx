@@ -182,10 +182,20 @@ export const SignStarknetTxView: FunctionComponent<{
           l1_data_gas_price,
         } = estimateResult;
 
-        const l1Fee = new Dec(l1_gas_consumed).mul(new Dec(l1_gas_price));
-        const l2Fee = new Dec(l2_gas_consumed ?? 0).mul(
-          new Dec(l2_gas_price ?? 0)
+        // CHECK: found discrepancy between calculated l2 gas and actual l2 gas.
+        // calculated max l2 gas: 1299840, actual l2 gas consumed: 23541440
+        // It seems onchain verification fee is not considered...
+
+        // CHECK: 언제 l2 gas로 빠지고 언제 l1 gas로 빠지는지 확인 필요.
+        // const extraL1GasForOnChainVerification = new Dec(583);
+        const extraL2GasForOnchainVerification = new Dec(22000000);
+
+        const adjustedL2GasConsumed = new Dec(l2_gas_consumed ?? 0).add(
+          extraL2GasForOnchainVerification
         );
+
+        const l1Fee = new Dec(l1_gas_consumed).mul(new Dec(l1_gas_price));
+        const l2Fee = adjustedL2GasConsumed.mul(new Dec(l2_gas_price ?? 0));
         const l1DataFee = new Dec(l1_data_gas_consumed).mul(
           new Dec(l1_data_gas_price)
         );
@@ -193,13 +203,10 @@ export const SignStarknetTxView: FunctionComponent<{
         const calculatedOverallFee = l1Fee.add(l2Fee).add(l1DataFee);
 
         const totalGasConsumed = new Dec(l1_gas_consumed)
-          .add(new Dec(l2_gas_consumed ?? 0))
+          .add(adjustedL2GasConsumed)
           .add(new Dec(l1_data_gas_consumed));
 
         const adjustedGasPrice = calculatedOverallFee.quo(totalGasConsumed);
-
-        // CHECK: It seems onchain verification fee doesn't need to be considered.
-        // const sigVerificationGasConsumed = new Dec(583);
 
         const gasPriceMargin = new Dec(1.5);
 
@@ -217,7 +224,7 @@ export const SignStarknetTxView: FunctionComponent<{
             price: l1_gas_price.toString(),
           },
           l2Gas: {
-            consumed: l2_gas_consumed?.toString() ?? "0",
+            consumed: adjustedL2GasConsumed.toString(),
             price: l2_gas_price?.toString() ?? "0",
           },
           l1DataGas: {
@@ -311,10 +318,6 @@ export const SignStarknetTxView: FunctionComponent<{
 
       const maxL1DataGas = new Dec(estimate.l1DataGas.consumed).mul(margin);
       const maxL1Gas = new Dec(estimate.l1Gas.consumed).mul(margin);
-
-      // CHECK: found discrepancy between calculated l2 gas and actual l2 gas.
-      // calculated: 1299840, actual: 23541440
-      // It seems onchain verification fee is not considered...
       const maxL2Gas = new Dec(estimate.l2Gas.consumed).mul(margin);
 
       const maxL1DataGasPrice = new Dec(estimate.l1DataGas.price).mul(margin);

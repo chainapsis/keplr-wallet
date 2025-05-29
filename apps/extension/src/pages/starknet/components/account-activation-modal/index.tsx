@@ -183,6 +183,7 @@ export const AccountActivationModal: FunctionComponent<{
             type === "ETH" ? feeContractAddress : undefined
           );
 
+        // CHECK: 계정 배포도 서명 검증 비용 들던가?
         const {
           l1_gas_consumed,
           l1_gas_price,
@@ -192,10 +193,14 @@ export const AccountActivationModal: FunctionComponent<{
           l1_data_gas_price,
         } = estimateResult;
 
-        const l1Fee = new Dec(l1_gas_consumed).mul(new Dec(l1_gas_price));
-        const l2Fee = new Dec(l2_gas_consumed ?? 0).mul(
-          new Dec(l2_gas_price ?? 0)
+        const extraL2GasForOnchainVerification = new Dec(22000000);
+
+        const adjustedL2GasConsumed = new Dec(l2_gas_consumed ?? 0).add(
+          extraL2GasForOnchainVerification
         );
+
+        const l1Fee = new Dec(l1_gas_consumed).mul(new Dec(l1_gas_price));
+        const l2Fee = adjustedL2GasConsumed.mul(new Dec(l2_gas_price ?? 0));
         const l1DataFee = new Dec(l1_data_gas_consumed).mul(
           new Dec(l1_data_gas_price)
         );
@@ -203,7 +208,7 @@ export const AccountActivationModal: FunctionComponent<{
         const calculatedOverallFee = l1Fee.add(l2Fee).add(l1DataFee);
 
         const totalGasConsumed = new Dec(l1_gas_consumed)
-          .add(new Dec(l2_gas_consumed ?? 0))
+          .add(adjustedL2GasConsumed)
           .add(new Dec(l1_data_gas_consumed));
 
         const adjustedGasPrice = calculatedOverallFee.quo(totalGasConsumed);
@@ -435,11 +440,16 @@ export const AccountActivationModal: FunctionComponent<{
                     const maxL1Gas = new Dec(estimate.l1Gas.consumed).mul(
                       margin
                     );
-
                     const maxL1DataGasPrice = new Dec(
                       estimate.l1DataGas.price
                     ).mul(margin);
                     const maxL1GasPrice = new Dec(estimate.l1Gas.price).mul(
+                      margin
+                    );
+                    const maxL2Gas = new Dec(estimate.l2Gas.consumed).mul(
+                      margin
+                    );
+                    const maxL2GasPrice = new Dec(estimate.l2Gas.price).mul(
                       margin
                     );
 
@@ -451,13 +461,19 @@ export const AccountActivationModal: FunctionComponent<{
                         constructorCalldata,
                         addressSalt,
                         {
-                          l1MaxGas: maxL1Gas.truncate().toString(),
+                          l1MaxGas: num.toHex(maxL1Gas.truncate().toString()),
                           l1MaxGasPrice: num.toHex(
                             maxL1GasPrice.truncate().toString()
                           ),
-                          l1MaxDataGas: maxL1DataGas.truncate().toString(),
+                          l1MaxDataGas: num.toHex(
+                            maxL1DataGas.truncate().toString()
+                          ),
                           l1MaxDataGasPrice: num.toHex(
                             maxL1DataGasPrice.truncate().toString()
+                          ),
+                          l2MaxGas: num.toHex(maxL2Gas.truncate().toString()),
+                          l2MaxGasPrice: num.toHex(
+                            maxL2GasPrice.truncate().toString()
                           ),
                           paymaster:
                             feeConfig.type === "ETH"
