@@ -438,7 +438,11 @@ export class KeyRingEthereumService {
               })) ||
             null;
           if (!tx) {
-            throw new Error("Invalid parameters: must provide a transaction.");
+            throw new EthereumProviderRpcError(
+              -32602,
+              "Invalid params",
+              "Must provide a transaction."
+            );
           }
 
           const currentChainId = this.forceGetCurrentChainId(origin, chainId);
@@ -494,36 +498,47 @@ export class KeyRingEthereumService {
             nonce,
           };
 
-          const { signingData, signature } = await this.signEthereumSelected(
-            env,
-            origin,
-            currentChainId,
-            sender,
-            Buffer.from(JSON.stringify(unsignedTx)),
-            EthSignType.TRANSACTION
-          );
+          try {
+            const { signingData, signature } = await this.signEthereumSelected(
+              env,
+              origin,
+              currentChainId,
+              sender,
+              Buffer.from(JSON.stringify(unsignedTx)),
+              EthSignType.TRANSACTION
+            );
 
-          const signingTx = JSON.parse(Buffer.from(signingData).toString());
+            const signingTx = JSON.parse(Buffer.from(signingData).toString());
 
-          const isEIP1559 =
-            !!signingTx.maxFeePerGas || !!signingTx.maxPriorityFeePerGas;
-          if (isEIP1559) {
-            signingTx.type = TransactionTypes.eip1559;
+            const isEIP1559 =
+              !!signingTx.maxFeePerGas || !!signingTx.maxPriorityFeePerGas;
+            if (isEIP1559) {
+              signingTx.type = TransactionTypes.eip1559;
+            }
+
+            const signedTx = Buffer.from(
+              serialize(signingTx, signature).replace("0x", ""),
+              "hex"
+            );
+
+            const txHash =
+              await this.backgroundTxEthereumService.sendEthereumTx(
+                origin,
+                currentChainId,
+                signedTx,
+                {}
+              );
+
+            return txHash;
+          } catch (e) {
+            if (
+              (e instanceof Error && e.message === "Request rejected") ||
+              e === "Request rejected"
+            ) {
+              throw new EthereumProviderRpcError(4001, "User Rejected Request");
+            }
+            throw e;
           }
-
-          const signedTx = Buffer.from(
-            serialize(signingTx, signature).replace("0x", ""),
-            "hex"
-          );
-
-          const txHash = await this.backgroundTxEthereumService.sendEthereumTx(
-            origin,
-            currentChainId,
-            signedTx,
-            {}
-          );
-
-          return txHash;
         }
         case "eth_signTransaction": {
           const tx =
@@ -544,7 +559,11 @@ export class KeyRingEthereumService {
               })) ||
             null;
           if (!tx) {
-            throw new Error("Invalid parameters: must provide a transaction.");
+            throw new EthereumProviderRpcError(
+              -32602,
+              "Invalid params",
+              "Must provide a transaction."
+            );
           }
 
           const currentChainId = this.forceGetCurrentChainId(origin, chainId);
@@ -600,65 +619,91 @@ export class KeyRingEthereumService {
             nonce,
           };
 
-          const { signingData, signature } = await this.signEthereumSelected(
-            env,
-            origin,
-            currentChainId,
-            sender,
-            Buffer.from(JSON.stringify(unsignedTx)),
-            EthSignType.TRANSACTION
-          );
+          try {
+            const { signingData, signature } = await this.signEthereumSelected(
+              env,
+              origin,
+              currentChainId,
+              sender,
+              Buffer.from(JSON.stringify(unsignedTx)),
+              EthSignType.TRANSACTION
+            );
 
-          const signingTx = JSON.parse(Buffer.from(signingData).toString());
+            const signingTx = JSON.parse(Buffer.from(signingData).toString());
 
-          const isEIP1559 =
-            !!signingTx.maxFeePerGas || !!signingTx.maxPriorityFeePerGas;
-          if (isEIP1559) {
-            signingTx.type = TransactionTypes.eip1559;
+            const isEIP1559 =
+              !!signingTx.maxFeePerGas || !!signingTx.maxPriorityFeePerGas;
+            if (isEIP1559) {
+              signingTx.type = TransactionTypes.eip1559;
+            }
+
+            const signedTx = serialize(signingTx, signature);
+
+            return signedTx;
+          } catch (e) {
+            if (
+              (e instanceof Error && e.message === "Request rejected") ||
+              e === "Request rejected"
+            ) {
+              throw new EthereumProviderRpcError(4001, "User Rejected Request");
+            }
+            throw e;
           }
-
-          const signedTx = serialize(signingTx, signature);
-
-          return signedTx;
         }
         case "personal_sign": {
           const message =
             (Array.isArray(params) && (params?.[0] as string)) || undefined;
           if (!message) {
-            throw new Error(
-              "Invalid parameters: must provide a stringified message."
+            throw new EthereumProviderRpcError(
+              -32602,
+              "Invalid params",
+              "Must provide a stringified message."
             );
           }
 
           const signer =
             (Array.isArray(params) && (params?.[1] as string)) || undefined;
           if (!signer || (signer && !signer.match(/^0x[0-9A-Fa-f]*$/))) {
-            throw new Error(
-              "Invalid parameters: must provide an Ethereum address."
+            throw new EthereumProviderRpcError(
+              -32602,
+              "Invalid params",
+              "Must provide an Ethereum address."
             );
           }
 
           const currentChainId = this.forceGetCurrentChainId(origin, chainId);
-          const { signature } = await this.signEthereumSelected(
-            env,
-            origin,
-            currentChainId,
-            signer,
-            message.startsWith("0x")
-              ? Buffer.from(message.slice(2), "hex")
-              : Buffer.from(message, "utf8"),
-            EthSignType.MESSAGE
-          );
+          try {
+            const { signature } = await this.signEthereumSelected(
+              env,
+              origin,
+              currentChainId,
+              signer,
+              message.startsWith("0x")
+                ? Buffer.from(message.slice(2), "hex")
+                : Buffer.from(message, "utf8"),
+              EthSignType.MESSAGE
+            );
 
-          return `0x${Buffer.from(signature).toString("hex")}`;
+            return `0x${Buffer.from(signature).toString("hex")}`;
+          } catch (e) {
+            if (
+              (e instanceof Error && e.message === "Request rejected") ||
+              e === "Request rejected"
+            ) {
+              throw new EthereumProviderRpcError(4001, "User Rejected Request");
+            }
+            throw e;
+          }
         }
         case "eth_signTypedData_v3":
         case "eth_signTypedData_v4": {
           const signer =
             (Array.isArray(params) && (params?.[0] as string)) || undefined;
           if (!signer || (signer && !signer.match(/^0x[0-9A-Fa-f]*$/))) {
-            throw new Error(
-              "Invalid parameters: must provide an Ethereum address."
+            throw new EthereumProviderRpcError(
+              -32602,
+              "Invalid params",
+              "Must provide an Ethereum address."
             );
           }
 
@@ -666,20 +711,30 @@ export class KeyRingEthereumService {
             (Array.isArray(params) && (params?.[1] as any)) || undefined;
 
           const currentChainId = this.forceGetCurrentChainId(origin, chainId);
-          const { signature } = await this.signEthereumSelected(
-            env,
-            origin,
-            currentChainId,
-            signer,
-            Buffer.from(
-              typeof typedData === "string"
-                ? typedData
-                : JSON.stringify(typedData)
-            ),
-            EthSignType.EIP712
-          );
+          try {
+            const { signature } = await this.signEthereumSelected(
+              env,
+              origin,
+              currentChainId,
+              signer,
+              Buffer.from(
+                typeof typedData === "string"
+                  ? typedData
+                  : JSON.stringify(typedData)
+              ),
+              EthSignType.EIP712
+            );
 
-          return `0x${Buffer.from(signature).toString("hex")}`;
+            return `0x${Buffer.from(signature).toString("hex")}`;
+          } catch (e) {
+            if (
+              (e instanceof Error && e.message === "Request rejected") ||
+              e === "Request rejected"
+            ) {
+              throw new EthereumProviderRpcError(4001, "User Rejected Request");
+            }
+            throw e;
+          }
         }
         case "eth_subscribe": {
           const currentChainId = this.forceGetCurrentChainId(origin, chainId);
@@ -764,8 +819,10 @@ export class KeyRingEthereumService {
           const subscriptionId =
             (Array.isArray(params) && (params?.[0] as string)) || undefined;
           if (!subscriptionId) {
-            throw new Error(
-              "Invalid parameters: must provide a subscription id."
+            throw new EthereumProviderRpcError(
+              -32602,
+              "Invalid params",
+              "Must provide a subscription id."
             );
           }
 
@@ -849,11 +906,21 @@ export class KeyRingEthereumService {
             return null;
           }
 
-          await this.permissionService.updateCurrentChainIdForEVM(
-            env,
-            origin,
-            newCurrentChainId
-          );
+          try {
+            await this.permissionService.updateCurrentChainIdForEVM(
+              env,
+              origin,
+              newCurrentChainId
+            );
+          } catch (e) {
+            if (
+              (e instanceof Error && e.message === "Request rejected") ||
+              e === "Request rejected"
+            ) {
+              throw new EthereumProviderRpcError(4001, "User Rejected Request");
+            }
+            throw e;
+          }
 
           return null;
         }
@@ -872,8 +939,10 @@ export class KeyRingEthereumService {
               iconUrls?: string[];
             });
           if (!param || typeof param !== "object") {
-            throw new Error(
-              "Invalid parameters: must provide a single object parameter."
+            throw new EthereumProviderRpcError(
+              -32602,
+              "Invalid params",
+              "Must provide a single object parameter."
             );
           }
 
@@ -944,11 +1013,24 @@ export class KeyRingEthereumService {
                 beta: true,
               } as ChainInfo;
 
-              await this.chainsService.suggestChainInfo(
-                env,
-                addingChainInfo,
-                origin
-              );
+              try {
+                await this.chainsService.suggestChainInfo(
+                  env,
+                  addingChainInfo,
+                  origin
+                );
+              } catch (e) {
+                if (
+                  (e instanceof Error && e.message === "Request rejected") ||
+                  e === "Request rejected"
+                ) {
+                  throw new EthereumProviderRpcError(
+                    4001,
+                    "User Rejected Request"
+                  );
+                }
+                throw e;
+              }
 
               return addingChainInfo;
             })());
@@ -959,11 +1041,21 @@ export class KeyRingEthereumService {
             [origin]
           );
 
-          await this.permissionService.updateCurrentChainIdForEVM(
-            env,
-            origin,
-            chainInfo.chainId
-          );
+          try {
+            await this.permissionService.updateCurrentChainIdForEVM(
+              env,
+              origin,
+              chainInfo.chainId
+            );
+          } catch (e) {
+            if (
+              (e instanceof Error && e.message === "Request rejected") ||
+              e === "Request rejected"
+            ) {
+              throw new EthereumProviderRpcError(4001, "User Rejected Request");
+            }
+            throw e;
+          }
 
           return null;
         }
@@ -977,14 +1069,18 @@ export class KeyRingEthereumService {
           const param =
             Array.isArray(params) && (params?.[0] as Record<string, object>);
           if (!param || typeof param !== "object") {
-            throw new Error(
-              "Invalid parameters: must provide a single object parameter."
+            throw new EthereumProviderRpcError(
+              -32602,
+              "Invalid params",
+              "Must provide a single object parameter."
             );
           }
 
           if (param["eth_accounts"] == null) {
-            throw new Error(
-              "Invalid parameters: must provide a single object parameter with the key 'eth_accounts'."
+            throw new EthereumProviderRpcError(
+              -32602,
+              "Invalid params",
+              "Must provide a single object parameter with the key 'eth_accounts'."
             );
           }
 
@@ -1005,19 +1101,41 @@ export class KeyRingEthereumService {
                 };
               }
             | undefined;
-          if (param?.type !== "ERC20") {
-            throw new Error("Not a supported asset type.");
+          if (!param) {
+            throw new EthereumProviderRpcError(
+              -32602,
+              "Invalid params",
+              "Must provide a single object parameter."
+            );
+          }
+
+          if (param.type !== "ERC20") {
+            throw new EthereumProviderRpcError(
+              -32602,
+              "Invalid params",
+              "Must provide a valid asset type. Only ERC20 is supported."
+            );
           }
 
           const contractAddress = param?.options.address;
 
           const currentChainId = this.forceGetCurrentChainId(origin, chainId);
 
-          await this.tokenERC20Service.suggestERC20Token(
-            env,
-            currentChainId,
-            contractAddress
-          );
+          try {
+            await this.tokenERC20Service.suggestERC20Token(
+              env,
+              currentChainId,
+              contractAddress
+            );
+          } catch (e) {
+            if (
+              (e instanceof Error && e.message === "Request rejected") ||
+              e === "Request rejected"
+            ) {
+              throw new EthereumProviderRpcError(4001, "User Rejected Request");
+            }
+            throw e;
+          }
 
           return true;
         }
@@ -1069,7 +1187,7 @@ export class KeyRingEthereumService {
           ).data.result;
         }
         default: {
-          throw new Error(`The method "${method}" is not supported.`);
+          throw new EthereumProviderRpcError(4200, `Unsupported Method`);
         }
       }
     })()) as T;
@@ -1087,7 +1205,11 @@ export class KeyRingEthereumService {
           (Array.isArray(params) && (params?.[0] as { chainId: string })) ||
           undefined;
         if (!param?.chainId) {
-          throw new Error("Invalid parameters: must provide a chain id.");
+          throw new EthereumProviderRpcError(
+            -32602,
+            "Invalid params",
+            "Must provide a chain id."
+          );
         }
 
         const newEvmChainId = validateEVMChainId(parseInt(param.chainId, 16));
