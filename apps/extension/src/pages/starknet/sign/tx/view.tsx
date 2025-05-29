@@ -162,64 +162,69 @@ export const SignStarknetTxView: FunctionComponent<{
 
       const sender = senderConfig.sender;
 
-      return {
-        simulate: async (): Promise<{
-          gasUsed: number;
-        }> => {
-          noop(gasSimulationRefresher.count);
+      return async () => {
+        noop(gasSimulationRefresher.count);
 
-          const estimateResult = await starknetAccountStore
-            .getAccount(chainId)
-            .estimateInvokeFee(
-              sender,
-              interactionData.data.transactions,
-              type === "ETH" ? feeContractAddress : undefined
-            );
-
-          const {
-            l1_gas_consumed,
-            l1_gas_price,
-            l2_gas_consumed,
-            l2_gas_price,
-            l1_data_gas_consumed,
-            l1_data_gas_price,
-          } = estimateResult;
-
-          const l1Fee = new Dec(l1_gas_consumed).mul(new Dec(l1_gas_price));
-          const l2Fee = new Dec(l2_gas_consumed ?? 0).mul(
-            new Dec(l2_gas_price ?? 0)
-          );
-          const l1DataFee = new Dec(l1_data_gas_consumed).mul(
-            new Dec(l1_data_gas_price)
+        const estimateResult = await starknetAccountStore
+          .getAccount(chainId)
+          .estimateInvokeFee(
+            sender,
+            interactionData.data.transactions,
+            type === "ETH" ? feeContractAddress : undefined
           );
 
-          const calculatedOverallFee = l1Fee.add(l2Fee).add(l1DataFee);
+        const {
+          l1_gas_consumed,
+          l1_gas_price,
+          l2_gas_consumed,
+          l2_gas_price,
+          l1_data_gas_consumed,
+          l1_data_gas_price,
+        } = estimateResult;
 
-          const gasMargin = new Dec(1.2);
-          const gasPriceMargin = new Dec(1.5);
+        const l1Fee = new Dec(l1_gas_consumed).mul(new Dec(l1_gas_price));
+        const l2Fee = new Dec(l2_gas_consumed ?? 0).mul(
+          new Dec(l2_gas_price ?? 0)
+        );
+        const l1DataFee = new Dec(l1_data_gas_consumed).mul(
+          new Dec(l1_data_gas_price)
+        );
 
-          const totalGasConsumed = new Dec(l1_gas_consumed)
-            .add(new Dec(l2_gas_consumed ?? 0))
-            .add(new Dec(l1_data_gas_consumed));
+        const calculatedOverallFee = l1Fee.add(l2Fee).add(l1DataFee);
 
-          const adjustedGasPrice = calculatedOverallFee.quo(totalGasConsumed);
+        const totalGasConsumed = new Dec(l1_gas_consumed)
+          .add(new Dec(l2_gas_consumed ?? 0))
+          .add(new Dec(l1_data_gas_consumed));
 
-          // CHECK: It seems onchain verification fee doesn't need to be considered.
-          // const sigVerificationGasConsumed = new Dec(583);
+        const adjustedGasPrice = calculatedOverallFee.quo(totalGasConsumed);
 
-          const gasPrice = new CoinPretty(feeCurrency, adjustedGasPrice);
-          const maxGasPrice = gasPrice.mul(gasPriceMargin);
-          const maxGas = totalGasConsumed.mul(gasMargin);
+        // CHECK: It seems onchain verification fee doesn't need to be considered.
+        // const sigVerificationGasConsumed = new Dec(583);
 
-          feeConfig.setGasPrice({
-            gasPrice: gasPrice,
-            maxGasPrice: maxGasPrice,
-          });
+        const gasPriceMargin = new Dec(1.5);
 
-          return {
-            gasUsed: parseInt(maxGas.truncate().toString()),
-          };
-        },
+        const gasPrice = new CoinPretty(feeCurrency, adjustedGasPrice);
+        const maxGasPrice = gasPrice.mul(gasPriceMargin);
+
+        feeConfig.setGasPrice({
+          gasPrice: gasPrice,
+          maxGasPrice: maxGasPrice,
+        });
+
+        return {
+          l1Gas: {
+            consumed: l1_gas_consumed.toString(),
+            price: l1_gas_price.toString(),
+          },
+          l2Gas: {
+            consumed: l2_gas_consumed?.toString() ?? "0",
+            price: l2_gas_price?.toString() ?? "0",
+          },
+          l1DataGas: {
+            consumed: l1_data_gas_consumed.toString(),
+            price: l1_data_gas_price.toString(),
+          },
+        };
       };
     }
   );
@@ -275,6 +280,11 @@ export const SignStarknetTxView: FunctionComponent<{
         return;
       }
 
+      const estimate = gasSimulator.gasEstimate;
+      if (!estimate) {
+        throw new Error("Gas estimate not found");
+      }
+
       const type = feeConfig.type;
       const feeContractAddress =
         type === "ETH"
@@ -297,6 +307,20 @@ export const SignStarknetTxView: FunctionComponent<{
           .getNonce(senderConfig.sender);
       }
 
+      const margin = new Dec(1.5);
+
+      const maxL1DataGas = new Dec(estimate.l1DataGas.consumed).mul(margin);
+      const maxL1Gas = new Dec(estimate.l1Gas.consumed).mul(margin);
+
+      // CHECK: found discrepancy between calculated l2 gas and actual l2 gas.
+      // calculated: 1299840, actual: 23541440
+      // It seems onchain verification fee is not considered...
+      const maxL2Gas = new Dec(estimate.l2Gas.consumed).mul(margin);
+
+      const maxL1DataGasPrice = new Dec(estimate.l1DataGas.price).mul(margin);
+      const maxL1GasPrice = new Dec(estimate.l1Gas.price).mul(margin);
+      const maxL2GasPrice = new Dec(estimate.l2Gas.price).mul(margin);
+
       const details: InvocationsSignerDetails = {
         version: "0x3",
         walletAddress: interactionData.data.details.walletAddress,
@@ -305,29 +329,19 @@ export const SignStarknetTxView: FunctionComponent<{
         cairoVersion: interactionData.data.details.cairoVersion,
         skipValidate: false,
         resourceBounds: {
-          // l1_data_gas, l1_gas, l2_gas 모두 명시해야한다. 쥰내 골때리네ㅋㅋ
           l1_data_gas: {
-            max_amount: "0x0", // TODO: 명시
-            max_price_per_unit: "0x0", // TODO: 명시
+            max_amount: num.toHex(maxL1DataGas.truncate().toString()),
+            max_price_per_unit: num.toHex(
+              maxL1DataGasPrice.truncate().toString()
+            ),
           },
           l1_gas: {
-            max_amount: num.toHex(gasConfig.gas.toString()),
-            max_price_per_unit: (() => {
-              if (!feeConfig.maxFee) {
-                return "0x0";
-              }
-
-              return num.toHex(
-                new Dec(feeConfig.maxFee.toCoin().amount)
-                  .quo(new Dec(gasConfig.gas))
-                  .truncate()
-                  .toString()
-              );
-            })(),
+            max_amount: num.toHex(maxL1Gas.truncate().toString()),
+            max_price_per_unit: num.toHex(maxL1GasPrice.truncate().toString()),
           },
           l2_gas: {
-            max_amount: "0x0",
-            max_price_per_unit: "0x0",
+            max_amount: num.toHex(maxL2Gas.truncate().toString()),
+            max_price_per_unit: num.toHex(maxL2GasPrice.truncate().toString()),
           },
         },
         tip: "0x0",

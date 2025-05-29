@@ -156,80 +156,82 @@ export const AccountActivationModal: FunctionComponent<{
         throw new Error("Can't find fee currency");
       }
 
-      return {
-        simulate: async (): Promise<{
-          gasUsed: number;
-        }> => {
-          noop(gasSimulationRefresher.count);
+      return async () => {
+        noop(gasSimulationRefresher.count);
 
-          const msg = new GetStarknetKeyParamsSelectedMsg(senderConfig.chainId);
-          const params = await new InExtensionMessageRequester().sendMessage(
-            BACKGROUND_PORT,
-            msg
+        const msg = new GetStarknetKeyParamsSelectedMsg(senderConfig.chainId);
+        const params = await new InExtensionMessageRequester().sendMessage(
+          BACKGROUND_PORT,
+          msg
+        );
+
+        const estimateResult = await starknetAccountStore
+          .getAccount(chainId)
+          .estimateDeployAccount(
+            accountStore.getAccount(senderConfig.chainId).starknetHexAddress,
+            "0x" + Buffer.from(params.classHash).toString("hex"),
+            // If account is with Ledger, must use the Starknet public key, not the secp256k1 public key.
+            account.isNanoLedger
+              ? ["0x" + Buffer.from(params.pubKey.slice(0, 32)).toString("hex")]
+              : [
+                  "0x" + Buffer.from(params.xLow).toString("hex"),
+                  "0x" + Buffer.from(params.xHigh).toString("hex"),
+                  "0x" + Buffer.from(params.yLow).toString("hex"),
+                  "0x" + Buffer.from(params.yHigh).toString("hex"),
+                ],
+            "0x" + Buffer.from(params.salt).toString("hex"),
+            type === "ETH" ? feeContractAddress : undefined
           );
 
-          const estimateResult = await starknetAccountStore
-            .getAccount(chainId)
-            .estimateDeployAccount(
-              accountStore.getAccount(senderConfig.chainId).starknetHexAddress,
-              "0x" + Buffer.from(params.classHash).toString("hex"),
-              // If account is with Ledger, must use the Starknet public key, not the secp256k1 public key.
-              account.isNanoLedger
-                ? [
-                    "0x" +
-                      Buffer.from(params.pubKey.slice(0, 32)).toString("hex"),
-                  ]
-                : [
-                    "0x" + Buffer.from(params.xLow).toString("hex"),
-                    "0x" + Buffer.from(params.xHigh).toString("hex"),
-                    "0x" + Buffer.from(params.yLow).toString("hex"),
-                    "0x" + Buffer.from(params.yHigh).toString("hex"),
-                  ],
-              "0x" + Buffer.from(params.salt).toString("hex"),
-              type === "ETH" ? feeContractAddress : undefined
-            );
+        const {
+          l1_gas_consumed,
+          l1_gas_price,
+          l2_gas_consumed,
+          l2_gas_price,
+          l1_data_gas_consumed,
+          l1_data_gas_price,
+        } = estimateResult;
 
-          const {
-            l1_gas_consumed,
-            l1_gas_price,
-            l2_gas_consumed,
-            l2_gas_price,
-            l1_data_gas_consumed,
-            l1_data_gas_price,
-          } = estimateResult;
+        const l1Fee = new Dec(l1_gas_consumed).mul(new Dec(l1_gas_price));
+        const l2Fee = new Dec(l2_gas_consumed ?? 0).mul(
+          new Dec(l2_gas_price ?? 0)
+        );
+        const l1DataFee = new Dec(l1_data_gas_consumed).mul(
+          new Dec(l1_data_gas_price)
+        );
 
-          const l1Fee = new Dec(l1_gas_consumed).mul(new Dec(l1_gas_price));
-          const l2Fee = new Dec(l2_gas_consumed ?? 0).mul(
-            new Dec(l2_gas_price ?? 0)
-          );
-          const l1DataFee = new Dec(l1_data_gas_consumed).mul(
-            new Dec(l1_data_gas_price)
-          );
+        const calculatedOverallFee = l1Fee.add(l2Fee).add(l1DataFee);
 
-          const calculatedOverallFee = l1Fee.add(l2Fee).add(l1DataFee);
+        const totalGasConsumed = new Dec(l1_gas_consumed)
+          .add(new Dec(l2_gas_consumed ?? 0))
+          .add(new Dec(l1_data_gas_consumed));
 
-          const gasMargin = new Dec(1.2);
-          const gasPriceMargin = new Dec(1.5);
+        const adjustedGasPrice = calculatedOverallFee.quo(totalGasConsumed);
 
-          const totalGasConsumed = new Dec(l1_gas_consumed)
-            .add(new Dec(l2_gas_consumed ?? 0))
-            .add(new Dec(l1_data_gas_consumed));
+        const gasPriceMargin = new Dec(1.5);
 
-          const adjustedGasPrice = calculatedOverallFee.quo(totalGasConsumed);
+        const gasPrice = new CoinPretty(feeCurrency, adjustedGasPrice);
+        const maxGasPrice = gasPrice.mul(gasPriceMargin);
 
-          const gasPrice = new CoinPretty(feeCurrency, adjustedGasPrice);
-          const maxGasPrice = gasPrice.mul(gasPriceMargin);
-          const maxGas = totalGasConsumed.mul(gasMargin);
+        feeConfig.setGasPrice({
+          gasPrice: gasPrice,
+          maxGasPrice: maxGasPrice,
+        });
 
-          feeConfig.setGasPrice({
-            gasPrice: gasPrice,
-            maxGasPrice: maxGasPrice,
-          });
-
-          return {
-            gasUsed: parseInt(maxGas.truncate().toString()),
-          };
-        },
+        return {
+          l1Gas: {
+            consumed: l1_gas_consumed.toString(),
+            price: l1_gas_price.toString(),
+          },
+          l1DataGas: {
+            consumed: l1_data_gas_consumed.toString(),
+            price: l1_data_gas_price.toString(),
+          },
+          l2Gas: {
+            consumed: l2_gas_consumed?.toString() ?? "0",
+            price: l2_gas_price?.toString() ?? "0",
+          },
+        };
       };
     }
   );
@@ -342,8 +344,10 @@ export const AccountActivationModal: FunctionComponent<{
                 isLedgerInteracting
               }
               onClick={async () => {
-                if (feeConfig.maxFee && feeConfig.maxGasPrice) {
+                if (gasSimulator.gasEstimate) {
                   starknetAccount.setIsDeployingAccount(true);
+
+                  const estimate = gasSimulator.gasEstimate;
 
                   try {
                     const msg = new GetStarknetKeyParamsSelectedMsg(
@@ -392,6 +396,8 @@ export const AccountActivationModal: FunctionComponent<{
                           "0x" + Buffer.from(params.yLow).toString("hex"),
                           "0x" + Buffer.from(params.yHigh).toString("hex"),
                         ];
+
+                    // TODO: ledger 서명 로직 수정
                     const preSigned = account.isNanoLedger
                       ? await connectAndSignDeployAccountTxWithLedger(
                           chainId,
@@ -406,15 +412,13 @@ export const AccountActivationModal: FunctionComponent<{
                             if (type === "ETH") {
                               return {
                                 type: "ETH",
-                                maxFee: feeConfig.maxFee.toCoin().amount,
+                                maxFee: estimate.l1Gas.consumed,
                               };
                             } else if (type === "STRK") {
                               return {
                                 type: "STRK",
                                 gas: gasConfig.gas.toString(),
-                                maxGasPrice: num.toHex(
-                                  feeConfig.maxGasPrice.toCoin().amount
-                                ),
+                                maxGasPrice: num.toHex(estimate.l1Gas.price),
                               };
                             } else {
                               throw new Error("Invalid fee type");
@@ -422,6 +426,22 @@ export const AccountActivationModal: FunctionComponent<{
                           })()
                         )
                       : undefined;
+
+                    const margin = new Dec(1.5);
+
+                    const maxL1DataGas = new Dec(
+                      estimate.l1DataGas.consumed
+                    ).mul(margin);
+                    const maxL1Gas = new Dec(estimate.l1Gas.consumed).mul(
+                      margin
+                    );
+
+                    const maxL1DataGasPrice = new Dec(
+                      estimate.l1DataGas.price
+                    ).mul(margin);
+                    const maxL1GasPrice = new Dec(estimate.l1Gas.price).mul(
+                      margin
+                    );
 
                     const { transaction_hash: txHash } =
                       await starknetAccount.deployAccountWithFee(
@@ -431,12 +451,14 @@ export const AccountActivationModal: FunctionComponent<{
                         constructorCalldata,
                         addressSalt,
                         {
-                          l1MaxGas: gasConfig.gas.toString(),
+                          l1MaxGas: maxL1Gas.truncate().toString(),
                           l1MaxGasPrice: num.toHex(
-                            feeConfig.maxGasPrice.toCoin().amount
+                            maxL1GasPrice.truncate().toString()
                           ),
-                          l1MaxDataGas: "0",
-                          l1MaxDataGasPrice: "0",
+                          l1MaxDataGas: maxL1DataGas.truncate().toString(),
+                          l1MaxDataGasPrice: num.toHex(
+                            maxL1DataGasPrice.truncate().toString()
+                          ),
                           paymaster:
                             feeConfig.type === "ETH"
                               ? {
