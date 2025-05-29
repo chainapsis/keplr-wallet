@@ -281,11 +281,17 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
           l1_data_gas_price,
         } = estimateResult;
 
+        // CHECK: 언제 l2 gas로 빠지고 언제 l1 gas로 빠지는지 확인 필요.
+        // const extraL1GasForOnChainVerification = new Dec(583);
+        const extraL2GasForOnchainVerification = new Dec(22000000);
+
+        const adjustedL2GasConsumed = new Dec(l2_gas_consumed ?? 0).add(
+          extraL2GasForOnchainVerification
+        );
+
         // fee = l1_gas_consumed * l1_gas_price + l2_gas_consumed * l2_gas_price + l1_data_gas_consumed * l1_data_gas_price
         const l1Fee = new Dec(l1_gas_consumed).mul(new Dec(l1_gas_price));
-        const l2Fee = new Dec(l2_gas_consumed ?? 0).mul(
-          new Dec(l2_gas_price ?? 0)
-        );
+        const l2Fee = adjustedL2GasConsumed.mul(new Dec(l2_gas_price ?? 0));
         const l1DataFee = new Dec(l1_data_gas_consumed).mul(
           new Dec(l1_data_gas_price)
         );
@@ -293,13 +299,10 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
         const calculatedOverallFee = l1Fee.add(l2Fee).add(l1DataFee);
 
         const totalGasConsumed = new Dec(l1_gas_consumed)
-          .add(new Dec(l2_gas_consumed ?? 0))
+          .add(adjustedL2GasConsumed)
           .add(new Dec(l1_data_gas_consumed));
 
         const adjustedGasPrice = calculatedOverallFee.quo(totalGasConsumed);
-
-        // CHECK: It seems onchain verification fee doesn't need to be considered.
-        // const sigVerificationGasConsumed = new Dec(583);
 
         const gasPriceMargin = new Dec(1.5);
 
@@ -311,14 +314,13 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
           maxGasPrice: maxGasPrice,
         });
 
-        // Return detailed gas estimate
         return {
           l1Gas: {
             consumed: l1_gas_consumed.toString(),
             price: l1_gas_price.toString(),
           },
           l2Gas: {
-            consumed: l2_gas_consumed?.toString() ?? "0",
+            consumed: adjustedL2GasConsumed.toString(),
             price: l2_gas_price?.toString() ?? "0",
           },
           l1DataGas: {

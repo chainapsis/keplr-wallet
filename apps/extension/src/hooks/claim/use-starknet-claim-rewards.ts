@@ -1,8 +1,8 @@
 import { useIntl } from "react-intl";
 import { useStore } from "../../stores";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
-import { Call, CallData } from "starknet";
-import { AppCurrency, ERC20Currency } from "@keplr-wallet/types";
+import { Call, CallData, num } from "starknet";
+import { ERC20Currency } from "@keplr-wallet/types";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { PrivilegeStarknetSignClaimRewardsMsg } from "@keplr-wallet/background";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
@@ -101,18 +101,21 @@ export const useStarknetClaimRewards = () => {
           account.starknetHexAddress,
           calls
         );
-        const l1Fee = new Dec(l1_gas_consumed).mul(new Dec(l1_gas_price));
-        const l2Fee = new Dec(l2_gas_consumed ?? 0).mul(
-          new Dec(l2_gas_price ?? 0)
+
+        const extraL2GasForOnchainVerification = new Dec(22000000);
+        const adjustedL2GasConsumed = new Dec(l2_gas_consumed ?? 0).add(
+          extraL2GasForOnchainVerification
         );
+
+        const l1Fee = new Dec(l1_gas_consumed).mul(new Dec(l1_gas_price));
+        const l2Fee = adjustedL2GasConsumed.mul(new Dec(l2_gas_price ?? 0));
         const l1DataFee = new Dec(l1_data_gas_consumed).mul(
           new Dec(l1_data_gas_price)
         );
 
         const calculatedOverallFee = l1Fee.add(l2Fee).add(l1DataFee);
 
-        const gasMargin = new Dec(1.2);
-        const gasPriceMargin = new Dec(1.5);
+        const margin = new Dec(1.5);
 
         const totalGasConsumed = new Dec(l1_gas_consumed)
           .add(new Dec(l2_gas_consumed ?? 0))
@@ -121,30 +124,8 @@ export const useStarknetClaimRewards = () => {
         const adjustedGasPrice = calculatedOverallFee.quo(totalGasConsumed);
 
         const gasPrice = new CoinPretty(feeCurrency, adjustedGasPrice);
-        const maxGasPrice = gasPrice.mul(gasPriceMargin);
-        const maxGas = totalGasConsumed.mul(gasMargin);
-
-        const fee: {
-          currency: AppCurrency;
-          gasPrice: CoinPretty;
-          maxGasPrice: CoinPretty;
-          gas: Dec;
-          maxGas: Dec;
-        } = {
-          currency: feeCurrency,
-          gasPrice,
-          maxGasPrice,
-          gas: totalGasConsumed,
-          maxGas,
-        };
-
-        // if (!fee) {
-        //   throw new Error(
-        //     intl.formatMessage({
-        //       id: "error.can-not-find-fee-for-claim-all",
-        //     })
-        //   );
-        // }
+        const maxGasPrice = gasPrice.mul(margin);
+        const maxGas = totalGasConsumed.mul(margin);
 
         // compare the account balance and fee
         const feeCurrencyBalance =
@@ -155,11 +136,12 @@ export const useStarknetClaimRewards = () => {
             feeCurrency.coinMinimalDenom
           );
 
+        // compare the price of claimable rewards and fee (just consider maxGasPrice)
+        const maxFee = maxGasPrice.mul(maxGas);
+
         if (
           !feeCurrencyBalance ||
-          feeCurrencyBalance.balance
-            .toDec()
-            .lt(fee.maxGasPrice.mul(fee.gas).toDec())
+          feeCurrencyBalance.balance.toDec().lt(maxFee.toDec())
         ) {
           throw new Error(
             intl.formatMessage({
@@ -167,9 +149,6 @@ export const useStarknetClaimRewards = () => {
             })
           );
         }
-
-        // compare the price of claimable rewards and fee (just consider maxGasPrice)
-        const maxFee = fee.maxGasPrice.mul(fee.gas);
 
         const rewardsPrice = await priceStore.waitCalculatePrice(
           rewardToken,
@@ -194,20 +173,25 @@ export const useStarknetClaimRewards = () => {
           );
         }
 
+        const maxL1DataGas = new Dec(l1_data_gas_consumed).mul(margin);
+        const maxL1Gas = new Dec(l1_gas_consumed).mul(margin);
+        const maxL2Gas = adjustedL2GasConsumed.mul(margin);
+
+        const maxL1DataGasPrice = new Dec(l1_data_gas_price).mul(margin);
+        const maxL1GasPrice = new Dec(l1_gas_price).mul(margin);
+        const maxL2GasPrice = new Dec(l2_gas_price ?? 0).mul(margin);
+
         // execute
         const { transaction_hash: txHash } = await starknetAccount.execute(
           account.starknetHexAddress,
           calls,
           {
-            // TODO: specify l1 data gas
-            l1MaxGas: fee.gas.roundUp().toString(),
-            l1MaxGasPrice: fee.maxGasPrice
-              .mul(new Dec(10 ** fee.currency.coinDecimals))
-              .toDec()
-              .roundUp()
-              .toString(),
-            l1MaxDataGas: "0",
-            l1MaxDataGasPrice: "0",
+            l1MaxGas: maxL1Gas.truncate().toString(),
+            l1MaxGasPrice: maxL1GasPrice.truncate().toString(),
+            l1MaxDataGas: maxL1DataGas.truncate().toString(),
+            l1MaxDataGasPrice: maxL1DataGasPrice.truncate().toString(),
+            l2MaxGas: maxL2Gas.truncate().toString(),
+            l2MaxGasPrice: maxL2GasPrice.truncate().toString(),
           },
           async (chainId, calls, details) => {
             const requester = new InExtensionMessageRequester();
@@ -324,65 +308,35 @@ export const useStarknetClaimRewards = () => {
         account.starknetHexAddress,
         calls
       );
-      const l1Fee = new Dec(l1_gas_consumed).mul(new Dec(l1_gas_price));
-      const l2Fee = new Dec(l2_gas_consumed ?? 0).mul(
-        new Dec(l2_gas_price ?? 0)
+
+      // CHECK: 언제 l2 gas로 빠지고 언제 l1 gas로 빠지는지 확인 필요.
+      // const extraL1GasForOnChainVerification = new Dec(583);
+      const extraL2GasForOnchainVerification = new Dec(22000000);
+
+      const adjustedL2GasConsumed = new Dec(l2_gas_consumed ?? 0).add(
+        extraL2GasForOnchainVerification
       );
-      const l1DataFee = new Dec(l1_data_gas_consumed).mul(
-        new Dec(l1_data_gas_price)
-      );
 
-      const calculatedOverallFee = l1Fee.add(l2Fee).add(l1DataFee);
+      const margin = new Dec(1.5);
 
-      const gasMargin = new Dec(1.2);
-      const gasPriceMargin = new Dec(1.5);
+      const maxL1DataGas = new Dec(l1_data_gas_consumed).mul(margin);
+      const maxL1Gas = new Dec(l1_gas_consumed).mul(margin);
+      const maxL2Gas = adjustedL2GasConsumed.mul(margin);
 
-      const totalGasConsumed = new Dec(l1_gas_consumed)
-        .add(new Dec(l2_gas_consumed ?? 0))
-        .add(new Dec(l1_data_gas_consumed));
-
-      const adjustedGasPrice = calculatedOverallFee.quo(totalGasConsumed);
-
-      const gasPrice = new CoinPretty(feeCurrency, adjustedGasPrice);
-      const maxGasPrice = gasPrice.mul(gasPriceMargin);
-      const maxGas = totalGasConsumed.mul(gasMargin);
-
-      const fee: {
-        version: "v3";
-        currency: AppCurrency;
-        gasPrice: CoinPretty;
-        maxGasPrice: CoinPretty;
-        gas: Dec;
-        maxGas: Dec;
-      } = {
-        version: "v3",
-        currency: feeCurrency,
-        gasPrice,
-        maxGasPrice,
-        gas: totalGasConsumed,
-        maxGas,
-      };
-
-      // if (!fee) {
-      //   throw new Error(
-      //     intl.formatMessage({
-      //       id: "error.can-not-find-fee-for-claim-all",
-      //     })
-      //   );
-      // }
+      const maxL1DataGasPrice = new Dec(l1_data_gas_price).mul(margin);
+      const maxL1GasPrice = new Dec(l1_gas_price).mul(margin);
+      const maxL2GasPrice = new Dec(l2_gas_price ?? 0).mul(margin);
 
       const { transaction_hash: txHash } = await starknetAccount.execute(
         account.starknetHexAddress,
         calls,
         {
-          l1MaxGas: fee.gas.roundUp().toString(),
-          l1MaxGasPrice: fee.maxGasPrice
-            .mul(new Dec(10 ** fee.currency.coinDecimals))
-            .toDec()
-            .roundUp()
-            .toString(),
-          l1MaxDataGas: "0",
-          l1MaxDataGasPrice: "0",
+          l1MaxGas: num.toHex(maxL1Gas.truncate().toString()),
+          l1MaxGasPrice: num.toHex(maxL1GasPrice.truncate().toString()),
+          l1MaxDataGas: num.toHex(maxL1DataGas.truncate().toString()),
+          l1MaxDataGasPrice: num.toHex(maxL1DataGasPrice.truncate().toString()),
+          l2MaxGas: num.toHex(maxL2Gas.truncate().toString()),
+          l2MaxGasPrice: num.toHex(maxL2GasPrice.truncate().toString()),
         }
       );
       if (!txHash) {
