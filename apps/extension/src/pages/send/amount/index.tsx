@@ -42,7 +42,7 @@ import { FeeControl } from "../../../components/input/fee-control";
 import { useNotification } from "../../../hooks/notification";
 import { DenomHelper, ExtensionKVStore } from "@keplr-wallet/common";
 import { ENSInfo, ICNSInfo, SwapVenues } from "../../../config.ui";
-import { CoinPretty, Dec, DecUtils, Int } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, DecUtils } from "@keplr-wallet/unit";
 import { ColorPalette } from "../../../styles";
 import { openPopupWindow } from "@keplr-wallet/popup";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
@@ -916,13 +916,6 @@ export const SendAmountPage: FunctionComponent = observer(() => {
               const swapReceiver: string[] = [];
 
               try {
-                let priorOutAmount: Int | undefined = undefined;
-                if (queryRoute.response) {
-                  priorOutAmount = new Int(
-                    queryRoute.response.data.route.amount_out
-                  );
-                }
-
                 if (!queryRoute.response) {
                   throw new Error("queryRoute.response is undefined");
                 }
@@ -984,8 +977,6 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                 const [_tx] = await Promise.all([
                   ibcSwapConfigsForBridge.amountConfig.getTx(
                     uiConfigStore.ibcSwapConfig.slippageNum,
-                    // 코스모스 스왑은 스왑베뉴가 무조건 하나라고 해서 일단 처음걸 쓰기로 한다.
-                    priorOutAmount,
                     convertToBech32IfNeed(
                       ibcSwapConfigsForBridge.recipientConfig.recipient,
                       chainStore.getChain(

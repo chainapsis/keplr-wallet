@@ -39,7 +39,7 @@ import styled, { useTheme } from "styled-components";
 import { GuideBox } from "../../components/guide-box";
 import { VerticalCollapseTransition } from "../../components/transition/vertical-collapse";
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
-import { Dec, DecUtils, Int } from "@keplr-wallet/unit";
+import { Dec, DecUtils } from "@keplr-wallet/unit";
 import { MakeTxResponse, WalletStatus } from "@keplr-wallet/stores";
 import { autorun } from "mobx";
 import {
@@ -437,8 +437,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
       }
 
       const tx = ibcSwapConfigs.amountConfig.getTxIfReady(
-        // simulation 자체는 쉽게 통과시키기 위해서 슬리피지를 50으로 설정한다.
-        50
+        uiConfigStore.ibcSwapConfig.slippageNum
       );
 
       if (!tx) {
@@ -572,7 +571,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         if (!queryRoute.isFetching) {
           queryRoute.fetch();
         }
-      }, 10000);
+      }, IBCSwapAmountConfig.QueryMsgsDirectRefreshInterval);
       return () => {
         clearTimeout(timeoutId);
       };
@@ -853,13 +852,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           // 인데 사실 ibcSwapConfigs.amountConfig.getTx에서 queryRoute.waitFreshResponse()를 하도록 나중에 바껴서...
           // 굳이 중복할 필요가 없어짐
           try {
-            let priorOutAmount: Int | undefined = undefined;
-            if (queryRoute.response) {
-              priorOutAmount = new Int(
-                queryRoute.response.data.route.amount_out
-              );
-            }
-
             if (!queryRoute.response) {
               throw new Error("queryRoute.response is undefined");
             }
@@ -1003,8 +995,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
             const [_tx] = await Promise.all([
               ibcSwapConfigs.amountConfig.getTx(
-                uiConfigStore.ibcSwapConfig.slippageNum,
-                priorOutAmount
+                uiConfigStore.ibcSwapConfig.slippageNum
               ),
             ]);
 
