@@ -9,7 +9,7 @@ import { ObservableQueryAssetsBatch } from "./assets";
 import { computed, makeObservable } from "mobx";
 import { ObservableQueryChains } from "./chains";
 import { CoinPretty } from "@keplr-wallet/unit";
-import { ObservableQueryRoute, ObservableQueryRouteInner } from "./route";
+import { ObservableQueryRoute } from "./route";
 import {
   ObservableQueryMsgsDirect,
   ObservableQueryMsgsDirectInner,
@@ -49,8 +49,8 @@ export class ObservableQueryIBCSwapInner {
   ) {}
 
   getQueryMsgsDirect(
-    chainIdsToAddresses: Record<string, string>,
-    slippageTolerancePercent: number
+    chainIdsToAddresses?: Record<string, string>,
+    slippageTolerancePercent?: number
   ): ObservableQueryMsgsDirectInner {
     const inAmount = new CoinPretty(
       this.chainStore
@@ -64,31 +64,11 @@ export class ObservableQueryIBCSwapInner {
       this.sourceAssetChainId,
       this.destAssetDenom,
       this.destAssetChainId,
-      chainIdsToAddresses,
-      slippageTolerancePercent,
+      chainIdsToAddresses ?? this.chainIdsToAddresses,
+      slippageTolerancePercent ?? this.slippageTolerancePercent,
       this.affiliateFeeBps,
       this.affiliateFeeReceivers,
       this.swapVenues,
-      this.smartSwapOptions
-    );
-  }
-
-  getQueryRoute(): ObservableQueryRouteInner {
-    const inAmount = new CoinPretty(
-      this.chainStore
-        .getChain(this.sourceAssetChainId)
-        .forceFindCurrency(this.amountInDenom),
-      this.amountInAmount
-    );
-
-    return this.queryRoute.getRoute(
-      this.sourceAssetChainId,
-      inAmount,
-      this.destAssetChainId,
-      this.destAssetDenom,
-      this.affiliateFeeBps,
-      this.swapVenues,
-      this.allowSwaps,
       this.smartSwapOptions
     );
   }

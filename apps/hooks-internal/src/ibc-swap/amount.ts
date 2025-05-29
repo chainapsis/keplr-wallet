@@ -107,9 +107,9 @@ export class IBCSwapAmountConfig extends AmountConfig {
     if (this.fraction > 0) {
       let result = this.maxAmount;
 
-      const queryRoute = this.getQueryIBCSwap(result)?.getQueryRoute();
+      const queryRoute = this.getQueryIBCSwap(result)?.getQueryMsgsDirect();
       if (queryRoute?.response != null) {
-        const estimatedFees = queryRoute.response.data.estimated_fees;
+        const estimatedFees = queryRoute.response.data.route.estimated_fees;
         const bridgeFee = estimatedFees?.reduce((acc, fee) => {
           if (fee.origin_asset.denom === this.currency.coinMinimalDenom) {
             return acc.add(new CoinPretty(this.currency, new Dec(fee.amount)));
@@ -148,7 +148,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
     if (!queryIBCSwap) {
       return new CoinPretty(this.outCurrency, "0");
     }
-    return queryIBCSwap.getQueryRoute().outAmount;
+    return queryIBCSwap.getQueryMsgsDirect().outAmount;
   }
 
   get outChainId(): string {
@@ -177,7 +177,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
     if (!queryIBCSwap) {
       return undefined;
     }
-    return queryIBCSwap.getQueryRoute().swapPriceImpact;
+    return queryIBCSwap.getQueryMsgsDirect().swapPriceImpact;
   }
 
   @action
@@ -205,7 +205,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
       return [new CoinPretty(this.outCurrency, "0")];
     }
 
-    return queryIBCSwap.getQueryRoute().swapFee;
+    return queryIBCSwap.getQueryMsgsDirect().swapFee;
   }
 
   get otherFees(): CoinPretty[] {
@@ -214,21 +214,21 @@ export class IBCSwapAmountConfig extends AmountConfig {
       return [new CoinPretty(this.outCurrency, "0")];
     }
 
-    return queryIBCSwap.getQueryRoute().otherFees;
+    return queryIBCSwap.getQueryMsgsDirect().otherFees;
   }
 
   async fetch(): Promise<void> {
     const queryIBCSwap = this.getQueryIBCSwap();
     if (queryIBCSwap) {
-      await queryIBCSwap.getQueryRoute().fetch();
+      await queryIBCSwap.getQueryMsgsDirect().fetch();
     }
   }
 
   get isFetchingInAmount(): boolean {
     if (this.fraction === 1) {
       return (
-        this.getQueryIBCSwap(this.maxAmount)?.getQueryRoute().isFetching ??
-        this.getQueryIBCSwap()?.getQueryRoute().isFetching ??
+        this.getQueryIBCSwap(this.maxAmount)?.getQueryMsgsDirect().isFetching ??
+        this.getQueryIBCSwap()?.getQueryMsgsDirect().isFetching ??
         false
       );
     }
@@ -237,7 +237,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
   }
 
   get isFetchingOutAmount(): boolean {
-    return this.getQueryIBCSwap()?.getQueryRoute().isFetching ?? false;
+    return this.getQueryIBCSwap()?.getQueryMsgsDirect().isFetching ?? false;
   }
 
   get type(): "swap" | "transfer" | "not-ready" {
@@ -246,12 +246,12 @@ export class IBCSwapAmountConfig extends AmountConfig {
       return "not-ready";
     }
 
-    const res = queryIBCSwap.getQueryRoute().response;
+    const res = queryIBCSwap.getQueryMsgsDirect().response;
     if (!res) {
       return "not-ready";
     }
 
-    if (res.data.does_swap === false) {
+    if (res.data.route.does_swap === false) {
       return "transfer";
     }
 
@@ -271,8 +271,8 @@ export class IBCSwapAmountConfig extends AmountConfig {
       throw new Error("Query IBC Swap is not initialized");
     }
 
-    await queryIBCSwap.getQueryRoute().waitFreshResponse();
-    const queryRouteResponse = queryIBCSwap.getQueryRoute().response;
+    await queryIBCSwap.getQueryMsgsDirect().waitFreshResponse();
+    const queryRouteResponse = queryIBCSwap.getQueryMsgsDirect().response;
     if (!queryRouteResponse) {
       throw new Error("Failed to fetch route");
     }
@@ -297,7 +297,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
         ? sourceAccount.ethereumHexAddress
         : sourceAccount.bech32Address;
 
-    const destinationChainIds = queryRouteResponse.data.chain_ids.map(
+    const destinationChainIds = queryRouteResponse.data.route.chain_ids.map(
       (chainId) => {
         const evmLikeChainId = Number(chainId);
         const isEVMChainId =
@@ -335,8 +335,8 @@ export class IBCSwapAmountConfig extends AmountConfig {
         customRecipient.recipient;
     }
 
-    for (const swapVenue of queryRouteResponse.data.swap_venues ?? [
-      queryRouteResponse.data.swap_venue,
+    for (const swapVenue of queryRouteResponse.data.route.swap_venues ?? [
+      queryRouteResponse.data.route.swap_venue,
     ]) {
       if (swapVenue) {
         const swapVenueChainId = (() => {
@@ -455,7 +455,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
       return;
     }
 
-    const queryRouteResponse = queryIBCSwap.getQueryRoute().response;
+    const queryRouteResponse = queryIBCSwap.getQueryMsgsDirect().response;
     if (!queryRouteResponse) {
       return;
     }
@@ -480,7 +480,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
         ? sourceAccount.ethereumHexAddress
         : sourceAccount.bech32Address;
 
-    const destinationChainIds = queryRouteResponse.data.chain_ids.map(
+    const destinationChainIds = queryRouteResponse.data.route.chain_ids.map(
       (chainId) => {
         const evmLikeChainId = Number(chainId);
         const isEVMChainId =
@@ -519,8 +519,8 @@ export class IBCSwapAmountConfig extends AmountConfig {
         customRecipient.recipient;
     }
 
-    for (const swapVenue of queryRouteResponse.data.swap_venues ?? [
-      queryRouteResponse.data.swap_venue,
+    for (const swapVenue of queryRouteResponse.data.route.swap_venues ?? [
+      queryRouteResponse.data.route.swap_venue,
     ]) {
       if (swapVenue) {
         const swapVenueChainId = (() => {
@@ -731,7 +731,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
         };
       }
 
-      const routeQuery = queryIBCSwap.getQueryRoute();
+      const routeQuery = queryIBCSwap.getQueryMsgsDirect();
       if (routeQuery.isFetching) {
         return {
           ...prev,
@@ -762,14 +762,14 @@ export class IBCSwapAmountConfig extends AmountConfig {
       //route로 부터 swap을 사용하는 경우가 있으면 에러를 발생시킨다.
       const routeResponse = routeQuery.response;
       if (routeResponse) {
-        if (this._isUseSwapInBridge(routeResponse.data)) {
+        if (this._isUseSwapInBridge(routeResponse.data.route)) {
           return {
             ...prev,
             error: new Error("Swap in bridge is not allowed"),
           };
         }
 
-        if (routeResponse.data.txs_required !== 1) {
+        if (routeResponse.data.route.txs_required !== 1) {
           return {
             ...prev,
             error: new Error("Swap can't be executed with ibc pfm"),
@@ -777,10 +777,10 @@ export class IBCSwapAmountConfig extends AmountConfig {
         }
 
         if (
-          routeResponse.data.estimated_fees &&
-          routeResponse.data.estimated_fees.length > 0
+          routeResponse.data.route.estimated_fees &&
+          routeResponse.data.route.estimated_fees.length > 0
         ) {
-          const bridgeFee = routeResponse.data.estimated_fees.reduce(
+          const bridgeFee = routeResponse.data.route.estimated_fees.reduce(
             (acc: CoinPretty, fee: any) => {
               if (fee.origin_asset.denom === this.currency.coinMinimalDenom) {
                 return acc.add(
@@ -816,7 +816,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
       };
     }
 
-    const routeQuery = queryIBCSwap.getQueryRoute();
+    const routeQuery = queryIBCSwap.getQueryMsgsDirect();
     if (routeQuery.isFetching) {
       return {
         ...prev,
@@ -847,14 +847,14 @@ export class IBCSwapAmountConfig extends AmountConfig {
     //route로 부터 swap을 사용하는 경우가 있으면 에러를 발생시킨다.
     const routeResponse = routeQuery.response;
     if (routeResponse) {
-      if (this._isUseSwapInBridge(routeResponse.data)) {
+      if (this._isUseSwapInBridge(routeResponse.data.route)) {
         return {
           ...prev,
           error: new Error("Swap in bridge is not allowed"),
         };
       }
 
-      if (routeResponse?.data.txs_required !== 1) {
+      if (routeResponse?.data.route.txs_required !== 1) {
         return {
           ...prev,
           error: new Error("Swap can't be executed with ibc pfm"),
@@ -862,10 +862,10 @@ export class IBCSwapAmountConfig extends AmountConfig {
       }
 
       if (
-        routeResponse.data.estimated_fees &&
-        routeResponse.data.estimated_fees.length > 0
+        routeResponse.data.route.estimated_fees &&
+        routeResponse.data.route.estimated_fees.length > 0
       ) {
-        const bridgeFee = routeResponse.data.estimated_fees.reduce(
+        const bridgeFee = routeResponse.data.route.estimated_fees.reduce(
           (acc: CoinPretty, fee: any) => {
             if (fee.origin_asset.denom === this.currency.coinMinimalDenom) {
               return acc.add(

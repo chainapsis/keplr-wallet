@@ -196,7 +196,7 @@ export const useSwapAnalytics = ({
 
   // Quote requested
   const queryIBCSwapForLog = ibcSwapConfigs.amountConfig.getQueryIBCSwap();
-  const queryRouteForLog = queryIBCSwapForLog?.getQueryRoute();
+  const queryRouteForLog = queryIBCSwapForLog?.getQueryMsgsDirect();
 
   useEffect(() => {
     const amount = ibcSwapConfigs.amountConfig.amount[0];
@@ -244,10 +244,10 @@ export const useSwapAnalytics = ({
   useEffect(() => {
     if (!queryRouteForLog?.response) return;
 
-    const currentKey = queryRouteForLog.response.data.amount_out;
+    const currentKey = queryRouteForLog.response.data.route.amount_out;
     if (prevRouteKeyRef.current === currentKey) return;
 
-    const outAmountRaw = queryRouteForLog.response.data.amount_out;
+    const outAmountRaw = queryRouteForLog.response.data.route.amount_out;
     const outCoinPretty = new CoinPretty(outCurrency, outAmountRaw.toString());
     const outUsd = (() => {
       const p = priceStore.calculatePrice(outCoinPretty, "usd");
@@ -259,13 +259,13 @@ export const useSwapAnalytics = ({
       out_amount_est_raw: outAmountRaw,
       out_amount_est_usd: outUsd,
       provider: "skip",
-      does_swap: queryRouteForLog.response.data.does_swap,
-      txs_required: queryRouteForLog.response.data.txs_required,
+      does_swap: queryRouteForLog.response.data.route.does_swap,
+      txs_required: queryRouteForLog.response.data.route.txs_required,
       route_duration_estimate_sec:
-        queryRouteForLog.response.data.estimated_route_duration_seconds,
+        queryRouteForLog.response.data.route.estimated_route_duration_seconds,
       swap_venues: (
-        queryRouteForLog.response.data.swap_venues ?? [
-          queryRouteForLog.response.data.swap_venue,
+        queryRouteForLog.response.data.route.swap_venues ?? [
+          queryRouteForLog.response.data.route.swap_venue,
         ]
       )
         .filter(Boolean)

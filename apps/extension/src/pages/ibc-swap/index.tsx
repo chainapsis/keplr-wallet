@@ -318,25 +318,25 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
       const queryRoute = ibcSwapConfigs.amountConfig
         .getQueryIBCSwap()
-        ?.getQueryRoute();
+        ?.getQueryMsgsDirect();
       if (queryRoute && queryRoute.response) {
         // swap일 경우 웬만하면 swap 한번으로 충분할 확률이 높다.
         // 이 가정에 따라서 첫로드시에 gas를 restore하기 위해서 트랜잭션을 보내는 체인에서 swap 할 경우
         // 일단 swap-1로 설정한다.
         if (
-          queryRoute.response.data.swap_venues &&
-          queryRoute.response.data.swap_venues.length === 1
+          queryRoute.response.data.route.swap_venues &&
+          queryRoute.response.data.route.swap_venues.length === 1
         ) {
           const swapVenueChainId = (() => {
             const evmLikeChainId = Number(
-              queryRoute.response.data.swap_venues[0].chain_id
+              queryRoute.response.data.route.swap_venues[0].chain_id
             );
             const isEVMChainId =
               !Number.isNaN(evmLikeChainId) && evmLikeChainId > 0;
 
             return isEVMChainId
               ? `eip155:${evmLikeChainId}`
-              : queryRoute.response.data.swap_venues[0].chain_id;
+              : queryRoute.response.data.route.swap_venues[0].chain_id;
           })();
 
           if (
@@ -347,8 +347,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           }
         }
 
-        if (queryRoute.response.data.operations.length > 0) {
-          const firstOperation = queryRoute.response.data.operations[0];
+        if (queryRoute.response.data.route.operations.length > 0) {
+          const firstOperation = queryRoute.response.data.route.operations[0];
           if ("swap" in firstOperation) {
             if (firstOperation.swap.swap_in) {
               type = `swap-${firstOperation.swap.swap_in.swap_operations.length}`;
@@ -416,10 +416,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
       const swapFeeBpsReceiver: string[] = [];
       const queryRoute = ibcSwapConfigs.amountConfig
         .getQueryIBCSwap()
-        ?.getQueryRoute();
+        ?.getQueryMsgsDirect();
       if (queryRoute && queryRoute.response) {
-        if (queryRoute.response.data.operations.length > 0) {
-          for (const operation of queryRoute.response.data.operations) {
+        if (queryRoute.response.data.route.operations.length > 0) {
+          for (const operation of queryRoute.response.data.route.operations) {
             if ("swap" in operation) {
               const swapIn =
                 operation.swap.swap_in ?? operation.swap.smart_swap_in;
@@ -565,7 +565,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
   // 10초마다 자동 refresh
   const queryIBCSwap = ibcSwapConfigs.amountConfig.getQueryIBCSwap();
-  const queryRoute = queryIBCSwap?.getQueryRoute();
+  const queryRoute = queryIBCSwap?.getQueryMsgsDirect();
   useEffect(() => {
     if (queryRoute && !queryRoute.isFetching) {
       const timeoutId = setTimeout(() => {
@@ -828,7 +828,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
           const queryRoute = ibcSwapConfigs.amountConfig
             .getQueryIBCSwap()!
-            .getQueryRoute();
+            .getQueryMsgsDirect();
           const channels: {
             portId: string;
             channelId: string;
@@ -855,7 +855,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           try {
             let priorOutAmount: Int | undefined = undefined;
             if (queryRoute.response) {
-              priorOutAmount = new Int(queryRoute.response.data.amount_out);
+              priorOutAmount = new Int(
+                queryRoute.response.data.route.amount_out
+              );
             }
 
             if (!queryRoute.response) {
@@ -864,7 +866,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
             // bridge가 필요한 경우와, 아닌 경우를 나눠서 처리
             // swap, transfer 이외의 다른 operation이 있으면 bridge가 사용된다.
-            const operations = queryRoute.response.data.operations;
+            const operations = queryRoute.response.data.route.operations;
             isInterchainSwap = operations.some(
               (operation) =>
                 !("swap" in operation) && !("transfer" in operation)
@@ -875,10 +877,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             // 문제는 chain_ids에 이미 ibc swap channel이 포함되어 있을 가능성 (아직 확인은 안됨)
             if (isInterchainSwap) {
               routeDurationSeconds =
-                queryRoute.response.data.estimated_route_duration_seconds;
+                queryRoute.response.data.route.estimated_route_duration_seconds;
 
               // 일단은 체인 id를 keplr에서 사용하는 형태로 바꿔야 한다.
-              for (const chainId of queryRoute.response.data.chain_ids) {
+              for (const chainId of queryRoute.response.data.route.chain_ids) {
                 const isOnlyEvm = parseInt(chainId) > 0;
                 const chainIdInKeplr = isOnlyEvm
                   ? `eip155:${chainId}`
@@ -2113,7 +2115,9 @@ const WarningGuideBox: FunctionComponent<{
         return err.message || err.toString();
       }
 
-      const queryError = amountConfig.getQueryIBCSwap()?.getQueryRoute()?.error;
+      const queryError = amountConfig
+        .getQueryIBCSwap()
+        ?.getQueryMsgsDirect()?.error;
       if (queryError) {
         return queryError.message || queryError.toString();
       }

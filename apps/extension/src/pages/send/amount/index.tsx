@@ -77,10 +77,7 @@ import {
   IBCSwapAmountConfig,
   useIBCSwapConfig,
 } from "@keplr-wallet/hooks-internal";
-import {
-  ObservableQueryRouteInner,
-  SkipQueries,
-} from "@keplr-wallet/stores-internal";
+import { SkipQueries } from "@keplr-wallet/stores-internal";
 import {
   AccountSetBase,
   ChainGetter,
@@ -104,6 +101,7 @@ import { usePreviousDistinct } from "../../../hooks/use-previous";
 import { SwapFeeInfoForBridgeOnSend } from "./swap-fee-info";
 import { useEffectOnce } from "../../../hooks/use-effect-once";
 import { useGlobarSimpleBar } from "../../../hooks/global-simplebar";
+import { ObservableQueryMsgsDirectInner } from "@keplr-wallet/stores-internal/build/skip/msgs-direct";
 
 const Styles = {
   Flex1: styled.div`
@@ -327,7 +325,7 @@ function useRefreshEIP1559TxFee(
 
 const QUERY_ROUTE_FETCH_TIMEOUT_MS = 10000;
 function useFetchBridgeRouterPer10sec(
-  queryRoute: ObservableQueryRouteInner | undefined
+  queryRoute: ObservableQueryMsgsDirectInner | undefined
 ) {
   useEffect(() => {
     if (queryRoute && !queryRoute.isFetching) {
@@ -539,7 +537,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   });
 
   const queryIBCSwap = ibcSwapConfigsForBridge.amountConfig.getQueryIBCSwap();
-  const queryRoute = queryIBCSwap?.getQueryRoute();
+  const queryRoute = queryIBCSwap?.getQueryMsgsDirect();
   useFetchBridgeRouterPer10sec(queryRoute);
 
   const sendConfigs = useSendMixedIBCTransferConfig(
@@ -901,7 +899,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
               const queryRoute = ibcSwapConfigsForBridge.amountConfig
                 .getQueryIBCSwap()!
-                .getQueryRoute();
+                .getQueryMsgsDirect();
 
               const simpleRoute: {
                 isOnlyEvm: boolean;
@@ -920,7 +918,9 @@ export const SendAmountPage: FunctionComponent = observer(() => {
               try {
                 let priorOutAmount: Int | undefined = undefined;
                 if (queryRoute.response) {
-                  priorOutAmount = new Int(queryRoute.response.data.amount_out);
+                  priorOutAmount = new Int(
+                    queryRoute.response.data.route.amount_out
+                  );
                 }
 
                 if (!queryRoute.response) {
@@ -928,10 +928,12 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                 }
 
                 routeDurationSeconds =
-                  queryRoute.response.data.estimated_route_duration_seconds;
+                  queryRoute.response.data.route
+                    .estimated_route_duration_seconds;
 
                 // 일단은 체인 id를 keplr에서 사용하는 형태로 바꿔야 한다.
-                for (const chainId of queryRoute.response.data.chain_ids) {
+                for (const chainId of queryRoute.response.data.route
+                  .chain_ids) {
                   const isOnlyEvm = parseInt(chainId) > 0;
                   const chainIdInKeplr = isOnlyEvm
                     ? `eip155:${chainId}`
@@ -2299,13 +2301,13 @@ function useCheckExpectedOutIsTooSmall(
       ) {
         const queryRouteResponse = ibcSwapConfigsForBridge.amountConfig
           .getQueryIBCSwap()
-          ?.getQueryRoute()?.response;
+          ?.getQueryMsgsDirect()?.response;
         if (!queryRouteResponse) {
           return;
         }
 
-        const inputDec = new Dec(queryRouteResponse.data.amount_in);
-        const outputDec = new Dec(queryRouteResponse.data.amount_out);
+        const inputDec = new Dec(queryRouteResponse.data.route.amount_in);
+        const outputDec = new Dec(queryRouteResponse.data.route.amount_out);
         const diff = (() => {
           if (inputDec.isZero()) {
             return;
@@ -2370,26 +2372,26 @@ function useGetGasSimulationForBridge(
 
       const queryRoute = ibcSwapConfigsForBridge.amountConfig
         .getQueryIBCSwap()
-        ?.getQueryRoute();
+        ?.getQueryMsgsDirect();
 
       if (queryRoute && queryRoute.response) {
         // swap일 경우 웬만하면 swap 한번으로 충분할 확률이 높다.
         // 이 가정에 따라서 첫로드시에 gas를 restore하기 위해서 트랜잭션을 보내는 체인에서 swap 할 경우
         // 일단 swap-1로 설정한다.
         if (
-          queryRoute.response.data.swap_venues &&
-          queryRoute.response.data.swap_venues.length === 1
+          queryRoute.response.data.route.swap_venues &&
+          queryRoute.response.data.route.swap_venues.length === 1
         ) {
           const swapVenueChainId = (() => {
             const evmLikeChainId = Number(
-              queryRoute.response.data.swap_venues[0].chain_id
+              queryRoute.response.data.route.swap_venues[0].chain_id
             );
             const isEVMChainId =
               !Number.isNaN(evmLikeChainId) && evmLikeChainId > 0;
 
             return isEVMChainId
               ? `eip155:${evmLikeChainId}`
-              : queryRoute.response.data.swap_venues[0].chain_id;
+              : queryRoute.response.data.route.swap_venues[0].chain_id;
           })();
 
           if (
@@ -2400,8 +2402,8 @@ function useGetGasSimulationForBridge(
           }
         }
 
-        if (queryRoute.response.data.operations.length > 0) {
-          const firstOperation = queryRoute.response.data.operations[0];
+        if (queryRoute.response.data.route.operations.length > 0) {
+          const firstOperation = queryRoute.response.data.route.operations[0];
           if ("swap" in firstOperation) {
             if (firstOperation.swap.swap_in) {
               type = `swap-${firstOperation.swap.swap_in.swap_operations.length}`;
