@@ -325,13 +325,13 @@ function useRefreshEIP1559TxFee(
 
 const QUERY_ROUTE_FETCH_TIMEOUT_MS = 10000;
 function useFetchBridgeRouterPer10sec(
-  queryRoute: ObservableQueryMsgsDirectInner | undefined
+  queryMsgsDirectForLog: ObservableQueryMsgsDirectInner | undefined
 ) {
   useEffect(() => {
-    if (queryRoute && !queryRoute.isFetching) {
+    if (queryMsgsDirectForLog && !queryMsgsDirectForLog.isFetching) {
       const timeoutId = setTimeout(() => {
-        if (!queryRoute.isFetching) {
-          queryRoute.fetch();
+        if (!queryMsgsDirectForLog.isFetching) {
+          queryMsgsDirectForLog.fetch();
         }
       }, QUERY_ROUTE_FETCH_TIMEOUT_MS);
 
@@ -340,13 +340,13 @@ function useFetchBridgeRouterPer10sec(
       };
     }
     // eslint가 자동으로 추천해주는 deps를 쓰면 안된다.
-    // queryRoute는 amountConfig에서 필요할때마다 reference가 바뀌므로 deps에 넣는다.
-    // queryRoute.isFetching는 현재 fetch중인지 아닌지를 알려주는 값이므로 deps에 꼭 넣어야한다.
-    // queryRoute는 input이 같으면 reference가 같으므로 eslint에서 추천하는대로 queryRoute만 deps에 넣으면
-    // queryRoute.isFetching이 무시되기 때문에 수동으로 넣어줌
+    // queryMsgsDirectForLog는 amountConfig에서 필요할때마다 reference가 바뀌므로 deps에 넣는다.
+    // queryMsgsDirectForLog.isFetching는 현재 fetch중인지 아닌지를 알려주는 값이므로 deps에 꼭 넣어야한다.
+    // queryMsgsDirectForLog는 input이 같으면 reference가 같으므로 eslint에서 추천하는대로 queryMsgsDirectForLog만 deps에 넣으면
+    // queryMsgsDirectForLog.isFetching이 무시되기 때문에 수동으로 넣어줌
     // 해당 코드는 IBCSwapPage에서 그대로 가져옴
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryRoute, queryRoute?.isFetching]);
+  }, [queryMsgsDirectForLog, queryMsgsDirectForLog?.isFetching]);
 }
 
 const useIBCSwapConfigWithRecipientConfig = (
@@ -537,8 +537,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   });
 
   const queryIBCSwap = ibcSwapConfigsForBridge.amountConfig.getQueryIBCSwap();
-  const queryRoute = queryIBCSwap?.getQueryMsgsDirect();
-  useFetchBridgeRouterPer10sec(queryRoute);
+  const queryMsgsDirect = queryIBCSwap?.getQueryMsgsDirect();
+  useFetchBridgeRouterPer10sec(queryMsgsDirect);
 
   const sendConfigs = useSendMixedIBCTransferConfig(
     chainStore,
@@ -897,7 +897,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
               let tx: MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals;
 
-              const queryRoute = ibcSwapConfigsForBridge.amountConfig
+              const queryMsgsDirect = ibcSwapConfigsForBridge.amountConfig
                 .getQueryIBCSwap()!
                 .getQueryMsgsDirect();
 
@@ -916,16 +916,16 @@ export const SendAmountPage: FunctionComponent = observer(() => {
               const swapReceiver: string[] = [];
 
               try {
-                if (!queryRoute.response) {
-                  throw new Error("queryRoute.response is undefined");
+                if (!queryMsgsDirect.response) {
+                  throw new Error("queryMsgsDirect.response is undefined");
                 }
 
                 routeDurationSeconds =
-                  queryRoute.response.data.route
+                  queryMsgsDirect.response.data.route
                     .estimated_route_duration_seconds;
 
                 // 일단은 체인 id를 keplr에서 사용하는 형태로 바꿔야 한다.
-                for (const chainId of queryRoute.response.data.route
+                for (const chainId of queryMsgsDirect.response.data.route
                   .chain_ids) {
                   const isOnlyEvm = parseInt(chainId) > 0;
                   const chainIdInKeplr = isOnlyEvm
@@ -2290,15 +2290,17 @@ function useCheckExpectedOutIsTooSmall(
         !ibcSwapConfigsForBridge.amountConfig.isFetchingInAmount &&
         !ibcSwapConfigsForBridge.amountConfig.isFetchingOutAmount
       ) {
-        const queryRouteResponse = ibcSwapConfigsForBridge.amountConfig
+        const queryMsgsDirectResponse = ibcSwapConfigsForBridge.amountConfig
           .getQueryIBCSwap()
           ?.getQueryMsgsDirect()?.response;
-        if (!queryRouteResponse) {
+        if (!queryMsgsDirectResponse) {
           return;
         }
 
-        const inputDec = new Dec(queryRouteResponse.data.route.amount_in);
-        const outputDec = new Dec(queryRouteResponse.data.route.amount_out);
+        const inputDec = new Dec(queryMsgsDirectResponse.data.route.amount_in);
+        const outputDec = new Dec(
+          queryMsgsDirectResponse.data.route.amount_out
+        );
         const diff = (() => {
           if (inputDec.isZero()) {
             return;
@@ -2361,28 +2363,28 @@ function useGetGasSimulationForBridge(
       // swap일 경우 (osmosis에서 실행될 경우) swpa이 몇번 필요한지에 따라 영향을 미칠 것이다.
       let type = "default";
 
-      const queryRoute = ibcSwapConfigsForBridge.amountConfig
+      const queryMsgsDirect = ibcSwapConfigsForBridge.amountConfig
         .getQueryIBCSwap()
         ?.getQueryMsgsDirect();
 
-      if (queryRoute && queryRoute.response) {
+      if (queryMsgsDirect && queryMsgsDirect.response) {
         // swap일 경우 웬만하면 swap 한번으로 충분할 확률이 높다.
         // 이 가정에 따라서 첫로드시에 gas를 restore하기 위해서 트랜잭션을 보내는 체인에서 swap 할 경우
         // 일단 swap-1로 설정한다.
         if (
-          queryRoute.response.data.route.swap_venues &&
-          queryRoute.response.data.route.swap_venues.length === 1
+          queryMsgsDirect.response.data.route.swap_venues &&
+          queryMsgsDirect.response.data.route.swap_venues.length === 1
         ) {
           const swapVenueChainId = (() => {
             const evmLikeChainId = Number(
-              queryRoute.response.data.route.swap_venues[0].chain_id
+              queryMsgsDirect.response.data.route.swap_venues[0].chain_id
             );
             const isEVMChainId =
               !Number.isNaN(evmLikeChainId) && evmLikeChainId > 0;
 
             return isEVMChainId
               ? `eip155:${evmLikeChainId}`
-              : queryRoute.response.data.route.swap_venues[0].chain_id;
+              : queryMsgsDirect.response.data.route.swap_venues[0].chain_id;
           })();
 
           if (
@@ -2393,8 +2395,9 @@ function useGetGasSimulationForBridge(
           }
         }
 
-        if (queryRoute.response.data.route.operations.length > 0) {
-          const firstOperation = queryRoute.response.data.route.operations[0];
+        if (queryMsgsDirect.response.data.route.operations.length > 0) {
+          const firstOperation =
+            queryMsgsDirect.response.data.route.operations[0];
           if ("swap" in firstOperation) {
             if (firstOperation.swap.swap_in) {
               type = `swap-${firstOperation.swap.swap_in.swap_operations.length}`;

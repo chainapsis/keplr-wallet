@@ -109,9 +109,11 @@ export class IBCSwapAmountConfig extends AmountConfig {
     if (this.fraction > 0) {
       let result = this.maxAmount;
 
-      const queryRoute = this.getQueryIBCSwap(result)?.getQueryMsgsDirect();
-      if (queryRoute?.response != null) {
-        const estimatedFees = queryRoute.response.data.route.estimated_fees;
+      const queryMsgsDirect =
+        this.getQueryIBCSwap(result)?.getQueryMsgsDirect();
+      if (queryMsgsDirect?.response != null) {
+        const estimatedFees =
+          queryMsgsDirect.response.data.route.estimated_fees;
         const bridgeFee = estimatedFees?.reduce((acc, fee) => {
           if (fee.origin_asset.denom === this.currency.coinMinimalDenom) {
             return acc.add(new CoinPretty(this.currency, new Dec(fee.amount)));
@@ -272,14 +274,14 @@ export class IBCSwapAmountConfig extends AmountConfig {
       throw new Error("Query IBC Swap is not initialized");
     }
 
-    const queryRouteResponse = queryIBCSwap.getQueryMsgsDirect().response;
-    if (!queryRouteResponse) {
+    const queryMsgsDirectResponse = queryIBCSwap.getQueryMsgsDirect().response;
+    if (!queryMsgsDirectResponse) {
       throw new Error("Failed to fetch route");
     }
 
-    if (queryRouteResponse.timestamp) {
+    if (queryMsgsDirectResponse.timestamp) {
       const now = new Date();
-      const diff = now.getTime() - queryRouteResponse.timestamp;
+      const diff = now.getTime() - queryMsgsDirectResponse.timestamp;
       // 오래전에 캐싱된 쿼리 응답으로 tx를 만들 경우 quote가 크게 변경될 수 있으므로 에러를 발생시킨다.
       // 쿼리 응답 오는데에 시간이 좀 드니, RefreshInterval에 5초를 더 추가한다.
       if (diff > IBCSwapAmountConfig.QueryMsgsDirectRefreshInterval + 5000) {
@@ -407,8 +409,8 @@ export class IBCSwapAmountConfig extends AmountConfig {
       return;
     }
 
-    const queryRouteResponse = queryIBCSwap.getQueryMsgsDirect().response;
-    if (!queryRouteResponse) {
+    const queryMsgsDirectResponse = queryIBCSwap.getQueryMsgsDirect().response;
+    if (!queryMsgsDirectResponse) {
       return;
     }
 

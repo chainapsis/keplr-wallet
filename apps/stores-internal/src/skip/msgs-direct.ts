@@ -812,7 +812,7 @@ export class ObservableQueryMsgsDirect extends HasMapStore<ObservableQueryMsgsDi
     });
   }
 
-  getRoute(
+  getMsgsDirect(
     amountIn: CoinPretty,
     sourceAssetChainId: string,
     destAssetDenom: string,

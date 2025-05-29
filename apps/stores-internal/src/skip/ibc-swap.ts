@@ -59,7 +59,7 @@ export class ObservableQueryIBCSwapInner {
       this.amountInAmount
     );
 
-    return this.queryMsgsDirect.getRoute(
+    return this.queryMsgsDirect.getMsgsDirect(
       inAmount,
       this.sourceAssetChainId,
       this.destAssetDenom,
