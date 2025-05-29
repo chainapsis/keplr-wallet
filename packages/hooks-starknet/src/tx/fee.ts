@@ -1,4 +1,5 @@
 import {
+  FeeType,
   IAmountConfig,
   IFeeConfig,
   IGasConfig,
@@ -19,7 +20,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   @observable.ref
   protected _maxGasPrice: CoinPretty | undefined = undefined;
   @observable
-  protected _type: "ETH" | "STRK" = "STRK";
+  protected _type: FeeType = "STRK";
 
   @observable
   protected _disableBalanceCheck: boolean = false;
