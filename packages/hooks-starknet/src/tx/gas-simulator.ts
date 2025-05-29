@@ -394,12 +394,15 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
         if (this.enabled && this.gasEstimate != null) {
           const { l1DataGas, l1Gas, l2Gas } = this.gasEstimate;
 
-          const totalGas = new Dec(l1DataGas.consumed)
+          const gas = new Dec(l1DataGas.consumed)
             .add(new Dec(l1Gas.consumed))
             .add(new Dec(l2Gas.consumed));
 
-          const adjustedTotalGas = totalGas.mul(new Dec(this.gasAdjustment));
-          this.gasConfig.setValue(adjustedTotalGas.truncate().toString());
+          const maxGas = gas.mul(new Dec(this.gasAdjustment));
+          this.gasConfig.setValue({
+            gas: gas.truncate().toString(),
+            maxGas: maxGas.truncate().toString(),
+          });
         }
       })
     );

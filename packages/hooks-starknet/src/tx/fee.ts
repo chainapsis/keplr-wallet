@@ -174,7 +174,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       return;
     }
 
-    const gasDec = new Dec(this.gasConfig.gas);
+    const gasDec = new Dec(this.gasConfig.maxGas);
     return this._maxGasPrice.mul(gasDec);
   }
 }
