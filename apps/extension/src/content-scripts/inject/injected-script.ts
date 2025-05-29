@@ -19,6 +19,7 @@ const keplr = new InjectedKeplr(
       if (!keplr.starknet.provider) {
         keplr.starknet.provider = new RpcProvider({
           nodeUrl: state.rpc,
+          specVersion: "0.8.1",
         });
       } else {
         keplr.starknet.provider.channel.nodeUrl = state.rpc;
