@@ -1,5 +1,0 @@
-<resources>
-    <string name="app_name">Keplr</string>
-    <string name="appCenterAnalytics_whenToEnableAnalytics" moduleConfig="true" translatable="false">ALWAYS_SEND</string>
-    <string moduleConfig="true" name="CodePushDeploymentKey">REjDoiFB_oK-qkJINr9jXzj8H4SArxGov6b61</string>
-</resources>

@@ -190,6 +190,7 @@ export class AccountSetBase {
             this._bech32Address = key.bech32Address;
             this._ethereumHexAddress = key.ethereumHexAddress;
             this._starknetHexAddress = "";
+            this._bitcoinAddress = undefined;
             this._isNanoLedger = key.isNanoLedger;
             this._isKeystone = key.isKeystone;
             this._name = key.name;
@@ -212,6 +213,7 @@ export class AccountSetBase {
             this._bech32Address = "";
             this._ethereumHexAddress = "";
             this._starknetHexAddress = key.hexAddress;
+            this._bitcoinAddress = undefined;
             this._isNanoLedger = key.isNanoLedger;
             this._isKeystone = false;
             this._name = key.name;
@@ -226,6 +228,7 @@ export class AccountSetBase {
           this._bech32Address = "";
           this._ethereumHexAddress = "";
           this._starknetHexAddress = "";
+          this._bitcoinAddress = undefined;
           this._isNanoLedger = false;
           this._isKeystone = false;
           this._name = "";

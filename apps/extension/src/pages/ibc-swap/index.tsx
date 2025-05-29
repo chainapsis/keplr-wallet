@@ -39,7 +39,7 @@ import styled, { useTheme } from "styled-components";
 import { GuideBox } from "../../components/guide-box";
 import { VerticalCollapseTransition } from "../../components/transition/vertical-collapse";
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
-import { Dec, DecUtils, Int } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { MakeTxResponse, WalletStatus } from "@keplr-wallet/stores";
 import { autorun } from "mobx";
 import {
@@ -61,6 +61,7 @@ import {
 } from "@keplr-wallet/stores-eth";
 import { EthTxStatus } from "@keplr-wallet/types";
 import { InsufficientFeeError } from "@keplr-wallet/hooks";
+import { useSwapAnalytics } from "./hooks/use-swap-analytics";
 
 const TextButtonStyles = {
   Container: styled.div`
@@ -185,7 +186,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
       ? inChainAccount.ethereumHexAddress
       : inChainAccount.bech32Address,
     // TODO: config로 빼기
-    300000,
+    1_500_000,
     outChainId,
     outCurrency,
     swapFeeBps
@@ -756,33 +757,41 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     const r: string[] = [];
     if (!inCurrency.coinGeckoId) {
       if ("originCurrency" in inCurrency && inCurrency.originCurrency) {
-        r.push(inCurrency.originCurrency.coinDenom);
+        r.push(
+          CoinPretty.makeCoinDenomPretty(inCurrency.originCurrency.coinDenom)
+        );
       } else {
-        r.push(inCurrency.coinDenom);
+        r.push(CoinPretty.makeCoinDenomPretty(inCurrency.coinDenom));
       }
     } else if (!inOrOutChangedDelay) {
       const price = priceStore.getPrice(inCurrency.coinGeckoId, "usd");
       if (!price) {
         if ("originCurrency" in inCurrency && inCurrency.originCurrency) {
-          r.push(inCurrency.originCurrency.coinDenom);
+          r.push(
+            CoinPretty.makeCoinDenomPretty(inCurrency.originCurrency.coinDenom)
+          );
         } else {
-          r.push(inCurrency.coinDenom);
+          r.push(CoinPretty.makeCoinDenomPretty(inCurrency.coinDenom));
         }
       }
     }
     if (!outCurrency.coinGeckoId) {
       if ("originCurrency" in outCurrency && outCurrency.originCurrency) {
-        r.push(outCurrency.originCurrency.coinDenom);
+        r.push(
+          CoinPretty.makeCoinDenomPretty(outCurrency.originCurrency.coinDenom)
+        );
       } else {
-        r.push(outCurrency.coinDenom);
+        r.push(CoinPretty.makeCoinDenomPretty(outCurrency.coinDenom));
       }
     } else if (!inOrOutChangedDelay) {
       const price = priceStore.getPrice(outCurrency.coinGeckoId, "usd");
       if (!price) {
         if ("originCurrency" in outCurrency && outCurrency.originCurrency) {
-          r.push(outCurrency.originCurrency.coinDenom);
+          r.push(
+            CoinPretty.makeCoinDenomPretty(outCurrency.originCurrency.coinDenom)
+          );
         } else {
-          r.push(outCurrency.coinDenom);
+          r.push(CoinPretty.makeCoinDenomPretty(outCurrency.coinDenom));
         }
       }
     }
@@ -792,6 +801,17 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   // --------------------------
 
   const [isTxLoading, setIsTxLoading] = useState(false);
+
+  const { logSwapSignOpened, logEvent, quoteId } = useSwapAnalytics({
+    inChainId: inChainId,
+    inCurrency: inCurrency,
+    outChainId: outChainId,
+    outCurrency: outCurrency,
+    ibcSwapConfigs: ibcSwapConfigs,
+    swapFeeBps,
+  });
+
+  const isSwap = ibcSwapConfigs.amountConfig.type === "swap";
 
   return (
     <MainHeaderLayout
@@ -808,6 +828,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         e.preventDefault();
 
         if (!interactionBlocked) {
+          logSwapSignOpened();
+
           setIsTxLoading(true);
 
           let tx: MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals;
@@ -1173,6 +1195,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       }
                     }
 
+                    if (isSwap) {
+                      logEvent("swap_tx_submitted", {
+                        quote_id: quoteId,
+                      });
+                    }
+
                     const params: Record<
                       string,
                       | number
@@ -1294,6 +1322,11 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   },
                   onFulfill: (tx: any) => {
                     if (tx.code != null && tx.code !== 0) {
+                      if (isSwap) {
+                        logEvent("swap_tx_failed", {
+                          quote_id: quoteId,
+                        });
+                      }
                       console.log(tx.log ?? tx.raw_log);
 
                       notification.show(
@@ -1302,6 +1335,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                         ""
                       );
                       return;
+                    }
+
+                    if (isSwap) {
+                      logEvent("swap_tx_success", {
+                        quote_id: quoteId,
+                      });
                     }
 
                     notification.show(
@@ -1374,6 +1413,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
               ethereumAccount.setIsSendingTx(true);
 
+              if (erc20ApprovalTx) {
+                logEvent("erc20_approve_sign_opened", {
+                  quote_id: quoteId,
+                });
+              }
+
               await ethereumAccount.sendEthereumTx(
                 sender,
                 {
@@ -1381,8 +1426,26 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   ...feeObject,
                 },
                 {
+                  onBroadcastFailed: (e) => {
+                    if (erc20ApprovalTx && e?.message === "Request rejected") {
+                      logEvent("erc20_approve_sign_canceled", {
+                        quote_id: quoteId,
+                      });
+                    }
+                  },
                   onBroadcasted: (txHash) => {
+                    if (erc20ApprovalTx) {
+                      logEvent("erc20_approve_tx_submitted", {
+                        quote_id: quoteId,
+                      });
+                    }
+
                     if (!erc20ApprovalTx) {
+                      if (isSwap) {
+                        logEvent("swap_tx_submitted", {
+                          quote_id: quoteId,
+                        });
+                      }
                       ethereumAccount.setIsSendingTx(false);
 
                       const msg = new RecordTxWithSkipSwapMsg(
@@ -1477,6 +1540,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       );
 
                       if (erc20ApprovalTx) {
+                        logEvent("erc20_approve_tx_success", {
+                          quote_id: quoteId,
+                        });
+
                         ethereumAccount.setIsSendingTx(true);
                         ethereumAccount
                           .simulateGas(sender, tx as UnsignedEVMTransaction)
@@ -1516,6 +1583,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                               },
                               {
                                 onBroadcasted: (txHash) => {
+                                  if (isSwap) {
+                                    logEvent("swap_tx_submitted", {
+                                      quote_id: quoteId,
+                                    });
+                                  }
+
                                   ethereumAccount.setIsSendingTx(false);
 
                                   const msg = new RecordTxWithSkipSwapMsg(
@@ -1606,6 +1679,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                                   if (
                                     txReceipt.status === EthTxStatus.Success
                                   ) {
+                                    if (isSwap) {
+                                      logEvent("swap_tx_success", {
+                                        quote_id: quoteId,
+                                      });
+                                    }
+
                                     notification.show(
                                       "success",
                                       intl.formatMessage({
@@ -1614,6 +1693,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                                       ""
                                     );
                                   } else {
+                                    if (isSwap) {
+                                      logEvent("swap_tx_failed", {
+                                        quote_id: quoteId,
+                                      });
+                                    }
+
                                     notification.show(
                                       "failed",
                                       intl.formatMessage({
@@ -1628,12 +1713,23 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                           })
                           .catch((e) => {
                             console.error(e);
+                            logEvent("swap_tx_client_error", {
+                              quote_id: quoteId,
+                              error_message: e?.message,
+                            });
+
                             ethereumAccount.setIsSendingTx(false);
                             setCalculatingTxError(e);
                             setIsTxLoading(false);
                           });
                       }
                     } else {
+                      if (erc20ApprovalTx) {
+                        logEvent("erc20_approve_tx_failed", {
+                          quote_id: quoteId,
+                        });
+                      }
+
                       notification.show(
                         "failed",
                         intl.formatMessage({ id: "error.transaction-failed" }),
@@ -1646,7 +1742,20 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             }
           } catch (e) {
             if (e?.message === "Request rejected") {
+              if (isSwap) {
+                logEvent("swap_sign_canceled", {
+                  quote_id: quoteId,
+                });
+              }
+
               return;
+            }
+
+            if (isSwap) {
+              logEvent("swap_tx_failed", {
+                quote_id: quoteId,
+                error_message: e?.message,
+              });
             }
 
             console.log(e);

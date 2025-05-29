@@ -22,6 +22,7 @@ import { useNotification } from "../../../../hooks/notification";
 import { Gutter } from "../../../../components/gutter";
 import { Tooltip } from "../../../../components/tooltip";
 import { FormattedMessage, useIntl } from "react-intl";
+import { CoinPretty } from "@keplr-wallet/unit";
 
 const Styles = {
   Container: styled(Stack)`
@@ -211,7 +212,9 @@ const TokenItem: FunctionComponent<{
     <ItemStyles.Container>
       <Columns sum={1}>
         <Stack gutter="0.25rem">
-          <ItemStyles.Denom>{tokenInfo.currency.coinDenom}</ItemStyles.Denom>
+          <ItemStyles.Denom>
+            {CoinPretty.makeCoinDenomPretty(tokenInfo.currency.coinDenom)}
+          </ItemStyles.Denom>
           <ItemStyles.Address>
             {(() => {
               if ("contractAddress" in tokenInfo.currency) {
