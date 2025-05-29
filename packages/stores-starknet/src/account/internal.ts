@@ -16,9 +16,22 @@ import {
   hash as starknetHash,
   DeployAccountSignerDetails,
   ETransactionVersion,
+  OutsideExecutionVersion,
 } from "starknet";
 import { Keplr } from "@keplr-wallet/types";
-import { Fee } from "./base";
+
+export type Fee = {
+  l1MaxGas: string;
+  l1MaxGasPrice: string;
+  l1MaxDataGas: string;
+  l1MaxDataGasPrice: string;
+  l2MaxGas?: string;
+  l2MaxGasPrice?: string;
+  paymaster?: {
+    mode: "default"; // "sponsored" is not supported yet
+    gasToken: string;
+  };
+};
 
 export class StoreAccount extends Account {
   constructor(
@@ -27,10 +40,17 @@ export class StoreAccount extends Account {
     public readonly keplrChainId: string,
     protected readonly getKeplr: () => Promise<Keplr | undefined>
   ) {
-    super({ nodeUrl: rpc }, address, "", "1", ETransactionVersion.V3, {
-      // TODO: change to node url
-      nodeUrl: keplrChainId.includes("SN_MAIN") ? "SN_MAIN" : "SN_SEPOLIA",
-    });
+    super(
+      { nodeUrl: rpc, specVersion: "0.8.1" },
+      address,
+      "",
+      "1",
+      ETransactionVersion.V3,
+      {
+        // TODO: change to node url
+        nodeUrl: keplrChainId.includes("SN_MAIN") ? "SN_MAIN" : "SN_SEPOLIA",
+      }
+    );
   }
 
   public override async deployAccount(
@@ -79,7 +99,7 @@ export class StoreAccount extends Account {
     }
     const { transaction: newTransaction, signature } =
       await keplr.signStarknetDeployAccountTransaction(this.keplrChainId, {
-        ...stark.v3Details(details),
+        ...stark.v3Details(details, "0.8.1"),
         classHash,
         constructorCalldata: compiledCalldata,
         contractAddress,
@@ -93,7 +113,7 @@ export class StoreAccount extends Account {
     return this.deployAccountContract(
       { classHash, addressSalt, constructorCalldata, signature },
       {
-        ...stark.v3Details(newTransaction),
+        ...stark.v3Details(newTransaction, "0.8.1"),
         ...newTransaction,
       }
     );
@@ -141,31 +161,17 @@ export class StoreAccount extends Account {
         0
       );
 
+    const universalDetails = await this._buildUniversalDetails({ fee });
+
     const signerDetails: DeployAccountSignerDetails = {
+      ...stark.v3Details(universalDetails, "0.8.1"),
       classHash,
       constructorCalldata: compiledCalldata,
       contractAddress,
       addressSalt,
-
       version: ETransactionVersion.V3,
       nonce: nonce,
       chainId: chainId,
-
-      resourceBounds: {
-        l1_gas: {
-          max_amount: num.toHex(fee.gas),
-          max_price_per_unit: num.toHex(fee.maxGasPrice),
-        },
-        l2_gas: {
-          max_amount: "0x0",
-          max_price_per_unit: "0x0",
-        },
-      },
-      tip: "0x0",
-      paymasterData: [],
-      accountDeploymentData: [],
-      nonceDataAvailabilityMode: "L1",
-      feeDataAvailabilityMode: "L1",
     };
 
     const keplr = await this.getKeplr();
@@ -181,7 +187,7 @@ export class StoreAccount extends Account {
     return this.deployAccountContract(
       { classHash, addressSalt, constructorCalldata, signature },
       {
-        ...stark.v3Details(newTransaction),
+        ...stark.v3Details(newTransaction, "0.8.1"),
         ...newTransaction,
       }
     );
@@ -206,7 +212,7 @@ export class StoreAccount extends Account {
     const calls = Array.isArray(transactions) ? transactions : [transactions];
     const nonce = num.toBigInt(details.nonce ?? (await this.getNonce()));
     const version = details.version;
-    if (version !== "0x1" && version !== "0x3") {
+    if (version !== "0x3") {
       throw new Error(`Invalid version: ${version}`);
     }
 
@@ -222,11 +228,10 @@ export class StoreAccount extends Account {
     const chainId = await this.getChainId();
 
     const signerDetails: InvocationsSignerDetails = {
-      ...stark.v3Details(details),
+      ...stark.v3Details(details, "0.8.1"),
       resourceBounds: estimate.resourceBounds,
       walletAddress: this.address,
       nonce,
-      maxFee: estimate.maxFee,
       version,
       chainId,
       cairoVersion: await this.getCairoVersion(),
@@ -269,31 +274,16 @@ export class StoreAccount extends Account {
     const nonce = await this.getNonce();
     const chainId = await this.getChainId();
 
-    // TODO: handle paymaster data
-    // stark.v3Details({});
+    const universalDetails = await this._buildUniversalDetails({ fee });
 
     const signerDetails: InvocationsSignerDetails = {
+      ...stark.v3Details(universalDetails, "0.8.1"),
       version: ETransactionVersion.V3,
       walletAddress: this.address,
       nonce: nonce,
       chainId: chainId,
       cairoVersion: this.cairoVersion,
       skipValidate: false,
-      resourceBounds: {
-        l1_gas: {
-          max_amount: num.toHex(fee.gas),
-          max_price_per_unit: num.toHex(fee.maxGasPrice),
-        },
-        l2_gas: {
-          max_amount: "0x0",
-          max_price_per_unit: "0x0",
-        },
-      },
-      tip: "0x0",
-      paymasterData: [],
-      accountDeploymentData: [],
-      nonceDataAvailabilityMode: "L1",
-      feeDataAvailabilityMode: "L1",
     };
 
     let transactions: Call[];
@@ -329,5 +319,63 @@ export class StoreAccount extends Account {
       { contractAddress: this.address, calldata, signature },
       details
     );
+  }
+
+  protected async _buildUniversalDetails({
+    fee,
+  }: {
+    fee: Fee;
+  }): Promise<UniversalDetails> {
+    const details: UniversalDetails = {};
+
+    if (fee.paymaster) {
+      try {
+        const snip9Version = await this.getSnip9Version();
+        const isSupported =
+          snip9Version !== OutsideExecutionVersion.UNSUPPORTED;
+        if (!isSupported) {
+          throw new Error("Outside execution is not supported");
+        }
+      } catch (e) {
+        // If account is not deployed yet, `getSnip9Version` will throw error.
+        // Thus, we need to check if the account is deployed or not.
+        const nonce = await this.getNonce();
+        if (nonce !== "0x0") {
+          throw new Error("Outside execution is not supported");
+        }
+      }
+
+      // check if paymaster is available
+      const isAvailable = await this.paymaster.isAvailable();
+      if (!isAvailable) {
+        throw new Error("Paymaster is not available");
+      }
+
+      // suppose gas token is supported by paymaster here
+      details.paymaster = {
+        feeMode: {
+          mode: "default",
+          gasToken: fee.paymaster.gasToken,
+        },
+      };
+
+      // set resource bounds
+      details.resourceBounds = {
+        l1_gas: {
+          max_amount: num.toHex(fee.l1MaxGas),
+          max_price_per_unit: num.toHex(fee.l1MaxGasPrice),
+        },
+        l2_gas: {
+          max_amount: num.toHex(fee.l2MaxGas ?? "0"),
+          max_price_per_unit: num.toHex(fee.l2MaxGasPrice ?? "0"),
+        },
+        l1_data_gas: {
+          max_amount: num.toHex(fee.l1MaxDataGas),
+          max_price_per_unit: num.toHex(fee.l1MaxDataGasPrice),
+        },
+      };
+    }
+
+    return details;
   }
 }

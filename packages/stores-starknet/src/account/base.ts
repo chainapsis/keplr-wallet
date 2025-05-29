@@ -13,14 +13,8 @@ import {
   OutsideExecutionVersion,
   UniversalDetails,
 } from "starknet";
-import { StoreAccount } from "./internal";
+import { Fee, StoreAccount } from "./internal";
 import { Dec, DecUtils, Int } from "@keplr-wallet/unit";
-
-export type Fee = {
-  gas: string;
-  maxGasPrice: string;
-  gasTokenAddress?: string;
-};
 
 export class StarknetAccountBase {
   @observable
