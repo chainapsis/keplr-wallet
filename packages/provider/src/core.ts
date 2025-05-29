@@ -1579,6 +1579,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
 
 // IMPORTANT: 사이드 패널을 열어야하는 JSON-RPC 메소드들이 생길 때마다 여기에 추가해야한다.
 const sidePanelOpenNeededJSONRPCMethods = [
+  "eth_signTransaction",
   "eth_sendTransaction",
   "personal_sign",
   "eth_signTypedData_v3",

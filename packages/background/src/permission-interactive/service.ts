@@ -1,5 +1,5 @@
 import { BIP44HDPath, KeyRingService } from "../keyring";
-import { Env } from "@keplr-wallet/router";
+import { Env, EthereumProviderRpcError } from "@keplr-wallet/router";
 import { PermissionService } from "../permission";
 import { ChainsService } from "../chains";
 import { KVStore } from "@keplr-wallet/common";
@@ -127,14 +127,24 @@ export class PermissionInteractiveService {
       // If the current chain id is not set, use Ethereum mainnet as the default chain id.
       "eip155:1";
 
-    await this.permissionService.checkOrGrantBasicAccessPermission(
-      env,
-      [newCurrentChainIdForEVM],
-      origin,
-      {
-        isForEVM: true,
+    try {
+      await this.permissionService.checkOrGrantBasicAccessPermission(
+        env,
+        [newCurrentChainIdForEVM],
+        origin,
+        {
+          isForEVM: true,
+        }
+      );
+    } catch (e) {
+      if (
+        (e instanceof Error && e.message === "Request rejected") ||
+        e === "Request rejected"
+      ) {
+        throw new EthereumProviderRpcError(4001, "User Rejected Request");
       }
-    );
+      throw e;
+    }
   }
 
   async ensureEnabledForStarknet(

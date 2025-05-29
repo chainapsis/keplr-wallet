@@ -21,6 +21,7 @@ import { IconProps } from "../../../../components/icon/types";
 import { useGlobarSimpleBar } from "../../../../hooks/global-simplebar";
 import { Tooltip } from "../../../../components/tooltip";
 import { Gutter } from "../../../../components/gutter";
+import { isRunningInSidePanel } from "../../../../utils";
 
 const Styles = {
   MenuContainer: styled.div`
@@ -320,16 +321,18 @@ export const ViewOptionsContextMenu: FunctionComponent<{
 
     const handleToggleShowFiatValue = () => {
       const willBeEnabled = !uiConfigStore.options.showFiatValue;
+      const isSidePanel = isRunningInSidePanel();
       analyticsAmplitudeStore.logEvent(
         willBeEnabled
           ? "click_toggle_on_show_fiat_value"
           : "click_toggle_off_show_fiat_value",
-        { itemKind: "toggle" }
+        { itemKind: "toggle", isSidePanel }
       );
 
       analyticsAmplitudeStore.setUserProperties({
         show_fiat_value_enabled: willBeEnabled,
         show_fiat_value_last_toggled_at: Date.now(),
+        is_side_panel: isSidePanel,
       });
 
       uiConfigStore.toggleShowFiatValue();
@@ -339,16 +342,18 @@ export const ViewOptionsContextMenu: FunctionComponent<{
       const willBeEnabled = !(
         uiConfigStore.options.assetViewMode === "grouped"
       );
+      const isSidePanel = isRunningInSidePanel();
       analyticsAmplitudeStore.logEvent(
         willBeEnabled
           ? "click_toggle_on_smart_grouping"
           : "click_toggle_off_smart_grouping",
-        { itemKind: "toggle" }
+        { itemKind: "toggle", isSidePanel }
       );
 
       analyticsAmplitudeStore.setUserProperties({
         smart_grouping_enabled: willBeEnabled,
         smart_grouping_last_toggled_at: Date.now(),
+        is_side_panel: isSidePanel,
       });
 
       if (uiConfigStore.options.assetViewMode === "grouped") {
