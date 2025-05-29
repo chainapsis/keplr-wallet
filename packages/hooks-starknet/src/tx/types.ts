@@ -37,9 +37,18 @@ export type FeeType = "STRK" | "ETH";
 
 export interface IGasConfig extends ITxChainSetter {
   value: string;
-  setValue(value: string | number): void;
+  setValue(
+    value:
+      | string
+      | number
+      | {
+          gas: string;
+          maxGas: string;
+        }
+  ): void;
 
   gas: number;
+  maxGas: number;
 
   uiProperties: UIProperties;
 }

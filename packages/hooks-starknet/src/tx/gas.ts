@@ -12,6 +12,9 @@ export class GasConfig extends TxChainSetter implements IGasConfig {
   @observable
   protected _value: string = "";
 
+  @observable
+  protected _maxGasValue: string = "";
+
   /*
    There are services that sometimes use invalid tx to sign arbitrary data on the sign page.
    In this case, there is no obligation to deal with it, but 0 gas is favorably allowed. This option is used for this case.
@@ -40,9 +43,12 @@ export class GasConfig extends TxChainSetter implements IGasConfig {
   }
 
   @action
-  setValue(value: string | number): void {
+  setValue(value: string | number | { gas: string; maxGas: string }): void {
     if (typeof value === "number") {
       this._value = Math.ceil(value).toString();
+    } else if (typeof value === "object") {
+      this._value = value.gas;
+      this._maxGasValue = value.maxGas;
     } else {
       this._value = value;
     }
@@ -56,6 +62,20 @@ export class GasConfig extends TxChainSetter implements IGasConfig {
     const num = Number.parseInt(this.value);
     if (Number.isNaN(num)) {
       return 0;
+    }
+
+    return num;
+  }
+
+  get maxGas(): number {
+    // TODO: gas adjustment를 이 클래스에서 관리하도록
+    if (this._maxGasValue.trim() === "") {
+      return Math.ceil(this.gas * 1.5);
+    }
+
+    const num = Number.parseInt(this._maxGasValue);
+    if (Number.isNaN(num)) {
+      return Math.ceil(this.gas * 1.5);
     }
 
     return num;
