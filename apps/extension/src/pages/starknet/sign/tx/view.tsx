@@ -170,82 +170,55 @@ export const SignStarknetTxView: FunctionComponent<{
 
           const estimateResult = await starknetAccountStore
             .getAccount(chainId)
-            .estimateInvokeFee(sender, interactionData.data.transactions, type);
+            .estimateInvokeFee(
+              sender,
+              interactionData.data.transactions,
+              type === "ETH" ? feeContractAddress : undefined
+            );
 
           const {
-            gas_consumed,
-            data_gas_consumed,
-            gas_price,
-            overall_fee,
-            resourceBounds,
-            unit,
+            l1_gas_consumed,
+            l1_gas_price,
+            l2_gas_consumed,
+            l2_gas_price,
+            l1_data_gas_consumed,
+            l1_data_gas_price,
           } = estimateResult;
+
+          const l1Fee = new Dec(l1_gas_consumed).mul(new Dec(l1_gas_price));
+          const l2Fee = new Dec(l2_gas_consumed ?? 0).mul(
+            new Dec(l2_gas_price ?? 0)
+          );
+          const l1DataFee = new Dec(l1_data_gas_consumed).mul(
+            new Dec(l1_data_gas_price)
+          );
+
+          const calculatedOverallFee = l1Fee.add(l2Fee).add(l1DataFee);
 
           const gasMargin = new Dec(1.2);
           const gasPriceMargin = new Dec(1.5);
 
-          const isV1Tx = feeConfig.type === "ETH" && unit === "WEI";
+          const totalGasConsumed = new Dec(l1_gas_consumed)
+            .add(new Dec(l2_gas_consumed ?? 0))
+            .add(new Dec(l1_data_gas_consumed));
 
-          const gasConsumed = new Dec(gas_consumed);
-          const dataGasConsumed = new Dec(data_gas_consumed);
-          const sigVerificationGasConsumed = new Dec(583);
-          const totalGasConsumed = gasConsumed
-            .add(dataGasConsumed)
-            .add(sigVerificationGasConsumed);
+          const adjustedGasPrice = calculatedOverallFee.quo(totalGasConsumed);
 
-          const gasPriceDec = new Dec(gas_price);
-
-          // overall_fee = gas_consumed * gas_price + data_gas_consumed * data_gas_price
-          const overallFee = new Dec(overall_fee);
-
-          const signatureVerificationFee =
-            sigVerificationGasConsumed.mul(gasPriceDec);
-
-          // adjusted_overall_fee = overall_fee + signature_verification_gas_consumed * gas_price
-          const adjustedOverallFee = overallFee.add(signatureVerificationFee);
-
-          // adjusted_gas_price = adjusted_overall_fee / total_gas_consumed
-          const adjustedGasPrice = adjustedOverallFee.quo(totalGasConsumed);
+          // CHECK: It seems onchain verification fee doesn't need to be considered.
+          // const sigVerificationGasConsumed = new Dec(583);
 
           const gasPrice = new CoinPretty(feeCurrency, adjustedGasPrice);
+          const maxGasPrice = gasPrice.mul(gasPriceMargin);
+          const maxGas = totalGasConsumed.mul(gasMargin);
 
-          if (isV1Tx) {
-            const maxGasPrice = gasPrice.mul(gasPriceMargin);
-            const maxGas = totalGasConsumed.mul(gasMargin);
+          feeConfig.setGasPrice({
+            gasPrice: gasPrice,
+            maxGasPrice: maxGasPrice,
+          });
 
-            feeConfig.setGasPrice({
-              gasPrice,
-              maxGasPrice,
-            });
-
-            return {
-              gasUsed: parseInt(maxGas.truncate().toString()),
-            };
-          } else {
-            const l1Gas = resourceBounds.l1_gas;
-
-            const maxGas = adjustedOverallFee.quo(gasPriceDec).mul(gasMargin);
-            const maxGasPrice = gasPrice.mul(gasPriceMargin);
-
-            const maxPricePerUnit = new CoinPretty(
-              feeCurrency,
-              num.hexToDecimalString(l1Gas.max_price_per_unit)
-            );
-
-            feeConfig.setGasPrice({
-              gasPrice: new CoinPretty(feeCurrency, gasPriceDec),
-              maxGasPrice: maxPricePerUnit
-                .sub(maxGasPrice)
-                .toDec()
-                .gt(new Dec(0))
-                ? maxPricePerUnit
-                : maxGasPrice,
-            });
-
-            return {
-              gasUsed: parseInt(maxGas.truncate().toString()),
-            };
-          }
+          return {
+            gasUsed: parseInt(maxGas.truncate().toString()),
+          };
         },
       };
     }
@@ -324,56 +297,45 @@ export const SignStarknetTxView: FunctionComponent<{
           .getNonce(senderConfig.sender);
       }
 
-      const details: InvocationsSignerDetails = (() => {
-        if (type === "ETH") {
-          return {
-            version: "0x1",
-            walletAddress: interactionData.data.details.walletAddress,
-            nonce: num.toBigInt(nonce.toString()),
-            chainId: interactionData.data.details.chainId,
-            cairoVersion: interactionData.data.details.cairoVersion,
-            skipValidate: false,
-            maxFee: feeConfig.maxFee
-              ? num.toHex(feeConfig.maxFee.toCoin().amount)
-              : "0x0",
-          };
-        } else {
-          return {
-            version: "0x3",
-            walletAddress: interactionData.data.details.walletAddress,
-            nonce: num.toBigInt(nonce.toString()),
-            chainId: interactionData.data.details.chainId,
-            cairoVersion: interactionData.data.details.cairoVersion,
-            skipValidate: false,
-            resourceBounds: {
-              l1_gas: {
-                max_amount: num.toHex(gasConfig.gas.toString()),
-                max_price_per_unit: (() => {
-                  if (!feeConfig.maxFee) {
-                    return "0x0";
-                  }
+      const details: InvocationsSignerDetails = {
+        version: "0x3",
+        walletAddress: interactionData.data.details.walletAddress,
+        nonce: num.toBigInt(nonce.toString()),
+        chainId: interactionData.data.details.chainId,
+        cairoVersion: interactionData.data.details.cairoVersion,
+        skipValidate: false,
+        resourceBounds: {
+          // l1_data_gas, l1_gas, l2_gas 모두 명시해야한다. 쥰내 골때리네ㅋㅋ
+          l1_data_gas: {
+            max_amount: "0x0", // TODO: 명시
+            max_price_per_unit: "0x0", // TODO: 명시
+          },
+          l1_gas: {
+            max_amount: num.toHex(gasConfig.gas.toString()),
+            max_price_per_unit: (() => {
+              if (!feeConfig.maxFee) {
+                return "0x0";
+              }
 
-                  return num.toHex(
-                    new Dec(feeConfig.maxFee.toCoin().amount)
-                      .quo(new Dec(gasConfig.gas))
-                      .truncate()
-                      .toString()
-                  );
-                })(),
-              },
-              l2_gas: {
-                max_amount: "0x0",
-                max_price_per_unit: "0x0",
-              },
-            },
-            tip: "0x0",
-            paymasterData: [],
-            accountDeploymentData: [],
-            nonceDataAvailabilityMode: "L1",
-            feeDataAvailabilityMode: "L1",
-          };
-        }
-      })();
+              return num.toHex(
+                new Dec(feeConfig.maxFee.toCoin().amount)
+                  .quo(new Dec(gasConfig.gas))
+                  .truncate()
+                  .toString()
+              );
+            })(),
+          },
+          l2_gas: {
+            max_amount: "0x0",
+            max_price_per_unit: "0x0",
+          },
+        },
+        tip: "0x0",
+        paymasterData: [],
+        accountDeploymentData: [],
+        nonceDataAvailabilityMode: "L1",
+        feeDataAvailabilityMode: "L1",
+      };
 
       let signature: string[] | undefined = undefined;
       if (interactionData.data.keyType === "ledger") {
