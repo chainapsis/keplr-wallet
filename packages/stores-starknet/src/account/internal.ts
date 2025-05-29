@@ -227,6 +227,8 @@ export class StoreAccount extends Account {
 
     const chainId = await this.getChainId();
 
+    // TODO: account.buildPaymasterTransaction when paymaster is enabled
+
     const signerDetails: InvocationsSignerDetails = {
       ...stark.v3Details(details, "0.8.1"),
       resourceBounds: estimate.resourceBounds,
@@ -326,7 +328,22 @@ export class StoreAccount extends Account {
   }: {
     fee: Fee;
   }): Promise<UniversalDetails> {
-    const details: UniversalDetails = {};
+    const details: UniversalDetails = {
+      resourceBounds: {
+        l1_gas: {
+          max_amount: num.toHex(fee.l1MaxGas),
+          max_price_per_unit: num.toHex(fee.l1MaxGasPrice),
+        },
+        l2_gas: {
+          max_amount: num.toHex(fee.l2MaxGas ?? "0"),
+          max_price_per_unit: num.toHex(fee.l2MaxGasPrice ?? "0"),
+        },
+        l1_data_gas: {
+          max_amount: num.toHex(fee.l1MaxDataGas),
+          max_price_per_unit: num.toHex(fee.l1MaxDataGasPrice),
+        },
+      },
+    };
 
     if (fee.paymaster) {
       try {
@@ -356,22 +373,6 @@ export class StoreAccount extends Account {
         feeMode: {
           mode: "default",
           gasToken: fee.paymaster.gasToken,
-        },
-      };
-
-      // set resource bounds
-      details.resourceBounds = {
-        l1_gas: {
-          max_amount: num.toHex(fee.l1MaxGas),
-          max_price_per_unit: num.toHex(fee.l1MaxGasPrice),
-        },
-        l2_gas: {
-          max_amount: num.toHex(fee.l2MaxGas ?? "0"),
-          max_price_per_unit: num.toHex(fee.l2MaxGasPrice ?? "0"),
-        },
-        l1_data_gas: {
-          max_amount: num.toHex(fee.l1MaxDataGas),
-          max_price_per_unit: num.toHex(fee.l1MaxDataGasPrice),
         },
       };
     }

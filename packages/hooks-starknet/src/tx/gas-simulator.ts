@@ -1,4 +1,10 @@
-import { IFeeConfig, IGasConfig, IGasSimulator, UIProperties } from "./types";
+import {
+  IFeeConfig,
+  IGasConfig,
+  IGasSimulator,
+  UIProperties,
+  GasEstimate,
+} from "./types";
 import {
   action,
   autorun,
@@ -12,40 +18,31 @@ import { useEffect, useState } from "react";
 import { KVStore } from "@keplr-wallet/common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { TxChainSetter } from "./chain";
-import { ChainGetter, MakeTxResponse } from "@keplr-wallet/stores";
-import { Coin, StdFee } from "@keplr-wallet/types";
+import { ChainGetter } from "@keplr-wallet/stores";
 import { isSimpleFetchError } from "@keplr-wallet/simple-fetch";
+import { Dec } from "@keplr-wallet/unit";
 
-type TxSimulate = Pick<MakeTxResponse, "simulate">;
-export type SimulateGasFn = () => TxSimulate;
+export type GasSimulate = () => Promise<GasEstimate>;
+export type SimulateGasFn = () => GasSimulate;
 
 class GasSimulatorState {
   @observable
-  protected _outdatedCosmosSdk: boolean = false;
-
-  // If the initialGasEstimated is null, it means that there is no value stored or being loaded.
-  @observable
-  protected _initialGasEstimated: number | null = null;
-
-  @observable
   protected _isInitialized: boolean = false;
 
-  @observable
-  protected _recentGasEstimated: number | undefined = undefined;
+  // If the initialGasEstimate is null, it means that there is no value stored or being loaded.
+  @observable.ref
+  protected _initialGasEstimate: GasEstimate | null = null;
 
   @observable.ref
-  protected _tx: TxSimulate | undefined = undefined;
+  protected _recentGasEstimate: GasEstimate | null = null;
+
   @observable.ref
-  protected _stdFee: StdFee | undefined = undefined;
+  protected _gasSimulate: GasSimulate | undefined = undefined;
   @observable.ref
   protected _error: Error | undefined = undefined;
 
   constructor() {
     makeObservable(this);
-  }
-
-  get outdatedCosmosSdk(): boolean {
-    return this._outdatedCosmosSdk;
   }
 
   @action
@@ -58,48 +55,30 @@ class GasSimulatorState {
   }
 
   @action
-  setOutdatedCosmosSdk(value: boolean) {
-    this._outdatedCosmosSdk = value;
+  setInitialGasEstimate(estimate: GasEstimate) {
+    this._initialGasEstimate = estimate;
   }
 
-  get initialGasEstimated(): number | null {
-    return this._initialGasEstimated;
-  }
-
-  @action
-  setInitialGasEstimated(value: number) {
-    this._initialGasEstimated = value;
-  }
-
-  get recentGasEstimated(): number | undefined {
-    return this._recentGasEstimated;
+  get initialGasEstimate(): GasEstimate | null {
+    return this._initialGasEstimate;
   }
 
   @action
-  setRecentGasEstimated(value: number) {
-    this._recentGasEstimated = value;
+  setRecentGasEstimate(estimate: GasEstimate) {
+    this._recentGasEstimate = estimate;
   }
 
-  get tx(): TxSimulate | undefined {
-    return this._tx;
-  }
-
-  @action
-  refreshTx(tx: TxSimulate | undefined) {
-    this._tx = tx;
-  }
-
-  get stdFee(): StdFee | undefined {
-    return this._stdFee;
+  get recentGasEstimate(): GasEstimate | null {
+    return this._recentGasEstimate;
   }
 
   @action
-  refreshStdFee(fee: StdFee | undefined) {
-    this._stdFee = fee;
+  refreshGasSimulate(value: GasSimulate) {
+    this._gasSimulate = value;
   }
 
-  get error(): Error | undefined {
-    return this._error;
+  get gasSimulate(): GasSimulate | undefined {
+    return this._gasSimulate;
   }
 
   @action
@@ -107,18 +86,8 @@ class GasSimulatorState {
     this._error = error;
   }
 
-  static isZeroFee(amount: readonly Coin[] | undefined): boolean {
-    if (!amount) {
-      return true;
-    }
-
-    for (const coin of amount) {
-      if (coin.amount !== "0") {
-        return false;
-      }
-    }
-
-    return true;
+  get error(): Error | undefined {
+    return this._error;
   }
 }
 
@@ -127,7 +96,7 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
   protected _key: string;
 
   @observable
-  protected _gasAdjustmentValue: string = "1";
+  protected _gasAdjustmentValue: string = "1.5";
 
   @observable
   protected _enabled: boolean = false;
@@ -154,7 +123,6 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
     protected readonly gasConfig: IGasConfig,
     protected readonly feeConfig: IFeeConfig,
     protected readonly initialKey: string,
-    // TODO: Add comment about the reason why simulateGasFn field is not observable.
     protected simulateGasFn: SimulateGasFn
   ) {
     super(chainGetter, initialChainId);
@@ -231,30 +199,21 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
     }
   }
 
-  get outdatedCosmosSdk(): boolean {
-    const key = this.storeKey;
-    const state = this.getState(key);
-    return state.outdatedCosmosSdk;
-  }
-
   get error(): Error | undefined {
     const key = this.storeKey;
     const state = this.getState(key);
     return state.error;
   }
 
-  get gasEstimated(): number | undefined {
+  get gasEstimate(): GasEstimate | undefined {
     const key = this.storeKey;
     const state = this.getState(key);
-    if (state.recentGasEstimated != null) {
-      return state.recentGasEstimated;
+
+    if (state.recentGasEstimate != null) {
+      return state.recentGasEstimate;
     }
 
-    if (state.initialGasEstimated != null) {
-      return state.initialGasEstimated;
-    }
-
-    return undefined;
+    return state.initialGasEstimate ?? undefined;
   }
 
   get gasAdjustment(): number {
@@ -312,9 +271,17 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
         const key = this.storeKey;
         const state = this.getState(key);
 
-        this.kvStore.get<number>(key).then((saved) => {
+        this.kvStore.get<string>(key).then((saved) => {
           if (saved) {
-            state.setInitialGasEstimated(saved);
+            try {
+              const gasEstimate: GasEstimate = JSON.parse(saved);
+              state.setInitialGasEstimate(gasEstimate);
+            } catch (e) {
+              // initial gas estimate is not critical,
+              // just log the error and delete the estimate from the store.
+              console.warn(e);
+              this.kvStore.set(key, "");
+            }
           }
 
           state.setIsInitialized(true);
@@ -344,19 +311,11 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
             return;
           }
 
-          const tx = this.simulateGasFn();
-          // TODO
-          // const fee = this.feeConfig.toStdFee();
+          const gasSimulate = this.simulateGasFn();
 
           runInAction(() => {
-            if (
-              (state.recentGasEstimated == null || state.error != null) &&
-              !state.outdatedCosmosSdk
-              // || GasSimulatorState.isZeroFee(state.stdFee?.amount) !==
-              //   GasSimulatorState.isZeroFee(fee.amount)
-            ) {
-              state.refreshTx(tx);
-              // state.refreshStdFee(fee);
+            if (state.recentGasEstimate == null || state.error != null) {
+              state.refreshGasSimulate(gasSimulate);
             }
           });
         } catch (e) {
@@ -368,57 +327,31 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
 
     this._disposers.push(
       autorun(() => {
-        // TODO: Add debounce logic?
-
         const key = this.storeKey;
         const state = this.getState(key);
 
-        if (!state.tx) {
+        if (!state.gasSimulate) {
           return;
         }
 
-        const promise = state.tx.simulate(state.stdFee);
+        const promise = state.gasSimulate();
 
         runInAction(() => {
           this._isSimulating = true;
         });
 
         promise
-          .then(({ gasUsed }) => {
-            // Changing the gas in the gas config definitely will make the reaction to the fee config,
-            // and, this reaction can potentially create a reaction in the amount config as well (Ex, when the "Max" option set).
-            // These potential reactions can create repeated meaningless reactions.
-            // To avoid this potential problem, change the value when there is a meaningful change in the gas estimated.
-            if (
-              !state.recentGasEstimated ||
-              Math.abs(state.recentGasEstimated - gasUsed) /
-                state.recentGasEstimated >
-                0.02
-            ) {
-              state.setRecentGasEstimated(gasUsed);
-            }
-
-            state.setOutdatedCosmosSdk(false);
+          .then((gasEstimate) => {
+            state.setRecentGasEstimate(gasEstimate);
             state.setError(undefined);
 
-            this.kvStore.set(key, gasUsed).catch((e) => {
+            this.kvStore.set(key, JSON.stringify(gasEstimate)).catch((e) => {
               console.log(e);
             });
           })
           .catch((e) => {
-            console.log(e);
+            console.log("starknet gas simulate error", e);
             if (isSimpleFetchError(e) && e.response) {
-              const response = e.response;
-              if (
-                response.status === 400 &&
-                response.data?.message &&
-                typeof response.data.message === "string" &&
-                response.data.message.includes("invalid empty tx")
-              ) {
-                state.setOutdatedCosmosSdk(true);
-                return;
-              }
-
               let message = "";
               const contentType: string = e.response.headers
                 ? e.response.headers.get("content-type") || ""
@@ -458,8 +391,15 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
 
     this._disposers.push(
       autorun(() => {
-        if (this.enabled && this.gasEstimated != null) {
-          this.gasConfig.setValue(this.gasEstimated * this.gasAdjustment);
+        if (this.enabled && this.gasEstimate != null) {
+          const { l1DataGas, l1Gas, l2Gas } = this.gasEstimate;
+
+          const totalGas = new Dec(l1DataGas.consumed)
+            .add(new Dec(l1Gas.consumed))
+            .add(new Dec(l2Gas.consumed));
+
+          const adjustedTotalGas = totalGas.mul(new Dec(this.gasAdjustment));
+          this.gasConfig.setValue(adjustedTotalGas.truncate().toString());
         }
       })
     );
@@ -477,10 +417,6 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
 
     return {
       warning: (() => {
-        if (this.outdatedCosmosSdk) {
-          return new Error("Outdated Cosmos SDK");
-        }
-
         if (this.forceDisableReason) {
           return this.forceDisableReason;
         }
@@ -496,9 +432,7 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
 
         if (this.isSimulating) {
           // If there is no saved result of the last simulation, user interaction is blocked.
-          return state.initialGasEstimated == null
-            ? "loading-block"
-            : "loading";
+          return state.initialGasEstimate == null ? "loading-block" : "loading";
         }
       })(),
     };
@@ -523,7 +457,7 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
     //   .toStdFee()
     //   .amount.map((coin) => coin.denom)
     //   .join("/");
-    return `${chainIdentifier.identifier}/${fees}/${this.key}}`;
+    return `${chainIdentifier.identifier}/${fees}/${this.key}`;
   }
 }
 
