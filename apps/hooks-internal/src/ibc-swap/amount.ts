@@ -1,6 +1,6 @@
 import { AmountConfig, ISenderConfig, UIProperties } from "@keplr-wallet/hooks";
 import { AppCurrency } from "@keplr-wallet/types";
-import { CoinPretty, Dec, Int, RatePretty } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, RatePretty } from "@keplr-wallet/unit";
 import {
   ChainGetter,
   CosmosAccount,
@@ -24,12 +24,21 @@ import {
 } from "@keplr-wallet/stores-eth";
 
 export class IBCSwapAmountConfig extends AmountConfig {
+  static readonly QueryMsgsDirectRefreshInterval = 10000;
+
   @observable
   protected _outChainId: string;
   @observable.ref
   protected _outCurrency: AppCurrency;
   @observable
   protected _swapFeeBps: number;
+  @observable
+  protected _swapVenues: {
+    name: string;
+    chainId: string;
+  }[];
+  @observable
+  protected _slippageTolerancePercent: number;
   @observable
   protected _allowSwaps?: boolean;
   @observable
@@ -53,6 +62,11 @@ export class IBCSwapAmountConfig extends AmountConfig {
     initialOutChainId: string,
     initialOutCurrency: AppCurrency,
     swapFeeBps: number,
+    swapVenues: {
+      name: string;
+      chainId: string;
+    }[],
+    slippageTolerancePercent: number,
     allowSwaps?: boolean,
     smartSwapOptions?: {
       evmSwaps?: boolean;
@@ -64,6 +78,8 @@ export class IBCSwapAmountConfig extends AmountConfig {
     this._outChainId = initialOutChainId;
     this._outCurrency = initialOutCurrency;
     this._swapFeeBps = swapFeeBps;
+    this._swapVenues = swapVenues;
+    this._slippageTolerancePercent = slippageTolerancePercent;
     this._allowSwaps = allowSwaps;
     this._smartSwapOptions = smartSwapOptions;
     this._oldValue = this._value;
@@ -93,9 +109,11 @@ export class IBCSwapAmountConfig extends AmountConfig {
     if (this.fraction > 0) {
       let result = this.maxAmount;
 
-      const queryRoute = this.getQueryIBCSwap(result)?.getQueryRoute();
-      if (queryRoute?.response != null) {
-        const estimatedFees = queryRoute.response.data.estimated_fees;
+      const queryMsgsDirect =
+        this.getQueryIBCSwap(result)?.getQueryMsgsDirect();
+      if (queryMsgsDirect?.response != null) {
+        const estimatedFees =
+          queryMsgsDirect.response.data.route.estimated_fees;
         const bridgeFee = estimatedFees?.reduce((acc, fee) => {
           if (fee.origin_asset.denom === this.currency.coinMinimalDenom) {
             return acc.add(new CoinPretty(this.currency, new Dec(fee.amount)));
@@ -134,7 +152,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
     if (!queryIBCSwap) {
       return new CoinPretty(this.outCurrency, "0");
     }
-    return queryIBCSwap.getQueryRoute().outAmount;
+    return queryIBCSwap.getQueryMsgsDirect().outAmount;
   }
 
   get outChainId(): string {
@@ -163,7 +181,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
     if (!queryIBCSwap) {
       return undefined;
     }
-    return queryIBCSwap.getQueryRoute().swapPriceImpact;
+    return queryIBCSwap.getQueryMsgsDirect().swapPriceImpact;
   }
 
   @action
@@ -191,7 +209,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
       return [new CoinPretty(this.outCurrency, "0")];
     }
 
-    return queryIBCSwap.getQueryRoute().swapFee;
+    return queryIBCSwap.getQueryMsgsDirect().swapFee;
   }
 
   get otherFees(): CoinPretty[] {
@@ -200,21 +218,21 @@ export class IBCSwapAmountConfig extends AmountConfig {
       return [new CoinPretty(this.outCurrency, "0")];
     }
 
-    return queryIBCSwap.getQueryRoute().otherFees;
+    return queryIBCSwap.getQueryMsgsDirect().otherFees;
   }
 
   async fetch(): Promise<void> {
     const queryIBCSwap = this.getQueryIBCSwap();
     if (queryIBCSwap) {
-      await queryIBCSwap.getQueryRoute().fetch();
+      await queryIBCSwap.getQueryMsgsDirect().fetch();
     }
   }
 
   get isFetchingInAmount(): boolean {
     if (this.fraction === 1) {
       return (
-        this.getQueryIBCSwap(this.maxAmount)?.getQueryRoute().isFetching ??
-        this.getQueryIBCSwap()?.getQueryRoute().isFetching ??
+        this.getQueryIBCSwap(this.maxAmount)?.getQueryMsgsDirect().isFetching ??
+        this.getQueryIBCSwap()?.getQueryMsgsDirect().isFetching ??
         false
       );
     }
@@ -223,7 +241,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
   }
 
   get isFetchingOutAmount(): boolean {
-    return this.getQueryIBCSwap()?.getQueryRoute().isFetching ?? false;
+    return this.getQueryIBCSwap()?.getQueryMsgsDirect().isFetching ?? false;
   }
 
   get type(): "swap" | "transfer" | "not-ready" {
@@ -232,12 +250,12 @@ export class IBCSwapAmountConfig extends AmountConfig {
       return "not-ready";
     }
 
-    const res = queryIBCSwap.getQueryRoute().response;
+    const res = queryIBCSwap.getQueryMsgsDirect().response;
     if (!res) {
       return "not-ready";
     }
 
-    if (res.data.does_swap === false) {
+    if (res.data.route.does_swap === false) {
       return "transfer";
     }
 
@@ -246,8 +264,6 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
   async getTx(
     slippageTolerancePercent: number,
-    affiliateFeeReceiver: string | undefined,
-    priorOutAmount?: Int,
     customRecipient?: {
       chainId: string;
       recipient: string;
@@ -258,10 +274,19 @@ export class IBCSwapAmountConfig extends AmountConfig {
       throw new Error("Query IBC Swap is not initialized");
     }
 
-    await queryIBCSwap.getQueryRoute().waitFreshResponse();
-    const queryRouteResponse = queryIBCSwap.getQueryRoute().response;
-    if (!queryRouteResponse) {
+    const queryMsgsDirectResponse = queryIBCSwap.getQueryMsgsDirect().response;
+    if (!queryMsgsDirectResponse) {
       throw new Error("Failed to fetch route");
+    }
+
+    if (queryMsgsDirectResponse.timestamp) {
+      const now = new Date();
+      const diff = now.getTime() - queryMsgsDirectResponse.timestamp;
+      // 오래전에 캐싱된 쿼리 응답으로 tx를 만들 경우 quote가 크게 변경될 수 있으므로 에러를 발생시킨다.
+      // 쿼리 응답 오는데에 시간이 좀 드니, RefreshInterval에 5초를 더 추가한다.
+      if (diff > IBCSwapAmountConfig.QueryMsgsDirectRefreshInterval + 5000) {
+        throw new Error("The quote is expired. Please try again.");
+      }
     }
 
     const chainIdsToAddresses: Record<string, string> = {};
@@ -284,141 +309,77 @@ export class IBCSwapAmountConfig extends AmountConfig {
         ? sourceAccount.ethereumHexAddress
         : sourceAccount.bech32Address;
 
-    const destinationChainIds = queryRouteResponse.data.chain_ids.map(
-      (chainId) => {
-        const evmLikeChainId = Number(chainId);
-        const isEVMChainId =
-          !Number.isNaN(evmLikeChainId) && evmLikeChainId !== 0;
-        if (isEVMChainId) {
-          return `eip155:${chainId}`;
-        }
-        return chainId;
-      }
-    );
-    for (const destinationChainId of destinationChainIds) {
-      const destinationAccount =
-        this.accountStore.getAccount(destinationChainId);
-      if (destinationAccount.walletStatus === WalletStatus.NotInit) {
-        await destinationAccount.init();
-      }
-
-      const isDestinationChainEVMOnly =
-        destinationChainId.startsWith("eip155:");
-      if (
-        isDestinationChainEVMOnly
-          ? !destinationAccount.ethereumHexAddress
-          : !destinationAccount.bech32Address
-      ) {
-        throw new Error("Destination account is not set");
-      }
-      chainIdsToAddresses[destinationChainId.replace("eip155:", "")] =
-        isDestinationChainEVMOnly
-          ? destinationAccount.ethereumHexAddress
-          : destinationAccount.bech32Address;
+    const destinationAccount = this.accountStore.getAccount(this.outChainId);
+    if (destinationAccount.walletStatus === WalletStatus.NotInit) {
+      await destinationAccount.init();
     }
+
+    const isDestinationChainEVMOnly = this.outChainId.startsWith("eip155:");
+    if (
+      isDestinationChainEVMOnly
+        ? !destinationAccount.ethereumHexAddress
+        : !destinationAccount.bech32Address
+    ) {
+      throw new Error("Destination account is not set");
+    }
+    chainIdsToAddresses[this.outChainId.replace("eip155:", "")] =
+      isDestinationChainEVMOnly
+        ? destinationAccount.ethereumHexAddress
+        : destinationAccount.bech32Address;
 
     if (customRecipient) {
       chainIdsToAddresses[customRecipient.chainId.replace("eip155:", "")] =
         customRecipient.recipient;
     }
 
-    for (const swapVenue of queryRouteResponse.data.swap_venues ?? [
-      queryRouteResponse.data.swap_venue,
-    ]) {
-      if (swapVenue) {
-        const swapVenueChainId = (() => {
-          const evmLikeChainId = Number(swapVenue.chain_id);
-          const isEVMChainId =
-            !Number.isNaN(evmLikeChainId) && evmLikeChainId !== 0;
-          if (isEVMChainId) {
-            return `eip155:${swapVenue.chain_id}`;
-          }
-
-          return swapVenue.chain_id;
-        })();
-        const swapAccount = this.accountStore.getAccount(swapVenueChainId);
-        if (swapAccount.walletStatus === WalletStatus.NotInit) {
-          await swapAccount.init();
-        }
-
-        const isSwapVenueChainEVMOnly = swapVenueChainId.startsWith("eip155:");
-        if (
-          isSwapVenueChainEVMOnly
-            ? !swapAccount.ethereumHexAddress
-            : !swapAccount.bech32Address
-        ) {
-          const swapVenueChainInfo =
-            this.chainGetter.hasChain(swapVenueChainId) &&
-            this.chainGetter.getChain(swapVenueChainId);
-          if (
-            swapAccount.isNanoLedger &&
-            swapVenueChainInfo &&
-            (swapVenueChainInfo.bip44.coinType === 60 ||
-              swapVenueChainInfo.features.includes("eth-address-gen") ||
-              swapVenueChainInfo.features.includes("eth-key-sign") ||
-              swapVenueChainInfo.evm != null)
-          ) {
-            throw new Error(
-              "Please connect Ethereum app on Ledger with Keplr to get the address"
-            );
-          }
-
-          throw new Error("Swap account is not set");
-        }
-        chainIdsToAddresses[swapVenueChainId.replace("eip155:", "")] =
-          isSwapVenueChainEVMOnly
-            ? swapAccount.ethereumHexAddress
-            : swapAccount.bech32Address;
+    for (const swapVenue of this._swapVenues) {
+      const swapAccount = this.accountStore.getAccount(swapVenue.chainId);
+      if (swapAccount.walletStatus === WalletStatus.NotInit) {
+        await swapAccount.init();
       }
+
+      const isSwapVenueChainEVMOnly = swapVenue.chainId.startsWith("eip155:");
+      if (
+        isSwapVenueChainEVMOnly
+          ? !swapAccount.ethereumHexAddress
+          : !swapAccount.bech32Address
+      ) {
+        const swapVenueChainInfo =
+          this.chainGetter.hasChain(swapVenue.chainId) &&
+          this.chainGetter.getChain(swapVenue.chainId);
+        if (
+          swapAccount.isNanoLedger &&
+          swapVenueChainInfo &&
+          (swapVenueChainInfo.bip44.coinType === 60 ||
+            swapVenueChainInfo.features.includes("eth-address-gen") ||
+            swapVenueChainInfo.features.includes("eth-key-sign") ||
+            swapVenueChainInfo.evm != null)
+        ) {
+          throw new Error(
+            "Please connect Ethereum app on Ledger with Keplr to get the address"
+          );
+        }
+
+        throw new Error("Swap account is not set");
+      }
+      chainIdsToAddresses[swapVenue.chainId.replace("eip155:", "")] =
+        isSwapVenueChainEVMOnly
+          ? swapAccount.ethereumHexAddress
+          : swapAccount.bech32Address;
     }
 
     const queryMsgsDirect = queryIBCSwap.getQueryMsgsDirect(
       chainIdsToAddresses,
-      slippageTolerancePercent,
-      affiliateFeeReceiver
+      slippageTolerancePercent
     );
 
-    await queryMsgsDirect.waitFreshResponse();
     if (queryMsgsDirect.error) {
       throw new Error(queryMsgsDirect.error.message);
     }
 
-    const tx = this.getTxIfReady(
-      slippageTolerancePercent,
-      affiliateFeeReceiver,
-      customRecipient
-    );
+    const tx = this.getTxIfReady(slippageTolerancePercent, customRecipient);
     if (!tx) {
       throw new Error("Tx is not ready");
-    }
-
-    if (priorOutAmount) {
-      const queryMsgsDirect = queryIBCSwap.getQueryMsgsDirect(
-        chainIdsToAddresses,
-        slippageTolerancePercent,
-        affiliateFeeReceiver
-      );
-      if (!queryMsgsDirect.response) {
-        throw new Error("Can't happen: queryMsgsDirect is not ready");
-      }
-
-      const currentAmountOut = new Int(
-        queryMsgsDirect.response.data.route.amount_out
-      );
-
-      if (
-        currentAmountOut.lt(priorOutAmount) &&
-        currentAmountOut
-          .sub(priorOutAmount)
-          .abs()
-          .toDec()
-          .quo(priorOutAmount.toDec())
-          .gte(new Dec(0.01))
-      ) {
-        throw new Error(
-          "Price change has been detected while building your transaction. Please try again"
-        );
-      }
     }
 
     return tx;
@@ -426,7 +387,6 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
   getTxIfReady(
     slippageTolerancePercent: number,
-    affiliateFeeReceiver?: string,
     customRecipient?: {
       chainId: string;
       recipient: string;
@@ -449,8 +409,8 @@ export class IBCSwapAmountConfig extends AmountConfig {
       return;
     }
 
-    const queryRouteResponse = queryIBCSwap.getQueryRoute().response;
-    if (!queryRouteResponse) {
+    const queryMsgsDirectResponse = queryIBCSwap.getQueryMsgsDirect().response;
+    if (!queryMsgsDirectResponse) {
       return;
     }
 
@@ -473,84 +433,53 @@ export class IBCSwapAmountConfig extends AmountConfig {
       isSourceAccountEVMOnly
         ? sourceAccount.ethereumHexAddress
         : sourceAccount.bech32Address;
+    const destinationAccount = this.accountStore.getAccount(this.outChainId);
 
-    const destinationChainIds = queryRouteResponse.data.chain_ids.map(
-      (chainId) => {
-        const evmLikeChainId = Number(chainId);
-        const isEVMChainId =
-          !Number.isNaN(evmLikeChainId) && evmLikeChainId !== 0;
-        if (isEVMChainId) {
-          return `eip155:${chainId}`;
-        }
-        return chainId;
-      }
-    );
-    for (const destinationChainId of destinationChainIds) {
-      const destinationAccount =
-        this.accountStore.getAccount(destinationChainId);
-
-      if (destinationAccount.walletStatus === WalletStatus.NotInit) {
-        destinationAccount.init();
-      }
-
-      const isDestinationChainEVMOnly =
-        destinationChainId.startsWith("eip155:");
-      if (
-        isDestinationChainEVMOnly
-          ? !destinationAccount.ethereumHexAddress
-          : !destinationAccount.bech32Address
-      ) {
-        return;
-      }
-      chainIdsToAddresses[destinationChainId.replace("eip155:", "")] =
-        isDestinationChainEVMOnly
-          ? destinationAccount.ethereumHexAddress
-          : destinationAccount.bech32Address;
+    if (destinationAccount.walletStatus === WalletStatus.NotInit) {
+      destinationAccount.init();
     }
+
+    const isDestinationChainEVMOnly = this.outChainId.startsWith("eip155:");
+    if (
+      isDestinationChainEVMOnly
+        ? !destinationAccount.ethereumHexAddress
+        : !destinationAccount.bech32Address
+    ) {
+      return;
+    }
+    chainIdsToAddresses[this.outChainId.replace("eip155:", "")] =
+      isDestinationChainEVMOnly
+        ? destinationAccount.ethereumHexAddress
+        : destinationAccount.bech32Address;
 
     if (customRecipient) {
       chainIdsToAddresses[customRecipient.chainId.replace("eip155:", "")] =
         customRecipient.recipient;
     }
 
-    for (const swapVenue of queryRouteResponse.data.swap_venues ?? [
-      queryRouteResponse.data.swap_venue,
-    ]) {
-      if (swapVenue) {
-        const swapVenueChainId = (() => {
-          const evmLikeChainId = Number(swapVenue.chain_id);
-          const isEVMChainId =
-            !Number.isNaN(evmLikeChainId) && evmLikeChainId !== 0;
-          if (isEVMChainId) {
-            return `eip155:${swapVenue.chain_id}`;
-          }
-
-          return swapVenue.chain_id;
-        })();
-        const swapAccount = this.accountStore.getAccount(swapVenueChainId);
-        if (swapAccount.walletStatus === WalletStatus.NotInit) {
-          swapAccount.init();
-        }
-
-        const isSwapVenueChainEVMOnly = swapVenueChainId.startsWith("eip155:");
-        if (
-          isSwapVenueChainEVMOnly
-            ? !swapAccount.ethereumHexAddress
-            : !swapAccount.bech32Address
-        ) {
-          return;
-        }
-        chainIdsToAddresses[swapVenueChainId.replace("eip155:", "")] =
-          isSwapVenueChainEVMOnly
-            ? swapAccount.ethereumHexAddress
-            : swapAccount.bech32Address;
+    for (const swapVenue of this._swapVenues) {
+      const swapAccount = this.accountStore.getAccount(swapVenue.chainId);
+      if (swapAccount.walletStatus === WalletStatus.NotInit) {
+        swapAccount.init();
       }
+
+      const isSwapVenueChainEVMOnly = swapVenue.chainId.startsWith("eip155:");
+      if (
+        isSwapVenueChainEVMOnly
+          ? !swapAccount.ethereumHexAddress
+          : !swapAccount.bech32Address
+      ) {
+        return;
+      }
+      chainIdsToAddresses[swapVenue.chainId.replace("eip155:", "")] =
+        isSwapVenueChainEVMOnly
+          ? swapAccount.ethereumHexAddress
+          : swapAccount.bech32Address;
     }
 
     const queryMsgsDirect = queryIBCSwap.getQueryMsgsDirect(
       chainIdsToAddresses,
-      slippageTolerancePercent,
-      affiliateFeeReceiver
+      slippageTolerancePercent
     );
     const msg = queryMsgsDirect.msg;
     if (!msg) {
@@ -726,7 +655,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
         };
       }
 
-      const routeQuery = queryIBCSwap.getQueryRoute();
+      const routeQuery = queryIBCSwap.getQueryMsgsDirect();
       if (routeQuery.isFetching) {
         return {
           ...prev,
@@ -757,14 +686,14 @@ export class IBCSwapAmountConfig extends AmountConfig {
       //route로 부터 swap을 사용하는 경우가 있으면 에러를 발생시킨다.
       const routeResponse = routeQuery.response;
       if (routeResponse) {
-        if (this._isUseSwapInBridge(routeResponse.data)) {
+        if (this._isUseSwapInBridge(routeResponse.data.route)) {
           return {
             ...prev,
             error: new Error("Swap in bridge is not allowed"),
           };
         }
 
-        if (routeResponse.data.txs_required !== 1) {
+        if (routeResponse.data.route.txs_required !== 1) {
           return {
             ...prev,
             error: new Error("Swap can't be executed with ibc pfm"),
@@ -772,10 +701,10 @@ export class IBCSwapAmountConfig extends AmountConfig {
         }
 
         if (
-          routeResponse.data.estimated_fees &&
-          routeResponse.data.estimated_fees.length > 0
+          routeResponse.data.route.estimated_fees &&
+          routeResponse.data.route.estimated_fees.length > 0
         ) {
-          const bridgeFee = routeResponse.data.estimated_fees.reduce(
+          const bridgeFee = routeResponse.data.route.estimated_fees.reduce(
             (acc: CoinPretty, fee: any) => {
               if (fee.origin_asset.denom === this.currency.coinMinimalDenom) {
                 return acc.add(
@@ -811,7 +740,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
       };
     }
 
-    const routeQuery = queryIBCSwap.getQueryRoute();
+    const routeQuery = queryIBCSwap.getQueryMsgsDirect();
     if (routeQuery.isFetching) {
       return {
         ...prev,
@@ -842,14 +771,14 @@ export class IBCSwapAmountConfig extends AmountConfig {
     //route로 부터 swap을 사용하는 경우가 있으면 에러를 발생시킨다.
     const routeResponse = routeQuery.response;
     if (routeResponse) {
-      if (this._isUseSwapInBridge(routeResponse.data)) {
+      if (this._isUseSwapInBridge(routeResponse.data.route)) {
         return {
           ...prev,
           error: new Error("Swap in bridge is not allowed"),
         };
       }
 
-      if (routeResponse?.data.txs_required !== 1) {
+      if (routeResponse?.data.route.txs_required !== 1) {
         return {
           ...prev,
           error: new Error("Swap can't be executed with ibc pfm"),
@@ -857,10 +786,10 @@ export class IBCSwapAmountConfig extends AmountConfig {
       }
 
       if (
-        routeResponse.data.estimated_fees &&
-        routeResponse.data.estimated_fees.length > 0
+        routeResponse.data.route.estimated_fees &&
+        routeResponse.data.route.estimated_fees.length > 0
       ) {
-        const bridgeFee = routeResponse.data.estimated_fees.reduce(
+        const bridgeFee = routeResponse.data.route.estimated_fees.reduce(
           (acc: CoinPretty, fee: any) => {
             if (fee.origin_asset.denom === this.currency.coinMinimalDenom) {
               return acc.add(
@@ -937,12 +866,73 @@ export class IBCSwapAmountConfig extends AmountConfig {
       return;
     }
 
+    const chainIdsToAddresses: Record<string, string> = {};
+
+    const sourceAccount = this.accountStore.getAccount(this.chainId);
+    if (sourceAccount.walletStatus === WalletStatus.NotInit) {
+      sourceAccount.init();
+    }
+
+    const isSourceAccountEVMOnly = this.chainId.startsWith("eip155:");
+    if (
+      isSourceAccountEVMOnly
+        ? !sourceAccount.ethereumHexAddress
+        : !sourceAccount.bech32Address
+    ) {
+      return;
+    }
+    chainIdsToAddresses[this.chainId.replace("eip155:", "")] =
+      isSourceAccountEVMOnly
+        ? sourceAccount.ethereumHexAddress
+        : sourceAccount.bech32Address;
+
+    const destinationAccount = this.accountStore.getAccount(this.outChainId);
+
+    if (destinationAccount.walletStatus === WalletStatus.NotInit) {
+      destinationAccount.init();
+    }
+
+    const isDestinationChainEVMOnly = this.outChainId.startsWith("eip155:");
+    if (
+      isDestinationChainEVMOnly
+        ? !destinationAccount.ethereumHexAddress
+        : !destinationAccount.bech32Address
+    ) {
+      return;
+    }
+    chainIdsToAddresses[this.outChainId.replace("eip155:", "")] =
+      isDestinationChainEVMOnly
+        ? destinationAccount.ethereumHexAddress
+        : destinationAccount.bech32Address;
+
+    for (const swapVenue of this._swapVenues) {
+      const swapAccount = this.accountStore.getAccount(swapVenue.chainId);
+      if (swapAccount.walletStatus === WalletStatus.NotInit) {
+        swapAccount.init();
+      }
+
+      const isSwapVenueChainEVMOnly = swapVenue.chainId.startsWith("eip155:");
+      if (
+        isSwapVenueChainEVMOnly
+          ? !swapAccount.ethereumHexAddress
+          : !swapAccount.bech32Address
+      ) {
+        return;
+      }
+      chainIdsToAddresses[swapVenue.chainId.replace("eip155:", "")] =
+        isSwapVenueChainEVMOnly
+          ? swapAccount.ethereumHexAddress
+          : swapAccount.bech32Address;
+    }
+
     return this.skipQueries.queryIBCSwap.getIBCSwap(
       this.chainId,
       amount ?? this.amount[0],
       this.outChainId,
       this.outCurrency.coinMinimalDenom,
       this.swapFeeBps,
+      chainIdsToAddresses,
+      this._slippageTolerancePercent,
       this.allowSwaps,
       this.smartSwapOptions
     );
@@ -960,6 +950,11 @@ export const useIBCSwapAmountConfig = (
   outChainId: string,
   outCurrency: AppCurrency,
   swapFeeBps: number,
+  swapVenues: {
+    name: string;
+    chainId: string;
+  }[],
+  slippageTolerancePercent: number,
   allowSwaps?: boolean,
   smartSwapOptions?: {
     evmSwaps?: boolean;
@@ -979,6 +974,8 @@ export const useIBCSwapAmountConfig = (
         outChainId,
         outCurrency,
         swapFeeBps,
+        swapVenues,
+        slippageTolerancePercent,
         allowSwaps,
         smartSwapOptions
       )

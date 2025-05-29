@@ -17,6 +17,7 @@ import {
   SwapVenues,
   SkipTokenInfoBaseURL,
   SkipTokenInfoAPIURI,
+  SwapFeeBps,
 } from "../config.ui";
 import {
   AccountStore,
@@ -386,7 +387,8 @@ export class RootStore {
       this.queriesStore.sharedContext,
       this.chainStore,
       this.swapUsageQueries,
-      SwapVenues
+      SwapVenues,
+      SwapFeeBps.receivers
     );
     this.starknetQueriesStore = new StarknetQueriesStore(
       this.queriesStore.sharedContext,

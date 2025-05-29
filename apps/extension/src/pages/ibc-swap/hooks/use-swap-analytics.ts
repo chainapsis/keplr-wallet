@@ -196,17 +196,17 @@ export const useSwapAnalytics = ({
 
   // Quote requested
   const queryIBCSwapForLog = ibcSwapConfigs.amountConfig.getQueryIBCSwap();
-  const queryRouteForLog = queryIBCSwapForLog?.getQueryRoute();
+  const queryMsgsDirectForLog = queryIBCSwapForLog?.getQueryMsgsDirect();
 
   useEffect(() => {
     const amount = ibcSwapConfigs.amountConfig.amount[0];
 
-    if (!queryRouteForLog || !amount) {
+    if (!queryMsgsDirectForLog || !amount) {
       prevFetchingRef.current = false;
       return;
     }
 
-    if (!prevFetchingRef.current && queryRouteForLog.isFetching) {
+    if (!prevFetchingRef.current && queryMsgsDirectForLog.isFetching) {
       quoteIdRef.current = generateQuoteId();
 
       const inAmountRaw = amount.toCoin().amount.toString();
@@ -226,10 +226,10 @@ export const useSwapAnalytics = ({
         swap_fee_bps: swapFeeBps,
       });
     }
-    prevFetchingRef.current = queryRouteForLog.isFetching;
+    prevFetchingRef.current = queryMsgsDirectForLog.isFetching;
   }, [
-    queryRouteForLog,
-    queryRouteForLog?.isFetching,
+    queryMsgsDirectForLog,
+    queryMsgsDirectForLog?.isFetching,
     inCurrency,
     outCurrency,
     swapFeeBps,
@@ -242,12 +242,12 @@ export const useSwapAnalytics = ({
 
   // Quote received
   useEffect(() => {
-    if (!queryRouteForLog?.response) return;
+    if (!queryMsgsDirectForLog?.response) return;
 
-    const currentKey = queryRouteForLog.response.data.amount_out;
+    const currentKey = queryMsgsDirectForLog.response.data.route.amount_out;
     if (prevRouteKeyRef.current === currentKey) return;
 
-    const outAmountRaw = queryRouteForLog.response.data.amount_out;
+    const outAmountRaw = queryMsgsDirectForLog.response.data.route.amount_out;
     const outCoinPretty = new CoinPretty(outCurrency, outAmountRaw.toString());
     const outUsd = (() => {
       const p = priceStore.calculatePrice(outCoinPretty, "usd");
@@ -259,13 +259,14 @@ export const useSwapAnalytics = ({
       out_amount_est_raw: outAmountRaw,
       out_amount_est_usd: outUsd,
       provider: "skip",
-      does_swap: queryRouteForLog.response.data.does_swap,
-      txs_required: queryRouteForLog.response.data.txs_required,
+      does_swap: queryMsgsDirectForLog.response.data.route.does_swap,
+      txs_required: queryMsgsDirectForLog.response.data.route.txs_required,
       route_duration_estimate_sec:
-        queryRouteForLog.response.data.estimated_route_duration_seconds,
+        queryMsgsDirectForLog.response.data.route
+          .estimated_route_duration_seconds,
       swap_venues: (
-        queryRouteForLog.response.data.swap_venues ?? [
-          queryRouteForLog.response.data.swap_venue,
+        queryMsgsDirectForLog.response.data.route.swap_venues ?? [
+          queryMsgsDirectForLog.response.data.route.swap_venue,
         ]
       )
         .filter(Boolean)
@@ -274,7 +275,7 @@ export const useSwapAnalytics = ({
     });
     prevRouteKeyRef.current = currentKey;
   }, [
-    queryRouteForLog?.response,
+    queryMsgsDirectForLog?.response,
     outCurrency,
     priceStore.calculatePrice,
     logEvent,
@@ -282,7 +283,7 @@ export const useSwapAnalytics = ({
 
   // Quote failed
   useEffect(() => {
-    if (!queryRouteForLog || !queryRouteForLog.error) return;
+    if (!queryMsgsDirectForLog || !queryMsgsDirectForLog.error) return;
 
     if (prevQuoteErrorIdRef.current === quoteIdRef.current) return;
 
@@ -290,10 +291,11 @@ export const useSwapAnalytics = ({
       quote_id: quoteIdRef.current,
       provider: "skip",
       error_message:
-        queryRouteForLog.error.message ?? queryRouteForLog.error.toString(),
+        queryMsgsDirectForLog.error.message ??
+        queryMsgsDirectForLog.error.toString(),
     });
     prevQuoteErrorIdRef.current = quoteIdRef.current;
-  }, [queryRouteForLog?.error, logEvent, queryRouteForLog]);
+  }, [queryMsgsDirectForLog?.error, logEvent, queryMsgsDirectForLog]);
 
   const logSwapSignOpened = useCallback(() => {
     logEvent("swap_sign_opened", {
