@@ -199,12 +199,6 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
     return () => clearInterval(interval);
   }, [gasSimulationRefresher]);
 
-  useEffect(() => {
-    starknetAccount.getOutsideExecutionSupported(sender).then((isSupported) => {
-      console.log("isOutsideExecutionSupported", isSupported);
-    });
-  }, [starknetAccount, sender]);
-
   const gasSimulator = useGasSimulator(
     new ExtensionKVStore("gas-simulator.starknet.send"),
     chainStore,
@@ -264,69 +258,74 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
         throw new Error("Can't find fee currency");
       }
 
-      return {
-        simulate: async (): Promise<{
-          gasUsed: number;
-        }> => {
-          noop(gasSimulationRefresher.count);
+      return async () => {
+        noop(gasSimulationRefresher.count);
 
-          const estimateResult =
-            await starknetAccount.estimateInvokeFeeForSendTokenTx(
-              {
-                currency: currency,
-                amount: sendConfigs.amountConfig.amount[0].toDec().toString(),
-                sender: sendConfigs.senderConfig.sender,
-                recipient: sendConfigs.recipientConfig.recipient,
-              },
-              type === "ETH" ? feeContractAddress : undefined
-            );
-
-          const {
-            l1_gas_consumed,
-            l1_gas_price,
-            l2_gas_consumed,
-            l2_gas_price,
-            l1_data_gas_consumed,
-            l1_data_gas_price,
-            // resourceBounds,
-          } = estimateResult;
-
-          // fee = l1_gas_consumed * l1_gas_price + l2_gas_consumed * l2_gas_price + l1_data_gas_consumed * l1_data_gas_price
-          const l1Fee = new Dec(l1_gas_consumed).mul(new Dec(l1_gas_price));
-          const l2Fee = new Dec(l2_gas_consumed ?? 0).mul(
-            new Dec(l2_gas_price ?? 0)
-          );
-          const l1DataFee = new Dec(l1_data_gas_consumed).mul(
-            new Dec(l1_data_gas_price)
+        const estimateResult =
+          await starknetAccount.estimateInvokeFeeForSendTokenTx(
+            {
+              currency: currency,
+              amount: sendConfigs.amountConfig.amount[0].toDec().toString(),
+              sender: sendConfigs.senderConfig.sender,
+              recipient: sendConfigs.recipientConfig.recipient,
+            },
+            type === "ETH" ? feeContractAddress : undefined
           );
 
-          const calculatedOverallFee = l1Fee.add(l2Fee).add(l1DataFee);
+        const {
+          l1_gas_consumed,
+          l1_gas_price,
+          l2_gas_consumed,
+          l2_gas_price,
+          l1_data_gas_consumed,
+          l1_data_gas_price,
+        } = estimateResult;
 
-          const gasMargin = new Dec(1.2);
-          const gasPriceMargin = new Dec(1.5);
+        // fee = l1_gas_consumed * l1_gas_price + l2_gas_consumed * l2_gas_price + l1_data_gas_consumed * l1_data_gas_price
+        const l1Fee = new Dec(l1_gas_consumed).mul(new Dec(l1_gas_price));
+        const l2Fee = new Dec(l2_gas_consumed ?? 0).mul(
+          new Dec(l2_gas_price ?? 0)
+        );
+        const l1DataFee = new Dec(l1_data_gas_consumed).mul(
+          new Dec(l1_data_gas_price)
+        );
 
-          const totalGasConsumed = new Dec(l1_gas_consumed)
-            .add(new Dec(l2_gas_consumed ?? 0))
-            .add(new Dec(l1_data_gas_consumed));
+        const calculatedOverallFee = l1Fee.add(l2Fee).add(l1DataFee);
 
-          const adjustedGasPrice = calculatedOverallFee.quo(totalGasConsumed);
+        const totalGasConsumed = new Dec(l1_gas_consumed)
+          .add(new Dec(l2_gas_consumed ?? 0))
+          .add(new Dec(l1_data_gas_consumed));
 
-          // CHECK: It seems onchain verification fee doesn't need to be considered.
-          // const sigVerificationGasConsumed = new Dec(583);
+        const adjustedGasPrice = calculatedOverallFee.quo(totalGasConsumed);
 
-          const gasPrice = new CoinPretty(feeCurrency, adjustedGasPrice);
-          const maxGasPrice = gasPrice.mul(gasPriceMargin);
-          const maxGas = totalGasConsumed.mul(gasMargin);
+        // CHECK: It seems onchain verification fee doesn't need to be considered.
+        // const sigVerificationGasConsumed = new Dec(583);
 
-          sendConfigs.feeConfig.setGasPrice({
-            gasPrice: gasPrice,
-            maxGasPrice: maxGasPrice,
-          });
+        const gasPriceMargin = new Dec(1.5);
 
-          return {
-            gasUsed: parseInt(maxGas.truncate().toString()),
-          };
-        },
+        const gasPrice = new CoinPretty(feeCurrency, adjustedGasPrice);
+        const maxGasPrice = gasPrice.mul(gasPriceMargin);
+
+        sendConfigs.feeConfig.setGasPrice({
+          gasPrice: gasPrice,
+          maxGasPrice: maxGasPrice,
+        });
+
+        // Return detailed gas estimate
+        return {
+          l1Gas: {
+            consumed: l1_gas_consumed.toString(),
+            price: l1_gas_price.toString(),
+          },
+          l2Gas: {
+            consumed: l2_gas_consumed?.toString() ?? "0",
+            price: l2_gas_price?.toString() ?? "0",
+          },
+          l1DataGas: {
+            consumed: l1_data_gas_consumed.toString(),
+            price: l1_data_gas_price.toString(),
+          },
+        };
       };
     }
   );
