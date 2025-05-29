@@ -325,7 +325,9 @@ const Schema = Joi.object<MsgsDirectResponse>({
       }).unknown(true)
     ),
     estimated_route_duration_seconds: Joi.number(),
-  }).required(),
+  })
+    .unknown(true)
+    .required(),
 }).unknown(true);
 
 export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectResponse> {
@@ -341,7 +343,10 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
     public readonly chainIdsToAddresses: Record<string, string>,
     public readonly slippageTolerancePercent: number,
     public readonly affiliateFeeBps: number,
-    public readonly affiliateFeeReceiver: string,
+    public readonly affiliateFeeReceivers: {
+      chainId: string;
+      address: string;
+    }[],
     public readonly swapVenues: {
       readonly name: string;
       readonly chainId: string;
@@ -699,13 +704,11 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
           chain_ids_to_addresses: this.chainIdsToAddresses,
           slippage_tolerance_percent: this.slippageTolerancePercent.toString(),
           affiliates:
-            this.affiliateFeeBps > 0 && this.affiliateFeeReceiver
-              ? [
-                  {
-                    basis_points_fee: this.affiliateFeeBps.toString(),
-                    address: this.affiliateFeeReceiver,
-                  },
-                ]
+            this.affiliateFeeBps > 0 && this.affiliateFeeReceivers.length > 0
+              ? this.affiliateFeeReceivers.map((receiver) => ({
+                  basis_points_fee: this.affiliateFeeBps.toString(),
+                  address: receiver.address,
+                }))
               : [],
           swap_venues: this.swapVenues
             .map((swapVenue) => ({
@@ -714,6 +717,22 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
             }))
             // 임시로 추가된 swap venue는 제외
             .filter((swapVenue) => !swapVenue.name.startsWith("temp-")),
+          // chain_ids_to_affiliates: this.affiliateFeeReceivers.reduce(
+          //   (
+          //     acc: Record<
+          //       string,
+          //       { basis_points_fee: string; address: string }
+          //     >,
+          //     receiver
+          //   ) => {
+          //     acc[receiver.chainId.replace("eip155:", "")] = {
+          //       basis_points_fee: this.affiliateFeeBps.toString(),
+          //       address: receiver.address,
+          //     };
+          //     return acc;
+          //   },
+          //   {}
+          // ),
           allow_unsafe: true,
           smart_relay: true,
           go_fast: true,
@@ -759,7 +778,7 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
       chainIdsToAddresses: this.chainIdsToAddresses,
       slippageTolerancePercent: this.slippageTolerancePercent,
       affiliateFeeBps: this.affiliateFeeBps,
-      affiliateFeeReceiver: this.affiliateFeeReceiver,
+      affiliateFeeReceivers: this.affiliateFeeReceivers,
       swap_venues: this.swapVenues,
       smartSwapOptions: this.smartSwapOptions,
     })}`;
@@ -786,7 +805,7 @@ export class ObservableQueryMsgsDirect extends HasMapStore<ObservableQueryMsgsDi
         parsed.chainIdsToAddresses,
         parsed.slippageTolerancePercent,
         parsed.affiliateFeeBps,
-        parsed.affiliateFeeReceiver,
+        parsed.affiliateFeeReceivers,
         parsed.swapVenues,
         parsed.smartSwapOptions
       );
@@ -801,7 +820,10 @@ export class ObservableQueryMsgsDirect extends HasMapStore<ObservableQueryMsgsDi
     chainIdsToAddresses: Record<string, string>,
     slippageTolerancePercent: number,
     affiliateFeeBps: number,
-    affiliateFeeReceiver: string | undefined,
+    affiliateFeeReceivers: {
+      chainId: string;
+      address: string;
+    }[],
     swapVenues: {
       readonly name: string;
       readonly chainId: string;
@@ -821,7 +843,7 @@ export class ObservableQueryMsgsDirect extends HasMapStore<ObservableQueryMsgsDi
       chainIdsToAddresses,
       slippageTolerancePercent,
       affiliateFeeBps,
-      affiliateFeeReceiver,
+      affiliateFeeReceivers,
       swapVenues,
       smartSwapOptions,
     });

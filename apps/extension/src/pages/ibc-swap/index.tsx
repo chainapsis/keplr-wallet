@@ -27,7 +27,7 @@ import {
 } from "@keplr-wallet/hooks";
 import { useNotification } from "../../hooks/notification";
 import { FormattedMessage, useIntl } from "react-intl";
-import { SwapFeeBps, TermsOfUseUrl } from "../../config.ui";
+import { SwapFeeBps, SwapVenues, TermsOfUseUrl } from "../../config.ui";
 import { BottomTabsHeightRem } from "../../bottom-tabs";
 import { useSearchParams } from "react-router-dom";
 import { useTxConfigsQueryString } from "../../hooks/use-tx-config-query-string";
@@ -189,7 +189,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     1_500_000,
     outChainId,
     outCurrency,
-    swapFeeBps
+    swapFeeBps,
+    SwapVenues,
+    uiConfigStore.ibcSwapConfig.slippageNum
   );
   const querySwapFeeBps = queriesStore.simpleQuery.queryGet<{
     pairs?: {
@@ -436,9 +438,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
       const tx = ibcSwapConfigs.amountConfig.getTxIfReady(
         // simulation 자체는 쉽게 통과시키기 위해서 슬리피지를 50으로 설정한다.
-        50,
-        // 코스모스 스왑은 스왑베뉴가 무조건 하나라고 해서 일단 처음걸 쓰기로 한다.
-        swapFeeBpsReceiver[0]
+        50
       );
 
       if (!tx) {
@@ -1002,8 +1002,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             const [_tx] = await Promise.all([
               ibcSwapConfigs.amountConfig.getTx(
                 uiConfigStore.ibcSwapConfig.slippageNum,
-                // 코스모스 스왑은 스왑베뉴가 무조건 하나라고 해서 일단 처음걸 쓰기로 한다.
-                swapFeeBpsReceiver[0],
                 priorOutAmount
               ),
             ]);

@@ -41,7 +41,7 @@ import { Gutter } from "../../../components/gutter";
 import { FeeControl } from "../../../components/input/fee-control";
 import { useNotification } from "../../../hooks/notification";
 import { DenomHelper, ExtensionKVStore } from "@keplr-wallet/common";
-import { ENSInfo, ICNSInfo } from "../../../config.ui";
+import { ENSInfo, ICNSInfo, SwapVenues } from "../../../config.ui";
 import { CoinPretty, Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { ColorPalette } from "../../../styles";
 import { openPopupWindow } from "@keplr-wallet/popup";
@@ -363,6 +363,7 @@ const useIBCSwapConfigWithRecipientConfig = (
   outChainId: string,
   outCurrency: AppCurrency,
   swapFeeBps: number,
+  slippageNum: number,
   options: {
     allowHexAddressToBech32Address?: boolean;
     allowHexAddressOnly?: boolean;
@@ -387,7 +388,9 @@ const useIBCSwapConfigWithRecipientConfig = (
     initialGas,
     outChainId,
     outCurrency,
-    swapFeeBps
+    swapFeeBps,
+    SwapVenues,
+    slippageNum
   );
   const channelConfig = useIBCChannelConfig(false);
 
@@ -505,6 +508,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     destinationChainInfoOfBridge.currency,
     //NOTE - when swap is used on send page, it use bridge so swap fee is 10
     10,
+    uiConfigStore.ibcSwapConfig.slippageNum,
     {
       allowHexAddressToBech32Address:
         isDestinationEvmChain &&
@@ -899,7 +903,6 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                 .getQueryIBCSwap()!
                 .getQueryRoute();
 
-              const swapFeeBpsReceiver: string[] = [];
               const simpleRoute: {
                 isOnlyEvm: boolean;
                 chainId: string;
@@ -980,7 +983,6 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                   ibcSwapConfigsForBridge.amountConfig.getTx(
                     uiConfigStore.ibcSwapConfig.slippageNum,
                     // 코스모스 스왑은 스왑베뉴가 무조건 하나라고 해서 일단 처음걸 쓰기로 한다.
-                    swapFeeBpsReceiver[0],
                     priorOutAmount,
                     convertToBech32IfNeed(
                       ibcSwapConfigsForBridge.recipientConfig.recipient,
@@ -2457,13 +2459,9 @@ function useGetGasSimulationForBridge(
         throw new Error("Not ready to simulate tx");
       }
 
-      const swapFeeBpsReceiver: string[] = [];
-
       const tx = ibcSwapConfigsForBridge.amountConfig.getTxIfReady(
         // simulation 자체는 쉽게 통과시키기 위해서 슬리피지를 50으로 설정한다.
         50,
-        // 코스모스 스왑은 스왑베뉴가 무조건 하나라고 해서 일단 처음걸 쓰기로 한다.
-        swapFeeBpsReceiver[0],
         convertToBech32IfNeed(
           ibcSwapConfigsForBridge.recipientConfig.recipient,
           chainStore.getChain(ibcSwapConfigsForBridge.recipientConfig.chainId),

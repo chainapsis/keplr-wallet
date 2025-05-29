@@ -31,6 +31,13 @@ export class IBCSwapAmountConfig extends AmountConfig {
   @observable
   protected _swapFeeBps: number;
   @observable
+  protected _swapVenues: {
+    name: string;
+    chainId: string;
+  }[];
+  @observable
+  protected _slippageTolerancePercent: number;
+  @observable
   protected _allowSwaps?: boolean;
   @observable
   protected _smartSwapOptions?: {
@@ -53,6 +60,11 @@ export class IBCSwapAmountConfig extends AmountConfig {
     initialOutChainId: string,
     initialOutCurrency: AppCurrency,
     swapFeeBps: number,
+    swapVenues: {
+      name: string;
+      chainId: string;
+    }[],
+    slippageTolerancePercent: number,
     allowSwaps?: boolean,
     smartSwapOptions?: {
       evmSwaps?: boolean;
@@ -64,6 +76,8 @@ export class IBCSwapAmountConfig extends AmountConfig {
     this._outChainId = initialOutChainId;
     this._outCurrency = initialOutCurrency;
     this._swapFeeBps = swapFeeBps;
+    this._swapVenues = swapVenues;
+    this._slippageTolerancePercent = slippageTolerancePercent;
     this._allowSwaps = allowSwaps;
     this._smartSwapOptions = smartSwapOptions;
     this._oldValue = this._value;
@@ -246,7 +260,6 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
   async getTx(
     slippageTolerancePercent: number,
-    affiliateFeeReceiver: string | undefined,
     priorOutAmount?: Int,
     customRecipient?: {
       chainId: string;
@@ -374,8 +387,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
     const queryMsgsDirect = queryIBCSwap.getQueryMsgsDirect(
       chainIdsToAddresses,
-      slippageTolerancePercent,
-      affiliateFeeReceiver
+      slippageTolerancePercent
     );
 
     await queryMsgsDirect.waitFreshResponse();
@@ -383,11 +395,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
       throw new Error(queryMsgsDirect.error.message);
     }
 
-    const tx = this.getTxIfReady(
-      slippageTolerancePercent,
-      affiliateFeeReceiver,
-      customRecipient
-    );
+    const tx = this.getTxIfReady(slippageTolerancePercent, customRecipient);
     if (!tx) {
       throw new Error("Tx is not ready");
     }
@@ -395,8 +403,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
     if (priorOutAmount) {
       const queryMsgsDirect = queryIBCSwap.getQueryMsgsDirect(
         chainIdsToAddresses,
-        slippageTolerancePercent,
-        affiliateFeeReceiver
+        slippageTolerancePercent
       );
       if (!queryMsgsDirect.response) {
         throw new Error("Can't happen: queryMsgsDirect is not ready");
@@ -426,7 +433,6 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
   getTxIfReady(
     slippageTolerancePercent: number,
-    affiliateFeeReceiver?: string,
     customRecipient?: {
       chainId: string;
       recipient: string;
@@ -549,8 +555,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
     const queryMsgsDirect = queryIBCSwap.getQueryMsgsDirect(
       chainIdsToAddresses,
-      slippageTolerancePercent,
-      affiliateFeeReceiver
+      slippageTolerancePercent
     );
     const msg = queryMsgsDirect.msg;
     if (!msg) {
@@ -937,12 +942,73 @@ export class IBCSwapAmountConfig extends AmountConfig {
       return;
     }
 
+    const chainIdsToAddresses: Record<string, string> = {};
+
+    const sourceAccount = this.accountStore.getAccount(this.chainId);
+    if (sourceAccount.walletStatus === WalletStatus.NotInit) {
+      sourceAccount.init();
+    }
+
+    const isSourceAccountEVMOnly = this.chainId.startsWith("eip155:");
+    if (
+      isSourceAccountEVMOnly
+        ? !sourceAccount.ethereumHexAddress
+        : !sourceAccount.bech32Address
+    ) {
+      return;
+    }
+    chainIdsToAddresses[this.chainId.replace("eip155:", "")] =
+      isSourceAccountEVMOnly
+        ? sourceAccount.ethereumHexAddress
+        : sourceAccount.bech32Address;
+
+    const destinationAccount = this.accountStore.getAccount(this.outChainId);
+
+    if (destinationAccount.walletStatus === WalletStatus.NotInit) {
+      destinationAccount.init();
+    }
+
+    const isDestinationChainEVMOnly = this.outChainId.startsWith("eip155:");
+    if (
+      isDestinationChainEVMOnly
+        ? !destinationAccount.ethereumHexAddress
+        : !destinationAccount.bech32Address
+    ) {
+      return;
+    }
+    chainIdsToAddresses[this.outChainId.replace("eip155:", "")] =
+      isDestinationChainEVMOnly
+        ? destinationAccount.ethereumHexAddress
+        : destinationAccount.bech32Address;
+
+    for (const swapVenue of this._swapVenues) {
+      const swapAccount = this.accountStore.getAccount(swapVenue.chainId);
+      if (swapAccount.walletStatus === WalletStatus.NotInit) {
+        swapAccount.init();
+      }
+
+      const isSwapVenueChainEVMOnly = swapVenue.chainId.startsWith("eip155:");
+      if (
+        isSwapVenueChainEVMOnly
+          ? !swapAccount.ethereumHexAddress
+          : !swapAccount.bech32Address
+      ) {
+        return;
+      }
+      chainIdsToAddresses[swapVenue.chainId.replace("eip155:", "")] =
+        isSwapVenueChainEVMOnly
+          ? swapAccount.ethereumHexAddress
+          : swapAccount.bech32Address;
+    }
+
     return this.skipQueries.queryIBCSwap.getIBCSwap(
       this.chainId,
       amount ?? this.amount[0],
       this.outChainId,
       this.outCurrency.coinMinimalDenom,
       this.swapFeeBps,
+      chainIdsToAddresses,
+      this._slippageTolerancePercent,
       this.allowSwaps,
       this.smartSwapOptions
     );
@@ -960,6 +1026,11 @@ export const useIBCSwapAmountConfig = (
   outChainId: string,
   outCurrency: AppCurrency,
   swapFeeBps: number,
+  swapVenues: {
+    name: string;
+    chainId: string;
+  }[],
+  slippageTolerancePercent: number,
   allowSwaps?: boolean,
   smartSwapOptions?: {
     evmSwaps?: boolean;
@@ -979,6 +1050,8 @@ export const useIBCSwapAmountConfig = (
         outChainId,
         outCurrency,
         swapFeeBps,
+        swapVenues,
+        slippageTolerancePercent,
         allowSwaps,
         smartSwapOptions
       )

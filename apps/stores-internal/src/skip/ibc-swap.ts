@@ -35,6 +35,12 @@ export class ObservableQueryIBCSwapInner {
       readonly name: string;
       readonly chainId: string;
     }[],
+    public readonly chainIdsToAddresses: Record<string, string>,
+    public readonly slippageTolerancePercent: number,
+    public readonly affiliateFeeReceivers: {
+      chainId: string;
+      address: string;
+    }[],
     public readonly allowSwaps?: boolean,
     public readonly smartSwapOptions?: {
       evmSwaps?: boolean;
@@ -44,8 +50,7 @@ export class ObservableQueryIBCSwapInner {
 
   getQueryMsgsDirect(
     chainIdsToAddresses: Record<string, string>,
-    slippageTolerancePercent: number,
-    affiliateFeeReceiver: string | undefined
+    slippageTolerancePercent: number
   ): ObservableQueryMsgsDirectInner {
     const inAmount = new CoinPretty(
       this.chainStore
@@ -62,7 +67,7 @@ export class ObservableQueryIBCSwapInner {
       chainIdsToAddresses,
       slippageTolerancePercent,
       this.affiliateFeeBps,
-      affiliateFeeReceiver,
+      this.affiliateFeeReceivers,
       this.swapVenues,
       this.smartSwapOptions
     );
@@ -98,6 +103,10 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
     protected readonly queryRoute: ObservableQueryRoute,
     protected readonly queryMsgsDirect: ObservableQueryMsgsDirect,
     protected readonly queryIBCPacketForwardingTransfer: ObservableQueryIbcPfmTransfer,
+    public readonly affiliateFeeReceivers: {
+      chainId: string;
+      address: string;
+    }[],
     public readonly swapVenues: {
       readonly name: string;
       readonly chainId: string;
@@ -117,6 +126,9 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
         parsed.destChainId,
         parsed.affiliateFeeBps,
         parsed.swapVenues,
+        parsed.chainIdsToAddresses,
+        parsed.slippageTolerancePercent,
+        parsed.affiliateFeeReceivers,
         parsed.allowSwaps,
         parsed.smartSwapOptions
       );
@@ -131,6 +143,8 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
     destChainId: string,
     destDenom: string,
     affiliateFeeBps: number,
+    chainIdsToAddresses: Record<string, string>,
+    slippageTolerancePercent: number,
     allowSwaps?: boolean,
     smartSwapOptions?: {
       evmSwaps?: boolean;
@@ -144,6 +158,9 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
       destChainId,
       destDenom,
       affiliateFeeBps,
+      chainIdsToAddresses,
+      slippageTolerancePercent,
+      affiliateFeeReceivers: this.affiliateFeeReceivers,
       swapVenues: this.swapVenues,
       allowSwaps,
       smartSwapOptions,
