@@ -180,7 +180,12 @@ export const AccountActivationModal: FunctionComponent<{
                   "0x" + Buffer.from(params.yHigh).toString("hex"),
                 ],
             "0x" + Buffer.from(params.salt).toString("hex"),
-            type === "ETH" ? feeContractAddress : undefined
+            type === "ETH"
+              ? {
+                  mode: "default",
+                  gasToken: feeContractAddress,
+                }
+              : undefined
           );
 
         // CHECK: 계정 배포도 서명 검증 비용 들던가?
@@ -193,7 +198,7 @@ export const AccountActivationModal: FunctionComponent<{
           l1_data_gas_price,
         } = estimateResult;
 
-        const extraL2GasForOnchainVerification = new Dec(22000000);
+        const extraL2GasForOnchainVerification = new Dec(22039040);
 
         const adjustedL2GasConsumed = new Dec(l2_gas_consumed ?? 0).add(
           extraL2GasForOnchainVerification
@@ -432,26 +437,21 @@ export const AccountActivationModal: FunctionComponent<{
                         )
                       : undefined;
 
+                    const { l1Gas, l2Gas, l1DataGas } =
+                      gasSimulator.gasEstimate;
+
                     const margin = new Dec(1.5);
 
-                    const maxL1DataGas = new Dec(
-                      estimate.l1DataGas.consumed
-                    ).mul(margin);
-                    const maxL1Gas = new Dec(estimate.l1Gas.consumed).mul(
+                    const maxL1DataGas = new Dec(l1DataGas.consumed).mul(
                       margin
                     );
-                    const maxL1DataGasPrice = new Dec(
-                      estimate.l1DataGas.price
-                    ).mul(margin);
-                    const maxL1GasPrice = new Dec(estimate.l1Gas.price).mul(
+                    const maxL1Gas = new Dec(l1Gas.consumed).mul(margin);
+                    const maxL1DataGasPrice = new Dec(l1DataGas.price).mul(
                       margin
                     );
-                    const maxL2Gas = new Dec(estimate.l2Gas.consumed).mul(
-                      margin
-                    );
-                    const maxL2GasPrice = new Dec(estimate.l2Gas.price).mul(
-                      margin
-                    );
+                    const maxL1GasPrice = new Dec(l1Gas.price).mul(margin);
+                    const maxL2Gas = new Dec(l2Gas.consumed).mul(margin);
+                    const maxL2GasPrice = new Dec(l2Gas.price).mul(margin);
 
                     const { transaction_hash: txHash } =
                       await starknetAccount.deployAccountWithFee(

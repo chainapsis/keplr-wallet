@@ -102,7 +102,7 @@ export const useStarknetClaimRewards = () => {
           calls
         );
 
-        const extraL2GasForOnchainVerification = new Dec(22000000);
+        const extraL2GasForOnchainVerification = new Dec(22039040);
         const adjustedL2GasConsumed = new Dec(l2_gas_consumed ?? 0).add(
           extraL2GasForOnchainVerification
         );

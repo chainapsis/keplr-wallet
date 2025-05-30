@@ -170,7 +170,12 @@ export const SignStarknetTxView: FunctionComponent<{
           .estimateInvokeFee(
             sender,
             interactionData.data.transactions,
-            type === "ETH" ? feeContractAddress : undefined
+            type === "ETH"
+              ? {
+                  mode: "default",
+                  gasToken: feeContractAddress,
+                }
+              : undefined
           );
 
         const {
@@ -188,7 +193,7 @@ export const SignStarknetTxView: FunctionComponent<{
 
         // CHECK: 언제 l2 gas로 빠지고 언제 l1 gas로 빠지는지 확인 필요.
         // const extraL1GasForOnChainVerification = new Dec(583);
-        const extraL2GasForOnchainVerification = new Dec(22000000);
+        const extraL2GasForOnchainVerification = new Dec(22039040);
 
         const adjustedL2GasConsumed = new Dec(l2_gas_consumed ?? 0).add(
           extraL2GasForOnchainVerification
@@ -314,15 +319,17 @@ export const SignStarknetTxView: FunctionComponent<{
           .getNonce(senderConfig.sender);
       }
 
+      const { l1Gas, l2Gas, l1DataGas } = gasSimulator.gasEstimate;
+
       const margin = new Dec(1.5);
 
-      const maxL1DataGas = new Dec(estimate.l1DataGas.consumed).mul(margin);
-      const maxL1Gas = new Dec(estimate.l1Gas.consumed).mul(margin);
-      const maxL2Gas = new Dec(estimate.l2Gas.consumed).mul(margin);
+      const maxL1DataGas = new Dec(l1DataGas.consumed).mul(margin);
+      const maxL1Gas = new Dec(l1Gas.consumed).mul(margin);
+      const maxL2Gas = new Dec(l2Gas.consumed).mul(margin);
 
-      const maxL1DataGasPrice = new Dec(estimate.l1DataGas.price).mul(margin);
-      const maxL1GasPrice = new Dec(estimate.l1Gas.price).mul(margin);
-      const maxL2GasPrice = new Dec(estimate.l2Gas.price).mul(margin);
+      const maxL1DataGasPrice = new Dec(l1DataGas.price).mul(margin);
+      const maxL1GasPrice = new Dec(l1Gas.price).mul(margin);
+      const maxL2GasPrice = new Dec(l2Gas.price).mul(margin);
 
       const details: InvocationsSignerDetails = {
         version: "0x3",
