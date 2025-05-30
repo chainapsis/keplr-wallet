@@ -37,18 +37,14 @@ export type FeeType = "STRK" | "ETH";
 
 export interface IGasConfig extends ITxChainSetter {
   value: string;
-  setValue(
-    value:
-      | string
-      | number
-      | {
-          gas: string;
-          maxGas: string;
-        }
-  ): void;
+  gasAdjustmentValue: string;
+
+  setValue(value: string | number): void;
+  setGasAdjustmentValue(gasAdjustment: string | number): void;
 
   gas: number;
   maxGas: number;
+  gasAdjustment: number;
 
   uiProperties: UIProperties;
 }
@@ -133,10 +129,6 @@ export interface IGasSimulator {
   isSimulating: boolean;
 
   gasEstimate: GasEstimate | undefined;
-  gasAdjustment: number;
-
-  gasAdjustmentValue: string;
-  setGasAdjustmentValue(gasAdjustment: string | number): void;
 
   uiProperties: UIProperties;
 }

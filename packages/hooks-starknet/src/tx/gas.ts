@@ -13,7 +13,7 @@ export class GasConfig extends TxChainSetter implements IGasConfig {
   protected _value: string = "";
 
   @observable
-  protected _maxGasValue: string = "";
+  protected _gasAdjustmentValue: string = "1.5";
 
   /*
    There are services that sometimes use invalid tx to sign arbitrary data on the sign page.
@@ -42,16 +42,58 @@ export class GasConfig extends TxChainSetter implements IGasConfig {
     return this._value;
   }
 
+  get gasAdjustmentValue(): string {
+    return this._gasAdjustmentValue;
+  }
+
   @action
-  setValue(value: string | number | { gas: string; maxGas: string }): void {
+  setValue(value: string | number): void {
     if (typeof value === "number") {
       this._value = Math.ceil(value).toString();
-    } else if (typeof value === "object") {
-      this._value = value.gas;
-      this._maxGasValue = value.maxGas;
     } else {
       this._value = value;
     }
+  }
+
+  @action
+  setGasAdjustmentValue(gasAdjustment: string | number) {
+    if (typeof gasAdjustment === "number") {
+      if (gasAdjustment < 0 || gasAdjustment > 2) {
+        return;
+      }
+
+      this._gasAdjustmentValue = gasAdjustment.toString();
+      return;
+    }
+
+    if (gasAdjustment === "") {
+      this._gasAdjustmentValue = "";
+      return;
+    }
+
+    if (gasAdjustment.startsWith(".")) {
+      this._gasAdjustmentValue = "0" + gasAdjustment;
+    }
+
+    const num = parseFloat(gasAdjustment);
+    if (Number.isNaN(num) || num < 0 || num > 2) {
+      return;
+    }
+
+    this._gasAdjustmentValue = gasAdjustment;
+  }
+
+  get gasAdjustment(): number {
+    if (this._gasAdjustmentValue === "") {
+      return 0;
+    }
+
+    const num = parseFloat(this._gasAdjustmentValue);
+    if (Number.isNaN(num) || num < 0) {
+      return 0;
+    }
+
+    return num;
   }
 
   get gas(): number {
@@ -68,17 +110,7 @@ export class GasConfig extends TxChainSetter implements IGasConfig {
   }
 
   get maxGas(): number {
-    // TODO: gas adjustment를 이 클래스에서 관리하도록
-    if (this._maxGasValue.trim() === "") {
-      return Math.ceil(this.gas * 1.5);
-    }
-
-    const num = Number.parseInt(this._maxGasValue);
-    if (Number.isNaN(num)) {
-      return Math.ceil(this.gas * 1.5);
-    }
-
-    return num;
+    return Math.ceil(this.gas * this.gasAdjustment);
   }
 
   @computed
