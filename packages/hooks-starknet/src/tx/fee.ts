@@ -132,7 +132,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     return this._maxGasPrice;
   }
 
-  get type(): "ETH" | "STRK" {
+  get type(): FeeType {
     return this._type;
   }
 
@@ -150,7 +150,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   @action
-  setType(type: "ETH" | "STRK"): void {
+  setType(type: FeeType): void {
     if (this._type !== type) {
       this._type = type;
       this._gasPrice = undefined;
@@ -158,6 +158,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     }
   }
 
+  // TODO: convert STRK to ETH if needed
   @computed
   get fee(): CoinPretty | undefined {
     if (!this._gasPrice) {
@@ -168,6 +169,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     return this._gasPrice.mul(gasDec);
   }
 
+  // TODO: convert STRK to ETH if needed
   @computed
   get maxFee(): CoinPretty | undefined {
     if (!this._maxGasPrice) {
