@@ -704,23 +704,60 @@ export class IBCSwapAmountConfig extends AmountConfig {
           routeResponse.data.route.estimated_fees &&
           routeResponse.data.route.estimated_fees.length > 0
         ) {
-          const bridgeFee = routeResponse.data.route.estimated_fees.reduce(
-            (acc: CoinPretty, fee: any) => {
-              if (fee.origin_asset.denom === this.currency.coinMinimalDenom) {
-                return acc.add(
-                  new CoinPretty(this.currency, new Dec(fee.amount))
-                );
-              }
-              return acc;
-            },
-            new CoinPretty(this.currency, new Dec(0))
-          );
+          const [inAmountBridgeFee, nativeAssetBridgeFee] =
+            routeResponse.data.route.estimated_fees.reduce(
+              (
+                acc: CoinPretty[],
+                fee: {
+                  amount: string;
+                  origin_asset: { denom: string; chain_id: string };
+                }
+              ) => {
+                if (fee.origin_asset.denom === this.currency.coinMinimalDenom) {
+                  return [
+                    acc[0].add(
+                      new CoinPretty(this.currency, new Dec(fee.amount))
+                    ),
+                    acc[1],
+                  ];
+                }
 
-          if (bridgeFee && bridgeFee.toDec().gte(this.maxAmount.toDec())) {
+                if (
+                  fee.origin_asset.denom ===
+                  this.chainInfo.currencies[0].coinMinimalDenom
+                ) {
+                  return [
+                    acc[0],
+                    acc[1].add(
+                      new CoinPretty(
+                        this.chainInfo.currencies[0],
+                        new Dec(fee.amount)
+                      )
+                    ),
+                  ];
+                }
+
+                return acc;
+              },
+              [
+                new CoinPretty(this.currency, new Dec(0)),
+                new CoinPretty(this.chainInfo.currencies[0], new Dec(0)),
+              ]
+            );
+          const nativeBalance = this.queriesStore
+            .get(this.chainId)
+            .queryBalances.getQueryBech32Address(this.senderConfig.sender)
+            .getBalance(this.chainInfo.currencies[0]);
+
+          if (
+            inAmountBridgeFee.toDec().gte(this.maxAmount.toDec()) ||
+            (nativeBalance &&
+              nativeAssetBridgeFee.toDec().gte(nativeBalance.balance.toDec()))
+          ) {
             return {
               ...prev,
               error: new Error(
-                "Your balance is too low to cover the bridge fees."
+                "Your current balance isn't sufficient to cover the bridge fees."
               ),
             };
           }
@@ -789,22 +826,60 @@ export class IBCSwapAmountConfig extends AmountConfig {
         routeResponse.data.route.estimated_fees &&
         routeResponse.data.route.estimated_fees.length > 0
       ) {
-        const bridgeFee = routeResponse.data.route.estimated_fees.reduce(
-          (acc: CoinPretty, fee: any) => {
-            if (fee.origin_asset.denom === this.currency.coinMinimalDenom) {
-              return acc.add(
-                new CoinPretty(this.currency, new Dec(fee.amount))
-              );
-            }
-            return acc;
-          },
-          new CoinPretty(this.currency, new Dec(0))
-        );
-        if (bridgeFee && bridgeFee.toDec().gte(this.maxAmount.toDec())) {
+        const [inAmountBridgeFee, nativeAssetBridgeFee] =
+          routeResponse.data.route.estimated_fees.reduce(
+            (
+              acc: CoinPretty[],
+              fee: {
+                amount: string;
+                origin_asset: { denom: string; chain_id: string };
+              }
+            ) => {
+              if (fee.origin_asset.denom === this.currency.coinMinimalDenom) {
+                return [
+                  acc[0].add(
+                    new CoinPretty(this.currency, new Dec(fee.amount))
+                  ),
+                  acc[1],
+                ];
+              }
+
+              if (
+                fee.origin_asset.denom ===
+                this.chainInfo.currencies[0].coinMinimalDenom
+              ) {
+                return [
+                  acc[0],
+                  acc[1].add(
+                    new CoinPretty(
+                      this.chainInfo.currencies[0],
+                      new Dec(fee.amount)
+                    )
+                  ),
+                ];
+              }
+
+              return acc;
+            },
+            [
+              new CoinPretty(this.currency, new Dec(0)),
+              new CoinPretty(this.chainInfo.currencies[0], new Dec(0)),
+            ]
+          );
+        const nativeBalance = this.queriesStore
+          .get(this.chainId)
+          .queryBalances.getQueryBech32Address(this.senderConfig.sender)
+          .getBalance(this.chainInfo.currencies[0]);
+
+        if (
+          inAmountBridgeFee.toDec().gte(this.maxAmount.toDec()) ||
+          (nativeBalance &&
+            nativeAssetBridgeFee.toDec().gte(nativeBalance.balance.toDec()))
+        ) {
           return {
             ...prev,
             error: new Error(
-              "Your balance is too low to cover the bridge fees."
+              "Your current balance isn't sufficient to cover the bridge fees."
             ),
           };
         }

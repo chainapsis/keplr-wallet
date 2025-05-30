@@ -1700,13 +1700,15 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                             );
                           })
                           .catch((e) => {
+                            console.error(e);
                             logEvent("swap_tx_client_error", {
                               quote_id: quoteId,
                               error_message: e?.message,
                             });
 
-                            console.log(e);
                             ethereumAccount.setIsSendingTx(false);
+                            setCalculatingTxError(e);
+                            setIsTxLoading(false);
                           });
                       }
                     } else {
