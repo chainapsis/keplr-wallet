@@ -5,9 +5,22 @@ import path from "path";
 
 (async () => {
   try {
-    const root = path.join(__dirname, "..");
+    const p = (() => {
+      const maxDepth = 6;
+      let currentDir = __dirname;
+      for (let i = 0; i < maxDepth; i++) {
+        const binPath = path.join(
+          currentDir,
+          "node_modules/starknet/dist/index.d.ts"
+        );
+        if (fs.existsSync(binPath)) {
+          return binPath;
+        }
+        currentDir = path.join(currentDir, "..");
+      }
+      throw new Error("Cannot find starknet");
+    })();
 
-    const p = path.join(root, "node_modules/starknet/dist/index.d.ts");
     if (fs.existsSync(p)) {
       const data = await fs.readFile(p, "utf8");
       // node_modules/starknet/dist/index.d.ts에서 타입 오류가 나는데
