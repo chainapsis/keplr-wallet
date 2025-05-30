@@ -51,6 +51,7 @@ import { useStarknetTxConfigsQueryString } from "../../../hooks/starknet/use-tx-
 import { Modal } from "../../../components/modal";
 import { AccountActivationModal } from "../components/account-activation-modal";
 import { LoadingIcon } from "../../../components/icon";
+import { num } from "starknet";
 
 const Styles = {
   Flex1: styled.div`
@@ -269,7 +270,12 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
               sender: sendConfigs.senderConfig.sender,
               recipient: sendConfigs.recipientConfig.recipient,
             },
-            type === "ETH" ? feeContractAddress : undefined
+            type === "ETH"
+              ? {
+                  mode: "default",
+                  gasToken: feeContractAddress,
+                }
+              : undefined
           );
 
         const {
@@ -283,7 +289,7 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
 
         // CHECK: 언제 l2 gas로 빠지고 언제 l1 gas로 빠지는지 확인 필요.
         // const extraL1GasForOnChainVerification = new Dec(583);
-        const extraL2GasForOnchainVerification = new Dec(22000000);
+        const extraL2GasForOnchainVerification = new Dec(22039040);
 
         const adjustedL2GasConsumed = new Dec(l2_gas_consumed ?? 0).add(
           extraL2GasForOnchainVerification
@@ -409,11 +415,7 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
           return;
         }
 
-        if (
-          !txConfigsValidate.interactionBlocked &&
-          sendConfigs.feeConfig.maxFee &&
-          sendConfigs.feeConfig.maxGasPrice
-        ) {
+        if (!txConfigsValidate.interactionBlocked && gasSimulator.gasEstimate) {
           setIsLoading(true);
           try {
             const type = sendConfigs.feeConfig.type;
@@ -439,6 +441,18 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
               denom: currency.coinMinimalDenom,
             };
 
+            const { l1Gas, l2Gas, l1DataGas } = gasSimulator.gasEstimate;
+
+            const margin = new Dec(1.5);
+
+            const maxL1DataGas = new Dec(l1DataGas.consumed).mul(margin);
+            const maxL1Gas = new Dec(l1Gas.consumed).mul(margin);
+            const maxL2Gas = new Dec(l2Gas.consumed).mul(margin);
+
+            const maxL1DataGasPrice = new Dec(l1DataGas.price).mul(margin);
+            const maxL1GasPrice = new Dec(l1Gas.price).mul(margin);
+            const maxL2GasPrice = new Dec(l2Gas.price).mul(margin);
+
             const { transaction_hash: txHash } = await starknetAccountStore
               .getAccount(chainId)
               .executeForSendTokenTx(
@@ -447,11 +461,14 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
                 currency,
                 recipient,
                 {
-                  l1MaxGas: sendConfigs.gasConfig.gas.toString(),
-                  l1MaxGasPrice:
-                    sendConfigs.feeConfig.maxGasPrice.toCoin().amount,
-                  l1MaxDataGas: "0",
-                  l1MaxDataGasPrice: "0",
+                  l1MaxGas: num.toHex(maxL1Gas.truncate().toString()),
+                  l1MaxGasPrice: num.toHex(maxL1GasPrice.truncate().toString()),
+                  l1MaxDataGas: num.toHex(maxL1DataGas.truncate().toString()),
+                  l1MaxDataGasPrice: num.toHex(
+                    maxL1DataGasPrice.truncate().toString()
+                  ),
+                  l2MaxGas: num.toHex(maxL2Gas.truncate().toString()),
+                  l2MaxGasPrice: num.toHex(maxL2GasPrice.truncate().toString()),
                   paymaster:
                     type === "ETH"
                       ? {

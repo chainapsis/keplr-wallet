@@ -110,6 +110,9 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
   @observable.shallow
   protected _stateMap: Map<string, GasSimulatorState> = new Map();
 
+  protected _debounceTimeoutId: NodeJS.Timeout | null = null;
+  protected readonly _debounceMs: number = 300;
+
   protected _disposers: IReactionDisposer[] = [];
 
   constructor(
@@ -286,58 +289,64 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
           return;
         }
 
+        if (this._debounceTimeoutId) {
+          clearTimeout(this._debounceTimeoutId);
+        }
+
         const promise = state.gasSimulate();
 
-        runInAction(() => {
-          this._isSimulating = true;
-        });
-
-        promise
-          .then((gasEstimate) => {
-            state.setRecentGasEstimate(gasEstimate);
-            state.setError(undefined);
-
-            this.kvStore.set(key, JSON.stringify(gasEstimate)).catch((e) => {
-              console.log(e);
-            });
-          })
-          .catch((e) => {
-            console.log("starknet gas simulate error", e);
-            if (isSimpleFetchError(e) && e.response) {
-              let message = "";
-              const contentType: string = e.response.headers
-                ? e.response.headers.get("content-type") || ""
-                : "";
-              // Try to figure out the message from the response.
-              // If the contentType in the header is specified, try to use the message from the response.
-              if (
-                contentType.startsWith("text/plain") &&
-                typeof e.response.data === "string"
-              ) {
-                message = e.response.data;
-              }
-              // If the response is an object and "message" field exists, it is used as a message.
-              if (
-                contentType.startsWith("application/json") &&
-                e.response.data?.message &&
-                typeof e.response.data?.message === "string"
-              ) {
-                message = e.response.data.message;
-              }
-
-              if (message !== "") {
-                state.setError(new Error(message));
-                return;
-              }
-            }
-
-            state.setError(e);
-          })
-          .finally(() => {
-            runInAction(() => {
-              this._isSimulating = false;
-            });
+        this._debounceTimeoutId = setTimeout(() => {
+          runInAction(() => {
+            this._isSimulating = true;
           });
+
+          promise
+            .then((gasEstimate) => {
+              state.setRecentGasEstimate(gasEstimate);
+              state.setError(undefined);
+
+              this.kvStore.set(key, JSON.stringify(gasEstimate)).catch((e) => {
+                console.log(e);
+              });
+            })
+            .catch((e) => {
+              console.log("starknet gas simulate error", e);
+              if (isSimpleFetchError(e) && e.response) {
+                let message = "";
+                const contentType: string = e.response.headers
+                  ? e.response.headers.get("content-type") || ""
+                  : "";
+                // Try to figure out the message from the response.
+                // If the contentType in the header is specified, try to use the message from the response.
+                if (
+                  contentType.startsWith("text/plain") &&
+                  typeof e.response.data === "string"
+                ) {
+                  message = e.response.data;
+                }
+                // If the response is an object and "message" field exists, it is used as a message.
+                if (
+                  contentType.startsWith("application/json") &&
+                  e.response.data?.message &&
+                  typeof e.response.data?.message === "string"
+                ) {
+                  message = e.response.data.message;
+                }
+
+                if (message !== "") {
+                  state.setError(new Error(message));
+                  return;
+                }
+              }
+
+              state.setError(e);
+            })
+            .finally(() => {
+              runInAction(() => {
+                this._isSimulating = false;
+              });
+            });
+        }, this._debounceMs);
       })
     );
 

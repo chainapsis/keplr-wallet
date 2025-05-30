@@ -27,10 +27,12 @@ export type Fee = {
   l1MaxDataGasPrice: string;
   l2MaxGas?: string;
   l2MaxGasPrice?: string;
-  paymaster?: {
-    mode: "default"; // "sponsored" is not supported yet
-    gasToken: string;
-  };
+  paymaster?: Paymaster;
+};
+
+export type Paymaster = {
+  mode: "default"; // "sponsored" is not supported yet
+  gasToken: string;
 };
 
 export class StoreAccount extends Account {

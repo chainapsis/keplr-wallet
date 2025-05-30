@@ -13,7 +13,7 @@ import {
   OutsideExecutionVersion,
   UniversalDetails,
 } from "starknet";
-import { Fee, StoreAccount } from "./internal";
+import { Fee, Paymaster, StoreAccount } from "./internal";
 import { Dec, DecUtils, Int } from "@keplr-wallet/unit";
 
 export class StarknetAccountBase {
@@ -54,7 +54,7 @@ export class StarknetAccountBase {
     classHash: string,
     constructorCalldata: RawArgs,
     addressSalt: string,
-    gasTokenAddress?: string
+    paymaster?: Paymaster
   ) {
     const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
     if (!("starknet" in modularChainInfo)) {
@@ -74,7 +74,7 @@ export class StarknetAccountBase {
         constructorCalldata,
         addressSalt,
       },
-      await this._buildUniversalDetails(sender, gasTokenAddress)
+      await this._buildUniversalDetails(sender, paymaster)
     );
   }
 
@@ -83,7 +83,7 @@ export class StarknetAccountBase {
     classHash: string,
     constructorCalldata: RawArgs,
     addressSalt: string,
-    feeTokenAddress?: string,
+    paymaster?: Paymaster,
     {
       onFulfilled,
       onBroadcastFailed,
@@ -111,7 +111,7 @@ export class StarknetAccountBase {
           constructorCalldata,
           addressSalt,
         },
-        await this._buildUniversalDetails(sender, feeTokenAddress)
+        await this._buildUniversalDetails(sender, paymaster)
       );
 
       onFulfilled?.(res);
@@ -162,7 +162,7 @@ export class StarknetAccountBase {
   async estimateInvokeFee(
     sender: string,
     calls: Call[],
-    gasTokenAddress?: string
+    paymaster?: Paymaster
   ) {
     const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
     if (!("starknet" in modularChainInfo)) {
@@ -178,7 +178,7 @@ export class StarknetAccountBase {
 
     return await walletAccount.estimateInvokeFee(
       calls,
-      await this._buildUniversalDetails(sender, gasTokenAddress)
+      await this._buildUniversalDetails(sender, paymaster)
     );
   }
 
@@ -194,7 +194,7 @@ export class StarknetAccountBase {
       sender: string;
       recipient: string;
     },
-    gasTokenAddress?: string
+    paymaster?: Paymaster
   ) {
     const actualAmount = (() => {
       let dec = new Dec(amount);
@@ -215,7 +215,7 @@ export class StarknetAccountBase {
       },
     ];
 
-    return await this.estimateInvokeFee(sender, calls, gasTokenAddress);
+    return await this.estimateInvokeFee(sender, calls, paymaster);
   }
 
   async execute(
@@ -309,13 +309,13 @@ export class StarknetAccountBase {
 
   private async _buildUniversalDetails(
     sender: string,
-    gasTokenAddress?: string
+    paymaster?: Paymaster
   ): Promise<UniversalDetails> {
     const details: UniversalDetails = {
       version: ETransactionVersion.V3,
     };
 
-    if (gasTokenAddress) {
+    if (paymaster) {
       // TODO: if account is not deployed, it will throw error.
       // Thus, we need to check if the account is deployed
       // or find is there any way to check the contract to deploy is supported by paymaster.
@@ -347,7 +347,7 @@ export class StarknetAccountBase {
         await walletAccount.paymaster.getSupportedTokens();
 
       let found = false;
-      let gasTokenAddressWithout0x = gasTokenAddress.replace("0x", "");
+      let gasTokenAddressWithout0x = paymaster.gasToken.replace("0x", "");
 
       for (const token of supportedTokens) {
         // 0x 떼고 비교, 길이가 맞지 않으면 짧은 쪽에 zero padding 추가
@@ -382,7 +382,7 @@ export class StarknetAccountBase {
       details.paymaster = {
         feeMode: {
           mode: "default",
-          gasToken: gasTokenAddress,
+          gasToken: paymaster.gasToken,
         },
       };
     }
