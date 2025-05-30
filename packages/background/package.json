@@ -44,7 +44,7 @@
     "@ledgerhq/hw-transport": "^6.31.4",
     "@ledgerhq/hw-transport-webhid": "^6.29.4",
     "@ledgerhq/hw-transport-webusb": "^6.29.4",
-    "@noble/hashes": "1.0.0",
+    "@noble/hashes": "^1.4.0",
     "aes-js": "^3.1.2",
     "big-integer": "^1.6.48",
     "bip39": "^3.0.2",

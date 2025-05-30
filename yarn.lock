@@ -5912,7 +5912,7 @@ __metadata:
     "@ledgerhq/hw-transport": ^6.31.4
     "@ledgerhq/hw-transport-webhid": ^6.29.4
     "@ledgerhq/hw-transport-webusb": ^6.29.4
-    "@noble/hashes": 1.0.0
+    "@noble/hashes": ^1.4.0
     "@types/aes-js": ^3.1.0
     "@types/secp256k1": ^4.0.1
     "@types/w3c-web-hid": ^1.0.2
