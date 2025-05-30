@@ -96,9 +96,6 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
   protected _key: string;
 
   @observable
-  protected _gasAdjustmentValue: string = "1.5";
-
-  @observable
   protected _enabled: boolean = false;
 
   @observable
@@ -214,51 +211,6 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
     }
 
     return state.initialGasEstimate ?? undefined;
-  }
-
-  get gasAdjustment(): number {
-    if (this._gasAdjustmentValue === "") {
-      return 0;
-    }
-
-    const num = parseFloat(this._gasAdjustmentValue);
-    if (Number.isNaN(num) || num < 0) {
-      return 0;
-    }
-
-    return num;
-  }
-
-  get gasAdjustmentValue(): string {
-    return this._gasAdjustmentValue;
-  }
-
-  @action
-  setGasAdjustmentValue(gasAdjustment: string | number) {
-    if (typeof gasAdjustment === "number") {
-      if (gasAdjustment < 0 || gasAdjustment > 2) {
-        return;
-      }
-
-      this._gasAdjustmentValue = gasAdjustment.toString();
-      return;
-    }
-
-    if (gasAdjustment === "") {
-      this._gasAdjustmentValue = "";
-      return;
-    }
-
-    if (gasAdjustment.startsWith(".")) {
-      this._gasAdjustmentValue = "0" + gasAdjustment;
-    }
-
-    const num = parseFloat(gasAdjustment);
-    if (Number.isNaN(num) || num < 0 || num > 2) {
-      return;
-    }
-
-    this._gasAdjustmentValue = gasAdjustment;
   }
 
   protected init() {
@@ -398,11 +350,7 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
             .add(new Dec(l1Gas.consumed))
             .add(new Dec(l2Gas.consumed));
 
-          const maxGas = gas.mul(new Dec(this.gasAdjustment));
-          this.gasConfig.setValue({
-            gas: gas.truncate().toString(),
-            maxGas: maxGas.truncate().toString(),
-          });
+          this.gasConfig.setValue(gas.truncate().toString());
         }
       })
     );
