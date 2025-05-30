@@ -26,6 +26,6 @@
   },
   "peerDependencies": {
     "bitcoinjs-lib": "^6",
-    "starknet": "^6"
+    "starknet": "^7"
   }
 }

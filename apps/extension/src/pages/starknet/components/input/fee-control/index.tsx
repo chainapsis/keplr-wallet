@@ -100,11 +100,12 @@ export const useAutoFeeCurrencySelectionOnInit = (
           feeConfig.chainId
         ).queryStarknetERC20Balance;
 
-        const ethCoinMinmalDenom = `erc20:${modularChainInfo.starknet.ethContractAddress}`;
         const strkCoinMinmalDenom = `erc20:${modularChainInfo.starknet.strkContractAddress}`;
+        const ethCoinMinmalDenom = `erc20:${modularChainInfo.starknet.ethContractAddress}`;
+
         for (const coinMinimalDenom of [
-          ethCoinMinmalDenom,
           strkCoinMinmalDenom,
+          ethCoinMinmalDenom,
         ]) {
           const feeCurrencyBal = queryBalances.getBalance(
             feeConfig.chainId,
