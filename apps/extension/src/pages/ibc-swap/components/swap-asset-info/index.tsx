@@ -87,7 +87,13 @@ export const SwapAssetInfo: FunctionComponent<{
   ) => void;
 }> = observer(
   ({ type, senderConfig, amountConfig, onDestinationChainSelect }) => {
-    const { chainStore, queriesStore, priceStore, uiConfigStore } = useStore();
+    const {
+      chainStore,
+      queriesStore,
+      priceStore,
+      uiConfigStore,
+      analyticsAmplitudeStore,
+    } = useStore();
 
     const theme = useTheme();
 
@@ -427,7 +433,7 @@ export const SwapAssetInfo: FunctionComponent<{
                         q = `&${q}`;
                       }
                       return q;
-                    })()}`
+                    })()}&entryPoint=select_from_asset`
                   )}`
                 );
               } else {
@@ -452,7 +458,7 @@ export const SwapAssetInfo: FunctionComponent<{
                         q += `&${key}=${value}`;
                       }
                       return q;
-                    })()}`
+                    })()}&entryPoint=select_to_asset`
                   )}`
                 );
               }
@@ -653,6 +659,10 @@ export const SwapAssetInfo: FunctionComponent<{
                     cursor="pointer"
                     onClick={(e) => {
                       e.preventDefault();
+
+                      analyticsAmplitudeStore.logEvent(
+                        "swap_dest_chain_btn_clicked"
+                      );
 
                       setIsSelectDestinationModalOpen(true);
                     }}

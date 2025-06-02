@@ -72,21 +72,19 @@ function setOutputHash(root, hash) {
     }
 
     const protoTsBinPath = (() => {
-      try {
+      const maxDepth = 6;
+      let currentDir = __dirname;
+      for (let i = 0; i < maxDepth; i++) {
         const binPath = path.join(
-          __dirname,
-          "../../node_modules/.bin/protoc-gen-ts_proto"
+          currentDir,
+          "node_modules/.bin/protoc-gen-ts_proto"
         );
-        fs.readFileSync(binPath);
-        return binPath;
-      } catch {
-        const binPath = path.join(
-          __dirname,
-          "../../../../node_modules/.bin/protoc-gen-ts_proto"
-        );
-        fs.readFileSync(binPath);
-        return binPath;
+        if (fs.existsSync(binPath)) {
+          return binPath;
+        }
+        currentDir = path.join(currentDir, "..");
       }
+      throw new Error("Cannot find protoc-gen-ts_proto");
     })();
 
     const baseDirPath = path.join(__dirname, "..");

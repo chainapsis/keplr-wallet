@@ -28,6 +28,11 @@ export const useIBCSwapConfig = (
   outChainId: string,
   outCurrency: AppCurrency,
   swapFeeBps: number,
+  swapVenues: {
+    name: string;
+    chainId: string;
+  }[],
+  slippageTolerancePercent: number,
   allowSwaps?: boolean,
   smartSwapOptions?: {
     evmSwaps?: boolean;
@@ -46,6 +51,8 @@ export const useIBCSwapConfig = (
     outChainId,
     outCurrency,
     swapFeeBps,
+    swapVenues,
+    slippageTolerancePercent,
     allowSwaps,
     smartSwapOptions
   );

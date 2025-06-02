@@ -64,7 +64,7 @@ export class EthereumAccountBase {
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const keplr = (await this.getKeplr())!;
-    const gasEstimated = await keplr.ethereum.request<string>({
+    const gasEstimated = await keplr.ethereum.request<string | undefined>({
       method: "eth_estimateGas",
       params: [
         {
@@ -76,6 +76,10 @@ export class EthereumAccountBase {
       ],
       chainId: this.chainId,
     });
+
+    if (!gasEstimated) {
+      throw new Error("Failed to estimate gas");
+    }
 
     return {
       gasUsed: parseInt(gasEstimated),

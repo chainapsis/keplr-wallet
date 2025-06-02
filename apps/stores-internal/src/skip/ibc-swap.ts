@@ -9,7 +9,7 @@ import { ObservableQueryAssetsBatch } from "./assets";
 import { computed, makeObservable } from "mobx";
 import { ObservableQueryChains } from "./chains";
 import { CoinPretty } from "@keplr-wallet/unit";
-import { ObservableQueryRoute, ObservableQueryRouteInner } from "./route";
+import { ObservableQueryRoute } from "./route";
 import {
   ObservableQueryMsgsDirect,
   ObservableQueryMsgsDirectInner,
@@ -35,6 +35,12 @@ export class ObservableQueryIBCSwapInner {
       readonly name: string;
       readonly chainId: string;
     }[],
+    public readonly chainIdsToAddresses: Record<string, string>,
+    public readonly slippageTolerancePercent: number,
+    public readonly affiliateFeeReceivers: {
+      chainId: string;
+      address: string;
+    }[],
     public readonly allowSwaps?: boolean,
     public readonly smartSwapOptions?: {
       evmSwaps?: boolean;
@@ -43,9 +49,8 @@ export class ObservableQueryIBCSwapInner {
   ) {}
 
   getQueryMsgsDirect(
-    chainIdsToAddresses: Record<string, string>,
-    slippageTolerancePercent: number,
-    affiliateFeeReceiver: string | undefined
+    chainIdsToAddresses?: Record<string, string>,
+    slippageTolerancePercent?: number
   ): ObservableQueryMsgsDirectInner {
     const inAmount = new CoinPretty(
       this.chainStore
@@ -54,36 +59,16 @@ export class ObservableQueryIBCSwapInner {
       this.amountInAmount
     );
 
-    return this.queryMsgsDirect.getRoute(
+    return this.queryMsgsDirect.getMsgsDirect(
       inAmount,
       this.sourceAssetChainId,
       this.destAssetDenom,
       this.destAssetChainId,
-      chainIdsToAddresses,
-      slippageTolerancePercent,
+      chainIdsToAddresses ?? this.chainIdsToAddresses,
+      slippageTolerancePercent ?? this.slippageTolerancePercent,
       this.affiliateFeeBps,
-      affiliateFeeReceiver,
+      this.affiliateFeeReceivers,
       this.swapVenues,
-      this.smartSwapOptions
-    );
-  }
-
-  getQueryRoute(): ObservableQueryRouteInner {
-    const inAmount = new CoinPretty(
-      this.chainStore
-        .getChain(this.sourceAssetChainId)
-        .forceFindCurrency(this.amountInDenom),
-      this.amountInAmount
-    );
-
-    return this.queryRoute.getRoute(
-      this.sourceAssetChainId,
-      inAmount,
-      this.destAssetChainId,
-      this.destAssetDenom,
-      this.affiliateFeeBps,
-      this.swapVenues,
-      this.allowSwaps,
       this.smartSwapOptions
     );
   }
@@ -98,6 +83,10 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
     protected readonly queryRoute: ObservableQueryRoute,
     protected readonly queryMsgsDirect: ObservableQueryMsgsDirect,
     protected readonly queryIBCPacketForwardingTransfer: ObservableQueryIbcPfmTransfer,
+    public readonly affiliateFeeReceivers: {
+      chainId: string;
+      address: string;
+    }[],
     public readonly swapVenues: {
       readonly name: string;
       readonly chainId: string;
@@ -117,6 +106,9 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
         parsed.destChainId,
         parsed.affiliateFeeBps,
         parsed.swapVenues,
+        parsed.chainIdsToAddresses,
+        parsed.slippageTolerancePercent,
+        parsed.affiliateFeeReceivers,
         parsed.allowSwaps,
         parsed.smartSwapOptions
       );
@@ -131,6 +123,8 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
     destChainId: string,
     destDenom: string,
     affiliateFeeBps: number,
+    chainIdsToAddresses: Record<string, string>,
+    slippageTolerancePercent: number,
     allowSwaps?: boolean,
     smartSwapOptions?: {
       evmSwaps?: boolean;
@@ -144,6 +138,9 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
       destChainId,
       destDenom,
       affiliateFeeBps,
+      chainIdsToAddresses,
+      slippageTolerancePercent,
+      affiliateFeeReceivers: this.affiliateFeeReceivers,
       swapVenues: this.swapVenues,
       allowSwaps,
       smartSwapOptions,

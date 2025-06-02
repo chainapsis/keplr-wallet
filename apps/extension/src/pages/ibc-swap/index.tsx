@@ -27,7 +27,7 @@ import {
 } from "@keplr-wallet/hooks";
 import { useNotification } from "../../hooks/notification";
 import { FormattedMessage, useIntl } from "react-intl";
-import { SwapFeeBps, TermsOfUseUrl } from "../../config.ui";
+import { SwapFeeBps, SwapVenues, TermsOfUseUrl } from "../../config.ui";
 import { BottomTabsHeightRem } from "../../bottom-tabs";
 import { useSearchParams } from "react-router-dom";
 import { useTxConfigsQueryString } from "../../hooks/use-tx-config-query-string";
@@ -39,7 +39,7 @@ import styled, { useTheme } from "styled-components";
 import { GuideBox } from "../../components/guide-box";
 import { VerticalCollapseTransition } from "../../components/transition/vertical-collapse";
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
-import { Dec, DecUtils, Int } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, DecUtils } from "@keplr-wallet/unit";
 import { MakeTxResponse, WalletStatus } from "@keplr-wallet/stores";
 import { autorun } from "mobx";
 import {
@@ -61,6 +61,7 @@ import {
 } from "@keplr-wallet/stores-eth";
 import { EthTxStatus } from "@keplr-wallet/types";
 import { InsufficientFeeError } from "@keplr-wallet/hooks";
+import { useSwapAnalytics } from "./hooks/use-swap-analytics";
 
 const TextButtonStyles = {
   Container: styled.div`
@@ -185,10 +186,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
       ? inChainAccount.ethereumHexAddress
       : inChainAccount.bech32Address,
     // TODO: config로 빼기
-    300000,
+    1_500_000,
     outChainId,
     outCurrency,
-    swapFeeBps
+    swapFeeBps,
+    SwapVenues,
+    uiConfigStore.ibcSwapConfig.slippageNum
   );
   const querySwapFeeBps = queriesStore.simpleQuery.queryGet<{
     pairs?: {
@@ -313,27 +316,27 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
       // swap일 경우 (osmosis에서 실행될 경우) swpa이 몇번 필요한지에 따라 영향을 미칠 것이다.
       let type = "default";
 
-      const queryRoute = ibcSwapConfigs.amountConfig
+      const queryMsgsDirect = ibcSwapConfigs.amountConfig
         .getQueryIBCSwap()
-        ?.getQueryRoute();
-      if (queryRoute && queryRoute.response) {
+        ?.getQueryMsgsDirect();
+      if (queryMsgsDirect && queryMsgsDirect.response) {
         // swap일 경우 웬만하면 swap 한번으로 충분할 확률이 높다.
         // 이 가정에 따라서 첫로드시에 gas를 restore하기 위해서 트랜잭션을 보내는 체인에서 swap 할 경우
         // 일단 swap-1로 설정한다.
         if (
-          queryRoute.response.data.swap_venues &&
-          queryRoute.response.data.swap_venues.length === 1
+          queryMsgsDirect.response.data.route.swap_venues &&
+          queryMsgsDirect.response.data.route.swap_venues.length === 1
         ) {
           const swapVenueChainId = (() => {
             const evmLikeChainId = Number(
-              queryRoute.response.data.swap_venues[0].chain_id
+              queryMsgsDirect.response.data.route.swap_venues[0].chain_id
             );
             const isEVMChainId =
               !Number.isNaN(evmLikeChainId) && evmLikeChainId > 0;
 
             return isEVMChainId
               ? `eip155:${evmLikeChainId}`
-              : queryRoute.response.data.swap_venues[0].chain_id;
+              : queryMsgsDirect.response.data.route.swap_venues[0].chain_id;
           })();
 
           if (
@@ -344,8 +347,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           }
         }
 
-        if (queryRoute.response.data.operations.length > 0) {
-          const firstOperation = queryRoute.response.data.operations[0];
+        if (queryMsgsDirect.response.data.route.operations.length > 0) {
+          const firstOperation =
+            queryMsgsDirect.response.data.route.operations[0];
           if ("swap" in firstOperation) {
             if (firstOperation.swap.swap_in) {
               type = `swap-${firstOperation.swap.swap_in.swap_operations.length}`;
@@ -411,12 +415,13 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
       }
 
       const swapFeeBpsReceiver: string[] = [];
-      const queryRoute = ibcSwapConfigs.amountConfig
+      const queryMsgsDirect = ibcSwapConfigs.amountConfig
         .getQueryIBCSwap()
-        ?.getQueryRoute();
-      if (queryRoute && queryRoute.response) {
-        if (queryRoute.response.data.operations.length > 0) {
-          for (const operation of queryRoute.response.data.operations) {
+        ?.getQueryMsgsDirect();
+      if (queryMsgsDirect && queryMsgsDirect.response) {
+        if (queryMsgsDirect.response.data.route.operations.length > 0) {
+          for (const operation of queryMsgsDirect.response.data.route
+            .operations) {
             if ("swap" in operation) {
               const swapIn =
                 operation.swap.swap_in ?? operation.swap.smart_swap_in;
@@ -434,10 +439,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
       }
 
       const tx = ibcSwapConfigs.amountConfig.getTxIfReady(
-        // simulation 자체는 쉽게 통과시키기 위해서 슬리피지를 50으로 설정한다.
-        50,
-        // 코스모스 스왑은 스왑베뉴가 무조건 하나라고 해서 일단 처음걸 쓰기로 한다.
-        swapFeeBpsReceiver[0]
+        uiConfigStore.ibcSwapConfig.slippageNum
       );
 
       if (!tx) {
@@ -564,25 +566,25 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
   // 10초마다 자동 refresh
   const queryIBCSwap = ibcSwapConfigs.amountConfig.getQueryIBCSwap();
-  const queryRoute = queryIBCSwap?.getQueryRoute();
+  const queryMsgsDirect = queryIBCSwap?.getQueryMsgsDirect();
   useEffect(() => {
-    if (queryRoute && !queryRoute.isFetching) {
+    if (queryMsgsDirect && !queryMsgsDirect.isFetching) {
       const timeoutId = setTimeout(() => {
-        if (!queryRoute.isFetching) {
-          queryRoute.fetch();
+        if (!queryMsgsDirect.isFetching) {
+          queryMsgsDirect.fetch();
         }
-      }, 10000);
+      }, IBCSwapAmountConfig.QueryMsgsDirectRefreshInterval);
       return () => {
         clearTimeout(timeoutId);
       };
     }
     // eslint가 자동으로 추천해주는 deps를 쓰면 안된다.
-    // queryRoute는 amountConfig에서 필요할때마다 reference가 바뀌므로 deps에 넣는다.
-    // queryRoute.isFetching는 현재 fetch중인지 아닌지를 알려주는 값이므로 deps에 꼭 넣어야한다.
-    // queryRoute는 input이 같으면 reference가 같으므로 eslint에서 추천하는대로 queryRoute만 deps에 넣으면
-    // queryRoute.isFetching이 무시되기 때문에 수동으로 넣어줌
+    // queryMsgsDirect는 amountConfig에서 필요할때마다 reference가 바뀌므로 deps에 넣는다.
+    // queryMsgsDirect.isFetching는 현재 fetch중인지 아닌지를 알려주는 값이므로 deps에 꼭 넣어야한다.
+    // queryMsgsDirect input이 같으면 reference가 같으므로 eslint에서 추천하는대로 queryMsgsDirect만 deps에 넣으면
+    // queryMsgsDirect.isFetching이 무시되기 때문에 수동으로 넣어줌
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryRoute, queryRoute?.isFetching]);
+  }, [queryMsgsDirect, queryMsgsDirect?.isFetching]);
 
   // ------ 기능상 의미는 없고 이 페이지에서 select asset page로의 전환시 UI flash를 막기 위해서 필요한 값들을 prefetch하는 용도
   useEffect(() => {
@@ -756,33 +758,41 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     const r: string[] = [];
     if (!inCurrency.coinGeckoId) {
       if ("originCurrency" in inCurrency && inCurrency.originCurrency) {
-        r.push(inCurrency.originCurrency.coinDenom);
+        r.push(
+          CoinPretty.makeCoinDenomPretty(inCurrency.originCurrency.coinDenom)
+        );
       } else {
-        r.push(inCurrency.coinDenom);
+        r.push(CoinPretty.makeCoinDenomPretty(inCurrency.coinDenom));
       }
     } else if (!inOrOutChangedDelay) {
       const price = priceStore.getPrice(inCurrency.coinGeckoId, "usd");
       if (!price) {
         if ("originCurrency" in inCurrency && inCurrency.originCurrency) {
-          r.push(inCurrency.originCurrency.coinDenom);
+          r.push(
+            CoinPretty.makeCoinDenomPretty(inCurrency.originCurrency.coinDenom)
+          );
         } else {
-          r.push(inCurrency.coinDenom);
+          r.push(CoinPretty.makeCoinDenomPretty(inCurrency.coinDenom));
         }
       }
     }
     if (!outCurrency.coinGeckoId) {
       if ("originCurrency" in outCurrency && outCurrency.originCurrency) {
-        r.push(outCurrency.originCurrency.coinDenom);
+        r.push(
+          CoinPretty.makeCoinDenomPretty(outCurrency.originCurrency.coinDenom)
+        );
       } else {
-        r.push(outCurrency.coinDenom);
+        r.push(CoinPretty.makeCoinDenomPretty(outCurrency.coinDenom));
       }
     } else if (!inOrOutChangedDelay) {
       const price = priceStore.getPrice(outCurrency.coinGeckoId, "usd");
       if (!price) {
         if ("originCurrency" in outCurrency && outCurrency.originCurrency) {
-          r.push(outCurrency.originCurrency.coinDenom);
+          r.push(
+            CoinPretty.makeCoinDenomPretty(outCurrency.originCurrency.coinDenom)
+          );
         } else {
-          r.push(outCurrency.coinDenom);
+          r.push(CoinPretty.makeCoinDenomPretty(outCurrency.coinDenom));
         }
       }
     }
@@ -792,6 +802,17 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   // --------------------------
 
   const [isTxLoading, setIsTxLoading] = useState(false);
+
+  const { logSwapSignOpened, logEvent, quoteId } = useSwapAnalytics({
+    inChainId: inChainId,
+    inCurrency: inCurrency,
+    outChainId: outChainId,
+    outCurrency: outCurrency,
+    ibcSwapConfigs: ibcSwapConfigs,
+    swapFeeBps,
+  });
+
+  const isSwap = ibcSwapConfigs.amountConfig.type === "swap";
 
   return (
     <MainHeaderLayout
@@ -808,13 +829,15 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         e.preventDefault();
 
         if (!interactionBlocked) {
+          logSwapSignOpened();
+
           setIsTxLoading(true);
 
           let tx: MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals;
 
-          const queryRoute = ibcSwapConfigs.amountConfig
+          const queryMsgsDirect = ibcSwapConfigs.amountConfig
             .getQueryIBCSwap()!
-            .getQueryRoute();
+            .getQueryMsgsDirect();
           const channels: {
             portId: string;
             channelId: string;
@@ -831,26 +854,14 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           let routeDurationSeconds: number | undefined;
           let isInterchainSwap: boolean = false;
 
-          // queryRoute는 ibc history를 추적하기 위한 채널 정보 등을 얻기 위해서 사용된다.
-          // /msgs_direct로도 얻을 순 있지만 따로 데이터를 해석해야되기 때문에 좀 힘들다...
-          // 엄밀히 말하면 각각의 엔드포인트이기 때문에 약간의 시간차 등으로 서로 일치하지 않는 값이 올수도 있다.
-          // 근데 현실에서는 그런 일 안 일어날듯 그냥 그런 문제는 무시하고 진행한다.
-          // queryRoute.waitFreshResponse(),
-          // 인데 사실 ibcSwapConfigs.amountConfig.getTx에서 queryRoute.waitFreshResponse()를 하도록 나중에 바껴서...
-          // 굳이 중복할 필요가 없어짐
           try {
-            let priorOutAmount: Int | undefined = undefined;
-            if (queryRoute.response) {
-              priorOutAmount = new Int(queryRoute.response.data.amount_out);
-            }
-
-            if (!queryRoute.response) {
-              throw new Error("queryRoute.response is undefined");
+            if (!queryMsgsDirect.response) {
+              throw new Error("queryMsgsDirect.response is undefined");
             }
 
             // bridge가 필요한 경우와, 아닌 경우를 나눠서 처리
             // swap, transfer 이외의 다른 operation이 있으면 bridge가 사용된다.
-            const operations = queryRoute.response.data.operations;
+            const operations = queryMsgsDirect.response.data.route.operations;
             isInterchainSwap = operations.some(
               (operation) =>
                 !("swap" in operation) && !("transfer" in operation)
@@ -861,10 +872,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             // 문제는 chain_ids에 이미 ibc swap channel이 포함되어 있을 가능성 (아직 확인은 안됨)
             if (isInterchainSwap) {
               routeDurationSeconds =
-                queryRoute.response.data.estimated_route_duration_seconds;
+                queryMsgsDirect.response.data.route
+                  .estimated_route_duration_seconds;
 
               // 일단은 체인 id를 keplr에서 사용하는 형태로 바꿔야 한다.
-              for (const chainId of queryRoute.response.data.chain_ids) {
+              for (const chainId of queryMsgsDirect.response.data.route
+                .chain_ids) {
                 const isOnlyEvm = parseInt(chainId) > 0;
                 const chainIdInKeplr = isOnlyEvm
                   ? `eip155:${chainId}`
@@ -987,10 +1000,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
             const [_tx] = await Promise.all([
               ibcSwapConfigs.amountConfig.getTx(
-                uiConfigStore.ibcSwapConfig.slippageNum,
-                // 코스모스 스왑은 스왑베뉴가 무조건 하나라고 해서 일단 처음걸 쓰기로 한다.
-                swapFeeBpsReceiver[0],
-                priorOutAmount
+                uiConfigStore.ibcSwapConfig.slippageNum
               ),
             ]);
 
@@ -1173,6 +1183,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       }
                     }
 
+                    if (isSwap) {
+                      logEvent("swap_tx_submitted", {
+                        quote_id: quoteId,
+                      });
+                    }
+
                     const params: Record<
                       string,
                       | number
@@ -1294,6 +1310,11 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   },
                   onFulfill: (tx: any) => {
                     if (tx.code != null && tx.code !== 0) {
+                      if (isSwap) {
+                        logEvent("swap_tx_failed", {
+                          quote_id: quoteId,
+                        });
+                      }
                       console.log(tx.log ?? tx.raw_log);
 
                       notification.show(
@@ -1302,6 +1323,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                         ""
                       );
                       return;
+                    }
+
+                    if (isSwap) {
+                      logEvent("swap_tx_success", {
+                        quote_id: quoteId,
+                      });
                     }
 
                     notification.show(
@@ -1374,6 +1401,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
               ethereumAccount.setIsSendingTx(true);
 
+              if (erc20ApprovalTx) {
+                logEvent("erc20_approve_sign_opened", {
+                  quote_id: quoteId,
+                });
+              }
+
               await ethereumAccount.sendEthereumTx(
                 sender,
                 {
@@ -1381,8 +1414,26 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   ...feeObject,
                 },
                 {
+                  onBroadcastFailed: (e) => {
+                    if (erc20ApprovalTx && e?.message === "Request rejected") {
+                      logEvent("erc20_approve_sign_canceled", {
+                        quote_id: quoteId,
+                      });
+                    }
+                  },
                   onBroadcasted: (txHash) => {
+                    if (erc20ApprovalTx) {
+                      logEvent("erc20_approve_tx_submitted", {
+                        quote_id: quoteId,
+                      });
+                    }
+
                     if (!erc20ApprovalTx) {
+                      if (isSwap) {
+                        logEvent("swap_tx_submitted", {
+                          quote_id: quoteId,
+                        });
+                      }
                       ethereumAccount.setIsSendingTx(false);
 
                       const msg = new RecordTxWithSkipSwapMsg(
@@ -1477,6 +1528,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       );
 
                       if (erc20ApprovalTx) {
+                        logEvent("erc20_approve_tx_success", {
+                          quote_id: quoteId,
+                        });
+
                         ethereumAccount.setIsSendingTx(true);
                         ethereumAccount
                           .simulateGas(sender, tx as UnsignedEVMTransaction)
@@ -1516,6 +1571,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                               },
                               {
                                 onBroadcasted: (txHash) => {
+                                  if (isSwap) {
+                                    logEvent("swap_tx_submitted", {
+                                      quote_id: quoteId,
+                                    });
+                                  }
+
                                   ethereumAccount.setIsSendingTx(false);
 
                                   const msg = new RecordTxWithSkipSwapMsg(
@@ -1606,6 +1667,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                                   if (
                                     txReceipt.status === EthTxStatus.Success
                                   ) {
+                                    if (isSwap) {
+                                      logEvent("swap_tx_success", {
+                                        quote_id: quoteId,
+                                      });
+                                    }
+
                                     notification.show(
                                       "success",
                                       intl.formatMessage({
@@ -1614,6 +1681,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                                       ""
                                     );
                                   } else {
+                                    if (isSwap) {
+                                      logEvent("swap_tx_failed", {
+                                        quote_id: quoteId,
+                                      });
+                                    }
+
                                     notification.show(
                                       "failed",
                                       intl.formatMessage({
@@ -1627,11 +1700,24 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                             );
                           })
                           .catch((e) => {
-                            console.log(e);
+                            console.error(e);
+                            logEvent("swap_tx_client_error", {
+                              quote_id: quoteId,
+                              error_message: e?.message,
+                            });
+
                             ethereumAccount.setIsSendingTx(false);
+                            setCalculatingTxError(e);
+                            setIsTxLoading(false);
                           });
                       }
                     } else {
+                      if (erc20ApprovalTx) {
+                        logEvent("erc20_approve_tx_failed", {
+                          quote_id: quoteId,
+                        });
+                      }
+
                       notification.show(
                         "failed",
                         intl.formatMessage({ id: "error.transaction-failed" }),
@@ -1644,7 +1730,20 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             }
           } catch (e) {
             if (e?.message === "Request rejected") {
+              if (isSwap) {
+                logEvent("swap_sign_canceled", {
+                  quote_id: quoteId,
+                });
+              }
+
               return;
+            }
+
+            if (isSwap) {
+              logEvent("swap_tx_failed", {
+                quote_id: quoteId,
+                error_message: e?.message,
+              });
             }
 
             console.log(e);
@@ -2014,7 +2113,9 @@ const WarningGuideBox: FunctionComponent<{
         return err.message || err.toString();
       }
 
-      const queryError = amountConfig.getQueryIBCSwap()?.getQueryRoute()?.error;
+      const queryError = amountConfig
+        .getQueryIBCSwap()
+        ?.getQueryMsgsDirect()?.error;
       if (queryError) {
         return queryError.message || queryError.toString();
       }
