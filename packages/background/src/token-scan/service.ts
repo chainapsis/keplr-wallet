@@ -508,7 +508,7 @@ export class TokenScanService {
         const confirmed =
           res.status === 200
             ? res.data.chain_stats.funded_txo_sum -
-            res.data.chain_stats.spent_txo_sum
+              res.data.chain_stats.spent_txo_sum
             : 0;
 
         if (confirmed > 0 || (confirmed === 0 && allowZeroAmount)) {
