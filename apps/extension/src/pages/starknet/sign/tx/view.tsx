@@ -196,7 +196,9 @@ export const SignStarknetTxView: FunctionComponent<{
         const extraL2GasForOnchainVerification = new Dec(22039040);
 
         const adjustedL2GasConsumed = new Dec(l2_gas_consumed ?? 0).add(
-          extraL2GasForOnchainVerification
+          interactionData.data.keyType === "ledger"
+            ? new Dec(0)
+            : extraL2GasForOnchainVerification
         );
 
         const l1Fee = new Dec(l1_gas_consumed).mul(new Dec(l1_gas_price));

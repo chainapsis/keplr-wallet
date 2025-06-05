@@ -104,7 +104,7 @@ export const useStarknetClaimRewards = () => {
 
         const extraL2GasForOnchainVerification = new Dec(22039040);
         const adjustedL2GasConsumed = new Dec(l2_gas_consumed ?? 0).add(
-          extraL2GasForOnchainVerification
+          account.isNanoLedger ? new Dec(0) : extraL2GasForOnchainVerification
         );
 
         const l1Fee = new Dec(l1_gas_consumed).mul(new Dec(l1_gas_price));
@@ -314,7 +314,7 @@ export const useStarknetClaimRewards = () => {
       const extraL2GasForOnchainVerification = new Dec(22000000);
 
       const adjustedL2GasConsumed = new Dec(l2_gas_consumed ?? 0).add(
-        extraL2GasForOnchainVerification
+        account.isNanoLedger ? new Dec(0) : extraL2GasForOnchainVerification
       );
 
       const margin = new Dec(1.5);

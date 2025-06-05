@@ -33,6 +33,7 @@ import { useNotification } from "../../../../hooks/notification";
 import { connectAndSignDeployAccountTxWithLedger } from "../../../sign/utils/handle-starknet-sign";
 import { ErrModuleLedgerSign } from "../../../sign/utils/ledger-types";
 import { LedgerGuideBox } from "../../../sign/components/ledger-guide-box";
+import { Fee } from "@keplr-wallet/stores-starknet/build/account/internal";
 
 const Styles = {
   Container: styled.div`
@@ -188,7 +189,6 @@ export const AccountActivationModal: FunctionComponent<{
               : undefined
           );
 
-        // CHECK: 계정 배포도 서명 검증 비용 들던가?
         const {
           l1_gas_consumed,
           l1_gas_price,
@@ -201,7 +201,7 @@ export const AccountActivationModal: FunctionComponent<{
         const extraL2GasForOnchainVerification = new Dec(22039040);
 
         const adjustedL2GasConsumed = new Dec(l2_gas_consumed ?? 0).add(
-          extraL2GasForOnchainVerification
+          account.isNanoLedger ? new Dec(0) : extraL2GasForOnchainVerification
         );
 
         const l1Fee = new Dec(l1_gas_consumed).mul(new Dec(l1_gas_price));
@@ -357,8 +357,6 @@ export const AccountActivationModal: FunctionComponent<{
                 if (gasSimulator.gasEstimate) {
                   starknetAccount.setIsDeployingAccount(true);
 
-                  const estimate = gasSimulator.gasEstimate;
-
                   try {
                     const msg = new GetStarknetKeyParamsSelectedMsg(
                       senderConfig.chainId
@@ -407,36 +405,6 @@ export const AccountActivationModal: FunctionComponent<{
                           "0x" + Buffer.from(params.yHigh).toString("hex"),
                         ];
 
-                    // TODO: ledger 서명 로직 수정
-                    const preSigned = account.isNanoLedger
-                      ? await connectAndSignDeployAccountTxWithLedger(
-                          chainId,
-                          params.pubKey,
-                          {
-                            addressSalt,
-                            classHash,
-                            constructorCalldata,
-                            contractAddress: account.starknetHexAddress,
-                          },
-                          (() => {
-                            if (type === "ETH") {
-                              return {
-                                type: "ETH",
-                                maxFee: estimate.l1Gas.consumed,
-                              };
-                            } else if (type === "STRK") {
-                              return {
-                                type: "STRK",
-                                gas: gasConfig.gas.toString(),
-                                maxGasPrice: num.toHex(estimate.l1Gas.price),
-                              };
-                            } else {
-                              throw new Error("Invalid fee type");
-                            }
-                          })()
-                        )
-                      : undefined;
-
                     const { l1Gas, l2Gas, l1DataGas } =
                       gasSimulator.gasEstimate;
 
@@ -453,6 +421,44 @@ export const AccountActivationModal: FunctionComponent<{
                     const maxL2Gas = new Dec(l2Gas.consumed).mul(margin);
                     const maxL2GasPrice = new Dec(l2Gas.price).mul(margin);
 
+                    const fee: Fee = {
+                      l1MaxGas: num.toHex(maxL1Gas.truncate().toString()),
+                      l1MaxGasPrice: num.toHex(
+                        maxL1GasPrice.truncate().toString()
+                      ),
+                      l1MaxDataGas: num.toHex(
+                        maxL1DataGas.truncate().toString()
+                      ),
+                      l1MaxDataGasPrice: num.toHex(
+                        maxL1DataGasPrice.truncate().toString()
+                      ),
+                      l2MaxGas: num.toHex(maxL2Gas.truncate().toString()),
+                      l2MaxGasPrice: num.toHex(
+                        maxL2GasPrice.truncate().toString()
+                      ),
+                      paymaster:
+                        feeConfig.type === "ETH"
+                          ? {
+                              mode: "default",
+                              gasToken: starknet.ethContractAddress,
+                            }
+                          : undefined,
+                    };
+
+                    const preSigned = account.isNanoLedger
+                      ? await connectAndSignDeployAccountTxWithLedger(
+                          chainId,
+                          params.pubKey,
+                          {
+                            addressSalt,
+                            classHash,
+                            constructorCalldata,
+                            contractAddress: account.starknetHexAddress,
+                          },
+                          fee
+                        )
+                      : undefined;
+
                     const { transaction_hash: txHash } =
                       await starknetAccount.deployAccountWithFee(
                         accountStore.getAccount(senderConfig.chainId)
@@ -460,29 +466,7 @@ export const AccountActivationModal: FunctionComponent<{
                         classHash,
                         constructorCalldata,
                         addressSalt,
-                        {
-                          l1MaxGas: num.toHex(maxL1Gas.truncate().toString()),
-                          l1MaxGasPrice: num.toHex(
-                            maxL1GasPrice.truncate().toString()
-                          ),
-                          l1MaxDataGas: num.toHex(
-                            maxL1DataGas.truncate().toString()
-                          ),
-                          l1MaxDataGasPrice: num.toHex(
-                            maxL1DataGasPrice.truncate().toString()
-                          ),
-                          l2MaxGas: num.toHex(maxL2Gas.truncate().toString()),
-                          l2MaxGasPrice: num.toHex(
-                            maxL2GasPrice.truncate().toString()
-                          ),
-                          paymaster:
-                            feeConfig.type === "ETH"
-                              ? {
-                                  mode: "default",
-                                  gasToken: starknet.ethContractAddress,
-                                }
-                              : undefined,
-                        },
+                        fee,
                         preSigned
                       );
 

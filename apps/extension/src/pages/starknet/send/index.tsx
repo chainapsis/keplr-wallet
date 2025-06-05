@@ -292,7 +292,7 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
         const extraL2GasForOnchainVerification = new Dec(22039040);
 
         const adjustedL2GasConsumed = new Dec(l2_gas_consumed ?? 0).add(
-          extraL2GasForOnchainVerification
+          account.isNanoLedger ? new Dec(0) : extraL2GasForOnchainVerification
         );
 
         // fee = l1_gas_consumed * l1_gas_price + l2_gas_consumed * l2_gas_price + l1_data_gas_consumed * l1_data_gas_price

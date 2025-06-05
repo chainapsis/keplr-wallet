@@ -11,7 +11,6 @@ import {
 import {
   Call,
   DeployAccountContractPayload,
-  InvocationsSignerDetails,
   num,
   hash as starknetHash,
   shortString,
@@ -20,6 +19,7 @@ import {
   CallData,
   encode,
   TypedData,
+  V3InvocationsSignerDetails,
 } from "starknet";
 import Transport from "@ledgerhq/hw-transport";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
@@ -27,16 +27,15 @@ import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
 import { KeplrError } from "@keplr-wallet/router";
 import {
   DeployAccountFields,
-  DeployAccountV1Fields,
   LedgerError,
   ResponseHashSign,
   ResponsePublicKey,
   ResponseTxSign,
   StarknetClient,
   TxFields,
-  TxV1Fields,
 } from "@ledgerhq/hw-app-starknet";
 import { PubKeyStarknet } from "@keplr-wallet/crypto";
+import { Fee } from "@keplr-wallet/stores-starknet/build/account/internal";
 
 export const STARKNET_LEDGER_DERIVATION_PATH =
   "m/2645'/1195502025'/1148870696'/0'/0'/0";
@@ -50,16 +49,7 @@ export const connectAndSignDeployAccountTxWithLedger = async (
     addressSalt = 0,
     contractAddress: providedContractAddress,
   }: DeployAccountContractPayload,
-  fee:
-    | {
-        type: "ETH";
-        maxFee: string;
-      }
-    | {
-        type: "STRK";
-        gas: string;
-        maxGasPrice: string;
-      },
+  fee: Fee,
   options: LedgerOptions = { useWebHID: true }
 ): Promise<{
   transaction: DeployAccountSignerDetails;
@@ -95,122 +85,71 @@ export const connectAndSignDeployAccountTxWithLedger = async (
     chainId.replace("starknet:", "")
   ) as constants.StarknetChainId;
 
-  const deployAccountFields: DeployAccountFields | DeployAccountV1Fields =
-    (() => {
-      switch (fee.type) {
-        case "ETH":
-          // V1
-          return {
-            class_hash: classHash,
-            constructor_calldata: compiledConstructorCalldata,
-            contractAddress,
-            contract_address_salt: addressSalt,
-            nonce: nonce,
-            chainId: starknetChainId,
-            max_fee: num.toHex(fee.maxFee),
-          } as DeployAccountV1Fields;
-        // V3
-        case "STRK":
-          return {
-            class_hash: classHash,
-            constructor_calldata: compiledConstructorCalldata,
-            contractAddress,
-            contract_address_salt: addressSalt,
-            nonce: nonce,
-            chainId: starknetChainId,
-            resourceBounds: {
-              l1_gas: {
-                max_amount: num.toHex(fee.gas),
-                max_price_per_unit: num.toHex(fee.maxGasPrice),
-              },
-              l2_gas: {
-                max_amount: "0x0",
-                max_price_per_unit: "0x0",
-              },
-            },
-            tip: "0x0",
-            paymaster_data: [],
-            nonceDataAvailabilityMode: "L1",
-            feeDataAvailabilityMode: "L1",
-          } as DeployAccountFields;
-        default:
-          throw new Error("Invalid fee type");
-      }
-    })();
+  const deployAccountFields: DeployAccountFields = {
+    class_hash: classHash,
+    constructor_calldata: compiledConstructorCalldata,
+    contractAddress,
+    contract_address_salt: num.toHex(addressSalt),
+    nonce: nonce,
+    chainId: starknetChainId,
+    resourceBounds: {
+      l2_gas: {
+        max_amount: num.toHex(fee.l2MaxGas ?? "0"),
+        max_price_per_unit: num.toHex(fee.l2MaxGasPrice ?? "0"),
+      },
+      l1_gas: {
+        max_amount: num.toHex(fee.l1MaxGas),
+        max_price_per_unit: num.toHex(fee.l1MaxGasPrice),
+      },
+      l1_data_gas: {
+        max_amount: num.toHex(fee.l1MaxDataGas),
+        max_price_per_unit: num.toHex(fee.l1MaxDataGasPrice),
+      },
+    },
+    tip: "0x0",
+    paymaster_data: [],
+    nonceDataAvailabilityMode: "L1",
+    feeDataAvailabilityMode: "L1",
+  };
 
   try {
     const starknetApp = new StarknetClient(transport);
-    const res =
-      "resourceBounds" in deployAccountFields
-        ? await starknetApp.signDeployAccount(
-            STARKNET_LEDGER_DERIVATION_PATH,
-            deployAccountFields
-          )
-        : await starknetApp.signDeployAccountV1(
-            STARKNET_LEDGER_DERIVATION_PATH,
-            deployAccountFields
-          );
+    const res = await starknetApp.signDeployAccount(
+      STARKNET_LEDGER_DERIVATION_PATH,
+      deployAccountFields
+    );
 
     return handleLedgerResponse(res, () => {
       const { r, s } = res;
 
-      const transaction: DeployAccountSignerDetails = (() => {
-        switch (fee.type) {
-          case "ETH":
-            return {
-              classHash,
-              constructorCalldata: compiledConstructorCalldata,
-              contractAddress,
-              addressSalt,
-              version: "0x1",
-              nonce: nonce,
-              chainId: starknetChainId,
-              maxFee: num.toHex(fee.maxFee),
-              resourceBounds: {
-                l1_gas: {
-                  max_amount: "0x0",
-                  max_price_per_unit: "0x0",
-                },
-                l2_gas: {
-                  max_amount: "0x0",
-                  max_price_per_unit: "0x0",
-                },
-              },
-              tip: "0x0",
-              paymasterData: [],
-              accountDeploymentData: [],
-              nonceDataAvailabilityMode: "L1",
-              feeDataAvailabilityMode: "L1",
-            };
-          case "STRK":
-            return {
-              classHash,
-              constructorCalldata: compiledConstructorCalldata,
-              contractAddress,
-              addressSalt,
-              version: "0x3",
-              nonce: nonce,
-              chainId: starknetChainId,
-              resourceBounds: {
-                l1_gas: {
-                  max_amount: num.toHex(fee.gas),
-                  max_price_per_unit: num.toHex(fee.maxGasPrice),
-                },
-                l2_gas: {
-                  max_amount: "0x0",
-                  max_price_per_unit: "0x0",
-                },
-              },
-              tip: "0x0",
-              paymasterData: [],
-              accountDeploymentData: [],
-              nonceDataAvailabilityMode: "L1",
-              feeDataAvailabilityMode: "L1",
-            };
-          default:
-            throw new Error("Invalid fee type");
-        }
-      })();
+      const transaction: DeployAccountSignerDetails = {
+        classHash,
+        constructorCalldata: compiledConstructorCalldata,
+        contractAddress,
+        addressSalt,
+        version: "0x3",
+        nonce: nonce,
+        chainId: starknetChainId,
+        resourceBounds: {
+          l1_gas: {
+            max_amount: num.toHex(fee.l1MaxGas),
+            max_price_per_unit: num.toHex(fee.l1MaxGasPrice),
+          },
+          l2_gas: {
+            max_amount: num.toHex(fee.l2MaxGas ?? "0"),
+            max_price_per_unit: num.toHex(fee.l2MaxGasPrice ?? "0"),
+          },
+          l1_data_gas: {
+            max_amount: num.toHex(fee.l1MaxDataGas),
+            max_price_per_unit: num.toHex(fee.l1MaxDataGasPrice),
+          },
+        },
+        tip: "0x0",
+        paymasterData: [],
+        accountDeploymentData: [],
+        nonceDataAvailabilityMode: "L1",
+        feeDataAvailabilityMode: "L1",
+      };
 
       return {
         transaction,
@@ -235,7 +174,7 @@ export const connectAndSignDeployAccountTxWithLedger = async (
 export const connectAndSignInvokeTxWithLedger = async (
   expectedPubKey: Uint8Array,
   transactions: Call[],
-  details: InvocationsSignerDetails,
+  details: V3InvocationsSignerDetails,
   options: LedgerOptions = { useWebHID: true }
 ): Promise<string[]> => {
   await checkStarknetPubKey(expectedPubKey, options);
@@ -254,49 +193,43 @@ export const connectAndSignInvokeTxWithLedger = async (
     );
   }
 
-  const txFields: TxFields | TxV1Fields = (() => {
-    switch (details.version) {
-      case "0x1":
-        return {
-          accountAddress: details.walletAddress,
-          chainId: details.chainId,
-          nonce: details.nonce,
-          max_fee: details.maxFee,
-        };
-      case "0x3":
-        return {
-          accountAddress: details.walletAddress,
-          chainId: details.chainId,
-          nonce: details.nonce,
-          tip: details.tip,
-          resourceBounds: details.resourceBounds,
-          paymaster_data: details.paymasterData,
-          nonceDataAvailabilityMode: details.nonceDataAvailabilityMode,
-          feeDataAvailabilityMode: details.feeDataAvailabilityMode,
-          account_deployment_data: details.accountDeploymentData,
-        };
-      default:
-        throw new Error("Invalid version");
-    }
-  })();
+  const txFields: TxFields = {
+    accountAddress: details.walletAddress,
+    tip: details.tip,
+    resourceBounds: details.resourceBounds,
+    paymaster_data: details.paymasterData,
+    chainId: details.chainId,
+    nonce: details.nonce,
+    nonceDataAvailabilityMode: details.nonceDataAvailabilityMode,
+    feeDataAvailabilityMode: details.feeDataAvailabilityMode,
+    account_deployment_data: details.accountDeploymentData,
+  };
+
+  console.log("txFields", txFields);
 
   try {
     const starknetApp = new StarknetClient(transport);
-    const res =
-      "resourceBounds" in txFields
-        ? await starknetApp.signTx(
-            STARKNET_LEDGER_DERIVATION_PATH,
-            transactions,
-            txFields
-          )
-        : await starknetApp.signTxV1(
-            STARKNET_LEDGER_DERIVATION_PATH,
-            transactions,
-            txFields
-          );
+
+    const res = await starknetApp.signTx(
+      STARKNET_LEDGER_DERIVATION_PATH,
+      transactions,
+      txFields
+    );
 
     return handleLedgerResponse(res, () => {
       const { r, s } = res;
+
+      console.log(
+        "res.h",
+        Buffer.from(res.h).toString("hex"),
+        "res.r",
+        Buffer.from(res.r).toString("hex"),
+        "res.s",
+        Buffer.from(res.s).toString("hex"),
+        "returnCode",
+        res.returnCode
+      );
+
       return formatStarknetSignature({ r, s });
     });
   } catch (e) {
