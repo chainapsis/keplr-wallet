@@ -231,18 +231,18 @@ export class CosmosAccountImpl {
                 : "/cosmos.bank.v1beta1.MsgSend",
               value: isThorchain
                 ? ThorMsgSend.encode({
-                  fromAddress: Bech32Address.fromBech32(
-                    msg.value.from_address
-                  ).address,
-                  toAddress: Bech32Address.fromBech32(msg.value.to_address)
-                    .address,
-                  amount: msg.value.amount,
-                }).finish()
+                    fromAddress: Bech32Address.fromBech32(
+                      msg.value.from_address
+                    ).address,
+                    toAddress: Bech32Address.fromBech32(msg.value.to_address)
+                      .address,
+                    amount: msg.value.amount,
+                  }).finish()
                 : MsgSend.encode({
-                  fromAddress: msg.value.from_address,
-                  toAddress: msg.value.to_address,
-                  amount: msg.value.amount,
-                }).finish(),
+                    fromAddress: msg.value.from_address,
+                    toAddress: msg.value.to_address,
+                    amount: msg.value.amount,
+                  }).finish(),
             },
           ],
           rlpTypes: {
@@ -288,10 +288,10 @@ export class CosmosAccountImpl {
     onTxEvents?:
       | ((tx: any) => void)
       | {
-      onBroadcastFailed?: (e?: Error) => void;
-      onBroadcasted?: (txHash: Uint8Array) => void;
-      onFulfill?: (tx: any) => void;
-    }
+          onBroadcastFailed?: (e?: Error) => void;
+          onBroadcasted?: (txHash: Uint8Array) => void;
+          onFulfill?: (tx: any) => void;
+        }
   ) {
     this.base.setTxTypeInProgress(type);
 
@@ -544,32 +544,32 @@ export class CosmosAccountImpl {
                 extensionOptions:
                   eip712Signing && !ethSignPlainJson
                     ? [
-                      {
-                        typeUrl: (() => {
-                          if (chainIsInjective) {
-                            return "/injective.types.v1beta1.ExtensionOptionsWeb3Tx";
-                          }
+                        {
+                          typeUrl: (() => {
+                            if (chainIsInjective) {
+                              return "/injective.types.v1beta1.ExtensionOptionsWeb3Tx";
+                            }
 
-                          return "/ethermint.types.v1.ExtensionOptionsWeb3Tx";
-                        })(),
-                        value: ExtensionOptionsWeb3Tx.encode(
-                          ExtensionOptionsWeb3Tx.fromPartial({
-                            typedDataChainId: EthermintChainIdHelper.parse(
-                              this.chainId
-                            ).ethChainId.toString(),
-                            feePayer: !chainIsInjective
-                              ? signResponse.signed.fee.feePayer
-                              : undefined,
-                            feePayerSig: !chainIsInjective
-                              ? Buffer.from(
-                                signResponse.signature.signature,
-                                "base64"
-                              )
-                              : undefined,
-                          })
-                        ).finish(),
-                      },
-                    ]
+                            return "/ethermint.types.v1.ExtensionOptionsWeb3Tx";
+                          })(),
+                          value: ExtensionOptionsWeb3Tx.encode(
+                            ExtensionOptionsWeb3Tx.fromPartial({
+                              typedDataChainId: EthermintChainIdHelper.parse(
+                                this.chainId
+                              ).ethChainId.toString(),
+                              feePayer: !chainIsInjective
+                                ? signResponse.signed.fee.feePayer
+                                : undefined,
+                              feePayerSig: !chainIsInjective
+                                ? Buffer.from(
+                                    signResponse.signature.signature,
+                                    "base64"
+                                  )
+                                : undefined,
+                            })
+                          ).finish(),
+                        },
+                      ]
                     : undefined,
               })
             ).finish(),
@@ -625,12 +625,12 @@ export class CosmosAccountImpl {
                 payer:
                   eip712Signing && !chainIsInjective && !ethSignPlainJson
                     ? // Fee delegation feature not yet supported. But, for eip712 ethermint signing, we must set fee payer.
-                    signResponse.signed.fee.feePayer
+                      signResponse.signed.fee.feePayer
                     : undefined,
               }),
             }).finish(),
             signatures:
-            // Injective needs the signature in the signatures list even if eip712
+              // Injective needs the signature in the signatures list even if eip712
               !eip712Signing || chainIsInjective || ethSignPlainJson
                 ? [Buffer.from(signResponse.signature.signature, "base64")]
                 : [new Uint8Array(0)],
@@ -853,10 +853,10 @@ export class CosmosAccountImpl {
     preOnTxEvents?:
       | ((tx: any) => void)
       | {
-      onBroadcastFailed?: (e?: Error) => void;
-      onBroadcasted?: (txHash: Uint8Array) => void;
-      onFulfill?: (tx: any) => void;
-    }
+          onBroadcastFailed?: (e?: Error) => void;
+          onBroadcasted?: (txHash: Uint8Array) => void;
+          onFulfill?: (tx: any) => void;
+        }
   ): MakeTxResponse {
     let type = defaultType;
 
@@ -892,9 +892,9 @@ export class CosmosAccountImpl {
       onTxEvents?:
         | ((tx: any) => void)
         | {
-        onBroadcasted?: (txHash: Uint8Array) => void;
-        onFulfill?: (tx: any) => void;
-      }
+            onBroadcasted?: (txHash: Uint8Array) => void;
+            onFulfill?: (tx: any) => void;
+          }
     ): Promise<void> => {
       if (gasInfo.gas < 0) {
         throw new Error("Gas is zero or negative");
@@ -904,14 +904,14 @@ export class CosmosAccountImpl {
         gas: gasInfo.gas.toString(),
         amount: gasInfo.gasPrice
           ? [
-            {
-              denom: gasInfo.gasPrice.denom,
-              amount: gasInfo.gasPrice.amount
-                .mul(new Dec(gasInfo.gas))
-                .truncate()
-                .toString(),
-            },
-          ]
+              {
+                denom: gasInfo.gasPrice.denom,
+                amount: gasInfo.gasPrice.amount
+                  .mul(new Dec(gasInfo.gas))
+                  .truncate()
+                  .toString(),
+              },
+            ]
           : [],
       };
 
@@ -952,9 +952,9 @@ export class CosmosAccountImpl {
         onTxEvents?:
           | ((tx: any) => void)
           | {
-          onBroadcasted?: (txHash: Uint8Array) => void;
-          onFulfill?: (tx: any) => void;
-        }
+              onBroadcasted?: (txHash: Uint8Array) => void;
+              onFulfill?: (tx: any) => void;
+            }
       ): Promise<void> => {
         this.base.setTxTypeInProgress(type);
 
@@ -988,9 +988,9 @@ export class CosmosAccountImpl {
         onTxEvents?:
           | ((tx: any) => void)
           | {
-          onBroadcasted?: (txHash: Uint8Array) => void;
-          onFulfill?: (tx: any) => void;
-        }
+              onBroadcasted?: (txHash: Uint8Array) => void;
+              onFulfill?: (tx: any) => void;
+            }
       ): Promise<void> => {
         return this.sendMsgs(
           type,
@@ -1414,9 +1414,9 @@ export class CosmosAccountImpl {
     onTxEvents?:
       | ((tx: any) => void)
       | {
-      onBroadcasted?: (txHash: Uint8Array) => void;
-      onFulfill?: (tx: any) => void;
-    }
+          onBroadcasted?: (txHash: Uint8Array) => void;
+          onFulfill?: (tx: any) => void;
+        }
   ) {
     if (new DenomHelper(currency.coinMinimalDenom).type !== "native") {
       throw new Error("Only native token can be sent via IBC");
@@ -1548,18 +1548,18 @@ export class CosmosAccountImpl {
       chainInfo.chainIdentifier === "osmosis" ||
       chainInfo.hasFeature("authz-msg-revoke-fixed")
         ? {
-          type: "cosmos-sdk/MsgRevoke",
-          value: {
+            type: "cosmos-sdk/MsgRevoke",
+            value: {
+              granter: this.base.bech32Address,
+              grantee,
+              msg_type_url: messageType,
+            },
+          }
+        : {
             granter: this.base.bech32Address,
             grantee,
             msg_type_url: messageType,
-          },
-        }
-        : {
-          granter: this.base.bech32Address,
-          grantee,
-          msg_type_url: messageType,
-        };
+          };
 
     return this.makeTx(
       "revoke",
@@ -1610,15 +1610,15 @@ export class CosmosAccountImpl {
         validator_address: validatorAddress,
         amount: this.chainId.startsWith("interwoven-")
           ? [
-            {
+              {
+                denom: currency.coinMinimalDenom,
+                amount: dec.truncate().toString(),
+              },
+            ]
+          : {
               denom: currency.coinMinimalDenom,
               amount: dec.truncate().toString(),
             },
-          ]
-          : {
-            denom: currency.coinMinimalDenom,
-            amount: dec.truncate().toString(),
-          },
       },
     };
 
@@ -1695,9 +1695,9 @@ export class CosmosAccountImpl {
     onTxEvents?:
       | ((tx: any) => void)
       | {
-      onBroadcasted?: (txHash: Uint8Array) => void;
-      onFulfill?: (tx: any) => void;
-    }
+          onBroadcasted?: (txHash: Uint8Array) => void;
+          onFulfill?: (tx: any) => void;
+        }
   ) {
     const currency = this.chainGetter.getChain(this.chainId).stakeCurrency;
 
@@ -1782,15 +1782,15 @@ export class CosmosAccountImpl {
         validator_address: validatorAddress,
         amount: this.chainId.startsWith("interwoven-")
           ? [
-            {
+              {
+                denom: currency.coinMinimalDenom,
+                amount: dec.truncate().toString(),
+              },
+            ]
+          : {
               denom: currency.coinMinimalDenom,
               amount: dec.truncate().toString(),
             },
-          ]
-          : {
-            denom: currency.coinMinimalDenom,
-            amount: dec.truncate().toString(),
-          },
       },
     };
 
@@ -1889,15 +1889,15 @@ export class CosmosAccountImpl {
         validator_dst_address: dstValidatorAddress,
         amount: this.chainId.startsWith("interwoven-")
           ? [
-            {
+              {
+                denom: currency.coinMinimalDenom,
+                amount: dec.truncate().toString(),
+              },
+            ]
+          : {
               denom: currency.coinMinimalDenom,
               amount: dec.truncate().toString(),
             },
-          ]
-          : {
-            denom: currency.coinMinimalDenom,
-            amount: dec.truncate().toString(),
-          },
       },
     };
 
