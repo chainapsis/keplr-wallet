@@ -96,7 +96,7 @@ export const useSwapAnalytics = ({
       const durationProps: Record<string, number> = {};
 
       if (milestoneEvents.has(eventName) && id) {
-        const now = Date.now();
+        const now = performance.now();
         if (eventName === "swap_quote_requested" || !durationRef.current[id]) {
           durationRef.current[id] = { first: now, prev: now };
         }
@@ -127,6 +127,13 @@ export const useSwapAnalytics = ({
         debouncedEventMapRef.current[eventName] = debounce(
           (p: Record<string, any>) => {
             analyticsAmplitudeStore.logEvent(eventName, p);
+
+            if (
+              eventName === "swap_tx_success" ||
+              eventName === "swap_tx_failed"
+            ) {
+              delete aggregatedPropsRef.current[id];
+            }
           },
           100
         );
