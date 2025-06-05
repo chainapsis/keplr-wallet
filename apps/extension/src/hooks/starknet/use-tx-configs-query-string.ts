@@ -1,4 +1,5 @@
 import {
+  FeeType,
   IAmountConfig,
   IFeeConfig,
   IGasConfig,
@@ -40,9 +41,9 @@ export const useStarknetTxConfigsQueryString = (configs: {
       configs.recipientConfig?.setValue(initialRecipient);
     }
 
-    const initialFeeCoinDenom = searchParams.get("initialFeeCoinDenom") as
-      | "ETH"
-      | "STRK";
+    const initialFeeCoinDenom = searchParams.get(
+      "initialFeeCoinDenom"
+    ) as FeeType;
     if (initialFeeCoinDenom) {
       configs.feeConfig.setType(initialFeeCoinDenom);
     }
@@ -54,10 +55,11 @@ export const useStarknetTxConfigsQueryString = (configs: {
     } else {
       const initialGasAdjustment = searchParams.get("initialGasAdjustment");
       if (initialGasAdjustment) {
-        configs.gasSimulator.setGasAdjustmentValue(initialGasAdjustment);
+        configs.gasConfig.setGasAdjustmentValue(initialGasAdjustment);
         configs.gasSimulator.setEnabled(true);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -96,7 +98,7 @@ export const useStarknetTxConfigsQueryString = (configs: {
         if (configs.gasSimulator.enabled) {
           prev.set(
             "initialGasAdjustment",
-            configs.gasSimulator.gasAdjustment.toString()
+            configs.gasConfig.gasAdjustmentValue.toString()
           );
           prev.delete("initialGasAmount");
         } else {
@@ -115,8 +117,8 @@ export const useStarknetTxConfigsQueryString = (configs: {
     configs.feeConfig.fee,
     configs.feeConfig.type,
     configs.gasConfig.value,
+    configs.gasConfig.gasAdjustmentValue,
     configs.gasSimulator.enabled,
-    configs.gasSimulator.gasAdjustment,
     configs.recipientConfig,
     setSearchParams,
   ]);
