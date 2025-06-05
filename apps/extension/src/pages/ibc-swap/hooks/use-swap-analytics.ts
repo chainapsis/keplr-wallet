@@ -22,6 +22,15 @@ const generateQuoteId = () => {
   }
 };
 
+const milestoneEvents = new Set([
+  "swap_quote_requested",
+  "swap_quote_received",
+  "swap_sign_opened",
+  "swap_tx_submitted",
+  "swap_tx_success",
+  "swap_tx_failed",
+]);
+
 interface SwapAnalyticsArgs {
   inChainId: string;
   inCurrency: AppCurrency;
@@ -49,25 +58,27 @@ export const useSwapAnalytics = ({
   const { analyticsAmplitudeStore, keyRingStore, uiConfigStore, priceStore } =
     useStore();
 
-  const quoteIdRef = useRef<string>(generateQuoteId());
+  const quoteIdRef = useRef("");
 
-  const prevInRef = useRef<{ chainIdentifier: string; denom: string }>({
+  const prevInRef = useRef({
     chainIdentifier: "",
     denom: "",
   });
-  const prevOutRef = useRef<{ chainIdentifier: string; denom: string }>({
+  const prevOutRef = useRef({
     chainIdentifier: "",
     denom: "",
   });
-  const prevFractionRef = useRef<number>(0);
-  const prevSlippageRef = useRef<number>(
-    uiConfigStore.ibcSwapConfig.slippageNum
-  );
-  const prevFetchingRef = useRef<boolean>(false);
+  const prevFractionRef = useRef(0);
+  const prevSlippageRef = useRef(uiConfigStore.ibcSwapConfig.slippageNum);
+  const prevFetchingRef = useRef(false);
   const prevRouteKeyRef = useRef("");
   const prevQuoteErrorIdRef = useRef("");
 
   const aggregatedPropsRef = useRef<Record<string, Record<string, any>>>({});
+
+  const durationRef = useRef<Record<string, { first: number; prev: number }>>(
+    {}
+  );
 
   const debouncedEventMapRef = useRef<
     Record<string, ReturnType<typeof debounce>>
@@ -81,10 +92,33 @@ export const useSwapAnalytics = ({
       const id = props["quote_id"];
 
       let mergedProps = { ...props };
+
+      const durationProps: Record<string, number> = {};
+
+      if (milestoneEvents.has(eventName) && id) {
+        const now = Date.now();
+        if (eventName === "swap_quote_requested" || !durationRef.current[id]) {
+          durationRef.current[id] = { first: now, prev: now };
+        }
+
+        if (eventName !== "swap_quote_requested") {
+          const duration = now - durationRef.current[id].prev;
+          durationProps["duration_ms"] = duration;
+          durationRef.current[id].prev = now;
+        }
+
+        if (eventName === "swap_tx_success" || eventName === "swap_tx_failed") {
+          durationProps["total_duration_ms"] =
+            now - durationRef.current[id].first;
+          delete durationRef.current[id];
+        }
+      }
+
       if (id) {
         aggregatedPropsRef.current[id] = {
           ...aggregatedPropsRef.current[id],
           ...props,
+          ...durationProps,
         };
         mergedProps = aggregatedPropsRef.current[id];
       }
