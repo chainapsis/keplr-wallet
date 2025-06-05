@@ -28,6 +28,7 @@ import { ObservableQueryFeeMarketGasPrices } from "./feemarket";
 import { ObservableQueryIBCClientStateV2 } from "./ibc/client-state-v2";
 import { ObservableQueryInitiaUnbondingDelegations } from "./staking/initia-unbonding-delegations";
 import { ObservableQueryInitiaDelegations } from "./staking/initia-delegations";
+import { ObservableQueryInitiaValidators } from "./staking/initia-validators";
 
 export interface CosmosQueries {
   cosmos: CosmosQueriesImpl;
@@ -73,6 +74,7 @@ export class CosmosQueriesImpl {
   public readonly queryInitiaUnbondingDelegations: DeepReadonly<ObservableQueryInitiaUnbondingDelegations>;
   public readonly queryValidators: DeepReadonly<ObservableQueryValidators>;
   public readonly queryBabylonBtcDelegationReward: DeepReadonly<ObservableQueryBabylonBtcDelegationReward>;
+  public readonly queryInitiaValidators: DeepReadonly<ObservableQueryInitiaValidators>;
 
   public readonly queryIBCClientState: DeepReadonly<ObservableQueryIBCClientState>;
   public readonly queryIBCClientStateV2: DeepReadonly<ObservableQueryIBCClientStateV2>;
@@ -164,6 +166,11 @@ export class CosmosQueriesImpl {
         chainGetter
       );
 
+    this.queryInitiaValidators = new ObservableQueryInitiaValidators(
+      sharedContext,
+      chainId,
+      chainGetter
+    );
     this.queryIBCClientState = new ObservableQueryIBCClientState(
       sharedContext,
       chainId,

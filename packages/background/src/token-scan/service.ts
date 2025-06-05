@@ -298,7 +298,14 @@ export class TokenScanService {
           method: "POST",
           headers: {
             "content-type": "application/json",
-            "request-source": new URL(browser.runtime.getURL("/")).origin,
+            ...(() => {
+              if (typeof browser !== "undefined") {
+                return {
+                  "request-source": new URL(browser.runtime.getURL("/")).origin,
+                };
+              }
+              return undefined;
+            })(),
           },
           body: JSON.stringify({
             jsonrpc: "2.0",
@@ -406,7 +413,15 @@ export class TokenScanService {
             method: "POST",
             headers: {
               "content-type": "application/json",
-              "request-source": new URL(browser.runtime.getURL("/")).origin,
+              ...(() => {
+                if (typeof browser !== "undefined") {
+                  return {
+                    "request-source": new URL(browser.runtime.getURL("/"))
+                      .origin,
+                  };
+                }
+                return undefined;
+              })(),
             },
             body: JSON.stringify({
               jsonrpc: "2.0",
@@ -493,7 +508,7 @@ export class TokenScanService {
         const confirmed =
           res.status === 200
             ? res.data.chain_stats.funded_txo_sum -
-              res.data.chain_stats.spent_txo_sum
+            res.data.chain_stats.spent_txo_sum
             : 0;
 
         if (confirmed > 0 || (confirmed === 0 && allowZeroAmount)) {

@@ -41,10 +41,13 @@ export class ObservableQueryStakingPool extends ObservableChainQuery<StakingPool
       return new CoinPretty(chainInfo.stakeCurrency, 0);
     }
 
-    return new CoinPretty(
-      chainInfo.stakeCurrency,
-      this.response.data.pool.not_bonded_tokens
-    );
+    const amount = !Array.isArray(this.response.data.pool.not_bonded_tokens)
+      ? this.response.data.pool.not_bonded_tokens
+      : this.response.data.pool.not_bonded_tokens.find(
+      (c) => c.denom === chainInfo.stakeCurrency?.coinMinimalDenom
+    )?.amount || "0";
+
+    return new CoinPretty(chainInfo.stakeCurrency, amount);
   }
 
   @computed
@@ -59,9 +62,12 @@ export class ObservableQueryStakingPool extends ObservableChainQuery<StakingPool
       return new CoinPretty(chainInfo.stakeCurrency, 0);
     }
 
-    return new CoinPretty(
-      chainInfo.stakeCurrency,
-      this.response.data.pool.bonded_tokens
-    );
+    const amount = !Array.isArray(this.response.data.pool.bonded_tokens)
+      ? this.response.data.pool.bonded_tokens
+      : this.response.data.pool.bonded_tokens.find(
+      (c) => c.denom === chainInfo.stakeCurrency?.coinMinimalDenom
+    )?.amount || "0";
+
+    return new CoinPretty(chainInfo.stakeCurrency, amount);
   }
 }
