@@ -44,8 +44,8 @@ export class ObservableQueryStakingPool extends ObservableChainQuery<StakingPool
     const amount = !Array.isArray(this.response.data.pool.not_bonded_tokens)
       ? this.response.data.pool.not_bonded_tokens
       : this.response.data.pool.not_bonded_tokens.find(
-      (c) => c.denom === chainInfo.stakeCurrency?.coinMinimalDenom
-    )?.amount || "0";
+          (c) => c.denom === chainInfo.stakeCurrency?.coinMinimalDenom
+        )?.amount || "0";
 
     return new CoinPretty(chainInfo.stakeCurrency, amount);
   }
@@ -65,8 +65,8 @@ export class ObservableQueryStakingPool extends ObservableChainQuery<StakingPool
     const amount = !Array.isArray(this.response.data.pool.bonded_tokens)
       ? this.response.data.pool.bonded_tokens
       : this.response.data.pool.bonded_tokens.find(
-      (c) => c.denom === chainInfo.stakeCurrency?.coinMinimalDenom
-    )?.amount || "0";
+          (c) => c.denom === chainInfo.stakeCurrency?.coinMinimalDenom
+        )?.amount || "0";
 
     return new CoinPretty(chainInfo.stakeCurrency, amount);
   }
