@@ -23,6 +23,7 @@ import { MsgRelationNobleWithdrawUsdc } from "./noble-withdraw-usdc";
 import { MsgRelationNobleDepositUsdc } from "./noble-deposit-usdc";
 import { MsgRelationBbnClaimRewardFromBTCStaking } from "./bbn-claim-reward-from-btc-staking";
 import { MsgRelationBbnCreateBTCDelegation } from "./bbn-create-btc-delegation";
+import { MsgRelationAtomoneMintPhoton } from "./atomone-mint-photon";
 
 export const MsgItemRender: FunctionComponent<{
   msg: MsgHistory;
@@ -159,6 +160,16 @@ const MsgItemRenderInner: FunctionComponent<{
       case "atomone-vote": {
         return (
           <MsgRelationVote
+            msg={msg}
+            prices={prices}
+            targetDenom={targetDenom}
+            isInAllActivitiesPage={isInAllActivitiesPage}
+          />
+        );
+      }
+      case "atomone-mint-photon": {
+        return (
+          <MsgRelationAtomoneMintPhoton
             msg={msg}
             prices={prices}
             targetDenom={targetDenom}
