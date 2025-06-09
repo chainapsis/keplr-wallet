@@ -33,8 +33,7 @@ import { CoinPretty } from "@keplr-wallet/unit";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { id } from "@ethersproject/hash";
 
-const SWAP_API_ENDPOINT =
-  process.env["KEPLR_API_ENDPOINT"] ?? "https://api.skip.money";
+const SWAP_API_ENDPOINT = process.env["KEPLR_API_ENDPOINT"] ?? "";
 
 export class RecentSendHistoryService {
   // Key: {chain_identifier}/{type}

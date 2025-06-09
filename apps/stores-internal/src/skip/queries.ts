@@ -10,8 +10,7 @@ import { ObservableQueryMsgsDirect } from "./msgs-direct";
 import { InternalChainStore } from "../internal";
 import { SwapUsageQueries } from "../swap-usage";
 
-const SWAP_API_ENDPOINT =
-  process.env["KEPLR_API_ENDPOINT"] ?? "https://api.skip.money";
+const SWAP_API_ENDPOINT = process.env["KEPLR_API_ENDPOINT"] ?? "";
 
 export class SkipQueries {
   public readonly queryChains: DeepReadonly<ObservableQueryChains>;
