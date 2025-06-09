@@ -1,1 +1,1 @@
-NODE_PATH=$(pwd)/node_modules npm run pre-commit
+npm run pre-commit
