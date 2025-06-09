@@ -193,12 +193,13 @@ export const SignStarknetTxView: FunctionComponent<{
 
         // CHECK: 언제 l2 gas로 빠지고 언제 l1 gas로 빠지는지 확인 필요.
         // const extraL1GasForOnChainVerification = new Dec(583);
-        const extraL2GasForOnchainVerification = new Dec(22039040);
+        const extraL2GasForOnchainVerification =
+          interactionData.data.keyType === "ledger"
+            ? new Dec(90240)
+            : new Dec(22039040);
 
         const adjustedL2GasConsumed = new Dec(l2_gas_consumed ?? 0).add(
-          interactionData.data.keyType === "ledger"
-            ? new Dec(0)
-            : extraL2GasForOnchainVerification
+          extraL2GasForOnchainVerification
         );
 
         const l1Fee = new Dec(l1_gas_consumed).mul(new Dec(l1_gas_price));

@@ -198,10 +198,12 @@ export const AccountActivationModal: FunctionComponent<{
           l1_data_gas_price,
         } = estimateResult;
 
-        const extraL2GasForOnchainVerification = new Dec(22039040);
+        const extraL2GasForOnchainVerification = account.isNanoLedger
+          ? new Dec(90240)
+          : new Dec(22039040);
 
         const adjustedL2GasConsumed = new Dec(l2_gas_consumed ?? 0).add(
-          account.isNanoLedger ? new Dec(0) : extraL2GasForOnchainVerification
+          extraL2GasForOnchainVerification
         );
 
         const l1Fee = new Dec(l1_gas_consumed).mul(new Dec(l1_gas_price));
@@ -238,7 +240,7 @@ export const AccountActivationModal: FunctionComponent<{
             price: l1_data_gas_price.toString(),
           },
           l2Gas: {
-            consumed: l2_gas_consumed?.toString() ?? "0",
+            consumed: adjustedL2GasConsumed.toString(),
             price: l2_gas_price?.toString() ?? "0",
           },
         };
