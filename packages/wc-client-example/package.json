@@ -5,7 +5,7 @@
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
-    "serve": "parcel ./src/index.html"
+    "serve": "npx parcel ./src/index.html"
   },
   "dependencies": {
     "@keplr-wallet/common": "0.12.238",

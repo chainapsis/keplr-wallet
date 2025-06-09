@@ -9,12 +9,12 @@
   },
   "scripts": {
     "clean": "rm -rf node_modules; rm -rf build",
-    "build": "zx ./scripts/build.mjs",
-    "dev": "tsc -w",
-    "test": "jest --passWithNoTests",
-    "lint-test": "eslint \"src/**/*\" && prettier --check \"src/**/*\"",
-    "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\"",
-    "version": "zx ./scripts/lerna-lifecyle-version.mjs"
+    "build": "npx zx ./scripts/build.mjs",
+    "dev": "npx tsc -w",
+    "test": "npx jest --passWithNoTests",
+    "lint-test": "npx eslint \"src/**/*\" && npx prettier --check \"src/**/*\"",
+    "lint-fix": "npx eslint --fix \"src/**/*\" && npx prettier --write \"src/**/*\"",
+    "version": "npx zx ./scripts/lerna-lifecyle-version.mjs"
   },
   "dependencies": {
     "@keplr-wallet/types": "0.12.238",
