@@ -284,7 +284,7 @@ export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
       splitRoutes?: boolean;
     }
   ) {
-    super(sharedContext, skipURL, "/v2/fungible/route");
+    super(sharedContext, skipURL, "/v1/route");
     makeObservable(this);
   }
 

@@ -356,7 +356,7 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
       splitRoutes?: boolean;
     }
   ) {
-    super(sharedContext, skipURL, "/v2/fungible/msgs_direct");
+    super(sharedContext, skipURL, "/v1/msgs_direct");
 
     makeObservable(this);
   }
@@ -696,11 +696,11 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
           })(),
         },
         body: JSON.stringify({
-          source_asset_denom: this.amountInDenom.replace("erc20:", ""),
+          amount_in_denom: this.amountInDenom.replace("erc20:", ""),
+          amount_in_amount: this.amountInAmount,
           source_asset_chain_id: this.sourceAssetChainId.replace("eip155:", ""),
           dest_asset_denom: this.destAssetDenom.replace("erc20:", ""),
           dest_asset_chain_id: this.destAssetChainId.replace("eip155:", ""),
-          amount_in: this.amountInAmount,
           chain_ids_to_addresses: this.chainIdsToAddresses,
           slippage_tolerance_percent: this.slippageTolerancePercent.toString(),
           affiliates:
@@ -717,22 +717,6 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
             }))
             // 임시로 추가된 swap venue는 제외
             .filter((swapVenue) => !swapVenue.name.startsWith("temp-")),
-          // chain_ids_to_affiliates: this.affiliateFeeReceivers.reduce(
-          //   (
-          //     acc: Record<
-          //       string,
-          //       { basis_points_fee: string; address: string }
-          //     >,
-          //     receiver
-          //   ) => {
-          //     acc[receiver.chainId.replace("eip155:", "")] = {
-          //       basis_points_fee: this.affiliateFeeBps.toString(),
-          //       address: receiver.address,
-          //     };
-          //     return acc;
-          //   },
-          //   {}
-          // ),
           allow_unsafe: true,
           smart_relay: true,
           go_fast: true,

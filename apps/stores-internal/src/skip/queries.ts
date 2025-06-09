@@ -10,6 +10,9 @@ import { ObservableQueryMsgsDirect } from "./msgs-direct";
 import { InternalChainStore } from "../internal";
 import { SwapUsageQueries } from "../swap-usage";
 
+const SWAP_API_ENDPOINT =
+  process.env["KEPLR_API_ENDPOINT"] ?? "https://api.skip.money";
+
 export class SkipQueries {
   public readonly queryChains: DeepReadonly<ObservableQueryChains>;
   public readonly queryAssets: DeepReadonly<ObservableQueryAssets>;
@@ -38,20 +41,20 @@ export class SkipQueries {
     this.queryChains = new ObservableQueryChains(
       sharedContext,
       chainStore,
-      "https://api.skip.money"
+      SWAP_API_ENDPOINT
     );
     this.queryAssets = new ObservableQueryAssets(
       sharedContext,
       chainStore,
       swapUsageQueries,
-      "https://api.skip.money"
+      SWAP_API_ENDPOINT
     );
 
     this.queryAssetsBatch = new ObservableQueryAssetsBatch(
       sharedContext,
       chainStore,
       swapUsageQueries,
-      "https://api.skip.money",
+      SWAP_API_ENDPOINT,
       {
         cacheMaxAge: 3 * 60 * 1000,
         batchSize: 5,
@@ -61,18 +64,18 @@ export class SkipQueries {
     this.queryAssetsFromSource = new ObservableQueryAssetsFromSource(
       sharedContext,
       chainStore,
-      "https://api.skip.money"
+      SWAP_API_ENDPOINT
     );
     this.queryRoute = new ObservableQueryRoute(
       sharedContext,
       chainStore,
-      "https://api.skip.money"
+      SWAP_API_ENDPOINT
     );
 
     this.queryMsgsDirect = new ObservableQueryMsgsDirect(
       sharedContext,
       chainStore,
-      "https://api.skip.money"
+      SWAP_API_ENDPOINT
     );
 
     this.queryIBCPacketForwardingTransfer = new ObservableQueryIbcPfmTransfer(
