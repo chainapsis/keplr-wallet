@@ -327,11 +327,6 @@ export class IBCSwapAmountConfig extends AmountConfig {
         ? destinationAccount.ethereumHexAddress
         : destinationAccount.bech32Address;
 
-    if (customRecipient) {
-      chainIdsToAddresses[customRecipient.chainId.replace("eip155:", "")] =
-        customRecipient.recipient;
-    }
-
     for (const swapVenue of this._swapVenues) {
       const swapAccount = this.accountStore.getAccount(swapVenue.chainId);
       if (swapAccount.walletStatus === WalletStatus.NotInit) {
@@ -368,10 +363,19 @@ export class IBCSwapAmountConfig extends AmountConfig {
           : swapAccount.bech32Address;
     }
 
+    if (customRecipient) {
+      chainIdsToAddresses[customRecipient.chainId.replace("eip155:", "")] =
+        customRecipient.recipient;
+    }
+
     const queryMsgsDirect = queryIBCSwap.getQueryMsgsDirect(
       chainIdsToAddresses,
       slippageTolerancePercent
     );
+
+    if (customRecipient) {
+      await queryMsgsDirect.waitFreshResponse();
+    }
 
     if (queryMsgsDirect.error) {
       throw new Error(queryMsgsDirect.error.message);
@@ -452,11 +456,6 @@ export class IBCSwapAmountConfig extends AmountConfig {
         ? destinationAccount.ethereumHexAddress
         : destinationAccount.bech32Address;
 
-    if (customRecipient) {
-      chainIdsToAddresses[customRecipient.chainId.replace("eip155:", "")] =
-        customRecipient.recipient;
-    }
-
     for (const swapVenue of this._swapVenues) {
       const swapAccount = this.accountStore.getAccount(swapVenue.chainId);
       if (swapAccount.walletStatus === WalletStatus.NotInit) {
@@ -477,10 +476,16 @@ export class IBCSwapAmountConfig extends AmountConfig {
           : swapAccount.bech32Address;
     }
 
+    if (customRecipient) {
+      chainIdsToAddresses[customRecipient.chainId.replace("eip155:", "")] =
+        customRecipient.recipient;
+    }
+
     const queryMsgsDirect = queryIBCSwap.getQueryMsgsDirect(
       chainIdsToAddresses,
       slippageTolerancePercent
     );
+
     const msg = queryMsgsDirect.msg;
     if (!msg) {
       return;
