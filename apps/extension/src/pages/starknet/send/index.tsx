@@ -51,7 +51,6 @@ import { useStarknetTxConfigsQueryString } from "../../../hooks/starknet/use-tx-
 import { Modal } from "../../../components/modal";
 import { AccountActivationModal } from "../components/account-activation-modal";
 import { LoadingIcon } from "../../../components/icon";
-import { num } from "starknet";
 
 const Styles = {
   Flex1: styled.div`
@@ -460,14 +459,12 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
                 currency,
                 recipient,
                 {
-                  l1MaxGas: num.toHex(maxL1Gas.truncate().toString()),
-                  l1MaxGasPrice: num.toHex(maxL1GasPrice.truncate().toString()),
-                  l1MaxDataGas: num.toHex(maxL1DataGas.truncate().toString()),
-                  l1MaxDataGasPrice: num.toHex(
-                    maxL1DataGasPrice.truncate().toString()
-                  ),
-                  l2MaxGas: num.toHex(maxL2Gas.truncate().toString()),
-                  l2MaxGasPrice: num.toHex(maxL2GasPrice.truncate().toString()),
+                  l1MaxGas: maxL1Gas.truncate().toString(),
+                  l1MaxGasPrice: maxL1GasPrice.truncate().toString(),
+                  l1MaxDataGas: maxL1DataGas.truncate().toString(),
+                  l1MaxDataGasPrice: maxL1DataGasPrice.truncate().toString(),
+                  l2MaxGas: maxL2Gas.truncate().toString(),
+                  l2MaxGasPrice: maxL2GasPrice.truncate().toString(),
                   paymaster:
                     type === "ETH"
                       ? {

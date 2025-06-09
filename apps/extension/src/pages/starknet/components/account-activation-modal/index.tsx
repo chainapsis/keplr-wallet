@@ -28,7 +28,6 @@ import { BACKGROUND_PORT, KeplrError } from "@keplr-wallet/router";
 import { FeeControl } from "../input/fee-control";
 import { ExtensionKVStore, sleep } from "@keplr-wallet/common";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
-import { num } from "starknet";
 import { useNotification } from "../../../../hooks/notification";
 import { connectAndSignDeployAccountTxWithLedger } from "../../../sign/utils/handle-starknet-sign";
 import { ErrModuleLedgerSign } from "../../../sign/utils/ledger-types";
@@ -424,20 +423,14 @@ export const AccountActivationModal: FunctionComponent<{
                     const maxL2GasPrice = new Dec(l2Gas.price).mul(margin);
 
                     const fee: Fee = {
-                      l1MaxGas: num.toHex(maxL1Gas.truncate().toString()),
-                      l1MaxGasPrice: num.toHex(
-                        maxL1GasPrice.truncate().toString()
-                      ),
-                      l1MaxDataGas: num.toHex(
-                        maxL1DataGas.truncate().toString()
-                      ),
-                      l1MaxDataGasPrice: num.toHex(
-                        maxL1DataGasPrice.truncate().toString()
-                      ),
-                      l2MaxGas: num.toHex(maxL2Gas.truncate().toString()),
-                      l2MaxGasPrice: num.toHex(
-                        maxL2GasPrice.truncate().toString()
-                      ),
+                      l1MaxGas: maxL1Gas.truncate().toString(),
+                      l1MaxGasPrice: maxL1GasPrice.truncate().toString(),
+                      l1MaxDataGas: maxL1DataGas.truncate().toString(),
+                      l1MaxDataGasPrice: maxL1DataGasPrice
+                        .truncate()
+                        .toString(),
+                      l2MaxGas: maxL2Gas.truncate().toString(),
+                      l2MaxGasPrice: maxL2GasPrice.truncate().toString(),
                       paymaster:
                         feeConfig.type === "ETH"
                           ? {

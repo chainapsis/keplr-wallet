@@ -13,14 +13,11 @@ import {
   typedData as starknetTypedDataUtils,
   hash as starknetHashUtils,
   transaction as starknetTransactionUtils,
-  V2InvocationsSignerDetails,
   V3InvocationsSignerDetails,
   DeployAccountSignerDetails,
   CallData,
-  V2DeployAccountSignerDetails,
   V3DeployAccountSignerDetails,
   DeclareSignerDetails,
-  V2DeclareSignerDetails,
   V3DeclareSignerDetails,
   SignerInterface,
   Signature,
@@ -730,16 +727,6 @@ export class KeyRingStarknetService {
         let msgHash;
 
         if (
-          Object.values(ETransactionVersion1).includes(details.version as any)
-        ) {
-          const det = details as V2InvocationsSignerDetails;
-          msgHash = starknetHashUtils.calculateInvokeTransactionHash({
-            ...det,
-            senderAddress: det.walletAddress,
-            compiledCalldata,
-            version: det.version,
-          });
-        } else if (
           Object.values(ETransactionVersion3).includes(details.version as any)
         ) {
           const det = details as V3InvocationsSignerDetails;
@@ -818,17 +805,7 @@ export class KeyRingStarknetService {
     );
     let msgHash;
 
-    if (Object.values(ETransactionVersion1).includes(details.version as any)) {
-      const det = details as V2DeployAccountSignerDetails;
-      msgHash = starknetHashUtils.calculateDeployAccountTransactionHash({
-        ...det,
-        salt: det.addressSalt,
-        constructorCalldata: compiledConstructorCalldata,
-        version: det.version,
-      });
-    } else if (
-      Object.values(ETransactionVersion3).includes(details.version as any)
-    ) {
+    if (Object.values(ETransactionVersion3).includes(details.version as any)) {
       const det = details as V3DeployAccountSignerDetails;
       msgHash = starknetHashUtils.calculateDeployAccountTransactionHash({
         ...det,
@@ -892,15 +869,7 @@ export class KeyRingStarknetService {
     // TODO: tx에서 signer와 실제 계정 / chain id에 대해서 validation 넣기
     let msgHash;
 
-    if (Object.values(ETransactionVersion1).includes(details.version as any)) {
-      const det = details as V2DeclareSignerDetails;
-      msgHash = starknetHashUtils.calculateDeclareTransactionHash({
-        ...det,
-        version: det.version,
-      });
-    } else if (
-      Object.values(ETransactionVersion3).includes(details.version as any)
-    ) {
+    if (Object.values(ETransactionVersion3).includes(details.version as any)) {
       const det = details as V3DeclareSignerDetails;
       msgHash = starknetHashUtils.calculateDeclareTransactionHash({
         ...det,
@@ -949,17 +918,7 @@ export class KeyRingStarknetService {
     );
     let msgHash;
 
-    if (Object.values(ETransactionVersion1).includes(details.version as any)) {
-      const det = details as V2InvocationsSignerDetails;
-      msgHash = starknetHashUtils.calculateInvokeTransactionHash({
-        ...det,
-        senderAddress: det.walletAddress,
-        compiledCalldata,
-        version: det.version,
-      });
-    } else if (
-      Object.values(ETransactionVersion3).includes(details.version as any)
-    ) {
+    if (Object.values(ETransactionVersion3).includes(details.version as any)) {
       const det = details as V3InvocationsSignerDetails;
       msgHash = starknetHashUtils.calculateInvokeTransactionHash({
         ...det,
@@ -1096,11 +1055,6 @@ class SignerInterfaceImpl extends SignerInterface {
     ).signature;
   }
 }
-
-const ETransactionVersion1 = {
-  V1: "0x1" as const,
-  F1: "0x100000000000000000000000000000001" as const,
-};
 
 const ETransactionVersion3 = {
   V3: "0x3" as const,

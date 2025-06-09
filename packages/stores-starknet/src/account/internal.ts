@@ -12,7 +12,6 @@ import {
   transaction,
   DeployAccountContractPayload,
   DeployContractResponse,
-  CallData,
   hash as starknetHash,
   DeployAccountSignerDetails,
   ETransactionVersion,
@@ -71,13 +70,12 @@ export class StoreAccount extends Account {
     const nonce = 0; // DEPLOY_ACCOUNT transaction will have a nonce zero as it is the first transaction in the account
     const chainId = await this.getChainId();
 
-    const compiledCalldata = CallData.compile(constructorCalldata);
     const contractAddress =
       providedContractAddress ??
       starknetHash.calculateContractAddressFromHash(
         addressSalt,
         classHash,
-        compiledCalldata,
+        constructorCalldata,
         0
       );
 
@@ -87,7 +85,7 @@ export class StoreAccount extends Account {
         type: TransactionType.DEPLOY_ACCOUNT,
         payload: {
           classHash,
-          constructorCalldata: compiledCalldata,
+          constructorCalldata,
           addressSalt,
           contractAddress,
         },
@@ -103,7 +101,7 @@ export class StoreAccount extends Account {
       await keplr.signStarknetDeployAccountTransaction(this.keplrChainId, {
         ...stark.v3Details(details, "0.8.1"),
         classHash,
-        constructorCalldata: compiledCalldata,
+        constructorCalldata,
         contractAddress,
         addressSalt,
         chainId,
@@ -153,13 +151,12 @@ export class StoreAccount extends Account {
     const nonce = 0; // DEPLOY_ACCOUNT transaction will have a nonce zero as it is the first transaction in the account
     const chainId = await this.getChainId();
 
-    const compiledCalldata = CallData.compile(constructorCalldata);
     const contractAddress =
       providedContractAddress ??
       starknetHash.calculateContractAddressFromHash(
         addressSalt,
         classHash,
-        compiledCalldata,
+        constructorCalldata,
         0
       );
 
@@ -168,7 +165,7 @@ export class StoreAccount extends Account {
     const signerDetails: DeployAccountSignerDetails = {
       ...stark.v3Details(universalDetails, "0.8.1"),
       classHash,
-      constructorCalldata: compiledCalldata,
+      constructorCalldata,
       contractAddress,
       addressSalt,
       version: ETransactionVersion.V3,
