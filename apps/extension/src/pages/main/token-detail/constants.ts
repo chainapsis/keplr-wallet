@@ -30,6 +30,7 @@ export const Relations = [
   "initia-redelegate",
   "initia-cancel-undelegate",
   "atomone-vote",
+  "atomone-mint-photon",
 ];
 
 export const PaginationLimit = 20;
