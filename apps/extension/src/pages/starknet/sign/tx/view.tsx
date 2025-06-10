@@ -187,12 +187,6 @@ export const SignStarknetTxView: FunctionComponent<{
           l1_data_gas_price,
         } = estimateResult;
 
-        // CHECK: found discrepancy between calculated l2 gas and actual l2 gas.
-        // calculated max l2 gas: 1299840, actual l2 gas consumed: 23541440
-        // It seems onchain verification fee is not considered...
-
-        // CHECK: 언제 l2 gas로 빠지고 언제 l1 gas로 빠지는지 확인 필요.
-        // const extraL1GasForOnChainVerification = new Dec(583);
         const extraL2GasForOnchainVerification =
           interactionData.data.keyType === "ledger"
             ? new Dec(90240)

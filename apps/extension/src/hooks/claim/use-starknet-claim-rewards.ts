@@ -4,7 +4,10 @@ import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { Call, CallData, num } from "starknet";
 import { ERC20Currency } from "@keplr-wallet/types";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
-import { PrivilegeStarknetSignClaimRewardsMsg } from "@keplr-wallet/background";
+import {
+  PrivilegeStarknetSignClaimRewardsMsg,
+  SubmitStarknetTxHashMsg,
+} from "@keplr-wallet/background";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { ClaimAllEachState } from "./use-claim-all-each-state";
 import { useNavigate } from "react-router";
@@ -312,8 +315,6 @@ export const useStarknetClaimRewards = () => {
         calls
       );
 
-      // CHECK: 언제 l2 gas로 빠지고 언제 l1 gas로 빠지는지 확인 필요.
-      // const extraL1GasForOnChainVerification = new Dec(583);
       const extraL2GasForOnchainVerification = account.isNanoLedger
         ? new Dec(90240)
         : new Dec(22039040);
@@ -348,10 +349,39 @@ export const useStarknetClaimRewards = () => {
         throw new Error("Failed to claim rewards");
       }
 
-      analyticsStore.logEvent("complete_claim", {
-        chainId: modularChainInfo.chainId,
-        chainName: modularChainInfo.chainName,
-      });
+      new InExtensionMessageRequester()
+        .sendMessage(
+          BACKGROUND_PORT,
+          new SubmitStarknetTxHashMsg(chainId, txHash)
+        )
+        .then(() => {
+          starknetQueries.queryStarknetERC20Balance
+            .getBalance(
+              chainId,
+              chainStore,
+              account.starknetHexAddress,
+              feeCurrency.coinMinimalDenom
+            )
+            ?.fetch();
+
+          notification.show(
+            "success",
+            intl.formatMessage({
+              id: "notification.transaction-success",
+            }),
+            ""
+          );
+
+          analyticsStore.logEvent("complete_claim", {
+            chainId: modularChainInfo.chainId,
+            chainName: modularChainInfo.chainName,
+          });
+        })
+        .catch((e) => {
+          // 이 경우에는 tx가 커밋된 이후의 오류이기 때문에 이미 페이지는 sign 페이지에서부터 전환된 상태다.
+          // 따로 멀 처리해줄 필요가 없다
+          console.log(e);
+        });
 
       navigate("/", {
         replace: true,
