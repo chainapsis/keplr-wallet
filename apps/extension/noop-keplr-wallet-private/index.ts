@@ -19,7 +19,7 @@ export const onGoogleSignInClick:
 export const exportGenerateQRCodeDataByInterval = (
   _data: string,
   _setQRCodeData: (data: string) => void
-): NodeJS.Timer => {
+): NodeJS.Timeout => {
   throw new Error("Method not implemented.");
 };
 

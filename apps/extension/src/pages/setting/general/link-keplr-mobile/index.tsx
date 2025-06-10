@@ -266,7 +266,7 @@ const QRCodeView: FunctionComponent<{
   }, [confirm, intl]);
 
   useEffect(() => {
-    let intervalId: NodeJS.Timer | undefined;
+    let intervalId: NodeJS.Timeout | undefined;
 
     try {
       (async () => {
