@@ -6,6 +6,7 @@ import { ObservableQueryTokenContracts } from "./token-contracts";
 import { ObservableQueryAccountNonce } from "./account-nonce";
 import {
   ObservableQueryStakingApr,
+  ObservableQueryStakingVersion,
   ObservableQueryValidators,
   StakingInfoManager,
 } from "./staking";
@@ -48,6 +49,8 @@ class StarknetQueriesStoreImpl {
   public readonly queryValidators: DeepReadonly<ObservableQueryValidators>;
 
   public readonly queryStakingApr: DeepReadonly<ObservableQueryStakingApr>;
+
+  public readonly queryStakingVersion: DeepReadonly<ObservableQueryStakingVersion>;
 
   public readonly stakingInfoManager: DeepReadonly<StakingInfoManager>;
 
@@ -92,11 +95,18 @@ class StarknetQueriesStoreImpl {
       chainGetter
     );
 
+    this.queryStakingVersion = new ObservableQueryStakingVersion(
+      sharedContext,
+      chainId,
+      chainGetter
+    );
+
     this.stakingInfoManager = new StakingInfoManager(
       sharedContext,
       chainId,
       chainGetter,
-      this.queryValidators
+      this.queryValidators,
+      this.queryStakingVersion
     );
   }
 }
