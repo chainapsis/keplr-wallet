@@ -40,6 +40,7 @@ export const RegisterIntroScene: FunctionComponent = observer(() => {
       <Gutter size="3.125rem" />
       <Stack gutter="1.25rem">
         <Button
+          id="create-wallet-button"
           text={intl.formatMessage({
             id: "pages.register.intro.create-wallet-button",
           })}
@@ -49,6 +50,7 @@ export const RegisterIntroScene: FunctionComponent = observer(() => {
           }}
         />
         <Button
+          id="import-wallet-button"
           text={intl.formatMessage({
             id: "pages.register.intro.import-wallet-button",
           })}

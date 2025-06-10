@@ -12,6 +12,8 @@ export type ButtonSize =
   | "large";
 
 export interface ButtonProps {
+  id?: string;
+
   color?: ButtonColor;
   mode?: ButtonMode;
   size?: ButtonSize;

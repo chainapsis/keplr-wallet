@@ -363,6 +363,7 @@ export const SceneTransitionBaseInner: FunctionComponent<
               parentRegistry={registry}
             >
               <SceneComponent
+                name={props.name}
                 top={props.top}
                 animTop={props.animTop}
                 index={index}
@@ -387,6 +388,8 @@ export const SceneTransitionBaseInner: FunctionComponent<
 
 const SceneComponent: FunctionComponent<
   PropsWithChildren<{
+    name: string;
+
     top: boolean;
     animTop: SpringValue<boolean>;
     index: number;
@@ -402,6 +405,8 @@ const SceneComponent: FunctionComponent<
   }>
 > = ({
   children,
+  name,
+  top,
   animTop,
   index,
   initialX,
@@ -489,6 +494,9 @@ const SceneComponent: FunctionComponent<
       }}
     >
       <animated.div
+        data-scene-name={name}
+        data-scene-top={top}
+        data-scene-is-animating={x.to((x) => x !== targetX)}
         style={{
           display: "grid",
           gridTemplateColumns: "100%",

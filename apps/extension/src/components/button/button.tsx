@@ -5,6 +5,7 @@ import { LoadingIcon } from "../icon";
 import { Box } from "../box";
 
 export const Button: FunctionComponent<ButtonProps> = ({
+  id,
   onClick,
   style,
   className,
@@ -23,6 +24,7 @@ export const Button: FunctionComponent<ButtonProps> = ({
       mode={otherProps.mode}
     >
       <Styles.Button
+        id={id}
         isLoading={isLoading}
         type={type || "button"}
         {...otherProps}

@@ -74,6 +74,7 @@ export const FormNamePassword: FunctionComponent<
           </YAxis>
         ) : null}
         <TextInput
+          id="input-name"
           label={intl.formatMessage({
             id: "pages.register.components.form.name-password.wallet-name-label",
           })}
@@ -90,6 +91,7 @@ export const FormNamePassword: FunctionComponent<
         {needPassword ? (
           <React.Fragment>
             <PasswordTextInput
+              id="input-password"
               label={intl.formatMessage({
                 id: "pages.register.components.form.name-password.password-label",
               })}
@@ -109,6 +111,7 @@ export const FormNamePassword: FunctionComponent<
               error={formState.errors.password?.message}
             />
             <PasswordTextInput
+              id="input-password-confirm"
               label={intl.formatMessage({
                 id: "pages.register.components.form.name-password.confirm-password-label",
               })}
@@ -139,6 +142,7 @@ export const FormNamePassword: FunctionComponent<
           <Gutter size="2.5rem" />
         )}
         <Button
+          id="button-submit"
           size="large"
           text={intl.formatMessage({
             id: "button.next",

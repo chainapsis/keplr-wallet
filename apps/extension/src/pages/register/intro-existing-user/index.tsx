@@ -59,6 +59,7 @@ export const RegisterIntroExistingUserScene: FunctionComponent = () => {
 
             <Gutter size="1.5rem" />
             <Button
+              id="recovery-button"
               text={intl.formatMessage({
                 id: "pages.register.intro-existing-user.recovery-button",
               })}

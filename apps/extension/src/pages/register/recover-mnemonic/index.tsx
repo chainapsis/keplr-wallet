@@ -316,6 +316,7 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
             {seedType === "private-key" ? (
               <Box width="100%">
                 <FocusVisiblePasswordInput
+                  id="input-private-key"
                   value={fullWords[0]}
                   disableShowPassword={true}
                   onChange={(e) => {
@@ -339,6 +340,7 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
                     <XAxis key={i} alignY="center">
                       <Styles.IndexText>{i + 1}.</Styles.IndexText>
                       <FocusVisiblePasswordInput
+                        id={`input-mnemonic-${i}`}
                         ref={i === 0 ? firstTextInputRef : undefined}
                         value={word}
                         onChange={(e) => {
@@ -406,6 +408,7 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
         <Box width="22.5rem" marginX="auto">
           <div ref={buttonContainerRef}>
             <Button
+              id="import-button"
               text={intl.formatMessage({
                 id: "pages.register.recover-mnemonic.import-button",
               })}
