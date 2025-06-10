@@ -6,6 +6,7 @@ on:
 
 jobs:
   chromatic:
+    if: github.repository == 'chainapsis/keplr-wallet'
     name: Upload to chromatic
     runs-on: ubuntu-24.04
     timeout-minutes: 30
