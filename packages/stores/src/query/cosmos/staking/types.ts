@@ -123,6 +123,16 @@ export type Validators = {
   // pagination: {}
 };
 
+export type InitiaValidator = Omit<Validator, "tokens" | "delegator_shares"> & {
+  voting_power: string;
+  tokens: Coin[];
+};
+
+export type InitiaValidators = {
+  validators: InitiaValidator[];
+  // pagination: {}
+};
+
 export enum BondStatus {
   Unbonded = "Unbonded",
   Unbonding = "Unbonding",
@@ -143,9 +153,9 @@ export type StakingParams = {
 export type StakingPool = {
   pool: {
     // Int
-    not_bonded_tokens: string;
+    not_bonded_tokens: string | { denom: string; amount: string }[];
     // Int
-    bonded_tokens: string;
+    bonded_tokens: string | { denom: string; amount: string }[];
   };
 };
 

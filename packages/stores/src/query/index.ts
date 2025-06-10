@@ -9,3 +9,4 @@ export * from "./secret-wasm";
 export * from "./osmosis";
 export * from "./icns";
 export * from "./noble";
+export * from "./babylon";

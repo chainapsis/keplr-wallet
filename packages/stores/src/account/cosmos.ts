@@ -1602,14 +1602,23 @@ export class CosmosAccountImpl {
     dec = dec.mulTruncate(DecUtils.getPrecisionDec(currency.coinDecimals));
 
     const msg = {
-      type: this.msgOpts.delegate.type,
+      type: this.chainId.startsWith("interwoven-")
+        ? "mstaking/MsgDelegate"
+        : this.msgOpts.delegate.type,
       value: {
         delegator_address: this.base.bech32Address,
         validator_address: validatorAddress,
-        amount: {
-          denom: currency.coinMinimalDenom,
-          amount: dec.truncate().toString(),
-        },
+        amount: this.chainId.startsWith("interwoven-")
+          ? [
+              {
+                denom: currency.coinMinimalDenom,
+                amount: dec.truncate().toString(),
+              },
+            ]
+          : {
+              denom: currency.coinMinimalDenom,
+              amount: dec.truncate().toString(),
+            },
       },
     };
 
@@ -1619,11 +1628,15 @@ export class CosmosAccountImpl {
         aminoMsgs: [msg],
         protoMsgs: [
           {
-            typeUrl: "/cosmos.staking.v1beta1.MsgDelegate",
+            typeUrl: this.chainId.startsWith("interwoven-")
+              ? "/initia.mstaking.v1.MsgDelegate"
+              : "/cosmos.staking.v1beta1.MsgDelegate",
             value: MsgDelegate.encode({
               delegatorAddress: msg.value.delegator_address,
               validatorAddress: msg.value.validator_address,
-              amount: msg.value.amount,
+              amount: Array.isArray(msg.value.amount)
+                ? msg.value.amount[0]
+                : msg.value.amount,
             }).finish(),
           },
         ],
@@ -1642,12 +1655,21 @@ export class CosmosAccountImpl {
       (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to delegate, refresh the validators and delegations, rewards.
-          this.queries.cosmos.queryValidators
-            .getQueryStatus(BondStatus.Bonded)
-            .fetch();
-          this.queries.cosmos.queryDelegations
-            .getQueryBech32Address(this.base.bech32Address)
-            .fetch();
+          if (this.chainId.startsWith("interwoven-")) {
+            this.queries.cosmos.queryInitiaValidators
+              .getQueryStatus(BondStatus.Bonded)
+              .fetch();
+            this.queries.cosmos.queryInitiaDelegations
+              .getQueryBech32Address(this.base.bech32Address)
+              .fetch();
+          } else {
+            this.queries.cosmos.queryValidators
+              .getQueryStatus(BondStatus.Bonded)
+              .fetch();
+            this.queries.cosmos.queryDelegations
+              .getQueryBech32Address(this.base.bech32Address)
+              .fetch();
+          }
           this.queries.cosmos.queryRewards
             .getQueryBech32Address(this.base.bech32Address)
             .fetch();
@@ -1752,14 +1774,23 @@ export class CosmosAccountImpl {
     dec = dec.mulTruncate(DecUtils.getPrecisionDec(currency.coinDecimals));
 
     const msg = {
-      type: this.msgOpts.undelegate.type,
+      type: this.chainId.startsWith("interwoven-")
+        ? "mstaking/MsgUndelegate"
+        : this.msgOpts.undelegate.type,
       value: {
         delegator_address: this.base.bech32Address,
         validator_address: validatorAddress,
-        amount: {
-          denom: currency.coinMinimalDenom,
-          amount: dec.truncate().toString(),
-        },
+        amount: this.chainId.startsWith("interwoven-")
+          ? [
+              {
+                denom: currency.coinMinimalDenom,
+                amount: dec.truncate().toString(),
+              },
+            ]
+          : {
+              denom: currency.coinMinimalDenom,
+              amount: dec.truncate().toString(),
+            },
       },
     };
 
@@ -1769,11 +1800,15 @@ export class CosmosAccountImpl {
         aminoMsgs: [msg],
         protoMsgs: [
           {
-            typeUrl: "/cosmos.staking.v1beta1.MsgUndelegate",
+            typeUrl: this.chainId.startsWith("interwoven-")
+              ? "/initia.mstaking.v1.MsgUndelegate"
+              : "/cosmos.staking.v1beta1.MsgUndelegate",
             value: MsgUndelegate.encode({
               delegatorAddress: msg.value.delegator_address,
               validatorAddress: msg.value.validator_address,
-              amount: msg.value.amount,
+              amount: Array.isArray(msg.value.amount)
+                ? msg.value.amount[0]
+                : msg.value.amount,
             }).finish(),
           },
         ],
@@ -1792,15 +1827,27 @@ export class CosmosAccountImpl {
       (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to unbond, refresh the validators and delegations, unbonding delegations, rewards.
-          this.queries.cosmos.queryValidators
-            .getQueryStatus(BondStatus.Bonded)
-            .fetch();
-          this.queries.cosmos.queryDelegations
-            .getQueryBech32Address(this.base.bech32Address)
-            .fetch();
-          this.queries.cosmos.queryUnbondingDelegations
-            .getQueryBech32Address(this.base.bech32Address)
-            .fetch();
+          if (this.chainId.startsWith("interwoven-")) {
+            this.queries.cosmos.queryInitiaValidators
+              .getQueryStatus(BondStatus.Bonded)
+              .fetch();
+            this.queries.cosmos.queryInitiaDelegations
+              .getQueryBech32Address(this.base.bech32Address)
+              .fetch();
+            this.queries.cosmos.queryInitiaUnbondingDelegations
+              .getQueryBech32Address(this.base.bech32Address)
+              .fetch();
+          } else {
+            this.queries.cosmos.queryValidators
+              .getQueryStatus(BondStatus.Bonded)
+              .fetch();
+            this.queries.cosmos.queryDelegations
+              .getQueryBech32Address(this.base.bech32Address)
+              .fetch();
+            this.queries.cosmos.queryUnbondingDelegations
+              .getQueryBech32Address(this.base.bech32Address)
+              .fetch();
+          }
           this.queries.cosmos.queryRewards
             .getQueryBech32Address(this.base.bech32Address)
             .fetch();
@@ -1833,15 +1880,24 @@ export class CosmosAccountImpl {
     dec = dec.mulTruncate(DecUtils.getPrecisionDec(currency.coinDecimals));
 
     const msg = {
-      type: this.msgOpts.redelegate.type,
+      type: this.chainId.startsWith("interwoven-")
+        ? "mstaking/MsgBeginRedelegate"
+        : this.msgOpts.redelegate.type,
       value: {
         delegator_address: this.base.bech32Address,
         validator_src_address: srcValidatorAddress,
         validator_dst_address: dstValidatorAddress,
-        amount: {
-          denom: currency.coinMinimalDenom,
-          amount: dec.truncate().toString(),
-        },
+        amount: this.chainId.startsWith("interwoven-")
+          ? [
+              {
+                denom: currency.coinMinimalDenom,
+                amount: dec.truncate().toString(),
+              },
+            ]
+          : {
+              denom: currency.coinMinimalDenom,
+              amount: dec.truncate().toString(),
+            },
       },
     };
 
@@ -1851,12 +1907,16 @@ export class CosmosAccountImpl {
         aminoMsgs: [msg],
         protoMsgs: [
           {
-            typeUrl: "/cosmos.staking.v1beta1.MsgBeginRedelegate",
+            typeUrl: this.chainId.startsWith("interwoven-")
+              ? "/initia.mstaking.v1.MsgBeginRedelegate"
+              : "/cosmos.staking.v1beta1.MsgBeginRedelegate",
             value: MsgBeginRedelegate.encode({
               delegatorAddress: msg.value.delegator_address,
               validatorSrcAddress: msg.value.validator_src_address,
               validatorDstAddress: msg.value.validator_dst_address,
-              amount: msg.value.amount,
+              amount: Array.isArray(msg.value.amount)
+                ? msg.value.amount[0]
+                : msg.value.amount,
             }).finish(),
           },
         ],
@@ -1876,12 +1936,21 @@ export class CosmosAccountImpl {
       (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to redelegate, refresh the validators and delegations, rewards.
-          this.queries.cosmos.queryValidators
-            .getQueryStatus(BondStatus.Bonded)
-            .fetch();
-          this.queries.cosmos.queryDelegations
-            .getQueryBech32Address(this.base.bech32Address)
-            .fetch();
+          if (this.chainId.startsWith("interwoven-")) {
+            this.queries.cosmos.queryInitiaValidators
+              .getQueryStatus(BondStatus.Bonded)
+              .fetch();
+            this.queries.cosmos.queryInitiaDelegations
+              .getQueryBech32Address(this.base.bech32Address)
+              .fetch();
+          } else {
+            this.queries.cosmos.queryValidators
+              .getQueryStatus(BondStatus.Bonded)
+              .fetch();
+            this.queries.cosmos.queryDelegations
+              .getQueryBech32Address(this.base.bech32Address)
+              .fetch();
+          }
           this.queries.cosmos.queryRewards
             .getQueryBech32Address(this.base.bech32Address)
             .fetch();

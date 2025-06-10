@@ -298,7 +298,14 @@ export class TokenScanService {
           method: "POST",
           headers: {
             "content-type": "application/json",
-            "request-source": new URL(browser.runtime.getURL("/")).origin,
+            ...(() => {
+              if (typeof browser !== "undefined") {
+                return {
+                  "request-source": new URL(browser.runtime.getURL("/")).origin,
+                };
+              }
+              return undefined;
+            })(),
           },
           body: JSON.stringify({
             jsonrpc: "2.0",
@@ -406,7 +413,15 @@ export class TokenScanService {
             method: "POST",
             headers: {
               "content-type": "application/json",
-              "request-source": new URL(browser.runtime.getURL("/")).origin,
+              ...(() => {
+                if (typeof browser !== "undefined") {
+                  return {
+                    "request-source": new URL(browser.runtime.getURL("/"))
+                      .origin,
+                  };
+                }
+                return undefined;
+              })(),
             },
             body: JSON.stringify({
               jsonrpc: "2.0",

@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/wc-qrcode-modal",
-  "version": "0.12.238",
+  "version": "0.12.239-rc.1",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -9,10 +9,10 @@
   },
   "scripts": {
     "clean": "rm -rf node_modules; rm -rf build",
-    "build": "tsc",
-    "test": "jest --passWithNoTests",
-    "lint-test": "eslint \"src/**/*\" && prettier --check \"src/**/*\"",
-    "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
+    "build": "npx tsc",
+    "test": "npx jest --passWithNoTests",
+    "lint-test": "npx eslint \"src/**/*\" && npx prettier --check \"src/**/*\"",
+    "lint-fix": "npx eslint --fix \"src/**/*\" && npx prettier --write \"src/**/*\""
   },
   "dependencies": {
     "detect-browser": "^5.3.0",
