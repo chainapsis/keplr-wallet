@@ -179,13 +179,7 @@ export const AccountActivationModal: FunctionComponent<{
                   "0x" + Buffer.from(params.yLow).toString("hex"),
                   "0x" + Buffer.from(params.yHigh).toString("hex"),
                 ],
-            "0x" + Buffer.from(params.salt).toString("hex"),
-            type === "ETH"
-              ? {
-                  mode: "default",
-                  gasToken: feeContractAddress,
-                }
-              : undefined
+            "0x" + Buffer.from(params.salt).toString("hex")
           );
 
         const {
@@ -431,13 +425,6 @@ export const AccountActivationModal: FunctionComponent<{
                         .toString(),
                       l2MaxGas: maxL2Gas.truncate().toString(),
                       l2MaxGasPrice: maxL2GasPrice.truncate().toString(),
-                      paymaster:
-                        feeConfig.type === "ETH"
-                          ? {
-                              mode: "default",
-                              gasToken: starknet.ethContractAddress,
-                            }
-                          : undefined,
                     };
 
                     const preSigned = account.isNanoLedger

@@ -167,16 +167,7 @@ export const SignStarknetTxView: FunctionComponent<{
 
         const estimateResult = await starknetAccountStore
           .getAccount(chainId)
-          .estimateInvokeFee(
-            sender,
-            interactionData.data.transactions,
-            type === "ETH"
-              ? {
-                  mode: "default",
-                  gasToken: feeContractAddress,
-                }
-              : undefined
-          );
+          .estimateInvokeFee(sender, interactionData.data.transactions);
 
         const {
           l1_gas_consumed,

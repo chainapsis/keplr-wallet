@@ -262,20 +262,12 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
         noop(gasSimulationRefresher.count);
 
         const estimateResult =
-          await starknetAccount.estimateInvokeFeeForSendTokenTx(
-            {
-              currency: currency,
-              amount: sendConfigs.amountConfig.amount[0].toDec().toString(),
-              sender: sendConfigs.senderConfig.sender,
-              recipient: sendConfigs.recipientConfig.recipient,
-            },
-            type === "ETH"
-              ? {
-                  mode: "default",
-                  gasToken: feeContractAddress,
-                }
-              : undefined
-          );
+          await starknetAccount.estimateInvokeFeeForSendTokenTx({
+            currency: currency,
+            amount: sendConfigs.amountConfig.amount[0].toDec().toString(),
+            sender: sendConfigs.senderConfig.sender,
+            recipient: sendConfigs.recipientConfig.recipient,
+          });
 
         const {
           l1_gas_consumed,
@@ -465,13 +457,6 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
                   l1MaxDataGasPrice: maxL1DataGasPrice.truncate().toString(),
                   l2MaxGas: maxL2Gas.truncate().toString(),
                   l2MaxGasPrice: maxL2GasPrice.truncate().toString(),
-                  paymaster:
-                    type === "ETH"
-                      ? {
-                          mode: "default",
-                          gasToken: feeContractAddress,
-                        }
-                      : undefined,
                 }
               );
 

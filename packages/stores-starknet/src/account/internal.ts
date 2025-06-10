@@ -15,7 +15,6 @@ import {
   hash as starknetHash,
   DeployAccountSignerDetails,
   ETransactionVersion,
-  OutsideExecutionVersion,
 } from "starknet";
 import { Keplr } from "@keplr-wallet/types";
 
@@ -26,12 +25,6 @@ export type Fee = {
   l1MaxDataGasPrice: string;
   l2MaxGas?: string;
   l2MaxGasPrice?: string;
-  paymaster?: Paymaster;
-};
-
-export type Paymaster = {
-  mode: "default"; // "sponsored" is not supported yet
-  gasToken: string;
 };
 
 export class StoreAccount extends Account {
@@ -46,11 +39,7 @@ export class StoreAccount extends Account {
       address,
       "",
       "1",
-      ETransactionVersion.V3,
-      {
-        // TODO: change to node url
-        nodeUrl: keplrChainId.includes("SN_MAIN") ? "SN_MAIN" : "SN_SEPOLIA",
-      }
+      ETransactionVersion.V3
     );
   }
 
@@ -160,10 +149,8 @@ export class StoreAccount extends Account {
         0
       );
 
-    const universalDetails = await this._buildUniversalDetails({ fee });
-
     const signerDetails: DeployAccountSignerDetails = {
-      ...stark.v3Details(universalDetails, "0.8.1"),
+      ...stark.v3Details({}, "0.8.1"),
       classHash,
       constructorCalldata,
       contractAddress,
@@ -171,6 +158,20 @@ export class StoreAccount extends Account {
       version: ETransactionVersion.V3,
       nonce: nonce,
       chainId: chainId,
+      resourceBounds: {
+        l1_gas: {
+          max_amount: num.toHex(fee.l1MaxGas),
+          max_price_per_unit: num.toHex(fee.l1MaxGasPrice),
+        },
+        l2_gas: {
+          max_amount: num.toHex(fee.l2MaxGas ?? "0"),
+          max_price_per_unit: num.toHex(fee.l2MaxGasPrice ?? "0"),
+        },
+        l1_data_gas: {
+          max_amount: num.toHex(fee.l1MaxDataGas),
+          max_price_per_unit: num.toHex(fee.l1MaxDataGasPrice),
+        },
+      },
     };
 
     const keplr = await this.getKeplr();
@@ -211,7 +212,7 @@ export class StoreAccount extends Account {
     const calls = Array.isArray(transactions) ? transactions : [transactions];
     const nonce = num.toBigInt(details.nonce ?? (await this.getNonce()));
     const version = details.version;
-    if (version !== "0x3") {
+    if (version !== ETransactionVersion.V3) {
       throw new Error(`Invalid version: ${version}`);
     }
 
@@ -225,8 +226,6 @@ export class StoreAccount extends Account {
     );
 
     const chainId = await this.getChainId();
-
-    // TODO: account.buildPaymasterTransaction when paymaster is enabled
 
     const signerDetails: InvocationsSignerDetails = {
       ...stark.v3Details(details, "0.8.1"),
@@ -275,16 +274,28 @@ export class StoreAccount extends Account {
     const nonce = await this.getNonce();
     const chainId = await this.getChainId();
 
-    const universalDetails = await this._buildUniversalDetails({ fee });
-
     const signerDetails: InvocationsSignerDetails = {
-      ...stark.v3Details(universalDetails, "0.8.1"),
+      ...stark.v3Details({}, "0.8.1"),
       version: ETransactionVersion.V3,
       walletAddress: this.address,
       nonce: nonce,
       chainId: chainId,
       cairoVersion: this.cairoVersion,
       skipValidate: false,
+      resourceBounds: {
+        l1_gas: {
+          max_amount: num.toHex(fee.l1MaxGas),
+          max_price_per_unit: num.toHex(fee.l1MaxGasPrice),
+        },
+        l2_gas: {
+          max_amount: num.toHex(fee.l2MaxGas ?? "0"),
+          max_price_per_unit: num.toHex(fee.l2MaxGasPrice ?? "0"),
+        },
+        l1_data_gas: {
+          max_amount: num.toHex(fee.l1MaxDataGas),
+          max_price_per_unit: num.toHex(fee.l1MaxDataGasPrice),
+        },
+      },
     };
 
     let transactions: Call[];
@@ -320,62 +331,5 @@ export class StoreAccount extends Account {
       { contractAddress: this.address, calldata, signature },
       details
     );
-  }
-
-  protected async _buildUniversalDetails({
-    fee,
-  }: {
-    fee: Fee;
-  }): Promise<UniversalDetails> {
-    const details: UniversalDetails = {
-      resourceBounds: {
-        l1_gas: {
-          max_amount: num.toHex(fee.l1MaxGas),
-          max_price_per_unit: num.toHex(fee.l1MaxGasPrice),
-        },
-        l2_gas: {
-          max_amount: num.toHex(fee.l2MaxGas ?? "0"),
-          max_price_per_unit: num.toHex(fee.l2MaxGasPrice ?? "0"),
-        },
-        l1_data_gas: {
-          max_amount: num.toHex(fee.l1MaxDataGas),
-          max_price_per_unit: num.toHex(fee.l1MaxDataGasPrice),
-        },
-      },
-    };
-
-    if (fee.paymaster) {
-      try {
-        const snip9Version = await this.getSnip9Version();
-        const isSupported =
-          snip9Version !== OutsideExecutionVersion.UNSUPPORTED;
-        if (!isSupported) {
-          throw new Error("Outside execution is not supported");
-        }
-      } catch (e) {
-        // If account is not deployed yet, `getSnip9Version` will throw error.
-        // Thus, we need to check if the account is deployed or not.
-        const nonce = await this.getNonce();
-        if (nonce !== "0x0") {
-          throw new Error("Outside execution is not supported");
-        }
-      }
-
-      // check if paymaster is available
-      const isAvailable = await this.paymaster.isAvailable();
-      if (!isAvailable) {
-        throw new Error("Paymaster is not available");
-      }
-
-      // suppose gas token is supported by paymaster here
-      details.paymaster = {
-        feeMode: {
-          mode: "default",
-          gasToken: fee.paymaster.gasToken,
-        },
-      };
-    }
-
-    return details;
   }
 }
