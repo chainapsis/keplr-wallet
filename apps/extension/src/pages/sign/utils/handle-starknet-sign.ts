@@ -21,9 +21,6 @@ import {
   LedgerSigner231,
   getLedgerPathBuffer221,
   V3DeployAccountSignerDetails,
-  stark,
-  hash,
-  CallData,
 } from "starknet";
 import Transport from "@ledgerhq/hw-transport";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
@@ -160,40 +157,17 @@ export const connectAndSignDeployAccountTxWithLedger = async (
       }
     );
 
-    // TODO: ledger and starknet.js msg hash mismatch error
+    const res = await ledgerSigner.signDeployAccountTransaction(transaction);
 
-    // const res = await ledgerSigner.signDeployAccountTransaction(transaction);
-
-    const res = await ledgerSigner.signDeployAccountV3(transaction);
-
-    console.log("ledger hash:", `0x${res.hash.toString(16)}`);
-
-    const compiledConstructorCalldata = CallData.compile(constructorCalldata);
-
-    const msgHash = hash.calculateDeployAccountTransactionHash({
-      ...transaction,
-      salt: transaction.addressSalt,
-      compiledConstructorCalldata,
-      version: transaction.version,
-      nonceDataAvailabilityMode: stark.intDAM(
-        transaction.nonceDataAvailabilityMode
-      ),
-      feeDataAvailabilityMode: stark.intDAM(
-        transaction.feeDataAvailabilityMode
-      ),
-    });
-
-    console.log("expected hash:", msgHash);
-
-    if (Array.isArray(res.signature)) {
+    if (Array.isArray(res)) {
       // CHECK: recovery bit might be included in the result array
       return {
         transaction,
-        signature: res.signature,
+        signature: res,
       };
     }
 
-    const { r, s } = res.signature;
+    const { r, s } = res;
 
     return {
       transaction,
