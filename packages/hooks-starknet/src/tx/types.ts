@@ -33,7 +33,7 @@ export interface GasEstimate {
   };
 }
 
-export type FeeType = "STRK" | "ETH";
+export type FeeType = "STRK";
 
 export interface IGasConfig extends ITxChainSetter {
   value: string;

@@ -70,7 +70,6 @@ export const useStarknetClaimRewards = () => {
       }
     }
 
-    // TODO: support ETH
     let STRK: ERC20Currency | undefined;
 
     if ("starknet" in modularChainInfo) {
@@ -83,7 +82,6 @@ export const useStarknetClaimRewards = () => {
 
     (async () => {
       try {
-        // select fee currency
         const feeCurrency = STRK;
         if (!feeCurrency) {
           throw new Error(
@@ -187,7 +185,6 @@ export const useStarknetClaimRewards = () => {
         const maxL1GasPrice = new Dec(l1_gas_price).mul(margin);
         const maxL2GasPrice = new Dec(l2_gas_price ?? 0).mul(margin);
 
-        // execute
         const { transaction_hash: txHash } = await starknetAccount.execute(
           account.starknetHexAddress,
           calls,
@@ -200,9 +197,7 @@ export const useStarknetClaimRewards = () => {
             l2MaxGasPrice: maxL2GasPrice.truncate().toString(),
           },
           async (chainId, calls, details) => {
-            const requester = new InExtensionMessageRequester();
-
-            return await requester.sendMessage(
+            return await new InExtensionMessageRequester().sendMessage(
               BACKGROUND_PORT,
               new PrivilegeStarknetSignClaimRewardsMsg(chainId, calls, details)
             );
@@ -266,9 +261,7 @@ export const useStarknetClaimRewards = () => {
       return;
     }
 
-    // TODO: support ETH
     let STRK: ERC20Currency | undefined;
-    let ETH: ERC20Currency | undefined;
 
     if ("starknet" in modularChainInfo) {
       STRK = modularChainInfo.starknet.currencies.find(
@@ -276,14 +269,9 @@ export const useStarknetClaimRewards = () => {
           c.coinMinimalDenom ===
           `erc20:${modularChainInfo.starknet.strkContractAddress}`
       );
-      ETH = modularChainInfo.starknet.currencies.find(
-        (c) =>
-          c.coinMinimalDenom ===
-          `erc20:${modularChainInfo.starknet.ethContractAddress}`
-      );
     }
 
-    const feeCurrency = STRK || ETH;
+    const feeCurrency = STRK;
     if (!feeCurrency) {
       return;
     }

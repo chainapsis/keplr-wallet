@@ -143,11 +143,8 @@ export const AccountActivationModal: FunctionComponent<{
     gasSimulatorKey,
     () => {
       // observed되어야 하므로 꼭 여기서 참조 해야함.
-      const type = feeConfig.type;
-      const feeContractAddress =
-        type === "ETH"
-          ? starknet.ethContractAddress
-          : starknet.strkContractAddress;
+      // const type = feeConfig.type;
+      const feeContractAddress = starknet.strkContractAddress;
       const feeCurrency = chainStore
         .getModularChainInfoImpl(chainId)
         .getCurrencies("starknet")
@@ -280,7 +277,7 @@ export const AccountActivationModal: FunctionComponent<{
             id: "components.input.fee-control.modal.fee-token-dropdown-label",
           })}
           menuContainerMaxHeight="10rem"
-          items={["ETH", "STRK"].map((type) => {
+          items={["STRK"].map((type) => {
             return {
               key: type,
               label: type,
@@ -288,7 +285,7 @@ export const AccountActivationModal: FunctionComponent<{
           })}
           selectedItemKey={feeConfig.type}
           onSelect={(key) => {
-            feeConfig.setType(key as "ETH" | "STRK");
+            feeConfig.setType(key as "STRK");
           }}
           size="large"
         />
@@ -362,11 +359,7 @@ export const AccountActivationModal: FunctionComponent<{
                         msg
                       );
 
-                    const type = feeConfig.type;
-                    const feeContractAddress =
-                      type === "ETH"
-                        ? starknet.ethContractAddress
-                        : starknet.strkContractAddress;
+                    const feeContractAddress = starknet.strkContractAddress;
                     const feeCurrency = chainStore
                       .getModularChainInfoImpl(chainId)
                       .getCurrencies("starknet")

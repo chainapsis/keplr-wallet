@@ -158,7 +158,6 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     }
   }
 
-  // TODO: convert STRK to ETH if needed
   @computed
   get fee(): CoinPretty | undefined {
     if (!this._gasPrice) {
@@ -169,7 +168,6 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     return this._gasPrice.mul(gasDec);
   }
 
-  // TODO: convert STRK to ETH if needed
   @computed
   get maxFee(): CoinPretty | undefined {
     if (!this._maxGasPrice) {

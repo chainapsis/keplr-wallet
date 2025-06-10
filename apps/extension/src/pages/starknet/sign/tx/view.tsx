@@ -96,14 +96,7 @@ export const SignStarknetTxView: FunctionComponent<{
     senderConfig,
     amountConfig,
     gasConfig,
-    (feeConfig) => {
-      if (interactionData.data.details.version === "0x1") {
-        feeConfig.setType("ETH");
-      }
-      if (interactionData.data.details.version === "0x3") {
-        feeConfig.setType("STRK");
-      }
-    }
+    (feeConfig) => feeConfig.setType("STRK")
   );
 
   const gasSimulationRefresher = useLocalObservable(() => ({
@@ -147,11 +140,8 @@ export const SignStarknetTxView: FunctionComponent<{
       }
 
       // observed되어야 하므로 꼭 여기서 참조 해야함.
-      const type = feeConfig.type;
-      const feeContractAddress =
-        type === "ETH"
-          ? starknet.ethContractAddress
-          : starknet.strkContractAddress;
+      // const type = feeConfig.type;
+      const feeContractAddress = starknet.strkContractAddress;
       const feeCurrency = chainStore
         .getModularChainInfoImpl(chainId)
         .getCurrencies("starknet")
@@ -285,11 +275,7 @@ export const SignStarknetTxView: FunctionComponent<{
         throw new Error("Gas estimate not found");
       }
 
-      const type = feeConfig.type;
-      const feeContractAddress =
-        type === "ETH"
-          ? starknet.ethContractAddress
-          : starknet.strkContractAddress;
+      const feeContractAddress = starknet.strkContractAddress;
       const feeCurrency = chainStore
         .getModularChainInfoImpl(chainId)
         .getCurrencies("starknet")

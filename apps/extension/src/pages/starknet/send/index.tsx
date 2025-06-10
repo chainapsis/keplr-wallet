@@ -245,11 +245,8 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
       }
 
       // observed되어야 하므로 꼭 여기서 참조 해야함.
-      const type = sendConfigs.feeConfig.type;
-      const feeContractAddress =
-        type === "ETH"
-          ? starknet.ethContractAddress
-          : starknet.strkContractAddress;
+      // const type = sendConfigs.feeConfig.type;
+      const feeContractAddress = starknet.strkContractAddress;
       const feeCurrency = chainStore
         .getModularChainInfoImpl(chainId)
         .getCurrencies("starknet")
@@ -408,11 +405,7 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
         if (!txConfigsValidate.interactionBlocked && gasSimulator.gasEstimate) {
           setIsLoading(true);
           try {
-            const type = sendConfigs.feeConfig.type;
-            const feeContractAddress =
-              type === "ETH"
-                ? starknet.ethContractAddress
-                : starknet.strkContractAddress;
+            const feeContractAddress = starknet.strkContractAddress;
             const feeCurrency = chainStore
               .getModularChainInfoImpl(chainId)
               .getCurrencies("starknet")
