@@ -44,6 +44,7 @@ module.exports = {
           "**/*.spec.js",
           "**/webpack.config.js",
           "**/*.stories.tsx",
+          "**/playwright.config.ts",
         ],
       },
     ],
@@ -53,7 +54,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: ["**/*.stories.tsx"],
+      files: ["**/*.stories.tsx", "**/*.spec.ts", "playwright.config.ts"],
       rules: {
         "import/no-default-export": "off",
       },
