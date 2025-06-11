@@ -29,7 +29,7 @@ export const MessageItem: FunctionComponent<{
         <Gutter size="0.5rem" />
 
         <Column weight={1}>
-          <Box minHeight="3rem" alignY="center">
+          <Box minHeight="2.5rem" alignY="center">
             <H5
               color={
                 theme.mode === "light"
