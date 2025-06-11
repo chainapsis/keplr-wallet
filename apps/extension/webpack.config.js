@@ -197,6 +197,7 @@ module.exports = {
       SKIP_API_KEY: "",
       KEPLR_EXT_PROVIDER_META_ID: "",
       KEPLR_EXT_MOONPAY_SIGN_API_BASE_URL: "",
+      KEPLR_API_ENDPOINT: "",
     }),
     new ForkTsCheckerWebpackPlugin(),
     new CopyWebpackPlugin({
