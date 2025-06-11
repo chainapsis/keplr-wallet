@@ -24,6 +24,10 @@ import { MsgRelationNobleDepositUsdc } from "./noble-deposit-usdc";
 import { MsgRelationBbnClaimRewardFromBTCStaking } from "./bbn-claim-reward-from-btc-staking";
 import { MsgRelationBbnCreateBTCDelegation } from "./bbn-create-btc-delegation";
 import { MsgRelationAtomoneMintPhoton } from "./atomone-mint-photon";
+import { MsgRelationEvmContractCall } from "./evm-contract-call";
+import { MsgRelationEvmApprove } from "./evm-approve";
+import { MsgRelationEvmSend } from "./evm-send";
+import { MsgRelationEvmReceive } from "./evm-receive";
 
 export const MsgItemRender: FunctionComponent<{
   msg: MsgHistory;
@@ -170,6 +174,54 @@ const MsgItemRenderInner: FunctionComponent<{
       case "atomone-mint-photon": {
         return (
           <MsgRelationAtomoneMintPhoton
+            msg={msg}
+            prices={prices}
+            targetDenom={targetDenom}
+            isInAllActivitiesPage={isInAllActivitiesPage}
+          />
+        );
+      }
+    }
+  }
+
+  if (msg.relation.startsWith("evm/")) {
+    switch (msg.relation) {
+      case "evm/send":
+      case "evm/erc20-send": {
+        return (
+          <MsgRelationEvmSend
+            msg={msg}
+            prices={prices}
+            targetDenom={targetDenom}
+            isInAllActivitiesPage={isInAllActivitiesPage}
+          />
+        );
+      }
+      case "evm/receive":
+      case "evm/erc20-receive": {
+        return (
+          <MsgRelationEvmReceive
+            msg={msg}
+            prices={prices}
+            targetDenom={targetDenom}
+            isInAllActivitiesPage={isInAllActivitiesPage}
+          />
+        );
+      }
+      case "evm/contract-call": {
+        return (
+          <MsgRelationEvmContractCall
+            msg={msg}
+            prices={prices}
+            targetDenom={targetDenom}
+            isInAllActivitiesPage={isInAllActivitiesPage}
+          />
+        );
+      }
+
+      case "evm/erc20-approve": {
+        return (
+          <MsgRelationEvmApprove
             msg={msg}
             prices={prices}
             targetDenom={targetDenom}
