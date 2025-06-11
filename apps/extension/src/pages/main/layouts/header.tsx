@@ -6,7 +6,7 @@ import React, {
   useRef,
 } from "react";
 import { Columns } from "../../../components/column";
-import { Box, BoxProps } from "../../../components/box";
+import { Box } from "../../../components/box";
 import { Tooltip } from "../../../components/tooltip";
 import { ChainImageFallback, Image } from "../../../components/image";
 import {
@@ -26,9 +26,9 @@ import { HeaderProps } from "../../../layouts/header/types";
 import { ColorPalette } from "../../../styles";
 import { YAxis } from "../../../components/axis";
 import {
+  BaseTypography,
   Body2,
   Body3,
-  Caption1,
   Subtitle3,
 } from "../../../components/typography";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -50,7 +50,11 @@ import {
 import { autoUpdate, offset, shift, useFloating } from "@floating-ui/react-dom";
 import SimpleBar from "simplebar-react";
 import { ExtensionKVStore } from "@keplr-wallet/common";
-import { SupportedPaymentType as BitcoinPaymentType } from "@keplr-wallet/types";
+import {
+  SupportedPaymentType as BitcoinPaymentType,
+  ChainInfo,
+  ModularChainInfo,
+} from "@keplr-wallet/types";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 
 export interface MainHeaderLayoutRef {
@@ -102,128 +106,6 @@ export const MainHeaderLayout = observer<
 
     const theme = useTheme();
     const intl = useIntl();
-
-    const [currentChainIdForEVM, setCurrentChainIdForEVM] = React.useState<
-      string | undefined
-    >();
-    const [
-      isOpenCurrentChainSelectorForEVM,
-      setIsOpenCurrentChainSelectorForEVM,
-    ] = React.useState(false);
-    const [
-      isHoveredCurrenctChainIconForEVM,
-      setIsHoveredCurrenctChainIconForEVM,
-    ] = React.useState(false);
-    const evmChainInfos = chainStore.chainInfos.filter((chainInfo) =>
-      chainStore.isEvmChain(chainInfo.chainId)
-    );
-
-    const [currentChainIdForStarknet, setCurrentChainIdForStarknet] =
-      React.useState<string | undefined>();
-    const [
-      isOpenCurrentChainSelectorForStarknet,
-      setIsOpenCurrentChainSelectorForStarknet,
-    ] = React.useState(false);
-    const [
-      isHoveredCurrenctChainIconForStarknet,
-      setIsHoveredCurrenctChainIconForStarknet,
-    ] = React.useState(false);
-    const starknetChainInfos = chainStore.modularChainInfos.filter(
-      (modularChainInfo) => "starknet" in modularChainInfo
-    );
-
-    const [currentChainIdForBitcoin, setCurrentChainIdForBitcoin] =
-      React.useState<string | undefined>();
-    const [
-      isOpenCurrentChainSelectorForBitcoin,
-      setIsOpenCurrentChainSelectorForBitcoin,
-    ] = React.useState(false);
-    const [
-      isHoveredCurrenctChainIconForBitcoin,
-      setIsHoveredCurrenctChainIconForBitcoin,
-    ] = React.useState(false);
-    const bitcoinChainInfos = chainStore.groupedModularChainInfos.filter(
-      (modularChainInfo) => "bitcoin" in modularChainInfo
-    );
-    const currentBitcoinChainInfo = bitcoinChainInfos.find(
-      (chainInfo) =>
-        "bitcoin" in chainInfo &&
-        chainInfo.bitcoin.chainId === currentChainIdForBitcoin
-    );
-
-    const [preferredPaymentTypeForBitcoin, setPreferredPaymentTypeForBitcoin] =
-      React.useState<BitcoinPaymentType | undefined>();
-
-    const [activeTabOrigin, setActiveTabOrigin] = React.useState<
-      string | undefined
-    >();
-
-    const [addressConfigHover, setAddressConfigHover] = React.useState(false);
-    const [displayAddressTypeSelector, setDisplayAddressTypeSelector] =
-      React.useState(false);
-
-    useEffect(() => {
-      const updateCurrentChainId = async () => {
-        const activeTabOrigin = await getActiveTabOrigin();
-
-        if (activeTabOrigin) {
-          const msgForEVM = new GetCurrentChainIdForEVMMsg(activeTabOrigin);
-          const msgForStarknet = new GetCurrentChainIdForStarknetMsg(
-            activeTabOrigin
-          );
-          const msgForBitcoin = new GetCurrentChainIdForBitcoinMsg(
-            activeTabOrigin
-          );
-          const msgForBitcoinPaymentType =
-            new GetPreferredBitcoinPaymentTypeMsg();
-
-          const newCurrentChainIdForEVM =
-            await new InExtensionMessageRequester().sendMessage(
-              BACKGROUND_PORT,
-              msgForEVM
-            );
-          const newCurrentChainIdForStarknet =
-            await new InExtensionMessageRequester().sendMessage(
-              BACKGROUND_PORT,
-              msgForStarknet
-            );
-          const newCurrentChainIdForBitcoin =
-            await new InExtensionMessageRequester().sendMessage(
-              BACKGROUND_PORT,
-              msgForBitcoin
-            );
-
-          const newPreferredPaymentTypeForBitcoin =
-            await new InExtensionMessageRequester().sendMessage(
-              BACKGROUND_PORT,
-              msgForBitcoinPaymentType
-            );
-
-          setCurrentChainIdForEVM(newCurrentChainIdForEVM);
-          setCurrentChainIdForStarknet(newCurrentChainIdForStarknet);
-          setCurrentChainIdForBitcoin(newCurrentChainIdForBitcoin);
-          setPreferredPaymentTypeForBitcoin(newPreferredPaymentTypeForBitcoin);
-          setActiveTabOrigin(activeTabOrigin);
-        } else {
-          setCurrentChainIdForEVM(undefined);
-          setCurrentChainIdForStarknet(undefined);
-          setCurrentChainIdForBitcoin(undefined);
-          setPreferredPaymentTypeForBitcoin(undefined);
-          setActiveTabOrigin(undefined);
-        }
-      };
-
-      browser.tabs.onActivated.addListener(updateCurrentChainId);
-      updateCurrentChainId();
-      // Update current chain id for EVM and Starknet every second.
-      // TODO: Make it sync with `chainChanged` event.
-      const intervalId = setInterval(updateCurrentChainId, 1000);
-
-      return () => {
-        browser.tabs.onActivated.removeListener(updateCurrentChainId);
-        clearInterval(intervalId);
-      };
-    }, []);
 
     const [isOpenMenu, setIsOpenMenu] = React.useState(false);
 
@@ -438,406 +320,7 @@ export const MainHeaderLayout = observer<
         }
         right={
           <Columns sum={1} alignY="center" gutter="0.875rem">
-            {currentChainIdForBitcoin != null &&
-              currentBitcoinChainInfo != null &&
-              activeTabOrigin != null && (
-                <ChainSelector
-                  isOpen={isOpenCurrentChainSelectorForBitcoin}
-                  close={() => {
-                    setIsOpenCurrentChainSelectorForBitcoin(false);
-                    setAddressConfigHover(false);
-                    setDisplayAddressTypeSelector(false);
-                  }}
-                  items={
-                    displayAddressTypeSelector
-                      ? ["taproot", "native-segwit"].map((key) => ({
-                          key,
-                          content: (() => {
-                            const address = accountStore.getAccount(
-                              `${currentChainIdForBitcoin}:${key}`
-                            )?.bitcoinAddress?.bech32Address;
-
-                            return (
-                              <Box>
-                                <Subtitle3
-                                  color={
-                                    theme.mode === "light"
-                                      ? ColorPalette["gray-700"]
-                                      : ColorPalette["white"]
-                                  }
-                                >
-                                  {key === "native-segwit"
-                                    ? "Native SegWit"
-                                    : "Taproot"}
-                                </Subtitle3>
-                                <Gutter size="0.25rem" />
-                                {address && (
-                                  <Body3 color={ColorPalette["gray-300"]}>
-                                    {Bech32Address.shortenAddress(address, 15)}
-                                  </Body3>
-                                )}
-                              </Box>
-                            );
-                          })(),
-                          onSelect: async (key: string) => {
-                            if (key !== "taproot" && key !== "native-segwit") {
-                              return;
-                            }
-
-                            const msg = new SetPreferredBitcoinPaymentTypeMsg(
-                              key as BitcoinPaymentType
-                            );
-                            await new InExtensionMessageRequester().sendMessage(
-                              BACKGROUND_PORT,
-                              msg
-                            );
-
-                            setPreferredPaymentTypeForBitcoin(key);
-                          },
-                        }))
-                      : [
-                          {
-                            key: "label",
-                            content: (
-                              <Columns sum={1} alignY="center" gutter="0.5rem">
-                                <Caption1>on</Caption1>
-                              </Columns>
-                            ),
-                            onSelect: async () => {},
-                            isDisabled: true,
-                          },
-                          ...bitcoinChainInfos.map((chainInfo) => ({
-                            key:
-                              "bitcoin" in chainInfo
-                                ? chainInfo.bitcoin.chainId
-                                : chainInfo.chainId,
-                            content: (
-                              <Columns sum={1} alignY="center" gutter="0.5rem">
-                                <ChainImageFallback
-                                  chainInfo={chainInfo}
-                                  size="2rem"
-                                />
-                                <Subtitle3>{chainInfo.chainName}</Subtitle3>
-                              </Columns>
-                            ),
-                            onSelect: async (key: string) => {
-                              const msg = new UpdateCurrentChainIdForBitcoinMsg(
-                                activeTabOrigin,
-                                key
-                              );
-                              await new InExtensionMessageRequester().sendMessage(
-                                BACKGROUND_PORT,
-                                msg
-                              );
-
-                              setCurrentChainIdForBitcoin(key);
-                            },
-                          })),
-                        ]
-                  }
-                  selectedItemKey={
-                    displayAddressTypeSelector
-                      ? preferredPaymentTypeForBitcoin ?? "taproot"
-                      : currentChainIdForBitcoin
-                  }
-                  activeTabOrigin={activeTabOrigin}
-                  headerContent={
-                    displayAddressTypeSelector ? (
-                      <Box
-                        alignY="center"
-                        alignX="center"
-                        style={{
-                          display: "flex",
-                          flexDirection: "row",
-                          gap: "0.375rem",
-                          cursor: "pointer",
-                        }}
-                        onClick={() => {
-                          setDisplayAddressTypeSelector(false);
-                        }}
-                      >
-                        <ArrowLeftIcon
-                          width="1rem"
-                          height="1rem"
-                          color={ColorPalette["gray-200"]}
-                        />
-                        <Body2 color={ColorPalette["gray-300"]}>Back</Body2>
-                      </Box>
-                    ) : (
-                      <Box width="100%">
-                        <Caption1 color={ColorPalette["gray-300"]}>
-                          Connected as
-                        </Caption1>
-                        <Gutter size="0.75rem" />
-                        <Columns sum={1} alignY="center" gutter="0.5rem">
-                          <Subtitle3
-                            color={
-                              theme.mode === "light"
-                                ? ColorPalette["gray-700"]
-                                : ColorPalette["white"]
-                            }
-                          >
-                            {preferredPaymentTypeForBitcoin === "native-segwit"
-                              ? "Native SegWit"
-                              : "Taproot"}
-                          </Subtitle3>
-                          <div
-                            style={{
-                              flex: 1,
-                            }}
-                          />
-                          {(() => {
-                            const address = accountStore.getAccount(
-                              `${currentChainIdForBitcoin}:${preferredPaymentTypeForBitcoin}`
-                            )?.bitcoinAddress?.bech32Address;
-
-                            if (address == null) {
-                              return null;
-                            }
-
-                            return (
-                              <Box
-                                alignY="center"
-                                alignX="center"
-                                style={{
-                                  display: "flex",
-                                  flexDirection: "row",
-                                  gap: "0.375rem",
-                                  cursor: "pointer",
-                                }}
-                                onHoverStateChange={setAddressConfigHover}
-                                onClick={() => {
-                                  setDisplayAddressTypeSelector(true);
-                                }}
-                              >
-                                <Body2
-                                  color={
-                                    addressConfigHover
-                                      ? theme.mode === "light"
-                                        ? ColorPalette["gray-200"]
-                                        : ColorPalette["gray-300"]
-                                      : theme.mode === "light"
-                                      ? ColorPalette["gray-300"]
-                                      : ColorPalette["gray-200"]
-                                  }
-                                >
-                                  {Bech32Address.shortenAddress(address, 15)}
-                                </Body2>
-                                <RightArrowIcon
-                                  width="1rem"
-                                  height="1rem"
-                                  color={
-                                    addressConfigHover
-                                      ? theme.mode === "light"
-                                        ? ColorPalette["gray-100"]
-                                        : ColorPalette["gray-400"]
-                                      : theme.mode === "light"
-                                      ? ColorPalette["gray-200"]
-                                      : ColorPalette["gray-300"]
-                                  }
-                                />
-                              </Box>
-                            );
-                          })()}
-                        </Columns>
-                      </Box>
-                    )
-                  }
-                  footerContent={
-                    displayAddressTypeSelector ? (
-                      <Body2>
-                        Select the address type you&apos;d like to use
-                        <br />
-                        with the web application.
-                      </Body2>
-                    ) : null
-                  }
-                  footerBoxPropsOverride={
-                    displayAddressTypeSelector
-                      ? undefined
-                      : {
-                          paddingY: "0.5rem",
-                        }
-                  }
-                >
-                  <Box
-                    borderRadius="99999px"
-                    position="relative"
-                    cursor="pointer"
-                    onHoverStateChange={setIsHoveredCurrenctChainIconForBitcoin}
-                    onClick={() =>
-                      setIsOpenCurrentChainSelectorForBitcoin(true)
-                    }
-                  >
-                    <ChainImageFallback
-                      chainInfo={currentBitcoinChainInfo}
-                      size="1.25rem"
-                      style={{
-                        opacity: isHoveredCurrenctChainIconForBitcoin ? 0.8 : 1,
-                      }}
-                    />
-                    <Box
-                      backgroundColor={
-                        theme.mode === "light"
-                          ? ColorPalette["light-gradient"]
-                          : ColorPalette["gray-700"]
-                      }
-                      width="0.625rem"
-                      height="0.625rem"
-                      borderRadius="99999px"
-                      position="absolute"
-                      style={{ right: "-3px", bottom: "-2px" }}
-                      alignX="center"
-                      alignY="center"
-                    >
-                      <Box
-                        backgroundColor={ColorPalette["green-400"]}
-                        width="0.375rem"
-                        height="0.375rem"
-                        borderRadius="99999px"
-                      />
-                    </Box>
-                  </Box>
-                </ChainSelector>
-              )}
-            {currentChainIdForStarknet != null && activeTabOrigin != null && (
-              <ChainSelector
-                isOpen={isOpenCurrentChainSelectorForStarknet}
-                close={() => setIsOpenCurrentChainSelectorForStarknet(false)}
-                items={starknetChainInfos.map((chainInfo) => ({
-                  key: chainInfo.chainId,
-                  content: (
-                    <Columns sum={1} alignY="center" gutter="0.5rem">
-                      <ChainImageFallback chainInfo={chainInfo} size="2rem" />
-                      <Subtitle3>{chainInfo.chainName}</Subtitle3>
-                    </Columns>
-                  ),
-                  onSelect: async (key) => {
-                    const msg = new UpdateCurrentChainIdForStarknetMsg(
-                      activeTabOrigin,
-                      key
-                    );
-                    await new InExtensionMessageRequester().sendMessage(
-                      BACKGROUND_PORT,
-                      msg
-                    );
-                    setCurrentChainIdForStarknet(key);
-                  },
-                }))}
-                selectedItemKey={currentChainIdForStarknet}
-                activeTabOrigin={activeTabOrigin}
-                footerContent={
-                  <Body2>Select a Starknet-compatible chain to connect.</Body2>
-                }
-              >
-                <Box
-                  borderRadius="99999px"
-                  position="relative"
-                  cursor="pointer"
-                  onHoverStateChange={setIsHoveredCurrenctChainIconForStarknet}
-                  onClick={() => setIsOpenCurrentChainSelectorForStarknet(true)}
-                >
-                  <ChainImageFallback
-                    chainInfo={chainStore.getModularChain(
-                      currentChainIdForStarknet
-                    )}
-                    size="1.25rem"
-                    style={{
-                      opacity: isHoveredCurrenctChainIconForStarknet ? 0.8 : 1,
-                    }}
-                  />
-                  <Box
-                    backgroundColor={
-                      theme.mode === "light"
-                        ? ColorPalette["light-gradient"]
-                        : ColorPalette["gray-700"]
-                    }
-                    width="0.625rem"
-                    height="0.625rem"
-                    borderRadius="99999px"
-                    position="absolute"
-                    style={{ right: "-3px", bottom: "-2px" }}
-                    alignX="center"
-                    alignY="center"
-                  >
-                    <Box
-                      backgroundColor={ColorPalette["green-400"]}
-                      width="0.375rem"
-                      height="0.375rem"
-                      borderRadius="99999px"
-                    />
-                  </Box>
-                </Box>
-              </ChainSelector>
-            )}
-            {currentChainIdForEVM != null && activeTabOrigin != null && (
-              <ChainSelector
-                isOpen={isOpenCurrentChainSelectorForEVM}
-                close={() => setIsOpenCurrentChainSelectorForEVM(false)}
-                items={evmChainInfos.map((chainInfo) => ({
-                  key: chainInfo.chainId,
-                  content: (
-                    <Columns sum={1} alignY="center" gutter="0.5rem">
-                      <ChainImageFallback chainInfo={chainInfo} size="2rem" />
-                      <Subtitle3>{chainInfo.chainName}</Subtitle3>
-                    </Columns>
-                  ),
-                  onSelect: async (key) => {
-                    const msg = new UpdateCurrentChainIdForEVMMsg(
-                      activeTabOrigin,
-                      key
-                    );
-                    await new InExtensionMessageRequester().sendMessage(
-                      BACKGROUND_PORT,
-                      msg
-                    );
-                    setCurrentChainIdForEVM(key);
-                  },
-                }))}
-                selectedItemKey={currentChainIdForEVM}
-                activeTabOrigin={activeTabOrigin}
-                footerContent={
-                  <Body2>Select an EVM-compatible chain to connect.</Body2>
-                }
-              >
-                <Box
-                  borderRadius="99999px"
-                  position="relative"
-                  cursor="pointer"
-                  onHoverStateChange={setIsHoveredCurrenctChainIconForEVM}
-                  onClick={() => setIsOpenCurrentChainSelectorForEVM(true)}
-                >
-                  <ChainImageFallback
-                    chainInfo={chainStore.getChain(currentChainIdForEVM)}
-                    size="1.25rem"
-                    style={{
-                      opacity: isHoveredCurrenctChainIconForEVM ? 0.8 : 1,
-                    }}
-                  />
-                  <Box
-                    backgroundColor={
-                      theme.mode === "light"
-                        ? ColorPalette["light-gradient"]
-                        : ColorPalette["gray-700"]
-                    }
-                    width="0.625rem"
-                    height="0.625rem"
-                    borderRadius="99999px"
-                    position="absolute"
-                    style={{ right: "-3px", bottom: "-2px" }}
-                    alignX="center"
-                    alignY="center"
-                  >
-                    <Box
-                      backgroundColor={ColorPalette["green-400"]}
-                      width="0.375rem"
-                      height="0.375rem"
-                      borderRadius="99999px"
-                    />
-                  </Box>
-                </Box>
-              </ChainSelector>
-            )}
+            <ConnectedEcosystems />
             <ProfileButton />
           </Columns>
         }
@@ -866,113 +349,695 @@ export const MainHeaderLayout = observer<
   }
 );
 
-const ChainSelector: FunctionComponent<
-  PropsWithChildren<{
-    isOpen: boolean;
-    close: () => void;
-    items: {
-      key: string;
-      content: React.ReactNode;
-      onSelect: (key: string) => void;
-      isDisabled?: boolean;
-    }[];
-    selectedItemKey: string;
-    activeTabOrigin: string;
-    headerContent?: React.ReactNode;
-    headerBoxPropsOverride?: BoxProps;
-    footerContent?: React.ReactNode;
-    footerBoxPropsOverride?: BoxProps;
-  }>
-> = observer(
-  ({
-    children,
-    isOpen,
-    close,
-    items,
-    selectedItemKey,
-    activeTabOrigin,
-    headerContent,
-    headerBoxPropsOverride,
-    footerContent,
-    footerBoxPropsOverride,
-  }) => {
-    const theme = useTheme();
-    const { x, y, strategy, refs } = useFloating({
-      placement: "bottom-end",
-      middleware: [
-        shift(),
-        offset({
-          mainAxis: 10,
-          crossAxis: 10,
-        }),
-      ],
-      whileElementsMounted: autoUpdate,
-      open: isOpen,
-    });
+const ConnectedEcosystems: FunctionComponent = observer(() => {
+  const { chainStore } = useStore();
 
-    const closeRef = useRef(close);
-    closeRef.current = close;
-    useEffect(() => {
-      function handleClickOutside(event: MouseEvent) {
-        const floatingRef = refs.floating;
-        if (
-          floatingRef.current &&
-          "contains" in floatingRef.current &&
-          !floatingRef.current.contains(event.target as Node)
-        ) {
-          closeRef.current();
-        }
+  const [currentChainIdForEVM, setCurrentChainIdForEVM] = React.useState<
+    string | undefined
+  >();
+  const [currentChainIdForStarknet, setCurrentChainIdForStarknet] =
+    React.useState<string | undefined>();
+
+  const [currentChainIdForBitcoin, setCurrentChainIdForBitcoin] =
+    React.useState<string | undefined>();
+
+  const [preferredPaymentTypeForBitcoin, setPreferredPaymentTypeForBitcoin] =
+    React.useState<BitcoinPaymentType | undefined>();
+
+  const [activeTabOrigin, setActiveTabOrigin] = React.useState<
+    string | undefined
+  >();
+
+  const evmChainInfos = chainStore.chainInfos.filter((chainInfo) =>
+    chainStore.isEvmChain(chainInfo.chainId)
+  );
+
+  const starknetChainInfos = chainStore.modularChainInfos.filter(
+    (modularChainInfo) => "starknet" in modularChainInfo
+  );
+
+  const bitcoinChainInfos = chainStore.groupedModularChainInfos.filter(
+    (modularChainInfo) => "bitcoin" in modularChainInfo
+  );
+
+  const [isOpenEcosystemSelector, setIsOpenEcosystemSelector] =
+    React.useState(false);
+  const [isHoveredEcosystemSelector, setIsHoveredEcosystemSelector] =
+    React.useState(false);
+
+  useEffect(() => {
+    const updateCurrentChainId = async () => {
+      const activeTabOrigin = await getActiveTabOrigin();
+
+      if (activeTabOrigin) {
+        const msgForEVM = new GetCurrentChainIdForEVMMsg(activeTabOrigin);
+        const msgForStarknet = new GetCurrentChainIdForStarknetMsg(
+          activeTabOrigin
+        );
+        const msgForBitcoin = new GetCurrentChainIdForBitcoinMsg(
+          activeTabOrigin
+        );
+        const msgForBitcoinPaymentType =
+          new GetPreferredBitcoinPaymentTypeMsg();
+
+        const newCurrentChainIdForEVM =
+          await new InExtensionMessageRequester().sendMessage(
+            BACKGROUND_PORT,
+            msgForEVM
+          );
+        const newCurrentChainIdForStarknet =
+          await new InExtensionMessageRequester().sendMessage(
+            BACKGROUND_PORT,
+            msgForStarknet
+          );
+        const newCurrentChainIdForBitcoin =
+          await new InExtensionMessageRequester().sendMessage(
+            BACKGROUND_PORT,
+            msgForBitcoin
+          );
+
+        const newPreferredPaymentTypeForBitcoin =
+          await new InExtensionMessageRequester().sendMessage(
+            BACKGROUND_PORT,
+            msgForBitcoinPaymentType
+          );
+
+        setCurrentChainIdForEVM(newCurrentChainIdForEVM);
+        setCurrentChainIdForStarknet(newCurrentChainIdForStarknet);
+        setCurrentChainIdForBitcoin(newCurrentChainIdForBitcoin);
+        setPreferredPaymentTypeForBitcoin(newPreferredPaymentTypeForBitcoin);
+        setActiveTabOrigin(activeTabOrigin);
+      } else {
+        setCurrentChainIdForEVM(undefined);
+        setCurrentChainIdForStarknet(undefined);
+        setCurrentChainIdForBitcoin(undefined);
+        setPreferredPaymentTypeForBitcoin(undefined);
+        setActiveTabOrigin(undefined);
       }
-      document.addEventListener("mousedown", handleClickOutside);
+    };
 
-      return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
-    }, [refs.floating]);
+    browser.tabs.onActivated.addListener(updateCurrentChainId);
+    updateCurrentChainId();
+    // Update current chain id for EVM and Starknet every second.
+    // TODO: Make it sync with `chainChanged` event.
+    const intervalId = setInterval(updateCurrentChainId, 1000);
 
+    return () => {
+      browser.tabs.onActivated.removeListener(updateCurrentChainId);
+      clearInterval(intervalId);
+    };
+  }, []);
+
+  const ecosystemSections: Array<EcosystemSection> = [];
+
+  if (currentChainIdForBitcoin) {
+    ecosystemSections.push({
+      type: "bitcoin",
+      chainId: currentChainIdForBitcoin,
+      chainInfos: bitcoinChainInfos,
+      currentChainId: currentChainIdForBitcoin,
+      setCurrentChainId: setCurrentChainIdForBitcoin,
+      preferredPaymentType: preferredPaymentTypeForBitcoin,
+      setPreferredPaymentType: setPreferredPaymentTypeForBitcoin,
+    });
+  }
+
+  if (currentChainIdForStarknet) {
+    ecosystemSections.push({
+      type: "starknet",
+      chainId: currentChainIdForStarknet,
+      chainInfos: starknetChainInfos,
+      currentChainId: currentChainIdForStarknet,
+      setCurrentChainId: setCurrentChainIdForStarknet,
+    });
+  }
+
+  if (currentChainIdForEVM) {
+    ecosystemSections.push({
+      type: "evm",
+      chainId: currentChainIdForEVM,
+      chainInfos: evmChainInfos,
+      currentChainId: currentChainIdForEVM,
+      setCurrentChainId: setCurrentChainIdForEVM,
+    });
+  }
+
+  const hasConnectedEcosystems = ecosystemSections.length > 0;
+
+  if (hasConnectedEcosystems && activeTabOrigin) {
     return (
-      <React.Fragment>
-        <div ref={refs.setReference}>{children}</div>
-        {isOpen && (
-          <div
-            ref={refs.setFloating}
-            style={{
-              position: strategy,
-              top: y ?? 0,
-              left: x ?? 0,
+      <MultipleEcosystemsSelector
+        ecosystemSections={ecosystemSections}
+        isOpen={isOpenEcosystemSelector}
+        onOpenChange={setIsOpenEcosystemSelector}
+        isHovered={isHoveredEcosystemSelector}
+        onHoverChange={setIsHoveredEcosystemSelector}
+        activeTabOrigin={activeTabOrigin}
+      />
+    );
+  }
 
-              minWidth: "19rem",
+  return null;
+});
+
+type EcosystemType = "bitcoin" | "starknet" | "evm";
+
+type EcosystemSection = {
+  type: EcosystemType;
+  chainId: string;
+  chainInfos: (ModularChainInfo | ChainInfo)[];
+  currentChainId: string;
+  setCurrentChainId: (chainId: string) => void;
+  preferredPaymentType?: BitcoinPaymentType;
+  setPreferredPaymentType?: (type: BitcoinPaymentType) => void;
+};
+
+const EcosystemOverviewSelector: FunctionComponent<{
+  ecosystemSections: EcosystemSection[];
+  setSelectionState: (state: any) => void;
+  theme: any;
+}> = ({ ecosystemSections, setSelectionState, theme }) => {
+  const { chainStore, accountStore } = useStore();
+
+  return (
+    <React.Fragment>
+      {ecosystemSections.map((section) => {
+        let chainInfo;
+
+        if (section.type === "bitcoin") {
+          chainInfo = chainStore.groupedModularChainInfos.find(
+            (chain) =>
+              "bitcoin" in chain && chain.bitcoin.chainId === section.chainId
+          );
+        } else if (section.type === "starknet") {
+          chainInfo = chainStore.getModularChain(section.chainId);
+        } else if (section.type === "evm") {
+          chainInfo = chainStore.getChain(section.chainId);
+        }
+
+        if (!chainInfo) return null;
+
+        if (section.type === "bitcoin") {
+          const currentAddressType =
+            section.preferredPaymentType === "native-segwit"
+              ? "Native SegWit"
+              : "Taproot";
+
+          const address = accountStore.getAccount(
+            `${section.currentChainId}:${section.preferredPaymentType}`
+          )?.bitcoinAddress?.bech32Address;
+
+          return (
+            <React.Fragment key={section.chainId}>
+              <Box
+                paddingX="1rem"
+                paddingY="0.75rem"
+                cursor="pointer"
+                backgroundColor={
+                  theme.mode === "light"
+                    ? ColorPalette["white"]
+                    : ColorPalette["gray-600"]
+                }
+                hover={{
+                  backgroundColor:
+                    theme.mode === "light"
+                      ? ColorPalette["gray-50"]
+                      : ColorPalette["gray-550"],
+                }}
+                onClick={() => {
+                  setSelectionState({
+                    ecosystemType: "bitcoin",
+                    selectionMode: "chain",
+                  });
+                }}
+              >
+                <Columns sum={1} alignY="center" gutter="0.5rem">
+                  <ChainImageFallback chainInfo={chainInfo} size="1.5rem" />
+                  <YAxis>
+                    <Subtitle3
+                      color={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-700"]
+                          : ColorPalette["white"]
+                      }
+                    >
+                      Bitcoin
+                    </Subtitle3>
+                    <Gutter size="0.125rem" />
+                    <Body3 color={ColorPalette["gray-300"]}>
+                      {chainInfo.chainName}
+                    </Body3>
+                  </YAxis>
+                  <div style={{ flex: 1 }} />
+                  <RightArrowIcon
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-300"]
+                        : ColorPalette["gray-200"]
+                    }
+                    width="1rem"
+                    height="1rem"
+                  />
+                </Columns>
+              </Box>
+
+              <Box
+                paddingX="1rem"
+                paddingY="0.75rem"
+                cursor="pointer"
+                backgroundColor={
+                  theme.mode === "light"
+                    ? ColorPalette["white"]
+                    : ColorPalette["gray-600"]
+                }
+                hover={{
+                  backgroundColor:
+                    theme.mode === "light"
+                      ? ColorPalette["gray-50"]
+                      : ColorPalette["gray-550"],
+                }}
+                onClick={() => {
+                  setSelectionState({
+                    ecosystemType: "bitcoin",
+                    selectionMode: "address-type",
+                  });
+                }}
+              >
+                <Columns sum={1} alignY="center" gutter="0.5rem">
+                  <YAxis>
+                    <Subtitle3
+                      color={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-700"]
+                          : ColorPalette["white"]
+                      }
+                    >
+                      Address Type
+                    </Subtitle3>
+                    <Gutter size="0.125rem" />
+                    <Columns sum={1} alignY="center" gutter="0.5rem">
+                      <Subtitle3
+                        color={
+                          theme.mode === "light"
+                            ? ColorPalette["gray-700"]
+                            : ColorPalette["white"]
+                        }
+                      >
+                        {currentAddressType}
+                      </Subtitle3>
+                      {address && (
+                        <React.Fragment>
+                          <Gutter size="0.125rem" />
+                          <Body3 color={ColorPalette["gray-300"]}>
+                            {Bech32Address.shortenAddress(address, 15)}
+                          </Body3>
+                        </React.Fragment>
+                      )}
+                    </Columns>
+                  </YAxis>
+                  <div style={{ flex: 1 }} />
+                  <RightArrowIcon
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-300"]
+                        : ColorPalette["gray-200"]
+                    }
+                    width="1rem"
+                    height="1rem"
+                  />
+                </Columns>
+              </Box>
+            </React.Fragment>
+          );
+        }
+
+        return (
+          <Box
+            key={section.chainId}
+            paddingX="1rem"
+            paddingY="0.75rem"
+            cursor="pointer"
+            backgroundColor={
+              theme.mode === "light"
+                ? ColorPalette["white"]
+                : ColorPalette["gray-600"]
+            }
+            hover={{
               backgroundColor:
                 theme.mode === "light"
-                  ? ColorPalette["white"]
-                  : ColorPalette["gray-600"],
-              borderRadius: "0.375rem",
-              borderStyle: "solid",
-              borderWidth: "1px",
-              borderColor:
+                  ? ColorPalette["gray-50"]
+                  : ColorPalette["gray-550"],
+            }}
+            onClick={() => {
+              setSelectionState({
+                ecosystemType: section.type,
+              });
+            }}
+          >
+            <Columns sum={1} alignY="center" gutter="0.5rem">
+              <ChainImageFallback chainInfo={chainInfo} size="1.5rem" />
+              <YAxis>
+                <Subtitle3
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-700"]
+                      : ColorPalette["white"]
+                  }
+                >
+                  {section.type === "starknet" ? "Starknet" : "EVM"}
+                </Subtitle3>
+                <Gutter size="0.125rem" />
+                <Body3 color={ColorPalette["gray-300"]}>
+                  {chainInfo.chainName}
+                </Body3>
+              </YAxis>
+              <div style={{ flex: 1 }} />
+              <RightArrowIcon
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-300"]
+                    : ColorPalette["gray-200"]
+                }
+                width="1rem"
+                height="1rem"
+              />
+            </Columns>
+          </Box>
+        );
+      })}
+    </React.Fragment>
+  );
+};
+
+const MultipleEcosystemsSelector: FunctionComponent<{
+  ecosystemSections: Array<EcosystemSection>;
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
+  isHovered: boolean;
+  onHoverChange: (isHovered: boolean) => void;
+  activeTabOrigin: string;
+}> = ({
+  ecosystemSections,
+  isOpen,
+  onOpenChange,
+  isHovered,
+  onHoverChange,
+  activeTabOrigin,
+}) => {
+  const theme = useTheme();
+  const { chainStore } = useStore();
+
+  const [selectionState, setSelectionState] = React.useState<{
+    ecosystemType: EcosystemType;
+    selectionMode?: "chain" | "address-type";
+  } | null>(null);
+
+  const bitcoinSection = React.useMemo(
+    () => ecosystemSections.find((section) => section.type === "bitcoin"),
+    [ecosystemSections]
+  );
+
+  const starknetSection = React.useMemo(
+    () => ecosystemSections.find((section) => section.type === "starknet"),
+    [ecosystemSections]
+  );
+
+  const evmSection = React.useMemo(
+    () => ecosystemSections.find((section) => section.type === "evm"),
+    [ecosystemSections]
+  );
+
+  const representativeSection = ecosystemSections[0];
+  let representativeChainInfo;
+
+  if (representativeSection?.type === "bitcoin") {
+    representativeChainInfo = chainStore.groupedModularChainInfos.find(
+      (chain) =>
+        "bitcoin" in chain &&
+        chain.bitcoin.chainId === representativeSection.chainId
+    );
+  } else if (representativeSection?.type === "starknet") {
+    representativeChainInfo = chainStore.getModularChain(
+      representativeSection.chainId
+    );
+  } else if (representativeSection?.type === "evm") {
+    representativeChainInfo = chainStore.getChain(
+      representativeSection.chainId
+    );
+  }
+
+  const { x, y, strategy, refs } = useFloating({
+    placement: "bottom-end",
+    middleware: [
+      shift(),
+      offset({
+        mainAxis: 10,
+        crossAxis: 10,
+      }),
+    ],
+    whileElementsMounted: autoUpdate,
+    open: isOpen,
+  });
+
+  const closeRef = useRef(() => onOpenChange(false));
+  closeRef.current = () => onOpenChange(false);
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const floatingRef = refs.floating;
+      const triggerRef = refs.reference;
+
+      if (
+        floatingRef.current &&
+        "contains" in floatingRef.current &&
+        !floatingRef.current.contains(event.target as Node) &&
+        triggerRef.current &&
+        "contains" in triggerRef.current &&
+        !triggerRef.current.contains(event.target as Node)
+      ) {
+        closeRef.current();
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [refs.floating, refs.reference]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setSelectionState(null);
+    }
+  }, [isOpen]);
+
+  const renderContent = React.useMemo(() => {
+    if (
+      selectionState?.ecosystemType === "bitcoin" &&
+      bitcoinSection &&
+      selectionState.selectionMode === "address-type"
+    ) {
+      return <BitcoinAddressTypeSelector bitcoinSection={bitcoinSection} />;
+    }
+
+    if (
+      selectionState?.ecosystemType === "bitcoin" &&
+      bitcoinSection &&
+      (selectionState.selectionMode === "chain" ||
+        selectionState.selectionMode === undefined)
+    ) {
+      return (
+        <ChainSelector
+          chainInfos={bitcoinSection.chainInfos}
+          currentChainId={bitcoinSection.currentChainId}
+          setCurrentChainId={bitcoinSection.setCurrentChainId}
+          activeTabOrigin={activeTabOrigin}
+          updateMessage={UpdateCurrentChainIdForBitcoinMsg}
+          // baseChainId is used for bitcoin chains
+          getChainId={(chainInfo: ModularChainInfo | ChainInfo) =>
+            "bitcoin" in chainInfo
+              ? chainInfo.bitcoin.chainId
+              : chainInfo.chainId
+          }
+          isChainSelected={(
+            chainInfo: ModularChainInfo | ChainInfo,
+            currentChainId: string
+          ) => {
+            const chainId =
+              "bitcoin" in chainInfo
+                ? chainInfo.bitcoin.chainId
+                : chainInfo.chainId;
+            return currentChainId === chainId;
+          }}
+        />
+      );
+    }
+
+    if (selectionState?.ecosystemType === "starknet" && starknetSection) {
+      return (
+        <ChainSelector
+          chainInfos={starknetSection.chainInfos}
+          currentChainId={starknetSection.currentChainId}
+          setCurrentChainId={starknetSection.setCurrentChainId}
+          activeTabOrigin={activeTabOrigin}
+          updateMessage={UpdateCurrentChainIdForStarknetMsg}
+        />
+      );
+    }
+
+    if (selectionState?.ecosystemType === "evm" && evmSection) {
+      return (
+        <ChainSelector
+          chainInfos={evmSection.chainInfos}
+          currentChainId={evmSection.currentChainId}
+          setCurrentChainId={evmSection.setCurrentChainId}
+          activeTabOrigin={activeTabOrigin}
+          updateMessage={UpdateCurrentChainIdForEVMMsg}
+        />
+      );
+    }
+
+    return (
+      <EcosystemOverviewSelector
+        ecosystemSections={ecosystemSections}
+        setSelectionState={setSelectionState}
+        theme={theme}
+      />
+    );
+  }, [
+    selectionState,
+    bitcoinSection,
+    starknetSection,
+    evmSection,
+    ecosystemSections,
+    activeTabOrigin,
+    theme,
+  ]);
+
+  const footerText = React.useMemo(() => {
+    if (selectionState?.ecosystemType === "bitcoin") {
+      if (selectionState.selectionMode === "chain") {
+        return "Select a Bitcoin network to connect.";
+      } else if (selectionState.selectionMode === "address-type") {
+        return "Select the address type you'd like to use with the web application.";
+      }
+    } else if (selectionState?.ecosystemType === "starknet") {
+      return "Select a Starknet-compatible chain to connect.";
+    } else if (selectionState?.ecosystemType === "evm") {
+      return "Select an EVM-compatible chain to connect.";
+    }
+    return null;
+  }, [selectionState]);
+
+  const shouldShowBackButton = selectionState !== null;
+
+  return (
+    <React.Fragment>
+      <div ref={refs.setReference}>
+        <Box
+          borderRadius="99999px"
+          position="relative"
+          cursor="pointer"
+          onHoverStateChange={onHoverChange}
+          onClick={() => onOpenChange(!isOpen)}
+        >
+          {representativeChainInfo && (
+            <ChainImageFallback
+              chainInfo={representativeChainInfo}
+              size="1.25rem"
+              style={{
+                opacity: isHovered ? 0.8 : 1,
+              }}
+            />
+          )}
+
+          <Box
+            backgroundColor={ColorPalette["gray-700"]}
+            width="0.875rem"
+            height="0.875rem"
+            borderRadius="99999px"
+            position="absolute"
+            style={{ right: "-0.234rem", bottom: "-0.29rem" }}
+            alignX="center"
+            alignY="center"
+          >
+            <BaseTypography
+              color={ColorPalette["gray-200"]}
+              style={{
+                fontSize: "0.625rem",
+                fontWeight: 600,
+                lineHeight: "normal",
+              }}
+            >
+              {ecosystemSections.length}
+            </BaseTypography>
+          </Box>
+        </Box>
+      </div>
+
+      {isOpen && (
+        <div
+          ref={refs.setFloating}
+          style={{
+            position: strategy,
+            top: y ?? 0,
+            left: x ?? 0,
+            width: "19rem",
+            backgroundColor:
+              theme.mode === "light"
+                ? ColorPalette["white"]
+                : ColorPalette["gray-600"],
+            borderRadius: "0.375rem",
+            borderStyle: "solid",
+            borderWidth: "1px",
+            borderColor:
+              theme.mode === "light"
+                ? ColorPalette["gray-100"]
+                : ColorPalette["gray-500"],
+            overflow: "hidden",
+          }}
+        >
+          <Box
+            alignX="left"
+            alignY="center"
+            paddingX="1rem"
+            paddingY="1.25rem"
+            style={{
+              borderTopLeftRadius: "0.375rem",
+              borderTopRightRadius: "0.375rem",
+              borderBottomStyle: "solid",
+              borderBottomWidth: "1px",
+              borderBottomColor:
                 theme.mode === "light"
                   ? ColorPalette["gray-100"]
                   : ColorPalette["gray-500"],
             }}
           >
+            <Columns sum={1} alignY="center" gutter="0.5rem">
+              <Box
+                backgroundColor={ColorPalette["green-400"]}
+                width="0.375rem"
+                height="0.375rem"
+                borderRadius="99999px"
+              />
+              <Body2
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-400"]
+                    : ColorPalette["gray-200"]
+                }
+              >
+                {activeTabOrigin}
+              </Body2>
+            </Columns>
+          </Box>
+
+          {shouldShowBackButton && (
             <Box
               alignX="left"
               alignY="center"
               paddingX="1rem"
               paddingY="1.25rem"
-              color={
-                theme.mode === "light"
-                  ? ColorPalette["gray-400"]
-                  : ColorPalette["gray-200"]
-              }
-              backgroundColor={
-                theme.mode === "light"
-                  ? ColorPalette["white"]
-                  : ColorPalette["gray-600"]
-              }
               style={{
-                borderTopLeftRadius: "0.375rem",
-                borderTopRightRadius: "0.375rem",
                 borderBottomStyle: "solid",
                 borderBottomWidth: "1px",
                 borderBottomColor:
@@ -981,110 +1046,41 @@ const ChainSelector: FunctionComponent<
                     : ColorPalette["gray-500"],
               }}
             >
-              <Columns sum={1} alignY="center" gutter="0.5rem">
-                <Box
-                  backgroundColor={ColorPalette["green-400"]}
-                  width="0.375rem"
-                  height="0.375rem"
-                  borderRadius="99999px"
-                />
-                <Body2>{activeTabOrigin}</Body2>
-              </Columns>
-            </Box>
-            {headerContent && (
               <Box
-                alignX="left"
                 alignY="center"
-                paddingX="1rem"
-                paddingY="1.25rem"
+                alignX="left"
                 style={{
-                  borderTopLeftRadius: "0.375rem",
-                  borderTopRightRadius: "0.375rem",
-                  borderBottomStyle: "solid",
-                  borderBottomWidth: "1px",
-                  borderBottomColor:
-                    theme.mode === "light"
-                      ? ColorPalette["gray-100"]
-                      : ColorPalette["gray-500"],
+                  display: "flex",
+                  flexDirection: "row",
+                  gap: "0.375rem",
+                  cursor: "pointer",
                 }}
-                {...headerBoxPropsOverride}
+                onClick={() => {
+                  setSelectionState(null);
+                }}
               >
-                {headerContent}
+                <ArrowLeftIcon
+                  width="1rem"
+                  height="1rem"
+                  color={ColorPalette["gray-200"]}
+                />
+                <Body2 color={ColorPalette["gray-300"]}>Back</Body2>
               </Box>
-            )}
-            <SimpleBar
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                maxHeight: "16rem",
-                overflowY: "auto",
-              }}
-            >
-              {items.map((item) => {
-                const isSelectedItem = selectedItemKey === item.key;
+            </Box>
+          )}
 
-                return (
-                  <Box
-                    key={item.key}
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                    paddingX="1rem"
-                    paddingY="0.75rem"
-                    cursor={item.isDisabled ? undefined : "pointer"}
-                    color={
-                      item.isDisabled
-                        ? ColorPalette["gray-300"]
-                        : theme.mode === "light"
-                        ? ColorPalette["gray-700"]
-                        : ColorPalette["white"]
-                    }
-                    backgroundColor={
-                      ColorPalette[
-                        isSelectedItem
-                          ? theme.mode === "light"
-                            ? "gray-100"
-                            : "gray-650"
-                          : theme.mode === "light"
-                          ? "white"
-                          : "gray-600"
-                      ]
-                    }
-                    hover={{
-                      backgroundColor: item.isDisabled
-                        ? "transparent"
-                        : theme.mode === "light"
-                        ? ColorPalette["gray-50"]
-                        : ColorPalette["gray-550"],
-                    }}
-                    onClick={(e) => {
-                      e.preventDefault();
+          <SimpleBar
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              maxHeight: "16rem",
+              overflowY: "auto",
+            }}
+          >
+            {renderContent}
+          </SimpleBar>
 
-                      if (item.isDisabled) {
-                        return;
-                      }
-
-                      item.onSelect(item.key);
-
-                      close();
-                    }}
-                  >
-                    {item.content}
-                    {isSelectedItem && (
-                      <CheckIcon
-                        color={
-                          theme.mode === "light"
-                            ? ColorPalette["blue-400"]
-                            : ColorPalette["gray-200"]
-                        }
-                      />
-                    )}
-                  </Box>
-                );
-              })}
-            </SimpleBar>
+          {footerText && (
             <Box
               alignX="left"
               alignY="center"
@@ -1095,17 +1091,224 @@ const ChainSelector: FunctionComponent<
                   ? ColorPalette["gray-300"]
                   : ColorPalette["gray-200"]
               }
-              style={{
-                borderBottomLeftRadius: "0.375rem",
-                borderBottomRightRadius: "0.375rem",
-              }}
-              {...footerBoxPropsOverride}
             >
-              {footerContent}
+              <Body2>{footerText}</Body2>
             </Box>
-          </div>
-        )}
-      </React.Fragment>
+          )}
+        </div>
+      )}
+    </React.Fragment>
+  );
+};
+
+const ChainSelector: FunctionComponent<{
+  chainInfos: (ModularChainInfo | ChainInfo)[];
+  currentChainId: string;
+  setCurrentChainId: (chainId: string) => void;
+  activeTabOrigin: string;
+  updateMessage:
+    | typeof UpdateCurrentChainIdForBitcoinMsg
+    | typeof UpdateCurrentChainIdForStarknetMsg
+    | typeof UpdateCurrentChainIdForEVMMsg;
+  getChainId?: (chainInfo: ModularChainInfo | ChainInfo) => string;
+  isChainSelected?: (
+    chainInfo: ModularChainInfo | ChainInfo,
+    currentChainId: string
+  ) => boolean;
+}> = ({
+  chainInfos,
+  currentChainId,
+  setCurrentChainId,
+  activeTabOrigin,
+  updateMessage,
+  getChainId,
+  isChainSelected,
+}) => {
+  const theme = useTheme();
+  return (
+    <React.Fragment>
+      {chainInfos.map((chainInfo) => {
+        const chainId = getChainId ? getChainId(chainInfo) : chainInfo.chainId;
+        const isSelected = isChainSelected
+          ? isChainSelected(chainInfo, currentChainId)
+          : currentChainId === chainInfo.chainId;
+
+        return (
+          <Box
+            key={chainId}
+            paddingX="1rem"
+            paddingY="0.75rem"
+            cursor="pointer"
+            backgroundColor={
+              isSelected
+                ? theme.mode === "light"
+                  ? ColorPalette["gray-100"]
+                  : ColorPalette["gray-650"]
+                : theme.mode === "light"
+                ? ColorPalette["white"]
+                : ColorPalette["gray-600"]
+            }
+            hover={{
+              backgroundColor:
+                theme.mode === "light"
+                  ? ColorPalette["gray-50"]
+                  : ColorPalette["gray-550"],
+            }}
+            onClick={async () => {
+              const msg = new updateMessage(activeTabOrigin, chainId);
+              await new InExtensionMessageRequester().sendMessage(
+                BACKGROUND_PORT,
+                msg
+              );
+              setCurrentChainId(chainId);
+            }}
+          >
+            <Columns sum={1} alignY="center" gutter="0.5rem">
+              <ChainImageFallback chainInfo={chainInfo} size="2rem" />
+              <Subtitle3
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-700"]
+                    : ColorPalette["white"]
+                }
+              >
+                {chainInfo.chainName}
+              </Subtitle3>
+              <div style={{ flex: 1 }} />
+              {isSelected && (
+                <CheckIcon
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["blue-400"]
+                      : ColorPalette["gray-200"]
+                  }
+                />
+              )}
+            </Columns>
+          </Box>
+        );
+      })}
+    </React.Fragment>
+  );
+};
+
+interface OptionItem<T = string> {
+  key: T;
+  label: string;
+  secondaryText?: string;
+}
+
+const OptionSelector: FunctionComponent<{
+  options: OptionItem[];
+  selectedValue: string;
+  onSelect: (value: string) => Promise<void>;
+  getSecondaryText?: (key: string) => string | undefined;
+}> = ({ options, selectedValue, onSelect, getSecondaryText }) => {
+  const theme = useTheme();
+
+  return (
+    <React.Fragment>
+      {options.map((option) => {
+        const isSelected = selectedValue === option.key;
+        const secondaryText = getSecondaryText
+          ? getSecondaryText(option.key)
+          : option.secondaryText;
+
+        return (
+          <Box
+            key={option.key}
+            paddingX="1rem"
+            paddingY="0.75rem"
+            cursor="pointer"
+            backgroundColor={
+              isSelected
+                ? theme.mode === "light"
+                  ? ColorPalette["gray-100"]
+                  : ColorPalette["gray-650"]
+                : theme.mode === "light"
+                ? ColorPalette["white"]
+                : ColorPalette["gray-600"]
+            }
+            hover={{
+              backgroundColor:
+                theme.mode === "light"
+                  ? ColorPalette["gray-50"]
+                  : ColorPalette["gray-550"],
+            }}
+            onClick={() => onSelect(option.key)}
+          >
+            <Columns sum={1} alignY="center" gutter="0.5rem">
+              <YAxis>
+                <Subtitle3
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-700"]
+                      : ColorPalette["white"]
+                  }
+                >
+                  {option.label}
+                </Subtitle3>
+                {secondaryText && (
+                  <React.Fragment>
+                    <Gutter size="0.25rem" />
+                    <Body3 color={ColorPalette["gray-300"]}>
+                      {secondaryText}
+                    </Body3>
+                  </React.Fragment>
+                )}
+              </YAxis>
+              <div style={{ flex: 1 }} />
+              {isSelected && (
+                <CheckIcon
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["blue-400"]
+                      : ColorPalette["gray-200"]
+                  }
+                />
+              )}
+            </Columns>
+          </Box>
+        );
+      })}
+    </React.Fragment>
+  );
+};
+
+const BitcoinAddressTypeSelector: FunctionComponent<{
+  bitcoinSection: EcosystemSection;
+}> = ({ bitcoinSection }) => {
+  const { accountStore } = useStore();
+
+  const bitcoinAddressOptions: OptionItem[] = [
+    { key: "taproot", label: "Taproot" },
+    { key: "native-segwit", label: "Native SegWit" },
+  ];
+
+  const getAddressText = (key: string) => {
+    const address = accountStore.getAccount(
+      `${bitcoinSection.currentChainId}:${key}`
+    )?.bitcoinAddress?.bech32Address;
+    return address ? Bech32Address.shortenAddress(address, 20) : undefined;
+  };
+
+  const handleSelect = async (key: string) => {
+    if (key !== "taproot" && key !== "native-segwit") {
+      return;
+    }
+    const msg = new SetPreferredBitcoinPaymentTypeMsg(
+      key as BitcoinPaymentType
     );
-  }
-);
+    await new InExtensionMessageRequester().sendMessage(BACKGROUND_PORT, msg);
+    bitcoinSection.setPreferredPaymentType?.(key as BitcoinPaymentType);
+  };
+
+  return (
+    <OptionSelector
+      options={bitcoinAddressOptions}
+      selectedValue={bitcoinSection.preferredPaymentType ?? "taproot"}
+      onSelect={handleSelect}
+      getSecondaryText={getAddressText}
+    />
+  );
+};
