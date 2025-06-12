@@ -5,6 +5,7 @@ import { ColorPalette } from "../../../../styles";
 import { Gutter } from "../../../../components/gutter";
 import { XAxis, YAxis } from "../../../../components/axis";
 import { performSearch } from "../../../../hooks/use-search";
+import { useTheme } from "styled-components";
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export interface SettingListProps {
@@ -35,6 +36,8 @@ export const SettingList: FunctionComponent<SettingListProps> = ({
   search,
   sections,
 }) => {
+  const theme = useTheme();
+
   const trimSearch = useMemo(() => {
     return search?.trim();
   }, [search]);
@@ -155,7 +158,13 @@ export const SettingList: FunctionComponent<SettingListProps> = ({
               {/* search 중에는 section title을 보여주지 않는다. */}
               {isSearching ? null : (
                 <React.Fragment>
-                  <Subtitle3 color={ColorPalette["gray-200"]}>
+                  <Subtitle3
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-300"]
+                        : ColorPalette["gray-200"]
+                    }
+                  >
                     {section.title}
                   </Subtitle3>
                   <Gutter size="0.75rem" />
@@ -180,7 +189,10 @@ export const SettingList: FunctionComponent<SettingListProps> = ({
                             item.onClick?.();
                           },
                           hover: {
-                            backgroundColor: ColorPalette["gray-600"],
+                            backgroundColor:
+                              theme.mode === "light"
+                                ? ColorPalette["gray-10"]
+                                : ColorPalette["gray-600"],
                           },
                         };
                       }
@@ -188,7 +200,11 @@ export const SettingList: FunctionComponent<SettingListProps> = ({
                       return {};
                     })()}
                     // icon color
-                    color={ColorPalette["gray-300"]}
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-200"]
+                        : ColorPalette["gray-300"]
+                    }
                   >
                     <XAxis alignY="center">
                       {item.icon ? <item.icon /> : null}
@@ -216,7 +232,9 @@ export const SettingList: FunctionComponent<SettingListProps> = ({
                                           height: "2px",
                                           borderRadius: "9999px",
                                           backgroundColor:
-                                            ColorPalette["gray-400"],
+                                            theme.mode === "light"
+                                              ? ColorPalette["gray-200"]
+                                              : ColorPalette["gray-400"],
                                           marginLeft: "4px",
                                           marginRight: "4px",
                                         }}
@@ -242,7 +260,10 @@ export const SettingList: FunctionComponent<SettingListProps> = ({
                 <div
                   style={{
                     height: "1px",
-                    backgroundColor: ColorPalette["gray-550"],
+                    backgroundColor:
+                      theme.mode === "light"
+                        ? ColorPalette["gray-50"]
+                        : ColorPalette["gray-550"],
                   }}
                 />
               </Box>
@@ -258,8 +279,20 @@ export const HighlightedSubtitle3: FunctionComponent<{
   value: string;
   searchText: string;
 }> = ({ value, searchText }) => {
+  const theme = useTheme();
+
   if (!searchText)
-    return <Subtitle3 color={ColorPalette["gray-10"]}>{value}</Subtitle3>;
+    return (
+      <Subtitle3
+        color={
+          theme.mode === "light"
+            ? ColorPalette["gray-700"]
+            : ColorPalette["gray-10"]
+        }
+      >
+        {value}
+      </Subtitle3>
+    );
 
   const regex = new RegExp(`(${searchText})`, "ig"); // 대소문자 무시
   const parts = value.split(regex);
@@ -289,7 +322,11 @@ export const HighlightedSubtitle3: FunctionComponent<{
               style={{
                 whiteSpace: "pre-wrap",
               }}
-              color={ColorPalette["gray-10"]}
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-700"]
+                  : ColorPalette["gray-10"]
+              }
             >
               {part}
             </Subtitle3>

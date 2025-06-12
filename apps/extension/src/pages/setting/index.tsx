@@ -445,9 +445,16 @@ const TopSection: FunctionComponent<{
           paddingX="1rem"
           paddingY="0.75rem"
           borderRadius="0.75rem"
-          backgroundColor={ColorPalette["gray-650"]}
+          backgroundColor={
+            theme.mode === "light"
+              ? ColorPalette["gray-10"]
+              : ColorPalette["gray-650"]
+          }
           hover={{
-            backgroundColor: ColorPalette["gray-550"],
+            backgroundColor:
+              theme.mode === "light"
+                ? ColorPalette["gray-10"]
+                : ColorPalette["gray-550"],
           }}
           cursor="pointer"
           onClick={(e) => {
@@ -455,7 +462,11 @@ const TopSection: FunctionComponent<{
 
             navigate("/wallet/select");
           }}
-          color={ColorPalette["gray-300"]}
+          color={
+            theme.mode === "light"
+              ? ColorPalette["gray-200"]
+              : ColorPalette["gray-300"]
+          }
         >
           <XAxis alignY="center">
             {icnsPrimaryName ? (
@@ -479,7 +490,13 @@ const TopSection: FunctionComponent<{
               </React.Fragment>
             ) : null}
             <YAxis>
-              <Subtitle3 color={ColorPalette["gray-10"]}>
+              <Subtitle3
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-700"]
+                    : ColorPalette["gray-10"]
+                }
+              >
                 {keyRingStore.selectedKeyInfo?.name || "Keplr Account"}
               </Subtitle3>
               <Gutter size="0.38rem" />
@@ -532,12 +549,18 @@ const TopSectionXAxisItem: FunctionComponent<{
     onClick?: () => void;
   };
 }> = ({ item }) => {
+  const theme = useTheme();
+
   const [isHover, setIsHover] = useState(false);
 
   return (
     <Box
       paddingX="1rem"
-      color={ColorPalette["gray-300"]}
+      color={
+        theme.mode === "light"
+          ? ColorPalette["gray-200"]
+          : ColorPalette["gray-300"]
+      }
       cursor={item.onClick ? "pointer" : undefined}
       onHoverStateChange={setIsHover}
       opacity={isHover ? 0.5 : 1}
@@ -550,7 +573,15 @@ const TopSectionXAxisItem: FunctionComponent<{
       <XAxis alignY="center">
         {item.icon ? <item.icon /> : null}
         <Gutter size="0.38rem" />
-        <Subtitle3 color={ColorPalette["gray-10"]}>{item.title}</Subtitle3>
+        <Subtitle3
+          color={
+            theme.mode === "light"
+              ? ColorPalette["gray-700"]
+              : ColorPalette["gray-10"]
+          }
+        >
+          {item.title}
+        </Subtitle3>
       </XAxis>
     </Box>
   );
