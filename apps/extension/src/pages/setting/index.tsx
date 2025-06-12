@@ -1,21 +1,12 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { Stack } from "../../components/stack";
-import { PageButton } from "./components";
-import {
-  SettingIcon,
-  RightArrowIcon,
-  RocketLaunchIcon,
-  KeyIcon,
-} from "../../components/icon";
 import { useNavigate } from "react-router";
 import { Box } from "../../components/box";
-import { FormattedMessage, useIntl } from "react-intl";
+import { useIntl } from "react-intl";
 import { MainHeaderLayout } from "../main/layouts/header";
-import { Body2, H3 } from "../../components/typography";
+import { Body2 } from "../../components/typography";
 import { useTheme } from "styled-components";
 import { ColorPalette } from "../../styles";
-import { Gutter } from "../../components/gutter";
 import { SettingList } from "./components/setting-list";
 import { useStore } from "../../stores";
 import { useLanguage } from "../../languages";
@@ -25,10 +16,12 @@ import { isRunningInSidePanel, toggleSidePanelMode } from "../../utils";
 import {
   GetSidePanelEnabledMsg,
   GetSidePanelIsSupportedMsg,
+  SetDisableAnalyticsMsg,
 } from "@keplr-wallet/background";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { SearchTextInput } from "../../components/input";
+import { HelpDeskUrl } from "../../config.ui";
 
 export const SettingPage: FunctionComponent = observer(() => {
   const navigate = useNavigate();
@@ -36,7 +29,9 @@ export const SettingPage: FunctionComponent = observer(() => {
 
   const { keyRingStore, uiConfigStore } = useStore();
 
-  const theme = useTheme();
+  const [disableAnalytics, setDisableAnalytics] = React.useState<boolean>(
+    localStorage.getItem("disable-analytics") === "true"
+  );
 
   const [sidePanelSupported, setSidePanelSupported] = useState(false);
   const [sidePanelEnabled, setSidePanelEnabled] = useState(
@@ -191,66 +186,89 @@ export const SettingPage: FunctionComponent = observer(() => {
                 },
               ],
             },
+            {
+              key: "security-privacy",
+              title: "Security & Privacy",
+              items: [
+                {
+                  key: "change-password",
+                  icon: IconChangePassword,
+                  title: "Change Password",
+                  right: ClickableRightIcon,
+                  rightProps: {},
+                  onClick: () => navigate("/setting/security/change-password"),
+                },
+                {
+                  key: "connected-websites",
+                  icon: IconConnectedWebsites,
+                  title: "Connected Websites",
+                  right: ConnectedWebsitesRight,
+                  rightProps: {},
+                  onClick: () => navigate("/setting/security/permission"),
+                },
+                {
+                  key: "share-anonymous-data",
+                  icon: IconAdvanced,
+                  title: "Share Anonymous data",
+                  right: Toggle,
+                  rightProps: {
+                    size: "smaller",
+                    isOpen: !disableAnalytics,
+                    setIsOpen: () => {
+                      const disableAnalytics =
+                        localStorage.getItem("disable-analytics") === "true";
+
+                      new InExtensionMessageRequester()
+                        .sendMessage(
+                          BACKGROUND_PORT,
+                          new SetDisableAnalyticsMsg(!disableAnalytics)
+                        )
+                        .then((analyticsDisabled) => {
+                          localStorage.setItem(
+                            "disable-analytics",
+                            analyticsDisabled ? "true" : "false"
+                          );
+
+                          setDisableAnalytics(analyticsDisabled);
+                        });
+                    },
+                  },
+                },
+              ],
+            },
+            {
+              key: "more",
+              title: "More",
+              items: [
+                {
+                  key: "helpdesk",
+                  icon: IconHelpDesk,
+                  title: "HelpDesk",
+                  right: ClickableRightIcon,
+                  rightProps: {},
+                  onClick: () => {
+                    browser.tabs.create({
+                      url: HelpDeskUrl,
+                    });
+                  },
+                },
+                {
+                  key: "about-keplr",
+                  icon: IconAboutKeplr,
+                  title: "About Keplr",
+                  subtitles: [
+                    "Official Website",
+                    "Terms of Use",
+                    "Privacy Policy",
+                  ],
+                  onClick: () => {
+                    // TODO
+                  },
+                },
+              ],
+            },
           ]}
         />
-      </Box>
-      <Box padding="0.75rem" paddingTop="0">
-        <Box paddingY="1.15rem" alignX="center" alignY="center">
-          <H3
-            color={
-              theme.mode === "light"
-                ? ColorPalette["gray-700"]
-                : ColorPalette.white
-            }
-          >
-            <FormattedMessage id="page.setting.title" />
-          </H3>
-        </Box>
-        <Gutter size="0.5rem" />
-        <Stack gutter="0.5rem">
-          <PageButton
-            title={intl.formatMessage({ id: "page.setting.general-title" })}
-            paragraph={intl.formatMessage({
-              id: "page.setting.general-paragraph",
-            })}
-            startIcon={<SettingIcon width="1rem" height="1rem" />}
-            endIcon={<RightArrowIcon />}
-            onClick={() => navigate("/setting/general")}
-          />
-
-          <PageButton
-            title={intl.formatMessage({ id: "page.setting.advanced-title" })}
-            paragraph={intl.formatMessage({
-              id: "page.setting.advanced-paragraph",
-            })}
-            startIcon={<RocketLaunchIcon width="1rem" height="1rem" />}
-            endIcon={<RightArrowIcon />}
-            onClick={() => navigate("/setting/advanced")}
-          />
-
-          <PageButton
-            title={intl.formatMessage({
-              id: "page.setting.security-privacy-title",
-            })}
-            paragraph={intl.formatMessage({
-              id: "page.setting.security-privacy-paragraph",
-            })}
-            startIcon={<KeyIcon width="1rem" height="1rem" />}
-            endIcon={<RightArrowIcon />}
-            onClick={() => navigate("/setting/security")}
-          />
-
-          <PageButton
-            title={intl.formatMessage({
-              id: "page.setting.manage-token-list-title",
-            })}
-            paragraph={intl.formatMessage({
-              id: "page.setting.manage-token-list-paragraph",
-            })}
-            endIcon={<RightArrowIcon />}
-            onClick={() => navigate("/setting/token/list")}
-          />
-        </Stack>
       </Box>
     </MainHeaderLayout>
   );
@@ -312,6 +330,28 @@ const ThemeRight: FunctionComponent = () => {
     </Body2>
   );
 };
+
+const ConnectedWebsitesRight: FunctionComponent = observer(() => {
+  const { permissionManagerStore } = useStore();
+
+  const num = useMemo(() => {
+    let n = 0;
+    for (const [_, value] of Object.entries(
+      permissionManagerStore.permissionData
+    )) {
+      if (value?.permissions) {
+        n = n + value.permissions.length;
+      }
+      if (value?.globalPermissions) {
+        n = n + value.globalPermissions.length;
+      }
+    }
+
+    return n;
+  }, [permissionManagerStore.permissionData]);
+
+  return <Body2 color={ColorPalette["gray-300"]}>{num}</Body2>;
+});
 
 const IconAddRemoveChains = () => {
   return (
@@ -499,6 +539,87 @@ const IconAdvanced: FunctionComponent = () => {
       <path
         fill="currentColor"
         d="m12.856 19.216 4.434-5.312h-3.427l.62-4.863-3.962 5.72h2.977zm-1.328-2.742H8.872q-.515 0-.76-.46a.79.79 0 0 1 .053-.89l6.405-9.21q.213-.3.556-.418t.707.01a.93.93 0 0 1 .536.45q.171.322.128.686l-.685 5.548h3.32q.557 0 .782.493.225.492-.14.92l-7.047 8.44q-.236.28-.578.365a.97.97 0 0 1-.664-.065 1.12 1.12 0 0 1-.503-.46 1.06 1.06 0 0 1-.14-.675z"
+      />
+    </svg>
+  );
+};
+
+const IconChangePassword: FunctionComponent = () => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="28"
+      height="28"
+      fill="none"
+      stroke="none"
+      viewBox="0 0 28 28"
+    >
+      <path
+        fill="currentColor"
+        d="M8.977 14.5q-.824 0-1.4-.576a1.9 1.9 0 0 1-.577-1.4q0-.825.577-1.401a1.9 1.9 0 0 1 1.4-.577q.825 0 1.4.577.577.575.577 1.4t-.576 1.4a1.9 1.9 0 0 1-1.4.577m-.659 3.955a.64.64 0 0 1-.47-.19.64.64 0 0 1-.189-.47q0-.278.19-.468a.64.64 0 0 1 .47-.19h11.863q.28 0 .47.19t.189.469a.64.64 0 0 1-.19.47.63.63 0 0 1-.47.189zM14.25 14.5q-.825 0-1.4-.576a1.9 1.9 0 0 1-.577-1.4q0-.825.576-1.401a1.9 1.9 0 0 1 1.401-.577q.825 0 1.4.577.577.575.577 1.4t-.576 1.4a1.9 1.9 0 0 1-1.401.577m5.273 0q-.825 0-1.4-.576a1.9 1.9 0 0 1-.578-1.4q0-.825.577-1.401a1.9 1.9 0 0 1 1.4-.577q.825 0 1.401.577.577.575.577 1.4t-.577 1.4a1.9 1.9 0 0 1-1.4.577"
+      />
+    </svg>
+  );
+};
+
+const IconConnectedWebsites: FunctionComponent = () => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="28"
+      height="28"
+      fill="none"
+      stroke="none"
+      viewBox="0 0 28 28"
+    >
+      <path fill="currentColor" d="M19 16a3 3 0 1 1 0 6 3 3 0 0 1 0-6" />
+      <path
+        fill="currentColor"
+        fillRule="evenodd"
+        d="M14.385 6.26A7.75 7.75 0 0 1 21.75 14l-.01.385a8 8 0 0 1-.033.412A4.97 4.97 0 0 0 19 14c-.978 0-1.89.28-2.66.766l.002-.016h-4.684c.077 1.544.386 2.903.827 3.895.256.576.542.996.82 1.261.276.262.51.344.695.344a.7.7 0 0 0 .152-.019 5 5 0 0 0 .645 1.476q-.396.042-.797.043l-.385-.01A7.75 7.75 0 0 1 6.25 14l.01-.385A7.75 7.75 0 0 1 14 6.25zm-6.588 8.49a6.25 6.25 0 0 0 3.5 4.884 8 8 0 0 1-.183-.38c-.537-1.21-.881-2.783-.959-4.504zm3.5-6.385a6.25 6.25 0 0 0-3.5 4.885h2.358c.078-1.722.422-3.294.96-4.504q.087-.195.183-.38M14 7.75c-.186 0-.42.082-.694.344-.28.265-.565.685-.82 1.26-.442.993-.751 2.352-.828 3.896h4.684c-.077-1.544-.386-2.903-.827-3.896-.256-.575-.542-.995-.82-1.26-.276-.262-.51-.344-.695-.344m2.886.996c.537 1.21.881 2.782.959 4.504h2.358a6.25 6.25 0 0 0-3.502-4.885q.097.185.185.381"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+};
+
+const IconHelpDesk: FunctionComponent = () => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="28"
+      height="28"
+      fill="none"
+      stroke="none"
+      viewBox="0 0 28 28"
+    >
+      <path
+        fill="currentColor"
+        d="M13.96 19q.437 0 .74-.302.3-.302.301-.74 0-.436-.302-.739a1 1 0 0 0-.74-.302q-.437 0-.739.302a1 1 0 0 0-.302.74q0 .437.302.74.302.3.74.301M14 22.334a8.1 8.1 0 0 1-3.25-.657 8.4 8.4 0 0 1-2.646-1.78 8.4 8.4 0 0 1-1.78-2.647A8.1 8.1 0 0 1 5.667 14q0-1.729.656-3.25a8.4 8.4 0 0 1 1.781-2.646 8.4 8.4 0 0 1 2.646-1.78 8.1 8.1 0 0 1 3.25-.657q1.73 0 3.25.656a8.4 8.4 0 0 1 2.646 1.781 8.4 8.4 0 0 1 1.781 2.646 8.1 8.1 0 0 1 .657 3.25 8.1 8.1 0 0 1-.657 3.25 8.4 8.4 0 0 1-1.78 2.646 8.4 8.4 0 0 1-2.647 1.781 8.1 8.1 0 0 1-3.25.657m0-1.667q2.792 0 4.73-1.937 1.937-1.938 1.937-4.73 0-2.79-1.937-4.729Q16.793 7.334 14 7.334q-2.79 0-4.729 1.937-1.937 1.938-1.937 4.73 0 2.79 1.937 4.729 1.938 1.937 4.73 1.937m.084-10.25q.52 0 .906.333.385.334.385.834 0 .458-.28.812a5 5 0 0 1-.636.667q-.48.417-.844.916a1.86 1.86 0 0 0-.365 1.126q0 .29.22.49a.74.74 0 0 0 .51.197q.312 0 .53-.208a.96.96 0 0 0 .282-.521q.083-.438.375-.781t.625-.657q.48-.458.823-1 .345-.541.344-1.208 0-1.062-.865-1.74Q15.231 9 14.085 9q-.793 0-1.51.334a2.33 2.33 0 0 0-1.094 1.02.75.75 0 0 0-.094.532q.051.281.281.427a.83.83 0 0 0 1.125-.25q.23-.313.573-.48.345-.165.719-.166"
+      />
+    </svg>
+  );
+};
+
+const IconAboutKeplr: FunctionComponent = () => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="28"
+      height="28"
+      fill="none"
+      stroke="none"
+      viewBox="0 0 28 28"
+    >
+      <path
+        fill="currentColor"
+        d="M12.398 9.295v3.978l3.65-3.978H18.3v.054l-4.269 4.503 4.625 4.744v.108H16.42l-4.021-4.167v4.167h-1.812v-9.41z"
+      />
+      <path
+        fill="currentColor"
+        fillRule="evenodd"
+        d="M19.12 5.005A4.09 4.09 0 0 1 23 9.09v9.818l-.005.21a4.09 4.09 0 0 1-3.876 3.876l-.21.005H9.091l-.21-.005a4.09 4.09 0 0 1-3.876-3.876L5 18.91V9.091a4.09 4.09 0 0 1 3.88-4.086L9.09 5h9.82zM9.09 6.5A2.59 2.59 0 0 0 6.5 9.09v9.82a2.59 2.59 0 0 0 2.59 2.59h9.82a2.59 2.59 0 0 0 2.59-2.59V9.09a2.59 2.59 0 0 0-2.326-2.576l-.265-.014z"
+        clipRule="evenodd"
       />
     </svg>
   );
