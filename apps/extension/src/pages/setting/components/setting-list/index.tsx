@@ -1,6 +1,11 @@
 import React, { FunctionComponent, useMemo } from "react";
 import { Box } from "../../../../components/box";
-import { Caption2, Subtitle3 } from "../../../../components/typography";
+import {
+  Body3,
+  Caption2,
+  Subtitle2,
+  Subtitle3,
+} from "../../../../components/typography";
 import { ColorPalette } from "../../../../styles";
 import { Gutter } from "../../../../components/gutter";
 import { XAxis, YAxis } from "../../../../components/axis";
@@ -153,6 +158,9 @@ export const SettingList: FunctionComponent<SettingListProps> = ({
 
   return (
     <React.Fragment>
+      {isSearching && renderSections.length === 0 ? (
+        <EmptySearchAlternative />
+      ) : null}
       {renderSections.map((section, i) => {
         return (
           <React.Fragment key={section.key}>
@@ -341,5 +349,55 @@ export const HighlightedSubtitle3: FunctionComponent<{
         return res;
       })}
     </span>
+  );
+};
+
+const EmptySearchAlternative: FunctionComponent = () => {
+  const theme = useTheme();
+
+  return (
+    <Box
+      marginTop="2rem"
+      alignX="center"
+      color={
+        theme.mode === "light"
+          ? ColorPalette["gray-300"]
+          : ColorPalette["gray-300"]
+      }
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="36"
+        height="36"
+        fill="none"
+        stroke="none"
+        viewBox="0 0 36 36"
+      >
+        <path
+          fill="currentColor"
+          d="m32.111 29.629-6.616-6.616a12.22 12.22 0 0 0 2.45-7.353c0-6.774-5.511-12.285-12.285-12.285S3.375 8.886 3.375 15.66 8.886 27.945 15.66 27.945a12.22 12.22 0 0 0 7.353-2.45l6.616 6.616a1.758 1.758 0 0 0 2.482-2.482M6.885 15.66a8.775 8.775 0 1 1 8.775 8.775 8.786 8.786 0 0 1-8.775-8.775"
+        />
+      </svg>
+      <Gutter size="1rem" />
+      <Subtitle2
+        color={
+          theme.mode === "light"
+            ? ColorPalette["gray-700"]
+            : ColorPalette["gray-10"]
+        }
+      >
+        Oops, Nothing Here!
+      </Subtitle2>
+      <Gutter size="0.75rem" />
+      <Body3
+        color={
+          theme.mode === "light"
+            ? ColorPalette["gray-300"]
+            : ColorPalette["gray-300"]
+        }
+      >
+        Try another keyword 🔍
+      </Body3>
+    </Box>
   );
 };
