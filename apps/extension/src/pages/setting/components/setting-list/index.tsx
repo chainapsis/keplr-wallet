@@ -18,6 +18,7 @@ export interface SettingListProps {
       icon?: React.ComponentType;
       title: string;
       subtitles?: string[];
+      searches?: string[];
       onClick?: () => void;
     } & (
       | {
@@ -56,6 +57,7 @@ export const SettingList: FunctionComponent<SettingListProps> = ({
       const searchedSections = performSearch(sections, trimSearch, [
         "items[].title",
         "items[].subtitles[]",
+        "items[].searches[]",
       ]);
       if (searchedSections.length > 0) {
         for (let i = 0; i < searchedSections.length; i++) {
@@ -64,7 +66,7 @@ export const SettingList: FunctionComponent<SettingListProps> = ({
           const searchedItems = performSearch(
             searchedSection.items,
             trimSearch,
-            ["title", "subtitles[]"]
+            ["title", "subtitles[]", "searches[]"]
           );
           if (searchedItems.length > 0) {
             sectionKeys.set(searchedSection.key, i);

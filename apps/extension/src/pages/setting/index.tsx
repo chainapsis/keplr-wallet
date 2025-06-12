@@ -66,6 +66,7 @@ export const SettingPage: FunctionComponent = observer(() => {
     key: string;
     title: string;
     icon?: React.ComponentType;
+    searches?: string[];
     onClick?: () => void;
   }[] = [
     {
@@ -165,6 +166,7 @@ export const SettingPage: FunctionComponent = observer(() => {
                   key: "add-remove-custom-token",
                   icon: IconAddRemoveCustomTokens,
                   title: "Add / Remove Custom Token",
+                  searches: ["contract", "erc20", "cw20", "secret20"],
                   right: ClickableRightIcon,
                   rightProps: {},
                   onClick: () => navigate("/setting/token/list"),
@@ -265,6 +267,7 @@ export const SettingPage: FunctionComponent = observer(() => {
                   key: "connected-websites",
                   icon: IconConnectedWebsites,
                   title: "Connected Websites",
+                  searches: ["permission"],
                   right: ConnectedWebsitesRight,
                   rightProps: {},
                   onClick: () => navigate("/setting/security/permission"),
