@@ -25,9 +25,7 @@ import { XAxis, YAxis } from "../../../../../components/axis";
 import { UIConfigStore } from "../../../../../stores/ui-config";
 import { IChainStore } from "@keplr-wallet/stores";
 import { Tooltip } from "../../../../../components/tooltip";
-import { autorun } from "mobx";
 import { StarknetQueriesStore } from "@keplr-wallet/stores-starknet";
-import { Dec } from "@keplr-wallet/unit";
 
 // 기본적으로 `FeeControl` 안에 있는 로직이였지만 `FeeControl` 말고도 다른 UI를 가진 똑같은 기능의 component가
 // 여러개 생기게 되면서 공통적으로 사용하기 위해서 custom hook으로 분리함
@@ -87,57 +85,54 @@ export const useAutoFeeCurrencySelectionOnInit = (
     // Try to find other fee currency if the account doesn't have enough fee to pay.
     // This logic can be slightly complex, so use mobx's `autorun`.
     // This part fairly different with the approach of react's hook.
-    let skip = false;
-    // Try until 500ms to avoid the confusion to user.
-    const timeoutId = setTimeout(() => {
-      skip = true;
-    }, 2000);
+    // let skip = false;
+    // // Try until 500ms to avoid the confusion to user.
+    // const timeoutId = setTimeout(() => {
+    //   skip = true;
+    // }, 2000);
 
-    const disposer = autorun(() => {
-      const modularChainInfo = chainStore.getModularChain(feeConfig.chainId);
-      if (!skip && "starknet" in modularChainInfo) {
-        const queryBalances = starknetQueriesStore.get(
-          feeConfig.chainId
-        ).queryStarknetERC20Balance;
+    // const disposer = autorun(() => {
+    //   const modularChainInfo = chainStore.getModularChain(feeConfig.chainId);
+    //   if (!skip && "starknet" in modularChainInfo) {
+    //     const queryBalances = starknetQueriesStore.get(
+    //       feeConfig.chainId
+    //     ).queryStarknetERC20Balance;
 
-        const ethCoinMinmalDenom = `erc20:${modularChainInfo.starknet.ethContractAddress}`;
-        const strkCoinMinmalDenom = `erc20:${modularChainInfo.starknet.strkContractAddress}`;
-        for (const coinMinimalDenom of [
-          ethCoinMinmalDenom,
-          strkCoinMinmalDenom,
-        ]) {
-          const feeCurrencyBal = queryBalances.getBalance(
-            feeConfig.chainId,
-            chainStore,
-            senderConfig.sender,
-            coinMinimalDenom
-          )?.balance;
+    //     const strkCoinMinmalDenom = `erc20:${modularChainInfo.starknet.strkContractAddress}`;
 
-          if (!feeCurrencyBal) {
-            return;
-          }
+    //     for (const coinMinimalDenom of [strkCoinMinmalDenom]) {
+    //       const feeCurrencyBal = queryBalances.getBalance(
+    //         feeConfig.chainId,
+    //         chainStore,
+    //         senderConfig.sender,
+    //         coinMinimalDenom
+    //       )?.balance;
 
-          if (feeCurrencyBal.toDec().gt(new Dec(0))) {
-            feeConfig.setType(
-              feeCurrencyBal.currency.coinDenom as "ETH" | "STRK"
-            );
-            const uiProperties = feeConfig.uiProperties;
-            skip =
-              !uiProperties.loadingState &&
-              uiProperties.error == null &&
-              uiProperties.warning == null;
-            return;
-          }
+    //       if (!feeCurrencyBal) {
+    //         return;
+    //       }
 
-          continue;
-        }
-      }
-    });
+    //       if (feeCurrencyBal.toDec().gt(new Dec(0))) {
+    //         feeConfig.setType(
+    //           feeCurrencyBal.currency.coinDenom as "ETH" | "STRK"
+    //         );
+    //         const uiProperties = feeConfig.uiProperties;
+    //         skip =
+    //           !uiProperties.loadingState &&
+    //           uiProperties.error == null &&
+    //           uiProperties.warning == null;
+    //         return;
+    //       }
+
+    //       continue;
+    //     }
+    //   }
+    // });
 
     return () => {
-      clearTimeout(timeoutId);
-      skip = true;
-      disposer();
+      // clearTimeout(timeoutId);
+      // skip = true;
+      // disposer();
     };
   }, [
     chainStore,

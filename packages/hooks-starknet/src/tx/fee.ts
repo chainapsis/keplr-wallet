@@ -1,4 +1,5 @@
 import {
+  FeeType,
   IAmountConfig,
   IFeeConfig,
   IGasConfig,
@@ -19,7 +20,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   @observable.ref
   protected _maxGasPrice: CoinPretty | undefined = undefined;
   @observable
-  protected _type: "ETH" | "STRK" = "STRK";
+  protected _type: FeeType = "STRK";
 
   @observable
   protected _disableBalanceCheck: boolean = false;
@@ -131,7 +132,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     return this._maxGasPrice;
   }
 
-  get type(): "ETH" | "STRK" {
+  get type(): FeeType {
     return this._type;
   }
 
@@ -149,7 +150,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   @action
-  setType(type: "ETH" | "STRK"): void {
+  setType(type: FeeType): void {
     if (this._type !== type) {
       this._type = type;
       this._gasPrice = undefined;
@@ -173,7 +174,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       return;
     }
 
-    const gasDec = new Dec(this.gasConfig.gas);
+    const gasDec = new Dec(this.gasConfig.maxGas);
     return this._maxGasPrice.mul(gasDec);
   }
 }

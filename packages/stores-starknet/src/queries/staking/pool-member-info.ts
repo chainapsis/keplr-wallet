@@ -11,32 +11,40 @@ import {
   ObservableStarknetChainJsonRpcQueryMap,
 } from "../starknet-chain-json-rpc";
 import { ObservableQueryValidators } from "./validators";
-import { CairoUint256 } from "starknet";
+import { CairoUint256, selector } from "starknet";
 import { ClaimableReward, UnpoolDelegation } from "./types";
 import { computedFn } from "mobx-utils";
 import { ERC20Currency } from "@keplr-wallet/types";
+import { ObservableQueryStakingVersion } from "./staking-version";
 
 export class ObservableQueryPoolMemberInfo extends ObservableStarknetChainJsonRpcQuery<
   string[]
 > {
+  @observable
+  protected majorVersion: string;
+
   constructor(
     sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
     poolAddress: string,
-    starknetHexAddress: string
+    starknetHexAddress: string,
+    majorVersion?: string
   ) {
     super(sharedContext, chainId, chainGetter, "starknet_call", {
       request: {
         contract_address: poolAddress,
         calldata: [starknetHexAddress],
-        // selector.getSelectorFromName("poolMemberInfo")
         entry_point_selector:
-          "0x00cf37a862e5bf34bd0e858865ea02d4ba6db9cc722f3424eb452c94d4ea567f",
+          majorVersion === "2"
+            ? selector.getSelectorFromName("pool_member_info_v1")
+            : selector.getSelectorFromName("pool_member_info"),
       },
     });
 
     makeObservable(this);
+
+    this.majorVersion = majorVersion ?? "1";
   }
 
   protected override canFetch(): boolean {
@@ -59,7 +67,7 @@ export class ObservableQueryPoolMemberInfo extends ObservableStarknetChainJsonRp
     }
 
     /**
-     * Expected response data structure:
+     * v1 Expected response data structure:
      * [
      *    rewardAddress: ContractAddress,
      *    amount: u128,
@@ -71,8 +79,13 @@ export class ObservableQueryPoolMemberInfo extends ObservableStarknetChainJsonRp
      *    unpoolTime (optional): hex unix timestamp if hasUnpoolTime is 0x1
      * ]
      *
+     * v2 Expected response data structure:
+     *    index is removed from the response data of v1
+     *    else, it's the same as v1
      */
-    if (this.response.data.length < 7) {
+    const expectedLength = this.majorVersion === "2" ? 6 : 7;
+
+    if (this.response.data.length < expectedLength) {
       return new CoinPretty(currency, new Int(0)).ready(false);
     }
 
@@ -95,12 +108,18 @@ export class ObservableQueryPoolMemberInfo extends ObservableStarknetChainJsonRp
       return new CoinPretty(currency, new Int(0)).ready(false);
     }
 
-    if (this.response.data.length < 7) {
+    const isV2 = this.majorVersion === "2";
+
+    const expectedLength = isV2 ? 6 : 7;
+
+    if (this.response.data.length < expectedLength) {
       return new CoinPretty(currency, new Int(0)).ready(false);
     }
 
+    const unclaimedRewardsIndex = isV2 ? 2 : 3;
+
     const unclaimedRewards = new CairoUint256({
-      low: this.response.data[3], // low 128 bits as unclaimedRewards is u128
+      low: this.response.data[unclaimedRewardsIndex],
       high: 0,
     });
 
@@ -118,12 +137,18 @@ export class ObservableQueryPoolMemberInfo extends ObservableStarknetChainJsonRp
       return new CoinPretty(currency, new Int(0)).ready(false);
     }
 
-    if (this.response.data.length < 7) {
+    const isV2 = this.majorVersion === "2";
+
+    const expectedLength = isV2 ? 6 : 7;
+
+    if (this.response.data.length < expectedLength) {
       return new CoinPretty(currency, new Int(0)).ready(false);
     }
 
+    const unpoolAmountIndex = isV2 ? 4 : 5;
+
     const unpoolAmount = new CairoUint256({
-      low: this.response.data[5], // low 128 bits as unpoolAmount is u128
+      low: this.response.data[unpoolAmountIndex],
       high: 0,
     });
 
@@ -141,12 +166,18 @@ export class ObservableQueryPoolMemberInfo extends ObservableStarknetChainJsonRp
       return;
     }
 
-    if (this.response.data.length < 7) {
+    const isV2 = this.majorVersion === "2";
+
+    const expectedLength = isV2 ? 6 : 7;
+
+    if (this.response.data.length < expectedLength) {
       return;
     }
 
-    if (this.response.data[6] === "0x0") {
-      return parseInt(this.response.data[7], 16);
+    const unpoolTimeIndex = isV2 ? 5 : 6;
+
+    if (this.response.data[unpoolTimeIndex] === "0x0") {
+      return parseInt(this.response.data[unpoolTimeIndex + 1], 16);
     }
 
     return undefined;
@@ -163,11 +194,17 @@ export class ObservableQueryPoolMemberInfo extends ObservableStarknetChainJsonRp
       return;
     }
 
-    if (this.response.data.length < 7) {
+    const isV2 = this.majorVersion === "2";
+
+    const expectedLength = isV2 ? 6 : 7;
+
+    if (this.response.data.length < expectedLength) {
       return;
     }
 
-    return parseInt(this.response.data[4], 16) / 100;
+    const commissionIndex = isV2 ? 3 : 4;
+
+    return parseInt(this.response.data[commissionIndex], 16) / 100;
   }
 
   private get stakingCurrency(): ERC20Currency | undefined {
@@ -195,12 +232,16 @@ export class ObservableQueryStakingInfo extends ObservableStarknetChainJsonRpcQu
   @observable.shallow
   protected queryValidators: ObservableQueryValidators;
 
+  @observable.shallow
+  protected queryStakingVersion: ObservableQueryStakingVersion;
+
   constructor(
     sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
     starknetHexAddress: string,
-    queryValidators: ObservableQueryValidators
+    queryValidators: ObservableQueryValidators,
+    queryStakingVersion: ObservableQueryStakingVersion
   ) {
     super(sharedContext, chainId, chainGetter, (poolAddress: string) => {
       return new ObservableQueryPoolMemberInfo(
@@ -208,13 +249,15 @@ export class ObservableQueryStakingInfo extends ObservableStarknetChainJsonRpcQu
         chainId,
         chainGetter,
         poolAddress,
-        starknetHexAddress
+        starknetHexAddress,
+        this.queryStakingVersion.majorVersion
       );
     });
     makeObservable(this);
 
     this.starknetHexAddress = starknetHexAddress;
     this.queryValidators = queryValidators;
+    this.queryStakingVersion = queryStakingVersion;
   }
 
   // only use for refreshing staking info
@@ -481,6 +524,9 @@ export class StakingInfoManager {
   @observable.shallow
   protected queryValidators: ObservableQueryValidators;
 
+  @observable.shallow
+  protected queryStakingVersion: ObservableQueryStakingVersion;
+
   protected sharedContext: QuerySharedContext;
   protected chainId: string;
   protected chainGetter: ChainGetter;
@@ -489,7 +535,8 @@ export class StakingInfoManager {
     sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
-    queryValidators: ObservableQueryValidators
+    queryValidators: ObservableQueryValidators,
+    queryStakingVersion: ObservableQueryStakingVersion
   ) {
     makeObservable(this);
 
@@ -497,6 +544,7 @@ export class StakingInfoManager {
     this.chainId = chainId;
     this.chainGetter = chainGetter;
     this.queryValidators = queryValidators;
+    this.queryStakingVersion = queryStakingVersion;
   }
 
   getStakingInfo = computedFn((starknetHexAddress: string) => {
@@ -507,7 +555,8 @@ export class StakingInfoManager {
           this.chainId,
           this.chainGetter,
           starknetHexAddress,
-          this.queryValidators
+          this.queryValidators,
+          this.queryStakingVersion
         );
 
         this.stakingInfoByStarknetHexAddress.set(

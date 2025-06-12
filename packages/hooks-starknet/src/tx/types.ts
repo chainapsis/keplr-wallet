@@ -18,11 +18,33 @@ export interface UIProperties {
   readonly loadingState?: "loading" | "loading-block";
 }
 
+export interface GasEstimate {
+  l1Gas: {
+    consumed: string;
+    price: string;
+  };
+  l1DataGas: {
+    consumed: string;
+    price: string;
+  };
+  l2Gas: {
+    consumed: string;
+    price: string;
+  };
+}
+
+export type FeeType = "STRK";
+
 export interface IGasConfig extends ITxChainSetter {
   value: string;
+  gasAdjustmentValue: string;
+
   setValue(value: string | number): void;
+  setGasAdjustmentValue(gasAdjustment: string | number): void;
 
   gas: number;
+  maxGas: number;
+  gasAdjustment: number;
 
   uiProperties: UIProperties;
 }
@@ -37,8 +59,8 @@ export interface ISenderConfig extends ITxChainSetter {
 }
 
 export interface IFeeConfig extends ITxChainSetter {
-  type: "ETH" | "STRK";
-  setType(type: "ETH" | "STRK"): void;
+  type: FeeType;
+  setType(type: FeeType): void;
 
   gasPrice: CoinPretty | undefined;
   maxGasPrice: CoinPretty | undefined;
@@ -106,11 +128,7 @@ export interface IGasSimulator {
 
   isSimulating: boolean;
 
-  gasEstimated: number | undefined;
-  gasAdjustment: number;
-
-  gasAdjustmentValue: string;
-  setGasAdjustmentValue(gasAdjustment: string | number): void;
+  gasEstimate: GasEstimate | undefined;
 
   uiProperties: UIProperties;
 }

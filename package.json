@@ -93,7 +93,7 @@
     "react-dom": "18.2.0",
     "react-is": "18.2.0",
     "semver": "^7.6.0",
-    "starknet": "=6.11.0",
+    "starknet": "^7.4.0",
     "ts-jest": "^29.0.5",
     "typescript": "5.0.4",
     "zx": "^4.2.0"

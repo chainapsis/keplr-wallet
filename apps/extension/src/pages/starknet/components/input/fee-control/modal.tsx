@@ -72,12 +72,9 @@ export const TransactionFeeModal: FunctionComponent<{
               id: "components.input.fee-control.modal.fee-token-dropdown-label",
             })}
             menuContainerMaxHeight="10rem"
-            items={["ETH", "STRK"]
-              .filter((type) => {
-                const contractAddress =
-                  type === "ETH"
-                    ? starknet.ethContractAddress
-                    : starknet.strkContractAddress;
+            items={["STRK"]
+              .filter((_type) => {
+                const contractAddress = starknet.strkContractAddress;
                 const cur = chainStore
                   .getModularChainInfoImpl(senderConfig.chainId)
                   .getCurrencies("starknet")
@@ -99,8 +96,8 @@ export const TransactionFeeModal: FunctionComponent<{
                 };
               })}
             selectedItemKey={feeConfig.type}
-            onSelect={(key) => {
-              feeConfig.setType(key as "ETH" | "STRK");
+            onSelect={(_key) => {
+              feeConfig.setType("STRK");
             }}
             size="large"
             direction="up"

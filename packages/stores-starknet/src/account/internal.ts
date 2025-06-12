@@ -12,11 +12,20 @@ import {
   transaction,
   DeployAccountContractPayload,
   DeployContractResponse,
-  CallData,
   hash as starknetHash,
   DeployAccountSignerDetails,
+  ETransactionVersion,
 } from "starknet";
 import { Keplr } from "@keplr-wallet/types";
+
+export type Fee = {
+  l1MaxGas: string;
+  l1MaxGasPrice: string;
+  l1MaxDataGas: string;
+  l1MaxDataGasPrice: string;
+  l2MaxGas?: string;
+  l2MaxGasPrice?: string;
+};
 
 export class StoreAccount extends Account {
   constructor(
@@ -25,7 +34,13 @@ export class StoreAccount extends Account {
     public readonly keplrChainId: string,
     protected readonly getKeplr: () => Promise<Keplr | undefined>
   ) {
-    super({ nodeUrl: rpc }, address, "", "1");
+    super(
+      { nodeUrl: rpc, specVersion: "0.8.1" },
+      address,
+      "",
+      "1",
+      ETransactionVersion.V3
+    );
   }
 
   public override async deployAccount(
@@ -38,19 +53,18 @@ export class StoreAccount extends Account {
     details: UniversalDetails = {}
   ): Promise<DeployContractResponse> {
     const version = details.version;
-    if (version !== "0x1" && version !== "0x3") {
+    if (version !== ETransactionVersion.V3) {
       throw new Error(`Invalid version: ${version}`);
     }
     const nonce = 0; // DEPLOY_ACCOUNT transaction will have a nonce zero as it is the first transaction in the account
     const chainId = await this.getChainId();
 
-    const compiledCalldata = CallData.compile(constructorCalldata);
     const contractAddress =
       providedContractAddress ??
       starknetHash.calculateContractAddressFromHash(
         addressSalt,
         classHash,
-        compiledCalldata,
+        constructorCalldata,
         0
       );
 
@@ -60,7 +74,7 @@ export class StoreAccount extends Account {
         type: TransactionType.DEPLOY_ACCOUNT,
         payload: {
           classHash,
-          constructorCalldata: compiledCalldata,
+          constructorCalldata,
           addressSalt,
           contractAddress,
         },
@@ -74,14 +88,13 @@ export class StoreAccount extends Account {
     }
     const { transaction: newTransaction, signature } =
       await keplr.signStarknetDeployAccountTransaction(this.keplrChainId, {
-        ...stark.v3Details(details),
+        ...stark.v3Details(details, "0.8.1"),
         classHash,
-        constructorCalldata: compiledCalldata,
+        constructorCalldata,
         contractAddress,
         addressSalt,
         chainId,
         resourceBounds: estimate.resourceBounds,
-        maxFee: estimate.maxFee,
         version,
         nonce,
       });
@@ -89,7 +102,7 @@ export class StoreAccount extends Account {
     return this.deployAccountContract(
       { classHash, addressSalt, constructorCalldata, signature },
       {
-        ...stark.v3Details(newTransaction),
+        ...stark.v3Details(newTransaction, "0.8.1"),
         ...newTransaction,
       }
     );
@@ -102,16 +115,7 @@ export class StoreAccount extends Account {
       addressSalt = 0,
       contractAddress: providedContractAddress,
     }: DeployAccountContractPayload,
-    fee:
-      | {
-          type: "ETH";
-          maxFee: string;
-        }
-      | {
-          type: "STRK";
-          gas: string;
-          maxGasPrice: string;
-        },
+    fee: Fee,
     preSigned?: {
       transaction: DeployAccountSignerDetails;
       signature: string[];
@@ -136,77 +140,39 @@ export class StoreAccount extends Account {
     const nonce = 0; // DEPLOY_ACCOUNT transaction will have a nonce zero as it is the first transaction in the account
     const chainId = await this.getChainId();
 
-    const compiledCalldata = CallData.compile(constructorCalldata);
     const contractAddress =
       providedContractAddress ??
       starknetHash.calculateContractAddressFromHash(
         addressSalt,
         classHash,
-        compiledCalldata,
+        constructorCalldata,
         0
       );
 
-    const signerDetails: DeployAccountSignerDetails = (() => {
-      switch (fee.type) {
-        case "ETH":
-          return {
-            classHash,
-            constructorCalldata: compiledCalldata,
-            contractAddress,
-            addressSalt,
-
-            version: "0x1",
-            nonce: nonce,
-            chainId: chainId,
-
-            maxFee: num.toHex(fee.maxFee),
-            resourceBounds: {
-              l1_gas: {
-                max_amount: "0x0",
-                max_price_per_unit: "0x0",
-              },
-              l2_gas: {
-                max_amount: "0x0",
-                max_price_per_unit: "0x0",
-              },
-            },
-            tip: "0x0",
-            paymasterData: [],
-            accountDeploymentData: [],
-            nonceDataAvailabilityMode: "L1",
-            feeDataAvailabilityMode: "L1",
-          };
-        case "STRK":
-          return {
-            classHash,
-            constructorCalldata: compiledCalldata,
-            contractAddress,
-            addressSalt,
-
-            version: "0x3",
-            nonce: nonce,
-            chainId: chainId,
-
-            resourceBounds: {
-              l1_gas: {
-                max_amount: num.toHex(fee.gas),
-                max_price_per_unit: num.toHex(fee.maxGasPrice),
-              },
-              l2_gas: {
-                max_amount: "0x0",
-                max_price_per_unit: "0x0",
-              },
-            },
-            tip: "0x0",
-            paymasterData: [],
-            accountDeploymentData: [],
-            nonceDataAvailabilityMode: "L1",
-            feeDataAvailabilityMode: "L1",
-          };
-        default:
-          throw new Error("Invalid fee type");
-      }
-    })();
+    const signerDetails: DeployAccountSignerDetails = {
+      ...stark.v3Details({}, "0.8.1"),
+      classHash,
+      constructorCalldata,
+      contractAddress,
+      addressSalt,
+      version: ETransactionVersion.V3,
+      nonce: nonce,
+      chainId: chainId,
+      resourceBounds: {
+        l1_gas: {
+          max_amount: num.toHex(fee.l1MaxGas),
+          max_price_per_unit: num.toHex(fee.l1MaxGasPrice),
+        },
+        l2_gas: {
+          max_amount: num.toHex(fee.l2MaxGas ?? "0"),
+          max_price_per_unit: num.toHex(fee.l2MaxGasPrice ?? "0"),
+        },
+        l1_data_gas: {
+          max_amount: num.toHex(fee.l1MaxDataGas),
+          max_price_per_unit: num.toHex(fee.l1MaxDataGasPrice),
+        },
+      },
+    };
 
     const keplr = await this.getKeplr();
     if (!keplr) {
@@ -221,7 +187,7 @@ export class StoreAccount extends Account {
     return this.deployAccountContract(
       { classHash, addressSalt, constructorCalldata, signature },
       {
-        ...stark.v3Details(newTransaction),
+        ...stark.v3Details(newTransaction, "0.8.1"),
         ...newTransaction,
       }
     );
@@ -246,7 +212,7 @@ export class StoreAccount extends Account {
     const calls = Array.isArray(transactions) ? transactions : [transactions];
     const nonce = num.toBigInt(details.nonce ?? (await this.getNonce()));
     const version = details.version;
-    if (version !== "0x1" && version !== "0x3") {
+    if (version !== ETransactionVersion.V3) {
       throw new Error(`Invalid version: ${version}`);
     }
 
@@ -262,11 +228,10 @@ export class StoreAccount extends Account {
     const chainId = await this.getChainId();
 
     const signerDetails: InvocationsSignerDetails = {
-      ...stark.v3Details(details),
+      ...stark.v3Details(details, "0.8.1"),
       resourceBounds: estimate.resourceBounds,
       walletAddress: this.address,
       nonce,
-      maxFee: estimate.maxFee,
       version,
       chainId,
       cairoVersion: await this.getCairoVersion(),
@@ -295,16 +260,7 @@ export class StoreAccount extends Account {
 
   public async executeWithFee(
     calls: Call[],
-    fee:
-      | {
-          type: "ETH";
-          maxFee: string;
-        }
-      | {
-          type: "STRK";
-          gas: string;
-          maxGasPrice: string;
-        },
+    fee: Fee,
     signTx?: (
       chainId: string,
       calls: Call[],
@@ -318,46 +274,29 @@ export class StoreAccount extends Account {
     const nonce = await this.getNonce();
     const chainId = await this.getChainId();
 
-    const signerDetails: InvocationsSignerDetails = (() => {
-      switch (fee.type) {
-        case "ETH":
-          return {
-            version: "0x1",
-            walletAddress: this.address,
-            nonce: nonce,
-            chainId: chainId,
-            cairoVersion: this.cairoVersion,
-            skipValidate: false,
-            maxFee: num.toHex(fee.maxFee),
-          };
-        case "STRK":
-          return {
-            version: "0x3",
-            walletAddress: this.address,
-            nonce: nonce,
-            chainId: chainId,
-            cairoVersion: this.cairoVersion,
-            skipValidate: false,
-            resourceBounds: {
-              l1_gas: {
-                max_amount: num.toHex(fee.gas),
-                max_price_per_unit: num.toHex(fee.maxGasPrice),
-              },
-              l2_gas: {
-                max_amount: "0x0",
-                max_price_per_unit: "0x0",
-              },
-            },
-            tip: "0x0",
-            paymasterData: [],
-            accountDeploymentData: [],
-            nonceDataAvailabilityMode: "L1",
-            feeDataAvailabilityMode: "L1",
-          };
-        default:
-          throw new Error("Invalid fee type");
-      }
-    })();
+    const signerDetails: InvocationsSignerDetails = {
+      ...stark.v3Details({}, "0.8.1"),
+      version: ETransactionVersion.V3,
+      walletAddress: this.address,
+      nonce: nonce,
+      chainId: chainId,
+      cairoVersion: this.cairoVersion,
+      skipValidate: false,
+      resourceBounds: {
+        l1_gas: {
+          max_amount: num.toHex(fee.l1MaxGas),
+          max_price_per_unit: num.toHex(fee.l1MaxGasPrice),
+        },
+        l2_gas: {
+          max_amount: num.toHex(fee.l2MaxGas ?? "0"),
+          max_price_per_unit: num.toHex(fee.l2MaxGasPrice ?? "0"),
+        },
+        l1_data_gas: {
+          max_amount: num.toHex(fee.l1MaxDataGas),
+          max_price_per_unit: num.toHex(fee.l1MaxDataGasPrice),
+        },
+      },
+    };
 
     let transactions: Call[];
     let details: InvocationsSignerDetails;

@@ -2312,7 +2312,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       "https://keplr-ext-update-note-images.s3.amazonaws.com/token/starknet.png",
     starknet: {
       chainId: "starknet:SN_MAIN",
-      rpc: "https://rpc-starknet.keplr.app",
+      rpc: "https://rpc-starknet.keplr.app/rpc/v0_8",
       currencies: [
         {
           type: "erc20",
@@ -2421,7 +2421,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       "https://keplr-ext-update-note-images.s3.amazonaws.com/token/starknet.png",
     starknet: {
       chainId: "starknet:SN_SEPOLIA",
-      rpc: "https://rpc-starknet-sepolia.keplr.app",
+      rpc: "https://rpc-starknet-sepolia.keplr.app/rpc/v0_8",
       currencies: [
         {
           type: "erc20",

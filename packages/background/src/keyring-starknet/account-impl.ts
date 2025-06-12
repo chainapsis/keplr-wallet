@@ -58,6 +58,10 @@ export class AccountImpl extends Account {
           max_amount: "0",
           max_price_per_unit: "0",
         },
+        l1_data_gas: {
+          max_amount: "0",
+          max_price_per_unit: "0",
+        },
       },
       maxFee: 0,
 

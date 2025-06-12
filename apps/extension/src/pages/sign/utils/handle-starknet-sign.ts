@@ -11,35 +11,67 @@ import {
 import {
   Call,
   DeployAccountContractPayload,
-  InvocationsSignerDetails,
   num,
   hash as starknetHash,
   shortString,
   constants,
-  DeployAccountSignerDetails,
-  CallData,
   encode,
   TypedData,
+  V3InvocationsSignerDetails,
+  LedgerSigner231,
+  getLedgerPathBuffer221,
+  V3DeployAccountSignerDetails,
 } from "starknet";
 import Transport from "@ledgerhq/hw-transport";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
 import { KeplrError } from "@keplr-wallet/router";
 import {
-  DeployAccountFields,
-  DeployAccountV1Fields,
   LedgerError,
   ResponseHashSign,
   ResponsePublicKey,
   ResponseTxSign,
   StarknetClient,
-  TxFields,
-  TxV1Fields,
 } from "@ledgerhq/hw-app-starknet";
 import { PubKeyStarknet } from "@keplr-wallet/crypto";
+import { Fee } from "@keplr-wallet/stores-starknet/build/account/internal";
 
+// eip-2645 derivation path, m/2645'/starknet'/{application}'/0'/{accountId}'/0
 export const STARKNET_LEDGER_DERIVATION_PATH =
   "m/2645'/1195502025'/1148870696'/0'/0'/0";
+
+// Custom path buffer function that overrides path2buff
+function getCustomLedgerPathBuffer(accountId: number): Uint8Array {
+  // Get the original path buffer from starknet library
+  const originalPathBuff = getLedgerPathBuffer221(accountId);
+
+  // Create custom path2buff to replace the original one
+  const HARDENING_BYTE = 128;
+  const customApplicationId = 1148870696; // 4bytes of the hash of applicationName
+
+  const path2Base = Buffer.alloc(4);
+  path2Base.writeUInt32BE(customApplicationId, 0); // Should be BigEndian
+
+  const customPath2buff = encode.concatenateArrayBuffer([
+    new Uint8Array([path2Base[0] | HARDENING_BYTE]),
+    path2Base.subarray(1),
+  ]);
+
+  // Create a copy of the original buffer to modify
+  const modifiedPathBuff = new Uint8Array(originalPathBuff);
+
+  // Replace path2buff in the buffer
+  // The original getLedgerPathBuffer221 creates a buffer with this structure:
+  // path0buff(4) + path1buff(4) + path2buff(4) + path3buff(4) + path4buff(4) + path5buff(4) = 24 bytes total
+  // path2buff starts at byte index 8 (0-based) and is 4 bytes long
+  if (modifiedPathBuff.length >= 12 && customPath2buff.length === 4) {
+    modifiedPathBuff.set(customPath2buff, 8); // Replace bytes 8-11 with custom path2buff
+  } else {
+    throw new Error("Invalid path buffer structure for path2buff override");
+  }
+
+  return modifiedPathBuff;
+}
 
 export const connectAndSignDeployAccountTxWithLedger = async (
   chainId: string,
@@ -50,19 +82,10 @@ export const connectAndSignDeployAccountTxWithLedger = async (
     addressSalt = 0,
     contractAddress: providedContractAddress,
   }: DeployAccountContractPayload,
-  fee:
-    | {
-        type: "ETH";
-        maxFee: string;
-      }
-    | {
-        type: "STRK";
-        gas: string;
-        maxGasPrice: string;
-      },
+  fee: Fee,
   options: LedgerOptions = { useWebHID: true }
 ): Promise<{
-  transaction: DeployAccountSignerDetails;
+  transaction: V3DeployAccountSignerDetails;
   signature: string[];
 }> => {
   await checkStarknetPubKey(expectedPubKey, options);
@@ -90,133 +113,66 @@ export const connectAndSignDeployAccountTxWithLedger = async (
       constructorCalldata,
       0
     );
-  const compiledConstructorCalldata = CallData.compile(constructorCalldata);
+
   const starknetChainId = shortString.encodeShortString(
     chainId.replace("starknet:", "")
   ) as constants.StarknetChainId;
 
-  const deployAccountFields: DeployAccountFields | DeployAccountV1Fields =
-    (() => {
-      switch (fee.type) {
-        case "ETH":
-          // V1
-          return {
-            class_hash: classHash,
-            constructor_calldata: compiledConstructorCalldata,
-            contractAddress,
-            contract_address_salt: addressSalt,
-            nonce: nonce,
-            chainId: starknetChainId,
-            max_fee: num.toHex(fee.maxFee),
-          } as DeployAccountV1Fields;
-        // V3
-        case "STRK":
-          return {
-            class_hash: classHash,
-            constructor_calldata: compiledConstructorCalldata,
-            contractAddress,
-            contract_address_salt: addressSalt,
-            nonce: nonce,
-            chainId: starknetChainId,
-            resourceBounds: {
-              l1_gas: {
-                max_amount: num.toHex(fee.gas),
-                max_price_per_unit: num.toHex(fee.maxGasPrice),
-              },
-              l2_gas: {
-                max_amount: "0x0",
-                max_price_per_unit: "0x0",
-              },
-            },
-            tip: "0x0",
-            paymaster_data: [],
-            nonceDataAvailabilityMode: "L1",
-            feeDataAvailabilityMode: "L1",
-          } as DeployAccountFields;
-        default:
-          throw new Error("Invalid fee type");
-      }
-    })();
+  const transaction: V3DeployAccountSignerDetails = {
+    version: "0x3",
+    chainId: starknetChainId,
+    contractAddress,
+    nonce,
+    classHash,
+    constructorCalldata,
+    addressSalt,
+    resourceBounds: {
+      l1_gas: {
+        max_amount: num.toHex(fee.l1MaxGas),
+        max_price_per_unit: num.toHex(fee.l1MaxGasPrice),
+      },
+      l2_gas: {
+        max_amount: num.toHex(fee.l2MaxGas ?? "0"),
+        max_price_per_unit: num.toHex(fee.l2MaxGasPrice ?? "0"),
+      },
+      l1_data_gas: {
+        max_amount: num.toHex(fee.l1MaxDataGas),
+        max_price_per_unit: num.toHex(fee.l1MaxDataGasPrice),
+      },
+    },
+    tip: "0x0",
+    paymasterData: [],
+    accountDeploymentData: [],
+    nonceDataAvailabilityMode: "L1",
+    feeDataAvailabilityMode: "L1",
+  };
 
   try {
-    const starknetApp = new StarknetClient(transport);
-    const res =
-      "resourceBounds" in deployAccountFields
-        ? await starknetApp.signDeployAccount(
-            STARKNET_LEDGER_DERIVATION_PATH,
-            deployAccountFields
-          )
-        : await starknetApp.signDeployAccountV1(
-            STARKNET_LEDGER_DERIVATION_PATH,
-            deployAccountFields
-          );
+    const ledgerSigner = new LedgerSigner231(
+      transport,
+      0,
+      undefined,
+      (accountId) => {
+        return getCustomLedgerPathBuffer(accountId);
+      }
+    );
 
-    return handleLedgerResponse(res, () => {
-      const { r, s } = res;
+    const res = await ledgerSigner.signDeployAccountTransaction(transaction);
 
-      const transaction: DeployAccountSignerDetails = (() => {
-        switch (fee.type) {
-          case "ETH":
-            return {
-              classHash,
-              constructorCalldata: compiledConstructorCalldata,
-              contractAddress,
-              addressSalt,
-              version: "0x1",
-              nonce: nonce,
-              chainId: starknetChainId,
-              maxFee: num.toHex(fee.maxFee),
-              resourceBounds: {
-                l1_gas: {
-                  max_amount: "0x0",
-                  max_price_per_unit: "0x0",
-                },
-                l2_gas: {
-                  max_amount: "0x0",
-                  max_price_per_unit: "0x0",
-                },
-              },
-              tip: "0x0",
-              paymasterData: [],
-              accountDeploymentData: [],
-              nonceDataAvailabilityMode: "L1",
-              feeDataAvailabilityMode: "L1",
-            };
-          case "STRK":
-            return {
-              classHash,
-              constructorCalldata: compiledConstructorCalldata,
-              contractAddress,
-              addressSalt,
-              version: "0x3",
-              nonce: nonce,
-              chainId: starknetChainId,
-              resourceBounds: {
-                l1_gas: {
-                  max_amount: num.toHex(fee.gas),
-                  max_price_per_unit: num.toHex(fee.maxGasPrice),
-                },
-                l2_gas: {
-                  max_amount: "0x0",
-                  max_price_per_unit: "0x0",
-                },
-              },
-              tip: "0x0",
-              paymasterData: [],
-              accountDeploymentData: [],
-              nonceDataAvailabilityMode: "L1",
-              feeDataAvailabilityMode: "L1",
-            };
-          default:
-            throw new Error("Invalid fee type");
-        }
-      })();
-
+    if (Array.isArray(res)) {
+      // CHECK: recovery bit might be included in the result array
       return {
         transaction,
-        signature: formatStarknetSignature({ r, s }),
+        signature: res,
       };
-    });
+    }
+
+    const { r, s } = res;
+
+    return {
+      transaction,
+      signature: formatStarknetSignature({ r, s }),
+    };
   } catch (e) {
     if (e.message?.includes("0x5515")) {
       throw new KeplrError(
@@ -235,7 +191,7 @@ export const connectAndSignDeployAccountTxWithLedger = async (
 export const connectAndSignInvokeTxWithLedger = async (
   expectedPubKey: Uint8Array,
   transactions: Call[],
-  details: InvocationsSignerDetails,
+  details: V3InvocationsSignerDetails,
   options: LedgerOptions = { useWebHID: true }
 ): Promise<string[]> => {
   await checkStarknetPubKey(expectedPubKey, options);
@@ -254,51 +210,26 @@ export const connectAndSignInvokeTxWithLedger = async (
     );
   }
 
-  const txFields: TxFields | TxV1Fields = (() => {
-    switch (details.version) {
-      case "0x1":
-        return {
-          accountAddress: details.walletAddress,
-          chainId: details.chainId,
-          nonce: details.nonce,
-          max_fee: details.maxFee,
-        };
-      case "0x3":
-        return {
-          accountAddress: details.walletAddress,
-          chainId: details.chainId,
-          nonce: details.nonce,
-          tip: details.tip,
-          resourceBounds: details.resourceBounds,
-          paymaster_data: details.paymasterData,
-          nonceDataAvailabilityMode: details.nonceDataAvailabilityMode,
-          feeDataAvailabilityMode: details.feeDataAvailabilityMode,
-          account_deployment_data: details.accountDeploymentData,
-        };
-      default:
-        throw new Error("Invalid version");
-    }
-  })();
-
   try {
-    const starknetApp = new StarknetClient(transport);
-    const res =
-      "resourceBounds" in txFields
-        ? await starknetApp.signTx(
-            STARKNET_LEDGER_DERIVATION_PATH,
-            transactions,
-            txFields
-          )
-        : await starknetApp.signTxV1(
-            STARKNET_LEDGER_DERIVATION_PATH,
-            transactions,
-            txFields
-          );
+    // EIP2645 path = 2645'/starknet/application/0/accountId/0
+    const ledgerSigner = new LedgerSigner231(
+      transport,
+      0, // accountId
+      undefined, // applicationName
+      (accountId) => {
+        return getCustomLedgerPathBuffer(accountId);
+      }
+    );
 
-    return handleLedgerResponse(res, () => {
-      const { r, s } = res;
-      return formatStarknetSignature({ r, s });
-    });
+    const res = await ledgerSigner.signTransaction(transactions, details);
+
+    if (Array.isArray(res)) {
+      // CHECK: recovery bit might be included in the result array
+      return res;
+    }
+
+    const { r, s } = res;
+    return formatStarknetSignature({ r, s });
   } catch (e) {
     if (e.message?.includes("0x5515")) {
       throw new KeplrError(
@@ -367,12 +298,16 @@ const formatStarknetSignature = ({
   r,
   s,
 }: {
-  r: Uint8Array;
-  s: Uint8Array;
+  r: Uint8Array | bigint;
+  s: Uint8Array | bigint;
 }): string[] => {
   return [
-    encode.addHexPrefix(encode.buf2hex(r)),
-    encode.addHexPrefix(encode.buf2hex(s)),
+    typeof r === "bigint"
+      ? encode.addHexPrefix(r.toString(16))
+      : encode.addHexPrefix(encode.buf2hex(r)),
+    typeof s === "bigint"
+      ? encode.addHexPrefix(s.toString(16))
+      : encode.addHexPrefix(encode.buf2hex(s)),
   ];
 };
 
