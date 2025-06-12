@@ -42,7 +42,10 @@ export const Styles = {
     line-height: ${({ isTextarea }) => (isTextarea ? 0 : undefined)};
   `,
   TextInputContainer: styled.div<
-    Pick<TextInputProps, "error" | "disabled" | "paragraph" | "errorBorder"> & {
+    Pick<
+      TextInputProps,
+      "error" | "disabled" | "paragraph" | "errorBorder" | "borderRadius"
+    > & {
       isTextarea?: boolean;
     }
   >`
@@ -73,7 +76,7 @@ export const Styles = {
           ? ColorPalette["gray-100"]
           : ColorPalette["gray-400"];
       }};
-      border-radius: 0.5rem;
+      border-radius: ${(props) => props.borderRadius || "0.5rem"};
 
       pointer-events: none;
     }

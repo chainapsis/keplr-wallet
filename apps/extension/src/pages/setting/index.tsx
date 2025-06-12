@@ -2,10 +2,8 @@ import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useNavigate } from "react-router";
 import { Box } from "../../components/box";
-import { useIntl } from "react-intl";
 import { MainHeaderLayout } from "../main/layouts/header";
-import { Body2 } from "../../components/typography";
-import { useTheme } from "styled-components";
+import { Body2, Body3, Subtitle3 } from "../../components/typography";
 import { ColorPalette } from "../../styles";
 import { SettingList } from "./components/setting-list";
 import { useStore } from "../../stores";
@@ -22,10 +20,17 @@ import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { SearchTextInput } from "../../components/input";
 import { HelpDeskUrl } from "../../config.ui";
+import { useFocusOnMount } from "../../hooks/use-focus-on-mount";
+import { Gutter } from "../../components/gutter";
+import { XAxis, YAxis } from "../../components/axis";
+import { PricePretty } from "@keplr-wallet/unit";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { Image } from "../../components/image";
+import { Tooltip } from "../../components/tooltip";
+import { useTheme } from "styled-components";
 
 export const SettingPage: FunctionComponent = observer(() => {
   const navigate = useNavigate();
-  const intl = useIntl();
 
   const { keyRingStore, uiConfigStore } = useStore();
 
@@ -55,18 +60,76 @@ export const SettingPage: FunctionComponent = observer(() => {
 
   const [searchText, setSearchText] = useState<string>("");
 
+  const focusOnMount = useFocusOnMount<HTMLInputElement>();
+
+  const topSectionItems: {
+    key: string;
+    title: string;
+    icon?: React.ComponentType;
+    onClick?: () => void;
+  }[] = [
+    {
+      key: "contacts",
+      icon: IconContacts,
+      title: "Contacts",
+      onClick: () => navigate("/setting/contacts/list"),
+    },
+    {
+      key: "link-keplr-mobile",
+      icon: IconLinkKeplrMobile,
+      title: "Link Keplr Mobile",
+      onClick: () => navigate("/setting/general/link-keplr-mobile"),
+    },
+  ];
+
+  const hasSearchText = searchText.trim().length > 0;
+
   return (
     <MainHeaderLayout>
       <Box paddingY="1rem">
         <Box paddingX="1rem">
           <SearchTextInput
+            ref={focusOnMount}
+            borderRadius="0.75rem"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
           />
         </Box>
+        {hasSearchText ? (
+          <Gutter size="1rem" />
+        ) : (
+          <TopSection items={topSectionItems} />
+        )}
         <SettingList
           search={searchText}
           sections={[
+            ...(() => {
+              if (hasSearchText) {
+                // search text가 있을때는 top section이 보이지 않기 때문에
+                // top section의 항목이 검색이 될 수 있도록 여기에 item을 추가해준다.
+                return [
+                  {
+                    key: "top",
+                    title: "Top",
+                    items: topSectionItems.map((item) => {
+                      if (item.onClick) {
+                        return {
+                          ...item,
+                          right: ClickableRightIcon,
+                          rightProps: {},
+                        };
+                      } else {
+                        return {
+                          ...item,
+                        };
+                      }
+                    }),
+                  },
+                ];
+              }
+
+              return [];
+            })(),
             {
               key: "chains-and-assets",
               title: "Chains and Assets",
@@ -274,6 +337,225 @@ export const SettingPage: FunctionComponent = observer(() => {
   );
 });
 
+const TopSection: FunctionComponent<{
+  items: {
+    key: string;
+    title: string;
+    icon?: React.ComponentType;
+    onClick?: () => void;
+  }[];
+}> = observer(({ items }) => {
+  const {
+    chainStore,
+    accountStore,
+    queriesStore,
+    keyRingStore,
+    uiConfigStore,
+    hugeQueriesStore,
+  } = useStore();
+
+  const navigate = useNavigate();
+  const theme = useTheme();
+
+  const icnsPrimaryName = (() => {
+    if (
+      uiConfigStore.icnsInfo &&
+      chainStore.hasChain(uiConfigStore.icnsInfo.chainId)
+    ) {
+      const queries = queriesStore.get(uiConfigStore.icnsInfo.chainId);
+      const icnsQuery = queries.icns.queryICNSNames.getQueryContract(
+        uiConfigStore.icnsInfo.resolverContractAddress,
+        accountStore.getAccount(uiConfigStore.icnsInfo.chainId).bech32Address
+      );
+
+      return icnsQuery.primaryName.split(".")[0];
+    }
+  })();
+
+  const disabledViewAssetTokenMap =
+    uiConfigStore.manageViewAssetTokenConfig.getViewAssetTokenMapByVaultId(
+      keyRingStore.selectedKeyInfo?.id ?? ""
+    );
+
+  const availableTotalPrice = useMemo(() => {
+    let result: PricePretty | undefined;
+    for (const bal of hugeQueriesStore.allKnownBalances) {
+      const disabledCoinSet = disabledViewAssetTokenMap.get(
+        ChainIdHelper.parse(bal.chainInfo.chainId).identifier
+      );
+
+      if (
+        bal.price &&
+        !disabledCoinSet?.has(bal.token.currency.coinMinimalDenom)
+      ) {
+        if (!result) {
+          result = bal.price;
+        } else {
+          result = result.add(bal.price);
+        }
+      }
+    }
+    return result;
+  }, [hugeQueriesStore.allKnownBalances, disabledViewAssetTokenMap]);
+
+  const stakedTotalPrice = useMemo(() => {
+    let result: PricePretty | undefined;
+    for (const bal of hugeQueriesStore.delegations) {
+      if (bal.price) {
+        if (!result) {
+          result = bal.price;
+        } else {
+          result = result.add(bal.price);
+        }
+      }
+    }
+    for (const bal of hugeQueriesStore.unbondings) {
+      if (bal.price) {
+        if (!result) {
+          result = bal.price;
+        } else {
+          result = result.add(bal.price);
+        }
+      }
+    }
+    return result;
+  }, [hugeQueriesStore.delegations, hugeQueriesStore.unbondings]);
+
+  const totalPriceText = useMemo(() => {
+    if (!availableTotalPrice && !stakedTotalPrice) {
+      return "-";
+    }
+    if (availableTotalPrice && !stakedTotalPrice) {
+      return availableTotalPrice.toString();
+    }
+    if (!availableTotalPrice && stakedTotalPrice) {
+      return stakedTotalPrice.toString();
+    }
+    if (availableTotalPrice && stakedTotalPrice) {
+      return availableTotalPrice.add(stakedTotalPrice).toString();
+    }
+    return "-";
+  }, [availableTotalPrice, stakedTotalPrice]);
+
+  return (
+    <React.Fragment>
+      <Gutter size="1rem" />
+      <Box paddingX="1rem">
+        <Box
+          paddingX="1rem"
+          paddingY="0.75rem"
+          borderRadius="0.75rem"
+          backgroundColor={ColorPalette["gray-650"]}
+          hover={{
+            backgroundColor: ColorPalette["gray-550"],
+          }}
+          cursor="pointer"
+          onClick={(e) => {
+            e.preventDefault();
+
+            navigate("/wallet/select");
+          }}
+          color={ColorPalette["gray-300"]}
+        >
+          <XAxis alignY="center">
+            {icnsPrimaryName ? (
+              <React.Fragment>
+                <Tooltip
+                  content={
+                    <div style={{ whiteSpace: "nowrap" }}>
+                      ICNS : {icnsPrimaryName}
+                    </div>
+                  }
+                >
+                  <Image
+                    alt="icns-icon"
+                    src={require(theme.mode === "light"
+                      ? "../../public/assets/img/icns-icon-light.png"
+                      : "../../public/assets/img/icns-icon.png")}
+                    style={{ width: "1rem", height: "1rem" }}
+                  />
+                </Tooltip>
+                <Gutter size="0.75rem" />
+              </React.Fragment>
+            ) : null}
+            <YAxis>
+              <Subtitle3 color={ColorPalette["gray-10"]}>
+                {keyRingStore.selectedKeyInfo?.name || "Keplr Account"}
+              </Subtitle3>
+              <Gutter size="0.38rem" />
+              <Body3 color={ColorPalette["gray-300"]}>{totalPriceText}</Body3>
+            </YAxis>
+            <div style={{ flex: 1 }} />
+            <ClickableRightIcon />
+          </XAxis>
+        </Box>
+        <Gutter size="0.75rem" />
+        <XAxis>
+          {items.map((item, i) => {
+            return (
+              <React.Fragment key={item.key}>
+                <TopSectionXAxisItem item={item} />
+                {i !== items.length - 1 ? (
+                  <div
+                    style={{
+                      flex: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "1px",
+                        height: "1rem",
+                        backgroundColor: ColorPalette["gray-500"],
+                      }}
+                    />
+                  </div>
+                ) : null}
+              </React.Fragment>
+            );
+          })}
+        </XAxis>
+      </Box>
+      <Gutter size="1rem" />
+    </React.Fragment>
+  );
+});
+
+const TopSectionXAxisItem: FunctionComponent<{
+  item: {
+    key: string;
+    title: string;
+    icon?: React.ComponentType;
+    onClick?: () => void;
+  };
+}> = ({ item }) => {
+  const [isHover, setIsHover] = useState(false);
+
+  return (
+    <Box
+      paddingX="1rem"
+      color={ColorPalette["gray-300"]}
+      cursor={item.onClick ? "pointer" : undefined}
+      onHoverStateChange={setIsHover}
+      opacity={isHover ? 0.5 : 1}
+      onClick={(e) => {
+        e.preventDefault();
+
+        item.onClick?.();
+      }}
+    >
+      <XAxis alignY="center">
+        {item.icon ? <item.icon /> : null}
+        <Gutter size="0.38rem" />
+        <Subtitle3 color={ColorPalette["gray-10"]}>{item.title}</Subtitle3>
+      </XAxis>
+    </Box>
+  );
+};
+
 const capitalizeFirstLetter = (str: string): string => {
   if (!str) return "";
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -352,6 +634,46 @@ const ConnectedWebsitesRight: FunctionComponent = observer(() => {
 
   return <Body2 color={ColorPalette["gray-300"]}>{num}</Body2>;
 });
+
+const IconContacts = () => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="28"
+      height="29"
+      fill="none"
+      stroke="none"
+      viewBox="0 0 28 28"
+    >
+      <path
+        fill="currentColor"
+        d="M16.28 7.948q.417-.024.833.038l.249.046a4.05 4.05 0 0 1 3.188 4.262 4.05 4.05 0 0 1-.637 1.896 4 4 0 0 1-.818.919c2.298.86 3.906 2.568 3.906 4.986a.7.7 0 0 1-.699.698h-2.811a.699.699 0 0 1 0-1.397h2.043c-.353-1.794-1.967-3.016-4.249-3.304a.7.7 0 0 1-.612-.693v-.167l.01-.117a.7.7 0 0 1 .509-.558q.306-.082.587-.234l.143-.084a2.66 2.66 0 0 0 1.234-2.05 2.654 2.654 0 0 0-2.088-2.791l-.163-.03a2.7 2.7 0 0 0-.727-.01l-.141.004a.699.699 0 0 1-.033-1.39z"
+      />
+      <path
+        fill="currentColor"
+        d="M11.482 8.116a3.877 3.877 0 0 1 3.877 3.877 3.87 3.87 0 0 1-1.656 3.174c2.403.775 4.172 2.668 4.173 5.102 0 .29-.235.524-.524.524H5.618a.524.524 0 0 1-.524-.524c0-2.433 1.765-4.326 4.167-5.1a3.877 3.877 0 0 1 2.221-7.052"
+      />
+    </svg>
+  );
+};
+
+const IconLinkKeplrMobile = () => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="28"
+      height="29"
+      fill="none"
+      stroke="none"
+      viewBox="0 0 28 28"
+    >
+      <path
+        fill="currentColor"
+        d="M21.401 18.189h-3.2v-5.6h3.2m.8-1.6h-4.8a.8.8 0 0 0-.8.8v8a.8.8 0 0 0 .8.8h4.8a.8.8 0 0 0 .8-.8v-8a.8.8 0 0 0-.8-.8m-14-1.6h12.4a.8.8 0 0 0 0-1.6h-12.4a1.6 1.6 0 0 0-1.6 1.6v8.8h-.4a1.2 1.2 0 0 0 0 2.4H15v-2.4H8.2z"
+      />
+    </svg>
+  );
+};
 
 const IconAddRemoveChains = () => {
   return (

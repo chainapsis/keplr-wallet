@@ -148,7 +148,6 @@ export const SettingList: FunctionComponent<SettingListProps> = ({
 
   return (
     <React.Fragment>
-      {isSearching ? <Gutter size="0.5rem" /> : null}
       {renderSections.map((section, i) => {
         return (
           <React.Fragment key={section.key}>
@@ -255,7 +254,7 @@ export const SettingList: FunctionComponent<SettingListProps> = ({
   );
 };
 
-const HighlightedSubtitle3: FunctionComponent<{
+export const HighlightedSubtitle3: FunctionComponent<{
   value: string;
   searchText: string;
 }> = ({ value, searchText }) => {

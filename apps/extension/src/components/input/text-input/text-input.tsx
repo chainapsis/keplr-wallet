@@ -37,6 +37,7 @@ export const TextInput = forwardRef<
       autoComplete,
       labelAlignment = "space-between",
       inputStyle,
+      borderRadius,
       ...props
     },
     ref
@@ -127,6 +128,7 @@ export const TextInput = forwardRef<
           error={error}
           disabled={props.disabled}
           errorBorder={props.errorBorder}
+          borderRadius={borderRadius}
         >
           <Columns sum={1}>
             {/*
