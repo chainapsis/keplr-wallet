@@ -28,6 +28,7 @@ import {
 } from "@keplr-wallet/background";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { SearchTextInput } from "../../components/input";
 
 export const SettingPage: FunctionComponent = observer(() => {
   const navigate = useNavigate();
@@ -57,10 +58,17 @@ export const SettingPage: FunctionComponent = observer(() => {
       });
   }, []);
 
+  const [searchText, setSearchText] = useState<string>("");
+
   return (
     <MainHeaderLayout>
+      <SearchTextInput
+        value={searchText}
+        onChange={(e) => setSearchText(e.target.value)}
+      />
       <Box padding="1rem">
         <SettingList
+          search={searchText}
           sections={[
             {
               key: "chains-and-assets",
@@ -142,6 +150,11 @@ export const SettingPage: FunctionComponent = observer(() => {
                       uiConfigStore.toggleShow24HChangesInMagePage();
                     },
                   },
+                },
+                {
+                  key: "advanced",
+                  title: "Advanced",
+                  subtitles: ["Endpoints", "Authz", "Manual IBC Transfer"],
                 },
               ],
             },
