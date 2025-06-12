@@ -487,6 +487,8 @@
   "page.sign.components.messages.create-btc-delegation.paragraph": "提交相关数据至 {chainName} 链。",
   "page.sign.components.messages.claim-btc-delegation-reward.title": "提取BTC质押奖励",
   "page.sign.components.messages.claim-btc-delegation-reward.paragraph": "提取{amount}",
+  "page.sign.components.messages.atomone-mint-photon.title": "铸造 PHOTON",
+  "page.sign.components.messages.atomone-mint-photon.paragraph": "销毁 ATONE，并铸造 PHOTON",
 
   "page.sign.components.ledger-guide.box.error-title": "错误",
   "page.sign.components.ledger-guide.box.connect-and-unlock-ledger-paragraph": "连接并解锁你的Ledger设备。",
