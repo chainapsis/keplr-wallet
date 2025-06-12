@@ -26,6 +26,22 @@ export const SettingAdvancedPage: FunctionComponent = observer(() => {
         <Stack gutter="0.5rem">
           <PageButton
             title={intl.formatMessage({
+              id: "page.setting.advanced.change-endpoints-title",
+            })}
+            endIcon={<RightArrowIcon />}
+            onClick={() => navigate("/setting/advanced/endpoint")}
+          />
+
+          <PageButton
+            title={intl.formatMessage({
+              id: "page.setting.general.manage-authz-title",
+            })}
+            endIcon={<RightArrowIcon />}
+            onClick={() => navigate("/setting/general/authz")}
+          />
+
+          <PageButton
+            title={intl.formatMessage({
               id: "page.setting.advanced.developer-mode-title",
             })}
             paragraph={intl.formatMessage({
@@ -39,25 +55,6 @@ export const SettingAdvancedPage: FunctionComponent = observer(() => {
                 }
               />
             }
-          />
-
-          <PageButton
-            title={intl.formatMessage({
-              id: "page.setting.advanced.change-endpoints-title",
-            })}
-            endIcon={<RightArrowIcon />}
-            onClick={() => navigate("/setting/advanced/endpoint")}
-          />
-
-          <PageButton
-            title={intl.formatMessage({
-              id: "page.setting.advanced.manage-non-native-chains-title",
-            })}
-            paragraph={intl.formatMessage({
-              id: "page.setting.advanced.manage-non-native-chains-paragraph",
-            })}
-            endIcon={<RightArrowIcon />}
-            onClick={() => navigate("/setting/advanced/delete-suggest-chain")}
           />
         </Stack>
       </Box>

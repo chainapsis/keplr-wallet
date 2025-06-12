@@ -17,6 +17,7 @@ export interface SettingListProps {
       icon?: React.ComponentType;
       title: string;
       subtitles?: string[];
+      onClick?: () => void;
     } & (
       | {
           right?: undefined;
@@ -50,8 +51,8 @@ export const SettingList: FunctionComponent<SettingListProps> = ({
       const sectionKeys = new Map<string, number>();
       const itemKeys = new Map<string, number>();
       const searchedSections = performSearch(sections, trimSearch, [
-        "title",
         "items[].title",
+        "items[].subtitles[]",
       ]);
       if (searchedSections.length > 0) {
         for (let i = 0; i < searchedSections.length; i++) {
@@ -60,7 +61,7 @@ export const SettingList: FunctionComponent<SettingListProps> = ({
           const searchedItems = performSearch(
             searchedSection.items,
             trimSearch,
-            ["title"]
+            ["title", "subtitles[]"]
           );
           if (searchedItems.length > 0) {
             sectionKeys.set(searchedSection.key, i);
@@ -143,23 +144,51 @@ export const SettingList: FunctionComponent<SettingListProps> = ({
       });
   })();
 
+  const isSearching = !!trimSearch;
+
   return (
     <React.Fragment>
-      {renderSections.map((section) => {
+      {isSearching ? <Gutter size="0.5rem" /> : null}
+      {renderSections.map((section, i) => {
         return (
           <React.Fragment key={section.key}>
-            <Box paddingY="0.5rem">
-              <Subtitle3 color={ColorPalette["gray-200"]}>
-                {section.title}
-              </Subtitle3>
-              <Gutter size="0.75rem" />
+            <Box paddingX="1rem" paddingY={isSearching ? "0" : "0.5rem"}>
+              {/* search 중에는 section title을 보여주지 않는다. */}
+              {isSearching ? null : (
+                <React.Fragment>
+                  <Subtitle3 color={ColorPalette["gray-200"]}>
+                    {section.title}
+                  </Subtitle3>
+                  <Gutter size="0.75rem" />
+                </React.Fragment>
+              )}
               {section.items.map((item) => {
                 return (
                   <Box
                     key={item.key}
                     paddingX="0.5rem"
                     paddingY="0.75rem"
-                    minHeight="1.75rem"
+                    minHeight="3.25rem"
+                    borderRadius="0.75rem"
+                    alignY="center"
+                    {...(() => {
+                      if (item.onClick) {
+                        return {
+                          cursor: "pointer",
+                          onClick: (e) => {
+                            e.preventDefault();
+
+                            item.onClick?.();
+                          },
+                          hover: {
+                            backgroundColor: ColorPalette["gray-600"],
+                          },
+                        };
+                      }
+
+                      return {};
+                    })()}
+                    // icon color
                     color={ColorPalette["gray-300"]}
                   >
                     <XAxis alignY="center">
@@ -167,9 +196,10 @@ export const SettingList: FunctionComponent<SettingListProps> = ({
                       <Gutter size="0.38rem" />
 
                       <YAxis>
-                        <Subtitle3 color={ColorPalette["gray-10"]}>
-                          {item.title}
-                        </Subtitle3>
+                        <HighlightedSubtitle3
+                          value={item.title}
+                          searchText={trimSearch || ""}
+                        />
                         {item.subtitles && item.subtitles.length > 0 ? (
                           <React.Fragment>
                             <Gutter size="0.38rem" />
@@ -208,9 +238,70 @@ export const SettingList: FunctionComponent<SettingListProps> = ({
                 );
               })}
             </Box>
+            {i !== renderSections.length - 1 && !isSearching ? (
+              <Box marginY="1rem">
+                <div
+                  style={{
+                    height: "1px",
+                    backgroundColor: ColorPalette["gray-550"],
+                  }}
+                />
+              </Box>
+            ) : null}
           </React.Fragment>
         );
       })}
     </React.Fragment>
+  );
+};
+
+const HighlightedSubtitle3: FunctionComponent<{
+  value: string;
+  searchText: string;
+}> = ({ value, searchText }) => {
+  if (!searchText)
+    return <Subtitle3 color={ColorPalette["gray-10"]}>{value}</Subtitle3>;
+
+  const regex = new RegExp(`(${searchText})`, "ig"); // 대소문자 무시
+  const parts = value.split(regex);
+
+  let firstOne = false;
+  return (
+    <span>
+      {parts.map((part, index) => {
+        const matched = part.toLowerCase() === searchText.toLowerCase();
+
+        const res =
+          matched && !firstOne ? (
+            <Subtitle3
+              key={index}
+              as="span"
+              style={{
+                whiteSpace: "pre-wrap",
+              }}
+              color={ColorPalette["blue-300"]}
+            >
+              {part}
+            </Subtitle3> // 파란색 강조
+          ) : (
+            <Subtitle3
+              key={index}
+              as="span"
+              style={{
+                whiteSpace: "pre-wrap",
+              }}
+              color={ColorPalette["gray-10"]}
+            >
+              {part}
+            </Subtitle3>
+          );
+
+        if (matched) {
+          firstOne = true;
+        }
+
+        return res;
+      })}
+    </span>
   );
 };
