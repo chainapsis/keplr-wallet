@@ -56,13 +56,13 @@ export const EcosystemsSelector: FunctionComponent<{
     [ecosystemSections]
   );
 
-  const starknetSection = React.useMemo(
-    () => ecosystemSections.find((section) => section.type === "starknet"),
+  const evmSection = React.useMemo(
+    () => ecosystemSections.find((section) => section.type === "evm"),
     [ecosystemSections]
   );
 
-  const evmSection = React.useMemo(
-    () => ecosystemSections.find((section) => section.type === "evm"),
+  const starknetSection = React.useMemo(
+    () => ecosystemSections.find((section) => section.type === "starknet"),
     [ecosystemSections]
   );
 
@@ -79,10 +79,10 @@ export const EcosystemsSelector: FunctionComponent<{
           "bitcoin" in chain &&
           chain.bitcoin.chainId === representativeSection.chainId
       );
-    } else if (representativeSection.type === "starknet") {
-      return chainStore.getModularChain(representativeSection.chainId);
     } else if (representativeSection.type === "evm") {
       return chainStore.getChain(representativeSection.chainId);
+    } else if (representativeSection.type === "starknet") {
+      return chainStore.getModularChain(representativeSection.chainId);
     }
 
     return undefined;
@@ -175,18 +175,6 @@ export const EcosystemsSelector: FunctionComponent<{
       );
     }
 
-    if (selectionState?.ecosystemType === "starknet" && starknetSection) {
-      return (
-        <ChainSelector
-          chainInfos={starknetSection.chainInfos}
-          currentChainId={starknetSection.currentChainId}
-          setCurrentChainId={starknetSection.setCurrentChainId}
-          activeTabOrigin={activeTabOrigin}
-          updateMessage={UpdateCurrentChainIdForStarknetMsg}
-        />
-      );
-    }
-
     if (selectionState?.ecosystemType === "evm" && evmSection) {
       return (
         <ChainSelector
@@ -199,7 +187,18 @@ export const EcosystemsSelector: FunctionComponent<{
       );
     }
 
-    // Default to ecosystem overview
+    if (selectionState?.ecosystemType === "starknet" && starknetSection) {
+      return (
+        <ChainSelector
+          chainInfos={starknetSection.chainInfos}
+          currentChainId={starknetSection.currentChainId}
+          setCurrentChainId={starknetSection.setCurrentChainId}
+          activeTabOrigin={activeTabOrigin}
+          updateMessage={UpdateCurrentChainIdForStarknetMsg}
+        />
+      );
+    }
+
     return (
       <EcosystemOverview
         ecosystemSections={ecosystemSections}

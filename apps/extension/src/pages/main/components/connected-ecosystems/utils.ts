@@ -24,8 +24,8 @@ export const ecosystemOptionConfigs: Record<
       label: "Address Type",
     },
   },
-  starknet: {},
   evm: {},
+  starknet: {},
 };
 
 export const createBitcoinSpecificOptions = (

@@ -135,21 +135,6 @@ export const ConnectedEcosystems: FunctionComponent = observer(() => {
     });
   }
 
-  if (currentChainIdForStarknet) {
-    ecosystemSections.push({
-      type: "starknet",
-      chainId: currentChainIdForStarknet,
-      chainInfos: starknetChainInfos,
-      currentChainId: currentChainIdForStarknet,
-      setCurrentChainId: setCurrentChainIdForStarknet,
-      specificOptions: undefined,
-      footer: {
-        visible: true,
-        text: "Select a Starknet-compatible chain to connect.",
-      },
-    });
-  }
-
   if (currentChainIdForEVM) {
     ecosystemSections.push({
       type: "evm",
@@ -161,6 +146,21 @@ export const ConnectedEcosystems: FunctionComponent = observer(() => {
       footer: {
         visible: true,
         text: "Select an EVM-compatible chain to connect.",
+      },
+    });
+  }
+
+  if (currentChainIdForStarknet) {
+    ecosystemSections.push({
+      type: "starknet",
+      chainId: currentChainIdForStarknet,
+      chainInfos: starknetChainInfos,
+      currentChainId: currentChainIdForStarknet,
+      setCurrentChainId: setCurrentChainIdForStarknet,
+      specificOptions: undefined,
+      footer: {
+        visible: true,
+        text: "Select a Starknet-compatible chain to connect.",
       },
     });
   }
