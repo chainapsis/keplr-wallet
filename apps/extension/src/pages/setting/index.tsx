@@ -440,6 +440,8 @@ const TopSection: FunctionComponent<{
     return "-";
   }, [availableTotalPrice, stakedTotalPrice]);
 
+  const [isAccountHovered, setIsAccountHovered] = useState(false);
+
   return (
     <React.Fragment>
       <Gutter size="1rem" />
@@ -460,6 +462,7 @@ const TopSection: FunctionComponent<{
                 : ColorPalette["gray-550"],
           }}
           cursor="pointer"
+          onHoverStateChange={setIsAccountHovered}
           onClick={(e) => {
             e.preventDefault();
 
@@ -470,6 +473,15 @@ const TopSection: FunctionComponent<{
               ? ColorPalette["gray-200"]
               : ColorPalette["gray-300"]
           }
+          transitions={["box-shadow 0.25s ease-out"]}
+          style={{
+            boxShadow:
+              theme.mode === "light"
+                ? isAccountHovered
+                  ? "0px 25px 40px -15px #D8DCED"
+                  : undefined
+                : undefined,
+          }}
         >
           <XAxis alignY="center">
             {icnsPrimaryName ? (
