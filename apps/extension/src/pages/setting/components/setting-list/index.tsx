@@ -167,7 +167,7 @@ export const SettingList: FunctionComponent<SettingListProps> = ({
       {renderSections.map((section, i) => {
         return (
           <React.Fragment key={section.key}>
-            <Box paddingX="1rem" paddingY={isSearching ? "0" : "0.5rem"}>
+            <Box paddingX="1rem" paddingTop={isSearching ? "0" : "0.5rem"}>
               {/* search 중에는 section title을 보여주지 않는다. */}
               {isSearching ? null : (
                 <React.Fragment>
@@ -187,7 +187,8 @@ export const SettingList: FunctionComponent<SettingListProps> = ({
                 return (
                   <Box
                     key={item.key}
-                    paddingX="0.5rem"
+                    paddingLeft="0.375rem"
+                    paddingRight="0.5rem"
                     paddingY="0.75rem"
                     minHeight="3.25rem"
                     borderRadius="0.75rem"

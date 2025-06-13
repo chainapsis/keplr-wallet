@@ -87,12 +87,14 @@ export const SettingPage: FunctionComponent = observer(() => {
 
   return (
     <MainHeaderLayout>
-      <Box paddingY="1rem">
+      <Box paddingTop="1rem">
         <Box paddingX="1rem">
           <SearchTextInput
             ref={focusOnMount}
+            placeholder="Search in settings...s"
             borderRadius="0.75rem"
             value={searchText}
+            alternativeSearchIcon={AlternativeSearchIcon}
             onChange={(e) => setSearchText(e.target.value)}
           />
         </Box>
@@ -571,6 +573,7 @@ const TopSectionXAxisItem: FunctionComponent<{
   return (
     <Box
       paddingX="1rem"
+      paddingY="0.38rem"
       color={
         theme.mode === "light"
           ? ColorPalette["gray-200"]
@@ -698,6 +701,23 @@ const IconContacts = () => {
       <path
         fill="currentColor"
         d="M11.482 8.116a3.877 3.877 0 0 1 3.877 3.877 3.87 3.87 0 0 1-1.656 3.174c2.403.775 4.172 2.668 4.173 5.102 0 .29-.235.524-.524.524H5.618a.524.524 0 0 1-.524-.524c0-2.433 1.765-4.326 4.167-5.1a3.877 3.877 0 0 1 2.221-7.052"
+      />
+    </svg>
+  );
+};
+
+const AlternativeSearchIcon: FunctionComponent = () => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1.25rem"
+      height="1.25rem"
+      fill="none"
+      viewBox="0 0 20 20"
+    >
+      <path
+        fill="currentColor"
+        d="m17.84 16.46-3.676-3.675A6.8 6.8 0 0 0 15.525 8.7 6.833 6.833 0 0 0 8.7 1.875 6.833 6.833 0 0 0 1.875 8.7 6.833 6.833 0 0 0 8.7 15.525a6.8 6.8 0 0 0 4.085-1.36l3.675 3.675a.977.977 0 0 0 1.38-1.38M3.825 8.7a4.875 4.875 0 1 1 9.75 0 4.875 4.875 0 0 1-9.75 0"
       />
     </svg>
   );
