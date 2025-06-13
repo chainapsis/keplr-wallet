@@ -17,6 +17,9 @@ export const SearchTextInput = forwardRef<
     <TextInput
       {...props}
       ref={ref}
+      inputStyle={{
+        paddingLeft: "0.5rem",
+      }}
       left={
         <Box
           style={{
