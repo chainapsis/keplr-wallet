@@ -5,6 +5,10 @@ import throttle from "lodash.throttle";
 type SearchField<T> =
   | string
   | {
+      field: string;
+      minLength: number;
+    }
+  | {
       key: string;
       function: (item: T) => string;
     };
@@ -24,8 +28,11 @@ type SearchField<T> =
   console.log(getNestedValue(data, "items[].subtitles[]")); // ["sub1", "sub2"]
  */
 const getNestedValue = (obj: any, path: SearchField<any>): any => {
-  if (typeof path === "object") {
+  if (typeof path === "object" && "key" in path) {
     return path.function(obj);
+  }
+  if (typeof path === "object" && "field" in path) {
+    path = path.field;
   }
 
   const segments = path.split(".");
@@ -95,6 +102,14 @@ export function performSearch<T>(
   const matchedItems = data
     .map((item) => {
       const fieldMatchScores = fields.map((field, index) => {
+        if (
+          typeof field === "object" &&
+          "minLength" in field &&
+          queryLower.length < field.minLength
+        ) {
+          return SCORE_NONE;
+        }
+
         const rawValue = getNestedValue(item, field);
         if (Array.isArray(rawValue)) {
           let highestScore = SCORE_NONE;
@@ -200,6 +215,9 @@ export function useSearch<T>(
     .map((field) => {
       if (typeof field === "string") {
         return field;
+      }
+      if ("field" in field) {
+        return `${field.field}/${field.minLength}`;
       }
       return field.key;
     })

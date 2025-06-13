@@ -62,7 +62,10 @@ export const SettingList: FunctionComponent<SettingListProps> = ({
       const searchedSections = performSearch(sections, trimSearch, [
         "items[].title",
         "items[].subtitles[]",
-        "items[].searches[]",
+        {
+          field: "items[].searches[]",
+          minLength: 3,
+        },
       ]);
       if (searchedSections.length > 0) {
         for (let i = 0; i < searchedSections.length; i++) {
@@ -71,7 +74,7 @@ export const SettingList: FunctionComponent<SettingListProps> = ({
           const searchedItems = performSearch(
             searchedSection.items,
             trimSearch,
-            ["title", "subtitles[]", "searches[]"]
+            ["title", "subtitles[]", { field: "searches[]", minLength: 3 }]
           );
           if (searchedItems.length > 0) {
             sectionKeys.set(searchedSection.key, i);
