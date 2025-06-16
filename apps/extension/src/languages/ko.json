@@ -213,6 +213,13 @@
   "page.register.google.title": "Google 계정 연결하기",
   "page.register.google.paragraph": "Google 계정에 연결된 지갑 생성하기",
 
+  "page.setting.list.chains-and-assets": "체인 및 자산 관리",
+  "page.setting.list.general": "일반",
+  "page.setting.list.security-privacy": "보안 및 프라이버시",
+  "page.setting.list.more": "기타",
+
+  "page.setting.helpdesk.title": "고객지원",
+
   "page.setting.title": "환경설정",
   "page.setting.general-title": "일반",
   "page.setting.general-paragraph": "언어, 통화, 연락처...",
@@ -220,11 +227,17 @@
   "page.setting.advanced-paragraph": "개발자 모드, 노드 주소 변경...",
   "page.setting.security-privacy-title": "보안과 프라이버시",
   "page.setting.security-privacy-paragraph": "연결된 웹사이트, 자동잠금",
-  "page.setting.manage-token-list-title": "토큰 추가 및 삭제",
+  "page.setting.manage-token-list-title": "커스텀 토큰 추가 / 제거",
   "page.setting.manage-token-list-paragraph": "컨트랙트 주소로 직접 추가할 수 있는 토큰만 여기서 관리할 수 있습니다.",
-  "page.setting.search-placeholder": "기능 검색",
+  "page.setting.search-placeholder": "설정 검색",
+
+  "page.setting.about.title": "케플러 알아보기",
+  "page.setting.about.website": "웹사이트",
+  "page.setting.about.terms-of-use": "이용약관",
+  "page.setting.about.privacy-policy": "개인정보 보호정책",
 
   "page.setting.advanced.developer-mode-title": "고급 IBC 트랜스퍼",
+  "page.setting.advanced.endpoints": "노드 주소",
   "page.setting.advanced.change-endpoints-title": "노드 주소 변경",
 
   "page.setting.advanced.endpoint.confirm-title": "노드 주소 설정",
@@ -239,13 +252,13 @@
   "page.setting.general.theme-title": "테마",
   "page.setting.general.manage-authz-title": "AuthZ 관리",
   "page.setting.general.link-kpelr-mobile-title": "케플러 모바일과 연결하기",
-  "page.setting.general.side-panel-title": "사이드 패널 모드로 변경",
+  "page.setting.general.side-panel-title": "사이드 패널",
   "page.setting.general.side-panel-paragraph": "케플러 지갑을 브라우저의 사이드 패널에서 사용할 수 있습니다.",
   "page.setting.general.show-24h-price-changes-title": "24시간 가격변동률 표시",
   "page.setting.general.show-24h-price-changes-paragraph": "각 토큰의 24시간 가격변동률을 표시하는 기능입니다.",
-  "page.setting.advanced.manage-non-native-chains-title": "선택형 체인 추가/제거",
+  "page.setting.advanced.manage-non-native-chains-title": "커스텀 체인 추가 / 제거",
   "page.setting.advanced.manage-non-native-chains-paragraph": "선택형 체인을 추가하거나 완전히 제거할 수 있습니다. 추가 후에는 체인을 활성화해주세요.",
-  "page.setting.general.manage-chain-visibility-title": "체인 추가/제거",
+  "page.setting.general.manage-chain-visibility-title": "체인 추가 / 제거",
   "page.setting.general.manage-chain-visibility-paragraph": "현재 계정에 표시될 체인(해당 체인의 자산 포함)을 선택해주세요.",
 
   "page.setting.general.manage-asset-list-title": "자산 표시 관리",
@@ -255,8 +268,11 @@
   "page.setting.general.language.automatic-title": "자동 (브라우저 언어)",
 
   "page.setting.general.theme.dark-mode": "다크 모드",
+  "page.setting.general.theme.short.dark": "다크",
   "page.setting.general.theme.light-mode": "라이트 모드",
+  "page.setting.general.theme.short.light": "라이트",
   "page.setting.general.theme.auto": "자동 (시스템 설정)",
+  "page.setting.general.theme.short.auto": "자동",
 
   "page.setting.general.authz.empty-subject": "AuthZ",
   "page.setting.general.authz.grant-view.grantee-authorized": "{grantee}에게 권한을 주었습니다.",
@@ -286,7 +302,7 @@
   "page.setting.security.connected-websites-paragraph": "이 웹사이트들은 당신의 지갑 주소를 조회하고, 서명을 요청할 수 있습니다.",
   "page.setting.security.auto-lock-title": "자동 잠금 타이머",
   "page.setting.security.change-password-title": "비밀번호 변경",
-  "page.setting.security.analytics-title": "익명화된 데이터 공유 허용",
+  "page.setting.security.analytics-title": "익명 데이터 공유",
   "page.setting.security.analytics-paragraph": "유저의 데이터가 익명화되어 케플러 팀에게 공유됩니다. 이는 케플러의 품질 향상과 사용자 경험 개선을 위해 사용됩니다.",
 
   "page.setting.security.permission.search-placeholder": "검색",

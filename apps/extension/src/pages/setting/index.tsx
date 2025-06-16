@@ -34,10 +34,12 @@ import { Image } from "../../components/image";
 import { Tooltip } from "../../components/tooltip";
 import { useTheme } from "styled-components";
 import { version } from "../../../package.json";
+import { useIntl } from "react-intl";
 
 export const SettingPage: FunctionComponent = observer(() => {
   const navigate = useNavigate();
   const theme = useTheme();
+  const intl = useIntl();
 
   const { keyRingStore, uiConfigStore } = useStore();
 
@@ -79,13 +81,17 @@ export const SettingPage: FunctionComponent = observer(() => {
     {
       key: "contacts",
       icon: IconContacts,
-      title: "Contacts",
+      title: intl.formatMessage({
+        id: "page.setting.general.contacts-title",
+      }),
       onClick: () => navigate("/setting/contacts/list"),
     },
     {
       key: "link-keplr-mobile",
       icon: IconLinkKeplrMobile,
-      title: "Link Keplr Mobile",
+      title: intl.formatMessage({
+        id: "page.setting.general.link-kpelr-mobile-title",
+      }),
       onClick: () => navigate("/setting/general/link-keplr-mobile"),
     },
   ];
@@ -98,7 +104,9 @@ export const SettingPage: FunctionComponent = observer(() => {
         <Box paddingX="1rem">
           <SearchTextInput
             ref={focusOnMount}
-            placeholder="Search in settings...s"
+            placeholder={intl.formatMessage({
+              id: "page.setting.search-placeholder",
+            })}
             borderRadius="0.75rem"
             value={searchText}
             alternativeSearchIcon={AlternativeSearchIcon}
@@ -142,12 +150,16 @@ export const SettingPage: FunctionComponent = observer(() => {
             })(),
             {
               key: "chains-and-assets",
-              title: "Chains and Assets",
+              title: intl.formatMessage({
+                id: "page.setting.list.chains-and-assets",
+              }),
               items: [
                 {
                   key: "add-remove-chains",
                   icon: IconAddRemoveChains,
-                  title: "Add / Remove Chains",
+                  title: intl.formatMessage({
+                    id: "page.setting.general.manage-chain-visibility-title",
+                  }),
                   right: ClickableRightIcon,
                   rightProps: {},
                   onClick: () => {
@@ -165,7 +177,9 @@ export const SettingPage: FunctionComponent = observer(() => {
                 {
                   key: "delete-custom-chains",
                   icon: IconDeleteCustomChains,
-                  title: "Delete Custom Chains",
+                  title: intl.formatMessage({
+                    id: "page.setting.advanced.manage-non-native-chains-title",
+                  }),
                   right: ClickableRightIcon,
                   rightProps: {},
                   onClick: () =>
@@ -174,7 +188,9 @@ export const SettingPage: FunctionComponent = observer(() => {
                 {
                   key: "add-remove-custom-token",
                   icon: IconAddRemoveCustomTokens,
-                  title: "Add / Remove Custom Token",
+                  title: intl.formatMessage({
+                    id: "page.setting.manage-token-list-title",
+                  }),
                   searches: ["contract", "erc20", "cw20", "secret20"],
                   right: ClickableRightIcon,
                   rightProps: {},
@@ -184,12 +200,16 @@ export const SettingPage: FunctionComponent = observer(() => {
             },
             {
               key: "general",
-              title: "General",
+              title: intl.formatMessage({
+                id: "page.setting.list.general",
+              }),
               items: [
                 {
                   key: "language",
                   icon: IconLanguage,
-                  title: "Language",
+                  title: intl.formatMessage({
+                    id: "page.setting.general.language-title",
+                  }),
                   right: LanguageRight,
                   rightProps: {},
                   onClick: () => navigate("/setting/general/language"),
@@ -197,7 +217,9 @@ export const SettingPage: FunctionComponent = observer(() => {
                 {
                   key: "currency",
                   icon: IconCurrency,
-                  title: "Currency",
+                  title: intl.formatMessage({
+                    id: "page.setting.general.currency-title",
+                  }),
                   right: CurrencyRight,
                   rightProps: {},
                   onClick: () => navigate("/setting/general/fiat"),
@@ -205,7 +227,9 @@ export const SettingPage: FunctionComponent = observer(() => {
                 {
                   key: "theme",
                   icon: IconTheme,
-                  title: "Theme",
+                  title: intl.formatMessage({
+                    id: "page.setting.general.theme-title",
+                  }),
                   right: ThemeRight,
                   rightProps: {},
                   onClick: () => navigate("/setting/general/theme"),
@@ -216,7 +240,9 @@ export const SettingPage: FunctionComponent = observer(() => {
                       {
                         key: "side-panel",
                         icon: IconSidePanel,
-                        title: "Side Panel",
+                        title: intl.formatMessage({
+                          id: "page.setting.general.side-panel-title",
+                        }),
                         right: Toggle,
                         rightProps: {
                           size: "smaller",
@@ -241,7 +267,9 @@ export const SettingPage: FunctionComponent = observer(() => {
                 {
                   key: "show-24h-price-change",
                   icon: Icon24HPrice,
-                  title: "Show 24h Price Change",
+                  title: intl.formatMessage({
+                    id: "page.setting.general.show-24h-price-changes-title",
+                  }),
                   right: Toggle,
                   rightProps: {
                     size: "smaller",
@@ -254,20 +282,34 @@ export const SettingPage: FunctionComponent = observer(() => {
                 {
                   key: "advanced",
                   icon: IconAdvanced,
-                  title: "Advanced",
-                  subtitles: ["Endpoints", "Authz", "Manual IBC Transfer"],
+                  title: intl.formatMessage({
+                    id: "page.setting.advanced-title",
+                  }),
+                  subtitles: [
+                    intl.formatMessage({
+                      id: "page.setting.advanced.endpoints",
+                    }),
+                    "Authz",
+                    intl.formatMessage({
+                      id: "page.setting.advanced.developer-mode-title",
+                    }),
+                  ],
                   onClick: () => navigate("/setting/advanced"),
                 },
               ],
             },
             {
               key: "security-privacy",
-              title: "Security & Privacy",
+              title: intl.formatMessage({
+                id: "page.setting.list.security-privacy",
+              }),
               items: [
                 {
                   key: "change-password",
                   icon: IconChangePassword,
-                  title: "Change Password",
+                  title: intl.formatMessage({
+                    id: "page.setting.security.change-password-title",
+                  }),
                   right: ClickableRightIcon,
                   rightProps: {},
                   onClick: () => navigate("/setting/security/change-password"),
@@ -275,7 +317,9 @@ export const SettingPage: FunctionComponent = observer(() => {
                 {
                   key: "connected-websites",
                   icon: IconConnectedWebsites,
-                  title: "Connected Websites",
+                  title: intl.formatMessage({
+                    id: "page.setting.security.connected-websites-title",
+                  }),
                   searches: ["permission"],
                   right: ConnectedWebsitesRight,
                   rightProps: {},
@@ -284,7 +328,9 @@ export const SettingPage: FunctionComponent = observer(() => {
                 {
                   key: "share-anonymous-data",
                   icon: IconAdvanced,
-                  title: "Share Anonymous data",
+                  title: intl.formatMessage({
+                    id: "page.setting.security.analytics-title",
+                  }),
                   right: Toggle,
                   rightProps: {
                     size: "smaller",
@@ -313,12 +359,16 @@ export const SettingPage: FunctionComponent = observer(() => {
             },
             {
               key: "more",
-              title: "More",
+              title: intl.formatMessage({
+                id: "page.setting.list.more",
+              }),
               items: [
                 {
                   key: "helpdesk",
                   icon: IconHelpDesk,
-                  title: "HelpDesk",
+                  title: intl.formatMessage({
+                    id: "page.setting.helpdesk.title",
+                  }),
                   right: ClickableRightIcon,
                   rightProps: {},
                   onClick: () => {
@@ -330,11 +380,19 @@ export const SettingPage: FunctionComponent = observer(() => {
                 {
                   key: "about-keplr",
                   icon: IconAboutKeplr,
-                  title: "About Keplr",
+                  title: intl.formatMessage({
+                    id: "page.setting.about.title",
+                  }),
                   subtitles: [
-                    "Official Website",
-                    "Terms of Use",
-                    "Privacy Policy",
+                    intl.formatMessage({
+                      id: "page.setting.about.website",
+                    }),
+                    intl.formatMessage({
+                      id: "page.setting.about.terms-of-use",
+                    }),
+                    intl.formatMessage({
+                      id: "page.setting.about.privacy-policy",
+                    }),
                   ],
                   onClick: () => navigate("/setting/about"),
                 },
@@ -677,11 +735,16 @@ const CurrencyRight: FunctionComponent = observer(() => {
 
 const ThemeRight: FunctionComponent = () => {
   const theme = useAppTheme();
+  const intl = useIntl();
 
   return (
     // TODO: intl
     <Body2 color={ColorPalette["gray-300"]}>
-      {capitalizeFirstLetter(theme.option)}
+      {capitalizeFirstLetter(
+        intl.formatMessage({
+          id: `page.setting.general.theme.short.${theme.option}`,
+        })
+      )}
     </Body2>
   );
 };

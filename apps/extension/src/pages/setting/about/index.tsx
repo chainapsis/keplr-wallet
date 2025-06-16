@@ -13,14 +13,14 @@ export const AboutKeplrPage: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout
-      title={intl.formatMessage({ id: "page.setting.advanced-title" })}
+      title={intl.formatMessage({ id: "page.setting.about.title" })}
       left={<BackButton />}
     >
       <Box padding="0.75rem" paddingTop="0">
         <Stack gutter="0.5rem">
           <PageButton
             title={intl.formatMessage({
-              id: "Official Website",
+              id: "page.setting.about.website",
             })}
             endIcon={<RightArrowIcon />}
             onClick={() => {
@@ -32,7 +32,7 @@ export const AboutKeplrPage: FunctionComponent = observer(() => {
 
           <PageButton
             title={intl.formatMessage({
-              id: "Terms of Use",
+              id: "page.setting.about.terms-of-use",
             })}
             endIcon={<RightArrowIcon />}
             onClick={() => {
@@ -44,7 +44,7 @@ export const AboutKeplrPage: FunctionComponent = observer(() => {
 
           <PageButton
             title={intl.formatMessage({
-              id: "Privacy Policy",
+              id: "page.setting.about.privacy-policy",
             })}
             endIcon={<RightArrowIcon />}
             onClick={() => {
