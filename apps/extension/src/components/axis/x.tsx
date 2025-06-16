@@ -3,9 +3,22 @@ import { XAxisProps } from "./types";
 import styled from "styled-components";
 
 const Styles = {
-  XAxis: styled.div<XAxisProps>`
+  XAxis: styled.div.withConfig({
+    shouldForwardProp: (prop, defaultValidatorFn) =>
+      !["wrap", "alignY", "gap"].includes(prop) && defaultValidatorFn(prop),
+  })<XAxisProps>`
     display: flex;
     flex-direction: row;
+    flex-wrap: ${({ wrap }) => {
+      switch (wrap) {
+        case "wrap":
+          return "wrap";
+        case "wrap-reverse":
+          return "wrap-reverse";
+        default:
+          return "nowrap";
+      }
+    }};
     align-items: ${({ alignY }) => {
       switch (alignY) {
         case "top":

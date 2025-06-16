@@ -70,6 +70,8 @@ export const Styles = {
     
     cursor: ${({ cursor }) => cursor};
     opacity: ${({ opacity }) => opacity};
+      
+    transition: ${({ transitions }) => transitions?.join(",")};
     
     ${({ hover }) => {
       if (hover) {

@@ -251,6 +251,7 @@ export class BackgroundTxService {
     const starknet = modularChainInfo.starknet;
     const provider = new RpcProvider({
       nodeUrl: starknet.rpc,
+      specVersion: "0.8.1",
     });
 
     this.notification.create({

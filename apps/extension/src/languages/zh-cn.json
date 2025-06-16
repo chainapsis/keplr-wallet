@@ -189,6 +189,13 @@
   "page.register.google.title": "Google登录",
   "page.register.google.paragraph": "创建一个与你的Google帐户关联的钱包。",
 
+  "page.setting.list.chains-and-assets": "链与资产显示设置",
+  "page.setting.list.general": "常规",
+  "page.setting.list.security-privacy": "安全与隐私",
+  "page.setting.list.more": "其他",
+
+  "page.setting.helpdesk.title": "帮助中心",
+
   "page.setting.title": "设置",
   "page.setting.general-title": "通用",
   "page.setting.general-paragraph": "语言、法定货币、联系人...",
@@ -198,9 +205,9 @@
   "page.setting.security-privacy-paragraph": "已连接的网站、自动锁定",
   "page.setting.manage-token-list-title": "添加/删除自定义令牌",
   "page.setting.manage-token-list-paragraph": "仅适用于可通过合约地址手动添加的币种",
-  "page.setting.search-placeholder": "搜索功能",
-  "page.setting.advanced.developer-mode-title": "开发者模式",
-  "page.setting.advanced.developer-mode-paragraph": "感觉到科技感十足了吗？:)",
+  "page.setting.search-placeholder": "搜索设置",
+  "page.setting.advanced.developer-mode-title": "高级 IBC 转账",
+  "page.setting.advanced.endpoints": "端点",
   "page.setting.advanced.change-endpoints-title": "修改连接点",
 
   "page.setting.advanced.endpoint.confirm-title": "设置连接点",
@@ -215,7 +222,7 @@
   "page.setting.general.theme-title": "主题",
   "page.setting.general.manage-authz-title": "管理AuthZ",
   "page.setting.general.link-kpelr-mobile-title": "连接Keplr移动端",
-  "page.setting.advanced.manage-non-native-chains-title": "添加/删除非原生链",
+  "page.setting.advanced.manage-non-native-chains-title": "移除自定义链",
   "page.setting.advanced.manage-non-native-chains-paragraph": "应首先将非原生链添加到Keplr以管理其可见性。",
   "page.setting.general.manage-chain-visibility-title": "添加/删除链",
   "page.setting.general.manage-chain-visibility-paragraph": "选择要显示在你当前帐户里的链（及其资产）",
@@ -227,8 +234,11 @@
   "page.setting.general.language.automatic-title": "自动（浏览器默认）",
 
   "page.setting.general.theme.dark-mode": "深色模式",
+  "page.setting.general.theme.short.dark": "深色",
   "page.setting.general.theme.light-mode": "浅色模式",
+  "page.setting.general.theme.short.light": "浅色",
   "page.setting.general.theme.auto": "自动（系统）",
+  "page.setting.general.theme.short.auto": "自动",
 
   "page.setting.general.authz.empty-subject": "Authz",
   "page.setting.general.authz.grant-view.grantee-authorized": "你已授权{grantee}",
@@ -258,7 +268,7 @@
   "page.setting.security.connected-websites-paragraph": "可以查看你的地址并请求签名的网站",
   "page.setting.security.auto-lock-title": "自动锁定",
   "page.setting.security.change-password-title": "修改密码",
-  "page.setting.security.analytics-title": "共享匿名数据",
+  "page.setting.security.analytics-title": "共享匿名使用数据",
   "page.setting.security.analytics-paragraph": "帮助我们提高Keplr的性能和质量",
 
   "page.setting.security.permission.search-placeholder": "搜索",
@@ -487,6 +497,8 @@
   "page.sign.components.messages.create-btc-delegation.paragraph": "提交相关数据至 {chainName} 链。",
   "page.sign.components.messages.claim-btc-delegation-reward.title": "提取BTC质押奖励",
   "page.sign.components.messages.claim-btc-delegation-reward.paragraph": "提取{amount}",
+  "page.sign.components.messages.atomone-mint-photon.title": "铸造 PHOTON",
+  "page.sign.components.messages.atomone-mint-photon.paragraph": "销毁 ATONE，并铸造 PHOTON",
 
   "page.sign.components.ledger-guide.box.error-title": "错误",
   "page.sign.components.ledger-guide.box.connect-and-unlock-ledger-paragraph": "连接并解锁你的Ledger设备。",

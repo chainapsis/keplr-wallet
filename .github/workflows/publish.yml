@@ -6,6 +6,7 @@ on:
 
 jobs:
   publish:
+    if: github.repository == 'chainapsis/keplr-wallet'
     name: Publish to npm and create release
     runs-on: ubuntu-24.04-l
     timeout-minutes: 30
@@ -57,6 +58,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   check-firefox-archive:
+    if: github.repository == 'chainapsis/keplr-wallet'
     name: Test that docker can produce the same result for firefox
     needs: [publish]
     runs-on: ubuntu-24.04-l
