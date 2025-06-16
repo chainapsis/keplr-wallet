@@ -38,6 +38,6 @@
     "mobx": "^6",
     "mobx-utils": "^6",
     "react": "^16.8.0 || ^17 || ^18",
-    "starknet": "^6"
+    "starknet": "^7"
   }
 }
