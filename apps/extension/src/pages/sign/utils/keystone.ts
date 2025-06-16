@@ -1,6 +1,6 @@
-import { serialize, TransactionTypes } from "@ethersproject/transactions";
-import { EthSignType } from "@keplr-wallet/types";
+import { EthSignType, EthTransactionType } from "@keplr-wallet/types";
 import { KeystoneEthereumSDK } from "@keystonehq/keystone-sdk";
+import { Transaction, TransactionLike } from "ethers";
 
 export interface KeystoneUR {
   type: string;
@@ -37,12 +37,20 @@ export function getEthDataTypeFromSignType(
   switch (signType) {
     case EthSignType.TRANSACTION:
       if (message) {
-        const msg = JSON.parse(Buffer.from(message).toString());
-        const isEIP1559 = !!msg.maxFeePerGas || !!msg.maxPriorityFeePerGas;
-        if (isEIP1559) {
-          msg.type = TransactionTypes.eip1559;
+        const txLike: TransactionLike = JSON.parse(
+          Buffer.from(message).toString()
+        );
+        if (txLike.from) {
+          delete txLike.from;
         }
-        if (!msg.type) {
+
+        const tx = Transaction.from(txLike);
+
+        const isEIP1559 = !!tx.maxFeePerGas || !!tx.maxPriorityFeePerGas;
+        if (isEIP1559) {
+          tx.type = EthTransactionType.eip1559;
+        }
+        if (!tx.type) {
           return KeystoneEthereumSDK.DataType.transaction;
         }
         return KeystoneEthereumSDK.DataType.typedTransaction;
@@ -61,15 +69,20 @@ export function encodeEthMessage(
 ): Buffer {
   switch (signType) {
     case EthSignType.TRANSACTION:
-      const tx = JSON.parse(Buffer.from(message).toString());
+      const txLike: TransactionLike = JSON.parse(
+        Buffer.from(message).toString()
+      );
+      if (txLike.from) {
+        delete txLike.from;
+      }
+
+      const tx = Transaction.from(txLike);
       const isEIP1559 = !!tx.maxFeePerGas || !!tx.maxPriorityFeePerGas;
       if (isEIP1559) {
-        tx.type = TransactionTypes.eip1559;
+        tx.type = EthTransactionType.eip1559;
       }
-      if (typeof tx.type === "string") {
-        tx.type = +tx.type.replace(/^0x/, "");
-      }
-      return Buffer.from(serialize(tx).replace(/^0x/, ""), "hex");
+
+      return Buffer.from(tx.serialized.replace(/^0x/, ""), "hex");
     case EthSignType.MESSAGE:
     case EthSignType.EIP712:
       return Buffer.from(message);

@@ -11,6 +11,7 @@ import {
   ChainInfo,
   EthereumSignResponse,
   EthSignType,
+  EthTransactionType,
 } from "@keplr-wallet/types";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
@@ -20,11 +21,6 @@ import {
   KeyRingCosmosService,
   messageHash,
 } from "../keyring-cosmos";
-import {
-  serialize,
-  TransactionTypes,
-  UnsignedTransaction,
-} from "@ethersproject/transactions";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { getBasicAccessPermissionType, PermissionService } from "../permission";
 import { BackgroundTxEthereumService } from "../tx-ethereum";
@@ -33,6 +29,8 @@ import { validateEVMChainId } from "./helper";
 import { runInAction } from "mobx";
 import { PermissionInteractiveService } from "../permission-interactive";
 import { enableAccessSkippedEVMJSONRPCMethods } from "./constants";
+import { Transaction, TransactionLike } from "ethers";
+import { hexValue } from "@ethersproject/bytes";
 
 export class KeyRingEthereumService {
   protected websocketSubscriptionMap = new Map<string, WebSocket>();
@@ -111,7 +109,11 @@ export class KeyRingEthereumService {
     if (signType === EthSignType.TRANSACTION) {
       const unsignedTx = JSON.parse(Buffer.from(message).toString());
       if (unsignedTx.authorizationList) {
-        throw new Error("EIP-7702 transactions are not supported.");
+        throw new EthereumProviderRpcError(
+          -32602,
+          "Invalid params",
+          "External EIP-7702 transactions are not supported."
+        );
       }
     }
 
@@ -184,23 +186,29 @@ export class KeyRingEthereumService {
                 };
               }
               case EthSignType.TRANSACTION: {
-                const unsignedTx = JSON.parse(
+                const txLike: TransactionLike = JSON.parse(
                   Buffer.from(res.signingData).toString()
                 );
+                if (txLike.from) {
+                  delete txLike.from;
+                }
+
+                const unsignedTx = Transaction.from(txLike);
 
                 const isEIP1559 =
                   !!unsignedTx.maxFeePerGas ||
                   !!unsignedTx.maxPriorityFeePerGas;
                 if (isEIP1559) {
-                  unsignedTx.type = TransactionTypes.eip1559;
+                  unsignedTx.type = EthTransactionType.eip1559;
                 }
-
-                delete unsignedTx.from;
 
                 const signature = await this.keyRingService.sign(
                   chainId,
                   vaultId,
-                  Buffer.from(serialize(unsignedTx).replace("0x", ""), "hex"),
+                  Buffer.from(
+                    unsignedTx.unsignedSerialized.replace("0x", ""),
+                    "hex"
+                  ),
                   "keccak256"
                 );
 
@@ -420,24 +428,9 @@ export class KeyRingEthereumService {
           return [selectedAddress];
         }
         case "eth_sendTransaction": {
-          const tx =
-            (Array.isArray(params) &&
-              (params?.[0] as {
-                chainId?: string | number;
-                from: string;
-                gas?: string;
-                gasLimit?: string;
-                authorizationList?: {
-                  address: string;
-                  chainId: string;
-                  nonce: string;
-                  r: string;
-                  s: string;
-                  yParity: string;
-                }[];
-              })) ||
-            null;
-          if (!tx) {
+          const txLike =
+            (Array.isArray(params) && (params?.[0] as TransactionLike)) || null;
+          if (!txLike) {
             throw new EthereumProviderRpcError(
               -32602,
               "Invalid params",
@@ -447,23 +440,29 @@ export class KeyRingEthereumService {
 
           const currentChainId = this.forceGetCurrentChainId(origin, chainId);
 
-          const { from: sender, gas, authorizationList, ...restTx } = tx;
+          const { from: sender, authorizationList } = txLike;
 
           if (authorizationList) {
-            throw new Error("EIP-7702 transactions are not supported.");
+            throw new EthereumProviderRpcError(
+              -32602,
+              "Invalid params",
+              "External EIP-7702 transactions are not supported."
+            );
           }
 
-          if (tx.chainId) {
+          if (txLike.chainId) {
             const evmChainIdFromTx: number = validateEVMChainId(
               (() => {
-                if (typeof tx.chainId === "string") {
-                  if (tx.chainId.startsWith("0x")) {
-                    return parseInt(tx.chainId, 16);
+                if (typeof txLike.chainId === "string") {
+                  if (txLike.chainId.startsWith("0x")) {
+                    return parseInt(txLike.chainId, 16);
                   } else {
-                    return parseInt(tx.chainId, 10);
+                    return parseInt(txLike.chainId, 10);
                   }
+                } else if (typeof txLike.chainId === "bigint") {
+                  return Number(txLike.chainId);
                 } else {
-                  return tx.chainId;
+                  return txLike.chainId;
                 }
               })()
             );
@@ -489,35 +488,45 @@ export class KeyRingEthereumService {
             providerId,
             chainId
           );
-          const nonce = parseInt(transactionCount, 16);
 
-          const unsignedTx: UnsignedTransaction = {
-            ...restTx,
-            gasLimit: restTx?.gasLimit ?? gas,
-            chainId: this.getEVMChainId(currentChainId),
-            nonce,
-          };
+          // ethersjs tries to recover 'from' address from signature, thus we need to remove it from the transaction
+          if (txLike.from) {
+            delete txLike.from;
+          }
+
+          const unsignedTx = Transaction.from(txLike);
+          unsignedTx.chainId = this.getEVMChainId(currentChainId);
+          unsignedTx.nonce = parseInt(transactionCount, 16);
 
           try {
             const { signingData, signature } = await this.signEthereumSelected(
               env,
               origin,
               currentChainId,
-              sender,
-              Buffer.from(JSON.stringify(unsignedTx)),
+              sender ?? "",
+              Buffer.from(JSON.stringify(unsignedTx.toJSON())),
               EthSignType.TRANSACTION
             );
 
-            const signingTx = JSON.parse(Buffer.from(signingData).toString());
+            const txLike: TransactionLike = JSON.parse(
+              Buffer.from(signingData).toString()
+            );
+            if (txLike.from) {
+              delete txLike.from;
+            }
+
+            const signingTx = Transaction.from(txLike);
 
             const isEIP1559 =
               !!signingTx.maxFeePerGas || !!signingTx.maxPriorityFeePerGas;
             if (isEIP1559) {
-              signingTx.type = TransactionTypes.eip1559;
+              signingTx.type = EthTransactionType.eip1559;
             }
 
+            signingTx.signature = "0x" + Buffer.from(signature).toString("hex");
+
             const signedTx = Buffer.from(
-              serialize(signingTx, signature).replace("0x", ""),
+              signingTx.serialized.replace("0x", ""),
               "hex"
             );
 
@@ -541,24 +550,9 @@ export class KeyRingEthereumService {
           }
         }
         case "eth_signTransaction": {
-          const tx =
-            (Array.isArray(params) &&
-              (params?.[0] as {
-                chainId?: string | number;
-                from: string;
-                gas?: string;
-                gasLimit?: string;
-                authorizationList?: {
-                  address: string;
-                  chainId: string;
-                  nonce: string;
-                  r: string;
-                  s: string;
-                  yParity: string;
-                }[];
-              })) ||
-            null;
-          if (!tx) {
+          const txLike =
+            (Array.isArray(params) && (params?.[0] as TransactionLike)) || null;
+          if (!txLike) {
             throw new EthereumProviderRpcError(
               -32602,
               "Invalid params",
@@ -568,23 +562,27 @@ export class KeyRingEthereumService {
 
           const currentChainId = this.forceGetCurrentChainId(origin, chainId);
 
-          const { from: sender, gas, authorizationList, ...restTx } = tx;
+          const { from: sender, authorizationList, ...restTx } = txLike;
 
           if (authorizationList) {
-            throw new Error("EIP-7702 transactions are not supported.");
+            throw new Error(
+              "External EIP-7702 transactions are not supported."
+            );
           }
 
-          if (tx.chainId) {
+          if (txLike.chainId) {
             const evmChainIdFromTx: number = validateEVMChainId(
               (() => {
-                if (typeof tx.chainId === "string") {
-                  if (tx.chainId.startsWith("0x")) {
-                    return parseInt(tx.chainId, 16);
+                if (typeof txLike.chainId === "string") {
+                  if (txLike.chainId.startsWith("0x")) {
+                    return parseInt(txLike.chainId, 16);
                   } else {
-                    return parseInt(tx.chainId, 10);
+                    return parseInt(txLike.chainId, 10);
                   }
+                } else if (typeof txLike.chainId === "bigint") {
+                  return Number(txLike.chainId);
                 } else {
-                  return tx.chainId;
+                  return txLike.chainId;
                 }
               })()
             );
@@ -610,34 +608,40 @@ export class KeyRingEthereumService {
             providerId,
             chainId
           );
-          const nonce = parseInt(transactionCount, 16);
 
-          const unsignedTx: UnsignedTransaction = {
-            ...restTx,
-            gasLimit: restTx?.gasLimit ?? gas,
-            chainId: this.getEVMChainId(currentChainId),
-            nonce,
-          };
+          const unsignedTx = new Transaction();
+          unsignedTx.chainId = this.getEVMChainId(currentChainId);
+          unsignedTx.nonce = parseInt(transactionCount, 16);
+          unsignedTx.gasLimit = hexValue(restTx?.gasLimit ?? "0");
 
           try {
             const { signingData, signature } = await this.signEthereumSelected(
               env,
               origin,
               currentChainId,
-              sender,
-              Buffer.from(JSON.stringify(unsignedTx)),
+              sender ?? "",
+              Buffer.from(JSON.stringify(unsignedTx.toJSON())),
               EthSignType.TRANSACTION
             );
 
-            const signingTx = JSON.parse(Buffer.from(signingData).toString());
+            const txLike: TransactionLike = JSON.parse(
+              Buffer.from(signingData).toString()
+            );
+            if (txLike.from) {
+              delete txLike.from;
+            }
+
+            const signingTx = Transaction.from(txLike);
 
             const isEIP1559 =
               !!signingTx.maxFeePerGas || !!signingTx.maxPriorityFeePerGas;
             if (isEIP1559) {
-              signingTx.type = TransactionTypes.eip1559;
+              signingTx.type = EthTransactionType.eip1559;
             }
 
-            const signedTx = serialize(signingTx, signature);
+            signingTx.signature = "0x" + Buffer.from(signature).toString("hex");
+
+            const signedTx = signingTx.serialized;
 
             return signedTx;
           } catch (e) {

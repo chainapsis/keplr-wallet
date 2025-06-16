@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { _TypedDataEncoder as TypedDataEncoder } from "@ethersproject/hash";
+import { TypedDataEncoder } from "ethers";
 
 // https://eips.ethereum.org/EIPS/eip-712
 

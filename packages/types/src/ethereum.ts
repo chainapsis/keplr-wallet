@@ -51,3 +51,11 @@ export interface EthereumSignResponse {
   signingData: Uint8Array;
   signature: Uint8Array;
 }
+
+export enum EthTransactionType {
+  legacy = 0,
+  eip2930 = 1, // EIP-2930 Access List
+  eip1559 = 2, // EIP-1559 Fee Market
+  eip4844 = 3, // EIP-4844 Blob Support
+  eip7702 = 4, // EIP-7702 Set Code for EOAs
+}

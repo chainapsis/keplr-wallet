@@ -1,8 +1,8 @@
 import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 import { ChainGetter } from "@keplr-wallet/stores";
 import { FetchDebounce, NameService } from "./name-service";
-import { JsonRpcProvider } from "@ethersproject/providers";
 import { ITxChainSetter } from "./types";
+import { JsonRpcProvider } from "ethers";
 
 export class ENSNameService implements NameService {
   readonly type = "ens";

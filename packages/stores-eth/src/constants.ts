@@ -1,4 +1,4 @@
-import { Interface } from "@ethersproject/abi";
+import { Interface } from "ethers";
 
 export const erc20ContractInterface: Interface = new Interface([
   { inputs: [], stateMutability: "nonpayable", type: "constructor" },

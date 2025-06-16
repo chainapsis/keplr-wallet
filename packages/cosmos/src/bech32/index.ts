@@ -1,7 +1,7 @@
 import bech32, { fromWords } from "bech32";
 import { Bech32Config } from "@keplr-wallet/types";
 import { Buffer } from "buffer/";
-import { getAddress as getEthAddress } from "@ethersproject/address";
+import { getAddress as getEthAddress } from "ethers";
 
 export class Bech32Address {
   static shortenAddress(bech32: string, maxCharacters: number): string {
