@@ -268,7 +268,7 @@ export const connectAndSignMessageWithLedger = async (
   }
 
   try {
-    const starknetApp = new StarknetClient(transport);
+    const starknetApp = new StarknetClient(transport as any);
     const res = await starknetApp.signMessage(
       STARKNET_LEDGER_DERIVATION_PATH,
       message,
@@ -358,7 +358,7 @@ async function checkStarknetPubKey(
   }
 
   try {
-    const starknetApp = new StarknetClient(transport);
+    const starknetApp = new StarknetClient(transport as any);
 
     const res = await starknetApp.getPubKey(
       STARKNET_LEDGER_DERIVATION_PATH,

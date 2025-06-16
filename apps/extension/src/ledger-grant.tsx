@@ -392,7 +392,9 @@ const LedgerGrantPage: FunctionComponent = observer(() => {
                           const transport = await TransportWebHID.create();
 
                           try {
-                            const starknetApp = new StarknetClient(transport);
+                            const starknetApp = new StarknetClient(
+                              transport as any
+                            );
 
                             const res = await starknetApp.getPubKey(
                               STARKNET_LEDGER_DERIVATION_PATH,
