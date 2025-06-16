@@ -6,52 +6,52 @@ import { Box } from "../../../components/box";
 import { PageButton } from "../components";
 import { RightArrowIcon } from "../../../components/icon";
 import { Stack } from "../../../components/stack";
-import { Toggle } from "../../../components/toggle";
-import { useStore } from "../../../stores";
-import { useNavigate } from "react-router";
 import { useIntl } from "react-intl";
 
-export const SettingAdvancedPage: FunctionComponent = observer(() => {
-  const { uiConfigStore } = useStore();
+export const AboutKeplrPage: FunctionComponent = observer(() => {
   const intl = useIntl();
-
-  const navigate = useNavigate();
 
   return (
     <HeaderLayout
-      title={intl.formatMessage({ id: "page.setting.advanced-title" })}
+      title={intl.formatMessage({ id: "page.setting.about.title" })}
       left={<BackButton />}
     >
       <Box padding="0.75rem" paddingTop="0">
         <Stack gutter="0.5rem">
           <PageButton
             title={intl.formatMessage({
-              id: "page.setting.advanced.change-endpoints-title",
+              id: "page.setting.about.website",
             })}
             endIcon={<RightArrowIcon />}
-            onClick={() => navigate("/setting/advanced/endpoint")}
+            onClick={() => {
+              browser.tabs.create({
+                url: "https://keplr.app",
+              });
+            }}
           />
 
           <PageButton
             title={intl.formatMessage({
-              id: "page.setting.general.manage-authz-title",
+              id: "page.setting.about.terms-of-use",
             })}
             endIcon={<RightArrowIcon />}
-            onClick={() => navigate("/setting/general/authz")}
+            onClick={() => {
+              browser.tabs.create({
+                url: "https://terms-of-use.keplr.app/",
+              });
+            }}
           />
 
           <PageButton
             title={intl.formatMessage({
-              id: "page.setting.advanced.developer-mode-title",
+              id: "page.setting.about.privacy-policy",
             })}
-            endIcon={
-              <Toggle
-                isOpen={uiConfigStore.isDeveloper}
-                setIsOpen={() =>
-                  uiConfigStore.setDeveloperMode(!uiConfigStore.isDeveloper)
-                }
-              />
-            }
+            endIcon={<RightArrowIcon />}
+            onClick={() => {
+              browser.tabs.create({
+                url: "https://privacy-policy.keplr.app/",
+              });
+            }}
           />
         </Stack>
       </Box>
