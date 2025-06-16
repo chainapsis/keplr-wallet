@@ -3,7 +3,6 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../../stores";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { erc20ContractInterface } from "@keplr-wallet/stores-eth";
-import { BigNumber } from "@ethersproject/bignumber";
 import { IEthTxRenderer } from "../types";
 import { ItemLogo } from "../../../../main/token-detail/msg-items/logo";
 import { ColorPalette } from "../../../../../styles";
@@ -33,7 +32,9 @@ export const EthSendTokenTx: IEthTxRenderer = {
           !recipient ||
           typeof recipient !== "string" ||
           !amount ||
-          amount instanceof BigNumber === false
+          (typeof amount !== "string" &&
+            typeof amount !== "number" &&
+            typeof amount !== "bigint")
         ) {
           return undefined;
         }
@@ -69,7 +70,7 @@ export const EthSendTokenTx: IEthTxRenderer = {
             <EthSendTokenTxPretty
               chainId={chainId}
               recipient={recipient}
-              amount={amount.toHexString()}
+              amount={amount.toString()}
               erc20ContractAddress={erc20ContractAddress}
             />
           ),
@@ -86,7 +87,9 @@ export const EthSendTokenTx: IEthTxRenderer = {
         !recipient ||
         typeof recipient !== "string" ||
         !amount ||
-        typeof amount !== "string"
+        (typeof amount !== "string" &&
+          typeof amount !== "number" &&
+          typeof amount !== "bigint")
       ) {
         return undefined;
       }
@@ -122,7 +125,7 @@ export const EthSendTokenTx: IEthTxRenderer = {
           <EthSendTokenTxPretty
             chainId={chainId}
             recipient={recipient}
-            amount={amount}
+            amount={amount.toString()}
           />
         ),
       };

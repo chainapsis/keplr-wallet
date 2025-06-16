@@ -31,7 +31,7 @@ import {
 } from "@keplr-wallet/types";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
-import { id } from "@ethersproject/hash";
+import { id } from "ethers";
 
 export class RecentSendHistoryService {
   // Key: {chain_identifier}/{type}

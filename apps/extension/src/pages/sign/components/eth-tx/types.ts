@@ -1,10 +1,10 @@
+import { Transaction } from "ethers";
 import React from "react";
-import { UnsignedTransaction } from "@ethersproject/transactions";
 
 export interface IEthTxRenderer {
   process(
     chainId: string,
-    unsignedTx: UnsignedTransaction
+    unsignedTx: Transaction
   ):
     | {
         icon?: React.ReactElement;
@@ -19,7 +19,7 @@ export interface IEthTxRenderRegistry {
 
   render(
     chainId: string,
-    unsignedTx: UnsignedTransaction
+    unsignedTx: Transaction
   ): {
     icon?: React.ReactElement;
     title?: string | React.ReactElement;

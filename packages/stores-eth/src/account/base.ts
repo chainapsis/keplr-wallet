@@ -9,15 +9,14 @@ import {
 import { DenomHelper, retry } from "@keplr-wallet/common";
 import { erc20ContractInterface } from "../constants";
 import { hexValue } from "@ethersproject/bytes";
-import { parseUnits } from "@ethersproject/units";
 import {
-  TransactionTypes,
-  UnsignedTransaction,
-  serialize,
-} from "@ethersproject/transactions";
-import { getAddress as getEthAddress } from "@ethersproject/address";
+  Interface,
+  parseUnits,
+  getAddress as getEthAddress,
+  Transaction,
+} from "ethers";
 import { action, makeObservable, observable } from "mobx";
-import { Interface } from "@ethersproject/abi";
+import { EthTransactionType } from "@keplr-wallet/types";
 
 const opStackGasPriceOracleProxyAddress =
   "0x420000000000000000000000000000000000000F";
@@ -53,7 +52,7 @@ export class EthereumAccountBase {
     return this._isSendingTx;
   }
 
-  async simulateGas(sender: string, unsignedTx: UnsignedTransaction) {
+  async simulateGas(sender: string, unsignedTx: Transaction) {
     const chainInfo = this.chainGetter.getChain(this.chainId);
     const evmInfo = chainInfo.evm;
     if (!evmInfo) {
@@ -62,18 +61,20 @@ export class EthereumAccountBase {
 
     const { to, value, data } = unsignedTx;
 
+    const params = [
+      {
+        from: sender,
+        to,
+        value: hexValue(value),
+        data,
+      },
+    ];
+
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const keplr = (await this.getKeplr())!;
     const gasEstimated = await keplr.ethereum.request<string | undefined>({
       method: "eth_estimateGas",
-      params: [
-        {
-          from: sender,
-          to,
-          value,
-          data,
-        },
-      ],
+      params,
       chainId: this.chainId,
     });
 
@@ -107,29 +108,28 @@ export class EthereumAccountBase {
     const parsedAmount = parseUnits(amount, currency.coinDecimals);
     const denomHelper = new DenomHelper(currency.coinMinimalDenom);
 
-    const unsignedTx: UnsignedTransaction = (() => {
-      switch (denomHelper.type) {
-        case "erc20":
-          return {
-            to: denomHelper.contractAddress,
-            value: "0x0",
-            data: erc20ContractInterface.encodeFunctionData("transfer", [
-              tempRecipient,
-              hexValue(parsedAmount),
-            ]),
-          };
-        default:
-          return {
-            to: tempRecipient,
-            value: hexValue(parsedAmount),
-          };
-      }
-    })();
+    const unsignedTx = new Transaction();
+
+    switch (denomHelper.type) {
+      case "erc20":
+        unsignedTx.to = denomHelper.contractAddress;
+        unsignedTx.value = "0x0";
+        unsignedTx.data = erc20ContractInterface.encodeFunctionData(
+          "transfer",
+          [tempRecipient, hexValue(parsedAmount)]
+        );
+        break;
+      default:
+        unsignedTx.to = tempRecipient;
+        unsignedTx.value = hexValue(parsedAmount);
+        unsignedTx.data = "0x";
+        break;
+    }
 
     return this.simulateGas(sender, unsignedTx);
   }
 
-  async simulateOpStackL1Fee(unsignedTx: UnsignedTransaction): Promise<string> {
+  async simulateOpStackL1Fee(unsignedTx: Transaction): Promise<string> {
     const chainInfo = this.chainGetter.getChain(this.chainId);
     if (!chainInfo.features.includes("op-stack-l1-data-fee")) {
       throw new Error("The chain isn't built with OP Stack");
@@ -149,7 +149,7 @@ export class EthereumAccountBase {
         {
           to: opStackGasPriceOracleProxyAddress,
           data: opStackGasPriceOracleABI.encodeFunctionData("getL1Fee", [
-            serialize(unsignedTx),
+            unsignedTx.unsignedSerialized,
           ]),
         },
         "latest",
@@ -176,7 +176,7 @@ export class EthereumAccountBase {
     maxFeePerGas?: string;
     maxPriorityFeePerGas?: string;
     gasPrice?: string;
-  }): UnsignedTransaction {
+  }): Transaction {
     const parsedAmount = parseUnits(amount, currency.coinDecimals);
     const denomHelper = new DenomHelper(currency.coinMinimalDenom);
     const feeObject =
@@ -192,36 +192,27 @@ export class EthereumAccountBase {
           };
 
     // Support EIP-1559 transaction only.
-    const unsignedTx: UnsignedTransaction = (() => {
-      switch (denomHelper.type) {
-        case "erc20":
-          return {
-            ...this.makeTx(
-              denomHelper.contractAddress,
-              "0x0",
-              erc20ContractInterface.encodeFunctionData("transfer", [
-                to,
-                hexValue(parsedAmount),
-              ])
-            ),
-            ...feeObject,
-          };
-        default:
-          return {
-            ...this.makeTx(to, hexValue(parsedAmount)),
-            ...feeObject,
-          };
-      }
-    })();
-
-    return unsignedTx;
+    switch (denomHelper.type) {
+      case "erc20":
+        return this.makeTx(
+          denomHelper.contractAddress,
+          "0x0",
+          erc20ContractInterface.encodeFunctionData("transfer", [
+            to,
+            hexValue(parsedAmount),
+          ]),
+          feeObject
+        );
+      default:
+        return this.makeTx(to, hexValue(parsedAmount), undefined, feeObject);
+    }
   }
 
   makeErc20ApprovalTx(
     currency: ERC20Currency,
     spender: string,
     amount: string
-  ): UnsignedTransaction {
+  ): Transaction {
     const parsedAmount = parseUnits(amount, currency.coinDecimals);
 
     return this.makeTx(
@@ -234,24 +225,48 @@ export class EthereumAccountBase {
     );
   }
 
-  makeTx(to: string, value: string, data?: string): UnsignedTransaction {
+  makeTx(
+    to: string,
+    value: string,
+    data?: string,
+    fee?: {
+      maxFeePerGas?: string;
+      maxPriorityFeePerGas?: string;
+      gasPrice?: string;
+      gasLimit?: string;
+    }
+  ): Transaction {
     const chainInfo = this.chainGetter.getChain(this.chainId);
     const evmInfo = chainInfo.evm;
     if (!evmInfo) {
       throw new Error("No EVM chain info provided");
     }
 
-    return {
-      chainId: evmInfo.chainId,
-      to,
-      value,
-      data,
-    };
+    const tx = new Transaction();
+
+    tx.chainId = evmInfo.chainId;
+    tx.to = to;
+    tx.value = value;
+    tx.data = data ?? "0x";
+
+    if (fee) {
+      if (fee.maxFeePerGas && fee.maxPriorityFeePerGas) {
+        tx.type = EthTransactionType.eip1559;
+        tx.maxFeePerGas = fee.maxFeePerGas;
+        tx.maxPriorityFeePerGas = fee.maxPriorityFeePerGas;
+      } else if (fee.gasPrice) {
+        tx.type = EthTransactionType.legacy;
+        tx.gasPrice = fee.gasPrice;
+      }
+      tx.gasLimit = fee.gasLimit ?? 0;
+    }
+
+    return tx;
   }
 
   async sendEthereumTx(
     sender: string,
-    unsignedTx: UnsignedTransaction,
+    unsignedTx: Transaction,
     onTxEvents?: {
       onBroadcastFailed?: (e?: Error) => void;
       onBroadcasted?: (txHash: string) => void;
@@ -276,28 +291,28 @@ export class EthereumAccountBase {
         params: [sender, "pending"],
         chainId: this.chainId,
       });
-      unsignedTx = {
-        ...unsignedTx,
-        nonce: parseInt(transactionCount),
-      };
+
+      unsignedTx.nonce = parseInt(transactionCount);
 
       const signEthereum = keplr.signEthereum.bind(keplr);
 
       const signature = await signEthereum(
         this.chainId,
         sender,
-        JSON.stringify(unsignedTx),
+        JSON.stringify(unsignedTx.toJSON()),
         EthSignType.TRANSACTION
       );
 
       const isEIP1559 =
         !!unsignedTx.maxFeePerGas || !!unsignedTx.maxPriorityFeePerGas;
       if (isEIP1559) {
-        unsignedTx.type = TransactionTypes.eip1559;
+        unsignedTx.type = EthTransactionType.eip1559;
       }
 
+      unsignedTx.signature = "0x" + Buffer.from(signature).toString("hex");
+
       const signedTx = Buffer.from(
-        serialize(unsignedTx, signature).replace("0x", ""),
+        unsignedTx.serialized.replace("0x", ""),
         "hex"
       );
 

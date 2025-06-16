@@ -2,9 +2,9 @@ import React, { FunctionComponent, PropsWithChildren } from "react";
 import { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
 import { IEthTxRenderRegistry, IEthTxRenderer } from "./types";
-import { UnsignedTransaction } from "@ethersproject/transactions";
 import { EthSendTokenTx } from "./render";
 import { EthExecuteContractTx } from "./render/execute-contract";
+import { Transaction } from "ethers";
 
 export class EthTxRenderRegistry implements IEthTxRenderRegistry {
   protected renderers: IEthTxRenderer[] = [];
@@ -15,7 +15,7 @@ export class EthTxRenderRegistry implements IEthTxRenderRegistry {
 
   render(
     chainId: string,
-    unsignedTx: UnsignedTransaction
+    unsignedTx: Transaction
   ): {
     icon?: React.ReactElement;
     title?: string | React.ReactElement;

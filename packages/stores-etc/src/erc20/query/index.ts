@@ -3,8 +3,8 @@ import {
   ObservableJsonRPCQuery,
   QuerySharedContext,
 } from "@keplr-wallet/stores";
-import { Interface } from "@ethersproject/abi";
 import { computed, makeObservable } from "mobx";
+import { Interface } from "ethers";
 
 const erc20MetadataInterface: Interface = new Interface([
   {

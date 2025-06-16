@@ -517,10 +517,11 @@ export class IBCSwapAmountConfig extends AmountConfig {
     } else if (msg.type === "evmTx") {
       const ethereumAccount = this.ethereumAccountStore.getAccount(msg.chainId);
       const tx = ethereumAccount.makeTx(msg.to, msg.value, msg.data);
-      return {
-        ...tx,
-        requiredErc20Approvals: msg.requiredErc20Approvals,
-      };
+
+      return new UnsignedEVMTransactionWithErc20Approvals(
+        tx,
+        msg.requiredErc20Approvals
+      );
     } else if (msg.type === "MsgCCTP") {
       const tx = sourceAccount.cosmos.makeCCTPTx(
         msg.msgs[0].msg,

@@ -16,11 +16,7 @@
     "lint-fix": "npx eslint --fix \"src/**/*\" && npx prettier --write \"src/**/*\""
   },
   "dependencies": {
-    "@ethersproject/abi": "^5.7.0",
-    "@ethersproject/address": "^5.7.0",
-    "@ethersproject/bytes": "^5.7.0",
-    "@ethersproject/transactions": "^5.7.0",
-    "@ethersproject/units": "^5.7.0",
+    "@ethersproject/bytes": "^5.8.0",
     "@keplr-wallet/common": "0.12.241-rc.1",
     "@keplr-wallet/simple-fetch": "0.12.241-rc.1",
     "@keplr-wallet/stores": "0.12.241-rc.1",
@@ -32,6 +28,7 @@
     "utility-types": "^3.10.0"
   },
   "peerDependencies": {
+    "ethers": "^6",
     "mobx": "^6",
     "mobx-utils": "^6"
   },

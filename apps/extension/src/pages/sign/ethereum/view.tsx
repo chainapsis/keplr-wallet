@@ -31,7 +31,6 @@ import { KeystoneSign } from "../components/keystone";
 import { useTheme } from "styled-components";
 import SimpleBar from "simplebar-react";
 import { ViewDataButton } from "../components/view-data-button";
-import { UnsignedTransaction } from "@ethersproject/transactions";
 import { defaultRegistry } from "../components/eth-tx/registry";
 import { ChainImageFallback } from "../../../components/image";
 import { Gutter } from "../../../components/gutter";
@@ -55,6 +54,7 @@ import { useNavigate } from "react-router";
 import { ApproveIcon, CancelIcon } from "../../../components/button";
 import { EthereumArbitrarySignPage } from "./sign-arbitrary-page";
 import { HeaderProps } from "../../../layouts/header/types";
+import { Transaction, TransactionLike } from "ethers";
 
 /**
  * CosmosTxView의 주석을 꼭 참고하셈
@@ -139,15 +139,18 @@ export const EthereumSigningView: FunctionComponent<{
         throw new Error("Gas simulator is only working with EVM info");
       }
 
-      const unsignedTx = JSON.parse(Buffer.from(message).toString("utf8"));
+      const txLike: TransactionLike = JSON.parse(
+        Buffer.from(message).toString("utf8")
+      );
+      if (txLike.from) {
+        delete txLike.from;
+      }
+
+      const unsignedTx = Transaction.from(txLike);
 
       return {
         simulate: () =>
-          ethereumAccount.simulateGas(account.ethereumHexAddress, {
-            to: unsignedTx.to,
-            data: unsignedTx.data,
-            value: unsignedTx.value,
-          }),
+          ethereumAccount.simulateGas(account.ethereumHexAddress, unsignedTx),
       };
     }
   );
@@ -261,16 +264,17 @@ export const EthereumSigningView: FunctionComponent<{
   useEffect(() => {
     (async () => {
       if (isTxSigning && chainInfo.features.includes("op-stack-l1-data-fee")) {
-        const { to, gasLimit, value, data, chainId }: UnsignedTransaction =
+        const { to, gasLimit, value, data, chainId }: TransactionLike =
           JSON.parse(Buffer.from(message).toString("utf8"));
 
-        const l1DataFee = await ethereumAccount.simulateOpStackL1Fee({
-          to,
-          gasLimit,
-          value,
-          data,
-          chainId,
-        });
+        const tx = new Transaction();
+        tx.to = to ?? null;
+        tx.gasLimit = gasLimit ?? 0;
+        tx.value = value ?? BigInt(0);
+        tx.data = data ?? "0x";
+        tx.chainId = chainId ?? 0;
+
+        const l1DataFee = await ethereumAccount.simulateOpStackL1Fee(tx);
         feeConfig.setL1DataFee(new Dec(BigInt(l1DataFee)));
       }
     })();
@@ -718,9 +722,11 @@ export const EthereumSigningView: FunctionComponent<{
                     {(() => {
                       const { icon, title, content } = defaultRegistry.render(
                         interactionData.data.chainId,
-                        JSON.parse(
-                          Buffer.from(interactionData.data.message).toString()
-                        ) as UnsignedTransaction
+                        Transaction.from(
+                          JSON.parse(
+                            Buffer.from(interactionData.data.message).toString()
+                          ) as TransactionLike
+                        )
                       );
 
                       if (icon !== undefined && title !== undefined) {
