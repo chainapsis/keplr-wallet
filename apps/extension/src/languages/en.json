@@ -224,8 +224,7 @@
   "page.setting.manage-token-list-paragraph": "Only for the tokens that can be added manually via contract addresses",
   "page.setting.search-placeholder": "Search for the features",
 
-  "page.setting.advanced.developer-mode-title": "Developer Mode",
-  "page.setting.advanced.developer-mode-paragraph": "Feeling techie today? :)",
+  "page.setting.advanced.developer-mode-title": "Manual IBC Transfer",
   "page.setting.advanced.change-endpoints-title": "Change Endpoints",
 
   "page.setting.advanced.endpoint.confirm-title": "Set endpoints",

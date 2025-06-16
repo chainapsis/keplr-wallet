@@ -117,6 +117,7 @@ import { EarnTransferIntroPage } from "./pages/earn/transfer/intro";
 import { EarnTransferAmountPage } from "./pages/earn/transfer/amount";
 import { EarnOverviewPage } from "./pages/earn/overview";
 import { EarnWithdrawAmountPage } from "./pages/earn/withdraw/amount";
+import { AboutKeplrPage } from "./pages/setting/about";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -449,6 +450,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
                 path="/setting/general/link-keplr-mobile"
                 element={<SettingGeneralLinkKeplrMobilePage />}
               />
+              <Route path="/setting/about" element={<AboutKeplrPage />} />
               <Route
                 path="/setting/advanced"
                 element={<SettingAdvancedPage />}

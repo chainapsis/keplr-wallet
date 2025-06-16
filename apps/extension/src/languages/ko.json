@@ -224,8 +224,7 @@
   "page.setting.manage-token-list-paragraph": "컨트랙트 주소로 직접 추가할 수 있는 토큰만 여기서 관리할 수 있습니다.",
   "page.setting.search-placeholder": "기능 검색",
 
-  "page.setting.advanced.developer-mode-title": "개발자 모드",
-  "page.setting.advanced.developer-mode-paragraph": "오늘은 내가 바로 개발자? :)",
+  "page.setting.advanced.developer-mode-title": "고급 IBC 트랜스퍼",
   "page.setting.advanced.change-endpoints-title": "노드 주소 변경",
 
   "page.setting.advanced.endpoint.confirm-title": "노드 주소 설정",

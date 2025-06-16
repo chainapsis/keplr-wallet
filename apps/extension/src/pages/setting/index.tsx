@@ -3,7 +3,12 @@ import { observer } from "mobx-react-lite";
 import { useNavigate } from "react-router";
 import { Box } from "../../components/box";
 import { MainHeaderLayout } from "../main/layouts/header";
-import { Body2, Body3, Subtitle3 } from "../../components/typography";
+import {
+  Body2,
+  Body3,
+  Subtitle3,
+  Subtitle4,
+} from "../../components/typography";
 import { ColorPalette } from "../../styles";
 import { SettingList } from "./components/setting-list";
 import { useStore } from "../../stores";
@@ -28,9 +33,11 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { Image } from "../../components/image";
 import { Tooltip } from "../../components/tooltip";
 import { useTheme } from "styled-components";
+import { version } from "../../../package.json";
 
 export const SettingPage: FunctionComponent = observer(() => {
   const navigate = useNavigate();
+  const theme = useTheme();
 
   const { keyRingStore, uiConfigStore } = useStore();
 
@@ -329,14 +336,31 @@ export const SettingPage: FunctionComponent = observer(() => {
                     "Terms of Use",
                     "Privacy Policy",
                   ],
-                  onClick: () => {
-                    // TODO
-                  },
+                  onClick: () => navigate("/setting/about"),
                 },
               ],
             },
           ]}
         />
+        {hasSearchText ? null : (
+          <Box paddingX="1rem" paddingY="0.75rem" marginTop="1rem">
+            <XAxis alignY="center">
+              <Subtitle4 color={ColorPalette["gray-300"]}>
+                Extension Version
+              </Subtitle4>
+              <div style={{ flex: 1 }} />
+              <Body3
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-300"]
+                    : ColorPalette["gray-100"]
+                }
+              >
+                {version}
+              </Body3>
+            </XAxis>
+          </Box>
+        )}
       </Box>
     </MainHeaderLayout>
   );
