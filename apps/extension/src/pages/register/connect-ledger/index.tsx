@@ -317,7 +317,7 @@ export const ConnectLedgerScene: FunctionComponent<{
         }
         case "Starknet": {
           transport = await LedgerUtils.tryAppOpen(transport, propApp);
-          const starknetApp = new StarknetClient(transport);
+          const starknetApp = new StarknetClient(transport as any);
           const res = await starknetApp.getPubKey(
             STARKNET_LEDGER_DERIVATION_PATH,
             false
