@@ -169,7 +169,9 @@ export const SettingPage: FunctionComponent = observer(() => {
                           url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&skipWelcome=true`,
                         })
                         .then(() => {
-                          window.close();
+                          if (!isRunningInSidePanel()) {
+                            window.close();
+                          }
                         });
                     }
                   },
