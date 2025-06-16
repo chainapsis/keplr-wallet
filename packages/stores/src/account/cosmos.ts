@@ -1681,7 +1681,7 @@ export class CosmosAccountImpl {
   /**
    * Send `MsgDelegate` msg to the chain.
    * @param amount Decimal number used by humans.
-   *               If amount is 0.1 and the stake currenct is uatom, actual amount will be changed to the 100000uatom.
+   *               If amount is 0.1 and the stake current is uatom, actual amount will be changed to the 100000uatom.
    * @param validatorAddress
    * @param memo
    * @param onFulfill
