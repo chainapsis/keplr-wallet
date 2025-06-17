@@ -49,6 +49,8 @@ export interface ChainInfo {
   readonly hideInUI?: boolean;
 
   readonly evm?: EVMInfo;
+
+  readonly isTestnet?: boolean;
 }
 
 export type ChainInfoWithoutEndpoints = Omit<
@@ -86,12 +88,14 @@ export type ModularChainInfo =
       readonly chainId: string;
       readonly chainName: string;
       readonly chainSymbolImageUrl?: string;
+      readonly isTestnet?: boolean;
       readonly cosmos: ChainInfo;
     }
   | {
       readonly chainId: string;
       readonly chainName: string;
       readonly chainSymbolImageUrl?: string;
+      readonly isTestnet?: boolean;
       readonly starknet: StarknetChainInfo;
     }
   | {
@@ -99,5 +103,6 @@ export type ModularChainInfo =
       readonly chainName: string;
       readonly chainSymbolImageUrl?: string;
       readonly linkedChainKey: string;
+      readonly isTestnet?: boolean;
       readonly bitcoin: BitcoinChainInfo;
     };

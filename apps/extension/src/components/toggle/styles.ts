@@ -5,18 +5,34 @@ import { ToggleProps } from "./types";
 export const Styles = {
   Container: styled.div<
     Omit<ToggleProps, "setIsOpen"> & {
-      size?: "large" | "small" | "extra-small";
+      size?: "large" | "small" | "smaller" | "extra-small";
     }
   >`
     position: relative;
-    height: ${({ size }) =>
-      size === "extra-small" ? "1rem" : size === "small" ? "1.5rem" : "2rem"};
-    width: ${({ size }) =>
-      size === "extra-small"
-        ? "1.75rem"
-        : size === "small"
-        ? "2.4375rem"
-        : "3.25rem"};
+    height: ${({ size }) => {
+      switch (size) {
+        case "extra-small":
+          return "1rem";
+        case "smaller":
+          return "1.25rem";
+        case "small":
+          return "1.5rem";
+        default:
+          return "2rem";
+      }
+    }};
+    width: ${({ size }) => {
+      switch (size) {
+        case "extra-small":
+          return "1.75rem";
+        case "smaller":
+          return "2.25rem";
+        case "small":
+          return "2.4375rem";
+        default:
+          return "3.25rem";
+      }
+    }};
     padding: 0;
     background-color: ${({ isOpen, disabled, theme }) =>
       disabled
@@ -35,7 +51,7 @@ export const Styles = {
   `,
   Circle: styled.div<
     Omit<ToggleProps, "setIsOpen"> & {
-      size?: "large" | "small" | "extra-small";
+      size?: "large" | "small" | "smaller" | "extra-small";
     }
   >`
     position: absolute;
@@ -43,33 +59,58 @@ export const Styles = {
     align-items: center;
     justify-content: center;
 
-    height: ${({ size }) =>
-      size === "extra-small"
-        ? "0.75rem"
-        : size === "small"
-        ? "1.125rem"
-        : "1.5rem"};
-    width: ${({ size }) =>
-      size === "extra-small"
-        ? "0.75rem"
-        : size === "small"
-        ? "1.125rem"
-        : "1.5rem"};
+    height: ${({ size }) => {
+      switch (size) {
+        case "extra-small":
+          return "0.75rem";
+        case "smaller":
+          return "0.75rem";
+        case "small":
+          return "1.125rem";
+        default:
+          return "1.5rem";
+      }
+    }};
+    width: ${({ size }) => {
+      switch (size) {
+        case "extra-small":
+          return "0.75rem";
+        case "smaller":
+          return "0.75rem";
+        case "small":
+          return "1.125rem";
+        default:
+          return "1.5rem";
+      }
+    }};
 
     top: 50%;
     transform: translateY(-50%);
-    left: ${({ isOpen, size }) =>
-      isOpen
-        ? size === "extra-small"
-          ? "calc(1.75rem - 0.75rem - 0.125rem)"
-          : size === "small"
-          ? "calc(2.4375rem - 1.125rem - 0.1875rem)"
-          : "calc(3.25rem - 1.5rem - 0.25rem)"
-        : size === "extra-small"
-        ? "0.125rem"
-        : size === "small"
-        ? "0.1875rem"
-        : "0.25rem"};
+    left: ${({ isOpen, size }) => {
+      if (isOpen) {
+        switch (size) {
+          case "extra-small":
+            return "calc(1.75rem - 0.75rem - 0.125rem)";
+          case "smaller":
+            return "calc(2.25rem - 0.75rem - 0.25rem)";
+          case "small":
+            return "calc(2.4375rem - 1.125rem - 0.1875rem)";
+          default:
+            return "calc(3.25rem - 1.5rem - 0.25rem)";
+        }
+      }
+
+      switch (size) {
+        case "extra-small":
+          return "0.125rem";
+        case "smaller":
+          return "0.25rem";
+        case "small":
+          return "0.1875rem";
+        default:
+          return "0.25rem";
+      }
+    }};
 
     border-radius: 50%;
     background-color: ${({ isOpen, disabled, theme }) =>

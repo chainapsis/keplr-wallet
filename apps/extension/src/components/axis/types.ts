@@ -3,6 +3,7 @@ export type AxisAlignY = "top" | "bottom" | "center";
 
 export interface XAxisProps {
   alignY?: AxisAlignY;
+  wrap?: "nowrap" | "wrap" | "wrap-reverse";
   gap?: string;
 }
 

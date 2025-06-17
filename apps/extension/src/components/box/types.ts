@@ -37,6 +37,8 @@ export interface BoxProps {
   alignX?: BoxAlignX;
   alignY?: BoxAlignY;
 
+  transitions?: string[];
+
   cursor?: "pointer" | "not-allowed" | "progress" | "grab" | "grabbing";
 
   className?: string;

@@ -19,6 +19,7 @@ const keplr = new InjectedKeplr(
       if (!keplr.starknet.provider) {
         keplr.starknet.provider = new RpcProvider({
           nodeUrl: state.rpc,
+          specVersion: "0.8.1",
         });
       } else {
         keplr.starknet.provider.channel.nodeUrl = state.rpc;
@@ -28,11 +29,20 @@ const keplr = new InjectedKeplr(
     if (keplr.starknet.provider) {
       if (state.selectedAddress) {
         if (!keplr.starknet.account) {
-          keplr.starknet.account = new WalletAccount(
+          WalletAccount.connect(
             keplr.starknet.provider,
             keplr.generateStarknetProvider()
-          );
-          keplr.starknet.account.address = state.selectedAddress;
+          )
+            .then((account) => {
+              keplr.starknet.account = account;
+              if (state.selectedAddress) {
+                keplr.starknet.account.address = state.selectedAddress;
+              }
+            })
+            .catch((error) => {
+              console.error("Failed to connect starknet account:", error);
+              keplr.starknet.account = undefined;
+            });
         } else {
           keplr.starknet.account.address = state.selectedAddress;
         }

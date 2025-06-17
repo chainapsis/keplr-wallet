@@ -9,14 +9,19 @@ import { useTheme } from "styled-components";
 // eslint-disable-next-line react/display-name
 export const SearchTextInput = forwardRef<
   HTMLInputElement,
-  Omit<React.ComponentProps<typeof TextInput>, "left">
->((props, ref) => {
+  Omit<React.ComponentProps<typeof TextInput>, "left"> & {
+    alternativeSearchIcon?: React.ComponentType;
+  }
+>(({ alternativeSearchIcon: AlternativeSearchIcon, ...props }, ref) => {
   const theme = useTheme();
 
   return (
     <TextInput
       {...props}
       ref={ref}
+      inputStyle={{
+        paddingLeft: "0.5rem",
+      }}
       left={
         <Box
           style={{
@@ -31,7 +36,11 @@ export const SearchTextInput = forwardRef<
             })(),
           }}
         >
-          <SearchIcon width="1.25rem" height="1.25rem" />
+          {AlternativeSearchIcon ? (
+            <AlternativeSearchIcon />
+          ) : (
+            <SearchIcon width="1.25rem" height="1.25rem" />
+          )}
         </Box>
       }
     />

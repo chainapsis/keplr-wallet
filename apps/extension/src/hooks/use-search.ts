@@ -5,23 +5,87 @@ import throttle from "lodash.throttle";
 type SearchField<T> =
   | string
   | {
+      field: string;
+      minLength: number;
+    }
+  | {
       key: string;
       function: (item: T) => string;
     };
 
+/*
+  const data = {
+    title: "test",
+    items: [
+      { title: "item1" },
+      { title: "item2" },
+      { title: "item3", subtitles: ["sub1", "sub2"] }
+    ]
+  };
+
+  console.log(getNestedValue(data, "title")); // "test"
+  console.log(getNestedValue(data, "items[].title")); // ["item1", "item2", "item3"]
+  console.log(getNestedValue(data, "items[].subtitles[]")); // ["sub1", "sub2"]
+ */
 const getNestedValue = (obj: any, path: SearchField<any>): any => {
-  if (typeof path === "object") {
+  if (typeof path === "object" && "key" in path) {
     return path.function(obj);
   }
-  return path.split(".").reduce((currentObject, key) => {
-    return currentObject?.[key];
-  }, obj);
+  if (typeof path === "object" && "field" in path) {
+    path = path.field;
+  }
+
+  const segments = path.split(".");
+
+  const extract = (current: any, pathSegments: string[]): any => {
+    if (current == null) return undefined;
+    if (pathSegments.length === 0) return current;
+
+    const [head, ...tail] = pathSegments;
+
+    if (head.endsWith("[]")) {
+      const key = head.slice(0, -2);
+      const arr = current?.[key];
+
+      if (!Array.isArray(arr)) return undefined;
+
+      const results = arr.map((item) => extract(item, tail));
+
+      // flatten if next segment is also an array (e.g. "items[].subtitles[]")
+      return results.flat();
+    } else {
+      return extract(current?.[head], tail);
+    }
+  };
+
+  return extract(obj, segments);
 };
 
 const SCORE_EXACT = 5;
 const SCORE_PREFIX = 2;
 const SCORE_SUBSTRING = 1;
 const SCORE_NONE = -Infinity;
+
+const getScore = (
+  fieldValue: string,
+  queryLower: string,
+  index: number
+): number => {
+  if (!fieldValue) {
+    return SCORE_NONE;
+  }
+
+  if (fieldValue === queryLower) {
+    return SCORE_EXACT - index;
+  }
+  if (fieldValue.startsWith(queryLower)) {
+    return SCORE_PREFIX - index;
+  }
+  if (fieldValue.includes(queryLower)) {
+    return SCORE_SUBSTRING - index;
+  }
+  return SCORE_NONE;
+};
 
 const THROTTLE_DELAY = 500;
 
@@ -38,27 +102,43 @@ export function performSearch<T>(
   const matchedItems = data
     .map((item) => {
       const fieldMatchScores = fields.map((field, index) => {
-        const rawValue = getNestedValue(item, field);
-        const fieldValue =
-          rawValue != null ? String(rawValue).toLowerCase() : "";
-        if (typeof rawValue !== "string") {
-          console.log(`[Warning] field ${field} is not a string: ${rawValue}`);
-        }
-
-        if (!fieldValue) {
+        if (
+          typeof field === "object" &&
+          "minLength" in field &&
+          queryLower.length < field.minLength
+        ) {
           return SCORE_NONE;
         }
 
-        if (fieldValue === queryLower) {
-          return SCORE_EXACT - index;
+        const rawValue = getNestedValue(item, field);
+        if (Array.isArray(rawValue)) {
+          let highestScore = SCORE_NONE;
+          for (let i = 0; i < rawValue.length; i++) {
+            const fieldValue = String(rawValue[i]).toLowerCase();
+            if (typeof rawValue[i] !== "string") {
+              console.log(
+                `[Warning] field ${field} is not a string: ${rawValue[i]}`
+              );
+            }
+
+            const score = getScore(fieldValue, queryLower, index);
+            if (score > highestScore) {
+              highestScore = score;
+            }
+          }
+
+          return highestScore;
+        } else {
+          const fieldValue =
+            rawValue != null ? String(rawValue).toLowerCase() : "";
+          if (typeof rawValue !== "string") {
+            console.log(
+              `[Warning] field ${field} is not a string: ${rawValue}`
+            );
+          }
+
+          return getScore(fieldValue, queryLower, index);
         }
-        if (fieldValue.startsWith(queryLower)) {
-          return SCORE_PREFIX - index;
-        }
-        if (fieldValue.includes(queryLower)) {
-          return SCORE_SUBSTRING - index;
-        }
-        return SCORE_NONE;
       });
 
       const hasAnyMatch = fieldMatchScores.some((score) => score > SCORE_NONE);
@@ -135,6 +215,9 @@ export function useSearch<T>(
     .map((field) => {
       if (typeof field === "string") {
         return field;
+      }
+      if ("field" in field) {
+        return `${field.field}/${field.minLength}`;
       }
       return field.key;
     })

@@ -2,9 +2,12 @@ import { useIntl } from "react-intl";
 import { useStore } from "../../stores";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { Call, CallData, num } from "starknet";
-import { AppCurrency, ERC20Currency } from "@keplr-wallet/types";
+import { ERC20Currency } from "@keplr-wallet/types";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
-import { PrivilegeStarknetSignClaimRewardsMsg } from "@keplr-wallet/background";
+import {
+  PrivilegeStarknetSignClaimRewardsMsg,
+  SubmitStarknetTxHashMsg,
+} from "@keplr-wallet/background";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { ClaimAllEachState } from "./use-claim-all-each-state";
 import { useNavigate } from "react-router";
@@ -55,7 +58,6 @@ export const useStarknetClaimRewards = () => {
 
     state.setIsLoading(true);
 
-    // build tx
     const calls: Call[] = [];
 
     for (const claimableReward of claimableRewards) {
@@ -69,7 +71,6 @@ export const useStarknetClaimRewards = () => {
     }
 
     let STRK: ERC20Currency | undefined;
-    let ETH: ERC20Currency | undefined;
 
     if ("starknet" in modularChainInfo) {
       STRK = modularChainInfo.starknet.currencies.find(
@@ -77,56 +78,11 @@ export const useStarknetClaimRewards = () => {
           c.coinMinimalDenom ===
           `erc20:${modularChainInfo.starknet.strkContractAddress}`
       );
-      ETH = modularChainInfo.starknet.currencies.find(
-        (c) =>
-          c.coinMinimalDenom ===
-          `erc20:${modularChainInfo.starknet.ethContractAddress}`
-      );
     }
 
     (async () => {
       try {
-        // select fee currency
-        let feeCurrency = STRK || ETH;
-        if (STRK && ETH) {
-          // compare the price of balances of STRK and ETH
-          const querySTRK =
-            starknetQueries.queryStarknetERC20Balance.getBalance(
-              chainId,
-              chainStore,
-              account.starknetHexAddress,
-              STRK?.coinMinimalDenom
-            );
-          const queryETH = starknetQueries.queryStarknetERC20Balance.getBalance(
-            chainId,
-            chainStore,
-            account.starknetHexAddress,
-            ETH?.coinMinimalDenom
-          );
-
-          const strkBalance = querySTRK?.balance;
-          const ethBalance = queryETH?.balance;
-
-          if (strkBalance && ethBalance) {
-            const strkPrice = await priceStore.waitCalculatePrice(
-              strkBalance,
-              "usd"
-            );
-            const ethPrice = await priceStore.waitCalculatePrice(
-              ethBalance,
-              "usd"
-            );
-
-            if (strkPrice && ethPrice) {
-              if (strkPrice.sub(ethPrice).toDec().lt(zeroDec)) {
-                feeCurrency = STRK;
-              } else {
-                feeCurrency = ETH;
-              }
-            }
-          }
-        }
-
+        const feeCurrency = STRK;
         if (!feeCurrency) {
           throw new Error(
             intl.formatMessage({
@@ -135,103 +91,45 @@ export const useStarknetClaimRewards = () => {
           );
         }
 
-        // estimate fee
         const {
-          gas_consumed,
-          data_gas_consumed,
-          gas_price,
-          overall_fee,
-          resourceBounds,
-          unit,
+          l1_gas_consumed,
+          l1_gas_price,
+          l2_gas_consumed,
+          l2_gas_price,
+          l1_data_gas_consumed,
+          l1_data_gas_price,
         } = await starknetAccount.estimateInvokeFee(
           account.starknetHexAddress,
-          calls,
-          feeCurrency.coinDenom === "STRK" ? "STRK" : "ETH"
+          calls
         );
 
-        const gasMargin = new Dec(1.2);
-        const gasPriceMargin = new Dec(1.5);
+        const extraL2GasForOnchainVerification = account.isNanoLedger
+          ? new Dec(90240)
+          : new Dec(22039040);
 
-        const gasConsumedDec = new Dec(gas_consumed);
-        const dataGasConsumedDec = new Dec(data_gas_consumed);
-        const sigVerificationGasConsumedDec = new Dec(583);
-        const totalGasConsumed = gasConsumedDec
-          .add(dataGasConsumedDec)
-          .add(sigVerificationGasConsumedDec);
+        const adjustedL2GasConsumed = new Dec(l2_gas_consumed ?? 0).add(
+          extraL2GasForOnchainVerification
+        );
 
-        const gasPriceDec = new Dec(gas_price);
-        // overallFee는 (gas_consumed * gas_price + data_gas_consumed * data_gas_price)로 계산됨.
-        const overallFeeDec = new Dec(overall_fee);
+        const l1Fee = new Dec(l1_gas_consumed).mul(new Dec(l1_gas_price));
+        const l2Fee = adjustedL2GasConsumed.mul(new Dec(l2_gas_price ?? 0));
+        const l1DataFee = new Dec(l1_data_gas_consumed).mul(
+          new Dec(l1_data_gas_price)
+        );
 
-        const sigVerificationFee =
-          sigVerificationGasConsumedDec.mul(gasPriceDec);
+        const calculatedOverallFee = l1Fee.add(l2Fee).add(l1DataFee);
 
-        const adjustedOverallFee = overallFeeDec.add(sigVerificationFee);
+        const margin = new Dec(1.5);
 
-        const adjustedGasPrice = adjustedOverallFee.quo(totalGasConsumed);
+        const totalGasConsumed = new Dec(l1_gas_consumed)
+          .add(new Dec(l2_gas_consumed ?? 0))
+          .add(new Dec(l1_data_gas_consumed));
+
+        const adjustedGasPrice = calculatedOverallFee.quo(totalGasConsumed);
 
         const gasPrice = new CoinPretty(feeCurrency, adjustedGasPrice);
-
-        let fee:
-          | {
-              version: "v1" | "v3";
-              currency: AppCurrency;
-              gasPrice: CoinPretty;
-              maxGasPrice: CoinPretty;
-              gas: Dec;
-              maxGas: Dec;
-            }
-          | undefined;
-
-        if (feeCurrency.coinDenom === "ETH" && unit === "WEI") {
-          const maxGasPriceForETH = gasPrice.mul(gasPriceMargin);
-          const maxGasForETH = totalGasConsumed.mul(gasMargin);
-
-          fee = {
-            version: "v1",
-            currency: feeCurrency,
-            gasPrice,
-            maxGasPrice: maxGasPriceForETH,
-            gas: totalGasConsumed,
-            maxGas: maxGasForETH,
-          };
-        } else if (feeCurrency.coinDenom === "STRK" && unit === "FRI") {
-          const l1Gas = resourceBounds.l1_gas;
-
-          const maxGasForSTRK = adjustedOverallFee
-            .quo(gasPriceDec)
-            .mul(gasMargin);
-          const maxGasPriceForSTRK = gasPrice.mul(gasPriceMargin);
-
-          const maxPricePerUnitForSTRK = new CoinPretty(
-            feeCurrency,
-            num.hexToDecimalString(l1Gas.max_price_per_unit)
-          );
-
-          const finalMaxGasPriceForSTRK = maxPricePerUnitForSTRK
-            .sub(maxGasPriceForSTRK)
-            .toDec()
-            .gt(new Dec(0))
-            ? maxPricePerUnitForSTRK
-            : maxGasPriceForSTRK;
-
-          fee = {
-            version: "v3",
-            currency: feeCurrency,
-            gasPrice,
-            maxGasPrice: finalMaxGasPriceForSTRK,
-            gas: totalGasConsumed,
-            maxGas: maxGasForSTRK,
-          };
-        }
-
-        if (!fee) {
-          throw new Error(
-            intl.formatMessage({
-              id: "error.can-not-find-fee-for-claim-all",
-            })
-          );
-        }
+        const maxGasPrice = gasPrice.mul(margin);
+        const maxGas = totalGasConsumed.mul(margin);
 
         // compare the account balance and fee
         const feeCurrencyBalance =
@@ -242,11 +140,12 @@ export const useStarknetClaimRewards = () => {
             feeCurrency.coinMinimalDenom
           );
 
+        // compare the price of claimable rewards and fee (just consider maxGasPrice)
+        const maxFee = maxGasPrice.mul(maxGas);
+
         if (
           !feeCurrencyBalance ||
-          feeCurrencyBalance.balance
-            .toDec()
-            .lt(fee.maxGasPrice.mul(fee.gas).toDec())
+          feeCurrencyBalance.balance.toDec().lt(maxFee.toDec())
         ) {
           throw new Error(
             intl.formatMessage({
@@ -254,9 +153,6 @@ export const useStarknetClaimRewards = () => {
             })
           );
         }
-
-        // compare the price of claimable rewards and fee (just consider maxGasPrice)
-        const maxFee = fee.maxGasPrice.mul(fee.gas);
 
         const rewardsPrice = await priceStore.waitCalculatePrice(
           rewardToken,
@@ -281,33 +177,27 @@ export const useStarknetClaimRewards = () => {
           );
         }
 
-        // execute
+        const maxL1DataGas = new Dec(l1_data_gas_consumed).mul(margin);
+        const maxL1Gas = new Dec(l1_gas_consumed).mul(margin);
+        const maxL2Gas = adjustedL2GasConsumed.mul(margin);
+
+        const maxL1DataGasPrice = new Dec(l1_data_gas_price).mul(margin);
+        const maxL1GasPrice = new Dec(l1_gas_price).mul(margin);
+        const maxL2GasPrice = new Dec(l2_gas_price ?? 0).mul(margin);
+
         const { transaction_hash: txHash } = await starknetAccount.execute(
           account.starknetHexAddress,
           calls,
-          fee.version === "v3"
-            ? {
-                type: "STRK",
-                gas: fee.gas.roundUp().toString(),
-                maxGasPrice: fee.maxGasPrice
-                  .mul(new Dec(10 ** fee.currency.coinDecimals))
-                  .toDec()
-                  .roundUp()
-                  .toString(),
-              }
-            : {
-                type: "ETH",
-                maxFee: fee.maxGasPrice
-                  .mul(fee.maxGas)
-                  .mul(new Dec(10 ** fee.currency.coinDecimals))
-                  .toDec()
-                  .roundUp()
-                  .toString(),
-              },
+          {
+            l1MaxGas: maxL1Gas.truncate().toString(),
+            l1MaxGasPrice: maxL1GasPrice.truncate().toString(),
+            l1MaxDataGas: maxL1DataGas.truncate().toString(),
+            l1MaxDataGasPrice: maxL1DataGasPrice.truncate().toString(),
+            l2MaxGas: maxL2Gas.truncate().toString(),
+            l2MaxGasPrice: maxL2GasPrice.truncate().toString(),
+          },
           async (chainId, calls, details) => {
-            const requester = new InExtensionMessageRequester();
-
-            return await requester.sendMessage(
+            return await new InExtensionMessageRequester().sendMessage(
               BACKGROUND_PORT,
               new PrivilegeStarknetSignClaimRewardsMsg(chainId, calls, details)
             );
@@ -372,7 +262,6 @@ export const useStarknetClaimRewards = () => {
     }
 
     let STRK: ERC20Currency | undefined;
-    let ETH: ERC20Currency | undefined;
 
     if ("starknet" in modularChainInfo) {
       STRK = modularChainInfo.starknet.currencies.find(
@@ -380,14 +269,9 @@ export const useStarknetClaimRewards = () => {
           c.coinMinimalDenom ===
           `erc20:${modularChainInfo.starknet.strkContractAddress}`
       );
-      ETH = modularChainInfo.starknet.currencies.find(
-        (c) =>
-          c.coinMinimalDenom ===
-          `erc20:${modularChainInfo.starknet.ethContractAddress}`
-      );
     }
 
-    const feeCurrency = STRK || ETH;
+    const feeCurrency = STRK;
     if (!feeCurrency) {
       return;
     }
@@ -408,131 +292,84 @@ export const useStarknetClaimRewards = () => {
       state.setIsSimulating(true);
 
       const {
-        gas_consumed,
-        data_gas_consumed,
-        gas_price,
-        overall_fee,
-        unit,
-        resourceBounds,
+        l1_gas_consumed,
+        l1_gas_price,
+        l2_gas_consumed,
+        l2_gas_price,
+        l1_data_gas_consumed,
+        l1_data_gas_price,
       } = await starknetAccount.estimateInvokeFee(
         account.starknetHexAddress,
-        calls,
-        feeCurrency.coinDenom === "STRK" ? "STRK" : "ETH"
+        calls
       );
 
-      const gasMargin = new Dec(1.2);
-      const gasPriceMargin = new Dec(1.5);
+      const extraL2GasForOnchainVerification = account.isNanoLedger
+        ? new Dec(90240)
+        : new Dec(22039040);
 
-      const gasConsumedDec = new Dec(gas_consumed);
-      const dataGasConsumedDec = new Dec(data_gas_consumed);
-      const sigVerificationGasConsumedDec = new Dec(583);
-      const totalGasConsumed = gasConsumedDec
-        .add(dataGasConsumedDec)
-        .add(sigVerificationGasConsumedDec);
+      const adjustedL2GasConsumed = new Dec(l2_gas_consumed ?? 0).add(
+        extraL2GasForOnchainVerification
+      );
 
-      const gasPriceDec = new Dec(gas_price);
-      const overallFeeDec = new Dec(overall_fee);
+      const margin = new Dec(1.5);
 
-      const sigVerificationFee = sigVerificationGasConsumedDec.mul(gasPriceDec);
+      const maxL1DataGas = new Dec(l1_data_gas_consumed).mul(margin);
+      const maxL1Gas = new Dec(l1_gas_consumed).mul(margin);
+      const maxL2Gas = adjustedL2GasConsumed.mul(margin);
 
-      const adjustedOverallFee = overallFeeDec.add(sigVerificationFee);
-
-      const adjustedGasPrice = adjustedOverallFee.quo(totalGasConsumed);
-
-      const gasPrice = new CoinPretty(feeCurrency, adjustedGasPrice);
-
-      let fee:
-        | {
-            version: "v1" | "v3";
-            currency: AppCurrency;
-            gasPrice: CoinPretty;
-            maxGasPrice: CoinPretty;
-            gas: Dec;
-            maxGas: Dec;
-          }
-        | undefined;
-
-      if (feeCurrency.coinDenom === "ETH" && unit === "WEI") {
-        const maxGasPriceForETH = gasPrice.mul(gasPriceMargin);
-        const maxGasForETH = totalGasConsumed.mul(gasMargin);
-
-        fee = {
-          version: "v1",
-          currency: feeCurrency,
-          gasPrice,
-          maxGasPrice: maxGasPriceForETH,
-          gas: totalGasConsumed,
-          maxGas: maxGasForETH,
-        };
-      } else if (feeCurrency.coinDenom === "STRK" && unit === "FRI") {
-        const l1Gas = resourceBounds.l1_gas;
-
-        const maxGasForSTRK = adjustedOverallFee
-          .quo(gasPriceDec)
-          .mul(gasMargin);
-        const maxGasPriceForSTRK = gasPrice.mul(gasPriceMargin);
-
-        const maxPricePerUnitForSTRK = new CoinPretty(
-          feeCurrency,
-          num.hexToDecimalString(l1Gas.max_price_per_unit)
-        );
-
-        const finalMaxGasPriceForSTRK = maxPricePerUnitForSTRK
-          .sub(maxGasPriceForSTRK)
-          .toDec()
-          .gt(new Dec(0))
-          ? maxPricePerUnitForSTRK
-          : maxGasPriceForSTRK;
-
-        fee = {
-          version: "v3",
-          currency: feeCurrency,
-          gasPrice,
-          maxGasPrice: finalMaxGasPriceForSTRK,
-          gas: totalGasConsumed,
-          maxGas: maxGasForSTRK,
-        };
-      }
-
-      if (!fee) {
-        throw new Error(
-          intl.formatMessage({
-            id: "error.can-not-find-fee-for-claim-all",
-          })
-        );
-      }
+      const maxL1DataGasPrice = new Dec(l1_data_gas_price).mul(margin);
+      const maxL1GasPrice = new Dec(l1_gas_price).mul(margin);
+      const maxL2GasPrice = new Dec(l2_gas_price ?? 0).mul(margin);
 
       const { transaction_hash: txHash } = await starknetAccount.execute(
         account.starknetHexAddress,
         calls,
-        fee.version === "v3"
-          ? {
-              type: "STRK",
-              gas: fee.gas.roundUp().toString(),
-              maxGasPrice: fee.maxGasPrice
-                .mul(new Dec(10 ** fee.currency.coinDecimals))
-                .toDec()
-                .roundUp()
-                .toString(),
-            }
-          : {
-              type: "ETH",
-              maxFee: fee.maxGasPrice
-                .mul(fee.maxGas)
-                .mul(new Dec(10 ** fee.currency.coinDecimals))
-                .toDec()
-                .roundUp()
-                .toString(),
-            }
+        {
+          l1MaxGas: num.toHex(maxL1Gas.truncate().toString()),
+          l1MaxGasPrice: num.toHex(maxL1GasPrice.truncate().toString()),
+          l1MaxDataGas: num.toHex(maxL1DataGas.truncate().toString()),
+          l1MaxDataGasPrice: num.toHex(maxL1DataGasPrice.truncate().toString()),
+          l2MaxGas: num.toHex(maxL2Gas.truncate().toString()),
+          l2MaxGasPrice: num.toHex(maxL2GasPrice.truncate().toString()),
+        }
       );
       if (!txHash) {
         throw new Error("Failed to claim rewards");
       }
 
-      analyticsStore.logEvent("complete_claim", {
-        chainId: modularChainInfo.chainId,
-        chainName: modularChainInfo.chainName,
-      });
+      new InExtensionMessageRequester()
+        .sendMessage(
+          BACKGROUND_PORT,
+          new SubmitStarknetTxHashMsg(chainId, txHash)
+        )
+        .then(() => {
+          starknetQueries.queryStarknetERC20Balance
+            .getBalance(
+              chainId,
+              chainStore,
+              account.starknetHexAddress,
+              feeCurrency.coinMinimalDenom
+            )
+            ?.fetch();
+
+          notification.show(
+            "success",
+            intl.formatMessage({
+              id: "notification.transaction-success",
+            }),
+            ""
+          );
+
+          analyticsStore.logEvent("complete_claim", {
+            chainId: modularChainInfo.chainId,
+            chainName: modularChainInfo.chainName,
+          });
+        })
+        .catch((e) => {
+          // 이 경우에는 tx가 커밋된 이후의 오류이기 때문에 이미 페이지는 sign 페이지에서부터 전환된 상태다.
+          // 따로 멀 처리해줄 필요가 없다
+          console.log(e);
+        });
 
       navigate("/", {
         replace: true,

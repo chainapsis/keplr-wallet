@@ -127,6 +127,7 @@ function setOutputHash(root, hash) {
       "babylon/epoching/v1/tx.proto",
       "babylon/incentive/tx.proto",
       "babylon/btcstaking/v1/tx.proto",
+      "atomone/photon/v1/tx.proto",
     ];
 
     const thirdPartyInputs = ["tendermint/crypto/keys.proto"];

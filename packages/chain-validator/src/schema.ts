@@ -279,6 +279,7 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
     }),
   chainSymbolImageUrl: Joi.string().uri(),
   hideInUI: Joi.boolean(),
+  isTestnet: Joi.boolean(),
 }).custom((value: ChainInfo) => {
   if (value.nodeProvider) {
     if (!value.nodeProvider.email && !value.nodeProvider.discord) {
