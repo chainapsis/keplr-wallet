@@ -1452,15 +1452,6 @@ export const EnableChainsScene: FunctionComponent<{
                   nativeGroupedModularChainInfos.length ===
                   enabledNativeChainIdentifiersInPage.length
                 ) {
-                  analyticsAmplitudeStore.logEvent(
-                    "click_all_native_chain_btn_register"
-                  );
-                }
-
-                if (
-                  nativeGroupedModularChainInfos.length ===
-                  enabledNativeChainIdentifiersInPage.length
-                ) {
                   if (backupSelectedNativeChainIdentifiers.length > 0) {
                     setEnabledChainIdentifiers([
                       ...enabledSuggestChainIdentifiers,
@@ -2469,6 +2460,9 @@ export const EnableChainsScene: FunctionComponent<{
 
                 // Amplitude Analytics
                 try {
+                  const allNativeChainsEnabled =
+                    nativeGroupedModularChainInfos.length ===
+                    enabledNativeChainIdentifiersInPage.length;
                   const enabledIds = Array.from(enablesSet);
 
                   const nonKcrChainCount = enabledIds.filter(
@@ -2510,7 +2504,7 @@ export const EnableChainsScene: FunctionComponent<{
                   });
 
                   analyticsAmplitudeStore.logEvent(
-                    "save_enable_chains_btn_register",
+                    "click_save_enable_chains_btn_register",
                     {
                       durationMs: performance.now() - pageMountedAtRef.current,
                       enabledChainCount: enabledIds.length,
@@ -2520,6 +2514,7 @@ export const EnableChainsScene: FunctionComponent<{
                       evmEnabledCount: ecosystemCounts.evm,
                       starknetEnabledCount: ecosystemCounts.starknet,
                       bitcoinEnabledCount: ecosystemCounts.bitcoin,
+                      allNativeChainsEnabled,
                     }
                   );
 
@@ -2531,6 +2526,7 @@ export const EnableChainsScene: FunctionComponent<{
                     evm_enabled_count: ecosystemCounts.evm,
                     starknet_enabled_count: ecosystemCounts.starknet,
                     bitcoin_enabled_count: ecosystemCounts.bitcoin,
+                    all_native_chains_enabled: allNativeChainsEnabled,
                   });
                 } catch (e) {
                   console.error(
