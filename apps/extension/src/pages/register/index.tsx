@@ -40,6 +40,7 @@ import {
   ConnectKeystoneUSBScene,
 } from "./connect-keystone";
 import { ScanKeystoneScene } from "./connect-keystone/scan";
+import { useEffectOnce } from "../../hooks/use-effect-once";
 
 const Container = styled.div`
   min-width: 100vw;
@@ -97,7 +98,7 @@ export const RegisterPage: FunctionComponent = observer(() => {
 });
 
 const RegisterPageImpl: FunctionComponent = observer(() => {
-  const { chainStore } = useStore();
+  const { chainStore, analyticsAmplitudeStore } = useStore();
 
   const sceneRef = useRef<SceneTransitionRef | null>(null);
   const theme = useTheme();
@@ -237,6 +238,10 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
   });
 
   const headerContext = useRegisterHeaderContext(initials.header);
+
+  useEffectOnce(() => {
+    analyticsAmplitudeStore.logEvent("view_page_register");
+  });
 
   return (
     <RegisterHeaderProvider {...headerContext}>

@@ -27,7 +27,7 @@ import { ColorPalette } from "../../../styles";
 import { useEffectOnce } from "../../../hooks/use-effect-once";
 import { useNavigate } from "react-router";
 import { ChainImageFallback } from "../../../components/image";
-import { KeyRingCosmosService } from "@keplr-wallet/background";
+import { KeyRingCosmosService, KeyRingService } from "@keplr-wallet/background";
 import { WalletStatus } from "@keplr-wallet/stores";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { TextButton } from "../../../components/button-text";
@@ -128,6 +128,7 @@ export const EnableChainsScene: FunctionComponent<{
 
     const searchRef = useRef<HTMLInputElement | null>(null);
     const buttonContainerRef = useRef<HTMLDivElement>(null);
+    const pageMountedAtRef = useRef(performance.now());
     useScrollDownWhenCantSeeSaveButton(buttonContainerRef);
 
     const nativeChainIdentifierSet = useMemo(
@@ -139,6 +140,16 @@ export const EnableChainsScene: FunctionComponent<{
             }
             return true;
           }).map(
+            (chainInfo) => ChainIdHelper.parse(chainInfo.chainId).identifier
+          )
+        ),
+      []
+    );
+
+    const embedChainIdentifierSet = useMemo(
+      () =>
+        new Set(
+          EmbedChainInfos.map(
             (chainInfo) => ChainIdHelper.parse(chainInfo.chainId).identifier
           )
         ),
@@ -1441,6 +1452,15 @@ export const EnableChainsScene: FunctionComponent<{
                   nativeGroupedModularChainInfos.length ===
                   enabledNativeChainIdentifiersInPage.length
                 ) {
+                  analyticsAmplitudeStore.logEvent(
+                    "click_all_native_chain_btn_register"
+                  );
+                }
+
+                if (
+                  nativeGroupedModularChainInfos.length ===
+                  enabledNativeChainIdentifiersInPage.length
+                ) {
                   if (backupSelectedNativeChainIdentifiers.length > 0) {
                     setEnabledChainIdentifiers([
                       ...enabledSuggestChainIdentifiers,
@@ -2445,6 +2465,78 @@ export const EnableChainsScene: FunctionComponent<{
                   } else {
                     replaceToWelcomePage();
                   }
+                }
+
+                // Amplitude Analytics
+                try {
+                  const enabledIds = Array.from(enablesSet);
+
+                  const nonKcrChainCount = enabledIds.filter(
+                    (id) => !embedChainIdentifierSet.has(id)
+                  ).length;
+
+                  const ecosystemCounts: {
+                    cosmos: number;
+                    evm: number;
+                    starknet: number;
+                    bitcoin: number;
+                  } = {
+                    cosmos: 0,
+                    evm: 0,
+                    starknet: 0,
+                    bitcoin: 0,
+                  };
+                  const ecosystemMix: (keyof typeof ecosystemCounts)[] = [];
+
+                  enabledIds.forEach((id) => {
+                    let eco: keyof typeof ecosystemCounts = "cosmos";
+                    const modularInfo = chainStore.getModularChain(id);
+
+                    if ("bitcoin" in modularInfo) {
+                      eco = "bitcoin";
+                    } else if ("starknet" in modularInfo) {
+                      eco = "starknet";
+                    } else if ("cosmos" in modularInfo) {
+                      const chainInfo = chainStore.getChain(id);
+                      const isEthermintLike =
+                        KeyRingService.isEthermintLike(chainInfo);
+                      eco = isEthermintLike ? "evm" : "cosmos";
+                    }
+
+                    ecosystemCounts[eco] += 1;
+                    if (!ecosystemMix.includes(eco)) {
+                      ecosystemMix.push(eco);
+                    }
+                  });
+
+                  analyticsAmplitudeStore.logEvent(
+                    "save_enable_chains_btn_register",
+                    {
+                      durationMs: performance.now() - pageMountedAtRef.current,
+                      enabledChainCount: enabledIds.length,
+                      nonKcrChainCount,
+                      ecosystemMix,
+                      cosmosEnabledCount: ecosystemCounts.cosmos,
+                      evmEnabledCount: ecosystemCounts.evm,
+                      starknetEnabledCount: ecosystemCounts.starknet,
+                      bitcoinEnabledCount: ecosystemCounts.bitcoin,
+                    }
+                  );
+
+                  analyticsAmplitudeStore.setUserProperties({
+                    enabled_chain_count: enabledIds.length,
+                    non_kcr_chain_count: nonKcrChainCount,
+                    ecosystem_mix: ecosystemMix,
+                    cosmos_enabled_count: ecosystemCounts.cosmos,
+                    evm_enabled_count: ecosystemCounts.evm,
+                    starknet_enabled_count: ecosystemCounts.starknet,
+                    bitcoin_enabled_count: ecosystemCounts.bitcoin,
+                  });
+                } catch (e) {
+                  console.error(
+                    "[Analytics] Failed to log save_enable_chains_btn_register",
+                    e
+                  );
                 }
               }}
             />
