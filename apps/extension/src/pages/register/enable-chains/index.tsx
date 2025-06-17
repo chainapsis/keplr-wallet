@@ -2453,7 +2453,16 @@ export const EnableChainsScene: FunctionComponent<{
                   const allNativeChainsEnabled =
                     nativeGroupedModularChainInfos.length ===
                     enabledNativeChainIdentifiersInPage.length;
+
                   const enabledIds = Array.from(enablesSet);
+
+                  const betaEnabledCount = enabledIds.filter((id) => {
+                    const chainInfo = chainStore.getChain(id);
+                    if (chainInfo.beta) {
+                      return true;
+                    }
+                    return false;
+                  }).length;
 
                   const testnetEnabledCount = enabledIds.filter((id) => {
                     if (id.includes("test") || id.includes("devnet")) {
@@ -2505,6 +2514,7 @@ export const EnableChainsScene: FunctionComponent<{
                       durationMs: performance.now() - pageMountedAtRef.current,
                       enabledChainCount: enabledIds.length,
                       testnetEnabledCount,
+                      betaEnabledCount,
                       cosmosEnabledCount: ecosystemCounts.cosmos,
                       evmEnabledCount: ecosystemCounts.evm,
                       starknetEnabledCount: ecosystemCounts.starknet,
@@ -2516,6 +2526,7 @@ export const EnableChainsScene: FunctionComponent<{
                   analyticsAmplitudeStore.setUserProperties({
                     enabled_chain_count: enabledIds.length,
                     testnet_enabled_count: testnetEnabledCount,
+                    beta_enabled_count: betaEnabledCount,
                     cosmos_enabled_count: ecosystemCounts.cosmos,
                     evm_enabled_count: ecosystemCounts.evm,
                     starknet_enabled_count: ecosystemCounts.starknet,
