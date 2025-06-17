@@ -103,6 +103,7 @@ import {
 } from "@keplr-wallet/proto-types/babylon/epoching/v1/tx";
 import { MsgWithdrawReward as BabylonMsgWithdrawReward } from "@keplr-wallet/proto-types/babylon/incentive/tx";
 import { MsgCreateBTCDelegation } from "@keplr-wallet/proto-types/babylon/btcstaking/v1/tx";
+import { MsgMintPhoton } from "@keplr-wallet/proto-types/atomone/photon/v1/tx";
 export * from "./unknown";
 
 export type AnyWithUnpacked = Any | (Any & { unpacked: unknown });
@@ -545,4 +546,8 @@ defaultProtoCodec.registerAny(
 defaultProtoCodec.registerAny(
   "/babylon.btcstaking.v1.MsgCreateBTCDelegation",
   MsgCreateBTCDelegation
+);
+defaultProtoCodec.registerAny(
+  "/atomone.photon.v1.MsgMintPhoton",
+  MsgMintPhoton
 );

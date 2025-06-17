@@ -1,0 +1,13 @@
+syntax = "proto3";
+package atomone.photon.v1;
+
+import "gogoproto/gogo.proto";
+import "atomone/photon/v1/photon.proto";
+import "amino/amino.proto";
+
+option go_package = "github.com/atomone-hub/atomone/x/photon/types";
+
+// GenesisState defines the x/photon module's genesis state.
+message GenesisState {
+	Params params = 1 [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+}
