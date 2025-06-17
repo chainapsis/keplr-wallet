@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@ethersproject/bytes": "^5.8.0",
+    "@ethersproject/hash": "^5.8.0",
     "@keplr-wallet/chain-validator": "0.12.240",
     "@keplr-wallet/common": "0.12.240",
     "@keplr-wallet/cosmos": "0.12.240",
