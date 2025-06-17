@@ -276,12 +276,16 @@ export const connectAndSignEthWithLedger = async (
           const txLike: TransactionLike = JSON.parse(
             Buffer.from(message).toString()
           );
+          if (txLike.from) {
+            delete txLike.from;
+          }
+
           const tx = Transaction.from(txLike);
           const isEIP1559 = !!tx.maxFeePerGas || !!tx.maxPriorityFeePerGas;
           if (isEIP1559) {
             tx.type = EthTransactionType.eip1559;
           }
-          const rlpArray = tx.serialized.replace("0x", "");
+          const rlpArray = tx.unsignedSerialized.replace("0x", "");
 
           return ethSignatureToBytes(
             await ethApp.signTransaction(
