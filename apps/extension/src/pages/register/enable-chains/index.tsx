@@ -2458,24 +2458,18 @@ export const EnableChainsScene: FunctionComponent<{
 
                   const betaEnabledCount = enabledIds.filter((id) => {
                     const chainInfo = chainStore.getChain(id);
-                    if (chainInfo.beta) {
-                      return true;
-                    }
-                    return false;
+                    return chainInfo.beta;
                   }).length;
 
                   const testnetEnabledCount = enabledIds.filter((id) => {
                     if (id.includes("test") || id.includes("devnet")) {
                       return true;
                     }
-                    const modularInfo = chainStore.getModularChain(id);
-                    if (
-                      modularInfo.chainName.toLowerCase().includes("test") ||
-                      modularInfo.chainName.toLowerCase().includes("devnet")
-                    ) {
-                      return true;
-                    }
-                    return false;
+                    const chainInfo = chainStore.getChain(id);
+                    return (
+                      chainInfo.chainName.toLowerCase().includes("test") ||
+                      chainInfo.chainName.toLowerCase().includes("devnet")
+                    );
                   }).length;
 
                   const ecosystemCounts: {
