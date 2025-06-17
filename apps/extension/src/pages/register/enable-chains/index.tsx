@@ -2455,8 +2455,6 @@ export const EnableChainsScene: FunctionComponent<{
                     enabledNativeChainIdentifiersInPage.length;
                   const enabledIds = Array.from(enablesSet);
 
-                  const nonKcrChainCount = nonNativeChainListForSuggest.length;
-
                   const testnetEnabledCount = enabledIds.filter((id) => {
                     if (id.includes("test") || id.includes("devnet")) {
                       return true;
@@ -2506,7 +2504,6 @@ export const EnableChainsScene: FunctionComponent<{
                     {
                       durationMs: performance.now() - pageMountedAtRef.current,
                       enabledChainCount: enabledIds.length,
-                      nonKcrChainCount,
                       testnetEnabledCount,
                       cosmosEnabledCount: ecosystemCounts.cosmos,
                       evmEnabledCount: ecosystemCounts.evm,
@@ -2518,7 +2515,6 @@ export const EnableChainsScene: FunctionComponent<{
 
                   analyticsAmplitudeStore.setUserProperties({
                     enabled_chain_count: enabledIds.length,
-                    non_kcr_chain_count: nonKcrChainCount,
                     testnet_enabled_count: testnetEnabledCount,
                     cosmos_enabled_count: ecosystemCounts.cosmos,
                     evm_enabled_count: ecosystemCounts.evm,
