@@ -52,7 +52,7 @@ export const ReceiveModal: FunctionComponent<{
         .split(":")[0];
       const network = GENESIS_HASH_TO_NETWORK[genesisHash as GenesisHash];
       if (network) {
-        return `${account.bitcoinAddress?.bech32Address}@${network}`;
+        return `bitcoin:${account.bitcoinAddress?.bech32Address}?message=${network}`;
       }
     }
 
