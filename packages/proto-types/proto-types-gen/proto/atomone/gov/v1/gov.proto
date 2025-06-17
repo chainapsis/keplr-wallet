@@ -1,0 +1,369 @@
+// Since: cosmos-sdk 0.46
+syntax = "proto3";
+package atomone.gov.v1;
+
+import "cosmos/base/v1beta1/coin.proto";
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
+import "google/protobuf/duration.proto";
+import "cosmos_proto/cosmos.proto";
+import "amino/amino.proto";
+
+option go_package = "github.com/atomone-hub/atomone/x/gov/types/v1";
+
+// VoteOption enumerates the valid vote options for a given governance proposal.
+enum VoteOption {
+  // VOTE_OPTION_UNSPECIFIED defines a no-op vote option.
+  VOTE_OPTION_UNSPECIFIED = 0;
+  // VOTE_OPTION_YES defines a yes vote option.
+  VOTE_OPTION_YES = 1;
+  // VOTE_OPTION_ABSTAIN defines an abstain vote option.
+  VOTE_OPTION_ABSTAIN = 2;
+  // VOTE_OPTION_NO defines a no vote option.
+  VOTE_OPTION_NO = 3;
+}
+
+// WeightedVoteOption defines a unit of vote for vote split.
+message WeightedVoteOption {
+  // option defines the valid vote options, it must not contain duplicate vote
+  // options.
+  VoteOption option = 1;
+
+  // weight is the vote weight associated with the vote option.
+  string weight = 2 [ (cosmos_proto.scalar) = "cosmos.Dec" ];
+}
+
+// Deposit defines an amount deposited by an account address to an active
+// proposal.
+message Deposit {
+  // proposal_id defines the unique id of the proposal.
+  uint64 proposal_id = 1;
+
+  // depositor defines the deposit addresses from the proposals.
+  string depositor = 2 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+
+  // amount to be deposited by depositor.
+  repeated cosmos.base.v1beta1.Coin amount = 3
+      [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+}
+
+// LastMinDeposit is a record of the last time the minimum deposit
+// was updated in the store, both its value and a timestamp
+message LastMinDeposit {
+  // value is the value of the minimum deposit
+  repeated cosmos.base.v1beta1.Coin value = 1
+      [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+
+  // time is the time the minimum deposit was last updated
+  google.protobuf.Timestamp time = 2 [ (gogoproto.stdtime) = true ];
+}
+
+// Proposal defines the core field members of a governance proposal.
+message Proposal {
+  // id defines the unique id of the proposal.
+  uint64 id = 1;
+
+  // messages are the arbitrary messages to be executed if the proposal passes.
+  repeated google.protobuf.Any messages = 2;
+
+  // status defines the proposal status.
+  ProposalStatus status = 3;
+
+  // final_tally_result is the final tally result of the proposal. When
+  // querying a proposal via gRPC, this field is not populated until the
+  // proposal's voting period has ended.
+  TallyResult final_tally_result = 4;
+
+  // submit_time is the time of proposal submission.
+  google.protobuf.Timestamp submit_time = 5 [ (gogoproto.stdtime) = true ];
+
+  // deposit_end_time is the end time for deposition.
+  google.protobuf.Timestamp deposit_end_time = 6 [ (gogoproto.stdtime) = true ];
+
+  // total_deposit is the total deposit on the proposal.
+  repeated cosmos.base.v1beta1.Coin total_deposit = 7
+      [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+
+  // voting_start_time is the starting time to vote on a proposal.
+  google.protobuf.Timestamp voting_start_time = 8
+      [ (gogoproto.stdtime) = true ];
+
+  // voting_end_time is the end time of voting on a proposal.
+  google.protobuf.Timestamp voting_end_time = 9 [ (gogoproto.stdtime) = true ];
+
+  // metadata is any arbitrary metadata attached to the proposal.
+  string metadata = 10;
+
+  // title is the title of the proposal
+  //
+  // Since: cosmos-sdk 0.47
+  string title = 11;
+
+  // summary is a short summary of the proposal
+  //
+  // Since: cosmos-sdk 0.47
+  string summary = 12;
+
+  // Proposer is the address of the proposal sumbitter
+  //
+  // Since: cosmos-sdk 0.47
+  string proposer = 13 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+}
+
+// ProposalStatus enumerates the valid statuses of a proposal.
+enum ProposalStatus {
+  // PROPOSAL_STATUS_UNSPECIFIED defines the default proposal status.
+  PROPOSAL_STATUS_UNSPECIFIED = 0;
+  // PROPOSAL_STATUS_DEPOSIT_PERIOD defines a proposal status during the deposit
+  // period.
+  PROPOSAL_STATUS_DEPOSIT_PERIOD = 1;
+  // PROPOSAL_STATUS_VOTING_PERIOD defines a proposal status during the voting
+  // period.
+  PROPOSAL_STATUS_VOTING_PERIOD = 2;
+  // PROPOSAL_STATUS_PASSED defines a proposal status of a proposal that has
+  // passed.
+  PROPOSAL_STATUS_PASSED = 3;
+  // PROPOSAL_STATUS_REJECTED defines a proposal status of a proposal that has
+  // been rejected.
+  PROPOSAL_STATUS_REJECTED = 4;
+  // PROPOSAL_STATUS_FAILED defines a proposal status of a proposal that has
+  // failed.
+  PROPOSAL_STATUS_FAILED = 5;
+}
+
+// TallyResult defines a standard tally for a governance proposal.
+message TallyResult {
+  // yes_count is the number of yes votes on a proposal.
+  string yes_count = 1 [ (cosmos_proto.scalar) = "cosmos.Int" ];
+  // abstain_count is the number of abstain votes on a proposal.
+  string abstain_count = 2 [ (cosmos_proto.scalar) = "cosmos.Int" ];
+  // no_count is the number of no votes on a proposal.
+  string no_count           = 3 [(cosmos_proto.scalar) = "cosmos.Int"];
+}
+
+// Vote defines a vote on a governance proposal.
+// A Vote consists of a proposal ID, the voter, and the vote option.
+message Vote {
+  // proposal_id defines the unique id of the proposal.
+  uint64 proposal_id = 1;
+
+  // voter is the voter address of the proposal.
+  string voter = 2 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+
+  reserved 3;
+
+  // options is the weighted vote options.
+  repeated WeightedVoteOption options = 4;
+
+  // metadata is any  arbitrary metadata to attached to the vote.
+  string metadata = 5;
+}
+
+// QuorumCheckQueueEntry defines a quorum check queue entry.
+message QuorumCheckQueueEntry {
+  // quorum_timeout_time is the time after which quorum checks start happening
+  // and voting period is extended if proposal reaches quorum.
+  google.protobuf.Timestamp quorum_timeout_time = 1 [(gogoproto.stdtime) = true];
+
+  // quorum_check_count is the number of times quorum will be checked.
+  // This is a snapshot of the parameter value with the same name when the
+  // proposal is initially added to the queue.
+  uint64 quorum_check_count = 2;
+
+  // quorum_checks_done is the number of quorum checks that have been done.
+  uint64 quorum_checks_done = 3;
+}
+
+// DepositParams defines the params for deposits on governance proposals.
+message DepositParams {
+  // Minimum deposit for a proposal to enter voting period.
+  repeated cosmos.base.v1beta1.Coin min_deposit = 1 [
+    (gogoproto.nullable) = false,
+    (gogoproto.jsontag) = "min_deposit,omitempty"
+  ];
+
+  // Maximum period for Atom holders to deposit on a proposal. Initial value: 2
+  // months.
+  google.protobuf.Duration max_deposit_period = 2 [
+    (gogoproto.stdduration) = true,
+    (gogoproto.jsontag) = "max_deposit_period,omitempty"
+  ];
+}
+
+// VotingParams defines the params for voting on governance proposals.
+message VotingParams {
+  // Duration of the voting period.
+  google.protobuf.Duration voting_period = 1 [ (gogoproto.stdduration) = true ];
+}
+
+// TallyParams defines the params for tallying votes on governance proposals.
+message TallyParams {
+  // Minimum percentage of total stake needed to vote for a result to be
+  // considered valid.
+  string quorum = 1 [ (cosmos_proto.scalar) = "cosmos.Dec", deprecated = true];
+
+  // Minimum proportion of Yes votes for proposal to pass. Default value: 2/3.
+  string threshold = 2 [(cosmos_proto.scalar) = "cosmos.Dec"];
+
+  // quorum for constitution amendment proposals
+  string constitution_amendment_quorum = 3 [(cosmos_proto.scalar) = "cosmos.Dec", deprecated = true];
+
+  // Minimum proportion of Yes votes for a Constitution Amendment proposal to pass. Default value: 0.9.
+  string constitution_amendment_threshold = 4 [(cosmos_proto.scalar) = "cosmos.Dec"];
+
+  // quorum for law proposals
+  string law_quorum = 5 [(cosmos_proto.scalar) = "cosmos.Dec", deprecated = true];
+
+  // Minimum proportion of Yes votes for a Law proposal to pass. Default value: 0.9.
+  string law_threshold = 6 [(cosmos_proto.scalar) = "cosmos.Dec"];
+}
+
+message MinDepositThrottler {
+  // Floor value for the minimum deposit required for a proposal to enter the voting period.
+  repeated cosmos.base.v1beta1.Coin floor_value = 1
+  [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+
+  // Duration that dictates after how long the dynamic minimum deposit should be recalculated
+  // for time-based decreases.
+  google.protobuf.Duration update_period = 2 [(gogoproto.stdduration) = true];
+
+  // The number of active proposals the dynamic minimum deposit should target.
+  uint64 target_active_proposals = 3;
+
+  // The ratio of increase for the minimum deposit when the number of active proposals
+  // is at or above the target.
+  string increase_ratio = 4 [(cosmos_proto.scalar) = "cosmos.Dec"];
+
+  // The ratio of decrease for the minimum deposit when the number of active proposals
+  // is 1 less than the target.
+  string decrease_ratio = 5 [(cosmos_proto.scalar) = "cosmos.Dec"];
+
+  // A positive integer representing the sensitivity of dynamic minimum deposit 
+  // decreases to the distance from the target number of active proposals.
+  // The higher the number, the lower the sensitivity. A value of 1 represents the
+  // highest sensitivity.
+  uint64 decrease_sensitivity_target_distance = 6;
+}
+
+message MinInitialDepositThrottler {
+  // Floor value for the minimum initial deposit required for a proposal to enter the deposit period.
+  repeated cosmos.base.v1beta1.Coin floor_value = 1
+  [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+
+  // Duration that dictates after how long the dynamic minimum deposit should be recalculated
+  // for time-based decreases.
+  google.protobuf.Duration update_period = 2 [(gogoproto.stdduration) = true];
+
+  // The number of proposals in deposit period the dynamic minimum initial deposit should target.
+  uint64 target_proposals = 3;
+
+  // The ratio of increase for the minimum initial deposit when the number of proposals
+  // in deposit period is at or above the target.
+  string increase_ratio = 4 [(cosmos_proto.scalar) = "cosmos.Dec"];
+
+  // The ratio of decrease for the minimum initial deposit when the number of proposals
+  // in deposit period is 1 less than the target.
+  string decrease_ratio = 5 [(cosmos_proto.scalar) = "cosmos.Dec"];
+
+  // A positive integer representing the sensitivity of dynamic minimum initial 
+  // deposit decreases to the distance from the target number of proposals
+  // in deposit period. The higher the number, the lower the sensitivity. A value 
+  // of 1 represents the highest sensitivity.
+  uint64 decrease_sensitivity_target_distance = 6;
+}
+
+// Params defines the parameters for the x/gov module.
+//
+// Since: cosmos-sdk 0.47
+message Params {
+  // Minimum deposit for a proposal to enter voting period.
+  // Deprecated: a dynamic system now determines the minimum deposit,
+  // see the other params inside the min_deposit_throttler field.
+  // While setting this value returns an error, when queried it is set to the
+  // value of the current minimum deposit value as determined by the dynamic
+  // system for backward compatibility.
+  repeated cosmos.base.v1beta1.Coin min_deposit = 1
+      [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true, deprecated = true ];
+
+  // Maximum period for Atom holders to deposit on a proposal. Initial value: 2
+  // months.
+  google.protobuf.Duration max_deposit_period = 2
+      [ (gogoproto.stdduration) = true ];
+
+  // Duration of the voting period.
+  google.protobuf.Duration voting_period = 3 [ (gogoproto.stdduration) = true ];
+
+  //  Minimum percentage of total stake needed to vote for a result to be
+  //  considered valid. Default value: 0.25.
+  string quorum = 4 [(cosmos_proto.scalar) = "cosmos.Dec", deprecated = true];
+
+  //  Minimum proportion of Yes votes for proposal to pass. Default value: 2/3.
+  string threshold = 5 [(cosmos_proto.scalar) = "cosmos.Dec"];
+
+  //  The ratio representing the proportion of the deposit value that must be paid at proposal submission.
+  string min_initial_deposit_ratio = 7 [(cosmos_proto.scalar) = "cosmos.Dec", deprecated = true ];
+
+  // burn deposits if a proposal does not meet quorum
+  bool burn_vote_quorum = 13;
+
+  // burn deposits if the proposal does not enter voting period
+  bool burn_proposal_deposit_prevote = 14;
+
+  // The ratio representing the proportion of the deposit value minimum that
+  // must be met when making a deposit. Default value: 0.01. Meaning that for a
+  // chain with a min_deposit of 100stake, a deposit of 1stake would be
+  // required.
+  //
+  // Since: cosmos-sdk 0.50
+  // NOTE: backported from v50 (https://github.com/cosmos/cosmos-sdk/pull/18146)
+  string min_deposit_ratio = 15 [ (cosmos_proto.scalar) = "cosmos.Dec" ];
+
+  // quorum for constitution amendment proposals
+  string constitution_amendment_quorum = 16 [(cosmos_proto.scalar) = "cosmos.Dec", deprecated = true];
+
+  // Minimum proportion of Yes votes for a Constitution Amendment proposal to pass. Default value: 0.9.
+  string constitution_amendment_threshold = 17 [(cosmos_proto.scalar) = "cosmos.Dec"];
+
+  // quorum for law proposals
+  string law_quorum = 18 [(cosmos_proto.scalar) = "cosmos.Dec", deprecated = true];
+
+  // Minimum proportion of Yes votes for a Law proposal to pass. Default value: 0.9.
+  string law_threshold = 19 [(cosmos_proto.scalar) = "cosmos.Dec"];
+
+  // Duration of time after a proposal enters the voting period, during which quorum
+  // must be achieved to not incur in a voting period extension.
+  google.protobuf.Duration quorum_timeout = 20 [(gogoproto.stdduration) = true];
+
+  // Duration that expresses the maximum amount of time by which a proposal voting period
+  // can be extended.
+  google.protobuf.Duration max_voting_period_extension = 21 [(gogoproto.stdduration) = true];
+
+  // Number of times a proposal should be checked for quorum after the quorum timeout
+  // has elapsed. Used to compute the amount of time in between quorum checks.
+  uint64 quorum_check_count = 22;
+
+  MinDepositThrottler min_deposit_throttler = 23;
+
+  MinInitialDepositThrottler min_initial_deposit_throttler = 24;
+
+  // Minimum proportion of No Votes for a proposal deposit to be burnt.
+  string burn_deposit_no_threshold = 25 [(cosmos_proto.scalar) = "cosmos.Dec"];
+
+  // Achievable quorum
+  QuorumRange quorum_range = 26 [(cosmos_proto.scalar) = "cosmos.Dec"];
+
+  // Achievable quorum for constitution amendment proposals
+  QuorumRange constitution_amendment_quorum_range = 27 [(cosmos_proto.scalar) = "cosmos.Dec"];
+
+  // Achievable quorum for law proposals
+  QuorumRange law_quorum_range = 28 [(cosmos_proto.scalar) = "cosmos.Dec"];
+}
+
+message QuorumRange {
+  // Maximum achievable quorum
+  string max = 1 [(cosmos_proto.scalar) = "cosmos.Dec"];
+
+  // Minimum achievable quorum
+  string min = 2 [(cosmos_proto.scalar) = "cosmos.Dec"];
+}

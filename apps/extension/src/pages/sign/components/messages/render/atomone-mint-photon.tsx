@@ -12,7 +12,7 @@ export const AtomoneMintPhotonMessage: IMessageRenderer = {
   process(_chainId: string, msg) {
     if (
       ("type" in msg && msg.type === "atomone/photon/v1/MsgMintPhoton") ||
-      ("typeUrl" in msg && msg.typeUrl === "/atomone.photon.v1.MsgMintPhoton")
+      ("unpacked" in msg && msg.typeUrl === "/atomone.photon.v1.MsgMintPhoton")
     ) {
       return {
         icon: (
