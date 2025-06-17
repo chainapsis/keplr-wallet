@@ -10,7 +10,6 @@ import {
   Body2,
   BaseTypography,
   Subtitle3,
-  Body3,
   Caption1,
 } from "../../../../components/typography";
 import { ColorPalette } from "../../../../styles";
@@ -362,19 +361,19 @@ export const EcosystemsSelector: FunctionComponent<{
                   theme.mode === "light"
                     ? ColorPalette["gray-100"]
                     : ColorPalette["gray-500"],
-                cursor: "pointer",
-              }}
-              onClick={() => {
-                setSelectionState(null);
               }}
             >
               <Box
                 alignY="center"
                 alignX="left"
+                cursor="pointer"
                 style={{
                   display: "flex",
                   flexDirection: "row",
                   gap: "0.25rem",
+                }}
+                onClick={() => {
+                  setSelectionState(null);
                 }}
               >
                 <ArrowLeftIcon
@@ -460,7 +459,6 @@ export const EcosystemOverview: FunctionComponent<{
             key={section.chainId}
             paddingX="1rem"
             paddingY="1.25rem"
-            cursor="pointer"
             backgroundColor={
               theme.mode === "light"
                 ? ColorPalette["white"]
@@ -474,19 +472,8 @@ export const EcosystemOverview: FunctionComponent<{
                   ? ColorPalette["gray-100"]
                   : ColorPalette["gray-500"],
             }}
-            hover={{
-              backgroundColor:
-                theme.mode === "light"
-                  ? ColorPalette["gray-50"]
-                  : ColorPalette["gray-550"],
-            }}
-            onClick={() => {
-              setSelectionState({
-                ecosystemType: section.type,
-              });
-            }}
           >
-            <Columns sum={1} alignY="center" gutter="0.5rem">
+            <Columns sum={1} alignY="center">
               <Subtitle3
                 color={
                   theme.mode === "light"
@@ -497,24 +484,43 @@ export const EcosystemOverview: FunctionComponent<{
                 {EcosystemTypeToText[section.type]}
               </Subtitle3>
               <div style={{ flex: 1 }} />
-              <XAxis alignY="center">
-                <ChainImageFallback chainInfo={chainInfo} size="1.5rem" />
-                <Gutter size="0.5rem" />
-                <Body3
-                  color={
-                    theme.mode === "light"
-                      ? ColorPalette["gray-700"]
-                      : ColorPalette["white"]
-                  }
-                >
-                  {chainInfo.chainName}
-                </Body3>
-              </XAxis>
-              <RightArrowIcon
-                color={ColorPalette["gray-300"]}
-                width="1rem"
-                height="1rem"
-              />
+              <Box
+                cursor="pointer"
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                }}
+                hover={{
+                  opacity: 0.6,
+                }}
+                onClick={() => {
+                  setSelectionState({
+                    ecosystemType: section.type,
+                  });
+                }}
+              >
+                <XAxis alignY="center">
+                  <ChainImageFallback chainInfo={chainInfo} size="1.5rem" />
+                  <Gutter size="0.5rem" />
+
+                  <Subtitle3
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-700"]
+                        : ColorPalette["white"]
+                    }
+                  >
+                    {chainInfo.chainName}
+                  </Subtitle3>
+                </XAxis>
+                <RightArrowIcon
+                  color={ColorPalette["gray-300"]}
+                  width="1rem"
+                  height="1rem"
+                />
+              </Box>
             </Columns>
             <EcosystemSpecificOptionsRenderer
               section={section}
@@ -573,27 +579,12 @@ const EcosystemOptionItem: FunctionComponent<{
       key={optionKey}
       marginTop="1.25rem"
       padding="0.75rem"
-      cursor="pointer"
       backgroundColor={
         theme.mode === "light"
           ? ColorPalette["gray-50"]
           : ColorPalette["gray-550"]
       }
       borderRadius="0.375rem"
-      hover={{
-        backgroundColor:
-          theme.mode === "light"
-            ? ColorPalette["gray-100"]
-            : ColorPalette["gray-500"],
-      }}
-      onHoverStateChange={setIsHovered}
-      onClick={(e) => {
-        e.stopPropagation();
-        setSelectionState({
-          ecosystemType: section.type,
-          selectionMode: parsed.config.selectionMode as any,
-        });
-      }}
     >
       <Caption1
         color={
@@ -616,27 +607,44 @@ const EcosystemOptionItem: FunctionComponent<{
           {parsed.displayName}
         </Subtitle3>
         <div style={{ flex: 1 }} />
-        {parsed.secondaryText && (
-          <Body2
+        <Box
+          cursor="pointer"
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            gap: "0.375rem",
+          }}
+          onHoverStateChange={setIsHovered}
+          onClick={(e) => {
+            e.stopPropagation();
+            setSelectionState({
+              ecosystemType: section.type,
+              selectionMode: parsed.config.selectionMode as any,
+            });
+          }}
+        >
+          {parsed.secondaryText && (
+            <Body2
+              color={
+                isHovered
+                  ? ColorPalette["gray-300"]
+                  : theme.mode === "light"
+                  ? ColorPalette["gray-400"]
+                  : ColorPalette["gray-200"]
+              }
+            >
+              {parsed.secondaryText}
+            </Body2>
+          )}
+          <RightArrowIcon
             color={
-              isHovered
-                ? ColorPalette["gray-300"]
-                : theme.mode === "light"
-                ? ColorPalette["gray-400"]
-                : ColorPalette["gray-200"]
+              isHovered ? ColorPalette["gray-400"] : ColorPalette["gray-300"]
             }
-          >
-            {parsed.secondaryText}
-          </Body2>
-        )}
-        <Gutter size="0.375rem" />
-        <RightArrowIcon
-          color={
-            isHovered ? ColorPalette["gray-400"] : ColorPalette["gray-300"]
-          }
-          width="1rem"
-          height="1rem"
-        />
+            width="1rem"
+            height="1rem"
+          />
+        </Box>
       </XAxis>
     </Box>
   );
