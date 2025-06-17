@@ -82,7 +82,7 @@ export function encodeEthMessage(
         tx.type = EthTransactionType.eip1559;
       }
 
-      return Buffer.from(tx.serialized.replace(/^0x/, ""), "hex");
+      return Buffer.from(tx.unsignedSerialized.replace(/^0x/, ""), "hex");
     case EthSignType.MESSAGE:
     case EthSignType.EIP712:
       return Buffer.from(message);
