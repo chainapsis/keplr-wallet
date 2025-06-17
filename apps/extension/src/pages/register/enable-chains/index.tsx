@@ -146,16 +146,6 @@ export const EnableChainsScene: FunctionComponent<{
       []
     );
 
-    const embedChainIdentifierSet = useMemo(
-      () =>
-        new Set(
-          EmbedChainInfos.map(
-            (chainInfo) => ChainIdHelper.parse(chainInfo.chainId).identifier
-          )
-        ),
-      []
-    );
-
     const tokensByChainIdentifier =
       hugeQueriesStore.allTokenMapByChainIdentifier;
 
@@ -2465,9 +2455,21 @@ export const EnableChainsScene: FunctionComponent<{
                     enabledNativeChainIdentifiersInPage.length;
                   const enabledIds = Array.from(enablesSet);
 
-                  const nonKcrChainCount = enabledIds.filter(
-                    (id) => !embedChainIdentifierSet.has(id)
-                  ).length;
+                  const nonKcrChainCount = nonNativeChainListForSuggest.length;
+
+                  const testnetEnabledCount = enabledIds.filter((id) => {
+                    if (id.includes("test") || id.includes("devnet")) {
+                      return true;
+                    }
+                    const modularInfo = chainStore.getModularChain(id);
+                    if (
+                      modularInfo.chainName.toLowerCase().includes("test") ||
+                      modularInfo.chainName.toLowerCase().includes("devnet")
+                    ) {
+                      return true;
+                    }
+                    return false;
+                  }).length;
 
                   const ecosystemCounts: {
                     cosmos: number;
@@ -2480,7 +2482,6 @@ export const EnableChainsScene: FunctionComponent<{
                     starknet: 0,
                     bitcoin: 0,
                   };
-                  const ecosystemMix: (keyof typeof ecosystemCounts)[] = [];
 
                   enabledIds.forEach((id) => {
                     let eco: keyof typeof ecosystemCounts = "cosmos";
@@ -2498,9 +2499,6 @@ export const EnableChainsScene: FunctionComponent<{
                     }
 
                     ecosystemCounts[eco] += 1;
-                    if (!ecosystemMix.includes(eco)) {
-                      ecosystemMix.push(eco);
-                    }
                   });
 
                   analyticsAmplitudeStore.logEvent(
@@ -2509,7 +2507,7 @@ export const EnableChainsScene: FunctionComponent<{
                       durationMs: performance.now() - pageMountedAtRef.current,
                       enabledChainCount: enabledIds.length,
                       nonKcrChainCount,
-                      ecosystemMix,
+                      testnetEnabledCount,
                       cosmosEnabledCount: ecosystemCounts.cosmos,
                       evmEnabledCount: ecosystemCounts.evm,
                       starknetEnabledCount: ecosystemCounts.starknet,
@@ -2521,7 +2519,7 @@ export const EnableChainsScene: FunctionComponent<{
                   analyticsAmplitudeStore.setUserProperties({
                     enabled_chain_count: enabledIds.length,
                     non_kcr_chain_count: nonKcrChainCount,
-                    ecosystem_mix: ecosystemMix,
+                    testnet_enabled_count: testnetEnabledCount,
                     cosmos_enabled_count: ecosystemCounts.cosmos,
                     evm_enabled_count: ecosystemCounts.evm,
                     starknet_enabled_count: ecosystemCounts.starknet,
