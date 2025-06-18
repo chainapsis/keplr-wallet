@@ -59,7 +59,7 @@ export const createBitcoinSpecificOptions = (
       getSecondaryText: (value: string) => {
         const address = accountStore.getAccount(`${currentChainId}:${value}`)
           ?.bitcoinAddress?.bech32Address;
-        return address ? Bech32Address.shortenAddress(address, 20) : undefined;
+        return address ? Bech32Address.shortenAddress(address, 15) : undefined;
       },
       footerText:
         "Select the address type you'd like to use with the web application.",
