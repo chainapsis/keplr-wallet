@@ -27,7 +27,7 @@ import { ColorPalette } from "../../../styles";
 import { useEffectOnce } from "../../../hooks/use-effect-once";
 import { useNavigate } from "react-router";
 import { ChainImageFallback } from "../../../components/image";
-import { KeyRingCosmosService, KeyRingService } from "@keplr-wallet/background";
+import { KeyRingCosmosService } from "@keplr-wallet/background";
 import { WalletStatus } from "@keplr-wallet/stores";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { TextButton } from "../../../components/button-text";
@@ -2493,10 +2493,7 @@ export const EnableChainsScene: FunctionComponent<{
                     } else if ("starknet" in modularInfo) {
                       eco = "starknet";
                     } else if ("cosmos" in modularInfo) {
-                      const chainInfo = chainStore.getChain(id);
-                      const isEthermintLike =
-                        KeyRingService.isEthermintLike(chainInfo);
-                      eco = isEthermintLike ? "evm" : "cosmos";
+                      eco = chainStore.isEvmOnlyChain(id) ? "evm" : "cosmos";
                     }
 
                     ecosystemCounts[eco] += 1;
