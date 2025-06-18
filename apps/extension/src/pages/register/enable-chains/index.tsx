@@ -128,6 +128,7 @@ export const EnableChainsScene: FunctionComponent<{
 
     const searchRef = useRef<HTMLInputElement | null>(null);
     const buttonContainerRef = useRef<HTMLDivElement>(null);
+    const pageMountedAtRef = useRef(performance.now());
     useScrollDownWhenCantSeeSaveButton(buttonContainerRef);
 
     const nativeChainIdentifierSet = useMemo(
@@ -2445,6 +2446,89 @@ export const EnableChainsScene: FunctionComponent<{
                   } else {
                     replaceToWelcomePage();
                   }
+                }
+
+                // Amplitude Analytics
+                try {
+                  const allNativeChainsEnabled =
+                    nativeGroupedModularChainInfos.length ===
+                    enabledNativeChainIdentifiersInPage.length;
+
+                  const enabledIds = Array.from(enablesSet);
+
+                  const betaEnabledCount = enabledIds.filter((id) => {
+                    const chainInfo = chainStore.getChain(id);
+                    return chainInfo.beta;
+                  }).length;
+
+                  const testnetEnabledCount = enabledIds.filter((id) => {
+                    if (id.includes("test") || id.includes("devnet")) {
+                      return true;
+                    }
+                    const chainInfo = chainStore.getChain(id);
+                    return (
+                      chainInfo.chainName.toLowerCase().includes("test") ||
+                      chainInfo.chainName.toLowerCase().includes("devnet")
+                    );
+                  }).length;
+
+                  const ecosystemCounts: {
+                    cosmos: number;
+                    evm: number;
+                    starknet: number;
+                    bitcoin: number;
+                  } = {
+                    cosmos: 0,
+                    evm: 0,
+                    starknet: 0,
+                    bitcoin: 0,
+                  };
+
+                  enabledIds.forEach((id) => {
+                    let eco: keyof typeof ecosystemCounts = "cosmos";
+                    const modularInfo = chainStore.getModularChain(id);
+
+                    if ("bitcoin" in modularInfo) {
+                      eco = "bitcoin";
+                    } else if ("starknet" in modularInfo) {
+                      eco = "starknet";
+                    } else if ("cosmos" in modularInfo) {
+                      eco = chainStore.isEvmOnlyChain(id) ? "evm" : "cosmos";
+                    }
+
+                    ecosystemCounts[eco] += 1;
+                  });
+
+                  analyticsAmplitudeStore.logEvent(
+                    "click_save_enable_chains_btn_register",
+                    {
+                      durationMs: performance.now() - pageMountedAtRef.current,
+                      enabledChainCount: enabledIds.length,
+                      testnetEnabledCount,
+                      betaEnabledCount,
+                      cosmosEnabledCount: ecosystemCounts.cosmos,
+                      evmEnabledCount: ecosystemCounts.evm,
+                      starknetEnabledCount: ecosystemCounts.starknet,
+                      bitcoinEnabledCount: ecosystemCounts.bitcoin,
+                      allNativeChainsEnabled,
+                    }
+                  );
+
+                  analyticsAmplitudeStore.setUserProperties({
+                    enabled_chain_count: enabledIds.length,
+                    testnet_enabled_count: testnetEnabledCount,
+                    beta_enabled_count: betaEnabledCount,
+                    cosmos_enabled_count: ecosystemCounts.cosmos,
+                    evm_enabled_count: ecosystemCounts.evm,
+                    starknet_enabled_count: ecosystemCounts.starknet,
+                    bitcoin_enabled_count: ecosystemCounts.bitcoin,
+                    all_native_chains_enabled: allNativeChainsEnabled,
+                  });
+                } catch (e) {
+                  console.error(
+                    "[Analytics] Failed to log save_enable_chains_btn_register",
+                    e
+                  );
                 }
               }}
             />
