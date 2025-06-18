@@ -112,7 +112,7 @@ export class KeyRingEthereumService {
         throw new EthereumProviderRpcError(
           -32602,
           "Invalid params",
-          "External EIP-7702 transactions are not supported."
+          "EIP-7702 transactions are not supported."
         );
       }
     }
@@ -326,6 +326,193 @@ export class KeyRingEthereumService {
     );
   }
 
+  async signEthereumAtomicSelected(
+    env: Env,
+    origin: string,
+    chainId: string,
+    signer: string,
+    message: Uint8Array
+  ): Promise<EthereumSignResponse> {
+    return await this.signEthereumAtomic(
+      env,
+      origin,
+      this.keyRingService.selectedVaultId,
+      chainId,
+      signer,
+      message
+    );
+  }
+
+  async signEthereumAtomic(
+    env: Env,
+    origin: string,
+    vaultId: string,
+    chainId: string,
+    signer: string,
+    message: Uint8Array
+  ): Promise<EthereumSignResponse> {
+    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    if (chainInfo.hideInUI) {
+      throw new Error("Can't sign for hidden chain");
+    }
+    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
+    const evmInfo = ChainsService.getEVMInfo(chainInfo);
+    const forceEVMLedger = chainInfo.features?.includes(
+      "force-enable-evm-ledger"
+    );
+
+    if (!isEthermintLike && !evmInfo) {
+      throw new Error("Not ethermint like and EVM chain");
+    }
+
+    const keyInfo = this.keyRingService.getKeyInfo(vaultId);
+    if (!keyInfo) {
+      throw new Error("Null key info");
+    }
+
+    if (keyInfo.type === "ledger" && !forceEVMLedger) {
+      KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
+        chainId
+      );
+    }
+
+    try {
+      Bech32Address.validate(signer);
+    } catch {
+      // Ignore mixed-case checksum
+      signer = (
+        signer.substring(0, 2) === "0x" ? signer : "0x" + signer
+      ).toLowerCase();
+    }
+
+    const key = await this.keyRingCosmosService.getKey(vaultId, chainId);
+    if (
+      signer !== key.bech32Address &&
+      signer !== key.ethereumHexAddress.toLowerCase()
+    ) {
+      throw new Error("Signer mismatched");
+    }
+
+    return await this.interactionService.waitApproveV2(
+      env,
+      "/sign-ethereum",
+      "request-sign-ethereum",
+      {
+        origin,
+        chainId,
+        signer,
+        pubKey: key.pubKey,
+        message,
+        signType: EthSignType.TRANSACTION,
+        keyType: keyInfo.type,
+        keyInsensitive: keyInfo.insensitive,
+      },
+      async (res: { signingData: Uint8Array; signature?: Uint8Array }) => {
+        const { signature, signingData } = await (async () => {
+          if (keyInfo.type === "ledger" || keyInfo.type === "keystone") {
+            if (!res.signature || res.signature.length === 0) {
+              throw new Error("Frontend should provide signature");
+            }
+
+            return {
+              signingData: res.signingData,
+              signature: res.signature,
+            };
+          } else {
+            const txLike: TransactionLike = JSON.parse(
+              Buffer.from(res.signingData).toString()
+            );
+            if (txLike.from) {
+              delete txLike.from;
+            }
+
+            const unsignedTx = Transaction.from(txLike);
+
+            const isEIP1559 =
+              !!unsignedTx.maxFeePerGas || !!unsignedTx.maxPriorityFeePerGas;
+            if (isEIP1559) {
+              unsignedTx.type = EthTransactionType.eip1559;
+            }
+
+            const signature = await this.keyRingService.sign(
+              chainId,
+              vaultId,
+              Buffer.from(
+                unsignedTx.unsignedSerialized.replace("0x", ""),
+                "hex"
+              ),
+              "keccak256"
+            );
+
+            return {
+              signingData: res.signingData,
+              signature: Buffer.concat([
+                signature.r,
+                signature.s,
+                // The metamask doesn't seem to consider the chain id in this case... (maybe bug on metamask?)
+                signature.v
+                  ? Buffer.from("1c", "hex")
+                  : Buffer.from("1b", "hex"),
+              ]),
+            };
+          }
+        })();
+
+        try {
+          const tx = JSON.parse(Buffer.from(signingData).toString());
+          const ethTxType = await (async () => {
+            if (tx.to == null || tx.to === "0x") {
+              return "deploy-contract";
+            }
+
+            const contractBytecode = await this.request<string>(
+              env,
+              origin,
+              "eth_getCode",
+              [tx.to, "latest"],
+              undefined,
+              chainId
+            );
+            if (
+              (tx.data == null || tx.data === "0x") &&
+              BigInt(tx.value) > 0 &&
+              contractBytecode === "0x"
+            ) {
+              return "send-native";
+            }
+
+            if (tx.data?.startsWith("0xa9059cbb")) {
+              return "execute-contract/send-erc20";
+            }
+
+            return "execute-contract";
+          })();
+
+          this.analyticsService.logEventIgnoreError("evm_tx_signed", {
+            chainId,
+            isInternal: env.isInternalMsg,
+            origin,
+            keyType: keyInfo.type,
+            ethSignType: EthSignType.TRANSACTION,
+            ethTxType,
+            ...(ethTxType &&
+              ethTxType.startsWith("execute-contract") &&
+              tx && {
+                contractAddress: tx.to,
+              }),
+          });
+        } catch (e) {
+          console.log(e);
+        }
+
+        return {
+          signingData,
+          signature,
+        };
+      }
+    );
+  }
+
   async request<T = any>(
     env: Env,
     origin: string,
@@ -446,7 +633,7 @@ export class KeyRingEthereumService {
             throw new EthereumProviderRpcError(
               -32602,
               "Invalid params",
-              "External EIP-7702 transactions are not supported."
+              "EIP-7702 transactions are not supported."
             );
           }
 
@@ -565,9 +752,7 @@ export class KeyRingEthereumService {
           const { from: sender, authorizationList, ...restTx } = txLike;
 
           if (authorizationList) {
-            throw new Error(
-              "External EIP-7702 transactions are not supported."
-            );
+            throw new Error("EIP-7702 transactions are not supported.");
           }
 
           if (txLike.chainId) {
@@ -1190,6 +1375,245 @@ export class KeyRingEthereumService {
             })
           ).data.result;
         }
+
+        // EIP-5792 Implementations
+        case "wallet_getCapabilities":
+          // parameter는 [account, [chainId]] 이거나 null
+          const isArray = Array.isArray(params);
+          let accountToCheck = isArray ? (params?.[0] as string) : undefined;
+          let chainIdsToCheck = isArray ? (params?.[1] as string[]) : undefined;
+
+          if (!accountToCheck) {
+            // 현재 연결된 계정 주소 불러오기 (이더리움 메인넷을 대표로 사용, hex address는 동일하기 때문에 무관)
+            const pubKey = await this.keyRingService.getPubKeySelected(
+              "eip155:1"
+            );
+            const bech32Address = new Bech32Address(pubKey.getEthAddress());
+
+            accountToCheck = bech32Address.toHex(true);
+          } else {
+            // validate accountToCheck
+          }
+
+          // check chainIdsToCheck
+          if (!chainIdsToCheck || chainIdsToCheck.length === 0) {
+            const currentChainId = this.forceGetCurrentChainId(origin, chainId);
+            chainIdsToCheck = [hexValue(this.getEVMChainId(currentChainId))];
+          }
+
+          const supportedChainIds = ["0x1", "0x2105", "0xa"]; // ethereum, base, optimism
+          const aaAddresses = [
+            "0x63c0c19a282a1B52b07dD5a65b58948A07DAE32B", // Metamask
+          ];
+          const aaAddressToCodes = aaAddresses.map((aaAddress) => {
+            return `0xef0100${aaAddress.slice(2)}`;
+          }); // 7702 code format
+
+          // # Wallet Capabilities
+          // The top-level keys are chain IDs in hexadecimal format
+          // Chain ID "0x0" indicates capabilities supported across all chains
+          // The values are objects mapping capability names to capability-specific parameters
+          // Each capability's parameters are defined in that capability's specification
+          /*
+
+          // # Atomic Capability
+            // The atomic capability has a status field that can take one of three values:
+            // - supported: The wallet will execute all calls atomically and contiguously
+            // - ready: The wallet is able to upgrade to supported pending user approval (e.g. via EIP-7702)
+            // - unsupported: The wallet does not provide any atomicity or contiguity guarantees. If the atomic capability is not present for a given chain, it means that the wallet does not support batching for that chain.
+
+            {
+             [hexChainId]: { 
+              atomic: {
+                status: "supported" |  "ready" | "unsupported"
+              }
+             }
+            }
+          */
+
+          const chainIdToCheck = chainIdsToCheck[0];
+
+          if (supportedChainIds.includes(chainIdToCheck)) {
+            // getCode rpc call to check if the account is upgraded
+            const currentChainEVMInfo = this.chainsService.getEVMInfoOrThrow(
+              `eip155:${parseInt(chainIdToCheck)}`
+            );
+
+            const response = await simpleFetch<{
+              jsonrpc: string;
+              id: number;
+              result: any;
+              error?: Error;
+            }>(currentChainEVMInfo.rpc, {
+              method: "POST",
+              headers: {
+                "content-type": "application/json",
+                "request-source": origin,
+              },
+              body: JSON.stringify({
+                jsonrpc: "2.0",
+                method: "eth_getCode",
+                params: [accountToCheck, "latest"],
+                id: 1,
+              }),
+            });
+
+            const code = response.data.result as string;
+
+            if (code === "0x") {
+              // supported but not yet upgraded
+              return {
+                [chainIdToCheck]: {
+                  atomic: {
+                    status: "ready",
+                  },
+                },
+              };
+            } else {
+              // check if the code is 7702 format (prefix 0xef0100 + 20 bytes address)
+              const isSupported7702 = aaAddressToCodes.some(
+                (aaAddressToCode) => {
+                  return aaAddressToCode.toLowerCase() === code.toLowerCase();
+                }
+              );
+
+              if (isSupported7702) {
+                // supported
+                return {
+                  [chainIdToCheck]: {
+                    atomic: {
+                      status: "supported",
+                    },
+                  },
+                };
+              } else {
+                // supported chain but not yet upgraded
+                return {
+                  [chainIdToCheck]: {
+                    atomic: {
+                      status: "ready",
+                    },
+                  },
+                };
+              }
+            }
+          }
+
+          // not supported chain
+          return {
+            [chainIdToCheck]: {
+              atomic: {
+                status: "unsupported",
+              },
+            },
+          };
+        case "wallet_sendCalls":
+          const param =
+            (Array.isArray(params) &&
+              (params[0] as {
+                atomicRequired: boolean;
+                calls: {
+                  to: string;
+                  data: string;
+                  value: string; // hex value
+                }[];
+                chainId: string; // hex chain id
+                version: string; // 5792 version (current: 2.0.0)
+                id?: string; // optional for user to identify the request
+                from?: string; // hex address
+                capabilities?: {
+                  [key: string]: Record<string, any>;
+                }; // optional for user to specify the capabilities
+              })) ||
+            undefined;
+
+          // check if the chain is supported
+          const currentChainId = this.forceGetCurrentChainId(origin, chainId);
+          const hexChainId = hexValue(this.getEVMChainId(currentChainId));
+
+          // 이거 이렇게 비교해도 되나
+          if (param?.chainId && param?.chainId !== hexChainId) {
+            throw new EthereumProviderRpcError(
+              4902,
+              `Unmatched chain ID: ${param?.chainId}`
+            );
+          }
+
+          // check if the from address is selected key
+          const pubKey = await this.keyRingService.getPubKeySelected(
+            currentChainId
+          );
+          const bech32Address = new Bech32Address(pubKey.getEthAddress());
+          const fromAddress = bech32Address.toHex(true);
+
+          if (
+            param?.from &&
+            param?.from.toLowerCase() !== fromAddress.toLowerCase()
+          ) {
+            throw new EthereumProviderRpcError(
+              4902,
+              `Unmatched from address: ${param?.from}`
+            );
+          }
+
+          // check account is upgraded (여기서 굳이 체크해야하나 싶음)
+
+          // sign and send calls
+
+          return {
+            id: param?.id || "1",
+            capabilities: param?.capabilities || {},
+          };
+        case "wallet_getCallsStatus":
+          const id =
+            (Array.isArray(params) && (params[0] as string)) || undefined;
+
+          if (!id) {
+            throw new EthereumProviderRpcError(
+              -32602,
+              "Invalid params",
+              "Must provide a id."
+            );
+          }
+
+          // 히스토리에 저장된 id를 찾아서 receipt 조회
+
+          // # Status code indicating the current state of the batch. Status codes follow these categories:
+          // 1xx: Pending states
+          //    100: Batch has been received by the wallet but has not completed execution onchain
+          // 2xx: Confirmed states
+          //    200: Batch has been included onchain without reverts
+          // 4xx: Offchain failures
+          //    400: Batch has not been included onchain and wallet will not retry
+          // 5xx: Chain rules failures
+          //    500: Batch reverted completely and only changes related to gas charge may have been included onchain
+          // 6xx: Partial chain rules failures
+          //    600: Batch reverted partially and some changes related to batch calls may have been included onchain
+
+          return {
+            version: "1.0", // current version is 1.0
+            chainId: "0x1",
+            id,
+            status: 100,
+            atomic: false,
+            receipts: [],
+            capabilities: {},
+          };
+        case "wallet_showCallsStatus":
+          const showId =
+            (Array.isArray(params) && (params[0] as string)) || undefined;
+
+          if (!showId) {
+            throw new EthereumProviderRpcError(
+              -32602,
+              "Invalid params",
+              "Must provide a id."
+            );
+          }
+          // TODO: 히스토리에 저장된 id를 찾아서 receipt 조회
+          // NOTE: 상태를 화면에 보여줘야 돼서 우선 skip
+
+          throw new EthereumProviderRpcError(4200, `Not implemented`);
         default: {
           throw new EthereumProviderRpcError(4200, `Unsupported Method`);
         }
