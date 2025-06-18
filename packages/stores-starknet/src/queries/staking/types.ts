@@ -8,10 +8,10 @@ export type StarknetValidator = {
   self_stake: string;
   delegated_stake: string;
   delegators_count: number;
-  delegators_count_change_24h: string;
-  total_stake_change_24h: string;
-  commission: number;
-  pool_contract_address: string;
+  delegators_count_change_24h?: string;
+  total_stake_change_24h?: string;
+  commission?: number;
+  pool_contract_address?: string;
   is_active: boolean;
 };
 
