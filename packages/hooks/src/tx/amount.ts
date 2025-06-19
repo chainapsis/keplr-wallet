@@ -47,7 +47,7 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
     makeObservable(this);
   }
 
-  get subFee(): number {
+  get fractionSubFeeWeight(): number {
     return this._fractionSubFeeWeight;
   }
 
