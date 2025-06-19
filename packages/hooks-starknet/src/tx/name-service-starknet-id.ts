@@ -92,7 +92,10 @@ export class StarknetIdNameService implements NameService {
   }
 
   get isEnabled(): boolean {
-    if (!this._starknetID || !("starknet" in this.base.modularChainInfo)) {
+    if (
+      !this._starknetID ||
+      !("starknet" in this.base.modularChainInfo.embedded)
+    ) {
       return false;
     }
 
@@ -162,10 +165,13 @@ export class StarknetIdNameService implements NameService {
   protected async fetchInternal(): Promise<void> {
     const prevValue = this.value;
     try {
-      const modularChainInfo = this.base.modularChainInfo;
-      if (!("starknet" in modularChainInfo)) {
-        throw new Error(`${modularChainInfo.chainId} is not starknet chain`);
+      const modularChainInfoImpl = this.base.modularChainInfo;
+      if (!("starknet" in modularChainInfoImpl.embedded)) {
+        throw new Error(
+          `${modularChainInfoImpl.chainId} is not starknet chain`
+        );
       }
+
       if (!this._starknetID) {
         throw new Error("Starknet id is not set");
       }
@@ -186,7 +192,7 @@ export class StarknetIdNameService implements NameService {
           code?: number;
           message?: string;
         };
-      }>(modularChainInfo.starknet.rpc, "", {
+      }>(modularChainInfoImpl.embedded.starknet.rpc, "", {
         method: "POST",
         headers: {
           "content-type": "application/json",
