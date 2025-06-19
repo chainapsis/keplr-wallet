@@ -78,22 +78,17 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
         return "0";
       }
 
-      if (this._subFee && this.feeConfig && this.feeConfig.fees.length > 0) {
-        return result
-          .sub(this.feeConfig.fees[0])
-          .mul(new Dec(this.fraction))
-          .trim(true)
-          .locale(false)
-          .hideDenom(true)
-          .toString();
-      }
-
-      return result
+      const maxValue = result
         .mul(new Dec(this.fraction))
         .trim(true)
         .locale(false)
-        .hideDenom(true)
-        .toString();
+        .hideDenom(true);
+
+      if (this._subFee && this.feeConfig && this.feeConfig.fees.length > 0) {
+        return maxValue.sub(this.feeConfig.fees[0]).toString();
+      }
+
+      return maxValue.toString();
     }
 
     return this._value;
