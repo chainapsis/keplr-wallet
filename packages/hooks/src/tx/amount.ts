@@ -33,15 +33,24 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
   @observable.ref
   protected _feeConfig: IFeeConfig | undefined = undefined;
 
+  @observable
+  protected _subFee: boolean = false;
+
   constructor(
     chainGetter: ChainGetter,
     protected readonly queriesStore: QueriesStore,
     initialChainId: string,
-    protected readonly senderConfig: ISenderConfig
+    protected readonly senderConfig: ISenderConfig,
+    subFee?: boolean
   ) {
     super(chainGetter, initialChainId);
+    this._subFee = subFee ?? false;
 
     makeObservable(this);
+  }
+
+  get subFee(): boolean {
+    return this._subFee;
   }
 
   get feeConfig(): IFeeConfig | undefined {
@@ -67,6 +76,16 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
       }
       if (result.toDec().lte(new Dec(0))) {
         return "0";
+      }
+
+      if (this._subFee && this.feeConfig && this.feeConfig.fees.length > 0) {
+        return result
+          .sub(this.feeConfig.fees[0])
+          .mul(new Dec(this.fraction))
+          .trim(true)
+          .locale(false)
+          .hideDenom(true)
+          .toString();
       }
 
       return result
@@ -249,10 +268,12 @@ export const useAmountConfig = (
   chainGetter: ChainGetter,
   queriesStore: QueriesStore,
   chainId: string,
-  senderConfig: ISenderConfig
+  senderConfig: ISenderConfig,
+  subFee?: boolean
 ) => {
   const [txConfig] = useState(
-    () => new AmountConfig(chainGetter, queriesStore, chainId, senderConfig)
+    () =>
+      new AmountConfig(chainGetter, queriesStore, chainId, senderConfig, subFee)
   );
   txConfig.setChain(chainId);
 

@@ -23,7 +23,8 @@ export const useDelegateTxConfig = (
     chainGetter,
     queriesStore,
     chainId,
-    senderConfig
+    senderConfig,
+    true
   );
 
   const memoConfig = useMemoConfig(chainGetter, chainId);
