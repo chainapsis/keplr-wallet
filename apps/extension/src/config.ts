@@ -3501,6 +3501,68 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     },
     features: [],
   },
+  {
+    chainId: "pocket",
+    chainName: "Pocket Network",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/pocket/chain.png",
+    rpc: "https://rpc-pocket.keplr.app",
+    rest: "https://lcd-pocket.keplr.app",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "pokt",
+      bech32PrefixAccPub: "poktpub",
+      bech32PrefixValAddr: "poktvaloper",
+      bech32PrefixValPub: "poktvaloperpub",
+      bech32PrefixConsAddr: "poktvalcons",
+      bech32PrefixConsPub: "poktvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "POKT",
+        coinMinimalDenom: "upokt",
+        coinDecimals: 6,
+        coinGeckoId: "pocket-network",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/pocket/chain.png",
+      },
+      {
+        coinDenom: "MACT",
+        coinMinimalDenom: "umact",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "POKT",
+        coinMinimalDenom: "upokt",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.01,
+          average: 0.01,
+          high: 0.01,
+        },
+      },
+      {
+        coinDenom: "MACT",
+        coinMinimalDenom: "umact",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.01,
+          average: 0.01,
+          high: 0.01,
+        },
+      },
+    ],
+    stakeCurrency: {
+      coinDenom: "POKT",
+      coinMinimalDenom: "upokt",
+      coinDecimals: 6,
+    },
+    features: [],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
