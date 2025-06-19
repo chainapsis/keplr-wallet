@@ -34,23 +34,26 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
   protected _feeConfig: IFeeConfig | undefined = undefined;
 
   @observable
-  protected _subFee: boolean = false;
+  protected _fractionSubFeeWeight: number = 0;
 
   constructor(
     chainGetter: ChainGetter,
     protected readonly queriesStore: QueriesStore,
     initialChainId: string,
-    protected readonly senderConfig: ISenderConfig,
-    subFee?: boolean
+    protected readonly senderConfig: ISenderConfig
   ) {
     super(chainGetter, initialChainId);
-    this._subFee = subFee ?? false;
 
     makeObservable(this);
   }
 
-  get subFee(): boolean {
-    return this._subFee;
+  get subFee(): number {
+    return this._fractionSubFeeWeight;
+  }
+
+  @action
+  setFractionSubFeeWeight(fractionSubFeeWeight: number) {
+    this._fractionSubFeeWeight = fractionSubFeeWeight;
   }
 
   get feeConfig(): IFeeConfig | undefined {
@@ -84,8 +87,15 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
         .locale(false)
         .hideDenom(true);
 
-      if (this._subFee && this.feeConfig && this.feeConfig.fees.length > 0) {
-        return maxValue.sub(this.feeConfig.fees[0]).toString();
+      if (
+        this._fractionSubFeeWeight > 0 &&
+        this.feeConfig &&
+        this.feeConfig.fees.length > 0
+      ) {
+        const subFee = this.feeConfig.fees[0].mul(
+          new Dec(this._fractionSubFeeWeight)
+        );
+        return maxValue.sub(subFee).toString();
       }
 
       return maxValue.toString();
@@ -264,13 +274,14 @@ export const useAmountConfig = (
   queriesStore: QueriesStore,
   chainId: string,
   senderConfig: ISenderConfig,
-  subFee?: boolean
+  fractionSubFeeWeight?: number
 ) => {
   const [txConfig] = useState(
-    () =>
-      new AmountConfig(chainGetter, queriesStore, chainId, senderConfig, subFee)
+    () => new AmountConfig(chainGetter, queriesStore, chainId, senderConfig)
   );
+
   txConfig.setChain(chainId);
+  txConfig.setFractionSubFeeWeight(fractionSubFeeWeight ?? 0);
 
   return txConfig;
 };

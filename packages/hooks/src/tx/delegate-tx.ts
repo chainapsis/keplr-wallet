@@ -16,7 +16,8 @@ export const useDelegateTxConfig = (
   chainId: string,
   sender: string,
   validatorAddress: string,
-  initialGas: number
+  initialGas: number,
+  fractionSubFee?: number
 ) => {
   const senderConfig = useSenderConfig(chainGetter, chainId, sender);
   const amountConfig = useAmountConfig(
@@ -24,7 +25,7 @@ export const useDelegateTxConfig = (
     queriesStore,
     chainId,
     senderConfig,
-    true
+    fractionSubFee
   );
 
   const memoConfig = useMemoConfig(chainGetter, chainId);
