@@ -450,7 +450,7 @@
 
   "page.permission.unknown-permission": "Unknown permission",
   "page.permission.requesting-connection-title": "Requesting Connection",
-  "page.permission.paragraph": "By approving this request, the website will:{br}• Get the list of all chain on your Keplr Wallet",
+  "page.permission.paragraph": "By approving this request, the website will:{br}• Get the list of all chains from your Keplr Wallet",
 
   "page.permission.basic-access.select-chain-title": "Connect",
   "page.permission.basic-access-for-bitcoin.select-chain-paragraph": "Select a Bitcoin chain to connect.",

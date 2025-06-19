@@ -33,6 +33,9 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
   @observable.ref
   protected _feeConfig: IFeeConfig | undefined = undefined;
 
+  @observable
+  protected _fractionSubFeeWeight: number = 0;
+
   constructor(
     chainGetter: ChainGetter,
     protected readonly queriesStore: QueriesStore,
@@ -42,6 +45,15 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
     super(chainGetter, initialChainId);
 
     makeObservable(this);
+  }
+
+  get fractionSubFeeWeight(): number {
+    return this._fractionSubFeeWeight;
+  }
+
+  @action
+  setFractionSubFeeWeight(fractionSubFeeWeight: number) {
+    this._fractionSubFeeWeight = fractionSubFeeWeight;
   }
 
   get feeConfig(): IFeeConfig | undefined {
@@ -69,12 +81,24 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
         return "0";
       }
 
-      return result
+      const maxValue = result
         .mul(new Dec(this.fraction))
         .trim(true)
         .locale(false)
-        .hideDenom(true)
-        .toString();
+        .hideDenom(true);
+
+      if (
+        this._fractionSubFeeWeight > 0 &&
+        this.feeConfig &&
+        this.feeConfig.fees.length > 0
+      ) {
+        const subFee = this.feeConfig.fees[0].mul(
+          new Dec(this._fractionSubFeeWeight)
+        );
+        return maxValue.sub(subFee).toString();
+      }
+
+      return maxValue.toString();
     }
 
     return this._value;
@@ -249,12 +273,15 @@ export const useAmountConfig = (
   chainGetter: ChainGetter,
   queriesStore: QueriesStore,
   chainId: string,
-  senderConfig: ISenderConfig
+  senderConfig: ISenderConfig,
+  fractionSubFeeWeight?: number
 ) => {
   const [txConfig] = useState(
     () => new AmountConfig(chainGetter, queriesStore, chainId, senderConfig)
   );
+
   txConfig.setChain(chainId);
+  txConfig.setFractionSubFeeWeight(fractionSubFeeWeight ?? 0);
 
   return txConfig;
 };

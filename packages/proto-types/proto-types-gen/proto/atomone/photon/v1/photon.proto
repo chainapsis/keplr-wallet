@@ -1,0 +1,16 @@
+syntax = "proto3";
+package atomone.photon.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/atomone-hub/atomone/x/photon/types";
+
+// Params defines the parameters for the x/photon module.
+message Params {
+  // Allow to mint photon or not
+  bool mint_disabled = 1;
+  // tx_fee_exceptions holds the msg type urls that are allowed to use some
+  // different tx fee coins than photon.
+  // A wildcard "*" can be used to allow all transactions to use any fee denom.
+  repeated string tx_fee_exceptions = 2;
+}

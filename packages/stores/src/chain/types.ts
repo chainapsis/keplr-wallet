@@ -78,6 +78,7 @@ export interface IChainInfoImpl<C extends ChainInfo = ChainInfo> {
       }
     | undefined;
   readonly hideInUI: boolean | undefined;
+  readonly isTestnet: boolean | undefined;
 }
 
 export interface IModularChainInfoImpl<

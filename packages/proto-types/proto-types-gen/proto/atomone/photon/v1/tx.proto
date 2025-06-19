@@ -1,0 +1,65 @@
+syntax = "proto3";
+package atomone.photon.v1;
+
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "cosmos_proto/cosmos.proto";
+import "cosmos/msg/v1/msg.proto";
+import "amino/amino.proto";
+import "atomone/photon/v1/photon.proto";
+
+option go_package = "github.com/atomone-hub/atomone/x/photon/types";
+
+// Msg defines the Msg service.
+service Msg {
+  option (cosmos.msg.v1.service) = true;
+
+  // MintPhoton defines a method to burn atone and mint photons.
+  rpc MintPhoton(MsgMintPhoton) returns (MsgMintPhotonResponse);
+
+  // UpdateParams defines a governance operation for updating the x/photon
+  // module parameters. The authority is defined in the keeper.
+  rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
+}
+
+// MsgMintPhoton defines an sdk.Msg for burning atone and minting photons.
+message MsgMintPhoton {
+  option (cosmos.msg.v1.signer) = "to_address";
+  option (amino.name) = "atomone/photon/v1/MsgMintPhoton";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string to_address = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  cosmos.base.v1beta1.Coin amount = 2
+      [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+}
+
+message MsgMintPhotonResponse {
+  cosmos.base.v1beta1.Coin minted = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+	// conversion_rate represents the factor used to convert atone to photon.
+  string conversion_rate = 2 [ (cosmos_proto.scalar) = "cosmos.Dec" ];
+}
+
+// MsgUpdateParams is the Msg/UpdateParams request type.
+message MsgUpdateParams {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "atomone/x/photon/v1/MsgUpdateParams";
+
+  // authority is the address that controls the module (defaults to x/gov unless
+  // overwritten).
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+
+  // params defines the x/gov parameters to update.
+  //
+  // NOTE: All parameters must be supplied.
+  Params params = 2
+      [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+}
+
+// MsgUpdateParamsResponse defines the response structure for executing a
+// MsgUpdateParams message.
+message MsgUpdateParamsResponse {}
