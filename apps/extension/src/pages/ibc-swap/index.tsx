@@ -255,22 +255,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         })(),
       ];
 
-      const getTokenKey = (
-        chainId: string,
-        coinMinimalDenom: string
-      ): string => {
-        return `${
-          chainStore.getChain(chainId).chainIdentifier
-        }/${coinMinimalDenom}`;
-      };
-
-      const inTokenKey = getTokenKey(
-        inOut[0].chainId,
-        inOut[0].coinMinimalDenom
-      );
-      const outTokenKey = getTokenKey(
-        inOut[1].chainId,
-        inOut[1].coinMinimalDenom
+      const [inTokenKey, outTokenKey] = inOut.map(
+        ({ chainId, coinMinimalDenom }) => {
+          return `${
+            ChainIdHelper.parse(chainId).identifier
+          }/${coinMinimalDenom}`;
+        }
       );
 
       const stableSwap = querySwapFeeBps.response.data["stableSwap"];
