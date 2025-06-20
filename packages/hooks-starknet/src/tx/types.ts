@@ -1,11 +1,12 @@
-import { ERC20Currency, ModularChainInfo } from "@keplr-wallet/types";
+import { ERC20Currency } from "@keplr-wallet/types";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { NameService } from "./name-service";
+import { IModularChainInfoImpl } from "@keplr-wallet/stores";
 
 export interface ITxChainSetter {
   chainId: string;
   setChain(chainId: string): void;
-  modularChainInfo: ModularChainInfo;
+  modularChainInfo: IModularChainInfoImpl;
 }
 
 export interface UIProperties {
