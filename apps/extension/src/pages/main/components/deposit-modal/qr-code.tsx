@@ -15,6 +15,9 @@ import { IconProps } from "../../../../components/icon/types";
 import { YAxis } from "../../../../components/axis";
 import { AddressChip } from "../../token-detail/address-chip";
 import { Button } from "../../../../components/button";
+import { GENESIS_HASH_TO_NETWORK, GenesisHash } from "@keplr-wallet/types";
+import { EthereumAccountBase } from "@keplr-wallet/stores-eth";
+import { EthermintChainIdHelper } from "@keplr-wallet/cosmos";
 
 export const QRCodeScene: FunctionComponent<{
   chainId: string;
@@ -28,9 +31,45 @@ export const QRCodeScene: FunctionComponent<{
   const modularChainInfo = chainStore.getModularChain(chainId);
   const isBitcoin =
     "bitcoin" in modularChainInfo && modularChainInfo.bitcoin != null;
+  const isEthereumAddress =
+    "cosmos" in modularChainInfo &&
+    EthereumAccountBase.isEthereumHexAddressWithChecksum(address || "");
+
   const account = accountStore.getAccount(chainId);
 
   const sceneTransition = useSceneTransition();
+
+  const addressQRdata = (() => {
+    if (!address) {
+      return "";
+    }
+
+    if (isEthereumAddress) {
+      const evmChainId = chainId.startsWith("eip155:")
+        ? chainId.replace("eip155:", "")
+        : modularChainInfo.cosmos.evm?.chainId ||
+          EthermintChainIdHelper.parse(chainId).ethChainId ||
+          null;
+
+      if (evmChainId) {
+        const hex = `0x${Number(evmChainId).toString(16)}`;
+        return `ethereum:${address}@${hex}`;
+      }
+      return `ethereum:${address}`;
+    }
+
+    if (isBitcoin && account.bitcoinAddress) {
+      const genesisHash = modularChainInfo.chainId
+        .split("bip122:")[1]
+        .split(":")[0];
+      const network = GENESIS_HASH_TO_NETWORK[genesisHash as GenesisHash];
+      if (network) {
+        return `bitcoin:${account.bitcoinAddress?.bech32Address}?message=${network}`;
+      }
+    }
+
+    return address;
+  })();
 
   if (!address) {
     return null;
@@ -121,7 +160,7 @@ export const QRCodeScene: FunctionComponent<{
             padding="0.75rem"
           >
             <QRCodeSVG
-              value={address}
+              value={addressQRdata}
               size={176}
               level="M"
               bgColor={ColorPalette.white}

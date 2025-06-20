@@ -127,21 +127,23 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
 
   @computed
   get currency(): ERC20Currency {
-    const modularChainInfo = this.modularChainInfo;
-    if (!("starknet" in modularChainInfo)) {
+    const modularChainInfoImpl = this.modularChainInfo;
+    if (!("starknet" in modularChainInfoImpl.embedded)) {
       throw new Error("Chain doesn't support the starknet");
     }
 
+    const currencies = modularChainInfoImpl.getCurrencies("starknet");
+
     if (this._currency) {
-      const find = modularChainInfo.starknet.currencies.find(
+      const find = currencies.find(
         (cur) => cur.coinMinimalDenom === this._currency!.coinMinimalDenom
       );
       if (find) {
-        return find;
+        return find as ERC20Currency;
       }
     }
 
-    return modularChainInfo.starknet.currencies[0];
+    return currencies[0] as ERC20Currency;
   }
 
   @action
@@ -164,13 +166,15 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
   }
 
   canUseCurrency(currency: ERC20Currency): boolean {
-    const modularChainInfo = this.modularChainInfo;
-    if (!("starknet" in modularChainInfo)) {
+    const modularChainInfoImpl = this.modularChainInfo;
+    if (!("starknet" in modularChainInfoImpl.embedded)) {
       throw new Error("Chain doesn't support the starknet");
     }
 
+    const currencies = modularChainInfoImpl.getCurrencies("starknet");
+
     return (
-      modularChainInfo.starknet.currencies.find(
+      currencies.find(
         (cur) => cur.coinMinimalDenom === currency.coinMinimalDenom
       ) != null
     );
