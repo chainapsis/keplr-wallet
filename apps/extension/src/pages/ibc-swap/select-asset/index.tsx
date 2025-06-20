@@ -25,6 +25,7 @@ import { getTokenSearchResultClickAnalyticsProperties } from "../../../analytics
 import { DenomHelper } from "@keplr-wallet/common";
 import { SwapNotAvailableModal } from "../components/swap-not-available-modal";
 import { MsgItemSkeleton } from "../../main/token-detail/msg-items/skeleton";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 // 계산이 복잡해서 memoize을 적용해야하는데
 // mobx와 useMemo()는 같이 사용이 어려워서
@@ -326,7 +327,10 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
                                 viewToken.token.currency.coinMinimalDenom
                               );
                             setSelectedCoinMinimalDenom(
-                              viewToken.token.currency.coinMinimalDenom
+                              `${
+                                ChainIdHelper.parse(viewToken.chainInfo.chainId)
+                                  .identifier
+                              }/${viewToken.token.currency.coinMinimalDenom}`
                             );
                             if (currency) {
                               if (paramNavigateTo) {
@@ -358,7 +362,10 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
                         unsupportedCoinMinimalDenoms
                       );
                       newUnsupportedCoinMinimalDenoms.add(
-                        viewToken.token.currency.coinMinimalDenom
+                        `${
+                          ChainIdHelper.parse(viewToken.chainInfo.chainId)
+                            .identifier
+                        }/${viewToken.token.currency.coinMinimalDenom}`
                       );
                       setUnsupportedCoinMinimalDenoms(
                         newUnsupportedCoinMinimalDenoms
@@ -420,9 +427,11 @@ const TokenListItem = ({
 
   const isFindingCurrency =
     data.selectedCoinMinimalDenom ===
-    ("currency" in item
-      ? item.currency.coinMinimalDenom
-      : item.token.currency.coinMinimalDenom);
+    `${ChainIdHelper.parse(item.chainInfo.chainId).identifier}/${
+      "currency" in item
+        ? item.currency.coinMinimalDenom
+        : item.token.currency.coinMinimalDenom
+    }`;
 
   const viewToken =
     "currency" in item
@@ -435,9 +444,11 @@ const TokenListItem = ({
       : item;
 
   const isUnsupportedToken = data.unsupportedCoinMinimalDenoms.has(
-    "currency" in item
-      ? item.currency.coinMinimalDenom
-      : item.token.currency.coinMinimalDenom
+    `${ChainIdHelper.parse(item.chainInfo.chainId).identifier}/${
+      "currency" in item
+        ? item.currency.coinMinimalDenom
+        : item.token.currency.coinMinimalDenom
+    }`
   );
 
   return (
