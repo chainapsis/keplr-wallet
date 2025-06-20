@@ -260,11 +260,14 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
       );
 
       const stableSwap = querySwapFeeBps.response.data["stableSwap"];
+      const coinsSet = stableSwap?.coins
+        ? new Set(stableSwap.coins.map((coin) => coin.toLowerCase()))
+        : undefined;
       if (
         stableSwap &&
-        stableSwap.coins &&
-        stableSwap.coins.includes(inTokenKey) &&
-        stableSwap.coins.includes(outTokenKey) &&
+        coinsSet &&
+        coinsSet.has(inTokenKey.toLowerCase()) &&
+        coinsSet.has(outTokenKey.toLowerCase()) &&
         stableSwap.feeBps != null
       ) {
         setSwapFeeBps(stableSwap.feeBps);
