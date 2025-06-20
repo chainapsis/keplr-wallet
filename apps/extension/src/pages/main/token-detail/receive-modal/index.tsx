@@ -15,6 +15,7 @@ import { ChainImageFallback } from "../../../../components/image";
 import { QRCodeSVG } from "qrcode.react";
 import { AddressChip } from "../address-chip";
 import { Button } from "../../../../components/button";
+import { GENESIS_HASH_TO_NETWORK, GenesisHash } from "@keplr-wallet/types";
 
 export const ReceiveModal: FunctionComponent<{
   chainId: string;
@@ -34,6 +35,33 @@ export const ReceiveModal: FunctionComponent<{
     chainStore.isEvmOnlyChain(chainId);
   const isBitcoin =
     "bitcoin" in modularChainInfo && modularChainInfo.bitcoin != null;
+
+  const addressQRdata = (() => {
+    if (isStarknetChain) {
+      return account.starknetHexAddress;
+    }
+
+    if (isEVMOnlyChain) {
+      const hex = `0x${modularChainInfo.cosmos.evm?.chainId.toString(16)}`;
+      return `ethereum:${account.ethereumHexAddress}@${hex}`;
+    }
+
+    if (isBitcoin) {
+      const genesisHash = modularChainInfo.chainId
+        .split("bip122:")[1]
+        .split(":")[0];
+      const network = GENESIS_HASH_TO_NETWORK[genesisHash as GenesisHash];
+      if (network) {
+        return `bitcoin:${account.bitcoinAddress?.bech32Address}?message=${network}`;
+      }
+    }
+
+    return account.bech32Address;
+  })();
+
+  if (!addressQRdata) {
+    return null;
+  }
 
   return (
     <Box
@@ -108,15 +136,7 @@ export const ReceiveModal: FunctionComponent<{
           padding="0.75rem"
         >
           <QRCodeSVG
-            value={
-              isStarknetChain
-                ? account.starknetHexAddress
-                : isEVMOnlyChain
-                ? account.ethereumHexAddress
-                : isBitcoin
-                ? account.bitcoinAddress!.bech32Address
-                : account.bech32Address
-            }
+            value={addressQRdata}
             size={176}
             level="M"
             bgColor={ColorPalette.white}
