@@ -143,8 +143,8 @@ export const ReceiveModal: FunctionComponent<{
             fgColor={ColorPalette.black}
             imageSettings={{
               src: require("../../../../public/assets/logo-256.png"),
-              width: 40,
-              height: 40,
+              width: 35,
+              height: 35,
               excavate: true,
             }}
           />
