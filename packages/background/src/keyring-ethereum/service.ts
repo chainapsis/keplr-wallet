@@ -29,8 +29,9 @@ import { validateEVMChainId } from "./helper";
 import { runInAction } from "mobx";
 import { PermissionInteractiveService } from "../permission-interactive";
 import { enableAccessSkippedEVMJSONRPCMethods } from "./constants";
-import { Transaction, TransactionLike } from "ethers";
+import { Transaction, TransactionLike, id as generateRequestId } from "ethers";
 import { hexValue } from "@ethersproject/bytes";
+import { RecentSendHistoryService } from "src/recent-send-history";
 
 export class KeyRingEthereumService {
   protected websocketSubscriptionMap = new Map<string, WebSocket>();
@@ -46,7 +47,8 @@ export class KeyRingEthereumService {
     protected readonly permissionService: PermissionService,
     protected readonly permissionInteractiveService: PermissionInteractiveService,
     protected readonly backgroundTxEthereumService: BackgroundTxEthereumService,
-    protected readonly tokenERC20Service: TokenERC20Service
+    protected readonly tokenERC20Service: TokenERC20Service,
+    protected readonly recentSendHistoryService: RecentSendHistoryService
   ) {}
 
   async init() {
@@ -1392,138 +1394,37 @@ export class KeyRingEthereumService {
 
             accountToCheck = bech32Address.toHex(true);
           } else {
-            // validate accountToCheck
+            // TODO: validate accountToCheck
           }
 
-          // check chainIdsToCheck
           if (!chainIdsToCheck || chainIdsToCheck.length === 0) {
             const currentChainId = this.forceGetCurrentChainId(origin, chainId);
             chainIdsToCheck = [hexValue(this.getEVMChainId(currentChainId))];
           }
 
-          const supportedChainIds = ["0x1", "0x2105", "0xa"]; // ethereum, base, optimism
-          const aaAddresses = [
-            "0x63c0c19a282a1B52b07dD5a65b58948A07DAE32B", // Metamask
-          ];
-          const aaAddressToCodes = aaAddresses.map((aaAddress) => {
-            return `0xef0100${aaAddress.slice(2)}`;
-          }); // 7702 code format
-
-          // # Wallet Capabilities
-          // The top-level keys are chain IDs in hexadecimal format
-          // Chain ID "0x0" indicates capabilities supported across all chains
-          // The values are objects mapping capability names to capability-specific parameters
-          // Each capability's parameters are defined in that capability's specification
-          /*
-
-          // # Atomic Capability
-            // The atomic capability has a status field that can take one of three values:
-            // - supported: The wallet will execute all calls atomically and contiguously
-            // - ready: The wallet is able to upgrade to supported pending user approval (e.g. via EIP-7702)
-            // - unsupported: The wallet does not provide any atomicity or contiguity guarantees. If the atomic capability is not present for a given chain, it means that the wallet does not support batching for that chain.
-
-            {
-             [hexChainId]: { 
-              atomic: {
-                status: "supported" |  "ready" | "unsupported"
-              }
-             }
-            }
-          */
-
           const chainIdToCheck = chainIdsToCheck[0];
 
-          if (supportedChainIds.includes(chainIdToCheck)) {
-            // getCode rpc call to check if the account is upgraded
-            const currentChainEVMInfo = this.chainsService.getEVMInfoOrThrow(
-              `eip155:${parseInt(chainIdToCheck)}`
-            );
-
-            const response = await simpleFetch<{
-              jsonrpc: string;
-              id: number;
-              result: any;
-              error?: Error;
-            }>(currentChainEVMInfo.rpc, {
-              method: "POST",
-              headers: {
-                "content-type": "application/json",
-                "request-source": origin,
-              },
-              body: JSON.stringify({
-                jsonrpc: "2.0",
-                method: "eth_getCode",
-                params: [accountToCheck, "latest"],
-                id: 1,
-              }),
-            });
-
-            const code = response.data.result as string;
-
-            if (code === "0x") {
-              // supported but not yet upgraded
-              return {
-                [chainIdToCheck]: {
-                  atomic: {
-                    status: "ready",
-                  },
-                },
-              };
-            } else {
-              // check if the code is 7702 format (prefix 0xef0100 + 20 bytes address)
-              const isSupported7702 = aaAddressToCodes.some(
-                (aaAddressToCode) => {
-                  return aaAddressToCode.toLowerCase() === code.toLowerCase();
-                }
-              );
-
-              if (isSupported7702) {
-                // supported
-                return {
-                  [chainIdToCheck]: {
-                    atomic: {
-                      status: "supported",
-                    },
-                  },
-                };
-              } else {
-                // supported chain but not yet upgraded
-                return {
-                  [chainIdToCheck]: {
-                    atomic: {
-                      status: "ready",
-                    },
-                  },
-                };
-              }
-            }
-          }
-
-          // not supported chain
-          return {
-            [chainIdToCheck]: {
-              atomic: {
-                status: "unsupported",
-              },
-            },
-          };
+          return await this.getAccountCapabilities(
+            chainIdToCheck,
+            accountToCheck
+          );
         case "wallet_sendCalls":
           const param =
             (Array.isArray(params) &&
               (params[0] as {
                 atomicRequired: boolean;
                 calls: {
-                  to: string;
-                  data: string;
-                  value: string; // hex value
+                  to?: string; // hex address, optional
+                  data: string; // hex value, required
+                  value?: string; // hex value, optional
                 }[];
-                chainId: string; // hex chain id
+                chainId: string; // hex value, required
                 version: string; // 5792 version (current: 2.0.0)
                 id?: string; // optional for user to identify the request
                 from?: string; // hex address
                 capabilities?: {
                   [key: string]: Record<string, any>;
-                }; // optional for user to specify the capabilities
+                }; // optional for user to specify the capabilities e.g. paymaster
               })) ||
             undefined;
 
@@ -1556,12 +1457,38 @@ export class KeyRingEthereumService {
             );
           }
 
-          // check account is upgraded (여기서 굳이 체크해야하나 싶음)
+          // check if atomicRequired but not supported
+          if (param?.atomicRequired) {
+            const capabilities = await this.getAccountCapabilities(
+              hexChainId,
+              fromAddress
+            );
+
+            const atomicStatus =
+              capabilities[hexChainId]["atomic"].status ?? "unsupported";
+
+            if (atomicStatus === "unsupported") {
+              throw new EthereumProviderRpcError(
+                4902,
+                `Atomic is not supported on this chain.`
+              );
+            }
+          }
 
           // sign and send calls
+          const request = {
+            id: generateRequestId(new Date().getTime().toString()),
+            calls: param?.calls,
+            meta: {
+              atomicRequired: param?.atomicRequired,
+              version: param?.version || "1.0.0",
+            },
+          };
+
+          console.log("request", request);
 
           return {
-            id: param?.id || "1",
+            id: request.id,
             capabilities: param?.capabilities || {},
           };
         case "wallet_getCallsStatus":
@@ -1577,6 +1504,11 @@ export class KeyRingEthereumService {
           }
 
           // 히스토리에 저장된 id를 찾아서 receipt 조회
+          const batchHistory =
+            this.recentSendHistoryService.getRecentBatchHistory(id);
+          if (!batchHistory) {
+            throw new EthereumProviderRpcError(4200, `History not found`);
+          }
 
           // # Status code indicating the current state of the batch. Status codes follow these categories:
           // 1xx: Pending states
@@ -1591,7 +1523,7 @@ export class KeyRingEthereumService {
           //    600: Batch reverted partially and some changes related to batch calls may have been included onchain
 
           return {
-            version: "1.0", // current version is 1.0
+            version: "2.0.0",
             chainId: "0x1",
             id,
             status: 100,
@@ -1611,6 +1543,12 @@ export class KeyRingEthereumService {
             );
           }
           // TODO: 히스토리에 저장된 id를 찾아서 receipt 조회
+          const batchShowHistory =
+            this.recentSendHistoryService.getRecentBatchHistory(showId);
+          if (!batchShowHistory) {
+            throw new EthereumProviderRpcError(4200, `History not found`);
+          }
+
           // NOTE: 상태를 화면에 보여줘야 돼서 우선 skip
 
           throw new EthereumProviderRpcError(4200, `Not implemented`);
@@ -1682,5 +1620,90 @@ export class KeyRingEthereumService {
     const evmInfo = this.chainsService.getEVMInfoOrThrow(chainId);
 
     return evmInfo.chainId;
+  }
+
+  private async getAccountCapabilities(
+    hexChainId: string,
+    address?: string
+  ): Promise<{
+    [chainId: string]: Record<string, any>;
+  }> {
+    if (!address) {
+      const pubKey = await this.keyRingService.getPubKeySelected(hexChainId);
+      const bech32Address = new Bech32Address(pubKey.getEthAddress());
+      address = bech32Address.toHex(true);
+    }
+
+    const chainId = `eip155:${validateEVMChainId(parseInt(hexChainId, 16))}`;
+
+    const currentChainEVMInfo = this.chainsService.getEVMInfoOrThrow(chainId);
+
+    const supportedChainIds = ["0x1", "0x2105", "0xa"]; // ethereum, base, optimism
+    const aaAddresses = [
+      "0x63c0c19a282a1B52b07dD5a65b58948A07DAE32B", // Metamask
+    ];
+    const aaAddressToCodes = aaAddresses.map((aaAddress) => {
+      return `0xef0100${aaAddress.slice(2)}`;
+    }); // 7702 code format
+
+    // The top-level keys are chain IDs in hexadecimal format
+    // Chain ID "0x0" indicates capabilities supported across all chains, 그러나 그럴 일은 없음
+    if (!supportedChainIds.includes(hexChainId)) {
+      return {
+        [hexChainId]: {
+          atomic: {
+            status: "unsupported",
+          },
+          // TODO: paymaster 지원 여부 추가
+        },
+      };
+    }
+
+    const response = await simpleFetch<{
+      jsonrpc: string;
+      id: number;
+      result: any;
+      error?: Error;
+    }>(currentChainEVMInfo.rpc, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "request-source": origin,
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        method: "eth_getCode",
+        params: [address, "latest"],
+        id: 1,
+      }),
+    });
+
+    const code = response.data.result as string;
+
+    // check if the account is upgraded (the code is 7702 format (prefix 0xef0100 + 20 bytes address))
+    if (code !== "0x") {
+      const isSupported7702 = aaAddressToCodes.some((aaAddressToCode) => {
+        return aaAddressToCode.toLowerCase() === code.toLowerCase();
+      });
+      if (isSupported7702) {
+        // supported
+        return {
+          [hexChainId]: {
+            atomic: {
+              status: "supported",
+            },
+          },
+        };
+      }
+    }
+
+    // not upgraded but supported chain
+    return {
+      [hexChainId]: {
+        atomic: {
+          status: "ready",
+        },
+      },
+    };
   }
 }

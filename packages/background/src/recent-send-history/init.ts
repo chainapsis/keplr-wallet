@@ -12,6 +12,8 @@ import {
   RecordTxWithSkipSwapMsg,
   GetSkipHistoriesMsg,
   RemoveSkipHistoryMsg,
+  RecordTxWithBatchMsg,
+  GetBatchHistoryMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -30,6 +32,10 @@ export function init(router: Router, service: RecentSendHistoryService): void {
   router.registerMessage(GetSkipHistoriesMsg);
   router.registerMessage(RemoveSkipHistoryMsg);
   router.registerMessage(ClearAllSkipHistoryMsg);
+
+  // NOTE: 7702 Batch 트랜잭션 히스토리
+  router.registerMessage(RecordTxWithBatchMsg);
+  router.registerMessage(GetBatchHistoryMsg);
 
   router.addHandler(ROUTE, getHandler(service));
 }

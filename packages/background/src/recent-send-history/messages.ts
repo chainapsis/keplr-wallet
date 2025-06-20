@@ -1,6 +1,11 @@
 import { Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
-import { IBCHistory, RecentSendHistory, SkipHistory } from "./types";
+import {
+  BatchHistory,
+  IBCHistory,
+  RecentSendHistory,
+  SkipHistory,
+} from "./types";
 import { AppCurrency } from "@keplr-wallet/types";
 
 export class GetRecentSendHistoriesMsg extends Message<RecentSendHistory[]> {
@@ -537,5 +542,65 @@ export class ClearAllSkipHistoryMsg extends Message<void> {
 
   type(): string {
     return ClearAllSkipHistoryMsg.type();
+  }
+}
+
+export class RecordTxWithBatchMsg extends Message<void> {
+  public static type() {
+    return "record-tx-with-batch";
+  }
+
+  constructor(
+    public readonly id: string,
+    public readonly txHashes: string[],
+    public readonly chainId: string
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.id) {
+      throw new Error("id is empty");
+    }
+
+    if (!this.txHashes) {
+      throw new Error("txHashes is empty");
+    }
+
+    if (!this.chainId) {
+      throw new Error("chainId is empty");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RecordTxWithBatchMsg.type();
+  }
+}
+
+export class GetBatchHistoryMsg extends Message<BatchHistory | undefined> {
+  public static type() {
+    return "get-batch-history";
+  }
+
+  constructor(public readonly id: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.id) {
+      throw new Error("id is empty");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetBatchHistoryMsg.type();
   }
 }

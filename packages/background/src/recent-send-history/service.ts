@@ -16,6 +16,7 @@ import {
 } from "mobx";
 import { KVStore, retry } from "@keplr-wallet/common";
 import {
+  BatchHistory,
   IBCHistory,
   RecentSendHistory,
   SkipHistory,
@@ -50,6 +51,10 @@ export class RecentSendHistoryService {
   // Key: id (sequence, it should be increased by 1 for each)
   @observable
   protected readonly recentSkipHistoryMap: Map<string, SkipHistory> = new Map();
+
+  @observable
+  protected readonly recentBatchHistoryMap: Map<string, BatchHistory> =
+    new Map();
 
   constructor(
     protected readonly kvStore: KVStore,
@@ -176,6 +181,26 @@ export class RecentSendHistoryService {
     for (const history of this.getRecentSkipHistories()) {
       this.trackSkipSwapRecursive(history.id);
     }
+
+    // Load batch history from the storage
+    const recentBatchHistoryMapSaved = await this.kvStore.get<
+      Record<string, BatchHistory>
+    >("recentBatchHistoryMap");
+    if (recentBatchHistoryMapSaved) {
+      runInAction(() => {
+        for (const [key, value] of Object.entries(recentBatchHistoryMapSaved)) {
+          this.recentBatchHistoryMap.set(key, value);
+        }
+      });
+    }
+    autorun(() => {
+      const js = toJS(this.recentBatchHistoryMap);
+      const obj = Object.fromEntries(js);
+      this.kvStore.set<Record<string, BatchHistory>>(
+        "recentBatchHistoryMap",
+        obj
+      );
+    });
 
     this.chainsService.addChainRemovedHandler(this.onChainRemoved);
   }
@@ -2025,6 +2050,15 @@ export class RecentSendHistoryService {
   @action
   clearAllRecentSkipHistory(): void {
     this.recentSkipHistoryMap.clear();
+  }
+
+  @action
+  addRecentBatchHistory(history: BatchHistory): void {
+    this.recentBatchHistoryMap.set(history.id, history);
+  }
+
+  getRecentBatchHistory(id: string): BatchHistory | undefined {
+    return this.recentBatchHistoryMap.get(id);
   }
 
   protected getIBCWriteAcknowledgementAckFromTx(

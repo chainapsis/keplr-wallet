@@ -254,6 +254,14 @@ export function init(
       chainsService
     );
 
+  const recentSendHistoryService =
+    new RecentSendHistory.RecentSendHistoryService(
+      storeCreator("recent-send-history"),
+      chainsService,
+      backgroundTxService,
+      notification
+    );
+
   const keyRingEthereumService = new KeyRingEthereum.KeyRingEthereumService(
     chainsService,
     keyRingV2Service,
@@ -263,7 +271,8 @@ export function init(
     permissionService,
     permissionInteractiveService,
     backgroundTxEthereumService,
-    tokenERC20Service
+    tokenERC20Service,
+    recentSendHistoryService
   );
   const chainsUpdateService = new ChainsUpdate.ChainsUpdateService(
     storeCreator("chains-update"),
@@ -288,14 +297,6 @@ export function init(
     keyRingStarknetService,
     keyRingBitcoinService
   );
-
-  const recentSendHistoryService =
-    new RecentSendHistory.RecentSendHistoryService(
-      storeCreator("recent-send-history"),
-      chainsService,
-      backgroundTxService,
-      notification
-    );
 
   const settingsService = new Settings.SettingsService(
     storeCreator("settings")

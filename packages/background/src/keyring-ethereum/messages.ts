@@ -134,3 +134,5 @@ export class CheckNeedEnableAccessForEVMMsg extends Message<boolean> {
     return CheckNeedEnableAccessForEVMMsg.type();
   }
 }
+
+// TODO: 7702 Atomic 처리 지원되는 체인 id 및 부가 정보를 가져오는 메시지 추가

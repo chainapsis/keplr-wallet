@@ -474,3 +474,9 @@ export type TransferEvent =
   | { go_fast_transfer: GoFastTransferInfo }
   | { stargate_transfer: StargateTransferInfo }
   | { eureka_transfer: EurekaTransferInfo };
+
+export type BatchHistory = {
+  id: string;
+  txHashes: string[];
+  chainId: string;
+};
