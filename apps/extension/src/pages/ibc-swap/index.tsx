@@ -199,11 +199,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
       feeBps?: number;
       coins?: string[];
     };
-  }>(
-    // process.env["KEPLR_EXT_CONFIG_SERVER"]
-    "https://2uvwiiaivoz74ugx3d7oish5rm0ihehh.lambda-url.us-west-2.on.aws/", // TODO: Remove
-    "/swap-fee/info.json"
-  );
+  }>(process.env["KEPLR_EXT_CONFIG_SERVER"], "/swap-fee/info-v2.json");
   useEffect(() => {
     const defaultSwapFeeBps = SwapFeeBps.value;
     if (querySwapFeeBps.response) {
