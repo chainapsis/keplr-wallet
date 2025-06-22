@@ -1587,6 +1587,8 @@ const sidePanelOpenNeededJSONRPCMethods = [
   "wallet_addEthereumChain",
   "wallet_switchEthereumChain",
   "wallet_watchAsset",
+  "wallet_sendCalls",
+  // "wallet_showCallsStatus",
 ];
 
 class EthereumProvider extends EventEmitter implements IEthereumProvider {

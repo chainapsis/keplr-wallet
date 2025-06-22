@@ -31,7 +31,16 @@ import { PermissionInteractiveService } from "../permission-interactive";
 import { enableAccessSkippedEVMJSONRPCMethods } from "./constants";
 import { Transaction, TransactionLike, id as generateRequestId } from "ethers";
 import { hexValue } from "@ethersproject/bytes";
-import { RecentSendHistoryService } from "src/recent-send-history";
+import { RecentSendHistoryService } from "../recent-send-history";
+import {
+  Capabilities,
+  DELEGATOR_ADDRESS,
+  InternalSendCallsRequest,
+  WalletGetCallStatusResponse,
+  WalletGetCallStatusResponseStatus,
+  WalletSendCallsRequest,
+  WalletSendCallsResponse,
+} from "./types";
 
 export class KeyRingEthereumService {
   protected websocketSubscriptionMap = new Map<string, WebSocket>();
@@ -258,6 +267,52 @@ export class KeyRingEthereumService {
                   ]),
                 };
               }
+              case EthSignType.EIP5792: {
+                const txLike: TransactionLike = JSON.parse(
+                  Buffer.from(res.signingData).toString()
+                );
+                if (txLike.from) {
+                  delete txLike.from;
+                }
+
+                const unsignedTx = Transaction.from(txLike);
+
+                const authorizationList = unsignedTx.authorizationList;
+                if (authorizationList && authorizationList.length > 0) {
+                  // TODO: authorizationList 구성 요소 validation
+                  // TODO: authorizationList 구성 요소 서명
+                  // CHECK: 이 경우 요소는 오직 하나만 있어야 함
+                } else {
+                  const isEIP1559 =
+                    !!unsignedTx.maxFeePerGas ||
+                    !!unsignedTx.maxPriorityFeePerGas;
+                  if (isEIP1559) {
+                    unsignedTx.type = EthTransactionType.eip1559;
+                  }
+                }
+
+                const signature = await this.keyRingService.sign(
+                  chainId,
+                  vaultId,
+                  Buffer.from(
+                    unsignedTx.unsignedSerialized.replace("0x", ""),
+                    "hex"
+                  ),
+                  "keccak256"
+                );
+
+                return {
+                  signingData: res.signingData,
+                  signature: Buffer.concat([
+                    signature.r,
+                    signature.s,
+                    // The metamask doesn't seem to consider the chain id in this case... (maybe bug on metamask?)
+                    signature.v
+                      ? Buffer.from("1c", "hex")
+                      : Buffer.from("1b", "hex"),
+                  ]),
+                };
+              }
               default:
                 throw new Error(`Unknown sign type: ${signType}`);
             }
@@ -310,193 +365,6 @@ export class KeyRingEthereumService {
             ...(signType === EthSignType.TRANSACTION && {
               ethTxType,
             }),
-            ...(ethTxType &&
-              ethTxType.startsWith("execute-contract") &&
-              tx && {
-                contractAddress: tx.to,
-              }),
-          });
-        } catch (e) {
-          console.log(e);
-        }
-
-        return {
-          signingData,
-          signature,
-        };
-      }
-    );
-  }
-
-  async signEthereumAtomicSelected(
-    env: Env,
-    origin: string,
-    chainId: string,
-    signer: string,
-    message: Uint8Array
-  ): Promise<EthereumSignResponse> {
-    return await this.signEthereumAtomic(
-      env,
-      origin,
-      this.keyRingService.selectedVaultId,
-      chainId,
-      signer,
-      message
-    );
-  }
-
-  async signEthereumAtomic(
-    env: Env,
-    origin: string,
-    vaultId: string,
-    chainId: string,
-    signer: string,
-    message: Uint8Array
-  ): Promise<EthereumSignResponse> {
-    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-    if (chainInfo.hideInUI) {
-      throw new Error("Can't sign for hidden chain");
-    }
-    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
-    const evmInfo = ChainsService.getEVMInfo(chainInfo);
-    const forceEVMLedger = chainInfo.features?.includes(
-      "force-enable-evm-ledger"
-    );
-
-    if (!isEthermintLike && !evmInfo) {
-      throw new Error("Not ethermint like and EVM chain");
-    }
-
-    const keyInfo = this.keyRingService.getKeyInfo(vaultId);
-    if (!keyInfo) {
-      throw new Error("Null key info");
-    }
-
-    if (keyInfo.type === "ledger" && !forceEVMLedger) {
-      KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
-        chainId
-      );
-    }
-
-    try {
-      Bech32Address.validate(signer);
-    } catch {
-      // Ignore mixed-case checksum
-      signer = (
-        signer.substring(0, 2) === "0x" ? signer : "0x" + signer
-      ).toLowerCase();
-    }
-
-    const key = await this.keyRingCosmosService.getKey(vaultId, chainId);
-    if (
-      signer !== key.bech32Address &&
-      signer !== key.ethereumHexAddress.toLowerCase()
-    ) {
-      throw new Error("Signer mismatched");
-    }
-
-    return await this.interactionService.waitApproveV2(
-      env,
-      "/sign-ethereum",
-      "request-sign-ethereum",
-      {
-        origin,
-        chainId,
-        signer,
-        pubKey: key.pubKey,
-        message,
-        signType: EthSignType.TRANSACTION,
-        keyType: keyInfo.type,
-        keyInsensitive: keyInfo.insensitive,
-      },
-      async (res: { signingData: Uint8Array; signature?: Uint8Array }) => {
-        const { signature, signingData } = await (async () => {
-          if (keyInfo.type === "ledger" || keyInfo.type === "keystone") {
-            if (!res.signature || res.signature.length === 0) {
-              throw new Error("Frontend should provide signature");
-            }
-
-            return {
-              signingData: res.signingData,
-              signature: res.signature,
-            };
-          } else {
-            const txLike: TransactionLike = JSON.parse(
-              Buffer.from(res.signingData).toString()
-            );
-            if (txLike.from) {
-              delete txLike.from;
-            }
-
-            const unsignedTx = Transaction.from(txLike);
-
-            const isEIP1559 =
-              !!unsignedTx.maxFeePerGas || !!unsignedTx.maxPriorityFeePerGas;
-            if (isEIP1559) {
-              unsignedTx.type = EthTransactionType.eip1559;
-            }
-
-            const signature = await this.keyRingService.sign(
-              chainId,
-              vaultId,
-              Buffer.from(
-                unsignedTx.unsignedSerialized.replace("0x", ""),
-                "hex"
-              ),
-              "keccak256"
-            );
-
-            return {
-              signingData: res.signingData,
-              signature: Buffer.concat([
-                signature.r,
-                signature.s,
-                // The metamask doesn't seem to consider the chain id in this case... (maybe bug on metamask?)
-                signature.v
-                  ? Buffer.from("1c", "hex")
-                  : Buffer.from("1b", "hex"),
-              ]),
-            };
-          }
-        })();
-
-        try {
-          const tx = JSON.parse(Buffer.from(signingData).toString());
-          const ethTxType = await (async () => {
-            if (tx.to == null || tx.to === "0x") {
-              return "deploy-contract";
-            }
-
-            const contractBytecode = await this.request<string>(
-              env,
-              origin,
-              "eth_getCode",
-              [tx.to, "latest"],
-              undefined,
-              chainId
-            );
-            if (
-              (tx.data == null || tx.data === "0x") &&
-              BigInt(tx.value) > 0 &&
-              contractBytecode === "0x"
-            ) {
-              return "send-native";
-            }
-
-            if (tx.data?.startsWith("0xa9059cbb")) {
-              return "execute-contract/send-erc20";
-            }
-
-            return "execute-contract";
-          })();
-
-          this.analyticsService.logEventIgnoreError("evm_tx_signed", {
-            chainId,
-            isInternal: env.isInternalMsg,
-            origin,
-            keyType: keyInfo.type,
-            ethSignType: EthSignType.TRANSACTION,
-            ethTxType,
             ...(ethTxType &&
               ethTxType.startsWith("execute-contract") &&
               tx && {
@@ -1377,7 +1245,6 @@ export class KeyRingEthereumService {
             })
           ).data.result;
         }
-
         // EIP-5792 Implementations
         case "wallet_getCapabilities":
           // parameter는 [account, [chainId]] 이거나 null
@@ -1410,22 +1277,7 @@ export class KeyRingEthereumService {
           );
         case "wallet_sendCalls":
           const param =
-            (Array.isArray(params) &&
-              (params[0] as {
-                atomicRequired: boolean;
-                calls: {
-                  to?: string; // hex address, optional
-                  data: string; // hex value, required
-                  value?: string; // hex value, optional
-                }[];
-                chainId: string; // hex value, required
-                version: string; // 5792 version (current: 2.0.0)
-                id?: string; // optional for user to identify the request
-                from?: string; // hex address
-                capabilities?: {
-                  [key: string]: Record<string, any>;
-                }; // optional for user to specify the capabilities e.g. paymaster
-              })) ||
+            (Array.isArray(params) && (params[0] as WalletSendCallsRequest)) ||
             undefined;
 
           // check if the chain is supported
@@ -1457,15 +1309,22 @@ export class KeyRingEthereumService {
             );
           }
 
+          if (!param?.calls || param?.calls.length === 0) {
+            throw new EthereumProviderRpcError(
+              -32602,
+              "Invalid params",
+              "Must provide at least one call."
+            );
+          }
+
+          const capabilities = await this.getAccountCapabilities(
+            hexChainId,
+            fromAddress
+          );
+
           // check if atomicRequired but not supported
           if (param?.atomicRequired) {
-            const capabilities = await this.getAccountCapabilities(
-              hexChainId,
-              fromAddress
-            );
-
-            const atomicStatus =
-              capabilities[hexChainId]["atomic"].status ?? "unsupported";
+            const atomicStatus = capabilities[hexChainId].atomic.status;
 
             if (atomicStatus === "unsupported") {
               throw new EthereumProviderRpcError(
@@ -1475,22 +1334,82 @@ export class KeyRingEthereumService {
             }
           }
 
-          // sign and send calls
-          const request = {
-            id: generateRequestId(new Date().getTime().toString()),
-            calls: param?.calls,
-            meta: {
-              atomicRequired: param?.atomicRequired,
-              version: param?.version || "1.0.0",
-            },
+          const transactionCount = await this.request(
+            env,
+            origin,
+            "eth_getTransactionCount",
+            [fromAddress, "pending"],
+            providerId,
+            chainId
+          );
+
+          const chainCapabilities = capabilities[hexChainId];
+
+          const request: InternalSendCallsRequest = {
+            batchId: generateRequestId(new Date().getTime().toString()),
+            calls: param?.calls.map((call) => {
+              return {
+                ...call,
+                data: call.data || "0x",
+              };
+            }),
+            nonce: parseInt(transactionCount, 16),
+            apiVersion: param?.version || "1.0.0",
+            chainCapabilities,
           };
 
-          console.log("request", request);
+          // TODO: signingData 파싱 타입 확인
+          const { signingData, signature } = await this.signEthereumSelected(
+            env,
+            origin,
+            currentChainId,
+            fromAddress,
+            Buffer.from(JSON.stringify(request)),
+            EthSignType.EIP5792
+          );
+
+          // TODO: signingData가 여러 개의 tx를 포함하고 있을 수 있음
+          // 그러나 현재는 하나의 tx만 지원하도록 구현
+          const txLike: TransactionLike = JSON.parse(
+            Buffer.from(signingData).toString()
+          );
+          if (txLike.from) {
+            delete txLike.from;
+          }
+
+          const signingTx = Transaction.from(txLike);
+
+          const isEIP1559 =
+            !!signingTx.maxFeePerGas || !!signingTx.maxPriorityFeePerGas;
+          if (isEIP1559) {
+            signingTx.type = EthTransactionType.eip1559;
+          }
+
+          signingTx.signature = "0x" + Buffer.from(signature).toString("hex");
+
+          const signedTx = Buffer.from(
+            signingTx.serialized.replace("0x", ""),
+            "hex"
+          );
+
+          const txHash = await this.backgroundTxEthereumService.sendEthereumTx(
+            origin,
+            currentChainId,
+            signedTx,
+            {
+              onFulfill: () => {
+                this.recentSendHistoryService.addRecentBatchHistory({
+                  id: request.batchId,
+                  chainId: currentChainId,
+                  txHashes: [txHash],
+                });
+              },
+            }
+          );
 
           return {
-            id: request.id,
-            capabilities: param?.capabilities || {},
-          };
+            id: request.batchId,
+          } as WalletSendCallsResponse;
         case "wallet_getCallsStatus":
           const id =
             (Array.isArray(params) && (params[0] as string)) || undefined;
@@ -1499,7 +1418,7 @@ export class KeyRingEthereumService {
             throw new EthereumProviderRpcError(
               -32602,
               "Invalid params",
-              "Must provide a id."
+              "Must provide an id."
             );
           }
 
@@ -1510,27 +1429,17 @@ export class KeyRingEthereumService {
             throw new EthereumProviderRpcError(4200, `History not found`);
           }
 
-          // # Status code indicating the current state of the batch. Status codes follow these categories:
-          // 1xx: Pending states
-          //    100: Batch has been received by the wallet but has not completed execution onchain
-          // 2xx: Confirmed states
-          //    200: Batch has been included onchain without reverts
-          // 4xx: Offchain failures
-          //    400: Batch has not been included onchain and wallet will not retry
-          // 5xx: Chain rules failures
-          //    500: Batch reverted completely and only changes related to gas charge may have been included onchain
-          // 6xx: Partial chain rules failures
-          //    600: Batch reverted partially and some changes related to batch calls may have been included onchain
+          // TODO: 히스토리에 저장된 txHashes를 기반으로 receipt 조회
 
           return {
-            version: "2.0.0",
+            version: "1.0.0",
             chainId: "0x1",
             id,
-            status: 100,
+            status: WalletGetCallStatusResponseStatus.Pending,
             atomic: false,
             receipts: [],
             capabilities: {},
-          };
+          } as WalletGetCallStatusResponse;
         case "wallet_showCallsStatus":
           const showId =
             (Array.isArray(params) && (params[0] as string)) || undefined;
@@ -1539,7 +1448,7 @@ export class KeyRingEthereumService {
             throw new EthereumProviderRpcError(
               -32602,
               "Invalid params",
-              "Must provide a id."
+              "Must provide an id."
             );
           }
           // TODO: 히스토리에 저장된 id를 찾아서 receipt 조회
@@ -1625,9 +1534,7 @@ export class KeyRingEthereumService {
   private async getAccountCapabilities(
     hexChainId: string,
     address?: string
-  ): Promise<{
-    [chainId: string]: Record<string, any>;
-  }> {
+  ): Promise<Capabilities> {
     if (!address) {
       const pubKey = await this.keyRingService.getPubKeySelected(hexChainId);
       const bech32Address = new Bech32Address(pubKey.getEthAddress());
@@ -1640,7 +1547,7 @@ export class KeyRingEthereumService {
 
     const supportedChainIds = ["0x1", "0x2105", "0xa"]; // ethereum, base, optimism
     const aaAddresses = [
-      "0x63c0c19a282a1B52b07dD5a65b58948A07DAE32B", // Metamask
+      DELEGATOR_ADDRESS, // Metamask
     ];
     const aaAddressToCodes = aaAddresses.map((aaAddress) => {
       return `0xef0100${aaAddress.slice(2)}`;
@@ -1654,7 +1561,6 @@ export class KeyRingEthereumService {
           atomic: {
             status: "unsupported",
           },
-          // TODO: paymaster 지원 여부 추가
         },
       };
     }

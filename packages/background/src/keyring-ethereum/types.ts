@@ -1,5 +1,7 @@
 import { TransactionReceipt } from "ethers";
 
+export const DELEGATOR_ADDRESS = "0x63c0c19a282a1B52b07dD5a65b58948A07DAE32B"; // Metamask
+
 export type WalletSendCallsRequest = {
   atomicRequired: boolean;
   calls: Call[];
@@ -10,17 +12,40 @@ export type WalletSendCallsRequest = {
   capabilities?: Capabilities; // optional for user to specify the capabilities e.g. paymaster
 };
 
+// signEthereum에서 프론트로 넘겨주는 데이터 (message로 전달됨)
 export type InternalSendCallsRequest = {
-  id: string;
+  batchId: string;
   calls: Call[];
   apiVersion: string;
-  atomicRequired: boolean;
+  nonce: number;
+  chainCapabilities: ChainCapabilities;
 };
 
 export type WalletSendCallsResponse = {
   id: string;
   capabilities?: Capabilities;
 };
+
+export type AccountUpgradeInfo = {
+  delegatorAddress: string; // 위임 계정 주소
+  initCode?: string; // 위임 계정 초기화 코드
+};
+
+export type BatchStrategy = "single" | "atomic" | "sequential" | "unavailable";
+
+// 프론트에서 백단으로 넘겨주는 서명 데이터 (res.signingData로 받음)
+export interface BatchSigningData {
+  strategy: BatchStrategy;
+  batchId: string;
+  unsignedTxs: string[];
+}
+
+// signEthereum 메서드의 응답
+export interface BatchSigningResponse {
+  strategy: BatchStrategy;
+  batchId: string;
+  signedTxs: string[];
+}
 
 export type Call = {
   to?: string; // hex address, optional

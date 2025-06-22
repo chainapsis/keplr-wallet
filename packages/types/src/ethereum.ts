@@ -2,6 +2,7 @@ export enum EthSignType {
   MESSAGE = "message",
   TRANSACTION = "transaction",
   EIP712 = "eip-712",
+  EIP5792 = "eip-5792",
 }
 
 export interface EthTxLog {
