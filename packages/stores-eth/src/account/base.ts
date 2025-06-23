@@ -52,7 +52,19 @@ export class EthereumAccountBase {
     return this._isSendingTx;
   }
 
-  async simulateGas(sender: string, unsignedTx: Transaction) {
+  async simulateGas(
+    sender: string,
+    unsignedTx: Transaction,
+    stateOverride?: {
+      [address: string]: {
+        code?: string;
+        balance?: string;
+        nonce?: string;
+        state?: { [slot: string]: string };
+        stateDiff?: { [slot: string]: string };
+      };
+    }
+  ) {
     const chainInfo = this.chainGetter.getChain(this.chainId);
     const evmInfo = chainInfo.evm;
     if (!evmInfo) {
@@ -61,14 +73,19 @@ export class EthereumAccountBase {
 
     const { to, value, data } = unsignedTx;
 
-    const params = [
+    const params: any[] = [
       {
         from: sender,
         to,
         value: hexValue(value),
         data,
       },
+      "latest",
     ];
+
+    if (stateOverride) {
+      params.push(stateOverride);
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const keplr = (await this.getKeplr())!;
@@ -92,11 +109,21 @@ export class EthereumAccountBase {
     amount,
     sender,
     recipient,
+    stateOverride,
   }: {
     currency: AppCurrency;
     amount: string;
     sender: string;
     recipient: string;
+    stateOverride?: {
+      [address: string]: {
+        code?: string;
+        balance?: string;
+        nonce?: string;
+        state?: { [slot: string]: string };
+        stateDiff?: { [slot: string]: string };
+      };
+    };
   }) {
     // If the recipient address is invalid, the sender address will be used as the recipient for gas estimating gas.
     const tempRecipient = EthereumAccountBase.isEthereumHexAddressWithChecksum(
@@ -126,7 +153,7 @@ export class EthereumAccountBase {
         break;
     }
 
-    return this.simulateGas(sender, unsignedTx);
+    return this.simulateGas(sender, unsignedTx, stateOverride);
   }
 
   async simulateOpStackL1Fee(unsignedTx: Transaction): Promise<string> {
