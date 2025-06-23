@@ -4,7 +4,7 @@ import { observer } from "mobx-react-lite";
 import { EthSignType } from "@keplr-wallet/types";
 import { EthereumArbitrarySignView } from "./components/arbitrary-sign-view";
 import { EthereumTransactionSignView } from "./components/transaction-sign-view";
-// import { EthereumEIP5792SignView } from "./components/eip5792-sign-view";
+import { EthereumEIP5792SignView } from "./components/eip5792-sign-view";
 
 /**
  * EthereumSigningView - Main router component for Ethereum signing
@@ -27,7 +27,7 @@ export const EthereumSigningView: FunctionComponent<{
       return <EthereumTransactionSignView interactionData={interactionData} />;
 
     case EthSignType.EIP5792:
-    // return <EthereumEIP5792SignView interactionData={interactionData} />;
+      return <EthereumEIP5792SignView interactionData={interactionData} />;
 
     default:
       throw new Error(`Unsupported sign type: ${signType}`);
