@@ -29,10 +29,17 @@ import { validateEVMChainId } from "./helper";
 import { runInAction } from "mobx";
 import { PermissionInteractiveService } from "../permission-interactive";
 import { enableAccessSkippedEVMJSONRPCMethods } from "./constants";
-import { Transaction, TransactionLike, id as generateRequestId } from "ethers";
+import {
+  Transaction,
+  TransactionLike,
+  id as generateRequestId,
+  hashAuthorization,
+} from "ethers";
 import { hexValue } from "@ethersproject/bytes";
 import { RecentSendHistoryService } from "../recent-send-history";
 import {
+  BatchSigningData,
+  BatchSigningResponse,
   Capabilities,
   DELEGATOR_ADDRESS,
   InternalSendCallsRequest,
@@ -268,50 +275,116 @@ export class KeyRingEthereumService {
                 };
               }
               case EthSignType.EIP5792: {
-                const txLike: TransactionLike = JSON.parse(
+                const signingData: BatchSigningData = JSON.parse(
                   Buffer.from(res.signingData).toString()
                 );
-                if (txLike.from) {
-                  delete txLike.from;
-                }
 
-                const unsignedTx = Transaction.from(txLike);
+                switch (signingData.strategy) {
+                  case "single":
+                  case "atomic": {
+                    const unsignedTxLike = signingData.unsignedTxs[0];
+                    const unsignedTx = Transaction.from(
+                      unsignedTxLike as TransactionLike
+                    );
 
-                const authorizationList = unsignedTx.authorizationList;
-                if (authorizationList && authorizationList.length > 0) {
-                  // TODO: authorizationList 구성 요소 validation
-                  // TODO: authorizationList 구성 요소 서명
-                  // CHECK: 이 경우 요소는 오직 하나만 있어야 함
-                } else {
-                  const isEIP1559 =
-                    !!unsignedTx.maxFeePerGas ||
-                    !!unsignedTx.maxPriorityFeePerGas;
-                  if (isEIP1559) {
-                    unsignedTx.type = EthTransactionType.eip1559;
+                    if (signingData.strategy === "atomic") {
+                      // Check if authorizationList is not null
+                      if (
+                        unsignedTxLike.authorizationList &&
+                        unsignedTxLike.authorizationList.length > 0
+                      ) {
+                        const authorization =
+                          unsignedTxLike.authorizationList[0];
+
+                        const nonce =
+                          typeof authorization.nonce === "string"
+                            ? BigInt(authorization.nonce)
+                            : authorization.nonce;
+
+                        const hash = hashAuthorization({
+                          address: authorization.address,
+                          nonce,
+                          chainId: unsignedTx.chainId,
+                        });
+
+                        // sign hash of authorization, no digest method
+                        const signature = await this.keyRingService.sign(
+                          chainId,
+                          vaultId,
+                          Buffer.from(hash.replace("0x", ""), "hex"),
+                          "noop"
+                        );
+
+                        // add signature to authorization list
+                        unsignedTx.authorizationList = [
+                          {
+                            address: authorization.address,
+                            nonce,
+                            chainId: unsignedTx.chainId,
+                            signature:
+                              "0x" +
+                              Buffer.concat([
+                                signature.r,
+                                signature.s,
+                                signature.v
+                                  ? Buffer.from("1c", "hex")
+                                  : Buffer.from("1b", "hex"),
+                              ]).toString("hex"),
+                          },
+                        ];
+                      }
+                    }
+
+                    const signature = await this.keyRingService.sign(
+                      chainId,
+                      vaultId,
+                      Buffer.from(
+                        unsignedTx.unsignedSerialized.replace("0x", ""),
+                        "hex"
+                      ),
+                      "keccak256"
+                    );
+
+                    unsignedTx.signature =
+                      "0x" +
+                      Buffer.concat([
+                        signature.r,
+                        signature.s,
+                        signature.v
+                          ? Buffer.from("1c", "hex")
+                          : Buffer.from("1b", "hex"),
+                      ]).toString("hex");
+
+                    const batchSigningResponse: BatchSigningResponse = {
+                      strategy: signingData.strategy,
+                      batchId: signingData.batchId,
+                      signedTxs: [unsignedTx.serialized],
+                    };
+
+                    return {
+                      signingData: Buffer.from(
+                        JSON.stringify(batchSigningResponse)
+                      ),
+                      signature: Buffer.concat([
+                        signature.r,
+                        signature.s,
+                        // The metamask doesn't seem to consider the chain id in this case... (maybe bug on metamask?)
+                        signature.v
+                          ? Buffer.from("1c", "hex")
+                          : Buffer.from("1b", "hex"),
+                      ]),
+                    };
+                  }
+                  // case "sequential": {
+                  //   // TODO: 여러 트랜잭션 처리
+                  //   break;
+                  // }
+                  default: {
+                    throw new Error(
+                      `Unknown or not supported strategy: ${signingData.strategy}`
+                    );
                   }
                 }
-
-                const signature = await this.keyRingService.sign(
-                  chainId,
-                  vaultId,
-                  Buffer.from(
-                    unsignedTx.unsignedSerialized.replace("0x", ""),
-                    "hex"
-                  ),
-                  "keccak256"
-                );
-
-                return {
-                  signingData: res.signingData,
-                  signature: Buffer.concat([
-                    signature.r,
-                    signature.s,
-                    // The metamask doesn't seem to consider the chain id in this case... (maybe bug on metamask?)
-                    signature.v
-                      ? Buffer.from("1c", "hex")
-                      : Buffer.from("1b", "hex"),
-                  ]),
-                };
               }
               default:
                 throw new Error(`Unknown sign type: ${signType}`);
@@ -1359,7 +1432,7 @@ export class KeyRingEthereumService {
           };
 
           // TODO: signingData 파싱 타입 확인
-          const { signingData, signature } = await this.signEthereumSelected(
+          const { signingData } = await this.signEthereumSelected(
             env,
             origin,
             currentChainId,
@@ -1368,34 +1441,23 @@ export class KeyRingEthereumService {
             EthSignType.EIP5792
           );
 
-          // TODO: signingData가 여러 개의 tx를 포함하고 있을 수 있음
-          // 그러나 현재는 하나의 tx만 지원하도록 구현
-          const txLike: TransactionLike = JSON.parse(
+          const batchSigningResponse: BatchSigningResponse = JSON.parse(
             Buffer.from(signingData).toString()
           );
-          if (txLike.from) {
-            delete txLike.from;
+
+          const signedTxs = batchSigningResponse.signedTxs;
+          if (signedTxs.length < 1) {
+            throw new EthereumProviderRpcError(
+              -32602,
+              "Invalid signing data",
+              "Invalid signing data"
+            );
           }
-
-          const signingTx = Transaction.from(txLike);
-
-          const isEIP1559 =
-            !!signingTx.maxFeePerGas || !!signingTx.maxPriorityFeePerGas;
-          if (isEIP1559) {
-            signingTx.type = EthTransactionType.eip1559;
-          }
-
-          signingTx.signature = "0x" + Buffer.from(signature).toString("hex");
-
-          const signedTx = Buffer.from(
-            signingTx.serialized.replace("0x", ""),
-            "hex"
-          );
 
           const txHash = await this.backgroundTxEthereumService.sendEthereumTx(
             origin,
             currentChainId,
-            signedTx,
+            Buffer.from(signedTxs[0].replace("0x", ""), "hex"),
             {
               onFulfill: () => {
                 this.recentSendHistoryService.addRecentBatchHistory({
