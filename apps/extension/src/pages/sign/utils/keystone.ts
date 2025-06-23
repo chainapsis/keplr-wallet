@@ -60,6 +60,8 @@ export function getEthDataTypeFromSignType(
       return KeystoneEthereumSDK.DataType.personalMessage;
     case EthSignType.EIP712:
       return KeystoneEthereumSDK.DataType.typedData;
+    case EthSignType.EIP5792:
+      return KeystoneEthereumSDK.DataType.typedTransaction; // Should be one of 1559 or 7702
   }
 }
 
@@ -85,6 +87,9 @@ export function encodeEthMessage(
       return Buffer.from(tx.unsignedSerialized.replace(/^0x/, ""), "hex");
     case EthSignType.MESSAGE:
     case EthSignType.EIP712:
+      return Buffer.from(message);
+    // TODO: EIP5792 처리, 메시지를 어떻게 받냐...
+    case EthSignType.EIP5792:
       return Buffer.from(message);
   }
 }
