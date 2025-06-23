@@ -154,24 +154,54 @@ export const EthereumEIP5792SignView: FunctionComponent<{
       }
 
       // TODO: handle sequential batch strategy with multiple transactions
-      const unsignedTx = transactions[0];
+      const unsignedTx = transactions[0].clone();
 
       if (unsignedTx.type === EthTransactionType.eip7702) {
-        const authorization = unsignedTx.authorizationList?.[0];
+        const authorizationList = unsignedTx.authorizationList;
+        const authorization = authorizationList?.[0];
         // Override the delegation designator of the account
         if (authorization) {
+          // NOTE: Only handle a single authorization
           const { address } = authorization;
+
+          // NOTE: For simulation, remove authorization list and change to EIP-1559 transaction,
+          // and override the delegation designator of the account
+          unsignedTx.authorizationList = null;
+          unsignedTx.type = EthTransactionType.eip1559;
+
           return {
-            simulate: () =>
-              ethereumAccount.simulateGas(
-                account.ethereumHexAddress,
-                unsignedTx,
-                {
-                  [account.ethereumHexAddress]: {
-                    code: `0xef0100${address.slice(2)}`,
-                  },
-                }
-              ),
+            simulate: async () => {
+              // TODO: check if account is empty
+              //   const [balance, nonce, code] = await Promise.all([
+              //     rpc.eth_getBalance(address),
+              //     rpc.eth_getTransactionCount(address),
+              //     rpc.eth_getCode(address),
+              //   ]);
+              const isAccountEmpty = false;
+
+              // EIP-7702 gas costs:
+              // - PER_AUTH_BASE_COST (25,000) always applied as intrinsic cost
+              // - If account is not empty: additional cost during execution
+              // - For simulation, we use conservative estimate
+              const authIntrinsic = isAccountEmpty
+                ? 25_000 // cost for empty accounts
+                : 12_500; // cost for non-empty accounts
+
+              const { gasUsed: baseGasUsed } =
+                await ethereumAccount.simulateGas(
+                  account.ethereumHexAddress,
+                  unsignedTx,
+                  {
+                    [account.ethereumHexAddress]: {
+                      code: `0xef0100${address.slice(2)}`,
+                    },
+                  }
+                );
+
+              return {
+                gasUsed: authIntrinsic + baseGasUsed,
+              };
+            },
           };
         }
       }

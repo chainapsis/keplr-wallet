@@ -335,7 +335,7 @@ export function determineBatchStrategy(
       requiresUserChoice: false,
       showUpgradeInfo: false,
       canUpgrade: false,
-      isUpgradeRequired: true,
+      isUpgradeRequired: false,
       availableStrategies: {},
       strategyDescriptions: {
         atomic: "All transactions execute together",
