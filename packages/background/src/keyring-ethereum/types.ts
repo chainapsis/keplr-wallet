@@ -1,4 +1,4 @@
-import { TransactionReceipt } from "ethers";
+import { BigNumberish, TransactionLike, TransactionReceipt } from "ethers";
 
 export const DELEGATOR_ADDRESS = "0x63c0c19a282a1B52b07dD5a65b58948A07DAE32B"; // Metamask
 
@@ -33,11 +33,21 @@ export type AccountUpgradeInfo = {
 
 export type BatchStrategy = "single" | "atomic" | "sequential" | "unavailable";
 
+export type AuthorizationLikeWithoutSignature = {
+  address: string;
+  nonce: BigNumberish;
+  chainId: BigNumberish;
+};
+
+export type UnsignedTxLike = Omit<TransactionLike, "authorizationList"> & {
+  authorizationList?: AuthorizationLikeWithoutSignature[]; // 현 ethers.js 버전(v6.14.4)에서는 toJSON 시 authorizationList가 소실되는 문제가 있음
+};
+
 // 프론트에서 백단으로 넘겨주는 서명 데이터 (res.signingData로 받음)
 export interface BatchSigningData {
   strategy: BatchStrategy;
   batchId: string;
-  unsignedTxs: string[];
+  unsignedTxs: UnsignedTxLike[];
 }
 
 // signEthereum 메서드의 응답

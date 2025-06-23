@@ -8,10 +8,12 @@ import { Buffer } from "buffer/";
 
 export interface UseEthereumSigningCommonProps {
   interactionData: NonNullable<SignEthereumInteractionStore["waitingData"]>;
+  emptySigningDataBuff?: boolean;
 }
 
 export const useEthereumSigningCommon = ({
   interactionData,
+  emptySigningDataBuff = false,
 }: UseEthereumSigningCommonProps) => {
   const { signEthereumInteractionStore } = useStore();
 
@@ -35,9 +37,12 @@ export const useEthereumSigningCommon = ({
     [interactionData.data.keyInsensitive, interactionData.data.signer]
   );
 
-  const [signingDataBuff, setSigningDataBuff] = useState<Buffer>(
-    Buffer.from(interactionData.data.message)
-  );
+  const [signingDataBuff, setSigningDataBuff] = useState<Buffer>(() => {
+    if (emptySigningDataBuff) {
+      return Buffer.from("");
+    }
+    return Buffer.from(interactionData.data.message);
+  });
 
   const [isLedgerInteracting, setIsLedgerInteracting] = useState(false);
   const [ledgerInteractingError, setLedgerInteractingError] = useState<

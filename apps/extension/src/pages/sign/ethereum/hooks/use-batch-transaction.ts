@@ -15,6 +15,7 @@ import {
   Call,
   ChainCapabilities,
   AccountUpgradeInfo,
+  UnsignedTxLike,
 } from "@keplr-wallet/background";
 import { EthTransactionType } from "@keplr-wallet/types";
 import { ModeLib } from "../utils/mod-lib";
@@ -131,8 +132,6 @@ export interface BatchTransactionState {
 export interface BatchTransactionActions {
   /** Update user's upgrade choice */
   setUpgradeChoice: (choice: boolean) => void;
-  /** Generate final signing data for execution */
-  generateSigningData: () => BatchSigningData;
 }
 
 /**
@@ -272,14 +271,6 @@ export function useBatchTransaction(
     [analysis.requiresUserChoice, analysis.canUpgrade]
   );
 
-  // Generate signing data with validation
-  const generateSigningData = useCallback(() => {
-    if (!signingData) {
-      throw new Error("No signing data available");
-    }
-    return signingData;
-  }, [signingData]);
-
   // Whether user can change their upgrade choice
   const canChangeUpgrade = useMemo(() => {
     return analysis.requiresUserChoice && analysis.canUpgrade;
@@ -294,7 +285,6 @@ export function useBatchTransaction(
     uiInfo,
     signingData,
     setUpgradeChoice,
-    generateSigningData,
   };
 }
 
@@ -602,7 +592,20 @@ export function createBatchSigningData(
   return {
     strategy,
     batchId,
-    unsignedTxs: transactions.map((tx) => tx.unsignedSerialized),
+    unsignedTxs: transactions.map((tx) => {
+      const txLike: UnsignedTxLike = tx.toJSON();
+
+      if (tx.type === EthTransactionType.eip7702 && tx.authorizationList) {
+        txLike.authorizationList = tx.authorizationList.map((auth) => {
+          return {
+            address: auth.address,
+            nonce: `0x${auth.nonce.toString(16)}`,
+            chainId: `0x${auth.chainId.toString(16)}`,
+          };
+        });
+      }
+      return txLike;
+    }),
   };
 }
 
