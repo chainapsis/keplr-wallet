@@ -1010,7 +1010,9 @@ export class KeyRingEthereumService {
                 },
                 features: ["eth-address-gen", "eth-key-sign"],
                 chainSymbolImageUrl:
-                  iconUrls && typeof iconUrls[0] === "string" && !!iconUrls[0],
+                  iconUrls && typeof iconUrls[0] === "string" && !!iconUrls[0]
+                    ? iconUrls[0]
+                    : undefined,
                 beta: true,
               } as ChainInfo;
 
