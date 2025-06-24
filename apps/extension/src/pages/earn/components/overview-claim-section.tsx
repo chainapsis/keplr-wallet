@@ -14,6 +14,8 @@ import { useTheme } from "styled-components";
 import { KEPLR_EXTS_MEMO } from "../../../config.ui";
 import debounce from "lodash.debounce";
 import { logNobleClaimAnalytics } from "../../../analytics-amplitude";
+import { XAxis } from "../../../components/axis";
+import { Tooltip } from "../../../components/tooltip";
 
 export const EarnOverviewClaimSection: FunctionComponent<{
   chainId: string;
@@ -166,13 +168,40 @@ export const EarnOverviewClaimSection: FunctionComponent<{
           </H4>
         </Box>
         <Box width="50%">
-          <Subtitle3
-            color={
-              isLightMode ? ColorPalette["gray-400"] : ColorPalette["gray-200"]
-            }
-          >
-            <FormattedMessage id="page.earn.overview.claim-section.total-claimed" />
-          </Subtitle3>
+          <XAxis>
+            <Subtitle3
+              color={
+                isLightMode
+                  ? ColorPalette["gray-400"]
+                  : ColorPalette["gray-200"]
+              }
+            >
+              <FormattedMessage id="page.earn.overview.claim-section.total-claimed" />
+            </Subtitle3>
+            <Tooltip
+              content={intl.formatMessage({
+                id: "page.earn.overview.claim-section.total-claimed-tooltip",
+              })}
+            >
+              <Box alignY="center" marginLeft="0.25rem">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="17"
+                  viewBox="0 0 16 17"
+                  fill="none"
+                >
+                  <path
+                    d="M7.5 8L7.52766 7.98617C7.90974 7.79513 8.33994 8.14023 8.23634 8.55465L7.76366 10.4453C7.66006 10.8598 8.09026 11.2049 8.47234 11.0138L8.5 11M14 8.5C14 11.8137 11.3137 14.5 8 14.5C4.68629 14.5 2 11.8137 2 8.5C2 5.18629 4.68629 2.5 8 2.5C11.3137 2.5 14 5.18629 14 8.5ZM8 6H8.005V6.005H8V6Z"
+                    stroke="#ABABB5"
+                    strokeWidth="1.66667"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </Box>
+            </Tooltip>
+          </XAxis>
           <Gutter size="0.875rem" />
           <H4
             color={isLightMode ? ColorPalette["gray-700"] : ColorPalette.white}
