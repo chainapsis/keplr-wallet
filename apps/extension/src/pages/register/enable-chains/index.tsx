@@ -2449,43 +2449,51 @@ export const EnableChainsScene: FunctionComponent<{
                 }
 
                 // Amplitude Analytics
-                try {
-                  const allNativeChainsEnabled =
-                    nativeGroupedModularChainInfos.length ===
-                    enabledNativeChainIdentifiersInPage.length;
+                const allNativeChainsEnabled =
+                  nativeGroupedModularChainInfos.length ===
+                  enabledNativeChainIdentifiersInPage.length;
 
-                  const enabledIds = Array.from(enablesSet);
+                const enabledIds = Array.from(enablesSet);
 
-                  const betaEnabledCount = enabledIds.filter((id) => {
+                const betaEnabledCount = enabledIds.filter((id) => {
+                  try {
                     const chainInfo = chainStore.getChain(id);
                     return chainInfo.beta;
-                  }).length;
+                  } catch (e) {
+                    return false;
+                  }
+                }).length;
 
-                  const testnetEnabledCount = enabledIds.filter((id) => {
-                    if (id.includes("test") || id.includes("devnet")) {
-                      return true;
-                    }
+                const testnetEnabledCount = enabledIds.filter((id) => {
+                  if (id.includes("test") || id.includes("devnet")) {
+                    return true;
+                  }
+                  try {
                     const chainInfo = chainStore.getChain(id);
                     return (
                       chainInfo.chainName.toLowerCase().includes("test") ||
                       chainInfo.chainName.toLowerCase().includes("devnet")
                     );
-                  }).length;
+                  } catch (e) {
+                    return false;
+                  }
+                }).length;
 
-                  const ecosystemCounts: {
-                    cosmos: number;
-                    evm: number;
-                    starknet: number;
-                    bitcoin: number;
-                  } = {
-                    cosmos: 0,
-                    evm: 0,
-                    starknet: 0,
-                    bitcoin: 0,
-                  };
+                const ecosystemCounts: {
+                  cosmos: number;
+                  evm: number;
+                  starknet: number;
+                  bitcoin: number;
+                } = {
+                  cosmos: 0,
+                  evm: 0,
+                  starknet: 0,
+                  bitcoin: 0,
+                };
 
-                  enabledIds.forEach((id) => {
-                    let eco: keyof typeof ecosystemCounts = "cosmos";
+                enabledIds.forEach((id) => {
+                  let eco: keyof typeof ecosystemCounts = "cosmos";
+                  try {
                     const modularInfo = chainStore.getModularChain(id);
 
                     if ("bitcoin" in modularInfo) {
@@ -2497,8 +2505,12 @@ export const EnableChainsScene: FunctionComponent<{
                     }
 
                     ecosystemCounts[eco] += 1;
-                  });
+                  } catch (e) {
+                    return;
+                  }
+                });
 
+                try {
                   analyticsAmplitudeStore.logEvent(
                     "click_save_enable_chains_btn_register",
                     {
@@ -2526,7 +2538,7 @@ export const EnableChainsScene: FunctionComponent<{
                   });
                 } catch (e) {
                   console.error(
-                    "[Analytics] Failed to log save_enable_chains_btn_register",
+                    "[Analytics] Failed to log click_save_enable_chains_btn_register",
                     e
                   );
                 }
