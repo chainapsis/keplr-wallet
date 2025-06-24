@@ -301,7 +301,7 @@
 
   "page.setting.security.connected-websites-title": "Connected Websites",
   "page.setting.security.connected-websites-paragraph": "Websites that can view your address and make requests for signing",
-  "page.setting.security.auto-lock-title": "Auto-Lock",
+  "page.setting.security.auto-lock-title": "Auto-Lock Timer",
   "page.setting.security.change-password-title": "Change Password",
   "page.setting.security.analytics-title": "Share Anonymous Data",
   "page.setting.security.analytics-paragraph": "Help us improve the performance and quality of Keplr",
