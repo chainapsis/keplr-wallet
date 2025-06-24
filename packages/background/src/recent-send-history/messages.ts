@@ -545,42 +545,6 @@ export class ClearAllSkipHistoryMsg extends Message<void> {
   }
 }
 
-export class RecordTxWithBatchMsg extends Message<void> {
-  public static type() {
-    return "record-tx-with-batch";
-  }
-
-  constructor(
-    public readonly id: string,
-    public readonly txHashes: string[],
-    public readonly chainId: string
-  ) {
-    super();
-  }
-
-  validateBasic(): void {
-    if (!this.id) {
-      throw new Error("id is empty");
-    }
-
-    if (!this.txHashes) {
-      throw new Error("txHashes is empty");
-    }
-
-    if (!this.chainId) {
-      throw new Error("chainId is empty");
-    }
-  }
-
-  route(): string {
-    return ROUTE;
-  }
-
-  type(): string {
-    return RecordTxWithBatchMsg.type();
-  }
-}
-
 export class GetBatchHistoryMsg extends Message<BatchHistory | undefined> {
   public static type() {
     return "get-batch-history";
@@ -602,5 +566,27 @@ export class GetBatchHistoryMsg extends Message<BatchHistory | undefined> {
 
   type(): string {
     return GetBatchHistoryMsg.type();
+  }
+}
+
+export class GetBatchHistoriesMsg extends Message<BatchHistory[]> {
+  public static type() {
+    return "get-batch-histories";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetBatchHistoriesMsg.type();
   }
 }

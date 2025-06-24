@@ -18,8 +18,8 @@ import {
   RemoveSkipHistoryMsg,
   ClearAllSkipHistoryMsg,
   RecordTxWithSkipSwapMsg,
-  RecordTxWithBatchMsg,
   GetBatchHistoryMsg,
+  GetBatchHistoriesMsg,
 } from "./messages";
 import { RecentSendHistoryService } from "./service";
 
@@ -88,15 +88,15 @@ export const getHandler: (service: RecentSendHistoryService) => Handler = (
           env,
           msg as ClearAllSkipHistoryMsg
         );
-      case RecordTxWithBatchMsg:
-        return handleRecordTxWithBatchMsg(service)(
-          env,
-          msg as RecordTxWithBatchMsg
-        );
       case GetBatchHistoryMsg:
         return handleGetBatchHistoryMsg(service)(
           env,
           msg as GetBatchHistoryMsg
+        );
+      case GetBatchHistoriesMsg:
+        return handleGetBatchHistoriesMsg(service)(
+          env,
+          msg as GetBatchHistoriesMsg
         );
       default:
         throw new KeplrError("tx", 110, "Unknown msg type");
@@ -266,22 +266,18 @@ const handleClearAllSkipHistoryMsg: (
   };
 };
 
-const handleRecordTxWithBatchMsg: (
-  service: RecentSendHistoryService
-) => InternalHandler<RecordTxWithBatchMsg> = (service) => {
-  return async (_env, msg) => {
-    service.addRecentBatchHistory({
-      id: msg.id,
-      txHashes: msg.txHashes,
-      chainId: msg.chainId,
-    });
-  };
-};
-
 const handleGetBatchHistoryMsg: (
   service: RecentSendHistoryService
 ) => InternalHandler<GetBatchHistoryMsg> = (service) => {
   return async (_env, msg) => {
     return service.getRecentBatchHistory(msg.id);
+  };
+};
+
+const handleGetBatchHistoriesMsg: (
+  service: RecentSendHistoryService
+) => InternalHandler<GetBatchHistoriesMsg> = (service) => {
+  return (_env, _msg) => {
+    return service.getRecentBatchHistories();
   };
 };

@@ -17,6 +17,7 @@ import {
 import { KVStore, retry } from "@keplr-wallet/common";
 import {
   BatchHistory,
+  BatchTransaction,
   IBCHistory,
   RecentSendHistory,
   SkipHistory,
@@ -185,7 +186,7 @@ export class RecentSendHistoryService {
     // Load batch history from the storage
     const recentBatchHistoryMapSaved = await this.kvStore.get<
       Record<string, BatchHistory>
-    >("recentBatchHistoryMap");
+    >("recentEthereumBatchHistoryMap");
     if (recentBatchHistoryMapSaved) {
       runInAction(() => {
         for (const [key, value] of Object.entries(recentBatchHistoryMapSaved)) {
@@ -197,7 +198,7 @@ export class RecentSendHistoryService {
       const js = toJS(this.recentBatchHistoryMap);
       const obj = Object.fromEntries(js);
       this.kvStore.set<Record<string, BatchHistory>>(
-        "recentBatchHistoryMap",
+        "recentEthereumBatchHistoryMap",
         obj
       );
     });
@@ -2053,12 +2054,169 @@ export class RecentSendHistoryService {
   }
 
   @action
-  addRecentBatchHistory(history: BatchHistory): void {
-    this.recentBatchHistoryMap.set(history.id, history);
+  addRecentBatchHistory({
+    batchId,
+    chainId,
+    strategy,
+    signedTxs,
+  }: {
+    batchId?: string;
+    chainId: string;
+    strategy: "atomic" | "sequential" | "single";
+    signedTxs: string[];
+  }): string {
+    if (!batchId) {
+      batchId = id(new Date().getTime().toString());
+    }
+
+    this.recentBatchHistoryMap.set(batchId, {
+      id: batchId,
+      chainId,
+      strategy,
+      transactions: signedTxs.map((signedTx) => ({
+        status: "BATCH_TX_PENDING",
+        signedTx,
+      })),
+      createdAt: Date.now(),
+      status: "BATCH_PENDING",
+    });
+
+    return batchId;
   }
 
   getRecentBatchHistory(id: string): BatchHistory | undefined {
     return this.recentBatchHistoryMap.get(id);
+  }
+
+  getRecentBatchHistories(): BatchHistory[] {
+    return Array.from(this.recentBatchHistoryMap.values());
+  }
+
+  @action
+  protected updateBatchTransactionStatus(
+    batchId: string,
+    txIndex: number,
+    status: Partial<
+      Pick<
+        BatchTransaction,
+        "status" | "txHash" | "error" | "timestamp" | "gasUsed"
+      >
+    >
+  ): void {
+    const history = this.recentBatchHistoryMap.get(batchId);
+    if (!history || !history.transactions[txIndex]) {
+      return;
+    }
+
+    Object.assign(history.transactions[txIndex], status);
+
+    // Update overall batch status
+    if (status.status === "BATCH_TX_FAILED") {
+      history.status = "BATCH_FAILED";
+      history.completedAt = Date.now();
+    } else if (status.status === "BATCH_TX_CONFIRMED") {
+      // Check if all transactions are completed
+      const allCompleted = history.transactions.every(
+        (tx) =>
+          tx.status === "BATCH_TX_CONFIRMED" || tx.status === "BATCH_TX_FAILED"
+      );
+      if (allCompleted) {
+        history.status = "BATCH_COMPLETED";
+        history.completedAt = Date.now();
+      }
+    }
+
+    this.recentBatchHistoryMap.set(batchId, history);
+  }
+
+  protected getNextPendingTransaction(
+    batchId: string
+  ): { index: number; transaction: BatchTransaction } | null {
+    const history = this.recentBatchHistoryMap.get(batchId);
+    if (!history) {
+      return null;
+    }
+
+    const pendingIndex = history.transactions.findIndex(
+      (tx) => tx.status === "BATCH_TX_PENDING"
+    );
+
+    if (pendingIndex === -1) {
+      return null;
+    }
+
+    return {
+      index: pendingIndex,
+      transaction: history.transactions[pendingIndex],
+    };
+  }
+
+  @action
+  async processBatchByStrategy(
+    batchId: string,
+    sendTxFn: (signedTx: string) => Promise<string>
+  ): Promise<void> {
+    const history = this.recentBatchHistoryMap.get(batchId);
+    if (!history) {
+      throw new Error(`Batch history not found: ${batchId}`);
+    }
+
+    // Update status to in progress
+    this.updateBatchTransactionStatus(batchId, 0, {});
+    history.status = "BATCH_IN_PROGRESS";
+
+    while (true) {
+      const next = this.getNextPendingTransaction(batchId);
+      if (!next) {
+        break; // No more pending transactions
+      }
+
+      const { index, transaction } = next;
+
+      try {
+        // Mark as broadcasting
+        this.updateBatchTransactionStatus(batchId, index, {
+          status: "BATCH_TX_BROADCASTING",
+          timestamp: Date.now(),
+        });
+
+        // Send transaction
+        const txHash = await sendTxFn(transaction.signedTx);
+
+        // Mark as sent
+        this.updateBatchTransactionStatus(batchId, index, {
+          status: "BATCH_TX_SENT",
+          txHash,
+          timestamp: Date.now(),
+        });
+
+        // For sequential strategy, wait for confirmation before proceeding
+        if (history.strategy === "sequential") {
+          // TODO: Add confirmation waiting logic here
+          // For now, just mark as confirmed immediately
+          this.updateBatchTransactionStatus(batchId, index, {
+            status: "BATCH_TX_CONFIRMED",
+          });
+        } else {
+          // For atomic strategy, mark as confirmed immediately
+          this.updateBatchTransactionStatus(batchId, index, {
+            status: "BATCH_TX_CONFIRMED",
+          });
+        }
+      } catch (error) {
+        // Mark as failed
+        this.updateBatchTransactionStatus(batchId, index, {
+          status: "BATCH_TX_FAILED",
+          error: error.message,
+          timestamp: Date.now(),
+        });
+
+        // For sequential strategy, stop on first failure
+        if (history.strategy === "sequential") {
+          break;
+        }
+      }
+    }
   }
 
   protected getIBCWriteAcknowledgementAckFromTx(

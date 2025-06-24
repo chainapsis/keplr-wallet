@@ -32,6 +32,7 @@ import { enableAccessSkippedEVMJSONRPCMethods } from "./constants";
 import {
   Transaction,
   TransactionLike,
+  TransactionReceipt,
   id as generateRequestId,
   hashAuthorization,
 } from "ethers";
@@ -1365,6 +1366,74 @@ export class KeyRingEthereumService {
             );
           }
 
+          // validate calls
+          if (!param?.calls || param?.calls.length === 0) {
+            throw new EthereumProviderRpcError(
+              -32602,
+              "Invalid params",
+              "Must provide at least one call."
+            );
+          }
+
+          for (const call of param?.calls) {
+            // Check if this is a contract deployment transaction
+            const isContractDeployment =
+              !call.to ||
+              call.to === "" ||
+              call.to === "0x" ||
+              call.to === "0x0000000000000000000000000000000000000000" ||
+              call.to.toLowerCase() ===
+                "0x0000000000000000000000000000000000000000";
+
+            if (isContractDeployment) {
+              // For contract deployment, data field must contain bytecode
+              if (!call.data || call.data === "0x" || call.data.length <= 2) {
+                throw new EthereumProviderRpcError(
+                  -32602,
+                  "Invalid params",
+                  "Contract deployment requires valid bytecode in data field."
+                );
+              }
+            } else {
+              // For regular transactions, validate the 'to' address format
+              if (!call.to || !call.to.match(/^0x[0-9a-fA-F]{40}$/)) {
+                throw new EthereumProviderRpcError(
+                  -32602,
+                  "Invalid params",
+                  "Invalid 'to' address format."
+                );
+              }
+            }
+
+            // Validate value field format if provided
+            if (call.value !== undefined) {
+              if (
+                typeof call.value !== "string" ||
+                !call.value.match(/^0x[0-9a-fA-F]*$/)
+              ) {
+                throw new EthereumProviderRpcError(
+                  -32602,
+                  "Invalid params",
+                  "Invalid 'value' format. Must be hex string."
+                );
+              }
+            }
+
+            // Validate data field format if provided
+            if (call.data !== undefined) {
+              if (
+                typeof call.data !== "string" ||
+                !call.data.match(/^0x[0-9a-fA-F]*$/)
+              ) {
+                throw new EthereumProviderRpcError(
+                  -32602,
+                  "Invalid params",
+                  "Invalid 'data' format. Must be hex string."
+                );
+              }
+            }
+          }
+
           // check if the from address is selected key
           const pubKey = await this.keyRingService.getPubKeySelected(
             currentChainId
@@ -1431,7 +1500,6 @@ export class KeyRingEthereumService {
             chainCapabilities,
           };
 
-          // TODO: signingData 파싱 타입 확인
           const { signingData } = await this.signEthereumSelected(
             env,
             origin,
@@ -1454,23 +1522,51 @@ export class KeyRingEthereumService {
             );
           }
 
-          const txHash = await this.backgroundTxEthereumService.sendEthereumTx(
-            origin,
-            currentChainId,
-            Buffer.from(signedTxs[0].replace("0x", ""), "hex"),
-            {
-              onFulfill: () => {
-                this.recentSendHistoryService.addRecentBatchHistory({
-                  id: request.batchId,
-                  chainId: currentChainId,
-                  txHashes: [txHash],
-                });
-              },
-            }
-          );
+          // Create batch history first with pending transactions
+          const strategy = (
+            batchSigningResponse.strategy === "unavailable"
+              ? "single"
+              : batchSigningResponse.strategy
+          ) as "atomic" | "sequential" | "single";
+
+          this.recentSendHistoryService.addRecentBatchHistory({
+            batchId: request.batchId,
+            chainId: currentChainId,
+            strategy,
+            signedTxs,
+          });
+
+          // Return ID immediately and process transactions in background
+          const batchId = request.batchId;
+
+          // Process transactions asynchronously in the background
+          // Using Promise microtask to avoid blocking the response
+          Promise.resolve().then(async () => {
+            await runInAction(async () => {
+              try {
+                await this.recentSendHistoryService.processBatchByStrategy(
+                  batchId,
+                  async (signedTx: string) => {
+                    return await this.backgroundTxEthereumService.sendEthereumTx(
+                      origin,
+                      currentChainId,
+                      Buffer.from(signedTx.replace("0x", ""), "hex"),
+                      {
+                        // silent: true
+                      }
+                    );
+                  }
+                );
+              } catch (error) {
+                console.error(`Batch processing failed for ${batchId}:`, error);
+                // The error handling will be done in processBatchByStrategy
+                // which updates the observable state accordingly
+              }
+            });
+          });
 
           return {
-            id: request.batchId,
+            id: batchId,
           } as WalletSendCallsResponse;
         case "wallet_getCallsStatus":
           const id =
@@ -1484,23 +1580,121 @@ export class KeyRingEthereumService {
             );
           }
 
-          // 히스토리에 저장된 id를 찾아서 receipt 조회
+          // 히스토리에 저장된 id를 찾아서 상태 계산
           const batchHistory =
             this.recentSendHistoryService.getRecentBatchHistory(id);
           if (!batchHistory) {
             throw new EthereumProviderRpcError(4200, `History not found`);
           }
 
-          // TODO: 히스토리에 저장된 txHashes를 기반으로 receipt 조회
+          const statusChainId = this.forceGetCurrentChainId(
+            origin,
+            batchHistory.chainId
+          );
+          const statusChainEVMInfo =
+            this.chainsService.getEVMInfoOrThrow(statusChainId);
+
+          const evmChainId = this.getEVMChainId(statusChainId);
+
+          // Calculate batch status and receipts
+          const confirmedTxs = batchHistory.transactions.filter(
+            (tx) => tx.status === "BATCH_TX_CONFIRMED"
+          );
+          const failedTxs = batchHistory.transactions.filter(
+            (tx) => tx.status === "BATCH_TX_FAILED"
+          );
+
+          // Determine if strategy is atomic
+          const atomic = batchHistory.strategy === "atomic";
+
+          // Build receipts array - only include completed transactions
+          const receipts: TransactionReceipt[] = [];
+
+          for (const tx of batchHistory.transactions) {
+            if (
+              tx.txHash &&
+              (tx.status === "BATCH_TX_CONFIRMED" ||
+                tx.status === "BATCH_TX_FAILED")
+            ) {
+              try {
+                const receipt = (
+                  await simpleFetch<{
+                    jsonrpc: string;
+                    id: number;
+                    result: any;
+                    error?: Error;
+                  }>(statusChainEVMInfo.rpc, {
+                    method: "POST",
+                    headers: {
+                      "content-type": "application/json",
+                      "request-source": origin,
+                    },
+                    body: JSON.stringify({
+                      jsonrpc: "2.0",
+                      method: "eth_getTransactionReceipt",
+                      params: [tx.txHash],
+                      id: 1,
+                    }),
+                  })
+                ).data.result;
+
+                // Only add non-null receipts
+                if (receipt) {
+                  receipts.push(receipt);
+                }
+              } catch (error) {
+                console.warn(
+                  `Failed to fetch receipt for ${tx.txHash}:`,
+                  error
+                );
+                // Skip this receipt if there's an error
+              }
+            }
+          }
+
+          // Calculate status based on batch state and transaction results
+          let status: WalletGetCallStatusResponseStatus;
+
+          switch (batchHistory.status) {
+            case "BATCH_PENDING":
+            case "BATCH_IN_PROGRESS":
+              status = 100; // Pending
+              break;
+
+            case "BATCH_COMPLETED":
+              if (failedTxs.length === 0) {
+                status = 200; // Confirmed - all transactions succeeded
+              } else if (confirmedTxs.length === 0) {
+                status = 500; // ChainRulesFailed - all transactions failed onchain
+              } else {
+                status = 600; // PartialChainRulesFailed - some succeeded, some failed
+              }
+              break;
+
+            case "BATCH_FAILED":
+              // Check if any transactions made it onchain
+              if (confirmedTxs.length > 0 || failedTxs.length > 0) {
+                if (confirmedTxs.length === 0) {
+                  status = 500; // ChainRulesFailed - failed onchain
+                } else {
+                  status = 600; // PartialChainRulesFailed - partial failure
+                }
+              } else {
+                status = 400; // OffchainFailed - failed before reaching chain
+              }
+              break;
+
+            default:
+              status = 100; // Default to pending
+          }
 
           return {
             version: "1.0.0",
-            chainId: "0x1",
+            chainId: `0x${evmChainId.toString(16)}`,
             id,
-            status: WalletGetCallStatusResponseStatus.Pending,
-            atomic: false,
-            receipts: [],
-            capabilities: {},
+            status,
+            atomic,
+            receipts,
           } as WalletGetCallStatusResponse;
         case "wallet_showCallsStatus":
           const showId =

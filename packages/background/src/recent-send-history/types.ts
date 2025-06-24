@@ -475,8 +475,32 @@ export type TransferEvent =
   | { stargate_transfer: StargateTransferInfo }
   | { eureka_transfer: EurekaTransferInfo };
 
+export type BatchTransactionStatus =
+  | "BATCH_TX_PENDING"
+  | "BATCH_TX_BROADCASTING"
+  | "BATCH_TX_SENT"
+  | "BATCH_TX_CONFIRMED"
+  | "BATCH_TX_FAILED";
+
+export type BatchTransaction = {
+  txHash?: string;
+  status: BatchTransactionStatus;
+  signedTx: string;
+  error?: string;
+  timestamp?: number;
+  gasUsed?: number;
+};
+
 export type BatchHistory = {
   id: string;
-  txHashes: string[];
   chainId: string;
+  strategy: "atomic" | "sequential" | "single";
+  transactions: BatchTransaction[];
+  createdAt: number;
+  completedAt?: number;
+  status:
+    | "BATCH_PENDING"
+    | "BATCH_IN_PROGRESS"
+    | "BATCH_COMPLETED"
+    | "BATCH_FAILED";
 };
