@@ -41,8 +41,8 @@ import { Gutter } from "../../../components/gutter";
 import { FeeControl } from "../../../components/input/fee-control";
 import { useNotification } from "../../../hooks/notification";
 import { DenomHelper, ExtensionKVStore } from "@keplr-wallet/common";
-import { ENSInfo, ICNSInfo, SwapVenues } from "../../../config.ui";
-import { CoinPretty, Dec, DecUtils } from "@keplr-wallet/unit";
+import { ENSInfo, ICNSInfo } from "../../../config.ui";
+import { CoinPretty, Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { ColorPalette } from "../../../styles";
 import { openPopupWindow } from "@keplr-wallet/popup";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
@@ -77,7 +77,10 @@ import {
   IBCSwapAmountConfig,
   useIBCSwapConfig,
 } from "@keplr-wallet/hooks-internal";
-import { SkipQueries } from "@keplr-wallet/stores-internal";
+import {
+  ObservableQueryRouteInner,
+  SkipQueries,
+} from "@keplr-wallet/stores-internal";
 import {
   AccountSetBase,
   ChainGetter,
@@ -101,7 +104,6 @@ import { usePreviousDistinct } from "../../../hooks/use-previous";
 import { SwapFeeInfoForBridgeOnSend } from "./swap-fee-info";
 import { useEffectOnce } from "../../../hooks/use-effect-once";
 import { useGlobarSimpleBar } from "../../../hooks/global-simplebar";
-import { ObservableQueryMsgsDirectInner } from "@keplr-wallet/stores-internal/build/skip/msgs-direct";
 
 const Styles = {
   Flex1: styled.div`
@@ -325,13 +327,13 @@ function useRefreshEIP1559TxFee(
 
 const QUERY_ROUTE_FETCH_TIMEOUT_MS = 10000;
 function useFetchBridgeRouterPer10sec(
-  queryMsgsDirectForLog: ObservableQueryMsgsDirectInner | undefined
+  queryRoute: ObservableQueryRouteInner | undefined
 ) {
   useEffect(() => {
-    if (queryMsgsDirectForLog && !queryMsgsDirectForLog.isFetching) {
+    if (queryRoute && !queryRoute.isFetching) {
       const timeoutId = setTimeout(() => {
-        if (!queryMsgsDirectForLog.isFetching) {
-          queryMsgsDirectForLog.fetch();
+        if (!queryRoute.isFetching) {
+          queryRoute.fetch();
         }
       }, QUERY_ROUTE_FETCH_TIMEOUT_MS);
 
@@ -340,13 +342,13 @@ function useFetchBridgeRouterPer10sec(
       };
     }
     // eslint가 자동으로 추천해주는 deps를 쓰면 안된다.
-    // queryMsgsDirectForLog는 amountConfig에서 필요할때마다 reference가 바뀌므로 deps에 넣는다.
-    // queryMsgsDirectForLog.isFetching는 현재 fetch중인지 아닌지를 알려주는 값이므로 deps에 꼭 넣어야한다.
-    // queryMsgsDirectForLog는 input이 같으면 reference가 같으므로 eslint에서 추천하는대로 queryMsgsDirectForLog만 deps에 넣으면
-    // queryMsgsDirectForLog.isFetching이 무시되기 때문에 수동으로 넣어줌
+    // queryRoute는 amountConfig에서 필요할때마다 reference가 바뀌므로 deps에 넣는다.
+    // queryRoute.isFetching는 현재 fetch중인지 아닌지를 알려주는 값이므로 deps에 꼭 넣어야한다.
+    // queryRoute는 input이 같으면 reference가 같으므로 eslint에서 추천하는대로 queryRoute만 deps에 넣으면
+    // queryRoute.isFetching이 무시되기 때문에 수동으로 넣어줌
     // 해당 코드는 IBCSwapPage에서 그대로 가져옴
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryMsgsDirectForLog, queryMsgsDirectForLog?.isFetching]);
+  }, [queryRoute, queryRoute?.isFetching]);
 }
 
 const useIBCSwapConfigWithRecipientConfig = (
@@ -361,7 +363,6 @@ const useIBCSwapConfigWithRecipientConfig = (
   outChainId: string,
   outCurrency: AppCurrency,
   swapFeeBps: number,
-  slippageNum: number,
   options: {
     allowHexAddressToBech32Address?: boolean;
     allowHexAddressOnly?: boolean;
@@ -386,9 +387,7 @@ const useIBCSwapConfigWithRecipientConfig = (
     initialGas,
     outChainId,
     outCurrency,
-    swapFeeBps,
-    SwapVenues,
-    slippageNum
+    swapFeeBps
   );
   const channelConfig = useIBCChannelConfig(false);
 
@@ -506,7 +505,6 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     destinationChainInfoOfBridge.currency,
     //NOTE - when swap is used on send page, it use bridge so swap fee is 10
     10,
-    uiConfigStore.ibcSwapConfig.slippageNum,
     {
       allowHexAddressToBech32Address:
         isDestinationEvmChain &&
@@ -537,8 +535,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   });
 
   const queryIBCSwap = ibcSwapConfigsForBridge.amountConfig.getQueryIBCSwap();
-  const queryMsgsDirect = queryIBCSwap?.getQueryMsgsDirect();
-  useFetchBridgeRouterPer10sec(queryMsgsDirect);
+  const queryRoute = queryIBCSwap?.getQueryRoute();
+  useFetchBridgeRouterPer10sec(queryRoute);
 
   const sendConfigs = useSendMixedIBCTransferConfig(
     chainStore,
@@ -897,10 +895,11 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
               let tx: MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals;
 
-              const queryMsgsDirect = ibcSwapConfigsForBridge.amountConfig
+              const queryRoute = ibcSwapConfigsForBridge.amountConfig
                 .getQueryIBCSwap()!
-                .getQueryMsgsDirect();
+                .getQueryRoute();
 
+              const swapFeeBpsReceiver: string[] = [];
               const simpleRoute: {
                 isOnlyEvm: boolean;
                 chainId: string;
@@ -916,17 +915,20 @@ export const SendAmountPage: FunctionComponent = observer(() => {
               const swapReceiver: string[] = [];
 
               try {
-                if (!queryMsgsDirect.response) {
-                  throw new Error("queryMsgsDirect.response is undefined");
+                let priorOutAmount: Int | undefined = undefined;
+                if (queryRoute.response) {
+                  priorOutAmount = new Int(queryRoute.response.data.amount_out);
+                }
+
+                if (!queryRoute.response) {
+                  throw new Error("queryRoute.response is undefined");
                 }
 
                 routeDurationSeconds =
-                  queryMsgsDirect.response.data.route
-                    .estimated_route_duration_seconds;
+                  queryRoute.response.data.estimated_route_duration_seconds;
 
                 // 일단은 체인 id를 keplr에서 사용하는 형태로 바꿔야 한다.
-                for (const chainId of queryMsgsDirect.response.data.route
-                  .chain_ids) {
+                for (const chainId of queryRoute.response.data.chain_ids) {
                   const isOnlyEvm = parseInt(chainId) > 0;
                   const chainIdInKeplr = isOnlyEvm
                     ? `eip155:${chainId}`
@@ -977,6 +979,9 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                 const [_tx] = await Promise.all([
                   ibcSwapConfigsForBridge.amountConfig.getTx(
                     uiConfigStore.ibcSwapConfig.slippageNum,
+                    // 코스모스 스왑은 스왑베뉴가 무조건 하나라고 해서 일단 처음걸 쓰기로 한다.
+                    swapFeeBpsReceiver[0],
+                    priorOutAmount,
                     convertToBech32IfNeed(
                       ibcSwapConfigsForBridge.recipientConfig.recipient,
                       chainStore.getChain(
@@ -2290,17 +2295,15 @@ function useCheckExpectedOutIsTooSmall(
         !ibcSwapConfigsForBridge.amountConfig.isFetchingInAmount &&
         !ibcSwapConfigsForBridge.amountConfig.isFetchingOutAmount
       ) {
-        const queryMsgsDirectResponse = ibcSwapConfigsForBridge.amountConfig
+        const queryRouteResponse = ibcSwapConfigsForBridge.amountConfig
           .getQueryIBCSwap()
-          ?.getQueryMsgsDirect()?.response;
-        if (!queryMsgsDirectResponse) {
+          ?.getQueryRoute()?.response;
+        if (!queryRouteResponse) {
           return;
         }
 
-        const inputDec = new Dec(queryMsgsDirectResponse.data.route.amount_in);
-        const outputDec = new Dec(
-          queryMsgsDirectResponse.data.route.amount_out
-        );
+        const inputDec = new Dec(queryRouteResponse.data.amount_in);
+        const outputDec = new Dec(queryRouteResponse.data.amount_out);
         const diff = (() => {
           if (inputDec.isZero()) {
             return;
@@ -2363,28 +2366,28 @@ function useGetGasSimulationForBridge(
       // swap일 경우 (osmosis에서 실행될 경우) swpa이 몇번 필요한지에 따라 영향을 미칠 것이다.
       let type = "default";
 
-      const queryMsgsDirect = ibcSwapConfigsForBridge.amountConfig
+      const queryRoute = ibcSwapConfigsForBridge.amountConfig
         .getQueryIBCSwap()
-        ?.getQueryMsgsDirect();
+        ?.getQueryRoute();
 
-      if (queryMsgsDirect && queryMsgsDirect.response) {
+      if (queryRoute && queryRoute.response) {
         // swap일 경우 웬만하면 swap 한번으로 충분할 확률이 높다.
         // 이 가정에 따라서 첫로드시에 gas를 restore하기 위해서 트랜잭션을 보내는 체인에서 swap 할 경우
         // 일단 swap-1로 설정한다.
         if (
-          queryMsgsDirect.response.data.route.swap_venues &&
-          queryMsgsDirect.response.data.route.swap_venues.length === 1
+          queryRoute.response.data.swap_venues &&
+          queryRoute.response.data.swap_venues.length === 1
         ) {
           const swapVenueChainId = (() => {
             const evmLikeChainId = Number(
-              queryMsgsDirect.response.data.route.swap_venues[0].chain_id
+              queryRoute.response.data.swap_venues[0].chain_id
             );
             const isEVMChainId =
               !Number.isNaN(evmLikeChainId) && evmLikeChainId > 0;
 
             return isEVMChainId
               ? `eip155:${evmLikeChainId}`
-              : queryMsgsDirect.response.data.route.swap_venues[0].chain_id;
+              : queryRoute.response.data.swap_venues[0].chain_id;
           })();
 
           if (
@@ -2395,9 +2398,8 @@ function useGetGasSimulationForBridge(
           }
         }
 
-        if (queryMsgsDirect.response.data.route.operations.length > 0) {
-          const firstOperation =
-            queryMsgsDirect.response.data.route.operations[0];
+        if (queryRoute.response.data.operations.length > 0) {
+          const firstOperation = queryRoute.response.data.operations[0];
           if ("swap" in firstOperation) {
             if (firstOperation.swap.swap_in) {
               type = `swap-${firstOperation.swap.swap_in.swap_operations.length}`;
@@ -2455,9 +2457,13 @@ function useGetGasSimulationForBridge(
         throw new Error("Not ready to simulate tx");
       }
 
+      const swapFeeBpsReceiver: string[] = [];
+
       const tx = ibcSwapConfigsForBridge.amountConfig.getTxIfReady(
         // simulation 자체는 쉽게 통과시키기 위해서 슬리피지를 50으로 설정한다.
         50,
+        // 코스모스 스왑은 스왑베뉴가 무조건 하나라고 해서 일단 처음걸 쓰기로 한다.
+        swapFeeBpsReceiver[0],
         convertToBech32IfNeed(
           ibcSwapConfigsForBridge.recipientConfig.recipient,
           chainStore.getChain(ibcSwapConfigsForBridge.recipientConfig.chainId),
