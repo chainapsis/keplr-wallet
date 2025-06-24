@@ -40,9 +40,9 @@ import { hexValue } from "@ethersproject/bytes";
 import { RecentSendHistoryService } from "../recent-send-history";
 import {
   BatchSigningData,
-  BatchSigningResponse,
   Capabilities,
   DELEGATOR_ADDRESS,
+  EthereumBatchSignResponse,
   InternalSendCallsRequest,
   WalletGetCallStatusResponse,
   WalletGetCallStatusResponseStatus,
@@ -72,6 +72,27 @@ export class KeyRingEthereumService {
     // TODO: ?
   }
 
+  // 오버로드: EIP5792 타입일 때 배치 응답 반환
+  async signEthereumSelected(
+    env: Env,
+    origin: string,
+    chainId: string,
+    signer: string,
+    message: Uint8Array,
+    signType: EthSignType.EIP5792
+  ): Promise<EthereumBatchSignResponse>;
+
+  // 오버로드: 다른 타입일 때 일반 응답 반환
+  async signEthereumSelected(
+    env: Env,
+    origin: string,
+    chainId: string,
+    signer: string,
+    message: Uint8Array,
+    signType: EthSignType.MESSAGE | EthSignType.TRANSACTION | EthSignType.EIP712
+  ): Promise<EthereumSignResponse>;
+
+  // 실제 구현
   async signEthereumSelected(
     env: Env,
     origin: string,
@@ -79,7 +100,18 @@ export class KeyRingEthereumService {
     signer: string,
     message: Uint8Array,
     signType: EthSignType
-  ): Promise<EthereumSignResponse> {
+  ): Promise<EthereumSignResponse | EthereumBatchSignResponse> {
+    if (signType === EthSignType.EIP5792) {
+      return await this.signEthereumBatch(
+        env,
+        origin,
+        this.keyRingService.selectedVaultId,
+        chainId,
+        signer,
+        message
+      );
+    }
+
     return await this.signEthereum(
       env,
       origin,
@@ -100,6 +132,15 @@ export class KeyRingEthereumService {
     message: Uint8Array,
     signType: EthSignType
   ): Promise<EthereumSignResponse> {
+    // EIP-5792 batch transactions should use signEthereumBatch method
+    if (signType === EthSignType.EIP5792) {
+      throw new EthereumProviderRpcError(
+        -32602,
+        "Invalid params",
+        "EIP-5792 batch transactions must use signEthereumBatch method."
+      );
+    }
+
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
     if (chainInfo.hideInUI) {
       throw new Error("Can't sign for hidden chain");
@@ -275,118 +316,7 @@ export class KeyRingEthereumService {
                   ]),
                 };
               }
-              case EthSignType.EIP5792: {
-                const signingData: BatchSigningData = JSON.parse(
-                  Buffer.from(res.signingData).toString()
-                );
 
-                switch (signingData.strategy) {
-                  case "single":
-                  case "atomic": {
-                    const unsignedTxLike = signingData.unsignedTxs[0];
-                    const unsignedTx = Transaction.from(
-                      unsignedTxLike as TransactionLike
-                    );
-
-                    if (signingData.strategy === "atomic") {
-                      // Check if authorizationList is not null
-                      if (
-                        unsignedTxLike.authorizationList &&
-                        unsignedTxLike.authorizationList.length > 0
-                      ) {
-                        const authorization =
-                          unsignedTxLike.authorizationList[0];
-
-                        const nonce =
-                          typeof authorization.nonce === "string"
-                            ? BigInt(authorization.nonce)
-                            : authorization.nonce;
-
-                        const hash = hashAuthorization({
-                          address: authorization.address,
-                          nonce,
-                          chainId: unsignedTx.chainId,
-                        });
-
-                        // sign hash of authorization, no digest method
-                        const signature = await this.keyRingService.sign(
-                          chainId,
-                          vaultId,
-                          Buffer.from(hash.replace("0x", ""), "hex"),
-                          "noop"
-                        );
-
-                        // add signature to authorization list
-                        unsignedTx.authorizationList = [
-                          {
-                            address: authorization.address,
-                            nonce,
-                            chainId: unsignedTx.chainId,
-                            signature:
-                              "0x" +
-                              Buffer.concat([
-                                signature.r,
-                                signature.s,
-                                signature.v
-                                  ? Buffer.from("1c", "hex")
-                                  : Buffer.from("1b", "hex"),
-                              ]).toString("hex"),
-                          },
-                        ];
-                      }
-                    }
-
-                    const signature = await this.keyRingService.sign(
-                      chainId,
-                      vaultId,
-                      Buffer.from(
-                        unsignedTx.unsignedSerialized.replace("0x", ""),
-                        "hex"
-                      ),
-                      "keccak256"
-                    );
-
-                    unsignedTx.signature =
-                      "0x" +
-                      Buffer.concat([
-                        signature.r,
-                        signature.s,
-                        signature.v
-                          ? Buffer.from("1c", "hex")
-                          : Buffer.from("1b", "hex"),
-                      ]).toString("hex");
-
-                    const batchSigningResponse: BatchSigningResponse = {
-                      strategy: signingData.strategy,
-                      batchId: signingData.batchId,
-                      signedTxs: [unsignedTx.serialized],
-                    };
-
-                    return {
-                      signingData: Buffer.from(
-                        JSON.stringify(batchSigningResponse)
-                      ),
-                      signature: Buffer.concat([
-                        signature.r,
-                        signature.s,
-                        // The metamask doesn't seem to consider the chain id in this case... (maybe bug on metamask?)
-                        signature.v
-                          ? Buffer.from("1c", "hex")
-                          : Buffer.from("1b", "hex"),
-                      ]),
-                    };
-                  }
-                  // case "sequential": {
-                  //   // TODO: 여러 트랜잭션 처리
-                  //   break;
-                  // }
-                  default: {
-                    throw new Error(
-                      `Unknown or not supported strategy: ${signingData.strategy}`
-                    );
-                  }
-                }
-              }
               default:
                 throw new Error(`Unknown sign type: ${signType}`);
             }
@@ -453,6 +383,192 @@ export class KeyRingEthereumService {
           signingData,
           signature,
         };
+      }
+    );
+  }
+
+  async signEthereumBatch(
+    env: Env,
+    origin: string,
+    vaultId: string,
+    chainId: string,
+    signer: string,
+    message: Uint8Array
+  ): Promise<EthereumBatchSignResponse> {
+    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    if (chainInfo.hideInUI) {
+      throw new Error("Can't sign for hidden chain");
+    }
+    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
+    const evmInfo = ChainsService.getEVMInfo(chainInfo);
+    const forceEVMLedger = chainInfo.features?.includes(
+      "force-enable-evm-ledger"
+    );
+
+    if (!isEthermintLike && !evmInfo) {
+      throw new Error("Not ethermint like and EVM chain");
+    }
+
+    const keyInfo = this.keyRingService.getKeyInfo(vaultId);
+    if (!keyInfo) {
+      throw new Error("Null key info");
+    }
+
+    if (keyInfo.type === "ledger" && !forceEVMLedger) {
+      KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
+        chainId
+      );
+    }
+
+    try {
+      Bech32Address.validate(signer);
+    } catch {
+      // Ignore mixed-case checksum
+      signer = (
+        signer.substring(0, 2) === "0x" ? signer : "0x" + signer
+      ).toLowerCase();
+    }
+
+    const key = await this.keyRingCosmosService.getKey(vaultId, chainId);
+    if (
+      signer !== key.bech32Address &&
+      signer !== key.ethereumHexAddress.toLowerCase()
+    ) {
+      throw new Error("Signer mismatched");
+    }
+
+    return await this.interactionService.waitApproveV2(
+      env,
+      "/sign-ethereum",
+      "request-sign-ethereum",
+      {
+        origin,
+        chainId,
+        signer,
+        pubKey: key.pubKey,
+        message,
+        signType: EthSignType.EIP5792,
+        keyType: keyInfo.type,
+        keyInsensitive: keyInfo.insensitive,
+      },
+      async (res: { signingData: Uint8Array; signature?: Uint8Array }) => {
+        const batchSigningResponse = await (async () => {
+          if (keyInfo.type === "ledger" || keyInfo.type === "keystone") {
+            throw new Error("Ledger and Keystone are not supported atm");
+          } else {
+            const signingData: BatchSigningData = JSON.parse(
+              Buffer.from(res.signingData).toString()
+            );
+
+            switch (signingData.strategy) {
+              case "single":
+              case "atomic": {
+                const unsignedTxLike = signingData.unsignedTxs[0];
+                const unsignedTx = Transaction.from(
+                  unsignedTxLike as TransactionLike
+                );
+
+                if (signingData.strategy === "atomic") {
+                  // Check if authorizationList is not null
+                  if (
+                    unsignedTxLike.authorizationList &&
+                    unsignedTxLike.authorizationList.length > 0
+                  ) {
+                    const authorization = unsignedTxLike.authorizationList[0];
+
+                    const nonce =
+                      typeof authorization.nonce === "string"
+                        ? BigInt(authorization.nonce)
+                        : authorization.nonce;
+
+                    const hash = hashAuthorization({
+                      address: authorization.address,
+                      nonce,
+                      chainId: unsignedTx.chainId,
+                    });
+
+                    // sign hash of authorization, no digest method
+                    const signature = await this.keyRingService.sign(
+                      chainId,
+                      vaultId,
+                      Buffer.from(hash.replace("0x", ""), "hex"),
+                      "noop"
+                    );
+
+                    // add signature to authorization list
+                    unsignedTx.authorizationList = [
+                      {
+                        address: authorization.address,
+                        nonce,
+                        chainId: unsignedTx.chainId,
+                        signature:
+                          "0x" +
+                          Buffer.concat([
+                            signature.r,
+                            signature.s,
+                            signature.v
+                              ? Buffer.from("1c", "hex")
+                              : Buffer.from("1b", "hex"),
+                          ]).toString("hex"),
+                      },
+                    ];
+                  }
+                }
+
+                const signature = await this.keyRingService.sign(
+                  chainId,
+                  vaultId,
+                  Buffer.from(
+                    unsignedTx.unsignedSerialized.replace("0x", ""),
+                    "hex"
+                  ),
+                  "keccak256"
+                );
+
+                unsignedTx.signature =
+                  "0x" +
+                  Buffer.concat([
+                    signature.r,
+                    signature.s,
+                    signature.v
+                      ? Buffer.from("1c", "hex")
+                      : Buffer.from("1b", "hex"),
+                  ]).toString("hex");
+
+                const batchSigningResponse: EthereumBatchSignResponse = {
+                  strategy: signingData.strategy,
+                  batchId: signingData.batchId,
+                  signedTxs: [unsignedTx.serialized],
+                };
+
+                return batchSigningResponse;
+              }
+              // case "sequential": {
+              //   // TODO: 여러 트랜잭션 처리
+              //   break;
+              // }
+              default: {
+                throw new Error(
+                  `Unknown or not supported strategy: ${signingData.strategy}`
+                );
+              }
+            }
+          }
+        })();
+
+        try {
+          this.analyticsService.logEventIgnoreError("evm_batch_tx_signed", {
+            chainId,
+            isInternal: env.isInternalMsg,
+            origin,
+            keyType: keyInfo.type,
+            ethSignType: EthSignType.EIP5792,
+          });
+        } catch (e) {
+          console.log(e);
+        }
+
+        return batchSigningResponse;
       }
     );
   }
@@ -1500,7 +1616,7 @@ export class KeyRingEthereumService {
             chainCapabilities,
           };
 
-          const { signingData } = await this.signEthereumSelected(
+          const batchResponse = await this.signEthereumSelected(
             env,
             origin,
             currentChainId,
@@ -1509,11 +1625,7 @@ export class KeyRingEthereumService {
             EthSignType.EIP5792
           );
 
-          const batchSigningResponse: BatchSigningResponse = JSON.parse(
-            Buffer.from(signingData).toString()
-          );
-
-          const signedTxs = batchSigningResponse.signedTxs;
+          const signedTxs = batchResponse.signedTxs;
           if (signedTxs.length < 1) {
             throw new EthereumProviderRpcError(
               -32602,
@@ -1524,9 +1636,9 @@ export class KeyRingEthereumService {
 
           // Create batch history first with pending transactions
           const strategy = (
-            batchSigningResponse.strategy === "unavailable"
+            batchResponse.strategy === "unavailable"
               ? "single"
-              : batchSigningResponse.strategy
+              : batchResponse.strategy
           ) as "atomic" | "sequential" | "single";
 
           this.recentSendHistoryService.addRecentBatchHistory({

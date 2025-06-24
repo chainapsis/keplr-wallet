@@ -12,7 +12,7 @@ export class RequestSignEthereumMsg extends Message<Uint8Array> {
     public readonly chainId: string,
     public readonly signer: string,
     public readonly message: Uint8Array,
-    public readonly signType: EthSignType
+    public readonly signType: Exclude<EthSignType, EthSignType.EIP5792>
   ) {
     super();
   }

@@ -50,8 +50,8 @@ export interface BatchSigningData {
   unsignedTxs: UnsignedTxLike[];
 }
 
-// signEthereum 메서드의 응답
-export interface BatchSigningResponse {
+// signEthereumBatch 메서드의 응답
+export interface EthereumBatchSignResponse {
   strategy: BatchStrategy;
   batchId: string;
   signedTxs: string[];
