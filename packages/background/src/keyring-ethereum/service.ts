@@ -35,6 +35,7 @@ import {
   TransactionReceipt,
   id as generateRequestId,
   hashAuthorization,
+  isAddress,
 } from "ethers";
 import { hexValue } from "@ethersproject/bytes";
 import { RecentSendHistoryService } from "../recent-send-history";
@@ -1442,24 +1443,29 @@ export class KeyRingEthereumService {
           let accountToCheck = isArray ? (params?.[0] as string) : undefined;
           let chainIdsToCheck = isArray ? (params?.[1] as string[]) : undefined;
 
-          if (!accountToCheck) {
-            // 현재 연결된 계정 주소 불러오기 (이더리움 메인넷을 대표로 사용, hex address는 동일하기 때문에 무관)
-            const pubKey = await this.keyRingService.getPubKeySelected(
-              "eip155:1"
-            );
-            const bech32Address = new Bech32Address(pubKey.getEthAddress());
-
-            accountToCheck = bech32Address.toHex(true);
-          } else {
-            // TODO: validate accountToCheck
-          }
-
           if (!chainIdsToCheck || chainIdsToCheck.length === 0) {
             const currentChainId = this.forceGetCurrentChainId(origin, chainId);
             chainIdsToCheck = [hexValue(this.getEVMChainId(currentChainId))];
           }
 
           const chainIdToCheck = chainIdsToCheck[0];
+
+          if (!accountToCheck) {
+            const pubKey = await this.keyRingService.getPubKeySelected(
+              `eip155:${parseInt(chainIdToCheck, 16)}`
+            );
+            const bech32Address = new Bech32Address(pubKey.getEthAddress());
+
+            accountToCheck = bech32Address.toHex(true);
+          } else {
+            if (!isAddress(accountToCheck)) {
+              throw new EthereumProviderRpcError(
+                -32602,
+                "Invalid params",
+                `Invalid Ethereum address format: ${accountToCheck}`
+              );
+            }
+          }
 
           return await this.getAccountCapabilities(
             chainIdToCheck,
@@ -1512,11 +1518,11 @@ export class KeyRingEthereumService {
               }
             } else {
               // For regular transactions, validate the 'to' address format
-              if (!call.to || !call.to.match(/^0x[0-9a-fA-F]{40}$/)) {
+              if (!call.to || !isAddress(call.to)) {
                 throw new EthereumProviderRpcError(
                   -32602,
                   "Invalid params",
-                  "Invalid 'to' address format."
+                  `Invalid 'to' address format: ${call.to || "undefined"}`
                 );
               }
             }
@@ -1557,14 +1563,23 @@ export class KeyRingEthereumService {
           const bech32Address = new Bech32Address(pubKey.getEthAddress());
           const fromAddress = bech32Address.toHex(true);
 
-          if (
-            param?.from &&
-            param?.from.toLowerCase() !== fromAddress.toLowerCase()
-          ) {
-            throw new EthereumProviderRpcError(
-              4902,
-              `Unmatched from address: ${param?.from}`
-            );
+          if (param?.from) {
+            // Validate from address format first
+            if (!isAddress(param.from)) {
+              throw new EthereumProviderRpcError(
+                -32602,
+                "Invalid params",
+                `Invalid 'from' address format: ${param.from}`
+              );
+            }
+
+            // Then check if it matches the selected account
+            if (param.from.toLowerCase() !== fromAddress.toLowerCase()) {
+              throw new EthereumProviderRpcError(
+                4902,
+                `Unmatched from address: ${param.from}`
+              );
+            }
           }
 
           if (!param?.calls || param?.calls.length === 0) {

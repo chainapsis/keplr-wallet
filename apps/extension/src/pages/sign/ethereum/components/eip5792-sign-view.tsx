@@ -137,13 +137,17 @@ export const EthereumEIP5792SignView: FunctionComponent<{
     gasConfig
   );
 
+  const simulatorKey = useMemo(() => {
+    return `evm/native/${upgradeChoice ? "atomic" : "sequential"}`;
+  }, [upgradeChoice]);
+
   const gasSimulator = useGasSimulator(
     new MemoryKVStore("gas-simulator.ethereum.sign"),
     chainStore,
     chainInfo.chainId,
     gasConfig,
     feeConfig,
-    "evm/native",
+    simulatorKey,
     () => {
       if (chainInfo.evm == null) {
         throw new Error("Gas simulator is only working with EVM info");
@@ -235,6 +239,15 @@ export const EthereumEIP5792SignView: FunctionComponent<{
           maxPriorityFeePerGas: undefined,
         };
   })();
+
+  useEffect(() => {
+    // TODO: swap 페이지에서 넘어오는 경우 Fee type을 받아서 처리해줄 필요가 있음
+    feeConfig.setFee({
+      type: "average",
+      currency: feeConfig.selectableFeeCurrencies[0],
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!isTransactionReady) {
