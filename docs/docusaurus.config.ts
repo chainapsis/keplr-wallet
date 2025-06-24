@@ -31,6 +31,10 @@ const config: Config = {
       {
         redirects: [
           {
+            from: "/",
+            to: "/api/intro",
+          },
+          {
             from: "/api",
             to: "/api/intro",
           },
