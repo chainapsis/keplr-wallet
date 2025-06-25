@@ -39,7 +39,7 @@ export class ObservableQueryAssetsFromSourceInner extends ObservableQuery<Assets
     super(
       sharedContext,
       skipURL,
-      `/v1/assets_from_source?chain_id=${chainId.replace(
+      `/v1/swap/assets_from_source?chain_id=${chainId.replace(
         "eip155:",
         ""
       )}&denom=${denom.replace("erc20:", "")}`

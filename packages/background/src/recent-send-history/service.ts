@@ -244,7 +244,7 @@ export class RecentSendHistoryService {
             if (shouldLegacyTrack) {
               // no wait
               setTimeout(() => {
-                simpleFetch<any>(SWAP_API_ENDPOINT, "/v1/tx", {
+                simpleFetch<any>(SWAP_API_ENDPOINT, "/v1/swap/tx", {
                   method: "POST",
                   headers: {
                     "content-type": "application/json",
@@ -343,7 +343,7 @@ export class RecentSendHistoryService {
             if (shouldLegacyTrack) {
               setTimeout(() => {
                 // no wait
-                simpleFetch<any>(SWAP_API_ENDPOINT, "/v1/tx", {
+                simpleFetch<any>(SWAP_API_ENDPOINT, "/v1/swap/tx", {
                   method: "POST",
                   headers: {
                     "content-type": "application/json",
@@ -1309,7 +1309,7 @@ export class RecentSendHistoryService {
           if (txReceipt) {
             if (txReceipt.status === EthTxStatus.Success) {
               setTimeout(() => {
-                simpleFetch(SWAP_API_ENDPOINT, "/v1/tx", {
+                simpleFetch(SWAP_API_ENDPOINT, "/v1/swap/tx", {
                   method: "POST",
                   headers: {
                     "content-type": "application/json",
@@ -1382,7 +1382,7 @@ export class RecentSendHistoryService {
 
           if (txResult.code === 0) {
             setTimeout(() => {
-              simpleFetch(SWAP_API_ENDPOINT, "/v1/tx", {
+              simpleFetch(SWAP_API_ENDPOINT, "/v1/swap/tx", {
                 method: "POST",
                 headers: {
                   "content-type": "application/json",
@@ -1471,7 +1471,7 @@ export class RecentSendHistoryService {
 
     simpleFetch<TxStatusResponse>(
       SWAP_API_ENDPOINT,
-      `/v1/tx?${requestParams}`,
+      `/v1/swap/tx?${requestParams}`,
       {
         method: "GET",
         headers: {

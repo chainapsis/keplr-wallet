@@ -99,7 +99,7 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
       splitRoutes?: boolean;
     }
   ) {
-    super(sharedContext, skipURL, "/v1/msgs_direct");
+    super(sharedContext, skipURL, "/v1/swap/msgs_direct");
 
     makeObservable(this);
   }

@@ -69,7 +69,7 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
     skipURL: string,
     public readonly chainId: string
   ) {
-    super(sharedContext, skipURL, `/assets?chainId=${chainId}`);
+    super(sharedContext, skipURL, `/v1/swap/assets?chainId=${chainId}`);
 
     makeObservable(this);
   }
@@ -402,7 +402,7 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
     super(
       sharedContext,
       skipURL,
-      `/v1/assets?${chainIds
+      `/v1/swap/assets?${chainIds
         .map((chainId) => `chain_id=${chainId.replace("eip155:", "")}`)
         .join("&")}`,
       options
