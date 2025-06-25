@@ -248,7 +248,12 @@
   "page.setting.manage-token-list-paragraph": "仅适用于可通过合约地址手动添加的币种",
   "page.setting.search-placeholder": "搜索设置",
 
-  "page.setting.advanced.developer-mode-title": "开发者模式",
+  "page.setting.about.title": "关于Keplr",
+  "page.setting.about.website": "官网",
+  "page.setting.about.terms-of-use": "使用条款",
+  "page.setting.about.privacy-policy": "隐私政策",
+
+  "page.setting.advanced.developer-mode-title": "手动IBC转账",
   "page.setting.advanced.endpoints": "连接点",
   "page.setting.advanced.change-endpoints-title": "修改连接点",
 
