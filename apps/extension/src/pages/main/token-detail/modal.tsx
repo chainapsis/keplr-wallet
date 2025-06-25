@@ -350,12 +350,9 @@ export const TokenDetailModal: FunctionComponent<{
         ChainIdHelper.parse(chainId).identifier
       }/${(() => {
         if ("cosmos" in modularChainInfo) {
-          if (chainId.startsWith("eip155:")) {
-            return account.hasEthereumHexAddress
-              ? account.ethereumHexAddress
-              : Bech32Address.fromBech32(account.bech32Address).toHex();
-          }
-          return accountStore.getAccount(chainId).bech32Address;
+          return account.hasEthereumHexAddress
+            ? account.ethereumHexAddress
+            : Bech32Address.fromBech32(account.bech32Address).toHex();
         }
         if ("starknet" in modularChainInfo) {
           return accountStore.getAccount(chainId).starknetHexAddress;
