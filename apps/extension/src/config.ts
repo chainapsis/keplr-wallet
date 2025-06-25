@@ -3563,43 +3563,6 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     },
     features: [],
   },
-  {
-    rpc: "https://rpc.gravity.xyz",
-    rest: "https://rpc.gravity.xyz",
-    evm: {
-      chainId: 1625,
-      rpc: "https://rpc.gravity.xyz",
-      websocket: "wss://rpc.gravity.xyz",
-    },
-    chainId: "eip155:1625",
-    chainName: "Gravity Alpha Mainnet",
-    chainSymbolImageUrl:
-      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1625/chain.png",
-    bip44: {
-      coinType: 60,
-    },
-    currencies: [
-      {
-        coinDenom: "G",
-        coinMinimalDenom: "gravity-native",
-        coinDecimals: 18,
-        coinGeckoId: "g-token",
-        coinImageUrl:
-          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1625/chain.png",
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "G",
-        coinMinimalDenom: "gravity-native",
-        coinDecimals: 18,
-        coinGeckoId: "g-token",
-        coinImageUrl:
-          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1625/chain.png",
-      },
-    ],
-    features: [],
-  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
