@@ -53,6 +53,7 @@ import { ArrowDownIcon, ArrowUpIcon } from "../../components/icon";
 import { Styles as AvailableCollapsibleListStyles } from "../../components/collapsible-list";
 import { getTokenSearchResultClickAnalyticsProperties } from "../../analytics-amplitude";
 import { useGroupedTokensMap } from "../../hooks/use-grouped-tokens-map";
+import { useBalanceAnalytics } from "./hooks/use-balance-analytics";
 
 type TokenViewData = {
   title: string;
@@ -400,6 +401,8 @@ export const AvailableTabView: FunctionComponent<{
       isFirstTime,
       TokenViewData,
     } = useAllBalances(trimSearch);
+
+    useBalanceAnalytics(allBalancesSearchFiltered, trimSearch);
 
     const isShowNotFound =
       allBalancesSearchFiltered.length === 0 &&
