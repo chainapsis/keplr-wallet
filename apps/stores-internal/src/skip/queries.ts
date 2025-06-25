@@ -31,10 +31,6 @@ export class SkipQueries {
     swapVenues: {
       name: string;
       chainId: string;
-    }[],
-    affiliateFeeReceivers: {
-      chainId: string;
-      address: string;
     }[]
   ) {
     this.queryChains = new ObservableQueryChains(
@@ -91,7 +87,6 @@ export class SkipQueries {
       this.queryRoute,
       this.queryMsgsDirect,
       this.queryIBCPacketForwardingTransfer,
-      affiliateFeeReceivers,
       swapVenues
     );
   }
