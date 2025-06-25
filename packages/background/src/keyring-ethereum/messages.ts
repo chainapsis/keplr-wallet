@@ -55,7 +55,7 @@ export class RequestSignEthereumMsg extends Message<Uint8Array> {
   }
 }
 
-export class RequestJsonRpcToEvmMsg extends Message<void> {
+export class RequestJsonRpcToEvmMsg<T = unknown> extends Message<T> {
   public static type() {
     return "request-json-rpc-to-evm";
   }

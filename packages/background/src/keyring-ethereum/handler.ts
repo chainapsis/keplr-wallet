@@ -32,7 +32,7 @@ export const getHandler: (
         return handleRequestJsonRpcToEvmMsg(
           service,
           permissionInteractionService
-        )(env, msg as RequestJsonRpcToEvmMsg);
+        )(env, msg as RequestJsonRpcToEvmMsg<unknown>);
       case GetNewCurrentChainIdForEVMMsg:
         return handleGetNewCurrentChainIdForEVMMsg(service)(
           env,
@@ -79,7 +79,7 @@ const handleRequestSignEthereumMsg: (
 const handleRequestJsonRpcToEvmMsg: (
   service: KeyRingEthereumService,
   permissionInteractionService: PermissionInteractiveService
-) => InternalHandler<RequestJsonRpcToEvmMsg> = (
+) => InternalHandler<RequestJsonRpcToEvmMsg<unknown>> = (
   service,
   permissionInteractionService
 ) => {

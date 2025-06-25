@@ -16,7 +16,7 @@ import { SwapAssetInfo } from "./components/swap-asset-info";
 import { SwapFeeInfo } from "./components/swap-fee-info";
 import { Gutter } from "../../components/gutter";
 import { ColorPalette } from "../../styles";
-import { ExtensionKVStore } from "@keplr-wallet/common";
+import { ExtensionKVStore, retry } from "@keplr-wallet/common";
 import {
   EmptyAmountError,
   IFeeConfig,
@@ -62,6 +62,9 @@ import {
   EthTxStatus,
   WalletSendCallsRequest,
   Call,
+  WalletSendCallsResponse,
+  WalletGetCallStatusResponseStatus,
+  WalletGetCallStatusResponse,
 } from "@keplr-wallet/types";
 import { InsufficientFeeError } from "@keplr-wallet/hooks";
 import { useSwapAnalytics } from "./hooks/use-swap-analytics";
@@ -1408,82 +1411,171 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   ibcSwapConfigs.amountConfig.chainId
                 );
 
-                await new InExtensionMessageRequester().sendMessage(
-                  BACKGROUND_PORT,
-                  msg
-                );
+                const { id: batchId } =
+                  (await new InExtensionMessageRequester().sendMessage(
+                    BACKGROUND_PORT,
+                    msg
+                  )) as WalletSendCallsResponse;
 
-                logEvent("swap_tx_submitted", {
-                  quote_id: quoteId,
-                });
+                retry(
+                  () => {
+                    return new Promise<void>(async (resolve, reject) => {
+                      const msg = new RequestJsonRpcToEvmMsg(
+                        "wallet_getCallsStatus",
+                        [batchId],
+                        undefined,
+                        ibcSwapConfigs.amountConfig.chainId
+                      );
 
-                const recordMsg = new RecordTxWithSkipSwapMsg(
-                  inChainId,
-                  outChainId,
-                  {
-                    chainId: outChainId,
-                    denom: outCurrency.coinMinimalDenom,
-                    expectedAmount: ibcSwapConfigs.amountConfig.outAmount
-                      .toDec()
-                      .toString(),
+                      const response =
+                        (await new InExtensionMessageRequester().sendMessage(
+                          BACKGROUND_PORT,
+                          msg
+                        )) as WalletGetCallStatusResponse;
+
+                      if (
+                        response.status ===
+                        WalletGetCallStatusResponseStatus.Confirmed
+                      ) {
+                        const txReceipt =
+                          response.receipts[response.receipts.length - 1];
+
+                        if (!txReceipt) {
+                          reject();
+                          return;
+                        }
+
+                        // CHECK: txReceipt 타입 미스 매치
+
+                        const txHash = txReceipt.transactionHash;
+
+                        console.log("txReceipt", txReceipt, "txHash", txHash);
+
+                        logEvent("swap_tx_submitted", {
+                          quote_id: quoteId,
+                        });
+
+                        const recordMsg = new RecordTxWithSkipSwapMsg(
+                          inChainId,
+                          outChainId,
+                          {
+                            chainId: outChainId,
+                            denom: outCurrency.coinMinimalDenom,
+                            expectedAmount:
+                              ibcSwapConfigs.amountConfig.outAmount
+                                .toDec()
+                                .toString(),
+                          },
+                          simpleRoute,
+                          sender,
+                          chainStore.isEvmOnlyChain(outChainId)
+                            ? accountStore.getAccount(outChainId)
+                                .ethereumHexAddress
+                            : accountStore.getAccount(outChainId).bech32Address,
+                          [
+                            ...ibcSwapConfigs.amountConfig.amount.map(
+                              (amount) => {
+                                return {
+                                  amount: DecUtils.getTenExponentN(
+                                    amount.currency.coinDecimals
+                                  )
+                                    .mul(amount.toDec())
+                                    .toString(),
+                                  denom: amount.currency.coinMinimalDenom,
+                                };
+                              }
+                            ),
+                            {
+                              amount: DecUtils.getTenExponentN(
+                                ibcSwapConfigs.amountConfig.outAmount.currency
+                                  .coinDecimals
+                              )
+                                .mul(
+                                  ibcSwapConfigs.amountConfig.outAmount.toDec()
+                                )
+                                .toString(),
+                              denom:
+                                ibcSwapConfigs.amountConfig.outAmount.currency
+                                  .coinMinimalDenom,
+                            },
+                          ],
+                          {
+                            currencies:
+                              chainStore.getChain(outChainId).currencies,
+                          },
+                          routeDurationSeconds ?? 0,
+                          txHash
+                        );
+
+                        await new InExtensionMessageRequester().sendMessage(
+                          BACKGROUND_PORT,
+                          recordMsg
+                        );
+
+                        console.log("recorded msg");
+
+                        const queryBalances = queriesStore.get(
+                          ibcSwapConfigs.amountConfig.chainId
+                        ).queryBalances;
+                        queryBalances
+                          .getQueryEthereumHexAddress(sender)
+                          .balances.forEach((balance) => {
+                            if (
+                              balance.currency.coinMinimalDenom ===
+                                ibcSwapConfigs.amountConfig.currency
+                                  .coinMinimalDenom ||
+                              ibcSwapConfigs.feeConfig.fees.some(
+                                (fee) =>
+                                  fee.currency.coinMinimalDenom ===
+                                  balance.currency.coinMinimalDenom
+                              )
+                            ) {
+                              balance.fetch();
+                            }
+                          });
+
+                        if (txReceipt.status === EthTxStatus.Success) {
+                          // logEvent("erc20_approve_tx_success", {
+                          //   quote_id: quoteId,
+                          // });
+
+                          logEvent("swap_tx_success", {
+                            quote_id: quoteId,
+                          });
+
+                          notification.show(
+                            "success",
+                            intl.formatMessage({
+                              id: "notification.transaction-success",
+                            }),
+                            ""
+                          );
+                        } else {
+                          notification.show(
+                            "failed",
+                            intl.formatMessage({
+                              id: "error.transaction-failed",
+                            }),
+                            ""
+                          );
+                        }
+
+                        resolve();
+
+                        navigate("/", {
+                          replace: true,
+                        });
+                      }
+
+                      reject();
+                    });
                   },
-                  simpleRoute,
-                  sender,
-                  chainStore.isEvmOnlyChain(outChainId)
-                    ? accountStore.getAccount(outChainId).ethereumHexAddress
-                    : accountStore.getAccount(outChainId).bech32Address,
-                  [
-                    ...ibcSwapConfigs.amountConfig.amount.map((amount) => {
-                      return {
-                        amount: DecUtils.getTenExponentN(
-                          amount.currency.coinDecimals
-                        )
-                          .mul(amount.toDec())
-                          .toString(),
-                        denom: amount.currency.coinMinimalDenom,
-                      };
-                    }),
-                    {
-                      amount: DecUtils.getTenExponentN(
-                        ibcSwapConfigs.amountConfig.outAmount.currency
-                          .coinDecimals
-                      )
-                        .mul(ibcSwapConfigs.amountConfig.outAmount.toDec())
-                        .toString(),
-                      denom:
-                        ibcSwapConfigs.amountConfig.outAmount.currency
-                          .coinMinimalDenom,
-                    },
-                  ],
                   {
-                    currencies: chainStore.getChain(outChainId).currencies,
-                  },
-                  routeDurationSeconds ?? 0,
-                  "wallet_sendCalls" // TODO: txHash 가져올 수 있는 방법 찾아보기
+                    maxRetries: 10,
+                    waitMsAfterError: 500,
+                    maxWaitMsAfterError: 4000,
+                  }
                 );
-
-                new InExtensionMessageRequester().sendMessage(
-                  BACKGROUND_PORT,
-                  recordMsg
-                );
-
-                // if (isSwap) {
-                //   logEvent("swap_tx_success", {
-                //     quote_id: quoteId,
-                //   });
-                // }
-
-                notification.show(
-                  "success",
-                  intl.formatMessage({
-                    id: "notification.transaction-success",
-                  }),
-                  ""
-                );
-
-                navigate("/", {
-                  replace: true,
-                });
               } else {
                 const { maxFeePerGas, maxPriorityFeePerGas, gasPrice } =
                   ibcSwapConfigs.feeConfig.getEIP1559TxFees(

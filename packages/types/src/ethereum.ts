@@ -1,4 +1,4 @@
-import { BigNumberish, TransactionLike, TransactionReceipt } from "ethers";
+import { BigNumberish, TransactionLike } from "ethers";
 
 export enum EthSignType {
   MESSAGE = "message",
@@ -158,6 +158,6 @@ export type WalletGetCallStatusResponse = {
   id: string;
   status: WalletGetCallStatusResponseStatus;
   atomic: boolean;
-  receipts: TransactionReceipt[];
+  receipts: EthTxReceipt[];
   capabilities?: Capabilities;
 };

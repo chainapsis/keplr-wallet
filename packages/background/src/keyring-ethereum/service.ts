@@ -12,6 +12,7 @@ import {
   EthereumSignResponse,
   EthSignType,
   EthTransactionType,
+  EthTxReceipt,
 } from "@keplr-wallet/types";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
@@ -32,7 +33,6 @@ import { enableAccessSkippedEVMJSONRPCMethods } from "./constants";
 import {
   Transaction,
   TransactionLike,
-  TransactionReceipt,
   id as generateRequestId,
   hashAuthorization,
   isAddress,
@@ -1735,7 +1735,7 @@ export class KeyRingEthereumService {
           const atomic = batchHistory.strategy === "atomic";
 
           // Build receipts array - only include completed transactions
-          const receipts: TransactionReceipt[] = [];
+          const receipts: EthTxReceipt[] = [];
 
           for (const tx of batchHistory.transactions) {
             if (
