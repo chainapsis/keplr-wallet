@@ -19,6 +19,7 @@
     "long": "^4.0.0"
   },
   "peerDependencies": {
+    "ethers": "^6",
     "starknet": "^7"
   }
 }

@@ -43,13 +43,11 @@ import { CoinPretty, Dec, DecUtils } from "@keplr-wallet/unit";
 import { MakeTxResponse, WalletStatus } from "@keplr-wallet/stores";
 import { autorun } from "mobx";
 import {
-  Call,
   LogAnalyticsEventMsg,
   RecordTxWithSkipSwapMsg,
   RequestJsonRpcToEvmMsg,
   SendTxAndRecordMsg,
   SendTxAndRecordWithIBCSwapMsg,
-  WalletSendCallsRequest,
 } from "@keplr-wallet/background";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT, Message } from "@keplr-wallet/router";
@@ -59,7 +57,12 @@ import { amountToAmbiguousAverage, amountToAmbiguousString } from "../../utils";
 import { Button } from "../../components/button";
 import { TextButtonProps } from "../../components/button-text";
 import { UnsignedEVMTransactionWithErc20Approvals } from "@keplr-wallet/stores-eth";
-import { EthTransactionType, EthTxStatus } from "@keplr-wallet/types";
+import {
+  EthTransactionType,
+  EthTxStatus,
+  WalletSendCallsRequest,
+  Call,
+} from "@keplr-wallet/types";
 import { InsufficientFeeError } from "@keplr-wallet/hooks";
 import { useSwapAnalytics } from "./hooks/use-swap-analytics";
 import { ZeroAddress } from "ethers";

@@ -26,7 +26,9 @@ import {
   BatchSigningData,
   InternalSendCallsRequest,
   UnsignedTxLike,
-} from "@keplr-wallet/background";
+  EthSignType,
+  EthTransactionType,
+} from "@keplr-wallet/types";
 import {
   useAmountConfig,
   useFeeConfig,
@@ -39,7 +41,6 @@ import { MemoryKVStore } from "@keplr-wallet/common";
 import { Buffer } from "buffer/";
 import { FeeSummary } from "../../components/fee-summary";
 import { FeeControl } from "../../../../components/input/fee-control";
-import { EthSignType, EthTransactionType } from "@keplr-wallet/types";
 import { Dec } from "@keplr-wallet/unit";
 
 export const EthereumEIP5792SignView: FunctionComponent<{

@@ -49,7 +49,7 @@ import {
   WalletGetCallStatusResponseStatus,
   WalletSendCallsRequest,
   WalletSendCallsResponse,
-} from "./types";
+} from "@keplr-wallet/types";
 
 export class KeyRingEthereumService {
   protected websocketSubscriptionMap = new Map<string, WebSocket>();

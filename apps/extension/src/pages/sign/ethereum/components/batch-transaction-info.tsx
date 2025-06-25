@@ -10,7 +10,7 @@ import { Gutter } from "../../../../components/gutter";
 import { Transaction } from "ethers";
 import { defaultRegistry } from "../../components/eth-tx/registry";
 import { EthTxBase } from "../../components/eth-tx/render/tx-base";
-import { InternalSendCallsRequest, Call } from "@keplr-wallet/background";
+import { InternalSendCallsRequest, Call } from "@keplr-wallet/types";
 import { BatchStrategyAnalysis } from "../hooks/use-batch-transaction";
 
 interface BatchHeaderProps {

@@ -16,7 +16,7 @@ import {
   ChainCapabilities,
   AccountUpgradeInfo,
   UnsignedTxLike,
-} from "@keplr-wallet/background";
+} from "@keplr-wallet/types";
 import { EthTransactionType } from "@keplr-wallet/types";
 import { ModeLib } from "../utils/mod-lib";
 
