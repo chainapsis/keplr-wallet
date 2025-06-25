@@ -33,6 +33,8 @@ import { CoinPretty } from "@keplr-wallet/unit";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { id } from "@ethersproject/hash";
 
+const SWAP_API_ENDPOINT = process.env["KEPLR_API_ENDPOINT"] ?? "";
+
 export class RecentSendHistoryService {
   // Key: {chain_identifier}/{type}
   @observable
@@ -242,7 +244,7 @@ export class RecentSendHistoryService {
             if (shouldLegacyTrack) {
               // no wait
               setTimeout(() => {
-                simpleFetch<any>("https://api.skip.build/", "/v2/tx/track", {
+                simpleFetch<any>(SWAP_API_ENDPOINT, "/v1/tx", {
                   method: "POST",
                   headers: {
                     "content-type": "application/json",
@@ -341,7 +343,7 @@ export class RecentSendHistoryService {
             if (shouldLegacyTrack) {
               setTimeout(() => {
                 // no wait
-                simpleFetch<any>("https://api.skip.build/", "/v2/tx/track", {
+                simpleFetch<any>(SWAP_API_ENDPOINT, "/v1/tx", {
                   method: "POST",
                   headers: {
                     "content-type": "application/json",
@@ -1307,7 +1309,7 @@ export class RecentSendHistoryService {
           if (txReceipt) {
             if (txReceipt.status === EthTxStatus.Success) {
               setTimeout(() => {
-                simpleFetch("https://api.skip.build/", "/v2/tx/track", {
+                simpleFetch(SWAP_API_ENDPOINT, "/v1/tx", {
                   method: "POST",
                   headers: {
                     "content-type": "application/json",
@@ -1380,7 +1382,7 @@ export class RecentSendHistoryService {
 
           if (txResult.code === 0) {
             setTimeout(() => {
-              simpleFetch("https://api.skip.build/", "/v2/tx/track", {
+              simpleFetch(SWAP_API_ENDPOINT, "/v1/tx", {
                 method: "POST",
                 headers: {
                   "content-type": "application/json",
@@ -1468,8 +1470,8 @@ export class RecentSendHistoryService {
     const requestParams = new URLSearchParams(request).toString();
 
     simpleFetch<TxStatusResponse>(
-      "https://api.skip.build/",
-      `v2/tx/status?${requestParams}`,
+      SWAP_API_ENDPOINT,
+      `/v1/tx?${requestParams}`,
       {
         method: "GET",
         headers: {
