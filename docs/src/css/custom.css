@@ -28,3 +28,8 @@
   --ifm-color-primary-lightest: #0096db;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
+
+/* Sidebar styling */
+.theme-doc-sidebar-menu {
+  padding-bottom: 2.5rem;
+}

@@ -5550,6 +5550,7 @@ __metadata:
     "@docusaurus/types": 3.6.3
     "@mdx-js/react": ^3.0.0
     clsx: ^2.0.0
+    dotenv: ^16.5.0
     prism-react-renderer: ^2.3.0
     react: ^19.0.0
     react-dom: ^19.0.0
@@ -5651,6 +5652,13 @@ __metadata:
   dependencies:
     is-obj: ^2.0.0
   checksum: 0f47600a4b93e1dc37261da4e6909652c008832a5d3684b5bf9a9a0d3f4c67ea949a86dceed9b72f5733ed8e8e6383cc5958df3bbd0799ee317fd181f2ece700
+  languageName: node
+  linkType: hard
+
+"dotenv@npm:^16.5.0":
+  version: 16.5.0
+  resolution: "dotenv@npm:16.5.0"
+  checksum: 6543fe87b5ddf2d60dd42df6616eec99148a5fc150cb4530fef5bda655db5204a3afa0e6f25f7cd64b20657ace4d79c0ef974bec32fdb462cad18754191e7a90
   languageName: node
   linkType: hard
 
