@@ -140,7 +140,7 @@
   "pages.register.connect-ledger.use-hid-confirm-title": "无法使用Web HID",
   "pages.register.connect-ledger.use-hid-confirm-paragraph": "请启用“实验性Web平台功能”以使用Web HID",
 
-  "pages.register.connect-keystone.title": "请连接你的硬件钱包",
+  "pages.register.connect-keystone.paragraph": "请连接你的硬件钱包",
   "pages.register.connect-keystone.step-text": "步骤 {num}",
   "pages.register.connect-keystone.step-1": "点击Keystone设备左下角的“<span>连接软件钱包</span>”。",
   "pages.register.connect-keystone.step-2": "选择“<span>Keplr钱包</span>”。",
