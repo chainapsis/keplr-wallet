@@ -148,7 +148,64 @@ await window.bitcoin_keplr.getBalance()
 
 ### getInscriptions
 
-**Not implemented yet.**
+#### Interface
+
+```typescript
+interface Inscription {
+  id: string; // Unique identifier
+  inscriptionId: string; // Ordinal inscription ID
+  content: string; // Content data
+  number: number; // Inscription number
+  address: string; // Current owner address
+  contentType: string; // MIME type of content
+  output: string; // UTXO containing the inscription
+  location: string; // Location within the UTXO
+  genesisTransaction: string; // Transaction where inscription was created
+  height: number; // Block height of inscription
+  preview: string; // Preview URL if available
+  outputValue: number; // Value of the UTXO
+  offset?: number; // Offset within the UTXO
+}
+```
+
+```typescript
+interface KeplrBitcoinProvider {
+  getInscriptions: (offset?: number, limit?: number) => Promise<{
+    total: number;
+    list: Inscription[];
+  }>; // return a list of inscriptions with total count
+}
+```
+
+#### Example
+
+```typescript
+await window.bitcoin_keplr.getInscriptions(0, 20)
+// {
+//   total: 20,
+//   list: [
+//     {
+//       id: "1",
+//       content: "https://example.com/content",
+//       contentType: "text/plain;charset=utf-8",
+//       output: "txid:outputIndex",
+//       location: "txid:outputIndex:satIndex",
+//       genesisTransaction: "genesis_txid",
+//       height: 892836,
+//       preview: "",
+//       outputValue: 100000000,
+//       offset: satIndex,
+//     },
+//     ...
+//   ]
+// }
+```
+
+**Note:**
+
+- `offset` is the offset of the inscriptions list. It must be a multiple of 20.
+- `limit` is the limit of the inscriptions list. It must be between 20 and 2000.
+
 
 ## Getting Network Info and Switching Current Network
 
