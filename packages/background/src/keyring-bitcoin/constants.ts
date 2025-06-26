@@ -32,3 +32,21 @@ export const signet = {
   ...testnet,
   id: Network.SIGNET,
 };
+
+export enum BitcoinInscriptionsApiUrl {
+  MAINNET = "https://mainnet-btc-inscriptions.keplr.app",
+  TESTNET = "https://testnet-btc-inscriptions.keplr.app",
+  SIGNET = "https://signet-btc-inscriptions.keplr.app",
+}
+
+export const getBitcoinInscriptionsApiUrl = (network: Network) => {
+  switch (network) {
+    case Network.LIVENET:
+    case Network.MAINNET:
+      return BitcoinInscriptionsApiUrl.MAINNET;
+    case Network.TESTNET:
+      return BitcoinInscriptionsApiUrl.TESTNET;
+    case Network.SIGNET:
+      return BitcoinInscriptionsApiUrl.SIGNET;
+  }
+};
