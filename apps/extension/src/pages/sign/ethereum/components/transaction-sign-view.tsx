@@ -32,10 +32,11 @@ import { LedgerGuideBox } from "../../components/ledger-guide-box";
 import { KeystoneUSBBox } from "../../components/keystone-usb-box";
 import { KeystoneSign } from "../../components/keystone";
 import { SignEthereumInteractionStore } from "@keplr-wallet/stores-core";
-import { Transaction, TransactionLike } from "ethers";
+import { Transaction, TransactionLike, ZeroAddress } from "ethers";
 import { Buffer } from "buffer/";
 import { useEthereumSigningCommon } from "../hooks/use-ethereum-signing-common";
 import { useEthereumSigningButtons } from "../hooks/use-ethereum-signing-buttons";
+import { EthTransactionType, UnsignedTxLike } from "@keplr-wallet/types";
 
 export const EthereumTransactionSignView: FunctionComponent<{
   interactionData: NonNullable<SignEthereumInteractionStore["waitingData"]>;
@@ -106,14 +107,59 @@ export const EthereumTransactionSignView: FunctionComponent<{
         throw new Error("Gas simulator is only working with EVM info");
       }
 
-      const txLike: TransactionLike = JSON.parse(
+      const txLike: UnsignedTxLike = JSON.parse(
         Buffer.from(message).toString("utf8")
       );
       if (txLike.from) {
         delete txLike.from;
       }
 
-      const unsignedTx = Transaction.from(txLike);
+      const unsignedTx = Transaction.from(txLike as TransactionLike);
+
+      if (unsignedTx.type === EthTransactionType.eip7702) {
+        const authorizationList = unsignedTx.authorizationList;
+        const authorization = authorizationList?.[0];
+        // Override the delegation designator of the account
+        if (authorization) {
+          // NOTE: Only handle a single authorization
+          const { address } = authorization;
+
+          const isZeroAddress = address === ZeroAddress;
+
+          // NOTE: For simulation, remove authorization list and change to EIP-1559 transaction,
+          // and override the delegation designator of the account
+          unsignedTx.authorizationList = null;
+          unsignedTx.type = EthTransactionType.eip1559;
+
+          return {
+            simulate: async () => {
+              const authIntrinsic = 25_000;
+
+              const { gasUsed: baseGasUsed } =
+                await ethereumAccount.simulateGas(
+                  account.ethereumHexAddress,
+                  unsignedTx,
+                  {
+                    [account.ethereumHexAddress]: {
+                      code: isZeroAddress
+                        ? "0x"
+                        : `0xef0100${address.slice(2)}`,
+                    },
+                  }
+                );
+
+              // CHECK: intrinsic gas should be 46_000 for 7702 revoke tx
+              // 21_000 for default call tx + 25_000 for authorization
+              return {
+                gasUsed:
+                  baseGasUsed < 21_000
+                    ? authIntrinsic + 21_000
+                    : authIntrinsic + baseGasUsed,
+              };
+            },
+          };
+        }
+      }
 
       return {
         simulate: () =>
@@ -171,39 +217,43 @@ export const EthereumTransactionSignView: FunctionComponent<{
 
         setPreferNoSetFee(!interactionData.isInternal);
       }
+    } else {
+      // upgrade/revoke 요청 처리 필요
+      feeConfig.setFee({
+        type: "average",
+        currency: feeConfig.selectableFeeCurrencies[0],
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    if (!interactionData.isInternal) {
-      const unsignedTx = JSON.parse(Buffer.from(message).toString("utf8"));
+    const unsignedTx = JSON.parse(Buffer.from(message).toString("utf8"));
 
-      // 수수료 옵션을 사이트에서 제공하는 경우, 수수료 옵션을 사용하지 않음
-      if (feeConfig.type === "manual") {
-        return;
-      }
-
-      if (gasConfig.gas > 0) {
-        unsignedTx.gasLimit = `0x${gasConfig.gas.toString(16)}`;
-      }
-
-      // EIP-1559 우선 적용
-      if (maxFeePerGas) {
-        unsignedTx.gasPrice = undefined;
-        unsignedTx.maxFeePerGas = maxFeePerGas;
-      }
-
-      if (unsignedTx.maxFeePerGas && maxPriorityFeePerGas) {
-        unsignedTx.maxPriorityFeePerGas = maxPriorityFeePerGas;
-      }
-
-      if (!maxFeePerGas && !maxPriorityFeePerGas && gasPrice) {
-        unsignedTx.gasPrice = gasPrice;
-      }
-
-      setSigningDataBuff(Buffer.from(JSON.stringify(unsignedTx), "utf8"));
+    // 수수료 옵션을 사이트에서 제공하는 경우, 수수료 옵션을 사용하지 않음
+    if (feeConfig.type === "manual") {
+      return;
     }
+
+    if (gasConfig.gas > 0) {
+      unsignedTx.gasLimit = `0x${gasConfig.gas.toString(16)}`;
+    }
+
+    // EIP-1559 우선 적용
+    if (maxFeePerGas) {
+      unsignedTx.gasPrice = undefined;
+      unsignedTx.maxFeePerGas = maxFeePerGas;
+    }
+
+    if (unsignedTx.maxFeePerGas && maxPriorityFeePerGas) {
+      unsignedTx.maxPriorityFeePerGas = maxPriorityFeePerGas;
+    }
+
+    if (!maxFeePerGas && !maxPriorityFeePerGas && gasPrice) {
+      unsignedTx.gasPrice = gasPrice;
+    }
+
+    setSigningDataBuff(Buffer.from(JSON.stringify(unsignedTx), "utf8"));
   }, [
     gasConfig.gas,
     message,

@@ -13,6 +13,7 @@ import {
   EthSignType,
   EthTransactionType,
   EthTxReceipt,
+  UnsignedTxLike,
 } from "@keplr-wallet/types";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
@@ -29,7 +30,10 @@ import { TokenERC20Service } from "../token-erc20";
 import { validateEVMChainId } from "./helper";
 import { runInAction } from "mobx";
 import { PermissionInteractiveService } from "../permission-interactive";
-import { enableAccessSkippedEVMJSONRPCMethods } from "./constants";
+import {
+  enableAccessSkippedEVMJSONRPCMethods,
+  smartAccountSupportedHexChainIds,
+} from "./constants";
 import {
   Transaction,
   TransactionLike,
@@ -169,11 +173,12 @@ export class KeyRingEthereumService {
 
     if (signType === EthSignType.TRANSACTION) {
       const unsignedTx = JSON.parse(Buffer.from(message).toString());
-      if (unsignedTx.authorizationList) {
+      // External 7702 트랜잭션은 지원하지 않음
+      if (!env.isInternalMsg && unsignedTx.authorizationList) {
         throw new EthereumProviderRpcError(
           -32602,
           "Invalid params",
-          "EIP-7702 transactions are not supported."
+          "External EIP-7702 transactions are not supported."
         );
       }
     }
@@ -247,20 +252,69 @@ export class KeyRingEthereumService {
                 };
               }
               case EthSignType.TRANSACTION: {
-                const txLike: TransactionLike = JSON.parse(
+                console.log("signEthereum", res.signingData);
+
+                const unsignedTxLike: UnsignedTxLike = JSON.parse(
                   Buffer.from(res.signingData).toString()
                 );
-                if (txLike.from) {
-                  delete txLike.from;
+
+                if (unsignedTxLike.from) {
+                  delete unsignedTxLike.from;
                 }
 
-                const unsignedTx = Transaction.from(txLike);
+                const unsignedTx = Transaction.from(
+                  unsignedTxLike as TransactionLike
+                );
 
-                const isEIP1559 =
-                  !!unsignedTx.maxFeePerGas ||
-                  !!unsignedTx.maxPriorityFeePerGas;
-                if (isEIP1559) {
-                  unsignedTx.type = EthTransactionType.eip1559;
+                if (
+                  unsignedTxLike.authorizationList &&
+                  unsignedTxLike.authorizationList.length > 0
+                ) {
+                  const authorization = unsignedTxLike.authorizationList[0];
+
+                  const nonce =
+                    typeof authorization.nonce === "string"
+                      ? BigInt(authorization.nonce)
+                      : authorization.nonce;
+
+                  const hash = hashAuthorization({
+                    address: authorization.address,
+                    nonce,
+                    chainId: unsignedTx.chainId,
+                  });
+
+                  // sign hash of authorization, no digest method
+                  const signature = await this.keyRingService.sign(
+                    chainId,
+                    vaultId,
+                    Buffer.from(hash.replace("0x", ""), "hex"),
+                    "noop"
+                  );
+
+                  // add signature to authorization list
+                  unsignedTx.authorizationList = [
+                    {
+                      address: authorization.address,
+                      nonce,
+                      chainId: unsignedTx.chainId,
+                      signature:
+                        "0x" +
+                        Buffer.concat([
+                          signature.r,
+                          signature.s,
+                          signature.v
+                            ? Buffer.from("1c", "hex")
+                            : Buffer.from("1b", "hex"),
+                        ]).toString("hex"),
+                    },
+                  ];
+                } else {
+                  const isEIP1559 =
+                    !!unsignedTx.maxFeePerGas ||
+                    !!unsignedTx.maxPriorityFeePerGas;
+                  if (isEIP1559) {
+                    unsignedTx.type = EthTransactionType.eip1559;
+                  }
                 }
 
                 const signature = await this.keyRingService.sign(
@@ -272,6 +326,30 @@ export class KeyRingEthereumService {
                   ),
                   "keccak256"
                 );
+
+                if (unsignedTx.type === EthTransactionType.eip7702) {
+                  unsignedTx.signature =
+                    "0x" +
+                    Buffer.concat([
+                      signature.r,
+                      signature.s,
+                      signature.v
+                        ? Buffer.from("1c", "hex")
+                        : Buffer.from("1b", "hex"),
+                    ]).toString("hex");
+
+                  const serialized = unsignedTx.serialized;
+
+                  console.log("serialized", serialized);
+
+                  return {
+                    signingData: res.signingData,
+                    signature: Buffer.from(
+                      unsignedTx.serialized.slice(2),
+                      "hex"
+                    ),
+                  };
+                }
 
                 return {
                   signingData: res.signingData,
@@ -690,11 +768,11 @@ export class KeyRingEthereumService {
 
           const { from: sender, authorizationList } = txLike;
 
-          if (authorizationList) {
+          if (!env.isInternalMsg && authorizationList) {
             throw new EthereumProviderRpcError(
               -32602,
               "Invalid params",
-              "EIP-7702 transactions are not supported."
+              "External EIP-7702 transactions are not supported."
             );
           }
 
@@ -812,8 +890,10 @@ export class KeyRingEthereumService {
 
           const { from: sender, authorizationList, ...restTx } = txLike;
 
-          if (authorizationList) {
-            throw new Error("EIP-7702 transactions are not supported.");
+          if (!env.isInternalMsg && authorizationList) {
+            throw new Error(
+              "External EIP-7702 transactions are not supported."
+            );
           }
 
           if (txLike.chainId) {
@@ -1853,6 +1933,23 @@ export class KeyRingEthereumService {
     return result;
   }
 
+  async getSupportedChainCapabilities() {
+    const supportedChainIds = smartAccountSupportedHexChainIds;
+
+    const capabilities = await Promise.all(
+      supportedChainIds.map(async (hexChainId) => {
+        const capabilities = await this.getAccountCapabilities(hexChainId);
+
+        return {
+          chainId: `eip155:${validateEVMChainId(parseInt(hexChainId, 16))}`,
+          chainCapabilities: capabilities[hexChainId],
+        };
+      })
+    );
+
+    return capabilities;
+  }
+
   getNewCurrentChainIdFromRequest(
     method: string,
     params?: unknown[] | Record<string, unknown>
@@ -1918,17 +2015,17 @@ export class KeyRingEthereumService {
     hexChainId: string,
     address?: string
   ): Promise<Capabilities> {
+    const chainId = `eip155:${validateEVMChainId(parseInt(hexChainId, 16))}`;
+
     if (!address) {
-      const pubKey = await this.keyRingService.getPubKeySelected(hexChainId);
+      const pubKey = await this.keyRingService.getPubKeySelected(chainId);
       const bech32Address = new Bech32Address(pubKey.getEthAddress());
       address = bech32Address.toHex(true);
     }
 
-    const chainId = `eip155:${validateEVMChainId(parseInt(hexChainId, 16))}`;
-
     const currentChainEVMInfo = this.chainsService.getEVMInfoOrThrow(chainId);
 
-    const supportedChainIds = ["0x1", "0x2105", "0xa"]; // ethereum, base, optimism
+    const supportedChainIds = smartAccountSupportedHexChainIds;
     const aaAddresses = [
       DELEGATOR_ADDRESS, // Metamask
     ];

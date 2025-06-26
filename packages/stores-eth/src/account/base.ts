@@ -5,10 +5,6 @@ import {
   EthSignType,
   EthTxReceipt,
   Keplr,
-  WalletGetCallStatusResponse,
-  WalletGetCallStatusResponseStatus,
-  WalletSendCallsRequest,
-  WalletSendCallsResponse,
 } from "@keplr-wallet/types";
 import { DenomHelper, retry } from "@keplr-wallet/common";
 import { erc20ContractInterface } from "../constants";
@@ -389,76 +385,6 @@ export class EthereumAccountBase {
         onTxEvents.onBroadcastFailed(e);
       }
 
-      throw e;
-    }
-  }
-
-  async sendEthereumBatchTx(
-    request: WalletSendCallsRequest,
-    onTxEvents?: {
-      onBroadcasted?: (txHash: string) => void;
-      onFulfill?: (txReceipt: EthTxReceipt) => void;
-    }
-  ) {
-    try {
-      const chainInfo = this.chainGetter.getChain(this.chainId);
-      const evmInfo = chainInfo.evm;
-      if (!evmInfo) {
-        throw new Error("No EVM info provided");
-      }
-
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const keplr = (await this.getKeplr())!;
-
-      const ethereumRequest = keplr.ethereum.request.bind(keplr);
-
-      const { id } = await ethereumRequest<WalletSendCallsResponse>({
-        method: "wallet_sendCalls",
-        params: [request],
-        chainId: this.chainId,
-      });
-
-      retry(
-        () => {
-          return new Promise<void>(async (resolve, reject) => {
-            const response = await ethereumRequest<WalletGetCallStatusResponse>(
-              {
-                method: "wallet_getCallsStatus",
-                params: [id],
-                chainId: this.chainId,
-              }
-            );
-
-            if (
-              response.status === WalletGetCallStatusResponseStatus.Confirmed
-            ) {
-              const txReceipt = response.receipts[
-                response.receipts.length - 1
-              ] as unknown as EthTxReceipt;
-              const txHash =
-                response.receipts[response.receipts.length - 1].hash; // TODO: 옵셔널하게 처리 필요. 일단 swap 배치 실행의 경우 마지막 트랜잭션 해시를 반환하는 것이 필요
-
-              if (onTxEvents?.onBroadcasted) {
-                onTxEvents.onBroadcasted(txHash);
-              }
-
-              if (onTxEvents?.onFulfill) {
-                onTxEvents.onFulfill(txReceipt);
-              }
-
-              resolve();
-            }
-
-            reject();
-          });
-        },
-        {
-          maxRetries: 10,
-          waitMsAfterError: 500,
-          maxWaitMsAfterError: 4000,
-        }
-      );
-    } catch (e) {
       throw e;
     }
   }

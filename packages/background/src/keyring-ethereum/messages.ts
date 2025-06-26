@@ -1,6 +1,6 @@
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Message } from "@keplr-wallet/router";
-import { EthSignType } from "@keplr-wallet/types";
+import { ChainCapabilities, EthSignType } from "@keplr-wallet/types";
 import { ROUTE } from "./constants";
 
 export class RequestSignEthereumMsg extends Message<Uint8Array> {
@@ -136,3 +136,27 @@ export class CheckNeedEnableAccessForEVMMsg extends Message<boolean> {
 }
 
 // TODO: 7702 Atomic 처리 지원되는 체인 id 및 부가 정보를 가져오는 메시지 추가
+export class GetSupportedChainCapabilitiesForEVMMsg extends Message<
+  {
+    chainId: string;
+    chainCapabilities: ChainCapabilities;
+  }[]
+> {
+  public static type() {
+    return "get-supported-chain-capabilities-for-evm";
+  }
+
+  validateBasic(): void {}
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetSupportedChainCapabilitiesForEVMMsg.type();
+  }
+}

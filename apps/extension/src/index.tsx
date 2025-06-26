@@ -118,6 +118,7 @@ import { EarnTransferAmountPage } from "./pages/earn/transfer/amount";
 import { EarnOverviewPage } from "./pages/earn/overview";
 import { EarnWithdrawAmountPage } from "./pages/earn/withdraw/amount";
 import { AboutKeplrPage } from "./pages/setting/about";
+import { SettingGeneralManageSmartAccountsPage } from "./pages/setting/advanced/manage-smart-accounts";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -458,6 +459,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               <Route
                 path="setting/advanced/delete-suggest-chain"
                 element={<SettingGeneralDeleteSuggestChainPage />}
+              />
+              <Route
+                path="/setting/advanced/manage-smart-accounts"
+                element={<SettingGeneralManageSmartAccountsPage />}
               />
               <Route
                 path="/setting/advanced/endpoint"

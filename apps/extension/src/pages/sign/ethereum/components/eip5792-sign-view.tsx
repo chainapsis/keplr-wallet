@@ -42,6 +42,7 @@ import { Buffer } from "buffer/";
 import { FeeSummary } from "../../components/fee-summary";
 import { FeeControl } from "../../../../components/input/fee-control";
 import { Dec } from "@keplr-wallet/unit";
+import { ZeroAddress } from "ethers";
 
 export const EthereumEIP5792SignView: FunctionComponent<{
   interactionData: NonNullable<SignEthereumInteractionStore["waitingData"]>;
@@ -169,6 +170,8 @@ export const EthereumEIP5792SignView: FunctionComponent<{
           // NOTE: Only handle a single authorization
           const { address } = authorization;
 
+          const isZeroAddress = address === ZeroAddress;
+
           // NOTE: For simulation, remove authorization list and change to EIP-1559 transaction,
           // and override the delegation designator of the account
           unsignedTx.authorizationList = null;
@@ -198,7 +201,9 @@ export const EthereumEIP5792SignView: FunctionComponent<{
                   unsignedTx,
                   {
                     [account.ethereumHexAddress]: {
-                      code: `0xef0100${address.slice(2)}`,
+                      code: isZeroAddress
+                        ? "0x"
+                        : `0xef0100${address.slice(2)}`,
                     },
                   }
                 );

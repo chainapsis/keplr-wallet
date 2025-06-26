@@ -188,6 +188,17 @@ export const SettingPage: FunctionComponent = observer(() => {
                     navigate("/setting/advanced/delete-suggest-chain"),
                 },
                 {
+                  key: "manage-smart-accounts",
+                  icon: IconContacts,
+                  title: intl.formatMessage({
+                    id: "page.setting.advanced.manage-smart-accounts-title",
+                  }),
+                  right: ClickableRightIcon,
+                  rightProps: {},
+                  onClick: () =>
+                    navigate("/setting/advanced/manage-smart-accounts"),
+                },
+                {
                   key: "add-remove-custom-token",
                   icon: IconAddRemoveCustomTokens,
                   title: intl.formatMessage({

@@ -1445,11 +1445,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                           return;
                         }
 
-                        // CHECK: txReceipt 타입 미스 매치
-
                         const txHash = txReceipt.transactionHash;
-
-                        console.log("txReceipt", txReceipt, "txHash", txHash);
 
                         logEvent("swap_tx_submitted", {
                           quote_id: quoteId,
@@ -1511,8 +1507,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                           BACKGROUND_PORT,
                           recordMsg
                         );
-
-                        console.log("recorded msg");
 
                         const queryBalances = queriesStore.get(
                           ibcSwapConfigs.amountConfig.chainId
