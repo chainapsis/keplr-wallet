@@ -35,6 +35,7 @@ import {
 import { AnalyticsService } from "../analytics";
 import { KVStore } from "@keplr-wallet/common";
 import { action, autorun, makeObservable, observable, runInAction } from "mobx";
+import { bitcoinInscriptionsRateLimiter } from "./rate-limiter";
 
 const DUST_THRESHOLD = 546;
 enum BitcoinSignType {
@@ -737,7 +738,6 @@ export class KeyRingBitcoinService {
     const bitcoinKey = await this.getBitcoinKeySelected(currentChainId);
 
     const network = this.getNetworkConfig(currentChainId).id;
-
     const apiUrl = getBitcoinInscriptionsApiUrl(network);
 
     const params = new URLSearchParams();
@@ -748,38 +748,41 @@ export class KeyRingBitcoinService {
     params.append("offset", offset?.toString() ?? "0");
     params.append("count", limit?.toString() ?? "20");
 
-    const res = await simpleFetch<{
-      data: Array<{
-        inscription_name?: string;
-        inscription_id: string;
-        inscription_number: number;
-        parent_ids: string[];
-        output_value: number;
-        genesis_block_hash: string;
-        genesis_ts: string;
-        genesis_height: number;
-        metadata: any;
-        mime_type?: string;
-        owner_wallet_addr: string;
-        last_sale_price?: number;
-        slug?: string;
-        collection_name?: string;
-        satpoint: string;
-        last_transfer_block_height?: number;
-        content_url: string;
-        bis_url: string;
-        render_url?: string;
-        bitmap_number?: number;
-        delegate?: {
-          delegate_id: string;
-          render_url?: string;
+    // execute API request through rate limiter to avoid rate limit from the server
+    const res = await bitcoinInscriptionsRateLimiter.add(async () => {
+      return await simpleFetch<{
+        data: Array<{
+          inscription_name?: string;
+          inscription_id: string;
+          inscription_number: number;
+          parent_ids: string[];
+          output_value: number;
+          genesis_block_hash: string;
+          genesis_ts: string;
+          genesis_height: number;
+          metadata: any;
           mime_type?: string;
+          owner_wallet_addr: string;
+          last_sale_price?: number;
+          slug?: string;
+          collection_name?: string;
+          satpoint: string;
+          last_transfer_block_height?: number;
           content_url: string;
           bis_url: string;
-        };
-      }>;
-      block_height: number;
-    }>(`${apiUrl}/wallet/inscriptions?${params.toString()}`);
+          render_url?: string;
+          bitmap_number?: number;
+          delegate?: {
+            delegate_id: string;
+            render_url?: string;
+            mime_type?: string;
+            content_url: string;
+            bis_url: string;
+          };
+        }>;
+        block_height: number;
+      }>(`${apiUrl}/wallet/inscriptions?${params.toString()}`);
+    });
 
     if (res.status === 429) {
       throw new Error("Rate limit exceeded, 10 requests per minute");
