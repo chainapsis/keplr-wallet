@@ -8,6 +8,7 @@ import {
   WEBPAGE_PORT,
 } from "@keplr-wallet/router";
 import {
+  ChainCapabilities,
   ChainInfo,
   EthereumSignResponse,
   EthSignType,
@@ -252,8 +253,6 @@ export class KeyRingEthereumService {
                 };
               }
               case EthSignType.TRANSACTION: {
-                console.log("signEthereum", res.signingData);
-
                 const unsignedTxLike: UnsignedTxLike = JSON.parse(
                   Buffer.from(res.signingData).toString()
                 );
@@ -337,10 +336,6 @@ export class KeyRingEthereumService {
                         ? Buffer.from("1c", "hex")
                         : Buffer.from("1b", "hex"),
                     ]).toString("hex");
-
-                  const serialized = unsignedTx.serialized;
-
-                  console.log("serialized", serialized);
 
                   return {
                     signingData: res.signingData,
@@ -1936,16 +1931,25 @@ export class KeyRingEthereumService {
   async getSupportedChainCapabilities() {
     const supportedChainIds = smartAccountSupportedHexChainIds;
 
-    const capabilities = await Promise.all(
-      supportedChainIds.map(async (hexChainId) => {
-        const capabilities = await this.getAccountCapabilities(hexChainId);
+    const capabilities: {
+      chainId: string;
+      chainCapabilities: ChainCapabilities;
+    }[] = [];
 
-        return {
+    for (const hexChainId of supportedChainIds) {
+      try {
+        const chainCapabilities = await this.getAccountCapabilities(hexChainId);
+        capabilities.push({
           chainId: `eip155:${validateEVMChainId(parseInt(hexChainId, 16))}`,
-          chainCapabilities: capabilities[hexChainId],
-        };
-      })
-    );
+          chainCapabilities: chainCapabilities[hexChainId],
+        });
+      } catch (error) {
+        console.error(
+          `Failed to get account capabilities for ${hexChainId}:`,
+          error
+        );
+      }
+    }
 
     return capabilities;
   }
