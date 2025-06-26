@@ -732,7 +732,7 @@ export class KeyRingBitcoinService {
     };
   }
 
-  async getInscriptions(origin: string, offset = 0, limit = 20) {
+  async getInscriptions(origin: string, offset?: number, limit?: number) {
     const currentChainId = this.forceGetCurrentChainId(origin);
     const bitcoinKey = await this.getBitcoinKeySelected(currentChainId);
 
@@ -745,8 +745,8 @@ export class KeyRingBitcoinService {
     params.append("order", "desc");
     params.append("exclude_brc20", "false");
     params.append("address", bitcoinKey.address);
-    params.append("offset", offset.toString());
-    params.append("count", limit.toString());
+    params.append("offset", offset?.toString() ?? "0");
+    params.append("count", limit?.toString() ?? "20");
 
     const res = await simpleFetch<{
       data: Array<{
