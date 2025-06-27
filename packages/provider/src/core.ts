@@ -28,6 +28,7 @@ import {
   BitcoinSignMessageType,
   ChainType as BitcoinChainType,
   SignPsbtOptions,
+  Inscription,
 } from "@keplr-wallet/types";
 import {
   BACKGROUND_PORT,
@@ -2048,7 +2049,10 @@ class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
     );
   }
 
-  async getInscriptions(): Promise<string[]> {
+  async getInscriptions(
+    offset?: number,
+    limit?: number
+  ): Promise<{ total: number; list: Inscription[] }> {
     await this.protectedEnableAccess();
 
     return await sendSimpleMessage(
@@ -2056,7 +2060,10 @@ class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
       BACKGROUND_PORT,
       "keyring-bitcoin",
       "request-bitcoin-get-inscriptions",
-      {}
+      {
+        offset,
+        limit,
+      }
     );
   }
 

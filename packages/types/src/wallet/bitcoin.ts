@@ -63,6 +63,22 @@ export type SignPsbtOptions = {
   }>;
 };
 
+export interface Inscription {
+  id: string; // Unique identifier
+  inscriptionId: string; // Ordinal inscription ID
+  content: string; // Content data
+  number: number; // Inscription number
+  address: string; // Current owner address
+  contentType: string; // MIME type of content
+  output: string; // UTXO containing the inscription
+  location: string; // Location within the UTXO
+  genesisTransaction: string; // Transaction where inscription was created
+  height: number; // Block height of inscription
+  preview: string; // Preview URL if available
+  outputValue: number; // Value of the UTXO
+  offset?: number; // Offset within the UTXO
+}
+
 export interface IBitcoinProvider extends EventEmitter {
   getAccounts: () => Promise<string[]>;
   requestAccounts: () => Promise<string[]>;
@@ -81,7 +97,13 @@ export interface IBitcoinProvider extends EventEmitter {
     unconfirmed: number;
     total: number;
   }>;
-  getInscriptions: () => Promise<string[]>;
+  getInscriptions: (
+    offset?: number,
+    limit?: number
+  ) => Promise<{
+    total: number;
+    list: Inscription[];
+  }>;
   signMessage: (
     message: string,
     type?: BitcoinSignMessageType

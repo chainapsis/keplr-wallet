@@ -6,6 +6,7 @@ import {
   SupportedPaymentType,
   Network as BitcoinNetwork,
   ChainType as BitcoinChainType,
+  Inscription,
 } from "@keplr-wallet/types";
 import { ROUTE } from "./constants";
 import { Psbt } from "bitcoinjs-lib";
@@ -529,17 +530,30 @@ export class RequestBitcoinGetBalanceMsg extends Message<{
   }
 }
 
-export class RequestBitcoinGetInscriptionsMsg extends Message<void> {
+export class RequestBitcoinGetInscriptionsMsg extends Message<{
+  total: number;
+  list: Inscription[];
+}> {
   public static type() {
     return "request-bitcoin-get-inscriptions";
   }
 
-  constructor() {
+  constructor(public readonly offset?: number, public readonly limit?: number) {
     super();
   }
 
   validateBasic(): void {
-    // noop
+    if (this.offset && this.offset < 0) {
+      throw new Error("offset must be greater than or equal to 0");
+    }
+
+    if (this.offset && this.offset % 20 !== 0) {
+      throw new Error("offset must be a multiple of 20");
+    }
+
+    if (this.limit && (this.limit < 20 || this.limit > 2000)) {
+      throw new Error("limit must be between 20 and 2000");
+    }
   }
 
   override approveExternal(): boolean {

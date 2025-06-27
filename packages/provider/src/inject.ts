@@ -34,6 +34,7 @@ import {
   BitcoinSignMessageType,
   ChainType as BitcoinChainType,
   SignPsbtOptions,
+  Inscription,
 } from "@keplr-wallet/types";
 import {
   Result,
@@ -1837,8 +1838,11 @@ export class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
     return this._requestMethod("getBalance", []);
   }
 
-  async getInscriptions(): Promise<string[]> {
-    return this._requestMethod("getInscriptions", []);
+  async getInscriptions(
+    offset?: number,
+    limit?: number
+  ): Promise<{ total: number; list: Inscription[] }> {
+    return this._requestMethod("getInscriptions", [offset, limit]);
   }
 
   async signMessage(

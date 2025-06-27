@@ -415,7 +415,7 @@ const handleRequestBitcoinGetInscriptionsMsg: (
   return async (env, msg) => {
     await permissionInteractionService.ensureEnabledForBitcoin(env, msg.origin);
 
-    return await service.getInscriptions();
+    return await service.getInscriptions(msg.origin, msg.offset, msg.limit);
   };
 };
 
