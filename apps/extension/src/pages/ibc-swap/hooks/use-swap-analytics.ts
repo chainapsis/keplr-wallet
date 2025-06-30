@@ -55,8 +55,7 @@ export const useSwapAnalytics = ({
   swapFeeBps,
 }: SwapAnalyticsArgs) => {
   const [searchParams] = useSearchParams();
-  const { analyticsAmplitudeStore, keyRingStore, uiConfigStore, priceStore } =
-    useStore();
+  const { analyticsAmplitudeStore, uiConfigStore, priceStore } = useStore();
 
   const quoteIdRef = useRef("");
 
@@ -157,7 +156,6 @@ export const useSwapAnalytics = ({
 
     logEvent("swap_entry", {
       entry_point: entryPoint,
-      wallet_type: keyRingStore.selectedKeyInfo?.type,
     });
   });
 
