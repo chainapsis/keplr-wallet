@@ -14,6 +14,7 @@ import {
   GENESIS_HASH_TO_CHAIN_TYPE,
   CHAIN_TYPE_TO_GENESIS_HASH,
   SignPsbtOptions,
+  Inscription,
 } from "@keplr-wallet/types";
 import { Env, KeplrError, WEBPAGE_PORT } from "@keplr-wallet/router";
 import { Psbt, address } from "bitcoinjs-lib";
@@ -25,10 +26,16 @@ import { BackgroundTxService } from "../tx";
 import validate, {
   Network as BitcoinNetwork,
 } from "bitcoin-address-validation";
-import { mainnet, signet, testnet } from "./constants";
+import {
+  getBitcoinInscriptionsApiUrl,
+  mainnet,
+  signet,
+  testnet,
+} from "./constants";
 import { AnalyticsService } from "../analytics";
 import { KVStore } from "@keplr-wallet/common";
 import { action, autorun, makeObservable, observable, runInAction } from "mobx";
+import { bitcoinInscriptionsRateLimiter } from "./rate-limiter";
 
 const DUST_THRESHOLD = 546;
 enum BitcoinSignType {
@@ -726,8 +733,103 @@ export class KeyRingBitcoinService {
     };
   }
 
-  async getInscriptions() {
-    throw new Error("Not implemented.");
+  async getInscriptions(origin: string, offset?: number, limit?: number) {
+    const currentChainId = this.forceGetCurrentChainId(origin);
+    const bitcoinKey = await this.getBitcoinKeySelected(currentChainId);
+
+    const network = this.getNetworkConfig(currentChainId).id;
+    const apiUrl = getBitcoinInscriptionsApiUrl(network);
+
+    const params = new URLSearchParams();
+    params.append("sort_by", "inscr_num");
+    params.append("order", "desc");
+    params.append("exclude_brc20", "false");
+    params.append("address", bitcoinKey.address);
+    params.append("offset", offset?.toString() ?? "0");
+    params.append("count", limit?.toString() ?? "20");
+
+    // execute API request through rate limiter to avoid rate limit from the server
+    const res = await bitcoinInscriptionsRateLimiter.add(async () => {
+      return await simpleFetch<{
+        data: Array<{
+          inscription_name?: string;
+          inscription_id: string;
+          inscription_number: number;
+          parent_ids: string[];
+          output_value: number;
+          genesis_block_hash: string;
+          genesis_ts: string;
+          genesis_height: number;
+          metadata: any;
+          mime_type?: string;
+          owner_wallet_addr: string;
+          last_sale_price?: number;
+          slug?: string;
+          collection_name?: string;
+          satpoint: string;
+          last_transfer_block_height?: number;
+          content_url: string;
+          bis_url: string;
+          render_url?: string;
+          bitmap_number?: number;
+          delegate?: {
+            delegate_id: string;
+            render_url?: string;
+            mime_type?: string;
+            content_url: string;
+            bis_url: string;
+          };
+        }>;
+        block_height: number;
+      }>(`${apiUrl}/wallet/inscriptions?${params.toString()}`);
+    });
+
+    if (res.status === 429) {
+      throw new Error("Rate limit exceeded, 10 requests per minute");
+    }
+
+    if (res.status !== 200) {
+      throw new Error("Failed to get inscriptions");
+    }
+
+    const list: Inscription[] = [];
+
+    for (const item of res.data.data) {
+      const {
+        inscription_id,
+        inscription_number,
+        owner_wallet_addr,
+        mime_type,
+        satpoint,
+        output_value,
+        genesis_height,
+        content_url,
+        render_url,
+      } = item;
+
+      const [txid, outputIndex, satIndex] = satpoint.split(":");
+
+      list.push({
+        id: inscription_id,
+        inscriptionId: inscription_id,
+        content: content_url,
+        number: inscription_number,
+        address: owner_wallet_addr,
+        contentType: mime_type ?? "",
+        output: `${txid}:${outputIndex}`,
+        location: satpoint,
+        genesisTransaction: txid,
+        height: genesis_height,
+        preview: render_url ?? "",
+        outputValue: output_value,
+        offset: parseInt(satIndex, 10),
+      });
+    }
+
+    return {
+      total: list.length,
+      list,
+    };
   }
 
   async sendBitcoin(

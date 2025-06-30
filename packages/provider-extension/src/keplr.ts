@@ -30,6 +30,7 @@ import {
   ChainType as BitcoinChainType,
   Network as BitcoinNetwork,
   BitcoinSignMessageType,
+  Inscription,
 } from "@keplr-wallet/types";
 import { JSONUint8Array } from "./uint8-array";
 import deepmerge from "deepmerge";
@@ -1155,8 +1156,11 @@ export class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
     return BitcoinProvider._requestMethod("getBalance", []);
   }
 
-  async getInscriptions(): Promise<string[]> {
-    return BitcoinProvider._requestMethod("getInscriptions", []);
+  async getInscriptions(
+    offset?: number,
+    limit?: number
+  ): Promise<{ total: number; list: Inscription[] }> {
+    return BitcoinProvider._requestMethod("getInscriptions", [offset, limit]);
   }
 
   async signMessage(

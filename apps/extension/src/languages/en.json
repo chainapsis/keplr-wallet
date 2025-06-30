@@ -774,6 +774,7 @@
   "page.earn.overview.title": "Earn Overview",
   "page.earn.overview.claim-section.claimable-reward": "Claimable Reward",
   "page.earn.overview.claim-section.total-claimed": "Total Claimed",
+  "page.earn.overview.claim-section.total-claimed-tooltip": "Showing rewards claimed since June 19, 2025",
   "page.earn.overview.claim-section.claim-button": "Claim",
   "page.earn.overview.tutorial-modal.manage-earn.title": "Manage your Earn balance and rewards",
   "page.earn.overview.tutorial-modal.manage-earn.paragraph": "Find your balance info under the {tokenName} asset box at Home.",

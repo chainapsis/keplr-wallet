@@ -691,6 +691,8 @@
   "page.starknet.components.account-activation-modal.title": "계정 활성화",
   "page.starknet.components.account-activation-modal.description": "스타크넷의 다양한 기능을 이용하려면 계정을 활성화하세요!{br}계정 활성화에는 약간의 수수료가 필요합니다.",
 
+  "page.earn.overview.claim-section.total-claimed-tooltip": "2025년 6월 19일 이후 수령한 보상이 표시됩니다.",
+
   "components.empty-view.text": "{subject} 데이터가 없습니다.",
   "components.input.recipient-input.wallet-address-only-label": "지갑 주소",
   "components.input.recipient-input.wallet-address-label": "지갑 주소 혹은 ICNS",

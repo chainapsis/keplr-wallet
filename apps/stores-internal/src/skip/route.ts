@@ -284,7 +284,7 @@ export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
       splitRoutes?: boolean;
     }
   ) {
-    super(sharedContext, skipURL, "/v2/fungible/route");
+    super(sharedContext, skipURL, "/v1/swap/route");
     makeObservable(this);
   }
 
@@ -433,15 +433,11 @@ export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
         cumulative_affiliate_fee_bps: this.affiliateFeeBps.toString(),
         swap_venues: this.swapVenues
           .map((swapVenue) => ({
-            ...swapVenue,
-            chainId: swapVenue.chainId.replace("eip155:", ""),
+            name: swapVenue.name,
+            chain_id: swapVenue.chainId.replace("eip155:", ""),
           }))
           // 임시로 추가된 swap venue는 제외
           .filter((swapVenue) => !swapVenue.name.startsWith("temp-")),
-        allow_unsafe: true,
-        smart_relay: true,
-        go_fast: true,
-        experimental_features: ["hyperlane", "eureka", "stargate"],
         smart_swap_options: {
           evm_swaps:
             this.smartSwapOptions?.evmSwaps === undefined

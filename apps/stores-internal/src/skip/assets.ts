@@ -69,14 +69,7 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
     skipURL: string,
     public readonly chainId: string
   ) {
-    super(
-      sharedContext,
-      skipURL,
-      `/v2/fungible/assets?chain_id=${chainId.replace(
-        "eip155:",
-        ""
-      )}&native_only=false&include_evm_assets=true`
-    );
+    super(sharedContext, skipURL, `/v1/swap/assets?chainId=${chainId}`);
 
     makeObservable(this);
   }
@@ -409,9 +402,9 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
     super(
       sharedContext,
       skipURL,
-      `/v2/fungible/assets?${chainIds
-        .map((chainId) => `chain_ids=${chainId.replace("eip155:", "")}`)
-        .join("&")}&native_only=false&include_evm_assets=true`,
+      `/v1/swap/assets?${chainIds
+        .map((chainId) => `chain_id=${chainId.replace("eip155:", "")}`)
+        .join("&")}`,
       options
     );
 
