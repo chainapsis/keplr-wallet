@@ -330,6 +330,8 @@ export const useSwapAnalytics = ({
       provider: "skip",
       error_message:
         queryRouteForLog.error.message ?? queryRouteForLog.error.toString(),
+      error_status: queryRouteForLog.error.status,
+      error_code: queryRouteForLog.error.data?.code ?? undefined,
     });
     prevQuoteErrorIdRef.current = quoteIdRef.current;
   }, [queryRouteForLog?.error, logEvent, queryRouteForLog]);
