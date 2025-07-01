@@ -55,9 +55,9 @@ export const useSwapAnalytics = ({
   swapFeeBps,
 }: SwapAnalyticsArgs) => {
   const [searchParams] = useSearchParams();
-  const { analyticsAmplitudeStore, uiConfigStore, priceStore } = useStore();
+  const { analyticsAmplitudeStore, uiConfigStore, priceStore, chainStore } =
+    useStore();
 
-  const pendingQuoteIdRef = useRef("");
   const quoteIdRef = useRef("");
 
   const prevInRef = useRef({
@@ -72,7 +72,6 @@ export const useSwapAnalytics = ({
   const prevSlippageRef = useRef(uiConfigStore.ibcSwapConfig.slippageNum);
   const prevFetchingRef = useRef(false);
   const prevRouteKeyRef = useRef("");
-  const prevQuoteErrorIdRef = useRef("");
 
   const aggregatedPropsRef = useRef<Record<string, Record<string, any>>>({});
 
@@ -84,11 +83,8 @@ export const useSwapAnalytics = ({
     Record<string, ReturnType<typeof debounce>>
   >({});
 
-  const inChainIdentifier = ChainIdHelper.parse(inChainId).identifier;
-  const outChainIdentifier = ChainIdHelper.parse(outChainId).identifier;
-
   const logEvent = useCallback(
-    (eventName: string, props: Record<string, any>) => {
+    (eventName: string, props: Record<string, any> = {}) => {
       const id = props["quote_id"];
 
       let mergedProps = { ...props };
@@ -160,6 +156,9 @@ export const useSwapAnalytics = ({
     });
   });
 
+  const inChainIdentifier = ChainIdHelper.parse(inChainId).identifier;
+  const outChainIdentifier = ChainIdHelper.parse(outChainId).identifier;
+
   // source selected
   useEffect(() => {
     if (entryPoint !== "select_from_asset") return;
@@ -177,7 +176,8 @@ export const useSwapAnalytics = ({
         denom: inCurrency.coinDenom,
       };
     }
-  }, [inChainIdentifier, inCurrency.coinDenom, logEvent, entryPoint]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inChainIdentifier, inCurrency.coinDenom]);
 
   // destination selected
   useEffect(() => {
@@ -185,7 +185,7 @@ export const useSwapAnalytics = ({
 
     if (
       prevOutRef.current.chainIdentifier !== outChainIdentifier ||
-      prevOutRef.current.denom !== outCurrency.coinMinimalDenom
+      prevOutRef.current.denom !== outCurrency.coinDenom
     ) {
       logEvent("swap_destination_selected", {
         out_chain_identifier: outChainIdentifier,
@@ -193,24 +193,17 @@ export const useSwapAnalytics = ({
       });
       prevOutRef.current = {
         chainIdentifier: outChainIdentifier,
-        denom: outCurrency.coinMinimalDenom,
+        denom: outCurrency.coinDenom,
       };
     }
-  }, [
-    outChainIdentifier,
-    outCurrency.coinMinimalDenom,
-    outCurrency.coinDenom,
-    logEvent,
-    entryPoint,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [outChainIdentifier, outCurrency.coinDenom]);
 
   // MAX button clicked
   useEffect(() => {
     const currentFraction = ibcSwapConfigs.amountConfig.fraction;
     if (prevFractionRef.current !== currentFraction && currentFraction === 1) {
-      logEvent("swap_max_btn_clicked", {
-        quote_id: quoteIdRef.current,
-      });
+      logEvent("swap_max_btn_clicked");
     }
     prevFractionRef.current = currentFraction;
   }, [ibcSwapConfigs.amountConfig.fraction, analyticsAmplitudeStore, logEvent]);
@@ -227,36 +220,32 @@ export const useSwapAnalytics = ({
       });
       prevSlippageRef.current = current;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     uiConfigStore.ibcSwapConfig.slippageNum,
     uiConfigStore.ibcSwapConfig.slippage,
     uiConfigStore.ibcSwapConfig.slippageIsCustom,
-    logEvent,
   ]);
 
   // Quote requested
   const queryIBCSwapForLog = ibcSwapConfigs.amountConfig.getQueryIBCSwap();
   const queryRouteForLog = queryIBCSwapForLog?.getQueryRoute();
 
-  useEffect(() => {
-    const amount = ibcSwapConfigs.amountConfig.amount[0];
+  const amount = ibcSwapConfigs.amountConfig.amount[0];
+  const inAmountRaw = amount.toCoin().amount.toString();
+  const inAmountUsd = priceStore
+    .calculatePrice(amount, "usd")
+    ?.toDec()
+    .toString();
 
+  useEffect(() => {
     if (!queryRouteForLog || !amount) {
       prevFetchingRef.current = false;
       return;
     }
 
     if (!prevFetchingRef.current && queryRouteForLog.isFetching) {
-      pendingQuoteIdRef.current = generateQuoteId();
-
-      const inAmountRaw = amount.toCoin().amount.toString();
-      const inAmountUsd = priceStore
-        .calculatePrice(amount, "usd")
-        ?.toDec()
-        .toString();
-
       logEvent("swap_quote_requested", {
-        quote_id: pendingQuoteIdRef.current,
         in_chain_identifier: inChainIdentifier,
         in_coin_denom: inCurrency.coinDenom,
         out_chain_identifier: outChainIdentifier,
@@ -268,38 +257,61 @@ export const useSwapAnalytics = ({
     }
     prevFetchingRef.current = queryRouteForLog.isFetching;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    queryRouteForLog?.isFetching,
-    inCurrency,
-    outCurrency,
-    swapFeeBps,
-    ibcSwapConfigs.amountConfig.amount,
-    priceStore.calculatePrice,
-    logEvent,
-    inChainIdentifier,
-    outChainIdentifier,
-  ]);
+  }, [queryRouteForLog?.isFetching]);
 
   // Quote received
   useEffect(() => {
     if (!queryRouteForLog?.response) return;
 
-    const currentKey = queryRouteForLog.response.data.amount_out;
+    const currentKey = JSON.stringify(queryRouteForLog.response.data, null, 2);
     if (prevRouteKeyRef.current === currentKey) return;
 
-    const outAmountRaw = queryRouteForLog.response.data.amount_out;
-    const outCoinPretty = new CoinPretty(outCurrency, outAmountRaw.toString());
-    const outUsd = (() => {
-      const p = priceStore.calculatePrice(outCoinPretty, "usd");
+    const sourceCoinMinimalDenom =
+      queryRouteForLog.response.data.source_asset_denom;
+    const sourceChainIdentifier = ChainIdHelper.parse(
+      queryRouteForLog.response.data.source_asset_chain_id
+    ).identifier;
+    const sourceCurrency = chainStore
+      .getChain(sourceChainIdentifier)
+      .forceFindCurrency(sourceCoinMinimalDenom);
+    const sourceAmountRaw = queryRouteForLog.response.data.amount_in;
+    const sourceAmountUsd = priceStore
+      .calculatePrice(
+        new CoinPretty(sourceCurrency, sourceAmountRaw.toString()),
+        "usd"
+      )
+      ?.toDec()
+      .toString();
+
+    const destCoinMinimalDenom =
+      queryRouteForLog.response.data.dest_asset_denom;
+    const destChainIdentifier =
+      queryRouteForLog.response.data.dest_asset_chain_id;
+    const destCurrency = chainStore
+      .getChain(destChainIdentifier)
+      .forceFindCurrency(destCoinMinimalDenom);
+    const destAmountRaw = queryRouteForLog.response.data.amount_out;
+    const destCoinPretty = new CoinPretty(
+      destCurrency,
+      destAmountRaw.toString()
+    );
+    const destAmountUsd = (() => {
+      const p = priceStore.calculatePrice(destCoinPretty, "usd");
       return p ? p.toDec().toString() : undefined;
     })();
 
-    const pendingQuoteId = pendingQuoteIdRef.current ?? generateQuoteId();
+    const quoteId = generateQuoteId();
 
     logEvent("swap_quote_received", {
-      quote_id: quoteIdRef.current,
-      out_amount_est_raw: outAmountRaw,
-      out_amount_est_usd: outUsd,
+      quote_id: quoteId,
+      in_chain_identifier: sourceChainIdentifier,
+      in_coin_denom: sourceCurrency.coinDenom,
+      in_amount_raw: sourceAmountRaw,
+      in_amount_usd: sourceAmountUsd,
+      out_chain_identifier: destChainIdentifier,
+      out_coin_denom: destCurrency.coinDenom,
+      out_amount_est_raw: destAmountRaw,
+      out_amount_est_usd: destAmountUsd,
       provider: "skip",
       does_swap: queryRouteForLog.response.data.does_swap,
       txs_required: queryRouteForLog.response.data.txs_required,
@@ -314,32 +326,28 @@ export const useSwapAnalytics = ({
         .map((v: any) => v.name ?? v.dex)
         .filter(Boolean),
     });
-    quoteIdRef.current = pendingQuoteId;
+    quoteIdRef.current = quoteId;
     prevRouteKeyRef.current = currentKey;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    queryRouteForLog?.response,
-    outCurrency,
-    priceStore.calculatePrice,
-    logEvent,
-  ]);
+  }, [queryRouteForLog?.response]);
 
   // Quote failed
   useEffect(() => {
     if (!queryRouteForLog?.error) return;
 
-    const pendingQuoteId = pendingQuoteIdRef.current ?? generateQuoteId();
-
-    if (prevQuoteErrorIdRef.current === pendingQuoteId) return;
-
     logEvent("swap_quote_failed", {
-      quote_id: pendingQuoteId,
+      in_chain_identifier: inChainIdentifier,
+      in_coin_denom: inCurrency.coinDenom,
+      out_chain_identifier: outChainIdentifier,
+      out_coin_denom: outCurrency.coinDenom,
+      in_amount_raw: inAmountRaw,
+      in_amount_usd: inAmountUsd,
       provider: "skip",
       error_message:
         queryRouteForLog.error.message ?? queryRouteForLog.error.toString(),
     });
-    prevQuoteErrorIdRef.current = pendingQuoteId;
-  }, [queryRouteForLog?.error, logEvent, queryRouteForLog]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryRouteForLog?.error]);
 
   const logSwapSignOpened = useCallback(() => {
     logEvent("swap_sign_opened", {
