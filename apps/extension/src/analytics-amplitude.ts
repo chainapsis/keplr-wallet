@@ -21,6 +21,7 @@ import { KVStore } from "@keplr-wallet/common";
 import { Hash } from "@keplr-wallet/crypto";
 import { ViewToken } from "./pages/main";
 import { ChainInfo, Currency } from "@keplr-wallet/types";
+import { PlainObject } from "@keplr-wallet/background";
 
 // https://developer.chrome.com/docs/extensions/mv3/tut_analytics/
 export class AmplitudeAnalyticsClient implements AnalyticsClientV2 {
@@ -67,6 +68,26 @@ export class AmplitudeAnalyticsClient implements AnalyticsClientV2 {
               )
             ).toString("hex");
             amplitude.setUserId(hashedAddress);
+
+            let currentKeyRingType: string = "none";
+
+            currentKeyRingType = this.keyringStore.selectedKeyInfo.insensitive[
+              "keyRingType"
+            ] as string;
+
+            if (currentKeyRingType === "private-key") {
+              const meta = this.keyringStore.selectedKeyInfo.insensitive[
+                "keyRingMeta"
+              ] as PlainObject;
+              if (meta["web3Auth"] && (meta["web3Auth"] as any)["type"]) {
+                currentKeyRingType =
+                  "web3_auth_" + (meta["web3Auth"] as any)["type"];
+              }
+            }
+
+            this.setUserProperties({
+              current_keyring_type: currentKeyRingType,
+            });
           }
         }
       });
