@@ -379,7 +379,7 @@ export const useSwapAnalytics = ({
   }, []);
 
   return {
-    quoteId: quoteIdRef.current,
+    quoteIdRef,
     logSwapSignOpened,
     logEvent,
   };
