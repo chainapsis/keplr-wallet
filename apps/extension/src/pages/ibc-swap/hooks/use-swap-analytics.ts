@@ -57,6 +57,7 @@ export const useSwapAnalytics = ({
   const [searchParams] = useSearchParams();
   const { analyticsAmplitudeStore, uiConfigStore, priceStore } = useStore();
 
+  const pendingQuoteIdRef = useRef("");
   const quoteIdRef = useRef("");
 
   const prevInRef = useRef({
@@ -246,7 +247,7 @@ export const useSwapAnalytics = ({
     }
 
     if (!prevFetchingRef.current && queryRouteForLog.isFetching) {
-      quoteIdRef.current = generateQuoteId();
+      pendingQuoteIdRef.current = generateQuoteId();
 
       const inAmountRaw = amount.toCoin().amount.toString();
       const inAmountUsd = priceStore
@@ -255,7 +256,7 @@ export const useSwapAnalytics = ({
         .toString();
 
       logEvent("swap_quote_requested", {
-        quote_id: quoteIdRef.current,
+        quote_id: pendingQuoteIdRef.current,
         in_chain_identifier: inChainIdentifier,
         in_coin_denom: inCurrency.coinDenom,
         out_chain_identifier: outChainIdentifier,
@@ -266,8 +267,8 @@ export const useSwapAnalytics = ({
       });
     }
     prevFetchingRef.current = queryRouteForLog.isFetching;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    queryRouteForLog,
     queryRouteForLog?.isFetching,
     inCurrency,
     outCurrency,
@@ -293,6 +294,8 @@ export const useSwapAnalytics = ({
       return p ? p.toDec().toString() : undefined;
     })();
 
+    const pendingQuoteId = pendingQuoteIdRef.current ?? generateQuoteId();
+
     logEvent("swap_quote_received", {
       quote_id: quoteIdRef.current,
       out_amount_est_raw: outAmountRaw,
@@ -311,7 +314,9 @@ export const useSwapAnalytics = ({
         .map((v: any) => v.name ?? v.dex)
         .filter(Boolean),
     });
+    quoteIdRef.current = pendingQuoteId;
     prevRouteKeyRef.current = currentKey;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     queryRouteForLog?.response,
     outCurrency,
@@ -321,17 +326,19 @@ export const useSwapAnalytics = ({
 
   // Quote failed
   useEffect(() => {
-    if (!queryRouteForLog || !queryRouteForLog.error) return;
+    if (!queryRouteForLog?.error) return;
 
-    if (prevQuoteErrorIdRef.current === quoteIdRef.current) return;
+    const pendingQuoteId = pendingQuoteIdRef.current ?? generateQuoteId();
+
+    if (prevQuoteErrorIdRef.current === pendingQuoteId) return;
 
     logEvent("swap_quote_failed", {
-      quote_id: quoteIdRef.current,
+      quote_id: pendingQuoteId,
       provider: "skip",
       error_message:
         queryRouteForLog.error.message ?? queryRouteForLog.error.toString(),
     });
-    prevQuoteErrorIdRef.current = quoteIdRef.current;
+    prevQuoteErrorIdRef.current = pendingQuoteId;
   }, [queryRouteForLog?.error, logEvent, queryRouteForLog]);
 
   const logSwapSignOpened = useCallback(() => {
