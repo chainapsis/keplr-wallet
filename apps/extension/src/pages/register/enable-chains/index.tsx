@@ -50,6 +50,7 @@ import { useSearch } from "../../../hooks/use-search";
 import { getChainSearchResultClickAnalyticsProperties } from "../../../analytics-amplitude";
 import { AnalyticsAmplitudeStore } from "@keplr-wallet/analytics";
 import debounce from "lodash.debounce";
+import { useSearchParams } from "react-router-dom";
 
 const logChainSearchClick = (
   analyticsStore: AnalyticsAmplitudeStore,
@@ -130,6 +131,8 @@ export const EnableChainsScene: FunctionComponent<{
     const buttonContainerRef = useRef<HTMLDivElement>(null);
     const pageMountedAtRef = useRef(performance.now());
     useScrollDownWhenCantSeeSaveButton(buttonContainerRef);
+
+    const [searchParams] = useSearchParams();
 
     const nativeChainIdentifierSet = useMemo(
       () =>
@@ -2511,6 +2514,11 @@ export const EnableChainsScene: FunctionComponent<{
                 });
 
                 try {
+                  const entryPoint =
+                    searchParams.get("route") === "enable-chains"
+                      ? "enable-chains"
+                      : "new-account";
+
                   analyticsAmplitudeStore.logEvent(
                     "click_save_enable_chains_btn_register",
                     {
@@ -2523,6 +2531,7 @@ export const EnableChainsScene: FunctionComponent<{
                       starknetEnabledCount: ecosystemCounts.starknet,
                       bitcoinEnabledCount: ecosystemCounts.bitcoin,
                       allNativeChainsEnabled,
+                      entryPoint,
                     }
                   );
 
