@@ -83,6 +83,8 @@ export const useSwapAnalytics = ({
     Record<string, ReturnType<typeof debounce>>
   >({});
 
+  const requestStartedAtRef = useRef<number | undefined>(undefined);
+
   const logEvent = useCallback(
     (eventName: string, props: Record<string, any> = {}) => {
       const id = props["quote_id"];
@@ -113,8 +115,8 @@ export const useSwapAnalytics = ({
       if (id) {
         aggregatedPropsRef.current[id] = {
           ...aggregatedPropsRef.current[id],
-          ...props,
           ...durationProps,
+          ...props,
         };
         mergedProps = aggregatedPropsRef.current[id];
       }
@@ -245,6 +247,7 @@ export const useSwapAnalytics = ({
     }
 
     if (!prevFetchingRef.current && queryRouteForLog.isFetching) {
+      requestStartedAtRef.current = performance.now();
       logEvent("swap_quote_requested", {
         in_chain_identifier: inChainIdentifier,
         in_coin_denom: inCurrency.coinDenom,
@@ -299,8 +302,14 @@ export const useSwapAnalytics = ({
 
     const quoteId = generateQuoteId();
 
+    const durationMs = requestStartedAtRef.current
+      ? performance.now() - requestStartedAtRef.current
+      : undefined;
+    requestStartedAtRef.current = undefined;
+
     logEvent("swap_quote_received", {
       quote_id: quoteId,
+      duration_ms: durationMs,
       in_chain_identifier: sourceChainIdentifier,
       in_coin_denom: sourceCurrency.coinDenom,
       in_amount_raw: amount_in,
@@ -332,7 +341,13 @@ export const useSwapAnalytics = ({
   useEffect(() => {
     if (!queryRouteForLog?.error) return;
 
+    const durationMs = requestStartedAtRef.current
+      ? performance.now() - requestStartedAtRef.current
+      : undefined;
+    requestStartedAtRef.current = undefined;
+
     logEvent("swap_quote_failed", {
+      duration_ms: durationMs,
       in_chain_identifier: inChainIdentifier,
       in_coin_denom: inCurrency.coinDenom,
       out_chain_identifier: outChainIdentifier,
@@ -343,6 +358,7 @@ export const useSwapAnalytics = ({
       error_message:
         queryRouteForLog.error.message ?? queryRouteForLog.error.toString(),
     });
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queryRouteForLog?.error]);
 
