@@ -263,38 +263,35 @@ export const useSwapAnalytics = ({
   useEffect(() => {
     if (!queryRouteForLog?.response) return;
 
-    const currentKey = JSON.stringify(queryRouteForLog.response.data, null, 2);
+    const {
+      source_asset_denom,
+      source_asset_chain_id,
+      dest_asset_denom,
+      dest_asset_chain_id,
+      amount_in,
+      amount_out,
+    } = queryRouteForLog.response.data;
+    const currentKey = `${source_asset_denom}-${source_asset_chain_id}-${dest_asset_denom}-${dest_asset_chain_id}-${amount_in}-${amount_out}`;
     if (prevRouteKeyRef.current === currentKey) return;
 
-    const sourceCoinMinimalDenom =
-      queryRouteForLog.response.data.source_asset_denom;
     const sourceChainIdentifier = ChainIdHelper.parse(
-      queryRouteForLog.response.data.source_asset_chain_id
+      source_asset_chain_id
     ).identifier;
     const sourceCurrency = chainStore
       .getChain(sourceChainIdentifier)
-      .forceFindCurrency(sourceCoinMinimalDenom);
-    const sourceAmountRaw = queryRouteForLog.response.data.amount_in;
-    const sourceAmountUsd = priceStore
-      .calculatePrice(
-        new CoinPretty(sourceCurrency, sourceAmountRaw.toString()),
-        "usd"
-      )
-      ?.toDec()
-      .toString();
+      .forceFindCurrency(source_asset_denom);
+    const sourceCoinPretty = new CoinPretty(sourceCurrency, amount_in);
+    const sourceAmountUsd = (() => {
+      const p = priceStore.calculatePrice(sourceCoinPretty, "usd");
+      return p ? p.toDec().toString() : undefined;
+    })();
 
-    const destCoinMinimalDenom =
-      queryRouteForLog.response.data.dest_asset_denom;
     const destChainIdentifier =
-      queryRouteForLog.response.data.dest_asset_chain_id;
+      ChainIdHelper.parse(dest_asset_chain_id).identifier;
     const destCurrency = chainStore
-      .getChain(destChainIdentifier)
-      .forceFindCurrency(destCoinMinimalDenom);
-    const destAmountRaw = queryRouteForLog.response.data.amount_out;
-    const destCoinPretty = new CoinPretty(
-      destCurrency,
-      destAmountRaw.toString()
-    );
+      .getChain(dest_asset_chain_id)
+      .forceFindCurrency(dest_asset_denom);
+    const destCoinPretty = new CoinPretty(destCurrency, amount_out);
     const destAmountUsd = (() => {
       const p = priceStore.calculatePrice(destCoinPretty, "usd");
       return p ? p.toDec().toString() : undefined;
@@ -306,11 +303,11 @@ export const useSwapAnalytics = ({
       quote_id: quoteId,
       in_chain_identifier: sourceChainIdentifier,
       in_coin_denom: sourceCurrency.coinDenom,
-      in_amount_raw: sourceAmountRaw,
+      in_amount_raw: amount_in,
       in_amount_usd: sourceAmountUsd,
       out_chain_identifier: destChainIdentifier,
       out_coin_denom: destCurrency.coinDenom,
-      out_amount_est_raw: destAmountRaw,
+      out_amount_est_raw: amount_out,
       out_amount_est_usd: destAmountUsd,
       provider: "skip",
       does_swap: queryRouteForLog.response.data.does_swap,
