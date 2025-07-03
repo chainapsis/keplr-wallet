@@ -98,6 +98,10 @@ export class ObservableQueryAssetsFromSourceInner extends ObservableQuery<Assets
         if (d) {
           const assets = d.assets
             .filter((asset) => {
+              if (d.assets.length > 1 && asset.trace) {
+                return false;
+              }
+
               return (
                 this.chainStore.hasChain(asset.chain_id) &&
                 this.chainStore.hasChain(asset.origin_chain_id)

@@ -544,6 +544,7 @@ export class ChainsService {
             features: ["eth-address-gen", "eth-key-sign"].concat(
               res.data.features ?? []
             ),
+            isTestnet: res.data.isTestnet,
           };
 
     const fetchedChainIdentifier = ChainIdHelper.parse(
