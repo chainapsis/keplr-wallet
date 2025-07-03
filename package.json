@@ -106,7 +106,8 @@
     "axios": "^0.27.2",
     "libsodium": "file:./etc/noop",
     "libsodium-wrappers": "file:./etc/noop",
-    "react-is": "^18.2.0"
+    "react-is": "^18.2.0",
+    "tiny-secp256k1": "^1.1.7"
   },
   "packageManager": "yarn@3.4.1"
 }
