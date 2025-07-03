@@ -4,7 +4,7 @@ import {
   ObservableQuery,
   QuerySharedContext,
 } from "@keplr-wallet/stores";
-import { RouteResponse } from "./types";
+import { RouteErrorData, RouteResponse } from "./types";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { computed, makeObservable } from "mobx";
 import { CoinPretty, Dec, RatePretty } from "@keplr-wallet/unit";
@@ -263,7 +263,10 @@ const Schema = Joi.object<RouteResponse>({
   estimated_route_duration_seconds: Joi.number(),
 }).unknown(true);
 
-export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
+export class ObservableQueryRouteInner extends ObservableQuery<
+  RouteResponse,
+  RouteErrorData
+> {
   constructor(
     sharedContext: QuerySharedContext,
     protected readonly chainGetter: ChainGetter,
