@@ -1,14 +1,8 @@
----
-title: Introduction
-description: Keplr is a non-custodial blockchain wallets for webpages that allow users to interact with blockchain applications.
-aside: true
----
-
 # Keplr wallet Documentation
 
 ## Introduction
 
-Keplr is a non-custodial blockchain wallets for webpages that allow users to interact with blockchain applications.
+Keplr is a non-custodial blockchain wallet for webpages that allow users to interact with blockchain applications.
 
 ## Why Keplr?
 

@@ -1,6 +1,7 @@
 import { themes as prismThemes } from "prism-react-renderer";
 import type { Config } from "@docusaurus/types";
 import type * as Preset from "@docusaurus/preset-classic";
+import "dotenv/config";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -30,6 +31,10 @@ const config: Config = {
       "@docusaurus/plugin-client-redirects",
       {
         redirects: [
+          {
+            from: "/",
+            to: "/api/intro",
+          },
           {
             from: "/api",
             to: "/api/intro",
@@ -116,6 +121,12 @@ const config: Config = {
     prism: {
       theme: prismThemes.oneLight,
       darkTheme: prismThemes.oneDark,
+    },
+    algolia: {
+      appId: process.env["ALGOLIA_APP_ID"],
+      apiKey: process.env["ALGOLIA_API_KEY"],
+      indexName: "keplr",
+      insights: true, // for analytics
     },
   } satisfies Preset.ThemeConfig,
 };
