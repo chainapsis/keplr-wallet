@@ -794,7 +794,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
   const [isTxLoading, setIsTxLoading] = useState(false);
 
-  const { logSwapSignOpened, logEvent, quoteId } = useSwapAnalytics({
+  const { logSwapSignOpened, logEvent, quoteIdRef } = useSwapAnalytics({
     inChainId: inChainId,
     inCurrency: inCurrency,
     outChainId: outChainId,
@@ -1189,7 +1189,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
                     if (isSwap) {
                       logEvent("swap_tx_submitted", {
-                        quote_id: quoteId,
+                        quote_id: quoteIdRef.current,
                       });
                     }
 
@@ -1316,7 +1316,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                     if (tx.code != null && tx.code !== 0) {
                       if (isSwap) {
                         logEvent("swap_tx_failed", {
-                          quote_id: quoteId,
+                          quote_id: quoteIdRef.current,
                         });
                       }
                       console.log(tx.log ?? tx.raw_log);
@@ -1331,7 +1331,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
                     if (isSwap) {
                       logEvent("swap_tx_success", {
-                        quote_id: quoteId,
+                        quote_id: quoteIdRef.current,
                       });
                     }
 
@@ -1407,7 +1407,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
               if (erc20ApprovalTx) {
                 logEvent("erc20_approve_sign_opened", {
-                  quote_id: quoteId,
+                  quote_id: quoteIdRef.current,
                 });
               }
 
@@ -1421,21 +1421,21 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   onBroadcastFailed: (e) => {
                     if (erc20ApprovalTx && e?.message === "Request rejected") {
                       logEvent("erc20_approve_sign_canceled", {
-                        quote_id: quoteId,
+                        quote_id: quoteIdRef.current,
                       });
                     }
                   },
                   onBroadcasted: (txHash) => {
                     if (erc20ApprovalTx) {
                       logEvent("erc20_approve_tx_submitted", {
-                        quote_id: quoteId,
+                        quote_id: quoteIdRef.current,
                       });
                     }
 
                     if (!erc20ApprovalTx) {
                       if (isSwap) {
                         logEvent("swap_tx_submitted", {
-                          quote_id: quoteId,
+                          quote_id: quoteIdRef.current,
                         });
                       }
                       ethereumAccount.setIsSendingTx(false);
@@ -1533,7 +1533,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
                       if (erc20ApprovalTx) {
                         logEvent("erc20_approve_tx_success", {
-                          quote_id: quoteId,
+                          quote_id: quoteIdRef.current,
                         });
 
                         ethereumAccount.setIsSendingTx(true);
@@ -1577,7 +1577,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                                 onBroadcasted: (txHash) => {
                                   if (isSwap) {
                                     logEvent("swap_tx_submitted", {
-                                      quote_id: quoteId,
+                                      quote_id: quoteIdRef.current,
                                     });
                                   }
 
@@ -1673,7 +1673,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                                   ) {
                                     if (isSwap) {
                                       logEvent("swap_tx_success", {
-                                        quote_id: quoteId,
+                                        quote_id: quoteIdRef.current,
                                       });
                                     }
 
@@ -1687,7 +1687,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                                   } else {
                                     if (isSwap) {
                                       logEvent("swap_tx_failed", {
-                                        quote_id: quoteId,
+                                        quote_id: quoteIdRef.current,
                                       });
                                     }
 
@@ -1706,7 +1706,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                           .catch((e) => {
                             console.error(e);
                             logEvent("swap_tx_client_error", {
-                              quote_id: quoteId,
+                              quote_id: quoteIdRef.current,
                               error_message: e?.message,
                             });
 
@@ -1718,7 +1718,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                     } else {
                       if (erc20ApprovalTx) {
                         logEvent("erc20_approve_tx_failed", {
-                          quote_id: quoteId,
+                          quote_id: quoteIdRef.current,
                         });
                       }
 
@@ -1736,7 +1736,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             if (e?.message === "Request rejected") {
               if (isSwap) {
                 logEvent("swap_sign_canceled", {
-                  quote_id: quoteId,
+                  quote_id: quoteIdRef.current,
                 });
               }
 
@@ -1745,7 +1745,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
             if (isSwap) {
               logEvent("swap_tx_failed", {
-                quote_id: quoteId,
+                quote_id: quoteIdRef.current,
                 error_message: e?.message,
               });
             }
