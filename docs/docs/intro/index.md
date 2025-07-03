@@ -19,7 +19,7 @@ Keplr simplifies blockchain integration for developers by offering seamless comp
 Keplr supports Cosmos SDK chains, EVM networks, Bitcoin, and Starknet, with more ecosystems on the way. It’s built to be a future-proof solution for projects looking to reach users across multiple blockchain environments.
 
 #### Cross-Platform UX
-Keplr is available as both a browser extension and a mobile app, providing users with a secure and seamless experience when accessing their wallets and dApps, whether at a desk or on the go.
+Keplr is available as both a [browser extension and a mobile app](https://www.keplr.app/get), providing users with a secure and seamless experience when accessing their wallets and dApps, whether at a desk or on the go.
 
 
 ## Sections
