@@ -808,6 +808,7 @@
   "page.earn.overview.title": "收益总览",
   "page.earn.overview.claim-section.claimable-reward": "可领取收益",
   "page.earn.overview.claim-section.total-claimed": "已领取总额",
+  "page.earn.overview.claim-section.total-claimed-tooltip": "显示自2025年6月19日起领取的收益",
   "page.earn.overview.claim-section.claim-button": "领取",
   "page.earn.overview.tutorial-modal.manage-earn.title": "管理你的赚取余额和收益",
   "page.earn.overview.tutorial-modal.manage-earn.paragraph": "在首页的{tokenName}资产卡片下查看余额信息。",
