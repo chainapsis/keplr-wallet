@@ -7,6 +7,7 @@ export interface AssetsFromSourceResponse {
             chain_id: string;
             origin_denom: string;
             origin_chain_id: string;
+            trace?: string;
           }[];
         }
       | undefined;

@@ -98,13 +98,7 @@ export class ObservableQueryAssetsFromSourceInner extends ObservableQuery<Assets
         if (d) {
           const assets = d.assets
             .filter((asset) => {
-              if (
-                this.chainId === "osmosis-1" &&
-                this.denom ===
-                  "ibc/0954E1C28EB7AF5B72D24F3BC2B47BBB2FDF91BDDFD57B74B99E133AED40972A" &&
-                asset.denom ===
-                  "ibc/BC9434ADA64FE79B7153C65ED01080F050C0FAEB24D8C4C35A27BA52E342A7E3"
-              ) {
+              if (d.assets.length > 1 && asset.trace) {
                 return false;
               }
 
