@@ -542,54 +542,73 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
           return false;
         }
 
-        const originOutChainId = currency.originChainId;
-        const originOutCurrency = currency.originCurrency;
-
-        const channels = this.queryIBCPacketForwardingTransfer.getIBCChannels(
-          originOutChainId,
-          originOutCurrency.coinMinimalDenom
-        );
-
-        // 다른 후보들은 사실 ibc pfm transfer가 가능한 채널 정보와 로직이 유사하다.
-        // 차이점은 ibc pfm transfer의 경우는 시작지점이 tx를 보내는 체인이지만
-        // ibc swap의 경우는 이렇게 처리할 수 없다. (일단 기본적으로 무조건 osmosis를 거치기 때문에)
-        // ibc pfm transfer의 경우 시작 지점을 보내는 체인의 경우 ibc module의 memo만 지원하면
-        // 두번째 체인부터 pfm을 지원하면 되기 때문에 보내는 체인의 경우는 이러한 확인을 하지 않는다.
-        // 하지만 ibc swap의 경우는 ibc pfm transfer 상의 보내는 체인은 시작 지점이 될 수 없기 때문에 pfm에 대한 확인을 꼭 해야한다.
-        if (
-          !this.chainStore.getChain(originOutChainId).hasFeature("ibc-go") ||
-          !this.queryChains.isSupportsMemo(originOutChainId) ||
-          !this.queryChains.isPFMEnabled(originOutChainId) ||
-          !this.chainStore.getChain(originOutChainId).hasFeature("ibc-pfm")
-        ) {
-          // 만약 originOutChainId가 ibc-pfm을 지원하지 않는다면
-          // 여기서 더 routing할 방법은 없다.
-          // osmosis의 경우는 ibc transfer가 아니라 그대로 osmosis에서 남기 때문에
-          // 따로 추가해주고 반환한다.
-          const findSwapVenue = channels.find(
-            (channel) =>
-              channel.channels.length === 1 &&
-              this.swapVenues.some(
-                (swapVenue) =>
-                  this.chainStore.getChain(swapVenue.chainId)
-                    .chainIdentifier ===
-                  this.chainStore.getChain(
-                    channel.channels[0].counterpartyChainId
-                  ).chainIdentifier
-              )
+        if (currency.originCurrency.coinMinimalDenom.startsWith("erc20:")) {
+          const bridges = this.queryIBCPacketForwardingTransfer.getBridges(
+            currency.originChainId,
+            currency.originCurrency.coinMinimalDenom.toLowerCase() ===
+              "erc20:0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+              ? "ethereum-native"
+              : currency.originCurrency.coinMinimalDenom
           );
-          if (findSwapVenue) {
-            return true;
+          for (const bridge of bridges) {
+            if (
+              ChainIdHelper.parse(bridge.destinationChainId).identifier ===
+                ChainIdHelper.parse(chainId).identifier &&
+              bridge.denom === currency.coinMinimalDenom
+            ) {
+              return true;
+            }
           }
-        }
+        } else {
+          const originOutChainId = currency.originChainId;
+          const originOutCurrency = currency.originCurrency;
 
-        for (const channel of channels) {
+          const channels = this.queryIBCPacketForwardingTransfer.getIBCChannels(
+            originOutChainId,
+            originOutCurrency.coinMinimalDenom
+          );
+
+          // 다른 후보들은 사실 ibc pfm transfer가 가능한 채널 정보와 로직이 유사하다.
+          // 차이점은 ibc pfm transfer의 경우는 시작지점이 tx를 보내는 체인이지만
+          // ibc swap의 경우는 이렇게 처리할 수 없다. (일단 기본적으로 무조건 osmosis를 거치기 때문에)
+          // ibc pfm transfer의 경우 시작 지점을 보내는 체인의 경우 ibc module의 memo만 지원하면
+          // 두번째 체인부터 pfm을 지원하면 되기 때문에 보내는 체인의 경우는 이러한 확인을 하지 않는다.
+          // 하지만 ibc swap의 경우는 ibc pfm transfer 상의 보내는 체인은 시작 지점이 될 수 없기 때문에 pfm에 대한 확인을 꼭 해야한다.
           if (
-            channel.destinationChainId ===
-              this.chainStore.getChain(chainId).chainId &&
-            channel.denom === currency.coinMinimalDenom
+            !this.chainStore.getChain(originOutChainId).hasFeature("ibc-go") ||
+            !this.queryChains.isSupportsMemo(originOutChainId) ||
+            !this.queryChains.isPFMEnabled(originOutChainId) ||
+            !this.chainStore.getChain(originOutChainId).hasFeature("ibc-pfm")
           ) {
-            return true;
+            // 만약 originOutChainId가 ibc-pfm을 지원하지 않는다면
+            // 여기서 더 routing할 방법은 없다.
+            // osmosis의 경우는 ibc transfer가 아니라 그대로 osmosis에서 남기 때문에
+            // 따로 추가해주고 반환한다.
+            const findSwapVenue = channels.find(
+              (channel) =>
+                channel.channels.length === 1 &&
+                this.swapVenues.some(
+                  (swapVenue) =>
+                    this.chainStore.getChain(swapVenue.chainId)
+                      .chainIdentifier ===
+                    this.chainStore.getChain(
+                      channel.channels[0].counterpartyChainId
+                    ).chainIdentifier
+                )
+            );
+            if (findSwapVenue) {
+              return true;
+            }
+          }
+
+          for (const channel of channels) {
+            if (
+              channel.destinationChainId ===
+                this.chainStore.getChain(chainId).chainId &&
+              channel.denom === currency.coinMinimalDenom
+            ) {
+              return true;
+            }
           }
         }
       } else {
