@@ -543,20 +543,25 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
         }
 
         if (currency.originCurrency.coinMinimalDenom.startsWith("erc20:")) {
-          const bridges = this.queryIBCPacketForwardingTransfer.getBridges(
-            currency.originChainId,
-            currency.originCurrency.coinMinimalDenom.toLowerCase() ===
-              "erc20:0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
-              ? "ethereum-native"
-              : currency.originCurrency.coinMinimalDenom
-          );
-          for (const bridge of bridges) {
-            if (
-              ChainIdHelper.parse(bridge.destinationChainId).identifier ===
-                ChainIdHelper.parse(chainId).identifier &&
-              bridge.denom === currency.coinMinimalDenom
-            ) {
-              return true;
+          const nativeCurrency = this.chainStore
+            .getChain(currency.originChainId)
+            .currencies.find((cur) => cur.coinMinimalDenom.endsWith("-native"));
+          if (nativeCurrency) {
+            const bridges = this.queryIBCPacketForwardingTransfer.getBridges(
+              currency.originChainId,
+              currency.originCurrency.coinMinimalDenom.toLowerCase() ===
+                "erc20:0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+                ? nativeCurrency.coinMinimalDenom
+                : currency.originCurrency.coinMinimalDenom
+            );
+            for (const bridge of bridges) {
+              if (
+                ChainIdHelper.parse(bridge.destinationChainId).identifier ===
+                  ChainIdHelper.parse(chainId).identifier &&
+                bridge.denom === currency.coinMinimalDenom
+              ) {
+                return true;
+              }
             }
           }
         } else {
