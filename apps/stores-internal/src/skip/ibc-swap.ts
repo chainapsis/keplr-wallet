@@ -548,13 +548,12 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
             .currencies.find((cur) => cur.coinMinimalDenom.endsWith("-native"));
           if (nativeCurrency) {
             const wrappedNativeAddress =
-              WRAPPED_NATIVE_ADDRESSES[
-                ChainIdHelper.parse(currency.originChainId).identifier
-              ];
+              WRAPPED_NATIVE_ADDRESSES[currency.originChainId];
             const bridges = this.queryIBCPacketForwardingTransfer.getBridges(
               currency.originChainId,
-              currency.originCurrency.coinMinimalDenom.toLowerCase() ===
-                `erc20:${wrappedNativeAddress}`.toLowerCase()
+              wrappedNativeAddress &&
+                currency.originCurrency.coinMinimalDenom.toLowerCase() ===
+                  `erc20:${wrappedNativeAddress}`.toLowerCase()
                 ? nativeCurrency.coinMinimalDenom
                 : currency.originCurrency.coinMinimalDenom
             );
