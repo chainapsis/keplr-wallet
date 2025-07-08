@@ -281,7 +281,11 @@ export const useSwapAnalytics = ({
       source_asset_chain_id
     ).identifier;
     const sourceCurrency = chainStore
-      .getChain(sourceChainIdentifier)
+      .getChain(
+        Number.isNaN(parseInt(sourceChainIdentifier))
+          ? sourceChainIdentifier
+          : `eip155:${sourceChainIdentifier}`
+      )
       .forceFindCurrency(source_asset_denom);
     const sourceCoinPretty = new CoinPretty(sourceCurrency, amount_in);
     const sourceAmountUsd = (() => {
@@ -292,7 +296,11 @@ export const useSwapAnalytics = ({
     const destChainIdentifier =
       ChainIdHelper.parse(dest_asset_chain_id).identifier;
     const destCurrency = chainStore
-      .getChain(dest_asset_chain_id)
+      .getChain(
+        Number.isNaN(parseInt(dest_asset_chain_id))
+          ? dest_asset_chain_id
+          : `eip155:${dest_asset_chain_id}`
+      )
       .forceFindCurrency(dest_asset_denom);
     const destCoinPretty = new CoinPretty(destCurrency, amount_out);
     const destAmountUsd = (() => {
