@@ -549,21 +549,23 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
           if (nativeCurrency) {
             const wrappedNativeAddress =
               WRAPPED_NATIVE_ADDRESSES[currency.originChainId];
-            const bridges = this.queryIBCPacketForwardingTransfer.getBridges(
-              currency.originChainId,
+            if (
               wrappedNativeAddress &&
-                currency.originCurrency.coinMinimalDenom.toLowerCase() ===
-                  `erc20:${wrappedNativeAddress}`.toLowerCase()
-                ? nativeCurrency.coinMinimalDenom
-                : currency.originCurrency.coinMinimalDenom
-            );
-            for (const bridge of bridges) {
-              if (
-                ChainIdHelper.parse(bridge.destinationChainId).identifier ===
-                  ChainIdHelper.parse(chainId).identifier &&
-                bridge.denom === currency.coinMinimalDenom
-              ) {
-                return true;
+              currency.originCurrency.coinMinimalDenom.toLowerCase() ===
+                `erc20:${wrappedNativeAddress}`.toLowerCase()
+            ) {
+              const bridges = this.queryIBCPacketForwardingTransfer.getBridges(
+                currency.originChainId,
+                nativeCurrency.coinMinimalDenom
+              );
+              for (const bridge of bridges) {
+                if (
+                  ChainIdHelper.parse(bridge.destinationChainId).identifier ===
+                    ChainIdHelper.parse(chainId).identifier &&
+                  bridge.denom === currency.coinMinimalDenom
+                ) {
+                  return true;
+                }
               }
             }
           }
@@ -772,7 +774,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
   );
 }
 
-const WRAPPED_NATIVE_ADDRESSES: Record<string, string> = {
+const WRAPPED_NATIVE_ADDRESSES: Record<string, string | undefined> = {
   "eip155:1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
   "eip155:8453": "0x4200000000000000000000000000000000000006",
   "eip155:10": "0x4200000000000000000000000000000000000006",
