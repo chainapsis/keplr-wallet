@@ -76,7 +76,29 @@ export class TokenScanService {
     this.chainsService.addChainSuggestedHandler((chainInfo) => {
       // 여기서 await을 하면 suggest chain이 계정이 늘어날수록 늦어진다.
       // 절대로 await을 하지않기...
-      this.scanWithAllVaults(chainInfo.chainId);
+      this.scanWithAllVaults(chainInfo.chainId).then(() => {
+        // suggest chain 이후에 한번에 한해서 자동으로 enable을 해준다.
+        // scanWithAllVaults이 끝났으면 this.vaultToMap이 업데이트가 완료되었을 것이다.
+        for (const keyRing of this.keyRingService.getKeyInfos()) {
+          const vaultId = keyRing.id;
+          const tokenScans = this.getTokenScans(vaultId);
+          for (const tokenScan of tokenScans) {
+            if (
+              tokenScan.chainId === chainInfo.chainId &&
+              tokenScan.infos.length === 1
+            ) {
+              for (const modularChainInfo of this.chainsService.getModularChainInfoWithLinkedChainKey(
+                chainInfo.chainId
+              )) {
+                const chainId = modularChainInfo.chainId;
+                if (!this.chainsUIService.isEnabled(vaultId, chainId)) {
+                  this.chainsUIService.enableChain(vaultId, chainId);
+                }
+              }
+            }
+          }
+        }
+      });
     });
     this.chainsUIService.addChainUIEnabledChangedHandler(
       (vaultId, chainIdentifiers) => {

@@ -1366,11 +1366,16 @@ export class KeyRingService {
       this.finalizeKeyCoinType(vault.id, chainId, coinType);
     }
 
-    if (
-      !this.needKeyCoinTypeFinalize(vault.id, chainId) &&
-      !this.chainsUIService.isEnabled(vault.id, chainId)
-    ) {
-      this.chainsUIService.enableChain(vault.id, chainId);
+    for (const modularChainInfo of this.chainsService.getModularChainInfoWithLinkedChainKey(
+      chainId
+    )) {
+      const chainId = modularChainInfo.chainId;
+      if (
+        !this.needKeyCoinTypeFinalize(vault.id, chainId) &&
+        !this.chainsUIService.isEnabled(vault.id, chainId)
+      ) {
+        this.chainsUIService.enableChain(vault.id, chainId);
+      }
     }
 
     return signature;
@@ -1431,11 +1436,16 @@ export class KeyRingService {
       this.finalizeKeyCoinType(vault.id, chainId, coinType);
     }
 
-    if (
-      !this.needKeyCoinTypeFinalize(vault.id, chainId) &&
-      !this.chainsUIService.isEnabled(vault.id, chainId)
-    ) {
-      this.chainsUIService.enableChain(vault.id, chainId);
+    for (const modularChainInfo of this.chainsService.getModularChainInfoWithLinkedChainKey(
+      chainId
+    )) {
+      const chainId = modularChainInfo.chainId;
+      if (
+        !this.needKeyCoinTypeFinalize(vault.id, chainId) &&
+        !this.chainsUIService.isEnabled(vault.id, chainId)
+      ) {
+        this.chainsUIService.enableChain(vault.id, chainId);
+      }
     }
 
     return signedPsbt;
