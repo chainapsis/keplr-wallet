@@ -1292,9 +1292,11 @@ export class ChainsService {
       }
 
       if (linkedChainKey) {
+        const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
         for (const modularChainInfo of this.modularChainInfos) {
           if (
-            modularChainInfo.chainId !== chainId &&
+            ChainIdHelper.parse(modularChainInfo.chainId).identifier !==
+              chainIdentifier &&
             "linkedChainKey" in modularChainInfo &&
             modularChainInfo.linkedChainKey === linkedChainKey
           ) {
