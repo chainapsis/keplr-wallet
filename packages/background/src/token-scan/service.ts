@@ -1,7 +1,7 @@
 import { ChainsService } from "../chains";
 import { KeyRingCosmosService } from "../keyring-cosmos";
 import { KeyRingService } from "../keyring";
-import { ChainsUIService } from "../chains-ui";
+import { ChainsUIForegroundService, ChainsUIService } from "../chains-ui";
 import { autorun, makeObservable, observable, runInAction, toJS } from "mobx";
 import { AppCurrency, SupportedPaymentType } from "@keplr-wallet/types";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
@@ -12,6 +12,7 @@ import { KVStore } from "@keplr-wallet/common";
 import { KeyRingStarknetService } from "../keyring-starknet";
 import { CairoUint256 } from "starknet";
 import { KeyRingBitcoinService } from "../keyring-bitcoin";
+import { MessageRequester } from "@keplr-wallet/router";
 
 export type TokenScan = {
   chainId: string;
@@ -38,6 +39,7 @@ export class TokenScanService {
 
   constructor(
     protected readonly kvStore: KVStore,
+    protected readonly eventMsgRequester: MessageRequester,
     protected readonly chainsService: ChainsService,
     protected readonly chainsUIService: ChainsUIService,
     protected readonly vaultService: VaultService,
@@ -80,6 +82,7 @@ export class TokenScanService {
         // suggest chain 이후에 한번에 한해서 자동으로 enable을 해준다.
         // scanWithAllVaults이 끝났으면 this.vaultToMap이 업데이트가 완료되었을 것이다.
         for (const keyRing of this.keyRingService.getKeyInfos()) {
+          let enabledChanges = false;
           const vaultId = keyRing.id;
           const tokenScans = this.getTokenScans(vaultId);
           for (const tokenScan of tokenScans) {
@@ -93,9 +96,16 @@ export class TokenScanService {
                 const chainId = modularChainInfo.chainId;
                 if (!this.chainsUIService.isEnabled(vaultId, chainId)) {
                   this.chainsUIService.enableChain(vaultId, chainId);
+                  enabledChanges = true;
                 }
               }
             }
+          }
+          if (enabledChanges) {
+            ChainsUIForegroundService.invokeEnabledChainIdentifiersUpdated(
+              this.eventMsgRequester,
+              vaultId
+            );
           }
         }
       });
