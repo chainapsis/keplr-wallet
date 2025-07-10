@@ -13,7 +13,7 @@ import { NativeChainMarkIcon } from "../../../components/icon";
 import { ColorPalette } from "../../../styles";
 import { ViewToken } from "../../main";
 import { NestedTokenItem } from "./nested-token-item";
-import { IconProps } from "../../../components/icon/types";
+import { ArrowIcon, StackIcon } from "../../main/components/token/grouped";
 
 interface ChainToggleItemProps {
   modularChainInfo: ModularChainInfo;
@@ -130,58 +130,6 @@ export const ChainToggleItem: FunctionComponent<ChainToggleItemProps> = ({
           ))}
         </Styles.ChildrenContainer>
       </VerticalCollapseTransition>
-    </div>
-  );
-};
-
-const ArrowIcon: FunctionComponent<IconProps> = () => {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-    >
-      <path
-        d="M7.05288 5.21786C7.53331 4.60016 8.46689 4.60016 8.94732 5.21786L12.0938 9.26327C12.7068 10.0515 12.1451 11.2 11.1465 11.2L4.85366 11.2C3.85509 11.2 3.29338 10.0515 3.90644 9.26327L7.05288 5.21786Z"
-        fill="#72747B"
-      />
-    </svg>
-  );
-};
-
-const StackIcon: FunctionComponent<IconProps> = () => {
-  return (
-    <div
-      style={{
-        width: "1rem",
-        height: "1rem",
-        position: "absolute",
-        top: "1.6875rem",
-        left: "0.1875rem",
-      }}
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="26"
-        height="13"
-        viewBox="0 0 26 13"
-        fill="none"
-      >
-        <path
-          fillRule="evenodd"
-          clipRule="evenodd"
-          d="M21.2859 8.02551C18.9217 9.6137 16.0699 10.5413 12.9999 10.5413C9.92962 10.5413 7.07773 9.61358 4.71338 8.02521C6.47131 10.7178 9.52586 12.4993 12.9998 12.4993C16.4735 12.4993 19.528 10.7179 21.2859 8.02551Z"
-          fill="#353539"
-        />
-        <path
-          fillRule="evenodd"
-          clipRule="evenodd"
-          d="M26.0001 0.499672C22.9245 4.23865 18.2432 6.62598 13 6.62598C7.757 6.62598 3.07589 4.23886 0.000244141 0.500161C1.91748 5.78461 7.01411 9.56302 13.0001 9.56302C18.9863 9.56302 24.083 5.78437 26.0001 0.499672Z"
-          fill="#424247"
-        />
-      </svg>
     </div>
   );
 };
