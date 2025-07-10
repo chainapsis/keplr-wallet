@@ -296,7 +296,9 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
                   enabled={enabledIdentifierMap.get(identifier) || false}
                   disabled={
                     "cosmos" in ci
-                      ? !chainStore.isInChainInfosInListUI(ci.chainId)
+                      ? chainStore.hasChain(ci.chainId)
+                        ? !chainStore.isInChainInfosInListUI(ci.chainId)
+                        : false
                       : false
                   }
                   isNativeChain={nativeChainIdentifierSet.has(identifier)}
