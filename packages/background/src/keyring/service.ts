@@ -1366,6 +1366,13 @@ export class KeyRingService {
       this.finalizeKeyCoinType(vault.id, chainId, coinType);
     }
 
+    if (
+      !this.needKeyCoinTypeFinalize(vault.id, chainId) &&
+      !this.chainsUIService.isEnabled(vault.id, chainId)
+    ) {
+      this.chainsUIService.enableChain(vault.id, chainId);
+    }
+
     return signature;
   }
 
@@ -1422,6 +1429,13 @@ export class KeyRingService {
 
     if (this.needKeyCoinTypeFinalize(vault.id, chainId)) {
       this.finalizeKeyCoinType(vault.id, chainId, coinType);
+    }
+
+    if (
+      !this.needKeyCoinTypeFinalize(vault.id, chainId) &&
+      !this.chainsUIService.isEnabled(vault.id, chainId)
+    ) {
+      this.chainsUIService.enableChain(vault.id, chainId);
     }
 
     return signedPsbt;
