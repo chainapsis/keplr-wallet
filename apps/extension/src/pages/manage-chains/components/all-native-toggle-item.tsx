@@ -72,7 +72,9 @@ export const AllNativeToggleItem: FunctionComponent<
       hideStackIcon={true}
       iconElement={iconElement}
       style={{
-        border: `0.09375rem solid ${ColorPalette["blue-600"]}`,
+        border: `0.09375rem solid ${
+          ColorPalette[theme.mode === "light" ? "blue-200" : "blue-600"]
+        }`,
       }}
     />
   );
