@@ -531,7 +531,8 @@ export const GroupedTokenItem: FunctionComponent<{
   }
 );
 
-const StackIcon: FunctionComponent<IconProps> = () => {
+export const StackIcon: FunctionComponent<IconProps> = () => {
+  const theme = useTheme();
   return (
     <div
       style={{
@@ -553,20 +554,21 @@ const StackIcon: FunctionComponent<IconProps> = () => {
           fillRule="evenodd"
           clipRule="evenodd"
           d="M21.2859 8.02551C18.9217 9.6137 16.0699 10.5413 12.9999 10.5413C9.92962 10.5413 7.07773 9.61358 4.71338 8.02521C6.47131 10.7178 9.52586 12.4993 12.9998 12.4993C16.4735 12.4993 19.528 10.7179 21.2859 8.02551Z"
-          fill="#353539"
+          fill={theme.mode === "dark" ? ColorPalette["gray-450"] : "#E1E1E8"}
         />
         <path
           fillRule="evenodd"
           clipRule="evenodd"
           d="M26.0001 0.499672C22.9245 4.23865 18.2432 6.62598 13 6.62598C7.757 6.62598 3.07589 4.23886 0.000244141 0.500161C1.91748 5.78461 7.01411 9.56302 13.0001 9.56302C18.9863 9.56302 24.083 5.78437 26.0001 0.499672Z"
-          fill="#424247"
+          fill={theme.mode === "dark" ? ColorPalette["gray-400"] : "#C7C7D3"}
         />
       </svg>
     </div>
   );
 };
 
-const ArrowIcon: FunctionComponent<IconProps> = () => {
+export const ArrowIcon: FunctionComponent<IconProps> = () => {
+  const theme = useTheme();
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -577,7 +579,11 @@ const ArrowIcon: FunctionComponent<IconProps> = () => {
     >
       <path
         d="M7.05288 5.21786C7.53331 4.60016 8.46689 4.60016 8.94732 5.21786L12.0938 9.26327C12.7068 10.0515 12.1451 11.2 11.1465 11.2L4.85366 11.2C3.85509 11.2 3.29338 10.0515 3.90644 9.26327L7.05288 5.21786Z"
-        fill="#72747B"
+        fill={
+          theme.mode === "dark"
+            ? ColorPalette["gray-300"]
+            : ColorPalette["gray-200"]
+        }
       />
     </svg>
   );

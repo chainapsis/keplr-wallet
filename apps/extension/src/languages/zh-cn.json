@@ -159,6 +159,10 @@
   "pages.register.enable-chains.guide.can-select-evm-next-step": "你可以在下一步中选择EVM链。",
   "pages.register.enable-chains.guide.can-select-starknet-later-step": "您可以在稍後的步驟中選擇Starknet鏈。",
   "pages.register.enable-chains.guide.can-select-bitcoin-later-step": "你可以在下一步中选择比特币链。",
+
+  "pages.manage-chains.title": "添加/删除链",
+  "pages.manage-chains.search-input-placeholder": "搜索网络",
+
   "pages.register.select-derivation-path.title": "选择账户派生路径",
   "pages.register.select-derivation-path.paragraph": "要使用这两个路径，你需要执行两次导入过程。",
   "pages.register.select-derivation-path.chain-step": "链 {currentStep}/{totalStep}",
