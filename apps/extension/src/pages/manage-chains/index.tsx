@@ -20,12 +20,33 @@ import { Stack } from "../../components/stack";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { useGetAllNonNativeChain } from "../../hooks/use-get-all-non-native-chain";
+import { Columns, Column } from "../../components/column";
+import { Subtitle4 } from "../../components/typography";
+import { Checkbox } from "../../components/checkbox";
+import { EcosystemFilterDropdown } from "../../components/ecosystem-filter-dropdown";
+import { useTheme } from "styled-components";
+import { ColorPalette } from "../../styles";
+
+export const Ecosystem = {
+  All: "All",
+  Cosmos: "Cosmos",
+  EVM: "EVM",
+  Bitcoin: "Bitcoin",
+  Starknet: "Starknet",
+} as const;
+export type Ecosystem = (typeof Ecosystem)[keyof typeof Ecosystem];
 
 export const ManageChainsPage: FunctionComponent = observer(() => {
   const { chainStore, hugeQueriesStore, keyRingStore, priceStore } = useStore();
   const intl = useIntl();
   const [searchParams] = useSearchParams();
   const [search, setSearch] = useState("");
+
+  const [selectedEcosystem, setSelectedEcosystem] = useState<Ecosystem>("All");
+
+  const theme = useTheme();
+
+  const [hideEnabled, setHideEnabled] = useState(false);
 
   const { chains: nonNativeChainInfos, infiniteScrollTriggerRef } =
     useGetAllNonNativeChain({ search });
@@ -201,6 +222,50 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
     searchFields
   );
 
+  const ecosystemFilteredChainInfos = useMemo(() => {
+    return filteredChainInfos.filter((ci) => {
+      switch (selectedEcosystem) {
+        case "All":
+          return true;
+        case "Cosmos":
+          return (
+            "cosmos" in ci &&
+            (() => {
+              try {
+                return !chainStore.isEvmOnlyChain(ci.chainId);
+              } catch {
+                return false;
+              }
+            })()
+          );
+        case "EVM":
+          return (() => {
+            try {
+              return chainStore.isEvmOnlyChain(ci.chainId);
+            } catch {
+              return false;
+            }
+          })();
+        case "Bitcoin":
+          return "bitcoin" in ci;
+        case "Starknet":
+          return "starknet" in ci;
+        default:
+          return true;
+      }
+    });
+  }, [filteredChainInfos, selectedEcosystem, chainStore]);
+
+  const visibleChainInfos = useMemo(() => {
+    if (!hideEnabled) {
+      return ecosystemFilteredChainInfos;
+    }
+    return ecosystemFilteredChainInfos.filter((ci) => {
+      const identifier = ChainIdHelper.parse(ci.chainId).identifier;
+      return !(enabledIdentifierMap.get(identifier) || false);
+    });
+  }, [ecosystemFilteredChainInfos, hideEnabled, enabledIdentifierMap]);
+
   const applyEnableChange = async (
     chainIdentifier: string,
     enable: boolean
@@ -274,9 +339,38 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
             setSearch(e.target.value);
           }}
         />
+        <Gutter size="0.75rem" />
+
+        <Columns sum={1} gutter="0.25rem" alignY="center">
+          <EcosystemFilterDropdown
+            selected={selectedEcosystem}
+            onSelect={setSelectedEcosystem}
+          />
+          <Column weight={1} />
+
+          <Subtitle4
+            onClick={() => setHideEnabled(!hideEnabled)}
+            style={{
+              color:
+                theme.mode === "light"
+                  ? ColorPalette["gray-200"]
+                  : ColorPalette["gray-300"],
+              cursor: "pointer",
+            }}
+          >
+            Hide Enabled
+          </Subtitle4>
+          <Gutter size="0.375rem" />
+          <Checkbox
+            size="extra-small"
+            checked={hideEnabled}
+            onChange={setHideEnabled}
+          />
+        </Columns>
+
         <Gutter size="1rem" />
         <Stack gutter="0.5rem">
-          {filteredChainInfos.map((ci) => {
+          {visibleChainInfos.map((ci) => {
             const variantIdentifier = ChainIdHelper.parse(
               ci.chainId
             ).identifier;
