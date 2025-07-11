@@ -92,16 +92,6 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
     //필터링을 활성화함
     enableFilterDisabledAssetToken: paramIsIBCSwap,
   });
-  console.log(
-    tokens
-      .filter((t) => t.token.currency.coinDenom.startsWith("USDC"))
-      .map((t) => {
-        return {
-          currency: t.token.currency,
-          chainId: t.chainInfo.chainId,
-        };
-      })
-  );
 
   const nonZeroTokens = useMemo(() => {
     const zeroDec = new Dec(0);
