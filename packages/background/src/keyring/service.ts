@@ -703,7 +703,7 @@ export class KeyRingService {
       ChainIdHelper.parse(chainId).identifier
     }-coinType`;
 
-    return !vault.insensitive[coinTypeTag];
+    return vault.insensitive[coinTypeTag] == null;
   }
 
   async createMnemonicKeyRing(

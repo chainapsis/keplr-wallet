@@ -175,8 +175,13 @@ export class TokenScanService {
         return 0;
       });
     for (const vaultId of vaultIds) {
-      // 얘는 계정 수를 예상하기 힘드니까 그냥 순차적으로 한다...
-      await this.scan(vaultId, chainId);
+      try {
+        // 얘는 계정 수를 예상하기 힘드니까 그냥 순차적으로 한다...
+        await this.scan(vaultId, chainId);
+      } catch (e) {
+        console.log(e);
+        // noop
+      }
     }
   }
 
