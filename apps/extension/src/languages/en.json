@@ -810,6 +810,8 @@
   "components.input.fee-control.tooltip.external-fee-set": "Transaction fee was set by website",
   "components.input.fee-control.modal.title": "Fee Options",
   "components.input.fee-control.modal.fee-title": "Fee tier",
+  "components.input.fee-control.modal.replace-pending-tx": "Resend to replace pending transaction",
+  "components.input.fee-control.modal.replace-pending-tx.paragraph": "Set fee option to Average or above to proceed.",
   "components.input.fee-control.modal.remember-last-fee-option": "Remember my choice",
   "components.input.fee-control.modal.fee-token-dropdown-label": "Fee Token",
   "components.input.fee-control.modal.auto-title": "Auto",

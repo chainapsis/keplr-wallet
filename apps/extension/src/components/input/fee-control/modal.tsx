@@ -35,6 +35,7 @@ import { Tooltip } from "../../tooltip";
 import { InformationOutlineIcon } from "../../icon";
 import { IBCSwapAmountConfig } from "@keplr-wallet/hooks-internal";
 import { useEffectOnce } from "../../../hooks/use-effect-once";
+import { getKeplrFromWindow } from "@keplr-wallet/stores";
 
 const Styles = {
   Container: styled.div`
@@ -63,6 +64,8 @@ export const TransactionFeeModal: FunctionComponent<{
   gasSimulator?: IGasSimulator;
   disableAutomaticFeeSet?: boolean;
   isForEVMTx?: boolean;
+  nonceMethod?: "pending" | "latest";
+  setNonceMethod?: (nonceMethod: "pending" | "latest") => void;
 }> = observer(
   ({
     close,
@@ -73,6 +76,8 @@ export const TransactionFeeModal: FunctionComponent<{
     gasSimulator,
     disableAutomaticFeeSet,
     isForEVMTx,
+    nonceMethod,
+    setNonceMethod,
   }) => {
     const { queriesStore, uiConfigStore, priceStore, analyticsAmplitudeStore } =
       useStore();
@@ -169,6 +174,40 @@ export const TransactionFeeModal: FunctionComponent<{
       analyticsAmplitudeStore.logEvent("view_fee_modal");
     });
 
+    const [hasEVMPendingTx, setHasEVMPendingTx] = useState<boolean>(false);
+    useEffect(() => {
+      if (isForEVMTx && setNonceMethod) {
+        (async () => {
+          const keplr = await getKeplrFromWindow();
+          if (keplr) {
+            const transactionCountPending =
+              await keplr.ethereum.request<string>({
+                method: "eth_getTransactionCount",
+                params: [senderConfig.sender, "pending"],
+                chainId: feeConfig.chainId,
+              });
+            const transactionCountLastest =
+              await keplr.ethereum.request<string>({
+                method: "eth_getTransactionCount",
+                params: [senderConfig.sender, "latest"],
+                chainId: feeConfig.chainId,
+              });
+            if (
+              transactionCountPending &&
+              transactionCountLastest &&
+              transactionCountPending !== transactionCountLastest
+            ) {
+              setHasEVMPendingTx(true);
+            } else {
+              setHasEVMPendingTx(false);
+            }
+          }
+        })();
+      } else {
+        setHasEVMPendingTx(false);
+      }
+    }, [feeConfig.chainId, isForEVMTx, senderConfig.sender, setNonceMethod]);
+
     return (
       <Styles.Container>
         <Box marginBottom="1.25rem" marginLeft="0.5rem" paddingY="0.4rem">
@@ -176,6 +215,57 @@ export const TransactionFeeModal: FunctionComponent<{
             <FormattedMessage id="components.input.fee-control.modal.title" />
           </Subtitle1>
         </Box>
+
+        {isForEVMTx && setNonceMethod != null && hasEVMPendingTx ? (
+          <Box
+            marginBottom="1.25rem"
+            paddingX="0.75rem"
+            paddingY="1rem"
+            borderRadius="0.375rem"
+            backgroundColor={
+              theme.mode === "light"
+                ? ColorPalette["gray-50"]
+                : ColorPalette["gray-500"]
+            }
+          >
+            <XAxis alignY="center">
+              <YAxis>
+                <Subtitle3
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-700"]
+                      : ColorPalette["gray-10"]
+                  }
+                >
+                  <FormattedMessage id="components.input.fee-control.modal.replace-pending-tx" />
+                </Subtitle3>
+                <Gutter size="0.37rem" />
+                <Subtitle3
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-300"]
+                      : ColorPalette["gray-300"]
+                  }
+                >
+                  <FormattedMessage id="components.input.fee-control.modal.replace-pending-tx.paragraph" />
+                </Subtitle3>
+              </YAxis>
+
+              <div style={{ flexShrink: 0 }}>
+                <Toggle
+                  isOpen={nonceMethod === "latest"}
+                  setIsOpen={(isOpen) => {
+                    if (isOpen) {
+                      setNonceMethod("latest");
+                    } else {
+                      setNonceMethod("pending");
+                    }
+                  }}
+                />
+              </div>
+            </XAxis>
+          </Box>
+        ) : null}
 
         <Stack gutter="0.75rem">
           <Stack gutter="0.375rem">

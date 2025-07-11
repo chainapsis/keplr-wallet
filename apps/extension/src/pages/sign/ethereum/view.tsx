@@ -55,6 +55,7 @@ import { useNavigate } from "react-router";
 import { ApproveIcon, CancelIcon } from "../../../components/button";
 import { EthereumArbitrarySignPage } from "./sign-arbitrary-page";
 import { HeaderProps } from "../../../layouts/header/types";
+import { getKeplrFromWindow } from "@keplr-wallet/stores";
 
 /**
  * CosmosTxView의 주석을 꼭 참고하셈
@@ -256,6 +257,72 @@ export const EthereumSigningView: FunctionComponent<{
     feeConfig,
     feeConfig.type,
     interactionData.isInternal,
+  ]);
+
+  // interactionData.isInternal === true일때는 이전 UI에서 설정할 수 있기 때문에
+  // 그때는 처리되지 않도록 신경써야한다.
+  const needHandleNonceMethod = isTxSigning && !interactionData.isInternal;
+  const [nonceMethod, setNonceMethod] = useState<"latest" | "pending">(
+    "pending"
+  );
+  const originalNonceRef = useRef(
+    (() => {
+      if (needHandleNonceMethod) {
+        const unsignedTx = JSON.parse(Buffer.from(message).toString("utf8"));
+        return unsignedTx.nonce;
+      }
+      return null;
+    })()
+  );
+  useEffect(() => {
+    if (needHandleNonceMethod) {
+      const unsignedTx = JSON.parse(Buffer.from(message).toString("utf8"));
+      if (nonceMethod === "pending") {
+        if (originalNonceRef.current) {
+          unsignedTx.nonce = originalNonceRef.current;
+          setSigningDataBuff(Buffer.from(JSON.stringify(unsignedTx), "utf8"));
+        } else {
+          (async () => {
+            const keplr = await getKeplrFromWindow();
+            if (keplr) {
+              const transactionCountPending =
+                await keplr.ethereum.request<string>({
+                  method: "eth_getTransactionCount",
+                  params: [senderConfig.sender, "pending"],
+                  chainId: feeConfig.chainId,
+                });
+              const nonce = parseInt(transactionCountPending, 16);
+              unsignedTx.nonce = nonce;
+              setSigningDataBuff(
+                Buffer.from(JSON.stringify(unsignedTx), "utf8")
+              );
+            }
+          })();
+        }
+      } else if (nonceMethod === "latest") {
+        (async () => {
+          const keplr = await getKeplrFromWindow();
+          if (keplr) {
+            const transactionCountLatest = await keplr.ethereum.request<string>(
+              {
+                method: "eth_getTransactionCount",
+                params: [senderConfig.sender, "latest"],
+                chainId: feeConfig.chainId,
+              }
+            );
+            const nonce = parseInt(transactionCountLatest, 16);
+            unsignedTx.nonce = nonce;
+            setSigningDataBuff(Buffer.from(JSON.stringify(unsignedTx), "utf8"));
+          }
+        })();
+      }
+    }
+  }, [
+    feeConfig.chainId,
+    message,
+    needHandleNonceMethod,
+    nonceMethod,
+    senderConfig.sender,
   ]);
 
   useEffect(() => {
@@ -784,6 +851,10 @@ export const EthereumSigningView: FunctionComponent<{
               gasSimulator={gasSimulator}
               disableAutomaticFeeSet={preferNoSetFee}
               isForEVMTx
+              nonceMethod={needHandleNonceMethod ? nonceMethod : undefined}
+              setNonceMethod={
+                needHandleNonceMethod ? setNonceMethod : undefined
+              }
             />
           );
         })()}
