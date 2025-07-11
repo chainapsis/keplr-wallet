@@ -23,9 +23,10 @@ import { useGetAllNonNativeChain } from "../../hooks/use-get-all-non-native-chai
 import { Columns, Column } from "../../components/column";
 import { Subtitle4 } from "../../components/typography";
 import { Checkbox } from "../../components/checkbox";
-import { EcosystemFilterDropdown } from "../../components/ecosystem-filter-dropdown";
+import { EcosystemFilterDropdown } from "./components/ecosystem-filter-dropdown";
 import { useTheme } from "styled-components";
 import { ColorPalette } from "../../styles";
+import styled from "styled-components";
 
 export const Ecosystem = {
   All: "All",
@@ -35,6 +36,13 @@ export const Ecosystem = {
   Starknet: "Starknet",
 } as const;
 export type Ecosystem = (typeof Ecosystem)[keyof typeof Ecosystem];
+
+const HideEnabledText = styled(Subtitle4)`
+  cursor: pointer;
+  &:hover {
+    opacity: 0.7;
+  }
+`;
 
 export const ManageChainsPage: FunctionComponent = observer(() => {
   const { chainStore, hugeQueriesStore, keyRingStore, priceStore } = useStore();
@@ -348,18 +356,25 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
           />
           <Column weight={1} />
 
-          <Subtitle4
-            onClick={() => setHideEnabled(!hideEnabled)}
-            style={{
-              color:
-                theme.mode === "light"
-                  ? ColorPalette["gray-200"]
-                  : ColorPalette["gray-300"],
-              cursor: "pointer",
-            }}
-          >
-            Hide Enabled
-          </Subtitle4>
+          {(() => {
+            const textColor =
+              theme.mode === "light"
+                ? hideEnabled
+                  ? ColorPalette["gray-300"]
+                  : ColorPalette["gray-200"]
+                : hideEnabled
+                ? ColorPalette["gray-200"]
+                : ColorPalette["gray-300"];
+
+            return (
+              <HideEnabledText
+                onClick={() => setHideEnabled(!hideEnabled)}
+                style={{ color: textColor }}
+              >
+                Hide Enabled
+              </HideEnabledText>
+            );
+          })()}
           <Gutter size="0.375rem" />
           <Checkbox
             size="extra-small"

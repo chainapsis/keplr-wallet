@@ -1,8 +1,8 @@
 import React, { FunctionComponent, useState } from "react";
 import styled, { useTheme } from "styled-components";
-import { ColorPalette } from "../../styles";
-import { Subtitle4 } from "../typography";
-import { Ecosystem } from "../../pages/manage-chains";
+import { ColorPalette } from "../../../styles";
+import { Subtitle4 } from "../../../components/typography";
+import { Ecosystem } from "..";
 
 interface Props {
   selected: Ecosystem;
@@ -44,6 +44,7 @@ export const EcosystemFilterDropdown: FunctionComponent<Props> = ({
                   onSelect(item);
                   setIsOpen(false);
                 }}
+                selected={item === selected}
               >
                 {item}
               </Styles.MenuItem>
@@ -106,31 +107,24 @@ const Styles = {
     overflow: hidden;
   `,
 
-  MenuItem: styled.div`
+  MenuItem: styled.div<{ selected?: boolean }>`
     padding: 0.6875rem 1rem;
     cursor: pointer;
-    background-color: ${(props) =>
-      props.theme.mode === "light"
-        ? ColorPalette.white
-        : ColorPalette["gray-500"]};
-    border-bottom: 1px solid
-      ${(props) =>
-        props.theme.mode === "light"
-          ? ColorPalette["gray-100"]
-          : ColorPalette["gray-400"]};
+    background-color: rgba(37, 37, 37, 0.5);
+    border-bottom: 0.03125rem solid rgba(84, 84, 88, 0.65);
 
     font-size: 1.0625rem;
     line-height: 1.375rem;
+
+    color: ${(props) =>
+      props.selected ? ColorPalette["blue-300"] : ColorPalette.white};
 
     &:last-child {
       border-bottom: none;
     }
 
     &:hover {
-      background-color: ${(props) =>
-        props.theme.mode === "light"
-          ? ColorPalette["gray-50"]
-          : ColorPalette["gray-450"]};
+      background-color: rgba(51, 51, 51, 0.5);
     }
   `,
 
