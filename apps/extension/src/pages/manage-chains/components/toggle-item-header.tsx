@@ -23,6 +23,9 @@ interface ToggleItemHeaderProps {
   isOpen?: boolean;
   onHeaderClick?: () => void;
   onToggle: (enable: boolean) => void;
+  hideStackIcon?: boolean;
+  iconElement?: React.ReactNode;
+  style?: React.CSSProperties;
 }
 
 export const ToggleItemHeader: FunctionComponent<ToggleItemHeaderProps> = ({
@@ -36,15 +39,33 @@ export const ToggleItemHeader: FunctionComponent<ToggleItemHeaderProps> = ({
   isOpen = false,
   onHeaderClick,
   onToggle,
+  hideStackIcon,
+  iconElement,
+  style,
 }) => {
   const theme = useTheme();
 
   return (
-    <Styles.Container disabled={disabled} onClick={onHeaderClick}>
+    <Styles.Container disabled={disabled} onClick={onHeaderClick} style={style}>
       <Columns sum={1} gutter="0.5rem" alignY="center">
         <Styles.ChainImageWrapper>
-          <ChainImageFallback chainInfo={chainInfo} size="2rem" />
-          <StackIcon />
+          {iconElement ? (
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {iconElement}
+            </div>
+          ) : (
+            <ChainImageFallback chainInfo={chainInfo} size="2rem" />
+          )}
+
+          {!hideStackIcon && <StackIcon />}
 
           {isNativeChain && (
             <Box
