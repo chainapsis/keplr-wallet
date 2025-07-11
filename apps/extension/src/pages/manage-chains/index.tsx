@@ -78,6 +78,45 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
     return chainStore.enabledChainIdentifiers.slice();
   });
 
+  const [
+    backupSelectedNativeChainIdentifiers,
+    setBackupSelectedNativeChainIdentifiers,
+  ] = useState<string[]>([]);
+
+  const applyBatchEnableChange = useCallback(
+    async (identifiers: string[], enable: boolean) => {
+      if (!vaultId || identifiers.length === 0) return;
+
+      if (enable) {
+        await chainStore.enableChainInfoInUIWithVaultId(
+          vaultId,
+          ...identifiers
+        );
+      } else {
+        await chainStore.disableChainInfoInUIWithVaultId(
+          vaultId,
+          ...identifiers
+        );
+      }
+    },
+    [chainStore, vaultId]
+  );
+
+  const setEnabledIdentifiersWithBatch = useCallback(
+    (identifiers: string[], enable: boolean) => {
+      setEnabledIdentifiers((prev) => {
+        const set = new Set(prev);
+        identifiers.forEach((id) => {
+          enable ? set.add(id) : set.delete(id);
+        });
+        return Array.from(set);
+      });
+
+      applyBatchEnableChange(identifiers, enable);
+    },
+    [applyBatchEnableChange]
+  );
+
   const enabledIdentifierMap = useMemo(() => {
     const map = new Map<string, boolean>();
     enabledIdentifiers.forEach((id) => map.set(id, true));
@@ -328,17 +367,55 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
     identifiersToChange.forEach((id) => applyEnableChange(id, enable));
   };
 
-  const handleToggleAllNative = useCallback(
-    (enable: boolean) => {
-      nativeChainIdentifierSet.forEach((id) => {
-        const currentlyEnabled = enabledIdentifierMap.get(id) || false;
-        if (currentlyEnabled !== enable) {
-          handleToggle(id, enable);
+  const handleToggleAllNative = useCallback(() => {
+    const nativeIds = Array.from(nativeChainIdentifierSet);
+    const enabledNativeIds = nativeIds.filter((id) =>
+      enabledIdentifierMap.get(id)
+    );
+
+    const isAllNativeSelected = enabledNativeIds.length === nativeIds.length;
+
+    if (isAllNativeSelected) {
+      if (backupSelectedNativeChainIdentifiers.length > 0) {
+        const toEnable = backupSelectedNativeChainIdentifiers;
+        const toDisable = nativeIds.filter((id) => !toEnable.includes(id));
+
+        setEnabledIdentifiersWithBatch(toDisable, false);
+        setEnabledIdentifiersWithBatch(toEnable, true);
+      } else if (sortedNativeChainInfos.length > 0) {
+        const first = sortedNativeChainInfos[0];
+        const chainIdentifiers: string[] = [
+          ChainIdHelper.parse(first.chainId).identifier,
+        ];
+        if ("linkedChainKey" in first) {
+          const key = (first as any).linkedChainKey;
+          sortedNativeChainInfos.forEach((ci) => {
+            if ("linkedChainKey" in ci && (ci as any).linkedChainKey === key) {
+              chainIdentifiers.push(ChainIdHelper.parse(ci.chainId).identifier);
+            }
+          });
         }
-      });
-    },
-    [nativeChainIdentifierSet, enabledIdentifierMap, handleToggle]
-  );
+
+        const toDisable = nativeIds.filter(
+          (id) => !chainIdentifiers.includes(id)
+        );
+        setEnabledIdentifiersWithBatch(toDisable, false);
+      }
+    } else {
+      setBackupSelectedNativeChainIdentifiers(enabledNativeIds);
+
+      const idsToEnable = nativeIds.filter(
+        (id) => !enabledNativeIds.includes(id)
+      );
+      setEnabledIdentifiersWithBatch(idsToEnable, true);
+    }
+  }, [
+    nativeChainIdentifierSet,
+    enabledIdentifierMap,
+    backupSelectedNativeChainIdentifiers,
+    sortedNativeChainInfos,
+    setEnabledIdentifiersWithBatch,
+  ]);
 
   return (
     <HeaderLayout
@@ -402,7 +479,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
             nativeChainInfos={sortedNativeChainInfos}
             nativeChainIdentifierSet={nativeChainIdentifierSet}
             enabledIdentifierMap={enabledIdentifierMap}
-            onToggleAll={handleToggleAllNative}
+            onToggleAll={() => handleToggleAllNative()}
           />
 
           {visibleChainInfos.map((ci) => {
