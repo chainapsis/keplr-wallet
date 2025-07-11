@@ -7,7 +7,7 @@ import {
   KeyRing,
   KeyRingStatus,
 } from "./types";
-import { Env, WEBPAGE_PORT } from "@keplr-wallet/router";
+import { Env, MessageRequester, WEBPAGE_PORT } from "@keplr-wallet/router";
 import {
   PubKeyBitcoinCompatible,
   PubKeySecp256k1,
@@ -25,7 +25,7 @@ import {
 } from "@keplr-wallet/types";
 import { Buffer } from "buffer/";
 import * as Legacy from "./legacy";
-import { ChainsUIService } from "../chains-ui";
+import { ChainsUIForegroundService, ChainsUIService } from "../chains-ui";
 import { MultiAccounts } from "../keyring-keystone";
 import { AnalyticsService } from "../analytics";
 import { Primitive } from "utility-types";
@@ -53,6 +53,7 @@ export class KeyRingService {
       readonly chainsUIService: ChainsUIService;
       readonly getDisabledChainIdentifiers: () => Promise<string[]>;
     },
+    protected readonly eventMsgRequester: MessageRequester,
     protected readonly chainsService: ChainsService,
     protected readonly chainsUIService: ChainsUIService,
     protected readonly interactionService: InteractionService,
@@ -702,7 +703,7 @@ export class KeyRingService {
       ChainIdHelper.parse(chainId).identifier
     }-coinType`;
 
-    return !vault.insensitive[coinTypeTag];
+    return vault.insensitive[coinTypeTag] == null;
   }
 
   async createMnemonicKeyRing(
@@ -1366,11 +1367,24 @@ export class KeyRingService {
       this.finalizeKeyCoinType(vault.id, chainId, coinType);
     }
 
-    if (
-      !this.needKeyCoinTypeFinalize(vault.id, chainId) &&
-      !this.chainsUIService.isEnabled(vault.id, chainId)
-    ) {
-      this.chainsUIService.enableChain(vault.id, chainId);
+    let enabledChanges = false;
+    for (const modularChainInfo of this.chainsService.getModularChainInfoWithLinkedChainKey(
+      chainId
+    )) {
+      const chainId = modularChainInfo.chainId;
+      if (
+        !this.needKeyCoinTypeFinalize(vault.id, chainId) &&
+        !this.chainsUIService.isEnabled(vault.id, chainId)
+      ) {
+        this.chainsUIService.enableChain(vault.id, chainId);
+        enabledChanges = true;
+      }
+    }
+    if (enabledChanges) {
+      ChainsUIForegroundService.invokeEnabledChainIdentifiersUpdated(
+        this.eventMsgRequester,
+        vault.id
+      );
     }
 
     return signature;
@@ -1431,11 +1445,24 @@ export class KeyRingService {
       this.finalizeKeyCoinType(vault.id, chainId, coinType);
     }
 
-    if (
-      !this.needKeyCoinTypeFinalize(vault.id, chainId) &&
-      !this.chainsUIService.isEnabled(vault.id, chainId)
-    ) {
-      this.chainsUIService.enableChain(vault.id, chainId);
+    let enabledChanges = false;
+    for (const modularChainInfo of this.chainsService.getModularChainInfoWithLinkedChainKey(
+      chainId
+    )) {
+      const chainId = modularChainInfo.chainId;
+      if (
+        !this.needKeyCoinTypeFinalize(vault.id, chainId) &&
+        !this.chainsUIService.isEnabled(vault.id, chainId)
+      ) {
+        this.chainsUIService.enableChain(vault.id, chainId);
+        enabledChanges = true;
+      }
+    }
+    if (enabledChanges) {
+      ChainsUIForegroundService.invokeEnabledChainIdentifiersUpdated(
+        this.eventMsgRequester,
+        vault.id
+      );
     }
 
     return signedPsbt;
