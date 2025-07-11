@@ -474,6 +474,14 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   }, [navigate, initialChainId, initialCoinMinimalDenom]);
 
   const [isEvmTx, setIsEvmTx] = useState(isErc20 || isEVMOnlyChain);
+  const [nonceMethod, setNonceMethod] = useState<"latest" | "pending">(
+    "pending"
+  );
+  useEffect(() => {
+    if (!isEvmTx) {
+      setNonceMethod("pending");
+    }
+  }, [isEvmTx]);
 
   const account = accountStore.getAccount(chainId);
 
@@ -1624,6 +1632,9 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                           );
                         }
                       },
+                    },
+                    {
+                      nonceMethod,
                     }
                   );
                 }
@@ -2213,6 +2224,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             gasConfig={gasConfig}
             gasSimulator={gasSimulatorForNotBridgeSend}
             isForEVMTx={isEvmTx}
+            nonceMethod={nonceMethod}
+            setNonceMethod={setNonceMethod}
           />
 
           {sendType === "bridge" && (

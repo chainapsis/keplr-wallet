@@ -29,6 +29,8 @@ export const SwapFeeInfo: FunctionComponent<{
   feeConfig: IFeeConfig;
   gasSimulator: IGasSimulator;
   isForEVMTx?: boolean;
+  nonceMethod?: "pending" | "latest";
+  setNonceMethod?: (nonceMethod: "pending" | "latest") => void;
 }> = observer(
   ({
     senderConfig,
@@ -37,6 +39,8 @@ export const SwapFeeInfo: FunctionComponent<{
     feeConfig,
     gasSimulator,
     isForEVMTx,
+    nonceMethod,
+    setNonceMethod,
   }) => {
     const { queriesStore, chainStore, priceStore, uiConfigStore } = useStore();
 
@@ -447,6 +451,8 @@ export const SwapFeeInfo: FunctionComponent<{
               gasSimulator={gasSimulator}
               isForEVMTx={isForEVMTx}
               ibcSwapAmountConfig={amountConfig}
+              nonceMethod={nonceMethod}
+              setNonceMethod={setNonceMethod}
             />
           </Modal>
         </Box>
