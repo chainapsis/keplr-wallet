@@ -102,9 +102,9 @@ export class BackgroundTxEthereumService {
           });
         },
         {
-          maxRetries: 10,
+          maxRetries: 50,
           waitMsAfterError: 500,
-          maxWaitMsAfterError: 4000,
+          maxWaitMsAfterError: 15000,
         }
       );
 

@@ -1233,14 +1233,6 @@ export class RecentSendHistoryService {
                 return;
               }
 
-              const now = Date.now();
-              const expectedEndTimestamp =
-                history.timestamp + history.routeDurationSeconds * 1000;
-              const diff = expectedEndTimestamp - now;
-
-              const waitMsAfterError = 5 * 1000;
-              const maxRetries = diff > 0 ? diff / waitMsAfterError : 10;
-
               retry(
                 () => {
                   return new Promise<void>((resolve, reject) => {
@@ -1252,9 +1244,9 @@ export class RecentSendHistoryService {
                   });
                 },
                 {
-                  maxRetries,
-                  waitMsAfterError,
-                  maxWaitMsAfterError: 30 * 1000, // 30sec
+                  maxRetries: 50,
+                  waitMsAfterError: 500,
+                  maxWaitMsAfterError: 15000,
                 }
               );
             },
@@ -1263,9 +1255,9 @@ export class RecentSendHistoryService {
         });
       },
       {
-        maxRetries: 10,
+        maxRetries: 50,
         waitMsAfterError: 500,
-        maxWaitMsAfterError: 4000,
+        maxWaitMsAfterError: 15000,
       }
     );
   }
