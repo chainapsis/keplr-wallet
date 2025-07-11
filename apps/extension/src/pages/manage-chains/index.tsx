@@ -24,6 +24,7 @@ import { Columns, Column } from "../../components/column";
 import { Subtitle4 } from "../../components/typography";
 import { Checkbox } from "../../components/checkbox";
 import { EcosystemFilterDropdown } from "./components/ecosystem-filter-dropdown";
+import { AllNativeToggleItem } from "./components/all-native-toggle-item";
 import { useTheme } from "styled-components";
 import { ColorPalette } from "../../styles";
 import styled from "styled-components";
@@ -327,6 +328,18 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
     identifiersToChange.forEach((id) => applyEnableChange(id, enable));
   };
 
+  const handleToggleAllNative = useCallback(
+    (enable: boolean) => {
+      nativeChainIdentifierSet.forEach((id) => {
+        const currentlyEnabled = enabledIdentifierMap.get(id) || false;
+        if (currentlyEnabled !== enable) {
+          handleToggle(id, enable);
+        }
+      });
+    },
+    [nativeChainIdentifierSet, enabledIdentifierMap, handleToggle]
+  );
+
   return (
     <HeaderLayout
       title={intl.formatMessage({
@@ -385,6 +398,13 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
 
         <Gutter size="1rem" />
         <Stack gutter="0.5rem">
+          <AllNativeToggleItem
+            nativeChainInfos={sortedNativeChainInfos}
+            nativeChainIdentifierSet={nativeChainIdentifierSet}
+            enabledIdentifierMap={enabledIdentifierMap}
+            onToggleAll={handleToggleAllNative}
+          />
+
           {visibleChainInfos.map((ci) => {
             const variantIdentifier = ChainIdHelper.parse(
               ci.chainId
