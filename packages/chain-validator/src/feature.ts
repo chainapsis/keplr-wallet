@@ -91,38 +91,6 @@ export const RecognizableChainFeaturesMethod: {
     },
   },
   {
-    feature: "ibc-pfm",
-    fetch: async (features, _rpc, rest) => {
-      if (features.includes("ibc-go")) {
-        const result = await simpleFetch(rest, "/ibc/apps/router/v1/params", {
-          validateStatus: (status) => {
-            return status === 200 || status === 501;
-          },
-        });
-
-        if (result.status === 200) {
-          return true;
-        }
-
-        const result2 = await simpleFetch(
-          rest,
-          "/ibc/apps/packetforward/v1/params",
-          {
-            validateStatus: (status) => {
-              return status === 200 || status === 501;
-            },
-          }
-        );
-
-        if (result2.status === 200) {
-          return true;
-        }
-      }
-
-      return false;
-    },
-  },
-  {
     feature: "wasmd_0.24+",
     fetch: async (features, _rpc, rest) => {
       if (features.includes("cosmwasm")) {
