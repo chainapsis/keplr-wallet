@@ -290,6 +290,11 @@ export interface RouteResponse {
   estimated_route_duration_seconds: number;
 }
 
+export interface RouteErrorData {
+  code: string;
+  message: string;
+}
+
 export interface ChainsResponse {
   chains: {
     chain_id: string;

@@ -55,7 +55,8 @@ export const useSwapAnalytics = ({
   swapFeeBps,
 }: SwapAnalyticsArgs) => {
   const [searchParams] = useSearchParams();
-  const { analyticsAmplitudeStore, uiConfigStore, priceStore } = useStore();
+  const { analyticsAmplitudeStore, uiConfigStore, priceStore, chainStore } =
+    useStore();
 
   const quoteIdRef = useRef("");
 
@@ -71,7 +72,6 @@ export const useSwapAnalytics = ({
   const prevSlippageRef = useRef(uiConfigStore.ibcSwapConfig.slippageNum);
   const prevFetchingRef = useRef(false);
   const prevRouteKeyRef = useRef("");
-  const prevQuoteErrorIdRef = useRef("");
 
   const aggregatedPropsRef = useRef<Record<string, Record<string, any>>>({});
 
@@ -83,11 +83,10 @@ export const useSwapAnalytics = ({
     Record<string, ReturnType<typeof debounce>>
   >({});
 
-  const inChainIdentifier = ChainIdHelper.parse(inChainId).identifier;
-  const outChainIdentifier = ChainIdHelper.parse(outChainId).identifier;
+  const requestStartedAtRef = useRef<number | undefined>(undefined);
 
   const logEvent = useCallback(
-    (eventName: string, props: Record<string, any>) => {
+    (eventName: string, props: Record<string, any> = {}) => {
       const id = props["quote_id"];
 
       let mergedProps = { ...props };
@@ -116,8 +115,8 @@ export const useSwapAnalytics = ({
       if (id) {
         aggregatedPropsRef.current[id] = {
           ...aggregatedPropsRef.current[id],
-          ...props,
           ...durationProps,
+          ...props,
         };
         mergedProps = aggregatedPropsRef.current[id];
       }
@@ -159,6 +158,9 @@ export const useSwapAnalytics = ({
     });
   });
 
+  const inChainIdentifier = ChainIdHelper.parse(inChainId).identifier;
+  const outChainIdentifier = ChainIdHelper.parse(outChainId).identifier;
+
   // source selected
   useEffect(() => {
     if (entryPoint !== "select_from_asset") return;
@@ -176,7 +178,8 @@ export const useSwapAnalytics = ({
         denom: inCurrency.coinDenom,
       };
     }
-  }, [inChainIdentifier, inCurrency.coinDenom, logEvent, entryPoint]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inChainIdentifier, inCurrency.coinDenom]);
 
   // destination selected
   useEffect(() => {
@@ -184,7 +187,7 @@ export const useSwapAnalytics = ({
 
     if (
       prevOutRef.current.chainIdentifier !== outChainIdentifier ||
-      prevOutRef.current.denom !== outCurrency.coinMinimalDenom
+      prevOutRef.current.denom !== outCurrency.coinDenom
     ) {
       logEvent("swap_destination_selected", {
         out_chain_identifier: outChainIdentifier,
@@ -192,24 +195,17 @@ export const useSwapAnalytics = ({
       });
       prevOutRef.current = {
         chainIdentifier: outChainIdentifier,
-        denom: outCurrency.coinMinimalDenom,
+        denom: outCurrency.coinDenom,
       };
     }
-  }, [
-    outChainIdentifier,
-    outCurrency.coinMinimalDenom,
-    outCurrency.coinDenom,
-    logEvent,
-    entryPoint,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [outChainIdentifier, outCurrency.coinDenom]);
 
   // MAX button clicked
   useEffect(() => {
     const currentFraction = ibcSwapConfigs.amountConfig.fraction;
     if (prevFractionRef.current !== currentFraction && currentFraction === 1) {
-      logEvent("swap_max_btn_clicked", {
-        quote_id: quoteIdRef.current,
-      });
+      logEvent("swap_max_btn_clicked");
     }
     prevFractionRef.current = currentFraction;
   }, [ibcSwapConfigs.amountConfig.fraction, analyticsAmplitudeStore, logEvent]);
@@ -226,36 +222,33 @@ export const useSwapAnalytics = ({
       });
       prevSlippageRef.current = current;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     uiConfigStore.ibcSwapConfig.slippageNum,
     uiConfigStore.ibcSwapConfig.slippage,
     uiConfigStore.ibcSwapConfig.slippageIsCustom,
-    logEvent,
   ]);
 
   // Quote requested
   const queryIBCSwapForLog = ibcSwapConfigs.amountConfig.getQueryIBCSwap();
   const queryRouteForLog = queryIBCSwapForLog?.getQueryRoute();
 
-  useEffect(() => {
-    const amount = ibcSwapConfigs.amountConfig.amount[0];
+  const amount = ibcSwapConfigs.amountConfig.amount[0];
+  const inAmountRaw = amount.toCoin().amount.toString();
+  const inAmountUsd = priceStore
+    .calculatePrice(amount, "usd")
+    ?.toDec()
+    .toString();
 
+  useEffect(() => {
     if (!queryRouteForLog || !amount) {
       prevFetchingRef.current = false;
       return;
     }
 
     if (!prevFetchingRef.current && queryRouteForLog.isFetching) {
-      quoteIdRef.current = generateQuoteId();
-
-      const inAmountRaw = amount.toCoin().amount.toString();
-      const inAmountUsd = priceStore
-        .calculatePrice(amount, "usd")
-        ?.toDec()
-        .toString();
-
+      requestStartedAtRef.current = performance.now();
       logEvent("swap_quote_requested", {
-        quote_id: quoteIdRef.current,
         in_chain_identifier: inChainIdentifier,
         in_coin_denom: inCurrency.coinDenom,
         out_chain_identifier: outChainIdentifier,
@@ -266,37 +259,73 @@ export const useSwapAnalytics = ({
       });
     }
     prevFetchingRef.current = queryRouteForLog.isFetching;
-  }, [
-    queryRouteForLog,
-    queryRouteForLog?.isFetching,
-    inCurrency,
-    outCurrency,
-    swapFeeBps,
-    ibcSwapConfigs.amountConfig.amount,
-    priceStore.calculatePrice,
-    logEvent,
-    inChainIdentifier,
-    outChainIdentifier,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryRouteForLog?.isFetching]);
 
   // Quote received
   useEffect(() => {
     if (!queryRouteForLog?.response) return;
 
-    const currentKey = queryRouteForLog.response.data.amount_out;
+    const {
+      source_asset_denom,
+      source_asset_chain_id,
+      dest_asset_denom,
+      dest_asset_chain_id,
+      amount_in,
+      amount_out,
+    } = queryRouteForLog.response.data;
+    const currentKey = `${source_asset_denom}-${source_asset_chain_id}-${dest_asset_denom}-${dest_asset_chain_id}-${amount_in}-${amount_out}`;
     if (prevRouteKeyRef.current === currentKey) return;
 
-    const outAmountRaw = queryRouteForLog.response.data.amount_out;
-    const outCoinPretty = new CoinPretty(outCurrency, outAmountRaw.toString());
-    const outUsd = (() => {
-      const p = priceStore.calculatePrice(outCoinPretty, "usd");
+    const sourceChainIdentifier = ChainIdHelper.parse(
+      source_asset_chain_id
+    ).identifier;
+    const sourceCurrency = chainStore
+      .getChain(
+        Number.isNaN(parseInt(sourceChainIdentifier))
+          ? sourceChainIdentifier
+          : `eip155:${sourceChainIdentifier}`
+      )
+      .forceFindCurrency(source_asset_denom);
+    const sourceCoinPretty = new CoinPretty(sourceCurrency, amount_in);
+    const sourceAmountUsd = (() => {
+      const p = priceStore.calculatePrice(sourceCoinPretty, "usd");
       return p ? p.toDec().toString() : undefined;
     })();
 
+    const destChainIdentifier =
+      ChainIdHelper.parse(dest_asset_chain_id).identifier;
+    const destCurrency = chainStore
+      .getChain(
+        Number.isNaN(parseInt(dest_asset_chain_id))
+          ? dest_asset_chain_id
+          : `eip155:${dest_asset_chain_id}`
+      )
+      .forceFindCurrency(dest_asset_denom);
+    const destCoinPretty = new CoinPretty(destCurrency, amount_out);
+    const destAmountUsd = (() => {
+      const p = priceStore.calculatePrice(destCoinPretty, "usd");
+      return p ? p.toDec().toString() : undefined;
+    })();
+
+    const quoteId = generateQuoteId();
+
+    const durationMs = requestStartedAtRef.current
+      ? performance.now() - requestStartedAtRef.current
+      : undefined;
+    requestStartedAtRef.current = undefined;
+
     logEvent("swap_quote_received", {
-      quote_id: quoteIdRef.current,
-      out_amount_est_raw: outAmountRaw,
-      out_amount_est_usd: outUsd,
+      quote_id: quoteId,
+      duration_ms: durationMs,
+      in_chain_identifier: sourceChainIdentifier,
+      in_coin_denom: sourceCurrency.coinDenom,
+      in_amount_raw: amount_in,
+      in_amount_usd: sourceAmountUsd,
+      out_chain_identifier: destChainIdentifier,
+      out_coin_denom: destCurrency.coinDenom,
+      out_amount_est_raw: amount_out,
+      out_amount_est_usd: destAmountUsd,
       provider: "skip",
       does_swap: queryRouteForLog.response.data.does_swap,
       txs_required: queryRouteForLog.response.data.txs_required,
@@ -311,28 +340,37 @@ export const useSwapAnalytics = ({
         .map((v: any) => v.name ?? v.dex)
         .filter(Boolean),
     });
+    quoteIdRef.current = quoteId;
     prevRouteKeyRef.current = currentKey;
-  }, [
-    queryRouteForLog?.response,
-    outCurrency,
-    priceStore.calculatePrice,
-    logEvent,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryRouteForLog?.response]);
 
   // Quote failed
   useEffect(() => {
-    if (!queryRouteForLog || !queryRouteForLog.error) return;
+    if (!queryRouteForLog?.error) return;
 
-    if (prevQuoteErrorIdRef.current === quoteIdRef.current) return;
+    const durationMs = requestStartedAtRef.current
+      ? performance.now() - requestStartedAtRef.current
+      : undefined;
+    requestStartedAtRef.current = undefined;
 
     logEvent("swap_quote_failed", {
-      quote_id: quoteIdRef.current,
+      duration_ms: durationMs,
+      in_chain_identifier: inChainIdentifier,
+      in_coin_denom: inCurrency.coinDenom,
+      out_chain_identifier: outChainIdentifier,
+      out_coin_denom: outCurrency.coinDenom,
+      in_amount_raw: inAmountRaw,
+      in_amount_usd: inAmountUsd,
       provider: "skip",
       error_message:
-        queryRouteForLog.error.message ?? queryRouteForLog.error.toString(),
+        queryRouteForLog.error.message ?? queryRouteForLog.error.data?.message,
+      error_status: queryRouteForLog.error.status,
+      error_code: queryRouteForLog.error.data?.code ?? undefined,
     });
-    prevQuoteErrorIdRef.current = quoteIdRef.current;
-  }, [queryRouteForLog?.error, logEvent, queryRouteForLog]);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryRouteForLog?.error]);
 
   const logSwapSignOpened = useCallback(() => {
     logEvent("swap_sign_opened", {
@@ -364,7 +402,7 @@ export const useSwapAnalytics = ({
   }, []);
 
   return {
-    quoteId: quoteIdRef.current,
+    quoteIdRef,
     logSwapSignOpened,
     logEvent,
   };

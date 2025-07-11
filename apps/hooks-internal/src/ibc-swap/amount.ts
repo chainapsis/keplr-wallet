@@ -1,4 +1,9 @@
-import { AmountConfig, ISenderConfig, UIProperties } from "@keplr-wallet/hooks";
+import {
+  AmountConfig,
+  InsufficientFeeError,
+  ISenderConfig,
+  UIProperties,
+} from "@keplr-wallet/hooks";
 import { AppCurrency } from "@keplr-wallet/types";
 import { CoinPretty, Dec, Int, RatePretty } from "@keplr-wallet/unit";
 import {
@@ -934,6 +939,65 @@ export class IBCSwapAmountConfig extends AmountConfig {
           "The currency you are swapping to is currently not supported"
         ),
       };
+    }
+
+    if (this.feeConfig) {
+      const feeUIProperties = this.feeConfig.uiProperties;
+      if (
+        !feeUIProperties.error ||
+        !(feeUIProperties.error instanceof InsufficientFeeError)
+      ) {
+        const amount = this.amount;
+        const fees = this.feeConfig.fees;
+
+        const needs = this.otherFees.slice();
+        for (let i = 0; i < needs.length; i++) {
+          const need = needs[i];
+          for (const amt of amount) {
+            if (
+              need.currency.coinMinimalDenom === amt.currency.coinMinimalDenom
+            ) {
+              needs[i] = needs[i].add(amt);
+            }
+          }
+          for (const fee of fees) {
+            if (
+              need.currency.coinMinimalDenom === fee.currency.coinMinimalDenom
+            ) {
+              needs[i] = needs[i].add(fee);
+            }
+          }
+        }
+
+        for (let i = 0; i < needs.length; i++) {
+          const need = needs[i];
+
+          if (need.toDec().lte(new Dec(0))) {
+            continue;
+          }
+
+          const bal = this.queriesStore
+            .get(this.chainId)
+            .queryBalances.getQueryBech32Address(this.senderConfig.value)
+            .balances.find(
+              (bal) =>
+                bal.currency.coinMinimalDenom === need.currency.coinMinimalDenom
+            );
+
+          if (bal && !bal.response) {
+            return {
+              loadingState: "loading",
+            };
+          }
+
+          if (bal && bal.balance.toDec().lt(need.toDec())) {
+            return {
+              error: new InsufficientFeeError("Insufficient fee"),
+              loadingState: bal.isFetching ? "loading" : undefined,
+            };
+          }
+        }
+      }
     }
 
     return {

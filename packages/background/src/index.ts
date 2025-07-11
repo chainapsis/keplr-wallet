@@ -198,6 +198,7 @@ export function init(
         keyRingMigrations.getDisabledChainIdentifiers,
       chainsUIService,
     },
+    eventMsgRequester,
     chainsService,
     chainsUIService,
     interactionService,
@@ -280,6 +281,7 @@ export function init(
 
   const tokenScanService = new TokenScan.TokenScanService(
     storeCreator("token-scan"),
+    eventMsgRequester,
     chainsService,
     chainsUIService,
     vaultService,

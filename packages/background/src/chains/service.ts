@@ -1278,6 +1278,37 @@ export class ChainsService {
     }
   );
 
+  getModularChainInfoWithLinkedChainKey = computedFn(
+    (chainId: string): ModularChainInfo[] => {
+      const res: ModularChainInfo[] = [];
+
+      let linkedChainKey: string | undefined;
+      if (this.hasModularChainInfo(chainId)) {
+        const modularChainInfo = this.getModularChainInfoOrThrow(chainId);
+        if ("linkedChainKey" in modularChainInfo) {
+          linkedChainKey = modularChainInfo.linkedChainKey;
+        }
+        res.push(modularChainInfo);
+      }
+
+      if (linkedChainKey) {
+        const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
+        for (const modularChainInfo of this.modularChainInfos) {
+          if (
+            ChainIdHelper.parse(modularChainInfo.chainId).identifier !==
+              chainIdentifier &&
+            "linkedChainKey" in modularChainInfo &&
+            modularChainInfo.linkedChainKey === linkedChainKey
+          ) {
+            res.push(modularChainInfo);
+          }
+        }
+      }
+
+      return res;
+    }
+  );
+
   getModularChainInfoOrThrow(chainId: string): ModularChainInfo {
     const modularChainInfo = this.getModularChainInfo(chainId);
     if (!modularChainInfo) {

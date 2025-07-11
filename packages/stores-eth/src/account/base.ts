@@ -259,6 +259,7 @@ export class EthereumAccountBase {
     },
     options?: {
       sendTx?: (chainId: string, signedTx: Buffer) => Promise<string>;
+      nonceMethod?: "pending" | "latest";
     }
   ) {
     try {
@@ -273,7 +274,7 @@ export class EthereumAccountBase {
 
       const transactionCount = await keplr.ethereum.request<string>({
         method: "eth_getTransactionCount",
-        params: [sender, "pending"],
+        params: [sender, options?.nonceMethod || "pending"],
         chainId: this.chainId,
       });
       unsignedTx = {

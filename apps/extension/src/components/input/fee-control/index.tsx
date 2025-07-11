@@ -179,6 +179,8 @@ export const FeeControl: FunctionComponent<{
 
   disableAutomaticFeeSet?: boolean;
   isForEVMTx?: boolean;
+  nonceMethod?: "pending" | "latest";
+  setNonceMethod?: (nonceMethod: "pending" | "latest") => void;
 }> = observer(
   ({
     senderConfig,
@@ -187,6 +189,8 @@ export const FeeControl: FunctionComponent<{
     gasSimulator,
     disableAutomaticFeeSet,
     isForEVMTx,
+    nonceMethod,
+    setNonceMethod,
   }) => {
     const {
       analyticsStore,
@@ -543,6 +547,8 @@ export const FeeControl: FunctionComponent<{
             gasSimulator={gasSimulator}
             disableAutomaticFeeSet={disableAutomaticFeeSet}
             isForEVMTx={isForEVMTx}
+            nonceMethod={nonceMethod}
+            setNonceMethod={setNonceMethod}
           />
         </Modal>
       </Box>

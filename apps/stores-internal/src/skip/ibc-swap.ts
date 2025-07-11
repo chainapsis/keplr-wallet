@@ -351,10 +351,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
                       ) ||
                       !this.queryChains.isPFMEnabled(
                         channel.counterpartyChainId
-                      ) ||
-                      !this.chainStore
-                        .getChain(channel.counterpartyChainId)
-                        .hasFeature("ibc-pfm")
+                      )
                     ) {
                       pfmPossibility = false;
                       break;
@@ -542,54 +539,82 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
           return false;
         }
 
-        const originOutChainId = currency.originChainId;
-        const originOutCurrency = currency.originCurrency;
-
-        const channels = this.queryIBCPacketForwardingTransfer.getIBCChannels(
-          originOutChainId,
-          originOutCurrency.coinMinimalDenom
-        );
-
-        // 다른 후보들은 사실 ibc pfm transfer가 가능한 채널 정보와 로직이 유사하다.
-        // 차이점은 ibc pfm transfer의 경우는 시작지점이 tx를 보내는 체인이지만
-        // ibc swap의 경우는 이렇게 처리할 수 없다. (일단 기본적으로 무조건 osmosis를 거치기 때문에)
-        // ibc pfm transfer의 경우 시작 지점을 보내는 체인의 경우 ibc module의 memo만 지원하면
-        // 두번째 체인부터 pfm을 지원하면 되기 때문에 보내는 체인의 경우는 이러한 확인을 하지 않는다.
-        // 하지만 ibc swap의 경우는 ibc pfm transfer 상의 보내는 체인은 시작 지점이 될 수 없기 때문에 pfm에 대한 확인을 꼭 해야한다.
-        if (
-          !this.chainStore.getChain(originOutChainId).hasFeature("ibc-go") ||
-          !this.queryChains.isSupportsMemo(originOutChainId) ||
-          !this.queryChains.isPFMEnabled(originOutChainId) ||
-          !this.chainStore.getChain(originOutChainId).hasFeature("ibc-pfm")
-        ) {
-          // 만약 originOutChainId가 ibc-pfm을 지원하지 않는다면
-          // 여기서 더 routing할 방법은 없다.
-          // osmosis의 경우는 ibc transfer가 아니라 그대로 osmosis에서 남기 때문에
-          // 따로 추가해주고 반환한다.
-          const findSwapVenue = channels.find(
-            (channel) =>
-              channel.channels.length === 1 &&
-              this.swapVenues.some(
-                (swapVenue) =>
-                  this.chainStore.getChain(swapVenue.chainId)
-                    .chainIdentifier ===
-                  this.chainStore.getChain(
-                    channel.channels[0].counterpartyChainId
-                  ).chainIdentifier
-              )
-          );
-          if (findSwapVenue) {
-            return true;
+        if (currency.originCurrency.coinMinimalDenom.startsWith("erc20:")) {
+          const nativeCurrency = this.chainStore
+            .getChain(currency.originChainId)
+            .currencies.find((cur) => cur.coinMinimalDenom.endsWith("-native"));
+          if (nativeCurrency) {
+            const wrappedNativeAddress =
+              WRAPPED_NATIVE_ADDRESSES[currency.originChainId];
+            if (
+              wrappedNativeAddress &&
+              currency.originCurrency.coinMinimalDenom.toLowerCase() ===
+                `erc20:${wrappedNativeAddress}`.toLowerCase()
+            ) {
+              const bridges = this.queryIBCPacketForwardingTransfer.getBridges(
+                currency.originChainId,
+                nativeCurrency.coinMinimalDenom
+              );
+              for (const bridge of bridges) {
+                if (
+                  ChainIdHelper.parse(bridge.destinationChainId).identifier ===
+                    ChainIdHelper.parse(chainId).identifier &&
+                  bridge.denom === currency.coinMinimalDenom
+                ) {
+                  return true;
+                }
+              }
+            }
           }
-        }
+        } else {
+          const originOutChainId = currency.originChainId;
+          const originOutCurrency = currency.originCurrency;
 
-        for (const channel of channels) {
+          const channels = this.queryIBCPacketForwardingTransfer.getIBCChannels(
+            originOutChainId,
+            originOutCurrency.coinMinimalDenom
+          );
+
+          // 다른 후보들은 사실 ibc pfm transfer가 가능한 채널 정보와 로직이 유사하다.
+          // 차이점은 ibc pfm transfer의 경우는 시작지점이 tx를 보내는 체인이지만
+          // ibc swap의 경우는 이렇게 처리할 수 없다. (일단 기본적으로 무조건 osmosis를 거치기 때문에)
+          // ibc pfm transfer의 경우 시작 지점을 보내는 체인의 경우 ibc module의 memo만 지원하면
+          // 두번째 체인부터 pfm을 지원하면 되기 때문에 보내는 체인의 경우는 이러한 확인을 하지 않는다.
+          // 하지만 ibc swap의 경우는 ibc pfm transfer 상의 보내는 체인은 시작 지점이 될 수 없기 때문에 pfm에 대한 확인을 꼭 해야한다.
           if (
-            channel.destinationChainId ===
-              this.chainStore.getChain(chainId).chainId &&
-            channel.denom === currency.coinMinimalDenom
+            !this.chainStore.getChain(originOutChainId).hasFeature("ibc-go") ||
+            !this.queryChains.isSupportsMemo(originOutChainId) ||
+            !this.queryChains.isPFMEnabled(originOutChainId)
           ) {
-            return true;
+            // 만약 originOutChainId가 ibc-pfm을 지원하지 않는다면
+            // 여기서 더 routing할 방법은 없다.
+            // osmosis의 경우는 ibc transfer가 아니라 그대로 osmosis에서 남기 때문에
+            // 따로 추가해주고 반환한다.
+            const findSwapVenue = channels.find(
+              (channel) =>
+                channel.channels.length === 1 &&
+                this.swapVenues.some(
+                  (swapVenue) =>
+                    this.chainStore.getChain(swapVenue.chainId)
+                      .chainIdentifier ===
+                    this.chainStore.getChain(
+                      channel.channels[0].counterpartyChainId
+                    ).chainIdentifier
+                )
+            );
+            if (findSwapVenue) {
+              return true;
+            }
+          }
+
+          for (const channel of channels) {
+            if (
+              channel.destinationChainId ===
+                this.chainStore.getChain(chainId).chainId &&
+              channel.denom === currency.coinMinimalDenom
+            ) {
+              return true;
+            }
           }
         }
       } else {
@@ -703,8 +728,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
       if (
         !this.chainStore.getChain(originOutChainId).hasFeature("ibc-go") ||
         !this.queryChains.isSupportsMemo(originOutChainId) ||
-        !this.queryChains.isPFMEnabled(originOutChainId) ||
-        !this.chainStore.getChain(originOutChainId).hasFeature("ibc-pfm")
+        !this.queryChains.isPFMEnabled(originOutChainId)
       ) {
         // 만약 originOutChainId가 ibc-pfm을 지원하지 않는다면
         // 여기서 더 routing할 방법은 없다.
@@ -744,3 +768,13 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
     }
   );
 }
+
+const WRAPPED_NATIVE_ADDRESSES: Record<string, string | undefined> = {
+  "eip155:1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+  "eip155:8453": "0x4200000000000000000000000000000000000006",
+  "eip155:10": "0x4200000000000000000000000000000000000006",
+  "eip155:42161": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+  "eip155:137": "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270", // WPOL
+  "eip155:56": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c", // WBNB
+  "eip155:43114": "0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7", // WAVAX
+} as const;
