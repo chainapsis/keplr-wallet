@@ -174,24 +174,20 @@ export const SwapVenues: {
   { name: "persistence-dexter", chainId: "core-1" },
   { name: "terra-terraswap", chainId: "phoenix-1" },
   { name: "injective-astroport", chainId: "injective-1" },
-  { name: "blast-uniswap-v2", chainId: "eip155:81457" },
-  { name: "blast-uniswap-v3", chainId: "eip155:81457" },
-  { name: "binance-uniswap-v2", chainId: "eip155:56" },
-  { name: "binance-uniswap-v3", chainId: "eip155:56" },
-  { name: "optimism-uniswap-v2", chainId: "eip155:10" },
-  { name: "optimism-uniswap-v3", chainId: "eip155:10" },
-  { name: "optimism-velodrome", chainId: "eip155:10" },
-  { name: "polygon-uniswap-v2", chainId: "eip155:137" },
-  { name: "polygon-uniswap-v3", chainId: "eip155:137" },
-  { name: "arbitrum-uniswap-v2", chainId: "eip155:42161" },
-  { name: "arbitrum-uniswap-v3", chainId: "eip155:42161" },
-  { name: "avalanche-uniswap-v2", chainId: "eip155:43114" },
-  { name: "avalanche-uniswap-v3", chainId: "eip155:43114" },
-  { name: "base-uniswap-v2", chainId: "eip155:8453" },
-  { name: "base-uniswap-v3", chainId: "eip155:8453" },
-  { name: "base-aerodrome", chainId: "eip155:8453" },
-  { name: "ethereum-uniswap-v2", chainId: "eip155:1" },
-  { name: "ethereum-uniswap-v3", chainId: "eip155:1" },
+  { name: "blast-uniswap", chainId: "eip155:81457" },
+  { name: "binance-uniswap", chainId: "eip155:56" },
+  { name: "optimism-uniswap", chainId: "eip155:10" },
+  { name: "polygon-uniswap", chainId: "eip155:137" },
+  { name: "arbitrum-uniswap", chainId: "eip155:42161" },
+  { name: "avalanche-uniswap", chainId: "eip155:43114" },
+  { name: "base-uniswap", chainId: "eip155:8453" },
+  { name: "ethereum-uniswap", chainId: "eip155:1" },
+  // Forma가 destination asset에 뜨게하기 위해 임시로 추가
+  // 실제 swap venue로 사용되진 않음
+  {
+    name: "temp-forma",
+    chainId: "eip155:984122",
+  },
 ];
 
 export const SwapFeeBps = {
