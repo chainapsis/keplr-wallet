@@ -152,95 +152,41 @@ export const SwapVenues: {
   name: string;
   chainId: string;
 }[] = [
-  {
-    name: "osmosis-poolmanager",
-    chainId: "osmosis-1",
-  },
-  {
-    name: "injective-helix",
-    chainId: "injective-1",
-  },
-  {
-    name: "injective-astroport",
-    chainId: "injective-1",
-  },
-  {
-    name: "injective-white-whale",
-    chainId: "injective-1",
-  },
-  {
-    name: "injective-dojoswap",
-    chainId: "injective-1",
-  },
-  {
-    name: "injective-hallswap",
-    chainId: "injective-1",
-  },
-  {
-    name: "neutron-drop",
-    chainId: "neutron-1",
-  },
-  {
-    name: "neutron-astroport",
-    chainId: "neutron-1",
-  },
-  {
-    name: "neutron-lido-satellite",
-    chainId: "neutron-1",
-  },
-  {
-    name: "persistence-dexter",
-    chainId: "core-1",
-  },
-  {
-    name: "pryzm-native",
-    chainId: "pryzm-1",
-  },
-  {
-    name: "chihuahua-white-whale",
-    chainId: "chihuahua-1",
-  },
-  {
-    name: "arbitrum-uniswap",
-    chainId: "eip155:42161",
-  },
-  {
-    name: "base-uniswap",
-    chainId: "eip155:8453",
-  },
-  {
-    name: "binance-uniswap",
-    chainId: "eip155:56",
-  },
-  {
-    name: "avalanche-uniswap",
-    chainId: "eip155:43114",
-  },
-  {
-    name: "optimism-uniswap",
-    chainId: "eip155:10",
-  },
-  {
-    name: "polygon-uniswap",
-    chainId: "eip155:137",
-  },
-  {
-    name: "blast-uniswap",
-    chainId: "eip155:81457",
-  },
-  {
-    name: "ethereum-uniswap",
-    chainId: "eip155:1",
-  },
+  { name: "terra-phoenix", chainId: "phoenix-1" },
+  { name: "chihuahua-white-whale", chainId: "chihuahua-1" },
+  { name: "injective-dojoswap", chainId: "injective-1" },
+  { name: "injective-white-whale", chainId: "injective-1" },
+  { name: "elys-native", chainId: "elys-1" },
+  { name: "neutron-astroport", chainId: "neutron-1" },
+  { name: "neutron-astrovault", chainId: "neutron-1" },
+  { name: "terra-nauticus", chainId: "phoenix-1" },
+  { name: "terra-white-whale", chainId: "phoenix-1" },
+  { name: "neutron-lido-satellite", chainId: "neutron-1" },
+  { name: "neutron-drop", chainId: "neutron-1" },
+  { name: "injective-helix", chainId: "injective-1" },
+  { name: "neutron-duality", chainId: "neutron-1" },
+  { name: "terra-astroport", chainId: "phoenix-1" },
+  { name: "terra-ura", chainId: "phoenix-1" },
+  { name: "babylon-tower", chainId: "bbn-1" },
+  { name: "osmosis-poolmanager", chainId: "osmosis-1" },
+  { name: "initia-dex", chainId: "interwoven-1" },
+  { name: "pryzm-native", chainId: "pryzm-1" },
+  { name: "persistence-dexter", chainId: "core-1" },
+  { name: "terra-terraswap", chainId: "phoenix-1" },
+  { name: "injective-astroport", chainId: "injective-1" },
+  { name: "blast-uniswap", chainId: "eip155:81457" },
+  { name: "binance-uniswap", chainId: "eip155:56" },
+  { name: "optimism-uniswap", chainId: "eip155:10" },
+  { name: "polygon-uniswap", chainId: "eip155:137" },
+  { name: "arbitrum-uniswap", chainId: "eip155:42161" },
+  { name: "avalanche-uniswap", chainId: "eip155:43114" },
+  { name: "base-uniswap", chainId: "eip155:8453" },
+  { name: "ethereum-uniswap", chainId: "eip155:1" },
   // Forma가 destination asset에 뜨게하기 위해 임시로 추가
   // 실제 swap venue로 사용되진 않음
   {
     name: "temp-forma",
     chainId: "eip155:984122",
-  },
-  {
-    name: "neutron-duality",
-    chainId: "neutron-1",
   },
 ];
 
