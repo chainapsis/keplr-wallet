@@ -187,7 +187,7 @@
   "pages.manage-chains.search-input-placeholder": "Search networks",
   "pages.manage-chains.select-derivation-path-modal.title": "Set Derivation Path",
   "pages.manage-chains.select-derivation-path-modal.chain-step": "Chains {currentStep}/{totalStep}",
-  "pages.manage-chains.select-derivation-path-modal.paragraph": "To use both paths, you need to go through the import process twice.",
+  "pages.manage-chains.select-derivation-path-modal.paragraph": "To use both paths, you need to go through {br} the import process twice.",
   "pages.manage-chains.select-derivation-path-modal.path-item.balance": "Balance",
   "pages.manage-chains.select-derivation-path-modal.path-item.previous-txs": "Previous txs",
   "pages.manage-chains.select-derivation-path-modal.import-button": "Import",

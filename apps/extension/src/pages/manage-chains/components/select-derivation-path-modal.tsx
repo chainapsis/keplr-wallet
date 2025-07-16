@@ -121,7 +121,26 @@ export const SelectDerivationPathModal: FunctionComponent<{
           />
 
           <YAxis alignX="center" gap="0.75rem">
-            <XAxis alignY="center">
+            <XAxis alignY="center" gap="0.5rem">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="21"
+                viewBox="0 0 20 21"
+                fill="none"
+              >
+                <path
+                  d="M10 7.6875V10.8125M17.5 10.1875C17.5 14.3296 14.1421 17.6875 10 17.6875C5.85786 17.6875 2.5 14.3296 2.5 10.1875C2.5 6.04536 5.85786 2.6875 10 2.6875C14.1421 2.6875 17.5 6.04536 17.5 10.1875ZM10 13.3125H10.0063V13.3188H10V13.3125Z"
+                  stroke={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-700"]
+                      : ColorPalette.white
+                  }
+                  strokeWidth="2.08333"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
               <H3
                 color={
                   theme.mode === "light"
@@ -191,11 +210,16 @@ export const SelectDerivationPathModal: FunctionComponent<{
                   ? ColorPalette["gray-300"]
                   : ColorPalette["gray-200"]
               }
-              style={{ textAlign: "center" }}
+              style={{ textAlign: "center", lineHeight: "140%" }}
             >
-              {intl.formatMessage({
-                id: "pages.manage-chains.select-derivation-path-modal.paragraph",
-              })}
+              {intl.formatMessage(
+                {
+                  id: "pages.manage-chains.select-derivation-path-modal.paragraph",
+                },
+                {
+                  br: <br />,
+                }
+              )}
             </Body2>
           </YAxis>
 
