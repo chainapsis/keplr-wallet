@@ -28,6 +28,8 @@ import { AllNativeToggleItem } from "./components/all-native-toggle-item";
 import { useTheme } from "styled-components";
 import { ColorPalette } from "../../styles";
 import styled from "styled-components";
+import { SelectDerivationPathModal } from "./components/select-derivation-path-modal";
+import { useKeyCoinTypeFinalize } from "./hooks/use-key-coin-type-finalize";
 
 export const Ecosystem = {
   All: "All",
@@ -74,6 +76,11 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
   const vaultId =
     searchParams.get("vaultId") || keyRingStore.selectedKeyInfo?.id;
 
+  const { needFinalizeKeyCoinTypeAction } = useKeyCoinTypeFinalize();
+
+  const [isDerivationModalOpen, setIsDerivationModalOpen] = useState(false);
+  const [derivationChainIds, setDerivationChainIds] = useState<string[]>([]);
+
   const [enabledIdentifiers, setEnabledIdentifiers] = useState<string[]>(() => {
     return chainStore.enabledChainIdentifiers.slice();
   });
@@ -83,15 +90,45 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
     setBackupSelectedNativeChainIdentifiers,
   ] = useState<string[]>([]);
 
+  const applyEnableChange = useCallback(
+    async (chainIdentifier: string, enable: boolean) => {
+      if (!vaultId) return;
+
+      const modInfo = chainStore.getModularChain(chainIdentifier);
+      const chainId = modInfo.chainId;
+
+      if (enable) {
+        try {
+          const chainInfo = chainStore.getChain(chainId);
+          const needModal = await needFinalizeKeyCoinTypeAction(
+            vaultId,
+            chainInfo
+          );
+
+          if (needModal) {
+            setDerivationChainIds((prev) =>
+              prev.includes(chainId) ? prev : [...prev, chainId]
+            );
+            setIsDerivationModalOpen(true);
+          } else {
+            await chainStore.enableChainInfoInUIWithVaultId(vaultId, chainId);
+          }
+        } catch {}
+      } else {
+        await chainStore.disableChainInfoInUIWithVaultId(vaultId, chainId);
+      }
+    },
+    [chainStore, vaultId, needFinalizeKeyCoinTypeAction]
+  );
+
   const applyBatchEnableChange = useCallback(
     async (identifiers: string[], enable: boolean) => {
       if (!vaultId || identifiers.length === 0) return;
 
       if (enable) {
-        await chainStore.enableChainInfoInUIWithVaultId(
-          vaultId,
-          ...identifiers
-        );
+        for (const id of identifiers) {
+          await applyEnableChange(id, true);
+        }
       } else {
         await chainStore.disableChainInfoInUIWithVaultId(
           vaultId,
@@ -99,7 +136,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
         );
       }
     },
-    [chainStore, vaultId]
+    [vaultId, applyEnableChange, chainStore]
   );
 
   const setEnabledIdentifiersWithBatch = useCallback(
@@ -314,22 +351,6 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
     });
   }, [ecosystemFilteredChainInfos, hideEnabled, enabledIdentifierMap]);
 
-  const applyEnableChange = async (
-    chainIdentifier: string,
-    enable: boolean
-  ) => {
-    if (!vaultId) return;
-
-    const modInfo = chainStore.getModularChain(chainIdentifier);
-    const chainId = modInfo.chainId;
-
-    if (enable) {
-      await chainStore.enableChainInfoInUIWithVaultId(vaultId, chainId);
-    } else {
-      await chainStore.disableChainInfoInUIWithVaultId(vaultId, chainId);
-    }
-  };
-
   const handleToggle = (chainIdentifier: string, enable: boolean) => {
     const linkedIdentifiers = (() => {
       try {
@@ -367,13 +388,36 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
     identifiersToChange.forEach((id) => applyEnableChange(id, enable));
   };
 
-  const handleToggleAllNative = useCallback(() => {
+  const handleToggleAllNative = useCallback(async () => {
     const nativeIds = Array.from(nativeChainIdentifierSet);
     const enabledNativeIds = nativeIds.filter((id) =>
       enabledIdentifierMap.get(id)
     );
 
     const isAllNativeSelected = enabledNativeIds.length === nativeIds.length;
+
+    const processFinalize = async (ids: string[]) => {
+      if (!vaultId) return;
+      await Promise.allSettled(
+        ids.map(async (id) => {
+          try {
+            const modInfo = chainStore.getModularChain(id);
+            const chainId = modInfo.chainId;
+            const chainInfo = chainStore.getChain(chainId);
+            const needModal = await needFinalizeKeyCoinTypeAction(
+              vaultId,
+              chainInfo
+            );
+            if (needModal) {
+              setDerivationChainIds((prev) =>
+                prev.includes(chainId) ? prev : [...prev, chainId]
+              );
+              setIsDerivationModalOpen(true);
+            }
+          } catch {}
+        })
+      );
+    };
 
     if (isAllNativeSelected) {
       if (backupSelectedNativeChainIdentifiers.length > 0) {
@@ -382,6 +426,8 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
 
         setEnabledIdentifiersWithBatch(toDisable, false);
         setEnabledIdentifiersWithBatch(toEnable, true);
+
+        await processFinalize(toEnable);
       } else if (sortedNativeChainInfos.length > 0) {
         const first = sortedNativeChainInfos[0];
         const chainIdentifiers: string[] = [
@@ -408,6 +454,8 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
         (id) => !enabledNativeIds.includes(id)
       );
       setEnabledIdentifiersWithBatch(idsToEnable, true);
+
+      await processFinalize(idsToEnable);
     }
   }, [
     nativeChainIdentifierSet,
@@ -415,6 +463,9 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
     backupSelectedNativeChainIdentifiers,
     sortedNativeChainInfos,
     setEnabledIdentifiersWithBatch,
+    vaultId,
+    chainStore,
+    needFinalizeKeyCoinTypeAction,
   ]);
 
   return (
@@ -516,6 +567,16 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
           <div ref={infiniteScrollTriggerRef} />
         </Stack>
       </div>
+      <SelectDerivationPathModal
+        isOpen={isDerivationModalOpen}
+        close={() => {
+          setIsDerivationModalOpen(false);
+          setDerivationChainIds([]);
+          setEnabledIdentifiers(chainStore.enabledChainIdentifiers.slice());
+        }}
+        chainIds={derivationChainIds}
+        vaultId={vaultId || ""}
+      />
     </HeaderLayout>
   );
 });
