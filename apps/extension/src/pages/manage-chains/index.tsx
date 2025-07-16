@@ -29,6 +29,7 @@ import { useTheme } from "styled-components";
 import { ColorPalette } from "../../styles";
 import styled from "styled-components";
 import { SelectDerivationPathModal } from "./components/select-derivation-path-modal";
+import { ConnectLedgerModal } from "./components/connect-ledger-modal";
 import { useKeyCoinTypeFinalize } from "./hooks/use-key-coin-type-finalize";
 
 export const Ecosystem = {
@@ -81,6 +82,10 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
   const [isDerivationModalOpen, setIsDerivationModalOpen] = useState(false);
   const [derivationChainIds, setDerivationChainIds] = useState<string[]>([]);
 
+  const [isConnectLedgerModalOpen, setIsConnectLedgerModalOpen] =
+    useState(false);
+  const [connectLedgerApp, setConnectLedgerApp] = useState<string>("");
+
   const [enabledIdentifiers, setEnabledIdentifiers] = useState<string[]>(() => {
     return chainStore.enabledChainIdentifiers.slice();
   });
@@ -96,6 +101,34 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
 
       const modInfo = chainStore.getModularChain(chainIdentifier);
       const chainId = modInfo.chainId;
+
+      if (enable && keyRingStore.selectedKeyInfo?.type === "ledger") {
+        const determineLedgerApp = (info: ModularChainInfo): string => {
+          try {
+            if (chainStore.isEvmOnlyChain(info.chainId)) {
+              return "Ethereum";
+            }
+          } catch {}
+
+          if ("starknet" in info) {
+            return "Starknet";
+          }
+          if ("bitcoin" in info) {
+            const coinType = info.bitcoin.bip44.coinType;
+            return coinType === 1 ? "Bitcoin Test" : "Bitcoin";
+          }
+
+          return "Cosmos";
+        };
+
+        const ledgerApp = determineLedgerApp(modInfo);
+
+        setEnabledIdentifiers(chainStore.enabledChainIdentifiers.slice());
+
+        setConnectLedgerApp(ledgerApp);
+        setIsConnectLedgerModalOpen(true);
+        return;
+      }
 
       if (enable) {
         try {
@@ -118,7 +151,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
         await chainStore.disableChainInfoInUIWithVaultId(vaultId, chainId);
       }
     },
-    [chainStore, vaultId, needFinalizeKeyCoinTypeAction]
+    [chainStore, vaultId, needFinalizeKeyCoinTypeAction, keyRingStore]
   );
 
   const applyBatchEnableChange = useCallback(
@@ -575,6 +608,12 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
           setEnabledIdentifiers(chainStore.enabledChainIdentifiers.slice());
         }}
         chainIds={derivationChainIds}
+        vaultId={vaultId || ""}
+      />
+      <ConnectLedgerModal
+        isOpen={isConnectLedgerModalOpen}
+        close={() => setIsConnectLedgerModalOpen(false)}
+        ledgerApp={connectLedgerApp}
         vaultId={vaultId || ""}
       />
     </HeaderLayout>

@@ -191,6 +191,9 @@
   "pages.manage-chains.select-derivation-path-modal.path-item.balance": "Balance",
   "pages.manage-chains.select-derivation-path-modal.path-item.previous-txs": "Previous txs",
   "pages.manage-chains.select-derivation-path-modal.import-button": "Import",
+  "pages.manage-chains.connect-ledger-modal.title": "Connect Ledger",
+  "pages.manage-chains.connect-ledger-modal.paragraph": "Get your Ledger device ready and {br} click the button below to begin.",
+  "pages.manage-chains.connect-ledger-modal.button": "Go to Connect",
 
   "pages.register.select-derivation-path.title": "Select Account Derivation Path",
   "pages.register.select-derivation-path.paragraph": "To use both paths, you need to go through the import process twice.",
