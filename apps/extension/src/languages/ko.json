@@ -185,6 +185,14 @@
 
   "pages.manage-chains.title": "체인 추가/제거",
   "pages.manage-chains.search-input-placeholder": "네트워크 검색하기",
+  "pages.manage-chains.select-derivation-path-modal.title": "파생 경로 설정 (고급)",
+  "pages.manage-chains.select-derivation-path-modal.paragraph": "두 가지 경로를 모두 사용하려면, 각각에 대해 불러오기 과정을 한번씩 거쳐야 합니다.",
+  "pages.manage-chains.select-derivation-path-modal.path-item.balance": "잔액",
+  "pages.manage-chains.select-derivation-path-modal.path-item.previous-txs": "트랜잭션 수",
+  "pages.manage-chains.select-derivation-path-modal.import-button": "불러오기",
+  "pages.manage-chains.connect-ledger-modal.title": "렛저 계정 연결하기",
+  "pages.manage-chains.connect-ledger-modal.paragraph": "렛저 장치를 준비하고 아래 버튼을 클릭하여 시작하세요.",
+  "pages.manage-chains.connect-ledger-modal.button": "불러오기",
 
   "pages.register.select-derivation-path.title": "계정 파생 경로(Derivation Path) 선택하기",
   "pages.register.select-derivation-path.paragraph": "두 가지 경로를 모두 사용하려면, 각각에 대해 불러오기 과정을 한번씩 거쳐야 합니다.",

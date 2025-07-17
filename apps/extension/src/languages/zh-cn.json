@@ -162,6 +162,14 @@
 
   "pages.manage-chains.title": "添加/删除链",
   "pages.manage-chains.search-input-placeholder": "搜索网络",
+  "pages.manage-chains.select-derivation-path-modal.title": "设置派生路径",
+  "pages.manage-chains.select-derivation-path-modal.paragraph": "要使用这两个路径，你需要执行两次导入过程。",
+  "pages.manage-chains.select-derivation-path-modal.path-item.balance": "余额",
+  "pages.manage-chains.select-derivation-path-modal.path-item.previous-txs": "交易记录",
+  "pages.manage-chains.select-derivation-path-modal.import-button": "导入",
+  "pages.manage-chains.connect-ledger-modal.title": "连接Ledger",
+  "pages.manage-chains.connect-ledger-modal.paragraph": "准备好你的Ledger设备并点击下面的按钮开始。",
+  "pages.manage-chains.connect-ledger-modal.button": "连接",
 
   "pages.register.select-derivation-path.title": "选择账户派生路径",
   "pages.register.select-derivation-path.paragraph": "要使用这两个路径，你需要执行两次导入过程。",
