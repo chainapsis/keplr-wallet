@@ -1,11 +1,15 @@
 import React from "react";
 
-export const NativeChainSectionIconDM = () => {
+export const NativeChainSectionIconDM = ({
+  size = "28",
+}: {
+  size?: string;
+}) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="28"
-      height="28"
+      width={size}
+      height={size}
       viewBox="0 0 28 28"
       fill="none"
     >

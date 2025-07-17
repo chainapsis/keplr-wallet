@@ -106,6 +106,7 @@ import { BitcoinSendPage } from "./pages/bitcoin/send";
 import { SignBitcoinTxPage } from "./pages/bitcoin/sign/tx";
 import { SignBitcoinMessagePage } from "./pages/bitcoin/sign/message";
 import { ManageViewAssetTokenListPage } from "./pages/manage-view-asset-token-list";
+import { ManageChainsPage } from "./pages/manage-chains";
 import { TxResultFailedPage } from "./pages/tx-result/failed";
 import { TxResultPendingPage } from "./pages/tx-result/pending";
 import { TxResultSuccessPage } from "./pages/tx-result/success";
@@ -424,6 +425,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
                 path="/manage-view-asset-token-list"
                 element={<ManageViewAssetTokenListPage />}
               />
+              <Route path="/manage-chains" element={<ManageChainsPage />} />
               <Route path="/setting" element={<SettingPage />} />
               <Route path="/setting/general" element={<SettingGeneralPage />} />
               <Route

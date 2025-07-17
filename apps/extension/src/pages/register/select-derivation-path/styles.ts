@@ -16,8 +16,10 @@ export const Styles = {
 
     border: ${(props) =>
       props.theme.mode === "light"
-        ? "none"
-        : `2px solid ${ColorPalette["gray-500"]}`};
+        ? props.isSelected
+          ? `2px solid ${ColorPalette["blue-400"]}`
+          : "none"
+        : "none"};
 
     background-color: ${(props) =>
       props.theme.mode === "light"
