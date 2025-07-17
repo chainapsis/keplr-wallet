@@ -52,7 +52,8 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
   const { chainStore, hugeQueriesStore, keyRingStore, priceStore } = useStore();
   const intl = useIntl();
   const [searchParams] = useSearchParams();
-  const [search, setSearch] = useState("");
+  const initialSearchValue = searchParams.get("initialSearchValue") ?? "";
+  const [search, setSearch] = useState(initialSearchValue);
 
   const [selectedEcosystem, setSelectedEcosystem] = useState<Ecosystem>("All");
 

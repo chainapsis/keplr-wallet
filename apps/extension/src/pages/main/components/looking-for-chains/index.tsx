@@ -18,6 +18,7 @@ import { dispatchGlobalEventExceptSelf } from "../../../../utils/global-events";
 import { Stack } from "../../../../components/stack";
 import { NativeChainMarkIcon } from "../../../../components/icon";
 import { getChainSearchResultClickAnalyticsProperties } from "../../../../analytics-amplitude";
+import { useNavigate } from "react-router";
 
 export const LookingForChains: FunctionComponent<{
   lookingForChains: {
@@ -76,6 +77,7 @@ export const LookingForChainItem: FunctionComponent<{
   const keyType = keyRingStore.selectedKeyInfo?.type;
   const intl = useIntl();
   const theme = useTheme();
+  const navigate = useNavigate();
 
   return (
     <Box
@@ -205,9 +207,16 @@ export const LookingForChainItem: FunctionComponent<{
                 return;
               }
 
-              browser.tabs.create({
-                url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&skipWelcome=true&initialSearchValue=${chainInfo.chainName}`,
-              });
+              if (keyType === "ledger") {
+                browser.tabs.create({
+                  url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&skipWelcome=true&initialSearchValue=${chainInfo.chainName}`,
+                });
+                return;
+              }
+
+              navigate(
+                `/manage-chains?vaultId=${keyRingStore.selectedKeyInfo.id}&initialSearchValue=${chainInfo.chainName}`
+              );
             }
           }}
         />
