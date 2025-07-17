@@ -85,6 +85,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
   const [isConnectLedgerModalOpen, setIsConnectLedgerModalOpen] =
     useState(false);
   const [connectLedgerApp, setConnectLedgerApp] = useState<string>("");
+  const [openEnableChainsRoute, setOpenEnableChainsRoute] = useState(false);
 
   const [enabledIdentifiers, setEnabledIdentifiers] = useState<string[]>(() => {
     return chainStore.enabledChainIdentifiers.slice();
@@ -126,6 +127,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
         setEnabledIdentifiers(chainStore.enabledChainIdentifiers.slice());
 
         setConnectLedgerApp(ledgerApp);
+        setOpenEnableChainsRoute(false);
         setIsConnectLedgerModalOpen(true);
         return;
       }
@@ -422,6 +424,12 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
   };
 
   const handleToggleAllNative = useCallback(async () => {
+    if (keyRingStore.selectedKeyInfo?.type === "ledger") {
+      setOpenEnableChainsRoute(true);
+      setIsConnectLedgerModalOpen(true);
+      return;
+    }
+
     const nativeIds = Array.from(nativeChainIdentifierSet);
     const enabledNativeIds = nativeIds.filter((id) =>
       enabledIdentifierMap.get(id)
@@ -491,6 +499,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
       await processFinalize(idsToEnable);
     }
   }, [
+    keyRingStore.selectedKeyInfo?.type,
     nativeChainIdentifierSet,
     enabledIdentifierMap,
     backupSelectedNativeChainIdentifiers,
@@ -614,6 +623,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
         close={() => setIsConnectLedgerModalOpen(false)}
         ledgerApp={connectLedgerApp}
         vaultId={vaultId || ""}
+        openEnableChains={openEnableChainsRoute}
       />
     </HeaderLayout>
   );

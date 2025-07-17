@@ -14,7 +14,8 @@ export const ConnectLedgerModal: FunctionComponent<{
   close: () => void;
   ledgerApp: string;
   vaultId: string;
-}> = ({ isOpen, close, ledgerApp, vaultId }) => {
+  openEnableChains?: boolean;
+}> = ({ isOpen, close, ledgerApp, vaultId, openEnableChains }) => {
   const intl = useIntl();
   const theme = useTheme();
 
@@ -98,11 +99,15 @@ export const ConnectLedgerModal: FunctionComponent<{
               size="large"
               onClick={() => {
                 browser.tabs.create({
-                  url: `/register.html#?route=connect-ledger&ledgerApp=${encodeURIComponent(
-                    ledgerApp
-                  )}&vaultId=${encodeURIComponent(
-                    vaultId
-                  )}&account=0&change=0&addressIndex=0&skipWelcome=true&stepPrevious=0&stepTotal=0`,
+                  url: openEnableChains
+                    ? `/register.html#?route=enable-chains&vaultId=${encodeURIComponent(
+                        vaultId
+                      )}&skipWelcome=true&stepPrevious=0&stepTotal=0`
+                    : `/register.html#?route=connect-ledger&ledgerApp=${encodeURIComponent(
+                        ledgerApp
+                      )}&vaultId=${encodeURIComponent(
+                        vaultId
+                      )}&account=0&change=0&addressIndex=0&skipWelcome=true&stepPrevious=0&stepTotal=0`,
                 });
 
                 close();
