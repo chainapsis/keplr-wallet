@@ -3,14 +3,12 @@ import { Modal } from "../../../components/modal";
 import { YAxis, XAxis } from "../../../components/axis";
 import { Box } from "../../../components/box";
 import { Body2, H3, H5, Subtitle3 } from "../../../components/typography";
-import { ChainImageFallback } from "../../../components/image";
 import { Stack } from "../../../components/stack";
 import { Button } from "../../../components/button";
 import { useStore } from "../../../stores";
 import { observer } from "mobx-react-lite";
 import { AppCurrency } from "@keplr-wallet/types";
 import { FormattedMessage, useIntl } from "react-intl";
-import Color from "color";
 import { ColorPalette } from "../../../styles";
 import { Styles as RegisterStyles } from "../../register/select-derivation-path/styles";
 import styled from "styled-components";
@@ -18,6 +16,7 @@ import { Bech32Address } from "@keplr-wallet/cosmos";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { useTheme } from "styled-components";
 import { dispatchGlobalEventExceptSelf } from "../../../utils/global-events";
+import { Gutter } from "../../../components/gutter";
 
 export const SelectDerivationPathModal: FunctionComponent<{
   isOpen: boolean;
@@ -108,7 +107,7 @@ export const SelectDerivationPathModal: FunctionComponent<{
   return (
     <Modal isOpen={isOpen} align="bottom" close={close} maxHeight="95vh">
       <Styles.Container>
-        <YAxis alignX="center" gap="1.5rem">
+        <YAxis alignX="center">
           <Box
             width="2.5rem"
             height="0.3125rem"
@@ -119,8 +118,8 @@ export const SelectDerivationPathModal: FunctionComponent<{
             }
             borderRadius="1.4375rem"
           />
-
-          <YAxis alignX="center" gap="0.75rem">
+          <Gutter size="1.5rem" />
+          <YAxis alignX="center">
             <XAxis alignY="center" gap="0.5rem">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -153,64 +152,18 @@ export const SelectDerivationPathModal: FunctionComponent<{
                 })}
               </H3>
             </XAxis>
-            <Subtitle3>
-              {intl.formatMessage(
-                {
-                  id: "pages.manage-chains.select-derivation-path-modal.chain-step",
-                  defaultMessage: "Chains {currentStep}/{totalStep}",
-                },
-                {
-                  currentStep: currentIndex + 1,
-                  totalStep: chainIds.length,
-                }
-              )}
-            </Subtitle3>
-            <Box
-              padding="0.75rem 2rem 0.75rem 0.75rem"
-              borderRadius="3.5rem"
-              backgroundColor={
-                theme.mode === "light"
-                  ? ColorPalette.white
-                  : Color(ColorPalette["gray-500"]).alpha(0.5).toString()
-              }
-              borderWidth={theme.mode === "light" ? "1px" : undefined}
-              borderColor={
-                theme.mode === "light" ? ColorPalette["gray-100"] : undefined
-              }
-            >
-              <XAxis alignY="center" gap="0.75rem">
-                <Box width="2.75rem" height="2.75rem">
-                  <ChainImageFallback chainInfo={chainInfo} size="2.75rem" />
-                </Box>
-                <Stack gutter="0.25rem">
-                  <H3
-                    color={
-                      theme.mode === "light"
-                        ? ColorPalette["gray-400"]
-                        : ColorPalette.white
-                    }
-                  >
-                    {chainInfo.chainName}
-                  </H3>
-                  <Body2
-                    color={
-                      theme.mode === "light"
-                        ? ColorPalette["gray-300"]
-                        : ColorPalette["gray-200"]
-                    }
-                  >
-                    {currency.coinDenom}
-                  </Body2>
-                </Stack>
-              </XAxis>
-            </Box>
+            <Gutter size="0.75rem" />
             <Body2
               color={
                 theme.mode === "light"
                   ? ColorPalette["gray-300"]
                   : ColorPalette["gray-200"]
               }
-              style={{ textAlign: "center", lineHeight: "140%" }}
+              style={{
+                textAlign: "center",
+                lineHeight: "140%",
+                marginBottom: "0.25rem",
+              }}
             >
               {intl.formatMessage(
                 {
@@ -221,8 +174,30 @@ export const SelectDerivationPathModal: FunctionComponent<{
                 }
               )}
             </Body2>
+            <Gutter size="1rem" />
+            <XAxis alignY="center" gap="0.5rem">
+              <Subtitle3
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-700"]
+                    : ColorPalette.white
+                }
+                style={{ fontWeight: 500 }}
+              >
+                {chainInfo.chainName}
+              </Subtitle3>
+              <Body2
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-200"]
+                    : ColorPalette["gray-300"]
+                }
+              >
+                {currentIndex + 1}/{chainIds.length}
+              </Body2>
+            </XAxis>
           </YAxis>
-
+          <Gutter size="1rem" />
           <Styles.PathItemList>
             {candidates.map((candidate) => (
               <PathItem
@@ -238,11 +213,11 @@ export const SelectDerivationPathModal: FunctionComponent<{
               />
             ))}
           </Styles.PathItemList>
-
+          <Gutter size="1.5rem" />
           <Box width="21rem" marginX="auto">
             <Button
               text={intl.formatMessage({
-                id: "pages.register.select-derivation-path.import-button",
+                id: "pages.manage-chains.select-derivation-path-modal.import-button",
               })}
               size="large"
               disabled={

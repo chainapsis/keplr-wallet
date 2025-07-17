@@ -504,8 +504,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
   return (
     <HeaderLayout
       title={intl.formatMessage({
-        id: "page.manage-chains.title",
-        defaultMessage: "Manage Chains",
+        id: "pages.manage-chains.title",
       })}
       left={<BackButton />}
     >
