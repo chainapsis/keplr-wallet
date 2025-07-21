@@ -185,6 +185,8 @@
 
   "pages.manage-chains.title": "Add/Remove Chains",
   "pages.manage-chains.search-input-placeholder": "Search networks",
+  "pages.manage-chains.ecosystem-filter-dropdown.title": "Filter",
+  "pages.manage-chains.hide-enabled-text": "Hide Enabled",
   "pages.manage-chains.select-derivation-path-modal.title": "Set Derivation Path",
   "pages.manage-chains.select-derivation-path-modal.paragraph": "To use both paths, you need to go through {br} the import process twice.",
   "pages.manage-chains.select-derivation-path-modal.path-item.balance": "Balance",

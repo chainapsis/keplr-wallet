@@ -3,6 +3,7 @@ import styled, { useTheme } from "styled-components";
 import { ColorPalette } from "../../../styles";
 import { Subtitle4 } from "../../../components/typography";
 import { Ecosystem } from "..";
+import { useIntl } from "react-intl";
 
 interface Props {
   selected: Ecosystem;
@@ -15,6 +16,7 @@ export const EcosystemFilterDropdown: FunctionComponent<Props> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const theme = useTheme();
+  const intl = useIntl();
 
   return (
     <Styles.MenuContainer>
@@ -27,7 +29,9 @@ export const EcosystemFilterDropdown: FunctionComponent<Props> = ({
                 : ColorPalette["gray-200"],
           }}
         >
-          Filter
+          {intl.formatMessage({
+            id: "pages.manage-chains.ecosystem-filter-dropdown.title",
+          })}
         </Subtitle4>
         <Subtitle4 style={{ color: ColorPalette["blue-300"] }}>
           {selected}

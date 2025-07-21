@@ -554,7 +554,9 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
                 onClick={() => setHideEnabled(!hideEnabled)}
                 style={{ color: textColor }}
               >
-                Hide Enabled
+                {intl.formatMessage({
+                  id: "pages.manage-chains.hide-enabled-text",
+                })}
               </HideEnabledText>
             );
           })()}
