@@ -55,6 +55,7 @@ import {
   SignStarknetMessageInteractionStore,
   SignBitcoinTxInteractionStore,
   SignBitcoinMessageInteractionStore,
+  ChainsUIForegroundStore,
 } from "@keplr-wallet/stores-core";
 import {
   KeplrETCQueries,
@@ -129,6 +130,7 @@ export class RootStore {
 
   public readonly keyRingStore: KeyRingStore;
   public readonly chainStore: ChainStore;
+  public readonly chainsUIForegroundStore: ChainsUIForegroundStore;
   public readonly ibcChannelStore: IBCChannelStore;
 
   public readonly permissionManagerStore: PermissionManagerStore;
@@ -318,6 +320,15 @@ export class RootStore {
       // register 페이지에서는 enable되지 않은 체인도 쉽게 등장(?)하기 때문에
       // 모든 체인에 대한 정보 업데이트를 시도해야함
       window.location.pathname === "/register.html"
+    );
+
+    this.chainsUIForegroundStore = new ChainsUIForegroundStore(
+      router,
+      (vaultId) => {
+        if (this.keyRingStore.selectedKeyInfo?.id === vaultId) {
+          this.chainStore.updateEnabledChainIdentifiersFromBackground();
+        }
+      }
     );
 
     this.ibcChannelStore = new IBCChannelStore(

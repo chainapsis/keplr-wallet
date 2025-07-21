@@ -2451,6 +2451,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       strkContractAddress:
         "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
     },
+    isTestnet: true,
   },
   {
     chainId: "mantra-1",
@@ -3148,6 +3149,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         },
       ],
     },
+    isTestnet: true,
   },
   {
     chainId:
@@ -3176,6 +3178,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         },
       ],
     },
+    isTestnet: true,
   },
   {
     chainId:
@@ -3204,6 +3207,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         },
       ],
     },
+    isTestnet: true,
   },
   {
     chainId:
@@ -3232,6 +3236,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         },
       ],
     },
+    isTestnet: true,
   },
   {
     rpc: "https://rpc-nillion.keplr.app",
@@ -3607,6 +3612,78 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       },
     ],
     features: ["eth-address-gen", "eth-key-sign", "axelar-evm-bridge"],
+  },
+  {
+    rpc: "https://rpc.testnet.citrea.xyz",
+    rest: "https://rpc.testnet.citrea.xyz",
+    evm: {
+      chainId: 5115,
+      rpc: "https://rpc.testnet.citrea.xyz",
+      websocket: "wss://rpc.testnet.citrea.xyz",
+    },
+    chainId: "eip155:5115",
+    chainName: "Citrea Testnet",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:5115/citrea-black.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "cBTC",
+        coinMinimalDenom: "cbtc",
+        coinDecimals: 18,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:5115/cbtc.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "cBTC",
+        coinMinimalDenom: "cbtc",
+        coinDecimals: 18,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:5115/cbtc.png",
+      },
+    ],
+    features: [],
+  },
+  {
+    rpc: "https://rpc.gravity.xyz",
+    rest: "https://rpc.gravity.xyz",
+    evm: {
+      chainId: 1625,
+      rpc: "https://rpc.gravity.xyz",
+      websocket: "wss://rpc.gravity.xyz",
+    },
+    chainId: "eip155:1625",
+    chainName: "Gravity Alpha Mainnet",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1625/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "G",
+        coinMinimalDenom: "gravity-native",
+        coinDecimals: 18,
+        coinGeckoId: "g-token",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1625/chain.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "G",
+        coinMinimalDenom: "gravity-native",
+        coinDecimals: 18,
+        coinGeckoId: "g-token",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1625/chain.png",
+      },
+    ],
+    features: [],
   },
 ];
 

@@ -265,10 +265,7 @@ export class ObservableQueryIbcPfmTransfer {
                         ) ||
                         !this.queryChains.isPFMEnabled(
                           channel.counterpartyChainId
-                        ) ||
-                        !this.chainStore
-                          .getChain(channel.counterpartyChainId)
-                          .hasFeature("ibc-pfm")
+                        )
                       ) {
                         pfmPossibility = false;
                         break;

@@ -175,6 +175,15 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   const isInChainEVMOnly = chainStore.isEvmOnlyChain(inChainId);
   const inChainAccount = accountStore.getAccount(inChainId);
 
+  const [nonceMethod, setNonceMethod] = useState<"latest" | "pending">(
+    "pending"
+  );
+  useEffect(() => {
+    if (!isInChainEVMOnly) {
+      setNonceMethod("pending");
+    }
+  }, [isInChainEVMOnly]);
+
   const ibcSwapConfigs = useIBCSwapConfig(
     chainStore,
     queriesStore,
@@ -1729,6 +1738,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       );
                     }
                   },
+                },
+                {
+                  nonceMethod,
                 }
               );
             }
@@ -1940,6 +1952,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           feeConfig={ibcSwapConfigs.feeConfig}
           gasSimulator={gasSimulator}
           isForEVMTx={isInChainEVMOnly}
+          nonceMethod={nonceMethod}
+          setNonceMethod={setNonceMethod}
         />
 
         <WarningGuideBox

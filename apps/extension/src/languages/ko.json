@@ -727,6 +727,8 @@
   "components.input.fee-control.tooltip.external-fee-set": "웹사이트에 의해 설정된 수수료입니다.",
   "components.input.fee-control.modal.title": "수수료 옵션",
   "components.input.fee-control.modal.fee-title": "수수료 선택",
+  "components.input.fee-control.modal.replace-pending-tx": "대기 중인 트랜잭션 대체하기",
+  "components.input.fee-control.modal.replace-pending-tx.paragraph": "진행하려면 수수료 옵션을 평균 이상으로 설정해주세요",
   "components.input.fee-control.modal.remember-last-fee-option": "이 선택을 기본 옵션으로 저장",
   "components.input.fee-control.modal.fee-token-dropdown-label": "수수료 토큰",
   "components.input.fee-control.modal.auto-title": "자동",

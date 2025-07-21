@@ -351,10 +351,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
                       ) ||
                       !this.queryChains.isPFMEnabled(
                         channel.counterpartyChainId
-                      ) ||
-                      !this.chainStore
-                        .getChain(channel.counterpartyChainId)
-                        .hasFeature("ibc-pfm")
+                      )
                     ) {
                       pfmPossibility = false;
                       break;
@@ -587,8 +584,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
           if (
             !this.chainStore.getChain(originOutChainId).hasFeature("ibc-go") ||
             !this.queryChains.isSupportsMemo(originOutChainId) ||
-            !this.queryChains.isPFMEnabled(originOutChainId) ||
-            !this.chainStore.getChain(originOutChainId).hasFeature("ibc-pfm")
+            !this.queryChains.isPFMEnabled(originOutChainId)
           ) {
             // 만약 originOutChainId가 ibc-pfm을 지원하지 않는다면
             // 여기서 더 routing할 방법은 없다.
@@ -732,8 +728,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
       if (
         !this.chainStore.getChain(originOutChainId).hasFeature("ibc-go") ||
         !this.queryChains.isSupportsMemo(originOutChainId) ||
-        !this.queryChains.isPFMEnabled(originOutChainId) ||
-        !this.chainStore.getChain(originOutChainId).hasFeature("ibc-pfm")
+        !this.queryChains.isPFMEnabled(originOutChainId)
       ) {
         // 만약 originOutChainId가 ibc-pfm을 지원하지 않는다면
         // 여기서 더 routing할 방법은 없다.
