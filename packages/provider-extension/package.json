@@ -19,7 +19,8 @@
   "dependencies": {
     "@keplr-wallet/types": "0.12.252",
     "deepmerge": "^4.2.2",
-    "long": "^4.0.0"
+    "long": "^4.0.0",
+    "uuid": "^11.1.0"
   },
   "peerDependencies": {
     "starknet": "^7"
