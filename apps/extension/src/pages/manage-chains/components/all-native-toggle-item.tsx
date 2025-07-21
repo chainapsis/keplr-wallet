@@ -5,29 +5,25 @@ import { ColorPalette } from "../../../styles";
 import { useTheme } from "styled-components";
 import { NativeChainSectionIconLM } from "../../register/enable-chains/components/native-chain-section-icon-lm";
 import { NativeChainSectionIconDM } from "../../register/enable-chains/components/native-chain-section-icon-dm";
+import { useStore } from "../../../stores";
 
 interface AllNativeToggleItemProps {
   nativeChainInfos: ModularChainInfo[];
   nativeChainIdentifierSet: Set<string>;
-  enabledIdentifierMap: Map<string, boolean>;
   onToggleAll: (enable: boolean) => void;
 }
 
 export const AllNativeToggleItem: FunctionComponent<
   AllNativeToggleItemProps
-> = ({
-  nativeChainInfos,
-  nativeChainIdentifierSet,
-  enabledIdentifierMap,
-  onToggleAll,
-}) => {
+> = ({ nativeChainInfos, nativeChainIdentifierSet, onToggleAll }) => {
+  const { chainStore } = useStore();
   const theme = useTheme();
   const allEnabled = useMemo(() => {
     for (const id of nativeChainIdentifierSet) {
-      if (!enabledIdentifierMap.get(id)) return false;
+      if (!chainStore.isEnabledChain(id)) return false;
     }
     return true;
-  }, [nativeChainIdentifierSet, enabledIdentifierMap]);
+  }, [nativeChainIdentifierSet, chainStore]);
 
   if (nativeChainInfos.length === 0) {
     return null;

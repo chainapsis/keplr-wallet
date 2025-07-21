@@ -88,10 +88,6 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
   const [connectLedgerApp, setConnectLedgerApp] = useState<string>("");
   const [openEnableChainsRoute, setOpenEnableChainsRoute] = useState(false);
 
-  const [enabledIdentifiers, setEnabledIdentifiers] = useState<string[]>(() => {
-    return chainStore.enabledChainIdentifiers.slice();
-  });
-
   const [
     backupSelectedNativeChainIdentifiers,
     setBackupSelectedNativeChainIdentifiers,
@@ -124,8 +120,6 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
         };
 
         const ledgerApp = determineLedgerApp(modInfo);
-
-        setEnabledIdentifiers(chainStore.enabledChainIdentifiers.slice());
 
         setConnectLedgerApp(ledgerApp);
         setOpenEnableChainsRoute(false);
@@ -177,24 +171,10 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
 
   const setEnabledIdentifiersWithBatch = useCallback(
     (identifiers: string[], enable: boolean) => {
-      setEnabledIdentifiers((prev) => {
-        const set = new Set(prev);
-        identifiers.forEach((id) => {
-          enable ? set.add(id) : set.delete(id);
-        });
-        return Array.from(set);
-      });
-
       applyBatchEnableChange(identifiers, enable);
     },
     [applyBatchEnableChange]
   );
-
-  const enabledIdentifierMap = useMemo(() => {
-    const map = new Map<string, boolean>();
-    enabledIdentifiers.forEach((id) => map.set(id, true));
-    return map;
-  }, [enabledIdentifiers]);
 
   const tokensByIdentifier = hugeQueriesStore.allTokenMapByChainIdentifier;
 
@@ -382,10 +362,9 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
       return ecosystemFilteredChainInfos;
     }
     return ecosystemFilteredChainInfos.filter((ci) => {
-      const identifier = ChainIdHelper.parse(ci.chainId).identifier;
-      return !(enabledIdentifierMap.get(identifier) || false);
+      return !chainStore.isEnabledChain(ci.chainId);
     });
-  }, [ecosystemFilteredChainInfos, hideEnabled, enabledIdentifierMap]);
+  }, [ecosystemFilteredChainInfos, hideEnabled, chainStore]);
 
   const handleToggle = (chainIdentifier: string, enable: boolean) => {
     const linkedIdentifiers = (() => {
@@ -409,18 +388,6 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
       ...linkedIdentifiers,
     ]);
 
-    setEnabledIdentifiers((prev) => {
-      const set = new Set(prev);
-      identifiersToChange.forEach((id) => {
-        if (enable) {
-          set.add(id);
-        } else {
-          set.delete(id);
-        }
-      });
-      return Array.from(set);
-    });
-
     identifiersToChange.forEach((id) => applyEnableChange(id, enable));
   };
 
@@ -433,7 +400,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
 
     const nativeIds = Array.from(nativeChainIdentifierSet);
     const enabledNativeIds = nativeIds.filter((id) =>
-      enabledIdentifierMap.get(id)
+      chainStore.isEnabledChain(id)
     );
 
     const isAllNativeSelected = enabledNativeIds.length === nativeIds.length;
@@ -502,7 +469,6 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
   }, [
     keyRingStore.selectedKeyInfo?.type,
     nativeChainIdentifierSet,
-    enabledIdentifierMap,
     backupSelectedNativeChainIdentifiers,
     sortedNativeChainInfos,
     setEnabledIdentifiersWithBatch,
@@ -573,7 +539,6 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
           <AllNativeToggleItem
             nativeChainInfos={sortedNativeChainInfos}
             nativeChainIdentifierSet={nativeChainIdentifierSet}
-            enabledIdentifierMap={enabledIdentifierMap}
             onToggleAll={() => handleToggleAllNative()}
           />
 
@@ -594,7 +559,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
                 <ChainToggleItem
                   modularChainInfo={ci}
                   tokens={tokens}
-                  enabled={enabledIdentifierMap.get(identifier) || false}
+                  enabled={chainStore.isEnabledChain(ci.chainId)}
                   disabled={
                     "cosmos" in ci
                       ? chainStore.hasChain(ci.chainId)
@@ -616,7 +581,6 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
         close={() => {
           setIsDerivationModalOpen(false);
           setDerivationChainIds([]);
-          setEnabledIdentifiers(chainStore.enabledChainIdentifiers.slice());
         }}
         chainIds={derivationChainIds}
         vaultId={vaultId || ""}

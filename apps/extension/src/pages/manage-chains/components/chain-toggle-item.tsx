@@ -27,6 +27,10 @@ export const ChainToggleItem: FunctionComponent<ChainToggleItemProps> = ({
   const [isOpen, setIsOpen] = useState(false);
 
   const handleHeaderClick = () => {
+    if (tokens.length === 0) {
+      return;
+    }
+
     setIsOpen(!isOpen);
   };
 
