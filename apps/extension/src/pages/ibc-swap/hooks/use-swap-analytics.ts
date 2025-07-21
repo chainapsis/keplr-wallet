@@ -13,14 +13,7 @@ import {
   SenderConfig,
 } from "@keplr-wallet/hooks";
 import debounce from "lodash.debounce";
-
-const generateQuoteId = () => {
-  try {
-    return crypto.randomUUID();
-  } catch (error) {
-    return `${Date.now()}-${Math.random().toString(36).substring(2)}`;
-  }
-};
+import { v4 as uuidv4 } from "uuid";
 
 const milestoneEvents = new Set([
   "swap_quote_requested",
@@ -308,7 +301,7 @@ export const useSwapAnalytics = ({
       return p ? p.toDec().toString() : undefined;
     })();
 
-    const quoteId = generateQuoteId();
+    const quoteId = uuidv4();
 
     const durationMs = requestStartedAtRef.current
       ? performance.now() - requestStartedAtRef.current

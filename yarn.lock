@@ -6128,6 +6128,7 @@ __metadata:
     swiper: ^8.4.4
     ts-loader: ^9.4.2
     utility-types: ^3.10.0
+    uuid: ^11.1.0
     webextension-polyfill: ^0.10.0
     webpack: ^5.74.0
     webpack-bundle-analyzer: ^4.5.0
@@ -6289,6 +6290,7 @@ __metadata:
     "@keplr-wallet/types": 0.12.252
     deepmerge: ^4.2.2
     long: ^4.0.0
+    uuid: ^11.1.0
   peerDependencies:
     starknet: ^7
   languageName: unknown
@@ -34504,6 +34506,15 @@ __metadata:
   version: 1.0.1
   resolution: "utils-merge@npm:1.0.1"
   checksum: c81095493225ecfc28add49c106ca4f09cdf56bc66731aa8dabc2edbbccb1e1bfe2de6a115e5c6a380d3ea166d1636410b62ef216bb07b3feb1cfde1d95d5080
+  languageName: node
+  linkType: hard
+
+"uuid@npm:^11.1.0":
+  version: 11.1.0
+  resolution: "uuid@npm:11.1.0"
+  bin:
+    uuid: dist/esm/bin/uuid
+  checksum: 840f19758543c4631e58a29439e51b5b669d5f34b4dd2700b6a1d15c5708c7a6e0c3e2c8c4a2eae761a3a7caa7e9884d00c86c02622ba91137bd3deade6b4b4a
   languageName: node
   linkType: hard
 
