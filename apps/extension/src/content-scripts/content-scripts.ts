@@ -24,13 +24,16 @@ router.addGuard(ContentScriptGuards.checkMessageIsInternal);
 initEvents(router);
 router.listen(WEBPAGE_PORT);
 
-const container = document.head || document.documentElement;
-const scriptElement = document.createElement("script");
+// When using Chrome, a content script with world: "MAIN" is used to inject the injected script. Refer to background.ts
+if (typeof chrome === "undefined") {
+  const container = document.head || document.documentElement;
+  const scriptElement = document.createElement("script");
 
-scriptElement.src = browser.runtime.getURL("injectedScript.bundle.js");
-scriptElement.type = "text/javascript";
-container.insertBefore(scriptElement, container.children[0]);
-scriptElement.remove();
+  scriptElement.src = browser.runtime.getURL("injectedScript.bundle.js");
+  scriptElement.type = "text/javascript";
+  container.insertBefore(scriptElement, container.children[0]);
+  scriptElement.remove();
+}
 
 export class CheckURLIsPhishingMsg extends Message<boolean> {
   public static type() {
