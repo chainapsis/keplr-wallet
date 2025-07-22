@@ -34,7 +34,32 @@ export const AllNativeToggleItem: FunctionComponent<
 
   const imageChainInfo = nativeChainInfos[0];
 
-  const iconElement = (
+  return (
+    <ToggleItemHeader
+      chainInfo={imageChainInfo}
+      title="All Native Chains"
+      subtitle={"Cosmos, Ethereum, Bitcoin..."}
+      enabled={allEnabled}
+      isNativeChain={true}
+      onToggle={onToggleAll}
+      disabled={false}
+      showExpandIcon={false}
+      onHeaderClick={onToggleAll}
+      hideStackIcon={true}
+      iconElement={<IconElement />}
+      style={{
+        border: `0.09375rem solid ${
+          ColorPalette[theme.mode === "light" ? "blue-200" : "blue-600"]
+        }`,
+      }}
+    />
+  );
+};
+
+const IconElement = () => {
+  const theme = useTheme();
+
+  return (
     <div
       style={{
         width: "100%",
@@ -55,26 +80,5 @@ export const AllNativeToggleItem: FunctionComponent<
         <NativeChainSectionIconDM size={"1.1666875rem"} />
       )}
     </div>
-  );
-
-  return (
-    <ToggleItemHeader
-      chainInfo={imageChainInfo}
-      title="All Native Chains"
-      subtitle={"Cosmos, Ethereum, Bitcoin..."}
-      enabled={allEnabled}
-      isNativeChain={true}
-      onToggle={onToggleAll}
-      disabled={false}
-      showExpandIcon={false}
-      onHeaderClick={onToggleAll}
-      hideStackIcon={true}
-      iconElement={iconElement}
-      style={{
-        border: `0.09375rem solid ${
-          ColorPalette[theme.mode === "light" ? "blue-200" : "blue-600"]
-        }`,
-      }}
-    />
   );
 };
