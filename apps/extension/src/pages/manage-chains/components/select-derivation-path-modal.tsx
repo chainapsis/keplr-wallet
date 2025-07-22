@@ -105,7 +105,17 @@ export const SelectDerivationPathModal: FunctionComponent<{
   const currency = chainInfo.stakeCurrency || chainInfo.currencies[0];
 
   return (
-    <Modal isOpen={isOpen} align="bottom" close={close} maxHeight="95vh">
+    <Modal
+      isOpen={isOpen}
+      align="bottom"
+      close={() => {
+        setSelectedCoinType(-1);
+        setCandidates([]);
+        setCurrentIndex(0);
+        close();
+      }}
+      maxHeight="95vh"
+    >
       <Styles.Container>
         <YAxis alignX="center">
           <Box

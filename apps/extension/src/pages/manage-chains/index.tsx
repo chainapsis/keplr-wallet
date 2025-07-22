@@ -157,31 +157,6 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
     [chainStore, vaultId, needFinalizeKeyCoinTypeAction, keyRingStore]
   );
 
-  const applyBatchEnableChange = useCallback(
-    async (identifiers: string[], enable: boolean) => {
-      if (!vaultId || identifiers.length === 0) return;
-
-      if (enable) {
-        for (const id of identifiers) {
-          await applyEnableChange(id, true);
-        }
-      } else {
-        await chainStore.disableChainInfoInUIWithVaultId(
-          vaultId,
-          ...identifiers
-        );
-      }
-    },
-    [vaultId, applyEnableChange, chainStore]
-  );
-
-  const setEnabledIdentifiersWithBatch = useCallback(
-    (identifiers: string[], enable: boolean) => {
-      applyBatchEnableChange(identifiers, enable);
-    },
-    [applyBatchEnableChange]
-  );
-
   const tokensByIdentifier = hugeQueriesStore.allTokenMapByChainIdentifier;
 
   const totalPriceByIdentifier = useMemo(() => {
@@ -398,6 +373,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
   };
 
   const handleToggleAllNative = useCallback(async () => {
+    if (!vaultId) return;
     if (keyRingStore.selectedKeyInfo?.type === "ledger") {
       setOpenEnableChainsRoute(true);
       setIsConnectLedgerModalOpen(true);
@@ -413,7 +389,9 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
 
     const processFinalize = async (ids: string[]) => {
       if (!vaultId) return;
-      await Promise.allSettled(
+      let needToOpenModal = false;
+      const chainIds = new Set<string>();
+      await Promise.all(
         ids.map(async (id) => {
           try {
             const modInfo = chainStore.getModularChain(id);
@@ -424,43 +402,35 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
               chainInfo
             );
             if (needModal) {
-              setDerivationChainIds((prev) =>
-                prev.includes(chainId) ? prev : [...prev, chainId]
-              );
-              setIsDerivationModalOpen(true);
+              chainIds.add(chainId);
+              needToOpenModal = true;
             }
           } catch {}
         })
       );
+
+      if (needToOpenModal && chainIds.size > 0) {
+        setDerivationChainIds(Array.from(chainIds));
+        setIsDerivationModalOpen(true);
+      }
     };
 
     if (isAllNativeSelected) {
-      if (backupSelectedNativeChainIdentifiers.length > 0) {
-        const toEnable = backupSelectedNativeChainIdentifiers;
-        const toDisable = nativeIds.filter((id) => !toEnable.includes(id));
-
-        setEnabledIdentifiersWithBatch(toDisable, false);
-        setEnabledIdentifiersWithBatch(toEnable, true);
-
-        await processFinalize(toEnable);
-      } else if (sortedNativeChainInfos.length > 0) {
-        const first = sortedNativeChainInfos[0];
-        const chainIdentifiers: string[] = [
-          ChainIdHelper.parse(first.chainId).identifier,
-        ];
-        if ("linkedChainKey" in first) {
-          const key = (first as any).linkedChainKey;
-          sortedNativeChainInfos.forEach((ci) => {
-            if ("linkedChainKey" in ci && (ci as any).linkedChainKey === key) {
-              chainIdentifiers.push(ChainIdHelper.parse(ci.chainId).identifier);
-            }
-          });
-        }
-
+      if (
+        backupSelectedNativeChainIdentifiers.length > 0 &&
+        backupSelectedNativeChainIdentifiers.length < nativeIds.length
+      ) {
         const toDisable = nativeIds.filter(
-          (id) => !chainIdentifiers.includes(id)
+          (id) => !backupSelectedNativeChainIdentifiers.includes(id)
         );
-        setEnabledIdentifiersWithBatch(toDisable, false);
+        chainStore.disableChainInfoInUIWithVaultId(vaultId, ...toDisable);
+      } else {
+        const [first, ...rest] = sortedNativeChainInfos;
+        applyEnableChange(first.chainId, true);
+        chainStore.disableChainInfoInUIWithVaultId(
+          vaultId,
+          ...rest.map((ci) => ci.chainId)
+        );
       }
     } else {
       setBackupSelectedNativeChainIdentifiers(enabledNativeIds);
@@ -468,7 +438,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
       const idsToEnable = nativeIds.filter(
         (id) => !enabledNativeIds.includes(id)
       );
-      setEnabledIdentifiersWithBatch(idsToEnable, true);
+      chainStore.enableChainInfoInUIWithVaultId(vaultId, ...idsToEnable);
 
       await processFinalize(idsToEnable);
     }
@@ -477,11 +447,42 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
     nativeChainIdentifierSet,
     backupSelectedNativeChainIdentifiers,
     sortedNativeChainInfos,
-    setEnabledIdentifiersWithBatch,
+    applyEnableChange,
     vaultId,
     chainStore,
     needFinalizeKeyCoinTypeAction,
   ]);
+
+  const handleDerivationModalClose = useCallback(async () => {
+    if (vaultId && derivationChainIds.length > 0) {
+      const toDisable = new Set<string>();
+      await Promise.all(
+        derivationChainIds.map(async (chainId) => {
+          try {
+            const chainInfo = chainStore.getChain(chainId);
+            const stillNeed = await needFinalizeKeyCoinTypeAction(
+              vaultId,
+              chainInfo
+            );
+
+            if (stillNeed) {
+              toDisable.add(chainId);
+            }
+          } catch {}
+        })
+      );
+
+      if (toDisable.size > 0) {
+        chainStore.disableChainInfoInUIWithVaultId(
+          vaultId,
+          ...Array.from(toDisable)
+        );
+      }
+    }
+
+    setIsDerivationModalOpen(false);
+    setDerivationChainIds([]);
+  }, [vaultId, derivationChainIds, chainStore, needFinalizeKeyCoinTypeAction]);
 
   return (
     <HeaderLayout
@@ -493,8 +494,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
       <div style={{ padding: "0.75rem" }}>
         <SearchTextInput
           placeholder={intl.formatMessage({
-            id: "page.manage-chains.search-placeholder",
-            defaultMessage: "Search chain",
+            id: "pages.manage-chains.search-input-placeholder",
           })}
           value={search}
           onChange={(e) => {
@@ -584,10 +584,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
       </div>
       <SelectDerivationPathModal
         isOpen={isDerivationModalOpen}
-        close={() => {
-          setIsDerivationModalOpen(false);
-          setDerivationChainIds([]);
-        }}
+        close={handleDerivationModalClose}
         chainIds={derivationChainIds}
         vaultId={vaultId || ""}
       />
