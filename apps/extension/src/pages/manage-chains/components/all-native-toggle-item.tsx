@@ -10,7 +10,7 @@ import { useStore } from "../../../stores";
 interface AllNativeToggleItemProps {
   nativeChainInfos: ModularChainInfo[];
   nativeChainIdentifierSet: Set<string>;
-  onToggleAll: (enable: boolean) => void;
+  onToggleAll: () => void;
 }
 
 export const AllNativeToggleItem: FunctionComponent<
@@ -18,12 +18,15 @@ export const AllNativeToggleItem: FunctionComponent<
 > = ({ nativeChainInfos, nativeChainIdentifierSet, onToggleAll }) => {
   const { chainStore } = useStore();
   const theme = useTheme();
+  const enabledSet = useMemo(
+    () => new Set(chainStore.enabledChainIdentifiers),
+    [chainStore.enabledChainIdentifiers]
+  );
   const allEnabled = useMemo(() => {
-    for (const id of nativeChainIdentifierSet) {
-      if (!chainStore.isEnabledChain(id)) return false;
-    }
-    return true;
-  }, [nativeChainIdentifierSet, chainStore]);
+    return Array.from(nativeChainIdentifierSet).every((id) =>
+      enabledSet.has(id)
+    );
+  }, [nativeChainIdentifierSet, enabledSet]);
 
   if (nativeChainInfos.length === 0) {
     return null;
@@ -64,7 +67,7 @@ export const AllNativeToggleItem: FunctionComponent<
       onToggle={onToggleAll}
       disabled={false}
       showExpandIcon={false}
-      onHeaderClick={() => onToggleAll(!allEnabled)}
+      onHeaderClick={onToggleAll}
       hideStackIcon={true}
       iconElement={iconElement}
       style={{

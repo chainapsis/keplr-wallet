@@ -92,7 +92,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
   const [
     backupSelectedNativeChainIdentifiers,
     setBackupSelectedNativeChainIdentifiers,
-  ] = useState<string[]>([]);
+  ] = useState(chainStore.enabledChainIdentifiers);
 
   const applyEnableChange = useCallback(
     async (chainIdentifier: string, enable: boolean) => {
@@ -130,6 +130,10 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
       }
 
       if (enable) {
+        if ("bitcoin" in modInfo || "starknet" in modInfo) {
+          await chainStore.enableChainInfoInUIWithVaultId(vaultId, chainId);
+          return;
+        }
         try {
           const chainInfo = chainStore.getChain(chainId);
           const needModal = await needFinalizeKeyCoinTypeAction(
