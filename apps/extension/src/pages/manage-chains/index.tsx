@@ -85,7 +85,8 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
 
   const [isConnectLedgerModalOpen, setIsConnectLedgerModalOpen] =
     useState(false);
-  const [connectLedgerApp, setConnectLedgerApp] = useState<string>("");
+  const [connectLedgerApp, setConnectLedgerApp] = useState("");
+  const [connectLedgerChainId, setConnectLedgerChainId] = useState("");
   const [openEnableChainsRoute, setOpenEnableChainsRoute] = useState(false);
 
   const [
@@ -122,6 +123,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
         const ledgerApp = determineLedgerApp(modInfo);
 
         setConnectLedgerApp(ledgerApp);
+        setConnectLedgerChainId(chainId);
         setOpenEnableChainsRoute(false);
         setIsConnectLedgerModalOpen(true);
         return;
@@ -590,6 +592,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
         close={() => setIsConnectLedgerModalOpen(false)}
         ledgerApp={connectLedgerApp}
         vaultId={vaultId || ""}
+        chainId={connectLedgerChainId}
         openEnableChains={openEnableChainsRoute}
       />
     </HeaderLayout>
