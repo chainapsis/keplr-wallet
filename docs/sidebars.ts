@@ -38,6 +38,7 @@ const sidebars: SidebarsConfig = {
         "guide/suggest-chain",
         "guide/sign-arbitrary",
         "guide/custom-event",
+        "guide/rainbowkit-custom-wallet",
       ],
     },
     {
