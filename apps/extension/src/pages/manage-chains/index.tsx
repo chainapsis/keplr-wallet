@@ -91,6 +91,22 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
     setBackupSelectedNativeChainIdentifiers,
   ] = useState(chainStore.enabledChainIdentifiers);
 
+  const determineLedgerApp = (info: ModularChainInfo, cid: string): string => {
+    if ("cosmos" in info && chainStore.isEvmOnlyChain(cid)) {
+      return "Ethereum";
+    }
+
+    if ("starknet" in info) {
+      return "Starknet";
+    }
+    if ("bitcoin" in info) {
+      const coinType = info.bitcoin.bip44.coinType;
+      return coinType === 1 ? "Bitcoin Test" : "Bitcoin";
+    }
+
+    return "Cosmos";
+  };
+
   const applyEnableChange = useCallback(
     async (cid: string, enable: boolean) => {
       if (!vaultId || !cid) return;
@@ -99,26 +115,12 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
         ? chainStore.getModularChain(cid)
         : undefined;
 
-      if (enable && keyRingStore.selectedKeyInfo?.type === "ledger") {
-        const determineLedgerApp = (info?: ModularChainInfo): string => {
-          if (!info) return "Cosmos";
-
-          if ("cosmos" in info && chainStore.isEvmOnlyChain(cid)) {
-            return "Ethereum";
-          }
-
-          if ("starknet" in info) {
-            return "Starknet";
-          }
-          if ("bitcoin" in info) {
-            const coinType = info.bitcoin.bip44.coinType;
-            return coinType === 1 ? "Bitcoin Test" : "Bitcoin";
-          }
-
-          return "Cosmos";
-        };
-
-        const ledgerApp = determineLedgerApp(modInfo);
+      if (
+        enable &&
+        modInfo &&
+        keyRingStore.selectedKeyInfo?.type === "ledger"
+      ) {
+        const ledgerApp = determineLedgerApp(modInfo, cid);
 
         const alreadyAppended = Boolean(
           keyRingStore.selectedKeyInfo?.insensitive?.[ledgerApp]

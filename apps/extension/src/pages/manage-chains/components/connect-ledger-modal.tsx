@@ -29,7 +29,7 @@ export const ConnectLedgerModal: FunctionComponent<{
   }
 
   const linkedIdentifiers = (() => {
-    if (!chainId) {
+    if (!chainId || !chainStore.hasModularChain(chainId)) {
       return [];
     }
 
