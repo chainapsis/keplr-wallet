@@ -122,11 +122,17 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
 
         const ledgerApp = determineLedgerApp(modInfo);
 
-        setConnectLedgerApp(ledgerApp);
-        setConnectLedgerChainId(chainId);
-        setOpenEnableChainsRoute(false);
-        setIsConnectLedgerModalOpen(true);
-        return;
+        const alreadyAppended = Boolean(
+          keyRingStore.selectedKeyInfo?.insensitive?.[ledgerApp]
+        );
+
+        if (!alreadyAppended) {
+          setConnectLedgerApp(ledgerApp);
+          setConnectLedgerChainId(chainId);
+          setOpenEnableChainsRoute(false);
+          setIsConnectLedgerModalOpen(true);
+          return;
+        }
       }
 
       if (enable) {
