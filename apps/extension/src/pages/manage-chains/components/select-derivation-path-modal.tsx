@@ -55,7 +55,9 @@ export const SelectDerivationPathModal: FunctionComponent<{
   useEffect(() => {
     setSelectedCoinType(-1);
 
-    if (!isOpen || !chainId || !chainInfo) return;
+    if (!isOpen || !chainId || !chainInfo) {
+      return;
+    }
 
     keyRingStore
       .computeNotFinalizedKeyAddresses(vaultId, chainId)
@@ -93,10 +95,12 @@ export const SelectDerivationPathModal: FunctionComponent<{
   }, [isOpen, chainId, chainStore, keyRingStore, vaultId]);
 
   useEffect(() => {
-    if (isOpen && (!chainId || !chainInfo)) {
-      close();
+    if (isOpen) {
+      setSelectedCoinType(-1);
+      setCandidates([]);
+      setCurrentIndex(0);
     }
-  }, [isOpen, chainId, chainInfo, close]);
+  }, [isOpen]);
 
   if (!chainId || !chainInfo) {
     return null;
@@ -105,17 +109,7 @@ export const SelectDerivationPathModal: FunctionComponent<{
   const currency = chainInfo.stakeCurrency || chainInfo.currencies[0];
 
   return (
-    <Modal
-      isOpen={isOpen}
-      align="bottom"
-      close={() => {
-        setSelectedCoinType(-1);
-        setCandidates([]);
-        setCurrentIndex(0);
-        close();
-      }}
-      maxHeight="95vh"
-    >
+    <Modal isOpen={isOpen} align="bottom" close={close} maxHeight="95vh">
       <Styles.Container>
         <YAxis alignX="center">
           <Box

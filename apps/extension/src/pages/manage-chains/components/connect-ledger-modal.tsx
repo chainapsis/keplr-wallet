@@ -29,17 +29,18 @@ export const ConnectLedgerModal: FunctionComponent<{
   }
 
   const linkedIdentifiers = (() => {
-    try {
-      const modInfo = chainStore.getModularChain(chainId);
-      if ("linkedChainKey" in modInfo) {
-        const key = (modInfo as any).linkedChainKey;
-        return chainStore.modularChainInfos
-          .filter(
-            (ci) => "linkedChainKey" in ci && (ci as any).linkedChainKey === key
-          )
-          .map((ci) => ChainIdHelper.parse(ci.chainId).identifier);
-      }
-    } catch {}
+    if (!chainId) {
+      return [];
+    }
+
+    const modInfo = chainStore.getModularChain(chainId);
+    if ("linkedChainKey" in modInfo) {
+      const key = modInfo.linkedChainKey;
+      return chainStore.modularChainInfos
+        .filter((ci) => "linkedChainKey" in ci && ci.linkedChainKey === key)
+        .map((ci) => ChainIdHelper.parse(ci.chainId).identifier);
+    }
+
     return [];
   })();
 

@@ -1,6 +1,5 @@
 import React, { FunctionComponent } from "react";
 import styled, { useTheme } from "styled-components";
-import { ModularChainInfo } from "@keplr-wallet/types";
 import { Columns, Column } from "../../../components/column";
 import { Box } from "../../../components/box";
 import { Gutter } from "../../../components/gutter";
@@ -11,9 +10,10 @@ import { ChainImageFallback } from "../../../components/image";
 import { NativeChainMarkIcon } from "../../../components/icon";
 import { ColorPalette } from "../../../styles";
 import { ArrowIcon, StackIcon } from "../../main/components/token/grouped";
+import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 
 interface ToggleItemHeaderProps {
-  chainInfo: ModularChainInfo;
+  chainInfo: ChainInfo | ModularChainInfo;
   title?: string;
   subtitle?: string;
   enabled: boolean;

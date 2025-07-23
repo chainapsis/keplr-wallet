@@ -1,14 +1,14 @@
 import React, { FunctionComponent, useState, useMemo } from "react";
 import styled from "styled-components";
-import { ModularChainInfo } from "@keplr-wallet/types";
 import { Box } from "../../../components/box";
 import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
 import { ViewToken } from "../../main";
 import { NestedTokenItem } from "./nested-token-item";
 import { ToggleItemHeader } from "./toggle-item-header";
+import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 
 interface ChainToggleItemProps {
-  modularChainInfo: ModularChainInfo;
+  chainInfo: ChainInfo | ModularChainInfo;
   tokens: ViewToken[];
   enabled: boolean;
   disabled?: boolean;
@@ -17,7 +17,7 @@ interface ChainToggleItemProps {
 }
 
 export const ChainToggleItem: FunctionComponent<ChainToggleItemProps> = ({
-  modularChainInfo,
+  chainInfo: modularChainInfo,
   tokens,
   enabled,
   disabled,
