@@ -17,7 +17,7 @@ interface ChainToggleItemProps {
 }
 
 export const ChainToggleItem: FunctionComponent<ChainToggleItemProps> = ({
-  chainInfo: modularChainInfo,
+  chainInfo,
   tokens,
   enabled,
   disabled,
@@ -39,7 +39,7 @@ export const ChainToggleItem: FunctionComponent<ChainToggleItemProps> = ({
   return (
     <div>
       <ToggleItemHeader
-        chainInfo={modularChainInfo}
+        chainInfo={chainInfo}
         subtitle={tokenCountText}
         enabled={enabled}
         disabled={disabled}
