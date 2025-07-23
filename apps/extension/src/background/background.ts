@@ -1563,3 +1563,25 @@ browser.alarms.onAlarm.addListener((alarm) => {
     // https://developer.chrome.com/blog/longer-esw-lifetimes/
   }
 });
+
+// When using Chrome, a content script with world: "MAIN" is used to inject the injected script.
+if (typeof chrome !== "undefined") {
+  (async () => {
+    try {
+      await chrome.scripting.registerContentScripts([
+        {
+          id: "injectedScript",
+          matches: ["<all_urls>"],
+          js: ["injectedScript.bundle.js"],
+          runAt: "document_start",
+          world: "MAIN",
+          allFrames: true,
+        },
+      ]);
+    } catch (err) {
+      console.warn(
+        `Dropped attempt to register injected script script. ${err}`
+      );
+    }
+  })();
+}

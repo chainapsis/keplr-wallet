@@ -45,6 +45,7 @@ import type {
   DeployAccountSignerDetails,
   InvocationsSignerDetails,
 } from "starknet";
+import { v4 as uuidv4 } from "uuid";
 
 export interface ProxyRequest {
   type: string;
@@ -761,7 +762,7 @@ const waitDocumentReady = (): Promise<void> => {
 
 class EthereumProvider extends EventEmitter implements IEthereumProvider {
   protected readonly eip6963ProviderInfo?: EIP6963ProviderInfo = {
-    uuid: crypto.randomUUID(),
+    uuid: uuidv4(),
     name: "Keplr",
     rdns: "app.keplr",
     icon: `data:image/png;base64,${KeplrLogoBase64}`,

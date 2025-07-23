@@ -2451,6 +2451,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       strkContractAddress:
         "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
     },
+    isTestnet: true,
   },
   {
     chainId: "mantra-1",
@@ -3148,6 +3149,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         },
       ],
     },
+    isTestnet: true,
   },
   {
     chainId:
@@ -3176,6 +3178,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         },
       ],
     },
+    isTestnet: true,
   },
   {
     chainId:
@@ -3204,6 +3207,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         },
       ],
     },
+    isTestnet: true,
   },
   {
     chainId:
@@ -3232,6 +3236,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         },
       ],
     },
+    isTestnet: true,
   },
   {
     rpc: "https://rpc-nillion.keplr.app",
