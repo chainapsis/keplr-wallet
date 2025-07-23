@@ -8,6 +8,9 @@ import { useIntl } from "react-intl";
 import { useTheme } from "styled-components";
 import { ColorPalette } from "../../../styles";
 import styled from "styled-components";
+import { useStore } from "../../../stores";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { BIP44HDPath } from "@keplr-wallet/background";
 
 export const ConnectLedgerModal: FunctionComponent<{
   isOpen: boolean;
@@ -19,10 +22,26 @@ export const ConnectLedgerModal: FunctionComponent<{
 }> = ({ isOpen, close, ledgerApp, vaultId, chainId, openEnableChains }) => {
   const intl = useIntl();
   const theme = useTheme();
+  const { chainStore, keyRingStore } = useStore();
 
   if (!isOpen) {
     return null;
   }
+
+  const linkedIdentifiers = (() => {
+    try {
+      const modInfo = chainStore.getModularChain(chainId);
+      if ("linkedChainKey" in modInfo) {
+        const key = (modInfo as any).linkedChainKey;
+        return chainStore.modularChainInfos
+          .filter(
+            (ci) => "linkedChainKey" in ci && (ci as any).linkedChainKey === key
+          )
+          .map((ci) => ChainIdHelper.parse(ci.chainId).identifier);
+      }
+    } catch {}
+    return [];
+  })();
 
   return (
     <Modal isOpen={isOpen} align="bottom" close={close} maxHeight="95vh">
@@ -99,10 +118,23 @@ export const ConnectLedgerModal: FunctionComponent<{
               })}
               size="large"
               onClick={() => {
+                const selectedKeyInfo = keyRingStore.selectedKeyInfo;
+                if (!selectedKeyInfo) return;
+
+                const bip44Path = selectedKeyInfo.insensitive["bip44Path"];
+                if (!bip44Path || typeof bip44Path !== "object") return;
+
+                const { account, change, addressIndex } =
+                  bip44Path as BIP44HDPath;
+
                 browser.tabs.create({
                   url: openEnableChains
                     ? `/register.html#?route=enable-chains&vaultId=${vaultId}&skipWelcome=true`
-                    : `/register.html#?route=connect-ledger&vaultId=${vaultId}&skipWelcome=true&ledgerApp=${ledgerApp}&afterEnableChains=${chainId}`,
+                    : `/register.html#?route=connect-ledger&vaultId=${vaultId}&skipWelcome=true&ledgerApp=${ledgerApp}&account=${account}&change=${change}&addressIndex=${addressIndex}${
+                        linkedIdentifiers.length > 0
+                          ? `&afterEnableChains=${linkedIdentifiers.join(",")}`
+                          : `&afterEnableChains=${chainId}`
+                      }`,
                 });
 
                 close();
