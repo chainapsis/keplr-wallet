@@ -164,15 +164,9 @@ export const SettingPage: FunctionComponent = observer(() => {
                   rightProps: {},
                   onClick: () => {
                     if (keyRingStore.selectedKeyInfo) {
-                      browser.tabs
-                        .create({
-                          url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&skipWelcome=true`,
-                        })
-                        .then(() => {
-                          if (!isRunningInSidePanel()) {
-                            window.close();
-                          }
-                        });
+                      navigate(
+                        `/manage-chains?vaultId=${keyRingStore.selectedKeyInfo.id}`
+                      );
                     }
                   },
                 },

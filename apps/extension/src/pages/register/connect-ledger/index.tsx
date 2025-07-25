@@ -32,6 +32,7 @@ import { STARKNET_LEDGER_DERIVATION_PATH } from "../../sign/utils/handle-starkne
 import { GuideBox } from "../../../components/guide-box";
 import { ExtendedKey } from "@keplr-wallet/background";
 import AppClient from "ledger-bitcoin";
+import { dispatchGlobalEventExceptSelf } from "../../../utils/global-events";
 
 type Step = "unknown" | "connected" | "app";
 
@@ -190,8 +191,18 @@ export const ConnectLedgerScene: FunctionComponent<{
                 res.compressed_pk,
                 propApp
               );
-              await chainStore.enableChainInfoInUI(
-                ...appendModeInfo.afterEnableChains
+              if (appendModeInfo.afterEnableChains.length > 0) {
+                await chainStore.enableChainInfoInUI(
+                  ...appendModeInfo.afterEnableChains
+                );
+                dispatchGlobalEventExceptSelf(
+                  "keplr_enabled_chain_changed",
+                  appendModeInfo.vaultId
+                );
+              }
+              dispatchGlobalEventExceptSelf(
+                "keplr_ledger_app_connected",
+                propApp
               );
               navigate("/welcome", {
                 replace: true,
@@ -271,8 +282,18 @@ export const ConnectLedgerScene: FunctionComponent<{
                 pubKey.toBytes(true),
                 propApp
               );
-              await chainStore.enableChainInfoInUI(
-                ...appendModeInfo.afterEnableChains
+              if (appendModeInfo.afterEnableChains.length > 0) {
+                await chainStore.enableChainInfoInUI(
+                  ...appendModeInfo.afterEnableChains
+                );
+                dispatchGlobalEventExceptSelf(
+                  "keplr_enabled_chain_changed",
+                  appendModeInfo.vaultId
+                );
+              }
+              dispatchGlobalEventExceptSelf(
+                "keplr_ledger_app_connected",
+                propApp
               );
 
               if (isStepMode) {
@@ -352,8 +373,18 @@ export const ConnectLedgerScene: FunctionComponent<{
                   pubKey.toBytes(),
                   propApp
                 );
-                await chainStore.enableChainInfoInUI(
-                  ...appendModeInfo.afterEnableChains
+                if (appendModeInfo.afterEnableChains.length > 0) {
+                  await chainStore.enableChainInfoInUI(
+                    ...appendModeInfo.afterEnableChains
+                  );
+                  dispatchGlobalEventExceptSelf(
+                    "keplr_enabled_chain_changed",
+                    appendModeInfo.vaultId
+                  );
+                }
+                dispatchGlobalEventExceptSelf(
+                  "keplr_ledger_app_connected",
+                  propApp
                 );
 
                 if (isStepMode) {
@@ -480,8 +511,18 @@ export const ConnectLedgerScene: FunctionComponent<{
                   extendedKeys,
                   propApp
                 );
-                await chainStore.enableChainInfoInUI(
-                  ...appendModeInfo.afterEnableChains
+                if (appendModeInfo.afterEnableChains.length > 0) {
+                  await chainStore.enableChainInfoInUI(
+                    ...appendModeInfo.afterEnableChains
+                  );
+                  dispatchGlobalEventExceptSelf(
+                    "keplr_enabled_chain_changed",
+                    appendModeInfo.vaultId
+                  );
+                }
+                dispatchGlobalEventExceptSelf(
+                  "keplr_ledger_app_connected",
+                  propApp
                 );
               }
 
