@@ -6,7 +6,7 @@ import React, {
 } from "react";
 
 import { createRootStore, RootStore } from "./root";
-import { getKeplrFromWindow } from "@keplr-wallet/stores";
+import { getKeplrFromWindow, WalletStatus } from "@keplr-wallet/stores";
 import { Keplr } from "@keplr-wallet/types";
 import { autorun } from "mobx";
 import { PlainObject } from "@keplr-wallet/background";
@@ -158,6 +158,20 @@ export const StoreProvider: FunctionComponent<PropsWithChildren> = ({
       }
     );
 
+    const disposal8 = addGlobalEventListener(
+      "keplr_ledger_app_connected",
+      async () => {
+        for (const modularChainInfo of stores.chainStore.modularChainInfos) {
+          const account = stores.accountStore.getAccount(
+            modularChainInfo.chainId
+          );
+          if (account.walletStatus === WalletStatus.Rejected) {
+            account.init();
+          }
+        }
+      }
+    );
+
     return () => {
       disposal1();
       disposal2();
@@ -166,6 +180,7 @@ export const StoreProvider: FunctionComponent<PropsWithChildren> = ({
       disposal5();
       disposal6();
       disposal7();
+      disposal8();
     };
   }, [stores]);
 
