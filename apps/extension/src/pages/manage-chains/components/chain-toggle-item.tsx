@@ -34,7 +34,10 @@ export const ChainToggleItem: FunctionComponent<ChainToggleItemProps> = ({
     setIsOpen(!isOpen);
   };
 
-  const tokenCountText = useMemo(() => `${tokens.length} Tokens`, [tokens]);
+  const tokenCountText = useMemo(
+    () => (tokens.length > 0 ? `${tokens.length} Tokens` : ""),
+    [tokens]
+  );
 
   return (
     <div>
@@ -44,7 +47,7 @@ export const ChainToggleItem: FunctionComponent<ChainToggleItemProps> = ({
         enabled={enabled}
         disabled={disabled}
         isNativeChain={isNativeChain}
-        showExpandIcon={true}
+        showExpandIcon={tokens.length > 0}
         isOpen={isOpen}
         onHeaderClick={handleHeaderClick}
         onToggle={onToggle}
