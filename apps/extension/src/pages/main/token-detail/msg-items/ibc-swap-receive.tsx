@@ -114,8 +114,26 @@ export const MsgRelationIBCSwapReceive: FunctionComponent<{
         if (
           (msg.msg as any)["@type"] === "/cosmwasm.wasm.v1.MsgExecuteContract"
         ) {
-          const operations = (msg.msg as any).msg?.swap_and_action?.user_swap
-            ?.swap_exact_asset_in?.operations;
+          const operations = (() => {
+            let operations = (msg.msg as any).msg?.swap_and_action?.user_swap
+              ?.swap_exact_asset_in?.operations;
+            if (operations) {
+              return operations;
+            }
+            if (
+              (msg.msg as any).msg?.smart_swap_exact_asset_in?.user_swap
+                ?.swap_exact_asset_in?.routes &&
+              (msg.msg as any).msg?.smart_swap_exact_asset_in?.user_swap
+                ?.swap_exact_asset_in?.routes.length > 0
+            ) {
+              operations = (msg.msg as any).msg?.smart_swap_exact_asset_in
+                ?.user_swap?.swap_exact_asset_in?.routes[
+                (msg.msg as any).msg?.smart_swap_exact_asset_in?.user_swap
+                  ?.swap_exact_asset_in?.routes.length - 1
+              ].operations;
+            }
+            return operations;
+          })();
           if (operations && operations.length > 0 && swapVenueChain) {
             const minimalDenom = operations[0].denom_in;
             const currency = swapVenueChain.findCurrency(minimalDenom);
@@ -171,11 +189,26 @@ export const MsgRelationIBCSwapReceive: FunctionComponent<{
             })();
           } else if (
             obj.wasm?.msg?.swap_and_action?.user_swap?.swap_exact_asset_in
-              ?.operations
+              ?.operations ||
+            obj.wasm?.msg?.swap_and_action?.user_swap?.smart_swap_exact_asset_in
+              ?.routes
           ) {
-            const operations =
-              obj.wasm.msg.swap_and_action?.user_swap?.swap_exact_asset_in
-                .operations;
+            const operations = obj.wasm?.msg?.swap_and_action?.user_swap
+              ?.smart_swap_exact_asset_in?.routes
+              ? (() => {
+                  if (
+                    obj.wasm?.msg?.swap_and_action?.user_swap
+                      ?.smart_swap_exact_asset_in?.routes.length > 0
+                  ) {
+                    return obj.wasm?.msg?.swap_and_action?.user_swap
+                      ?.smart_swap_exact_asset_in?.routes[
+                      obj.wasm?.msg?.swap_and_action?.user_swap
+                        ?.smart_swap_exact_asset_in?.routes.length - 1
+                    ].operations;
+                  }
+                })()
+              : obj.wasm.msg.swap_and_action?.user_swap?.swap_exact_asset_in
+                  .operations;
 
             if (operations && operations.length > 0 && swapVenueChain) {
               const minimalDenom = operations[0].denom_in;
