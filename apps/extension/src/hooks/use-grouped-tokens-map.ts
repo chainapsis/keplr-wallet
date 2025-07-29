@@ -22,14 +22,18 @@ export function useGroupedTokensMap(search: string) {
               return;
             }
 
-            const nonLowBalanceTokens = tokens.filter(
-              (token) =>
-                !lowBalanceTokens.some(
-                  (lowToken) =>
-                    lowToken.chainInfo.chainId === token.chainInfo.chainId &&
-                    lowToken.token.currency.coinMinimalDenom ===
-                      token.token.currency.coinMinimalDenom
-                )
+            const map = new Map<string, boolean>();
+            for (const token of lowBalanceTokens) {
+              map.set(
+                `${token.chainInfo.chainId}/${token.token.currency.coinMinimalDenom}`,
+                true
+              );
+            }
+
+            const nonLowBalanceTokens = tokens.filter((token) =>
+              map.get(
+                `${token.chainInfo.chainId}/${token.token.currency.coinMinimalDenom}`
+              )
             );
 
             filteredMap.set(groupKey, nonLowBalanceTokens);
@@ -92,21 +96,25 @@ const tokenSearchFields = [
 
 const groupedTokensSearchFields = [
   {
-    key: "originCurrency.coinDenom",
+    key: "originCurrency.coinDenom[]",
     function: (entries: [groupKey: string, tokens: ViewToken[]]) => {
-      const currency = entries[1][0].token.currency;
-      if ("originCurrency" in currency) {
-        return CoinPretty.makeCoinDenomPretty(
-          currency.originCurrency?.coinDenom || ""
-        );
-      }
-      return CoinPretty.makeCoinDenomPretty(currency.coinDenom);
+      return entries[1].map((token) => {
+        const currency = token.token.currency;
+        if ("originCurrency" in currency) {
+          return CoinPretty.makeCoinDenomPretty(
+            currency.originCurrency?.coinDenom || ""
+          );
+        }
+        return CoinPretty.makeCoinDenomPretty(currency.coinDenom);
+      });
     },
   },
   {
-    key: "chainInfo.chainName",
+    key: "chainInfo.chainName[]",
     function: (entries: [groupKey: string, tokens: ViewToken[]]) => {
-      return entries[1][0].chainInfo.chainName;
+      return entries[1].map((token) => {
+        return token.chainInfo.chainName;
+      });
     },
   },
 ];
