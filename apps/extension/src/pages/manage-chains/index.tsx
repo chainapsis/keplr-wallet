@@ -108,19 +108,19 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
   };
 
   const applyEnableChange = useCallback(
-    async (cid: string, enable: boolean) => {
-      if (!vaultId || !cid) return;
+    async (chainId: string, enable: boolean) => {
+      if (!vaultId || !chainId) return;
 
-      const modInfo = chainStore.hasModularChain(cid)
-        ? chainStore.getModularChain(cid)
+      const modularChainInfo = chainStore.hasModularChain(chainId)
+        ? chainStore.getModularChain(chainId)
         : undefined;
 
       if (
         enable &&
-        modInfo &&
+        modularChainInfo &&
         keyRingStore.selectedKeyInfo?.type === "ledger"
       ) {
-        const ledgerApp = determineLedgerApp(modInfo, cid);
+        const ledgerApp = determineLedgerApp(modularChainInfo, chainId);
 
         const alreadyAppended = Boolean(
           keyRingStore.selectedKeyInfo?.insensitive?.[ledgerApp]
@@ -128,7 +128,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
 
         if (!alreadyAppended) {
           setConnectLedgerApp(ledgerApp);
-          setConnectLedgerChainId(cid);
+          setConnectLedgerChainId(chainId);
           setOpenEnableChainsRoute(false);
           setIsConnectLedgerModalOpen(true);
           return;
@@ -136,8 +136,8 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
       }
 
       if (enable) {
-        if (chainStore.hasChain(cid)) {
-          const chainInfo = chainStore.getChain(cid);
+        if (chainStore.hasChain(chainId)) {
+          const chainInfo = chainStore.getChain(chainId);
           const needModal = await needFinalizeKeyCoinTypeAction(
             vaultId,
             chainInfo
@@ -145,33 +145,31 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
 
           if (needModal) {
             setDerivationChainIds((prev) =>
-              prev.includes(cid) ? prev : [...prev, cid]
+              prev.includes(chainId) ? prev : [...prev, chainId]
             );
             setIsDerivationModalOpen(true);
           }
-        }
-
-        if (!chainStore.hasChain(cid)) {
+        } else {
           const chainInfoToSuggest = searchedNonNativeChainInfos.find(
-            (c) => c.chainId === cid
+            (c) =>
+              ChainIdHelper.parse(c.chainId).identifier ===
+              ChainIdHelper.parse(chainId).identifier
           );
           if (chainInfoToSuggest && window.keplr?.experimentalSuggestChain) {
             try {
-              await window.keplr.experimentalSuggestChain(
-                chainInfoToSuggest as any
-              );
+              await window.keplr.experimentalSuggestChain(chainInfoToSuggest);
               await keyRingStore.refreshKeyRingStatus();
               await chainStore.updateChainInfosFromBackground();
               await chainStore.updateEnabledChainIdentifiersFromBackground();
             } catch (e) {
-              console.error("Failed to suggest chain", cid, e);
+              console.error("Failed to suggest chain", chainId, e);
             }
           }
         }
 
-        await chainStore.enableChainInfoInUIWithVaultId(vaultId, cid);
+        await chainStore.enableChainInfoInUIWithVaultId(vaultId, chainId);
       } else {
-        await chainStore.disableChainInfoInUIWithVaultId(vaultId, cid);
+        await chainStore.disableChainInfoInUIWithVaultId(vaultId, chainId);
       }
     },
     [

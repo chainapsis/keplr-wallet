@@ -35,7 +35,12 @@ export const ChainToggleItem: FunctionComponent<ChainToggleItemProps> = ({
   };
 
   const tokenCountText = useMemo(
-    () => (tokens.length > 0 ? `${tokens.length} Tokens` : ""),
+    () =>
+      tokens.length > 0
+        ? tokens.length === 1
+          ? "1 Token"
+          : `${tokens.length} Tokens`
+        : "",
     [tokens]
   );
 
