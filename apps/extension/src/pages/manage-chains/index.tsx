@@ -32,6 +32,7 @@ import { SelectDerivationPathModal } from "./components/select-derivation-path-m
 import { ConnectLedgerModal } from "./components/connect-ledger-modal";
 import { useKeyCoinTypeFinalize } from "./hooks/use-key-coin-type-finalize";
 import { EmbedChainInfos } from "../../config";
+import { getKeplrFromWindow } from "@keplr-wallet/stores";
 
 export const Ecosystem = {
   All: "All",
@@ -111,31 +112,26 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
     async (chainId: string, enable: boolean) => {
       if (!vaultId || !chainId) return;
 
-      const modularChainInfo = chainStore.hasModularChain(chainId)
-        ? chainStore.getModularChain(chainId)
-        : undefined;
-
-      if (
-        enable &&
-        modularChainInfo &&
-        keyRingStore.selectedKeyInfo?.type === "ledger"
-      ) {
-        const ledgerApp = determineLedgerApp(modularChainInfo, chainId);
-
-        const alreadyAppended = Boolean(
-          keyRingStore.selectedKeyInfo?.insensitive?.[ledgerApp]
-        );
-
-        if (!alreadyAppended) {
-          setConnectLedgerApp(ledgerApp);
-          setConnectLedgerChainId(chainId);
-          setOpenEnableChainsRoute(false);
-          setIsConnectLedgerModalOpen(true);
-          return;
-        }
-      }
-
       if (enable) {
+        if (!chainStore.hasChain(chainId)) {
+          const keplr = await getKeplrFromWindow();
+          const chainInfoToSuggest = searchedNonNativeChainInfos.find(
+            (c) =>
+              ChainIdHelper.parse(c.chainId).identifier ===
+              ChainIdHelper.parse(chainId).identifier
+          );
+          if (chainInfoToSuggest && keplr) {
+            try {
+              await keplr.experimentalSuggestChain(chainInfoToSuggest);
+              await keyRingStore.refreshKeyRingStatus();
+              await chainStore.updateChainInfosFromBackground();
+              await chainStore.updateEnabledChainIdentifiersFromBackground();
+            } catch (e) {
+              console.error("Failed to suggest chain", chainId, e);
+            }
+          }
+        }
+
         if (chainStore.hasChain(chainId)) {
           const chainInfo = chainStore.getChain(chainId);
           const needModal = await needFinalizeKeyCoinTypeAction(
@@ -149,25 +145,28 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
             );
             setIsDerivationModalOpen(true);
           }
-        } else {
-          const chainInfoToSuggest = searchedNonNativeChainInfos.find(
-            (c) =>
-              ChainIdHelper.parse(c.chainId).identifier ===
-              ChainIdHelper.parse(chainId).identifier
-          );
-          if (chainInfoToSuggest && window.keplr?.experimentalSuggestChain) {
-            try {
-              await window.keplr.experimentalSuggestChain(chainInfoToSuggest);
-              await keyRingStore.refreshKeyRingStatus();
-              await chainStore.updateChainInfosFromBackground();
-              await chainStore.updateEnabledChainIdentifiersFromBackground();
-            } catch (e) {
-              console.error("Failed to suggest chain", chainId, e);
-            }
-          }
         }
 
-        await chainStore.enableChainInfoInUIWithVaultId(vaultId, chainId);
+        if (chainStore.hasModularChain(chainId)) {
+          if (keyRingStore.selectedKeyInfo?.type === "ledger") {
+            const modularChainInfo = chainStore.getModularChain(chainId);
+            const ledgerApp = determineLedgerApp(modularChainInfo, chainId);
+
+            const alreadyAppended = Boolean(
+              keyRingStore.selectedKeyInfo?.insensitive?.[ledgerApp]
+            );
+
+            if (!alreadyAppended) {
+              setConnectLedgerApp(ledgerApp);
+              setConnectLedgerChainId(chainId);
+              setOpenEnableChainsRoute(false);
+              setIsConnectLedgerModalOpen(true);
+              return;
+            }
+          }
+
+          await chainStore.enableChainInfoInUIWithVaultId(vaultId, chainId);
+        }
       } else {
         await chainStore.disableChainInfoInUIWithVaultId(vaultId, chainId);
       }
@@ -326,7 +325,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
     }
 
     return modularChainInfos;
-  }, [chainStore, keyType]);
+  }, [chainStore, keyType, chainStore.groupedModularChainInfosInListUI]);
 
   const nativeChainIdentifierSet = useMemo(
     () =>
@@ -403,7 +402,12 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
   ).sort(chainSort);
 
   const searchedAllChains = useSearch(
-    [...nativeChains, ...searchedNonNativeChainInfos],
+    [
+      ...nativeChains,
+      ...searchedNonNativeChainInfos.filter(
+        (chainInfo) => !chainStore.hasModularChain(chainInfo.chainId)
+      ),
+    ],
     search,
     searchFields
   );
@@ -656,7 +660,10 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
                 <ChainToggleItem
                   chainInfo={ci}
                   tokens={tokens}
-                  enabled={chainStore.isEnabledChain(ci.chainId)}
+                  enabled={
+                    chainStore.isEnabledChain(ci.chainId) &&
+                    chainStore.hasModularChain(ci.chainId)
+                  }
                   disabled={
                     "cosmos" in ci
                       ? chainStore.hasChain(ci.chainId)
