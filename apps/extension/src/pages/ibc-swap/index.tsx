@@ -851,6 +851,14 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     }
     return false;
   })();
+  const showCelestiaWarning = (() => {
+    if (uiConfigStore.ibcSwapConfig.celestiaDisabled) {
+      return (
+        ibcSwapConfigs.amountConfig.chainId === "celestia" ||
+        ibcSwapConfigs.amountConfig.outChainId === "celestia"
+      );
+    }
+  })();
 
   return (
     <MainHeaderLayout
@@ -1996,6 +2004,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
         <WarningGuideBox
           showUSDNWarning={showUSDNWarning}
+          showCelestiaWarning={showCelestiaWarning}
           amountConfig={ibcSwapConfigs.amountConfig}
           feeConfig={ibcSwapConfigs.feeConfig}
           gasConfig={ibcSwapConfigs.gasConfig}
@@ -2058,7 +2067,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
         <Button
           type="submit"
-          disabled={interactionBlocked || showUSDNWarning}
+          disabled={
+            interactionBlocked || showUSDNWarning || showCelestiaWarning
+          }
           text={intl.formatMessage({
             id: "page.ibc-swap.button.next",
           })}
@@ -2113,6 +2124,7 @@ const WarningGuideBox: FunctionComponent<{
   title?: string;
 
   showUSDNWarning?: boolean;
+  showCelestiaWarning?: boolean;
 }> = observer(
   ({
     amountConfig,
@@ -2122,6 +2134,7 @@ const WarningGuideBox: FunctionComponent<{
     forceWarning,
     title,
     showUSDNWarning,
+    showCelestiaWarning,
   }) => {
     const intl = useIntl();
     const theme = useTheme();
@@ -2243,6 +2256,13 @@ const WarningGuideBox: FunctionComponent<{
       title = "Swap Smarter";
       errorText =
         "To avoid high slippage, use Deposit or Withdraw on the Earn page.";
+      collapsed = false;
+    }
+
+    if (showCelestiaWarning) {
+      title = "Temporarily Unavailable";
+      errorText =
+        "IBC transfers to and from Celestia are temporarily unavailable due to network issues.";
       collapsed = false;
     }
 

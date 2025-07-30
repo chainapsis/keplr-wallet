@@ -2,7 +2,7 @@ import { KVStore, PrefixKVStore } from "@keplr-wallet/common";
 import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 import { ChainStore } from "../chain";
 import { computedFn } from "mobx-utils";
-import { IChainInfoImpl } from "@keplr-wallet/stores";
+import { IChainInfoImpl, IQueriesStore } from "@keplr-wallet/stores";
 import { AppCurrency } from "@keplr-wallet/types";
 
 export class IBCSwapConfig {
@@ -24,7 +24,14 @@ export class IBCSwapConfig {
   @observable
   protected _lastSlippageIsCustom: boolean = false;
 
-  constructor(kvStore: KVStore, protected readonly chainStore: ChainStore) {
+  @observable
+  protected _celestiaDisabled: boolean = false;
+
+  constructor(
+    kvStore: KVStore,
+    protected readonly chainStore: ChainStore,
+    protected readonly queriesStore: IQueriesStore
+  ) {
     this.kvStore = new PrefixKVStore(kvStore, "ibc-swap");
 
     makeObservable(this);
@@ -83,6 +90,20 @@ export class IBCSwapConfig {
         lastSlippage: this._lastSlippage,
         lastSlippageIsCustom: this._lastSlippageIsCustom,
       });
+    });
+
+    autorun(() => {
+      const res = this.queriesStore.simpleQuery.queryGet<{
+        disabled?: boolean;
+      }>(
+        process.env["KEPLR_EXT_CONFIG_SERVER"],
+        "/celestia-ibc-disable/config.json"
+      );
+      if (res.response?.data["disabled"] === true) {
+        runInAction(() => {
+          this._celestiaDisabled = true;
+        });
+      }
     });
   }
 
@@ -217,5 +238,9 @@ export class IBCSwapConfig {
   async removeStatesWhenErrorOccurredDuringRendering() {
     await this.kvStore.set("ibc-swap-amount-in-out-info", null);
     await this.kvStore.set("ibc-swap-slippage", null);
+  }
+
+  get celestiaDisabled(): boolean {
+    return this._celestiaDisabled;
   }
 }

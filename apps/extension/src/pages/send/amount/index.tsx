@@ -851,6 +851,19 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       ? txConfigsValidateForBridge.interactionBlocked || !outCurrencyFetched
       : txConfigsValidate.interactionBlocked;
 
+  const showCelestiaWarning = (() => {
+    if (uiConfigStore.ibcSwapConfig.celestiaDisabled) {
+      if (sendType === "ibc-transfer") {
+        return (
+          sendConfigs.amountConfig.chainId === "celestia" ||
+          sendConfigs.channelConfig.channels.find(
+            (c) => c.counterpartyChainId === "celestia"
+          ) != null
+        );
+      }
+    }
+  })();
+
   return (
     <HeaderLayout
       title={intl.formatMessage({ id: "page.send.amount.title" })}
@@ -879,7 +892,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       }
       bottomButtons={[
         {
-          disabled: interactionBlocked,
+          disabled: interactionBlocked || showCelestiaWarning,
           text: intl.formatMessage({ id: "button.next" }),
           color: "primary",
           size: "large",
@@ -2144,6 +2157,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           )}
           <Gutter size="0.75rem" />
           <WarningGuideBox
+            showCelestiaWarning={showCelestiaWarning}
             title={
               isExpectedAmountTooSmall &&
               !calculatingTxError &&
@@ -2538,77 +2552,94 @@ const WarningGuideBox: FunctionComponent<{
   forceError?: Error;
   forceWarning?: Error;
   title?: string;
-}> = observer(({ amountConfigError, forceError, forceWarning, title }) => {
-  const error: string | undefined = (() => {
-    //NOTE - ibc swap의 amountConfig에러는 amount input에서 처리하기 때문에 여기서는 처리하지 않는다.
-    if (amountConfigError) {
-      return undefined;
+
+  showCelestiaWarning?: boolean;
+}> = observer(
+  ({
+    amountConfigError,
+    forceError,
+    forceWarning,
+    title,
+    showCelestiaWarning,
+  }) => {
+    const error: string | undefined = (() => {
+      //NOTE - ibc swap의 amountConfig에러는 amount input에서 처리하기 때문에 여기서는 처리하지 않는다.
+      if (amountConfigError) {
+        return undefined;
+      }
+
+      if (forceError) {
+        return forceError.message || forceError.toString();
+      }
+
+      if (forceWarning) {
+        return forceWarning.message || forceWarning.toString();
+      }
+    })();
+
+    // Collapse됐을때는 이미 error가 없어졌기 때문이다.
+    // 그러면 트랜지션 중에 이미 내용은 사라져있기 때문에
+    // 이 문제를 해결하기 위해서 마지막 오류를 기억해야 한다.
+    const [lastError, setLastError] = useState("");
+    useLayoutEffect(() => {
+      if (error != null) {
+        setLastError(error);
+      }
+    }, [error]);
+
+    let collapsed = error == null;
+
+    const globalSimpleBar = useGlobarSimpleBar();
+    useEffect(() => {
+      if (!collapsed) {
+        const timeoutId = setTimeout(() => {
+          const el = globalSimpleBar.ref.current?.getScrollElement();
+          if (el) {
+            // 오류 메세지가 가장 밑에 있는 관계로 유저가 잘 못볼수도 있기 때문에
+            // 트랜지션 종료 이후에 스크롤을 맨 밑으로 내린다.
+            // 어차피 높이는 대충 정해져있기 때문에 대충 큰 값을 넣으면 가장 밑으로 스크롤 된다.
+            el.scrollTo({
+              top: 1000,
+              behavior: "smooth",
+            });
+          }
+        }, 300);
+        return () => {
+          clearTimeout(timeoutId);
+        };
+      }
+    }, [collapsed]);
+
+    let errorText = (() => {
+      const err = error || lastError;
+      return err;
+    })();
+
+    if (showCelestiaWarning) {
+      title = "Temporarily Unavailable";
+      errorText =
+        "IBC transfers to and from Celestia are temporarily unavailable due to network issues.";
+      collapsed = false;
     }
 
-    if (forceError) {
-      return forceError.message || forceError.toString();
-    }
-
-    if (forceWarning) {
-      return forceWarning.message || forceWarning.toString();
-    }
-  })();
-
-  // Collapse됐을때는 이미 error가 없어졌기 때문이다.
-  // 그러면 트랜지션 중에 이미 내용은 사라져있기 때문에
-  // 이 문제를 해결하기 위해서 마지막 오류를 기억해야 한다.
-  const [lastError, setLastError] = useState("");
-  useLayoutEffect(() => {
-    if (error != null) {
-      setLastError(error);
-    }
-  }, [error]);
-
-  const collapsed = error == null;
-
-  const globalSimpleBar = useGlobarSimpleBar();
-  useEffect(() => {
-    if (!collapsed) {
-      const timeoutId = setTimeout(() => {
-        const el = globalSimpleBar.ref.current?.getScrollElement();
-        if (el) {
-          // 오류 메세지가 가장 밑에 있는 관계로 유저가 잘 못볼수도 있기 때문에
-          // 트랜지션 종료 이후에 스크롤을 맨 밑으로 내린다.
-          // 어차피 높이는 대충 정해져있기 때문에 대충 큰 값을 넣으면 가장 밑으로 스크롤 된다.
-          el.scrollTo({
-            top: 1000,
-            behavior: "smooth",
-          });
-        }
-      }, 300);
-      return () => {
-        clearTimeout(timeoutId);
-      };
-    }
-  }, [collapsed]);
-
-  const errorText = (() => {
-    const err = error || lastError;
-    return err;
-  })();
-
-  return (
-    <React.Fragment>
-      {/* 별 차이는 없기는한데 gutter와 실제 컴포넌트의 트랜지션을 분리하는게 아주 약간 더 자연스러움 */}
-      <VerticalCollapseTransition collapsed={collapsed}>
-        <Gutter size="0.75rem" />
-      </VerticalCollapseTransition>
-      <VerticalCollapseTransition collapsed={collapsed}>
-        <GuideBox
-          color="warning"
-          title={title || errorText}
-          paragraph={title ? errorText : undefined}
-          hideInformationIcon={true}
-        />
-      </VerticalCollapseTransition>
-    </React.Fragment>
-  );
-});
+    return (
+      <React.Fragment>
+        {/* 별 차이는 없기는한데 gutter와 실제 컴포넌트의 트랜지션을 분리하는게 아주 약간 더 자연스러움 */}
+        <VerticalCollapseTransition collapsed={collapsed}>
+          <Gutter size="0.75rem" />
+        </VerticalCollapseTransition>
+        <VerticalCollapseTransition collapsed={collapsed}>
+          <GuideBox
+            color="warning"
+            title={title || errorText}
+            paragraph={title ? errorText : undefined}
+            hideInformationIcon={!showCelestiaWarning}
+          />
+        </VerticalCollapseTransition>
+      </React.Fragment>
+    );
+  }
+);
 
 const convertToBech32IfNeed = (
   address: string,
