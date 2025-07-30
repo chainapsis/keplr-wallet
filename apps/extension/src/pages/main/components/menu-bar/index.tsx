@@ -13,7 +13,7 @@ import { XAxis } from "../../../../components/axis";
 import { Bleed } from "../../../../components/bleed";
 import { FormattedMessage } from "react-intl";
 import { useLocation } from "react-router-dom";
-import { isRunningInSidePanel, toggleSidePanelMode } from "../../../../utils";
+import { toggleSidePanelMode } from "../../../../utils";
 import { dispatchGlobalEventExceptSelf } from "../../../../utils/global-events";
 import { Column, Columns } from "../../../../components/column";
 import {
@@ -140,17 +140,9 @@ export const MenuBar: FunctionComponent<{
 
             if (keyRingStore.selectedKeyInfo) {
               analyticsStore.logEvent("click_menu_manageChainVisibility");
-              browser.tabs
-                .create({
-                  url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&skipWelcome=true`,
-                })
-                .then(() => {
-                  if (!isRunningInSidePanel()) {
-                    window.close();
-                  } else {
-                    close();
-                  }
-                });
+              navigate(
+                `/manage-chains?vaultId=${keyRingStore.selectedKeyInfo.id}`
+              );
             }
           }}
         >

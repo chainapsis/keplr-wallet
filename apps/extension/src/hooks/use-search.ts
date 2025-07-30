@@ -10,7 +10,7 @@ type SearchField<T> =
     }
   | {
       key: string;
-      function: (item: T) => string;
+      function: (item: T) => string | string[];
     };
 
 /*

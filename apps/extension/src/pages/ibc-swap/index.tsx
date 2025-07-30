@@ -29,11 +29,11 @@ import { useNotification } from "../../hooks/notification";
 import { FormattedMessage, useIntl } from "react-intl";
 import { SwapFeeBps, TermsOfUseUrl } from "../../config.ui";
 import { BottomTabsHeightRem } from "../../bottom-tabs";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useTxConfigsQueryString } from "../../hooks/use-tx-config-query-string";
 import { MainHeaderLayout } from "../main/layouts/header";
 import { XAxis } from "../../components/axis";
-import { Caption2, H4 } from "../../components/typography";
+import { Caption2, H4, Subtitle4 } from "../../components/typography";
 import { SlippageModal } from "./components/slippage-modal";
 import styled, { useTheme } from "styled-components";
 import { GuideBox } from "../../components/guide-box";
@@ -62,6 +62,10 @@ import {
 import { EthTxStatus } from "@keplr-wallet/types";
 import { InsufficientFeeError } from "@keplr-wallet/hooks";
 import { useSwapAnalytics } from "./hooks/use-swap-analytics";
+import {
+  validateIsUsdcFromNoble,
+  validateIsUsdnFromNoble,
+} from "../earn/utils";
 
 const TextButtonStyles = {
   Container: styled.div`
@@ -813,6 +817,48 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   });
 
   const isSwap = ibcSwapConfigs.amountConfig.type === "swap";
+
+  const showUSDNWarning = (() => {
+    if (
+      validateIsUsdcFromNoble(
+        ibcSwapConfigs.amountConfig.currency,
+        ibcSwapConfigs.amountConfig.chainId
+      )
+    ) {
+      if (
+        validateIsUsdnFromNoble(
+          ibcSwapConfigs.amountConfig.outCurrency,
+          ibcSwapConfigs.amountConfig.outChainId
+        )
+      ) {
+        return true;
+      }
+    }
+    if (
+      validateIsUsdnFromNoble(
+        ibcSwapConfigs.amountConfig.currency,
+        ibcSwapConfigs.amountConfig.chainId
+      )
+    ) {
+      if (
+        validateIsUsdcFromNoble(
+          ibcSwapConfigs.amountConfig.outCurrency,
+          ibcSwapConfigs.amountConfig.outChainId
+        )
+      ) {
+        return true;
+      }
+    }
+    return false;
+  })();
+  const showCelestiaWarning = (() => {
+    if (uiConfigStore.ibcSwapConfig.celestiaDisabled) {
+      return (
+        ibcSwapConfigs.amountConfig.chainId === "celestia" ||
+        ibcSwapConfigs.amountConfig.outChainId === "celestia"
+      );
+    }
+  })();
 
   return (
     <MainHeaderLayout
@@ -1957,6 +2003,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         />
 
         <WarningGuideBox
+          showUSDNWarning={showUSDNWarning}
+          showCelestiaWarning={showCelestiaWarning}
           amountConfig={ibcSwapConfigs.amountConfig}
           feeConfig={ibcSwapConfigs.feeConfig}
           gasConfig={ibcSwapConfigs.gasConfig}
@@ -2019,7 +2067,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
         <Button
           type="submit"
-          disabled={interactionBlocked}
+          disabled={
+            interactionBlocked || showUSDNWarning || showCelestiaWarning
+          }
           text={intl.formatMessage({
             id: "page.ibc-swap.button.next",
           })}
@@ -2072,9 +2122,22 @@ const WarningGuideBox: FunctionComponent<{
   forceError?: Error;
   forceWarning?: Error;
   title?: string;
+
+  showUSDNWarning?: boolean;
+  showCelestiaWarning?: boolean;
 }> = observer(
-  ({ amountConfig, feeConfig, gasConfig, forceError, forceWarning, title }) => {
+  ({
+    amountConfig,
+    feeConfig,
+    gasConfig,
+    forceError,
+    forceWarning,
+    title,
+    showUSDNWarning,
+    showCelestiaWarning,
+  }) => {
     const intl = useIntl();
+    const theme = useTheme();
 
     const error: string | undefined = (() => {
       if (feeConfig.uiProperties.error) {
@@ -2151,7 +2214,7 @@ const WarningGuideBox: FunctionComponent<{
       }
     }, [error]);
 
-    const collapsed = error == null;
+    let collapsed = error == null;
 
     const globalSimpleBar = useGlobarSimpleBar();
     useEffect(() => {
@@ -2174,7 +2237,7 @@ const WarningGuideBox: FunctionComponent<{
       }
     }, [collapsed]);
 
-    const errorText = (() => {
+    let errorText = (() => {
       const err = error || lastError;
 
       if (
@@ -2189,6 +2252,20 @@ const WarningGuideBox: FunctionComponent<{
       return err;
     })();
 
+    if (showUSDNWarning) {
+      title = "Swap Smarter";
+      errorText =
+        "To avoid high slippage, use Deposit or Withdraw on the Earn page.";
+      collapsed = false;
+    }
+
+    if (showCelestiaWarning) {
+      title = "Temporarily Unavailable";
+      errorText =
+        "IBC transfers to and from Celestia are temporarily unavailable due to network issues.";
+      collapsed = false;
+    }
+
     return (
       <React.Fragment>
         {/* 별 차이는 없기는한데 gutter와 실제 컴포넌트의 트랜지션을 분리하는게 아주 약간 더 자연스러움 */}
@@ -2197,10 +2274,35 @@ const WarningGuideBox: FunctionComponent<{
         </VerticalCollapseTransition>
         <VerticalCollapseTransition collapsed={collapsed}>
           <GuideBox
-            color="warning"
+            color={showUSDNWarning ? "default" : "warning"}
             title={title || errorText}
             paragraph={title ? errorText : undefined}
             hideInformationIcon={!title}
+            backgroundColor={(() => {
+              if (showUSDNWarning && theme.mode === "light") {
+                return ColorPalette["gray-10"];
+              }
+            })()}
+            bottom={(() => {
+              if (showUSDNWarning) {
+                return (
+                  <Link to="/earn/overview">
+                    <Subtitle4
+                      style={{
+                        textDecorationLine: "underline",
+                      }}
+                      color={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-600"]
+                          : ColorPalette["gray-100"]
+                      }
+                    >
+                      Go to Earn page
+                    </Subtitle4>
+                  </Link>
+                );
+              }
+            })()}
           />
         </VerticalCollapseTransition>
       </React.Fragment>
