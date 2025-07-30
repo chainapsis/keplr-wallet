@@ -3062,7 +3062,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         coinGeckoId: "ethereum",
       },
     ],
-    features: [],
+    features: ["op-stack-l1-data-fee"],
   },
   {
     chainId:
