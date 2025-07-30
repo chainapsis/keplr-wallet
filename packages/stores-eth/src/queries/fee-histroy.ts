@@ -13,8 +13,6 @@ interface EthereumFeeHistory {
 }
 
 export class ObservableQueryEthereumFeeHistoryInner extends ObservableEvmChainJsonRpcQuery<EthereumFeeHistory> {
-  rewardPercentiles: number[];
-
   constructor(
     sharedContext: QuerySharedContext,
     chainId: string,
@@ -35,8 +33,6 @@ export class ObservableQueryEthereumFeeHistoryInner extends ObservableEvmChainJs
     ]);
 
     makeObservable(this);
-
-    this.rewardPercentiles = rewardPercentiles;
   }
 
   @computed
@@ -46,54 +42,6 @@ export class ObservableQueryEthereumFeeHistoryInner extends ObservableEvmChainJs
     }
 
     return this.response.data;
-  }
-
-  @computed
-  get reasonableMaxPriorityFeePerGas():
-    | Array<{
-        percentile: number;
-        value: bigint;
-      }>
-    | undefined {
-    if (!this.feeHistory?.reward || this.feeHistory.reward.length === 0) {
-      return;
-    }
-
-    const rewards = this.feeHistory.reward;
-
-    const results: {
-      percentile: number;
-      value: bigint;
-    }[] = [];
-
-    const percentiles = this.rewardPercentiles;
-    const deviationThreshold = BigInt(1 * 10 ** 9); // 1 Gwei
-
-    for (let idx = 0; idx < percentiles.length; idx++) {
-      const vals = rewards
-        .map((block) => block[idx])
-        .filter((v) => v != null)
-        .map((v) => BigInt(v));
-
-      if (vals.length === 0) continue;
-
-      const sum = vals.reduce((acc, x) => acc + x, BigInt(0));
-      const mean = sum / BigInt(vals.length);
-
-      vals.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
-      const median = vals[Math.floor(vals.length / 2)];
-
-      const deviation = mean > median ? mean - median : median - mean;
-      const pick =
-        deviation > deviationThreshold ? (mean > median ? mean : median) : mean;
-
-      results.push({
-        percentile: percentiles[idx],
-        value: pick,
-      });
-    }
-
-    return results.length > 0 ? results : undefined;
   }
 }
 

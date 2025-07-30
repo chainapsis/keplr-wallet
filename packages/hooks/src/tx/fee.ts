@@ -17,7 +17,6 @@ import { useState } from "react";
 import { InsufficientFeeError } from "./errors";
 import { QueriesStore } from "./internal";
 import { DenomHelper } from "@keplr-wallet/common";
-import { EthereumQueriesImpl } from "@keplr-wallet/stores-eth";
 
 export class FeeConfig extends TxChainSetter implements IFeeConfig {
   @observable.ref
@@ -490,18 +489,6 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
           blockQuery.waitFreshResponse();
         }
 
-        const feeHistoryQuery =
-          queries.ethereum.queryEthereumFeeHistory.getQueryByFeeHistoryParams(
-            ETH_FEE_HISTORY_BLOCK_COUNT,
-            ETH_FEE_HISTORY_NEWEST_BLOCK,
-            ETH_FEE_HISTORY_REWARD_PERCENTILES
-          );
-        if (feeHistoryQuery.feeHistory != null) {
-          if (isRefresh) {
-            feeHistoryQuery.waitFreshResponse();
-          }
-        }
-
         const maxPriorityFeePerGasQuery =
           queries.ethereum.queryEthereumMaxPriorityFee;
         if (maxPriorityFeePerGasQuery.maxPriorityFeePerGas != null) {
@@ -832,16 +819,19 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
           ).block;
         const latestBaseFeePerGas = parseInt(block?.baseFeePerGas ?? "0");
         if (latestBaseFeePerGas !== 0) {
-          const baseFeePerGasDec = new Dec(latestBaseFeePerGas);
-
           const maxPriorityFeePerGas =
-            this.calculateOptimalMaxPriorityFeePerGas(ethereumQueries, feeType);
-
-          if (maxPriorityFeePerGas.gt(new Dec(0))) {
-            const maxFeePerGas = baseFeePerGasDec.add(maxPriorityFeePerGas);
+            ethereumQueries.queryEthereumMaxPriorityFee.maxPriorityFeePerGas;
+          if (maxPriorityFeePerGas != null) {
+            const baseFeePerGasDec = new Dec(latestBaseFeePerGas).mul(
+              ETH_FEE_SETTINGS_BY_FEE_TYPE[feeType].baseFeePercentageMultiplier
+            );
+            const maxPriorityFeePerGasDec = new Dec(
+              BigInt(maxPriorityFeePerGas)
+            );
+            const maxFeePerGas = baseFeePerGasDec.add(maxPriorityFeePerGasDec);
 
             return {
-              maxPriorityFeePerGas: maxPriorityFeePerGas.truncateDec(),
+              maxPriorityFeePerGas: maxPriorityFeePerGasDec.truncateDec(),
               maxFeePerGas: maxFeePerGas.truncateDec(),
             };
           }
@@ -865,48 +855,6 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       };
     }
   );
-
-  private calculateOptimalMaxPriorityFeePerGas(
-    ethereumQueries: EthereumQueriesImpl,
-    feeType: FeeType
-  ): Dec {
-    const feeHistoryQuery =
-      ethereumQueries.queryEthereumFeeHistory.getQueryByFeeHistoryParams(
-        ETH_FEE_HISTORY_BLOCK_COUNT,
-        ETH_FEE_HISTORY_NEWEST_BLOCK,
-        ETH_FEE_HISTORY_REWARD_PERCENTILES
-      );
-
-    const reasonableMaxPriorityFeePerGas =
-      feeHistoryQuery.reasonableMaxPriorityFeePerGas;
-    const maxPriorityFeePerGas =
-      ethereumQueries.queryEthereumMaxPriorityFee.maxPriorityFeePerGas;
-
-    if (
-      reasonableMaxPriorityFeePerGas &&
-      reasonableMaxPriorityFeePerGas.length > 0
-    ) {
-      const percentile = ETH_FEE_SETTINGS_BY_FEE_TYPE[feeType].percentile;
-      const targetPercentileData = reasonableMaxPriorityFeePerGas.find(
-        (item) => item.percentile === percentile
-      );
-
-      if (targetPercentileData) {
-        const historyBasedFee = new Dec(targetPercentileData.value);
-        const networkFee = new Dec(BigInt(maxPriorityFeePerGas ?? "0x0"));
-
-        return historyBasedFee.gt(networkFee) ? historyBasedFee : networkFee;
-      }
-    }
-
-    if (maxPriorityFeePerGas) {
-      const multiplier =
-        ETH_FEE_SETTINGS_BY_FEE_TYPE[feeType].baseFeePercentageMultiplier;
-      return new Dec(BigInt(maxPriorityFeePerGas)).mul(multiplier);
-    }
-
-    return new Dec(ETH_DEFAULT_MAX_PRIORITY_FEE_PER_GAS);
-  }
 
   protected populateGasPriceStep(
     feeCurrency: FeeCurrency,
@@ -1121,30 +1069,6 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
           };
         }
 
-        const feeHistoryQuery =
-          ethereumQueries.queryEthereumFeeHistory.getQueryByFeeHistoryParams(
-            ETH_FEE_HISTORY_BLOCK_COUNT,
-            ETH_FEE_HISTORY_NEWEST_BLOCK,
-            ETH_FEE_HISTORY_REWARD_PERCENTILES
-          );
-        if (feeHistoryQuery.error) {
-          return {
-            warning: new Error(
-              `Failed to fetch fee history. chain id: ${this.chainId}`
-            ),
-          };
-        }
-        if (feeHistoryQuery.isFetching) {
-          return {
-            loadingState: "loading",
-          };
-        }
-        if (!feeHistoryQuery.response) {
-          return {
-            loadingState: "loading-block",
-          };
-        }
-
         const maxPriorityFeePerGasQuery =
           ethereumQueries.queryEthereumMaxPriorityFee;
         if (maxPriorityFeePerGasQuery.error) {
@@ -1289,8 +1213,6 @@ export const useFeeConfig = (
   return config;
 };
 
-const ETH_FEE_HISTORY_BLOCK_COUNT = 20;
-const ETH_FEE_HISTORY_REWARD_PERCENTILES = [10, 25, 45];
 const ETH_FEE_SETTINGS_BY_FEE_TYPE: Record<
   FeeType,
   {
@@ -1299,17 +1221,16 @@ const ETH_FEE_SETTINGS_BY_FEE_TYPE: Record<
   }
 > = {
   low: {
-    percentile: ETH_FEE_HISTORY_REWARD_PERCENTILES[0],
+    percentile: 10,
     baseFeePercentageMultiplier: new Dec(1),
   },
   average: {
-    percentile: ETH_FEE_HISTORY_REWARD_PERCENTILES[1],
+    percentile: 40,
     baseFeePercentageMultiplier: new Dec(1.125),
   },
   high: {
-    percentile: ETH_FEE_HISTORY_REWARD_PERCENTILES[2],
+    percentile: 70,
     baseFeePercentageMultiplier: new Dec(1.25),
   },
 };
 const ETH_FEE_HISTORY_NEWEST_BLOCK = "latest";
-const ETH_DEFAULT_MAX_PRIORITY_FEE_PER_GAS = BigInt(1.5 * 10 ** 9); // 1.5 gwei
