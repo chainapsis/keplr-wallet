@@ -54,6 +54,7 @@ import { Styles as AvailableCollapsibleListStyles } from "../../components/colla
 import { getTokenSearchResultClickAnalyticsProperties } from "../../analytics-amplitude";
 import { useGroupedTokensMap } from "../../hooks/use-grouped-tokens-map";
 import { useBalanceAnalytics } from "./hooks/use-balance-analytics";
+import { KeyRingCosmosService } from "@keplr-wallet/background";
 
 type TokenViewData = {
   title: string;
@@ -284,7 +285,7 @@ export const AvailableTabView: FunctionComponent<{
   onMoreTokensClosed: () => void;
 }> = observer(
   ({ search, isNotReady, onClickGetStarted, onMoreTokensClosed }) => {
-    const { chainStore, uiConfigStore } = useStore();
+    const { chainStore, uiConfigStore, keyRingStore } = useStore();
     const intl = useIntl();
     const theme = useTheme();
     const navigate = useNavigate();
@@ -372,7 +373,36 @@ export const AvailableTabView: FunctionComponent<{
       trimSearch.length >= 2 ? lookingForChains : [],
       trimSearch,
       chainSearchFields
-    );
+    ).filter(({ chainInfo }) => {
+      if (keyRingStore.selectedKeyInfo?.type === "ledger") {
+        const cosmosChainInfo = (() => {
+          if ("cosmos" in chainInfo) {
+            return chainInfo.cosmos;
+          }
+          if ("currencies" in chainInfo && "feeCurrencies" in chainInfo) {
+            return chainInfo;
+          }
+        })();
+        if (cosmosChainInfo) {
+          // cosmos 계열이면서 ledger일때
+          // background에서 ledger를 지원하지 않는 체인은 다 지워줘야한다.
+          try {
+            if (cosmosChainInfo.features?.includes("force-enable-evm-ledger")) {
+              return true;
+            }
+
+            KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
+              cosmosChainInfo.chainId
+            );
+            return true;
+          } catch {
+            return false;
+          }
+        }
+      }
+
+      return true;
+    });
 
     const numFoundToken = useMemo(() => {
       if (chainStore.tokenScans.length === 0) {
