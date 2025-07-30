@@ -186,7 +186,6 @@
   "pages.register.enable-chains.native-chain-view.ledger-bitcoin-title": "所有原生比特币链",
   "pages.register.enable-chains.native-chain-view.ledger-bitcoin-paragraph": "Bitcoin, Bitcoin Signet, Bitcoin Testnet",
 
-
   "pages.manage-chains.title": "添加/删除链",
   "pages.manage-chains.search-input-placeholder": "搜索网络",
   "pages.manage-chains.ecosystem-filter-dropdown.title": "筛选",
