@@ -1078,4 +1078,19 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
       chainIdLikeCAIP2[0] === "eip155"
     );
   }
+
+  isEvmOrEthermintLikeChain(chainId: string): boolean {
+    const b = this.isEvmChain(chainId);
+    if (b) {
+      return true;
+    }
+    const chainInfo = this.getChain(chainId);
+
+    const isEthermintLike =
+      chainInfo.bip44.coinType === 60 ||
+      !!chainInfo.features?.includes("eth-address-gen") ||
+      !!chainInfo.features?.includes("eth-key-sign");
+
+    return isEthermintLike;
+  }
 }

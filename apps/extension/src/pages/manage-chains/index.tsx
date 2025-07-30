@@ -33,6 +33,7 @@ import { ConnectLedgerModal } from "./components/connect-ledger-modal";
 import { useKeyCoinTypeFinalize } from "./hooks/use-key-coin-type-finalize";
 import { EmbedChainInfos } from "../../config";
 import { getKeplrFromWindow } from "@keplr-wallet/stores";
+import { KeyRingCosmosService } from "@keplr-wallet/background";
 
 export const Ecosystem = {
   All: "All",
@@ -93,7 +94,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
   ] = useState(chainStore.enabledChainIdentifiers);
 
   const determineLedgerApp = (info: ModularChainInfo, cid: string): string => {
-    if ("cosmos" in info && chainStore.isEvmOnlyChain(cid)) {
+    if ("cosmos" in info && chainStore.isEvmOrEthermintLikeChain(cid)) {
       return "Ethereum";
     }
 
@@ -410,7 +411,36 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
     ],
     search,
     searchFields
-  );
+  ).filter((chainInfo) => {
+    if (keyType === "ledger") {
+      const cosmosChainInfo = (() => {
+        if ("cosmos" in chainInfo) {
+          return chainInfo.cosmos;
+        }
+        if ("currencies" in chainInfo && "feeCurrencies" in chainInfo) {
+          return chainInfo;
+        }
+      })();
+      if (cosmosChainInfo) {
+        // cosmos 계열이면서 ledger일때
+        // background에서 ledger를 지원하지 않는 체인은 다 지워줘야한다.
+        try {
+          if (cosmosChainInfo.features?.includes("force-enable-evm-ledger")) {
+            return true;
+          }
+
+          KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
+            cosmosChainInfo.chainId
+          );
+          return true;
+        } catch {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  });
 
   const ecosystemFilteredChainInfos = useMemo(() => {
     return searchedAllChains.filter((ci) => {
