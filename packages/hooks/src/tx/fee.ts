@@ -1290,7 +1290,7 @@ export const useFeeConfig = (
 };
 
 const ETH_FEE_HISTORY_BLOCK_COUNT = 20;
-const ETH_FEE_HISTORY_REWARD_PERCENTILES = [15, 40, 65];
+const ETH_FEE_HISTORY_REWARD_PERCENTILES = [10, 25, 45];
 const ETH_FEE_SETTINGS_BY_FEE_TYPE: Record<
   FeeType,
   {
