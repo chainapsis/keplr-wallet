@@ -19,6 +19,7 @@ export function useGroupedTokensMap(search: string) {
               hugeQueriesStore.filterLowBalanceTokens(tokens);
 
             if (lowBalanceTokens.length === tokens.length) {
+              filteredMap.set(groupKey, tokens);
               return;
             }
 
