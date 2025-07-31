@@ -30,10 +30,11 @@ export function useGroupedTokensMap(search: string) {
               );
             }
 
-            const nonLowBalanceTokens = tokens.filter((token) =>
-              map.get(
-                `${token.chainInfo.chainId}/${token.token.currency.coinMinimalDenom}`
-              )
+            const nonLowBalanceTokens = tokens.filter(
+              (token) =>
+                !map.get(
+                  `${token.chainInfo.chainId}/${token.token.currency.coinMinimalDenom}`
+                )
             );
 
             filteredMap.set(groupKey, nonLowBalanceTokens);

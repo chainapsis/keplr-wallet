@@ -729,12 +729,14 @@ export class HugeQueriesStore {
           return false;
         }
 
-        // Else, hide the low balance tokens (under 0.001)
-        const isNotLowBalance = viewToken.token.toDec().gte(new Dec("0.001"));
-        if (!isNotLowBalance) {
-          lowBalanceTokens.push(viewToken);
+        if (viewToken.token.currency.coinGeckoId == null) {
+          // Else, hide the low balance tokens (under 0.001)
+          const isNotLowBalance = viewToken.token.toDec().gte(new Dec("0.001"));
+          if (!isNotLowBalance) {
+            lowBalanceTokens.push(viewToken);
+          }
+          return isNotLowBalance;
         }
-        return isNotLowBalance;
       });
 
       return {
