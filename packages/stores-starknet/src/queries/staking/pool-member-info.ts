@@ -297,8 +297,6 @@ export class ObservableQueryStakingInfo extends ObservableStarknetChainJsonRpcQu
     const validators = this.queryValidators.validators;
 
     for (const validator of validators) {
-      console.log("validator", validator);
-
       if (!validator.pool_address) {
         continue;
       }
@@ -315,8 +313,6 @@ export class ObservableQueryStakingInfo extends ObservableStarknetChainJsonRpcQu
       if (!stakedAmount) {
         continue;
       }
-
-      console.log("stakedAmount", stakedAmount);
 
       totalStakedAmount = totalStakedAmount.add(stakedAmount);
     }
