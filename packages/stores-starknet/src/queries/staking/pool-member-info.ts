@@ -231,12 +231,12 @@ export class ObservableQueryStakingInfo extends ObservableStarknetChainJsonRpcQu
     if (response) {
       await Promise.all(
         this.queryValidators.validators.map((validator) => {
-          if (!validator.pool_contract_address) {
+          if (!validator.pool_address) {
             return Promise.resolve(undefined);
           }
 
           const queryPoolMemberInfo = this.getQueryPoolAddress(
-            validator.pool_contract_address
+            validator.pool_address
           );
           if (queryPoolMemberInfo) {
             return queryPoolMemberInfo.waitFreshResponse();
@@ -261,12 +261,12 @@ export class ObservableQueryStakingInfo extends ObservableStarknetChainJsonRpcQu
 
     return (
       validators.some((validator) => {
-        if (!validator.pool_contract_address) {
+        if (!validator.pool_address) {
           return false;
         }
 
         const queryPoolMemberInfo = this.getQueryPoolAddress(
-          validator.pool_contract_address
+          validator.pool_address
         );
 
         return queryPoolMemberInfo?.isFetching;
@@ -297,12 +297,12 @@ export class ObservableQueryStakingInfo extends ObservableStarknetChainJsonRpcQu
     const validators = this.queryValidators.validators;
 
     for (const validator of validators) {
-      if (!validator.pool_contract_address) {
+      if (!validator.pool_address) {
         continue;
       }
 
       const queryPoolMemberInfo = this.getQueryPoolAddress(
-        validator.pool_contract_address
+        validator.pool_address
       );
 
       if (!queryPoolMemberInfo) {
@@ -332,12 +332,12 @@ export class ObservableQueryStakingInfo extends ObservableStarknetChainJsonRpcQu
     const validators = this.queryValidators.validators;
 
     for (const validator of validators) {
-      if (!validator.pool_contract_address) {
+      if (!validator.pool_address) {
         continue;
       }
 
       const queryPoolMemberInfo = this.getQueryPoolAddress(
-        validator.pool_contract_address
+        validator.pool_address
       );
 
       if (!queryPoolMemberInfo) {
@@ -374,12 +374,12 @@ export class ObservableQueryStakingInfo extends ObservableStarknetChainJsonRpcQu
     }
 
     for (const validator of validators) {
-      if (!validator.pool_contract_address) {
+      if (!validator.pool_address) {
         continue;
       }
 
       const queryPoolMemberInfo = this.getQueryPoolAddress(
-        validator.pool_contract_address
+        validator.pool_address
       );
 
       if (!queryPoolMemberInfo) {
@@ -394,7 +394,7 @@ export class ObservableQueryStakingInfo extends ObservableStarknetChainJsonRpcQu
       if (unclaimedRewards.toDec().gt(new Dec(0))) {
         claimableRewards.push({
           validatorAddress: validator.operational_address,
-          poolAddress: validator.pool_contract_address,
+          poolAddress: validator.pool_address,
           rewardAddress: validator.reward_address,
           amount: unclaimedRewards,
         });
@@ -430,12 +430,12 @@ export class ObservableQueryStakingInfo extends ObservableStarknetChainJsonRpcQu
     }
 
     for (const validator of validators) {
-      if (!validator.pool_contract_address) {
+      if (!validator.pool_address) {
         continue;
       }
 
       const queryPoolMemberInfo = this.getQueryPoolAddress(
-        validator.pool_contract_address
+        validator.pool_address
       );
 
       if (!queryPoolMemberInfo) {
@@ -456,7 +456,7 @@ export class ObservableQueryStakingInfo extends ObservableStarknetChainJsonRpcQu
 
       unbondings.push({
         validatorAddress: validator.operational_address,
-        poolAddress: validator.pool_contract_address,
+        poolAddress: validator.pool_address,
         rewardAddress: validator.reward_address,
         amount: unpoolAmount,
         completeTime: unpoolTime,
