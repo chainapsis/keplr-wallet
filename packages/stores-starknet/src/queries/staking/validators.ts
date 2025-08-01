@@ -17,8 +17,8 @@ export class ObservableQueryValidators extends ObservableQuery<StarknetValidator
   ) {
     super(
       sharedContext,
-      "https://api.dashboard.endur.fi/api/",
-      "validators" // CHECK: query params are not working for now
+      "https://staking-dashboard-mainnet-api-v2.onrender.com/api/",
+      "query/validators"
     );
     makeObservable(this);
 
@@ -40,10 +40,10 @@ export class ObservableQueryValidators extends ObservableQuery<StarknetValidator
       return [];
     }
 
-    if (!Array.isArray(this.response.data.validators)) {
+    if (!Array.isArray(this.response.data)) {
       return [];
     }
 
-    return this.response.data.validators;
+    return this.response.data;
   }
 }
