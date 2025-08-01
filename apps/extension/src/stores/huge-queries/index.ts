@@ -737,6 +737,8 @@ export class HugeQueriesStore {
           }
           return isNotLowBalance;
         }
+
+        return true;
       });
 
       return {
