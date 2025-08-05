@@ -400,6 +400,7 @@
   "page.wallet.unknown-title": "알 수 없음",
   "page.wallet.keyring-item.bip44-path-Terra-text": "(테라 앱)",
   "page.wallet.keyring-item.bip44-path-Secret-text": "(시크릿 앱)",
+  "page.wallet.keyring-item.bip44-path-THORChain-text": "(토르 체인 앱)",
   "page.wallet.keyring-item.dropdown.change-wallet-name-title": "지갑 이름 변경",
   "page.wallet.keyring-item.dropdown.delete-wallet-title": "지갑 삭제",
   "page.wallet.keyring-item.dropdown.view-recovery-path-title": "복구 문구 보기",

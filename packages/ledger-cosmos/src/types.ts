@@ -9,7 +9,7 @@ export const AppHRP: Record<App, string | undefined> = {
   Cosmos: "cosmos",
   Terra: "terra",
   Secret: "secret",
-  THORChain: "THORChain",
+  THORChain: "thor",
 };
 
 export interface CommonResponse {
