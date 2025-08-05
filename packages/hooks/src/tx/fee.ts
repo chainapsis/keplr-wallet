@@ -833,18 +833,14 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         const latestBaseFeePerGas = parseInt(block?.baseFeePerGas ?? "0");
         if (latestBaseFeePerGas !== 0) {
           const baseFeePerGasDec = new Dec(latestBaseFeePerGas);
-
           const maxPriorityFeePerGas =
             this.calculateOptimalMaxPriorityFeePerGas(ethereumQueries, feeType);
+          const maxFeePerGas = baseFeePerGasDec.add(maxPriorityFeePerGas);
 
-          if (maxPriorityFeePerGas.gt(new Dec(0))) {
-            const maxFeePerGas = baseFeePerGasDec.add(maxPriorityFeePerGas);
-
-            return {
-              maxPriorityFeePerGas: maxPriorityFeePerGas.truncateDec(),
-              maxFeePerGas: maxFeePerGas.truncateDec(),
-            };
-          }
+          return {
+            maxPriorityFeePerGas: maxPriorityFeePerGas.truncateDec(),
+            maxFeePerGas: maxFeePerGas.truncateDec(),
+          };
         } else {
           const gasPrice = ethereumQueries.queryEthereumGasPrice.gasPrice;
 
@@ -893,9 +889,13 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
       if (targetPercentileData) {
         const historyBasedFee = new Dec(targetPercentileData.value);
-        const networkFee = new Dec(BigInt(maxPriorityFeePerGas ?? "0x0"));
+        const networkSuggestedFee = new Dec(
+          BigInt(maxPriorityFeePerGas ?? "0x0")
+        );
 
-        return historyBasedFee.gt(networkFee) ? historyBasedFee : networkFee;
+        return historyBasedFee.gt(networkSuggestedFee)
+          ? historyBasedFee
+          : networkSuggestedFee;
       }
     }
 
@@ -905,7 +905,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       return new Dec(BigInt(maxPriorityFeePerGas)).mul(multiplier);
     }
 
-    return new Dec(ETH_DEFAULT_MAX_PRIORITY_FEE_PER_GAS);
+    return new Dec(0);
   }
 
   protected populateGasPriceStep(
@@ -1312,4 +1312,3 @@ const ETH_FEE_SETTINGS_BY_FEE_TYPE: Record<
   },
 };
 const ETH_FEE_HISTORY_NEWEST_BLOCK = "latest";
-const ETH_DEFAULT_MAX_PRIORITY_FEE_PER_GAS = BigInt(1.5 * 10 ** 9); // 1.5 gwei
