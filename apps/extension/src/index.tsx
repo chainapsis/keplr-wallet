@@ -119,6 +119,7 @@ import { EarnTransferAmountPage } from "./pages/earn/transfer/amount";
 import { EarnOverviewPage } from "./pages/earn/overview";
 import { EarnWithdrawAmountPage } from "./pages/earn/withdraw/amount";
 import { AboutKeplrPage } from "./pages/setting/about";
+import { HistoryDetailPage } from "./pages/history-detail";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -567,6 +568,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               <Route
                 path="/earn/withdraw/amount"
                 element={<EarnWithdrawAmountPage />}
+              />
+              <Route
+                path="/tx-history-detail/:chainId/:msgJson"
+                element={<HistoryDetailPage />}
               />
             </Routes>
           )
