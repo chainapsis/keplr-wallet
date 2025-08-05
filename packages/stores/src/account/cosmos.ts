@@ -1773,56 +1773,101 @@ export class CosmosAccountImpl {
     let dec = new Dec(amount);
     dec = dec.mulTruncate(DecUtils.getPrecisionDec(currency.coinDecimals));
 
-    const msg = {
-      type: this.chainId.startsWith("interwoven-")
-        ? "mstaking/MsgUndelegate"
-        : this.msgOpts.undelegate.type,
-      value: {
-        delegator_address: this.base.bech32Address,
-        validator_address: validatorAddress,
-        amount: this.chainId.startsWith("interwoven-")
-          ? [
-              {
-                denom: currency.coinMinimalDenom,
-                amount: dec.truncate().toString(),
-              },
-            ]
-          : {
-              denom: currency.coinMinimalDenom,
-              amount: dec.truncate().toString(),
-            },
-      },
-    };
-
     return this.makeTx(
       "undelegate",
-      {
-        aminoMsgs: [msg],
-        protoMsgs: [
-          {
-            typeUrl: this.chainId.startsWith("interwoven-")
-              ? "/initia.mstaking.v1.MsgUndelegate"
-              : "/cosmos.staking.v1beta1.MsgUndelegate",
-            value: MsgUndelegate.encode({
-              delegatorAddress: msg.value.delegator_address,
-              validatorAddress: msg.value.validator_address,
-              amount: Array.isArray(msg.value.amount)
-                ? msg.value.amount[0]
-                : msg.value.amount,
-            }).finish(),
+      async () => {
+        if (this.chainId === "celestia") {
+          await this.queriesStore
+            .get(this.chainId)
+            .cosmos.queryRewards.getQueryBech32Address(this.base.bech32Address)
+            .waitFreshResponse();
+        }
+
+        const msgs: any[] = [];
+
+        let prependWithdrawRewards = false;
+        if (this.chainId === "celestia") {
+          const queryRewards = this.queriesStore
+            .get(this.chainId)
+            .cosmos.queryRewards.getQueryBech32Address(this.base.bech32Address);
+          const rewards = queryRewards.getRewardsOf(validatorAddress);
+          if (rewards.length > 0) {
+            prependWithdrawRewards = true;
+          }
+        }
+
+        if (prependWithdrawRewards) {
+          msgs.push({
+            type: this.msgOpts.withdrawRewards.type,
+            value: {
+              delegator_address: this.base.bech32Address,
+              validator_address: validatorAddress,
+            },
+          });
+        }
+
+        msgs.push({
+          type: this.chainId.startsWith("interwoven-")
+            ? "mstaking/MsgUndelegate"
+            : this.msgOpts.undelegate.type,
+          value: {
+            delegator_address: this.base.bech32Address,
+            validator_address: validatorAddress,
+            amount: this.chainId.startsWith("interwoven-")
+              ? [
+                  {
+                    denom: currency.coinMinimalDenom,
+                    amount: dec.truncate().toString(),
+                  },
+                ]
+              : {
+                  denom: currency.coinMinimalDenom,
+                  amount: dec.truncate().toString(),
+                },
           },
-        ],
-        rlpTypes: {
-          MsgValue: [
-            { name: "delegator_address", type: "string" },
-            { name: "validator_address", type: "string" },
-            { name: "amount", type: "TypeAmount" },
-          ],
-          TypeAmount: [
-            { name: "denom", type: "string" },
-            { name: "amount", type: "string" },
-          ],
-        },
+        });
+
+        return {
+          aminoMsgs: msgs,
+          protoMsgs: msgs.map((msg) => {
+            if (msg.type.includes("MsgUndelegate")) {
+              return {
+                typeUrl: this.chainId.startsWith("interwoven-")
+                  ? "/initia.mstaking.v1.MsgUndelegate"
+                  : "/cosmos.staking.v1beta1.MsgUndelegate",
+                value: MsgUndelegate.encode({
+                  delegatorAddress: msg.value.delegator_address,
+                  validatorAddress: msg.value.validator_address,
+                  amount: Array.isArray(msg.value.amount)
+                    ? msg.value.amount[0]
+                    : msg.value.amount,
+                }).finish(),
+              };
+            } else if (msg.type.includes("MsgWithdrawDelegationReward")) {
+              return {
+                typeUrl:
+                  "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+                value: MsgWithdrawDelegatorReward.encode({
+                  delegatorAddress: msg.value.delegator_address,
+                  validatorAddress: msg.value.validator_address,
+                }).finish(),
+              };
+            }
+
+            throw new Error("Unknown error");
+          }),
+          rlpTypes: {
+            MsgValue: [
+              { name: "delegator_address", type: "string" },
+              { name: "validator_address", type: "string" },
+              { name: "amount", type: "TypeAmount" },
+            ],
+            TypeAmount: [
+              { name: "denom", type: "string" },
+              { name: "amount", type: "string" },
+            ],
+          },
+        };
       },
       (tx) => {
         if (tx.code == null || tx.code === 0) {
@@ -1879,59 +1924,104 @@ export class CosmosAccountImpl {
     let dec = new Dec(amount);
     dec = dec.mulTruncate(DecUtils.getPrecisionDec(currency.coinDecimals));
 
-    const msg = {
-      type: this.chainId.startsWith("interwoven-")
-        ? "mstaking/MsgBeginRedelegate"
-        : this.msgOpts.redelegate.type,
-      value: {
-        delegator_address: this.base.bech32Address,
-        validator_src_address: srcValidatorAddress,
-        validator_dst_address: dstValidatorAddress,
-        amount: this.chainId.startsWith("interwoven-")
-          ? [
-              {
-                denom: currency.coinMinimalDenom,
-                amount: dec.truncate().toString(),
-              },
-            ]
-          : {
-              denom: currency.coinMinimalDenom,
-              amount: dec.truncate().toString(),
-            },
-      },
-    };
-
     return this.makeTx(
       "redelegate",
-      {
-        aminoMsgs: [msg],
-        protoMsgs: [
-          {
-            typeUrl: this.chainId.startsWith("interwoven-")
-              ? "/initia.mstaking.v1.MsgBeginRedelegate"
-              : "/cosmos.staking.v1beta1.MsgBeginRedelegate",
-            value: MsgBeginRedelegate.encode({
-              delegatorAddress: msg.value.delegator_address,
-              validatorSrcAddress: msg.value.validator_src_address,
-              validatorDstAddress: msg.value.validator_dst_address,
-              amount: Array.isArray(msg.value.amount)
-                ? msg.value.amount[0]
-                : msg.value.amount,
-            }).finish(),
+      async () => {
+        if (this.chainId === "celestia") {
+          await this.queriesStore
+            .get(this.chainId)
+            .cosmos.queryRewards.getQueryBech32Address(this.base.bech32Address)
+            .waitFreshResponse();
+        }
+
+        const msgs: any[] = [];
+
+        let prependWithdrawRewards = false;
+        if (this.chainId === "celestia") {
+          const queryRewards = this.queriesStore
+            .get(this.chainId)
+            .cosmos.queryRewards.getQueryBech32Address(this.base.bech32Address);
+          const rewards = queryRewards.getRewardsOf(srcValidatorAddress);
+          if (rewards.length > 0) {
+            prependWithdrawRewards = true;
+          }
+        }
+
+        if (prependWithdrawRewards) {
+          msgs.push({
+            type: this.msgOpts.withdrawRewards.type,
+            value: {
+              delegator_address: this.base.bech32Address,
+              validator_address: srcValidatorAddress,
+            },
+          });
+        }
+
+        msgs.push({
+          type: this.chainId.startsWith("interwoven-")
+            ? "mstaking/MsgBeginRedelegate"
+            : this.msgOpts.redelegate.type,
+          value: {
+            delegator_address: this.base.bech32Address,
+            validator_src_address: srcValidatorAddress,
+            validator_dst_address: dstValidatorAddress,
+            amount: this.chainId.startsWith("interwoven-")
+              ? [
+                  {
+                    denom: currency.coinMinimalDenom,
+                    amount: dec.truncate().toString(),
+                  },
+                ]
+              : {
+                  denom: currency.coinMinimalDenom,
+                  amount: dec.truncate().toString(),
+                },
           },
-        ],
-        rlpTypes: {
-          MsgValue: [
-            { name: "delegator_address", type: "string" },
-            { name: "validator_src_address", type: "string" },
-            { name: "validator_dst_address", type: "string" },
-            { name: "amount", type: "TypeAmount" },
-          ],
-          TypeAmount: [
-            { name: "denom", type: "string" },
-            { name: "amount", type: "string" },
-          ],
-        },
+        });
+
+        return {
+          aminoMsgs: msgs,
+          protoMsgs: msgs.map((msg) => {
+            if (msg.type.includes("MsgBeginRedelegate")) {
+              return {
+                typeUrl: this.chainId.startsWith("interwoven-")
+                  ? "/initia.mstaking.v1.MsgBeginRedelegate"
+                  : "/cosmos.staking.v1beta1.MsgBeginRedelegate",
+                value: MsgBeginRedelegate.encode({
+                  delegatorAddress: msg.value.delegator_address,
+                  validatorSrcAddress: msg.value.validator_src_address,
+                  validatorDstAddress: msg.value.validator_dst_address,
+                  amount: Array.isArray(msg.value.amount)
+                    ? msg.value.amount[0]
+                    : msg.value.amount,
+                }).finish(),
+              };
+            } else if (msg.type.includes("MsgWithdrawDelegationReward")) {
+              return {
+                typeUrl:
+                  "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+                value: MsgWithdrawDelegatorReward.encode({
+                  delegatorAddress: msg.value.delegator_address,
+                  validatorAddress: msg.value.validator_address,
+                }).finish(),
+              };
+            }
+
+            throw new Error("Unknown error");
+          }),
+          rlpTypes: {
+            MsgValue: [
+              { name: "delegator_address", type: "string" },
+              { name: "validator_src_address", type: "string" },
+              { name: "validator_dst_address", type: "string" },
+              { name: "amount", type: "TypeAmount" },
+            ],
+            TypeAmount: [
+              { name: "denom", type: "string" },
+              { name: "amount", type: "string" },
+            ],
+          },
+        };
       },
       (tx) => {
         if (tx.code == null || tx.code === 0) {
@@ -1968,35 +2058,62 @@ export class CosmosAccountImpl {
       );
     }
 
-    const msgs = validatorAddresses.map((validatorAddress) => {
-      return {
-        type: this.msgOpts.withdrawRewards.type,
-        value: {
-          delegator_address: this.base.bech32Address,
-          validator_address: validatorAddress,
-        },
-      };
-    });
-
     return this.makeTx(
       "withdrawRewards",
-      {
-        aminoMsgs: msgs,
-        protoMsgs: msgs.map((msg) => {
+      async () => {
+        let msgs = validatorAddresses.map((validatorAddress) => {
           return {
-            typeUrl: "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
-            value: MsgWithdrawDelegatorReward.encode({
-              delegatorAddress: msg.value.delegator_address,
-              validatorAddress: msg.value.validator_address,
-            }).finish(),
+            type: this.msgOpts.withdrawRewards.type,
+            value: {
+              delegator_address: this.base.bech32Address,
+              validator_address: validatorAddress,
+            },
           };
-        }),
-        rlpTypes: {
-          MsgValue: [
-            { name: "delegator_address", type: "string" },
-            { name: "validator_address", type: "string" },
-          ],
-        },
+        });
+
+        if (this.chainId === "celestia") {
+          const queryDelegations = this.queriesStore
+            .get(this.chainId)
+            .cosmos.queryDelegations.getQueryBech32Address(
+              this.base.bech32Address
+            );
+          await queryDelegations.waitFreshResponse();
+
+          const hasDel = new Map<string, boolean>();
+          for (const del of queryDelegations.delegations) {
+            if (new Int(del.balance.amount).gt(new Int(0))) {
+              hasDel.set(del.delegation.validator_address, true);
+            }
+          }
+
+          msgs = msgs.filter((msg) => {
+            return hasDel.get(msg.value.validator_address) === true;
+          });
+        }
+
+        if (msgs.length === 0) {
+          throw new Error("No delegations found.");
+        }
+
+        return {
+          aminoMsgs: msgs,
+          protoMsgs: msgs.map((msg) => {
+            return {
+              typeUrl:
+                "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+              value: MsgWithdrawDelegatorReward.encode({
+                delegatorAddress: msg.value.delegator_address,
+                validatorAddress: msg.value.validator_address,
+              }).finish(),
+            };
+          }),
+          rlpTypes: {
+            MsgValue: [
+              { name: "delegator_address", type: "string" },
+              { name: "validator_address", type: "string" },
+            ],
+          },
+        };
       },
       (tx) => {
         if (tx.code == null || tx.code === 0) {
