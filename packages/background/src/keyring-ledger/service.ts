@@ -80,6 +80,9 @@ export class KeyRingLedgerService {
       if (vault.insensitive["Secret"]) {
         app = "Secret";
       }
+      if (vault.insensitive["THORChain"]) {
+        app = "THORChain";
+      }
     }
 
     if (!vault.insensitive[app]) {

@@ -131,6 +131,12 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
                       id: "pages.register.name-password-hardware.connect-to-secret",
                     }),
                   },
+                  {
+                    key: "THORChain",
+                    label: intl.formatMessage({
+                      id: "pages.register.name-password-hardware.connect-to-thor",
+                    }),
+                  },
                 ]}
                 onSelect={(key) => {
                   setConnectTo(key);

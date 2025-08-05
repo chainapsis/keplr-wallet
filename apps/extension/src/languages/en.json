@@ -106,6 +106,7 @@
   "pages.register.name-password-hardware.connect-to-cosmos": "Cosmos app (Recommended)",
   "pages.register.name-password-hardware.connect-to-terra": "Terra app",
   "pages.register.name-password-hardware.connect-to-secret": "Secret app",
+  "pages.register.name-password-hardware.connect-to-thor": "THORChain app",
 
   "pages.register.name-password-hardware.connect-keystone-way": "Connect Keystone via",
   "pages.register.name-password-hardware.connect-to-keystone-USB": "USB",

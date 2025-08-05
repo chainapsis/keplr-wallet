@@ -174,6 +174,9 @@ export const LedgerGuideBox: FunctionComponent<{
                 if (appData["Secret"]) {
                   app = "Secret";
                 }
+                if (appData["THORChain"]) {
+                  app = "THORChain";
+                }
 
                 if (data.isEthereum) {
                   if (appData["Ethereum"]) {
