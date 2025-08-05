@@ -106,6 +106,7 @@
   "pages.register.name-password-hardware.connect-to-cosmos": "코스모스 앱 (추천)",
   "pages.register.name-password-hardware.connect-to-terra": "테라 앱",
   "pages.register.name-password-hardware.connect-to-secret": "시크릿 앱",
+  "pages.register.name-password-hardware.connect-to-thor": "토르 체인 앱",
 
   "pages.register.name-password-hardware.connect-keystone-way": "Keystone를 통해 연결하세요",
   "pages.register.name-password-hardware.connect-to-keystone-USB": "USB",

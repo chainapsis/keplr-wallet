@@ -820,6 +820,7 @@ const KeyringItem = observer<
             "Cosmos",
             "Terra",
             "Secret",
+            "THORChain",
             "Ethereum",
             "Starknet",
             "Bitcoin",

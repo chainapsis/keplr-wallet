@@ -306,7 +306,58 @@ const LedgerGrantPage: FunctionComponent = observer(() => {
                           );
                           app = new CosmosApp("Secret", transport);
 
-                          if ((await app.getAppInfo()).app_name === "Secret ") {
+                          if ((await app.getAppInfo()).app_name === "Secret") {
+                            setStatus("success");
+                            return;
+                          }
+
+                          setStatus("failed");
+                        } catch (e) {
+                          console.log(e);
+
+                          setStatus("failed");
+                        } finally {
+                          transport?.close().catch(console.log);
+
+                          setAppIsLoading("");
+                        }
+                      }}
+                    />
+                    <Button
+                      color="secondary"
+                      text="THORChain app"
+                      isLoading={appIsLoading === "THORChain"}
+                      disabled={!!appIsLoading && appIsLoading !== "THORChain"}
+                      onClick={async () => {
+                        if (appIsLoading) {
+                          return;
+                        }
+                        setAppIsLoading("THORChain");
+
+                        let transport: Transport | undefined = undefined;
+                        try {
+                          transport = uiConfigStore.useWebHIDLedger
+                            ? await TransportWebHID.create()
+                            : await TransportWebUSB.create();
+
+                          let app = new CosmosApp("THORChain", transport);
+
+                          if (
+                            (await app.getAppInfo()).app_name === "THORChain"
+                          ) {
+                            setStatus("success");
+                            return;
+                          }
+
+                          transport = await LedgerUtils.tryAppOpen(
+                            transport,
+                            "THORChain"
+                          );
+                          app = new CosmosApp("THORChain", transport);
+
+                          if (
+                            (await app.getAppInfo()).app_name === "THORChain"
+                          ) {
                             setStatus("success");
                             return;
                           }
