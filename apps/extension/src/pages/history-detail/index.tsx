@@ -8,6 +8,7 @@ import { Box } from "../../components/box";
 import { BackButton } from "../../layouts/header/components";
 import { HeaderLayout } from "../../layouts/header";
 import { Gutter } from "../../components/gutter";
+import { HistoryDetailTopSection } from "./top-section";
 
 export const HistoryDetailPage: FunctionComponent = observer(() => {
   const { queriesStore, priceStore } = useStore();
@@ -35,6 +36,7 @@ export const HistoryDetailPage: FunctionComponent = observer(() => {
   return (
     <HeaderLayout title="Transaction Detail" left={<BackButton />}>
       <Box paddingX="0.75rem">
+        <HistoryDetailTopSection msg={msg.msg} />
         <Gutter size="1.75rem" />
         <HistoryDetailCommonBottomSection msg={msg.msg} />
       </Box>
