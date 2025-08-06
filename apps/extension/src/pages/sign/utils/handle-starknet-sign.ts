@@ -35,6 +35,7 @@ import {
 } from "@ledgerhq/hw-app-starknet";
 import { PubKeyStarknet } from "@keplr-wallet/crypto";
 import { Fee } from "@keplr-wallet/stores-starknet/build/account/internal";
+import PQueue from "p-queue";
 
 // eip-2645 derivation path, m/2645'/starknet'/{application}'/0'/{accountId}'/0
 export const STARKNET_LEDGER_DERIVATION_PATH =
@@ -212,7 +213,7 @@ export const connectAndSignInvokeTxWithLedger = async (
 
   const origExchange = transport.exchange.bind(transport);
   transport.exchange = async (apdu, options) => {
-    return await ledgerRequestQueue.enqueue(() => origExchange(apdu, options));
+    return await ledgerRequestQueue.add(() => origExchange(apdu, options));
   };
 
   try {
@@ -403,27 +404,6 @@ async function checkStarknetPubKey(
   }
 }
 
-class LedgerRequestQueue {
-  private last: Promise<unknown> = Promise.resolve();
-
-  /**
-   * add a job to the queue and return the result.
-   * wait for the previous job to finish before executing job().
-   * if the previous job fails, the queue will stop.
-   *
-   * @param job a function that calls Ledger transport.exchange etc.
-   * @returns a promise of the result of job()
-   */
-  enqueue<T>(job: () => Promise<T>): Promise<T> {
-    const next = this.last.then(
-      () => job(),
-      (e) => Promise.reject(e)
-    );
-
-    this.last = next;
-
-    return next;
-  }
-}
-
-const ledgerRequestQueue = new LedgerRequestQueue();
+const ledgerRequestQueue = new PQueue({
+  concurrency: 1,
+});

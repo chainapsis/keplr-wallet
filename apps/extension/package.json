@@ -78,6 +78,7 @@
     "lodash.throttle": "^4.1.1",
     "lottie-web": "^5.10.2",
     "os-browserify": "^0.3.0",
+    "p-queue": "^6.6.2",
     "process": "^0.11.10",
     "qrcode.react": "^3.1.0",
     "query-string": "^6.8.3",
