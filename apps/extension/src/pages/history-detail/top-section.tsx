@@ -5,6 +5,7 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { HistoryDetailReceive } from "./msgs/receive";
 import { HistoryDetailIBCSend } from "./msgs/ibc-send";
+import { HistoryDetailIBCSendReceive } from "./msgs/ibc-send-receive";
 
 export const HistoryDetailTopSection: FunctionComponent<{
   msg: MsgHistory;
@@ -52,6 +53,11 @@ export const HistoryDetailTopSection: FunctionComponent<{
     }
     case "ibc-send": {
       return <HistoryDetailIBCSend msg={msg} targetDenom={targetDenom} />;
+    }
+    case "ibc-send-receive": {
+      return (
+        <HistoryDetailIBCSendReceive msg={msg} targetDenom={targetDenom} />
+      );
     }
   }
 
