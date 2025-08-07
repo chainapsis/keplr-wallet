@@ -109,131 +109,172 @@ export const HistoryDetailSendBaseUI: FunctionComponent<{
   return (
     <Box>
       <YAxis alignX="center">
-        <Box
-          width="100%"
-          padding="1rem"
-          borderRadius="0.375rem"
-          backgroundColor={ColorPalette["gray-650"]}
-        >
-          <XAxis alignY="center">
-            <Box minWidth="2rem">
-              <Subtitle4 color={ColorPalette["gray-200"]}>From</Subtitle4>
-            </Box>
-            <Gutter size="0.5rem" />
-            <YAxis>
-              <Tooltip
-                content={fromAddress}
-                allowedPlacements={["top", "right"]}
-              >
-                <Box
-                  backgroundColor={ColorPalette["gray-550"]}
-                  borderRadius="999px"
-                  paddingX="0.5rem"
-                  paddingY="0.25rem"
-                >
-                  <Subtitle3 color={ColorPalette["white"]}>
-                    {shortenedFromAddress}
-                  </Subtitle3>
-                </Box>
-              </Tooltip>
-              {fromText ? (
-                <React.Fragment>
-                  <Gutter size="0.25rem" />
-                  <XAxis alignY="center">
-                    {fromTextWalletIcon ? (
-                      <React.Fragment>
-                        <ManIcon
-                          size="0.875rem"
-                          color={ColorPalette["gray-400"]}
-                        />
-                        <Gutter size="0.25rem" />
-                      </React.Fragment>
-                    ) : null}
-                    <Subtitle4 color={ColorPalette["gray-300"]}>
-                      {fromText}
-                    </Subtitle4>
-                  </XAxis>
-                </React.Fragment>
-              ) : null}
-            </YAxis>
-            {fromAmount ? (
-              <React.Fragment>
-                <div style={{ flex: 1 }} />
-                <Subtitle3 color={ColorPalette["gray-50"]}>{`- ${fromAmount
-                  .maxDecimals(3)
-                  .shrink(true)
-                  .hideIBCMetadata(true)
-                  .inequalitySymbol(true)
-                  .inequalitySymbolSeparator(" ")
-                  .toString()}`}</Subtitle3>
-              </React.Fragment>
-            ) : null}
-          </XAxis>
-        </Box>
+        <HistoryDetailSendBaseUIUpper
+          fromAddress={fromAddress}
+          shortenedFromAddress={shortenedFromAddress}
+          fromTextWalletIcon={fromTextWalletIcon}
+          fromText={fromText}
+          fromAmount={fromAmount}
+        />
 
         <Gutter size="0.5rem" />
         <ArrowDownIcon size="1.25rem" color={ColorPalette["gray-300"]} />
         <Gutter size="0.5rem" />
 
-        <Box
-          width="100%"
-          padding="1rem"
-          borderRadius="0.375rem"
-          backgroundColor={ColorPalette["gray-650"]}
-        >
-          <XAxis alignY="center">
-            <Box minWidth="2rem">
-              <Subtitle4 color={ColorPalette["gray-200"]}>To</Subtitle4>
-            </Box>
-            <Gutter size="0.5rem" />
-            <YAxis>
-              <Tooltip content={toAddress} allowedPlacements={["top", "right"]}>
-                <Box
-                  backgroundColor={ColorPalette["gray-550"]}
-                  borderRadius="999px"
-                  paddingX="0.5rem"
-                  paddingY="0.25rem"
-                >
-                  <Subtitle3 color={ColorPalette["white"]}>
-                    {shortenedToAddress}
-                  </Subtitle3>
-                </Box>
-              </Tooltip>
-              {toText ? (
-                <React.Fragment>
-                  <Gutter size="0.25rem" />
-                  <XAxis alignY="center">
-                    {toTextWalletIcon ? (
-                      <React.Fragment>
-                        <ManIcon
-                          size="0.875rem"
-                          color={ColorPalette["gray-400"]}
-                        />
-                        <Gutter size="0.25rem" />
-                      </React.Fragment>
-                    ) : null}
-                    <Subtitle4 color={ColorPalette["gray-300"]}>
-                      {toText}
-                    </Subtitle4>
-                  </XAxis>
-                </React.Fragment>
-              ) : null}
-            </YAxis>
-            {toAmount ? (
-              <React.Fragment>
-                <div style={{ flex: 1 }} />
-                <Subtitle3 color={ColorPalette["green-400"]}>{`+ ${toAmount
-                  .maxDecimals(3)
-                  .shrink(true)
-                  .hideIBCMetadata(true)
-                  .inequalitySymbol(true)
-                  .inequalitySymbolSeparator(" ")
-                  .toString()}`}</Subtitle3>
-              </React.Fragment>
-            ) : null}
-          </XAxis>
-        </Box>
+        <HistoryDetailSendBaseUILower
+          toAddress={toAddress}
+          shortenedToAddress={shortenedToAddress}
+          toTextWalletIcon={toTextWalletIcon}
+          toText={toText}
+          toAmount={toAmount}
+        />
       </YAxis>
+    </Box>
+  );
+};
+
+export const HistoryDetailSendBaseUIUpper: FunctionComponent<{
+  fromAddress: string;
+  shortenedFromAddress: string;
+
+  fromTextWalletIcon?: boolean;
+  fromText?: string;
+
+  fromAmount?: CoinPretty;
+}> = ({
+  fromAddress,
+  shortenedFromAddress,
+  fromTextWalletIcon,
+  fromText,
+  fromAmount,
+}) => {
+  return (
+    <Box
+      width="100%"
+      padding="1rem"
+      borderRadius="0.375rem"
+      backgroundColor={ColorPalette["gray-650"]}
+    >
+      <XAxis alignY="center">
+        <Box minWidth="2rem">
+          <Subtitle4 color={ColorPalette["gray-200"]}>From</Subtitle4>
+        </Box>
+        <Gutter size="0.5rem" />
+        <YAxis>
+          <Tooltip content={fromAddress} allowedPlacements={["top", "right"]}>
+            <Box
+              backgroundColor={ColorPalette["gray-550"]}
+              borderRadius="999px"
+              paddingX="0.5rem"
+              paddingY="0.25rem"
+            >
+              <Subtitle3 color={ColorPalette["white"]}>
+                {shortenedFromAddress}
+              </Subtitle3>
+            </Box>
+          </Tooltip>
+          {fromText ? (
+            <React.Fragment>
+              <Gutter size="0.25rem" />
+              <XAxis alignY="center">
+                {fromTextWalletIcon ? (
+                  <React.Fragment>
+                    <ManIcon size="0.875rem" color={ColorPalette["gray-400"]} />
+                    <Gutter size="0.25rem" />
+                  </React.Fragment>
+                ) : null}
+                <Subtitle4 color={ColorPalette["gray-300"]}>
+                  {fromText}
+                </Subtitle4>
+              </XAxis>
+            </React.Fragment>
+          ) : null}
+        </YAxis>
+        {fromAmount ? (
+          <React.Fragment>
+            <div style={{ flex: 1 }} />
+            <Subtitle3 color={ColorPalette["gray-50"]}>{`- ${fromAmount
+              .maxDecimals(3)
+              .shrink(true)
+              .hideIBCMetadata(true)
+              .inequalitySymbol(true)
+              .inequalitySymbolSeparator(" ")
+              .toString()}`}</Subtitle3>
+          </React.Fragment>
+        ) : null}
+      </XAxis>
+    </Box>
+  );
+};
+
+export const HistoryDetailSendBaseUILower: FunctionComponent<{
+  toAddress: string;
+  shortenedToAddress: string;
+
+  toTextWalletIcon?: boolean;
+  toText?: string;
+
+  toAmount?: CoinPretty;
+}> = ({
+  toAddress,
+  shortenedToAddress,
+  toTextWalletIcon,
+  toText,
+  toAmount,
+}) => {
+  return (
+    <Box
+      width="100%"
+      padding="1rem"
+      borderRadius="0.375rem"
+      backgroundColor={ColorPalette["gray-650"]}
+    >
+      <XAxis alignY="center">
+        <Box minWidth="2rem">
+          <Subtitle4 color={ColorPalette["gray-200"]}>To</Subtitle4>
+        </Box>
+        <Gutter size="0.5rem" />
+        <YAxis>
+          <Tooltip content={toAddress} allowedPlacements={["top", "right"]}>
+            <Box
+              backgroundColor={ColorPalette["gray-550"]}
+              borderRadius="999px"
+              paddingX="0.5rem"
+              paddingY="0.25rem"
+            >
+              <Subtitle3 color={ColorPalette["white"]}>
+                {shortenedToAddress}
+              </Subtitle3>
+            </Box>
+          </Tooltip>
+          {toText ? (
+            <React.Fragment>
+              <Gutter size="0.25rem" />
+              <XAxis alignY="center">
+                {toTextWalletIcon ? (
+                  <React.Fragment>
+                    <ManIcon size="0.875rem" color={ColorPalette["gray-400"]} />
+                    <Gutter size="0.25rem" />
+                  </React.Fragment>
+                ) : null}
+                <Subtitle4 color={ColorPalette["gray-300"]}>{toText}</Subtitle4>
+              </XAxis>
+            </React.Fragment>
+          ) : null}
+        </YAxis>
+        {toAmount ? (
+          <React.Fragment>
+            <div style={{ flex: 1 }} />
+            <Subtitle3 color={ColorPalette["green-400"]}>{`+ ${toAmount
+              .maxDecimals(3)
+              .shrink(true)
+              .hideIBCMetadata(true)
+              .inequalitySymbol(true)
+              .inequalitySymbolSeparator(" ")
+              .toString()}`}</Subtitle3>
+          </React.Fragment>
+        ) : null}
+      </XAxis>
     </Box>
   );
 };

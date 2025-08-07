@@ -6,6 +6,8 @@ import { useStore } from "../../stores";
 import { HistoryDetailReceive } from "./msgs/receive";
 import { HistoryDetailIBCSend } from "./msgs/ibc-send";
 import { HistoryDetailIBCSendReceive } from "./msgs/ibc-send-receive";
+import { HistoryDetailIBCSwapSkip } from "./msgs/ibc-swap";
+import { HistoryDetailIBCSwapSkipReceive } from "./msgs/ibc-swap-receive";
 
 export const HistoryDetailTopSection: FunctionComponent<{
   msg: MsgHistory;
@@ -57,6 +59,16 @@ export const HistoryDetailTopSection: FunctionComponent<{
     case "ibc-send-receive": {
       return (
         <HistoryDetailIBCSendReceive msg={msg} targetDenom={targetDenom} />
+      );
+    }
+    case "ibc-swap-skip-osmosis":
+    case "ibc-swap-skip": {
+      return <HistoryDetailIBCSwapSkip msg={msg} targetDenom={targetDenom} />;
+    }
+    case "ibc-swap-skip-osmosis-receive":
+    case "ibc-swap-skip-receive": {
+      return (
+        <HistoryDetailIBCSwapSkipReceive msg={msg} targetDenom={targetDenom} />
       );
     }
   }
