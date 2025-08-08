@@ -268,4 +268,21 @@ export class StarknetAccountBase {
 
     return new Int(num.toBigInt(await walletAccount.getNonce()));
   }
+
+  static isStarknetHexAddress(address: string) {
+    if (!address.startsWith("0x")) {
+      return false;
+    }
+
+    const hex = address.replace("0x", "");
+    const buf = Buffer.from(hex, "hex");
+    if (buf.length !== 32) {
+      return false;
+    }
+    if (hex.toLowerCase() !== buf.toString("hex").toLowerCase()) {
+      return false;
+    }
+
+    return true;
+  }
 }

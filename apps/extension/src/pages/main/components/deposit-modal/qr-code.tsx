@@ -18,6 +18,7 @@ import { Button } from "../../../../components/button";
 import { GENESIS_HASH_TO_NETWORK, GenesisHash } from "@keplr-wallet/types";
 import { EthereumAccountBase } from "@keplr-wallet/stores-eth";
 import { EthermintChainIdHelper } from "@keplr-wallet/cosmos";
+import { StarknetAccountBase } from "@keplr-wallet/stores-starknet";
 
 export const QRCodeScene: FunctionComponent<{
   chainId: string;
@@ -34,6 +35,9 @@ export const QRCodeScene: FunctionComponent<{
   const isEthereumAddress =
     "cosmos" in modularChainInfo &&
     EthereumAccountBase.isEthereumHexAddressWithChecksum(address || "");
+  const isStarknetAddress =
+    "starknet" in modularChainInfo &&
+    StarknetAccountBase.isStarknetHexAddress(address || "");
 
   const account = accountStore.getAccount(chainId);
 
@@ -66,6 +70,11 @@ export const QRCodeScene: FunctionComponent<{
       if (network) {
         return `bitcoin:${account.bitcoinAddress?.bech32Address}?message=${network}`;
       }
+    }
+
+    if (isStarknetAddress) {
+      const prefix = modularChainInfo.starknet?.chainId.split(":")[1];
+      return `${prefix}:${address}`;
     }
 
     return address;
