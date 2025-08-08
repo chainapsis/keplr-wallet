@@ -35,6 +35,7 @@ import {
 } from "@ledgerhq/hw-app-starknet";
 import { PubKeyStarknet } from "@keplr-wallet/crypto";
 import { Fee } from "@keplr-wallet/stores-starknet/build/account/internal";
+import PQueue from "p-queue";
 
 // eip-2645 derivation path, m/2645'/starknet'/{application}'/0'/{accountId}'/0
 export const STARKNET_LEDGER_DERIVATION_PATH =
@@ -209,6 +210,11 @@ export const connectAndSignInvokeTxWithLedger = async (
       "Failed to init transport"
     );
   }
+
+  const origExchange = transport.exchange.bind(transport);
+  transport.exchange = async (apdu, options) => {
+    return await ledgerRequestQueue.add(() => origExchange(apdu, options));
+  };
 
   try {
     // EIP2645 path = 2645'/starknet/application/0/accountId/0
@@ -397,3 +403,7 @@ async function checkStarknetPubKey(
     await transport.close();
   }
 }
+
+const ledgerRequestQueue = new PQueue({
+  concurrency: 1,
+});
