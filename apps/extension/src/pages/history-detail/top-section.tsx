@@ -3,7 +3,7 @@ import { MsgHistory } from "../main/token-detail/types";
 import { HistoryDetailSend, HistoryDetailSendIcon } from "./msgs/send";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
-import { HistoryDetailReceive } from "./msgs/receive";
+import { HistoryDetailReceive, HistoryDetailReceiveIcon } from "./msgs/receive";
 import { HistoryDetailIBCSend } from "./msgs/ibc-send";
 import { HistoryDetailIBCSendReceive } from "./msgs/ibc-send-receive";
 import { HistoryDetailIBCSwapSkip } from "./msgs/ibc-swap";
@@ -65,14 +65,20 @@ export const HistoryDetailTopSection: FunctionComponent<{
       break;
     }
     case "receive": {
+      icon = <HistoryDetailReceiveIcon />;
+      iconText = "Receive";
       section = <HistoryDetailReceive msg={msg} targetDenom={targetDenom} />;
       break;
     }
     case "ibc-send": {
+      icon = <HistoryDetailSendIcon />;
+      iconText = "Send";
       section = <HistoryDetailIBCSend msg={msg} targetDenom={targetDenom} />;
       break;
     }
     case "ibc-send-receive": {
+      icon = <HistoryDetailReceiveIcon />;
+      iconText = "Receive";
       section = (
         <HistoryDetailIBCSendReceive msg={msg} targetDenom={targetDenom} />
       );
@@ -130,7 +136,7 @@ export const HistoryDetailTopSection: FunctionComponent<{
             return iconText;
           }
 
-          if ((msg.msg as any)["@type"]) {
+          if (msg.msg && (msg.msg as any)["@type"]) {
             return (msg.msg as any)["@type"];
           }
           return msg.relation || "Unknown";

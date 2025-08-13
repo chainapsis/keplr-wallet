@@ -5,6 +5,7 @@ import { useStore } from "../../../stores";
 import { MsgHistory } from "../../main/token-detail/types";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { HistoryDetailSendBaseUI } from "./send";
+import { ColorPalette } from "../../../styles";
 
 export const HistoryDetailReceive: FunctionComponent<{
   msg: MsgHistory;
@@ -75,3 +76,23 @@ export const HistoryDetailReceive: FunctionComponent<{
     />
   );
 });
+
+export const HistoryDetailReceiveIcon: FunctionComponent = () => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="41"
+      height="41"
+      fill="none"
+      viewBox="0 0 41 41"
+    >
+      <path
+        stroke={ColorPalette["gray-200"]}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2.53"
+        d="M31.836 8.645 8.644 31.836m0 0h17.394m-17.394 0V14.442"
+      />
+    </svg>
+  );
+};
