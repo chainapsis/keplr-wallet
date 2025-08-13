@@ -22,9 +22,11 @@ export const UnknownIcon: FunctionComponent<{
         {/* Icon Section */}
         <Box
           position="relative"
-          width="4rem"
-          height="4rem"
-          backgroundColor={ColorPalette["gray-600"]}
+          marginTop="1.875rem"
+          width="5rem"
+          height="5rem"
+          borderColor={ColorPalette["gray-400"]}
+          borderWidth="2px"
           borderRadius="999px"
           style={{
             display: "flex",
@@ -46,21 +48,31 @@ export const UnknownIcon: FunctionComponent<{
           {/* Chain image in bottom right */}
           <Box
             position="absolute"
-            width="1.5rem"
-            height="1.5rem"
+            width="2.25rem"
+            height="2.25rem"
             borderRadius="999px"
             style={{
               overflow: "hidden",
-              border: `2px solid ${ColorPalette["gray-700"]}`,
+              right: "-0.25rem",
+              bottom: "-0.25rem",
             }}
           >
-            <ChainImageFallback chainInfo={modularChainInfo} size="1.5rem" />
+            <ChainImageFallback chainInfo={modularChainInfo} size="2.25rem" />
           </Box>
         </Box>
 
         <Gutter size="1rem" />
 
-        <H1 color={ColorPalette["white"]}>{type}</H1>
+        <H1
+          color={ColorPalette["gray-50"]}
+          style={{
+            fontWeight: 600,
+          }}
+        >
+          {type}
+        </H1>
+
+        <Gutter size="1.5rem" />
       </YAxis>
     </Box>
   );

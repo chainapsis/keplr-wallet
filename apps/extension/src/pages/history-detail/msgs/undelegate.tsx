@@ -5,11 +5,10 @@ import { XAxis, YAxis } from "../../../components/axis";
 import { ColorPalette } from "../../../styles";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
-import { H1, Subtitle3, Subtitle4 } from "../../../components/typography";
+import { Subtitle3, Subtitle4 } from "../../../components/typography";
 import { Gutter } from "../../../components/gutter";
 import { MsgHistory } from "../../main/token-detail/types";
 import { Staking } from "@keplr-wallet/stores";
-import { MessageUndelegateIcon } from "../../../components/icon";
 
 export const HistoryDetailUndelegate: FunctionComponent<{
   msg: MsgHistory;
@@ -67,55 +66,11 @@ export const HistoryDetailUndelegate: FunctionComponent<{
     return "Unknown";
   }, [validatorAddress, queryBonded, queryUnbonding, queryUnbonded]);
 
-  const fiatCurrency = priceStore.getFiatCurrency("usd");
-  const price = priceStore.calculatePrice(amountPretty, fiatCurrency);
+  const price = priceStore.calculatePrice(amountPretty);
 
   return (
     <Box>
       <YAxis alignX="center">
-        {/* Icon Section */}
-        <Box
-          position="relative"
-          width="4rem"
-          height="4rem"
-          backgroundColor={ColorPalette["gray-600"]}
-          borderRadius="999px"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <MessageUndelegateIcon
-            width="2rem"
-            height="2rem"
-            color={ColorPalette["white"]}
-          />
-          <Box
-            position="absolute"
-            bottom="-0.25rem"
-            right="-0.25rem"
-            width="1.5rem"
-            height="1.5rem"
-            backgroundColor={ColorPalette["pink-400"]}
-            borderRadius="999px"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Subtitle4 color={ColorPalette["white"]}>S</Subtitle4>
-          </Box>
-        </Box>
-
-        <Gutter size="1rem" />
-
-        {/* Title */}
-        <H1 color={ColorPalette["white"]}>Unstake</H1>
-
-        <Gutter size="1.5rem" />
-
         {/* Validator Info */}
         <Box
           width="100%"

@@ -5,11 +5,10 @@ import { XAxis, YAxis } from "../../../components/axis";
 import { ColorPalette } from "../../../styles";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
-import { H1, Subtitle3, Subtitle4 } from "../../../components/typography";
+import { Subtitle3, Subtitle4 } from "../../../components/typography";
 import { Gutter } from "../../../components/gutter";
 import { MsgHistory } from "../../main/token-detail/types";
 import { Staking } from "@keplr-wallet/stores";
-import { MessageRedelegateIcon } from "../../../components/icon";
 
 export const HistoryDetailRedelegate: FunctionComponent<{
   msg: MsgHistory;
@@ -96,47 +95,6 @@ export const HistoryDetailRedelegate: FunctionComponent<{
   return (
     <Box>
       <YAxis alignX="center">
-        {/* Icon Section */}
-        <Box
-          position="relative"
-          width="4rem"
-          height="4rem"
-          backgroundColor={ColorPalette["gray-600"]}
-          borderRadius="999px"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <MessageRedelegateIcon
-            width="2rem"
-            height="2rem"
-            color={ColorPalette["white"]}
-          />
-          <Box
-            position="absolute"
-            width="1.5rem"
-            height="1.5rem"
-            backgroundColor={ColorPalette["pink-400"]}
-            borderRadius="999px"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Subtitle4 color={ColorPalette["white"]}>S</Subtitle4>
-          </Box>
-        </Box>
-
-        <Gutter size="1rem" />
-
-        {/* Title */}
-        <H1 color={ColorPalette["white"]}>Switch Validator</H1>
-
-        <Gutter size="1.5rem" />
-
         {/* From Validator Info */}
         <Box
           width="100%"
