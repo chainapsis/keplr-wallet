@@ -28,6 +28,8 @@ import {
   HistoryDetailRedelegateIcon,
 } from "./msgs/redelegate";
 import { HistoryDetailVote } from "./msgs/vote";
+import { HistoryDetailEvmSend } from "./msgs/evm-send";
+import { HistoryDetailEvmReceive } from "./msgs/evm-receive";
 import { IconBase } from "./icon-base";
 import { ColorPalette } from "../../styles";
 
@@ -146,6 +148,20 @@ export const HistoryDetailTopSection: FunctionComponent<{
     }
     case "vote": {
       section = <HistoryDetailVote msg={msg} targetDenom={targetDenom} />;
+      break;
+    }
+    case "evm/send":
+    case "evm/erc20-send": {
+      icon = <HistoryDetailSendIcon />;
+      iconText = "Send";
+      section = <HistoryDetailEvmSend msg={msg} targetDenom={targetDenom} />;
+      break;
+    }
+    case "evm/receive":
+    case "evm/erc20-receive": {
+      icon = <HistoryDetailReceiveIcon />;
+      iconText = "Receive";
+      section = <HistoryDetailEvmReceive msg={msg} targetDenom={targetDenom} />;
       break;
     }
   }
