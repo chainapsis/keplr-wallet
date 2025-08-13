@@ -324,3 +324,23 @@ const ManIcon: FunctionComponent<{ size: string; color: string }> = ({
     </svg>
   );
 };
+
+export const HistoryDetailSendIcon: FunctionComponent = () => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="41"
+      height="41"
+      fill="none"
+      viewBox="0 0 41 41"
+    >
+      <path
+        stroke={ColorPalette["gray-200"]}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2.53"
+        d="M8.644 31.836 31.836 8.645m0 0H14.442m17.394 0v17.393"
+      />
+    </svg>
+  );
+};

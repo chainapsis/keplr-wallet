@@ -7,11 +7,14 @@ import { useStore } from "../../stores";
 import { H1 } from "../../components/typography";
 import { Gutter } from "../../components/gutter";
 import { ChainImageFallback } from "../../components/image";
+import { decorateMsgType } from "./decorate-msg-type";
 
-export const UnknownIcon: FunctionComponent<{
+export const IconBase: FunctionComponent<{
   type: string;
   chainId: string;
-}> = observer(({ type, chainId }) => {
+  noDecorateType?: boolean;
+  icon: React.ReactElement;
+}> = observer(({ type, chainId, noDecorateType, icon }) => {
   const { chainStore } = useStore();
 
   const modularChainInfo = chainStore.getModularChain(chainId);
@@ -34,16 +37,8 @@ export const UnknownIcon: FunctionComponent<{
             justifyContent: "center",
           }}
         >
-          {/* Question mark or default icon */}
-          <Box
-            style={{
-              fontSize: "2rem",
-              color: ColorPalette["white"],
-              fontWeight: "bold",
-            }}
-          >
-            ?
-          </Box>
+          {/* Icon */}
+          {icon}
 
           {/* Chain image in bottom right */}
           <Box
@@ -69,7 +64,7 @@ export const UnknownIcon: FunctionComponent<{
             fontWeight: 600,
           }}
         >
-          {type}
+          {noDecorateType ? type : decorateMsgType(type)}
         </H1>
 
         <Gutter size="1.5rem" />
