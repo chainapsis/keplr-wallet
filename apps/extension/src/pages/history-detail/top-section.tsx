@@ -8,6 +8,11 @@ import { HistoryDetailIBCSend } from "./msgs/ibc-send";
 import { HistoryDetailIBCSendReceive } from "./msgs/ibc-send-receive";
 import { HistoryDetailIBCSwapSkip } from "./msgs/ibc-swap";
 import { HistoryDetailIBCSwapSkipReceive } from "./msgs/ibc-swap-receive";
+import { HistoryDetailMergedClaimRewards } from "./msgs/merged-claim-rewards";
+import { HistoryDetailDelegate } from "./msgs/delegate";
+import { HistoryDetailUndelegate } from "./msgs/undelegate";
+import { HistoryDetailRedelegate } from "./msgs/redelegate";
+import { HistoryDetailVote } from "./msgs/vote";
 
 export const HistoryDetailTopSection: FunctionComponent<{
   msg: MsgHistory;
@@ -70,6 +75,24 @@ export const HistoryDetailTopSection: FunctionComponent<{
       return (
         <HistoryDetailIBCSwapSkipReceive msg={msg} targetDenom={targetDenom} />
       );
+    }
+    case "custom/merged-claim-rewards":
+    case "noble-claim-yield": {
+      return (
+        <HistoryDetailMergedClaimRewards msg={msg} targetDenom={targetDenom} />
+      );
+    }
+    case "delegate": {
+      return <HistoryDetailDelegate msg={msg} targetDenom={targetDenom} />;
+    }
+    case "undelegate": {
+      return <HistoryDetailUndelegate msg={msg} targetDenom={targetDenom} />;
+    }
+    case "redelegate": {
+      return <HistoryDetailRedelegate msg={msg} targetDenom={targetDenom} />;
+    }
+    case "vote": {
+      return <HistoryDetailVote msg={msg} targetDenom={targetDenom} />;
     }
   }
 
