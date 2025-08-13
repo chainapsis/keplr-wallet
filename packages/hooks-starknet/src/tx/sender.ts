@@ -78,7 +78,7 @@ export class SenderConfig extends TxChainSetter implements ISenderConfig {
       };
     }
 
-    if (queryNonce.error?.message === "Contract not found") {
+    if (queryNonce.error?.message.includes("Contract not found")) {
       return {
         error: new AccountNotDeployed("Account not deployed"),
       };
