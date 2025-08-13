@@ -6,12 +6,27 @@ import { useStore } from "../../stores";
 import { HistoryDetailReceive, HistoryDetailReceiveIcon } from "./msgs/receive";
 import { HistoryDetailIBCSend } from "./msgs/ibc-send";
 import { HistoryDetailIBCSendReceive } from "./msgs/ibc-send-receive";
-import { HistoryDetailIBCSwapSkip } from "./msgs/ibc-swap";
+import {
+  HistoryDetailIBCSwapSkip,
+  HistoryDetailIBCSwapSkipIcon,
+} from "./msgs/ibc-swap";
 import { HistoryDetailIBCSwapSkipReceive } from "./msgs/ibc-swap-receive";
-import { HistoryDetailMergedClaimRewards } from "./msgs/merged-claim-rewards";
-import { HistoryDetailDelegate } from "./msgs/delegate";
-import { HistoryDetailUndelegate } from "./msgs/undelegate";
-import { HistoryDetailRedelegate } from "./msgs/redelegate";
+import {
+  HistoryDetailMergedClaimRewards,
+  HistoryDetailMergedClaimRewardsIcon,
+} from "./msgs/merged-claim-rewards";
+import {
+  HistoryDetailDelegate,
+  HistoryDetailDelegateIcon,
+} from "./msgs/delegate";
+import {
+  HistoryDetailUndelegate,
+  HistoryDetailUndelegateIcon,
+} from "./msgs/undelegate";
+import {
+  HistoryDetailRedelegate,
+  HistoryDetailRedelegateIcon,
+} from "./msgs/redelegate";
 import { HistoryDetailVote } from "./msgs/vote";
 import { IconBase } from "./icon-base";
 import { ColorPalette } from "../../styles";
@@ -86,6 +101,8 @@ export const HistoryDetailTopSection: FunctionComponent<{
     }
     case "ibc-swap-skip-osmosis":
     case "ibc-swap-skip": {
+      icon = <HistoryDetailIBCSwapSkipIcon />;
+      iconText = "Swap";
       section = (
         <HistoryDetailIBCSwapSkip msg={msg} targetDenom={targetDenom} />
       );
@@ -93,6 +110,8 @@ export const HistoryDetailTopSection: FunctionComponent<{
     }
     case "ibc-swap-skip-osmosis-receive":
     case "ibc-swap-skip-receive": {
+      icon = <HistoryDetailIBCSwapSkipIcon />;
+      iconText = "Swap Complete";
       section = (
         <HistoryDetailIBCSwapSkipReceive msg={msg} targetDenom={targetDenom} />
       );
@@ -100,20 +119,28 @@ export const HistoryDetailTopSection: FunctionComponent<{
     }
     case "custom/merged-claim-rewards":
     case "noble-claim-yield": {
+      icon = <HistoryDetailMergedClaimRewardsIcon />;
+      iconText = "Claim Reward";
       section = (
         <HistoryDetailMergedClaimRewards msg={msg} targetDenom={targetDenom} />
       );
       break;
     }
     case "delegate": {
+      icon = <HistoryDetailDelegateIcon />;
+      iconText = "Stake";
       section = <HistoryDetailDelegate msg={msg} targetDenom={targetDenom} />;
       break;
     }
     case "undelegate": {
+      icon = <HistoryDetailUndelegateIcon />;
+      iconText = "Unstake";
       section = <HistoryDetailUndelegate msg={msg} targetDenom={targetDenom} />;
       break;
     }
     case "redelegate": {
+      icon = <HistoryDetailRedelegateIcon />;
+      iconText = "Switch Validator";
       section = <HistoryDetailRedelegate msg={msg} targetDenom={targetDenom} />;
       break;
     }
@@ -125,7 +152,7 @@ export const HistoryDetailTopSection: FunctionComponent<{
 
   // Render icon and section
   const iconElement = icon || <UnknownIcon />;
-  const sectionElement = section || <div>Unknown</div>;
+  const sectionElement = section;
 
   return (
     <React.Fragment>

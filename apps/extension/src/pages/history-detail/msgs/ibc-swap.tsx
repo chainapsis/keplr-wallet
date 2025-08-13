@@ -8,6 +8,7 @@ import { YAxis } from "../../../components/axis";
 import { Box } from "../../../components/box";
 import { isValidCoinStr, parseCoinStr } from "@keplr-wallet/common";
 import { Bech32Address } from "@keplr-wallet/cosmos";
+import { ColorPalette } from "../../../styles";
 
 export const HistoryDetailIBCSwapSkip: FunctionComponent<{
   msg: MsgHistory;
@@ -66,3 +67,23 @@ export const HistoryDetailIBCSwapSkip: FunctionComponent<{
     </Box>
   );
 });
+
+export const HistoryDetailIBCSwapSkipIcon: FunctionComponent = () => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="41"
+      height="41"
+      fill="none"
+      viewBox="0 0 41 41"
+    >
+      <path
+        stroke={ColorPalette["gray-200"]}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2.53"
+        d="m12.65 35.42-7.59-7.59m0 0 7.59-7.59m-7.59 7.59h22.77m0-22.77 7.59 7.59m0 0-7.59 7.59m7.59-7.59H12.65"
+      />
+    </svg>
+  );
+};

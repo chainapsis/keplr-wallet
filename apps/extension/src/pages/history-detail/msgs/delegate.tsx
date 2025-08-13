@@ -117,3 +117,38 @@ export const HistoryDetailDelegate: FunctionComponent<{
     </Box>
   );
 });
+
+export const HistoryDetailDelegateIcon: FunctionComponent = () => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="40"
+      height="40"
+      fill="none"
+      viewBox="0 0 40 40"
+    >
+      <g clipPath="url(#clip0_19452_156004)">
+        <path
+          stroke={ColorPalette["gray-200"]}
+          strokeWidth="2.5"
+          d="M17.613 6.8a4.81 4.81 0 0 1 4.774 0l9.57 5.465c1.345.768 1.345 2.706 0 3.474l-9.57 5.464a4.81 4.81 0 0 1-4.774 0l-9.57-5.464c-1.345-.768-1.345-2.706 0-3.474z"
+        />
+        <path
+          stroke={ColorPalette["gray-200"]}
+          strokeLinecap="round"
+          strokeWidth="2.5"
+          d="m7.416 21.75 10.197 5.823a4.81 4.81 0 0 0 4.774 0l1.78-1.017 4.166-2.39M7.413 28.089 17.61 33.91a4.81 4.81 0 0 0 4.773 0l1.78-1.017"
+        />
+        <path
+          fill={ColorPalette["gray-200"]}
+          d="M33.667 24.5a1.167 1.167 0 1 0-2.334 0V28h-3.5a1.167 1.167 0 1 0 0 2.333h3.5v3.5a1.167 1.167 0 1 0 2.334 0v-3.5h3.5a1.167 1.167 0 0 0 0-2.333h-3.5z"
+        />
+      </g>
+      <defs>
+        <clipPath id="clip0_19452_156004">
+          <path fill="#fff" d="M0 0h40v40H0z" />
+        </clipPath>
+      </defs>
+    </svg>
+  );
+};

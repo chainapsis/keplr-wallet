@@ -139,3 +139,23 @@ const RewardItem: FunctionComponent<{
     </Box>
   );
 };
+
+export const HistoryDetailMergedClaimRewardsIcon: FunctionComponent = () => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="40"
+      height="40"
+      fill="none"
+      viewBox="0 0 40 40"
+    >
+      <path
+        stroke={ColorPalette["gray-200"]}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2.8"
+        d="m14.31 13.728 4.33-8.72a1.518 1.518 0 0 1 2.716 0l4.33 8.72 9.68 1.406a1.504 1.504 0 0 1 .839 2.57L29.2 24.489l1.654 9.583c.211 1.23-1.089 2.167-2.2 1.587l-8.657-4.527-8.658 4.527c-1.11.581-2.41-.357-2.199-1.589l1.654-9.583-7.004-6.783a1.504 1.504 0 0 1 .839-2.567z"
+      />
+    </svg>
+  );
+};

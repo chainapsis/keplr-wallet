@@ -48,8 +48,8 @@ export const IconBase: FunctionComponent<{
             borderRadius="999px"
             style={{
               overflow: "hidden",
-              right: "-0.25rem",
-              bottom: "-0.25rem",
+              right: "-0.3rem",
+              bottom: "-0.3rem",
             }}
           >
             <ChainImageFallback chainInfo={modularChainInfo} size="2.25rem" />

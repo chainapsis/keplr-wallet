@@ -117,3 +117,40 @@ export const HistoryDetailUndelegate: FunctionComponent<{
     </Box>
   );
 });
+
+export const HistoryDetailUndelegateIcon: FunctionComponent = () => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="40"
+      height="40"
+      fill="none"
+      viewBox="0 0 40 40"
+    >
+      <g clipPath="url(#clip0_19452_156043)">
+        <path
+          stroke={ColorPalette["gray-200"]}
+          strokeWidth="2.5"
+          d="M17.613 6.8a4.81 4.81 0 0 1 4.774 0l9.57 5.464c1.345.768 1.345 2.706 0 3.474l-9.57 5.464a4.81 4.81 0 0 1-4.774 0l-9.57-5.464c-1.345-.768-1.345-2.706 0-3.474z"
+        />
+        <path
+          stroke={ColorPalette["gray-200"]}
+          strokeLinecap="round"
+          strokeWidth="2.5"
+          d="m32.584 21.751-10.197 5.822a4.81 4.81 0 0 1-4.774 0L7.416 21.751M7.416 28.09l10.198 5.821a4.81 4.81 0 0 0 4.773 0l1.444-.824"
+        />
+        <path
+          fill={ColorPalette["gray-200"]}
+          fillRule="evenodd"
+          d="M37.168 29.756c0 .69-.553 1.25-1.234 1.25h-7.6c-.68 0-1.233-.56-1.233-1.25s.552-1.25 1.233-1.25h7.6c.681 0 1.233.56 1.233 1.25"
+          clipRule="evenodd"
+        />
+      </g>
+      <defs>
+        <clipPath id="clip0_19452_156043">
+          <path fill="#fff" d="M0 0h40v40H0z" />
+        </clipPath>
+      </defs>
+    </svg>
+  );
+};
