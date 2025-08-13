@@ -13,6 +13,7 @@ import { HistoryDetailDelegate } from "./msgs/delegate";
 import { HistoryDetailUndelegate } from "./msgs/undelegate";
 import { HistoryDetailRedelegate } from "./msgs/redelegate";
 import { HistoryDetailVote } from "./msgs/vote";
+import { UnknownIcon } from "./unknown-icon";
 
 export const HistoryDetailTopSection: FunctionComponent<{
   msg: MsgHistory;
@@ -51,50 +52,77 @@ export const HistoryDetailTopSection: FunctionComponent<{
     return msg.denoms[0];
   })();
 
+  let icon: React.ReactElement | undefined;
+  let section: React.ReactElement | undefined;
+
   switch (msg.relation) {
     case "send": {
-      return <HistoryDetailSend msg={msg} targetDenom={targetDenom} />;
+      section = <HistoryDetailSend msg={msg} targetDenom={targetDenom} />;
+      break;
     }
     case "receive": {
-      return <HistoryDetailReceive msg={msg} targetDenom={targetDenom} />;
+      section = <HistoryDetailReceive msg={msg} targetDenom={targetDenom} />;
+      break;
     }
     case "ibc-send": {
-      return <HistoryDetailIBCSend msg={msg} targetDenom={targetDenom} />;
+      section = <HistoryDetailIBCSend msg={msg} targetDenom={targetDenom} />;
+      break;
     }
     case "ibc-send-receive": {
-      return (
+      section = (
         <HistoryDetailIBCSendReceive msg={msg} targetDenom={targetDenom} />
       );
+      break;
     }
     case "ibc-swap-skip-osmosis":
     case "ibc-swap-skip": {
-      return <HistoryDetailIBCSwapSkip msg={msg} targetDenom={targetDenom} />;
+      section = (
+        <HistoryDetailIBCSwapSkip msg={msg} targetDenom={targetDenom} />
+      );
+      break;
     }
     case "ibc-swap-skip-osmosis-receive":
     case "ibc-swap-skip-receive": {
-      return (
+      section = (
         <HistoryDetailIBCSwapSkipReceive msg={msg} targetDenom={targetDenom} />
       );
+      break;
     }
     case "custom/merged-claim-rewards":
     case "noble-claim-yield": {
-      return (
+      section = (
         <HistoryDetailMergedClaimRewards msg={msg} targetDenom={targetDenom} />
       );
+      break;
     }
     case "delegate": {
-      return <HistoryDetailDelegate msg={msg} targetDenom={targetDenom} />;
+      section = <HistoryDetailDelegate msg={msg} targetDenom={targetDenom} />;
+      break;
     }
     case "undelegate": {
-      return <HistoryDetailUndelegate msg={msg} targetDenom={targetDenom} />;
+      section = <HistoryDetailUndelegate msg={msg} targetDenom={targetDenom} />;
+      break;
     }
     case "redelegate": {
-      return <HistoryDetailRedelegate msg={msg} targetDenom={targetDenom} />;
+      section = <HistoryDetailRedelegate msg={msg} targetDenom={targetDenom} />;
+      break;
     }
     case "vote": {
-      return <HistoryDetailVote msg={msg} targetDenom={targetDenom} />;
+      section = <HistoryDetailVote msg={msg} targetDenom={targetDenom} />;
+      break;
     }
   }
 
-  return <div>Unknown</div>;
+  // Render icon and section
+  const iconElement = icon || (
+    <UnknownIcon type={msg.relation || "Unknown"} chainId={msg.chainId} />
+  );
+  const sectionElement = section || <div>Unknown</div>;
+
+  return (
+    <React.Fragment>
+      {iconElement}
+      {sectionElement}
+    </React.Fragment>
+  );
 });

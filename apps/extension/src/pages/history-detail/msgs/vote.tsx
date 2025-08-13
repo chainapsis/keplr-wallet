@@ -12,7 +12,7 @@ import { useTheme } from "styled-components";
 export const HistoryDetailVote: FunctionComponent<{
   msg: MsgHistory;
   targetDenom: string;
-}> = observer(({ msg, targetDenom }) => {
+}> = observer(({ msg }) => {
   const theme = useTheme();
 
   const proposal: {
