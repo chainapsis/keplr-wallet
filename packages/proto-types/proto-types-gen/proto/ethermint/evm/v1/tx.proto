@@ -106,7 +106,7 @@ message AccessListTx {
   bytes s = 11;
 }
 
-// DynamicFeeTx is the data of EIP-1559 dinamic fee transactions.
+// DynamicFeeTx is the data of EIP-1559 dynamic fee transactions.
 message DynamicFeeTx {
   option (gogoproto.goproto_getters) = false;
   option (cosmos_proto.implements_interface) = "TxData";
@@ -129,7 +129,7 @@ message DynamicFeeTx {
   uint64 gas = 5 [ (gogoproto.customname) = "GasLimit" ];
   // hex formatted address of the recipient
   string to = 6;
-  // value defines the the transaction amount.
+  // value defines the transaction amount.
   string value = 7 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.customname) = "Amount"
