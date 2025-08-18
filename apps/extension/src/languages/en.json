@@ -106,6 +106,7 @@
   "pages.register.name-password-hardware.connect-to-cosmos": "Cosmos app (Recommended)",
   "pages.register.name-password-hardware.connect-to-terra": "Terra app",
   "pages.register.name-password-hardware.connect-to-secret": "Secret app",
+  "pages.register.name-password-hardware.connect-to-thor": "THORChain app",
 
   "pages.register.name-password-hardware.connect-keystone-way": "Connect Keystone via",
   "pages.register.name-password-hardware.connect-to-keystone-USB": "USB",
@@ -405,6 +406,7 @@
   "page.wallet.unknown-title": "Unknown",
   "page.wallet.keyring-item.bip44-path-Terra-text": "(Terra app)",
   "page.wallet.keyring-item.bip44-path-Secret-text": "(Secret app)",
+  "page.wallet.keyring-item.bip44-path-THORChain-text": "(THORChain app)",
   "page.wallet.keyring-item.dropdown.change-wallet-name-title": "Change Wallet Name",
   "page.wallet.keyring-item.dropdown.delete-wallet-title": "Delete Wallet",
   "page.wallet.keyring-item.dropdown.view-recovery-path-title": "View Recovery Phrase",

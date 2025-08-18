@@ -25,7 +25,10 @@ initEvents(router);
 router.listen(WEBPAGE_PORT);
 
 // When using Chrome, a content script with world: "MAIN" is used to inject the injected script. Refer to background.ts
-if (typeof chrome === "undefined") {
+if (
+  typeof chrome === "undefined" ||
+  chrome.runtime.getManifest().manifest_version === 2
+) {
   const container = document.head || document.documentElement;
   const scriptElement = document.createElement("script");
 
