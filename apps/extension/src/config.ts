@@ -3685,6 +3685,96 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     ],
     features: [],
   },
+  {
+    rpc: "https://evm-57073.keplr.app",
+    rest: "https://evm-57073.keplr.app",
+    evm: {
+      chainId: 57073,
+      rpc: "https://evm-57073.keplr.app",
+      websocket: "wss://evm-57073.keplr.app/websocket",
+    },
+    chainId: "eip155:57073",
+    chainName: "Ink",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:57073/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "ink-native",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:57073/ink-native.png",
+      },
+      {
+        coinDenom: "USDC.e",
+        coinMinimalDenom: "erc20:0xF1815bd50389c46847f0Bda824eC8da914045D14",
+        coinDecimals: 6,
+        coinGeckoId: "stargate-bridged-usdc-ink",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:57073/erc20/0xF1815bd50389c46847f0Bda824eC8da914045D14.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "ink-native",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:57073/ink-native.png",
+      },
+    ],
+    features: ["op-stack-l1-data-fee"],
+  },
+  {
+    rpc: "https://evm-59144.keplr.app",
+    rest: "https://evm-59144.keplr.app",
+    evm: {
+      chainId: 59144,
+      rpc: "https://evm-59144.keplr.app",
+      websocket: "wss://evm-59144.keplr.app/websocket",
+    },
+    chainId: "eip155:59144",
+    chainName: "Linea",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:59144/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "linea-native",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:59144/linea-native.png",
+      },
+      {
+        coinDenom: "USDC",
+        coinMinimalDenom: "erc20:0x176211869cA2b568f2A7D4EE941E073a821EE1ff",
+        coinDecimals: 6,
+        coinGeckoId: "usd-coin",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:59144/erc20/0x176211869cA2b568f2A7D4EE941E073a821EE1ff.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "linea-native",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:59144/linea-native.png",
+      },
+    ],
+    features: [],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
