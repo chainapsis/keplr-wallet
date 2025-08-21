@@ -30,6 +30,14 @@ import {
 import { HistoryDetailVote } from "./msgs/vote";
 import { HistoryDetailEvmSend } from "./msgs/evm-send";
 import { HistoryDetailEvmReceive } from "./msgs/evm-receive";
+import {
+  HistoryDetailEvmApprove,
+  HistoryDetailEvmApproveIcon,
+} from "./msgs/evm-approve";
+import {
+  HistoryDetailEvmContractCall,
+  HistoryDetailEvmContractCallIcon,
+} from "./msgs/evm-contract-call";
 import { IconBase } from "./icon-base";
 import { ColorPalette } from "../../styles";
 
@@ -162,6 +170,20 @@ export const HistoryDetailTopSection: FunctionComponent<{
       icon = <HistoryDetailReceiveIcon />;
       iconText = "Receive";
       section = <HistoryDetailEvmReceive msg={msg} targetDenom={targetDenom} />;
+      break;
+    }
+    case "evm/erc20-approve": {
+      icon = <HistoryDetailEvmApproveIcon />;
+      iconText = "Approve Token";
+      section = <HistoryDetailEvmApprove msg={msg} targetDenom={targetDenom} />;
+      break;
+    }
+    case "evm/contract-call": {
+      icon = <HistoryDetailEvmContractCallIcon />;
+      iconText = "Execute Contract";
+      section = (
+        <HistoryDetailEvmContractCall msg={msg} targetDenom={targetDenom} />
+      );
       break;
     }
   }

@@ -92,8 +92,8 @@ export const HistoryDetailSendBaseUI: FunctionComponent<{
   toTextWalletIcon?: boolean;
   toText?: string;
 
-  fromAmount?: CoinPretty;
-  toAmount?: CoinPretty;
+  fromAmount?: CoinPretty | string;
+  toAmount?: CoinPretty | string;
 }> = ({
   fromAddress,
   shortenedFromAddress,
@@ -140,7 +140,7 @@ export const HistoryDetailSendBaseUIUpper: FunctionComponent<{
   fromTextWalletIcon?: boolean;
   fromText?: string;
 
-  fromAmount?: CoinPretty;
+  fromAmount?: CoinPretty | string;
 }> = ({
   fromAddress,
   shortenedFromAddress,
@@ -193,13 +193,17 @@ export const HistoryDetailSendBaseUIUpper: FunctionComponent<{
         {fromAmount ? (
           <React.Fragment>
             <div style={{ flex: 1 }} />
-            <Subtitle3 color={ColorPalette["gray-50"]}>{`- ${fromAmount
-              .maxDecimals(3)
-              .shrink(true)
-              .hideIBCMetadata(true)
-              .inequalitySymbol(true)
-              .inequalitySymbolSeparator(" ")
-              .toString()}`}</Subtitle3>
+            <Subtitle3 color={ColorPalette["gray-50"]}>{`- ${
+              typeof fromAmount === "string"
+                ? fromAmount
+                : fromAmount
+                    .maxDecimals(3)
+                    .shrink(true)
+                    .hideIBCMetadata(true)
+                    .inequalitySymbol(true)
+                    .inequalitySymbolSeparator(" ")
+                    .toString()
+            }`}</Subtitle3>
           </React.Fragment>
         ) : null}
       </XAxis>
@@ -214,7 +218,7 @@ export const HistoryDetailSendBaseUILower: FunctionComponent<{
   toTextWalletIcon?: boolean;
   toText?: string;
 
-  toAmount?: CoinPretty;
+  toAmount?: CoinPretty | string;
 }> = ({
   toAddress,
   shortenedToAddress,
@@ -265,13 +269,17 @@ export const HistoryDetailSendBaseUILower: FunctionComponent<{
         {toAmount ? (
           <React.Fragment>
             <div style={{ flex: 1 }} />
-            <Subtitle3 color={ColorPalette["green-400"]}>{`+ ${toAmount
-              .maxDecimals(3)
-              .shrink(true)
-              .hideIBCMetadata(true)
-              .inequalitySymbol(true)
-              .inequalitySymbolSeparator(" ")
-              .toString()}`}</Subtitle3>
+            <Subtitle3 color={ColorPalette["green-400"]}>{`+ ${
+              typeof toAmount === "string"
+                ? toAmount
+                : toAmount
+                    .maxDecimals(3)
+                    .shrink(true)
+                    .hideIBCMetadata(true)
+                    .inequalitySymbol(true)
+                    .inequalitySymbolSeparator(" ")
+                    .toString()
+            }`}</Subtitle3>
           </React.Fragment>
         ) : null}
       </XAxis>
