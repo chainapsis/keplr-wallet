@@ -18,16 +18,22 @@ export const MsgRelationEvmApprove: FunctionComponent<{
 
   const meta = msg.meta as ERC20ApproveRelMeta;
 
-  const approveCurrency = chainInfo.forceFindCurrency(
-    meta.contract ? `erc20:${meta.contract}` : targetDenom
-  );
+  const currencyName = (() => {
+    const approveCurrency = chainInfo.findCurrency(
+      meta.contract ? `erc20:${meta.contract}` : targetDenom
+    );
+    if (approveCurrency) {
+      return approveCurrency.coinDenom;
+    }
+    return "Unknown";
+  })();
 
   return (
     <MsgItemBase
       amount={""}
       logo={<ItemLogo center={<MsgApproveIcon width="1rem" height="1rem" />} />}
       chainId={msg.chainId}
-      title={`Approve ${approveCurrency.coinDenom}`}
+      title={`Approve ${currencyName}`}
       prices={prices || {}}
       msg={msg}
       targetDenom={targetDenom}
