@@ -24,13 +24,17 @@ export const MsgRelationEvmSend: FunctionComponent<{
   const meta = msg.meta as NativeTransferRelMeta | ERC20TransferRelMeta;
 
   const sendAmountPretty = useMemo(() => {
-    const currency = chainInfo.forceFindCurrency(
+    const currency = chainInfo.findCurrency(
       meta.contract ? `erc20:${meta.contract}` : targetDenom
     );
 
-    const val = meta.value;
+    if (currency) {
+      const val = meta.value;
 
-    return new CoinPretty(currency, val);
+      return new CoinPretty(currency, val);
+    } else {
+      return "Unknown";
+    }
   }, [chainInfo, meta.value, targetDenom, meta.contract]);
 
   const toAddress = (() => {
@@ -53,7 +57,7 @@ export const MsgRelationEvmSend: FunctionComponent<{
       amount={sendAmountPretty}
       prices={prices || {}}
       msg={msg}
-      targetDenom={sendAmountPretty.denom}
+      targetDenom={targetDenom}
       amountDeco={{
         prefix: "minus",
         color: "none",
