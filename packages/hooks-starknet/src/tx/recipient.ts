@@ -8,26 +8,9 @@ import { ChainGetter } from "@keplr-wallet/stores";
 import { action, computed, makeObservable, observable } from "mobx";
 import { EmptyAddressError, InvalidHexError } from "./errors";
 import { useState } from "react";
-import { Buffer } from "buffer";
 import { NameService } from "./name-service";
 import { StarknetIdNameService } from "./name-service-starknet-id";
-
-function isStarknetHexAddress(address: string): boolean {
-  if (!address.startsWith("0x")) {
-    return false;
-  }
-
-  const hex = address.replace("0x", "");
-  const buf = Buffer.from(hex, "hex");
-  if (buf.length !== 32) {
-    return false;
-  }
-  if (hex.toLowerCase() !== buf.toString("hex").toLowerCase()) {
-    return false;
-  }
-
-  return true;
-}
+import { StarknetAccountBase } from "@keplr-wallet/stores-starknet";
 
 export class RecipientConfig
   extends TxChainSetter
@@ -146,7 +129,7 @@ export class RecipientConfig
       rawRecipient = r.address;
     }
 
-    if (!isStarknetHexAddress(rawRecipient)) {
+    if (!StarknetAccountBase.isStarknetHexAddress(rawRecipient)) {
       return {
         error: new InvalidHexError("Not found"),
       };
