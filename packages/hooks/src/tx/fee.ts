@@ -893,9 +893,15 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
           BigInt(maxPriorityFeePerGas ?? "0x0")
         );
 
-        return historyBasedFee.gt(networkSuggestedFee)
+        const higherFee = historyBasedFee.gt(networkSuggestedFee)
           ? historyBasedFee
           : networkSuggestedFee;
+
+        if (higherFee.gt(MAX_PRIORITY_FEE_UPPER_BOUND)) {
+          return MAX_PRIORITY_FEE_UPPER_BOUND;
+        }
+
+        return higherFee;
       }
     }
 
@@ -1127,46 +1133,34 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
             ETH_FEE_HISTORY_NEWEST_BLOCK,
             ETH_FEE_HISTORY_REWARD_PERCENTILES
           );
-        if (feeHistoryQuery.error) {
-          return {
-            warning: new Error(
-              `Failed to fetch fee history. chain id: ${this.chainId}`
-            ),
-          };
-        }
-        if (feeHistoryQuery.isFetching) {
-          return {
-            loadingState: "loading",
-          };
-        }
-        if (!feeHistoryQuery.response) {
-          return {
-            loadingState: "loading-block",
-          };
-        }
 
         const maxPriorityFeePerGasQuery =
           ethereumQueries.queryEthereumMaxPriorityFee;
-        if (maxPriorityFeePerGasQuery.error) {
+
+        if (feeHistoryQuery.error && maxPriorityFeePerGasQuery.error) {
           return {
             warning: new Error(
-              `Failed to fetch max priority fee. chain id: ${this.chainId}`
+              `Failed to fetch both fee history and max priority fee. chain id: ${this.chainId}`
             ),
           };
         }
-        if (maxPriorityFeePerGasQuery.isFetching) {
+
+        if (
+          feeHistoryQuery.isFetching ||
+          maxPriorityFeePerGasQuery.isFetching
+        ) {
           return {
             loadingState: "loading",
           };
         }
-        if (!maxPriorityFeePerGasQuery.response) {
+        if (!feeHistoryQuery.response || !maxPriorityFeePerGasQuery.response) {
           return {
             loadingState: "loading-block",
           };
         }
 
         const gasPriceQuery = ethereumQueries.queryEthereumGasPrice;
-        if (maxPriorityFeePerGasQuery.error) {
+        if (gasPriceQuery.error) {
           return {
             warning: new Error(
               `Failed to fetch gas price. chain id: ${this.chainId}`
@@ -1289,8 +1283,10 @@ export const useFeeConfig = (
   return config;
 };
 
+const GWEI = new Dec(10 ** 9);
 const ETH_FEE_HISTORY_BLOCK_COUNT = 20;
-const ETH_FEE_HISTORY_REWARD_PERCENTILES = [10, 25, 45];
+const ETH_FEE_HISTORY_REWARD_PERCENTILES = [25, 50, 75];
+const MAX_PRIORITY_FEE_UPPER_BOUND = new Dec(20).mul(GWEI);
 const ETH_FEE_SETTINGS_BY_FEE_TYPE: Record<
   FeeType,
   {
@@ -1304,11 +1300,11 @@ const ETH_FEE_SETTINGS_BY_FEE_TYPE: Record<
   },
   average: {
     percentile: ETH_FEE_HISTORY_REWARD_PERCENTILES[1],
-    baseFeePercentageMultiplier: new Dec(1.125),
+    baseFeePercentageMultiplier: new Dec(1.25),
   },
   high: {
     percentile: ETH_FEE_HISTORY_REWARD_PERCENTILES[2],
-    baseFeePercentageMultiplier: new Dec(1.25),
+    baseFeePercentageMultiplier: new Dec(1.5),
   },
 };
 const ETH_FEE_HISTORY_NEWEST_BLOCK = "latest";

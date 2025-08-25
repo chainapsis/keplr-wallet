@@ -38,7 +38,8 @@ export const ReceiveModal: FunctionComponent<{
 
   const addressQRdata = (() => {
     if (isStarknetChain) {
-      return account.starknetHexAddress;
+      const prefix = modularChainInfo.starknet?.chainId.split(":")[1];
+      return `${prefix}:${account.starknetHexAddress}`;
     }
 
     if (isEVMOnlyChain) {
