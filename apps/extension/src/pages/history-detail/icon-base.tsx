@@ -8,6 +8,7 @@ import { H1 } from "../../components/typography";
 import { Gutter } from "../../components/gutter";
 import { ChainImageFallback } from "../../components/image";
 import { decorateMsgType } from "./decorate-msg-type";
+import { useTheme } from "styled-components";
 
 export const IconBase: FunctionComponent<{
   type: string;
@@ -16,6 +17,8 @@ export const IconBase: FunctionComponent<{
   icon: React.ReactElement;
 }> = observer(({ type, chainId, noDecorateType, icon }) => {
   const { chainStore } = useStore();
+
+  const theme = useTheme();
 
   const modularChainInfo = chainStore.getModularChain(chainId);
 
@@ -28,7 +31,11 @@ export const IconBase: FunctionComponent<{
           marginTop="1.875rem"
           width="5rem"
           height="5rem"
-          borderColor={ColorPalette["gray-400"]}
+          borderColor={
+            theme.mode === "light"
+              ? ColorPalette["gray-100"]
+              : ColorPalette["gray-400"]
+          }
           borderWidth="2px"
           borderRadius="999px"
           style={{
@@ -59,7 +66,11 @@ export const IconBase: FunctionComponent<{
         <Gutter size="1rem" />
 
         <H1
-          color={ColorPalette["gray-50"]}
+          color={
+            theme.mode === "light"
+              ? ColorPalette["gray-700"]
+              : ColorPalette["gray-50"]
+          }
           style={{
             fontWeight: 600,
           }}

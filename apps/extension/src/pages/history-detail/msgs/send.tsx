@@ -10,6 +10,7 @@ import { Gutter } from "../../../components/gutter";
 import { MsgHistory } from "../../main/token-detail/types";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Tooltip } from "../../../components/tooltip";
+import { useTheme } from "styled-components";
 
 export const HistoryDetailSend: FunctionComponent<{
   msg: MsgHistory;
@@ -148,27 +149,57 @@ export const HistoryDetailSendBaseUIUpper: FunctionComponent<{
   fromText,
   fromAmount,
 }) => {
+  const theme = useTheme();
+
   return (
     <Box
       width="100%"
       padding="1rem"
       borderRadius="0.375rem"
-      backgroundColor={ColorPalette["gray-650"]}
+      backgroundColor={
+        theme.mode === "light"
+          ? ColorPalette["white"]
+          : ColorPalette["gray-650"]
+      }
+      style={{
+        boxShadow:
+          theme.mode === "light"
+            ? "0 1px 4px 0 rgba(43, 39, 55, 0.10)"
+            : undefined,
+      }}
     >
       <XAxis alignY="center">
         <Box minWidth="2rem">
-          <Subtitle4 color={ColorPalette["gray-200"]}>From</Subtitle4>
+          <Subtitle4
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-300"]
+                : ColorPalette["gray-200"]
+            }
+          >
+            From
+          </Subtitle4>
         </Box>
         <Gutter size="0.5rem" />
         <YAxis>
           <Tooltip content={fromAddress} allowedPlacements={["top", "right"]}>
             <Box
-              backgroundColor={ColorPalette["gray-550"]}
+              backgroundColor={
+                theme.mode === "light"
+                  ? ColorPalette["gray-50"]
+                  : ColorPalette["gray-550"]
+              }
               borderRadius="999px"
               paddingX="0.5rem"
               paddingY="0.25rem"
             >
-              <Subtitle3 color={ColorPalette["white"]}>
+              <Subtitle3
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-700"]
+                    : ColorPalette["white"]
+                }
+              >
                 {shortenedFromAddress}
               </Subtitle3>
             </Box>
@@ -179,7 +210,14 @@ export const HistoryDetailSendBaseUIUpper: FunctionComponent<{
               <XAxis alignY="center">
                 {fromTextWalletIcon ? (
                   <React.Fragment>
-                    <ManIcon size="0.875rem" color={ColorPalette["gray-400"]} />
+                    <ManIcon
+                      size="0.875rem"
+                      color={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-200"]
+                          : ColorPalette["gray-400"]
+                      }
+                    />
                     <Gutter size="0.25rem" />
                   </React.Fragment>
                 ) : null}
@@ -193,7 +231,13 @@ export const HistoryDetailSendBaseUIUpper: FunctionComponent<{
         {fromAmount ? (
           <React.Fragment>
             <div style={{ flex: 1 }} />
-            <Subtitle3 color={ColorPalette["gray-50"]}>{`- ${
+            <Subtitle3
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-700"]
+                  : ColorPalette["gray-50"]
+              }
+            >{`- ${
               typeof fromAmount === "string"
                 ? fromAmount
                 : fromAmount
@@ -226,27 +270,57 @@ export const HistoryDetailSendBaseUILower: FunctionComponent<{
   toText,
   toAmount,
 }) => {
+  const theme = useTheme();
+
   return (
     <Box
       width="100%"
       padding="1rem"
       borderRadius="0.375rem"
-      backgroundColor={ColorPalette["gray-650"]}
+      backgroundColor={
+        theme.mode === "light"
+          ? ColorPalette["white"]
+          : ColorPalette["gray-650"]
+      }
+      style={{
+        boxShadow:
+          theme.mode === "light"
+            ? "0 1px 4px 0 rgba(43, 39, 55, 0.10)"
+            : undefined,
+      }}
     >
       <XAxis alignY="center">
         <Box minWidth="2rem">
-          <Subtitle4 color={ColorPalette["gray-200"]}>To</Subtitle4>
+          <Subtitle4
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-300"]
+                : ColorPalette["gray-200"]
+            }
+          >
+            To
+          </Subtitle4>
         </Box>
         <Gutter size="0.5rem" />
         <YAxis>
           <Tooltip content={toAddress} allowedPlacements={["top", "right"]}>
             <Box
-              backgroundColor={ColorPalette["gray-550"]}
+              backgroundColor={
+                theme.mode === "light"
+                  ? ColorPalette["gray-50"]
+                  : ColorPalette["gray-550"]
+              }
               borderRadius="999px"
               paddingX="0.5rem"
               paddingY="0.25rem"
             >
-              <Subtitle3 color={ColorPalette["white"]}>
+              <Subtitle3
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-700"]
+                    : ColorPalette["white"]
+                }
+              >
                 {shortenedToAddress}
               </Subtitle3>
             </Box>
@@ -257,7 +331,14 @@ export const HistoryDetailSendBaseUILower: FunctionComponent<{
               <XAxis alignY="center">
                 {toTextWalletIcon ? (
                   <React.Fragment>
-                    <ManIcon size="0.875rem" color={ColorPalette["gray-400"]} />
+                    <ManIcon
+                      size="0.875rem"
+                      color={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-200"]
+                          : ColorPalette["gray-400"]
+                      }
+                    />
                     <Gutter size="0.25rem" />
                   </React.Fragment>
                 ) : null}
@@ -269,7 +350,13 @@ export const HistoryDetailSendBaseUILower: FunctionComponent<{
         {toAmount ? (
           <React.Fragment>
             <div style={{ flex: 1 }} />
-            <Subtitle3 color={ColorPalette["green-400"]}>{`+ ${
+            <Subtitle3
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-500"]
+                  : ColorPalette["green-400"]
+              }
+            >{`+ ${
               typeof toAmount === "string"
                 ? toAmount
                 : toAmount
@@ -334,6 +421,8 @@ const ManIcon: FunctionComponent<{ size: string; color: string }> = ({
 };
 
 export const HistoryDetailSendIcon: FunctionComponent = () => {
+  const theme = useTheme();
+
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -343,7 +432,11 @@ export const HistoryDetailSendIcon: FunctionComponent = () => {
       viewBox="0 0 41 41"
     >
       <path
-        stroke={ColorPalette["gray-200"]}
+        stroke={
+          theme.mode === "light"
+            ? ColorPalette["gray-300"]
+            : ColorPalette["gray-200"]
+        }
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth="2.53"

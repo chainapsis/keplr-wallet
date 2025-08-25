@@ -7,6 +7,7 @@ import { Subtitle3, Subtitle4 } from "../../../components/typography";
 import { MsgHistory } from "../../main/token-detail/types";
 import { Tooltip } from "../../../components/tooltip";
 import { useStore } from "../../../stores";
+import { useTheme } from "styled-components";
 
 export const HistoryDetailEvmContractCall: FunctionComponent<{
   msg: MsgHistory;
@@ -72,6 +73,8 @@ export const HistoryDetailEvmContractCall: FunctionComponent<{
 });
 
 export const HistoryDetailEvmContractCallIcon: FunctionComponent = () => {
+  const theme = useTheme();
+
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -86,12 +89,20 @@ export const HistoryDetailEvmContractCallIcon: FunctionComponent = () => {
         width="20"
         height="24"
         rx="2"
-        stroke={ColorPalette["gray-200"]}
+        stroke={
+          theme.mode === "light"
+            ? ColorPalette["gray-300"]
+            : ColorPalette["gray-200"]
+        }
         strokeWidth="2.5"
         fill="none"
       />
       <path
-        stroke={ColorPalette["gray-200"]}
+        stroke={
+          theme.mode === "light"
+            ? ColorPalette["gray-300"]
+            : ColorPalette["gray-200"]
+        }
         strokeWidth="2.5"
         strokeLinecap="round"
         d="M14 16h12M14 20h12M14 24h8"

@@ -9,6 +9,7 @@ import { Subtitle3, Subtitle4 } from "../../../components/typography";
 import { Gutter } from "../../../components/gutter";
 import { ERC20ApproveRelMeta, MsgHistory } from "../../main/token-detail/types";
 import { Tooltip } from "../../../components/tooltip";
+import { useTheme } from "styled-components";
 
 export const HistoryDetailEvmApprove: FunctionComponent<{
   msg: MsgHistory;
@@ -119,6 +120,8 @@ export const HistoryDetailEvmApprove: FunctionComponent<{
 });
 
 export const HistoryDetailEvmApproveIcon: FunctionComponent = () => {
+  const theme = useTheme();
+
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -128,7 +131,11 @@ export const HistoryDetailEvmApproveIcon: FunctionComponent = () => {
       viewBox="0 0 40 40"
     >
       <path
-        stroke={ColorPalette["gray-200"]}
+        stroke={
+          theme.mode === "light"
+            ? ColorPalette["gray-300"]
+            : ColorPalette["gray-200"]
+        }
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth="2.5"

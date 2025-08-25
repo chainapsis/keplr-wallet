@@ -9,6 +9,7 @@ import { Box } from "../../../components/box";
 import { isValidCoinStr, parseCoinStr } from "@keplr-wallet/common";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { ColorPalette } from "../../../styles";
+import { useTheme } from "styled-components";
 
 export const HistoryDetailIBCSwapSkip: FunctionComponent<{
   msg: MsgHistory;
@@ -69,6 +70,8 @@ export const HistoryDetailIBCSwapSkip: FunctionComponent<{
 });
 
 export const HistoryDetailIBCSwapSkipIcon: FunctionComponent = () => {
+  const theme = useTheme();
+
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -78,7 +81,11 @@ export const HistoryDetailIBCSwapSkipIcon: FunctionComponent = () => {
       viewBox="0 0 41 41"
     >
       <path
-        stroke={ColorPalette["gray-200"]}
+        stroke={
+          theme.mode === "light"
+            ? ColorPalette["gray-300"]
+            : ColorPalette["gray-200"]
+        }
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth="2.53"

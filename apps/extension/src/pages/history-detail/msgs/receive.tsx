@@ -6,6 +6,7 @@ import { MsgHistory } from "../../main/token-detail/types";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { HistoryDetailSendBaseUI } from "./send";
 import { ColorPalette } from "../../../styles";
+import { useTheme } from "styled-components";
 
 export const HistoryDetailReceive: FunctionComponent<{
   msg: MsgHistory;
@@ -78,6 +79,8 @@ export const HistoryDetailReceive: FunctionComponent<{
 });
 
 export const HistoryDetailReceiveIcon: FunctionComponent = () => {
+  const theme = useTheme();
+
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -87,7 +90,11 @@ export const HistoryDetailReceiveIcon: FunctionComponent = () => {
       viewBox="0 0 41 41"
     >
       <path
-        stroke={ColorPalette["gray-200"]}
+        stroke={
+          theme.mode === "light"
+            ? ColorPalette["gray-300"]
+            : ColorPalette["gray-200"]
+        }
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth="2.53"
