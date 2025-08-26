@@ -10,7 +10,7 @@ import { Box } from "../../components/box";
 import { Gutter } from "../../components/gutter";
 import { MsgHistory } from "../main/token-detail/types";
 import { XAxis } from "../../components/axis";
-import { Subtitle3, Subtitle4 } from "../../components/typography";
+import { Button2, Subtitle3, Subtitle4 } from "../../components/typography";
 import { useIntl } from "react-intl";
 import { ColorPalette } from "../../styles";
 import { useStore } from "../../stores";
@@ -23,6 +23,7 @@ import { useTheme } from "styled-components";
 import lottie, { AnimationItem } from "lottie-web";
 import AnimCheckLight from "../../public/assets/lottie/register/check-circle-icon-light.json";
 import AnimCheck from "../../public/assets/lottie/register/check-circle-icon.json";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export const HistoryDetailCommonBottomSection: FunctionComponent<{
   msg: MsgHistory;
@@ -99,6 +100,15 @@ export const HistoryDetailCommonBottomSection: FunctionComponent<{
       return "Unknown";
     }
   })();
+
+  const queryExplorer = queriesStore.simpleQuery.queryGet<{
+    link: string;
+  }>(
+    process.env["KEPLR_EXT_CONFIG_SERVER"],
+    `/tx-history/explorer/${ChainIdHelper.parse(msg.chainId).identifier}`
+  );
+
+  const explorerUrl = queryExplorer.response?.data.link || "";
 
   return (
     <React.Fragment>
@@ -298,6 +308,59 @@ export const HistoryDetailCommonBottomSection: FunctionComponent<{
           </Box>
         </XAxis>
       </Box>
+      <Gutter size="1.75rem" />
+      {explorerUrl ? (
+        <React.Fragment>
+          <Box
+            alignX="center"
+            cursor="pointer"
+            onClick={(e) => {
+              e.preventDefault();
+
+              browser.tabs.create({
+                url: explorerUrl
+                  .replace("{txHash}", msg.txHash.toUpperCase())
+                  .replace("{txHash:lowercase}", msg.txHash.toLowerCase())
+                  .replace("{txHash:uppercase}", msg.txHash.toUpperCase()),
+              });
+            }}
+          >
+            <XAxis alignY="center">
+              <Button2
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-300"]
+                    : ColorPalette["gray-50"]
+                }
+              >
+                View on Explorer
+              </Button2>
+              <Gutter size="0.25rem" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="19"
+                height="19"
+                fill="none"
+                stroke="none"
+                viewBox="0 0 19 19"
+              >
+                <path
+                  stroke={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-300"]
+                      : ColorPalette["gray-50"]
+                  }
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="1.5"
+                  d="M10.625 5H4.438c-.932 0-1.688.756-1.688 1.688v7.875c0 .931.756 1.687 1.688 1.687h7.875c.931 0 1.687-.755 1.687-1.687V8.375m-7.875 4.5L16.25 2.75m0 0h-3.937m3.937 0v3.938"
+                />
+              </svg>
+            </XAxis>
+          </Box>
+          <Gutter size="1.75rem" />
+        </React.Fragment>
+      ) : null}
     </React.Fragment>
   );
 });

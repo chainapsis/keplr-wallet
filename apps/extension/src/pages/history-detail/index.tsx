@@ -42,8 +42,6 @@ export const HistoryDetailPage: FunctionComponent = observer(() => {
 
   const explorerUrl = queryExplorer.response?.data.link || "";
 
-  console.log(chainId, explorerUrl, msg.msg.txHash);
-
   return (
     <HeaderLayout
       title={
