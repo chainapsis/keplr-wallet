@@ -6,7 +6,9 @@ import { useNavigate } from "react-router";
 export const BackButton: FunctionComponent<{
   hidden?: boolean;
   onClick?: () => void;
-}> = ({ hidden, onClick }) => {
+
+  color?: string;
+}> = ({ hidden, onClick, color }) => {
   const navigate = useNavigate();
 
   if (window.history.state && window.history.state.idx === 0) {
@@ -23,7 +25,7 @@ export const BackButton: FunctionComponent<{
       cursor="pointer"
       onClick={() => (onClick ? onClick() : navigate(-1))}
     >
-      <ArrowLeftIcon />
+      <ArrowLeftIcon color={color} />
     </Box>
   );
 };
