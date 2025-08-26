@@ -190,6 +190,14 @@ export const HistoryDetailTopSection: FunctionComponent<{
     }
   }
 
+  // 실패한 경우 section을 보여주지 않는다.
+  // msg.meta가 어떻게 처리될지 불확실한데
+  // 이걸 일일히 각 컴포넌트에서 고려하기보다
+  // 그냥 안보여주는 걸 선택...
+  if (msg.code) {
+    section = undefined;
+  }
+
   // Render icon and section
   const iconElement = icon || <UnknownIcon />;
   const sectionElement = section;
