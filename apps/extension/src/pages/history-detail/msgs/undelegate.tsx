@@ -15,7 +15,9 @@ export const HistoryDetailUndelegate: FunctionComponent<{
   msg: MsgHistory;
   targetDenom: string;
 }> = observer(({ msg, targetDenom }) => {
-  const { chainStore, queriesStore, priceStore } = useStore();
+  const { chainStore, queriesStore } = useStore();
+
+  const theme = useTheme();
 
   const chainInfo = chainStore.getChain(msg.chainId);
 
@@ -67,8 +69,6 @@ export const HistoryDetailUndelegate: FunctionComponent<{
     return "Unknown";
   }, [validatorAddress, queryBonded, queryUnbonding, queryUnbonded]);
 
-  const price = priceStore.calculatePrice(amountPretty);
-
   return (
     <Box>
       <YAxis alignX="center">
@@ -77,41 +77,66 @@ export const HistoryDetailUndelegate: FunctionComponent<{
           width="100%"
           padding="1rem"
           borderRadius="0.375rem"
-          backgroundColor={ColorPalette["gray-700"]}
+          backgroundColor={
+            theme.mode === "light"
+              ? ColorPalette["white"]
+              : ColorPalette["gray-650"]
+          }
+          style={{
+            boxShadow:
+              theme.mode === "light"
+                ? "0 1px 4px 0 rgba(43, 39, 55, 0.10)"
+                : undefined,
+          }}
         >
           <XAxis alignY="center">
-            <Subtitle4 color={ColorPalette["gray-300"]}>From</Subtitle4>
+            <Subtitle4
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-300"]
+                  : ColorPalette["gray-200"]
+              }
+            >
+              From
+            </Subtitle4>
             <div style={{ flex: 1 }} />
-            <Subtitle3 color={ColorPalette["white"]}>{moniker}</Subtitle3>
+            <Subtitle3
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-650"]
+                  : ColorPalette["white"]
+              }
+            >
+              {moniker}
+            </Subtitle3>
           </XAxis>
-        </Box>
-
-        <Gutter size="0.5rem" />
-
-        {/* Amount Info */}
-        <Box
-          width="100%"
-          padding="1rem"
-          borderRadius="0.375rem"
-          backgroundColor={ColorPalette["gray-700"]}
-        >
+          <Gutter size="1rem" />
           <XAxis alignY="center">
-            <Subtitle4 color={ColorPalette["gray-300"]}>Amount</Subtitle4>
+            <Subtitle4
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-300"]
+                  : ColorPalette["gray-200"]
+              }
+            >
+              Amount
+            </Subtitle4>
             <div style={{ flex: 1 }} />
-            <YAxis alignX="right">
-              <Subtitle3 color={ColorPalette["white"]}>
-                {amountPretty
-                  .maxDecimals(6)
-                  .shrink(true)
-                  .hideIBCMetadata(true)
-                  .toString()}
-              </Subtitle3>
-              {price && (
-                <Subtitle4 color={ColorPalette["gray-300"]}>
-                  {price.toString()}
-                </Subtitle4>
-              )}
-            </YAxis>
+            <Subtitle3
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-650"]
+                  : ColorPalette["white"]
+              }
+            >
+              {amountPretty
+                .maxDecimals(3)
+                .shrink(true)
+                .hideIBCMetadata(true)
+                .inequalitySymbol(true)
+                .inequalitySymbolSeparator("")
+                .toString()}
+            </Subtitle3>
           </XAxis>
         </Box>
       </YAxis>

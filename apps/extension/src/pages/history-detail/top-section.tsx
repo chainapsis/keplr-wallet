@@ -27,7 +27,7 @@ import {
   HistoryDetailRedelegate,
   HistoryDetailRedelegateIcon,
 } from "./msgs/redelegate";
-import { HistoryDetailVote } from "./msgs/vote";
+import { HistoryDetailGovVoteIcon, HistoryDetailVote } from "./msgs/vote";
 import { HistoryDetailEvmSend } from "./msgs/evm-send";
 import { HistoryDetailEvmReceive } from "./msgs/evm-receive";
 import {
@@ -155,6 +155,8 @@ export const HistoryDetailTopSection: FunctionComponent<{
       break;
     }
     case "vote": {
+      icon = <HistoryDetailGovVoteIcon />;
+      iconText = "Vote";
       section = <HistoryDetailVote msg={msg} targetDenom={targetDenom} />;
       break;
     }

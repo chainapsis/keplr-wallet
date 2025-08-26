@@ -182,7 +182,11 @@ export const HistoryDetailSendBaseUIUpper: FunctionComponent<{
         </Box>
         <Gutter size="0.5rem" />
         <YAxis>
-          <Tooltip content={fromAddress} allowedPlacements={["top", "right"]}>
+          <Tooltip
+            content={fromAddress}
+            allowedPlacements={["top", "right"]}
+            hoverCloseInteractive={true}
+          >
             <Box
               backgroundColor={
                 theme.mode === "light"
@@ -303,7 +307,11 @@ export const HistoryDetailSendBaseUILower: FunctionComponent<{
         </Box>
         <Gutter size="0.5rem" />
         <YAxis>
-          <Tooltip content={toAddress} allowedPlacements={["top", "right"]}>
+          <Tooltip
+            content={toAddress}
+            allowedPlacements={["top", "right"]}
+            hoverCloseInteractive={true}
+          >
             <Box
               backgroundColor={
                 theme.mode === "light"

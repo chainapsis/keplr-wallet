@@ -1,4 +1,11 @@
-import React, { FunctionComponent } from "react";
+import React, {
+  forwardRef,
+  FunctionComponent,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import { Box } from "../../components/box";
 import { Gutter } from "../../components/gutter";
 import { MsgHistory } from "../main/token-detail/types";
@@ -13,6 +20,9 @@ import { observer } from "mobx-react-lite";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { LoadingIcon } from "../../components/icon";
 import { useTheme } from "styled-components";
+import lottie, { AnimationItem } from "lottie-web";
+import AnimCheckLight from "../../public/assets/lottie/register/check-circle-icon-light.json";
+import AnimCheck from "../../public/assets/lottie/register/check-circle-icon.json";
 
 export const HistoryDetailCommonBottomSection: FunctionComponent<{
   msg: MsgHistory;
@@ -75,6 +85,18 @@ export const HistoryDetailCommonBottomSection: FunctionComponent<{
           )
           .join(", ");
       }
+    }
+  })();
+
+  const copyIconButtonRef = useRef<CopyIconButtonRef | null>(null);
+  const txHashShortText = (() => {
+    try {
+      const hex = Buffer.from(msg.txHash.replace("0x", ""), "hex")
+        .toString("hex")
+        .toUpperCase();
+      return `0x${hex.slice(0, 5)}...${hex.slice(-5)}`;
+    } catch {
+      return "Unknown";
     }
   })();
 
@@ -256,20 +278,128 @@ export const HistoryDetailCommonBottomSection: FunctionComponent<{
             Tx Hash
           </Subtitle4>
           <div style={{ flex: 1 }} />
-          <Subtitle3 color={ColorPalette["gray-300"]}>
-            {(() => {
-              try {
-                const hex = Buffer.from(msg.txHash.replace("0x", ""), "hex")
-                  .toString("hex")
-                  .toUpperCase();
-                return `0x${hex.slice(0, 5)}...${hex.slice(-5)}`;
-              } catch {
-                return "Unknown";
-              }
-            })()}
-          </Subtitle3>
+          <Box
+            cursor="pointer"
+            onClick={(e) => {
+              e.preventDefault();
+
+              copyIconButtonRef.current?.startAnimation();
+
+              navigator.clipboard.writeText("0x" + msg.txHash);
+            }}
+          >
+            <XAxis alignY="center">
+              <Subtitle3 color={ColorPalette["gray-300"]}>
+                {txHashShortText}
+              </Subtitle3>
+              <Gutter size="0.25rem" />
+              <CopyIconButton ref={copyIconButtonRef} />
+            </XAxis>
+          </Box>
         </XAxis>
       </Box>
     </React.Fragment>
+  );
+});
+
+interface CopyIconButtonRef {
+  startAnimation: () => void;
+}
+
+// eslint-disable-next-line react/display-name
+const CopyIconButton = forwardRef<CopyIconButtonRef>((_, ref) => {
+  const theme = useTheme();
+
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  const checkAnimDivRef = useRef<HTMLDivElement | null>(null);
+  const animationRef = useRef<AnimationItem | null>(null);
+
+  useEffect(() => {
+    if (checkAnimDivRef.current) {
+      const anim = lottie.loadAnimation({
+        container: checkAnimDivRef.current,
+        renderer: "svg",
+        autoplay: false,
+        loop: false,
+        animationData: theme.mode === "light" ? AnimCheckLight : AnimCheck,
+      });
+
+      anim.addEventListener("enterFrame", () => {
+        setIsAnimating(true);
+      });
+
+      anim.addEventListener("complete", () => {
+        setTimeout(() => {
+          setIsAnimating(false);
+        }, 1500);
+      });
+
+      animationRef.current = anim;
+
+      return () => {
+        anim.destroy();
+        animationRef.current = null;
+      };
+    }
+  }, [theme.mode]);
+
+  useImperativeHandle(ref, () => {
+    return {
+      startAnimation: () => {
+        if (animationRef.current) {
+          animationRef.current.goToAndPlay(0);
+        }
+      },
+    };
+  });
+
+  return (
+    <div
+      style={{
+        position: "relative",
+        width: "18px",
+        height: "18px",
+      }}
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="18"
+        height="18"
+        fill="none"
+        stroke="none"
+        viewBox="0 0 18 18"
+        style={{
+          opacity: isAnimating ? 0 : 1,
+        }}
+      >
+        <path
+          stroke={ColorPalette["gray-300"]}
+          strokeLinecap="round"
+          strokeWidth="1.5"
+          d="M12 3H4.8A1.8 1.8 0 0 0 3 4.8V12"
+        />
+        <rect
+          width="9"
+          height="9"
+          x="6"
+          y="6"
+          stroke={ColorPalette["gray-300"]}
+          strokeWidth="1.5"
+          rx="1.05"
+        />
+      </svg>
+      <div
+        ref={checkAnimDivRef}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          opacity: isAnimating ? 1 : 0,
+        }}
+      />
+    </div>
   );
 });

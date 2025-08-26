@@ -86,6 +86,7 @@ export const HistoryDetailEvmApprove: FunctionComponent<{
             <Tooltip
               content={meta.contract || "Unknown"}
               allowedPlacements={["top", "left"]}
+              hoverCloseInteractive={true}
             >
               <Subtitle4 color={ColorPalette["gray-300"]}>
                 {shortenedContractAddress}

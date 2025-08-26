@@ -60,6 +60,7 @@ export const HistoryDetailEvmContractCall: FunctionComponent<{
             <Tooltip
               content={contractAddress}
               allowedPlacements={["top", "left"]}
+              hoverCloseInteractive={true}
             >
               <Subtitle3 color={ColorPalette["white"]}>
                 {shortenedContractAddress}
