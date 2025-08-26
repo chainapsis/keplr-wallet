@@ -5,22 +5,32 @@ import { ViewToken } from "../pages/main";
 export const useCopyAddress = (viewToken: ViewToken): string | undefined => {
   const { accountStore, chainStore } = useStore();
 
+  const denomHelper = new DenomHelper(
+    viewToken.token.currency.coinMinimalDenom
+  );
+  const account = accountStore.getAccount(viewToken.chainInfo.chainId);
+
+  if (denomHelper.type === "erc20" && "starknet" in viewToken.chainInfo) {
+    const isETH =
+      denomHelper.contractAddress ===
+      viewToken.chainInfo.starknet.ethContractAddress;
+    const isSTRK =
+      denomHelper.contractAddress ===
+      viewToken.chainInfo.starknet.strkContractAddress;
+    if (isETH || isSTRK) {
+      return account.starknetHexAddress;
+    }
+  }
+
   if (
-    new DenomHelper(viewToken.token.currency.coinMinimalDenom).type !==
-      "native" ||
+    denomHelper.type !== "native" ||
     viewToken.token.currency.coinMinimalDenom.startsWith("ibc/")
   ) {
     return undefined;
   }
 
-  const account = accountStore.getAccount(viewToken.chainInfo.chainId);
-
   if ("bitcoin" in viewToken.chainInfo) {
     return account.bitcoinAddress?.bech32Address;
-  }
-
-  if ("starknet" in viewToken.chainInfo) {
-    return account.starknetHexAddress;
   }
 
   const isEVMOnlyChain = chainStore.isEvmOnlyChain(viewToken.chainInfo.chainId);
