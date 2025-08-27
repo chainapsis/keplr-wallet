@@ -190,6 +190,7 @@ export const HeaderLayout: FunctionComponent<
   PropsWithChildren<HeaderProps>
 > = ({
   title,
+  titleColor,
   left,
   right,
   bottomButtons,
@@ -297,7 +298,7 @@ export const HeaderLayout: FunctionComponent<
             horizontalBleed="0.15rem"
             verticalBleed="0.15rem"
           >
-            <Subtitle1>{title}</Subtitle1>
+            <Subtitle1 color={titleColor}>{title}</Subtitle1>
           </Skeleton>
         </Styles.HeaderTitle>
 

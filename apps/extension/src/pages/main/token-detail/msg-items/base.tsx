@@ -10,6 +10,7 @@ import { CoinPretty, Dec, PricePretty } from "@keplr-wallet/unit";
 import { MsgHistory } from "../types";
 import { useTheme } from "styled-components";
 import { ChainImageFallback } from "../../../../components/image";
+import { useNavigate } from "react-router";
 
 export const MsgItemBase: FunctionComponent<{
   logo: React.ReactElement;
@@ -44,8 +45,9 @@ export const MsgItemBase: FunctionComponent<{
     amountDeco,
     isInAllActivitiesPage,
   }) => {
-    const { chainStore, priceStore, queriesStore } = useStore();
+    const { chainStore, priceStore } = useStore();
 
+    const navigate = useNavigate();
     const theme = useTheme();
 
     const chainInfo = chainStore.getChain(chainId);
@@ -72,17 +74,6 @@ export const MsgItemBase: FunctionComponent<{
       return;
     }, [defaultVsCurrency, foundCurrency, priceStore, prices, amount]);
 
-    const queryExplorer = queriesStore.simpleQuery.queryGet<{
-      link: string;
-    }>(
-      process.env["KEPLR_EXT_CONFIG_SERVER"],
-      `/tx-history/explorer/${chainInfo.chainIdentifier}`
-    );
-
-    const explorerUrl = queryExplorer.response?.data.link || "";
-
-    const clickable = !!explorerUrl;
-
     return (
       <Box
         backgroundColor={
@@ -104,25 +95,21 @@ export const MsgItemBase: FunctionComponent<{
           paddingY="0.875rem"
           alignY="center"
           minHeight="4rem"
-          cursor={clickable ? "pointer" : undefined}
+          cursor="pointer"
           onClick={(e) => {
             e.preventDefault();
 
-            if (explorerUrl) {
-              browser.tabs.create({
-                url: explorerUrl
-                  .replace("{txHash}", msg.txHash.toUpperCase())
-                  .replace("{txHash:lowercase}", msg.txHash.toLowerCase())
-                  .replace("{txHash:uppercase}", msg.txHash.toUpperCase()),
-              });
-            }
+            navigate(
+              `/tx-history-detail/${chainId}/${encodeURIComponent(
+                JSON.stringify({ msg, prices })
+              )}`
+            );
           }}
           hover={{
-            backgroundColor: clickable
-              ? theme.mode === "light"
+            backgroundColor:
+              theme.mode === "light"
                 ? ColorPalette["gray-10"]
-                : ColorPalette["gray-600"]
-              : undefined,
+                : ColorPalette["gray-600"],
           }}
         >
           <XAxis alignY="center">
