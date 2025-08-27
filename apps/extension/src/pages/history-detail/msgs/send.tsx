@@ -184,6 +184,9 @@ export const HistoryDetailSendBaseUIUpper: FunctionComponent<{
         <YAxis>
           <Tooltip
             content={fromAddress}
+            containerStyle={{
+              width: "fit-content",
+            }}
             allowedPlacements={["top", "right"]}
             hoverCloseInteractive={true}
           >
@@ -241,6 +244,9 @@ export const HistoryDetailSendBaseUIUpper: FunctionComponent<{
                   ? ColorPalette["gray-700"]
                   : ColorPalette["gray-50"]
               }
+              style={{
+                textAlign: "right",
+              }}
             >{`- ${
               typeof fromAmount === "string"
                 ? fromAmount
@@ -309,6 +315,9 @@ export const HistoryDetailSendBaseUILower: FunctionComponent<{
         <YAxis>
           <Tooltip
             content={toAddress}
+            containerStyle={{
+              width: "fit-content",
+            }}
             allowedPlacements={["top", "right"]}
             hoverCloseInteractive={true}
           >
@@ -364,6 +373,9 @@ export const HistoryDetailSendBaseUILower: FunctionComponent<{
                   ? ColorPalette["gray-500"]
                   : ColorPalette["green-400"]
               }
+              style={{
+                textAlign: "right",
+              }}
             >{`+ ${
               typeof toAmount === "string"
                 ? toAmount

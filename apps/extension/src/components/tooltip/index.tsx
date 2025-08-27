@@ -22,6 +22,7 @@ import { useTheme } from "styled-components";
 export const Tooltip: FunctionComponent<
   PropsWithChildren<{
     enabled?: boolean;
+    containerStyle?: React.CSSProperties;
     content?: string | React.ReactElement;
     isAlwaysOpen?: boolean;
 
@@ -42,6 +43,7 @@ export const Tooltip: FunctionComponent<
   }>
 > = ({
   enabled,
+  containerStyle,
   content,
   isAlwaysOpen = false,
   allowedPlacements,
@@ -125,6 +127,7 @@ export const Tooltip: FunctionComponent<
           // 이유는 모르겠는데 일단 이렇게 처리한다.
           display: "flex",
           flexDirection: "column",
+          ...containerStyle,
         }}
         {...getReferenceProps()}
       >

@@ -136,18 +136,24 @@ export const HistoryDetailTopSection: FunctionComponent<{
       );
       break;
     }
+    case "initia-delegate":
+    case "bbn-wrapped-delegate":
     case "delegate": {
       icon = <HistoryDetailDelegateIcon />;
       iconText = "Stake";
       section = <HistoryDetailDelegate msg={msg} targetDenom={targetDenom} />;
       break;
     }
+    case "initia-undelegate":
+    case "bbn-wrapped-undelegate":
     case "undelegate": {
       icon = <HistoryDetailUndelegateIcon />;
       iconText = "Unstake";
       section = <HistoryDetailUndelegate msg={msg} targetDenom={targetDenom} />;
       break;
     }
+    case "initia-redelegate":
+    case "bbn-wrapped-redelegate":
     case "redelegate": {
       icon = <HistoryDetailRedelegateIcon />;
       iconText = "Switch Validator";
@@ -176,7 +182,12 @@ export const HistoryDetailTopSection: FunctionComponent<{
     }
     case "evm/erc20-approve": {
       icon = <HistoryDetailEvmApproveIcon />;
-      iconText = "Approve Token";
+      const currency = chainStore
+        .getChain(msg.chainId)
+        .findCurrency(
+          msg.meta["contract"] ? `erc20:${msg.meta["contract"]}` : targetDenom
+        );
+      iconText = `Approve ${currency?.coinDenom || "Unknown"}`;
       section = <HistoryDetailEvmApprove msg={msg} targetDenom={targetDenom} />;
       break;
     }
