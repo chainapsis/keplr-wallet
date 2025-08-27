@@ -56,7 +56,7 @@ export const HistoryDetailIBCSend: FunctionComponent<{
     }
 
     try {
-      let res = Bech32Address.shortenAddress((msg.msg as any)["receiver"], 20);
+      let res = (msg.msg as any)["receiver"];
       const packetData = Buffer.from(
         msg.ibcTracking.originPacket,
         "base64"
@@ -72,7 +72,7 @@ export const HistoryDetailIBCSend: FunctionComponent<{
 
       while (obj) {
         if (obj.receiver) {
-          res = Bech32Address.shortenAddress(obj.receiver, 20);
+          res = obj.receiver;
         }
         obj = (() => {
           if (
