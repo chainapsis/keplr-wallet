@@ -100,6 +100,7 @@ export const HistoryDetailMergedClaimRewards: FunctionComponent<{
             <RewardItem
               key={rewardsData[0].currency.coinMinimalDenom}
               index={0}
+              length={rewardsData.length}
               currency={rewardsData[0].currency}
               amount={rewardsData[0].amount}
               chainInfo={chainInfo}
@@ -115,6 +116,7 @@ export const HistoryDetailMergedClaimRewards: FunctionComponent<{
                         <RewardItem
                           key={reward.currency.coinMinimalDenom}
                           index={index}
+                          length={rewardsData.length}
                           currency={reward.currency}
                           amount={reward.amount}
                           chainInfo={chainInfo}
@@ -182,10 +184,11 @@ export const HistoryDetailMergedClaimRewards: FunctionComponent<{
 
 const RewardItem: FunctionComponent<{
   index: number;
+  length: number;
   currency: AppCurrency;
   amount: CoinPretty;
   chainInfo: ChainInfo;
-}> = observer(({ currency, amount, chainInfo }) => {
+}> = observer(({ index, length, currency, amount, chainInfo }) => {
   const { priceStore } = useStore();
 
   const theme = useTheme();
@@ -199,7 +202,10 @@ const RewardItem: FunctionComponent<{
   })();
 
   return (
-    <Box width="100%" paddingBottom="1rem">
+    <Box
+      width="100%"
+      paddingBottom={index === 0 && length === 1 ? "0" : "1rem"}
+    >
       <XAxis alignY="center">
         <CurrencyImageFallback
           size="2rem"
