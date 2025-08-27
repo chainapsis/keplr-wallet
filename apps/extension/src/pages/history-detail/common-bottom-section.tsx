@@ -17,7 +17,7 @@ import { useStore } from "../../stores";
 import { Buffer } from "buffer/";
 import { ChainImageFallback } from "../../components/image";
 import { observer } from "mobx-react-lite";
-import { CoinPretty } from "@keplr-wallet/unit";
+import { CoinPretty, Int } from "@keplr-wallet/unit";
 import { LoadingIcon } from "../../components/icon";
 import { useTheme } from "styled-components";
 import lottie, { AnimationItem } from "lottie-web";
@@ -34,6 +34,36 @@ export const HistoryDetailCommonBottomSection: FunctionComponent<{
 
   const fee: string | undefined = (() => {
     if (chainStore.isEvmOnlyChain(msg.chainId)) {
+      // EVM 트랜잭션의 수수료 계산 로직
+      const res = queriesStore.simpleQuery.queryGet<{
+        tx_fee?: string;
+      }>(
+        "https://keplr-api.keplr.app",
+        `/v1/evm/tx?chain_identifier=${msg.chainId}&tx_hash=0x${msg.txHash}`
+      );
+
+      if (res.response?.data) {
+        const txData = res.response.data;
+
+        if (!txData.tx_fee) {
+          return "-";
+        }
+
+        const amt = new Int(txData.tx_fee);
+        const chainInfo = chainStore.getChain(msg.chainId);
+        if (chainInfo.feeCurrencies.length === 0) {
+          return "-";
+        }
+        const feeCurrency = chainInfo.feeCurrencies[0];
+        const pretty = new CoinPretty(feeCurrency, amt);
+        return pretty
+          .maxDecimals(5)
+          .shrink(true)
+          .hideIBCMetadata(true)
+          .inequalitySymbol(true)
+          .inequalitySymbolSeparator(" ")
+          .toString();
+      }
     } else {
       const queryTx = queriesStore.simpleQuery.queryGet<{
         authInfo: {
