@@ -228,7 +228,14 @@ export const HistoryDetailSendBaseUIUpper: FunctionComponent<{
                     <Gutter size="0.25rem" />
                   </React.Fragment>
                 ) : null}
-                <Subtitle4 color={ColorPalette["gray-300"]}>
+                <Subtitle4
+                  color={ColorPalette["gray-300"]}
+                  style={{
+                    wordBreak: "normal",
+                    overflowWrap: "break-word",
+                    maxWidth: "10rem",
+                  }}
+                >
                   {fromText}
                 </Subtitle4>
               </XAxis>
@@ -359,7 +366,16 @@ export const HistoryDetailSendBaseUILower: FunctionComponent<{
                     <Gutter size="0.25rem" />
                   </React.Fragment>
                 ) : null}
-                <Subtitle4 color={ColorPalette["gray-300"]}>{toText}</Subtitle4>
+                <Subtitle4
+                  color={ColorPalette["gray-300"]}
+                  style={{
+                    wordBreak: "normal",
+                    overflowWrap: "break-word",
+                    maxWidth: "10rem",
+                  }}
+                >
+                  {toText}
+                </Subtitle4>
               </XAxis>
             </React.Fragment>
           ) : null}
