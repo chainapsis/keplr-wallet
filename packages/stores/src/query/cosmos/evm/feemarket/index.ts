@@ -16,11 +16,17 @@ export class ObservableQueryEvmFeeMarketBaseFee extends ObservableChainQuery<Bas
     makeObservable(this);
   }
 
-  get baseFee(): Dec | null {
+  get baseFee(): {
+    amount: Dec | null;
+  } {
     if (!this.response || !this.response.data.base_fee) {
-      return null;
+      return {
+        amount: null,
+      };
     }
 
-    return new Dec(this.response.data.base_fee);
+    return {
+      amount: new Dec(this.response.data.base_fee.amount),
+    };
   }
 }
