@@ -121,7 +121,7 @@ export const HistoryDetailTopSection: FunctionComponent<{
     case "ibc-swap-skip-osmosis-receive":
     case "ibc-swap-skip-receive": {
       icon = <HistoryDetailIBCSwapSkipIcon />;
-      iconText = "Swap Complete";
+      iconText = "Swap Completed";
       section = (
         <HistoryDetailIBCSwapSkipReceive msg={msg} targetDenom={targetDenom} />
       );
@@ -193,7 +193,7 @@ export const HistoryDetailTopSection: FunctionComponent<{
     }
     case "evm/contract-call": {
       icon = <HistoryDetailEvmContractCallIcon />;
-      iconText = "Execute Contract";
+      iconText = "Contract Call";
       section = (
         <HistoryDetailEvmContractCall msg={msg} targetDenom={targetDenom} />
       );
