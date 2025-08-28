@@ -29,7 +29,7 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
                 ([chainId, coinDenoms]) =>
                   chainId === selectedTokenInfo.chainId &&
                   coinDenoms?.some((coinDenom) =>
-                    coinDenom === "USDC"
+                    coinDenom === "USDC" || coinDenom === "USDC_NOBLE"
                       ? selectedTokenInfo.currency.coinDenom.includes("USDC")
                       : coinDenom === selectedTokenInfo.currency.coinDenom
                   )
@@ -42,7 +42,7 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
 
     const selectedCoinDenom = selectedTokenInfo
       ? buySupportCoinDenoms.find((coinDenom) =>
-          coinDenom === "USDC"
+          coinDenom === "USDC" || coinDenom === "USDC_NOBLE"
             ? selectedTokenInfo.currency.coinDenom.includes("USDC")
             : coinDenom === selectedTokenInfo.currency.coinDenom
         )
