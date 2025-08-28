@@ -34,13 +34,16 @@ export const getButtonHeightRem = (size: ButtonSize | undefined): number => {
 };
 
 export const getLoadingColor = (
-  buttonColor: ButtonColor | undefined
+  buttonColor: ButtonColor | undefined,
+  theme: ButtonTheme
 ): string => {
   switch (buttonColor) {
     case "primary":
       return ColorPalette["blue-200"];
     case "secondary":
-      return ColorPalette["gray-200"];
+      return theme === "dark"
+        ? ColorPalette["blue-700"]
+        : ColorPalette["gray-200"];
     case "danger":
       return ColorPalette["red-400"];
     default:
@@ -78,7 +81,7 @@ const buttonStyleFromColorAndMode: Record<
 
           ::after {
             background-color: ${ColorPalette["gray-300"]};
-            opacity: 0.4;
+            opacity: 0.2;
           }
 
           ${makeTextAndSvgColor(ColorPalette["white"])}
@@ -88,7 +91,7 @@ const buttonStyleFromColorAndMode: Record<
     dark: {
       fill: {
         enabled: css`
-          background-color: ${ColorPalette["blue-400"]};
+          background-color: ${ColorPalette["blue-500"]};
 
           ${makeTextAndSvgColor(ColorPalette["white"])}
 
@@ -100,11 +103,11 @@ const buttonStyleFromColorAndMode: Record<
           }
         `,
         disabled: css`
-          background-color: ${ColorPalette["blue-400"]};
+          background-color: ${ColorPalette["blue-500"]};
 
           ::after {
             background-color: ${ColorPalette["gray-600"]};
-            opacity: 0.7;
+            opacity: 0.5;
           }
 
           ${makeTextAndSvgColor(ColorPalette["white"])}
@@ -138,9 +141,9 @@ const buttonStyleFromColorAndMode: Record<
     dark: {
       fill: {
         enabled: css`
-          background-color: ${ColorPalette["gray-500"]};
+          background-color: ${ColorPalette["blue-800"]};
 
-          ${makeTextAndSvgColor(ColorPalette["white"])}
+          ${makeTextAndSvgColor(ColorPalette["blue-400"])}
 
           :hover {
             ::after {
@@ -151,14 +154,14 @@ const buttonStyleFromColorAndMode: Record<
         `,
 
         disabled: css`
-          background-color: ${ColorPalette["gray-400"]};
+          background-color: ${ColorPalette["blue-800"]};
+
+          ${makeTextAndSvgColor(ColorPalette["blue-400"])}
 
           ::after {
             background-color: ${ColorPalette["gray-600"]};
-            opacity: 0.7;
+            opacity: 0.5;
           }
-
-          ${makeTextAndSvgColor(ColorPalette["white"])}
         `,
       },
     },
@@ -181,19 +184,19 @@ const buttonStyleFromColorAndMode: Record<
         disabled: css`
           background-color: ${ColorPalette["red-100"]};
 
+          ${makeTextAndSvgColor(ColorPalette["red-400"])}
+
           ::after {
             background-color: ${ColorPalette["gray-300"]};
-            opacity: 0.2;
+            opacity: 0.1;
           }
-
-          ${makeTextAndSvgColor(ColorPalette["red-400"])}
         `,
       },
     },
     dark: {
       fill: {
         enabled: css`
-          background-color: ${ColorPalette["red-100"]};
+          background-color: rgba(166, 31, 58, 0.3);
 
           ${makeTextAndSvgColor(ColorPalette["red-400"])}
 
@@ -206,14 +209,14 @@ const buttonStyleFromColorAndMode: Record<
         `,
 
         disabled: css`
-          background-color: ${ColorPalette["gray-400"]};
+          background-color: rgba(166, 31, 58, 0.3);
+
+          ${makeTextAndSvgColor(ColorPalette["red-400"])}
 
           ::after {
             background-color: ${ColorPalette["gray-600"]};
-            opacity: 0.7;
+            opacity: 0.5;
           }
-
-          ${makeTextAndSvgColor(ColorPalette["white"])}
         `,
       },
     },
@@ -292,12 +295,15 @@ export const Styles = {
     align-items: center;
     margin-left: 0.25rem;
   `,
-  Loading: styled.div<{ buttonColor: ButtonColor | undefined }>`
+  Loading: styled.div<{
+    buttonColor: ButtonColor | undefined;
+    theme: ButtonTheme;
+  }>`
     display: flex;
     align-items: center;
 
     position: absolute;
-    color: ${({ buttonColor }) => getLoadingColor(buttonColor)};
+    color: ${({ buttonColor, theme }) => getLoadingColor(buttonColor, theme)};
   `,
   TextOverrideIcon: styled.div`
     display: flex;
