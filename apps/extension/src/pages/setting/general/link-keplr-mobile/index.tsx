@@ -8,8 +8,6 @@ import styled, { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
 import { Subtitle3 } from "../../../../components/typography";
 import { PasswordTextInput } from "../../../../components/input";
-import lottie from "lottie-web";
-import AnimScan from "../../../../public/assets/lottie/wallet/scan.json";
 import { YAxis } from "../../../../components/axis";
 import { useConfirm } from "../../../../hooks/confirm";
 import {
@@ -105,25 +103,8 @@ export const SettingGeneralLinkKeplrMobilePage: FunctionComponent = observer(
 const EnterPasswordView: FunctionComponent<{
   onSubmit: (password: string) => Promise<void>;
 }> = observer(({ onSubmit }) => {
-  const animDivRef = useRef<HTMLDivElement | null>(null);
   const intl = useIntl();
   const theme = useTheme();
-
-  useEffect(() => {
-    if (animDivRef.current) {
-      const anim = lottie.loadAnimation({
-        container: animDivRef.current,
-        renderer: "svg",
-        loop: true,
-        autoplay: true,
-        animationData: AnimScan,
-      });
-
-      return () => {
-        anim.destroy();
-      };
-    }
-  }, []);
 
   const [password, setPassword] = useState("");
 
