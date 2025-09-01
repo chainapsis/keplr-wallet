@@ -136,6 +136,14 @@ export const HistoryDetailTopSection: FunctionComponent<{
       );
       break;
     }
+    case "noble-deposit-usdc": {
+      iconText = "Deposit";
+      break;
+    }
+    case "noble-withdraw-usdc": {
+      iconText = "Withdraw";
+      break;
+    }
     case "initia-delegate":
     case "bbn-wrapped-delegate":
     case "delegate": {
