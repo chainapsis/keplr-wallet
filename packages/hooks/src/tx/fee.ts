@@ -897,8 +897,10 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
           ? historyBasedFee
           : networkSuggestedFee;
 
-        if (higherFee.gt(MAX_PRIORITY_FEE_UPPER_BOUND)) {
-          return MAX_PRIORITY_FEE_UPPER_BOUND;
+        const upperBound = this.getMaxPriorityFeeUpperBound();
+
+        if (higherFee.gt(upperBound)) {
+          return upperBound;
         }
 
         return higherFee;
@@ -912,6 +914,12 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     }
 
     return new Dec(0);
+  }
+
+  private getMaxPriorityFeeUpperBound(): Dec {
+    return this.chainId === "eip155:137"
+      ? MAX_PRIORITY_FEE_UPPER_BOUND_FOR_POLYGON
+      : MAX_PRIORITY_FEE_UPPER_BOUND;
   }
 
   protected populateGasPriceStep(
@@ -1287,6 +1295,7 @@ const GWEI = new Dec(10 ** 9);
 const ETH_FEE_HISTORY_BLOCK_COUNT = 20;
 const ETH_FEE_HISTORY_REWARD_PERCENTILES = [25, 50, 75];
 const MAX_PRIORITY_FEE_UPPER_BOUND = new Dec(20).mul(GWEI);
+const MAX_PRIORITY_FEE_UPPER_BOUND_FOR_POLYGON = new Dec(100).mul(GWEI);
 const ETH_FEE_SETTINGS_BY_FEE_TYPE: Record<
   FeeType,
   {
