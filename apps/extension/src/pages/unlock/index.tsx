@@ -10,6 +10,9 @@ import { TextButton } from "../../components/button-text";
 import { ColorPalette } from "../../styles";
 import { H1, Subtitle4 } from "../../components/typography";
 import { Tooltip } from "../../components/tooltip";
+import AnimLogo from "../../public/assets/lottie/unlock/logo.json";
+import AnimLogoLight from "../../public/assets/lottie/unlock/logo-light.json";
+import lottie, { AnimationItem } from "lottie-web";
 import { GuideBox } from "../../components/guide-box";
 import { LoadingIcon } from "../../components/icon";
 import { XAxis } from "../../components/axis";
@@ -18,6 +21,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
 import { Buffer } from "buffer/";
 import { handleExternalInteractionWithNoProceedNext } from "../../utils";
+
 export const UnlockPage: FunctionComponent = observer(() => {
   const { keyRingStore, interactionStore } = useStore();
   const intl = useIntl();
@@ -51,6 +55,43 @@ export const UnlockPage: FunctionComponent = observer(() => {
   // 그 경우를 위해서 따로 state를 관리한다.
   const [migrationSecondPhasePassword, setMigrationSecondPhasePassword] =
     useState("");
+
+  const animContainerRef = useRef<HTMLDivElement | null>(null);
+  const animRef = useRef<AnimationItem | null>(null);
+  useEffect(() => {
+    if (animContainerRef.current) {
+      const anim = lottie.loadAnimation({
+        container: animContainerRef.current,
+        renderer: "svg",
+        loop: true,
+        autoplay: false,
+        animationData: theme.mode === "light" ? AnimLogoLight : AnimLogo,
+      });
+
+      animRef.current = anim;
+
+      return () => {
+        anim.destroy();
+
+        animRef.current = null;
+      };
+    }
+  }, []);
+
+  const animLoading = isLoading || keyRingStore.isMigrating;
+  useEffect(() => {
+    // 현실적으로는 이 애니메이션은 마이그레이션 과정 중에서만 보이고 그게 의도이다.
+    if (animRef.current) {
+      if (animLoading) {
+        animRef.current.goToAndPlay(0);
+      } else {
+        // page가 넘어가기 직전에 애니메이션이 멈추지 않도록 약간의 delay를 준다.
+        setTimeout(() => {
+          animRef.current?.goToAndStop(0);
+        }, 50);
+      }
+    }
+  }, [animLoading]);
 
   // post message를 쓸때 browser.extension.getViews()를 쓰는데 자기 자신을 제외하는 옵션은 없는 것 같음.
   // 그냥 대충 각 view가 고유의 id를 가상으로 가지게 해서 처리한다.
@@ -166,18 +207,7 @@ export const UnlockPage: FunctionComponent = observer(() => {
   }, [interactionStore, keyRingStore, viewPostMessageId]);
 
   return (
-    <Box
-      width="100vw"
-      paddingX="1.5rem"
-      style={{
-        backgroundImage: `url(${require(theme.mode === "light"
-          ? "../../public/assets/img/unlock-light.png"
-          : "../../public/assets/img/unlock-dark.png")})`,
-        backgroundSize: "100% auto",
-        backgroundPosition: "top center",
-        backgroundRepeat: "no-repeat",
-      }}
-    >
+    <Box height="100vh" paddingX="1.5rem">
       <form
         onSubmit={async (e) => {
           e.preventDefault();
@@ -208,7 +238,17 @@ export const UnlockPage: FunctionComponent = observer(() => {
           }
         }}
       >
-        <Gutter size="15.5rem" />
+        <Box alignX="center">
+          <Gutter size="6rem" />
+
+          <div
+            ref={animContainerRef}
+            style={{
+              width: "12rem",
+              height: "9.5rem",
+            }}
+          />
+        </Box>
 
         <ParagraphSection
           needMigration={keyRingStore.needMigration}

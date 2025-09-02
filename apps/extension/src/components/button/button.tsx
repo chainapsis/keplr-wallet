@@ -3,7 +3,6 @@ import { ButtonProps } from "./types";
 import { Styles } from "./styles";
 import { LoadingIcon } from "../icon";
 import { Box } from "../box";
-import { useTheme } from "styled-components";
 
 export const Button: FunctionComponent<ButtonProps> = ({
   onClick,
@@ -17,7 +16,6 @@ export const Button: FunctionComponent<ButtonProps> = ({
   type,
   ...otherProps
 }) => {
-  const theme = useTheme();
   return (
     <Styles.Container
       style={style}
@@ -41,7 +39,7 @@ export const Button: FunctionComponent<ButtonProps> = ({
         {left ? <Styles.Left>{left}</Styles.Left> : null}
 
         {isLoading ? (
-          <Styles.Loading buttonColor={otherProps.color} theme={theme}>
+          <Styles.Loading buttonColor={otherProps.color}>
             <LoadingIcon width="1rem" height="1rem" />
           </Styles.Loading>
         ) : null}

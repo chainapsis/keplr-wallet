@@ -55,7 +55,7 @@ export const WelcomePage: FunctionComponent = observer(() => {
       <Stack alignX="left">
         {isDesktop ? null : (
           <React.Fragment>
-            <CongratsImage size="150" />
+            <CongratsVideo size="150" />
             <Gutter size="1.25rem" />
           </React.Fragment>
         )}
@@ -181,7 +181,7 @@ export const WelcomePage: FunctionComponent = observer(() => {
             </YAxis>
           </Box>
 
-          {isDesktop ? <CongratsImage size="450" /> : null}
+          {isDesktop ? <CongratsVideo size="450" /> : null}
         </Styles.ResponsiveContainer>
 
         <Gutter size="1.5rem" />
@@ -258,20 +258,18 @@ export const WelcomePage: FunctionComponent = observer(() => {
   );
 });
 
-const CongratsImage: FunctionComponent<{ size: string }> = ({ size }) => {
-  const theme = useTheme();
-  const src =
-    theme.mode === "light"
-      ? require("../../../../public/assets/img/congrats-bird-light.png")
-      : require("../../../../public/assets/img/congrats-bird-dark.png");
-
+const CongratsVideo: FunctionComponent<{ size: string }> = ({ size }) => {
   return (
-    <img
+    <video
       width={size}
       height={size}
-      src={src}
-      alt="Congrats"
-      style={{ borderRadius: "2.5rem" }}
-    />
+      autoPlay={true}
+      loop={true}
+      style={{ borderRadius: "2.5rem", backgroundColor: "#1A1239" }}
+    >
+      <source
+        src={require("../../../../public/assets/lottie/register/congrats.webm")}
+      />
+    </video>
   );
 };
