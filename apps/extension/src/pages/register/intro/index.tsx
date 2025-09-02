@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useRef } from "react";
+import React, { FunctionComponent } from "react";
 import { RegisterSceneBox } from "../components/register-scene-box";
 import { Stack } from "../../../components/stack";
 import { Button } from "../../../components/button";
@@ -13,8 +13,6 @@ import { TextButton } from "../../../components/button-text";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import { useIntl } from "react-intl";
-import lottie from "lottie-web";
-import AnimIntro from "../../../public/assets/lottie/register/intro.json";
 
 export const RegisterIntroScene: FunctionComponent = observer(() => {
   const { uiConfigStore } = useStore();
@@ -30,26 +28,14 @@ export const RegisterIntroScene: FunctionComponent = observer(() => {
     },
   });
 
-  const animContainerRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    if (animContainerRef.current) {
-      const anim = lottie.loadAnimation({
-        container: animContainerRef.current,
-        renderer: "svg",
-        loop: true,
-        autoplay: true,
-        animationData: AnimIntro,
-      });
-      return () => {
-        anim.destroy();
-      };
-    }
-  }, []);
-
   return (
     <RegisterSceneBox>
       <YAxis alignX="center">
-        <div ref={animContainerRef} style={{ width: 200, height: 200 }} />
+        <video width="200" height="200" autoPlay={true} loop={true}>
+          <source
+            src={require("../../../public/assets/lottie/register/intro.webm")}
+          />
+        </video>
       </YAxis>
       <Gutter size="3.125rem" />
       <Stack gutter="1.25rem">

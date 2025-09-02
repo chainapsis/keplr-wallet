@@ -31,15 +31,15 @@ const onClickSpringConfig = {
 
 const gradient1Pos = "16.15%";
 const gradient1DefaultColor = ColorPalette["blue-400"];
-const gradient1HoverColor = "#00C2FF";
+const gradient1HoverColor = "#2C4BE2";
 
 const gradient2Pos = "100%";
 const gradient2DefaultColor = ColorPalette["blue-400"];
-const gradient2HoverColor = "#2DD2B9";
+const gradient2HoverColor = "#7A59FF";
 
-const defaultBoxShadowColor = "#00c2ff80";
-const hoverBoxShadowColor = "#00c2ff80";
-const pressedBoxShadowColor = "#00c2ff80";
+const defaultBoxShadowColor = "#2723F700";
+const hoverBoxShadowColor = "#2723F7FF";
+const pressedBoxShadowColor = "#2723F700";
 
 const defaultBoxShadowStrength = 0;
 const hoverBoxShadowStrength = 11;

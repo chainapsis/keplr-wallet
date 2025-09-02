@@ -8,6 +8,8 @@ import styled, { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
 import { Subtitle3 } from "../../../../components/typography";
 import { PasswordTextInput } from "../../../../components/input";
+import lottie from "lottie-web";
+import AnimScan from "../../../../public/assets/lottie/wallet/scan.json";
 import { YAxis } from "../../../../components/axis";
 import { useConfirm } from "../../../../hooks/confirm";
 import {
@@ -103,8 +105,25 @@ export const SettingGeneralLinkKeplrMobilePage: FunctionComponent = observer(
 const EnterPasswordView: FunctionComponent<{
   onSubmit: (password: string) => Promise<void>;
 }> = observer(({ onSubmit }) => {
+  const animDivRef = useRef<HTMLDivElement | null>(null);
   const intl = useIntl();
   const theme = useTheme();
+
+  useEffect(() => {
+    if (animDivRef.current) {
+      const anim = lottie.loadAnimation({
+        container: animDivRef.current,
+        renderer: "svg",
+        loop: true,
+        autoplay: true,
+        animationData: AnimScan,
+      });
+
+      return () => {
+        anim.destroy();
+      };
+    }
+  }, []);
 
   const [password, setPassword] = useState("");
 
@@ -155,48 +174,16 @@ const EnterPasswordView: FunctionComponent<{
         />
 
         <YAxis alignX="center">
-          <Gutter size="3.75rem" direction="vertical" />
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="66"
-            height="66"
-            fill="none"
-            stroke="none"
-            viewBox="0 0 66 66"
-          >
-            <g clipPath="url(#clip0_20035_158658)">
-              <path
-                fill={
-                  theme.mode === "light"
-                    ? ColorPalette["gray-200"]
-                    : ColorPalette["gray-300"]
-                }
-                d="M12.503 52.764v-4.251l2.125-2.126H8.251q-1.754 0-3.001-1.248Q4.002 43.892 4 42.136V10.25Q4 8.497 5.25 7.25 6.5 6.002 8.25 6H52.89q1.754 0 3.003 1.25 1.251 1.25 1.248 3.001v31.885q0 1.753-1.248 3.003t-3.003 1.248h-6.377l2.125 2.126v4.251zM8.25 42.136H52.89V10.25H8.25z"
-              />
-              <path
-                fill={
-                  theme.mode === "light"
-                    ? ColorPalette["white"]
-                    : ColorPalette["gray-700"]
-                }
-                d="M33.759 14.503h34.01v44.639h-34.01z"
-              />
-              <path
-                fill={
-                  theme.mode === "light"
-                    ? ColorPalette["gray-200"]
-                    : ColorPalette["gray-300"]
-                }
-                d="M42.261 23.005v29.76h17.005v-29.76zm12.754 23.382a2.126 2.126 0 0 1 0 4.252h-8.502a2.126 2.126 0 0 1 0-4.252zm8.503 6.377a4.25 4.25 0 0 1-4.251 4.251H42.26a4.25 4.25 0 0 1-4.25-4.25v-29.76a4.25 4.25 0 0 1 4.25-4.251h17.005a4.25 4.25 0 0 1 4.252 4.251z"
-              />
-            </g>
-            <defs>
-              <clipPath id="clip0_20035_158658">
-                <path fill="#fff" d="M0 0h66v66H0z" />
-              </clipPath>
-            </defs>
-          </svg>
-          <Gutter size="2.5rem" direction="vertical" />
+          <div
+            ref={animDivRef}
+            style={{
+              backgroundColor:
+                theme.mode === "light" ? "none" : ColorPalette["gray-600"],
+              borderRadius: "2.5rem",
+              width: "9.375rem",
+              height: "9.375rem",
+            }}
+          />
         </YAxis>
 
         <Styles.Paragraph>

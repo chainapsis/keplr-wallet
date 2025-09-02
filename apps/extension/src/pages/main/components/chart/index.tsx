@@ -150,14 +150,8 @@ export const DualChart: FunctionComponent<{
       >
         <defs>
           <linearGradient id="linear" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop
-              offset="0%"
-              stopColor={theme.mode === "light" ? "#14AFEB" : "#0074A2"}
-            />
-            <stop
-              offset="100%"
-              stopColor={theme.mode === "light" ? "#ADE8FF" : "#A1D3E7"}
-            />
+            <stop offset="0%" stopColor="#00C2FF" />
+            <stop offset="100%" stopColor="#DB00FF" />
           </linearGradient>
         </defs>
 

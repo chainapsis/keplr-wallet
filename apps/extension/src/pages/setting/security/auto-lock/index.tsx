@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { HeaderLayout } from "../../../../layouts/header";
 import { BackButton } from "../../../../layouts/header/components";
@@ -21,6 +21,9 @@ import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
 import { YAxis } from "../../../../components/axis";
+import lottie from "lottie-web";
+import AnimShield from "../../../../public/assets/lottie/wallet/shield.json";
+import AnimShieldLight from "../../../../public/assets/lottie/wallet/shield-light.json";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useEffectOnce } from "../../../../hooks/use-effect-once";
 import { useTheme } from "styled-components";
@@ -63,8 +66,24 @@ export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
       });
   }, [setValue]);
 
+  const animDivRef = useRef<HTMLDivElement | null>(null);
+
   useEffectOnce(() => {
     setFocus("timer");
+
+    if (animDivRef.current) {
+      const anim = lottie.loadAnimation({
+        container: animDivRef.current,
+        renderer: "svg",
+        loop: true,
+        autoplay: true,
+        animationData: theme.mode === "light" ? AnimShieldLight : AnimShield,
+      });
+
+      return () => {
+        anim.destroy();
+      };
+    }
   });
 
   return (
@@ -135,25 +154,16 @@ export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
         </Body2>
 
         <YAxis alignX="center">
-          <Gutter size="2.5rem" direction="vertical" />
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="66"
-            height="66"
-            fill="none"
-            stroke="none"
-            viewBox="0 0 66 66"
-          >
-            <path
-              fill={
-                theme.mode === "light"
-                  ? ColorPalette["gray-200"]
-                  : ColorPalette["gray-300"]
-              }
-              d="M16.5 60.5q-2.268 0-3.883-1.614Q11.003 57.272 11 55V27.5q0-2.268 1.617-3.883Q14.234 22.003 16.5 22h2.75v-5.5q0-5.706 4.023-9.727Q27.296 2.753 33 2.75q5.703-.002 9.73 4.023 4.026 4.026 4.02 9.727V22h2.75q2.27 0 3.886 1.617T55 27.5V55q0 2.27-1.614 3.886T49.5 60.5zM33 46.75q2.27 0 3.886-1.614T38.5 41.25q-.003-2.271-1.614-3.883Q35.274 35.756 33 35.75t-3.883 1.617T27.5 41.25t1.617 3.886Q30.743 46.76 33 46.75M24.75 22h16.5v-5.5q0-3.438-2.406-5.844T33 8.25t-5.844 2.406T24.75 16.5z"
-            />
-          </svg>
-          <Gutter size="2rem" direction="vertical" />
+          <div
+            ref={animDivRef}
+            style={{
+              backgroundColor:
+                theme.mode === "light" ? "none" : ColorPalette["gray-600"],
+              borderRadius: "2.5rem",
+              width: "8.5rem",
+              height: "8.5rem",
+            }}
+          />
         </YAxis>
 
         <Gutter size="3.125rem" />
