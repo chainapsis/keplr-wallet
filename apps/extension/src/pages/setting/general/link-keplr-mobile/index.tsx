@@ -8,6 +8,8 @@ import styled, { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
 import { Subtitle3 } from "../../../../components/typography";
 import { PasswordTextInput } from "../../../../components/input";
+import lottie from "lottie-web";
+import AnimScan from "../../../../public/assets/lottie/wallet/scan.json";
 import { YAxis } from "../../../../components/axis";
 import { useConfirm } from "../../../../hooks/confirm";
 import {
@@ -103,8 +105,25 @@ export const SettingGeneralLinkKeplrMobilePage: FunctionComponent = observer(
 const EnterPasswordView: FunctionComponent<{
   onSubmit: (password: string) => Promise<void>;
 }> = observer(({ onSubmit }) => {
+  const animDivRef = useRef<HTMLDivElement | null>(null);
   const intl = useIntl();
   const theme = useTheme();
+
+  useEffect(() => {
+    if (animDivRef.current) {
+      const anim = lottie.loadAnimation({
+        container: animDivRef.current,
+        renderer: "svg",
+        loop: true,
+        autoplay: true,
+        animationData: AnimScan,
+      });
+
+      return () => {
+        anim.destroy();
+      };
+    }
+  }, []);
 
   const [password, setPassword] = useState("");
 
@@ -155,22 +174,16 @@ const EnterPasswordView: FunctionComponent<{
         />
 
         <YAxis alignX="center">
-          <Gutter size="3.75rem" direction="vertical" />
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="66"
-            height="66"
-            fill="none"
-            viewBox="0 0 66 66"
-          >
-            <path
-              fill={
-                theme.mode === "light" ? ColorPalette["gray-200"] : "#797979"
-              }
-              d="M16.5 60.5q-2.268 0-3.883-1.614Q11.003 57.272 11 55V27.5q0-2.268 1.617-3.883Q14.234 22.003 16.5 22h2.75v-5.5q0-5.706 4.023-9.727Q27.296 2.753 33 2.75q5.703-.002 9.73 4.023 4.026 4.026 4.02 9.727V22h2.75q2.27 0 3.886 1.617T55 27.5V55q0 2.27-1.614 3.886T49.5 60.5zM33 46.75q2.27 0 3.886-1.614T38.5 41.25q-.003-2.271-1.614-3.883Q35.274 35.756 33 35.75t-3.883 1.617T27.5 41.25t1.617 3.886Q30.743 46.76 33 46.75M24.75 22h16.5v-5.5q0-3.438-2.406-5.844T33 8.25t-5.844 2.406T24.75 16.5z"
-            />
-          </svg>
-          <Gutter size="2.5rem" direction="vertical" />
+          <div
+            ref={animDivRef}
+            style={{
+              backgroundColor:
+                theme.mode === "light" ? "none" : ColorPalette["gray-600"],
+              borderRadius: "2.5rem",
+              width: "9.375rem",
+              height: "9.375rem",
+            }}
+          />
         </YAxis>
 
         <Styles.Paragraph>
