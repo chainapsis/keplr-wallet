@@ -16,6 +16,7 @@ import { InteractionStore } from "./interaction";
 import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
 import { KeyRingStore } from "./keyring";
+import { computedFn } from "mobx-utils";
 
 export class TokensStore {
   @observable
@@ -237,6 +238,21 @@ export class TokensStore {
     } else {
       throw new Error(`Unsupported chain: ${chainId}`);
     }
+  }
+
+  protected getTokensMap = computedFn(
+    (chainId: string): Map<string, TokenInfo> => {
+      const tokens = this.getTokens(chainId);
+      const res = new Map<string, TokenInfo>();
+      for (const token of tokens) {
+        res.set(token.currency.coinMinimalDenom.toLowerCase(), token);
+      }
+      return res;
+    }
+  );
+
+  tokenIsRegistered(chainId: string, coinMinimalDenom: string): boolean {
+    return this.getTokensMap(chainId).has(coinMinimalDenom.toLowerCase());
   }
 
   async addToken(chainId: string, currency: AppCurrency): Promise<void> {

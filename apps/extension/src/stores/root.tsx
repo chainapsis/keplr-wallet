@@ -590,6 +590,15 @@ export class RootStore {
       ICNSInfo
     );
 
+    this.tokensStore = new TokensStore(
+      window,
+      new InExtensionMessageRequester(),
+      this.chainStore,
+      this.accountStore,
+      this.keyRingStore,
+      this.interactionStore
+    );
+
     this.hugeQueriesStore = new HugeQueriesStore(
       this.chainStore,
       this.queriesStore,
@@ -599,16 +608,8 @@ export class RootStore {
       this.priceStore,
       this.uiConfigStore,
       this.keyRingStore,
-      this.skipQueriesStore
-    );
-
-    this.tokensStore = new TokensStore(
-      window,
-      new InExtensionMessageRequester(),
-      this.chainStore,
-      this.accountStore,
-      this.keyRingStore,
-      this.interactionStore
+      this.skipQueriesStore,
+      this.tokensStore
     );
 
     this.tokenFactoryRegistrar = new TokenFactoryCurrencyRegistrar(

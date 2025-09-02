@@ -21,7 +21,7 @@ import {
 } from "@keplr-wallet/types";
 import { BitcoinQueriesStore } from "@keplr-wallet/stores-bitcoin";
 import { UIConfigStore } from "../ui-config";
-import { KeyRingStore } from "@keplr-wallet/stores-core";
+import { KeyRingStore, TokensStore } from "@keplr-wallet/stores-core";
 import { AllTokenMapByChainIdentifierState } from "./all-token-map-state";
 import { Asset, SkipQueries } from "@keplr-wallet/stores-internal";
 import { getBabylonUnbondingRemainingTime } from "../../utils/get-babylon-unbonding-remaining-time";
@@ -71,7 +71,8 @@ export class HugeQueriesStore {
     protected readonly priceStore: CoinGeckoPriceStore,
     protected readonly uiConfigStore: UIConfigStore,
     protected readonly keyRingStore: KeyRingStore,
-    protected readonly skipQueriesStore: SkipQueries
+    protected readonly skipQueriesStore: SkipQueries,
+    protected readonly tokensStore: TokensStore
   ) {
     let balanceDisposal: (() => void) | undefined;
     this.balanceBinarySort = new BinarySortArray<ViewToken>(
@@ -236,7 +237,11 @@ export class HugeQueriesStore {
                   // If the balance is zero and currency is "native" or "erc20", don't show it.
                   if (
                     denomHelper.type === "native" ||
-                    denomHelper.type === "erc20"
+                    (denomHelper.type === "erc20" &&
+                      !this.tokensStore.tokenIsRegistered(
+                        chainInfo.chainId,
+                        denomHelper.denom
+                      ))
                   ) {
                     // However, if currency is native currency and not ibc, and same with currencies[0],
                     // just show it as 0 balance.
@@ -304,7 +309,11 @@ export class HugeQueriesStore {
                 `erc20:${modularChainInfo.starknet.ethContractAddress}`;
             if (
               !isNative &&
-              queryBalance.balance.toDec().equals(HugeQueriesStore.zeroDec)
+              queryBalance.balance.toDec().equals(HugeQueriesStore.zeroDec) &&
+              !this.tokensStore.tokenIsRegistered(
+                modularChainInfo.chainId,
+                currency.coinMinimalDenom
+              )
             ) {
               continue;
             }
