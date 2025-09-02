@@ -236,6 +236,13 @@ export const StoreProvider: FunctionComponent<PropsWithChildren> = ({
         current_keyring_type: currentKeyRingType,
         ...numPerTypes,
       });
+
+      stores.analyticsAmplitudeStore.setUserProperties({
+        account_count: stores.keyRingStore.keyInfos.length,
+        is_developer_mode: stores.uiConfigStore.isDeveloper,
+        current_keyring_type: currentKeyRingType,
+        ...numPerTypes,
+      });
     });
 
     return () => {
