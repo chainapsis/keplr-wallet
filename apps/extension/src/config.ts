@@ -3775,6 +3775,57 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     ],
     features: [],
   },
+  {
+    chainId: "union-1",
+    chainName: "Union",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/union/chain.png",
+    rpc: "https://rpc-union.keplr.app",
+    rest: "https://lcd-union.keplr.app",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "union",
+      bech32PrefixAccPub: "unionpub",
+      bech32PrefixValAddr: "unionvaloper",
+      bech32PrefixValPub: "unionvaloperpub",
+      bech32PrefixConsAddr: "unionvalcons",
+      bech32PrefixConsPub: "unionvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "U",
+        coinMinimalDenom: "au",
+        coinDecimals: 18,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/union/chain.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "U",
+        coinMinimalDenom: "au",
+        coinDecimals: 18,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/union/chain.png",
+        gasPriceStep: {
+          low: 100000000,
+          average: 100000000,
+          high: 200000000,
+        },
+      },
+    ],
+    stakeCurrency: {
+      coinDenom: "U",
+      coinMinimalDenom: "au",
+      coinDecimals: 18,
+      coinImageUrl:
+        "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/union/chain.png",
+    },
+    features: ["cosmwasm"],
+    walletUrlForStaking: "https://wallet.keplr.app/chains/union",
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
