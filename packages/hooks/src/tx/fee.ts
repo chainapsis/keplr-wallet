@@ -680,7 +680,6 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
           if (queryCosmos) {
             const baseFee = queryCosmos.queryEvmFeeMarketBaseFee.baseFee;
             if (baseFee && baseFee.amount) {
-              console.log(`Fetched base fee: ${baseFee.amount}`);
               const multiplication = this.getMultiplication();
               switch (feeType) {
                 case "low":
