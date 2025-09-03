@@ -11,7 +11,12 @@ export class ObservableQueryEvmFeeMarketBaseFee extends ObservableChainQuery<Bas
     chainId: string,
     chainGetter: ChainGetter
   ) {
-    super(sharedContext, chainId, chainGetter, "/feemarket/v1/base_fee");
+    super(
+      sharedContext,
+      chainId,
+      chainGetter,
+      "/cosmos/evm/feemarket/v1/base_fee"
+    );
 
     makeObservable(this);
   }
