@@ -452,7 +452,7 @@ export const GroupedTokenItem: FunctionComponent<{
       if (isOpen && bottomTagType) {
         setTimeout(() => {
           setDelayedIsOpen(isOpen);
-        }, 300);
+        }, 50);
       } else {
         setDelayedIsOpen(isOpen);
       }
