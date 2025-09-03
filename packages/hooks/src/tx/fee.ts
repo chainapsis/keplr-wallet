@@ -476,11 +476,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
       const queryInitiaDynamicFee = queries.keplrETC.queryInitiaDynamicFee;
 
-      if (!queryInitiaDynamicFee.baseGasPrice) {
-        return false;
-      }
-
-      return true;
+      return queryInitiaDynamicFee.baseGasPrice !== undefined;
     }
 
     return false;
