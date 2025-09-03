@@ -23,6 +23,7 @@ export const SupportedChainFeatures = [
   "authz-msg-revoke-fixed",
   "osmosis-base-fee-beta",
   "feemarket",
+  "evm-feemarket",
   "op-stack-l1-data-fee",
   "force-enable-evm-ledger",
   "ibc-v2",
@@ -137,6 +138,18 @@ export const RecognizableChainFeaturesMethod: {
       }>(rest, "/feemarket/v1/params");
 
       return result.data.params.enabled;
+    },
+  },
+  {
+    feature: "evm-feemarket",
+    fetch: async (_features, _rpc, rest) => {
+      const result = await simpleFetch<{
+        params: {
+          no_base_fee: boolean;
+        };
+      }>(rest, "/cosmos/evm/feemarket/v1/params");
+
+      return !result.data.params.no_base_fee;
     },
   },
   {
