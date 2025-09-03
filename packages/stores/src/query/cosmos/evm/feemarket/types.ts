@@ -1,5 +1,3 @@
 export interface BaseFee {
-  base_fee: {
-    amount: string;
-  };
+  base_fee: string;
 }

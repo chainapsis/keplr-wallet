@@ -31,7 +31,7 @@ export class ObservableQueryEvmFeeMarketBaseFee extends ObservableChainQuery<Bas
     }
 
     return {
-      amount: new Dec(this.response.data.base_fee.amount),
+      amount: new Dec(this.response.data.base_fee),
     };
   }
 }
