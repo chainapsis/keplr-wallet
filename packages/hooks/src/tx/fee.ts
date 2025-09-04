@@ -48,6 +48,9 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   @observable
   protected _l1DataFee: Dec | undefined = undefined;
 
+  @observable
+  protected forceUseAtoneTokenAsFee: boolean = false;
+
   constructor(
     chainGetter: ChainGetter,
     protected readonly queriesStore: QueriesStore,
@@ -56,13 +59,14 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     protected readonly amountConfig: IBaseAmountConfig,
     protected readonly gasConfig: IGasConfig,
     additionAmountToNeedFee: boolean = true,
-    computeTerraClassicTax: boolean = false
+    computeTerraClassicTax: boolean = false,
+    forceUseAtoneTokenAsFee: boolean = false
   ) {
     super(chainGetter, initialChainId);
 
     this.additionAmountToNeedFee = additionAmountToNeedFee;
     this.computeTerraClassicTax = computeTerraClassicTax;
-
+    this.forceUseAtoneTokenAsFee = forceUseAtoneTokenAsFee;
     makeObservable(this);
   }
 
@@ -182,6 +186,20 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       ("evm" in this.chainInfo && this.chainInfo.evm)
     ) {
       return this.chainInfo.feeCurrencies.slice(0, 1);
+    }
+
+    if (this.chainInfo.chainId === "atomone-1") {
+      //현재 atomone에서는 MsgMintPhoton를 제외하면 ATONE을 fee로 사용해서 안됨 해서 하드코딩으로 옵션을 적용
+      const feeCurrenciesWithoutAtone = this.chainInfo.feeCurrencies.filter(
+        (cur) => cur.coinMinimalDenom !== "uatone"
+      );
+
+      if (
+        feeCurrenciesWithoutAtone.length > 0 &&
+        !this.forceUseAtoneTokenAsFee
+      ) {
+        return feeCurrenciesWithoutAtone;
+      }
     }
 
     if (this.canOsmosisTxFeesAndReady()) {
@@ -1269,6 +1287,7 @@ export const useFeeConfig = (
   opts: {
     additionAmountToNeedFee?: boolean;
     computeTerraClassicTax?: boolean;
+    forceUseAtoneTokenAsFee?: boolean;
   } = {}
 ) => {
   const [config] = useState(
@@ -1281,7 +1300,8 @@ export const useFeeConfig = (
         amountConfig,
         gasConfig,
         opts.additionAmountToNeedFee ?? true,
-        opts.computeTerraClassicTax ?? false
+        opts.computeTerraClassicTax ?? false,
+        opts.forceUseAtoneTokenAsFee ?? false
       )
   );
   config.setChain(chainId);

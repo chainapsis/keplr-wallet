@@ -96,7 +96,17 @@ export const CosmosTxView: FunctionComponent<{
     chainId,
     senderConfig,
     amountConfig,
-    gasConfig
+    gasConfig,
+    {
+      forceUseAtoneTokenAsFee:
+        interactionData.data.mode === "amino"
+          ? interactionData.data.signDocWrapper.aminoSignDoc.msgs.some((msg) =>
+              msg.type.includes("MsgMintPhoton")
+            )
+          : interactionData.data.signDocWrapper.protoSignDoc.txMsgs.some(
+              (msg) => msg.typeUrl.includes("MsgMintPhoton")
+            ),
+    }
   );
   const memoConfig = useMemoConfig(chainStore, chainId);
 
