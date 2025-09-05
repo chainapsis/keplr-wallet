@@ -189,7 +189,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     }
 
     if (this.chainInfo.chainId === "atomone-1") {
-      //현재 atomone에서는 MsgMintPhoton를 제외하면 ATONE을 fee로 사용해서 안됨 해서 하드코딩으로 옵션을 적용
+      //현재 atomone에서는 MsgMintPhoton를 제외하면 ATONE을 fee로 사용해서 안됨, 그래서 하드코딩으로 옵션을 적용
       const feeCurrenciesWithoutAtone = this.chainInfo.feeCurrencies.filter(
         (cur) => cur.coinMinimalDenom !== "uatone"
       );
