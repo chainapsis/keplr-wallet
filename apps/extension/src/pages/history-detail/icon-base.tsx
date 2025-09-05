@@ -73,6 +73,7 @@ export const IconBase: FunctionComponent<{
           }
           style={{
             fontWeight: 600,
+            textAlign: "center",
           }}
         >
           {noDecorateType ? type : decorateMsgType(type)}
