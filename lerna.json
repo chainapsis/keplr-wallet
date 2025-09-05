@@ -1,5 +1,5 @@
 {
-  "version": "0.12.270-rc.0",
+  "version": "0.12.270",
   "useWorkspaces": true,
   "npmClient": "yarn",
   "command": {
