@@ -176,6 +176,7 @@ export const UnlockPage: FunctionComponent = observer(() => {
         backgroundSize: "100% auto",
         backgroundPosition: "top center",
         backgroundRepeat: "no-repeat",
+        maxWidth: "540px",
       }}
     >
       <form
