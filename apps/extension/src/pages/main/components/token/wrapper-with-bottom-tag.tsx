@@ -59,7 +59,7 @@ export const WrapperwithBottomTag = observer(function ({
           justifyContent: "center",
           gap: "0.5rem",
           transition:
-            "opacity 0.3s ease, transform 0.3s ease, max-height 0.3s ease, padding 0.3s ease",
+            "opacity 0.05s ease, transform 0.3s ease, max-height 0.3s ease, padding 0.3s ease",
           opacity: isVisible ? 1 : 0,
           transform: isVisible ? "translateY(0)" : "translateY(-10px)",
           pointerEvents: isVisible ? "auto" : "none",
