@@ -7,7 +7,7 @@ import { Button } from "../../components/button";
 import { Gutter } from "../../components/gutter";
 import { Box } from "../../components/box";
 import { TextButton } from "../../components/button-text";
-import { ColorPalette } from "../../styles";
+import { ColorPalette, SidePanelMaxWidth } from "../../styles";
 import { H1, Subtitle4 } from "../../components/typography";
 import { Tooltip } from "../../components/tooltip";
 import { GuideBox } from "../../components/guide-box";
@@ -176,7 +176,7 @@ export const UnlockPage: FunctionComponent = observer(() => {
         backgroundSize: "100% auto",
         backgroundPosition: "top center",
         backgroundRepeat: "no-repeat",
-        maxWidth: "540px",
+        maxWidth: SidePanelMaxWidth,
       }}
     >
       <form
