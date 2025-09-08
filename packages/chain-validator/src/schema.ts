@@ -214,6 +214,7 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
     website: Joi.string().uri(),
   }),
   chainId: ChainIdSchema.required(),
+  shadowChainIdOf: Joi.string(),
   chainName: Joi.string().required().min(1).max(36),
   stakeCurrency: CurrencySchema,
   walletUrl: Joi.string().uri(),

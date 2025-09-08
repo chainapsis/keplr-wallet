@@ -13,6 +13,7 @@ export interface ChainInfo {
     readonly website?: string;
   };
   readonly chainId: string;
+  readonly shadowChainIdOf?: string;
   readonly chainName: string;
   /**
    * This indicates the type of coin that can be used for stake.
