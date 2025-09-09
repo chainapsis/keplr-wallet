@@ -81,6 +81,11 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   @action
+  setForceUseAtoneTokenAsFee(forceUseAtoneTokenAsFee: boolean) {
+    this.forceUseAtoneTokenAsFee = forceUseAtoneTokenAsFee;
+  }
+
+  @action
   setDisableBalanceCheck(bool: boolean) {
     this._disableBalanceCheck = bool;
   }
@@ -1307,6 +1312,7 @@ export const useFeeConfig = (
   config.setChain(chainId);
   config.setAdditionAmountToNeedFee(opts.additionAmountToNeedFee ?? true);
   config.setComputeTerraClassicTax(opts.computeTerraClassicTax ?? false);
+  config.setForceUseAtoneTokenAsFee(opts.forceUseAtoneTokenAsFee ?? false);
 
   return config;
 };
