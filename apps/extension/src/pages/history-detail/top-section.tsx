@@ -80,6 +80,7 @@ export const HistoryDetailTopSection: FunctionComponent<{
 
   let icon: React.ReactElement | undefined;
   let iconText: string | undefined;
+  let noDecorateType: boolean = false;
   let section: React.ReactElement | undefined;
 
   switch (msg.relation) {
@@ -138,10 +139,12 @@ export const HistoryDetailTopSection: FunctionComponent<{
     }
     case "noble-deposit-usdc": {
       iconText = "USDC → USDN (Earn)";
+      noDecorateType = true;
       break;
     }
     case "noble-withdraw-usdc": {
       iconText = "USDN → USDC (Earn)";
+      noDecorateType = true;
       break;
     }
     case "initia-delegate":
@@ -235,6 +238,7 @@ export const HistoryDetailTopSection: FunctionComponent<{
           }
           return msg.relation || "Unknown";
         })()}
+        noDecorateType={noDecorateType}
         chainId={msg.chainId}
       />
       {sectionElement}
