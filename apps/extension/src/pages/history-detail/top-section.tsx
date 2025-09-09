@@ -137,11 +137,11 @@ export const HistoryDetailTopSection: FunctionComponent<{
       break;
     }
     case "noble-deposit-usdc": {
-      iconText = "Deposit";
+      iconText = "USDC → USDN (Earn)";
       break;
     }
     case "noble-withdraw-usdc": {
-      iconText = "Withdraw";
+      iconText = "USDN → USDC (Earn)";
       break;
     }
     case "initia-delegate":
