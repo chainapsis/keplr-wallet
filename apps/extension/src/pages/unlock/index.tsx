@@ -7,7 +7,7 @@ import { Button } from "../../components/button";
 import { Gutter } from "../../components/gutter";
 import { Box } from "../../components/box";
 import { TextButton } from "../../components/button-text";
-import { ColorPalette, SidePanelMaxWidth } from "../../styles";
+import { ColorPalette, PopupWidth, SidePanelMaxWidth } from "../../styles";
 import { H1, Subtitle4 } from "../../components/typography";
 import { Tooltip } from "../../components/tooltip";
 import { GuideBox } from "../../components/guide-box";
@@ -17,7 +17,10 @@ import { autorun } from "mobx";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
 import { Buffer } from "buffer/";
-import { handleExternalInteractionWithNoProceedNext } from "../../utils";
+import {
+  handleExternalInteractionWithNoProceedNext,
+  isRunningInSidePanel,
+} from "../../utils";
 export const UnlockPage: FunctionComponent = observer(() => {
   const { keyRingStore, interactionStore } = useStore();
   const intl = useIntl();
@@ -176,7 +179,9 @@ export const UnlockPage: FunctionComponent = observer(() => {
         backgroundSize: "100% auto",
         backgroundPosition: "top center",
         backgroundRepeat: "no-repeat",
-        maxWidth: SidePanelMaxWidth,
+        maxWidth: isRunningInSidePanel()
+          ? SidePanelMaxWidth
+          : `${PopupWidth}px`,
       }}
     >
       <form
