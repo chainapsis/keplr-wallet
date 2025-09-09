@@ -60,7 +60,7 @@ export const MsgRelationNobleDepositUsdc: FunctionComponent<{
         <ItemLogo center={<MessageReceiveIcon width="2rem" height="2rem" />} />
       }
       chainId={msg.chainId}
-      title="Deposit"
+      title="USDC → USDN (Earn)"
       paragraph={(() => {
         if (chainInfo) {
           if (tokenIn) {
