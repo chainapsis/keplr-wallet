@@ -63,6 +63,13 @@ export class AccountSetBase {
   @observable
   protected _txTypeInProgress: string = "";
 
+  // 현재로써는 ethermint를 처리하기 위해서만 사용됨...
+  // 이 값이 ethsecp256k1이면 ethermint이다.
+  // 나머지 케이스의 경우 아직 어떤 값으로 설정할지 불확실...
+  // ethsecp256k1 외의 케이스의 경우 아직 사용하지 말 것...
+  @observable
+  protected _keyAlgo: string = "";
+  @observable
   protected _pubKey: Uint8Array;
 
   protected hasInited = false;
@@ -195,6 +202,7 @@ export class AccountSetBase {
             this._isKeystone = key.isKeystone;
             this._name = key.name;
             this._pubKey = key.pubKey;
+            this._keyAlgo = key.algo;
           } else if ("paymentType" in key) {
             this._bech32Address = "";
             this._ethereumHexAddress = "";
@@ -209,6 +217,7 @@ export class AccountSetBase {
             this._isKeystone = false;
             this._name = key.name;
             this._pubKey = key.pubKey;
+            this._keyAlgo = "bitcoin";
           } else {
             this._bech32Address = "";
             this._ethereumHexAddress = "";
@@ -218,6 +227,7 @@ export class AccountSetBase {
             this._isKeystone = false;
             this._name = key.name;
             this._pubKey = key.pubKey;
+            this._keyAlgo = "starknet";
           }
 
           // Set the wallet status as loaded after getting all necessary infos.
@@ -233,6 +243,7 @@ export class AccountSetBase {
           this._isKeystone = false;
           this._name = "";
           this._pubKey = new Uint8Array(0);
+          this._keyAlgo = "";
 
           this._walletStatus = WalletStatus.Rejected;
           this._rejectionReason = res.reason;
@@ -261,6 +272,7 @@ export class AccountSetBase {
     this._isKeystone = false;
     this._name = "";
     this._pubKey = new Uint8Array(0);
+    this._keyAlgo = "";
     this._rejectionReason = undefined;
   }
 
@@ -324,6 +336,10 @@ export class AccountSetBase {
     return this._pubKey.slice();
   }
 
+  get keyAlgo(): string {
+    return this._keyAlgo;
+  }
+
   get isNanoLedger(): boolean {
     return this._isNanoLedger;
   }
@@ -355,6 +371,10 @@ export class AccountSetBase {
       !!chainInfo.features?.includes("eth-address-gen") ||
       !!chainInfo.features?.includes("eth-key-sign")
     );
+  }
+
+  get isEthermintKeyAlgo(): boolean {
+    return this.keyAlgo === "ethsecp256k1";
   }
 
   get ethereumHexAddress(): string {

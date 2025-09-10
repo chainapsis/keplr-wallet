@@ -348,8 +348,13 @@ export class KeyRingEthereumService {
             const pubkey = await this.keyRingService.getPubKeySelected(
               currentChainId
             );
+            if (pubkey.coinType !== 60) {
+              throw new Error(
+                "Can't use ethereum json rpc if coin type is not 60"
+              );
+            }
             const selectedAddress = `0x${Buffer.from(
-              pubkey.getEthAddress()
+              pubkey.pubKey.getEthAddress()
             ).toString("hex")}`;
 
             return {
@@ -368,8 +373,13 @@ export class KeyRingEthereumService {
             const pubkey = await this.keyRingService.getPubKeySelected(
               currentChainId
             );
+            if (pubkey.coinType !== 60) {
+              throw new Error(
+                "Can't use ethereum json rpc if coin type is not 60"
+              );
+            }
             const selectedAddress = `0x${Buffer.from(
-              pubkey.getEthAddress()
+              pubkey.pubKey.getEthAddress()
             ).toString("hex")}`;
 
             return {
@@ -402,8 +412,13 @@ export class KeyRingEthereumService {
           const pubkey = await this.keyRingService.getPubKeySelected(
             currentChainId
           );
+          if (pubkey.coinType !== 60) {
+            throw new Error(
+              "Can't use ethereum json rpc if coin type is not 60"
+            );
+          }
           const selectedAddress = `0x${Buffer.from(
-            pubkey.getEthAddress()
+            pubkey.pubKey.getEthAddress()
           ).toString("hex")}`;
 
           return [selectedAddress];
@@ -413,8 +428,13 @@ export class KeyRingEthereumService {
           const pubkey = await this.keyRingService.getPubKeySelected(
             currentChainId
           );
+          if (pubkey.coinType !== 60) {
+            throw new Error(
+              "Can't use ethereum json rpc if coin type is not 60"
+            );
+          }
           const selectedAddress = `0x${Buffer.from(
-            pubkey.getEthAddress()
+            pubkey.pubKey.getEthAddress()
           ).toString("hex")}`;
 
           return [selectedAddress];
@@ -477,8 +497,13 @@ export class KeyRingEthereumService {
           const pubkey = await this.keyRingService.getPubKeySelected(
             currentChainId
           );
+          if (pubkey.coinType !== 60) {
+            throw new Error(
+              "Can't use ethereum json rpc if coin type is not 60"
+            );
+          }
           const selectedAddress = `0x${Buffer.from(
-            pubkey.getEthAddress()
+            pubkey.pubKey.getEthAddress()
           ).toString("hex")}`;
 
           const transactionCount = await this.request(
@@ -598,8 +623,13 @@ export class KeyRingEthereumService {
           const pubkey = await this.keyRingService.getPubKeySelected(
             currentChainId
           );
+          if (pubkey.coinType !== 60) {
+            throw new Error(
+              "Can't use ethereum json rpc if coin type is not 60"
+            );
+          }
           const selectedAddress = `0x${Buffer.from(
-            pubkey.getEthAddress()
+            pubkey.pubKey.getEthAddress()
           ).toString("hex")}`;
 
           const transactionCount = await this.request(

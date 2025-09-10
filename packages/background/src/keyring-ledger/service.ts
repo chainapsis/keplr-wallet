@@ -7,6 +7,7 @@ import { KeyRingService } from "../keyring";
 import { Network as BitcoinNetwork } from "bitcoinjs-lib";
 import { PubKeyBitcoinCompatible } from "@keplr-wallet/crypto";
 import { Descriptor } from "../keyring-bitcoin";
+import { App, AppCoinType } from "@keplr-wallet/ledger-cosmos";
 
 export class KeyRingLedgerService {
   async init(): Promise<void> {
@@ -45,7 +46,10 @@ export class KeyRingLedgerService {
     _purpose: number,
     _coinType: number,
     modularChainInfo: ModularChainInfo
-  ): PubKeySecp256k1 {
+  ): {
+    pubKey: PubKeySecp256k1;
+    coinType: number;
+  } {
     if ("starknet" in modularChainInfo) {
       throw new Error(
         "'getPubKeyStarknet' should be called for Starknet chain"
@@ -56,6 +60,8 @@ export class KeyRingLedgerService {
       throw new Error("Chain is not a cosmos chain");
     }
 
+    let coinType = -1;
+
     let app = "Cosmos";
 
     const isEthermintLike = KeyRingService.isEthermintLike(
@@ -63,6 +69,7 @@ export class KeyRingLedgerService {
     );
     if (isEthermintLike) {
       app = "Ethereum";
+      coinType = 60;
       if (!vault.insensitive[app]) {
         throw new KeplrError(
           "keyring",
@@ -83,6 +90,12 @@ export class KeyRingLedgerService {
       if (vault.insensitive["THORChain"]) {
         app = "THORChain";
       }
+
+      const appCoinType = AppCoinType[app as App];
+      if (appCoinType == null) {
+        throw new Error(`CoinType is null: ${app}`);
+      }
+      coinType = appCoinType;
     }
 
     if (!vault.insensitive[app]) {
@@ -93,7 +106,10 @@ export class KeyRingLedgerService {
       (vault.insensitive[app] as any)["pubKey"] as string,
       "hex"
     );
-    return new PubKeySecp256k1(bytes);
+    return {
+      pubKey: new PubKeySecp256k1(bytes),
+      coinType,
+    };
   }
 
   getPubKeyStarknet(

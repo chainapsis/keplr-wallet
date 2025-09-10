@@ -996,7 +996,9 @@ export class KeyRingService {
       },
     });
   }
-  getPubKeySelected(chainId: string): Promise<PubKeySecp256k1> {
+  getPubKeySelected(
+    chainId: string
+  ): Promise<{ pubKey: PubKeySecp256k1; coinType: number | undefined }> {
     return this.getPubKey(chainId, this.selectedVaultId);
   }
 
@@ -1122,7 +1124,10 @@ export class KeyRingService {
     return this.sign(chainId, this.selectedVaultId, data, digestMethod);
   }
 
-  getPubKey(chainId: string, vaultId: string): Promise<PubKeySecp256k1> {
+  getPubKey(
+    chainId: string,
+    vaultId: string
+  ): Promise<{ pubKey: PubKeySecp256k1; coinType: number | undefined }> {
     if (this.vaultService.isLocked) {
       throw new Error("KeyRing is locked");
     }
@@ -1245,7 +1250,7 @@ export class KeyRingService {
     vaultId: string,
     purpose: number,
     coinType: number
-  ): Promise<PubKeySecp256k1> {
+  ): Promise<{ pubKey: PubKeySecp256k1; coinType: number | undefined }> {
     if (this.vaultService.isLocked) {
       throw new Error("KeyRing is locked");
     }
@@ -1490,7 +1495,7 @@ export class KeyRingService {
     purpose: number,
     coinType: number,
     modularChainInfo: ModularChainInfo
-  ): Promise<PubKeySecp256k1> {
+  ): Promise<{ pubKey: PubKeySecp256k1; coinType: number | undefined }> {
     if (this.vaultService.isLocked) {
       throw new Error("KeyRing is locked");
     }
@@ -1520,7 +1525,7 @@ export class KeyRingService {
         (async () =>
           (
             await keyRing.getPubKey(vault, purpose, coinType, modularChainInfo)
-          ).toBitcoinPubKey(network))()
+          ).pubKey.toBitcoinPubKey(network))()
       );
     }
 

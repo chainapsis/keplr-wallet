@@ -65,14 +65,21 @@ export class KeyRingMnemonicService {
     });
   }
 
-  getPubKey(vault: Vault, purpose: number, coinType: number): PubKeySecp256k1 {
+  getPubKey(
+    vault: Vault,
+    purpose: number,
+    coinType: number
+  ): { pubKey: PubKeySecp256k1; coinType: number } {
     const bip44Path = this.getBIP44PathFromVault(vault);
 
     const tag = `pubKey-m/${purpose}'/${coinType}'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`;
 
     if (vault.insensitive[tag]) {
       const pubKey = Buffer.from(vault.insensitive[tag] as string, "hex");
-      return new PubKeySecp256k1(pubKey);
+      return {
+        coinType,
+        pubKey: new PubKeySecp256k1(pubKey),
+      };
     }
 
     const privKey = this.getPrivKey(vault, purpose, coinType);
@@ -84,7 +91,10 @@ export class KeyRingMnemonicService {
       [tag]: pubKeyText,
     });
 
-    return pubKey;
+    return {
+      coinType,
+      pubKey,
+    };
   }
 
   getPubKeyBitcoin(

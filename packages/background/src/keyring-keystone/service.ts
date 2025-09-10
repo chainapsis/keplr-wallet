@@ -38,7 +38,14 @@ export class KeyRingKeystoneService {
     });
   }
 
-  getPubKey(vault: Vault, purpose: number, coinType: number): PubKeySecp256k1 {
+  getPubKey(
+    vault: Vault,
+    purpose: number,
+    coinType: number
+  ): {
+    pubKey: PubKeySecp256k1;
+    coinType: number;
+  } {
     let bytes;
     if (vault.insensitive["keys"]) {
       const path = Object.keys(vault.insensitive["keys"]).find((path) => {
@@ -59,7 +66,10 @@ export class KeyRingKeystoneService {
     } else {
       throw new Error(`Keystone is not initialized.`);
     }
-    return new PubKeySecp256k1(bytes);
+    return {
+      pubKey: new PubKeySecp256k1(bytes),
+      coinType,
+    };
   }
 
   sign(): {

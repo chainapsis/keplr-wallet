@@ -325,8 +325,11 @@ export class TokenScanService {
       if (this.chainsService.isEvmOnlyChain(chainId)) {
         const evmInfo = this.chainsService.getEVMInfoOrThrow(chainId);
         const pubkey = await this.keyRingService.getPubKey(chainId, vaultId);
+        if (pubkey.coinType !== 60) {
+          return;
+        }
         const ethereumHexAddress = `0x${Buffer.from(
-          pubkey.getEthAddress()
+          pubkey.pubKey.getEthAddress()
         ).toString("hex")}`;
 
         const res = await simpleFetch<{

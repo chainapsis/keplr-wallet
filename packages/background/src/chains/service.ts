@@ -1063,6 +1063,7 @@ export class ChainsService {
         };
       }
 
+      // TODO
       // Reduce the confusion from different coin type on ecosystem.
       // Unite coin type for all chain to 118 with allowing alternatives.
       // (If coin type is 60, it is probably to be compatible with metamask. So, in this case, do nothing.)
@@ -1088,6 +1089,22 @@ export class ChainsService {
 
       newChainInfo = {
         ...newChainInfo,
+        ...(() => {
+          if (newChainInfo.chainId === "mantra-1") {
+            return {
+              bip44: {
+                coinType: 60,
+              },
+              alternativeBIP44s: [
+                {
+                  coinType: 118,
+                },
+              ],
+            };
+          }
+
+          return {};
+        })(),
         currencies: newChainInfo.currencies.map((currency) => {
           // Normalize coinMinimalDenom for all currencies.
           const coinMinimalDenom = DenomHelper.normalizeDenom(

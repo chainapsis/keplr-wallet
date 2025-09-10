@@ -44,13 +44,16 @@ export class KeyRingPrivateKeyService {
     });
   }
 
-  getPubKey(vault: Vault): PubKeySecp256k1 {
+  getPubKey(vault: Vault): { pubKey: PubKeySecp256k1; coinType: undefined } {
     const publicKeyBytes = Buffer.from(
       vault.insensitive["publicKey"] as string,
       "hex"
     );
 
-    return new PubKeySecp256k1(publicKeyBytes);
+    return {
+      pubKey: new PubKeySecp256k1(publicKeyBytes),
+      coinType: undefined,
+    };
   }
 
   sign(

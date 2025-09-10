@@ -425,10 +425,7 @@ export class CosmosAccountImpl {
       true
     );
 
-    const useEthereumSign =
-      this.chainGetter
-        .getChain(this.chainId)
-        .features?.includes("eth-key-sign") === true;
+    const useEthereumSign = this.base.isEthermintKeyAlgo;
 
     const eip712Signing = useEthereumSign && this.base.isNanoLedger;
 
@@ -663,10 +660,7 @@ export class CosmosAccountImpl {
     tx: Uint8Array;
     signDoc: SignDoc;
   }> {
-    const useEthereumSign =
-      this.chainGetter
-        .getChain(this.chainId)
-        .features?.includes("eth-key-sign") === true;
+    const useEthereumSign = this.base.isEthermintKeyAlgo;
 
     const chainIsInjective = this.chainId.startsWith("injective");
     const chainIsStratos = this.chainId.startsWith("stratos");
@@ -1247,10 +1241,7 @@ export class CosmosAccountImpl {
           );
         }
 
-        const useEthereumSign =
-          this.chainGetter
-            .getChain(this.chainId)
-            .features?.includes("eth-key-sign") === true;
+        const useEthereumSign = this.base.isEthermintKeyAlgo;
 
         const eip712Signing = useEthereumSign && this.base.isNanoLedger;
         const chainIsInjective = this.chainId.startsWith("injective");

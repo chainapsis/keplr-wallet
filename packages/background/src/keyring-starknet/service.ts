@@ -197,7 +197,8 @@ export class KeyRingStarknetService {
         );
 
         return {
-          pubKey: await this.keyRingService.getPubKey(chainId, vaultId),
+          pubKey: (await this.keyRingService.getPubKey(chainId, vaultId))
+            .pubKey,
           salt: Hash.sha256(Buffer.concat([sig.r, sig.s])).slice(0, 24),
           classHash: Buffer.from(EthAccountUpgradeableClassHash, "hex"),
         };

@@ -41,7 +41,9 @@ export interface KeyRing {
     purpose: number,
     coinType: number,
     modularChainInfo: ModularChainInfo
-  ): PubKeySecp256k1 | Promise<PubKeySecp256k1>;
+  ):
+    | { pubKey: PubKeySecp256k1; coinType: number | undefined }
+    | Promise<{ pubKey: PubKeySecp256k1; coinType: number | undefined }>;
   // This method should only be implemented for Ledger keyring.
   getPubKeyStarknet?(
     vault: Vault,

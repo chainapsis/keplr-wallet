@@ -155,8 +155,9 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
   })();
 
   const isSecretWasm = chainInfo?.hasFeature("secretwasm");
-  const isEvmChain =
-    chainInfo != null && "evm" in chainInfo && chainInfo.evm != null;
+  const isERC20 =
+    chainStore.isEvmSupport(chainId) &&
+    accountStore.getAccount(chainId).isEthermintKeyAlgo;
   const isStarknet =
     modularChainInfo != null &&
     "starknet" in modularChainInfo &&
@@ -182,7 +183,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
 
   const contractAddress = watch("contractAddress").trim();
   const queryContract = (() => {
-    if (isEvmChain) {
+    if (isERC20) {
       return queriesStore
         .get(chainId)
         .ethereum.queryEthereumERC20ContractInfo.getQueryContract(
@@ -261,11 +262,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
 
           const tokenContract = data.tokenContractFromAddressBook;
 
-          if (
-            !("name" in queryContract.tokenInfo) ||
-            isEvmChain ||
-            isStarknet
-          ) {
+          if (!("name" in queryContract.tokenInfo) || isERC20 || isStarknet) {
             currency = {
               type: "erc20",
               contractAddress: contractAddress,
@@ -405,7 +402,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
             required: true,
             validate: (value): string | undefined => {
               try {
-                if (!isEvmChain && !isStarknet) {
+                if (!isERC20 && !isStarknet) {
                   Bech32Address.validate(
                     value,
                     chainInfo?.bech32Config?.bech32PrefixAccAddr

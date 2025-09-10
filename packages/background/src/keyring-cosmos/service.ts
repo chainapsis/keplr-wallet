@@ -108,29 +108,25 @@ export class KeyRingCosmosService {
 
     const pubKey = await this.keyRingService.getPubKey(chainId, vaultId);
 
-    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
-    const evmInfo = ChainsService.getEVMInfo(chainInfo);
-    const forceEVMLedger = chainInfo.features?.includes(
-      "force-enable-evm-ledger"
-    );
-
     const keyInfo = this.keyRingService.getKeyInfo(vaultId);
     if (!keyInfo) {
       throw new Error("Null key info");
     }
 
-    if (isEthermintLike && keyInfo.type === "ledger" && !forceEVMLedger) {
+    const isEthermintLike = pubKey.coinType === 60;
+
+    if (isEthermintLike && keyInfo.type === "ledger") {
       KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
         chainId
       );
     }
 
     const address = (() => {
-      if (isEthermintLike || evmInfo !== undefined) {
-        return pubKey.getEthAddress();
+      if (isEthermintLike) {
+        return pubKey.pubKey.getEthAddress();
       }
 
-      return pubKey.getCosmosAddress();
+      return pubKey.pubKey.getCosmosAddress();
     })();
 
     const bech32Address = new Bech32Address(address);
@@ -138,7 +134,7 @@ export class KeyRingCosmosService {
     return {
       name: this.keyRingService.getKeyRingName(vaultId),
       algo: isEthermintLike ? "ethsecp256k1" : "secp256k1",
-      pubKey: pubKey.toBytes(),
+      pubKey: pubKey.pubKey.toBytes(),
       address,
       bech32Address: bech32Address.toBech32(
         chainInfo.bech32Config?.bech32PrefixAccAddr ?? ""
@@ -165,15 +161,13 @@ export class KeyRingCosmosService {
       coinTypes.push(...chainInfo.alternativeBIP44s.map((alt) => alt.coinType));
     }
 
-    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
-
     const res: {
       coinType: number;
       bech32Address: string;
     }[] = [];
 
     for (const coinType of coinTypes) {
-      let pubKey: PubKeySecp256k1;
+      let pubKey: { pubKey: PubKeySecp256k1; coinType: number | undefined };
       try {
         pubKey = await this.keyRingService.getPubKeyWithNotFinalizedCoinType(
           chainId,
@@ -181,17 +175,21 @@ export class KeyRingCosmosService {
           DEFAULT_BIP44_PURPOSE,
           coinType
         );
+        // coin type이 명시되지 않는다면 coin type을 처리할 수 없는 keyring이라고 가정하고 처리하지 않는다.
+        if (pubKey.coinType == null) {
+          return [];
+        }
       } catch (e) {
         console.log(e);
         continue;
       }
 
       const address = (() => {
-        if (isEthermintLike) {
-          return pubKey.getEthAddress();
+        if (pubKey.coinType === 60) {
+          return pubKey.pubKey.getEthAddress();
         }
 
-        return pubKey.getCosmosAddress();
+        return pubKey.pubKey.getCosmosAddress();
       })();
 
       const bech32Address = new Bech32Address(address);
