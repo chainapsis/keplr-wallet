@@ -1,7 +1,12 @@
-import React, { FunctionComponent, PropsWithChildren } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { IMessageRenderer, IMessageRenderRegistry } from "./types";
 import { Msg } from "@keplr-wallet/types";
-import { AnyWithUnpacked, ProtoCodec } from "@keplr-wallet/cosmos";
+import {
+  AnyWithUnpacked,
+  ChainIdHelper,
+  defaultProtoCodec,
+  ProtoCodec,
+} from "@keplr-wallet/cosmos";
 import yaml from "js-yaml";
 import {
   AgoricProvisionMessage,
@@ -23,6 +28,8 @@ import { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
 import { ClaimBtcDelegationRewardMessage } from "./render/claim-btc-delegation-reward";
 import { AtomoneMintPhotonMessage } from "./render/atomone-mint-photon";
+import { useStore } from "../../../../stores";
+import { MsgSkeleton } from "./render/msg-skeleton";
 
 export class MessageRenderRegistry implements IMessageRenderRegistry {
   protected renderers: IMessageRenderer[] = [];
@@ -52,37 +59,86 @@ export class MessageRenderRegistry implements IMessageRenderRegistry {
       // Fallback to unknown message
     }
 
-    const prettyMsg = (() => {
-      try {
-        if ("type" in msg) {
-          return yaml.dump(msg);
-        }
-
-        if ("typeUrl" in msg) {
-          return yaml.dump(protoCodec.unpackedAnyToJSONRecursive(msg));
-        }
-
-        return yaml.dump(msg);
-      } catch (e) {
-        console.log(e);
-        return "Failed to decode the msg";
-      }
-    })();
-
     return {
       icon: <CustomIcon />,
       title: (
         <FormattedMessage id="page.sign.components.messages.custom.title" />
       ),
-      content: <UnknownMessageContent>{prettyMsg}</UnknownMessageContent>,
+      content: <UnknownMessageContent msg={msg} chainId={chainId} />,
     };
   }
 }
 
-const UnknownMessageContent: FunctionComponent<PropsWithChildren> = ({
-  children,
-}) => {
+const UnknownMessageContent: FunctionComponent<{
+  msg: Msg | AnyWithUnpacked;
+  chainId: string;
+}> = ({ msg, chainId }) => {
   const theme = useTheme();
+  const { queriesStore } = useStore();
+  const [loading, setLoading] = useState(false);
+  const [prettyMsg, setPrettyMsg] = useState<string>("");
+
+  useEffect(() => {
+    if ("type" in msg) {
+      setPrettyMsg(yaml.dump(msg));
+      return;
+    }
+
+    if (!("typeUrl" in msg)) {
+      setPrettyMsg(yaml.dump(msg));
+      return;
+    }
+
+    (async () => {
+      try {
+        setLoading(true);
+        const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
+        const keplrETCQueries = queriesStore.get(chainId).keplrETC;
+
+        const query = await keplrETCQueries.queryTxMsgDecoder
+          .protoToAmino(chainIdentifier, [
+            {
+              typeUrl: msg.typeUrl,
+              value: Buffer.from(msg.value).toString("base64"),
+            },
+          ])
+          .waitFreshResponse();
+
+        const decoded = query?.data?.result;
+
+        if (decoded?.messages?.length) {
+          setPrettyMsg(
+            yaml.dump(
+              {
+                typeUrl: msg.typeUrl,
+                value: decoded.messages[0]["value"],
+              },
+              {
+                indent: 2,
+                sortKeys: true,
+              }
+            )
+          );
+          return;
+        }
+
+        setPrettyMsg(
+          yaml.dump(defaultProtoCodec.unpackedAnyToJSONRecursive(msg))
+        );
+        return;
+      } catch (e) {
+        console.log(e);
+        setPrettyMsg("Failed to decode the msg");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [chainId, msg, queriesStore]);
+
+  if (loading && !prettyMsg) {
+    return <MsgSkeleton />;
+  }
+
   return (
     <pre
       style={{
@@ -93,7 +149,7 @@ const UnknownMessageContent: FunctionComponent<PropsWithChildren> = ({
             : ColorPalette["gray-200"],
       }}
     >
-      {children}
+      {prettyMsg}
     </pre>
   );
 };
