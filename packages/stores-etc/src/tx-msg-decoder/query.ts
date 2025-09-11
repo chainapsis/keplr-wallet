@@ -14,11 +14,11 @@ export interface TxMsgDecoderResponse {
 
 export interface TxMsgDecoderRequestBody {
   result: {
-    messages: ProtoToRawJsonRequestMsg[];
+    messages: ProtoToAminoRequestMsg[];
   };
 }
 
-interface ProtoToRawJsonRequestMsg {
+interface ProtoToAminoRequestMsg {
   typeUrl: string;
   value: string;
 }
@@ -46,13 +46,9 @@ export class ObservablePostTxMsgDecoder extends ObservablePostQueryMap<
   any,
   TxMsgDecoderRequestBody
 > {
-  protected _baseURL: string = "";
-
   constructor(sharedContext: QuerySharedContext, baseURL: string) {
     super((key: string) => {
       const { url, body, postOptions } = JSON.parse(key);
-
-      this._baseURL = baseURL;
 
       return new ObservablePostTxMsgDecoderInner(
         sharedContext,
@@ -64,12 +60,13 @@ export class ObservablePostTxMsgDecoder extends ObservablePostQueryMap<
     });
   }
 
-  protoToRawJson(chainIdentifier: string, msgs: ProtoToRawJsonRequestMsg[]) {
+  protoToAmino(chainIdentifier: string, msgs: ProtoToAminoRequestMsg[]) {
     return this.get(
       JSON.stringify({
-        baseURL: this._baseURL,
-        url: `${chainIdentifier}/tx/proto-to-raw-json`,
-        body: msgs,
+        url: `${chainIdentifier}/tx/proto-to-amino`,
+        body: {
+          messages: msgs,
+        },
         postOptions: { headers: { "Content-Type": "application/json" } },
       })
     );
