@@ -1,7 +1,12 @@
-import React, { FunctionComponent, PropsWithChildren } from "react";
+import React, { FunctionComponent } from "react";
 import { IMessageRenderer, IMessageRenderRegistry } from "./types";
 import { Msg } from "@keplr-wallet/types";
-import { AnyWithUnpacked, ProtoCodec } from "@keplr-wallet/cosmos";
+import {
+  AnyWithUnpacked,
+  ChainIdHelper,
+  defaultProtoCodec,
+  ProtoCodec,
+} from "@keplr-wallet/cosmos";
 import yaml from "js-yaml";
 import {
   AgoricProvisionMessage,
@@ -23,6 +28,8 @@ import { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
 import { ClaimBtcDelegationRewardMessage } from "./render/claim-btc-delegation-reward";
 import { AtomoneMintPhotonMessage } from "./render/atomone-mint-photon";
+import { observer } from "mobx-react-lite";
+import { useStore } from "../../../../stores";
 
 export class MessageRenderRegistry implements IMessageRenderRegistry {
   protected renderers: IMessageRenderer[] = [];
@@ -52,37 +59,66 @@ export class MessageRenderRegistry implements IMessageRenderRegistry {
       // Fallback to unknown message
     }
 
-    const prettyMsg = (() => {
-      try {
-        if ("type" in msg) {
-          return yaml.dump(msg);
-        }
-
-        if ("typeUrl" in msg) {
-          return yaml.dump(protoCodec.unpackedAnyToJSONRecursive(msg));
-        }
-
-        return yaml.dump(msg);
-      } catch (e) {
-        console.log(e);
-        return "Failed to decode the msg";
-      }
-    })();
-
     return {
       icon: <CustomIcon />,
       title: (
         <FormattedMessage id="page.sign.components.messages.custom.title" />
       ),
-      content: <UnknownMessageContent>{prettyMsg}</UnknownMessageContent>,
+      content: <UnknownMessageContent msg={msg} chainId={chainId} />,
     };
   }
 }
 
-const UnknownMessageContent: FunctionComponent<PropsWithChildren> = ({
-  children,
-}) => {
+const UnknownMessageContent: FunctionComponent<{
+  msg: Msg | AnyWithUnpacked;
+  chainId: string;
+}> = observer(({ msg, chainId }) => {
   const theme = useTheme();
+  const { queriesStore } = useStore();
+
+  const prettyMsg: string | null = (() => {
+    try {
+      if ("type" in msg) {
+        return yaml.dump(msg);
+      }
+
+      if ("typeUrl" in msg) {
+        const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
+        const keplrETCQueries = queriesStore.get(chainId).keplrETC;
+
+        const decoded = keplrETCQueries.queryTxMsgDecoder.protoToAmino(
+          chainIdentifier,
+          [
+            {
+              typeUrl: msg.typeUrl,
+              value: Buffer.from(msg.value).toString("base64"),
+            },
+          ]
+        ).response?.data?.result;
+
+        if (decoded?.messages?.length) {
+          return yaml.dump(
+            {
+              typeUrl: msg.typeUrl,
+              value: decoded.messages[0]["value"],
+            },
+            {
+              indent: 2,
+              sortKeys: true,
+            }
+          );
+        }
+
+        return yaml.dump(defaultProtoCodec.unpackedAnyToJSONRecursive(msg));
+      }
+
+      return yaml.dump(msg);
+    } catch (e) {
+      console.log(e);
+      return "Failed to decode the msg";
+    }
+  })();
+
   return (
     <pre
       style={{
@@ -93,10 +129,10 @@ const UnknownMessageContent: FunctionComponent<PropsWithChildren> = ({
             : ColorPalette["gray-200"],
       }}
     >
-      {children}
+      {prettyMsg}
     </pre>
   );
-};
+});
 
 export const defaultRegistry = new MessageRenderRegistry();
 defaultRegistry.register(AgoricProvisionMessage);
