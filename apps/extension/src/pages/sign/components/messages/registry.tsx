@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { IMessageRenderer, IMessageRenderRegistry } from "./types";
 import { Msg } from "@keplr-wallet/types";
 import {
@@ -28,8 +28,8 @@ import { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
 import { ClaimBtcDelegationRewardMessage } from "./render/claim-btc-delegation-reward";
 import { AtomoneMintPhotonMessage } from "./render/atomone-mint-photon";
-import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
+import { MsgSkeleton } from "./render/msg-skeleton";
 
 export class MessageRenderRegistry implements IMessageRenderRegistry {
   protected renderers: IMessageRenderer[] = [];
@@ -72,52 +72,72 @@ export class MessageRenderRegistry implements IMessageRenderRegistry {
 const UnknownMessageContent: FunctionComponent<{
   msg: Msg | AnyWithUnpacked;
   chainId: string;
-}> = observer(({ msg, chainId }) => {
+}> = ({ msg, chainId }) => {
   const theme = useTheme();
   const { queriesStore } = useStore();
+  const [loading, setLoading] = useState(false);
+  const [prettyMsg, setPrettyMsg] = useState<string>("");
 
-  const prettyMsg: string | null = (() => {
-    try {
-      if ("type" in msg) {
-        return yaml.dump(msg);
-      }
+  useEffect(() => {
+    if ("type" in msg) {
+      setPrettyMsg(yaml.dump(msg));
+      return;
+    }
 
-      if ("typeUrl" in msg) {
+    if (!("typeUrl" in msg)) {
+      setPrettyMsg(yaml.dump(msg));
+      return;
+    }
+
+    (async () => {
+      try {
+        setLoading(true);
         const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
         const keplrETCQueries = queriesStore.get(chainId).keplrETC;
 
-        const decoded = keplrETCQueries.queryTxMsgDecoder.protoToAmino(
-          chainIdentifier,
-          [
+        const query = await keplrETCQueries.queryTxMsgDecoder
+          .protoToAmino(chainIdentifier, [
             {
               typeUrl: msg.typeUrl,
               value: Buffer.from(msg.value).toString("base64"),
             },
-          ]
-        ).response?.data?.result;
+          ])
+          .waitFreshResponse();
+
+        const decoded = query?.data?.result;
 
         if (decoded?.messages?.length) {
-          return yaml.dump(
-            {
-              typeUrl: msg.typeUrl,
-              value: decoded.messages[0]["value"],
-            },
-            {
-              indent: 2,
-              sortKeys: true,
-            }
+          setPrettyMsg(
+            yaml.dump(
+              {
+                typeUrl: msg.typeUrl,
+                value: decoded.messages[0]["value"],
+              },
+              {
+                indent: 2,
+                sortKeys: true,
+              }
+            )
           );
+          return;
         }
 
-        return yaml.dump(defaultProtoCodec.unpackedAnyToJSONRecursive(msg));
+        setPrettyMsg(
+          yaml.dump(defaultProtoCodec.unpackedAnyToJSONRecursive(msg))
+        );
+        return;
+      } catch (e) {
+        console.log(e);
+        setPrettyMsg("Failed to decode the msg");
+      } finally {
+        setLoading(false);
       }
+    })();
+  }, [chainId, msg, queriesStore]);
 
-      return yaml.dump(msg);
-    } catch (e) {
-      console.log(e);
-      return "Failed to decode the msg";
-    }
-  })();
+  if (loading && !prettyMsg) {
+    return <MsgSkeleton />;
+  }
 
   return (
     <pre
@@ -132,7 +152,7 @@ const UnknownMessageContent: FunctionComponent<{
       {prettyMsg}
     </pre>
   );
-});
+};
 
 export const defaultRegistry = new MessageRenderRegistry();
 defaultRegistry.register(AgoricProvisionMessage);
