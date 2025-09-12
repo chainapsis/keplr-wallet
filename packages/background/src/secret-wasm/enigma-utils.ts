@@ -23,7 +23,7 @@ const hkdfSalt: Uint8Array = new Uint8Array(
 );
 
 const secretConsensusIoPubKey = new Uint8Array(
-  Buffer.from("79++5YOHfm0SwhlpUDClv7cuCjq9xBZlWqSjDJWkRG8=", "base64")
+  Buffer.from("UyAkgs8Z55YD2091/RjSnmdMH4yF9PKc5lWqjV78nS8=", "base64")
 );
 
 export class EnigmaUtils implements EncryptionUtils {
