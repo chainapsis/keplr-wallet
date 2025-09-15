@@ -12,7 +12,9 @@ export type QueriesStore = IQueriesStore<
     Partial<EthereumQueries> & {
       cosmos?: Pick<
         CosmosQueriesImpl,
-        "queryDelegations" | "queryFeeMarketGasPrices"
+        | "queryDelegations"
+        | "queryFeeMarketGasPrices"
+        | "queryEvmFeeMarketBaseFee"
       >;
     } & {
       keplrETC?: Pick<
