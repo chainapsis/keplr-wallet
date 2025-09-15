@@ -116,7 +116,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Keplr, Chainapsis`,
+      copyright: `Copyright © ${new Date().getFullYear()} Keplr`,
     },
     prism: {
       theme: prismThemes.oneLight,
