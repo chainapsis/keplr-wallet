@@ -366,14 +366,15 @@ export class IBCSwapAmountConfig extends AmountConfig {
           const swapVenueChainInfo =
             this.chainGetter.hasChain(swapVenueChainId) &&
             this.chainGetter.getChain(swapVenueChainId);
-          if (
-            swapAccount.isNanoLedger &&
+
+          const isEvmOrEthermintLikeChain =
             swapVenueChainInfo &&
             (swapVenueChainInfo.bip44.coinType === 60 ||
               swapVenueChainInfo.features.includes("eth-address-gen") ||
               swapVenueChainInfo.features.includes("eth-key-sign") ||
-              swapVenueChainInfo.evm != null)
-          ) {
+              swapVenueChainInfo.evm != null);
+
+          if (swapAccount.isNanoLedger && isEvmOrEthermintLikeChain) {
             throw new Error(
               "Please connect Ethereum app on Ledger with Keplr to get the address"
             );

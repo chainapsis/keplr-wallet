@@ -190,15 +190,9 @@ export const LookingForChainItem: FunctionComponent<{
                 }
               }
 
-              const isEthereumChain =
-                ("cosmos" in chainInfo &&
-                  chainInfo.cosmos.bip44.coinType === 60 &&
-                  (!!chainInfo.cosmos.features?.includes("eth-address-gen") ||
-                    !!chainInfo.cosmos.features?.includes("eth-key-sign"))) ||
-                ("bip44" in chainInfo &&
-                  chainInfo.bip44.coinType === 60 &&
-                  (!!chainInfo.features?.includes("eth-address-gen") ||
-                    !!chainInfo.features?.includes("eth-key-sign")));
+              const isEthereumChain = chainStore.isEvmOrEthermintLikeChain(
+                chainInfo.chainId
+              );
 
               if (keyType === "ledger" && isEthereumChain) {
                 browser.tabs.create({
