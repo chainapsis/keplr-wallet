@@ -141,18 +141,6 @@ export const RecognizableChainFeaturesMethod: {
     },
   },
   {
-    feature: "evm-feemarket",
-    fetch: async (_features, _rpc, rest) => {
-      const result = await simpleFetch<{
-        params: {
-          no_base_fee: boolean;
-        };
-      }>(rest, "/cosmos/evm/feemarket/v1/params");
-
-      return !result.data.params.no_base_fee;
-    },
-  },
-  {
     feature: "ibc-v2",
     fetch: async (features, _rpc, rest) => {
       if (!features.includes("ibc-go")) {
