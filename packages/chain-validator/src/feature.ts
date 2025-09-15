@@ -23,6 +23,7 @@ export const SupportedChainFeatures = [
   "authz-msg-revoke-fixed",
   "osmosis-base-fee-beta",
   "feemarket",
+  "evm-feemarket",
   "op-stack-l1-data-fee",
   "force-enable-evm-ledger",
   "ibc-v2",
