@@ -255,6 +255,13 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
           });
       }
     } else if (this.canFeeMarketTxFeesAndReady()) {
+      if (this.chainInfo.hasFeature("initia-dynamicfee")) {
+        return this.chainInfo.feeCurrencies.slice(0, 1);
+      }
+      if (this.chainInfo.hasFeature("evm-feemarket")) {
+        return this.chainInfo.feeCurrencies.slice(0, 1);
+      }
+
       const queryCosmos = this.queriesStore.get(this.chainId).cosmos;
       if (queryCosmos) {
         const gasPrices = queryCosmos.queryFeeMarketGasPrices.gasPrices;
@@ -330,7 +337,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     let res: {
       amount: string;
       currency: FeeCurrency;
-    }[];
+    }[] = [];
 
     // If there is no fee currency, just return with empty fee amount.
     if (!this.fee) {
