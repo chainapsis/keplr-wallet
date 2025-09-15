@@ -24,6 +24,7 @@ import { ObservableQueryDistributionParams } from "./distribution";
 import { ObservableQueryRPCStatus } from "./status";
 import { ObservableQueryAuthZGranter } from "./authz";
 import { QuerySharedContext } from "../../common";
+import { ObservableQueryEvmFeeMarketBaseFee } from "./evm/feemarket";
 import { ObservableQueryFeeMarketGasPrices } from "./feemarket";
 import { ObservableQueryIBCClientStateV2 } from "./ibc/client-state-v2";
 import { ObservableQueryInitiaUnbondingDelegations } from "./staking/initia-unbonding-delegations";
@@ -84,6 +85,7 @@ export class CosmosQueriesImpl {
   public readonly queryAuthZGranter: DeepReadonly<ObservableQueryAuthZGranter>;
 
   public readonly queryFeeMarketGasPrices: DeepReadonly<ObservableQueryFeeMarketGasPrices>;
+  public readonly queryEvmFeeMarketBaseFee: DeepReadonly<ObservableQueryEvmFeeMarketBaseFee>;
 
   constructor(
     base: QueriesSetBase,
@@ -198,6 +200,11 @@ export class CosmosQueriesImpl {
     );
 
     this.queryFeeMarketGasPrices = new ObservableQueryFeeMarketGasPrices(
+      sharedContext,
+      chainId,
+      chainGetter
+    );
+    this.queryEvmFeeMarketBaseFee = new ObservableQueryEvmFeeMarketBaseFee(
       sharedContext,
       chainId,
       chainGetter
