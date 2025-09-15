@@ -214,7 +214,7 @@ export const CopyAddressScene: FunctionComponent<{
           return undefined;
         }
 
-        return accountInfo.hasEthereumHexAddress
+        return accountInfo.isEvmOrEthermint
           ? accountInfo.ethereumHexAddress
           : undefined;
       })();

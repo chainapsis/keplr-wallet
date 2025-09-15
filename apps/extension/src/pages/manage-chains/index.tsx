@@ -93,8 +93,10 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
     setBackupSelectedNativeChainIdentifiers,
   ] = useState(chainStore.enabledChainIdentifiers);
 
-  const determineLedgerApp = (info: ModularChainInfo, cid: string): string => {
-    if ("cosmos" in info && chainStore.isEvmOrEthermintLikeChain(cid)) {
+  const determineLedgerApp = (info: ModularChainInfo, _cid: string): string => {
+    // TODO
+    // if ("cosmos" in info && chainStore.isEvmOrEthermintLikeChain(cid)) {
+    if ("cosmos" in info) {
       return "Ethereum";
     }
 

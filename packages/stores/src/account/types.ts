@@ -7,6 +7,11 @@ import {
   Msg,
   StdFee,
 } from "@keplr-wallet/types";
+import { ChainGetter } from "../chain";
+
+export interface AccountChainGetter extends ChainGetter {
+  isEvmSupport: (chainId: string) => boolean;
+}
 
 export type ProtoMsgsOrWithAminoMsgs = {
   aminoMsgs?: Msg[];

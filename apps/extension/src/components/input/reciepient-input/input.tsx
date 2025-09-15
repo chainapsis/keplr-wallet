@@ -42,7 +42,7 @@ export type RecipientInputProps = (
 
 export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
   (props, ref) => {
-    const { analyticsStore, chainStore } = useStore();
+    const { analyticsStore, chainStore, accountStore } = useStore();
     const intl = useIntl();
     const theme = useTheme();
     const { recipientConfig, memoConfig } = props;
@@ -74,13 +74,15 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
                   chainStore.getChain(recipientConfig.chainId).bech32Config !=
                     null &&
                   ens?.isEnabled &&
-                  chainStore.isEvmChain(recipientConfig.chainId)
+                  accountStore.getAccount(recipientConfig.chainId)
+                    .isEvmOrEthermint
                 ) {
                   return "components.input.recipient-input.wallet-address-label-icns-ens";
                 }
                 if (
                   ens?.isEnabled &&
-                  chainStore.isEvmChain(recipientConfig.chainId)
+                  accountStore.getAccount(recipientConfig.chainId)
+                    .isEvmOrEthermint
                 ) {
                   return "components.input.recipient-input.wallet-address-label-ens";
                 }

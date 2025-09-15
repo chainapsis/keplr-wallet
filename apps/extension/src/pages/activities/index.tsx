@@ -65,10 +65,10 @@ class OtherHexAddresses {
             return false;
           }
 
-          const baseAccountHexAddress = baseAccount.hasEthereumHexAddress
+          const baseAccountHexAddress = baseAccount.isEvmOrEthermint
             ? baseAccount.ethereumHexAddress
             : Bech32Address.fromBech32(baseAccount.bech32Address).toHex();
-          const accountHexAddress = account.hasEthereumHexAddress
+          const accountHexAddress = account.isEvmOrEthermint
             ? account.ethereumHexAddress
             : Bech32Address.fromBech32(account.bech32Address).toHex();
 
@@ -76,7 +76,7 @@ class OtherHexAddresses {
         })
         .map((chainInfo) => {
           const account = this.accountStore.getAccount(chainInfo.chainId);
-          const accountHexAddress = account.hasEthereumHexAddress
+          const accountHexAddress = account.isEvmOrEthermint
             ? account.ethereumHexAddress
             : Bech32Address.fromBech32(account.bech32Address).toHex();
 
@@ -122,7 +122,7 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
   const msgHistory = usePaginatedCursorQuery<ResMsgsHistory>(
     process.env["KEPLR_EXT_TX_HISTORY_BASE_URL"],
     () => {
-      const baseHexAddress = account.hasEthereumHexAddress
+      const baseHexAddress = account.isEvmOrEthermint
         ? account.ethereumHexAddress
         : Bech32Address.fromBech32(account.bech32Address).toHex();
       return `/history/v2/msgs/keplr-multi-chain?baseHexAddress=${baseHexAddress}&chainIdentifiers=${(() => {

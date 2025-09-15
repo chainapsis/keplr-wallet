@@ -120,7 +120,8 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
                           if (matchedCurrency) {
                             const currencyCode = matchedCurrency.coinDenom;
                             coinsAcc[currencyCode] = {
-                              address: chainStore.isEvmChain(chainId)
+                              address: accountStore.getAccount(chainId)
+                                .isEthermintKeyAlgo
                                 ? accountStore.getAccount(chainId)
                                     .ethereumHexAddress
                                 : accountStore.getAccount(chainId)
@@ -165,7 +166,8 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
                 );
 
                 if (chainStore.hasChain(chainId)) {
-                  const address = chainStore.isEvmChain(chainId)
+                  const address = accountStore.getAccount(chainId)
+                    .isEthermintKeyAlgo
                     ? accountStore.getAccount(chainId).ethereumHexAddress
                     : accountStore.getAccount(chainId).bech32Address;
 

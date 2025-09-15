@@ -22,7 +22,6 @@ import {
   TxRaw,
 } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import { SignMode } from "@keplr-wallet/proto-types/cosmos/tx/signing/v1beta1/signing";
-import { PubKey } from "@keplr-wallet/proto-types/cosmos/crypto/secp256k1/keys";
 import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
 import { MsgTransfer } from "@keplr-wallet/proto-types/ibc/applications/transfer/v1/tx";
 import {
@@ -35,6 +34,7 @@ import {
   BaseAccount,
   Bech32Address,
   ChainIdHelper,
+  encodePubKey,
   EthermintChainIdHelper,
   TendermintTxTracer,
 } from "@keplr-wallet/cosmos";
@@ -464,7 +464,6 @@ export class CosmosAccountImpl {
 
         const chainInfo = this.chainGetter.getChain(this.chainId);
         const chainIsInjective = this.chainId.startsWith("injective");
-        const chainIsStratos = this.chainId.startsWith("stratos");
         const ethSignPlainJson: boolean =
           chainInfo.features &&
           chainInfo.features.includes("evm-ledger-sign-plain-json");
@@ -573,37 +572,11 @@ export class CosmosAccountImpl {
             authInfoBytes: AuthInfo.encode({
               signerInfos: [
                 {
-                  publicKey: {
-                    typeUrl: (() => {
-                      if (!useEthereumSign) {
-                        return "/cosmos.crypto.secp256k1.PubKey";
-                      }
-
-                      if (chainIsInjective) {
-                        return "/injective.crypto.v1beta1.ethsecp256k1.PubKey";
-                      }
-
-                      if (chainIsStratos) {
-                        return "/stratos.crypto.v1.ethsecp256k1.PubKey";
-                      }
-
-                      if (chainInfo.hasFeature("eth-secp256k1-cosmos")) {
-                        return "/cosmos.evm.crypto.v1.ethsecp256k1.PubKey";
-                      }
-
-                      if (chainInfo.hasFeature("eth-secp256k1-initia")) {
-                        return "/initia.crypto.v1beta1.ethsecp256k1.PubKey";
-                      }
-
-                      return "/ethermint.crypto.v1.ethsecp256k1.PubKey";
-                    })(),
-                    value: PubKey.encode({
-                      key: Buffer.from(
-                        signResponse.signature.pub_key.value,
-                        "base64"
-                      ),
-                    }).finish(),
-                  },
+                  publicKey: encodePubKey(
+                    this.chainGetter.getChain(this.chainId),
+                    useEthereumSign,
+                    this.base.pubKey
+                  ),
                   modeInfo: {
                     single: {
                       mode:
@@ -662,9 +635,6 @@ export class CosmosAccountImpl {
   }> {
     const useEthereumSign = this.base.isEthermintKeyAlgo;
 
-    const chainIsInjective = this.chainId.startsWith("injective");
-    const chainIsStratos = this.chainId.startsWith("stratos");
-
     // Should use bind to avoid "this" problem
     let signDirect = keplr.signDirect.bind(keplr);
     if (signOptions?.signDirect) {
@@ -684,40 +654,11 @@ export class CosmosAccountImpl {
         authInfoBytes: AuthInfo.encode({
           signerInfos: [
             {
-              publicKey: {
-                typeUrl: (() => {
-                  if (!useEthereumSign) {
-                    return "/cosmos.crypto.secp256k1.PubKey";
-                  }
-
-                  if (chainIsInjective) {
-                    return "/injective.crypto.v1beta1.ethsecp256k1.PubKey";
-                  }
-
-                  if (chainIsStratos) {
-                    return "/stratos.crypto.v1.ethsecp256k1.PubKey";
-                  }
-
-                  if (
-                    this.chainGetter
-                      .getChain(this.chainId)
-                      .hasFeature("eth-secp256k1-cosmos")
-                  ) {
-                    return "/cosmos.evm.crypto.v1.ethsecp256k1.PubKey";
-                  }
-                  if (
-                    this.chainGetter
-                      .getChain(this.chainId)
-                      .hasFeature("eth-secp256k1-initia")
-                  ) {
-                    return "/initia.crypto.v1beta1.ethsecp256k1.PubKey";
-                  }
-                  return "/ethermint.crypto.v1.ethsecp256k1.PubKey";
-                })(),
-                value: PubKey.encode({
-                  key: this.base.pubKey,
-                }).finish(),
-              },
+              publicKey: encodePubKey(
+                this.chainGetter.getChain(this.chainId),
+                useEthereumSign,
+                this.base.pubKey
+              ),
               modeInfo: {
                 single: {
                   mode: SignMode.SIGN_MODE_DIRECT,

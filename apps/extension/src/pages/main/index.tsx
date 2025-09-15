@@ -861,10 +861,7 @@ const RefreshButton: FunctionComponent<{
           const chainInfo = chainStore.getChain(modularChainInfo.chainId);
           const account = accountStore.getAccount(chainInfo.chainId);
 
-          if (
-            !chainStore.isEvmChain(chainInfo.chainId) &&
-            account.bech32Address !== ""
-          ) {
+          if (!account.isEvmOrEthermint && account.bech32Address !== "") {
             const queries = queriesStore.get(chainInfo.chainId);
             const queryBalance = queries.queryBalances.getQueryBech32Address(
               account.bech32Address
@@ -879,10 +876,7 @@ const RefreshButton: FunctionComponent<{
             promises.push(queryRewards.waitFreshResponse());
           }
 
-          if (
-            chainStore.isEvmChain(chainInfo.chainId) &&
-            account.ethereumHexAddress
-          ) {
+          if (account.isEvmOrEthermint && account.ethereumHexAddress) {
             const queries = queriesStore.get(chainInfo.chainId);
             const queryBalance =
               queries.queryBalances.getQueryEthereumHexAddress(

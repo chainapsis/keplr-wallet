@@ -21,7 +21,7 @@ export const PermissionBasicAccessForEVMPage: FunctionComponent<{
     ids: string[];
   } & PermissionData;
 }> = observer(({ data }) => {
-  const { chainStore, permissionStore } = useStore();
+  const { chainStore, accountStore, permissionStore } = useStore();
   const intl = useIntl();
   const theme = useTheme();
   const navigate = useNavigate();
@@ -175,8 +175,10 @@ export const PermissionBasicAccessForEVMPage: FunctionComponent<{
               </Body2>
               <Dropdown
                 items={chainStore.chainInfos
-                  .filter((chainInfo) =>
-                    chainStore.isEvmChain(chainInfo.chainId)
+                  .filter(
+                    (chainInfo) =>
+                      accountStore.getAccount(chainInfo.chainId)
+                        .isEvmOrEthermint
                   )
                   .map((chainInfo) => ({
                     key: `${chainInfo.chainId}`,

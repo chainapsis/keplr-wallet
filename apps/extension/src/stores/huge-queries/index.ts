@@ -176,7 +176,7 @@ export class HugeQueriesStore {
           const isMainCurrency =
             mainCurrency.coinMinimalDenom === currency.coinMinimalDenom;
           const queryBalance =
-            this.chainStore.isEvmChain(chainInfo.chainId) &&
+            this.accountStore.getAccount(chainInfo.chainId).isEvmOrEthermint &&
             (isMainCurrency || isERC20)
               ? queries.queryBalances.getQueryEthereumHexAddress(
                   account.ethereumHexAddress
@@ -431,7 +431,7 @@ export class HugeQueriesStore {
           const isMainCurrency =
             mainCurrency.coinMinimalDenom === currency.coinMinimalDenom;
           const queryBalance =
-            this.chainStore.isEvmChain(chainInfo.chainId) &&
+            this.accountStore.getAccount(chainInfo.chainId).isEvmOrEthermint &&
             (isMainCurrency || isERC20)
               ? queries.queryBalances.getQueryEthereumHexAddress(
                   account.ethereumHexAddress

@@ -50,8 +50,13 @@ export const AddressBookModal: FunctionComponent<{
     currency,
     permitSelfKeyInfo,
   }) => {
-    const { analyticsStore, uiConfigStore, keyRingStore, chainStore } =
-      useStore();
+    const {
+      analyticsStore,
+      uiConfigStore,
+      keyRingStore,
+      chainStore,
+      accountStore,
+    } = useStore();
     const intl = useIntl();
     const theme = useTheme();
 
@@ -123,7 +128,6 @@ export const AddressBookModal: FunctionComponent<{
     ]);
 
     const chainInfo = chainStore.getChain(recipientConfig.chainId);
-    const isEVMChain = chainStore.isEvmChain(chainInfo.chainId);
     const isEVMOnlyChain = chainStore.isEvmOnlyChain(chainInfo.chainId);
     const isERC20 = new DenomHelper(currency.coinMinimalDenom).type === "erc20";
 
@@ -196,7 +200,7 @@ export const AddressBookModal: FunctionComponent<{
               });
             }
 
-            if (isEVMChain) {
+            if (accountStore.getAccount(chainInfo.chainId).isEvmOrEthermint) {
               acc.push({
                 name: account.name,
                 address: account.ethereumHexAddress,

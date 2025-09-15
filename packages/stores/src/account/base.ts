@@ -1,8 +1,7 @@
 import { action, computed, flow, makeObservable, observable } from "mobx";
 import { AppCurrency, Keplr, SupportedPaymentType } from "@keplr-wallet/types";
-import { ChainGetter } from "../chain";
 import { DenomHelper, toGenerator } from "@keplr-wallet/common";
-import { MakeTxResponse } from "./types";
+import { AccountChainGetter, MakeTxResponse } from "./types";
 import { AccountSharedContext } from "./context";
 
 export enum WalletStatus {
@@ -22,7 +21,7 @@ export interface AccountSetOpts {
   readonly suggestChain: boolean;
   readonly suggestChainFn?: (
     keplr: Keplr,
-    chainInfo: ReturnType<ChainGetter["getChain"]>
+    chainInfo: ReturnType<AccountChainGetter["getChain"]>
   ) => Promise<void>;
   readonly autoInit: boolean;
 }
@@ -85,7 +84,7 @@ export class AccountSetBase {
       addEventListener: (type: string, fn: () => unknown) => void;
       removeEventListener: (type: string, fn: () => unknown) => void;
     },
-    protected readonly chainGetter: ChainGetter,
+    protected readonly chainGetter: AccountChainGetter,
     protected readonly chainId: string,
     protected readonly sharedContext: AccountSharedContext,
     protected readonly opts: AccountSetOpts
@@ -363,18 +362,14 @@ export class AccountSetBase {
     return this.txTypeInProgress;
   }
 
-  get hasEthereumHexAddress(): boolean {
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-    return (
-      chainInfo.evm != null ||
-      chainInfo.bip44.coinType === 60 ||
-      !!chainInfo.features?.includes("eth-address-gen") ||
-      !!chainInfo.features?.includes("eth-key-sign")
-    );
-  }
-
   get isEthermintKeyAlgo(): boolean {
     return this.keyAlgo === "ethsecp256k1";
+  }
+
+  get isEvmOrEthermint(): boolean {
+    return (
+      this.chainGetter.isEvmSupport(this.chainId) && this.isEthermintKeyAlgo
+    );
   }
 
   get ethereumHexAddress(): string {

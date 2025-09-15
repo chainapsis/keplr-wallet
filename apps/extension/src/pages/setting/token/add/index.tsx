@@ -155,9 +155,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
   })();
 
   const isSecretWasm = chainInfo?.hasFeature("secretwasm");
-  const isERC20 =
-    chainStore.isEvmSupport(chainId) &&
-    accountStore.getAccount(chainId).isEthermintKeyAlgo;
+  const isERC20 = accountStore.getAccount(chainId).isEthermintKeyAlgo;
   const isStarknet =
     modularChainInfo != null &&
     "starknet" in modularChainInfo &&

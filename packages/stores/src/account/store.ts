@@ -4,11 +4,11 @@ import {
   IObject,
   mergeStores,
 } from "../common";
-import { ChainGetter } from "../chain";
 import { AccountSetBase, AccountSetBaseSuper, AccountSetOpts } from "./base";
 import { UnionToIntersection } from "utility-types";
 import { AccountSharedContext } from "./context";
 import { Keplr } from "@keplr-wallet/types";
+import { AccountChainGetter } from "./types";
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export interface IAccountStore<T extends IObject = {}> {
@@ -31,7 +31,7 @@ export class AccountStore<
     AccountSetBaseSuper,
     // chainGetter: ChainGetter,
     // chainId: string,
-    [ChainGetter, string],
+    [AccountChainGetter, string],
     Injects
   >;
 
@@ -40,14 +40,14 @@ export class AccountStore<
       addEventListener: (type: string, fn: () => unknown) => void;
       removeEventListener: (type: string, fn: () => unknown) => void;
     },
-    protected readonly chainGetter: ChainGetter,
+    protected readonly chainGetter: AccountChainGetter,
     protected readonly getKeplr: () => Promise<Keplr | undefined>,
     protected readonly storeOptsCreator: (chainId: string) => AccountSetOpts,
     ...accountSetCreators: ChainedFunctionifyTuple<
       AccountSetBaseSuper,
       // chainGetter: ChainGetter,
       // chainId: string,
-      [ChainGetter, string],
+      [AccountChainGetter, string],
       Injects
     >
   ) {

@@ -1065,11 +1065,6 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
     this.currencyRegistrars.push(registrar);
   }
 
-  isEvmChain(chainId: string): boolean {
-    const chainInfo = this.getChain(chainId);
-    return chainInfo.evm != null;
-  }
-
   isEvmSupport(chainId: string): boolean {
     const chainInfo = this.getChain(chainId);
     return chainInfo.evm != null;
@@ -1082,20 +1077,5 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
       chainIdLikeCAIP2.length === 2 &&
       chainIdLikeCAIP2[0] === "eip155"
     );
-  }
-
-  isEvmOrEthermintLikeChain(chainId: string): boolean {
-    const b = this.isEvmSupport(chainId);
-    if (b) {
-      return true;
-    }
-    const chainInfo = this.getChain(chainId);
-
-    const isEthermintLike =
-      chainInfo.bip44.coinType === 60 ||
-      !!chainInfo.features?.includes("eth-address-gen") ||
-      !!chainInfo.features?.includes("eth-key-sign");
-
-    return isEthermintLike;
   }
 }

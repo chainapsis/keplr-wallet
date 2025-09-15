@@ -144,7 +144,7 @@ export const TokenDetailModal: FunctionComponent<{
   const balance = (() => {
     if ("cosmos" in modularChainInfo) {
       const queryBalances = queriesStore.get(chainId).queryBalances;
-      return chainStore.isEvmChain(chainId) && (isMainCurrency || isERC20)
+      return account.isEvmOrEthermint && (isMainCurrency || isERC20)
         ? queryBalances
             .getQueryEthereumHexAddress(account.ethereumHexAddress)
             .getBalance(currency)
@@ -350,7 +350,7 @@ export const TokenDetailModal: FunctionComponent<{
         ChainIdHelper.parse(chainId).identifier
       }/${(() => {
         if ("cosmos" in modularChainInfo) {
-          return account.hasEthereumHexAddress
+          return account.isEvmOrEthermint
             ? account.ethereumHexAddress
             : Bech32Address.fromBech32(account.bech32Address).toHex();
         }

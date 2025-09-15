@@ -1,5 +1,5 @@
 import { ChainsService } from "../chains";
-import { KeyRingService, DEFAULT_BIP44_PURPOSE } from "../keyring";
+import { DEFAULT_BIP44_PURPOSE, KeyRingService } from "../keyring";
 import {
   AminoSignResponse,
   ChainInfo,
@@ -15,6 +15,7 @@ import {
   Bech32Address,
   ChainIdHelper,
   checkAndValidateADR36AminoSignDoc,
+  encodePubKey,
   encodeSecp256k1Pubkey,
   encodeSecp256k1Signature,
   EthermintChainIdHelper,
@@ -861,6 +862,24 @@ export class KeyRingCosmosService {
     }
 
     const key = await this.getKey(vaultId, chainId);
+    if (!env.isInternalMsg && key.algo === "ethsecp256k1") {
+      const authInfo = AuthInfo.decode(signDoc.authInfoBytes);
+      if (
+        authInfo.signerInfos.length === 1 &&
+        authInfo.signerInfos[0].publicKey?.typeUrl ===
+          "/cosmos.crypto.secp256k1.PubKey"
+      ) {
+        signDoc.authInfoBytes = AuthInfo.encode({
+          ...authInfo,
+          signerInfos: [
+            {
+              ...authInfo.signerInfos[0],
+              publicKey: encodePubKey(chainInfo, true, key.pubKey),
+            },
+          ],
+        }).finish();
+      }
+    }
     const bech32Prefix =
       this.chainsService.getChainInfoOrThrow(chainId).bech32Config
         ?.bech32PrefixAccAddr ?? "";

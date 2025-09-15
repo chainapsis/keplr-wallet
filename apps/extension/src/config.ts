@@ -1070,7 +1070,13 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         },
       },
     ],
-    features: ["ibc-transfer", "ibc-go", "eth-address-gen", "eth-key-sign"],
+    features: [
+      "ibc-transfer",
+      "ibc-go",
+      "eth-address-gen",
+      "eth-key-sign",
+      "force-not-show-evm-address",
+    ],
   },
   {
     rpc: "https://rpc-kava.keplr.app",

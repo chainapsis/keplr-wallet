@@ -49,8 +49,7 @@ export const SettingTokenListPage: FunctionComponent = observer(() => {
       return (
         chainInfo.features?.includes("cosmwasm") ||
         chainInfo.features?.includes("secretwasm") ||
-        (chainStore.isEvmSupport(chainInfo.chainId) &&
-          accountStore.getAccount(chainInfo.chainId).isEthermintKeyAlgo)
+        accountStore.getAccount(chainInfo.chainId).isEvmOrEthermint
       );
     });
   }, [chainStore.chainInfosInListUI]);

@@ -35,7 +35,7 @@ export const ConnectedEcosystems: FunctionComponent = observer(() => {
   >();
 
   const evmChainInfos = chainStore.chainInfos.filter((chainInfo) =>
-    chainStore.isEvmChain(chainInfo.chainId)
+    chainStore.isEvmSupport(chainInfo.chainId)
   );
 
   const starknetChainInfos = chainStore.modularChainInfos.filter(
