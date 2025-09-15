@@ -86,6 +86,7 @@ import {
   ChainGetter,
   CosmosAccount,
   CosmwasmAccount,
+  IAccountStore,
   IAccountStoreWithInjects,
   IChainInfoImpl,
   IQueriesStore,
@@ -428,7 +429,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
   const chainId = initialChainId || chainStore.chainInfosInUI[0].chainId;
   const chainInfo = chainStore.getChain(chainId);
-  const isEvmChain = chainStore.isEvmChain(chainId);
+  const isEvmChain = accountStore.getAccount(chainId).isEvmOrEthermint;
   const isEVMOnlyChain = chainStore.isEvmOnlyChain(chainId);
 
   const coinMinimalDenom =
@@ -493,9 +494,9 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     ? queryBalances.getQueryEthereumHexAddress(sender).getBalance(currency)
     : queryBalances.getQueryBech32Address(sender).getBalance(currency);
 
-  const isDestinationEvmChain = chainStore.isEvmChain(
+  const isDestinationEvmChain = accountStore.getAccount(
     destinationChainInfoOfBridge.chainId
-  );
+  ).isEvmOrEthermint;
   const isDestinationEvmOnlyChain = chainStore.isEvmOnlyChain(
     destinationChainInfoOfBridge.chainId
   );
@@ -528,6 +529,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
   const gasSimulatorForBridge = useGetGasSimulationForBridge(
     chainStore,
+    accountStore,
     chainId,
     ibcSwapConfigsForBridge,
     ethereumAccountStore,
@@ -1008,9 +1010,9 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                       chainStore.getChain(
                         ibcSwapConfigsForBridge.recipientConfig.chainId
                       ),
-                      chainStore.isEvmChain(
+                      accountStore.getAccount(
                         ibcSwapConfigsForBridge.recipientConfig.chainId
-                      ),
+                      ).isEvmOrEthermint,
                       chainStore.isEvmOnlyChain(
                         ibcSwapConfigsForBridge.recipientConfig.chainId
                       )
@@ -2366,6 +2368,7 @@ function useCheckExpectedOutIsTooSmall(
 
 function useGetGasSimulationForBridge(
   chainStore: ChainStore,
+  accountStore: IAccountStore,
   chainId: string,
   ibcSwapConfigsForBridge: {
     recipientConfig: IBCRecipientConfig;
@@ -2494,9 +2497,9 @@ function useGetGasSimulationForBridge(
         convertToBech32IfNeed(
           ibcSwapConfigsForBridge.recipientConfig.recipient,
           chainStore.getChain(ibcSwapConfigsForBridge.recipientConfig.chainId),
-          chainStore.isEvmChain(
+          accountStore.getAccount(
             ibcSwapConfigsForBridge.recipientConfig.chainId
-          ),
+          ).isEvmOrEthermint,
           chainStore.isEvmOnlyChain(
             ibcSwapConfigsForBridge.recipientConfig.chainId
           )
