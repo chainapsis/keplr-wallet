@@ -83,13 +83,13 @@ export class ObservablePostQuery<
 
   protected override getCacheKey(): string {
     const baseKey = super.getCacheKey();
-    if (this._body) {
-      const bodyHash = Buffer.from(
-        Hash.sha256(Buffer.from(JSON.stringify(this._body))).slice(0, 8)
-      ).toString("hex");
-      return `${baseKey}-post-${bodyHash}`;
-    }
-    return `${baseKey}-post`;
+    const extraKeys = [this._postOptions, ...(this._body ? [this._body] : [])];
+
+    const hash = Buffer.from(
+      Hash.sha256(Buffer.from(JSON.stringify(extraKeys))).slice(0, 8)
+    ).toString("hex");
+
+    return `${baseKey}-post-${hash}`;
   }
 }
 
