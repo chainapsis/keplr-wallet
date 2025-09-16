@@ -76,16 +76,31 @@ const UnknownMessageContent: FunctionComponent<{
   const theme = useTheme();
   const { queriesStore } = useStore();
   const [loading, setLoading] = useState(false);
-  const [prettyMsg, setPrettyMsg] = useState<string>("");
+  const [txCodecMsg, setTxCodecMsg] = useState<string>("");
+
+  const rawPrettyMsg = (() => {
+    try {
+      if ("type" in msg) {
+        return yaml.dump(msg);
+      }
+
+      if ("typeUrl" in msg) {
+        return yaml.dump(defaultProtoCodec.unpackedAnyToJSONRecursive(msg));
+      }
+
+      return yaml.dump(msg);
+    } catch (e) {
+      console.log(e);
+      return "Failed to decode the msg";
+    }
+  })();
 
   useEffect(() => {
     if ("type" in msg) {
-      setPrettyMsg(yaml.dump(msg));
       return;
     }
 
     if (!("typeUrl" in msg)) {
-      setPrettyMsg(yaml.dump(msg));
       return;
     }
 
@@ -107,7 +122,7 @@ const UnknownMessageContent: FunctionComponent<{
         const decoded = query?.data?.result;
 
         if (decoded?.messages?.length) {
-          setPrettyMsg(
+          setTxCodecMsg(
             yaml.dump(
               {
                 typeUrl: msg.typeUrl,
@@ -122,20 +137,16 @@ const UnknownMessageContent: FunctionComponent<{
           return;
         }
 
-        setPrettyMsg(
-          yaml.dump(defaultProtoCodec.unpackedAnyToJSONRecursive(msg))
-        );
-        return;
+        console.log("Invalid or empty response from tx-codec:", decoded);
       } catch (e) {
-        console.log(e);
-        setPrettyMsg("Failed to decode the msg");
+        console.log("tx-codec error:", e);
       } finally {
         setLoading(false);
       }
     })();
   }, [chainId, msg, queriesStore]);
 
-  if (loading && !prettyMsg) {
+  if (loading) {
     return <MsgSkeleton />;
   }
 
@@ -149,7 +160,7 @@ const UnknownMessageContent: FunctionComponent<{
             : ColorPalette["gray-200"],
       }}
     >
-      {prettyMsg}
+      {txCodecMsg || rawPrettyMsg}
     </pre>
   );
 };
