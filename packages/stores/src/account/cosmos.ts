@@ -445,6 +445,8 @@ export class CosmosAccountImpl {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const keplr = (await this.base.getKeplr())!;
 
+    let signResponse: AminoSignResponse | undefined;
+
     const signedTx = await (async () => {
       if (isDirectSign) {
         return await this.createSignedTxWithDirectSign(
@@ -512,7 +514,7 @@ export class CosmosAccountImpl {
             signOptions.experimentalSignEIP712CosmosTx_v0;
         }
 
-        const signResponse: AminoSignResponse = await (async () => {
+        signResponse = await (async () => {
           if (!eip712Signing) {
             return await signAmino(
               this.chainId,
@@ -640,6 +642,20 @@ export class CosmosAccountImpl {
       }
     })();
 
+    if (signOptions?.topUpSend) {
+      const payload = {
+        chainId: this.chainId,
+        senderAddress: this.base.bech32Address,
+        rawTx: Buffer.from(signedTx.tx).toString("base64"),
+      };
+
+      return {
+        txHash: await signOptions.topUpSend(payload),
+        signDoc: signedTx.signDoc,
+      };
+    }
+
+    // Default behavior: use normal sendTx
     // Should use bind to avoid "this" problem
     let sendTx = keplr.sendTx.bind(keplr);
     if (signOptions?.sendTx) {

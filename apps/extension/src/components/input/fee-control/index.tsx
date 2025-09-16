@@ -24,6 +24,8 @@ import { UIConfigStore } from "../../../stores/ui-config";
 import { IChainStore, IQueriesStore } from "@keplr-wallet/stores";
 import { Tooltip } from "../../tooltip";
 import { EthereumAccountBase } from "@keplr-wallet/stores-eth";
+import { Checkbox } from "../../checkbox";
+import { isTopUpSupported } from "@keplr-wallet/topup-client";
 
 // 기본적으로 `FeeControl` 안에 있는 로직이였지만 `FeeControl` 말고도 다른 UI를 가진 똑같은 기능의 component가
 // 여러개 생기게 되면서 공통적으로 사용하기 위해서 custom hook으로 분리함
@@ -225,6 +227,11 @@ export const FeeControl: FunctionComponent<{
     // gasAdjustment와 gasEstimated를 사용해 계산된 값을 보여주는 경우
     const isShowingFeeWithGasEstimated =
       !!gasSimulator?.enabled && !!gasSimulator?.gasEstimated && isFeeSetByUser;
+
+    const showTopUpCheckbox =
+      feeConfig.uiProperties.error instanceof InsufficientFeeError &&
+      isTopUpSupported(feeConfig.chainId) &&
+      feeConfig.useTopUp;
 
     return (
       <Box>
@@ -471,65 +478,105 @@ export const FeeControl: FunctionComponent<{
         </YAxis>
         <VerticalResizeTransition transitionAlign="top">
           {feeConfig.uiProperties.error || feeConfig.uiProperties.warning ? (
-            <Box
-              marginTop="1.04rem"
-              borderRadius="0.5rem"
-              alignX="center"
-              alignY="center"
-              paddingY="1.125rem"
-              backgroundColor={
-                theme.mode === "light"
-                  ? ColorPalette["orange-50"]
-                  : ColorPalette["yellow-800"]
-              }
-            >
-              <Subtitle4
-                color={
+            <YAxis gap="0.75rem">
+              <Box
+                marginTop="1.04rem"
+                borderRadius="0.5rem"
+                alignX="center"
+                alignY="center"
+                paddingY="1.125rem"
+                backgroundColor={
                   theme.mode === "light"
-                    ? ColorPalette["orange-400"]
-                    : ColorPalette["yellow-400"]
+                    ? ColorPalette["orange-50"]
+                    : ColorPalette["yellow-800"]
                 }
               >
-                {(() => {
-                  if (feeConfig.uiProperties.error) {
-                    if (
-                      feeConfig.uiProperties.error instanceof
-                      InsufficientFeeError
-                    ) {
-                      return intl.formatMessage({
-                        id: "components.input.fee-control.error.insufficient-fee",
-                      });
+                <Subtitle4
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["orange-400"]
+                      : ColorPalette["yellow-400"]
+                  }
+                >
+                  {(() => {
+                    if (feeConfig.uiProperties.error) {
+                      if (
+                        feeConfig.uiProperties.error instanceof
+                        InsufficientFeeError
+                      ) {
+                        return intl.formatMessage({
+                          id: "components.input.fee-control.error.insufficient-fee",
+                        });
+                      }
+
+                      return (
+                        feeConfig.uiProperties.error.message ||
+                        feeConfig.uiProperties.error.toString()
+                      );
                     }
 
-                    return (
-                      feeConfig.uiProperties.error.message ||
-                      feeConfig.uiProperties.error.toString()
-                    );
-                  }
+                    if (feeConfig.uiProperties.warning) {
+                      return (
+                        feeConfig.uiProperties.warning.message ||
+                        feeConfig.uiProperties.warning.toString()
+                      );
+                    }
 
-                  if (feeConfig.uiProperties.warning) {
-                    return (
-                      feeConfig.uiProperties.warning.message ||
-                      feeConfig.uiProperties.warning.toString()
-                    );
-                  }
+                    if (gasConfig.uiProperties.error) {
+                      return (
+                        gasConfig.uiProperties.error.message ||
+                        gasConfig.uiProperties.error.toString()
+                      );
+                    }
 
-                  if (gasConfig.uiProperties.error) {
-                    return (
-                      gasConfig.uiProperties.error.message ||
-                      gasConfig.uiProperties.error.toString()
-                    );
-                  }
+                    if (gasConfig.uiProperties.warning) {
+                      return (
+                        gasConfig.uiProperties.warning.message ||
+                        gasConfig.uiProperties.warning.toString()
+                      );
+                    }
+                  })()}
+                </Subtitle4>
+              </Box>
 
-                  if (gasConfig.uiProperties.warning) {
-                    return (
-                      gasConfig.uiProperties.warning.message ||
-                      gasConfig.uiProperties.warning.toString()
-                    );
-                  }
-                })()}
-              </Subtitle4>
-            </Box>
+              {showTopUpCheckbox ? (
+                <Box paddingX="0.75rem" paddingY="0.5rem">
+                  <XAxis alignY="center" gap="0.5rem">
+                    <Checkbox
+                      size="small"
+                      checked={
+                        "useTopUp" in feeConfig ? feeConfig.useTopUp : false
+                      }
+                      onChange={(checked) => {
+                        if ("setUseTopUp" in feeConfig) {
+                          feeConfig.setUseTopUp(checked);
+                        }
+                      }}
+                    />
+                    <YAxis gap="0.25rem">
+                      <Body2
+                        color={
+                          theme.mode === "light"
+                            ? ColorPalette["gray-700"]
+                            : ColorPalette["gray-300"]
+                        }
+                      >
+                        Use TopUp Service
+                      </Body2>
+                      <Body2
+                        color={
+                          theme.mode === "light"
+                            ? ColorPalette["gray-400"]
+                            : ColorPalette["gray-500"]
+                        }
+                      >
+                        Automatically add tokens to cover transaction fees
+                      </Body2>
+                    </YAxis>
+                  </XAxis>
+                </Box>
+              ) : null}
+            </YAxis>
           ) : null}
         </VerticalResizeTransition>
 
