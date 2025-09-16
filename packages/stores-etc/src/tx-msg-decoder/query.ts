@@ -1,10 +1,4 @@
-import {
-  QuerySharedContext,
-  ObservablePostQuery,
-  PostRequestOptions,
-  ObservablePostQueryMap,
-} from "@keplr-wallet/stores";
-import { makeObservable } from "mobx";
+import { QuerySharedContext, ObservablePostQuery } from "@keplr-wallet/stores";
 
 export interface TxMsgDecoderResponse {
   result: {
@@ -13,9 +7,7 @@ export interface TxMsgDecoderResponse {
 }
 
 export interface TxMsgDecoderRequestBody {
-  result: {
-    messages: ProtoToAminoRequestMsg[];
-  };
+  messages: ProtoToAminoRequestMsg[];
 }
 
 interface ProtoToAminoRequestMsg {
@@ -32,43 +24,35 @@ export class ObservablePostTxMsgDecoderInner extends ObservablePostQuery<
     sharedContext: QuerySharedContext,
     baseURL: string,
     url: string,
-    body: TxMsgDecoderRequestBody,
-    postOptions: PostRequestOptions
+    body: TxMsgDecoderRequestBody
   ) {
-    super(sharedContext, baseURL, url, body, postOptions);
-
-    makeObservable(this);
+    super(
+      sharedContext,
+      baseURL,
+      url,
+      body,
+      {},
+      {
+        disableCache: true,
+      }
+    );
   }
 }
 
-export class ObservablePostTxMsgDecoder extends ObservablePostQueryMap<
-  TxMsgDecoderResponse,
-  any,
-  TxMsgDecoderRequestBody
-> {
-  constructor(sharedContext: QuerySharedContext, baseURL: string) {
-    super((key: string) => {
-      const { url, body, postOptions } = JSON.parse(key);
-
-      return new ObservablePostTxMsgDecoderInner(
-        sharedContext,
-        baseURL,
-        url,
-        body,
-        postOptions
-      );
-    });
-  }
+export class ObservablePostTxMsgDecoder {
+  constructor(
+    private readonly sharedContext: QuerySharedContext,
+    private readonly baseURL: string
+  ) {}
 
   protoToAmino(chainIdentifier: string, msgs: ProtoToAminoRequestMsg[]) {
-    return this.get(
-      JSON.stringify({
-        url: `${chainIdentifier}/tx/proto-to-amino`,
-        body: {
-          messages: msgs,
-        },
-        postOptions: { headers: { "Content-Type": "application/json" } },
-      })
+    return new ObservablePostTxMsgDecoderInner(
+      this.sharedContext,
+      this.baseURL,
+      `${chainIdentifier}/tx/proto-to-amino`,
+      {
+        messages: msgs,
+      }
     );
   }
 }

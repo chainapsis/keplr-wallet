@@ -105,6 +105,10 @@ const UnknownMessageContent: FunctionComponent<{
     }
 
     (async () => {
+      if (loading) {
+        return;
+      }
+
       try {
         setLoading(true);
         const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
@@ -144,6 +148,8 @@ const UnknownMessageContent: FunctionComponent<{
         setLoading(false);
       }
     })();
+    // `loading` is not included in the dependency array, since it should not trigger the effect when it changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chainId, msg, queriesStore]);
 
   if (loading) {
