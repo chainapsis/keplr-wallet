@@ -175,12 +175,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
   @computed
   get selectableFeeCurrencies(): FeeCurrency[] {
-    if (
-      this.chainInfo.bip44.coinType === 60 ||
-      this.chainInfo.hasFeature("eth-address-gen") ||
-      this.chainInfo.hasFeature("eth-key-sign") ||
-      ("evm" in this.chainInfo && this.chainInfo.evm)
-    ) {
+    if (this.senderConfig.isEthermintOrEvm) {
       return this.chainInfo.feeCurrencies.slice(0, 1);
     }
 

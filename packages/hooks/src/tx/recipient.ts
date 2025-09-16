@@ -180,6 +180,7 @@ export class RecipientConfig
     const isEvmChain = !!this.chainInfo.evm;
     const hasEthereumAddress =
       chainInfo.bip44.coinType === 60 ||
+      chainInfo.alternativeBIP44s?.find((bip44) => bip44.coinType === 60) ||
       !!chainInfo.features?.includes("eth-address-gen") ||
       !!chainInfo.features?.includes("eth-key-sign") ||
       isEvmChain;

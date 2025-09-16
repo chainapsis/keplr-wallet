@@ -6,7 +6,7 @@ import {
   QuerySharedContext,
 } from "@keplr-wallet/stores";
 import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
-import { CoinPretty, Int } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { computed, makeObservable } from "mobx";
 import { EthereumAccountBase } from "../account";
 import { ObservableEvmChainJsonRpcQuery } from "./evm-chain-json-rpc";
@@ -50,7 +50,15 @@ export class ObservableQueryEthAccountBalanceImpl
       return new CoinPretty(currency, new Int(0)).ready(false);
     }
 
-    return new CoinPretty(currency, new Int(BigInt(this.response.data)));
+    let int = new Int(BigInt(this.response.data));
+
+    if (currency.coinDecimals !== 18) {
+      int = new Dec(int)
+        .quo(DecUtils.getTenExponentN(18 - currency.coinDecimals))
+        .truncate();
+    }
+
+    return new CoinPretty(currency, int);
   }
 
   @computed
