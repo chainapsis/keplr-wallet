@@ -3,7 +3,6 @@ import { Buffer } from "buffer/";
 import { PubKeySecp256k1, PubKeyStarknet } from "@keplr-wallet/crypto";
 import { KeplrError } from "@keplr-wallet/router";
 import { ModularChainInfo } from "@keplr-wallet/types";
-import { KeyRingService } from "../keyring";
 import { Network as BitcoinNetwork } from "bitcoinjs-lib";
 import { PubKeyBitcoinCompatible } from "@keplr-wallet/crypto";
 import { Descriptor } from "../keyring-bitcoin";
@@ -44,7 +43,7 @@ export class KeyRingLedgerService {
   getPubKey(
     vault: Vault,
     _purpose: number,
-    _coinType: number,
+    coinType: number,
     modularChainInfo: ModularChainInfo
   ): {
     pubKey: PubKeySecp256k1;
@@ -60,16 +59,10 @@ export class KeyRingLedgerService {
       throw new Error("Chain is not a cosmos chain");
     }
 
-    let coinType = -1;
-
     let app = "Cosmos";
 
-    const isEthermintLike = KeyRingService.isEthermintLike(
-      modularChainInfo.cosmos
-    );
-    if (isEthermintLike) {
+    if (coinType === 60) {
       app = "Ethereum";
-      coinType = 60;
       if (!vault.insensitive[app]) {
         throw new KeplrError(
           "keyring",

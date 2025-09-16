@@ -469,7 +469,12 @@ export class KeyRingService {
                   continue;
                 }
 
-                if (KeyRingService.isEthermintLike(chainInfo) && !hasEthereum) {
+                if (
+                  chainInfo.bip44.coinType === 60 ||
+                  !!chainInfo.features?.includes("eth-address-gen") ||
+                  (!!chainInfo.features?.includes("eth-key-sign") &&
+                    !hasEthereum)
+                ) {
                   continue;
                 }
 
@@ -509,7 +514,11 @@ export class KeyRingService {
                 continue;
               }
 
-              if (KeyRingService.isEthermintLike(chainInfo)) {
+              if (
+                chainInfo.bip44.coinType === 60 ||
+                !!chainInfo.features?.includes("eth-address-gen") ||
+                !!chainInfo.features?.includes("eth-key-sign")
+              ) {
                 continue;
               }
 
@@ -1804,10 +1813,10 @@ export class KeyRingService {
     throw new Error(`Unsupported keyRing ${type}`);
   }
 
-  searchKeyRings(
+  async searchKeyRings(
     searchText: string,
     ignoreChainEnabled: boolean = false
-  ): KeyInfo[] {
+  ): Promise<KeyInfo[]> {
     searchText = searchText.trim();
 
     const keyInfos = this.getKeyInfos();
@@ -1836,53 +1845,62 @@ export class KeyRingService {
       })();
 
       if (isHex) {
-        hexAddressSearchKeyInfos = keyInfos.filter((keyInfo) => {
-          const modularChainInfos =
-            this.chainsUIService.enabledModularChainInfosForVault(keyInfo.id);
-          // TODO: 다른 체인도 지원하기
-          const chainInfos = modularChainInfos
-            .filter((c) => "cosmos" in c)
-            .map((c) => {
-              if (!("cosmos" in c)) {
-                throw new Error("Unsupported chain");
-              }
-              return c.cosmos;
-            });
-
-          let evmEnabled = false;
-          for (const chainInfo of chainInfos) {
-            if (KeyRingService.isEthermintLike(chainInfo)) {
-              evmEnabled = true;
-            }
-          }
-          if (!evmEnabled && !ignoreChainEnabled) {
-            return false;
-          }
-
-          for (const [key, value] of Object.entries(keyInfo.insensitive)) {
-            for (const chainInfo of chainInfos) {
-              try {
-                const hexAddress =
-                  KeyRingService.getAddressHexStringFromKeyInfo(
-                    chainInfo,
-                    keyInfo,
-                    key,
-                    value,
-                    true
-                  );
-
-                if (
-                  hexAddress.includes(
-                    searchText.replace("0x", "").toLowerCase()
-                  )
-                ) {
-                  return true;
+        const asyncFilter = await Promise.all(
+          keyInfos.map(async (keyInfo) => {
+            const modularChainInfos =
+              this.chainsUIService.enabledModularChainInfosForVault(keyInfo.id);
+            // TODO: 다른 체인도 지원하기
+            const chainInfos = modularChainInfos
+              .filter((c) => "cosmos" in c)
+              .map((c) => {
+                if (!("cosmos" in c)) {
+                  throw new Error("Unsupported chain");
                 }
-              } catch {
-                // noop
+                return c.cosmos;
+              });
+
+            let evmEnabled = false;
+            for (const chainInfo of chainInfos) {
+              const pubKey = await this.getPubKey(
+                chainInfo.chainId,
+                keyInfo.id
+              );
+              if (pubKey.coinType === 60) {
+                evmEnabled = true;
               }
             }
-          }
+            if (!evmEnabled && !ignoreChainEnabled) {
+              return false;
+            }
+
+            for (const [key, value] of Object.entries(keyInfo.insensitive)) {
+              for (const chainInfo of chainInfos) {
+                try {
+                  const hexAddress =
+                    KeyRingService.getAddressHexStringFromKeyInfo(
+                      chainInfo,
+                      keyInfo,
+                      key,
+                      value,
+                      true
+                    );
+
+                  if (
+                    hexAddress.includes(
+                      searchText.replace("0x", "").toLowerCase()
+                    )
+                  ) {
+                    return true;
+                  }
+                } catch {
+                  // noop
+                }
+              }
+            }
+          })
+        );
+        hexAddressSearchKeyInfos = keyInfos.filter((_, i) => {
+          return asyncFilter[i];
         });
       }
     }
@@ -1916,69 +1934,78 @@ export class KeyRingService {
           return result;
         })();
 
-        bech32AddressSearchKeyInfos = keyInfos.filter((keyInfo) => {
-          if (!ignoreChainEnabled) {
-            targetChainInfos = targetChainInfos.filter((chainInfo) => {
-              return this.chainsUIService.isEnabled(
-                keyInfo.id,
-                chainInfo.chainId
-              );
-            });
-          }
-
-          const chainInfos = (() => {
-            if (ignoreChainEnabled) {
-              return this.chainsService.getChainInfos();
-            }
-            return targetChainInfos.length > 0
-              ? targetChainInfos
-              : (() => {
-                  const modularChainInfos =
-                    this.chainsUIService.enabledModularChainInfosForVault(
-                      keyInfo.id
-                    );
-                  // TODO: 다른 체인도 지원하기
-                  return modularChainInfos
-                    .filter((c) => "cosmos" in c)
-                    .map((c) => {
-                      if (!("cosmos" in c)) {
-                        throw new Error("Unsupported chain");
-                      }
-                      return c.cosmos;
-                    });
-                })();
-          })();
-
-          for (const chainInfo of chainInfos) {
-            for (const [key, value] of Object.entries(keyInfo.insensitive)) {
-              try {
-                const isEVM = KeyRingService.isEthermintLike(chainInfo);
-
-                const hexAddress =
-                  KeyRingService.getAddressHexStringFromKeyInfo(
-                    chainInfo,
-                    keyInfo,
-                    key,
-                    value,
-                    isEVM
-                  );
-
-                if (chainInfo.bech32Config == null) {
-                  return false;
-                }
-
-                const bech32Address = this.getKeySearchBech32FromHex(
-                  chainInfo.bech32Config.bech32PrefixAccAddr,
-                  hexAddress
+        const asyncFilter = await Promise.all(
+          keyInfos.map(async (keyInfo) => {
+            if (!ignoreChainEnabled) {
+              targetChainInfos = targetChainInfos.filter((chainInfo) => {
+                return this.chainsUIService.isEnabled(
+                  keyInfo.id,
+                  chainInfo.chainId
                 );
-                if (bech32Address.includes(searchText.toLowerCase())) {
-                  return true;
+              });
+            }
+
+            const chainInfos = (() => {
+              if (ignoreChainEnabled) {
+                return this.chainsService.getChainInfos();
+              }
+              return targetChainInfos.length > 0
+                ? targetChainInfos
+                : (() => {
+                    const modularChainInfos =
+                      this.chainsUIService.enabledModularChainInfosForVault(
+                        keyInfo.id
+                      );
+                    // TODO: 다른 체인도 지원하기
+                    return modularChainInfos
+                      .filter((c) => "cosmos" in c)
+                      .map((c) => {
+                        if (!("cosmos" in c)) {
+                          throw new Error("Unsupported chain");
+                        }
+                        return c.cosmos;
+                      });
+                  })();
+            })();
+
+            for (const chainInfo of chainInfos) {
+              for (const [key, value] of Object.entries(keyInfo.insensitive)) {
+                try {
+                  const pubKey = await this.getPubKey(
+                    chainInfo.chainId,
+                    keyInfo.id
+                  );
+                  const isEVM = pubKey.coinType === 60;
+
+                  const hexAddress =
+                    KeyRingService.getAddressHexStringFromKeyInfo(
+                      chainInfo,
+                      keyInfo,
+                      key,
+                      value,
+                      isEVM
+                    );
+
+                  if (chainInfo.bech32Config == null) {
+                    return false;
+                  }
+
+                  const bech32Address = this.getKeySearchBech32FromHex(
+                    chainInfo.bech32Config.bech32PrefixAccAddr,
+                    hexAddress
+                  );
+                  if (bech32Address.includes(searchText.toLowerCase())) {
+                    return true;
+                  }
+                } catch {
+                  // noop
                 }
-              } catch {
-                // noop
               }
             }
-          }
+          })
+        );
+        bech32AddressSearchKeyInfos = keyInfos.filter((_, i) => {
+          return asyncFilter[i];
         });
       }
     }
@@ -2113,13 +2140,5 @@ export class KeyRingService {
     ) {
       throw new Error("Invalid address index in hd path");
     }
-  }
-
-  static isEthermintLike(chainInfo: ChainInfo): boolean {
-    return (
-      chainInfo.bip44.coinType === 60 ||
-      !!chainInfo.features?.includes("eth-address-gen") ||
-      !!chainInfo.features?.includes("eth-key-sign")
-    );
   }
 }

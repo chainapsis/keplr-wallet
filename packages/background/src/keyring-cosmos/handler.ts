@@ -358,7 +358,7 @@ const handleGetCosmosKeysForEachVaultWithSearchSettledMsg: (
   service
 ) => {
   return async (_, msg) => {
-    const searched = service.keyRingService.searchKeyRings(
+    const searched = await service.keyRingService.searchKeyRings(
       msg.searchText,
       true
     );

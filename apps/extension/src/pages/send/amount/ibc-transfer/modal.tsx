@@ -204,7 +204,8 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
                       const isEVMOnlyChain = chainStore.isEvmOnlyChain(
                         bridgeOrChannel.destinationChainId
                       );
-                      const isEvmChain = chainStore.isEvmChain(chainId);
+                      const isEvmChain =
+                        accountStore.getAccount(chainId).isEvmOrEthermint;
 
                       const sendingDenomHelper = new DenomHelper(
                         bridgeOrChannel.denom

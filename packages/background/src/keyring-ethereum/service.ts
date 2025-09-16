@@ -87,7 +87,8 @@ export class KeyRingEthereumService {
     if (chainInfo.hideInUI) {
       throw new Error("Can't sign for hidden chain");
     }
-    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
+    const key = await this.keyRingCosmosService.getKey(vaultId, chainId);
+    const isEthermintLike = key.algo === "ethsecp256k1";
     const evmInfo = ChainsService.getEVMInfo(chainInfo);
     const forceEVMLedger = chainInfo.features?.includes(
       "force-enable-evm-ledger"
@@ -124,7 +125,6 @@ export class KeyRingEthereumService {
       ).toLowerCase();
     }
 
-    const key = await this.keyRingCosmosService.getKey(vaultId, chainId);
     if (
       signer !== key.bech32Address &&
       signer !== key.ethereumHexAddress.toLowerCase()

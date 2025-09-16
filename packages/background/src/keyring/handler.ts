@@ -431,7 +431,7 @@ const handleExportKeyRingVaultsMsg: (
 const handleSearchKeyRingsMsg: (
   service: KeyRingService
 ) => InternalHandler<SearchKeyRingsMsg> = (service) => {
-  return (_, msg) => {
-    return service.searchKeyRings(msg.searchText);
+  return async (_, msg) => {
+    return await service.searchKeyRings(msg.searchText);
   };
 };

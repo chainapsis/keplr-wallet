@@ -238,7 +238,8 @@ export class KeyRingCosmosService {
     if (chainInfo.hideInUI) {
       throw new Error("Can't sign for hidden chain");
     }
-    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
+    const key = await this.getKey(vaultId, chainId);
+    const isEthermintLike = key.algo === "ethsecp256k1";
     const forceEVMLedger = chainInfo.features?.includes(
       "force-enable-evm-ledger"
     );
@@ -262,7 +263,6 @@ export class KeyRingCosmosService {
     signDoc = trimAminoSignDoc(signDoc);
     signDoc = sortObjectByKey(signDoc);
 
-    const key = await this.getKey(vaultId, chainId);
     const bech32Prefix =
       this.chainsService.getChainInfoOrThrow(chainId).bech32Config
         ?.bech32PrefixAccAddr ?? "";
@@ -384,7 +384,8 @@ export class KeyRingCosmosService {
 
     const vaultId = this.keyRingService.selectedVaultId;
 
-    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
+    const key = await this.getKey(vaultId, chainId);
+    const isEthermintLike = key.algo === "ethsecp256k1";
     const forceEVMLedger = chainInfo.features?.includes(
       "force-enable-evm-ledger"
     );
@@ -408,7 +409,6 @@ export class KeyRingCosmosService {
     signDoc = trimAminoSignDoc(signDoc);
     signDoc = sortObjectByKey(signDoc);
 
-    const key = await this.getKey(vaultId, chainId);
     const bech32Prefix =
       this.chainsService.getChainInfoOrThrow(chainId).bech32Config
         ?.bech32PrefixAccAddr ?? "";
@@ -487,7 +487,8 @@ export class KeyRingCosmosService {
 
     const vaultId = this.keyRingService.selectedVaultId;
 
-    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
+    const key = await this.getKey(vaultId, chainId);
+    const isEthermintLike = key.algo === "ethsecp256k1";
     const forceEVMLedger = chainInfo.features?.includes(
       "force-enable-evm-ledger"
     );
@@ -511,7 +512,6 @@ export class KeyRingCosmosService {
     signDoc = trimAminoSignDoc(signDoc);
     signDoc = sortObjectByKey(signDoc);
 
-    const key = await this.getKey(vaultId, chainId);
     const bech32Prefix =
       this.chainsService.getChainInfoOrThrow(chainId).bech32Config
         ?.bech32PrefixAccAddr ?? "";
@@ -624,7 +624,8 @@ export class KeyRingCosmosService {
 
     const vaultId = this.keyRingService.selectedVaultId;
 
-    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
+    const key = await this.getKey(vaultId, chainId);
+    const isEthermintLike = key.algo === "ethsecp256k1";
     const forceEVMLedger = chainInfo.features?.includes(
       "force-enable-evm-ledger"
     );
@@ -648,7 +649,6 @@ export class KeyRingCosmosService {
     signDoc = trimAminoSignDoc(signDoc);
     signDoc = sortObjectByKey(signDoc);
 
-    const key = await this.getKey(vaultId, chainId);
     const bech32Prefix =
       this.chainsService.getChainInfoOrThrow(chainId).bech32Config
         ?.bech32PrefixAccAddr ?? "";
@@ -746,7 +746,8 @@ export class KeyRingCosmosService {
     if (chainInfo.hideInUI) {
       throw new Error("Can't sign for hidden chain");
     }
-    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
+    const key = await this.getKey(vaultId, chainId);
+    const isEthermintLike = key.algo === "ethsecp256k1";
     const forceEVMLedger = chainInfo.features?.includes(
       "force-enable-evm-ledger"
     );
@@ -762,7 +763,6 @@ export class KeyRingCosmosService {
       );
     }
 
-    const key = await this.getKey(vaultId, chainId);
     const bech32Prefix =
       this.chainsService.getChainInfoOrThrow(chainId).bech32Config
         ?.bech32PrefixAccAddr ?? "";
@@ -845,7 +845,8 @@ export class KeyRingCosmosService {
     if (chainInfo.hideInUI) {
       throw new Error("Can't sign for hidden chain");
     }
-    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
+    const key = await this.getKey(vaultId, chainId);
+    const isEthermintLike = key.algo === "ethsecp256k1";
     const forceEVMLedger = chainInfo.features?.includes(
       "force-enable-evm-ledger"
     );
@@ -861,7 +862,6 @@ export class KeyRingCosmosService {
       );
     }
 
-    const key = await this.getKey(vaultId, chainId);
     if (!env.isInternalMsg && key.algo === "ethsecp256k1") {
       const authInfo = AuthInfo.decode(signDoc.authInfoBytes);
       if (
@@ -1003,7 +1003,8 @@ export class KeyRingCosmosService {
     if (chainInfo.hideInUI) {
       throw new Error("Can't sign for hidden chain");
     }
-    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
+    const key = await this.getKey(vaultId, chainId);
+    const isEthermintLike = key.algo === "ethsecp256k1";
     const forceEVMLedger = chainInfo.features?.includes(
       "force-enable-evm-ledger"
     );
@@ -1019,7 +1020,6 @@ export class KeyRingCosmosService {
       );
     }
 
-    const key = await this.getKey(vaultId, chainId);
     const bech32Prefix =
       this.chainsService.getChainInfoOrThrow(chainId).bech32Config
         ?.bech32PrefixAccAddr ?? "";
@@ -1141,9 +1141,9 @@ export class KeyRingCosmosService {
     signature: StdSignature
   ): Promise<boolean> {
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
-
     const key = await this.getKey(vaultId, chainId);
+    const isEthermintLike = key.algo === "ethsecp256k1";
+
     const bech32Prefix = chainInfo.bech32Config?.bech32PrefixAccAddr ?? "";
     const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
     if (signer !== bech32Address) {
@@ -1212,7 +1212,8 @@ export class KeyRingCosmosService {
     if (chainInfo.hideInUI) {
       throw new Error("Can't sign for hidden chain");
     }
-    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
+    const key = await this.getKey(vaultId, chainId);
+    const isEthermintLike = key.algo === "ethsecp256k1";
     const forceEVMLedger = chainInfo.features?.includes(
       "force-enable-evm-ledger"
     );
@@ -1264,7 +1265,6 @@ export class KeyRingCosmosService {
     signDoc = trimAminoSignDoc(signDoc);
     signDoc = sortObjectByKey(signDoc);
 
-    const key = await this.getKey(vaultId, chainId);
     const bech32Prefix =
       this.chainsService.getChainInfoOrThrow(chainId).bech32Config
         ?.bech32PrefixAccAddr ?? "";
@@ -1453,9 +1453,8 @@ export class KeyRingCosmosService {
 
         const ownerBech32 = Bech32Address.fromBech32(owner);
         for (const accountInfo of interactionInfo.accountInfos) {
-          const isEthermintLike = KeyRingService.isEthermintLike(
-            this.chainsService.getChainInfoOrThrow(accountInfo.chainId)
-          );
+          const key = await this.getKey(vaultId, chainId);
+          const isEthermintLike = key.algo === "ethsecp256k1";
 
           if (
             ownerBech32.toHex(false) !==

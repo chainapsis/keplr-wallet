@@ -1090,7 +1090,10 @@ export class ChainsService {
       newChainInfo = {
         ...newChainInfo,
         ...(() => {
-          if (newChainInfo.chainId === "mantra-1") {
+          if (
+            newChainInfo.chainId === "mantra-1" ||
+            newChainInfo.chainId === "mantra-dukong-1"
+          ) {
             return {
               bip44: {
                 coinType: 60,
