@@ -37,7 +37,6 @@ import { FormattedMessage, useIntl } from "react-intl";
 import SimpleBar from "simplebar-react";
 import { KeystoneSign } from "../../components/keystone";
 import { ErrModuleKeystoneSign, KeystoneUR } from "../../utils/keystone";
-import { KeyRingService } from "@keplr-wallet/background";
 import { useTheme } from "styled-components";
 import { defaultProtoCodec } from "@keplr-wallet/cosmos";
 import { MsgGrant } from "@keplr-wallet/proto-types/cosmos/authz/v1beta1/tx";
@@ -402,9 +401,7 @@ export const CosmosTxView: FunctionComponent<{
       } else if (interactionData.data.keyType === "keystone") {
         setIsKeystoneInteracting(true);
         setKeystoneInteractingError(undefined);
-        const isEthSigning = KeyRingService.isEthermintLike(
-          chainStore.getChain(chainId)
-        );
+        const isEthSigning = interactionData.data.isEthermintLike;
         presignOptions = {
           isEthSigning,
           displayQRCode: async (ur: KeystoneUR) => {

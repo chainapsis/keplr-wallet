@@ -17,6 +17,7 @@ export type SignInteractionData =
       };
       keyType: string;
       keyInsensitive: PlainObject;
+      isEthermintLike: boolean;
 
       eip712?: {
         types: Record<string, { name: string; type: string }[] | undefined>;
@@ -35,6 +36,7 @@ export type SignInteractionData =
       signOptions: KeplrSignOptions;
       keyType: string;
       keyInsensitive: PlainObject;
+      isEthermintLike: boolean;
     };
 
 export class SignInteractionStore {

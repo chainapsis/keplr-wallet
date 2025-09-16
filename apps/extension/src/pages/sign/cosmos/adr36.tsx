@@ -17,7 +17,6 @@ import { useIntl } from "react-intl";
 import { ErrModuleKeystoneSign, KeystoneUR } from "../utils/keystone";
 import { KeystoneSign } from "../components/keystone";
 import { useTheme } from "styled-components";
-import { KeyRingService } from "@keplr-wallet/background";
 import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
 import { KeystoneUSBBox } from "../components/keystone-usb-box";
 import { useNavigate } from "react-router";
@@ -261,11 +260,8 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
               ) {
                 setIsKeystoneInteracting(true);
                 setKeystoneInteractingError(undefined);
-                const isEthSigning = KeyRingService.isEthermintLike(
-                  chainStore.getChain(
-                    signInteractionStore.waitingData.data.chainId
-                  )
-                );
+                const isEthSigning =
+                  signInteractionStore.waitingData.data.isEthermintLike;
                 presignOptions = {
                   isEthSigning,
                   displayQRCode: async (ur: KeystoneUR) => {
