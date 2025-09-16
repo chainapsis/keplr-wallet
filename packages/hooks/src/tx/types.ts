@@ -42,7 +42,7 @@ export interface ISenderConfig extends ITxChainSetter {
   setValue(value: string): void;
 
   sender: string;
-  readonly isEthermintOrEvm: boolean;
+  readonly isEvmOrEthermint: boolean;
 
   uiProperties: UIProperties;
 }

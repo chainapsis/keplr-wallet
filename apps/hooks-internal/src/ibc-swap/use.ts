@@ -24,6 +24,7 @@ export const useIBCSwapConfig = (
   skipQueries: SkipQueries,
   chainId: string,
   sender: string,
+  isEvmOrEthermint: boolean,
   initialGas: number,
   outChainId: string,
   outCurrency: AppCurrency,
@@ -34,7 +35,12 @@ export const useIBCSwapConfig = (
     splitRoutes?: boolean;
   }
 ) => {
-  const senderConfig = useSenderConfig(chainGetter, chainId, sender);
+  const senderConfig = useSenderConfig(
+    chainGetter,
+    chainId,
+    sender,
+    isEvmOrEthermint
+  );
   const amountConfig = useIBCSwapAmountConfig(
     chainGetter,
     queriesStore,

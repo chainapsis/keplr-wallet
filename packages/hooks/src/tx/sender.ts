@@ -8,18 +8,18 @@ export class SenderConfig extends TxChainSetter implements ISenderConfig {
   @observable
   protected _value: string = "";
   @observable
-  protected _isEthermintOrEvm: boolean = false;
+  protected _isEvmOrEthermint: boolean = false;
 
   constructor(
     chainGetter: ChainGetter,
     initialChainId: string,
     initialSender: string,
-    initialIsEthermintOrEvm: boolean
+    initialisEvmOrEthermint: boolean
   ) {
     super(chainGetter, initialChainId);
 
     this._value = initialSender;
-    this._isEthermintOrEvm = initialIsEthermintOrEvm;
+    this._isEvmOrEthermint = initialisEvmOrEthermint;
 
     makeObservable(this);
   }
@@ -37,13 +37,13 @@ export class SenderConfig extends TxChainSetter implements ISenderConfig {
     this._value = value;
   }
 
-  get isEthermintOrEvm(): boolean {
-    return this._isEthermintOrEvm;
+  get isEvmOrEthermint(): boolean {
+    return this._isEvmOrEthermint;
   }
 
   @action
-  setIsEthermintOrEvm(value: boolean) {
-    this._isEthermintOrEvm = value;
+  setisEvmOrEthermint(value: boolean) {
+    this._isEvmOrEthermint = value;
   }
 
   get uiProperties(): UIProperties {
@@ -55,14 +55,14 @@ export const useSenderConfig = (
   chainGetter: ChainGetter,
   chainId: string,
   sender: string,
-  isEthermintOrEvm: boolean
+  isEvmOrEthermint: boolean
 ) => {
   const [config] = useState(
-    () => new SenderConfig(chainGetter, chainId, sender, isEthermintOrEvm)
+    () => new SenderConfig(chainGetter, chainId, sender, isEvmOrEthermint)
   );
   config.setChain(chainId);
   config.setValue(sender);
-  config.setIsEthermintOrEvm(isEthermintOrEvm);
+  config.setisEvmOrEthermint(isEvmOrEthermint);
 
   return config;
 };

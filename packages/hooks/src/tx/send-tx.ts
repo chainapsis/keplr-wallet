@@ -14,6 +14,7 @@ export const useSendTxConfig = (
   queriesStore: QueriesStore,
   chainId: string,
   sender: string,
+  isEvmOrEthermint: boolean,
   initialGas: number,
   options: {
     allowHexAddressToBech32Address?: boolean;
@@ -27,7 +28,12 @@ export const useSendTxConfig = (
     computeTerraClassicTax?: boolean;
   } = {}
 ) => {
-  const senderConfig = useSenderConfig(chainGetter, chainId, sender);
+  const senderConfig = useSenderConfig(
+    chainGetter,
+    chainId,
+    sender,
+    isEvmOrEthermint
+  );
 
   const amountConfig = useAmountConfig(
     chainGetter,

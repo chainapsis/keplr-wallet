@@ -14,10 +14,16 @@ export const useRedelegateTxConfig = (
   queriesStore: QueriesStore,
   chainId: string,
   sender: string,
+  isEvmOrEthermint: boolean,
   validatorAddress: string,
   initialGas: number
 ) => {
-  const senderConfig = useSenderConfig(chainGetter, chainId, sender);
+  const senderConfig = useSenderConfig(
+    chainGetter,
+    chainId,
+    sender,
+    isEvmOrEthermint
+  );
   const amountConfig = useStakedAmountConfig(
     chainGetter,
     queriesStore,

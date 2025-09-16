@@ -67,6 +67,7 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
     accountStore,
     chainId,
     sender,
+    account.isEvmOrEthermint,
     currency,
     outCurrency
   );

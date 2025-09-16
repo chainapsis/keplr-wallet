@@ -80,7 +80,12 @@ export const CosmosTxView: FunctionComponent<{
   const chainId = interactionData.data.chainId;
   const signer = interactionData.data.signer;
 
-  const senderConfig = useSenderConfig(chainStore, chainId, signer);
+  const senderConfig = useSenderConfig(
+    chainStore,
+    chainId,
+    signer,
+    signInteractionStore.waitingData?.data.isEthermintLike ?? false
+  );
   // There are services that sometimes use invalid tx to sign arbitrary data on the sign page.
   // In this case, there is no obligation to deal with it, but 0 gas is favorably allowed.
   const gasConfig = useZeroAllowedGasConfig(chainStore, chainId, 0);

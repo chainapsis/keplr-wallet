@@ -101,7 +101,7 @@ export const EthereumSigningView: FunctionComponent<{
   const ethereumAccount = ethereumAccountStore.getAccount(chainId);
   const chainInfo = chainStore.getChain(chainId);
 
-  const senderConfig = useSenderConfig(chainStore, chainId, signer);
+  const senderConfig = useSenderConfig(chainStore, chainId, signer, true);
   const gasConfig = useZeroAllowedGasConfig(chainStore, chainId, 0);
   const amountConfig = useAmountConfig(
     chainStore,

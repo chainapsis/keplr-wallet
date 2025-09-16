@@ -111,6 +111,7 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
     queriesStore,
     chainId,
     sender,
+    account.isEvmOrEthermint,
     300000,
     true
   );

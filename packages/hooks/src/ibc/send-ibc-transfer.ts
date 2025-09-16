@@ -26,6 +26,7 @@ export const useIBCTransferConfig = (
   queriesStore: IQueriesStore,
   chainId: string,
   sender: string,
+  isEvmOrEthermint: boolean,
   initialGas: number,
   options: {
     allowHexAddressToBech32Address?: boolean;
@@ -37,7 +38,12 @@ export const useIBCTransferConfig = (
 ) => {
   const channelConfig = useIBCChannelConfig();
 
-  const senderConfig = useSenderConfig(chainGetter, chainId, sender);
+  const senderConfig = useSenderConfig(
+    chainGetter,
+    chainId,
+    sender,
+    isEvmOrEthermint
+  );
 
   const amountConfig = useIBCAmountConfig(
     chainGetter,
@@ -85,6 +91,7 @@ export const useSendMixedIBCTransferConfig = (
   queriesStore: IQueriesStore,
   chainId: string,
   sender: string,
+  isEvmOrEthermint: boolean,
   initialGas: number,
   isIBCTransfer: boolean,
   options: {
@@ -102,7 +109,12 @@ export const useSendMixedIBCTransferConfig = (
 ) => {
   const channelConfig = useIBCChannelConfig(!isIBCTransfer);
 
-  const senderConfig = useSenderConfig(chainGetter, chainId, sender);
+  const senderConfig = useSenderConfig(
+    chainGetter,
+    chainId,
+    sender,
+    isEvmOrEthermint
+  );
 
   const amountConfig = useIBCAmountConfig(
     chainGetter,

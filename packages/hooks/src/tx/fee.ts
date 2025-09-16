@@ -175,7 +175,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
   @computed
   get selectableFeeCurrencies(): FeeCurrency[] {
-    if (this.senderConfig.isEthermintOrEvm) {
+    if (this.senderConfig.isEvmOrEthermint) {
       return this.chainInfo.feeCurrencies.slice(0, 1);
     }
 

@@ -90,6 +90,7 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
     accountStore,
     chainId,
     sender,
+    account.isEvmOrEthermint,
     currency,
     outCurrency
   );

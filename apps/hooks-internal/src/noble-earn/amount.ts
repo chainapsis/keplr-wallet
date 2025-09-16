@@ -159,10 +159,16 @@ export const useNobleEarnAmountConfig = (
   accountStore: IAccountStoreWithInjects<[CosmosAccount]>,
   chainId: string,
   sender: string,
+  isEvmOrEthermint: boolean,
   inCurrency: AppCurrency,
   outCurrency: AppCurrency
 ) => {
-  const senderConfig = useSenderConfig(chainGetter, chainId, sender);
+  const senderConfig = useSenderConfig(
+    chainGetter,
+    chainId,
+    sender,
+    isEvmOrEthermint
+  );
 
   const [amountConfig] = useState(
     () =>

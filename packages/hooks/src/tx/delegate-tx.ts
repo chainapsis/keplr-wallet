@@ -15,11 +15,17 @@ export const useDelegateTxConfig = (
   queriesStore: QueriesStore,
   chainId: string,
   sender: string,
+  isEvmOrEthermint: boolean,
   validatorAddress: string,
   initialGas: number,
   fractionSubFeeWeight?: number
 ) => {
-  const senderConfig = useSenderConfig(chainGetter, chainId, sender);
+  const senderConfig = useSenderConfig(
+    chainGetter,
+    chainId,
+    sender,
+    isEvmOrEthermint
+  );
   const amountConfig = useAmountConfig(
     chainGetter,
     queriesStore,

@@ -194,6 +194,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     isInChainEVMOnly
       ? inChainAccount.ethereumHexAddress
       : inChainAccount.bech32Address,
+    inChainAccount.isEvmOrEthermint,
     // TODO: config로 빼기
     1_500_000,
     outChainId,

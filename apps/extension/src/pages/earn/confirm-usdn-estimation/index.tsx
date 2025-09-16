@@ -75,6 +75,7 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
     accountStore,
     NOBLE_CHAIN_ID,
     account.bech32Address,
+    account.isEvmOrEthermint,
     inCurrency,
     outCurrency
   );

@@ -48,6 +48,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
     queriesStore,
     chainStore.getChain(chainId).chainId,
     accountInfo.bech32Address,
+    accountInfo.isEvmOrEthermint,
     // TODO: 이 값을 config 밑으로 빼자
     300000,
     {
