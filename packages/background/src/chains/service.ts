@@ -1086,6 +1086,12 @@ export class ChainsService {
         };
       }
 
+      let features = [...(newChainInfo.features ?? [])];
+      if (features.includes("evm-feemarket")) {
+        // evm-feemarket and feemarket is incompatible.
+        features = features.filter((f) => f !== "feemarket");
+      }
+
       newChainInfo = {
         ...newChainInfo,
         currencies: newChainInfo.currencies.map((currency) => {
@@ -1128,6 +1134,7 @@ export class ChainsService {
             coinMinimalDenom,
           };
         }),
+        features,
       };
       return newChainInfo;
     });
