@@ -917,10 +917,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   if (
                     receiverAccount.isNanoLedger &&
                     receiverChainInfo &&
-                    (receiverChainInfo.bip44.coinType === 60 ||
-                      receiverChainInfo.features.includes("eth-address-gen") ||
-                      receiverChainInfo.features.includes("eth-key-sign") ||
-                      receiverChainInfo.evm != null)
+                    chainStore.isEvmOrEthermintLikeChain(chainId)
                   ) {
                     throw new Error(
                       "Please connect Ethereum app on Ledger with Keplr to get the address"
@@ -1001,10 +998,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   if (
                     receiverAccount.isNanoLedger &&
                     receiverChainInfo &&
-                    (receiverChainInfo.bip44.coinType === 60 ||
-                      receiverChainInfo.features.includes("eth-address-gen") ||
-                      receiverChainInfo.features.includes("eth-key-sign") ||
-                      receiverChainInfo.evm != null)
+                    chainStore.isEvmOrEthermintLikeChain(receiverChainId)
                   ) {
                     throw new Error(
                       "Please connect Ethereum app on Ledger with Keplr to get the address"
