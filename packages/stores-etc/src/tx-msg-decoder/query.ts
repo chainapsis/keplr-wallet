@@ -50,7 +50,7 @@ export class ObservablePostTxMsgDecoder {
     const urlPrefix = getTxInterpreterURLPrefix(bech32Prefix);
 
     if (!urlPrefix.length) {
-      console.log(
+      throw new Error(
         `Url prefix not supported. Unable to send the request to the tx-codec, bech32Prefix: ${bech32Prefix}`
       );
     }
