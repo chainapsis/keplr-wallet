@@ -2466,6 +2466,10 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/mantra/chain.png",
     rpc: "https://rpc-mantra.keplr.app",
     rest: "https://lcd-mantra.keplr.app",
+    evm: {
+      chainId: 5888,
+      rpc: "https://evm-mantra.keplr.app",
+    },
     bip44: {
       coinType: 118,
     },
@@ -2510,7 +2514,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       coinImageUrl:
         "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/mantra/om.png",
     },
-    features: ["cosmwasm"],
+    features: ["cosmwasm", "eth-secp256k1-cosmos"],
   },
   {
     rpc: "https://rpc-pirin.keplr.app",
