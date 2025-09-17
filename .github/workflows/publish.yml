@@ -47,6 +47,7 @@ jobs:
           KEPLR_EXT_TOKEN_FACTORY_URI: ${{ secrets.KEPLR_EXT_TOKEN_FACTORY_URI }}
           KEPLR_EXT_TX_HISTORY_BASE_URL: ${{ secrets.KEPLR_EXT_TX_HISTORY_BASE_URL }}
           KEPLR_EXT_CONFIG_SERVER: ${{ secrets.KEPLR_EXT_CONFIG_SERVER }}
+          KEPLR_EXT_TX_CODEC_BASE_URL: ${{ secrets.KEPLR_EXT_TX_CODEC_BASE_URL }}
           WC_PROJECT_ID: ${{ secrets.WC_PROJECT_ID }}
           SKIP_API_KEY: ${{ secrets.SKIP_API_KEY }}
           KEPLR_EXT_PROVIDER_META_ID: ${{ secrets.KEPLR_EXT_PROVIDER_META_ID }}

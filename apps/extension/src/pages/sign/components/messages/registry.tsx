@@ -1,7 +1,11 @@
-import React, { FunctionComponent, PropsWithChildren } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { IMessageRenderer, IMessageRenderRegistry } from "./types";
 import { Msg } from "@keplr-wallet/types";
-import { AnyWithUnpacked, ProtoCodec } from "@keplr-wallet/cosmos";
+import {
+  AnyWithUnpacked,
+  defaultProtoCodec,
+  ProtoCodec,
+} from "@keplr-wallet/cosmos";
 import yaml from "js-yaml";
 import {
   AgoricProvisionMessage,
@@ -23,6 +27,8 @@ import { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
 import { ClaimBtcDelegationRewardMessage } from "./render/claim-btc-delegation-reward";
 import { AtomoneMintPhotonMessage } from "./render/atomone-mint-photon";
+import { useStore } from "../../../../stores";
+import { MsgSkeleton } from "./render/msg-skeleton";
 
 export class MessageRenderRegistry implements IMessageRenderRegistry {
   protected renderers: IMessageRenderer[] = [];
@@ -52,37 +58,108 @@ export class MessageRenderRegistry implements IMessageRenderRegistry {
       // Fallback to unknown message
     }
 
-    const prettyMsg = (() => {
-      try {
-        if ("type" in msg) {
-          return yaml.dump(msg);
-        }
-
-        if ("typeUrl" in msg) {
-          return yaml.dump(protoCodec.unpackedAnyToJSONRecursive(msg));
-        }
-
-        return yaml.dump(msg);
-      } catch (e) {
-        console.log(e);
-        return "Failed to decode the msg";
-      }
-    })();
-
     return {
       icon: <CustomIcon />,
       title: (
         <FormattedMessage id="page.sign.components.messages.custom.title" />
       ),
-      content: <UnknownMessageContent>{prettyMsg}</UnknownMessageContent>,
+      content: <UnknownMessageContent msg={msg} chainId={chainId} />,
     };
   }
 }
 
-const UnknownMessageContent: FunctionComponent<PropsWithChildren> = ({
-  children,
-}) => {
+const UnknownMessageContent: FunctionComponent<{
+  msg: Msg | AnyWithUnpacked;
+  chainId: string;
+}> = ({ msg, chainId }) => {
   const theme = useTheme();
+  const { queriesStore, chainStore } = useStore();
+  const [loading, setLoading] = useState(false);
+  const [txCodecMsg, setTxCodecMsg] = useState<string>("");
+
+  const rawPrettyMsg = (() => {
+    try {
+      if ("type" in msg) {
+        return yaml.dump(msg);
+      }
+
+      if ("typeUrl" in msg) {
+        return yaml.dump(defaultProtoCodec.unpackedAnyToJSONRecursive(msg));
+      }
+
+      return yaml.dump(msg);
+    } catch (e) {
+      console.log(e);
+      return "Failed to decode the msg";
+    }
+  })();
+
+  useEffect(() => {
+    if ("type" in msg) {
+      return;
+    }
+
+    if (!("typeUrl" in msg)) {
+      return;
+    }
+
+    if (loading || txCodecMsg.length) {
+      return;
+    }
+
+    (async () => {
+      try {
+        setLoading(true);
+
+        const chainInfo = chainStore.getModularChain(chainId);
+        const bech32Prefix =
+          "cosmos" in chainInfo
+            ? chainInfo.cosmos.bech32Config?.bech32PrefixAccAddr ?? ""
+            : "";
+        const keplrETCQueries = queriesStore.get(chainId).keplrETC;
+
+        const query = await keplrETCQueries.queryTxMsgDecoder
+          .protoToAmino(bech32Prefix, [
+            {
+              typeUrl: msg.typeUrl,
+              value: Buffer.from(msg.value).toString("base64"),
+            },
+          ])
+          .waitFreshResponse();
+
+        const decoded = query?.data?.result;
+
+        if (decoded?.messages?.length) {
+          setTxCodecMsg(
+            yaml.dump(
+              {
+                typeUrl: msg.typeUrl,
+                value: decoded.messages[0]["value"],
+              },
+              {
+                indent: 2,
+                sortKeys: true,
+              }
+            )
+          );
+          return;
+        }
+
+        console.log("Invalid or empty response from tx-codec:", decoded);
+      } catch (e) {
+        console.log("tx-codec error:", e);
+      } finally {
+        setLoading(false);
+      }
+    })();
+    // `loading` is not included in the dependency array, since it should not trigger the effect when it changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chainId, msg, queriesStore, chainStore]);
+
+  if (loading) {
+    return <MsgSkeleton />;
+  }
+
   return (
     <pre
       style={{
@@ -93,7 +170,7 @@ const UnknownMessageContent: FunctionComponent<PropsWithChildren> = ({
             : ColorPalette["gray-200"],
       }}
     >
-      {children}
+      {txCodecMsg || rawPrettyMsg}
     </pre>
   );
 };

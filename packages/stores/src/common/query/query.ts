@@ -19,11 +19,13 @@ export type QueryOptions = {
   readonly cacheMaxAge: number;
   // millisec
   readonly fetchingInterval: number;
+  readonly disableCache: boolean;
 };
 
 export const defaultOptions: QueryOptions = {
   cacheMaxAge: 0,
   fetchingInterval: 0,
+  disableCache: false,
 };
 
 export type QueryError<E> = {
@@ -401,7 +403,9 @@ export abstract class ObservableQuery<T = unknown, E = unknown>
         }
       }
     } else {
-      if (this.options.cacheMaxAge > 0) {
+      if (this.options.disableCache) {
+        // Skip cache check when cache is disabled
+      } else if (this.options.cacheMaxAge > 0) {
         if (this._response.timestamp > Date.now() - this.options.cacheMaxAge) {
           this._isFetching = false;
           return;
@@ -499,8 +503,11 @@ export abstract class ObservableQuery<T = unknown, E = unknown>
         local: false,
         timestamp: Date.now(),
       };
-      // Should not wait.
-      this.saveResponse(response);
+      // Skip saving response if disableCache is true.
+      if (!this.options.disableCache) {
+        // Should not wait.
+        this.saveResponse(response);
+      }
 
       this.onReceiveResponse(response);
       yield this.sharedContext.handleResponse(() => {

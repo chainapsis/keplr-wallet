@@ -12,6 +12,7 @@ declare namespace NodeJS {
     KEPLR_EXT_STARKNET_PROVIDER_INFO_ID: string;
     KEPLR_EXT_STARKNET_PROVIDER_INFO_NAME: string;
     KEPLR_EXT_STARKNET_PROVIDER_INFO_ICON: string;
+    KEPLR_EXT_TX_CODEC_BASE_URL: string;
 
     KEPLR_EXT_PROVIDER_META_ID: string | undefined;
   }
