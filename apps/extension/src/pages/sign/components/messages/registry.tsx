@@ -103,11 +103,11 @@ const UnknownMessageContent: FunctionComponent<{
       return;
     }
 
-    (async () => {
-      if (loading) {
-        return;
-      }
+    if (loading || txCodecMsg.length) {
+      return;
+    }
 
+    (async () => {
       try {
         setLoading(true);
 
