@@ -41,6 +41,7 @@ import {
 import { Button } from "../../../components/button";
 import { FormattedMessage } from "react-intl";
 import { NOBLE_CHAIN_ID } from "../../../config.ui";
+import { MintPhotonButton } from "./mint-photon-button";
 
 const Styles = {
   Container: styled.div`
@@ -643,6 +644,18 @@ export const TokenDetailModal: FunctionComponent<{
                 <React.Fragment>
                   <Gutter size="1.25rem" />
                   <StakedBalance modularChainInfo={modularChainInfo} />
+                </React.Fragment>
+              );
+            }
+            return null;
+          })()}
+
+          {(() => {
+            if (ChainIdHelper.parse(chainId).identifier === "atomone") {
+              return (
+                <React.Fragment>
+                  <Gutter size="0.5rem" />
+                  <MintPhotonButton />
                 </React.Fragment>
               );
             }

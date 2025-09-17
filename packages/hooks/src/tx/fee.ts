@@ -48,6 +48,9 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   @observable
   protected _l1DataFee: Dec | undefined = undefined;
 
+  @observable
+  protected forceUseAtoneTokenAsFee: boolean = false;
+
   constructor(
     chainGetter: ChainGetter,
     protected readonly queriesStore: QueriesStore,
@@ -56,13 +59,14 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     protected readonly amountConfig: IBaseAmountConfig,
     protected readonly gasConfig: IGasConfig,
     additionAmountToNeedFee: boolean = true,
-    computeTerraClassicTax: boolean = false
+    computeTerraClassicTax: boolean = false,
+    forceUseAtoneTokenAsFee: boolean = false
   ) {
     super(chainGetter, initialChainId);
 
     this.additionAmountToNeedFee = additionAmountToNeedFee;
     this.computeTerraClassicTax = computeTerraClassicTax;
-
+    this.forceUseAtoneTokenAsFee = forceUseAtoneTokenAsFee;
     makeObservable(this);
   }
 
@@ -74,6 +78,11 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   @action
   setComputeTerraClassicTax(computeTerraClassicTax: boolean) {
     this.computeTerraClassicTax = computeTerraClassicTax;
+  }
+
+  @action
+  setForceUseAtoneTokenAsFee(forceUseAtoneTokenAsFee: boolean) {
+    this.forceUseAtoneTokenAsFee = forceUseAtoneTokenAsFee;
   }
 
   @action
@@ -179,6 +188,20 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       return this.chainInfo.feeCurrencies.slice(0, 1);
     }
 
+    if (this.chainInfo.chainId === "atomone-1") {
+      //현재 atomone에서는 MsgMintPhoton를 제외하면 ATONE을 fee로 사용해서 안됨, 그래서 하드코딩으로 옵션을 적용
+      const feeCurrenciesWithoutAtone = this.chainInfo.feeCurrencies.filter(
+        (cur) => cur.coinMinimalDenom !== "uatone"
+      );
+
+      if (
+        feeCurrenciesWithoutAtone.length > 0 &&
+        !this.forceUseAtoneTokenAsFee
+      ) {
+        return feeCurrenciesWithoutAtone;
+      }
+    }
+
     if (this.canOsmosisTxFeesAndReady()) {
       const queryOsmosis = this.queriesStore.get(this.chainId).osmosis;
 
@@ -227,6 +250,13 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
           });
       }
     } else if (this.canFeeMarketTxFeesAndReady()) {
+      if (this.chainInfo.hasFeature("initia-dynamicfee")) {
+        return this.chainInfo.feeCurrencies.slice(0, 1);
+      }
+      if (this.chainInfo.hasFeature("evm-feemarket")) {
+        return this.chainInfo.feeCurrencies.slice(0, 1);
+      }
+
       const queryCosmos = this.queriesStore.get(this.chainId).cosmos;
       if (queryCosmos) {
         const gasPrices = queryCosmos.queryFeeMarketGasPrices.gasPrices;
@@ -447,6 +477,19 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         ) != null
       );
     }
+    if (this.chainInfo.hasFeature("evm-feemarket")) {
+      const queries = this.queriesStore.get(this.chainId);
+      if (!queries.cosmos) {
+        console.log(
+          "Chain has evm-feemarket feature. But no cosmos queries provided."
+        );
+        return false;
+      }
+      const queryEvmFeeMarketBaseFee = queries.cosmos.queryEvmFeeMarketBaseFee;
+
+      return queryEvmFeeMarketBaseFee.baseFee != null;
+    }
+
     if (this.chainInfo.hasFeature("initia-dynamicfee")) {
       const queries = this.queriesStore.get(this.chainId);
       if (!queries.keplrETC) {
@@ -650,64 +693,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
           if (queryEtc) {
             const gasPrice = queryEtc.queryInitiaDynamicFee.baseGasPrice;
             if (gasPrice) {
-              let multiplication = {
-                low: 1.1,
-                average: 1.2,
-                high: 1.3,
-              };
-
-              const multificationConfig =
-                this.queriesStore.simpleQuery.queryGet<{
-                  [str: string]:
-                    | {
-                        low: number;
-                        average: number;
-                        high: number;
-                      }
-                    | undefined;
-                }>(
-                  "https://gjsttg7mkgtqhjpt3mv5aeuszi0zblbb.lambda-url.us-west-2.on.aws",
-                  "/feemarket/info.json"
-                );
-
-              if (multificationConfig.response) {
-                const _default =
-                  multificationConfig.response.data["__default__"];
-                if (
-                  _default &&
-                  _default.low != null &&
-                  typeof _default.low === "number" &&
-                  _default.average != null &&
-                  typeof _default.average === "number" &&
-                  _default.high != null &&
-                  typeof _default.high === "number"
-                ) {
-                  multiplication = {
-                    low: _default.low,
-                    average: _default.average,
-                    high: _default.high,
-                  };
-                }
-                const specific =
-                  multificationConfig.response.data[
-                    this.chainInfo.chainIdentifier
-                  ];
-                if (
-                  specific &&
-                  specific.low != null &&
-                  typeof specific.low === "number" &&
-                  specific.average != null &&
-                  typeof specific.average === "number" &&
-                  specific.high != null &&
-                  typeof specific.high === "number"
-                ) {
-                  multiplication = {
-                    low: specific.low,
-                    average: specific.average,
-                    high: specific.high,
-                  };
-                }
-              }
+              const multiplication = this.getMultiplication();
               switch (feeType) {
                 case "low":
                   return new Dec(multiplication.low).mul(new Dec(gasPrice));
@@ -715,6 +701,22 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
                   return new Dec(multiplication.average).mul(new Dec(gasPrice));
                 case "high":
                   return new Dec(multiplication.high).mul(new Dec(gasPrice));
+              }
+            }
+          }
+        } else if (this.chainInfo.hasFeature("evm-feemarket")) {
+          const queryCosmos = this.queriesStore.get(this.chainId).cosmos;
+          if (queryCosmos) {
+            const baseFee = queryCosmos.queryEvmFeeMarketBaseFee.baseFee;
+            if (baseFee && baseFee.amount) {
+              const multiplication = this.getMultiplication();
+              switch (feeType) {
+                case "low":
+                  return new Dec(multiplication.low).mul(baseFee.amount);
+                case "average":
+                  return new Dec(multiplication.average).mul(baseFee.amount);
+                case "high":
+                  return new Dec(multiplication.high).mul(baseFee.amount);
               }
             }
           }
@@ -727,64 +729,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
               (gasPrice) => gasPrice.denom === feeCurrency.coinMinimalDenom
             );
             if (gasPrice) {
-              let multiplication = {
-                low: 1.1,
-                average: 1.2,
-                high: 1.3,
-              };
-
-              const multificationConfig =
-                this.queriesStore.simpleQuery.queryGet<{
-                  [str: string]:
-                    | {
-                        low: number;
-                        average: number;
-                        high: number;
-                      }
-                    | undefined;
-                }>(
-                  "https://gjsttg7mkgtqhjpt3mv5aeuszi0zblbb.lambda-url.us-west-2.on.aws",
-                  "/feemarket/info.json"
-                );
-
-              if (multificationConfig.response) {
-                const _default =
-                  multificationConfig.response.data["__default__"];
-                if (
-                  _default &&
-                  _default.low != null &&
-                  typeof _default.low === "number" &&
-                  _default.average != null &&
-                  typeof _default.average === "number" &&
-                  _default.high != null &&
-                  typeof _default.high === "number"
-                ) {
-                  multiplication = {
-                    low: _default.low,
-                    average: _default.average,
-                    high: _default.high,
-                  };
-                }
-                const specific =
-                  multificationConfig.response.data[
-                    this.chainInfo.chainIdentifier
-                  ];
-                if (
-                  specific &&
-                  specific.low != null &&
-                  typeof specific.low === "number" &&
-                  specific.average != null &&
-                  typeof specific.average === "number" &&
-                  specific.high != null &&
-                  typeof specific.high === "number"
-                ) {
-                  multiplication = {
-                    low: specific.low,
-                    average: specific.average,
-                    high: specific.high,
-                  };
-                }
-              }
+              const multiplication = this.getMultiplication();
               switch (feeType) {
                 case "low":
                   return new Dec(multiplication.low).mul(gasPrice.amount);
@@ -1039,6 +984,26 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
             };
           }
         }
+      } else if (this.chainInfo.hasFeature("evm-feemarket")) {
+        const queryCosmos = this.queriesStore.get(this.chainId).cosmos;
+        if (queryCosmos) {
+          const queryEvmFeeMarketBaseFee = queryCosmos.queryEvmFeeMarketBaseFee;
+          if (queryEvmFeeMarketBaseFee.error) {
+            return {
+              warning: new Error("Failed to fetch base fee"),
+            };
+          }
+          if (!queryEvmFeeMarketBaseFee.response) {
+            return {
+              loadingState: "loading-block",
+            };
+          }
+          if (queryEvmFeeMarketBaseFee.isFetching) {
+            return {
+              loadingState: "loading",
+            };
+          }
+        }
       } else {
         const queryCosmos = this.queriesStore.get(this.chainId).cosmos;
         if (queryCosmos) {
@@ -1252,6 +1217,65 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
     return {};
   }
+
+  private getMultiplication(): { low: number; average: number; high: number } {
+    let multiplication = {
+      low: 1.1,
+      average: 1.2,
+      high: 1.3,
+    };
+
+    const multificationConfig = this.queriesStore.simpleQuery.queryGet<{
+      [str: string]:
+        | {
+            low: number;
+            average: number;
+            high: number;
+          }
+        | undefined;
+    }>(
+      "https://gjsttg7mkgtqhjpt3mv5aeuszi0zblbb.lambda-url.us-west-2.on.aws",
+      "/feemarket/info.json"
+    );
+
+    if (multificationConfig.response) {
+      const _default = multificationConfig.response.data["__default__"];
+      if (
+        _default &&
+        _default.low != null &&
+        typeof _default.low === "number" &&
+        _default.average != null &&
+        typeof _default.average === "number" &&
+        _default.high != null &&
+        typeof _default.high === "number"
+      ) {
+        multiplication = {
+          low: _default.low,
+          average: _default.average,
+          high: _default.high,
+        };
+      }
+      const specific =
+        multificationConfig.response.data[this.chainInfo.chainIdentifier];
+      if (
+        specific &&
+        specific.low != null &&
+        typeof specific.low === "number" &&
+        specific.average != null &&
+        typeof specific.average === "number" &&
+        specific.high != null &&
+        typeof specific.high === "number"
+      ) {
+        multiplication = {
+          low: specific.low,
+          average: specific.average,
+          high: specific.high,
+        };
+      }
+    }
+
+    return multiplication;
+  }
 }
 
 export const useFeeConfig = (
@@ -1264,6 +1288,7 @@ export const useFeeConfig = (
   opts: {
     additionAmountToNeedFee?: boolean;
     computeTerraClassicTax?: boolean;
+    forceUseAtoneTokenAsFee?: boolean;
   } = {}
 ) => {
   const [config] = useState(
@@ -1276,12 +1301,14 @@ export const useFeeConfig = (
         amountConfig,
         gasConfig,
         opts.additionAmountToNeedFee ?? true,
-        opts.computeTerraClassicTax ?? false
+        opts.computeTerraClassicTax ?? false,
+        opts.forceUseAtoneTokenAsFee ?? false
       )
   );
   config.setChain(chainId);
   config.setAdditionAmountToNeedFee(opts.additionAmountToNeedFee ?? true);
   config.setComputeTerraClassicTax(opts.computeTerraClassicTax ?? false);
+  config.setForceUseAtoneTokenAsFee(opts.forceUseAtoneTokenAsFee ?? false);
 
   return config;
 };

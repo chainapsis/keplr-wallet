@@ -4,7 +4,6 @@ import { sha256 } from "@noble/hashes/sha256";
 import * as miscreant from "miscreant";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { Buffer } from "buffer/";
-import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 const cryptoProvider = new miscreant.PolyfillCryptoProvider();
 
@@ -20,10 +19,6 @@ const hkdfSalt: Uint8Array = new Uint8Array(
     "000000000000000000024bead8df69990852c202db0e0097c1a12ea637d7e96d",
     "hex"
   )
-);
-
-const secretConsensusIoPubKey = new Uint8Array(
-  Buffer.from("79++5YOHfm0SwhlpUDClv7cuCjq9xBZlWqSjDJWkRG8=", "base64")
 );
 
 export class EnigmaUtils implements EncryptionUtils {
@@ -45,10 +40,6 @@ export class EnigmaUtils implements EncryptionUtils {
     );
     this.privkey = privkey;
     this.pubkey = pubkey;
-
-    if (ChainIdHelper.parse(chainId).identifier === "secret") {
-      this.consensusIoPubKey = secretConsensusIoPubKey;
-    }
   }
 
   private static secureRandom(count: number): Uint8Array {
