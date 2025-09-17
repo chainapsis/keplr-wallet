@@ -73,8 +73,8 @@ export interface IFeeConfig extends ITxChainSetter {
   l1DataFee: Dec | undefined;
   setL1DataFee(fee: Dec): void;
 
-  useTopUp: boolean;
-  setUseTopUp(useTopUp: boolean): void;
+  disableBalanceCheck: boolean;
+  setDisableBalanceCheck(bool: boolean): void;
 
   uiProperties: UIProperties;
 }

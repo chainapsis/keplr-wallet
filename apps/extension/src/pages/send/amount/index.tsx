@@ -865,6 +865,17 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     }
   })();
 
+  useEffect(() => {
+    // amount가 변경되면 topup 초기화
+    feeConfig.setDisableBalanceCheck(false);
+    uiConfigStore.setUseTopUp(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    amountConfig.amount,
+    feeConfig.setDisableBalanceCheck,
+    uiConfigStore.setUseTopUp,
+  ]);
+
   return (
     <HeaderLayout
       title={intl.formatMessage({ id: "page.send.amount.title" })}
@@ -1791,15 +1802,15 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                         sendConfigs.amountConfig.amount[0].currency,
                         sendConfigs.recipientConfig.recipient
                       );
-
               await tx.send(
                 sendConfigs.feeConfig.toStdFee(),
                 sendConfigs.memoConfig.memo,
                 {
-                  preferNoSetFee: true,
+                  preferNoSetFee: !uiConfigStore.useTopUp,
                   preferNoSetMemo: true,
+                  disableBalanceCheck: uiConfigStore.useTopUp,
 
-                  ...(sendConfigs.feeConfig.useTopUp && {
+                  ...(uiConfigStore.useTopUp && {
                     topUpSend: async (payload: any) => {
                       try {
                         // TODO: Replace with real TopUp Client
@@ -1815,7 +1826,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                     },
                   }),
 
-                  ...(!sendConfigs.feeConfig.useTopUp && {
+                  ...(!uiConfigStore.useTopUp && {
                     sendTx: async (chainId, tx, mode) => {
                       let msg: Message<Uint8Array> = new SendTxAndRecordMsg(
                         historyType,

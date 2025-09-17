@@ -51,9 +51,6 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   @observable
   protected forceUseAtoneTokenAsFee: boolean = false;
 
-  @observable
-  protected _useTopUp: boolean = false;
-
   constructor(
     chainGetter: ChainGetter,
     protected readonly queriesStore: QueriesStore,
@@ -95,20 +92,6 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
   get disableBalanceCheck(): boolean {
     return this._disableBalanceCheck;
-  }
-
-  @action
-  setUseTopUp(useTopUp: boolean) {
-    this._useTopUp = useTopUp;
-    if (useTopUp) {
-      this.setDisableBalanceCheck(true);
-    } else {
-      this.setDisableBalanceCheck(false);
-    }
-  }
-
-  get useTopUp(): boolean {
-    return this._useTopUp;
   }
 
   get type(): FeeType | "manual" {

@@ -748,6 +748,7 @@ export const CosmosTxView: FunctionComponent<{
                     senderConfig={senderConfig}
                     gasConfig={gasConfig}
                     disableAutomaticFeeSet={preferNoSetFee}
+                    lockTopUp={true}
                   />
                 );
               })()}
