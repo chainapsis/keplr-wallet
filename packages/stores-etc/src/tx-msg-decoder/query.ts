@@ -1,4 +1,5 @@
 import { QuerySharedContext, ObservablePostQuery } from "@keplr-wallet/stores";
+import { getTxInterpreterURLPrefix } from "./get-tx-interpreter-url-prefix";
 
 export interface TxMsgDecoderResponse {
   result: {
@@ -45,11 +46,19 @@ export class ObservablePostTxMsgDecoder {
     private readonly baseURL: string
   ) {}
 
-  protoToAmino(chainIdentifier: string, msgs: ProtoToAminoRequestMsg[]) {
+  protoToAmino(bech32Prefix: string, msgs: ProtoToAminoRequestMsg[]) {
+    const urlPrefix = getTxInterpreterURLPrefix(bech32Prefix);
+
+    if (!urlPrefix.length) {
+      console.log(
+        `Url prefix not supported. Unable to send the request to the tx-codec, bech32Prefix: ${bech32Prefix}`
+      );
+    }
+
     return new ObservablePostTxMsgDecoderInner(
       this.sharedContext,
       this.baseURL,
-      `${chainIdentifier}/tx/proto-to-amino`,
+      `${urlPrefix}/tx/proto-to-amino`,
       {
         messages: msgs,
       }

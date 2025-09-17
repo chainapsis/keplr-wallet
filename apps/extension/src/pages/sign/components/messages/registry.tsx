@@ -3,7 +3,6 @@ import { IMessageRenderer, IMessageRenderRegistry } from "./types";
 import { Msg } from "@keplr-wallet/types";
 import {
   AnyWithUnpacked,
-  ChainIdHelper,
   defaultProtoCodec,
   ProtoCodec,
 } from "@keplr-wallet/cosmos";
@@ -74,7 +73,7 @@ const UnknownMessageContent: FunctionComponent<{
   chainId: string;
 }> = ({ msg, chainId }) => {
   const theme = useTheme();
-  const { queriesStore } = useStore();
+  const { queriesStore, chainStore } = useStore();
   const [loading, setLoading] = useState(false);
   const [txCodecMsg, setTxCodecMsg] = useState<string>("");
 
@@ -111,11 +110,16 @@ const UnknownMessageContent: FunctionComponent<{
 
       try {
         setLoading(true);
-        const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
+
+        const chainInfo = chainStore.getModularChain(chainId);
+        const bech32Prefix =
+          "cosmos" in chainInfo
+            ? chainInfo.cosmos.bech32Config?.bech32PrefixAccAddr ?? ""
+            : "";
         const keplrETCQueries = queriesStore.get(chainId).keplrETC;
 
         const query = await keplrETCQueries.queryTxMsgDecoder
-          .protoToAmino(chainIdentifier, [
+          .protoToAmino(bech32Prefix, [
             {
               typeUrl: msg.typeUrl,
               value: Buffer.from(msg.value).toString("base64"),
@@ -150,7 +154,7 @@ const UnknownMessageContent: FunctionComponent<{
     })();
     // `loading` is not included in the dependency array, since it should not trigger the effect when it changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chainId, msg, queriesStore]);
+  }, [chainId, msg, queriesStore, chainStore]);
 
   if (loading) {
     return <MsgSkeleton />;
