@@ -535,10 +535,13 @@ export const EnableChainsScene: FunctionComponent<{
             const isEVMOnlyChain = chainStore.isEvmOnlyChain(chainInfo.chainId);
             const queryBalance = isEVMOnlyChain
               ? queries.queryBalances.getQueryEthereumHexAddress(
+                  // 현재 candidateAddress에서 ethereumHexAddress를 반환하지 않는다.
+                  // 그래서 account.ethereumHexAddress를 그냥 쓰는데
+                  // 어차피 evm only에서는 bip44 selection이 불가능하므로 괜찮다.
                   account.ethereumHexAddress
                 )
               : queries.queryBalances.getQueryBech32Address(
-                  account.bech32Address
+                  bech32Address.address
                 );
             const balance = queryBalance.getBalance(mainCurrency);
 
