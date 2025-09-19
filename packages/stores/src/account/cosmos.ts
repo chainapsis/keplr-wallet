@@ -546,6 +546,14 @@ export class CosmosAccountImpl {
                     ? [
                         {
                           typeUrl: (() => {
+                            if (
+                              chainInfo.hasFeature(
+                                "/cosmos.evm.types.v1.ExtensionOptionsWeb3Tx"
+                              )
+                            ) {
+                              return "/cosmos.evm.types.v1.ExtensionOptionsWeb3Tx";
+                            }
+
                             if (chainIsInjective) {
                               return "/injective.types.v1beta1.ExtensionOptionsWeb3Tx";
                             }

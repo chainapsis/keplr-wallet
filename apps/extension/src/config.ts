@@ -1966,7 +1966,11 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         },
       },
     ],
-    features: ["eth-address-gen", "eth-key-sign"],
+    features: [
+      "eth-address-gen",
+      "eth-key-sign",
+      "/cosmos.evm.types.v1.ExtensionOptionsWeb3Tx",
+    ],
   },
   {
     rpc: "https://evm-1.keplr.app",
