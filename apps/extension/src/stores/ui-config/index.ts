@@ -39,6 +39,7 @@ export interface UIConfigOptions {
   show24HChangesInMagePage: boolean;
 
   useWebHIDLedger: boolean;
+  useTopUp: boolean;
 }
 
 export class UIConfigStore {
@@ -67,6 +68,7 @@ export class UIConfigStore {
     switchAssetViewModeSuggestion: true,
 
     useWebHIDLedger: false,
+    useTopUp: false,
   };
 
   @observable
@@ -440,6 +442,16 @@ export class UIConfigStore {
   @action
   setShowNewSidePanelHeaderTop(value: boolean) {
     this._showNewSidePanelHeaderTop = value;
+  }
+
+  @computed
+  get useTopUp(): boolean {
+    return this._options.useTopUp;
+  }
+
+  @action
+  setUseTopUp(value: boolean) {
+    this._options.useTopUp = value;
   }
 
   async removeStatesWhenErrorOccurredDuringRending() {

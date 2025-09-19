@@ -1,4 +1,9 @@
-import React, { FunctionComponent, useLayoutEffect, useState } from "react";
+import React, {
+  FunctionComponent,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from "react";
 import { observer } from "mobx-react-lite";
 import {
   IFeeConfig,
@@ -24,6 +29,8 @@ import { UIConfigStore } from "../../../stores/ui-config";
 import { IChainStore, IQueriesStore } from "@keplr-wallet/stores";
 import { Tooltip } from "../../tooltip";
 import { EthereumAccountBase } from "@keplr-wallet/stores-eth";
+import { Checkbox } from "../../checkbox";
+import { isTopUpSupported } from "@keplr-wallet/topup-client";
 
 // 기본적으로 `FeeControl` 안에 있는 로직이였지만 `FeeControl` 말고도 다른 UI를 가진 똑같은 기능의 component가
 // 여러개 생기게 되면서 공통적으로 사용하기 위해서 custom hook으로 분리함
@@ -181,6 +188,7 @@ export const FeeControl: FunctionComponent<{
   isForEVMTx?: boolean;
   nonceMethod?: "pending" | "latest";
   setNonceMethod?: (nonceMethod: "pending" | "latest") => void;
+  lockTopUp?: boolean;
 }> = observer(
   ({
     senderConfig,
@@ -191,6 +199,7 @@ export const FeeControl: FunctionComponent<{
     isForEVMTx,
     nonceMethod,
     setNonceMethod,
+    lockTopUp = false,
   }) => {
     const {
       analyticsStore,
@@ -225,6 +234,17 @@ export const FeeControl: FunctionComponent<{
     // gasAdjustment와 gasEstimated를 사용해 계산된 값을 보여주는 경우
     const isShowingFeeWithGasEstimated =
       !!gasSimulator?.enabled && !!gasSimulator?.gasEstimated && isFeeSetByUser;
+
+    const showTopUpCheckbox =
+      uiConfigStore.useTopUp ||
+      (feeConfig.uiProperties.error instanceof InsufficientFeeError &&
+        isTopUpSupported(feeConfig.chainId));
+
+    useEffect(() => {
+      // on init
+      feeConfig.setDisableBalanceCheck(uiConfigStore.useTopUp);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return (
       <Box>
@@ -529,6 +549,44 @@ export const FeeControl: FunctionComponent<{
                   }
                 })()}
               </Subtitle4>
+            </Box>
+          ) : null}
+        </VerticalResizeTransition>
+
+        <VerticalResizeTransition transitionAlign="top">
+          {showTopUpCheckbox ? (
+            <Box paddingX="0.75rem" paddingY="0.5rem" marginTop="0.75rem">
+              <XAxis alignY="center" gap="0.5rem">
+                <Checkbox
+                  size="small"
+                  checked={uiConfigStore.useTopUp}
+                  onChange={(checked) => {
+                    uiConfigStore.setUseTopUp(checked);
+                    feeConfig.setDisableBalanceCheck(checked);
+                  }}
+                  disabled={lockTopUp}
+                />
+                <YAxis gap="0.25rem">
+                  <Body2
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-700"]
+                        : ColorPalette["gray-300"]
+                    }
+                  >
+                    Use TopUp Service
+                  </Body2>
+                  <Body2
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-400"]
+                        : ColorPalette["gray-500"]
+                    }
+                  >
+                    Automatically add tokens to cover transaction fees
+                  </Body2>
+                </YAxis>
+              </XAxis>
             </Box>
           ) : null}
         </VerticalResizeTransition>

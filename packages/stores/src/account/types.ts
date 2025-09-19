@@ -23,6 +23,12 @@ export type ProtoMsgsOrWithAminoMsgs = {
   >;
 };
 
+export interface TopUpPayload {
+  chainId: string;
+  senderAddress: string;
+  rawTx: string;
+}
+
 export interface KeplrSignOptionsWithAltSignMethods extends KeplrSignOptions {
   readonly signAmino?: Keplr["signAmino"];
   readonly signDirect?: Keplr["signDirect"];
