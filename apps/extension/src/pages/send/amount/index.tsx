@@ -47,7 +47,7 @@ import { ColorPalette } from "../../../styles";
 import { openPopupWindow } from "@keplr-wallet/popup";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT, Message } from "@keplr-wallet/router";
-import { MockTopUpClient } from "@keplr-wallet/topup-client";
+import { TopUpClient } from "@keplr-wallet/topup-client";
 import {
   ChainInfoWithCoreTypes,
   LogAnalyticsEventMsg,
@@ -73,7 +73,7 @@ import {
   amountToAmbiguousString,
   isRunningInSidePanel,
 } from "../../../utils";
-import { AppCurrency, EthTxStatus } from "@keplr-wallet/types";
+import { AppCurrency, BroadcastMode, EthTxStatus } from "@keplr-wallet/types";
 import {
   IBCSwapAmountConfig,
   useIBCSwapConfig,
@@ -105,6 +105,7 @@ import { usePreviousDistinct } from "../../../hooks/use-previous";
 import { SwapFeeInfoForBridgeOnSend } from "./swap-fee-info";
 import { useEffectOnce } from "../../../hooks/use-effect-once";
 import { useGlobarSimpleBar } from "../../../hooks/global-simplebar";
+import { Buffer } from "buffer/";
 
 const Styles = {
   Flex1: styled.div`
@@ -865,16 +866,74 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     }
   })();
 
-  useEffect(() => {
-    // amount가 변경되면 topup 초기화
-    feeConfig.setDisableBalanceCheck(false);
-    uiConfigStore.setUseTopUp(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    amountConfig.amount,
-    feeConfig.setDisableBalanceCheck,
-    uiConfigStore.setUseTopUp,
-  ]);
+  // useEffect(() => {
+  //   // amount가 변경되면 topup 초기화
+  //   feeConfig.setDisableBalanceCheck(false);
+  //   uiConfigStore.setUseTopUp(false);
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [
+  //   amountConfig.amount,
+  //   feeConfig.setDisableBalanceCheck,
+  //   uiConfigStore.setUseTopUp,
+  // ]);
+
+  const useTopUpAtClick = uiConfigStore.useTopUp;
+
+  const signOptions: any = useTopUpAtClick
+    ? {
+        preferNoSetFee: false,
+        preferNoSetMemo: true,
+        disableBalanceCheck: true,
+        sendTx: async (chainId: string, tx: Uint8Array) => {
+          const payload = {
+            chainId,
+            senderAddress: sendConfigs.senderConfig.sender,
+            rawTx: Buffer.from(tx).toString("base64"),
+          };
+
+          const topUpClient = new TopUpClient(10000);
+          return await topUpClient.postTopUp(payload);
+        },
+      }
+    : {
+        preferNoSetFee: true,
+        preferNoSetMemo: true,
+        disableBalanceCheck: false,
+        sendTx: async (
+          chainId: string,
+          tx: Uint8Array,
+          mode: BroadcastMode
+        ) => {
+          const baseMsg = new SendTxAndRecordMsg(
+            historyType,
+            chainId,
+            sendConfigs.recipientConfig.chainId,
+            tx,
+            mode,
+            false,
+            sendConfigs.senderConfig.sender,
+            sendConfigs.recipientConfig.recipient,
+            sendConfigs.amountConfig.amount.map((amount) => ({
+              amount: DecUtils.getTenExponentN(amount.currency.coinDecimals)
+                .mul(amount.toDec())
+                .toString(),
+              denom: amount.currency.coinMinimalDenom,
+            })),
+            sendConfigs.memoConfig.memo
+          );
+          const finalMsg: Message<Uint8Array> =
+            sendType === "ibc-transfer"
+              ? baseMsg.withIBCPacketForwarding(
+                  sendConfigs.channelConfig.channels,
+                  { currencies: chainStore.getChain(chainId).currencies }
+                )
+              : baseMsg;
+          return await new InExtensionMessageRequester().sendMessage(
+            BACKGROUND_PORT,
+            finalMsg
+          );
+        },
+      };
 
   return (
     <HeaderLayout
@@ -1805,70 +1864,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
               await tx.send(
                 sendConfigs.feeConfig.toStdFee(),
                 sendConfigs.memoConfig.memo,
-                {
-                  preferNoSetFee: !uiConfigStore.useTopUp,
-                  preferNoSetMemo: true,
-                  disableBalanceCheck: uiConfigStore.useTopUp,
-
-                  ...(uiConfigStore.useTopUp && {
-                    topUpSend: async (payload: any) => {
-                      try {
-                        // TODO: Replace with real TopUp Client
-                        const topUpClient = new MockTopUpClient(2000, false);
-                        const txHash = await topUpClient.postTopUp(payload);
-
-                        return txHash;
-                      } catch (error) {
-                        console.error("[SendAmountPage] TopUp failed:", error);
-
-                        throw error;
-                      }
-                    },
-                  }),
-
-                  ...(!uiConfigStore.useTopUp && {
-                    sendTx: async (chainId, tx, mode) => {
-                      let msg: Message<Uint8Array> = new SendTxAndRecordMsg(
-                        historyType,
-                        chainId,
-                        sendConfigs.recipientConfig.chainId,
-                        tx,
-                        mode,
-                        false,
-                        sendConfigs.senderConfig.sender,
-                        sendConfigs.recipientConfig.recipient,
-                        sendConfigs.amountConfig.amount.map((amount) => {
-                          return {
-                            amount: DecUtils.getTenExponentN(
-                              amount.currency.coinDecimals
-                            )
-                              .mul(amount.toDec())
-                              .toString(),
-                            denom: amount.currency.coinMinimalDenom,
-                          };
-                        }),
-                        sendConfigs.memoConfig.memo
-                      );
-                      if (sendType === "ibc-transfer") {
-                        if (msg instanceof SendTxAndRecordMsg) {
-                          msg = msg.withIBCPacketForwarding(
-                            sendConfigs.channelConfig.channels,
-                            {
-                              currencies:
-                                chainStore.getChain(chainId).currencies,
-                            }
-                          );
-                        } else {
-                          throw new Error("Invalid message type");
-                        }
-                      }
-                      return await new InExtensionMessageRequester().sendMessage(
-                        BACKGROUND_PORT,
-                        msg
-                      );
-                    },
-                  }),
-                },
+                signOptions,
                 {
                   onBroadcasted: async () => {
                     chainStore.enableVaultsWithCosmosAddress(

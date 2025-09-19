@@ -38,7 +38,6 @@ export interface KeplrSignOptionsWithAltSignMethods extends KeplrSignOptions {
     tx: Uint8Array,
     mode: BroadcastMode
   ) => Promise<Uint8Array>;
-  readonly topUpSend?: (payload: TopUpPayload) => Promise<Uint8Array>;
 }
 
 export interface MakeTxResponse {

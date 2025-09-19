@@ -642,19 +642,6 @@ export class CosmosAccountImpl {
       }
     })();
 
-    if (signOptions?.topUpSend) {
-      const payload = {
-        chainId: this.chainId,
-        senderAddress: this.base.bech32Address,
-        rawTx: Buffer.from(signedTx.tx).toString("base64"),
-      };
-
-      return {
-        txHash: await signOptions.topUpSend(payload),
-        signDoc: signedTx.signDoc,
-      };
-    }
-
     // Default behavior: use normal sendTx
     // Should use bind to avoid "this" problem
     let sendTx = keplr.sendTx.bind(keplr);
