@@ -100,6 +100,25 @@ export class ChainsService {
       | undefined
   ) {
     this.modularChainInfos = embedModularChainInfos.map((modularChainInfo) => {
+      if (
+        "evm" in modularChainInfo &&
+        modularChainInfo.evm &&
+        modularChainInfo.chainId.split(":")[0] === "eip155"
+      ) {
+        return {
+          chainId: modularChainInfo.chainId,
+          chainName: modularChainInfo.chainName,
+          chainSymbolImageUrl: modularChainInfo.chainSymbolImageUrl,
+          evmNative: {
+            chainId: modularChainInfo.evm.chainId,
+            rpc: modularChainInfo.rpc,
+            websocket: modularChainInfo.evm.websocket,
+            currencies: modularChainInfo.currencies,
+            bip44: modularChainInfo.bip44,
+          },
+        };
+      }
+
       if ("currencies" in modularChainInfo) {
         return {
           chainId: modularChainInfo.chainId,
@@ -110,6 +129,7 @@ export class ChainsService {
       }
       return modularChainInfo;
     });
+
     this.embedChainInfos = embedModularChainInfos
       .filter(
         (modularChainInfo) =>
@@ -1144,7 +1164,10 @@ export class ChainsService {
     modularChainInfos: ModularChainInfo[]
   ): ModularChainInfo[] {
     return modularChainInfos.map((modularChainInfo) => {
-      if (this.hasChainInfo(modularChainInfo.chainId)) {
+      if (
+        this.hasChainInfo(modularChainInfo.chainId) &&
+        "cosmos" in modularChainInfo
+      ) {
         const cosmos = this.getChainInfoOrThrow(modularChainInfo.chainId);
         return {
           chainId: cosmos.chainId,
@@ -1152,6 +1175,17 @@ export class ChainsService {
           chainSymbolImageUrl: cosmos.chainSymbolImageUrl,
           isTestnet: cosmos.isTestnet,
           cosmos: this.mergeChainInfosWithDynamics([cosmos])[0],
+        };
+      }
+
+      if ("evmNative" in modularChainInfo) {
+        const endpoint = this.getEndpoint(modularChainInfo.chainId);
+        return {
+          ...modularChainInfo,
+          evmNative: {
+            ...modularChainInfo.evmNative,
+            rpc: endpoint?.rpc || modularChainInfo.evmNative.rpc,
+          },
         };
       }
 
