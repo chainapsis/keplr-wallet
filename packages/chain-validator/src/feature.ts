@@ -31,6 +31,7 @@ export const SupportedChainFeatures = [
   "initia-dynamicfee",
   "eth-secp256k1-initia",
   "eth-secp256k1-cosmos",
+  "/cosmos.evm.types.v1.ExtensionOptionsWeb3Tx",
 ];
 
 /**
