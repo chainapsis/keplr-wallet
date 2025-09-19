@@ -29,6 +29,14 @@ export const FeeSummary: FunctionComponent<{
 
   const theme = useTheme();
 
+  const decimalDiff = (() => {
+    if (isForEVMTx) {
+      const feeCurrency = feeConfig.chainInfo.feeCurrencies[0];
+      return 18 - feeCurrency.coinDecimals;
+    }
+    return 0;
+  })();
+
   return (
     <Box>
       <Box
@@ -83,6 +91,7 @@ export const FeeSummary: FunctionComponent<{
               .map((fee) =>
                 fee
                   .add(new Dec(feeConfig.l1DataFee?.toString() || "0"))
+                  .moveDecimalPointLeft(decimalDiff)
                   .maxDecimals(6)
                   .inequalitySymbol(true)
                   .trim(true)
@@ -123,7 +132,9 @@ export const FeeSummary: FunctionComponent<{
                   break;
                 } else {
                   const price = priceStore.calculatePrice(
-                    fee.add(new Dec(feeConfig.l1DataFee?.toString() || "0"))
+                    fee
+                      .add(new Dec(feeConfig.l1DataFee?.toString() || "0"))
+                      .moveDecimalPointLeft(decimalDiff)
                   );
                   if (price) {
                     if (!total) {

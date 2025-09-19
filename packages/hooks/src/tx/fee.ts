@@ -422,6 +422,9 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   protected canOsmosisTxFeesAndReady(): boolean {
+    if (this.senderConfig.sender.startsWith("0x")) {
+      return false;
+    }
     if (this.chainInfo.hasFeature("osmosis-txfees")) {
       const queries = this.queriesStore.get(this.chainId);
       if (!queries.osmosis) {
@@ -447,6 +450,9 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   protected canFeeMarketTxFeesAndReady(): boolean {
+    if (this.senderConfig.sender.startsWith("0x")) {
+      return false;
+    }
     if (this.chainInfo.chainId.startsWith("cheqd-mainnet-")) {
       return false;
     }
@@ -1207,7 +1213,18 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         };
       }
 
-      if (new Int(bal.balance.toCoin().amount).lt(new Int(need.amount))) {
+      let needAmount = new Int(need.amount);
+      if (this.canEIP1559TxFeesAndReady() && needs.length === 1) {
+        const feeCurrency = this.chainInfo.feeCurrencies[0];
+        const decimalDiff = 18 - feeCurrency.coinDecimals;
+        if (decimalDiff !== 0) {
+          needAmount = new Dec(needAmount)
+            .quo(DecUtils.getTenExponentN(decimalDiff))
+            .truncate();
+        }
+      }
+
+      if (new Int(bal.balance.toCoin().amount).lt(needAmount)) {
         return {
           error: new InsufficientFeeError("Insufficient fee"),
           loadingState: bal.isFetching ? "loading" : undefined,

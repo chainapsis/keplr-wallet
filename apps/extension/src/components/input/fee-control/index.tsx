@@ -226,6 +226,14 @@ export const FeeControl: FunctionComponent<{
     const isShowingFeeWithGasEstimated =
       !!gasSimulator?.enabled && !!gasSimulator?.gasEstimated && isFeeSetByUser;
 
+    const decimalDiff = (() => {
+      if (isForEVMTx) {
+        const feeCurrency = feeConfig.chainInfo.feeCurrencies[0];
+        return 18 - feeCurrency.coinDecimals;
+      }
+      return 0;
+    })();
+
     return (
       <Box>
         <YAxis alignX="center">
@@ -317,6 +325,7 @@ export const FeeControl: FunctionComponent<{
                                     feeConfig.l1DataFee?.toString() || "0"
                                   ) // evm fee가 외부에서 설정된 경우, fee = gasLimit * gasPrice이므로 l1DataFee를 더해줘야 함
                             )
+                            .moveDecimalPointLeft(decimalDiff)
                             .maxDecimals(6)
                             .inequalitySymbol(true)
                             .trim(true)
@@ -379,6 +388,7 @@ export const FeeControl: FunctionComponent<{
                               ? new Dec(0)
                               : new Dec(feeConfig.l1DataFee?.toString() || "0")
                           )
+                          .moveDecimalPointLeft(decimalDiff)
                       );
                       if (price) {
                         if (!total) {

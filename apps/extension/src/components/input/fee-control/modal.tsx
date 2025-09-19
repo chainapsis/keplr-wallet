@@ -84,6 +84,14 @@ export const TransactionFeeModal: FunctionComponent<{
     const intl = useIntl();
     const theme = useTheme();
 
+    const decimalDiff = (() => {
+      if (isForEVMTx) {
+        const feeCurrency = feeConfig.chainInfo.feeCurrencies[0];
+        return 18 - feeCurrency.coinDecimals;
+      }
+      return 0;
+    })();
+
     const isGasSimulatorUsable = (() => {
       if (!gasSimulator) {
         return false;
@@ -322,6 +330,7 @@ export const TransactionFeeModal: FunctionComponent<{
               gasConfig={gasConfig}
               gasSimulator={gasSimulator}
               isShowingFeeWithGasEstimated={isShowingFeeWithGasEstimated}
+              decimalDiff={decimalDiff}
             />
           </Stack>
 
@@ -345,6 +354,7 @@ export const TransactionFeeModal: FunctionComponent<{
                         ? new Dec(feeConfig.l1DataFee?.toString() || "0")
                         : new Dec(0)
                     )
+                    .moveDecimalPointLeft(decimalDiff)
                     .maxDecimals(6)
                     .inequalitySymbol(true)
                     .trim(true)
@@ -365,11 +375,13 @@ export const TransactionFeeModal: FunctionComponent<{
                   {` ${(() => {
                     let total: PricePretty | undefined;
                     let hasUnknown = false;
-                    const maxFee = feeConfig.fees[0].sub(
-                      isFeeSetByUser
-                        ? new Dec(feeConfig.l1DataFee?.toString() || "0")
-                        : new Dec(0)
-                    );
+                    const maxFee = feeConfig.fees[0]
+                      .sub(
+                        isFeeSetByUser
+                          ? new Dec(feeConfig.l1DataFee?.toString() || "0")
+                          : new Dec(0)
+                      )
+                      .moveDecimalPointLeft(decimalDiff);
                     if (!maxFee.currency.coinGeckoId) {
                       hasUnknown = true;
                     } else {
@@ -666,8 +678,15 @@ const FeeSelector: FunctionComponent<{
   gasConfig?: IGasConfig;
   gasSimulator?: IGasSimulator;
   isShowingFeeWithGasEstimated?: boolean;
+  decimalDiff: number;
 }> = observer(
-  ({ feeConfig, gasConfig, gasSimulator, isShowingFeeWithGasEstimated }) => {
+  ({
+    feeConfig,
+    gasConfig,
+    gasSimulator,
+    isShowingFeeWithGasEstimated,
+    decimalDiff,
+  }) => {
     const { priceStore } = useStore();
     const theme = useTheme();
 
@@ -734,6 +753,7 @@ const FeeSelector: FunctionComponent<{
                           )
                         )
                         .add(new Dec(feeConfig.l1DataFee?.toString() || "0"))
+                        .moveDecimalPointLeft(decimalDiff)
                     )
                     ?.toString() || "-"}
                 </FeeSelectorStyle.Price>
@@ -762,6 +782,7 @@ const FeeSelector: FunctionComponent<{
                     )
                   )
                   .add(new Dec(feeConfig.l1DataFee?.toString() || "0"))
+                  .moveDecimalPointLeft(decimalDiff)
                   .maxDecimals(6)
                   .inequalitySymbol(true)
                   .trim(true)
@@ -817,6 +838,7 @@ const FeeSelector: FunctionComponent<{
                           )
                         )
                         .add(new Dec(feeConfig.l1DataFee?.toString() || "0"))
+                        .moveDecimalPointLeft(decimalDiff)
                     )
                     ?.toString() || "-"}
                 </FeeSelectorStyle.Price>
@@ -845,6 +867,7 @@ const FeeSelector: FunctionComponent<{
                     )
                   )
                   .add(new Dec(feeConfig.l1DataFee?.toString() || "0"))
+                  .moveDecimalPointLeft(decimalDiff)
                   .maxDecimals(6)
                   .inequalitySymbol(true)
                   .trim(true)
@@ -908,6 +931,7 @@ const FeeSelector: FunctionComponent<{
                           )
                         )
                         .add(new Dec(feeConfig.l1DataFee?.toString() || "0"))
+                        .moveDecimalPointLeft(decimalDiff)
                     )
                     ?.toString() || "-"}
                 </FeeSelectorStyle.Price>
@@ -936,6 +960,7 @@ const FeeSelector: FunctionComponent<{
                     )
                   )
                   .add(new Dec(feeConfig.l1DataFee?.toString() || "0"))
+                  .moveDecimalPointLeft(decimalDiff)
                   .maxDecimals(6)
                   .inequalitySymbol(true)
                   .trim(true)
