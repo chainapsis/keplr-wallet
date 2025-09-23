@@ -3830,6 +3830,56 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     features: ["cosmwasm"],
     walletUrlForStaking: "https://wallet.keplr.app/chains/union",
   },
+  {
+    rpc: "https://rpc-lumera.keplr.app",
+    rest: "https://lcd-lumera.keplr.app",
+    chainId: "lumera-mainnet-1",
+    chainName: "Lumera",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/lumera-mainnet/chain.png",
+    stakeCurrency: {
+      coinDenom: "LUME",
+      coinMinimalDenom: "ulume",
+      coinDecimals: 6,
+      coinImageUrl:
+        "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/lumera-mainnet/chain.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "lumera",
+      bech32PrefixAccPub: "lumerapub",
+      bech32PrefixValAddr: "lumeravaloper",
+      bech32PrefixValPub: "lumeravaloperpub",
+      bech32PrefixConsAddr: "lumeravalcons",
+      bech32PrefixConsPub: "lumeravalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "LUME",
+        coinMinimalDenom: "ulume",
+        coinDecimals: 6,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/lumera-mainnet/chain.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "LUME",
+        coinMinimalDenom: "ulume",
+        coinDecimals: 6,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/lumera-mainnet/chain.png",
+        gasPriceStep: {
+          low: 0.025,
+          average: 0.025,
+          high: 0.025,
+        },
+      },
+    ],
+    features: ["cosmwasm"],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
