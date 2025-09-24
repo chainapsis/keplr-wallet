@@ -3,7 +3,7 @@ import { useStore } from "../stores";
 import { ChainInfo } from "@keplr-wallet/types";
 import { autorun } from "mobx";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import { KeyRingCosmosService } from "@keplr-wallet/background";
+import { KeyRingCosmosService, KeyRingService } from "@keplr-wallet/background";
 import { useSearch } from "./use-search";
 
 interface UseGetAllNonNativeChainParams {
@@ -112,11 +112,6 @@ export const useGetAllNonNativeChain = ({
     if (fallbackEthereumLedgerApp && keyType === "ledger") {
       const filteredChains = chains
         .filter((chainInfo) => {
-          const isEthermintLike =
-            chainInfo.bip44.coinType === 60 ||
-            !!chainInfo.features?.includes("eth-address-gen") ||
-            !!chainInfo.features?.includes("eth-key-sign");
-
           const isLedgerSupported = (() => {
             try {
               if (chainInfo.features?.includes("force-enable-evm-ledger")) {
@@ -132,7 +127,7 @@ export const useGetAllNonNativeChain = ({
             }
           })();
 
-          if (isEthermintLike && isLedgerSupported) {
+          if (KeyRingService.isEthermintLike(chainInfo) && isLedgerSupported) {
             return true;
           }
 

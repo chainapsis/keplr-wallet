@@ -33,7 +33,7 @@ import { ConnectLedgerModal } from "./components/connect-ledger-modal";
 import { useKeyCoinTypeFinalize } from "./hooks/use-key-coin-type-finalize";
 import { EmbedChainInfos } from "../../config";
 import { getKeplrFromWindow } from "@keplr-wallet/stores";
-import { KeyRingCosmosService } from "@keplr-wallet/background";
+import { KeyRingCosmosService, KeyRingService } from "@keplr-wallet/background";
 
 export const Ecosystem = {
   All: "All",
@@ -298,14 +298,10 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
           const chainInfo = chainStore.getChain(
             modularChainInfo.cosmos.chainId
           );
-          const isEthermintLike =
-            chainInfo.bip44.coinType === 60 ||
-            !!chainInfo.features?.includes("eth-address-gen") ||
-            !!chainInfo.features?.includes("eth-key-sign");
 
           // Ledger일 경우 ethereum app을 바로 처리할 수 없다.
           // 이 경우 빼줘야한다.
-          if (isEthermintLike) {
+          if (KeyRingService.isEthermintLike(chainInfo)) {
             return false;
           }
 
