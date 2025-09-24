@@ -73,7 +73,18 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
         .queryBalances.getQueryBech32Address(this.senderConfig.sender)
         .getBalanceFromCurrency(this.currency);
       if (this.feeConfig) {
-        for (const fee of this.feeConfig.fees) {
+        for (let fee of this.feeConfig.fees) {
+          if (
+            this.senderConfig.isEvmOrEthermint &&
+            this.feeConfig.fees.length === 1 &&
+            this.feeConfig.fees[0].currency.coinDecimals !== 18
+          ) {
+            fee = fee
+              .clone()
+              .moveDecimalPointLeft(
+                18 - this.feeConfig.fees[0].currency.coinDecimals
+              );
+          }
           result = result.sub(fee);
         }
       }
@@ -92,9 +103,17 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
         this.feeConfig &&
         this.feeConfig.fees.length > 0
       ) {
-        const subFee = this.feeConfig.fees[0].mul(
+        let subFee = this.feeConfig.fees[0].mul(
           new Dec(this._fractionSubFeeWeight)
         );
+        if (
+          this.senderConfig.isEvmOrEthermint &&
+          subFee.currency.coinDecimals !== 18
+        ) {
+          subFee = subFee
+            .clone()
+            .moveDecimalPointLeft(18 - subFee.currency.coinDecimals);
+        }
         return maxValue.sub(subFee).toString();
       }
 

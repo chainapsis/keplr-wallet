@@ -630,7 +630,22 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         const { to, gasLimit, value, data, chainId } =
           ethereumAccount.makeSendTokenTx({
             currency: sendConfigs.amountConfig.amount[0].currency,
-            amount: sendConfigs.amountConfig.amount[0].toDec().toString(),
+            amount: (() => {
+              if (
+                sendConfigs.amountConfig.amount[0].currency.coinDecimals !== 18
+              ) {
+                return sendConfigs.amountConfig.amount[0]
+                  .toDec()
+                  .mulTruncate(
+                    DecUtils.getTenExponentN(
+                      18 -
+                        sendConfigs.amountConfig.amount[0].currency.coinDecimals
+                    )
+                  );
+              }
+
+              return sendConfigs.amountConfig.amount[0].toDec();
+            })().toString(),
             to: sendConfigs.recipientConfig.recipient,
             gasLimit: sendConfigs.gasConfig.gas,
             maxFeePerGas: maxFeePerGas?.toString(),
@@ -1687,7 +1702,24 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
               const unsignedTx = ethereumAccount.makeSendTokenTx({
                 currency: sendConfigs.amountConfig.amount[0].currency,
-                amount: sendConfigs.amountConfig.amount[0].toDec().toString(),
+                amount: (() => {
+                  if (
+                    sendConfigs.amountConfig.amount[0].currency.coinDecimals !==
+                    18
+                  ) {
+                    return sendConfigs.amountConfig.amount[0]
+                      .toDec()
+                      .mulTruncate(
+                        DecUtils.getTenExponentN(
+                          18 -
+                            sendConfigs.amountConfig.amount[0].currency
+                              .coinDecimals
+                        )
+                      );
+                  }
+
+                  return sendConfigs.amountConfig.amount[0].toDec();
+                })().toString(),
                 to: sendConfigs.recipientConfig.recipient,
                 gasLimit: sendConfigs.gasConfig.gas,
                 maxFeePerGas: maxFeePerGas?.toString(),
