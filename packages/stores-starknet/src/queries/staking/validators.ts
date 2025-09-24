@@ -17,7 +17,7 @@ export class ObservableQueryValidators extends ObservableQuery<StarknetValidator
   ) {
     super(
       sharedContext,
-      "https://staking-dashboard-mainnet-api-v2.onrender.com/api/",
+      "https://staging-staking-dashboard-backend-api.onrender.com/api/",
       "query/validators"
     );
     makeObservable(this);
@@ -36,14 +36,18 @@ export class ObservableQueryValidators extends ObservableQuery<StarknetValidator
 
   @computed
   get validators(): StarknetValidator[] {
-    if (!this.response || !this.response.data) {
+    if (
+      !this.response ||
+      !this.response.data ||
+      !this.response.data.validators
+    ) {
       return [];
     }
 
-    if (!Array.isArray(this.response.data)) {
+    if (!Array.isArray(this.response.data.validators)) {
       return [];
     }
 
-    return this.response.data;
+    return this.response.data.validators;
   }
 }
