@@ -7,13 +7,7 @@ export interface IMessageRenderer {
     chainId: string,
     msg: Msg | AnyWithUnpacked,
     protoCodec: ProtoCodec
-  ):
-    | {
-        icon: React.ReactElement;
-        title: string | React.ReactElement;
-        content: string | React.ReactElement;
-      }
-    | undefined;
+  ): MessageRenderResult | undefined;
 }
 
 export interface IMessageRenderRegistry {
@@ -23,9 +17,11 @@ export interface IMessageRenderRegistry {
     chainId: string,
     protoCodec: ProtoCodec,
     msg: Msg | AnyWithUnpacked
-  ): {
-    icon: React.ReactElement;
-    title: string | React.ReactElement;
-    content: string | React.ReactElement;
-  };
+  ): MessageRenderResult;
+}
+
+export interface MessageRenderResult {
+  icon: React.ReactElement;
+  title: string | React.ReactElement;
+  content: string | React.ReactElement;
 }
