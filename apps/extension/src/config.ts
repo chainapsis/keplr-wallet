@@ -3839,6 +3839,9 @@ export const PrivilegedOrigins: string[] = [
   "https://chains.keplr.app",
   "https://testnet.keplr.app",
   "https://multisig.keplr.app",
+  "https://beta-stage.polaris.app",
+  "https://beta.polaris.app",
+  "https://polaris.app",
 ];
 
 export const MsgPrivilegedContractMap: Record<
