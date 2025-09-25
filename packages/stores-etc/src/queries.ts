@@ -12,6 +12,7 @@ import {
 } from "./terra-classic/treasury";
 import { ObservableQuerySkipTokenInfo } from "./token-info";
 import { ObservableQueryInitiaDynamicFee } from "./initia/dynamicfee";
+import { ObservablePostTxMsgDecoder } from "./tx-msg-decoder";
 
 export interface KeplrETCQueries {
   keplrETC: KeplrETCQueriesImpl;
@@ -22,6 +23,7 @@ export const KeplrETCQueries = {
     ethereumURL: string;
     skipTokenInfoBaseURL: string;
     skipTokenInfoAPIURI: string;
+    txCodecBaseURL: string;
   }): (
     queriesSetBase: QueriesSetBase,
     sharedContext: QuerySharedContext,
@@ -42,7 +44,8 @@ export const KeplrETCQueries = {
           chainGetter,
           options.ethereumURL,
           options.skipTokenInfoBaseURL,
-          options.skipTokenInfoAPIURI
+          options.skipTokenInfoAPIURI,
+          options.txCodecBaseURL
         ),
       };
     };
@@ -59,6 +62,8 @@ export class KeplrETCQueriesImpl {
 
   public readonly queryInitiaDynamicFee: DeepReadonly<ObservableQueryInitiaDynamicFee>;
 
+  public readonly queryTxMsgDecoder: DeepReadonly<ObservablePostTxMsgDecoder>;
+
   constructor(
     _base: QueriesSetBase,
     sharedContext: QuerySharedContext,
@@ -66,7 +71,8 @@ export class KeplrETCQueriesImpl {
     chainGetter: ChainGetter,
     ethereumURL: string,
     skipTokenInfoBaseURL: string,
-    skipTokenInfoAPIURI: string
+    skipTokenInfoAPIURI: string,
+    txCodecBaseURL: string
   ) {
     this.queryERC20Metadata = new ObservableQueryERC20Metadata(
       sharedContext,
@@ -100,6 +106,11 @@ export class KeplrETCQueriesImpl {
       sharedContext,
       chainId,
       chainGetter
+    );
+
+    this.queryTxMsgDecoder = new ObservablePostTxMsgDecoder(
+      sharedContext,
+      txCodecBaseURL
     );
   }
 }
