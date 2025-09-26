@@ -75,7 +75,6 @@ const TextButtonStyles = {
   `,
 
   Button: styled.button<Omit<TextButtonProps, "onClick">>`
-    width: 100%;
     height: 2rem;
     display: flex;
     justify-content: center;
