@@ -1,4 +1,10 @@
-import React, { FunctionComponent, useEffect, useRef, useState } from "react";
+import React, {
+  FunctionComponent,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
 import { PasswordTextInput } from "../../components/input";
 import { observer } from "mobx-react-lite";
@@ -21,6 +27,7 @@ import {
   handleExternalInteractionWithNoProceedNext,
   isRunningInSidePanel,
 } from "../../utils";
+import { useHorizontalResizeObserver } from "../../components/transition/horizontal-collapse/hook";
 export const UnlockPage: FunctionComponent = observer(() => {
   const { keyRingStore, interactionStore } = useStore();
   const intl = useIntl();
@@ -168,16 +175,73 @@ export const UnlockPage: FunctionComponent = observer(() => {
     };
   }, [interactionStore, keyRingStore, viewPostMessageId]);
 
+  const [backgroundPosition, setBackgroundPosition] = useState("top center");
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const backgroundImageUrl = require(theme.mode === "light"
+    ? "../../public/assets/img/unlock-light.png"
+    : "../../public/assets/img/unlock-dark.png");
+  const backgroundImageRatioRef = useRef<number | null>(null);
+  const containerSizeWidthRef = useRef<number | null>(null);
+  const containerSizeHeightRef = useRef<number | null>(null);
+
+  const recalc = () => {
+    if (backgroundImageRatioRef.current == null) {
+      return;
+    }
+    if (containerSizeWidthRef.current == null) {
+      return;
+    }
+    if (containerSizeHeightRef.current == null) {
+      return;
+    }
+
+    const imageDisplayedHeight =
+      containerSizeWidthRef.current / backgroundImageRatioRef.current; // background-size: 100% auto 기준
+
+    if (imageDisplayedHeight >= containerSizeHeightRef.current) {
+      // 세로가 충분히 커서 위아래가 꽉 참 → bottom center로 내려도 위 여백 없음
+      setBackgroundPosition("bottom center");
+    } else {
+      // 세로가 부족 → bottom으로 내리면 위에 여백 생김 → top 유지
+      setBackgroundPosition("top center");
+    }
+  };
+
+  // 이미지 로드해서 intrinsic ratio 얻기
+  useLayoutEffect(() => {
+    const img = new Image();
+    img.onload = () => {
+      backgroundImageRatioRef.current = img.naturalWidth / img.naturalHeight;
+      recalc();
+    };
+    img.src = backgroundImageUrl;
+    // 캐시된 경우 onload가 바로 안 올 수도 있어 강제 호출
+    if (img.complete && img.naturalWidth) {
+      backgroundImageRatioRef.current = img.naturalWidth / img.naturalHeight;
+      recalc();
+    }
+  }, [backgroundImageUrl]);
+
+  const ref = useHorizontalResizeObserver(
+    (width) => {
+      containerSizeWidthRef.current = width;
+      recalc();
+    },
+    (height) => {
+      containerSizeHeightRef.current = height;
+      recalc();
+    }
+  );
+
   return (
     <Box
+      ref={ref}
       width="100vw"
       paddingX="1.5rem"
       style={{
-        backgroundImage: `url(${require(theme.mode === "light"
-          ? "../../public/assets/img/unlock-light.png"
-          : "../../public/assets/img/unlock-dark.png")})`,
+        backgroundImage: `url(${backgroundImageUrl})`,
         backgroundSize: "100% auto",
-        backgroundPosition: "top center",
+        backgroundPosition,
         backgroundRepeat: "no-repeat",
         maxWidth: isRunningInSidePanel()
           ? SidePanelMaxWidth
