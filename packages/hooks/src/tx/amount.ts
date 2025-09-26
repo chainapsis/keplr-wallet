@@ -75,7 +75,7 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
       if (this.feeConfig) {
         for (let fee of this.feeConfig.fees) {
           if (
-            this.senderConfig.isEvmOrEthermint &&
+            this.senderConfig.sender.startsWith("0x") &&
             this.feeConfig.fees.length === 1 &&
             this.feeConfig.fees[0].currency.coinDecimals !== 18
           ) {
@@ -107,7 +107,7 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
           new Dec(this._fractionSubFeeWeight)
         );
         if (
-          this.senderConfig.isEvmOrEthermint &&
+          this.senderConfig.sender.startsWith("0x") &&
           subFee.currency.coinDecimals !== 18
         ) {
           subFee = subFee
