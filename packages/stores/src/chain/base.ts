@@ -653,13 +653,13 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
           this.registeredBitcoinCurrencies
         );
       case "evm":
-        if (!("evmNative" in this._embedded)) {
+        if (!("evm" in this._embedded)) {
           throw new Error(
             `No evm native module for this chain: ${this.chainId}`
           );
         }
 
-        return this._embedded.evmNative.currencies.concat(
+        return this._embedded.evm.currencies.concat(
           this.registeredEvmCurrencies
         );
 
@@ -722,7 +722,7 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
         }
         break;
       case "evm":
-        if (!("evmNative" in this._embedded)) {
+        if (!("evm" in this._embedded)) {
           throw new Error(`No evm module for this chain: ${this.chainId}`);
         }
 
@@ -783,7 +783,7 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
           );
         break;
       case "evm":
-        if (!("evmNative" in this._embedded)) {
+        if (!("evm" in this._embedded)) {
           throw new Error(`No evm module for this chain: ${this.chainId}`);
         }
 
@@ -835,8 +835,8 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
   @computed
   protected get evmCurrencyMap(): Map<string, AppCurrency> {
     const result: Map<string, AppCurrency> = new Map();
-    if ("evmNative" in this._embedded) {
-      for (const currency of this._embedded.evmNative.currencies) {
+    if ("evm" in this._embedded) {
+      for (const currency of this._embedded.evm.currencies) {
         result.set(
           DenomHelper.normalizeDenom(currency.coinMinimalDenom),
           currency
@@ -1005,20 +1005,20 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
 
         return new ChainInfoImpl(chainInfo, this);
       });
+
     this._modularChainInfos = chainInfos.map((chainInfo) => {
       if (
         "evm" in chainInfo &&
         chainInfo.evm &&
+        "currencies" in chainInfo && // clarify if it's ChainInfo type
         this.isEvmOnlyChain(chainInfo.chainId)
       ) {
         return {
           chainId: chainInfo.chainId,
           chainName: chainInfo.chainName,
           chainSymbolImageUrl: chainInfo.chainSymbolImageUrl,
-          evmNative: {
-            chainId: chainInfo.evm.chainId,
-            rpc: chainInfo.rpc,
-            websocket: chainInfo.evm.websocket,
+          evm: {
+            ...chainInfo.evm,
             currencies: chainInfo.currencies,
             bip44: chainInfo.bip44,
           },
@@ -1030,25 +1030,32 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
           chainName: chainInfo.chainName,
           chainSymbolImageUrl: chainInfo.chainSymbolImageUrl,
           cosmos: chainInfo as C,
+          ...(chainInfo.evm && {
+            evm: {
+              ...chainInfo.evm,
+              currencies: chainInfo.currencies,
+              bip44: chainInfo.bip44,
+            },
+          }),
         };
       }
       return chainInfo;
     });
+
     this._modularChainInfoImpls = chainInfos.map((chainInfo) => {
       const modularChainInfo = (() => {
         if (
           "evm" in chainInfo &&
           chainInfo.evm &&
+          "currencies" in chainInfo &&
           this.isEvmOnlyChain(chainInfo.chainId)
         ) {
           return {
             chainId: chainInfo.chainId,
             chainName: chainInfo.chainName,
             chainSymbolImageUrl: chainInfo.chainSymbolImageUrl,
-            evmNative: {
-              chainId: chainInfo.evm.chainId,
-              rpc: chainInfo.rpc,
-              websocket: chainInfo.evm.websocket,
+            evm: {
+              ...chainInfo.evm,
               currencies: chainInfo.currencies,
               bip44: chainInfo.bip44,
             },
@@ -1060,6 +1067,13 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
             chainName: chainInfo.chainName,
             chainSymbolImageUrl: chainInfo.chainSymbolImageUrl,
             cosmos: chainInfo as C,
+            ...(chainInfo.evm && {
+              evm: {
+                ...chainInfo.evm,
+                currencies: chainInfo.currencies,
+                bip44: chainInfo.bip44,
+              },
+            }),
           };
         }
         return chainInfo;
@@ -1102,7 +1116,7 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
       return new ChainInfoImpl(chainInfo, this);
     });
     this._modularChainInfos = infos.modulrChainInfos.map((chainInfo) => {
-      if ("evmNative" in chainInfo) {
+      if ("evm" in chainInfo) {
         return chainInfo;
       }
 
@@ -1119,6 +1133,13 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
           chainName: cosmos.chainName,
           chainSymbolImageUrl: cosmos.chainSymbolImageUrl,
           cosmos,
+          ...(cosmos.evm && {
+            evm: {
+              ...cosmos.evm,
+              currencies: cosmos.currencies,
+              bip44: cosmos.bip44,
+            },
+          }),
         };
       }
       return chainInfo;
@@ -1142,10 +1163,8 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
               chainId: cosmos.chainId,
               chainName: cosmos.chainName,
               chainSymbolImageUrl: cosmos.chainSymbolImageUrl,
-              evmNative: {
-                chainId: cosmos.evm.chainId,
-                rpc: cosmos.rpc,
-                websocket: cosmos.evm.websocket,
+              evm: {
+                ...cosmos.evm,
                 currencies: cosmos.currencies,
                 bip44: cosmos.bip44,
               },
@@ -1157,6 +1176,13 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
             chainName: cosmos.chainName,
             chainSymbolImageUrl: cosmos.chainSymbolImageUrl,
             cosmos,
+            ...(cosmos.evm && {
+              evm: {
+                ...cosmos.evm,
+                currencies: cosmos.currencies,
+                bip44: cosmos.bip44,
+              },
+            }),
           };
         }
         return chainInfo;

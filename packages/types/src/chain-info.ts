@@ -119,5 +119,13 @@ export type ModularChainInfo =
       readonly chainName: string;
       readonly chainSymbolImageUrl?: string;
       readonly isTestnet?: boolean;
-      readonly evmNative: EVMNativeChainInfo;
+      readonly evm: EVMNativeChainInfo;
+    }
+  | {
+      readonly chainId: string;
+      readonly chainName: string;
+      readonly chainSymbolImageUrl?: string;
+      readonly isTestnet?: boolean;
+      readonly cosmos: ChainInfo;
+      readonly evm: EVMNativeChainInfo;
     };

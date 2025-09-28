@@ -99,9 +99,10 @@ export class ChainsService {
         ) => void | Promise<void>)
       | undefined
   ) {
-    this.modularChainInfos = embedModularChainInfos.map((modularChainInfo) => {
+    this.modularChainInfos = (
+      embedModularChainInfos as ChainInfoWithCoreTypes[]
+    ).map((modularChainInfo) => {
       if (
-        "evm" in modularChainInfo &&
         modularChainInfo.evm &&
         modularChainInfo.chainId.split(":")[0] === "eip155"
       ) {
@@ -109,10 +110,8 @@ export class ChainsService {
           chainId: modularChainInfo.chainId,
           chainName: modularChainInfo.chainName,
           chainSymbolImageUrl: modularChainInfo.chainSymbolImageUrl,
-          evmNative: {
-            chainId: modularChainInfo.evm.chainId,
-            rpc: modularChainInfo.rpc,
-            websocket: modularChainInfo.evm.websocket,
+          evm: {
+            ...modularChainInfo.evm,
             currencies: modularChainInfo.currencies,
             bip44: modularChainInfo.bip44,
           },
@@ -125,8 +124,16 @@ export class ChainsService {
           chainName: modularChainInfo.chainName,
           chainSymbolImageUrl: modularChainInfo.chainSymbolImageUrl,
           cosmos: modularChainInfo,
+          ...(modularChainInfo.evm && {
+            evm: {
+              ...modularChainInfo.evm,
+              currencies: modularChainInfo.currencies,
+              bip44: modularChainInfo.bip44,
+            },
+          }),
         };
       }
+
       return modularChainInfo;
     });
 
@@ -1169,22 +1176,31 @@ export class ChainsService {
         "cosmos" in modularChainInfo
       ) {
         const cosmos = this.getChainInfoOrThrow(modularChainInfo.chainId);
+        const mergedCosmos = this.mergeChainInfosWithDynamics([cosmos])[0];
+
         return {
           chainId: cosmos.chainId,
           chainName: cosmos.chainName,
           chainSymbolImageUrl: cosmos.chainSymbolImageUrl,
           isTestnet: cosmos.isTestnet,
-          cosmos: this.mergeChainInfosWithDynamics([cosmos])[0],
+          cosmos: mergedCosmos,
+          ...(mergedCosmos.evm && {
+            evm: {
+              ...mergedCosmos.evm,
+              currencies: mergedCosmos.currencies,
+              bip44: mergedCosmos.bip44,
+            },
+          }),
         };
       }
 
-      if ("evmNative" in modularChainInfo) {
+      if ("evm" in modularChainInfo) {
         const endpoint = this.getEndpoint(modularChainInfo.chainId);
         return {
           ...modularChainInfo,
-          evmNative: {
-            ...modularChainInfo.evmNative,
-            rpc: endpoint?.rpc || modularChainInfo.evmNative.rpc,
+          evm: {
+            ...modularChainInfo.evm,
+            rpc: endpoint?.rpc || modularChainInfo.evm.rpc,
           },
         };
       }
@@ -1291,6 +1307,13 @@ export class ChainsService {
               chainName: chainInfo.chainName,
               chainSymbolImageUrl: chainInfo.chainSymbolImageUrl,
               cosmos: chainInfo,
+              ...(chainInfo.evm && {
+                evm: {
+                  ...chainInfo.evm,
+                  currencies: chainInfo.currencies,
+                  bip44: chainInfo.bip44,
+                },
+              }),
             };
           }
         )
