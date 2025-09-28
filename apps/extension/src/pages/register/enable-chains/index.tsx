@@ -27,7 +27,7 @@ import { ColorPalette } from "../../../styles";
 import { useEffectOnce } from "../../../hooks/use-effect-once";
 import { useNavigate } from "react-router";
 import { ChainImageFallback } from "../../../components/image";
-import { KeyRingCosmosService } from "@keplr-wallet/background";
+import { KeyRingCosmosService, KeyRingService } from "@keplr-wallet/background";
 import { WalletStatus } from "@keplr-wallet/stores";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { TextButton } from "../../../components/button-text";
@@ -646,10 +646,7 @@ export const EnableChainsScene: FunctionComponent<{
             const chainInfo = chainStore.getChain(
               modularChainInfo.cosmos.chainId
             );
-            const isEthermintLike =
-              chainInfo.bip44.coinType === 60 ||
-              !!chainInfo.features?.includes("eth-address-gen") ||
-              !!chainInfo.features?.includes("eth-key-sign");
+            const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
 
             // Ledger일 경우 ethereum app을 바로 처리할 수 없다.
             // 이 경우 빼줘야한다.
@@ -1055,13 +1052,9 @@ export const EnableChainsScene: FunctionComponent<{
             const isCosmosAppNeed = "cosmos" in enabledModularChainInfo;
             const isEthereumAppNeed =
               isCosmosAppNeed &&
-              (enabledModularChainInfo.cosmos.bip44.coinType === 60 ||
-                !!enabledModularChainInfo.cosmos.features?.includes(
-                  "eth-address-gen"
-                ) ||
-                !!enabledModularChainInfo.cosmos.features?.includes(
-                  "eth-key-sign"
-                ));
+              KeyRingService.isEthermintLike(
+                chainStore.getChain(enabledModularChainInfo.chainId)
+              );
             const isStarknetAppNeed = "starknet" in enabledModularChainInfo;
             const isBitcoinAppNeed = "bitcoin" in enabledModularChainInfo;
 
@@ -1678,9 +1671,7 @@ export const EnableChainsScene: FunctionComponent<{
                     modularChainInfo.chainId
                   );
                   const isEthermintLike =
-                    chainInfo.bip44.coinType === 60 ||
-                    !!chainInfo.features?.includes("eth-address-gen") ||
-                    !!chainInfo.features?.includes("eth-key-sign");
+                    KeyRingService.isEthermintLike(chainInfo);
 
                   const isLedgerSupported = (() => {
                     try {
@@ -1743,9 +1734,9 @@ export const EnableChainsScene: FunctionComponent<{
                   !fallbackEthereumLedgerApp &&
                   keyType === "ledger" &&
                   isChainInfoType &&
-                  (modularChainInfo.bip44.coinType === 60 ||
-                    !!modularChainInfo.features?.includes("eth-address-gen") ||
-                    !!modularChainInfo.features?.includes("eth-key-sign"));
+                  chainStore.isEvmOrEthermintLikeChain(
+                    modularChainInfo.chainId
+                  );
                 if (isNextStepChain) {
                   return (
                     <NextStepChainItem
@@ -1993,9 +1984,7 @@ export const EnableChainsScene: FunctionComponent<{
                   if ("cosmos" in modularChainInfo) {
                     const chainInfo = chainStore.getChain(chainId);
                     const isEthermintLike =
-                      chainInfo.bip44.coinType === 60 ||
-                      !!chainInfo.features?.includes("eth-address-gen") ||
-                      !!chainInfo.features?.includes("eth-key-sign");
+                      KeyRingService.isEthermintLike(chainInfo);
                     return !isEthermintLike;
                   }
                   return false;
@@ -2004,11 +1993,7 @@ export const EnableChainsScene: FunctionComponent<{
                   const modularChainInfo = chainStore.getModularChain(chainId);
                   if ("cosmos" in modularChainInfo) {
                     const chainInfo = chainStore.getChain(chainId);
-                    const isEthermintLike =
-                      chainInfo.bip44.coinType === 60 ||
-                      !!chainInfo.features?.includes("eth-address-gen") ||
-                      !!chainInfo.features?.includes("eth-key-sign");
-                    return isEthermintLike;
+                    return KeyRingService.isEthermintLike(chainInfo);
                   }
                   return false;
                 };
