@@ -99,17 +99,44 @@ export class ChainsService {
         ) => void | Promise<void>)
       | undefined
   ) {
-    this.modularChainInfos = embedModularChainInfos.map((modularChainInfo) => {
+    this.modularChainInfos = (
+      embedModularChainInfos as ChainInfoWithCoreTypes[]
+    ).map((modularChainInfo) => {
+      if (
+        modularChainInfo.evm &&
+        modularChainInfo.chainId.split(":")[0] === "eip155"
+      ) {
+        return {
+          chainId: modularChainInfo.chainId,
+          chainName: modularChainInfo.chainName,
+          chainSymbolImageUrl: modularChainInfo.chainSymbolImageUrl,
+          evm: {
+            ...modularChainInfo.evm,
+            currencies: modularChainInfo.currencies,
+            bip44: modularChainInfo.bip44,
+          },
+        };
+      }
+
       if ("currencies" in modularChainInfo) {
         return {
           chainId: modularChainInfo.chainId,
           chainName: modularChainInfo.chainName,
           chainSymbolImageUrl: modularChainInfo.chainSymbolImageUrl,
           cosmos: modularChainInfo,
+          ...(modularChainInfo.evm && {
+            evm: {
+              ...modularChainInfo.evm,
+              currencies: modularChainInfo.currencies,
+              bip44: modularChainInfo.bip44,
+            },
+          }),
         };
       }
+
       return modularChainInfo;
     });
+
     this.embedChainInfos = embedModularChainInfos
       .filter(
         (modularChainInfo) =>
@@ -1144,14 +1171,37 @@ export class ChainsService {
     modularChainInfos: ModularChainInfo[]
   ): ModularChainInfo[] {
     return modularChainInfos.map((modularChainInfo) => {
-      if (this.hasChainInfo(modularChainInfo.chainId)) {
+      if (
+        this.hasChainInfo(modularChainInfo.chainId) &&
+        "cosmos" in modularChainInfo
+      ) {
         const cosmos = this.getChainInfoOrThrow(modularChainInfo.chainId);
+        const mergedCosmos = this.mergeChainInfosWithDynamics([cosmos])[0];
+
         return {
           chainId: cosmos.chainId,
           chainName: cosmos.chainName,
           chainSymbolImageUrl: cosmos.chainSymbolImageUrl,
           isTestnet: cosmos.isTestnet,
-          cosmos: this.mergeChainInfosWithDynamics([cosmos])[0],
+          cosmos: mergedCosmos,
+          ...(mergedCosmos.evm && {
+            evm: {
+              ...mergedCosmos.evm,
+              currencies: mergedCosmos.currencies,
+              bip44: mergedCosmos.bip44,
+            },
+          }),
+        };
+      }
+
+      if ("evm" in modularChainInfo) {
+        const endpoint = this.getEndpoint(modularChainInfo.chainId);
+        return {
+          ...modularChainInfo,
+          evm: {
+            ...modularChainInfo.evm,
+            rpc: endpoint?.rpc || modularChainInfo.evm.rpc,
+          },
         };
       }
 
@@ -1257,6 +1307,13 @@ export class ChainsService {
               chainName: chainInfo.chainName,
               chainSymbolImageUrl: chainInfo.chainSymbolImageUrl,
               cosmos: chainInfo,
+              ...(chainInfo.evm && {
+                evm: {
+                  ...chainInfo.evm,
+                  currencies: chainInfo.currencies,
+                  bip44: chainInfo.bip44,
+                },
+              }),
             };
           }
         )

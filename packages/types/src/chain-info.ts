@@ -81,7 +81,15 @@ export interface BitcoinChainInfo {
   readonly currencies: AppCurrency[];
 }
 
-export type ChainInfoModule = "cosmos" | "starknet" | "bitcoin";
+export interface EVMNativeChainInfo {
+  readonly rpc: string;
+  readonly chainId: number;
+  readonly websocket?: string;
+  readonly currencies: AppCurrency[];
+  readonly bip44: BIP44;
+}
+
+export type ChainInfoModule = "cosmos" | "starknet" | "bitcoin" | "evm";
 
 export type ModularChainInfo =
   | {
@@ -105,4 +113,19 @@ export type ModularChainInfo =
       readonly linkedChainKey: string;
       readonly isTestnet?: boolean;
       readonly bitcoin: BitcoinChainInfo;
+    }
+  | {
+      readonly chainId: string;
+      readonly chainName: string;
+      readonly chainSymbolImageUrl?: string;
+      readonly isTestnet?: boolean;
+      readonly evm: EVMNativeChainInfo;
+    }
+  | {
+      readonly chainId: string;
+      readonly chainName: string;
+      readonly chainSymbolImageUrl?: string;
+      readonly isTestnet?: boolean;
+      readonly cosmos: ChainInfo;
+      readonly evm: EVMNativeChainInfo;
     };
