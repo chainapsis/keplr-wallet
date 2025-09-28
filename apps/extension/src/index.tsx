@@ -367,7 +367,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
             }),
             ...(() => {
               for (const modularChainInfo of chainStore.modularChainInfosInUI) {
-                if ("cosmos" in modularChainInfo) {
+                if ("cosmos" in modularChainInfo || "evm" in modularChainInfo) {
                   return {
                     disabled: false,
                   };
