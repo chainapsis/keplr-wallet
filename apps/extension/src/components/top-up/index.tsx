@@ -74,12 +74,17 @@ export const FeeCoverageBox = ({ feeConfig }: { feeConfig: IFeeConfig }) => {
         >
           <Subtitle3 color={ColorPalette["gray-200"]}>Tx Fee</Subtitle3>
 
-          <Subtitle3 style={{ textDecoration: "line-through" }}>
+          <Subtitle3
+            style={{
+              textDecoration: "line-through",
+              textDecorationColor: ColorPalette["gray-300"],
+            }}
+          >
             <span style={{ color: ColorPalette["gray-50"] }}>
               {feeConfig.fees[0]?.toString()}{" "}
             </span>
             <span style={{ color: ColorPalette["gray-300"] }}>
-              {price?.toString()}
+              ({price?.toString()})
             </span>
           </Subtitle3>
         </div>
