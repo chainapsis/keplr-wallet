@@ -7,7 +7,6 @@ import { BackButton } from "../../../../layouts/header/components";
 import { useInteractionInfo } from "../../../../hooks";
 import { KeplrError } from "@keplr-wallet/router";
 import { ErrModuleLedgerSign } from "../../utils/ledger-types";
-import { Buffer } from "buffer/";
 import { LedgerGuideBox } from "../../components/ledger-guide-box";
 import { KeystoneUSBBox } from "../../components/keystone-usb-box";
 import {
@@ -30,6 +29,7 @@ import { Gutter } from "../../../../components/gutter";
 import { ArbitraryMsgRequestOrigin } from "../../components/arbitrary-message/arbitrary-message-origin";
 import { ArbitraryMsgWalletDetails } from "../../components/arbitrary-message/arbitrary-message-wallet-details";
 import { ArbitraryMsgDataView } from "../../components/arbitrary-message/arbitrary-message-data-view";
+import { useEIP712Intent } from "../../../../hooks/ethereum/use-eip712-intent";
 
 export const EthereumSignEIP712View: FunctionComponent<{
   interactionData: NonNullable<SignEthereumInteractionStore["waitingData"]>;
@@ -44,12 +44,14 @@ export const EthereumSignEIP712View: FunctionComponent<{
     onUnmount: async () => {
       await signEthereumInteractionStore.rejectWithProceedNext(
         interactionData.id,
-        () => {}
+        () => {
+          // noop
+        }
       );
     },
   });
 
-  const { message, signType, chainId } = interactionData.data;
+  const { chainId } = interactionData.data;
 
   const chainInfo = chainStore.getChain(chainId);
 
@@ -61,12 +63,11 @@ export const EthereumSignEIP712View: FunctionComponent<{
     address: interactionData.data.signer || "",
   };
 
-  const signingDataBuff = Buffer.from(message);
+  // EIP712 인텐트 파싱
+  const { intent, signingDataBuff, signingDataText } =
+    useEIP712Intent(interactionData);
 
-  // TODO: handle eip712 permit
-  const signingDataText = useMemo(() => {
-    return JSON.stringify(JSON.parse(signingDataBuff.toString()), null, 2);
-  }, [signingDataBuff]);
+  console.log("intent", intent);
 
   const [isLedgerInteracting, setIsLedgerInteracting] = useState(false);
   const [ledgerInteractingError, setLedgerInteractingError] = useState<
