@@ -16,7 +16,7 @@ export interface EIP712Domain {
   name: string;
   version?: string;
   chainId: number;
-  verifyingContract?: string;
+  verifyingContract: string;
 }
 
 export interface ERC2612PermitIntent {
@@ -92,7 +92,7 @@ const EIP712DomainSchema: Joi.ObjectSchema<EIP712Domain> = Joi.object({
   chainId: Joi.alternatives()
     .try(Joi.number(), Joi.string().pattern(/^\d+$/))
     .required(),
-  verifyingContract: EthereumAddressSchema.optional(),
+  verifyingContract: EthereumAddressSchema.required(),
 });
 
 const ERC2612PermitMessageSchema = Joi.object({
