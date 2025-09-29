@@ -29,6 +29,7 @@ import {
   useTxConfigsValidate,
   IBCRecipientConfig,
   useIBCRecipientConfig,
+  InsufficientFeeError,
 } from "@keplr-wallet/hooks";
 import { useNavigate } from "react-router";
 import { AmountInput, RecipientInput } from "../../../components/input";
@@ -104,6 +105,7 @@ import { usePreviousDistinct } from "../../../hooks/use-previous";
 import { SwapFeeInfoForBridgeOnSend } from "./swap-fee-info";
 import { useEffectOnce } from "../../../hooks/use-effect-once";
 import { useGlobarSimpleBar } from "../../../hooks/global-simplebar";
+import { FeeCoverageDescription } from "../../../components/top-up";
 
 const Styles = {
   Flex1: styled.div`
@@ -863,6 +865,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       }
     }
   })();
+
+  console.log(JSON.stringify(feeConfig.uiProperties, null, 2));
 
   return (
     <HeaderLayout
@@ -2232,15 +2236,30 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           <Styles.Flex1 />
           <Gutter size="0" />
 
-          <FeeControl
-            senderConfig={senderConfig}
-            feeConfig={feeConfig}
-            gasConfig={gasConfig}
-            gasSimulator={gasSimulatorForNotBridgeSend}
-            isForEVMTx={isEvmTx}
-            nonceMethod={nonceMethod}
-            setNonceMethod={setNonceMethod}
-          />
+          <VerticalCollapseTransition
+            collapsed={
+              "isTopUpAvailable" in feeConfig.topUpStatus &&
+              feeConfig.uiProperties.warning instanceof InsufficientFeeError
+            }
+          >
+            <FeeControl
+              senderConfig={senderConfig}
+              feeConfig={feeConfig}
+              gasConfig={gasConfig}
+              gasSimulator={gasSimulatorForNotBridgeSend}
+              isForEVMTx={isEvmTx}
+              nonceMethod={nonceMethod}
+              setNonceMethod={setNonceMethod}
+            />
+          </VerticalCollapseTransition>
+          <VerticalCollapseTransition
+            collapsed={
+              "error" in feeConfig.topUpStatus ||
+              !(feeConfig.uiProperties.warning instanceof InsufficientFeeError)
+            }
+          >
+            <FeeCoverageDescription feeConfig={feeConfig} />
+          </VerticalCollapseTransition>
 
           {sendType === "bridge" && (
             <SwapFeeInfoForBridgeOnSend

@@ -1231,14 +1231,15 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       queryTopUpStatus.setRecipientAddress(this.senderConfig.sender);
     }
 
+    const data = queryTopUpStatus?.response?.data;
+
     if (
       this._uiProperties.error instanceof InsufficientFeeError &&
-      (() => {
-        const data = queryTopUpStatus?.response?.data;
-        return data && "isTopUpAvailable" in data && data.isTopUpAvailable;
-      })()
+      data &&
+      "isTopUpAvailable" in data &&
+      data.isTopUpAvailable
     ) {
-      return {}; // Don't show error
+      return { warning: this._uiProperties.error };
     }
 
     return this._uiProperties;
