@@ -690,6 +690,18 @@ export const ConnectLedgerScene: FunctionComponent<{
 
         <Gutter size="1.25rem" />
 
+        {["Cosmos", "Terra", "Secret", "THORChain"].includes(propApp) &&
+          (bip44Path.account > 100 || bip44Path.addressIndex > 100) && (
+            <GuideBox
+              title="To set the first or last value of the derivation path above 100, please enable Expert Mode on your Ledger device."
+              backgroundColor={
+                theme.mode === "light"
+                  ? ColorPalette["gray-50"]
+                  : ColorPalette["gray-500"]
+              }
+            />
+          )}
+
         {propApp === "Starknet" && (
           <GuideBox
             title="The custom derivation path set in the previous step does not apply to Starknet App accounts."
