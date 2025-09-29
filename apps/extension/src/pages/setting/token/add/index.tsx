@@ -156,7 +156,9 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
 
   const isSecretWasm = chainInfo?.hasFeature("secretwasm");
   const isEvmChain =
-    chainInfo != null && "evm" in chainInfo && chainInfo.evm != null;
+    "evm" in modularChainInfo &&
+    modularChainInfo?.evm &&
+    chainStore.isEvmChain(modularChainInfo.chainId);
   const isStarknet =
     modularChainInfo != null &&
     "starknet" in modularChainInfo &&

@@ -156,7 +156,8 @@ export class HugeQueriesStore {
 
     for (const modularChainInfo of this.chainStore.modularChainInfosInUI) {
       const account = this.accountStore.getAccount(modularChainInfo.chainId);
-      if ("cosmos" in modularChainInfo) {
+
+      if ("cosmos" in modularChainInfo || "evm" in modularChainInfo) {
         const chainInfo = this.chainStore.getChain(modularChainInfo.chainId);
 
         const mainCurrency = chainInfo.stakeCurrency || chainInfo.currencies[0];
@@ -410,7 +411,7 @@ export class HugeQueriesStore {
       }
 
       const account = this.accountStore.getAccount(modularChainInfo.chainId);
-      if ("cosmos" in modularChainInfo) {
+      if ("cosmos" in modularChainInfo || "evm" in modularChainInfo) {
         const chainInfo = this.chainStore.getChain(modularChainInfo.chainId);
 
         const mainCurrency = chainInfo.stakeCurrency || chainInfo.currencies[0];
@@ -663,9 +664,18 @@ export class HugeQueriesStore {
             keys.set(key, true);
           }
         }
-        if ("starknet" in modularChainInfo || "bitcoin" in modularChainInfo) {
+
+        if (
+          "evm" in modularChainInfo ||
+          "starknet" in modularChainInfo ||
+          "bitcoin" in modularChainInfo
+        ) {
           const module =
-            "starknet" in modularChainInfo ? "starknet" : "bitcoin";
+            "evm" in modularChainInfo
+              ? "evm"
+              : "starknet" in modularChainInfo
+              ? "starknet"
+              : "bitcoin";
 
           const modularChainInfoImpl = this.chainStore.getModularChainInfoImpl(
             modularChainInfo.chainId

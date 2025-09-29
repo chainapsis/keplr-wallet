@@ -857,7 +857,7 @@ const RefreshButton: FunctionComponent<{
               account.bech32Address
             );
           promises.push(queryNeutronRewardInner.waitFreshResponse());
-        } else if ("cosmos" in modularChainInfo) {
+        } else if ("cosmos" in modularChainInfo || "evm" in modularChainInfo) {
           const chainInfo = chainStore.getChain(modularChainInfo.chainId);
           const account = accountStore.getAccount(chainInfo.chainId);
 
