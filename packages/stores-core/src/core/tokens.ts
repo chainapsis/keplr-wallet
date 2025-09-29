@@ -174,6 +174,20 @@ export class TokensStore {
 
           modularChainInfoImpl.addCurrencies("starknet", ...adds);
         }
+      } else if ("evm" in modularChainInfoImpl.embedded) {
+        const chainIdentifier = ChainIdHelper.parse(
+          modularChainInfoImpl.chainId
+        );
+
+        const tokens = this.tokenMap.get(chainIdentifier.identifier) ?? [];
+
+        const adds: AppCurrency[] = [];
+
+        for (const token of tokens) {
+          adds.push(token.currency);
+        }
+
+        modularChainInfoImpl.addCurrencies("evm", ...adds);
       }
     }
 
