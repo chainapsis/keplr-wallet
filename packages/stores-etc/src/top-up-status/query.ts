@@ -1,13 +1,18 @@
 import { ObservableQuery, QuerySharedContext } from "@keplr-wallet/stores";
 import { makeObservable } from "mobx";
 
-export type TopUpStatusResponse = {
-  status: boolean;
-  error?: string;
-  // remainingSeconds?: number;
-};
+export type StatusResponseBody =
+  | {
+      isTopUpAvailable: boolean;
+      remainingTimeMs?: number;
+    }
+  | {
+      error: string;
+    };
 
-class ObservableQueryTopUpStatusInner extends ObservableQuery<TopUpStatusResponse> {
+class ObservableQueryTopUpStatusInner extends ObservableQuery<StatusResponseBody> {
+  private readonly chainId: string;
+
   constructor(
     sharedContext: QuerySharedContext,
     baseURL: string,
@@ -18,7 +23,17 @@ class ObservableQueryTopUpStatusInner extends ObservableQuery<TopUpStatusRespons
       fetchingInterval: 10_000,
     });
 
+    this.chainId = chainId;
+
     makeObservable(this);
+  }
+
+  setRecipientAddress(recipientAddress: string) {
+    this.setUrl(
+      `/status/${encodeURIComponent(
+        this.chainId
+      )}?recipientAddress=${encodeURIComponent(recipientAddress)}`
+    );
   }
 }
 

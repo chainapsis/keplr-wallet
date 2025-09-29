@@ -1225,10 +1225,18 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
   @computed
   get uiProperties(): UIProperties {
+    const queryTopUpStatus = this.queriesStore.get(this.chainId).keplrETC
+      ?.queryTopUpStatus;
+    if (queryTopUpStatus) {
+      queryTopUpStatus.setRecipientAddress(this.senderConfig.sender);
+    }
+
     if (
       this._uiProperties.error instanceof InsufficientFeeError &&
-      this.queriesStore.get(this.chainId).keplrETC?.queryTopUpStatus?.response
-        ?.data?.status
+      (() => {
+        const data = queryTopUpStatus?.response?.data;
+        return data && "isTopUpAvailable" in data && data.isTopUpAvailable;
+      })()
     ) {
       return {}; // Don't show error
     }
@@ -1237,11 +1245,22 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   @computed
-  get topUpStatus() {
+  get topUpStatus():
+    | { isTopUpAvailable: boolean; remainingTimeMs?: number }
+    | { error: string } {
+    const queryTopUpStatus = this.queriesStore.get(this.chainId).keplrETC
+      ?.queryTopUpStatus;
+    if (queryTopUpStatus) {
+      queryTopUpStatus.setRecipientAddress(this.senderConfig.sender);
+    } else {
+      return {
+        error: "Failed to fetch top-up status",
+      };
+    }
+
     return (
-      this.queriesStore.get(this.chainId).keplrETC?.queryTopUpStatus?.response
-        ?.data || {
-        status: false,
+      queryTopUpStatus?.response?.data || {
+        error: "Failed to fetch top-up status",
       }
     );
   }
