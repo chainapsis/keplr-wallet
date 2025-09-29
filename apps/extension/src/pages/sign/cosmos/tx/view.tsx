@@ -40,7 +40,7 @@ import { KeystoneSign } from "../../components/keystone";
 import { ErrModuleKeystoneSign, KeystoneUR } from "../../utils/keystone";
 import { KeyRingService } from "@keplr-wallet/background";
 import { useTheme } from "styled-components";
-import { defaultProtoCodec } from "@keplr-wallet/cosmos";
+import { defaultProtoCodec, TendermintTxTracer } from "@keplr-wallet/cosmos";
 import { MsgGrant } from "@keplr-wallet/proto-types/cosmos/authz/v1beta1/tx";
 import { GenericAuthorization } from "@keplr-wallet/stores/build/query/cosmos/authz/types";
 import { Checkbox } from "../../../../components/checkbox";
@@ -52,6 +52,7 @@ import { useNavigate } from "react-router-dom";
 import { ApproveIcon, CancelIcon } from "../../../../components/button";
 import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse";
 import { FeeCoverageBox } from "../../../../components/top-up";
+import { TopUpClient } from "@keplr-wallet/topup-client";
 
 /**
  * 서명을 처리할때 웹페이지에서 연속적으로 서명을 요청했을 수 있고
@@ -370,6 +371,8 @@ export const CosmosTxView: FunctionComponent<{
     Error | undefined
   >(undefined);
 
+  const [isTopUpInProgress, setIsTopUpInProgress] = useState(false);
+
   const isHighFee = (() => {
     if (feeConfig.fees) {
       let sumPrice = new Dec(0);
@@ -398,39 +401,72 @@ export const CosmosTxView: FunctionComponent<{
     !signDocHelper.signDocWrapper ||
     isLedgerAndDirect ||
     (isSendAuthzGrant && !isSendAuthzGrantChecked) ||
-    (isHighFee && !isHighFeeApproved);
+    (isHighFee && !isHighFeeApproved) ||
+    isTopUpInProgress;
 
   const approve = async () => {
     if (signDocHelper.signDocWrapper) {
       let presignOptions;
-      if (interactionData.data.keyType === "ledger") {
-        setIsLedgerInteracting(true);
-        setLedgerInteractingError(undefined);
-        presignOptions = {
-          useWebHID: uiConfigStore.useWebHIDLedger,
-          signEthPlainJSON: chainStore
-            .getChain(signInteractionStore.waitingData!.data.chainId)
-            .hasFeature("evm-ledger-sign-plain-json"),
-        };
-      } else if (interactionData.data.keyType === "keystone") {
-        setIsKeystoneInteracting(true);
-        setKeystoneInteractingError(undefined);
-        const isEthSigning = KeyRingService.isEthermintLike(
-          chainStore.getChain(chainId)
-        );
-        presignOptions = {
-          isEthSigning,
-          displayQRCode: async (ur: KeystoneUR) => {
-            setKeystoneUR(ur);
-          },
-          scanQRCode: () =>
-            new Promise<KeystoneUR>((resolve) => {
-              keystoneScanResolve.current = resolve;
-            }),
-        };
-      }
-
       try {
+        if (showTopUpInfo) {
+          setIsTopUpInProgress(true);
+          try {
+            const stdFee = feeConfig.toStdFee();
+            const client = new TopUpClient();
+            const topUpTxHash = await client.postTopUp({
+              chainId,
+              recipientAddress: signer,
+              fee: {
+                amount: stdFee.amount,
+                payer: stdFee.payer,
+                granter: stdFee.granter,
+                feePayer: stdFee.feePayer,
+              },
+            });
+
+            const rpc = chainStore.getChain(chainId).rpc;
+            const tracer = new TendermintTxTracer(rpc, "/websocket");
+            try {
+              await tracer.traceTx(
+                Buffer.from(topUpTxHash, "hex") as Uint8Array
+              );
+            } finally {
+              tracer.close();
+            }
+          } finally {
+            setIsTopUpInProgress(false);
+          }
+        }
+
+        if (interactionData.data.keyType === "ledger") {
+          setIsLedgerInteracting(true);
+          setLedgerInteractingError(undefined);
+          presignOptions = {
+            useWebHID: uiConfigStore.useWebHIDLedger,
+            signEthPlainJSON: chainStore
+              .getChain(
+                signInteractionStore.waitingData?.data.chainId ?? chainId
+              )
+              .hasFeature("evm-ledger-sign-plain-json"),
+          };
+        } else if (interactionData.data.keyType === "keystone") {
+          setIsKeystoneInteracting(true);
+          setKeystoneInteractingError(undefined);
+          const isEthSigning = KeyRingService.isEthermintLike(
+            chainStore.getChain(chainId)
+          );
+          presignOptions = {
+            isEthSigning,
+            displayQRCode: async (ur: KeystoneUR) => {
+              setKeystoneUR(ur);
+            },
+            scanQRCode: () =>
+              new Promise<KeystoneUR>((resolve) => {
+                keystoneScanResolve.current = resolve;
+              }),
+          };
+        }
+
         const signature = await handleCosmosPreSign(
           interactionData,
           signDocHelper.signDocWrapper,
@@ -513,7 +549,8 @@ export const CosmosTxView: FunctionComponent<{
   const isLoading =
     signInteractionStore.isObsoleteInteractionApproved(interactionData.id) ||
     isLedgerInteracting ||
-    isKeystoneInteracting;
+    isKeystoneInteracting ||
+    isTopUpInProgress;
 
   const showTopUpInfo =
     "isTopUpAvailable" in feeConfig.topUpStatus &&
