@@ -51,7 +51,11 @@ import { handleExternalInteractionWithNoProceedNext } from "../../../../utils";
 import { useNavigate } from "react-router-dom";
 import { ApproveIcon, CancelIcon } from "../../../../components/button";
 import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse";
-import { FeeCoverageBox } from "../../../../components/top-up";
+import {
+  FeeCoverageBox,
+  FeeCoverageDescription,
+  FeeCoverageOverlay,
+} from "../../../../components/top-up";
 import { TopUpClient } from "@keplr-wallet/topup-client";
 
 /**
@@ -811,7 +815,11 @@ export const CosmosTxView: FunctionComponent<{
           </Box>
         </VerticalCollapseTransition>
         <VerticalCollapseTransition collapsed={!showTopUpInfo}>
-          <FeeCoverageBox feeConfig={feeConfig} />
+          {interactionData.isInternal ? (
+            <FeeCoverageBox feeConfig={feeConfig} />
+          ) : (
+            <FeeCoverageDescription feeConfig={feeConfig} />
+          )}
         </VerticalCollapseTransition>
 
         {isSendAuthzGrant ? (
@@ -891,6 +899,7 @@ export const CosmosTxView: FunctionComponent<{
           }}
         />
       )}
+      {showTopUpInfo && !interactionData.isInternal && <FeeCoverageOverlay />}
     </HeaderLayout>
   );
 });

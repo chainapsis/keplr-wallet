@@ -16,6 +16,7 @@ export const FeeCoverageDescription = ({
         flexDirection: "column",
         gap: "0.25rem",
         lineHeight: "155%",
+        padding: "0.25rem 0",
       }}
     >
       <Subtitle4
@@ -111,6 +112,49 @@ export const FeeCoverageBox = ({ feeConfig }: { feeConfig: IFeeConfig }) => {
       >
         Keep this window open during the transaction
       </Subtitle3>
+    </div>
+  );
+};
+
+export const FeeCoverageOverlay = () => {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        bottom: 0,
+        width: "100vw",
+        height: "9.75rem",
+        background:
+          "linear-gradient(180deg, rgba(9, 9, 10, 0) 35%, #013E55 100%)",
+        zIndex: 1,
+        pointerEvents: "none",
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "1.25rem",
+          height: "1.25rem",
+          zIndex: 2,
+        }}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 20 20"
+          fill="none"
+        >
+          <path
+            opacity="0.45"
+            d="M10 0C10.9828 5.06035 14.9396 9.01717 20 10C14.9396 10.9828 10.9828 14.9396 10 20C9.01717 14.9396 5.06035 10.9828 0 10C5.06035 9.01717 9.01717 5.06035 10 0Z"
+            fill="#009FDD"
+          />
+        </svg>
+      </div>
     </div>
   );
 };
