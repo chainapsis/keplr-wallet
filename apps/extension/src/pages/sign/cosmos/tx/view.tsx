@@ -10,6 +10,7 @@ import { MessageItem } from "../../components/message-item";
 import { MemoInput } from "../../../../components/input/memo-input";
 import { observer } from "mobx-react-lite";
 import {
+  InsufficientFeeError,
   useFeeConfig,
   useMemoConfig,
   useSenderConfig,
@@ -49,6 +50,8 @@ import { HighFeeWarning } from "../../components/high-fee-warning";
 import { handleExternalInteractionWithNoProceedNext } from "../../../../utils";
 import { useNavigate } from "react-router-dom";
 import { ApproveIcon, CancelIcon } from "../../../../components/button";
+import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse";
+import { FeeCoverageBox } from "../../../../components/top-up";
 
 /**
  * 서명을 처리할때 웹페이지에서 연속적으로 서명을 요청했을 수 있고
@@ -512,6 +515,12 @@ export const CosmosTxView: FunctionComponent<{
     isLedgerInteracting ||
     isKeystoneInteracting;
 
+  const showTopUpInfo =
+    "isTopUpAvailable" in feeConfig.topUpStatus &&
+    (feeConfig.topUpStatus.isTopUpAvailable ||
+      feeConfig.topUpStatus.remainingTimeMs !== undefined) &&
+    feeConfig.uiProperties.warning instanceof InsufficientFeeError;
+
   return (
     <HeaderLayout
       title={intl.formatMessage({ id: "page.sign.cosmos.tx.title" })}
@@ -726,42 +735,47 @@ export const CosmosTxView: FunctionComponent<{
           </React.Fragment>
         ) : null}
 
-        <Box
-          style={{
-            opacity: isLedgerAndDirect ? 0.5 : undefined,
-          }}
-        >
-          {/* direct aux는 수수료를 설정할수도 없으니 보여줄 필요가 없다. */}
-          {"isDirectAux" in interactionData.data &&
-          interactionData.data.isDirectAux
-            ? null
-            : (() => {
-                if (interactionData.isInternal && preferNoSetFee) {
+        <VerticalCollapseTransition collapsed={showTopUpInfo}>
+          <Box
+            style={{
+              opacity: isLedgerAndDirect ? 0.5 : undefined,
+            }}
+          >
+            {/* direct aux는 수수료를 설정할수도 없으니 보여줄 필요가 없다. */}
+            {"isDirectAux" in interactionData.data &&
+            interactionData.data.isDirectAux
+              ? null
+              : (() => {
+                  if (interactionData.isInternal && preferNoSetFee) {
+                    return (
+                      <FeeSummary feeConfig={feeConfig} gasConfig={gasConfig} />
+                    );
+                  }
+
                   return (
-                    <FeeSummary feeConfig={feeConfig} gasConfig={gasConfig} />
+                    <FeeControl
+                      feeConfig={feeConfig}
+                      senderConfig={senderConfig}
+                      gasConfig={gasConfig}
+                      disableAutomaticFeeSet={preferNoSetFee}
+                    />
                   );
-                }
+                })()}
 
-                return (
-                  <FeeControl
-                    feeConfig={feeConfig}
-                    senderConfig={senderConfig}
-                    gasConfig={gasConfig}
-                    disableAutomaticFeeSet={preferNoSetFee}
-                  />
-                );
-              })()}
-
-          {isHighFee ? (
-            <React.Fragment>
-              <Gutter size="0.75rem" />
-              <HighFeeWarning
-                checked={isHighFeeApproved}
-                onChange={(v) => setIsHighFeeApproved(v)}
-              />
-            </React.Fragment>
-          ) : null}
-        </Box>
+            {isHighFee ? (
+              <React.Fragment>
+                <Gutter size="0.75rem" />
+                <HighFeeWarning
+                  checked={isHighFeeApproved}
+                  onChange={(v) => setIsHighFeeApproved(v)}
+                />
+              </React.Fragment>
+            ) : null}
+          </Box>
+        </VerticalCollapseTransition>
+        <VerticalCollapseTransition collapsed={!showTopUpInfo}>
+          <FeeCoverageBox feeConfig={feeConfig} />
+        </VerticalCollapseTransition>
 
         {isSendAuthzGrant ? (
           <React.Fragment>

@@ -895,7 +895,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   @computed
-  get uiProperties(): UIProperties {
+  get _uiProperties(): UIProperties {
     if (this.disableBalanceCheck) {
       return {};
     }
@@ -1221,6 +1221,49 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     }
 
     return {};
+  }
+
+  @computed
+  get uiProperties(): UIProperties {
+    const queryTopUpStatus = this.queriesStore.get(this.chainId).keplrETC
+      ?.queryTopUpStatus;
+    if (queryTopUpStatus) {
+      queryTopUpStatus.setRecipientAddress(this.senderConfig.sender);
+    }
+
+    const data = queryTopUpStatus?.response?.data;
+
+    if (
+      this._uiProperties.error instanceof InsufficientFeeError &&
+      data &&
+      "isTopUpAvailable" in data &&
+      data.isTopUpAvailable
+    ) {
+      return { warning: this._uiProperties.error };
+    }
+
+    return this._uiProperties;
+  }
+
+  @computed
+  get topUpStatus():
+    | { isTopUpAvailable: boolean; remainingTimeMs?: number }
+    | { error: string } {
+    const queryTopUpStatus = this.queriesStore.get(this.chainId).keplrETC
+      ?.queryTopUpStatus;
+    if (queryTopUpStatus) {
+      queryTopUpStatus.setRecipientAddress(this.senderConfig.sender);
+    } else {
+      return {
+        error: "Failed to fetch top-up status",
+      };
+    }
+
+    return (
+      queryTopUpStatus?.response?.data || {
+        error: "Failed to fetch top-up status",
+      }
+    );
   }
 
   private getMultiplication(): { low: number; average: number; high: number } {
