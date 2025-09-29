@@ -866,7 +866,11 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     }
   })();
 
-  console.log(JSON.stringify(feeConfig.uiProperties, null, 2));
+  const showTopUpInfo =
+    "isTopUpAvailable" in feeConfig.topUpStatus &&
+    (feeConfig.topUpStatus.isTopUpAvailable ||
+      feeConfig.topUpStatus.remainingTimeMs !== undefined) &&
+    feeConfig.uiProperties.warning instanceof InsufficientFeeError;
 
   return (
     <HeaderLayout
@@ -2236,12 +2240,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           <Styles.Flex1 />
           <Gutter size="0" />
 
-          <VerticalCollapseTransition
-            collapsed={
-              "isTopUpAvailable" in feeConfig.topUpStatus &&
-              feeConfig.uiProperties.warning instanceof InsufficientFeeError
-            }
-          >
+          <VerticalCollapseTransition collapsed={showTopUpInfo}>
             <FeeControl
               senderConfig={senderConfig}
               feeConfig={feeConfig}
@@ -2252,12 +2251,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
               setNonceMethod={setNonceMethod}
             />
           </VerticalCollapseTransition>
-          <VerticalCollapseTransition
-            collapsed={
-              "error" in feeConfig.topUpStatus ||
-              !(feeConfig.uiProperties.warning instanceof InsufficientFeeError)
-            }
-          >
+          <VerticalCollapseTransition collapsed={!showTopUpInfo}>
             <FeeCoverageDescription feeConfig={feeConfig} />
           </VerticalCollapseTransition>
 

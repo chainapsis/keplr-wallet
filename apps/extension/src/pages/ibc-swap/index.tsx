@@ -66,6 +66,7 @@ import {
   validateIsUsdcFromNoble,
   validateIsUsdnFromNoble,
 } from "../earn/utils";
+import { FeeCoverageDescription } from "../../components/top-up";
 
 const TextButtonStyles = {
   Container: styled.div`
@@ -859,6 +860,13 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
       );
     }
   })();
+
+  const showTopUpInfo =
+    "isTopUpAvailable" in ibcSwapConfigs.feeConfig.topUpStatus &&
+    (ibcSwapConfigs.feeConfig.topUpStatus.isTopUpAvailable ||
+      ibcSwapConfigs.feeConfig.topUpStatus.remainingTimeMs !== undefined) &&
+    ibcSwapConfigs.feeConfig.uiProperties.warning instanceof
+      InsufficientFeeError;
 
   return (
     <MainHeaderLayout
@@ -1991,16 +1999,21 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           }}
         />
         <Gutter size="0.75rem" />
-        <SwapFeeInfo
-          senderConfig={ibcSwapConfigs.senderConfig}
-          amountConfig={ibcSwapConfigs.amountConfig}
-          gasConfig={ibcSwapConfigs.gasConfig}
-          feeConfig={ibcSwapConfigs.feeConfig}
-          gasSimulator={gasSimulator}
-          isForEVMTx={isInChainEVMOnly}
-          nonceMethod={nonceMethod}
-          setNonceMethod={setNonceMethod}
-        />
+        <VerticalCollapseTransition collapsed={showTopUpInfo}>
+          <SwapFeeInfo
+            senderConfig={ibcSwapConfigs.senderConfig}
+            amountConfig={ibcSwapConfigs.amountConfig}
+            gasConfig={ibcSwapConfigs.gasConfig}
+            feeConfig={ibcSwapConfigs.feeConfig}
+            gasSimulator={gasSimulator}
+            isForEVMTx={isInChainEVMOnly}
+            nonceMethod={nonceMethod}
+            setNonceMethod={setNonceMethod}
+          />
+        </VerticalCollapseTransition>
+        <VerticalCollapseTransition collapsed={!showTopUpInfo}>
+          <FeeCoverageDescription feeConfig={ibcSwapConfigs.feeConfig} />
+        </VerticalCollapseTransition>
 
         <WarningGuideBox
           showUSDNWarning={showUSDNWarning}
