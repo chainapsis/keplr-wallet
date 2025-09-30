@@ -2044,66 +2044,75 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           <FeeCoverageDescription />
         </VerticalCollapseTransition>
 
-        <WarningGuideBox
-          showUSDNWarning={showUSDNWarning}
-          showCelestiaWarning={showCelestiaWarning}
-          amountConfig={ibcSwapConfigs.amountConfig}
-          feeConfig={ibcSwapConfigs.feeConfig}
-          gasConfig={ibcSwapConfigs.gasConfig}
-          title={
-            isHighPriceImpact &&
-            !calculatingTxError &&
-            !ibcSwapConfigs.amountConfig.uiProperties.error &&
-            !ibcSwapConfigs.amountConfig.uiProperties.warning
-              ? (() => {
-                  const inPrice = priceStore.calculatePrice(
-                    ibcSwapConfigs.amountConfig.amount[0],
-                    "usd"
-                  );
-                  const outPrice = priceStore.calculatePrice(
-                    ibcSwapConfigs.amountConfig.outAmount,
-                    "usd"
-                  );
-                  return intl.formatMessage(
+        <VerticalCollapseTransition
+          collapsed={
+            shouldTopup &&
+            ibcSwapConfigs.feeConfig.uiProperties.warning instanceof
+              InsufficientFeeError
+          }
+        >
+          <WarningGuideBox
+            showUSDNWarning={showUSDNWarning}
+            showCelestiaWarning={showCelestiaWarning}
+            amountConfig={ibcSwapConfigs.amountConfig}
+            feeConfig={ibcSwapConfigs.feeConfig}
+            gasConfig={ibcSwapConfigs.gasConfig}
+            title={
+              isHighPriceImpact &&
+              !calculatingTxError &&
+              !ibcSwapConfigs.amountConfig.uiProperties.error &&
+              !ibcSwapConfigs.amountConfig.uiProperties.warning
+                ? (() => {
+                    const inPrice = priceStore.calculatePrice(
+                      ibcSwapConfigs.amountConfig.amount[0],
+                      "usd"
+                    );
+                    const outPrice = priceStore.calculatePrice(
+                      ibcSwapConfigs.amountConfig.outAmount,
+                      "usd"
+                    );
+                    return intl.formatMessage(
+                      {
+                        id: "page.ibc-swap.warning.high-price-impact-title",
+                      },
+                      {
+                        inPrice: inPrice?.toString(),
+                        srcChain:
+                          ibcSwapConfigs.amountConfig.chainInfo.chainName,
+                        outPrice: outPrice?.toString(),
+                        dstChain: chainStore.getChain(
+                          ibcSwapConfigs.amountConfig.outChainId
+                        ).chainName,
+                      }
+                    );
+                  })()
+                : undefined
+            }
+            forceError={calculatingTxError}
+            forceWarning={(() => {
+              if (unablesToPopulatePrice.length > 0) {
+                return new Error(
+                  intl.formatMessage(
                     {
-                      id: "page.ibc-swap.warning.high-price-impact-title",
+                      id: "page.ibc-swap.warning.unable-to-populate-price",
                     },
                     {
-                      inPrice: inPrice?.toString(),
-                      srcChain: ibcSwapConfigs.amountConfig.chainInfo.chainName,
-                      outPrice: outPrice?.toString(),
-                      dstChain: chainStore.getChain(
-                        ibcSwapConfigs.amountConfig.outChainId
-                      ).chainName,
+                      assets: unablesToPopulatePrice.join(", "),
                     }
-                  );
-                })()
-              : undefined
-          }
-          forceError={calculatingTxError}
-          forceWarning={(() => {
-            if (unablesToPopulatePrice.length > 0) {
-              return new Error(
-                intl.formatMessage(
-                  {
-                    id: "page.ibc-swap.warning.unable-to-populate-price",
-                  },
-                  {
-                    assets: unablesToPopulatePrice.join(", "),
-                  }
-                )
-              );
-            }
+                  )
+                );
+              }
 
-            if (isHighPriceImpact) {
-              return new Error(
-                intl.formatMessage({
-                  id: "page.ibc-swap.warning.high-price-impact",
-                })
-              );
-            }
-          })()}
-        />
+              if (isHighPriceImpact) {
+                return new Error(
+                  intl.formatMessage({
+                    id: "page.ibc-swap.warning.high-price-impact",
+                  })
+                );
+              }
+            })()}
+          />
+        </VerticalCollapseTransition>
 
         <Gutter size="0.75rem" />
 
