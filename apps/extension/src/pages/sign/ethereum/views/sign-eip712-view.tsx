@@ -451,11 +451,7 @@ const PermitIntentView: FunctionComponent<{
             tokenAddress
           );
 
-        if (tokenMetadata.isFetching) {
-          return { currency: UNKNOWN_ERC20_CURRENCY, isFetching: true };
-        }
-
-        if (tokenMetadata.tokenInfo) {
+        if (tokenMetadata.error === undefined && tokenMetadata.tokenInfo) {
           return {
             currency: {
               type: "erc20",
@@ -464,12 +460,14 @@ const PermitIntentView: FunctionComponent<{
               coinDecimals: tokenMetadata.tokenInfo.decimals,
               coinMinimalDenom: `erc20:${tokenAddress}`,
             },
-            isFetching: false,
+            isFetching: tokenMetadata.isFetching,
           };
         }
 
-        // NOTE: this should not happen..
-        return { currency: UNKNOWN_ERC20_CURRENCY, isFetching: false };
+        return {
+          currency: UNKNOWN_ERC20_CURRENCY,
+          isFetching: tokenMetadata.isFetching,
+        };
       })();
 
     const formattedAmount = (() => {
