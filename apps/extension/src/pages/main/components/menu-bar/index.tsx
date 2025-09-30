@@ -230,7 +230,7 @@ export const MenuBar: FunctionComponent<{
                     e.preventDefault();
 
                     browser.tabs.create({
-                      url: "https://help.keplr.app/articles/side-panel-mode",
+                      url: "https://help.keplr.app/extension/5R3bMyjtr2FwnBvJQuJwJu/introducing-our-side-panel-mode/5R3bMyjtr4sURRhtsURt7t",
                     });
                   }}
                   width="17"
