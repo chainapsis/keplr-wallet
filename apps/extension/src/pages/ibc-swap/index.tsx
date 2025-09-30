@@ -67,6 +67,7 @@ import {
   validateIsUsdnFromNoble,
 } from "../earn/utils";
 import { FeeCoverageDescription } from "../../components/top-up";
+import { useShouldTopup } from "../../hooks/use-should-topup";
 
 const TextButtonStyles = {
   Container: styled.div`
@@ -861,12 +862,39 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     }
   })();
 
-  const showTopUpInfo =
-    "isTopUpAvailable" in ibcSwapConfigs.feeConfig.topUpStatus &&
-    (ibcSwapConfigs.feeConfig.topUpStatus.isTopUpAvailable ||
-      ibcSwapConfigs.feeConfig.topUpStatus.remainingTimeMs !== undefined) &&
-    ibcSwapConfigs.feeConfig.uiProperties.warning instanceof
-      InsufficientFeeError;
+  const shouldTopup = useShouldTopup({
+    feeConfig: ibcSwapConfigs.feeConfig,
+    senderConfig: ibcSwapConfigs.senderConfig,
+    amountConfig: ibcSwapConfigs.amountConfig,
+  });
+
+  // topup 필요 시 강제로 기본 수수료 통화 적용
+  useEffect(() => {
+    if (!shouldTopup) return;
+
+    const baseFeeCurrency = chainStore.getChain(
+      ibcSwapConfigs.feeConfig.chainId
+    ).feeCurrencies[0];
+    if (!baseFeeCurrency) return;
+
+    const currentFeeDenom =
+      ibcSwapConfigs.feeConfig.fees[0]?.currency.coinMinimalDenom;
+    if (currentFeeDenom === baseFeeCurrency.coinMinimalDenom) return;
+
+    console.log("setFee to baseFeeCurrency", baseFeeCurrency.coinDenom);
+    ibcSwapConfigs.feeConfig.setFee({
+      type: "average",
+      currency: baseFeeCurrency,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldTopup]);
+
+  useEffect(() => {
+    console.log(
+      "currentFeeDenom",
+      ibcSwapConfigs.feeConfig.fees[0]?.currency.coinDenom
+    );
+  }, [ibcSwapConfigs.feeConfig.fees[0]?.currency.coinDenom]);
 
   return (
     <MainHeaderLayout
@@ -1999,20 +2027,21 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           }}
         />
         <Gutter size="0.75rem" />
-        <VerticalCollapseTransition collapsed={showTopUpInfo}>
+        <VerticalCollapseTransition collapsed={shouldTopup}>
           <SwapFeeInfo
             senderConfig={ibcSwapConfigs.senderConfig}
             amountConfig={ibcSwapConfigs.amountConfig}
             gasConfig={ibcSwapConfigs.gasConfig}
             feeConfig={ibcSwapConfigs.feeConfig}
             gasSimulator={gasSimulator}
+            disableAutomaticFeeSet={shouldTopup}
             isForEVMTx={isInChainEVMOnly}
             nonceMethod={nonceMethod}
             setNonceMethod={setNonceMethod}
           />
         </VerticalCollapseTransition>
-        <VerticalCollapseTransition collapsed={!showTopUpInfo}>
-          <FeeCoverageDescription feeConfig={ibcSwapConfigs.feeConfig} />
+        <VerticalCollapseTransition collapsed={!shouldTopup}>
+          <FeeCoverageDescription />
         </VerticalCollapseTransition>
 
         <WarningGuideBox

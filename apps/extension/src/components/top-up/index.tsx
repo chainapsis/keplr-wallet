@@ -4,11 +4,7 @@ import { Subtitle3, Subtitle4 } from "../typography";
 import { ColorPalette } from "../../styles";
 import { useStore } from "../../stores";
 
-export const FeeCoverageDescription = ({
-  feeConfig,
-}: {
-  feeConfig: IFeeConfig;
-}) => {
+export const FeeCoverageDescription = () => {
   return (
     <div
       style={{
@@ -23,12 +19,10 @@ export const FeeCoverageDescription = ({
         color={ColorPalette["gray-300"]}
         style={{ textAlign: "center" }}
       >
-        Not enough {feeConfig.fees[0]?.denom}? Don’t worry! ✨<br />
-        We&apos;ll cover{" "}
+        No fees? Don’t worry! ✨<br />
         <span style={{ color: ColorPalette["blue-500"] }}>
-          {feeConfig.fees[0]?.toString()}
-        </span>{" "}
-        for you :)
+          We&apos;ll cover it for you :)
+        </span>
       </Subtitle4>
     </div>
   );

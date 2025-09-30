@@ -29,7 +29,6 @@ import {
   useTxConfigsValidate,
   IBCRecipientConfig,
   useIBCRecipientConfig,
-  InsufficientFeeError,
 } from "@keplr-wallet/hooks";
 import { useNavigate } from "react-router";
 import { AmountInput, RecipientInput } from "../../../components/input";
@@ -106,6 +105,7 @@ import { SwapFeeInfoForBridgeOnSend } from "./swap-fee-info";
 import { useEffectOnce } from "../../../hooks/use-effect-once";
 import { useGlobarSimpleBar } from "../../../hooks/global-simplebar";
 import { FeeCoverageDescription } from "../../../components/top-up";
+import { useShouldTopup } from "../../../hooks/use-should-topup";
 
 const Styles = {
   Flex1: styled.div`
@@ -866,11 +866,29 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     }
   })();
 
-  const showTopUpInfo =
-    "isTopUpAvailable" in feeConfig.topUpStatus &&
-    (feeConfig.topUpStatus.isTopUpAvailable ||
-      feeConfig.topUpStatus.remainingTimeMs !== undefined) &&
-    feeConfig.uiProperties.warning instanceof InsufficientFeeError;
+  const shouldTopup = useShouldTopup({
+    feeConfig,
+    senderConfig,
+    amountConfig: sendConfigs.amountConfig,
+  });
+
+  // topup 필요 시 강제로 기본 수수료 통화 적용
+  useEffect(() => {
+    if (!shouldTopup) return;
+
+    const baseFeeCurrency = chainStore.getChain(feeConfig.chainId)
+      .feeCurrencies[0];
+    if (!baseFeeCurrency) return;
+
+    const currentFeeDenom = feeConfig.fees[0]?.currency.coinMinimalDenom;
+    if (currentFeeDenom === baseFeeCurrency.coinMinimalDenom) return;
+
+    feeConfig.setFee({
+      type: "average",
+      currency: baseFeeCurrency,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldTopup]);
 
   return (
     <HeaderLayout
@@ -2240,19 +2258,20 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           <Styles.Flex1 />
           <Gutter size="0" />
 
-          <VerticalCollapseTransition collapsed={showTopUpInfo}>
+          <VerticalCollapseTransition collapsed={shouldTopup}>
             <FeeControl
               senderConfig={senderConfig}
               feeConfig={feeConfig}
               gasConfig={gasConfig}
               gasSimulator={gasSimulatorForNotBridgeSend}
+              disableAutomaticFeeSet={shouldTopup}
               isForEVMTx={isEvmTx}
               nonceMethod={nonceMethod}
               setNonceMethod={setNonceMethod}
             />
           </VerticalCollapseTransition>
-          <VerticalCollapseTransition collapsed={!showTopUpInfo}>
-            <FeeCoverageDescription feeConfig={feeConfig} />
+          <VerticalCollapseTransition collapsed={!shouldTopup}>
+            <FeeCoverageDescription />
           </VerticalCollapseTransition>
 
           {sendType === "bridge" && (
