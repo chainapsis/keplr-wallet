@@ -866,29 +866,11 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     }
   })();
 
-  const shouldTopup = useShouldTopup({
+  const { shouldTopup, remainingText, isTopUpAvailable } = useShouldTopup({
     feeConfig,
     senderConfig,
     amountConfig: sendConfigs.amountConfig,
   });
-
-  // topup 필요 시 강제로 기본 수수료 통화 적용
-  useEffect(() => {
-    if (!shouldTopup) return;
-
-    const baseFeeCurrency = chainStore.getChain(feeConfig.chainId)
-      .feeCurrencies[0];
-    if (!baseFeeCurrency) return;
-
-    const currentFeeDenom = feeConfig.fees[0]?.currency.coinMinimalDenom;
-    if (currentFeeDenom === baseFeeCurrency.coinMinimalDenom) return;
-
-    feeConfig.setFee({
-      type: "average",
-      currency: baseFeeCurrency,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shouldTopup]);
 
   return (
     <HeaderLayout
@@ -918,8 +900,14 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       }
       bottomButtons={[
         {
-          disabled: interactionBlocked || showCelestiaWarning,
-          text: intl.formatMessage({ id: "button.next" }),
+          disabled:
+            interactionBlocked ||
+            showCelestiaWarning ||
+            (shouldTopup && !isTopUpAvailable),
+          text:
+            shouldTopup && remainingText
+              ? remainingText
+              : intl.formatMessage({ id: "button.next" }),
           color: "primary",
           size: "large",
           type: "submit",

@@ -4,6 +4,7 @@ import { IBaseAmountConfig } from "@keplr-wallet/hooks";
 import { InsufficientFeeError } from "@keplr-wallet/hooks";
 import { useStore } from "../stores";
 import { Dec } from "@keplr-wallet/unit";
+import { useEffect, useState } from "react";
 
 export function useShouldTopup({
   feeConfig,
@@ -13,7 +14,11 @@ export function useShouldTopup({
   feeConfig: FeeConfig;
   senderConfig: SenderConfig;
   amountConfig: IBaseAmountConfig;
-}): boolean {
+}): {
+  shouldTopup: boolean;
+  remainingText: string | undefined;
+  isTopUpAvailable: boolean;
+} {
   const { chainStore, queriesStore } = useStore();
   const isOsmosis =
     chainStore.hasChain(feeConfig.chainId) &&
@@ -48,8 +53,6 @@ export function useShouldTopup({
       }
 
       if (bal.toDec().gte(totalNeed.toDec())) {
-        console.log("bal", bal.toString());
-        console.log("totalNeed", totalNeed.toString());
         return false;
       }
     }
@@ -57,12 +60,71 @@ export function useShouldTopup({
     return feeConfig.selectableFeeCurrencies.length > 0;
   })();
 
-  return (
+  const shouldTopup =
     "isTopUpAvailable" in feeConfig.topUpStatus &&
     (feeConfig.topUpStatus.isTopUpAvailable ||
       feeConfig.topUpStatus.remainingTimeMs !== undefined) &&
     (isOsmosis
       ? allFeeCurrenciesInsufficient
-      : feeConfig.uiProperties.warning instanceof InsufficientFeeError)
-  );
+      : feeConfig.uiProperties.warning instanceof InsufficientFeeError);
+
+  const isTopUpAvailable =
+    "isTopUpAvailable" in feeConfig.topUpStatus &&
+    feeConfig.topUpStatus.isTopUpAvailable;
+
+  const [remainingTimeMs, setRemainingTimeMs] = useState<number>();
+
+  const remainingText = (() => {
+    if (remainingTimeMs === undefined) return undefined;
+    const minutes = Math.floor(remainingTimeMs / 60000);
+    const seconds = Math.floor((remainingTimeMs % 60000) / 1000);
+    return `Wait ${minutes}:${seconds.toString().padStart(2, "0")}`;
+  })();
+
+  useEffect(() => {
+    setRemainingTimeMs(
+      "remainingTimeMs" in feeConfig.topUpStatus
+        ? feeConfig.topUpStatus.remainingTimeMs
+        : undefined
+    );
+  }, [feeConfig.topUpStatus]);
+
+  useEffect(() => {
+    if (remainingTimeMs === undefined || remainingTimeMs <= 0) return;
+
+    const interval = setInterval(() => {
+      setRemainingTimeMs((prev) => {
+        if (prev === undefined) return undefined;
+        if (prev <= 1000) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1000;
+      });
+    }, 1000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [remainingTimeMs]);
+
+  // topup 필요 시 강제로 기본 수수료 통화 적용
+  useEffect(() => {
+    if (!shouldTopup) return;
+
+    const baseFeeCurrency = chainStore.getChain(feeConfig.chainId)
+      .feeCurrencies[0];
+    if (!baseFeeCurrency) return;
+
+    const currentFeeDenom = feeConfig.fees[0]?.currency.coinMinimalDenom;
+    if (currentFeeDenom === baseFeeCurrency.coinMinimalDenom) return;
+
+    feeConfig.setFee({
+      type: "average",
+      currency: baseFeeCurrency,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldTopup]);
+
+  return { shouldTopup, remainingText, isTopUpAvailable };
 }

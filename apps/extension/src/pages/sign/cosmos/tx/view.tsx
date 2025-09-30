@@ -10,7 +10,6 @@ import { MessageItem } from "../../components/message-item";
 import { MemoInput } from "../../../../components/input/memo-input";
 import { observer } from "mobx-react-lite";
 import {
-  InsufficientFeeError,
   useFeeConfig,
   useMemoConfig,
   useSenderConfig,
@@ -57,6 +56,7 @@ import {
   FeeCoverageOverlay,
 } from "../../../../components/top-up";
 import { TopUpClient } from "@keplr-wallet/topup-client";
+import { useShouldTopup } from "../../../../hooks/use-should-topup";
 
 /**
  * 서명을 처리할때 웹페이지에서 연속적으로 서명을 요청했을 수 있고
@@ -400,19 +400,25 @@ export const CosmosTxView: FunctionComponent<{
   })();
   const [isHighFeeApproved, setIsHighFeeApproved] = useState(false);
 
+  const { shouldTopup, isTopUpAvailable, remainingText } = useShouldTopup({
+    feeConfig,
+    senderConfig,
+    amountConfig,
+  });
+
   const buttonDisabled =
     txConfigsValidate.interactionBlocked ||
     !signDocHelper.signDocWrapper ||
     isLedgerAndDirect ||
     (isSendAuthzGrant && !isSendAuthzGrantChecked) ||
     (isHighFee && !isHighFeeApproved) ||
-    isTopUpInProgress;
+    (shouldTopup && (isTopUpInProgress || !isTopUpAvailable));
 
   const approve = async () => {
     if (signDocHelper.signDocWrapper) {
       let presignOptions;
       try {
-        if (showTopUpInfo) {
+        if (shouldTopup) {
           setIsTopUpInProgress(true);
           try {
             const stdFee = feeConfig.toStdFee();
@@ -556,12 +562,6 @@ export const CosmosTxView: FunctionComponent<{
     isKeystoneInteracting ||
     isTopUpInProgress;
 
-  const showTopUpInfo =
-    "isTopUpAvailable" in feeConfig.topUpStatus &&
-    (feeConfig.topUpStatus.isTopUpAvailable ||
-      feeConfig.topUpStatus.remainingTimeMs !== undefined) &&
-    feeConfig.uiProperties.warning instanceof InsufficientFeeError;
-
   return (
     <HeaderLayout
       title={intl.formatMessage({ id: "page.sign.cosmos.tx.title" })}
@@ -615,7 +615,10 @@ export const CosmosTxView: FunctionComponent<{
         // 유저가 enter를 눌러서 우발적으로(?) approve를 누르지 않도록 onSubmit을 의도적으로 사용하지 않았음.
         {
           isSpecial: true,
-          text: intl.formatMessage({ id: "button.approve" }),
+          text:
+            shouldTopup && remainingText
+              ? remainingText
+              : intl.formatMessage({ id: "button.approve" }),
           size: "large",
           left: !isLoading && <ApproveIcon />,
           disabled: buttonDisabled,
@@ -776,7 +779,7 @@ export const CosmosTxView: FunctionComponent<{
           </React.Fragment>
         ) : null}
 
-        <VerticalCollapseTransition collapsed={showTopUpInfo}>
+        <VerticalCollapseTransition collapsed={shouldTopup}>
           <Box
             style={{
               opacity: isLedgerAndDirect ? 0.5 : undefined,
@@ -814,7 +817,7 @@ export const CosmosTxView: FunctionComponent<{
             ) : null}
           </Box>
         </VerticalCollapseTransition>
-        <VerticalCollapseTransition collapsed={!showTopUpInfo}>
+        <VerticalCollapseTransition collapsed={!shouldTopup}>
           {interactionData.isInternal ? (
             <FeeCoverageBox feeConfig={feeConfig} />
           ) : (
@@ -899,7 +902,7 @@ export const CosmosTxView: FunctionComponent<{
           }}
         />
       )}
-      {showTopUpInfo && !interactionData.isInternal && <FeeCoverageOverlay />}
+      {shouldTopup && !interactionData.isInternal && <FeeCoverageOverlay />}
     </HeaderLayout>
   );
 });
