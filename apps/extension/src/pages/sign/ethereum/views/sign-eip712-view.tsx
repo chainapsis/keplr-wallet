@@ -430,47 +430,56 @@ const PermitIntentView: FunctionComponent<{
       }
     }
 
-    const UNKNOWN_ERC20_CURRENCY = {
-      type: "erc20",
-      contractAddress: tokenAddress,
-      coinDenom: "Unknown",
-      coinDecimals: 18,
-      coinMinimalDenom: `erc20:${tokenAddress}`,
-    };
+    const {
+      currency: erc20Currency,
+      isFetching: isFetchingErc20Metadata,
+      notFound: notFoundErc20Metadata,
+    } = (() => {
+      const currency = chainInfo.findCurrency(`erc20:${tokenAddress}`);
+      if (currency) {
+        return { currency, isFetching: false, notFound: false };
+      }
 
-    const { currency: erc20Currency, isFetching: isFetchingErc20Metadata } =
-      (() => {
-        const currency = chainInfo.findCurrency(`erc20:${tokenAddress}`);
-        if (currency) {
-          return { currency, isFetching: false };
-        }
+      const tokenMetadata = queriesStore
+        .get(chainInfo.chainId)
+        .ethereum.queryEthereumERC20ContractInfo.getQueryContract(tokenAddress);
 
-        const tokenMetadata = queriesStore
-          .get(chainInfo.chainId)
-          .ethereum.queryEthereumERC20ContractInfo.getQueryContract(
-            tokenAddress
-          );
-
-        if (tokenMetadata.error === undefined && tokenMetadata.tokenInfo) {
-          return {
-            currency: {
-              type: "erc20",
-              contractAddress: tokenAddress,
-              coinDenom: tokenMetadata.tokenInfo.symbol,
-              coinDecimals: tokenMetadata.tokenInfo.decimals,
-              coinMinimalDenom: `erc20:${tokenAddress}`,
-            },
-            isFetching: tokenMetadata.isFetching,
-          };
-        }
-
+      if (tokenMetadata.error === undefined && tokenMetadata.tokenInfo) {
         return {
-          currency: UNKNOWN_ERC20_CURRENCY,
+          currency: {
+            type: "erc20",
+            contractAddress: tokenAddress,
+            coinDenom: tokenMetadata.tokenInfo.symbol,
+            coinDecimals: tokenMetadata.tokenInfo.decimals,
+            coinMinimalDenom: `erc20:${tokenAddress}`,
+          },
           isFetching: tokenMetadata.isFetching,
+          notFound: false,
         };
-      })();
+      }
+
+      return {
+        currency: {
+          type: "erc20",
+          contractAddress: tokenAddress,
+          coinDenom: "Unknown",
+          coinDecimals: 0,
+          coinMinimalDenom: `erc20:${tokenAddress}`,
+        },
+        isFetching: tokenMetadata.isFetching,
+        notFound: tokenMetadata.notFound || !!tokenMetadata.error,
+      };
+    })();
 
     const formattedAmount = (() => {
+      if (isFetchingErc20Metadata || notFoundErc20Metadata) {
+        return {
+          display: "Unknown",
+          full: "Unknown",
+          isTruncated: false,
+        };
+      }
+
       const coinPretty = new CoinPretty(erc20Currency, amount);
 
       const maxLength = 24;
@@ -633,24 +642,36 @@ const PermitIntentView: FunctionComponent<{
                 type="button"
                 layer={1}
               >
-                <XAxis gap="0.5rem" alignY="center">
-                  <CurrencyImageFallback
-                    chainInfo={chainInfo}
-                    currency={erc20Currency}
-                    size="1.5rem"
-                    alt={erc20Currency.coinDenom}
-                  />
-
+                {notFoundErc20Metadata ? (
                   <Body2
                     color={
                       theme.mode === "light"
-                        ? ColorPalette["gray-700"]
-                        : ColorPalette["white"]
+                        ? ColorPalette["gray-400"]
+                        : ColorPalette["gray-200"]
                     }
                   >
-                    {formattedAmount.display}
+                    Unknown
                   </Body2>
-                </XAxis>
+                ) : (
+                  <XAxis gap="0.5rem" alignY="center">
+                    <CurrencyImageFallback
+                      chainInfo={chainInfo}
+                      currency={erc20Currency}
+                      size="1.5rem"
+                      alt={erc20Currency.coinDenom}
+                    />
+
+                    <Body2
+                      color={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-700"]
+                          : ColorPalette["white"]
+                      }
+                    >
+                      {formattedAmount.display}
+                    </Body2>
+                  </XAxis>
+                )}
               </Skeleton>
             </Tooltip>
           </XAxis>
