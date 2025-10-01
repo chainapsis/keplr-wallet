@@ -60,6 +60,8 @@ export function useShouldTopup({
     return feeConfig.selectableFeeCurrencies.length > 0;
   })();
 
+  // CHECK: shouldTopup일 때 max 버튼 누르면 fee를 제외하지 않도록 수정 필요한지 확인
+  // TODO: send token인 경우, selected token의 amount가 0이면 안됨
   const shouldTopup =
     (feeConfig.topUpStatus.isTopUpAvailable ||
       feeConfig.topUpStatus.remainingTimeMs !== undefined) &&

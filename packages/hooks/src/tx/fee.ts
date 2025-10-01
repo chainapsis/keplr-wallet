@@ -1233,7 +1233,8 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     if (
       this._uiProperties.error instanceof InsufficientFeeError &&
       topUpStatus &&
-      topUpStatus.isTopUpAvailable
+      (topUpStatus.isTopUpAvailable ||
+        topUpStatus.remainingTimeMs !== undefined)
     ) {
       return { warning: this._uiProperties.error };
     }
