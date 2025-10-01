@@ -119,6 +119,14 @@ export const connectAndSignDeployAccountTxWithLedger = async (
     chainId.replace("starknet:", "")
   ) as constants.StarknetChainId;
 
+  const safeToHex = (value: any): string => {
+    if (value === null || value === undefined) {
+      return "0";
+    }
+    const val = value.toString();
+    return num.toHex(val === "0x" ? "0" : val);
+  };
+
   const transaction: V3DeployAccountSignerDetails = {
     version: "0x3",
     chainId: starknetChainId,
@@ -129,16 +137,16 @@ export const connectAndSignDeployAccountTxWithLedger = async (
     addressSalt,
     resourceBounds: {
       l1_gas: {
-        max_amount: num.toHex(fee.l1MaxGas),
-        max_price_per_unit: num.toHex(fee.l1MaxGasPrice),
+        max_amount: safeToHex(fee.l1MaxGas),
+        max_price_per_unit: safeToHex(fee.l1MaxGasPrice),
       },
       l2_gas: {
-        max_amount: num.toHex(fee.l2MaxGas ?? "0"),
-        max_price_per_unit: num.toHex(fee.l2MaxGasPrice ?? "0"),
+        max_amount: safeToHex(fee.l2MaxGas),
+        max_price_per_unit: safeToHex(fee.l2MaxGasPrice),
       },
       l1_data_gas: {
-        max_amount: num.toHex(fee.l1MaxDataGas),
-        max_price_per_unit: num.toHex(fee.l1MaxDataGasPrice),
+        max_amount: safeToHex(fee.l1MaxDataGas),
+        max_price_per_unit: safeToHex(fee.l1MaxDataGasPrice),
       },
     },
     tip: "0x0",

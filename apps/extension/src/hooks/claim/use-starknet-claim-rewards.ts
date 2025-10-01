@@ -321,16 +321,24 @@ export const useStarknetClaimRewards = () => {
       const maxL1GasPrice = new Dec(l1_gas_price).mul(margin);
       const maxL2GasPrice = new Dec(l2_gas_price ?? 0).mul(margin);
 
+      const safeToHex = (value: any): string => {
+        if (value === null || value === undefined) {
+          return "0";
+        }
+        const val = value.toString();
+        return num.toHex(val === "0x" ? "0" : val);
+      };
+
       const { transaction_hash: txHash } = await starknetAccount.execute(
         account.starknetHexAddress,
         calls,
         {
-          l1MaxGas: num.toHex(maxL1Gas.truncate().toString()),
-          l1MaxGasPrice: num.toHex(maxL1GasPrice.truncate().toString()),
-          l1MaxDataGas: num.toHex(maxL1DataGas.truncate().toString()),
-          l1MaxDataGasPrice: num.toHex(maxL1DataGasPrice.truncate().toString()),
-          l2MaxGas: num.toHex(maxL2Gas.truncate().toString()),
-          l2MaxGasPrice: num.toHex(maxL2GasPrice.truncate().toString()),
+          l1MaxGas: safeToHex(maxL1Gas.truncate()),
+          l1MaxGasPrice: safeToHex(maxL1GasPrice.truncate()),
+          l1MaxDataGas: safeToHex(maxL1DataGas.truncate()),
+          l1MaxDataGasPrice: safeToHex(maxL1DataGasPrice.truncate()),
+          l2MaxGas: safeToHex(maxL2Gas.truncate()),
+          l2MaxGasPrice: safeToHex(maxL2GasPrice.truncate()),
         }
       );
       if (!txHash) {
