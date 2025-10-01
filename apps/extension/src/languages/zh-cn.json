@@ -714,6 +714,12 @@
 
   "components.fee-info.bridge-fee": "桥接费用",
 
+  "components.top-up.description.no-fees": "没有手续费？别担心！✨",
+  "components.top-up.description.we-cover": "我们会帮您支付 :)",
+  "components.top-up.tx-fee": "交易手续费",
+  "components.top-up.covered-by-keplr": "由 Keplr 支付",
+  "components.top-up.keep-window-open": "交易期间请保持此窗口打开",
+
   "button.confirm": "确定",
   "button.ok": "好的",
   "button.next": "下一步",

@@ -872,6 +872,12 @@
 
   "components.fee-info.bridge-fee": "Bridge Fee",
 
+  "components.top-up.description.no-fees": "No fees? Don't worry! ✨",
+  "components.top-up.description.we-cover": "We'll cover it for you :)",
+  "components.top-up.tx-fee": "Tx Fee",
+  "components.top-up.covered-by-keplr": "Covered by Keplr",
+  "components.top-up.keep-window-open": "Keep this window open during the transaction",
+
   "button.confirm": "Confirm",
   "button.ok": "OK",
   "button.next": "Next",

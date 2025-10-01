@@ -4,6 +4,7 @@ import { Subtitle3, Subtitle4 } from "../typography";
 import { ColorPalette } from "../../styles";
 import { useStore } from "../../stores";
 import { useTheme } from "styled-components";
+import { FormattedMessage } from "react-intl";
 
 export const FeeCoverageDescription = () => {
   return (
@@ -20,9 +21,10 @@ export const FeeCoverageDescription = () => {
         color={ColorPalette["gray-300"]}
         style={{ textAlign: "center" }}
       >
-        No fees? Don’t worry! ✨<br />
+        <FormattedMessage id="components.top-up.description.no-fees" />
+        <br />
         <span style={{ color: ColorPalette["blue-500"] }}>
-          We&apos;ll cover it for you :)
+          <FormattedMessage id="components.top-up.description.we-cover" />
         </span>
       </Subtitle4>
     </div>
@@ -79,7 +81,7 @@ export const FeeCoverageBox = ({ feeConfig }: { feeConfig: IFeeConfig }) => {
               ColorPalette[theme.mode === "light" ? "gray-500" : "gray-200"]
             }
           >
-            Tx Fee
+            <FormattedMessage id="components.top-up.tx-fee" />
           </Subtitle3>
 
           <Subtitle3
@@ -115,7 +117,7 @@ export const FeeCoverageBox = ({ feeConfig }: { feeConfig: IFeeConfig }) => {
               ColorPalette[theme.mode === "light" ? "gray-500" : "gray-200"]
             }
           >
-            Covered by Keplr
+            <FormattedMessage id="components.top-up.covered-by-keplr" />
           </Subtitle3>
           <Subtitle3
             color={
@@ -130,7 +132,7 @@ export const FeeCoverageBox = ({ feeConfig }: { feeConfig: IFeeConfig }) => {
         color={ColorPalette["gray-300"]}
         style={{ textAlign: "center" }}
       >
-        Keep this window open during the transaction
+        <FormattedMessage id="components.top-up.keep-window-open" />
       </Subtitle3>
     </div>
   );
