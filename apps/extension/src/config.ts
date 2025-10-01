@@ -2361,6 +2361,42 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
             "erc20:0x28d709c875c0ceac3dce7065bec5328186dc89fe254527084d1689910954b0a",
           coinDecimals: 18,
         },
+        {
+          type: "erc20",
+          contractAddress:
+            "0x04daa17763b286d1e59b97c283c0b8c949994c361e426a28f743c67bdfe9a32f",
+          coinDenom: "tBTC",
+          coinMinimalDenom:
+            "erc20:0x04daa17763b286d1e59b97c283c0b8c949994c361e426a28f743c67bdfe9a32f",
+          coinDecimals: 18,
+          coinGeckoId: "tbtc",
+          coinImageUrl:
+            "https://keplr-ext-update-note-images.s3.amazonaws.com/token/tBTC.png",
+        },
+        {
+          type: "erc20",
+          contractAddress:
+            "0x036834a40984312f7f7de8d31e3f6305b325389eaeea5b1c0664b2fb936461a4",
+          coinDenom: "LBTC",
+          coinMinimalDenom:
+            "erc20:0x036834a40984312f7f7de8d31e3f6305b325389eaeea5b1c0664b2fb936461a4",
+          coinDecimals: 8,
+          coinGeckoId: "lombard-staked-btc",
+          coinImageUrl:
+            "https://keplr-ext-update-note-images.s3.amazonaws.com/token/LBTC.png",
+        },
+        {
+          type: "erc20",
+          contractAddress:
+            "0x0593e034dda23eea82d2ba9a30960ed42cf4a01502cc2351dc9b9881f9931a68",
+          coinDenom: "SolvBTC",
+          coinMinimalDenom:
+            "erc20:0x0593e034dda23eea82d2ba9a30960ed42cf4a01502cc2351dc9b9881f9931a68",
+          coinDecimals: 18,
+          coinGeckoId: "solv-btc",
+          coinImageUrl:
+            "https://keplr-ext-update-note-images.s3.amazonaws.com/token/SolvBTC.png",
+        },
       ],
       ethContractAddress:
         "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
