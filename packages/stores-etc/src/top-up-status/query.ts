@@ -35,6 +35,24 @@ class ObservableQueryTopUpStatusInner extends ObservableQuery<StatusResponseBody
       )}?recipientAddress=${encodeURIComponent(recipientAddress)}`
     );
   }
+
+  get topUpStatus(): { isTopUpAvailable: boolean; remainingTimeMs?: number } {
+    if (!this.response?.data) {
+      return {
+        isTopUpAvailable: false,
+        remainingTimeMs: undefined,
+      };
+    }
+
+    if ("error" in this.response?.data) {
+      return {
+        isTopUpAvailable: false,
+        remainingTimeMs: undefined,
+      };
+    }
+
+    return this.response.data;
+  }
 }
 
 export class ObservableQueryTopUpStatus extends ObservableQueryTopUpStatusInner {

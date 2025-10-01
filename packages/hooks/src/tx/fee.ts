@@ -1227,17 +1227,13 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   get uiProperties(): UIProperties {
     const queryTopUpStatus = this.queriesStore.get(this.chainId).keplrETC
       ?.queryTopUpStatus;
-    if (queryTopUpStatus) {
-      queryTopUpStatus.setRecipientAddress(this.senderConfig.sender);
-    }
 
-    const data = queryTopUpStatus?.response?.data;
+    const topUpStatus = queryTopUpStatus?.topUpStatus;
 
     if (
       this._uiProperties.error instanceof InsufficientFeeError &&
-      data &&
-      "isTopUpAvailable" in data &&
-      data.isTopUpAvailable
+      topUpStatus &&
+      topUpStatus.isTopUpAvailable
     ) {
       return { warning: this._uiProperties.error };
     }
@@ -1246,24 +1242,21 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   @computed
-  get topUpStatus():
-    | { isTopUpAvailable: boolean; remainingTimeMs?: number }
-    | { error: string } {
+  get topUpStatus(): { isTopUpAvailable: boolean; remainingTimeMs?: number } {
     const queryTopUpStatus = this.queriesStore.get(this.chainId).keplrETC
       ?.queryTopUpStatus;
+
     if (queryTopUpStatus) {
+      // CHECK: manage topup status by mapping recipient address
+      // like queryTopUpStatus.getQueryByRecipientAddress(this.senderConfig.sender)
       queryTopUpStatus.setRecipientAddress(this.senderConfig.sender);
-    } else {
-      return {
-        error: "Failed to fetch top-up status",
-      };
+      return queryTopUpStatus.topUpStatus;
     }
 
-    return (
-      queryTopUpStatus?.response?.data || {
-        error: "Failed to fetch top-up status",
-      }
-    );
+    return {
+      isTopUpAvailable: false,
+      remainingTimeMs: undefined,
+    };
   }
 
   private getMultiplication(): { low: number; average: number; high: number } {

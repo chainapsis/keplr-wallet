@@ -61,16 +61,13 @@ export function useShouldTopup({
   })();
 
   const shouldTopup =
-    "isTopUpAvailable" in feeConfig.topUpStatus &&
     (feeConfig.topUpStatus.isTopUpAvailable ||
       feeConfig.topUpStatus.remainingTimeMs !== undefined) &&
     (isOsmosis
       ? allFeeCurrenciesInsufficient
       : feeConfig.uiProperties.warning instanceof InsufficientFeeError);
 
-  const isTopUpAvailable =
-    "isTopUpAvailable" in feeConfig.topUpStatus &&
-    feeConfig.topUpStatus.isTopUpAvailable;
+  const isTopUpAvailable = feeConfig.topUpStatus.isTopUpAvailable;
 
   const [remainingTimeMs, setRemainingTimeMs] = useState<number>();
 
@@ -82,11 +79,7 @@ export function useShouldTopup({
   })();
 
   useEffect(() => {
-    setRemainingTimeMs(
-      "remainingTimeMs" in feeConfig.topUpStatus
-        ? feeConfig.topUpStatus.remainingTimeMs
-        : undefined
-    );
+    setRemainingTimeMs(feeConfig.topUpStatus.remainingTimeMs);
   }, [feeConfig.topUpStatus]);
 
   useEffect(() => {
