@@ -1,4 +1,9 @@
-import { ObservableQuery, QuerySharedContext } from "@keplr-wallet/stores";
+import {
+  ObservableQuery,
+  QuerySharedContext,
+  ChainGetter,
+  HasMapStore,
+} from "@keplr-wallet/stores";
 import { makeObservable } from "mobx";
 
 export type StatusResponseBody =
@@ -11,29 +16,25 @@ export type StatusResponseBody =
     };
 
 class ObservableQueryTopUpStatusInner extends ObservableQuery<StatusResponseBody> {
-  private readonly chainId: string;
-
   constructor(
     sharedContext: QuerySharedContext,
+    chainId: string,
     baseURL: string,
-    chainId: string
+    recipientAddress: string
   ) {
-    super(sharedContext, baseURL, `/status/${encodeURIComponent(chainId)}`, {
-      cacheMaxAge: 0,
-      fetchingInterval: 10_000,
-    });
-
-    this.chainId = chainId;
+    super(
+      sharedContext,
+      baseURL,
+      `status/${encodeURIComponent(
+        chainId
+      )}?recipientAddress=${encodeURIComponent(recipientAddress)}`,
+      {
+        cacheMaxAge: 0,
+        fetchingInterval: 10_000,
+      }
+    );
 
     makeObservable(this);
-  }
-
-  setRecipientAddress(recipientAddress: string) {
-    this.setUrl(
-      `/status/${encodeURIComponent(
-        this.chainId
-      )}?recipientAddress=${encodeURIComponent(recipientAddress)}`
-    );
   }
 
   get topUpStatus(): { isTopUpAvailable: boolean; remainingTimeMs?: number } {
@@ -55,12 +56,24 @@ class ObservableQueryTopUpStatusInner extends ObservableQuery<StatusResponseBody
   }
 }
 
-export class ObservableQueryTopUpStatus extends ObservableQueryTopUpStatusInner {
+export class ObservableQueryTopUpStatus extends HasMapStore<ObservableQueryTopUpStatusInner> {
   constructor(
-    sharedContext: QuerySharedContext,
-    baseURL: string,
-    chainId: string
+    protected readonly sharedContext: QuerySharedContext,
+    protected readonly chainId: string,
+    protected readonly chainGetter: ChainGetter,
+    protected readonly baseURL: string
   ) {
-    super(sharedContext, baseURL, chainId);
+    super((recipientAddress: string) => {
+      return new ObservableQueryTopUpStatusInner(
+        this.sharedContext,
+        this.chainId,
+        this.baseURL,
+        recipientAddress
+      );
+    });
+  }
+
+  getTopUpStatus(recipientAddress: string): ObservableQueryTopUpStatusInner {
+    return this.get(recipientAddress);
   }
 }

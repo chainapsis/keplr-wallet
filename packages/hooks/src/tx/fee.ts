@@ -1228,7 +1228,9 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     const queryTopUpStatus = this.queriesStore.get(this.chainId).keplrETC
       ?.queryTopUpStatus;
 
-    const topUpStatus = queryTopUpStatus?.topUpStatus;
+    const topUpStatus = queryTopUpStatus?.getTopUpStatus(
+      this.senderConfig.sender
+    ).topUpStatus;
 
     if (
       this._uiProperties.error instanceof InsufficientFeeError &&
@@ -1248,10 +1250,10 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       ?.queryTopUpStatus;
 
     if (queryTopUpStatus) {
-      // CHECK: manage topup status by mapping recipient address
-      // like queryTopUpStatus.getQueryByRecipientAddress(this.senderConfig.sender)
-      queryTopUpStatus.setRecipientAddress(this.senderConfig.sender);
-      return queryTopUpStatus.topUpStatus;
+      const topUpStatus = queryTopUpStatus.getTopUpStatus(
+        this.senderConfig.sender
+      ).topUpStatus;
+      return topUpStatus;
     }
 
     return {
