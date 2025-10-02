@@ -438,7 +438,7 @@
   "page.ibc-transfer.add-channel-modal.channel-id-placeholder": "Source Channel ID",
 
   "page.ibc-swap.title.swap": "Swap",
-  "page.ibc-swap.button.next": "Next",
+  "page.ibc-swap.button.next": "Swap",
   "page.ibc-swap.error.no-route-found": "No routes found for this swap",
   "page.ibc-swap.warning.unable-to-populate-price": "Unable to retrieve {assets} price from Coingecko. Check the fiat values of input and output from other sources before clicking \"Next\".",
   "page.ibc-swap.warning.high-price-impact-title": "{inPrice} on {srcChain} → {outPrice} on {dstChain}",
@@ -482,8 +482,7 @@
   "page.sign.cosmos.tx.readonly-memo.empty": "(Empty)",
   "page.sign.cosmos.tx.view-data-button": "View data",
   "page.sign.cosmos.tx.high-fee-warning": "The transaction fee is unusually high.{br}I confirm and agree to proceed, nevertheless.",
-  "page.sign.cosmos.tx.top-up-error-title": "Top-up Failed",
-  "page.sign.cosmos.tx.top-up-error-message": "Failed to process top-up. Please try again or check your connection.",
+  "page.sign.cosmos.tx.top-up-error-message": "Fee coverage request failed. Try again later.",
   "page.sign.cosmos.icns.title": "Request Registration",
   "page.sign.cosmos.lava.guide.title": "🌋 Using Lava Endpoints",
   "page.sign.cosmos.lava.guide.paragraph": "You are currently using endpoints provided Lava.",

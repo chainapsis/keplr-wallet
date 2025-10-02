@@ -872,10 +872,7 @@ export const CosmosTxView: FunctionComponent<{
         {topUpError ? (
           <GuideBox
             color="warning"
-            title={intl.formatMessage({
-              id: "page.sign.cosmos.tx.top-up-error-title",
-            })}
-            paragraph={topUpError.message || topUpError.toString()}
+            title={topUpError.message || topUpError.toString()}
           />
         ) : null}
       </Box>

@@ -189,11 +189,15 @@ export function useTopUp({
     } catch (e) {
       console.error(e);
 
-      throw new Error(
+      const error = new Error(
         intl.formatMessage({
           id: "page.sign.cosmos.tx.top-up-error-message",
         })
       );
+
+      setTopUpError(error);
+
+      throw error;
     } finally {
       setIsTopUpInProgress(false);
     }

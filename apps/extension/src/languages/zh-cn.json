@@ -396,7 +396,7 @@
   "page.ibc-transfer.add-channel-modal.channel-id-placeholder": "源通道ID",
 
   "page.ibc-swap.title.swap": "兑换",
-  "page.ibc-swap.button.next": "下一步",
+  "page.ibc-swap.button.next": "交换",
   "page.ibc-swap.error.no-route-found": "找不到此兑换的路线",
   "page.ibc-swap.warning.unable-to-populate-price": "无法从Coingecko检索到{assets}的价格。在点击“下一步”之前从其他来源检查输入和输出的法定价值。",
   "page.ibc-swap.warning.high-price-impact-title": "{inPrice} ({srcChain}) → {outPrice} ({dstChain})",
@@ -433,8 +433,7 @@
   "page.sign.cosmos.tx.warning-paragraph": "错误：SIGN_MODE_DIRECT无法在Ledger上签名。请联系网络应用提供商来解决此问题。",
   "page.sign.cosmos.tx.readonly-memo.empty": "（空）",
   "page.sign.cosmos.tx.view-data-button": "查看数据",
-  "page.sign.cosmos.tx.top-up-error-title": "手续费充值失败",
-  "page.sign.cosmos.tx.top-up-error-message": "手续费充值处理失败。请重试或检查您的连接。",
+  "page.sign.cosmos.tx.top-up-error-message": "手续费覆盖请求失败。请稍后重试。",
   "page.sign.cosmos.icns.title": "请求注册",
 
   "page.sign.adr36.title": "签名申请",
