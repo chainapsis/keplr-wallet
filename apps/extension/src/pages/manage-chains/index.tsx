@@ -440,64 +440,18 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
       switch (selectedEcosystem) {
         case "All":
           return true;
-        case "Cosmos": {
-          if (keyType === "ledger") {
-            // filter ethermint like chains
-            const cosmosChainInfo = (() => {
-              if ("cosmos" in ci) {
-                return ci.cosmos;
-              }
-
-              if ("currencies" in ci && "feeCurrencies" in ci) {
-                return ci;
-              }
-            })();
-
-            if (cosmosChainInfo) {
-              const isEthermintLike =
-                cosmosChainInfo.bip44.coinType === 60 ||
-                !!cosmosChainInfo.features?.includes("eth-address-gen") ||
-                !!cosmosChainInfo.features?.includes("eth-key-sign");
-
-              return !isEthermintLike && chainStore.hasChain(ci.chainId);
-            }
-          }
-
+        case "Cosmos":
           return (
             "cosmos" in ci &&
             chainStore.hasChain(ci.chainId) &&
             !chainStore.isEvmOnlyChain(ci.chainId)
           );
-        }
-        case "EVM": {
-          if (keyType === "ledger") {
-            // include ethermint like chains
-            const cosmosChainInfo = (() => {
-              if ("cosmos" in ci) {
-                return ci.cosmos;
-              }
-
-              if ("currencies" in ci && "feeCurrencies" in ci) {
-                return ci;
-              }
-            })();
-
-            if (cosmosChainInfo) {
-              const isEthermintLike =
-                cosmosChainInfo.bip44.coinType === 60 ||
-                !!cosmosChainInfo.features?.includes("eth-address-gen") ||
-                !!cosmosChainInfo.features?.includes("eth-key-sign");
-
-              return isEthermintLike && chainStore.hasChain(ci.chainId);
-            }
-          }
-
+        case "EVM":
           return (
             "cosmos" in ci &&
             chainStore.hasChain(ci.chainId) &&
             chainStore.isEvmOnlyChain(ci.chainId)
           );
-        }
         case "Bitcoin":
           return "bitcoin" in ci;
         case "Starknet":
@@ -506,7 +460,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
           return true;
       }
     });
-  }, [searchedAllChains, selectedEcosystem, keyType, chainStore]);
+  }, [searchedAllChains, selectedEcosystem, chainStore]);
 
   const visibleChainInfos = useMemo(() => {
     if (!hideEnabled) {
