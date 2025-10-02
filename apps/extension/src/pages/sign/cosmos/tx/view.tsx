@@ -53,7 +53,7 @@ import { VerticalCollapseTransition } from "../../../../components/transition/ve
 import {
   FeeCoverageBox,
   FeeCoverageDescription,
-  FeeCoverageOverlay,
+  FeeCoverageBackground,
 } from "../../../../components/top-up";
 import { TopUpClient } from "@keplr-wallet/topup-client";
 import { useShouldTopup } from "../../../../hooks/use-should-topup";
@@ -626,6 +626,11 @@ export const CosmosTxView: FunctionComponent<{
           onClick: approve,
         },
       ]}
+      bottomBackground={
+        shouldTopup && !interactionData.isInternal ? (
+          <FeeCoverageBackground />
+        ) : undefined
+      }
     >
       <Box
         height="100%"
@@ -902,7 +907,6 @@ export const CosmosTxView: FunctionComponent<{
           }}
         />
       )}
-      {shouldTopup && !interactionData.isInternal && <FeeCoverageOverlay />}
     </HeaderLayout>
   );
 });

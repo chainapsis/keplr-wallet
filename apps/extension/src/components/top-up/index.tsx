@@ -138,24 +138,21 @@ export const FeeCoverageBox = ({ feeConfig }: { feeConfig: IFeeConfig }) => {
   );
 };
 
-export const FeeCoverageOverlay = () => {
+export const FeeCoverageBackground = () => {
   const theme = useTheme();
 
   return (
     <div
       style={{
-        position: "absolute",
-        bottom: 0,
         display: "flex",
         alignItems: "center",
+        justifyContent: "center",
         width: "100vw",
         height: "9.75rem",
         background:
           theme.mode === "light"
-            ? "linear-gradient(180deg, rgba(251, 250, 254, 0.00) 0%, #96E2FF 100%)"
+            ? "linear-gradient(180deg, rgba(251, 250, 254, 0.00) 35%, #96E2FF 100%)"
             : "linear-gradient(180deg, rgba(9, 9, 10, 0) 35%, #013E55 100%)",
-        zIndex: 1, // TODO: coverage layout should be under the bottom buttons
-        pointerEvents: "none",
       }}
     >
       <div
@@ -166,7 +163,6 @@ export const FeeCoverageOverlay = () => {
           transform: "translateX(-50%)",
           width: "1.25rem",
           height: "1.25rem",
-          zIndex: 2,
         }}
       >
         <svg

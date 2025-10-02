@@ -207,6 +207,7 @@ export const HeaderLayout: FunctionComponent<
   contentContainerStyle,
 
   fixedTop,
+  bottomBackground,
 }) => {
   const [height, setHeight] = React.useState(() => pxToRem(600));
   const lastSetHeight = useRef(-1);
@@ -336,6 +337,8 @@ export const HeaderLayout: FunctionComponent<
             transform: bottomButtonAnimation.to((value) => {
               return `translateY(${(1 - value) * 100}%)`;
             }),
+            background: bottomBackground ? "transparent" : undefined,
+            zIndex: bottomBackground ? 20 : undefined,
           }}
         >
           {/*
@@ -352,11 +355,26 @@ export const HeaderLayout: FunctionComponent<
                 bottom: 0,
                 left: 0,
                 right: 0,
+                background: bottomBackground ? "transparent" : undefined,
               }}
             />
           ) : null}
           {bottomButtons?.map(renderButton)}
         </AnimatedBox>
+      ) : null}
+      {bottomBackground ? (
+        <div
+          style={{
+            position: "fixed",
+            bottom: additionalPaddingBottom || "0",
+            left: 0,
+            right: 0,
+            zIndex: 1,
+            pointerEvents: "none",
+          }}
+        >
+          {bottomBackground}
+        </div>
       ) : null}
     </Styles.Container>
   );
