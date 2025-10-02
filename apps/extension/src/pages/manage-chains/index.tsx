@@ -282,52 +282,6 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
     [sortPriorityChainIdentifierMap, totalPriceByIdentifier]
   );
 
-  // 검색 뿐만 아니라 로직에 따른 선택할 수 있는 체인 목록을 가지고 있다.
-  // 그러니까 로직을 파악해서 주의해서 사용해야함.
-  // 그리고 이를 토대로 balance에 따른 sort를 진행한다.
-  // queries store의 구조 문제로 useMemo 안에서 balance에 따른 sort를 진행하긴 힘들다.
-  // 그래서 이를 위한 변수로 따로 둔다.
-  // 실제로는 modularChainInfos를 사용하면 된다.
-  // linkedChainKey를 기반으로 그룹화된 체인을 `linkedModularChainInfos`로 가지고 있다.
-  const preSortGroupedModularChainInfos = useMemo(() => {
-    let modularChainInfos = chainStore.groupedModularChainInfosInListUI.slice();
-
-    if (keyType === "ledger") {
-      modularChainInfos = modularChainInfos.filter((modularChainInfo) => {
-        if ("cosmos" in modularChainInfo) {
-          const chainInfo = chainStore.getChain(
-            modularChainInfo.cosmos.chainId
-          );
-          const isEthermintLike =
-            chainInfo.bip44.coinType === 60 ||
-            !!chainInfo.features?.includes("eth-address-gen") ||
-            !!chainInfo.features?.includes("eth-key-sign");
-
-          // Ledger일 경우 ethereum app을 바로 처리할 수 없다.
-          // 이 경우 빼줘야한다.
-          if (isEthermintLike) {
-            return false;
-          }
-
-          return true;
-        }
-      });
-    }
-
-    if (keyType === "keystone") {
-      modularChainInfos = modularChainInfos.filter((modularChainInfo) => {
-        // keystone은 스타크넷을 지원하지 않는다.
-        // CHECK: 비트코인 지원 여부 확인 필요
-        if ("starknet" in modularChainInfo || "bitcoin" in modularChainInfo) {
-          return false;
-        }
-        return true;
-      });
-    }
-
-    return modularChainInfos;
-  }, [chainStore, keyType, chainStore.groupedModularChainInfosInListUI]);
-
   const nativeChainIdentifierSet = useMemo(
     () =>
       new Set(
@@ -341,22 +295,37 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
     []
   );
 
-  const nativeGroupedModularChainInfos = preSortGroupedModularChainInfos
-    .filter((modularChainInfo) =>
-      nativeChainIdentifierSet.has(
-        ChainIdHelper.parse(modularChainInfo.chainId).identifier
-      )
-    )
-    .sort(chainSort);
+  const { nativeGroupedModularChainInfos, suggestGroupedModularChainInfos } =
+    useMemo(() => {
+      const modularChainInfos =
+        chainStore.groupedModularChainInfosInListUI.slice();
 
-  const suggestGroupedModularChainInfos = preSortGroupedModularChainInfos
-    .filter(
-      (modularChainInfo) =>
-        !nativeChainIdentifierSet.has(
-          ChainIdHelper.parse(modularChainInfo.chainId).identifier
+      const nativeGroupedModularChainInfos = modularChainInfos
+        .filter((modularChainInfo) =>
+          nativeChainIdentifierSet.has(
+            ChainIdHelper.parse(modularChainInfo.chainId).identifier
+          )
         )
-    )
-    .sort(chainSort);
+        .sort(chainSort);
+
+      const suggestGroupedModularChainInfos = modularChainInfos
+        .filter(
+          (modularChainInfo) =>
+            !nativeChainIdentifierSet.has(
+              ChainIdHelper.parse(modularChainInfo.chainId).identifier
+            )
+        )
+        .sort(chainSort);
+
+      return {
+        nativeGroupedModularChainInfos,
+        suggestGroupedModularChainInfos,
+      };
+    }, [
+      chainStore.groupedModularChainInfosInListUI,
+      nativeChainIdentifierSet,
+      chainSort,
+    ]);
 
   const searchFields = useMemo(
     () => [
@@ -392,13 +361,10 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
     [chainStore]
   );
 
-  const showLedgerChains = keyType === "ledger";
-
   const nativeChains = Array.from(
     new Set([
       ...nativeGroupedModularChainInfos,
       ...suggestGroupedModularChainInfos,
-      ...(showLedgerChains ? chainStore.groupedModularChainInfos : []),
     ])
   ).sort(chainSort);
 
@@ -421,22 +387,49 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
           return chainInfo;
         }
       })();
+
       if (cosmosChainInfo) {
-        // cosmos 계열이면서 ledger일때
-        // background에서 ledger를 지원하지 않는 체인은 다 지워줘야한다.
-        try {
-          if (cosmosChainInfo.features?.includes("force-enable-evm-ledger")) {
+        const isEthermintLike =
+          cosmosChainInfo.bip44.coinType === 60 ||
+          !!cosmosChainInfo.features?.includes("eth-address-gen") ||
+          !!cosmosChainInfo.features?.includes("eth-key-sign");
+
+        if (isEthermintLike) {
+          // don't filter evm only chains
+          const isEvmOnlyChain =
+            chainStore.hasChain(cosmosChainInfo.chainId) &&
+            chainStore.isEvmOnlyChain(cosmosChainInfo.chainId);
+
+          if (isEvmOnlyChain) {
             return true;
           }
 
-          KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
-            cosmosChainInfo.chainId
-          );
-          return true;
-        } catch {
-          return false;
+          // cosmos 계열이면서 ledger일때
+          // background에서 ledger를 지원하지 않는 체인은 다 지워줘야한다.
+          const isLedgerSupported = (() => {
+            try {
+              if (
+                cosmosChainInfo.features?.includes("force-enable-evm-ledger")
+              ) {
+                return true;
+              }
+
+              KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
+                chainInfo.chainId
+              );
+              return true;
+            } catch {
+              return false;
+            }
+          })();
+
+          return isLedgerSupported;
         }
+
+        return true;
       }
+
+      return true;
     }
 
     return true;
