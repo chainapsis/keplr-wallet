@@ -18,6 +18,7 @@ const TX_INTERPRETER_URL_PREFIX_BY_BECH32_PREFIX: Record<string, string> = {
   kyve: "kyve",
   lava: "lava",
   like: "likecoin",
+  lumera: "lumera",
   milk: "milkyway",
   mantra: "mantra",
   neutron: "neutron",
