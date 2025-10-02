@@ -862,7 +862,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     }
   })();
 
-  const { shouldTopup, isTopUpAvailable, remainingText } = useTopUp({
+  const { shouldTopUp, isTopUpAvailable, remainingText } = useTopUp({
     feeConfig: ibcSwapConfigs.feeConfig,
     senderConfig: ibcSwapConfigs.senderConfig,
     amountConfig: ibcSwapConfigs.amountConfig,
@@ -1999,26 +1999,26 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           }}
         />
         <Gutter size="0.75rem" />
-        <VerticalCollapseTransition collapsed={shouldTopup}>
+        <VerticalCollapseTransition collapsed={shouldTopUp}>
           <SwapFeeInfo
             senderConfig={ibcSwapConfigs.senderConfig}
             amountConfig={ibcSwapConfigs.amountConfig}
             gasConfig={ibcSwapConfigs.gasConfig}
             feeConfig={ibcSwapConfigs.feeConfig}
             gasSimulator={gasSimulator}
-            disableAutomaticFeeSet={shouldTopup}
+            disableAutomaticFeeSet={shouldTopUp}
             isForEVMTx={isInChainEVMOnly}
             nonceMethod={nonceMethod}
             setNonceMethod={setNonceMethod}
           />
         </VerticalCollapseTransition>
-        <VerticalCollapseTransition collapsed={!shouldTopup}>
+        <VerticalCollapseTransition collapsed={!shouldTopUp}>
           <FeeCoverageDescription />
         </VerticalCollapseTransition>
 
         <VerticalCollapseTransition
           collapsed={
-            shouldTopup &&
+            shouldTopUp &&
             ibcSwapConfigs.feeConfig.uiProperties.warning instanceof
               InsufficientFeeError
           }
@@ -2094,10 +2094,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             interactionBlocked ||
             showUSDNWarning ||
             showCelestiaWarning ||
-            (shouldTopup && !isTopUpAvailable)
+            (shouldTopUp && !isTopUpAvailable)
           }
           text={
-            shouldTopup && remainingText
+            shouldTopUp && remainingText
               ? remainingText
               : intl.formatMessage({
                   id: "page.ibc-swap.button.next",

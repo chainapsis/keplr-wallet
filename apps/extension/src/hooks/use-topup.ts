@@ -17,11 +17,13 @@ export interface TopUpParams {
 }
 
 export interface TopUpResult {
-  shouldTopup: boolean;
+  shouldTopUp: boolean;
   remainingText: string | undefined;
   isTopUpAvailable: boolean;
+  isInsufficientFeeWarning: boolean;
   isTopUpInProgress: boolean;
   executeTopUpIfAvailable: () => Promise<void>;
+  topUpError: Error | undefined;
 }
 
 export function useTopUp({
@@ -34,6 +36,7 @@ export function useTopUp({
   const intl = useIntl();
   const [isTopUpInProgress, setIsTopUpInProgress] = useState(false);
   const [topUpCompleted, setTopUpCompleted] = useState(false);
+  const [topUpError, setTopUpError] = useState<Error | undefined>(undefined);
 
   const isOsmosis =
     chainStore.hasChain(feeConfig.chainId) &&
@@ -75,9 +78,9 @@ export function useTopUp({
     return feeConfig.selectableFeeCurrencies.length > 0;
   })();
 
-  // CHECK: shouldTopup일 때 max 버튼 누르면 fee를 제외하지 않도록 수정 필요한지 확인
+  // CHECK: shouldTopUp일 때 max 버튼 누르면 fee를 제외하지 않도록 수정 필요한지 확인
   // TODO: send token인 경우, selected token의 amount가 0이면 안됨
-  const shouldTopup =
+  const shouldTopUp =
     !topUpCompleted &&
     !hasHardwareWalletError &&
     (feeConfig.topUpStatus.isTopUpAvailable ||
@@ -87,6 +90,14 @@ export function useTopUp({
       : feeConfig.uiProperties.warning instanceof InsufficientFeeError);
 
   const isTopUpAvailable = feeConfig.topUpStatus.isTopUpAvailable;
+
+  // NOTE: osmosis의 경우 모든 수수료 토큰이 부족한지 체크하고 있으므로,
+  // 일부 shouldTopUp과 isTopUpAvailable만으로 버튼 비활성화 여부를 체크하게 되면
+  // 현재 선택된 fee currency가 부족한 경우 버튼 비활성화 되지 않는 케이스가 발생하므로
+  // 추가로 아래 조건을 추가하여 버튼 비활성화 여부를 체크하도록 함
+  const isInsufficientFeeWarning =
+    (isTopUpAvailable || feeConfig.topUpStatus.remainingTimeMs !== undefined) &&
+    feeConfig.uiProperties.warning instanceof InsufficientFeeError;
 
   const [remainingTimeMs, setRemainingTimeMs] = useState<number>();
 
@@ -128,7 +139,7 @@ export function useTopUp({
 
   // topup 필요 시 강제로 기본 수수료 통화 적용
   useEffect(() => {
-    if (!shouldTopup) return;
+    if (!shouldTopUp) return;
 
     const baseFeeCurrency = chainStore.getChain(feeConfig.chainId)
       .feeCurrencies[0];
@@ -142,10 +153,10 @@ export function useTopUp({
       currency: baseFeeCurrency,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shouldTopup]);
+  }, [shouldTopUp]);
 
   async function executeTopUpIfAvailable() {
-    if (!shouldTopup || isTopUpInProgress) {
+    if (!shouldTopUp || isTopUpInProgress) {
       return;
     }
 
@@ -177,18 +188,24 @@ export function useTopUp({
         .fetch();
     } catch (e) {
       console.error(e);
-      // TODO: error handling
-      throw e;
+
+      throw new Error(
+        intl.formatMessage({
+          id: "page.sign.cosmos.tx.top-up-error-message",
+        })
+      );
     } finally {
       setIsTopUpInProgress(false);
     }
   }
 
   return {
-    shouldTopup,
+    shouldTopUp,
     remainingText,
     isTopUpAvailable,
+    isInsufficientFeeWarning,
     isTopUpInProgress,
     executeTopUpIfAvailable,
+    topUpError,
   };
 }

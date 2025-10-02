@@ -433,6 +433,8 @@
   "page.sign.cosmos.tx.warning-paragraph": "错误：SIGN_MODE_DIRECT无法在Ledger上签名。请联系网络应用提供商来解决此问题。",
   "page.sign.cosmos.tx.readonly-memo.empty": "（空）",
   "page.sign.cosmos.tx.view-data-button": "查看数据",
+  "page.sign.cosmos.tx.top-up-error-title": "手续费充值失败",
+  "page.sign.cosmos.tx.top-up-error-message": "手续费充值处理失败。请重试或检查您的连接。",
   "page.sign.cosmos.icns.title": "请求注册",
 
   "page.sign.adr36.title": "签名申请",

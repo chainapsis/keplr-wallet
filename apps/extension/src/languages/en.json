@@ -482,6 +482,8 @@
   "page.sign.cosmos.tx.readonly-memo.empty": "(Empty)",
   "page.sign.cosmos.tx.view-data-button": "View data",
   "page.sign.cosmos.tx.high-fee-warning": "The transaction fee is unusually high.{br}I confirm and agree to proceed, nevertheless.",
+  "page.sign.cosmos.tx.top-up-error-title": "Top-up Failed",
+  "page.sign.cosmos.tx.top-up-error-message": "Failed to process top-up. Please try again or check your connection.",
   "page.sign.cosmos.icns.title": "Request Registration",
   "page.sign.cosmos.lava.guide.title": "🌋 Using Lava Endpoints",
   "page.sign.cosmos.lava.guide.paragraph": "You are currently using endpoints provided Lava.",

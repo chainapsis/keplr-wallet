@@ -398,11 +398,13 @@ export const CosmosTxView: FunctionComponent<{
   const [isHighFeeApproved, setIsHighFeeApproved] = useState(false);
 
   const {
-    shouldTopup,
+    shouldTopUp,
     isTopUpAvailable,
     isTopUpInProgress,
+    isInsufficientFeeWarning,
     remainingText,
     executeTopUpIfAvailable,
+    topUpError,
   } = useTopUp({
     feeConfig,
     senderConfig,
@@ -419,7 +421,9 @@ export const CosmosTxView: FunctionComponent<{
     isLedgerAndDirect ||
     (isSendAuthzGrant && !isSendAuthzGrantChecked) ||
     (isHighFee && !isHighFeeApproved) ||
-    (shouldTopup && (isTopUpInProgress || !isTopUpAvailable));
+    (shouldTopUp
+      ? isTopUpInProgress || !isTopUpAvailable
+      : isInsufficientFeeWarning);
 
   const approve = async () => {
     if (signDocHelper.signDocWrapper) {
@@ -595,11 +599,11 @@ export const CosmosTxView: FunctionComponent<{
         {
           isSpecial: true,
           text:
-            shouldTopup && remainingText
+            shouldTopUp && remainingText
               ? remainingText
               : intl.formatMessage({ id: "button.approve" }),
           size: "large",
-          left: !(shouldTopup && remainingText) && !isLoading && (
+          left: !(shouldTopUp && remainingText) && !isLoading && (
             <ApproveIcon />
           ),
           disabled: buttonDisabled,
@@ -608,7 +612,7 @@ export const CosmosTxView: FunctionComponent<{
         },
       ]}
       bottomBackground={
-        shouldTopup && !interactionData.isInternal ? (
+        shouldTopUp && !interactionData.isInternal ? (
           <FeeCoverageBackground />
         ) : undefined
       }
@@ -765,7 +769,7 @@ export const CosmosTxView: FunctionComponent<{
           </React.Fragment>
         ) : null}
 
-        <VerticalCollapseTransition collapsed={shouldTopup}>
+        <VerticalCollapseTransition collapsed={shouldTopUp}>
           <Box
             style={{
               opacity: isLedgerAndDirect ? 0.5 : undefined,
@@ -803,7 +807,7 @@ export const CosmosTxView: FunctionComponent<{
             ) : null}
           </Box>
         </VerticalCollapseTransition>
-        <VerticalCollapseTransition collapsed={!shouldTopup}>
+        <VerticalCollapseTransition collapsed={!shouldTopUp}>
           {interactionData.isInternal ? (
             <FeeCoverageBox feeConfig={feeConfig} />
           ) : (
@@ -865,6 +869,15 @@ export const CosmosTxView: FunctionComponent<{
             KeystoneInteractingError={keystoneInteractingError}
           />
         )}
+        {topUpError ? (
+          <GuideBox
+            color="warning"
+            title={intl.formatMessage({
+              id: "page.sign.cosmos.tx.top-up-error-title",
+            })}
+            paragraph={topUpError.message || topUpError.toString()}
+          />
+        ) : null}
       </Box>
       {!isKeystonUSB && (
         <KeystoneSign

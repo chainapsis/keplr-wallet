@@ -866,7 +866,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     }
   })();
 
-  const { shouldTopup, remainingText, isTopUpAvailable } = useTopUp({
+  const { shouldTopUp, remainingText, isTopUpAvailable } = useTopUp({
     feeConfig,
     senderConfig,
     amountConfig: sendConfigs.amountConfig,
@@ -903,9 +903,9 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           disabled:
             interactionBlocked ||
             showCelestiaWarning ||
-            (shouldTopup && !isTopUpAvailable),
+            (shouldTopUp && !isTopUpAvailable),
           text:
-            shouldTopup && remainingText
+            shouldTopUp && remainingText
               ? remainingText
               : intl.formatMessage({ id: "button.next" }),
           color: "primary",
@@ -2246,19 +2246,19 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           <Styles.Flex1 />
           <Gutter size="0" />
 
-          <VerticalCollapseTransition collapsed={shouldTopup}>
+          <VerticalCollapseTransition collapsed={shouldTopUp}>
             <FeeControl
               senderConfig={senderConfig}
               feeConfig={feeConfig}
               gasConfig={gasConfig}
               gasSimulator={gasSimulatorForNotBridgeSend}
-              disableAutomaticFeeSet={shouldTopup}
+              disableAutomaticFeeSet={shouldTopUp}
               isForEVMTx={isEvmTx}
               nonceMethod={nonceMethod}
               setNonceMethod={setNonceMethod}
             />
           </VerticalCollapseTransition>
-          <VerticalCollapseTransition collapsed={!shouldTopup}>
+          <VerticalCollapseTransition collapsed={!shouldTopUp}>
             <FeeCoverageDescription />
           </VerticalCollapseTransition>
 
