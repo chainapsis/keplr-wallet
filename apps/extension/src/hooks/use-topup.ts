@@ -161,6 +161,8 @@ export function useTopUp({
     }
 
     setIsTopUpInProgress(true);
+    setTopUpError(undefined);
+
     try {
       const stdFee = feeConfig.toStdFee();
       const client = new TopUpClient();

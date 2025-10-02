@@ -613,7 +613,14 @@ export const CosmosTxView: FunctionComponent<{
       ]}
       bottomBackground={
         shouldTopUp && !interactionData.isInternal ? (
-          <FeeCoverageBackground />
+          <FeeCoverageBackground
+            hideIcon={
+              !!topUpError ||
+              !!ledgerInteractingError ||
+              !!keystoneInteractingError ||
+              isSendAuthzGrant
+            }
+          />
         ) : undefined
       }
     >

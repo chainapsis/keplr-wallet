@@ -138,7 +138,7 @@ export const FeeCoverageBox = ({ feeConfig }: { feeConfig: IFeeConfig }) => {
   );
 };
 
-export const FeeCoverageBackground = () => {
+export const FeeCoverageBackground = ({ hideIcon }: { hideIcon?: boolean }) => {
   const theme = useTheme();
 
   return (
@@ -163,6 +163,7 @@ export const FeeCoverageBackground = () => {
           transform: "translateX(-50%)",
           width: "1.25rem",
           height: "1.25rem",
+          display: hideIcon ? "none" : "block",
         }}
       >
         <svg
