@@ -105,7 +105,7 @@ import { SwapFeeInfoForBridgeOnSend } from "./swap-fee-info";
 import { useEffectOnce } from "../../../hooks/use-effect-once";
 import { useGlobarSimpleBar } from "../../../hooks/global-simplebar";
 import { FeeCoverageDescription } from "../../../components/top-up";
-import { useShouldTopup } from "../../../hooks/use-should-topup";
+import { useTopUp } from "../../../hooks/use-topup";
 
 const Styles = {
   Flex1: styled.div`
@@ -866,7 +866,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     }
   })();
 
-  const { shouldTopup, remainingText, isTopUpAvailable } = useShouldTopup({
+  const { shouldTopup, remainingText, isTopUpAvailable } = useTopUp({
     feeConfig,
     senderConfig,
     amountConfig: sendConfigs.amountConfig,

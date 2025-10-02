@@ -5,21 +5,36 @@ import { InsufficientFeeError } from "@keplr-wallet/hooks";
 import { useStore } from "../stores";
 import { Dec } from "@keplr-wallet/unit";
 import { useEffect, useState } from "react";
+import { TopUpClient } from "@keplr-wallet/topup-client";
+import { TendermintTxTracer } from "@keplr-wallet/cosmos";
+import { useIntl } from "react-intl";
 
-export function useShouldTopup({
-  feeConfig,
-  senderConfig,
-  amountConfig,
-}: {
+export interface TopUpParams {
   feeConfig: FeeConfig;
   senderConfig: SenderConfig;
   amountConfig: IBaseAmountConfig;
-}): {
+  hasHardwareWalletError?: boolean;
+}
+
+export interface TopUpResult {
   shouldTopup: boolean;
   remainingText: string | undefined;
   isTopUpAvailable: boolean;
-} {
+  isTopUpInProgress: boolean;
+  executeTopUpIfAvailable: () => Promise<void>;
+}
+
+export function useTopUp({
+  feeConfig,
+  senderConfig,
+  amountConfig,
+  hasHardwareWalletError,
+}: TopUpParams): TopUpResult {
   const { chainStore, queriesStore } = useStore();
+  const intl = useIntl();
+  const [isTopUpInProgress, setIsTopUpInProgress] = useState(false);
+  const [topUpCompleted, setTopUpCompleted] = useState(false);
+
   const isOsmosis =
     chainStore.hasChain(feeConfig.chainId) &&
     chainStore.getChain(feeConfig.chainId).hasFeature("osmosis-txfees");
@@ -63,6 +78,8 @@ export function useShouldTopup({
   // CHECK: shouldTopup일 때 max 버튼 누르면 fee를 제외하지 않도록 수정 필요한지 확인
   // TODO: send token인 경우, selected token의 amount가 0이면 안됨
   const shouldTopup =
+    !topUpCompleted &&
+    !hasHardwareWalletError &&
     (feeConfig.topUpStatus.isTopUpAvailable ||
       feeConfig.topUpStatus.remainingTimeMs !== undefined) &&
     (isOsmosis
@@ -77,7 +94,13 @@ export function useShouldTopup({
     if (remainingTimeMs === undefined) return undefined;
     const minutes = Math.floor(remainingTimeMs / 60000);
     const seconds = Math.floor((remainingTimeMs % 60000) / 1000);
-    return `Wait ${minutes}:${seconds.toString().padStart(2, "0")}`;
+    return intl.formatMessage(
+      { id: "components.top-up.wait-time" },
+      {
+        minutes: minutes.toString(),
+        seconds: seconds.toString().padStart(2, "0"),
+      }
+    );
   })();
 
   useEffect(() => {
@@ -121,5 +144,51 @@ export function useShouldTopup({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shouldTopup]);
 
-  return { shouldTopup, remainingText, isTopUpAvailable };
+  async function executeTopUpIfAvailable() {
+    if (!shouldTopup || isTopUpInProgress) {
+      return;
+    }
+
+    setIsTopUpInProgress(true);
+    try {
+      const stdFee = feeConfig.toStdFee();
+      const client = new TopUpClient();
+
+      const topUpTxHash = await client.postTopUp({
+        chainId: feeConfig.chainId,
+        recipientAddress: senderConfig.sender,
+        fee: stdFee,
+      });
+
+      const rpc = chainStore.getChain(feeConfig.chainId).rpc;
+      const tracer = new TendermintTxTracer(rpc, "/websocket");
+
+      try {
+        await tracer.traceTx(Buffer.from(topUpTxHash, "hex") as Uint8Array);
+      } finally {
+        tracer.close();
+      }
+
+      setTopUpCompleted(true);
+
+      queriesStore
+        .get(feeConfig.chainId)
+        .queryBalances.getQueryBech32Address(senderConfig.sender)
+        .fetch();
+    } catch (e) {
+      console.error(e);
+      // TODO: error handling
+      throw e;
+    } finally {
+      setIsTopUpInProgress(false);
+    }
+  }
+
+  return {
+    shouldTopup,
+    remainingText,
+    isTopUpAvailable,
+    isTopUpInProgress,
+    executeTopUpIfAvailable,
+  };
 }

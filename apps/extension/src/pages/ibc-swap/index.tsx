@@ -67,7 +67,7 @@ import {
   validateIsUsdnFromNoble,
 } from "../earn/utils";
 import { FeeCoverageDescription } from "../../components/top-up";
-import { useShouldTopup } from "../../hooks/use-should-topup";
+import { useTopUp } from "../../hooks/use-topup";
 
 const TextButtonStyles = {
   Container: styled.div`
@@ -862,7 +862,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     }
   })();
 
-  const { shouldTopup, isTopUpAvailable, remainingText } = useShouldTopup({
+  const { shouldTopup, isTopUpAvailable, remainingText } = useTopUp({
     feeConfig: ibcSwapConfigs.feeConfig,
     senderConfig: ibcSwapConfigs.senderConfig,
     amountConfig: ibcSwapConfigs.amountConfig,

@@ -781,6 +781,7 @@
   "components.top-up.tx-fee": "트랜잭션 수수료",
   "components.top-up.covered-by-keplr": "Keplr가 대신 지불",
   "components.top-up.keep-window-open": "거래 진행 중에는 이 창을 열어두세요",
+  "components.top-up.wait-time": "대기 {minutes}:{seconds}",
 
   "button.confirm": "확인",
   "button.ok": "확인",

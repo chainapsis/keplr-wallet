@@ -39,7 +39,7 @@ import { KeystoneSign } from "../../components/keystone";
 import { ErrModuleKeystoneSign, KeystoneUR } from "../../utils/keystone";
 import { KeyRingService } from "@keplr-wallet/background";
 import { useTheme } from "styled-components";
-import { defaultProtoCodec, TendermintTxTracer } from "@keplr-wallet/cosmos";
+import { defaultProtoCodec } from "@keplr-wallet/cosmos";
 import { MsgGrant } from "@keplr-wallet/proto-types/cosmos/authz/v1beta1/tx";
 import { GenericAuthorization } from "@keplr-wallet/stores/build/query/cosmos/authz/types";
 import { Checkbox } from "../../../../components/checkbox";
@@ -55,8 +55,7 @@ import {
   FeeCoverageDescription,
   FeeCoverageBackground,
 } from "../../../../components/top-up";
-import { TopUpClient } from "@keplr-wallet/topup-client";
-import { useShouldTopup } from "../../../../hooks/use-should-topup";
+import { useTopUp } from "../../../../hooks/use-topup";
 
 /**
  * 서명을 처리할때 웹페이지에서 연속적으로 서명을 요청했을 수 있고
@@ -375,8 +374,6 @@ export const CosmosTxView: FunctionComponent<{
     Error | undefined
   >(undefined);
 
-  const [isTopUpInProgress, setIsTopUpInProgress] = useState(false);
-
   const isHighFee = (() => {
     if (feeConfig.fees) {
       let sumPrice = new Dec(0);
@@ -400,10 +397,20 @@ export const CosmosTxView: FunctionComponent<{
   })();
   const [isHighFeeApproved, setIsHighFeeApproved] = useState(false);
 
-  const { shouldTopup, isTopUpAvailable, remainingText } = useShouldTopup({
+  const {
+    shouldTopup,
+    isTopUpAvailable,
+    isTopUpInProgress,
+    remainingText,
+    executeTopUpIfAvailable,
+  } = useTopUp({
     feeConfig,
     senderConfig,
     amountConfig,
+    hasHardwareWalletError:
+      !!ledgerInteractingError ||
+      !!keystoneInteractingError ||
+      isLedgerAndDirect,
   });
 
   const buttonDisabled =
@@ -418,35 +425,7 @@ export const CosmosTxView: FunctionComponent<{
     if (signDocHelper.signDocWrapper) {
       let presignOptions;
       try {
-        if (shouldTopup) {
-          setIsTopUpInProgress(true);
-          try {
-            const stdFee = feeConfig.toStdFee();
-            const client = new TopUpClient();
-            const topUpTxHash = await client.postTopUp({
-              chainId,
-              recipientAddress: signer,
-              fee: {
-                amount: stdFee.amount,
-                payer: stdFee.payer,
-                granter: stdFee.granter,
-                feePayer: stdFee.feePayer,
-              },
-            });
-
-            const rpc = chainStore.getChain(chainId).rpc;
-            const tracer = new TendermintTxTracer(rpc, "/websocket");
-            try {
-              await tracer.traceTx(
-                Buffer.from(topUpTxHash, "hex") as Uint8Array
-              );
-            } finally {
-              tracer.close();
-            }
-          } finally {
-            setIsTopUpInProgress(false);
-          }
-        }
+        await executeTopUpIfAvailable();
 
         if (interactionData.data.keyType === "ledger") {
           setIsLedgerInteracting(true);
@@ -620,7 +599,9 @@ export const CosmosTxView: FunctionComponent<{
               ? remainingText
               : intl.formatMessage({ id: "button.approve" }),
           size: "large",
-          left: !isLoading && <ApproveIcon />,
+          left: !(shouldTopup && remainingText) && !isLoading && (
+            <ApproveIcon />
+          ),
           disabled: buttonDisabled,
           isLoading,
           onClick: approve,
