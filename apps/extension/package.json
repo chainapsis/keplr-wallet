@@ -150,7 +150,7 @@
   },
   "peerDependencies": {
     "@ledgerhq/hw-app-eth": "^6",
-    "@ledgerhq/hw-app-starknet": "^2",
+    "@ledgerhq/hw-app-starknet": "^3",
     "@ledgerhq/hw-transport": "^6",
     "@ledgerhq/hw-transport-webhid": "^6",
     "@ledgerhq/hw-transport-webusb": "^6",
