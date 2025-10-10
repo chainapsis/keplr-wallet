@@ -305,7 +305,7 @@ export const SignStarknetTxView: FunctionComponent<{
       const maxL1GasPrice = new Dec(l1Gas.price).mul(margin);
       const maxL2GasPrice = new Dec(l2Gas.price).mul(margin);
 
-      const safeToHex = (value: any): string => {
+      const safeToHex = (value: string | Int | null | undefined): string => {
         if (value === null || value === undefined) {
           return "0";
         }

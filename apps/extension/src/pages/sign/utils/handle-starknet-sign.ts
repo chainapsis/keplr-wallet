@@ -37,6 +37,7 @@ import {
 } from "@ledgerhq/hw-app-starknet";
 import { PubKeyStarknet } from "@keplr-wallet/crypto";
 import { Fee } from "@keplr-wallet/stores-starknet/build/account/internal";
+import { Int } from "@keplr-wallet/unit";
 
 // eip-2645 derivation path, m/2645'/starknet'/{application}'/0'/{accountId}'/0
 export const STARKNET_LEDGER_DERIVATION_PATH =
@@ -87,7 +88,7 @@ export const connectAndSignDeployAccountTxWithLedger = async (
     chainId.replace("starknet:", "")
   ) as constants.StarknetChainId;
 
-  const safeToHex = (value: any): string => {
+  const safeToHex = (value: string | Int | null | undefined): string => {
     if (value === null || value === undefined) {
       return "0";
     }

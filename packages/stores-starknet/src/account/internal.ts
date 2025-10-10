@@ -17,6 +17,7 @@ import {
   ETransactionVersion,
 } from "starknet";
 import { Keplr } from "@keplr-wallet/types";
+import { Int } from "@keplr-wallet/unit";
 
 export type Fee = {
   l1MaxGas: string;
@@ -149,7 +150,7 @@ export class StoreAccount extends Account {
         0
       );
 
-    const safeToHex = (value: any): string => {
+    const safeToHex = (value: string | Int | null | undefined): string => {
       if (value === null || value === undefined) {
         return "0";
       }
@@ -282,7 +283,7 @@ export class StoreAccount extends Account {
     const nonce = await this.getNonce();
     const chainId = await this.getChainId();
 
-    const safeToHex = (value: any): string => {
+    const safeToHex = (value: string | Int | null | undefined): string => {
       if (value === null || value === undefined) {
         return "0";
       }

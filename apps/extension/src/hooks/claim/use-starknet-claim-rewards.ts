@@ -1,6 +1,6 @@
 import { useIntl } from "react-intl";
 import { useStore } from "../../stores";
-import { CoinPretty, Dec } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
 import { Call, CallData, num } from "starknet";
 import { ERC20Currency } from "@keplr-wallet/types";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
@@ -321,7 +321,7 @@ export const useStarknetClaimRewards = () => {
       const maxL1GasPrice = new Dec(l1_gas_price).mul(margin);
       const maxL2GasPrice = new Dec(l2_gas_price ?? 0).mul(margin);
 
-      const safeToHex = (value: any): string => {
+      const safeToHex = (value: string | Int | null | undefined): string => {
         if (value === null || value === undefined) {
           return "0";
         }
