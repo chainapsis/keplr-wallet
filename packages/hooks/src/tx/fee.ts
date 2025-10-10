@@ -895,7 +895,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   @computed
-  get uiProperties(): UIProperties {
+  get _uiProperties(): UIProperties {
     if (this.disableBalanceCheck) {
       return {};
     }
@@ -1221,6 +1221,45 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     }
 
     return {};
+  }
+
+  @computed
+  get uiProperties(): UIProperties {
+    const queryTopUpStatus = this.queriesStore.get(this.chainId).keplrETC
+      ?.queryTopUpStatus;
+
+    const topUpStatus = queryTopUpStatus?.getTopUpStatus(
+      this.senderConfig.sender
+    ).topUpStatus;
+
+    if (
+      this._uiProperties.error instanceof InsufficientFeeError &&
+      topUpStatus &&
+      (topUpStatus.isTopUpAvailable ||
+        topUpStatus.remainingTimeMs !== undefined)
+    ) {
+      return { warning: this._uiProperties.error };
+    }
+
+    return this._uiProperties;
+  }
+
+  @computed
+  get topUpStatus(): { isTopUpAvailable: boolean; remainingTimeMs?: number } {
+    const queryTopUpStatus = this.queriesStore.get(this.chainId).keplrETC
+      ?.queryTopUpStatus;
+
+    if (queryTopUpStatus) {
+      const topUpStatus = queryTopUpStatus.getTopUpStatus(
+        this.senderConfig.sender
+      ).topUpStatus;
+      return topUpStatus;
+    }
+
+    return {
+      isTopUpAvailable: false,
+      remainingTimeMs: undefined,
+    };
   }
 
   private getMultiplication(): { low: number; average: number; high: number } {

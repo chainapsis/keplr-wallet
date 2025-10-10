@@ -396,7 +396,7 @@
   "page.ibc-transfer.add-channel-modal.channel-id-placeholder": "源通道ID",
 
   "page.ibc-swap.title.swap": "兑换",
-  "page.ibc-swap.button.next": "下一步",
+  "page.ibc-swap.button.next": "交换",
   "page.ibc-swap.error.no-route-found": "找不到此兑换的路线",
   "page.ibc-swap.warning.unable-to-populate-price": "无法从Coingecko检索到{assets}的价格。在点击“下一步”之前从其他来源检查输入和输出的法定价值。",
   "page.ibc-swap.warning.high-price-impact-title": "{inPrice} ({srcChain}) → {outPrice} ({dstChain})",
@@ -433,6 +433,7 @@
   "page.sign.cosmos.tx.warning-paragraph": "错误：SIGN_MODE_DIRECT无法在Ledger上签名。请联系网络应用提供商来解决此问题。",
   "page.sign.cosmos.tx.readonly-memo.empty": "（空）",
   "page.sign.cosmos.tx.view-data-button": "查看数据",
+  "page.sign.cosmos.tx.top-up-error-message": "手续费覆盖请求失败。请稍后重试。",
   "page.sign.cosmos.icns.title": "请求注册",
 
   "page.sign.adr36.title": "签名申请",
@@ -713,6 +714,13 @@
   "components.bitcoin-guide-box.paragraph.none-of-the-inputs-belong-to-this-wallet": "出于安全考虑，只能对属于该钱包的输入进行签名。",
 
   "components.fee-info.bridge-fee": "桥接费用",
+
+  "components.top-up.description.no-fees": "没有手续费？别担心！✨",
+  "components.top-up.description.we-cover": "我们会帮您支付 :)",
+  "components.top-up.tx-fee": "交易手续费",
+  "components.top-up.covered-by-keplr": "由 Keplr 支付",
+  "components.top-up.keep-window-open": "交易期间请保持此窗口打开",
+  "components.top-up.wait-time": "等待 {minutes}:{seconds}",
 
   "button.confirm": "确定",
   "button.ok": "好的",
