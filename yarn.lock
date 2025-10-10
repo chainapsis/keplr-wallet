@@ -6044,6 +6044,7 @@ __metadata:
     "@keplr-wallet/stores-ibc": 0.12.279
     "@keplr-wallet/stores-internal": 0.12.279
     "@keplr-wallet/stores-starknet": 0.12.279
+    "@keplr-wallet/topup-client": 0.12.279
     "@keplr-wallet/types": 0.12.279
     "@keplr-wallet/unit": 0.12.279
     "@keystonehq/animated-qr": ^0.8.6
@@ -6359,13 +6360,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/simple-fetch@npm:0.12.275":
-  version: 0.12.275
-  resolution: "@keplr-wallet/simple-fetch@npm:0.12.275"
-  checksum: 82a675e58fffbb0fb064d976f7478b8ff28db528e3c77e2d66daaea12bf15cd3ea4e6436fc81403ccb67af74a2ca066f66fced4d5c53ca61572b1cd33b93b109
-  languageName: node
-  linkType: hard
-
 "@keplr-wallet/stores-bitcoin@0.12.279, @keplr-wallet/stores-bitcoin@workspace:packages/stores-bitcoin":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/stores-bitcoin@workspace:packages/stores-bitcoin"
@@ -6529,12 +6523,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/topup-client@workspace:packages/topup-client":
+"@keplr-wallet/topup-client@0.12.279, @keplr-wallet/topup-client@workspace:packages/topup-client":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/topup-client@workspace:packages/topup-client"
   dependencies:
-    "@keplr-wallet/simple-fetch": 0.12.275
-    "@keplr-wallet/types": 0.12.275
+    "@keplr-wallet/simple-fetch": 0.12.279
+    "@keplr-wallet/types": 0.12.279
   languageName: unknown
   linkType: soft
 
@@ -6547,17 +6541,6 @@ __metadata:
     starknet: ^7
   languageName: unknown
   linkType: soft
-
-"@keplr-wallet/types@npm:0.12.275":
-  version: 0.12.275
-  resolution: "@keplr-wallet/types@npm:0.12.275"
-  dependencies:
-    long: ^4.0.0
-  peerDependencies:
-    starknet: ^7
-  checksum: ebcf16de13a394e105f3ffa4bef013fb035b21771b48067e0283da137cc177a859b8b7b19e982394704f01660365d52a63dd92de11e4bf9fa51df845a2c97ba0
-  languageName: node
-  linkType: hard
 
 "@keplr-wallet/unit@0.12.279, @keplr-wallet/unit@workspace:packages/unit":
   version: 0.0.0-use.local
