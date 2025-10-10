@@ -118,6 +118,18 @@ export class ManageViewAssetTokenConfig {
           }
         }
       } else {
+        if ("evm" in modularChainInfo) {
+          for (const coinMinimalDenom of coinMinimaldenomSet.values()) {
+            const currency = modularChainInfo.evm.currencies.find(
+              (currency) => currency.coinMinimalDenom === coinMinimalDenom
+            );
+            if (currency) {
+              if (currency.coinDenom.toLowerCase().includes(search)) {
+                return true;
+              }
+            }
+          }
+        }
         if ("bitcoin" in modularChainInfo) {
           for (const coinMinimalDenom of coinMinimaldenomSet.values()) {
             const currency = modularChainInfo.bitcoin.currencies.find(

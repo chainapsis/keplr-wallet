@@ -156,7 +156,8 @@ export class HugeQueriesStore {
 
     for (const modularChainInfo of this.chainStore.modularChainInfosInUI) {
       const account = this.accountStore.getAccount(modularChainInfo.chainId);
-      if ("cosmos" in modularChainInfo) {
+
+      if ("cosmos" in modularChainInfo || "evm" in modularChainInfo) {
         const chainInfo = this.chainStore.getChain(modularChainInfo.chainId);
 
         const mainCurrency = chainInfo.stakeCurrency || chainInfo.currencies[0];
@@ -410,7 +411,7 @@ export class HugeQueriesStore {
       }
 
       const account = this.accountStore.getAccount(modularChainInfo.chainId);
-      if ("cosmos" in modularChainInfo) {
+      if ("cosmos" in modularChainInfo || "evm" in modularChainInfo) {
         const chainInfo = this.chainStore.getChain(modularChainInfo.chainId);
 
         const mainCurrency = chainInfo.stakeCurrency || chainInfo.currencies[0];
@@ -647,7 +648,7 @@ export class HugeQueriesStore {
           this.keyRingStore.selectedKeyInfo?.id ?? ""
         );
       for (const modularChainInfo of this.chainStore.modularChainInfosInUI) {
-        if ("cosmos" in modularChainInfo) {
+        if ("cosmos" in modularChainInfo || "evm" in modularChainInfo) {
           const chainInfo = this.chainStore.getChain(modularChainInfo.chainId);
           for (const currency of chainInfo.currencies) {
             const denomHelper = new DenomHelper(currency.coinMinimalDenom);
@@ -663,6 +664,7 @@ export class HugeQueriesStore {
             keys.set(key, true);
           }
         }
+
         if ("starknet" in modularChainInfo || "bitcoin" in modularChainInfo) {
           const module =
             "starknet" in modularChainInfo ? "starknet" : "bitcoin";

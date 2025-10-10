@@ -316,125 +316,120 @@ export class TokenScanService {
       tokenScan.linkedChainKey = modularChainInfo.linkedChainKey;
     }
 
-    if ("cosmos" in modularChainInfo) {
+    if ("evm" in modularChainInfo) {
+      console.log("[calculateTokenScan] evm:", chainId, modularChainInfo);
+      const evmInfo = this.chainsService.getEVMInfoOrThrow(chainId);
+      const pubkey = await this.keyRingService.getPubKey(chainId, vaultId);
+      const ethereumHexAddress = `0x${Buffer.from(
+        pubkey.getEthAddress()
+      ).toString("hex")}`;
+
+      const res = await simpleFetch<{
+        result: string;
+      }>(evmInfo.rpc, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...(() => {
+            if (typeof browser !== "undefined") {
+              return {
+                "request-source": new URL(browser.runtime.getURL("/")).origin,
+              };
+            }
+            return undefined;
+          })(),
+        },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method: "eth_getBalance",
+          params: [ethereumHexAddress, "latest"],
+          id: 1,
+        }),
+      });
+
+      if (res.status === 200 && BigInt(res.data.result).toString(10) !== "0") {
+        tokenScan.infos.push({
+          bech32Address: "",
+          ethereumHexAddress,
+          coinType: 60,
+          assets: [
+            {
+              currency: modularChainInfo.evm.currencies[0],
+              amount: BigInt(res.data.result).toString(10),
+            },
+          ],
+        });
+      }
+    } else if ("cosmos" in modularChainInfo) {
       const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
       if (chainInfo.hideInUI) {
         return;
       }
 
-      if (this.chainsService.isEvmOnlyChain(chainId)) {
-        const evmInfo = this.chainsService.getEVMInfoOrThrow(chainId);
-        const pubkey = await this.keyRingService.getPubKey(chainId, vaultId);
-        const ethereumHexAddress = `0x${Buffer.from(
-          pubkey.getEthAddress()
-        ).toString("hex")}`;
-
-        const res = await simpleFetch<{
-          result: string;
-        }>(evmInfo.rpc, {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-            ...(() => {
-              if (typeof browser !== "undefined") {
-                return {
-                  "request-source": new URL(browser.runtime.getURL("/")).origin,
-                };
-              }
-              return undefined;
-            })(),
-          },
-          body: JSON.stringify({
-            jsonrpc: "2.0",
-            method: "eth_getBalance",
-            params: [ethereumHexAddress, "latest"],
-            id: 1,
-          }),
-        });
-
-        if (
-          res.status === 200 &&
-          BigInt(res.data.result).toString(10) !== "0"
-        ) {
-          tokenScan.infos.push({
-            bech32Address: "",
-            ethereumHexAddress,
-            coinType: 60,
-            assets: [
-              {
-                currency: chainInfo.stakeCurrency ?? chainInfo.currencies[0],
-                amount: BigInt(res.data.result).toString(10),
-              },
-            ],
+      const bech32Addresses: {
+        value: string;
+        coinType?: number;
+      }[] = await (async () => {
+        if (this.keyRingService.needKeyCoinTypeFinalize(vaultId, chainId)) {
+          return (
+            await this.keyRingCosmosService.computeNotFinalizedKeyAddresses(
+              vaultId,
+              chainId
+            )
+          ).map((addr) => {
+            return {
+              value: addr.bech32Address,
+              coinType: addr.coinType,
+            };
           });
+        } else {
+          return [
+            {
+              value: (await this.keyRingCosmosService.getKey(vaultId, chainId))
+                .bech32Address,
+            },
+          ];
         }
-      } else {
-        const bech32Addresses: {
-          value: string;
-          coinType?: number;
-        }[] = await (async () => {
-          if (this.keyRingService.needKeyCoinTypeFinalize(vaultId, chainId)) {
-            return (
-              await this.keyRingCosmosService.computeNotFinalizedKeyAddresses(
-                vaultId,
-                chainId
-              )
-            ).map((addr) => {
-              return {
-                value: addr.bech32Address,
-                coinType: addr.coinType,
-              };
-            });
-          } else {
-            return [
-              {
-                value: (
-                  await this.keyRingCosmosService.getKey(vaultId, chainId)
-                ).bech32Address,
-              },
-            ];
-          }
-        })();
+      })();
 
-        for (const bech32Address of bech32Addresses) {
-          const res = await simpleFetch<{
-            balances: { denom: string; amount: string }[];
-          }>(
-            chainInfo.rest,
-            `/cosmos/bank/v1beta1/balances/${bech32Address.value}?pagination.limit=1000`
-          );
+      for (const bech32Address of bech32Addresses) {
+        const res = await simpleFetch<{
+          balances: { denom: string; amount: string }[];
+        }>(
+          chainInfo.rest,
+          `/cosmos/bank/v1beta1/balances/${bech32Address.value}?pagination.limit=1000`
+        );
 
-          if (res.status === 200) {
-            const assets: TokenScan["infos"][number]["assets"] = [];
+        if (res.status === 200) {
+          const assets: TokenScan["infos"][number]["assets"] = [];
 
-            const balances = res.data?.balances ?? [];
-            for (const bal of balances) {
-              const currency = chainInfo.currencies.find(
-                (cur) => cur.coinMinimalDenom === bal.denom
-              );
-              if (currency) {
-                // validate
-                if (typeof bal.amount !== "string") {
-                  throw new Error("Invalid amount");
-                }
+          const balances = res.data?.balances ?? [];
+          for (const bal of balances) {
+            const currency = chainInfo.currencies.find(
+              (cur) => cur.coinMinimalDenom === bal.denom
+            );
+            if (currency) {
+              // validate
+              if (typeof bal.amount !== "string") {
+                throw new Error("Invalid amount");
+              }
 
-                const dec = new Dec(bal.amount);
-                if (dec.gt(new Dec(0))) {
-                  assets.push({
-                    currency,
-                    amount: bal.amount,
-                  });
-                }
+              const dec = new Dec(bal.amount);
+              if (dec.gt(new Dec(0))) {
+                assets.push({
+                  currency,
+                  amount: bal.amount,
+                });
               }
             }
+          }
 
-            if (assets.length > 0) {
-              tokenScan.infos.push({
-                bech32Address: bech32Address.value,
-                coinType: bech32Address.coinType,
-                assets,
-              });
-            }
+          if (assets.length > 0) {
+            tokenScan.infos.push({
+              bech32Address: bech32Address.value,
+              coinType: bech32Address.coinType,
+              assets,
+            });
           }
         }
       }
