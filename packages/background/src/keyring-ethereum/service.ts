@@ -440,7 +440,6 @@ export class KeyRingEthereumService {
           if (!tx) {
             throw new EthereumProviderRpcError(
               -32602,
-              "Invalid params",
               "Must provide a transaction."
             );
           }
@@ -561,7 +560,6 @@ export class KeyRingEthereumService {
           if (!tx) {
             throw new EthereumProviderRpcError(
               -32602,
-              "Invalid params",
               "Must provide a transaction."
             );
           }
@@ -656,7 +654,6 @@ export class KeyRingEthereumService {
           if (!message) {
             throw new EthereumProviderRpcError(
               -32602,
-              "Invalid params",
               "Must provide a stringified message."
             );
           }
@@ -666,7 +663,6 @@ export class KeyRingEthereumService {
           if (!signer || (signer && !signer.match(/^0x[0-9A-Fa-f]*$/))) {
             throw new EthereumProviderRpcError(
               -32602,
-              "Invalid params",
               "Must provide an Ethereum address."
             );
           }
@@ -695,14 +691,13 @@ export class KeyRingEthereumService {
             throw e;
           }
         }
-        case "eth_signTypedData_v3":
+        case "eth_signTypedData_v3": // NOTE: v3 is deprecated
         case "eth_signTypedData_v4": {
           const signer =
             (Array.isArray(params) && (params?.[0] as string)) || undefined;
           if (!signer || (signer && !signer.match(/^0x[0-9A-Fa-f]*$/))) {
             throw new EthereumProviderRpcError(
               -32602,
-              "Invalid params",
               "Must provide an Ethereum address."
             );
           }
@@ -711,6 +706,38 @@ export class KeyRingEthereumService {
             (Array.isArray(params) && (params?.[1] as any)) || undefined;
 
           const currentChainId = this.forceGetCurrentChainId(origin, chainId);
+
+          const { value: validatedTypedData, error } =
+            EIP712MessageValidator.validate(
+              typeof typedData === "string" ? JSON.parse(typedData) : typedData
+            );
+          if (error) {
+            throw new EthereumProviderRpcError(
+              -32602,
+              "Must provide a valid EIP712 data format"
+            );
+          }
+
+          const chainIdFromDomain = validatedTypedData.domain["chainId"] as
+            | string
+            | number
+            | undefined;
+          if (chainIdFromDomain !== undefined) {
+            const chainIdFromDomainNumber = validateEVMChainId(
+              typeof chainIdFromDomain === "string"
+                ? parseInt(chainIdFromDomain)
+                : chainIdFromDomain
+            );
+            const currentChainIdNumber = this.getEVMChainId(currentChainId);
+
+            if (chainIdFromDomainNumber !== currentChainIdNumber) {
+              throw new EthereumProviderRpcError(
+                -32602,
+                `The current active chain id ${currentChainIdNumber} does not match the one in the domain ${chainIdFromDomainNumber}.`
+              );
+            }
+          }
+
           try {
             const { signature } = await this.signEthereumSelected(
               env,
@@ -821,7 +848,6 @@ export class KeyRingEthereumService {
           if (!subscriptionId) {
             throw new EthereumProviderRpcError(
               -32602,
-              "Invalid params",
               "Must provide a subscription id."
             );
           }
@@ -941,7 +967,6 @@ export class KeyRingEthereumService {
           if (!param || typeof param !== "object") {
             throw new EthereumProviderRpcError(
               -32602,
-              "Invalid params",
               "Must provide a single object parameter."
             );
           }
@@ -1074,7 +1099,6 @@ export class KeyRingEthereumService {
           if (!param || typeof param !== "object") {
             throw new EthereumProviderRpcError(
               -32602,
-              "Invalid params",
               "Must provide a single object parameter."
             );
           }
@@ -1082,7 +1106,6 @@ export class KeyRingEthereumService {
           if (param["eth_accounts"] == null) {
             throw new EthereumProviderRpcError(
               -32602,
-              "Invalid params",
               "Must provide a single object parameter with the key 'eth_accounts'."
             );
           }
@@ -1107,7 +1130,6 @@ export class KeyRingEthereumService {
           if (!param) {
             throw new EthereumProviderRpcError(
               -32602,
-              "Invalid params",
               "Must provide a single object parameter."
             );
           }
@@ -1115,7 +1137,6 @@ export class KeyRingEthereumService {
           if (param.type !== "ERC20") {
             throw new EthereumProviderRpcError(
               -32602,
-              "Invalid params",
               "Must provide a valid asset type. Only ERC20 is supported."
             );
           }
@@ -1210,7 +1231,6 @@ export class KeyRingEthereumService {
         if (!param?.chainId) {
           throw new EthereumProviderRpcError(
             -32602,
-            "Invalid params",
             "Must provide a chain id."
           );
         }

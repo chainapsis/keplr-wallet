@@ -24,11 +24,17 @@ interface ArbitraryMsgDataViewProps {
   message?: string;
   rawMessage?: string;
   messageIsShownAsJSON?: boolean;
+  forceCollapsable?: boolean;
 }
 const MAX_HEIGHT = 780;
 export const ArbitraryMsgDataView: FunctionComponent<
   ArbitraryMsgDataViewProps
-> = ({ message, rawMessage, messageIsShownAsJSON = false }) => {
+> = ({
+  message,
+  rawMessage,
+  messageIsShownAsJSON = false,
+  forceCollapsable = false,
+}) => {
   const [isMessageExpanded, setIsMessageExpanded] = useState(false);
   const [isRawMessageExpanded, setIsRawMessageExpanded] = useState(false);
   const initialHeight = useRef<number>(0);
@@ -52,7 +58,7 @@ export const ArbitraryMsgDataView: FunctionComponent<
         <Adr36DataSection
           content={message}
           isShowRawMessage={messageIsShownAsJSON}
-          isCollapsable={false}
+          isCollapsable={forceCollapsable}
           onToggle={setIsMessageExpanded}
         />
         <Gutter size="0.725rem" />
@@ -71,7 +77,7 @@ export const ArbitraryMsgDataView: FunctionComponent<
       <Adr36DataSection
         content={message}
         isShowRawMessage={false}
-        isCollapsable={false}
+        isCollapsable={forceCollapsable}
         onToggle={setIsMessageExpanded}
       />
     );
@@ -82,7 +88,7 @@ export const ArbitraryMsgDataView: FunctionComponent<
       <Adr36DataSection
         content={rawMessage}
         isShowRawMessage={true}
-        isCollapsable={false}
+        isCollapsable={forceCollapsable}
         onToggle={setIsRawMessageExpanded}
       />
     );

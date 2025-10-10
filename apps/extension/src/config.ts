@@ -977,56 +977,6 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     features: ["ibc-transfer", "ibc-go"],
   },
   {
-    rpc: "https://rpc-evmos.keplr.app",
-    rest: "https://lcd-evmos.keplr.app",
-    evm: {
-      chainId: 9001,
-      rpc: "https://evm-evmos.keplr.app",
-    },
-    chainId: "evmos_9001-2",
-    chainName: "Evmos",
-    stakeCurrency: {
-      coinDenom: "EVMOS",
-      coinMinimalDenom: "aevmos",
-      coinDecimals: 18,
-      coinGeckoId: "evmos",
-    },
-    walletUrl:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/evmos"
-        : "http://localhost:8080/chains/evmos",
-    walletUrlForStaking:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/evmos"
-        : "http://localhost:8080/chains/evmos",
-    bip44: {
-      coinType: 60,
-    },
-    bech32Config: Bech32Address.defaultBech32Config("evmos"),
-    currencies: [
-      {
-        coinDenom: "EVMOS",
-        coinMinimalDenom: "aevmos",
-        coinDecimals: 18,
-        coinGeckoId: "evmos",
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "EVMOS",
-        coinMinimalDenom: "aevmos",
-        coinDecimals: 18,
-        coinGeckoId: "evmos",
-        gasPriceStep: {
-          low: 25000000000,
-          average: 25000000000,
-          high: 40000000000,
-        },
-      },
-    ],
-    features: ["ibc-transfer", "ibc-go", "eth-address-gen", "eth-key-sign"],
-  },
-  {
     rpc: "https://rpc-injective.keplr.app",
     rest: "https://lcd-injective.keplr.app",
     chainId: "injective-1",
@@ -2410,6 +2360,42 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
           coinMinimalDenom:
             "erc20:0x28d709c875c0ceac3dce7065bec5328186dc89fe254527084d1689910954b0a",
           coinDecimals: 18,
+        },
+        {
+          type: "erc20",
+          contractAddress:
+            "0x04daa17763b286d1e59b97c283c0b8c949994c361e426a28f743c67bdfe9a32f",
+          coinDenom: "tBTC",
+          coinMinimalDenom:
+            "erc20:0x04daa17763b286d1e59b97c283c0b8c949994c361e426a28f743c67bdfe9a32f",
+          coinDecimals: 18,
+          coinGeckoId: "tbtc",
+          coinImageUrl:
+            "https://keplr-ext-update-note-images.s3.amazonaws.com/token/tBTC.png",
+        },
+        {
+          type: "erc20",
+          contractAddress:
+            "0x036834a40984312f7f7de8d31e3f6305b325389eaeea5b1c0664b2fb936461a4",
+          coinDenom: "LBTC",
+          coinMinimalDenom:
+            "erc20:0x036834a40984312f7f7de8d31e3f6305b325389eaeea5b1c0664b2fb936461a4",
+          coinDecimals: 8,
+          coinGeckoId: "lombard-staked-btc",
+          coinImageUrl:
+            "https://keplr-ext-update-note-images.s3.amazonaws.com/token/LBTC.png",
+        },
+        {
+          type: "erc20",
+          contractAddress:
+            "0x0593e034dda23eea82d2ba9a30960ed42cf4a01502cc2351dc9b9881f9931a68",
+          coinDenom: "SolvBTC",
+          coinMinimalDenom:
+            "erc20:0x0593e034dda23eea82d2ba9a30960ed42cf4a01502cc2351dc9b9881f9931a68",
+          coinDecimals: 18,
+          coinGeckoId: "solv-btc",
+          coinImageUrl:
+            "https://keplr-ext-update-note-images.s3.amazonaws.com/token/SolvBTC.png",
         },
       ],
       ethContractAddress:
@@ -3889,6 +3875,9 @@ export const PrivilegedOrigins: string[] = [
   "https://chains.keplr.app",
   "https://testnet.keplr.app",
   "https://multisig.keplr.app",
+  "https://beta-stage.polaris.app",
+  "https://beta.polaris.app",
+  "https://polaris.app",
 ];
 
 export const MsgPrivilegedContractMap: Record<
