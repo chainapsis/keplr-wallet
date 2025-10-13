@@ -87,12 +87,22 @@ export class ObservableQueryBalancesImplMap {
    */
   @computed
   get balances(): IObservableQueryBalanceImpl[] {
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-
+    const currencies = [];
     const result = [];
 
-    for (let i = 0; i < chainInfo.currencies.length; i++) {
-      const currency = chainInfo.currencies[i];
+    const chainInfo = this.chainGetter.getChain(this.chainId);
+
+    if (chainInfo.evm) {
+      const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
+        this.chainId
+      );
+      currencies.push(...modularChainInfoImpl.getCurrencies("evm"));
+    } else {
+      currencies.push(...chainInfo.currencies);
+    }
+
+    for (let i = 0; i < currencies.length; i++) {
+      const currency = currencies[i];
       const balanceInner = this.getBalanceInner(currency);
       if (balanceInner) {
         result.push(balanceInner);
@@ -182,7 +192,9 @@ export class ObservableQueryBalancesImplMap {
   readonly getBalance = computedFn(
     (currency: AppCurrency): IObservableQueryBalanceImpl | undefined => {
       const bal = this.balances.find(
-        (bal) => bal.currency.coinMinimalDenom === currency.coinMinimalDenom
+        (bal) =>
+          DenomHelper.normalizeDenom(bal.currency.coinMinimalDenom) ===
+          DenomHelper.normalizeDenom(currency.coinMinimalDenom)
       );
       if (bal) {
         return bal;
