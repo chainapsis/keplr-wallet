@@ -182,7 +182,9 @@ export class ObservableQueryBalancesImplMap {
   readonly getBalance = computedFn(
     (currency: AppCurrency): IObservableQueryBalanceImpl | undefined => {
       const bal = this.balances.find(
-        (bal) => bal.currency.coinMinimalDenom === currency.coinMinimalDenom
+        (bal) =>
+          DenomHelper.normalizeDenom(bal.currency.coinMinimalDenom) ===
+          DenomHelper.normalizeDenom(currency.coinMinimalDenom)
       );
       if (bal) {
         return bal;
