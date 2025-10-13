@@ -178,7 +178,18 @@ export class HugeQueriesStore {
 
           if (!keysUsed.get(key)) {
             const balance = queryBalance.getBalance(currency);
+
             if (balance) {
+              if (
+                balance.balance.toDec().isZero() &&
+                !this.tokensStore.tokenIsRegistered(
+                  modularChainInfo.chainId,
+                  currency.coinMinimalDenom
+                )
+              ) {
+                continue;
+              }
+
               keysUsed.set(key, true);
               prevKeyMap.delete(key);
               this.balanceBinarySort.pushAndSort(key, {
