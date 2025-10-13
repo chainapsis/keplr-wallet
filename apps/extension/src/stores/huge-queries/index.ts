@@ -157,7 +157,45 @@ export class HugeQueriesStore {
     for (const modularChainInfo of this.chainStore.modularChainInfosInUI) {
       const account = this.accountStore.getAccount(modularChainInfo.chainId);
 
-      if ("cosmos" in modularChainInfo || "evm" in modularChainInfo) {
+      if ("evm" in modularChainInfo) {
+        const modularChainInfoImpl = this.chainStore.getModularChainInfoImpl(
+          modularChainInfo.chainId
+        );
+        const queries = this.queriesStore.get(modularChainInfo.chainId);
+        const queryBalance = queries.queryBalances.getQueryEthereumHexAddress(
+          account.ethereumHexAddress
+        );
+
+        // 외부에 요청된 balance를 기다려야 modularChainInfoImpl.getCurrencies("evm")에서 currencies 목록을 전부 얻을 수 있다.
+        queryBalance.balances.forEach((b) => b.waitResponse());
+
+        const currencies = modularChainInfoImpl.getCurrencies("evm");
+
+        for (const currency of currencies) {
+          const key = `${
+            ChainIdHelper.parse(modularChainInfo.chainId).identifier
+          }/${currency.coinMinimalDenom}`;
+
+          if (!keysUsed.get(key)) {
+            const balance = queryBalance.getBalance(currency);
+            if (balance) {
+              keysUsed.set(key, true);
+              prevKeyMap.delete(key);
+              this.balanceBinarySort.pushAndSort(key, {
+                chainInfo: modularChainInfo,
+                token: balance.balance,
+                price: currency.coinGeckoId
+                  ? this.priceStore.calculatePrice(balance.balance)
+                  : undefined,
+                isFetching: balance.isFetching,
+                error: balance.error,
+              });
+            }
+          }
+        }
+      }
+
+      if ("cosmos" in modularChainInfo) {
         const chainInfo = this.chainStore.getChain(modularChainInfo.chainId);
 
         const mainCurrency = chainInfo.stakeCurrency || chainInfo.currencies[0];
