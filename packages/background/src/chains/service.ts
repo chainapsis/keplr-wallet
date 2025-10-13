@@ -1196,10 +1196,17 @@ export class ChainsService {
 
       if ("evm" in modularChainInfo) {
         const endpoint = this.getEndpoint(modularChainInfo.chainId);
+
+        const chainInfo = this.getChainInfoOrThrow(modularChainInfo.chainId);
+        const mergedChainInfo = this.mergeChainInfosWithDynamics([
+          chainInfo,
+        ])[0];
+
         return {
           ...modularChainInfo,
           evm: {
             ...modularChainInfo.evm,
+            currencies: mergedChainInfo.currencies,
             rpc: endpoint?.rpc || modularChainInfo.evm.rpc,
           },
         };
