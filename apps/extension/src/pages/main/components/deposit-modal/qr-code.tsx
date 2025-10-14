@@ -33,7 +33,7 @@ export const QRCodeScene: FunctionComponent<{
   const isBitcoin =
     "bitcoin" in modularChainInfo && modularChainInfo.bitcoin != null;
   const isEthereumAddress =
-    "cosmos" in modularChainInfo &&
+    ("cosmos" in modularChainInfo || "evm" in modularChainInfo) &&
     EthereumAccountBase.isEthereumHexAddressWithChecksum(address || "");
   const isStarknetAddress =
     "starknet" in modularChainInfo &&
@@ -49,11 +49,10 @@ export const QRCodeScene: FunctionComponent<{
     }
 
     if (isEthereumAddress) {
-      const evmChainId = chainId.startsWith("eip155:")
-        ? chainId.replace("eip155:", "")
-        : modularChainInfo.cosmos.evm?.chainId ||
-          EthermintChainIdHelper.parse(chainId).ethChainId ||
-          null;
+      const evmChainId =
+        "evm" in modularChainInfo
+          ? modularChainInfo.evm.chainId
+          : EthermintChainIdHelper.parse(chainId).ethChainId || null;
 
       if (evmChainId) {
         const hex = `0x${Number(evmChainId).toString(16)}`;

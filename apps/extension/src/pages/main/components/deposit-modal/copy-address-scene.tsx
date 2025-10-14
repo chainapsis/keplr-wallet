@@ -70,7 +70,10 @@ const addressSearchFields = [
   {
     key: "modularChainInfo.currency.coinDenom",
     function: (item: Address) => {
-      if (
+      if ("evm" in item.modularChainInfo && item.modularChainInfo.evm != null) {
+        const evmChainInfo = item.modularChainInfo.evm;
+        CoinPretty.makeCoinDenomPretty(evmChainInfo.currencies[0].coinDenom);
+      } else if (
         "cosmos" in item.modularChainInfo &&
         item.modularChainInfo.cosmos != null
       ) {
@@ -199,14 +202,10 @@ export const CopyAddressScene: FunctionComponent<{
           return undefined;
         }
 
-        if (modularChainInfo.chainId.startsWith("eip155")) {
-          return undefined;
-        }
-
         return accountInfo.bech32Address;
       })();
       const ethereumAddress = (() => {
-        if (!("cosmos" in modularChainInfo)) {
+        if (!("evm" in modularChainInfo) && !("cosmos" in modularChainInfo)) {
           return undefined;
         }
 
