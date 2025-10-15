@@ -547,8 +547,7 @@ const CopyAddressItem: FunctionComponent<{
     setSortPriorities,
     onClick,
   }) => {
-    const { analyticsStore, keyRingStore, uiConfigStore, chainStore } =
-      useStore();
+    const { analyticsStore, keyRingStore, uiConfigStore } = useStore();
 
     const theme = useTheme();
 
@@ -567,9 +566,9 @@ const CopyAddressItem: FunctionComponent<{
     const [isBookmarkHover, setIsBookmarkHover] = useState(false);
 
     const isEVMOnlyChain =
-      "cosmos" in address.modularChainInfo &&
-      address.modularChainInfo.cosmos != null &&
-      chainStore.isEvmOnlyChain(address.modularChainInfo.chainId);
+      "evm" in address.modularChainInfo &&
+      address.modularChainInfo.evm != null &&
+      !("cosmos" in address.modularChainInfo);
 
     // 클릭 영역 문제로 레이아웃이 복잡해졌다.
     // 알아서 잘 해결하자
