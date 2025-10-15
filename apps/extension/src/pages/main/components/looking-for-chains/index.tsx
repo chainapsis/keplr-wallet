@@ -191,6 +191,7 @@ export const LookingForChainItem: FunctionComponent<{
               }
 
               const isEthereumChain =
+                "evm" in chainInfo ||
                 ("cosmos" in chainInfo &&
                   chainInfo.cosmos.bip44.coinType === 60 &&
                   (!!chainInfo.cosmos.features?.includes("eth-address-gen") ||

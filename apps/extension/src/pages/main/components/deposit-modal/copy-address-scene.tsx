@@ -70,7 +70,10 @@ const addressSearchFields = [
   {
     key: "modularChainInfo.currency.coinDenom",
     function: (item: Address) => {
-      if (
+      if ("evm" in item.modularChainInfo && item.modularChainInfo.evm != null) {
+        const evmChainInfo = item.modularChainInfo.evm;
+        CoinPretty.makeCoinDenomPretty(evmChainInfo.currencies[0].coinDenom);
+      } else if (
         "cosmos" in item.modularChainInfo &&
         item.modularChainInfo.cosmos != null
       ) {
@@ -199,14 +202,10 @@ export const CopyAddressScene: FunctionComponent<{
           return undefined;
         }
 
-        if (modularChainInfo.chainId.startsWith("eip155")) {
-          return undefined;
-        }
-
         return accountInfo.bech32Address;
       })();
       const ethereumAddress = (() => {
-        if (!("cosmos" in modularChainInfo)) {
+        if (!("evm" in modularChainInfo) && !("cosmos" in modularChainInfo)) {
           return undefined;
         }
 
@@ -548,8 +547,7 @@ const CopyAddressItem: FunctionComponent<{
     setSortPriorities,
     onClick,
   }) => {
-    const { analyticsStore, keyRingStore, uiConfigStore, chainStore } =
-      useStore();
+    const { analyticsStore, keyRingStore, uiConfigStore } = useStore();
 
     const theme = useTheme();
 
@@ -568,9 +566,9 @@ const CopyAddressItem: FunctionComponent<{
     const [isBookmarkHover, setIsBookmarkHover] = useState(false);
 
     const isEVMOnlyChain =
-      "cosmos" in address.modularChainInfo &&
-      address.modularChainInfo.cosmos != null &&
-      chainStore.isEvmOnlyChain(address.modularChainInfo.chainId);
+      "evm" in address.modularChainInfo &&
+      address.modularChainInfo.evm != null &&
+      !("cosmos" in address.modularChainInfo);
 
     // 클릭 영역 문제로 레이아웃이 복잡해졌다.
     // 알아서 잘 해결하자
