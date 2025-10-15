@@ -632,6 +632,12 @@ export class KeyRingService {
     const modularChainInfo =
       this.chainsService.getModularChainInfoOrThrow(chainId);
 
+    if ("evm" in modularChainInfo) {
+      if (modularChainInfo.evm.bip44.coinType !== coinType) {
+        throw new Error("Coin type is not associated to chain");
+      }
+    }
+
     if ("cosmos" in modularChainInfo) {
       const chainInfo = modularChainInfo.cosmos;
       if (
@@ -1155,6 +1161,10 @@ export class KeyRingService {
         return vault.insensitive[coinTypeTag] as number;
       }
 
+      if ("evm" in modularChainInfo) {
+        return modularChainInfo.evm.bip44.coinType;
+      }
+
       if ("cosmos" in modularChainInfo) {
         return modularChainInfo.cosmos.bip44.coinType;
       }
@@ -1224,6 +1234,10 @@ export class KeyRingService {
         return vault.insensitive[coinTypeTag] as number;
       }
 
+      if ("evm" in modularChainInfo) {
+        return modularChainInfo.evm.bip44.coinType;
+      }
+
       if ("bitcoin" in modularChainInfo) {
         return modularChainInfo.bitcoin.bip44.coinType;
       }
@@ -1253,7 +1267,11 @@ export class KeyRingService {
     const modularChainInfo =
       this.chainsService.getModularChainInfoOrThrow(chainId);
 
-    if ("cosmos" in modularChainInfo) {
+    if ("evm" in modularChainInfo) {
+      if (modularChainInfo.evm.bip44.coinType !== coinType) {
+        throw new Error("Coin type is not associated to chain");
+      }
+    } else if ("cosmos" in modularChainInfo) {
       if (
         modularChainInfo.cosmos.bip44.coinType !== coinType &&
         !(modularChainInfo.cosmos.alternativeBIP44s ?? []).find(
@@ -1333,7 +1351,9 @@ export class KeyRingService {
       })() ?? DEFAULT_BIP44_PURPOSE;
 
     const coinType = (() => {
-      if ("cosmos" in modularChainInfo) {
+      if ("evm" in modularChainInfo) {
+        return modularChainInfo.evm.bip44.coinType;
+      } else if ("cosmos" in modularChainInfo) {
         const coinTypeTag = `keyRing-${
           ChainIdHelper.parse(chainId).identifier
         }-coinType`;
