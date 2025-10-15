@@ -178,6 +178,10 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
         const account = accountStore.getAccount(chainId);
         const isNeutron = chainId === NEUTRON_CHAIN_ID;
 
+        if ("evm" in modularChainInfo && !("cosmos" in modularChainInfo)) {
+          continue;
+        }
+
         if (isNeutron && account.bech32Address) {
           const queries = queriesStore.get(chainId);
           const queryNeutronRewardInner =
@@ -198,11 +202,6 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
             });
           }
         } else if ("cosmos" in modularChainInfo) {
-          const isEVMOnly = chainStore.isEvmOnlyChain(chainId);
-          if (isEVMOnly) {
-            continue;
-          }
-
           const accountAddress = account.bech32Address;
           const chainInfo = chainStore.getChain(chainId);
           const queries = queriesStore.get(chainId);

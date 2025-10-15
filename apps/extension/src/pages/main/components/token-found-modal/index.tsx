@@ -105,7 +105,7 @@ export const TokenFoundModal: FunctionComponent<{
 
       if (!tokenScan) continue;
 
-      if ("cosmos" in modularChainInfo) {
+      if ("cosmos" in modularChainInfo || "evm" in modularChainInfo) {
         if (
           keyRingStore.needKeyCoinTypeFinalize(
             keyRingStore.selectedKeyInfo.id,
@@ -551,23 +551,25 @@ const FoundTokenView: FunctionComponent<{
               const modularChainInfo = chainStore.getModularChain(chainId);
               const isBitcoin = "bitcoin" in modularChainInfo;
               const isStarknet = "starknet" in modularChainInfo;
-              const isCosmos = "cosmos" in modularChainInfo;
+              const isEvm = "evm" in modularChainInfo;
 
-              if (isBitcoin || isStarknet || isCosmos) {
-                return (
-                  chainStore
-                    .getModularChainInfoImpl(chainId)
-                    .getCurrencies(
-                      isBitcoin ? "bitcoin" : isStarknet ? "starknet" : "cosmos"
-                    )
-                    .find(
-                      (cur) =>
-                        cur.coinMinimalDenom === asset.currency.coinMinimalDenom
-                    )?.coinDenom ?? asset.currency.coinDenom
-                );
-              } else {
-                return asset.currency.coinDenom;
-              }
+              return (
+                chainStore
+                  .getModularChainInfoImpl(chainId)
+                  .getCurrencies(
+                    isBitcoin
+                      ? "bitcoin"
+                      : isStarknet
+                      ? "starknet"
+                      : isEvm
+                      ? "evm"
+                      : "cosmos"
+                  )
+                  .find(
+                    (cur) =>
+                      cur.coinMinimalDenom === asset.currency.coinMinimalDenom
+                  )?.coinDenom ?? asset.currency.coinDenom
+              );
             }
           })()}
         </Subtitle3>
