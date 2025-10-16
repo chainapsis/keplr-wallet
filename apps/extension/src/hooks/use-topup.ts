@@ -132,6 +132,7 @@ export function useTopUp({
         if (prev === undefined) return undefined;
         if (prev <= 1000) {
           clearInterval(interval);
+          feeConfig.refreshTopUpStatus();
           return 0;
         }
         return prev - 1000;
@@ -141,7 +142,7 @@ export function useTopUp({
     return () => {
       clearInterval(interval);
     };
-  }, [remainingTimeMs]);
+  }, [remainingTimeMs, feeConfig]);
 
   // topup 필요 시 강제로 기본 수수료 통화 적용
   useEffect(() => {
