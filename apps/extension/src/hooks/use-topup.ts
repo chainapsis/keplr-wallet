@@ -42,6 +42,10 @@ export function useTopUp({
     chainStore.hasChain(feeConfig.chainId) &&
     chainStore.getChain(feeConfig.chainId).hasFeature("osmosis-txfees");
 
+  const topupBaseURL = process.env["KEPLR_EXT_TOPUP_BASE_URL"] || "";
+  const topupApiKey = process.env["KEPLR_EXT_TOPUP_API_KEY"] || "";
+  const isTopupConfigured = !!(topupBaseURL.trim() && topupApiKey.trim());
+
   // Osmosis의 경우에는 모든 fee currency가 (수수료 + 동일 denom 전송/스왑 금액) 부족할 경우에만 topup 사용이 가능
   const allFeeCurrenciesInsufficient = (() => {
     const queryBalances = queriesStore
@@ -81,6 +85,7 @@ export function useTopUp({
   // CHECK: shouldTopUp일 때 max 버튼 누르면 fee를 제외하지 않도록 수정 필요한지 확인
   // TODO: send token인 경우, selected token의 amount가 0이면 안됨
   const shouldTopUp =
+    isTopupConfigured && // 환경 변수가 설정되어 있어야 함
     !topUpCompleted &&
     !hasHardwareWalletError &&
     (feeConfig.topUpStatus.isTopUpAvailable ||
@@ -89,7 +94,8 @@ export function useTopUp({
       ? allFeeCurrenciesInsufficient
       : feeConfig.uiProperties.warning instanceof InsufficientFeeError);
 
-  const isTopUpAvailable = feeConfig.topUpStatus.isTopUpAvailable;
+  const isTopUpAvailable =
+    isTopupConfigured && feeConfig.topUpStatus.isTopUpAvailable;
 
   // NOTE: osmosis의 경우 모든 수수료 토큰이 부족한지 체크하고 있으므로,
   // 일부 shouldTopUp과 isTopUpAvailable만으로 버튼 비활성화 여부를 체크하게 되면
@@ -165,7 +171,10 @@ export function useTopUp({
 
     try {
       const stdFee = feeConfig.toStdFee();
-      const client = new TopUpClient();
+      const client = new TopUpClient(
+        process.env["KEPLR_EXT_TOPUP_BASE_URL"] || "",
+        process.env["KEPLR_EXT_TOPUP_API_KEY"] || ""
+      );
 
       const topUpTxHash = await client.postTopUp({
         chainId: feeConfig.chainId,
