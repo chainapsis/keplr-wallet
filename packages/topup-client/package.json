@@ -17,7 +17,7 @@
     "lint-fix": "npx eslint --fix \"src/**/*\" && npx prettier --write \"src/**/*\""
   },
   "dependencies": {
-    "@keplr-wallet/simple-fetch": "0.12.279",
-    "@keplr-wallet/types": "0.12.279"
+    "@keplr-wallet/simple-fetch": "0.12.281-rc.0",
+    "@keplr-wallet/types": "0.12.281-rc.0"
   }
 }

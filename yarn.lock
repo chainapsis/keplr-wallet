@@ -6360,13 +6360,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/simple-fetch@npm:0.12.279":
-  version: 0.12.279
-  resolution: "@keplr-wallet/simple-fetch@npm:0.12.279"
-  checksum: 2aae0dac3a519826e9a50c4cf26539cb52f6ae92342a75ebba83f8a8631fb9262cadc37b6d34e9d4b08efd1f2bf98d61ca7b61551d22bb8fcd3a4779698e2129
-  languageName: node
-  linkType: hard
-
 "@keplr-wallet/stores-bitcoin@0.12.281-rc.0, @keplr-wallet/stores-bitcoin@workspace:packages/stores-bitcoin":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/stores-bitcoin@workspace:packages/stores-bitcoin"
@@ -6534,8 +6527,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/topup-client@workspace:packages/topup-client"
   dependencies:
-    "@keplr-wallet/simple-fetch": 0.12.279
-    "@keplr-wallet/types": 0.12.279
+    "@keplr-wallet/simple-fetch": 0.12.281-rc.0
+    "@keplr-wallet/types": 0.12.281-rc.0
   languageName: unknown
   linkType: soft
 
@@ -6548,17 +6541,6 @@ __metadata:
     starknet: ^7
   languageName: unknown
   linkType: soft
-
-"@keplr-wallet/types@npm:0.12.279":
-  version: 0.12.279
-  resolution: "@keplr-wallet/types@npm:0.12.279"
-  dependencies:
-    long: ^4.0.0
-  peerDependencies:
-    starknet: ^7
-  checksum: a956ed1e2a453b54219f02ea358da99d0cf87dca3540c1e5e963676b044de7757f3853b4c1b1b82e2641668d2e3b9a4de4147e6503fbb9b6798dea815faf72fd
-  languageName: node
-  linkType: hard
 
 "@keplr-wallet/unit@0.12.281-rc.0, @keplr-wallet/unit@workspace:packages/unit":
   version: 0.0.0-use.local
