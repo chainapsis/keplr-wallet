@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/stores-ibc",
-  "version": "0.12.281-rc.0",
+  "version": "0.12.281-rc.1",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -16,11 +16,11 @@
     "lint-fix": "npx eslint --fix \"src/**/*\" && npx prettier --write \"src/**/*\""
   },
   "dependencies": {
-    "@keplr-wallet/common": "0.12.281-rc.0",
-    "@keplr-wallet/cosmos": "0.12.281-rc.0",
-    "@keplr-wallet/stores": "0.12.281-rc.0",
-    "@keplr-wallet/stores-eth": "0.12.281-rc.0",
-    "@keplr-wallet/types": "0.12.281-rc.0",
+    "@keplr-wallet/common": "0.12.281-rc.1",
+    "@keplr-wallet/cosmos": "0.12.281-rc.1",
+    "@keplr-wallet/stores": "0.12.281-rc.1",
+    "@keplr-wallet/stores-eth": "0.12.281-rc.1",
+    "@keplr-wallet/types": "0.12.281-rc.1",
     "lodash.debounce": "^4.0.8"
   },
   "peerDependencies": {
