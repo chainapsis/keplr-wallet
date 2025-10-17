@@ -38,15 +38,14 @@ export function useTopUp({
   const [topUpCompleted, setTopUpCompleted] = useState(false);
   const [topUpError, setTopUpError] = useState<Error | undefined>(undefined);
 
-  const isOsmosis =
-    chainStore.hasChain(feeConfig.chainId) &&
-    chainStore.getChain(feeConfig.chainId).hasFeature("osmosis-txfees");
+  const hasMultipleFeeCurrencies = feeConfig.selectableFeeCurrencies.length > 1;
 
   const topupBaseURL = process.env["KEPLR_EXT_TOPUP_BASE_URL"] || "";
   const topupApiKey = process.env["KEPLR_EXT_TOPUP_API_KEY"] || "";
   const isTopupConfigured = !!(topupBaseURL.trim() && topupApiKey.trim());
 
-  // Osmosis의 경우에는 모든 fee currency가 (수수료 + 동일 denom 전송/스왑 금액) 부족할 경우에만 topup 사용이 가능
+  // Osmosis를 포함하여 다수의 fee currency가 있는 경우에는
+  // 모든 fee currency가 부족할 경우에만 topup 사용이 가능
   const allFeeCurrenciesInsufficient = (() => {
     const queryBalances = queriesStore
       .get(feeConfig.chainId)
@@ -59,7 +58,6 @@ export function useTopUp({
       );
 
       const totalNeed = (() => {
-        if (!isOsmosis) return requiredFee;
         let need = requiredFee;
         for (const amt of amountConfig.amount) {
           if (amt.currency.coinMinimalDenom === feeCurrency.coinMinimalDenom) {
@@ -90,7 +88,7 @@ export function useTopUp({
     !hasHardwareWalletError &&
     (feeConfig.topUpStatus.isTopUpAvailable ||
       feeConfig.topUpStatus.remainingTimeMs !== undefined) &&
-    (isOsmosis
+    (hasMultipleFeeCurrencies
       ? allFeeCurrenciesInsufficient
       : feeConfig.uiProperties.warning instanceof InsufficientFeeError);
 

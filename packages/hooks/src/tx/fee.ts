@@ -1225,20 +1225,21 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
   @computed
   get uiProperties(): UIProperties {
-    const queryTopUpStatus = this.queriesStore.get(this.chainId).keplrETC
-      ?.queryTopUpStatus;
+    if (this._uiProperties.error instanceof InsufficientFeeError) {
+      const queryTopUpStatus = this.queriesStore.get(this.chainId).keplrETC
+        ?.queryTopUpStatus;
 
-    const topUpStatus = queryTopUpStatus?.getTopUpStatus(
-      this.senderConfig.sender
-    ).topUpStatus;
+      const topUpStatus = queryTopUpStatus?.getTopUpStatus(
+        this.senderConfig.sender
+      ).topUpStatus;
 
-    if (
-      this._uiProperties.error instanceof InsufficientFeeError &&
-      topUpStatus &&
-      (topUpStatus.isTopUpAvailable ||
-        topUpStatus.remainingTimeMs !== undefined)
-    ) {
-      return { warning: this._uiProperties.error };
+      if (
+        topUpStatus &&
+        (topUpStatus.isTopUpAvailable ||
+          topUpStatus.remainingTimeMs !== undefined)
+      ) {
+        return { warning: this._uiProperties.error };
+      }
     }
 
     return this._uiProperties;
