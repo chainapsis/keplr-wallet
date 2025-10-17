@@ -438,7 +438,7 @@
   "page.ibc-transfer.add-channel-modal.channel-id-placeholder": "Source Channel ID",
 
   "page.ibc-swap.title.swap": "Swap",
-  "page.ibc-swap.button.next": "Next",
+  "page.ibc-swap.button.next": "Swap",
   "page.ibc-swap.error.no-route-found": "No routes found for this swap",
   "page.ibc-swap.warning.unable-to-populate-price": "Unable to retrieve {assets} price from Coingecko. Check the fiat values of input and output from other sources before clicking \"Next\".",
   "page.ibc-swap.warning.high-price-impact-title": "{inPrice} on {srcChain} → {outPrice} on {dstChain}",
@@ -482,6 +482,7 @@
   "page.sign.cosmos.tx.readonly-memo.empty": "(Empty)",
   "page.sign.cosmos.tx.view-data-button": "View data",
   "page.sign.cosmos.tx.high-fee-warning": "The transaction fee is unusually high.{br}I confirm and agree to proceed, nevertheless.",
+  "page.sign.cosmos.tx.top-up-error-message": "Fee coverage request failed. Try again later.",
   "page.sign.cosmos.icns.title": "Request Registration",
   "page.sign.cosmos.lava.guide.title": "🌋 Using Lava Endpoints",
   "page.sign.cosmos.lava.guide.paragraph": "You are currently using endpoints provided Lava.",
@@ -871,6 +872,13 @@
   "components.bitcoin-guide-box.paragraph.none-of-the-inputs-belong-to-this-wallet": "For security reasons, signing is allowed only if an input belongs to this wallet.",
 
   "components.fee-info.bridge-fee": "Bridge Fee",
+
+  "components.top-up.description.no-fees": "No fees? Don't worry! ✨",
+  "components.top-up.description.we-cover": "We'll cover it for you :)",
+  "components.top-up.tx-fee": "Tx Fee",
+  "components.top-up.covered-by-keplr": "Covered by Keplr",
+  "components.top-up.keep-window-open": "Keep this window open during the transaction",
+  "components.top-up.wait-time": "Wait {minutes}:{seconds}",
 
   "button.confirm": "Confirm",
   "button.ok": "OK",

@@ -6044,6 +6044,7 @@ __metadata:
     "@keplr-wallet/stores-ibc": 0.12.281-rc.0
     "@keplr-wallet/stores-internal": 0.12.281-rc.0
     "@keplr-wallet/stores-starknet": 0.12.281-rc.0
+    "@keplr-wallet/topup-client": 0.12.281-rc.0
     "@keplr-wallet/types": 0.12.281-rc.0
     "@keplr-wallet/unit": 0.12.281-rc.0
     "@keystonehq/animated-qr": ^0.8.6
@@ -6519,6 +6520,15 @@ __metadata:
   peerDependencies:
     mobx: ^6
     mobx-utils: ^6
+  languageName: unknown
+  linkType: soft
+
+"@keplr-wallet/topup-client@0.12.281-rc.0, @keplr-wallet/topup-client@workspace:packages/topup-client":
+  version: 0.0.0-use.local
+  resolution: "@keplr-wallet/topup-client@workspace:packages/topup-client"
+  dependencies:
+    "@keplr-wallet/simple-fetch": 0.12.281-rc.0
+    "@keplr-wallet/types": 0.12.281-rc.0
   languageName: unknown
   linkType: soft
 
