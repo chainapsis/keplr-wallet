@@ -109,6 +109,7 @@
   "pages.register.name-password-hardware.connect-to-cosmos": "Cosmos应用 (推荐)",
   "pages.register.name-password-hardware.connect-to-terra": "Terra应用",
   "pages.register.name-password-hardware.connect-to-secret": "Secret应用",
+  "pages.register.name-password-hardware.connect-to-thor": "THORChain应用",
 
   "pages.register.name-password-hardware.connect-keystone-way": "选择Keystone连接方式",
   "pages.register.name-password-hardware.connect-to-keystone-USB": "USB",
@@ -408,6 +409,7 @@
   "page.wallet.unknown-title": "未知",
   "page.wallet.keyring-item.bip44-path-Terra-text": "（Terra应用）",
   "page.wallet.keyring-item.bip44-path-Secret-text": "（Secret应用）",
+  "page.wallet.keyring-item.bip44-path-THORChain-text": "(THORChain应用)",
   "page.wallet.keyring-item.dropdown.change-wallet-name-title": "修改钱包名称",
   "page.wallet.keyring-item.dropdown.delete-wallet-title": "删除钱包",
   "page.wallet.keyring-item.dropdown.view-recovery-path-title": "查看助记词",
