@@ -2514,27 +2514,6 @@ export const EnableChainsScene: FunctionComponent<{
                 });
 
                 try {
-                  const entryPoint =
-                    searchParams.get("route") === "enable-chains"
-                      ? "enable-chains"
-                      : "new-account";
-
-                  analyticsAmplitudeStore.logEvent(
-                    "click_save_enable_chains_btn_register",
-                    {
-                      durationMs: performance.now() - pageMountedAtRef.current,
-                      enabledChainCount: enabledIds.length,
-                      testnetEnabledCount,
-                      betaEnabledCount,
-                      cosmosEnabledCount: ecosystemCounts.cosmos,
-                      evmEnabledCount: ecosystemCounts.evm,
-                      starknetEnabledCount: ecosystemCounts.starknet,
-                      bitcoinEnabledCount: ecosystemCounts.bitcoin,
-                      allNativeChainsEnabled,
-                      entryPoint,
-                    }
-                  );
-
                   analyticsAmplitudeStore.setUserProperties({
                     enabled_chain_count: enabledIds.length,
                     testnet_enabled_count: testnetEnabledCount,
@@ -2547,7 +2526,7 @@ export const EnableChainsScene: FunctionComponent<{
                   });
                 } catch (e) {
                   console.error(
-                    "[Analytics] Failed to log click_save_enable_chains_btn_register",
+                    "[Analytics] Failed to set user properties for enable chains",
                     e
                   );
                 }
