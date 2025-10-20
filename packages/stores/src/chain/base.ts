@@ -613,6 +613,9 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
   @observable.shallow
   protected registrationInProgressCurrencyMap: Map<string, boolean> = new Map();
 
+  // Refactor Note: constructor에서 한 번만 파악하여 들고 있는 available modules 추가
+  protected availableModules: ChainInfoModule[];
+
   constructor(
     embedded: M,
     protected readonly currencyRegistry: {
@@ -620,6 +623,7 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
     }
   ) {
     this._embedded = embedded;
+    this.availableModules = this.detectAvailableModules();
 
     makeObservable(this);
 
@@ -629,6 +633,15 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
     keepAlive(this, "evmCurrencyMap");
   }
 
+  protected detectAvailableModules(): ChainInfoModule[] {
+    const modules: ChainInfoModule[] = [];
+    if ("bitcoin" in this._embedded) modules.push("bitcoin");
+    if ("starknet" in this._embedded) modules.push("starknet");
+    if ("evm" in this._embedded) modules.push("evm");
+    if ("cosmos" in this._embedded) modules.push("cosmos");
+    return modules;
+  }
+
   get embedded(): M {
     return this._embedded;
   }
@@ -636,6 +649,7 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
   @action
   setEmbeddedModularChainInfo(embedded: M) {
     this._embedded = embedded;
+    this.availableModules = this.detectAvailableModules();
   }
 
   get chainId(): string {
@@ -687,53 +701,61 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
   /**
    * Currency를 반환한다.
    * 만약 해당 Currency가 없다면 unknownDenomMap에 추가한다.
-   * @param module "cosmos", "starknet", "bitcoin", "evm" 등
    * @param coinMinimalDenom
    */
-  findCurrency(
-    module: ChainInfoModule,
-    coinMinimalDenom: string
-  ): AppCurrency | undefined {
-    const normalizedCoinMinimalDenom =
-      DenomHelper.normalizeDenom(coinMinimalDenom);
+  findCurrency(coinMinimalDenom: string): AppCurrency | undefined {
+    const normalizedDenom = DenomHelper.normalizeDenom(coinMinimalDenom);
 
-    const currency = this.getCurrencyMapByModule(module).get(
-      normalizedCoinMinimalDenom
-    );
-
+    const currency = this.findCurrencyByModule(normalizedDenom);
     if (currency) {
       return currency;
     }
 
-    if (module === "cosmos") {
-      const noReactionCurrency = this.cosmosCurrencyMapNoReaction.get(
-        normalizedCoinMinimalDenom
-      );
-      if (noReactionCurrency) {
-        return noReactionCurrency;
+    this.availableModules.forEach((module) => {
+      // 동적으로 토큰을 발견하고 등록하는 절차는 cosmos, evm 모듈에서만 지원
+      if (module === "cosmos" || module === "evm") {
+        this.addUnknownDenomsImpl({
+          module,
+          coinMinimalDenoms: [normalizedDenom],
+          reaction: true,
+        });
+      }
+    });
+
+    // Unknown denom can be registered synchronously in some cases.
+    // For this case, re-try to get currency.
+    return this.findCurrencyByModule(normalizedDenom);
+  }
+
+  findCurrencyByModule(denom: string) {
+    for (const module of this.availableModules) {
+      const currency = this.getCurrencyMapByModule(module).get(denom);
+
+      if (currency) {
+        return currency;
+      }
+
+      if (module === "cosmos") {
+        const noReactionCurrency = this.cosmosCurrencyMapNoReaction.get(denom);
+        if (noReactionCurrency) {
+          return noReactionCurrency;
+        }
       }
     }
 
-    this.addUnknownDenomsImpl({
-      module,
-      coinMinimalDenoms: [normalizedCoinMinimalDenom],
-      reaction: true,
-    });
+    return undefined;
   }
 
   /**
    * findCurrency와 비슷하지만 해당하는 currency가 존재하지 않을 경우 raw currency를 반환한다.
-   * @param module "cosmos", "starknet", "bitcoin", "evm" 등
    * @param coinMinimalDenom
    */
-  forceFindCurrency(
-    module: ChainInfoModule,
-    coinMinimalDenom: string
-  ): AppCurrency {
+  forceFindCurrency(coinMinimalDenom: string): AppCurrency {
     const normalizedCoinMinimalDenom =
       DenomHelper.normalizeDenom(coinMinimalDenom);
 
-    const currency = this.findCurrency(module, coinMinimalDenom);
+    const currency = this.findCurrency(coinMinimalDenom);
+
     if (currency) {
       return currency;
     }
