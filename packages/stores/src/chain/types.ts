@@ -93,4 +93,10 @@ export interface IModularChainInfoImpl<
     module: ChainInfoModule,
     ...coinMinimalDenoms: string[]
   ): void;
+  findCurrency(coinMinimalDenom: string): AppCurrency | undefined;
+  forceFindCurrency(coinMinimalDenom: string): AppCurrency;
+  findCurrencyWithoutReaction(
+    coinMinimalDenom: string
+  ): AppCurrency | undefined;
+  forceFindCurrencyWithoutReaction(coinMinimalDenom: string): AppCurrency;
 }
