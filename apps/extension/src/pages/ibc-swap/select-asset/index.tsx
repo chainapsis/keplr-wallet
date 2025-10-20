@@ -21,7 +21,6 @@ import { IChainInfoImpl } from "@keplr-wallet/stores";
 import { FixedSizeList } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { useSearch } from "../../../hooks/use-search";
-import { getTokenSearchResultClickAnalyticsProperties } from "../../../analytics-amplitude";
 import { DenomHelper } from "@keplr-wallet/common";
 import { SwapNotAvailableModal } from "../components/swap-not-available-modal";
 import { MsgItemSkeleton } from "../../main/token-detail/msg-items/skeleton";
@@ -297,19 +296,7 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
                     searchedRemaining,
                     selectedCoinMinimalDenom,
                     unsupportedCoinMinimalDenoms,
-                    onClick: async (viewToken, index) => {
-                      if (search.trim().length > 0) {
-                        analyticsAmplitudeStore.logEvent(
-                          "click_token_item_search_results_select_asset_ibc_swap",
-                          getTokenSearchResultClickAnalyticsProperties(
-                            viewToken,
-                            search,
-                            [...searchedTokens, ...searchedRemaining],
-                            index
-                          )
-                        );
-                      }
-
+                    onClick: async (viewToken) => {
                       let timer: NodeJS.Timeout | undefined;
                       let disposal: IReactionDisposer | undefined;
                       await Promise.race([
