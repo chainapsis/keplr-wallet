@@ -47,7 +47,6 @@ import { NextStepChainItem } from "./components/next-step-chain-item";
 import { ChainItem } from "./components/chain-item";
 import { INITIA_CHAIN_ID } from "../../../config.ui";
 import { useSearch } from "../../../hooks/use-search";
-import { useSearchParams } from "react-router-dom";
 
 /**
  * EnableChainsScene은 finalize-key scene에서 선택한 chains를 활성화하는 scene이다.
@@ -105,10 +104,7 @@ export const EnableChainsScene: FunctionComponent<{
 
     const searchRef = useRef<HTMLInputElement | null>(null);
     const buttonContainerRef = useRef<HTMLDivElement>(null);
-    const pageMountedAtRef = useRef(performance.now());
     useScrollDownWhenCantSeeSaveButton(buttonContainerRef);
-
-    const [searchParams] = useSearchParams();
 
     const nativeChainIdentifierSet = useMemo(
       () =>
@@ -995,13 +991,6 @@ export const EnableChainsScene: FunctionComponent<{
         fallbackStarknetLedgerApp,
         keyType,
       });
-
-    const searchedAllChains = [
-      ...searchedNativeGroupedModularChainInfos,
-      ...searchedSuggestGroupedModularChainInfos,
-      ...(showLedgerChains ? searchedLedgerChains : []),
-      ...searchedNonNativeChainInfos,
-    ];
 
     const numSelected = useMemo(() => {
       const modularChainInfoMap = new Map<string, ModularChainInfo>();

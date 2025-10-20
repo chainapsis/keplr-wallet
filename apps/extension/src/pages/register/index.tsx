@@ -97,7 +97,7 @@ export const RegisterPage: FunctionComponent = observer(() => {
 });
 
 const RegisterPageImpl: FunctionComponent = observer(() => {
-  const { chainStore, analyticsAmplitudeStore } = useStore();
+  const { chainStore } = useStore();
 
   const sceneRef = useRef<SceneTransitionRef | null>(null);
   const theme = useTheme();

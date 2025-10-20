@@ -55,12 +55,7 @@ const searchFields = [
 ];
 
 export const SendSelectAssetPage: FunctionComponent = observer(() => {
-  const {
-    hugeQueriesStore,
-    skipQueriesStore,
-    chainStore,
-    analyticsAmplitudeStore,
-  } = useStore();
+  const { hugeQueriesStore, skipQueriesStore, chainStore } = useStore();
   const navigate = useNavigate();
   const intl = useIntl();
   const theme = useTheme();
@@ -249,7 +244,7 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
         ) : null}
 
         {filteredTokens.length > 0 &&
-          filteredTokens.map((viewToken, index) => {
+          filteredTokens.map((viewToken) => {
             const modularChainInfo = chainStore.getModularChain(
               viewToken.chainInfo.chainId
             );

@@ -137,13 +137,7 @@ const chainSearchFields = [
 export const CopyAddressScene: FunctionComponent<{
   close: () => void;
 }> = observer(({ close }) => {
-  const {
-    chainStore,
-    accountStore,
-    keyRingStore,
-    uiConfigStore,
-    analyticsAmplitudeStore,
-  } = useStore();
+  const { chainStore, accountStore, keyRingStore, uiConfigStore } = useStore();
 
   const intl = useIntl();
   const theme = useTheme();

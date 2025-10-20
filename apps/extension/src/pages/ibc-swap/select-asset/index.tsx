@@ -172,12 +172,7 @@ const remainingSearchFields = [
 // /send/select-asset 페이지와 세트로 관리하셈
 export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
   () => {
-    const {
-      hugeQueriesStore,
-      chainStore,
-      skipQueriesStore,
-      analyticsAmplitudeStore,
-    } = useStore();
+    const { hugeQueriesStore, chainStore, skipQueriesStore } = useStore();
     const navigate = useNavigate();
     const intl = useIntl();
     const [searchParams] = useSearchParams();

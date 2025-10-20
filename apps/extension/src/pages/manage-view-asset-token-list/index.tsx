@@ -46,13 +46,8 @@ const searchFields = [
 ];
 
 export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
-  const {
-    hugeQueriesStore,
-    keyRingStore,
-    uiConfigStore,
-    chainStore,
-    analyticsAmplitudeStore,
-  } = useStore();
+  const { hugeQueriesStore, keyRingStore, uiConfigStore, chainStore } =
+    useStore();
   const intl = useIntl();
   const [sortMode, setSortMode] = useState<"asc" | "desc" | undefined>(
     undefined
@@ -261,7 +256,7 @@ export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
               </XAxis>
             </Styles.NewTokenFoundButtonContainer>
           )}
-          {sortedBalances.map((viewToken, index) => {
+          {sortedBalances.map((viewToken) => {
             const chainIdentifier = ChainIdHelper.parse(
               viewToken.chainInfo.chainId
             ).identifier;

@@ -758,7 +758,7 @@ const TokensFlatViewScene = observer(
     onMoreTokensClosed: () => void;
     setSearchParams: Dispatch<SetStateAction<URLSearchParams>>;
   }) => {
-    const { uiConfigStore, analyticsAmplitudeStore } = useStore();
+    const { uiConfigStore } = useStore();
 
     const { TokenViewData } = useAllBalances(trimSearch);
 
@@ -775,7 +775,7 @@ const TokensFlatViewScene = observer(
               }
             }}
             lenAlwaysShown={TokenViewData.lenAlwaysShown}
-            items={TokenViewData.balance.map((viewToken, index) => {
+            items={TokenViewData.balance.map((viewToken) => {
               return (
                 <TokenItemWithCopyAddress
                   key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
