@@ -47,31 +47,6 @@ import { NextStepChainItem } from "./components/next-step-chain-item";
 import { ChainItem } from "./components/chain-item";
 import { INITIA_CHAIN_ID } from "../../../config.ui";
 import { useSearch } from "../../../hooks/use-search";
-import { getChainSearchResultClickAnalyticsProperties } from "../../../analytics-amplitude";
-import { AnalyticsAmplitudeStore } from "@keplr-wallet/analytics";
-import debounce from "lodash.debounce";
-import { useSearchParams } from "react-router-dom";
-
-const logChainSearchClick = (
-  analyticsStore: AnalyticsAmplitudeStore,
-  chainInfo: { chainName: string; chainId: string },
-  search: string,
-  allSearchResults: { chainName: string; chainId: string }[]
-) => {
-  if (!search?.trim()) return;
-
-  analyticsStore.logEvent(
-    "click_chain_item_search_results_register",
-    getChainSearchResultClickAnalyticsProperties(
-      chainInfo.chainName,
-      search,
-      allSearchResults.map((chain) => chain.chainName),
-      allSearchResults.findIndex((chain) => chain.chainId === chainInfo.chainId)
-    )
-  );
-};
-
-const debouncedLogChainSearchClick = debounce(logChainSearchClick, 100);
 
 /**
  * EnableChainsScene은 finalize-key scene에서 선택한 chains를 활성화하는 scene이다.
@@ -129,10 +104,7 @@ export const EnableChainsScene: FunctionComponent<{
 
     const searchRef = useRef<HTMLInputElement | null>(null);
     const buttonContainerRef = useRef<HTMLDivElement>(null);
-    const pageMountedAtRef = useRef(performance.now());
     useScrollDownWhenCantSeeSaveButton(buttonContainerRef);
-
-    const [searchParams] = useSearchParams();
 
     const nativeChainIdentifierSet = useMemo(
       () =>
@@ -1020,13 +992,6 @@ export const EnableChainsScene: FunctionComponent<{
         keyType,
       });
 
-    const searchedAllChains = [
-      ...searchedNativeGroupedModularChainInfos,
-      ...searchedSuggestGroupedModularChainInfos,
-      ...(showLedgerChains ? searchedLedgerChains : []),
-      ...searchedNonNativeChainInfos,
-    ];
-
     const numSelected = useMemo(() => {
       const modularChainInfoMap = new Map<string, ModularChainInfo>();
       for (const modularChainInfo of chainStore.groupedModularChainInfosInListUI) {
@@ -1548,13 +1513,6 @@ export const EnableChainsScene: FunctionComponent<{
                         chainIdentifier
                       )}
                       onClick={() => {
-                        debouncedLogChainSearchClick(
-                          analyticsAmplitudeStore,
-                          modularChainInfo,
-                          search,
-                          searchedAllChains
-                        );
-
                         const isEnabled =
                           enabledChainIdentifierMap.get(chainIdentifier);
                         const linkedChainIdentifiers = new Set<string>([
@@ -1624,13 +1582,6 @@ export const EnableChainsScene: FunctionComponent<{
                   blockInteraction={blockInteraction}
                   isFresh={isFresh ?? false}
                   onClick={() => {
-                    debouncedLogChainSearchClick(
-                      analyticsAmplitudeStore,
-                      modularChainInfo,
-                      search,
-                      searchedAllChains
-                    );
-
                     const isEnabled =
                       enabledChainIdentifierMap.get(chainIdentifier);
                     const linkedChainIdentifiers = new Set<string>([
@@ -1773,13 +1724,6 @@ export const EnableChainsScene: FunctionComponent<{
                     isFresh={true}
                     blockInteraction={false}
                     onClick={() => {
-                      debouncedLogChainSearchClick(
-                        analyticsAmplitudeStore,
-                        modularChainInfo,
-                        search,
-                        searchedAllChains
-                      );
-
                       if (isChecked) {
                         setNonNativeChainListForSuggest(
                           nonNativeChainListForSuggest.filter(
@@ -2514,27 +2458,6 @@ export const EnableChainsScene: FunctionComponent<{
                 });
 
                 try {
-                  const entryPoint =
-                    searchParams.get("route") === "enable-chains"
-                      ? "enable-chains"
-                      : "new-account";
-
-                  analyticsAmplitudeStore.logEvent(
-                    "click_save_enable_chains_btn_register",
-                    {
-                      durationMs: performance.now() - pageMountedAtRef.current,
-                      enabledChainCount: enabledIds.length,
-                      testnetEnabledCount,
-                      betaEnabledCount,
-                      cosmosEnabledCount: ecosystemCounts.cosmos,
-                      evmEnabledCount: ecosystemCounts.evm,
-                      starknetEnabledCount: ecosystemCounts.starknet,
-                      bitcoinEnabledCount: ecosystemCounts.bitcoin,
-                      allNativeChainsEnabled,
-                      entryPoint,
-                    }
-                  );
-
                   analyticsAmplitudeStore.setUserProperties({
                     enabled_chain_count: enabledIds.length,
                     testnet_enabled_count: testnetEnabledCount,
@@ -2547,7 +2470,7 @@ export const EnableChainsScene: FunctionComponent<{
                   });
                 } catch (e) {
                   console.error(
-                    "[Analytics] Failed to log click_save_enable_chains_btn_register",
+                    "[Analytics] Failed to set user properties for enable chains",
                     e
                   );
                 }
