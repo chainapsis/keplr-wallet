@@ -1231,12 +1231,14 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
       const topUpStatus = queryTopUpStatus?.getTopUpStatus(
         this.senderConfig.sender
-      ).topUpStatus;
+      );
 
       if (
         topUpStatus &&
-        (topUpStatus.isTopUpAvailable ||
-          topUpStatus.remainingTimeMs !== undefined)
+        topUpStatus.error != null &&
+        topUpStatus.topUpStatus &&
+        (topUpStatus.topUpStatus.isTopUpAvailable ||
+          topUpStatus.topUpStatus.remainingTimeMs !== undefined)
       ) {
         return { warning: this._uiProperties.error };
       }
@@ -1253,8 +1255,10 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     if (queryTopUpStatus) {
       const topUpStatus = queryTopUpStatus.getTopUpStatus(
         this.senderConfig.sender
-      ).topUpStatus;
-      return topUpStatus;
+      );
+      if (topUpStatus.error == null) {
+        return topUpStatus.topUpStatus;
+      }
     }
 
     return {
