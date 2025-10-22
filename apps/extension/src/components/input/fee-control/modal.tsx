@@ -86,9 +86,9 @@ export const TransactionFeeModal: FunctionComponent<{
     const intl = useIntl();
     const theme = useTheme();
 
-    const isExternalMsg =
+    const isManualFee =
       typeof isInternalMsg === "boolean"
-        ? !isInternalMsg
+        ? !isInternalMsg && disableAutomaticFeeSet
         : disableAutomaticFeeSet;
 
     const isGasSimulatorUsable = (() => {
@@ -289,7 +289,7 @@ export const TransactionFeeModal: FunctionComponent<{
                 </Subtitle3>
 
                 <div style={{ flex: 1 }} />
-                {!isExternalMsg ? (
+                {isInternalMsg ? (
                   <React.Fragment>
                     <div
                       style={{
@@ -543,7 +543,7 @@ export const TransactionFeeModal: FunctionComponent<{
             />
           )}
 
-          {isExternalMsg ? (
+          {isManualFee ? (
             <GuideBox
               title={intl.formatMessage({
                 id: "components.input.fee-control.modal.guide.external-fee-set",
