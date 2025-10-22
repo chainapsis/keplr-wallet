@@ -91,6 +91,11 @@ export const TransactionFeeModal: FunctionComponent<{
         ? !isInternalMsg && disableAutomaticFeeSet
         : disableAutomaticFeeSet;
 
+    const isInternalMsgSafe =
+      typeof isInternalMsg === "boolean"
+        ? isInternalMsg
+        : !disableAutomaticFeeSet;
+
     const isGasSimulatorUsable = (() => {
       if (!gasSimulator) {
         return false;
@@ -289,7 +294,7 @@ export const TransactionFeeModal: FunctionComponent<{
                 </Subtitle3>
 
                 <div style={{ flex: 1 }} />
-                {isInternalMsg ? (
+                {isInternalMsgSafe ? (
                   <React.Fragment>
                     <div
                       style={{
