@@ -181,6 +181,7 @@ export const FeeControl: FunctionComponent<{
   isForEVMTx?: boolean;
   nonceMethod?: "pending" | "latest";
   setNonceMethod?: (nonceMethod: "pending" | "latest") => void;
+  isInternalMsg?: boolean;
 }> = observer(
   ({
     senderConfig,
@@ -191,6 +192,7 @@ export const FeeControl: FunctionComponent<{
     isForEVMTx,
     nonceMethod,
     setNonceMethod,
+    isInternalMsg,
   }) => {
     const {
       analyticsStore,
@@ -546,6 +548,7 @@ export const FeeControl: FunctionComponent<{
             gasConfig={gasConfig}
             gasSimulator={gasSimulator}
             disableAutomaticFeeSet={disableAutomaticFeeSet}
+            isInternalMsg={isInternalMsg}
             isForEVMTx={isForEVMTx}
             nonceMethod={nonceMethod}
             setNonceMethod={setNonceMethod}

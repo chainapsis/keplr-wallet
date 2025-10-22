@@ -63,6 +63,7 @@ export const TransactionFeeModal: FunctionComponent<{
   ibcSwapAmountConfig?: IBCSwapAmountConfig;
   gasSimulator?: IGasSimulator;
   disableAutomaticFeeSet?: boolean;
+  isInternalMsg?: boolean;
   isForEVMTx?: boolean;
   nonceMethod?: "pending" | "latest";
   setNonceMethod?: (nonceMethod: "pending" | "latest") => void;
@@ -75,6 +76,7 @@ export const TransactionFeeModal: FunctionComponent<{
     ibcSwapAmountConfig,
     gasSimulator,
     disableAutomaticFeeSet,
+    isInternalMsg,
     isForEVMTx,
     nonceMethod,
     setNonceMethod,
@@ -83,6 +85,11 @@ export const TransactionFeeModal: FunctionComponent<{
       useStore();
     const intl = useIntl();
     const theme = useTheme();
+
+    const isExternalMsg =
+      typeof isInternalMsg === "boolean"
+        ? !isInternalMsg
+        : disableAutomaticFeeSet;
 
     const isGasSimulatorUsable = (() => {
       if (!gasSimulator) {
@@ -282,7 +289,7 @@ export const TransactionFeeModal: FunctionComponent<{
                 </Subtitle3>
 
                 <div style={{ flex: 1 }} />
-                {!disableAutomaticFeeSet ? (
+                {!isExternalMsg ? (
                   <React.Fragment>
                     <div
                       style={{
@@ -536,7 +543,7 @@ export const TransactionFeeModal: FunctionComponent<{
             />
           )}
 
-          {disableAutomaticFeeSet ? (
+          {isExternalMsg ? (
             <GuideBox
               title={intl.formatMessage({
                 id: "components.input.fee-control.modal.guide.external-fee-set",

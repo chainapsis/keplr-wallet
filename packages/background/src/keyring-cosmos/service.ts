@@ -307,6 +307,7 @@ export class KeyRingCosmosService {
         signOptions,
         keyType: keyInfo.type,
         keyInsensitive: keyInfo.insensitive,
+        isInternalMsg: env.isInternalMsg,
       },
       async (res: { newSignDoc: StdSignDoc; signature?: Uint8Array }) => {
         let newSignDoc = res.newSignDoc;
@@ -885,6 +886,7 @@ export class KeyRingCosmosService {
         signOptions,
         keyType: keyInfo.type,
         keyInsensitive: keyInfo.insensitive,
+        isInternalMsg: env.isInternalMsg,
       },
       async (res: { newSignDocBytes: Uint8Array; signature?: Uint8Array }) => {
         const newSignDocBytes = res.newSignDocBytes;

@@ -2258,6 +2258,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
               gasConfig={gasConfig}
               gasSimulator={gasSimulatorForNotBridgeSend}
               disableAutomaticFeeSet={shouldTopUp}
+              isInternalMsg={true}
               isForEVMTx={isEvmTx}
               nonceMethod={nonceMethod}
               setNonceMethod={setNonceMethod}
