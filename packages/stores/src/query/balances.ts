@@ -96,7 +96,7 @@ export class ObservableQueryBalancesImplMap {
       const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
         this.chainId
       );
-      currencies.push(...modularChainInfoImpl.getCurrencies("evm"));
+      currencies.push(...modularChainInfoImpl.getCurrenciesByModule("evm"));
     } else {
       currencies.push(...chainInfo.currencies);
     }

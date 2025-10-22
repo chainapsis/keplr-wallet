@@ -109,7 +109,7 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
     //       나중에 이런 기능을 chain store 자체에다가 만들어야한다.
     const res = chainStore
       .getModularChainInfoImpl(chainId)
-      .getCurrencies("starknet")
+      .getCurrenciesByModule("starknet")
       .find((cur) => cur.coinMinimalDenom === coinMinimalDenom);
     if (res) {
       return res;
@@ -249,7 +249,7 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
       const feeContractAddress = starknet.strkContractAddress;
       const feeCurrency = chainStore
         .getModularChainInfoImpl(chainId)
-        .getCurrencies("starknet")
+        .getCurrenciesByModule("starknet")
         .find((cur) => cur.coinMinimalDenom === `erc20:${feeContractAddress}`);
       if (!feeCurrency) {
         throw new Error("Can't find fee currency");
@@ -408,7 +408,7 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
             const feeContractAddress = starknet.strkContractAddress;
             const feeCurrency = chainStore
               .getModularChainInfoImpl(chainId)
-              .getCurrencies("starknet")
+              .getCurrenciesByModule("starknet")
               .find(
                 (cur) => cur.coinMinimalDenom === `erc20:${feeContractAddress}`
               );

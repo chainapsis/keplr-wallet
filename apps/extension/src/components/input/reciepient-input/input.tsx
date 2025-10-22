@@ -69,10 +69,13 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
               if ("getNameService" in recipientConfig) {
                 const icns = recipientConfig.getNameService("icns");
                 const ens = recipientConfig.getNameService("ens");
+                const modularChainInfo = chainStore.getModularChain(
+                  recipientConfig.chainId
+                );
                 if (
                   icns?.isEnabled &&
-                  chainStore.getChain(recipientConfig.chainId).bech32Config !=
-                    null &&
+                  "cosmos" in modularChainInfo &&
+                  modularChainInfo.cosmos.bech32Config != null &&
                   ens?.isEnabled &&
                   chainStore.isEvmChain(recipientConfig.chainId)
                 ) {

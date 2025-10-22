@@ -87,7 +87,8 @@ export interface IModularChainInfoImpl<
   readonly embedded: M;
   readonly chainId: string;
 
-  getCurrencies(module: ChainInfoModule): AppCurrency[];
+  getCurrencies(): AppCurrency[];
+  getCurrenciesByModule(module: ChainInfoModule): AppCurrency[];
   addCurrencies(module: ChainInfoModule, ...currencies: AppCurrency[]): void;
   removeCurrencies(
     module: ChainInfoModule,

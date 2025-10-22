@@ -614,6 +614,7 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
   protected registrationInProgressCurrencyMap: Map<string, boolean> = new Map();
 
   // Refactor Note: constructor에서 한 번만 파악하여 들고 있는 available modules 추가
+  @observable.shallow
   protected availableModules: ChainInfoModule[];
 
   constructor(
@@ -656,7 +657,13 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
     return this._embedded.chainId;
   }
 
-  getCurrencies(module: ChainInfoModule): AppCurrency[] {
+  getCurrencies(): AppCurrency[] {
+    return this.availableModules
+      .map((module) => this.getCurrenciesByModule(module))
+      .flat();
+  }
+
+  getCurrenciesByModule(module: ChainInfoModule): AppCurrency[] {
     switch (module) {
       case "cosmos":
         if (!("cosmos" in this._embedded)) {
