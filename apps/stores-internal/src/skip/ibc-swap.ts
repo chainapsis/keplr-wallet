@@ -333,7 +333,9 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
               // (If channel is only one, no need to check packet forwarding because it is direct transfer)
               if (channels.length > 1) {
                 if (
-                  !this.chainStore.getChain(chainId).hasFeature("ibc-go") ||
+                  !this.chainStore
+                    .getModularChainInfoImpl(chainId)
+                    .hasFeature("ibc-go") ||
                   !this.queryChains.isSupportsMemo(chainId)
                 ) {
                   pfmPossibility = false;
@@ -344,7 +346,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
                     const channel = channels[i];
                     if (
                       !this.chainStore
-                        .getChain(channel.counterpartyChainId)
+                        .getModularChainInfoImpl(channel.counterpartyChainId)
                         .hasFeature("ibc-go") ||
                       !this.queryChains.isSupportsMemo(
                         channel.counterpartyChainId
@@ -582,7 +584,9 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
           // 두번째 체인부터 pfm을 지원하면 되기 때문에 보내는 체인의 경우는 이러한 확인을 하지 않는다.
           // 하지만 ibc swap의 경우는 ibc pfm transfer 상의 보내는 체인은 시작 지점이 될 수 없기 때문에 pfm에 대한 확인을 꼭 해야한다.
           if (
-            !this.chainStore.getChain(originOutChainId).hasFeature("ibc-go") ||
+            !this.chainStore
+              .getModularChainInfoImpl(originOutChainId)
+              .hasFeature("ibc-go") ||
             !this.queryChains.isSupportsMemo(originOutChainId) ||
             !this.queryChains.isPFMEnabled(originOutChainId)
           ) {
@@ -726,7 +730,9 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
       // 두번째 체인부터 pfm을 지원하면 되기 때문에 보내는 체인의 경우는 이러한 확인을 하지 않는다.
       // 하지만 ibc swap의 경우는 ibc pfm transfer 상의 보내는 체인은 시작 지점이 될 수 없기 때문에 pfm에 대한 확인을 꼭 해야한다.
       if (
-        !this.chainStore.getChain(originOutChainId).hasFeature("ibc-go") ||
+        !this.chainStore
+          .getModularChainInfoImpl(originOutChainId)
+          .hasFeature("ibc-go") ||
         !this.queryChains.isSupportsMemo(originOutChainId) ||
         !this.queryChains.isPFMEnabled(originOutChainId)
       ) {

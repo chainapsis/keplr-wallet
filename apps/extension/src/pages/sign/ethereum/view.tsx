@@ -99,7 +99,8 @@ export const EthereumSigningView: FunctionComponent<{
   };
 
   const ethereumAccount = ethereumAccountStore.getAccount(chainId);
-  const chainInfo = chainStore.getChain(chainId);
+  const chainInfo = chainStore.getModularChain(chainId);
+  const modularChainInfoImpl = chainStore.getModularChainInfoImpl(chainId);
 
   const senderConfig = useSenderConfig(chainStore, chainId, signer);
   const gasConfig = useZeroAllowedGasConfig(chainStore, chainId, 0);
@@ -136,7 +137,7 @@ export const EthereumSigningView: FunctionComponent<{
         );
       }
 
-      if (chainInfo.evm == null) {
+      if (!("evm" in chainInfo) || chainInfo.evm == null) {
         throw new Error("Gas simulator is only working with EVM info");
       }
 
@@ -204,7 +205,7 @@ export const EthereumSigningView: FunctionComponent<{
           // 사용자가 수동으로 설정하는 것을 지양하기 위해 preferNoSetFee를 true로 설정
           feeConfig.setFee(
             new CoinPretty(
-              chainInfo.currencies[0],
+              modularChainInfoImpl.getCurrencies()[0],
               new Dec(gasConfig.gas).mul(new Dec(gasPriceFromTx))
             )
           );
@@ -327,7 +328,10 @@ export const EthereumSigningView: FunctionComponent<{
 
   useEffect(() => {
     (async () => {
-      if (isTxSigning && chainInfo.features.includes("op-stack-l1-data-fee")) {
+      if (
+        isTxSigning &&
+        modularChainInfoImpl.hasFeature("op-stack-l1-data-fee")
+      ) {
         const { to, gasLimit, value, data, chainId }: UnsignedTransaction =
           JSON.parse(Buffer.from(message).toString("utf8"));
 
@@ -341,7 +345,7 @@ export const EthereumSigningView: FunctionComponent<{
         feeConfig.setL1DataFee(new Dec(BigInt(l1DataFee)));
       }
     })();
-  }, [chainInfo.features, ethereumAccount, feeConfig, isTxSigning, message]);
+  }, [modularChainInfoImpl, ethereumAccount, feeConfig, isTxSigning, message]);
 
   useEffect(() => {
     if (isTxSigning) {

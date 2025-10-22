@@ -158,8 +158,8 @@ export const CurrencyImageFallback: FunctionComponent<
               currency.originCurrency
             ) {
               if (
-                chainStore.hasChain(currency.originChainId) &&
-                chainStore.getChain(currency.originChainId).chainIdentifier ===
+                chainStore.hasModularChain(currency.originChainId) &&
+                ChainIdHelper.parse(currency.originChainId).identifier ===
                   axelarChainIdentifier &&
                 currency.originCurrency.coinMinimalDenom !== "uaxl"
               ) {
@@ -178,7 +178,7 @@ export const CurrencyImageFallback: FunctionComponent<
 
           if (isAxelarBridged && chainStore.hasChain(axelarChainIdentifier)) {
             const axlCurrency = chainStore
-              .getChain(axelarChainIdentifier)
+              .getModularChainInfoImpl(axelarChainIdentifier)
               .findCurrency("uaxl");
 
             if (axlCurrency && axlCurrency.coinImageUrl) {

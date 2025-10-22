@@ -327,7 +327,9 @@ export class IBCCurrencyRegistrar {
               // 현재 ethereum ibc의 경우 ethereum까지 타고 들어가서 nested하게 처리할 방법은 없다.
               // 마지막 path일 경우만 처리한다.
               isLast &&
-              this.chainStore.getChain(chainIdBefore).hasFeature("ibc-v2") &&
+              this.chainStore
+                .getModularChainInfoImpl(chainIdBefore)
+                .hasFeature("ibc-v2") &&
               denomTrace.denom.startsWith("0x")
             ) {
               const clientState = this.queriesStore

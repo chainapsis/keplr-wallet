@@ -70,11 +70,11 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
     }, [channelConfig.channels, selectedChannelId]);
 
     const sender = accountStore.getAccount(
-      chainStore.getChain(chainId).chainId
+      chainStore.getModularChainInfoImpl(chainId).chainId
     ).bech32Address;
 
     const currency = chainStore
-      .getChain(chainId)
+      .getModularChainInfoImpl(chainId)
       .forceFindCurrency(coinMinimalDenom);
 
     const queryBalance = queriesStore
@@ -103,7 +103,7 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
             <TokenItem
               viewToken={{
                 token: queryBalance?.balance ?? new CoinPretty(currency, "0"),
-                chainInfo: chainStore.getChain(chainId),
+                chainInfo: chainStore.getModularChain(chainId),
                 isFetching: queryBalance?.isFetching ?? true,
                 error: queryBalance?.error,
               }}

@@ -33,7 +33,9 @@ export const HistoryDetailCommonBottomSection: FunctionComponent<{
   const theme = useTheme();
 
   const fee: string | undefined = (() => {
-    if (chainStore.isEvmOnlyChain(msg.chainId)) {
+    const chainInfo = chainStore.getModularChain(msg.chainId);
+
+    if (chainStore.isEvmOnlyChain(msg.chainId) && "evm" in chainInfo) {
       // EVM 트랜잭션의 수수료 계산 로직
       const res = queriesStore.simpleQuery.queryGet<{
         tx_fee?: string;
@@ -50,11 +52,10 @@ export const HistoryDetailCommonBottomSection: FunctionComponent<{
         }
 
         const amt = new Int(txData.tx_fee);
-        const chainInfo = chainStore.getChain(msg.chainId);
-        if (chainInfo.feeCurrencies.length === 0) {
+        if (chainInfo.evm.feeCurrencies.length === 0) {
           return "-";
         }
-        const feeCurrency = chainInfo.feeCurrencies[0];
+        const feeCurrency = chainInfo.evm.feeCurrencies[0];
         const pretty = new CoinPretty(feeCurrency, amt);
         return pretty
           .maxDecimals(5)
@@ -96,7 +97,7 @@ export const HistoryDetailCommonBottomSection: FunctionComponent<{
         const pretties: CoinPretty[] = [];
         for (const amt of feeAmountRaw) {
           const curreny = chainStore
-            .getChain(msg.chainIdentifier)
+            .getModularChainInfoImpl(msg.chainIdentifier)
             .findCurrency(amt.denom);
           if (!curreny) {
             return "Unknown";

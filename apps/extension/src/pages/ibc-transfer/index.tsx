@@ -58,7 +58,9 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
   );
 
   ibcTransferConfigs.amountConfig.setCurrency(
-    chainStore.getChain(chainId).forceFindCurrency(coinMinimalDenom)
+    chainStore
+      .getModularChainInfoImpl(chainId)
+      .forceFindCurrency(coinMinimalDenom)
   );
 
   if (ibcTransferConfigs.channelConfig.channels.length > 1) {

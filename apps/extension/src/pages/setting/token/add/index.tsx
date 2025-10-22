@@ -76,14 +76,17 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
     });
 
   const supportedChainInfos = useMemo(() => {
-    return chainStore.chainInfosInListUI.filter((chainInfo) => {
+    return chainStore.modularChainInfosInListUI.filter((chainInfo) => {
+      const modularChainInfoImpl = chainStore.getModularChainInfoImpl(
+        chainInfo.chainId
+      );
       return (
-        chainInfo.features?.includes("cosmwasm") ||
-        chainInfo.features?.includes("secretwasm") ||
-        chainInfo.evm != null
+        modularChainInfoImpl.hasFeature("cosmwasm") ||
+        modularChainInfoImpl.hasFeature("secretwasm") ||
+        ("evm" in chainInfo && chainInfo.evm != null)
       );
     });
-  }, [chainStore.chainInfosInListUI]);
+  }, [chainStore]);
   const starknetChainInfos = useMemo(() => {
     return chainStore.modularChainInfosInUI.filter((modularChainInfo) => {
       return (
@@ -154,7 +157,9 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
     }
   })();
 
-  const isSecretWasm = chainInfo?.hasFeature("secretwasm");
+  const isSecretWasm = chainStore
+    .getModularChainInfoImpl(chainId)
+    .hasFeature("secretwasm");
   const isEvmChain =
     "evm" in modularChainInfo &&
     modularChainInfo?.evm &&

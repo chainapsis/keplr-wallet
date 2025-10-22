@@ -131,7 +131,7 @@ export const SwapFeeInfo: FunctionComponent<{
             const isOsmosis =
               chainStore.hasChain(feeConfig.chainId) &&
               chainStore
-                .getChain(feeConfig.chainId)
+                .getModularChainInfoImpl(feeConfig.chainId)
                 .hasFeature("osmosis-txfees");
 
             // Not enough balances for fee.
