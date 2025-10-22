@@ -45,10 +45,10 @@ import { autorun } from "mobx";
 import {
   LogAnalyticsEventMsg,
   RecordTxWithSkipSwapMsg,
+  RequestCosmosSignAminoMsg,
+  RequestCosmosSignDirectMsg,
   SendTxAndRecordMsg,
   SendTxAndRecordWithIBCSwapMsg,
-  RequestCosmosSignAminoWithForceTopUpMsg,
-  RequestCosmosSignDirectWithForceTopUpMsg,
 } from "@keplr-wallet/background";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT, Message } from "@keplr-wallet/router";
@@ -1097,16 +1097,15 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                           signDoc,
                           signOptions
                         ) => {
-                          const msg =
-                            new RequestCosmosSignAminoWithForceTopUpMsg(
-                              chainId,
-                              signer,
-                              signDoc,
-                              {
-                                ...signOptions,
-                                forceTopUp: true,
-                              }
-                            );
+                          const msg = new RequestCosmosSignAminoMsg(
+                            chainId,
+                            signer,
+                            signDoc,
+                            {
+                              ...signOptions,
+                              forceTopUp: true,
+                            }
+                          );
                           return await new InExtensionMessageRequester().sendMessage(
                             BACKGROUND_PORT,
                             msg
@@ -1118,24 +1117,21 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                           signDoc,
                           signOptions
                         ) => {
-                          const msg =
-                            new RequestCosmosSignDirectWithForceTopUpMsg(
-                              chainId,
-                              signer,
-                              {
-                                bodyBytes: signDoc.bodyBytes ?? undefined,
-                                authInfoBytes:
-                                  signDoc.authInfoBytes ?? undefined,
-                                chainId: signDoc.chainId ?? undefined,
-                                accountNumber:
-                                  signDoc.accountNumber?.toString() ??
-                                  undefined,
-                              },
-                              {
-                                ...signOptions,
-                                forceTopUp: true,
-                              }
-                            );
+                          const msg = new RequestCosmosSignDirectMsg(
+                            chainId,
+                            signer,
+                            {
+                              bodyBytes: signDoc.bodyBytes ?? undefined,
+                              authInfoBytes: signDoc.authInfoBytes ?? undefined,
+                              chainId: signDoc.chainId ?? undefined,
+                              accountNumber:
+                                signDoc.accountNumber?.toString() ?? undefined,
+                            },
+                            {
+                              ...signOptions,
+                              forceTopUp: true,
+                            }
+                          );
                           const response =
                             await new InExtensionMessageRequester().sendMessage(
                               BACKGROUND_PORT,
