@@ -113,6 +113,7 @@ export class ChainsService {
           evm: {
             ...modularChainInfo.evm,
             currencies: modularChainInfo.currencies,
+            feeCurrencies: modularChainInfo.feeCurrencies,
             bip44: modularChainInfo.bip44,
           },
         };
@@ -128,6 +129,7 @@ export class ChainsService {
             evm: {
               ...modularChainInfo.evm,
               currencies: modularChainInfo.currencies,
+              feeCurrencies: modularChainInfo.feeCurrencies,
               bip44: modularChainInfo.bip44,
             },
           }),
@@ -1188,6 +1190,7 @@ export class ChainsService {
             evm: {
               ...mergedCosmos.evm,
               currencies: mergedCosmos.currencies,
+              feeCurrencies: mergedCosmos.feeCurrencies,
               bip44: mergedCosmos.bip44,
             },
           }),
@@ -1207,6 +1210,7 @@ export class ChainsService {
           evm: {
             ...modularChainInfo.evm,
             currencies: mergedChainInfo.currencies,
+            feeCurrencies: mergedChainInfo.feeCurrencies,
             rpc: endpoint?.rpc || modularChainInfo.evm.rpc,
             features: mergedChainInfo.features,
           },
@@ -1318,6 +1322,7 @@ export class ChainsService {
                 evm: {
                   ...chainInfo.evm,
                   currencies: chainInfo.currencies,
+                  feeCurrencies: chainInfo.feeCurrencies,
                   bip44: chainInfo.bip44,
                   features: chainInfo.features,
                 },
@@ -1333,6 +1338,7 @@ export class ChainsService {
                 evm: {
                   ...chainInfo.evm,
                   currencies: chainInfo.currencies,
+                  feeCurrencies: chainInfo.feeCurrencies,
                   bip44: chainInfo.bip44,
                 },
               }),
