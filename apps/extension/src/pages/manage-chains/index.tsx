@@ -94,7 +94,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
   ] = useState(chainStore.enabledChainIdentifiers);
 
   const determineLedgerApp = (info: ModularChainInfo, cid: string): string => {
-    if ("cosmos" in info && chainStore.isEvmOrEthermintLikeChain(cid)) {
+    if (chainStore.isEvmOrEthermintLikeChain(cid)) {
       return "Ethereum";
     }
 
@@ -448,17 +448,9 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
         case "All":
           return true;
         case "Cosmos":
-          return (
-            "cosmos" in ci &&
-            chainStore.hasChain(ci.chainId) &&
-            !chainStore.isEvmOnlyChain(ci.chainId)
-          );
+          return "cosmos" in ci;
         case "EVM":
-          return (
-            "cosmos" in ci &&
-            chainStore.hasChain(ci.chainId) &&
-            chainStore.isEvmOnlyChain(ci.chainId)
-          );
+          return "evm" in ci;
         case "Bitcoin":
           return "bitcoin" in ci;
         case "Starknet":
@@ -467,7 +459,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
           return true;
       }
     });
-  }, [searchedAllChains, selectedEcosystem, chainStore]);
+  }, [searchedAllChains, selectedEcosystem]);
 
   const visibleChainInfos = useMemo(() => {
     if (!hideEnabled) {

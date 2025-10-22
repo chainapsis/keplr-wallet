@@ -17,10 +17,10 @@ export const HistoryDetailIBCSwapSkip: FunctionComponent<{
 }> = observer(({ msg, targetDenom }) => {
   const { chainStore } = useStore();
 
-  const chainInfo = chainStore.getChain(msg.chainId);
+  const modularChainInfoImpl = chainStore.getModularChainInfoImpl(msg.chainId);
 
   const sendAmountPretty = useMemo(() => {
-    const currency = chainInfo.forceFindCurrency(targetDenom);
+    const currency = modularChainInfoImpl.forceFindCurrency(targetDenom);
 
     const from = msg.meta["from"];
     if (
@@ -40,7 +40,7 @@ export const HistoryDetailIBCSwapSkip: FunctionComponent<{
     }
 
     return new CoinPretty(currency, "0");
-  }, [chainInfo, msg.meta, targetDenom]);
+  }, [modularChainInfoImpl, msg.meta, targetDenom]);
 
   const fromAddress = (() => {
     return (msg.msg as any)["sender"];

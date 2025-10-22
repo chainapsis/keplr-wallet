@@ -406,7 +406,9 @@ export const CosmosTxView: FunctionComponent<{
         presignOptions = {
           useWebHID: uiConfigStore.useWebHIDLedger,
           signEthPlainJSON: chainStore
-            .getChain(signInteractionStore.waitingData!.data.chainId)
+            .getModularChainInfoImpl(
+              signInteractionStore.waitingData!.data.chainId
+            )
             .hasFeature("evm-ledger-sign-plain-json"),
         };
       } else if (interactionData.data.keyType === "keystone") {

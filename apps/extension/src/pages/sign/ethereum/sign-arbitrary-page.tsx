@@ -1,14 +1,12 @@
 import React, { FunctionComponent } from "react";
 import { HeaderProps } from "../../../layouts/header/types";
-import { EthSignType } from "@keplr-wallet/types";
+import { EthSignType, ModularChainInfo } from "@keplr-wallet/types";
 import { observer } from "mobx-react-lite";
 import { HeaderLayout } from "../../../layouts/header";
 import { ArbitraryMsgSignHeader } from "../components/arbitrary-message/arbitrary-message-header";
 import { ArbitraryMsgRequestOrigin } from "../components/arbitrary-message/arbitrary-message-origin";
 import { ArbitraryMsgWalletDetails } from "../components/arbitrary-message/arbitrary-message-wallet-details";
 import { ArbitraryMsgDataView } from "../components/arbitrary-message/arbitrary-message-data-view";
-import { IChainInfoImpl } from "@keplr-wallet/stores";
-import { ChainInfoWithCoreTypes } from "@keplr-wallet/background";
 import { Box } from "../../../components/box";
 import { Gutter } from "../../../components/gutter";
 
@@ -20,7 +18,7 @@ export const EthereumArbitrarySignPage: FunctionComponent<{
   keystoneSign?: React.ReactNode;
   origin: string;
   walletName: string;
-  chainInfo: IChainInfoImpl<ChainInfoWithCoreTypes>;
+  chainInfo: ModularChainInfo;
   addressInfo: {
     type: "bech32" | "ethereum" | "starknet" | "bitcoin";
     address: string;

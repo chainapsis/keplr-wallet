@@ -887,7 +887,7 @@ const SelectDestinationChainModal: FunctionComponent<{
               >
                 <XAxis alignY="center">
                   <ChainImageFallback
-                    chainInfo={chainStore.getChain(channel.chainId)}
+                    chainInfo={chainStore.getModularChain(channel.chainId)}
                     size="2rem"
                   />
                   <Gutter size="0.75rem" />

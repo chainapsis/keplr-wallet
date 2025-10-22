@@ -19,10 +19,10 @@ export const HistoryDetailRedelegate: FunctionComponent<{
 
   const theme = useTheme();
 
-  const chainInfo = chainStore.getChain(msg.chainId);
+  const modularChainInfoImpl = chainStore.getModularChainInfoImpl(msg.chainId);
 
   const amountPretty = useMemo(() => {
-    const currency = chainInfo.forceFindCurrency(targetDenom);
+    const currency = modularChainInfoImpl.forceFindCurrency(targetDenom);
 
     const amount = (msg.msg as any)["amount"] as {
       denom: string;
@@ -33,7 +33,7 @@ export const HistoryDetailRedelegate: FunctionComponent<{
       return new CoinPretty(currency, "0");
     }
     return new CoinPretty(currency, amount.amount);
-  }, [chainInfo, msg.msg, targetDenom]);
+  }, [modularChainInfoImpl, msg.msg, targetDenom]);
 
   const srcValidatorAddress: string = useMemo(() => {
     return (msg.msg as any)["validator_src_address"];
@@ -44,13 +44,13 @@ export const HistoryDetailRedelegate: FunctionComponent<{
   }, [msg.msg]);
 
   const queryBonded = queriesStore
-    .get(chainInfo.chainId)
+    .get(modularChainInfoImpl.chainId)
     .cosmos.queryValidators.getQueryStatus(Staking.BondStatus.Bonded);
   const queryUnbonding = queriesStore
-    .get(chainInfo.chainId)
+    .get(modularChainInfoImpl.chainId)
     .cosmos.queryValidators.getQueryStatus(Staking.BondStatus.Unbonding);
   const queryUnbonded = queriesStore
-    .get(chainInfo.chainId)
+    .get(modularChainInfoImpl.chainId)
     .cosmos.queryValidators.getQueryStatus(Staking.BondStatus.Unbonded);
 
   const srcMoniker: string = useMemo(() => {

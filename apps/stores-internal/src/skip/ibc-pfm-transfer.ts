@@ -70,11 +70,15 @@ export class ObservableQueryIbcPfmTransfer {
 
   getIBCChannels = computedFn(
     (chainId: string, denom: string): IBCChannel[] => {
-      if (!this.chainStore.hasChain(chainId)) {
+      if (!this.chainStore.hasModularChain(chainId)) {
         return [];
       }
 
-      if (!this.chainStore.getChain(chainId).hasFeature("ibc-transfer")) {
+      if (
+        !this.chainStore
+          .getModularChainInfoImpl(chainId)
+          .hasFeature("ibc-transfer")
+      ) {
         return [];
       }
 
@@ -247,7 +251,9 @@ export class ObservableQueryIbcPfmTransfer {
                 // (If channel is only one, no need to check packet forwarding because it is direct transfer)
                 if (channels.length > 1) {
                   if (
-                    !this.chainStore.getChain(chainId).hasFeature("ibc-go") ||
+                    !this.chainStore
+                      .getModularChainInfoImpl(chainId)
+                      .hasFeature("ibc-go") ||
                     !this.queryChains.isSupportsMemo(chainId)
                   ) {
                     pfmPossibility = false;
@@ -258,7 +264,7 @@ export class ObservableQueryIbcPfmTransfer {
                       const channel = channels[i];
                       if (
                         !this.chainStore
-                          .getChain(channel.counterpartyChainId)
+                          .getModularChainInfoImpl(channel.counterpartyChainId)
                           .hasFeature("ibc-go") ||
                         !this.queryChains.isSupportsMemo(
                           channel.counterpartyChainId

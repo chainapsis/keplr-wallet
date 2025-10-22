@@ -533,7 +533,7 @@ export const AvailableTabView: FunctionComponent<{
                 chainStore.chainInfos[0].currencies[0],
                 new Dec(0)
               ),
-              chainInfo: chainStore.chainInfos[0],
+              chainInfo: chainStore.modularChainInfos[0],
               isFetching: false,
               error: undefined,
             }}

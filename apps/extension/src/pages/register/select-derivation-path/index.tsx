@@ -76,7 +76,8 @@ export const SelectDerivationPathScene: FunctionComponent<{
   const sceneTransition = useSceneTransition();
 
   const chainId = chainIds[0];
-  const chainInfo = chainStore.getChain(chainId);
+  const modularChainInfoImpl = chainStore.getModularChainInfoImpl(chainId);
+  const chainInfo = chainStore.getModularChain(chainId);
 
   const _goToNext = () => {
     if (chainIds.length > 1) {
@@ -144,7 +145,10 @@ export const SelectDerivationPathScene: FunctionComponent<{
       });
   }, [chainId, chainStore, keyRingStore, vaultId]);
 
-  const currency = chainInfo.stakeCurrency || chainInfo.currencies[0];
+  const currency =
+    ("cosmos" in modularChainInfoImpl.embedded &&
+      modularChainInfoImpl.embedded.cosmos.stakeCurrency) ||
+    modularChainInfoImpl.getCurrencies()[0];
 
   return (
     <RegisterSceneBox>

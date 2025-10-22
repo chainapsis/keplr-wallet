@@ -96,7 +96,7 @@ export const useAutoFeeCurrencySelectionOnInit = (
         feeConfig.fees.length > 0
       ) {
         const queryBalances =
-          chainStore.getChain(feeConfig.chainId).evm != null &&
+          "evm" in chainStore.getModularChain(feeConfig.chainId) &&
           EthereumAccountBase.isEthereumHexAddressWithChecksum(
             senderConfig.sender
           )

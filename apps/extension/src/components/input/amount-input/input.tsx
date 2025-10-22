@@ -187,7 +187,7 @@ export const AmountInput: FunctionComponent<{
           // We currently disable if chain is terra classic because we can't handle it properly.
           chainStore.hasChain(amountConfig.chainId) &&
           chainStore
-            .getChain(amountConfig.chainId)
+            .getModularChainInfoImpl(amountConfig.chainId)
             .hasFeature("terra-classic-fee")
         ) {
           return undefined;
