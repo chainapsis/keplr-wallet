@@ -1235,7 +1235,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
       if (
         topUpStatus &&
-        topUpStatus.error != null &&
+        topUpStatus.error == null &&
         topUpStatus.topUpStatus &&
         (topUpStatus.topUpStatus.isTopUpAvailable ||
           topUpStatus.topUpStatus.remainingTimeMs !== undefined)
