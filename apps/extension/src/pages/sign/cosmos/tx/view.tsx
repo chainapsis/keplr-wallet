@@ -416,7 +416,9 @@ export const CosmosTxView: FunctionComponent<{
   });
 
   const shouldTopUp =
-    interactionData.data.signOptions?.forceTopUp === true || _shouldTopUp;
+    ("forceTopUp" in interactionData.data.signOptions &&
+      interactionData.data.signOptions.forceTopUp === true) ||
+    _shouldTopUp;
 
   const buttonDisabled =
     txConfigsValidate.interactionBlocked ||
