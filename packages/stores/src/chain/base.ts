@@ -1602,9 +1602,11 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
           chainId: chainInfo.chainId,
           chainName: chainInfo.chainName,
           chainSymbolImageUrl: chainInfo.chainSymbolImageUrl,
+          isTestnet: chainInfo.isTestnet,
           evm: {
             ...chainInfo.evm,
             currencies: chainInfo.currencies,
+            feeCurrencies: chainInfo.feeCurrencies,
             bip44: chainInfo.bip44,
             features: chainInfo.features,
           },
@@ -1643,6 +1645,7 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
             evm: {
               ...chainInfo.evm,
               currencies: chainInfo.currencies,
+              feeCurrencies: chainInfo.feeCurrencies,
               bip44: chainInfo.bip44,
               features: chainInfo.features,
             },
@@ -1753,6 +1756,7 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
               evm: {
                 ...cosmos.evm,
                 currencies: cosmos.currencies,
+                feeCurrencies: cosmos.feeCurrencies,
                 bip44: cosmos.bip44,
               },
             };
