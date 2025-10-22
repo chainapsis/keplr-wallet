@@ -425,6 +425,7 @@ export class KeyRingEthereumService {
               (params?.[0] as {
                 chainId?: string | number;
                 from: string;
+                value?: string;
                 gas?: string;
                 gasLimit?: string;
                 authorizationList?: {
@@ -446,7 +447,7 @@ export class KeyRingEthereumService {
 
           const currentChainId = this.forceGetCurrentChainId(origin, chainId);
 
-          const { from: sender, gas, authorizationList, ...restTx } = tx;
+          const { from: sender, gas, value, authorizationList, ...restTx } = tx;
 
           if (authorizationList) {
             throw new Error("EIP-7702 transactions are not supported.");
@@ -492,6 +493,7 @@ export class KeyRingEthereumService {
 
           const unsignedTx: UnsignedTransaction = {
             ...restTx,
+            value: value ? `0x${BigInt(value).toString(16)}` : undefined,
             gasLimit: restTx?.gasLimit ?? gas,
             chainId: this.getEVMChainId(currentChainId),
             nonce,
@@ -545,6 +547,7 @@ export class KeyRingEthereumService {
               (params?.[0] as {
                 chainId?: string | number;
                 from: string;
+                value?: string;
                 gas?: string;
                 gasLimit?: string;
                 authorizationList?: {
@@ -566,7 +569,7 @@ export class KeyRingEthereumService {
 
           const currentChainId = this.forceGetCurrentChainId(origin, chainId);
 
-          const { from: sender, gas, authorizationList, ...restTx } = tx;
+          const { from: sender, gas, value, authorizationList, ...restTx } = tx;
 
           if (authorizationList) {
             throw new Error("EIP-7702 transactions are not supported.");
@@ -612,6 +615,7 @@ export class KeyRingEthereumService {
 
           const unsignedTx: UnsignedTransaction = {
             ...restTx,
+            value: value ? `0x${BigInt(value).toString(16)}` : undefined,
             gasLimit: restTx?.gasLimit ?? gas,
             chainId: this.getEVMChainId(currentChainId),
             nonce,
