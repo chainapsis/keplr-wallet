@@ -447,7 +447,7 @@ export class KeyRingEthereumService {
 
           const currentChainId = this.forceGetCurrentChainId(origin, chainId);
 
-          const { from: sender, gas, value, authorizationList, ...restTx } = tx;
+          const { from: sender, authorizationList, ...restTx } = tx;
 
           if (authorizationList) {
             throw new Error("EIP-7702 transactions are not supported.");
@@ -491,13 +491,11 @@ export class KeyRingEthereumService {
           );
           const nonce = parseInt(transactionCount, 16);
 
-          const unsignedTx: UnsignedTransaction = {
-            ...restTx,
-            value: value ? `0x${BigInt(value).toString(16)}` : undefined,
-            gasLimit: restTx?.gasLimit ?? gas,
-            chainId: this.getEVMChainId(currentChainId),
-            nonce,
-          };
+          const unsignedTx = this.normalizeUnsignedTx(
+            restTx,
+            currentChainId,
+            nonce
+          );
 
           try {
             const { signingData, signature } = await this.signEthereumSelected(
@@ -569,7 +567,7 @@ export class KeyRingEthereumService {
 
           const currentChainId = this.forceGetCurrentChainId(origin, chainId);
 
-          const { from: sender, gas, value, authorizationList, ...restTx } = tx;
+          const { from: sender, authorizationList, ...restTx } = tx;
 
           if (authorizationList) {
             throw new Error("EIP-7702 transactions are not supported.");
@@ -613,13 +611,11 @@ export class KeyRingEthereumService {
           );
           const nonce = parseInt(transactionCount, 16);
 
-          const unsignedTx: UnsignedTransaction = {
-            ...restTx,
-            value: value ? `0x${BigInt(value).toString(16)}` : undefined,
-            gasLimit: restTx?.gasLimit ?? gas,
-            chainId: this.getEVMChainId(currentChainId),
-            nonce,
-          };
+          const unsignedTx = this.normalizeUnsignedTx(
+            restTx,
+            currentChainId,
+            nonce
+          );
 
           try {
             const { signingData, signature } = await this.signEthereumSelected(
@@ -1281,5 +1277,56 @@ export class KeyRingEthereumService {
     const evmInfo = this.chainsService.getEVMInfoOrThrow(chainId);
 
     return evmInfo.chainId;
+  }
+
+  private toHexQty(x?: string | number | bigint): string | undefined {
+    if (x === undefined || x === null) {
+      return undefined;
+    }
+    if (typeof x === "string") {
+      x = x.trim();
+    }
+
+    if (x === "" || x === "0x") {
+      return undefined;
+    }
+
+    return `0x${BigInt(x).toString(16)}`;
+  }
+
+  private normalizeUnsignedTx(
+    tx: any,
+    chainId: string,
+    nonce: number
+  ): UnsignedTransaction {
+    const t = { ...tx };
+
+    if (t.gasLimit == null && t.gas != null) {
+      t.gasLimit = t.gas;
+    }
+    delete t.gas;
+
+    // normalize the necessary fields
+    t.value = this.toHexQty(t.value);
+    t.gasLimit = this.toHexQty(t.gasLimit);
+    t.gasPrice = this.toHexQty(t.gasPrice);
+    t.maxFeePerGas = this.toHexQty(t.maxFeePerGas);
+    t.maxPriorityFeePerGas = this.toHexQty(t.maxPriorityFeePerGas);
+    t.chainId = this.getEVMChainId(chainId);
+    t.nonce = nonce;
+
+    if (t.data != null && !t.data.startsWith("0x")) {
+      t.data = `0x${t.data}`;
+    }
+
+    // if there is a conflict between the fee system, apply EIP-1559 first
+    const hasEIP1559 =
+      t.maxFeePerGas !== undefined || t.maxPriorityFeePerGas !== undefined;
+    const hasLegacy = t.gasPrice !== undefined;
+    if (hasEIP1559 && hasLegacy) {
+      delete t.gasPrice;
+    }
+
+    return t;
   }
 }
