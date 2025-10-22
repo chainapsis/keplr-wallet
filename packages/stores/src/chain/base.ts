@@ -1415,6 +1415,22 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
 
     return result;
   }
+
+  hasFeature(feature: string): boolean {
+    if ("evm" in this._embedded) {
+      return !!(
+        "features" in this._embedded.evm &&
+        this._embedded.evm.features?.includes(feature)
+      );
+    }
+    if ("cosmos" in this._embedded) {
+      return !!(
+        "features" in this._embedded.cosmos &&
+        this._embedded.cosmos.features?.includes(feature)
+      );
+    }
+    return false;
+  }
 }
 
 export class ChainStore<C extends ChainInfo = ChainInfo>
@@ -1583,6 +1599,7 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
             ...chainInfo.evm,
             currencies: chainInfo.currencies,
             bip44: chainInfo.bip44,
+            features: chainInfo.features,
           },
         };
       }
@@ -1620,6 +1637,7 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
               ...chainInfo.evm,
               currencies: chainInfo.currencies,
               bip44: chainInfo.bip44,
+              features: chainInfo.features,
             },
           };
         }

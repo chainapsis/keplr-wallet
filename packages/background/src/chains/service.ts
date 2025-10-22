@@ -1208,6 +1208,7 @@ export class ChainsService {
             ...modularChainInfo.evm,
             currencies: mergedChainInfo.currencies,
             rpc: endpoint?.rpc || modularChainInfo.evm.rpc,
+            features: mergedChainInfo.features,
           },
         };
       }
@@ -1318,6 +1319,7 @@ export class ChainsService {
                   ...chainInfo.evm,
                   currencies: chainInfo.currencies,
                   bip44: chainInfo.bip44,
+                  features: chainInfo.features,
                 },
               } as ModularChainInfo;
             }

@@ -99,4 +99,5 @@ export interface IModularChainInfoImpl<
     coinMinimalDenom: string
   ): AppCurrency | undefined;
   forceFindCurrencyWithoutReaction(coinMinimalDenom: string): AppCurrency;
+  hasFeature(feature: string): boolean;
 }
