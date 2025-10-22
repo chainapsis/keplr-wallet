@@ -404,11 +404,7 @@ const FoundChainView: FunctionComponent<{
       <Columns sum={1} gutter="0.5rem" alignY="center">
         <Box width="2.25rem" height="2.25rem" position="relative">
           <ChainImageFallback
-            chainInfo={
-              chainStore.hasChain(tokenScan.chainId)
-                ? chainStore.getChain(tokenScan.chainId)
-                : chainStore.getModularChain(tokenScan.chainId)
-            }
+            chainInfo={chainStore.getModularChain(tokenScan.chainId)}
             size="2rem"
             alt="Token Found Modal Chain Image"
           />
@@ -542,36 +538,10 @@ const FoundTokenView: FunctionComponent<{
               : ColorPalette["gray-50"]
           }
         >
-          {(() => {
-            if (chainStore.hasChain(chainId)) {
-              return chainStore
-                .getChain(chainId)
-                .forceFindCurrency(asset.currency.coinMinimalDenom).coinDenom;
-            } else {
-              const modularChainInfo = chainStore.getModularChain(chainId);
-              const isBitcoin = "bitcoin" in modularChainInfo;
-              const isStarknet = "starknet" in modularChainInfo;
-              const isEvm = "evm" in modularChainInfo;
-
-              return (
-                chainStore
-                  .getModularChainInfoImpl(chainId)
-                  .getCurrencies(
-                    isBitcoin
-                      ? "bitcoin"
-                      : isStarknet
-                      ? "starknet"
-                      : isEvm
-                      ? "evm"
-                      : "cosmos"
-                  )
-                  .find(
-                    (cur) =>
-                      cur.coinMinimalDenom === asset.currency.coinMinimalDenom
-                  )?.coinDenom ?? asset.currency.coinDenom
-              );
-            }
-          })()}
+          {chainStore
+            .getModularChainInfoImpl(chainId)
+            .forceFindCurrency(asset.currency.coinMinimalDenom).coinDenom ||
+            asset.currency.coinDenom}
         </Subtitle3>
         {addressTag ? <TokenTag text={addressTag.text} /> : null}
       </Box>
@@ -586,34 +556,11 @@ const FoundTokenView: FunctionComponent<{
         }
       >
         {(() => {
-          const currency = (() => {
-            if (chainStore.hasChain(chainId)) {
-              return chainStore
-                .getChain(chainId)
-                .forceFindCurrency(asset.currency.coinMinimalDenom);
-            } else {
-              const modularChainInfo = chainStore.getModularChain(chainId);
-              const isBitcoin = "bitcoin" in modularChainInfo;
-              const isStarknet = "starknet" in modularChainInfo;
-              const isCosmos = "cosmos" in modularChainInfo;
-
-              if (isBitcoin || isStarknet || isCosmos) {
-                return (
-                  chainStore
-                    .getModularChainInfoImpl(chainId)
-                    .getCurrencies(
-                      isBitcoin ? "bitcoin" : isStarknet ? "starknet" : "cosmos"
-                    )
-                    .find(
-                      (cur) =>
-                        cur.coinMinimalDenom === asset.currency.coinMinimalDenom
-                    ) ?? asset.currency
-                );
-              } else {
-                return asset.currency;
-              }
-            }
-          })();
+          const currency =
+            chainStore
+              .getModularChainInfoImpl(chainId)
+              .forceFindCurrency(asset.currency.coinMinimalDenom) ||
+            asset.currency;
           return uiConfigStore.hideStringIfPrivacyMode(
             new CoinPretty(currency, asset.amount)
               .shrink(true)

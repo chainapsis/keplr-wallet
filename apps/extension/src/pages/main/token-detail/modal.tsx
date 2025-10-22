@@ -95,31 +95,9 @@ export const TokenDetailModal: FunctionComponent<{
   const account = accountStore.getAccount(chainId);
   const modularChainInfo: ModularChainInfo =
     chainStore.getModularChain(chainId);
-  const currency = (() => {
-    if ("cosmos" in modularChainInfo) {
-      return chainStore.getChain(chainId).forceFindCurrency(coinMinimalDenom);
-    }
-    // TODO: 일단 cosmos가 아니면 대충에기에다가 force currency 로직을 박아놓는다...
-    //       나중에 이런 기능을 chain store 자체에다가 만들어야한다.
-    const modularChainInfoImpl = chainStore.getModularChainInfoImpl(chainId);
-    const currencies =
-      "bitcoin" in modularChainInfo
-        ? modularChainInfoImpl.getCurrencies("bitcoin")
-        : "starknet" in modularChainInfo
-        ? modularChainInfoImpl.getCurrencies("starknet")
-        : modularChainInfoImpl.getCurrencies("evm");
-    const res = currencies.find(
-      (cur) => cur.coinMinimalDenom === coinMinimalDenom
-    );
-    if (res) {
-      return res;
-    }
-    return {
-      coinMinimalDenom,
-      coinDenom: coinMinimalDenom,
-      coinDecimals: 0,
-    };
-  })();
+  const currency = chainStore
+    .getModularChainInfoImpl(chainId)
+    .forceFindCurrency(coinMinimalDenom);
 
   const isIBCCurrency = "paths" in currency;
 
