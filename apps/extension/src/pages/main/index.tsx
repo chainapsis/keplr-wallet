@@ -895,7 +895,7 @@ const RefreshButton: FunctionComponent<{
 
             for (const currency of chainStore
               .getModularChainInfoImpl(modularChainInfo.chainId)
-              .getCurrencies("starknet")) {
+              .getCurrenciesByModule("starknet")) {
               const query = queries.queryStarknetERC20Balance.getBalance(
                 modularChainInfo.chainId,
                 chainStore,

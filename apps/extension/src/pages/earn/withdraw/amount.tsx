@@ -67,12 +67,15 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
   const initialCoinMinimalDenom = searchParams.get("coinMinimalDenom");
 
   const chainId = initialChainId || chainStore.chainInfosInUI[0].chainId;
+
+  const modularChainInfoImpl = chainStore.getModularChainInfoImpl(chainId);
   const chainInfo = chainStore.getChain(chainId);
   const account = accountStore.getAccount(chainId);
 
   const coinMinimalDenom =
-    initialCoinMinimalDenom || chainInfo.currencies[0].coinMinimalDenom;
-  const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
+    initialCoinMinimalDenom ||
+    modularChainInfoImpl.getCurrenciesByModule("cosmos")[0].coinMinimalDenom;
+  const currency = modularChainInfoImpl.forceFindCurrency(coinMinimalDenom);
 
   const outCurrency = chainInfo.forceFindCurrency(
     NOBLE_EARN_WITHDRAW_OUT_COIN_MINIMAL_DENOM

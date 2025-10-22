@@ -126,7 +126,8 @@ export class ObservableQueryThirdpartyERC20BalancesImplParent extends Observable
       const coinMinimalDenom = `erc20:${balance.contractAddress}`;
 
       const normalizedDenom = DenomHelper.normalizeDenom(coinMinimalDenom);
-      const existingCurrencies = modularChainInfoImpl.getCurrencies("evm");
+      const existingCurrencies =
+        modularChainInfoImpl.getCurrenciesByModule("evm");
       if (
         existingCurrencies.some(
           (c) =>
