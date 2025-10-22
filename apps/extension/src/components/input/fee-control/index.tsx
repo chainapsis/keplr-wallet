@@ -1,4 +1,9 @@
-import React, { FunctionComponent, useLayoutEffect, useState } from "react";
+import React, {
+  FunctionComponent,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from "react";
 import { observer } from "mobx-react-lite";
 import {
   IFeeConfig,
@@ -182,6 +187,7 @@ export const FeeControl: FunctionComponent<{
   nonceMethod?: "pending" | "latest";
   setNonceMethod?: (nonceMethod: "pending" | "latest") => void;
   isInternalMsg?: boolean;
+  shouldTopUp?: boolean;
 }> = observer(
   ({
     senderConfig,
@@ -193,6 +199,7 @@ export const FeeControl: FunctionComponent<{
     nonceMethod,
     setNonceMethod,
     isInternalMsg,
+    shouldTopUp,
   }) => {
     const {
       analyticsStore,
@@ -220,6 +227,12 @@ export const FeeControl: FunctionComponent<{
     );
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    useEffect(() => {
+      if (shouldTopUp) {
+        setIsModalOpen(false);
+      }
+    }, [shouldTopUp]);
 
     // EVM 트랜잭션의 경우, 외부에서 fee를 설정한 경우를 구분하기 위해서 사용
     const isFeeSetByUser = isForEVMTx && feeConfig.type !== "manual";

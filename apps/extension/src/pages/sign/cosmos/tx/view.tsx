@@ -800,6 +800,7 @@ export const CosmosTxView: FunctionComponent<{
                       gasConfig={gasConfig}
                       disableAutomaticFeeSet={preferNoSetFee}
                       isInternalMsg={interactionData.isInternal}
+                      shouldTopUp={shouldTopUp}
                     />
                   );
                 })()}
