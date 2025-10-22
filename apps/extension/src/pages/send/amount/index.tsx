@@ -871,6 +871,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     remainingText,
     isTopUpAvailable,
     isInsufficientFeeWarning,
+    isTopUpStatusFetching,
   } = useTopUp({
     feeConfig,
     senderConfig,
@@ -920,7 +921,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             ? isTxLoading || ethereumAccount.isSendingTx
             : isTxLoading ||
               accountStore.getAccount(chainId).isSendingMsg ===
-                (sendType === "ibc-transfer" ? "ibcTransfer" : "send"),
+                (sendType === "ibc-transfer" ? "ibcTransfer" : "send") ||
+              isTopUpStatusFetching,
         },
       ]}
       onSubmit={async (e) => {

@@ -1267,6 +1267,21 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     };
   }
 
+  @computed
+  get isTopUpStatusFetching(): boolean {
+    const queryTopUpStatus = this.queriesStore.get(this.chainId).keplrETC
+      ?.queryTopUpStatus;
+
+    if (queryTopUpStatus) {
+      const topUpQuery = queryTopUpStatus.getTopUpStatus(
+        this.senderConfig.sender
+      );
+      return topUpQuery.isFetching;
+    }
+
+    return false;
+  }
+
   refreshTopUpStatus(): void {
     const queryTopUpStatus = this.queriesStore.get(this.chainId).keplrETC
       ?.queryTopUpStatus;

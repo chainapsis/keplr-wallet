@@ -22,6 +22,7 @@ export interface TopUpResult {
   isTopUpAvailable: boolean;
   isInsufficientFeeWarning: boolean;
   isTopUpInProgress: boolean;
+  isTopUpStatusFetching: boolean;
   executeTopUpIfAvailable: () => Promise<void>;
   topUpError: Error | undefined;
 }
@@ -37,6 +38,9 @@ export function useTopUp({
   const [isTopUpInProgress, setIsTopUpInProgress] = useState(false);
   const [topUpCompleted, setTopUpCompleted] = useState(false);
   const [topUpError, setTopUpError] = useState<Error | undefined>(undefined);
+
+  const isTopUpStatusFetching = feeConfig.isTopUpStatusFetching;
+  console.log("isTopUpStatusFetching", isTopUpStatusFetching);
 
   const hasMultipleFeeCurrencies = feeConfig.selectableFeeCurrencies.length > 1;
 
@@ -219,6 +223,7 @@ export function useTopUp({
     isTopUpAvailable,
     isInsufficientFeeWarning,
     isTopUpInProgress,
+    isTopUpStatusFetching,
     executeTopUpIfAvailable,
     topUpError,
   };

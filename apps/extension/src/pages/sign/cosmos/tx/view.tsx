@@ -403,6 +403,7 @@ export const CosmosTxView: FunctionComponent<{
     isTopUpInProgress,
     isInsufficientFeeWarning,
     remainingText,
+    isTopUpStatusFetching,
     executeTopUpIfAvailable,
     topUpError,
   } = useTopUp({
@@ -543,7 +544,8 @@ export const CosmosTxView: FunctionComponent<{
     signInteractionStore.isObsoleteInteractionApproved(interactionData.id) ||
     isLedgerInteracting ||
     isKeystoneInteracting ||
-    isTopUpInProgress;
+    isTopUpInProgress ||
+    isTopUpStatusFetching;
 
   return (
     <HeaderLayout

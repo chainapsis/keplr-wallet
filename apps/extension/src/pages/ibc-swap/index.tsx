@@ -861,7 +861,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     }
   })();
 
-  const { shouldTopUp, isTopUpAvailable, remainingText } = useTopUp({
+  const {
+    shouldTopUp,
+    isTopUpAvailable,
+    remainingText,
+    isTopUpStatusFetching,
+  } = useTopUp({
     feeConfig: ibcSwapConfigs.feeConfig,
     senderConfig: ibcSwapConfigs.senderConfig,
     amountConfig: ibcSwapConfigs.amountConfig,
@@ -2106,7 +2111,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           size="large"
           isLoading={
             isTxLoading ||
-            accountStore.getAccount(inChainId).isSendingMsg === "ibc-swap"
+            accountStore.getAccount(inChainId).isSendingMsg === "ibc-swap" ||
+            isTopUpStatusFetching
           }
         />
 
