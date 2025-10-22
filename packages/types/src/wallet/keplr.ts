@@ -62,6 +62,8 @@ export interface KeplrSignOptions {
   readonly preferNoSetMemo?: boolean;
 
   readonly disableBalanceCheck?: boolean;
+
+  readonly forceTopUp?: boolean;
 }
 
 export interface Keplr {

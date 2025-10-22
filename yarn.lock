@@ -6100,6 +6100,7 @@ __metadata:
     keplr-wallet-private: "file:./noop-keplr-wallet-private"
     lodash.debounce: ^4.0.8
     lodash.throttle: ^4.1.1
+    long: ^5.3.2
     lottie-web: ^5.10.2
     os-browserify: ^0.3.0
     p-queue: ^6.6.2
@@ -23737,6 +23738,13 @@ __metadata:
   version: 5.2.1
   resolution: "long@npm:5.2.1"
   checksum: 9264da12d1b7df67e5aa6da4498144293caf1ad12e7f092efe4e9a2d32c53f0bbf7334f7cef997080a2a3af061142558ab366efa71698d98b1cdb883477445a7
+  languageName: node
+  linkType: hard
+
+"long@npm:^5.3.2":
+  version: 5.3.2
+  resolution: "long@npm:5.3.2"
+  checksum: be215816b563f4ca27ad3677678b53415bc489f9e3466414e54d2d85f5f8e86768547fa58493bacfb363ffc57a664debc83403ccc2178aef0c40aca28bad47c9
   languageName: node
   linkType: hard
 

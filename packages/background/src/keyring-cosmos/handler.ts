@@ -22,6 +22,8 @@ import {
   RequestCosmosSignDirectAuxMsg,
   GetCosmosKeysForEachVaultWithSearchSettledMsg,
   PrivilegeCosmosSignAminoExecuteCosmWasmMsg,
+  RequestCosmosSignAminoWithForceTopUpMsg,
+  RequestCosmosSignDirectWithForceTopUpMsg,
 } from "./messages";
 import { KeyRingCosmosService } from "./service";
 import { PermissionInteractiveService } from "../permission-interactive";
@@ -118,6 +120,16 @@ export const getHandler: (
         return handlePrivilegeCosmosSignAminoExecuteCosmWasmMsg(service)(
           env,
           msg as PrivilegeCosmosSignAminoExecuteCosmWasmMsg
+        );
+      case RequestCosmosSignAminoWithForceTopUpMsg:
+        return handleRequestCosmosSignAminoWithForceTopUpMsg(service)(
+          env,
+          msg as RequestCosmosSignAminoWithForceTopUpMsg
+        );
+      case RequestCosmosSignDirectWithForceTopUpMsg:
+        return handleRequestCosmosSignDirectWithForceTopUpMsg(service)(
+          env,
+          msg as RequestCosmosSignDirectWithForceTopUpMsg
         );
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
@@ -485,6 +497,53 @@ const handleRequestCosmosSignDirectAuxMsg: (
         chainId: response.signed.chainId,
         accountNumber: response.signed.accountNumber.toString(),
         sequence: response.signed.sequence.toString(),
+      },
+      signature: response.signature,
+    };
+  };
+};
+
+const handleRequestCosmosSignAminoWithForceTopUpMsg: (
+  service: KeyRingCosmosService
+) => InternalHandler<RequestCosmosSignAminoWithForceTopUpMsg> = (service) => {
+  return async (env, msg) => {
+    return await service.signAminoSelected(
+      env,
+      msg.origin,
+      msg.chainId,
+      msg.signer,
+      msg.signDoc,
+      msg.signOptions
+    );
+  };
+};
+
+const handleRequestCosmosSignDirectWithForceTopUpMsg: (
+  service: KeyRingCosmosService
+) => InternalHandler<RequestCosmosSignDirectWithForceTopUpMsg> = (service) => {
+  return async (env, msg) => {
+    const signDoc = SignDoc.fromPartial({
+      bodyBytes: msg.signDoc.bodyBytes,
+      authInfoBytes: msg.signDoc.authInfoBytes,
+      chainId: msg.signDoc.chainId,
+      accountNumber: msg.signDoc.accountNumber,
+    });
+
+    const response = await service.signDirectSelected(
+      env,
+      msg.origin,
+      msg.chainId,
+      msg.signer,
+      signDoc,
+      msg.signOptions
+    );
+
+    return {
+      signed: {
+        bodyBytes: response.signed.bodyBytes,
+        authInfoBytes: response.signed.authInfoBytes,
+        chainId: response.signed.chainId,
+        accountNumber: response.signed.accountNumber.toString(),
       },
       signature: response.signature,
     };

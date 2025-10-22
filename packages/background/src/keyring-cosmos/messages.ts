@@ -846,3 +846,133 @@ export class EnableVaultsWithCosmosAddressMsg extends Message<
     return EnableVaultsWithCosmosAddressMsg.type();
   }
 }
+
+export class RequestCosmosSignAminoWithForceTopUpMsg extends Message<AminoSignResponse> {
+  public static type() {
+    return "request-cosmos-sign-amino-with-force-topup";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly signer: string,
+    public readonly signDoc: StdSignDoc,
+    public readonly signOptions: KeplrSignOptions & { forceTopUp?: boolean }
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new KeplrError("keyring", 270, "chain id not set");
+    }
+
+    if (!this.signer) {
+      throw new KeplrError("keyring", 230, "signer not set");
+    }
+
+    Bech32Address.validate(this.signer);
+
+    if (!checkAndValidateADR36AminoSignDoc(this.signDoc)) {
+      if (this.signDoc.chain_id !== this.chainId) {
+        throw new KeplrError(
+          "keyring",
+          234,
+          "Chain id in the message is not matched with the requested chain id"
+        );
+      }
+    } else {
+      if (this.signDoc.msgs[0].value.signer !== this.signer) {
+        throw new KeplrError("keyring", 233, "Unmatched signer in sign doc");
+      }
+    }
+
+    if (!this.signOptions) {
+      throw new KeplrError("keyring", 235, "Sign options are null");
+    }
+  }
+
+  override approveExternal(): boolean {
+    return false;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestCosmosSignAminoWithForceTopUpMsg.type();
+  }
+}
+
+export class RequestCosmosSignDirectWithForceTopUpMsg extends Message<{
+  readonly signed: {
+    bodyBytes: Uint8Array;
+    authInfoBytes: Uint8Array;
+    chainId: string;
+    accountNumber: string;
+  };
+  readonly signature: StdSignature;
+}> {
+  public static type() {
+    return "request-cosmos-sign-direct-with-force-topup";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly signer: string,
+    public readonly signDoc: {
+      bodyBytes?: Uint8Array;
+      authInfoBytes?: Uint8Array;
+      chainId?: string;
+      accountNumber?: string;
+    },
+    public readonly signOptions: KeplrSignOptions & {
+      forceTopUp?: boolean;
+    } = {}
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new KeplrError("keyring", 270, "chain id not set");
+    }
+
+    if (!this.signer) {
+      throw new KeplrError("keyring", 230, "signer not set");
+    }
+
+    Bech32Address.validate(this.signer);
+
+    const signDoc = SignDoc.fromPartial({
+      bodyBytes: this.signDoc.bodyBytes,
+      authInfoBytes: this.signDoc.authInfoBytes,
+      chainId: this.signDoc.chainId,
+      accountNumber: this.signDoc.accountNumber,
+    });
+
+    if (signDoc.chainId !== this.chainId) {
+      throw new KeplrError(
+        "keyring",
+        234,
+        "Chain id in the message is not matched with the requested chain id"
+      );
+    }
+
+    if (!this.signOptions) {
+      throw new KeplrError("keyring", 235, "Sign options are null");
+    }
+  }
+
+  override approveExternal(): boolean {
+    return false;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestCosmosSignDirectWithForceTopUpMsg.type();
+  }
+}
