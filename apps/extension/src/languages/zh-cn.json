@@ -578,6 +578,8 @@
   "page.main.available.get-started-button": "开始",
   "page.main.available.new-token-found": "找到{numFoundToken}个新币种",
   "page.main.available.manage-asset-list-button": "管理资产列表",
+  "page.main.balance.staked-balance-title-1": "with",
+  "page.main.balance.staked-balance-title-2": "Staked",
 
   "page.main.staked.staked-balance-title": "质押数量",
   "page.main.staked.staked-balance-tooltip": "质押给验证者并获得收益的币种。",
