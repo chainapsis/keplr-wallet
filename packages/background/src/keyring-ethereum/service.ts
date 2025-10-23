@@ -1283,15 +1283,37 @@ export class KeyRingEthereumService {
     if (x === undefined || x === null) {
       return undefined;
     }
-    if (typeof x === "string") {
-      x = x.trim();
+
+    if (typeof x === "bigint") {
+      return `0x${x.toString(16)}`;
     }
 
-    if (x === "" || x === "0x") {
+    if (typeof x === "number") {
+      const n = Number.isFinite(x) ? Math.max(0, Math.floor(x)) : 0;
+      return `0x${n.toString(16)}`;
+    }
+
+    x = x.trim();
+    if (x.length === 0 || x === "0x") {
       return undefined;
     }
 
-    return `0x${BigInt(x).toString(16)}`;
+    let q: bigint;
+
+    try {
+      q = BigInt(x);
+    } catch {
+      if (!x.startsWith("0x")) {
+        x = `0x${x}`;
+      }
+      try {
+        q = BigInt(x);
+      } catch {
+        return undefined;
+      }
+    }
+
+    return `0x${q.toString(16)}`;
   }
 
   private normalizeUnsignedTx(
@@ -1299,34 +1321,44 @@ export class KeyRingEthereumService {
     chainId: string,
     nonce: number
   ): UnsignedTransaction {
-    const t = { ...tx };
+    const {
+      value,
+      gas,
+      gasLimit,
+      gasPrice,
+      maxFeePerGas,
+      maxPriorityFeePerGas,
+      data,
+      ...restTx
+    } = tx;
 
-    if (t.gasLimit == null && t.gas != null) {
-      t.gasLimit = t.gas;
+    const unsignedTx: UnsignedTransaction = {
+      ...restTx,
+      value: this.toHexQty(value),
+      gasPrice: this.toHexQty(gasPrice),
+      maxFeePerGas: this.toHexQty(maxFeePerGas),
+      maxPriorityFeePerGas: this.toHexQty(maxPriorityFeePerGas),
+      chainId: this.getEVMChainId(chainId),
+      nonce,
+    };
+
+    if (gasLimit == null && gas != null) {
+      unsignedTx.gasLimit = this.toHexQty(gas);
+    } else if (gasLimit != null) {
+      unsignedTx.gasLimit = this.toHexQty(gasLimit);
     }
-    delete t.gas;
 
-    // normalize the necessary fields
-    t.value = this.toHexQty(t.value);
-    t.gasLimit = this.toHexQty(t.gasLimit);
-    t.gasPrice = this.toHexQty(t.gasPrice);
-    t.maxFeePerGas = this.toHexQty(t.maxFeePerGas);
-    t.maxPriorityFeePerGas = this.toHexQty(t.maxPriorityFeePerGas);
-    t.chainId = this.getEVMChainId(chainId);
-    t.nonce = nonce;
-
-    if (t.data != null && !t.data.startsWith("0x")) {
-      t.data = `0x${t.data}`;
+    if (data != null && typeof data === "string") {
+      unsignedTx.data = data.startsWith("0x") ? data : `0x${data}`;
     }
 
-    // if there is a conflict between the fee system, apply EIP-1559 first
     const hasEIP1559 =
-      t.maxFeePerGas !== undefined || t.maxPriorityFeePerGas !== undefined;
-    const hasLegacy = t.gasPrice !== undefined;
-    if (hasEIP1559 && hasLegacy) {
-      delete t.gasPrice;
+      unsignedTx.maxFeePerGas !== undefined ||
+      unsignedTx.maxPriorityFeePerGas !== undefined;
+    if (hasEIP1559) {
+      delete unsignedTx.gasPrice;
     }
 
-    return t;
+    return unsignedTx;
   }
 }
