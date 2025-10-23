@@ -28,6 +28,7 @@ export const SwapFeeInfo: FunctionComponent<{
   gasConfig: IGasConfig;
   feeConfig: IFeeConfig;
   gasSimulator: IGasSimulator;
+  disableAutomaticFeeSet?: boolean;
   isForEVMTx?: boolean;
   nonceMethod?: "pending" | "latest";
   setNonceMethod?: (nonceMethod: "pending" | "latest") => void;
@@ -38,6 +39,7 @@ export const SwapFeeInfo: FunctionComponent<{
     gasConfig,
     feeConfig,
     gasSimulator,
+    disableAutomaticFeeSet,
     isForEVMTx,
     nonceMethod,
     setNonceMethod,
@@ -47,6 +49,9 @@ export const SwapFeeInfo: FunctionComponent<{
     const theme = useTheme();
 
     useLayoutEffect(() => {
+      if (disableAutomaticFeeSet) {
+        return;
+      }
       const disposer = autorun(() => {
         // Require to invoke effect whenever chain is changed,
         // even though it is not used in logic.
@@ -92,9 +97,12 @@ export const SwapFeeInfo: FunctionComponent<{
       return () => {
         disposer();
       };
-    }, [feeConfig, uiConfigStore]);
+    }, [feeConfig, uiConfigStore, disableAutomaticFeeSet]);
 
     useLayoutEffect(() => {
+      if (disableAutomaticFeeSet) {
+        return;
+      }
       // Require to invoke effect whenever chain is changed,
       // even though it is not used in logic.
       noop(feeConfig.chainId);
@@ -182,6 +190,7 @@ export const SwapFeeInfo: FunctionComponent<{
       feeConfig.chainId,
       queriesStore,
       senderConfig.sender,
+      disableAutomaticFeeSet,
     ]);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -449,6 +458,7 @@ export const SwapFeeInfo: FunctionComponent<{
               feeConfig={feeConfig}
               gasConfig={gasConfig}
               gasSimulator={gasSimulator}
+              disableAutomaticFeeSet={disableAutomaticFeeSet}
               isForEVMTx={isForEVMTx}
               ibcSwapAmountConfig={amountConfig}
               nonceMethod={nonceMethod}
