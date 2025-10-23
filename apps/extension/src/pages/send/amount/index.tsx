@@ -104,8 +104,6 @@ import { usePreviousDistinct } from "../../../hooks/use-previous";
 import { SwapFeeInfoForBridgeOnSend } from "./swap-fee-info";
 import { useEffectOnce } from "../../../hooks/use-effect-once";
 import { useGlobarSimpleBar } from "../../../hooks/global-simplebar";
-import { FeeCoverageDescription } from "../../../components/top-up";
-import { useTopUp } from "../../../hooks/use-topup";
 
 const Styles = {
   Flex1: styled.div`
@@ -866,17 +864,6 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     }
   })();
 
-  const {
-    shouldTopUp,
-    remainingText,
-    isTopUpAvailable,
-    isInsufficientFeeWarning,
-  } = useTopUp({
-    feeConfig,
-    senderConfig,
-    amountConfig: sendConfigs.amountConfig,
-  });
-
   return (
     <HeaderLayout
       title={intl.formatMessage({ id: "page.send.amount.title" })}
@@ -905,14 +892,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       }
       bottomButtons={[
         {
-          disabled:
-            interactionBlocked ||
-            showCelestiaWarning ||
-            (shouldTopUp ? !isTopUpAvailable : isInsufficientFeeWarning),
-          text:
-            shouldTopUp && remainingText
-              ? remainingText
-              : intl.formatMessage({ id: "button.next" }),
+          disabled: interactionBlocked || showCelestiaWarning,
+          text: intl.formatMessage({ id: "button.next" }),
           color: "primary",
           size: "large",
           type: "submit",
@@ -2251,21 +2232,15 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           <Styles.Flex1 />
           <Gutter size="0" />
 
-          <VerticalCollapseTransition collapsed={shouldTopUp}>
-            <FeeControl
-              senderConfig={senderConfig}
-              feeConfig={feeConfig}
-              gasConfig={gasConfig}
-              gasSimulator={gasSimulatorForNotBridgeSend}
-              disableAutomaticFeeSet={shouldTopUp}
-              isForEVMTx={isEvmTx}
-              nonceMethod={nonceMethod}
-              setNonceMethod={setNonceMethod}
-            />
-          </VerticalCollapseTransition>
-          <VerticalCollapseTransition collapsed={!shouldTopUp}>
-            <FeeCoverageDescription />
-          </VerticalCollapseTransition>
+          <FeeControl
+            senderConfig={senderConfig}
+            feeConfig={feeConfig}
+            gasConfig={gasConfig}
+            gasSimulator={gasSimulatorForNotBridgeSend}
+            isForEVMTx={isEvmTx}
+            nonceMethod={nonceMethod}
+            setNonceMethod={setNonceMethod}
+          />
 
           {sendType === "bridge" && (
             <SwapFeeInfoForBridgeOnSend

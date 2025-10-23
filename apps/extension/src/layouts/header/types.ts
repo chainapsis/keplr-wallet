@@ -40,6 +40,4 @@ export interface HeaderProps {
     height: string;
     element: React.ReactElement;
   };
-
-  bottomBackground?: React.ReactElement;
 }

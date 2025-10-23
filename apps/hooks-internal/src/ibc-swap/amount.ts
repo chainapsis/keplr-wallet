@@ -333,6 +333,11 @@ export class IBCSwapAmountConfig extends AmountConfig {
           : destinationAccount.bech32Address;
     }
 
+    if (customRecipient) {
+      chainIdsToAddresses[customRecipient.chainId.replace("eip155:", "")] =
+        customRecipient.recipient;
+    }
+
     for (const swapVenue of queryRouteResponse.data.swap_venues ?? [
       queryRouteResponse.data.swap_venue,
     ]) {
@@ -381,11 +386,6 @@ export class IBCSwapAmountConfig extends AmountConfig {
             ? swapAccount.ethereumHexAddress
             : swapAccount.bech32Address;
       }
-    }
-
-    if (customRecipient) {
-      chainIdsToAddresses[customRecipient.chainId.replace("eip155:", "")] =
-        customRecipient.recipient;
     }
 
     const queryMsgsDirect = queryIBCSwap.getQueryMsgsDirect(
@@ -524,6 +524,11 @@ export class IBCSwapAmountConfig extends AmountConfig {
           : destinationAccount.bech32Address;
     }
 
+    if (customRecipient) {
+      chainIdsToAddresses[customRecipient.chainId.replace("eip155:", "")] =
+        customRecipient.recipient;
+    }
+
     for (const swapVenue of queryRouteResponse.data.swap_venues ?? [
       queryRouteResponse.data.swap_venue,
     ]) {
@@ -556,11 +561,6 @@ export class IBCSwapAmountConfig extends AmountConfig {
             ? swapAccount.ethereumHexAddress
             : swapAccount.bech32Address;
       }
-    }
-
-    if (customRecipient) {
-      chainIdsToAddresses[customRecipient.chainId.replace("eip155:", "")] =
-        customRecipient.recipient;
     }
 
     const queryMsgsDirect = queryIBCSwap.getQueryMsgsDirect(

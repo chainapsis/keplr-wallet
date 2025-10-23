@@ -112,7 +112,6 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
                 color="text-input"
                 size="large"
                 selectedItemKey={connectTo}
-                menuContainerMaxHeight="10rem"
                 items={[
                   {
                     key: "Cosmos",

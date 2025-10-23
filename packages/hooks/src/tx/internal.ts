@@ -22,7 +22,6 @@ export type QueriesStore = IQueriesStore<
         | "queryTerraClassicTaxRate"
         | "queryTerraClassicTaxCaps"
         | "queryInitiaDynamicFee"
-        | "queryTopUpStatus"
       >;
     } & Partial<NobleQueries>
 >;

@@ -895,7 +895,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   @computed
-  get _uiProperties(): UIProperties {
+  get uiProperties(): UIProperties {
     if (this.disableBalanceCheck) {
       return {};
     }
@@ -1221,61 +1221,6 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     }
 
     return {};
-  }
-
-  @computed
-  get uiProperties(): UIProperties {
-    if (this._uiProperties.error instanceof InsufficientFeeError) {
-      const queryTopUpStatus = this.queriesStore.get(this.chainId).keplrETC
-        ?.queryTopUpStatus;
-
-      const topUpStatus = queryTopUpStatus?.getTopUpStatus(
-        this.senderConfig.sender
-      );
-
-      if (
-        topUpStatus &&
-        topUpStatus.error != null &&
-        topUpStatus.topUpStatus &&
-        (topUpStatus.topUpStatus.isTopUpAvailable ||
-          topUpStatus.topUpStatus.remainingTimeMs !== undefined)
-      ) {
-        return { warning: this._uiProperties.error };
-      }
-    }
-
-    return this._uiProperties;
-  }
-
-  @computed
-  get topUpStatus(): { isTopUpAvailable: boolean; remainingTimeMs?: number } {
-    const queryTopUpStatus = this.queriesStore.get(this.chainId).keplrETC
-      ?.queryTopUpStatus;
-
-    if (queryTopUpStatus) {
-      const topUpStatus = queryTopUpStatus.getTopUpStatus(
-        this.senderConfig.sender
-      );
-      if (topUpStatus.error == null) {
-        return topUpStatus.topUpStatus;
-      }
-    }
-
-    return {
-      isTopUpAvailable: false,
-      remainingTimeMs: undefined,
-    };
-  }
-
-  refreshTopUpStatus(): void {
-    const queryTopUpStatus = this.queriesStore.get(this.chainId).keplrETC
-      ?.queryTopUpStatus;
-    if (queryTopUpStatus) {
-      const topUpQuery = queryTopUpStatus.getTopUpStatus(
-        this.senderConfig.sender
-      );
-      topUpQuery.fetch();
-    }
   }
 
   private getMultiplication(): { low: number; average: number; high: number } {

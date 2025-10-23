@@ -199,8 +199,6 @@ module.exports = {
       KEPLR_EXT_MOONPAY_SIGN_API_BASE_URL: "",
       KEPLR_API_ENDPOINT: "",
       KEPLR_EXT_TX_CODEC_BASE_URL: "",
-      KEPLR_EXT_TOPUP_BASE_URL: "",
-      KEPLR_EXT_TOPUP_API_KEY: "",
     }),
     new ForkTsCheckerWebpackPlugin(),
     new CopyWebpackPlugin({

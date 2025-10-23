@@ -379,7 +379,6 @@ export class RootStore {
         skipTokenInfoBaseURL: SkipTokenInfoBaseURL,
         skipTokenInfoAPIURI: SkipTokenInfoAPIURI,
         txCodecBaseURL: process.env["KEPLR_EXT_TX_CODEC_BASE_URL"] || "",
-        topupBaseURL: process.env["KEPLR_EXT_TOPUP_BASE_URL"] || "",
       }),
       ICNSQueries.use(),
       TokenContractsQueries.use({
