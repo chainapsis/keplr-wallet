@@ -15,6 +15,7 @@ import {
   BuyCryptoModal,
   UpdateNoteModal,
   UpdateNotePageData,
+  SpendableCard,
 } from "./components";
 import { Stack } from "../../components/stack";
 import { CoinPretty, Dec, PricePretty } from "@keplr-wallet/unit";
@@ -35,7 +36,6 @@ import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
 import styled, { useTheme } from "styled-components";
 import { IbcHistoryView } from "./components/ibc-history-view";
 import { XAxis } from "../../components/axis";
-import { DepositModal } from "./components/deposit-modal";
 import { MainHeaderLayout, MainHeaderLayoutRef } from "./layouts/header";
 import { amountToAmbiguousAverage, isRunningInSidePanel } from "../../utils";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
@@ -54,6 +54,7 @@ import { AvailableTabLinkButtonList } from "./components/available-tab-link-butt
 import { INITIA_CHAIN_ID, NEUTRON_CHAIN_ID } from "../../config.ui";
 import { MainH1 } from "../../components/typography/main-h1";
 import { LockIcon } from "../../components/icon/lock";
+import { DepositModal } from "./components/deposit-modal";
 
 export interface ViewToken {
   token: CoinPretty;
@@ -99,7 +100,7 @@ export const MainPage: FunctionComponent<{
       keyRingStore.selectedKeyInfo?.id ?? ""
     );
 
-  const availableTotalPrice = useMemo(() => {
+  const spendableTotalPrice = useMemo(() => {
     let result: PricePretty | undefined;
     for (const bal of hugeQueriesStore.allKnownBalances) {
       const disabledCoinSet = disabledViewAssetTokenMap.get(
@@ -208,16 +209,16 @@ export const MainPage: FunctionComponent<{
   }, [hugeQueriesStore.delegations, hugeQueriesStore.unbondings, priceStore]);
 
   const totalPrice = useMemo(() => {
-    if (!availableTotalPrice) {
-      return availableTotalPrice;
+    if (!spendableTotalPrice) {
+      return spendableTotalPrice;
     }
 
     if (!stakedTotalPrice) {
       return stakedTotalPrice;
     }
 
-    return availableTotalPrice.add(stakedTotalPrice);
-  }, [availableTotalPrice, stakedTotalPrice]);
+    return spendableTotalPrice.add(stakedTotalPrice);
+  }, [spendableTotalPrice, stakedTotalPrice]);
 
   const stakedPercentage = useMemo(() => {
     if (!totalPrice || !stakedTotalPrice) {
@@ -545,14 +546,13 @@ export const MainPage: FunctionComponent<{
               <Gutter size="2rem" />
             </Box>
           </Box>
-          {/* <Buttons
+          <SpendableCard
+            spendableTotalPrice={spendableTotalPrice}
+            isNotReady={isNotReady}
             onClickDeposit={() => {
               setIsOpenDepositModal(true);
-              analyticsStore.logEvent("click_deposit");
             }}
-            onClickBuy={() => setIsOpenBuy(true)}
-            isNotReady={isNotReady}
-          /> */}
+          />
 
           {/* {tabStatus === "staked" && !isNotReady ? (
             <StakeWithKeplrDashboardButton
