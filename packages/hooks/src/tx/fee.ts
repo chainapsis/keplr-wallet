@@ -1265,24 +1265,32 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     shouldTopUp: boolean;
     isTopUpAvailable: boolean;
     remainingTimeMs?: number;
-    localFeeInsufficient: boolean;
     topUpOverrideStdFee?: StdFee;
   } {
     const queryTopUpStatus = this.queriesStore.get(this.chainId).keplrETC
       ?.queryTopUpStatus;
-
-    let isTopUpAvailable = false;
-    let remainingTimeMs: number | undefined = undefined;
-
-    if (queryTopUpStatus) {
-      const topUpStatus = queryTopUpStatus.getTopUpStatus(
-        this.senderConfig.sender
-      );
-      if (topUpStatus.error == null) {
-        isTopUpAvailable = topUpStatus.topUpStatus.isTopUpAvailable;
-        remainingTimeMs = topUpStatus.topUpStatus.remainingTimeMs;
-      }
+    if (!queryTopUpStatus) {
+      return {
+        isTopUpAvailable: false,
+        remainingTimeMs: undefined,
+        shouldTopUp: false,
+        topUpOverrideStdFee: undefined,
+      };
     }
+
+    const topUpStatus = queryTopUpStatus.getTopUpStatus(
+      this.senderConfig.sender
+    );
+    if (topUpStatus.error != null) {
+      return {
+        isTopUpAvailable: false,
+        remainingTimeMs: undefined,
+        shouldTopUp: false,
+        topUpOverrideStdFee: undefined,
+      };
+    }
+
+    const { isTopUpAvailable, remainingTimeMs } = topUpStatus.topUpStatus;
 
     const hasMultipleFeeCurrencies = this.selectableFeeCurrencies.length > 1;
 
@@ -1360,7 +1368,6 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       shouldTopUp,
       isTopUpAvailable,
       remainingTimeMs,
-      localFeeInsufficient,
       topUpOverrideStdFee,
     };
   }
