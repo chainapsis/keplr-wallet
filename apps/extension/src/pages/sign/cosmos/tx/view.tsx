@@ -398,7 +398,7 @@ export const CosmosTxView: FunctionComponent<{
   const [isHighFeeApproved, setIsHighFeeApproved] = useState(false);
 
   const {
-    shouldTopUp: _shouldTopUp,
+    shouldTopUp,
     isTopUpAvailable,
     isTopUpInProgress,
     isInsufficientFeeWarning,
@@ -415,10 +415,18 @@ export const CosmosTxView: FunctionComponent<{
       isLedgerAndDirect,
   });
 
-  const shouldTopUp =
-    ("forceTopUp" in interactionData.data.signOptions &&
-      interactionData.data.signOptions.forceTopUp === true) ||
-    _shouldTopUp;
+  useEffect(() => {
+    if (
+      "forceTopUp" in interactionData.data.signOptions &&
+      interactionData.data.signOptions.forceTopUp
+    ) {
+      feeConfig.setForceTopUp(true);
+    } else {
+      feeConfig.setForceTopUp(false);
+    }
+
+    return () => feeConfig.setForceTopUp(false);
+  }, [interactionData.data.signOptions, feeConfig]);
 
   const buttonDisabled =
     txConfigsValidate.interactionBlocked ||
