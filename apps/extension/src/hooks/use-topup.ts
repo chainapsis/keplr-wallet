@@ -40,7 +40,6 @@ export function useTopUp({
   const [topUpError, setTopUpError] = useState<Error | undefined>(undefined);
 
   const isTopUpStatusFetching = feeConfig.isTopUpStatusFetching;
-  console.log("isTopUpStatusFetching", isTopUpStatusFetching);
 
   const hasMultipleFeeCurrencies = feeConfig.selectableFeeCurrencies.length > 1;
 
