@@ -687,6 +687,9 @@
   "page.main.components.buttons.deposit-button": "Deposit",
   "page.main.components.buttons.buy-button": "Buy",
   "page.main.components.buttons.send-button": "Send",
+  "page.main.components.buttons.swap-button": "Swap",
+  "page.main.spendable-card.title": "Spendable",
+
   "page.main.components.claim-all.title": "Claimable Reward",
   "page.main.components.claim-all.button": "Claim All",
   "page.main.components.claim-all.claim-button": "Claim",
