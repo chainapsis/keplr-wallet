@@ -63,7 +63,7 @@ export const TransactionFeeModal: FunctionComponent<{
   ibcSwapAmountConfig?: IBCSwapAmountConfig;
   gasSimulator?: IGasSimulator;
   disableAutomaticFeeSet?: boolean;
-  isInternalMsg?: boolean;
+  isExternalMsg?: boolean;
   isForEVMTx?: boolean;
   nonceMethod?: "pending" | "latest";
   setNonceMethod?: (nonceMethod: "pending" | "latest") => void;
@@ -76,7 +76,7 @@ export const TransactionFeeModal: FunctionComponent<{
     ibcSwapAmountConfig,
     gasSimulator,
     disableAutomaticFeeSet,
-    isInternalMsg,
+    isExternalMsg,
     isForEVMTx,
     nonceMethod,
     setNonceMethod,
@@ -87,13 +87,13 @@ export const TransactionFeeModal: FunctionComponent<{
     const theme = useTheme();
 
     const isManualFee =
-      typeof isInternalMsg === "boolean"
-        ? !isInternalMsg && disableAutomaticFeeSet
+      typeof isExternalMsg === "boolean"
+        ? isExternalMsg && disableAutomaticFeeSet
         : disableAutomaticFeeSet;
 
     const isInternalMsgSafe =
-      typeof isInternalMsg === "boolean"
-        ? isInternalMsg
+      typeof isExternalMsg === "boolean"
+        ? !isExternalMsg
         : !disableAutomaticFeeSet;
 
     const isGasSimulatorUsable = (() => {

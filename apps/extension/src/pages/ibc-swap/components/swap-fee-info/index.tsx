@@ -472,7 +472,6 @@ export const SwapFeeInfo: FunctionComponent<{
               gasConfig={gasConfig}
               gasSimulator={gasSimulator}
               disableAutomaticFeeSet={disableAutomaticFeeSet}
-              isInternalMsg={true}
               isForEVMTx={isForEVMTx}
               ibcSwapAmountConfig={amountConfig}
               nonceMethod={nonceMethod}
