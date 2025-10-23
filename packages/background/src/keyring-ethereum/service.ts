@@ -1335,6 +1335,7 @@ export class KeyRingEthereumService {
     const unsignedTx: UnsignedTransaction = {
       ...restTx,
       value: this.toHexQty(value),
+      gasLimit: this.toHexQty(gasLimit ?? gas),
       gasPrice: this.toHexQty(gasPrice),
       maxFeePerGas: this.toHexQty(maxFeePerGas),
       maxPriorityFeePerGas: this.toHexQty(maxPriorityFeePerGas),
@@ -1342,21 +1343,20 @@ export class KeyRingEthereumService {
       nonce,
     };
 
-    if (gasLimit == null && gas != null) {
-      unsignedTx.gasLimit = this.toHexQty(gas);
-    } else if (gasLimit != null) {
-      unsignedTx.gasLimit = this.toHexQty(gasLimit);
-    }
-
     if (data != null && typeof data === "string") {
       unsignedTx.data = data.startsWith("0x") ? data : `0x${data}`;
     }
 
-    const hasEIP1559 =
-      unsignedTx.maxFeePerGas !== undefined ||
+    const isLegacy = unsignedTx.gasPrice !== undefined;
+    const isEIP1559 =
+      unsignedTx.maxFeePerGas !== undefined &&
       unsignedTx.maxPriorityFeePerGas !== undefined;
-    if (hasEIP1559) {
+
+    if (isEIP1559) {
       delete unsignedTx.gasPrice;
+    } else if (isLegacy) {
+      delete unsignedTx.maxFeePerGas;
+      delete unsignedTx.maxPriorityFeePerGas;
     }
 
     return unsignedTx;
