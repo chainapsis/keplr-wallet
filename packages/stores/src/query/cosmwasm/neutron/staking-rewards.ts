@@ -56,8 +56,9 @@ class ObservableQueryNeutronStakingRewardsInner extends ObservableCosmwasmContra
 
       return new CoinPretty(defaultCurrency, new Int(0)).ready(false);
     }
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-    const currency = chainInfo.forceFindCurrency(reward.denom);
+    const currency = this.chainGetter
+      .getModularChainInfoImpl(this.chainId)
+      .forceFindCurrency(reward.denom);
 
     return new CoinPretty(currency, new Int(reward.amount)).ready(
       !this.isFetching
@@ -73,8 +74,9 @@ class ObservableQueryNeutronStakingRewardsInner extends ObservableCosmwasmContra
     if (!reward.denom || !reward.amount) {
       return undefined;
     }
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-    return chainInfo.findCurrency(reward.denom);
+    return this.chainGetter
+      .getModularChainInfoImpl(this.chainId)
+      .findCurrency(reward.denom);
   }
 }
 
