@@ -1376,7 +1376,8 @@ export const useFeeConfig = (
         gasConfig,
         opts.additionAmountToNeedFee ?? true,
         opts.computeTerraClassicTax ?? false,
-        opts.forceUseAtoneTokenAsFee ?? false
+        opts.forceUseAtoneTokenAsFee ?? false,
+        opts.forceTopUp ?? false
       )
   );
   config.setChain(chainId);
