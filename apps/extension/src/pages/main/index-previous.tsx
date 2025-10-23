@@ -42,6 +42,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
 import styled, { useTheme } from "styled-components";
 import { IbcHistoryView } from "./components/ibc-history-view";
+import { LayeredHorizontalRadioGroup } from "../../components/radio-group";
 import { XAxis, YAxis } from "../../components/axis";
 import { DepositModal } from "./components/deposit-modal";
 import { MainHeaderLayout, MainHeaderLayoutRef } from "./layouts/header";
@@ -434,7 +435,34 @@ export const MainPage: FunctionComponent<{
       />
       <Box paddingX="0.75rem" paddingBottom="1.5rem">
         <Stack gutter="0.75rem">
-          <YAxis alignX="center">test</YAxis>
+          <YAxis alignX="center">
+            <LayeredHorizontalRadioGroup
+              items={[
+                {
+                  key: "available",
+                  text: intl.formatMessage({
+                    id: "page.main.components.string-toggle.available-tab",
+                  }),
+                },
+                {
+                  key: "staked",
+                  text: intl.formatMessage({
+                    id: "page.main.components.string-toggle.staked-tab",
+                  }),
+                },
+              ]}
+              selectedKey={tabStatus}
+              onSelect={(key) => {
+                analyticsStore.logEvent("click_main_tab", {
+                  tabName: key,
+                });
+
+                setTabStatus(key as TabStatus);
+              }}
+              itemMinWidth="5.75rem"
+              isNotReady={isNotReady}
+            />
+          </YAxis>
           <CopyAddress
             onClick={() => {
               analyticsStore.logEvent("click_copyAddress");
