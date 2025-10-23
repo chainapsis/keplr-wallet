@@ -171,13 +171,11 @@ const handleRequestCosmosSignAminoMsg: (
   permissionInteractionService
 ) => {
   return async (env, msg) => {
-    if (!msg.signOptions.forceTopUp) {
-      await permissionInteractionService.ensureEnabled(
-        env,
-        [msg.chainId],
-        msg.origin
-      );
-    }
+    await permissionInteractionService.ensureEnabled(
+      env,
+      [msg.chainId],
+      msg.origin
+    );
 
     return await service.signAminoSelected(
       env,
@@ -198,13 +196,11 @@ const handleRequestCosmosSignDirectMsg: (
   permissionInteractionService
 ) => {
   return async (env, msg) => {
-    if (!msg.signOptions.forceTopUp) {
-      await permissionInteractionService.ensureEnabled(
-        env,
-        [msg.chainId],
-        msg.origin
-      );
-    }
+    await permissionInteractionService.ensureEnabled(
+      env,
+      [msg.chainId],
+      msg.origin
+    );
 
     const signDoc = SignDoc.fromPartial({
       bodyBytes: msg.signDoc.bodyBytes,
