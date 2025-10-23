@@ -729,6 +729,12 @@ export class PermissionService {
       return;
     }
 
+    // Since the current Ethereum provider is only initialized when current chainId is given as state,
+    // for privileged origins, return Ethereum mainnet by default to allow initialization
+    if (!currentChainId && this.isPrivilegedOrigins(origin)) {
+      return "eip155:1";
+    }
+
     return currentChainId;
   }
 
