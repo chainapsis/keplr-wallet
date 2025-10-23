@@ -409,7 +409,6 @@ export const CosmosTxView: FunctionComponent<{
   } = useTopUp({
     feeConfig,
     senderConfig,
-    amountConfig,
     hasHardwareWalletError:
       !!ledgerInteractingError ||
       !!keystoneInteractingError ||

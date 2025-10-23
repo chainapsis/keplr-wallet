@@ -874,7 +874,6 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   } = useTopUp({
     feeConfig,
     senderConfig,
-    amountConfig: sendConfigs.amountConfig,
   });
 
   return (
@@ -1048,7 +1047,9 @@ export const SendAmountPage: FunctionComponent = observer(() => {
               try {
                 if ("send" in tx) {
                   await tx.send(
-                    ibcSwapConfigsForBridge.feeConfig.toStdFee(),
+                    ibcSwapConfigsForBridge.feeConfig.topUpStatus
+                      .topUpOverrideStdFee ??
+                      ibcSwapConfigsForBridge.feeConfig.toStdFee(),
                     ibcSwapConfigsForBridge.memoConfig.memo,
                     {
                       preferNoSetFee: true,
@@ -1811,7 +1812,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                       );
 
               await tx.send(
-                sendConfigs.feeConfig.toStdFee(),
+                sendConfigs.feeConfig.topUpStatus.topUpOverrideStdFee ??
+                  sendConfigs.feeConfig.toStdFee(),
                 sendConfigs.memoConfig.memo,
                 {
                   preferNoSetFee: true,
