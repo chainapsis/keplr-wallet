@@ -47,9 +47,6 @@ export function useTopUp({
   const isTopUpAvailable =
     isTopupConfigured && feeConfig.topUpStatus.isTopUpAvailable;
 
-  console.log("isTopUpAvailable", isTopUpAvailable);
-  console.log("shouldTopUp", shouldTopUp);
-
   // NOTE: osmosis의 경우 모든 수수료 토큰이 부족한지 체크하고 있으므로,
   // 일부 shouldTopUp과 isTopUpAvailable만으로 버튼 비활성화 여부를 체크하게 되면
   // 현재 선택된 fee currency가 부족한 경우 버튼 비활성화 되지 않는 케이스가 발생하므로
