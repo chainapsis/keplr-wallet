@@ -250,9 +250,12 @@ export class ObservableQueryRewardsInner extends ObservableChainQuery<Rewards> {
   ) {
     super.onReceiveResponse(response);
 
-    const chainInfo = this.chainGetter.getChain(this.chainId);
+    const chainInfo = this.chainGetter.getModularChainInfoImpl(this.chainId);
     const denoms = response.data.total.map((coin) => coin.denom);
-    chainInfo.addUnknownDenoms(...denoms);
+    chainInfo.addUnknownDenoms({
+      module: "cosmos",
+      coinMinimalDenoms: denoms,
+    });
   }
 }
 
