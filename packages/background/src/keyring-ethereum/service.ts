@@ -425,6 +425,7 @@ export class KeyRingEthereumService {
               (params?.[0] as {
                 chainId?: string | number;
                 from: string;
+                value?: string;
                 gas?: string;
                 gasLimit?: string;
                 authorizationList?: {
@@ -446,7 +447,7 @@ export class KeyRingEthereumService {
 
           const currentChainId = this.forceGetCurrentChainId(origin, chainId);
 
-          const { from: sender, gas, authorizationList, ...restTx } = tx;
+          const { from: sender, authorizationList, ...restTx } = tx;
 
           if (authorizationList) {
             throw new Error("EIP-7702 transactions are not supported.");
@@ -490,12 +491,11 @@ export class KeyRingEthereumService {
           );
           const nonce = parseInt(transactionCount, 16);
 
-          const unsignedTx: UnsignedTransaction = {
-            ...restTx,
-            gasLimit: restTx?.gasLimit ?? gas,
-            chainId: this.getEVMChainId(currentChainId),
-            nonce,
-          };
+          const unsignedTx = this.normalizeUnsignedTx(
+            restTx,
+            currentChainId,
+            nonce
+          );
 
           try {
             const { signingData, signature } = await this.signEthereumSelected(
@@ -545,6 +545,7 @@ export class KeyRingEthereumService {
               (params?.[0] as {
                 chainId?: string | number;
                 from: string;
+                value?: string;
                 gas?: string;
                 gasLimit?: string;
                 authorizationList?: {
@@ -566,7 +567,7 @@ export class KeyRingEthereumService {
 
           const currentChainId = this.forceGetCurrentChainId(origin, chainId);
 
-          const { from: sender, gas, authorizationList, ...restTx } = tx;
+          const { from: sender, authorizationList, ...restTx } = tx;
 
           if (authorizationList) {
             throw new Error("EIP-7702 transactions are not supported.");
@@ -610,12 +611,11 @@ export class KeyRingEthereumService {
           );
           const nonce = parseInt(transactionCount, 16);
 
-          const unsignedTx: UnsignedTransaction = {
-            ...restTx,
-            gasLimit: restTx?.gasLimit ?? gas,
-            chainId: this.getEVMChainId(currentChainId),
-            nonce,
-          };
+          const unsignedTx = this.normalizeUnsignedTx(
+            restTx,
+            currentChainId,
+            nonce
+          );
 
           try {
             const { signingData, signature } = await this.signEthereumSelected(
@@ -1277,5 +1277,88 @@ export class KeyRingEthereumService {
     const evmInfo = this.chainsService.getEVMInfoOrThrow(chainId);
 
     return evmInfo.chainId;
+  }
+
+  private toHexQty(x?: string | number | bigint): string | undefined {
+    if (x === undefined || x === null) {
+      return undefined;
+    }
+
+    if (typeof x === "bigint") {
+      return `0x${x.toString(16)}`;
+    }
+
+    if (typeof x === "number") {
+      const n = Number.isFinite(x) ? Math.max(0, Math.floor(x)) : 0;
+      return `0x${n.toString(16)}`;
+    }
+
+    x = x.trim();
+    if (x.length === 0 || x === "0x") {
+      return undefined;
+    }
+
+    let q: bigint;
+
+    try {
+      q = BigInt(x);
+    } catch {
+      if (!x.startsWith("0x")) {
+        x = `0x${x}`;
+      }
+      try {
+        q = BigInt(x);
+      } catch {
+        return undefined;
+      }
+    }
+
+    return `0x${q.toString(16)}`;
+  }
+
+  private normalizeUnsignedTx(
+    tx: any,
+    chainId: string,
+    nonce: number
+  ): UnsignedTransaction {
+    const {
+      value,
+      gas,
+      gasLimit,
+      gasPrice,
+      maxFeePerGas,
+      maxPriorityFeePerGas,
+      data,
+      ...restTx
+    } = tx;
+
+    const unsignedTx: UnsignedTransaction = {
+      ...restTx,
+      value: this.toHexQty(value),
+      gasLimit: this.toHexQty(gasLimit ?? gas),
+      gasPrice: this.toHexQty(gasPrice),
+      maxFeePerGas: this.toHexQty(maxFeePerGas),
+      maxPriorityFeePerGas: this.toHexQty(maxPriorityFeePerGas),
+      chainId: this.getEVMChainId(chainId),
+      nonce,
+    };
+
+    if (data != null && typeof data === "string") {
+      unsignedTx.data = data.startsWith("0x") ? data : `0x${data}`;
+    }
+
+    const isLegacy = unsignedTx.gasPrice !== undefined;
+    const isEIP1559 =
+      unsignedTx.maxFeePerGas !== undefined &&
+      unsignedTx.maxPriorityFeePerGas !== undefined;
+
+    if (isEIP1559) {
+      delete unsignedTx.gasPrice;
+    } else if (isLegacy) {
+      delete unsignedTx.maxFeePerGas;
+      delete unsignedTx.maxPriorityFeePerGas;
+    }
+
+    return unsignedTx;
   }
 }
