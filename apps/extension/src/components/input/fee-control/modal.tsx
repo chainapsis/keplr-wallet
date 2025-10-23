@@ -86,15 +86,9 @@ export const TransactionFeeModal: FunctionComponent<{
     const intl = useIntl();
     const theme = useTheme();
 
-    const isManualFee =
-      typeof isExternalMsg === "boolean"
-        ? isExternalMsg && disableAutomaticFeeSet
-        : disableAutomaticFeeSet;
+    const showExternalFeeSetGuide = isExternalMsg && disableAutomaticFeeSet;
 
-    const isInternalMsgSafe =
-      typeof isExternalMsg === "boolean"
-        ? !isExternalMsg
-        : !disableAutomaticFeeSet;
+    const showRememberLastFeeOptionToggle = !isExternalMsg;
 
     const isGasSimulatorUsable = (() => {
       if (!gasSimulator) {
@@ -294,7 +288,7 @@ export const TransactionFeeModal: FunctionComponent<{
                 </Subtitle3>
 
                 <div style={{ flex: 1 }} />
-                {isInternalMsgSafe ? (
+                {showRememberLastFeeOptionToggle ? (
                   <React.Fragment>
                     <div
                       style={{
@@ -548,7 +542,7 @@ export const TransactionFeeModal: FunctionComponent<{
             />
           )}
 
-          {isManualFee ? (
+          {showExternalFeeSetGuide ? (
             <GuideBox
               title={intl.formatMessage({
                 id: "components.input.fee-control.modal.guide.external-fee-set",
