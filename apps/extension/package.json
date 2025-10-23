@@ -77,6 +77,7 @@
     "keplr-wallet-private": "file:./noop-keplr-wallet-private",
     "lodash.debounce": "^4.0.8",
     "lodash.throttle": "^4.1.1",
+    "long": "^4.0.0",
     "lottie-web": "^5.10.2",
     "os-browserify": "^0.3.0",
     "p-queue": "^6.6.2",

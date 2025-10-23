@@ -51,6 +51,9 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   @observable
   protected forceUseAtoneTokenAsFee: boolean = false;
 
+  @observable
+  protected forceTopUp: boolean = false;
+
   constructor(
     chainGetter: ChainGetter,
     protected readonly queriesStore: QueriesStore,
@@ -60,13 +63,15 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     protected readonly gasConfig: IGasConfig,
     additionAmountToNeedFee: boolean = true,
     computeTerraClassicTax: boolean = false,
-    forceUseAtoneTokenAsFee: boolean = false
+    forceUseAtoneTokenAsFee: boolean = false,
+    forceTopUp: boolean = false
   ) {
     super(chainGetter, initialChainId);
 
     this.additionAmountToNeedFee = additionAmountToNeedFee;
     this.computeTerraClassicTax = computeTerraClassicTax;
     this.forceUseAtoneTokenAsFee = forceUseAtoneTokenAsFee;
+    this.forceTopUp = forceTopUp;
     makeObservable(this);
   }
 
@@ -83,6 +88,11 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   @action
   setForceUseAtoneTokenAsFee(forceUseAtoneTokenAsFee: boolean) {
     this.forceUseAtoneTokenAsFee = forceUseAtoneTokenAsFee;
+  }
+
+  @action
+  setForceTopUp(forceTopUp: boolean) {
+    this.forceTopUp = forceTopUp;
   }
 
   @action
@@ -1225,7 +1235,10 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
   @computed
   get uiProperties(): UIProperties {
-    if (this._uiProperties.error instanceof InsufficientFeeError) {
+    if (
+      this.forceTopUp ||
+      this._uiProperties.error instanceof InsufficientFeeError
+    ) {
       const queryTopUpStatus = this.queriesStore.get(this.chainId).keplrETC
         ?.queryTopUpStatus;
 
@@ -1349,6 +1362,7 @@ export const useFeeConfig = (
     additionAmountToNeedFee?: boolean;
     computeTerraClassicTax?: boolean;
     forceUseAtoneTokenAsFee?: boolean;
+    forceTopUp?: boolean;
   } = {}
 ) => {
   const [config] = useState(
@@ -1362,13 +1376,15 @@ export const useFeeConfig = (
         gasConfig,
         opts.additionAmountToNeedFee ?? true,
         opts.computeTerraClassicTax ?? false,
-        opts.forceUseAtoneTokenAsFee ?? false
+        opts.forceUseAtoneTokenAsFee ?? false,
+        opts.forceTopUp ?? false
       )
   );
   config.setChain(chainId);
   config.setAdditionAmountToNeedFee(opts.additionAmountToNeedFee ?? true);
   config.setComputeTerraClassicTax(opts.computeTerraClassicTax ?? false);
   config.setForceUseAtoneTokenAsFee(opts.forceUseAtoneTokenAsFee ?? false);
+  config.setForceTopUp(opts.forceTopUp ?? false);
 
   return config;
 };
