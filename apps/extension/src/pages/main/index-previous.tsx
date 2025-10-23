@@ -9,7 +9,7 @@ import React, {
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import {
-  Buttons,
+  // Buttons,
   ClaimAll,
   CopyAddress,
   IBCTransferView,
@@ -584,16 +584,16 @@ export const MainPage: FunctionComponent<{
               </Box>
             </Box>
           </Box>
-          {tabStatus === "available" ? (
-            <Buttons
-              onClickDeposit={() => {
-                setIsOpenDepositModal(true);
-                analyticsStore.logEvent("click_deposit");
-              }}
-              onClickBuy={() => setIsOpenBuy(true)}
-              isNotReady={isNotReady}
-            />
-          ) : null}
+          {/* {tabStatus === "available" ? (
+            // <Buttons
+            //   onClickDeposit={() => {
+            //     setIsOpenDepositModal(true);
+            //     analyticsStore.logEvent("click_deposit");
+            //   }}
+            //   onClickBuy={() => setIsOpenBuy(true)}
+            //   isNotReady={isNotReady}
+            // />
+          ) : null} */}
 
           {tabStatus === "staked" && !isNotReady ? (
             <StakeWithKeplrDashboardButton
