@@ -9,7 +9,7 @@ import React, {
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import {
-  Buttons,
+  // Buttons,
   ClaimAll,
   IBCTransferView,
   BuyCryptoModal,
@@ -83,8 +83,10 @@ export const MainPage: FunctionComponent<{
   } = useStore();
 
   const isNotReady = useIsNotReady();
+  // const isNotReady = true;
+
   const intl = useIntl();
-  const theme = useTheme();
+  // const theme = useTheme();
 
   const setIsNotReadyRef = useRef(setIsNotReady);
   setIsNotReadyRef.current = setIsNotReady;
@@ -425,9 +427,8 @@ export const MainPage: FunctionComponent<{
         }}
       />
 
-      <Box paddingX="1.25rem">
+      <Box padding="1.25rem">
         <Box
-          alignX={isNotReady ? "center" : undefined}
           onHoverStateChange={(isHover) => {
             if (!isNotReady) {
               animatedPrivacyModeHover.start(isHover ? 1 : 0);
@@ -436,8 +437,8 @@ export const MainPage: FunctionComponent<{
             }
           }}
         >
-          <Skeleton isNotReady={isNotReady}>
-            <XAxis alignY="center">
+          <XAxis alignY="center">
+            <Skeleton isNotReady={isNotReady} dummyMinWidth="6rem">
               <MainH1>
                 {uiConfigStore.hideStringIfPrivacyMode(
                   totalPrice?.toString().split(".")[0] || "-",
@@ -450,66 +451,69 @@ export const MainPage: FunctionComponent<{
                   )}
                 </span>
               </MainH1>
-              <animated.div
+            </Skeleton>
+
+            <animated.div
+              style={{
+                position: "relative",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                height: "1px",
+                overflowX: "clip",
+                width: animatedPrivacyModeHover.to((v) => `${v * 1.25}rem`),
+              }}
+            >
+              <Styles.PrivacyModeButton
+                as={animated.div}
                 style={{
-                  position: "relative",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  height: "1px",
-                  overflowX: "clip",
-                  width: animatedPrivacyModeHover.to((v) => `${v * 1.25}rem`),
+                  position: "absolute",
+                  right: 0,
+                  cursor: "pointer",
+                  opacity: animatedPrivacyModeHover.to((v) =>
+                    Math.max(0, (v - 0.3) * (10 / 3))
+                  ),
+                  marginTop: "2px",
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  uiConfigStore.toggleIsPrivacyMode();
                 }}
               >
-                <Styles.PrivacyModeButton
-                  as={animated.div}
-                  style={{
-                    position: "absolute",
-                    right: 0,
-                    cursor: "pointer",
-                    opacity: animatedPrivacyModeHover.to((v) =>
-                      Math.max(0, (v - 0.3) * (10 / 3))
-                    ),
-                    marginTop: "2px",
-                  }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    uiConfigStore.toggleIsPrivacyMode();
-                  }}
-                >
-                  {uiConfigStore.isPrivacyMode ? (
-                    <EyeSlashIcon width="1rem" height="1rem" />
-                  ) : (
-                    <EyeIcon width="1rem" height="1rem" />
-                  )}
-                </Styles.PrivacyModeButton>
-              </animated.div>
-            </XAxis>
-          </Skeleton>
+                {uiConfigStore.isPrivacyMode ? (
+                  <EyeSlashIcon width="1rem" height="1rem" />
+                ) : (
+                  <EyeIcon width="1rem" height="1rem" />
+                )}
+              </Styles.PrivacyModeButton>
+            </animated.div>
+          </XAxis>
         </Box>
 
         <Gutter size="0.75rem" />
         <Box paddingY="0.125rem">
-          <XAxis gap="0.25rem" alignY="center">
-            <Body2 style={{ color: ColorPalette["gray-300"] }}>
-              {intl.formatMessage({
-                id: "page.main.balance.staked-balance-title-1",
-              })}
-            </Body2>
-            <LockIcon
-              width="1rem"
-              height="1rem"
-              color={ColorPalette["gray-300"]}
-            />
-            <Body2 style={{ color: ColorPalette["gray-300"] }}>
-              {`${uiConfigStore.hideStringIfPrivacyMode(
-                stakedTotalPrice?.toString() || "-",
-                4
-              )} (${stakedPercentage.toFixed(1)}%) ${intl.formatMessage({
-                id: "page.main.balance.staked-balance-title-2",
-              })}`}
-            </Body2>
-          </XAxis>
+          <Skeleton isNotReady={isNotReady}>
+            <XAxis gap="0.25rem" alignY="center">
+              <Body2 style={{ color: ColorPalette["gray-300"] }}>
+                {intl.formatMessage({
+                  id: "page.main.balance.staked-balance-title-1",
+                })}
+              </Body2>
+              <LockIcon
+                width="1rem"
+                height="1rem"
+                color={ColorPalette["gray-300"]}
+              />
+              <Body2 style={{ color: ColorPalette["gray-300"] }}>
+                {`${uiConfigStore.hideStringIfPrivacyMode(
+                  stakedTotalPrice?.toString() || "-",
+                  4
+                )} (${stakedPercentage.toFixed(1)}%) ${intl.formatMessage({
+                  id: "page.main.balance.staked-balance-title-2",
+                })}`}
+              </Body2>
+            </XAxis>
+          </Skeleton>
         </Box>
       </Box>
       <Box paddingX="0.75rem" paddingBottom="1.5rem">
@@ -541,14 +545,14 @@ export const MainPage: FunctionComponent<{
               <Gutter size="2rem" />
             </Box>
           </Box>
-          <Buttons
+          {/* <Buttons
             onClickDeposit={() => {
               setIsOpenDepositModal(true);
               analyticsStore.logEvent("click_deposit");
             }}
             onClickBuy={() => setIsOpenBuy(true)}
             isNotReady={isNotReady}
-          />
+          /> */}
 
           {/* {tabStatus === "staked" && !isNotReady ? (
             <StakeWithKeplrDashboardButton
