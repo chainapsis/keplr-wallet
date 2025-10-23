@@ -113,6 +113,7 @@ export const CosmosTxView: FunctionComponent<{
           : interactionData.data.signDocWrapper.protoSignDoc.txMsgs.some(
               (msg) => msg.typeUrl.includes("MsgMintPhoton")
             ),
+      forceTopUp: interactionData.data.signOptions.forceTopUp,
     }
   );
   const memoConfig = useMemoConfig(chainStore, chainId);
@@ -414,19 +415,6 @@ export const CosmosTxView: FunctionComponent<{
       !!keystoneInteractingError ||
       isLedgerAndDirect,
   });
-
-  useEffect(() => {
-    if (
-      "forceTopUp" in interactionData.data.signOptions &&
-      interactionData.data.signOptions.forceTopUp
-    ) {
-      feeConfig.setForceTopUp(true);
-    } else {
-      feeConfig.setForceTopUp(false);
-    }
-
-    return () => feeConfig.setForceTopUp(false);
-  }, [interactionData.data.signOptions, feeConfig]);
 
   const buttonDisabled =
     txConfigsValidate.interactionBlocked ||

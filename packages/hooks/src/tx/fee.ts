@@ -1362,6 +1362,7 @@ export const useFeeConfig = (
     additionAmountToNeedFee?: boolean;
     computeTerraClassicTax?: boolean;
     forceUseAtoneTokenAsFee?: boolean;
+    forceTopUp?: boolean;
   } = {}
 ) => {
   const [config] = useState(
@@ -1382,6 +1383,7 @@ export const useFeeConfig = (
   config.setAdditionAmountToNeedFee(opts.additionAmountToNeedFee ?? true);
   config.setComputeTerraClassicTax(opts.computeTerraClassicTax ?? false);
   config.setForceUseAtoneTokenAsFee(opts.forceUseAtoneTokenAsFee ?? false);
+  config.setForceTopUp(opts.forceTopUp ?? false);
 
   return config;
 };
