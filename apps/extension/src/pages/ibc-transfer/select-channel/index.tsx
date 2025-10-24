@@ -128,7 +128,7 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
               items={ibcChannelStore
                 .getTransferChannels(chainId)
                 .filter((channel) =>
-                  chainStore.hasChain(channel.counterpartyChainId)
+                  chainStore.hasModularChain(channel.counterpartyChainId)
                 )
                 .map((channel) => {
                   const chainInfo = chainStore.getChain(

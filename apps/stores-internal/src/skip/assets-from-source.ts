@@ -81,7 +81,7 @@ export class ObservableQueryAssetsFromSourceInner extends ObservableQuery<Assets
     } = {};
 
     for (const key of Object.keys(this.response.data.dest_assets)) {
-      if (this.chainStore.hasChain(key)) {
+      if (this.chainStore.hasModularChain(key)) {
         const chainInfo = this.chainStore.getChain(key);
         if (!this.chainStore.isInChainInfosInListUI(chainInfo.chainId)) {
           continue;
@@ -103,8 +103,8 @@ export class ObservableQueryAssetsFromSourceInner extends ObservableQuery<Assets
               }
 
               return (
-                this.chainStore.hasChain(asset.chain_id) &&
-                this.chainStore.hasChain(asset.origin_chain_id)
+                this.chainStore.hasModularChain(asset.chain_id) &&
+                this.chainStore.hasModularChain(asset.origin_chain_id)
               );
             })
             .map((asset) => {

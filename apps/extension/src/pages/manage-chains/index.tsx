@@ -114,7 +114,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
       if (!vaultId || !chainId) return;
 
       if (enable) {
-        if (!chainStore.hasChain(chainId)) {
+        if (!chainStore.hasModularChain(chainId)) {
           const keplr = await getKeplrFromWindow();
           const chainInfoToSuggest = searchedNonNativeChainInfos.find(
             (c) =>
@@ -133,7 +133,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
           }
         }
 
-        if (chainStore.hasChain(chainId)) {
+        if (chainStore.hasModularChain(chainId)) {
           const chainInfo = chainStore.getChain(chainId);
           const needModal = await needFinalizeKeyCoinTypeAction(
             vaultId,
@@ -366,7 +366,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
         function: (chainInfo: ModularChainInfo | ChainInfo) => {
           if (
             "cosmos" in chainInfo &&
-            chainStore.hasChain(chainInfo.chainId) &&
+            chainStore.hasModularChain(chainInfo.chainId) &&
             "cosmos" in chainInfo
           ) {
             const cosmosChainInfo = chainStore.getChain(
@@ -507,7 +507,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
 
     await Promise.all(
       ids.map(async (id) => {
-        if (!id || !chainStore.hasChain(id)) return;
+        if (!id || !chainStore.hasModularChain(id)) return;
 
         const chainInfo = chainStore.getChain(id);
         const needModal = await needFinalizeKeyCoinTypeAction(
@@ -576,7 +576,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
 
       await Promise.all(
         derivationChainIds.map(async (chainId) => {
-          if (!chainId || !chainStore.hasChain(chainId)) return;
+          if (!chainId || !chainStore.hasModularChain(chainId)) return;
           const chainInfo = chainStore.getChain(chainId);
           const stillNeed = await needFinalizeKeyCoinTypeAction(
             vaultId,
@@ -688,7 +688,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
                   }
                   disabled={
                     "cosmos" in ci
-                      ? chainStore.hasChain(ci.chainId)
+                      ? chainStore.hasModularChain(ci.chainId)
                         ? !chainStore.isInChainInfosInListUI(ci.chainId)
                         : false
                       : false

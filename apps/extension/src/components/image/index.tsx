@@ -176,7 +176,10 @@ export const CurrencyImageFallback: FunctionComponent<
             }
           }
 
-          if (isAxelarBridged && chainStore.hasChain(axelarChainIdentifier)) {
+          if (
+            isAxelarBridged &&
+            chainStore.hasModularChain(axelarChainIdentifier)
+          ) {
             const axlCurrency = chainStore
               .getModularChainInfoImpl(axelarChainIdentifier)
               .findCurrency("uaxl");

@@ -149,7 +149,7 @@ export class ENSNameService implements NameService {
         this._isFetching = true;
       });
 
-      if (!this.chainGetter.hasChain(this._ens.chainId)) {
+      if (!this.chainGetter.hasModularChain(this._ens.chainId)) {
         throw new Error(`Can't find chain: ${this._ens.chainId}`);
       }
 

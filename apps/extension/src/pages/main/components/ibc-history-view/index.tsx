@@ -1146,7 +1146,9 @@ const SkipHistoryViewItem: FunctionComponent<{
                   transferAssetRelease.released
                 ) {
                   if (history.swapRefundInfo) {
-                    if (chainStore.hasChain(history.swapRefundInfo.chainId)) {
+                    if (
+                      chainStore.hasModularChain(history.swapRefundInfo.chainId)
+                    ) {
                       const swapRefundChain = chainStore.getChain(
                         history.swapRefundInfo.chainId
                       );
@@ -1185,7 +1187,7 @@ const SkipHistoryViewItem: FunctionComponent<{
                     ? `eip155:${transferAssetRelease.chain_id}`
                     : transferAssetRelease.chain_id;
 
-                  if (chainStore.hasChain(chainIdInKeplr)) {
+                  if (chainStore.hasModularChain(chainIdInKeplr)) {
                     const releasedChain = chainStore.getChain(chainIdInKeplr);
 
                     const destinationDenom = (() => {

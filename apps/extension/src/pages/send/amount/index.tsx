@@ -954,7 +954,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                   const chainIdInKeplr = isOnlyEvm
                     ? `eip155:${chainId}`
                     : chainId;
-                  if (!chainStore.hasChain(chainIdInKeplr)) {
+                  if (!chainStore.hasModularChain(chainIdInKeplr)) {
                     continue;
                   }
 
@@ -966,7 +966,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
                   if (isOnlyEvm && !receiverAccount.ethereumHexAddress) {
                     const receiverChainInfo =
-                      chainStore.hasChain(chainId) &&
+                      chainStore.hasModularChain(chainId) &&
                       chainStore.getChain(chainId);
                     if (
                       receiverAccount.isNanoLedger &&
