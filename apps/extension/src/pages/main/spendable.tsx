@@ -162,7 +162,7 @@ const chainSearchFields = [
   },
 ];
 
-const AvailableCollapsibleList: FunctionComponent<{
+const SpendableCollapsibleList: FunctionComponent<{
   items: React.ReactNode[];
   lenAlwaysShown: number;
   onCollapse?: (isCollapsed: boolean) => void;
@@ -275,7 +275,7 @@ const TokenItemWithCopyAddress: FunctionComponent<{
   }
 );
 
-export const AvailableTabView: FunctionComponent<{
+export const SpendableAssetView: FunctionComponent<{
   search: string;
   isNotReady?: boolean;
 
@@ -547,10 +547,10 @@ export const AvailableTabView: FunctionComponent<{
                   <Subtitle4>{TokenViewData.balance.length}</Subtitle4>
                   <TokenTitleView
                     title={intl.formatMessage({
-                      id: "page.main.available.available-balance-title",
+                      id: "page.main.spendable.spendable-balance-title",
                     })}
                     tooltip={intl.formatMessage({
-                      id: "page.main.available.available-balance-tooltip",
+                      id: "page.main.spendable.spendable-balance-tooltip",
                     })}
                     right={
                       <ViewOptionsContextMenu
@@ -587,7 +587,7 @@ export const AvailableTabView: FunctionComponent<{
               <YAxis alignX="center">
                 <ManageViewAssetTokenPageButton
                   text={intl.formatMessage({
-                    id: "page.main.available.manage-asset-list-button",
+                    id: "page.main.spendable.manage-asset-list-button",
                   })}
                   size="small"
                   right={
@@ -636,11 +636,11 @@ export const AvailableTabView: FunctionComponent<{
                 >
                   <Stack alignX="center" gutter="0.1rem">
                     <Subtitle1>
-                      <FormattedMessage id="page.main.available.search-show-check-manage-asset-view-guide-title" />
+                      <FormattedMessage id="page.main.spendable.search-show-check-manage-asset-view-guide-title" />
                     </Subtitle1>
                     <Body2 style={{ textAlign: "center", lineHeight: "1.4" }}>
                       <FormattedMessage
-                        id="page.main.available.search-show-check-manage-asset-view-guide-paragraph"
+                        id="page.main.spendable.search-show-check-manage-asset-view-guide-paragraph"
                         values={{
                           br: <br />,
                         }}
@@ -658,10 +658,10 @@ export const AvailableTabView: FunctionComponent<{
                 <EmptyView>
                   <Stack alignX="center" gutter="0.1rem">
                     <Subtitle3 style={{ fontWeight: 700 }}>
-                      <FormattedMessage id="page.main.available.search-empty-view-title" />
+                      <FormattedMessage id="page.main.spendable.search-empty-view-title" />
                     </Subtitle3>
                     <Subtitle3>
-                      <FormattedMessage id="page.main.available.search-empty-view-paragraph" />
+                      <FormattedMessage id="page.main.spendable.search-empty-view-paragraph" />
                     </Subtitle3>
                   </Stack>
                 </EmptyView>
@@ -681,15 +681,15 @@ export const AvailableTabView: FunctionComponent<{
                   />
                 }
                 paragraph={intl.formatMessage({
-                  id: "page.main.available.empty-view-paragraph",
+                  id: "page.main.spendable.empty-view-paragraph",
                 })}
                 title={intl.formatMessage({
-                  id: "page.main.available.empty-view-title",
+                  id: "page.main.spendable.empty-view-title",
                 })}
                 button={
                   <Button
                     text={intl.formatMessage({
-                      id: "page.main.available.get-started-button",
+                      id: "page.main.spendable.get-started-button",
                     })}
                     color="primary"
                     size="small"
@@ -768,7 +768,7 @@ const TokensFlatViewScene = observer(
     return (
       <React.Fragment>
         {TokenViewData.balance.length === 0 ? null : (
-          <AvailableCollapsibleList
+          <SpendableCollapsibleList
             notRenderHiddenItems={true}
             onCollapse={(isCollapsed) => {
               if (isCollapsed) {
@@ -833,7 +833,7 @@ const TokensGroupedViewScene = observer(
     return (
       <React.Fragment>
         {searchedGroupedTokensMap.size === 0 ? null : (
-          <AvailableCollapsibleList
+          <SpendableCollapsibleList
             notRenderHiddenItems={true}
             onCollapse={(isCollapsed) => {
               if (isCollapsed) {
@@ -913,12 +913,12 @@ const useAllBalances = (trimSearch: string) => {
   const TokenViewData: TokenViewData = useMemo(
     () => ({
       title: intl.formatMessage({
-        id: "page.main.available.available-balance-title",
+        id: "page.main.spendable.spendable-balance-title",
       }),
       balance: allBalancesSearchFiltered,
       lenAlwaysShown: 10,
       tooltip: intl.formatMessage({
-        id: "page.main.available.available-balance-tooltip",
+        id: "page.main.spendable.spendable-balance-tooltip",
       }),
     }),
     [intl, allBalancesSearchFiltered]

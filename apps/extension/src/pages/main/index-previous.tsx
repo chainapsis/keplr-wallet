@@ -31,7 +31,7 @@ import { DualChart } from "./components/chart";
 import { Gutter } from "../../components/gutter";
 import { H1, Subtitle3, Subtitle4 } from "../../components/typography";
 import { ColorPalette, SidePanelMaxWidth } from "../../styles";
-import { AvailableTabView } from "./available";
+import { SpendableAssetView } from "./spendable";
 import { StakedTabView } from "./staked";
 import { SearchTextInput } from "../../components/input";
 import { animated, useSpringValue, easings } from "@react-spring/web";
@@ -677,7 +677,7 @@ export const MainPage: FunctionComponent<{
             각 컴포넌트에서 알아서 gutter를 처리해야한다.
            */}
           {tabStatus === "available" ? (
-            <AvailableTabView
+            <SpendableAssetView
               search={search}
               isNotReady={isNotReady}
               onClickGetStarted={() => {

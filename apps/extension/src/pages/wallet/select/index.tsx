@@ -244,10 +244,10 @@ export const WalletSelectPage: FunctionComponent = observer(() => {
             <EmptyView>
               <Stack alignX="center" gutter="0.1rem">
                 <Subtitle3 style={{ fontWeight: 700 }}>
-                  <FormattedMessage id="page.main.available.search-empty-view-title" />
+                  <FormattedMessage id="page.main.spendable.search-empty-view-title" />
                 </Subtitle3>
                 <Subtitle3>
-                  <FormattedMessage id="page.main.available.search-empty-view-paragraph" />
+                  <FormattedMessage id="page.main.spendable.search-empty-view-paragraph" />
                 </Subtitle3>
               </Stack>
             </EmptyView>
