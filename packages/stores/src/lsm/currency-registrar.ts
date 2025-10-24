@@ -78,14 +78,16 @@ export class LSMCurrencyRegistrar {
       return;
     }
 
-    const chainInfo = this.chainStore.getChain(chainId);
-    if (!chainInfo.stakeCurrency) {
+    const chainInfo = this.chainStore.getModularChain(chainId);
+    if (!("cosmos" in chainInfo) || !chainInfo.cosmos.stakeCurrency) {
       return;
     }
 
     if (
-      !chainInfo.bech32Config ||
-      !coinMinimalDenom.startsWith(chainInfo.bech32Config.bech32PrefixValAddr)
+      !chainInfo.cosmos.bech32Config ||
+      !coinMinimalDenom.startsWith(
+        chainInfo.cosmos.bech32Config.bech32PrefixValAddr
+      )
     ) {
       return;
     }
@@ -99,7 +101,7 @@ export class LSMCurrencyRegistrar {
     try {
       Bech32Address.validate(
         valAddress,
-        chainInfo.bech32Config?.bech32PrefixValAddr
+        chainInfo.cosmos.bech32Config?.bech32PrefixValAddr
       );
     } catch {
       // noop
@@ -196,7 +198,7 @@ export class LSMCurrencyRegistrar {
 
           return "Unknown";
         })()}/${id}`,
-        coinDecimals: chainInfo.stakeCurrency.coinDecimals,
+        coinDecimals: chainInfo.cosmos.stakeCurrency.coinDecimals,
         coinImageUrl: validator.thumbnail || undefined,
       },
       done: !validator.isFetching,

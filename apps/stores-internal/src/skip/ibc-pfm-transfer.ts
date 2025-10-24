@@ -17,7 +17,7 @@ export class ObservableQueryIbcPfmTransfer {
     (chainId: string, coinMinimalDenom: string): NoneIBCBridgeInfo[] => {
       const res: NoneIBCBridgeInfo[] = [];
 
-      const chainInfo = this.chainStore.getChain(chainId);
+      const chainInfo = this.chainStore.getModularChain(chainId);
 
       const candidateChainIds = this.queryChains.chains
         .filter((c) => {
@@ -52,7 +52,7 @@ export class ObservableQueryIbcPfmTransfer {
 
         if (candidateAsset) {
           const currencyFound = this.chainStore
-            .getChain(chainId)
+            .getModularChainInfoImpl(chainId)
             .findCurrencyWithoutReaction(candidateAsset.denom);
 
           if (currencyFound) {
@@ -119,7 +119,9 @@ export class ObservableQueryIbcPfmTransfer {
               this.chainStore.hasModularChain(asset.chainId) &&
               this.chainStore.hasModularChain(asset.originChainId)
             ) {
-              if (!this.chainStore.isInChainInfosInListUI(asset.chainId)) {
+              if (
+                !this.chainStore.isInModularChainInfosInListUI(asset.chainId)
+              ) {
                 continue;
               }
 
@@ -131,10 +133,10 @@ export class ObservableQueryIbcPfmTransfer {
               }[] = [];
 
               const currency = this.chainStore
-                .getChain(chainId)
+                .getModularChainInfoImpl(chainId)
                 .findCurrencyWithoutReaction(denom);
               const destinationCurrency = this.chainStore
-                .getChain(asset.chainId)
+                .getModularChainInfoImpl(asset.chainId)
                 .findCurrencyWithoutReaction(asset.denom);
 
               if (
@@ -311,10 +313,12 @@ export class ObservableQueryIbcPfmTransfer {
         .sort((a, b) => {
           // Sort by chain name.
           return this.chainStore
-            .getChain(a.destinationChainId)
+            .getModularChain(a.destinationChainId)
             .chainName.trim()
             .localeCompare(
-              this.chainStore.getChain(b.destinationChainId).chainName.trim()
+              this.chainStore
+                .getModularChain(b.destinationChainId)
+                .chainName.trim()
             );
         });
     }

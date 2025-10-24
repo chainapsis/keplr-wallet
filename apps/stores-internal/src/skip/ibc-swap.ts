@@ -1,9 +1,9 @@
-import { HasMapStore, IChainInfoImpl } from "@keplr-wallet/stores";
+import { HasMapStore } from "@keplr-wallet/stores";
 import {
   AppCurrency,
-  ChainInfo,
   Currency,
   ERC20Currency,
+  ModularChainInfo,
 } from "@keplr-wallet/types";
 import { ObservableQueryAssetsBatch } from "./assets";
 import { computed, makeObservable } from "mobx";
@@ -49,7 +49,7 @@ export class ObservableQueryIBCSwapInner {
   ): ObservableQueryMsgsDirectInner {
     const inAmount = new CoinPretty(
       this.chainStore
-        .getChain(this.sourceAssetChainId)
+        .getModularChainInfoImpl(this.sourceAssetChainId)
         .forceFindCurrency(this.amountInDenom),
       this.amountInAmount
     );
@@ -71,7 +71,7 @@ export class ObservableQueryIBCSwapInner {
   getQueryRoute(): ObservableQueryRouteInner {
     const inAmount = new CoinPretty(
       this.chainStore
-        .getChain(this.sourceAssetChainId)
+        .getModularChainInfoImpl(this.sourceAssetChainId)
         .forceFindCurrency(this.amountInDenom),
       this.amountInAmount
     );
@@ -170,7 +170,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
         return false;
       }
     }
-    if (!this.chainStore.isInChainInfosInListUI(chainId)) {
+    if (!this.chainStore.isInModularChainInfosInListUI(chainId)) {
       return false;
     }
 
@@ -188,7 +188,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
         // osmosis 위에 있는 ibc 토큰은 그냥 통과시킨다.
         if (
           ChainIdHelper.parse(chainId).identifier ===
-          this.chainStore.getChain(swapVenue.chainId).chainIdentifier
+          ChainIdHelper.parse(swapVenue.chainId).identifier
         ) {
           return true;
         }
@@ -202,7 +202,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
           return false;
         }
 
-        const swapVenueChainId = this.chainStore.getChain(
+        const swapVenueChainId = this.chainStore.getModularChain(
           swapVenue.chainId
         ).chainId;
 
@@ -237,7 +237,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
             }
 
             const destinationCurrency = this.chainStore
-              .getChain(asset.chainId)
+              .getModularChainInfoImpl(asset.chainId)
               .findCurrencyWithoutReaction(asset.denom);
 
             if (!destinationCurrency) {
@@ -394,7 +394,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
   get swapDestinationCurrenciesMap(): Map<
     string,
     {
-      chainInfo: IChainInfoImpl;
+      chainInfo: ModularChainInfo;
       currencies: Currency[];
     }
   > {
@@ -402,7 +402,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
     const res = new Map<
       string,
       {
-        chainInfo: IChainInfoImpl;
+        chainInfo: ModularChainInfo;
         currencies: Currency[];
       }
     >();
@@ -416,10 +416,10 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
     }
 
     const getMapEntry = (chainId: string) => {
-      const chainIdentifier = this.chainStore.getChain(chainId).chainIdentifier;
+      const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
       if (!res.has(chainIdentifier)) {
         res.set(chainIdentifier, {
-          chainInfo: this.chainStore.getChain(chainId),
+          chainInfo: this.chainStore.getModularChain(chainId),
           currencies: [],
         });
       }
@@ -444,7 +444,9 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
         }
 
         // Skip assets from chains not in the UI list
-        if (!this.chainStore.isInChainInfosInListUI(asset.originChainId)) {
+        if (
+          !this.chainStore.isInModularChainInfosInListUI(asset.originChainId)
+        ) {
           continue;
         }
 
@@ -519,7 +521,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
 
   @computed
   get swapDestinationCurrencies(): {
-    chainInfo: IChainInfoImpl;
+    chainInfo: ModularChainInfo;
     currencies: Currency[];
   }[] {
     return Array.from(this.swapDestinationCurrenciesMap.values());
@@ -529,7 +531,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
     (chainId: string, currency: AppCurrency): boolean => {
       if (
         this.swapDestinationCurrenciesMap
-          .get(this.chainStore.getChain(chainId).chainIdentifier)
+          .get(ChainIdHelper.parse(chainId).identifier)
           ?.currencies.find(
             (c) => c.coinMinimalDenom === currency.coinMinimalDenom
           )
@@ -545,8 +547,9 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
 
         if (currency.originCurrency.coinMinimalDenom.startsWith("erc20:")) {
           const nativeCurrency = this.chainStore
-            .getChain(currency.originChainId)
-            .currencies.find((cur) => cur.coinMinimalDenom.endsWith("-native"));
+            .getModularChainInfoImpl(currency.originChainId)
+            .getCurrencies()
+            .find((cur) => cur.coinMinimalDenom.endsWith("-native"));
           if (nativeCurrency) {
             const wrappedNativeAddress =
               WRAPPED_NATIVE_ADDRESSES[currency.originChainId];
@@ -601,11 +604,9 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
                 channel.channels.length === 1 &&
                 this.swapVenues.some(
                   (swapVenue) =>
-                    this.chainStore.getChain(swapVenue.chainId)
-                      .chainIdentifier ===
-                    this.chainStore.getChain(
-                      channel.channels[0].counterpartyChainId
-                    ).chainIdentifier
+                    ChainIdHelper.parse(swapVenue.chainId).identifier ===
+                    ChainIdHelper.parse(channel.channels[0].counterpartyChainId)
+                      .identifier
                 )
             );
             if (findSwapVenue) {
@@ -616,7 +617,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
           for (const channel of channels) {
             if (
               channel.destinationChainId ===
-                this.chainStore.getChain(chainId).chainId &&
+                this.chainStore.getModularChain(chainId).chainId &&
               channel.denom === currency.coinMinimalDenom
             ) {
               return true;
@@ -633,7 +634,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
 
   getSwapDestinationCurrencyAlternativeChains = computedFn(
     (
-      chainInfo: IChainInfoImpl,
+      chainInfo: ModularChainInfo,
       currency: AppCurrency
     ): { denom: string; chainId: string }[] => {
       if (
@@ -663,7 +664,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
         chainIdsToEnsure.add(originOutChainId);
       }
 
-      const candidateChains: IChainInfoImpl<ChainInfo>[] = [];
+      const candidateChains: ModularChainInfo[] = [];
 
       // 밑에서 따로 IBC 경로에 대한 처리를 하기 때문에 여기선 EVM 체인이 포함된 경우만 다룬다.
       for (const chain of this.queryChains.chains) {
@@ -679,7 +680,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
       }
 
       const res: { denom: string; chainId: string }[] =
-        !this.chainStore.isInChainInfosInListUI(originOutChainId)
+        !this.chainStore.isInModularChainInfosInListUI(originOutChainId)
           ? []
           : [
               {
@@ -708,9 +709,9 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
           );
 
         if (candidateAsset) {
-          const currencyFound = candidateChain.findCurrencyWithoutReaction(
-            candidateAsset.denom
-          );
+          const currencyFound = this.chainStore
+            .getModularChainInfoImpl(candidateChain.chainId)
+            .findCurrencyWithoutReaction(candidateAsset.denom);
 
           if (currencyFound) {
             res.push({
@@ -747,10 +748,9 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
             channel.channels.length === 1 &&
             this.swapVenues.some(
               (swapVenue) =>
-                this.chainStore.getChain(swapVenue.chainId).chainIdentifier ===
-                this.chainStore.getChain(
-                  channel.channels[0].counterpartyChainId
-                ).chainIdentifier
+                ChainIdHelper.parse(swapVenue.chainId).identifier ===
+                ChainIdHelper.parse(channel.channels[0].counterpartyChainId)
+                  .identifier
             )
         );
         if (findSwapVenue) {
@@ -771,7 +771,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
       }
 
       return res.filter(({ chainId }) => {
-        return this.chainStore.isInChainInfosInListUI(chainId);
+        return this.chainStore.isInModularChainInfosInListUI(chainId);
       });
     }
   );

@@ -114,7 +114,7 @@ export const SwapAssetInfo: FunctionComponent<{
       }
     }, [isPriceBased]);
 
-    const fromChainInfo = chainStore.getChain(amountConfig.chainId);
+    const fromChainInfo = chainStore.getModularChain(amountConfig.chainId);
     const fromCurrency: AppCurrency | undefined = (() => {
       if (amountConfig.amount.length === 0) {
         return;
@@ -123,7 +123,7 @@ export const SwapAssetInfo: FunctionComponent<{
       return amountConfig.amount[0].currency;
     })();
 
-    const toChainInfo = chainStore.getChain(amountConfig.outChainId);
+    const toChainInfo = chainStore.getModularChain(amountConfig.outChainId);
     const outCurrency: AppCurrency = amountConfig.outCurrency;
 
     const textInputRef = useRef<HTMLInputElement | null>(null);
@@ -471,7 +471,7 @@ export const SwapAssetInfo: FunctionComponent<{
                 if (type === "to") {
                   if (
                     chainStore
-                      .getChain(amountConfig.outChainId)
+                      .getModularChainInfoImpl(amountConfig.outChainId)
                       .findCurrency(outCurrency.coinMinimalDenom) == null
                   ) {
                     return (
@@ -785,7 +785,7 @@ const SelectDestinationChainModal: FunctionComponent<{
     denom: string;
   }[] =
     skipQueriesStore.queryIBCSwap.getSwapDestinationCurrencyAlternativeChains(
-      chainStore.getChain(amountConfig.outChainId),
+      chainStore.getModularChain(amountConfig.outChainId),
       amountConfig.outCurrency
     );
 
@@ -797,7 +797,7 @@ const SelectDestinationChainModal: FunctionComponent<{
 
     return channels.filter((channel) => {
       return chainStore
-        .getChain(channel.chainId)
+        .getModularChain(channel.chainId)
         .chainName.toLowerCase()
         .includes(trim);
     });
@@ -877,7 +877,7 @@ const SelectDestinationChainModal: FunctionComponent<{
                   // amountConfig.setOutChainId(channel.destinationChainId);
                   // amountConfig.setOutCurrency(
                   //   chainStore
-                  //     .getChain(channel.destinationChainId)
+                  //     .getModularChain(channel.destinationChainId)
                   //     .forceFindCurrency(channel.denom)
                   // );
                   onDestinationChainSelect(channel.chainId, channel.denom);
@@ -898,7 +898,7 @@ const SelectDestinationChainModal: FunctionComponent<{
                         : ColorPalette["gray-10"]
                     }
                   >
-                    {chainStore.getChain(channel.chainId).chainName}
+                    {chainStore.getModularChain(channel.chainId).chainName}
                   </Subtitle2>
                 </XAxis>
               </Box>

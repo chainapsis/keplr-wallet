@@ -33,7 +33,7 @@ export class ObservableQuerySecret20BalanceImpl
       throw new Error(`Denom helper must be secret20: ${denomHelper.denom}`);
     }
     const currency = chainGetter
-      .getChain(chainId)
+      .getModularChainInfoImpl(chainId)
       .forceFindCurrency(denomHelper.denom);
     let viewingKey = "";
     if ("type" in currency && currency.type === "secret20") {

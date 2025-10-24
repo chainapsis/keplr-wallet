@@ -38,10 +38,12 @@ export class ObservableQueryEthAccountBalanceImpl
   @computed
   get balance(): CoinPretty {
     const denom = this.denomHelper.denom;
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-    const currency = chainInfo.currencies.find(
-      (cur) => cur.coinMinimalDenom === denom
+    const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
+      this.chainId
     );
+    const currency = modularChainInfoImpl
+      .getCurrencies()
+      .find((cur) => cur.coinMinimalDenom === denom);
     if (!currency) {
       throw new Error(`Unknown currency: ${denom}`);
     }
@@ -74,13 +76,13 @@ export class ObservableQueryEthAccountBalanceRegistry
     minimalDenom: string
   ): IObservableQueryBalanceImpl | undefined {
     const denomHelper = new DenomHelper(minimalDenom);
-    const chainInfo = chainGetter.getChain(chainId);
+    const chainInfo = chainGetter.getModularChain(chainId);
     const isHexAddress =
       EthereumAccountBase.isEthereumHexAddressWithChecksum(address);
     if (
       denomHelper.type !== "native" ||
       !isHexAddress ||
-      chainInfo.evm == null
+      !("evm" in chainInfo && chainInfo.evm != null)
     ) {
       return;
     }

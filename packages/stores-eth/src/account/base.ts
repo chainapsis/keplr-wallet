@@ -54,9 +54,8 @@ export class EthereumAccountBase {
   }
 
   async simulateGas(sender: string, unsignedTx: UnsignedTransaction) {
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-    const evmInfo = chainInfo.evm;
-    if (!evmInfo) {
+    const chainInfo = this.chainGetter.getModularChain(this.chainId);
+    if (!("evm" in chainInfo)) {
       throw new Error("No EVM chain info provided");
     }
 
@@ -130,14 +129,13 @@ export class EthereumAccountBase {
   }
 
   async simulateOpStackL1Fee(unsignedTx: UnsignedTransaction): Promise<string> {
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-    if (!chainInfo.features.includes("op-stack-l1-data-fee")) {
-      throw new Error("The chain isn't built with OP Stack");
+    const chainInfo = this.chainGetter.getModularChain(this.chainId);
+    if (!("evm" in chainInfo)) {
+      throw new Error("No EVM chain info provided");
     }
 
-    const evmInfo = chainInfo.evm;
-    if (!evmInfo) {
-      throw new Error("No EVM chain info provided");
+    if (!chainInfo.evm.features?.includes("op-stack-l1-data-fee")) {
+      throw new Error("The chain isn't built with OP Stack");
     }
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -235,14 +233,13 @@ export class EthereumAccountBase {
   }
 
   makeTx(to: string, value: string, data?: string): UnsignedTransaction {
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-    const evmInfo = chainInfo.evm;
-    if (!evmInfo) {
+    const chainInfo = this.chainGetter.getModularChain(this.chainId);
+    if (!("evm" in chainInfo)) {
       throw new Error("No EVM chain info provided");
     }
 
     return {
-      chainId: evmInfo.chainId,
+      chainId: chainInfo.evm.chainId,
       to,
       value,
       data,
@@ -263,12 +260,10 @@ export class EthereumAccountBase {
     }
   ) {
     try {
-      const chainInfo = this.chainGetter.getChain(this.chainId);
-      const evmInfo = chainInfo.evm;
-      if (!evmInfo) {
-        throw new Error("No EVM info provided");
+      const chainInfo = this.chainGetter.getModularChain(this.chainId);
+      if (!("evm" in chainInfo)) {
+        throw new Error("No EVM chain info provided");
       }
-
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const keplr = (await this.getKeplr())!;
 

@@ -130,9 +130,7 @@ export class NewChainSuggestionConfig {
 
     for (const r of this._remote) {
       if (this.chainStore.hasModularChain(r.chainIdentifier)) {
-        const identifier = this.chainStore.getChain(
-          r.chainIdentifier
-        ).chainIdentifier;
+        const identifier = ChainIdHelper.parse(r.chainIdentifier).identifier;
 
         if (!this.turnOffSuggestionChainsMap.get(identifier)) {
           try {

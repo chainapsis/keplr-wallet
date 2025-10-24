@@ -34,15 +34,16 @@ export class ObservableQueryInitiaDelegationsInner extends ObservableChainQuery<
     // If bech32 address is empty, it will always fail, so don't need to fetch it.
     return (
       this.bech32Address.length > 0 ||
-      this.chainGetter.getChain(this.chainId).stakeCurrency != null
+      this.chainGetter.getModularChainInfoImpl(this.chainId).stakeCurrency !=
+        null
     );
   }
 
   // a function to extract amount from delegation balance
   // For Initia chain, the balance is an array of Coin
   protected getAmountFromBalanceArray(balance: Coin[]): string {
-    const stakeDenom = this.chainGetter.getChain(this.chainId).stakeCurrency
-      ?.coinMinimalDenom;
+    const stakeDenom = this.chainGetter.getModularChainInfoImpl(this.chainId)
+      .stakeCurrency?.coinMinimalDenom;
 
     if (!stakeDenom) {
       return "0";
@@ -54,7 +55,9 @@ export class ObservableQueryInitiaDelegationsInner extends ObservableChainQuery<
 
   @computed
   get total(): CoinPretty | undefined {
-    const stakeCurrency = this.chainGetter.getChain(this.chainId).stakeCurrency;
+    const stakeCurrency = this.chainGetter.getModularChainInfoImpl(
+      this.chainId
+    ).stakeCurrency;
 
     if (!stakeCurrency) {
       return;
@@ -86,7 +89,9 @@ export class ObservableQueryInitiaDelegationsInner extends ObservableChainQuery<
       return [];
     }
 
-    const stakeCurrency = this.chainGetter.getChain(this.chainId).stakeCurrency;
+    const stakeCurrency = this.chainGetter.getModularChainInfoImpl(
+      this.chainId
+    ).stakeCurrency;
 
     if (!stakeCurrency) {
       return [];
@@ -116,7 +121,9 @@ export class ObservableQueryInitiaDelegationsInner extends ObservableChainQuery<
       return [];
     }
 
-    const stakeCurrency = this.chainGetter.getChain(this.chainId).stakeCurrency;
+    const stakeCurrency = this.chainGetter.getModularChainInfoImpl(
+      this.chainId
+    ).stakeCurrency;
 
     return this.response.data.delegation_responses
       .filter((del) => {
@@ -138,7 +145,7 @@ export class ObservableQueryInitiaDelegationsInner extends ObservableChainQuery<
     (validatorAddress: string): CoinPretty | undefined => {
       const delegations = this.delegations;
 
-      const stakeCurrency = this.chainGetter.getChain(
+      const stakeCurrency = this.chainGetter.getModularChainInfoImpl(
         this.chainId
       ).stakeCurrency;
 

@@ -99,11 +99,8 @@ export class AxelarEVMBridgeCurrencyRegistrar {
       return;
     }
 
-    const chainInfo = this.chainStore.getChain(chainId);
-    if (
-      !chainInfo.features ||
-      !chainInfo.features.includes("axelar-evm-bridge")
-    ) {
+    const chainInfo = this.chainStore.getModularChainInfoImpl(chainId);
+    if (!chainInfo.hasFeature("axelar-evm-bridge")) {
       return;
     }
 
