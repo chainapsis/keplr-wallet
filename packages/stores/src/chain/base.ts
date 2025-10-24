@@ -796,6 +796,52 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
     });
   }
 
+  findCurrencyAsync(
+    coinMinimalDenom: string
+  ): Promise<AppCurrency | undefined> {
+    const normalizedCoinMinimalDenom =
+      DenomHelper.normalizeDenom(coinMinimalDenom);
+
+    const currency = this.findCurrencyByModule(normalizedCoinMinimalDenom);
+    if (currency) {
+      return Promise.resolve(currency);
+    }
+
+    this.availableModules.forEach((module) => {
+      if (module === "cosmos" || module === "evm") {
+        this.addUnknownDenomsImpl({
+          module,
+          coinMinimalDenoms: [normalizedCoinMinimalDenom],
+          reaction: true,
+        });
+      }
+    });
+
+    let disposal: IReactionDisposer | undefined;
+
+    return new Promise<AppCurrency | undefined>((resolve) => {
+      disposal = autorun(() => {
+        const registration = this.registrationInProgressCurrencyMap.get(
+          normalizedCoinMinimalDenom
+        );
+        if (!registration) {
+          const result = this.findCurrencyByModule(normalizedCoinMinimalDenom);
+          console.log(
+            `[findCurrencyAsync] 등록`,
+            result
+              ? `성공: ${result.coinDenom} (${result.coinMinimalDenom})`
+              : "실패"
+          );
+          resolve(result);
+        }
+      });
+    }).finally(() => {
+      if (disposal) {
+        disposal();
+      }
+    });
+  }
+
   forceFindCurrencyWithoutReaction(coinMinimalDenom: string): AppCurrency {
     const normalizedCoinMinimalDenom =
       DenomHelper.normalizeDenom(coinMinimalDenom);
