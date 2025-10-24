@@ -657,6 +657,33 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
     return this._embedded.chainId;
   }
 
+  get stakeCurrency(): Currency | undefined {
+    return "cosmos" in this._embedded
+      ? this._embedded.cosmos.stakeCurrency
+      : undefined;
+  }
+
+  get feeCurrencies(): FeeCurrency[] | undefined {
+    if ("cosmos" in this._embedded) {
+      return this._embedded.cosmos.feeCurrencies;
+    }
+    if ("evm" in this._embedded) {
+      return this._embedded.evm.feeCurrencies;
+    }
+    if ("starknet" in this._embedded) {
+      const feeContractAddress = this._embedded.starknet.strkContractAddress;
+      const feeCurrency = this.getCurrenciesByModule("starknet").find(
+        (cur) => cur.coinMinimalDenom === `erc20:${feeContractAddress}`
+      );
+      if (feeCurrency) {
+        return [feeCurrency];
+      }
+    }
+    if ("bitcoin" in this._embedded) {
+      return [this._embedded.bitcoin.currencies[0]];
+    }
+  }
+
   getCurrencies(): AppCurrency[] {
     return this.availableModules
       .map((module) => this.getCurrenciesByModule(module))
