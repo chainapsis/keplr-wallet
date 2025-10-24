@@ -2261,6 +2261,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
               isForEVMTx={isEvmTx}
               nonceMethod={nonceMethod}
               setNonceMethod={setNonceMethod}
+              shouldTopUp={shouldTopUp}
             />
           </VerticalCollapseTransition>
           <VerticalCollapseTransition collapsed={!shouldTopUp}>
