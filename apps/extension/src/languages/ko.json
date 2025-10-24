@@ -616,6 +616,8 @@
   "page.main.available.search-empty-view-paragraph": "검색 결과가 없어요",
   "page.main.available.search-show-check-manage-asset-view-guide-title": "토큰을 찾을 수 없나요?",
   "page.main.available.search-show-check-manage-asset-view-guide-paragraph": "소액 숨기기가 활성화되어 있는지 확인하거나 '자산 표시 관리'에서 토큰을 확인해보세요.",
+  "page.main.balance.staked-balance-title-1": "with",
+  "page.main.balance.staked-balance-title-2": "Staked",
 
   "page.main.available.empty-view-title": "인터체인을 탐험할 준비가 되셨나요?",
   "page.main.available.empty-view-paragraph": "지갑에 자산을 채워 탐험을 시작해보세요!",
@@ -664,6 +666,11 @@
   "page.main.components.buttons.deposit-button": "받기",
   "page.main.components.buttons.buy-button": "구매하기",
   "page.main.components.buttons.send-button": "보내기",
+  "page.main.components.buttons.swap-button": "Swap",
+  "page.main.components.spendable-card.title": "Spendable",
+  "page.main.components.rewards-card.title": "Rewards",
+  "page.main.components.rewards-card.claim-all-button": "Claim All",
+
   "page.main.components.claim-all.title": "아직 받지 않은 리워드",
   "page.main.components.claim-all.button": "한번에 받기",
   "page.main.components.claim-all.claim-button": "받기",

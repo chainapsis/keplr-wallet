@@ -1,5 +1,5 @@
 export * from "./claim-all";
-export * from "./buttons";
+export * from "./spendable-card";
 export * from "./buy-crypto-modal";
 export * from "./token";
 export * from "./menu-bar";
