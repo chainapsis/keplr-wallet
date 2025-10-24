@@ -78,9 +78,10 @@ export const EcosystemsSelector: FunctionComponent<{
           "bitcoin" in chain &&
           chain.bitcoin.chainId === representativeSection.chainId
       );
-    } else if (representativeSection.type === "evm") {
-      return chainStore.getChain(representativeSection.chainId);
-    } else if (representativeSection.type === "starknet") {
+    } else if (
+      representativeSection.type === "evm" ||
+      representativeSection.type === "starknet"
+    ) {
       return chainStore.getModularChain(representativeSection.chainId);
     }
 

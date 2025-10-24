@@ -69,7 +69,7 @@ export class LSMCurrencyRegistrar {
         done: boolean;
       }
     | undefined {
-    if (!this.chainStore.hasChain(chainId)) {
+    if (!this.chainStore.hasModularChain(chainId)) {
       return;
     }
 

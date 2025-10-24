@@ -194,7 +194,7 @@ export const HistoryDetailTopSection: FunctionComponent<{
     case "evm/erc20-approve": {
       icon = <HistoryDetailEvmApproveIcon />;
       const currency = chainStore
-        .getChain(msg.chainId)
+        .getModularChainInfoImpl(msg.chainId)
         .findCurrency(
           msg.meta["contract"] ? `erc20:${msg.meta["contract"]}` : targetDenom
         );

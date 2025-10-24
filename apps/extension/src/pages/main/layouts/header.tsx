@@ -61,7 +61,7 @@ export const MainHeaderLayout = observer<
     const icnsPrimaryName = (() => {
       if (
         uiConfigStore.icnsInfo &&
-        chainStore.hasChain(uiConfigStore.icnsInfo.chainId)
+        chainStore.hasModularChain(uiConfigStore.icnsInfo.chainId)
       ) {
         const queries = queriesStore.get(uiConfigStore.icnsInfo.chainId);
         const icnsQuery = queries.icns.queryICNSNames.getQueryContract(

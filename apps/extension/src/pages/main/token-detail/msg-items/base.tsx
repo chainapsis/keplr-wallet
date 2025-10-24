@@ -50,10 +50,10 @@ export const MsgItemBase: FunctionComponent<{
     const navigate = useNavigate();
     const theme = useTheme();
 
-    const chainInfo = chainStore.getChain(chainId);
+    const modularChainInfoImpl = chainStore.getModularChainInfoImpl(chainId);
 
     // mobx와 useMemo의 조합 문제로... 값 몇개를 밖으로 뺀다.
-    const foundCurrency = chainInfo.findCurrency(targetDenom);
+    const foundCurrency = modularChainInfoImpl.findCurrency(targetDenom);
     const defaultVsCurrency = priceStore.defaultVsCurrency;
     const sendAmountPricePretty = useMemo(() => {
       if (typeof amount === "string") {
@@ -131,7 +131,7 @@ export const MsgItemBase: FunctionComponent<{
                     >
                       {
                         <ChainImageFallback
-                          chainInfo={chainInfo}
+                          chainInfo={modularChainInfoImpl.embedded}
                           size="0.875rem"
                         />
                       }

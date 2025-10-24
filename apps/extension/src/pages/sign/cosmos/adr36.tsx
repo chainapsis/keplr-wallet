@@ -343,7 +343,7 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
         {chainId && (
           <ArbitraryMsgWalletDetails
             walletName={signerInfo.name}
-            chainInfo={chainStore.getChain(chainId)}
+            chainInfo={chainStore.getModularChain(chainId)}
             addressInfo={{
               type: "bech32",
               address: signerInfo.address,

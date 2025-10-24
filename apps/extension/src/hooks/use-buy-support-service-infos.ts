@@ -63,7 +63,7 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
                 Object.entries(
                   serviceInfo.buySupportCoinDenomsByChainId
                 ).reduce((finalAcc, [chainId, coinDenoms]) => {
-                  if (chainStore.hasChain(chainId)) {
+                  if (chainStore.hasModularChain(chainId)) {
                     const currencyCodeMap = coinDenoms?.reduce(
                       (acc, coinDenom) => {
                         const chainInfo = chainStore.getChain(chainId);
@@ -109,7 +109,7 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
                   serviceInfo.buySupportCoinDenomsByChainId
                 ).reduce(
                   (finalAcc, [chainId, coinDenoms]) => {
-                    if (chainStore.hasChain(chainId)) {
+                    if (chainStore.hasModularChain(chainId)) {
                       const chainInfo = chainStore.getChain(chainId);
                       const coins = coinDenoms?.reduce(
                         (coinsAcc, coinDenom) => {
@@ -164,7 +164,7 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
                   (modularChainInfo) => modularChainInfo.chainId === chainId
                 );
 
-                if (chainStore.hasChain(chainId)) {
+                if (chainStore.hasModularChain(chainId)) {
                   const address = chainStore.isEvmChain(chainId)
                     ? accountStore.getAccount(chainId).ethereumHexAddress
                     : accountStore.getAccount(chainId).bech32Address;

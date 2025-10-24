@@ -79,8 +79,7 @@ export class ObservableQueryThirdpartyERC20BalancesImplParent extends Observable
   ) {
     super.onReceiveResponse(response);
 
-    // Note: yet support legacy ChainInfo
-    const chainInfo = this.chainGetter.getChain(this.chainId);
+    const chainInfo = this.chainGetter.getModularChainInfoImpl(this.chainId);
     const erc20Denoms = response.data.tokenBalances
       .filter(
         (tokenBalance) =>
@@ -90,7 +89,10 @@ export class ObservableQueryThirdpartyERC20BalancesImplParent extends Observable
       .map((tokenBalance) => `erc20:${tokenBalance.contractAddress}`);
 
     if (erc20Denoms.length) {
-      chainInfo.addUnknownDenoms(...erc20Denoms);
+      chainInfo.addUnknownDenoms({
+        module: "evm",
+        coinMinimalDenoms: erc20Denoms,
+      });
     }
 
     this.registerTokensToModularChain(response);
@@ -200,8 +202,9 @@ export class ObservableQueryThirdpartyERC20BalancesImpl
   get currency(): AppCurrency {
     const denom = this.denomHelper.denom;
 
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-    return chainInfo.forceFindCurrency(denom);
+    return this.chainGetter
+      .getModularChainInfoImpl(this.chainId)
+      .forceFindCurrency(denom);
   }
 
   get error(): Readonly<QueryError<unknown>> | undefined {

@@ -83,14 +83,15 @@ const ExecuteContractMessagePretty: FunctionComponent<{
   callbackCodeHash: string | undefined;
 }> = observer(({ chainId, funds, contract, msg }) => {
   const { chainStore } = useStore();
+  const modularChainInfoImpl = chainStore.getModularChainInfoImpl(chainId);
 
   const coins = funds.map((coin) => {
-    const currency = chainStore.getChain(chainId).forceFindCurrency(coin.denom);
+    const currency = modularChainInfoImpl.forceFindCurrency(coin.denom);
 
     return new CoinPretty(currency, coin.amount);
   });
 
-  const isSecretWasm = chainStore.getChain(chainId).hasFeature("secretwasm");
+  const isSecretWasm = modularChainInfoImpl.hasFeature("secretwasm");
 
   return (
     <React.Fragment>

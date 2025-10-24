@@ -152,7 +152,7 @@ export class ICNSNameService implements NameService {
         this._isFetching = true;
       });
 
-      if (!this.chainGetter.hasChain(this._icns.chainId)) {
+      if (!this.chainGetter.hasModularChain(this._icns.chainId)) {
         throw new Error(`Can't find chain: ${this._icns.chainId}`);
       }
 

@@ -695,7 +695,7 @@ export const TokenDetailModal: FunctionComponent<{
             if ("paths" in currency && currency.paths.length > 0) {
               const path = currency.paths[currency.paths.length - 1];
               if (path.clientChainId) {
-                const chainName = chainStore.hasChain(path.clientChainId)
+                const chainName = chainStore.hasModularChain(path.clientChainId)
                   ? chainStore.getChain(path.clientChainId).chainName
                   : path.clientChainId;
                 infos.push({

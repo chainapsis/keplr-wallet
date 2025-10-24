@@ -57,14 +57,14 @@ export const MsgRelationIBCSwap: FunctionComponent<{
           if (!path.chainId) {
             return undefined;
           }
-          if (!chainStore.hasChain(path.chainId)) {
+          if (!chainStore.hasModularChain(path.chainId)) {
             return undefined;
           }
 
           if (!path.clientChainId) {
             return undefined;
           }
-          if (!chainStore.hasChain(path.clientChainId)) {
+          if (!chainStore.hasModularChain(path.clientChainId)) {
             return undefined;
           }
 
@@ -90,7 +90,7 @@ export const MsgRelationIBCSwap: FunctionComponent<{
         )?.chainId;
 
         if (swapVenueChainId) {
-          return chainStore.hasChain(swapVenueChainId)
+          return chainStore.hasModularChain(swapVenueChainId)
             ? chainStore.getChain(swapVenueChainId)
             : undefined;
         }

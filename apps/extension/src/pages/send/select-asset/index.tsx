@@ -103,18 +103,21 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
   const searchedTokens = useSearch(nonZeroTokens, search, searchFields);
 
   const _filteredTokens = useMemo(() => {
+    console.log("paramIsIBCTransfer", paramIsIBCTransfer);
     if (paramIsIBCTransfer) {
       return searchedTokens.filter((token) => {
-        if (!("currencies" in token.chainInfo)) {
+        if (!("cosmos" in token.chainInfo)) {
           return false;
         }
 
-        return token.chainInfo.hasFeature("ibc-transfer");
+        return chainStore
+          .getModularChainInfoImpl(token.chainInfo.chainId)
+          .hasFeature("ibc-transfer");
       });
     }
 
     return searchedTokens;
-  }, [paramIsIBCTransfer, searchedTokens]);
+  }, [chainStore, paramIsIBCTransfer, searchedTokens]);
 
   const filteredTokens = _filteredTokens.filter((token) => {
     if (paramIsIBCSwap) {

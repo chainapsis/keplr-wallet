@@ -52,7 +52,7 @@ export const IBCAddChannelModal: FunctionComponent<{
           })}
           menuContainerMaxHeight="10rem"
           selectedItemKey={selectedChainId}
-          items={chainStore.chainInfos
+          items={chainStore.modularChainInfoImpls
             .filter(
               (chainInfo) =>
                 chainInfo.chainId !== chainId &&
@@ -61,7 +61,7 @@ export const IBCAddChannelModal: FunctionComponent<{
             .map((chainInfo) => {
               return {
                 key: chainInfo.chainId,
-                label: chainInfo.chainName,
+                label: chainInfo.embedded.chainName,
               };
             })}
           onSelect={(key) => {

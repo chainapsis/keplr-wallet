@@ -1280,7 +1280,7 @@ export const EnableChainsScene: FunctionComponent<{
         if (fallbackEthereumLedgerApp) {
           return (
             <ChainImageFallback
-              chainInfo={chainStore.getChain("eip155:1")}
+              chainInfo={chainStore.getModularChain("eip155:1")}
               size="3rem"
             />
           );
@@ -1674,24 +1674,22 @@ export const EnableChainsScene: FunctionComponent<{
             {showLedgerChains &&
               searchedLedgerChains.map((modularChainInfo) => {
                 if ("cosmos" in modularChainInfo) {
-                  const chainInfo = chainStore.getChain(
-                    modularChainInfo.chainId
-                  );
+                  const cosmos = modularChainInfo.cosmos;
                   const isEthermintLike =
-                    chainInfo.bip44.coinType === 60 ||
-                    !!chainInfo.features?.includes("eth-address-gen") ||
-                    !!chainInfo.features?.includes("eth-key-sign");
+                    cosmos.bip44.coinType === 60 ||
+                    !!cosmos.features?.includes("eth-address-gen") ||
+                    !!cosmos.features?.includes("eth-key-sign");
 
                   const isLedgerSupported = (() => {
                     try {
                       if (
-                        chainInfo.features?.includes("force-enable-evm-ledger")
+                        cosmos.features?.includes("force-enable-evm-ledger")
                       ) {
                         return true;
                       }
                       // 처리가능한 체인만 true를 반환한다.
                       KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
-                        chainInfo.chainId
+                        cosmos.chainId
                       );
                       return true;
                     } catch {
@@ -1731,26 +1729,27 @@ export const EnableChainsScene: FunctionComponent<{
 
             {!fallbackStarknetLedgerApp &&
               !fallbackBitcoinLedgerApp &&
-              searchedNonNativeChainInfos.map((modularChainInfo) => {
+              searchedNonNativeChainInfos.map((chainInfo) => {
                 const chainIdentifier = ChainIdHelper.parse(
-                  modularChainInfo.chainId
+                  chainInfo.chainId
                 ).identifier;
                 const isChecked =
-                  nonNativeChainListForSuggest.includes(modularChainInfo);
-                const isChainInfoType = "bip44" in modularChainInfo;
+                  nonNativeChainListForSuggest.includes(chainInfo);
+                const isChainInfoType = "bip44" in chainInfo;
 
                 const isNextStepChain =
                   !fallbackEthereumLedgerApp &&
                   keyType === "ledger" &&
                   isChainInfoType &&
-                  (modularChainInfo.bip44.coinType === 60 ||
-                    !!modularChainInfo.features?.includes("eth-address-gen") ||
-                    !!modularChainInfo.features?.includes("eth-key-sign"));
+                  (chainInfo.bip44.coinType === 60 ||
+                    !!chainInfo.features?.includes("eth-address-gen") ||
+                    !!chainInfo.features?.includes("eth-key-sign"));
+
                 if (isNextStepChain) {
                   return (
                     <NextStepChainItem
                       key={chainIdentifier}
-                      modularChainInfo={modularChainInfo}
+                      modularChainInfo={chainInfo}
                       tagText="EVM"
                     />
                   );
@@ -1768,14 +1767,14 @@ export const EnableChainsScene: FunctionComponent<{
                         : undefined
                     }
                     key={chainIdentifier}
-                    chainInfo={modularChainInfo}
+                    chainInfo={chainInfo}
                     enabled={isChecked}
                     isFresh={true}
                     blockInteraction={false}
                     onClick={() => {
                       debouncedLogChainSearchClick(
                         analyticsAmplitudeStore,
-                        modularChainInfo,
+                        chainInfo,
                         search,
                         searchedAllChains
                       );
@@ -1783,13 +1782,13 @@ export const EnableChainsScene: FunctionComponent<{
                       if (isChecked) {
                         setNonNativeChainListForSuggest(
                           nonNativeChainListForSuggest.filter(
-                            (ci) => ci.chainId !== modularChainInfo.chainId
+                            (ci) => ci.chainId !== chainInfo.chainId
                           )
                         );
                       } else {
                         setNonNativeChainListForSuggest([
                           ...nonNativeChainListForSuggest,
-                          modularChainInfo,
+                          chainInfo,
                         ]);
                       }
                     }}

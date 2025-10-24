@@ -432,7 +432,7 @@ const FoundChainView: FunctionComponent<{
         <Stack gutter="0.25rem">
           <Subtitle3>
             {
-              (chainStore.hasChain(tokenScan.chainId)
+              (chainStore.hasModularChain(tokenScan.chainId)
                 ? chainStore.getChain(tokenScan.chainId)
                 : chainStore.getModularChain(tokenScan.chainId)
               ).chainName
@@ -515,7 +515,7 @@ const FoundTokenView: FunctionComponent<{
       <Box width="1.5rem" height="1.5rem">
         <CurrencyImageFallback
           chainInfo={
-            chainStore.hasChain(chainId)
+            chainStore.hasModularChain(chainId)
               ? chainStore.getChain(chainId)
               : chainStore.getModularChain(chainId)
           }
