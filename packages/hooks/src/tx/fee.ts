@@ -1242,7 +1242,6 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       if (this._topUpStatus.shouldTopUp) {
         return {
           warning: this._uiProperties.error,
-          loadingState: this._uiProperties.loadingState,
         };
       }
     }
