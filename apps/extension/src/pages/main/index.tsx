@@ -449,7 +449,9 @@ export const MainPage: FunctionComponent<{
                 )}
                 <span style={{ color: ColorPalette["gray-300"] }}>
                   {uiConfigStore.hideStringIfPrivacyMode(
-                    totalPrice?.toString().split(".")[1] || "",
+                    totalPrice?.toString().split(".")[1]
+                      ? `.${totalPrice?.toString().split(".")[1]}`
+                      : "",
                     0
                   )}
                 </span>
