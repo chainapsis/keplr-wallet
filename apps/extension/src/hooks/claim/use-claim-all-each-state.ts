@@ -40,8 +40,8 @@ export const useClaimAllEachState = () => {
     // modular chain의 경우 chainIdentifier가 없다.
     // 따라서 chainId를 사용한다.
 
-    const chainIdentifier = chainStore.hasChain(chainId)
-      ? chainStore.getChain(chainId).chainIdentifier
+    const chainIdentifier = chainStore.hasModularChain(chainId)
+      ? chainStore.getModularChain(chainId).chainId
       : chainId;
 
     let state = statesRef.current.get(chainIdentifier);

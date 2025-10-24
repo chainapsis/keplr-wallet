@@ -166,10 +166,10 @@ export class HugeQueriesStore {
           account.ethereumHexAddress
         );
 
-        // 외부에 요청된 balance를 기다려야 modularChainInfoImpl.getCurrencies("evm")에서 currencies 목록을 전부 얻을 수 있다.
+        // 외부에 요청된 balance를 기다려야 modularChainInfoImpl.getCurrenciesByModule("evm")에서 currencies 목록을 전부 얻을 수 있다.
         queryBalance.balances.forEach((b) => b.waitResponse());
 
-        const currencies = modularChainInfoImpl.getCurrencies("evm");
+        const currencies = modularChainInfoImpl.getCurrenciesByModule("evm");
 
         for (const currency of currencies) {
           const key = `${
@@ -334,7 +334,8 @@ export class HugeQueriesStore {
           modularChainInfo.chainId
         );
         const queries = this.starknetQueriesStore.get(modularChainInfo.chainId);
-        const currencies = modularChainInfoImpl.getCurrencies("starknet");
+        const currencies =
+          modularChainInfoImpl.getCurrenciesByModule("starknet");
 
         for (const currency of currencies) {
           const queryBalance = queries.queryStarknetERC20Balance.getBalance(
@@ -392,7 +393,8 @@ export class HugeQueriesStore {
           modularChainInfo.chainId
         );
         const queries = this.bitcoinQueriesStore.get(modularChainInfo.chainId);
-        const currencies = modularChainInfoImpl.getCurrencies("bitcoin");
+        const currencies =
+          modularChainInfoImpl.getCurrenciesByModule("bitcoin");
 
         const currency = currencies[0];
 
@@ -568,7 +570,8 @@ export class HugeQueriesStore {
           modularChainInfo.chainId
         );
         const queries = this.starknetQueriesStore.get(modularChainInfo.chainId);
-        const currencies = modularChainInfoImpl.getCurrencies("starknet");
+        const currencies =
+          modularChainInfoImpl.getCurrenciesByModule("starknet");
 
         for (const currency of currencies) {
           const queryBalance = queries.queryStarknetERC20Balance.getBalance(
@@ -729,7 +732,9 @@ export class HugeQueriesStore {
           const modularChainInfoImpl = this.chainStore.getModularChainInfoImpl(
             modularChainInfo.chainId
           );
-          for (const currency of modularChainInfoImpl.getCurrencies(module)) {
+          for (const currency of modularChainInfoImpl.getCurrenciesByModule(
+            module
+          )) {
             const key = `${
               ChainIdHelper.parse(modularChainInfo.chainId).identifier
             }/${currency.coinMinimalDenom}`;

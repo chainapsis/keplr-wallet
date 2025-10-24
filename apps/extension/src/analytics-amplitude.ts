@@ -252,8 +252,10 @@ export const logNobleClaimAnalytics = async (
   eventName: string
 ) => {
   const chainId = NOBLE_CHAIN_ID;
-  const chainInfo = chainStore.getChain(chainId);
-  const currency = await chainInfo.findCurrencyAsync("uusdn");
+  const chainInfo = chainStore.getModularChain(chainId);
+  const currency = await chainStore
+    .getModularChainInfoImpl(chainId)
+    .findCurrencyAsync("uusdn");
   const bech32Address = accountStore.getAccount(chainId).bech32Address;
 
   if (!bech32Address) return;
