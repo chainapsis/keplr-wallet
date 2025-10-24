@@ -27,6 +27,6 @@
     "buffer": "^6.0.3",
     "long": "^4.0.0",
     "protobufjs": "^6.11.2",
-    "utility-types": "3.10.0"
+    "utility-types": "^3.10.0"
   }
 }
