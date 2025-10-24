@@ -1049,12 +1049,16 @@ function StakedBalanceTitle({
   stakedPercentage: number;
 }) {
   const intl = useIntl();
+  const [isHover, setIsHover] = useState(false);
   // const navigate = useNavigate();
 
   return (
     <Skeleton isNotReady={isNotReady}>
       <Box
+        onHoverStateChange={(hovered) => setIsHover(hovered)}
         paddingY="0.125rem"
+        cursor="pointer"
+        opacity={isHover ? 0.8 : 1}
         onClick={() => {
           // TODO: 추후 staked 페이지로 바로 이동
         }}
