@@ -29,7 +29,7 @@ class ObservableQueryTopUpStatusInner extends ObservableQuery<StatusResponseBody
         chainId
       )}?recipientAddress=${encodeURIComponent(recipientAddress)}`,
       {
-        cacheMaxAge: 0,
+        disableCache: true,
         fetchingInterval: 10_000,
       }
     );
@@ -38,7 +38,7 @@ class ObservableQueryTopUpStatusInner extends ObservableQuery<StatusResponseBody
   }
 
   get topUpStatus(): { isTopUpAvailable: boolean; remainingTimeMs?: number } {
-    if (!this.response?.data) {
+    if (this.error || !this.response?.data) {
       return {
         isTopUpAvailable: false,
         remainingTimeMs: undefined,
