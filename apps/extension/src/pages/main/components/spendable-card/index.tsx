@@ -41,10 +41,10 @@ export const SpendableCard: FunctionComponent<{
         padding="1rem"
       >
         <Box>
-          <Skeleton isNotReady={isNotReady}>
+          <Skeleton isNotReady={isNotReady} verticalBleed="2px">
             <Body3 color={ColorPalette["gray-200"]}>
               {intl.formatMessage({
-                id: "page.main.spendable-card.title",
+                id: "page.main.components.spendable-card.title",
               })}
             </Body3>
           </Skeleton>
@@ -55,11 +55,7 @@ export const SpendableCard: FunctionComponent<{
         <Box>
           <Skeleton isNotReady={isNotReady}>
             <Subtitle2 color={ColorPalette["white"]}>
-              {spendableTotalPrice
-                ? spendableTotalPrice.toString()
-                : intl.formatMessage({
-                    id: "page.main.spendable-card.amount-placeholder",
-                  })}
+              {spendableTotalPrice ? spendableTotalPrice.toString() : "-"}
             </Subtitle2>
           </Skeleton>
         </Box>
@@ -107,7 +103,7 @@ export const SpendableCard: FunctionComponent<{
             />
           </Skeleton>
 
-          <Skeleton type="button" isNotReady={isNotReady}>
+          <Skeleton type="button" isNotReady={isNotReady} verticalBleed="2px">
             <EllipseButton
               text={intl.formatMessage({
                 id: "page.main.components.buttons.swap-button",
