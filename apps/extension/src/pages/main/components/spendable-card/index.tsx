@@ -38,7 +38,7 @@ export const SpendableCard: FunctionComponent<{
         borderColor={ColorPalette["gray-600"]}
         borderWidth="1px"
         borderRadius="1.5rem"
-        padding="1.25rem"
+        padding="1rem"
       >
         <Box>
           <Skeleton isNotReady={isNotReady}>
@@ -175,21 +175,19 @@ const EllipseButton: FunctionComponent<{
           {icon}
         </Box>
         <Gutter size="0.25rem" />
-        <Box alignX="center" width="1px">
-          <Body3
-            color={
-              !isHover
-                ? isLightMode
-                  ? ColorPalette["gray-300"]
-                  : ColorPalette["white"]
-                : isLightMode
+        <Body3
+          color={
+            !isHover
+              ? isLightMode
                 ? ColorPalette["gray-300"]
-                : ColorPalette["gray-100"]
-            }
-          >
-            {text}
-          </Body3>
-        </Box>
+                : ColorPalette["white"]
+              : isLightMode
+              ? ColorPalette["gray-300"]
+              : ColorPalette["gray-100"]
+          }
+        >
+          {text}
+        </Body3>
       </YAxis>
     </Box>
   );
