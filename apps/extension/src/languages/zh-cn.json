@@ -623,6 +623,11 @@
   "page.main.components.buttons.deposit-button": "存入",
   "page.main.components.buttons.buy-button": "买币",
   "page.main.components.buttons.send-button": "转账",
+  "page.main.components.buttons.swap-button": "Swap",
+  "page.main.components.spendable-card.title": "Spendable",
+  "page.main.components.rewards-card.title": "Rewards",
+  "page.main.components.rewards-card.claim-all-button": "Claim All",
+
   "page.main.components.claim-all.title": "可提取的质押收益",
   "page.main.components.claim-all.button": "全部提取",
   "page.main.components.claim-all.claim-button": "提取",
