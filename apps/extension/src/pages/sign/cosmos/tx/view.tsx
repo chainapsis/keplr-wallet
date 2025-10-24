@@ -799,6 +799,8 @@ export const CosmosTxView: FunctionComponent<{
                       senderConfig={senderConfig}
                       gasConfig={gasConfig}
                       disableAutomaticFeeSet={preferNoSetFee}
+                      isExternalMsg={!interactionData.isInternal}
+                      shouldTopUp={shouldTopUp}
                     />
                   );
                 })()}

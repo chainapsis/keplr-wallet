@@ -2072,6 +2072,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             isForEVMTx={isInChainEVMOnly}
             nonceMethod={nonceMethod}
             setNonceMethod={setNonceMethod}
+            shouldTopUp={shouldTopUp}
           />
         </VerticalCollapseTransition>
         <VerticalCollapseTransition collapsed={!shouldTopUp}>
