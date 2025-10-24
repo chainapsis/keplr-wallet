@@ -160,8 +160,6 @@ export class SignDocWrapper {
   }
 
   getTopUpOverridedWrapper(overrideStdFee: StdFee): SignDocWrapper {
-    console.log("getTopUpOverridedWrapper", overrideStdFee);
-
     // If the sign doc is for ADR-36,
     // The fee and memo should be empty.
     // Ignore the fee and memo config, and just return itself.

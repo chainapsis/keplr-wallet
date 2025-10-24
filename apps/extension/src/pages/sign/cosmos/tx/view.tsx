@@ -460,10 +460,6 @@ export const CosmosTxView: FunctionComponent<{
           };
         }
 
-        console.log(
-          "feeConfig.topUpStatus.topUpOverrideStdFee",
-          feeConfig.topUpStatus.topUpOverrideStdFee
-        );
         const signDocWrapper = feeConfig.topUpStatus.topUpOverrideStdFee
           ? signDocHelper.signDocWrapper.getTopUpOverridedWrapper(
               feeConfig.topUpStatus.topUpOverrideStdFee
