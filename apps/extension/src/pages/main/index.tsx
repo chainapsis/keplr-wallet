@@ -19,7 +19,7 @@ import {
 } from "./components";
 import { Stack } from "../../components/stack";
 import { CoinPretty, Dec, PricePretty } from "@keplr-wallet/unit";
-import { EyeIcon, EyeSlashIcon } from "../../components/icon";
+import { EyeIcon, EyeSlashIcon, RightArrowIcon } from "../../components/icon";
 import { Box } from "../../components/box";
 import { Modal } from "../../components/modal";
 import { Gutter } from "../../components/gutter";
@@ -56,6 +56,7 @@ import { MainH1 } from "../../components/typography/main-h1";
 import { LockIcon } from "../../components/icon/lock";
 import { DepositModal } from "./components/deposit-modal";
 import { RewardsCard } from "./components/rewards-card";
+import { UIConfigStore } from "../../stores/ui-config";
 
 export interface ViewToken {
   token: CoinPretty;
@@ -493,30 +494,12 @@ export const MainPage: FunctionComponent<{
         </Box>
 
         <Gutter size="0.75rem" />
-        <Box paddingY="0.125rem">
-          <Skeleton isNotReady={isNotReady}>
-            <XAxis gap="0.25rem" alignY="center">
-              <Body2 style={{ color: ColorPalette["gray-300"] }}>
-                {intl.formatMessage({
-                  id: "page.main.balance.staked-balance-title-1",
-                })}
-              </Body2>
-              <LockIcon
-                width="1rem"
-                height="1rem"
-                color={ColorPalette["gray-300"]}
-              />
-              <Body2 style={{ color: ColorPalette["gray-300"] }}>
-                {`${uiConfigStore.hideStringIfPrivacyMode(
-                  stakedTotalPrice?.toString() || "-",
-                  4
-                )} (${stakedPercentage.toFixed(1)}%) ${intl.formatMessage({
-                  id: "page.main.balance.staked-balance-title-2",
-                })}`}
-              </Body2>
-            </XAxis>
-          </Skeleton>
-        </Box>
+        <StakedBalanceTitle
+          isNotReady={isNotReady}
+          uiConfigStore={uiConfigStore}
+          stakedTotalPrice={stakedTotalPrice}
+          stakedPercentage={stakedPercentage}
+        />
       </Box>
       <Box paddingX="0.75rem" paddingBottom="1.5rem">
         <Stack gutter="0.75rem">
@@ -1053,3 +1036,55 @@ const RefreshButton: FunctionComponent<{
     </animated.div>
   );
 });
+
+function StakedBalanceTitle({
+  isNotReady,
+  uiConfigStore,
+  stakedTotalPrice,
+  stakedPercentage,
+}: {
+  isNotReady: boolean;
+  uiConfigStore: UIConfigStore;
+  stakedTotalPrice: PricePretty | undefined;
+  stakedPercentage: number;
+}) {
+  const intl = useIntl();
+  // const navigate = useNavigate();
+
+  return (
+    <Skeleton isNotReady={isNotReady}>
+      <Box
+        paddingY="0.125rem"
+        onClick={() => {
+          // TODO: 추후 staked 페이지로 바로 이동
+        }}
+      >
+        <XAxis gap="0.25rem" alignY="center">
+          <Body2 style={{ color: ColorPalette["gray-300"] }}>
+            {intl.formatMessage({
+              id: "page.main.balance.staked-balance-title-1",
+            })}
+          </Body2>
+          <LockIcon
+            width="1rem"
+            height="1rem"
+            color={ColorPalette["gray-300"]}
+          />
+          <Body2 style={{ color: ColorPalette["gray-300"] }}>
+            {`${uiConfigStore.hideStringIfPrivacyMode(
+              stakedTotalPrice?.toString() || "-",
+              4
+            )} (${stakedPercentage.toFixed(1)}%) ${intl.formatMessage({
+              id: "page.main.balance.staked-balance-title-2",
+            })}`}
+          </Body2>
+          <RightArrowIcon
+            width="1rem"
+            height="1rem"
+            color={ColorPalette["gray-300"]}
+          />
+        </XAxis>
+      </Box>
+    </Skeleton>
+  );
+}
