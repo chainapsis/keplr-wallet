@@ -219,8 +219,8 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
           const asset = assets.assets[0];
           if (
             asset.chainId === swapVenueChainId &&
-            this.chainStore.hasChain(asset.chainId) &&
-            this.chainStore.hasChain(asset.originChainId)
+            this.chainStore.hasModularChain(asset.chainId) &&
+            this.chainStore.hasModularChain(asset.originChainId)
           ) {
             const channels: {
               portId: string;
@@ -253,7 +253,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
                   !path.counterpartyPortId ||
                   !path.counterpartyChannelId ||
                   !path.clientChainId ||
-                  !this.chainStore.hasChain(path.clientChainId)
+                  !this.chainStore.hasModularChain(path.clientChainId)
                 );
               })
             ) {
@@ -284,7 +284,9 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
               if (
                 !destinationCurrency.originChainId ||
                 !destinationCurrency.originCurrency ||
-                !this.chainStore.hasChain(destinationCurrency.originChainId)
+                !this.chainStore.hasModularChain(
+                  destinationCurrency.originChainId
+                )
               ) {
                 return false;
               }
@@ -306,7 +308,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
                     !path.counterpartyPortId ||
                     !path.counterpartyChannelId ||
                     !path.clientChainId ||
-                    !this.chainStore.hasChain(path.clientChainId)
+                    !this.chainStore.hasModularChain(path.clientChainId)
                   );
                 })
               ) {

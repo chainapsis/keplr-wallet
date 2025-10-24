@@ -105,7 +105,10 @@ export const HistoryDetailIBCSend: FunctionComponent<{
     }
 
     const lastPath = msg.ibcTracking.paths[msg.ibcTracking.paths.length - 1];
-    if (lastPath.clientChainId && chainStore.hasChain(lastPath.clientChainId)) {
+    if (
+      lastPath.clientChainId &&
+      chainStore.hasModularChain(lastPath.clientChainId)
+    ) {
       return chainStore.getChain(lastPath.clientChainId).chainName;
     }
     return "Unknown";

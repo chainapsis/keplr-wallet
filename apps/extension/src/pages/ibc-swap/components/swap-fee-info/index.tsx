@@ -129,7 +129,7 @@ export const SwapFeeInfo: FunctionComponent<{
           );
           if (currentFeeCurrencyBal.toDec().lt(currentFee.toDec())) {
             const isOsmosis =
-              chainStore.hasChain(feeConfig.chainId) &&
+              chainStore.hasModularChain(feeConfig.chainId) &&
               chainStore
                 .getModularChainInfoImpl(feeConfig.chainId)
                 .hasFeature("osmosis-txfees");

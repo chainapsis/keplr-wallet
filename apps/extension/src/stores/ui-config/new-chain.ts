@@ -129,7 +129,7 @@ export class NewChainSuggestionConfig {
     const res = [];
 
     for (const r of this._remote) {
-      if (this.chainStore.hasChain(r.chainIdentifier)) {
+      if (this.chainStore.hasModularChain(r.chainIdentifier)) {
         const identifier = this.chainStore.getChain(
           r.chainIdentifier
         ).chainIdentifier;

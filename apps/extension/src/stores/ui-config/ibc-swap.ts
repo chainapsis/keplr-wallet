@@ -110,7 +110,7 @@ export class IBCSwapConfig {
   getAmountInChainInfo = computedFn((): IChainInfoImpl => {
     if (
       this._lastAmountInChainId &&
-      this.chainStore.hasChain(this._lastAmountInChainId) &&
+      this.chainStore.hasModularChain(this._lastAmountInChainId) &&
       this.chainStore.isEnabledChain(this._lastAmountInChainId)
     ) {
       return this.chainStore.getChain(this._lastAmountInChainId);
@@ -145,7 +145,7 @@ export class IBCSwapConfig {
   getAmountOutChainInfo = computedFn((): IChainInfoImpl => {
     if (
       this._lastAmountOutChainId &&
-      this.chainStore.hasChain(this._lastAmountOutChainId)
+      this.chainStore.hasModularChain(this._lastAmountOutChainId)
     ) {
       return this.chainStore.getChain(this._lastAmountOutChainId);
     }

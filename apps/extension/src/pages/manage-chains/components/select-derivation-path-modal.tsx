@@ -32,7 +32,7 @@ export const SelectDerivationPathModal: FunctionComponent<{
   const chainId = chainIds[currentIndex];
 
   const chainInfo =
-    chainId && chainStore.hasChain(chainId)
+    chainId && chainStore.hasModularChain(chainId)
       ? chainStore.getChain(chainId)
       : undefined;
 

@@ -84,7 +84,7 @@ export class ObservableQueryChains extends ObservableQuery<ChainsResponse> {
           ? `eip155:${chain.chain_id}`
           : chain.chain_id;
 
-        return this.chainStore.hasChain(chainId);
+        return this.chainStore.hasModularChain(chainId);
       })
       .filter((chain) => {
         const isEVMChain = chain.chain_type === "evm";

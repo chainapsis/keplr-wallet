@@ -116,7 +116,7 @@ export class IBCChannelStore {
       const savedChainIdentifiers = new Set<string>(Object.keys(saved ?? {}));
       const removingChainIdentifiers: string[] = [];
       for (const savedChainIdentifier of savedChainIdentifiers) {
-        if (!this.chainStore.hasChain(savedChainIdentifier)) {
+        if (!this.chainStore.hasModularChain(savedChainIdentifier)) {
           removingChainIdentifiers.push(savedChainIdentifier);
         }
       }

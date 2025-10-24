@@ -48,7 +48,7 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
 
   const recipientConfig = useRecipientConfig(chainStore, chainId, {
     allowHexAddressToBech32Address:
-      chainStore.hasChain(chainId) &&
+      chainStore.hasModularChain(chainId) &&
       !chainStore.getChain(chainId).chainId.startsWith("injective"),
     icns: uiConfigStore.icnsInfo,
     ens: ENSInfo,

@@ -364,7 +364,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
             : !swapAccount.bech32Address
         ) {
           const swapVenueChainInfo =
-            this.chainGetter.hasChain(swapVenueChainId) &&
+            this.chainGetter.hasModularChain(swapVenueChainId) &&
             this.chainGetter.getChain(swapVenueChainId);
           if (
             swapAccount.isNanoLedger &&

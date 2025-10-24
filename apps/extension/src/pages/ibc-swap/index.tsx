@@ -901,7 +901,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 const chainIdInKeplr = isOnlyEvm
                   ? `eip155:${chainId}`
                   : chainId;
-                if (!chainStore.hasChain(chainIdInKeplr)) {
+                if (!chainStore.hasModularChain(chainIdInKeplr)) {
                   continue;
                 }
 
@@ -912,7 +912,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
                 if (isOnlyEvm && !receiverAccount.ethereumHexAddress) {
                   const receiverChainInfo =
-                    chainStore.hasChain(chainId) &&
+                    chainStore.hasModularChain(chainId) &&
                     chainStore.getChain(chainId);
                   if (
                     receiverAccount.isNanoLedger &&
@@ -996,7 +996,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
                 if (!receiverAccount.bech32Address) {
                   const receiverChainInfo =
-                    chainStore.hasChain(receiverChainId) &&
+                    chainStore.hasModularChain(receiverChainId) &&
                     chainStore.getChain(receiverChainId);
                   if (
                     receiverAccount.isNanoLedger &&

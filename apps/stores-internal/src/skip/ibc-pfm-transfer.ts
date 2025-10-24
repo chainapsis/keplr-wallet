@@ -107,7 +107,7 @@ export class ObservableQueryIbcPfmTransfer {
       }[] = [];
 
       for (const assetChainId of Object.keys(assetsFromSource)) {
-        if (this.chainStore.hasChain(assetChainId)) {
+        if (this.chainStore.hasModularChain(assetChainId)) {
           const assets = assetsFromSource[assetChainId]!.assets;
           // TODO: 미래에는 assets가 두개 이상이 될수도 있다고 한다.
           //       근데 지금은 한개로만 고정되어 있다고 한다...
@@ -116,8 +116,8 @@ export class ObservableQueryIbcPfmTransfer {
             const asset = assets[0];
             if (
               asset.chainId === assetChainId &&
-              this.chainStore.hasChain(asset.chainId) &&
-              this.chainStore.hasChain(asset.originChainId)
+              this.chainStore.hasModularChain(asset.chainId) &&
+              this.chainStore.hasModularChain(asset.originChainId)
             ) {
               if (!this.chainStore.isInChainInfosInListUI(asset.chainId)) {
                 continue;
@@ -147,7 +147,7 @@ export class ObservableQueryIbcPfmTransfer {
                   if (
                     !currency.originChainId ||
                     !currency.originCurrency ||
-                    !this.chainStore.hasChain(currency.originChainId)
+                    !this.chainStore.hasModularChain(currency.originChainId)
                   ) {
                     continue;
                   }
@@ -168,7 +168,7 @@ export class ObservableQueryIbcPfmTransfer {
                         !path.counterpartyPortId ||
                         !path.counterpartyChannelId ||
                         !path.clientChainId ||
-                        !this.chainStore.hasChain(path.clientChainId)
+                        !this.chainStore.hasModularChain(path.clientChainId)
                       );
                     })
                   ) {
@@ -199,7 +199,9 @@ export class ObservableQueryIbcPfmTransfer {
                   if (
                     !destinationCurrency.originChainId ||
                     !destinationCurrency.originCurrency ||
-                    !this.chainStore.hasChain(destinationCurrency.originChainId)
+                    !this.chainStore.hasModularChain(
+                      destinationCurrency.originChainId
+                    )
                   ) {
                     continue;
                   }
@@ -221,7 +223,7 @@ export class ObservableQueryIbcPfmTransfer {
                         !path.counterpartyPortId ||
                         !path.counterpartyChannelId ||
                         !path.clientChainId ||
-                        !this.chainStore.hasChain(path.clientChainId)
+                        !this.chainStore.hasModularChain(path.clientChainId)
                       );
                     })
                   ) {
