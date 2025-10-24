@@ -113,6 +113,7 @@ export const CosmosTxView: FunctionComponent<{
           : interactionData.data.signDocWrapper.protoSignDoc.txMsgs.some(
               (msg) => msg.typeUrl.includes("MsgMintPhoton")
             ),
+      forceTopUp: interactionData.data.signOptions.forceTopUp,
     }
   );
   const memoConfig = useMemoConfig(chainStore, chainId);
@@ -801,6 +802,8 @@ export const CosmosTxView: FunctionComponent<{
                       senderConfig={senderConfig}
                       gasConfig={gasConfig}
                       disableAutomaticFeeSet={preferNoSetFee}
+                      isExternalMsg={!interactionData.isInternal}
+                      shouldTopUp={shouldTopUp}
                     />
                   );
                 })()}
