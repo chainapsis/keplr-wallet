@@ -86,6 +86,8 @@ export interface IModularChainInfoImpl<
 > {
   readonly embedded: M;
   readonly chainId: string;
+  readonly stakeCurrency: Currency | undefined;
+  readonly feeCurrencies: FeeCurrency[] | undefined;
 
   getCurrencies(): AppCurrency[];
   getCurrenciesByModule(module: ChainInfoModule): AppCurrency[];
