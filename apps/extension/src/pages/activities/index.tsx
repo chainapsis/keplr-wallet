@@ -22,7 +22,7 @@ import {
   IChainStore,
 } from "@keplr-wallet/stores";
 import { action, computed, makeObservable, observable } from "mobx";
-import { Bech32Address } from "@keplr-wallet/cosmos";
+import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import { FormattedMessage } from "react-intl";
 
 // React hook으로 처리하기 귀찮은 부분이 많아서
@@ -346,8 +346,13 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
                   if (!msg.denoms || msg.denoms.length === 0) {
                     throw new Error(`Invalid denoms: ${msg.denoms})`);
                   }
-                  const chainInfo = chainStore.getChain(msg.chainId);
-                  if (chainInfo.chainIdentifier === "dydx-mainnet") {
+                  const modularChainInfoImpl =
+                    chainStore.getModularChainInfoImpl(msg.chainId);
+
+                  if (
+                    ChainIdHelper.parse(msg.chainId).identifier ===
+                    "dydx-mainnet"
+                  ) {
                     // dydx는 USDC에 우선권을 줌
                     if (
                       msg.denoms.includes(
@@ -357,13 +362,14 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
                       return "ibc/8E27BA2D5493AF5636760E354E46004562C46AB7EC0CC4C1CA14E9E20E2545B5";
                     }
                   }
-                  if (chainInfo.stakeCurrency) {
+                  if (modularChainInfoImpl.stakeCurrency) {
                     if (
                       msg.denoms.includes(
-                        chainInfo.stakeCurrency.coinMinimalDenom
+                        modularChainInfoImpl.stakeCurrency.coinMinimalDenom
                       )
                     ) {
-                      return chainInfo.stakeCurrency.coinMinimalDenom;
+                      return modularChainInfoImpl.stakeCurrency
+                        .coinMinimalDenom;
                     }
                   }
                   return msg.denoms[0];

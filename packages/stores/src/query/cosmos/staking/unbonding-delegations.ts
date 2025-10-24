@@ -29,7 +29,7 @@ export class ObservableQueryUnbondingDelegationsInner extends ObservableChainQue
   }
 
   protected override canFetch(): boolean {
-    if (!this.chainGetter.getChain(this.chainId).stakeCurrency) {
+    if (!this.chainGetter.getModularChainInfoImpl(this.chainId).stakeCurrency) {
       return false;
     }
     // If bech32 address is empty, it will always fail, so don't need to fetch it.
@@ -38,7 +38,9 @@ export class ObservableQueryUnbondingDelegationsInner extends ObservableChainQue
 
   @computed
   get total(): CoinPretty | undefined {
-    const stakeCurrency = this.chainGetter.getChain(this.chainId).stakeCurrency;
+    const stakeCurrency = this.chainGetter.getModularChainInfoImpl(
+      this.chainId
+    ).stakeCurrency;
 
     if (!stakeCurrency) {
       return;
@@ -72,7 +74,9 @@ export class ObservableQueryUnbondingDelegationsInner extends ObservableChainQue
   }[] {
     const unbondings = this.unbondings;
 
-    const stakeCurrency = this.chainGetter.getChain(this.chainId).stakeCurrency;
+    const stakeCurrency = this.chainGetter.getModularChainInfoImpl(
+      this.chainId
+    ).stakeCurrency;
 
     if (!stakeCurrency) {
       return [];

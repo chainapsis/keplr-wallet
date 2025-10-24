@@ -223,7 +223,8 @@ export const MainHeaderLayout = observer<
                             chains:
                               uiConfigStore.newChainSuggestionConfig.newSuggestionChains
                                 .map((chain) => {
-                                  return chainStore.getChain(chain).chainName;
+                                  return chainStore.getModularChain(chain)
+                                    .chainName;
                                 })
                                 .join(", "),
                           }}

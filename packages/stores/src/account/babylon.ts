@@ -53,12 +53,17 @@ export class BabylonAccountImpl {
   ) {}
 
   makeDelegateTx(amount: string, validatorAddress: string) {
+    const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
+    if (!("cosmos" in modularChainInfo)) {
+      throw new Error("cosmos module is not supported on this chain");
+    }
+
     Bech32Address.validate(
       validatorAddress,
-      this.chainGetter.getChain(this.chainId).bech32Config?.bech32PrefixValAddr
+      modularChainInfo.cosmos.bech32Config?.bech32PrefixValAddr
     );
 
-    const currency = this.chainGetter.getChain(this.chainId).stakeCurrency;
+    const currency = modularChainInfo.cosmos.stakeCurrency;
 
     if (!currency) {
       throw new Error("Stake currency is null");
@@ -108,12 +113,16 @@ export class BabylonAccountImpl {
   }
 
   makeUndelegateTx(amount: string, validatorAddress: string) {
+    const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
+    if (!("cosmos" in modularChainInfo)) {
+      throw new Error("cosmos module is not supported on this chain");
+    }
     Bech32Address.validate(
       validatorAddress,
-      this.chainGetter.getChain(this.chainId).bech32Config?.bech32PrefixValAddr
+      modularChainInfo.cosmos.bech32Config?.bech32PrefixValAddr
     );
 
-    const currency = this.chainGetter.getChain(this.chainId).stakeCurrency;
+    const currency = modularChainInfo.cosmos.stakeCurrency;
 
     if (!currency) {
       throw new Error("Stake currency is null");
@@ -167,16 +176,21 @@ export class BabylonAccountImpl {
     srcValidatorAddress: string,
     dstValidatorAddress: string
   ) {
+    const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
+    if (!("cosmos" in modularChainInfo)) {
+      throw new Error("cosmos module is not supported on this chain");
+    }
+
     Bech32Address.validate(
       srcValidatorAddress,
-      this.chainGetter.getChain(this.chainId).bech32Config?.bech32PrefixValAddr
+      modularChainInfo.cosmos.bech32Config?.bech32PrefixValAddr
     );
     Bech32Address.validate(
       dstValidatorAddress,
-      this.chainGetter.getChain(this.chainId).bech32Config?.bech32PrefixValAddr
+      modularChainInfo.cosmos.bech32Config?.bech32PrefixValAddr
     );
 
-    const currency = this.chainGetter.getChain(this.chainId).stakeCurrency;
+    const currency = modularChainInfo.cosmos.stakeCurrency;
 
     if (!currency) {
       throw new Error("Stake currency is null");

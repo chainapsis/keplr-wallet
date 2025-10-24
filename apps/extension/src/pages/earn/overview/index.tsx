@@ -42,13 +42,16 @@ export const EarnOverviewPage: FunctionComponent = observer(() => {
   const { chainStore, accountStore } = useStore();
   const [searchParams] = useSearchParams();
   const chainId = searchParams.get("chainId") || NOBLE_CHAIN_ID;
-  const chainInfo = chainStore.getChain(chainId);
+  const chainInfo = chainStore.getModularChain(chainId);
+  if (!("cosmos" in chainInfo)) {
+    throw new Error("cosmos module is not supported on this chain");
+  }
 
   const account = accountStore.getAccount(NOBLE_CHAIN_ID);
 
-  const holdingCurrency = chainInfo.currencies[0];
+  const holdingCurrency = chainInfo.cosmos.currencies[0];
   const rewardCurrency =
-    chainInfo.currencies.find((c) => c.coinMinimalDenom === "uusdn") ??
+    chainInfo.cosmos.currencies.find((c) => c.coinMinimalDenom === "uusdn") ??
     USDN_CURRENCY;
 
   return (

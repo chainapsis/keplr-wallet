@@ -88,8 +88,8 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
       return [];
     }
 
-    const chainInfo = this.chainStore.getChain(this.chainId);
-    if (!this.chainStore.isInChainInfosInListUI(chainInfo.chainId)) {
+    const chainInfo = this.chainStore.getModularChain(this.chainId);
+    if (!this.chainStore.isInModularChainInfosInListUI(chainInfo.chainId)) {
       return [];
     }
 
@@ -184,8 +184,8 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
       return [];
     }
 
-    const chainInfo = this.chainStore.getChain(this.chainId);
-    if (!this.chainStore.isInChainInfosInListUI(chainInfo.chainId)) {
+    const chainInfo = this.chainStore.getModularChain(this.chainId);
+    if (!this.chainStore.isInModularChainInfosInListUI(chainInfo.chainId)) {
       return [];
     }
 
@@ -235,8 +235,9 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
             const originCoinMinimalDenom = asset.origin_denom.startsWith("0x")
               ? `erc20:${asset.origin_denom.toLowerCase()}`
               : asset.origin_denom;
-            const currencyFound =
-              chainInfo.findCurrencyWithoutReaction(coinMinimalDenom);
+            const currencyFound = this.chainStore
+              .getModularChainInfoImpl(chainId)
+              .findCurrencyWithoutReaction(coinMinimalDenom);
             // decimals이 18 이하인 경우만을 고려해서 짜여진 코드가 많아서 임시로 18 이하인 경우만 고려한다.
             // TODO: Dec, Int 같은 곳에서 18 이상인 경우도 고려하도록 수정
             if (currencyFound && currencyFound.coinDecimals <= 18) {
@@ -281,8 +282,8 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
       return [];
     }
 
-    const chainInfo = this.chainStore.getChain(this.chainId);
-    if (!this.chainStore.isInChainInfosInListUI(chainInfo.chainId)) {
+    const chainInfo = this.chainStore.getModularChain(this.chainId);
+    if (!this.chainStore.isInModularChainInfosInListUI(chainInfo.chainId)) {
       return [];
     }
 
@@ -313,7 +314,11 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
               originChainId: asset.origin_chain_id,
             });
             // IBC asset이 아니라면 알고있는 currency만 넣는다.
-          } else if (chainInfo.findCurrencyWithoutReaction(asset.denom)) {
+          } else if (
+            this.chainStore
+              .getModularChainInfoImpl(this.chainId)
+              .findCurrencyWithoutReaction(asset.denom)
+          ) {
             res.push({
               denom: asset.denom,
               chainId: asset.chain_id,
@@ -434,8 +439,8 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
         continue;
       }
 
-      const chainInfo = this.chainStore.getChain(chainId);
-      if (!this.chainStore.isInChainInfosInListUI(chainInfo.chainId)) {
+      const chainInfo = this.chainStore.getModularChain(chainId);
+      if (!this.chainStore.isInModularChainInfosInListUI(chainInfo.chainId)) {
         continue;
       }
 
@@ -543,8 +548,8 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
         continue;
       }
 
-      const chainInfo = this.chainStore.getChain(chainId);
-      if (!this.chainStore.isInChainInfosInListUI(chainInfo.chainId)) {
+      const chainInfo = this.chainStore.getModularChain(chainId);
+      if (!this.chainStore.isInModularChainInfosInListUI(chainInfo.chainId)) {
         continue;
       }
 
@@ -592,8 +597,9 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
               const originCoinMinimalDenom = asset.origin_denom.startsWith("0x")
                 ? `erc20:${asset.origin_denom.toLowerCase()}`
                 : asset.origin_denom;
-              const currencyFound =
-                chainInfo.findCurrencyWithoutReaction(coinMinimalDenom);
+              const currencyFound = this.chainStore
+                .getModularChainInfoImpl(chainId)
+                .findCurrencyWithoutReaction(coinMinimalDenom);
               // decimals이 18 이하인 경우만을 고려해서 짜여진 코드가 많아서 임시로 18 이하인 경우만 고려한다.
               // TODO: Dec, Int 같은 곳에서 18 이상인 경우도 고려하도록 수정
               if (currencyFound && currencyFound.coinDecimals <= 18) {
@@ -653,8 +659,8 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
         continue;
       }
 
-      const chainInfo = this.chainStore.getChain(chainId);
-      if (!this.chainStore.isInChainInfosInListUI(chainInfo.chainId)) {
+      const chainInfo = this.chainStore.getModularChain(chainId);
+      if (!this.chainStore.isInModularChainInfosInListUI(chainInfo.chainId)) {
         continue;
       }
 
@@ -685,7 +691,11 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
                 originChainId: asset.origin_chain_id,
               });
               // IBC asset이 아니라면 알고있는 currency만 넣는다.
-            } else if (chainInfo.findCurrencyWithoutReaction(asset.denom)) {
+            } else if (
+              this.chainStore
+                .getModularChainInfoImpl(chainId)
+                .findCurrencyWithoutReaction(asset.denom)
+            ) {
               assets.push({
                 denom: asset.denom,
                 chainId: asset.chain_id,

@@ -109,7 +109,7 @@ export const HistoryDetailIBCSend: FunctionComponent<{
       lastPath.clientChainId &&
       chainStore.hasModularChain(lastPath.clientChainId)
     ) {
-      return chainStore.getChain(lastPath.clientChainId).chainName;
+      return chainStore.getModularChain(lastPath.clientChainId).chainName;
     }
     return "Unknown";
   })();

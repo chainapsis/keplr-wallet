@@ -41,18 +41,18 @@ class ObservableQueryNeutronStakingRewardsInner extends ObservableCosmwasmContra
   @computed
   get pendingReward(): CoinPretty {
     if (!this.response?.data?.pending_rewards) {
-      const chainInfo = this.chainGetter.getChain(this.chainId);
+      const chainInfo = this.chainGetter.getModularChainInfoImpl(this.chainId);
       const defaultCurrency =
-        chainInfo.stakeCurrency || chainInfo.currencies[0];
+        chainInfo.stakeCurrency || chainInfo.getCurrencies()[0];
 
       return new CoinPretty(defaultCurrency, new Int(0)).ready(false);
     }
 
     const reward = this.response.data.pending_rewards;
     if (!reward.denom || !reward.amount) {
-      const chainInfo = this.chainGetter.getChain(this.chainId);
+      const chainInfo = this.chainGetter.getModularChainInfoImpl(this.chainId);
       const defaultCurrency =
-        chainInfo.stakeCurrency || chainInfo.currencies[0];
+        chainInfo.stakeCurrency || chainInfo.getCurrencies()[0];
 
       return new CoinPretty(defaultCurrency, new Int(0)).ready(false);
     }

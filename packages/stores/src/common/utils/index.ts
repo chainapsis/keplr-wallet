@@ -1,11 +1,11 @@
 import { Currency } from "@keplr-wallet/types";
 import { CoinPrimitive } from "../types";
 import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
-import { IChainInfoImpl } from "../../chain";
+import { IModularChainInfoImpl } from "../../chain/types";
 
 export class StoreUtils {
   public static toCoinPretties(
-    chainInfo: IChainInfoImpl,
+    chainInfo: IModularChainInfoImpl,
     balances: CoinPrimitive[]
   ): CoinPretty[] {
     const result: CoinPretty[] = [];

@@ -72,7 +72,7 @@ export class ObservableQueryNobleSwapSimulateSwapInner extends ObservableChainQu
 
     return new CoinPretty(
       this.chainGetter
-        .getChain(this.chainId)
+        .getModularChainInfoImpl(this.chainId)
         .forceFindCurrency(this.response.data.result.denom),
       this.response.data.result.amount
     );

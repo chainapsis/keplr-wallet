@@ -312,7 +312,11 @@ export const CopyAddressScene: FunctionComponent<{
         let embedded: boolean | undefined = false;
         let stored: boolean = true;
 
-        const isModular = "starknet" in chainInfo || "bitcoin" in chainInfo;
+        const isModular =
+          "starknet" in chainInfo ||
+          "bitcoin" in chainInfo ||
+          "cosmos" in chainInfo ||
+          "evm" in chainInfo;
 
         try {
           if (isModular) {

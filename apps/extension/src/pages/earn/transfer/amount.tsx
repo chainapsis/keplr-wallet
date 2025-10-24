@@ -385,7 +385,9 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
                     msg = msg.withIBCPacketForwarding(
                       sendConfigs.channelConfig.channels,
                       {
-                        currencies: chainStore.getChain(chainId).currencies,
+                        currencies: chainStore
+                          .getModularChainInfoImpl(chainId)
+                          .getCurrencies(),
                       }
                     );
                   } else {

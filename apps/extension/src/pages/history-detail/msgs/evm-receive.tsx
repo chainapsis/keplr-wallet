@@ -15,13 +15,13 @@ export const HistoryDetailEvmReceive: FunctionComponent<{
 }> = observer(({ msg, targetDenom }) => {
   const { chainStore, accountStore } = useStore();
 
-  const chainInfo = chainStore.getChain(msg.chainId);
+  const modularChainInfoImpl = chainStore.getModularChainInfoImpl(msg.chainId);
   const account = accountStore.getAccount(msg.chainId);
 
   const meta = msg.meta as NativeTransferRelMeta | ERC20TransferRelMeta;
 
   const receiveAmountPretty = useMemo(() => {
-    const currency = chainInfo.findCurrency(
+    const currency = modularChainInfoImpl.findCurrency(
       meta.contract ? `erc20:${meta.contract}` : targetDenom
     );
 
@@ -32,7 +32,7 @@ export const HistoryDetailEvmReceive: FunctionComponent<{
     } else {
       return "Unknown";
     }
-  }, [chainInfo, meta.value, targetDenom, meta.contract]);
+  }, [modularChainInfoImpl, meta.value, targetDenom, meta.contract]);
 
   const fromAddress = useMemo(() => {
     return meta.sender;

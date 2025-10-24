@@ -1,8 +1,4 @@
-import {
-  IChainInfoImpl,
-  ObservableQuery,
-  QuerySharedContext,
-} from "@keplr-wallet/stores";
+import { ObservableQuery, QuerySharedContext } from "@keplr-wallet/stores";
 import { ChainsResponse } from "./types";
 import { computed, makeObservable } from "mobx";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
@@ -10,6 +6,7 @@ import { computedFn } from "mobx-utils";
 import Joi from "joi";
 import { InternalChainStore } from "../internal";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
+import { ModularChainInfo } from "@keplr-wallet/types";
 
 const Schema = Joi.object<ChainsResponse>({
   chains: Joi.array().items(
@@ -68,7 +65,7 @@ export class ObservableQueryChains extends ObservableQuery<ChainsResponse> {
 
   @computed
   get chains(): {
-    chainInfo: IChainInfoImpl;
+    chainInfo: ModularChainInfo;
     pfmEnabled: boolean;
     supportsMemo: boolean;
     chainType: string;
@@ -92,7 +89,7 @@ export class ObservableQueryChains extends ObservableQuery<ChainsResponse> {
           ? `eip155:${chain.chain_id}`
           : chain.chain_id;
 
-        return this.chainStore.isInChainInfosInListUI(chainId);
+        return this.chainStore.isInModularChainInfosInListUI(chainId);
       })
       .map((chain) => {
         const isEVMChain = chain.chain_type === "evm";
@@ -101,7 +98,7 @@ export class ObservableQueryChains extends ObservableQuery<ChainsResponse> {
           : chain.chain_id;
 
         return {
-          chainInfo: this.chainStore.getChain(chainId),
+          chainInfo: this.chainStore.getModularChain(chainId),
           pfmEnabled: chain.pfm_enabled,
           supportsMemo: chain.supports_memo ?? false,
           chainType: chain.chain_type,
@@ -112,7 +109,7 @@ export class ObservableQueryChains extends ObservableQuery<ChainsResponse> {
   isPFMEnabled = computedFn((chainId: string): boolean => {
     const chain = this.chains.find((chain) => {
       return (
-        chain.chainInfo.chainIdentifier ===
+        ChainIdHelper.parse(chain.chainInfo.chainId).identifier ===
         ChainIdHelper.parse(chainId).identifier
       );
     });
@@ -126,7 +123,7 @@ export class ObservableQueryChains extends ObservableQuery<ChainsResponse> {
   isSupportsMemo = computedFn((chainId: string): boolean => {
     const chain = this.chains.find((chain) => {
       return (
-        chain.chainInfo.chainIdentifier ===
+        ChainIdHelper.parse(chain.chainInfo.chainId).identifier ===
         ChainIdHelper.parse(chainId).identifier
       );
     });
@@ -140,7 +137,7 @@ export class ObservableQueryChains extends ObservableQuery<ChainsResponse> {
   isChainTypeEVM = computedFn((chainId: string): boolean => {
     const chain = this.chains.find((chain) => {
       return (
-        chain.chainInfo.chainIdentifier ===
+        ChainIdHelper.parse(chain.chainInfo.chainId).identifier ===
         ChainIdHelper.parse(chainId).identifier
       );
     });

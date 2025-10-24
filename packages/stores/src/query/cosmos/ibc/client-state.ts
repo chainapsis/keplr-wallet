@@ -29,8 +29,8 @@ export class ObservableChainQueryClientState extends ObservableChainQuery<Client
     super.onStart();
 
     this.disposer = autorun(() => {
-      const chainInfo = this.chainGetter.getChain(this.chainId);
-      if (chainInfo.features && chainInfo.features.includes("ibc-go")) {
+      const chainInfo = this.chainGetter.getModularChainInfoImpl(this.chainId);
+      if (chainInfo.hasFeature("ibc-go")) {
         this.setUrl(
           `/ibc/core/channel/v1/channels/${this.channelId}/ports/${this.portId}/client_state`
         );

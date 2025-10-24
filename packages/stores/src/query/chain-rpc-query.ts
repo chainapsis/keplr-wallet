@@ -16,9 +16,13 @@ export class ObservableChainQueryRPC<
     chainGetter: ChainGetter,
     url: string
   ) {
-    const chainInfo = chainGetter.getChain(chainId);
+    const chainInfo = chainGetter.getModularChain(chainId);
 
-    super(sharedContext, chainInfo.rpc, url);
+    if (!("cosmos" in chainInfo)) {
+      throw new Error("cosmos module is not supported on this chain");
+    }
+
+    super(sharedContext, chainInfo.cosmos.rest, url);
 
     this._chainId = chainId;
     this.chainGetter = chainGetter;

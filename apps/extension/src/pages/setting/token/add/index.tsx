@@ -151,7 +151,10 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
   const { chainInfo, modularChainInfo } = (() => {
     const modularChainInfo = chainStore.getModularChain(chainId);
     if ("cosmos" in modularChainInfo) {
-      return { chainInfo: chainStore.getChain(chainId), modularChainInfo };
+      return {
+        chainInfo: chainStore.getModularChain(chainId),
+        modularChainInfo,
+      };
     } else {
       return { chainInfo: undefined, modularChainInfo };
     }
@@ -412,10 +415,14 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
             required: true,
             validate: (value): string | undefined => {
               try {
-                if (!isEvmChain && !isStarknet) {
+                if (
+                  !isEvmChain &&
+                  !isStarknet &&
+                  "cosmos" in modularChainInfo
+                ) {
                   Bech32Address.validate(
                     value,
-                    chainInfo?.bech32Config?.bech32PrefixAccAddr
+                    modularChainInfo?.cosmos?.bech32Config?.bech32PrefixAccAddr
                   );
                 }
               } catch (e) {

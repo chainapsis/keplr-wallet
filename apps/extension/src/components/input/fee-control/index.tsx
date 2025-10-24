@@ -273,12 +273,14 @@ export const FeeControl: FunctionComponent<{
                         if (feeConfig.fees.length > 0) {
                           return feeConfig.fees;
                         }
-                        const chainInfo = chainStore.getChain(
+                        const chainInfo = chainStore.getModularChainInfoImpl(
                           feeConfig.chainId
                         );
                         return [
                           new CoinPretty(
-                            chainInfo.stakeCurrency || chainInfo.currencies[0],
+                            ("cosmos" in chainInfo.embedded &&
+                              chainInfo.embedded.cosmos.stakeCurrency) ||
+                              chainInfo.getCurrencies()[0],
                             new Dec(0)
                           ),
                         ];

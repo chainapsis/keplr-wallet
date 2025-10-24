@@ -61,7 +61,7 @@ export const HistoryDetailIBCSwapSkip: FunctionComponent<{
         <HistoryDetailSendBaseUIUpper
           fromAddress={fromAddress}
           shortenedFromAddress={shortenedFromAddress}
-          fromText={chainStore.getChain(msg.chainId).chainName}
+          fromText={chainStore.getModularChain(msg.chainId).chainName}
           fromAmount={sendAmountPretty}
         />
       </YAxis>
