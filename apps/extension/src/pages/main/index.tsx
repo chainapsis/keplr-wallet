@@ -55,6 +55,7 @@ import { INITIA_CHAIN_ID, NEUTRON_CHAIN_ID } from "../../config.ui";
 import { MainH1 } from "../../components/typography/main-h1";
 import { LockIcon } from "../../components/icon/lock";
 import { DepositModal } from "./components/deposit-modal";
+import { RewardsCard } from "./components/rewards-card";
 
 export interface ViewToken {
   token: CoinPretty;
@@ -546,14 +547,17 @@ export const MainPage: FunctionComponent<{
               <Gutter size="2rem" />
             </Box>
           </Box>
-          <SpendableCard
-            spendableTotalPrice={spendableTotalPrice}
-            isNotReady={isNotReady}
-            onClickDeposit={() => {
-              setIsOpenDepositModal(true);
-            }}
-          />
-
+          <XAxis>
+            <SpendableCard
+              spendableTotalPrice={spendableTotalPrice}
+              isNotReady={isNotReady}
+              onClickDeposit={() => {
+                setIsOpenDepositModal(true);
+              }}
+            />
+            <Gutter size="0.75rem" />
+            <RewardsCard isNotReady={isNotReady} />
+          </XAxis>
           {/* {tabStatus === "staked" && !isNotReady ? (
             <StakeWithKeplrDashboardButton
               type="button"
