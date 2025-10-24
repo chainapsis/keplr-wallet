@@ -5986,6 +5986,7 @@ __metadata:
     buffer: ^6.0.3
     long: ^4.0.0
     protobufjs: ^6.11.2
+    utility-types: 3.10.0
   languageName: unknown
   linkType: soft
 
@@ -34507,7 +34508,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"utility-types@npm:^3.10.0":
+"utility-types@npm:3.10.0, utility-types@npm:^3.10.0":
   version: 3.10.0
   resolution: "utility-types@npm:3.10.0"
   checksum: 8f274415c6196ab62883b8bd98c9d2f8829b58016e4269aaa1ebd84184ac5dda7dc2ca45800c0d5e0e0650966ba063bf9a412aaeaea6850ca4440a391283d5c8
