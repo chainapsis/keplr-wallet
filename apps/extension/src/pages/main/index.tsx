@@ -491,6 +491,9 @@ export const MainPage: FunctionComponent<{
             onClickGetStarted={() => {
               setIsOpenDepositModal(true);
             }}
+            onClickBuy={() => {
+              setIsOpenBuy(true);
+            }}
             onMoreTokensClosed={() => {
               // token list가 접히면서 scroll height가 작아지게 된다.
               // scroll height가 작아지는 것은 위로 스크롤 하는 것과 같은 효과를 내기 때문에

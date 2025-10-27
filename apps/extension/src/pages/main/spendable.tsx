@@ -9,8 +9,10 @@ import React, {
 } from "react";
 import {
   BottomTagType,
+  BuyButtonWhenFirstTime,
   LookingForChains,
   MainEmptyView,
+  ReceiveButtonWhenFirstTime,
   TokenFoundModal,
   TokenItem,
   TokenTitleView,
@@ -20,7 +22,6 @@ import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { ViewToken } from "./index";
 import { observer } from "mobx-react-lite";
 import { Stack } from "../../components/stack";
-import { Button } from "../../components/button";
 import { useStore } from "../../stores";
 import { Styles, TextButton } from "../../components/button-text";
 import { Box } from "../../components/box";
@@ -347,558 +348,546 @@ export const SpendableAssetView: FunctionComponent<{
   // 근데 컴포넌트가 분리되어있는데 이거 하려고 context api 쓰긴 귀찮아서 그냥 prop으로 대충 처리한다.
   onClickGetStarted: () => void;
   onMoreTokensClosed: () => void;
-}> = observer(({ isNotReady, onClickGetStarted, onMoreTokensClosed }) => {
-  const { chainStore, uiConfigStore, keyRingStore } = useStore();
-  const intl = useIntl();
-  const theme = useTheme();
-  const navigate = useNavigate();
-  const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
-  const [showFiatValueVisible, setShowFiatValueVisible] = useState(
-    uiConfigStore.assetViewMode === "grouped"
-  );
-  const {
-    searchScrollAnim,
-    globalSimpleBar,
-    search,
-    setSearch,
-    isEnteredSearch,
-    setIsEnteredSearch,
-    searchRef,
-  } = useSearchBar(isNotReady);
-  const [isFoundTokenModalOpen, setIsFoundTokenModalOpen] = useState(false);
 
-  const sceneTransitionRef = useRef<SceneTransitionRef>(null);
-
-  const { trimSearch, searchedChainInfos } = useGetSearchChains({
-    search,
-    searchOption: "all",
-    filterOption: "chainNameAndToken",
-    minSearchLength: 3,
-    clearResultsOnEmptyQuery: true,
-  });
-
-  const lookingForChains = useMemo(() => {
-    let disabledChainInfos: (ChainInfo | ModularChainInfo)[] =
-      searchedChainInfos.filter(
-        (chainInfo) => !chainStore.isEnabledChain(chainInfo.chainId)
-      );
-
-    const disabledModularChainInfos =
-      chainStore.groupedModularChainInfos.filter(
-        (modularChainInfo) =>
-          ("starknet" in modularChainInfo || "bitcoin" in modularChainInfo) &&
-          !chainStore.isEnabledChain(modularChainInfo.chainId)
-      );
-
-    disabledChainInfos = [
-      ...new Set([...disabledChainInfos, ...disabledModularChainInfos]),
-    ].sort((a, b) => a.chainName.localeCompare(b.chainName));
-
-    return disabledChainInfos.reduce(
-      (acc, chainInfo) => {
-        let embedded: boolean | undefined = false;
-        let stored: boolean = true;
-
-        const isModular = "starknet" in chainInfo || "bitcoin" in chainInfo;
-
-        try {
-          if (isModular) {
-            embedded = true;
-          } else {
-            const chainInfoInStore = chainStore.getChain(chainInfo.chainId);
-
-            if (!chainInfoInStore) {
-              stored = false;
-            } else {
-              if (chainInfoInStore.hideInUI) {
-                return acc;
-              }
-
-              stored = true;
-              embedded = chainInfoInStore.embedded?.embedded;
-            }
-          }
-        } catch (e) {
-          // got an error while getting chain info
-          embedded = undefined;
-          stored = false;
-        }
-
-        const chainItem = {
-          embedded: !!embedded,
-          stored,
-          chainInfo,
-        };
-
-        acc.push(chainItem);
-
-        return acc;
-      },
-      [] as {
-        embedded: boolean;
-        stored: boolean;
-        chainInfo: ChainInfo | ModularChainInfo;
-      }[]
+  onClickBuy: () => void;
+}> = observer(
+  ({ isNotReady, onClickGetStarted, onMoreTokensClosed, onClickBuy }) => {
+    const { chainStore, uiConfigStore, keyRingStore } = useStore();
+    const intl = useIntl();
+    const theme = useTheme();
+    const navigate = useNavigate();
+    const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
+    const [showFiatValueVisible, setShowFiatValueVisible] = useState(
+      uiConfigStore.assetViewMode === "grouped"
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chainStore, chainStore.modularChainInfosInUI, searchedChainInfos]);
+    const {
+      searchScrollAnim,
+      globalSimpleBar,
+      search,
+      setSearch,
+      isEnteredSearch,
+      setIsEnteredSearch,
+      searchRef,
+    } = useSearchBar(isNotReady);
+    const [isFoundTokenModalOpen, setIsFoundTokenModalOpen] = useState(false);
 
-  const searchedLookingForChains = useSearch(
-    trimSearch.length >= 2 ? lookingForChains : [],
-    trimSearch,
-    chainSearchFields
-  ).filter(({ chainInfo }) => {
-    if (keyRingStore.selectedKeyInfo?.type === "ledger") {
-      const cosmosChainInfo = (() => {
-        if ("cosmos" in chainInfo) {
-          return chainInfo.cosmos;
-        }
-        if ("currencies" in chainInfo && "feeCurrencies" in chainInfo) {
-          return chainInfo;
-        }
-      })();
-      if (cosmosChainInfo) {
-        // cosmos 계열이면서 ledger일때
-        // background에서 ledger를 지원하지 않는 체인은 다 지워줘야한다.
-        try {
-          if (cosmosChainInfo.features?.includes("force-enable-evm-ledger")) {
-            return true;
-          }
+    const sceneTransitionRef = useRef<SceneTransitionRef>(null);
 
-          KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
-            cosmosChainInfo.chainId
-          );
-          return true;
-        } catch {
-          return false;
-        }
-      }
-    }
-
-    return true;
-  });
-
-  const numFoundToken = useMemo(() => {
-    if (chainStore.tokenScans.length === 0) {
-      return 0;
-    }
-
-    const set = new Set<string>();
-
-    for (const tokenScan of chainStore.tokenScans) {
-      for (const info of tokenScan.infos) {
-        for (const asset of info.assets) {
-          const key = `${ChainIdHelper.parse(tokenScan.chainId).identifier}/${
-            asset.currency.coinMinimalDenom
-          }`;
-          set.add(key);
-        }
-      }
-    }
-
-    return Array.from(set).length;
-  }, [chainStore.tokenScans]);
-
-  const { allBalancesSearchFiltered, lowBalanceTokens, isFirstTime } =
-    useAllBalances(trimSearch);
-
-  useBalanceAnalytics(allBalancesSearchFiltered, trimSearch);
-
-  const isShowNotFound =
-    allBalancesSearchFiltered.length === 0 &&
-    trimSearch.length > 0 &&
-    searchedLookingForChains.length === 0;
-
-  const isShowCheckMangeAssetViewGuide =
-    isShowNotFound &&
-    uiConfigStore.manageViewAssetTokenConfig.isDisabledTokenSearched(
-      trimSearch
-    );
-
-  const isShowSearchedLowBalanceTokenGuide =
-    uiConfigStore.isHideLowBalance &&
-    lowBalanceTokens.some((token) => {
-      return (
-        (token.chainInfo.chainName.toLowerCase().includes(trimSearch) ||
-          token.token.currency.coinDenom.toLowerCase().includes(trimSearch)) &&
-        trimSearch.length
-      );
+    const { trimSearch, searchedChainInfos } = useGetSearchChains({
+      search,
+      searchOption: "all",
+      filterOption: "chainNameAndToken",
+      minSearchLength: 3,
+      clearResultsOnEmptyQuery: true,
     });
 
-  const [searchParams, setSearchParams] = useSearchParams();
+    const lookingForChains = useMemo(() => {
+      let disabledChainInfos: (ChainInfo | ModularChainInfo)[] =
+        searchedChainInfos.filter(
+          (chainInfo) => !chainStore.isEnabledChain(chainInfo.chainId)
+        );
 
-  const tokenDetailInfo: {
-    chainId: string | null;
-    coinMinimalDenom: string | null;
-    isTokenDetailModalOpen: boolean | null;
-  } = (() => {
-    return {
-      chainId: searchParams.get("tokenChainId"),
-      coinMinimalDenom: searchParams.get("tokenCoinMinimalDenom"),
-      // modal의 close transition을 유지하기 위해서는 위의 두 field가 존재하는지 만으로 판단하면 안된다...
-      // close transition이 끝난후에 위의 두 값을 지워줘야한다.
-      // close가 될 것인지는 밑의 값으로 판단한다.
-      isTokenDetailModalOpen:
-        searchParams.get("isTokenDetailModalOpen") === "true",
-    };
-  })();
+      const disabledModularChainInfos =
+        chainStore.groupedModularChainInfos.filter(
+          (modularChainInfo) =>
+            ("starknet" in modularChainInfo || "bitcoin" in modularChainInfo) &&
+            !chainStore.isEnabledChain(modularChainInfo.chainId)
+        );
 
-  const scenes = useMemo(
-    () => [
-      {
-        name: "flat-view",
-        element: () => (
-          <TokensFlatViewScene
-            trimSearch={trimSearch}
-            onMoreTokensClosed={onMoreTokensClosed}
-            setSearchParams={setSearchParams}
+      disabledChainInfos = [
+        ...new Set([...disabledChainInfos, ...disabledModularChainInfos]),
+      ].sort((a, b) => a.chainName.localeCompare(b.chainName));
+
+      return disabledChainInfos.reduce(
+        (acc, chainInfo) => {
+          let embedded: boolean | undefined = false;
+          let stored: boolean = true;
+
+          const isModular = "starknet" in chainInfo || "bitcoin" in chainInfo;
+
+          try {
+            if (isModular) {
+              embedded = true;
+            } else {
+              const chainInfoInStore = chainStore.getChain(chainInfo.chainId);
+
+              if (!chainInfoInStore) {
+                stored = false;
+              } else {
+                if (chainInfoInStore.hideInUI) {
+                  return acc;
+                }
+
+                stored = true;
+                embedded = chainInfoInStore.embedded?.embedded;
+              }
+            }
+          } catch (e) {
+            // got an error while getting chain info
+            embedded = undefined;
+            stored = false;
+          }
+
+          const chainItem = {
+            embedded: !!embedded,
+            stored,
+            chainInfo,
+          };
+
+          acc.push(chainItem);
+
+          return acc;
+        },
+        [] as {
+          embedded: boolean;
+          stored: boolean;
+          chainInfo: ChainInfo | ModularChainInfo;
+        }[]
+      );
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [chainStore, chainStore.modularChainInfosInUI, searchedChainInfos]);
+
+    const searchedLookingForChains = useSearch(
+      trimSearch.length >= 2 ? lookingForChains : [],
+      trimSearch,
+      chainSearchFields
+    ).filter(({ chainInfo }) => {
+      if (keyRingStore.selectedKeyInfo?.type === "ledger") {
+        const cosmosChainInfo = (() => {
+          if ("cosmos" in chainInfo) {
+            return chainInfo.cosmos;
+          }
+          if ("currencies" in chainInfo && "feeCurrencies" in chainInfo) {
+            return chainInfo;
+          }
+        })();
+        if (cosmosChainInfo) {
+          // cosmos 계열이면서 ledger일때
+          // background에서 ledger를 지원하지 않는 체인은 다 지워줘야한다.
+          try {
+            if (cosmosChainInfo.features?.includes("force-enable-evm-ledger")) {
+              return true;
+            }
+
+            KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
+              cosmosChainInfo.chainId
+            );
+            return true;
+          } catch {
+            return false;
+          }
+        }
+      }
+
+      return true;
+    });
+
+    const numFoundToken = useMemo(() => {
+      if (chainStore.tokenScans.length === 0) {
+        return 0;
+      }
+
+      const set = new Set<string>();
+
+      for (const tokenScan of chainStore.tokenScans) {
+        for (const info of tokenScan.infos) {
+          for (const asset of info.assets) {
+            const key = `${ChainIdHelper.parse(tokenScan.chainId).identifier}/${
+              asset.currency.coinMinimalDenom
+            }`;
+            set.add(key);
+          }
+        }
+      }
+
+      return Array.from(set).length;
+    }, [chainStore.tokenScans]);
+
+    const { allBalancesSearchFiltered, lowBalanceTokens, isFirstTime } =
+      useAllBalances(trimSearch);
+
+    useBalanceAnalytics(allBalancesSearchFiltered, trimSearch);
+
+    const isShowNotFound =
+      allBalancesSearchFiltered.length === 0 &&
+      trimSearch.length > 0 &&
+      searchedLookingForChains.length === 0;
+
+    const isShowCheckMangeAssetViewGuide =
+      isShowNotFound &&
+      uiConfigStore.manageViewAssetTokenConfig.isDisabledTokenSearched(
+        trimSearch
+      );
+
+    const isShowSearchedLowBalanceTokenGuide =
+      uiConfigStore.isHideLowBalance &&
+      lowBalanceTokens.some((token) => {
+        return (
+          (token.chainInfo.chainName.toLowerCase().includes(trimSearch) ||
+            token.token.currency.coinDenom
+              .toLowerCase()
+              .includes(trimSearch)) &&
+          trimSearch.length
+        );
+      });
+
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    const tokenDetailInfo: {
+      chainId: string | null;
+      coinMinimalDenom: string | null;
+      isTokenDetailModalOpen: boolean | null;
+    } = (() => {
+      return {
+        chainId: searchParams.get("tokenChainId"),
+        coinMinimalDenom: searchParams.get("tokenCoinMinimalDenom"),
+        // modal의 close transition을 유지하기 위해서는 위의 두 field가 존재하는지 만으로 판단하면 안된다...
+        // close transition이 끝난후에 위의 두 값을 지워줘야한다.
+        // close가 될 것인지는 밑의 값으로 판단한다.
+        isTokenDetailModalOpen:
+          searchParams.get("isTokenDetailModalOpen") === "true",
+      };
+    })();
+
+    const scenes = useMemo(
+      () => [
+        {
+          name: "flat-view",
+          element: () => (
+            <TokensFlatViewScene
+              trimSearch={trimSearch}
+              onMoreTokensClosed={onMoreTokensClosed}
+              setSearchParams={setSearchParams}
+            />
+          ),
+        },
+        {
+          name: "grouped-view",
+          element: () => (
+            <TokensGroupedViewScene
+              trimSearch={trimSearch}
+              onMoreTokensClosed={onMoreTokensClosed}
+            />
+          ),
+        },
+      ],
+      [trimSearch]
+    );
+
+    const initialSceneProps = useMemo(
+      () => ({
+        name:
+          uiConfigStore.assetViewMode === "grouped"
+            ? "grouped-view"
+            : "flat-view",
+      }),
+      []
+    );
+
+    useEffect(() => {
+      if (
+        uiConfigStore.assetViewMode === "grouped" &&
+        sceneTransitionRef.current?.currentScene !== "grouped-view"
+      ) {
+        sceneTransitionRef.current?.replace("grouped-view");
+      } else if (
+        uiConfigStore.assetViewMode === "flat" &&
+        sceneTransitionRef.current?.currentScene !== "flat-view"
+      ) {
+        sceneTransitionRef.current?.replace("flat-view");
+      }
+    }, [uiConfigStore.assetViewMode]);
+
+    return (
+      <React.Fragment>
+        {isNotReady ? (
+          <TokenItem
+            viewToken={{
+              token: new CoinPretty(
+                chainStore.chainInfos[0].currencies[0],
+                new Dec(0)
+              ),
+              chainInfo: chainStore.chainInfos[0],
+              isFetching: false,
+              error: undefined,
+            }}
+            isNotReady={isNotReady}
           />
-        ),
-      },
-      {
-        name: "grouped-view",
-        element: () => (
-          <TokensGroupedViewScene
-            trimSearch={trimSearch}
-            onMoreTokensClosed={onMoreTokensClosed}
-          />
-        ),
-      },
-    ],
-    [trimSearch]
-  );
+        ) : (
+          <React.Fragment>
+            <Stack gutter="0.5rem">
+              <Box paddingX="0.375rem" paddingY="0.25rem">
+                <XAxis alignY="center" gap="0.25rem">
+                  <TokenTitleView
+                    title={intl.formatMessage({
+                      id: "page.main.spendable.spendable-balance-title",
+                    })}
+                    right={
+                      <XAxis>
+                        <SearchBarIcon
+                          toggleShowSearchBar={() => {
+                            uiConfigStore.toggleShowSearchBar();
+                          }}
+                        />
 
-  const initialSceneProps = useMemo(
-    () => ({
-      name:
-        uiConfigStore.assetViewMode === "grouped"
-          ? "grouped-view"
-          : "flat-view",
-    }),
-    []
-  );
-
-  useEffect(() => {
-    if (
-      uiConfigStore.assetViewMode === "grouped" &&
-      sceneTransitionRef.current?.currentScene !== "grouped-view"
-    ) {
-      sceneTransitionRef.current?.replace("grouped-view");
-    } else if (
-      uiConfigStore.assetViewMode === "flat" &&
-      sceneTransitionRef.current?.currentScene !== "flat-view"
-    ) {
-      sceneTransitionRef.current?.replace("flat-view");
-    }
-  }, [uiConfigStore.assetViewMode]);
-
-  return (
-    <React.Fragment>
-      {isNotReady ? (
-        <TokenItem
-          viewToken={{
-            token: new CoinPretty(
-              chainStore.chainInfos[0].currencies[0],
-              new Dec(0)
-            ),
-            chainInfo: chainStore.chainInfos[0],
-            isFetching: false,
-            error: undefined,
-          }}
-          isNotReady={isNotReady}
-        />
-      ) : (
-        <React.Fragment>
-          <Stack gutter="0.5rem">
-            <Box paddingX="0.375rem" paddingY="0.25rem">
-              <XAxis alignY="center" gap="0.25rem">
-                <TokenTitleView
-                  title={intl.formatMessage({
-                    id: "page.main.spendable.spendable-balance-title",
-                  })}
-                  right={
-                    <XAxis>
-                      <SearchBarIcon
-                        toggleShowSearchBar={() => {
-                          uiConfigStore.toggleShowSearchBar();
-                        }}
-                      />
-
-                      <ViewOptionsContextMenu
-                        isOpen={isContextMenuOpen}
-                        setIsOpen={setIsContextMenuOpen}
-                        showFiatValueVisible={showFiatValueVisible}
-                        setShowFiatValueVisible={setShowFiatValueVisible}
-                      />
-                    </XAxis>
-                  }
-                />
-              </XAxis>
-            </Box>
-
-            <VerticalCollapseTransition
-              collapsed={!uiConfigStore.isShowSearchBar}
-            >
-              <SearchTextInput
-                ref={searchRef}
-                value={search}
-                onChange={(e) => {
-                  e.preventDefault();
-
-                  setSearch(e.target.value);
-
-                  if (e.target.value.trim().length > 0) {
-                    if (!isEnteredSearch) {
-                      setIsEnteredSearch(true);
+                        <ViewOptionsContextMenu
+                          isOpen={isContextMenuOpen}
+                          setIsOpen={setIsContextMenuOpen}
+                          showFiatValueVisible={showFiatValueVisible}
+                          setShowFiatValueVisible={setShowFiatValueVisible}
+                        />
+                      </XAxis>
                     }
-
-                    const simpleBarScrollRef =
-                      globalSimpleBar.ref.current?.getScrollElement();
-                    if (
-                      simpleBarScrollRef &&
-                      simpleBarScrollRef.scrollTop < 218
-                    ) {
-                      searchScrollAnim.start(218, {
-                        from: simpleBarScrollRef.scrollTop,
-                        onChange: (anim: any) => {
-                          // XXX: 이거 실제 파라미터랑 타입스크립트 인터페이스가 다르다...???
-                          const v = anim.value != null ? anim.value : anim;
-                          if (typeof v === "number") {
-                            simpleBarScrollRef.scrollTop = v;
-                          }
-                        },
-                      });
-                    }
-                  }
-                }}
-                placeholder={intl.formatMessage({
-                  id: "page.main.search-placeholder",
-                })}
-              />
-            </VerticalCollapseTransition>
-
-            {numFoundToken > 0 && (
-              <Styles.NewTokenFoundButtonContainer
-                onClick={() => setIsFoundTokenModalOpen(true)}
-              >
-                <XAxis alignY="center">
-                  <Subtitle3>
-                    {intl.formatMessage(
-                      { id: "page.main.spendable.new-token-found" },
-                      {
-                        numFoundToken: (
-                          <span
-                            style={{
-                              paddingRight: "0.25rem",
-                              color: ColorPalette["blue-300"],
-                            }}
-                          >
-                            {numFoundToken}
-                          </span>
-                        ),
-                      }
-                    )}
-                  </Subtitle3>
-                  <div style={{ flex: 1 }} />
-                  <ArrowRightIcon
-                    width="1.25rem"
-                    height="1.25rem"
-                    color={ColorPalette["gray-300"]}
                   />
                 </XAxis>
-              </Styles.NewTokenFoundButtonContainer>
+              </Box>
+
+              <VerticalCollapseTransition
+                collapsed={!uiConfigStore.isShowSearchBar}
+              >
+                <SearchTextInput
+                  ref={searchRef}
+                  value={search}
+                  onChange={(e) => {
+                    e.preventDefault();
+
+                    setSearch(e.target.value);
+
+                    if (e.target.value.trim().length > 0) {
+                      if (!isEnteredSearch) {
+                        setIsEnteredSearch(true);
+                      }
+
+                      const simpleBarScrollRef =
+                        globalSimpleBar.ref.current?.getScrollElement();
+                      if (
+                        simpleBarScrollRef &&
+                        simpleBarScrollRef.scrollTop < 218
+                      ) {
+                        searchScrollAnim.start(218, {
+                          from: simpleBarScrollRef.scrollTop,
+                          onChange: (anim: any) => {
+                            // XXX: 이거 실제 파라미터랑 타입스크립트 인터페이스가 다르다...???
+                            const v = anim.value != null ? anim.value : anim;
+                            if (typeof v === "number") {
+                              simpleBarScrollRef.scrollTop = v;
+                            }
+                          },
+                        });
+                      }
+                    }
+                  }}
+                  placeholder={intl.formatMessage({
+                    id: "page.main.search-placeholder",
+                  })}
+                />
+              </VerticalCollapseTransition>
+
+              {numFoundToken > 0 && (
+                <Styles.NewTokenFoundButtonContainer
+                  onClick={() => setIsFoundTokenModalOpen(true)}
+                >
+                  <XAxis alignY="center">
+                    <Subtitle3>
+                      {intl.formatMessage(
+                        { id: "page.main.spendable.new-token-found" },
+                        {
+                          numFoundToken: (
+                            <span
+                              style={{
+                                paddingRight: "0.25rem",
+                                color: ColorPalette["blue-300"],
+                              }}
+                            >
+                              {numFoundToken}
+                            </span>
+                          ),
+                        }
+                      )}
+                    </Subtitle3>
+                    <div style={{ flex: 1 }} />
+                    <ArrowRightIcon
+                      width="1.25rem"
+                      height="1.25rem"
+                      color={ColorPalette["gray-300"]}
+                    />
+                  </XAxis>
+                </Styles.NewTokenFoundButtonContainer>
+              )}
+
+              <SceneTransition
+                ref={sceneTransitionRef}
+                scenes={scenes}
+                initialSceneProps={initialSceneProps}
+                transitionMode="opacity"
+              />
+            </Stack>
+            {searchedLookingForChains.length > 0 && (
+              <React.Fragment>
+                {allBalancesSearchFiltered.length > 0 && (
+                  <Gutter size="1rem" direction="vertical" />
+                )}
+                <LookingForChains
+                  lookingForChains={searchedLookingForChains}
+                  search={search}
+                />
+              </React.Fragment>
             )}
 
-            <SceneTransition
-              ref={sceneTransitionRef}
-              scenes={scenes}
-              initialSceneProps={initialSceneProps}
-              transitionMode="opacity"
-            />
-          </Stack>
-          {searchedLookingForChains.length > 0 && (
-            <React.Fragment>
-              {allBalancesSearchFiltered.length > 0 && (
-                <Gutter size="1rem" direction="vertical" />
-              )}
-              <LookingForChains
-                lookingForChains={searchedLookingForChains}
-                search={search}
-              />
-            </React.Fragment>
-          )}
-
-          <Box padding="0.75rem">
-            <YAxis alignX="center">
-              <ManageViewAssetTokenPageButton
-                text={intl.formatMessage({
-                  id: "page.main.spendable.manage-asset-list-button",
-                })}
-                size="small"
-                right={
-                  <XAxis alignY="center">
-                    <AdjustmentIcon
-                      width="1.125rem"
-                      height="1.125rem"
-                      color={
-                        theme.mode === "light"
-                          ? ColorPalette["blue-400"]
-                          : ColorPalette["white"]
-                      }
-                    />
-                    {numFoundToken > 0 ? (
-                      <React.Fragment>
-                        <Gutter size="0.375rem" />
-                        <CircleIndicator />
-                      </React.Fragment>
-                    ) : null}
-                  </XAxis>
-                }
-                onClick={() => navigate("/manage-view-asset-token-list")}
-              />
-            </YAxis>
-          </Box>
-
-          {(isShowCheckMangeAssetViewGuide ||
-            isShowSearchedLowBalanceTokenGuide) && (
-            <Box marginY="2rem">
-              <EmptyView
-                altSvg={
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="70"
-                    height="70"
-                    viewBox="0 0 70 70"
-                    fill="none"
-                  >
-                    <path
-                      d="M55.9 10H15.1C13.7485 10 12.448 10.5355 11.5045 11.5045C10.5355 12.448 10 13.7485 10 15.1V45.7C10 47.0515 10.5355 48.352 11.5045 49.2955C12.448 50.2645 13.7485 50.8 15.1 50.8H25.3L35.5 61L45.7 50.8H55.9C57.2515 50.8 58.552 50.2645 59.4955 49.2955C60.439 48.3265 61 47.0515 61 45.7V15.1C61 13.7485 60.4645 12.448 59.4955 11.5045C58.552 10.5355 57.2515 10 55.9 10ZM15.1 45.7V15.1H55.9V45.7H43.5835L35.5 53.7835L27.4165 45.7M30.5275 20.302C31.9045 19.384 33.715 18.925 35.9845 18.925C38.3815 18.925 40.294 19.4605 41.671 20.506C43.048 21.577 43.7365 23.005 43.7365 24.79C43.7365 25.912 43.354 26.9065 42.6145 27.85C41.875 28.768 40.906 29.482 39.733 30.0175C39.07 30.4 38.6365 30.7825 38.407 31.216C38.1775 31.675 38.05 32.236 38.05 32.95H32.95C32.95 31.675 33.205 30.808 33.6895 30.196C34.225 29.584 35.092 28.87 36.418 28.054C37.081 27.697 37.6165 27.238 38.05 26.677C38.407 26.1415 38.611 25.504 38.611 24.79C38.611 24.025 38.3815 23.464 37.9225 23.0305C37.4635 22.5715 36.775 22.3675 35.9845 22.3675C35.296 22.3675 34.735 22.546 34.225 22.903C33.817 23.26 33.562 23.7955 33.562 24.5095H28.5385C28.411 22.75 29.125 21.22 30.5275 20.302ZM32.95 40.6V35.5H38.05V40.6H32.95Z"
-                      fill="#424247"
-                    />
-                  </svg>
-                }
-              >
-                <Stack alignX="center" gutter="0.1rem">
-                  <Subtitle1>
-                    <FormattedMessage id="page.main.spendable.search-show-check-manage-asset-view-guide-title" />
-                  </Subtitle1>
-                  <Body2 style={{ textAlign: "center", lineHeight: "1.4" }}>
-                    <FormattedMessage
-                      id="page.main.spendable.search-show-check-manage-asset-view-guide-paragraph"
-                      values={{
-                        br: <br />,
-                      }}
-                    />
-                  </Body2>
-                </Stack>
-              </EmptyView>
-            </Box>
-          )}
-
-          {isShowNotFound &&
-          !isShowCheckMangeAssetViewGuide &&
-          !isShowSearchedLowBalanceTokenGuide ? (
-            <Box marginY="2rem">
-              <EmptyView>
-                <Stack alignX="center" gutter="0.1rem">
-                  <Subtitle3 style={{ fontWeight: 700 }}>
-                    <FormattedMessage id="page.main.spendable.search-empty-view-title" />
-                  </Subtitle3>
-                  <Subtitle3>
-                    <FormattedMessage id="page.main.spendable.search-empty-view-paragraph" />
-                  </Subtitle3>
-                </Stack>
-              </EmptyView>
-            </Box>
-          ) : isFirstTime ? (
-            <MainEmptyView
-              image={
-                <img
-                  src={require(theme.mode === "light"
-                    ? "../../public/assets/img/main-empty-balance-light.png"
-                    : "../../public/assets/img/main-empty-balance.png")}
-                  style={{
-                    width: "6.25rem",
-                    height: "6.25rem",
-                  }}
-                  alt="empty balance image"
-                />
-              }
-              paragraph={intl.formatMessage({
-                id: "page.main.spendable.empty-view-paragraph",
-              })}
-              title={intl.formatMessage({
-                id: "page.main.spendable.empty-view-title",
-              })}
-              button={
-                <Button
+            <Box padding="0.75rem">
+              <YAxis alignX="center">
+                <ManageViewAssetTokenPageButton
                   text={intl.formatMessage({
-                    id: "page.main.spendable.get-started-button",
+                    id: "page.main.spendable.manage-asset-list-button",
                   })}
-                  color="primary"
                   size="small"
-                  onClick={onClickGetStarted}
+                  right={
+                    <XAxis alignY="center">
+                      <AdjustmentIcon
+                        width="1.125rem"
+                        height="1.125rem"
+                        color={
+                          theme.mode === "light"
+                            ? ColorPalette["blue-400"]
+                            : ColorPalette["white"]
+                        }
+                      />
+                      {numFoundToken > 0 ? (
+                        <React.Fragment>
+                          <Gutter size="0.375rem" />
+                          <CircleIndicator />
+                        </React.Fragment>
+                      ) : null}
+                    </XAxis>
+                  }
+                  onClick={() => navigate("/manage-view-asset-token-list")}
                 />
-              }
-            />
-          ) : null}
-        </React.Fragment>
-      )}
+              </YAxis>
+            </Box>
 
-      <Modal
-        isOpen={
-          tokenDetailInfo.chainId != null &&
+            {(isShowCheckMangeAssetViewGuide ||
+              isShowSearchedLowBalanceTokenGuide) && (
+              <Box marginY="2rem">
+                <EmptyView
+                  altSvg={
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="70"
+                      height="70"
+                      viewBox="0 0 70 70"
+                      fill="none"
+                    >
+                      <path
+                        d="M55.9 10H15.1C13.7485 10 12.448 10.5355 11.5045 11.5045C10.5355 12.448 10 13.7485 10 15.1V45.7C10 47.0515 10.5355 48.352 11.5045 49.2955C12.448 50.2645 13.7485 50.8 15.1 50.8H25.3L35.5 61L45.7 50.8H55.9C57.2515 50.8 58.552 50.2645 59.4955 49.2955C60.439 48.3265 61 47.0515 61 45.7V15.1C61 13.7485 60.4645 12.448 59.4955 11.5045C58.552 10.5355 57.2515 10 55.9 10ZM15.1 45.7V15.1H55.9V45.7H43.5835L35.5 53.7835L27.4165 45.7M30.5275 20.302C31.9045 19.384 33.715 18.925 35.9845 18.925C38.3815 18.925 40.294 19.4605 41.671 20.506C43.048 21.577 43.7365 23.005 43.7365 24.79C43.7365 25.912 43.354 26.9065 42.6145 27.85C41.875 28.768 40.906 29.482 39.733 30.0175C39.07 30.4 38.6365 30.7825 38.407 31.216C38.1775 31.675 38.05 32.236 38.05 32.95H32.95C32.95 31.675 33.205 30.808 33.6895 30.196C34.225 29.584 35.092 28.87 36.418 28.054C37.081 27.697 37.6165 27.238 38.05 26.677C38.407 26.1415 38.611 25.504 38.611 24.79C38.611 24.025 38.3815 23.464 37.9225 23.0305C37.4635 22.5715 36.775 22.3675 35.9845 22.3675C35.296 22.3675 34.735 22.546 34.225 22.903C33.817 23.26 33.562 23.7955 33.562 24.5095H28.5385C28.411 22.75 29.125 21.22 30.5275 20.302ZM32.95 40.6V35.5H38.05V40.6H32.95Z"
+                        fill="#424247"
+                      />
+                    </svg>
+                  }
+                >
+                  <Stack alignX="center" gutter="0.1rem">
+                    <Subtitle1>
+                      <FormattedMessage id="page.main.spendable.search-show-check-manage-asset-view-guide-title" />
+                    </Subtitle1>
+                    <Body2 style={{ textAlign: "center", lineHeight: "1.4" }}>
+                      <FormattedMessage
+                        id="page.main.spendable.search-show-check-manage-asset-view-guide-paragraph"
+                        values={{
+                          br: <br />,
+                        }}
+                      />
+                    </Body2>
+                  </Stack>
+                </EmptyView>
+              </Box>
+            )}
+
+            {isShowNotFound &&
+            !isShowCheckMangeAssetViewGuide &&
+            !isShowSearchedLowBalanceTokenGuide ? (
+              <Box marginY="2rem">
+                <EmptyView>
+                  <Stack alignX="center" gutter="0.1rem">
+                    <Subtitle3 style={{ fontWeight: 700 }}>
+                      <FormattedMessage id="page.main.spendable.search-empty-view-title" />
+                    </Subtitle3>
+                    <Subtitle3>
+                      <FormattedMessage id="page.main.spendable.search-empty-view-paragraph" />
+                    </Subtitle3>
+                  </Stack>
+                </EmptyView>
+              </Box>
+            ) : isFirstTime ? (
+              <MainEmptyView
+                buttons={[
+                  <ReceiveButtonWhenFirstTime
+                    key={"receive-button"}
+                    onClick={onClickGetStarted}
+                  />,
+                  <BuyButtonWhenFirstTime
+                    key={"buy-button"}
+                    onClick={onClickBuy}
+                  />,
+                ]}
+              />
+            ) : null}
+          </React.Fragment>
+        )}
+
+        <Modal
+          isOpen={
+            tokenDetailInfo.chainId != null &&
+            tokenDetailInfo.chainId.length > 0 &&
+            tokenDetailInfo.coinMinimalDenom != null &&
+            tokenDetailInfo.coinMinimalDenom.length > 0 &&
+            tokenDetailInfo.isTokenDetailModalOpen === true
+          }
+          align="right"
+          close={() => {
+            setSearchParams((prev) => {
+              prev.delete("isTokenDetailModalOpen");
+
+              return prev;
+            });
+          }}
+          onCloseTransitionEnd={() => {
+            setSearchParams((prev) => {
+              prev.delete("tokenChainId");
+              prev.delete("tokenCoinMinimalDenom");
+
+              return prev;
+            });
+          }}
+          forceNotOverflowAuto={true}
+        >
+          {tokenDetailInfo.chainId != null &&
           tokenDetailInfo.chainId.length > 0 &&
           tokenDetailInfo.coinMinimalDenom != null &&
-          tokenDetailInfo.coinMinimalDenom.length > 0 &&
-          tokenDetailInfo.isTokenDetailModalOpen === true
-        }
-        align="right"
-        close={() => {
-          setSearchParams((prev) => {
-            prev.delete("isTokenDetailModalOpen");
+          tokenDetailInfo.coinMinimalDenom.length > 0 ? (
+            <TokenDetailModal
+              close={() => {
+                setSearchParams((prev) => {
+                  prev.delete("isTokenDetailModalOpen");
 
-            return prev;
-          });
-        }}
-        onCloseTransitionEnd={() => {
-          setSearchParams((prev) => {
-            prev.delete("tokenChainId");
-            prev.delete("tokenCoinMinimalDenom");
+                  return prev;
+                });
+              }}
+              chainId={tokenDetailInfo.chainId}
+              coinMinimalDenom={tokenDetailInfo.coinMinimalDenom}
+            />
+          ) : null}
+        </Modal>
 
-            return prev;
-          });
-        }}
-        forceNotOverflowAuto={true}
-      >
-        {tokenDetailInfo.chainId != null &&
-        tokenDetailInfo.chainId.length > 0 &&
-        tokenDetailInfo.coinMinimalDenom != null &&
-        tokenDetailInfo.coinMinimalDenom.length > 0 ? (
-          <TokenDetailModal
-            close={() => {
-              setSearchParams((prev) => {
-                prev.delete("isTokenDetailModalOpen");
-
-                return prev;
-              });
-            }}
-            chainId={tokenDetailInfo.chainId}
-            coinMinimalDenom={tokenDetailInfo.coinMinimalDenom}
-          />
-        ) : null}
-      </Modal>
-
-      <Modal
-        isOpen={isFoundTokenModalOpen && numFoundToken > 0}
-        align="bottom"
-        close={() => setIsFoundTokenModalOpen(false)}
-      >
-        <TokenFoundModal close={() => setIsFoundTokenModalOpen(false)} />
-      </Modal>
-    </React.Fragment>
-  );
-});
+        <Modal
+          isOpen={isFoundTokenModalOpen && numFoundToken > 0}
+          align="bottom"
+          close={() => setIsFoundTokenModalOpen(false)}
+        >
+          <TokenFoundModal close={() => setIsFoundTokenModalOpen(false)} />
+        </Modal>
+      </React.Fragment>
+    );
+  }
+);
 
 const TokensFlatViewScene = observer(
   ({

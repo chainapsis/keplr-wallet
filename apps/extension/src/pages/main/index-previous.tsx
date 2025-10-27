@@ -678,6 +678,9 @@ export const MainPage: FunctionComponent<{
            */}
           {tabStatus === "available" ? (
             <SpendableAssetView
+              onClickBuy={() => {
+                setIsOpenBuy(true);
+              }}
               isNotReady={isNotReady}
               onClickGetStarted={() => {
                 setIsOpenDepositModal(true);
