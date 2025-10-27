@@ -402,6 +402,7 @@ export const CosmosTxView: FunctionComponent<{
     shouldTopUp,
     isTopUpAvailable,
     isTopUpInProgress,
+    topUpCompleted,
     remainingText,
     executeTopUpIfAvailable,
     topUpError,
@@ -779,7 +780,7 @@ export const CosmosTxView: FunctionComponent<{
           </React.Fragment>
         ) : null}
 
-        <VerticalCollapseTransition collapsed={shouldTopUp}>
+        <VerticalCollapseTransition collapsed={shouldTopUp || topUpCompleted}>
           <Box
             style={{
               opacity: isLedgerAndDirect ? 0.5 : undefined,
@@ -819,7 +820,9 @@ export const CosmosTxView: FunctionComponent<{
             ) : null}
           </Box>
         </VerticalCollapseTransition>
-        <VerticalCollapseTransition collapsed={!shouldTopUp}>
+        <VerticalCollapseTransition
+          collapsed={!(shouldTopUp || topUpCompleted)}
+        >
           {interactionData.isInternal ? (
             <FeeCoverageBox feeConfig={feeConfig} />
           ) : (

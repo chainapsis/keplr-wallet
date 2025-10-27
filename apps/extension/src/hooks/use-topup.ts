@@ -17,6 +17,7 @@ export interface TopUpResult {
   remainingText: string | undefined;
   isTopUpAvailable: boolean;
   isTopUpInProgress: boolean;
+  topUpCompleted: boolean;
   executeTopUpIfAvailable: () => Promise<void>;
   topUpError: Error | undefined;
 }
@@ -143,6 +144,7 @@ export function useTopUp({
     remainingText,
     isTopUpAvailable,
     isTopUpInProgress,
+    topUpCompleted,
     executeTopUpIfAvailable,
     topUpError,
   };
