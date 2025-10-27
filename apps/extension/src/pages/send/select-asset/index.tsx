@@ -103,7 +103,6 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
   const searchedTokens = useSearch(nonZeroTokens, search, searchFields);
 
   const _filteredTokens = useMemo(() => {
-    console.log("paramIsIBCTransfer", paramIsIBCTransfer);
     if (paramIsIBCTransfer) {
       return searchedTokens.filter((token) => {
         if (!("cosmos" in token.chainInfo)) {

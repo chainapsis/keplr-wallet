@@ -3,7 +3,6 @@ import {
   CoinGeckoPriceStore,
   CosmosQueries,
   IAccountStore,
-  IChainInfoImpl,
   IQueriesStore,
   QueryError,
 } from "@keplr-wallet/stores";
@@ -28,7 +27,7 @@ import { getBabylonUnbondingRemainingTime } from "../../utils/get-babylon-unbond
 import { INITIA_CHAIN_ID } from "../../config.ui";
 
 interface ViewToken {
-  chainInfo: IChainInfoImpl | ModularChainInfo;
+  chainInfo: ModularChainInfo;
   token: CoinPretty;
   price: PricePretty | undefined;
   isFetching: boolean;

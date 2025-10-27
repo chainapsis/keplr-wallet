@@ -211,20 +211,22 @@ export const EnableChainsScene: FunctionComponent<{
           const promises: Promise<unknown>[] = [];
           for (const modularChainInfo of chainStore.modularChainInfos) {
             if ("cosmos" in modularChainInfo) {
-              const chainInfo = chainStore.getChain(
-                modularChainInfo.cosmos.chainId
-              );
-              if (keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo)) {
+              if (
+                keyRingStore.needKeyCoinTypeFinalize(
+                  vaultId,
+                  modularChainInfo.chainId
+                )
+              ) {
                 promises.push(
                   (async () => {
                     const res =
                       await keyRingStore.computeNotFinalizedKeyAddresses(
                         vaultId,
-                        chainInfo.chainId
+                        modularChainInfo.chainId
                       );
 
                     candidateAddresses.push({
-                      chainId: chainInfo.chainId,
+                      chainId: modularChainInfo.chainId,
                       bech32Addresses: res.map((res) => {
                         return {
                           coinType: res.coinType,
@@ -235,7 +237,9 @@ export const EnableChainsScene: FunctionComponent<{
                   })()
                 );
               } else {
-                const account = accountStore.getAccount(chainInfo.chainId);
+                const account = accountStore.getAccount(
+                  modularChainInfo.chainId
+                );
                 promises.push(
                   (async () => {
                     if (account.walletStatus !== WalletStatus.Loaded) {
@@ -244,10 +248,10 @@ export const EnableChainsScene: FunctionComponent<{
 
                     if (account.bech32Address) {
                       candidateAddresses.push({
-                        chainId: chainInfo.chainId,
+                        chainId: modularChainInfo.chainId,
                         bech32Addresses: [
                           {
-                            coinType: chainInfo.bip44.coinType,
+                            coinType: modularChainInfo.cosmos.bip44.coinType,
                             address: account.bech32Address,
                           },
                         ],
@@ -310,9 +314,17 @@ export const EnableChainsScene: FunctionComponent<{
       if (!isFresh && candidateAddresses.length > 0) {
         for (const candidateAddress of candidateAddresses) {
           const queries = queriesStore.get(candidateAddress.chainId);
-          const chainInfo = chainStore.getChain(candidateAddress.chainId);
+          const chainInfo = chainStore.getModularChain(
+            candidateAddress.chainId
+          );
 
-          if (keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo)) {
+          if (!("cosmos" in chainInfo)) {
+            continue;
+          }
+
+          if (
+            keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo.chainId)
+          ) {
             if (candidateAddress.bech32Addresses.length === 1) {
               // finalize-key scene을 통하지 않고도 이 scene으로 들어올 수 있는 경우가 있기 때문에...
               keyRingStore.finalizeKeyCoinType(
@@ -338,10 +350,10 @@ export const EnableChainsScene: FunctionComponent<{
                 await Promise.allSettled(promises);
 
                 const mainAddress = candidateAddress.bech32Addresses.find(
-                  (a) => a.coinType === chainInfo.bip44.coinType
+                  (a) => a.coinType === chainInfo.cosmos.bip44.coinType
                 );
                 const otherAddresses = candidateAddress.bech32Addresses.filter(
-                  (a) => a.coinType !== chainInfo.bip44.coinType
+                  (a) => a.coinType !== chainInfo.cosmos.bip44.coinType
                 );
 
                 let otherIsSelectable = false;
@@ -510,15 +522,22 @@ export const EnableChainsScene: FunctionComponent<{
 
         for (const candidateAddress of candidateAddresses) {
           const queries = queriesStore.get(candidateAddress.chainId);
-          const chainInfo = chainStore.getChain(candidateAddress.chainId);
+          const chainInfo = chainStore.getModularChain(
+            candidateAddress.chainId
+          );
+
+          if (!("cosmos" in chainInfo)) {
+            continue;
+          }
+
           const mainCurrency =
-            chainInfo.stakeCurrency || chainInfo.currencies[0];
+            chainInfo.cosmos.stakeCurrency || chainInfo.cosmos.currencies[0];
           const account = accountStore.getAccount(chainInfo.chainId);
 
           // hideInUI인 chain은 UI 상에서 enable이 되지 않아야한다.
           // 정말 만약의 수로 왜인지 그 체인에 유저가 자산등을 가지고 있을수도 있으니
           // 여기서도 막아야한다
-          if (!chainStore.isInChainInfosInListUI(chainInfo.chainId)) {
+          if (!chainStore.isInModularChainInfosInListUI(chainInfo.chainId)) {
             continue;
           }
 
@@ -541,6 +560,10 @@ export const EnableChainsScene: FunctionComponent<{
                   account.bech32Address
                 );
             const balance = queryBalance.getBalance(mainCurrency);
+
+            const chainIdentifier = ChainIdHelper.parse(
+              chainInfo.chainId
+            ).identifier;
 
             if (balance?.response?.data) {
               // A bit tricky. The stake coin is currently only native, and in this case,
@@ -565,13 +588,13 @@ export const EnableChainsScene: FunctionComponent<{
                 })
               ) {
                 enableAllChains = false;
-                enabledChainIdentifiers.push(chainInfo.chainIdentifier);
+                enabledChainIdentifiers.push(chainIdentifier);
                 break;
               }
 
               if (isEVMOnlyChain && balance.balance.toDec().gt(new Dec(0))) {
                 enableAllChains = false;
-                enabledChainIdentifiers.push(chainInfo.chainIdentifier);
+                enabledChainIdentifiers.push(chainIdentifier);
                 break;
               }
             }
@@ -587,7 +610,7 @@ export const EnableChainsScene: FunctionComponent<{
                   );
               if (queryDelegations.delegationBalances.length > 0) {
                 enableAllChains = false;
-                enabledChainIdentifiers.push(chainInfo.chainIdentifier);
+                enabledChainIdentifiers.push(chainIdentifier);
                 break;
               }
             }
@@ -643,13 +666,10 @@ export const EnableChainsScene: FunctionComponent<{
       if (keyType === "ledger") {
         modularChainInfos = modularChainInfos.filter((modularChainInfo) => {
           if ("cosmos" in modularChainInfo) {
-            const chainInfo = chainStore.getChain(
-              modularChainInfo.cosmos.chainId
-            );
             const isEthermintLike =
-              chainInfo.bip44.coinType === 60 ||
-              !!chainInfo.features?.includes("eth-address-gen") ||
-              !!chainInfo.features?.includes("eth-key-sign");
+              modularChainInfo.cosmos.bip44.coinType === 60 ||
+              !!modularChainInfo.cosmos.features?.includes("eth-address-gen") ||
+              !!modularChainInfo.cosmos.features?.includes("eth-key-sign");
 
             // Ledger일 경우 ethereum app을 바로 처리할 수 없다.
             // 이 경우 빼줘야한다.
@@ -665,12 +685,16 @@ export const EnableChainsScene: FunctionComponent<{
               }
 
               try {
-                if (chainInfo.features?.includes("force-enable-evm-ledger")) {
+                if (
+                  modularChainInfo.cosmos.features?.includes(
+                    "force-enable-evm-ledger"
+                  )
+                ) {
                   return true;
                 }
                 // 처리가능한 체인만 true를 반환한다.
                 KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
-                  chainInfo.chainId
+                  modularChainInfo.chainId
                 );
                 return true;
               } catch {
@@ -808,15 +832,17 @@ export const EnableChainsScene: FunctionComponent<{
         ) => {
           if ("cosmos" in modularChainInfo) {
             const addresses = candidateAddressesMap.get(chainIdentifier);
-            const chainInfo = chainStore.getChain(modularChainInfo.chainId);
             const queries = queriesStore.get(modularChainInfo.chainId);
 
             const mainCurrency =
-              chainInfo.stakeCurrency || chainInfo.currencies[0];
-            const account = accountStore.getAccount(chainInfo.chainId);
+              modularChainInfo.cosmos.stakeCurrency ||
+              modularChainInfo.cosmos.currencies[0];
+            const account = accountStore.getAccount(modularChainInfo.chainId);
 
             if (addresses && addresses.length > 0) {
-              const queryBalance = chainStore.isEvmOnlyChain(chainInfo.chainId)
+              const queryBalance = chainStore.isEvmOnlyChain(
+                modularChainInfo.chainId
+              )
                 ? queries.queryBalances.getQueryEthereumHexAddress(
                     account.ethereumHexAddress
                   )
@@ -966,11 +992,11 @@ export const EnableChainsScene: FunctionComponent<{
           key: "modularChainInfo.currency.coinDenom",
           function: (modularChainInfo: ModularChainInfo) => {
             if ("cosmos" in modularChainInfo) {
-              const chainInfo = chainStore.getChain(
-                modularChainInfo.cosmos.chainId
-              );
               return CoinPretty.makeCoinDenomPretty(
-                (chainInfo.stakeCurrency || chainInfo.currencies[0]).coinDenom
+                (
+                  modularChainInfo.cosmos.stakeCurrency ||
+                  modularChainInfo.cosmos.currencies[0]
+                ).coinDenom
               );
             } else if ("starknet" in modularChainInfo) {
               return CoinPretty.makeCoinDenomPretty(
@@ -1145,21 +1171,32 @@ export const EnableChainsScene: FunctionComponent<{
           ) ?? [];
 
         const balance = (() => {
-          if ("cosmos" in modularChainInfo) {
-            const chainInfo = chainStore.getChain(
-              modularChainInfo.cosmos.chainId
-            );
+          if (
+            "evm" in modularChainInfo &&
+            chainStore.isEvmOnlyChain(modularChainInfo.chainId)
+          ) {
+            const queries = queriesStore.get(modularChainInfo.chainId);
+            const mainCurrency = modularChainInfo.evm.currencies[0];
+
+            const queryBalance =
+              queries.queryBalances.getQueryEthereumHexAddress(
+                account.ethereumHexAddress
+              );
+            const balance = queryBalance.getBalance(mainCurrency);
+            if (balance) {
+              return balance.balance;
+            }
+
+            return new CoinPretty(mainCurrency, "0");
+          } else if ("cosmos" in modularChainInfo) {
             const queries = queriesStore.get(modularChainInfo.chainId);
             const mainCurrency =
-              chainInfo.stakeCurrency || chainInfo.currencies[0];
+              modularChainInfo.cosmos.stakeCurrency ||
+              modularChainInfo.cosmos.currencies[0];
 
-            const queryBalance = chainStore.isEvmOnlyChain(chainInfo.chainId)
-              ? queries.queryBalances.getQueryEthereumHexAddress(
-                  account.ethereumHexAddress
-                )
-              : queries.queryBalances.getQueryBech32Address(
-                  account.bech32Address
-                );
+            const queryBalance = queries.queryBalances.getQueryBech32Address(
+              account.bech32Address
+            );
             const balance = queryBalance.getBalance(mainCurrency);
 
             if (balance) {
@@ -1972,9 +2009,11 @@ export const EnableChainsScene: FunctionComponent<{
                   const enable = enables[i];
                   const modularChainInfo = chainStore.getModularChain(enable);
                   if ("cosmos" in modularChainInfo) {
-                    const chainInfo = chainStore.getChain(enable);
                     if (
-                      keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo)
+                      keyRingStore.needKeyCoinTypeFinalize(
+                        vaultId,
+                        modularChainInfo.chainId
+                      )
                     ) {
                       // Remove enable from enables
                       enables.splice(i, 1);
@@ -1990,11 +2029,14 @@ export const EnableChainsScene: FunctionComponent<{
                 const isCosmosChainId = (chainId: string) => {
                   const modularChainInfo = chainStore.getModularChain(chainId);
                   if ("cosmos" in modularChainInfo) {
-                    const chainInfo = chainStore.getChain(chainId);
                     const isEthermintLike =
-                      chainInfo.bip44.coinType === 60 ||
-                      !!chainInfo.features?.includes("eth-address-gen") ||
-                      !!chainInfo.features?.includes("eth-key-sign");
+                      modularChainInfo.cosmos.bip44.coinType === 60 ||
+                      !!modularChainInfo.cosmos.features?.includes(
+                        "eth-address-gen"
+                      ) ||
+                      !!modularChainInfo.cosmos.features?.includes(
+                        "eth-key-sign"
+                      );
                     return !isEthermintLike;
                   }
                   return false;
@@ -2002,11 +2044,14 @@ export const EnableChainsScene: FunctionComponent<{
                 const isEthereumChainId = (chainId: string) => {
                   const modularChainInfo = chainStore.getModularChain(chainId);
                   if ("cosmos" in modularChainInfo) {
-                    const chainInfo = chainStore.getChain(chainId);
                     const isEthermintLike =
-                      chainInfo.bip44.coinType === 60 ||
-                      !!chainInfo.features?.includes("eth-address-gen") ||
-                      !!chainInfo.features?.includes("eth-key-sign");
+                      modularChainInfo.cosmos.bip44.coinType === 60 ||
+                      !!modularChainInfo.cosmos.features?.includes(
+                        "eth-address-gen"
+                      ) ||
+                      !!modularChainInfo.cosmos.features?.includes(
+                        "eth-key-sign"
+                      );
                     return isEthermintLike;
                   }
                   return false;
@@ -2471,7 +2516,7 @@ export const EnableChainsScene: FunctionComponent<{
                     return true;
                   }
                   try {
-                    const chainInfo = chainStore.getChain(id);
+                    const chainInfo = chainStore.getModularChain(id);
                     return (
                       chainInfo.chainName.toLowerCase().includes("test") ||
                       chainInfo.chainName.toLowerCase().includes("devnet")

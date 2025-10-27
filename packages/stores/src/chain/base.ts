@@ -1511,6 +1511,12 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
     }
     return false;
   }
+
+  isCurrencyRegistrationInProgress(coinMinimalDenom: string): boolean {
+    return (
+      this.registrationInProgressCurrencyMap.get(coinMinimalDenom) || false
+    );
+  }
 }
 
 export class ChainStore<C extends ChainInfo = ChainInfo>

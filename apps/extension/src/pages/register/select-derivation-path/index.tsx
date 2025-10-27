@@ -120,8 +120,7 @@ export const SelectDerivationPathScene: FunctionComponent<{
 
         if (res.length === 1) {
           (async () => {
-            const chainInfo = chainStore.getChain(chainId);
-            if (keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo)) {
+            if (keyRingStore.needKeyCoinTypeFinalize(vaultId, chainId)) {
               await keyRingStore.finalizeKeyCoinType(
                 vaultId,
                 chainId,
@@ -239,7 +238,7 @@ export const SelectDerivationPathScene: FunctionComponent<{
             })}
             size="large"
             disabled={
-              !keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo) ||
+              !keyRingStore.needKeyCoinTypeFinalize(vaultId, chainId) ||
               selectedCoinType < 0
             }
             onClick={async () => {

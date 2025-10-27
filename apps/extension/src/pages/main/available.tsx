@@ -331,17 +331,27 @@ export const AvailableTabView: FunctionComponent<{
             if (isModular) {
               embedded = true;
             } else {
-              const chainInfoInStore = chainStore.getChain(chainInfo.chainId);
+              const chainInfoInStore = chainStore.getModularChain(
+                chainInfo.chainId
+              );
 
               if (!chainInfoInStore) {
                 stored = false;
               } else {
-                if (chainInfoInStore.hideInUI) {
+                if (
+                  "cosmos" in chainInfoInStore &&
+                  chainInfoInStore.cosmos.hideInUI
+                ) {
                   return acc;
                 }
 
                 stored = true;
-                embedded = chainInfoInStore.embedded?.embedded;
+
+                if ("cosmos" in chainInfoInStore) {
+                  embedded = !!chainInfoInStore.cosmos;
+                } else if ("evm" in chainInfoInStore) {
+                  embedded = !!chainInfoInStore.evm;
+                }
               }
             }
           } catch (e) {

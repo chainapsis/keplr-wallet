@@ -147,6 +147,9 @@ export const LookingForChainItem: FunctionComponent<{
           onClick={async () => {
             onClick();
 
+            console.log("chainInfo", chainInfo);
+            console.log("embedded, stored", embedded, stored);
+
             // If the chain is not embedded and not added to the store,
             // add the chain internally and refresh the store.
             if (!embedded && !stored) {

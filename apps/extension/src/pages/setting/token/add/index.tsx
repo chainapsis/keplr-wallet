@@ -148,17 +148,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
     };
   }, [accountStore, chainId]);
 
-  const { chainInfo, modularChainInfo } = (() => {
-    const modularChainInfo = chainStore.getModularChain(chainId);
-    if ("cosmos" in modularChainInfo) {
-      return {
-        chainInfo: chainStore.getModularChain(chainId),
-        modularChainInfo,
-      };
-    } else {
-      return { chainInfo: undefined, modularChainInfo };
-    }
-  })();
+  const modularChainInfo = chainStore.getModularChain(chainId);
 
   const isSecretWasm = chainStore
     .getModularChainInfoImpl(chainId)
