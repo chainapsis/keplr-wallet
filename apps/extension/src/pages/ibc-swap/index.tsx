@@ -2079,13 +2079,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           <FeeCoverageDescription />
         </VerticalCollapseTransition>
 
-        <VerticalCollapseTransition
-          collapsed={
-            shouldTopUp &&
-            ibcSwapConfigs.feeConfig.uiProperties.warning instanceof
-              InsufficientFeeError
-          }
-        >
+        <VerticalCollapseTransition collapsed={shouldTopUp}>
           <WarningGuideBox
             showUSDNWarning={showUSDNWarning}
             showCelestiaWarning={showCelestiaWarning}

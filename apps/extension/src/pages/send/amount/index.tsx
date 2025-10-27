@@ -866,12 +866,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     }
   })();
 
-  const {
-    shouldTopUp,
-    remainingText,
-    isTopUpAvailable,
-    isInsufficientFeeWarning,
-  } = useTopUp({
+  const { shouldTopUp, remainingText, isTopUpAvailable } = useTopUp({
     feeConfig,
     senderConfig,
   });
@@ -907,7 +902,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           disabled:
             interactionBlocked ||
             showCelestiaWarning ||
-            (shouldTopUp ? !isTopUpAvailable : isInsufficientFeeWarning),
+            (shouldTopUp && !isTopUpAvailable),
           text:
             shouldTopUp && remainingText
               ? remainingText

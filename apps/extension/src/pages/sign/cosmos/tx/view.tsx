@@ -402,7 +402,6 @@ export const CosmosTxView: FunctionComponent<{
     shouldTopUp,
     isTopUpAvailable,
     isTopUpInProgress,
-    isInsufficientFeeWarning,
     remainingText,
     executeTopUpIfAvailable,
     topUpError,
@@ -421,9 +420,7 @@ export const CosmosTxView: FunctionComponent<{
     isLedgerAndDirect ||
     (isSendAuthzGrant && !isSendAuthzGrantChecked) ||
     (isHighFee && !isHighFeeApproved) ||
-    (shouldTopUp
-      ? isTopUpInProgress || !isTopUpAvailable
-      : isInsufficientFeeWarning);
+    (shouldTopUp && (isTopUpInProgress || !isTopUpAvailable));
 
   const approve = async () => {
     if (signDocHelper.signDocWrapper) {

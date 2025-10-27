@@ -14,7 +14,7 @@ import { CoinPretty, Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { Currency, FeeCurrency, StdFee } from "@keplr-wallet/types";
 import { computedFn } from "mobx-utils";
 import { useState } from "react";
-import { InsufficientFeeError } from "./errors";
+import { InsufficientFeeError, ShouldTopUpWarning } from "./errors";
 import { QueriesStore } from "./internal";
 import { DenomHelper } from "@keplr-wallet/common";
 import { EthereumQueriesImpl } from "@keplr-wallet/stores-eth";
@@ -1241,7 +1241,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     ) {
       if (this._topUpStatus.shouldTopUp) {
         return {
-          warning: this._uiProperties.error,
+          warning: new ShouldTopUpWarning("Should top up"),
         };
       }
     }
@@ -1354,7 +1354,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     topUpOverrideStdFee?: StdFee;
     isTopUpAvailable: boolean;
   } {
-    if (this.uiProperties.warning instanceof InsufficientFeeError) {
+    if (this.uiProperties.warning instanceof ShouldTopUpWarning) {
       return this._topUpStatus;
     }
     return {
