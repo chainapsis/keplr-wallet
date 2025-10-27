@@ -62,28 +62,43 @@ export function useTopUp({
   })();
 
   useEffect(() => {
-    setRemainingTimeMs(feeConfig.topUpStatus.remainingTimeMs);
-  }, [feeConfig.topUpStatus]);
+    const serverRemaining = feeConfig.topUpStatus.remainingTimeMs;
+
+    setRemainingTimeMs((prev) => {
+      if (serverRemaining === undefined) {
+        return undefined;
+      }
+      if (prev === undefined) {
+        return serverRemaining;
+      }
+      return Math.min(prev, serverRemaining);
+    });
+  }, [feeConfig.topUpStatus.remainingTimeMs]);
 
   useEffect(() => {
     if (remainingTimeMs === undefined || remainingTimeMs <= 0) return;
 
     const interval = setInterval(() => {
       setRemainingTimeMs((prev) => {
-        if (prev === undefined) return undefined;
-        if (prev <= 1000) {
+        if (prev === undefined) {
+          clearInterval(interval);
+          feeConfig.refreshTopUpStatus();
+          return undefined;
+        }
+        if (prev <= 0) {
           clearInterval(interval);
           feeConfig.refreshTopUpStatus();
           return 0;
         }
-        return prev - 1000;
+        return Math.max(prev - 1000, 0);
       });
     }, 1000);
 
     return () => {
       clearInterval(interval);
     };
-  }, [remainingTimeMs, feeConfig]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [remainingTimeMs !== undefined && remainingTimeMs > 0]);
 
   async function executeTopUpIfAvailable() {
     if (!shouldTopUp || isTopUpInProgress) {
