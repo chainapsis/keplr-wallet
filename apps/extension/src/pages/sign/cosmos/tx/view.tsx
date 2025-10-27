@@ -409,7 +409,6 @@ export const CosmosTxView: FunctionComponent<{
   } = useTopUp({
     feeConfig,
     senderConfig,
-    amountConfig,
     hasHardwareWalletError:
       !!ledgerInteractingError ||
       !!keystoneInteractingError ||
@@ -461,15 +460,21 @@ export const CosmosTxView: FunctionComponent<{
           };
         }
 
+        const signDocWrapper = feeConfig.topUpStatus.topUpOverrideStdFee
+          ? signDocHelper.signDocWrapper.getTopUpOverridedWrapper(
+              feeConfig.topUpStatus.topUpOverrideStdFee
+            )
+          : signDocHelper.signDocWrapper;
+
         const signature = await handleCosmosPreSign(
           interactionData,
-          signDocHelper.signDocWrapper,
+          signDocWrapper,
           presignOptions
         );
 
         await signInteractionStore.approveWithProceedNext(
           interactionData.id,
-          signDocHelper.signDocWrapper,
+          signDocWrapper,
           signature,
           async (proceedNext) => {
             if (!proceedNext) {

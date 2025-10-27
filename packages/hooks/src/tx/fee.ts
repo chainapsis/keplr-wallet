@@ -1261,22 +1261,114 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   @computed
-  get topUpStatus(): { isTopUpAvailable: boolean; remainingTimeMs?: number } {
+  get topUpStatus(): {
+    shouldTopUp: boolean;
+    isTopUpAvailable: boolean;
+    remainingTimeMs?: number;
+    topUpOverrideStdFee?: StdFee;
+  } {
     const queryTopUpStatus = this.queriesStore.get(this.chainId).keplrETC
       ?.queryTopUpStatus;
+    if (!queryTopUpStatus) {
+      return {
+        isTopUpAvailable: false,
+        remainingTimeMs: undefined,
+        shouldTopUp: false,
+        topUpOverrideStdFee: undefined,
+      };
+    }
 
-    if (queryTopUpStatus) {
-      const topUpStatus = queryTopUpStatus.getTopUpStatus(
-        this.senderConfig.sender
-      );
-      if (topUpStatus.error == null) {
-        return topUpStatus.topUpStatus;
+    const topUpStatus = queryTopUpStatus.getTopUpStatus(
+      this.senderConfig.sender
+    );
+    if (topUpStatus.error != null) {
+      return {
+        isTopUpAvailable: false,
+        remainingTimeMs: undefined,
+        shouldTopUp: false,
+        topUpOverrideStdFee: undefined,
+      };
+    }
+
+    const { isTopUpAvailable, remainingTimeMs } = topUpStatus.topUpStatus;
+
+    const hasMultipleFeeCurrencies = this.selectableFeeCurrencies.length > 1;
+
+    // Osmosis를 포함하여 다수의 fee currency가 있는 경우에는
+    // 모든 fee currency가 부족할 경우에만 topup 사용이 가능
+    const allFeeCurrenciesInsufficient = (() => {
+      const queryBalances = this.queriesStore
+        .get(this.chainId)
+        .queryBalances.getQueryBech32Address(this.senderConfig.sender);
+
+      for (const feeCurrency of this.selectableFeeCurrencies) {
+        const requiredFee = this.getFeeTypePrettyForFeeCurrency(
+          feeCurrency,
+          this.type === "manual" ? "average" : this.type
+        );
+
+        const totalNeed = (() => {
+          let need = requiredFee;
+          for (const amt of this.amountConfig.amount) {
+            if (
+              amt.currency.coinMinimalDenom === feeCurrency.coinMinimalDenom
+            ) {
+              need = need.add(amt);
+            }
+          }
+          return need;
+        })();
+
+        const bal = queryBalances.getBalance(feeCurrency)?.balance;
+        if (!bal || bal.toDec().lte(new Dec(0))) {
+          continue;
+        }
+
+        if (bal.toDec().gte(totalNeed.toDec())) {
+          return false;
+        }
+      }
+
+      return this.selectableFeeCurrencies.length > 0;
+    })();
+
+    const insufficientFeeWarning =
+      this.uiProperties.warning instanceof InsufficientFeeError;
+
+    const localFeeInsufficient = hasMultipleFeeCurrencies
+      ? allFeeCurrenciesInsufficient
+      : insufficientFeeWarning;
+
+    const serverEligible = isTopUpAvailable || remainingTimeMs !== undefined;
+    const shouldTopUp = serverEligible && localFeeInsufficient;
+
+    let topUpOverrideStdFee: StdFee | undefined = undefined;
+
+    if (shouldTopUp) {
+      const baseFeeCurrency = this.chainInfo.feeCurrencies[0];
+      if (baseFeeCurrency) {
+        const feeAmount = this.getFeeTypePrettyForFeeCurrency(
+          baseFeeCurrency,
+          "average"
+        );
+
+        topUpOverrideStdFee = {
+          gas: this.gasConfig.gas.toString(),
+          amount: [
+            {
+              amount: feeAmount.toCoin().amount,
+              denom: baseFeeCurrency.coinMinimalDenom,
+            },
+          ],
+        };
       }
     }
 
     return {
-      isTopUpAvailable: false,
-      remainingTimeMs: undefined,
+      shouldTopUp,
+      isTopUpAvailable,
+      remainingTimeMs,
+      topUpOverrideStdFee,
     };
   }
 

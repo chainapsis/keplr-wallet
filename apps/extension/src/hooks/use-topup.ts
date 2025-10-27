@@ -1,9 +1,7 @@
 import { FeeConfig } from "@keplr-wallet/hooks";
 import { SenderConfig } from "@keplr-wallet/hooks";
-import { IBaseAmountConfig } from "@keplr-wallet/hooks";
 import { InsufficientFeeError } from "@keplr-wallet/hooks";
 import { useStore } from "../stores";
-import { Dec } from "@keplr-wallet/unit";
 import { useEffect, useState } from "react";
 import { TopUpClient } from "@keplr-wallet/topup-client";
 import { TendermintTxTracer } from "@keplr-wallet/cosmos";
@@ -12,7 +10,6 @@ import { useIntl } from "react-intl";
 export interface TopUpParams {
   feeConfig: FeeConfig;
   senderConfig: SenderConfig;
-  amountConfig: IBaseAmountConfig;
   hasHardwareWalletError?: boolean;
 }
 
@@ -29,7 +26,6 @@ export interface TopUpResult {
 export function useTopUp({
   feeConfig,
   senderConfig,
-  amountConfig,
   hasHardwareWalletError,
 }: TopUpParams): TopUpResult {
   const { chainStore, queriesStore } = useStore();
@@ -38,59 +34,15 @@ export function useTopUp({
   const [topUpCompleted, setTopUpCompleted] = useState(false);
   const [topUpError, setTopUpError] = useState<Error | undefined>(undefined);
 
-  const hasMultipleFeeCurrencies = feeConfig.selectableFeeCurrencies.length > 1;
-
   const topupBaseURL = process.env["KEPLR_EXT_TOPUP_BASE_URL"] || "";
   const topupApiKey = process.env["KEPLR_EXT_TOPUP_API_KEY"] || "";
   const isTopupConfigured = !!(topupBaseURL.trim() && topupApiKey.trim());
 
-  // Osmosis를 포함하여 다수의 fee currency가 있는 경우에는
-  // 모든 fee currency가 부족할 경우에만 topup 사용이 가능
-  const allFeeCurrenciesInsufficient = (() => {
-    const queryBalances = queriesStore
-      .get(feeConfig.chainId)
-      .queryBalances.getQueryBech32Address(senderConfig.sender);
-
-    for (const feeCurrency of feeConfig.selectableFeeCurrencies) {
-      const requiredFee = feeConfig.getFeeTypePrettyForFeeCurrency(
-        feeCurrency,
-        feeConfig.type === "manual" ? "average" : feeConfig.type
-      );
-
-      const totalNeed = (() => {
-        let need = requiredFee;
-        for (const amt of amountConfig.amount) {
-          if (amt.currency.coinMinimalDenom === feeCurrency.coinMinimalDenom) {
-            need = need.add(amt);
-          }
-        }
-        return need;
-      })();
-
-      const bal = queryBalances.getBalance(feeCurrency)?.balance;
-      if (!bal || bal.toDec().lte(new Dec(0))) {
-        continue;
-      }
-
-      if (bal.toDec().gte(totalNeed.toDec())) {
-        return false;
-      }
-    }
-
-    return feeConfig.selectableFeeCurrencies.length > 0;
-  })();
-
-  // CHECK: shouldTopUp일 때 max 버튼 누르면 fee를 제외하지 않도록 수정 필요한지 확인
-  // TODO: send token인 경우, selected token의 amount가 0이면 안됨
   const shouldTopUp =
     isTopupConfigured && // 환경 변수가 설정되어 있어야 함
     !topUpCompleted &&
     !hasHardwareWalletError &&
-    (feeConfig.topUpStatus.isTopUpAvailable ||
-      feeConfig.topUpStatus.remainingTimeMs !== undefined) &&
-    (hasMultipleFeeCurrencies
-      ? allFeeCurrenciesInsufficient
-      : feeConfig.uiProperties.warning instanceof InsufficientFeeError);
+    feeConfig.topUpStatus.shouldTopUp;
 
   const isTopUpAvailable =
     isTopupConfigured && feeConfig.topUpStatus.isTopUpAvailable;
@@ -142,24 +94,6 @@ export function useTopUp({
     };
   }, [remainingTimeMs, feeConfig]);
 
-  // topup 필요 시 강제로 기본 수수료 통화 적용
-  useEffect(() => {
-    if (!shouldTopUp) return;
-
-    const baseFeeCurrency = chainStore.getChain(feeConfig.chainId)
-      .feeCurrencies[0];
-    if (!baseFeeCurrency) return;
-
-    const currentFeeDenom = feeConfig.fees[0]?.currency.coinMinimalDenom;
-    if (currentFeeDenom === baseFeeCurrency.coinMinimalDenom) return;
-
-    feeConfig.setFee({
-      type: "average",
-      currency: baseFeeCurrency,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shouldTopUp]);
-
   async function executeTopUpIfAvailable() {
     if (!shouldTopUp || isTopUpInProgress) {
       return;
@@ -169,7 +103,8 @@ export function useTopUp({
     setTopUpError(undefined);
 
     try {
-      const stdFee = feeConfig.toStdFee();
+      const stdFee =
+        feeConfig.topUpStatus.topUpOverrideStdFee ?? feeConfig.toStdFee();
       const client = new TopUpClient(
         process.env["KEPLR_EXT_TOPUP_BASE_URL"] || "",
         process.env["KEPLR_EXT_TOPUP_API_KEY"] || ""

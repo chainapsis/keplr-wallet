@@ -867,7 +867,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   const { shouldTopUp, isTopUpAvailable, remainingText } = useTopUp({
     feeConfig: ibcSwapConfigs.feeConfig,
     senderConfig: ibcSwapConfigs.senderConfig,
-    amountConfig: ibcSwapConfigs.amountConfig,
   });
 
   return (
@@ -1084,7 +1083,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           try {
             if ("send" in tx) {
               await tx.send(
-                ibcSwapConfigs.feeConfig.toStdFee(),
+                ibcSwapConfigs.feeConfig.topUpStatus.topUpOverrideStdFee ??
+                  ibcSwapConfigs.feeConfig.toStdFee(),
                 ibcSwapConfigs.memoConfig.memo,
                 {
                   preferNoSetFee: true,

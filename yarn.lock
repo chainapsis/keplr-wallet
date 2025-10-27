@@ -5986,6 +5986,7 @@ __metadata:
     buffer: ^6.0.3
     long: ^4.0.0
     protobufjs: ^6.11.2
+    utility-types: ^3.10.0
   languageName: unknown
   linkType: soft
 
