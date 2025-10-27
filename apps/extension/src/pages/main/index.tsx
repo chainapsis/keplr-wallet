@@ -442,12 +442,14 @@ export const MainPage: FunctionComponent<{
         </Box>
 
         <Gutter size="0.75rem" />
-        <StakedBalanceTitle
-          isNotReady={isNotReady}
-          uiConfigStore={uiConfigStore}
-          stakedTotalPrice={stakedTotalPrice}
-          stakedPercentage={stakedPercentage}
-        />
+        {stakedTotalPrice && stakedTotalPrice.toDec().gt(new Dec(0)) && (
+          <StakedBalanceTitle
+            isNotReady={isNotReady}
+            uiConfigStore={uiConfigStore}
+            stakedTotalPrice={stakedTotalPrice}
+            stakedPercentage={stakedPercentage}
+          />
+        )}
       </Box>
 
       <Box paddingX="0.75rem" paddingBottom="1.5rem">
@@ -953,7 +955,10 @@ function StakedBalanceTitle({
             {`${uiConfigStore.hideStringIfPrivacyMode(
               stakedTotalPrice?.toString() || "-",
               4
-            )} (${stakedPercentage.toFixed(1)}%) ${intl.formatMessage({
+            )} ${uiConfigStore.hideStringIfPrivacyMode(
+              `(${stakedPercentage.toFixed(1)}%)`,
+              0
+            )} ${intl.formatMessage({
               id: "page.main.balance.staked-balance-title-2",
             })}`}
           </Body2>
