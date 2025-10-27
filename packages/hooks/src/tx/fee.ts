@@ -1237,13 +1237,12 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   get uiProperties(): UIProperties {
     if (
       this.forceTopUp ||
-      this._uiProperties.error instanceof InsufficientFeeError
+      (this._uiProperties.error instanceof InsufficientFeeError &&
+        this._topUpStatus.shouldTopUp)
     ) {
-      if (this._topUpStatus.shouldTopUp) {
-        return {
-          warning: new ShouldTopUpWarning("Should top up"),
-        };
-      }
+      return {
+        warning: new ShouldTopUpWarning("Should top up"),
+      };
     }
 
     return this._uiProperties;
@@ -1319,7 +1318,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     })();
     let topUpOverrideStdFee: StdFee | undefined = undefined;
 
-    if (shouldTopUp) {
+    if (this.forceTopUp || shouldTopUp) {
       const baseFeeCurrency = this.chainInfo.feeCurrencies[0];
       if (baseFeeCurrency) {
         const feeAmount = this.getFeeTypePrettyForFeeCurrency(
@@ -1355,7 +1354,10 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     isTopUpAvailable: boolean;
   } {
     if (this.uiProperties.warning instanceof ShouldTopUpWarning) {
-      return this._topUpStatus;
+      return {
+        ...this._topUpStatus,
+        shouldTopUp: this.forceTopUp || this._topUpStatus.shouldTopUp,
+      };
     }
     return {
       shouldTopUp: false,
