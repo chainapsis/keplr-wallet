@@ -41,12 +41,15 @@ export const useDelegateTxConfig = (
   amountConfig.setFeeConfig(feeConfig);
 
   const recipientConfig = useRecipientConfig(chainGetter, chainId);
-  const chainInfo = chainGetter.getChain(chainId);
-  if (chainInfo.bech32Config) {
-    recipientConfig.setBech32Prefix(chainInfo.bech32Config.bech32PrefixValAddr);
+  const chainInfo = chainGetter.getModularChain(chainId);
+
+  if ("cosmos" in chainInfo) {
+    recipientConfig.setBech32Prefix(
+      chainInfo.cosmos.bech32Config?.bech32PrefixValAddr ?? ""
+    );
+    recipientConfig.setValue(validatorAddress);
+    amountConfig.setCurrency(chainInfo.cosmos.stakeCurrency);
   }
-  recipientConfig.setValue(validatorAddress);
-  amountConfig.setCurrency(chainGetter.getChain(chainId).stakeCurrency);
 
   return {
     amountConfig,

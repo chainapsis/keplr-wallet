@@ -23,11 +23,13 @@ export class ObservableEvmChainJsonRpcQuery<
   ) {
     const chainInfo = chainGetter.getModularChain(chainId);
 
-    if (!("evm" in chainInfo)) {
-      throw new Error("evm module is not supported on this chain");
-    }
-
-    super(sharedContext, chainInfo.evm?.rpc ?? "", "", method, params);
+    super(
+      sharedContext,
+      "evm" in chainInfo && chainInfo.evm != null ? chainInfo.evm.rpc : "",
+      "",
+      method,
+      params
+    );
 
     this._chainId = chainId;
     this.chainGetter = chainGetter;

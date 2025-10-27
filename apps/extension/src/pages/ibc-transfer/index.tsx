@@ -46,7 +46,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
   const ibcTransferConfigs = useIBCTransferConfig(
     chainStore,
     queriesStore,
-    chainStore.getChain(chainId).chainId,
+    chainStore.getModularChain(chainId).chainId,
     accountInfo.bech32Address,
     // TODO: 이 값을 config 밑으로 빼자
     300000,

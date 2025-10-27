@@ -109,7 +109,7 @@ export const TokenFoundModal: FunctionComponent<{
         if (
           keyRingStore.needKeyCoinTypeFinalize(
             keyRingStore.selectedKeyInfo.id,
-            chainStore.getChain(enable)
+            chainStore.getModularChain(enable).chainId
           )
         ) {
           if (tokenScan.infos.length > 1) {

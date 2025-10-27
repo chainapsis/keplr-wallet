@@ -112,4 +112,5 @@ export interface IModularChainInfoImpl<
     module: ChainInfoModule;
     coinMinimalDenoms: string[];
   }): void;
+  isCurrencyRegistrationInProgress(coinMinimalDenom: string): boolean;
 }

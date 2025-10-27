@@ -1035,8 +1035,8 @@ const SkipHistoryViewItem: FunctionComponent<{
             })();
 
             if (history.isOnlyUseBridge) {
-              const sourceChain = chainStore.getChain(history.chainId);
-              const destinationChain = chainStore.getChain(
+              const sourceChain = chainStore.getModularChain(history.chainId);
+              const destinationChain = chainStore.getModularChain(
                 history.destinationChainId
               );
 
@@ -1149,7 +1149,7 @@ const SkipHistoryViewItem: FunctionComponent<{
                     if (
                       chainStore.hasModularChain(history.swapRefundInfo.chainId)
                     ) {
-                      const swapRefundChain = chainStore.getChain(
+                      const swapRefundChain = chainStore.getModularChain(
                         history.swapRefundInfo.chainId
                       );
 
@@ -1188,7 +1188,8 @@ const SkipHistoryViewItem: FunctionComponent<{
                     : transferAssetRelease.chain_id;
 
                   if (chainStore.hasModularChain(chainIdInKeplr)) {
-                    const releasedChain = chainStore.getChain(chainIdInKeplr);
+                    const releasedChain =
+                      chainStore.getModularChainInfoImpl(chainIdInKeplr);
 
                     const destinationDenom = (() => {
                       const currency = releasedChain.forceFindCurrency(
@@ -1210,7 +1211,7 @@ const SkipHistoryViewItem: FunctionComponent<{
                         id: "page.main.components.ibc-history-view.skip-swap.failed.after-transfer.complete",
                       },
                       {
-                        chain: releasedChain.chainName,
+                        chain: releasedChain.embedded.chainName,
                         assets: destinationDenom,
                       }
                     );

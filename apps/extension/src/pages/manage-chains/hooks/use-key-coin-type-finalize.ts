@@ -1,19 +1,19 @@
 import { useStore } from "../../../stores";
 import { useCallback } from "react";
-import { IChainInfoImpl } from "@keplr-wallet/stores";
-import { ChainInfoWithCoreTypes } from "@keplr-wallet/background";
+import { ModularChainInfo } from "@keplr-wallet/types";
 
 export function useKeyCoinTypeFinalize() {
   const { keyRingStore, queriesStore } = useStore();
 
   const needFinalizeKeyCoinTypeAction = useCallback(
-    async (
-      vaultId: string,
-      chainInfo: IChainInfoImpl<ChainInfoWithCoreTypes>
-    ) => {
+    async (vaultId: string, chainInfo: ModularChainInfo) => {
+      if (!("cosmos" in chainInfo)) {
+        return false;
+      }
+
       const queries = queriesStore.get(chainInfo.chainId);
 
-      if (keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo)) {
+      if (keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo.chainId)) {
         const candidateAddress =
           await keyRingStore.computeNotFinalizedKeyAddresses(
             vaultId,
@@ -45,10 +45,10 @@ export function useKeyCoinTypeFinalize() {
             await Promise.allSettled(promises);
 
             const mainAddress = candidateAddress.find(
-              (a) => a.coinType === chainInfo.bip44.coinType
+              (a) => a.coinType === chainInfo.cosmos.bip44.coinType
             );
             const otherAddresses = candidateAddress.filter(
-              (a) => a.coinType !== chainInfo.bip44.coinType
+              (a) => a.coinType !== chainInfo.cosmos.bip44.coinType
             );
 
             let otherIsSelectable = false;

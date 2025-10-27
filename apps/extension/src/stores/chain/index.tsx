@@ -328,6 +328,23 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     );
   }
 
+  @computed
+  protected get modularChainInfosInListUIMap(): Map<string, true> {
+    const map = new Map<string, true>();
+    for (const chainInfo of this.modularChainInfosInListUI) {
+      map.set(ChainIdHelper.parse(chainInfo.chainId).identifier, true);
+    }
+    return map;
+  }
+
+  isInModularChainInfosInListUI(chainId: string): boolean {
+    return (
+      this.modularChainInfosInListUIMap.get(
+        ChainIdHelper.parse(chainId).identifier
+      ) === true
+    );
+  }
+
   @flow
   *toggleChainInfoInUI(...chainIds: string[]) {
     if (!this.keyRingStore.selectedKeyInfo) {
