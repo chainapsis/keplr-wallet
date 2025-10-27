@@ -11,6 +11,7 @@ import {
   BottomTagType,
   LookingForChains,
   MainEmptyView,
+  TokenFoundModal,
   TokenItem,
   TokenTitleView,
 } from "./components";
@@ -43,7 +44,11 @@ import { useCopyAddress } from "../../hooks/use-copy-address";
 import { SceneTransition } from "../../components/transition/scene";
 import { SceneTransitionRef } from "../../components/transition/scene/internal";
 import { VerticalCollapseTransition } from "../../components/transition/vertical-collapse";
-import { ArrowDownIcon, ArrowUpIcon } from "../../components/icon";
+import {
+  ArrowDownIcon,
+  ArrowRightIcon,
+  ArrowUpIcon,
+} from "../../components/icon";
 import { Styles as AvailableCollapsibleListStyles } from "../../components/collapsible-list";
 import { getTokenSearchResultClickAnalyticsProperties } from "../../analytics-amplitude";
 import { useGroupedTokensMap } from "../../hooks/use-grouped-tokens-map";
@@ -54,6 +59,7 @@ import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
 import { defaultSpringConfig } from "../../styles/spring";
 import { useSearch } from "../../hooks/use-search";
 import { SearchTextInput } from "../../components/input";
+import { COMMON_HOVER_OPACITY } from "../../styles/constant";
 
 type TokenViewData = {
   title: string;
@@ -359,6 +365,7 @@ export const SpendableAssetView: FunctionComponent<{
     setIsEnteredSearch,
     searchRef,
   } = useSearchBar(isNotReady);
+  const [isFoundTokenModalOpen, setIsFoundTokenModalOpen] = useState(false);
 
   const sceneTransitionRef = useRef<SceneTransitionRef>(null);
 
@@ -670,6 +677,38 @@ export const SpendableAssetView: FunctionComponent<{
               />
             </VerticalCollapseTransition>
 
+            {numFoundToken > 0 && (
+              <Styles.NewTokenFoundButtonContainer
+                onClick={() => setIsFoundTokenModalOpen(true)}
+              >
+                <XAxis alignY="center">
+                  <Subtitle3>
+                    {intl.formatMessage(
+                      { id: "page.main.spendable.new-token-found" },
+                      {
+                        numFoundToken: (
+                          <span
+                            style={{
+                              paddingRight: "0.25rem",
+                              color: ColorPalette["blue-300"],
+                            }}
+                          >
+                            {numFoundToken}
+                          </span>
+                        ),
+                      }
+                    )}
+                  </Subtitle3>
+                  <div style={{ flex: 1 }} />
+                  <ArrowRightIcon
+                    width="1.25rem"
+                    height="1.25rem"
+                    color={ColorPalette["gray-300"]}
+                  />
+                </XAxis>
+              </Styles.NewTokenFoundButtonContainer>
+            )}
+
             <SceneTransition
               ref={sceneTransitionRef}
               scenes={scenes}
@@ -848,6 +887,14 @@ export const SpendableAssetView: FunctionComponent<{
             coinMinimalDenom={tokenDetailInfo.coinMinimalDenom}
           />
         ) : null}
+      </Modal>
+
+      <Modal
+        isOpen={isFoundTokenModalOpen && numFoundToken > 0}
+        align="bottom"
+        close={() => setIsFoundTokenModalOpen(false)}
+      >
+        <TokenFoundModal close={() => setIsFoundTokenModalOpen(false)} />
       </Modal>
     </React.Fragment>
   );
