@@ -734,36 +734,38 @@ export const SpendableAssetView: FunctionComponent<{
               </React.Fragment>
             )}
 
-            <Box padding="0.75rem">
-              <YAxis alignX="center">
-                <ManageViewAssetTokenPageButton
-                  text={intl.formatMessage({
-                    id: "page.main.spendable.manage-asset-list-button",
-                  })}
-                  size="small"
-                  right={
-                    <XAxis alignY="center">
-                      <AdjustmentIcon
-                        width="1.125rem"
-                        height="1.125rem"
-                        color={
-                          theme.mode === "light"
-                            ? ColorPalette["blue-400"]
-                            : ColorPalette["white"]
-                        }
-                      />
-                      {numFoundToken > 0 ? (
-                        <React.Fragment>
-                          <Gutter size="0.375rem" />
-                          <CircleIndicator />
-                        </React.Fragment>
-                      ) : null}
-                    </XAxis>
-                  }
-                  onClick={() => navigate("/manage-view-asset-token-list")}
-                />
-              </YAxis>
-            </Box>
+            {!isShowNotFound && (
+              <Box padding="0.75rem">
+                <YAxis alignX="center">
+                  <ManageViewAssetTokenPageButton
+                    text={intl.formatMessage({
+                      id: "page.main.spendable.manage-asset-list-button",
+                    })}
+                    size="small"
+                    right={
+                      <XAxis alignY="center">
+                        <AdjustmentIcon
+                          width="1.125rem"
+                          height="1.125rem"
+                          color={
+                            theme.mode === "light"
+                              ? ColorPalette["blue-400"]
+                              : ColorPalette["white"]
+                          }
+                        />
+                        {numFoundToken > 0 ? (
+                          <React.Fragment>
+                            <Gutter size="0.375rem" />
+                            <CircleIndicator />
+                          </React.Fragment>
+                        ) : null}
+                      </XAxis>
+                    }
+                    onClick={() => navigate("/manage-view-asset-token-list")}
+                  />
+                </YAxis>
+              </Box>
+            )}
 
             {(isShowCheckMangeAssetViewGuide ||
               isShowSearchedLowBalanceTokenGuide) && (
