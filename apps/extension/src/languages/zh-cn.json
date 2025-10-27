@@ -738,6 +738,8 @@
   "button.save": "保存",
   "button.close": "关闭",
   "text-button.select-all": "全选",
+  "button.receive": "接收",
+  "button.buy": "购买",
 
   "notification.transaction-success": "交易成功",
   "notification.transaction-sent": "交易已发送",

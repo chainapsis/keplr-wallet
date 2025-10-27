@@ -804,6 +804,8 @@
   "button.activate": "활성화",
   "button.activating": "활성화중",
   "text-button.select-all": "전체 선택",
+  "button.receive": "받기",
+  "button.buy": "구매하기",
 
   "notification.transaction-success": "트랜잭션 성공",
   "notification.transaction-sent": "트랜잭션 전송됌",

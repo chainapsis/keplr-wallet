@@ -904,6 +904,8 @@
   "button.activate": "Activate",
   "button.activating": "Activating",
   "text-button.select-all": "Select All",
+  "button.receive": "Receive",
+  "button.buy": "Buy",
 
   "notification.transaction-success": "Transaction Success",
   "notification.transaction-sent": "Transaction Sent",
