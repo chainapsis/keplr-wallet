@@ -390,7 +390,7 @@ export const UnlockPage: FunctionComponent = observer(() => {
             color="faint"
             onClick={() => {
               browser.tabs.create({
-                url: `https://help.keplr.app/faq?tab=4&topic=5`,
+                url: `https://help.keplr.app/general-faq/5R3bMyjtr3tXNeJo8ojSDV/privacy--security/5So5gM41LjRMhRcps2GQmq#i-cant-remember-my-keplr-password-how-can-i-reset-it`,
               });
             }}
             style={{ width: "100%", color: ColorPalette["gray-300"] }}
