@@ -278,7 +278,7 @@ const useSearchBar = (isNotReady?: boolean) => {
   const searchScrollAnim = useSpringValue(0, {
     config: defaultSpringConfig,
   });
-  const { analyticsStore } = useStore();
+  const { analyticsStore, uiConfigStore } = useStore();
   const globalSimpleBar = useGlobarSimpleBar();
   const searchRef = useRef<HTMLInputElement | null>(null);
   const [search, setSearch] = useState("");
@@ -287,16 +287,18 @@ const useSearchBar = (isNotReady?: boolean) => {
   useEffect(() => {
     // Give focus whenever available tab is selected.
     if (!isNotReady) {
+      // NOTE - whenever uiConfigStore.isShowSearchBar is changed,
+      // clearing search text is an intended action.
       // And clear search text.
       setSearch("");
 
-      if (searchRef.current) {
+      if (searchRef.current && uiConfigStore.isShowSearchBar) {
         searchRef.current.focus({
           preventScroll: true,
         });
       }
     }
-  }, [isNotReady]);
+  }, [isNotReady, uiConfigStore.isShowSearchBar]);
   useEffect(() => {
     // Log if a search term is entered at least once.
     if (isEnteredSearch) {
@@ -708,7 +710,6 @@ export const SpendableAssetView: FunctionComponent<{
                     {numFoundToken > 0 ? (
                       <React.Fragment>
                         <Gutter size="0.375rem" />
-
                         <CircleIndicator />
                       </React.Fragment>
                     ) : null}
