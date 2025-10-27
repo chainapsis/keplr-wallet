@@ -53,6 +53,7 @@ import { LockIcon } from "../../components/icon/lock";
 import { DepositModal } from "./components/deposit-modal";
 import { RewardsCard } from "./components/rewards-card";
 import { UIConfigStore } from "../../stores/ui-config";
+import { COMMON_HOVER_OPACITY } from "../../styles/constant";
 
 export interface ViewToken {
   token: CoinPretty;
@@ -903,6 +904,14 @@ const RefreshButton: FunctionComponent<{
   );
 });
 
+const StyledBox = styled(Box)`
+  cursor: pointer;
+  transition: opacity 0.1s ease-in-out;
+
+  &:hover {
+    opacity: ${COMMON_HOVER_OPACITY};
+  }
+`;
 function StakedBalanceTitle({
   isNotReady,
   uiConfigStore,
@@ -915,16 +924,13 @@ function StakedBalanceTitle({
   stakedPercentage: number;
 }) {
   const intl = useIntl();
-  const [isHover, setIsHover] = useState(false);
   // const navigate = useNavigate();
 
   return (
     <Skeleton isNotReady={isNotReady}>
-      <Box
-        onHoverStateChange={(hovered) => setIsHover(hovered)}
+      <StyledBox
         paddingY="0.125rem"
         cursor="pointer"
-        opacity={isHover ? 0.8 : 1}
         onClick={() => {
           // TODO: 추후 staked 페이지로 바로 이동
         }}
@@ -954,7 +960,7 @@ function StakedBalanceTitle({
             color={ColorPalette["gray-300"]}
           />
         </XAxis>
-      </Box>
+      </StyledBox>
     </Skeleton>
   );
 }

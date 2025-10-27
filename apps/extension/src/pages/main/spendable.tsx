@@ -1041,7 +1041,7 @@ const StyledBox = styled(Box)`
   transition: opacity 0.1s ease;
 
   &:hover {
-    opacity: 0.8;
+    opacity: ${COMMON_HOVER_OPACITY};
   }
 `;
 const SearchBarIcon = ({

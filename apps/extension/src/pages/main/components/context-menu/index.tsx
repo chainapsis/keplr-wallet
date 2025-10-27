@@ -21,6 +21,7 @@ import { useGlobarSimpleBar } from "../../../../hooks/global-simplebar";
 import { Tooltip } from "../../../../components/tooltip";
 import { Gutter } from "../../../../components/gutter";
 import { isRunningInSidePanel } from "../../../../utils";
+import { COMMON_HOVER_OPACITY } from "../../../../styles/constant";
 
 const Styles = {
   MenuContainer: styled.div`
@@ -249,7 +250,7 @@ const CustomBox = styled(Box)`
   transition: opacity 0.1s ease;
 
   &:hover {
-    opacity: 0.8;
+    opacity: ${COMMON_HOVER_OPACITY};
   }
 `;
 
