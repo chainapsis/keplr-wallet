@@ -1239,21 +1239,10 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       this.forceTopUp ||
       this._uiProperties.error instanceof InsufficientFeeError
     ) {
-      const queryTopUpStatus = this.queriesStore.get(this.chainId).keplrETC
-        ?.queryTopUpStatus;
-
-      const topUpStatus = queryTopUpStatus?.getTopUpStatus(
-        this.senderConfig.sender
-      );
-
-      if (
-        topUpStatus &&
-        topUpStatus.error == null &&
-        topUpStatus.topUpStatus &&
-        (topUpStatus.topUpStatus.isTopUpAvailable ||
-          topUpStatus.topUpStatus.remainingTimeMs !== undefined)
-      ) {
-        return { warning: this._uiProperties.error };
+      if (this._topUpStatus.shouldTopUp) {
+        return {
+          warning: this._uiProperties.error,
+        };
       }
     }
 
@@ -1261,7 +1250,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   @computed
-  get topUpStatus(): {
+  protected get _topUpStatus(): {
     shouldTopUp: boolean;
     isTopUpAvailable: boolean;
     remainingTimeMs?: number;
@@ -1292,11 +1281,8 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
     const { isTopUpAvailable, remainingTimeMs } = topUpStatus.topUpStatus;
 
-    const hasMultipleFeeCurrencies = this.selectableFeeCurrencies.length > 1;
-
-    // Osmosis를 포함하여 다수의 fee currency가 있는 경우에는
     // 모든 fee currency가 부족할 경우에만 topup 사용이 가능
-    const allFeeCurrenciesInsufficient = (() => {
+    const shouldTopUp = (() => {
       const queryBalances = this.queriesStore
         .get(this.chainId)
         .queryBalances.getQueryBech32Address(this.senderConfig.sender);
@@ -1331,17 +1317,6 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
       return this.selectableFeeCurrencies.length > 0;
     })();
-
-    const insufficientFeeWarning =
-      this.uiProperties.warning instanceof InsufficientFeeError;
-
-    const localFeeInsufficient = hasMultipleFeeCurrencies
-      ? allFeeCurrenciesInsufficient
-      : insufficientFeeWarning;
-
-    const serverEligible = isTopUpAvailable || remainingTimeMs !== undefined;
-    const shouldTopUp = serverEligible && localFeeInsufficient;
-
     let topUpOverrideStdFee: StdFee | undefined = undefined;
 
     if (shouldTopUp) {
@@ -1369,6 +1344,24 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       isTopUpAvailable,
       remainingTimeMs,
       topUpOverrideStdFee,
+    };
+  }
+
+  @computed
+  get topUpStatus(): {
+    shouldTopUp: boolean;
+    remainingTimeMs?: number;
+    topUpOverrideStdFee?: StdFee;
+    isTopUpAvailable: boolean;
+  } {
+    if (this.uiProperties.warning instanceof InsufficientFeeError) {
+      return this._topUpStatus;
+    }
+    return {
+      shouldTopUp: false,
+      remainingTimeMs: undefined,
+      topUpOverrideStdFee: undefined,
+      isTopUpAvailable: false,
     };
   }
 
