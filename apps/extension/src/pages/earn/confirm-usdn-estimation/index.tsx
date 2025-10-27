@@ -383,7 +383,8 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
   );
 });
 
-const LEARN_MORE_URL = "https://help.keplr.app/extension/5R3bMyjtr2FwnBvJQuJwJu/earn-more-with-keplr/5R3bMyjtqZ3BsEKHQy2tYf";
+const LEARN_MORE_URL =
+  "https://help.keplr.app/extension/5R3bMyjtr2FwnBvJQuJwJu/earn-more-with-keplr/5R3bMyjtqZ3BsEKHQy2tYf";
 
 const Styles = {
   Link: styled.span`
