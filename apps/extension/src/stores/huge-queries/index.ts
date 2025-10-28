@@ -451,7 +451,7 @@ export class HugeQueriesStore {
         modularChainInfo.chainId
       );
 
-      if ("evm" in modularChainInfo) {
+      if ("evm" in modularChainInfo && !("cosmos" in modularChainInfo)) {
         const queries = this.queriesStore.get(modularChainInfo.chainId);
         const queryBalance = queries.queryBalances.getQueryEthereumHexAddress(
           account.ethereumHexAddress
