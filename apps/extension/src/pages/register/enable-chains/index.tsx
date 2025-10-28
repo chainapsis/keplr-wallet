@@ -998,14 +998,12 @@ export const EnableChainsScene: FunctionComponent<{
                   modularChainInfo.cosmos.currencies[0]
                 ).coinDenom
               );
-            } else if ("starknet" in modularChainInfo) {
-              return CoinPretty.makeCoinDenomPretty(
-                modularChainInfo.starknet.currencies[0].coinDenom
-              );
-            } else if ("bitcoin" in modularChainInfo) {
-              return CoinPretty.makeCoinDenomPretty(
-                modularChainInfo.bitcoin.currencies[0].coinDenom
-              );
+            } else if (chainStore.hasModularChain(modularChainInfo.chainId)) {
+              const denom = chainStore
+                .getModularChainInfoImpl(modularChainInfo.chainId)
+                .getCurrencies()?.[0].coinDenom;
+
+              return CoinPretty.makeCoinDenomPretty(denom) ?? "";
             }
             return "";
           },

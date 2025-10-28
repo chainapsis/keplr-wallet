@@ -72,7 +72,9 @@ const addressSearchFields = [
     function: (item: Address) => {
       if ("evm" in item.modularChainInfo && item.modularChainInfo.evm != null) {
         const evmChainInfo = item.modularChainInfo.evm;
-        CoinPretty.makeCoinDenomPretty(evmChainInfo.currencies[0].coinDenom);
+        return CoinPretty.makeCoinDenomPretty(
+          evmChainInfo.currencies[0].coinDenom
+        );
       } else if (
         "cosmos" in item.modularChainInfo &&
         item.modularChainInfo.cosmos != null
