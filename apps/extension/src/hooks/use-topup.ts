@@ -1,6 +1,5 @@
 import { FeeConfig } from "@keplr-wallet/hooks";
 import { SenderConfig } from "@keplr-wallet/hooks";
-import { InsufficientFeeError } from "@keplr-wallet/hooks";
 import { useStore } from "../stores";
 import { useEffect, useState } from "react";
 import { TopUpClient } from "@keplr-wallet/topup-client";
@@ -17,8 +16,8 @@ export interface TopUpResult {
   shouldTopUp: boolean;
   remainingText: string | undefined;
   isTopUpAvailable: boolean;
-  isInsufficientFeeWarning: boolean;
   isTopUpInProgress: boolean;
+  topUpCompleted: boolean;
   executeTopUpIfAvailable: () => Promise<void>;
   topUpError: Error | undefined;
 }
@@ -47,14 +46,6 @@ export function useTopUp({
   const isTopUpAvailable =
     isTopupConfigured && feeConfig.topUpStatus.isTopUpAvailable;
 
-  // NOTE: osmosis의 경우 모든 수수료 토큰이 부족한지 체크하고 있으므로,
-  // 일부 shouldTopUp과 isTopUpAvailable만으로 버튼 비활성화 여부를 체크하게 되면
-  // 현재 선택된 fee currency가 부족한 경우 버튼 비활성화 되지 않는 케이스가 발생하므로
-  // 추가로 아래 조건을 추가하여 버튼 비활성화 여부를 체크하도록 함
-  const isInsufficientFeeWarning =
-    (isTopUpAvailable || feeConfig.topUpStatus.remainingTimeMs !== undefined) &&
-    feeConfig.uiProperties.warning instanceof InsufficientFeeError;
-
   const [remainingTimeMs, setRemainingTimeMs] = useState<number>();
 
   const remainingText = (() => {
@@ -71,28 +62,43 @@ export function useTopUp({
   })();
 
   useEffect(() => {
-    setRemainingTimeMs(feeConfig.topUpStatus.remainingTimeMs);
-  }, [feeConfig.topUpStatus]);
+    const serverRemaining = feeConfig.topUpStatus.remainingTimeMs;
+
+    setRemainingTimeMs((prev) => {
+      if (serverRemaining === undefined) {
+        return undefined;
+      }
+      if (prev === undefined) {
+        return serverRemaining;
+      }
+      return Math.min(prev, serverRemaining);
+    });
+  }, [feeConfig.topUpStatus.remainingTimeMs]);
 
   useEffect(() => {
     if (remainingTimeMs === undefined || remainingTimeMs <= 0) return;
 
     const interval = setInterval(() => {
       setRemainingTimeMs((prev) => {
-        if (prev === undefined) return undefined;
-        if (prev <= 1000) {
+        if (prev === undefined) {
+          clearInterval(interval);
+          feeConfig.refreshTopUpStatus();
+          return undefined;
+        }
+        if (prev <= 0) {
           clearInterval(interval);
           feeConfig.refreshTopUpStatus();
           return 0;
         }
-        return prev - 1000;
+        return Math.max(prev - 1000, 0);
       });
     }, 1000);
 
     return () => {
       clearInterval(interval);
     };
-  }, [remainingTimeMs, feeConfig]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [remainingTimeMs !== undefined && remainingTimeMs > 0]);
 
   async function executeTopUpIfAvailable() {
     if (!shouldTopUp || isTopUpInProgress) {
@@ -152,8 +158,8 @@ export function useTopUp({
     shouldTopUp,
     remainingText,
     isTopUpAvailable,
-    isInsufficientFeeWarning,
     isTopUpInProgress,
+    topUpCompleted,
     executeTopUpIfAvailable,
     topUpError,
   };
