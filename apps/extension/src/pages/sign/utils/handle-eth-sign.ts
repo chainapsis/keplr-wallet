@@ -274,6 +274,7 @@ export const connectAndSignEthWithLedger = async (
         }
         case EthSignType.TRANSACTION: {
           const tx = JSON.parse(Buffer.from(message).toString());
+
           const isEIP1559 = !!tx.maxFeePerGas || !!tx.maxPriorityFeePerGas;
           if (isEIP1559) {
             tx.type = TransactionTypes.eip1559;
@@ -284,7 +285,7 @@ export const connectAndSignEthWithLedger = async (
             await ethApp.signTransaction(
               `44'/60'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`,
               rlpArray,
-              null
+              tx.chainId === 999 ? null : undefined // NOTE: only disable auto resolution query on hyperevm
             )
           );
         }
