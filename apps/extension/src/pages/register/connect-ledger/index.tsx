@@ -268,7 +268,7 @@ export const ConnectLedgerScene: FunctionComponent<{
 
           try {
             const res = await ethApp.getAddress(
-              `m/44'/60'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`
+              `44'/60'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`
             );
 
             const pubKey = new PubKeySecp256k1(
