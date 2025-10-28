@@ -349,6 +349,7 @@ export class TokensStore {
     }
   }
 
+  @action
   private updateTokenMap(chainIdentifier: string, newTokens?: TokenInfo[]) {
     const newTokenMap = new Map(this.tokenMap);
     if (newTokens) {
