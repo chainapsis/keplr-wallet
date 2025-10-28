@@ -50,6 +50,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
     accountInfo.bech32Address,
     // TODO: 이 값을 config 밑으로 빼자
     300000,
+    false,
     {
       // Injective에서는 안되게 해야되는데 ibc의 경우는 recipient config의 설정된 chain id를 알기가 어려워서...
       allowHexAddressToBech32Address: true,

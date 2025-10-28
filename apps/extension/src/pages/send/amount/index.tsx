@@ -364,6 +364,7 @@ const useIBCSwapConfigWithRecipientConfig = (
   initialGas: number,
   outChainId: string,
   outCurrency: AppCurrency,
+  disableSubFeeFromFaction: boolean,
   swapFeeBps: number,
   options: {
     allowHexAddressToBech32Address?: boolean;
@@ -389,6 +390,7 @@ const useIBCSwapConfigWithRecipientConfig = (
     initialGas,
     outChainId,
     outCurrency,
+    disableSubFeeFromFaction,
     swapFeeBps
   );
   const channelConfig = useIBCChannelConfig(false);
@@ -502,6 +504,10 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     destinationChainInfoOfBridge.chainId
   );
 
+  const [
+    topUpForDisableSubFeeFromFaction,
+    setTopUpForDisableSubFeeFromFaction,
+  ] = useState(false);
   const ibcSwapConfigsForBridge = useIBCSwapConfigWithRecipientConfig(
     chainStore,
     queriesStore,
@@ -513,6 +519,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     200000,
     destinationChainInfoOfBridge.chainId,
     destinationChainInfoOfBridge.currency,
+    topUpForDisableSubFeeFromFaction,
     //NOTE - when swap is used on send page, it use bridge so swap fee is 10
     10,
     {
@@ -555,6 +562,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     sender,
     // TODO: 이 값을 config 밑으로 빼자
     isEvmTx ? 21000 : 300000,
+    topUpForDisableSubFeeFromFaction,
     sendType === "ibc-transfer",
     {
       allowHexAddressToBech32Address:
@@ -870,6 +878,9 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     feeConfig,
     senderConfig,
   });
+  useEffect(() => {
+    setTopUpForDisableSubFeeFromFaction(shouldTopUp);
+  }, [shouldTopUp]);
 
   return (
     <HeaderLayout

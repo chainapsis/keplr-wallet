@@ -192,6 +192,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     }
   }, [isInChainEVMOnly]);
 
+  const [
+    topUpForDisableSubFeeFromFaction,
+    setTopUpForDisableSubFeeFromFaction,
+  ] = useState(false);
   const ibcSwapConfigs = useIBCSwapConfig(
     chainStore,
     queriesStore,
@@ -206,6 +210,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     1_500_000,
     outChainId,
     outCurrency,
+    topUpForDisableSubFeeFromFaction,
     swapFeeBps
   );
   const querySwapFeeBps = queriesStore.simpleQuery.queryGet<{
@@ -868,6 +873,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     feeConfig: ibcSwapConfigs.feeConfig,
     senderConfig: ibcSwapConfigs.senderConfig,
   });
+  useEffect(() => {
+    setTopUpForDisableSubFeeFromFaction(shouldTopUp);
+  }, [shouldTopUp]);
 
   return (
     <MainHeaderLayout

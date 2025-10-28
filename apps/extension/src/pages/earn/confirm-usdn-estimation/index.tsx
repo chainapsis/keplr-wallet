@@ -76,7 +76,8 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
     NOBLE_CHAIN_ID,
     account.bech32Address,
     inCurrency,
-    outCurrency
+    outCurrency,
+    false
   );
 
   const poolForDeposit = nobleEarnAmountConfig.amountConfig.pool;
