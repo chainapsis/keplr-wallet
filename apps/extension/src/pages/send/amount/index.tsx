@@ -2224,6 +2224,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
               }
             })()}
           />
+          <Gutter size="0" />
           <VerticalCollapseTransition collapsed={sendType !== "ibc-transfer"}>
             <GuideBox
               color="warning"
@@ -2261,9 +2262,11 @@ export const SendAmountPage: FunctionComponent = observer(() => {
               shouldTopUp={shouldTopUp}
             />
           </VerticalCollapseTransition>
+          <Gutter size="0" />
           <VerticalCollapseTransition collapsed={!shouldTopUp}>
             <FeeCoverageDescription />
           </VerticalCollapseTransition>
+          <Gutter size="0" />
 
           {sendType === "bridge" && (
             <SwapFeeInfoForBridgeOnSend
@@ -2658,6 +2661,9 @@ const WarningGuideBox: FunctionComponent<{
             paragraph={title ? errorText : undefined}
             hideInformationIcon={!showCelestiaWarning}
           />
+        </VerticalCollapseTransition>
+        <VerticalCollapseTransition collapsed={collapsed}>
+          <Gutter size="0.75rem" />
         </VerticalCollapseTransition>
       </React.Fragment>
     );
