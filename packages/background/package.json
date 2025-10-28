@@ -39,7 +39,7 @@
     "@keplr-wallet/simple-fetch": "0.12.281-rc.3",
     "@keplr-wallet/types": "0.12.281-rc.3",
     "@keplr-wallet/unit": "0.12.281-rc.3",
-    "@ledgerhq/hw-app-eth": "^6.40.3",
+    "@ledgerhq/hw-app-eth": "6.42.8",
     "@ledgerhq/hw-app-starknet": "^3.0.1",
     "@ledgerhq/hw-transport": "^6.31.4",
     "@ledgerhq/hw-transport-webhid": "^6.29.4",
