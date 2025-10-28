@@ -461,7 +461,7 @@
   "page.ibc-swap.components.swap-not-available-modal.paragraph": "Swap is currently not available for this token.",
   "page.ibc-swap.button.terms-of-use.title": "Terms of Use",
 
-  "page.history.title": "Activity",
+  "page.history.title": "History",
 
   "page.permission.unknown-permission": "Unknown permission",
   "page.permission.requesting-connection-title": "Requesting Connection",
