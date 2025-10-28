@@ -720,7 +720,7 @@
   "components.top-up.tx-fee": "交易手续费",
   "components.top-up.covered-by-keplr": "由 Keplr 支付",
   "components.top-up.keep-window-open": "交易期间请保持此窗口打开",
-  "components.top-up.wait-time": "等待 {minutes}:{seconds}",
+  "components.top-up.wait-time": "下次免费交易在 {minutes}:{seconds}",
 
   "button.confirm": "确定",
   "button.ok": "好的",

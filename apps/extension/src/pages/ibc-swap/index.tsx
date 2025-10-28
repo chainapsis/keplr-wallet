@@ -2076,7 +2076,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           />
         </VerticalCollapseTransition>
         <VerticalCollapseTransition collapsed={!shouldTopUp}>
-          <FeeCoverageDescription />
+          <FeeCoverageDescription isTopUpAvailable={isTopUpAvailable} />
         </VerticalCollapseTransition>
 
         <VerticalCollapseTransition collapsed={shouldTopUp}>

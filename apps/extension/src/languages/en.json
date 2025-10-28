@@ -878,7 +878,7 @@
   "components.top-up.tx-fee": "Tx Fee",
   "components.top-up.covered-by-keplr": "Covered by Keplr",
   "components.top-up.keep-window-open": "Keep this window open during the transaction",
-  "components.top-up.wait-time": "Wait {minutes}:{seconds}",
+  "components.top-up.wait-time": "Next free tx in {minutes}:{seconds}",
 
   "button.confirm": "Confirm",
   "button.ok": "OK",

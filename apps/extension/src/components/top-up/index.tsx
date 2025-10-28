@@ -1,12 +1,14 @@
 import { IFeeConfig } from "@keplr-wallet/hooks";
-import React from "react";
+import React, { FunctionComponent } from "react";
 import { Subtitle3, Subtitle4 } from "../typography";
 import { ColorPalette } from "../../styles";
 import { useStore } from "../../stores";
 import { useTheme } from "styled-components";
 import { FormattedMessage } from "react-intl";
 
-export const FeeCoverageDescription = () => {
+export const FeeCoverageDescription: FunctionComponent<{
+  isTopUpAvailable: boolean;
+}> = ({ isTopUpAvailable }) => {
   return (
     <div
       style={{
@@ -22,10 +24,14 @@ export const FeeCoverageDescription = () => {
         style={{ textAlign: "center" }}
       >
         <FormattedMessage id="components.top-up.description.no-fees" />
-        <br />
-        <span style={{ color: ColorPalette["blue-500"] }}>
-          <FormattedMessage id="components.top-up.description.we-cover" />
-        </span>
+        {isTopUpAvailable ? (
+          <React.Fragment>
+            <br />
+            <span style={{ color: ColorPalette["blue-500"] }}>
+              <FormattedMessage id="components.top-up.description.we-cover" />
+            </span>
+          </React.Fragment>
+        ) : null}
       </Subtitle4>
     </div>
   );

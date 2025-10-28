@@ -826,7 +826,7 @@ export const CosmosTxView: FunctionComponent<{
           {interactionData.isInternal ? (
             <FeeCoverageBox feeConfig={feeConfig} />
           ) : (
-            <FeeCoverageDescription />
+            <FeeCoverageDescription isTopUpAvailable={isTopUpAvailable} />
           )}
         </VerticalCollapseTransition>
 
