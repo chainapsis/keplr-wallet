@@ -106,6 +106,7 @@ import { useEffectOnce } from "../../../hooks/use-effect-once";
 import { useGlobarSimpleBar } from "../../../hooks/global-simplebar";
 import { FeeCoverageDescription } from "../../../components/top-up";
 import { useTopUp } from "../../../hooks/use-topup";
+import { getShouldTopUpSignOptions } from "../../../utils/should-top-up-sign-options";
 
 const Styles = {
   Flex1: styled.div`
@@ -1061,6 +1062,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                       preferNoSetFee: true,
                       preferNoSetMemo: false,
 
+                      ...(shouldTopUp ? getShouldTopUpSignOptions() : {}),
+
                       sendTx: async (chainId, tx, mode) => {
                         const outChainId =
                           ibcSwapConfigsForBridge.amountConfig.outChainId;
@@ -1824,6 +1827,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                 {
                   preferNoSetFee: true,
                   preferNoSetMemo: true,
+                  ...(shouldTopUp ? getShouldTopUpSignOptions() : {}),
                   sendTx: async (chainId, tx, mode) => {
                     let msg: Message<Uint8Array> = new SendTxAndRecordMsg(
                       historyType,
