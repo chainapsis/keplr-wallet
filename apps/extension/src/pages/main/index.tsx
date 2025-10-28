@@ -543,26 +543,6 @@ export const MainPage: FunctionComponent<{
             <Gutter size="0.75rem" />
             <RewardsCard isNotReady={isNotReady} />
           </XAxis>
-          {/* {tabStatus === "staked" && !isNotReady ? (
-            <StakeWithKeplrDashboardButton
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                analyticsStore.logEvent("click_keplrDashboard", {
-                  tabName: tabStatus,
-                });
-
-                browser.tabs.create({
-                  url: "https://wallet.keplr.app/?modal=staking&utm_source=keplrextension&utm_medium=button&utm_campaign=permanent&utm_content=manage_stake",
-                });
-              }}
-            >
-              <FormattedMessage id="page.main.chart.stake-with-keplr-dashboard-button" />
-              <Box color={ColorPalette["gray-300"]} marginLeft="0.5rem">
-                <ArrowTopRightOnSquareIcon width="1rem" height="1rem" />
-              </Box>
-            </StakeWithKeplrDashboardButton>
-          ) : null} */}
 
           <ClaimAll isNotReady={isNotReady} />
 
