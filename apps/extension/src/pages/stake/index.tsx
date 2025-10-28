@@ -55,22 +55,22 @@ export const StakePage: FunctionComponent = observer(() => {
   }[] = [
     {
       title: intl.formatMessage({
-        id: "page.main.staked.staked-balance-title",
+        id: "page.stake.staked-balance-title",
       }),
       balance: delegations,
       lenAlwaysShown: 5,
       tooltip: intl.formatMessage({
-        id: "page.main.staked.staked-balance-tooltip",
+        id: "page.stake.staked-balance-tooltip",
       }),
     },
     {
       title: intl.formatMessage({
-        id: "page.main.staked.unstaking-balance-title",
+        id: "page.stake.unstaking-balance-title",
       }),
       balance: unbondings,
       lenAlwaysShown: 3,
       tooltip: intl.formatMessage({
-        id: "page.main.staked.unstaking-balance-tooltip",
+        id: "page.stake.unstaking-balance-tooltip",
       }),
     },
   ];
@@ -93,7 +93,11 @@ export const StakePage: FunctionComponent = observer(() => {
       <Box paddingX="1rem">
         <Gutter size="1.25rem" />
 
-        <Subtitle3 color={ColorPalette["gray-200"]}>Total Staked</Subtitle3>
+        <Subtitle3 color={ColorPalette["gray-200"]}>
+          {intl.formatMessage({
+            id: "page.stake.total-staked-title",
+          })}
+        </Subtitle3>
         <Gutter size="0.75rem" />
         <Box
           onHoverStateChange={(isHover) => {
@@ -161,7 +165,9 @@ export const StakePage: FunctionComponent = observer(() => {
           <Gutter size="0.75rem" />
 
           <TextButton
-            text="Stake More"
+            text={intl.formatMessage({
+              id: "page.stake.stake-more-button",
+            })}
             color="blue"
             onClick={() => {
               navigate("/stake/empty");
