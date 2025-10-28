@@ -366,13 +366,13 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
               (chainInfo.cosmos.stakeCurrency || chainInfo.cosmos.currencies[0])
                 .coinDenom
             );
-          } else if ("starknet" in chainInfo) {
-            return CoinPretty.makeCoinDenomPretty(
-              chainInfo.starknet.currencies[0].coinDenom
-            );
-          } else if ("bitcoin" in chainInfo) {
-            return CoinPretty.makeCoinDenomPretty(
-              chainInfo.bitcoin.currencies[0].coinDenom
+          } else if (chainStore.hasModularChain(chainInfo.chainId)) {
+            return (
+              CoinPretty.makeCoinDenomPretty(
+                chainStore
+                  .getModularChainInfoImpl(chainInfo.chainId)
+                  .getCurrencies()?.[0].coinDenom ?? ""
+              ) ?? ""
             );
           }
           return "";
