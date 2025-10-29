@@ -17,14 +17,12 @@ import { FiatCurrency } from "@keplr-wallet/types";
 import { CopyAddressConfig } from "./copy-address";
 import { ChainStore } from "../chain";
 import { AddressBookConfig } from "./address-book";
-import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
+import { MessageRequester } from "@keplr-wallet/router";
 import manifest from "../../manifest.v2.json";
 import { IBCSwapConfig } from "./ibc-swap";
 import { NewChainSuggestionConfig } from "./new-chain";
 import { ChangelogConfig } from "./changelog";
 import { SelectWalletConfig } from "./select-wallet";
-import { GetSidePanelIsSupportedMsg } from "@keplr-wallet/background";
-import { isRunningInSidePanel } from "../../utils";
 import { ManageViewAssetTokenConfig } from "./manage-view-asset-token";
 
 export interface UIConfigOptions {
@@ -90,9 +88,6 @@ export class UIConfigStore {
 
   @observable
   protected _fiatCurrency: string = "usd";
-
-  @observable
-  protected _showNewSidePanelHeaderTop: boolean = false;
 
   constructor(
     protected readonly kvStores: {
@@ -196,41 +191,6 @@ export class UIConfigStore {
       autorun(() => {
         this.kvStore.set("options", toJS(this._options));
       });
-    }
-
-    {
-      const saved = await this.kvStore.get<boolean>(
-        "__showNewSidePanelHeaderTop"
-      );
-      if (saved == null) {
-        if (!isRunningInSidePanel()) {
-          const msg = new GetSidePanelIsSupportedMsg();
-          const res = await this.messageRequester.sendMessage(
-            BACKGROUND_PORT,
-            msg
-          );
-          if (res.supported) {
-            runInAction(() => {
-              this._showNewSidePanelHeaderTop = true;
-            });
-          }
-        }
-      } else {
-        runInAction(() => {
-          this._showNewSidePanelHeaderTop = saved;
-        });
-      }
-
-      const pathname = new URL(window.location.href).pathname;
-      // popup 외에 register 등의 페이지도 존재하는데 이 페이지들은 sidePanel과 관련이 없으니 그 경우는 무시한다.
-      if (pathname === "/sidePanel.html" || pathname === "/popup.html") {
-        autorun(() => {
-          this.kvStore.set(
-            "__showNewSidePanelHeaderTop",
-            this._showNewSidePanelHeaderTop
-          );
-        });
-      }
     }
 
     await Promise.all([
@@ -433,15 +393,6 @@ export class UIConfigStore {
 
   get icnsInfo() {
     return this._icnsInfo;
-  }
-
-  get showNewSidePanelHeaderTop(): boolean {
-    return this._showNewSidePanelHeaderTop;
-  }
-
-  @action
-  setShowNewSidePanelHeaderTop(value: boolean) {
-    this._showNewSidePanelHeaderTop = value;
   }
 
   async removeStatesWhenErrorOccurredDuringRending() {

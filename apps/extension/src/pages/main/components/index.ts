@@ -2,7 +2,7 @@ export * from "./claim-all";
 export * from "./spendable-card";
 export * from "./buy-crypto-modal";
 export * from "./token";
-export * from "./menu-bar";
+export * from "./floating-menu-bar";
 export * from "./copy-address";
 export * from "./empty-view";
 export * from "./ibc-transfer-view";
