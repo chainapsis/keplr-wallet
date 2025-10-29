@@ -100,6 +100,17 @@ export function useTopUp({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [remainingTimeMs !== undefined && remainingTimeMs > 0]);
 
+  useEffect(() => {
+    // 10 seconds interval refresh top up status
+    const interval = setInterval(() => {
+      feeConfig.refreshTopUpStatus();
+    }, 10000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [feeConfig]);
+
   async function executeTopUpIfAvailable() {
     if (!shouldTopUp || isTopUpInProgress) {
       return;

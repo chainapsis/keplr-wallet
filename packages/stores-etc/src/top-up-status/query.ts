@@ -30,7 +30,6 @@ class ObservableQueryTopUpStatusInner extends ObservableQuery<StatusResponse> {
       )}?recipientAddress=${encodeURIComponent(recipientAddress)}`,
       {
         disableCache: true,
-        fetchingInterval: 10_000,
       }
     );
 
