@@ -25,8 +25,8 @@
 
   "bottom-tabs.home": "Home",
   "bottom-tabs.swap": "Swap",
-  "bottom-tabs.activity": "Activity",
-  "bottom-tabs.settings": "Settings",
+  "bottom-tabs.stake": "Stake",
+  "bottom-tabs.history": "History",
   "bottom-tabs.swap.disabled": "Swap only works with Cosmos or Ethereum-based chains. Please add one to use it.",
 
   "pages.register.components.header.intro-title": "Your Interchain Gateway",
@@ -461,7 +461,7 @@
   "page.ibc-swap.components.swap-not-available-modal.paragraph": "Swap is currently not available for this token.",
   "page.ibc-swap.button.terms-of-use.title": "Terms of Use",
 
-  "page.activity.title": "Activity",
+  "page.history.title": "History",
 
   "page.permission.unknown-permission": "Unknown permission",
   "page.permission.requesting-connection-title": "Requesting Connection",
