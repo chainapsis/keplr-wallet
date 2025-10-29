@@ -1210,6 +1210,11 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         };
       }
 
+      // XXX: AtomOne에서 fee top-up 시에 bal.error 또는 bal.response에 접근해도
+      //      bal이 observed 상태가 되지 않아서 fetch가 이뤄지지 않는 문제가 있음
+      //      아무리봐도 원인을 찾을 수 없기 때문에 일단 강제로 observed 상태로 만든다.
+      bal.waitResponse();
+
       if (bal.error) {
         return {
           warning: new Error("Failed to fetch balance"),
