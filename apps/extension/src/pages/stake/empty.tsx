@@ -113,6 +113,7 @@ export const StakeEmptyPage: FunctionComponent = observer(() => {
               };
               lastUpdated: number;
             }>(
+              // TODO: 아래 url을 공용 상수로 만들기
               "https://pjld2aanw3elvteui4gwyxgx4m0ceweg.lambda-url.us-west-2.on.aws",
               `/apr/${chainIdentifier}`
             );
