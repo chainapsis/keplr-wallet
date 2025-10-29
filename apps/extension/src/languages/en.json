@@ -646,9 +646,7 @@
   "page.main.available.manage-asset-list-button": "Manage Asset List",
 
   "page.stake.staked-balance-title": "Staked Balance",
-  "page.stake.staked-balance-tooltip": "Tokens that are staked to validators and earning rewards.",
   "page.stake.unstaking-balance-title": "Unstaking Balance",
-  "page.stake.unstaking-balance-tooltip": "Tokens that are under the unbonding period.",
   "page.stake.total-staked-title": "Total Staked",
   "page.stake.stake-more-button": "Stake More",
 

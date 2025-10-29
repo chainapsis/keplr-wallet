@@ -625,9 +625,7 @@
   "page.main.available.new-token-found": "{numFoundToken}개의 새로운 토큰 발견",
   "page.main.available.manage-asset-list-button": "자산 표시 관리",
   "page.stake.staked-balance-title": "스테이킹된 자산",
-  "page.stake.staked-balance-tooltip": "밸리데이터에게 위임되어 리워드를 받고 있는 토큰들입니다.",
   "page.stake.unstaking-balance-title": "언스테이킹 중인 자산",
-  "page.stake.unstaking-balance-tooltip": "언본딩 기간을 거치고 있는 토큰들입니다.",
   "page.stake.total-staked-title": "Total Staked",
   "page.stake.stake-more-button": "Stake More",
 

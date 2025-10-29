@@ -582,9 +582,7 @@
   "page.main.balance.staked-balance-title-2": "Staked",
 
   "page.stake.staked-balance-title": "质押数量",
-  "page.stake.staked-balance-tooltip": "质押给验证者并获得收益的币种。",
   "page.stake.unstaking-balance-title": "解除质押数量",
-  "page.stake.unstaking-balance-tooltip": "正在解除质押的币种。",
   "page.stake.total-staked-title": "Total Staked",
   "page.stake.stake-more-button": "Stake More",
 
