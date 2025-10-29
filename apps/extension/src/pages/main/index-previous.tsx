@@ -45,7 +45,7 @@ import { IbcHistoryView } from "./components/ibc-history-view";
 import { LayeredHorizontalRadioGroup } from "../../components/radio-group";
 import { XAxis, YAxis } from "../../components/axis";
 import { DepositModal } from "./components/deposit-modal";
-import { MainHeaderLayout, MainHeaderLayoutRef } from "./layouts/header";
+import { MainHeaderLayout } from "./layouts/header";
 import { amountToAmbiguousAverage, isRunningInSidePanel } from "../../utils";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import {
@@ -56,7 +56,6 @@ import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { useBuySupportServiceInfos } from "../../hooks/use-buy-support-service-infos";
 import { BottomTabsHeightRem } from "../../bottom-tabs";
 import { DenomHelper } from "@keplr-wallet/common";
-import { NewSidePanelHeaderTop } from "./new-side-panel-header-top";
 import { ModularChainInfo } from "@keplr-wallet/types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { AvailableTabLinkButtonList } from "./components/available-tab-link-button-list";
@@ -390,38 +389,8 @@ export const MainPage: FunctionComponent<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const mainHeaderLayoutRef = useRef<MainHeaderLayoutRef | null>(null);
-
   return (
-    <MainHeaderLayout
-      ref={mainHeaderLayoutRef}
-      isNotReady={isNotReady}
-      fixedTop={(() => {
-        if (isNotReady) {
-          return;
-        }
-
-        if (uiConfigStore.showNewSidePanelHeaderTop) {
-          return {
-            height: "3rem",
-            element: (
-              <NewSidePanelHeaderTop
-                onClick={() => {
-                  uiConfigStore.setShowNewSidePanelHeaderTop(false);
-
-                  if (mainHeaderLayoutRef.current) {
-                    mainHeaderLayoutRef.current.openSideMenu();
-                  }
-                }}
-                onCloseClick={() => {
-                  uiConfigStore.setShowNewSidePanelHeaderTop(false);
-                }}
-              />
-            ),
-          };
-        }
-      })()}
-    >
+    <MainHeaderLayout isNotReady={isNotReady}>
       {/* side panel에서만 보여준다. 보여주는 로직은 isRefreshButtonVisible를 다루는 useEffect를 참고. refresh button이 로딩중이면 모조건 보여준다. */}
       <RefreshButton
         visible={

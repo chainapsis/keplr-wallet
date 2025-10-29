@@ -70,7 +70,7 @@ export const FloatingMenuBar = ({
   openMenu: () => void;
   closeMenu: () => void;
 }) => {
-  const { keyRingStore, analyticsStore, uiConfigStore } = useStore();
+  const { keyRingStore, analyticsStore } = useStore();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -194,9 +194,6 @@ export const FloatingMenuBar = ({
                   e.preventDefault();
                   toggleSidePanelMode(!sidePanelEnabled, (res) => {
                     setSidePanelEnabled(res);
-                    if (res) {
-                      uiConfigStore.setShowNewSidePanelHeaderTop(false);
-                    }
                   });
                 }}
               >

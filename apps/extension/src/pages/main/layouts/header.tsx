@@ -1,11 +1,4 @@
-import React, {
-  Fragment,
-  PropsWithChildren,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-} from "react";
+import React, { Fragment, PropsWithChildren, useMemo } from "react";
 import { Columns } from "../../../components/column";
 import { Box } from "../../../components/box";
 import { CopyOutlineIcon } from "../../../components/icon";
@@ -38,12 +31,6 @@ const Styles = {
   `,
 };
 
-export interface MainHeaderLayoutRef {
-  toggleSideMenu: () => void;
-  openSideMenu: () => void;
-  closeSideMenu: () => void;
-}
-
 export const MainHeaderLayout = observer<
   PropsWithChildren<
     Pick<
@@ -56,10 +43,9 @@ export const MainHeaderLayout = observer<
       | "headerContainerStyle"
       | "fixedTop"
     >
-  >,
-  MainHeaderLayoutRef
+  >
 >(
-  (props, ref) => {
+  (props) => {
     const { children, ...otherProps } = props;
 
     const { uiConfigStore, keyRingStore } = useStore();
@@ -87,13 +73,6 @@ export const MainHeaderLayout = observer<
 
     const [isOpenMenu, setIsOpenMenu] = React.useState(false);
 
-    useEffect(() => {
-      // showNewSidePanelHeaderTop이 true면서 사이드 메뉴가 열렸으면 당연히 false로 바꿔줘야함
-      if (isOpenMenu && uiConfigStore.showNewSidePanelHeaderTop) {
-        uiConfigStore.setShowNewSidePanelHeaderTop(false);
-      }
-    }, [isOpenMenu, uiConfigStore]);
-
     const openMenu = () => {
       setIsOpenMenu(true);
 
@@ -109,31 +88,6 @@ export const MainHeaderLayout = observer<
     const closeMenu = () => {
       setIsOpenMenu(false);
     };
-
-    const openMenuRef = useRef(openMenu);
-    openMenuRef.current = openMenu;
-    const closeMenuRef = useRef(closeMenu);
-    closeMenuRef.current = closeMenu;
-
-    useImperativeHandle(
-      ref,
-      () => ({
-        toggleSideMenu: () => {
-          if (isOpenMenu) {
-            closeMenuRef.current();
-          } else {
-            openMenuRef.current();
-          }
-        },
-        openSideMenu: () => {
-          openMenuRef.current();
-        },
-        closeSideMenu: () => {
-          closeMenuRef.current();
-        },
-      }),
-      [isOpenMenu]
-    );
 
     return (
       <Fragment>
