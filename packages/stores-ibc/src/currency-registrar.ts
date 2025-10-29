@@ -188,7 +188,7 @@ export class IBCCurrencyRegistrar {
         done: boolean;
       }
     | undefined {
-    if (!this.chainStore.hasModularChain(chainId)) {
+    if (!this.isIBCAvailableChain(chainId)) {
       return;
     }
 
@@ -238,14 +238,14 @@ export class IBCCurrencyRegistrar {
             if (!path.clientChainId) {
               return true;
             }
-            return !this.chainStore.hasModularChain(path.clientChainId);
+            return !this.isIBCAvailableChain(path.clientChainId);
           })
         ) {
           fromCache = true;
           denomTrace = cached.denomTrace;
           if (
             cached.originChainId &&
-            this.chainStore.hasModularChain(cached.originChainId)
+            this.isIBCAvailableChain(cached.originChainId)
           ) {
             originChainInfo = this.chainStore.getModularChain(
               cached.originChainId
@@ -253,7 +253,7 @@ export class IBCCurrencyRegistrar {
           }
           if (
             cached.counterpartyChainId &&
-            this.chainStore.hasModularChain(cached.counterpartyChainId)
+            this.isIBCAvailableChain(cached.counterpartyChainId)
           ) {
             counterpartyChainInfo = this.chainStore.getModularChain(
               cached.counterpartyChainId
@@ -281,10 +281,10 @@ export class IBCCurrencyRegistrar {
             // 현재는 알게된 경우에는 cache를 사용하지않고 지운다.
             if (
               (cached.originChainId &&
-                this.chainStore.hasModularChain(cached.originChainId) &&
+                this.isIBCAvailableChain(cached.originChainId) &&
                 cached.originChainUnknown) ||
               (cached.counterpartyChainId &&
-                this.chainStore.hasModularChain(cached.counterpartyChainId) &&
+                this.isIBCAvailableChain(cached.counterpartyChainId) &&
                 cached.counterpartyChainUnknown)
             ) {
               cached = undefined;
@@ -352,7 +352,7 @@ export class IBCCurrencyRegistrar {
                 if (!rawCounterpartyChainId) {
                   rawCounterpartyChainId = ethereumChainId;
                 }
-                if (this.chainStore.hasModularChain(ethereumChainId)) {
+                if (this.isIBCAvailableChain(ethereumChainId)) {
                   // TODO: counterparty channel id를 구해야할듯한데
                   //       https://github.com/cosmos/ibc-go/blob/a8b4af9c757f5235a965718597f73f039c4a5708/proto/ibc/core/client/v2/query.proto#L15
                   //       이것으로 추정되지만 현재 cosmos testnet에서 해당 쿼리가 501 not implemented로 반환되기 때문에 일단 패스...
@@ -406,7 +406,7 @@ export class IBCCurrencyRegistrar {
             }
             if (
               clientState.clientChainId &&
-              this.chainStore.hasModularChain(clientState.clientChainId)
+              this.isIBCAvailableChain(clientState.clientChainId)
             ) {
               path.clientChainId = clientState.clientChainId;
 
@@ -448,7 +448,7 @@ export class IBCCurrencyRegistrar {
           if (
             !originChainInfo &&
             cached.originChainId &&
-            this.chainStore.hasModularChain(cached.originChainId)
+            this.isIBCAvailableChain(cached.originChainId)
           ) {
             originChainInfo = this.chainStore.getModularChain(
               cached.originChainId
@@ -457,7 +457,7 @@ export class IBCCurrencyRegistrar {
           if (
             !counterpartyChainInfo &&
             cached.counterpartyChainId &&
-            this.chainStore.hasModularChain(cached.counterpartyChainId)
+            this.isIBCAvailableChain(cached.counterpartyChainId)
           ) {
             counterpartyChainInfo = this.chainStore.getModularChain(
               cached.counterpartyChainId
@@ -592,7 +592,7 @@ export class IBCCurrencyRegistrar {
                   );
                 if (
                   !cw20Currency &&
-                  this.chainStore.hasModularChain(originChainInfo.chainId)
+                  this.isIBCAvailableChain(originChainInfo.chainId)
                 ) {
                   const originQueries = this.queriesStore.get(
                     originChainInfo.chainId
@@ -651,7 +651,7 @@ export class IBCCurrencyRegistrar {
                   );
                 if (
                   !secret20Currency &&
-                  this.chainStore.hasModularChain(originChainInfo.chainId)
+                  this.isIBCAvailableChain(originChainInfo.chainId)
                 ) {
                   const originQueries = this.queriesStore.get(
                     originChainInfo.chainId
@@ -715,7 +715,7 @@ export class IBCCurrencyRegistrar {
                 });
               if (
                 !erc20Currency &&
-                this.chainStore.hasModularChain(originChainInfo.chainId)
+                this.isIBCAvailableChain(originChainInfo.chainId)
               ) {
                 const originQueries = this.queriesStore.get(
                   originChainInfo.chainId
@@ -820,6 +820,13 @@ export class IBCCurrencyRegistrar {
         done: true,
       };
     }
+  }
+
+  protected isIBCAvailableChain(chainId: string): boolean {
+    return (
+      this.chainStore.hasModularChain(chainId) &&
+      this.chainStore.getModularChainInfoImpl(chainId).matchModule("cosmos")
+    );
   }
 
   protected getERC20TokenInfo(

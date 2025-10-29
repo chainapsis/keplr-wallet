@@ -431,12 +431,7 @@ const FoundChainView: FunctionComponent<{
 
         <Stack gutter="0.25rem">
           <Subtitle3>
-            {
-              (chainStore.hasModularChain(tokenScan.chainId)
-                ? chainStore.getChain(tokenScan.chainId)
-                : chainStore.getModularChain(tokenScan.chainId)
-              ).chainName
-            }
+            {chainStore.getModularChain(tokenScan.chainId).chainName}
           </Subtitle3>
           <Body3 color={ColorPalette["gray-300"]}>{numTokens} Tokens</Body3>
         </Stack>
@@ -514,11 +509,7 @@ const FoundTokenView: FunctionComponent<{
     <Columns sum={1} gutter="0.5rem" alignY="center">
       <Box width="1.5rem" height="1.5rem">
         <CurrencyImageFallback
-          chainInfo={
-            chainStore.hasModularChain(chainId)
-              ? chainStore.getChain(chainId)
-              : chainStore.getModularChain(chainId)
-          }
+          chainInfo={chainStore.getModularChain(chainId)}
           currency={asset.currency}
           size="1.5rem"
           alt="Token Found Modal Token Image"

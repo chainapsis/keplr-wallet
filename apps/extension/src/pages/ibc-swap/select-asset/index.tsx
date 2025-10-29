@@ -67,7 +67,7 @@ class IBCSwapDestinationState {
         return token.token.toDec().gt(zeroDec);
       })
       .filter((token) => {
-        if (!("cosmos" in token.chainInfo)) {
+        if (!("cosmos" in token.chainInfo) && !("evm" in token.chainInfo)) {
           return false;
         }
 
@@ -215,7 +215,7 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
 
     const filteredTokens = useMemo(() => {
       const filtered = tokens.filter((token) => {
-        if (!("cosmos" in token.chainInfo) || !("evm" in token.chainInfo)) {
+        if (!("cosmos" in token.chainInfo) && !("evm" in token.chainInfo)) {
           return false;
         }
 

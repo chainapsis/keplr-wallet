@@ -68,13 +68,16 @@ export class ObservableQueryIbcPfmTransfer {
     }
   );
 
+  isSwappableChain = computedFn((chainId: string): boolean => {
+    return this.chainStore
+      .getModularChainInfoImpl(chainId)
+      .matchModules({ or: ["cosmos", "evm"] });
+  });
+
   getIBCChannels = computedFn(
     (chainId: string, denom: string): IBCChannel[] => {
-      if (!this.chainStore.hasModularChain(chainId)) {
-        return [];
-      }
-
       if (
+        !this.isSwappableChain(chainId) ||
         !this.chainStore
           .getModularChainInfoImpl(chainId)
           .hasFeature("ibc-transfer")
@@ -107,7 +110,7 @@ export class ObservableQueryIbcPfmTransfer {
       }[] = [];
 
       for (const assetChainId of Object.keys(assetsFromSource)) {
-        if (this.chainStore.hasModularChain(assetChainId)) {
+        if (this.isSwappableChain(assetChainId)) {
           const assets = assetsFromSource[assetChainId]!.assets;
           // TODO: 미래에는 assets가 두개 이상이 될수도 있다고 한다.
           //       근데 지금은 한개로만 고정되어 있다고 한다...
@@ -116,8 +119,8 @@ export class ObservableQueryIbcPfmTransfer {
             const asset = assets[0];
             if (
               asset.chainId === assetChainId &&
-              this.chainStore.hasModularChain(asset.chainId) &&
-              this.chainStore.hasModularChain(asset.originChainId)
+              this.isSwappableChain(asset.chainId) &&
+              this.isSwappableChain(asset.originChainId)
             ) {
               if (
                 !this.chainStore.isInModularChainInfosInListUI(asset.chainId)
@@ -149,7 +152,7 @@ export class ObservableQueryIbcPfmTransfer {
                   if (
                     !currency.originChainId ||
                     !currency.originCurrency ||
-                    !this.chainStore.hasModularChain(currency.originChainId)
+                    !this.isSwappableChain(currency.originChainId)
                   ) {
                     continue;
                   }
@@ -170,7 +173,7 @@ export class ObservableQueryIbcPfmTransfer {
                         !path.counterpartyPortId ||
                         !path.counterpartyChannelId ||
                         !path.clientChainId ||
-                        !this.chainStore.hasModularChain(path.clientChainId)
+                        !this.isSwappableChain(path.clientChainId)
                       );
                     })
                   ) {
@@ -201,9 +204,7 @@ export class ObservableQueryIbcPfmTransfer {
                   if (
                     !destinationCurrency.originChainId ||
                     !destinationCurrency.originCurrency ||
-                    !this.chainStore.hasModularChain(
-                      destinationCurrency.originChainId
-                    )
+                    !this.isSwappableChain(destinationCurrency.originChainId)
                   ) {
                     continue;
                   }
@@ -225,7 +226,7 @@ export class ObservableQueryIbcPfmTransfer {
                         !path.counterpartyPortId ||
                         !path.counterpartyChannelId ||
                         !path.clientChainId ||
-                        !this.chainStore.hasModularChain(path.clientChainId)
+                        !this.isSwappableChain(path.clientChainId)
                       );
                     })
                   ) {
