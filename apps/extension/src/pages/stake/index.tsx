@@ -51,7 +51,6 @@ export const StakePage: FunctionComponent = observer(() => {
           altSentence: string;
         }[];
     lenAlwaysShown: number;
-    tooltip?: string | React.ReactElement;
   }[] = [
     {
       title: intl.formatMessage({
@@ -59,9 +58,6 @@ export const StakePage: FunctionComponent = observer(() => {
       }),
       balance: delegations,
       lenAlwaysShown: 5,
-      tooltip: intl.formatMessage({
-        id: "page.stake.staked-balance-tooltip",
-      }),
     },
     {
       title: intl.formatMessage({
@@ -69,9 +65,6 @@ export const StakePage: FunctionComponent = observer(() => {
       }),
       balance: unbondings,
       lenAlwaysShown: 3,
-      tooltip: intl.formatMessage({
-        id: "page.stake.unstaking-balance-tooltip",
-      }),
     },
   ];
 
@@ -188,7 +181,7 @@ export const StakePage: FunctionComponent = observer(() => {
         <Gutter size="1.5rem" />
 
         <Stack gutter="1.5rem">
-          {TokenViewData.map(({ title, balance, lenAlwaysShown, tooltip }) => {
+          {TokenViewData.map(({ title, balance, lenAlwaysShown }) => {
             if (balance.length === 0) {
               return null;
             }
@@ -197,7 +190,7 @@ export const StakePage: FunctionComponent = observer(() => {
               <CollapsibleList
                 key={title}
                 hideNumInTitle={uiConfigStore.isPrivacyMode}
-                title={<TokenTitleView title={title} tooltip={tooltip} />}
+                title={<TokenTitleView title={title} />}
                 lenAlwaysShown={lenAlwaysShown}
                 items={balance.map((viewToken) => {
                   if ("altSentence" in viewToken) {
