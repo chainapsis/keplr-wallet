@@ -649,6 +649,9 @@
   "page.stake.unstaking-balance-title": "Unstaking Balance",
   "page.stake.total-staked-title": "Total Staked",
   "page.stake.stake-more-button": "Stake More",
+  "page.stake.empty.title": "Stake your assets{br}and earn rewards",
+  "page.stake.empty.subtitle": "Choose an asset to stake",
+  "page.stake.empty.link": "Learn more",
 
   "page.main.components.ibc-history-view.item.pending": "IBC Transfer in Progress",
   "page.main.components.ibc-history-view.item.succeed": "IBC Transfer Successful",

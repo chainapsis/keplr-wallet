@@ -13,12 +13,14 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { TextButton } from "../../components/button-text";
 import { useNavigate } from "react-router";
 import { ChevronIcon } from ".";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const zeroDec = new Dec(0);
 
 export const StakeEmptyPage: FunctionComponent = observer(() => {
   const theme = useTheme();
   const navigate = useNavigate();
+  const intl = useIntl();
   const { hugeQueriesStore, priceStore, queriesStore, starknetQueriesStore } =
     useStore();
 
@@ -61,9 +63,12 @@ export const StakeEmptyPage: FunctionComponent = observer(() => {
               lineHeight: "115.008%",
             }}
           >
-            Stake your assets
-            <br />
-            and earn rewards
+            <FormattedMessage
+              id="page.stake.empty.title"
+              values={{
+                br: <br />,
+              }}
+            />
           </span>
         </Box>
 
@@ -71,7 +76,9 @@ export const StakeEmptyPage: FunctionComponent = observer(() => {
 
         <Box paddingX="0.25rem">
           <Subtitle2 color={ColorPalette["gray-200"]}>
-            Choose an asset to stake
+            {intl.formatMessage({
+              id: "page.stake.empty.subtitle",
+            })}
           </Subtitle2>
         </Box>
 
@@ -147,7 +154,9 @@ export const StakeEmptyPage: FunctionComponent = observer(() => {
         <Gutter size="1.25rem" />
 
         <TextButton
-          text="Learn more"
+          text={intl.formatMessage({
+            id: "page.stake.empty.link",
+          })}
           color="blue"
           onClick={() => {
             navigate("/stake/explore");

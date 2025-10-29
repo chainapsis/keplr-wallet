@@ -775,7 +775,7 @@ export class HugeQueriesStore {
         ).identifier;
         const strkContractAddress =
           modularChainInfo.starknet.strkContractAddress;
-        const strkKey = `${chainIdentifier}/erc20:${strkContractAddress}`;
+        const strkKey = `${chainIdentifier}/erc20:${strkContractAddress.toLowerCase()}`;
         keys.set(strkKey, true);
       }
     }

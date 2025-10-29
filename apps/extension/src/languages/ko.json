@@ -628,6 +628,9 @@
   "page.stake.unstaking-balance-title": "언스테이킹 중인 자산",
   "page.stake.total-staked-title": "Total Staked",
   "page.stake.stake-more-button": "Stake More",
+  "page.stake.empty.title": "Stake your assets{br}and earn rewards",
+  "page.stake.empty.subtitle": "Choose an asset to stake",
+  "page.stake.empty.link": "Learn more",
 
   "page.main.components.ibc-history-view.item.pending": "IBC 전송 중",
   "page.main.components.ibc-history-view.item.succeed": "IBC 전송 성공",
