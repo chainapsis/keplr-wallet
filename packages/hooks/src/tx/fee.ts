@@ -579,6 +579,28 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     return false;
   }
 
+  protected canTopUpStatusAndReady(isRefresh?: boolean): boolean {
+    const queryTopUpStatus = this.queriesStore.get(this.chainId).keplrETC
+      ?.queryTopUpStatus;
+    if (!queryTopUpStatus) {
+      return false;
+    }
+
+    const topUpStatus = queryTopUpStatus.getTopUpStatus(
+      this.senderConfig.sender
+    );
+
+    if (topUpStatus.error != null) {
+      return false;
+    }
+
+    if (isRefresh) {
+      topUpStatus.waitFreshResponse();
+    }
+
+    return true;
+  }
+
   get l1DataFee(): Dec | undefined {
     return this._l1DataFee;
   }
@@ -1237,7 +1259,8 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   get uiProperties(): UIProperties {
     if (
       this.forceTopUp ||
-      (this._uiProperties.error instanceof InsufficientFeeError &&
+      (this.canTopUpStatusAndReady() &&
+        this._uiProperties.error instanceof InsufficientFeeError &&
         this._topUpStatus.shouldTopUp)
     ) {
       return {
@@ -1368,14 +1391,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   refreshTopUpStatus(): void {
-    const queryTopUpStatus = this.queriesStore.get(this.chainId).keplrETC
-      ?.queryTopUpStatus;
-    if (queryTopUpStatus) {
-      const topUpQuery = queryTopUpStatus.getTopUpStatus(
-        this.senderConfig.sender
-      );
-      topUpQuery.fetch();
-    }
+    this.canTopUpStatusAndReady(true);
   }
 
   private getMultiplication(): { low: number; average: number; high: number } {
