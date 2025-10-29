@@ -231,10 +231,7 @@ export const StakePage: FunctionComponent = observer(() => {
           })}
         </Stack>
 
-        <Gutter
-          size="1.25
-        rem"
-        />
+        <Gutter size="1.25rem" />
       </Box>
     </MainHeaderLayout>
   );
