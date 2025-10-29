@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/unit",
-  "version": "0.12.281-rc.5",
+  "version": "0.12.281-rc.6",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -16,7 +16,7 @@
     "lint-fix": "npx eslint --fix \"src/**/*\" && npx prettier --write \"src/**/*\""
   },
   "dependencies": {
-    "@keplr-wallet/types": "0.12.281-rc.5",
+    "@keplr-wallet/types": "0.12.281-rc.6",
     "big-integer": "^1.6.48",
     "utility-types": "^3.10.0"
   }
