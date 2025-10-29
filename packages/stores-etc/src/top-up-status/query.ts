@@ -6,7 +6,7 @@ import {
 } from "@keplr-wallet/stores";
 import { makeObservable } from "mobx";
 
-export type StatusResponseBody =
+export type StatusResponse =
   | {
       isTopUpAvailable: boolean;
       remainingTimeMs?: number;
@@ -15,7 +15,7 @@ export type StatusResponseBody =
       error: string;
     };
 
-class ObservableQueryTopUpStatusInner extends ObservableQuery<StatusResponseBody> {
+class ObservableQueryTopUpStatusInner extends ObservableQuery<StatusResponse> {
   constructor(
     sharedContext: QuerySharedContext,
     chainId: string,
@@ -37,22 +37,8 @@ class ObservableQueryTopUpStatusInner extends ObservableQuery<StatusResponseBody
     makeObservable(this);
   }
 
-  get topUpStatus(): { isTopUpAvailable: boolean; remainingTimeMs?: number } {
-    if (this.error || !this.response?.data) {
-      return {
-        isTopUpAvailable: false,
-        remainingTimeMs: undefined,
-      };
-    }
-
-    if ("error" in this.response?.data) {
-      return {
-        isTopUpAvailable: false,
-        remainingTimeMs: undefined,
-      };
-    }
-
-    return this.response.data;
+  get topUpStatus(): StatusResponse | undefined {
+    return this.response?.data;
   }
 }
 

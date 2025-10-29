@@ -580,25 +580,24 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   protected canTopUpStatusAndReady(isRefresh?: boolean): boolean {
-    const queryTopUpStatus = this.queriesStore.get(this.chainId).keplrETC
-      ?.queryTopUpStatus;
+    const queryTopUpStatus = this.queriesStore
+      .get(this.chainId)
+      .keplrETC?.queryTopUpStatus.getTopUpStatus(this.senderConfig.sender);
     if (!queryTopUpStatus) {
       return false;
     }
 
-    const topUpStatus = queryTopUpStatus.getTopUpStatus(
-      this.senderConfig.sender
-    );
+    const topUpStatus = queryTopUpStatus.topUpStatus;
 
-    if (topUpStatus.error != null) {
-      return false;
+    if (topUpStatus != null) {
+      if (isRefresh) {
+        queryTopUpStatus.waitFreshResponse();
+      }
+
+      return true;
     }
 
-    if (isRefresh) {
-      topUpStatus.waitFreshResponse();
-    }
-
-    return true;
+    return false;
   }
 
   get l1DataFee(): Dec | undefined {
@@ -1278,9 +1277,10 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     remainingTimeMs?: number;
     topUpOverrideStdFee?: StdFee;
   } {
-    const queryTopUpStatus = this.queriesStore.get(this.chainId).keplrETC
-      ?.queryTopUpStatus;
-    if (!queryTopUpStatus) {
+    const queryTopUpStatus = this.queriesStore
+      .get(this.chainId)
+      .keplrETC?.queryTopUpStatus.getTopUpStatus(this.senderConfig.sender);
+    if (!queryTopUpStatus || queryTopUpStatus.error != null) {
       return {
         isTopUpAvailable: false,
         remainingTimeMs: undefined,
@@ -1289,10 +1289,8 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       };
     }
 
-    const topUpStatus = queryTopUpStatus.getTopUpStatus(
-      this.senderConfig.sender
-    );
-    if (topUpStatus.error != null) {
+    const topUpStatus = queryTopUpStatus.topUpStatus;
+    if (topUpStatus == null || "error" in topUpStatus) {
       return {
         isTopUpAvailable: false,
         remainingTimeMs: undefined,
@@ -1301,7 +1299,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       };
     }
 
-    const { isTopUpAvailable, remainingTimeMs } = topUpStatus.topUpStatus;
+    const { isTopUpAvailable, remainingTimeMs } = topUpStatus;
 
     // 모든 fee currency가 부족할 경우에만 topup 사용이 가능
     const shouldTopUp = (() => {
