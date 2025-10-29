@@ -9,7 +9,6 @@ import { observer } from "mobx-react-lite";
 import styled, { useTheme } from "styled-components";
 import { useStore } from "../../../../stores";
 import { Box } from "../../../../components/box";
-import { TextButton } from "../../../../components/button-text";
 import { XAxis, YAxis } from "../../../../components/axis";
 import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse/collapse";
 import { Body2, Body3 } from "../../../../components/typography";
@@ -22,6 +21,7 @@ import { useGlobarSimpleBar } from "../../../../hooks/global-simplebar";
 import { Tooltip } from "../../../../components/tooltip";
 import { Gutter } from "../../../../components/gutter";
 import { isRunningInSidePanel } from "../../../../utils";
+import { COMMON_HOVER_OPACITY } from "../../../../styles/constant";
 
 const Styles = {
   MenuContainer: styled.div`
@@ -245,19 +245,12 @@ const MainMenu: React.FC<MainMenuProps> = observer(
   }
 );
 
-const CustomTextButton = styled(TextButton)`
-  && button {
-    padding: 0.25rem 0 !important;
-    color: ${ColorPalette["gray-300"]};
-    height: 1rem;
-    font-size: 0.8125rem;
+const CustomBox = styled(Box)`
+  cursor: pointer;
+  transition: opacity 0.1s ease;
 
-    &:hover {
-      color: ${(props) =>
-        props.theme.mode === "light"
-          ? ColorPalette["gray-500"]
-          : ColorPalette["gray-200"]};
-    }
+  &:hover {
+    opacity: ${COMMON_HOVER_OPACITY};
   }
 `;
 
@@ -269,12 +262,10 @@ export const ViewOptionsContextMenu: FunctionComponent<{
 }> = observer(
   ({ isOpen, setIsOpen, showFiatValueVisible, setShowFiatValueVisible }) => {
     const { uiConfigStore, analyticsAmplitudeStore } = useStore();
-    const intl = useIntl();
     const containerRef = useRef<HTMLDivElement>(null);
     const menuContentRef = useRef<HTMLDivElement>(null);
     const [initialized, setInitialized] = useState(false);
     const theme = useTheme();
-    const [isHovered, setIsHovered] = useState(false);
     const globalSimpleBar = useGlobarSimpleBar();
 
     useLayoutEffect(() => {
@@ -403,33 +394,13 @@ export const ViewOptionsContextMenu: FunctionComponent<{
           enabled={uiConfigStore.switchAssetViewModeSuggestion}
           isAlwaysOpen={uiConfigStore.switchAssetViewModeSuggestion}
         >
-          <div
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-          >
-            <CustomTextButton
-              text={intl.formatMessage({
-                id: "page.main.components.context-menu.title",
-              })}
-              size="small"
-              right={
-                <Styles.MenuItemXAxis alignY="center">
-                  <ViewOptionsIcon
-                    width="1rem"
-                    height="1rem"
-                    color={
-                      isHovered
-                        ? theme.mode === "light"
-                          ? ColorPalette["gray-500"]
-                          : ColorPalette["gray-200"]
-                        : ColorPalette["gray-300"]
-                    }
-                  />
-                </Styles.MenuItemXAxis>
-              }
-              onClick={toggleMenu}
+          <CustomBox onClick={toggleMenu}>
+            <ViewOptionsIcon
+              width="1.5rem"
+              height="1.5rem"
+              color={ColorPalette["gray-300"]}
             />
-          </div>
+          </CustomBox>
         </Tooltip>
 
         {isOpen && (
@@ -516,12 +487,16 @@ const SuggestionTooltipContent: FunctionComponent<{
   );
 };
 
-const ViewOptionsIcon: FunctionComponent<IconProps> = ({ color }) => {
+const ViewOptionsIcon: FunctionComponent<IconProps> = ({
+  color,
+  width,
+  height,
+}) => {
   return (
     <div
       style={{
-        width: "1rem",
-        height: "1rem",
+        width: width,
+        height: height,
         display: "flex",
         justifyContent: "center",
         alignItems: "center",

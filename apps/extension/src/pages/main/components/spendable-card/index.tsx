@@ -20,7 +20,7 @@ export const SpendableCard: FunctionComponent<{
   isNotReady?: boolean;
   onClickDeposit: () => void;
 }> = observer(({ spendableTotalPrice, isNotReady, onClickDeposit }) => {
-  const { hugeQueriesStore } = useStore();
+  const { hugeQueriesStore, uiConfigStore } = useStore();
   const navigate = useNavigate();
   const intl = useIntl();
 
@@ -55,7 +55,12 @@ export const SpendableCard: FunctionComponent<{
         <Box>
           <Skeleton isNotReady={isNotReady}>
             <Subtitle2 color={ColorPalette["white"]}>
-              {spendableTotalPrice ? spendableTotalPrice.toString() : "-"}
+              {spendableTotalPrice
+                ? uiConfigStore.hideStringIfPrivacyMode(
+                    spendableTotalPrice.toString(),
+                    4
+                  )
+                : "-"}
             </Subtitle2>
           </Skeleton>
         </Box>
