@@ -189,7 +189,7 @@ export const StakePage: FunctionComponent = observer(() => {
             return (
               <CollapsibleList
                 key={title}
-                hideNumInTitle={uiConfigStore.isPrivacyMode}
+                removeNumInTitle={true}
                 title={<TokenTitleView title={title} />}
                 lenAlwaysShown={lenAlwaysShown}
                 items={balance.map((viewToken) => {
