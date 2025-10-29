@@ -169,6 +169,7 @@ interface TokenItemProps {
 
   // If this prop is provided, the token item will be shown with loading state.
   isLoading?: boolean;
+  stakingApr?: string;
 }
 
 export const TokenItem: FunctionComponent<TokenItemProps> = observer(
@@ -188,6 +189,7 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
     earnedAssetPrice,
     noTokenTag,
     isLoading,
+    stakingApr,
   }) => {
     const { priceStore, uiConfigStore } = useStore();
     const navigate = useNavigate();
@@ -279,6 +281,7 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
         price24HChange={price24HChange}
         tag={tokenTag}
         isLoading={isLoading}
+        stakingApr={stakingApr}
       />
     );
 
@@ -323,6 +326,7 @@ interface TokenItemContentProps {
     tooltip?: string;
   };
   isLoading?: boolean;
+  stakingApr?: string;
 }
 
 const TokenItemContent: FunctionComponent<TokenItemContentProps> = ({
@@ -347,6 +351,7 @@ const TokenItemContent: FunctionComponent<TokenItemContentProps> = ({
   pricePretty,
   price24HChange,
   tag,
+  stakingApr,
 }) => (
   <Styles.Container
     forChange={forChange}
@@ -422,6 +427,25 @@ const TokenItemContent: FunctionComponent<TokenItemContentProps> = ({
                 .toString()}
             </Subtitle2>
           </Skeleton>
+
+          {stakingApr ? (
+            <React.Fragment>
+              <Gutter size="0.25rem" />
+              <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth="4rem">
+                <Caption1
+                  style={{
+                    color: ColorPalette["gray-300"],
+                    fontSize: "0.875rem",
+                    fontStyle: "normal",
+                    fontWeight: 400,
+                    lineHeight: "120%",
+                  }}
+                >
+                  {stakingApr}
+                </Caption1>
+              </Skeleton>
+            </React.Fragment>
+          ) : null}
 
           {price24HChange ? (
             <React.Fragment>

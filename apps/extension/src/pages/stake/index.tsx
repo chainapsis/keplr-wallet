@@ -23,16 +23,19 @@ import { Dec } from "@keplr-wallet/unit";
 import { CollapsibleList } from "../../components/collapsible-list";
 import { Stack } from "../../components/stack";
 import { ClaimAll, TokenItem, TokenTitleView } from "../main/components";
+import { StakeExplorePage } from "./explore";
 import { StakeEmptyPage } from "./empty";
 import { IconProps } from "../../components/icon/types";
 import { Subtitle3 } from "../../components/typography";
+
+const zeroDec = new Dec(0);
 
 export const StakePage: FunctionComponent = observer(() => {
   const theme = useTheme();
   const navigate = useNavigate();
   const intl = useIntl();
 
-  const { uiConfigStore } = useStore();
+  const { uiConfigStore, hugeQueriesStore } = useStore();
   const isNotReady = useIsNotReady();
 
   const animatedPrivacyModeHover = useSpringValue(0, {
@@ -40,7 +43,15 @@ export const StakePage: FunctionComponent = observer(() => {
   });
 
   const { stakedTotalPrice } = useStakedTotalPrice();
+
   const { delegations, unbondings } = useViewStakingTokens();
+
+  const allBalances = hugeQueriesStore.getAllBalances({
+    allowIBCToken: true,
+  });
+  const hasAnyAsset = useMemo(() => {
+    return allBalances.some((token) => token.token.toDec().gt(zeroDec));
+  }, [allBalances]);
 
   const TokenViewData: {
     title: string;
@@ -67,6 +78,10 @@ export const StakePage: FunctionComponent = observer(() => {
       lenAlwaysShown: 3,
     },
   ];
+
+  if (!hasAnyAsset) {
+    return <StakeExplorePage />;
+  }
 
   if (delegations.length === 0 && unbondings.length === 0) {
     return <StakeEmptyPage />;
@@ -342,7 +357,7 @@ function formatRelativeTime(
   };
 }
 
-const ChevronIcon: FunctionComponent<IconProps> = ({
+export const ChevronIcon: FunctionComponent<IconProps> = ({
   width = "1rem",
   height = "1rem",
 }) => {
