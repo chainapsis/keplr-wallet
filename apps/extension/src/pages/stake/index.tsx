@@ -46,12 +46,11 @@ export const StakePage: FunctionComponent = observer(() => {
 
   const { delegations, unbondings } = useViewStakingTokens();
 
-  const allBalances = hugeQueriesStore.getAllBalances({
-    allowIBCToken: true,
-  });
-  const hasAnyAsset = useMemo(() => {
-    return allBalances.some((token) => token.token.toDec().gt(zeroDec));
-  }, [allBalances]);
+  const hasAnyStakableAsset = useMemo(() => {
+    return hugeQueriesStore.stakables.some((token) =>
+      token.token.toDec().gt(zeroDec)
+    );
+  }, [hugeQueriesStore.stakables]);
 
   const TokenViewData: {
     title: string;
@@ -79,7 +78,7 @@ export const StakePage: FunctionComponent = observer(() => {
     },
   ];
 
-  if (!hasAnyAsset) {
+  if (!hasAnyStakableAsset) {
     return <StakeExplorePage />;
   }
 
