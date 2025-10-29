@@ -339,8 +339,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           })();
 
           if (
-            ibcSwapConfigs.amountConfig.chainInfo.chainIdentifier ===
-            ChainIdHelper.parse(swapVenueChainId).identifier
+            ChainIdHelper.parse(ibcSwapConfigs.amountConfig.chainId)
+              .identifier === ChainIdHelper.parse(swapVenueChainId).identifier
           ) {
             type = `swap-1`;
           }
@@ -901,7 +901,11 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 const chainIdInKeplr = isOnlyEvm
                   ? `eip155:${chainId}`
                   : chainId;
-                if (!chainStore.hasModularChain(chainIdInKeplr)) {
+                if (
+                  !chainStore
+                    .getModularChainInfoImpl(chainIdInKeplr)
+                    .matchModules({ or: ["cosmos", "evm"] })
+                ) {
                   continue;
                 }
 

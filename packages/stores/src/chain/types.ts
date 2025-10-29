@@ -113,4 +113,10 @@ export interface IModularChainInfoImpl<
     coinMinimalDenoms: string[];
   }): void;
   isCurrencyRegistrationInProgress(coinMinimalDenom: string): boolean;
+  matchModules(
+    conditions:
+      | { or: ChainInfoModule[]; and?: undefined }
+      | { and: ChainInfoModule[]; or?: undefined }
+  ): boolean;
+  matchModule(module: ChainInfoModule): boolean;
 }

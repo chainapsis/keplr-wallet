@@ -84,7 +84,7 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
       return [];
     }
 
-    if (!this.chainStore.hasModularChain(this.chainId)) {
+    if (!this.isSwappableChain(this.chainId)) {
       return [];
     }
 
@@ -108,8 +108,8 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
           ? `eip155:${asset.origin_chain_id}`
           : asset.origin_chain_id;
         if (
-          this.chainStore.hasModularChain(chainId) &&
-          (this.chainStore.hasModularChain(originChainId) ||
+          this.isSwappableChain(chainId) &&
+          (this.isSwappableChain(originChainId) ||
             (asset.chain_id === "osmosis-1" &&
               asset.denom ===
                 "ibc/0FA9232B262B89E77D1335D54FB1E1F506A92A7E4B51524B400DC69C68D28372"))
@@ -180,7 +180,7 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
       return [];
     }
 
-    if (!this.chainStore.hasModularChain(this.chainId)) {
+    if (!this.isSwappableChain(this.chainId)) {
       return [];
     }
 
@@ -204,8 +204,8 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
           ? `eip155:${asset.origin_chain_id}`
           : asset.origin_chain_id;
         if (
-          this.chainStore.hasModularChain(chainId) &&
-          this.chainStore.hasModularChain(originChainId)
+          this.isSwappableChain(chainId) &&
+          this.isSwappableChain(originChainId)
         ) {
           // IBC asset일 경우 그냥 넣는다.
           if (asset.denom.startsWith("ibc/")) {
@@ -278,7 +278,7 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
       return [];
     }
 
-    if (!this.chainStore.hasModularChain(this.chainId)) {
+    if (!this.isSwappableChain(this.chainId)) {
       return [];
     }
 
@@ -294,8 +294,8 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
 
       for (const asset of assetsInResponse.assets) {
         if (
-          this.chainStore.hasModularChain(asset.chain_id) &&
-          this.chainStore.hasModularChain(asset.origin_chain_id)
+          this.isSwappableChain(asset.chain_id) &&
+          this.isSwappableChain(asset.origin_chain_id)
         ) {
           if (
             !this.swapUsageQueries.querySwapUsage
@@ -370,6 +370,15 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
       data: validated.value,
     };
   }
+
+  protected isSwappableChain(chainId: string): boolean {
+    return (
+      this.chainStore.hasModularChain(chainId) &&
+      this.chainStore
+        .getModularChainInfoImpl(chainId)
+        .matchModules({ or: ["cosmos", "evm"] })
+    );
+  }
 }
 
 export class ObservableQueryAssets extends HasMapStore<ObservableQueryAssetsInner> {
@@ -435,7 +444,7 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
     }[] = [];
 
     for (const chainId of this.chainIds) {
-      if (!this.chainStore.hasModularChain(chainId)) {
+      if (!this.isSwappableChain(chainId)) {
         continue;
       }
 
@@ -457,8 +466,8 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
             ? `eip155:${asset.origin_chain_id}`
             : asset.origin_chain_id;
           if (
-            this.chainStore.hasModularChain(assetChainId) &&
-            (this.chainStore.hasModularChain(originChainId) ||
+            this.isSwappableChain(assetChainId) &&
+            (this.isSwappableChain(originChainId) ||
               (asset.chain_id === "osmosis-1" &&
                 asset.denom ===
                   "ibc/0FA9232B262B89E77D1335D54FB1E1F506A92A7E4B51524B400DC69C68D28372"))
@@ -544,7 +553,7 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
     }[] = [];
 
     for (const chainId of this.chainIds) {
-      if (!this.chainStore.hasModularChain(chainId)) {
+      if (!this.isSwappableChain(chainId)) {
         continue;
       }
 
@@ -566,8 +575,8 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
             ? `eip155:${asset.origin_chain_id}`
             : asset.origin_chain_id;
           if (
-            this.chainStore.hasModularChain(assetChainId) &&
-            this.chainStore.hasModularChain(originChainId)
+            this.isSwappableChain(assetChainId) &&
+            this.isSwappableChain(originChainId)
           ) {
             // IBC asset일 경우 그냥 넣는다.
             if (asset.denom.startsWith("ibc/")) {
@@ -655,7 +664,7 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
     }[] = [];
 
     for (const chainId of this.chainIds) {
-      if (!this.chainStore.hasModularChain(chainId)) {
+      if (!this.isSwappableChain(chainId)) {
         continue;
       }
 
@@ -671,8 +680,8 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
 
         for (const asset of assetsInResponse.assets) {
           if (
-            this.chainStore.hasModularChain(asset.chain_id) &&
-            this.chainStore.hasModularChain(asset.origin_chain_id)
+            this.isSwappableChain(asset.chain_id) &&
+            this.isSwappableChain(asset.origin_chain_id)
           ) {
             if (
               !this.swapUsageQueries.querySwapUsage
@@ -716,6 +725,15 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
     }
 
     return result;
+  }
+
+  protected isSwappableChain(chainId: string): boolean {
+    return (
+      this.chainStore.hasModularChain(chainId) &&
+      this.chainStore
+        .getModularChainInfoImpl(chainId)
+        .matchModules({ or: ["cosmos", "evm"] })
+    );
   }
 
   protected override async fetchResponse(

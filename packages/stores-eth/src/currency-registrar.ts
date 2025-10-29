@@ -77,7 +77,7 @@ export class ERC20CurrencyRegistrar {
         done: boolean;
       }
     | undefined {
-    if (!this.chainStore.hasModularChain(chainId)) {
+    if (!this.chainStore.getModularChainInfoImpl(chainId).matchModule("evm")) {
       return;
     }
 

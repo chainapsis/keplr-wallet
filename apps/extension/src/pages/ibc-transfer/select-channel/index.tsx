@@ -128,7 +128,9 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
               items={ibcChannelStore
                 .getTransferChannels(chainId)
                 .filter((channel) =>
-                  chainStore.hasModularChain(channel.counterpartyChainId)
+                  chainStore
+                    .getModularChainInfoImpl(channel.counterpartyChainId)
+                    .matchModules({ or: ["cosmos", "evm"] })
                 )
                 .map((channel) => {
                   const chainInfo = chainStore.getModularChain(

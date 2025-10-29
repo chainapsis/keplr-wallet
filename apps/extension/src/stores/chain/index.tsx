@@ -127,7 +127,9 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     return this._tokenScans.filter((scan) => {
       if (
         !this.hasModularChain(scan.chainId) &&
-        !this.hasModularChain(scan.chainId)
+        !this.getModularChainInfoImpl(scan.chainId).matchModules({
+          or: ["cosmos", "evm"],
+        })
       ) {
         return false;
       }

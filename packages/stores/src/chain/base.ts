@@ -808,19 +808,25 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
     const normalizedCoinMinimalDenom =
       DenomHelper.normalizeDenom(coinMinimalDenom);
 
-    const currency = this.cosmosCurrencyMapNoReaction.get(
-      normalizedCoinMinimalDenom
-    );
+    const currency = this.findCurrencyByModule(normalizedCoinMinimalDenom);
 
     if (currency) {
       return currency;
     }
 
-    this.addUnknownDenomsImpl({
-      module: "cosmos",
-      coinMinimalDenoms: [normalizedCoinMinimalDenom],
-      reaction: false,
-    });
+    const cosmos = this.availableModules.find((module) => module === "cosmos");
+
+    if (cosmos) {
+      this.addUnknownDenomsImpl({
+        module: cosmos,
+        coinMinimalDenoms: [normalizedCoinMinimalDenom],
+        reaction: false,
+      });
+    }
+
+    // Unknown denom can be registered synchronously in some cases.
+    // For this case, re-try to get currency.
+    return this.findCurrencyByModule(normalizedCoinMinimalDenom);
   }
 
   findCurrencyAsync(
@@ -1238,12 +1244,12 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
           sortedJsonByKeyStringify(prev) !== sortedJsonByKeyStringify(currency)
         ) {
           newRegisteredCurrencies.splice(index, 1, currency);
-          this.replaceRegisteredCurrencies(module, newRegisteredCurrencies);
+          this.registeredCosmosCurrenciesNoReaction = newRegisteredCurrencies;
         }
       }
     } else {
       newRegisteredCurrencies.push(currency);
-      this.replaceRegisteredCurrencies(module, newRegisteredCurrencies);
+      this.registeredCosmosCurrenciesNoReaction = newRegisteredCurrencies;
     }
   }
 
@@ -1517,6 +1523,27 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
       this.registrationInProgressCurrencyMap.get(coinMinimalDenom) || false
     );
   }
+
+  /**
+   * @description Check if the chain matches the given modules. Either `or` or `and` condition must be provided.
+   * @param or - If any of the modules in the array is available, return true.
+   * @param and - If all of the modules in the array are available, return true.
+   */
+  matchModules({
+    and,
+    or,
+  }:
+    | { or: ChainInfoModule[]; and?: undefined }
+    | { and: ChainInfoModule[]; or?: undefined }): boolean {
+    return (
+      (or?.some((module) => this.matchModule(module)) || true) &&
+      (and?.every((module) => this.matchModule(module)) || true)
+    );
+  }
+
+  matchModule(module: ChainInfoModule): boolean {
+    return this.availableModules.includes(module);
+  }
 }
 
 export class ChainStore<C extends ChainInfo = ChainInfo>
@@ -1675,7 +1702,7 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
         "evm" in chainInfo &&
         chainInfo.evm &&
         "currencies" in chainInfo && // clarify if it's ChainInfo type
-        this.isEvmOnlyChain(chainInfo.chainId)
+        this.isEvmOnlyChainForInit(chainInfo.chainId)
       ) {
         return {
           chainId: chainInfo.chainId,
@@ -1902,8 +1929,8 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
   }
 
   isEvmChain(chainId: string): boolean {
-    const chainInfo = this.getChain(chainId);
-    return chainInfo.evm != null;
+    const chainInfo = this.getModularChain(chainId);
+    return "evm" in chainInfo && chainInfo.evm != null;
   }
 
   isEvmOnlyChain(chainId: string): boolean {
@@ -1913,6 +1940,12 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
       chainIdLikeCAIP2.length === 2 &&
       chainIdLikeCAIP2[0] === "eip155"
     );
+  }
+
+  // 초기화 시 isEvmOnlyChain 확인하면 _modularChainInfos 할당 전이라 오류가 발생할 수 밖에 없어서 별도 추가
+  isEvmOnlyChainForInit(chainId: string): boolean {
+    const chainIdLikeCAIP2 = chainId.split(":");
+    return chainIdLikeCAIP2.length === 2 && chainIdLikeCAIP2[0] === "eip155";
   }
 
   isEvmOrEthermintLikeChain(chainId: string): boolean {
