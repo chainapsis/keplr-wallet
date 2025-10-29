@@ -16,7 +16,6 @@ import { animated } from "@react-spring/web";
 import { EyeIcon, EyeSlashIcon } from "../../components/icon";
 import { Gutter } from "../../components/gutter";
 import { TextButton } from "../../components/button-text";
-import { useNavigate } from "react-router";
 import { ViewStakedToken, ViewUnbondingToken } from "../../stores/huge-queries";
 import { useIntl } from "react-intl";
 import { Dec } from "@keplr-wallet/unit";
@@ -32,7 +31,6 @@ const zeroDec = new Dec(0);
 
 export const StakePage: FunctionComponent = observer(() => {
   const theme = useTheme();
-  const navigate = useNavigate();
   const intl = useIntl();
 
   const { uiConfigStore, hugeQueriesStore } = useStore();
@@ -176,8 +174,10 @@ export const StakePage: FunctionComponent = observer(() => {
               id: "page.stake.stake-more-button",
             })}
             color="blue"
-            onClick={() => {
-              navigate("/stake/empty");
+            onClick={async () => {
+              await browser.tabs.create({
+                url: "https://wallet.keplr.app/?modal=staking&utm_source=keplrextension&utm_medium=button&utm_campaign=permanent&utm_content=manage_stake",
+              });
             }}
             right={<ChevronIcon width="1rem" height="1rem" />}
             style={{
