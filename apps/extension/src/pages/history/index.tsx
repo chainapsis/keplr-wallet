@@ -91,7 +91,7 @@ class OtherHexAddresses {
   }
 }
 
-export const ActivitiesPage: FunctionComponent = observer(() => {
+export const HistoryPage: FunctionComponent = observer(() => {
   const { chainStore, accountStore, priceStore, queriesStore } = useStore();
 
   const [otherHexAddresses] = useState(
@@ -221,7 +221,7 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
                 : ColorPalette["white"]
             }
           >
-            <FormattedMessage id="page.activity.title" />
+            <FormattedMessage id="page.history.title" />
           </H4>
         </Box>
         <Box paddingX="0.75rem">

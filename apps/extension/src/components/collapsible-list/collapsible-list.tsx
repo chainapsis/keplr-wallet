@@ -35,6 +35,7 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
   title,
   items,
   lenAlwaysShown,
+  removeNumInTitle,
   hideNumInTitle,
   notRenderHiddenItems,
   altViewMoreIntlTextId,
@@ -73,10 +74,10 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
                   : ColorPalette["gray-50"],
             }}
           >
-            {hideNumInTitle ? "**" : items.length}
+            {removeNumInTitle ? "" : hideNumInTitle ? "**" : items.length}
           </Subtitle4>
 
-          <Gutter size="0.25rem" />
+          {removeNumInTitle ? null : <Gutter size="0.25rem" />}
 
           {title}
         </Columns>

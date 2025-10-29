@@ -74,6 +74,38 @@ const buttonStyleFromColorAndMode: Record<
       `,
     },
   },
+  blue: {
+    light: {
+      enabled: css`
+        color: ${ColorPalette["blue-400"]};
+        ${makeTextAndSvgColor(ColorPalette["blue-400"])}
+
+        :hover {
+          color: ${ColorPalette["blue-300"]};
+          ${makeTextAndSvgColor(ColorPalette["blue-300"])}
+        }
+      `,
+      disabled: css`
+        color: ${ColorPalette["blue-400"]};
+        ${makeTextAndSvgColor(ColorPalette["blue-400"])}
+      `,
+    },
+    dark: {
+      enabled: css`
+        color: ${ColorPalette["blue-400"]};
+        ${makeTextAndSvgColor(ColorPalette["blue-400"])}
+
+        :hover {
+          color: ${ColorPalette["blue-300"]};
+          ${makeTextAndSvgColor(ColorPalette["blue-300"])}
+        }
+      `,
+      disabled: css`
+        color: ${ColorPalette["blue-400"]};
+        ${makeTextAndSvgColor(ColorPalette["blue-400"])}
+      `,
+    },
+  },
 };
 
 export const Styles = {
@@ -134,5 +166,30 @@ export const Styles = {
     display: flex;
     align-items: center;
     margin-left: 0.25rem;
+  `,
+
+  NewTokenFoundButtonContainer: styled.div`
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["skeleton-layer-0"]
+        : ColorPalette["gray-650"]};
+    padding: 1rem 0.875rem;
+    border-radius: 0.375rem;
+    cursor: pointer;
+
+    box-shadow: ${(props) =>
+      props.theme.mode === "light"
+        ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+        : "none"};
+
+    ${(props) => {
+      return css`
+        &:hover {
+          background-color: ${props.theme.mode === "light"
+            ? ColorPalette["gray-10"]
+            : ColorPalette["gray-600"]};
+        }
+      `;
+    }}
   `,
 };

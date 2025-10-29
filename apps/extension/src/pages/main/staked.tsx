@@ -1,13 +1,10 @@
 import React, { FunctionComponent, useMemo } from "react";
 import { CollapsibleList } from "../../components/collapsible-list";
-import { MainEmptyView, TokenItem, TokenTitleView } from "./components";
+import { TokenItem, TokenTitleView } from "./components";
 import { Dec } from "@keplr-wallet/unit";
 import { observer } from "mobx-react-lite";
 import { Stack } from "../../components/stack";
 import { useStore } from "../../stores";
-import { TextButton } from "../../components/button-text";
-import { ArrowRightSolidIcon } from "../../components/icon";
-import { ColorPalette } from "../../styles";
 import { useIntl } from "react-intl";
 import { ViewStakedToken, ViewUnbondingToken } from "../../stores/huge-queries";
 
@@ -153,7 +150,10 @@ export const StakedTabView: FunctionComponent<{
         })}
       </Stack>
 
-      {delegations.length === 0 && unbondings.length === 0 ? (
+      {/* FIXME - @kws1207 MainEmptyView가 메인에서 수정이 되고 더 이상 필요 없기 때문에 여기서 주석 처리함
+       staked 페이지 구현 할때 삭제 필요
+      */}
+      {/* {delegations.length === 0 && unbondings.length === 0 ? (
         <MainEmptyView
           image={
             <img
@@ -194,7 +194,7 @@ export const StakedTabView: FunctionComponent<{
             />
           }
         />
-      ) : null}
+      ) : null} */}
     </React.Fragment>
   );
 });

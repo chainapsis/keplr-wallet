@@ -2,7 +2,7 @@ import React, { CSSProperties } from "react";
 
 export type ButtonType = "button" | "submit" | "reset";
 export type ButtonSize = "small" | "large";
-export type ButtonColor = "default" | "faint";
+export type ButtonColor = "default" | "faint" | "blue";
 
 export interface TextButtonProps {
   color?: ButtonColor;

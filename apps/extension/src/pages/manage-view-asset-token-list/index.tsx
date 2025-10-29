@@ -238,7 +238,7 @@ export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
               <XAxis alignY="center">
                 <Subtitle3>
                   {intl.formatMessage(
-                    { id: "page.main.available.new-token-found" },
+                    { id: "page.main.spendable.new-token-found" },
                     {
                       numFoundToken: (
                         <span

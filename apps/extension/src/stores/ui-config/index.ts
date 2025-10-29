@@ -32,6 +32,7 @@ export interface UIConfigOptions {
   assetViewMode: "grouped" | "flat";
   hideLowBalance: boolean;
   showFiatValue: boolean;
+  showSearchBar: boolean;
   switchAssetViewModeSuggestion: boolean;
   isPrivacyMode: boolean;
   rememberLastFeeOption: boolean;
@@ -61,6 +62,7 @@ export class UIConfigStore {
     hideLowBalance: false,
     showFiatValue: true,
     isPrivacyMode: false,
+    showSearchBar: false,
     rememberLastFeeOption: false,
     lastFeeOption: false,
     show24HChangesInMagePage: true,
@@ -445,5 +447,19 @@ export class UIConfigStore {
   async removeStatesWhenErrorOccurredDuringRending() {
     await this.ibcSwapConfig.removeStatesWhenErrorOccurredDuringRendering();
     await this.newChainSuggestionConfig.removeStatesWhenErrorOccurredDuringRendering();
+  }
+
+  get isShowSearchBar(): boolean {
+    return this.options.showSearchBar;
+  }
+
+  @action
+  setShowSearchBar(value: boolean) {
+    this.options.showSearchBar = value;
+  }
+
+  @action
+  toggleShowSearchBar() {
+    this.options.showSearchBar = !this.options.showSearchBar;
   }
 }
