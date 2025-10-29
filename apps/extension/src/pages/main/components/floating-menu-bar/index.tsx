@@ -63,10 +63,12 @@ const Styles = {
 
 export const FloatingMenuBar = ({
   isOpen,
-  setIsOpen,
+  openMenu,
+  closeMenu,
 }: {
   isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
+  openMenu: () => void;
+  closeMenu: () => void;
 }) => {
   const { keyRingStore, analyticsStore, uiConfigStore } = useStore();
   const navigate = useNavigate();
@@ -104,7 +106,7 @@ export const FloatingMenuBar = ({
   return (
     <React.Fragment>
       <Box
-        onClick={() => setIsOpen(true)}
+        onClick={openMenu}
         cursor="pointer"
         paddingRight="0.75rem"
         ref={refs.setReference}
@@ -116,7 +118,7 @@ export const FloatingMenuBar = ({
         />
       </Box>
       {isOpen && (
-        <Modal isOpen={isOpen} align="left" close={() => setIsOpen(false)}>
+        <Modal isOpen={isOpen} align="left" close={closeMenu}>
           <Styles.MenuFloatingBarContainer
             top={y ?? 0}
             left={x ?? 0}

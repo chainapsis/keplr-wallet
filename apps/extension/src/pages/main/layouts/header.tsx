@@ -13,18 +13,15 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import { HeaderLayout } from "../../../layouts/header";
 import styled, { useTheme } from "styled-components";
-import { Modal } from "../../../components/modal";
-import { MenuBar } from "../components";
 import { HeaderProps } from "../../../layouts/header/types";
 import { ColorPalette } from "../../../styles";
 import { XAxis } from "../../../components/axis";
 import { Caption1, Subtitle4 } from "../../../components/typography";
 import { Gutter } from "../../../components/gutter";
-import { ExtensionKVStore } from "@keplr-wallet/common";
 import { ConnectedEcosystems } from "../components/connected-ecosystems";
 import { COMMON_HOVER_OPACITY } from "../../../styles/constant";
 import { IconButton } from "../../../components/icon-button";
-import { MenuTwoLineIcon } from "../../../components/icon/menu-two-line";
+import { FloatingMenuBar } from "../components/floating-menu-bar";
 
 const Styles = {
   NameContainer: styled.div`
@@ -67,6 +64,7 @@ export const MainHeaderLayout = observer<
 
     const { uiConfigStore, keyRingStore } = useStore();
 
+    // 여기도 다음 pr에서 사용
     // const icnsPrimaryName = (() => {
     //   if (
     //     uiConfigStore.icnsInfo &&
@@ -88,45 +86,6 @@ export const MainHeaderLayout = observer<
     }, [keyRingStore.selectedKeyInfo?.name]);
 
     const [isOpenMenu, setIsOpenMenu] = React.useState(false);
-
-    const [
-      showSidePanelRecommendationTooltip,
-      setShowSidePanelRecommendationTooltip,
-    ] = React.useState(false);
-
-    useEffect(() => {
-      const kvStore = new ExtensionKVStore(
-        "_side_menu_side_panel_recommendation_tooltip"
-      );
-      kvStore.get<boolean>("hasSeen").then((hasSeen) => {
-        if (hasSeen == null) {
-          // 한번도 side menu가 열린적이 없으면 tooltip을 보여준다.
-          setShowSidePanelRecommendationTooltip(true);
-        }
-      });
-    }, []);
-    const prevIsOpenMenu = useRef(isOpenMenu);
-    useEffect(() => {
-      if (showSidePanelRecommendationTooltip && isOpenMenu) {
-        // 한번이라도 side menu가 열린적이 있으면 tooltip을 보여주지 않는다.
-        const kvStore = new ExtensionKVStore(
-          "_side_menu_side_panel_recommendation_tooltip"
-        );
-        kvStore.set("hasSeen", true);
-      }
-
-      if (isOpenMenu !== prevIsOpenMenu.current) {
-        // side menu가 닫히는 순간에 tooltip을 없앤다.
-        if (
-          prevIsOpenMenu.current &&
-          !isOpenMenu &&
-          showSidePanelRecommendationTooltip
-        ) {
-          setShowSidePanelRecommendationTooltip(false);
-        }
-        prevIsOpenMenu.current = isOpenMenu;
-      }
-    }, [showSidePanelRecommendationTooltip, isOpenMenu]);
 
     useEffect(() => {
       // showNewSidePanelHeaderTop이 true면서 사이드 메뉴가 열렸으면 당연히 false로 바꿔줘야함
@@ -179,38 +138,7 @@ export const MainHeaderLayout = observer<
     return (
       <Fragment>
         <HeaderLayout
-          title={
-            ""
-            //   (() => {
-            //   const name = keyRingStore.selectedKeyInfo?.name || "Keplr Account";
-
-            //   if (icnsPrimaryName !== "") {
-            //     return (
-            //       <Columns sum={1} alignY="center" gutter="0.25rem">
-            //         <Box>{name}</Box>
-
-            //         <Tooltip
-            //           content={
-            //             <div style={{ whiteSpace: "nowrap" }}>
-            //               ICNS : {icnsPrimaryName}
-            //             </div>
-            //           }
-            //         >
-            //           <Image
-            //             alt="icns-icon"
-            //             src={require(theme.mode === "light"
-            //               ? "../../../public/assets/img/icns-icon-light.png"
-            //               : "../../../public/assets/img/icns-icon.png")}
-            //             style={{ width: "1rem", height: "1rem" }}
-            //           />
-            //         </Tooltip>
-            //       </Columns>
-            //     );
-            //   }
-
-            //   return name;
-            // })()
-          }
+          title={""}
           left={
             <React.Fragment>
               <Gutter size="0.75rem" />
@@ -252,13 +180,8 @@ export const MainHeaderLayout = observer<
                   />
                 </IconButton>
               </XAxis>
+              {/* 뉴체인 공지 추후 구현 필요 */}
               {/* 일종의 padding left인데 cursor를 가지게 하면서 밑에서 tooltip도 함께 사용하기 위해서 다른 Box로 분리되어있음 */}
-              {/* <Box
-                width="1rem"
-                height="1.5rem"
-                cursor="pointer"
-                onClick={openMenu}
-              /> */}
               {/* <Box>
                 <Tooltip
                   content={
@@ -345,33 +268,17 @@ export const MainHeaderLayout = observer<
           right={
             <Columns sum={1} alignY="center" gutter="0.875rem">
               <ConnectedEcosystems />
-              <Box onClick={openMenu} cursor="pointer" paddingRight="0.75rem">
-                <MenuTwoLineIcon
-                  width="1.5rem"
-                  height="1.5rem"
-                  color={ColorPalette["gray-300"]}
-                />
-              </Box>
+              <FloatingMenuBar
+                isOpen={isOpenMenu}
+                openMenu={openMenu}
+                closeMenu={closeMenu}
+              />
               {/* <ProfileButton /> */}
             </Columns>
           }
           {...otherProps}
         >
           {children}
-
-          <Modal
-            isOpen={isOpenMenu}
-            align="left"
-            close={() => setIsOpenMenu(false)}
-          >
-            <MenuBar
-              isOpen={isOpenMenu}
-              close={() => setIsOpenMenu(false)}
-              showSidePanelRecommendationTooltip={
-                showSidePanelRecommendationTooltip
-              }
-            />
-          </Modal>
         </HeaderLayout>
       </Fragment>
     );
