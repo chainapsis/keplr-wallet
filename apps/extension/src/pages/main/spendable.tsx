@@ -9,8 +9,11 @@ import React, {
 } from "react";
 import {
   BottomTagType,
+  BuyButtonWhenFirstTime,
   LookingForChains,
   MainEmptyView,
+  ReceiveButtonWhenFirstTime,
+  TokenFoundModal,
   TokenItem,
   TokenTitleView,
 } from "./components";
@@ -19,7 +22,6 @@ import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { ViewToken } from "./index";
 import { observer } from "mobx-react-lite";
 import { Stack } from "../../components/stack";
-import { Button } from "../../components/button";
 import { useStore } from "../../stores";
 import { Styles, TextButton } from "../../components/button-text";
 import { Box } from "../../components/box";
@@ -27,12 +29,7 @@ import { Modal } from "../../components/modal";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { Gutter } from "../../components/gutter";
 import { EmptyView } from "../../components/empty-view";
-import {
-  Body2,
-  Subtitle1,
-  Subtitle3,
-  Subtitle4,
-} from "../../components/typography";
+import { Body2, Subtitle1, Subtitle3 } from "../../components/typography";
 import { XAxis, YAxis } from "../../components/axis";
 import { ColorPalette } from "../../styles";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -45,16 +42,25 @@ import { useEarnBottomTag } from "../earn/components/use-earn-bottom-tag";
 import { AdjustmentIcon } from "../../components/icon/adjustment";
 import { ViewOptionsContextMenu } from "./components/context-menu";
 import { useCopyAddress } from "../../hooks/use-copy-address";
-import { useSearch } from "../../hooks/use-search";
 import { SceneTransition } from "../../components/transition/scene";
 import { SceneTransitionRef } from "../../components/transition/scene/internal";
 import { VerticalCollapseTransition } from "../../components/transition/vertical-collapse";
-import { ArrowDownIcon, ArrowUpIcon } from "../../components/icon";
+import {
+  ArrowDownIcon,
+  ArrowRightIcon,
+  ArrowUpIcon,
+} from "../../components/icon";
 import { Styles as AvailableCollapsibleListStyles } from "../../components/collapsible-list";
 import { getTokenSearchResultClickAnalyticsProperties } from "../../analytics-amplitude";
 import { useGroupedTokensMap } from "../../hooks/use-grouped-tokens-map";
 import { useBalanceAnalytics } from "./hooks/use-balance-analytics";
 import { KeyRingCosmosService } from "@keplr-wallet/background";
+import { useSpringValue } from "@react-spring/web";
+import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
+import { defaultSpringConfig } from "../../styles/spring";
+import { useSearch } from "../../hooks/use-search";
+import { SearchTextInput } from "../../components/input";
+import { COMMON_HOVER_OPACITY } from "../../styles/constant";
 
 type TokenViewData = {
   title: string;
@@ -162,7 +168,7 @@ const chainSearchFields = [
   },
 ];
 
-const AvailableCollapsibleList: FunctionComponent<{
+const SpendableCollapsibleList: FunctionComponent<{
   items: React.ReactNode[];
   lenAlwaysShown: number;
   onCollapse?: (isCollapsed: boolean) => void;
@@ -275,16 +281,77 @@ const TokenItemWithCopyAddress: FunctionComponent<{
   }
 );
 
-export const AvailableTabView: FunctionComponent<{
-  search: string;
+const useSearchBar = (isNotReady?: boolean) => {
+  const searchScrollAnim = useSpringValue(0, {
+    config: defaultSpringConfig,
+  });
+  const { analyticsStore, uiConfigStore } = useStore();
+  const globalSimpleBar = useGlobarSimpleBar();
+  const searchRef = useRef<HTMLInputElement | null>(null);
+  const [search, setSearch] = useState("");
+  const [isEnteredSearch, setIsEnteredSearch] = useState(false);
+
+  useEffect(() => {
+    // Give focus whenever available tab is selected.
+    if (!isNotReady) {
+      // NOTE - whenever uiConfigStore.isShowSearchBar is changed,
+      // clearing search text is an intended action.
+      // And clear search text.
+      setSearch("");
+
+      if (searchRef.current && uiConfigStore.isShowSearchBar) {
+        searchRef.current.focus({
+          preventScroll: true,
+        });
+      }
+    }
+  }, [isNotReady, uiConfigStore.isShowSearchBar]);
+  useEffect(() => {
+    // Log if a search term is entered at least once.
+    if (isEnteredSearch) {
+      analyticsStore.logEvent("input_searchAssetOrChain", {
+        pageName: "main",
+      });
+    }
+  }, [analyticsStore, isEnteredSearch]);
+  useEffect(() => {
+    // Log a search term with delay.
+    const handler = setTimeout(() => {
+      if (isEnteredSearch && search) {
+        analyticsStore.logEvent("input_searchAssetOrChain", {
+          inputValue: search,
+          pageName: "main",
+        });
+      }
+    }, 1000);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [analyticsStore, search, isEnteredSearch]);
+
+  return {
+    searchScrollAnim,
+    globalSimpleBar,
+    search,
+    setSearch,
+    isEnteredSearch,
+    setIsEnteredSearch,
+    searchRef,
+  };
+};
+
+export const SpendableAssetView: FunctionComponent<{
   isNotReady?: boolean;
 
   // 초기 유저에게 뜨는 alternative에서 get started 버튼을 누르면 copy address modal을 띄워야된다...
   // 근데 컴포넌트가 분리되어있는데 이거 하려고 context api 쓰긴 귀찮아서 그냥 prop으로 대충 처리한다.
   onClickGetStarted: () => void;
   onMoreTokensClosed: () => void;
+
+  onClickBuy: () => void;
 }> = observer(
-  ({ search, isNotReady, onClickGetStarted, onMoreTokensClosed }) => {
+  ({ isNotReady, onClickGetStarted, onMoreTokensClosed, onClickBuy }) => {
     const { chainStore, uiConfigStore, keyRingStore } = useStore();
     const intl = useIntl();
     const theme = useTheme();
@@ -293,6 +360,17 @@ export const AvailableTabView: FunctionComponent<{
     const [showFiatValueVisible, setShowFiatValueVisible] = useState(
       uiConfigStore.assetViewMode === "grouped"
     );
+    const {
+      searchScrollAnim,
+      globalSimpleBar,
+      search,
+      setSearch,
+      isEnteredSearch,
+      setIsEnteredSearch,
+      searchRef,
+    } = useSearchBar(isNotReady);
+    const [isFoundTokenModalOpen, setIsFoundTokenModalOpen] = useState(false);
+
     const sceneTransitionRef = useRef<SceneTransitionRef>(null);
 
     const { trimSearch, searchedChainInfos } = useGetSearchChains({
@@ -425,12 +503,8 @@ export const AvailableTabView: FunctionComponent<{
       return Array.from(set).length;
     }, [chainStore.tokenScans]);
 
-    const {
-      allBalancesSearchFiltered,
-      lowBalanceTokens,
-      isFirstTime,
-      TokenViewData,
-    } = useAllBalances(trimSearch);
+    const { allBalancesSearchFiltered, lowBalanceTokens, isFirstTime } =
+      useAllBalances(trimSearch);
 
     useBalanceAnalytics(allBalancesSearchFiltered, trimSearch);
 
@@ -544,25 +618,102 @@ export const AvailableTabView: FunctionComponent<{
             <Stack gutter="0.5rem">
               <Box paddingX="0.375rem" paddingY="0.25rem">
                 <XAxis alignY="center" gap="0.25rem">
-                  <Subtitle4>{TokenViewData.balance.length}</Subtitle4>
                   <TokenTitleView
                     title={intl.formatMessage({
-                      id: "page.main.available.available-balance-title",
-                    })}
-                    tooltip={intl.formatMessage({
-                      id: "page.main.available.available-balance-tooltip",
+                      id: "page.main.spendable.spendable-balance-title",
                     })}
                     right={
-                      <ViewOptionsContextMenu
-                        isOpen={isContextMenuOpen}
-                        setIsOpen={setIsContextMenuOpen}
-                        showFiatValueVisible={showFiatValueVisible}
-                        setShowFiatValueVisible={setShowFiatValueVisible}
-                      />
+                      <XAxis>
+                        <SearchBarIcon
+                          toggleShowSearchBar={() => {
+                            uiConfigStore.toggleShowSearchBar();
+                          }}
+                        />
+
+                        <ViewOptionsContextMenu
+                          isOpen={isContextMenuOpen}
+                          setIsOpen={setIsContextMenuOpen}
+                          showFiatValueVisible={showFiatValueVisible}
+                          setShowFiatValueVisible={setShowFiatValueVisible}
+                        />
+                      </XAxis>
                     }
                   />
                 </XAxis>
               </Box>
+
+              <VerticalCollapseTransition
+                collapsed={!uiConfigStore.isShowSearchBar}
+              >
+                <SearchTextInput
+                  ref={searchRef}
+                  value={search}
+                  onChange={(e) => {
+                    e.preventDefault();
+
+                    setSearch(e.target.value);
+
+                    if (e.target.value.trim().length > 0) {
+                      if (!isEnteredSearch) {
+                        setIsEnteredSearch(true);
+                      }
+
+                      const simpleBarScrollRef =
+                        globalSimpleBar.ref.current?.getScrollElement();
+                      if (
+                        simpleBarScrollRef &&
+                        simpleBarScrollRef.scrollTop < 218
+                      ) {
+                        searchScrollAnim.start(218, {
+                          from: simpleBarScrollRef.scrollTop,
+                          onChange: (anim: any) => {
+                            // XXX: 이거 실제 파라미터랑 타입스크립트 인터페이스가 다르다...???
+                            const v = anim.value != null ? anim.value : anim;
+                            if (typeof v === "number") {
+                              simpleBarScrollRef.scrollTop = v;
+                            }
+                          },
+                        });
+                      }
+                    }
+                  }}
+                  placeholder={intl.formatMessage({
+                    id: "page.main.search-placeholder",
+                  })}
+                />
+              </VerticalCollapseTransition>
+
+              {numFoundToken > 0 && (
+                <Styles.NewTokenFoundButtonContainer
+                  onClick={() => setIsFoundTokenModalOpen(true)}
+                >
+                  <XAxis alignY="center">
+                    <Subtitle3>
+                      {intl.formatMessage(
+                        { id: "page.main.spendable.new-token-found" },
+                        {
+                          numFoundToken: (
+                            <span
+                              style={{
+                                paddingRight: "0.25rem",
+                                color: ColorPalette["blue-300"],
+                              }}
+                            >
+                              {numFoundToken}
+                            </span>
+                          ),
+                        }
+                      )}
+                    </Subtitle3>
+                    <div style={{ flex: 1 }} />
+                    <ArrowRightIcon
+                      width="1.25rem"
+                      height="1.25rem"
+                      color={ColorPalette["gray-300"]}
+                    />
+                  </XAxis>
+                </Styles.NewTokenFoundButtonContainer>
+              )}
 
               <SceneTransition
                 ref={sceneTransitionRef}
@@ -583,37 +734,38 @@ export const AvailableTabView: FunctionComponent<{
               </React.Fragment>
             )}
 
-            <Box padding="0.75rem">
-              <YAxis alignX="center">
-                <ManageViewAssetTokenPageButton
-                  text={intl.formatMessage({
-                    id: "page.main.available.manage-asset-list-button",
-                  })}
-                  size="small"
-                  right={
-                    <XAxis alignY="center">
-                      <AdjustmentIcon
-                        width="1.125rem"
-                        height="1.125rem"
-                        color={
-                          theme.mode === "light"
-                            ? ColorPalette["blue-400"]
-                            : ColorPalette["white"]
-                        }
-                      />
-                      {numFoundToken > 0 ? (
-                        <React.Fragment>
-                          <Gutter size="0.375rem" />
-
-                          <CircleIndicator />
-                        </React.Fragment>
-                      ) : null}
-                    </XAxis>
-                  }
-                  onClick={() => navigate("/manage-view-asset-token-list")}
-                />
-              </YAxis>
-            </Box>
+            {!isShowNotFound && (
+              <Box padding="0.75rem">
+                <YAxis alignX="center">
+                  <ManageViewAssetTokenPageButton
+                    text={intl.formatMessage({
+                      id: "page.main.spendable.manage-asset-list-button",
+                    })}
+                    size="small"
+                    right={
+                      <XAxis alignY="center">
+                        <AdjustmentIcon
+                          width="1.125rem"
+                          height="1.125rem"
+                          color={
+                            theme.mode === "light"
+                              ? ColorPalette["blue-400"]
+                              : ColorPalette["white"]
+                          }
+                        />
+                        {numFoundToken > 0 ? (
+                          <React.Fragment>
+                            <Gutter size="0.375rem" />
+                            <CircleIndicator />
+                          </React.Fragment>
+                        ) : null}
+                      </XAxis>
+                    }
+                    onClick={() => navigate("/manage-view-asset-token-list")}
+                  />
+                </YAxis>
+              </Box>
+            )}
 
             {(isShowCheckMangeAssetViewGuide ||
               isShowSearchedLowBalanceTokenGuide) && (
@@ -636,11 +788,11 @@ export const AvailableTabView: FunctionComponent<{
                 >
                   <Stack alignX="center" gutter="0.1rem">
                     <Subtitle1>
-                      <FormattedMessage id="page.main.available.search-show-check-manage-asset-view-guide-title" />
+                      <FormattedMessage id="page.main.spendable.search-show-check-manage-asset-view-guide-title" />
                     </Subtitle1>
                     <Body2 style={{ textAlign: "center", lineHeight: "1.4" }}>
                       <FormattedMessage
-                        id="page.main.available.search-show-check-manage-asset-view-guide-paragraph"
+                        id="page.main.spendable.search-show-check-manage-asset-view-guide-paragraph"
                         values={{
                           br: <br />,
                         }}
@@ -658,44 +810,26 @@ export const AvailableTabView: FunctionComponent<{
                 <EmptyView>
                   <Stack alignX="center" gutter="0.1rem">
                     <Subtitle3 style={{ fontWeight: 700 }}>
-                      <FormattedMessage id="page.main.available.search-empty-view-title" />
+                      <FormattedMessage id="page.main.spendable.search-empty-view-title" />
                     </Subtitle3>
                     <Subtitle3>
-                      <FormattedMessage id="page.main.available.search-empty-view-paragraph" />
+                      <FormattedMessage id="page.main.spendable.search-empty-view-paragraph" />
                     </Subtitle3>
                   </Stack>
                 </EmptyView>
               </Box>
             ) : isFirstTime ? (
               <MainEmptyView
-                image={
-                  <img
-                    src={require(theme.mode === "light"
-                      ? "../../public/assets/img/main-empty-balance-light.png"
-                      : "../../public/assets/img/main-empty-balance.png")}
-                    style={{
-                      width: "6.25rem",
-                      height: "6.25rem",
-                    }}
-                    alt="empty balance image"
-                  />
-                }
-                paragraph={intl.formatMessage({
-                  id: "page.main.available.empty-view-paragraph",
-                })}
-                title={intl.formatMessage({
-                  id: "page.main.available.empty-view-title",
-                })}
-                button={
-                  <Button
-                    text={intl.formatMessage({
-                      id: "page.main.available.get-started-button",
-                    })}
-                    color="primary"
-                    size="small"
+                buttons={[
+                  <ReceiveButtonWhenFirstTime
+                    key={"receive-button"}
                     onClick={onClickGetStarted}
-                  />
-                }
+                  />,
+                  <BuyButtonWhenFirstTime
+                    key={"buy-button"}
+                    onClick={onClickBuy}
+                  />,
+                ]}
               />
             ) : null}
           </React.Fragment>
@@ -744,6 +878,14 @@ export const AvailableTabView: FunctionComponent<{
             />
           ) : null}
         </Modal>
+
+        <Modal
+          isOpen={isFoundTokenModalOpen && numFoundToken > 0}
+          align="bottom"
+          close={() => setIsFoundTokenModalOpen(false)}
+        >
+          <TokenFoundModal close={() => setIsFoundTokenModalOpen(false)} />
+        </Modal>
       </React.Fragment>
     );
   }
@@ -768,7 +910,7 @@ const TokensFlatViewScene = observer(
     return (
       <React.Fragment>
         {TokenViewData.balance.length === 0 ? null : (
-          <AvailableCollapsibleList
+          <SpendableCollapsibleList
             notRenderHiddenItems={true}
             onCollapse={(isCollapsed) => {
               if (isCollapsed) {
@@ -833,7 +975,7 @@ const TokensGroupedViewScene = observer(
     return (
       <React.Fragment>
         {searchedGroupedTokensMap.size === 0 ? null : (
-          <AvailableCollapsibleList
+          <SpendableCollapsibleList
             notRenderHiddenItems={true}
             onCollapse={(isCollapsed) => {
               if (isCollapsed) {
@@ -913,12 +1055,12 @@ const useAllBalances = (trimSearch: string) => {
   const TokenViewData: TokenViewData = useMemo(
     () => ({
       title: intl.formatMessage({
-        id: "page.main.available.available-balance-title",
+        id: "page.main.spendable.spendable-balance-title",
       }),
       balance: allBalancesSearchFiltered,
       lenAlwaysShown: 10,
       tooltip: intl.formatMessage({
-        id: "page.main.available.available-balance-tooltip",
+        id: "page.main.spendable.spendable-balance-tooltip",
       }),
     }),
     [intl, allBalancesSearchFiltered]
@@ -930,4 +1072,53 @@ const useAllBalances = (trimSearch: string) => {
     allBalancesSearchFiltered,
     lowBalanceTokens,
   };
+};
+
+const StyledBox = styled(Box)`
+  cursor: pointer;
+  transition: opacity 0.1s ease;
+
+  &:hover {
+    opacity: ${COMMON_HOVER_OPACITY};
+  }
+`;
+const SearchBarIcon = ({
+  toggleShowSearchBar,
+}: {
+  toggleShowSearchBar: () => void;
+}) => {
+  return (
+    <StyledBox onClick={toggleShowSearchBar}>
+      <_SearchIcon
+        width="1.5rem"
+        height="1.5rem"
+        color={ColorPalette["gray-300"]}
+      />
+    </StyledBox>
+  );
+};
+
+const _SearchIcon = ({
+  width,
+  height,
+  color,
+}: {
+  width: string;
+  height: string;
+  color: string;
+}) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={width}
+      height={height}
+      viewBox="0 0 24 24"
+      fill="none"
+    >
+      <path
+        d="M10.5807 14.9349C9.36381 14.9349 8.33399 14.5134 7.49129 13.6702C6.64858 12.8271 6.22701 11.7972 6.22656 10.5807C6.22612 9.36425 6.64769 8.33443 7.49129 7.49128C8.33488 6.64814 9.3647 6.22656 10.5807 6.22656C11.7968 6.22656 12.8268 6.64814 13.6709 7.49128C14.5149 8.33443 14.9363 9.36425 14.9349 10.5807C14.9349 11.072 14.8568 11.5353 14.7005 11.9707C14.5442 12.4062 14.332 12.7913 14.0641 13.1263L17.8154 16.8776C17.9382 17.0004 17.9996 17.1567 17.9996 17.3465C17.9996 17.5363 17.9382 17.6926 17.8154 17.8154C17.6926 17.9382 17.5363 17.9996 17.3465 17.9996C17.1567 17.9996 17.0004 17.9382 16.8776 17.8154L13.1263 14.0641C12.7913 14.332 12.4062 14.5442 11.9707 14.7005C11.5353 14.8568 11.072 14.9349 10.5807 14.9349ZM10.5807 13.5952C11.4181 13.5952 12.1299 13.3022 12.7163 12.7163C13.3027 12.1304 13.5956 11.4185 13.5952 10.5807C13.5947 9.74296 13.3018 9.03133 12.7163 8.44586C12.1308 7.86039 11.419 7.5672 10.5807 7.56631C9.74251 7.56542 9.03088 7.8586 8.44586 8.44586C7.86083 9.03311 7.56765 9.74474 7.56631 10.5807C7.56497 11.4167 7.85815 12.1286 8.44586 12.7163C9.03356 13.304 9.74519 13.597 10.5807 13.5952Z"
+        fill={color}
+      />
+    </svg>
+  );
 };

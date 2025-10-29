@@ -9,7 +9,6 @@ import React, {
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import {
-  // Buttons,
   IBCTransferView,
   BuyCryptoModal,
   UpdateNoteModal,
@@ -24,8 +23,7 @@ import { Modal } from "../../components/modal";
 import { Gutter } from "../../components/gutter";
 import { Body2, Subtitle4 } from "../../components/typography";
 import { ColorPalette, SidePanelMaxWidth } from "../../styles";
-import { AvailableTabView } from "./available";
-import { SearchTextInput } from "../../components/input";
+import { SpendableAssetView } from "./spendable";
 import { animated, useSpringValue, easings } from "@react-spring/web";
 import { defaultSpringConfig } from "../../styles/spring";
 import { IChainInfoImpl, QueryError } from "@keplr-wallet/stores";
@@ -49,7 +47,6 @@ import { DenomHelper } from "@keplr-wallet/common";
 import { NewSidePanelHeaderTop } from "./new-side-panel-header-top";
 import { ModularChainInfo } from "@keplr-wallet/types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import { AvailableTabLinkButtonList } from "./components/available-tab-link-button-list";
 import { INITIA_CHAIN_ID, NEUTRON_CHAIN_ID } from "../../config.ui";
 import { MainH1 } from "../../components/typography/main-h1";
 import { LockIcon } from "../../components/icon/lock";
@@ -57,6 +54,7 @@ import { DepositModal } from "./components/deposit-modal";
 import { RewardsCard } from "./components/rewards-card";
 import { UIConfigStore } from "../../stores/ui-config";
 import { useStakedTotalPrice } from "../../hooks/use-staked-total-price";
+import { COMMON_HOVER_OPACITY } from "../../styles/constant";
 
 export interface ViewToken {
   token: CoinPretty;
@@ -77,18 +75,10 @@ export const useIsNotReady = () => {
 export const MainPage: FunctionComponent<{
   setIsNotReady: (isNotReady: boolean) => void;
 }> = observer(({ setIsNotReady }) => {
-  const {
-    analyticsStore,
-    hugeQueriesStore,
-    uiConfigStore,
-    keyRingStore,
-    priceStore,
-  } = useStore();
+  const { hugeQueriesStore, uiConfigStore, keyRingStore, priceStore } =
+    useStore();
 
   const isNotReady = useIsNotReady();
-  // const isNotReady = true;
-
-  const intl = useIntl();
   // const theme = useTheme();
 
   const setIsNotReadyRef = useRef(setIsNotReady);
@@ -214,49 +204,6 @@ export const MainPage: FunctionComponent<{
 
   const buySupportServiceInfos = useBuySupportServiceInfos();
 
-  const searchRef = useRef<HTMLInputElement | null>(null);
-  const [search, setSearch] = useState("");
-  const [isEnteredSearch, setIsEnteredSearch] = useState(false);
-  useEffect(() => {
-    // Give focus whenever available tab is selected.
-    if (!isNotReady) {
-      // And clear search text.
-      setSearch("");
-
-      if (searchRef.current) {
-        searchRef.current.focus({
-          preventScroll: true,
-        });
-      }
-    }
-  }, [isNotReady]);
-  useEffect(() => {
-    // Log if a search term is entered at least once.
-    if (isEnteredSearch) {
-      analyticsStore.logEvent("input_searchAssetOrChain", {
-        pageName: "main",
-      });
-    }
-  }, [analyticsStore, isEnteredSearch]);
-  useEffect(() => {
-    // Log a search term with delay.
-    const handler = setTimeout(() => {
-      if (isEnteredSearch && search) {
-        analyticsStore.logEvent("input_searchAssetOrChain", {
-          inputValue: search,
-          pageName: "main",
-        });
-      }
-    }, 1000);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [analyticsStore, search, isEnteredSearch]);
-
-  const searchScrollAnim = useSpringValue(0, {
-    config: defaultSpringConfig,
-  });
   const globalSimpleBar = useGlobarSimpleBar();
 
   const animatedPrivacyModeHover = useSpringValue(0, {
@@ -435,15 +382,18 @@ export const MainPage: FunctionComponent<{
         </Box>
 
         <Gutter size="0.75rem" />
-        <StakedBalanceTitle
-          isNotReady={isNotReady}
-          uiConfigStore={uiConfigStore}
-          stakedTotalPrice={stakedTotalPrice}
-          stakedPercentage={stakedPercentage}
-        />
+        {stakedTotalPrice && stakedTotalPrice.toDec().gt(new Dec(0)) && (
+          <StakedBalanceTitle
+            isNotReady={isNotReady}
+            uiConfigStore={uiConfigStore}
+            stakedTotalPrice={stakedTotalPrice}
+            stakedPercentage={stakedPercentage}
+          />
+        )}
       </Box>
+
       <Box paddingX="0.75rem" paddingBottom="1.5rem">
-        <Stack gutter="0.75rem">
+        <Stack gutter="1.5rem">
           {/* 
           TODO: 추후 앱 바로 이동
           <CopyAddress
@@ -453,24 +403,6 @@ export const MainPage: FunctionComponent<{
             }}
             isNotReady={isNotReady}
           /> */}
-          <Box position="relative">
-            <Box
-              position="absolute"
-              style={{
-                top: 0,
-                bottom: 0,
-                left: 0,
-                right: 0,
-
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Gutter size="2rem" />
-            </Box>
-          </Box>
           <XAxis>
             <SpendableCard
               spendableTotalPrice={spendableTotalPrice}
@@ -490,58 +422,17 @@ export const MainPage: FunctionComponent<{
           */}
           <Gutter size="0" />
 
-          {!isNotReady ? <AvailableTabLinkButtonList /> : null}
-
-          {!isNotReady ? (
-            <Stack gutter="0.75rem">
-              <SearchTextInput
-                ref={searchRef}
-                value={search}
-                onChange={(e) => {
-                  e.preventDefault();
-
-                  setSearch(e.target.value);
-
-                  if (e.target.value.trim().length > 0) {
-                    if (!isEnteredSearch) {
-                      setIsEnteredSearch(true);
-                    }
-
-                    const simpleBarScrollRef =
-                      globalSimpleBar.ref.current?.getScrollElement();
-                    if (
-                      simpleBarScrollRef &&
-                      simpleBarScrollRef.scrollTop < 218
-                    ) {
-                      searchScrollAnim.start(218, {
-                        from: simpleBarScrollRef.scrollTop,
-                        onChange: (anim: any) => {
-                          // XXX: 이거 실제 파라미터랑 타입스크립트 인터페이스가 다르다...???
-                          const v = anim.value != null ? anim.value : anim;
-                          if (typeof v === "number") {
-                            simpleBarScrollRef.scrollTop = v;
-                          }
-                        },
-                      });
-                    }
-                  }
-                }}
-                placeholder={intl.formatMessage({
-                  id: "page.main.search-placeholder",
-                })}
-              />
-            </Stack>
-          ) : null}
-
           {/*
-            AvailableTabView, StakedTabView가 컴포넌트로 빠지면서 밑의 얘들의 각각의 item들에는 stack이 안먹힌다는 걸 주의
+            SpendableAssetView, StakedTabView가 컴포넌트로 빠지면서 밑의 얘들의 각각의 item들에는 stack이 안먹힌다는 걸 주의
             각 컴포넌트에서 알아서 gutter를 처리해야한다.
            */}
-          <AvailableTabView
-            search={search}
+          <SpendableAssetView
             isNotReady={isNotReady}
             onClickGetStarted={() => {
               setIsOpenDepositModal(true);
+            }}
+            onClickBuy={() => {
+              setIsOpenBuy(true);
             }}
             onMoreTokensClosed={() => {
               // token list가 접히면서 scroll height가 작아지게 된다.
@@ -956,6 +847,14 @@ const RefreshButton: FunctionComponent<{
   );
 });
 
+const StyledBox = styled(Box)`
+  cursor: pointer;
+  transition: opacity 0.1s ease-in-out;
+
+  &:hover {
+    opacity: ${COMMON_HOVER_OPACITY};
+  }
+`;
 function StakedBalanceTitle({
   isNotReady,
   uiConfigStore,
@@ -968,16 +867,13 @@ function StakedBalanceTitle({
   stakedPercentage: number;
 }) {
   const intl = useIntl();
-  const [isHover, setIsHover] = useState(false);
   // const navigate = useNavigate();
 
   return (
     <Skeleton isNotReady={isNotReady}>
-      <Box
-        onHoverStateChange={(hovered) => setIsHover(hovered)}
+      <StyledBox
         paddingY="0.125rem"
         cursor="pointer"
-        opacity={isHover ? 0.8 : 1}
         onClick={() => {
           // TODO: 추후 staked 페이지로 바로 이동
         }}
@@ -997,7 +893,10 @@ function StakedBalanceTitle({
             {`${uiConfigStore.hideStringIfPrivacyMode(
               stakedTotalPrice?.toString() || "-",
               4
-            )} (${stakedPercentage.toFixed(1)}%) ${intl.formatMessage({
+            )} ${uiConfigStore.hideStringIfPrivacyMode(
+              `(${stakedPercentage.toFixed(1)}%)`,
+              0
+            )} ${intl.formatMessage({
               id: "page.main.balance.staked-balance-title-2",
             })}`}
           </Body2>
@@ -1007,7 +906,7 @@ function StakedBalanceTitle({
             color={ColorPalette["gray-300"]}
           />
         </XAxis>
-      </Box>
+      </StyledBox>
     </Skeleton>
   );
 }
