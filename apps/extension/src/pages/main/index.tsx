@@ -53,6 +53,7 @@ import { LockIcon } from "../../components/icon/lock";
 import { DepositModal } from "./components/deposit-modal";
 import { RewardsCard } from "./components/rewards-card";
 import { UIConfigStore } from "../../stores/ui-config";
+import { useStakedTotalPrice } from "../../hooks/use-staked-total-price";
 import { COMMON_HOVER_OPACITY } from "../../styles/constant";
 
 export interface ViewToken {
@@ -135,69 +136,8 @@ export const MainPage: FunctionComponent<{
     return result;
   }, [hugeQueriesStore.allKnownBalances, priceStore]);
 
-  const stakedTotalPrice = useMemo(() => {
-    let result: PricePretty | undefined;
-    for (const bal of hugeQueriesStore.delegations) {
-      if (bal.price) {
-        if (!result) {
-          result = bal.price;
-        } else {
-          result = result.add(bal.price);
-        }
-      }
-    }
-    for (const bal of hugeQueriesStore.unbondings) {
-      if (bal.price) {
-        if (!result) {
-          result = bal.price;
-        } else {
-          result = result.add(bal.price);
-        }
-      }
-    }
-    return result;
-  }, [hugeQueriesStore.delegations, hugeQueriesStore.unbondings]);
-
-  const stakedTotalPriceEmbedOnlyUSD = useMemo(() => {
-    let result: PricePretty | undefined;
-    for (const bal of hugeQueriesStore.delegations) {
-      if (!("currencies" in bal.chainInfo)) {
-        continue;
-      }
-      if (!(bal.chainInfo.embedded as ChainInfoWithCoreTypes).embedded) {
-        continue;
-      }
-      if (bal.price) {
-        const price = priceStore.calculatePrice(bal.token, "usd");
-        if (price) {
-          if (!result) {
-            result = price;
-          } else {
-            result = result.add(price);
-          }
-        }
-      }
-    }
-    for (const bal of hugeQueriesStore.unbondings) {
-      if (!("currencies" in bal.chainInfo)) {
-        continue;
-      }
-      if (!(bal.chainInfo.embedded as ChainInfoWithCoreTypes).embedded) {
-        continue;
-      }
-      if (bal.price) {
-        const price = priceStore.calculatePrice(bal.token, "usd");
-        if (price) {
-          if (!result) {
-            result = price;
-          } else {
-            result = result.add(price);
-          }
-        }
-      }
-    }
-    return result;
-  }, [hugeQueriesStore.delegations, hugeQueriesStore.unbondings, priceStore]);
+  const { stakedTotalPrice, stakedTotalPriceEmbedOnlyUSD } =
+    useStakedTotalPrice();
 
   const totalPrice = useMemo(() => {
     if (!spendableTotalPrice) {
@@ -415,7 +355,7 @@ export const MainPage: FunctionComponent<{
                 width: animatedPrivacyModeHover.to((v) => `${v * 1.25}rem`),
               }}
             >
-              <Styles.PrivacyModeButton
+              <PrivacyModeButtonStyles.PrivacyModeButton
                 as={animated.div}
                 style={{
                   position: "absolute",
@@ -436,7 +376,7 @@ export const MainPage: FunctionComponent<{
                 ) : (
                   <EyeIcon width="1rem" height="1rem" />
                 )}
-              </Styles.PrivacyModeButton>
+              </PrivacyModeButtonStyles.PrivacyModeButton>
             </animated.div>
           </XAxis>
         </Box>
@@ -576,7 +516,7 @@ export const MainPage: FunctionComponent<{
   );
 });
 
-const Styles = {
+export const PrivacyModeButtonStyles = {
   // hover style을 쉽게 넣으려고 그냥 styled-component로 만들었다.
   PrivacyModeButton: styled.div`
     color: ${(props) =>

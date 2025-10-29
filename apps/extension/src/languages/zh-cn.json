@@ -581,13 +581,10 @@
   "page.main.balance.staked-balance-title-1": "with",
   "page.main.balance.staked-balance-title-2": "Staked",
 
-  "page.main.staked.staked-balance-title": "质押数量",
-  "page.main.staked.staked-balance-tooltip": "质押给验证者并获得收益的币种。",
-  "page.main.staked.unstaking-balance-title": "解除质押数量",
-  "page.main.staked.unstaking-balance-tooltip": "正在解除质押的币种。",
-  "page.main.staked.empty-view-title": "准备好开始质押了吗?",
-  "page.main.staked.empty-view-paragraph": "质押你的资产以获得收益并为维护网络做出贡献！",
-  "page.main.staked.go-to-dashboard-button": "前往Dashboard",
+  "page.stake.staked-balance-title": "质押数量",
+  "page.stake.unstaking-balance-title": "解除质押数量",
+  "page.stake.total-staked-title": "Total Staked",
+  "page.stake.stake-more-button": "Stake More",
 
   "page.main.components.ibc-history-view.item.pending": "IBC交易失败。",
   "page.main.components.ibc-history-view.item.succeed": "IBC交易成功。",

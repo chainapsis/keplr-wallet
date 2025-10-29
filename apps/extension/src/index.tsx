@@ -121,6 +121,7 @@ import { EarnWithdrawAmountPage } from "./pages/earn/withdraw/amount";
 import { AboutKeplrPage } from "./pages/setting/about";
 import { HistoryDetailPage } from "./pages/history-detail";
 import { StakePage } from "./pages/stake";
+import { StakeEmptyPage } from "./pages/stake/empty";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -432,6 +433,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               />
               <Route path="/history" element={<HistoryPage />} />
               <Route path="/stake" element={<StakePage />} />
+              <Route path="/stake/empty" element={<StakeEmptyPage />} />
               <Route
                 path="/manage-view-asset-token-list"
                 element={<ManageViewAssetTokenListPage />}

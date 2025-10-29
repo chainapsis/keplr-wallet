@@ -31,8 +31,8 @@ import { DualChart } from "./components/chart";
 import { Gutter } from "../../components/gutter";
 import { H1, Subtitle3, Subtitle4 } from "../../components/typography";
 import { ColorPalette, SidePanelMaxWidth } from "../../styles";
+// import { StakedTabView } from "./staked";
 import { SpendableAssetView } from "./spendable";
-import { StakedTabView } from "./staked";
 import { SearchTextInput } from "../../components/input";
 import { animated, useSpringValue, easings } from "@react-spring/web";
 import { defaultSpringConfig } from "../../styles/spring";
@@ -697,18 +697,19 @@ export const MainPage: FunctionComponent<{
               }}
             />
           ) : (
-            <StakedTabView
-              onMoreTokensClosed={() => {
-                // token list가 접히면서 scroll height가 작아지게 된다.
-                // scroll height가 작아지는 것은 위로 스크롤 하는 것과 같은 효과를 내기 때문에
-                // 아래와같은 처리가 없으면 token list를 접으면 refesh 버튼이 무조건 나타나게 된다.
-                // 이게 약간 어색해보이므로 token list를 접을때 1.5초 동안 refresh 버튼 기능을 없애버린다.
-                forcePreventScrollRefreshButtonVisible.current = true;
-                setTimeout(() => {
-                  forcePreventScrollRefreshButtonVisible.current = false;
-                }, 1500);
-              }}
-            />
+            // <StakedTabView
+            //   onMoreTokensClosed={() => {
+            //     // token list가 접히면서 scroll height가 작아지게 된다.
+            //     // scroll height가 작아지는 것은 위로 스크롤 하는 것과 같은 효과를 내기 때문에
+            //     // 아래와같은 처리가 없으면 token list를 접으면 refesh 버튼이 무조건 나타나게 된다.
+            //     // 이게 약간 어색해보이므로 token list를 접을때 1.5초 동안 refresh 버튼 기능을 없애버린다.
+            //     forcePreventScrollRefreshButtonVisible.current = true;
+            //     setTimeout(() => {
+            //       forcePreventScrollRefreshButtonVisible.current = false;
+            //     }, 1500);
+            //   }}
+            // />
+            <React.Fragment />
           )}
 
           {tabStatus === "available" &&
