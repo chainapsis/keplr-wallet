@@ -3,8 +3,8 @@ import { FiatOnRampServiceInfo } from "../config.ui";
 import { useStore } from "../stores";
 import { createHmac } from "crypto";
 
-interface BuySupportServiceInfo extends FiatOnRampServiceInfo {
-  buyUrl?: string;
+export interface BuySupportServiceInfo extends FiatOnRampServiceInfo {
+  getBuyUrl: (() => Promise<string>) | undefined;
 }
 
 export const useBuySupportServiceInfos = (selectedTokenInfo?: {
@@ -248,21 +248,6 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
       )
     : undefined;
   const moonpaySignedUrl = moonpaySignResult?.response?.data;
-  const transakServiceInfo = buySupportServiceInfos?.find(
-    (serviceInfo) => serviceInfo.serviceId === "transak"
-  );
-  const transakSignResult = transakServiceInfo?.buyUrl
-    ? queriesStore.simpleQuery.queryGet<{
-        widgetUrl: string;
-      }>(
-        process.env["KEPLR_EXT_CONFIG_SERVER"] || "",
-        `api/transak${transakServiceInfo.buyUrl.replace(
-          transakServiceInfo.buyOrigin,
-          ""
-        )}`
-      )
-    : undefined;
-  const transakSignedUrl = transakSignResult?.response?.data.widgetUrl;
 
   return (
     buySupportServiceInfos
@@ -272,16 +257,6 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
             moonpaySignResult &&
             !moonpaySignResult.error &&
             moonpaySignedUrl
-          ) {
-            return true;
-          }
-          return false;
-        }
-        if (serviceInfo.serviceId === "transak") {
-          if (
-            transakSignResult &&
-            !transakSignResult.error &&
-            transakSignedUrl
           ) {
             return true;
           }
@@ -298,13 +273,38 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
           moonpaySignedUrl && {
             buyUrl: moonpaySignedUrl,
           }),
-        ...(serviceInfo.serviceId === "transak" &&
-          transakSignResult &&
-          !transakSignResult.error &&
-          transakSignedUrl && {
-            buyUrl: transakSignedUrl,
-          }),
-      })) ?? []
+      }))
+      .map((serviceInfo) => {
+        return {
+          ...serviceInfo,
+          getBuyUrl: serviceInfo.buyUrl
+            ? async () => {
+                if (serviceInfo.serviceId === "transak") {
+                  const buyUrl = serviceInfo.buyUrl;
+                  if (!buyUrl) {
+                    throw new Error("buyUrl is null");
+                  }
+
+                  const transakSignResult = queriesStore.simpleQuery.queryGet<{
+                    widgetUrl: string;
+                  }>(
+                    process.env["KEPLR_EXT_CONFIG_SERVER"] || "",
+                    `api/transak${buyUrl.replace(serviceInfo.buyOrigin, "")}`
+                  );
+                  await transakSignResult.waitFreshResponse();
+                  const transakSignedUrl =
+                    transakSignResult?.response?.data.widgetUrl;
+                  if (!transakSignedUrl) {
+                    throw new Error("transakSignedUrl is null");
+                  }
+
+                  return transakSignedUrl;
+                }
+                return serviceInfo.buyUrl!;
+              }
+            : undefined,
+        };
+      }) ?? []
   );
 };
 

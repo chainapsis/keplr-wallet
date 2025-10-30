@@ -140,7 +140,7 @@ export const TokenDetailModal: FunctionComponent<{
     currency,
   });
   const isSomeBuySupport = buySupportServiceInfos.some(
-    (serviceInfo) => !!serviceInfo.buyUrl
+    (serviceInfo) => !!serviceInfo.getBuyUrl
   );
   const balance = (() => {
     if ("cosmos" in modularChainInfo) {
