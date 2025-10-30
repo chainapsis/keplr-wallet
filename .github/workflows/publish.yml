@@ -54,6 +54,8 @@ jobs:
           KEPLR_EXT_AMPLITUDE_API_KEY: ${{ secrets.KEPLR_EXT_AMPLITUDE_API_KEY }}
           KEPLR_API_ENDPOINT: ${{ secrets.KEPLR_API_ENDPOINT }}
           KEPLR_EXT_TX_CODEC_BASE_URL: ${{ secrets.KEPLR_EXT_TX_CODEC_BASE_URL }}
+          KEPLR_EXT_TOPUP_BASE_URL: ${{ secrets.KEPLR_EXT_TOPUP_BASE_URL }}
+          KEPLR_EXT_TOPUP_API_KEY: ${{ secrets.KEPLR_EXT_TOPUP_API_KEY }}
       - run: sudo apt-get install gh
       - run: npx zx ./scripts/publish.mjs
         env:
@@ -66,72 +68,74 @@ jobs:
     runs-on: ubuntu-24.04-l
     timeout-minutes: 30
     steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: true
-        token: ${{ secrets.TOKEN }}
-    - name: Setup node
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
-        registry-url: "https://registry.npmjs.org"
-    - run: docker build -f ./docker/create-firefox-archive/Dockerfile -t archiver .
-    - run: docker run -v $(pwd):/data archiver
-    - run: cp ./build/firefox-archive.tar.gz ../firefox-archive.tar.gz
-    - run: mkdir temp && tar xvzf firefox-archive.tar.gz -C temp
-      working-directory: ..
-    - run: docker build -f ./docker/Dockerfile -t builder --build-arg KEPLR_EXT_ETHEREUM_ENDPOINT=$KEPLR_EXT_ETHEREUM_ENDPOINT --build-arg KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN=$KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN --build-arg KEPLR_EXT_ANALYTICS_API_URL=$KEPLR_EXT_ANALYTICS_API_URL --build-arg KEPLR_EXT_COINGECKO_ENDPOINT=$KEPLR_EXT_COINGECKO_ENDPOINT --build-arg KEPLR_EXT_COINGECKO_GETPRICE=$KEPLR_EXT_COINGECKO_GETPRICE --build-arg KEPLR_EXT_COINGECKO_COIN_DATA_BY_TOKEN_ADDRESS=$KEPLR_EXT_COINGECKO_COIN_DATA_BY_TOKEN_ADDRESS --build-arg KEPLR_EXT_TRANSAK_API_KEY=$KEPLR_EXT_TRANSAK_API_KEY --build-arg KEPLR_EXT_MOONPAY_API_KEY=$KEPLR_EXT_MOONPAY_API_KEY --build-arg KEPLR_EXT_SWAPPED_API_KEY=$KEPLR_EXT_SWAPPED_API_KEY --build-arg KEPLR_EXT_SWAPPED_API_SECRET=$KEPLR_EXT_SWAPPED_API_SECRET --build-arg KEPLR_EXT_CHAIN_REGISTRY_URL=$KEPLR_EXT_CHAIN_REGISTRY_URL --build-arg KEPLR_EXT_GOOGLE_MEASUREMENT_ID=$KEPLR_EXT_GOOGLE_MEASUREMENT_ID --build-arg KEPLR_EXT_GOOGLE_API_KEY_FOR_MEASUREMENT=$KEPLR_EXT_GOOGLE_API_KEY_FOR_MEASUREMENT --build-arg WC_PROJECT_ID=$WC_PROJECT_ID --build-arg KEPLR_EXT_TOKEN_FACTORY_BASE_URL=$KEPLR_EXT_TOKEN_FACTORY_BASE_URL --build-arg KEPLR_EXT_TOKEN_FACTORY_URI=$KEPLR_EXT_TOKEN_FACTORY_URI --build-arg KEPLR_EXT_TX_HISTORY_BASE_URL=$KEPLR_EXT_TX_HISTORY_BASE_URL --build-arg KEPLR_EXT_CONFIG_SERVER=$KEPLR_EXT_CONFIG_SERVER --build-arg SKIP_API_KEY=$SKIP_API_KEY --build-arg KEPLR_EXT_PROVIDER_META_ID=$KEPLR_EXT_PROVIDER_META_ID --build-arg KEPLR_EXT_MOONPAY_SIGN_API_BASE_URL=$KEPLR_EXT_MOONPAY_SIGN_API_BASE_URL --build-arg KEPLR_EXT_AMPLITUDE_API_KEY=$KEPLR_EXT_AMPLITUDE_API_KEY --build-arg KEPLR_API_ENDPOINT=$KEPLR_API_ENDPOINT --build-arg KEPLR_EXT_TX_CODEC_BASE_URL=$KEPLR_EXT_TX_CODEC_BASE_URL .
-      working-directory: ../temp
-      env:
-        KEPLR_EXT_ETHEREUM_ENDPOINT: ${{ secrets.KEPLR_EXT_ETHEREUM_ENDPOINT }}
-        KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN: ${{ secrets.KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN }}
-        KEPLR_EXT_ANALYTICS_API_URL: ${{ secrets.KEPLR_EXT_ANALYTICS_API_URL }}
-        KEPLR_EXT_COINGECKO_ENDPOINT: ${{ secrets.KEPLR_EXT_COINGECKO_ENDPOINT }}
-        KEPLR_EXT_COINGECKO_GETPRICE: ${{ secrets.KEPLR_EXT_COINGECKO_GETPRICE }}
-        KEPLR_EXT_COINGECKO_COIN_DATA_BY_TOKEN_ADDRESS: ${{ secrets.KEPLR_EXT_COINGECKO_COIN_DATA_BY_TOKEN_ADDRESS }}
-        KEPLR_EXT_TRANSAK_API_KEY: ${{ secrets.KEPLR_EXT_TRANSAK_API_KEY }}
-        KEPLR_EXT_MOONPAY_API_KEY: ${{ secrets.KEPLR_EXT_MOONPAY_API_KEY }}
-        KEPLR_EXT_SWAPPED_API_KEY: ${{ secrets.KEPLR_EXT_SWAPPED_API_KEY }}
-        KEPLR_EXT_SWAPPED_API_SECRET: ${{ secrets.KEPLR_EXT_SWAPPED_API_SECRET }}
-        KEPLR_EXT_CHAIN_REGISTRY_URL: ${{ secrets.KEPLR_EXT_CHAIN_REGISTRY_URL }}
-        KEPLR_EXT_GOOGLE_MEASUREMENT_ID: ${{ secrets.KEPLR_EXT_GOOGLE_MEASUREMENT_ID }}
-        KEPLR_EXT_GOOGLE_API_KEY_FOR_MEASUREMENT: ${{ secrets.KEPLR_EXT_GOOGLE_API_KEY_FOR_MEASUREMENT }}
-        KEPLR_EXT_TOKEN_FACTORY_BASE_URL: ${{ secrets.KEPLR_EXT_TOKEN_FACTORY_BASE_URL }}
-        KEPLR_EXT_TOKEN_FACTORY_URI: ${{ secrets.KEPLR_EXT_TOKEN_FACTORY_URI }}
-        KEPLR_EXT_TX_HISTORY_BASE_URL: ${{ secrets.KEPLR_EXT_TX_HISTORY_BASE_URL }}
-        KEPLR_EXT_CONFIG_SERVER: ${{ secrets.KEPLR_EXT_CONFIG_SERVER }}
-        WC_PROJECT_ID: ${{ secrets.WC_PROJECT_ID }}
-        SKIP_API_KEY: ${{ secrets.SKIP_API_KEY }}
-        KEPLR_EXT_PROVIDER_META_ID: ${{ secrets.KEPLR_EXT_PROVIDER_META_ID }}
-        KEPLR_EXT_MOONPAY_SIGN_API_BASE_URL: ${{ secrets.KEPLR_EXT_MOONPAY_SIGN_API_BASE_URL }}
-        KEPLR_EXT_AMPLITUDE_API_KEY: ${{ secrets.KEPLR_EXT_AMPLITUDE_API_KEY }}
-        KEPLR_API_ENDPOINT: ${{ secrets.KEPLR_API_ENDPOINT }}
-        KEPLR_EXT_TX_CODEC_BASE_URL: ${{ secrets.KEPLR_EXT_TX_CODEC_BASE_URL }}
-    - run: docker run -v $(pwd):/data builder
-      working-directory: ../temp
-    - run: sudo apt-get update
-    - run: sudo apt-get install gh
-    - run: sudo snap install aws-cli --classic
-    - run: mkdir release && cd release && gh release download $GITHUB_REF_NAME --pattern '*.firefox.zip' --repo https://github.com/chainapsis/keplr-wallet
-      working-directory: ../temp
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - run: unzip keplr-extension-$GITHUB_REF_NAME.firefox.zip -d build
-      working-directory: ../temp/release
-    - run: ls
-      working-directory: ../temp/build/firefox
-    - run: ls
-      working-directory: ../temp/release/build
-    - run: find . -type f -exec openssl dgst -sha256 {} \; | awk '{print $NF}' > ../../output_hashes1.txt
-      working-directory: ../temp/build/firefox
-    - run: find . -type f -exec openssl dgst -sha256 {} \; | awk '{print $NF}' > ../../output_hashes2.txt
-      working-directory: ../temp/release/build
-    - run: if [ $(openssl dgst -sha256 output_hashes1.txt | awk '{print $NF}') != $(openssl dgst -sha256 output_hashes2.txt | awk '{print $NF}') ]; then exit 1; fi
-      working-directory: ../temp
-    - run: aws s3 cp firefox-archive.tar.gz s3://$S3_BUCKET/keplr-extension-$GITHUB_REF_NAME-firefox-archive.tar.gz --region us-west-2
-      working-directory: ..
-      env:
-        S3_BUCKET: ${{ secrets.AWS_S3_FIREFOX_ARCHIVE_BUCKET }}
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_S3_FIREFOX_ARCHIVE_KEY }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_S3_FIREFOX_ARCHIVE_SECRET_KEY }}
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+          token: ${{ secrets.TOKEN }}
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          registry-url: "https://registry.npmjs.org"
+      - run: docker build -f ./docker/create-firefox-archive/Dockerfile -t archiver .
+      - run: docker run -v $(pwd):/data archiver
+      - run: cp ./build/firefox-archive.tar.gz ../firefox-archive.tar.gz
+      - run: mkdir temp && tar xvzf firefox-archive.tar.gz -C temp
+        working-directory: ..
+      - run: docker build -f ./docker/Dockerfile -t builder --build-arg KEPLR_EXT_ETHEREUM_ENDPOINT=$KEPLR_EXT_ETHEREUM_ENDPOINT --build-arg KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN=$KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN --build-arg KEPLR_EXT_ANALYTICS_API_URL=$KEPLR_EXT_ANALYTICS_API_URL --build-arg KEPLR_EXT_COINGECKO_ENDPOINT=$KEPLR_EXT_COINGECKO_ENDPOINT --build-arg KEPLR_EXT_COINGECKO_GETPRICE=$KEPLR_EXT_COINGECKO_GETPRICE --build-arg KEPLR_EXT_COINGECKO_COIN_DATA_BY_TOKEN_ADDRESS=$KEPLR_EXT_COINGECKO_COIN_DATA_BY_TOKEN_ADDRESS --build-arg KEPLR_EXT_TRANSAK_API_KEY=$KEPLR_EXT_TRANSAK_API_KEY --build-arg KEPLR_EXT_MOONPAY_API_KEY=$KEPLR_EXT_MOONPAY_API_KEY --build-arg KEPLR_EXT_SWAPPED_API_KEY=$KEPLR_EXT_SWAPPED_API_KEY --build-arg KEPLR_EXT_SWAPPED_API_SECRET=$KEPLR_EXT_SWAPPED_API_SECRET --build-arg KEPLR_EXT_CHAIN_REGISTRY_URL=$KEPLR_EXT_CHAIN_REGISTRY_URL --build-arg KEPLR_EXT_GOOGLE_MEASUREMENT_ID=$KEPLR_EXT_GOOGLE_MEASUREMENT_ID --build-arg KEPLR_EXT_GOOGLE_API_KEY_FOR_MEASUREMENT=$KEPLR_EXT_GOOGLE_API_KEY_FOR_MEASUREMENT --build-arg WC_PROJECT_ID=$WC_PROJECT_ID --build-arg KEPLR_EXT_TOKEN_FACTORY_BASE_URL=$KEPLR_EXT_TOKEN_FACTORY_BASE_URL --build-arg KEPLR_EXT_TOKEN_FACTORY_URI=$KEPLR_EXT_TOKEN_FACTORY_URI --build-arg KEPLR_EXT_TX_HISTORY_BASE_URL=$KEPLR_EXT_TX_HISTORY_BASE_URL --build-arg KEPLR_EXT_CONFIG_SERVER=$KEPLR_EXT_CONFIG_SERVER --build-arg SKIP_API_KEY=$SKIP_API_KEY --build-arg KEPLR_EXT_PROVIDER_META_ID=$KEPLR_EXT_PROVIDER_META_ID --build-arg KEPLR_EXT_MOONPAY_SIGN_API_BASE_URL=$KEPLR_EXT_MOONPAY_SIGN_API_BASE_URL --build-arg KEPLR_EXT_AMPLITUDE_API_KEY=$KEPLR_EXT_AMPLITUDE_API_KEY --build-arg KEPLR_API_ENDPOINT=$KEPLR_API_ENDPOINT --build-arg KEPLR_EXT_TX_CODEC_BASE_URL=$KEPLR_EXT_TX_CODEC_BASE_URL --build-arg KEPLR_EXT_TOPUP_BASE_URL=$KEPLR_EXT_TOPUP_BASE_URL --build-arg KEPLR_EXT_TOPUP_API_KEY=$KEPLR_EXT_TOPUP_API_KEY .
+        working-directory: ../temp
+        env:
+          KEPLR_EXT_ETHEREUM_ENDPOINT: ${{ secrets.KEPLR_EXT_ETHEREUM_ENDPOINT }}
+          KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN: ${{ secrets.KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN }}
+          KEPLR_EXT_ANALYTICS_API_URL: ${{ secrets.KEPLR_EXT_ANALYTICS_API_URL }}
+          KEPLR_EXT_COINGECKO_ENDPOINT: ${{ secrets.KEPLR_EXT_COINGECKO_ENDPOINT }}
+          KEPLR_EXT_COINGECKO_GETPRICE: ${{ secrets.KEPLR_EXT_COINGECKO_GETPRICE }}
+          KEPLR_EXT_COINGECKO_COIN_DATA_BY_TOKEN_ADDRESS: ${{ secrets.KEPLR_EXT_COINGECKO_COIN_DATA_BY_TOKEN_ADDRESS }}
+          KEPLR_EXT_TRANSAK_API_KEY: ${{ secrets.KEPLR_EXT_TRANSAK_API_KEY }}
+          KEPLR_EXT_MOONPAY_API_KEY: ${{ secrets.KEPLR_EXT_MOONPAY_API_KEY }}
+          KEPLR_EXT_SWAPPED_API_KEY: ${{ secrets.KEPLR_EXT_SWAPPED_API_KEY }}
+          KEPLR_EXT_SWAPPED_API_SECRET: ${{ secrets.KEPLR_EXT_SWAPPED_API_SECRET }}
+          KEPLR_EXT_CHAIN_REGISTRY_URL: ${{ secrets.KEPLR_EXT_CHAIN_REGISTRY_URL }}
+          KEPLR_EXT_GOOGLE_MEASUREMENT_ID: ${{ secrets.KEPLR_EXT_GOOGLE_MEASUREMENT_ID }}
+          KEPLR_EXT_GOOGLE_API_KEY_FOR_MEASUREMENT: ${{ secrets.KEPLR_EXT_GOOGLE_API_KEY_FOR_MEASUREMENT }}
+          KEPLR_EXT_TOKEN_FACTORY_BASE_URL: ${{ secrets.KEPLR_EXT_TOKEN_FACTORY_BASE_URL }}
+          KEPLR_EXT_TOKEN_FACTORY_URI: ${{ secrets.KEPLR_EXT_TOKEN_FACTORY_URI }}
+          KEPLR_EXT_TX_HISTORY_BASE_URL: ${{ secrets.KEPLR_EXT_TX_HISTORY_BASE_URL }}
+          KEPLR_EXT_CONFIG_SERVER: ${{ secrets.KEPLR_EXT_CONFIG_SERVER }}
+          WC_PROJECT_ID: ${{ secrets.WC_PROJECT_ID }}
+          SKIP_API_KEY: ${{ secrets.SKIP_API_KEY }}
+          KEPLR_EXT_PROVIDER_META_ID: ${{ secrets.KEPLR_EXT_PROVIDER_META_ID }}
+          KEPLR_EXT_MOONPAY_SIGN_API_BASE_URL: ${{ secrets.KEPLR_EXT_MOONPAY_SIGN_API_BASE_URL }}
+          KEPLR_EXT_AMPLITUDE_API_KEY: ${{ secrets.KEPLR_EXT_AMPLITUDE_API_KEY }}
+          KEPLR_API_ENDPOINT: ${{ secrets.KEPLR_API_ENDPOINT }}
+          KEPLR_EXT_TX_CODEC_BASE_URL: ${{ secrets.KEPLR_EXT_TX_CODEC_BASE_URL }}
+          KEPLR_EXT_TOPUP_BASE_URL: ${{ secrets.KEPLR_EXT_TOPUP_BASE_URL }}
+          KEPLR_EXT_TOPUP_API_KEY: ${{ secrets.KEPLR_EXT_TOPUP_API_KEY }}
+      - run: docker run -v $(pwd):/data builder
+        working-directory: ../temp
+      - run: sudo apt-get update
+      - run: sudo apt-get install gh
+      - run: sudo snap install aws-cli --classic
+      - run: mkdir release && cd release && gh release download $GITHUB_REF_NAME --pattern '*.firefox.zip' --repo https://github.com/chainapsis/keplr-wallet
+        working-directory: ../temp
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: unzip keplr-extension-$GITHUB_REF_NAME.firefox.zip -d build
+        working-directory: ../temp/release
+      - run: ls
+        working-directory: ../temp/build/firefox
+      - run: ls
+        working-directory: ../temp/release/build
+      - run: find . -type f -exec openssl dgst -sha256 {} \; | awk '{print $NF}' > ../../output_hashes1.txt
+        working-directory: ../temp/build/firefox
+      - run: find . -type f -exec openssl dgst -sha256 {} \; | awk '{print $NF}' > ../../output_hashes2.txt
+        working-directory: ../temp/release/build
+      - run: if [ $(openssl dgst -sha256 output_hashes1.txt | awk '{print $NF}') != $(openssl dgst -sha256 output_hashes2.txt | awk '{print $NF}') ]; then exit 1; fi
+        working-directory: ../temp
+      - run: aws s3 cp firefox-archive.tar.gz s3://$S3_BUCKET/keplr-extension-$GITHUB_REF_NAME-firefox-archive.tar.gz --region us-west-2
+        working-directory: ..
+        env:
+          S3_BUCKET: ${{ secrets.AWS_S3_FIREFOX_ARCHIVE_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_S3_FIREFOX_ARCHIVE_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_S3_FIREFOX_ARCHIVE_SECRET_KEY }}
