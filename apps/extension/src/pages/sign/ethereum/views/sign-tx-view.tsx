@@ -91,7 +91,8 @@ export const EthereumSignTxView: FunctionComponent<{
     chainStore,
     queriesStore,
     chainId,
-    senderConfig
+    senderConfig,
+    false
   );
   const feeConfig = useFeeConfig(
     chainStore,

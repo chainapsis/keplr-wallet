@@ -100,10 +100,7 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
           };
         case "transak":
           return {
-            apiKey:
-              process.env["KEPLR_EXT_TRANSAK_API_KEY"] ?? serviceInfo.apiKey,
-            hideMenu: "true",
-            walletAddressesData: encodeURIComponent(
+            addressesData: encodeURIComponent(
               JSON.stringify(
                 Object.entries(
                   serviceInfo.buySupportCoinDenomsByChainId
@@ -251,17 +248,63 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
       )
     : undefined;
   const moonpaySignedUrl = moonpaySignResult?.response?.data;
+  const transakServiceInfo = buySupportServiceInfos?.find(
+    (serviceInfo) => serviceInfo.serviceId === "transak"
+  );
+  const transakSignResult = transakServiceInfo?.buyUrl
+    ? queriesStore.simpleQuery.queryGet<{
+        widgetUrl: string;
+      }>(
+        process.env["KEPLR_EXT_CONFIG_SERVER"] || "",
+        `api/transak${transakServiceInfo.buyUrl.replace(
+          transakServiceInfo.buyOrigin,
+          ""
+        )}`
+      )
+    : undefined;
+  const transakSignedUrl = transakSignResult?.response?.data.widgetUrl;
 
   return (
-    buySupportServiceInfos?.map((serviceInfo) => ({
-      ...serviceInfo,
-      ...(serviceInfo.serviceId === "moonpay" &&
-        moonpaySignResult &&
-        !moonpaySignResult.error &&
-        moonpaySignedUrl && {
-          buyUrl: moonpaySignedUrl,
-        }),
-    })) ?? []
+    buySupportServiceInfos
+      ?.filter((serviceInfo) => {
+        if (serviceInfo.serviceId === "moonpay") {
+          if (
+            moonpaySignResult &&
+            !moonpaySignResult.error &&
+            moonpaySignedUrl
+          ) {
+            return true;
+          }
+          return false;
+        }
+        if (serviceInfo.serviceId === "transak") {
+          if (
+            transakSignResult &&
+            !transakSignResult.error &&
+            transakSignedUrl
+          ) {
+            return true;
+          }
+          return false;
+        }
+
+        return true;
+      })
+      .map((serviceInfo) => ({
+        ...serviceInfo,
+        ...(serviceInfo.serviceId === "moonpay" &&
+          moonpaySignResult &&
+          !moonpaySignResult.error &&
+          moonpaySignedUrl && {
+            buyUrl: moonpaySignedUrl,
+          }),
+        ...(serviceInfo.serviceId === "transak" &&
+          transakSignResult &&
+          !transakSignResult.error &&
+          transakSignedUrl && {
+            buyUrl: transakSignedUrl,
+          }),
+      })) ?? []
   );
 };
 

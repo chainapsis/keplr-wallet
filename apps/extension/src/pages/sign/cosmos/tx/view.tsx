@@ -49,6 +49,13 @@ import { HighFeeWarning } from "../../components/high-fee-warning";
 import { handleExternalInteractionWithNoProceedNext } from "../../../../utils";
 import { useNavigate } from "react-router-dom";
 import { ApproveIcon, CancelIcon } from "../../../../components/button";
+import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse";
+import {
+  FeeCoverageBox,
+  FeeCoverageDescription,
+  FeeCoverageBackground,
+} from "../../../../components/top-up";
+import { useTopUp } from "../../../../hooks/use-topup";
 
 /**
  * 서명을 처리할때 웹페이지에서 연속적으로 서명을 요청했을 수 있고
@@ -106,6 +113,7 @@ export const CosmosTxView: FunctionComponent<{
           : interactionData.data.signDocWrapper.protoSignDoc.txMsgs.some(
               (msg) => msg.typeUrl.includes("MsgMintPhoton")
             ),
+      forceTopUp: interactionData.data.signOptions.forceTopUp,
     }
   );
   const memoConfig = useMemoConfig(chainStore, chainId);
@@ -390,53 +398,81 @@ export const CosmosTxView: FunctionComponent<{
   })();
   const [isHighFeeApproved, setIsHighFeeApproved] = useState(false);
 
+  const {
+    shouldTopUp,
+    isTopUpAvailable,
+    isTopUpInProgress,
+    topUpCompleted,
+    remainingText,
+    executeTopUpIfAvailable,
+    topUpError,
+  } = useTopUp({
+    feeConfig,
+    senderConfig,
+    hasHardwareWalletError:
+      !!ledgerInteractingError ||
+      !!keystoneInteractingError ||
+      isLedgerAndDirect,
+  });
+
   const buttonDisabled =
     txConfigsValidate.interactionBlocked ||
     !signDocHelper.signDocWrapper ||
     isLedgerAndDirect ||
     (isSendAuthzGrant && !isSendAuthzGrantChecked) ||
-    (isHighFee && !isHighFeeApproved);
+    (isHighFee && !isHighFeeApproved) ||
+    (shouldTopUp && (isTopUpInProgress || !isTopUpAvailable));
 
   const approve = async () => {
     if (signDocHelper.signDocWrapper) {
       let presignOptions;
-      if (interactionData.data.keyType === "ledger") {
-        setIsLedgerInteracting(true);
-        setLedgerInteractingError(undefined);
-        presignOptions = {
-          useWebHID: uiConfigStore.useWebHIDLedger,
-          signEthPlainJSON: chainStore
-            .getChain(signInteractionStore.waitingData!.data.chainId)
-            .hasFeature("evm-ledger-sign-plain-json"),
-        };
-      } else if (interactionData.data.keyType === "keystone") {
-        setIsKeystoneInteracting(true);
-        setKeystoneInteractingError(undefined);
-        const isEthSigning = KeyRingService.isEthermintLike(
-          chainStore.getChain(chainId)
-        );
-        presignOptions = {
-          isEthSigning,
-          displayQRCode: async (ur: KeystoneUR) => {
-            setKeystoneUR(ur);
-          },
-          scanQRCode: () =>
-            new Promise<KeystoneUR>((resolve) => {
-              keystoneScanResolve.current = resolve;
-            }),
-        };
-      }
-
       try {
+        await executeTopUpIfAvailable();
+
+        if (interactionData.data.keyType === "ledger") {
+          setIsLedgerInteracting(true);
+          setLedgerInteractingError(undefined);
+          presignOptions = {
+            useWebHID: uiConfigStore.useWebHIDLedger,
+            signEthPlainJSON: chainStore
+              .getChain(
+                signInteractionStore.waitingData?.data.chainId ?? chainId
+              )
+              .hasFeature("evm-ledger-sign-plain-json"),
+          };
+        } else if (interactionData.data.keyType === "keystone") {
+          setIsKeystoneInteracting(true);
+          setKeystoneInteractingError(undefined);
+          const isEthSigning = KeyRingService.isEthermintLike(
+            chainStore.getChain(chainId)
+          );
+          presignOptions = {
+            isEthSigning,
+            displayQRCode: async (ur: KeystoneUR) => {
+              setKeystoneUR(ur);
+            },
+            scanQRCode: () =>
+              new Promise<KeystoneUR>((resolve) => {
+                keystoneScanResolve.current = resolve;
+              }),
+          };
+        }
+
+        const signDocWrapper = feeConfig.topUpStatus.topUpOverrideStdFee
+          ? signDocHelper.signDocWrapper.getTopUpOverridedWrapper(
+              feeConfig.topUpStatus.topUpOverrideStdFee
+            )
+          : signDocHelper.signDocWrapper;
+
         const signature = await handleCosmosPreSign(
           interactionData,
-          signDocHelper.signDocWrapper,
+          signDocWrapper,
           presignOptions
         );
 
         await signInteractionStore.approveWithProceedNext(
           interactionData.id,
-          signDocHelper.signDocWrapper,
+          signDocWrapper,
           signature,
           async (proceedNext) => {
             if (!proceedNext) {
@@ -510,7 +546,8 @@ export const CosmosTxView: FunctionComponent<{
   const isLoading =
     signInteractionStore.isObsoleteInteractionApproved(interactionData.id) ||
     isLedgerInteracting ||
-    isKeystoneInteracting;
+    isKeystoneInteracting ||
+    isTopUpInProgress;
 
   return (
     <HeaderLayout
@@ -565,14 +602,31 @@ export const CosmosTxView: FunctionComponent<{
         // 유저가 enter를 눌러서 우발적으로(?) approve를 누르지 않도록 onSubmit을 의도적으로 사용하지 않았음.
         {
           isSpecial: true,
-          text: intl.formatMessage({ id: "button.approve" }),
+          text:
+            shouldTopUp && remainingText
+              ? remainingText
+              : intl.formatMessage({ id: "button.approve" }),
           size: "large",
-          left: !isLoading && <ApproveIcon />,
+          left: !(shouldTopUp && remainingText) && !isLoading && (
+            <ApproveIcon />
+          ),
           disabled: buttonDisabled,
           isLoading,
           onClick: approve,
         },
       ]}
+      bottomBackground={
+        shouldTopUp && !interactionData.isInternal ? (
+          <FeeCoverageBackground
+            hideIcon={
+              !!topUpError ||
+              !!ledgerInteractingError ||
+              !!keystoneInteractingError ||
+              isSendAuthzGrant
+            }
+          />
+        ) : undefined
+      }
     >
       <Box
         height="100%"
@@ -726,42 +780,55 @@ export const CosmosTxView: FunctionComponent<{
           </React.Fragment>
         ) : null}
 
-        <Box
-          style={{
-            opacity: isLedgerAndDirect ? 0.5 : undefined,
-          }}
-        >
-          {/* direct aux는 수수료를 설정할수도 없으니 보여줄 필요가 없다. */}
-          {"isDirectAux" in interactionData.data &&
-          interactionData.data.isDirectAux
-            ? null
-            : (() => {
-                if (interactionData.isInternal && preferNoSetFee) {
+        <VerticalCollapseTransition collapsed={shouldTopUp || topUpCompleted}>
+          <Box
+            style={{
+              opacity: isLedgerAndDirect ? 0.5 : undefined,
+            }}
+          >
+            {/* direct aux는 수수료를 설정할수도 없으니 보여줄 필요가 없다. */}
+            {"isDirectAux" in interactionData.data &&
+            interactionData.data.isDirectAux
+              ? null
+              : (() => {
+                  if (interactionData.isInternal && preferNoSetFee) {
+                    return (
+                      <FeeSummary feeConfig={feeConfig} gasConfig={gasConfig} />
+                    );
+                  }
+
                   return (
-                    <FeeSummary feeConfig={feeConfig} gasConfig={gasConfig} />
+                    <FeeControl
+                      feeConfig={feeConfig}
+                      senderConfig={senderConfig}
+                      gasConfig={gasConfig}
+                      disableAutomaticFeeSet={preferNoSetFee}
+                      isExternalMsg={!interactionData.isInternal}
+                      shouldTopUp={shouldTopUp}
+                    />
                   );
-                }
+                })()}
 
-                return (
-                  <FeeControl
-                    feeConfig={feeConfig}
-                    senderConfig={senderConfig}
-                    gasConfig={gasConfig}
-                    disableAutomaticFeeSet={preferNoSetFee}
-                  />
-                );
-              })()}
-
-          {isHighFee ? (
-            <React.Fragment>
-              <Gutter size="0.75rem" />
-              <HighFeeWarning
-                checked={isHighFeeApproved}
-                onChange={(v) => setIsHighFeeApproved(v)}
-              />
-            </React.Fragment>
-          ) : null}
-        </Box>
+            {isHighFee ? (
+              <React.Fragment>
+                <Gutter size="0.75rem" />
+                <HighFeeWarning
+                  checked={isHighFeeApproved}
+                  onChange={(v) => setIsHighFeeApproved(v)}
+                />
+              </React.Fragment>
+            ) : null}
+          </Box>
+        </VerticalCollapseTransition>
+        <VerticalCollapseTransition
+          collapsed={!(shouldTopUp || topUpCompleted)}
+        >
+          {interactionData.isInternal ? (
+            <FeeCoverageBox feeConfig={feeConfig} />
+          ) : (
+            <FeeCoverageDescription isTopUpAvailable={isTopUpAvailable} />
+          )}
+        </VerticalCollapseTransition>
 
         {isSendAuthzGrant ? (
           <React.Fragment>
@@ -817,6 +884,12 @@ export const CosmosTxView: FunctionComponent<{
             KeystoneInteractingError={keystoneInteractingError}
           />
         )}
+        {topUpError ? (
+          <GuideBox
+            color="warning"
+            title={topUpError.message || topUpError.toString()}
+          />
+        ) : null}
       </Box>
       {!isKeystonUSB && (
         <KeystoneSign

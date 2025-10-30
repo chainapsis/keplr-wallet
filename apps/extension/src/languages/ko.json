@@ -432,7 +432,7 @@
   "page.ibc-transfer.add-channel-modal.channel-id-placeholder": "채널 ID를 입력하세요.",
 
   "page.ibc-swap.title.swap": "토큰 교환",
-  "page.ibc-swap.button.next": "다음",
+  "page.ibc-swap.button.next": "스왑",
   "page.ibc-swap.error.no-route-found": "이 교환에 맞는 경로가 검색되지 않습니다.",
   "page.ibc-swap.warning.unable-to-populate-price": "{assets}의 가격을 알 수 없습니다. \"다음\"을 누르기 전에 각각 통화 가치를 확인하십시오.",
   "page.ibc-swap.warning.high-price-impact-title": "{inPrice} ({srcChain}) → {outPrice} ({dstChain})",
@@ -476,6 +476,7 @@
   "page.sign.cosmos.tx.readonly-memo.empty": "(비어있음)",
   "page.sign.cosmos.tx.view-data-button": "데이터 조회",
   "page.sign.cosmos.tx.high-fee-warning": "트랜잭션 수수료가 평소보다 높습니다.{br}그래도 계속 진행하겠습니다.",
+  "page.sign.cosmos.tx.top-up-error-message": "수수료 지원 요청이 실패했습니다. 나중에 다시 시도해주세요.",
   "page.sign.cosmos.icns.title": "ICNS 등록 요청",
 
   "page.sign.adr36.title": "서명 요청",
@@ -775,6 +776,13 @@
   "components.bitcoin-guide-box.paragraph.none-of-the-inputs-belong-to-this-wallet": "보안상의 이유로 이 지갑에 속한 입력값에 대해서만 서명이 가능합니다.",
 
   "components.fee-info.bridge-fee": "브릿지 수수료",
+
+  "components.top-up.description.no-fees": "수수료가 없나요? 걱정 마세요! ✨",
+  "components.top-up.description.we-cover": "저희가 대신 지불해드립니다 :)",
+  "components.top-up.tx-fee": "트랜잭션 수수료",
+  "components.top-up.covered-by-keplr": "Keplr가 대신 지불",
+  "components.top-up.keep-window-open": "거래 진행 중에는 이 창을 열어두세요",
+  "components.top-up.wait-time": "다음 수수료 지원까지 {minutes}:{seconds}",
 
   "button.confirm": "확인",
   "button.ok": "확인",

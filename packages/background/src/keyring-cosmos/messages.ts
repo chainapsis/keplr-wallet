@@ -92,7 +92,9 @@ export class RequestCosmosSignAminoMsg extends Message<AminoSignResponse> {
     public readonly chainId: string,
     public readonly signer: string,
     public readonly signDoc: StdSignDoc,
-    public readonly signOptions: KeplrSignOptions
+    public readonly signOptions: KeplrSignOptions & {
+      forceTopUp?: boolean;
+    }
   ) {
     super();
   }
@@ -131,7 +133,7 @@ export class RequestCosmosSignAminoMsg extends Message<AminoSignResponse> {
   }
 
   override approveExternal(): boolean {
-    return true;
+    return !this.signOptions.forceTopUp;
   }
 
   route(): string {
@@ -165,7 +167,9 @@ export class RequestCosmosSignDirectMsg extends Message<{
       chainId?: string;
       accountNumber?: string;
     },
-    public readonly signOptions: KeplrSignOptions = {}
+    public readonly signOptions: KeplrSignOptions & {
+      forceTopUp?: boolean;
+    } = {}
   ) {
     super();
   }
@@ -203,7 +207,7 @@ export class RequestCosmosSignDirectMsg extends Message<{
   }
 
   override approveExternal(): boolean {
-    return true;
+    return !this.signOptions.forceTopUp;
   }
 
   route(): string {

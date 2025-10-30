@@ -202,7 +202,7 @@ export const connectAndSignEthWithLedger = async (
   // getAppConfiguration() works even if the ledger is on screen saver mode.
   // To detect the screen saver mode, we should request the address before using.
   try {
-    await ethApp.getAddress(`m/44'/60'/'0/0/0`);
+    await ethApp.getAddress(`44'/60'/0'/0/0`);
   } catch (e) {
     // Device is locked
     if (e?.message.includes("(0x6b0c)")) {
@@ -231,7 +231,7 @@ export const connectAndSignEthWithLedger = async (
     let pubKey: PubKeySecp256k1;
     try {
       const res = await ethApp.getAddress(
-        `m/44'/60'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`
+        `44'/60'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`
       );
 
       pubKey = new PubKeySecp256k1(Buffer.from(res.publicKey, "hex"));
@@ -267,13 +267,14 @@ export const connectAndSignEthWithLedger = async (
         case EthSignType.MESSAGE: {
           return ethSignatureToBytes(
             await ethApp.signPersonalMessage(
-              `m/44'/60'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`,
+              `44'/60'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`,
               Buffer.from(message).toString("hex")
             )
           );
         }
         case EthSignType.TRANSACTION: {
           const tx = JSON.parse(Buffer.from(message).toString());
+
           const isEIP1559 = !!tx.maxFeePerGas || !!tx.maxPriorityFeePerGas;
           if (isEIP1559) {
             tx.type = TransactionTypes.eip1559;
@@ -282,8 +283,9 @@ export const connectAndSignEthWithLedger = async (
 
           return ethSignatureToBytes(
             await ethApp.signTransaction(
-              `m/44'/60'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`,
-              rlpArray
+              `44'/60'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`,
+              rlpArray,
+              tx.chainId === 999 ? null : undefined // NOTE: only disable auto resolution query on hyperevm
             )
           );
         }
@@ -295,7 +297,7 @@ export const connectAndSignEthWithLedger = async (
           // Unfortunately, signEIP712Message not works on ledger yet.
           return ethSignatureToBytes(
             await ethApp.signEIP712HashedMessage(
-              `m/44'/60'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`,
+              `44'/60'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`,
               domainHash(data),
               messageHash(data)
             )
