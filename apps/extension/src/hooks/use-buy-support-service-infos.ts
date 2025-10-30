@@ -100,7 +100,7 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
           };
         case "transak":
           return {
-            addressesData: encodeURIComponent(
+            walletAddressesData: encodeURIComponent(
               JSON.stringify(
                 Object.entries(
                   serviceInfo.buySupportCoinDenomsByChainId
