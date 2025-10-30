@@ -588,6 +588,7 @@
   "page.stake.empty.title": "Stake your assets{br}and earn rewards",
   "page.stake.empty.subtitle": "Choose an asset to stake",
   "page.stake.empty.link": "Learn more",
+  "page.stake.explore.title": "Stake & Earn Rewards",
 
   "page.main.components.ibc-history-view.item.pending": "IBC交易失败。",
   "page.main.components.ibc-history-view.item.succeed": "IBC交易成功。",

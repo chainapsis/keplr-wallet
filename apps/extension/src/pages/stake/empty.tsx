@@ -123,7 +123,7 @@ export const StakeEmptyPage: FunctionComponent = observer(() => {
           })}
           color="blue"
           onClick={() => {
-            navigate("/stake/explore");
+            navigate("/stake/explore?showBackButton=true");
           }}
           right={<ChevronIcon width="1rem" height="1rem" />}
           style={{
