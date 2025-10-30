@@ -25,7 +25,6 @@ import { Modal } from "../../components/modal";
 import { DepositModal } from "../main/components/deposit-modal";
 import { useBuySupportServiceInfos } from "../../hooks/use-buy-support-service-infos";
 import { useStore } from "../../stores";
-import { Dec } from "@keplr-wallet/unit";
 import { ViewToken } from "../main";
 import { CurrencyImageFallback } from "../../components/image";
 import { useGetStakingApr } from "../../hooks/use-get-staking-apr";
@@ -33,15 +32,13 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { IconProps } from "../../components/icon/types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
-const zeroDec = new Dec(0);
-
 export const StakeExplorePage: FunctionComponent = observer(() => {
   const theme = useTheme();
   const intl = useIntl();
 
   const [searchParams, _] = useSearchParams();
 
-  const { hugeQueriesStore, priceStore } = useStore();
+  const { hugeQueriesStore } = useStore();
 
   const [isOpenDepositModal, setIsOpenDepositModal] = React.useState(false);
   const [isOpenBuy, setIsOpenBuy] = React.useState(false);
