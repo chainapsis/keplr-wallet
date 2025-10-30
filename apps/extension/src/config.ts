@@ -19,8 +19,8 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         : "http://localhost:8080/chains/cosmos-hub",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/cosmos-hub"
-        : "http://localhost:8080/chains/cosmos-hub",
+        ? "https://wallet.keplr.app/chains/cosmos-hub?modal=staking&chain=cosmoshub-4&step_id=2"
+        : "http://localhost:8080/chains/cosmos-hub?modal=staking&chain=cosmoshub-4&step_id=2",
     bip44: {
       coinType: 118,
     },
@@ -60,8 +60,8 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         : "https://app.osmosis.zone",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/osmosis"
-        : "http://localhost:8080/chains/osmosis",
+        ? "https://wallet.keplr.app/chains/osmosis?modal=staking&chain=osmosis-1&step_id=2"
+        : "http://localhost:8080/chains/osmosis?modal=staking&chain=osmosis-1&step_id=2",
     bip44: { coinType: 118 },
     bech32Config: Bech32Address.defaultBech32Config("osmo"),
     currencies: [
@@ -116,8 +116,8 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         : "http://localhost:8080/chains/secret-network",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/secret-network"
-        : "http://localhost:8080/chains/secret-network",
+        ? "https://wallet.keplr.app/chains/secret-network?modal=staking&chain=secret-4&step_id=2"
+        : "http://localhost:8080/chains/secret-network?modal=staking&chain=secret-4&step_id=2",
     bip44: {
       coinType: 529,
     },
@@ -167,8 +167,8 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         : "http://localhost:8080/chains/akash",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/akash"
-        : "http://localhost:8080/chains/akash",
+        ? "https://wallet.keplr.app/chains/akash?modal=staking&chain=akashnet-2&step_id=2"
+        : "http://localhost:8080/chains/akash?modal=staking&chain=akashnet-2&step_id=2",
     bip44: {
       coinType: 118,
     },
@@ -208,8 +208,8 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         : "http://localhost:8080/chains/crypto-org",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/crypto-org"
-        : "http://localhost:8080/chains/crypto-org",
+        ? "https://wallet.keplr.app/chains/crypto-org?modal=staking&chain=crypto-org-chain-mainnet-1&step_id=2"
+        : "http://localhost:8080/chains/crypto-org?modal=staking&chain=crypto-org-chain-mainnet-1&step_id=2",
     bip44: {
       coinType: 394,
     },
@@ -261,8 +261,8 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         : "http://localhost:8080/chains/irisnet",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/irisnet"
-        : "http://localhost:8080/chains/irisnet",
+        ? "https://wallet.keplr.app/chains/irisnet?modal=staking&chain=irishub-1&step_id=2"
+        : "http://localhost:8080/chains/irisnet?modal=staking&chain=irishub-1&step_id=2",
     bip44: {
       coinType: 118,
     },
@@ -319,8 +319,8 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         : "http://localhost:8080/chains/regen",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/regen"
-        : "http://localhost:8080/chains/regen",
+        ? "https://wallet.keplr.app/chains/regen?modal=staking&chain=regen-1&step_id=2"
+        : "http://localhost:8080/chains/regen?modal=staking&chain=regen-1&step_id=2",
     bip44: {
       coinType: 118,
     },
@@ -365,8 +365,8 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         : "http://localhost:8080/chains/persistence",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/persistence"
-        : "http://localhost:8080/chains/persistence",
+        ? "https://wallet.keplr.app/chains/persistence?modal=staking&chain=core-1&step_id=2"
+        : "http://localhost:8080/chains/persistence?modal=staking&chain=core-1&step_id=2",
     bip44: {
       coinType: 118,
     },
@@ -421,8 +421,8 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         : "http://localhost:8080/chains/sentinel",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/sentinel"
-        : "http://localhost:8080/chains/sentinel",
+        ? "https://wallet.keplr.app/chains/sentinel?modal=staking&chain=sentinelhub-2&step_id=2"
+        : "http://localhost:8080/chains/sentinel?modal=staking&chain=sentinelhub-2&step_id=2",
     bip44: {
       coinType: 118,
     },
@@ -467,8 +467,8 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         : "http://localhost:8080/chains/agoric",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/agoric"
-        : "http://localhost:8080/chains/agoric",
+        ? "https://wallet.keplr.app/chains/agoric?modal=staking&chain=agoric-3&step_id=2"
+        : "http://localhost:8080/chains/agoric?modal=staking&chain=agoric-3&step_id=2",
     bip44: {
       coinType: 564,
     },
@@ -527,8 +527,8 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         : "http://localhost:8080/chains/bostrom",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/bostrom"
-        : "http://localhost:8080/chains/bostrom",
+        ? "https://wallet.keplr.app/chains/bostrom?modal=staking&chain=bostrom&step_id=2"
+        : "http://localhost:8080/chains/bostrom?modal=staking&chain=bostrom&step_id=2",
     bip44: {
       coinType: 118,
     },
@@ -591,8 +591,8 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         : "http://localhost:8080/chains/juno",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/juno"
-        : "http://localhost:8080/chains/juno",
+        ? "https://wallet.keplr.app/chains/juno?modal=staking&chain=juno-1&step_id=2"
+        : "http://localhost:8080/chains/juno?modal=staking&chain=juno-1&step_id=2",
     bip44: {
       coinType: 118,
     },
@@ -648,8 +648,8 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         : "http://localhost:8080/chains/stargaze",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/stargaze"
-        : "http://localhost:8080/chains/stargaze",
+        ? "https://wallet.keplr.app/chains/stargaze?modal=staking&chain=stargaze-1&step_id=2"
+        : "http://localhost:8080/chains/stargaze?modal=staking&chain=stargaze-1&step_id=2",
     bip44: {
       coinType: 118,
     },
@@ -689,8 +689,8 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         : "http://localhost:8080/chains/axelar",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/axelar"
-        : "http://localhost:8080/chains/axelar",
+        ? "https://wallet.keplr.app/chains/axelar?modal=staking&chain=axelar-dojo-1&step_id=2"
+        : "http://localhost:8080/chains/axelar?modal=staking&chain=axelar-dojo-1&step_id=2",
     bip44: {
       coinType: 118,
     },
@@ -843,8 +843,8 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         : "http://localhost:8080/chains/sommelier",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/sommelier"
-        : "http://localhost:8080/chains/sommelier",
+        ? "https://wallet.keplr.app/chains/sommelier?modal=staking&chain=sommelier-3&step_id=2"
+        : "http://localhost:8080/chains/sommelier?modal=staking&chain=sommelier-3&step_id=2",
     bip44: {
       coinType: 118,
     },
@@ -883,8 +883,8 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         : "http://localhost:8080/chains/umee",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/umee"
-        : "http://localhost:8080/chains/umee",
+        ? "https://wallet.keplr.app/chains/umee?modal=staking&chain=umee-1&step_id=2"
+        : "http://localhost:8080/chains/umee?modal=staking&chain=umee-1&step_id=2",
     bip44: {
       coinType: 118,
     },
@@ -927,8 +927,8 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         : "http://localhost:8080/chains/stride",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/stride"
-        : "http://localhost:8080/chains/stride",
+        ? "https://wallet.keplr.app/chains/stride?modal=staking&chain=stride-1&step_id=2"
+        : "http://localhost:8080/chains/stride?modal=staking&chain=stride-1&step_id=2",
     bip44: {
       coinType: 118,
     },
@@ -993,8 +993,8 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         : "http://localhost:8080/chains/injective",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/injective"
-        : "http://localhost:8080/chains/injective",
+        ? "https://wallet.keplr.app/chains/injective?modal=staking&chain=injective-1&step_id=2"
+        : "http://localhost:8080/chains/injective?modal=staking&chain=injective-1&step_id=2",
     bip44: {
       coinType: 60,
     },
@@ -1039,8 +1039,8 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         : "http://localhost:8080/chains/kava",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/kava"
-        : "http://localhost:8080/chains/kava",
+        ? "https://wallet.keplr.app/chains/kava?modal=staking&chain=kava_2222-10&step_id=2"
+        : "http://localhost:8080/chains/kava?modal=staking&chain=kava_2222-10&step_id=2",
     bip44: { coinType: 459 },
     alternativeBIP44s: [{ coinType: 118 }],
     bech32Config: Bech32Address.defaultBech32Config("kava"),
@@ -1115,8 +1115,8 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     },
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/quicksilver"
-        : "http://localhost:8080/chains/quicksilver",
+        ? "https://wallet.keplr.app/chains/quicksilver?modal=staking&chain=quicksilver-1&step_id=2"
+        : "http://localhost:8080/chains/quicksilver?modal=staking&chain=quicksilver-1&step_id=2",
     bip44: {
       coinType: 118,
     },
@@ -1162,8 +1162,8 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     },
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/terra"
-        : "http://localhost:8080/chains/terra",
+        ? "https://wallet.keplr.app/chains/terra?modal=staking&chain=phoenix-1&step_id=2"
+        : "http://localhost:8080/chains/terra?modal=staking&chain=phoenix-1&step_id=2",
     bip44: {
       coinType: 330,
     },
@@ -1439,8 +1439,8 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     ],
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/neutron"
-        : "http://localhost:8080/chains/neutron",
+        ? "https://wallet.keplr.app/chains/neutron?modal=staking&chain=neutron-1&step_id=2"
+        : "http://localhost:8080/chains/neutron?modal=staking&chain=neutron-1&step_id=2",
     features: [],
   },
   {
@@ -2661,7 +2661,10 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     chainName: "Xion",
     chainSymbolImageUrl:
       "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/xion-mainnet/chain.png",
-    walletUrlForStaking: "https://wallet.keplr.app/chains/xion",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/chains/xion?modal=staking&chain=xion-mainnet-1&step_id=2"
+        : "http://localhost:8080/chains/xion?modal=staking&chain=xion-mainnet-1&step_id=2",
     stakeCurrency: {
       coinDenom: "XION",
       coinMinimalDenom: "uxion",
@@ -2715,7 +2718,10 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/jackal/chain.png",
     rpc: "https://rpc-jackal.keplr.app",
     rest: "https://lcd-jackal.keplr.app",
-    walletUrlForStaking: "https://wallet.keplr.app/chains/jackal",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/chains/jackal?modal=staking&chain=jackal-1&step_id=2"
+        : "http://localhost:8080/chains/jackal?modal=staking&chain=jackal-1&step_id=2",
     bip44: {
       coinType: 118,
     },
@@ -2814,7 +2820,10 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/elys/chain.png",
     rpc: "https://rpc-elys.keplr.app",
     rest: "https://lcd-elys.keplr.app",
-    walletUrlForStaking: "https://wallet.keplr.app/chains/elys-network",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/chains/elys-network?modal=staking&chain=elys-1&step_id=2"
+        : "http://localhost:8080/chains/elys-network?modal=staking&chain=elys-1&step_id=2",
     bip44: {
       coinType: 118,
     },
@@ -3287,7 +3296,10 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/bbn/chain.png",
     rpc: "https://rpc-babylon.keplr.app",
     rest: "https://lcd-babylon.keplr.app",
-    walletUrlForStaking: "https://wallet.keplr.app/chains/babylon-genesis",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/chains/babylon-genesis?modal=staking&chain=bbn-1&step_id=2"
+        : "http://localhost:8080/chains/babylon-genesis?modal=staking&chain=bbn-1&step_id=2",
     bip44: {
       coinType: 118,
     },
@@ -3336,7 +3348,10 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     rest: "https://rest.initia.xyz",
     chainId: "interwoven-1",
     chainName: "Initia",
-    walletUrlForStaking: "https://testnet.keplr.app/chains/initia",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/chains/initia?modal=staking&chain=interwoven-1&step_id=2"
+        : "http://localhost:8080/chains/initia?modal=staking&chain=interwoven-1&step_id=2",
     bip44: {
       coinType: 60,
     },
@@ -3814,7 +3829,10 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/union/chain.png",
     },
     features: ["cosmwasm"],
-    walletUrlForStaking: "https://wallet.keplr.app/chains/union",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/chains/union?modal=staking&chain=union-1&step_id=2"
+        : "http://localhost:8080/chains/union?modal=staking&chain=union-1&step_id=2",
   },
   {
     rpc: "https://rpc-lumera.keplr.app",
