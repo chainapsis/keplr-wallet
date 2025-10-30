@@ -16,23 +16,24 @@ import { animated } from "@react-spring/web";
 import { EyeIcon, EyeSlashIcon } from "../../components/icon";
 import { Gutter } from "../../components/gutter";
 import { TextButton } from "../../components/button-text";
-import { useNavigate } from "react-router";
 import { ViewStakedToken, ViewUnbondingToken } from "../../stores/huge-queries";
 import { useIntl } from "react-intl";
 import { Dec } from "@keplr-wallet/unit";
 import { CollapsibleList } from "../../components/collapsible-list";
 import { Stack } from "../../components/stack";
 import { ClaimAll, TokenItem, TokenTitleView } from "../main/components";
+import { StakeExplorePage } from "./explore";
 import { StakeEmptyPage } from "./empty";
 import { IconProps } from "../../components/icon/types";
 import { Subtitle3 } from "../../components/typography";
 
+const zeroDec = new Dec(0);
+
 export const StakePage: FunctionComponent = observer(() => {
   const theme = useTheme();
-  const navigate = useNavigate();
   const intl = useIntl();
 
-  const { uiConfigStore } = useStore();
+  const { uiConfigStore, hugeQueriesStore } = useStore();
   const isNotReady = useIsNotReady();
 
   const animatedPrivacyModeHover = useSpringValue(0, {
@@ -40,7 +41,14 @@ export const StakePage: FunctionComponent = observer(() => {
   });
 
   const { stakedTotalPrice } = useStakedTotalPrice();
+
   const { delegations, unbondings } = useViewStakingTokens();
+
+  const hasAnyStakableAsset = useMemo(() => {
+    return hugeQueriesStore.stakables.some((token) =>
+      token.token.toDec().gt(zeroDec)
+    );
+  }, [hugeQueriesStore.stakables]);
 
   const TokenViewData: {
     title: string;
@@ -67,6 +75,10 @@ export const StakePage: FunctionComponent = observer(() => {
       lenAlwaysShown: 3,
     },
   ];
+
+  if (!hasAnyStakableAsset) {
+    return <StakeExplorePage />;
+  }
 
   if (delegations.length === 0 && unbondings.length === 0) {
     return <StakeEmptyPage />;
@@ -162,8 +174,10 @@ export const StakePage: FunctionComponent = observer(() => {
               id: "page.stake.stake-more-button",
             })}
             color="blue"
-            onClick={() => {
-              navigate("/stake/empty");
+            onClick={async () => {
+              await browser.tabs.create({
+                url: "https://wallet.keplr.app/?modal=staking&utm_source=keplrextension&utm_medium=button&utm_campaign=permanent&utm_content=manage_stake",
+              });
             }}
             right={<ChevronIcon width="1rem" height="1rem" />}
             style={{
@@ -342,7 +356,7 @@ function formatRelativeTime(
   };
 }
 
-const ChevronIcon: FunctionComponent<IconProps> = ({
+export const ChevronIcon: FunctionComponent<IconProps> = ({
   width = "1rem",
   height = "1rem",
 }) => {
