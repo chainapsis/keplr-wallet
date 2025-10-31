@@ -36,6 +36,7 @@ import { SearchTextInput } from "../../../../components/input";
 import { useFocusOnMount } from "../../../../hooks/use-focus-on-mount";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Tooltip } from "../../../../components/tooltip";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 const Styles = {
   TextInput: styled.input`
@@ -446,7 +447,9 @@ export const SwapAssetInfo: FunctionComponent<{
                   `/ibc-swap/select-destination?${(() => {
                     if (amountConfig.amount.length === 1) {
                       return `excludeKey=${encodeURIComponent(
-                        `${amountConfig.chainInfo.chainIdentifier}/${amountConfig.amount[0].currency.coinMinimalDenom}`
+                        `${
+                          ChainIdHelper.parse(amountConfig.chainId).identifier
+                        }/${amountConfig.amount[0].currency.coinMinimalDenom}`
                       )}&`;
                     }
 

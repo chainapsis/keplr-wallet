@@ -20,7 +20,7 @@ export class ObservableChainQueryRPC<
 
     super(
       sharedContext,
-      "cosmos" in modularChainInfo ? modularChainInfo.cosmos.rest : "",
+      "cosmos" in modularChainInfo ? modularChainInfo.cosmos.rpc : "",
       url
     );
 

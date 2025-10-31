@@ -825,7 +825,9 @@ export class IBCCurrencyRegistrar {
   protected isIBCAvailableChain(chainId: string): boolean {
     return (
       this.chainStore.hasModularChain(chainId) &&
-      this.chainStore.getModularChainInfoImpl(chainId).matchModule("cosmos")
+      this.chainStore
+        .getModularChainInfoImpl(chainId)
+        .matchModules({ or: ["cosmos", "evm"] })
     );
   }
 

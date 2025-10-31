@@ -330,6 +330,7 @@ export class ObservableQueryRouteInner extends ObservableQuery<
 
     return this.response.data.estimated_fees.map((fee) => {
       return new CoinPretty(
+        this.chainGetter.hasModularChain(fee.origin_asset.chain_id) &&
         this.chainGetter
           .getModularChainInfoImpl(fee.origin_asset.chain_id)
           .matchModule("cosmos")

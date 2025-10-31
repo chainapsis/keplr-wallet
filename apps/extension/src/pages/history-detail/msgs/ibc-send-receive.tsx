@@ -69,7 +69,7 @@ export const HistoryDetailIBCSendReceive: FunctionComponent<{
 
     const firstPath = msg.ibcTracking.paths[0];
     if (firstPath.chainId && chainStore.hasModularChain(firstPath.chainId)) {
-      return chainStore.getChain(firstPath.chainId).chainName;
+      return chainStore.getModularChain(firstPath.chainId).chainName;
     }
     return "";
   })();
@@ -105,7 +105,7 @@ export const HistoryDetailIBCSendReceive: FunctionComponent<{
       lastPath.clientChainId &&
       chainStore.hasModularChain(lastPath.clientChainId)
     ) {
-      return chainStore.getChain(lastPath.clientChainId).chainId;
+      return chainStore.getModularChain(lastPath.clientChainId).chainId;
     }
     return "";
   })();

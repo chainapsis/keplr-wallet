@@ -6181,6 +6181,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/hooks-internal@workspace:apps/hooks-internal"
   dependencies:
+    "@keplr-wallet/cosmos": 0.12.272
     "@keplr-wallet/hooks": 0.12.272
     "@keplr-wallet/stores": 0.12.272
     "@keplr-wallet/stores-eth": 0.12.272

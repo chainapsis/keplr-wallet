@@ -105,7 +105,7 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
   const _filteredTokens = useMemo(() => {
     if (paramIsIBCTransfer) {
       return searchedTokens.filter((token) => {
-        if (!("cosmos" in token.chainInfo)) {
+        if (!("cosmos" in token.chainInfo) && !("evm" in token.chainInfo)) {
           return false;
         }
 

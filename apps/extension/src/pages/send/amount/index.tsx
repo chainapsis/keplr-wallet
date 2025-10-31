@@ -2432,8 +2432,8 @@ function useGetGasSimulationForBridge(
           })();
 
           if (
-            ibcSwapConfigsForBridge.amountConfig.chainInfo.chainIdentifier ===
-            ChainIdHelper.parse(swapVenueChainId).identifier
+            ChainIdHelper.parse(ibcSwapConfigsForBridge.amountConfig.chainId)
+              .identifier === ChainIdHelper.parse(swapVenueChainId).identifier
           ) {
             type = `swap-1`;
           }
