@@ -1,4 +1,3 @@
-export * from "./claim-all";
 export * from "./spendable-card";
 export * from "./buy-crypto-modal";
 export * from "./token";
