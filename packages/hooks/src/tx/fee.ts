@@ -996,16 +996,16 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       if (queryOsmosis) {
         const queryBaseFee = queryOsmosis.queryBaseFee;
         const baseFee = queryBaseFee.baseFee;
-        if (!baseFee) {
-          return makeReturn({
-            loadingState: "loading-block",
-          });
-        }
         if (queryBaseFee.isFetching) {
           priorIsLoadingState = true;
         }
         if (queryBaseFee.error) {
           priorWarning = new Error("Failed to fetch base fee");
+        }
+        if (!baseFee) {
+          return makeReturn({
+            loadingState: "loading-block",
+          });
         }
       }
     } else if (this.canFeeMarketTxFeesAndReady()) {
