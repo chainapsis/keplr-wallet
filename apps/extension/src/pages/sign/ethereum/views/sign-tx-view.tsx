@@ -311,13 +311,29 @@ export const EthereumSignTxView: FunctionComponent<{
   }, [chainInfo.features, ethereumAccount, feeConfig, message]);
 
   useEffect(() => {
+    // If the signing request is internal or the fee is set by dApp,
+    // we don't need to refresh the fee.
+    if (!needHandleNonceMethod || preferNoSetFee) {
+      return;
+    }
+
     // Refresh EIP-1559 fee every 12 seconds.
     const intervalId = setInterval(() => {
       feeConfig.refreshEIP1559TxFees();
     }, 12000);
 
     return () => clearInterval(intervalId);
-  }, [feeConfig]);
+  }, [feeConfig, preferNoSetFee, needHandleNonceMethod]);
+
+  useEffect(() => {
+    if (feeConfig.type === "manual") {
+      return;
+    }
+
+    // if fee type is changed from manual to auto(average, fast, fastest),
+    // we need to set preferNoSetFee to false to allow automatic fee set.
+    setPreferNoSetFee(false);
+  }, [feeConfig.type]);
 
   const signingDataText = useMemo(() => {
     return JSON.stringify(
@@ -377,7 +393,14 @@ export const EthereumSignTxView: FunctionComponent<{
     isLedgerInteracting ||
     isKeystoneInteracting;
 
-  const buttonDisabled = txConfigsValidate.interactionBlocked;
+  // TODO: ethereum fee config is refreshed every 12 seconds,
+  // so we need to consider the initial state condition.
+  const initialGuard =
+    amountConfig.uiProperties.loadingState === "loading" ||
+    feeConfig.uiProperties.loadingState === "loading";
+
+  const buttonDisabled = txConfigsValidate.interactionBlocked || initialGuard;
+
   const bottomButtons: HeaderProps["bottomButtons"] = [
     {
       textOverrideIcon: (
