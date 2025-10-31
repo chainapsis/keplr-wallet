@@ -68,7 +68,8 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
     chainId,
     sender,
     currency,
-    outCurrency
+    outCurrency,
+    false
   );
 
   // XXX: 원래는 밑의 처리를 FeeControl component에서 해야하지만 이 UI에는 그런게 없기 때문에 따로 불러줘야 함

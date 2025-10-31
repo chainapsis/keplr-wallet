@@ -17,6 +17,7 @@ export const useDelegateTxConfig = (
   sender: string,
   validatorAddress: string,
   initialGas: number,
+  disableSubFeeFromFaction: boolean,
   fractionSubFeeWeight?: number
 ) => {
   const senderConfig = useSenderConfig(chainGetter, chainId, sender);
@@ -25,6 +26,7 @@ export const useDelegateTxConfig = (
     queriesStore,
     chainId,
     senderConfig,
+    disableSubFeeFromFaction,
     fractionSubFeeWeight
   );
 

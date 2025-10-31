@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { HeaderLayout } from "../../layouts/header";
 import { useLocation, useSearchParams } from "react-router-dom";
@@ -22,6 +22,8 @@ import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { useIntl } from "react-intl";
 import { useTxConfigsQueryString } from "../../hooks/use-tx-config-query-string";
 import { useIBCChannelConfigQueryString } from "../../hooks/use-ibc-channel-config-query-string";
+import { useTopUp } from "../../hooks/use-topup";
+import { getShouldTopUpSignOptions } from "../../utils/should-top-up-sign-options";
 
 export const IBCTransferPage: FunctionComponent = observer(() => {
   const { accountStore, chainStore, queriesStore, uiConfigStore } = useStore();
@@ -43,6 +45,10 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
 
   const accountInfo = accountStore.getAccount(chainId);
 
+  const [
+    topUpForDisableSubFeeFromFaction,
+    setTopUpForDisableSubFeeFromFaction,
+  ] = useState(false);
   const ibcTransferConfigs = useIBCTransferConfig(
     chainStore,
     queriesStore,
@@ -50,6 +56,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
     accountInfo.bech32Address,
     // TODO: 이 값을 config 밑으로 빼자
     300000,
+    topUpForDisableSubFeeFromFaction,
     {
       // Injective에서는 안되게 해야되는데 ibc의 경우는 recipient config의 설정된 chain id를 알기가 어려워서...
       allowHexAddressToBech32Address: true,
@@ -123,6 +130,14 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
 
   const historyType = "ibc-transfer";
 
+  const { shouldTopUp, remainingText, isTopUpAvailable } = useTopUp({
+    feeConfig: ibcTransferConfigs.feeConfig,
+    senderConfig: ibcTransferConfigs.senderConfig,
+  });
+  useEffect(() => {
+    setTopUpForDisableSubFeeFromFaction(shouldTopUp);
+  }, [shouldTopUp]);
+
   return (
     <HeaderLayout
       title={intl.formatMessage({ id: "page.ibc-transfer.title" })}
@@ -144,7 +159,15 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
       }
       bottomButtons={[
         {
-          text: intl.formatMessage({ id: "button.next" }),
+          text: (() => {
+            if (!isSelectChannelPhase) {
+              if (shouldTopUp && remainingText) {
+                return remainingText;
+              }
+            }
+
+            return intl.formatMessage({ id: "button.next" });
+          })(),
           size: "large",
           onClick: async () => {
             if (isSelectChannelPhase) {
@@ -162,11 +185,14 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
                   );
 
                   await tx.send(
-                    ibcTransferConfigs.feeConfig.toStdFee(),
+                    ibcTransferConfigs.feeConfig.topUpStatus
+                      .topUpOverrideStdFee ??
+                      ibcTransferConfigs.feeConfig.toStdFee(),
                     ibcTransferConfigs.memoConfig.memo,
                     {
                       preferNoSetFee: true,
                       preferNoSetMemo: true,
+                      ...(shouldTopUp ? getShouldTopUpSignOptions() : {}),
                       sendTx: async (chainId, tx, mode) => {
                         const msg = new SendTxAndRecordMsg(
                           historyType,
@@ -253,7 +279,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
           },
           disabled: isSelectChannelPhase
             ? isSelectChannelInteractionBlocked
-            : isAmountInteractionBlocked,
+            : isAmountInteractionBlocked || (shouldTopUp && !isTopUpAvailable),
           isLoading: accountInfo.isSendingMsg === "ibcTransfer",
         },
       ]}
@@ -276,6 +302,8 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
             memoConfig={ibcTransferConfigs.memoConfig}
             gasConfig={ibcTransferConfigs.gasConfig}
             gasSimulator={gasSimulator}
+            shouldTopUp={shouldTopUp}
+            isTopUpAvailable={isTopUpAvailable}
           />
         )}
       </Box>

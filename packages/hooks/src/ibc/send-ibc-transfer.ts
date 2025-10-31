@@ -27,6 +27,7 @@ export const useIBCTransferConfig = (
   chainId: string,
   sender: string,
   initialGas: number,
+  disableSubFeeFromFaction: boolean,
   options: {
     allowHexAddressToBech32Address?: boolean;
     icns?: {
@@ -45,6 +46,7 @@ export const useIBCTransferConfig = (
     chainId,
     senderConfig,
     channelConfig,
+    disableSubFeeFromFaction,
     true
   );
 
@@ -86,6 +88,7 @@ export const useSendMixedIBCTransferConfig = (
   chainId: string,
   sender: string,
   initialGas: number,
+  disableSubFeeFromFaction: boolean,
   isIBCTransfer: boolean,
   options: {
     allowHexAddressToBech32Address?: boolean;
@@ -110,6 +113,7 @@ export const useSendMixedIBCTransferConfig = (
     chainId,
     senderConfig,
     channelConfig,
+    disableSubFeeFromFaction,
     isIBCTransfer
   );
 

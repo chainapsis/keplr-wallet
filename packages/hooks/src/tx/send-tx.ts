@@ -15,6 +15,7 @@ export const useSendTxConfig = (
   chainId: string,
   sender: string,
   initialGas: number,
+  disableSubFeeFromFaction: boolean,
   options: {
     allowHexAddressToBech32Address?: boolean;
     icns?: {
@@ -33,7 +34,8 @@ export const useSendTxConfig = (
     chainGetter,
     queriesStore,
     chainId,
-    senderConfig
+    senderConfig,
+    disableSubFeeFromFaction
   );
 
   const memoConfig = useMemoConfig(chainGetter, chainId);

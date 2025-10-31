@@ -674,7 +674,7 @@ export class KeyRingBitcoinService {
   }
 
   async switchChain(env: Env, origin: string, chainType: ChainType) {
-    const currentChainId = this.forceGetCurrentChainId(origin);
+    const currentChainId = this.getCurrentChainId(origin);
     const newCurrentChainId = this.getNewCurrentChainIdFromChainType(chainType);
     if (currentChainId === newCurrentChainId) {
       return chainType;

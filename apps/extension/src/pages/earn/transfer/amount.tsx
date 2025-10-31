@@ -114,6 +114,7 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
     chainId,
     sender,
     300000,
+    false,
     true
   );
   sendConfigs.amountConfig.setCurrency(currency);

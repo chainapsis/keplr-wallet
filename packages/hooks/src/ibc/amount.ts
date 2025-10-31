@@ -16,9 +16,16 @@ export class IBCAmountConfig extends AmountConfig {
     initialChainId: string,
     senderConfig: ISenderConfig,
     protected readonly channelConfig: IIBCChannelConfig,
+    disableSubFeeFromFaction: boolean,
     isIBCTransfer: boolean
   ) {
-    super(chainGetter, queriesStore, initialChainId, senderConfig);
+    super(
+      chainGetter,
+      queriesStore,
+      initialChainId,
+      senderConfig,
+      disableSubFeeFromFaction
+    );
     this.isIBCTransfer = isIBCTransfer;
 
     makeObservable(this);
@@ -45,6 +52,7 @@ export const useIBCAmountConfig = (
   chainId: string,
   senderConfig: ISenderConfig,
   channelConfig: IIBCChannelConfig,
+  disableSubFeeFromFaction: boolean,
   isIBCTransfer: boolean
 ) => {
   const [txConfig] = useState(
@@ -55,11 +63,13 @@ export const useIBCAmountConfig = (
         chainId,
         senderConfig,
         channelConfig,
+        disableSubFeeFromFaction,
         isIBCTransfer
       )
   );
   txConfig.setChain(chainId);
   txConfig.setIsIBCTransfer(isIBCTransfer);
+  txConfig.setDisableSubFeeFromFaction(disableSubFeeFromFaction);
 
   return txConfig;
 };

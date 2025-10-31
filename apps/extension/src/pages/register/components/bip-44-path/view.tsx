@@ -44,7 +44,7 @@ export const SetBip44PathCard: FunctionComponent<{
   isLedger?: boolean;
 
   onClose: () => void;
-}> = observer(({ coinType, state, isLedger, onClose }) => {
+}> = observer(({ coinType, state, onClose }) => {
   const confirm = useConfirm();
   const intl = useIntl();
   const theme = useTheme();
@@ -131,7 +131,7 @@ export const SetBip44PathCard: FunctionComponent<{
           <TextInput
             type="number"
             min={0}
-            max={isLedger ? 100 : 2147483647}
+            max={2147483647}
             value={state.accountText}
             onChange={(e) => {
               e.preventDefault();
@@ -165,7 +165,7 @@ export const SetBip44PathCard: FunctionComponent<{
           <TextInput
             type="number"
             min={0}
-            max={isLedger ? 100 : 4294967295}
+            max={4294967295}
             value={state.addressIndexText}
             onChange={(e) => {
               e.preventDefault();

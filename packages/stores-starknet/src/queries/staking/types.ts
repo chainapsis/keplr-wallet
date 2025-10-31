@@ -15,7 +15,7 @@ export type StarknetValidator = {
   is_active: boolean;
 };
 
-export type StarknetValidators = StarknetValidator[];
+export type StarknetValidators = { validators: StarknetValidator[] };
 
 export type ClaimableReward = {
   validatorAddress: string;

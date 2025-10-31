@@ -14,6 +14,7 @@ export type SignInteractionData =
       signDoc: StdSignDoc;
       signOptions: KeplrSignOptions & {
         isADR36WithString?: boolean;
+        forceTopUp?: boolean;
       };
       keyType: string;
       keyInsensitive: PlainObject;
@@ -32,7 +33,9 @@ export type SignInteractionData =
       pubKey: Uint8Array;
       signDocBytes: Uint8Array;
       isDirectAux?: boolean;
-      signOptions: KeplrSignOptions;
+      signOptions: KeplrSignOptions & {
+        forceTopUp?: boolean;
+      };
       keyType: string;
       keyInsensitive: PlainObject;
     };
