@@ -31,8 +31,8 @@ const Styles = {
     max-width: 13.875rem;
 
     background-color: rgba(37, 37, 37, 0.5);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
 
     border-radius: 0.75rem;
 
