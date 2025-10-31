@@ -915,6 +915,40 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       return {};
     }
 
+    let priorWarning: Error | undefined = undefined;
+    let priorIsLoadingState = false;
+    const makeReturn = (uiProperties: UIProperties): UIProperties => {
+      return {
+        ...uiProperties,
+        ...(() => {
+          if (priorIsLoadingState) {
+            if (uiProperties.loadingState === "loading-block") {
+              return {
+                loadingState: "loading-block",
+              };
+            } else {
+              return {
+                loadingState: "loading",
+              };
+            }
+          }
+          return {};
+        })(),
+        ...(() => {
+          if (priorWarning) {
+            if (uiProperties.error) {
+              return {};
+            } else {
+              return {
+                warning: priorWarning,
+              };
+            }
+          }
+          return {};
+        })(),
+      };
+    };
+
     if (
       fee.length > 0 &&
       this.computeTerraClassicTax &&
@@ -927,7 +961,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
           etcQueries.queryTerraClassicTaxRate.error ||
           etcQueries.queryTerraClassicTaxRate.isFetching
         ) {
-          return {
+          return makeReturn({
             error: (() => {
               if (etcQueries.queryTerraClassicTaxRate.error) {
                 return new Error("Failed to fetch tax rate");
@@ -936,14 +970,14 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
             loadingState: etcQueries.queryTerraClassicTaxRate.isFetching
               ? "loading-block"
               : undefined,
-          };
+          });
         }
 
         if (
           etcQueries.queryTerraClassicTaxCaps.error ||
           etcQueries.queryTerraClassicTaxCaps.isFetching
         ) {
-          return {
+          return makeReturn({
             error: (() => {
               if (etcQueries.queryTerraClassicTaxCaps.error) {
                 return new Error("Failed to fetch tax rate");
@@ -952,7 +986,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
             loadingState: etcQueries.queryTerraClassicTaxCaps.isFetching
               ? "loading-block"
               : undefined,
-          };
+          });
         }
       }
     }
@@ -962,20 +996,16 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       if (queryOsmosis) {
         const queryBaseFee = queryOsmosis.queryBaseFee;
         const baseFee = queryBaseFee.baseFee;
-        if (!baseFee) {
-          return {
-            loadingState: "loading-block",
-          };
-        }
         if (queryBaseFee.isFetching) {
-          return {
-            loadingState: "loading",
-          };
+          priorIsLoadingState = true;
         }
         if (queryBaseFee.error) {
-          return {
-            warning: new Error("Failed to fetch base fee"),
-          };
+          priorWarning = new Error("Failed to fetch base fee");
+        }
+        if (!baseFee) {
+          return makeReturn({
+            loadingState: "loading-block",
+          });
         }
       }
     } else if (this.canFeeMarketTxFeesAndReady()) {
@@ -984,19 +1014,15 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         if (queryEtc) {
           const queryInitiaDynamicFee = queryEtc.queryInitiaDynamicFee;
           if (queryInitiaDynamicFee.error) {
-            return {
-              warning: new Error("Failed to fetch gas prices"),
-            };
+            priorWarning = new Error("Failed to fetch gas prices");
           }
           if (!queryInitiaDynamicFee.response) {
-            return {
+            return makeReturn({
               loadingState: "loading-block",
-            };
+            });
           }
           if (queryInitiaDynamicFee.isFetching) {
-            return {
-              loadingState: "loading",
-            };
+            priorIsLoadingState = true;
           }
         }
       } else if (this.chainInfo.hasFeature("evm-feemarket")) {
@@ -1004,19 +1030,15 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         if (queryCosmos) {
           const queryEvmFeeMarketBaseFee = queryCosmos.queryEvmFeeMarketBaseFee;
           if (queryEvmFeeMarketBaseFee.error) {
-            return {
-              warning: new Error("Failed to fetch base fee"),
-            };
+            priorWarning = new Error("Failed to fetch base fee");
           }
           if (!queryEvmFeeMarketBaseFee.response) {
-            return {
+            return makeReturn({
               loadingState: "loading-block",
-            };
+            });
           }
           if (queryEvmFeeMarketBaseFee.isFetching) {
-            return {
-              loadingState: "loading",
-            };
+            priorIsLoadingState = true;
           }
         }
       } else {
@@ -1024,19 +1046,15 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         if (queryCosmos) {
           const queryFeeMarketGasPrices = queryCosmos.queryFeeMarketGasPrices;
           if (queryFeeMarketGasPrices.error) {
-            return {
-              warning: new Error("Failed to fetch gas prices"),
-            };
+            priorWarning = new Error("Failed to fetch gas prices");
           }
           if (!queryFeeMarketGasPrices.response) {
-            return {
+            return makeReturn({
               loadingState: "loading-block",
-            };
+            });
           }
           if (queryFeeMarketGasPrices.isFetching) {
-            return {
-              loadingState: "loading",
-            };
+            priorIsLoadingState = true;
           }
         }
       }
@@ -1075,11 +1093,14 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
           // Return only needed.
           // There is proceeding logic to validate the balance.
+          if (loadingState === "loading") {
+            priorIsLoadingState = true;
+          }
           if (error || loadingState) {
-            return {
+            return makeReturn({
               error,
               loadingState,
-            };
+            });
           }
         }
       }
@@ -1093,21 +1114,17 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
             ETH_FEE_HISTORY_NEWEST_BLOCK
           );
         if (blockQuery.error) {
-          return {
-            warning: new Error(
-              `Failed to fetch latest block. chain id: ${this.chainId}`
-            ),
-          };
+          priorWarning = new Error(
+            `Failed to fetch latest block. chain id: ${this.chainId}`
+          );
         }
         if (blockQuery.isFetching) {
-          return {
-            loadingState: "loading",
-          };
+          priorIsLoadingState = true;
         }
         if (!blockQuery.response) {
-          return {
+          return makeReturn({
             loadingState: "loading-block",
-          };
+          });
         }
 
         const feeHistoryQuery =
@@ -1121,45 +1138,37 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
           ethereumQueries.queryEthereumMaxPriorityFee;
 
         if (feeHistoryQuery.error && maxPriorityFeePerGasQuery.error) {
-          return {
-            warning: new Error(
-              `Failed to fetch both fee history and max priority fee. chain id: ${this.chainId}`
-            ),
-          };
+          priorWarning = new Error(
+            `Failed to fetch both fee history and max priority fee. chain id: ${this.chainId}`
+          );
         }
 
         if (
           feeHistoryQuery.isFetching ||
           maxPriorityFeePerGasQuery.isFetching
         ) {
-          return {
-            loadingState: "loading",
-          };
+          priorIsLoadingState = true;
         }
         if (!feeHistoryQuery.response || !maxPriorityFeePerGasQuery.response) {
-          return {
+          return makeReturn({
             loadingState: "loading-block",
-          };
+          });
         }
 
         const gasPriceQuery = ethereumQueries.queryEthereumGasPrice;
         if (gasPriceQuery.error) {
-          return {
-            warning: new Error(
-              `Failed to fetch gas price. chain id: ${this.chainId}`
-            ),
-          };
+          priorWarning = new Error(
+            `Failed to fetch gas price. chain id: ${this.chainId}`
+          );
         }
         if (gasPriceQuery.isFetching) {
-          return {
-            loadingState: "loading",
-          };
+          priorIsLoadingState = true;
         }
 
         if (!gasPriceQuery.response) {
-          return {
+          return makeReturn({
             loadingState: "loading-block",
-          };
+          });
         }
       }
     }
@@ -1203,39 +1212,40 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         );
 
       if (!bal) {
-        return {
-          warning: new Error(
-            `Can't parse the balance for ${need.currency.coinMinimalDenom}`
-          ),
-        };
+        priorWarning = new Error(
+          `Can't parse the balance for ${need.currency.coinMinimalDenom}`
+        );
       }
 
-      // XXX: AtomOne에서 fee top-up 시에 bal.error 또는 bal.response에 접근해도
-      //      bal이 observed 상태가 되지 않아서 fetch가 이뤄지지 않는 문제가 있음
-      //      아무리봐도 원인을 찾을 수 없기 때문에 일단 강제로 observed 상태로 만든다.
-      bal.waitResponse();
+      if (bal) {
+        // XXX: AtomOne에서 fee top-up 시에 bal.error 또는 bal.response에 접근해도
+        //      bal이 observed 상태가 되지 않아서 fetch가 이뤄지지 않는 문제가 있음
+        //      아무리봐도 원인을 찾을 수 없기 때문에 일단 강제로 observed 상태로 만든다.
+        bal.waitResponse();
 
-      if (bal.error) {
-        return {
-          warning: new Error("Failed to fetch balance"),
-        };
-      }
+        if (bal.error) {
+          priorWarning = new Error("Failed to fetch balance");
+        }
 
-      if (!bal.response) {
-        return {
-          loadingState: "loading-block",
-        };
-      }
+        if (!bal.response) {
+          return makeReturn({
+            loadingState: "loading-block",
+          });
+        }
 
-      if (new Int(bal.balance.toCoin().amount).lt(new Int(need.amount))) {
-        return {
-          error: new InsufficientFeeError("Insufficient fee"),
-          loadingState: bal.isFetching ? "loading" : undefined,
-        };
+        if (new Int(bal.balance.toCoin().amount).lt(new Int(need.amount))) {
+          if (bal.isFetching) {
+            priorIsLoadingState = true;
+          }
+
+          return makeReturn({
+            error: new InsufficientFeeError("Insufficient fee"),
+          });
+        }
       }
     }
 
-    return {};
+    return makeReturn({});
   }
 
   @computed
