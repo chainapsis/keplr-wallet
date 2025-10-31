@@ -414,6 +414,7 @@
 
   "page.wallet.change-name.previous-name-input-label": "Previous Wallet Name",
   "page.wallet.change-name.new-name-input-label": "New Wallet Name",
+  "page.wallet.change-name.min-length-error": "Wallet name must be at least 4 characters",
 
   "page.wallet.delete.warning-title": "Alert",
   "page.wallet.delete.warning-paragraph": "Make sure that you’ve backed up your recovery phrase and private key.",

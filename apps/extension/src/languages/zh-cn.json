@@ -372,6 +372,7 @@
 
   "page.wallet.change-name.previous-name-input-label": "原钱包名称",
   "page.wallet.change-name.new-name-input-label": "新钱包名称",
+  "page.wallet.change-name.min-length-error": "钱包名称至少需要4个字符",
 
   "page.wallet.delete.warning-title": "警告",
   "page.wallet.delete.warning-paragraph": "确保你已备份助记词和私钥。",

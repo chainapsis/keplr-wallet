@@ -19,6 +19,7 @@ export const TextInput = forwardRef<
   TextInputProps &
     React.InputHTMLAttributes<HTMLInputElement> & {
       inputStyle?: React.CSSProperties;
+      textInputContainerStyle?: React.CSSProperties;
     }
 >(
   (
@@ -38,6 +39,7 @@ export const TextInput = forwardRef<
       labelAlignment = "space-between",
       inputStyle,
       borderRadius,
+      textInputContainerStyle,
       ...props
     },
     ref
@@ -126,6 +128,7 @@ export const TextInput = forwardRef<
         <Styles.TextInputContainer
           paragraph={paragraph}
           error={error}
+          style={textInputContainerStyle}
           disabled={props.disabled}
           errorBorder={props.errorBorder}
           borderRadius={borderRadius}
