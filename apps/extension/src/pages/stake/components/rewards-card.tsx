@@ -1,43 +1,25 @@
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
-import { Column, Columns } from "../../../../components/column";
-import { Button } from "../../../../components/button";
-import { Stack } from "../../../../components/stack";
-import { Box } from "../../../../components/box";
-import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse";
+import { Column, Columns } from "../../../components/column";
+import { Stack } from "../../../components/stack";
+import { Box } from "../../../components/box";
+import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
+import { Body3, Subtitle2, Subtitle3 } from "../../../components/typography";
+import { ColorPalette } from "../../../styles";
+import styled, { useTheme } from "styled-components";
 import {
-  Body2,
-  Body3,
-  Subtitle2,
-  Subtitle3,
-} from "../../../../components/typography";
-import { ColorPalette } from "../../../../styles";
-import { ViewToken } from "../../index";
-import styled, { css, useTheme } from "styled-components";
-import {
-  ArrowDownIcon,
   CoinsPlusOutlineIcon,
   LoadingIcon,
   WarningIcon,
-} from "../../../../components/icon";
+} from "../../../components/icon";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../../../stores";
-import { CoinPretty, Dec, PricePretty } from "@keplr-wallet/unit";
-import { ModularChainInfo } from "@keplr-wallet/types";
-import { Tooltip } from "../../../../components/tooltip";
-import { Skeleton } from "../../../../components/skeleton";
-import { XAxis, YAxis } from "../../../../components/axis";
-import Color from "color";
-import { SpecialButton } from "../../../../components/special-button";
+import { useStore } from "../../../stores";
+import { Tooltip } from "../../../components/tooltip";
+import { Skeleton } from "../../../components/skeleton";
+import { XAxis, YAxis } from "../../../components/axis";
 import { FormattedMessage, useIntl } from "react-intl";
-import { CurrencyImageFallback } from "../../../../components/image";
+import { CurrencyImageFallback } from "../../../components/image";
+import { ClaimAllEachState } from "../../../hooks/claim";
 import {
-  ClaimAllEachState,
-  useCosmosClaimRewards,
-  useClaimAllEachState,
-  useStarknetClaimRewards,
-} from "../../../../hooks/claim";
-import {
-  useSpring,
   animated,
   useTransition,
   useSpringRef,
@@ -46,355 +28,31 @@ import {
 import {
   DescendantHeightPxRegistry,
   useVerticalSizeInternalContext,
-} from "../../../../components/transition/vertical-size/internal";
-import { NEUTRON_CHAIN_ID, NOBLE_CHAIN_ID } from "../../../../config.ui";
-import { Gutter } from "../../../../components/gutter";
-import { PortalTooltip } from "../../../../components/tooltip/portal";
+} from "../../../components/transition/vertical-size/internal";
+import { PortalTooltip } from "../../../components/tooltip/portal";
+import { useRewards, ViewClaimToken } from "../../../hooks/use-rewards";
+import { TextButton } from "../../../components/button-text";
 
-const USDN_CURRENCY = {
-  coinDenom: "USDN",
-  coinMinimalDenom: "uusdn",
-  coinDecimals: 6,
-};
-
-interface ViewClaimToken extends Omit<ViewToken, "chainInfo"> {
-  modularChainInfo: ModularChainInfo;
-  price?: PricePretty;
-  onClaimAll: (
-    chainId: string,
-    rewardToken: CoinPretty,
-    state: ClaimAllEachState
-  ) => void | Promise<void>;
-  onClaimSingle: (
-    chainId: string,
-    state: ClaimAllEachState
-  ) => void | Promise<void>;
-}
-
-const Styles = {
-  Container: styled.div<{ isNotReady?: boolean }>`
-    background-color: ${(props) =>
-      props.theme.mode === "light"
-        ? props.isNotReady
-          ? ColorPalette["skeleton-layer-0"]
-          : ColorPalette.white
-        : ColorPalette["gray-650"]};
-
-    box-shadow: ${(props) =>
-      props.theme.mode === "light" && !props.isNotReady
-        ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
-        : "none"};
-    padding: 0.75rem 0 0 0;
-    border-radius: 0.375rem;
-  `,
-  ExpandButton: styled(Box)<{ viewTokenCount: number }>`
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-height: 1.5rem;
-
-    cursor: pointer;
-
-    border-bottom-left-radius: 0.375rem;
-    border-bottom-right-radius: 0.375rem;
-
-    ${({ viewTokenCount }) => {
-      if (viewTokenCount === 0) {
-        return css`
-          cursor: not-allowed;
-        `;
-      }
-
-      return css`
-        :hover {
-          background-color: ${(props) =>
-            props.theme.mode === "light"
-              ? ColorPalette["gray-10"]
-              : Color(ColorPalette["gray-600"]).alpha(0.5).toString()};
-        }
-
-        :active {
-          background-color: ${(props) =>
-            props.theme.mode === "light"
-              ? ColorPalette["gray-50"]
-              : ColorPalette["gray-500"]};
-        }
-      `;
-    }};
-  `,
-  ItemContentBox: styled(Box)<{ showButton?: boolean; isLastItem?: boolean }>`
-    padding: 0.875rem 1rem;
-    padding-right: ${(props) => (props.showButton ? "0.625rem" : "1rem")};
-    border-radius: 0.375rem;
-
-    margin: 0 0.75rem;
-    margin-bottom: ${(props) => (props.isLastItem ? "0.75rem" : "0")};
-
-    &:hover {
-      background-color: ${(props) =>
-        props.theme.mode === "light"
-          ? ColorPalette["gray-10"]
-          : ColorPalette["gray-600"]};
-    }
-
-    &:active {
-      background-color: ${(props) =>
-        props.theme.mode === "light"
-          ? ColorPalette["gray-50"]
-          : ColorPalette["gray-550"]};
-    }
-  `,
-};
-
-const zeroDec = new Dec(0);
-
-export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
-  ({ isNotReady }) => {
-    const {
-      analyticsStore,
-      chainStore,
-      accountStore,
-      queriesStore,
-      starknetQueriesStore,
-      priceStore,
-      keyRingStore,
-      uiConfigStore,
-    } = useStore();
+export const RewardsCard: FunctionComponent<{ isNotReady?: boolean }> =
+  observer(({ isNotReady }) => {
+    const { analyticsStore, uiConfigStore } = useStore();
     const intl = useIntl();
     const theme = useTheme();
 
     const [isExpanded, setIsExpanded] = useState(false);
-    const { states, getClaimAllEachState } = useClaimAllEachState();
+    const [disableHover, setDisableHover] = useState(false);
 
-    const { handleCosmosClaimAllEach, handleCosmosClaimSingle } =
-      useCosmosClaimRewards();
-    const { handleStarknetClaimAllEach, handleStarknetClaimSingle } =
-      useStarknetClaimRewards();
-
-    const viewClaimTokens: ViewClaimToken[] = (() => {
-      const res: ViewClaimToken[] = [];
-      for (const modularChainInfo of chainStore.modularChainInfosInUI) {
-        const chainId = modularChainInfo.chainId;
-        const account = accountStore.getAccount(chainId);
-        const isNeutron = chainId === NEUTRON_CHAIN_ID;
-
-        if (isNeutron && account.bech32Address) {
-          const queries = queriesStore.get(chainId);
-          const queryNeutronRewardInner =
-            queries.cosmwasm.queryNeutronStakingRewards.getRewardFor(
-              account.bech32Address
-            );
-          const reward = queryNeutronRewardInner.pendingReward;
-
-          if (reward && reward.toDec().gt(zeroDec)) {
-            res.push({
-              token: reward,
-              price: priceStore.calculatePrice(reward),
-              modularChainInfo: modularChainInfo,
-              isFetching: queryNeutronRewardInner.isFetching,
-              error: queryNeutronRewardInner.error,
-              onClaimAll: handleCosmosClaimAllEach,
-              onClaimSingle: handleCosmosClaimSingle,
-            });
-          }
-        } else if ("cosmos" in modularChainInfo) {
-          const isEVMOnly = chainStore.isEvmOnlyChain(chainId);
-          if (isEVMOnly) {
-            continue;
-          }
-
-          const accountAddress = account.bech32Address;
-          const chainInfo = chainStore.getChain(chainId);
-          const queries = queriesStore.get(chainId);
-
-          if (chainId === NOBLE_CHAIN_ID) {
-            const queryYield =
-              queries.noble.queryYield.getQueryBech32Address(accountAddress);
-            const usdnCurrency =
-              chainInfo.findCurrency("uusdn") || USDN_CURRENCY;
-            const rawAmount = queryYield.claimableAmount;
-            const amount = new CoinPretty(usdnCurrency, rawAmount);
-            if (amount.toDec().gt(new Dec(0))) {
-              res.push({
-                token: amount,
-                price: priceStore.calculatePrice(amount),
-                modularChainInfo: modularChainInfo,
-                isFetching: queryYield.isFetching,
-                error: queryYield.error,
-                onClaimAll: handleCosmosClaimAllEach,
-                onClaimSingle: handleCosmosClaimSingle,
-              });
-            }
-          }
-
-          const queryRewards =
-            queries.cosmos.queryRewards.getQueryBech32Address(accountAddress);
-
-          const targetDenom = (() => {
-            if (chainInfo.chainIdentifier === "dydx-mainnet") {
-              return "ibc/8E27BA2D5493AF5636760E354E46004562C46AB7EC0CC4C1CA14E9E20E2545B5";
-            }
-
-            if (chainInfo.chainIdentifier === "elys") {
-              return "ueden";
-            }
-
-            return chainInfo.stakeCurrency?.coinMinimalDenom;
-          })();
-
-          if (targetDenom) {
-            const currency = chainInfo.findCurrency(targetDenom);
-            if (currency) {
-              const reward = queryRewards.rewards.find(
-                (r) => r.currency.coinMinimalDenom === targetDenom
-              );
-              if (reward) {
-                res.push({
-                  token: reward,
-                  price: priceStore.calculatePrice(reward),
-                  modularChainInfo: modularChainInfo,
-                  isFetching: queryRewards.isFetching,
-                  error: queryRewards.error,
-                  onClaimAll: handleCosmosClaimAllEach,
-                  onClaimSingle: handleCosmosClaimSingle,
-                });
-              }
-            }
-          }
-        } else if ("starknet" in modularChainInfo) {
-          if (chainId !== "starknet:SN_MAIN") {
-            continue;
-          }
-
-          const starknetChainInfo = chainStore.getModularChain(chainId);
-          const queryStakingInfo = starknetQueriesStore
-            .get(chainId)
-            .stakingInfoManager.getStakingInfo(
-              accountStore.getAccount(starknetChainInfo.chainId)
-                .starknetHexAddress
-            );
-
-          const totalClaimableRewardAmount =
-            queryStakingInfo?.totalClaimableRewardAmount;
-
-          if (totalClaimableRewardAmount?.toDec().gt(zeroDec)) {
-            res.push({
-              token: totalClaimableRewardAmount,
-              price: priceStore.calculatePrice(totalClaimableRewardAmount),
-              modularChainInfo: starknetChainInfo,
-              isFetching: queryStakingInfo?.isFetching ?? false,
-              error: queryStakingInfo?.error,
-              onClaimAll: handleStarknetClaimAllEach,
-              onClaimSingle: handleStarknetClaimSingle,
-            });
-          }
-        }
-      }
-
-      return res
-        .filter((viewToken) => viewToken.token.toDec().gt(zeroDec))
-        .sort((a, b) => {
-          const aPrice = priceStore.calculatePrice(a.token)?.toDec() ?? zeroDec;
-          const bPrice = priceStore.calculatePrice(b.token)?.toDec() ?? zeroDec;
-
-          if (aPrice.equals(bPrice)) {
-            return 0;
-          }
-          return aPrice.gt(bPrice) ? -1 : 1;
-        })
-        .sort((a, b) => {
-          const aHasError =
-            getClaimAllEachState(a.modularChainInfo.chainId).failedReason !=
-            null;
-          const bHasError =
-            getClaimAllEachState(b.modularChainInfo.chainId).failedReason !=
-            null;
-
-          if (aHasError || bHasError) {
-            if (aHasError && bHasError) {
-              return 0;
-            } else if (aHasError) {
-              return 1;
-            } else {
-              return -1;
-            }
-          }
-
-          return 0;
-        });
-    })();
-
-    const totalPrice = (() => {
-      const fiatCurrency = priceStore.getFiatCurrency(
-        priceStore.defaultVsCurrency
-      );
-      if (!fiatCurrency) {
-        return undefined;
-      }
-
-      let res = new PricePretty(fiatCurrency, 0);
-
-      for (const viewClaimToken of viewClaimTokens) {
-        const price = priceStore.calculatePrice(viewClaimToken.token);
-        if (price) {
-          res = res.add(price);
-        }
-      }
-
-      return res;
-    })();
-
-    const isLedger =
-      keyRingStore.selectedKeyInfo &&
-      keyRingStore.selectedKeyInfo.type === "ledger";
-
-    const isKeystone =
-      keyRingStore.selectedKeyInfo &&
-      keyRingStore.selectedKeyInfo.type === "keystone";
-
-    const claimAll = () => {
-      analyticsStore.logEvent("click_claimAll");
-
-      if (viewClaimTokens.length > 0) {
-        setIsExpanded(true);
-      }
-
-      for (const viewClaimToken of viewClaimTokens) {
-        const state = getClaimAllEachState(
-          viewClaimToken.modularChainInfo.chainId
-        );
-
-        viewClaimToken.onClaimAll(
-          viewClaimToken.modularChainInfo.chainId,
-          viewClaimToken.token,
-          state
-        );
-      }
-    };
-
-    const claimAllDisabled = (() => {
-      if (viewClaimTokens.length === 0) {
-        return true;
-      }
-
-      for (const viewClaimToken of viewClaimTokens) {
-        if (viewClaimToken.token.toDec().gt(new Dec(0))) {
-          return false;
-        }
-      }
-
-      return true;
-    })();
-
-    const claimAllIsLoading = (() => {
-      for (const chainInfo of chainStore.chainInfosInUI) {
-        const state = getClaimAllEachState(chainInfo.chainId);
-        if (state.isLoading) {
-          return true;
-        }
-      }
-      return false;
-    })();
+    const {
+      viewClaimTokens,
+      totalPrice,
+      isLedger,
+      isKeystone,
+      claimAll,
+      claimAllDisabled,
+      claimAllIsLoading,
+      states,
+      getClaimAllEachState,
+    } = useRewards();
 
     useEffect(() => {
       if (isExpanded) {
@@ -410,21 +68,29 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isExpanded]);
 
-    const arrowAnimation = useSpring({
-      transform: isExpanded ? "rotate(-180deg)" : "rotate(0deg)",
-      config: { tension: 300, friction: 25, clamp: true },
-    });
-
     return (
-      <Styles.Container isNotReady={isNotReady}>
-        <Box paddingX="1rem" paddingBottom="0.25rem">
-          <Columns sum={1} alignY="center">
+      <Styles.Container
+        isNotReady={isNotReady}
+        onClick={() => {
+          analyticsStore.logEvent("click_claimExpandButton");
+          if (viewClaimTokens.length > 0) {
+            setIsExpanded(!isExpanded);
+          }
+        }}
+        isExpanded={isExpanded}
+        disableHover={disableHover}
+      >
+        <Columns sum={1} alignY="center">
+          <Box paddingY="0.875rem" paddingX="1rem">
             <Stack gutter="0.5rem">
               <YAxis alignX="left">
                 <Skeleton layer={1} isNotReady={isNotReady}>
-                  <Body2 style={{ color: ColorPalette["gray-300"] }}>
-                    <FormattedMessage id="page.main.components.claim-all.title" />
-                  </Body2>
+                  <XAxis alignY="center">
+                    <Body3 style={{ color: ColorPalette["gray-300"] }}>
+                      <FormattedMessage id="page.main.components.rewards-card.title" />
+                    </Body3>
+                    <ArrowIcon direction={isExpanded ? "up" : "down"} />
+                  </XAxis>
                 </Skeleton>
               </YAxis>
 
@@ -450,72 +116,38 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
                 </Skeleton>
               </YAxis>
             </Stack>
+          </Box>
 
-            <Column weight={1} />
+          <Column weight={1} />
 
-            <Skeleton type="button" layer={1} isNotReady={isNotReady}>
-              {/*
+          <Skeleton type="button" layer={1} isNotReady={isNotReady}>
+            {/*
                  ledger일 경우 특수한 행동을 하진 못하고 그냥 collapse를 펼치기만 한다.
                  특수한 기능이 없다는 것을 암시하기 위해서 ledger일때는 일반 버튼으로 처리한다.
                */}
-              {isLedger || isKeystone ? (
-                <Button
+            {isLedger || isKeystone ? null : (
+              <div
+                onMouseEnter={() => setDisableHover(true)}
+                onMouseLeave={() => setDisableHover(false)}
+              >
+                <TextButton
                   text={intl.formatMessage({
-                    id: isExpanded
-                      ? "page.main.components.hide-all.button"
-                      : "page.main.components.show-all.button",
+                    id: "page.main.components.rewards-card.claim-all-button",
                   })}
                   size="small"
-                  isLoading={claimAllIsLoading}
-                  disabled={claimAllDisabled}
-                  onClick={() => setIsExpanded((prev) => !prev)}
-                  color="secondary"
-                  right={<ChevronIcon direction={isExpanded ? "up" : "down"} />}
-                />
-              ) : (
-                <SpecialButton
-                  text={intl.formatMessage({
-                    id: "page.main.components.claim-all.button",
-                  })}
-                  size="small"
-                  isLoading={claimAllIsLoading}
                   disabled={claimAllDisabled}
                   onClick={claimAll}
+                  color="blue"
+                  right={
+                    claimAllIsLoading ? (
+                      <LoadingIcon width="1rem" height="1rem" />
+                    ) : null
+                  }
                 />
-              )}
-            </Skeleton>
-          </Columns>
-        </Box>
-
-        {isLedger || isKeystone ? (
-          <Gutter size="0.75rem" />
-        ) : (
-          <Styles.ExpandButton
-            paddingX="0.125rem"
-            alignX="center"
-            viewTokenCount={viewClaimTokens.length}
-            onClick={() => {
-              analyticsStore.logEvent("click_claimExpandButton");
-              if (viewClaimTokens.length > 0) {
-                setIsExpanded(!isExpanded);
-              }
-            }}
-          >
-            <Box
-              style={{
-                opacity: isNotReady ? 0 : 1,
-              }}
-            >
-              <animated.div style={arrowAnimation}>
-                <ArrowDownIcon
-                  width="1.25rem"
-                  height="1.25rem"
-                  color={ColorPalette["gray-300"]}
-                />
-              </animated.div>
-            </Box>
-          </Styles.ExpandButton>
-        )}
+              </div>
+            )}
+          </Skeleton>
+        </Columns>
 
         <VerticalCollapseTransition
           collapsed={!isExpanded}
@@ -545,8 +177,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
         </VerticalCollapseTransition>
       </Styles.Container>
     );
-  }
-);
+  });
 
 const ViewClaimTokenItem: FunctionComponent<{
   viewClaimToken: ViewClaimToken;
@@ -901,7 +532,7 @@ const ViewClaimTokenItemContent: FunctionComponent<{
                         ) : isLedger || isKeystone ? (
                           <PortalTooltip
                             content={intl.formatMessage({
-                              id: "page.main.components.claim-all.claim-button",
+                              id: "page.stake.components.rewards-card.claim-button",
                             })}
                             isAlwaysOpen={isHover}
                           >
@@ -922,7 +553,7 @@ const ViewClaimTokenItemContent: FunctionComponent<{
   }
 );
 
-const ChevronIcon = ({ direction }: { direction: "up" | "down" }) => {
+const ArrowIcon = ({ direction }: { direction: "up" | "down" }) => {
   return (
     <div
       style={{
@@ -930,27 +561,24 @@ const ChevronIcon = ({ direction }: { direction: "up" | "down" }) => {
         transition: "transform 0.3s ease",
       }}
     >
-      <ChevronDownIcon />
+      <ArrowDownIcon />
     </div>
   );
 };
 
-const ChevronDownIcon = () => {
+const ArrowDownIcon = () => {
   return (
     <div>
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="12"
-        height="13"
-        viewBox="0 0 12 13"
-        style={{ fill: "none", stroke: "none" }}
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+        fill="none"
       >
         <path
-          d="M9.5 5L5.75 8L2 5"
-          stroke={ColorPalette["gray-300"]}
-          strokeWidth="2.08333"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+          d="M8.78087 10.0239C8.38054 10.5243 7.61946 10.5243 7.21913 10.0239L5.29976 7.6247C4.77595 6.96993 5.24212 6 6.08063 6L9.91938 6C10.7579 6 11.2241 6.96993 10.7002 7.6247L8.78087 10.0239Z"
+          fill={ColorPalette["gray-300"]}
         />
       </svg>
     </div>
@@ -970,4 +598,53 @@ const ClaimCoinIcon: FunctionComponent<{
       }
     />
   );
+};
+
+const Styles = {
+  Container: styled.div<{
+    isNotReady?: boolean;
+    isExpanded?: boolean;
+    disableHover?: boolean;
+  }>`
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? props.isNotReady
+          ? ColorPalette["skeleton-layer-0"]
+          : ColorPalette.white
+        : ColorPalette["gray-650"]};
+
+    box-shadow: ${(props) =>
+      props.theme.mode === "light" && !props.isNotReady
+        ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+        : "none"};
+    border-radius: 1.25rem;
+
+    cursor: pointer;
+
+    &:hover {
+      opacity: ${(props) => (props.isExpanded || props.disableHover ? 1 : 0.7)};
+    }
+  `,
+  ItemContentBox: styled(Box)<{ showButton?: boolean; isLastItem?: boolean }>`
+    padding: 0.875rem 1rem;
+    padding-right: ${(props) => (props.showButton ? "0.625rem" : "1rem")};
+    border-radius: 1rem;
+
+    margin: 0 0.5rem;
+    margin-bottom: ${(props) => (props.isLastItem ? "0.75rem" : "0")};
+
+    &:hover {
+      background-color: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-10"]
+          : ColorPalette["gray-600"]};
+    }
+
+    &:active {
+      background-color: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-50"]
+          : ColorPalette["gray-550"]};
+    }
+  `,
 };

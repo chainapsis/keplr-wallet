@@ -10,7 +10,6 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import {
   // Buttons,
-  ClaimAll,
   CopyAddress,
   IBCTransferView,
   BuyCryptoModal,
@@ -584,8 +583,6 @@ export const MainPage: FunctionComponent<{
               </Box>
             </StakeWithKeplrDashboardButton>
           ) : null}
-
-          <ClaimAll isNotReady={isNotReady} />
 
           <IbcHistoryView isNotReady={isNotReady} />
           {/*
