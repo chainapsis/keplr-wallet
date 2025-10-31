@@ -77,6 +77,10 @@ export class TokenERC20Service {
       const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
 
       this.validateChainInfo(chainInfo);
+    } else if ("evm" in modularChainInfo) {
+      if (modularChainInfo.evm == null) {
+        throw new Error("EVM chain info is not defined");
+      }
     } else if ("starknet" in modularChainInfo) {
       if (modularChainInfo.starknet == null) {
         throw new Error("Starknet chain info is not defined");
@@ -140,6 +144,10 @@ export class TokenERC20Service {
     if ("cosmos" in modularChainInfo) {
       const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
       this.validateChainInfo(chainInfo);
+    } else if ("evm" in modularChainInfo) {
+      if (modularChainInfo.evm == null) {
+        throw new Error("EVM chain info is not defined");
+      }
     } else if ("starknet" in modularChainInfo) {
       if (modularChainInfo.starknet == null) {
         throw new Error("Starknet chain info is not defined");

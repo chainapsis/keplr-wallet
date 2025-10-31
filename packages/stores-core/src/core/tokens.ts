@@ -174,6 +174,20 @@ export class TokensStore {
 
           modularChainInfoImpl.addCurrencies("starknet", ...adds);
         }
+      } else if ("evm" in modularChainInfoImpl.embedded) {
+        const chainIdentifier = ChainIdHelper.parse(
+          modularChainInfoImpl.chainId
+        );
+
+        const tokens = this.tokenMap.get(chainIdentifier.identifier) ?? [];
+
+        const adds: AppCurrency[] = [];
+
+        for (const token of tokens) {
+          adds.push(token.currency);
+        }
+
+        modularChainInfoImpl.addCurrencies("evm", ...adds);
       }
     }
 
@@ -205,7 +219,7 @@ export class TokensStore {
   getTokens(chainId: string): ReadonlyArray<TokenInfo> {
     const bech32Address = this.accountStore.getAccount(chainId).bech32Address;
     const modularChainInfo = this.chainStore.getModularChain(chainId);
-    if ("cosmos" in modularChainInfo) {
+    if ("cosmos" in modularChainInfo || "evm" in modularChainInfo) {
       const chainInfo = this.chainStore.getChain(chainId);
 
       const hasBech32Config = chainInfo.bech32Config != null;
@@ -263,44 +277,28 @@ export class TokensStore {
         throw new Error("Account not initialized");
       }
 
-      const chainInfo = this.chainStore.getChain(chainId);
-      const isEvmChain = chainInfo.evm != null;
-      const hasBech32Config = chainInfo.bech32Config != null;
+      const hasBech32Config = modularChainInfo.cosmos.bech32Config != null;
       const associatedAccountAddress = hasBech32Config
         ? Buffer.from(
             Bech32Address.fromBech32(
               bech32Address,
-              chainInfo.bech32Config.bech32PrefixAccAddr
+              modularChainInfo.cosmos.bech32Config.bech32PrefixAccAddr
             ).address
           ).toString("hex")
         : "";
 
-      const msg = isEvmChain
-        ? new AddERC20TokenMsg(chainId, currency)
-        : new AddTokenMsg(chainId, associatedAccountAddress, currency);
+      const msg = new AddTokenMsg(chainId, associatedAccountAddress, currency);
       const res = await this.requester.sendMessage(BACKGROUND_PORT, msg);
       runInAction(() => {
-        const newTokenMap = new Map(this.tokenMap);
-        const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId);
-        const newTokens = res[chainIdentifier.identifier];
-        if (newTokens) {
-          newTokenMap.set(chainIdentifier.identifier, newTokens);
-        }
-
-        this.tokenMap = newTokenMap;
+        const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
+        this.updateTokenMap(chainIdentifier, res[chainIdentifier]);
       });
-    } else if ("starknet" in modularChainInfo) {
+    } else if ("evm" in modularChainInfo || "starknet" in modularChainInfo) {
       const msg = new AddERC20TokenMsg(chainId, currency);
       const res = await this.requester.sendMessage(BACKGROUND_PORT, msg);
       runInAction(() => {
-        const newTokenMap = new Map(this.tokenMap);
-        const chainIdentifier = ChainIdHelper.parse(modularChainInfo.chainId);
-        const newTokens = res[chainIdentifier.identifier];
-        if (newTokens) {
-          newTokenMap.set(chainIdentifier.identifier, newTokens);
-        }
-
-        this.tokenMap = newTokenMap;
+        const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
+        this.updateTokenMap(chainIdentifier, res[chainIdentifier]);
       });
     } else {
       throw new Error(`Unsupported chain: ${chainId}`);
@@ -317,33 +315,23 @@ export class TokensStore {
     })();
 
     const modularChainInfo = this.chainStore.getModularChain(chainId);
-    if ("cosmos" in modularChainInfo) {
-      const chainInfo = this.chainStore.getChain(chainId);
-      const isEvmChain = chainInfo.evm !== undefined;
 
-      const msg = isEvmChain
-        ? new RemoveERC20TokenMsg(chainId, contractAddress)
-        : new RemoveTokenMsg(
-            chainId,
-            tokenInfo.associatedAccountAddress ?? "",
-            contractAddress
-          );
+    if ("cosmos" in modularChainInfo) {
+      const msg = new RemoveTokenMsg(
+        chainId,
+        tokenInfo.associatedAccountAddress ?? "",
+        contractAddress
+      );
       const res = await this.requester.sendMessage(BACKGROUND_PORT, msg);
       runInAction(() => {
         // Remove 이후에는 지워진 토큰에 대한 싱크를 맞추기 위해서 clearTokensFromChainInfos를 호출한다.
         // 그냥 다 지우고 다시 다 설정하는 방식임.
         this.clearTokensFromChainInfos();
 
-        const newTokenMap = new Map(this.tokenMap);
-        const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId);
-        const newTokens = res[chainIdentifier.identifier];
-        if (newTokens) {
-          newTokenMap.set(chainIdentifier.identifier, newTokens);
-        }
-
-        this.tokenMap = newTokenMap;
+        const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
+        this.updateTokenMap(chainIdentifier, res[chainIdentifier]);
       });
-    } else if ("starknet" in modularChainInfo) {
+    } else if ("evm" in modularChainInfo || "starknet" in modularChainInfo) {
       const msg = new RemoveERC20TokenMsg(chainId, contractAddress);
 
       const res = await this.requester.sendMessage(BACKGROUND_PORT, msg);
@@ -352,18 +340,21 @@ export class TokensStore {
         // 그냥 다 지우고 다시 다 설정하는 방식임.
         this.clearTokensFromChainInfos();
 
-        const newTokenMap = new Map(this.tokenMap);
-        const chainIdentifier = ChainIdHelper.parse(modularChainInfo.chainId);
-        const newTokens = res[chainIdentifier.identifier];
-        if (newTokens) {
-          newTokenMap.set(chainIdentifier.identifier, newTokens);
-        }
-
-        this.tokenMap = newTokenMap;
+        const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
+        this.updateTokenMap(chainIdentifier, res[chainIdentifier]);
       });
     } else {
       throw new Error(`Unsupported chain: ${chainId}`);
     }
+  }
+
+  private updateTokenMap(chainIdentifier: string, newTokens?: TokenInfo[]) {
+    const newTokenMap = new Map(this.tokenMap);
+    if (newTokens) {
+      newTokenMap.set(chainIdentifier, newTokens);
+    }
+
+    this.tokenMap = newTokenMap;
   }
 
   get waitingSuggestedToken():
