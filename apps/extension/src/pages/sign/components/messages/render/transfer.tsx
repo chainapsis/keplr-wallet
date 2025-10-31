@@ -75,7 +75,9 @@ const TransferMessagePretty: FunctionComponent<{
 
   const [isOpen, setIsOpen] = useState(false);
 
-  const currency = chainStore.getChain(chainId).forceFindCurrency(amount.denom);
+  const currency = chainStore
+    .getModularChainInfoImpl(chainId)
+    .forceFindCurrency(amount.denom);
   const coinPretty = new CoinPretty(currency, amount.amount);
 
   return (

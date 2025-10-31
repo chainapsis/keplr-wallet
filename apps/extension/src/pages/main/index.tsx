@@ -36,7 +36,7 @@ import { StakedTabView } from "./staked";
 import { SearchTextInput } from "../../components/input";
 import { animated, useSpringValue, easings } from "@react-spring/web";
 import { defaultSpringConfig } from "../../styles/spring";
-import { IChainInfoImpl, QueryError } from "@keplr-wallet/stores";
+import { QueryError } from "@keplr-wallet/stores";
 import { Skeleton } from "../../components/skeleton";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
@@ -48,10 +48,7 @@ import { DepositModal } from "./components/deposit-modal";
 import { MainHeaderLayout, MainHeaderLayoutRef } from "./layouts/header";
 import { amountToAmbiguousAverage, isRunningInSidePanel } from "../../utils";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
-import {
-  ChainInfoWithCoreTypes,
-  LogAnalyticsEventMsg,
-} from "@keplr-wallet/background";
+import { LogAnalyticsEventMsg } from "@keplr-wallet/background";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { useBuySupportServiceInfos } from "../../hooks/use-buy-support-service-infos";
 import { BottomTabsHeightRem } from "../../bottom-tabs";
@@ -64,7 +61,7 @@ import { INITIA_CHAIN_ID, NEUTRON_CHAIN_ID } from "../../config.ui";
 
 export interface ViewToken {
   token: CoinPretty;
-  chainInfo: IChainInfoImpl | ModularChainInfo;
+  chainInfo: ModularChainInfo;
   isFetching: boolean;
   error: QueryError<any> | undefined;
 }
@@ -132,10 +129,7 @@ export const MainPage: FunctionComponent<{
     let result: PricePretty | undefined;
     for (const bal of hugeQueriesStore.allKnownBalances) {
       // TODO: 이거 starknet에서도 embedded를 확인할 수 있도록 수정해야함.
-      if (!("currencies" in bal.chainInfo)) {
-        continue;
-      }
-      if (!(bal.chainInfo.embedded as ChainInfoWithCoreTypes).embedded) {
+      if (!("cosmos" in bal.chainInfo)) {
         continue;
       }
       if (bal.price) {
@@ -188,10 +182,7 @@ export const MainPage: FunctionComponent<{
   const stakedTotalPriceEmbedOnlyUSD = useMemo(() => {
     let result: PricePretty | undefined;
     for (const bal of hugeQueriesStore.delegations) {
-      if (!("currencies" in bal.chainInfo)) {
-        continue;
-      }
-      if (!(bal.chainInfo.embedded as ChainInfoWithCoreTypes).embedded) {
+      if (!("cosmos" in bal.chainInfo)) {
         continue;
       }
       if (bal.price) {
@@ -206,10 +197,7 @@ export const MainPage: FunctionComponent<{
       }
     }
     for (const bal of hugeQueriesStore.unbondings) {
-      if (!("currencies" in bal.chainInfo)) {
-        continue;
-      }
-      if (!(bal.chainInfo.embedded as ChainInfoWithCoreTypes).embedded) {
+      if (!("cosmos" in bal.chainInfo)) {
         continue;
       }
       if (bal.price) {

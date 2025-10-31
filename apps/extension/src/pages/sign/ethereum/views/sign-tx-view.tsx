@@ -6,38 +6,37 @@ import React, {
   useState,
 } from "react";
 import { SignEthereumInteractionStore } from "@keplr-wallet/stores-core";
-import { Box } from "../../../components/box";
-import { XAxis } from "../../../components/axis";
-import { Body2, Body3, H5 } from "../../../components/typography";
-import { ColorPalette } from "../../../styles";
+import { Box } from "../../../../components/box";
+import { XAxis } from "../../../../components/axis";
+import { Body2, Body3, H5 } from "../../../../components/typography";
+import { ColorPalette } from "../../../../styles";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../../stores";
-import { BackButton } from "../../../layouts/header/components";
-import { HeaderLayout } from "../../../layouts/header";
-import { useInteractionInfo } from "../../../hooks";
+import { useStore } from "../../../../stores";
+import { BackButton } from "../../../../layouts/header/components";
+import { HeaderLayout } from "../../../../layouts/header";
+import { useInteractionInfo } from "../../../../hooks";
 import { KeplrError } from "@keplr-wallet/router";
-import { ErrModuleLedgerSign } from "../utils/ledger-types";
+import { ErrModuleLedgerSign } from "../../utils/ledger-types";
 import { Buffer } from "buffer/";
-import { LedgerGuideBox } from "../components/ledger-guide-box";
-import { KeystoneUSBBox } from "../components/keystone-usb-box";
-import { EthSignType } from "@keplr-wallet/types";
+import { LedgerGuideBox } from "../../components/ledger-guide-box";
+import { KeystoneUSBBox } from "../../components/keystone-usb-box";
 import {
   handleEthereumPreSignByKeystone,
   handleEthereumPreSignByLedger,
-} from "../utils/handle-eth-sign";
+} from "../../utils/handle-eth-sign";
 import { FormattedMessage, useIntl } from "react-intl";
-import { ErrModuleKeystoneSign, KeystoneUR } from "../utils/keystone";
-import { KeystoneSign } from "../components/keystone";
+import { ErrModuleKeystoneSign, KeystoneUR } from "../../utils/keystone";
+import { KeystoneSign } from "../../components/keystone";
 import { useTheme } from "styled-components";
 import SimpleBar from "simplebar-react";
-import { ViewDataButton } from "../components/view-data-button";
+import { ViewDataButton } from "../../components/view-data-button";
 import { UnsignedTransaction } from "@ethersproject/transactions";
-import { defaultRegistry } from "../components/eth-tx/registry";
-import { ChainImageFallback } from "../../../components/image";
-import { Gutter } from "../../../components/gutter";
-import { useUnmount } from "../../../hooks/use-unmount";
-import { FeeSummary } from "../components/fee-summary";
-import { FeeControl } from "../../../components/input/fee-control";
+import { defaultRegistry } from "../../components/eth-tx/registry";
+import { ChainImageFallback } from "../../../../components/image";
+import { Gutter } from "../../../../components/gutter";
+import { useUnmount } from "../../../../hooks/use-unmount";
+import { FeeSummary } from "../../components/fee-summary";
+import { FeeControl } from "../../../../components/input/fee-control";
 import {
   useAmountConfig,
   useFeeConfig,
@@ -46,24 +45,17 @@ import {
   useTxConfigsValidate,
   useZeroAllowedGasConfig,
 } from "@keplr-wallet/hooks";
-import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
-import { EthTxBase } from "../components/eth-tx/render/tx-base";
+import { handleExternalInteractionWithNoProceedNext } from "../../../../utils";
+import { EthTxBase } from "../../components/eth-tx/render/tx-base";
 import { MemoryKVStore } from "@keplr-wallet/common";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
-import { Column, Columns } from "../../../components/column";
+import { Column, Columns } from "../../../../components/column";
 import { useNavigate } from "react-router";
-import { ApproveIcon, CancelIcon } from "../../../components/button";
-import { EthereumArbitrarySignPage } from "./sign-arbitrary-page";
-import { HeaderProps } from "../../../layouts/header/types";
+import { ApproveIcon, CancelIcon } from "../../../../components/button";
+import { HeaderProps } from "../../../../layouts/header/types";
 import { getKeplrFromWindow } from "@keplr-wallet/stores";
 
-/**
- * CosmosTxView의 주석을 꼭 참고하셈
- * 이 View는 아직 실험적이고 임시로 구현한거임
- * evmos에서 ADR-036 view랑 똑같이 구현해놔서 그게 마음에 안들어서 2.0에서 잠시 뺐다가
- * 쓰는 사람들이 약간 있길래 최소한의 UI로 먼저 구현함
- */
-export const EthereumSigningView: FunctionComponent<{
+export const EthereumSignTxView: FunctionComponent<{
   interactionData: NonNullable<SignEthereumInteractionStore["waitingData"]>;
 }> = observer(({ interactionData }) => {
   const {
@@ -90,16 +82,9 @@ export const EthereumSigningView: FunctionComponent<{
   const { message, signType, signer, chainId } = interactionData.data;
 
   const account = accountStore.getAccount(chainId);
-  const signerInfo = {
-    name:
-      typeof interactionData.data.keyInsensitive["keyRingName"] === "string"
-        ? interactionData.data.keyInsensitive["keyRingName"]
-        : "",
-    address: interactionData.data.signer || "",
-  };
-
   const ethereumAccount = ethereumAccountStore.getAccount(chainId);
-  const chainInfo = chainStore.getChain(chainId);
+  const chainInfo = chainStore.getModularChain(chainId);
+  const modularChainInfoImpl = chainStore.getModularChainInfoImpl(chainId);
 
   const senderConfig = useSenderConfig(chainStore, chainId, signer);
   const gasConfig = useZeroAllowedGasConfig(chainStore, chainId, 0);
@@ -107,7 +92,8 @@ export const EthereumSigningView: FunctionComponent<{
     chainStore,
     queriesStore,
     chainId,
-    senderConfig
+    senderConfig,
+    false
   );
   const feeConfig = useFeeConfig(
     chainStore,
@@ -120,7 +106,6 @@ export const EthereumSigningView: FunctionComponent<{
 
   const [signingDataBuff, setSigningDataBuff] = useState(Buffer.from(message));
   const [preferNoSetFee, setPreferNoSetFee] = useState<boolean>(false);
-  const isTxSigning = signType === EthSignType.TRANSACTION;
 
   const gasSimulator = useGasSimulator(
     new MemoryKVStore("gas-simulator.ethereum.sign"),
@@ -130,13 +115,7 @@ export const EthereumSigningView: FunctionComponent<{
     feeConfig,
     "evm/native",
     () => {
-      if (!isTxSigning) {
-        throw new Error(
-          "Gas simulator is only working for transaction signing"
-        );
-      }
-
-      if (chainInfo.evm == null) {
+      if (!("evm" in chainInfo) || chainInfo.evm == null) {
         throw new Error("Gas simulator is only working with EVM info");
       }
 
@@ -154,70 +133,60 @@ export const EthereumSigningView: FunctionComponent<{
   );
 
   const { maxFeePerGas, maxPriorityFeePerGas, gasPrice } = (() => {
-    if (isTxSigning) {
-      const { maxFeePerGas, maxPriorityFeePerGas, gasPrice } =
-        feeConfig.getEIP1559TxFees(
-          feeConfig.type === "manual"
-            ? uiConfigStore.lastFeeOption || "average"
-            : feeConfig.type
-        );
+    const { maxFeePerGas, maxPriorityFeePerGas, gasPrice } =
+      feeConfig.getEIP1559TxFees(
+        feeConfig.type === "manual"
+          ? uiConfigStore.lastFeeOption || "average"
+          : feeConfig.type
+      );
 
-      return maxFeePerGas && maxPriorityFeePerGas
-        ? {
-            maxFeePerGas: `0x${BigInt(
-              maxFeePerGas.truncate().toString()
-            ).toString(16)}`,
-            maxPriorityFeePerGas: `0x${BigInt(
-              maxPriorityFeePerGas.truncate().toString()
-            ).toString(16)}`,
-            gasPrice: undefined,
-          }
-        : {
-            maxFeePerGas: undefined,
-            maxPriorityFeePerGas: undefined,
-            gasPrice: `0x${BigInt(
-              gasPrice?.truncate().toString() ?? 0
-            ).toString(16)}`,
-          };
-    }
-
-    return {
-      maxFeePerGas: undefined,
-      maxPriorityFeePerGas: undefined,
-      gasPrice: undefined,
-    };
+    return maxFeePerGas && maxPriorityFeePerGas
+      ? {
+          maxFeePerGas: `0x${BigInt(
+            maxFeePerGas.truncate().toString()
+          ).toString(16)}`,
+          maxPriorityFeePerGas: `0x${BigInt(
+            maxPriorityFeePerGas.truncate().toString()
+          ).toString(16)}`,
+          gasPrice: undefined,
+        }
+      : {
+          maxFeePerGas: undefined,
+          maxPriorityFeePerGas: undefined,
+          gasPrice: `0x${BigInt(gasPrice?.truncate().toString() ?? 0).toString(
+            16
+          )}`,
+        };
   })();
 
   useEffect(() => {
-    if (isTxSigning) {
-      const unsignedTx = JSON.parse(Buffer.from(message).toString("utf8"));
+    const unsignedTx = JSON.parse(Buffer.from(message).toString("utf8"));
 
-      const gasLimitFromTx = BigInt(unsignedTx.gasLimit ?? unsignedTx.gas ?? 0);
-      if (gasLimitFromTx > 0) {
-        gasConfig.setValue(gasLimitFromTx.toString());
+    const gasLimitFromTx = BigInt(unsignedTx.gasLimit ?? unsignedTx.gas ?? 0);
+    if (gasLimitFromTx > 0) {
+      gasConfig.setValue(gasLimitFromTx.toString());
 
-        const gasPriceFromTx = BigInt(
-          unsignedTx.maxFeePerGas ?? unsignedTx.gasPrice ?? 0
+      const gasPriceFromTx = BigInt(
+        unsignedTx.maxFeePerGas ?? unsignedTx.gasPrice ?? 0
+      );
+      if (gasPriceFromTx > 0) {
+        // 사이트에서 제공된 수수료를 사용하는 경우, fee type이 manual로 설정되며,
+        // 사용자가 수동으로 설정하는 것을 지양하기 위해 preferNoSetFee를 true로 설정
+        feeConfig.setFee(
+          new CoinPretty(
+            modularChainInfoImpl.getCurrencies()[0],
+            new Dec(gasConfig.gas).mul(new Dec(gasPriceFromTx))
+          )
         );
-        if (gasPriceFromTx > 0) {
-          // 사이트에서 제공된 수수료를 사용하는 경우, fee type이 manual로 설정되며,
-          // 사용자가 수동으로 설정하는 것을 지양하기 위해 preferNoSetFee를 true로 설정
-          feeConfig.setFee(
-            new CoinPretty(
-              chainInfo.currencies[0],
-              new Dec(gasConfig.gas).mul(new Dec(gasPriceFromTx))
-            )
-          );
 
-          setPreferNoSetFee(!interactionData.isInternal);
-        }
+        setPreferNoSetFee(!interactionData.isInternal);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    if (isTxSigning && !interactionData.isInternal) {
+    if (!interactionData.isInternal) {
       const unsignedTx = JSON.parse(Buffer.from(message).toString("utf8"));
 
       // 수수료 옵션을 사이트에서 제공하는 경우, 수수료 옵션을 사용하지 않음
@@ -247,7 +216,6 @@ export const EthereumSigningView: FunctionComponent<{
     }
   }, [
     gasConfig.gas,
-    isTxSigning,
     message,
     maxFeePerGas,
     maxPriorityFeePerGas,
@@ -261,7 +229,7 @@ export const EthereumSigningView: FunctionComponent<{
 
   // interactionData.isInternal === true일때는 이전 UI에서 설정할 수 있기 때문에
   // 그때는 처리되지 않도록 신경써야한다.
-  const needHandleNonceMethod = isTxSigning && !interactionData.isInternal;
+  const needHandleNonceMethod = !interactionData.isInternal;
   const [nonceMethod, setNonceMethod] = useState<"latest" | "pending">(
     "pending"
   );
@@ -327,7 +295,7 @@ export const EthereumSigningView: FunctionComponent<{
 
   useEffect(() => {
     (async () => {
-      if (isTxSigning && chainInfo.features.includes("op-stack-l1-data-fee")) {
+      if (modularChainInfoImpl.hasFeature("op-stack-l1-data-fee")) {
         const { to, gasLimit, value, data, chainId }: UnsignedTransaction =
           JSON.parse(Buffer.from(message).toString("utf8"));
 
@@ -341,61 +309,40 @@ export const EthereumSigningView: FunctionComponent<{
         feeConfig.setL1DataFee(new Dec(BigInt(l1DataFee)));
       }
     })();
-  }, [chainInfo.features, ethereumAccount, feeConfig, isTxSigning, message]);
+  }, [modularChainInfoImpl, ethereumAccount, feeConfig, message]);
 
   useEffect(() => {
-    if (isTxSigning) {
-      // Refresh EIP-1559 fee every 12 seconds.
-      const intervalId = setInterval(() => {
-        feeConfig.refreshEIP1559TxFees();
-      }, 12000);
-
-      return () => clearInterval(intervalId);
+    // If the signing request is internal or the fee is set by dApp,
+    // we don't need to refresh the fee.
+    if (!needHandleNonceMethod || preferNoSetFee) {
+      return;
     }
-  }, [isTxSigning, feeConfig]);
+
+    // Refresh EIP-1559 fee every 12 seconds.
+    const intervalId = setInterval(() => {
+      feeConfig.refreshEIP1559TxFees();
+    }, 12000);
+
+    return () => clearInterval(intervalId);
+  }, [feeConfig, preferNoSetFee, needHandleNonceMethod]);
+
+  useEffect(() => {
+    if (feeConfig.type === "manual") {
+      return;
+    }
+
+    // if fee type is changed from manual to auto(average, fast, fastest),
+    // we need to set preferNoSetFee to false to allow automatic fee set.
+    setPreferNoSetFee(false);
+  }, [feeConfig.type]);
 
   const signingDataText = useMemo(() => {
-    switch (signType) {
-      case EthSignType.MESSAGE:
-        // If the message is 32 bytes, it's probably a hash.
-        if (signingDataBuff.length === 32) {
-          return "0x" + signingDataBuff.toString("hex");
-        } else {
-          const text = (() => {
-            const string = signingDataBuff.toString("utf8");
-            if (string.startsWith("0x")) {
-              const buf = Buffer.from(string.slice(2), "hex");
-
-              try {
-                // 정상적인 utf-8 문자열인지 확인
-                const decoder = new TextDecoder("utf-8", { fatal: true });
-                decoder.decode(new Uint8Array(buf)); // UTF-8 변환 시도
-              } catch {
-                // 정상적인 utf-8 문자열이 아니면 hex로 변환
-                return "0x" + buf.toString("hex");
-              }
-
-              return buf.toString("utf8");
-            }
-
-            return string;
-          })();
-
-          // If the text contains RTL mark, escape it.
-          return text.replace(/\u202E/giu, "\\u202E");
-        }
-      case EthSignType.TRANSACTION:
-        return JSON.stringify(
-          JSON.parse(signingDataBuff.toString("utf8")),
-          null,
-          2
-        );
-      case EthSignType.EIP712:
-        return JSON.stringify(JSON.parse(signingDataBuff.toString()), null, 2);
-      default:
-        return "0x" + signingDataBuff.toString("hex");
-    }
-  }, [signingDataBuff, signType]);
+    return JSON.stringify(
+      JSON.parse(signingDataBuff.toString("utf8")),
+      null,
+      2
+    );
+  }, [signingDataBuff]);
 
   const [isViewData, setIsViewData] = useState(false);
 
@@ -447,7 +394,8 @@ export const EthereumSigningView: FunctionComponent<{
     isLedgerInteracting ||
     isKeystoneInteracting;
 
-  const buttonDisabled = isTxSigning && txConfigsValidate.interactionBlocked;
+  const buttonDisabled = txConfigsValidate.interactionBlocked;
+
   const bottomButtons: HeaderProps["bottomButtons"] = [
     {
       textOverrideIcon: (
@@ -633,29 +581,6 @@ export const EthereumSigningView: FunctionComponent<{
       }}
     />
   );
-
-  if (!isTxSigning) {
-    return (
-      <EthereumArbitrarySignPage
-        bottomButtons={bottomButtons}
-        headerLeft={headerLeft}
-        ledgerGuideBox={ledgerGuideBox}
-        keystoneUSBBox={keystoneUSBBox}
-        keystoneSign={keystoneSign}
-        origin={interactionData.data.origin}
-        walletName={signerInfo.name}
-        chainInfo={chainInfo}
-        addressInfo={{
-          type: "ethereum",
-          address: signerInfo.address,
-        }}
-        messageData={{
-          signType: signType,
-          signingDataText: signingDataText,
-        }}
-      />
-    );
-  }
 
   return (
     <HeaderLayout

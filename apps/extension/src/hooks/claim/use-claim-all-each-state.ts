@@ -1,6 +1,6 @@
 import { action, makeObservable, observable } from "mobx";
-import { useStore } from "../../stores";
 import { useRef } from "react";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 // XXX: 좀 이상하긴 한데 상위/하위 컴포넌트가 state를 공유하기 쉽게하려고 이렇게 한다...
 export class ClaimAllEachState {
@@ -34,15 +34,9 @@ export class ClaimAllEachState {
 }
 
 export const useClaimAllEachState = () => {
-  const { chainStore } = useStore();
   const statesRef = useRef(new Map<string, ClaimAllEachState>());
   const getClaimAllEachState = (chainId: string): ClaimAllEachState => {
-    // modular chain의 경우 chainIdentifier가 없다.
-    // 따라서 chainId를 사용한다.
-
-    const chainIdentifier = chainStore.hasModularChain(chainId)
-      ? chainStore.getModularChain(chainId).chainId
-      : chainId;
+    const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
 
     let state = statesRef.current.get(chainIdentifier);
     if (!state) {

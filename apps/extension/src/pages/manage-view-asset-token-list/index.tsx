@@ -27,7 +27,6 @@ import { Modal } from "../../components/modal";
 import { Subtitle3 } from "../../components/typography";
 import { useSearch } from "../../hooks/use-search";
 import { ViewToken } from "../main";
-import { getTokenSearchResultClickAnalyticsProperties } from "../../analytics-amplitude";
 import { CoinPretty } from "@keplr-wallet/unit";
 
 const searchFields = [
@@ -47,13 +46,8 @@ const searchFields = [
 ];
 
 export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
-  const {
-    hugeQueriesStore,
-    keyRingStore,
-    uiConfigStore,
-    chainStore,
-    analyticsAmplitudeStore,
-  } = useStore();
+  const { hugeQueriesStore, keyRingStore, uiConfigStore, chainStore } =
+    useStore();
   const intl = useIntl();
   const [sortMode, setSortMode] = useState<"asc" | "desc" | undefined>(
     undefined
@@ -262,7 +256,7 @@ export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
               </XAxis>
             </Styles.NewTokenFoundButtonContainer>
           )}
-          {sortedBalances.map((viewToken, index) => {
+          {sortedBalances.map((viewToken) => {
             const chainIdentifier = ChainIdHelper.parse(
               viewToken.chainInfo.chainId
             ).identifier;
@@ -273,19 +267,6 @@ export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
 
             return (
               <TokenItem
-                onClick={() => {
-                  if (search.trim().length > 0) {
-                    analyticsAmplitudeStore.logEvent(
-                      "click_token_item_search_results_manage_view_asset",
-                      getTokenSearchResultClickAnalyticsProperties(
-                        viewToken,
-                        search,
-                        sortedBalances,
-                        index
-                      )
-                    );
-                  }
-                }}
                 key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
                 viewToken={viewToken}
                 disableHoverStyle={true}

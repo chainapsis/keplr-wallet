@@ -17,6 +17,7 @@ import {
   ETransactionVersion,
 } from "starknet";
 import { Keplr } from "@keplr-wallet/types";
+import { Int } from "@keplr-wallet/unit";
 
 export type Fee = {
   l1MaxGas: string;
@@ -149,6 +150,14 @@ export class StoreAccount extends Account {
         0
       );
 
+    const safeToHex = (value: string | Int | null | undefined): string => {
+      if (value === null || value === undefined) {
+        return "0";
+      }
+      const val = value.toString();
+      return num.toHex(val === "0x" ? "0" : val);
+    };
+
     const signerDetails: DeployAccountSignerDetails = {
       ...stark.v3Details({}, "0.8.1"),
       classHash,
@@ -160,16 +169,16 @@ export class StoreAccount extends Account {
       chainId: chainId,
       resourceBounds: {
         l1_gas: {
-          max_amount: num.toHex(fee.l1MaxGas),
-          max_price_per_unit: num.toHex(fee.l1MaxGasPrice),
+          max_amount: safeToHex(fee.l1MaxGas),
+          max_price_per_unit: safeToHex(fee.l1MaxGasPrice),
         },
         l2_gas: {
-          max_amount: num.toHex(fee.l2MaxGas ?? "0"),
-          max_price_per_unit: num.toHex(fee.l2MaxGasPrice ?? "0"),
+          max_amount: safeToHex(fee.l2MaxGas),
+          max_price_per_unit: safeToHex(fee.l2MaxGasPrice),
         },
         l1_data_gas: {
-          max_amount: num.toHex(fee.l1MaxDataGas),
-          max_price_per_unit: num.toHex(fee.l1MaxDataGasPrice),
+          max_amount: safeToHex(fee.l1MaxDataGas),
+          max_price_per_unit: safeToHex(fee.l1MaxDataGasPrice),
         },
       },
     };
@@ -274,6 +283,14 @@ export class StoreAccount extends Account {
     const nonce = await this.getNonce();
     const chainId = await this.getChainId();
 
+    const safeToHex = (value: string | Int | null | undefined): string => {
+      if (value === null || value === undefined) {
+        return "0";
+      }
+      const val = value.toString();
+      return num.toHex(val === "0x" ? "0" : val);
+    };
+
     const signerDetails: InvocationsSignerDetails = {
       ...stark.v3Details({}, "0.8.1"),
       version: ETransactionVersion.V3,
@@ -284,16 +301,16 @@ export class StoreAccount extends Account {
       skipValidate: false,
       resourceBounds: {
         l1_gas: {
-          max_amount: num.toHex(fee.l1MaxGas),
-          max_price_per_unit: num.toHex(fee.l1MaxGasPrice),
+          max_amount: safeToHex(fee.l1MaxGas),
+          max_price_per_unit: safeToHex(fee.l1MaxGasPrice),
         },
         l2_gas: {
-          max_amount: num.toHex(fee.l2MaxGas ?? "0"),
-          max_price_per_unit: num.toHex(fee.l2MaxGasPrice ?? "0"),
+          max_amount: safeToHex(fee.l2MaxGas),
+          max_price_per_unit: safeToHex(fee.l2MaxGasPrice),
         },
         l1_data_gas: {
-          max_amount: num.toHex(fee.l1MaxDataGas),
-          max_price_per_unit: num.toHex(fee.l1MaxDataGasPrice),
+          max_amount: safeToHex(fee.l1MaxDataGas),
+          max_price_per_unit: safeToHex(fee.l1MaxDataGasPrice),
         },
       },
     };

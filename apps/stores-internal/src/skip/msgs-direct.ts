@@ -206,7 +206,7 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
             (fund: { denom: string; amount: string }) => {
               return new CoinPretty(
                 this.chainGetter
-                  .getChain(msg.cosmos_tx!.chain_id)
+                  .getModularChainInfoImpl(msg.cosmos_tx!.chain_id)
                   .forceFindCurrency(fund.denom),
                 fund.amount
               );
@@ -231,7 +231,7 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
           timeoutTimestamp: chainMsg.timeout_timestamp,
           token: new CoinPretty(
             this.chainGetter
-              .getChain(msg.cosmos_tx.chain_id)
+              .getModularChainInfoImpl(msg.cosmos_tx.chain_id)
               .forceFindCurrency(chainMsg.token.denom),
             chainMsg.token.amount
           ),

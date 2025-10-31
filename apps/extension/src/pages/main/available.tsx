@@ -51,7 +51,6 @@ import { SceneTransitionRef } from "../../components/transition/scene/internal";
 import { VerticalCollapseTransition } from "../../components/transition/vertical-collapse";
 import { ArrowDownIcon, ArrowUpIcon } from "../../components/icon";
 import { Styles as AvailableCollapsibleListStyles } from "../../components/collapsible-list";
-import { getTokenSearchResultClickAnalyticsProperties } from "../../analytics-amplitude";
 import { useGroupedTokensMap } from "../../hooks/use-grouped-tokens-map";
 import { useBalanceAnalytics } from "./hooks/use-balance-analytics";
 import { KeyRingCosmosService } from "@keplr-wallet/background";
@@ -331,17 +330,27 @@ export const AvailableTabView: FunctionComponent<{
             if (isModular) {
               embedded = true;
             } else {
-              const chainInfoInStore = chainStore.getChain(chainInfo.chainId);
+              const chainInfoInStore = chainStore.getModularChain(
+                chainInfo.chainId
+              );
 
               if (!chainInfoInStore) {
                 stored = false;
               } else {
-                if (chainInfoInStore.hideInUI) {
+                if (
+                  "cosmos" in chainInfoInStore &&
+                  chainInfoInStore.cosmos.hideInUI
+                ) {
                   return acc;
                 }
 
                 stored = true;
-                embedded = chainInfoInStore.embedded?.embedded;
+
+                if ("cosmos" in chainInfoInStore) {
+                  embedded = !!chainInfoInStore.cosmos;
+                } else if ("evm" in chainInfoInStore) {
+                  embedded = !!chainInfoInStore.evm;
+                }
               }
             }
           } catch (e) {
@@ -533,7 +542,7 @@ export const AvailableTabView: FunctionComponent<{
                 chainStore.chainInfos[0].currencies[0],
                 new Dec(0)
               ),
-              chainInfo: chainStore.chainInfos[0],
+              chainInfo: chainStore.modularChainInfos[0],
               isFetching: false,
               error: undefined,
             }}
@@ -759,7 +768,7 @@ const TokensFlatViewScene = observer(
     onMoreTokensClosed: () => void;
     setSearchParams: Dispatch<SetStateAction<URLSearchParams>>;
   }) => {
-    const { uiConfigStore, analyticsAmplitudeStore } = useStore();
+    const { uiConfigStore } = useStore();
 
     const { TokenViewData } = useAllBalances(trimSearch);
 
@@ -776,24 +785,13 @@ const TokensFlatViewScene = observer(
               }
             }}
             lenAlwaysShown={TokenViewData.lenAlwaysShown}
-            items={TokenViewData.balance.map((viewToken, index) => {
+            items={TokenViewData.balance.map((viewToken) => {
               return (
                 <TokenItemWithCopyAddress
                   key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
                   {...getBottomTagInfoProps(viewToken)}
                   viewToken={viewToken}
                   onClick={() => {
-                    if (trimSearch.length > 0) {
-                      analyticsAmplitudeStore.logEvent(
-                        "click_token_item_search_results_available_tab",
-                        getTokenSearchResultClickAnalyticsProperties(
-                          viewToken,
-                          trimSearch,
-                          TokenViewData.balance,
-                          index
-                        )
-                      );
-                    }
                     setSearchParams((prev) => {
                       prev.set("tokenChainId", viewToken.chainInfo.chainId);
                       prev.set(

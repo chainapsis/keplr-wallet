@@ -94,7 +94,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
   ] = useState(chainStore.enabledChainIdentifiers);
 
   const determineLedgerApp = (info: ModularChainInfo, cid: string): string => {
-    if ("cosmos" in info && chainStore.isEvmOrEthermintLikeChain(cid)) {
+    if (chainStore.isEvmOrEthermintLikeChain(cid)) {
       return "Ethereum";
     }
 
@@ -114,7 +114,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
       if (!vaultId || !chainId) return;
 
       if (enable) {
-        if (!chainStore.hasChain(chainId)) {
+        if (!chainStore.hasModularChain(chainId)) {
           const keplr = await getKeplrFromWindow();
           const chainInfoToSuggest = searchedNonNativeChainInfos.find(
             (c) =>
@@ -133,8 +133,9 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
           }
         }
 
-        if (chainStore.hasChain(chainId)) {
-          const chainInfo = chainStore.getChain(chainId);
+        const chainInfo = chainStore.getModularChain(chainId);
+
+        if ("cosmos" in chainInfo) {
           const needModal = await needFinalizeKeyCoinTypeAction(
             vaultId,
             chainInfo
@@ -150,8 +151,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
 
         if (chainStore.hasModularChain(chainId)) {
           if (keyRingStore.selectedKeyInfo?.type === "ledger") {
-            const modularChainInfo = chainStore.getModularChain(chainId);
-            const ledgerApp = determineLedgerApp(modularChainInfo, chainId);
+            const ledgerApp = determineLedgerApp(chainInfo, chainId);
 
             const alreadyAppended = Boolean(
               keyRingStore.selectedKeyInfo?.insensitive?.[ledgerApp]
@@ -282,52 +282,6 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
     [sortPriorityChainIdentifierMap, totalPriceByIdentifier]
   );
 
-  // 검색 뿐만 아니라 로직에 따른 선택할 수 있는 체인 목록을 가지고 있다.
-  // 그러니까 로직을 파악해서 주의해서 사용해야함.
-  // 그리고 이를 토대로 balance에 따른 sort를 진행한다.
-  // queries store의 구조 문제로 useMemo 안에서 balance에 따른 sort를 진행하긴 힘들다.
-  // 그래서 이를 위한 변수로 따로 둔다.
-  // 실제로는 modularChainInfos를 사용하면 된다.
-  // linkedChainKey를 기반으로 그룹화된 체인을 `linkedModularChainInfos`로 가지고 있다.
-  const preSortGroupedModularChainInfos = useMemo(() => {
-    let modularChainInfos = chainStore.groupedModularChainInfosInListUI.slice();
-
-    if (keyType === "ledger") {
-      modularChainInfos = modularChainInfos.filter((modularChainInfo) => {
-        if ("cosmos" in modularChainInfo) {
-          const chainInfo = chainStore.getChain(
-            modularChainInfo.cosmos.chainId
-          );
-          const isEthermintLike =
-            chainInfo.bip44.coinType === 60 ||
-            !!chainInfo.features?.includes("eth-address-gen") ||
-            !!chainInfo.features?.includes("eth-key-sign");
-
-          // Ledger일 경우 ethereum app을 바로 처리할 수 없다.
-          // 이 경우 빼줘야한다.
-          if (isEthermintLike) {
-            return false;
-          }
-
-          return true;
-        }
-      });
-    }
-
-    if (keyType === "keystone") {
-      modularChainInfos = modularChainInfos.filter((modularChainInfo) => {
-        // keystone은 스타크넷을 지원하지 않는다.
-        // CHECK: 비트코인 지원 여부 확인 필요
-        if ("starknet" in modularChainInfo || "bitcoin" in modularChainInfo) {
-          return false;
-        }
-        return true;
-      });
-    }
-
-    return modularChainInfos;
-  }, [chainStore, keyType, chainStore.groupedModularChainInfosInListUI]);
-
   const nativeChainIdentifierSet = useMemo(
     () =>
       new Set(
@@ -341,22 +295,37 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
     []
   );
 
-  const nativeGroupedModularChainInfos = preSortGroupedModularChainInfos
-    .filter((modularChainInfo) =>
-      nativeChainIdentifierSet.has(
-        ChainIdHelper.parse(modularChainInfo.chainId).identifier
-      )
-    )
-    .sort(chainSort);
+  const { nativeGroupedModularChainInfos, suggestGroupedModularChainInfos } =
+    useMemo(() => {
+      const modularChainInfos =
+        chainStore.groupedModularChainInfosInListUI.slice();
 
-  const suggestGroupedModularChainInfos = preSortGroupedModularChainInfos
-    .filter(
-      (modularChainInfo) =>
-        !nativeChainIdentifierSet.has(
-          ChainIdHelper.parse(modularChainInfo.chainId).identifier
+      const nativeGroupedModularChainInfos = modularChainInfos
+        .filter((modularChainInfo) =>
+          nativeChainIdentifierSet.has(
+            ChainIdHelper.parse(modularChainInfo.chainId).identifier
+          )
         )
-    )
-    .sort(chainSort);
+        .sort(chainSort);
+
+      const suggestGroupedModularChainInfos = modularChainInfos
+        .filter(
+          (modularChainInfo) =>
+            !nativeChainIdentifierSet.has(
+              ChainIdHelper.parse(modularChainInfo.chainId).identifier
+            )
+        )
+        .sort(chainSort);
+
+      return {
+        nativeGroupedModularChainInfos,
+        suggestGroupedModularChainInfos,
+      };
+    }, [
+      chainStore.groupedModularChainInfosInListUI,
+      nativeChainIdentifierSet,
+      chainSort,
+    ]);
 
   const searchFields = useMemo(
     () => [
@@ -364,41 +333,31 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
       {
         key: "chainInfo.currency.coinDenom",
         function: (chainInfo: ModularChainInfo | ChainInfo) => {
-          if (
-            "cosmos" in chainInfo &&
-            chainStore.hasChain(chainInfo.chainId) &&
-            "cosmos" in chainInfo
-          ) {
-            const cosmosChainInfo = chainStore.getChain(
-              chainInfo.cosmos.chainId
-            );
+          if ("cosmos" in chainInfo) {
             return CoinPretty.makeCoinDenomPretty(
-              (cosmosChainInfo.stakeCurrency || cosmosChainInfo.currencies[0])
+              (chainInfo.cosmos.stakeCurrency || chainInfo.cosmos.currencies[0])
                 .coinDenom
             );
-          } else if ("starknet" in chainInfo) {
-            return CoinPretty.makeCoinDenomPretty(
-              chainInfo.starknet.currencies[0].coinDenom
-            );
-          } else if ("bitcoin" in chainInfo) {
-            return CoinPretty.makeCoinDenomPretty(
-              chainInfo.bitcoin.currencies[0].coinDenom
+          } else if (chainStore.hasModularChain(chainInfo.chainId)) {
+            return (
+              CoinPretty.makeCoinDenomPretty(
+                chainStore
+                  .getModularChainInfoImpl(chainInfo.chainId)
+                  .getCurrencies()?.[0].coinDenom ?? ""
+              ) ?? ""
             );
           }
           return "";
         },
       },
     ],
-    [chainStore]
+    []
   );
-
-  const showLedgerChains = keyType === "ledger";
 
   const nativeChains = Array.from(
     new Set([
       ...nativeGroupedModularChainInfos,
       ...suggestGroupedModularChainInfos,
-      ...(showLedgerChains ? chainStore.groupedModularChainInfos : []),
     ])
   ).sort(chainSort);
 
@@ -421,22 +380,49 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
           return chainInfo;
         }
       })();
+
       if (cosmosChainInfo) {
-        // cosmos 계열이면서 ledger일때
-        // background에서 ledger를 지원하지 않는 체인은 다 지워줘야한다.
-        try {
-          if (cosmosChainInfo.features?.includes("force-enable-evm-ledger")) {
+        const isEthermintLike =
+          cosmosChainInfo.bip44.coinType === 60 ||
+          !!cosmosChainInfo.features?.includes("eth-address-gen") ||
+          !!cosmosChainInfo.features?.includes("eth-key-sign");
+
+        if (isEthermintLike) {
+          // don't filter evm only chains
+          const isEvmOnlyChain =
+            chainStore.hasChain(cosmosChainInfo.chainId) &&
+            chainStore.isEvmOnlyChain(cosmosChainInfo.chainId);
+
+          if (isEvmOnlyChain) {
             return true;
           }
 
-          KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
-            cosmosChainInfo.chainId
-          );
-          return true;
-        } catch {
-          return false;
+          // cosmos 계열이면서 ledger일때
+          // background에서 ledger를 지원하지 않는 체인은 다 지워줘야한다.
+          const isLedgerSupported = (() => {
+            try {
+              if (
+                cosmosChainInfo.features?.includes("force-enable-evm-ledger")
+              ) {
+                return true;
+              }
+
+              KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
+                chainInfo.chainId
+              );
+              return true;
+            } catch {
+              return false;
+            }
+          })();
+
+          return isLedgerSupported;
         }
+
+        return true;
       }
+
+      return true;
     }
 
     return true;
@@ -448,17 +434,9 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
         case "All":
           return true;
         case "Cosmos":
-          return (
-            "cosmos" in ci &&
-            chainStore.hasChain(ci.chainId) &&
-            !chainStore.isEvmOnlyChain(ci.chainId)
-          );
+          return "cosmos" in ci && !("evm" in ci);
         case "EVM":
-          return (
-            "cosmos" in ci &&
-            chainStore.hasChain(ci.chainId) &&
-            chainStore.isEvmOnlyChain(ci.chainId)
-          );
+          return "evm" in ci;
         case "Bitcoin":
           return "bitcoin" in ci;
         case "Starknet":
@@ -467,7 +445,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
           return true;
       }
     });
-  }, [searchedAllChains, selectedEcosystem, chainStore]);
+  }, [searchedAllChains, selectedEcosystem]);
 
   const visibleChainInfos = useMemo(() => {
     if (!hideEnabled) {
@@ -479,6 +457,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
   }, [ecosystemFilteredChainInfos, hideEnabled, chainStore]);
 
   const handleToggle = async (chainIdentifier: string, enable: boolean) => {
+    console.log("handleToggle", chainIdentifier, enable);
     const linkedIdentifiers = (() => {
       if (!chainIdentifier || !chainStore.hasModularChain(chainIdentifier)) {
         return [];
@@ -515,9 +494,9 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
 
     await Promise.all(
       ids.map(async (id) => {
-        if (!id || !chainStore.hasChain(id)) return;
+        if (!id || !chainStore.hasModularChain(id)) return;
 
-        const chainInfo = chainStore.getChain(id);
+        const chainInfo = chainStore.getModularChain(id);
         const needModal = await needFinalizeKeyCoinTypeAction(
           vaultId,
           chainInfo
@@ -584,11 +563,10 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
 
       await Promise.all(
         derivationChainIds.map(async (chainId) => {
-          if (!chainId || !chainStore.hasChain(chainId)) return;
-          const chainInfo = chainStore.getChain(chainId);
+          if (!chainId || !chainStore.hasModularChain(chainId)) return;
           const stillNeed = await needFinalizeKeyCoinTypeAction(
             vaultId,
-            chainInfo
+            chainStore.getModularChain(chainId)
           );
 
           if (stillNeed) {
@@ -696,9 +674,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
                   }
                   disabled={
                     "cosmos" in ci
-                      ? chainStore.hasChain(ci.chainId)
-                        ? !chainStore.isInChainInfosInListUI(ci.chainId)
-                        : false
+                      ? !chainStore.isInModularChainInfosInListUI(ci.chainId)
                       : false
                   }
                   isNativeChain={nativeChainIdentifierSet.has(identifier)}

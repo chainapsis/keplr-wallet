@@ -29,11 +29,11 @@ import { useNotification } from "../../hooks/notification";
 import { FormattedMessage, useIntl } from "react-intl";
 import { SwapFeeBps, TermsOfUseUrl } from "../../config.ui";
 import { BottomTabsHeightRem } from "../../bottom-tabs";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useTxConfigsQueryString } from "../../hooks/use-tx-config-query-string";
 import { MainHeaderLayout } from "../main/layouts/header";
 import { XAxis } from "../../components/axis";
-import { Caption2, H4 } from "../../components/typography";
+import { Caption2, H4, Subtitle4 } from "../../components/typography";
 import { SlippageModal } from "./components/slippage-modal";
 import styled, { useTheme } from "styled-components";
 import { GuideBox } from "../../components/guide-box";
@@ -62,6 +62,13 @@ import {
 import { EthTxStatus } from "@keplr-wallet/types";
 import { InsufficientFeeError } from "@keplr-wallet/hooks";
 import { useSwapAnalytics } from "./hooks/use-swap-analytics";
+import {
+  validateIsUsdcFromNoble,
+  validateIsUsdnFromNoble,
+} from "../earn/utils";
+import { FeeCoverageDescription } from "../../components/top-up";
+import { useTopUp } from "../../hooks/use-topup";
+import { getShouldTopUpSignOptions } from "../../utils/should-top-up-sign-options";
 
 const TextButtonStyles = {
   Container: styled.div`
@@ -71,7 +78,6 @@ const TextButtonStyles = {
   `,
 
   Button: styled.button<Omit<TextButtonProps, "onClick">>`
-    width: 100%;
     height: 2rem;
     display: flex;
     justify-content: center;
@@ -184,6 +190,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     }
   }, [isInChainEVMOnly]);
 
+  const [
+    topUpForDisableSubFeeFromFaction,
+    setTopUpForDisableSubFeeFromFaction,
+  ] = useState(false);
   const ibcSwapConfigs = useIBCSwapConfig(
     chainStore,
     queriesStore,
@@ -198,6 +208,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     1_500_000,
     outChainId,
     outCurrency,
+    topUpForDisableSubFeeFromFaction,
     swapFeeBps
   );
   const querySwapFeeBps = queriesStore.simpleQuery.queryGet<{
@@ -339,8 +350,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           })();
 
           if (
-            ibcSwapConfigs.amountConfig.chainInfo.chainIdentifier ===
-            chainStore.getChain(swapVenueChainId).chainIdentifier
+            ChainIdHelper.parse(ibcSwapConfigs.amountConfig.chainId)
+              .identifier === ChainIdHelper.parse(swapVenueChainId).identifier
           ) {
             type = `swap-1`;
           }
@@ -483,8 +494,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               .then(({ gasUsed }) => {
                 if (
                   chainStore
-                    .getChain(inChainId)
-                    .features.includes("op-stack-l1-data-fee")
+                    .getModularChainInfoImpl(inChainId)
+                    .hasFeature("op-stack-l1-data-fee")
                 ) {
                   return ethereumAccount
                     .simulateOpStackL1Fee({
@@ -619,7 +630,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     const disposal = autorun(() => {
       noop(
         skipQueriesStore.queryIBCSwap.getSwapDestinationCurrencyAlternativeChains(
-          chainStore.getChain(ibcSwapConfigs.amountConfig.outChainId),
+          chainStore.getModularChain(ibcSwapConfigs.amountConfig.outChainId),
           ibcSwapConfigs.amountConfig.outCurrency
         )
       );
@@ -723,7 +734,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
   const outCurrencyFetched =
     chainStore
-      .getChain(outChainId)
+      .getModularChainInfoImpl(outChainId)
       .findCurrency(outCurrency.coinMinimalDenom) != null;
 
   const interactionBlocked =
@@ -814,6 +825,39 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
   const isSwap = ibcSwapConfigs.amountConfig.type === "swap";
 
+  const showUSDNWarning = (() => {
+    if (
+      validateIsUsdcFromNoble(
+        ibcSwapConfigs.amountConfig.currency,
+        ibcSwapConfigs.amountConfig.chainId
+      )
+    ) {
+      if (
+        validateIsUsdnFromNoble(
+          ibcSwapConfigs.amountConfig.outCurrency,
+          ibcSwapConfigs.amountConfig.outChainId
+        )
+      ) {
+        return true;
+      }
+    }
+    if (
+      validateIsUsdnFromNoble(
+        ibcSwapConfigs.amountConfig.currency,
+        ibcSwapConfigs.amountConfig.chainId
+      )
+    ) {
+      if (
+        validateIsUsdcFromNoble(
+          ibcSwapConfigs.amountConfig.outCurrency,
+          ibcSwapConfigs.amountConfig.outChainId
+        )
+      ) {
+        return true;
+      }
+    }
+    return false;
+  })();
   const showCelestiaWarning = (() => {
     if (uiConfigStore.ibcSwapConfig.celestiaDisabled) {
       return (
@@ -822,6 +866,14 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
       );
     }
   })();
+
+  const { shouldTopUp, isTopUpAvailable, remainingText } = useTopUp({
+    feeConfig: ibcSwapConfigs.feeConfig,
+    senderConfig: ibcSwapConfigs.senderConfig,
+  });
+  useEffect(() => {
+    setTopUpForDisableSubFeeFromFaction(shouldTopUp);
+  }, [shouldTopUp]);
 
   return (
     <MainHeaderLayout
@@ -901,7 +953,11 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 const chainIdInKeplr = isOnlyEvm
                   ? `eip155:${chainId}`
                   : chainId;
-                if (!chainStore.hasChain(chainIdInKeplr)) {
+                if (
+                  !chainStore
+                    .getModularChainInfoImpl(chainIdInKeplr)
+                    .matchModules({ or: ["cosmos", "evm"] })
+                ) {
                   continue;
                 }
 
@@ -912,15 +968,21 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
                 if (isOnlyEvm && !receiverAccount.ethereumHexAddress) {
                   const receiverChainInfo =
-                    chainStore.hasChain(chainId) &&
-                    chainStore.getChain(chainId);
+                    chainStore.hasModularChain(chainId) &&
+                    chainStore.getModularChain(chainId);
                   if (
                     receiverAccount.isNanoLedger &&
                     receiverChainInfo &&
-                    (receiverChainInfo.bip44.coinType === 60 ||
-                      receiverChainInfo.features.includes("eth-address-gen") ||
-                      receiverChainInfo.features.includes("eth-key-sign") ||
-                      receiverChainInfo.evm != null)
+                    (("evm" in receiverChainInfo &&
+                      receiverChainInfo.evm != null) ||
+                      ("cosmos" in receiverChainInfo &&
+                        (receiverChainInfo.cosmos.bip44.coinType === 60 ||
+                          receiverChainInfo.cosmos.features?.includes(
+                            "eth-address-gen"
+                          ) ||
+                          receiverChainInfo.cosmos.features?.includes(
+                            "eth-key-sign"
+                          ))))
                   ) {
                     throw new Error(
                       "Please connect Ethereum app on Ledger with Keplr to get the address"
@@ -996,15 +1058,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
                 if (!receiverAccount.bech32Address) {
                   const receiverChainInfo =
-                    chainStore.hasChain(receiverChainId) &&
-                    chainStore.getChain(receiverChainId);
+                    chainStore.hasModularChain(receiverChainId) &&
+                    chainStore.getModularChain(receiverChainId);
                   if (
                     receiverAccount.isNanoLedger &&
                     receiverChainInfo &&
-                    (receiverChainInfo.bip44.coinType === 60 ||
-                      receiverChainInfo.features.includes("eth-address-gen") ||
-                      receiverChainInfo.features.includes("eth-key-sign") ||
-                      receiverChainInfo.evm != null)
+                    "evm" in receiverChainInfo
                   ) {
                     throw new Error(
                       "Please connect Ethereum app on Ledger with Keplr to get the address"
@@ -1037,11 +1096,13 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           try {
             if ("send" in tx) {
               await tx.send(
-                ibcSwapConfigs.feeConfig.toStdFee(),
+                ibcSwapConfigs.feeConfig.topUpStatus.topUpOverrideStdFee ??
+                  ibcSwapConfigs.feeConfig.toStdFee(),
                 ibcSwapConfigs.memoConfig.memo,
                 {
                   preferNoSetFee: true,
                   preferNoSetMemo: false,
+                  ...(shouldTopUp ? getShouldTopUpSignOptions() : {}),
 
                   sendTx: async (chainId, tx, mode) => {
                     if (
@@ -1070,7 +1131,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                         ibcSwapConfigs.memoConfig.memo,
                         true
                       ).withIBCPacketForwarding(channels, {
-                        currencies: chainStore.getChain(chainId).currencies,
+                        currencies: chainStore
+                          .getModularChainInfoImpl(chainId)
+                          .getCurrencies(),
                       });
                       return await new InExtensionMessageRequester().sendMessage(
                         BACKGROUND_PORT,
@@ -1104,8 +1167,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                         }),
                         ibcSwapConfigs.memoConfig.memo,
                         {
-                          currencies:
-                            chainStore.getChain(outChainId).currencies,
+                          currencies: chainStore
+                            .getModularChainInfoImpl(outChainId)
+                            .getCurrencies(),
                         },
                         !isInterchainSwap // ibc swap이 아닌 interchain swap인 경우, ibc swap history에 추가하는 대신 skip swap history를 추가한다.
                       );
@@ -1164,8 +1228,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                           },
                         ],
                         {
-                          currencies:
-                            chainStore.getChain(outChainId).currencies,
+                          currencies: chainStore
+                            .getModularChainInfoImpl(outChainId)
+                            .getCurrencies(),
                         },
                         routeDurationSeconds ?? 0,
                         Buffer.from(txHash).toString("hex")
@@ -1186,19 +1251,23 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                         );
 
                         if (keyRingStore.selectedKeyInfo) {
-                          const outChainInfo = chainStore.getChain(
+                          const outChainInfo = chainStore.getModularChain(
                             ibcSwapConfigs.amountConfig.outChainId
                           );
                           if (
                             keyRingStore.needKeyCoinTypeFinalize(
                               keyRingStore.selectedKeyInfo.id,
-                              outChainInfo
+                              outChainInfo.chainId
                             )
                           ) {
                             keyRingStore.finalizeKeyCoinType(
                               keyRingStore.selectedKeyInfo.id,
                               outChainInfo.chainId,
-                              outChainInfo.bip44.coinType
+                              "evm" in outChainInfo
+                                ? outChainInfo.evm.bip44.coinType
+                                : "cosmos" in outChainInfo
+                                ? outChainInfo.cosmos.bip44.coinType
+                                : 118
                             );
                           }
                         }
@@ -1502,8 +1571,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                           },
                         ],
                         {
-                          currencies:
-                            chainStore.getChain(outChainId).currencies,
+                          currencies: chainStore
+                            .getModularChainInfoImpl(outChainId)
+                            .getCurrencies(),
                         },
                         routeDurationSeconds ?? 0,
                         txHash
@@ -1648,9 +1718,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                                       },
                                     ],
                                     {
-                                      currencies:
-                                        chainStore.getChain(outChainId)
-                                          .currencies,
+                                      currencies: chainStore
+                                        .getModularChainInfoImpl(outChainId)
+                                        .getCurrencies(),
                                     },
                                     routeDurationSeconds ?? 0,
                                     txHash
@@ -1954,85 +2024,105 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           }}
         />
         <Gutter size="0.75rem" />
-        <SwapFeeInfo
-          senderConfig={ibcSwapConfigs.senderConfig}
-          amountConfig={ibcSwapConfigs.amountConfig}
-          gasConfig={ibcSwapConfigs.gasConfig}
-          feeConfig={ibcSwapConfigs.feeConfig}
-          gasSimulator={gasSimulator}
-          isForEVMTx={isInChainEVMOnly}
-          nonceMethod={nonceMethod}
-          setNonceMethod={setNonceMethod}
-        />
+        <VerticalCollapseTransition collapsed={shouldTopUp}>
+          <SwapFeeInfo
+            senderConfig={ibcSwapConfigs.senderConfig}
+            amountConfig={ibcSwapConfigs.amountConfig}
+            gasConfig={ibcSwapConfigs.gasConfig}
+            feeConfig={ibcSwapConfigs.feeConfig}
+            gasSimulator={gasSimulator}
+            disableAutomaticFeeSet={shouldTopUp}
+            isForEVMTx={isInChainEVMOnly}
+            nonceMethod={nonceMethod}
+            setNonceMethod={setNonceMethod}
+            shouldTopUp={shouldTopUp}
+          />
+        </VerticalCollapseTransition>
+        <VerticalCollapseTransition collapsed={!shouldTopUp}>
+          <FeeCoverageDescription isTopUpAvailable={isTopUpAvailable} />
+        </VerticalCollapseTransition>
 
-        <WarningGuideBox
-          showCelestiaWarning={showCelestiaWarning}
-          amountConfig={ibcSwapConfigs.amountConfig}
-          feeConfig={ibcSwapConfigs.feeConfig}
-          gasConfig={ibcSwapConfigs.gasConfig}
-          title={
-            isHighPriceImpact &&
-            !calculatingTxError &&
-            !ibcSwapConfigs.amountConfig.uiProperties.error &&
-            !ibcSwapConfigs.amountConfig.uiProperties.warning
-              ? (() => {
-                  const inPrice = priceStore.calculatePrice(
-                    ibcSwapConfigs.amountConfig.amount[0],
-                    "usd"
-                  );
-                  const outPrice = priceStore.calculatePrice(
-                    ibcSwapConfigs.amountConfig.outAmount,
-                    "usd"
-                  );
-                  return intl.formatMessage(
+        <VerticalCollapseTransition collapsed={shouldTopUp}>
+          <WarningGuideBox
+            showUSDNWarning={showUSDNWarning}
+            showCelestiaWarning={showCelestiaWarning}
+            amountConfig={ibcSwapConfigs.amountConfig}
+            feeConfig={ibcSwapConfigs.feeConfig}
+            gasConfig={ibcSwapConfigs.gasConfig}
+            title={
+              isHighPriceImpact &&
+              !calculatingTxError &&
+              !ibcSwapConfigs.amountConfig.uiProperties.error &&
+              !ibcSwapConfigs.amountConfig.uiProperties.warning
+                ? (() => {
+                    const inPrice = priceStore.calculatePrice(
+                      ibcSwapConfigs.amountConfig.amount[0],
+                      "usd"
+                    );
+                    const outPrice = priceStore.calculatePrice(
+                      ibcSwapConfigs.amountConfig.outAmount,
+                      "usd"
+                    );
+                    return intl.formatMessage(
+                      {
+                        id: "page.ibc-swap.warning.high-price-impact-title",
+                      },
+                      {
+                        inPrice: inPrice?.toString(),
+                        srcChain:
+                          ibcSwapConfigs.amountConfig.chainInfo.chainName,
+                        outPrice: outPrice?.toString(),
+                        dstChain: chainStore.getModularChain(
+                          ibcSwapConfigs.amountConfig.outChainId
+                        ).chainName,
+                      }
+                    );
+                  })()
+                : undefined
+            }
+            forceError={calculatingTxError}
+            forceWarning={(() => {
+              if (unablesToPopulatePrice.length > 0) {
+                return new Error(
+                  intl.formatMessage(
                     {
-                      id: "page.ibc-swap.warning.high-price-impact-title",
+                      id: "page.ibc-swap.warning.unable-to-populate-price",
                     },
                     {
-                      inPrice: inPrice?.toString(),
-                      srcChain: ibcSwapConfigs.amountConfig.chainInfo.chainName,
-                      outPrice: outPrice?.toString(),
-                      dstChain: chainStore.getChain(
-                        ibcSwapConfigs.amountConfig.outChainId
-                      ).chainName,
+                      assets: unablesToPopulatePrice.join(", "),
                     }
-                  );
-                })()
-              : undefined
-          }
-          forceError={calculatingTxError}
-          forceWarning={(() => {
-            if (unablesToPopulatePrice.length > 0) {
-              return new Error(
-                intl.formatMessage(
-                  {
-                    id: "page.ibc-swap.warning.unable-to-populate-price",
-                  },
-                  {
-                    assets: unablesToPopulatePrice.join(", "),
-                  }
-                )
-              );
-            }
+                  )
+                );
+              }
 
-            if (isHighPriceImpact) {
-              return new Error(
-                intl.formatMessage({
-                  id: "page.ibc-swap.warning.high-price-impact",
-                })
-              );
-            }
-          })()}
-        />
+              if (isHighPriceImpact) {
+                return new Error(
+                  intl.formatMessage({
+                    id: "page.ibc-swap.warning.high-price-impact",
+                  })
+                );
+              }
+            })()}
+          />
+        </VerticalCollapseTransition>
 
         <Gutter size="0.75rem" />
 
         <Button
           type="submit"
-          disabled={interactionBlocked || showCelestiaWarning}
-          text={intl.formatMessage({
-            id: "page.ibc-swap.button.next",
-          })}
+          disabled={
+            interactionBlocked ||
+            showUSDNWarning ||
+            showCelestiaWarning ||
+            (shouldTopUp && !isTopUpAvailable)
+          }
+          text={
+            shouldTopUp && remainingText
+              ? remainingText
+              : intl.formatMessage({
+                  id: "page.ibc-swap.button.next",
+                })
+          }
           color="primary"
           size="large"
           isLoading={
@@ -2083,6 +2173,7 @@ const WarningGuideBox: FunctionComponent<{
   forceWarning?: Error;
   title?: string;
 
+  showUSDNWarning?: boolean;
   showCelestiaWarning?: boolean;
 }> = observer(
   ({
@@ -2092,9 +2183,11 @@ const WarningGuideBox: FunctionComponent<{
     forceError,
     forceWarning,
     title,
+    showUSDNWarning,
     showCelestiaWarning,
   }) => {
     const intl = useIntl();
+    const theme = useTheme();
 
     const error: string | undefined = (() => {
       if (feeConfig.uiProperties.error) {
@@ -2209,6 +2302,13 @@ const WarningGuideBox: FunctionComponent<{
       return err;
     })();
 
+    if (showUSDNWarning) {
+      title = "Swap Smarter";
+      errorText =
+        "To avoid high slippage, use Deposit or Withdraw on the Earn page.";
+      collapsed = false;
+    }
+
     if (showCelestiaWarning) {
       title = "Temporarily Unavailable";
       errorText =
@@ -2224,10 +2324,35 @@ const WarningGuideBox: FunctionComponent<{
         </VerticalCollapseTransition>
         <VerticalCollapseTransition collapsed={collapsed}>
           <GuideBox
-            color={"warning"}
+            color={showUSDNWarning ? "default" : "warning"}
             title={title || errorText}
             paragraph={title ? errorText : undefined}
             hideInformationIcon={!title}
+            backgroundColor={(() => {
+              if (showUSDNWarning && theme.mode === "light") {
+                return ColorPalette["gray-10"];
+              }
+            })()}
+            bottom={(() => {
+              if (showUSDNWarning) {
+                return (
+                  <Link to="/earn/overview">
+                    <Subtitle4
+                      style={{
+                        textDecorationLine: "underline",
+                      }}
+                      color={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-600"]
+                          : ColorPalette["gray-100"]
+                      }
+                    >
+                      Go to Earn page
+                    </Subtitle4>
+                  </Link>
+                );
+              }
+            })()}
           />
         </VerticalCollapseTransition>
       </React.Fragment>

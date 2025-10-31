@@ -47,7 +47,7 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
   const chainId = searchParams.get("chainId") || NOBLE_CHAIN_ID;
   const coinMinimalDenom = searchParams.get("coinMinimalDenom") || "uusdc";
 
-  const chainInfo = chainStore.getChain(chainId);
+  const chainInfo = chainStore.getModularChainInfoImpl(chainId);
   const account = accountStore.getAccount(chainId);
   const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
 
@@ -68,7 +68,8 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
     chainId,
     sender,
     currency,
-    outCurrency
+    outCurrency,
+    false
   );
 
   // XXX: 원래는 밑의 처리를 FeeControl component에서 해야하지만 이 UI에는 그런게 없기 때문에 따로 불러줘야 함
@@ -292,7 +293,7 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
             <Subtitle3 color={ColorPalette["gray-300"]}>
               {intl.formatMessage(
                 { id: "page.earn.amount.balance.current-chain" },
-                { chain: chainInfo.chainName }
+                { chain: chainInfo.embedded.chainName }
               )}
             </Subtitle3>
           </XAxis>

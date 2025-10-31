@@ -3,8 +3,8 @@ import { FiatOnRampServiceInfo } from "../config.ui";
 import { useStore } from "../stores";
 import { createHmac } from "crypto";
 
-interface BuySupportServiceInfo extends FiatOnRampServiceInfo {
-  buyUrl?: string;
+export interface BuySupportServiceInfo extends FiatOnRampServiceInfo {
+  getBuyUrl: (() => Promise<string>) | undefined;
 }
 
 export const useBuySupportServiceInfos = (selectedTokenInfo?: {
@@ -63,13 +63,14 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
                 Object.entries(
                   serviceInfo.buySupportCoinDenomsByChainId
                 ).reduce((finalAcc, [chainId, coinDenoms]) => {
-                  if (chainStore.hasChain(chainId)) {
+                  if (chainStore.hasModularChain(chainId)) {
                     const currencyCodeMap = coinDenoms?.reduce(
                       (acc, coinDenom) => {
-                        const chainInfo = chainStore.getChain(chainId);
-                        const matchedCurrency = chainInfo.currencies.find(
-                          (currency) => currency.coinDenom === coinDenom
-                        );
+                        const chainInfo =
+                          chainStore.getModularChainInfoImpl(chainId);
+                        const matchedCurrency = chainInfo
+                          .getCurrencies()
+                          .find((currency) => currency.coinDenom === coinDenom);
                         const currencyCode = getCurrencyCodeForMoonpay(
                           matchedCurrency?.coinDenom
                         );
@@ -100,22 +101,22 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
           };
         case "transak":
           return {
-            apiKey:
-              process.env["KEPLR_EXT_TRANSAK_API_KEY"] ?? serviceInfo.apiKey,
-            hideMenu: "true",
             walletAddressesData: encodeURIComponent(
               JSON.stringify(
                 Object.entries(
                   serviceInfo.buySupportCoinDenomsByChainId
                 ).reduce(
                   (finalAcc, [chainId, coinDenoms]) => {
-                    if (chainStore.hasChain(chainId)) {
-                      const chainInfo = chainStore.getChain(chainId);
+                    if (chainStore.hasModularChain(chainId)) {
+                      const chainInfo =
+                        chainStore.getModularChainInfoImpl(chainId);
                       const coins = coinDenoms?.reduce(
                         (coinsAcc, coinDenom) => {
-                          const matchedCurrency = chainInfo.currencies.find(
-                            (currency) => currency.coinDenom === coinDenom
-                          );
+                          const matchedCurrency = chainInfo
+                            .getCurrencies()
+                            .find(
+                              (currency) => currency.coinDenom === coinDenom
+                            );
 
                           if (matchedCurrency) {
                             const currencyCode = matchedCurrency.coinDenom;
@@ -164,10 +165,11 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
                   (modularChainInfo) => modularChainInfo.chainId === chainId
                 );
 
-                if (chainStore.hasChain(chainId)) {
-                  const address = chainStore.isEvmChain(chainId)
-                    ? accountStore.getAccount(chainId).ethereumHexAddress
-                    : accountStore.getAccount(chainId).bech32Address;
+                if (chainStore.hasModularChain(chainId)) {
+                  const address =
+                    modularChainInfo && "evm" in modularChainInfo
+                      ? accountStore.getAccount(chainId).ethereumHexAddress
+                      : accountStore.getAccount(chainId).bech32Address;
 
                   coinDenoms.forEach((coinDenom) => {
                     if (!seenCoinDenoms.has(coinDenom)) {
@@ -253,15 +255,61 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
   const moonpaySignedUrl = moonpaySignResult?.response?.data;
 
   return (
-    buySupportServiceInfos?.map((serviceInfo) => ({
-      ...serviceInfo,
-      ...(serviceInfo.serviceId === "moonpay" &&
-        moonpaySignResult &&
-        !moonpaySignResult.error &&
-        moonpaySignedUrl && {
-          buyUrl: moonpaySignedUrl,
-        }),
-    })) ?? []
+    buySupportServiceInfos
+      ?.filter((serviceInfo) => {
+        if (serviceInfo.serviceId === "moonpay") {
+          if (
+            moonpaySignResult &&
+            !moonpaySignResult.error &&
+            moonpaySignedUrl
+          ) {
+            return true;
+          }
+          return false;
+        }
+
+        return true;
+      })
+      .map((serviceInfo) => ({
+        ...serviceInfo,
+        ...(serviceInfo.serviceId === "moonpay" &&
+          moonpaySignResult &&
+          !moonpaySignResult.error &&
+          moonpaySignedUrl && {
+            buyUrl: moonpaySignedUrl,
+          }),
+      }))
+      .map((serviceInfo) => {
+        return {
+          ...serviceInfo,
+          getBuyUrl: serviceInfo.buyUrl
+            ? async () => {
+                if (serviceInfo.serviceId === "transak") {
+                  const buyUrl = serviceInfo.buyUrl;
+                  if (!buyUrl) {
+                    throw new Error("buyUrl is null");
+                  }
+
+                  const transakSignResult = queriesStore.simpleQuery.queryGet<{
+                    widgetUrl: string;
+                  }>(
+                    process.env["KEPLR_EXT_CONFIG_SERVER"] || "",
+                    `api/transak${buyUrl.replace(serviceInfo.buyOrigin, "")}`
+                  );
+                  await transakSignResult.waitFreshResponse();
+                  const transakSignedUrl =
+                    transakSignResult?.response?.data.widgetUrl;
+                  if (!transakSignedUrl) {
+                    throw new Error("transakSignedUrl is null");
+                  }
+
+                  return transakSignedUrl;
+                }
+                return serviceInfo.buyUrl!;
+              }
+            : undefined,
+        };
+      }) ?? []
   );
 };
 

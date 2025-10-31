@@ -27,6 +27,7 @@ export const useIBCSwapConfig = (
   initialGas: number,
   outChainId: string,
   outCurrency: AppCurrency,
+  disableSubFeeFromFaction: boolean,
   swapFeeBps: number,
   allowSwaps?: boolean,
   smartSwapOptions?: {
@@ -45,6 +46,7 @@ export const useIBCSwapConfig = (
     senderConfig,
     outChainId,
     outCurrency,
+    disableSubFeeFromFaction,
     swapFeeBps,
     allowSwaps,
     smartSwapOptions

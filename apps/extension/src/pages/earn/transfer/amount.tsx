@@ -86,12 +86,14 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
   const chainId = initialChainId;
   const ibcTransferDestinationChainId =
     initialIBCTransferDestinationChainId ?? NOBLE_CHAIN_ID;
-  const chainInfo = chainStore.getChain(chainId);
-  const ibcTransferDestinationChainInfo = chainStore.getChain(
+  const modularChainInfoImpl = chainStore.getModularChainInfoImpl(chainId);
+  const ibcTransferDestinationChainInfo = chainStore.getModularChain(
     ibcTransferDestinationChainId
   );
 
-  const currency = chainInfo.forceFindCurrency(initialCoinMinimalDenom);
+  const currency = modularChainInfoImpl.forceFindCurrency(
+    initialCoinMinimalDenom
+  );
   const account = accountStore.getAccount(chainId);
 
   const queryBalances = queriesStore.get(chainId).queryBalances;
@@ -112,6 +114,7 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
     chainId,
     sender,
     300000,
+    false,
     true
   );
   sendConfigs.amountConfig.setCurrency(currency);
@@ -383,7 +386,9 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
                     msg = msg.withIBCPacketForwarding(
                       sendConfigs.channelConfig.channels,
                       {
-                        currencies: chainStore.getChain(chainId).currencies,
+                        currencies: chainStore
+                          .getModularChainInfoImpl(chainId)
+                          .getCurrencies(),
                       }
                     );
                   } else {
@@ -431,7 +436,9 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
                       originDenom: ibcChannelFluent.originDenom,
                       originCommonDenom: (() => {
                         const currency = chainStore
-                          .getChain(ibcChannelFluent.originChainId)
+                          .getModularChainInfoImpl(
+                            ibcChannelFluent.originChainId
+                          )
                           .forceFindCurrency(ibcChannelFluent.originDenom);
                         if ("paths" in currency && currency.originCurrency) {
                           return currency.originCurrency.coinDenom;
@@ -675,7 +682,7 @@ export const EarnTransferAmountPage: FunctionComponent = observer(() => {
                 </XAxis>
               </HorizontalCollapseTransition>
               <Subtitle3 color={ColorPalette["gray-300"]}>
-                {`on ${chainInfo.chainName}`}
+                {`on ${modularChainInfoImpl.embedded.chainName}`}
               </Subtitle3>
             </XAxis>
           </Box>

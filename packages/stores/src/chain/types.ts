@@ -104,4 +104,19 @@ export interface IModularChainInfoImpl<
   forceFindCurrencyWithoutReaction(coinMinimalDenom: string): AppCurrency;
   findCurrencyAsync(coinMinimalDenom: string): Promise<AppCurrency | undefined>;
   hasFeature(feature: string): boolean;
+  addUnknownDenoms(args: {
+    module: ChainInfoModule;
+    coinMinimalDenoms: string[];
+  }): void;
+  addUnknownDenomsWithoutReaction(args: {
+    module: ChainInfoModule;
+    coinMinimalDenoms: string[];
+  }): void;
+  isCurrencyRegistrationInProgress(coinMinimalDenom: string): boolean;
+  matchModules(
+    conditions:
+      | { or: ChainInfoModule[]; and?: undefined }
+      | { and: ChainInfoModule[]; or?: undefined }
+  ): boolean;
+  matchModule(module: ChainInfoModule): boolean;
 }

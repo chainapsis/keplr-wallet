@@ -92,7 +92,7 @@ export class BIP44PathState {
       return false;
     }
     if (this._isLedger) {
-      if (validated > 100) {
+      if (validated > 2147483647) {
         return false;
       }
     } else {
@@ -128,7 +128,7 @@ export class BIP44PathState {
       return false;
     }
     if (this._isLedger) {
-      if (validated > 100) {
+      if (validated > 4294967295) {
         return false;
       }
     } else {

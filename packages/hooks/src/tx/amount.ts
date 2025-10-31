@@ -36,13 +36,19 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
   @observable
   protected _fractionSubFeeWeight: number = 0;
 
+  @observable
+  protected _disableSubFeeFromFaction: boolean = false;
+
   constructor(
     chainGetter: ChainGetter,
     protected readonly queriesStore: QueriesStore,
     initialChainId: string,
-    protected readonly senderConfig: ISenderConfig
+    protected readonly senderConfig: ISenderConfig,
+    disableSubFeeFromFaction: boolean
   ) {
     super(chainGetter, initialChainId);
+
+    this._disableSubFeeFromFaction = disableSubFeeFromFaction;
 
     makeObservable(this);
   }
@@ -54,6 +60,15 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
   @action
   setFractionSubFeeWeight(fractionSubFeeWeight: number) {
     this._fractionSubFeeWeight = fractionSubFeeWeight;
+  }
+
+  get disableSubFeeFromFaction(): boolean {
+    return this._disableSubFeeFromFaction;
+  }
+
+  @action
+  setDisableSubFeeFromFaction(value: boolean) {
+    this._disableSubFeeFromFaction = value;
   }
 
   get feeConfig(): IFeeConfig | undefined {
@@ -72,7 +87,7 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
         .get(this.chainId)
         .queryBalances.getQueryBech32Address(this.senderConfig.sender)
         .getBalanceFromCurrency(this.currency);
-      if (this.feeConfig) {
+      if (this.feeConfig && !this.disableSubFeeFromFaction) {
         for (const fee of this.feeConfig.fees) {
           result = result.sub(fee);
         }
@@ -144,20 +159,24 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
 
   @computed
   get currency(): AppCurrency {
-    const chainInfo = this.chainInfo;
+    const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
+      this.chainId
+    );
 
     if (this._currency) {
-      const find = chainInfo.findCurrency(this._currency.coinMinimalDenom);
+      const find = modularChainInfoImpl.findCurrency(
+        this._currency.coinMinimalDenom
+      );
       if (find) {
         return find;
       }
     }
 
-    if (chainInfo.currencies.length === 0) {
+    if (modularChainInfoImpl.getCurrencies().length === 0) {
       throw new Error("Chain doesn't have the sendable currency informations");
     }
 
-    return chainInfo.currencies[0];
+    return modularChainInfoImpl.getCurrencies()[0];
   }
 
   @action
@@ -180,7 +199,11 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
   }
 
   canUseCurrency(currency: AppCurrency): boolean {
-    return this.chainInfo.findCurrency(currency.coinMinimalDenom) != null;
+    return (
+      this.chainGetter
+        .getModularChainInfoImpl(this.chainId)
+        .findCurrency(currency.coinMinimalDenom) != null
+    );
   }
 
   @computed
@@ -274,14 +297,23 @@ export const useAmountConfig = (
   queriesStore: QueriesStore,
   chainId: string,
   senderConfig: ISenderConfig,
+  disableSubFeeFromFaction: boolean,
   fractionSubFeeWeight?: number
 ) => {
   const [txConfig] = useState(
-    () => new AmountConfig(chainGetter, queriesStore, chainId, senderConfig)
+    () =>
+      new AmountConfig(
+        chainGetter,
+        queriesStore,
+        chainId,
+        senderConfig,
+        disableSubFeeFromFaction
+      )
   );
 
   txConfig.setChain(chainId);
   txConfig.setFractionSubFeeWeight(fractionSubFeeWeight ?? 0);
+  txConfig.setDisableSubFeeFromFaction(disableSubFeeFromFaction);
 
   return txConfig;
 };

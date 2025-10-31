@@ -1,3 +1,4 @@
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import {
   AmountConfig,
   InsufficientFeeError,
@@ -59,6 +60,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
     senderConfig: ISenderConfig,
     initialOutChainId: string,
     initialOutCurrency: AppCurrency,
+    disableSubFeeFromFaction: boolean,
     swapFeeBps: number,
     allowSwaps?: boolean,
     smartSwapOptions?: {
@@ -66,7 +68,13 @@ export class IBCSwapAmountConfig extends AmountConfig {
       splitRoutes?: boolean;
     }
   ) {
-    super(chainGetter, queriesStore, initialChainId, senderConfig);
+    super(
+      chainGetter,
+      queriesStore,
+      initialChainId,
+      senderConfig,
+      disableSubFeeFromFaction
+    );
 
     this._outChainId = initialOutChainId;
     this._outCurrency = initialOutCurrency;
@@ -83,7 +91,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
       .get(this.chainId)
       .queryBalances.getQueryBech32Address(this.senderConfig.sender)
       .getBalanceFromCurrency(this.currency);
-    if (this.feeConfig) {
+    if (this.feeConfig && !this.disableSubFeeFromFaction) {
       for (const fee of this.feeConfig.fees) {
         result = result.sub(fee);
       }
@@ -333,11 +341,6 @@ export class IBCSwapAmountConfig extends AmountConfig {
           : destinationAccount.bech32Address;
     }
 
-    if (customRecipient) {
-      chainIdsToAddresses[customRecipient.chainId.replace("eip155:", "")] =
-        customRecipient.recipient;
-    }
-
     for (const swapVenue of queryRouteResponse.data.swap_venues ?? [
       queryRouteResponse.data.swap_venue,
     ]) {
@@ -364,15 +367,23 @@ export class IBCSwapAmountConfig extends AmountConfig {
             : !swapAccount.bech32Address
         ) {
           const swapVenueChainInfo =
-            this.chainGetter.hasChain(swapVenueChainId) &&
-            this.chainGetter.getChain(swapVenueChainId);
+            this.chainGetter.hasModularChain(swapVenueChainId) &&
+            this.chainGetter
+              .getModularChainInfoImpl(swapVenueChainId)
+              .matchModules({ or: ["cosmos", "evm"] }) &&
+            this.chainGetter.getModularChain(swapVenueChainId);
           if (
             swapAccount.isNanoLedger &&
             swapVenueChainInfo &&
-            (swapVenueChainInfo.bip44.coinType === 60 ||
-              swapVenueChainInfo.features.includes("eth-address-gen") ||
-              swapVenueChainInfo.features.includes("eth-key-sign") ||
-              swapVenueChainInfo.evm != null)
+            (("evm" in swapVenueChainInfo && swapVenueChainInfo.evm != null) ||
+              ("cosmos" in swapVenueChainInfo &&
+                (swapVenueChainInfo.cosmos.bip44.coinType === 60 ||
+                  swapVenueChainInfo.cosmos.features?.includes(
+                    "eth-address-gen"
+                  ) ||
+                  swapVenueChainInfo.cosmos.features?.includes(
+                    "eth-key-sign"
+                  ))))
           ) {
             throw new Error(
               "Please connect Ethereum app on Ledger with Keplr to get the address"
@@ -386,6 +397,11 @@ export class IBCSwapAmountConfig extends AmountConfig {
             ? swapAccount.ethereumHexAddress
             : swapAccount.bech32Address;
       }
+    }
+
+    if (customRecipient) {
+      chainIdsToAddresses[customRecipient.chainId.replace("eip155:", "")] =
+        customRecipient.recipient;
     }
 
     const queryMsgsDirect = queryIBCSwap.getQueryMsgsDirect(
@@ -524,11 +540,6 @@ export class IBCSwapAmountConfig extends AmountConfig {
           : destinationAccount.bech32Address;
     }
 
-    if (customRecipient) {
-      chainIdsToAddresses[customRecipient.chainId.replace("eip155:", "")] =
-        customRecipient.recipient;
-    }
-
     for (const swapVenue of queryRouteResponse.data.swap_venues ?? [
       queryRouteResponse.data.swap_venue,
     ]) {
@@ -561,6 +572,11 @@ export class IBCSwapAmountConfig extends AmountConfig {
             ? swapAccount.ethereumHexAddress
             : swapAccount.bech32Address;
       }
+    }
+
+    if (customRecipient) {
+      chainIdsToAddresses[customRecipient.chainId.replace("eip155:", "")] =
+        customRecipient.recipient;
     }
 
     const queryMsgsDirect = queryIBCSwap.getQueryMsgsDirect(
@@ -902,8 +918,8 @@ export class IBCSwapAmountConfig extends AmountConfig {
       this.amount.length > 0 &&
       this.amount[0].currency.coinMinimalDenom ===
         this.outAmount.currency.coinMinimalDenom &&
-      this.chainGetter.getChain(this.chainId).chainIdentifier ===
-        this.chainGetter.getChain(this.outChainId).chainIdentifier
+      ChainIdHelper.parse(this.chainId).identifier ===
+        ChainIdHelper.parse(this.outChainId).identifier
     ) {
       return {
         ...prev,
@@ -1034,6 +1050,7 @@ export const useIBCSwapAmountConfig = (
   senderConfig: ISenderConfig,
   outChainId: string,
   outCurrency: AppCurrency,
+  disableSubFeeFromFaction: boolean,
   swapFeeBps: number,
   allowSwaps?: boolean,
   smartSwapOptions?: {
@@ -1053,6 +1070,7 @@ export const useIBCSwapAmountConfig = (
         senderConfig,
         outChainId,
         outCurrency,
+        disableSubFeeFromFaction,
         swapFeeBps,
         allowSwaps,
         smartSwapOptions
@@ -1062,6 +1080,7 @@ export const useIBCSwapAmountConfig = (
   txConfig.setOutChainId(outChainId);
   txConfig.setOutCurrency(outCurrency);
   txConfig.setSwapFeeBps(swapFeeBps);
+  txConfig.setDisableSubFeeFromFaction(disableSubFeeFromFaction);
 
   return txConfig;
 };

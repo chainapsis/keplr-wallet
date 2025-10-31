@@ -1,4 +1,9 @@
-import React, { FunctionComponent, useLayoutEffect, useState } from "react";
+import React, {
+  FunctionComponent,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from "react";
 import { observer } from "mobx-react-lite";
 import {
   IFeeConfig,
@@ -96,7 +101,7 @@ export const useAutoFeeCurrencySelectionOnInit = (
         feeConfig.fees.length > 0
       ) {
         const queryBalances =
-          chainStore.getChain(feeConfig.chainId).evm != null &&
+          "evm" in chainStore.getModularChain(feeConfig.chainId) &&
           EthereumAccountBase.isEthereumHexAddressWithChecksum(
             senderConfig.sender
           )
@@ -183,6 +188,8 @@ export const FeeControl: FunctionComponent<{
   isForEVMTx?: boolean;
   nonceMethod?: "pending" | "latest";
   setNonceMethod?: (nonceMethod: "pending" | "latest") => void;
+  isExternalMsg?: boolean;
+  shouldTopUp?: boolean;
 }> = observer(
   ({
     senderConfig,
@@ -193,6 +200,8 @@ export const FeeControl: FunctionComponent<{
     isForEVMTx,
     nonceMethod,
     setNonceMethod,
+    isExternalMsg,
+    shouldTopUp,
   }) => {
     const {
       analyticsStore,
@@ -220,6 +229,12 @@ export const FeeControl: FunctionComponent<{
     );
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    useEffect(() => {
+      if (shouldTopUp) {
+        setIsModalOpen(false);
+      }
+    }, [shouldTopUp]);
 
     // EVM 트랜잭션의 경우, 외부에서 fee를 설정한 경우를 구분하기 위해서 사용
     const isFeeSetByUser = isForEVMTx && feeConfig.type !== "manual";
@@ -273,12 +288,14 @@ export const FeeControl: FunctionComponent<{
                         if (feeConfig.fees.length > 0) {
                           return feeConfig.fees;
                         }
-                        const chainInfo = chainStore.getChain(
+                        const chainInfo = chainStore.getModularChainInfoImpl(
                           feeConfig.chainId
                         );
                         return [
                           new CoinPretty(
-                            chainInfo.stakeCurrency || chainInfo.currencies[0],
+                            ("cosmos" in chainInfo.embedded &&
+                              chainInfo.embedded.cosmos.stakeCurrency) ||
+                              chainInfo.getCurrencies()[0],
                             new Dec(0)
                           ),
                         ];
@@ -548,6 +565,7 @@ export const FeeControl: FunctionComponent<{
             gasConfig={gasConfig}
             gasSimulator={gasSimulator}
             disableAutomaticFeeSet={disableAutomaticFeeSet}
+            isExternalMsg={isExternalMsg}
             isForEVMTx={isForEVMTx}
             nonceMethod={nonceMethod}
             setNonceMethod={setNonceMethod}

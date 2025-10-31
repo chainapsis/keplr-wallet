@@ -14,10 +14,11 @@ import { CoinPretty, Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { Currency, FeeCurrency, StdFee } from "@keplr-wallet/types";
 import { computedFn } from "mobx-utils";
 import { useState } from "react";
-import { InsufficientFeeError } from "./errors";
+import { InsufficientFeeError, ShouldTopUpWarning } from "./errors";
 import { QueriesStore } from "./internal";
 import { DenomHelper } from "@keplr-wallet/common";
 import { EthereumQueriesImpl } from "@keplr-wallet/stores-eth";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export class FeeConfig extends TxChainSetter implements IFeeConfig {
   @observable.ref
@@ -51,6 +52,9 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   @observable
   protected forceUseAtoneTokenAsFee: boolean = false;
 
+  @observable
+  protected forceTopUp: boolean = false;
+
   constructor(
     chainGetter: ChainGetter,
     protected readonly queriesStore: QueriesStore,
@@ -60,13 +64,15 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     protected readonly gasConfig: IGasConfig,
     additionAmountToNeedFee: boolean = true,
     computeTerraClassicTax: boolean = false,
-    forceUseAtoneTokenAsFee: boolean = false
+    forceUseAtoneTokenAsFee: boolean = false,
+    forceTopUp: boolean = false
   ) {
     super(chainGetter, initialChainId);
 
     this.additionAmountToNeedFee = additionAmountToNeedFee;
     this.computeTerraClassicTax = computeTerraClassicTax;
     this.forceUseAtoneTokenAsFee = forceUseAtoneTokenAsFee;
+    this.forceTopUp = forceTopUp;
     makeObservable(this);
   }
 
@@ -83,6 +89,11 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   @action
   setForceUseAtoneTokenAsFee(forceUseAtoneTokenAsFee: boolean) {
     this.forceUseAtoneTokenAsFee = forceUseAtoneTokenAsFee;
+  }
+
+  @action
+  setForceTopUp(forceTopUp: boolean) {
+    this.forceTopUp = forceTopUp;
   }
 
   @action
@@ -118,13 +129,20 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       return undefined;
     }
 
+    const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
+      this.chainId
+    );
+
     if ("type" in this._fee) {
       const coinMinimalDenom = this._fee.currency.coinMinimalDenom;
-      const feeCurrency = this.chainGetter
-        .getChain(this.chainId)
-        .feeCurrencies.find((cur) => cur.coinMinimalDenom === coinMinimalDenom);
+      const feeCurrency =
+        "cosmos" in modularChainInfoImpl.embedded
+          ? modularChainInfoImpl.embedded.cosmos.feeCurrencies.find(
+              (cur) => cur.coinMinimalDenom === coinMinimalDenom
+            )
+          : undefined;
       const currency = this.chainGetter
-        .getChain(this.chainId)
+        .getModularChainInfoImpl(this.chainId)
         .forceFindCurrency(coinMinimalDenom);
 
       return {
@@ -138,12 +156,10 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
     return this._fee.map((coin) => {
       const coinMinimalDenom = coin.currency.coinMinimalDenom;
-      const feeCurrency = this.chainGetter
-        .getChain(this.chainId)
-        .feeCurrencies.find((cur) => cur.coinMinimalDenom === coinMinimalDenom);
-      const currency = this.chainGetter
-        .getChain(this.chainId)
-        .forceFindCurrency(coinMinimalDenom);
+      const feeCurrency = modularChainInfoImpl.feeCurrencies?.find(
+        (cur) => cur.coinMinimalDenom === coinMinimalDenom
+      );
+      const currency = modularChainInfoImpl.forceFindCurrency(coinMinimalDenom);
 
       return new CoinPretty(
         {
@@ -184,20 +200,26 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
   @computed
   get selectableFeeCurrencies(): FeeCurrency[] {
+    const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
+      this.chainId
+    );
+
     if (
-      this.chainInfo.bip44.coinType === 60 ||
-      this.chainInfo.hasFeature("eth-address-gen") ||
-      this.chainInfo.hasFeature("eth-key-sign") ||
+      ("cosmos" in this.chainInfo &&
+        (this.chainInfo.cosmos.bip44.coinType === 60 ||
+          this.chainInfo.cosmos.features?.includes("eth-address-gen") ||
+          this.chainInfo.cosmos.features?.includes("eth-key-sign"))) ||
       ("evm" in this.chainInfo && this.chainInfo.evm)
     ) {
-      return this.chainInfo.feeCurrencies.slice(0, 1);
+      return modularChainInfoImpl.feeCurrencies?.slice(0, 1) ?? [];
     }
 
     if (this.chainInfo.chainId === "atomone-1") {
       //현재 atomone에서는 MsgMintPhoton를 제외하면 ATONE을 fee로 사용해서 안됨, 그래서 하드코딩으로 옵션을 적용
-      const feeCurrenciesWithoutAtone = this.chainInfo.feeCurrencies.filter(
-        (cur) => cur.coinMinimalDenom !== "uatone"
-      );
+      const feeCurrenciesWithoutAtone =
+        modularChainInfoImpl.feeCurrencies?.filter(
+          (cur) => cur.coinMinimalDenom !== "uatone"
+        ) ?? [];
 
       if (
         feeCurrenciesWithoutAtone.length > 0 &&
@@ -218,7 +240,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         // To reduce the confusion, add the priority to native (not ibc token) currency.
         // And, put the most priority to the base denom.
         // Remainings are sorted in alphabetical order.
-        return this.chainInfo.feeCurrencies
+        return (modularChainInfoImpl.feeCurrencies ?? [])
           .concat(txFees.feeCurrencies)
           .filter((cur) => {
             if (!exists[cur.coinMinimalDenom]) {
@@ -255,11 +277,11 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
           });
       }
     } else if (this.canFeeMarketTxFeesAndReady()) {
-      if (this.chainInfo.hasFeature("initia-dynamicfee")) {
-        return this.chainInfo.feeCurrencies.slice(0, 1);
-      }
-      if (this.chainInfo.hasFeature("evm-feemarket")) {
-        return this.chainInfo.feeCurrencies.slice(0, 1);
+      if (
+        modularChainInfoImpl.hasFeature("initia-dynamicfee") ||
+        modularChainInfoImpl.hasFeature("evm-feemarket")
+      ) {
+        return modularChainInfoImpl.feeCurrencies?.slice(0, 1) ?? [];
       }
 
       const queryCosmos = this.queriesStore.get(this.chainId).cosmos;
@@ -268,16 +290,15 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
         const found: FeeCurrency[] = [];
         for (const gasPrice of gasPrices) {
-          const cur = this.chainInfo.findCurrency(gasPrice.denom);
+          const cur = modularChainInfoImpl.findCurrency(gasPrice.denom);
           if (cur) {
             found.push(cur);
           }
         }
 
-        const firstFeeDenom =
-          this.chainInfo.feeCurrencies.length > 0
-            ? this.chainInfo.feeCurrencies[0].coinMinimalDenom
-            : "";
+        const firstFeeDenom = !!modularChainInfoImpl.feeCurrencies?.length
+          ? modularChainInfoImpl.feeCurrencies?.[0].coinMinimalDenom
+          : "";
         return found.sort((cur1, cur2) => {
           // firstFeeDenom should be the first.
           // others should be sorted in alphabetical order.
@@ -294,8 +315,10 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
     const res: FeeCurrency[] = [];
 
-    for (const feeCurrency of this.chainInfo.feeCurrencies) {
-      const cur = this.chainInfo.findCurrency(feeCurrency.coinMinimalDenom);
+    for (const feeCurrency of modularChainInfoImpl.feeCurrencies ?? []) {
+      const cur = modularChainInfoImpl.findCurrency(
+        feeCurrency.coinMinimalDenom
+      );
       if (cur) {
         res.push({
           ...feeCurrency,
@@ -370,8 +393,9 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     if (
       res.length > 0 &&
       this.computeTerraClassicTax &&
-      this.chainInfo.features &&
-      this.chainInfo.features.includes("terra-classic-fee")
+      this.chainGetter
+        .getModularChainInfoImpl(this.chainId)
+        .hasFeature("terra-classic-fee")
     ) {
       const etcQueries = this.queriesStore.get(this.chainId).keplrETC;
       if (
@@ -427,7 +451,11 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   protected canOsmosisTxFeesAndReady(): boolean {
-    if (this.chainInfo.hasFeature("osmosis-txfees")) {
+    const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
+      this.chainId
+    );
+
+    if (modularChainInfoImpl.hasFeature("osmosis-txfees")) {
       const queries = this.queriesStore.get(this.chainId);
       if (!queries.osmosis) {
         console.log(
@@ -440,7 +468,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
       if (
         queryBaseDenom.baseDenom &&
-        this.chainInfo.feeCurrencies.find(
+        modularChainInfoImpl.feeCurrencies?.find(
           (cur) => cur.coinMinimalDenom === queryBaseDenom.baseDenom
         )
       ) {
@@ -455,7 +483,11 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     if (this.chainInfo.chainId.startsWith("cheqd-mainnet-")) {
       return false;
     }
-    if (this.chainInfo.hasFeature("feemarket")) {
+
+    const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
+      this.chainId
+    );
+    if (modularChainInfoImpl.hasFeature("feemarket")) {
       const queries = this.queriesStore.get(this.chainId);
       if (!queries.cosmos) {
         console.log(
@@ -473,16 +505,16 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       for (let i = 0; i < queryFeeMarketGasPrices.gasPrices.length; i++) {
         const gasPrice = queryFeeMarketGasPrices.gasPrices[i];
         // 일단 모든 currency에 대해서 find를 시도한다.
-        this.chainInfo.findCurrency(gasPrice.denom);
+        modularChainInfoImpl.findCurrency(gasPrice.denom);
       }
 
       return (
         queryFeeMarketGasPrices.gasPrices.find((gasPrice) =>
-          this.chainInfo.findCurrency(gasPrice.denom)
+          modularChainInfoImpl.findCurrency(gasPrice.denom)
         ) != null
       );
     }
-    if (this.chainInfo.hasFeature("evm-feemarket")) {
+    if (modularChainInfoImpl.hasFeature("evm-feemarket")) {
       const queries = this.queriesStore.get(this.chainId);
       if (!queries.cosmos) {
         console.log(
@@ -495,7 +527,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       return queryEvmFeeMarketBaseFee.baseFee != null;
     }
 
-    if (this.chainInfo.hasFeature("initia-dynamicfee")) {
+    if (modularChainInfoImpl.hasFeature("initia-dynamicfee")) {
       const queries = this.queriesStore.get(this.chainId);
       if (!queries.keplrETC) {
         console.log(
@@ -517,7 +549,11 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   protected canEIP1559TxFeesAndReady(isRefresh?: boolean): boolean {
-    if (this.chainInfo.evm && this.senderConfig.sender.startsWith("0x")) {
+    if (
+      "evm" in this.chainInfo &&
+      this.chainInfo.evm &&
+      this.senderConfig.sender.startsWith("0x")
+    ) {
       const queries = this.queriesStore.get(this.chainId);
       if (!queries.ethereum) {
         console.log("Chain supports EVM. But no ethereum queries provided.");
@@ -594,8 +630,12 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
   readonly getGasPriceForFeeCurrency = computedFn(
     (feeCurrency: FeeCurrency, feeType: FeeType): Dec => {
+      const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
+        this.chainId
+      );
+
       if (
-        this.chainInfo.hasFeature("osmosis-base-fee-beta") ||
+        modularChainInfoImpl.hasFeature("osmosis-base-fee-beta") ||
         this.canOsmosisTxFeesAndReady()
       ) {
         const queryOsmosis = this.queriesStore.get(this.chainId).osmosis;
@@ -604,9 +644,9 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
           let baseFeeCurrency =
             this.selectableFeeCurrencies.find(
               (c) => c.coinMinimalDenom === baseDenom
-            ) || this.chainInfo.feeCurrencies[0];
+            ) || modularChainInfoImpl.feeCurrencies![0];
 
-          if (this.chainInfo.hasFeature("osmosis-base-fee-beta")) {
+          if (modularChainInfoImpl.hasFeature("osmosis-base-fee-beta")) {
             const remoteBaseFeeStep = this.queriesStore.simpleQuery.queryGet<{
               low?: number;
               average?: number;
@@ -693,7 +733,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
           }
         }
       } else if (this.canFeeMarketTxFeesAndReady()) {
-        if (this.chainInfo.hasFeature("initia-dynamicfee")) {
+        if (modularChainInfoImpl.hasFeature("initia-dynamicfee")) {
           const queryEtc = this.queriesStore.get(this.chainId).keplrETC;
           if (queryEtc) {
             const gasPrice = queryEtc.queryInitiaDynamicFee.baseGasPrice;
@@ -709,7 +749,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
               }
             }
           }
-        } else if (this.chainInfo.hasFeature("evm-feemarket")) {
+        } else if (modularChainInfoImpl.hasFeature("evm-feemarket")) {
           const queryCosmos = this.queriesStore.get(this.chainId).cosmos;
           if (queryCosmos) {
             const baseFee = queryCosmos.queryEvmFeeMarketBaseFee.baseFee;
@@ -895,7 +935,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   @computed
-  get uiProperties(): UIProperties {
+  get _uiProperties(): UIProperties {
     if (this.disableBalanceCheck) {
       return {};
     }
@@ -905,11 +945,47 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       return {};
     }
 
+    const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
+      this.chainId
+    );
+    let priorWarning: Error | undefined = undefined;
+    let priorIsLoadingState = false;
+    const makeReturn = (uiProperties: UIProperties): UIProperties => {
+      return {
+        ...uiProperties,
+        ...(() => {
+          if (priorIsLoadingState) {
+            if (uiProperties.loadingState === "loading-block") {
+              return {
+                loadingState: "loading-block",
+              };
+            } else {
+              return {
+                loadingState: "loading",
+              };
+            }
+          }
+          return {};
+        })(),
+        ...(() => {
+          if (priorWarning) {
+            if (uiProperties.error) {
+              return {};
+            } else {
+              return {
+                warning: priorWarning,
+              };
+            }
+          }
+          return {};
+        })(),
+      };
+    };
+
     if (
       fee.length > 0 &&
       this.computeTerraClassicTax &&
-      this.chainInfo.features &&
-      this.chainInfo.features.includes("terra-classic-fee")
+      modularChainInfoImpl.hasFeature("terra-classic-fee")
     ) {
       const etcQueries = this.queriesStore.get(this.chainId).keplrETC;
       if (etcQueries) {
@@ -917,7 +993,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
           etcQueries.queryTerraClassicTaxRate.error ||
           etcQueries.queryTerraClassicTaxRate.isFetching
         ) {
-          return {
+          return makeReturn({
             error: (() => {
               if (etcQueries.queryTerraClassicTaxRate.error) {
                 return new Error("Failed to fetch tax rate");
@@ -926,14 +1002,14 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
             loadingState: etcQueries.queryTerraClassicTaxRate.isFetching
               ? "loading-block"
               : undefined,
-          };
+          });
         }
 
         if (
           etcQueries.queryTerraClassicTaxCaps.error ||
           etcQueries.queryTerraClassicTaxCaps.isFetching
         ) {
-          return {
+          return makeReturn({
             error: (() => {
               if (etcQueries.queryTerraClassicTaxCaps.error) {
                 return new Error("Failed to fetch tax rate");
@@ -942,71 +1018,59 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
             loadingState: etcQueries.queryTerraClassicTaxCaps.isFetching
               ? "loading-block"
               : undefined,
-          };
+          });
         }
       }
     }
 
-    if (this.chainInfo.hasFeature("osmosis-base-fee-beta")) {
+    if (modularChainInfoImpl.hasFeature("osmosis-base-fee-beta")) {
       const queryOsmosis = this.queriesStore.get(this.chainId).osmosis;
       if (queryOsmosis) {
         const queryBaseFee = queryOsmosis.queryBaseFee;
         const baseFee = queryBaseFee.baseFee;
-        if (!baseFee) {
-          return {
-            loadingState: "loading-block",
-          };
-        }
         if (queryBaseFee.isFetching) {
-          return {
-            loadingState: "loading",
-          };
+          priorIsLoadingState = true;
         }
         if (queryBaseFee.error) {
-          return {
-            warning: new Error("Failed to fetch base fee"),
-          };
+          priorWarning = new Error("Failed to fetch base fee");
+        }
+        if (!baseFee) {
+          return makeReturn({
+            loadingState: "loading-block",
+          });
         }
       }
     } else if (this.canFeeMarketTxFeesAndReady()) {
-      if (this.chainInfo.hasFeature("initia-dynamicfee")) {
+      if (modularChainInfoImpl.hasFeature("initia-dynamicfee")) {
         const queryEtc = this.queriesStore.get(this.chainId).keplrETC;
         if (queryEtc) {
           const queryInitiaDynamicFee = queryEtc.queryInitiaDynamicFee;
           if (queryInitiaDynamicFee.error) {
-            return {
-              warning: new Error("Failed to fetch gas prices"),
-            };
+            priorWarning = new Error("Failed to fetch gas prices");
           }
           if (!queryInitiaDynamicFee.response) {
-            return {
+            return makeReturn({
               loadingState: "loading-block",
-            };
+            });
           }
           if (queryInitiaDynamicFee.isFetching) {
-            return {
-              loadingState: "loading",
-            };
+            priorIsLoadingState = true;
           }
         }
-      } else if (this.chainInfo.hasFeature("evm-feemarket")) {
+      } else if (modularChainInfoImpl.hasFeature("evm-feemarket")) {
         const queryCosmos = this.queriesStore.get(this.chainId).cosmos;
         if (queryCosmos) {
           const queryEvmFeeMarketBaseFee = queryCosmos.queryEvmFeeMarketBaseFee;
           if (queryEvmFeeMarketBaseFee.error) {
-            return {
-              warning: new Error("Failed to fetch base fee"),
-            };
+            priorWarning = new Error("Failed to fetch base fee");
           }
           if (!queryEvmFeeMarketBaseFee.response) {
-            return {
+            return makeReturn({
               loadingState: "loading-block",
-            };
+            });
           }
           if (queryEvmFeeMarketBaseFee.isFetching) {
-            return {
-              loadingState: "loading",
-            };
+            priorIsLoadingState = true;
           }
         }
       } else {
@@ -1014,19 +1078,15 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         if (queryCosmos) {
           const queryFeeMarketGasPrices = queryCosmos.queryFeeMarketGasPrices;
           if (queryFeeMarketGasPrices.error) {
-            return {
-              warning: new Error("Failed to fetch gas prices"),
-            };
+            priorWarning = new Error("Failed to fetch gas prices");
           }
           if (!queryFeeMarketGasPrices.response) {
-            return {
+            return makeReturn({
               loadingState: "loading-block",
-            };
+            });
           }
           if (queryFeeMarketGasPrices.isFetching) {
-            return {
-              loadingState: "loading",
-            };
+            priorIsLoadingState = true;
           }
         }
       }
@@ -1065,11 +1125,14 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
           // Return only needed.
           // There is proceeding logic to validate the balance.
+          if (loadingState === "loading") {
+            priorIsLoadingState = true;
+          }
           if (error || loadingState) {
-            return {
+            return makeReturn({
               error,
               loadingState,
-            };
+            });
           }
         }
       }
@@ -1083,21 +1146,17 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
             ETH_FEE_HISTORY_NEWEST_BLOCK
           );
         if (blockQuery.error) {
-          return {
-            warning: new Error(
-              `Failed to fetch latest block. chain id: ${this.chainId}`
-            ),
-          };
+          priorWarning = new Error(
+            `Failed to fetch latest block. chain id: ${this.chainId}`
+          );
         }
         if (blockQuery.isFetching) {
-          return {
-            loadingState: "loading",
-          };
+          priorIsLoadingState = true;
         }
         if (!blockQuery.response) {
-          return {
+          return makeReturn({
             loadingState: "loading-block",
-          };
+          });
         }
 
         const feeHistoryQuery =
@@ -1111,45 +1170,37 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
           ethereumQueries.queryEthereumMaxPriorityFee;
 
         if (feeHistoryQuery.error && maxPriorityFeePerGasQuery.error) {
-          return {
-            warning: new Error(
-              `Failed to fetch both fee history and max priority fee. chain id: ${this.chainId}`
-            ),
-          };
+          priorWarning = new Error(
+            `Failed to fetch both fee history and max priority fee. chain id: ${this.chainId}`
+          );
         }
 
         if (
           feeHistoryQuery.isFetching ||
           maxPriorityFeePerGasQuery.isFetching
         ) {
-          return {
-            loadingState: "loading",
-          };
+          priorIsLoadingState = true;
         }
         if (!feeHistoryQuery.response || !maxPriorityFeePerGasQuery.response) {
-          return {
+          return makeReturn({
             loadingState: "loading-block",
-          };
+          });
         }
 
         const gasPriceQuery = ethereumQueries.queryEthereumGasPrice;
         if (gasPriceQuery.error) {
-          return {
-            warning: new Error(
-              `Failed to fetch gas price. chain id: ${this.chainId}`
-            ),
-          };
+          priorWarning = new Error(
+            `Failed to fetch gas price. chain id: ${this.chainId}`
+          );
         }
         if (gasPriceQuery.isFetching) {
-          return {
-            loadingState: "loading",
-          };
+          priorIsLoadingState = true;
         }
 
         if (!gasPriceQuery.response) {
-          return {
+          return makeReturn({
             loadingState: "loading-block",
-          };
+          });
         }
       }
     }
@@ -1193,34 +1244,187 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         );
 
       if (!bal) {
-        return {
-          warning: new Error(
-            `Can't parse the balance for ${need.currency.coinMinimalDenom}`
-          ),
-        };
+        priorWarning = new Error(
+          `Can't parse the balance for ${need.currency.coinMinimalDenom}`
+        );
       }
 
-      if (bal.error) {
-        return {
-          warning: new Error("Failed to fetch balance"),
-        };
+      if (bal) {
+        // XXX: AtomOne에서 fee top-up 시에 bal.error 또는 bal.response에 접근해도
+        //      bal이 observed 상태가 되지 않아서 fetch가 이뤄지지 않는 문제가 있음
+        //      아무리봐도 원인을 찾을 수 없기 때문에 일단 강제로 observed 상태로 만든다.
+        bal.waitResponse();
+
+        if (bal.error) {
+          priorWarning = new Error("Failed to fetch balance");
+        }
+
+        if (!bal.response) {
+          return makeReturn({
+            loadingState: "loading-block",
+          });
+        }
+
+        if (new Int(bal.balance.toCoin().amount).lt(new Int(need.amount))) {
+          if (bal.isFetching) {
+            priorIsLoadingState = true;
+          }
+
+          return makeReturn({
+            error: new InsufficientFeeError("Insufficient fee"),
+          });
+        }
+      }
+    }
+
+    return makeReturn({});
+  }
+
+  @computed
+  get uiProperties(): UIProperties {
+    if (
+      this.forceTopUp ||
+      (this._uiProperties.error instanceof InsufficientFeeError &&
+        this._topUpStatus.shouldTopUp)
+    ) {
+      return {
+        warning: new ShouldTopUpWarning("Should top up"),
+      };
+    }
+
+    return this._uiProperties;
+  }
+
+  @computed
+  protected get _topUpStatus(): {
+    shouldTopUp: boolean;
+    isTopUpAvailable: boolean;
+    remainingTimeMs?: number;
+    topUpOverrideStdFee?: StdFee;
+  } {
+    const queryTopUpStatus = this.queriesStore.get(this.chainId).keplrETC
+      ?.queryTopUpStatus;
+    if (!queryTopUpStatus) {
+      return {
+        isTopUpAvailable: false,
+        remainingTimeMs: undefined,
+        shouldTopUp: false,
+        topUpOverrideStdFee: undefined,
+      };
+    }
+
+    const topUpStatus = queryTopUpStatus.getTopUpStatus(
+      this.senderConfig.sender
+    );
+    if (topUpStatus.error != null) {
+      return {
+        isTopUpAvailable: false,
+        remainingTimeMs: undefined,
+        shouldTopUp: false,
+        topUpOverrideStdFee: undefined,
+      };
+    }
+
+    const { isTopUpAvailable, remainingTimeMs } = topUpStatus.topUpStatus;
+
+    // 모든 fee currency가 부족할 경우에만 topup 사용이 가능
+    const shouldTopUp = (() => {
+      const queryBalances = this.queriesStore
+        .get(this.chainId)
+        .queryBalances.getQueryBech32Address(this.senderConfig.sender);
+
+      for (const feeCurrency of this.selectableFeeCurrencies) {
+        const requiredFee = this.getFeeTypePrettyForFeeCurrency(
+          feeCurrency,
+          this.type === "manual" ? "average" : this.type
+        );
+
+        const totalNeed = (() => {
+          let need = requiredFee;
+          for (const amt of this.amountConfig.amount) {
+            if (
+              amt.currency.coinMinimalDenom === feeCurrency.coinMinimalDenom
+            ) {
+              need = need.add(amt);
+            }
+          }
+          return need;
+        })();
+
+        const bal = queryBalances.getBalance(feeCurrency)?.balance;
+        if (!bal || bal.toDec().lte(new Dec(0))) {
+          continue;
+        }
+
+        if (bal.toDec().gte(totalNeed.toDec())) {
+          return false;
+        }
       }
 
-      if (!bal.response) {
-        return {
-          loadingState: "loading-block",
-        };
-      }
+      return this.selectableFeeCurrencies.length > 0;
+    })();
+    let topUpOverrideStdFee: StdFee | undefined = undefined;
 
-      if (new Int(bal.balance.toCoin().amount).lt(new Int(need.amount))) {
-        return {
-          error: new InsufficientFeeError("Insufficient fee"),
-          loadingState: bal.isFetching ? "loading" : undefined,
+    if (this.forceTopUp || shouldTopUp) {
+      const baseFeeCurrency = this.chainGetter.getModularChainInfoImpl(
+        this.chainId
+      ).feeCurrencies?.[0];
+      if (baseFeeCurrency) {
+        const feeAmount = this.getFeeTypePrettyForFeeCurrency(
+          baseFeeCurrency,
+          "average"
+        );
+
+        topUpOverrideStdFee = {
+          gas: this.gasConfig.gas.toString(),
+          amount: [
+            {
+              amount: feeAmount.toCoin().amount,
+              denom: baseFeeCurrency.coinMinimalDenom,
+            },
+          ],
         };
       }
     }
 
-    return {};
+    return {
+      shouldTopUp,
+      isTopUpAvailable,
+      remainingTimeMs,
+      topUpOverrideStdFee,
+    };
+  }
+
+  @computed
+  get topUpStatus(): {
+    shouldTopUp: boolean;
+    remainingTimeMs?: number;
+    topUpOverrideStdFee?: StdFee;
+    isTopUpAvailable: boolean;
+  } {
+    if (this.uiProperties.warning instanceof ShouldTopUpWarning) {
+      return {
+        ...this._topUpStatus,
+        shouldTopUp: this.forceTopUp || this._topUpStatus.shouldTopUp,
+      };
+    }
+    return {
+      shouldTopUp: false,
+      remainingTimeMs: undefined,
+      topUpOverrideStdFee: undefined,
+      isTopUpAvailable: false,
+    };
+  }
+
+  refreshTopUpStatus(): void {
+    const queryTopUpStatus = this.queriesStore.get(this.chainId).keplrETC
+      ?.queryTopUpStatus;
+    if (queryTopUpStatus) {
+      const topUpQuery = queryTopUpStatus.getTopUpStatus(
+        this.senderConfig.sender
+      );
+      topUpQuery.fetch();
+    }
   }
 
   private getMultiplication(): { low: number; average: number; high: number } {
@@ -1261,7 +1465,9 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         };
       }
       const specific =
-        multificationConfig.response.data[this.chainInfo.chainIdentifier];
+        multificationConfig.response.data[
+          ChainIdHelper.parse(this.chainId).identifier
+        ];
       if (
         specific &&
         specific.low != null &&
@@ -1294,6 +1500,7 @@ export const useFeeConfig = (
     additionAmountToNeedFee?: boolean;
     computeTerraClassicTax?: boolean;
     forceUseAtoneTokenAsFee?: boolean;
+    forceTopUp?: boolean;
   } = {}
 ) => {
   const [config] = useState(
@@ -1307,13 +1514,15 @@ export const useFeeConfig = (
         gasConfig,
         opts.additionAmountToNeedFee ?? true,
         opts.computeTerraClassicTax ?? false,
-        opts.forceUseAtoneTokenAsFee ?? false
+        opts.forceUseAtoneTokenAsFee ?? false,
+        opts.forceTopUp ?? false
       )
   );
   config.setChain(chainId);
   config.setAdditionAmountToNeedFee(opts.additionAmountToNeedFee ?? true);
   config.setComputeTerraClassicTax(opts.computeTerraClassicTax ?? false);
   config.setForceUseAtoneTokenAsFee(opts.forceUseAtoneTokenAsFee ?? false);
+  config.setForceTopUp(opts.forceTopUp ?? false);
 
   return config;
 };

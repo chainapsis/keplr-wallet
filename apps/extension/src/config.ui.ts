@@ -182,6 +182,7 @@ export const SwapVenues: {
   { name: "avalanche-uniswap", chainId: "eip155:43114" },
   { name: "base-uniswap", chainId: "eip155:8453" },
   { name: "ethereum-uniswap", chainId: "eip155:1" },
+  { name: "base-aerodrome", chainId: "eip155:8453" },
   // Forma가 destination asset에 뜨게하기 위해 임시로 추가
   // 실제 swap venue로 사용되진 않음
   {

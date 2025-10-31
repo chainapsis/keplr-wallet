@@ -97,7 +97,7 @@ const RedelegateMessagePretty: FunctionComponent<{
     const { chainStore, queriesStore } = useStore();
 
     const currency = chainStore
-      .getChain(chainId)
+      .getModularChainInfoImpl(chainId)
       .forceFindCurrency(amount.denom);
     const coinPretty = new CoinPretty(currency, amount.amount);
 

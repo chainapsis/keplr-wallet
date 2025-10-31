@@ -69,7 +69,6 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
   const chainId = initialChainId || chainStore.chainInfosInUI[0].chainId;
 
   const modularChainInfoImpl = chainStore.getModularChainInfoImpl(chainId);
-  const chainInfo = chainStore.getChain(chainId);
   const account = accountStore.getAccount(chainId);
 
   const coinMinimalDenom =
@@ -77,7 +76,7 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
     modularChainInfoImpl.getCurrenciesByModule("cosmos")[0].coinMinimalDenom;
   const currency = modularChainInfoImpl.forceFindCurrency(coinMinimalDenom);
 
-  const outCurrency = chainInfo.forceFindCurrency(
+  const outCurrency = modularChainInfoImpl.forceFindCurrency(
     NOBLE_EARN_WITHDRAW_OUT_COIN_MINIMAL_DENOM
   );
 
@@ -94,7 +93,8 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
     chainId,
     sender,
     currency,
-    outCurrency
+    outCurrency,
+    false
   );
 
   // XXX: 원래는 밑의 처리를 FeeControl component에서 해야하지만 이 UI에는 그런게 없기 때문에 따로 불러줘야 함
@@ -402,7 +402,7 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
                 <Subtitle3 color={ColorPalette["gray-300"]}>
                   {intl.formatMessage(
                     { id: "page.earn.amount.balance.current-chain" },
-                    { chain: chainInfo.chainName }
+                    { chain: modularChainInfoImpl.embedded.chainName }
                   )}
                 </Subtitle3>
               </XAxis>
@@ -441,7 +441,7 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
                   </Box>
                   <Gutter size="0.5rem" />
                   <Subtitle3 color={ColorPalette["gray-300"]}>
-                    {`on ${chainInfo.chainName}`}
+                    {`on ${modularChainInfoImpl.embedded.chainName}`}
                   </Subtitle3>
                 </Fragment>
               )}

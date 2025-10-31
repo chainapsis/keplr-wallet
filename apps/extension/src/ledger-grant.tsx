@@ -397,7 +397,7 @@ const LedgerGrantPage: FunctionComponent = observer(() => {
                             // Ensure that the keplr can connect to ethereum app on ledger.
                             // getAppConfiguration() works even if the ledger is on screen saver mode.
                             // To detect the screen saver mode, we should request the address before using.
-                            await app.getAddress("m/44'/60'/0'/0/0");
+                            await app.getAddress("44'/60'/0'/0/0");
                             setStatus("success");
                             return;
                           } catch (e) {
@@ -414,7 +414,7 @@ const LedgerGrantPage: FunctionComponent = observer(() => {
                           // Ensure that the keplr can connect to ethereum app on ledger.
                           // getAppConfiguration() works even if the ledger is on screen saver mode.
                           // To detect the screen saver mode, we should request the address before using.
-                          await app.getAddress("m/44'/60'/0'/0/0");
+                          await app.getAddress("44'/60'/0'/0/0");
                           setStatus("success");
                           return;
                         } catch (e) {

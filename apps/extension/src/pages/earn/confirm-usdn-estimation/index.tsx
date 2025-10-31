@@ -40,7 +40,7 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
   const [isUsdnDescriptionModalOpen, setIsUsdnDescriptionModalOpen] =
     useState(false);
 
-  const chainInfo = chainStore.getChain(NOBLE_CHAIN_ID);
+  const chainInfo = chainStore.getModularChainInfoImpl(NOBLE_CHAIN_ID);
   const account = accountStore.getAccount(NOBLE_CHAIN_ID);
 
   const amountValue = searchParams.get("amount");
@@ -76,7 +76,8 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
     NOBLE_CHAIN_ID,
     account.bech32Address,
     inCurrency,
-    outCurrency
+    outCurrency,
+    false
   );
 
   const poolForDeposit = nobleEarnAmountConfig.amountConfig.pool;
@@ -91,11 +92,13 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
       nobleEarnAmountConfig.gasConfig.setValue(gasValue);
     }
     if (feeMinimalDenom && feeType) {
-      const feeCurrency = chainStore
-        .getChain(NOBLE_CHAIN_ID)
-        .feeCurrencies.find(
-          (feeCurrency) => feeCurrency.coinMinimalDenom === feeMinimalDenom
-        );
+      const modularChainInfo = chainStore.getModularChain(NOBLE_CHAIN_ID);
+      const feeCurrency =
+        "cosmos" in modularChainInfo
+          ? modularChainInfo.cosmos.feeCurrencies.find(
+              (feeCurrency) => feeCurrency.coinMinimalDenom === feeMinimalDenom
+            )
+          : undefined;
       if (feeCurrency) {
         nobleEarnAmountConfig.feeConfig.setFee({
           type: feeType as FeeType,
@@ -383,7 +386,8 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
   );
 });
 
-const LEARN_MORE_URL = "https://help.keplr.app/articles/earn-more-with-keplr";
+const LEARN_MORE_URL =
+  "https://help.keplr.app/extension/5R3bMyjtr2FwnBvJQuJwJu/earn-more-with-keplr/5R3bMyjtqZ3BsEKHQy2tYf";
 
 const Styles = {
   Link: styled.span`

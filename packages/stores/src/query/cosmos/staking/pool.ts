@@ -23,7 +23,7 @@ export class ObservableQueryStakingPool extends ObservableChainQuery<StakingPool
   }
 
   protected override canFetch(): boolean {
-    if (!this.chainGetter.getChain(this.chainId).stakeCurrency) {
+    if (!this.chainGetter.getModularChainInfoImpl(this.chainId).stakeCurrency) {
       return false;
     }
     return super.canFetch();
@@ -31,7 +31,7 @@ export class ObservableQueryStakingPool extends ObservableChainQuery<StakingPool
 
   @computed
   get notBondedTokens(): CoinPretty | undefined {
-    const chainInfo = this.chainGetter.getChain(this.chainId);
+    const chainInfo = this.chainGetter.getModularChainInfoImpl(this.chainId);
 
     if (!chainInfo.stakeCurrency) {
       return;
@@ -52,7 +52,7 @@ export class ObservableQueryStakingPool extends ObservableChainQuery<StakingPool
 
   @computed
   get bondedTokens(): CoinPretty | undefined {
-    const chainInfo = this.chainGetter.getChain(this.chainId);
+    const chainInfo = this.chainGetter.getModularChainInfoImpl(this.chainId);
 
     if (!chainInfo.stakeCurrency) {
       return;
