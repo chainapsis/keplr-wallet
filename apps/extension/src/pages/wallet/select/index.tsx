@@ -35,6 +35,7 @@ import { defaultSpringConfig } from "../../../styles/spring";
 import { useGlobarSimpleBar } from "../../../hooks/global-simplebar";
 import { EmptyView } from "../../../components/empty-view";
 import { dispatchGlobalEventExceptSelf } from "../../../utils/global-events";
+import { useSearchKeyInfos } from "../../../hooks/use-search-key-infos";
 
 const AnimatedBox = animated(Box);
 
@@ -56,42 +57,7 @@ export const WalletSelectPage: FunctionComponent = observer(() => {
   const { keyRingStore } = useStore();
   const intl = useIntl();
 
-  const [searchText, setSearchText] = useState<string>("");
-  const [debounceSearchText, setDebounceSearchText] = useState<string>("");
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebounceSearchText(searchText);
-    }, 300);
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [searchText]);
-
-  const [searchedKeyInfos, setSearchedKeyInfos] = useState<
-    KeyInfo[] | undefined
-  >(undefined);
-  useEffect(() => {
-    if (debounceSearchText.trim().length === 0) {
-      setSearchedKeyInfos(undefined);
-      return;
-    }
-
-    let exposed = false;
-
-    keyRingStore
-      .searchKeyRings(debounceSearchText)
-      .then((keyInfos) => {
-        if (!exposed) {
-          setSearchedKeyInfos(keyInfos);
-        }
-      })
-      .catch(console.log);
-
-    return () => {
-      exposed = true;
-    };
-  }, [debounceSearchText, keyRingStore]);
+  const { searchText, setSearchText, searchedKeyInfos } = useSearchKeyInfos();
 
   const keyInfos = searchedKeyInfos ?? keyRingStore.keyInfos;
 

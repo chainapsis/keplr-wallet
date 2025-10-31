@@ -33,6 +33,7 @@ import {
   autoUpdate,
 } from "@floating-ui/react-dom";
 import { FloatModal } from "../../../../components/float-modal";
+import { useSearchKeyInfos } from "../../../../hooks/use-search-key-infos";
 
 const Styles = {
   ModalContainer: styled.div<{
@@ -386,46 +387,15 @@ export const AccountSwitchFloatModal = observer(
       new Map()
     );
     const theme = useTheme();
-    const [searchText, setSearchText] = useState<string>("");
-    const [debounceSearchText, setDebounceSearchText] = useState<string>("");
     const searchInputRef = useRef<HTMLInputElement>(null);
 
-    useEffect(() => {
-      const timer = setTimeout(() => {
-        setDebounceSearchText(searchText);
-      }, 300);
-
-      return () => {
-        clearTimeout(timer);
-      };
-    }, [searchText]);
+    const { searchText, setSearchText, searchedKeyInfos } = useSearchKeyInfos();
 
     const closeModalInner = useCallback(() => {
       setSearchText("");
       closeModal();
     }, [closeModal, setSearchText]);
 
-    const [searchedKeyInfos, setSearchedKeyInfos] = useState<
-      KeyInfo[] | undefined
-    >(undefined);
-    useEffect(() => {
-      if (debounceSearchText.trim().length === 0) {
-        setSearchedKeyInfos(undefined);
-        return;
-      }
-
-      let exposed = false;
-
-      keyRingStore.searchKeyRings(debounceSearchText).then((keyInfos) => {
-        if (!exposed) {
-          setSearchedKeyInfos(keyInfos);
-        }
-      });
-
-      return () => {
-        exposed = true;
-      };
-    }, [debounceSearchText, keyRingStore]);
     const keyInfos = searchedKeyInfos ?? keyRingStore.keyInfos;
     const shouldShowSearch = keyRingStore.keyInfos.length >= 7;
 
