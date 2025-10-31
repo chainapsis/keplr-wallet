@@ -769,8 +769,8 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
         return currency;
       }
 
-      if (module === "cosmos") {
-        const noReactionCurrency = this.cosmosCurrencyMapNoReaction.get(denom);
+      if (module === "cosmos" || module === "evm") {
+        const noReactionCurrency = this.currencyMapNoReaction.get(denom);
         if (noReactionCurrency) {
           return noReactionCurrency;
         }
@@ -814,15 +814,15 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
       return currency;
     }
 
-    const cosmos = this.availableModules.find((module) => module === "cosmos");
-
-    if (cosmos) {
-      this.addUnknownDenomsImpl({
-        module: cosmos,
-        coinMinimalDenoms: [normalizedCoinMinimalDenom],
-        reaction: false,
-      });
-    }
+    this.availableModules.forEach((module) => {
+      if (module === "cosmos" || module === "evm") {
+        this.addUnknownDenomsImpl({
+          module,
+          coinMinimalDenoms: [normalizedCoinMinimalDenom],
+          reaction: false,
+        });
+      }
+    });
 
     // Unknown denom can be registered synchronously in some cases.
     // For this case, re-try to get currency.
@@ -974,7 +974,7 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
       }
 
       // noreaction 맵 확인
-      if (!reaction && this.cosmosCurrencyMapNoReaction.has(normalizedDenom)) {
+      if (!reaction && this.currencyMapNoReaction.has(normalizedDenom)) {
         continue;
       }
 
@@ -1222,7 +1222,7 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
     module: ChainInfoModule,
     currency: AppCurrency
   ) {
-    if (module !== "cosmos") {
+    if (module !== "cosmos" && module !== "evm") {
       return;
     }
 
@@ -1436,7 +1436,7 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
 
   // 일단 IBC asset 에서만 사용되는 것 같아서 Cosmos만 추가?
   @computed
-  protected get cosmosCurrencyMapNoReaction(): Map<string, AppCurrency> {
+  protected get currencyMapNoReaction(): Map<string, AppCurrency> {
     const result: Map<string, AppCurrency> = new Map();
     for (const currency of this.registeredCosmosCurrenciesNoReaction) {
       result.set(currency.coinMinimalDenom, currency);

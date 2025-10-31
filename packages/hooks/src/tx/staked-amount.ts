@@ -149,8 +149,6 @@ export class StakedAmountConfig extends TxChainSetter implements IAmountConfig {
 
   @computed
   get currency(): AppCurrency {
-    const chainInfo = this.chainInfo;
-
     const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
       this.chainId
     );
