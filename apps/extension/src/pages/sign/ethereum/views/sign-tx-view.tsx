@@ -393,13 +393,7 @@ export const EthereumSignTxView: FunctionComponent<{
     isLedgerInteracting ||
     isKeystoneInteracting;
 
-  // TODO: ethereum fee config is refreshed every 12 seconds,
-  // so we need to consider the initial state condition.
-  const initialGuard =
-    amountConfig.uiProperties.loadingState === "loading" ||
-    feeConfig.uiProperties.loadingState === "loading";
-
-  const buttonDisabled = txConfigsValidate.interactionBlocked || initialGuard;
+  const buttonDisabled = txConfigsValidate.interactionBlocked;
 
   const bottomButtons: HeaderProps["bottomButtons"] = [
     {

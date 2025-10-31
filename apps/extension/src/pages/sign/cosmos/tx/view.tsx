@@ -415,19 +415,13 @@ export const CosmosTxView: FunctionComponent<{
       isLedgerAndDirect,
   });
 
-  // Disable the button if transaction validity check data is not ready.
-  // NOTE: Consider whether this part should be handled inside useTxConfigsValidate.
-  const initialGuard =
-    !signDocHelper.signDocWrapper ||
-    amountConfig.uiProperties.loadingState === "loading" ||
-    feeConfig.uiProperties.loadingState === "loading";
-
   const buttonDisabled =
     txConfigsValidate.interactionBlocked ||
-    initialGuard ||
+    !signDocHelper.signDocWrapper ||
     isLedgerAndDirect ||
     (isSendAuthzGrant && !isSendAuthzGrantChecked) ||
-    (isHighFee && !isHighFeeApproved);
+    (isHighFee && !isHighFeeApproved) ||
+    (shouldTopUp && (isTopUpInProgress || !isTopUpAvailable));
 
   const approve = async () => {
     if (signDocHelper.signDocWrapper) {
