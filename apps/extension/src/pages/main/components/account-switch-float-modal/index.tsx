@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled, { css, useTheme } from "styled-components";
 import SimpleBar from "simplebar-react";
-import { Modal } from "../../../../components/modal";
 import { ColorPalette } from "../../../../styles";
 import {
   Body3,
@@ -33,6 +32,7 @@ import {
   UseFloatingReturn,
   autoUpdate,
 } from "@floating-ui/react-dom";
+import { FloatModal } from "../../../../components/float-modal";
 
 const Styles = {
   ModalContainer: styled.div<{
@@ -340,7 +340,11 @@ const AccountItem = observer(
           </Styles.OptionButton>
         </Styles.AccountItem>
 
-        {isMenuOpen && (
+        <FloatModal
+          isOpen={isMenuOpen}
+          close={() => setIsMenuOpen(false)}
+          disableBackdropStyle={true}
+        >
           <Styles.ItemMenuContainer
             ref={refs.setFloating}
             top={y ?? 0}
@@ -358,7 +362,7 @@ const AccountItem = observer(
               </Styles.MenuItem>
             ))}
           </Styles.ItemMenuContainer>
-        )}
+        </FloatModal>
       </React.Fragment>
     );
   }
@@ -468,65 +472,63 @@ export const AccountSwitchFloatModal = observer(
 
     return (
       <React.Fragment>
-        {isOpen && (
-          <Modal isOpen={isOpen} align="left" close={closeModalInner}>
-            <Styles.ModalContainer
-              top={floating.y ?? 0}
-              left={floating.x ?? 0}
-              strategy={floating.strategy}
-              ref={floating.refs.setFloating}
-            >
-              {shouldShowSearch && (
-                <Styles.SearchContainer>
-                  <SearchTextInput
-                    ref={searchInputRef}
-                    value={searchText}
-                    onChange={(e) => {
-                      e.preventDefault();
-                      setSearchText(e.target.value);
-                    }}
-                    placeholder="Search"
-                    textInputContainerStyle={{
-                      backgroundColor:
-                        theme.mode === "light"
-                          ? ColorPalette["white"]
-                          : ColorPalette["gray-650"],
-                    }}
-                    inputStyle={{
-                      borderColor: "red",
-                      backgroundColor:
-                        theme.mode === "light"
-                          ? ColorPalette["white"]
-                          : ColorPalette["gray-650"],
-                    }}
-                  />
-                </Styles.SearchContainer>
-              )}
+        <FloatModal isOpen={isOpen} close={closeModalInner}>
+          <Styles.ModalContainer
+            top={floating.y ?? 0}
+            left={floating.x ?? 0}
+            strategy={floating.strategy}
+            ref={floating.refs.setFloating}
+          >
+            {shouldShowSearch && (
+              <Styles.SearchContainer>
+                <SearchTextInput
+                  ref={searchInputRef}
+                  value={searchText}
+                  onChange={(e) => {
+                    e.preventDefault();
+                    setSearchText(e.target.value);
+                  }}
+                  placeholder="Search"
+                  textInputContainerStyle={{
+                    backgroundColor:
+                      theme.mode === "light"
+                        ? ColorPalette["white"]
+                        : ColorPalette["gray-650"],
+                  }}
+                  inputStyle={{
+                    borderColor: "red",
+                    backgroundColor:
+                      theme.mode === "light"
+                        ? ColorPalette["white"]
+                        : ColorPalette["gray-650"],
+                  }}
+                />
+              </Styles.SearchContainer>
+            )}
 
-              <SimpleBar
-                style={{
-                  maxHeight: "19.75rem",
-                  display: "flex",
-                  flexDirection: "column",
-                }}
-              >
-                {keyInfos.map((keyInfo) => {
-                  const isSelected =
-                    keyInfo.id === keyRingStore.selectedKeyInfo?.id;
-                  return (
-                    <AccountItem
-                      key={keyInfo.id}
-                      keyInfo={keyInfo}
-                      isSelected={isSelected}
-                      onSelect={() => handleAccountSelect(keyInfo)}
-                      bech32Address={addressMap.get(keyInfo.id) ?? ""}
-                    />
-                  );
-                })}
-              </SimpleBar>
-            </Styles.ModalContainer>
-          </Modal>
-        )}
+            <SimpleBar
+              style={{
+                maxHeight: "19.75rem",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              {keyInfos.map((keyInfo) => {
+                const isSelected =
+                  keyInfo.id === keyRingStore.selectedKeyInfo?.id;
+                return (
+                  <AccountItem
+                    key={keyInfo.id}
+                    keyInfo={keyInfo}
+                    isSelected={isSelected}
+                    onSelect={() => handleAccountSelect(keyInfo)}
+                    bech32Address={addressMap.get(keyInfo.id) ?? ""}
+                  />
+                );
+              })}
+            </SimpleBar>
+          </Styles.ModalContainer>
+        </FloatModal>
       </React.Fragment>
     );
   }
