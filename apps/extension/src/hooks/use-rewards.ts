@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { ViewToken } from "../pages/main";
 import { useStore } from "../stores";
 import {
@@ -49,6 +50,9 @@ export function useRewards() {
     useStarknetClaimRewards();
 
   const { states, getClaimAllEachState } = useClaimAllEachState();
+
+  const completedChainsRef = useRef(new Set<string>());
+  const prevFetchingStateRef = useRef(new Map<string, boolean>());
 
   const viewClaimTokens: ViewClaimToken[] = (() => {
     const res: ViewClaimToken[] = [];
@@ -268,15 +272,43 @@ export function useRewards() {
     return false;
   })();
 
-  const claimCountText = (() => {
-    let count = chainStore.chainInfosInUI.length;
-    for (const chainInfo of chainStore.chainInfosInUI) {
-      const state = getClaimAllEachState(chainInfo.chainId);
-      if (state.isLoading) {
-        count--;
+  (() => {
+    for (const viewClaimToken of viewClaimTokens) {
+      const chainId = viewClaimToken.modularChainInfo.chainId;
+      const prevState = prevFetchingStateRef.current.get(chainId);
+
+      if (!prevState && getClaimAllEachState(chainId).isLoading) {
+        prevFetchingStateRef.current.set(chainId, true);
+      }
+
+      if (
+        prevState &&
+        (!getClaimAllEachState(chainId).isLoading ||
+          getClaimAllEachState(chainId).failedReason != null)
+      ) {
+        completedChainsRef.current.add(chainId);
+        prevFetchingStateRef.current.set(chainId, false);
       }
     }
-    return `${count}/${viewClaimTokens.length}`;
+
+    if (
+      completedChainsRef.current.size === viewClaimTokens.length &&
+      viewClaimTokens.length > 0
+    ) {
+      completedChainsRef.current.clear();
+      prevFetchingStateRef.current.clear();
+    }
+  })();
+
+  const claimCountText = (() => {
+    const totalCount = viewClaimTokens.length;
+    if (totalCount === 0) {
+      return "";
+    }
+
+    const completedCount = completedChainsRef.current.size;
+    const remainingCount = Math.max(0, totalCount - completedCount);
+    return `${remainingCount}/${totalCount}`;
   })();
 
   return {

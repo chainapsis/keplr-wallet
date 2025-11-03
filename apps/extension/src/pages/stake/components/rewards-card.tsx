@@ -133,7 +133,7 @@ export const RewardsCard: FunctionComponent<{ isNotReady?: boolean }> =
               >
                 <TextButton
                   text={
-                    claimAllIsLoading
+                    claimAllIsLoading && claimCountText !== ""
                       ? claimCountText
                       : intl.formatMessage({
                           id: "page.main.components.rewards-card.claim-all-button",
