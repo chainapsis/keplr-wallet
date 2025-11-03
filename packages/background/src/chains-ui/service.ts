@@ -76,8 +76,9 @@ export class ChainsUIService {
       if (chainIdentifiers.length === 0) {
         // Should be enabled at least one chain.
         return [
-          ChainIdHelper.parse(this.chainsService.getChainInfos()[0].chainId)
-            .identifier,
+          ChainIdHelper.parse(
+            this.chainsService.getModularChainInfos()[0].chainId
+          ).identifier,
         ];
       } else {
         return chainIdentifiers;

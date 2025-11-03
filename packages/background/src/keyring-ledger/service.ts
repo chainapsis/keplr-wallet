@@ -58,9 +58,7 @@ export class KeyRingLedgerService {
 
     let app = "Cosmos";
 
-    const isEthermintLike = KeyRingService.isEthermintLike(
-      modularChainInfo.cosmos
-    );
+    const isEthermintLike = KeyRingService.isEthermintLike(modularChainInfo);
     if (isEthermintLike) {
       app = "Ethereum";
       if (!vault.insensitive[app]) {

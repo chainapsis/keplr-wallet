@@ -49,7 +49,7 @@ export class TokenCW20Service {
   async init(): Promise<void> {
     const migrated = await this.kvStore.get<boolean>("migrated/v2");
     if (!migrated) {
-      for (const chainInfo of this.chainsService.getChainInfos()) {
+      for (const chainInfo of this.chainsService.getModularChainInfos()) {
         const identifier = ChainIdHelper.parse(chainInfo.chainId).identifier;
         const globalTokens = await this.legacyKVStore.get<AppCurrency[]>(
           identifier

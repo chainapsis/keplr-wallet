@@ -9,6 +9,7 @@ import {
   ChainInfo,
   ChainInfoWithoutEndpoints,
   EVMInfo,
+  EVMNativeChainInfo,
   ModularChainInfo,
   StarknetChainInfo,
 } from "@keplr-wallet/types";
@@ -40,8 +41,13 @@ type ChainSuggestedHandler = (chainInfo: ChainInfo) => void | Promise<void>;
 type UpdatedChainInfo = Pick<ChainInfo, "chainId" | "features">;
 
 export class ChainsService {
-  static getEVMInfo(chainInfo: ChainInfo): EVMInfo | undefined {
-    return chainInfo.evm;
+  static getEVMInfo(
+    chainInfo: ModularChainInfo
+  ): EVMNativeChainInfo | undefined {
+    if ("evm" in chainInfo) {
+      return chainInfo.evm;
+    }
+    return undefined;
   }
 
   @observable.ref
