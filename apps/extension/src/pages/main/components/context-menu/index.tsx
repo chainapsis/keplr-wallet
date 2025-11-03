@@ -15,13 +15,14 @@ import { Body2, Body3 } from "../../../../components/typography";
 import { ColorPalette } from "../../../../styles";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Toggle } from "../../../../components/toggle/toggle";
-import { CloseIcon } from "../../../../components/icon";
+import { AdjustmentIcon, CloseIcon } from "../../../../components/icon";
 import { IconProps } from "../../../../components/icon/types";
 import { useGlobarSimpleBar } from "../../../../hooks/global-simplebar";
 import { Tooltip } from "../../../../components/tooltip";
 import { Gutter } from "../../../../components/gutter";
 import { isRunningInSidePanel } from "../../../../utils";
 import { COMMON_HOVER_OPACITY } from "../../../../styles/constant";
+import { useNavigate } from "react-router";
 
 const Styles = {
   MenuContainer: styled.div`
@@ -118,6 +119,7 @@ const MainMenu: React.FC<MainMenuProps> = observer(
     const { hideLowBalance, showFiatValue } = uiConfigStore.options;
     const theme = useTheme();
     const intl = useIntl();
+    const navigate = useNavigate();
 
     const handleToggleClick = (e: React.MouseEvent, toggleFn: () => void) => {
       if (!(e.target as HTMLElement).closest(".toggle-component")) {
@@ -137,6 +139,35 @@ const MainMenu: React.FC<MainMenuProps> = observer(
 
     return (
       <YAxis>
+        <Styles.MenuItem
+          onClick={(e) => {
+            e.preventDefault();
+            navigate("/manage-view-asset-token-list");
+          }}
+        >
+          <Styles.MenuItemXAxis alignY="center" gap="0.25rem">
+            <AdjustmentIcon
+              width="1rem"
+              height="1rem"
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-700"]
+                  : ColorPalette["white"]
+              }
+            />
+            <Body3
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-700"]
+                  : ColorPalette["white"]
+              }
+            >
+              {intl.formatMessage({
+                id: "page.main.components.context-menu.manage-asset-list",
+              })}
+            </Body3>
+          </Styles.MenuItemXAxis>
+        </Styles.MenuItem>
         <Styles.MenuItem
           onClick={(e) => handleToggleClick(e, onToggleHideLowBalance)}
         >

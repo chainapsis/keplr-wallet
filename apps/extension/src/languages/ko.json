@@ -684,6 +684,7 @@
   "page.main.components.context-menu.tooltip-paragraph": "흩어진 자산을 한 눈에!{br}스마트 그루핑 기능(베타) 출시",
   "page.main.components.context-menu.hide-low-balance": "소액 숨기기",
   "page.main.components.context-menu.smart-grouping": "Smart Grouping",
+  "page.main.components.context-menu.manage-asset-list": "자산 표시 관리",
   "page.main.components.context-menu.show-fiat-value": "체인별 화폐가치 보기",
   "page.main.components.menu-bar.manage-chain-visibility-title": "체인 추가/제거",
   "page.main.components.menu-bar.manage-asset-list-title": "자산 표시 관리",

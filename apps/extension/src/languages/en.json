@@ -704,6 +704,7 @@
   "page.main.components.context-menu.tooltip-title": "New",
   "page.main.components.context-menu.tooltip-paragraph": "Tired of cluttered asset lists?{br}Try Smart Grouping (Beta)!",
   "page.main.components.context-menu.hide-low-balance": "Hide Low Balances",
+  "page.main.components.context-menu.manage-asset-list": "Manage Asset List",
   "page.main.components.context-menu.smart-grouping": "Smart Grouping",
   "page.main.components.context-menu.show-fiat-value": "Show fiat value per chain",
   "page.main.components.menu-bar.manage-chain-visibility-title": "Add/Remove Chains",
