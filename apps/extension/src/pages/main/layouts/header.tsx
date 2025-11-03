@@ -1,4 +1,4 @@
-import React, { Fragment, PropsWithChildren, useMemo } from "react";
+import React, { Fragment, PropsWithChildren, useMemo, useState } from "react";
 import { Columns } from "../../../components/column";
 import { Box } from "../../../components/box";
 import { CopyOutlineIcon } from "../../../components/icon";
@@ -15,6 +15,8 @@ import { ConnectedEcosystems } from "../components/connected-ecosystems";
 import { COMMON_HOVER_OPACITY } from "../../../styles/constant";
 import { IconButton } from "../../../components/icon-button";
 import { FloatingMenuBar } from "../components/floating-menu-bar";
+import { offset, useFloating } from "@floating-ui/react-dom";
+import { AccountSwitchFloatModal } from "../components/account-switch-float-modal";
 
 const Styles = {
   NameContainer: styled.div`
@@ -49,22 +51,17 @@ export const MainHeaderLayout = observer<
     const { children, ...otherProps } = props;
 
     const { uiConfigStore, keyRingStore } = useStore();
+    const [isOpenAccountSwitchModal, setIsOpenAccountSwitchModal] =
+      useState(false);
 
-    // 여기도 다음 pr에서 사용
-    // const icnsPrimaryName = (() => {
-    //   if (
-    //     uiConfigStore.icnsInfo &&
-    //     chainStore.hasChain(uiConfigStore.icnsInfo.chainId)
-    //   ) {
-    //     const queries = queriesStore.get(uiConfigStore.icnsInfo.chainId);
-    //     const icnsQuery = queries.icns.queryICNSNames.getQueryContract(
-    //       uiConfigStore.icnsInfo.resolverContractAddress,
-    //       accountStore.getAccount(uiConfigStore.icnsInfo.chainId).bech32Address
-    //     );
-
-    //     return icnsQuery.primaryName.split(".")[0];
-    //   }
-    // })();
+    const accountSwitchFloatingModal = useFloating({
+      placement: "bottom-start",
+      middleware: [
+        offset({
+          mainAxis: 10,
+        }),
+      ],
+    });
 
     const theme = useTheme();
     const name = useMemo(() => {
@@ -98,8 +95,9 @@ export const MainHeaderLayout = observer<
               <Gutter size="0.75rem" />
               <XAxis alignY="center">
                 <Styles.NameContainer
+                  ref={accountSwitchFloatingModal.refs.setReference}
                   onClick={() => {
-                    //TODO 어카운트 변경 모달
+                    setIsOpenAccountSwitchModal(true);
                   }}
                 >
                   <NameIcon name={name} />
@@ -234,6 +232,11 @@ export const MainHeaderLayout = observer<
         >
           {children}
         </HeaderLayout>
+        <AccountSwitchFloatModal
+          isOpen={isOpenAccountSwitchModal}
+          closeModal={() => setIsOpenAccountSwitchModal(false)}
+          floating={accountSwitchFloatingModal}
+        />
       </Fragment>
     );
   },
