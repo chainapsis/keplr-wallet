@@ -698,6 +698,7 @@
   "page.main.components.deposit-modal.look-for-chains": "체인을 찾으시나요?",
   "page.main.components.deposit-modal.enable-chain": "활성화",
   "page.main.components.deposit-modal.empty-text": "검색 결과가 없습니다. 아직 Keplr에서 지원하지 않는 체인일 수 있습니다.",
+  "page.main.components.deposit-modal.buy-crypto-button": "암호화폐 구매",
   "page.main.components.buy-crypto-modal.title": "암호화폐 구매",
   "page.main.components.looking-for-chains.title": "체인을 찾으시나요?",
   "page.main.components.looking-for-chains.not-enabled": "활성화되지 않음",

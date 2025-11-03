@@ -20,6 +20,7 @@ import SimpleBar from "simplebar-react";
 import { ChainImageFallback } from "../../../../components/image";
 import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import {
+  ArrowRightSolidIcon,
   CheckToggleIcon,
   CopyOutlineIcon,
   FolderMinusIcon,
@@ -42,6 +43,8 @@ import { LookingForChainItem } from "../looking-for-chains";
 import { useSearch } from "../../../../hooks/use-search";
 import { getChainSearchResultClickAnalyticsProperties } from "../../../../analytics-amplitude";
 import { CoinPretty } from "@keplr-wallet/unit";
+import { Column, Columns } from "../../../../components/column";
+import { TextButton } from "../../../../components/button-text";
 
 type Address = {
   modularChainInfo: ModularChainInfo;
@@ -375,7 +378,8 @@ export const CopyAddressScene: FunctionComponent<{
       }
       height={runInSidePanel ? "70vh" : undefined}
     >
-      <YAxis alignX="center">
+      <Columns sum={1} style={{ padding: "0 1rem" }} alignY="center">
+        <Gutter size="0.5rem" />
         <Subtitle1
           color={
             theme.mode === "light"
@@ -385,7 +389,25 @@ export const CopyAddressScene: FunctionComponent<{
         >
           <FormattedMessage id="page.main.components.deposit-modal.title" />
         </Subtitle1>
-      </YAxis>
+        <Column weight={1} />
+        <TextButton
+          text={intl.formatMessage({
+            id: "page.main.components.deposit-modal.buy-crypto-button",
+          })}
+          color="blue"
+          onClick={() => {}}
+          right={
+            <ArrowRightSolidIcon
+              width="1rem"
+              height="1rem"
+              color={ColorPalette["blue-400"]}
+            />
+          }
+          style={{
+            margin: "0.5rem -0.75rem",
+          }}
+        />
+      </Columns>
 
       <Gutter size="0.75rem" />
 

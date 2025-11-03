@@ -719,6 +719,7 @@
   "page.main.components.deposit-modal.look-for-chains": "Looking for a chain?",
   "page.main.components.deposit-modal.enable-chain": "Enable",
   "page.main.components.deposit-modal.empty-text": "If it doesn't appear in the search results, the chain is not yet supported by Keplr.",
+  "page.main.components.deposit-modal.buy-crypto-button": "Buy Crypto",
   "page.main.components.buy-crypto-modal.title": "Buy Crypto",
   "page.main.components.looking-for-chains.title": "Looking for a chain?",
   "page.main.components.looking-for-chains.not-enabled": "Not Enabled",
