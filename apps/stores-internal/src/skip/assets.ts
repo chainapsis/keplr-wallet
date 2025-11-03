@@ -112,7 +112,10 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
           (this.chainStore.hasChain(originChainId) ||
             (asset.chain_id === "osmosis-1" &&
               asset.denom ===
-                "ibc/0FA9232B262B89E77D1335D54FB1E1F506A92A7E4B51524B400DC69C68D28372"))
+                "ibc/0FA9232B262B89E77D1335D54FB1E1F506A92A7E4B51524B400DC69C68D28372") ||
+            (asset.chain_id === "osmosis-1" &&
+              asset.denom ===
+                "ibc/C7110DEC66869DAE9BE9C3C60F4B5313B16A2204AE020C3B0527DD6B322386A3"))
         ) {
           // IBC asset일 경우 그냥 넣는다.
           if (asset.denom.startsWith("ibc/")) {
@@ -456,7 +459,10 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
             (this.chainStore.hasChain(originChainId) ||
               (asset.chain_id === "osmosis-1" &&
                 asset.denom ===
-                  "ibc/0FA9232B262B89E77D1335D54FB1E1F506A92A7E4B51524B400DC69C68D28372"))
+                  "ibc/0FA9232B262B89E77D1335D54FB1E1F506A92A7E4B51524B400DC69C68D28372") ||
+              (asset.chain_id === "osmosis-1" &&
+                asset.denom ===
+                  "ibc/C7110DEC66869DAE9BE9C3C60F4B5313B16A2204AE020C3B0527DD6B322386A3"))
           ) {
             // IBC asset일 경우 그냥 넣는다.
             if (asset.denom.startsWith("ibc/")) {
