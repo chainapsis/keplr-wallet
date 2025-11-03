@@ -155,6 +155,8 @@ export class TokensStore {
           }
         }
 
+        modularChainInfoImpl.addCurrencies("cosmos", ...adds);
+
         this.chainStore
           .getChain(modularChainInfoImpl.chainId)
           .addCurrencies(...adds);

@@ -1309,6 +1309,19 @@ export class ChainsService {
       ).concat(
         this.mergeChainInfosWithDynamics(this.suggestedChainInfos).map(
           (chainInfo) => {
+            if (chainInfo.chainId.split(":")[0] === "eip155") {
+              return {
+                chainId: chainInfo.chainId,
+                chainName: chainInfo.chainName,
+                chainSymbolImageUrl: chainInfo.chainSymbolImageUrl,
+                evm: {
+                  ...chainInfo.evm,
+                  currencies: chainInfo.currencies,
+                  bip44: chainInfo.bip44,
+                },
+              } as ModularChainInfo;
+            }
+
             return {
               chainId: chainInfo.chainId,
               chainName: chainInfo.chainName,

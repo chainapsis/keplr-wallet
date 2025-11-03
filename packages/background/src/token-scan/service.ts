@@ -317,7 +317,6 @@ export class TokenScanService {
     }
 
     if ("evm" in modularChainInfo) {
-      console.log("[calculateTokenScan] evm:", chainId, modularChainInfo);
       const evmInfo = this.chainsService.getEVMInfoOrThrow(chainId);
       const pubkey = await this.keyRingService.getPubKey(chainId, vaultId);
       const ethereumHexAddress = `0x${Buffer.from(
@@ -360,9 +359,10 @@ export class TokenScanService {
           ],
         });
       }
-    } else if ("cosmos" in modularChainInfo) {
-      const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-      if (chainInfo.hideInUI) {
+    }
+
+    if ("cosmos" in modularChainInfo) {
+      if (modularChainInfo.cosmos.hideInUI) {
         return;
       }
 
@@ -396,7 +396,7 @@ export class TokenScanService {
         const res = await simpleFetch<{
           balances: { denom: string; amount: string }[];
         }>(
-          chainInfo.rest,
+          modularChainInfo.cosmos.rest,
           `/cosmos/bank/v1beta1/balances/${bech32Address.value}?pagination.limit=1000`
         );
 
@@ -405,7 +405,7 @@ export class TokenScanService {
 
           const balances = res.data?.balances ?? [];
           for (const bal of balances) {
-            const currency = chainInfo.currencies.find(
+            const currency = modularChainInfo.cosmos.currencies.find(
               (cur) => cur.coinMinimalDenom === bal.denom
             );
             if (currency) {

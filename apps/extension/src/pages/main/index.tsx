@@ -848,24 +848,35 @@ const RefreshButton: FunctionComponent<{
       promises.push(priceStore.waitFreshResponse());
       for (const modularChainInfo of chainStore.modularChainInfosInUI) {
         const isNeutron = modularChainInfo.chainId === NEUTRON_CHAIN_ID;
+        const account = accountStore.getAccount(modularChainInfo.chainId);
+
+        if ("evm" in modularChainInfo && account.ethereumHexAddress) {
+          const queries = queriesStore.get(modularChainInfo.chainId);
+          const queryBalance = queries.queryBalances.getQueryEthereumHexAddress(
+            account.ethereumHexAddress
+          );
+          // XXX: 얘는 구조상 waitFreshResponse()가 안되서 일단 쿼리가 끝인지 아닌지는 무시한다.
+          queryBalance.fetch();
+
+          for (const currency of modularChainInfo.evm.currencies) {
+            const denomHelper = new DenomHelper(currency.coinMinimalDenom);
+            if (denomHelper.type === "erc20") {
+              // XXX: 얘는 구조상 waitFreshResponse()가 안되서 일단 쿼리가 끝인지 아닌지는 무시한다.
+              queryBalance.fetch();
+            }
+          }
+        }
 
         if (isNeutron) {
-          const account = accountStore.getAccount(modularChainInfo.chainId);
           const queries = queriesStore.get(modularChainInfo.chainId);
           const queryNeutronRewardInner =
             queries.cosmwasm.queryNeutronStakingRewards.getRewardFor(
               account.bech32Address
             );
           promises.push(queryNeutronRewardInner.waitFreshResponse());
-        } else if ("cosmos" in modularChainInfo || "evm" in modularChainInfo) {
-          const chainInfo = chainStore.getChain(modularChainInfo.chainId);
-          const account = accountStore.getAccount(chainInfo.chainId);
-
-          if (
-            !chainStore.isEvmChain(chainInfo.chainId) &&
-            account.bech32Address !== ""
-          ) {
-            const queries = queriesStore.get(chainInfo.chainId);
+        } else if ("cosmos" in modularChainInfo) {
+          if (account.bech32Address !== "") {
+            const queries = queriesStore.get(modularChainInfo.chainId);
             const queryBalance = queries.queryBalances.getQueryBech32Address(
               account.bech32Address
             );
@@ -878,36 +889,7 @@ const RefreshButton: FunctionComponent<{
 
             promises.push(queryRewards.waitFreshResponse());
           }
-
-          if (
-            chainStore.isEvmChain(chainInfo.chainId) &&
-            account.ethereumHexAddress
-          ) {
-            const queries = queriesStore.get(chainInfo.chainId);
-            const queryBalance =
-              queries.queryBalances.getQueryEthereumHexAddress(
-                account.ethereumHexAddress
-              );
-            // XXX: 얘는 구조상 waitFreshResponse()가 안되서 일단 쿼리가 끝인지 아닌지는 무시한다.
-            queryBalance.fetch();
-
-            for (const currency of chainInfo.currencies) {
-              const query = queriesStore
-                .get(chainInfo.chainId)
-                .queryBalances.getQueryEthereumHexAddress(
-                  account.ethereumHexAddress
-                );
-
-              const denomHelper = new DenomHelper(currency.coinMinimalDenom);
-              if (denomHelper.type === "erc20") {
-                // XXX: 얘는 구조상 waitFreshResponse()가 안되서 일단 쿼리가 끝인지 아닌지는 무시한다.
-                query.fetch();
-              }
-            }
-          }
         } else if ("starknet" in modularChainInfo) {
-          const account = accountStore.getAccount(modularChainInfo.chainId);
-
           if (account.starknetHexAddress) {
             const queries = starknetQueriesStore.get(modularChainInfo.chainId);
 
@@ -934,7 +916,6 @@ const RefreshButton: FunctionComponent<{
             promises.push(stakingInfo.waitFreshResponse());
           }
         } else if ("bitcoin" in modularChainInfo) {
-          const account = accountStore.getAccount(modularChainInfo.chainId);
           const currency = modularChainInfo.bitcoin.currencies[0];
 
           if (account.bitcoinAddress) {
@@ -953,14 +934,18 @@ const RefreshButton: FunctionComponent<{
         }
       }
 
-      for (const chainInfo of chainStore.chainInfosInUI) {
-        const account = accountStore.getAccount(chainInfo.chainId);
-        const isInitia = chainInfo.chainId === INITIA_CHAIN_ID;
+      for (const modularChainInfo of chainStore.modularChainInfosInUI) {
+        if (!("cosmos" in modularChainInfo)) {
+          continue;
+        }
+
+        const account = accountStore.getAccount(modularChainInfo.chainId);
+        const isInitia = modularChainInfo.chainId === INITIA_CHAIN_ID;
 
         if (account.bech32Address === "") {
           continue;
         }
-        const queries = queriesStore.get(chainInfo.chainId);
+        const queries = queriesStore.get(modularChainInfo.chainId);
         const queryUnbonding = isInitia
           ? queries.cosmos.queryInitiaUnbondingDelegations.getQueryBech32Address(
               account.bech32Address
