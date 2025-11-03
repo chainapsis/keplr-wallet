@@ -408,6 +408,7 @@
 
   "page.wallet.change-name.previous-name-input-label": "현재 지갑 이름",
   "page.wallet.change-name.new-name-input-label": "새로운 지갑 이름",
+  "page.wallet.change-name.min-length-error": "지갑 이름은 최소 4자 이상이어야 합니다",
 
   "page.wallet.delete.warning-title": "경고",
   "page.wallet.delete.warning-paragraph": "지갑을 삭제하기 전에 복구 문구와 프라이빗키를 반드시 백업해두세요.",

@@ -2,7 +2,6 @@ import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useNavigate } from "react-router";
 import { Box } from "../../components/box";
-import { MainHeaderLayout } from "../main/layouts/header";
 import {
   Body2,
   Body3,
@@ -35,6 +34,8 @@ import { Tooltip } from "../../components/tooltip";
 import { useTheme } from "styled-components";
 import { version } from "../../../package.json";
 import { useIntl } from "react-intl";
+import { HeaderLayout } from "../../layouts/header";
+import { BackButton } from "../../layouts/header/components";
 
 export const SettingPage: FunctionComponent = observer(() => {
   const navigate = useNavigate();
@@ -99,7 +100,10 @@ export const SettingPage: FunctionComponent = observer(() => {
   const hasSearchText = searchText.trim().length > 0;
 
   return (
-    <MainHeaderLayout>
+    <HeaderLayout
+      title={intl.formatMessage({ id: "page.setting.title" })}
+      left={<BackButton />}
+    >
       <Box paddingTop="1rem">
         <Box paddingX="1rem">
           <SearchTextInput
@@ -420,7 +424,7 @@ export const SettingPage: FunctionComponent = observer(() => {
           </Box>
         )}
       </Box>
-    </MainHeaderLayout>
+    </HeaderLayout>
   );
 });
 
