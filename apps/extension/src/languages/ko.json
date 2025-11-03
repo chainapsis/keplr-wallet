@@ -693,7 +693,7 @@
   "page.main.components.menu-bar.lock-wallet-title": "지갑 잠금",
   "page.main.components.menu-bar.go-to-setting-page": "설정",
 
-  "page.main.components.deposit-modal.title": "주소 복사",
+  "page.main.components.deposit-modal.title": "받기",
   "page.main.components.deposit-modal.search-placeholder": "체인 검색",
   "page.main.components.deposit-modal.look-for-chains": "체인을 찾으시나요?",
   "page.main.components.deposit-modal.enable-chain": "활성화",

@@ -714,7 +714,7 @@
   "page.main.components.menu-bar.lock-wallet-title": "Lock Wallet",
   "page.main.components.menu-bar.go-to-setting-page": "Settings",
 
-  "page.main.components.deposit-modal.title": "Copy Address",
+  "page.main.components.deposit-modal.title": "Deposit",
   "page.main.components.deposit-modal.search-placeholder": "Search for a chain",
   "page.main.components.deposit-modal.look-for-chains": "Looking for a chain?",
   "page.main.components.deposit-modal.enable-chain": "Enable",

@@ -644,7 +644,7 @@
   "page.main.components.menu-bar.lock-wallet-title": "锁定钱包",
   "page.main.components.menu-bar.go-to-setting-page": "设置",
 
-  "page.main.components.deposit-modal.title": "复制地址",
+  "page.main.components.deposit-modal.title": "接收",
   "page.main.components.deposit-modal.search-placeholder": "搜索链",
   "page.main.components.deposit-modal.look-for-chains": "搜索链",
   "page.main.components.deposit-modal.enable-chain": "启用",
