@@ -52,6 +52,7 @@ export const RewardsCard: FunctionComponent<{ isNotReady?: boolean }> =
       claimAllIsLoading,
       states,
       getClaimAllEachState,
+      claimCountText,
     } = useRewards();
 
     useEffect(() => {
@@ -131,9 +132,13 @@ export const RewardsCard: FunctionComponent<{ isNotReady?: boolean }> =
                 onMouseLeave={() => setDisableHover(false)}
               >
                 <TextButton
-                  text={intl.formatMessage({
-                    id: "page.main.components.rewards-card.claim-all-button",
-                  })}
+                  text={
+                    claimAllIsLoading
+                      ? claimCountText
+                      : intl.formatMessage({
+                          id: "page.main.components.rewards-card.claim-all-button",
+                        })
+                  }
                   size="small"
                   disabled={claimAllDisabled}
                   onClick={claimAll}
@@ -149,32 +154,38 @@ export const RewardsCard: FunctionComponent<{ isNotReady?: boolean }> =
           </Skeleton>
         </Columns>
 
-        <VerticalCollapseTransition
-          collapsed={!isExpanded}
-          opacityLeft={0}
-          onTransitionEnd={() => {
-            if (!isExpanded) {
-              if (!claimAllIsLoading) {
-                // Clear errors when collapsed.
-                for (const state of states) {
-                  state.setFailedReason(undefined);
-                }
-              }
-            }
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
           }}
         >
-          {viewClaimTokens.map((viewClaimToken, index) => (
-            <ViewClaimTokenItem
-              key={`${viewClaimToken.modularChainInfo.chainId}-${viewClaimToken.token.currency.coinMinimalDenom}`}
-              viewClaimToken={viewClaimToken}
-              state={getClaimAllEachState(
-                viewClaimToken.modularChainInfo.chainId
-              )}
-              itemsLength={viewClaimTokens.length}
-              isLastItem={index === viewClaimTokens.length - 1}
-            />
-          ))}
-        </VerticalCollapseTransition>
+          <VerticalCollapseTransition
+            collapsed={!isExpanded}
+            opacityLeft={0}
+            onTransitionEnd={() => {
+              if (!isExpanded) {
+                if (!claimAllIsLoading) {
+                  // Clear errors when collapsed.
+                  for (const state of states) {
+                    state.setFailedReason(undefined);
+                  }
+                }
+              }
+            }}
+          >
+            {viewClaimTokens.map((viewClaimToken, index) => (
+              <ViewClaimTokenItem
+                key={`${viewClaimToken.modularChainInfo.chainId}-${viewClaimToken.token.currency.coinMinimalDenom}`}
+                viewClaimToken={viewClaimToken}
+                state={getClaimAllEachState(
+                  viewClaimToken.modularChainInfo.chainId
+                )}
+                itemsLength={viewClaimTokens.length}
+                isLastItem={index === viewClaimTokens.length - 1}
+              />
+            ))}
+          </VerticalCollapseTransition>
+        </div>
       </Styles.Container>
     );
   });

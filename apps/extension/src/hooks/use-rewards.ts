@@ -269,11 +269,11 @@ export function useRewards() {
   })();
 
   const claimCountText = (() => {
-    let count = 0;
+    let count = chainStore.chainInfosInUI.length;
     for (const chainInfo of chainStore.chainInfosInUI) {
       const state = getClaimAllEachState(chainInfo.chainId);
       if (state.isLoading) {
-        count++;
+        count--;
       }
     }
     return `${count}/${viewClaimTokens.length}`;
