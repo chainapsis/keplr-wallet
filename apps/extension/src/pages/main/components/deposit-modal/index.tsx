@@ -6,6 +6,7 @@ import { FixedWidthSceneTransition } from "../../../../components/transition";
 import { useTheme } from "styled-components";
 import { CopyAddressScene } from "./copy-address-scene";
 import { QRCodeScene } from "./qr-code";
+import { BuyCryptoModal } from "../buy-crypto-modal";
 
 export const DepositModal: FunctionComponent<{
   close: () => void;
@@ -28,6 +29,11 @@ export const DepositModal: FunctionComponent<{
           {
             name: "qr-code",
             element: QRCodeScene,
+            width: "100%",
+          },
+          {
+            name: "buy-crypto",
+            element: BuyCryptoModal,
             width: "100%",
           },
         ]}

@@ -45,6 +45,7 @@ import { getChainSearchResultClickAnalyticsProperties } from "../../../../analyt
 import { CoinPretty } from "@keplr-wallet/unit";
 import { Column, Columns } from "../../../../components/column";
 import { TextButton } from "../../../../components/button-text";
+import { useBuySupportServiceInfos } from "../../../../hooks/use-buy-support-service-infos";
 
 type Address = {
   modularChainInfo: ModularChainInfo;
@@ -155,6 +156,8 @@ export const CopyAddressScene: FunctionComponent<{
   const runInSidePanel = isRunningInSidePanel();
 
   const searchRef = useFocusOnMount<HTMLInputElement>();
+  const sceneTransition = useSceneTransition();
+  const buySupportServiceInfos = useBuySupportServiceInfos();
 
   useSceneEvents({
     onDidVisible: () => {
@@ -395,7 +398,12 @@ export const CopyAddressScene: FunctionComponent<{
             id: "page.main.components.deposit-modal.buy-crypto-button",
           })}
           color="blue"
-          onClick={() => {}}
+          onClick={() => {
+            sceneTransition.push("buy-crypto", {
+              buySupportServiceInfos,
+              showBackButton: true,
+            });
+          }}
           right={
             <ArrowRightSolidIcon
               width="1rem"

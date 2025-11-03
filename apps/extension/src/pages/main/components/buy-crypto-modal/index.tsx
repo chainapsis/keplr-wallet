@@ -8,7 +8,10 @@ import { Box } from "../../../../components/box";
 import { useStore } from "../../../../stores";
 import { FormattedMessage } from "react-intl";
 import { BuySupportServiceInfo } from "../../../../hooks/use-buy-support-service-infos";
-import { LoadingIcon } from "../../../../components/icon";
+import { ArrowLeftIcon, LoadingIcon } from "../../../../components/icon";
+import { IconButton } from "../../../../components/icon-button";
+import { Column, Columns } from "../../../../components/column";
+import { useSceneTransition } from "../../../../components/transition";
 
 const Styles = {
   Container: styled.div`
@@ -65,22 +68,67 @@ const Styles = {
 export const BuyCryptoModal: FunctionComponent<{
   close: () => void;
   buySupportServiceInfos: BuySupportServiceInfo[];
-}> = observer(({ close, buySupportServiceInfos }) => {
+  showBackButton?: boolean;
+}> = observer(({ close, buySupportServiceInfos, showBackButton }) => {
   const theme = useTheme();
+  const sceneTransition = useSceneTransition();
 
   return (
     <Styles.Container>
-      <Subtitle1
-        style={{
-          color:
-            theme.mode === "light"
-              ? ColorPalette["gray-700"]
-              : ColorPalette["white"],
-          textAlign: "center",
-        }}
-      >
-        <FormattedMessage id="page.main.components.buy-crypto-modal.title" />
-      </Subtitle1>
+      {showBackButton ? (
+        <Columns sum={1} alignY="center">
+          <IconButton
+            padding="0.25rem"
+            onClick={() => {
+              sceneTransition.pop();
+            }}
+            hoverColor={
+              theme.mode === "light"
+                ? ColorPalette["gray-50"]
+                : ColorPalette["gray-500"]
+            }
+          >
+            <ArrowLeftIcon
+              width="1.5rem"
+              height="1.5rem"
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-200"]
+                  : ColorPalette["gray-300"]
+              }
+            />
+          </IconButton>
+
+          <Column weight={1} />
+
+          <Subtitle1
+            style={{
+              color:
+                theme.mode === "light"
+                  ? ColorPalette["gray-700"]
+                  : ColorPalette["white"],
+              textAlign: "center",
+            }}
+          >
+            <FormattedMessage id="page.main.components.buy-crypto-modal.title" />
+          </Subtitle1>
+          <Column weight={1} />
+          {/* 제목을 중앙 정렬시키기 위해서 뒤로가기 버튼과 맞춰야한다. 이를 위한 mock임 */}
+          <Box width="2rem" height="2rem" />
+        </Columns>
+      ) : (
+        <Subtitle1
+          style={{
+            color:
+              theme.mode === "light"
+                ? ColorPalette["gray-700"]
+                : ColorPalette["white"],
+            textAlign: "center",
+          }}
+        >
+          <FormattedMessage id="page.main.components.buy-crypto-modal.title" />
+        </Subtitle1>
+      )}
 
       {buySupportServiceInfos.map((serviceInfo) => {
         return (
