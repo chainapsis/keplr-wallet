@@ -1,12 +1,14 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useState } from "react";
 import { observer } from "mobx-react-lite";
 import styled, { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
 import { Subtitle1 } from "../../../../components/typography";
-import { FiatOnRampServiceInfo } from "../../../../config.ui";
+
 import { Box } from "../../../../components/box";
 import { useStore } from "../../../../stores";
 import { FormattedMessage } from "react-intl";
+import { BuySupportServiceInfo } from "../../../../hooks/use-buy-support-service-infos";
+import { LoadingIcon } from "../../../../components/icon";
 
 const Styles = {
   Container: styled.div`
@@ -62,7 +64,7 @@ const Styles = {
 
 export const BuyCryptoModal: FunctionComponent<{
   close: () => void;
-  buySupportServiceInfos: (FiatOnRampServiceInfo & { buyUrl?: string })[];
+  buySupportServiceInfos: BuySupportServiceInfo[];
 }> = observer(({ close, buySupportServiceInfos }) => {
   const theme = useTheme();
 
@@ -94,12 +96,14 @@ export const BuyCryptoModal: FunctionComponent<{
 });
 
 const ServiceItem: FunctionComponent<{
-  serviceInfo: FiatOnRampServiceInfo & { buyUrl?: string };
+  serviceInfo: BuySupportServiceInfo;
   close: () => void;
 }> = ({ serviceInfo, close }) => {
   const { analyticsStore } = useStore();
 
-  if (serviceInfo.buyUrl === undefined) {
+  const [isLoading, setIsLoading] = useState(false);
+
+  if (serviceInfo.getBuyUrl === undefined) {
     return null;
   }
 
@@ -110,21 +114,40 @@ const ServiceItem: FunctionComponent<{
           onRampProvider: serviceInfo.serviceName,
         });
 
-        await browser.tabs.create({
-          url: serviceInfo.buyUrl,
-        });
+        setIsLoading(true);
+
+        try {
+          if (!serviceInfo.getBuyUrl) {
+            throw new Error("Buy URL is missing");
+          }
+
+          const url = await serviceInfo.getBuyUrl();
+
+          await browser.tabs.create({
+            url,
+          });
+        } catch (e) {
+          console.log(e);
+        } finally {
+          setIsLoading(false);
+        }
 
         close();
       }}
     >
-      <Box>
-        <img
-          src={require(`../../../../public/assets/img/fiat-on-ramp/${serviceInfo.serviceId}.svg`)}
-          alt={`buy ${serviceInfo.serviceId} button`}
-        />
-      </Box>
-
-      <Styles.ItemName>{serviceInfo.serviceName}</Styles.ItemName>
+      {!isLoading ? (
+        <React.Fragment>
+          <Box>
+            <img
+              src={require(`../../../../public/assets/img/fiat-on-ramp/${serviceInfo.serviceId}.svg`)}
+              alt={`buy ${serviceInfo.serviceId} button`}
+            />
+          </Box>
+          <Styles.ItemName>{serviceInfo.serviceName}</Styles.ItemName>
+        </React.Fragment>
+      ) : (
+        <LoadingIcon width="1.75rem" height="1.75rem" />
+      )}
     </Styles.ItemContainer>
   );
 };

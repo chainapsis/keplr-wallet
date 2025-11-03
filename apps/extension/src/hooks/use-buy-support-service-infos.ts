@@ -3,8 +3,8 @@ import { FiatOnRampServiceInfo } from "../config.ui";
 import { useStore } from "../stores";
 import { createHmac } from "crypto";
 
-interface BuySupportServiceInfo extends FiatOnRampServiceInfo {
-  buyUrl?: string;
+export interface BuySupportServiceInfo extends FiatOnRampServiceInfo {
+  getBuyUrl: (() => Promise<string>) | undefined;
 }
 
 export const useBuySupportServiceInfos = (selectedTokenInfo?: {
@@ -100,9 +100,6 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
           };
         case "transak":
           return {
-            apiKey:
-              process.env["KEPLR_EXT_TRANSAK_API_KEY"] ?? serviceInfo.apiKey,
-            hideMenu: "true",
             walletAddressesData: encodeURIComponent(
               JSON.stringify(
                 Object.entries(
@@ -253,15 +250,61 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
   const moonpaySignedUrl = moonpaySignResult?.response?.data;
 
   return (
-    buySupportServiceInfos?.map((serviceInfo) => ({
-      ...serviceInfo,
-      ...(serviceInfo.serviceId === "moonpay" &&
-        moonpaySignResult &&
-        !moonpaySignResult.error &&
-        moonpaySignedUrl && {
-          buyUrl: moonpaySignedUrl,
-        }),
-    })) ?? []
+    buySupportServiceInfos
+      ?.filter((serviceInfo) => {
+        if (serviceInfo.serviceId === "moonpay") {
+          if (
+            moonpaySignResult &&
+            !moonpaySignResult.error &&
+            moonpaySignedUrl
+          ) {
+            return true;
+          }
+          return false;
+        }
+
+        return true;
+      })
+      .map((serviceInfo) => ({
+        ...serviceInfo,
+        ...(serviceInfo.serviceId === "moonpay" &&
+          moonpaySignResult &&
+          !moonpaySignResult.error &&
+          moonpaySignedUrl && {
+            buyUrl: moonpaySignedUrl,
+          }),
+      }))
+      .map((serviceInfo) => {
+        return {
+          ...serviceInfo,
+          getBuyUrl: serviceInfo.buyUrl
+            ? async () => {
+                if (serviceInfo.serviceId === "transak") {
+                  const buyUrl = serviceInfo.buyUrl;
+                  if (!buyUrl) {
+                    throw new Error("buyUrl is null");
+                  }
+
+                  const transakSignResult = queriesStore.simpleQuery.queryGet<{
+                    widgetUrl: string;
+                  }>(
+                    process.env["KEPLR_EXT_CONFIG_SERVER"] || "",
+                    `api/transak${buyUrl.replace(serviceInfo.buyOrigin, "")}`
+                  );
+                  await transakSignResult.waitFreshResponse();
+                  const transakSignedUrl =
+                    transakSignResult?.response?.data.widgetUrl;
+                  if (!transakSignedUrl) {
+                    throw new Error("transakSignedUrl is null");
+                  }
+
+                  return transakSignedUrl;
+                }
+                return serviceInfo.buyUrl!;
+              }
+            : undefined,
+        };
+      }) ?? []
   );
 };
 
