@@ -221,11 +221,12 @@ export class TokensStore {
   getTokens(chainId: string): ReadonlyArray<TokenInfo> {
     const bech32Address = this.accountStore.getAccount(chainId).bech32Address;
     const modularChainInfo = this.chainStore.getModularChain(chainId);
-    if ("cosmos" in modularChainInfo || "evm" in modularChainInfo) {
-      const hasBech32Config =
-        this.chainStore.getChain(chainId).bech32Config != null;
+    if ("evm" in modularChainInfo && !("cosmos" in modularChainInfo)) {
+      return this.tokenMap.get(ChainIdHelper.parse(chainId).identifier) ?? [];
+    } else if ("cosmos" in modularChainInfo) {
+      const hasBech32Config = modularChainInfo.cosmos.bech32Config != null;
       const associatedAccountAddress =
-        hasBech32Config && bech32Address && "cosmos" in modularChainInfo
+        hasBech32Config && bech32Address
           ? Buffer.from(
               Bech32Address.fromBech32(
                 bech32Address,

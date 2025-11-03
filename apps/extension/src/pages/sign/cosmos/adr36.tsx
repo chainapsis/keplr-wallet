@@ -270,7 +270,7 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
                 setIsKeystoneInteracting(true);
                 setKeystoneInteractingError(undefined);
                 const isEthSigning = KeyRingService.isEthermintLike(
-                  chainStore.getChain(
+                  chainStore.getModularChain(
                     signInteractionStore.waitingData.data.chainId
                   )
                 );

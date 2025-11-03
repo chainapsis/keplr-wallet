@@ -116,11 +116,12 @@ export const useAutoFeeCurrencySelectionOnInit = (
           feeConfig.type
         );
         if (currentFeeCurrencyBal.toDec().lt(currentFee.toDec())) {
+          const modularChainInfo = chainStore.getModularChainInfoImpl(
+            feeConfig.chainId
+          );
           const isOsmosis =
-            chainStore.hasModularChain(feeConfig.chainId) &&
-            chainStore
-              .getModularChainInfoImpl(feeConfig.chainId)
-              .hasFeature("osmosis-txfees");
+            modularChainInfo.matchModule("cosmos") &&
+            modularChainInfo.hasFeature("osmosis-txfees");
 
           // Not enough balances for fee.
           // Try to find other fee currency to send.

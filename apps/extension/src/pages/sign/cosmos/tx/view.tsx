@@ -415,7 +415,7 @@ export const CosmosTxView: FunctionComponent<{
         setIsKeystoneInteracting(true);
         setKeystoneInteractingError(undefined);
         const isEthSigning = KeyRingService.isEthermintLike(
-          chainStore.getChain(chainId)
+          chainStore.getModularChain(chainId)
         );
         presignOptions = {
           isEthSigning,

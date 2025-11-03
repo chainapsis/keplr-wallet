@@ -30,7 +30,9 @@ export const ReceiveModal: FunctionComponent<{
   const isStarknetChain =
     "starknet" in modularChainInfo && modularChainInfo.starknet != null;
   const isEVMOnlyChain =
-    "evm" in modularChainInfo && modularChainInfo.evm != null;
+    "evm" in modularChainInfo &&
+    modularChainInfo.evm != null &&
+    chainStore.isEvmOnlyChain(chainId);
   const isBitcoin =
     "bitcoin" in modularChainInfo && modularChainInfo.bitcoin != null;
 

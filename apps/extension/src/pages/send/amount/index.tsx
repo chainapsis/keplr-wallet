@@ -430,7 +430,6 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   const initialCoinMinimalDenom = searchParams.get("coinMinimalDenom");
 
   const chainId = initialChainId || chainStore.chainInfosInUI[0].chainId;
-  const chainInfo = chainStore.getModularChain(chainId);
   const isEvmChain = chainStore.isEvmChain(chainId);
   const isEVMOnlyChain = chainStore.isEvmOnlyChain(chainId);
 
@@ -974,16 +973,18 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                   if (isOnlyEvm && !receiverAccount.ethereumHexAddress) {
                     const receiverChainInfo =
                       chainStore.hasModularChain(chainId) &&
-                      chainStore.getChain(chainId);
+                      chainStore.getModularChain(chainId);
                     if (
                       receiverAccount.isNanoLedger &&
                       receiverChainInfo &&
-                      (receiverChainInfo.bip44.coinType === 60 ||
-                        receiverChainInfo.features.includes(
+                      "evm" in receiverChainInfo &&
+                      (receiverChainInfo.evm.bip44.coinType === 60 ||
+                        receiverChainInfo.evm.features?.includes(
                           "eth-address-gen"
                         ) ||
-                        receiverChainInfo.features.includes("eth-key-sign") ||
-                        receiverChainInfo.evm != null)
+                        receiverChainInfo.evm.features?.includes(
+                          "eth-key-sign"
+                        ))
                     ) {
                       throw new Error(
                         "Please connect Ethereum app on Ledger with Keplr to get the address"
