@@ -33,7 +33,6 @@ export const RewardsCard: FunctionComponent<{
     claimAllIsLoading,
     isLedger,
     isKeystone,
-    claimCountText,
     claimAllIsCompleted,
     setClaimAllIsCompleted,
   } = useRewards();
@@ -110,7 +109,7 @@ export const RewardsCard: FunctionComponent<{
           ) : claimAllIsLoading || claimAllIsCompleted ? (
             <YAxis alignX="right">
               <XAxis alignY="center">
-                <Body3 color={ColorPalette["gray-200"]}>{claimCountText}</Body3>
+                <Body3 color={ColorPalette["gray-200"]}>{}</Body3>
                 <Gutter size="0.25rem" />
                 {claimAllIsLoading ? (
                   <LoadingIcon
@@ -144,7 +143,7 @@ export const RewardsCard: FunctionComponent<{
           ) : (
             <Subtitle3 color={ColorPalette["blue-300"]}>
               {claimAllIsLoading
-                ? claimCountText
+                ? ""
                 : intl.formatMessage({
                     id: "page.main.components.rewards-card.claim-all-button",
                   })}

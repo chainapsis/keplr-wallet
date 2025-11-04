@@ -298,17 +298,6 @@ export function useRewards() {
     }
   })();
 
-  const claimCountText = (() => {
-    const totalCount = viewClaimTokens.length;
-    if (totalCount === 0) {
-      return "";
-    }
-
-    const completedCount = completedChainsRef.current.size;
-    const remainingCount = Math.max(0, totalCount - completedCount);
-    return `${remainingCount}/${totalCount}`;
-  })();
-
   return {
     viewClaimTokens,
     totalPrice,
@@ -317,7 +306,6 @@ export function useRewards() {
     claimAll,
     claimAllDisabled,
     claimAllIsLoading,
-    claimCountText,
     claimAllIsCompleted,
     setClaimAllIsCompleted,
     states,
