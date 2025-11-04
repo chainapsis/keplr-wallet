@@ -655,6 +655,8 @@
   "page.stake.empty.link": "Learn more",
   "page.stake.explore.title": "Stake & Earn Rewards",
   "page.stake.explore.subtitle": "Buy or receive assets to start staking",
+  "page.stake.components.rewards-card.title": "Rewards",
+  "page.stake.components.rewards-card.claim-all-button": "Claim All",
   "page.stake.components.rewards-card.claim-button": "Claim",
   "page.stake.components.rewards-card.show-all-button": "Show All",
   "page.stake.components.rewards-card.hide-all-button": "Hide All",

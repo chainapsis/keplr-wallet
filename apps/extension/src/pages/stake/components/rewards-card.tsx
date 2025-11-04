@@ -87,7 +87,7 @@ export const RewardsCard: FunctionComponent<{ isNotReady?: boolean }> =
                 <Skeleton layer={1} isNotReady={isNotReady}>
                   <XAxis alignY="center">
                     <Body3 style={{ color: ColorPalette["gray-300"] }}>
-                      <FormattedMessage id="page.main.components.rewards-card.title" />
+                      <FormattedMessage id="page.stake.components.rewards-card.title" />
                     </Body3>
                     <ArrowIcon direction={isExpanded ? "up" : "down"} />
                   </XAxis>
@@ -143,7 +143,7 @@ export const RewardsCard: FunctionComponent<{ isNotReady?: boolean }> =
               >
                 <TextButton
                   text={intl.formatMessage({
-                    id: "page.main.components.rewards-card.claim-all-button",
+                    id: "page.stake.components.rewards-card.claim-all-button",
                   })}
                   size="small"
                   disabled={claimAllDisabled}
