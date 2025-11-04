@@ -385,6 +385,13 @@ export const AvailableTabView: FunctionComponent<{
       chainSearchFields
     ).filter(({ chainInfo }) => {
       if (keyRingStore.selectedKeyInfo?.type === "ledger") {
+        if ("evm" in chainInfo) {
+          KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
+            chainInfo.chainId
+          );
+          return true;
+        }
+
         const cosmosChainInfo = (() => {
           if ("cosmos" in chainInfo) {
             return chainInfo.cosmos;

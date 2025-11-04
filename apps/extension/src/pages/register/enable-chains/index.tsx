@@ -665,7 +665,13 @@ export const EnableChainsScene: FunctionComponent<{
 
       if (keyType === "ledger") {
         modularChainInfos = modularChainInfos.filter((modularChainInfo) => {
-          if ("cosmos" in modularChainInfo) {
+          if ("evm" in modularChainInfo && !("cosmos" in modularChainInfo)) {
+            if (!fallbackEthereumLedgerApp) {
+              return false;
+            }
+
+            return true;
+          } else if ("cosmos" in modularChainInfo) {
             const isEthermintLike =
               modularChainInfo.cosmos.bip44.coinType === 60 ||
               !!modularChainInfo.cosmos.features?.includes("eth-address-gen") ||
@@ -1708,7 +1714,18 @@ export const EnableChainsScene: FunctionComponent<{
             })}
             {showLedgerChains &&
               searchedLedgerChains.map((modularChainInfo) => {
-                if ("cosmos" in modularChainInfo) {
+                if (
+                  "evm" in modularChainInfo &&
+                  !("cosmos" in modularChainInfo)
+                ) {
+                  return (
+                    <NextStepChainItem
+                      key={modularChainInfo.chainId}
+                      modularChainInfo={modularChainInfo}
+                      tagText="EVM"
+                    />
+                  );
+                } else if ("cosmos" in modularChainInfo) {
                   const cosmos = modularChainInfo.cosmos;
                   const isEthermintLike =
                     cosmos.bip44.coinType === 60 ||
@@ -2006,6 +2023,7 @@ export const EnableChainsScene: FunctionComponent<{
                 for (let i = 0; i < enables.length; i++) {
                   const enable = enables[i];
                   const modularChainInfo = chainStore.getModularChain(enable);
+                  // evm 체인은 코인타입 60이므로 여기서 분기할 필요가 없음.
                   if ("cosmos" in modularChainInfo) {
                     if (
                       keyRingStore.needKeyCoinTypeFinalize(
@@ -2041,6 +2059,9 @@ export const EnableChainsScene: FunctionComponent<{
                 };
                 const isEthereumChainId = (chainId: string) => {
                   const modularChainInfo = chainStore.getModularChain(chainId);
+                  if ("evm" in modularChainInfo) {
+                    return true;
+                  }
                   if ("cosmos" in modularChainInfo) {
                     const isEthermintLike =
                       modularChainInfo.cosmos.bip44.coinType === 60 ||

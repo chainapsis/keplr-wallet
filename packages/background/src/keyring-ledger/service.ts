@@ -51,9 +51,9 @@ export class KeyRingLedgerService {
         "'getPubKeyStarknet' should be called for Starknet chain"
       );
     }
-    if (!("cosmos" in modularChainInfo)) {
+    if (!("cosmos" in modularChainInfo || "evm" in modularChainInfo)) {
       // TODO: 나중에 starknet을 어떻게 지원할지 생각해본다.
-      throw new Error("Chain is not a cosmos chain");
+      throw new Error("Chain is not a Cosmos or EVM chain");
     }
 
     let app = "Cosmos";
