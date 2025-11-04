@@ -249,59 +249,62 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
           </Box>
         ) : null}
 
-        {filteredTokens.length > 0 &&
-          filteredTokens.map((viewToken, index) => {
-            const modularChainInfo = chainStore.getModularChain(
-              viewToken.chainInfo.chainId
-            );
-            const isStarknet =
-              "starknet" in modularChainInfo &&
-              modularChainInfo.starknet != null;
-            const isBitcoin =
-              "bitcoin" in modularChainInfo && modularChainInfo.bitcoin != null;
+        <Stack>
+          {filteredTokens.length > 0 &&
+            filteredTokens.map((viewToken, index) => {
+              const modularChainInfo = chainStore.getModularChain(
+                viewToken.chainInfo.chainId
+              );
+              const isStarknet =
+                "starknet" in modularChainInfo &&
+                modularChainInfo.starknet != null;
+              const isBitcoin =
+                "bitcoin" in modularChainInfo &&
+                modularChainInfo.bitcoin != null;
 
-            const sendRoute = isBitcoin
-              ? "/bitcoin/send"
-              : isStarknet
-              ? "/starknet/send"
-              : "/send";
+              const sendRoute = isBitcoin
+                ? "/bitcoin/send"
+                : isStarknet
+                ? "/starknet/send"
+                : "/send";
 
-            return (
-              <TokenItem
-                viewToken={viewToken}
-                key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
-                onClick={() => {
-                  if (search.trim().length > 0) {
-                    analyticsAmplitudeStore.logEvent(
-                      "click_token_item_search_results_select_asset_send",
-                      getTokenSearchResultClickAnalyticsProperties(
-                        viewToken,
-                        search,
-                        filteredTokens,
-                        index
-                      )
-                    );
-                  }
-                  if (paramNavigateTo) {
-                    navigate(
-                      paramNavigateTo
-                        .replace("/send", sendRoute)
-                        .replace("{chainId}", viewToken.chainInfo.chainId)
-                        .replace(
-                          "{coinMinimalDenom}",
-                          viewToken.token.currency.coinMinimalDenom
-                        ),
-                      {
-                        replace: paramNavigateReplace === "true",
-                      }
-                    );
-                  } else {
-                    console.error("Empty navigateTo param");
-                  }
-                }}
-              />
-            );
-          })}
+              return (
+                <TokenItem
+                  viewToken={viewToken}
+                  key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
+                  onClick={() => {
+                    if (search.trim().length > 0) {
+                      analyticsAmplitudeStore.logEvent(
+                        "click_token_item_search_results_select_asset_send",
+                        getTokenSearchResultClickAnalyticsProperties(
+                          viewToken,
+                          search,
+                          filteredTokens,
+                          index
+                        )
+                      );
+                    }
+                    if (paramNavigateTo) {
+                      navigate(
+                        paramNavigateTo
+                          .replace("/send", sendRoute)
+                          .replace("{chainId}", viewToken.chainInfo.chainId)
+                          .replace(
+                            "{coinMinimalDenom}",
+                            viewToken.token.currency.coinMinimalDenom
+                          ),
+                        {
+                          replace: paramNavigateReplace === "true",
+                        }
+                      );
+                    } else {
+                      console.error("Empty navigateTo param");
+                    }
+                  }}
+                />
+              );
+            })}
+        </Stack>
 
         {nonZeroTokens.length === 0 && (
           <Box marginY="2rem">

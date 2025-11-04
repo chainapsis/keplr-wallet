@@ -51,7 +51,7 @@ export const WrapperwithBottomTag = observer(function ({
         zIndex={0}
         position="relative"
         style={{
-          top: "-0.5rem",
+          top: 0,
           left: 0,
           display: "flex",
           flexDirection: "row",
@@ -65,10 +65,9 @@ export const WrapperwithBottomTag = observer(function ({
           pointerEvents: isVisible ? "auto" : "none",
           overflow: "hidden",
           maxHeight: isVisible ? "none" : "0.375rem",
-          paddingTop: isVisible ? "0.875rem" : "0",
+          paddingTop: isVisible ? "0.375rem" : "0",
           paddingBottom: isVisible ? "0.375rem" : "0",
         }}
-        marginBottom="-0.5rem"
         backgroundColor={
           isLightMode
             ? ColorPalette["green-100"]

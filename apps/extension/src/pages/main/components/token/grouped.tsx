@@ -471,6 +471,7 @@ export const GroupedTokenItem: FunctionComponent<{
           earnedAssetPrice={earnedAssetPrice}
           showPrice24HChange={showPrice24HChange}
           copyAddress={copyAddress}
+          showBackground={true}
         />
       );
     }

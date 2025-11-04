@@ -230,7 +230,7 @@ export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
           </XAxis>
         </YAxis>
 
-        <Stack gutter="0.5rem">
+        <Stack>
           {numFoundToken > 0 && (
             <Styles.NewTokenFoundButtonContainer
               onClick={() => setIsFoundTokenModalOpen(true)}
@@ -262,6 +262,7 @@ export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
               </XAxis>
             </Styles.NewTokenFoundButtonContainer>
           )}
+          <Gutter size="0.5rem" />
           {sortedBalances.map((viewToken, index) => {
             const chainIdentifier = ChainIdHelper.parse(
               viewToken.chainInfo.chainId
@@ -285,28 +286,23 @@ export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
                       )
                     );
                   }
+
+                  isDisabled
+                    ? handleEnableToken(
+                        viewToken.chainInfo.chainId,
+                        viewToken.token.currency.coinMinimalDenom
+                      )
+                    : handleDisableToken(
+                        viewToken.chainInfo.chainId,
+                        viewToken.token.currency.coinMinimalDenom
+                      );
                 }}
                 key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
                 viewToken={viewToken}
-                disableHoverStyle={true}
                 right={
                   <XAxis>
                     <Gutter size="0.5rem" />
-                    <Toggle
-                      isOpen={!isDisabled}
-                      setIsOpen={() =>
-                        isDisabled
-                          ? handleEnableToken(
-                              viewToken.chainInfo.chainId,
-                              viewToken.token.currency.coinMinimalDenom
-                            )
-                          : handleDisableToken(
-                              viewToken.chainInfo.chainId,
-                              viewToken.token.currency.coinMinimalDenom
-                            )
-                      }
-                      size="small"
-                    />
+                    <Toggle isOpen={!isDisabled} size="small" />
                   </XAxis>
                 }
               />
