@@ -22,6 +22,7 @@ export interface SceneTransitionBaseProps<S extends Scene = Scene> {
   width?: string | SpringValue<string>;
   transitionAlign?: "top" | "bottom" | "center";
   transitionMode?: "x-axis" | "opacity"; // Default: x-axis
+  borderRadius?: string;
 }
 
 export interface SceneTransitionContext {

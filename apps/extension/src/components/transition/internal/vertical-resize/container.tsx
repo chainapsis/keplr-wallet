@@ -9,13 +9,15 @@ export const VerticalResizeContainer = forwardRef<
 
     width?: string | SpringValue<string>;
     transitionAlign?: "top" | "bottom" | "center";
+    borderRadius?: string;
   }>
->(({ children, heightPx, width, transitionAlign }, ref) => {
+>(({ children, heightPx, width, transitionAlign, borderRadius }, ref) => {
   return (
     <animated.div
       style={{
         position: "relative",
         overflow: "hidden",
+        borderRadius,
         width,
         height: heightPx.to((heightPx) =>
           heightPx < 0 ? "auto" : `${heightPx}px`
