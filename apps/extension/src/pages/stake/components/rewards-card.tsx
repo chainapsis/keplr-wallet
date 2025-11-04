@@ -33,168 +33,177 @@ import { PortalTooltip } from "../../../components/tooltip/portal";
 import { useRewards, ViewClaimToken } from "../../../hooks/use-rewards";
 import { TextButton } from "../../../components/button-text";
 
-export const RewardsCard: FunctionComponent<{ isNotReady?: boolean }> =
-  observer(({ isNotReady }) => {
-    const { analyticsStore, uiConfigStore } = useStore();
-    const intl = useIntl();
-    const theme = useTheme();
+export const RewardsCard: FunctionComponent<{
+  isNotReady?: boolean;
+  initialExpand?: boolean;
+}> = observer(({ isNotReady, initialExpand }) => {
+  const { analyticsStore, uiConfigStore } = useStore();
+  const intl = useIntl();
+  const theme = useTheme();
 
-    const [isExpanded, setIsExpanded] = useState(false);
-    const [disableHover, setDisableHover] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [disableHover, setDisableHover] = useState(false);
 
-    const {
-      viewClaimTokens,
-      totalPrice,
-      isLedger,
-      isKeystone,
-      claimAll,
-      claimAllDisabled,
-      claimAllIsLoading,
-      states,
-      getClaimAllEachState,
-    } = useRewards();
+  const {
+    viewClaimTokens,
+    totalPrice,
+    isLedger,
+    isKeystone,
+    claimAll,
+    claimAllDisabled,
+    claimAllIsLoading,
+    states,
+    getClaimAllEachState,
+  } = useRewards();
 
-    useEffect(() => {
-      if (isExpanded) {
-        if (!claimAllIsLoading) {
-          // Clear errors when collapsed.
-          for (const state of states) {
-            state.setFailedReason(undefined);
-          }
+  useEffect(() => {
+    if (isExpanded) {
+      if (!claimAllIsLoading) {
+        // Clear errors when collapsed.
+        for (const state of states) {
+          state.setFailedReason(undefined);
         }
       }
-      // 펼쳐지면서 그 때 loading 중이 아닐 경우에 에러를 지워준다.
-      // 펼쳐지는 순간에만 발생해야하기 때문에 claimAllIsLoading는 deps에서 없어야한다.
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isExpanded]);
+    }
+    // 펼쳐지면서 그 때 loading 중이 아닐 경우에 에러를 지워준다.
+    // 펼쳐지는 순간에만 발생해야하기 때문에 claimAllIsLoading는 deps에서 없어야한다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isExpanded]);
 
-    return (
-      <Styles.Container
-        isNotReady={isNotReady}
-        onClick={() => {
-          analyticsStore.logEvent("click_claimExpandButton");
-          if (viewClaimTokens.length > 0) {
-            setIsExpanded(!isExpanded);
-          }
-        }}
-        isExpanded={isExpanded}
-        disableHover={disableHover}
-      >
-        <Columns sum={1} alignY="center">
-          <Box paddingY="0.875rem" paddingX="1rem">
-            <Stack gutter="0.5rem">
-              <YAxis alignX="left">
-                <Skeleton layer={1} isNotReady={isNotReady}>
-                  <XAxis alignY="center">
-                    <Body3 style={{ color: ColorPalette["gray-300"] }}>
-                      <FormattedMessage id="page.stake.components.rewards-card.title" />
-                    </Body3>
-                    <ArrowIcon direction={isExpanded ? "up" : "down"} />
-                  </XAxis>
-                </Skeleton>
-              </YAxis>
+  useEffect(() => {
+    if (initialExpand) {
+      setIsExpanded(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-              <YAxis alignX="left">
-                <Skeleton
-                  layer={1}
-                  isNotReady={isNotReady}
-                  dummyMinWidth="5.125rem"
+  return (
+    <Styles.Container
+      isNotReady={isNotReady}
+      onClick={() => {
+        analyticsStore.logEvent("click_claimExpandButton");
+        if (viewClaimTokens.length > 0) {
+          setIsExpanded(!isExpanded);
+        }
+      }}
+      isExpanded={isExpanded}
+      disableHover={disableHover}
+    >
+      <Columns sum={1} alignY="center">
+        <Box paddingY="0.875rem" paddingX="1rem">
+          <Stack gutter="0.5rem">
+            <YAxis alignX="left">
+              <Skeleton layer={1} isNotReady={isNotReady}>
+                <XAxis alignY="center">
+                  <Body3 style={{ color: ColorPalette["gray-300"] }}>
+                    <FormattedMessage id="page.stake.components.rewards-card.title" />
+                  </Body3>
+                  <ArrowIcon direction={isExpanded ? "up" : "down"} />
+                </XAxis>
+              </Skeleton>
+            </YAxis>
+
+            <YAxis alignX="left">
+              <Skeleton
+                layer={1}
+                isNotReady={isNotReady}
+                dummyMinWidth="5.125rem"
+              >
+                <Subtitle2
+                  style={{
+                    color:
+                      theme.mode === "light"
+                        ? ColorPalette["gray-700"]
+                        : ColorPalette["gray-10"],
+                  }}
                 >
-                  <Subtitle2
-                    style={{
-                      color:
-                        theme.mode === "light"
-                          ? ColorPalette["gray-700"]
-                          : ColorPalette["gray-10"],
-                    }}
-                  >
-                    {uiConfigStore.hideStringIfPrivacyMode(
-                      totalPrice ? totalPrice.separator(" ").toString() : "?",
-                      3
-                    )}
-                  </Subtitle2>
-                </Skeleton>
-              </YAxis>
-            </Stack>
-          </Box>
+                  {uiConfigStore.hideStringIfPrivacyMode(
+                    totalPrice ? totalPrice.separator(" ").toString() : "?",
+                    3
+                  )}
+                </Subtitle2>
+              </Skeleton>
+            </YAxis>
+          </Stack>
+        </Box>
 
-          <Column weight={1} />
+        <Column weight={1} />
 
-          <Skeleton type="button" layer={1} isNotReady={isNotReady}>
-            {/*
+        <Skeleton type="button" layer={1} isNotReady={isNotReady}>
+          {/*
                  ledger일 경우 특수한 행동을 하진 못하고 그냥 collapse를 펼치기만 한다.
                  특수한 기능이 없다는 것을 암시하기 위해서 ledger일때는 일반 버튼으로 처리한다.
                */}
-            {isLedger || isKeystone ? (
+          {isLedger || isKeystone ? (
+            <TextButton
+              text={intl.formatMessage({
+                id: isExpanded
+                  ? "page.stake.components.rewards-card.hide-all-button"
+                  : "page.stake.components.rewards-card.show-all-button",
+              })}
+              size="small"
+              onClick={() => setIsExpanded(!isExpanded)}
+              color="default"
+            />
+          ) : (
+            <div
+              onMouseEnter={() => setDisableHover(true)}
+              onMouseLeave={() => setDisableHover(false)}
+            >
               <TextButton
                 text={intl.formatMessage({
-                  id: isExpanded
-                    ? "page.stake.components.rewards-card.hide-all-button"
-                    : "page.stake.components.rewards-card.show-all-button",
+                  id: "page.stake.components.rewards-card.claim-all-button",
                 })}
                 size="small"
-                onClick={() => setIsExpanded(!isExpanded)}
-                color="default"
+                disabled={claimAllDisabled}
+                onClick={claimAll}
+                color="blue"
+                right={
+                  claimAllIsLoading ? (
+                    <LoadingIcon width="1rem" height="1rem" />
+                  ) : null
+                }
               />
-            ) : (
-              <div
-                onMouseEnter={() => setDisableHover(true)}
-                onMouseLeave={() => setDisableHover(false)}
-              >
-                <TextButton
-                  text={intl.formatMessage({
-                    id: "page.stake.components.rewards-card.claim-all-button",
-                  })}
-                  size="small"
-                  disabled={claimAllDisabled}
-                  onClick={claimAll}
-                  color="blue"
-                  right={
-                    claimAllIsLoading ? (
-                      <LoadingIcon width="1rem" height="1rem" />
-                    ) : null
-                  }
-                />
-              </div>
-            )}
-          </Skeleton>
-        </Columns>
+            </div>
+          )}
+        </Skeleton>
+      </Columns>
 
-        <div
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
-        >
-          <VerticalCollapseTransition
-            collapsed={!isExpanded}
-            opacityLeft={0}
-            onTransitionEnd={() => {
-              if (!isExpanded) {
-                if (!claimAllIsLoading) {
-                  // Clear errors when collapsed.
-                  for (const state of states) {
-                    state.setFailedReason(undefined);
-                  }
+      <div
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+      >
+        <VerticalCollapseTransition
+          collapsed={!isExpanded}
+          opacityLeft={0}
+          onTransitionEnd={() => {
+            if (!isExpanded) {
+              if (!claimAllIsLoading) {
+                // Clear errors when collapsed.
+                for (const state of states) {
+                  state.setFailedReason(undefined);
                 }
               }
-            }}
-          >
-            {viewClaimTokens.map((viewClaimToken, index) => (
-              <ViewClaimTokenItem
-                key={`${viewClaimToken.modularChainInfo.chainId}-${viewClaimToken.token.currency.coinMinimalDenom}`}
-                viewClaimToken={viewClaimToken}
-                state={getClaimAllEachState(
-                  viewClaimToken.modularChainInfo.chainId
-                )}
-                itemsLength={viewClaimTokens.length}
-                isLastItem={index === viewClaimTokens.length - 1}
-              />
-            ))}
-          </VerticalCollapseTransition>
-        </div>
-      </Styles.Container>
-    );
-  });
+            }
+          }}
+        >
+          {viewClaimTokens.map((viewClaimToken, index) => (
+            <ViewClaimTokenItem
+              key={`${viewClaimToken.modularChainInfo.chainId}-${viewClaimToken.token.currency.coinMinimalDenom}`}
+              viewClaimToken={viewClaimToken}
+              state={getClaimAllEachState(
+                viewClaimToken.modularChainInfo.chainId
+              )}
+              itemsLength={viewClaimTokens.length}
+              isLastItem={index === viewClaimTokens.length - 1}
+            />
+          ))}
+        </VerticalCollapseTransition>
+      </div>
+    </Styles.Container>
+  );
+});
 
 const ViewClaimTokenItem: FunctionComponent<{
   viewClaimToken: ViewClaimToken;

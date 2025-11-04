@@ -27,12 +27,15 @@ import { StakeEmptyPage } from "./empty";
 import { IconProps } from "../../components/icon/types";
 import { Subtitle3 } from "../../components/typography";
 import { RewardsCard } from "./components/rewards-card";
+import { useSearchParams } from "react-router-dom";
 
 const zeroDec = new Dec(0);
 
 export const StakePage: FunctionComponent = observer(() => {
   const theme = useTheme();
   const intl = useIntl();
+  const [params] = useSearchParams();
+  const initialExpand = params.get("intitialExpand") === "true";
 
   const { uiConfigStore, hugeQueriesStore } = useStore();
   const isNotReady = useIsNotReady();
@@ -191,7 +194,7 @@ export const StakePage: FunctionComponent = observer(() => {
 
         <Gutter size="1.25rem" />
 
-        <RewardsCard isNotReady={isNotReady} />
+        <RewardsCard isNotReady={isNotReady} initialExpand={initialExpand} />
 
         <Gutter size="1.5rem" />
 

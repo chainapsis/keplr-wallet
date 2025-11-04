@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { ViewToken } from "../pages/main";
 import { useStore } from "../stores";
 import {
@@ -53,6 +53,7 @@ export function useRewards() {
 
   const completedChainsRef = useRef(new Set<string>());
   const prevFetchingStateRef = useRef(new Map<string, boolean>());
+  const [claimAllIsCompleted, setClaimAllIsCompleted] = useState(false);
 
   const viewClaimTokens: ViewClaimToken[] = (() => {
     const res: ViewClaimToken[] = [];
@@ -281,13 +282,10 @@ export function useRewards() {
         prevFetchingStateRef.current.set(chainId, true);
       }
 
-      if (
-        prevState &&
-        (!getClaimAllEachState(chainId).isLoading ||
-          getClaimAllEachState(chainId).failedReason != null)
-      ) {
+      if (prevState && getClaimAllEachState(chainId).isLoading) {
         completedChainsRef.current.add(chainId);
         prevFetchingStateRef.current.set(chainId, false);
+        setClaimAllIsCompleted(true);
       }
     }
 
@@ -320,6 +318,8 @@ export function useRewards() {
     claimAllDisabled,
     claimAllIsLoading,
     claimCountText,
+    claimAllIsCompleted,
+    setClaimAllIsCompleted,
     states,
     getClaimAllEachState,
   };
