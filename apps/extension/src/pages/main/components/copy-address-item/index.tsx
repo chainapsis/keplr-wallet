@@ -1,0 +1,386 @@
+import React, { FunctionComponent, useState } from "react";
+import { observer } from "mobx-react-lite";
+import { useStore } from "../../../../stores";
+import { useTheme } from "styled-components";
+import { Box } from "../../../../components/box";
+import { ColorPalette } from "../../../../styles";
+import { XAxis, YAxis } from "../../../../components/axis";
+import {
+  BaseTypography,
+  Caption1,
+  Subtitle3,
+} from "../../../../components/typography";
+import { Gutter } from "../../../../components/gutter";
+import { ChainImageFallback } from "../../../../components/image";
+import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
+import {
+  CheckToggleIcon,
+  CopyOutlineIcon,
+  QRCodeIcon,
+  StarIcon,
+} from "../../../../components/icon";
+import { IconButton } from "../../../../components/icon-button";
+import { useSceneTransition } from "../../../../components/transition";
+import { ModularChainInfo, SupportedPaymentType } from "@keplr-wallet/types";
+
+export const CopyAddressItem: FunctionComponent<{
+  address: {
+    modularChainInfo: ModularChainInfo;
+    bech32Address?: string;
+    ethereumAddress?: string;
+    starknetAddress?: string;
+    bitcoinAddress?: {
+      bech32Address: string;
+      paymentType: SupportedPaymentType;
+    };
+  };
+  close: () => void;
+  blockInteraction: boolean;
+  setBlockInteraction: (block: boolean) => void;
+  setSortPriorities: (
+    fn: (
+      value: Record<string, true | undefined>
+    ) => Record<string, true | undefined>
+  ) => void;
+  onClick: () => void;
+}> = observer(
+  ({
+    address,
+    close,
+    blockInteraction,
+    setBlockInteraction,
+    setSortPriorities,
+    onClick,
+  }) => {
+    const { analyticsStore, keyRingStore, uiConfigStore, chainStore } =
+      useStore();
+
+    const theme = useTheme();
+
+    const sceneTransition = useSceneTransition();
+
+    const [hasCopied, setHasCopied] = useState(false);
+
+    const isBookmarked = keyRingStore.selectedKeyInfo
+      ? uiConfigStore.copyAddressConfig.isBookmarkedChain(
+          keyRingStore.selectedKeyInfo.id,
+          address.modularChainInfo.chainId
+        )
+      : false;
+
+    const [isCopyContainerHover, setIsCopyContainerHover] = useState(false);
+    const [isBookmarkHover, setIsBookmarkHover] = useState(false);
+
+    const isEVMOnlyChain =
+      "cosmos" in address.modularChainInfo &&
+      address.modularChainInfo.cosmos != null &&
+      chainStore.isEvmOnlyChain(address.modularChainInfo.chainId);
+
+    // 클릭 영역 문제로 레이아웃이 복잡해졌다.
+    // 알아서 잘 해결하자
+    return (
+      <Box height="4rem" borderRadius="0.375rem" alignY="center">
+        <XAxis alignY="center">
+          <Box
+            height="4rem"
+            borderRadius="0.375rem"
+            alignY="center"
+            backgroundColor={(() => {
+              if (blockInteraction) {
+                return;
+              }
+
+              if (isBookmarkHover) {
+                return;
+              }
+
+              if (isCopyContainerHover) {
+                return theme.mode === "light"
+                  ? ColorPalette["gray-10"]
+                  : ColorPalette["gray-550"];
+              }
+
+              return;
+            })()}
+            onHoverStateChange={(isHover) => {
+              setIsCopyContainerHover(isHover);
+            }}
+            cursor={blockInteraction ? undefined : "pointer"}
+            paddingLeft="1rem"
+            style={{
+              flex: 1,
+            }}
+            onClick={async (e) => {
+              e.preventDefault();
+
+              onClick();
+
+              await navigator.clipboard.writeText(
+                address.starknetAddress ||
+                  address.ethereumAddress ||
+                  address.bech32Address ||
+                  address.bitcoinAddress?.bech32Address ||
+                  ""
+              );
+              setHasCopied(true);
+              setBlockInteraction(true);
+
+              analyticsStore.logEvent("click_copyAddress_copy", {
+                chainId: address.modularChainInfo.chainId,
+                chainName: address.modularChainInfo.chainName,
+              });
+              setHasCopied(true);
+
+              setTimeout(() => {
+                close();
+              }, 500);
+            }}
+          >
+            <XAxis alignY="center">
+              <Box
+                cursor={
+                  blockInteraction ||
+                  (!isEVMOnlyChain && address.ethereumAddress)
+                    ? undefined
+                    : "pointer"
+                }
+                onHoverStateChange={(isHover) => {
+                  setIsBookmarkHover(isHover);
+                }}
+                style={{
+                  opacity: !isEVMOnlyChain && address.ethereumAddress ? 0 : 1,
+                  pointerEvents:
+                    !isEVMOnlyChain && address.ethereumAddress
+                      ? "none"
+                      : undefined,
+                  color: (() => {
+                    if (isBookmarked) {
+                      if (!blockInteraction && isBookmarkHover) {
+                        return theme.mode === "light"
+                          ? ColorPalette["blue-300"]
+                          : ColorPalette["blue-500"];
+                      }
+                      return ColorPalette["blue-400"];
+                    }
+
+                    if (!blockInteraction && isBookmarkHover) {
+                      return theme.mode === "light"
+                        ? ColorPalette["gray-200"]
+                        : ColorPalette["gray-400"];
+                    }
+
+                    return theme.mode === "light"
+                      ? ColorPalette["gray-100"]
+                      : ColorPalette["gray-300"];
+                  })(),
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  // 컨테이너로의 전파를 막아야함
+                  e.stopPropagation();
+
+                  if (blockInteraction) {
+                    return;
+                  }
+
+                  const newIsBookmarked = !isBookmarked;
+
+                  analyticsStore.logEvent("click_favoriteChain", {
+                    chainId: address.modularChainInfo.chainId,
+                    chainName: address.modularChainInfo.chainName,
+                    isFavorite: newIsBookmarked,
+                  });
+
+                  if (keyRingStore.selectedKeyInfo) {
+                    if (newIsBookmarked) {
+                      uiConfigStore.copyAddressConfig.bookmarkChain(
+                        keyRingStore.selectedKeyInfo.id,
+                        address.modularChainInfo.chainId
+                      );
+                    } else {
+                      uiConfigStore.copyAddressConfig.unbookmarkChain(
+                        keyRingStore.selectedKeyInfo.id,
+                        address.modularChainInfo.chainId
+                      );
+
+                      setSortPriorities((priorities) => {
+                        const identifier = ChainIdHelper.parse(
+                          address.modularChainInfo.chainId
+                        ).identifier;
+                        const newPriorities = { ...priorities };
+                        if (newPriorities[identifier]) {
+                          delete newPriorities[identifier];
+                        }
+                        return newPriorities;
+                      });
+                    }
+                  }
+                }}
+              >
+                <StarIcon width="1.25rem" height="1.25rem" />
+              </Box>
+              <Gutter size="0.5rem" />
+
+              <ChainImageFallback
+                chainInfo={address.modularChainInfo}
+                size="2rem"
+              />
+              <Gutter size="0.5rem" />
+              <YAxis>
+                <Box
+                  style={{
+                    flex: 1,
+                    flexDirection: "row",
+                    flexWrap: "wrap",
+                    gap: "0.25rem",
+                  }}
+                >
+                  <Subtitle3
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-700"]
+                        : ColorPalette["gray-10"]
+                    }
+                  >
+                    {address.modularChainInfo.chainName}
+                  </Subtitle3>
+                  {address.bitcoinAddress && (
+                    <Box
+                      alignX="center"
+                      alignY="center"
+                      backgroundColor={
+                        theme.mode === "light"
+                          ? ColorPalette["blue-50"]
+                          : ColorPalette["gray-500"]
+                      }
+                      borderRadius="0.375rem"
+                      paddingY="0.125rem"
+                      paddingX="0.375rem"
+                      style={{
+                        flexShrink: 0,
+                      }}
+                    >
+                      <BaseTypography
+                        style={{
+                          fontWeight: 400,
+                          fontSize: "0.6875rem",
+                        }}
+                        color={
+                          theme.mode === "light"
+                            ? ColorPalette["blue-400"]
+                            : ColorPalette["gray-200"]
+                        }
+                      >
+                        {address.bitcoinAddress.paymentType
+                          .replace("-", " ")
+                          .replace(/\b\w/g, (char: string) =>
+                            char.toUpperCase()
+                          )}
+                      </BaseTypography>
+                    </Box>
+                  )}
+                </Box>
+                <Gutter size="0.25rem" />
+                <Caption1 color={ColorPalette["gray-300"]}>
+                  {(() => {
+                    if (address.starknetAddress) {
+                      return `${address.starknetAddress.slice(
+                        0,
+                        10
+                      )}...${address.starknetAddress.slice(-8)}`;
+                    }
+
+                    if (address.ethereumAddress) {
+                      return address.ethereumAddress.length === 42
+                        ? `${address.ethereumAddress.slice(
+                            0,
+                            10
+                          )}...${address.ethereumAddress.slice(-8)}`
+                        : address.ethereumAddress;
+                    }
+
+                    if (address.bech32Address) {
+                      return Bech32Address.shortenAddress(
+                        address.bech32Address,
+                        20
+                      );
+                    }
+
+                    if (address.bitcoinAddress?.bech32Address) {
+                      return Bech32Address.shortenAddress(
+                        address.bitcoinAddress.bech32Address,
+                        20
+                      );
+                    }
+                  })()}
+                </Caption1>
+              </YAxis>
+
+              <div
+                style={{
+                  flex: 1,
+                }}
+              />
+
+              <Box padding="0.5rem" alignX="center" alignY="center">
+                {hasCopied ? (
+                  <CheckToggleIcon
+                    width="1.25rem"
+                    height="1.25rem"
+                    color={ColorPalette["green-400"]}
+                  />
+                ) : (
+                  <CopyOutlineIcon
+                    width="1.25rem"
+                    height="1.25rem"
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-300"]
+                        : ColorPalette.white
+                    }
+                  />
+                )}
+              </Box>
+              <Gutter size="0.5rem" />
+            </XAxis>
+          </Box>
+
+          <Gutter size="0.38rem" />
+          <XAxis alignY="center">
+            <IconButton
+              padding="0.5rem"
+              hoverColor={
+                theme.mode === "light"
+                  ? ColorPalette["gray-50"]
+                  : ColorPalette["gray-500"]
+              }
+              disabled={hasCopied}
+              onClick={() => {
+                sceneTransition.push("qr-code", {
+                  chainId: address.modularChainInfo.chainId,
+                  address:
+                    address.starknetAddress ||
+                    address.ethereumAddress ||
+                    address.bech32Address ||
+                    address.bitcoinAddress?.bech32Address,
+                  close,
+                });
+              }}
+            >
+              <QRCodeIcon
+                width="1.25rem"
+                height="1.25rem"
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-300"]
+                    : ColorPalette.white
+                }
+              />
+            </IconButton>
+            <Gutter size="0.75rem" direction="horizontal" />
+          </XAxis>
+        </XAxis>
+      </Box>
+    );
+  }
+);
