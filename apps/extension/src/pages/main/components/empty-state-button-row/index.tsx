@@ -46,7 +46,10 @@ export const EmptyStateButtonRow = ({
           })}
         </Body3>
       </Styles.EmptyStateButton>
-      <Styles.EmptyStateButton disabled={!hasBalance} onClick={onClickSend}>
+      <Styles.EmptyStateButton
+        disabled={!hasBalance}
+        onClick={hasBalance ? onClickSend : undefined}
+      >
         <ArrowRightUpIcon width="1rem" height="1rem" />
         <Body3>
           {intl.formatMessage({
@@ -54,7 +57,10 @@ export const EmptyStateButtonRow = ({
           })}
         </Body3>
       </Styles.EmptyStateButton>
-      <Styles.EmptyStateButton disabled={!hasBalance} onClick={onClickSwap}>
+      <Styles.EmptyStateButton
+        disabled={!hasBalance}
+        onClick={hasBalance ? onClickSwap : undefined}
+      >
         <ArrowLeftRightIcon width="1rem" height="1rem" />
         <Body3>
           {intl.formatMessage({
