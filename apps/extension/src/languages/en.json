@@ -656,6 +656,8 @@
   "page.stake.explore.title": "Stake & Earn Rewards",
   "page.stake.explore.subtitle": "Buy or receive assets to start staking",
   "page.stake.components.rewards-card.claim-button": "Claim",
+  "page.stake.components.rewards-card.show-all-button": "Show All",
+  "page.stake.components.rewards-card.hide-all-button": "Hide All",
 
   "page.main.components.ibc-history-view.item.pending": "IBC Transfer in Progress",
   "page.main.components.ibc-history-view.item.succeed": "IBC Transfer Successful",
@@ -696,8 +698,6 @@
   "page.main.components.rewards-card.title": "Rewards",
   "page.main.components.rewards-card.claim-all-button": "Claim All",
 
-  "page.main.components.show-all.button": "Show All",
-  "page.main.components.hide-all.button": "Hide All",
   "page.main.components.context-menu.title": "View Options",
   "page.main.components.context-menu.tooltip-title": "New",
   "page.main.components.context-menu.tooltip-paragraph": "Tired of cluttered asset lists?{br}Try Smart Grouping (Beta)!",

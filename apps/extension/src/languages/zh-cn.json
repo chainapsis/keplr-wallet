@@ -592,6 +592,8 @@
   "page.stake.explore.title": "Stake & Earn Rewards",
   "page.stake.explore.subtitle": "Buy or receive assets to start staking",
   "page.stake.components.rewards-card.claim-button": "提取",
+  "page.stake.components.rewards-card.show-all-button": "全部展开",
+  "page.stake.components.rewards-card.hide-all-button": "全部收起",
 
   "page.main.components.ibc-history-view.item.pending": "IBC交易失败。",
   "page.main.components.ibc-history-view.item.succeed": "IBC交易成功。",
@@ -632,8 +634,6 @@
   "page.main.components.rewards-card.title": "Rewards",
   "page.main.components.rewards-card.claim-all-button": "Claim All",
 
-  "page.main.components.show-all.button": "全部展开",
-  "page.main.components.hide-all.button": "全部收起",
   "page.main.components.menu-bar.manage-chain-visibility-title": "添加/删除链",
   "page.main.components.menu-bar.manage-asset-list-title": "管理资产列表",
   "page.main.components.menu-bar.my-contacts-title": "我的联系人",
