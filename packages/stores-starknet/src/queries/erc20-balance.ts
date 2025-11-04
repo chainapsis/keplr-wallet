@@ -67,7 +67,7 @@ export class ObservableQueryStarknetERC20BalanceImpl
     );
 
     const currency = modularChainInfoImpl
-      .getCurrencies("starknet")
+      .getCurrenciesByModule("starknet")
       .find((cur) => cur.coinMinimalDenom === denom);
 
     if (!currency) {

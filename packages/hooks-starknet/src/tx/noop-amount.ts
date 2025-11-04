@@ -49,7 +49,9 @@ export class NoopAmountConfig extends TxChainSetter implements IAmountConfig {
       throw new Error("Chain doesn't support the starknet");
     }
 
-    return modularChainInfoImpl.getCurrencies("starknet")[0] as ERC20Currency;
+    return modularChainInfoImpl.getCurrenciesByModule(
+      "starknet"
+    )[0] as ERC20Currency;
   }
 
   @action

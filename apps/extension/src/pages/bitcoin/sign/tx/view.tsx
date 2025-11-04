@@ -362,7 +362,7 @@ export const SignBitcoinTxView: FunctionComponent<{
     try {
       const feeCurrency = chainStore
         .getModularChainInfoImpl(chainId)
-        .getCurrencies("bitcoin")[0];
+        .getCurrenciesByModule("bitcoin")[0];
       if (!feeCurrency) {
         throw new Error("Can't find fee currency");
       }
@@ -699,7 +699,7 @@ const InternalSendBitcoinTxReview: FunctionComponent<{
     const modularChainInfo = chainStore.getModularChain(chainId);
     const currency = chainStore
       .getModularChainInfoImpl(chainId)
-      .getCurrencies("bitcoin")[0];
+      .getCurrenciesByModule("bitcoin")[0];
     const sendToken = new CoinPretty(
       currency,
       recipientOutput?.value ?? new Dec(0)
@@ -972,7 +972,7 @@ const PsbtDetailsView: FunctionComponent<{
     const modularChainInfo = chainStore.getModularChain(chainId);
     const currency = chainStore
       .getModularChainInfoImpl(chainId)
-      .getCurrencies("bitcoin")[0];
+      .getCurrenciesByModule("bitcoin")[0];
 
     const { totalSpend, expectedFee } = useMemo(() => {
       if (!sumInputValueByAddress?.length) {

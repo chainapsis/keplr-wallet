@@ -107,7 +107,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
   const currency = (() => {
     const res = chainStore
       .getModularChainInfoImpl(chainId)
-      .getCurrencies("bitcoin")
+      .getCurrenciesByModule("bitcoin")
       .find((cur) => cur.coinMinimalDenom === coinMinimalDenom);
     if (res) {
       return res;

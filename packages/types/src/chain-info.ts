@@ -86,7 +86,9 @@ export interface EVMNativeChainInfo {
   readonly chainId: number;
   readonly websocket?: string;
   readonly currencies: AppCurrency[];
+  readonly feeCurrencies: FeeCurrency[];
   readonly bip44: BIP44;
+  readonly features?: string[];
 }
 
 export type ChainInfoModule = "cosmos" | "starknet" | "bitcoin" | "evm";
