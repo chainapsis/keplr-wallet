@@ -28,6 +28,8 @@ export const RewardsCard: FunctionComponent<{
 
   const {
     totalPrice,
+    viewClaimTokens,
+    completedChainsRef,
     claimAll,
     claimAllDisabled,
     claimAllIsLoading,
@@ -39,24 +41,44 @@ export const RewardsCard: FunctionComponent<{
 
   const [count, setCount] = React.useState(0);
 
+  const claimCountText = (() => {
+    const totalCount = viewClaimTokens.length;
+    if (totalCount === 0) {
+      return "";
+    }
+
+    if (claimAllIsCompleted) {
+      return `${totalCount}/${totalCount}`;
+    }
+
+    return `${completedChainsRef.current.size}/${totalCount}`;
+  })();
+
   React.useEffect(() => {
     if (!claimAllIsCompleted) {
       return;
     }
-    setCount(7);
+    setCount(6);
+
+    const completedChains = completedChainsRef.current;
 
     const interval = setInterval(() => {
       setCount((prev) => {
         if (prev <= 1) {
           clearInterval(interval);
           setClaimAllIsCompleted(false);
+          completedChains.clear();
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      setClaimAllIsCompleted(false);
+      completedChains.clear();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [claimAllIsCompleted]);
 
@@ -70,17 +92,20 @@ export const RewardsCard: FunctionComponent<{
       padding="1rem"
       width="100%"
       onHoverStateChange={(hovered) => {
+        if (claimAllDisabled) {
+          return;
+        }
         setIsHover(hovered);
       }}
-      cursor="pointer"
+      cursor={claimAllDisabled ? "not-allowed" : "pointer"}
       onClick={
-        isLedger ||
-        isKeystone ||
-        claimAllIsLoading ||
-        (claimAllIsCompleted && count >= 1)
-          ? () => navigate("/stake?intitialExpand=true")
-          : claimAllDisabled
+        claimAllDisabled
           ? undefined
+          : isLedger ||
+            isKeystone ||
+            claimAllIsLoading ||
+            (claimAllIsCompleted && count >= 1)
+          ? () => navigate("/stake?intitialExpand=true")
           : claimAll
       }
     >
@@ -109,7 +134,7 @@ export const RewardsCard: FunctionComponent<{
           ) : claimAllIsLoading || claimAllIsCompleted ? (
             <YAxis alignX="right">
               <XAxis alignY="center">
-                <Body3 color={ColorPalette["gray-200"]}>{}</Body3>
+                <Body3 color={ColorPalette["gray-200"]}>{claimCountText}</Body3>
                 <Gutter size="0.25rem" />
                 {claimAllIsLoading ? (
                   <LoadingIcon
@@ -141,9 +166,15 @@ export const RewardsCard: FunctionComponent<{
               </XAxis>
             </YAxis>
           ) : (
-            <Subtitle3 color={ColorPalette["blue-300"]}>
+            <Subtitle3
+              color={
+                claimAllDisabled
+                  ? ColorPalette["gray-300"]
+                  : ColorPalette["blue-300"]
+              }
+            >
               {claimAllIsLoading
-                ? ""
+                ? claimCountText
                 : intl.formatMessage({
                     id: "page.main.components.rewards-card.claim-all-button",
                   })}

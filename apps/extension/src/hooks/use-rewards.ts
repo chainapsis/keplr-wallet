@@ -236,6 +236,10 @@ export function useRewards() {
   const claimAll = () => {
     analyticsStore.logEvent("click_claimAll");
 
+    completedChainsRef.current.clear();
+    prevFetchingStateRef.current.clear();
+    setClaimAllIsCompleted(false);
+
     for (const viewClaimToken of viewClaimTokens) {
       const state = getClaimAllEachState(
         viewClaimToken.modularChainInfo.chainId
@@ -282,10 +286,9 @@ export function useRewards() {
         prevFetchingStateRef.current.set(chainId, true);
       }
 
-      if (prevState && getClaimAllEachState(chainId).isLoading) {
+      if (prevState && !getClaimAllEachState(chainId).isLoading) {
         completedChainsRef.current.add(chainId);
         prevFetchingStateRef.current.set(chainId, false);
-        setClaimAllIsCompleted(true);
       }
     }
 
@@ -295,6 +298,7 @@ export function useRewards() {
     ) {
       completedChainsRef.current.clear();
       prevFetchingStateRef.current.clear();
+      setClaimAllIsCompleted(true);
     }
   })();
 
@@ -310,5 +314,6 @@ export function useRewards() {
     setClaimAllIsCompleted,
     states,
     getClaimAllEachState,
+    completedChainsRef,
   };
 }
