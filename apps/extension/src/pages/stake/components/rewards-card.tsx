@@ -52,7 +52,6 @@ export const RewardsCard: FunctionComponent<{ isNotReady?: boolean }> =
       claimAllIsLoading,
       states,
       getClaimAllEachState,
-      claimCountText,
     } = useRewards();
 
     useEffect(() => {
@@ -132,13 +131,9 @@ export const RewardsCard: FunctionComponent<{ isNotReady?: boolean }> =
                 onMouseLeave={() => setDisableHover(false)}
               >
                 <TextButton
-                  text={
-                    claimAllIsLoading && claimCountText !== ""
-                      ? claimCountText
-                      : intl.formatMessage({
-                          id: "page.main.components.rewards-card.claim-all-button",
-                        })
-                  }
+                  text={intl.formatMessage({
+                    id: "page.main.components.rewards-card.claim-all-button",
+                  })}
                   size="small"
                   disabled={claimAllDisabled}
                   onClick={claimAll}
