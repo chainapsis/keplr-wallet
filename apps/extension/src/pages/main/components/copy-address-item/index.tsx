@@ -20,7 +20,6 @@ import {
   StarIcon,
 } from "../../../../components/icon";
 import { IconButton } from "../../../../components/icon-button";
-import { useSceneTransition } from "../../../../components/transition";
 import { ModularChainInfo, SupportedPaymentType } from "@keplr-wallet/types";
 
 export const CopyAddressItem: FunctionComponent<{
@@ -43,6 +42,9 @@ export const CopyAddressItem: FunctionComponent<{
     ) => Record<string, true | undefined>
   ) => void;
   onClick: () => void;
+  // QR scene이 일반 modal, float modal에서 스타일이 조금 다르기 때문에
+  // 분리해서 prop을 따로 줄 수 있게 함
+  onClickIcon: () => void;
   hoverColor?: string;
 }> = observer(
   ({
@@ -52,14 +54,13 @@ export const CopyAddressItem: FunctionComponent<{
     setBlockInteraction,
     setSortPriorities,
     onClick,
+    onClickIcon,
     hoverColor,
   }) => {
     const { analyticsStore, keyRingStore, uiConfigStore, chainStore } =
       useStore();
 
     const theme = useTheme();
-
-    const sceneTransition = useSceneTransition();
 
     const [hasCopied, setHasCopied] = useState(false);
 
@@ -361,17 +362,7 @@ export const CopyAddressItem: FunctionComponent<{
                   : ColorPalette["gray-500"])
               }
               disabled={hasCopied}
-              onClick={() => {
-                sceneTransition.push("qr-code", {
-                  chainId: address.modularChainInfo.chainId,
-                  address:
-                    address.starknetAddress ||
-                    address.ethereumAddress ||
-                    address.bech32Address ||
-                    address.bitcoinAddress?.bech32Address,
-                  close,
-                });
-              }}
+              onClick={onClickIcon}
             >
               <QRCodeIcon
                 width="1.25rem"

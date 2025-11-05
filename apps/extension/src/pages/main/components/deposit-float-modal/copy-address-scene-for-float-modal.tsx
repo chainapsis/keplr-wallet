@@ -12,7 +12,10 @@ import { SearchTextInput } from "../../../../components/input";
 import SimpleBar from "simplebar-react";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { FolderMinusIcon } from "../../../../components/icon";
-import { useSceneEvents } from "../../../../components/transition";
+import {
+  useSceneEvents,
+  useSceneTransition,
+} from "../../../../components/transition";
 import { getChainSearchResultClickAnalyticsProperties } from "../../../../analytics-amplitude";
 import { CopyAddressItem } from "../copy-address-item";
 import { useGetAddressesOnCopyAddress } from "../../hooks/use-get-addresses-copy-address";
@@ -27,6 +30,7 @@ export const CopyAddressSceneForFloatModal: FunctionComponent<{
   const [search, setSearch] = useState("");
 
   const searchRef = useFocusOnMount<HTMLInputElement>();
+  const sceneTransition = useSceneTransition();
 
   useSceneEvents({
     onDidVisible: () => {
@@ -131,6 +135,18 @@ export const CopyAddressSceneForFloatModal: FunctionComponent<{
                         )
                       );
                     }
+                  }}
+                  onClickIcon={() => {
+                    sceneTransition.push("qr-code", {
+                      chainId: address.modularChainInfo.chainId,
+                      address:
+                        address.starknetAddress ||
+                        address.ethereumAddress ||
+                        address.bech32Address ||
+                        address.bitcoinAddress?.bech32Address,
+                      close,
+                      isOnTheFloatingModal: true,
+                    });
                   }}
                   hoverColor={
                     theme.mode === "light"

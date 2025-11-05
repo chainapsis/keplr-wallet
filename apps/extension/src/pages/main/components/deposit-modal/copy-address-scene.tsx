@@ -76,13 +76,7 @@ const chainSearchFields = [
 export const CopyAddressScene: FunctionComponent<{
   close: () => void;
 }> = observer(({ close }) => {
-  const {
-    chainStore,
-    accountStore,
-    keyRingStore,
-    uiConfigStore,
-    analyticsAmplitudeStore,
-  } = useStore();
+  const { chainStore, analyticsAmplitudeStore } = useStore();
 
   const intl = useIntl();
   const theme = useTheme();
@@ -325,6 +319,17 @@ export const CopyAddressScene: FunctionComponent<{
                         )
                       );
                     }
+                  }}
+                  onClickIcon={() => {
+                    sceneTransition.push("qr-code", {
+                      chainId: address.modularChainInfo.chainId,
+                      address:
+                        address.starknetAddress ||
+                        address.ethereumAddress ||
+                        address.bech32Address ||
+                        address.bitcoinAddress?.bech32Address,
+                      close,
+                    });
                   }}
                 />
               );
