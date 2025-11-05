@@ -43,6 +43,7 @@ export const CopyAddressItem: FunctionComponent<{
     ) => Record<string, true | undefined>
   ) => void;
   onClick: () => void;
+  hoverColor?: string;
 }> = observer(
   ({
     address,
@@ -51,6 +52,7 @@ export const CopyAddressItem: FunctionComponent<{
     setBlockInteraction,
     setSortPriorities,
     onClick,
+    hoverColor,
   }) => {
     const { analyticsStore, keyRingStore, uiConfigStore, chainStore } =
       useStore();
@@ -95,9 +97,12 @@ export const CopyAddressItem: FunctionComponent<{
               }
 
               if (isCopyContainerHover) {
-                return theme.mode === "light"
-                  ? ColorPalette["gray-10"]
-                  : ColorPalette["gray-550"];
+                return (
+                  hoverColor ||
+                  (theme.mode === "light"
+                    ? ColorPalette["gray-10"]
+                    : ColorPalette["gray-550"])
+                );
               }
 
               return;
@@ -350,9 +355,10 @@ export const CopyAddressItem: FunctionComponent<{
             <IconButton
               padding="0.5rem"
               hoverColor={
-                theme.mode === "light"
+                hoverColor ||
+                (theme.mode === "light"
                   ? ColorPalette["gray-50"]
-                  : ColorPalette["gray-500"]
+                  : ColorPalette["gray-500"])
               }
               disabled={hasCopied}
               onClick={() => {
