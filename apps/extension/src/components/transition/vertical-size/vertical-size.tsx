@@ -22,13 +22,7 @@ import { defaultSpringConfig } from "../../../styles/spring";
 
 export const VerticalResizeTransition: FunctionComponent<
   PropsWithChildren<VerticalResizeTransitionProps>
-> = ({
-  children,
-  width,
-  transitionAlign,
-  registry: altRegistry,
-  borderRadius,
-}) => {
+> = ({ children, width, transitionAlign, registry: altRegistry, style }) => {
   // if -1, it means not initialized yet.
   const heightPx = useSpringValue<number>(-1, {
     config: defaultSpringConfig,
@@ -78,7 +72,7 @@ export const VerticalResizeTransition: FunctionComponent<
       heightPx={heightPx}
       width={width}
       transitionAlign={transitionAlign}
-      borderRadius={borderRadius}
+      style={style}
     >
       <_VerticalSizeInternalContext.Provider value={contextValue}>
         {children}

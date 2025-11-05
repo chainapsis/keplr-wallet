@@ -12,5 +12,8 @@ export interface VerticalResizeTransitionProps {
   // 내부로직을 좀 알아야지 처리가 가능하다.
   // 이 값은 생명주기 동안 유지되어야함에 주의할 것
   registry?: IDescendantRegistry;
-  borderRadius?: string;
+  style?: Omit<
+    React.CSSProperties,
+    "width" | "height" | "flexShrink" | "position" | "overflow"
+  >;
 }

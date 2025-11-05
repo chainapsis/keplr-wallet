@@ -34,6 +34,9 @@ export const DepositFloatingModal: FunctionComponent<{
       ref={floating.refs.setFloating}
     >
       <FixedWidthSceneTransition
+        transitionContainerStyle={{
+          borderRadius: "0.75rem",
+        }}
         scenes={[
           {
             name: "copy-address",
@@ -52,7 +55,6 @@ export const DepositFloatingModal: FunctionComponent<{
             close,
           },
         }}
-        borderRadius="0.75rem"
         transitionAlign="bottom"
       />
     </Box>
