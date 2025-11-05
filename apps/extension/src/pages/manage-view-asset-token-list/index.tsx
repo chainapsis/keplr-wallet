@@ -12,6 +12,7 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { Gutter } from "../../components/gutter";
 import { XAxis, YAxis } from "../../components/axis";
 import { SearchTextInput } from "../../components/input";
+import { NewTokenFoundButtonContainer } from "../../components/new-token-found-button";
 import { Dec } from "@keplr-wallet/unit";
 import styled, {
   css,
@@ -232,7 +233,7 @@ export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
 
         <Stack gutter="0.5rem">
           {numFoundToken > 0 && (
-            <Styles.NewTokenFoundButtonContainer
+            <NewTokenFoundButtonContainer
               onClick={() => setIsFoundTokenModalOpen(true)}
             >
               <XAxis alignY="center">
@@ -260,7 +261,7 @@ export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
                   color={ColorPalette["gray-300"]}
                 />
               </XAxis>
-            </Styles.NewTokenFoundButtonContainer>
+            </NewTokenFoundButtonContainer>
           )}
           {sortedBalances.map((viewToken, index) => {
             const chainIdentifier = ChainIdHelper.parse(
@@ -368,33 +369,7 @@ const UpDownArrowIcon = ({
     </svg>
   );
 };
-
 const Styles = {
-  NewTokenFoundButtonContainer: styled.div`
-    background-color: ${(props) =>
-      props.theme.mode === "light"
-        ? ColorPalette["skeleton-layer-0"]
-        : ColorPalette["gray-650"]};
-    padding: 1rem 0.875rem;
-    border-radius: 0.375rem;
-    cursor: pointer;
-
-    box-shadow: ${(props) =>
-      props.theme.mode === "light"
-        ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
-        : "none"};
-
-    ${(props) => {
-      return css`
-        &:hover {
-          background-color: ${props.theme.mode === "light"
-            ? ColorPalette["gray-10"]
-            : ColorPalette["gray-600"]};
-        }
-      `;
-    }}
-  `,
-
   //NOTE - 기존 textButton과 다른 hover 스타일이라서 따로 정의
   SortButton: styled.button`
     display: inline-flex;
