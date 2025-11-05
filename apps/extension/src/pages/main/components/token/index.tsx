@@ -241,10 +241,12 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
       return (
         <React.Fragment>
           {content}
-          <EarnBox
-            bottomTagType={bottomTagType}
-            earnedAssetPrice={earnedAssetPrice}
-          />
+          <Box margin="0.25rem 0">
+            <EarnBox
+              bottomTagType={bottomTagType}
+              earnedAssetPrice={earnedAssetPrice}
+            />
+          </Box>
         </React.Fragment>
       );
     }
