@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import React, { FunctionComponent, useMemo, useState } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { BackButton } from "../../../layouts/header/components";
 import { HeaderLayout } from "../../../layouts/header";
 import styled from "styled-components";
@@ -14,7 +14,14 @@ import { useNavigate } from "react-router";
 import { useIntl } from "react-intl";
 import { HugeQueriesStore } from "../../../stores/huge-queries";
 import { ViewToken } from "../../main";
-import { autorun, computed, IReactionDisposer, makeObservable } from "mobx";
+import {
+  autorun,
+  computed,
+  IReactionDisposer,
+  makeObservable,
+  observable,
+  runInAction,
+} from "mobx";
 import { Currency } from "@keplr-wallet/types";
 import { IChainInfoImpl } from "@keplr-wallet/stores";
 import { DenomHelper } from "@keplr-wallet/common";
@@ -22,16 +29,37 @@ import { SwapNotAvailableModal } from "../components/swap-not-available-modal";
 import { MsgItemSkeleton } from "../../main/token-detail/msg-items/skeleton";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { ObservableQueryTargetAssets } from "@keplr-wallet/stores-internal/build/swap/target-assets";
+import { Gutter } from "../../../components/gutter";
+import { useGlobarSimpleBar } from "../../../hooks/global-simplebar";
 
 // 계산이 복잡해서 memoize을 적용해야하는데
 // mobx와 useMemo()는 같이 사용이 어려워서
 // 그냥 일단 computed를 쓰기 위해서 따로 뺌
 class IBCSwapDestinationState {
+  static PAGE_LIMIT = 100;
+
+  @observable
+  protected currentPage = 1;
+
   constructor(
     protected readonly hugeQueriesStore: HugeQueriesStore,
     protected readonly queryTargetAssets: ObservableQueryTargetAssets
   ) {
     makeObservable(this);
+  }
+
+  increasePage() {
+    const query = this.queryTargetAssets.getObservableQueryTargetAssets(
+      "osmosis-1",
+      "uosmo",
+      this.currentPage,
+      IBCSwapDestinationState.PAGE_LIMIT
+    );
+    if (!query.isFetching) {
+      runInAction(() => {
+        this.currentPage++;
+      });
+    }
   }
 
   // ibc swap destination인 currency 중에서 현재 가지고 있는 자산은 기존처럼 보여준다.
@@ -47,14 +75,6 @@ class IBCSwapDestinationState {
   } {
     const zeroDec = new Dec(0);
 
-    const destinationMap =
-      this.queryTargetAssets.getObservableQueryTargetAssets(
-        "osmosis-1",
-        "uosmo",
-        1,
-        100
-      ).currenciesMap;
-
     // Swap destination은 ibc currency는 보여주지 않는다.
     let tokens = this.hugeQueriesStore.getAllBalances({
       allowIBCToken: false,
@@ -65,50 +85,60 @@ class IBCSwapDestinationState {
       chainInfo: IChainInfoImpl;
     }[] = [];
 
-    tokens = tokens
-      .filter((token) => {
-        return token.token.toDec().gt(zeroDec);
-      })
-      .filter((token) => {
-        if (!("currencies" in token.chainInfo)) {
-          return false;
-        }
+    for (let i = 1; i <= this.currentPage; i++) {
+      const destinationMap =
+        this.queryTargetAssets.getObservableQueryTargetAssets(
+          "osmosis-1",
+          "uosmo",
+          i,
+          IBCSwapDestinationState.PAGE_LIMIT
+        ).currenciesMap;
 
-        const map = destinationMap.get(token.chainInfo.chainIdentifier);
-        if (map) {
-          return (
-            map.currencies.find(
-              (cur) =>
-                cur.coinMinimalDenom === token.token.currency.coinMinimalDenom
-            ) != null
+      tokens = tokens
+        .filter((token) => {
+          return token.token.toDec().gt(zeroDec);
+        })
+        .filter((token) => {
+          if (!("currencies" in token.chainInfo)) {
+            return false;
+          }
+
+          const map = destinationMap.get(token.chainInfo.chainIdentifier);
+          if (map) {
+            return (
+              map.currencies.find(
+                (cur) =>
+                  cur.coinMinimalDenom === token.token.currency.coinMinimalDenom
+              ) != null
+            );
+          }
+
+          return false;
+        });
+
+      // tokens에 존재했는지 체크 용으로 사용
+      // key: {chain_identifier}/{coinMinimalDenom}
+      const tokensKeyMap = new Map<string, boolean>();
+
+      for (const token of tokens) {
+        if ("currencies" in token.chainInfo) {
+          tokensKeyMap.set(
+            `${token.chainInfo.chainIdentifier}/${token.token.currency.coinMinimalDenom}`,
+            true
           );
         }
-
-        return false;
-      });
-
-    // tokens에 존재했는지 체크 용으로 사용
-    // key: {chain_identifier}/{coinMinimalDenom}
-    const tokensKeyMap = new Map<string, boolean>();
-
-    for (const token of tokens) {
-      if ("currencies" in token.chainInfo) {
-        tokensKeyMap.set(
-          `${token.chainInfo.chainIdentifier}/${token.token.currency.coinMinimalDenom}`,
-          true
-        );
       }
-    }
 
-    for (const [chainIdentifier, map] of destinationMap) {
-      for (const currency of map.currencies) {
-        if (
-          !tokensKeyMap.has(`${chainIdentifier}/${currency.coinMinimalDenom}`)
-        ) {
-          remaining.push({
-            currency,
-            chainInfo: map.chainInfo,
-          });
+      for (const [chainIdentifier, map] of destinationMap) {
+        for (const currency of map.currencies) {
+          if (
+            !tokensKeyMap.has(`${chainIdentifier}/${currency.coinMinimalDenom}`)
+          ) {
+            remaining.push({
+              currency,
+              chainInfo: map.chainInfo,
+            });
+          }
         }
       }
     }
@@ -132,7 +162,14 @@ class IBCSwapDestinationState {
     return {
       tokens,
       remaining,
-      isLoading: false,
+      isLoading: (() => {
+        return !this.queryTargetAssets.getObservableQueryTargetAssets(
+          "osmosis-1",
+          "uosmo",
+          this.currentPage,
+          IBCSwapDestinationState.PAGE_LIMIT
+        ).response;
+      })(),
     };
   }
 }
@@ -178,6 +215,37 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
           swapQueriesStore.queryTargetAssets
         )
     );
+
+    const globalSimpleBar = useGlobarSimpleBar();
+    useEffect(() => {
+      if (globalSimpleBar.ref.current) {
+        const scrollElement = globalSimpleBar.ref.current.getScrollElement();
+        if (scrollElement) {
+          // scroll to refresh
+          const onScroll = () => {
+            const el = globalSimpleBar.ref.current?.getContentElement();
+            const scrollEl = globalSimpleBar.ref.current?.getScrollElement();
+            if (el && scrollEl) {
+              const rect = el.getBoundingClientRect();
+              const scrollRect = scrollEl.getBoundingClientRect();
+
+              const remainingBottomY =
+                rect.y + rect.height - scrollRect.y - scrollRect.height;
+
+              if (remainingBottomY < scrollRect.height / 10) {
+                state.increasePage();
+              }
+            }
+          };
+
+          scrollElement.addEventListener("scroll", onScroll);
+
+          return () => {
+            scrollElement.removeEventListener("scroll", onScroll);
+          };
+        }
+      }
+    }, [globalSimpleBar.ref, state]);
 
     const { tokens, remaining, isLoading } = state.tokens;
 
@@ -294,7 +362,6 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
       <HeaderLayout
         title={intl.formatMessage({ id: "page.send.select-asset.title" })}
         left={<BackButton />}
-        contentContainerStyle={{ height: "100vh" }}
       >
         <Styles.Container gutter="0.5rem">
           <SearchTextInput
@@ -309,12 +376,7 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
               setSearch(e.target.value);
             }}
           />
-          {isLoading ? (
-            <Stack gutter="0.5rem">
-              <MsgItemSkeleton />
-              <MsgItemSkeleton />
-            </Stack>
-          ) : (
+          {
             <Stack gutter="0.5rem">
               {filteredTokens.map((viewToken) => {
                 const isUnsupportedToken = unsupportedCoinMinimalDenoms.has(
@@ -374,8 +436,16 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
                   </div>
                 );
               })}
+              {isLoading ? (
+                <React.Fragment>
+                  <MsgItemSkeleton />
+                  <MsgItemSkeleton />
+                </React.Fragment>
+              ) : null}
+
+              <Gutter size="0.5rem" />
             </Stack>
-          )}
+          }
         </Styles.Container>
         <SwapNotAvailableModal
           isOpen={isSwapNotAvailableModalOpen}

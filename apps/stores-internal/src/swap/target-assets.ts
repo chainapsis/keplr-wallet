@@ -69,7 +69,7 @@ export class ObservableQueryTargetAssetsInner extends ObservableQuery<TargetAsse
     for (const token of this.response.data.tokens) {
       const chainId =
         token.type === "evm" ? `eip155:${token.chain_id}` : token.chain_id;
-      if (this.chainStore.hasChain(chainId)) {
+      if (this.chainStore.hasChain(chainId) && token.decimals <= 18) {
         const denom = (() => {
           if (token.type === "evm") {
             if (token.denom === "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee") {

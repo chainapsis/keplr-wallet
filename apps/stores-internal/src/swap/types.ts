@@ -13,7 +13,7 @@ export interface TargetAssetsResponse {
     denom: string;
     symbol: string;
     name: string;
-    decimals: 6;
+    decimals: number;
     image_url?: string | null;
     coingecko_id?: string | null;
     vendor: string[];
