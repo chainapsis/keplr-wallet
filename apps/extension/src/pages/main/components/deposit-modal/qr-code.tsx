@@ -390,17 +390,14 @@ const AddressDisplay = ({
             e.preventDefault();
 
             if ("cosmos" in modularChainInfo) {
-              // copy address
               navigator.clipboard.writeText(
                 isEVMOnlyChain
                   ? account.ethereumHexAddress
                   : account.bech32Address
               );
             } else if ("starknet" in modularChainInfo) {
-              // copy address
               navigator.clipboard.writeText(account.starknetHexAddress);
             } else if ("bitcoin" in modularChainInfo) {
-              // copy address
               navigator.clipboard.writeText(
                 account.bitcoinAddress?.bech32Address ?? ""
               );

@@ -6,19 +6,12 @@ import { useTheme } from "styled-components";
 import { useFocusOnMount } from "../../../../hooks/use-focus-on-mount";
 import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
-import {
-  Subtitle1,
-  Subtitle3,
-  Subtitle4,
-} from "../../../../components/typography";
+import { Subtitle1, Subtitle4 } from "../../../../components/typography";
 import { Gutter } from "../../../../components/gutter";
 import { SearchTextInput } from "../../../../components/input";
 import SimpleBar from "simplebar-react";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import {
-  ArrowRightSolidIcon,
-  FolderMinusIcon,
-} from "../../../../components/icon";
+import { ArrowRightSolidIcon } from "../../../../components/icon";
 import {
   useSceneEvents,
   useSceneTransition,
@@ -38,6 +31,7 @@ import { TextButton } from "../../../../components/button-text";
 import { useBuySupportServiceInfos } from "../../../../hooks/use-buy-support-service-infos";
 import { CopyAddressItem } from "../copy-address-item";
 import { useGetAddressesOnCopyAddress } from "../../hooks/use-get-addresses-copy-address";
+import { NoResultBox } from "../deposit-modal-no-search-box";
 
 export type Address = {
   modularChainInfo: ModularChainInfo;
@@ -382,35 +376,3 @@ export const CopyAddressScene: FunctionComponent<{
     </Box>
   );
 });
-
-const NoResultBox: FunctionComponent = () => {
-  const theme = useTheme();
-
-  return (
-    <Box alignX="center" alignY="center" paddingY="1.875rem">
-      <FolderMinusIcon
-        width="4.5rem"
-        height="4.5rem"
-        color={
-          theme.mode === "light"
-            ? ColorPalette["gray-200"]
-            : ColorPalette["gray-400"]
-        }
-      />
-      <Gutter size="0.75rem" />
-      <Subtitle3
-        color={
-          theme.mode === "light"
-            ? ColorPalette["gray-200"]
-            : ColorPalette["gray-400"]
-        }
-        style={{
-          textAlign: "center",
-          width: "17.25rem",
-        }}
-      >
-        <FormattedMessage id="page.main.components.deposit-modal.empty-text" />
-      </Subtitle3>
-    </Box>
-  );
-};
