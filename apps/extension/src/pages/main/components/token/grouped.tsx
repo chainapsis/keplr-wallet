@@ -16,17 +16,13 @@ import {
   Subtitle2,
   Subtitle3,
   Caption1,
-  Body2,
 } from "../../../../components/typography";
 import { BottomTagType, TokenItem } from "./index";
 import { PriceChangeTag } from "./price-change-tag";
 import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse/collapse";
-import { ArrowRightIcon } from "../../../../components/icon";
 import { useStore } from "../../../../stores";
 import { useSearchParams } from "react-router-dom";
 import { WrapperwithBottomTag } from "./wrapper-with-bottom-tag";
-import { useEarnFeature } from "../../../../hooks/use-earn-feature";
-import Color from "color";
 import { IconProps } from "../../../../components/icon/types";
 import { usePriceChange } from "../../../../hooks/use-price-change";
 import { useTokenTag } from "../../../../hooks/use-token-tag";
@@ -35,32 +31,7 @@ import { CopyAddressButton } from "./copy-address-button";
 import { useCopyAddress } from "../../../../hooks/use-copy-address";
 import { CoinPretty, PricePretty } from "@keplr-wallet/unit";
 import { Tooltip } from "../../../../components/tooltip";
-
-const StandaloneEarnBox: FunctionComponent<{
-  bottomTagType?: BottomTagType;
-  earnedAssetPrice?: string;
-}> = observer(({ bottomTagType, earnedAssetPrice }) => {
-  const { message, handleClick } = useEarnFeature(
-    bottomTagType,
-    earnedAssetPrice
-  );
-
-  const theme = useTheme();
-
-  const textColor =
-    theme.mode === "light"
-      ? ColorPalette["green-600"]
-      : ColorPalette["green-400"];
-
-  return (
-    <StyledEarningsBox onClick={handleClick}>
-      <Body2 color={textColor} style={{ textAlign: "center" }}>
-        {message}
-      </Body2>
-      <ArrowRightIcon width="1rem" height="1rem" color={textColor} />
-    </StyledEarningsBox>
-  );
-});
+import { EarnBox } from "./earn-box";
 
 const NestedTokenItemContainer = styled.div<{ tagPosition: string }>`
   background-color: transparent;
@@ -516,7 +487,7 @@ export const GroupedTokenItem: FunctionComponent<{
             ))}
 
             {isOpen && bottomTagType && (
-              <StandaloneEarnBox
+              <EarnBox
                 bottomTagType={bottomTagType}
                 earnedAssetPrice={effectiveEarnedAssetPrice}
               />
@@ -693,26 +664,3 @@ const Styles = {
     font-weight: 400;
   `,
 };
-
-const StyledEarningsBox = styled.div`
-  display: flex;
-  height: 40px;
-  padding: 6px 0px;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  align-self: stretch;
-  border-radius: 6px;
-  background: ${({ theme }) =>
-    theme.mode === "light"
-      ? ColorPalette["green-100"]
-      : Color(ColorPalette["green-600"]).alpha(0.2).toString()};
-  cursor: pointer;
-
-  &:hover {
-    background-color: ${({ theme }) =>
-      theme.mode === "light"
-        ? Color(ColorPalette["green-200"]).alpha(0.5).toString()
-        : Color(ColorPalette["green-600"]).alpha(0.15).toString()};
-  }
-`;
