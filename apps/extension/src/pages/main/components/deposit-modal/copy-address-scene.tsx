@@ -293,37 +293,34 @@ export const CopyAddressScene: FunctionComponent<{
   });
 
   const lookingForChains = useMemo(() => {
-    let disabledChainInfos: (ChainInfo | ModularChainInfo)[] =
+    let disabledSearchedChainInfos: ModularChainInfo[] =
       searchedChainInfos.filter(
         (chainInfo) => !chainStore.isEnabledChain(chainInfo.chainId)
       );
 
-    const disabledModularChainInfos =
+    const disabledGroupedChainInfos =
       chainStore.groupedModularChainInfos.filter(
         (modularChainInfo) =>
           ("starknet" in modularChainInfo || "bitcoin" in modularChainInfo) &&
           !chainStore.isEnabledChain(modularChainInfo.chainId)
       );
 
-    disabledChainInfos = [
-      ...new Set([...disabledChainInfos, ...disabledModularChainInfos]),
+    disabledSearchedChainInfos = [
+      ...new Set([...disabledSearchedChainInfos, ...disabledGroupedChainInfos]),
     ].sort((a, b) => a.chainName.localeCompare(b.chainName));
 
-    return disabledChainInfos.reduce(
+    return disabledSearchedChainInfos.reduce(
       (acc, chainInfo) => {
         let embedded: boolean | undefined = false;
         let stored: boolean = true;
 
-        const isModular =
-          "starknet" in chainInfo ||
-          "bitcoin" in chainInfo ||
-          "cosmos" in chainInfo ||
-          "evm" in chainInfo;
+        const isEmbedded = "starknet" in chainInfo || "bitcoin" in chainInfo;
 
         try {
-          if (isModular) {
+          if (isEmbedded) {
             embedded = true;
           } else {
+            // Note: Native chain 여부 확인용으로 일단 getModularChain 대신 getChain을 계속 사용. 조치가 필요함.
             const chainInfoInStore = chainStore.getChain(chainInfo.chainId);
 
             if (!chainInfoInStore) {
@@ -356,7 +353,7 @@ export const CopyAddressScene: FunctionComponent<{
       [] as {
         embedded: boolean;
         stored: boolean;
-        chainInfo: ChainInfo | ModularChainInfo;
+        chainInfo: ModularChainInfo;
       }[]
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps

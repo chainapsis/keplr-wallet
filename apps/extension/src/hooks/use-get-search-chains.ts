@@ -3,6 +3,7 @@ import { useStore } from "../stores";
 import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import { autorun } from "mobx";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { convertChainInfoToModularChainInfo } from "@keplr-wallet/common";
 
 type SearchOption = "all" | "cosmos" | "evm";
 type FilterOption = "all" | "chain" | "token" | "chainNameAndToken";
@@ -15,7 +16,7 @@ interface UseGetSearchChainsBaseParams {
 }
 
 interface WithInitialChainInfos {
-  initialChainInfos: (ChainInfo | ModularChainInfo)[];
+  initialChainInfos: ModularChainInfo[];
   clearResultsOnEmptyQuery?: never;
 }
 
@@ -47,7 +48,7 @@ export const useGetSearchChains = ({
   clearResultsOnEmptyQuery,
 }: GetSearchChainsParams): {
   trimSearch: string;
-  searchedChainInfos: (ChainInfo | ModularChainInfo)[];
+  searchedChainInfos: ModularChainInfo[];
 } => {
   const { queriesStore, chainStore } = useStore();
 
@@ -72,22 +73,26 @@ export const useGetSearchChains = ({
       : null;
 
   const [searchedChainInfos, setSearchedChainInfos] = useState<
-    (ChainInfo | ModularChainInfo)[]
+    ModularChainInfo[]
   >([]);
 
   const disabledChainInfosSearched = useMemo(() => {
-    return chainStore.chainInfosInListUI
+    return chainStore.modularChainInfosInListUI
       .filter(
         (modularChainInfo) =>
           !chainStore.isEnabledChain(modularChainInfo.chainId)
       )
       .filter((chainInfo) => {
+        const modularChainInfoImpl = chainStore.getModularChainInfoImpl(
+          chainInfo.chainId
+        );
         const chainId = chainInfo.chainId.toLowerCase();
         const chainName = chainInfo.chainName.toLowerCase();
-        const mainCurrencyDenom =
-          chainInfo.currencies[0].coinDenom.toLowerCase();
+        const mainCurrencyDenom = modularChainInfoImpl
+          .getCurrencies()[0]
+          .coinDenom.toLowerCase();
         const stakeCurrencyDenom =
-          chainInfo.stakeCurrency?.coinDenom.toLowerCase();
+          modularChainInfoImpl.stakeCurrency?.coinDenom.toLowerCase();
         const tokenDenom = chainStore.isEvmOnlyChain(chainInfo.chainId)
           ? mainCurrencyDenom
           : stakeCurrencyDenom || mainCurrencyDenom;
@@ -142,14 +147,17 @@ export const useGetSearchChains = ({
           dupCheck.add(ChainIdHelper.parse(chain.chainId).identifier);
         }
 
-        const chains = queryChains.response.data.chains;
+        const chains: ModularChainInfo[] = queryChains.response.data.chains.map(
+          (chain) => convertChainInfoToModularChainInfo(chain)
+        );
+
         for (const disabledChainInfo of disabledChainInfosSearched) {
           if (
             !dupCheck.has(
               ChainIdHelper.parse(disabledChainInfo.chainId).identifier
             )
           ) {
-            chains.push(disabledChainInfo.embedded);
+            chains.push(convertChainInfoToModularChainInfo(disabledChainInfo));
           }
         }
 
