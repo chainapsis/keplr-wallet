@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ViewToken } from "../pages/main";
 import { useStore } from "../stores";
 import {
@@ -53,7 +53,10 @@ export function useRewards() {
 
   const completedChainsRef = useRef(new Set<string>());
   const prevFetchingStateRef = useRef(new Map<string, boolean>());
+  const prevSelectedKeyIdRef = useRef(keyRingStore.selectedKeyInfo?.id);
+
   const [claimAllIsCompleted, setClaimAllIsCompleted] = useState(false);
+  const [claimAllIsLoading, setClaimAllIsLoading] = useState(false);
 
   const viewClaimTokens: ViewClaimToken[] = (() => {
     const res: ViewClaimToken[] = [];
@@ -239,6 +242,7 @@ export function useRewards() {
     completedChainsRef.current.clear();
     prevFetchingStateRef.current.clear();
     setClaimAllIsCompleted(false);
+    setClaimAllIsLoading(false);
 
     for (const viewClaimToken of viewClaimTokens) {
       const state = getClaimAllEachState(
@@ -267,17 +271,31 @@ export function useRewards() {
     return true;
   })();
 
-  const claimAllIsLoading = (() => {
+  useEffect(() => {
+    if (keyRingStore.selectedKeyInfo?.id !== prevSelectedKeyIdRef.current) {
+      return;
+    }
+
+    let isLoading = false;
     for (const chainInfo of chainStore.chainInfosInUI) {
       const state = getClaimAllEachState(chainInfo.chainId);
       if (state.isLoading) {
-        return true;
+        isLoading = true;
+        break;
       }
     }
-    return false;
-  })();
+    setClaimAllIsLoading(isLoading);
+  }, [
+    chainStore.chainInfosInUI,
+    getClaimAllEachState,
+    keyRingStore.selectedKeyInfo?.id,
+  ]);
 
-  (() => {
+  useEffect(() => {
+    if (keyRingStore.selectedKeyInfo?.id !== prevSelectedKeyIdRef.current) {
+      return;
+    }
+
     for (const viewClaimToken of viewClaimTokens) {
       const chainId = viewClaimToken.modularChainInfo.chainId;
       const prevState = prevFetchingStateRef.current.get(chainId);
@@ -296,11 +314,71 @@ export function useRewards() {
       completedChainsRef.current.size === viewClaimTokens.length &&
       viewClaimTokens.length > 0
     ) {
-      completedChainsRef.current.clear();
-      prevFetchingStateRef.current.clear();
       setClaimAllIsCompleted(true);
     }
+  }, [viewClaimTokens, getClaimAllEachState, keyRingStore.selectedKeyInfo?.id]);
+
+  const [count, setCount] = useState(0);
+
+  const claimCountText = (() => {
+    const totalCount = viewClaimTokens.length;
+    if (totalCount === 0) {
+      return "";
+    }
+
+    if (claimAllIsCompleted) {
+      return `${totalCount}/${totalCount}`;
+    }
+
+    return `${completedChainsRef.current.size}/${totalCount}`;
   })();
+
+  useEffect(() => {
+    if (keyRingStore.selectedKeyInfo?.id !== prevSelectedKeyIdRef.current) {
+      return;
+    }
+
+    if (!claimAllIsCompleted) {
+      return;
+    }
+    setCount(6);
+
+    const completedChains = completedChainsRef.current;
+
+    const interval = setInterval(() => {
+      setCount((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setClaimAllIsCompleted(false);
+          completedChains.clear();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => {
+      clearInterval(interval);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [claimAllIsCompleted]);
+
+  useEffect(() => {
+    if (keyRingStore.selectedKeyInfo?.id !== prevSelectedKeyIdRef.current) {
+      setClaimAllIsLoading(false);
+      setClaimAllIsCompleted(false);
+      setCount(0);
+      completedChainsRef.current.clear();
+      prevFetchingStateRef.current.clear();
+      for (const s of states) {
+        s.setIsLoading(false);
+        s.setIsSimulating(false);
+        s.setFailedReason(undefined);
+      }
+      prevSelectedKeyIdRef.current = keyRingStore.selectedKeyInfo?.id;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [keyRingStore.selectedKeyInfo?.id]);
 
   return {
     viewClaimTokens,
@@ -311,9 +389,9 @@ export function useRewards() {
     claimAllDisabled,
     claimAllIsLoading,
     claimAllIsCompleted,
-    setClaimAllIsCompleted,
-    states,
     getClaimAllEachState,
-    completedChainsRef,
+    states,
+    count,
+    claimCountText,
   };
 }

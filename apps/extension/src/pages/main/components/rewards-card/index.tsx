@@ -28,59 +28,15 @@ export const RewardsCard: FunctionComponent<{
 
   const {
     totalPrice,
-    viewClaimTokens,
-    completedChainsRef,
     claimAll,
     claimAllDisabled,
     claimAllIsLoading,
     isLedger,
     isKeystone,
     claimAllIsCompleted,
-    setClaimAllIsCompleted,
+    count,
+    claimCountText,
   } = useRewards();
-
-  const [count, setCount] = React.useState(0);
-
-  const claimCountText = (() => {
-    const totalCount = viewClaimTokens.length;
-    if (totalCount === 0) {
-      return "";
-    }
-
-    if (claimAllIsCompleted) {
-      return `${totalCount}/${totalCount}`;
-    }
-
-    return `${completedChainsRef.current.size}/${totalCount}`;
-  })();
-
-  React.useEffect(() => {
-    if (!claimAllIsCompleted) {
-      return;
-    }
-    setCount(6);
-
-    const completedChains = completedChainsRef.current;
-
-    const interval = setInterval(() => {
-      setCount((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          setClaimAllIsCompleted(false);
-          completedChains.clear();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => {
-      clearInterval(interval);
-      setClaimAllIsCompleted(false);
-      completedChains.clear();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [claimAllIsCompleted]);
 
   return (
     <Box
