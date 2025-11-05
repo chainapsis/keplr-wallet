@@ -93,6 +93,7 @@ import {
   SkipQueries,
   Price24HChangesStore,
   SwapUsageQueries,
+  SwapQueries,
 } from "@keplr-wallet/stores-internal";
 import { setInteractionDataHref } from "../utils";
 import {
@@ -163,6 +164,7 @@ export class RootStore {
   >;
   public readonly swapUsageQueries: SwapUsageQueries;
   public readonly skipQueriesStore: SkipQueries;
+  public readonly swapQueriesStore: SwapQueries;
   public readonly starknetQueriesStore: StarknetQueriesStore;
   public readonly bitcoinQueriesStore: BitcoinQueriesStore;
   public readonly accountStore: AccountStore<
@@ -400,6 +402,11 @@ export class RootStore {
       this.chainStore,
       this.swapUsageQueries,
       SwapVenues
+    );
+    this.swapQueriesStore = new SwapQueries(
+      this.queriesStore.sharedContext,
+      this.chainStore,
+      "https://keplr-api-dev.keplr.app"
     );
     this.starknetQueriesStore = new StarknetQueriesStore(
       this.queriesStore.sharedContext,

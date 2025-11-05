@@ -6389,7 +6389,9 @@ __metadata:
     "@keplr-wallet/stores": 0.12.285
     "@keplr-wallet/types": 0.12.285
     "@keplr-wallet/unit": 0.12.285
+    "@types/lodash.chunk": ^4
     joi: ^17.5.0
+    lodash.chunk: ^4.2.0
     utility-types: ^3.10.0
   peerDependencies:
     mobx: ^6
@@ -11225,6 +11227,15 @@ __metadata:
   dependencies:
     "@types/lodash": "*"
   checksum: 4b1f39fd1d921311c37a846c0e0df9d1fa23e27448a6ad1efd7574e703abd2b2fa5e8f3b5037146000f167ba231d0d01e52747d902654151b4ceeff9f2a9b380
+  languageName: node
+  linkType: hard
+
+"@types/lodash.chunk@npm:^4":
+  version: 4.2.9
+  resolution: "@types/lodash.chunk@npm:4.2.9"
+  dependencies:
+    "@types/lodash": "*"
+  checksum: ccffe7273a0941655d5b988baeffa8f7d4d19a8b43ed728ff4e616013506efe85914ba99d4ec299e0106506e1bca3923b065eabb0aa5f1e4b18f68e790ae6b88
   languageName: node
   linkType: hard
 
@@ -23454,6 +23465,13 @@ __metadata:
   version: 3.0.0
   resolution: "lodash._reinterpolate@npm:3.0.0"
   checksum: 06d2d5f33169604fa5e9f27b6067ed9fb85d51a84202a656901e5ffb63b426781a601508466f039c720af111b0c685d12f1a5c14ff8df5d5f27e491e562784b2
+  languageName: node
+  linkType: hard
+
+"lodash.chunk@npm:^4.2.0":
+  version: 4.2.0
+  resolution: "lodash.chunk@npm:4.2.0"
+  checksum: 6286c6d06814fbeda502164015c42ef53a9194e6ebaac52ec2b41e83344aefe7bc3d94fdfec525adcd2c66cefdf05dc333b6a1128e4de739797342315c17cbc7
   languageName: node
   linkType: hard
 
