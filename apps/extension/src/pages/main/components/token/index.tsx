@@ -12,8 +12,8 @@ import { Column, Columns } from "../../../../components/column";
 import { observer } from "mobx-react-lite";
 import { ViewToken } from "../../index";
 import {
+  Body3,
   Caption1,
-  Subtitle2,
   Subtitle3,
   Subtitle4,
 } from "../../../../components/typography";
@@ -366,7 +366,7 @@ const TokenItemContent: FunctionComponent<TokenItemContentProps> = ({
       <Stack gutter="0.25rem">
         <XAxis alignY="center">
           <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth="3.25rem">
-            <Subtitle2
+            <Subtitle3
               color={
                 theme.mode === "light"
                   ? ColorPalette["gray-700"]
@@ -380,7 +380,7 @@ const TokenItemContent: FunctionComponent<TokenItemContentProps> = ({
                 .hideAmount(true)
                 .hideIBCMetadata(true)
                 .toString()}
-            </Subtitle2>
+            </Subtitle3>
           </Skeleton>
 
           {stakingApr ? (
@@ -466,11 +466,11 @@ const TokenItemContent: FunctionComponent<TokenItemContentProps> = ({
           }}
         >
           <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth="4.5rem">
-            <Caption1 style={{ color: ColorPalette["gray-300"] }}>
+            <Body3 style={{ color: ColorPalette["gray-300"] }}>
               {isIBC
                 ? `on ${viewToken.chainInfo.chainName}`
                 : viewToken.chainInfo.chainName}
-            </Caption1>
+            </Body3>
           </Skeleton>
           <XAxis>
             {tag ? (
