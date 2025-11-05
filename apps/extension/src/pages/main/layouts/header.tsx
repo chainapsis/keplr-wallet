@@ -15,8 +15,10 @@ import { ConnectedEcosystems } from "../components/connected-ecosystems";
 import { COMMON_HOVER_OPACITY } from "../../../styles/constant";
 import { IconButton } from "../../../components/icon-button";
 import { FloatingMenuBar } from "../components/floating-menu-bar";
-import { offset, useFloating } from "@floating-ui/react-dom";
+import { autoUpdate, offset, shift, useFloating } from "@floating-ui/react-dom";
 import { AccountSwitchFloatModal } from "../components/account-switch-float-modal";
+import { FloatModal } from "../../../components/float-modal";
+import { DepositFloatingModal } from "../components/deposit-float-modal";
 
 const Styles = {
   NameContainer: styled.div`
@@ -62,6 +64,16 @@ export const MainHeaderLayout = observer<
         }),
       ],
     });
+    const depositFloatingModal = useFloating({
+      placement: "bottom-start",
+      middleware: [
+        offset({
+          mainAxis: 10,
+        }),
+        shift({ padding: 12 }),
+      ],
+      whileElementsMounted: autoUpdate,
+    });
 
     const theme = useTheme();
     const name = useMemo(() => {
@@ -69,6 +81,7 @@ export const MainHeaderLayout = observer<
     }, [keyRingStore.selectedKeyInfo?.name]);
 
     const [isOpenMenu, setIsOpenMenu] = React.useState(false);
+    const [isOpenDepositModal, setIsOpenDepositModal] = React.useState(false);
 
     const openMenu = () => {
       setIsOpenMenu(true);
@@ -114,23 +127,26 @@ export const MainHeaderLayout = observer<
                 </Styles.NameContainer>
 
                 <Gutter size="0.125rem" />
-                <IconButton
-                  padding="0.375rem"
-                  hoverColor={
-                    theme.mode === "light"
-                      ? ColorPalette["gray-100"]
-                      : ColorPalette["gray-600"]
-                  }
-                  onClick={() => {
-                    //TODO 주소모달
-                  }}
-                >
-                  <CopyOutlineIcon
-                    width="0.75rem"
-                    height="0.75rem"
-                    color={ColorPalette["gray-300"]}
-                  />
-                </IconButton>
+                <Box ref={depositFloatingModal.refs.setReference}>
+                  <IconButton
+                    padding="0.375rem"
+                    hoverColor={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-100"]
+                        : ColorPalette["gray-600"]
+                    }
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setIsOpenDepositModal(true);
+                    }}
+                  >
+                    <CopyOutlineIcon
+                      width="0.75rem"
+                      height="0.75rem"
+                      color={ColorPalette["gray-300"]}
+                    />
+                  </IconButton>
+                </Box>
               </XAxis>
               {/* 뉴체인 공지 추후 구현 필요 */}
               {/* 일종의 padding left인데 cursor를 가지게 하면서 밑에서 tooltip도 함께 사용하기 위해서 다른 Box로 분리되어있음 */}
@@ -237,6 +253,15 @@ export const MainHeaderLayout = observer<
           closeModal={() => setIsOpenAccountSwitchModal(false)}
           floating={accountSwitchFloatingModal}
         />
+        <FloatModal
+          isOpen={isOpenDepositModal}
+          close={() => setIsOpenDepositModal(false)}
+        >
+          <DepositFloatingModal
+            close={() => setIsOpenDepositModal(false)}
+            floating={depositFloatingModal}
+          />
+        </FloatModal>
       </Fragment>
     );
   },
