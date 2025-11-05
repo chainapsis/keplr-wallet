@@ -459,7 +459,9 @@ export const SwapAssetInfo: FunctionComponent<{
                       }
                       return q;
                     })()}&entryPoint=select_to_asset`
-                  )}`
+                  )}&inChainId=${amountConfig.chainInfo.chainId}&inDenom=${
+                    amountConfig.amount[0].currency.coinMinimalDenom
+                  }`
                 );
               }
             }}

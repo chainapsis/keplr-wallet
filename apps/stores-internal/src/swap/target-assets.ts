@@ -152,6 +152,9 @@ export class ObservableQueryTargetAssetsInner extends ObservableQuery<TargetAsse
               return "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
             }
           }
+          if (this.denom.startsWith("erc20:")) {
+            return this.denom.replace("erc20:", "");
+          }
           return this.denom;
         })(),
         page: this.page,

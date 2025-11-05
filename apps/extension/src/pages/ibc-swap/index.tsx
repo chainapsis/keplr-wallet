@@ -127,7 +127,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     accountStore,
     ethereumAccountStore,
     skipQueriesStore,
-    swapQueriesStore,
     uiConfigStore,
     keyRingStore,
     hugeQueriesStore,
@@ -162,14 +161,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     }
     return uiConfigStore.ibcSwapConfig.getAmountInCurrency();
   })();
-  console.log(
-    swapQueriesStore.queryTargetAssets.getObservableQueryTargetAssets(
-      inChainId,
-      inCurrency.coinMinimalDenom,
-      1,
-      100
-    ).currencies
-  );
   const outChainId = (() => {
     if (searchParamsOutChainId) {
       uiConfigStore.ibcSwapConfig.setAmountOutChainId(searchParamsOutChainId);

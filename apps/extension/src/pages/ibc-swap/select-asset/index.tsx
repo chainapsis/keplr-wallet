@@ -43,15 +43,17 @@ class IBCSwapDestinationState {
 
   constructor(
     protected readonly hugeQueriesStore: HugeQueriesStore,
-    protected readonly queryTargetAssets: ObservableQueryTargetAssets
+    protected readonly queryTargetAssets: ObservableQueryTargetAssets,
+    protected readonly inChainId: string,
+    protected readonly inDenom: string
   ) {
     makeObservable(this);
   }
 
   increasePage() {
     const query = this.queryTargetAssets.getObservableQueryTargetAssets(
-      "osmosis-1",
-      "uosmo",
+      this.inChainId,
+      this.inDenom,
       this.currentPage,
       IBCSwapDestinationState.PAGE_LIMIT
     );
@@ -88,8 +90,8 @@ class IBCSwapDestinationState {
     for (let i = 1; i <= this.currentPage; i++) {
       const destinationMap =
         this.queryTargetAssets.getObservableQueryTargetAssets(
-          "osmosis-1",
-          "uosmo",
+          this.inChainId,
+          this.inDenom,
           i,
           IBCSwapDestinationState.PAGE_LIMIT
         ).currenciesMap;
@@ -164,8 +166,8 @@ class IBCSwapDestinationState {
       remaining,
       isLoading: (() => {
         return !this.queryTargetAssets.getObservableQueryTargetAssets(
-          "osmosis-1",
-          "uosmo",
+          this.inChainId,
+          this.inDenom,
           this.currentPage,
           IBCSwapDestinationState.PAGE_LIMIT
         ).response;
@@ -199,10 +201,18 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
     );
     같은 형태로 써야함...
    */
+    const paramInChainId = searchParams.get("inChainId");
+    const paramInDenom = searchParams.get("inDenom");
     const paramNavigateTo = searchParams.get("navigateTo");
     const paramNavigateReplace = searchParams.get("navigateReplace");
     // {chain_identifier}/{coinMinimalDenom}
     const excludeKey = searchParams.get("excludeKey");
+
+    if (!paramInChainId || !paramInDenom) {
+      console.error("paramInChainId or paramInDenom is null");
+      navigate("/");
+      return <div />;
+    }
 
     const [search, setSearch] = useState("");
 
@@ -212,7 +222,9 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
       () =>
         new IBCSwapDestinationState(
           hugeQueriesStore,
-          swapQueriesStore.queryTargetAssets
+          swapQueriesStore.queryTargetAssets,
+          paramInChainId,
+          paramInDenom
         )
     );
 
