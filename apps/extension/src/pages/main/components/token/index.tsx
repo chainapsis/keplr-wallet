@@ -122,8 +122,6 @@ interface TokenItemProps {
   // If this prop is provided, the token item will be shown with loading state.
   isLoading?: boolean;
   stakingApr?: string;
-
-  showBackground?: boolean;
 }
 
 export const TokenItem: FunctionComponent<TokenItemProps> = observer(
@@ -144,7 +142,6 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
     noTokenTag,
     isLoading,
     stakingApr,
-    showBackground = false,
   }) => {
     const { priceStore, uiConfigStore } = useStore();
     const navigate = useNavigate();
@@ -237,7 +234,6 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
         tag={tokenTag}
         isLoading={isLoading}
         stakingApr={stakingApr}
-        showBackground={showBackground}
       />
     );
 
@@ -283,7 +279,6 @@ interface TokenItemContentProps {
   };
   isLoading?: boolean;
   stakingApr?: string;
-  showBackground?: boolean;
 }
 
 const TokenItemContent: FunctionComponent<TokenItemContentProps> = ({
@@ -309,10 +304,8 @@ const TokenItemContent: FunctionComponent<TokenItemContentProps> = ({
   price24HChange,
   tag,
   stakingApr,
-  showBackground = false,
 }) => (
   <Styles.Container
-    showBackground={showBackground}
     forChange={forChange}
     isError={isError}
     disabled={disabled}
@@ -589,21 +582,13 @@ const TokenItemContent: FunctionComponent<TokenItemContentProps> = ({
 
 const Styles = {
   Container: styled.div<{
-    showBackground: boolean;
     forChange: boolean | undefined;
     isError: boolean;
     disabled?: boolean;
     disableHoverStyle?: boolean;
     isNotReady?: boolean;
   }>`
-    background-color: ${(props) =>
-      props.showBackground
-        ? props.theme.mode === "light"
-          ? props.isNotReady
-            ? ColorPalette["skeleton-layer-0"]
-            : ColorPalette.white
-          : ColorPalette["gray-650"]
-        : "transparent"};
+    background-color: transparent;
     padding: ${({ forChange }) =>
       forChange ? "0.875rem 0.25rem 0.875rem 1rem" : "0.875rem 1rem"};
     border-radius: 0.375rem;
@@ -615,13 +600,6 @@ const Styles = {
             .alpha(0.5)
             .toString()}`
         : undefined};
-
-    box-shadow: ${(props) =>
-      props.showBackground
-        ? props.theme.mode === "light" && !props.isNotReady
-          ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
-          : "none"
-        : "none"};
 
     ${({ disabled, theme, disableHoverStyle }) => {
       if (!disableHoverStyle && !disabled) {

@@ -173,14 +173,7 @@ const SpendableCollapsibleList: FunctionComponent<{
   lenAlwaysShown: number;
   onCollapse?: (isCollapsed: boolean) => void;
   notRenderHiddenItems?: boolean;
-  showGutter?: boolean;
-}> = ({
-  items,
-  lenAlwaysShown,
-  onCollapse,
-  notRenderHiddenItems,
-  showGutter,
-}) => {
+}> = ({ items, lenAlwaysShown, onCollapse, notRenderHiddenItems }) => {
   const intl = useIntl();
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [notRenderHiddenItemsIsClosing, setNotRenderHiddenItemsIsClosing] =
@@ -195,7 +188,7 @@ const SpendableCollapsibleList: FunctionComponent<{
 
   return (
     <Stack>
-      <Stack gutter={showGutter ? "0.5rem" : undefined}>{alwaysShown}</Stack>
+      <Stack>{alwaysShown}</Stack>
 
       <VerticalCollapseTransition
         collapsed={isCollapsed}
@@ -209,8 +202,7 @@ const SpendableCollapsibleList: FunctionComponent<{
         notRenderHiddenItemsIsClosing ||
         !isCollapsed ? (
           <React.Fragment>
-            {showGutter ? <Gutter size="0.5rem" /> : null}
-            <Stack gutter={showGutter ? "0.5rem" : undefined}>{hidden}</Stack>
+            <Stack>{hidden}</Stack>
           </React.Fragment>
         ) : null}
       </VerticalCollapseTransition>
@@ -990,7 +982,6 @@ const TokensGroupedViewScene = observer(
               }
             }}
             lenAlwaysShown={10}
-            showGutter={true}
             items={Array.from(searchedGroupedTokensMap.entries()).map(
               ([groupKey, tokens]) => {
                 let bottomTagType: BottomTagType | undefined;

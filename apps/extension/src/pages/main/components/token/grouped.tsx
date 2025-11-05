@@ -471,7 +471,6 @@ export const GroupedTokenItem: FunctionComponent<{
           earnedAssetPrice={earnedAssetPrice}
           showPrice24HChange={showPrice24HChange}
           copyAddress={copyAddress}
-          showBackground={true}
         />
       );
     }
@@ -502,7 +501,6 @@ export const GroupedTokenItem: FunctionComponent<{
             {tokens.map((token, index) => (
               <Box
                 key={`${token.chainInfo.chainId}-${token.token.currency.coinMinimalDenom}`}
-                marginTop={"0.375rem"}
                 marginBottom={
                   alwaysOpen && index === tokens.length - 1 ? "1rem" : "none"
                 }
@@ -518,12 +516,10 @@ export const GroupedTokenItem: FunctionComponent<{
             ))}
 
             {isOpen && bottomTagType && (
-              <Box marginTop="0.375rem">
-                <StandaloneEarnBox
-                  bottomTagType={bottomTagType}
-                  earnedAssetPrice={effectiveEarnedAssetPrice}
-                />
-              </Box>
+              <StandaloneEarnBox
+                bottomTagType={bottomTagType}
+                earnedAssetPrice={effectiveEarnedAssetPrice}
+              />
             )}
           </Styles.ChildrenContainer>
         </VerticalCollapseTransition>
@@ -595,17 +591,10 @@ const Styles = {
     disabled?: boolean;
     isOpen: boolean;
   }>`
-    background-color: ${(props) =>
-      props.theme.mode === "light"
-        ? ColorPalette.white
-        : ColorPalette["gray-650"]};
+    background-color: transparent;
     padding: 0.875rem 1rem;
     border-radius: 0.375rem;
     cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
-    box-shadow: ${(props) =>
-      props.theme.mode === "light"
-        ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
-        : "none"};
     position: relative;
 
     &:hover {
