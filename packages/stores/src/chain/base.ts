@@ -1953,12 +1953,17 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
     if (b) {
       return true;
     }
-    const chainInfo = this.getChain(chainId);
+    const chainInfo = this.getModularChain(chainId);
 
     const isEthermintLike =
-      chainInfo.bip44.coinType === 60 ||
-      !!chainInfo.features?.includes("eth-address-gen") ||
-      !!chainInfo.features?.includes("eth-key-sign");
+      ("cosmos" in chainInfo &&
+        (chainInfo.cosmos.bip44.coinType === 60 ||
+          !!chainInfo.cosmos.features?.includes("eth-address-gen") ||
+          !!chainInfo.cosmos.features?.includes("eth-key-sign"))) ||
+      ("evm" in chainInfo &&
+        (chainInfo.evm.bip44.coinType === 60 ||
+          !!chainInfo.evm.features?.includes("eth-address-gen") ||
+          !!chainInfo.evm.features?.includes("eth-key-sign")));
 
     return isEthermintLike;
   }
