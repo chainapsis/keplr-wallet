@@ -22,7 +22,6 @@ import { PriceChangeTag } from "./price-change-tag";
 import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse/collapse";
 import { useStore } from "../../../../stores";
 import { useSearchParams } from "react-router-dom";
-import { WrapperwithBottomTag } from "./wrapper-with-bottom-tag";
 import { IconProps } from "../../../../components/icon/types";
 import { usePriceChange } from "../../../../hooks/use-price-change";
 import { useTokenTag } from "../../../../hooks/use-token-tag";
@@ -448,25 +447,18 @@ export const GroupedTokenItem: FunctionComponent<{
 
     return (
       <div>
-        <WrapperwithBottomTag
-          bottomTagType={bottomTagType}
-          earnedAssetPrice={effectiveEarnedAssetPrice}
-          hideBottomTag={isOpen && !!bottomTagType}
-        >
-          <TokenGroupHeader
-            disabled={disabled}
-            isOpen={isOpen}
-            onClick={handleClick}
-            mainToken={mainToken}
-            tokens={tokens}
-            uniqueChainIds={uniqueChainIds}
-            coinDenom={coinDenom}
-            price24HChange={price24HChange}
-            totalBalance={totalBalance}
-            totalPrice={totalPrice}
-          />
-        </WrapperwithBottomTag>
-
+        <TokenGroupHeader
+          disabled={disabled}
+          isOpen={isOpen}
+          onClick={handleClick}
+          mainToken={mainToken}
+          tokens={tokens}
+          uniqueChainIds={uniqueChainIds}
+          coinDenom={coinDenom}
+          price24HChange={price24HChange}
+          totalBalance={totalBalance}
+          totalPrice={totalPrice}
+        />
         <VerticalCollapseTransition collapsed={!delayedIsOpen}>
           <Styles.ChildrenContainer>
             {tokens.map((token, index) => (
@@ -485,15 +477,17 @@ export const GroupedTokenItem: FunctionComponent<{
                 />
               </Box>
             ))}
-
-            {isOpen && bottomTagType && (
-              <EarnBox
-                bottomTagType={bottomTagType}
-                earnedAssetPrice={effectiveEarnedAssetPrice}
-              />
-            )}
           </Styles.ChildrenContainer>
         </VerticalCollapseTransition>
+
+        {bottomTagType ? (
+          <Box margin="0.25rem 0">
+            <EarnBox
+              bottomTagType={bottomTagType}
+              earnedAssetPrice={effectiveEarnedAssetPrice}
+            />
+          </Box>
+        ) : null}
       </div>
     );
   }

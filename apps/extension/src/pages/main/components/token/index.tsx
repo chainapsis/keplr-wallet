@@ -35,11 +35,11 @@ import { WrongViewingKeyError } from "@keplr-wallet/stores";
 import { useNavigate } from "react-router";
 import { Secret20Currency } from "@keplr-wallet/types";
 import { FormattedMessage, useIntl } from "react-intl";
-import { WrapperwithBottomTag } from "./wrapper-with-bottom-tag";
 import { usePriceChange } from "../../../../hooks/use-price-change";
 import { PriceChangeTag } from "./price-change-tag";
 import { TokenTag } from "./token-tag";
 import { CopyAddressButton } from "./copy-address-button";
+import { EarnBox } from "./earn-box";
 
 export const TokenTitleView: FunctionComponent<{
   title: string;
@@ -239,12 +239,13 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
 
     if (bottomTagType) {
       return (
-        <WrapperwithBottomTag
-          bottomTagType={bottomTagType as BottomTagType}
-          earnedAssetPrice={earnedAssetPrice}
-        >
+        <React.Fragment>
           {content}
-        </WrapperwithBottomTag>
+          <EarnBox
+            bottomTagType={bottomTagType}
+            earnedAssetPrice={earnedAssetPrice}
+          />
+        </React.Fragment>
       );
     }
 

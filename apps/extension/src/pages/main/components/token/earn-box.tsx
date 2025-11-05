@@ -36,13 +36,13 @@ export const EarnBox: FunctionComponent<{
 
 const StyledEarningsBox = styled.div`
   display: flex;
-  height: 40px;
-  padding: 6px 0px;
+  height: 2.375rem;
+  padding: 0.375rem 0rem;
   justify-content: center;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
   align-self: stretch;
-  border-radius: 6px;
+  border-radius: 0.375rem;
   background: ${({ theme }) =>
     theme.mode === "light"
       ? ColorPalette["green-100"]
