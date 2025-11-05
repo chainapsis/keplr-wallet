@@ -10,7 +10,6 @@ import { Subtitle1, Subtitle4 } from "../../../../components/typography";
 import { Gutter } from "../../../../components/gutter";
 import { SearchTextInput } from "../../../../components/input";
 import SimpleBar from "simplebar-react";
-import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { ArrowRightSolidIcon } from "../../../../components/icon";
 import {
   useSceneEvents,
@@ -29,9 +28,9 @@ import { getChainSearchResultClickAnalyticsProperties } from "../../../../analyt
 import { Column, Columns } from "../../../../components/column";
 import { TextButton } from "../../../../components/button-text";
 import { useBuySupportServiceInfos } from "../../../../hooks/use-buy-support-service-infos";
-import { CopyAddressItem } from "../copy-address-item";
 import { useGetAddressesOnCopyAddress } from "../../hooks/use-get-addresses-copy-address";
 import { NoResultBox } from "../deposit-modal-no-search-box";
+import { CopyAddressItemList } from "../copy-address-item/copy-address-item-list";
 
 export type Address = {
   modularChainInfo: ModularChainInfo;
@@ -263,72 +262,25 @@ export const CopyAddressScene: FunctionComponent<{
       >
         {isShowNoResult && <NoResultBox />}
 
-        <Box paddingX="0.75rem">
-          {sortedAddresses
-            .map((address) => {
-              // CopyAddressItem 컴포넌트는 ethereumAddress가 있냐 없냐에 따라서 다르게 동작한다.
-              // ethereumAddress가 있으면 두개의 CopyAddressItem 컴포넌트를 각각 렌더링하기 위해서
-              // ethereumAddress가 있으면 두개의 address로 쪼개서 리턴하고 flat으로 펼져서 렌더링한다.
-              if (address.ethereumAddress && address.bech32Address) {
-                return [
-                  {
-                    modularChainInfo: address.modularChainInfo,
-                    bech32Address: address.bech32Address,
-                  },
-                  {
-                    ...address,
-                  },
-                ];
-              }
-
-              return address;
-            })
-            .flat()
-            .map((address, index) => {
-              return (
-                <CopyAddressItem
-                  key={
-                    ChainIdHelper.parse(address.modularChainInfo.chainId)
-                      .identifier +
-                    address.bech32Address +
-                    (address.ethereumAddress || "") +
-                    (address.bitcoinAddress?.bech32Address || "")
-                  }
-                  address={address}
-                  close={close}
-                  blockInteraction={blockInteraction}
-                  setBlockInteraction={setBlockInteraction}
-                  setSortPriorities={setSortPriorities}
-                  onClick={() => {
-                    if (search.trim().length > 0) {
-                      analyticsAmplitudeStore.logEvent(
-                        "click_copy_address_item_search_results_deposit_modal",
-                        getChainSearchResultClickAnalyticsProperties(
-                          address.modularChainInfo.chainName,
-                          search,
-                          sortedAddresses.map(
-                            (address) => address.modularChainInfo.chainName
-                          ),
-                          index
-                        )
-                      );
-                    }
-                  }}
-                  onClickIcon={() => {
-                    sceneTransition.push("qr-code", {
-                      chainId: address.modularChainInfo.chainId,
-                      address:
-                        address.starknetAddress ||
-                        address.ethereumAddress ||
-                        address.bech32Address ||
-                        address.bitcoinAddress?.bech32Address,
-                      close,
-                    });
-                  }}
-                />
-              );
-            })}
-        </Box>
+        <CopyAddressItemList
+          sortedAddresses={sortedAddresses}
+          close={close}
+          blockInteraction={blockInteraction}
+          setBlockInteraction={setBlockInteraction}
+          setSortPriorities={setSortPriorities}
+          search={search}
+          onClickIcon={(address: Address) => {
+            sceneTransition.push("qr-code", {
+              chainId: address.modularChainInfo.chainId,
+              address:
+                address.starknetAddress ||
+                address.ethereumAddress ||
+                address.bech32Address ||
+                address.bitcoinAddress?.bech32Address,
+              close,
+            });
+          }}
+        />
 
         {hasAddresses && hasLookingForChains && <Gutter size="1.25rem" />}
         {hasLookingForChains && (
