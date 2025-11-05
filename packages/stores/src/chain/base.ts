@@ -597,11 +597,9 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
   @observable.shallow
   protected registeredEvmCurrencies: AppCurrency[] = [];
 
-  // Refactor Note: 일단 IBC asset 에서만 사용되는 것 같아서 Cosmos만 추가
   @observable.shallow
-  protected registeredCosmosCurrenciesNoReaction: AppCurrency[] = [];
+  protected registeredCurrenciesNoReaction: AppCurrency[] = [];
 
-  // Refactor Note: 기존 방식은 배열 + Map 이중 관리 -> 하나의 Map으로 관리
   @computed
   protected get unknownDenomMap(): Map<
     string,
@@ -613,7 +611,6 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
   @observable.shallow
   protected registrationInProgressCurrencyMap: Map<string, boolean> = new Map();
 
-  // Refactor Note: constructor에서 한 번만 파악하여 들고 있는 available modules 추가
   @observable.shallow
   protected availableModules: ChainInfoModule[];
 
@@ -859,12 +856,6 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
         );
         if (!registration) {
           const result = this.findCurrencyByModule(normalizedCoinMinimalDenom);
-          console.log(
-            `[findCurrencyAsync] 등록`,
-            result
-              ? `성공: ${result.coinDenom} (${result.coinMinimalDenom})`
-              : "실패"
-          );
           resolve(result);
         }
       });
@@ -935,8 +926,6 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
       reaction: false,
     });
   }
-
-  // Refactor Note: 역할이 많아서 함수 분리 + description 디테일 보강
 
   /**
    * 해당되는 denom의 currency를 모를 때 이 메소드를 사용해서 등록을 요청할 수 있다.
@@ -1183,7 +1172,6 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
     return unknownDenom;
   }
 
-  // Refactor Note: 불변성 유지를 위해 새로운 배열 생성 후 대체 (하지만 기존에도 action이 있어서 성능 상 리렌더링 문제는 없었을 것)
   @action
   protected addOrReplaceCurrency(
     module: ChainInfoModule,
@@ -1230,8 +1218,7 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
       currency.coinMinimalDenom
     );
     const currencyMap = this.getCurrencyMapByModule(module);
-    const newRegisteredCurrencies =
-      this.registeredCosmosCurrenciesNoReaction.slice();
+    const newRegisteredCurrencies = this.registeredCurrenciesNoReaction.slice();
 
     if (currencyMap.has(normalizedCoinMinimalDenom)) {
       const index = newRegisteredCurrencies.findIndex(
@@ -1244,12 +1231,12 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
           sortedJsonByKeyStringify(prev) !== sortedJsonByKeyStringify(currency)
         ) {
           newRegisteredCurrencies.splice(index, 1, currency);
-          this.registeredCosmosCurrenciesNoReaction = newRegisteredCurrencies;
+          this.registeredCurrenciesNoReaction = newRegisteredCurrencies;
         }
       }
     } else {
       newRegisteredCurrencies.push(currency);
-      this.registeredCosmosCurrenciesNoReaction = newRegisteredCurrencies;
+      this.registeredCurrenciesNoReaction = newRegisteredCurrencies;
     }
   }
 
@@ -1434,11 +1421,10 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
     return result;
   }
 
-  // 일단 IBC asset 에서만 사용되는 것 같아서 Cosmos만 추가?
   @computed
   protected get currencyMapNoReaction(): Map<string, AppCurrency> {
     const result: Map<string, AppCurrency> = new Map();
-    for (const currency of this.registeredCosmosCurrenciesNoReaction) {
+    for (const currency of this.registeredCurrenciesNoReaction) {
       result.set(currency.coinMinimalDenom, currency);
     }
     return result;
@@ -1672,8 +1658,6 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
 
   @action
   protected setEmbeddedChainInfos(chainInfos: (C | ModularChainInfo)[]) {
-    console.log("setEmbeddedChainInfos 호출됨 - 입력 chainInfos:", chainInfos);
-
     this._chainInfos = chainInfos
       .filter((chainInfo) => "currencies" in chainInfo || "cosmos" in chainInfo)
       .map((chainInfo) => {
@@ -1786,9 +1770,8 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
       return new ModularChainInfoImpl(modularChainInfo, this);
     });
 
-    console.log("setEmbeddedChainInfos 완료");
     console.log(
-      "- 설정된 _modularChainInfoImpls:",
+      "setEmbeddedChainInfos 완료:",
       this._modularChainInfoImpls.map((impl) => impl.embedded)
     );
   }
@@ -1798,8 +1781,6 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
     chainInfos: C[];
     modulrChainInfos: ModularChainInfo[];
   }) {
-    console.log("setEmbeddedChainInfosV2 호출됨");
-    console.log("- 입력 modulrChainInfos:", infos.modulrChainInfos);
     this._chainInfos = infos.chainInfos.map((chainInfo) => {
       const prev = this.chainInfoMap.get(
         ChainIdHelper.parse(chainInfo.chainId).identifier
@@ -1896,12 +1877,7 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
       return new ModularChainInfoImpl(modularChainInfo, this);
     });
 
-    console.log("setEmbeddedChainInfosV2 완료");
-    console.log("- V2로 설정된 _modularChainInfos:", this._modularChainInfos);
-    console.log(
-      "- V2로 설정된 _modularChainInfoImpls:",
-      this._modularChainInfoImpls
-    );
+    console.log("setEmbeddedChainInfosV2 완료:", this._modularChainInfos);
   }
 
   getCurrencyRegistrar(
