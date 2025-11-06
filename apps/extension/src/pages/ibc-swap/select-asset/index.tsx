@@ -206,34 +206,18 @@ class IBCSwapDestinationState {
       }
     }
 
-    remaining = remaining
-      .sort((a, b) => {
-        if (
-          CoinPretty.makeCoinDenomPretty(a.currency.coinDenom) <
-          CoinPretty.makeCoinDenomPretty(b.currency.coinDenom)
-        ) {
-          return -1;
-        } else if (
-          CoinPretty.makeCoinDenomPretty(a.currency.coinDenom) >
-          CoinPretty.makeCoinDenomPretty(b.currency.coinDenom)
-        ) {
-          return 1;
-        } else {
-          return 0;
-        }
-      })
-      .filter((r) => {
-        const denomHelper = new DenomHelper(r.currency.coinMinimalDenom);
-        if (denomHelper.type === "lp") {
-          return false;
-        }
+    remaining = remaining.filter((r) => {
+      const denomHelper = new DenomHelper(r.currency.coinMinimalDenom);
+      if (denomHelper.type === "lp") {
+        return false;
+      }
 
-        return (
-          !this.excludeKey ||
-          `${r.chainInfo.chainIdentifier}/${r.currency.coinMinimalDenom}` !==
-            this.excludeKey
-        );
-      });
+      return (
+        !this.excludeKey ||
+        `${r.chainInfo.chainIdentifier}/${r.currency.coinMinimalDenom}` !==
+          this.excludeKey
+      );
+    });
 
     return {
       tokens,
