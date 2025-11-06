@@ -231,9 +231,6 @@ export const CopyAddressItemList = ({
             ref={(el) => {
               itemContainerRefs.current[index] = el;
             }}
-            onMouseEnter={() => handleMouseEnter(index)}
-            onMouseLeave={handleMouseLeave}
-            onMouseMove={() => debouncedOnMouseMove(index)}
           >
             <CopyAddressItem
               ref={(handle) => {
@@ -261,8 +258,10 @@ export const CopyAddressItemList = ({
               }}
               onClickIcon={() => onClickIcon(address)}
               isFocused={focusedIndex === index && !isHoveredCopyAddressItem}
-              isHovered={hoveredIndex === index}
               preventHover={focusOrigin === "search"}
+              onHoverEnter={() => handleMouseEnter(index)}
+              onHoverLeave={handleMouseLeave}
+              onPointerMove={() => debouncedOnMouseMove(index)}
             />
           </div>
         );

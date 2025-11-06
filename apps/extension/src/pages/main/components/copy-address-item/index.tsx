@@ -48,12 +48,10 @@ interface CopyAddressItemProps {
   hoverColor?: string;
   isFocused?: boolean;
 
-  // cursor hover 상태에서 search로 검색을 하면
-  // CopyAddressItemList애서 각 CopyAddressItem onMouseEnter가 호출되는 타이밍과
-  // search 값 변경으로 발생하는 effect의 호출 타이밍이 onMouseEnter가 먼저 실행되는게 보장이 안됨
-  // 해서 preventHover과 isHovered를 통해서 부모에서 해당 컴포넌트의 hover 상태를 제어함
-  isHovered?: boolean;
   preventHover?: boolean;
+  onHoverEnter: () => void;
+  onHoverLeave: () => void;
+  onPointerMove: () => void;
 }
 
 export const CopyAddressItem = observer(
@@ -69,8 +67,10 @@ export const CopyAddressItem = observer(
         onClickIcon,
         hoverColor,
         isFocused = false,
-        isHovered = false,
         preventHover = false,
+        onHoverEnter,
+        onHoverLeave,
+        onPointerMove,
       }: CopyAddressItemProps,
       ref
     ) {
@@ -88,7 +88,6 @@ export const CopyAddressItem = observer(
           )
         : false;
 
-      const [isCopyContainerHover, setIsCopyContainerHover] = useState(false);
       const [isBookmarkHover, setIsBookmarkHover] = useState(false);
 
       const isEVMOnlyChain =
@@ -150,6 +149,31 @@ export const CopyAddressItem = observer(
               height="4rem"
               borderRadius="0.375rem"
               alignY="center"
+              // hover와 backgroundColor를 따로 처리하는 이유는
+              // js로 hover style을 처리 하면 커서가 해당 컴포넌트 위에 있을때
+              // 검색을 하게 되면 hover 스타일을 제거 했다가.
+              // 다시 커서가 해당 컴포넌트 위에서 움직이면 hover 스타일을 다시 적용해야 하는데
+              // 이걸 js로 처리하려면 QR 아이콘 쪽에서도 처리를 해야 돼서 좀 복잡해짐
+              // css로 하면 browser가 알아서 처리해줘서 이렇게 처리함
+              hover={{
+                backgroundColor: (() => {
+                  if (blockInteraction) {
+                    return;
+                  }
+                  if (isBookmarkHover) {
+                    return;
+                  }
+                  if (preventHover) {
+                    return;
+                  }
+                  return (
+                    hoverColor ||
+                    (theme.mode === "light"
+                      ? ColorPalette["gray-10"]
+                      : ColorPalette["gray-550"])
+                  );
+                })(),
+              }}
               backgroundColor={(() => {
                 if (blockInteraction) {
                   return;
@@ -159,36 +183,35 @@ export const CopyAddressItem = observer(
                   return;
                 }
 
-                const hoverColorInner =
-                  hoverColor ||
-                  (theme.mode === "light"
-                    ? ColorPalette["gray-10"]
-                    : ColorPalette["gray-550"]);
-
-                if (preventHover && isFocused) {
-                  return hoverColorInner;
-                }
-
-                if (preventHover) {
-                  return;
-                }
-
-                if (isFocused || isHovered || isCopyContainerHover) {
-                  return hoverColorInner;
+                if (isFocused) {
+                  return (
+                    hoverColor ||
+                    (theme.mode === "light"
+                      ? ColorPalette["gray-10"]
+                      : ColorPalette["gray-550"])
+                  );
                 }
 
                 return;
               })()}
               onHoverStateChange={(isHover) => {
-                setIsCopyContainerHover(isHover);
+                if (isHover) {
+                  onHoverEnter();
+                } else {
+                  onHoverLeave();
+                }
               }}
               cursor={blockInteraction ? undefined : "pointer"}
               paddingLeft="1rem"
               style={{
                 flex: 1,
               }}
+              onMouseMove={onPointerMove}
               onClick={async (e) => {
                 e.preventDefault();
+                if (preventHover) {
+                  return;
+                }
 
                 await executeCopy();
               }}
@@ -404,27 +427,45 @@ export const CopyAddressItem = observer(
 
             <Gutter size="0.38rem" />
             <XAxis alignY="center">
-              <IconButton
-                padding="0.5rem"
-                hoverColor={
-                  hoverColor ||
-                  (theme.mode === "light"
-                    ? ColorPalette["gray-50"]
-                    : ColorPalette["gray-500"])
-                }
-                disabled={hasCopied}
-                onClick={onClickIcon}
-              >
-                <QRCodeIcon
-                  width="1.25rem"
-                  height="1.25rem"
-                  color={
-                    theme.mode === "light"
-                      ? ColorPalette["gray-300"]
-                      : ColorPalette.white
+              <Box
+                onMouseMove={onPointerMove}
+                onHoverStateChange={(isHover) => {
+                  if (isHover) {
+                    onHoverEnter?.();
+                  } else {
+                    onHoverLeave?.();
                   }
-                />
-              </IconButton>
+                }}
+              >
+                <IconButton
+                  padding="0.5rem"
+                  hoverColor={
+                    preventHover
+                      ? "transparent"
+                      : hoverColor ||
+                        (theme.mode === "light"
+                          ? ColorPalette["gray-50"]
+                          : ColorPalette["gray-500"])
+                  }
+                  disabled={hasCopied}
+                  onClick={() => {
+                    if (preventHover) {
+                      return;
+                    }
+                    onClickIcon();
+                  }}
+                >
+                  <QRCodeIcon
+                    width="1.25rem"
+                    height="1.25rem"
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-300"]
+                        : ColorPalette.white
+                    }
+                  />
+                </IconButton>
+              </Box>
               <Gutter size="0.75rem" direction="horizontal" />
             </XAxis>
           </XAxis>
