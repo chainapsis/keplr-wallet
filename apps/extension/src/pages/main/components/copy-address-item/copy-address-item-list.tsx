@@ -77,6 +77,19 @@ export const CopyAddressItemList = ({
     [sortedAddresses]
   );
 
+  // keyDown addEventListener를 마운트 될때 한번 등록하기 위해서
+  // 관련 상태를 ref로 관리함
+  const focusedIndexRef = useRef<number | null>(focusedIndex);
+  const maxIndexRef = useRef<number>(0);
+  const hoveredIndexRef = useRef<number | null>(hoveredIndex);
+  const blockInteractionRef = useRef<boolean>(blockInteraction);
+  useEffect(() => {
+    focusedIndexRef.current = focusedIndex;
+    maxIndexRef.current = flattenedAddresses.length - 1;
+    hoveredIndexRef.current = hoveredIndex;
+    blockInteractionRef.current = blockInteraction;
+  }, [focusedIndex, flattenedAddresses, hoveredIndex, blockInteraction]);
+
   useEffect(() => {
     itemHandlesRef.current = itemHandlesRef.current.slice(
       0,
@@ -143,62 +156,56 @@ export const CopyAddressItemList = ({
     [focusOrigin]
   );
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (blockInteractionRef.current) {
+      return;
+    }
+    // 마우스 호버가 있으면 키보드 네비게이션 비활성화
+    if (hoveredIndexRef.current !== null) {
+      return;
+    }
+
+    if (e.key === "ArrowDown") {
       e.preventDefault();
-
-      if (blockInteraction) {
-        return;
-      }
-
-      // 마우스 호버가 있으면 키보드 네비게이션 비활성화
-      if (isHoveredCopyAddressItem) {
-        return;
-      }
-
-      if (e.key === "ArrowDown") {
-        setFocusedIndex((prev) => {
-          if (prev === null) {
-            return 0;
-          }
-          return Math.min(prev + 1, flattenedAddresses.length - 1);
-        });
-
-        return;
-      }
-
-      if (e.key === "ArrowUp") {
-        setFocusedIndex((prev) => {
-          if (prev === null) {
-            return flattenedAddresses.length - 1;
-          }
-          return Math.max(prev - 1, 0);
-        });
-
-        return;
-      }
-
-      if (e.key === "Enter" && focusedIndex !== null) {
-        const handle = itemHandlesRef.current[focusedIndex];
-        if (handle) {
-          handle.triggerCopy();
+      setFocusedIndex((prev) => {
+        if (prev === null) {
+          return 0;
         }
+        return Math.min(prev + 1, maxIndexRef.current);
+      });
 
-        return;
+      return;
+    }
+
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setFocusedIndex((prev) => {
+        if (prev === null) {
+          return maxIndexRef.current;
+        }
+        return Math.max(prev - 1, 0);
+      });
+
+      return;
+    }
+
+    const focusedIndex = focusedIndexRef.current;
+    if (e.key === "Enter" && focusedIndex !== null) {
+      e.preventDefault();
+      const handle = itemHandlesRef.current[focusedIndex];
+      if (handle) {
+        handle.triggerCopy();
       }
-    };
+      return;
+    }
+  }, []);
 
+  useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
-
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [
-    blockInteraction,
-    focusedIndex,
-    isHoveredCopyAddressItem,
-    flattenedAddresses,
-  ]);
+  }, [handleKeyDown]);
 
   useEffect(() => {
     if (focusedIndex !== null && itemContainerRefs.current[focusedIndex]) {
