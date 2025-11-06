@@ -30,7 +30,10 @@ import { TextButton } from "../../../../components/button-text";
 import { useBuySupportServiceInfos } from "../../../../hooks/use-buy-support-service-infos";
 import { useGetAddressesOnCopyAddress } from "../../hooks/use-get-addresses-copy-address";
 import { NoResultBox } from "../deposit-modal-no-search-box";
-import { CopyAddressItemList } from "../copy-address-item/copy-address-item-list";
+import {
+  CopyAddressItemList,
+  EnterTag,
+} from "../copy-address-item/copy-address-item-list";
 
 export type Address = {
   modularChainInfo: ModularChainInfo;
@@ -79,6 +82,7 @@ export const CopyAddressScene: FunctionComponent<{
   const searchRef = useFocusOnMount<HTMLInputElement>();
   const sceneTransition = useSceneTransition();
   const buySupportServiceInfos = useBuySupportServiceInfos();
+  const [showEnterTag, setShowEnterTag] = useState(false);
 
   useSceneEvents({
     onDidVisible: () => {
@@ -247,6 +251,7 @@ export const CopyAddressScene: FunctionComponent<{
           placeholder={intl.formatMessage({
             id: "page.main.components.deposit-modal.search-placeholder",
           })}
+          right={showEnterTag ? <EnterTag /> : undefined}
         />
       </Box>
 
@@ -280,6 +285,7 @@ export const CopyAddressScene: FunctionComponent<{
               close,
             });
           }}
+          setShowEnterTag={setShowEnterTag}
         />
 
         {hasAddresses && hasLookingForChains && <Gutter size="1.25rem" />}

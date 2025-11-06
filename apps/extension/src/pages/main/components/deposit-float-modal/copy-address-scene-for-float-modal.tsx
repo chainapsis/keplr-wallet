@@ -15,7 +15,10 @@ import {
 import { useGetAddressesOnCopyAddress } from "../../hooks/use-get-addresses-copy-address";
 import { NoResultBox } from "../deposit-modal-no-search-box";
 import { Address } from "../deposit-modal/copy-address-scene";
-import { CopyAddressItemList } from "../copy-address-item/copy-address-item-list";
+import {
+  CopyAddressItemList,
+  EnterTag,
+} from "../copy-address-item/copy-address-item-list";
 
 export const CopyAddressSceneForFloatModal: FunctionComponent<{
   close: () => void;
@@ -26,6 +29,7 @@ export const CopyAddressSceneForFloatModal: FunctionComponent<{
 
   const searchRef = useFocusOnMount<HTMLInputElement>();
   const sceneTransition = useSceneTransition();
+  const [showEnterTag, setShowEnterTag] = useState(false);
 
   useSceneEvents({
     onDidVisible: () => {
@@ -65,6 +69,7 @@ export const CopyAddressSceneForFloatModal: FunctionComponent<{
           placeholder={intl.formatMessage({
             id: "page.main.components.deposit-modal.search-placeholder",
           })}
+          right={showEnterTag ? <EnterTag /> : undefined}
         />
       </Box>
 
@@ -99,6 +104,7 @@ export const CopyAddressSceneForFloatModal: FunctionComponent<{
               isOnTheFloatingModal: true,
             });
           }}
+          setShowEnterTag={setShowEnterTag}
         />
 
         <Gutter size="0.75rem" />
