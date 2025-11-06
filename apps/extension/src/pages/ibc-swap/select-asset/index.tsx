@@ -92,11 +92,19 @@ class IBCSwapDestinationState {
       IBCSwapDestinationState.PAGE_LIMIT,
       this.search
     );
-    if (!query.isFetching) {
-      runInAction(() => {
-        this.currentPage++;
-      });
+    if (query.isFetching) {
+      return;
     }
+    if (
+      query.response &&
+      query.response.data.pagination.total_pages <= this.currentPage
+    ) {
+      return;
+    }
+
+    runInAction(() => {
+      this.currentPage++;
+    });
   }
 
   // ibc swap destination인 currency 중에서 현재 가지고 있는 자산은 기존처럼 보여준다.
