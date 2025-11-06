@@ -158,8 +158,13 @@ export const RewardsCard: FunctionComponent<{
                   id: "page.stake.components.rewards-card.claim-all-button",
                 })}
                 size="small"
-                disabled={claimAllIsLoading || claimAllDisabled}
+                disabled={claimAllDisabled}
+                isLoading={claimAllIsLoading}
                 onClick={() => {
+                  if (claimAllDisabled || claimAllIsLoading) {
+                    return;
+                  }
+
                   claimAll();
                   setTimeout(() => {
                     setIsExpanded(true);
