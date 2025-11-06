@@ -1522,8 +1522,8 @@ export class ModularChainInfoImpl<M extends ModularChainInfo = ModularChainInfo>
     | { or: ChainInfoModule[]; and?: undefined }
     | { and: ChainInfoModule[]; or?: undefined }): boolean {
     return (
-      (or?.some((module) => this.matchModule(module)) || true) &&
-      (and?.every((module) => this.matchModule(module)) || true)
+      (or?.some((module) => this.matchModule(module)) ?? true) &&
+      (and?.every((module) => this.matchModule(module)) ?? true)
     );
   }
 
