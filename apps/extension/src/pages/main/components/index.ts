@@ -11,3 +11,4 @@ export * from "./looking-for-chains";
 export * from "./update-note-modal";
 export * from "./receive-button";
 export * from "./buy-button";
+export * from "./copy-check-animation";

@@ -4,36 +4,48 @@ import { Box } from "../../../../components/box";
 import { observer } from "mobx-react-lite";
 import { FixedWidthSceneTransition } from "../../../../components/transition";
 import { useTheme } from "styled-components";
-import { CopyAddressScene } from "./copy-address-scene";
-import { QRCodeScene } from "./qr-code";
-import { BuyCryptoModal } from "../buy-crypto-modal";
+import { ReferenceType, UseFloatingReturn } from "@floating-ui/react-dom";
+import { CopyAddressSceneForFloatModal } from "./copy-address-scene-for-float-modal";
+import { QRCodeScene } from "../deposit-modal/qr-code";
 
-export const DepositModal: FunctionComponent<{
+export const DepositFloatingModal: FunctionComponent<{
   close: () => void;
-}> = observer(({ close }) => {
+  floating: Pick<
+    UseFloatingReturn<ReferenceType>,
+    "x" | "y" | "strategy" | "refs"
+  >;
+}> = observer(({ close, floating }) => {
   const theme = useTheme();
 
   return (
     <Box
       backgroundColor={
-        theme.mode === "light" ? ColorPalette.white : ColorPalette["gray-600"]
+        theme.mode === "light"
+          ? ColorPalette["gray-10"]
+          : ColorPalette["gray-650"]
       }
+      style={{
+        position: floating.strategy,
+        top: floating.y ?? 0,
+        left: floating.x ?? 0,
+        width: "336px",
+        borderRadius: "0.75rem",
+      }}
+      ref={floating.refs.setFloating}
     >
       <FixedWidthSceneTransition
+        transitionContainerStyle={{
+          borderRadius: "0.75rem",
+        }}
         scenes={[
           {
             name: "copy-address",
-            element: CopyAddressScene,
+            element: CopyAddressSceneForFloatModal,
             width: "100%",
           },
           {
             name: "qr-code",
             element: QRCodeScene,
-            width: "100%",
-          },
-          {
-            name: "buy-crypto",
-            element: BuyCryptoModal,
             width: "100%",
           },
         ]}

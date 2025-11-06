@@ -300,18 +300,18 @@ export const EcosystemsSelector: FunctionComponent<{
             position: strategy,
             top: y ?? 0,
             left: x ?? 0,
-            width: "19rem",
+            width: "21rem",
             backgroundColor:
               theme.mode === "light"
-                ? ColorPalette["white"]
-                : ColorPalette["gray-600"],
+                ? ColorPalette["gray-10"]
+                : ColorPalette["gray-650"],
             borderRadius: "0.375rem",
             borderStyle: "solid",
             borderWidth: "1px",
             borderColor:
               theme.mode === "light"
                 ? ColorPalette["gray-100"]
-                : ColorPalette["gray-500"],
+                : ColorPalette["gray-550"],
           }}
         >
           <Box
@@ -461,8 +461,8 @@ export const EcosystemOverview: FunctionComponent<{
             paddingY="1.25rem"
             backgroundColor={
               theme.mode === "light"
-                ? ColorPalette["white"]
-                : ColorPalette["gray-600"]
+                ? ColorPalette["gray-10"]
+                : ColorPalette["gray-650"]
             }
             style={{
               borderBottomStyle: isLast ? "none" : "solid",
@@ -581,18 +581,12 @@ const EcosystemOptionItem: FunctionComponent<{
       padding="0.75rem"
       backgroundColor={
         theme.mode === "light"
-          ? ColorPalette["gray-50"]
-          : ColorPalette["gray-550"]
+          ? ColorPalette["gray-75"]
+          : ColorPalette["gray-600"]
       }
       borderRadius="0.375rem"
     >
-      <Caption1
-        color={
-          theme.mode === "light"
-            ? ColorPalette["gray-700"]
-            : ColorPalette["gray-200"]
-        }
-      >
+      <Caption1 color={ColorPalette["gray-300"]}>
         {parsed.config.label}
       </Caption1>
       <Gutter size="0.75rem" />

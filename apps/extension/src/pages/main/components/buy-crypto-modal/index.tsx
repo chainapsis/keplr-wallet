@@ -1,12 +1,17 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useState } from "react";
 import { observer } from "mobx-react-lite";
 import styled, { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
 import { Subtitle1 } from "../../../../components/typography";
-import { FiatOnRampServiceInfo } from "../../../../config.ui";
+
 import { Box } from "../../../../components/box";
 import { useStore } from "../../../../stores";
 import { FormattedMessage } from "react-intl";
+import { BuySupportServiceInfo } from "../../../../hooks/use-buy-support-service-infos";
+import { ArrowLeftIcon, LoadingIcon } from "../../../../components/icon";
+import { IconButton } from "../../../../components/icon-button";
+import { Column, Columns } from "../../../../components/column";
+import { useSceneTransition } from "../../../../components/transition";
 
 const Styles = {
   Container: styled.div`
@@ -62,23 +67,68 @@ const Styles = {
 
 export const BuyCryptoModal: FunctionComponent<{
   close: () => void;
-  buySupportServiceInfos: (FiatOnRampServiceInfo & { buyUrl?: string })[];
-}> = observer(({ close, buySupportServiceInfos }) => {
+  buySupportServiceInfos: BuySupportServiceInfo[];
+  showBackButton?: boolean;
+}> = observer(({ close, buySupportServiceInfos, showBackButton }) => {
   const theme = useTheme();
+  const sceneTransition = useSceneTransition();
 
   return (
     <Styles.Container>
-      <Subtitle1
-        style={{
-          color:
-            theme.mode === "light"
-              ? ColorPalette["gray-700"]
-              : ColorPalette["white"],
-          textAlign: "center",
-        }}
-      >
-        <FormattedMessage id="page.main.components.buy-crypto-modal.title" />
-      </Subtitle1>
+      {showBackButton ? (
+        <Columns sum={1} alignY="center">
+          <IconButton
+            padding="0.25rem"
+            onClick={() => {
+              sceneTransition.pop();
+            }}
+            hoverColor={
+              theme.mode === "light"
+                ? ColorPalette["gray-50"]
+                : ColorPalette["gray-500"]
+            }
+          >
+            <ArrowLeftIcon
+              width="1.5rem"
+              height="1.5rem"
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-200"]
+                  : ColorPalette["gray-300"]
+              }
+            />
+          </IconButton>
+
+          <Column weight={1} />
+
+          <Subtitle1
+            style={{
+              color:
+                theme.mode === "light"
+                  ? ColorPalette["gray-700"]
+                  : ColorPalette["white"],
+              textAlign: "center",
+            }}
+          >
+            <FormattedMessage id="page.main.components.buy-crypto-modal.title" />
+          </Subtitle1>
+          <Column weight={1} />
+          {/* 제목을 중앙 정렬시키기 위해서 뒤로가기 버튼과 맞춰야한다. 이를 위한 mock임 */}
+          <Box width="2rem" height="2rem" />
+        </Columns>
+      ) : (
+        <Subtitle1
+          style={{
+            color:
+              theme.mode === "light"
+                ? ColorPalette["gray-700"]
+                : ColorPalette["white"],
+            textAlign: "center",
+          }}
+        >
+          <FormattedMessage id="page.main.components.buy-crypto-modal.title" />
+        </Subtitle1>
+      )}
 
       {buySupportServiceInfos.map((serviceInfo) => {
         return (
@@ -94,12 +144,14 @@ export const BuyCryptoModal: FunctionComponent<{
 });
 
 const ServiceItem: FunctionComponent<{
-  serviceInfo: FiatOnRampServiceInfo & { buyUrl?: string };
+  serviceInfo: BuySupportServiceInfo;
   close: () => void;
 }> = ({ serviceInfo, close }) => {
   const { analyticsStore } = useStore();
 
-  if (serviceInfo.buyUrl === undefined) {
+  const [isLoading, setIsLoading] = useState(false);
+
+  if (serviceInfo.getBuyUrl === undefined) {
     return null;
   }
 
@@ -110,21 +162,40 @@ const ServiceItem: FunctionComponent<{
           onRampProvider: serviceInfo.serviceName,
         });
 
-        await browser.tabs.create({
-          url: serviceInfo.buyUrl,
-        });
+        setIsLoading(true);
+
+        try {
+          if (!serviceInfo.getBuyUrl) {
+            throw new Error("Buy URL is missing");
+          }
+
+          const url = await serviceInfo.getBuyUrl();
+
+          await browser.tabs.create({
+            url,
+          });
+        } catch (e) {
+          console.log(e);
+        } finally {
+          setIsLoading(false);
+        }
 
         close();
       }}
     >
-      <Box>
-        <img
-          src={require(`../../../../public/assets/img/fiat-on-ramp/${serviceInfo.serviceId}.svg`)}
-          alt={`buy ${serviceInfo.serviceId} button`}
-        />
-      </Box>
-
-      <Styles.ItemName>{serviceInfo.serviceName}</Styles.ItemName>
+      {!isLoading ? (
+        <React.Fragment>
+          <Box>
+            <img
+              src={require(`../../../../public/assets/img/fiat-on-ramp/${serviceInfo.serviceId}.svg`)}
+              alt={`buy ${serviceInfo.serviceId} button`}
+            />
+          </Box>
+          <Styles.ItemName>{serviceInfo.serviceName}</Styles.ItemName>
+        </React.Fragment>
+      ) : (
+        <LoadingIcon width="1.75rem" height="1.75rem" />
+      )}
     </Styles.ItemContainer>
   );
 };
