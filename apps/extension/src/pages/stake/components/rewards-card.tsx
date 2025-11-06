@@ -149,14 +149,22 @@ export const RewardsCard: FunctionComponent<{
             <div
               onMouseEnter={() => setDisableHover(true)}
               onMouseLeave={() => setDisableHover(false)}
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
             >
               <TextButton
                 text={intl.formatMessage({
                   id: "page.stake.components.rewards-card.claim-all-button",
                 })}
                 size="small"
-                disabled={claimAllDisabled}
-                onClick={claimAll}
+                disabled={claimAllIsLoading || claimAllDisabled}
+                onClick={() => {
+                  claimAll();
+                  setTimeout(() => {
+                    setIsExpanded(true);
+                  }, 1);
+                }}
                 color="blue"
                 right={
                   claimAllIsLoading ? (
