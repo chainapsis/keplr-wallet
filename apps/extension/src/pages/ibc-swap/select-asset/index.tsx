@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { BackButton } from "../../../layouts/header/components";
 import { HeaderLayout } from "../../../layouts/header";
 import styled from "styled-components";
@@ -15,6 +15,7 @@ import { useIntl } from "react-intl";
 import { HugeQueriesStore } from "../../../stores/huge-queries";
 import { ViewToken } from "../../main";
 import {
+  action,
   autorun,
   computed,
   IReactionDisposer,
@@ -31,6 +32,25 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { ObservableQueryTargetAssets } from "@keplr-wallet/stores-internal/build/swap/target-assets";
 import { Gutter } from "../../../components/gutter";
 import { useGlobarSimpleBar } from "../../../hooks/global-simplebar";
+import { ObservableQueryValidateTargetAssets } from "@keplr-wallet/stores-internal/build/swap/validate-target-assets";
+import { performSearch } from "../../../hooks/use-search";
+import { Mutable } from "utility-types";
+
+const searchFields = [
+  {
+    key: "originCurrency.coinDenom",
+    function: (item: ViewToken) => {
+      const currency = item.token.currency;
+      if ("originCurrency" in currency) {
+        return CoinPretty.makeCoinDenomPretty(
+          currency.originCurrency?.coinDenom || ""
+        );
+      }
+      return CoinPretty.makeCoinDenomPretty(currency.coinDenom);
+    },
+  },
+  "chainInfo.chainName",
+];
 
 // 계산이 복잡해서 memoize을 적용해야하는데
 // mobx와 useMemo()는 같이 사용이 어려워서
@@ -41,13 +61,27 @@ class IBCSwapDestinationState {
   @observable
   protected currentPage = 1;
 
+  @observable
+  protected search = "";
+
   constructor(
+    protected readonly excludeKey: string | null,
     protected readonly hugeQueriesStore: HugeQueriesStore,
     protected readonly queryTargetAssets: ObservableQueryTargetAssets,
+    protected readonly queryValidateTargetAssets: ObservableQueryValidateTargetAssets,
     protected readonly inChainId: string,
-    protected readonly inDenom: string
+    protected readonly inDenom: string,
+    initialSearch: string
   ) {
+    this.search = initialSearch;
+
     makeObservable(this);
+  }
+
+  @action
+  setSearch(search: string) {
+    this.search = search;
+    this.currentPage = 1;
   }
 
   increasePage() {
@@ -55,7 +89,8 @@ class IBCSwapDestinationState {
       this.inChainId,
       this.inDenom,
       this.currentPage,
-      IBCSwapDestinationState.PAGE_LIMIT
+      IBCSwapDestinationState.PAGE_LIMIT,
+      this.search
     );
     if (!query.isFetching) {
       runInAction(() => {
@@ -78,10 +113,38 @@ class IBCSwapDestinationState {
     const zeroDec = new Dec(0);
 
     // Swap destination은 ibc currency는 보여주지 않는다.
-    let tokens = this.hugeQueriesStore.getAllBalances({
-      allowIBCToken: false,
-      enableFilterDisabledAssetToken: false,
-    });
+    let tokens = this.hugeQueriesStore
+      .getAllBalances({
+        allowIBCToken: false,
+        enableFilterDisabledAssetToken: false,
+      })
+      .filter((token) => {
+        if (!("currencies" in token.chainInfo)) {
+          return false;
+        }
+
+        const denomHelper = new DenomHelper(
+          token.token.currency.coinMinimalDenom
+        );
+        if (denomHelper.type === "lp") {
+          return false;
+        }
+
+        return (
+          !this.excludeKey ||
+          `${token.chainInfo.chainIdentifier}/${token.token.currency.coinMinimalDenom}` !==
+            this.excludeKey
+        );
+      });
+
+    if (this.search.trim().length > 0) {
+      tokens = performSearch(
+        tokens as Mutable<typeof tokens>,
+        this.search,
+        searchFields
+      ) as typeof tokens;
+    }
+
     let remaining: {
       currency: Currency;
       chainInfo: IChainInfoImpl;
@@ -93,7 +156,8 @@ class IBCSwapDestinationState {
           this.inChainId,
           this.inDenom,
           i,
-          IBCSwapDestinationState.PAGE_LIMIT
+          IBCSwapDestinationState.PAGE_LIMIT,
+          this.search
         ).currenciesMap;
 
       tokens = tokens
@@ -105,17 +169,14 @@ class IBCSwapDestinationState {
             return false;
           }
 
-          const map = destinationMap.get(token.chainInfo.chainIdentifier);
-          if (map) {
-            return (
-              map.currencies.find(
-                (cur) =>
-                  cur.coinMinimalDenom === token.token.currency.coinMinimalDenom
-              ) != null
-            );
-          }
-
-          return false;
+          return this.queryValidateTargetAssets.isTargetAssetsToken(
+            this.inChainId,
+            this.inDenom,
+            {
+              chainId: token.chainInfo.chainId,
+              denom: token.token.currency.coinMinimalDenom,
+            }
+          );
         });
 
       // tokens에 존재했는지 체크 용으로 사용
@@ -145,21 +206,34 @@ class IBCSwapDestinationState {
       }
     }
 
-    remaining = remaining.sort((a, b) => {
-      if (
-        CoinPretty.makeCoinDenomPretty(a.currency.coinDenom) <
-        CoinPretty.makeCoinDenomPretty(b.currency.coinDenom)
-      ) {
-        return -1;
-      } else if (
-        CoinPretty.makeCoinDenomPretty(a.currency.coinDenom) >
-        CoinPretty.makeCoinDenomPretty(b.currency.coinDenom)
-      ) {
-        return 1;
-      } else {
-        return 0;
-      }
-    });
+    remaining = remaining
+      .sort((a, b) => {
+        if (
+          CoinPretty.makeCoinDenomPretty(a.currency.coinDenom) <
+          CoinPretty.makeCoinDenomPretty(b.currency.coinDenom)
+        ) {
+          return -1;
+        } else if (
+          CoinPretty.makeCoinDenomPretty(a.currency.coinDenom) >
+          CoinPretty.makeCoinDenomPretty(b.currency.coinDenom)
+        ) {
+          return 1;
+        } else {
+          return 0;
+        }
+      })
+      .filter((r) => {
+        const denomHelper = new DenomHelper(r.currency.coinMinimalDenom);
+        if (denomHelper.type === "lp") {
+          return false;
+        }
+
+        return (
+          !this.excludeKey ||
+          `${r.chainInfo.chainIdentifier}/${r.currency.coinMinimalDenom}` !==
+            this.excludeKey
+        );
+      });
 
     return {
       tokens,
@@ -169,7 +243,8 @@ class IBCSwapDestinationState {
           this.inChainId,
           this.inDenom,
           this.currentPage,
-          IBCSwapDestinationState.PAGE_LIMIT
+          IBCSwapDestinationState.PAGE_LIMIT,
+          this.search
         ).response;
       })(),
     };
@@ -221,12 +296,18 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
     const [state] = useState(
       () =>
         new IBCSwapDestinationState(
+          excludeKey,
           hugeQueriesStore,
           swapQueriesStore.queryTargetAssets,
+          swapQueriesStore.queryValidateTargetAssets,
           paramInChainId,
-          paramInDenom
+          paramInDenom,
+          search
         )
     );
+    useEffect(() => {
+      state.setSearch(search);
+    }, [state, search]);
 
     const globalSimpleBar = useGlobarSimpleBar();
     useEffect(() => {
@@ -260,46 +341,6 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
     }, [globalSimpleBar.ref, state]);
 
     const { tokens, remaining, isLoading } = state.tokens;
-
-    const filteredTokens = useMemo(() => {
-      const filtered = tokens.filter((token) => {
-        if (!("currencies" in token.chainInfo)) {
-          return false;
-        }
-
-        const denomHelper = new DenomHelper(
-          token.token.currency.coinMinimalDenom
-        );
-        if (denomHelper.type === "lp") {
-          return false;
-        }
-
-        return (
-          !excludeKey ||
-          `${token.chainInfo.chainIdentifier}/${token.token.currency.coinMinimalDenom}` !==
-            excludeKey
-        );
-      });
-
-      return filtered;
-    }, [excludeKey, tokens]);
-
-    const filteredRemaining = useMemo(() => {
-      const filtered = remaining.filter((r) => {
-        const denomHelper = new DenomHelper(r.currency.coinMinimalDenom);
-        if (denomHelper.type === "lp") {
-          return false;
-        }
-
-        return (
-          !excludeKey ||
-          `${r.chainInfo.chainIdentifier}/${r.currency.coinMinimalDenom}` !==
-            excludeKey
-        );
-      });
-
-      return filtered;
-    }, [excludeKey, remaining]);
 
     const [selectedCoinMinimalDenom, setSelectedCoinMinimalDenom] =
       useState<string>();
@@ -390,7 +431,7 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
           />
           {
             <Stack gutter="0.5rem">
-              {filteredTokens.map((viewToken) => {
+              {tokens.map((viewToken) => {
                 const isUnsupportedToken = unsupportedCoinMinimalDenoms.has(
                   `${
                     ChainIdHelper.parse(viewToken.chainInfo.chainId).identifier
@@ -410,7 +451,7 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
                   />
                 );
               })}
-              {filteredRemaining.map((item) => {
+              {remaining.map((item) => {
                 const isFindingCurrency =
                   selectedCoinMinimalDenom ===
                   `${ChainIdHelper.parse(item.chainInfo.chainId).identifier}/${

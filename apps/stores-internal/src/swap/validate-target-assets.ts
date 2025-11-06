@@ -4,14 +4,20 @@ import {
   ObservableQuery,
   QuerySharedContext,
 } from "@keplr-wallet/stores";
-import { SwappableResponse } from "./types";
-import { computed, makeObservable, observable, runInAction } from "mobx";
+import { ValidateTargetAssetsResponse } from "./types";
+import {
+  computed,
+  makeObservable,
+  observable,
+  ObservableMap,
+  runInAction,
+} from "mobx";
 import Joi from "joi";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import chunk from "lodash.chunk";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
-const Schema = Joi.object<SwappableResponse>({
+const Schema = Joi.object<ValidateTargetAssetsResponse>({
   tokens: Joi.array()
     .items(
       Joi.object({
@@ -49,17 +55,19 @@ function normalizeChainId(chainId: string): string {
   return chainId;
 }
 
-export class ObservableQuerySwappableInner extends ObservableQuery<SwappableResponse> {
+export class ObservableQueryValidateTargetAssetsInner extends ObservableQuery<ValidateTargetAssetsResponse> {
   constructor(
     sharedContext: QuerySharedContext,
     protected readonly chainStore: IChainStore,
     baseURL: string,
+    protected readonly chainId: string,
+    protected readonly denom: string,
     protected readonly tokens: {
       chainId: string;
       denom: string;
     }[]
   ) {
-    super(sharedContext, baseURL, "/v2/swap/swappable");
+    super(sharedContext, baseURL, "/v2/swap/validate_target_assets");
 
     makeObservable(this);
   }
@@ -77,7 +85,7 @@ export class ObservableQuerySwappableInner extends ObservableQuery<SwappableResp
     return res;
   }
 
-  isSwappableToken(chainId: string, denom: string): boolean {
+  isTargetAssetsToken(chainId: string, denom: string): boolean {
     const key = this.makeMapKey(chainId, denom);
     return this.map.get(key) === true;
   }
@@ -92,7 +100,7 @@ export class ObservableQuerySwappableInner extends ObservableQuery<SwappableResp
 
   protected override async fetchResponse(
     abortController: AbortController
-  ): Promise<{ headers: any; data: SwappableResponse }> {
+  ): Promise<{ headers: any; data: ValidateTargetAssetsResponse }> {
     const _result = await simpleFetch(this.baseURL, this.url, {
       signal: abortController.signal,
       method: "POST",
@@ -100,6 +108,8 @@ export class ObservableQuerySwappableInner extends ObservableQuery<SwappableResp
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
+        chain_id: normalizeChainId(this.chainId),
+        denom: normalizeDenom(this.chainStore, this.chainId, this.denom),
         tokens: this.tokens.map((t) => {
           return {
             chain_id: normalizeChainId(t.chainId),
@@ -130,6 +140,8 @@ export class ObservableQuerySwappableInner extends ObservableQuery<SwappableResp
 
   protected override getCacheKey(): string {
     return `${super.getCacheKey()}-${JSON.stringify({
+      chain_id: normalizeChainId(this.chainId),
+      denom: normalizeDenom(this.chainStore, this.chainId, this.denom),
       tokens: this.tokens.map((t) => {
         return {
           chain_id: normalizeChainId(t.chainId),
@@ -140,13 +152,15 @@ export class ObservableQuerySwappableInner extends ObservableQuery<SwappableResp
   }
 }
 
-export class ObservableQuerySwappable extends HasMapStore<ObservableQuerySwappableInner> {
-  @observable
-  protected batchTokenToKey: Map<string, string> = new Map();
-
-  protected batchTick: Promise<void> | undefined;
-  protected batchTokens: Map<string, { chainId: string; denom: string }> =
+export class ObservableQueryValidateTargetAssets extends HasMapStore<ObservableQueryValidateTargetAssetsInner> {
+  protected batchTokenToKey: Map<string, ObservableMap<string, string>> =
     new Map();
+
+  protected batchTick: Map<string, Promise<void> | undefined> = new Map();
+  protected batchTokens: Map<
+    string,
+    Map<string, { chainId: string; denom: string }>
+  > = new Map();
 
   constructor(
     protected readonly sharedContext: QuerySharedContext,
@@ -154,65 +168,113 @@ export class ObservableQuerySwappable extends HasMapStore<ObservableQuerySwappab
     protected readonly baseURL: string
   ) {
     super((key) => {
-      const tokens = JSON.parse(key);
-      return new ObservableQuerySwappableInner(
+      const obj = JSON.parse(key);
+      return new ObservableQueryValidateTargetAssetsInner(
         this.sharedContext,
         this.chainStore,
         this.baseURL,
-        tokens
+        obj.chainId,
+        obj.denom,
+        obj.tokens
       );
     });
-
-    makeObservable(this);
   }
 
-  isSwappableToken(chainId: string, denom: string): boolean {
-    const observable = this.getObservableQuerySwappable(chainId, denom);
+  protected getBatchState(baseKey: string): {
+    batchTokenToKey: Map<string, string>;
+    batchTokens: Map<string, { chainId: string; denom: string }>;
+  } {
+    let batchTokenToKey: ObservableMap<string, string>;
+    let batchTokens: Map<string, { chainId: string; denom: string }>;
+    if (!this.batchTokenToKey.has(baseKey)) {
+      batchTokenToKey = observable.map();
+      this.batchTokenToKey.set(baseKey, batchTokenToKey);
+    } else {
+      batchTokenToKey = this.batchTokenToKey.get(baseKey)!;
+    }
+    if (!this.batchTokens.has(baseKey)) {
+      batchTokens = new Map();
+      this.batchTokens.set(baseKey, batchTokens);
+    } else {
+      batchTokens = this.batchTokens.get(baseKey)!;
+    }
+
+    return {
+      batchTokenToKey,
+      batchTokens,
+    };
+  }
+
+  isTargetAssetsToken(
+    chainId: string,
+    denom: string,
+    token: {
+      chainId: string;
+      denom: string;
+    }
+  ): boolean {
+    const observable = this.getObservableQueryValidateTargetAssets(
+      chainId,
+      denom,
+      token
+    );
     if (observable) {
-      return observable.isSwappableToken(chainId, denom);
+      return observable.isTargetAssetsToken(token.chainId, token.denom);
     }
     return false;
   }
 
-  getObservableQuerySwappable(
+  getObservableQueryValidateTargetAssets(
     chainId: string,
-    denom: string
-  ): ObservableQuerySwappableInner | undefined {
-    const key = `${ChainIdHelper.parse(chainId).identifier}/${normalizeDenom(
-      this.chainStore,
-      chainId,
-      denom
-    )}`;
-    if (this.batchTokenToKey.has(key)) {
-      const k = this.batchTokenToKey.get(key);
+    denom: string,
+    token: {
+      chainId: string;
+      denom: string;
+    }
+  ): ObservableQueryValidateTargetAssetsInner | undefined {
+    const baseKey = `${
+      ChainIdHelper.parse(chainId).identifier
+    }/${normalizeDenom(this.chainStore, chainId, denom)}`;
+
+    const { batchTokenToKey, batchTokens } = this.getBatchState(baseKey);
+
+    const key = `${
+      ChainIdHelper.parse(token.chainId).identifier
+    }/${normalizeDenom(this.chainStore, token.chainId, token.denom)}`;
+    if (batchTokenToKey.has(key)) {
+      const k = batchTokenToKey.get(key);
       return this.get(k!);
     }
 
-    if (!this.batchTokens.has(key)) {
-      this.batchTokens.set(key, {
-        chainId,
-        denom,
+    if (!batchTokens.has(key)) {
+      batchTokens.set(key, {
+        chainId: token.chainId,
+        denom: token.denom,
       });
     }
-    if (!this.batchTick) {
-      this.batchTick = Promise.resolve();
-      this.batchTick.then(() => {
-        this.batchTick = undefined;
-        const tokens = Array.from(this.batchTokens.values());
-        this.batchTokens.clear();
+    if (!this.batchTick.get(baseKey)) {
+      this.batchTick.set(baseKey, Promise.resolve());
+      this.batchTick.get(baseKey)!.then(() => {
+        this.batchTick.set(baseKey, undefined);
+        const tokens = Array.from(batchTokens.values());
+        batchTokens.clear();
 
         if (tokens.length > 0) {
           const chunks = chunk(tokens, 100);
 
           for (const tokens of chunks) {
-            const k = JSON.stringify(tokens);
+            const k = JSON.stringify({
+              chainId,
+              denom,
+              tokens,
+            });
 
-            // Get invokes the creationg of ObservableQuerySwappableInner
+            // Get invokes the creationg of ObservableQueryValidateTargetAssetsInner
             this.get(k);
 
             runInAction(() => {
               for (const t of tokens) {
-                this.batchTokenToKey.set(
+                batchTokenToKey.set(
                   `${
                     ChainIdHelper.parse(t.chainId).identifier
                   }/${normalizeDenom(this.chainStore, t.chainId, t.denom)}`,
@@ -225,8 +287,8 @@ export class ObservableQuerySwappable extends HasMapStore<ObservableQuerySwappab
       });
     }
 
-    if (this.batchTokenToKey.has(key)) {
-      const k = this.batchTokenToKey.get(key);
+    if (batchTokenToKey.has(key)) {
+      const k = batchTokenToKey.get(key);
       return this.get(k!);
     }
   }

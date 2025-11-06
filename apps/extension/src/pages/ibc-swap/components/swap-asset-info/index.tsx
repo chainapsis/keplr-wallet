@@ -775,7 +775,7 @@ const SelectDestinationChainModal: FunctionComponent<{
   amountConfig: IBCSwapAmountConfig;
   onDestinationChainSelect: (chainId: string, coinMinimalDenom: string) => void;
 }> = observer(({ close, amountConfig, onDestinationChainSelect }) => {
-  const { chainStore, skipQueriesStore } = useStore();
+  const { chainStore, swapQueriesStore } = useStore();
 
   const theme = useTheme();
 
@@ -785,11 +785,12 @@ const SelectDestinationChainModal: FunctionComponent<{
   const channels: {
     chainId: string;
     denom: string;
-  }[] =
-    skipQueriesStore.queryIBCSwap.getSwapDestinationCurrencyAlternativeChains(
-      chainStore.getChain(amountConfig.outChainId),
-      amountConfig.outCurrency
-    );
+  }[] = swapQueriesStore.queryRelatedAssets
+    .getObservableQueryRelatedAssets(
+      amountConfig.outChainId,
+      amountConfig.outCurrency.coinMinimalDenom
+    )
+    .currencies.map((c) => ({ chainId: c.chainId, denom: c.coinMinimalDenom }));
 
   const filteredChannels = (() => {
     const trim = search.trim().toLowerCase();

@@ -5,14 +5,14 @@ import {
   ObservableQuery,
   QuerySharedContext,
 } from "@keplr-wallet/stores";
-import { TargetAssetsResponse } from "./types";
+import { RelatedAssetsResponse } from "./types";
 import { computed, makeObservable } from "mobx";
 import Joi from "joi";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { Currency } from "@keplr-wallet/types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
-const Schema = Joi.object<TargetAssetsResponse>({
+const Schema = Joi.object<RelatedAssetsResponse>({
   tokens: Joi.array()
     .items(
       Joi.object({
@@ -29,28 +29,17 @@ const Schema = Joi.object<TargetAssetsResponse>({
       }).unknown(true)
     )
     .required(),
-  pagination: Joi.object({
-    page: Joi.number().required(),
-    limit: Joi.number().required(),
-    total: Joi.number().required(),
-    total_pages: Joi.number().required(),
-  }).unknown(true),
 }).unknown(true);
 
-export class ObservableQueryTargetAssetsInner extends ObservableQuery<TargetAssetsResponse> {
+export class ObservableQueryRelatedAssetsInner extends ObservableQuery<RelatedAssetsResponse> {
   constructor(
     sharedContext: QuerySharedContext,
     protected readonly chainStore: IChainStore,
     baseURL: string,
     protected readonly chainId: string,
-    protected readonly denom: string,
-    protected readonly page: number,
-    protected readonly limit: number,
-    protected readonly search: string
+    protected readonly denom: string
   ) {
-    super(sharedContext, baseURL, "/v2/swap/swappable_target_assets", {
-      disableCache: page !== 1 || search.trim().length > 0,
-    });
+    super(sharedContext, baseURL, "/v2/swap/swappable_related_assets");
 
     makeObservable(this);
   }
@@ -132,7 +121,7 @@ export class ObservableQueryTargetAssetsInner extends ObservableQuery<TargetAsse
 
   protected override async fetchResponse(
     abortController: AbortController
-  ): Promise<{ headers: any; data: TargetAssetsResponse }> {
+  ): Promise<{ headers: any; data: RelatedAssetsResponse }> {
     const _result = await simpleFetch(this.baseURL, this.url, {
       signal: abortController.signal,
       method: "POST",
@@ -158,17 +147,6 @@ export class ObservableQueryTargetAssetsInner extends ObservableQuery<TargetAsse
           }
           return this.denom;
         })(),
-        page: this.page,
-        limit: this.limit,
-        ...(() => {
-          if (this.search.trim().length > 0) {
-            return {
-              search: this.search,
-            };
-          }
-
-          return {};
-        })(),
       }),
     });
     const result = {
@@ -179,7 +157,7 @@ export class ObservableQueryTargetAssetsInner extends ObservableQuery<TargetAsse
     const validated = Schema.validate(result.data);
     if (validated.error) {
       console.log(
-        "Failed to validate swappable target assets response from source response",
+        "Failed to validate swappable related assets response from source response",
         validated.error
       );
       throw validated.error;
@@ -195,14 +173,11 @@ export class ObservableQueryTargetAssetsInner extends ObservableQuery<TargetAsse
     return `${super.getCacheKey()}-${JSON.stringify({
       chainId: this.chainId,
       denom: this.denom,
-      page: this.page,
-      limit: this.limit,
-      search: this.search.trim(),
     })}`;
   }
 }
 
-export class ObservableQueryTargetAssets extends HasMapStore<ObservableQueryTargetAssetsInner> {
+export class ObservableQueryRelatedAssets extends HasMapStore<ObservableQueryRelatedAssetsInner> {
   constructor(
     protected readonly sharedContext: QuerySharedContext,
     protected readonly chainStore: IChainStore,
@@ -210,33 +185,24 @@ export class ObservableQueryTargetAssets extends HasMapStore<ObservableQueryTarg
   ) {
     super((key) => {
       const p = JSON.parse(key);
-      return new ObservableQueryTargetAssetsInner(
+      return new ObservableQueryRelatedAssetsInner(
         this.sharedContext,
         this.chainStore,
         this.baseURL,
         p.chainId,
-        p.denom,
-        p.page,
-        p.limit,
-        p.search
+        p.denom
       );
     });
   }
 
-  getObservableQueryTargetAssets(
+  getObservableQueryRelatedAssets(
     chainId: string,
-    denom: string,
-    page: number,
-    limit: number,
-    search: string
-  ): ObservableQueryTargetAssetsInner {
+    denom: string
+  ): ObservableQueryRelatedAssetsInner {
     return this.get(
       JSON.stringify({
         chainId,
         denom,
-        page,
-        limit,
-        search,
       })
     );
   }

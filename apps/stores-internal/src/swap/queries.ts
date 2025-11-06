@@ -3,10 +3,14 @@ import { DeepReadonly } from "utility-types";
 import { ObservableQuerySwappable } from "./swappable";
 import { InternalChainStore } from "../internal";
 import { ObservableQueryTargetAssets } from "./target-assets";
+import { ObservableQueryRelatedAssets } from "./related-assets";
+import { ObservableQueryValidateTargetAssets } from "./validate-target-assets";
 
 export class SwapQueries {
   public readonly querySwappable: DeepReadonly<ObservableQuerySwappable>;
   public readonly queryTargetAssets: DeepReadonly<ObservableQueryTargetAssets>;
+  public readonly queryRelatedAssets: DeepReadonly<ObservableQueryRelatedAssets>;
+  public readonly queryValidateTargetAssets: DeepReadonly<ObservableQueryValidateTargetAssets>;
 
   constructor(
     sharedContext: QuerySharedContext,
@@ -19,6 +23,16 @@ export class SwapQueries {
       baseURL
     );
     this.queryTargetAssets = new ObservableQueryTargetAssets(
+      sharedContext,
+      chainStore,
+      baseURL
+    );
+    this.queryRelatedAssets = new ObservableQueryRelatedAssets(
+      sharedContext,
+      chainStore,
+      baseURL
+    );
+    this.queryValidateTargetAssets = new ObservableQueryValidateTargetAssets(
       sharedContext,
       chainStore,
       baseURL
