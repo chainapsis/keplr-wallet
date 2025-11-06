@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { ViewToken } from "../pages/main";
 import { useStore } from "../stores";
 import {
-  ClaimAllEachState,
   useClaimAllEachState,
   useCosmosClaimRewards,
   useStarknetClaimRewards,
@@ -10,6 +9,7 @@ import {
 import { CoinPretty, Dec, PricePretty } from "@keplr-wallet/unit";
 import { NEUTRON_CHAIN_ID, NOBLE_CHAIN_ID } from "../config.ui";
 import { ModularChainInfo } from "@keplr-wallet/types";
+import { ClaimAllEachState } from "../stores/claim-rewards-state";
 
 export interface ViewClaimToken extends Omit<ViewToken, "chainInfo"> {
   modularChainInfo: ModularChainInfo;
@@ -370,11 +370,6 @@ export function useRewards() {
       setCount(0);
       completedChainsRef.current.clear();
       prevFetchingStateRef.current.clear();
-      for (const s of states) {
-        s.setIsLoading(false);
-        s.setIsSimulating(false);
-        s.setFailedReason(undefined);
-      }
       prevSelectedKeyIdRef.current = keyRingStore.selectedKeyInfo?.id;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

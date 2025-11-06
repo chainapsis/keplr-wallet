@@ -18,7 +18,7 @@ import { Skeleton } from "../../../components/skeleton";
 import { XAxis, YAxis } from "../../../components/axis";
 import { FormattedMessage, useIntl } from "react-intl";
 import { CurrencyImageFallback } from "../../../components/image";
-import { ClaimAllEachState } from "../../../hooks/claim";
+import { ClaimAllEachState } from "../../../stores/claim-rewards-state";
 import {
   animated,
   useTransition,
