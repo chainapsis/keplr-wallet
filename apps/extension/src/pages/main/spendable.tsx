@@ -189,7 +189,7 @@ const SpendableCollapsibleList: FunctionComponent<{
 
   return (
     <Stack>
-      <Stack gutter="0.5rem">{alwaysShown}</Stack>
+      <Stack>{alwaysShown}</Stack>
 
       <VerticalCollapseTransition
         collapsed={isCollapsed}
@@ -203,8 +203,7 @@ const SpendableCollapsibleList: FunctionComponent<{
         notRenderHiddenItemsIsClosing ||
         !isCollapsed ? (
           <React.Fragment>
-            <Gutter size="0.5rem" />
-            <Stack gutter="0.5rem">{hidden}</Stack>
+            <Stack>{hidden}</Stack>
           </React.Fragment>
         ) : null}
       </VerticalCollapseTransition>
