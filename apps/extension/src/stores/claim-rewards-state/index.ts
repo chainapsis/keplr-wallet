@@ -12,12 +12,18 @@ export class ClaimAllEachState {
   @observable
   failedReason: Error | undefined = undefined;
 
+  @observable
+  hasStarted = false;
+
   constructor() {
     makeObservable(this);
   }
 
   @action
   setIsLoading(value: boolean) {
+    if (value) {
+      this.hasStarted = true;
+    }
     this.isLoading = value;
   }
 
@@ -30,6 +36,14 @@ export class ClaimAllEachState {
   setFailedReason(value: Error | undefined) {
     this.isLoading = false;
     this.failedReason = value;
+  }
+
+  @action
+  reset() {
+    this.isLoading = false;
+    this.isSimulating = false;
+    this.failedReason = undefined;
+    this.hasStarted = false;
   }
 }
 
@@ -69,12 +83,19 @@ export class ClaimRewardsStateStore {
     }
     for (const mapKey of Array.from(this.map.keys())) {
       if (mapKey.startsWith(`${keyId}:`)) {
+        const state = this.map.get(mapKey);
+        if (state) {
+          state.reset();
+        }
         this.map.delete(mapKey);
       }
     }
   }
 
   resetAll() {
+    for (const state of this.map.values()) {
+      state.reset();
+    }
     this.map.clear();
   }
 }
