@@ -830,7 +830,12 @@ export const CosmosTxView: FunctionComponent<{
          * fee coverage section should be displayed when top-up is should be done and available, or completed.
          */}
         <VerticalCollapseTransition
-          collapsed={!((shouldTopUp && isTopUpAvailable) || topUpCompleted)}
+          collapsed={
+            !(
+              (shouldTopUp && (isTopUpAvailable || !!remainingText)) ||
+              topUpCompleted
+            )
+          }
         >
           {interactionData.isInternal ? (
             <FeeCoverageBox feeConfig={feeConfig} />

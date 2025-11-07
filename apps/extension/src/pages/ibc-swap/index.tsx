@@ -2008,7 +2008,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           }}
         />
         <Gutter size="0.75rem" />
-        <VerticalCollapseTransition collapsed={shouldTopUp && isTopUpAvailable}>
+        <VerticalCollapseTransition
+          collapsed={shouldTopUp && (isTopUpAvailable || !!remainingText)}
+        >
           <SwapFeeInfo
             senderConfig={ibcSwapConfigs.senderConfig}
             amountConfig={ibcSwapConfigs.amountConfig}
@@ -2023,7 +2025,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           />
         </VerticalCollapseTransition>
         <VerticalCollapseTransition
-          collapsed={!(shouldTopUp && isTopUpAvailable)}
+          collapsed={!(shouldTopUp && (isTopUpAvailable || !!remainingText))}
         >
           <FeeCoverageDescription isTopUpAvailable={isTopUpAvailable} />
         </VerticalCollapseTransition>
