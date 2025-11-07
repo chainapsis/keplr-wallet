@@ -287,7 +287,7 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
     const chainIdentifier2 = ChainIdHelper.parse(chainIdentifier1.identifier);
     if (chainIdentifier1.identifier !== chainIdentifier2.identifier) {
       throw new Error(
-        "chainIdentifier cannot be nested in the {chainIdentifier}-{version} format"
+        `chainIdentifier cannot be nested in the {chainIdentifier}-{version} format (chainId: ${value.chainId}, chainIdentifier: ${chainIdentifier1.identifier})`
       );
     }
   }
