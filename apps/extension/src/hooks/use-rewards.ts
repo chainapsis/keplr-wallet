@@ -278,7 +278,20 @@ export function useRewards() {
       const state = getClaimAllEachState(
         viewClaimToken.modularChainInfo.chainId
       );
-      if (state.hasStarted && !state.isLoading && !state.isSimulating) {
+      if (state.isCompleted) {
+        count += 1;
+      }
+    }
+    return count;
+  }, [viewClaimTokens, getClaimAllEachState]);
+
+  const succeededCount = useMemo(() => {
+    let count = 0;
+    for (const viewClaimToken of viewClaimTokens) {
+      const state = getClaimAllEachState(
+        viewClaimToken.modularChainInfo.chainId
+      );
+      if (state.isSucceeded) {
         count += 1;
       }
     }
@@ -318,12 +331,8 @@ export function useRewards() {
       return "";
     }
 
-    if (finishedCount === totalClaimTokenCount) {
-      return `${totalClaimTokenCount}/${totalClaimTokenCount}`;
-    }
-
-    return `${finishedCount}/${totalClaimTokenCount}`;
-  }, [finishedCount, totalClaimTokenCount]);
+    return `${succeededCount}/${totalClaimTokenCount}`;
+  }, [succeededCount, totalClaimTokenCount]);
 
   useEffect(() => {
     if (keyRingStore.selectedKeyInfo?.id !== prevSelectedKeyIdRef.current) {

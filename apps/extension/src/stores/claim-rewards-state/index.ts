@@ -1,4 +1,4 @@
-import { action, makeObservable, observable } from "mobx";
+import { action, makeObservable, observable, computed } from "mobx";
 import { ChainStore } from "../chain";
 import { KeyRingStore } from "@keplr-wallet/stores-core";
 
@@ -44,6 +44,16 @@ export class ClaimAllEachState {
     this.isSimulating = false;
     this.failedReason = undefined;
     this.hasStarted = false;
+  }
+
+  @computed
+  get isCompleted() {
+    return this.hasStarted && !this.isLoading && !this.isSimulating;
+  }
+
+  @computed
+  get isSucceeded() {
+    return this.isCompleted && !this.failedReason;
   }
 }
 
