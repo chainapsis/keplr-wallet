@@ -63,13 +63,16 @@ export const CopyAddressSceneForFloatModal: FunctionComponent<{
           value={search}
           onChange={(e) => {
             e.preventDefault();
-
             setSearch(e.target.value);
           }}
-          placeholder={intl.formatMessage({
-            id: "page.main.components.deposit-modal.search-placeholder",
-          })}
-          right={showEnterTag ? <EnterTag /> : undefined}
+          placeholder={
+            showEnterTag
+              ? ""
+              : intl.formatMessage({
+                  id: "page.main.components.deposit-modal.search-placeholder",
+                })
+          }
+          textSuffix={showEnterTag ? <EnterTag /> : undefined}
         />
       </Box>
 

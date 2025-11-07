@@ -283,6 +283,7 @@ export const EnterTag = () => {
           : ColorPalette["gray-500"]
       }
       borderRadius="0.25rem"
+      marginLeft="0.25rem"
     >
       <XAxis alignY="center" gap="0.125rem">
         <div
