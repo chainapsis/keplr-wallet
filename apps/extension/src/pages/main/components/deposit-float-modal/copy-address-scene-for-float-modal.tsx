@@ -89,6 +89,9 @@ export const CopyAddressSceneForFloatModal: FunctionComponent<{
         {isShowNoResult && <NoResultBox />}
 
         <CopyAddressItemList
+          containerStyle={{
+            padding: "0 1rem",
+          }}
           sortedAddresses={sortedAddresses}
           close={close}
           blockInteraction={blockInteraction}
