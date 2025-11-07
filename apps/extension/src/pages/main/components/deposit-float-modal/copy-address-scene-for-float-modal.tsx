@@ -90,6 +90,11 @@ export const CopyAddressSceneForFloatModal: FunctionComponent<{
 
         <CopyAddressItemList
           sortedAddresses={sortedAddresses}
+          copyItemAddressHoverColor={
+            theme.mode === "light"
+              ? ColorPalette["gray-75"]
+              : ColorPalette["gray-600"]
+          }
           close={close}
           blockInteraction={blockInteraction}
           setBlockInteraction={setBlockInteraction}
