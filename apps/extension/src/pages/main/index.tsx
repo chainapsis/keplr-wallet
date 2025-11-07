@@ -205,6 +205,9 @@ export const MainPage: FunctionComponent<{
 
   const globalSimpleBar = useGlobarSimpleBar();
 
+  const totalPriceSectionRef = useRef<HTMLDivElement | null>(null);
+  const [isTotalPriceVisible, setIsTotalPriceVisible] = useState(true);
+
   const animatedPrivacyModeHover = useSpringValue(0, {
     config: defaultSpringConfig,
   });
@@ -271,8 +274,37 @@ export const MainPage: FunctionComponent<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    const scrollElement =
+      globalSimpleBar.ref.current?.getScrollElement() ?? null;
+    const target = totalPriceSectionRef.current;
+
+    if (!target) {
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry) {
+          setIsTotalPriceVisible(entry.isIntersecting);
+        }
+      },
+      {
+        root: scrollElement,
+        threshold: 0.8,
+      }
+    );
+    observer.observe(target);
+    return () => {
+      observer.disconnect();
+    };
+  }, [globalSimpleBar]);
+
   return (
-    <MainHeaderLayout isNotReady={isNotReady}>
+    <MainHeaderLayout
+      isNotReady={isNotReady}
+      isShowTotalPrice={!isTotalPriceVisible}
+    >
       {/* side panel에서만 보여준다. 보여주는 로직은 isRefreshButtonVisible를 다루는 useEffect를 참고. refresh button이 로딩중이면 모조건 보여준다. */}
       <RefreshButton
         visible={
@@ -285,7 +317,7 @@ export const MainPage: FunctionComponent<{
         }}
       />
 
-      <Box padding="1.25rem">
+      <Box ref={totalPriceSectionRef} padding="1.25rem">
         <Box
           onHoverStateChange={(isHover) => {
             if (!isNotReady) {
