@@ -23,9 +23,9 @@ export const FeeCoverageDescription: FunctionComponent<{
         color={ColorPalette["gray-300"]}
         style={{ textAlign: "center" }}
       >
-        <FormattedMessage id="components.top-up.description.no-fees" />
         {isTopUpAvailable ? (
           <React.Fragment>
+            <FormattedMessage id="components.top-up.description.no-fees" />
             <br />
             <span style={{ color: ColorPalette["blue-500"] }}>
               <FormattedMessage id="components.top-up.description.we-cover" />
