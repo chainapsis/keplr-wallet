@@ -15,7 +15,10 @@ import {
 import { useGetAddressesOnCopyAddress } from "../../hooks/use-get-addresses-copy-address";
 import { NoResultBox } from "../deposit-modal-no-search-box";
 import { Address } from "../deposit-modal/copy-address-scene";
-import { CopyAddressItemList } from "../copy-address-item/copy-address-item-list";
+import {
+  CopyAddressItemList,
+  EnterTag,
+} from "../copy-address-item/copy-address-item-list";
 
 export const CopyAddressSceneForFloatModal: FunctionComponent<{
   close: () => void;
@@ -26,6 +29,7 @@ export const CopyAddressSceneForFloatModal: FunctionComponent<{
 
   const searchRef = useFocusOnMount<HTMLInputElement>();
   const sceneTransition = useSceneTransition();
+  const [showEnterTag, setShowEnterTag] = useState(false);
 
   useSceneEvents({
     onDidVisible: () => {
@@ -59,12 +63,16 @@ export const CopyAddressSceneForFloatModal: FunctionComponent<{
           value={search}
           onChange={(e) => {
             e.preventDefault();
-
             setSearch(e.target.value);
           }}
-          placeholder={intl.formatMessage({
-            id: "page.main.components.deposit-modal.search-placeholder",
-          })}
+          placeholder={
+            showEnterTag
+              ? ""
+              : intl.formatMessage({
+                  id: "page.main.components.deposit-modal.search-placeholder",
+                })
+          }
+          suffix={showEnterTag ? <EnterTag /> : undefined}
         />
       </Box>
 
@@ -82,6 +90,11 @@ export const CopyAddressSceneForFloatModal: FunctionComponent<{
 
         <CopyAddressItemList
           sortedAddresses={sortedAddresses}
+          copyItemAddressHoverColor={
+            theme.mode === "light"
+              ? ColorPalette["gray-75"]
+              : ColorPalette["gray-600"]
+          }
           close={close}
           blockInteraction={blockInteraction}
           setBlockInteraction={setBlockInteraction}
@@ -99,6 +112,7 @@ export const CopyAddressSceneForFloatModal: FunctionComponent<{
               isOnTheFloatingModal: true,
             });
           }}
+          setShowEnterTag={setShowEnterTag}
         />
 
         <Gutter size="0.75rem" />

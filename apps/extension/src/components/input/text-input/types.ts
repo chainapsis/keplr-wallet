@@ -17,7 +17,7 @@ export interface TextInputProps {
   left?: React.ReactNode;
   right?: React.ReactNode;
   bottom?: React.ReactNode;
-  textSuffix?: string;
+  suffix?: string | React.ReactNode;
 
   borderRadius?: string;
 }

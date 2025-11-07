@@ -170,7 +170,7 @@ export const Styles = {
     font-weight: 400;
     white-space: pre;
   `,
-  TextSuffix: styled.div<{
+  Suffix: styled.div<{
     textWidth: number | null;
   }>`
     position: absolute;
