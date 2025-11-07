@@ -54,6 +54,7 @@ import { RewardsCard } from "./components/rewards-card";
 import { UIConfigStore } from "../../stores/ui-config";
 import { useStakedTotalPrice } from "../../hooks/use-staked-total-price";
 import { COMMON_HOVER_OPACITY } from "../../styles/constant";
+import { EmptyStateButtonRow } from "./components/empty-state-button-row";
 import { useNavigate } from "react-router";
 
 export interface ViewToken {
@@ -162,6 +163,12 @@ export const MainPage: FunctionComponent<{
     const stakedDec = stakedTotalPrice.toDec();
     return parseFloat(stakedDec.quo(totalDec).mul(new Dec(100)).toString());
   }, [totalPrice, stakedTotalPrice]);
+
+  const hasAnyStakableAsset = useMemo(() => {
+    return hugeQueriesStore.stakables.some((token) =>
+      token.token.toDec().gt(new Dec(0))
+    );
+  }, [hugeQueriesStore.stakables]);
 
   const lastTotalAvailableAmbiguousAvg = useRef(-1);
   const lastTotalStakedAmbiguousAvg = useRef(-1);
@@ -396,18 +403,27 @@ export const MainPage: FunctionComponent<{
 
       <Box paddingX="0.75rem" paddingBottom="1.5rem">
         <Stack gutter="1.5rem">
-          <XAxis>
-            <SpendableCard
-              spendableTotalPrice={spendableTotalPrice}
-              isNotReady={isNotReady}
-              onClickDeposit={() => {
-                setIsOpenDepositModal(true);
-              }}
-            />
-            <Gutter size="0.75rem" />
-            <RewardsCard isNotReady={isNotReady} />
-          </XAxis>
-
+          {hasAnyStakableAsset ? (
+            <XAxis>
+              <SpendableCard
+                spendableTotalPrice={spendableTotalPrice}
+                isNotReady={isNotReady}
+                onClickDeposit={() => {
+                  setIsOpenDepositModal(true);
+                }}
+              />
+              <Gutter size="0.75rem" />
+              <RewardsCard isNotReady={isNotReady} />
+            </XAxis>
+          ) : (
+            <XAxis>
+              <EmptyStateButtonRow
+                onClickDeposit={() => {
+                  setIsOpenDepositModal(true);
+                }}
+              />
+            </XAxis>
+          )}
           <IbcHistoryView isNotReady={isNotReady} />
           {/*
             IbcHistoryView 자체가 list를 그리기 때문에 여기서 gutter를 처리하기는 힘들다.

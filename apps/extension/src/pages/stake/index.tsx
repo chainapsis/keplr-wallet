@@ -21,11 +21,12 @@ import { useIntl } from "react-intl";
 import { Dec } from "@keplr-wallet/unit";
 import { CollapsibleList } from "../../components/collapsible-list";
 import { Stack } from "../../components/stack";
-import { ClaimAll, TokenItem, TokenTitleView } from "../main/components";
+import { TokenItem, TokenTitleView } from "../main/components";
 import { StakeExplorePage } from "./explore";
 import { StakeEmptyPage } from "./empty";
 import { IconProps } from "../../components/icon/types";
 import { Subtitle3 } from "../../components/typography";
+import { RewardsCard } from "./components/rewards-card";
 
 const zeroDec = new Dec(0);
 
@@ -190,7 +191,7 @@ export const StakePage: FunctionComponent = observer(() => {
 
         <Gutter size="1.25rem" />
 
-        <ClaimAll isNotReady={isNotReady} />
+        <RewardsCard isNotReady={isNotReady} />
 
         <Gutter size="1.5rem" />
 

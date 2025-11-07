@@ -24,6 +24,7 @@ import { observer } from "mobx-react-lite";
 import { Stack } from "../../components/stack";
 import { useStore } from "../../stores";
 import { Styles, TextButton } from "../../components/button-text";
+import { NewTokenFoundButtonContainer } from "../../components/new-token-found-button";
 import { Box } from "../../components/box";
 import { Modal } from "../../components/modal";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
@@ -188,7 +189,7 @@ const SpendableCollapsibleList: FunctionComponent<{
 
   return (
     <Stack>
-      <Stack gutter="0.5rem">{alwaysShown}</Stack>
+      <Stack>{alwaysShown}</Stack>
 
       <VerticalCollapseTransition
         collapsed={isCollapsed}
@@ -202,8 +203,7 @@ const SpendableCollapsibleList: FunctionComponent<{
         notRenderHiddenItemsIsClosing ||
         !isCollapsed ? (
           <React.Fragment>
-            <Gutter size="0.5rem" />
-            <Stack gutter="0.5rem">{hidden}</Stack>
+            <Stack>{hidden}</Stack>
           </React.Fragment>
         ) : null}
       </VerticalCollapseTransition>
@@ -684,7 +684,7 @@ export const SpendableAssetView: FunctionComponent<{
               </VerticalCollapseTransition>
 
               {numFoundToken > 0 && (
-                <Styles.NewTokenFoundButtonContainer
+                <NewTokenFoundButtonContainer
                   onClick={() => setIsFoundTokenModalOpen(true)}
                 >
                   <XAxis alignY="center">
@@ -712,7 +712,7 @@ export const SpendableAssetView: FunctionComponent<{
                       color={ColorPalette["gray-300"]}
                     />
                   </XAxis>
-                </Styles.NewTokenFoundButtonContainer>
+                </NewTokenFoundButtonContainer>
               )}
 
               <SceneTransition

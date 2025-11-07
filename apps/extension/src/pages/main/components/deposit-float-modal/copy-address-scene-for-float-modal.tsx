@@ -72,7 +72,7 @@ export const CopyAddressSceneForFloatModal: FunctionComponent<{
                   id: "page.main.components.deposit-modal.search-placeholder",
                 })
           }
-          textSuffix={showEnterTag ? <EnterTag /> : undefined}
+          suffix={showEnterTag ? <EnterTag /> : undefined}
         />
       </Box>
 
@@ -93,6 +93,11 @@ export const CopyAddressSceneForFloatModal: FunctionComponent<{
             padding: "0 1rem",
           }}
           sortedAddresses={sortedAddresses}
+          copyItemAddressHoverColor={
+            theme.mode === "light"
+              ? ColorPalette["gray-75"]
+              : ColorPalette["gray-600"]
+          }
           close={close}
           blockInteraction={blockInteraction}
           setBlockInteraction={setBlockInteraction}

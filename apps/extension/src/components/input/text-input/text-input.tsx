@@ -33,7 +33,7 @@ export const TextInput = forwardRef<
       left,
       right,
       bottom,
-      textSuffix,
+      suffix,
       isLoading,
       autoComplete,
       labelAlignment = "space-between",
@@ -166,7 +166,7 @@ export const TextInput = forwardRef<
                 />
                 <div
                   style={(() => {
-                    if (suffixTextWidth == null || !textSuffix) {
+                    if (suffixTextWidth == null || !suffix) {
                       return {
                         width: 0,
                         opacity: 0,
@@ -177,7 +177,7 @@ export const TextInput = forwardRef<
                     };
                   })()}
                 />
-                <Styles.TextSuffix
+                <Styles.Suffix
                   ref={suffixWidthCheckRef}
                   textWidth={(() => {
                     if (textWidth != null && textInputWidth != null) {
@@ -193,8 +193,8 @@ export const TextInput = forwardRef<
                     return 0;
                   })()}
                 >
-                  {textSuffix}
-                </Styles.TextSuffix>
+                  {suffix}
+                </Styles.Suffix>
               </div>
             </Column>
 

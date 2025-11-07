@@ -146,17 +146,10 @@ export const ToggleItemHeader: FunctionComponent<ToggleItemHeaderProps> = ({
 
 const Styles = {
   Container: styled.div<{ disabled?: boolean }>`
-    background-color: ${(props) =>
-      props.theme.mode === "light"
-        ? ColorPalette.white
-        : ColorPalette["gray-650"]};
+    background-color: transparent;
     padding: 0.875rem 1rem;
     border-radius: 0.375rem;
     cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
-    box-shadow: ${(props) =>
-      props.theme.mode === "light"
-        ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
-        : "none"};
     position: relative;
     &:hover {
       background-color: ${(props) =>

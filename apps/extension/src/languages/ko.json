@@ -634,6 +634,11 @@
   "page.stake.empty.link": "Learn more",
   "page.stake.explore.title": "Stake & Earn Rewards",
   "page.stake.explore.subtitle": "Buy or receive assets to start staking",
+  "page.stake.components.rewards-card.title": "Rewards",
+  "page.stake.components.rewards-card.claim-all-button": "Claim All",
+  "page.stake.components.rewards-card.claim-button": "받기",
+  "page.stake.components.rewards-card.show-all-button": "모두 보기",
+  "page.stake.components.rewards-card.hide-all-button": "닫기",
 
   "page.main.components.ibc-history-view.item.pending": "IBC 전송 중",
   "page.main.components.ibc-history-view.item.succeed": "IBC 전송 성공",
@@ -674,11 +679,6 @@
   "page.main.components.rewards-card.title": "Rewards",
   "page.main.components.rewards-card.claim-all-button": "Claim All",
 
-  "page.main.components.claim-all.title": "아직 받지 않은 리워드",
-  "page.main.components.claim-all.button": "한번에 받기",
-  "page.main.components.claim-all.claim-button": "받기",
-  "page.main.components.show-all.button": "모두 보기",
-  "page.main.components.hide-all.button": "닫기",
   "page.main.components.context-menu.title": "자산 보기 설정",
   "page.main.components.context-menu.tooltip-title": "신규",
   "page.main.components.context-menu.tooltip-paragraph": "흩어진 자산을 한 눈에!{br}스마트 그루핑 기능(베타) 출시",

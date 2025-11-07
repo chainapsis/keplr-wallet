@@ -90,9 +90,11 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
 
         <Gutter size="0.75rem" />
 
-        <Subtitle3 color={ColorPalette["blue-300"]}>
-          {intl.formatMessage({ id: "page.stake.explore.subtitle" })}
-        </Subtitle3>
+        <Box paddingX="0.25rem">
+          <Subtitle3 color={ColorPalette["blue-300"]}>
+            {intl.formatMessage({ id: "page.stake.explore.subtitle" })}
+          </Subtitle3>
+        </Box>
 
         <Gutter size="1.25rem" />
 

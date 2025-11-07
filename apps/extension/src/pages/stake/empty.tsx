@@ -51,9 +51,6 @@ export const StakeEmptyPage: FunctionComponent = observer(() => {
       <Box paddingX="1rem" paddingY="1.25rem">
         <Box paddingX="0.25rem">
           <MainH1
-            style={{
-              fontWeight: 600,
-            }}
             color={
               theme.mode === "light"
                 ? ColorPalette["gray-700"]
@@ -69,7 +66,7 @@ export const StakeEmptyPage: FunctionComponent = observer(() => {
           </MainH1>
         </Box>
 
-        <Gutter size="1rem" />
+        <Gutter size="2rem" />
 
         <Box paddingX="0.25rem">
           <Subtitle2 color={ColorPalette["gray-200"]}>

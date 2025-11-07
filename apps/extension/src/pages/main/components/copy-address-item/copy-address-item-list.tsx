@@ -32,6 +32,7 @@ interface CopyAddressItemListProps {
   onClickIcon: (address: Address) => void;
   setShowEnterTag: (show: boolean) => void;
   containerStyle?: React.CSSProperties;
+  copyItemAddressHoverColor?: string;
 }
 
 export const CopyAddressItemList = ({
@@ -44,6 +45,7 @@ export const CopyAddressItemList = ({
   onClickIcon,
   setShowEnterTag,
   containerStyle,
+  copyItemAddressHoverColor,
 }: CopyAddressItemListProps) => {
   const { analyticsAmplitudeStore } = useStore();
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
@@ -162,6 +164,11 @@ export const CopyAddressItemList = ({
       }, 50),
     [focusOrigin]
   );
+  useEffect(() => {
+    return () => {
+      debouncedOnMouseMove.cancel();
+    };
+  }, [debouncedOnMouseMove]);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (blockInteractionRef.current) {
@@ -244,6 +251,7 @@ export const CopyAddressItemList = ({
                 itemHandlesRef.current[index] = handle;
               }}
               address={address}
+              hoverColor={copyItemAddressHoverColor}
               close={close}
               blockInteraction={blockInteraction}
               setBlockInteraction={setBlockInteraction}
