@@ -162,6 +162,11 @@ export const CopyAddressItemList = ({
       }, 50),
     [focusOrigin]
   );
+  useEffect(() => {
+    return () => {
+      debouncedOnMouseMove.cancel();
+    };
+  }, [debouncedOnMouseMove]);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (blockInteractionRef.current) {
