@@ -148,7 +148,7 @@ export class ObservableQueryTargetAssetsInner extends ObservableQuery<TargetAsse
         })(),
         denom: (() => {
           const currencies = this.chainStore.getChain(this.chainId).currencies;
-          if (currencies.length > 0) {
+          if (this.chainId.startsWith("eip155:") && currencies.length > 0) {
             if (currencies[0].coinMinimalDenom === this.denom) {
               return "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
             }
