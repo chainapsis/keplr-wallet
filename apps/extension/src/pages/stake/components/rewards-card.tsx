@@ -166,9 +166,7 @@ export const RewardsCard: FunctionComponent<{
                   }
 
                   claimAll();
-                  setTimeout(() => {
-                    setIsExpanded(true);
-                  }, 1);
+                  setIsExpanded(true);
                 }}
                 color="blue"
                 right={

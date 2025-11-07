@@ -241,7 +241,7 @@ export function useRewards() {
     homeRewardsSuppressedByKeyId.delete(keyId);
 
     setClaimAllIsCompleted(false);
-    setClaimAllIsLoading(false);
+    setClaimAllIsLoading(true);
 
     for (const viewClaimToken of viewClaimTokens) {
       const state = getClaimAllEachState(
