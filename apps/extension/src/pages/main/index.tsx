@@ -54,6 +54,7 @@ import { RewardsCard } from "./components/rewards-card";
 import { UIConfigStore } from "../../stores/ui-config";
 import { useStakedTotalPrice } from "../../hooks/use-staked-total-price";
 import { COMMON_HOVER_OPACITY } from "../../styles/constant";
+import { useNavigate } from "react-router";
 
 export interface ViewToken {
   token: CoinPretty;
@@ -395,15 +396,6 @@ export const MainPage: FunctionComponent<{
 
       <Box paddingX="0.75rem" paddingBottom="1.5rem">
         <Stack gutter="1.5rem">
-          {/* 
-          TODO: 추후 앱 바로 이동
-          <CopyAddress
-            onClick={() => {
-              analyticsStore.logEvent("click_copyAddress");
-              setIsOpenDepositModal(true);
-            }}
-            isNotReady={isNotReady}
-          /> */}
           <XAxis>
             <SpendableCard
               spendableTotalPrice={spendableTotalPrice}
@@ -868,7 +860,7 @@ function StakedBalanceTitle({
   stakedPercentage: number;
 }) {
   const intl = useIntl();
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   return (
     <Skeleton isNotReady={isNotReady}>
@@ -876,7 +868,7 @@ function StakedBalanceTitle({
         paddingY="0.125rem"
         cursor="pointer"
         onClick={() => {
-          // TODO: 추후 staked 페이지로 바로 이동
+          navigate("/stake");
         }}
       >
         <XAxis gap="0.25rem" alignY="center">
