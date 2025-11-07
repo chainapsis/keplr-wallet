@@ -1693,6 +1693,7 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
           chainName: chainInfo.chainName,
           chainSymbolImageUrl: chainInfo.chainSymbolImageUrl,
           isTestnet: chainInfo.isTestnet,
+          isNative: true,
           evm: {
             ...chainInfo.evm,
             currencies: chainInfo.currencies,
@@ -1707,6 +1708,7 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
           chainId: chainInfo.chainId,
           chainName: chainInfo.chainName,
           chainSymbolImageUrl: chainInfo.chainSymbolImageUrl,
+          isNative: true,
           cosmos: chainInfo as C,
           ...(chainInfo.evm && {
             evm: {
@@ -1717,47 +1719,17 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
           }),
         };
       }
-      return chainInfo;
+      return { ...chainInfo, isNative: true };
     });
 
     this._modularChainInfoImpls = chainInfos.map((chainInfo) => {
-      const modularChainInfo = (() => {
-        if (
-          "evm" in chainInfo &&
-          chainInfo.evm &&
-          "currencies" in chainInfo &&
-          this.isEvmOnlyChain(chainInfo.chainId)
-        ) {
-          return {
-            chainId: chainInfo.chainId,
-            chainName: chainInfo.chainName,
-            chainSymbolImageUrl: chainInfo.chainSymbolImageUrl,
-            evm: {
-              ...chainInfo.evm,
-              currencies: chainInfo.currencies,
-              feeCurrencies: chainInfo.feeCurrencies,
-              bip44: chainInfo.bip44,
-              features: chainInfo.features,
-            },
-          };
-        }
-        if ("currencies" in chainInfo) {
-          return {
-            chainId: chainInfo.chainId,
-            chainName: chainInfo.chainName,
-            chainSymbolImageUrl: chainInfo.chainSymbolImageUrl,
-            cosmos: chainInfo as C,
-            ...(chainInfo.evm && {
-              evm: {
-                ...chainInfo.evm,
-                currencies: chainInfo.currencies,
-                bip44: chainInfo.bip44,
-              },
-            }),
-          };
-        }
-        return chainInfo;
-      })();
+      const modularChainInfo = this._modularChainInfos.find(
+        (c) => c.chainId === chainInfo.chainId
+      );
+
+      if (!modularChainInfo) {
+        throw new Error(`Unknown modular chain info: ${chainInfo.chainId}`);
+      }
 
       const prev = this.modularChainInfoImplMap.get(
         ChainIdHelper.parse(chainInfo.chainId).identifier
@@ -1809,6 +1781,7 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
           chainId: cosmos.chainId,
           chainName: cosmos.chainName,
           chainSymbolImageUrl: cosmos.chainSymbolImageUrl,
+          isNative: chainInfo.isNative || !cosmos.beta,
           cosmos,
           ...(cosmos.evm && {
             evm: {
@@ -1822,49 +1795,13 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
       return chainInfo;
     });
     this._modularChainInfoImpls = infos.modulrChainInfos.map((chainInfo) => {
-      const modularChainInfo = (() => {
-        if ("currencies" in chainInfo) {
-          const cosmos = infos.chainInfos.find(
-            (c) => c.chainId === chainInfo.chainId
-          );
-          if (!cosmos) {
-            throw new Error("Can't find cosmos chain info");
-          }
+      const modularChainInfo = this._modularChainInfos.find(
+        (c) => c.chainId === chainInfo.chainId
+      );
 
-          if (
-            "evm" in cosmos &&
-            cosmos.evm &&
-            this.isEvmOnlyChain(cosmos.chainId)
-          ) {
-            return {
-              chainId: cosmos.chainId,
-              chainName: cosmos.chainName,
-              chainSymbolImageUrl: cosmos.chainSymbolImageUrl,
-              evm: {
-                ...cosmos.evm,
-                currencies: cosmos.currencies,
-                feeCurrencies: cosmos.feeCurrencies,
-                bip44: cosmos.bip44,
-              },
-            };
-          }
-
-          return {
-            chainId: cosmos.chainId,
-            chainName: cosmos.chainName,
-            chainSymbolImageUrl: cosmos.chainSymbolImageUrl,
-            cosmos,
-            ...(cosmos.evm && {
-              evm: {
-                ...cosmos.evm,
-                currencies: cosmos.currencies,
-                bip44: cosmos.bip44,
-              },
-            }),
-          };
-        }
-        return chainInfo;
-      })();
+      if (!modularChainInfo) {
+        throw new Error(`Unknown modular chain info: ${chainInfo.chainId}`);
+      }
 
       const prev = this.modularChainInfoImplMap.get(
         ChainIdHelper.parse(chainInfo.chainId).identifier

@@ -334,18 +334,22 @@ export const AvailableTabView: FunctionComponent<{
             if (isEmbedded) {
               embedded = true;
             } else {
-              // Note: Native chain 여부 확인용으로 일단 getModularChain 대신 getChain을 계속 사용. 조치가 필요함.
-              const chainInfoInStore = chainStore.getChain(chainInfo.chainId);
-
-              if (!chainInfoInStore) {
+              if (!chainStore.hasModularChain(chainInfo.chainId)) {
                 stored = false;
               } else {
-                if (chainInfoInStore.hideInUI) {
+                const chainInfoInStore = chainStore.getModularChain(
+                  chainInfo.chainId
+                );
+
+                if (
+                  "cosmos" in chainInfoInStore &&
+                  chainInfoInStore.cosmos.hideInUI
+                ) {
                   return acc;
                 }
 
                 stored = true;
-                embedded = chainInfoInStore.embedded?.embedded;
+                embedded = chainInfoInStore.isNative;
               }
             }
           } catch (e) {

@@ -323,7 +323,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
     }
 
     return modularChainInfos;
-  }, [chainStore, keyType, chainStore.groupedModularChainInfosInListUI]);
+  }, [chainStore, keyType]);
 
   const nativeChainIdentifierSet = useMemo(
     () =>
@@ -461,7 +461,6 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
   }, [ecosystemFilteredChainInfos, hideEnabled, chainStore]);
 
   const handleToggle = async (chainIdentifier: string, enable: boolean) => {
-    console.log("handleToggle", chainIdentifier, enable);
     const linkedIdentifiers = (() => {
       if (!chainIdentifier || !chainStore.hasModularChain(chainIdentifier)) {
         return [];

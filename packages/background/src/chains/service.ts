@@ -116,6 +116,7 @@ export class ChainsService {
           chainId: modularChainInfo.chainId,
           chainName: modularChainInfo.chainName,
           chainSymbolImageUrl: modularChainInfo.chainSymbolImageUrl,
+          isNative: true,
           evm: {
             ...modularChainInfo.evm,
             currencies: modularChainInfo.currencies,
@@ -131,6 +132,7 @@ export class ChainsService {
           chainName: modularChainInfo.chainName,
           chainSymbolImageUrl: modularChainInfo.chainSymbolImageUrl,
           cosmos: modularChainInfo,
+          isNative: true,
           ...(modularChainInfo.evm && {
             evm: {
               ...modularChainInfo.evm,
@@ -142,7 +144,7 @@ export class ChainsService {
         };
       }
 
-      return modularChainInfo;
+      return { ...(modularChainInfo as ModularChainInfo), isNative: true };
     });
 
     this.embedChainInfos = embedModularChainInfos
@@ -1188,6 +1190,7 @@ export class ChainsService {
           chainName: cosmos.chainName,
           chainSymbolImageUrl: cosmos.chainSymbolImageUrl,
           isTestnet: cosmos.isTestnet,
+          isNative: !(mergedCosmos.beta ?? false),
           cosmos: mergedCosmos,
           ...(mergedCosmos.evm && {
             evm: {
@@ -1211,6 +1214,8 @@ export class ChainsService {
 
         return {
           ...modularChainInfo,
+          isNative:
+            modularChainInfo.isNative ?? !(mergedChainInfo.beta ?? false),
           evm: {
             ...modularChainInfo.evm,
             currencies: mergedChainInfo.currencies,
@@ -1323,6 +1328,7 @@ export class ChainsService {
                 chainId: chainInfo.chainId,
                 chainName: chainInfo.chainName,
                 chainSymbolImageUrl: chainInfo.chainSymbolImageUrl,
+                isNative: false,
                 evm: {
                   ...chainInfo.evm,
                   currencies: chainInfo.currencies,
@@ -1337,6 +1343,7 @@ export class ChainsService {
               chainId: chainInfo.chainId,
               chainName: chainInfo.chainName,
               chainSymbolImageUrl: chainInfo.chainSymbolImageUrl,
+              isNative: false,
               cosmos: chainInfo,
               ...(chainInfo.evm && {
                 evm: {

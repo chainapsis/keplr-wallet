@@ -148,7 +148,10 @@ export const useGetSearchChains = ({
         }
 
         const chains: ModularChainInfo[] = queryChains.response.data.chains.map(
-          (chain) => convertChainInfoToModularChainInfo(chain)
+          (chain) =>
+            chainStore.hasModularChain(chain.chainId)
+              ? chainStore.getModularChain(chain.chainId)
+              : convertChainInfoToModularChainInfo(chain, false)
         );
 
         for (const disabledChainInfo of disabledChainInfosSearched) {
@@ -157,7 +160,7 @@ export const useGetSearchChains = ({
               ChainIdHelper.parse(disabledChainInfo.chainId).identifier
             )
           ) {
-            chains.push(convertChainInfoToModularChainInfo(disabledChainInfo));
+            chains.push(disabledChainInfo);
           }
         }
 
@@ -179,6 +182,7 @@ export const useGetSearchChains = ({
     initialChainInfos,
     queryChains,
     disabledChainInfosSearched,
+    chainStore,
   ]);
 
   return {

@@ -1,10 +1,12 @@
 import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 
 export function convertChainInfoToModularChainInfo(
-  chainInfo: ChainInfo | ModularChainInfo
+  chainInfo: ChainInfo | ModularChainInfo,
+  isNative: boolean
 ): ModularChainInfo {
   // evm chain
   const chainIdLikeCAIP2 = chainInfo.chainId.split(":");
+
   if (
     "evm" in chainInfo &&
     chainInfo.evm &&
@@ -17,6 +19,7 @@ export function convertChainInfoToModularChainInfo(
       chainName: chainInfo.chainName,
       chainSymbolImageUrl: chainInfo.chainSymbolImageUrl,
       isTestnet: chainInfo.isTestnet,
+      isNative,
       evm: {
         ...chainInfo.evm,
         currencies: chainInfo.currencies,
@@ -33,6 +36,7 @@ export function convertChainInfoToModularChainInfo(
       chainId: chainInfo.chainId,
       chainName: chainInfo.chainName,
       chainSymbolImageUrl: chainInfo.chainSymbolImageUrl,
+      isNative,
       cosmos: chainInfo,
       ...(chainInfo.evm && {
         evm: {
@@ -71,6 +75,7 @@ export function convertModularChainInfoToChainInfo(
       features: modularChainInfo.evm.features,
       isTestnet: modularChainInfo.isTestnet,
       evm: modularChainInfo.evm,
+      beta: !modularChainInfo.isNative,
     };
   }
 }
