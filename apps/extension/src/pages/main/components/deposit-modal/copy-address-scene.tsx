@@ -255,7 +255,7 @@ export const CopyAddressScene: FunctionComponent<{
                   id: "page.main.components.deposit-modal.search-placeholder",
                 })
           }
-          textSuffix={showEnterTag ? <EnterTag /> : undefined}
+          suffix={showEnterTag ? <EnterTag /> : undefined}
         />
       </Box>
 
