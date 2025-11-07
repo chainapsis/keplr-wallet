@@ -616,8 +616,7 @@ export const CosmosTxView: FunctionComponent<{
         },
       ]}
       bottomBackground={
-        ((shouldTopUp && isTopUpAvailable) || topUpCompleted) &&
-        !interactionData.isInternal ? (
+        shouldTopUp && isTopUpAvailable && !interactionData.isInternal ? (
           <FeeCoverageBackground
             hideIcon={
               !!topUpError ||
@@ -827,14 +826,13 @@ export const CosmosTxView: FunctionComponent<{
           </Box>
         </VerticalCollapseTransition>
         {/**
-         * fee coverage section should be displayed when top-up is should be done and available, or completed.
+         * fee coverage section should be displayed when top-up should be done
+         * and is available (or remaining time is displayed), or top-up is completed.
          */}
         <VerticalCollapseTransition
           collapsed={
-            !(
-              (shouldTopUp && (isTopUpAvailable || !!remainingText)) ||
-              topUpCompleted
-            )
+            !(shouldTopUp && (isTopUpAvailable || !!remainingText)) ||
+            topUpCompleted
           }
         >
           {interactionData.isInternal ? (
