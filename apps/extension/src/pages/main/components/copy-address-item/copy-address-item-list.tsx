@@ -131,6 +131,11 @@ export const CopyAddressItemList = ({
 
   const handleMouseEnter = useCallback(
     (index: number) => {
+      // 해당 로직이 필요한 이유는
+      // 커서가 copy-address-item에 호버가 되어있을때 search를 진행 하면
+      // 간혈적으로 커서가 있는 위치에서 해당 copy-address-item의 handleMouseEnter 트리거가 되면서
+      // 검색시 1번째 아이템에 포커스가 풀리는 현상을 막기 위해서 focusOrigin를 통해서 명시적으로
+      // 어떤 행동이 focus를 만드는지 구분하기 위해서 사용함
       if (focusOrigin === "search") {
         return;
       }
