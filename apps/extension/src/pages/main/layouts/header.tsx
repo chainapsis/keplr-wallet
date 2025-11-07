@@ -19,6 +19,10 @@ import { autoUpdate, offset, shift, useFloating } from "@floating-ui/react-dom";
 import { AccountSwitchFloatModal } from "../components/account-switch-float-modal";
 import { FloatModal } from "../../../components/float-modal";
 import { DepositFloatingModal } from "../components/deposit-float-modal";
+import { useStakedTotalPrice } from "../../../hooks/use-staked-total-price";
+import { PricePretty } from "@keplr-wallet/unit";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { useLocation } from "react-router";
 
 const Styles = {
   NameContainer: styled.div`
@@ -47,14 +51,30 @@ export const MainHeaderLayout = observer<
       | "headerContainerStyle"
       | "fixedTop"
     >
-  >
+  > & {
+    isShowTotalPrice?: boolean;
+  }
 >(
   (props) => {
     const { children, ...otherProps } = props;
 
-    const { uiConfigStore, keyRingStore } = useStore();
+    const { uiConfigStore, keyRingStore, hugeQueriesStore } = useStore();
     const [isOpenAccountSwitchModal, setIsOpenAccountSwitchModal] =
       useState(false);
+    const location = useLocation();
+    const isNotMainPage = location.pathname !== "/";
+
+    const isShowTotalPrice = (() => {
+      if (props.isShowTotalPrice) {
+        return props.isShowTotalPrice;
+      }
+
+      if (uiConfigStore.isPrivacyMode) {
+        return false;
+      }
+
+      return isNotMainPage;
+    })();
 
     const accountSwitchFloatingModal = useFloating({
       placement: "bottom-start",
@@ -74,6 +94,45 @@ export const MainHeaderLayout = observer<
       ],
       whileElementsMounted: autoUpdate,
     });
+
+    const { stakedTotalPrice } = useStakedTotalPrice();
+
+    const disabledViewAssetTokenMap =
+      uiConfigStore.manageViewAssetTokenConfig.getViewAssetTokenMapByVaultId(
+        keyRingStore.selectedKeyInfo?.id ?? ""
+      );
+
+    const spendableTotalPrice = useMemo(() => {
+      let result: PricePretty | undefined;
+      for (const bal of hugeQueriesStore.allKnownBalances) {
+        const disabledCoinSet = disabledViewAssetTokenMap.get(
+          ChainIdHelper.parse(bal.chainInfo.chainId).identifier
+        );
+
+        if (
+          bal.price &&
+          !disabledCoinSet?.has(bal.token.currency.coinMinimalDenom)
+        ) {
+          if (!result) {
+            result = bal.price;
+          } else {
+            result = result.add(bal.price);
+          }
+        }
+      }
+      return result;
+    }, [hugeQueriesStore.allKnownBalances, disabledViewAssetTokenMap]);
+    const totalPrice = useMemo(() => {
+      if (!spendableTotalPrice) {
+        return spendableTotalPrice;
+      }
+
+      if (!stakedTotalPrice) {
+        return stakedTotalPrice;
+      }
+
+      return spendableTotalPrice.add(stakedTotalPrice);
+    }, [spendableTotalPrice, stakedTotalPrice]);
 
     const theme = useTheme();
     const name = useMemo(() => {
@@ -115,15 +174,28 @@ export const MainHeaderLayout = observer<
                 >
                   <NameIcon name={name} />
                   <Gutter size="0.5rem" />
-                  <Subtitle4
-                    color={
-                      theme.mode === "light"
-                        ? ColorPalette["gray-700"]
-                        : ColorPalette["white"]
-                    }
-                  >
-                    {name}
-                  </Subtitle4>
+                  <Box>
+                    <Subtitle4
+                      color={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-700"]
+                          : ColorPalette["white"]
+                      }
+                    >
+                      {name}
+                    </Subtitle4>
+                    {isShowTotalPrice && (
+                      <Subtitle4
+                        color={
+                          theme.mode === "light"
+                            ? ColorPalette["gray-700"]
+                            : ColorPalette["white"]
+                        }
+                      >
+                        {totalPrice?.toString()}
+                      </Subtitle4>
+                    )}
+                  </Box>
                 </Styles.NameContainer>
 
                 <Gutter size="0.125rem" />
