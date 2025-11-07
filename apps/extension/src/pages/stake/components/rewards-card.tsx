@@ -57,20 +57,6 @@ export const RewardsCard: FunctionComponent<{
   } = useRewards();
 
   useEffect(() => {
-    if (isExpanded) {
-      if (!claimAllIsLoading) {
-        // Clear errors when collapsed.
-        for (const state of states) {
-          state.setFailedReason(undefined);
-        }
-      }
-    }
-    // 펼쳐지면서 그 때 loading 중이 아닐 경우에 에러를 지워준다.
-    // 펼쳐지는 순간에만 발생해야하기 때문에 claimAllIsLoading는 deps에서 없어야한다.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isExpanded]);
-
-  useEffect(() => {
     if (initialExpand) {
       setIsExpanded(true);
     }
