@@ -1200,9 +1200,18 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
             selectedAddress = (
               await injectedKeplr().getKey(this._currentChainId)
             ).ethereumHexAddress;
-          } catch {
+          } catch (e) {
             // If the key is not found (e.g. ledger is never connected with ethereum app),
             // should emit empty array as parameter to accountsChanged event
+            if (
+              !e?.message.includes(
+                "on Ledger by selecting the chain in the extension"
+              )
+            ) {
+              console.error(
+                `Failed to get key for keystorechange event: ${e.message}`
+              );
+            }
           }
 
           this._handleAccountsChanged(selectedAddress);
@@ -1493,9 +1502,18 @@ class StarknetProvider implements IStarknetProvider {
           selectedAddress = (
             await this._injectedKeplr().getStarknetKey(this._currentChainId)
           ).hexAddress;
-        } catch {
+        } catch (e) {
           // If the key is not found (e.g. ledger is never connected with starknet app),
           // should emit array with empty string as parameter to accountsChanged event
+          if (
+            !e?.message.includes(
+              "on Ledger by selecting the chain in the extension"
+            )
+          ) {
+            console.error(
+              `Failed to get key for keystorechange event: ${e.message}`
+            );
+          }
         }
 
         this.selectedAddress = selectedAddress ?? undefined;
@@ -1733,7 +1751,17 @@ export class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
 
       try {
         accounts = await this.getAccounts();
-      } catch {}
+      } catch (e) {
+        if (
+          !e?.message.includes(
+            "on Ledger by selecting the chain in the extension"
+          )
+        ) {
+          console.error(
+            `Failed to get key for keystorechange event: ${e.message}`
+          );
+        }
+      }
 
       this._handleAccountsChanged(accounts);
     });
@@ -1747,7 +1775,17 @@ export class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
         let accounts: string[] | null = null;
         try {
           accounts = await this.getAccounts();
-        } catch {}
+        } catch (e) {
+          if (
+            !e?.message.includes(
+              "on Ledger by selecting the chain in the extension"
+            )
+          ) {
+            console.error(
+              `Failed to get key for keystorechange event: ${e.message}`
+            );
+          }
+        }
 
         this._handleNetworkChanged(network);
         this._handleAccountsChanged(accounts);
@@ -1758,7 +1796,17 @@ export class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
       let accounts: string[] | null = null;
       try {
         accounts = await this.getAccounts();
-      } catch {}
+      } catch (e) {
+        if (
+          !e?.message.includes(
+            "on Ledger by selecting the chain in the extension"
+          )
+        ) {
+          console.error(
+            `Failed to get key for keystorechange event: ${e.message}`
+          );
+        }
+      }
 
       this._handleAccountsChanged(accounts);
     });
