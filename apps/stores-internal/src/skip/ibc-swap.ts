@@ -501,6 +501,17 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
       }
     }
 
+    const entry = getMapEntry("osmosis-1");
+    entry.currencies.push({
+      coinDecimals: 6,
+      coinMinimalDenom:
+        "ibc/0FA9232B262B89E77D1335D54FB1E1F506A92A7E4B51524B400DC69C68D28372",
+      coinDenom: "UM",
+      coinGeckoId: "penumbra",
+      coinImageUrl:
+        "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/osmosis/ibc/0FA9232B262B89E77D1335D54FB1E1F506A92A7E4B51524B400DC69C68D28372.png",
+    });
+
     return res;
   }
 
