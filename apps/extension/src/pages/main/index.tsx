@@ -264,8 +264,10 @@ export const MainPage: FunctionComponent<{
         }
       },
       {
+        //globalSimpleBar영역이 전체 페이지이기 때문에 상단 header 높이만큼 rootMargin에서 빼줘야함
         root: scrollElement,
-        threshold: 0.8,
+        threshold: 0.01,
+        rootMargin: "-60px 0px 0px 0px",
       }
     );
     observer.observe(target);
@@ -291,8 +293,9 @@ export const MainPage: FunctionComponent<{
         }}
       />
 
-      <Box ref={totalPriceSectionRef} padding="1.25rem">
+      <Box padding="1.25rem">
         <Box
+          ref={totalPriceSectionRef}
           onHoverStateChange={(isHover) => {
             if (!isNotReady) {
               animatedPrivacyModeHover.start(isHover ? 1 : 0);
