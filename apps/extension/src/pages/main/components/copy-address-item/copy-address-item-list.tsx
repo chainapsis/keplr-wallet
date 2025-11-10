@@ -31,6 +31,7 @@ interface CopyAddressItemListProps {
   search: string;
   onClickIcon: (address: Address) => void;
   setShowEnterTag: (show: boolean) => void;
+  containerStyle?: React.CSSProperties;
   copyItemAddressHoverColor?: string;
 }
 
@@ -43,6 +44,7 @@ export const CopyAddressItemList = ({
   search,
   onClickIcon,
   setShowEnterTag,
+  containerStyle,
   copyItemAddressHoverColor,
 }: CopyAddressItemListProps) => {
   const { analyticsAmplitudeStore } = useStore();
@@ -229,7 +231,7 @@ export const CopyAddressItemList = ({
   }, [focusedIndex]);
 
   return (
-    <Box paddingX="0.75rem">
+    <Box style={containerStyle}>
       {flattenedAddresses.map((address, index) => {
         const key = `${
           ChainIdHelper.parse(address.modularChainInfo.chainId).identifier

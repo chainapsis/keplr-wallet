@@ -22,6 +22,7 @@ export const SpendableCard: FunctionComponent<{
 }> = observer(({ spendableTotalPrice, isNotReady, onClickDeposit }) => {
   const { hugeQueriesStore, uiConfigStore } = useStore();
   const navigate = useNavigate();
+  const theme = useTheme();
   const intl = useIntl();
 
   const balances = hugeQueriesStore.getAllBalances({
@@ -34,15 +35,29 @@ export const SpendableCard: FunctionComponent<{
   return (
     <Fragment>
       <Box
-        backgroundColor="rgba(21, 21, 23, 0.8)"
-        borderColor={ColorPalette["gray-600"]}
+        backgroundColor={
+          theme.mode === "light"
+            ? ColorPalette["gray-10"]
+            : "rgba(21, 21, 23, 0.8)"
+        }
+        borderColor={
+          theme.mode === "light"
+            ? "rgba(220, 220, 227, 0.8)"
+            : ColorPalette["gray-600"]
+        }
         borderWidth="1px"
         borderRadius="1.5rem"
         padding="1rem"
       >
         <Box>
           <Skeleton isNotReady={isNotReady} verticalBleed="2px">
-            <Body3 color={ColorPalette["gray-200"]}>
+            <Body3
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-300"]
+                  : ColorPalette["gray-200"]
+              }
+            >
               {intl.formatMessage({
                 id: "page.main.components.spendable-card.title",
               })}
@@ -54,7 +69,13 @@ export const SpendableCard: FunctionComponent<{
 
         <Box>
           <Skeleton isNotReady={isNotReady}>
-            <Subtitle2 color={ColorPalette["white"]}>
+            <Subtitle2
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-700"]
+                  : ColorPalette["white"]
+              }
+            >
               {spendableTotalPrice
                 ? uiConfigStore.hideStringIfPrivacyMode(
                     spendableTotalPrice.toString(),
@@ -77,7 +98,11 @@ export const SpendableCard: FunctionComponent<{
                 <ArrowDownLeftIcon
                   width="0.625rem"
                   height="0.625rem"
-                  color={ColorPalette["blue-300"]}
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["blue-400"]
+                      : ColorPalette["blue-300"]
+                  }
                 />
               }
               disabled={!hasBalance}
@@ -171,7 +196,9 @@ const EllipseButton: FunctionComponent<{
           height="1.625rem"
           alignX="center"
           alignY="center"
-          backgroundColor={ColorPalette["blue-800"]}
+          backgroundColor={
+            isLightMode ? ColorPalette["blue-50"] : ColorPalette["blue-800"]
+          }
         >
           {icon}
         </Box>
@@ -180,7 +207,7 @@ const EllipseButton: FunctionComponent<{
           color={
             !isHover
               ? isLightMode
-                ? ColorPalette["gray-300"]
+                ? ColorPalette["gray-500"]
                 : ColorPalette["white"]
               : isLightMode
               ? ColorPalette["gray-300"]

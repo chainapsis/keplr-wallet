@@ -202,7 +202,6 @@ export const CopyAddressItem = observer(
                 }
               }}
               cursor={blockInteraction ? undefined : "pointer"}
-              paddingLeft="1rem"
               style={{
                 flex: 1,
               }}
@@ -466,7 +465,6 @@ export const CopyAddressItem = observer(
                   />
                 </IconButton>
               </Box>
-              <Gutter size="0.75rem" direction="horizontal" />
             </XAxis>
           </XAxis>
         </Box>

@@ -45,16 +45,16 @@ import { useBuySupportServiceInfos } from "../../hooks/use-buy-support-service-i
 import { BottomTabsHeightRem } from "../../bottom-tabs";
 import { DenomHelper } from "@keplr-wallet/common";
 import { ModularChainInfo } from "@keplr-wallet/types";
-import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { INITIA_CHAIN_ID, NEUTRON_CHAIN_ID } from "../../config.ui";
 import { MainH1 } from "../../components/typography/main-h1";
 import { LockIcon } from "../../components/icon/lock";
 import { DepositModal } from "./components/deposit-modal";
 import { RewardsCard } from "./components/rewards-card";
 import { UIConfigStore } from "../../stores/ui-config";
-import { useStakedTotalPrice } from "../../hooks/use-staked-total-price";
 import { COMMON_HOVER_OPACITY } from "../../styles/constant";
 import { EmptyStateButtonRow } from "./components/empty-state-button-row";
+import { useNavigate } from "react-router";
+import { useTotalPrices } from "../../hooks/use-total-prices";
 
 export interface ViewToken {
   token: CoinPretty;
@@ -87,31 +87,6 @@ export const MainPage: FunctionComponent<{
     setIsNotReadyRef.current(isNotReady);
   }, [isNotReady]);
 
-  const disabledViewAssetTokenMap =
-    uiConfigStore.manageViewAssetTokenConfig.getViewAssetTokenMapByVaultId(
-      keyRingStore.selectedKeyInfo?.id ?? ""
-    );
-
-  const spendableTotalPrice = useMemo(() => {
-    let result: PricePretty | undefined;
-    for (const bal of hugeQueriesStore.allKnownBalances) {
-      const disabledCoinSet = disabledViewAssetTokenMap.get(
-        ChainIdHelper.parse(bal.chainInfo.chainId).identifier
-      );
-
-      if (
-        bal.price &&
-        !disabledCoinSet?.has(bal.token.currency.coinMinimalDenom)
-      ) {
-        if (!result) {
-          result = bal.price;
-        } else {
-          result = result.add(bal.price);
-        }
-      }
-    }
-    return result;
-  }, [hugeQueriesStore.allKnownBalances, disabledViewAssetTokenMap]);
   const availableTotalPriceEmbedOnlyUSD = useMemo(() => {
     let result: PricePretty | undefined;
     for (const bal of hugeQueriesStore.allKnownBalances) {
@@ -136,20 +111,12 @@ export const MainPage: FunctionComponent<{
     return result;
   }, [hugeQueriesStore.allKnownBalances, priceStore]);
 
-  const { stakedTotalPrice, stakedTotalPriceEmbedOnlyUSD } =
-    useStakedTotalPrice();
-
-  const totalPrice = useMemo(() => {
-    if (!spendableTotalPrice) {
-      return spendableTotalPrice;
-    }
-
-    if (!stakedTotalPrice) {
-      return stakedTotalPrice;
-    }
-
-    return spendableTotalPrice.add(stakedTotalPrice);
-  }, [spendableTotalPrice, stakedTotalPrice]);
+  const {
+    spendableTotalPrice,
+    stakedTotalPrice,
+    stakedTotalPriceEmbedOnlyUSD,
+    totalPrice,
+  } = useTotalPrices();
 
   const stakedPercentage = useMemo(() => {
     if (!totalPrice || !stakedTotalPrice) {
@@ -211,6 +178,9 @@ export const MainPage: FunctionComponent<{
   const buySupportServiceInfos = useBuySupportServiceInfos();
 
   const globalSimpleBar = useGlobarSimpleBar();
+
+  const totalPriceSectionRef = useRef<HTMLDivElement | null>(null);
+  const [isTotalPriceVisible, setIsTotalPriceVisible] = useState(true);
 
   const animatedPrivacyModeHover = useSpringValue(0, {
     config: defaultSpringConfig,
@@ -278,8 +248,37 @@ export const MainPage: FunctionComponent<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    const scrollElement =
+      globalSimpleBar.ref.current?.getScrollElement() ?? null;
+    const target = totalPriceSectionRef.current;
+
+    if (!target) {
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry) {
+          setIsTotalPriceVisible(entry.isIntersecting);
+        }
+      },
+      {
+        root: scrollElement,
+        threshold: 0.8,
+      }
+    );
+    observer.observe(target);
+    return () => {
+      observer.disconnect();
+    };
+  }, [globalSimpleBar]);
+
   return (
-    <MainHeaderLayout isNotReady={isNotReady}>
+    <MainHeaderLayout
+      isNotReady={isNotReady}
+      isShowTotalPrice={!isTotalPriceVisible}
+    >
       {/* side panel에서만 보여준다. 보여주는 로직은 isRefreshButtonVisible를 다루는 useEffect를 참고. refresh button이 로딩중이면 모조건 보여준다. */}
       <RefreshButton
         visible={
@@ -292,7 +291,7 @@ export const MainPage: FunctionComponent<{
         }}
       />
 
-      <Box padding="1.25rem">
+      <Box ref={totalPriceSectionRef} padding="1.25rem">
         <Box
           onHoverStateChange={(isHover) => {
             if (!isNotReady) {
@@ -370,15 +369,6 @@ export const MainPage: FunctionComponent<{
 
       <Box paddingX="0.75rem" paddingBottom="1.5rem">
         <Stack gutter="1.5rem">
-          {/* 
-          TODO: 추후 앱 바로 이동
-          <CopyAddress
-            onClick={() => {
-              analyticsStore.logEvent("click_copyAddress");
-              setIsOpenDepositModal(true);
-            }}
-            isNotReady={isNotReady}
-          /> */}
           {hasAnyStakableAsset ? (
             <XAxis>
               <SpendableCard
@@ -852,7 +842,7 @@ function StakedBalanceTitle({
   stakedPercentage: number;
 }) {
   const intl = useIntl();
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   return (
     <Skeleton isNotReady={isNotReady}>
@@ -860,7 +850,7 @@ function StakedBalanceTitle({
         paddingY="0.125rem"
         cursor="pointer"
         onClick={() => {
-          // TODO: 추후 staked 페이지로 바로 이동
+          navigate("/stake");
         }}
       >
         <XAxis gap="0.25rem" alignY="center">

@@ -272,6 +272,9 @@ export const CopyAddressScene: FunctionComponent<{
         {isShowNoResult && <NoResultBox />}
 
         <CopyAddressItemList
+          containerStyle={{
+            padding: "0 1.125rem",
+          }}
           sortedAddresses={sortedAddresses}
           close={close}
           blockInteraction={blockInteraction}
