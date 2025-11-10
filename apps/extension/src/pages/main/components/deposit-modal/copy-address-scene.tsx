@@ -24,7 +24,6 @@ import { isRunningInSidePanel } from "../../../../utils";
 import { useGetSearchChains } from "../../../../hooks/use-get-search-chains";
 import { LookingForChainItem } from "../looking-for-chains";
 import { useSearch } from "../../../../hooks/use-search";
-import { getChainSearchResultClickAnalyticsProperties } from "../../../../analytics-amplitude";
 import { Column, Columns } from "../../../../components/column";
 import { TextButton } from "../../../../components/button-text";
 import { useBuySupportServiceInfos } from "../../../../hooks/use-buy-support-service-infos";
@@ -72,7 +71,7 @@ const chainSearchFields = [
 export const CopyAddressScene: FunctionComponent<{
   close: () => void;
 }> = observer(({ close }) => {
-  const { chainStore, analyticsAmplitudeStore } = useStore();
+  const { chainStore } = useStore();
 
   const intl = useIntl();
   const theme = useTheme();
@@ -307,7 +306,7 @@ export const CopyAddressScene: FunctionComponent<{
             >
               <FormattedMessage id="page.main.components.deposit-modal.look-for-chains" />
             </Subtitle4>
-            {searchedLookingForChains.map((chainData, index) => {
+            {searchedLookingForChains.map((chainData) => {
               return (
                 <React.Fragment key={chainData.chainInfo.chainId}>
                   <Gutter size="0.75rem" />
@@ -315,21 +314,6 @@ export const CopyAddressScene: FunctionComponent<{
                     chainInfo={chainData.chainInfo}
                     stored={chainData.stored}
                     embedded={chainData.embedded}
-                    onClick={() => {
-                      if (search.trim().length > 0) {
-                        analyticsAmplitudeStore.logEvent(
-                          "click_looking_for_chain_search_results_deposit_modal",
-                          getChainSearchResultClickAnalyticsProperties(
-                            chainData.chainInfo.chainName,
-                            search,
-                            searchedLookingForChains.map(
-                              (chain) => chain.chainInfo.chainName
-                            ),
-                            index
-                          )
-                        );
-                      }
-                    }}
                   />
                 </React.Fragment>
               );

@@ -402,14 +402,13 @@ export const CosmosTxView: FunctionComponent<{
     shouldTopUp,
     isTopUpAvailable,
     isTopUpInProgress,
-    isInsufficientFeeWarning,
+    topUpCompleted,
     remainingText,
     executeTopUpIfAvailable,
     topUpError,
   } = useTopUp({
     feeConfig,
     senderConfig,
-    amountConfig,
     hasHardwareWalletError:
       !!ledgerInteractingError ||
       !!keystoneInteractingError ||
@@ -422,9 +421,7 @@ export const CosmosTxView: FunctionComponent<{
     isLedgerAndDirect ||
     (isSendAuthzGrant && !isSendAuthzGrantChecked) ||
     (isHighFee && !isHighFeeApproved) ||
-    (shouldTopUp
-      ? isTopUpInProgress || !isTopUpAvailable
-      : isInsufficientFeeWarning);
+    (shouldTopUp && (isTopUpInProgress || !isTopUpAvailable));
 
   const approve = async () => {
     if (signDocHelper.signDocWrapper) {
@@ -461,15 +458,21 @@ export const CosmosTxView: FunctionComponent<{
           };
         }
 
+        const signDocWrapper = feeConfig.topUpStatus.topUpOverrideStdFee
+          ? signDocHelper.signDocWrapper.getTopUpOverridedWrapper(
+              feeConfig.topUpStatus.topUpOverrideStdFee
+            )
+          : signDocHelper.signDocWrapper;
+
         const signature = await handleCosmosPreSign(
           interactionData,
-          signDocHelper.signDocWrapper,
+          signDocWrapper,
           presignOptions
         );
 
         await signInteractionStore.approveWithProceedNext(
           interactionData.id,
-          signDocHelper.signDocWrapper,
+          signDocWrapper,
           signature,
           async (proceedNext) => {
             if (!proceedNext) {
@@ -777,7 +780,7 @@ export const CosmosTxView: FunctionComponent<{
           </React.Fragment>
         ) : null}
 
-        <VerticalCollapseTransition collapsed={shouldTopUp}>
+        <VerticalCollapseTransition collapsed={shouldTopUp || topUpCompleted}>
           <Box
             style={{
               opacity: isLedgerAndDirect ? 0.5 : undefined,
@@ -800,6 +803,8 @@ export const CosmosTxView: FunctionComponent<{
                       senderConfig={senderConfig}
                       gasConfig={gasConfig}
                       disableAutomaticFeeSet={preferNoSetFee}
+                      isExternalMsg={!interactionData.isInternal}
+                      shouldTopUp={shouldTopUp}
                     />
                   );
                 })()}
@@ -815,11 +820,13 @@ export const CosmosTxView: FunctionComponent<{
             ) : null}
           </Box>
         </VerticalCollapseTransition>
-        <VerticalCollapseTransition collapsed={!shouldTopUp}>
+        <VerticalCollapseTransition
+          collapsed={!(shouldTopUp || topUpCompleted)}
+        >
           {interactionData.isInternal ? (
             <FeeCoverageBox feeConfig={feeConfig} />
           ) : (
-            <FeeCoverageDescription />
+            <FeeCoverageDescription isTopUpAvailable={isTopUpAvailable} />
           )}
         </VerticalCollapseTransition>
 

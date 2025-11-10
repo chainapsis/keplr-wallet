@@ -10,8 +10,6 @@ import { CopyAddressItem, CopyAddressItemHandle } from ".";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { Box } from "../../../../components/box";
 import { Address } from "../deposit-modal/copy-address-scene";
-import { useStore } from "../../../../stores";
-import { getChainSearchResultClickAnalyticsProperties } from "../../../../analytics-amplitude";
 import { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
 import { XAxis } from "../../../../components/axis";
@@ -47,7 +45,6 @@ export const CopyAddressItemList = ({
   containerStyle,
   copyItemAddressHoverColor,
 }: CopyAddressItemListProps) => {
-  const { analyticsAmplitudeStore } = useStore();
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const itemContainerRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -256,21 +253,6 @@ export const CopyAddressItemList = ({
               blockInteraction={blockInteraction}
               setBlockInteraction={setBlockInteraction}
               setSortPriorities={setSortPriorities}
-              onClick={() => {
-                if (search.trim().length > 0) {
-                  analyticsAmplitudeStore.logEvent(
-                    "click_copy_address_item_search_results_deposit_modal",
-                    getChainSearchResultClickAnalyticsProperties(
-                      address.modularChainInfo.chainName,
-                      search,
-                      sortedAddresses.map(
-                        (address) => address.modularChainInfo.chainName
-                      ),
-                      index
-                    )
-                  );
-                }
-              }}
               onClickIcon={() => onClickIcon(address)}
               isFocused={focusedIndex === index && !isHoveredCopyAddressItem}
               preventHover={focusOrigin === "search"}

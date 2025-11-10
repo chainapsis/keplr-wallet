@@ -41,7 +41,6 @@ interface CopyAddressItemProps {
       value: Record<string, true | undefined>
     ) => Record<string, true | undefined>
   ) => void;
-  onClick: () => void;
   // QR scene이 일반 modal, float modal에서 스타일이 조금 다르기 때문에
   // 분리해서 prop을 따로 줄 수 있게 함
   onClickIcon: () => void;
@@ -63,7 +62,6 @@ export const CopyAddressItem = observer(
         blockInteraction,
         setBlockInteraction,
         setSortPriorities,
-        onClick,
         onClickIcon,
         hoverColor,
         isFocused = false,
@@ -100,8 +98,6 @@ export const CopyAddressItem = observer(
           return;
         }
 
-        onClick();
-
         await navigator.clipboard.writeText(
           address.starknetAddress ||
             address.ethereumAddress ||
@@ -126,7 +122,6 @@ export const CopyAddressItem = observer(
         analyticsStore,
         blockInteraction,
         close,
-        onClick,
         setBlockInteraction,
       ]);
 

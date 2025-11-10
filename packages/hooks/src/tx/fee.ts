@@ -14,7 +14,7 @@ import { CoinPretty, Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { Currency, FeeCurrency, StdFee } from "@keplr-wallet/types";
 import { computedFn } from "mobx-utils";
 import { useState } from "react";
-import { InsufficientFeeError } from "./errors";
+import { InsufficientFeeError, ShouldTopUpWarning } from "./errors";
 import { QueriesStore } from "./internal";
 import { DenomHelper } from "@keplr-wallet/common";
 import { EthereumQueriesImpl } from "@keplr-wallet/stores-eth";
@@ -915,6 +915,40 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       return {};
     }
 
+    let priorWarning: Error | undefined = undefined;
+    let priorIsLoadingState = false;
+    const makeReturn = (uiProperties: UIProperties): UIProperties => {
+      return {
+        ...uiProperties,
+        ...(() => {
+          if (priorIsLoadingState) {
+            if (uiProperties.loadingState === "loading-block") {
+              return {
+                loadingState: "loading-block",
+              };
+            } else {
+              return {
+                loadingState: "loading",
+              };
+            }
+          }
+          return {};
+        })(),
+        ...(() => {
+          if (priorWarning) {
+            if (uiProperties.error) {
+              return {};
+            } else {
+              return {
+                warning: priorWarning,
+              };
+            }
+          }
+          return {};
+        })(),
+      };
+    };
+
     if (
       fee.length > 0 &&
       this.computeTerraClassicTax &&
@@ -927,7 +961,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
           etcQueries.queryTerraClassicTaxRate.error ||
           etcQueries.queryTerraClassicTaxRate.isFetching
         ) {
-          return {
+          return makeReturn({
             error: (() => {
               if (etcQueries.queryTerraClassicTaxRate.error) {
                 return new Error("Failed to fetch tax rate");
@@ -936,14 +970,14 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
             loadingState: etcQueries.queryTerraClassicTaxRate.isFetching
               ? "loading-block"
               : undefined,
-          };
+          });
         }
 
         if (
           etcQueries.queryTerraClassicTaxCaps.error ||
           etcQueries.queryTerraClassicTaxCaps.isFetching
         ) {
-          return {
+          return makeReturn({
             error: (() => {
               if (etcQueries.queryTerraClassicTaxCaps.error) {
                 return new Error("Failed to fetch tax rate");
@@ -952,7 +986,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
             loadingState: etcQueries.queryTerraClassicTaxCaps.isFetching
               ? "loading-block"
               : undefined,
-          };
+          });
         }
       }
     }
@@ -962,20 +996,16 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       if (queryOsmosis) {
         const queryBaseFee = queryOsmosis.queryBaseFee;
         const baseFee = queryBaseFee.baseFee;
-        if (!baseFee) {
-          return {
-            loadingState: "loading-block",
-          };
-        }
         if (queryBaseFee.isFetching) {
-          return {
-            loadingState: "loading",
-          };
+          priorIsLoadingState = true;
         }
         if (queryBaseFee.error) {
-          return {
-            warning: new Error("Failed to fetch base fee"),
-          };
+          priorWarning = new Error("Failed to fetch base fee");
+        }
+        if (!baseFee) {
+          return makeReturn({
+            loadingState: "loading-block",
+          });
         }
       }
     } else if (this.canFeeMarketTxFeesAndReady()) {
@@ -984,19 +1014,15 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         if (queryEtc) {
           const queryInitiaDynamicFee = queryEtc.queryInitiaDynamicFee;
           if (queryInitiaDynamicFee.error) {
-            return {
-              warning: new Error("Failed to fetch gas prices"),
-            };
+            priorWarning = new Error("Failed to fetch gas prices");
           }
           if (!queryInitiaDynamicFee.response) {
-            return {
+            return makeReturn({
               loadingState: "loading-block",
-            };
+            });
           }
           if (queryInitiaDynamicFee.isFetching) {
-            return {
-              loadingState: "loading",
-            };
+            priorIsLoadingState = true;
           }
         }
       } else if (this.chainInfo.hasFeature("evm-feemarket")) {
@@ -1004,19 +1030,15 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         if (queryCosmos) {
           const queryEvmFeeMarketBaseFee = queryCosmos.queryEvmFeeMarketBaseFee;
           if (queryEvmFeeMarketBaseFee.error) {
-            return {
-              warning: new Error("Failed to fetch base fee"),
-            };
+            priorWarning = new Error("Failed to fetch base fee");
           }
           if (!queryEvmFeeMarketBaseFee.response) {
-            return {
+            return makeReturn({
               loadingState: "loading-block",
-            };
+            });
           }
           if (queryEvmFeeMarketBaseFee.isFetching) {
-            return {
-              loadingState: "loading",
-            };
+            priorIsLoadingState = true;
           }
         }
       } else {
@@ -1024,19 +1046,15 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         if (queryCosmos) {
           const queryFeeMarketGasPrices = queryCosmos.queryFeeMarketGasPrices;
           if (queryFeeMarketGasPrices.error) {
-            return {
-              warning: new Error("Failed to fetch gas prices"),
-            };
+            priorWarning = new Error("Failed to fetch gas prices");
           }
           if (!queryFeeMarketGasPrices.response) {
-            return {
+            return makeReturn({
               loadingState: "loading-block",
-            };
+            });
           }
           if (queryFeeMarketGasPrices.isFetching) {
-            return {
-              loadingState: "loading",
-            };
+            priorIsLoadingState = true;
           }
         }
       }
@@ -1075,11 +1093,14 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
           // Return only needed.
           // There is proceeding logic to validate the balance.
+          if (loadingState === "loading") {
+            priorIsLoadingState = true;
+          }
           if (error || loadingState) {
-            return {
+            return makeReturn({
               error,
               loadingState,
-            };
+            });
           }
         }
       }
@@ -1093,21 +1114,17 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
             ETH_FEE_HISTORY_NEWEST_BLOCK
           );
         if (blockQuery.error) {
-          return {
-            warning: new Error(
-              `Failed to fetch latest block. chain id: ${this.chainId}`
-            ),
-          };
+          priorWarning = new Error(
+            `Failed to fetch latest block. chain id: ${this.chainId}`
+          );
         }
         if (blockQuery.isFetching) {
-          return {
-            loadingState: "loading",
-          };
+          priorIsLoadingState = true;
         }
         if (!blockQuery.response) {
-          return {
+          return makeReturn({
             loadingState: "loading-block",
-          };
+          });
         }
 
         const feeHistoryQuery =
@@ -1121,45 +1138,37 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
           ethereumQueries.queryEthereumMaxPriorityFee;
 
         if (feeHistoryQuery.error && maxPriorityFeePerGasQuery.error) {
-          return {
-            warning: new Error(
-              `Failed to fetch both fee history and max priority fee. chain id: ${this.chainId}`
-            ),
-          };
+          priorWarning = new Error(
+            `Failed to fetch both fee history and max priority fee. chain id: ${this.chainId}`
+          );
         }
 
         if (
           feeHistoryQuery.isFetching ||
           maxPriorityFeePerGasQuery.isFetching
         ) {
-          return {
-            loadingState: "loading",
-          };
+          priorIsLoadingState = true;
         }
         if (!feeHistoryQuery.response || !maxPriorityFeePerGasQuery.response) {
-          return {
+          return makeReturn({
             loadingState: "loading-block",
-          };
+          });
         }
 
         const gasPriceQuery = ethereumQueries.queryEthereumGasPrice;
         if (gasPriceQuery.error) {
-          return {
-            warning: new Error(
-              `Failed to fetch gas price. chain id: ${this.chainId}`
-            ),
-          };
+          priorWarning = new Error(
+            `Failed to fetch gas price. chain id: ${this.chainId}`
+          );
         }
         if (gasPriceQuery.isFetching) {
-          return {
-            loadingState: "loading",
-          };
+          priorIsLoadingState = true;
         }
 
         if (!gasPriceQuery.response) {
-          return {
+          return makeReturn({
             loadingState: "loading-block",
-          };
+          });
         }
       }
     }
@@ -1203,34 +1212,40 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         );
 
       if (!bal) {
-        return {
-          warning: new Error(
-            `Can't parse the balance for ${need.currency.coinMinimalDenom}`
-          ),
-        };
+        priorWarning = new Error(
+          `Can't parse the balance for ${need.currency.coinMinimalDenom}`
+        );
       }
 
-      if (bal.error) {
-        return {
-          warning: new Error("Failed to fetch balance"),
-        };
-      }
+      if (bal) {
+        // XXX: AtomOne에서 fee top-up 시에 bal.error 또는 bal.response에 접근해도
+        //      bal이 observed 상태가 되지 않아서 fetch가 이뤄지지 않는 문제가 있음
+        //      아무리봐도 원인을 찾을 수 없기 때문에 일단 강제로 observed 상태로 만든다.
+        bal.waitResponse();
 
-      if (!bal.response) {
-        return {
-          loadingState: "loading-block",
-        };
-      }
+        if (bal.error) {
+          priorWarning = new Error("Failed to fetch balance");
+        }
 
-      if (new Int(bal.balance.toCoin().amount).lt(new Int(need.amount))) {
-        return {
-          error: new InsufficientFeeError("Insufficient fee"),
-          loadingState: bal.isFetching ? "loading" : undefined,
-        };
+        if (!bal.response) {
+          return makeReturn({
+            loadingState: "loading-block",
+          });
+        }
+
+        if (new Int(bal.balance.toCoin().amount).lt(new Int(need.amount))) {
+          if (bal.isFetching) {
+            priorIsLoadingState = true;
+          }
+
+          return makeReturn({
+            error: new InsufficientFeeError("Insufficient fee"),
+          });
+        }
       }
     }
 
-    return {};
+    return makeReturn({});
   }
 
   @computed
@@ -1239,55 +1254,146 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       this.forceTopUp ||
       this._uiProperties.error instanceof InsufficientFeeError
     ) {
-      const queryTopUpStatus = this.queriesStore.get(this.chainId).keplrETC
-        ?.queryTopUpStatus;
-
-      const topUpStatus = queryTopUpStatus?.getTopUpStatus(
-        this.senderConfig.sender
-      );
-
-      if (
-        topUpStatus &&
-        topUpStatus.error == null &&
-        topUpStatus.topUpStatus &&
-        (topUpStatus.topUpStatus.isTopUpAvailable ||
-          topUpStatus.topUpStatus.remainingTimeMs !== undefined)
-      ) {
-        return { warning: this._uiProperties.error };
+      const topUpStatus = this.getTopUpStatus();
+      if (topUpStatus.shouldTopUp) {
+        return {
+          warning: new ShouldTopUpWarning("Should top up"),
+        };
       }
     }
 
     return this._uiProperties;
   }
 
-  @computed
-  get topUpStatus(): { isTopUpAvailable: boolean; remainingTimeMs?: number } {
-    const queryTopUpStatus = this.queriesStore.get(this.chainId).keplrETC
-      ?.queryTopUpStatus;
+  readonly getTopUpStatus = computedFn(() => {
+    const keplrETCQueries = this.queriesStore.get(this.chainId).keplrETC;
+    if (!keplrETCQueries) {
+      return {
+        isTopUpAvailable: false,
+        remainingTimeMs: undefined,
+        shouldTopUp: false,
+        topUpOverrideStdFee: undefined,
+      };
+    }
 
-    if (queryTopUpStatus) {
-      const topUpStatus = queryTopUpStatus.getTopUpStatus(
-        this.senderConfig.sender
-      );
-      if (topUpStatus.error == null) {
-        return topUpStatus.topUpStatus;
+    const topUpStatus = keplrETCQueries.queryTopUpStatus.getTopUpStatus(
+      this.senderConfig.sender
+    ).topUpStatus;
+
+    if (topUpStatus != null) {
+      const { isTopUpAvailable, remainingTimeMs } = topUpStatus;
+
+      // 모든 fee currency가 부족할 경우에만 topup 사용이 가능
+      const shouldTopUp = (() => {
+        const queryBalances = this.queriesStore
+          .get(this.chainId)
+          .queryBalances.getQueryBech32Address(this.senderConfig.sender);
+
+        for (const feeCurrency of this.selectableFeeCurrencies) {
+          const requiredFee = this.getFeeTypePrettyForFeeCurrency(
+            feeCurrency,
+            this.type === "manual" ? "average" : this.type
+          );
+
+          const totalNeed = (() => {
+            let need = requiredFee;
+            for (const amt of this.amountConfig.amount) {
+              if (
+                amt.currency.coinMinimalDenom === feeCurrency.coinMinimalDenom
+              ) {
+                need = need.add(amt);
+              }
+            }
+            return need;
+          })();
+
+          const bal = queryBalances.getBalance(feeCurrency)?.balance;
+          if (!bal || bal.toDec().lte(new Dec(0))) {
+            continue;
+          }
+
+          if (bal.toDec().gte(totalNeed.toDec())) {
+            return false;
+          }
+        }
+
+        return this.selectableFeeCurrencies.length > 0;
+      })();
+      let topUpOverrideStdFee: StdFee | undefined = undefined;
+
+      if (this.forceTopUp || shouldTopUp) {
+        const baseFeeCurrency = this.chainInfo.feeCurrencies[0];
+        if (baseFeeCurrency) {
+          const feeAmount = this.getFeeTypePrettyForFeeCurrency(
+            baseFeeCurrency,
+            "average"
+          );
+
+          topUpOverrideStdFee = {
+            gas: this.gasConfig.gas.toString(),
+            amount: [
+              {
+                amount: feeAmount.toCoin().amount,
+                denom: baseFeeCurrency.coinMinimalDenom,
+              },
+            ],
+          };
+        }
       }
+
+      return {
+        shouldTopUp,
+        isTopUpAvailable,
+        remainingTimeMs,
+        topUpOverrideStdFee,
+      };
     }
 
     return {
       isTopUpAvailable: false,
       remainingTimeMs: undefined,
+      shouldTopUp: false,
+      topUpOverrideStdFee: undefined,
+    };
+  });
+
+  @computed
+  get topUpStatus(): {
+    shouldTopUp: boolean;
+    remainingTimeMs?: number;
+    topUpOverrideStdFee?: StdFee;
+    isTopUpAvailable: boolean;
+  } {
+    // always call getTopUpStatus() to ensure topUpQuery is observed
+    const status = this.getTopUpStatus();
+
+    if (this.uiProperties.warning instanceof ShouldTopUpWarning) {
+      return {
+        ...status,
+        shouldTopUp: this.forceTopUp || status.shouldTopUp,
+      };
+    }
+
+    return {
+      shouldTopUp: false,
+      remainingTimeMs: undefined,
+      topUpOverrideStdFee: undefined,
+      isTopUpAvailable: false,
     };
   }
 
   refreshTopUpStatus(): void {
-    const queryTopUpStatus = this.queriesStore.get(this.chainId).keplrETC
-      ?.queryTopUpStatus;
-    if (queryTopUpStatus) {
-      const topUpQuery = queryTopUpStatus.getTopUpStatus(
-        this.senderConfig.sender
-      );
-      topUpQuery.fetch();
+    const keplrETCQueries = this.queriesStore.get(this.chainId).keplrETC;
+    if (!keplrETCQueries) {
+      return;
+    }
+
+    const topUpQuery = keplrETCQueries.queryTopUpStatus.getTopUpStatus(
+      this.senderConfig.sender
+    );
+
+    if (topUpQuery.topUpStatus != null) {
+      topUpQuery.waitFreshResponse();
     }
   }
 

@@ -1,21 +1,18 @@
 import {
   ObservableQuery,
   QuerySharedContext,
-  ChainGetter,
   HasMapStore,
 } from "@keplr-wallet/stores";
-import { makeObservable } from "mobx";
+import { computed, makeObservable } from "mobx";
 
-export type StatusResponseBody =
-  | {
-      isTopUpAvailable: boolean;
-      remainingTimeMs?: number;
-    }
-  | {
-      error: string;
-    };
+export type TopUpStatus = {
+  isTopUpAvailable: boolean;
+  remainingTimeMs?: number;
+};
 
-class ObservableQueryTopUpStatusInner extends ObservableQuery<StatusResponseBody> {
+export type StatusResponse = TopUpStatus | { error: string };
+
+class ObservableQueryTopUpStatusInner extends ObservableQuery<StatusResponse> {
   constructor(
     sharedContext: QuerySharedContext,
     chainId: string,
@@ -29,7 +26,7 @@ class ObservableQueryTopUpStatusInner extends ObservableQuery<StatusResponseBody
         chainId
       )}?recipientAddress=${encodeURIComponent(recipientAddress)}`,
       {
-        cacheMaxAge: 0,
+        disableCache: true,
         fetchingInterval: 10_000,
       }
     );
@@ -37,19 +34,14 @@ class ObservableQueryTopUpStatusInner extends ObservableQuery<StatusResponseBody
     makeObservable(this);
   }
 
-  get topUpStatus(): { isTopUpAvailable: boolean; remainingTimeMs?: number } {
-    if (!this.response?.data) {
-      return {
-        isTopUpAvailable: false,
-        remainingTimeMs: undefined,
-      };
+  @computed
+  get topUpStatus(): TopUpStatus | undefined {
+    if (this.error || !this.response?.data || this.isFetching) {
+      return undefined;
     }
 
     if ("error" in this.response?.data) {
-      return {
-        isTopUpAvailable: false,
-        remainingTimeMs: undefined,
-      };
+      return undefined;
     }
 
     return this.response.data;
@@ -60,7 +52,6 @@ export class ObservableQueryTopUpStatus extends HasMapStore<ObservableQueryTopUp
   constructor(
     protected readonly sharedContext: QuerySharedContext,
     protected readonly chainId: string,
-    protected readonly chainGetter: ChainGetter,
     protected readonly baseURL: string
   ) {
     super((recipientAddress: string) => {
