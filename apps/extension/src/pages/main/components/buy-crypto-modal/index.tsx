@@ -11,6 +11,7 @@ import { BuySupportServiceInfo } from "../../../../hooks/use-buy-support-service
 import { ArrowLeftIcon, LoadingIcon } from "../../../../components/icon";
 import { IconButton } from "../../../../components/icon-button";
 import { Column, Columns } from "../../../../components/column";
+import { useSceneTransition } from "../../../../components/transition";
 
 const Styles = {
   Container: styled.div`
@@ -70,6 +71,7 @@ export const BuyCryptoModal: FunctionComponent<{
   showBackButton?: boolean;
 }> = observer(({ close, buySupportServiceInfos, showBackButton }) => {
   const theme = useTheme();
+  const sceneTransition = useSceneTransition();
 
   return (
     <Styles.Container>
@@ -77,7 +79,13 @@ export const BuyCryptoModal: FunctionComponent<{
         <Columns sum={1} alignY="center">
           <IconButton
             padding="0.25rem"
-            onClick={close}
+            onClick={() => {
+              if (sceneTransition) {
+                sceneTransition.pop();
+              } else {
+                close();
+              }
+            }}
             hoverColor={
               theme.mode === "light"
                 ? ColorPalette["gray-50"]
