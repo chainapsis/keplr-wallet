@@ -10,7 +10,8 @@ import { BuyCryptoModal } from "../buy-crypto-modal";
 
 export const DepositModal: FunctionComponent<{
   close: () => void;
-}> = observer(({ close }) => {
+  initialSearch?: string;
+}> = observer(({ close, initialSearch }) => {
   const theme = useTheme();
 
   return (
@@ -41,6 +42,7 @@ export const DepositModal: FunctionComponent<{
           name: "copy-address",
           props: {
             close,
+            initialSearch,
           },
         }}
         transitionAlign="bottom"

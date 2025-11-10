@@ -36,12 +36,15 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
   const theme = useTheme();
   const intl = useIntl();
 
-  const [searchParams, _] = useSearchParams();
+  const [searchParams] = useSearchParams();
 
   const { hugeQueriesStore } = useStore();
 
   const [isOpenDepositModal, setIsOpenDepositModal] = React.useState(false);
   const [isOpenBuy, setIsOpenBuy] = React.useState(false);
+  const [depositInitialSearch, setDepositInitialSearch] = React.useState<
+    string | undefined
+  >(undefined);
 
   const buySupportServiceInfos = useBuySupportServiceInfos();
 
@@ -56,9 +59,13 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
     return 4;
   };
 
-  const stakables = [...hugeQueriesStore.stakables].sort(
-    (a, b) => priority(a.chainInfo.chainId) - priority(b.chainInfo.chainId)
-  );
+  const stakables = [...hugeQueriesStore.stakables].sort((a, b) => {
+    const diff = priority(a.chainInfo.chainId) - priority(b.chainInfo.chainId);
+    if (diff !== 0) {
+      return diff;
+    }
+    return a.token.currency.coinDenom.localeCompare(b.token.currency.coinDenom);
+  });
 
   return (
     <MainHeaderLayout
@@ -119,6 +126,10 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
             <AssetCard
               key={`${stakable.chainInfo.chainId}-${stakable.token.currency.coinMinimalDenom}`}
               viewToken={stakable}
+              onClick={() => {
+                setDepositInitialSearch(stakable.chainInfo.chainName);
+                setIsOpenDepositModal(true);
+              }}
             />
           ))}
         />
@@ -127,11 +138,20 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
       <Modal
         isOpen={isOpenDepositModal}
         align="bottom"
-        close={() => setIsOpenDepositModal(false)}
+        close={() => {
+          setIsOpenDepositModal(false);
+          setDepositInitialSearch(undefined);
+        }}
         /* Simplebar를 사용하면 트랜지션이 덜덜 떨리는 문제가 있다... */
         forceNotUseSimplebar={true}
       >
-        <DepositModal close={() => setIsOpenDepositModal(false)} />
+        <DepositModal
+          close={() => {
+            setIsOpenDepositModal(false);
+            setDepositInitialSearch(undefined);
+          }}
+          initialSearch={depositInitialSearch}
+        />
       </Modal>
 
       <Modal
@@ -212,16 +232,13 @@ const CollapsibleGrid: FunctionComponent<{
 
 const AssetCard: FunctionComponent<{
   viewToken: ViewToken;
-}> = observer(({ viewToken }) => {
+  onClick: () => void;
+}> = observer(({ viewToken, onClick }) => {
   const stakingAprDec = useGetStakingApr(viewToken.chainInfo.chainId);
   const theme = useTheme();
 
   return (
-    <Styles.AssetCard
-      onClick={() => {
-        // TODO: open copy address modal
-      }}
-    >
+    <Styles.AssetCard onClick={onClick}>
       <CurrencyImageFallback
         chainInfo={viewToken.chainInfo}
         currency={viewToken.token.currency}
