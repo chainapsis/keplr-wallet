@@ -791,8 +791,25 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
         );
 
         if (chainInfo) {
-          const selectedAddress = (await keplr.getKey(this._currentChainId))
-            .ethereumHexAddress;
+          let selectedAddress: string | null = null;
+
+          try {
+            selectedAddress = (await keplr.getKey(this._currentChainId))
+              .ethereumHexAddress;
+          } catch (e) {
+            // If the key is not found (e.g. ledger is never connected with ethereum app),
+            // should emit empty array as parameter to accountsChanged event
+            if (
+              !e?.message.includes(
+                "on Ledger by selecting the chain in the extension"
+              )
+            ) {
+              console.error(
+                `Failed to get key for keystorechange event: ${e.message}`
+              );
+            }
+          }
+
           this.handleAccountsChanged(selectedAddress);
         }
       }
@@ -975,11 +992,17 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     this.emit("chainChanged", evmChainIdHex);
   }
 
-  protected async handleAccountsChanged(selectedAddress: string) {
+  protected async handleAccountsChanged(selectedAddress: string | null) {
     if (this._isConnected) {
-      this.selectedAddress = selectedAddress;
+      if (this.selectedAddress !== selectedAddress) {
+        this.selectedAddress = selectedAddress;
 
-      this.emit("accountsChanged", [selectedAddress]);
+        if (selectedAddress) {
+          this.emit("accountsChanged", [selectedAddress]);
+        } else {
+          this.emit("accountsChanged", []);
+        }
+      }
     }
   }
 
@@ -1028,6 +1051,71 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
 export class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
   constructor(protected readonly keplr: Keplr) {
     super();
+
+    window.addEventListener("keplr_keystorechange", async () => {
+      let accounts: string[] | null = null;
+
+      try {
+        accounts = await this.getAccounts();
+      } catch (e) {
+        if (
+          !e?.message.includes(
+            "on Ledger by selecting the chain in the extension"
+          )
+        ) {
+          console.error(
+            `Failed to get key for keystorechange event: ${e.message}`
+          );
+        }
+      }
+
+      this._handleAccountsChanged(accounts);
+    });
+
+    window.addEventListener("keplr_bitcoinChainChanged", async (event) => {
+      const origin = (event as CustomEvent).detail.origin;
+
+      if (origin === window.location.origin) {
+        const network = (event as CustomEvent).detail.network;
+
+        let accounts: string[] | null = null;
+        try {
+          accounts = await this.getAccounts();
+        } catch (e) {
+          if (
+            !e?.message.includes(
+              "on Ledger by selecting the chain in the extension"
+            )
+          ) {
+            console.error(
+              `Failed to get key for keystorechange event: ${e.message}`
+            );
+          }
+        }
+
+        this._handleNetworkChanged(network);
+        this._handleAccountsChanged(accounts);
+      }
+    });
+
+    window.addEventListener("keplr_bitcoinAccountsChanged", async () => {
+      let accounts: string[] | null = null;
+      try {
+        accounts = await this.getAccounts();
+      } catch (e) {
+        if (
+          !e?.message.includes(
+            "on Ledger by selecting the chain in the extension"
+          )
+        ) {
+          console.error(
+            `Failed to get key for keystorechange event: ${e.message}`
+          );
+        }
+      }
+
+      this._handleAccountsChanged(accounts);
+    });
   }
 
   protected static async _requestMethod(
@@ -1202,4 +1290,20 @@ export class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
   async connectWallet(): Promise<string[]> {
     return this.requestAccounts();
   }
+
+  protected _handleNetworkChanged = async (network: BitcoinNetwork) => {
+    this.emit("networkChanged", network);
+  };
+
+  protected _handleAccountsChanged = async (accounts: string[] | null) => {
+    if (accounts && accounts.length > 0) {
+      this.emit("accountChanged", accounts);
+      this.emit("accountsChanged", accounts);
+    } else {
+      // If the accounts are not found (e.g. ledger is never connected with bitcoin app),
+      // should emit empty array as parameter to accountsChanged event
+      this.emit("accountChanged", [""]);
+      this.emit("accountsChanged", [""]);
+    }
+  };
 }
