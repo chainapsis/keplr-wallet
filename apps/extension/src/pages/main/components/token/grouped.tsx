@@ -12,11 +12,7 @@ import {
   ChainImageFallback,
   CurrencyImageFallback,
 } from "../../../../components/image";
-import {
-  Subtitle2,
-  Subtitle3,
-  Caption1,
-} from "../../../../components/typography";
+import { Subtitle3, Caption1 } from "../../../../components/typography";
 import { BottomTagType, TokenItem } from "./index";
 import { PriceChangeTag } from "./price-change-tag";
 import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse/collapse";
@@ -235,7 +231,7 @@ const TokenGroupHeader: FunctionComponent<TokenGroupHeaderProps> = observer(
 
           <Stack gutter="0.25rem">
             <XAxis alignY="center">
-              <Subtitle2
+              <Subtitle3
                 color={
                   theme.mode === "light"
                     ? ColorPalette["gray-700"]
@@ -243,7 +239,7 @@ const TokenGroupHeader: FunctionComponent<TokenGroupHeaderProps> = observer(
                 }
               >
                 {coinDenom}
-              </Subtitle2>
+              </Subtitle3>
 
               {price24HChange ? (
                 <React.Fragment>
