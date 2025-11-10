@@ -564,10 +564,6 @@
   "page.send.amount.warning.expected-amount-too-small-title": "{inAmount} ({srcChain}) → {outAmount} ({dstChain})",
   "page.send.amount.bridge-fee-info.expected-amount": "你将收到",
 
-  "page.main.chart.available": "可用总额",
-  "page.main.chart.staked": "质押总额",
-  "page.main.chart.stake-with-keplr-dashboard-button": "使用Keplr Dashboard进行质押",
-  "page.main.chart.manage-portfolio-in-keplr-dashboard": "在Keplr Dashboard中管理投资组合",
   "page.main.search-placeholder": "搜索资产或链（如ATOM、Cosmos）",
   "page.main.spendable.spendable-balance-title": "可用余额",
   "page.main.spendable.spendable-balance-tooltip": "你可以立即使用或交易的资产金额，目前抵押或锁定在LP池中的资产除外。",

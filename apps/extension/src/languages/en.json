@@ -624,12 +624,6 @@
   "page.send.amount.warning.expected-amount-too-small-title": "{inAmount} on {srcChain} → {outAmount} on {dstChain}",
   "page.send.amount.bridge-fee-info.expected-amount": "You will receive",
 
-  "page.main.chart.available": "Total Available",
-  "page.main.chart.staked": "Total Staked",
-  "page.main.chart.earn-button": "Earn with USDC",
-  "page.main.chart.dashboard-button": "Dashboard",
-  "page.main.chart.stake-with-keplr-dashboard-button": "Stake with Keplr Dashboard",
-  "page.main.chart.manage-portfolio-in-keplr-dashboard": "Manage Portfolio in Keplr Dashboard",
   "page.main.search-placeholder": "Search for asset or chain (i.e. ATOM, Cosmos)",
   "page.main.spendable.spendable-balance-title": "Spendable Assets",
   "page.main.spendable.spendable-balance-tooltip": "The amount of your assets that are available for use or transfer immediately, except for those that are currently staked or locked in LP pools.",
