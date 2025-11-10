@@ -37,17 +37,10 @@ export class ObservableQueryChains extends ObservableQuery<ChainsResponse> {
     abortController: AbortController
   ): Promise<{ headers: any; data: ChainsResponse }> {
     const _result = await simpleFetch(this.baseURL, this.url, {
-      signal: abortController.signal,
       headers: {
-        ...(() => {
-          const res: { authorization?: string } = {};
-          if (process.env["SKIP_API_KEY"]) {
-            res.authorization = process.env["SKIP_API_KEY"];
-          }
-
-          return res;
-        })(),
+        "content-type": "application/json",
       },
+      signal: abortController.signal,
     });
     const result = {
       headers: _result.headers,
