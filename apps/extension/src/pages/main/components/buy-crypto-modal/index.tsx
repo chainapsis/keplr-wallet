@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useContext, useState } from "react";
 import { observer } from "mobx-react-lite";
 import styled, { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
@@ -11,7 +11,7 @@ import { BuySupportServiceInfo } from "../../../../hooks/use-buy-support-service
 import { ArrowLeftIcon, LoadingIcon } from "../../../../components/icon";
 import { IconButton } from "../../../../components/icon-button";
 import { Column, Columns } from "../../../../components/column";
-import { useSceneTransition } from "../../../../components/transition";
+import { SceneTransitionContextBase } from "../../../../components/transition/scene/internal";
 
 const Styles = {
   Container: styled.div`
@@ -71,7 +71,7 @@ export const BuyCryptoModal: FunctionComponent<{
   showBackButton?: boolean;
 }> = observer(({ close, buySupportServiceInfos, showBackButton }) => {
   const theme = useTheme();
-  const sceneTransition = useSceneTransition();
+  const sceneTransition = useContext(SceneTransitionContextBase);
 
   return (
     <Styles.Container>
