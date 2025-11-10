@@ -28,6 +28,7 @@ import { IconProps } from "../../components/icon/types";
 import { Subtitle3 } from "../../components/typography";
 import { RewardsCard } from "./components/rewards-card";
 import { useSearchParams } from "react-router-dom";
+import { useGetStakingApr } from "../../hooks/use-get-staking-apr";
 
 const zeroDec = new Dec(0);
 
@@ -211,6 +212,16 @@ export const StakePage: FunctionComponent = observer(() => {
                 title={<TokenTitleView title={title} />}
                 lenAlwaysShown={lenAlwaysShown}
                 items={balance.map((viewToken) => {
+                  const chainId =
+                    "chainInfo" in viewToken
+                      ? viewToken.chainInfo.chainId
+                      : viewToken.unbonding.chainInfo.chainId;
+                  const stakingAprDec = useGetStakingApr(chainId);
+
+                  const stakingApr = stakingAprDec
+                    ? `APR ${stakingAprDec.toString(2)}%`
+                    : undefined;
+
                   if ("altSentence" in viewToken) {
                     return (
                       <TokenItem
@@ -225,6 +236,7 @@ export const StakePage: FunctionComponent = observer(() => {
                           }
                         }}
                         altSentence={viewToken.altSentence}
+                        stakingApr={stakingApr}
                       />
                     );
                   }
@@ -241,6 +253,7 @@ export const StakePage: FunctionComponent = observer(() => {
                           });
                         }
                       }}
+                      stakingApr={stakingApr}
                     />
                   );
                 })}
