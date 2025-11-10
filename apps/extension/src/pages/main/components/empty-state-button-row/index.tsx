@@ -82,8 +82,14 @@ const Styles = {
     flex: 1 0 0;
     align-self: stretch;
     border-radius: 222px;
-    background: rgba(255, 255, 255, 0.05);
-    color: ${ColorPalette.white};
+    background: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["blue-50"]
+        : "rgba(255, 255, 255, 0.05)"};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["blue-500"]
+        : ColorPalette.white};
 
     opacity: ${({ disabled }) => (disabled ? 0.7 : 1)};
     cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};

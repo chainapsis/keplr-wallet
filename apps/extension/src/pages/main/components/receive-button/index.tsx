@@ -1,5 +1,5 @@
 import React from "react";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { COMMON_HOVER_OPACITY } from "../../../../styles/constant";
 import { ColorPalette } from "../../../../styles";
 import { useIntl } from "react-intl";
@@ -10,8 +10,14 @@ import { Box } from "../../../../components/box";
 const StyledButton = styled.button`
   width: 100%;
   height: 100%;
-  background-color: ${ColorPalette["gray-600"]};
-  color: ${ColorPalette["gray-100"]};
+  background-color: ${(props) =>
+    props.theme.mode === "light"
+      ? ColorPalette["gray-50"]
+      : ColorPalette["gray-600"]};
+  color: ${(props) =>
+    props.theme.mode === "light"
+      ? ColorPalette["gray-300"]
+      : ColorPalette["gray-100"]};
   border-radius: 1.25rem;
   padding: 0.75rem;
   border: none;
@@ -33,6 +39,7 @@ interface ReceiveButtonWhenFirstTimeProps {
 export const ReceiveButtonWhenFirstTime = ({
   onClick,
 }: ReceiveButtonWhenFirstTimeProps) => {
+  const theme = useTheme();
   const intl = useIntl();
   return (
     <StyledButton onClick={onClick}>
@@ -46,7 +53,11 @@ export const ReceiveButtonWhenFirstTime = ({
         >
           <path
             d="M15.375 1L1 15.375M1 15.375L11.7813 15.375M1 15.375L1 4.59375"
-            stroke="#F6F6F9"
+            stroke={
+              theme.mode === "light"
+                ? ColorPalette["gray-500"]
+                : ColorPalette["gray-10"]
+            }
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"

@@ -91,7 +91,13 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
         <Gutter size="0.75rem" />
 
         <Box paddingX="0.25rem">
-          <Subtitle3 color={ColorPalette["blue-300"]}>
+          <Subtitle3
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-300"]
+                : ColorPalette["blue-400"]
+            }
+          >
             {intl.formatMessage({ id: "page.stake.explore.subtitle" })}
           </Subtitle3>
         </Box>
@@ -233,7 +239,13 @@ const AssetCard: FunctionComponent<{
           {viewToken.token.currency.coinDenom}
         </Subtitle2>
         <Gutter size="0.25rem" />
-        <Subtitle3 color={ColorPalette["gray-200"]}>
+        <Subtitle3
+          color={
+            theme.mode === "light"
+              ? ColorPalette["blue-400"]
+              : ColorPalette["gray-400"]
+          }
+        >
           {stakingAprDec ? `APR ${stakingAprDec.toString(0)}%` : undefined}
         </Subtitle3>
       </XAxis>
@@ -280,7 +292,11 @@ const Styles = {
     justify-content: center;
     flex-shrink: 0;
     border-radius: 1.25rem;
-    border: 1px solid ${ColorPalette["gray-450"]};
+    border: 1px solid
+      ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-100"]
+          : ColorPalette["gray-550"]};
     cursor: pointer;
 
     :hover {
