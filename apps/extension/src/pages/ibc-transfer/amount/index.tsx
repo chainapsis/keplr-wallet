@@ -57,23 +57,22 @@ export const IBCTransferAmountView: FunctionComponent<{
               id: "components.input.memo-input.optional-placeholder",
             })}
           />
+
+          <div style={{ flex: 1 }} />
+          <VerticalCollapseTransition collapsed={shouldTopUp}>
+            <FeeControl
+              senderConfig={senderConfig}
+              feeConfig={feeConfig}
+              gasConfig={gasConfig}
+              gasSimulator={gasSimulator}
+              disableAutomaticFeeSet={shouldTopUp}
+              shouldTopUp={shouldTopUp}
+            />
+          </VerticalCollapseTransition>
+          <VerticalCollapseTransition collapsed={!shouldTopUp}>
+            <FeeCoverageDescription isTopUpAvailable={isTopUpAvailable} />
+          </VerticalCollapseTransition>
         </Stack>
-        <div style={{ flex: 1 }} />
-        <VerticalCollapseTransition collapsed={shouldTopUp}>
-          <FeeControl
-            senderConfig={senderConfig}
-            feeConfig={feeConfig}
-            gasConfig={gasConfig}
-            gasSimulator={gasSimulator}
-            disableAutomaticFeeSet={shouldTopUp}
-            shouldTopUp={shouldTopUp}
-          />
-        </VerticalCollapseTransition>
-        <VerticalCollapseTransition
-          collapsed={!(shouldTopUp && isTopUpAvailable)}
-        >
-          <FeeCoverageDescription isTopUpAvailable={isTopUpAvailable} />
-        </VerticalCollapseTransition>
       </Box>
     );
   }

@@ -2278,9 +2278,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             />
           </VerticalCollapseTransition>
           <Gutter size="0" />
-          <VerticalCollapseTransition
-            collapsed={!(shouldTopUp && isTopUpAvailable)}
-          >
+          <VerticalCollapseTransition collapsed={!shouldTopUp}>
             <FeeCoverageDescription isTopUpAvailable={isTopUpAvailable} />
           </VerticalCollapseTransition>
           <Gutter size="0" />

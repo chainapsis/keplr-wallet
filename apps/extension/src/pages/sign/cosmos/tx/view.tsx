@@ -616,8 +616,7 @@ export const CosmosTxView: FunctionComponent<{
         },
       ]}
       bottomBackground={
-        ((shouldTopUp && isTopUpAvailable) || topUpCompleted) &&
-        !interactionData.isInternal ? (
+        shouldTopUp && !interactionData.isInternal ? (
           <FeeCoverageBackground
             hideIcon={
               !!topUpError ||
@@ -781,11 +780,6 @@ export const CosmosTxView: FunctionComponent<{
           </React.Fragment>
         ) : null}
 
-        {/**
-         // Since shouldTopUp can temporarily become true during the balance check process in fee config,
-         // we only check shouldTopUp || topUpCompleted so that the section can remain collapsed temporarily,
-         // and if top-up is not available, fee control section can be displayed.
-         */}
         <VerticalCollapseTransition collapsed={shouldTopUp || topUpCompleted}>
           <Box
             style={{
@@ -826,11 +820,8 @@ export const CosmosTxView: FunctionComponent<{
             ) : null}
           </Box>
         </VerticalCollapseTransition>
-        {/**
-         * fee coverage section should be displayed when top-up is should be done and available, or completed.
-         */}
         <VerticalCollapseTransition
-          collapsed={!((shouldTopUp && isTopUpAvailable) || topUpCompleted)}
+          collapsed={!(shouldTopUp || topUpCompleted)}
         >
           {interactionData.isInternal ? (
             <FeeCoverageBox feeConfig={feeConfig} />
