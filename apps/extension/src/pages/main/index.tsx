@@ -45,17 +45,16 @@ import { useBuySupportServiceInfos } from "../../hooks/use-buy-support-service-i
 import { BottomTabsHeightRem } from "../../bottom-tabs";
 import { DenomHelper } from "@keplr-wallet/common";
 import { ModularChainInfo } from "@keplr-wallet/types";
-import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { INITIA_CHAIN_ID, NEUTRON_CHAIN_ID } from "../../config.ui";
 import { MainH1 } from "../../components/typography/main-h1";
 import { LockIcon } from "../../components/icon/lock";
 import { DepositModal } from "./components/deposit-modal";
 import { RewardsCard } from "./components/rewards-card";
 import { UIConfigStore } from "../../stores/ui-config";
-import { useStakedTotalPrice } from "../../hooks/use-staked-total-price";
 import { COMMON_HOVER_OPACITY } from "../../styles/constant";
 import { EmptyStateButtonRow } from "./components/empty-state-button-row";
 import { useNavigate } from "react-router";
+import { useTotalPrices } from "../../hooks/use-total-prices";
 
 export interface ViewToken {
   token: CoinPretty;
@@ -88,31 +87,6 @@ export const MainPage: FunctionComponent<{
     setIsNotReadyRef.current(isNotReady);
   }, [isNotReady]);
 
-  const disabledViewAssetTokenMap =
-    uiConfigStore.manageViewAssetTokenConfig.getViewAssetTokenMapByVaultId(
-      keyRingStore.selectedKeyInfo?.id ?? ""
-    );
-
-  const spendableTotalPrice = useMemo(() => {
-    let result: PricePretty | undefined;
-    for (const bal of hugeQueriesStore.allKnownBalances) {
-      const disabledCoinSet = disabledViewAssetTokenMap.get(
-        ChainIdHelper.parse(bal.chainInfo.chainId).identifier
-      );
-
-      if (
-        bal.price &&
-        !disabledCoinSet?.has(bal.token.currency.coinMinimalDenom)
-      ) {
-        if (!result) {
-          result = bal.price;
-        } else {
-          result = result.add(bal.price);
-        }
-      }
-    }
-    return result;
-  }, [hugeQueriesStore.allKnownBalances, disabledViewAssetTokenMap]);
   const availableTotalPriceEmbedOnlyUSD = useMemo(() => {
     let result: PricePretty | undefined;
     for (const bal of hugeQueriesStore.allKnownBalances) {
@@ -137,20 +111,12 @@ export const MainPage: FunctionComponent<{
     return result;
   }, [hugeQueriesStore.allKnownBalances, priceStore]);
 
-  const { stakedTotalPrice, stakedTotalPriceEmbedOnlyUSD } =
-    useStakedTotalPrice();
-
-  const totalPrice = useMemo(() => {
-    if (!spendableTotalPrice) {
-      return spendableTotalPrice;
-    }
-
-    if (!stakedTotalPrice) {
-      return stakedTotalPrice;
-    }
-
-    return spendableTotalPrice.add(stakedTotalPrice);
-  }, [spendableTotalPrice, stakedTotalPrice]);
+  const {
+    spendableTotalPrice,
+    stakedTotalPrice,
+    stakedTotalPriceEmbedOnlyUSD,
+    totalPrice,
+  } = useTotalPrices();
 
   const stakedPercentage = useMemo(() => {
     if (!totalPrice || !stakedTotalPrice) {

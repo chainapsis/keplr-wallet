@@ -24,13 +24,11 @@ import { autoUpdate, offset, shift, useFloating } from "@floating-ui/react-dom";
 import { AccountSwitchFloatModal } from "../components/account-switch-float-modal";
 import { FloatModal } from "../../../components/float-modal";
 import { DepositFloatingModal } from "../components/deposit-float-modal";
-import { useStakedTotalPrice } from "../../../hooks/use-staked-total-price";
-import { PricePretty } from "@keplr-wallet/unit";
-import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { useLocation } from "react-router";
 import { Tooltip } from "../../../components/tooltip";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Button } from "../../../components/button";
+import { useTotalPrices } from "../../../hooks/use-total-prices";
 
 const Styles = {
   NameContainer: styled.div`
@@ -66,8 +64,7 @@ export const MainHeaderLayout = observer<
   (props) => {
     const { children, ...otherProps } = props;
 
-    const { uiConfigStore, keyRingStore, hugeQueriesStore, chainStore } =
-      useStore();
+    const { uiConfigStore, keyRingStore, chainStore } = useStore();
     const [isOpenAccountSwitchModal, setIsOpenAccountSwitchModal] =
       useState(false);
     const location = useLocation();
@@ -104,45 +101,7 @@ export const MainHeaderLayout = observer<
       ],
       whileElementsMounted: autoUpdate,
     });
-
-    const { stakedTotalPrice } = useStakedTotalPrice();
-
-    const disabledViewAssetTokenMap =
-      uiConfigStore.manageViewAssetTokenConfig.getViewAssetTokenMapByVaultId(
-        keyRingStore.selectedKeyInfo?.id ?? ""
-      );
-
-    const spendableTotalPrice = useMemo(() => {
-      let result: PricePretty | undefined;
-      for (const bal of hugeQueriesStore.allKnownBalances) {
-        const disabledCoinSet = disabledViewAssetTokenMap.get(
-          ChainIdHelper.parse(bal.chainInfo.chainId).identifier
-        );
-
-        if (
-          bal.price &&
-          !disabledCoinSet?.has(bal.token.currency.coinMinimalDenom)
-        ) {
-          if (!result) {
-            result = bal.price;
-          } else {
-            result = result.add(bal.price);
-          }
-        }
-      }
-      return result;
-    }, [hugeQueriesStore.allKnownBalances, disabledViewAssetTokenMap]);
-    const totalPrice = useMemo(() => {
-      if (!spendableTotalPrice) {
-        return spendableTotalPrice;
-      }
-
-      if (!stakedTotalPrice) {
-        return stakedTotalPrice;
-      }
-
-      return spendableTotalPrice.add(stakedTotalPrice);
-    }, [spendableTotalPrice, stakedTotalPrice]);
+    const { totalPrice } = useTotalPrices();
 
     const theme = useTheme();
     const name = useMemo(() => {
