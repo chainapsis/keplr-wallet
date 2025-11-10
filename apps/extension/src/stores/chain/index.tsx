@@ -125,7 +125,12 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   @computed
   get tokenScans(): TokenScan[] {
     return this._tokenScans.filter((scan) => {
-      if (!this.hasChain(scan.chainId) && !this.hasModularChain(scan.chainId)) {
+      if (
+        !this.hasModularChain(scan.chainId) &&
+        !this.getModularChainInfoImpl(scan.chainId).matchModules({
+          or: ["cosmos", "evm"],
+        })
+      ) {
         return false;
       }
 
@@ -320,6 +325,23 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   isInChainInfosInListUI(chainId: string): boolean {
     return (
       this.chainInfosInListUIMap.get(
+        ChainIdHelper.parse(chainId).identifier
+      ) === true
+    );
+  }
+
+  @computed
+  protected get modularChainInfosInListUIMap(): Map<string, true> {
+    const map = new Map<string, true>();
+    for (const chainInfo of this.modularChainInfosInListUI) {
+      map.set(ChainIdHelper.parse(chainInfo.chainId).identifier, true);
+    }
+    return map;
+  }
+
+  isInModularChainInfosInListUI(chainId: string): boolean {
+    return (
+      this.modularChainInfosInListUIMap.get(
         ChainIdHelper.parse(chainId).identifier
       ) === true
     );

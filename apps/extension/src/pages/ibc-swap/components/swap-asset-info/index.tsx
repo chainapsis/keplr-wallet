@@ -36,6 +36,7 @@ import { SearchTextInput } from "../../../../components/input";
 import { useFocusOnMount } from "../../../../hooks/use-focus-on-mount";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Tooltip } from "../../../../components/tooltip";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 const Styles = {
   TextInput: styled.input`
@@ -114,7 +115,7 @@ export const SwapAssetInfo: FunctionComponent<{
       }
     }, [isPriceBased]);
 
-    const fromChainInfo = chainStore.getChain(amountConfig.chainId);
+    const fromChainInfo = chainStore.getModularChain(amountConfig.chainId);
     const fromCurrency: AppCurrency | undefined = (() => {
       if (amountConfig.amount.length === 0) {
         return;
@@ -123,7 +124,7 @@ export const SwapAssetInfo: FunctionComponent<{
       return amountConfig.amount[0].currency;
     })();
 
-    const toChainInfo = chainStore.getChain(amountConfig.outChainId);
+    const toChainInfo = chainStore.getModularChain(amountConfig.outChainId);
     const outCurrency: AppCurrency = amountConfig.outCurrency;
 
     const textInputRef = useRef<HTMLInputElement | null>(null);
@@ -446,7 +447,9 @@ export const SwapAssetInfo: FunctionComponent<{
                   `/ibc-swap/select-destination?${(() => {
                     if (amountConfig.amount.length === 1) {
                       return `excludeKey=${encodeURIComponent(
-                        `${amountConfig.chainInfo.chainIdentifier}/${amountConfig.amount[0].currency.coinMinimalDenom}`
+                        `${
+                          ChainIdHelper.parse(amountConfig.chainId).identifier
+                        }/${amountConfig.amount[0].currency.coinMinimalDenom}`
                       )}&`;
                     }
 
@@ -471,7 +474,7 @@ export const SwapAssetInfo: FunctionComponent<{
                 if (type === "to") {
                   if (
                     chainStore
-                      .getChain(amountConfig.outChainId)
+                      .getModularChainInfoImpl(amountConfig.outChainId)
                       .findCurrency(outCurrency.coinMinimalDenom) == null
                   ) {
                     return (
@@ -785,7 +788,7 @@ const SelectDestinationChainModal: FunctionComponent<{
     denom: string;
   }[] =
     skipQueriesStore.queryIBCSwap.getSwapDestinationCurrencyAlternativeChains(
-      chainStore.getChain(amountConfig.outChainId),
+      chainStore.getModularChain(amountConfig.outChainId),
       amountConfig.outCurrency
     );
 
@@ -797,7 +800,7 @@ const SelectDestinationChainModal: FunctionComponent<{
 
     return channels.filter((channel) => {
       return chainStore
-        .getChain(channel.chainId)
+        .getModularChain(channel.chainId)
         .chainName.toLowerCase()
         .includes(trim);
     });
@@ -877,7 +880,7 @@ const SelectDestinationChainModal: FunctionComponent<{
                   // amountConfig.setOutChainId(channel.destinationChainId);
                   // amountConfig.setOutCurrency(
                   //   chainStore
-                  //     .getChain(channel.destinationChainId)
+                  //     .getModularChain(channel.destinationChainId)
                   //     .forceFindCurrency(channel.denom)
                   // );
                   onDestinationChainSelect(channel.chainId, channel.denom);
@@ -887,7 +890,7 @@ const SelectDestinationChainModal: FunctionComponent<{
               >
                 <XAxis alignY="center">
                   <ChainImageFallback
-                    chainInfo={chainStore.getChain(channel.chainId)}
+                    chainInfo={chainStore.getModularChain(channel.chainId)}
                     size="2rem"
                   />
                   <Gutter size="0.75rem" />
@@ -898,7 +901,7 @@ const SelectDestinationChainModal: FunctionComponent<{
                         : ColorPalette["gray-10"]
                     }
                   >
-                    {chainStore.getChain(channel.chainId).chainName}
+                    {chainStore.getModularChain(channel.chainId).chainName}
                   </Subtitle2>
                 </XAxis>
               </Box>

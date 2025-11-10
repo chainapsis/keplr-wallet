@@ -15,6 +15,7 @@ import {
 } from "@keplr-wallet/types";
 import { ThemeOption } from "../../../theme";
 import { INITIA_CHAIN_ID } from "../../../config.ui";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export const StakedBalance: FunctionComponent<{
   modularChainInfo: ModularChainInfo;
@@ -39,12 +40,11 @@ const CosmosStakedBalance: FunctionComponent<{
 }> = observer(({ chainInfo }) => {
   const theme = useTheme();
 
-  const { queriesStore, accountStore, chainStore, uiConfigStore } = useStore();
+  const { queriesStore, accountStore, uiConfigStore } = useStore();
 
   const [isHover, setIsHover] = useState(false);
 
   const chainId = chainInfo.chainId;
-  const chain = chainStore.getChain(chainId);
 
   const queryAPR = queriesStore.simpleQuery.queryGet<{
     overview: {
@@ -53,7 +53,7 @@ const CosmosStakedBalance: FunctionComponent<{
     lastUpdated: number;
   }>(
     "https://pjld2aanw3elvteui4gwyxgx4m0ceweg.lambda-url.us-west-2.on.aws",
-    `/apr/${chain.chainIdentifier}`
+    `/apr/${ChainIdHelper.parse(chainId).identifier}`
   );
 
   const cosmosAPR =
@@ -78,7 +78,7 @@ const CosmosStakedBalance: FunctionComponent<{
 
   return (
     <StakedBalanceLayout
-      stakingUrl={chain.walletUrlForStaking}
+      stakingUrl={chainInfo.walletUrlForStaking}
       isHover={isHover}
       onHoverStateChange={setIsHover}
     >
@@ -91,7 +91,7 @@ const CosmosStakedBalance: FunctionComponent<{
         <Gutter size="0.75rem" />
         <YAxis>
           {(() => {
-            if (stakeBalanceIsZero && chain.walletUrlForStaking) {
+            if (stakeBalanceIsZero && chainInfo.walletUrlForStaking) {
               return (
                 <React.Fragment>
                   <Subtitle1
@@ -172,7 +172,7 @@ const CosmosStakedBalance: FunctionComponent<{
             </Subtitle3>
           ) : null}
 
-          {chain.walletUrlForStaking ? (
+          {chainInfo.walletUrlForStaking ? (
             stakeBalanceIsZero ? (
               <React.Fragment>
                 <Gutter size="0.25rem" />

@@ -16,8 +16,7 @@ import { HugeQueriesStore } from "../../../stores/huge-queries";
 import { ViewToken } from "../../main";
 import { autorun, computed, IReactionDisposer, makeObservable } from "mobx";
 import { ObservableQueryIbcSwap } from "@keplr-wallet/stores-internal";
-import { Currency } from "@keplr-wallet/types";
-import { IChainInfoImpl } from "@keplr-wallet/stores";
+import { Currency, ModularChainInfo } from "@keplr-wallet/types";
 import { FixedSizeList } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { useSearch } from "../../../hooks/use-search";
@@ -45,7 +44,7 @@ class IBCSwapDestinationState {
     tokens: ReadonlyArray<ViewToken>;
     remaining: {
       currency: Currency;
-      chainInfo: IChainInfoImpl;
+      chainInfo: ModularChainInfo;
     }[];
     isLoading: boolean;
   } {
@@ -60,7 +59,7 @@ class IBCSwapDestinationState {
     });
     let remaining: {
       currency: Currency;
-      chainInfo: IChainInfoImpl;
+      chainInfo: ModularChainInfo;
     }[] = [];
 
     tokens = tokens
@@ -68,11 +67,13 @@ class IBCSwapDestinationState {
         return token.token.toDec().gt(zeroDec);
       })
       .filter((token) => {
-        if (!("currencies" in token.chainInfo)) {
+        if (!("cosmos" in token.chainInfo) && !("evm" in token.chainInfo)) {
           return false;
         }
 
-        const map = destinationMap.get(token.chainInfo.chainIdentifier);
+        const map = destinationMap.get(
+          ChainIdHelper.parse(token.chainInfo.chainId).identifier
+        );
         if (map) {
           return (
             map.currencies.find(
@@ -90,9 +91,11 @@ class IBCSwapDestinationState {
     const tokensKeyMap = new Map<string, boolean>();
 
     for (const token of tokens) {
-      if ("currencies" in token.chainInfo) {
+      if ("cosmos" in token.chainInfo) {
         tokensKeyMap.set(
-          `${token.chainInfo.chainIdentifier}/${token.token.currency.coinMinimalDenom}`,
+          `${ChainIdHelper.parse(token.chainInfo.chainId).identifier}/${
+            token.token.currency.coinMinimalDenom
+          }`,
           true
         );
       }
@@ -161,7 +164,7 @@ const searchFields = [
 const remainingSearchFields = [
   {
     key: "currency.coinDenom",
-    function: (item: { currency: Currency; chainInfo: IChainInfoImpl }) => {
+    function: (item: { currency: Currency; chainInfo: ModularChainInfo }) => {
       return CoinPretty.makeCoinDenomPretty(item.currency.coinDenom);
     },
   },
@@ -212,7 +215,7 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
 
     const filteredTokens = useMemo(() => {
       const filtered = tokens.filter((token) => {
-        if (!("currencies" in token.chainInfo)) {
+        if (!("cosmos" in token.chainInfo) && !("evm" in token.chainInfo)) {
           return false;
         }
 
@@ -225,8 +228,9 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
 
         return (
           !excludeKey ||
-          `${token.chainInfo.chainIdentifier}/${token.token.currency.coinMinimalDenom}` !==
-            excludeKey
+          `${ChainIdHelper.parse(token.chainInfo.chainId).identifier}/${
+            token.token.currency.coinMinimalDenom
+          }` !== excludeKey
         );
       });
 
@@ -242,8 +246,9 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
 
         return (
           !excludeKey ||
-          `${r.chainInfo.chainIdentifier}/${r.currency.coinMinimalDenom}` !==
-            excludeKey
+          `${ChainIdHelper.parse(r.chainInfo.chainId).identifier}/${
+            r.currency.coinMinimalDenom
+          }` !== excludeKey
         );
       });
 
@@ -322,7 +327,9 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
                           // 따라서 findCurrency를 쓰되 정해진 timeout 동안에도 찾지 못하면 찾지 못했다고 판단하도록 한다.
                           disposal = autorun(() => {
                             const currency = chainStore
-                              .getChain(viewToken.chainInfo.chainId)
+                              .getModularChainInfoImpl(
+                                viewToken.chainInfo.chainId
+                              )
                               .findCurrency(
                                 viewToken.token.currency.coinMinimalDenom
                               );
@@ -411,7 +418,7 @@ const TokenListItem = ({
     searchedTokens: ViewToken[];
     searchedRemaining: {
       currency: Currency;
-      chainInfo: IChainInfoImpl;
+      chainInfo: ModularChainInfo;
     }[];
     selectedCoinMinimalDenom?: string;
     unsupportedCoinMinimalDenoms: Set<string>;

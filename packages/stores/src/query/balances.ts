@@ -74,12 +74,16 @@ export class ObservableQueryBalancesImplMap {
 
   @computed
   get stakable(): IObservableQueryBalanceImpl | undefined {
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-    if (!chainInfo.stakeCurrency) {
+    const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
+      this.chainId
+    );
+    const chainInfo = modularChainInfoImpl.embedded;
+
+    if (!("cosmos" in chainInfo) || !chainInfo.cosmos.stakeCurrency) {
       return undefined;
     }
 
-    return this.getBalanceInner(chainInfo.stakeCurrency);
+    return this.getBalanceInner(chainInfo.cosmos.stakeCurrency);
   }
 
   /**
@@ -90,16 +94,11 @@ export class ObservableQueryBalancesImplMap {
     const currencies = [];
     const result = [];
 
-    const chainInfo = this.chainGetter.getChain(this.chainId);
+    const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
+      this.chainId
+    );
 
-    if (chainInfo.evm) {
-      const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
-        this.chainId
-      );
-      currencies.push(...modularChainInfoImpl.getCurrenciesByModule("evm"));
-    } else {
-      currencies.push(...chainInfo.currencies);
-    }
+    currencies.push(...modularChainInfoImpl.getCurrencies());
 
     for (let i = 0; i < currencies.length; i++) {
       const currency = currencies[i];
@@ -139,7 +138,10 @@ export class ObservableQueryBalancesImplMap {
    */
   @computed
   get positiveNativeUnstakables(): IObservableQueryBalanceImpl[] {
-    const chainInfo = this.chainGetter.getChain(this.chainId);
+    const chainInfo = this.chainGetter.getModularChain(this.chainId);
+    if (!("cosmos" in chainInfo)) {
+      return [];
+    }
 
     const balances = this.balances;
     return balances.filter(
@@ -147,17 +149,21 @@ export class ObservableQueryBalancesImplMap {
         new DenomHelper(bal.currency.coinMinimalDenom).type === "native" &&
         bal.balance.toDec().gt(new Dec(0)) &&
         bal.currency.coinMinimalDenom !==
-          chainInfo.stakeCurrency?.coinMinimalDenom
+          chainInfo.cosmos.stakeCurrency?.coinMinimalDenom
     );
   }
 
   @computed
   get unstakables(): IObservableQueryBalanceImpl[] {
-    const chainInfo = this.chainGetter.getChain(this.chainId);
+    const chainInfo = this.chainGetter.getModularChain(this.chainId);
+    if (!("cosmos" in chainInfo)) {
+      return [];
+    }
 
-    const currencies = chainInfo.currencies.filter(
+    const currencies = chainInfo.cosmos.currencies.filter(
       (cur) =>
-        cur.coinMinimalDenom !== chainInfo.stakeCurrency?.coinMinimalDenom
+        cur.coinMinimalDenom !==
+        chainInfo.cosmos.stakeCurrency?.coinMinimalDenom
     );
 
     const result = [];

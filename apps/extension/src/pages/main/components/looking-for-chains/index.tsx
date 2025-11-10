@@ -2,7 +2,7 @@ import React, { FunctionComponent } from "react";
 import { Box } from "../../../../components/box";
 import { TokenTitleView } from "../token";
 import { ColorPalette } from "../../../../styles";
-import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
+import { ModularChainInfo } from "@keplr-wallet/types";
 import { Gutter } from "../../../../components/gutter";
 import { ChainImageFallback } from "../../../../components/image";
 import { Column, Columns } from "../../../../components/column";
@@ -19,12 +19,13 @@ import { Stack } from "../../../../components/stack";
 import { NativeChainMarkIcon } from "../../../../components/icon";
 import { getChainSearchResultClickAnalyticsProperties } from "../../../../analytics-amplitude";
 import { useNavigate } from "react-router";
+import { convertModularChainInfoToChainInfo } from "@keplr-wallet/common";
 
 export const LookingForChains: FunctionComponent<{
   lookingForChains: {
     embedded: boolean;
     stored: boolean;
-    chainInfo: ChainInfo | ModularChainInfo;
+    chainInfo: ModularChainInfo;
   }[];
   search: string;
 }> = ({ lookingForChains, search }) => {
@@ -68,7 +69,7 @@ export const LookingForChains: FunctionComponent<{
 };
 
 export const LookingForChainItem: FunctionComponent<{
-  chainInfo: ChainInfo | ModularChainInfo;
+  chainInfo: ModularChainInfo;
   embedded: boolean;
   stored: boolean;
   onClick: () => void;
@@ -151,8 +152,15 @@ export const LookingForChainItem: FunctionComponent<{
             // add the chain internally and refresh the store.
             if (!embedded && !stored) {
               try {
+                const convertedChainInfo =
+                  convertModularChainInfoToChainInfo(chainInfo);
+
+                if (!convertedChainInfo) {
+                  return;
+                }
+
                 await window.keplr?.experimentalSuggestChain(
-                  chainInfo as ChainInfo
+                  convertedChainInfo
                 );
                 await keyRingStore.refreshKeyRingStatus();
                 await chainStore.updateChainInfosFromBackground();
@@ -190,16 +198,9 @@ export const LookingForChainItem: FunctionComponent<{
                 }
               }
 
-              const isEthereumChain =
-                "evm" in chainInfo ||
-                ("cosmos" in chainInfo &&
-                  chainInfo.cosmos.bip44.coinType === 60 &&
-                  (!!chainInfo.cosmos.features?.includes("eth-address-gen") ||
-                    !!chainInfo.cosmos.features?.includes("eth-key-sign"))) ||
-                ("bip44" in chainInfo &&
-                  chainInfo.bip44.coinType === 60 &&
-                  (!!chainInfo.features?.includes("eth-address-gen") ||
-                    !!chainInfo.features?.includes("eth-key-sign")));
+              const isEthereumChain = chainStore.isEvmOrEthermintLikeChain(
+                chainInfo.chainId
+              );
 
               if (keyType === "ledger" && isEthereumChain) {
                 browser.tabs.create({

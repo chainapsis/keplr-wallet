@@ -86,7 +86,9 @@ const UndelegateMessagePretty: FunctionComponent<{
 }> = observer(({ chainId, validatorAddress, amount }) => {
   const { chainStore, queriesStore } = useStore();
 
-  const currency = chainStore.getChain(chainId).forceFindCurrency(amount.denom);
+  const currency = chainStore
+    .getModularChainInfoImpl(chainId)
+    .forceFindCurrency(amount.denom);
   const coinPretty = new CoinPretty(currency, amount.amount);
 
   const moniker = queriesStore

@@ -1,11 +1,10 @@
 import { DenomHelper } from "@keplr-wallet/common";
-import { autorun, computed, makeObservable, runInAction } from "mobx";
+import { computed, makeObservable } from "mobx";
 import { CoinPretty, Int } from "@keplr-wallet/unit";
 import { AppCurrency } from "@keplr-wallet/types";
 import {
   BalanceRegistry,
   ChainGetter,
-  ChainStore,
   IObservableQueryBalanceImpl,
   ObservableJsonRPCQuery,
   QueryError,
@@ -79,8 +78,7 @@ export class ObservableQueryThirdpartyERC20BalancesImplParent extends Observable
   ) {
     super.onReceiveResponse(response);
 
-    // Note: yet support legacy ChainInfo
-    const chainInfo = this.chainGetter.getChain(this.chainId);
+    const chainInfo = this.chainGetter.getModularChainInfoImpl(this.chainId);
     const erc20Denoms = response.data.tokenBalances
       .filter(
         (tokenBalance) =>
@@ -90,75 +88,9 @@ export class ObservableQueryThirdpartyERC20BalancesImplParent extends Observable
       .map((tokenBalance) => `erc20:${tokenBalance.contractAddress}`);
 
     if (erc20Denoms.length) {
-      chainInfo.addUnknownDenoms(...erc20Denoms);
-    }
-
-    this.registerTokensToModularChain(response);
-  }
-
-  /**
-   * Register tokens to ModularChainInfoImpl's registeredEvmCurrencies
-   */
-  protected registerTokensToModularChain(
-    response: Readonly<QueryResponse<ThirdpartyERC20TokenBalance>>
-  ) {
-    const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
-
-    if (!("evm" in modularChainInfo)) {
-      return;
-    }
-
-    const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
-      this.chainId
-    );
-
-    const erc20Balances = response.data.tokenBalances.filter(
-      (tokenBalance) =>
-        tokenBalance.tokenBalance != null &&
-        BigInt(tokenBalance.tokenBalance) > 0
-    );
-
-    if (erc20Balances.length === 0) {
-      return;
-    }
-
-    for (const balance of erc20Balances) {
-      const coinMinimalDenom = `erc20:${balance.contractAddress}`;
-
-      const normalizedDenom = DenomHelper.normalizeDenom(coinMinimalDenom);
-      const existingCurrencies =
-        modularChainInfoImpl.getCurrenciesByModule("evm");
-      if (
-        existingCurrencies.some(
-          (c) =>
-            DenomHelper.normalizeDenom(c.coinMinimalDenom) === normalizedDenom
-        )
-      ) {
-        continue;
-      }
-
-      // wait for the metadata to load
-      const disposer = autorun(() => {
-        const currencyRegistrar =
-          "getCurrencyRegistrar" in this.chainGetter
-            ? (this.chainGetter as ChainStore).getCurrencyRegistrar.bind(
-                this.chainGetter
-              )
-            : undefined;
-
-        if (!currencyRegistrar) {
-          return;
-        }
-
-        const generator = currencyRegistrar(this.chainId, coinMinimalDenom);
-        const currency = generator?.value;
-
-        if (generator?.done && currency) {
-          runInAction(() => {
-            modularChainInfoImpl.addCurrencies("evm", currency);
-          });
-          disposer();
-        }
+      chainInfo.addUnknownDenoms({
+        module: "evm",
+        coinMinimalDenoms: erc20Denoms,
       });
     }
   }
@@ -200,8 +132,9 @@ export class ObservableQueryThirdpartyERC20BalancesImpl
   get currency(): AppCurrency {
     const denom = this.denomHelper.denom;
 
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-    return chainInfo.forceFindCurrency(denom);
+    return this.chainGetter
+      .getModularChainInfoImpl(this.chainId)
+      .forceFindCurrency(denom);
   }
 
   get error(): Readonly<QueryError<unknown>> | undefined {

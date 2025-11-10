@@ -15,7 +15,7 @@ export const MsgRelationNobleDepositUsdc: FunctionComponent<{
   isInAllActivitiesPage: boolean | undefined;
 }> = observer(({ msg, prices, targetDenom, isInAllActivitiesPage }) => {
   const { chainStore } = useStore();
-  const chainInfo = chainStore.getChain(msg.chainId);
+  const chainInfo = chainStore.getModularChainInfoImpl(msg.chainId);
 
   const tokenIn = (() => {
     const tokensIn = msg.meta["tokensIn"];
@@ -68,7 +68,7 @@ export const MsgRelationNobleDepositUsdc: FunctionComponent<{
               chainInfo.forceFindCurrency(tokenIn?.denom ?? ""),
               tokenIn?.amount
             ).denom;
-            return `From ${denom} on ${chainInfo.chainName}`;
+            return `From ${denom} on ${chainInfo.embedded.chainName}`;
           }
         }
         return "Unknown";

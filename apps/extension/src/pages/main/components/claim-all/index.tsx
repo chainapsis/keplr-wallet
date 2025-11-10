@@ -50,6 +50,7 @@ import {
 import { NEUTRON_CHAIN_ID, NOBLE_CHAIN_ID } from "../../../../config.ui";
 import { Gutter } from "../../../../components/gutter";
 import { PortalTooltip } from "../../../../components/tooltip/portal";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 const USDN_CURRENCY = {
   coinDenom: "USDN",
@@ -178,10 +179,6 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
         const account = accountStore.getAccount(chainId);
         const isNeutron = chainId === NEUTRON_CHAIN_ID;
 
-        if ("evm" in modularChainInfo && !("cosmos" in modularChainInfo)) {
-          continue;
-        }
-
         if (isNeutron && account.bech32Address) {
           const queries = queriesStore.get(chainId);
           const queryNeutronRewardInner =
@@ -203,21 +200,22 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
           }
         } else if ("cosmos" in modularChainInfo) {
           const accountAddress = account.bech32Address;
-          const chainInfo = chainStore.getChain(chainId);
           const queries = queriesStore.get(chainId);
 
           if (chainId === NOBLE_CHAIN_ID) {
             const queryYield =
               queries.noble.queryYield.getQueryBech32Address(accountAddress);
             const usdnCurrency =
-              chainInfo.findCurrency("uusdn") || USDN_CURRENCY;
+              chainStore
+                .getModularChainInfoImpl(chainId)
+                .findCurrency("uusdn") || USDN_CURRENCY;
             const rawAmount = queryYield.claimableAmount;
             const amount = new CoinPretty(usdnCurrency, rawAmount);
             if (amount.toDec().gt(new Dec(0))) {
               res.push({
                 token: amount,
                 price: priceStore.calculatePrice(amount),
-                modularChainInfo: modularChainInfo,
+                modularChainInfo,
                 isFetching: queryYield.isFetching,
                 error: queryYield.error,
                 onClaimAll: handleCosmosClaimAllEach,
@@ -230,19 +228,24 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
             queries.cosmos.queryRewards.getQueryBech32Address(accountAddress);
 
           const targetDenom = (() => {
-            if (chainInfo.chainIdentifier === "dydx-mainnet") {
+            const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
+            if (chainIdentifier === "dydx-mainnet") {
               return "ibc/8E27BA2D5493AF5636760E354E46004562C46AB7EC0CC4C1CA14E9E20E2545B5";
             }
 
-            if (chainInfo.chainIdentifier === "elys") {
+            if (chainIdentifier === "elys") {
               return "ueden";
             }
 
-            return chainInfo.stakeCurrency?.coinMinimalDenom;
+            return "cosmos" in modularChainInfo
+              ? modularChainInfo.cosmos.stakeCurrency?.coinMinimalDenom
+              : undefined;
           })();
 
           if (targetDenom) {
-            const currency = chainInfo.findCurrency(targetDenom);
+            const currency = chainStore
+              .getModularChainInfoImpl(chainId)
+              .findCurrency(targetDenom);
             if (currency) {
               const reward = queryRewards.rewards.find(
                 (r) => r.currency.coinMinimalDenom === targetDenom

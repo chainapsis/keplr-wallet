@@ -93,41 +93,31 @@ export interface EVMNativeChainInfo {
 
 export type ChainInfoModule = "cosmos" | "starknet" | "bitcoin" | "evm";
 
-export type ModularChainInfo =
-  | {
-      readonly chainId: string;
-      readonly chainName: string;
-      readonly chainSymbolImageUrl?: string;
-      readonly isTestnet?: boolean;
-      readonly cosmos: ChainInfo;
-    }
-  | {
-      readonly chainId: string;
-      readonly chainName: string;
-      readonly chainSymbolImageUrl?: string;
-      readonly isTestnet?: boolean;
-      readonly starknet: StarknetChainInfo;
-    }
-  | {
-      readonly chainId: string;
-      readonly chainName: string;
-      readonly chainSymbolImageUrl?: string;
-      readonly linkedChainKey: string;
-      readonly isTestnet?: boolean;
-      readonly bitcoin: BitcoinChainInfo;
-    }
-  | {
-      readonly chainId: string;
-      readonly chainName: string;
-      readonly chainSymbolImageUrl?: string;
-      readonly isTestnet?: boolean;
-      readonly evm: EVMNativeChainInfo;
-    }
-  | {
-      readonly chainId: string;
-      readonly chainName: string;
-      readonly chainSymbolImageUrl?: string;
-      readonly isTestnet?: boolean;
-      readonly cosmos: ChainInfo;
-      readonly evm: EVMNativeChainInfo;
-    };
+export interface ModularChainInfoBase {
+  readonly chainId: string;
+  readonly chainName: string;
+  readonly chainSymbolImageUrl?: string;
+  readonly isTestnet?: boolean;
+  readonly isNative?: boolean;
+}
+
+export type ModularChainInfo = ModularChainInfoBase &
+  (
+    | {
+        readonly cosmos: ChainInfo;
+      }
+    | {
+        readonly starknet: StarknetChainInfo;
+      }
+    | {
+        readonly bitcoin: BitcoinChainInfo;
+        readonly linkedChainKey: string;
+      }
+    | {
+        readonly evm: EVMNativeChainInfo;
+      }
+    | {
+        readonly cosmos: ChainInfo;
+        readonly evm: EVMNativeChainInfo;
+      }
+  );

@@ -30,13 +30,13 @@ export class ObservableChainQueryDenomTrace extends ObservableChainQuery<
     super.onStart();
 
     this.disposer = autorun(() => {
-      const chainInfo = this.chainGetter.getChain(this.chainId);
-      if (chainInfo.features) {
-        if (chainInfo.features.includes("ibc-v2")) {
-          this.setUrl(`/ibc/apps/transfer/v1/denoms/${this.hash}`);
-        } else if (chainInfo.features.includes("ibc-go")) {
-          this.setUrl(`/ibc/apps/transfer/v1/denom_traces/${this.hash}`);
-        }
+      const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
+        this.chainId
+      );
+      if (modularChainInfoImpl.hasFeature("ibc-v2")) {
+        this.setUrl(`/ibc/apps/transfer/v1/denoms/${this.hash}`);
+      } else if (modularChainInfoImpl.hasFeature("ibc-go")) {
+        this.setUrl(`/ibc/apps/transfer/v1/denom_traces/${this.hash}`);
       }
     });
   }

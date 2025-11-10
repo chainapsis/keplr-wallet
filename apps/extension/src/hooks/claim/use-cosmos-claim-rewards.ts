@@ -601,7 +601,7 @@ export const useCosmosClaimRewards = () => {
     chainId: string,
     state: ClaimAllEachState
   ) => {
-    const cosmosChainInfo = chainStore.getChain(chainId);
+    const cosmosChainInfo = chainStore.getModularChain(chainId);
     const account = accountStore.getAccount(chainId);
     if (!account.bech32Address) {
       return;

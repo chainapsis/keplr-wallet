@@ -84,12 +84,12 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
       return [];
     }
 
-    if (!this.chainStore.hasChain(this.chainId)) {
+    if (!this.isSwappableChain(this.chainId)) {
       return [];
     }
 
-    const chainInfo = this.chainStore.getChain(this.chainId);
-    if (!this.chainStore.isInChainInfosInListUI(chainInfo.chainId)) {
+    const chainInfo = this.chainStore.getModularChain(this.chainId);
+    if (!this.chainStore.isInModularChainInfosInListUI(chainInfo.chainId)) {
       return [];
     }
 
@@ -108,8 +108,8 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
           ? `eip155:${asset.origin_chain_id}`
           : asset.origin_chain_id;
         if (
-          this.chainStore.hasChain(chainId) &&
-          (this.chainStore.hasChain(originChainId) ||
+          this.isSwappableChain(chainId) &&
+          (this.isSwappableChain(originChainId) ||
             (asset.chain_id === "osmosis-1" &&
               asset.denom ===
                 "ibc/0FA9232B262B89E77D1335D54FB1E1F506A92A7E4B51524B400DC69C68D28372"))
@@ -180,12 +180,12 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
       return [];
     }
 
-    if (!this.chainStore.hasChain(this.chainId)) {
+    if (!this.isSwappableChain(this.chainId)) {
       return [];
     }
 
-    const chainInfo = this.chainStore.getChain(this.chainId);
-    if (!this.chainStore.isInChainInfosInListUI(chainInfo.chainId)) {
+    const chainInfo = this.chainStore.getModularChain(this.chainId);
+    if (!this.chainStore.isInModularChainInfosInListUI(chainInfo.chainId)) {
       return [];
     }
 
@@ -204,8 +204,8 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
           ? `eip155:${asset.origin_chain_id}`
           : asset.origin_chain_id;
         if (
-          this.chainStore.hasChain(chainId) &&
-          this.chainStore.hasChain(originChainId)
+          this.isSwappableChain(chainId) &&
+          this.isSwappableChain(originChainId)
         ) {
           // IBC asset일 경우 그냥 넣는다.
           if (asset.denom.startsWith("ibc/")) {
@@ -235,8 +235,9 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
             const originCoinMinimalDenom = asset.origin_denom.startsWith("0x")
               ? `erc20:${asset.origin_denom.toLowerCase()}`
               : asset.origin_denom;
-            const currencyFound =
-              chainInfo.findCurrencyWithoutReaction(coinMinimalDenom);
+            const currencyFound = this.chainStore
+              .getModularChainInfoImpl(chainId)
+              .findCurrencyWithoutReaction(coinMinimalDenom);
             // decimals이 18 이하인 경우만을 고려해서 짜여진 코드가 많아서 임시로 18 이하인 경우만 고려한다.
             // TODO: Dec, Int 같은 곳에서 18 이상인 경우도 고려하도록 수정
             if (currencyFound && currencyFound.coinDecimals <= 18) {
@@ -277,12 +278,12 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
       return [];
     }
 
-    if (!this.chainStore.hasChain(this.chainId)) {
+    if (!this.isSwappableChain(this.chainId)) {
       return [];
     }
 
-    const chainInfo = this.chainStore.getChain(this.chainId);
-    if (!this.chainStore.isInChainInfosInListUI(chainInfo.chainId)) {
+    const chainInfo = this.chainStore.getModularChain(this.chainId);
+    if (!this.chainStore.isInModularChainInfosInListUI(chainInfo.chainId)) {
       return [];
     }
 
@@ -293,8 +294,8 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
 
       for (const asset of assetsInResponse.assets) {
         if (
-          this.chainStore.hasChain(asset.chain_id) &&
-          this.chainStore.hasChain(asset.origin_chain_id)
+          this.isSwappableChain(asset.chain_id) &&
+          this.isSwappableChain(asset.origin_chain_id)
         ) {
           if (
             !this.swapUsageQueries.querySwapUsage
@@ -313,7 +314,11 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
               originChainId: asset.origin_chain_id,
             });
             // IBC asset이 아니라면 알고있는 currency만 넣는다.
-          } else if (chainInfo.findCurrencyWithoutReaction(asset.denom)) {
+          } else if (
+            this.chainStore
+              .getModularChainInfoImpl(this.chainId)
+              .findCurrencyWithoutReaction(asset.denom)
+          ) {
             res.push({
               denom: asset.denom,
               chainId: asset.chain_id,
@@ -364,6 +369,15 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
       headers: result.headers,
       data: validated.value,
     };
+  }
+
+  protected isSwappableChain(chainId: string): boolean {
+    return (
+      this.chainStore.hasModularChain(chainId) &&
+      this.chainStore
+        .getModularChainInfoImpl(chainId)
+        .matchModules({ or: ["cosmos", "evm"] })
+    );
   }
 }
 
@@ -430,12 +444,12 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
     }[] = [];
 
     for (const chainId of this.chainIds) {
-      if (!this.chainStore.hasChain(chainId)) {
+      if (!this.isSwappableChain(chainId)) {
         continue;
       }
 
-      const chainInfo = this.chainStore.getChain(chainId);
-      if (!this.chainStore.isInChainInfosInListUI(chainInfo.chainId)) {
+      const chainInfo = this.chainStore.getModularChain(chainId);
+      if (!this.chainStore.isInModularChainInfosInListUI(chainInfo.chainId)) {
         continue;
       }
 
@@ -452,8 +466,8 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
             ? `eip155:${asset.origin_chain_id}`
             : asset.origin_chain_id;
           if (
-            this.chainStore.hasChain(assetChainId) &&
-            (this.chainStore.hasChain(originChainId) ||
+            this.isSwappableChain(assetChainId) &&
+            (this.isSwappableChain(originChainId) ||
               (asset.chain_id === "osmosis-1" &&
                 asset.denom ===
                   "ibc/0FA9232B262B89E77D1335D54FB1E1F506A92A7E4B51524B400DC69C68D28372"))
@@ -539,12 +553,12 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
     }[] = [];
 
     for (const chainId of this.chainIds) {
-      if (!this.chainStore.hasChain(chainId)) {
+      if (!this.isSwappableChain(chainId)) {
         continue;
       }
 
-      const chainInfo = this.chainStore.getChain(chainId);
-      if (!this.chainStore.isInChainInfosInListUI(chainInfo.chainId)) {
+      const chainInfo = this.chainStore.getModularChain(chainId);
+      if (!this.chainStore.isInModularChainInfosInListUI(chainInfo.chainId)) {
         continue;
       }
 
@@ -561,8 +575,8 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
             ? `eip155:${asset.origin_chain_id}`
             : asset.origin_chain_id;
           if (
-            this.chainStore.hasChain(assetChainId) &&
-            this.chainStore.hasChain(originChainId)
+            this.isSwappableChain(assetChainId) &&
+            this.isSwappableChain(originChainId)
           ) {
             // IBC asset일 경우 그냥 넣는다.
             if (asset.denom.startsWith("ibc/")) {
@@ -592,8 +606,9 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
               const originCoinMinimalDenom = asset.origin_denom.startsWith("0x")
                 ? `erc20:${asset.origin_denom.toLowerCase()}`
                 : asset.origin_denom;
-              const currencyFound =
-                chainInfo.findCurrencyWithoutReaction(coinMinimalDenom);
+              const currencyFound = this.chainStore
+                .getModularChainInfoImpl(chainId)
+                .findCurrencyWithoutReaction(coinMinimalDenom);
               // decimals이 18 이하인 경우만을 고려해서 짜여진 코드가 많아서 임시로 18 이하인 경우만 고려한다.
               // TODO: Dec, Int 같은 곳에서 18 이상인 경우도 고려하도록 수정
               if (currencyFound && currencyFound.coinDecimals <= 18) {
@@ -649,12 +664,12 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
     }[] = [];
 
     for (const chainId of this.chainIds) {
-      if (!this.chainStore.hasChain(chainId)) {
+      if (!this.isSwappableChain(chainId)) {
         continue;
       }
 
-      const chainInfo = this.chainStore.getChain(chainId);
-      if (!this.chainStore.isInChainInfosInListUI(chainInfo.chainId)) {
+      const chainInfo = this.chainStore.getModularChain(chainId);
+      if (!this.chainStore.isInModularChainInfosInListUI(chainInfo.chainId)) {
         continue;
       }
 
@@ -665,8 +680,8 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
 
         for (const asset of assetsInResponse.assets) {
           if (
-            this.chainStore.hasChain(asset.chain_id) &&
-            this.chainStore.hasChain(asset.origin_chain_id)
+            this.isSwappableChain(asset.chain_id) &&
+            this.isSwappableChain(asset.origin_chain_id)
           ) {
             if (
               !this.swapUsageQueries.querySwapUsage
@@ -685,7 +700,11 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
                 originChainId: asset.origin_chain_id,
               });
               // IBC asset이 아니라면 알고있는 currency만 넣는다.
-            } else if (chainInfo.findCurrencyWithoutReaction(asset.denom)) {
+            } else if (
+              this.chainStore
+                .getModularChainInfoImpl(chainId)
+                .findCurrencyWithoutReaction(asset.denom)
+            ) {
               assets.push({
                 denom: asset.denom,
                 chainId: asset.chain_id,
@@ -706,6 +725,15 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
     }
 
     return result;
+  }
+
+  protected isSwappableChain(chainId: string): boolean {
+    return (
+      this.chainStore.hasModularChain(chainId) &&
+      this.chainStore
+        .getModularChainInfoImpl(chainId)
+        .matchModules({ or: ["cosmos", "evm"] })
+    );
   }
 
   protected override async fetchResponse(

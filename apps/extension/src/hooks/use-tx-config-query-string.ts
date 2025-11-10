@@ -58,7 +58,7 @@ export const useTxConfigsQueryString = (
     const initialFeeType = searchParams.get("initialFeeType");
     if (initialFeeCurrency && initialFeeType) {
       const currency = chainStore
-        .getChain(chainId)
+        .getModularChainInfoImpl(chainId)
         .forceFindCurrency(initialFeeCurrency);
       configs.feeConfig.setFee({
         currency,

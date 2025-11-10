@@ -16,10 +16,12 @@ export const HistoryDetailIBCSwapSkipReceive: FunctionComponent<{
 }> = observer(({ msg, targetDenom }) => {
   const { chainStore } = useStore();
 
-  const chainInfo = chainStore.getChain(msg.chainId);
+  const modularChainInfo = chainStore.getModularChain(msg.chainId);
 
   const sendAmountPretty = useMemo(() => {
-    const currency = chainInfo.forceFindCurrency(targetDenom);
+    const currency = chainStore
+      .getModularChainInfoImpl(msg.chainId)
+      .forceFindCurrency(targetDenom);
 
     const receives = msg.meta["receives"] as string[];
     for (const receive of receives) {
@@ -32,7 +34,7 @@ export const HistoryDetailIBCSwapSkipReceive: FunctionComponent<{
     }
 
     return new CoinPretty(currency, "0");
-  }, [chainInfo, msg.meta, targetDenom]);
+  }, [chainStore, msg.chainId, msg.meta, targetDenom]);
 
   const toAddress = (() => {
     if (!msg.search) {
@@ -43,13 +45,16 @@ export const HistoryDetailIBCSwapSkipReceive: FunctionComponent<{
       return "0x" + msg.search;
     }
 
-    if (!chainInfo.bech32Config?.bech32PrefixAccAddr) {
+    if (
+      !("cosmos" in modularChainInfo) ||
+      !modularChainInfo.cosmos.bech32Config?.bech32PrefixAccAddr
+    ) {
       return "Unknown";
     }
 
-    return new Bech32Address(Buffer.from(msg.search, "hex")).toBech32(
-      chainInfo.bech32Config.bech32PrefixAccAddr
-    );
+    return new Bech32Address(
+      new Uint8Array(Buffer.from(msg.search, "hex"))
+    ).toBech32(modularChainInfo.cosmos.bech32Config.bech32PrefixAccAddr);
   })();
 
   const shortenedToAddress = useMemo(() => {
@@ -67,7 +72,7 @@ export const HistoryDetailIBCSwapSkipReceive: FunctionComponent<{
         <HistoryDetailSendBaseUILower
           toAddress={toAddress}
           shortenedToAddress={shortenedToAddress}
-          toText={chainInfo.chainName}
+          toText={modularChainInfo.chainName}
           toAmount={sendAmountPretty}
         />
       </YAxis>

@@ -18,11 +18,7 @@ import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 import { KVStore } from "@keplr-wallet/common";
 import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import { InteractionService } from "../interaction";
-import {
-  ChainInfo,
-  ModularChainInfo,
-  SignPsbtOptions,
-} from "@keplr-wallet/types";
+import { ModularChainInfo, SignPsbtOptions } from "@keplr-wallet/types";
 import { Buffer } from "buffer/";
 import * as Legacy from "./legacy";
 import { ChainsUIForegroundService, ChainsUIService } from "../chains-ui";
@@ -303,7 +299,7 @@ export class KeyRingService {
             password
           );
           if (keyStore.coinTypeForChain) {
-            for (const chainInfo of this.chainsService.getChainInfos()) {
+            for (const chainInfo of this.chainsService.getModularChainInfos()) {
               const coinType =
                 keyStore.coinTypeForChain[
                   ChainIdHelper.parse(chainInfo.chainId).identifier
@@ -313,10 +309,11 @@ export class KeyRingService {
                 this.needKeyCoinTypeFinalize(vaultId, chainInfo.chainId)
               ) {
                 if (
-                  chainInfo.bip44.coinType === coinType ||
-                  (chainInfo.alternativeBIP44s ?? []).find(
-                    (path) => path.coinType === coinType
-                  )
+                  "cosmos" in chainInfo &&
+                  (chainInfo.cosmos.bip44.coinType === coinType ||
+                    (chainInfo.cosmos.alternativeBIP44s ?? []).find(
+                      (path) => path.coinType === coinType
+                    ))
                 ) {
                   this.finalizeKeyCoinType(
                     vaultId,
@@ -347,7 +344,7 @@ export class KeyRingService {
             }
           }
 
-          for (const chainInfo of this.chainsService.getChainInfos()) {
+          for (const chainInfo of this.chainsService.getModularChainInfos()) {
             if (checkChainDisabled(chainInfo.chainId)) {
               continue;
             }
@@ -393,7 +390,7 @@ export class KeyRingService {
             password
           );
 
-          for (const chainInfo of this.chainsService.getChainInfos()) {
+          for (const chainInfo of this.chainsService.getModularChainInfos()) {
             if (checkChainDisabled(chainInfo.chainId)) {
               continue;
             }
@@ -464,7 +461,7 @@ export class KeyRingService {
                 hasEthereum = true;
               }
 
-              for (const chainInfo of this.chainsService.getChainInfos()) {
+              for (const chainInfo of this.chainsService.getModularChainInfos()) {
                 if (checkChainDisabled(chainInfo.chainId)) {
                   continue;
                 }
@@ -504,7 +501,7 @@ export class KeyRingService {
               password
             );
 
-            for (const chainInfo of this.chainsService.getChainInfos()) {
+            for (const chainInfo of this.chainsService.getModularChainInfos()) {
               if (checkChainDisabled(chainInfo.chainId)) {
                 continue;
               }
@@ -734,16 +731,17 @@ export class KeyRingService {
 
     // Finalize coin type if only one coin type exists.
     const coinTypes: Record<string, number | undefined> = {};
-    const chainInfos = this.chainsService.getChainInfos();
+    const chainInfos = this.chainsService.getModularChainInfos();
     for (const chainInfo of chainInfos) {
       if (
-        !chainInfo.alternativeBIP44s ||
-        chainInfo.alternativeBIP44s.length === 0
+        "cosmos" in chainInfo &&
+        (!chainInfo.cosmos.alternativeBIP44s ||
+          chainInfo.cosmos.alternativeBIP44s.length === 0)
       ) {
         const coinTypeTag = `keyRing-${
           ChainIdHelper.parse(chainInfo.chainId).identifier
         }-coinType`;
-        coinTypes[coinTypeTag] = chainInfo.bip44.coinType;
+        coinTypes[coinTypeTag] = chainInfo.cosmos.bip44.coinType;
       }
     }
 
@@ -830,16 +828,17 @@ export class KeyRingService {
 
     // Finalize coin type if only one coin type exists.
     const coinTypes: Record<string, number | undefined> = {};
-    const chainInfos = this.chainsService.getChainInfos();
+    const chainInfos = this.chainsService.getModularChainInfos();
     for (const chainInfo of chainInfos) {
       if (
-        !chainInfo.alternativeBIP44s ||
-        chainInfo.alternativeBIP44s.length === 0
+        "cosmos" in chainInfo &&
+        (!chainInfo.cosmos.alternativeBIP44s ||
+          chainInfo.cosmos.alternativeBIP44s.length === 0)
       ) {
         const coinTypeTag = `keyRing-${
           ChainIdHelper.parse(chainInfo.chainId).identifier
         }-coinType`;
-        coinTypes[coinTypeTag] = chainInfo.bip44.coinType;
+        coinTypes[coinTypeTag] = chainInfo.cosmos.bip44.coinType;
       }
     }
 
@@ -1733,7 +1732,7 @@ export class KeyRingService {
                 [identifier: string]: number;
               } = {};
 
-              for (const chainInfo of this.chainsService.getChainInfos()) {
+              for (const chainInfo of this.chainsService.getModularChainInfos()) {
                 const identifier = ChainIdHelper.parse(
                   chainInfo.chainId
                 ).identifier;
@@ -1856,12 +1855,12 @@ export class KeyRingService {
             this.chainsUIService.enabledModularChainInfosForVault(keyInfo.id);
           // TODO: 다른 체인도 지원하기
           const chainInfos = modularChainInfos
-            .filter((c) => "cosmos" in c)
+            .filter((c) => "cosmos" in c || "evm" in c)
             .map((c) => {
-              if (!("cosmos" in c)) {
+              if (!("cosmos" in c || "evm" in c)) {
                 throw new Error("Unsupported chain");
               }
-              return c.cosmos;
+              return c;
             });
 
           let evmEnabled = false;
@@ -1916,15 +1915,18 @@ export class KeyRingService {
       })();
 
       if (!isHex) {
-        let targetChainInfos: ChainInfo[] = (() => {
+        let targetChainInfos: ModularChainInfo[] = (() => {
           const i = searchText.indexOf("1");
           if (i < 0) {
             return [];
           }
           const prefix = searchText.slice(0, i);
-          const result: ChainInfo[] = [];
-          for (const chainInfo of this.chainsService.getChainInfos()) {
-            if (chainInfo.bech32Config?.bech32PrefixAccAddr === prefix) {
+          const result: ModularChainInfo[] = [];
+          for (const chainInfo of this.chainsService.getModularChainInfos()) {
+            if (
+              "cosmos" in chainInfo &&
+              chainInfo.cosmos.bech32Config?.bech32PrefixAccAddr === prefix
+            ) {
               result.push(chainInfo);
             }
           }
@@ -1943,7 +1945,7 @@ export class KeyRingService {
 
           const chainInfos = (() => {
             if (ignoreChainEnabled) {
-              return this.chainsService.getChainInfos();
+              return this.chainsService.getModularChainInfos();
             }
             return targetChainInfos.length > 0
               ? targetChainInfos
@@ -1959,7 +1961,7 @@ export class KeyRingService {
                       if (!("cosmos" in c)) {
                         throw new Error("Unsupported chain");
                       }
-                      return c.cosmos;
+                      return c;
                     });
                 })();
           })();
@@ -1978,12 +1980,15 @@ export class KeyRingService {
                     isEVM
                   );
 
-                if (chainInfo.bech32Config == null) {
+                if (
+                  !("cosmos" in chainInfo) ||
+                  chainInfo.cosmos.bech32Config == null
+                ) {
                   return false;
                 }
 
                 const bech32Address = this.getKeySearchBech32FromHex(
-                  chainInfo.bech32Config.bech32PrefixAccAddr,
+                  chainInfo.cosmos.bech32Config.bech32PrefixAccAddr,
                   hexAddress
                 );
                 if (bech32Address.includes(searchText.toLowerCase())) {
@@ -2024,7 +2029,7 @@ export class KeyRingService {
   }
 
   protected static getAddressHexStringFromKeyInfo(
-    chainInfo: ChainInfo,
+    chainInfo: ModularChainInfo,
     keyInfo: KeyInfo,
     key: string,
     value: PlainObject | Primitive | undefined,
@@ -2062,7 +2067,13 @@ export class KeyRingService {
           return keyInfo.insensitive[coinTypeTag] as number;
         }
 
-        return chainInfo.bip44.coinType;
+        if ("evm" in chainInfo) {
+          return chainInfo.evm.bip44.coinType;
+        } else if ("cosmos" in chainInfo) {
+          return chainInfo.cosmos.bip44.coinType;
+        }
+
+        throw new Error("Unsupported chain");
       })();
 
       const bip44Path = keyInfo.insensitive["bip44Path"] as
@@ -2130,11 +2141,16 @@ export class KeyRingService {
     }
   }
 
-  static isEthermintLike(chainInfo: ChainInfo): boolean {
+  static isEthermintLike(chainInfo: ModularChainInfo): boolean {
     return (
-      chainInfo.bip44.coinType === 60 ||
-      !!chainInfo.features?.includes("eth-address-gen") ||
-      !!chainInfo.features?.includes("eth-key-sign")
+      ("cosmos" in chainInfo &&
+        (chainInfo.cosmos.bip44.coinType === 60 ||
+          !!chainInfo.cosmos.features?.includes("eth-address-gen") ||
+          !!chainInfo.cosmos.features?.includes("eth-key-sign"))) ||
+      ("evm" in chainInfo &&
+        (chainInfo.evm.bip44.coinType === 60 ||
+          !!chainInfo.evm.features?.includes("eth-address-gen") ||
+          !!chainInfo.evm.features?.includes("eth-key-sign")))
     );
   }
 }

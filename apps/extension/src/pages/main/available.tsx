@@ -304,44 +304,52 @@ export const AvailableTabView: FunctionComponent<{
     });
 
     const lookingForChains = useMemo(() => {
-      let disabledChainInfos: (ChainInfo | ModularChainInfo)[] =
+      let disabledSearchedChainInfos: ModularChainInfo[] =
         searchedChainInfos.filter(
           (chainInfo) => !chainStore.isEnabledChain(chainInfo.chainId)
         );
 
-      const disabledModularChainInfos =
+      const disabledGroupedChainInfos =
         chainStore.groupedModularChainInfos.filter(
           (modularChainInfo) =>
             ("starknet" in modularChainInfo || "bitcoin" in modularChainInfo) &&
             !chainStore.isEnabledChain(modularChainInfo.chainId)
         );
 
-      disabledChainInfos = [
-        ...new Set([...disabledChainInfos, ...disabledModularChainInfos]),
+      disabledSearchedChainInfos = [
+        ...new Set([
+          ...disabledSearchedChainInfos,
+          ...disabledGroupedChainInfos,
+        ]),
       ].sort((a, b) => a.chainName.localeCompare(b.chainName));
 
-      return disabledChainInfos.reduce(
+      return disabledSearchedChainInfos.reduce(
         (acc, chainInfo) => {
           let embedded: boolean | undefined = false;
           let stored: boolean = true;
 
-          const isModular = "starknet" in chainInfo || "bitcoin" in chainInfo;
+          const isEmbedded = "starknet" in chainInfo || "bitcoin" in chainInfo;
 
           try {
-            if (isModular) {
+            if (isEmbedded) {
               embedded = true;
             } else {
-              const chainInfoInStore = chainStore.getChain(chainInfo.chainId);
-
-              if (!chainInfoInStore) {
+              if (!chainStore.hasModularChain(chainInfo.chainId)) {
                 stored = false;
               } else {
-                if (chainInfoInStore.hideInUI) {
+                const chainInfoInStore = chainStore.getModularChain(
+                  chainInfo.chainId
+                );
+
+                if (
+                  "cosmos" in chainInfoInStore &&
+                  chainInfoInStore.cosmos.hideInUI
+                ) {
                   return acc;
                 }
 
                 stored = true;
-                embedded = chainInfoInStore.embedded?.embedded;
+                embedded = chainInfoInStore.isNative;
               }
             }
           } catch (e) {
@@ -363,7 +371,7 @@ export const AvailableTabView: FunctionComponent<{
         [] as {
           embedded: boolean;
           stored: boolean;
-          chainInfo: ChainInfo | ModularChainInfo;
+          chainInfo: ModularChainInfo;
         }[]
       );
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -375,14 +383,16 @@ export const AvailableTabView: FunctionComponent<{
       chainSearchFields
     ).filter(({ chainInfo }) => {
       if (keyRingStore.selectedKeyInfo?.type === "ledger") {
-        const cosmosChainInfo = (() => {
-          if ("cosmos" in chainInfo) {
-            return chainInfo.cosmos;
-          }
-          if ("currencies" in chainInfo && "feeCurrencies" in chainInfo) {
-            return chainInfo;
-          }
-        })();
+        if ("evm" in chainInfo) {
+          KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
+            chainInfo.chainId
+          );
+          return true;
+        }
+
+        const cosmosChainInfo =
+          "cosmos" in chainInfo ? chainInfo.cosmos : undefined;
+
         if (cosmosChainInfo) {
           // cosmos 계열이면서 ledger일때
           // background에서 ledger를 지원하지 않는 체인은 다 지워줘야한다.
@@ -533,7 +543,7 @@ export const AvailableTabView: FunctionComponent<{
                 chainStore.chainInfos[0].currencies[0],
                 new Dec(0)
               ),
-              chainInfo: chainStore.chainInfos[0],
+              chainInfo: chainStore.modularChainInfos[0],
               isFetching: false,
               error: undefined,
             }}

@@ -72,7 +72,7 @@ export class TokenFactoryCurrencyRegistrar {
       return;
     }
 
-    if (!this.chainStore.hasChain(chainId)) {
+    if (!this.chainStore.hasModularChain(chainId)) {
       return;
     }
 

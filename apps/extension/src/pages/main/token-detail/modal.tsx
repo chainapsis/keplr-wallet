@@ -263,7 +263,7 @@ export const TokenDetailModal: FunctionComponent<{
       onClick: () => {
         navigate(
           `/ibc-swap?chainId=${chainId}&coinMinimalDenom=${coinMinimalDenom}&outChainId=${
-            chainStore.getChain("noble").chainId
+            chainStore.getModularChain("noble").chainId
           }&outCoinMinimalDenom=uusdc&entryPoint=token_detail`
         );
       },
@@ -586,15 +586,16 @@ export const TokenDetailModal: FunctionComponent<{
 
           {(() => {
             if ("cosmos" in modularChainInfo) {
-              const chainInfo = chainStore.getChain(chainId);
+              const modularChainInfoImpl =
+                chainStore.getModularChainInfoImpl(chainId);
 
               if (validateIsUsdcFromNoble(currency, chainId)) {
                 return <EarnApyBanner chainId={NOBLE_CHAIN_ID} />;
               }
 
               if (
-                chainInfo.stakeCurrency &&
-                chainInfo.stakeCurrency.coinMinimalDenom ===
+                modularChainInfoImpl.stakeCurrency &&
+                modularChainInfoImpl.stakeCurrency.coinMinimalDenom ===
                   currency.coinMinimalDenom
               ) {
                 return (
@@ -695,8 +696,8 @@ export const TokenDetailModal: FunctionComponent<{
             if ("paths" in currency && currency.paths.length > 0) {
               const path = currency.paths[currency.paths.length - 1];
               if (path.clientChainId) {
-                const chainName = chainStore.hasChain(path.clientChainId)
-                  ? chainStore.getChain(path.clientChainId).chainName
+                const chainName = chainStore.hasModularChain(path.clientChainId)
+                  ? chainStore.getModularChain(path.clientChainId).chainName
                   : path.clientChainId;
                 infos.push({
                   title: "Channel",

@@ -222,7 +222,7 @@ export const PermissionBasicAccessForEVMPage: FunctionComponent<{
                       : ColorPalette["gray-50"]
                   }
                 >
-                  {chainStore.getChain(data.chainIds[0]).chainName}
+                  {chainStore.getModularChain(data.chainIds[0]).chainName}
                 </Subtitle3>
               </Box>
               <Box

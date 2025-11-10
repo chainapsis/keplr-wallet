@@ -31,10 +31,7 @@ export const SelectDerivationPathModal: FunctionComponent<{
   const [currentIndex, setCurrentIndex] = useState(0);
   const chainId = chainIds[currentIndex];
 
-  const chainInfo =
-    chainId && chainStore.hasChain(chainId)
-      ? chainStore.getChain(chainId)
-      : undefined;
+  const chainInfo = chainId ? chainStore.getModularChain(chainId) : undefined;
 
   const goToNext = () => {
     if (currentIndex < chainIds.length - 1) {
@@ -70,7 +67,7 @@ export const SelectDerivationPathModal: FunctionComponent<{
 
         if (res.length === 1) {
           const [single] = res;
-          if (keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo)) {
+          if (keyRingStore.needKeyCoinTypeFinalize(vaultId, chainId)) {
             await keyRingStore.finalizeKeyCoinType(
               vaultId,
               chainId,
@@ -106,7 +103,9 @@ export const SelectDerivationPathModal: FunctionComponent<{
     return null;
   }
 
-  const currency = chainInfo.stakeCurrency || chainInfo.currencies[0];
+  const chainInfoImpl = chainStore.getModularChainInfoImpl(chainId);
+  const currency =
+    chainInfoImpl.stakeCurrency || chainInfoImpl.getCurrencies()[0];
 
   return (
     <Modal isOpen={isOpen} align="bottom" close={close} maxHeight="95vh">
@@ -225,7 +224,7 @@ export const SelectDerivationPathModal: FunctionComponent<{
               })}
               size="large"
               disabled={
-                !keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo) ||
+                !keyRingStore.needKeyCoinTypeFinalize(vaultId, chainId) ||
                 selectedCoinType < 0
               }
               onClick={async () => {

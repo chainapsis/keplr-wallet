@@ -186,7 +186,10 @@ export const FinalizeKeyScene: FunctionComponent<{
           // If mnemonic is fresh, there is no way that additional coin type account has value to select.
           if (mnemonic) {
             if (
-              keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo) &&
+              keyRingStore.needKeyCoinTypeFinalize(
+                vaultId,
+                chainInfo.chainId
+              ) &&
               mnemonic?.isFresh
             ) {
               promises.push(
@@ -217,20 +220,22 @@ export const FinalizeKeyScene: FunctionComponent<{
         promises = [];
         for (const modularChainInfo of chainStore.modularChainInfos) {
           if ("cosmos" in modularChainInfo) {
-            const chainInfo = chainStore.getChain(
-              modularChainInfo.cosmos.chainId
-            );
-            if (keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo)) {
+            if (
+              keyRingStore.needKeyCoinTypeFinalize(
+                vaultId,
+                modularChainInfo.chainId
+              )
+            ) {
               promises.push(
                 (async () => {
                   const res =
                     await keyRingStore.computeNotFinalizedKeyAddresses(
                       vaultId,
-                      chainInfo.chainId
+                      modularChainInfo.chainId
                     );
 
                   candidateAddresses.push({
-                    chainId: chainInfo.chainId,
+                    chainId: modularChainInfo.chainId,
                     bech32Addresses: res.map((res) => {
                       return {
                         coinType: res.coinType,
@@ -241,7 +246,7 @@ export const FinalizeKeyScene: FunctionComponent<{
                 })()
               );
             } else {
-              const account = accountStore.getAccount(chainInfo.chainId);
+              const account = accountStore.getAccount(modularChainInfo.chainId);
               promises.push(
                 (async () => {
                   if (account.walletStatus !== WalletStatus.Loaded) {
@@ -250,10 +255,10 @@ export const FinalizeKeyScene: FunctionComponent<{
 
                   if (account.bech32Address) {
                     candidateAddresses.push({
-                      chainId: chainInfo.chainId,
+                      chainId: modularChainInfo.chainId,
                       bech32Addresses: [
                         {
-                          coinType: chainInfo.bip44.coinType,
+                          coinType: modularChainInfo.cosmos.bip44.coinType,
                           address: account.bech32Address,
                         },
                       ],
@@ -362,19 +367,22 @@ export const FinalizeKeyScene: FunctionComponent<{
               }
               promises.push(
                 (async () => {
-                  const chainInfo = chainStore.getChain(
+                  const chainInfo = chainStore.getModularChainInfoImpl(
                     candidateAddress.chainId
                   );
+
                   const bal = isEVMOnlyChain
                     ? queries.queryBalances
                         .getQueryEthereumHexAddress(account.ethereumHexAddress)
                         .getBalance(
-                          chainInfo.stakeCurrency || chainInfo.currencies[0]
+                          chainInfo.stakeCurrency ||
+                            chainInfo.getCurrencies()[0]
                         )
                     : queries.queryBalances
                         .getQueryBech32Address(bech32Address.address)
                         .getBalance(
-                          chainInfo.stakeCurrency || chainInfo.currencies[0]
+                          chainInfo.stakeCurrency ||
+                            chainInfo.getCurrencies()[0]
                         );
 
                   if (bal) {
@@ -396,9 +404,11 @@ export const FinalizeKeyScene: FunctionComponent<{
               }
             }
 
-            const chainInfo = chainStore.getChain(candidateAddress.chainId);
+            const chainInfo = chainStore.getModularChainInfoImpl(
+              candidateAddress.chainId
+            );
             const targetCurrency =
-              chainInfo.stakeCurrency || chainInfo.currencies[0];
+              chainInfo.stakeCurrency || chainInfo.getCurrencies()[0];
             if (targetCurrency.coinGeckoId) {
               // Push coingecko id to priceStore.
               priceStore.getPrice(targetCurrency.coinGeckoId);

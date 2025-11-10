@@ -46,7 +46,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
   const ibcTransferConfigs = useIBCTransferConfig(
     chainStore,
     queriesStore,
-    chainStore.getChain(chainId).chainId,
+    chainStore.getModularChain(chainId).chainId,
     accountInfo.bech32Address,
     // TODO: 이 값을 config 밑으로 빼자
     300000,
@@ -58,7 +58,9 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
   );
 
   ibcTransferConfigs.amountConfig.setCurrency(
-    chainStore.getChain(chainId).forceFindCurrency(coinMinimalDenom)
+    chainStore
+      .getModularChainInfoImpl(chainId)
+      .forceFindCurrency(coinMinimalDenom)
   );
 
   if (ibcTransferConfigs.channelConfig.channels.length > 1) {

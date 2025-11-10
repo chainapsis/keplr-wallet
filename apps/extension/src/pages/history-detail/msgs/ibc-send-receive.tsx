@@ -14,10 +14,10 @@ export const HistoryDetailIBCSendReceive: FunctionComponent<{
 }> = observer(({ msg, targetDenom }) => {
   const { chainStore, accountStore } = useStore();
 
-  const chainInfo = chainStore.getChain(msg.chainId);
+  const modularChainInfoImpl = chainStore.getModularChainInfoImpl(msg.chainId);
 
   const sendAmountPretty = useMemo(() => {
-    const currency = chainInfo.forceFindCurrency(targetDenom);
+    const currency = modularChainInfoImpl.forceFindCurrency(targetDenom);
 
     const receives = msg.meta["receives"] as string[];
     for (const receive of receives) {
@@ -30,7 +30,7 @@ export const HistoryDetailIBCSendReceive: FunctionComponent<{
     }
 
     return new CoinPretty(currency, "0");
-  }, [chainInfo, msg.meta, targetDenom]);
+  }, [modularChainInfoImpl, msg.meta, targetDenom]);
 
   const fromAddress = (() => {
     if (!msg.ibcTracking) {
@@ -68,8 +68,8 @@ export const HistoryDetailIBCSendReceive: FunctionComponent<{
     }
 
     const firstPath = msg.ibcTracking.paths[0];
-    if (firstPath.chainId && chainStore.hasChain(firstPath.chainId)) {
-      return chainStore.getChain(firstPath.chainId).chainName;
+    if (firstPath.chainId && chainStore.hasModularChain(firstPath.chainId)) {
+      return chainStore.getModularChain(firstPath.chainId).chainName;
     }
     return "";
   })();
@@ -101,8 +101,11 @@ export const HistoryDetailIBCSendReceive: FunctionComponent<{
     }
 
     const lastPath = msg.ibcTracking.paths[msg.ibcTracking.paths.length - 1];
-    if (lastPath.clientChainId && chainStore.hasChain(lastPath.clientChainId)) {
-      return chainStore.getChain(lastPath.clientChainId).chainId;
+    if (
+      lastPath.clientChainId &&
+      chainStore.hasModularChain(lastPath.clientChainId)
+    ) {
+      return chainStore.getModularChain(lastPath.clientChainId).chainId;
     }
     return "";
   })();
@@ -112,7 +115,7 @@ export const HistoryDetailIBCSendReceive: FunctionComponent<{
       return "";
     }
 
-    if (chainStore.hasChain(toChainId)) {
+    if (chainStore.hasModularChain(toChainId)) {
       const toAccount = accountStore.getAccount(toChainId);
       if (toAccount.bech32Address === toAddress) {
         return toAccount.name;

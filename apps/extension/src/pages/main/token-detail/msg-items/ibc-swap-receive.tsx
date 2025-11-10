@@ -5,7 +5,7 @@ import { useStore } from "../../../../stores";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { MsgItemBase } from "./base";
 import { ItemLogo } from "./logo";
-import { ChainInfo } from "@keplr-wallet/types";
+import { ModularChainInfo } from "@keplr-wallet/types";
 import { isValidCoinStr, parseCoinStr } from "@keplr-wallet/common";
 import { Buffer } from "buffer/";
 import { MessageSwapIcon } from "../../../../components/icon";
@@ -21,10 +21,12 @@ export const MsgRelationIBCSwapReceive: FunctionComponent<{
   ({ msg, prices, targetDenom, isInAllActivitiesPage, isLegacyOsmosis }) => {
     const { chainStore, queriesStore } = useStore();
 
-    const chainInfo = chainStore.getChain(msg.chainId);
+    const modularChainInfoImpl = chainStore.getModularChainInfoImpl(
+      msg.chainId
+    );
 
     const sendAmountPretty = useMemo(() => {
-      const currency = chainInfo.forceFindCurrency(targetDenom);
+      const currency = modularChainInfoImpl.forceFindCurrency(targetDenom);
 
       const receives = msg.meta["receives"];
       if (
@@ -44,9 +46,9 @@ export const MsgRelationIBCSwapReceive: FunctionComponent<{
       }
 
       return new CoinPretty(currency, "0");
-    }, [chainInfo, msg.meta, targetDenom]);
+    }, [modularChainInfoImpl, msg.meta, targetDenom]);
 
-    const sourceChain: ChainInfo | undefined = (() => {
+    const sourceChain: ModularChainInfo | undefined = (() => {
       if (!msg.ibcTracking) {
         return undefined;
       }
@@ -56,14 +58,14 @@ export const MsgRelationIBCSwapReceive: FunctionComponent<{
           if (!path.chainId) {
             return undefined;
           }
-          if (!chainStore.hasChain(path.chainId)) {
+          if (!chainStore.hasModularChain(path.chainId)) {
             return undefined;
           }
 
           if (!path.clientChainId) {
             return undefined;
           }
-          if (!chainStore.hasChain(path.clientChainId)) {
+          if (!chainStore.hasModularChain(path.clientChainId)) {
             return undefined;
           }
         }
@@ -73,10 +75,10 @@ export const MsgRelationIBCSwapReceive: FunctionComponent<{
           if (!path.chainId) {
             return undefined;
           }
-          if (!chainStore.hasChain(path.chainId)) {
+          if (!chainStore.hasModularChain(path.chainId)) {
             return undefined;
           }
-          return chainStore.getChain(path.chainId);
+          return chainStore.getModularChain(path.chainId);
         }
 
         return undefined;
@@ -88,7 +90,7 @@ export const MsgRelationIBCSwapReceive: FunctionComponent<{
 
     const swapVenueChain = (() => {
       if (isLegacyOsmosis) {
-        return chainStore.getChain("osmosis");
+        return chainStore.getModularChain("osmosis");
       }
 
       const swapVenue = msg.meta["swapVenue"];
@@ -98,9 +100,8 @@ export const MsgRelationIBCSwapReceive: FunctionComponent<{
         )?.chainId;
 
         if (swapVenueChainId) {
-          return chainStore.hasChain(swapVenueChainId)
-            ? chainStore.getChain(swapVenueChainId)
-            : undefined;
+          const venueChainInfo = chainStore.getModularChain(swapVenueChainId);
+          return "cosmos" in venueChainInfo ? venueChainInfo : undefined;
         }
       }
 
@@ -136,7 +137,9 @@ export const MsgRelationIBCSwapReceive: FunctionComponent<{
           })();
           if (operations && operations.length > 0 && swapVenueChain) {
             const minimalDenom = operations[0].denom_in;
-            const currency = swapVenueChain.findCurrency(minimalDenom);
+            const currency = chainStore
+              .getModularChainInfoImpl(swapVenueChain.chainId)
+              .findCurrency(minimalDenom);
             if (currency) {
               if ("originCurrency" in currency && currency.originCurrency) {
                 return currency.originCurrency.coinDenom;
@@ -212,7 +215,9 @@ export const MsgRelationIBCSwapReceive: FunctionComponent<{
 
             if (operations && operations.length > 0 && swapVenueChain) {
               const minimalDenom = operations[0].denom_in;
-              const currency = swapVenueChain.findCurrency(minimalDenom);
+              const currency = chainStore
+                .getModularChainInfoImpl(swapVenueChain.chainId)
+                .findCurrency(minimalDenom);
               if (currency) {
                 if ("originCurrency" in currency && currency.originCurrency) {
                   return currency.originCurrency.coinDenom;
@@ -265,7 +270,9 @@ export const MsgRelationIBCSwapReceive: FunctionComponent<{
                 .operations;
             if (operations && operations.length > 0 && swapVenueChain) {
               const minimalDenom = operations[0].denom_in;
-              const currency = swapVenueChain.findCurrency(minimalDenom);
+              const currency = chainStore
+                .getModularChainInfoImpl(swapVenueChain.chainId)
+                .findCurrency(minimalDenom);
               if (currency) {
                 if ("originCurrency" in currency && currency.originCurrency) {
                   return currency.originCurrency.coinDenom;
@@ -291,7 +298,7 @@ export const MsgRelationIBCSwapReceive: FunctionComponent<{
         paragraph={(() => {
           if (srcDenom) {
             if (!msg.ibcTracking) {
-              return `From ${srcDenom} on ${chainInfo.chainName}`;
+              return `From ${srcDenom} on ${modularChainInfoImpl.embedded.chainName}`;
             }
 
             if (sourceChain) {

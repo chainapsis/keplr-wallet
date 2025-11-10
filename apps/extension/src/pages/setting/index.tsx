@@ -453,7 +453,9 @@ const TopSection: FunctionComponent<{
   const icnsPrimaryName = (() => {
     if (
       uiConfigStore.icnsInfo &&
-      chainStore.hasChain(uiConfigStore.icnsInfo.chainId)
+      chainStore
+        .getModularChainInfoImpl(uiConfigStore.icnsInfo.chainId)
+        .matchModule("cosmos")
     ) {
       const queries = queriesStore.get(uiConfigStore.icnsInfo.chainId);
       const icnsQuery = queries.icns.queryICNSNames.getQueryContract(

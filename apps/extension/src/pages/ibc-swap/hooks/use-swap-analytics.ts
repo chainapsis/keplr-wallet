@@ -274,7 +274,7 @@ export const useSwapAnalytics = ({
       source_asset_chain_id
     ).identifier;
     const sourceCurrency = chainStore
-      .getChain(
+      .getModularChainInfoImpl(
         Number.isNaN(parseInt(sourceChainIdentifier))
           ? sourceChainIdentifier
           : `eip155:${sourceChainIdentifier}`
@@ -289,7 +289,7 @@ export const useSwapAnalytics = ({
     const destChainIdentifier =
       ChainIdHelper.parse(dest_asset_chain_id).identifier;
     const destCurrency = chainStore
-      .getChain(
+      .getModularChainInfoImpl(
         Number.isNaN(parseInt(dest_asset_chain_id))
           ? dest_asset_chain_id
           : `eip155:${dest_asset_chain_id}`

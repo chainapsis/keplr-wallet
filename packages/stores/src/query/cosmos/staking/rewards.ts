@@ -35,7 +35,7 @@ export class ObservableQueryRewardsInner extends ObservableChainQuery<Rewards> {
   }
 
   protected override canFetch(): boolean {
-    if (!this.chainGetter.getChain(this.chainId).stakeCurrency) {
+    if (!this.chainGetter.getModularChainInfoImpl(this.chainId).stakeCurrency) {
       return false;
     }
     // If bech32 address is empty, it will always fail, so don't need to fetch it.
@@ -44,7 +44,7 @@ export class ObservableQueryRewardsInner extends ObservableChainQuery<Rewards> {
 
   @computed
   get rewards(): CoinPretty[] {
-    const chainInfo = this.chainGetter.getChain(this.chainId);
+    const chainInfo = this.chainGetter.getModularChainInfoImpl(this.chainId);
 
     if (!this.response || !this.response.data.rewards) {
       return [];
@@ -75,7 +75,7 @@ export class ObservableQueryRewardsInner extends ObservableChainQuery<Rewards> {
 
   readonly getRewardsOf = computedFn(
     (validatorAddress: string): CoinPretty[] => {
-      const chainInfo = this.chainGetter.getChain(this.chainId);
+      const chainInfo = this.chainGetter.getModularChainInfoImpl(this.chainId);
 
       const rewards = this.response?.data.rewards?.find((r) => {
         return r.validator_address === validatorAddress;
@@ -109,7 +109,7 @@ export class ObservableQueryRewardsInner extends ObservableChainQuery<Rewards> {
 
   @computed
   get stakableReward(): CoinPretty | undefined {
-    const chainInfo = this.chainGetter.getChain(this.chainId);
+    const chainInfo = this.chainGetter.getModularChainInfoImpl(this.chainId);
 
     if (!chainInfo.stakeCurrency) {
       return;
@@ -127,7 +127,7 @@ export class ObservableQueryRewardsInner extends ObservableChainQuery<Rewards> {
 
   readonly getStakableRewardOf = computedFn(
     (validatorAddress: string): CoinPretty | undefined => {
-      const chainInfo = this.chainGetter.getChain(this.chainId);
+      const chainInfo = this.chainGetter.getModularChainInfoImpl(this.chainId);
 
       if (!chainInfo.stakeCurrency) {
         return;
@@ -147,7 +147,7 @@ export class ObservableQueryRewardsInner extends ObservableChainQuery<Rewards> {
 
   @computed
   get unstakableRewards(): CoinPretty[] {
-    const chainInfo = this.chainGetter.getChain(this.chainId);
+    const chainInfo = this.chainGetter.getModularChainInfoImpl(this.chainId);
 
     return this.rewards.filter((r) => {
       return (
@@ -162,7 +162,7 @@ export class ObservableQueryRewardsInner extends ObservableChainQuery<Rewards> {
       return this.getRewardsOf(validatorAddress).filter((r) => {
         return (
           r.currency.coinMinimalDenom !==
-          this.chainGetter.getChain(this.chainId).stakeCurrency
+          this.chainGetter.getModularChainInfoImpl(this.chainId).stakeCurrency
             ?.coinMinimalDenom
         );
       });
@@ -202,7 +202,7 @@ export class ObservableQueryRewardsInner extends ObservableChainQuery<Rewards> {
         return [];
       }
 
-      const chainInfo = this.chainGetter.getChain(this.chainId);
+      const chainInfo = this.chainGetter.getModularChainInfoImpl(this.chainId);
 
       if (!chainInfo.stakeCurrency) {
         return [];
@@ -250,9 +250,12 @@ export class ObservableQueryRewardsInner extends ObservableChainQuery<Rewards> {
   ) {
     super.onReceiveResponse(response);
 
-    const chainInfo = this.chainGetter.getChain(this.chainId);
+    const chainInfo = this.chainGetter.getModularChainInfoImpl(this.chainId);
     const denoms = response.data.total.map((coin) => coin.denom);
-    chainInfo.addUnknownDenoms(...denoms);
+    chainInfo.addUnknownDenoms({
+      module: "cosmos",
+      coinMinimalDenoms: denoms,
+    });
   }
 }
 

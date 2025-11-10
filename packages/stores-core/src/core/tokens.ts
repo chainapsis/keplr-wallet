@@ -221,16 +221,16 @@ export class TokensStore {
   getTokens(chainId: string): ReadonlyArray<TokenInfo> {
     const bech32Address = this.accountStore.getAccount(chainId).bech32Address;
     const modularChainInfo = this.chainStore.getModularChain(chainId);
-    if ("cosmos" in modularChainInfo || "evm" in modularChainInfo) {
-      const chainInfo = this.chainStore.getChain(chainId);
-
-      const hasBech32Config = chainInfo.bech32Config != null;
+    if ("evm" in modularChainInfo && !("cosmos" in modularChainInfo)) {
+      return this.tokenMap.get(ChainIdHelper.parse(chainId).identifier) ?? [];
+    } else if ("cosmos" in modularChainInfo) {
+      const hasBech32Config = modularChainInfo.cosmos.bech32Config != null;
       const associatedAccountAddress =
         hasBech32Config && bech32Address
           ? Buffer.from(
               Bech32Address.fromBech32(
                 bech32Address,
-                chainInfo.bech32Config.bech32PrefixAccAddr
+                modularChainInfo.cosmos.bech32Config?.bech32PrefixAccAddr
               ).address
             ).toString("hex")
           : undefined;
@@ -350,6 +350,7 @@ export class TokensStore {
     }
   }
 
+  @action
   private updateTokenMap(chainIdentifier: string, newTokens?: TokenInfo[]) {
     const newTokenMap = new Map(this.tokenMap);
     if (newTokens) {

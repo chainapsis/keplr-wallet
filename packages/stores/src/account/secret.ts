@@ -104,6 +104,11 @@ export class SecretAccountImpl {
   ) {
     const denomHelper = new DenomHelper(currency.coinMinimalDenom);
 
+    const chainInfo = this.chainGetter.getModularChain(this.chainId);
+    if (!("cosmos" in chainInfo)) {
+      throw new Error("cosmos module is not supported on this chain");
+    }
+
     if (denomHelper.type === "secret20") {
       const actualAmount = (() => {
         let dec = new Dec(amount);
@@ -117,8 +122,7 @@ export class SecretAccountImpl {
 
       Bech32Address.validate(
         recipient,
-        this.chainGetter.getChain(this.chainId).bech32Config
-          ?.bech32PrefixAccAddr
+        chainInfo.cosmos.bech32Config?.bech32PrefixAccAddr
       );
 
       return this.makeExecuteSecretContractTx(
@@ -204,9 +208,14 @@ export class SecretAccountImpl {
           onFulfill?: (tx: any) => void;
         }
   ) {
+    const chainInfo = this.chainGetter.getModularChain(this.chainId);
+    if (!("cosmos" in chainInfo)) {
+      throw new Error("cosmos module is not supported on this chain");
+    }
+
     Bech32Address.validate(
       contractAddress,
-      this.chainGetter.getChain(this.chainId).bech32Config?.bech32PrefixAccAddr
+      chainInfo.cosmos.bech32Config?.bech32PrefixAccAddr
     );
 
     let encryptedMsg: Uint8Array;

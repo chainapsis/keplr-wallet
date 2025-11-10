@@ -12,7 +12,6 @@ import { CoinPretty } from "@keplr-wallet/unit";
 import { NOBLE_CHAIN_ID } from "./config.ui";
 import {
   IAccountStore,
-  IChainInfoImpl,
   IChainStore,
   IQueriesStore,
   NobleQueries,
@@ -20,7 +19,7 @@ import {
 import { KVStore } from "@keplr-wallet/common";
 import { Hash } from "@keplr-wallet/crypto";
 import { ViewToken } from "./pages/main";
-import { ChainInfo, Currency } from "@keplr-wallet/types";
+import { Currency, ModularChainInfo } from "@keplr-wallet/types";
 
 // https://developer.chrome.com/docs/extensions/mv3/tut_analytics/
 export class AmplitudeAnalyticsClient implements AnalyticsClientV2 {
@@ -290,10 +289,7 @@ export const logNobleClaimAnalytics = async (
 export function getTokenSearchResultClickAnalyticsProperties(
   viewToken: ViewToken,
   search: string,
-  balance: (
-    | ViewToken
-    | { currency: Currency; chainInfo: IChainInfoImpl<ChainInfo> }
-  )[], // ibc swap select asset page remaining tokens
+  balance: (ViewToken | { currency: Currency; chainInfo: ModularChainInfo })[], // ibc swap select asset page remaining tokens
   index: number
 ): Properties {
   return {

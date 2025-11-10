@@ -164,7 +164,7 @@ export const PermissionBasicAccessPage: FunctionComponent<{
             {data.chainIds.map((chainId, index) => {
               const chainInfo = (() => {
                 try {
-                  return chainStore.getChain(chainId);
+                  return chainStore.getModularChain(chainId);
                 } catch (e) {
                   return chainStore.getModularChain(chainId);
                 }

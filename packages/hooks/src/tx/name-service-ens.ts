@@ -69,8 +69,9 @@ export class ENSNameService implements NameService {
   get isEnabled(): boolean {
     if (
       !this._ens ||
+      !("evm" in this.base.chainInfo) ||
       this.base.chainInfo.evm == null ||
-      this.base.chainInfo.bip44.coinType !== 60
+      this.base.chainInfo.evm.bip44.coinType !== 60
     ) {
       return false;
     }
@@ -149,8 +150,16 @@ export class ENSNameService implements NameService {
         this._isFetching = true;
       });
 
-      if (!this.chainGetter.hasChain(this._ens.chainId)) {
+      if (!this.chainGetter.hasModularChain(this._ens.chainId)) {
         throw new Error(`Can't find chain: ${this._ens.chainId}`);
+      }
+
+      const chainInfo = this.chainGetter.getModularChainInfoImpl(
+        this._ens.chainId
+      );
+
+      if (!("evm" in chainInfo.embedded)) {
+        throw new Error("EVM is not supported on this chain");
       }
 
       const suffix = "eth";
@@ -158,7 +167,7 @@ export class ENSNameService implements NameService {
       const username = domain + "." + suffix;
 
       const resolver = await new JsonRpcProvider(
-        this.chainGetter.getChain(this._ens.chainId).rpc
+        chainInfo.embedded.evm.rpc
       ).getResolver(username);
 
       if (!resolver) {
