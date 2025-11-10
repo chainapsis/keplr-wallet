@@ -429,6 +429,7 @@ export class KeyRingEthereumService {
               (params?.[0] as {
                 chainId?: string | number;
                 from: string;
+                value?: string;
                 gas?: string;
                 gasLimit?: string;
                 authorizationList?: {
@@ -444,14 +445,13 @@ export class KeyRingEthereumService {
           if (!tx) {
             throw new EthereumProviderRpcError(
               -32602,
-              "Invalid params",
               "Must provide a transaction."
             );
           }
 
           const currentChainId = this.forceGetCurrentChainId(origin, chainId);
 
-          const { from: sender, gas, authorizationList, ...restTx } = tx;
+          const { from: sender, authorizationList, ...restTx } = tx;
 
           if (authorizationList) {
             throw new Error("EIP-7702 transactions are not supported.");
@@ -495,12 +495,11 @@ export class KeyRingEthereumService {
           );
           const nonce = parseInt(transactionCount, 16);
 
-          const unsignedTx: UnsignedTransaction = {
-            ...restTx,
-            gasLimit: restTx?.gasLimit ?? gas,
-            chainId: this.getEVMChainId(currentChainId),
-            nonce,
-          };
+          const unsignedTx = this.normalizeUnsignedTx(
+            restTx,
+            currentChainId,
+            nonce
+          );
 
           try {
             const { signingData, signature } = await this.signEthereumSelected(
@@ -550,6 +549,7 @@ export class KeyRingEthereumService {
               (params?.[0] as {
                 chainId?: string | number;
                 from: string;
+                value?: string;
                 gas?: string;
                 gasLimit?: string;
                 authorizationList?: {
@@ -565,14 +565,13 @@ export class KeyRingEthereumService {
           if (!tx) {
             throw new EthereumProviderRpcError(
               -32602,
-              "Invalid params",
               "Must provide a transaction."
             );
           }
 
           const currentChainId = this.forceGetCurrentChainId(origin, chainId);
 
-          const { from: sender, gas, authorizationList, ...restTx } = tx;
+          const { from: sender, authorizationList, ...restTx } = tx;
 
           if (authorizationList) {
             throw new Error("EIP-7702 transactions are not supported.");
@@ -616,12 +615,11 @@ export class KeyRingEthereumService {
           );
           const nonce = parseInt(transactionCount, 16);
 
-          const unsignedTx: UnsignedTransaction = {
-            ...restTx,
-            gasLimit: restTx?.gasLimit ?? gas,
-            chainId: this.getEVMChainId(currentChainId),
-            nonce,
-          };
+          const unsignedTx = this.normalizeUnsignedTx(
+            restTx,
+            currentChainId,
+            nonce
+          );
 
           try {
             const { signingData, signature } = await this.signEthereumSelected(
@@ -660,7 +658,6 @@ export class KeyRingEthereumService {
           if (!message) {
             throw new EthereumProviderRpcError(
               -32602,
-              "Invalid params",
               "Must provide a stringified message."
             );
           }
@@ -670,7 +667,6 @@ export class KeyRingEthereumService {
           if (!signer || (signer && !signer.match(/^0x[0-9A-Fa-f]*$/))) {
             throw new EthereumProviderRpcError(
               -32602,
-              "Invalid params",
               "Must provide an Ethereum address."
             );
           }
@@ -699,14 +695,13 @@ export class KeyRingEthereumService {
             throw e;
           }
         }
-        case "eth_signTypedData_v3":
+        case "eth_signTypedData_v3": // NOTE: v3 is deprecated
         case "eth_signTypedData_v4": {
           const signer =
             (Array.isArray(params) && (params?.[0] as string)) || undefined;
           if (!signer || (signer && !signer.match(/^0x[0-9A-Fa-f]*$/))) {
             throw new EthereumProviderRpcError(
               -32602,
-              "Invalid params",
               "Must provide an Ethereum address."
             );
           }
@@ -715,6 +710,38 @@ export class KeyRingEthereumService {
             (Array.isArray(params) && (params?.[1] as any)) || undefined;
 
           const currentChainId = this.forceGetCurrentChainId(origin, chainId);
+
+          const { value: validatedTypedData, error } =
+            EIP712MessageValidator.validate(
+              typeof typedData === "string" ? JSON.parse(typedData) : typedData
+            );
+          if (error) {
+            throw new EthereumProviderRpcError(
+              -32602,
+              "Must provide a valid EIP712 data format"
+            );
+          }
+
+          const chainIdFromDomain = validatedTypedData.domain["chainId"] as
+            | string
+            | number
+            | undefined;
+          if (chainIdFromDomain !== undefined) {
+            const chainIdFromDomainNumber = validateEVMChainId(
+              typeof chainIdFromDomain === "string"
+                ? parseInt(chainIdFromDomain)
+                : chainIdFromDomain
+            );
+            const currentChainIdNumber = this.getEVMChainId(currentChainId);
+
+            if (chainIdFromDomainNumber !== currentChainIdNumber) {
+              throw new EthereumProviderRpcError(
+                -32602,
+                `The current active chain id ${currentChainIdNumber} does not match the one in the domain ${chainIdFromDomainNumber}.`
+              );
+            }
+          }
+
           try {
             const { signature } = await this.signEthereumSelected(
               env,
@@ -825,7 +852,6 @@ export class KeyRingEthereumService {
           if (!subscriptionId) {
             throw new EthereumProviderRpcError(
               -32602,
-              "Invalid params",
               "Must provide a subscription id."
             );
           }
@@ -945,7 +971,6 @@ export class KeyRingEthereumService {
           if (!param || typeof param !== "object") {
             throw new EthereumProviderRpcError(
               -32602,
-              "Invalid params",
               "Must provide a single object parameter."
             );
           }
@@ -1078,7 +1103,6 @@ export class KeyRingEthereumService {
           if (!param || typeof param !== "object") {
             throw new EthereumProviderRpcError(
               -32602,
-              "Invalid params",
               "Must provide a single object parameter."
             );
           }
@@ -1086,7 +1110,6 @@ export class KeyRingEthereumService {
           if (param["eth_accounts"] == null) {
             throw new EthereumProviderRpcError(
               -32602,
-              "Invalid params",
               "Must provide a single object parameter with the key 'eth_accounts'."
             );
           }
@@ -1111,7 +1134,6 @@ export class KeyRingEthereumService {
           if (!param) {
             throw new EthereumProviderRpcError(
               -32602,
-              "Invalid params",
               "Must provide a single object parameter."
             );
           }
@@ -1119,7 +1141,6 @@ export class KeyRingEthereumService {
           if (param.type !== "ERC20") {
             throw new EthereumProviderRpcError(
               -32602,
-              "Invalid params",
               "Must provide a valid asset type. Only ERC20 is supported."
             );
           }
@@ -1214,7 +1235,6 @@ export class KeyRingEthereumService {
         if (!param?.chainId) {
           throw new EthereumProviderRpcError(
             -32602,
-            "Invalid params",
             "Must provide a chain id."
           );
         }
@@ -1261,5 +1281,88 @@ export class KeyRingEthereumService {
     const evmInfo = this.chainsService.getEVMInfoOrThrow(chainId);
 
     return evmInfo.chainId;
+  }
+
+  private toHexQty(x?: string | number | bigint): string | undefined {
+    if (x === undefined || x === null) {
+      return undefined;
+    }
+
+    if (typeof x === "bigint") {
+      return `0x${x.toString(16)}`;
+    }
+
+    if (typeof x === "number") {
+      const n = Number.isFinite(x) ? Math.max(0, Math.floor(x)) : 0;
+      return `0x${n.toString(16)}`;
+    }
+
+    x = x.trim();
+    if (x.length === 0 || x === "0x") {
+      return undefined;
+    }
+
+    let q: bigint;
+
+    try {
+      q = BigInt(x);
+    } catch {
+      if (!x.startsWith("0x")) {
+        x = `0x${x}`;
+      }
+      try {
+        q = BigInt(x);
+      } catch {
+        return undefined;
+      }
+    }
+
+    return `0x${q.toString(16)}`;
+  }
+
+  private normalizeUnsignedTx(
+    tx: any,
+    chainId: string,
+    nonce: number
+  ): UnsignedTransaction {
+    const {
+      value,
+      gas,
+      gasLimit,
+      gasPrice,
+      maxFeePerGas,
+      maxPriorityFeePerGas,
+      data,
+      ...restTx
+    } = tx;
+
+    const unsignedTx: UnsignedTransaction = {
+      ...restTx,
+      value: this.toHexQty(value),
+      gasLimit: this.toHexQty(gasLimit ?? gas),
+      gasPrice: this.toHexQty(gasPrice),
+      maxFeePerGas: this.toHexQty(maxFeePerGas),
+      maxPriorityFeePerGas: this.toHexQty(maxPriorityFeePerGas),
+      chainId: this.getEVMChainId(chainId),
+      nonce,
+    };
+
+    if (data != null && typeof data === "string") {
+      unsignedTx.data = data.startsWith("0x") ? data : `0x${data}`;
+    }
+
+    const isLegacy = unsignedTx.gasPrice !== undefined;
+    const isEIP1559 =
+      unsignedTx.maxFeePerGas !== undefined &&
+      unsignedTx.maxPriorityFeePerGas !== undefined;
+
+    if (isEIP1559) {
+      delete unsignedTx.gasPrice;
+    } else if (isLegacy) {
+      delete unsignedTx.maxFeePerGas;
+      delete unsignedTx.maxPriorityFeePerGas;
+    }
+
+    return unsignedTx;
   }
 }

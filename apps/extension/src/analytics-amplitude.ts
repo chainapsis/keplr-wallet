@@ -18,8 +18,6 @@ import {
 } from "@keplr-wallet/stores";
 import { KVStore } from "@keplr-wallet/common";
 import { Hash } from "@keplr-wallet/crypto";
-import { ViewToken } from "./pages/main";
-import { Currency, ModularChainInfo } from "@keplr-wallet/types";
 
 // https://developer.chrome.com/docs/extensions/mv3/tut_analytics/
 export class AmplitudeAnalyticsClient implements AnalyticsClientV2 {
@@ -285,56 +283,3 @@ export const logNobleClaimAnalytics = async (
     Number(claimableAmountDec.toString())
   );
 };
-
-export function getTokenSearchResultClickAnalyticsProperties(
-  viewToken: ViewToken,
-  search: string,
-  balance: (ViewToken | { currency: Currency; chainInfo: ModularChainInfo })[], // ibc swap select asset page remaining tokens
-  index: number
-): Properties {
-  return {
-    coinDenom: viewToken.token.currency.coinDenom,
-    chainName: viewToken.chainInfo.chainName,
-    query: search.trim(),
-    searchResultCount: balance.length,
-    index,
-    upperItems: balance
-      .slice(0, index)
-      .slice(-3)
-      .map(
-        (item) =>
-          `${item.chainInfo.chainName}/${
-            "token" in item
-              ? item.token.currency.coinDenom
-              : item.currency.coinDenom
-          }`
-      ),
-    lowerItems: balance
-      .slice(index + 1)
-      .slice(0, 3)
-      .map(
-        (item) =>
-          `${item.chainInfo.chainName}/${
-            "token" in item
-              ? item.token.currency.coinDenom
-              : item.currency.coinDenom
-          }`
-      ),
-  };
-}
-
-export function getChainSearchResultClickAnalyticsProperties(
-  chainName: string,
-  search: string,
-  chainNames: string[],
-  index: number
-): Properties {
-  return {
-    chainName,
-    query: search.trim(),
-    searchResultCount: chainNames.length,
-    index,
-    upperItems: chainNames.slice(0, index).slice(-3),
-    lowerItems: chainNames.slice(index + 1).slice(0, 3),
-  };
-}

@@ -109,7 +109,7 @@ export const TokenDetailModal: FunctionComponent<{
     currency,
   });
   const isSomeBuySupport = buySupportServiceInfos.some(
-    (serviceInfo) => !!serviceInfo.buyUrl
+    (serviceInfo) => !!serviceInfo.getBuyUrl
   );
   const balance = (() => {
     const queryBalances = queriesStore.get(chainId).queryBalances;

@@ -40,7 +40,6 @@ import { isRunningInSidePanel } from "../../../../utils";
 import { useGetSearchChains } from "../../../../hooks/use-get-search-chains";
 import { LookingForChainItem } from "../looking-for-chains";
 import { useSearch } from "../../../../hooks/use-search";
-import { getChainSearchResultClickAnalyticsProperties } from "../../../../analytics-amplitude";
 import { CoinPretty } from "@keplr-wallet/unit";
 
 type Address = {
@@ -143,13 +142,7 @@ const chainSearchFields = [
 export const CopyAddressScene: FunctionComponent<{
   close: () => void;
 }> = observer(({ close }) => {
-  const {
-    chainStore,
-    accountStore,
-    keyRingStore,
-    uiConfigStore,
-    analyticsAmplitudeStore,
-  } = useStore();
+  const { chainStore, accountStore, keyRingStore, uiConfigStore } = useStore();
 
   const intl = useIntl();
   const theme = useTheme();
@@ -443,7 +436,7 @@ export const CopyAddressScene: FunctionComponent<{
               return address;
             })
             .flat()
-            .map((address, index) => {
+            .map((address) => {
               return (
                 <CopyAddressItem
                   key={
@@ -458,21 +451,6 @@ export const CopyAddressScene: FunctionComponent<{
                   blockInteraction={blockInteraction}
                   setBlockInteraction={setBlockInteraction}
                   setSortPriorities={setSortPriorities}
-                  onClick={() => {
-                    if (search.trim().length > 0) {
-                      analyticsAmplitudeStore.logEvent(
-                        "click_copy_address_item_search_results_deposit_modal",
-                        getChainSearchResultClickAnalyticsProperties(
-                          address.modularChainInfo.chainName,
-                          search,
-                          sortedAddresses.map(
-                            (address) => address.modularChainInfo.chainName
-                          ),
-                          index
-                        )
-                      );
-                    }
-                  }}
                 />
               );
             })}
@@ -490,7 +468,7 @@ export const CopyAddressScene: FunctionComponent<{
             >
               <FormattedMessage id="page.main.components.deposit-modal.look-for-chains" />
             </Subtitle4>
-            {searchedLookingForChains.map((chainData, index) => {
+            {searchedLookingForChains.map((chainData) => {
               return (
                 <React.Fragment key={chainData.chainInfo.chainId}>
                   <Gutter size="0.75rem" />
@@ -498,21 +476,6 @@ export const CopyAddressScene: FunctionComponent<{
                     chainInfo={chainData.chainInfo}
                     stored={chainData.stored}
                     embedded={chainData.embedded}
-                    onClick={() => {
-                      if (search.trim().length > 0) {
-                        analyticsAmplitudeStore.logEvent(
-                          "click_looking_for_chain_search_results_deposit_modal",
-                          getChainSearchResultClickAnalyticsProperties(
-                            chainData.chainInfo.chainName,
-                            search,
-                            searchedLookingForChains.map(
-                              (chain) => chain.chainInfo.chainName
-                            ),
-                            index
-                          )
-                        );
-                      }
-                    }}
                   />
                 </React.Fragment>
               );
@@ -544,7 +507,6 @@ const CopyAddressItem: FunctionComponent<{
       value: Record<string, true | undefined>
     ) => Record<string, true | undefined>
   ) => void;
-  onClick: () => void;
 }> = observer(
   ({
     address,
@@ -552,7 +514,6 @@ const CopyAddressItem: FunctionComponent<{
     blockInteraction,
     setBlockInteraction,
     setSortPriorities,
-    onClick,
   }) => {
     const { analyticsStore, keyRingStore, uiConfigStore } = useStore();
 
@@ -613,8 +574,6 @@ const CopyAddressItem: FunctionComponent<{
             }}
             onClick={async (e) => {
               e.preventDefault();
-
-              onClick();
 
               await navigator.clipboard.writeText(
                 address.starknetAddress ||

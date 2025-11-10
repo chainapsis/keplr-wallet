@@ -107,6 +107,9 @@ import { usePreviousDistinct } from "../../../hooks/use-previous";
 import { SwapFeeInfoForBridgeOnSend } from "./swap-fee-info";
 import { useEffectOnce } from "../../../hooks/use-effect-once";
 import { useGlobarSimpleBar } from "../../../hooks/global-simplebar";
+import { FeeCoverageDescription } from "../../../components/top-up";
+import { useTopUp } from "../../../hooks/use-topup";
+import { getShouldTopUpSignOptions } from "../../../utils/should-top-up-sign-options";
 
 const Styles = {
   Flex1: styled.div`
@@ -365,6 +368,7 @@ const useIBCSwapConfigWithRecipientConfig = (
   initialGas: number,
   outChainId: string,
   outCurrency: AppCurrency,
+  disableSubFeeFromFaction: boolean,
   swapFeeBps: number,
   options: {
     allowHexAddressToBech32Address?: boolean;
@@ -390,6 +394,7 @@ const useIBCSwapConfigWithRecipientConfig = (
     initialGas,
     outChainId,
     outCurrency,
+    disableSubFeeFromFaction,
     swapFeeBps
   );
   const channelConfig = useIBCChannelConfig(false);
@@ -505,6 +510,10 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     destinationChainInfoOfBridge.chainId
   );
 
+  const [
+    topUpForDisableSubFeeFromFaction,
+    setTopUpForDisableSubFeeFromFaction,
+  ] = useState(false);
   const ibcSwapConfigsForBridge = useIBCSwapConfigWithRecipientConfig(
     chainStore,
     queriesStore,
@@ -516,6 +525,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     200000,
     destinationChainInfoOfBridge.chainId,
     destinationChainInfoOfBridge.currency,
+    topUpForDisableSubFeeFromFaction,
     //NOTE - when swap is used on send page, it use bridge so swap fee is 10
     10,
     {
@@ -558,6 +568,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     sender,
     // TODO: 이 값을 config 밑으로 빼자
     isEvmTx ? 21000 : 300000,
+    topUpForDisableSubFeeFromFaction,
     sendType === "ibc-transfer",
     {
       allowHexAddressToBech32Address:
@@ -870,6 +881,14 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     }
   })();
 
+  const { shouldTopUp, remainingText, isTopUpAvailable } = useTopUp({
+    feeConfig,
+    senderConfig,
+  });
+  useEffect(() => {
+    setTopUpForDisableSubFeeFromFaction(shouldTopUp);
+  }, [shouldTopUp]);
+
   return (
     <HeaderLayout
       title={intl.formatMessage({ id: "page.send.amount.title" })}
@@ -898,8 +917,14 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       }
       bottomButtons={[
         {
-          disabled: interactionBlocked || showCelestiaWarning,
-          text: intl.formatMessage({ id: "button.next" }),
+          disabled:
+            interactionBlocked ||
+            showCelestiaWarning ||
+            (shouldTopUp && !isTopUpAvailable),
+          text:
+            shouldTopUp && remainingText
+              ? remainingText
+              : intl.formatMessage({ id: "button.next" }),
           color: "primary",
           size: "large",
           type: "submit",
@@ -1037,11 +1062,15 @@ export const SendAmountPage: FunctionComponent = observer(() => {
               try {
                 if ("send" in tx) {
                   await tx.send(
-                    ibcSwapConfigsForBridge.feeConfig.toStdFee(),
+                    ibcSwapConfigsForBridge.feeConfig.topUpStatus
+                      .topUpOverrideStdFee ??
+                      ibcSwapConfigsForBridge.feeConfig.toStdFee(),
                     ibcSwapConfigsForBridge.memoConfig.memo,
                     {
                       preferNoSetFee: true,
                       preferNoSetMemo: false,
+
+                      ...(shouldTopUp ? getShouldTopUpSignOptions() : {}),
 
                       sendTx: async (chainId, tx, mode) => {
                         const outChainId =
@@ -1803,11 +1832,13 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                       );
 
               await tx.send(
-                sendConfigs.feeConfig.toStdFee(),
+                sendConfigs.feeConfig.topUpStatus.topUpOverrideStdFee ??
+                  sendConfigs.feeConfig.toStdFee(),
                 sendConfigs.memoConfig.memo,
                 {
                   preferNoSetFee: true,
                   preferNoSetMemo: true,
+                  ...(shouldTopUp ? getShouldTopUpSignOptions() : {}),
                   sendTx: async (chainId, tx, mode) => {
                     let msg: Message<Uint8Array> = new SendTxAndRecordMsg(
                       historyType,
@@ -2223,6 +2254,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
               }
             })()}
           />
+          <Gutter size="0" />
           <VerticalCollapseTransition collapsed={sendType !== "ibc-transfer"}>
             <GuideBox
               color="warning"
@@ -2247,15 +2279,24 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           <Styles.Flex1 />
           <Gutter size="0" />
 
-          <FeeControl
-            senderConfig={senderConfig}
-            feeConfig={feeConfig}
-            gasConfig={gasConfig}
-            gasSimulator={gasSimulatorForNotBridgeSend}
-            isForEVMTx={isEvmTx}
-            nonceMethod={nonceMethod}
-            setNonceMethod={setNonceMethod}
-          />
+          <VerticalCollapseTransition collapsed={shouldTopUp}>
+            <FeeControl
+              senderConfig={senderConfig}
+              feeConfig={feeConfig}
+              gasConfig={gasConfig}
+              gasSimulator={gasSimulatorForNotBridgeSend}
+              disableAutomaticFeeSet={shouldTopUp}
+              isForEVMTx={isEvmTx}
+              nonceMethod={nonceMethod}
+              setNonceMethod={setNonceMethod}
+              shouldTopUp={shouldTopUp}
+            />
+          </VerticalCollapseTransition>
+          <Gutter size="0" />
+          <VerticalCollapseTransition collapsed={!shouldTopUp}>
+            <FeeCoverageDescription isTopUpAvailable={isTopUpAvailable} />
+          </VerticalCollapseTransition>
+          <Gutter size="0" />
 
           {sendType === "bridge" && (
             <SwapFeeInfoForBridgeOnSend
@@ -2652,6 +2693,9 @@ const WarningGuideBox: FunctionComponent<{
             paragraph={title ? errorText : undefined}
             hideInformationIcon={!showCelestiaWarning}
           />
+        </VerticalCollapseTransition>
+        <VerticalCollapseTransition collapsed={collapsed}>
+          <Gutter size="0.75rem" />
         </VerticalCollapseTransition>
       </React.Fragment>
     );

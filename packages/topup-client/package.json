@@ -1,0 +1,23 @@
+{
+  "name": "@keplr-wallet/topup-client",
+  "version": "0.12.286",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "author": "chainapsis",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "clean": "rm -rf node_modules; rm -rf build",
+    "build": "npx tsc",
+    "dev": "npx tsc -w",
+    "test": "npx jest --passWithNoTests",
+    "lint-test": "npx eslint \"src/**/*\" && npx prettier --check \"src/**/*\"",
+    "lint-fix": "npx eslint --fix \"src/**/*\" && npx prettier --write \"src/**/*\""
+  },
+  "dependencies": {
+    "@keplr-wallet/simple-fetch": "0.12.286",
+    "@keplr-wallet/types": "0.12.286"
+  }
+}

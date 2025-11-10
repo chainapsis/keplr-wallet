@@ -268,7 +268,7 @@ export const ConnectLedgerScene: FunctionComponent<{
 
           try {
             const res = await ethApp.getAddress(
-              `m/44'/60'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`
+              `44'/60'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`
             );
 
             const pubKey = new PubKeySecp256k1(
@@ -689,6 +689,18 @@ export const ConnectLedgerScene: FunctionComponent<{
         )}
 
         <Gutter size="1.25rem" />
+
+        {["Cosmos", "Terra", "Secret", "THORChain"].includes(propApp) &&
+          (bip44Path.account > 100 || bip44Path.addressIndex > 100) && (
+            <GuideBox
+              title="To set the first or last value of the derivation path above 100, please enable Expert Mode on your Ledger device."
+              backgroundColor={
+                theme.mode === "light"
+                  ? ColorPalette["gray-50"]
+                  : ColorPalette["gray-500"]
+              }
+            />
+          )}
 
         {propApp === "Starknet" && (
           <GuideBox

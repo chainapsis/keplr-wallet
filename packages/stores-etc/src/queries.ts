@@ -12,6 +12,8 @@ import {
 } from "./terra-classic/treasury";
 import { ObservableQuerySkipTokenInfo } from "./token-info";
 import { ObservableQueryInitiaDynamicFee } from "./initia/dynamicfee";
+import { ObservablePostTxMsgDecoder } from "./tx-msg-decoder";
+import { ObservableQueryTopUpStatus } from "./top-up-status";
 
 export interface KeplrETCQueries {
   keplrETC: KeplrETCQueriesImpl;
@@ -22,6 +24,8 @@ export const KeplrETCQueries = {
     ethereumURL: string;
     skipTokenInfoBaseURL: string;
     skipTokenInfoAPIURI: string;
+    txCodecBaseURL: string;
+    topupBaseURL: string;
   }): (
     queriesSetBase: QueriesSetBase,
     sharedContext: QuerySharedContext,
@@ -42,7 +46,9 @@ export const KeplrETCQueries = {
           chainGetter,
           options.ethereumURL,
           options.skipTokenInfoBaseURL,
-          options.skipTokenInfoAPIURI
+          options.skipTokenInfoAPIURI,
+          options.txCodecBaseURL,
+          options.topupBaseURL
         ),
       };
     };
@@ -59,6 +65,9 @@ export class KeplrETCQueriesImpl {
 
   public readonly queryInitiaDynamicFee: DeepReadonly<ObservableQueryInitiaDynamicFee>;
 
+  public readonly queryTxMsgDecoder: DeepReadonly<ObservablePostTxMsgDecoder>;
+  public readonly queryTopUpStatus: DeepReadonly<ObservableQueryTopUpStatus>;
+
   constructor(
     _base: QueriesSetBase,
     sharedContext: QuerySharedContext,
@@ -66,7 +75,9 @@ export class KeplrETCQueriesImpl {
     chainGetter: ChainGetter,
     ethereumURL: string,
     skipTokenInfoBaseURL: string,
-    skipTokenInfoAPIURI: string
+    skipTokenInfoAPIURI: string,
+    txCodecBaseURL: string,
+    topupBaseURL: string
   ) {
     this.queryERC20Metadata = new ObservableQueryERC20Metadata(
       sharedContext,
@@ -100,6 +111,17 @@ export class KeplrETCQueriesImpl {
       sharedContext,
       chainId,
       chainGetter
+    );
+
+    this.queryTxMsgDecoder = new ObservablePostTxMsgDecoder(
+      sharedContext,
+      txCodecBaseURL
+    );
+
+    this.queryTopUpStatus = new ObservableQueryTopUpStatus(
+      sharedContext,
+      chainId,
+      topupBaseURL
     );
   }
 }

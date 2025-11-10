@@ -40,6 +40,8 @@ export const Tooltip: FunctionComponent<
     // true면 hover가 늦게 닫히거나 마우스가 하위 컴포넌트와 툴팁 둘 다를 인식함.
     // 마우스를 통해서 툴팁 내용을 드래그 앤 카피 할 수 있도록 만듬.
     hoverCloseInteractive?: boolean;
+
+    textStyle?: React.CSSProperties;
   }>
 > = ({
   enabled,
@@ -56,6 +58,7 @@ export const Tooltip: FunctionComponent<
   hideArrow,
   floatingOffset,
   hoverCloseInteractive,
+  textStyle,
 }) => {
   const [_isOpen, setIsOpen] = useState(false);
   const isOpen = _isOpen || isAlwaysOpen;
@@ -168,6 +171,7 @@ export const Tooltip: FunctionComponent<
           <Caption2
             style={{
               color: ColorPalette["white"],
+              ...textStyle,
             }}
           >
             {content}

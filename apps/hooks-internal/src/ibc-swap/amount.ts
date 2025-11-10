@@ -60,6 +60,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
     senderConfig: ISenderConfig,
     initialOutChainId: string,
     initialOutCurrency: AppCurrency,
+    disableSubFeeFromFaction: boolean,
     swapFeeBps: number,
     allowSwaps?: boolean,
     smartSwapOptions?: {
@@ -67,7 +68,13 @@ export class IBCSwapAmountConfig extends AmountConfig {
       splitRoutes?: boolean;
     }
   ) {
-    super(chainGetter, queriesStore, initialChainId, senderConfig);
+    super(
+      chainGetter,
+      queriesStore,
+      initialChainId,
+      senderConfig,
+      disableSubFeeFromFaction
+    );
 
     this._outChainId = initialOutChainId;
     this._outCurrency = initialOutCurrency;
@@ -84,7 +91,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
       .get(this.chainId)
       .queryBalances.getQueryBech32Address(this.senderConfig.sender)
       .getBalanceFromCurrency(this.currency);
-    if (this.feeConfig) {
+    if (this.feeConfig && !this.disableSubFeeFromFaction) {
       for (const fee of this.feeConfig.fees) {
         result = result.sub(fee);
       }
@@ -334,11 +341,6 @@ export class IBCSwapAmountConfig extends AmountConfig {
           : destinationAccount.bech32Address;
     }
 
-    if (customRecipient) {
-      chainIdsToAddresses[customRecipient.chainId.replace("eip155:", "")] =
-        customRecipient.recipient;
-    }
-
     for (const swapVenue of queryRouteResponse.data.swap_venues ?? [
       queryRouteResponse.data.swap_venue,
     ]) {
@@ -395,6 +397,11 @@ export class IBCSwapAmountConfig extends AmountConfig {
             ? swapAccount.ethereumHexAddress
             : swapAccount.bech32Address;
       }
+    }
+
+    if (customRecipient) {
+      chainIdsToAddresses[customRecipient.chainId.replace("eip155:", "")] =
+        customRecipient.recipient;
     }
 
     const queryMsgsDirect = queryIBCSwap.getQueryMsgsDirect(
@@ -533,11 +540,6 @@ export class IBCSwapAmountConfig extends AmountConfig {
           : destinationAccount.bech32Address;
     }
 
-    if (customRecipient) {
-      chainIdsToAddresses[customRecipient.chainId.replace("eip155:", "")] =
-        customRecipient.recipient;
-    }
-
     for (const swapVenue of queryRouteResponse.data.swap_venues ?? [
       queryRouteResponse.data.swap_venue,
     ]) {
@@ -570,6 +572,11 @@ export class IBCSwapAmountConfig extends AmountConfig {
             ? swapAccount.ethereumHexAddress
             : swapAccount.bech32Address;
       }
+    }
+
+    if (customRecipient) {
+      chainIdsToAddresses[customRecipient.chainId.replace("eip155:", "")] =
+        customRecipient.recipient;
     }
 
     const queryMsgsDirect = queryIBCSwap.getQueryMsgsDirect(
@@ -1043,6 +1050,7 @@ export const useIBCSwapAmountConfig = (
   senderConfig: ISenderConfig,
   outChainId: string,
   outCurrency: AppCurrency,
+  disableSubFeeFromFaction: boolean,
   swapFeeBps: number,
   allowSwaps?: boolean,
   smartSwapOptions?: {
@@ -1062,6 +1070,7 @@ export const useIBCSwapAmountConfig = (
         senderConfig,
         outChainId,
         outCurrency,
+        disableSubFeeFromFaction,
         swapFeeBps,
         allowSwaps,
         smartSwapOptions
@@ -1071,6 +1080,7 @@ export const useIBCSwapAmountConfig = (
   txConfig.setOutChainId(outChainId);
   txConfig.setOutCurrency(outCurrency);
   txConfig.setSwapFeeBps(swapFeeBps);
+  txConfig.setDisableSubFeeFromFaction(disableSubFeeFromFaction);
 
   return txConfig;
 };

@@ -305,6 +305,14 @@ export const SignStarknetTxView: FunctionComponent<{
       const maxL1GasPrice = new Dec(l1Gas.price).mul(margin);
       const maxL2GasPrice = new Dec(l2Gas.price).mul(margin);
 
+      const safeToHex = (value: string | Int | null | undefined): string => {
+        if (value === null || value === undefined) {
+          return "0";
+        }
+        const val = value.toString();
+        return num.toHex(val === "0x" ? "0" : val);
+      };
+
       const details: InvocationsSignerDetails = {
         version: "0x3",
         walletAddress: interactionData.data.details.walletAddress,
@@ -314,18 +322,16 @@ export const SignStarknetTxView: FunctionComponent<{
         skipValidate: false,
         resourceBounds: {
           l1_data_gas: {
-            max_amount: num.toHex(maxL1DataGas.truncate().toString()),
-            max_price_per_unit: num.toHex(
-              maxL1DataGasPrice.truncate().toString()
-            ),
+            max_amount: safeToHex(maxL1DataGas.truncate()),
+            max_price_per_unit: safeToHex(maxL1DataGasPrice.truncate()),
           },
           l1_gas: {
-            max_amount: num.toHex(maxL1Gas.truncate().toString()),
-            max_price_per_unit: num.toHex(maxL1GasPrice.truncate().toString()),
+            max_amount: safeToHex(maxL1Gas.truncate()),
+            max_price_per_unit: safeToHex(maxL1GasPrice.truncate()),
           },
           l2_gas: {
-            max_amount: num.toHex(maxL2Gas.truncate().toString()),
-            max_price_per_unit: num.toHex(maxL2GasPrice.truncate().toString()),
+            max_amount: safeToHex(maxL2Gas.truncate()),
+            max_price_per_unit: safeToHex(maxL2GasPrice.truncate()),
           },
         },
         tip: "0x0",

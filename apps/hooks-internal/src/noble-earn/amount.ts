@@ -31,9 +31,16 @@ export class NobleEarnAmountConfig extends AmountConfig {
     protected readonly accountStore: IAccountStoreWithInjects<[CosmosAccount]>,
     chainId: string,
     senderConfig: ISenderConfig,
-    initialOutCurrency: AppCurrency
+    initialOutCurrency: AppCurrency,
+    disableSubFeeFromFaction: boolean
   ) {
-    super(chainGetter, queriesStore, chainId, senderConfig);
+    super(
+      chainGetter,
+      queriesStore,
+      chainId,
+      senderConfig,
+      disableSubFeeFromFaction
+    );
 
     this._outCurrency = initialOutCurrency;
 
@@ -160,7 +167,8 @@ export const useNobleEarnAmountConfig = (
   chainId: string,
   sender: string,
   inCurrency: AppCurrency,
-  outCurrency: AppCurrency
+  outCurrency: AppCurrency,
+  disableSubFeeFromFaction: boolean
 ) => {
   const senderConfig = useSenderConfig(chainGetter, chainId, sender);
 
@@ -172,12 +180,14 @@ export const useNobleEarnAmountConfig = (
         accountStore,
         chainId,
         senderConfig,
-        outCurrency
+        outCurrency,
+        disableSubFeeFromFaction
       )
   );
   amountConfig.setChain(chainId);
   amountConfig.setCurrency(inCurrency);
   amountConfig.setOutCurrency(outCurrency);
+  amountConfig.setDisableSubFeeFromFaction(disableSubFeeFromFaction);
 
   const gasConfig = useGasConfig(chainGetter, chainId, 230000);
   const feeConfig = useFeeConfig(
