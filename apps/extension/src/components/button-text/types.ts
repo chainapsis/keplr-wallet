@@ -17,4 +17,6 @@ export interface TextButtonProps {
 
   className?: string;
   style?: CSSProperties;
+
+  isLoading?: boolean;
 }

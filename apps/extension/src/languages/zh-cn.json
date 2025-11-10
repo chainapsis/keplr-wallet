@@ -635,6 +635,8 @@
   "page.main.components.spendable-card.title": "Spendable",
   "page.main.components.rewards-card.title": "Rewards",
   "page.main.components.rewards-card.claim-all-button": "Claim All",
+  "page.main.components.rewards-card.claim-button": "Claim",
+  "page.main.components.rewards-card.review-claim-button": "Review",
 
   "page.main.components.menu-bar.manage-chain-visibility-title": "添加/删除链",
   "page.main.components.menu-bar.manage-asset-list-title": "管理资产列表",

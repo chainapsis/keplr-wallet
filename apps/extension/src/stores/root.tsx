@@ -86,6 +86,7 @@ import {
 } from "@keplr-wallet/analytics";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { HugeQueriesStore } from "./huge-queries";
+import { ClaimRewardsStateStore } from "./claim-rewards-state";
 import { ExtensionAnalyticsClient } from "../analytics";
 import { AmplitudeAnalyticsClient } from "../analytics-amplitude";
 import { TokenContractsQueries } from "./token-contracts";
@@ -132,6 +133,7 @@ export class RootStore {
   public readonly chainStore: ChainStore;
   public readonly chainsUIForegroundStore: ChainsUIForegroundStore;
   public readonly ibcChannelStore: IBCChannelStore;
+  public readonly claimRewardsStateStore: ClaimRewardsStateStore;
 
   public readonly permissionManagerStore: PermissionManagerStore;
 
@@ -612,6 +614,11 @@ export class RootStore {
       this.keyRingStore,
       this.skipQueriesStore,
       this.tokensStore
+    );
+
+    this.claimRewardsStateStore = new ClaimRewardsStateStore(
+      this.chainStore,
+      this.keyRingStore
     );
 
     this.tokenFactoryRegistrar = new TokenFactoryCurrencyRegistrar(

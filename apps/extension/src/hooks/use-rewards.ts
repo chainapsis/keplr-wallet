@@ -1,7 +1,7 @@
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ViewToken } from "../pages/main";
 import { useStore } from "../stores";
 import {
-  ClaimAllEachState,
   useClaimAllEachState,
   useCosmosClaimRewards,
   useStarknetClaimRewards,
@@ -9,6 +9,7 @@ import {
 import { CoinPretty, Dec, PricePretty } from "@keplr-wallet/unit";
 import { NEUTRON_CHAIN_ID, NOBLE_CHAIN_ID } from "../config.ui";
 import { ModularChainInfo } from "@keplr-wallet/types";
+import { ClaimAllEachState } from "../stores/claim-rewards-state";
 
 export interface ViewClaimToken extends Omit<ViewToken, "chainInfo"> {
   modularChainInfo: ModularChainInfo;
@@ -32,6 +33,8 @@ const USDN_CURRENCY = {
 
 const zeroDec = new Dec(0);
 
+const homeRewardsSuppressedByKeyId = new Set<string>();
+
 export function useRewards() {
   const {
     chainStore,
@@ -49,6 +52,11 @@ export function useRewards() {
     useStarknetClaimRewards();
 
   const { states, getClaimAllEachState } = useClaimAllEachState();
+  const prevSelectedKeyIdRef = useRef(keyRingStore.selectedKeyInfo?.id);
+  const keyId = keyRingStore.selectedKeyInfo?.id ?? "unknown";
+
+  const [claimAllIsCompleted, setClaimAllIsCompleted] = useState(false);
+  const [claimAllIsLoading, setClaimAllIsLoading] = useState(false);
 
   const viewClaimTokens: ViewClaimToken[] = (() => {
     const res: ViewClaimToken[] = [];
@@ -230,6 +238,10 @@ export function useRewards() {
 
   const claimAll = () => {
     analyticsStore.logEvent("click_claimAll");
+    homeRewardsSuppressedByKeyId.delete(keyId);
+
+    setClaimAllIsCompleted(false);
+    setClaimAllIsLoading(true);
 
     for (const viewClaimToken of viewClaimTokens) {
       const state = getClaimAllEachState(
@@ -258,15 +270,140 @@ export function useRewards() {
     return true;
   })();
 
-  const claimAllIsLoading = (() => {
-    for (const chainInfo of chainStore.chainInfosInUI) {
-      const state = getClaimAllEachState(chainInfo.chainId);
-      if (state.isLoading) {
+  const totalClaimTokenCount = viewClaimTokens.length;
+
+  const finishedCount = useMemo(() => {
+    let count = 0;
+    for (const viewClaimToken of viewClaimTokens) {
+      const state = getClaimAllEachState(
+        viewClaimToken.modularChainInfo.chainId
+      );
+      if (state.isCompleted) {
+        count += 1;
+      }
+    }
+    return count;
+  }, [viewClaimTokens, getClaimAllEachState]);
+
+  const succeededCount = useMemo(() => {
+    let count = 0;
+    for (const viewClaimToken of viewClaimTokens) {
+      const state = getClaimAllEachState(
+        viewClaimToken.modularChainInfo.chainId
+      );
+      if (state.isSucceeded) {
+        count += 1;
+      }
+    }
+    return count;
+  }, [viewClaimTokens, getClaimAllEachState]);
+
+  const hasAnyInProgress = useMemo(() => {
+    for (const viewClaimToken of viewClaimTokens) {
+      const state = getClaimAllEachState(
+        viewClaimToken.modularChainInfo.chainId
+      );
+      if (state.hasStarted && (state.isLoading || state.isSimulating)) {
         return true;
       }
     }
     return false;
-  })();
+  }, [viewClaimTokens, getClaimAllEachState]);
+
+  useEffect(() => {
+    setClaimAllIsLoading(hasAnyInProgress);
+  }, [hasAnyInProgress]);
+
+  useEffect(() => {
+    if (homeRewardsSuppressedByKeyId.has(keyId)) {
+      setClaimAllIsCompleted(false);
+      return;
+    }
+    setClaimAllIsCompleted(
+      totalClaimTokenCount > 0 && finishedCount === totalClaimTokenCount
+    );
+  }, [finishedCount, totalClaimTokenCount, keyId]);
+
+  const [count, setCount] = useState(0);
+
+  const claimCountText = useMemo(() => {
+    if (totalClaimTokenCount === 0) {
+      return "";
+    }
+
+    return `${succeededCount}/${totalClaimTokenCount}`;
+  }, [succeededCount, totalClaimTokenCount]);
+
+  useEffect(() => {
+    if (keyRingStore.selectedKeyInfo?.id !== prevSelectedKeyIdRef.current) {
+      return;
+    }
+
+    if (!claimAllIsCompleted) {
+      return;
+    }
+
+    setCount(6);
+
+    const interval = setInterval(() => {
+      setCount((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setClaimAllIsCompleted(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => {
+      setCount(0);
+      clearInterval(interval);
+      setClaimAllIsCompleted(false);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [claimAllIsCompleted]);
+
+  useEffect(() => {
+    if (keyRingStore.selectedKeyInfo?.id !== prevSelectedKeyIdRef.current) {
+      setClaimAllIsLoading(false);
+      setClaimAllIsCompleted(false);
+      setCount(0);
+      for (const s of states) {
+        s.reset();
+      }
+      prevSelectedKeyIdRef.current = keyRingStore.selectedKeyInfo?.id;
+      homeRewardsSuppressedByKeyId.delete(keyId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [keyRingStore.selectedKeyInfo?.id]);
+
+  const claimAllIsCompletedRef = useRef(claimAllIsCompleted);
+  const countRef = useRef(count);
+  const keyIdRef = useRef(keyId);
+
+  // complete 되고 다른 페이지로 이동할 경우에만 UI상태를 초기화 하기 위해서 참조를 유지한다.
+  useEffect(() => {
+    claimAllIsCompletedRef.current = claimAllIsCompleted;
+  }, [claimAllIsCompleted]);
+
+  useEffect(() => {
+    countRef.current = count;
+  }, [count]);
+
+  useEffect(() => {
+    keyIdRef.current = keyId;
+  }, [keyId]);
+
+  useEffect(() => {
+    return () => {
+      if (claimAllIsCompletedRef.current && countRef.current > 0) {
+        homeRewardsSuppressedByKeyId.add(keyIdRef.current);
+        setCount(0);
+        setClaimAllIsCompleted(false);
+      }
+    };
+  }, []);
 
   return {
     viewClaimTokens,
@@ -276,7 +413,10 @@ export function useRewards() {
     claimAll,
     claimAllDisabled,
     claimAllIsLoading,
-    states,
+    claimAllIsCompleted,
     getClaimAllEachState,
+    states,
+    count,
+    claimCountText,
   };
 }
