@@ -33,8 +33,6 @@ import {
   EIP712Intent,
   useEIP712Intent,
 } from "../../../../hooks/ethereum/use-eip712-intent";
-import { ChainInfoWithCoreTypes } from "@keplr-wallet/background";
-import { IChainInfoImpl } from "@keplr-wallet/stores";
 import { XAxis } from "../../../../components/axis";
 import { Body2, Subtitle4 } from "../../../../components/typography";
 import { CoinOutlineIcon } from "../../../../components/icon/coin-outline";
@@ -43,6 +41,7 @@ import { CurrencyImageFallback } from "../../../../components/image";
 import { Skeleton } from "../../../../components/skeleton";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { Tooltip } from "../../../../components/tooltip";
+import { ModularChainInfo } from "@keplr-wallet/types";
 
 export const EthereumSignEIP712View: FunctionComponent<{
   interactionData: NonNullable<SignEthereumInteractionStore["waitingData"]>;
@@ -66,7 +65,7 @@ export const EthereumSignEIP712View: FunctionComponent<{
 
   const { chainId } = interactionData.data;
 
-  const chainInfo = chainStore.getChain(chainId);
+  const chainInfo = chainStore.getModularChain(chainId);
 
   const signerInfo = {
     name:
@@ -355,7 +354,7 @@ const MAX_UINT256 =
   "115792089237316195423570985008687907853269984665640564039457584007913129639935";
 
 const EIP712IntentView: FunctionComponent<{
-  chainInfo: IChainInfoImpl<ChainInfoWithCoreTypes>;
+  chainInfo: ModularChainInfo;
   intent: EIP712Intent;
   signingDataText: string;
 }> = observer(({ chainInfo, intent, signingDataText }) => {
@@ -402,7 +401,7 @@ const EIP712IntentView: FunctionComponent<{
 });
 
 const PermitIntentView: FunctionComponent<{
-  chainInfo: IChainInfoImpl<ChainInfoWithCoreTypes>;
+  chainInfo: ModularChainInfo;
   spender: string;
   tokenAddress: string;
   amount: string;
@@ -410,7 +409,7 @@ const PermitIntentView: FunctionComponent<{
 }> = observer(
   ({ chainInfo, spender, tokenAddress, amount, signingDataText }) => {
     const theme = useTheme();
-    const { queriesStore } = useStore();
+    const { queriesStore, chainStore } = useStore();
 
     const queryExplorer = queriesStore.simpleQuery.queryGet<{
       link: string;
@@ -435,7 +434,9 @@ const PermitIntentView: FunctionComponent<{
       isFetching: isFetchingErc20Metadata,
       notFound: notFoundErc20Metadata,
     } = (() => {
-      const currency = chainInfo.findCurrency(`erc20:${tokenAddress}`);
+      const currency = chainStore
+        .getModularChainInfoImpl(chainInfo.chainId)
+        .findCurrency(`erc20:${tokenAddress}`);
       if (currency) {
         return { currency, isFetching: false, notFound: false };
       }
