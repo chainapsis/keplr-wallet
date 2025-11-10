@@ -267,11 +267,13 @@ const CongratsImage: FunctionComponent<{ size: string }> = ({ size }) => {
 
   return (
     <img
-      width={size}
-      height={size}
       src={src}
       alt="Congrats"
-      style={{ borderRadius: "2.5rem" }}
+      style={{
+        width: `${size}px`,
+        aspectRatio: "1932/1800",
+        borderRadius: "2.5rem",
+      }}
     />
   );
 };
