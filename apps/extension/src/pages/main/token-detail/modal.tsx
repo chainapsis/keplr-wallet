@@ -791,7 +791,7 @@ export const TokenDetailModal: FunctionComponent<{
               // TODO: 아직 cosmos 체인이 아니면 embedded인지 아닌지 구분할 수 없다.
               if (
                 ("cosmos" in modularChainInfo &&
-                  chainStore.getChain(chainId).embedded.embedded) ||
+                  chainStore.getModularChain(chainId).isNative) ||
                 "evm" in modularChainInfo ||
                 "starknet" in modularChainInfo ||
                 "bitcoin" in modularChainInfo
