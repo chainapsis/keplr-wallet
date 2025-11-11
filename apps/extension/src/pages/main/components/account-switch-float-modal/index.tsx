@@ -45,7 +45,7 @@ const Styles = {
     top: ${({ top }) => top.toString()}px;
     left: ${({ left }) => left.toString()}px;
     width: 336px;
-    padding: 0.5rem;
+    padding: 1rem 0.5rem 0 0.5rem;
 
     background-color: ${({ theme }) =>
       theme.mode === "light"
@@ -150,10 +150,12 @@ const Styles = {
 
     display: flex;
     flex-direction: column;
+
+    min-width: 11.25rem;
   `,
 
   MenuItem: styled(Body3)<{ isLast?: boolean }>`
-    padding: 0.5rem 0.5rem 0.5rem 0.75rem;
+    padding: 0.5rem 1.5rem;
     cursor: pointer;
     display: flex;
     height: 2.5rem;
@@ -496,6 +498,7 @@ export const AccountSwitchFloatModal = observer(
                   />
                 );
               })}
+              <Gutter size="0.5rem" />
             </SimpleBar>
           </Styles.ModalContainer>
         </FloatModal>
