@@ -36,12 +36,15 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
   const theme = useTheme();
   const intl = useIntl();
 
-  const [searchParams, _] = useSearchParams();
+  const [searchParams] = useSearchParams();
 
   const { hugeQueriesStore } = useStore();
 
   const [isOpenDepositModal, setIsOpenDepositModal] = React.useState(false);
   const [isOpenBuy, setIsOpenBuy] = React.useState(false);
+  const [depositInitialSearch, setDepositInitialSearch] = React.useState<
+    string | undefined
+  >(undefined);
 
   const buySupportServiceInfos = useBuySupportServiceInfos();
 
@@ -56,9 +59,13 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
     return 4;
   };
 
-  const stakables = [...hugeQueriesStore.stakables].sort(
-    (a, b) => priority(a.chainInfo.chainId) - priority(b.chainInfo.chainId)
-  );
+  const stakables = [...hugeQueriesStore.stakables].sort((a, b) => {
+    const diff = priority(a.chainInfo.chainId) - priority(b.chainInfo.chainId);
+    if (diff !== 0) {
+      return diff;
+    }
+    return a.token.currency.coinDenom.localeCompare(b.token.currency.coinDenom);
+  });
 
   return (
     <MainHeaderLayout
@@ -91,7 +98,13 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
         <Gutter size="0.75rem" />
 
         <Box paddingX="0.25rem">
-          <Subtitle3 color={ColorPalette["blue-300"]}>
+          <Subtitle3
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-300"]
+                : ColorPalette["blue-400"]
+            }
+          >
             {intl.formatMessage({ id: "page.stake.explore.subtitle" })}
           </Subtitle3>
         </Box>
@@ -113,6 +126,10 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
             <AssetCard
               key={`${stakable.chainInfo.chainId}-${stakable.token.currency.coinMinimalDenom}`}
               viewToken={stakable}
+              onClick={() => {
+                setDepositInitialSearch(stakable.chainInfo.chainName);
+                setIsOpenDepositModal(true);
+              }}
             />
           ))}
         />
@@ -121,11 +138,20 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
       <Modal
         isOpen={isOpenDepositModal}
         align="bottom"
-        close={() => setIsOpenDepositModal(false)}
+        close={() => {
+          setIsOpenDepositModal(false);
+          setDepositInitialSearch(undefined);
+        }}
         /* Simplebar를 사용하면 트랜지션이 덜덜 떨리는 문제가 있다... */
         forceNotUseSimplebar={true}
       >
-        <DepositModal close={() => setIsOpenDepositModal(false)} />
+        <DepositModal
+          close={() => {
+            setIsOpenDepositModal(false);
+            setDepositInitialSearch(undefined);
+          }}
+          initialSearch={depositInitialSearch}
+        />
       </Modal>
 
       <Modal
@@ -206,16 +232,13 @@ const CollapsibleGrid: FunctionComponent<{
 
 const AssetCard: FunctionComponent<{
   viewToken: ViewToken;
-}> = observer(({ viewToken }) => {
+  onClick: () => void;
+}> = observer(({ viewToken, onClick }) => {
   const stakingAprDec = useGetStakingApr(viewToken.chainInfo.chainId);
   const theme = useTheme();
 
   return (
-    <Styles.AssetCard
-      onClick={() => {
-        // TODO: open copy address modal
-      }}
-    >
+    <Styles.AssetCard onClick={onClick}>
       <CurrencyImageFallback
         chainInfo={viewToken.chainInfo}
         currency={viewToken.token.currency}
@@ -233,7 +256,13 @@ const AssetCard: FunctionComponent<{
           {viewToken.token.currency.coinDenom}
         </Subtitle2>
         <Gutter size="0.25rem" />
-        <Subtitle3 color={ColorPalette["gray-200"]}>
+        <Subtitle3
+          color={
+            theme.mode === "light"
+              ? ColorPalette["blue-400"]
+              : ColorPalette["gray-400"]
+          }
+        >
           {stakingAprDec ? `APR ${stakingAprDec.toString(0)}%` : undefined}
         </Subtitle3>
       </XAxis>
@@ -280,7 +309,11 @@ const Styles = {
     justify-content: center;
     flex-shrink: 0;
     border-radius: 1.25rem;
-    border: 1px solid ${ColorPalette["gray-450"]};
+    border: 1px solid
+      ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-100"]
+          : ColorPalette["gray-550"]};
     cursor: pointer;
 
     :hover {

@@ -69,7 +69,13 @@ export const StakeEmptyPage: FunctionComponent = observer(() => {
         <Gutter size="2rem" />
 
         <Box paddingX="0.25rem">
-          <Subtitle2 color={ColorPalette["gray-200"]}>
+          <Subtitle2
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-500"]
+                : ColorPalette["gray-200"]
+            }
+          >
             {intl.formatMessage({
               id: "page.stake.empty.subtitle",
             })}

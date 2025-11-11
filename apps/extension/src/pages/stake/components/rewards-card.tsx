@@ -636,11 +636,13 @@ const Styles = {
           : ColorPalette.white
         : ColorPalette["gray-650"]};
 
-    box-shadow: ${(props) =>
-      props.theme.mode === "light" && !props.isNotReady
-        ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
-        : "none"};
     border-radius: 1.25rem;
+    border-width: 0.0625rem;
+    border-style: solid;
+    border-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-100"]
+        : ColorPalette["gray-550"]};
 
     cursor: pointer;
 

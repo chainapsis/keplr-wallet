@@ -70,12 +70,13 @@ const chainSearchFields = [
 
 export const CopyAddressScene: FunctionComponent<{
   close: () => void;
-}> = observer(({ close }) => {
+  initialSearch?: string;
+}> = observer(({ close, initialSearch }) => {
   const { chainStore } = useStore();
 
   const intl = useIntl();
   const theme = useTheme();
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialSearch ?? "");
   const runInSidePanel = isRunningInSidePanel();
 
   const searchRef = useFocusOnMount<HTMLInputElement>();
