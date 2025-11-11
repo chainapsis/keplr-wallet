@@ -1,4 +1,11 @@
-import React, { Fragment, PropsWithChildren, useMemo, useState } from "react";
+import React, {
+  Fragment,
+  PropsWithChildren,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Columns } from "../../../components/column";
 import { Box } from "../../../components/box";
 import { CopyOutlineIcon } from "../../../components/icon";
@@ -30,6 +37,12 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { Button } from "../../../components/button";
 import { useTotalPrices } from "../../../hooks/use-total-prices";
 import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
+import { useSearchParams } from "react-router-dom";
+import {
+  HEADER_ANIMATION_QUERY_KEY,
+  HEADER_ANIMATION_QUERY_VALUE_HIDE,
+  HEADER_ANIMATION_QUERY_VALUE_SHOW,
+} from "../../../utils/header-animation";
 
 const Styles = {
   NameContainer: styled.div`
@@ -74,6 +87,123 @@ const NameHoverArea = ({
   );
 };
 
+const useHeaderTotalPriceVisibility = ({
+  forcedIsShowTotalPrice,
+}: {
+  forcedIsShowTotalPrice?: boolean;
+}): boolean => {
+  const { uiConfigStore } = useStore();
+  const location = useLocation();
+  const isNotMainPage = location.pathname !== "/";
+  const [searchParams] = useSearchParams();
+  const isHeaderAnimationTriggerShow =
+    searchParams.get(HEADER_ANIMATION_QUERY_KEY) ===
+    HEADER_ANIMATION_QUERY_VALUE_SHOW;
+  const isHeaderAnimationTriggerHide =
+    searchParams.get(HEADER_ANIMATION_QUERY_KEY) ===
+    HEADER_ANIMATION_QUERY_VALUE_HIDE;
+
+  const isPrivacyMode = uiConfigStore.isPrivacyMode;
+
+  // 최종적으로 TotalPrice를 보여주는걸 결정하는 상태
+  const isShowTotalPriceFinally = useMemo(() => {
+    if (isPrivacyMode) {
+      return false;
+    }
+
+    if (forcedIsShowTotalPrice) {
+      return forcedIsShowTotalPrice;
+    }
+
+    return isNotMainPage;
+  }, [forcedIsShowTotalPrice, isNotMainPage, isPrivacyMode]);
+
+  // 해당 상태로 UI상 보여줄지를 결정하기 때문에
+  // 페이지 이동시 show or hide 애니메이션을 위해서 존재함
+  const [isShowTotalPrice, setIsShowTotalPrice] = useState<boolean>(() => {
+    if (isPrivacyMode) {
+      return false;
+    }
+
+    if (isHeaderAnimationTriggerHide) {
+      return true;
+    }
+
+    if (isHeaderAnimationTriggerShow && isShowTotalPriceFinally) {
+      return false;
+    }
+
+    return isShowTotalPriceFinally;
+  });
+  const isAlreadyAnimationRun = useRef<boolean>(false);
+
+  //여기서 어떻게 isShowTotalPrice를 업데이트 할지 결정한다.
+  //기본적으로 isHeaderAnimationTriggerHide가 true이면 isShowTotalPrice가 false -> true 순으로 변경된다.
+  //isHeaderAnimationTriggerShow가 true이면 isShowTotalPrice가 true -> false 순으로 변경된다.
+  //그리고 한번 실행 되고 나면은 isAlreadyAnimationRun을 true로 변경해서
+  //임의의 변경 없이 isShowTotalPriceFinally 상태를 따르도록 한다.
+  useEffect(() => {
+    const resetToBase = () => {
+      isAlreadyAnimationRun.current = false;
+      setIsShowTotalPrice(isShowTotalPriceFinally);
+    };
+
+    if (!isHeaderAnimationTriggerShow && !isHeaderAnimationTriggerHide) {
+      resetToBase();
+      return;
+    }
+
+    if (isHeaderAnimationTriggerHide) {
+      if (isPrivacyMode) {
+        setIsShowTotalPrice(false);
+        return;
+      }
+
+      if (isAlreadyAnimationRun.current) {
+        setIsShowTotalPrice(isShowTotalPriceFinally);
+        return;
+      }
+
+      isAlreadyAnimationRun.current = true;
+      setIsShowTotalPrice(true);
+      const timer = setTimeout(() => {
+        setIsShowTotalPrice(false);
+      }, 0);
+
+      return () => {
+        clearTimeout(timer);
+      };
+    }
+
+    if (!isShowTotalPriceFinally) {
+      setIsShowTotalPrice(false);
+      return;
+    }
+
+    if (isAlreadyAnimationRun.current) {
+      setIsShowTotalPrice(isShowTotalPriceFinally);
+      return;
+    }
+
+    isAlreadyAnimationRun.current = true;
+    setIsShowTotalPrice(false);
+
+    const timer = setTimeout(() => {
+      setIsShowTotalPrice(true);
+    }, 0);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [
+    isHeaderAnimationTriggerShow,
+    isHeaderAnimationTriggerHide,
+    isShowTotalPriceFinally,
+    isPrivacyMode,
+  ]);
+
+  return isShowTotalPrice;
+};
+
 export const MainHeaderLayout = observer<
   PropsWithChildren<
     Pick<
@@ -96,22 +226,12 @@ export const MainHeaderLayout = observer<
     const { uiConfigStore, keyRingStore, chainStore } = useStore();
     const [isOpenAccountSwitchModal, setIsOpenAccountSwitchModal] =
       useState(false);
-    const location = useLocation();
-    const isNotMainPage = location.pathname !== "/";
+
     const intl = useIntl();
     const [isNameHover, setIsNameHover] = useState(false);
-
-    const isShowTotalPrice = (() => {
-      if (uiConfigStore.isPrivacyMode) {
-        return false;
-      }
-
-      if (props.isShowTotalPrice) {
-        return props.isShowTotalPrice;
-      }
-
-      return isNotMainPage;
-    })();
+    const isShowTotalPrice = useHeaderTotalPriceVisibility({
+      forcedIsShowTotalPrice: props.isShowTotalPrice,
+    });
 
     const accountSwitchFloatingModal = useFloating({
       placement: "bottom-start",

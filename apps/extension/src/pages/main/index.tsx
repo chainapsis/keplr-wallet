@@ -55,6 +55,7 @@ import { COMMON_HOVER_OPACITY } from "../../styles/constant";
 import { EmptyStateButtonRow } from "./components/empty-state-button-row";
 import { useNavigate } from "react-router";
 import { useTotalPrices } from "../../hooks/use-total-prices";
+import { appendHeaderAnimationTriggerParam } from "../../utils/header-animation";
 
 export interface ViewToken {
   token: CoinPretty;
@@ -79,7 +80,7 @@ export const MainPage: FunctionComponent<{
     useStore();
 
   const isNotReady = useIsNotReady();
-  // const theme = useTheme();
+  const navigate = useNavigate();
 
   const setIsNotReadyRef = useRef(setIsNotReady);
   setIsNotReadyRef.current = setIsNotReady;
@@ -366,6 +367,7 @@ export const MainPage: FunctionComponent<{
             uiConfigStore={uiConfigStore}
             stakedTotalPrice={stakedTotalPrice}
             stakedPercentage={stakedPercentage}
+            preventHeaderAnimation={!isTotalPriceVisible}
           />
         )}
       </Box>
@@ -379,6 +381,11 @@ export const MainPage: FunctionComponent<{
                 isNotReady={isNotReady}
                 onClickDeposit={() => {
                   setIsOpenDepositModal(true);
+                }}
+                onClickSwapBtn={() => {
+                  !isTotalPriceVisible
+                    ? navigate(`/ibc-swap`)
+                    : navigate(appendHeaderAnimationTriggerParam(`/ibc-swap`));
                 }}
               />
               <Gutter size="0.75rem" />
@@ -838,11 +845,13 @@ function StakedBalanceTitle({
   uiConfigStore,
   stakedTotalPrice,
   stakedPercentage,
+  preventHeaderAnimation,
 }: {
   isNotReady: boolean;
   uiConfigStore: UIConfigStore;
   stakedTotalPrice: PricePretty | undefined;
   stakedPercentage: number;
+  preventHeaderAnimation: boolean;
 }) {
   const intl = useIntl();
   const navigate = useNavigate();
@@ -853,7 +862,11 @@ function StakedBalanceTitle({
         paddingY="0.125rem"
         cursor="pointer"
         onClick={() => {
-          navigate("/stake");
+          navigate(
+            preventHeaderAnimation
+              ? "/stake"
+              : appendHeaderAnimationTriggerParam("/stake")
+          );
         }}
       >
         <XAxis gap="0.25rem" alignY="center">

@@ -19,143 +19,146 @@ export const SpendableCard: FunctionComponent<{
   spendableTotalPrice: PricePretty | undefined;
   isNotReady?: boolean;
   onClickDeposit: () => void;
-}> = observer(({ spendableTotalPrice, isNotReady, onClickDeposit }) => {
-  const { hugeQueriesStore, uiConfigStore } = useStore();
-  const navigate = useNavigate();
-  const theme = useTheme();
-  const intl = useIntl();
+  onClickSwapBtn: () => void;
+}> = observer(
+  ({ spendableTotalPrice, isNotReady, onClickDeposit, onClickSwapBtn }) => {
+    const { hugeQueriesStore, uiConfigStore } = useStore();
+    const navigate = useNavigate();
+    const theme = useTheme();
+    const intl = useIntl();
 
-  const balances = hugeQueriesStore.getAllBalances({
-    allowIBCToken: true,
-  });
-  const hasBalance = useMemo(() => {
-    return balances.find((bal) => bal.token.toDec().gt(new Dec(0))) != null;
-  }, [balances]);
+    const balances = hugeQueriesStore.getAllBalances({
+      allowIBCToken: true,
+    });
+    const hasBalance = useMemo(() => {
+      return balances.find((bal) => bal.token.toDec().gt(new Dec(0))) != null;
+    }, [balances]);
 
-  return (
-    <Fragment>
-      <Box
-        backgroundColor={
-          theme.mode === "light"
-            ? ColorPalette["gray-10"]
-            : "rgba(21, 21, 23, 0.8)"
-        }
-        borderColor={
-          theme.mode === "light"
-            ? "rgba(220, 220, 227, 0.8)"
-            : ColorPalette["gray-600"]
-        }
-        borderWidth="1px"
-        borderRadius="1.5rem"
-        padding="1rem"
-      >
-        <Box>
-          <Skeleton isNotReady={isNotReady} verticalBleed="2px">
-            <Body3
-              color={
-                theme.mode === "light"
-                  ? ColorPalette["gray-300"]
-                  : ColorPalette["gray-200"]
-              }
-            >
-              {intl.formatMessage({
-                id: "page.main.components.spendable-card.title",
-              })}
-            </Body3>
-          </Skeleton>
+    return (
+      <Fragment>
+        <Box
+          backgroundColor={
+            theme.mode === "light"
+              ? ColorPalette["gray-10"]
+              : "rgba(21, 21, 23, 0.8)"
+          }
+          borderColor={
+            theme.mode === "light"
+              ? "rgba(220, 220, 227, 0.8)"
+              : ColorPalette["gray-600"]
+          }
+          borderWidth="1px"
+          borderRadius="1.5rem"
+          padding="1rem"
+        >
+          <Box>
+            <Skeleton isNotReady={isNotReady} verticalBleed="2px">
+              <Body3
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-300"]
+                    : ColorPalette["gray-200"]
+                }
+              >
+                {intl.formatMessage({
+                  id: "page.main.components.spendable-card.title",
+                })}
+              </Body3>
+            </Skeleton>
+          </Box>
+
+          <Gutter size="0.5rem" />
+
+          <Box>
+            <Skeleton isNotReady={isNotReady}>
+              <Subtitle2
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-700"]
+                    : ColorPalette["white"]
+                }
+              >
+                {spendableTotalPrice
+                  ? uiConfigStore.hideStringIfPrivacyMode(
+                      spendableTotalPrice.toString(),
+                      4
+                    )
+                  : "-"}
+              </Subtitle2>
+            </Skeleton>
+          </Box>
+
+          <Gutter size="1.5rem" />
+
+          <XAxis gap="0.375rem" alignY="center">
+            <Skeleton type="button" isNotReady={isNotReady}>
+              <EllipseButton
+                text={intl.formatMessage({
+                  id: "page.main.components.buttons.deposit-button",
+                })}
+                icon={
+                  <ArrowDownLeftIcon
+                    width="0.625rem"
+                    height="0.625rem"
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["blue-400"]
+                        : ColorPalette["blue-300"]
+                    }
+                  />
+                }
+                disabled={!hasBalance}
+                onClick={onClickDeposit}
+              />
+            </Skeleton>
+
+            <Skeleton type="button" isNotReady={isNotReady}>
+              <EllipseButton
+                text={intl.formatMessage({
+                  id: "page.main.components.buttons.send-button",
+                })}
+                icon={
+                  <ArrowUpRightIcon
+                    width="0.625rem"
+                    height="0.625rem"
+                    color={ColorPalette["blue-300"]}
+                  />
+                }
+                disabled={!hasBalance}
+                onClick={() => {
+                  navigate(
+                    `/send/select-asset?navigateReplace=true&navigateTo=${encodeURIComponent(
+                      "/send?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}"
+                    )}`
+                  );
+                }}
+              />
+            </Skeleton>
+
+            <Skeleton type="button" isNotReady={isNotReady} verticalBleed="2px">
+              <EllipseButton
+                text={intl.formatMessage({
+                  id: "page.main.components.buttons.swap-button",
+                })}
+                icon={
+                  <ArrowSwapIcon
+                    width="1rem"
+                    height="1rem"
+                    color={ColorPalette["blue-300"]}
+                  />
+                }
+                disabled={!hasBalance}
+                onClick={() => {
+                  onClickSwapBtn();
+                }}
+              />
+            </Skeleton>
+          </XAxis>
         </Box>
-
-        <Gutter size="0.5rem" />
-
-        <Box>
-          <Skeleton isNotReady={isNotReady}>
-            <Subtitle2
-              color={
-                theme.mode === "light"
-                  ? ColorPalette["gray-700"]
-                  : ColorPalette["white"]
-              }
-            >
-              {spendableTotalPrice
-                ? uiConfigStore.hideStringIfPrivacyMode(
-                    spendableTotalPrice.toString(),
-                    4
-                  )
-                : "-"}
-            </Subtitle2>
-          </Skeleton>
-        </Box>
-
-        <Gutter size="1.5rem" />
-
-        <XAxis gap="0.375rem" alignY="center">
-          <Skeleton type="button" isNotReady={isNotReady}>
-            <EllipseButton
-              text={intl.formatMessage({
-                id: "page.main.components.buttons.deposit-button",
-              })}
-              icon={
-                <ArrowDownLeftIcon
-                  width="0.625rem"
-                  height="0.625rem"
-                  color={
-                    theme.mode === "light"
-                      ? ColorPalette["blue-400"]
-                      : ColorPalette["blue-300"]
-                  }
-                />
-              }
-              disabled={!hasBalance}
-              onClick={onClickDeposit}
-            />
-          </Skeleton>
-
-          <Skeleton type="button" isNotReady={isNotReady}>
-            <EllipseButton
-              text={intl.formatMessage({
-                id: "page.main.components.buttons.send-button",
-              })}
-              icon={
-                <ArrowUpRightIcon
-                  width="0.625rem"
-                  height="0.625rem"
-                  color={ColorPalette["blue-300"]}
-                />
-              }
-              disabled={!hasBalance}
-              onClick={() => {
-                navigate(
-                  `/send/select-asset?navigateReplace=true&navigateTo=${encodeURIComponent(
-                    "/send?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}"
-                  )}`
-                );
-              }}
-            />
-          </Skeleton>
-
-          <Skeleton type="button" isNotReady={isNotReady} verticalBleed="2px">
-            <EllipseButton
-              text={intl.formatMessage({
-                id: "page.main.components.buttons.swap-button",
-              })}
-              icon={
-                <ArrowSwapIcon
-                  width="1rem"
-                  height="1rem"
-                  color={ColorPalette["blue-300"]}
-                />
-              }
-              disabled={!hasBalance}
-              onClick={() => {
-                navigate(`/ibc-swap`);
-              }}
-            />
-          </Skeleton>
-        </XAxis>
-      </Box>
-    </Fragment>
-  );
-});
+      </Fragment>
+    );
+  }
+);
 
 const EllipseButton: FunctionComponent<{
   onClick: () => void;

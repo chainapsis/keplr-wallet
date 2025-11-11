@@ -7,6 +7,9 @@ import { YAxis } from "./components/axis";
 import { Caption2 } from "./components/typography";
 import { Box } from "./components/box";
 import { Tooltip } from "./components/tooltip";
+import { appendHeaderAnimationTriggerParam } from "./utils/header-animation";
+import { useStore } from "./stores";
+import { observer } from "mobx-react-lite";
 
 export const BottomTabsHeightRem = "3.75rem";
 
@@ -33,8 +36,9 @@ export const BottomTabsRouteProvider: FunctionComponent<
 
     forceHideBottomTabs?: boolean;
   }>
-> = ({ children, isNotReady, tabs, forceHideBottomTabs }) => {
+> = observer(({ children, isNotReady, tabs, forceHideBottomTabs }) => {
   const location = useLocation();
+  const { uiConfigStore } = useStore();
 
   const theme = useTheme();
 
@@ -100,6 +104,19 @@ export const BottomTabsRouteProvider: FunctionComponent<
           {tabs.map((tab, i) => {
             const disabled = !!tab.disabled;
             const isActive = tab.pathname === location.pathname;
+            const isCurrentMainPath = location.pathname === "/";
+            const targetIsMainPath = tab.pathname === "/";
+
+            const shouldAttachHeaderAnimationParam =
+              (isCurrentMainPath && uiConfigStore.mainPageTotalPriceVisible) ||
+              targetIsMainPath;
+
+            const to = shouldAttachHeaderAnimationParam
+              ? appendHeaderAnimationTriggerParam(
+                  tab.pathname,
+                  targetIsMainPath ? "hide" : "show"
+                )
+              : tab.pathname;
 
             return (
               <Box
@@ -109,11 +126,7 @@ export const BottomTabsRouteProvider: FunctionComponent<
                   width: "1px",
                 }}
               >
-                <LinkComp
-                  pathname={tab.pathname}
-                  disabled={disabled}
-                  tooltip={tab.tooltip}
-                >
+                <LinkComp disabled={disabled} tooltip={tab.tooltip} to={to}>
                   <div
                     style={{
                       position: "relative",
@@ -193,20 +206,20 @@ export const BottomTabsRouteProvider: FunctionComponent<
       ) : null}
     </div>
   );
-};
+});
 
 const LinkComp: FunctionComponent<
   PropsWithChildren<{
-    pathname: string;
     disabled: boolean;
     tooltip?: string;
+    to: string;
   }>
-> = ({ children, pathname, disabled, tooltip }) => {
+> = ({ children, disabled, tooltip, to }) => {
   if (!disabled) {
     return (
       <Tooltip content={tooltip}>
         <Link
-          to={pathname}
+          to={to}
           style={{
             textDecoration: "none",
           }}

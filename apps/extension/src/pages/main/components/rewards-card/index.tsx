@@ -17,6 +17,7 @@ import { useNavigate } from "react-router";
 import { LoadingIcon } from "../../../../components/icon";
 import { IconProps } from "../../../../components/icon/types";
 import styled, { useTheme } from "styled-components";
+import { appendHeaderAnimationTriggerParam } from "../../../../utils/header-animation";
 
 export const RewardsCard: FunctionComponent<{
   isNotReady?: boolean;
@@ -72,7 +73,10 @@ export const RewardsCard: FunctionComponent<{
             isKeystone ||
             claimAllIsLoading ||
             (claimAllIsCompleted && count >= 1)
-          ? () => navigate("/stake?intitialExpand=true")
+          ? () =>
+              navigate(
+                appendHeaderAnimationTriggerParam("/stake?intitialExpand=true")
+              )
           : claimAll
       }
     >
