@@ -78,6 +78,7 @@ import {
 import { APP_PORT } from "@keplr-wallet/router";
 import { FiatCurrency } from "@keplr-wallet/types";
 import { UIConfigStore } from "./ui-config";
+import { MainHeaderAnimationStore } from "./main-header-animation";
 import {
   AnalyticsStore,
   NoopAnalyticsClient,
@@ -128,6 +129,7 @@ getSidePanelWindowId();
 
 export class RootStore {
   public readonly uiConfigStore: UIConfigStore;
+  public readonly mainHeaderAnimationStore: MainHeaderAnimationStore;
 
   public readonly keyRingStore: KeyRingStore;
   public readonly chainStore: ChainStore;
@@ -232,6 +234,8 @@ export class RootStore {
     const interactionAddonService =
       new InteractionAddon.InteractionAddonService();
     InteractionAddon.init(router, interactionAddonService);
+
+    this.mainHeaderAnimationStore = new MainHeaderAnimationStore();
 
     this.permissionManagerStore = new PermissionManagerStore(
       new InExtensionMessageRequester()

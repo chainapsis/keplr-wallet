@@ -3,7 +3,6 @@ import React, {
   PropsWithChildren,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from "react";
 import { Columns } from "../../../components/column";
@@ -37,12 +36,6 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { Button } from "../../../components/button";
 import { useTotalPrices } from "../../../hooks/use-total-prices";
 import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
-import { useSearchParams } from "react-router-dom";
-import {
-  HEADER_ANIMATION_QUERY_KEY,
-  HEADER_ANIMATION_QUERY_VALUE_HIDE,
-  HEADER_ANIMATION_QUERY_VALUE_SHOW,
-} from "../../../utils/header-animation";
 
 const Styles = {
   NameContainer: styled.div`
@@ -92,29 +85,19 @@ const useHeaderTotalPriceVisibility = ({
 }: {
   forcedIsShowTotalPrice?: boolean;
 }): boolean => {
-  const { uiConfigStore } = useStore();
+  const { uiConfigStore, mainHeaderAnimationStore } = useStore();
   const location = useLocation();
   const isNotMainPage = location.pathname !== "/";
-  const [searchParams] = useSearchParams();
-  const isHeaderAnimationTriggerShow =
-    searchParams.get(HEADER_ANIMATION_QUERY_KEY) ===
-    HEADER_ANIMATION_QUERY_VALUE_SHOW;
-  const isHeaderAnimationTriggerHide =
-    searchParams.get(HEADER_ANIMATION_QUERY_KEY) ===
-    HEADER_ANIMATION_QUERY_VALUE_HIDE;
-
   const isPrivacyMode = uiConfigStore.isPrivacyMode;
+  const trigger = mainHeaderAnimationStore.triggerMainHeaderPriceAnimation;
 
-  // 최종적으로 TotalPrice를 보여주는걸 결정하는 상태
   const isShowTotalPriceFinally = useMemo(() => {
     if (isPrivacyMode) {
       return false;
     }
-
     if (forcedIsShowTotalPrice) {
       return forcedIsShowTotalPrice;
     }
-
     return isNotMainPage;
   }, [forcedIsShowTotalPrice, isNotMainPage, isPrivacyMode]);
 
@@ -124,83 +107,60 @@ const useHeaderTotalPriceVisibility = ({
     if (isPrivacyMode) {
       return false;
     }
-
-    if (isHeaderAnimationTriggerHide) {
+    if (trigger === "hide") {
       return true;
     }
-
-    if (isHeaderAnimationTriggerShow && isShowTotalPriceFinally) {
+    if (trigger === "show" && isShowTotalPriceFinally) {
       return false;
     }
-
     return isShowTotalPriceFinally;
   });
-  const isAlreadyAnimationRun = useRef<boolean>(false);
 
   //여기서 어떻게 isShowTotalPrice를 업데이트 할지 결정한다.
-  //기본적으로 isHeaderAnimationTriggerHide가 true이면 isShowTotalPrice가 false -> true 순으로 변경된다.
-  //isHeaderAnimationTriggerShow가 true이면 isShowTotalPrice가 true -> false 순으로 변경된다.
-  //그리고 한번 실행 되고 나면은 isAlreadyAnimationRun을 true로 변경해서
-  //임의의 변경 없이 isShowTotalPriceFinally 상태를 따르도록 한다.
+  //기본적으로 trigger가 hide이면 isShowTotalPrice가 true -> false 순으로 변경된다.
+  //trigger가 show이고 isShowTotalPriceFinally가 true이면 isShowTotalPrice가 false -> true 순으로 변경된다.
+  //그리고 한번 실행 되고 나면은임의의 변경 없이 isShowTotalPriceFinally 상태를 따르도록 한다.
   useEffect(() => {
-    const resetToBase = () => {
-      isAlreadyAnimationRun.current = false;
+    if (trigger === "not-triggered") {
       setIsShowTotalPrice(isShowTotalPriceFinally);
-    };
-
-    if (!isHeaderAnimationTriggerShow && !isHeaderAnimationTriggerHide) {
-      resetToBase();
       return;
     }
 
-    if (isHeaderAnimationTriggerHide) {
-      if (isPrivacyMode) {
-        setIsShowTotalPrice(false);
-        return;
-      }
+    if (isPrivacyMode) {
+      setIsShowTotalPrice(false);
+      mainHeaderAnimationStore.resetTriggerForMainHeaderPrice();
+      return;
+    }
 
-      if (isAlreadyAnimationRun.current) {
-        setIsShowTotalPrice(isShowTotalPriceFinally);
-        return;
-      }
-
-      isAlreadyAnimationRun.current = true;
-      setIsShowTotalPrice(true);
+    if (trigger === "hide") {
       const timer = setTimeout(() => {
         setIsShowTotalPrice(false);
+        mainHeaderAnimationStore.resetTriggerForMainHeaderPrice();
       }, 0);
-
       return () => {
         clearTimeout(timer);
       };
     }
 
     if (!isShowTotalPriceFinally) {
-      setIsShowTotalPrice(false);
-      return;
-    }
-
-    if (isAlreadyAnimationRun.current) {
       setIsShowTotalPrice(isShowTotalPriceFinally);
+      mainHeaderAnimationStore.resetTriggerForMainHeaderPrice();
       return;
     }
-
-    isAlreadyAnimationRun.current = true;
-    setIsShowTotalPrice(false);
 
     const timer = setTimeout(() => {
       setIsShowTotalPrice(true);
+      mainHeaderAnimationStore.resetTriggerForMainHeaderPrice();
     }, 0);
     return () => {
       clearTimeout(timer);
     };
   }, [
-    isHeaderAnimationTriggerShow,
-    isHeaderAnimationTriggerHide,
+    trigger,
     isShowTotalPriceFinally,
     isPrivacyMode,
+    mainHeaderAnimationStore,
   ]);
-
   return isShowTotalPrice;
 };
 

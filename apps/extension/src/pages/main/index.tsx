@@ -55,7 +55,6 @@ import { COMMON_HOVER_OPACITY } from "../../styles/constant";
 import { EmptyStateButtonRow } from "./components/empty-state-button-row";
 import { useNavigate } from "react-router";
 import { useTotalPrices } from "../../hooks/use-total-prices";
-import { appendHeaderAnimationTriggerParam } from "../../utils/header-animation";
 
 export interface ViewToken {
   token: CoinPretty;
@@ -76,8 +75,13 @@ export const useIsNotReady = () => {
 export const MainPage: FunctionComponent<{
   setIsNotReady: (isNotReady: boolean) => void;
 }> = observer(({ setIsNotReady }) => {
-  const { hugeQueriesStore, uiConfigStore, keyRingStore, priceStore } =
-    useStore();
+  const {
+    hugeQueriesStore,
+    uiConfigStore,
+    keyRingStore,
+    priceStore,
+    mainHeaderAnimationStore,
+  } = useStore();
 
   const isNotReady = useIsNotReady();
   const navigate = useNavigate();
@@ -184,8 +188,8 @@ export const MainPage: FunctionComponent<{
   const [isTotalPriceVisible, setIsTotalPriceVisible] = useState(true);
 
   useEffect(() => {
-    uiConfigStore.setMainPageTotalPriceVisible(isTotalPriceVisible);
-  }, [isTotalPriceVisible, uiConfigStore]);
+    mainHeaderAnimationStore.setMainPageTotalPriceVisible(isTotalPriceVisible);
+  }, [isTotalPriceVisible, mainHeaderAnimationStore]);
 
   const animatedPrivacyModeHover = useSpringValue(0, {
     config: defaultSpringConfig,
@@ -387,9 +391,12 @@ export const MainPage: FunctionComponent<{
                   setIsOpenDepositModal(true);
                 }}
                 onClickSwapBtn={() => {
-                  !isTotalPriceVisible
-                    ? navigate(`/ibc-swap`)
-                    : navigate(appendHeaderAnimationTriggerParam(`/ibc-swap`));
+                  if (!isTotalPriceVisible) {
+                    navigate(`/ibc-swap`);
+                    return;
+                  }
+                  mainHeaderAnimationStore.triggerShowForMainHeaderPrice();
+                  navigate(`/ibc-swap`);
                 }}
               />
               <Gutter size="0.75rem" />
@@ -859,6 +866,7 @@ function StakedBalanceTitle({
 }) {
   const intl = useIntl();
   const navigate = useNavigate();
+  const { mainHeaderAnimationStore } = useStore();
 
   return (
     <Skeleton isNotReady={isNotReady}>
@@ -866,11 +874,10 @@ function StakedBalanceTitle({
         paddingY="0.125rem"
         cursor="pointer"
         onClick={() => {
-          navigate(
-            preventHeaderAnimation
-              ? "/stake"
-              : appendHeaderAnimationTriggerParam("/stake")
-          );
+          if (!preventHeaderAnimation) {
+            mainHeaderAnimationStore.triggerShowForMainHeaderPrice();
+          }
+          navigate("/stake");
         }}
       >
         <XAxis gap="0.25rem" alignY="center">

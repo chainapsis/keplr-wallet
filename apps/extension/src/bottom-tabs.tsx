@@ -7,7 +7,6 @@ import { YAxis } from "./components/axis";
 import { Caption2 } from "./components/typography";
 import { Box } from "./components/box";
 import { Tooltip } from "./components/tooltip";
-import { appendHeaderAnimationTriggerParam } from "./utils/header-animation";
 import { useStore } from "./stores";
 import { observer } from "mobx-react-lite";
 
@@ -38,7 +37,7 @@ export const BottomTabsRouteProvider: FunctionComponent<
   }>
 > = observer(({ children, isNotReady, tabs, forceHideBottomTabs }) => {
   const location = useLocation();
-  const { uiConfigStore } = useStore();
+  const { mainHeaderAnimationStore } = useStore();
 
   const theme = useTheme();
 
@@ -107,16 +106,22 @@ export const BottomTabsRouteProvider: FunctionComponent<
             const isCurrentMainPath = location.pathname === "/";
             const targetIsMainPath = tab.pathname === "/";
 
-            const shouldAttachHeaderAnimationParam =
-              (isCurrentMainPath && uiConfigStore.mainPageTotalPriceVisible) ||
-              targetIsMainPath;
-
-            const to = shouldAttachHeaderAnimationParam
-              ? appendHeaderAnimationTriggerParam(
-                  tab.pathname,
-                  targetIsMainPath ? "hide" : "show"
-                )
-              : tab.pathname;
+            const to = tab.pathname;
+            const handleTabClick = () => {
+              if (disabled || isActive) {
+                return;
+              }
+              if (targetIsMainPath) {
+                mainHeaderAnimationStore.triggerHideForMainHeaderPrice();
+                return;
+              }
+              if (
+                isCurrentMainPath &&
+                mainHeaderAnimationStore.mainPageTotalPriceVisible
+              ) {
+                mainHeaderAnimationStore.triggerShowForMainHeaderPrice();
+              }
+            };
 
             return (
               <Box
@@ -126,7 +131,12 @@ export const BottomTabsRouteProvider: FunctionComponent<
                   width: "1px",
                 }}
               >
-                <LinkComp disabled={disabled} tooltip={tab.tooltip} to={to}>
+                <LinkComp
+                  disabled={disabled}
+                  tooltip={tab.tooltip}
+                  to={to}
+                  onClick={handleTabClick}
+                >
                   <div
                     style={{
                       position: "relative",
@@ -213,13 +223,19 @@ const LinkComp: FunctionComponent<
     disabled: boolean;
     tooltip?: string;
     to: string;
+    onClick?: () => void;
   }>
-> = ({ children, disabled, tooltip, to }) => {
+> = ({ children, disabled, tooltip, to, onClick }) => {
   if (!disabled) {
     return (
       <Tooltip content={tooltip}>
         <Link
           to={to}
+          onClick={() => {
+            if (onClick) {
+              onClick();
+            }
+          }}
           style={{
             textDecoration: "none",
           }}
