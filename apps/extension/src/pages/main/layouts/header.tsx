@@ -47,7 +47,6 @@ import {
 const Styles = {
   NameContainer: styled.div`
     display: flex;
-    cursor: pointer;
     align-items: center;
     justify-content: center;
   `,
@@ -56,6 +55,7 @@ const Styles = {
     display: flex;
     flex-direction: row;
     transition: opacity 0.1s ease-in-out;
+    cursor: pointer;
 
     ${({ isHover }) =>
       isHover &&
@@ -288,9 +288,6 @@ export const MainHeaderLayout = observer<
                 <XAxis alignY="center">
                   <Styles.NameContainer
                     ref={accountSwitchFloatingModal.refs.setReference}
-                    onClick={() => {
-                      setIsOpenAccountSwitchModal(true);
-                    }}
                   >
                     <NameHoverArea
                       onHover={setIsNameHover}
