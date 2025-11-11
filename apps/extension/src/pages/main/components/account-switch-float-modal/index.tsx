@@ -34,6 +34,7 @@ import {
 } from "@floating-ui/react-dom";
 import { FloatModal } from "../../../../components/float-modal";
 import { useSearchKeyInfos } from "../../../../hooks/use-search-key-infos";
+import { useGetAllSortedKeyInfos } from "../../../../hooks/use-key-ring-sort";
 
 const Styles = {
   ModalContainer: styled.div<{
@@ -397,6 +398,7 @@ export const AccountSwitchFloatModal = observer(
     }, [closeModal, setSearchText]);
 
     const keyInfos = searchedKeyInfos ?? keyRingStore.keyInfos;
+    const sortedKeyInfos = useGetAllSortedKeyInfos(keyInfos);
     const shouldShowSearch = keyRingStore.keyInfos.length >= 7;
 
     useEffect(() => {
@@ -421,12 +423,7 @@ export const AccountSwitchFloatModal = observer(
           setAddressMap(addressMap);
         }
       })();
-    }, [
-      chainStore,
-      keyInfos,
-      uiConfigStore.addressBookConfig,
-      uiConfigStore.icnsInfo,
-    ]);
+    }, [chainStore, uiConfigStore.addressBookConfig, uiConfigStore.icnsInfo]);
 
     const handleAccountSelect = async (keyInfo: KeyInfo) => {
       if (keyInfo.id === keyRingStore.selectedKeyInfo?.id) {
@@ -483,7 +480,7 @@ export const AccountSwitchFloatModal = observer(
                 flexDirection: "column",
               }}
             >
-              {keyInfos.map((keyInfo) => {
+              {sortedKeyInfos.map((keyInfo) => {
                 const isSelected =
                   keyInfo.id === keyRingStore.selectedKeyInfo?.id;
                 return (
