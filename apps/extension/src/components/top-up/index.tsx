@@ -1,12 +1,14 @@
 import { IFeeConfig } from "@keplr-wallet/hooks";
-import React from "react";
+import React, { FunctionComponent } from "react";
 import { Subtitle3, Subtitle4 } from "../typography";
 import { ColorPalette } from "../../styles";
 import { useStore } from "../../stores";
 import { useTheme } from "styled-components";
 import { FormattedMessage } from "react-intl";
 
-export const FeeCoverageDescription = () => {
+export const FeeCoverageDescription: FunctionComponent<{
+  isTopUpAvailable: boolean;
+}> = ({ isTopUpAvailable }) => {
   return (
     <div
       style={{
@@ -22,10 +24,14 @@ export const FeeCoverageDescription = () => {
         style={{ textAlign: "center" }}
       >
         <FormattedMessage id="components.top-up.description.no-fees" />
-        <br />
-        <span style={{ color: ColorPalette["blue-500"] }}>
-          <FormattedMessage id="components.top-up.description.we-cover" />
-        </span>
+        {isTopUpAvailable ? (
+          <React.Fragment>
+            <br />
+            <span style={{ color: ColorPalette["blue-500"] }}>
+              <FormattedMessage id="components.top-up.description.we-cover" />
+            </span>
+          </React.Fragment>
+        ) : null}
       </Subtitle4>
     </div>
   );
@@ -83,7 +89,23 @@ export const FeeCoverageBox = ({ feeConfig }: { feeConfig: IFeeConfig }) => {
           >
             <FormattedMessage id="components.top-up.tx-fee" />
           </Subtitle3>
-
+          <Subtitle3
+            color={
+              ColorPalette[theme.mode === "light" ? "blue-500" : "blue-400"]
+            }
+          >
+            <FormattedMessage id="components.top-up.covered-by-keplr" /> ✨
+          </Subtitle3>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "flex-end",
+            alignItems: "center",
+            width: "100%",
+          }}
+        >
           <Subtitle3
             style={{
               textDecoration: "line-through",
@@ -93,7 +115,9 @@ export const FeeCoverageBox = ({ feeConfig }: { feeConfig: IFeeConfig }) => {
             <span
               style={{
                 color:
-                  ColorPalette[theme.mode === "light" ? "gray-600" : "gray-50"],
+                  ColorPalette[
+                    theme.mode === "light" ? "gray-600" : "gray-200"
+                  ],
               }}
             >
               {feeConfig.fees[0]?.toString()}{" "}
@@ -101,30 +125,6 @@ export const FeeCoverageBox = ({ feeConfig }: { feeConfig: IFeeConfig }) => {
             <span style={{ color: ColorPalette["gray-300"] }}>
               ({price?.toString()})
             </span>
-          </Subtitle3>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            width: "100%",
-          }}
-        >
-          <Subtitle3
-            color={
-              ColorPalette[theme.mode === "light" ? "gray-500" : "gray-200"]
-            }
-          >
-            <FormattedMessage id="components.top-up.covered-by-keplr" />
-          </Subtitle3>
-          <Subtitle3
-            color={
-              ColorPalette[theme.mode === "light" ? "gray-500" : "gray-50"]
-            }
-          >
-            0 {feeConfig.fees[0]?.denom}
           </Subtitle3>
         </div>
       </div>

@@ -3,7 +3,6 @@ import { observer } from "mobx-react-lite";
 import styled, { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
 import { Subtitle1 } from "../../../../components/typography";
-
 import { Box } from "../../../../components/box";
 import { useStore } from "../../../../stores";
 import { FormattedMessage } from "react-intl";

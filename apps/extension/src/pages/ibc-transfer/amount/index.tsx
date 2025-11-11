@@ -14,6 +14,8 @@ import {
 import { MemoInput } from "../../../components/input/memo-input";
 import { FeeControl } from "../../../components/input/fee-control";
 import { useIntl } from "react-intl";
+import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
+import { FeeCoverageDescription } from "../../../components/top-up";
 
 export const IBCTransferAmountView: FunctionComponent<{
   amountConfig: IAmountConfig;
@@ -22,6 +24,9 @@ export const IBCTransferAmountView: FunctionComponent<{
   memoConfig: IMemoConfig;
   gasConfig: IGasConfig;
   gasSimulator?: IGasSimulator;
+
+  shouldTopUp: boolean;
+  isTopUpAvailable: boolean;
 }> = observer(
   ({
     amountConfig,
@@ -30,6 +35,9 @@ export const IBCTransferAmountView: FunctionComponent<{
     memoConfig,
     gasConfig,
     gasSimulator,
+
+    shouldTopUp,
+    isTopUpAvailable,
   }) => {
     const intl = useIntl();
 
@@ -51,12 +59,19 @@ export const IBCTransferAmountView: FunctionComponent<{
           />
 
           <div style={{ flex: 1 }} />
-          <FeeControl
-            senderConfig={senderConfig}
-            feeConfig={feeConfig}
-            gasConfig={gasConfig}
-            gasSimulator={gasSimulator}
-          />
+          <VerticalCollapseTransition collapsed={shouldTopUp}>
+            <FeeControl
+              senderConfig={senderConfig}
+              feeConfig={feeConfig}
+              gasConfig={gasConfig}
+              gasSimulator={gasSimulator}
+              disableAutomaticFeeSet={shouldTopUp}
+              shouldTopUp={shouldTopUp}
+            />
+          </VerticalCollapseTransition>
+          <VerticalCollapseTransition collapsed={!shouldTopUp}>
+            <FeeCoverageDescription isTopUpAvailable={isTopUpAvailable} />
+          </VerticalCollapseTransition>
         </Stack>
       </Box>
     );

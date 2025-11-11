@@ -45,15 +45,12 @@ import { autorun } from "mobx";
 import {
   LogAnalyticsEventMsg,
   RecordTxWithSkipSwapMsg,
-  RequestCosmosSignAminoMsg,
-  RequestCosmosSignDirectMsg,
   SendTxAndRecordMsg,
   SendTxAndRecordWithIBCSwapMsg,
 } from "@keplr-wallet/background";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT, Message } from "@keplr-wallet/router";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import Long from "long";
 import { useEffectOnce } from "../../hooks/use-effect-once";
 import { amountToAmbiguousAverage, amountToAmbiguousString } from "../../utils";
 import { Button } from "../../components/button";
@@ -71,6 +68,7 @@ import {
 } from "../earn/utils";
 import { FeeCoverageDescription } from "../../components/top-up";
 import { useTopUp } from "../../hooks/use-topup";
+import { getShouldTopUpSignOptions } from "../../utils/should-top-up-sign-options";
 
 const TextButtonStyles = {
   Container: styled.div`
@@ -192,6 +190,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     }
   }, [isInChainEVMOnly]);
 
+  const [
+    topUpForDisableSubFeeFromFaction,
+    setTopUpForDisableSubFeeFromFaction,
+  ] = useState(false);
   const ibcSwapConfigs = useIBCSwapConfig(
     chainStore,
     queriesStore,
@@ -206,6 +208,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     1_500_000,
     outChainId,
     outCurrency,
+    topUpForDisableSubFeeFromFaction,
     swapFeeBps
   );
   const querySwapFeeBps = queriesStore.simpleQuery.queryGet<{
@@ -867,8 +870,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   const { shouldTopUp, isTopUpAvailable, remainingText } = useTopUp({
     feeConfig: ibcSwapConfigs.feeConfig,
     senderConfig: ibcSwapConfigs.senderConfig,
-    amountConfig: ibcSwapConfigs.amountConfig,
   });
+  useEffect(() => {
+    setTopUpForDisableSubFeeFromFaction(shouldTopUp);
+  }, [shouldTopUp]);
 
   return (
     <MainHeaderLayout
@@ -1084,71 +1089,13 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           try {
             if ("send" in tx) {
               await tx.send(
-                ibcSwapConfigs.feeConfig.toStdFee(),
+                ibcSwapConfigs.feeConfig.topUpStatus.topUpOverrideStdFee ??
+                  ibcSwapConfigs.feeConfig.toStdFee(),
                 ibcSwapConfigs.memoConfig.memo,
                 {
                   preferNoSetFee: true,
                   preferNoSetMemo: false,
-                  ...(shouldTopUp
-                    ? {
-                        signAmino: async (
-                          chainId,
-                          signer,
-                          signDoc,
-                          signOptions
-                        ) => {
-                          const msg = new RequestCosmosSignAminoMsg(
-                            chainId,
-                            signer,
-                            signDoc,
-                            {
-                              ...signOptions,
-                              forceTopUp: true,
-                            }
-                          );
-                          return await new InExtensionMessageRequester().sendMessage(
-                            BACKGROUND_PORT,
-                            msg
-                          );
-                        },
-                        signDirect: async (
-                          chainId,
-                          signer,
-                          signDoc,
-                          signOptions
-                        ) => {
-                          const msg = new RequestCosmosSignDirectMsg(
-                            chainId,
-                            signer,
-                            {
-                              bodyBytes: signDoc.bodyBytes ?? undefined,
-                              authInfoBytes: signDoc.authInfoBytes ?? undefined,
-                              chainId: signDoc.chainId ?? undefined,
-                              accountNumber:
-                                signDoc.accountNumber?.toString() ?? undefined,
-                            },
-                            {
-                              ...signOptions,
-                              forceTopUp: true,
-                            }
-                          );
-                          const response =
-                            await new InExtensionMessageRequester().sendMessage(
-                              BACKGROUND_PORT,
-                              msg
-                            );
-                          return {
-                            ...response,
-                            signed: {
-                              ...response.signed,
-                              accountNumber: Long.fromString(
-                                response.signed.accountNumber
-                              ),
-                            },
-                          };
-                        },
-                      }
-                    : {}),
+                  ...(shouldTopUp ? getShouldTopUpSignOptions() : {}),
 
                   sendTx: async (chainId, tx, mode) => {
                     if (
@@ -2072,19 +2019,14 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             isForEVMTx={isInChainEVMOnly}
             nonceMethod={nonceMethod}
             setNonceMethod={setNonceMethod}
+            shouldTopUp={shouldTopUp}
           />
         </VerticalCollapseTransition>
         <VerticalCollapseTransition collapsed={!shouldTopUp}>
-          <FeeCoverageDescription />
+          <FeeCoverageDescription isTopUpAvailable={isTopUpAvailable} />
         </VerticalCollapseTransition>
 
-        <VerticalCollapseTransition
-          collapsed={
-            shouldTopUp &&
-            ibcSwapConfigs.feeConfig.uiProperties.warning instanceof
-              InsufficientFeeError
-          }
-        >
+        <VerticalCollapseTransition collapsed={shouldTopUp}>
           <WarningGuideBox
             showUSDNWarning={showUSDNWarning}
             showCelestiaWarning={showCelestiaWarning}

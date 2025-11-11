@@ -52,7 +52,6 @@ import {
   ArrowUpIcon,
 } from "../../components/icon";
 import { Styles as AvailableCollapsibleListStyles } from "../../components/collapsible-list";
-import { getTokenSearchResultClickAnalyticsProperties } from "../../analytics-amplitude";
 import { useGroupedTokensMap } from "../../hooks/use-grouped-tokens-map";
 import { useBalanceAnalytics } from "./hooks/use-balance-analytics";
 import { KeyRingCosmosService } from "@keplr-wallet/background";
@@ -901,7 +900,7 @@ const TokensFlatViewScene = observer(
     onMoreTokensClosed: () => void;
     setSearchParams: Dispatch<SetStateAction<URLSearchParams>>;
   }) => {
-    const { uiConfigStore, analyticsAmplitudeStore } = useStore();
+    const { uiConfigStore } = useStore();
 
     const { TokenViewData } = useAllBalances(trimSearch);
 
@@ -918,24 +917,13 @@ const TokensFlatViewScene = observer(
               }
             }}
             lenAlwaysShown={TokenViewData.lenAlwaysShown}
-            items={TokenViewData.balance.map((viewToken, index) => {
+            items={TokenViewData.balance.map((viewToken) => {
               return (
                 <TokenItemWithCopyAddress
                   key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
                   {...getBottomTagInfoProps(viewToken)}
                   viewToken={viewToken}
                   onClick={() => {
-                    if (trimSearch.length > 0) {
-                      analyticsAmplitudeStore.logEvent(
-                        "click_token_item_search_results_available_tab",
-                        getTokenSearchResultClickAnalyticsProperties(
-                          viewToken,
-                          trimSearch,
-                          TokenViewData.balance,
-                          index
-                        )
-                      );
-                    }
                     setSearchParams((prev) => {
                       prev.set("tokenChainId", viewToken.chainInfo.chainId);
                       prev.set(

@@ -29,7 +29,6 @@ import { YAxis } from "../../../components/axis";
 import { StackIcon } from "../../../components/icon/stack";
 import { useSearch } from "../../../hooks/use-search";
 import { ViewToken } from "../../main";
-import { getTokenSearchResultClickAnalyticsProperties } from "../../../analytics-amplitude";
 import { EmptyView } from "../../../components/empty-view";
 
 const Styles = {
@@ -56,12 +55,7 @@ const searchFields = [
 ];
 
 export const SendSelectAssetPage: FunctionComponent = observer(() => {
-  const {
-    hugeQueriesStore,
-    skipQueriesStore,
-    chainStore,
-    analyticsAmplitudeStore,
-  } = useStore();
+  const { hugeQueriesStore, skipQueriesStore, chainStore } = useStore();
   const navigate = useNavigate();
   const intl = useIntl();
   const theme = useTheme();
@@ -251,7 +245,7 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
 
         <Stack>
           {filteredTokens.length > 0 &&
-            filteredTokens.map((viewToken, index) => {
+            filteredTokens.map((viewToken) => {
               const modularChainInfo = chainStore.getModularChain(
                 viewToken.chainInfo.chainId
               );
@@ -273,17 +267,6 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
                   viewToken={viewToken}
                   key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
                   onClick={() => {
-                    if (search.trim().length > 0) {
-                      analyticsAmplitudeStore.logEvent(
-                        "click_token_item_search_results_select_asset_send",
-                        getTokenSearchResultClickAnalyticsProperties(
-                          viewToken,
-                          search,
-                          filteredTokens,
-                          index
-                        )
-                      );
-                    }
                     if (paramNavigateTo) {
                       navigate(
                         paramNavigateTo

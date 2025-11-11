@@ -121,7 +121,6 @@ export class KeplrETCQueriesImpl {
     this.queryTopUpStatus = new ObservableQueryTopUpStatus(
       sharedContext,
       chainId,
-      chainGetter,
       topupBaseURL
     );
   }

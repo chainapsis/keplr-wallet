@@ -1,4 +1,9 @@
-import React, { FunctionComponent, useLayoutEffect, useState } from "react";
+import React, {
+  FunctionComponent,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from "react";
 import { observer } from "mobx-react-lite";
 import {
   IFeeConfig,
@@ -32,6 +37,7 @@ export const SwapFeeInfo: FunctionComponent<{
   isForEVMTx?: boolean;
   nonceMethod?: "pending" | "latest";
   setNonceMethod?: (nonceMethod: "pending" | "latest") => void;
+  shouldTopUp?: boolean;
 }> = observer(
   ({
     senderConfig,
@@ -43,6 +49,7 @@ export const SwapFeeInfo: FunctionComponent<{
     isForEVMTx,
     nonceMethod,
     setNonceMethod,
+    shouldTopUp,
   }) => {
     const { queriesStore, chainStore, priceStore, uiConfigStore } = useStore();
 
@@ -195,6 +202,12 @@ export const SwapFeeInfo: FunctionComponent<{
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
+
+    useEffect(() => {
+      if (shouldTopUp) {
+        setIsModalOpen(false);
+      }
+    }, [shouldTopUp]);
 
     const isShowingEstimatedFee = isForEVMTx && !!gasSimulator.gasEstimated;
 
