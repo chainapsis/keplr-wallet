@@ -8,7 +8,6 @@ import { useStore } from "../../../../stores";
 import { FormattedMessage } from "react-intl";
 import { BuySupportServiceInfo } from "../../../../hooks/use-buy-support-service-infos";
 import { ArrowLeftIcon, LoadingIcon } from "../../../../components/icon";
-import { IconButton } from "../../../../components/icon-button";
 import { Column, Columns } from "../../../../components/column";
 import { SceneTransitionContextBase } from "../../../../components/transition/scene/internal";
 
@@ -62,6 +61,13 @@ const Styles = {
         ? ColorPalette["gray-400"]
         : ColorPalette["gray-10"]};
   `,
+  BackButtonContainer: styled.div`
+    padding: 0.25rem;
+    cursor: pointer;
+    &:hover {
+      opacity: 0.7;
+    }
+  `,
 };
 
 export const BuyCryptoModal: FunctionComponent<{
@@ -76,8 +82,7 @@ export const BuyCryptoModal: FunctionComponent<{
     <Styles.Container>
       {showBackButton ? (
         <Columns sum={1} alignY="center">
-          <IconButton
-            padding="0.25rem"
+          <Styles.BackButtonContainer
             onClick={() => {
               if (sceneTransition) {
                 sceneTransition.pop();
@@ -85,11 +90,6 @@ export const BuyCryptoModal: FunctionComponent<{
                 close();
               }
             }}
-            hoverColor={
-              theme.mode === "light"
-                ? ColorPalette["gray-50"]
-                : ColorPalette["gray-500"]
-            }
           >
             <ArrowLeftIcon
               width="1.5rem"
@@ -100,7 +100,7 @@ export const BuyCryptoModal: FunctionComponent<{
                   : ColorPalette["gray-300"]
               }
             />
-          </IconButton>
+          </Styles.BackButtonContainer>
 
           <Column weight={1} />
 

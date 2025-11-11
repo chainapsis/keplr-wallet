@@ -282,13 +282,13 @@ function BackButton() {
   }
 
   return (
-    <Box cursor="pointer" onClick={() => navigate(-1)}>
+    <Styles.BackButtonContainer onClick={() => navigate(-1)}>
       <ArrowLeftIcon
         width="1.5rem"
         height="1.5rem"
         color={ColorPalette["gray-300"]}
       />
-    </Box>
+    </Styles.BackButtonContainer>
   );
 }
 
@@ -335,6 +335,13 @@ const Styles = {
         props.theme.mode === "light"
           ? ColorPalette["gray-200"]
           : ColorPalette["gray-400"]};
+    }
+  `,
+
+  BackButtonContainer: styled.div`
+    cursor: pointer;
+    &:hover {
+      opacity: 0.7;
     }
   `,
 };

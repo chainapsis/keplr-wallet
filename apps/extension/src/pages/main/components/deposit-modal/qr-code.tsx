@@ -4,7 +4,6 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { useSceneTransition } from "../../../../components/transition";
 import { Column, Columns } from "../../../../components/column";
-import { IconButton } from "../../../../components/icon-button";
 import { ChainImageFallback } from "../../../../components/image";
 import { Gutter } from "../../../../components/gutter";
 import {
@@ -13,7 +12,7 @@ import {
   Subtitle2,
 } from "../../../../components/typography";
 import { ColorPalette } from "../../../../styles";
-import { useTheme } from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { QRCodeSVG } from "qrcode.react";
 import { IconProps } from "../../../../components/icon/types";
 import { YAxis } from "../../../../components/axis";
@@ -142,18 +141,12 @@ export const QRCodeScene: FunctionComponent<{
             : ColorPalette["gray-600"]
         }
       >
-        <Box paddingX="0.5rem" alignY="center">
+        <Box paddingX="0.25rem" alignY="center">
           <Columns sum={2} alignY="center">
-            <IconButton
-              padding="0.25rem"
+            <BackButtonContainer
               onClick={() => {
                 sceneTransition.pop();
               }}
-              hoverColor={
-                theme.mode === "light"
-                  ? ColorPalette["gray-50"]
-                  : ColorPalette["gray-500"]
-              }
             >
               <ArrowLeftIcon
                 width="1.5rem"
@@ -164,7 +157,7 @@ export const QRCodeScene: FunctionComponent<{
                     : ColorPalette["gray-300"]
                 }
               />
-            </IconButton>
+            </BackButtonContainer>
 
             <Column weight={1} />
 
@@ -510,6 +503,14 @@ const AddressDisplay = ({
     </React.Fragment>
   );
 };
+
+const BackButtonContainer = styled.div`
+  padding: 0.25rem;
+  cursor: pointer;
+  &:hover {
+    opacity: 0.7;
+  }
+`;
 
 const CopyIcon = () => {
   return (
