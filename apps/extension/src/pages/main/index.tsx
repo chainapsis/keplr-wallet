@@ -183,6 +183,10 @@ export const MainPage: FunctionComponent<{
   const totalPriceSectionRef = useRef<HTMLDivElement | null>(null);
   const [isTotalPriceVisible, setIsTotalPriceVisible] = useState(true);
 
+  useEffect(() => {
+    uiConfigStore.setMainPageTotalPriceVisible(isTotalPriceVisible);
+  }, [isTotalPriceVisible, uiConfigStore]);
+
   const animatedPrivacyModeHover = useSpringValue(0, {
     config: defaultSpringConfig,
   });

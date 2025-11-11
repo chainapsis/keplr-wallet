@@ -89,6 +89,11 @@ export class UIConfigStore {
   @observable
   protected _fiatCurrency: string = "usd";
 
+  // 조금 이상하지만 하단 탭에서 페이지 이동시 main에서 totalPrice가 보이는지
+  // 아닌지에 따라서 애니메이션 동작이 다르고 해당 상태는 전역에 존재 해야 하기 때문에 설정
+  @observable
+  protected _mainPageTotalPriceVisible: boolean = true;
+
   constructor(
     protected readonly kvStores: {
       kvStore: KVStore;
@@ -379,6 +384,15 @@ export class UIConfigStore {
         locale: "en-US",
       }),
     };
+  }
+
+  get mainPageTotalPriceVisible(): boolean {
+    return this._mainPageTotalPriceVisible;
+  }
+
+  @action
+  setMainPageTotalPriceVisible(isVisible: boolean) {
+    this._mainPageTotalPriceVisible = isVisible;
   }
 
   @action
