@@ -18,6 +18,7 @@ import { XAxis, YAxis } from "../../../components/axis";
 import {
   Body2,
   Caption1,
+  Caption2,
   Subtitle3,
   Subtitle4,
 } from "../../../components/typography";
@@ -36,6 +37,8 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { Button } from "../../../components/button";
 import { useTotalPrices } from "../../../hooks/use-total-prices";
 import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
+import { Image } from "../../../components/image";
+import { useGetIcnsName } from "../../../hooks/use-get-icns-name";
 
 const Styles = {
   NameContainer: styled.div`
@@ -116,10 +119,10 @@ const useHeaderTotalPriceVisibility = ({
     return isShowTotalPriceFinally;
   });
 
-  //여기서 어떻게 isShowTotalPrice를 업데이트 할지 결정한다.
-  //기본적으로 trigger가 hide이면 isShowTotalPrice가 true -> false 순으로 변경된다.
-  //trigger가 show이고 isShowTotalPriceFinally가 true이면 isShowTotalPrice가 false -> true 순으로 변경된다.
-  //그리고 한번 실행 되고 나면은임의의 변경 없이 isShowTotalPriceFinally 상태를 따르도록 한다.
+  // 여기서 어떻게 isShowTotalPrice를 업데이트 할지 결정한다.
+  // 기본적으로 trigger가 hide이면 isShowTotalPrice가 true -> false 순으로 변경된다.
+  // trigger가 show이고 isShowTotalPriceFinally가 true이면 isShowTotalPrice가 false -> true 순으로 변경된다.
+  // 그리고 한번 실행 되고 나면 임의의 변경 없이 isShowTotalPriceFinally 상태를 따르도록 한다.
   useEffect(() => {
     if (trigger === "not-triggered") {
       setIsShowTotalPrice(isShowTotalPriceFinally);
@@ -183,7 +186,8 @@ export const MainHeaderLayout = observer<
   (props) => {
     const { children, ...otherProps } = props;
 
-    const { uiConfigStore, keyRingStore, chainStore } = useStore();
+    const { uiConfigStore, keyRingStore, chainStore, accountStore } =
+      useStore();
     const [isOpenAccountSwitchModal, setIsOpenAccountSwitchModal] =
       useState(false);
 
@@ -192,6 +196,12 @@ export const MainHeaderLayout = observer<
     const isShowTotalPrice = useHeaderTotalPriceVisibility({
       forcedIsShowTotalPrice: props.isShowTotalPrice,
     });
+
+    const icnsPrimaryName = useGetIcnsName(
+      uiConfigStore.icnsInfo?.chainId
+        ? accountStore.getAccount(uiConfigStore.icnsInfo.chainId).bech32Address
+        : undefined
+    );
 
     const accountSwitchFloatingModal = useFloating({
       placement: "bottom-start",
@@ -267,23 +277,48 @@ export const MainHeaderLayout = observer<
                             paddingRight: "1.75rem",
                           }}
                         >
-                          <NameHoverArea
-                            onHover={setIsNameHover}
-                            isHover={isNameHover}
-                            onClick={() => {
-                              setIsOpenAccountSwitchModal(true);
-                            }}
-                          >
-                            <Subtitle4
-                              color={
-                                theme.mode === "light"
-                                  ? ColorPalette["gray-700"]
-                                  : ColorPalette["white"]
-                              }
+                          <XAxis alignY="center">
+                            <NameHoverArea
+                              onHover={setIsNameHover}
+                              isHover={isNameHover}
+                              onClick={() => {
+                                setIsOpenAccountSwitchModal(true);
+                              }}
                             >
-                              {name}
-                            </Subtitle4>
-                          </NameHoverArea>
+                              <Subtitle4
+                                color={
+                                  theme.mode === "light"
+                                    ? ColorPalette["gray-700"]
+                                    : ColorPalette["white"]
+                                }
+                              >
+                                {name}
+                              </Subtitle4>
+                            </NameHoverArea>
+
+                            {icnsPrimaryName && (
+                              <Tooltip
+                                content={
+                                  <Caption2 color={ColorPalette["white"]}>
+                                    {icnsPrimaryName}
+                                  </Caption2>
+                                }
+                                allowedPlacements={["top", "bottom"]}
+                              >
+                                <Image
+                                  alt="icns-icon"
+                                  src={require(theme.mode === "light"
+                                    ? "../../../public/assets/img/icns-icon-light.png"
+                                    : "../../../public/assets/img/icns-icon.png")}
+                                  style={{
+                                    width: "1rem",
+                                    height: "1rem",
+                                    marginLeft: "0.25rem",
+                                  }}
+                                />
+                              </Tooltip>
+                            )}
+                          </XAxis>
                           <Box
                             ref={depositFloatingModal.refs.setReference}
                             position="absolute"

@@ -35,6 +35,7 @@ import {
 import { FloatModal } from "../../../../components/float-modal";
 import { useSearchKeyInfos } from "../../../../hooks/use-search-key-infos";
 import { useGetAllSortedKeyInfos } from "../../../../hooks/use-key-ring-sort";
+import { useGetIcnsName } from "../../../../hooks/use-get-icns-name";
 
 const Styles = {
   ModalContainer: styled.div<{
@@ -197,7 +198,6 @@ const AccountItem = observer(
     onSelect: () => void;
   }) => {
     const theme = useTheme();
-    const { uiConfigStore, chainStore, queriesStore } = useStore();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const intl = useIntl();
     const navigate = useNavigate();
@@ -212,20 +212,7 @@ const AccountItem = observer(
     const dismiss = useDismiss(context);
     const { getReferenceProps, getFloatingProps } = useInteractions([dismiss]);
 
-    const icnsPrimaryName = (() => {
-      if (
-        uiConfigStore.icnsInfo &&
-        chainStore.hasChain(uiConfigStore.icnsInfo.chainId)
-      ) {
-        const queries = queriesStore.get(uiConfigStore.icnsInfo.chainId);
-        const icnsQuery = queries.icns.queryICNSNames.getQueryContract(
-          uiConfigStore.icnsInfo.resolverContractAddress,
-          bech32Address
-        );
-
-        return icnsQuery.primaryName.split(".")[0];
-      }
-    })();
+    const icnsPrimaryName = useGetIcnsName(bech32Address);
 
     const dropdownItems = (() => {
       const defaults = [
