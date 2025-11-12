@@ -17,6 +17,7 @@ import { useNavigate } from "react-router";
 import { LoadingIcon } from "../../../../components/icon";
 import { IconProps } from "../../../../components/icon/types";
 import styled, { useTheme } from "styled-components";
+import { useStore } from "../../../../stores";
 
 export const RewardsCard: FunctionComponent<{
   isNotReady?: boolean;
@@ -24,6 +25,7 @@ export const RewardsCard: FunctionComponent<{
   const intl = useIntl();
   const theme = useTheme();
   const navigate = useNavigate();
+  const { mainHeaderAnimationStore } = useStore();
 
   const [isHover, setIsHover] = React.useState(false);
 
@@ -72,7 +74,10 @@ export const RewardsCard: FunctionComponent<{
             isKeystone ||
             claimAllIsLoading ||
             (claimAllIsCompleted && count >= 1)
-          ? () => navigate("/stake?intitialExpand=true")
+          ? () => {
+              mainHeaderAnimationStore.triggerShowForMainHeaderPrice();
+              navigate("/stake?intitialExpand=true");
+            }
           : claimAll
       }
     >
@@ -101,13 +106,25 @@ export const RewardsCard: FunctionComponent<{
           ) : claimAllIsLoading || claimAllIsCompleted ? (
             <YAxis alignX="right">
               <XAxis alignY="center">
-                <Body3 color={ColorPalette["gray-200"]}>{claimCountText}</Body3>
+                <Body3
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-300"]
+                      : ColorPalette["gray-200"]
+                  }
+                >
+                  {claimCountText}
+                </Body3>
                 <Gutter size="0.25rem" />
                 {claimAllIsLoading ? (
                   <LoadingIcon
                     width="0.75rem"
                     height="0.75rem"
-                    color={ColorPalette["gray-200"]}
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-200"]
+                        : ColorPalette["gray-300"]
+                    }
                   />
                 ) : (
                   <CheckIcon
@@ -119,14 +136,24 @@ export const RewardsCard: FunctionComponent<{
               </XAxis>
               <Gutter size="0.5rem" />
               <XAxis alignY="center">
-                <Body3 color={ColorPalette.white}>
+                <Body3
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-700"]
+                      : ColorPalette.white
+                  }
+                >
                   {intl.formatMessage({
                     id: "page.main.components.rewards-card.review-claim-button",
                   })}
                 </Body3>
                 <Gutter size="0.125rem" />
                 <ArrowRightIcon
-                  color={ColorPalette.white}
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-700"]
+                      : ColorPalette.white
+                  }
                   width="1rem"
                   height="1rem"
                 />
@@ -159,8 +186,14 @@ const CountdownCircle = styled(Caption1)`
   width: 1.0625rem;
   height: 1.1875rem;
   border-radius: 0.75rem;
-  background-color: ${ColorPalette["gray-600"]};
-  color: ${ColorPalette["gray-300"]};
+  background-color: ${({ theme }) =>
+    theme.mode === "light"
+      ? ColorPalette["gray-50"]
+      : ColorPalette["gray-600"]};
+  color: ${({ theme }) =>
+    theme.mode === "light"
+      ? ColorPalette["gray-200"]
+      : ColorPalette["gray-300"]};
   text-align: center;
   line-height: 1.1875rem;
 

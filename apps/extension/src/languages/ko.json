@@ -606,10 +606,6 @@
   "page.send.amount.warning.expected-amount-too-small-title": "{inAmount} ({srcChain}) → {outAmount} ({dstChain})",
   "page.send.amount.bridge-fee-info.expected-amount": "받을 금액",
 
-  "page.main.chart.available": "사용 가능한 자산",
-  "page.main.chart.staked": "스테이킹된 자산",
-  "page.main.chart.stake-with-keplr-dashboard-button": "케플러 대시보드에서 스테이킹 시작하기",
-  "page.main.chart.manage-portfolio-in-keplr-dashboard": "케플러 대시보드에서 포트폴리오 관리하기",
   "page.main.search-placeholder": "자산이나 체인 이름 검색 (예: ATOM, Cosmos)",
   "page.main.spendable.spendable-balance-title": "사용 가능한 자산",
   "page.main.spendable.spendable-balance-tooltip": "바로 사용하거나 전송할 수 있는 자산을 의미합니다. 스테이킹된 자산이나 LP 풀에 예치된 자산은 제외됩니다.",
