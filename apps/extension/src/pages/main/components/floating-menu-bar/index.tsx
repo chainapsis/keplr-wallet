@@ -393,6 +393,8 @@ const Styles = {
       `}
     gap: 0.75rem;
 
+    opacity: 0.9;
+
     svg {
       color: ${ColorPalette["gray-300"]};
     }

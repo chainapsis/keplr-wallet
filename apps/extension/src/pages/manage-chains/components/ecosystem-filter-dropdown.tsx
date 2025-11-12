@@ -118,7 +118,6 @@ const Styles = {
     top: calc(100% + 0.5rem);
     z-index: 9999;
     min-width: 8rem;
-    overflow: visible;
   `,
 
   MenuItem: styled(ContextMenuStyles.Item)<{ selected?: boolean }>`
