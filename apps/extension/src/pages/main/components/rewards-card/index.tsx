@@ -17,6 +17,7 @@ import { useNavigate } from "react-router";
 import { LoadingIcon } from "../../../../components/icon";
 import { IconProps } from "../../../../components/icon/types";
 import styled, { useTheme } from "styled-components";
+import { useStore } from "../../../../stores";
 
 export const RewardsCard: FunctionComponent<{
   isNotReady?: boolean;
@@ -24,6 +25,7 @@ export const RewardsCard: FunctionComponent<{
   const intl = useIntl();
   const theme = useTheme();
   const navigate = useNavigate();
+  const { mainHeaderAnimationStore } = useStore();
 
   const [isHover, setIsHover] = React.useState(false);
 
@@ -72,7 +74,10 @@ export const RewardsCard: FunctionComponent<{
             isKeystone ||
             claimAllIsLoading ||
             (claimAllIsCompleted && count >= 1)
-          ? () => navigate("/stake?intitialExpand=true")
+          ? () => {
+              mainHeaderAnimationStore.triggerShowForMainHeaderPrice();
+              navigate("/stake?intitialExpand=true");
+            }
           : claimAll
       }
     >

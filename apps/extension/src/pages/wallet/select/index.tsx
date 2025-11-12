@@ -36,6 +36,11 @@ import { useGlobarSimpleBar } from "../../../hooks/global-simplebar";
 import { EmptyView } from "../../../components/empty-view";
 import { dispatchGlobalEventExceptSelf } from "../../../utils/global-events";
 import { useSearchKeyInfos } from "../../../hooks/use-search-key-infos";
+import {
+  KEYRING_SORT_KEY,
+  useKeyringSort,
+  useGetKeyInfosSeparatedByType,
+} from "../../../hooks/use-key-ring-sort";
 
 const AnimatedBox = animated(Box);
 
@@ -61,117 +66,14 @@ export const WalletSelectPage: FunctionComponent = observer(() => {
 
   const keyInfos = searchedKeyInfos ?? keyRingStore.keyInfos;
 
-  const mnemonicKeys = useMemo(() => {
-    return keyInfos.filter((keyInfo) => {
-      return keyInfo.type === "mnemonic";
-    });
-  }, [keyInfos]);
-
-  const socialPrivateKeyInfos = useMemo(() => {
-    return keyInfos.filter((keyInfo) => {
-      if (
-        keyInfo.type === "private-key" &&
-        typeof keyInfo.insensitive === "object" &&
-        keyInfo.insensitive["keyRingMeta"] &&
-        typeof keyInfo.insensitive["keyRingMeta"] === "object" &&
-        keyInfo.insensitive["keyRingMeta"]["web3Auth"] &&
-        typeof keyInfo.insensitive["keyRingMeta"]["web3Auth"] === "object"
-      ) {
-        const web3Auth = keyInfo.insensitive["keyRingMeta"]["web3Auth"];
-        if (web3Auth["type"] && web3Auth["email"]) {
-          return true;
-        }
-      }
-
-      return false;
-    });
-  }, [keyInfos]);
-
-  const privateKeyInfos = useMemo(() => {
-    return keyInfos.filter((keyInfo) => {
-      return (
-        keyInfo.type === "private-key" &&
-        !socialPrivateKeyInfos.some((k) => k.id === keyInfo.id)
-      );
-    });
-  }, [keyInfos, socialPrivateKeyInfos]);
-
-  const ledgerKeys = useMemo(() => {
-    return keyInfos.filter((keyInfo) => {
-      return keyInfo.type === "ledger";
-    });
-  }, [keyInfos]);
-
-  const keystoneKeys = useMemo(() => {
-    return keyInfos.filter((keyInfo) => {
-      return keyInfo.type === "keystone";
-    });
-  }, [keyInfos]);
-
-  const unknownKeys = useMemo(() => {
-    const knownKeys = mnemonicKeys
-      .concat(ledgerKeys)
-      .concat(privateKeyInfos)
-      .concat(socialPrivateKeyInfos)
-      .concat(keystoneKeys);
-    return keyInfos.filter((keyInfo) => {
-      return !knownKeys.find((k) => k.id === keyInfo.id);
-    });
-  }, [
-    keyInfos,
-    ledgerKeys,
+  const {
     mnemonicKeys,
+    socialPrivateKeyInfoByType,
     privateKeyInfos,
-    socialPrivateKeyInfos,
+    ledgerKeys,
     keystoneKeys,
-  ]);
-
-  const socialPrivateKeyInfoByType: {
-    type: string;
-    keyInfos: KeyInfo[];
-  }[] = useMemo(() => {
-    const typeMap = new Map<string, KeyInfo[]>();
-
-    socialPrivateKeyInfos.forEach((keyInfo) => {
-      if (
-        keyInfo.type === "private-key" &&
-        typeof keyInfo.insensitive === "object" &&
-        keyInfo.insensitive["keyRingMeta"] &&
-        typeof keyInfo.insensitive["keyRingMeta"] === "object" &&
-        keyInfo.insensitive["keyRingMeta"]["web3Auth"] &&
-        typeof keyInfo.insensitive["keyRingMeta"]["web3Auth"] === "object"
-      ) {
-        const web3Auth = keyInfo.insensitive["keyRingMeta"]["web3Auth"];
-        if (
-          web3Auth["type"] &&
-          web3Auth["email"] &&
-          typeof web3Auth["type"] === "string" &&
-          typeof web3Auth["email"] === "string"
-        ) {
-          const type = web3Auth["type"];
-
-          const arr = typeMap.get(type) || [];
-          arr.push(keyInfo);
-
-          typeMap.set(type, arr);
-        }
-      }
-    });
-
-    const res: {
-      type: string;
-      keyInfos: KeyInfo[];
-    }[] = [];
-
-    for (const [type, keyInfos] of typeMap.entries()) {
-      res.push({
-        type,
-        keyInfos,
-      });
-    }
-
-    return res;
-  }, [socialPrivateKeyInfos]);
+    unknownKeys,
+  } = useGetKeyInfosSeparatedByType(keyInfos);
 
   return (
     <HeaderLayout
@@ -222,7 +124,7 @@ export const WalletSelectPage: FunctionComponent = observer(() => {
           <Styles.Content gutter="1.25rem">
             {mnemonicKeys.length > 0 ? (
               <KeyInfoList
-                sortKey="sort-mnemonic"
+                sortKey={KEYRING_SORT_KEY.MNEMONIC}
                 title={intl.formatMessage({
                   id: "page.wallet.recovery-phrase-title",
                 })}
@@ -251,7 +153,7 @@ export const WalletSelectPage: FunctionComponent = observer(() => {
 
             {privateKeyInfos.length > 0 ? (
               <KeyInfoList
-                sortKey="sort-private-key"
+                sortKey={KEYRING_SORT_KEY.PRIVATE_KEY}
                 title={intl.formatMessage({
                   id: "page.wallet.private-key-title",
                 })}
@@ -261,7 +163,7 @@ export const WalletSelectPage: FunctionComponent = observer(() => {
 
             {ledgerKeys.length > 0 ? (
               <KeyInfoList
-                sortKey="sort-ledger"
+                sortKey={KEYRING_SORT_KEY.LEDGER}
                 title={intl.formatMessage({ id: "page.wallet.ledger-title" })}
                 keyInfos={ledgerKeys}
               />
@@ -269,7 +171,7 @@ export const WalletSelectPage: FunctionComponent = observer(() => {
 
             {keystoneKeys.length > 0 ? (
               <KeyInfoList
-                sortKey="sort-keystone"
+                sortKey={KEYRING_SORT_KEY.KEYSTONE}
                 title="Keystone"
                 keyInfos={keystoneKeys}
               />
@@ -277,7 +179,7 @@ export const WalletSelectPage: FunctionComponent = observer(() => {
 
             {unknownKeys.length > 0 ? (
               <KeyInfoList
-                sortKey="sort-unknown"
+                sortKey={KEYRING_SORT_KEY.UNKNOWN}
                 title={intl.formatMessage({ id: "page.wallet.unknown-title" })}
                 keyInfos={unknownKeys}
               />
@@ -301,28 +203,7 @@ const KeyInfoList: FunctionComponent<{
     config: defaultSpringConfig,
   });
 
-  const indexMap =
-    uiConfigStore.selectWalletConfig.getKeyToSortVaultIdsMapIndex(sortKey);
-  const sortedKeyInfos = useMemo(() => {
-    return keyInfos.sort((key1, key2) => {
-      const key1Id = key1.id;
-      const key2Id = key2.id;
-
-      const key1Index = indexMap.get(key1Id);
-      const key2Index = indexMap.get(key2Id);
-
-      if (key1Index == null && key2Index != null) {
-        return 1;
-      }
-      if (key1Index != null && key2Index == null) {
-        return -1;
-      }
-      if (key1Index == null && key2Index == null) {
-        return 0;
-      }
-      return key1Index! - key2Index!;
-    });
-  }, [keyInfos, indexMap]);
+  const { sortedKeyInfos } = useKeyringSort(sortKey, keyInfos);
 
   const separatorPx = 8;
   const [drapMap, _setDragMap] = useState(

@@ -1,11 +1,17 @@
-import React, { Fragment, PropsWithChildren, useMemo, useState } from "react";
+import React, {
+  Fragment,
+  PropsWithChildren,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Columns } from "../../../components/column";
 import { Box } from "../../../components/box";
 import { CopyOutlineIcon } from "../../../components/icon";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import { HeaderLayout } from "../../../layouts/header";
-import styled, { useTheme } from "styled-components";
+import styled, { css, useTheme } from "styled-components";
 import { HeaderProps } from "../../../layouts/header/types";
 import { ColorPalette } from "../../../styles";
 import { XAxis, YAxis } from "../../../components/axis";
@@ -29,20 +35,133 @@ import { Tooltip } from "../../../components/tooltip";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Button } from "../../../components/button";
 import { useTotalPrices } from "../../../hooks/use-total-prices";
+import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
 
 const Styles = {
   NameContainer: styled.div`
     display: flex;
-    cursor: pointer;
     align-items: center;
     justify-content: center;
-
-    transition: opacity 0.1s ease-in-out;
-
-    &:hover {
-      opacity: ${COMMON_HOVER_OPACITY};
-    }
   `,
+
+  NameHoverArea: styled(Box)<{ isHover: boolean }>`
+    display: flex;
+    flex-direction: row;
+    transition: opacity 0.1s ease-in-out;
+    cursor: pointer;
+
+    ${({ isHover }) =>
+      isHover &&
+      css`
+        opacity: ${COMMON_HOVER_OPACITY};
+      `}
+  `,
+};
+
+const NameHoverArea = ({
+  children,
+  onClick,
+  onHover,
+  isHover,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  onHover: (isHover: boolean) => void;
+  isHover: boolean;
+}) => {
+  return (
+    <Styles.NameHoverArea
+      onClick={onClick}
+      isHover={isHover}
+      onHoverStateChange={onHover}
+    >
+      {children}
+    </Styles.NameHoverArea>
+  );
+};
+
+const useHeaderTotalPriceVisibility = ({
+  forcedIsShowTotalPrice,
+}: {
+  forcedIsShowTotalPrice?: boolean;
+}): boolean => {
+  const { uiConfigStore, mainHeaderAnimationStore } = useStore();
+  const location = useLocation();
+  const isNotMainPage = location.pathname !== "/";
+  const isPrivacyMode = uiConfigStore.isPrivacyMode;
+  const trigger = mainHeaderAnimationStore.triggerMainHeaderPriceAnimation;
+
+  const isShowTotalPriceFinally = useMemo(() => {
+    if (isPrivacyMode) {
+      return false;
+    }
+    if (forcedIsShowTotalPrice) {
+      return forcedIsShowTotalPrice;
+    }
+    return isNotMainPage;
+  }, [forcedIsShowTotalPrice, isNotMainPage, isPrivacyMode]);
+
+  // 해당 상태로 UI상 보여줄지를 결정하기 때문에
+  // 페이지 이동시 show or hide 애니메이션을 위해서 존재함
+  const [isShowTotalPrice, setIsShowTotalPrice] = useState<boolean>(() => {
+    if (isPrivacyMode) {
+      return false;
+    }
+    if (trigger === "hide") {
+      return true;
+    }
+    if (trigger === "show" && isShowTotalPriceFinally) {
+      return false;
+    }
+    return isShowTotalPriceFinally;
+  });
+
+  //여기서 어떻게 isShowTotalPrice를 업데이트 할지 결정한다.
+  //기본적으로 trigger가 hide이면 isShowTotalPrice가 true -> false 순으로 변경된다.
+  //trigger가 show이고 isShowTotalPriceFinally가 true이면 isShowTotalPrice가 false -> true 순으로 변경된다.
+  //그리고 한번 실행 되고 나면은임의의 변경 없이 isShowTotalPriceFinally 상태를 따르도록 한다.
+  useEffect(() => {
+    if (trigger === "not-triggered") {
+      setIsShowTotalPrice(isShowTotalPriceFinally);
+      return;
+    }
+
+    if (isPrivacyMode) {
+      setIsShowTotalPrice(false);
+      mainHeaderAnimationStore.resetTriggerForMainHeaderPrice();
+      return;
+    }
+
+    if (trigger === "hide") {
+      const timer = setTimeout(() => {
+        setIsShowTotalPrice(false);
+        mainHeaderAnimationStore.resetTriggerForMainHeaderPrice();
+      }, 0);
+      return () => {
+        clearTimeout(timer);
+      };
+    }
+
+    if (!isShowTotalPriceFinally) {
+      setIsShowTotalPrice(isShowTotalPriceFinally);
+      mainHeaderAnimationStore.resetTriggerForMainHeaderPrice();
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setIsShowTotalPrice(true);
+      mainHeaderAnimationStore.resetTriggerForMainHeaderPrice();
+    }, 0);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [
+    trigger,
+    isShowTotalPriceFinally,
+    isPrivacyMode,
+    mainHeaderAnimationStore,
+  ]);
+  return isShowTotalPrice;
 };
 
 export const MainHeaderLayout = observer<
@@ -67,21 +186,12 @@ export const MainHeaderLayout = observer<
     const { uiConfigStore, keyRingStore, chainStore } = useStore();
     const [isOpenAccountSwitchModal, setIsOpenAccountSwitchModal] =
       useState(false);
-    const location = useLocation();
-    const isNotMainPage = location.pathname !== "/";
+
     const intl = useIntl();
-
-    const isShowTotalPrice = (() => {
-      if (props.isShowTotalPrice) {
-        return props.isShowTotalPrice;
-      }
-
-      if (uiConfigStore.isPrivacyMode) {
-        return false;
-      }
-
-      return isNotMainPage;
-    })();
+    const [isNameHover, setIsNameHover] = useState(false);
+    const isShowTotalPrice = useHeaderTotalPriceVisibility({
+      forcedIsShowTotalPrice: props.isShowTotalPrice,
+    });
 
     const accountSwitchFloatingModal = useFloating({
       placement: "bottom-start",
@@ -134,61 +244,105 @@ export const MainHeaderLayout = observer<
           left={
             <React.Fragment>
               <Gutter size="0.75rem" />
-              <XAxis alignY="center">
-                <Styles.NameContainer
-                  ref={accountSwitchFloatingModal.refs.setReference}
-                  onClick={() => {
-                    setIsOpenAccountSwitchModal(true);
-                  }}
-                >
-                  <NameIcon name={name} />
-                  <Gutter size="0.5rem" />
-                  <Box>
-                    <Subtitle4
-                      color={
-                        theme.mode === "light"
-                          ? ColorPalette["gray-700"]
-                          : ColorPalette["white"]
-                      }
-                    >
-                      {name}
-                    </Subtitle4>
-                    {isShowTotalPrice && (
-                      <Subtitle4
-                        color={
-                          theme.mode === "light"
-                            ? ColorPalette["gray-700"]
-                            : ColorPalette["white"]
-                        }
-                      >
-                        {totalPrice?.toString()}
-                      </Subtitle4>
-                    )}
-                  </Box>
-                </Styles.NameContainer>
-
-                <Gutter size="0.125rem" />
-                <Box ref={depositFloatingModal.refs.setReference}>
-                  <IconButton
-                    padding="0.375rem"
-                    hoverColor={
-                      theme.mode === "light"
-                        ? ColorPalette["gray-100"]
-                        : ColorPalette["gray-600"]
-                    }
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setIsOpenDepositModal(true);
-                    }}
+              <Box>
+                <XAxis alignY="center">
+                  <Styles.NameContainer
+                    ref={accountSwitchFloatingModal.refs.setReference}
                   >
-                    <CopyOutlineIcon
-                      width="0.75rem"
-                      height="0.75rem"
-                      color={ColorPalette["gray-300"]}
-                    />
-                  </IconButton>
-                </Box>
-              </XAxis>
+                    <NameHoverArea
+                      onHover={setIsNameHover}
+                      isHover={isNameHover}
+                      onClick={() => {
+                        setIsOpenAccountSwitchModal(true);
+                      }}
+                    >
+                      <NameIcon name={name} />
+                      <Gutter size="0.5rem" />
+                    </NameHoverArea>
+                    <Box alignY="center">
+                      <XAxis alignY="center">
+                        <Box
+                          position="relative"
+                          style={{
+                            paddingRight: "1.75rem",
+                          }}
+                        >
+                          <NameHoverArea
+                            onHover={setIsNameHover}
+                            isHover={isNameHover}
+                            onClick={() => {
+                              setIsOpenAccountSwitchModal(true);
+                            }}
+                          >
+                            <Subtitle4
+                              color={
+                                theme.mode === "light"
+                                  ? ColorPalette["gray-700"]
+                                  : ColorPalette["white"]
+                              }
+                            >
+                              {name}
+                            </Subtitle4>
+                          </NameHoverArea>
+                          <Box
+                            ref={depositFloatingModal.refs.setReference}
+                            position="absolute"
+                            alignY="center"
+                            style={{
+                              top: "50%",
+                              right: "0",
+                              transform: "translateY(-50%)",
+                            }}
+                          >
+                            <IconButton
+                              padding="0.375rem"
+                              hoverColor={
+                                theme.mode === "light"
+                                  ? ColorPalette["gray-100"]
+                                  : ColorPalette["gray-600"]
+                              }
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setIsOpenDepositModal(true);
+                              }}
+                            >
+                              <CopyOutlineIcon
+                                width="0.75rem"
+                                height="0.75rem"
+                                color={ColorPalette["gray-300"]}
+                              />
+                            </IconButton>
+                          </Box>
+                        </Box>
+                      </XAxis>
+
+                      <VerticalCollapseTransition
+                        collapsed={!isShowTotalPrice}
+                        width="15rem"
+                      >
+                        <NameHoverArea
+                          onHover={setIsNameHover}
+                          isHover={isNameHover}
+                          onClick={() => {
+                            setIsOpenAccountSwitchModal(true);
+                          }}
+                        >
+                          <Subtitle4
+                            color={
+                              theme.mode === "light"
+                                ? ColorPalette["gray-700"]
+                                : ColorPalette["white"]
+                            }
+                          >
+                            {totalPrice?.toString()}
+                          </Subtitle4>
+                        </NameHoverArea>
+                      </VerticalCollapseTransition>
+                    </Box>
+                  </Styles.NameContainer>
+                </XAxis>
+              </Box>
             </React.Fragment>
           }
           right={

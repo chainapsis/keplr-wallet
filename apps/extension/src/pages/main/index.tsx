@@ -75,11 +75,16 @@ export const useIsNotReady = () => {
 export const MainPage: FunctionComponent<{
   setIsNotReady: (isNotReady: boolean) => void;
 }> = observer(({ setIsNotReady }) => {
-  const { hugeQueriesStore, uiConfigStore, keyRingStore, priceStore } =
-    useStore();
+  const {
+    hugeQueriesStore,
+    uiConfigStore,
+    keyRingStore,
+    priceStore,
+    mainHeaderAnimationStore,
+  } = useStore();
 
   const isNotReady = useIsNotReady();
-  // const theme = useTheme();
+  const navigate = useNavigate();
 
   const setIsNotReadyRef = useRef(setIsNotReady);
   setIsNotReadyRef.current = setIsNotReady;
@@ -182,6 +187,10 @@ export const MainPage: FunctionComponent<{
   const totalPriceSectionRef = useRef<HTMLDivElement | null>(null);
   const [isTotalPriceVisible, setIsTotalPriceVisible] = useState(true);
 
+  useEffect(() => {
+    mainHeaderAnimationStore.setMainPageTotalPriceVisible(isTotalPriceVisible);
+  }, [isTotalPriceVisible, mainHeaderAnimationStore]);
+
   const animatedPrivacyModeHover = useSpringValue(0, {
     config: defaultSpringConfig,
   });
@@ -264,8 +273,10 @@ export const MainPage: FunctionComponent<{
         }
       },
       {
+        //globalSimpleBar영역이 전체 페이지이기 때문에 상단 header 높이만큼 rootMargin에서 빼줘야함
         root: scrollElement,
-        threshold: 0.8,
+        threshold: 0.01,
+        rootMargin: "-60px 0px 0px 0px",
       }
     );
     observer.observe(target);
@@ -291,8 +302,9 @@ export const MainPage: FunctionComponent<{
         }}
       />
 
-      <Box ref={totalPriceSectionRef} padding="1.25rem">
+      <Box padding="1.25rem">
         <Box
+          ref={totalPriceSectionRef}
           onHoverStateChange={(isHover) => {
             if (!isNotReady) {
               animatedPrivacyModeHover.start(isHover ? 1 : 0);
@@ -363,6 +375,7 @@ export const MainPage: FunctionComponent<{
             uiConfigStore={uiConfigStore}
             stakedTotalPrice={stakedTotalPrice}
             stakedPercentage={stakedPercentage}
+            preventHeaderAnimation={!isTotalPriceVisible}
           />
         )}
       </Box>
@@ -376,6 +389,14 @@ export const MainPage: FunctionComponent<{
                 isNotReady={isNotReady}
                 onClickDeposit={() => {
                   setIsOpenDepositModal(true);
+                }}
+                onClickSwapBtn={() => {
+                  if (!isTotalPriceVisible) {
+                    navigate(`/ibc-swap`);
+                    return;
+                  }
+                  mainHeaderAnimationStore.triggerShowForMainHeaderPrice();
+                  navigate(`/ibc-swap`);
                 }}
               />
               <Gutter size="0.75rem" />
@@ -835,14 +856,17 @@ function StakedBalanceTitle({
   uiConfigStore,
   stakedTotalPrice,
   stakedPercentage,
+  preventHeaderAnimation,
 }: {
   isNotReady: boolean;
   uiConfigStore: UIConfigStore;
   stakedTotalPrice: PricePretty | undefined;
   stakedPercentage: number;
+  preventHeaderAnimation: boolean;
 }) {
   const intl = useIntl();
   const navigate = useNavigate();
+  const { mainHeaderAnimationStore } = useStore();
 
   return (
     <Skeleton isNotReady={isNotReady}>
@@ -850,6 +874,9 @@ function StakedBalanceTitle({
         paddingY="0.125rem"
         cursor="pointer"
         onClick={() => {
+          if (!preventHeaderAnimation) {
+            mainHeaderAnimationStore.triggerShowForMainHeaderPrice();
+          }
           navigate("/stake");
         }}
       >

@@ -37,7 +37,15 @@ export const FormNamePassword: FunctionComponent<
     }
   >
 > = observer(
-  ({ children, register, formState, getValues, appendButton, autoFocus }) => {
+  ({
+    children,
+    register,
+    setValue,
+    formState,
+    getValues,
+    appendButton,
+    autoFocus,
+  }) => {
     const { keyRingStore } = useStore();
     const intl = useIntl();
     const theme = useTheme();
@@ -45,7 +53,18 @@ export const FormNamePassword: FunctionComponent<
     const needPassword = keyRingStore.keyInfos.length === 0;
 
     const { ref: nameRegisterRef, ...nameRegisterProps } = register("name", {
-      required: true,
+      required: intl.formatMessage({
+        id: "page.wallet.change-name.min-length-error",
+      }),
+      validate: (value) => {
+        const trimmedValue = value.trim();
+        if (trimmedValue.length < 4) {
+          return intl.formatMessage({
+            id: "page.wallet.change-name.min-length-error",
+          });
+        }
+        return true;
+      },
     });
 
     const nameTextInputRef = useRef<HTMLInputElement | null>(null);
@@ -86,6 +105,11 @@ export const FormNamePassword: FunctionComponent<
             id: "pages.register.components.form.name-password.wallet-name-placeholder",
           })}
           error={formState.errors.name?.message}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            const value = e.target.value;
+            const trimmedStartValue = value.trimStart();
+            setValue("name", trimmedStartValue, { shouldValidate: true });
+          }}
         />
         {needPassword ? (
           <React.Fragment>
