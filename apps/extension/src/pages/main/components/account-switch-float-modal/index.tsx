@@ -36,154 +36,7 @@ import { FloatModal } from "../../../../components/float-modal";
 import { useSearchKeyInfos } from "../../../../hooks/use-search-key-infos";
 import { useGetAllSortedKeyInfos } from "../../../../hooks/use-key-ring-sort";
 import { useGetIcnsName } from "../../../../hooks/use-get-icns-name";
-
-const Styles = {
-  ModalContainer: styled.div<{
-    top: number;
-    left: number;
-    strategy: string;
-  }>`
-    position: ${({ strategy }) => strategy ?? "absolute"};
-    top: ${({ top }) => top.toString()}px;
-    left: ${({ left }) => left.toString()}px;
-    width: 336px;
-    padding: 0.5rem;
-
-    background-color: ${({ theme }) =>
-      theme.mode === "light"
-        ? ColorPalette["gray-10"]
-        : ColorPalette["gray-650"]};
-
-    border-radius: 0.75rem;
-    border: 1px solid
-      ${({ theme }) =>
-        theme.mode === "light"
-          ? ColorPalette["gray-100"]
-          : ColorPalette["gray-550"]};
-
-    display: flex;
-    flex-direction: column;
-  `,
-
-  SearchContainer: styled.div`
-    padding: 0 0.5rem;
-    margin-bottom: 0.5rem;
-  `,
-
-  AccountItem: styled.div`
-    padding: 1rem 0.5rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    transition: background-color 0.1s ease-in-out;
-    border-radius: 0.5rem;
-    &:hover {
-      background-color: ${({ theme }) =>
-        theme.mode === "light"
-          ? ColorPalette["gray-75"]
-          : ColorPalette["gray-600"]};
-    }
-  `,
-
-  AccountIcon: styled.div<{ isSelected: boolean }>`
-    width: 1.5rem;
-    height: 1.5rem;
-    border-radius: 9999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: ${({ theme }) =>
-      theme.mode === "light"
-        ? ColorPalette["gray-100"]
-        : ColorPalette["gray-550"]};
-    flex-shrink: 0;
-
-    ${({ isSelected }) =>
-      isSelected &&
-      css`
-        opacity: 0.6;
-      `}
-  `,
-
-  AccountName: styled(Subtitle4)<{ isSelected: boolean }>`
-    color: ${({ theme }) =>
-      theme.mode === "light" ? ColorPalette["gray-700"] : ColorPalette.white};
-
-    ${({ isSelected }) =>
-      isSelected &&
-      css`
-        opacity: 0.6;
-      `}
-  `,
-
-  OptionButton: styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-
-    flex-shrink: 0;
-    transition: opacity 0.1s ease-in-out;
-
-    &:hover {
-      opacity: ${COMMON_HOVER_OPACITY};
-    }
-  `,
-
-  ItemMenuContainer: styled.div<{
-    top: number;
-    left: number;
-    strategy: string;
-  }>`
-    position: ${({ strategy }) => strategy ?? "absolute"};
-    top: ${({ top }) => top.toString()}px;
-    left: ${({ left }) => left.toString()}px;
-
-    border-radius: 0.5rem;
-
-    background-color: ${({ theme }) =>
-      theme.mode === "light"
-        ? "rgba(66, 66, 71, 0.90)"
-        : "rgba(37, 37, 37, 0.5)"};
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-
-    display: flex;
-    flex-direction: column;
-  `,
-
-  MenuItem: styled(Body3)<{ isLast?: boolean }>`
-    padding: 0.5rem 0.5rem 0.5rem 0.75rem;
-    cursor: pointer;
-    display: flex;
-    height: 2.5rem;
-    width: 100%;
-
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-
-    color: ${ColorPalette.white};
-
-    &:hover {
-      color: ${({ theme }) =>
-        theme.mode === "light"
-          ? ColorPalette["gray-50"]
-          : ColorPalette["gray-200"]};
-    }
-
-    ${({ isLast, theme }) =>
-      !isLast &&
-      css`
-        border-bottom: 1px solid
-          ${theme.mode === "light"
-            ? ColorPalette["gray-300"]
-            : ColorPalette["gray-400"]};
-      `}
-  `,
-};
+import { ContextMenuStyles } from "../../../../components/context-menu";
 
 const AccountItem = observer(
   ({
@@ -480,6 +333,7 @@ export const AccountSwitchFloatModal = observer(
                   />
                 );
               })}
+              <Gutter size="0.5rem" />
             </SimpleBar>
           </Styles.ModalContainer>
         </FloatModal>
@@ -487,3 +341,131 @@ export const AccountSwitchFloatModal = observer(
     );
   }
 );
+
+const Styles = {
+  ModalContainer: styled.div<{
+    top: number;
+    left: number;
+    strategy: string;
+  }>`
+    position: ${({ strategy }) => strategy ?? "absolute"};
+    top: ${({ top }) => top.toString()}px;
+    left: ${({ left }) => left.toString()}px;
+    width: 336px;
+    padding: 1rem 0.5rem 0 0.5rem;
+
+    background-color: ${({ theme }) =>
+      theme.mode === "light"
+        ? ColorPalette["gray-10"]
+        : ColorPalette["gray-650"]};
+
+    border-radius: 0.75rem;
+    border: 1px solid
+      ${({ theme }) =>
+        theme.mode === "light"
+          ? ColorPalette["gray-100"]
+          : ColorPalette["gray-550"]};
+
+    display: flex;
+    flex-direction: column;
+  `,
+
+  SearchContainer: styled.div`
+    padding: 0 0.5rem;
+    margin-bottom: 0.5rem;
+  `,
+
+  AccountItem: styled.div`
+    padding: 1rem 0.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    transition: background-color 0.1s ease-in-out;
+    border-radius: 0.5rem;
+    &:hover {
+      background-color: ${({ theme }) =>
+        theme.mode === "light"
+          ? ColorPalette["gray-75"]
+          : ColorPalette["gray-600"]};
+    }
+  `,
+
+  AccountIcon: styled.div<{ isSelected: boolean }>`
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: ${({ theme }) =>
+      theme.mode === "light"
+        ? ColorPalette["gray-100"]
+        : ColorPalette["gray-550"]};
+    flex-shrink: 0;
+
+    ${({ isSelected }) =>
+      isSelected &&
+      css`
+        opacity: 0.6;
+      `}
+  `,
+
+  AccountName: styled(Subtitle4)<{ isSelected: boolean }>`
+    color: ${({ theme }) =>
+      theme.mode === "light" ? ColorPalette["gray-700"] : ColorPalette.white};
+
+    ${({ isSelected }) =>
+      isSelected &&
+      css`
+        opacity: 0.6;
+      `}
+  `,
+
+  OptionButton: styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+
+    flex-shrink: 0;
+    transition: opacity 0.1s ease-in-out;
+
+    &:hover {
+      opacity: ${COMMON_HOVER_OPACITY};
+    }
+  `,
+
+  ItemMenuContainer: styled(ContextMenuStyles.Container)<{
+    top: number;
+    left: number;
+    strategy: string;
+  }>`
+    position: ${({ strategy }) => strategy ?? "absolute"};
+    top: ${({ top }) => top.toString()}px;
+    left: ${({ left }) => left.toString()}px;
+
+    min-width: 11.25rem;
+  `,
+
+  MenuItem: styled(ContextMenuStyles.Item)<{ isLast?: boolean }>`
+    ${Body3}
+
+    padding: 0.5rem 1.5rem;
+    height: 2.5rem;
+    width: 100%;
+
+    justify-content: center;
+    text-align: center;
+
+    ${({ isLast, theme }) =>
+      !isLast &&
+      css`
+        border-bottom: 1px solid
+          ${theme.mode === "light"
+            ? ColorPalette["gray-100"]
+            : ColorPalette["gray-400"]};
+      `}
+  `,
+};

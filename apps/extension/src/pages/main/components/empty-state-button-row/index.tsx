@@ -7,6 +7,7 @@ import { ColorPalette } from "../../../../styles";
 import { useStore } from "../../../../stores";
 import { Dec } from "@keplr-wallet/unit";
 import { useNavigate } from "react-router";
+import { COMMON_HOVER_OPACITY } from "../../../../styles/constant";
 
 export const EmptyStateButtonRow = ({
   onClickDeposit,
@@ -96,7 +97,7 @@ const Styles = {
     pointer-events: ${({ disabled }) => (disabled ? "none" : "auto")};
 
     &:hover {
-      opacity: 0.7;
+      opacity: ${COMMON_HOVER_OPACITY};
     }
   `,
   Grid: styled.div`

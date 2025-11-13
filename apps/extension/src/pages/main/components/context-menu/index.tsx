@@ -23,6 +23,7 @@ import { Gutter } from "../../../../components/gutter";
 import { isRunningInSidePanel } from "../../../../utils";
 import { COMMON_HOVER_OPACITY } from "../../../../styles/constant";
 import { useNavigate } from "react-router";
+import { ContextMenuStyles } from "../../../../components/context-menu";
 
 const Styles = {
   MenuContainer: styled.div`
@@ -33,25 +34,14 @@ const Styles = {
     user-select: none;
     background-color: transparent;
   `,
-  MenuWrapper: styled.div`
+  ContextMenuContent: styled(ContextMenuStyles.Container)`
     position: absolute;
     right: 0;
     top: calc(100% + 0.5rem);
     z-index: 9999;
     min-width: 15.625rem;
     overflow: visible;
-    box-shadow: ${(props) =>
-      props.theme.mode === "light"
-        ? "0px 1px 3px 0px rgba(43, 39, 55, 0.10), 0px 5px 30px 0px rgba(43, 39, 55, 0.05), 0px 10px 50px 0px rgba(43, 39, 55, 0.05)"
-        : "none"};
-  `,
-  ContextMenuContent: styled.div`
     border-radius: 0.5rem;
-    background-color: ${(props) =>
-      props.theme.mode === "light"
-        ? ColorPalette.white
-        : ColorPalette["gray-500"]};
-    box-shadow: 0 0.25rem 1.25rem rgba(0, 0, 0, 0.15);
     overflow: hidden;
   `,
   MenuBackdrop: styled.div`
@@ -63,16 +53,10 @@ const Styles = {
     z-index: 9998;
     background-color: transparent;
   `,
-  MenuItem: styled.div`
+  MenuItem: styled(ContextMenuStyles.Item)`
     padding: 0.75rem 0.75rem 0.75rem 1rem;
-    display: flex;
     justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    background-color: ${(props) =>
-      props.theme.mode === "light"
-        ? ColorPalette.white
-        : ColorPalette["gray-500"]};
+
     border-bottom: 1px solid
       ${(props) =>
         props.theme.mode === "light"
@@ -81,13 +65,6 @@ const Styles = {
 
     &:last-child {
       border-bottom: none;
-    }
-
-    &:hover {
-      background-color: ${(props) =>
-        props.theme.mode === "light"
-          ? ColorPalette["gray-50"]
-          : ColorPalette["gray-450"]};
     }
   `,
   MenuItemXAxis: styled(XAxis)`
@@ -435,19 +412,17 @@ export const ViewOptionsContextMenu: FunctionComponent<{
         </Tooltip>
 
         {isOpen && (
-          <Styles.MenuWrapper>
-            <Styles.ContextMenuContent ref={menuContentRef}>
-              <MainMenu
-                onToggleAssetViewMode={handleToggleAssetViewMode}
-                hideLowBalance={uiConfigStore.options.hideLowBalance}
-                showFiatValue={uiConfigStore.options.showFiatValue}
-                onToggleHideLowBalance={handleToggleHideLowBalance}
-                onToggleShowFiatValue={handleToggleShowFiatValue}
-                showFiatValueVisible={showFiatValueVisible}
-                assetViewMode={uiConfigStore.options.assetViewMode}
-              />
-            </Styles.ContextMenuContent>
-          </Styles.MenuWrapper>
+          <Styles.ContextMenuContent ref={menuContentRef}>
+            <MainMenu
+              onToggleAssetViewMode={handleToggleAssetViewMode}
+              hideLowBalance={uiConfigStore.options.hideLowBalance}
+              showFiatValue={uiConfigStore.options.showFiatValue}
+              onToggleHideLowBalance={handleToggleHideLowBalance}
+              onToggleShowFiatValue={handleToggleShowFiatValue}
+              showFiatValueVisible={showFiatValueVisible}
+              assetViewMode={uiConfigStore.options.assetViewMode}
+            />
+          </Styles.ContextMenuContent>
         )}
       </Styles.MenuContainer>
     );

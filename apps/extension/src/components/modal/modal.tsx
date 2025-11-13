@@ -14,6 +14,7 @@ import { defaultSpringConfig } from "../../styles/spring";
 import { ModalProps } from "./types";
 import Color from "color";
 import SimpleBar from "simplebar-react";
+import { ColorPalette } from "../../styles";
 
 const AnimatedSimpleBar = animated(SimpleBar);
 
@@ -203,8 +204,8 @@ const ModalChild: FunctionComponent<
         backgroundColor: disableBackdrop
           ? "rgba(0,0,0,0)"
           : transition.to((t) =>
-              Color("#000000")
-                .alpha(t * 0.55)
+              Color(ColorPalette["gray-550"])
+                .alpha(t * 0.3)
                 .string()
             ),
       }}
