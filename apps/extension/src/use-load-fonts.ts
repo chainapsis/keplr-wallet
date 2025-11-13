@@ -2,69 +2,105 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { useLanguage } from "./languages";
 import { useLayoutEffectOnce } from "./hooks/use-effect-once";
 
+const interFontFaces = [
+  new FontFace(
+    "Inter",
+    `url(${require("./public/assets/font/Inter-Regular.ttf")})`,
+    {
+      weight: "400",
+    }
+  ),
+  new FontFace(
+    "Inter",
+    `url(${require("./public/assets/font/Inter-Medium.ttf")})`,
+    {
+      weight: "500",
+    }
+  ),
+  new FontFace(
+    "Inter",
+    `url(${require("./public/assets/font/Inter-SemiBold.ttf")})`,
+    {
+      weight: "600",
+    }
+  ),
+  new FontFace(
+    "Inter",
+    `url(${require("./public/assets/font/Inter-Bold.ttf")})`,
+    {
+      weight: "700",
+    }
+  ),
+];
+
+const notoSansSCFontFaces = [
+  new FontFace(
+    "NotoSansSC",
+    `url(${require("./public/assets/font/NatoSansSC-Regular.woff2")})`,
+    {
+      weight: "400",
+    }
+  ),
+  new FontFace(
+    "NotoSansSC",
+    `url(${require("./public/assets/font/NatoSansSC-Medium.woff2")})`,
+    {
+      weight: "500",
+    }
+  ),
+  new FontFace(
+    "NotoSansSC",
+    `url(${require("./public/assets/font/NatoSansSC-SemiBold.woff2")})`,
+    {
+      weight: "600",
+    }
+  ),
+  new FontFace(
+    "NotoSansSC",
+    `url(${require("./public/assets/font/NatoSansSC-Bold.woff2")})`,
+    {
+      weight: "700",
+    }
+  ),
+];
+
+const notoSansKRFontFaces = [
+  new FontFace(
+    "NotoSansKR",
+    `url(${require("./public/assets/font/NotoSansKR-Regular.woff2")})`,
+    {
+      weight: "400",
+    }
+  ),
+  new FontFace(
+    "NotoSansKR",
+    `url(${require("./public/assets/font/NotoSansKR-Medium.woff2")})`,
+    {
+      weight: "500",
+    }
+  ),
+  new FontFace(
+    "NotoSansKR",
+    `url(${require("./public/assets/font/NotoSansKR-Medium.woff2")})`,
+    {
+      weight: "600",
+    }
+  ),
+  new FontFace(
+    "NotoSansKR",
+    `url(${require("./public/assets/font/NotoSansKR-Bold.woff2")})`,
+    {
+      weight: "700",
+    }
+  ),
+];
+
 const languageToFontFaces: {
   [lang: string]: FontFace[] | undefined;
 } = {
-  en: [
-    new FontFace(
-      "Inter",
-      `url(${require("./public/assets/font/Inter-Regular.ttf")})`,
-      {
-        weight: "400",
-      }
-    ),
-    new FontFace(
-      "Inter",
-      `url(${require("./public/assets/font/Inter-Medium.ttf")})`,
-      {
-        weight: "500",
-      }
-    ),
-    new FontFace(
-      "Inter",
-      `url(${require("./public/assets/font/Inter-SemiBold.ttf")})`,
-      {
-        weight: "600",
-      }
-    ),
-    new FontFace(
-      "Inter",
-      `url(${require("./public/assets/font/Inter-Bold.ttf")})`,
-      {
-        weight: "700",
-      }
-    ),
-  ],
-  ko: [
-    new FontFace(
-      "NotoSansKR",
-      `url(${require("./public/assets/font/NotoSansKR-Regular.woff2")})`,
-      {
-        weight: "400",
-      }
-    ),
-    new FontFace(
-      "NotoSansKR",
-      `url(${require("./public/assets/font/NotoSansKR-Medium.woff2")})`,
-      {
-        weight: "500",
-      }
-    ),
-    new FontFace(
-      "NotoSansKR",
-      `url(${require("./public/assets/font/NotoSansKR-Medium.woff2")})`,
-      {
-        weight: "600",
-      }
-    ),
-    new FontFace(
-      "NotoSansKR",
-      `url(${require("./public/assets/font/NotoSansKR-Bold.woff2")})`,
-      {
-        weight: "700",
-      }
-    ),
-  ],
+  en: interFontFaces,
+  "zh-cn": [...interFontFaces, ...notoSansSCFontFaces],
+  ko: [...interFontFaces, ...notoSansKRFontFaces],
 };
 
 export const useLoadFonts = () => {
