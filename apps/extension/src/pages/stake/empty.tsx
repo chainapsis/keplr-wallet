@@ -38,16 +38,7 @@ export const StakeEmptyPage: FunctionComponent = observer(() => {
     .slice(0, 4);
 
   return (
-    <MainHeaderLayout
-      headerContainerStyle={{
-        borderBottomStyle: "solid",
-        borderBottomWidth: "1px",
-        borderBottomColor:
-          theme.mode === "light"
-            ? ColorPalette["gray-100"]
-            : ColorPalette["gray-500"],
-      }}
-    >
+    <MainHeaderLayout>
       <Box paddingX="1rem" paddingY="1.25rem">
         <Box paddingX="0.25rem">
           <MainH1

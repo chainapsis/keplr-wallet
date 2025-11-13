@@ -17,7 +17,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { Toggle } from "../../../../components/toggle/toggle";
 import { AdjustmentIcon, CloseIcon } from "../../../../components/icon";
 import { IconProps } from "../../../../components/icon/types";
-import { useGlobarSimpleBar } from "../../../../hooks/global-simplebar";
+import { useGlobalSimpleBar } from "../../../../hooks/global-simplebar";
 import { Tooltip } from "../../../../components/tooltip";
 import { Gutter } from "../../../../components/gutter";
 import { isRunningInSidePanel } from "../../../../utils";
@@ -274,7 +274,7 @@ export const ViewOptionsContextMenu: FunctionComponent<{
     const menuContentRef = useRef<HTMLDivElement>(null);
     const [initialized, setInitialized] = useState(false);
     const theme = useTheme();
-    const globalSimpleBar = useGlobarSimpleBar();
+    const globalSimpleBar = useGlobalSimpleBar();
 
     useLayoutEffect(() => {
       if (!initialized) {

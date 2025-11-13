@@ -29,7 +29,7 @@ import { defaultSpringConfig } from "../../styles/spring";
 import { IChainInfoImpl, QueryError } from "@keplr-wallet/stores";
 import { Skeleton } from "../../components/skeleton";
 import { useIntl } from "react-intl";
-import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
+import { useGlobalSimpleBar } from "../../hooks/global-simplebar";
 import styled, { useTheme } from "styled-components";
 import { IbcHistoryView } from "./components/ibc-history-view";
 import { XAxis } from "../../components/axis";
@@ -182,7 +182,7 @@ export const MainPage: FunctionComponent<{
 
   const buySupportServiceInfos = useBuySupportServiceInfos();
 
-  const globalSimpleBar = useGlobarSimpleBar();
+  const globalSimpleBar = useGlobalSimpleBar();
 
   const totalPriceSectionRef = useRef<HTMLDivElement | null>(null);
   const [isTotalPriceVisible, setIsTotalPriceVisible] = useState(true);

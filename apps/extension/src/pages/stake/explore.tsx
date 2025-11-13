@@ -69,16 +69,7 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
   });
 
   return (
-    <MainHeaderLayout
-      headerContainerStyle={{
-        borderBottomStyle: "solid",
-        borderBottomWidth: "1px",
-        borderBottomColor:
-          theme.mode === "light"
-            ? ColorPalette["gray-100"]
-            : ColorPalette["gray-500"],
-      }}
-    >
+    <MainHeaderLayout>
       <Box paddingX="1rem" paddingY="1.25rem">
         {showBackButton ? <BackButton /> : null}
 

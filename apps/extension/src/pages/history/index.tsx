@@ -15,7 +15,7 @@ import { Gutter } from "../../components/gutter";
 import { Dropdown } from "../../components/dropdown";
 import { EmptyView } from "../../components/empty-view";
 import { H4, Subtitle3 } from "../../components/typography";
-import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
+import { useGlobalSimpleBar } from "../../hooks/global-simplebar";
 import {
   IAccountStore,
   IChainInfoImpl,
@@ -170,7 +170,7 @@ export const HistoryPage: FunctionComponent = observer(() => {
 
   const theme = useTheme();
 
-  const globalSimpleBar = useGlobarSimpleBar();
+  const globalSimpleBar = useGlobalSimpleBar();
   useEffect(() => {
     if (globalSimpleBar.ref.current) {
       const scrollElement = globalSimpleBar.ref.current.getScrollElement();
