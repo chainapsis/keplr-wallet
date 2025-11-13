@@ -3,7 +3,7 @@ import { MenuTwoLineIcon } from "../../../../components/icon/menu-two-line";
 import { Box } from "../../../../components/box";
 import styled, { css, useTheme } from "styled-components";
 import { autoUpdate, offset, useFloating } from "@floating-ui/react-dom";
-import { Modal } from "../../../../components/modal";
+import { FloatModal } from "../../../../components/float-modal";
 import { ColorPalette } from "../../../../styles";
 import { FormattedMessage } from "react-intl";
 import { useLocation, useNavigate } from "react-router";
@@ -79,138 +79,136 @@ export const FloatingMenuBar = ({
           color={ColorPalette["gray-300"]}
         />
       </Box>
-      {isOpen && (
-        <Modal isOpen={isOpen} align="left" close={closeMenu}>
-          <Styles.MenuFloatingBarContainer
-            top={y ?? 0}
-            left={x ?? 0}
-            strategy={strategy}
-            ref={refs.setFloating}
+      <FloatModal isOpen={isOpen} close={closeMenu}>
+        <Styles.MenuFloatingBarContainer
+          top={y ?? 0}
+          left={x ?? 0}
+          strategy={strategy}
+          ref={refs.setFloating}
+        >
+          <Styles.MenuItem
+            key="manage-chain-visibility"
+            isTopOrBottom={"top"}
+            onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+              e.preventDefault();
+              if (keyRingStore.selectedKeyInfo) {
+                analyticsStore.logEvent("click_menu_manageChainVisibility");
+                navigate(
+                  `/manage-chains?vaultId=${keyRingStore.selectedKeyInfo.id}`
+                );
+              }
+            }}
           >
+            <AddRemoveChainsIcon />
+            <Body2>
+              <FormattedMessage id="page.main.components.menu-bar.manage-chain-visibility-title" />
+            </Body2>
+          </Styles.MenuItem>
+
+          <Styles.MenuItem
+            key="manage-asset-list"
+            onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+              e.preventDefault();
+              navigate("/manage-view-asset-token-list");
+            }}
+          >
+            <ManageAssetListIcon />
+            <Body2>
+              <FormattedMessage id="page.main.components.menu-bar.manage-asset-list-title" />
+            </Body2>
+          </Styles.MenuItem>
+
+          <Styles.MenuItem
+            key="my-contacts"
+            onClick={() => {
+              navigate("/setting/contacts/list");
+            }}
+          >
+            <ContactsIcon />
+            <Body2>
+              <FormattedMessage id="page.main.components.menu-bar.my-contacts-title" />
+            </Body2>
+          </Styles.MenuItem>
+
+          <Styles.MenuItem
+            key="go-to-dashboard"
+            onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+              e.preventDefault();
+              analyticsStore.logEvent("click_keplrDashboard", {
+                tabName: "available",
+              });
+              browser.tabs.create({
+                url: "https://wallet.keplr.app/?utm_source=keplrextension&utm_medium=button&utm_campaign=permanent&utm_content=manage_portfolio",
+              });
+            }}
+          >
+            <GoToDashboardIcon />
+            <Body2>
+              <FormattedMessage id="page.main.components.menu-bar.go-to-dashboard" />
+            </Body2>
+          </Styles.MenuItem>
+
+          {sidePanelSupported && (
             <Styles.MenuItem
-              key="manage-chain-visibility"
-              isTopOrBottom={"top"}
+              key="side-panel-mode"
               onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                 e.preventDefault();
-                if (keyRingStore.selectedKeyInfo) {
-                  analyticsStore.logEvent("click_menu_manageChainVisibility");
-                  navigate(
-                    `/manage-chains?vaultId=${keyRingStore.selectedKeyInfo.id}`
-                  );
-                }
-              }}
-            >
-              <AddRemoveChainsIcon />
-              <Body2>
-                <FormattedMessage id="page.main.components.menu-bar.manage-chain-visibility-title" />
-              </Body2>
-            </Styles.MenuItem>
-
-            <Styles.MenuItem
-              key="manage-asset-list"
-              onClick={(e: React.MouseEvent<HTMLDivElement>) => {
-                e.preventDefault();
-                navigate("/manage-view-asset-token-list");
-              }}
-            >
-              <ManageAssetListIcon />
-              <Body2>
-                <FormattedMessage id="page.main.components.menu-bar.manage-asset-list-title" />
-              </Body2>
-            </Styles.MenuItem>
-
-            <Styles.MenuItem
-              key="my-contacts"
-              onClick={() => {
-                navigate("/setting/contacts/list");
-              }}
-            >
-              <ContactsIcon />
-              <Body2>
-                <FormattedMessage id="page.main.components.menu-bar.my-contacts-title" />
-              </Body2>
-            </Styles.MenuItem>
-
-            <Styles.MenuItem
-              key="go-to-dashboard"
-              onClick={(e: React.MouseEvent<HTMLDivElement>) => {
-                e.preventDefault();
-                analyticsStore.logEvent("click_keplrDashboard", {
-                  tabName: "available",
+                toggleSidePanelMode(!sidePanelEnabled, (res) => {
+                  setSidePanelEnabled(res);
                 });
-                browser.tabs.create({
-                  url: "https://wallet.keplr.app/?utm_source=keplrextension&utm_medium=button&utm_campaign=permanent&utm_content=manage_portfolio",
-                });
               }}
             >
-              <GoToDashboardIcon />
+              <SidePanelModeIcon />
               <Body2>
-                <FormattedMessage id="page.main.components.menu-bar.go-to-dashboard" />
+                <FormattedMessage id="page.main.components.menu-bar.side-panel-mode" />
               </Body2>
+              <Toggle size="extra-small" isOpen={sidePanelEnabled} />
             </Styles.MenuItem>
+          )}
 
-            {sidePanelSupported && (
-              <Styles.MenuItem
-                key="side-panel-mode"
-                onClick={(e: React.MouseEvent<HTMLDivElement>) => {
-                  e.preventDefault();
-                  toggleSidePanelMode(!sidePanelEnabled, (res) => {
-                    setSidePanelEnabled(res);
-                  });
-                }}
-              >
-                <SidePanelModeIcon />
-                <Body2>
-                  <FormattedMessage id="page.main.components.menu-bar.side-panel-mode" />
-                </Body2>
-                <Toggle size="extra-small" isOpen={sidePanelEnabled} />
-              </Styles.MenuItem>
-            )}
+          <div
+            style={{
+              width: "100%",
+              backgroundColor:
+                theme.mode === "light"
+                  ? ColorPalette["gray-100"]
+                  : ColorPalette["gray-400"],
+              height: "0.03125rem",
+            }}
+          />
 
-            <div
-              style={{
-                width: "100%",
-                backgroundColor:
-                  theme.mode === "light"
-                    ? ColorPalette["gray-100"]
-                    : ColorPalette["gray-400"],
-                height: "0.03125rem",
-              }}
-            />
+          <Styles.MenuItem
+            key="lock-wallet"
+            onClick={async (e: React.MouseEvent<HTMLDivElement>) => {
+              e.preventDefault();
+              await keyRingStore.lock();
 
+              dispatchGlobalEventExceptSelf("keplr_keyring_locked");
+            }}
+          >
+            <LockWalletIcon />
+            <Body2>
+              <FormattedMessage id="page.main.components.menu-bar.lock-wallet-title" />
+            </Body2>
+          </Styles.MenuItem>
+
+          {location.pathname !== "/setting" && (
             <Styles.MenuItem
-              key="lock-wallet"
-              onClick={async (e: React.MouseEvent<HTMLDivElement>) => {
+              key="go-to-setting-page"
+              isTopOrBottom={"bottom"}
+              onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                 e.preventDefault();
-                await keyRingStore.lock();
-
-                dispatchGlobalEventExceptSelf("keplr_keyring_locked");
+                navigate("/setting");
               }}
             >
-              <LockWalletIcon />
+              <SettingsIcon />
               <Body2>
-                <FormattedMessage id="page.main.components.menu-bar.lock-wallet-title" />
+                <FormattedMessage id="page.main.components.menu-bar.go-to-setting-page" />
               </Body2>
             </Styles.MenuItem>
-
-            {location.pathname !== "/setting" && (
-              <Styles.MenuItem
-                key="go-to-setting-page"
-                isTopOrBottom={"bottom"}
-                onClick={(e: React.MouseEvent<HTMLDivElement>) => {
-                  e.preventDefault();
-                  navigate("/setting");
-                }}
-              >
-                <SettingsIcon />
-                <Body2>
-                  <FormattedMessage id="page.main.components.menu-bar.go-to-setting-page" />
-                </Body2>
-              </Styles.MenuItem>
-            )}
-          </Styles.MenuFloatingBarContainer>
-        </Modal>
-      )}
+          )}
+        </Styles.MenuFloatingBarContainer>
+      </FloatModal>
     </React.Fragment>
   );
 };
