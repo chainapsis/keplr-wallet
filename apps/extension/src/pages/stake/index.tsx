@@ -1,7 +1,6 @@
 import React, { FunctionComponent, useMemo } from "react";
 import { observer } from "mobx-react-lite";
 import { MainHeaderLayout } from "../main/layouts/header";
-import { useTheme } from "styled-components";
 import { ColorPalette } from "../../styles";
 import { Box } from "../../components/box";
 import { XAxis } from "../../components/axis";
@@ -33,7 +32,6 @@ import { useGetStakingApr } from "../../hooks/use-get-staking-apr";
 const zeroDec = new Dec(0);
 
 export const StakePage: FunctionComponent = observer(() => {
-  const theme = useTheme();
   const intl = useIntl();
   const [params] = useSearchParams();
   const initialExpand = params.get("intitialExpand") === "true";
@@ -90,16 +88,7 @@ export const StakePage: FunctionComponent = observer(() => {
   }
 
   return (
-    <MainHeaderLayout
-      headerContainerStyle={{
-        borderBottomStyle: "solid",
-        borderBottomWidth: "1px",
-        borderBottomColor:
-          theme.mode === "light"
-            ? ColorPalette["gray-100"]
-            : ColorPalette["gray-500"],
-      }}
-    >
+    <MainHeaderLayout>
       <Box paddingX="1rem">
         <Gutter size="1.25rem" />
 

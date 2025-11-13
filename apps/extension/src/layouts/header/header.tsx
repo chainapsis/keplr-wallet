@@ -304,6 +304,17 @@ export const HeaderLayout: FunctionComponent<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  console.log({
+    ...(showBorderBottom && {
+      borderBottom:
+        "0.5px solid " +
+        (theme.mode === "light"
+          ? ColorPalette["gray-100"]
+          : ColorPalette["gray-500"]),
+    }),
+    ...headerContainerStyle,
+  });
+
   return (
     <Styles.Container as={onSubmit ? "form" : undefined} onSubmit={onSubmit}>
       {fixedTop ? (
@@ -313,12 +324,14 @@ export const HeaderLayout: FunctionComponent<
       ) : null}
       <Styles.HeaderContainer
         style={{
-          borderBottom: showBorderBottom
-            ? "0.5px solid " +
-              (theme.mode === "light"
+          ...(showBorderBottom && {
+            borderBottomStyle: "solid",
+            borderBottomWidth: "0.5px",
+            borderBottomColor:
+              theme.mode === "light"
                 ? ColorPalette["gray-100"]
-                : ColorPalette["gray-500"])
-            : undefined,
+                : ColorPalette["gray-500"],
+          }),
           ...headerContainerStyle,
         }}
         fixedTopHeight={fixedTop?.height}
