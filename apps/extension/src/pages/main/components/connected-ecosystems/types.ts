@@ -1,4 +1,4 @@
-import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
+import { ModularChainInfo } from "@keplr-wallet/types";
 
 export type EcosystemType = "bitcoin" | "evm" | "starknet";
 
@@ -11,7 +11,7 @@ export const EcosystemTypeToText: Record<EcosystemType, string> = {
 export type EcosystemSection = {
   type: EcosystemType;
   chainId: string;
-  chainInfos: (ModularChainInfo | ChainInfo)[];
+  chainInfos: ModularChainInfo[];
   currentChainId: string;
   setCurrentChainId: (chainId: string) => void;
   footer?: {

@@ -2,8 +2,9 @@ import { KVStore, PrefixKVStore } from "@keplr-wallet/common";
 import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 import { ChainStore } from "../chain";
 import { computedFn } from "mobx-utils";
-import { IChainInfoImpl, IQueriesStore } from "@keplr-wallet/stores";
-import { AppCurrency } from "@keplr-wallet/types";
+import { IQueriesStore } from "@keplr-wallet/stores";
+import { AppCurrency, ModularChainInfo } from "@keplr-wallet/types";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export class IBCSwapConfig {
   protected readonly kvStore: KVStore;
@@ -107,16 +108,16 @@ export class IBCSwapConfig {
     });
   }
 
-  getAmountInChainInfo = computedFn((): IChainInfoImpl => {
+  getAmountInChainInfo = computedFn((): ModularChainInfo => {
     if (
       this._lastAmountInChainId &&
-      this.chainStore.hasChain(this._lastAmountInChainId) &&
+      this.chainStore.hasModularChain(this._lastAmountInChainId) &&
       this.chainStore.isEnabledChain(this._lastAmountInChainId)
     ) {
-      return this.chainStore.getChain(this._lastAmountInChainId);
+      return this.chainStore.getModularChain(this._lastAmountInChainId);
     }
 
-    return this.chainStore.chainInfosInUI[0];
+    return this.chainStore.modularChainInfosInUI[0];
   });
 
   @action
@@ -125,8 +126,12 @@ export class IBCSwapConfig {
   }
 
   getAmountInCurrency = computedFn((): AppCurrency => {
+    const modularChainInfoImpl = this.chainStore.getModularChainInfoImpl(
+      this.getAmountInChainInfo().chainId
+    );
+
     if (this._lastAmountInMinimalDenom) {
-      const currency = this.getAmountInChainInfo().findCurrency(
+      const currency = modularChainInfoImpl.findCurrency(
         this._lastAmountInMinimalDenom
       );
       if (currency) {
@@ -134,7 +139,7 @@ export class IBCSwapConfig {
       }
     }
 
-    return this.getAmountInChainInfo().currencies[0];
+    return modularChainInfoImpl.getCurrencies()[0];
   });
 
   @action
@@ -142,39 +147,42 @@ export class IBCSwapConfig {
     this._lastAmountInMinimalDenom = denom;
   }
 
-  getAmountOutChainInfo = computedFn((): IChainInfoImpl => {
+  getAmountOutChainInfo = computedFn((): ModularChainInfo => {
     if (
       this._lastAmountOutChainId &&
-      this.chainStore.hasChain(this._lastAmountOutChainId)
+      this.chainStore.hasModularChain(this._lastAmountOutChainId)
     ) {
-      return this.chainStore.getChain(this._lastAmountOutChainId);
+      return this.chainStore.getModularChain(this._lastAmountOutChainId);
     }
 
-    if (this.getAmountInChainInfo().chainIdentifier !== "osmosis") {
+    if (
+      ChainIdHelper.parse(this.getAmountInChainInfo().chainId).identifier !==
+      "osmosis"
+    ) {
       const findIndex = this.chainStore.chainInfosInUI.findIndex(
         (c) => c.chainIdentifier === "osmosis"
       );
       if (findIndex >= 0) {
-        return this.chainStore.chainInfosInUI[findIndex];
+        return this.chainStore.modularChainInfosInUI[findIndex];
       }
     }
 
     if (this.chainStore.chainInfosInUI.length >= 2) {
-      return this.chainStore.chainInfosInUI[1];
+      return this.chainStore.modularChainInfosInUI[1];
     }
 
     // Enabled된 체인들이 한개만 있을수도 있다는 점을 고려해야한다. 그러므로 chain infos in ui에서 두번째 체인을 찾을 수 없다면
     // 그것과 상관없이 chain infos에서 찾는다.
-    const find = this.chainStore.chainInfos.find((chainInfo) => {
+    const find = this.chainStore.modularChainInfos.find((modularChainInfo) => {
       return (
-        chainInfo.chainIdentifier !==
-        this.getAmountInChainInfo().chainIdentifier
+        ChainIdHelper.parse(modularChainInfo.chainId).identifier !==
+        ChainIdHelper.parse(this.getAmountInChainInfo().chainId).identifier
       );
     });
     if (find) {
       return find;
     }
-    return this.chainStore.chainInfos[0];
+    return this.chainStore.modularChainInfos[0];
   });
 
   @action
@@ -183,13 +191,17 @@ export class IBCSwapConfig {
   }
 
   getAmountOutCurrency = computedFn((): AppCurrency => {
+    const modularChainInfoImpl = this.chainStore.getModularChainInfoImpl(
+      this.getAmountOutChainInfo().chainId
+    );
+
     if (this._lastAmountOutMinimalDenom) {
-      return this.getAmountOutChainInfo().forceFindCurrency(
+      return modularChainInfoImpl.forceFindCurrency(
         this._lastAmountOutMinimalDenom
       );
     }
 
-    return this.getAmountOutChainInfo().currencies[0];
+    return modularChainInfoImpl.getCurrencies()[0];
   });
 
   @action

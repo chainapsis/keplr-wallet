@@ -69,7 +69,12 @@ const addressSearchFields = [
   {
     key: "modularChainInfo.currency.coinDenom",
     function: (item: Address) => {
-      if (
+      if ("evm" in item.modularChainInfo && item.modularChainInfo.evm != null) {
+        const evmChainInfo = item.modularChainInfo.evm;
+        return CoinPretty.makeCoinDenomPretty(
+          evmChainInfo.currencies[0].coinDenom
+        );
+      } else if (
         "cosmos" in item.modularChainInfo &&
         item.modularChainInfo.cosmos != null
       ) {
@@ -192,14 +197,10 @@ export const CopyAddressScene: FunctionComponent<{
           return undefined;
         }
 
-        if (modularChainInfo.chainId.startsWith("eip155")) {
-          return undefined;
-        }
-
         return accountInfo.bech32Address;
       })();
       const ethereumAddress = (() => {
-        if (!("cosmos" in modularChainInfo)) {
+        if (!("evm" in modularChainInfo) && !("cosmos" in modularChainInfo)) {
           return undefined;
         }
 
@@ -285,44 +286,49 @@ export const CopyAddressScene: FunctionComponent<{
   });
 
   const lookingForChains = useMemo(() => {
-    let disabledChainInfos: (ChainInfo | ModularChainInfo)[] =
+    let disabledSearchedChainInfos: ModularChainInfo[] =
       searchedChainInfos.filter(
         (chainInfo) => !chainStore.isEnabledChain(chainInfo.chainId)
       );
 
-    const disabledModularChainInfos =
+    const disabledGroupedChainInfos =
       chainStore.groupedModularChainInfos.filter(
         (modularChainInfo) =>
           ("starknet" in modularChainInfo || "bitcoin" in modularChainInfo) &&
           !chainStore.isEnabledChain(modularChainInfo.chainId)
       );
 
-    disabledChainInfos = [
-      ...new Set([...disabledChainInfos, ...disabledModularChainInfos]),
+    disabledSearchedChainInfos = [
+      ...new Set([...disabledSearchedChainInfos, ...disabledGroupedChainInfos]),
     ].sort((a, b) => a.chainName.localeCompare(b.chainName));
 
-    return disabledChainInfos.reduce(
+    return disabledSearchedChainInfos.reduce(
       (acc, chainInfo) => {
         let embedded: boolean | undefined = false;
         let stored: boolean = true;
 
-        const isModular = "starknet" in chainInfo || "bitcoin" in chainInfo;
+        const isEmbedded = "starknet" in chainInfo || "bitcoin" in chainInfo;
 
         try {
-          if (isModular) {
+          if (isEmbedded) {
             embedded = true;
           } else {
-            const chainInfoInStore = chainStore.getChain(chainInfo.chainId);
-
-            if (!chainInfoInStore) {
+            if (!chainStore.hasModularChain(chainInfo.chainId)) {
               stored = false;
             } else {
-              if (chainInfoInStore.hideInUI) {
+              const chainInfoInStore = chainStore.getModularChain(
+                chainInfo.chainId
+              );
+
+              if (
+                "cosmos" in chainInfoInStore &&
+                chainInfoInStore.cosmos.hideInUI
+              ) {
                 return acc;
               }
 
               stored = true;
-              embedded = chainInfoInStore.embedded?.embedded;
+              embedded = chainInfoInStore.isNative;
             }
           }
         } catch (e) {
@@ -344,7 +350,7 @@ export const CopyAddressScene: FunctionComponent<{
       [] as {
         embedded: boolean;
         stored: boolean;
-        chainInfo: ChainInfo | ModularChainInfo;
+        chainInfo: ModularChainInfo;
       }[]
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -509,8 +515,7 @@ const CopyAddressItem: FunctionComponent<{
     setBlockInteraction,
     setSortPriorities,
   }) => {
-    const { analyticsStore, keyRingStore, uiConfigStore, chainStore } =
-      useStore();
+    const { analyticsStore, keyRingStore, uiConfigStore } = useStore();
 
     const theme = useTheme();
 
@@ -529,9 +534,9 @@ const CopyAddressItem: FunctionComponent<{
     const [isBookmarkHover, setIsBookmarkHover] = useState(false);
 
     const isEVMOnlyChain =
-      "cosmos" in address.modularChainInfo &&
-      address.modularChainInfo.cosmos != null &&
-      chainStore.isEvmOnlyChain(address.modularChainInfo.chainId);
+      "evm" in address.modularChainInfo &&
+      address.modularChainInfo.evm != null &&
+      !("cosmos" in address.modularChainInfo);
 
     // 클릭 영역 문제로 레이아웃이 복잡해졌다.
     // 알아서 잘 해결하자

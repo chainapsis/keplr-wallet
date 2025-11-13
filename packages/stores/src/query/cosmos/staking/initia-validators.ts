@@ -42,7 +42,7 @@ export class ObservableQueryInitiaValidatorsInner extends ObservableChainQuery<I
   }
 
   protected override canFetch(): boolean {
-    if (!this.chainGetter.getChain(this.chainId).stakeCurrency) {
+    if (!this.chainGetter.getModularChainInfoImpl(this.chainId).stakeCurrency) {
       return false;
     }
     return super.canFetch();
@@ -54,7 +54,9 @@ export class ObservableQueryInitiaValidatorsInner extends ObservableChainQuery<I
       return [];
     }
 
-    const stakeCurrency = this.chainGetter.getChain(this.chainId).stakeCurrency;
+    const stakeCurrency = this.chainGetter.getModularChainInfoImpl(
+      this.chainId
+    ).stakeCurrency;
 
     if (!stakeCurrency) {
       return [];
@@ -148,7 +150,7 @@ export class ObservableQueryInitiaValidatorsInner extends ObservableChainQuery<I
         return;
       }
 
-      const chainInfo = this.chainGetter.getChain(this.chainId);
+      const chainInfo = this.chainGetter.getModularChainInfoImpl(this.chainId);
       const stakeCurrency = chainInfo.stakeCurrency;
 
       if (!stakeCurrency) {

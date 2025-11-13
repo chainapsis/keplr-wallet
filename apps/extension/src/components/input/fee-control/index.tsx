@@ -101,7 +101,7 @@ export const useAutoFeeCurrencySelectionOnInit = (
         feeConfig.fees.length > 0
       ) {
         const queryBalances =
-          chainStore.getChain(feeConfig.chainId).evm != null &&
+          "evm" in chainStore.getModularChain(feeConfig.chainId) &&
           EthereumAccountBase.isEthereumHexAddressWithChecksum(
             senderConfig.sender
           )
@@ -121,9 +121,12 @@ export const useAutoFeeCurrencySelectionOnInit = (
           feeConfig.type
         );
         if (currentFeeCurrencyBal.toDec().lt(currentFee.toDec())) {
+          const modularChainInfo = chainStore.getModularChainInfoImpl(
+            feeConfig.chainId
+          );
           const isOsmosis =
-            chainStore.hasChain(feeConfig.chainId) &&
-            chainStore.getChain(feeConfig.chainId).hasFeature("osmosis-txfees");
+            modularChainInfo.matchModule("cosmos") &&
+            modularChainInfo.hasFeature("osmosis-txfees");
 
           // Not enough balances for fee.
           // Try to find other fee currency to send.
@@ -286,12 +289,14 @@ export const FeeControl: FunctionComponent<{
                         if (feeConfig.fees.length > 0) {
                           return feeConfig.fees;
                         }
-                        const chainInfo = chainStore.getChain(
+                        const chainInfo = chainStore.getModularChainInfoImpl(
                           feeConfig.chainId
                         );
                         return [
                           new CoinPretty(
-                            chainInfo.stakeCurrency || chainInfo.currencies[0],
+                            ("cosmos" in chainInfo.embedded &&
+                              chainInfo.embedded.cosmos.stakeCurrency) ||
+                              chainInfo.getCurrencies()[0],
                             new Dec(0)
                           ),
                         ];
