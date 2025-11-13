@@ -6,7 +6,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import styled, { css, useTheme } from "styled-components";
+import styled, { css } from "styled-components";
 import { HeaderProps } from "./types";
 import { Subtitle1 } from "../../components/typography";
 import { ColorPalette } from "../../styles";
@@ -43,6 +43,7 @@ const Styles = {
 
   HeaderContainer: styled.div<{
     fixedTopHeight?: string;
+    showBorderBottom?: boolean;
   }>`
     height: ${HeaderHeight};
 
@@ -69,6 +70,14 @@ const Styles = {
     right: 0;
 
     z-index: 100;
+    border-bottom: ${({ showBorderBottom, theme }) =>
+      showBorderBottom
+        ? `0.5px solid ${
+            theme.mode === "light"
+              ? ColorPalette["gray-100"]
+              : ColorPalette["gray-500"]
+          }`
+        : "none"};
   `,
 
   HeaderTitle: styled.div`
@@ -279,7 +288,6 @@ export const HeaderLayout: FunctionComponent<
     bottomButtonAnimation.start(hasBottomButton ? 1 : 0);
   }, [bottomButtonAnimation, hasBottomButton]);
 
-  const theme = useTheme();
   const globalSimpleBar = useGlobalSimpleBar();
   const [showBorderBottom, setShowBorderBottom] = useState(false);
 
@@ -312,17 +320,8 @@ export const HeaderLayout: FunctionComponent<
         </div>
       ) : null}
       <Styles.HeaderContainer
-        style={{
-          ...(showBorderBottom && {
-            borderBottomStyle: "solid",
-            borderBottomWidth: "0.5px",
-            borderBottomColor:
-              theme.mode === "light"
-                ? ColorPalette["gray-100"]
-                : ColorPalette["gray-500"],
-          }),
-          ...headerContainerStyle,
-        }}
+        showBorderBottom={showBorderBottom}
+        style={headerContainerStyle}
         fixedTopHeight={fixedTop?.height}
       >
         {left && !isNotReady ? (
