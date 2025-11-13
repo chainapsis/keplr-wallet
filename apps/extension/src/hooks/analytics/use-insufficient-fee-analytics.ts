@@ -1,17 +1,21 @@
 import { useEffect, useRef } from "react";
 import { useLocation } from "react-router";
 import { autorun } from "mobx";
-import { IFeeConfig, InsufficientFeeError } from "@keplr-wallet/hooks";
+import {
+  IFeeConfig,
+  InsufficientFeeError,
+  ISenderConfig,
+} from "@keplr-wallet/hooks";
 import { useStore } from "../../stores";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export const useInsufficientFeeAnalytics = (
   feeConfig: IFeeConfig,
+  senderConfig: ISenderConfig,
   forceTopUp?: boolean
 ) => {
   const location = useLocation();
-  const { analyticsAmplitudeStore, chainStore, queriesStore, accountStore } =
-    useStore();
+  const { analyticsAmplitudeStore, chainStore, queriesStore } = useStore();
 
   const loggedKeySetRef = useRef(new Set<string>());
 
@@ -28,10 +32,7 @@ export const useInsufficientFeeAnalytics = (
 
       const chainId = feeConfig.chainId;
       const pathname = location.pathname;
-      const account = accountStore.getAccount(chainId);
-      const sender = chainStore.isEvmOnlyChain(chainId)
-        ? account.ethereumHexAddress
-        : account.bech32Address;
+      const sender = senderConfig.sender;
       if (!sender) {
         return;
       }
@@ -77,7 +78,7 @@ export const useInsufficientFeeAnalytics = (
     feeConfig,
     location.pathname,
     queriesStore,
-    accountStore,
+    senderConfig.sender,
     forceTopUp,
   ]);
 };

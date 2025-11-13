@@ -212,7 +212,7 @@ export const FeeControl: FunctionComponent<{
       uiConfigStore,
     } = useStore();
 
-    useInsufficientFeeAnalytics(feeConfig, forceTopUp);
+    useInsufficientFeeAnalytics(feeConfig, senderConfig, forceTopUp);
 
     const intl = useIntl();
     const theme = useTheme();

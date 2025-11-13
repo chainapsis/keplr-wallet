@@ -21,6 +21,7 @@ import {
   EmptyAmountError,
   IFeeConfig,
   IGasConfig,
+  ISenderConfig,
   useGasSimulator,
   useTxConfigsValidate,
   ZeroAmountError,
@@ -2034,6 +2035,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             amountConfig={ibcSwapConfigs.amountConfig}
             feeConfig={ibcSwapConfigs.feeConfig}
             gasConfig={ibcSwapConfigs.gasConfig}
+            senderConfig={ibcSwapConfigs.senderConfig}
             title={
               isHighPriceImpact &&
               !calculatingTxError &&
@@ -2153,6 +2155,7 @@ const WarningGuideBox: FunctionComponent<{
   amountConfig: IBCSwapAmountConfig;
   feeConfig: IFeeConfig;
   gasConfig: IGasConfig;
+  senderConfig: ISenderConfig;
 
   forceError?: Error;
   forceWarning?: Error;
@@ -2165,13 +2168,14 @@ const WarningGuideBox: FunctionComponent<{
     amountConfig,
     feeConfig,
     gasConfig,
+    senderConfig,
     forceError,
     forceWarning,
     title,
     showUSDNWarning,
     showCelestiaWarning,
   }) => {
-    useInsufficientFeeAnalytics(feeConfig);
+    useInsufficientFeeAnalytics(feeConfig, senderConfig);
 
     const intl = useIntl();
     const theme = useTheme();
