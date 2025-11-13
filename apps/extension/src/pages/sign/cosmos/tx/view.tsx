@@ -805,6 +805,7 @@ export const CosmosTxView: FunctionComponent<{
                       disableAutomaticFeeSet={preferNoSetFee}
                       isExternalMsg={!interactionData.isInternal}
                       shouldTopUp={shouldTopUp}
+                      forceTopUp={interactionData.data.signOptions.forceTopUp}
                     />
                   );
                 })()}
