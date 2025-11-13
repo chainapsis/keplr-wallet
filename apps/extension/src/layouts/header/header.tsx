@@ -304,17 +304,6 @@ export const HeaderLayout: FunctionComponent<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  console.log({
-    ...(showBorderBottom && {
-      borderBottom:
-        "0.5px solid " +
-        (theme.mode === "light"
-          ? ColorPalette["gray-100"]
-          : ColorPalette["gray-500"]),
-    }),
-    ...headerContainerStyle,
-  });
-
   return (
     <Styles.Container as={onSubmit ? "form" : undefined} onSubmit={onSubmit}>
       {fixedTop ? (
