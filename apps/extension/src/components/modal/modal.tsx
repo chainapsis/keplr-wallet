@@ -205,7 +205,7 @@ const ModalChild: FunctionComponent<
           ? "rgba(0,0,0,0)"
           : transition.to((t) =>
               Color(ColorPalette["gray-550"])
-                .alpha(t * 0.3)
+                .alpha(t * 0.55)
                 .string()
             ),
       }}

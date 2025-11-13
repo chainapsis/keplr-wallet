@@ -11,6 +11,7 @@ import ReactDOM from "react-dom";
 import { animated, useSpringValue } from "@react-spring/web";
 import Color from "color";
 import { defaultSpringConfig } from "../../styles/spring";
+import { ColorPalette } from "../../styles";
 
 type FloatModalProps = {
   isOpen: boolean;
@@ -131,7 +132,7 @@ const ModalChild: FunctionComponent<
           disableBackdrop || disableBackdropStyle
             ? "rgba(0,0,0,0)"
             : transition.to((t) =>
-                Color("#000000")
+                Color(ColorPalette["gray-550"])
                   .alpha(t * 0.55)
                   .string()
               ),

@@ -363,7 +363,7 @@ const TokenItemContent: FunctionComponent<TokenItemContentProps> = ({
 
       <Gutter size="0.75rem" />
 
-      <Stack gutter="0.25rem">
+      <Stack gutter="0.375rem">
         <XAxis alignY="center">
           <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth="3.25rem">
             <Subtitle3
@@ -496,7 +496,7 @@ const TokenItemContent: FunctionComponent<TokenItemContentProps> = ({
       <Column weight={1} />
 
       <Columns sum={1} gutter="0.25rem" alignY="center">
-        <Stack gutter="0.25rem" alignX="right">
+        <Stack gutter="0.375rem" alignX="right">
           {!hideBalance ? (
             <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth="3.25rem">
               <Subtitle3
@@ -593,7 +593,7 @@ const Styles = {
   }>`
     background-color: transparent;
     padding: ${({ forChange }) =>
-      forChange ? "0.875rem 0.25rem 0.875rem 1rem" : "0.875rem 1rem"};
+      forChange ? "0.875rem 0.25rem 0.875rem 1rem" : "0.875rem 0.5rem"};
     border-radius: 0.375rem;
     cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
 

@@ -229,7 +229,7 @@ const TokenGroupHeader: FunctionComponent<TokenGroupHeaderProps> = observer(
 
           <Gutter size="0.75rem" />
 
-          <Stack gutter="0.25rem">
+          <Stack gutter="0.375rem">
             <XAxis alignY="center">
               <Subtitle3
                 color={
@@ -290,7 +290,7 @@ const TokenGroupHeader: FunctionComponent<TokenGroupHeaderProps> = observer(
           <Column weight={1} />
 
           <Columns sum={1} gutter="0.25rem" alignY="center">
-            <Stack gutter="0.25rem" alignX="right">
+            <Stack gutter="0.375rem" alignX="right">
               <Subtitle3
                 color={
                   theme.mode === "light"
@@ -553,7 +553,7 @@ const Styles = {
     isOpen: boolean;
   }>`
     background-color: transparent;
-    padding: 0.875rem 1rem;
+    padding: 0.875rem 0.5rem;
     border-radius: 0.375rem;
     cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
     position: relative;
