@@ -508,7 +508,7 @@ const BackButtonContainer = styled.div`
   padding: 0.25rem;
   cursor: pointer;
   &:hover {
-    opacity: 0.7;
+    opacity: ${COMMON_HOVER_OPACITY};
   }
 `;
 

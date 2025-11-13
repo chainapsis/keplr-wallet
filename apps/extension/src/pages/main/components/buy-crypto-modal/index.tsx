@@ -10,6 +10,7 @@ import { BuySupportServiceInfo } from "../../../../hooks/use-buy-support-service
 import { ArrowLeftIcon, LoadingIcon } from "../../../../components/icon";
 import { Column, Columns } from "../../../../components/column";
 import { SceneTransitionContextBase } from "../../../../components/transition/scene/internal";
+import { COMMON_HOVER_OPACITY } from "../../../../styles/constant";
 
 const Styles = {
   Container: styled.div`
@@ -65,7 +66,7 @@ const Styles = {
     padding: 0.25rem;
     cursor: pointer;
     &:hover {
-      opacity: 0.7;
+      opacity: ${COMMON_HOVER_OPACITY};
     }
   `,
 };

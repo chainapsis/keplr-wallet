@@ -19,6 +19,7 @@ import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { dispatchGlobalEventExceptSelf } from "../../../../utils/global-events";
 import { ContextMenuStyles } from "../../../../components/context-menu";
+import { COMMON_HOVER_OPACITY } from "../../../../styles/constant";
 
 export const FloatingMenuBar = ({
   isOpen,
@@ -70,7 +71,7 @@ export const FloatingMenuBar = ({
         cursor="pointer"
         paddingRight="0.75rem"
         ref={refs.setReference}
-        hover={{ opacity: 0.7 }}
+        hover={{ opacity: COMMON_HOVER_OPACITY }}
       >
         <MenuTwoLineIcon
           width="1.5rem"

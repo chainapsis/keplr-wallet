@@ -31,6 +31,7 @@ import { useGetStakingApr } from "../../hooks/use-get-staking-apr";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { IconProps } from "../../components/icon/types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { COMMON_HOVER_OPACITY } from "../../styles/constant";
 
 export const StakeExplorePage: FunctionComponent = observer(() => {
   const theme = useTheme();
@@ -317,7 +318,7 @@ const Styles = {
     cursor: pointer;
 
     :hover {
-      opacity: 0.7;
+      opacity: ${COMMON_HOVER_OPACITY};
     }
   `,
 
@@ -341,7 +342,7 @@ const Styles = {
   BackButtonContainer: styled.div`
     cursor: pointer;
     &:hover {
-      opacity: 0.7;
+      opacity: ${COMMON_HOVER_OPACITY};
     }
   `,
 };

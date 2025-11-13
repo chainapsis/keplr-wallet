@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { ArrowLeftIcon } from "../../../../components/icon";
 import { useNavigate } from "react-router";
 import { ColorPalette } from "../../../../styles";
+import { COMMON_HOVER_OPACITY } from "../../../../styles/constant";
 
 export const BackButton: FunctionComponent<{
   hidden?: boolean;
@@ -30,6 +31,6 @@ const BackButtonContainer = styled.div`
   padding-left: 1rem;
   cursor: pointer;
   &:hover {
-    opacity: 0.7;
+    opacity: ${COMMON_HOVER_OPACITY};
   }
 `;

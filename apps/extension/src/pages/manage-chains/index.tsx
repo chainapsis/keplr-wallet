@@ -34,6 +34,7 @@ import { useKeyCoinTypeFinalize } from "./hooks/use-key-coin-type-finalize";
 import { EmbedChainInfos } from "../../config";
 import { getKeplrFromWindow } from "@keplr-wallet/stores";
 import { KeyRingCosmosService } from "@keplr-wallet/background";
+import { COMMON_HOVER_OPACITY } from "../../styles/constant";
 
 export const Ecosystem = {
   All: "All",
@@ -47,7 +48,7 @@ export type Ecosystem = (typeof Ecosystem)[keyof typeof Ecosystem];
 const HideEnabledText = styled(Subtitle4)`
   cursor: pointer;
   &:hover {
-    opacity: 0.7;
+    opacity: ${COMMON_HOVER_OPACITY};
   }
 `;
 

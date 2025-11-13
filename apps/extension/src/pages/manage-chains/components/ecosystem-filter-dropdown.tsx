@@ -5,6 +5,7 @@ import { Subtitle4 } from "../../../components/typography";
 import { Ecosystem } from "..";
 import { useIntl } from "react-intl";
 import { ContextMenuStyles } from "../../../components/context-menu";
+import { COMMON_HOVER_OPACITY } from "../../../styles/constant";
 
 interface Props {
   selected: Ecosystem;
@@ -152,7 +153,7 @@ const Styles = {
 
     &:hover > :nth-child(2),
     &:hover > :nth-child(3) {
-      opacity: 0.7;
+      opacity: ${COMMON_HOVER_OPACITY};
     }
   `,
 };
