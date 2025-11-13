@@ -24,6 +24,9 @@ export const GlobalStyle = createGlobalStyle`
       word-break: keep-all;
       word-wrap: break-word;
     }
+    &[data-lang="zh-cn"] {
+      font-family: 'Inter', 'NotoSansSC', sans-serif;
+    }
     color: ${(props) =>
       props.theme.mode === "light"
         ? ColorPalette["gray-700"]
@@ -50,6 +53,9 @@ export const GlobalStyle = createGlobalStyle`
 
     &[data-lang="ko"] {
       font-family: 'Inter', 'NotoSansKR', sans-serif;
+    }
+    &[data-lang="zh-cn"] {
+      font-family: 'Inter', 'NotoSansSC', sans-serif;
     }
   }
 
