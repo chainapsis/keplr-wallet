@@ -29,6 +29,7 @@ import { UIConfigStore } from "../../../stores/ui-config";
 import { IChainStore, IQueriesStore } from "@keplr-wallet/stores";
 import { Tooltip } from "../../tooltip";
 import { EthereumAccountBase } from "@keplr-wallet/stores-eth";
+import { useInsufficientFeeAnalytics } from "../../../hooks/analytics/use-insufficient-fee-analytics";
 
 // 기본적으로 `FeeControl` 안에 있는 로직이였지만 `FeeControl` 말고도 다른 UI를 가진 똑같은 기능의 component가
 // 여러개 생기게 되면서 공통적으로 사용하기 위해서 custom hook으로 분리함
@@ -188,6 +189,7 @@ export const FeeControl: FunctionComponent<{
   setNonceMethod?: (nonceMethod: "pending" | "latest") => void;
   isExternalMsg?: boolean;
   shouldTopUp?: boolean;
+  forceTopUp?: boolean;
 }> = observer(
   ({
     senderConfig,
@@ -200,6 +202,7 @@ export const FeeControl: FunctionComponent<{
     setNonceMethod,
     isExternalMsg,
     shouldTopUp,
+    forceTopUp,
   }) => {
     const {
       analyticsStore,
@@ -208,6 +211,8 @@ export const FeeControl: FunctionComponent<{
       chainStore,
       uiConfigStore,
     } = useStore();
+
+    useInsufficientFeeAnalytics(feeConfig, forceTopUp);
 
     const intl = useIntl();
     const theme = useTheme();

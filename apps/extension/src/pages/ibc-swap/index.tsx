@@ -68,6 +68,7 @@ import {
 } from "../earn/utils";
 import { FeeCoverageDescription } from "../../components/top-up";
 import { useTopUp } from "../../hooks/use-topup";
+import { useInsufficientFeeAnalytics } from "../../hooks/analytics/use-insufficient-fee-analytics";
 import { getShouldTopUpSignOptions } from "../../utils/should-top-up-sign-options";
 
 const TextButtonStyles = {
@@ -2170,6 +2171,8 @@ const WarningGuideBox: FunctionComponent<{
     showUSDNWarning,
     showCelestiaWarning,
   }) => {
+    useInsufficientFeeAnalytics(feeConfig);
+
     const intl = useIntl();
     const theme = useTheme();
 
