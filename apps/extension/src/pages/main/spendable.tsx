@@ -56,7 +56,7 @@ import { useGroupedTokensMap } from "../../hooks/use-grouped-tokens-map";
 import { useBalanceAnalytics } from "./hooks/use-balance-analytics";
 import { KeyRingCosmosService } from "@keplr-wallet/background";
 import { useSpringValue } from "@react-spring/web";
-import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
+import { useGlobalSimpleBar } from "../../hooks/global-simplebar";
 import { defaultSpringConfig } from "../../styles/spring";
 import { useSearch } from "../../hooks/use-search";
 import { SearchTextInput } from "../../components/input";
@@ -285,7 +285,7 @@ const useSearchBar = (isNotReady?: boolean) => {
     config: defaultSpringConfig,
   });
   const { analyticsStore, uiConfigStore } = useStore();
-  const globalSimpleBar = useGlobarSimpleBar();
+  const globalSimpleBar = useGlobalSimpleBar();
   const searchRef = useRef<HTMLInputElement | null>(null);
   const [search, setSearch] = useState("");
   const [isEnteredSearch, setIsEnteredSearch] = useState(false);

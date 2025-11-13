@@ -32,7 +32,7 @@ import { App, AppCoinType } from "@keplr-wallet/ledger-cosmos";
 import { SearchTextInput } from "../../../components/input";
 import { SpringValue, animated, to, useSpringValue } from "@react-spring/web";
 import { defaultSpringConfig } from "../../../styles/spring";
-import { useGlobarSimpleBar } from "../../../hooks/global-simplebar";
+import { useGlobalSimpleBar } from "../../../hooks/global-simplebar";
 import { EmptyView } from "../../../components/empty-view";
 import { dispatchGlobalEventExceptSelf } from "../../../utils/global-events";
 import { useSearchKeyInfos } from "../../../hooks/use-search-key-infos";
@@ -198,7 +198,7 @@ const KeyInfoList: FunctionComponent<{
 }> = observer(({ sortKey, title, keyInfos }) => {
   const { uiConfigStore } = useStore();
 
-  const globalSimpleBar = useGlobarSimpleBar();
+  const globalSimpleBar = useGlobalSimpleBar();
   const scrollAnim = useSpringValue(0, {
     config: defaultSpringConfig,
   });
