@@ -36,6 +36,7 @@ import { version } from "../../../package.json";
 import { useIntl } from "react-intl";
 import { HeaderLayout } from "../../layouts/header";
 import { BackButton } from "../../layouts/header/components";
+import { useGetIcnsName } from "../../hooks/use-get-icns-name";
 
 export const SettingPage: FunctionComponent = observer(() => {
   const navigate = useNavigate();
@@ -436,32 +437,17 @@ const TopSection: FunctionComponent<{
     onClick?: () => void;
   }[];
 }> = observer(({ items }) => {
-  const {
-    chainStore,
-    accountStore,
-    queriesStore,
-    keyRingStore,
-    uiConfigStore,
-    hugeQueriesStore,
-  } = useStore();
+  const { accountStore, keyRingStore, uiConfigStore, hugeQueriesStore } =
+    useStore();
 
   const navigate = useNavigate();
   const theme = useTheme();
 
-  const icnsPrimaryName = (() => {
-    if (
-      uiConfigStore.icnsInfo &&
-      chainStore.hasChain(uiConfigStore.icnsInfo.chainId)
-    ) {
-      const queries = queriesStore.get(uiConfigStore.icnsInfo.chainId);
-      const icnsQuery = queries.icns.queryICNSNames.getQueryContract(
-        uiConfigStore.icnsInfo.resolverContractAddress,
-        accountStore.getAccount(uiConfigStore.icnsInfo.chainId).bech32Address
-      );
-
-      return icnsQuery.primaryName.split(".")[0];
-    }
-  })();
+  const icnsPrimaryName = useGetIcnsName(
+    uiConfigStore.icnsInfo?.chainId
+      ? accountStore.getAccount(uiConfigStore.icnsInfo.chainId).bech32Address
+      : undefined
+  );
 
   const disabledViewAssetTokenMap =
     uiConfigStore.manageViewAssetTokenConfig.getViewAssetTokenMapByVaultId(

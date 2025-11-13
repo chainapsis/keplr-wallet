@@ -9,9 +9,10 @@ export const ContextMenuStyles = {
     backdrop-filter: blur(11px);
     -webkit-backdrop-filter: blur(11px);
 
-    filter: drop-shadow(0 10px 50px rgba(43, 39, 55, 0.05))
-      drop-shadow(0 5px 30px rgba(43, 39, 55, 0.05))
-      drop-shadow(0 1px 3px rgba(43, 39, 55, 0.1));
+    box-shadow: ${({ theme }) =>
+      theme.mode === "light"
+        ? `0 1px 3px 0 rgba(43, 39, 55, 0.10), 0 5px 30px 0 rgba(43, 39, 55, 0.05), 0 10px 50px 0 rgba(43, 39, 55, 0.05);`
+        : undefined};
 
     border-radius: 0.5rem;
     overflow: hidden;
