@@ -49,9 +49,8 @@ export const SettingGeneralDeleteSuggestChainPage: FunctionComponent = observer(
                     key={chainInfo.chainIdentifier}
                     chainInfo={chainInfo}
                     onClickClose={async () => {
-                      await chainStore.removeChainInfo(
-                        chainInfo.chainIdentifier
-                      );
+                      // 여기서 chain identifier를 쓰면 안되고 꼭 chainId를 써야함
+                      await chainStore.removeChainInfo(chainInfo.chainId);
 
                       dispatchGlobalEventExceptSelf(
                         "keplr_suggested_chain_removed"

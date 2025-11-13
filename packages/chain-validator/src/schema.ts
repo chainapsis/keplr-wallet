@@ -13,6 +13,7 @@ import {
 import { SupportedChainFeatures } from "./feature";
 
 import Joi, { ObjectSchema } from "joi";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export const CurrencySchema = Joi.object<
   Currency & {
@@ -281,6 +282,16 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
   hideInUI: Joi.boolean(),
   isTestnet: Joi.boolean(),
 }).custom((value: ChainInfo) => {
+  const chainIdentifier1 = ChainIdHelper.parse(value.chainId);
+  if (chainIdentifier1.version !== 0) {
+    const chainIdentifier2 = ChainIdHelper.parse(chainIdentifier1.identifier);
+    if (chainIdentifier1.identifier !== chainIdentifier2.identifier) {
+      throw new Error(
+        `chainIdentifier cannot be nested in the {chainIdentifier}-{version} format (chainId: ${value.chainId}, chainIdentifier: ${chainIdentifier1.identifier})`
+      );
+    }
+  }
+
   if (value.nodeProvider) {
     if (!value.nodeProvider.email && !value.nodeProvider.discord) {
       throw new Error("email or discord should be provided");
