@@ -2,40 +2,43 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { useLanguage } from "./languages";
 import { useLayoutEffectOnce } from "./hooks/use-effect-once";
 
+const interFontFaces = [
+  new FontFace(
+    "Inter",
+    `url(${require("./public/assets/font/Inter-Regular.ttf")})`,
+    {
+      weight: "400",
+    }
+  ),
+  new FontFace(
+    "Inter",
+    `url(${require("./public/assets/font/Inter-Medium.ttf")})`,
+    {
+      weight: "500",
+    }
+  ),
+  new FontFace(
+    "Inter",
+    `url(${require("./public/assets/font/Inter-SemiBold.ttf")})`,
+    {
+      weight: "600",
+    }
+  ),
+  new FontFace(
+    "Inter",
+    `url(${require("./public/assets/font/Inter-Bold.ttf")})`,
+    {
+      weight: "700",
+    }
+  ),
+];
+
 const languageToFontFaces: {
   [lang: string]: FontFace[] | undefined;
 } = {
-  en: [
-    new FontFace(
-      "Inter",
-      `url(${require("./public/assets/font/Inter-Regular.ttf")})`,
-      {
-        weight: "400",
-      }
-    ),
-    new FontFace(
-      "Inter",
-      `url(${require("./public/assets/font/Inter-Medium.ttf")})`,
-      {
-        weight: "500",
-      }
-    ),
-    new FontFace(
-      "Inter",
-      `url(${require("./public/assets/font/Inter-SemiBold.ttf")})`,
-      {
-        weight: "600",
-      }
-    ),
-    new FontFace(
-      "Inter",
-      `url(${require("./public/assets/font/Inter-Bold.ttf")})`,
-      {
-        weight: "700",
-      }
-    ),
-  ],
+  en: interFontFaces,
   ko: [
+    ...interFontFaces,
     new FontFace(
       "NotoSansKR",
       `url(${require("./public/assets/font/NotoSansKR-Regular.woff2")})`,

@@ -19,7 +19,7 @@ export const GlobalStyle = createGlobalStyle`
     -webkit-font-smoothing: antialiased;
     
     &[data-lang="ko"] {
-      font-family: 'NotoSansKR', sans-serif;
+      font-family: 'Inter', 'NotoSansKR', sans-serif;
       
       word-break: keep-all;
       word-wrap: break-word;
@@ -49,7 +49,7 @@ export const GlobalStyle = createGlobalStyle`
     color: ${ColorPalette["gray-200"]};
 
     &[data-lang="ko"] {
-      font-family: 'NotoSansKR', sans-serif;
+      font-family: 'Inter', 'NotoSansKR', sans-serif;
     }
   }
 
