@@ -494,16 +494,12 @@ export const EnableChainsScene: FunctionComponent<{
 
         for (const candidateAddress of candidateAddresses) {
           const queries = queriesStore.get(candidateAddress.chainId);
-          const chainInfo = chainStore.getModularChain(
+          const chainInfo = chainStore.getModularChainInfoImpl(
             candidateAddress.chainId
           );
 
-          if (!("cosmos" in chainInfo)) {
-            continue;
-          }
-
           const mainCurrency =
-            chainInfo.cosmos.stakeCurrency || chainInfo.cosmos.currencies[0];
+            chainInfo.stakeCurrency || chainInfo.getCurrencies()[0];
           const account = accountStore.getAccount(chainInfo.chainId);
 
           // hideInUI인 chain은 UI 상에서 enable이 되지 않아야한다.
@@ -808,25 +804,37 @@ export const EnableChainsScene: FunctionComponent<{
           },
           chainIdentifier: string
         ) => {
-          if ("cosmos" in modularChainInfo) {
-            const addresses = candidateAddressesMap.get(chainIdentifier);
+          const addresses = candidateAddressesMap.get(chainIdentifier);
+          const account = accountStore.getAccount(modularChainInfo.chainId);
+
+          if ("evm" in modularChainInfo) {
+            const queries = queriesStore.get(modularChainInfo.chainId);
+            const mainCurrency = modularChainInfo.evm.currencies[0];
+
+            if (addresses && addresses.length > 0) {
+              const queryBalance =
+                queries.queryBalances.getQueryEthereumHexAddress(
+                  account.ethereumHexAddress
+                );
+
+              const balance = queryBalance.getBalance(mainCurrency)?.balance;
+              if (balance) {
+                return balance;
+              }
+            }
+
+            return new CoinPretty(mainCurrency, "0");
+          } else if ("cosmos" in modularChainInfo) {
             const queries = queriesStore.get(modularChainInfo.chainId);
 
             const mainCurrency =
               modularChainInfo.cosmos.stakeCurrency ||
               modularChainInfo.cosmos.currencies[0];
-            const account = accountStore.getAccount(modularChainInfo.chainId);
 
             if (addresses && addresses.length > 0) {
-              const queryBalance = chainStore.isEvmOnlyChain(
-                modularChainInfo.chainId
-              )
-                ? queries.queryBalances.getQueryEthereumHexAddress(
-                    account.ethereumHexAddress
-                  )
-                : queries.queryBalances.getQueryBech32Address(
-                    addresses[0].address
-                  );
+              const queryBalance = queries.queryBalances.getQueryBech32Address(
+                addresses[0].address
+              );
               const balance = queryBalance.getBalance(mainCurrency)?.balance;
 
               if (balance) {
@@ -836,7 +844,6 @@ export const EnableChainsScene: FunctionComponent<{
 
             return new CoinPretty(mainCurrency, "0");
           } else if ("starknet" in modularChainInfo) {
-            const account = accountStore.getAccount(modularChainInfo.chainId);
             const mainCurrency = modularChainInfo.starknet.currencies[0];
 
             const balance = starknetQueriesStore
@@ -852,7 +859,6 @@ export const EnableChainsScene: FunctionComponent<{
               return balance;
             }
           } else if ("bitcoin" in modularChainInfo) {
-            const account = accountStore.getAccount(modularChainInfo.chainId);
             const getBitcoinBalance = (
               chainId: string,
               address: string,

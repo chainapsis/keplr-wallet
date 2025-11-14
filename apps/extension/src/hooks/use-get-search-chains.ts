@@ -128,7 +128,7 @@ export const useGetSearchChains = ({
         }
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chainStore.chainInfosInListUI, filterOption, trimSearch]);
+  }, [chainStore.modularChainInfosInListUI, filterOption, trimSearch]);
 
   useEffect(() => {
     const disposer = autorun(() => {

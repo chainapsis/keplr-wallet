@@ -967,22 +967,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 }
 
                 if (isOnlyEvm && !receiverAccount.ethereumHexAddress) {
-                  const receiverChainInfo =
-                    chainStore.hasModularChain(chainId) &&
-                    chainStore.getModularChain(chainId);
                   if (
                     receiverAccount.isNanoLedger &&
-                    receiverChainInfo &&
-                    (("evm" in receiverChainInfo &&
-                      receiverChainInfo.evm != null) ||
-                      ("cosmos" in receiverChainInfo &&
-                        (receiverChainInfo.cosmos.bip44.coinType === 60 ||
-                          receiverChainInfo.cosmos.features?.includes(
-                            "eth-address-gen"
-                          ) ||
-                          receiverChainInfo.cosmos.features?.includes(
-                            "eth-key-sign"
-                          ))))
+                    chainStore.isEvmOnlyChain(chainId)
                   ) {
                     throw new Error(
                       "Please connect Ethereum app on Ledger with Keplr to get the address"

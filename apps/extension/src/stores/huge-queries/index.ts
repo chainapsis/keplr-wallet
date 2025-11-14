@@ -733,29 +733,14 @@ export class HugeQueriesStore {
           }
         }
 
-        if (
-          "evm" in modularChainInfo ||
-          "starknet" in modularChainInfo ||
-          "bitcoin" in modularChainInfo
-        ) {
-          const module =
-            "evm" in modularChainInfo
-              ? "evm"
-              : "starknet" in modularChainInfo
-              ? "starknet"
-              : "bitcoin";
-
-          const modularChainInfoImpl = this.chainStore.getModularChainInfoImpl(
-            modularChainInfo.chainId
-          );
-          for (const currency of modularChainInfoImpl.getCurrenciesByModule(
-            module
-          )) {
-            const key = `${
-              ChainIdHelper.parse(modularChainInfo.chainId).identifier
-            }/${currency.coinMinimalDenom}`;
-            keys.set(key, true);
-          }
+        const modularChainInfoImpl = this.chainStore.getModularChainInfoImpl(
+          modularChainInfo.chainId
+        );
+        for (const currency of modularChainInfoImpl.getCurrencies()) {
+          const key = `${
+            ChainIdHelper.parse(modularChainInfo.chainId).identifier
+          }/${currency.coinMinimalDenom}`;
+          keys.set(key, true);
         }
       }
 

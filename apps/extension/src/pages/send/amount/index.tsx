@@ -301,8 +301,9 @@ function useChangeSenderAddressWhenEtherMintChainSendToHexAddress(
     sendConfigs.recipientConfig.isRecipientEthereumHexAddress,
     sendConfigs.senderConfig,
     chainInfo.stakeCurrency?.coinMinimalDenom,
-    chainInfo.getCurrencies(),
     setIsEvmTx,
+    sendType,
+    chainInfo,
   ]);
 }
 
@@ -612,10 +613,9 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       }
     }
   }, [
-    chainId,
-    chainStore,
-    gasSimulatorForNotBridgeSend,
     currentFeeCurrencyCoinMinimalDenom,
+    gasSimulatorForNotBridgeSend,
+    modularChainInfoImpl,
   ]);
 
   useChangeSenderAddressWhenEtherMintChainSendToHexAddress(
@@ -667,6 +667,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     sendConfigs.feeConfig,
     sendConfigs.gasConfig.gas,
     sendConfigs.recipientConfig.recipient,
+    modularChainInfoImpl,
   ]);
 
   useRefreshEIP1559TxFee(isEvmTx, sendConfigs);
