@@ -2435,6 +2435,18 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
           coinImageUrl:
             "https://keplr-ext-update-note-images.s3.amazonaws.com/token/starknet.png",
         },
+        {
+          type: "erc20",
+          contractAddress:
+            "0x0512feac6339ff7889822cb5aa2a86c848e9d392bb0e3e237c008674feed8343",
+          coinDenom: "USDC",
+          coinMinimalDenom:
+            "erc20:0x0512feac6339ff7889822cb5aa2a86c848e9d392bb0e3e237c008674feed8343",
+          coinDecimals: 6,
+          coinGeckoId: "usd-coin",
+          coinImageUrl:
+            "https://keplr-ext-update-note-images.s3.amazonaws.com/token/usdc.png",
+        },
       ],
       ethContractAddress:
         "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
