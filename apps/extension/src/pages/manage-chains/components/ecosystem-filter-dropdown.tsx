@@ -1,9 +1,15 @@
-import React, { FunctionComponent, useState } from "react";
+import React, {
+  FunctionComponent,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import styled, { useTheme } from "styled-components";
 import { ColorPalette } from "../../../styles";
 import { Subtitle4 } from "../../../components/typography";
 import { Ecosystem } from "..";
 import { useIntl } from "react-intl";
+import { useGlobarSimpleBar } from "../../../hooks/global-simplebar";
 
 interface Props {
   selected: Ecosystem;
@@ -17,6 +23,26 @@ export const EcosystemFilterDropdown: FunctionComponent<Props> = ({
   const [isOpen, setIsOpen] = useState(false);
   const theme = useTheme();
   const intl = useIntl();
+
+  const globalSimpleBar = useGlobarSimpleBar();
+
+  const closeDropdown = useCallback(() => {
+    setIsOpen(false);
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+    const scrollElement = globalSimpleBar.ref.current?.getScrollElement();
+
+    scrollElement?.addEventListener("scroll", closeDropdown);
+
+    return () => {
+      scrollElement?.removeEventListener("scroll", closeDropdown);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   return (
     <Styles.MenuContainer>
