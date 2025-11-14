@@ -12,6 +12,7 @@ import { animated, useSpringValue } from "@react-spring/web";
 import Color from "color";
 import { defaultSpringConfig } from "../../styles/spring";
 import { ColorPalette } from "../../styles";
+import { useTheme } from "styled-components";
 
 type FloatModalProps = {
   isOpen: boolean;
@@ -114,6 +115,8 @@ const ModalChild: FunctionComponent<
 }) => {
   const innerContainerRef = useRef<HTMLDivElement>(null);
 
+  const theme = useTheme();
+
   return (
     <animated.div
       style={{
@@ -132,8 +135,12 @@ const ModalChild: FunctionComponent<
           disableBackdrop || disableBackdropStyle
             ? "rgba(0,0,0,0)"
             : transition.to((t) =>
-                Color(ColorPalette["gray-550"])
-                  .alpha(t * 0.55)
+                Color(
+                  theme.mode === "light"
+                    ? ColorPalette["gray-550"]
+                    : ColorPalette["gray-700"]
+                )
+                  .alpha(t * (theme.mode === "light" ? 0.3 : 0.5))
                   .string()
               ),
       }}

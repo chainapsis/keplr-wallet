@@ -392,7 +392,15 @@ const Styles = {
       `}
     gap: 0.75rem;
 
-    opacity: 0.9;
+    ${({ theme }) =>
+      theme.mode === "light" &&
+      css`
+        background-color: rgba(254, 254, 254, 0.9);
+
+        &:hover {
+          background-color: rgba(242, 242, 246, 0.9);
+        }
+      `}
 
     svg {
       color: ${ColorPalette["gray-300"]};
