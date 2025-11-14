@@ -1,4 +1,9 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, {
+  FunctionComponent,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import styled, { useTheme } from "styled-components";
 import { ColorPalette } from "../../../styles";
 import { Subtitle4 } from "../../../components/typography";
@@ -21,16 +26,20 @@ export const EcosystemFilterDropdown: FunctionComponent<Props> = ({
 
   const globalSimpleBar = useGlobarSimpleBar();
 
+  const closeDropdown = useCallback(() => {
+    setIsOpen(false);
+  }, []);
+
   useEffect(() => {
     if (!isOpen) {
       return;
     }
     const scrollElement = globalSimpleBar.ref.current?.getScrollElement();
 
-    scrollElement?.addEventListener("scroll", () => setIsOpen(false));
+    scrollElement?.addEventListener("scroll", closeDropdown);
 
     return () => {
-      scrollElement?.removeEventListener("scroll", () => setIsOpen(false));
+      scrollElement?.removeEventListener("scroll", closeDropdown);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
