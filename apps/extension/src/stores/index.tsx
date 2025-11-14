@@ -47,7 +47,6 @@ export const StoreProvider: FunctionComponent<PropsWithChildren> = ({
       async () => {
         await stores.keyRingStore.refreshKeyRingStatus();
         await stores.chainStore.updateEnabledChainIdentifiersFromBackground();
-        stores.claimRewardsStateStore.resetAll();
 
         for (const modularChainInfo of stores.chainStore.modularChainInfos) {
           if ("cosmos" in modularChainInfo) {
@@ -78,7 +77,6 @@ export const StoreProvider: FunctionComponent<PropsWithChildren> = ({
       "keplr_new_key_created",
       async (newKeyId: string) => {
         await stores.keyRingStore.refreshKeyRingStatus();
-        stores.claimRewardsStateStore.resetAll();
         if (newKeyId && stores.keyRingStore.selectedKeyInfo?.id === newKeyId) {
           await stores.chainStore.updateEnabledChainIdentifiersFromBackground();
 
@@ -121,7 +119,6 @@ export const StoreProvider: FunctionComponent<PropsWithChildren> = ({
       "keplr_derivation_path_changed",
       async (params: any) => {
         await stores.keyRingStore.refreshKeyRingStatus();
-        stores.claimRewardsStateStore.resetAll();
         if (params?.chainId) {
           if (stores.accountStore.hasAccount(params.chainId)) {
             stores.accountStore.getAccount(params.chainId).init();

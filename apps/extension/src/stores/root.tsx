@@ -622,7 +622,8 @@ export class RootStore {
 
     this.claimRewardsStateStore = new ClaimRewardsStateStore(
       this.chainStore,
-      this.keyRingStore
+      this.keyRingStore,
+      window
     );
 
     this.tokenFactoryRegistrar = new TokenFactoryCurrencyRegistrar(

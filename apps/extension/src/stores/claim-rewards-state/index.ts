@@ -62,8 +62,15 @@ export class ClaimRewardsStateStore {
 
   constructor(
     private readonly chainStore: ChainStore,
-    private readonly keyRingStore: KeyRingStore
-  ) {}
+    private readonly keyRingStore: KeyRingStore,
+    private readonly eventListener: {
+      addEventListener: (type: string, fn: () => unknown) => void;
+    }
+  ) {
+    this.eventListener.addEventListener("keplr_keystorechange", () => {
+      this.resetAll();
+    });
+  }
 
   private key(chainId: string) {
     const chainIdentifier = this.chainStore.hasChain(chainId)
