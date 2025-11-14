@@ -43,6 +43,7 @@ import { CurrencyImageFallback } from "../../../../components/image";
 import { Skeleton } from "../../../../components/skeleton";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { Tooltip } from "../../../../components/tooltip";
+import { COMMON_HOVER_OPACITY } from "../../../../styles/constant";
 
 export const EthereumSignEIP712View: FunctionComponent<{
   interactionData: NonNullable<SignEthereumInteractionStore["waitingData"]>;
@@ -597,7 +598,7 @@ const PermitIntentView: FunctionComponent<{
                 justifyContent: "center",
               }}
               hover={{
-                opacity: 0.7,
+                opacity: COMMON_HOVER_OPACITY,
               }}
             >
               <Body2

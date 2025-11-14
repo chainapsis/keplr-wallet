@@ -376,7 +376,7 @@ const TokenView: FunctionComponent<{
           : ColorPalette["gray-500"]
       }
     >
-      <Stack gutter="0.5rem">
+      <Stack>
         {tokens?.map((token) => (
           <TokenItem
             key={token.token.currency.coinMinimalDenom}

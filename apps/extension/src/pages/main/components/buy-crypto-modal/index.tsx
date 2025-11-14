@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useContext, useState } from "react";
 import { observer } from "mobx-react-lite";
 import styled, { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
@@ -7,7 +7,10 @@ import { Box } from "../../../../components/box";
 import { useStore } from "../../../../stores";
 import { FormattedMessage } from "react-intl";
 import { BuySupportServiceInfo } from "../../../../hooks/use-buy-support-service-infos";
-import { LoadingIcon } from "../../../../components/icon";
+import { ArrowLeftIcon, LoadingIcon } from "../../../../components/icon";
+import { Column, Columns } from "../../../../components/column";
+import { SceneTransitionContextBase } from "../../../../components/transition/scene/internal";
+import { COMMON_HOVER_OPACITY } from "../../../../styles/constant";
 
 const Styles = {
   Container: styled.div`
@@ -59,27 +62,77 @@ const Styles = {
         ? ColorPalette["gray-400"]
         : ColorPalette["gray-10"]};
   `,
+  BackButtonContainer: styled.div`
+    padding: 0.25rem;
+    cursor: pointer;
+    &:hover {
+      opacity: ${COMMON_HOVER_OPACITY};
+    }
+  `,
 };
 
 export const BuyCryptoModal: FunctionComponent<{
   close: () => void;
   buySupportServiceInfos: BuySupportServiceInfo[];
-}> = observer(({ close, buySupportServiceInfos }) => {
+  showBackButton?: boolean;
+}> = observer(({ close, buySupportServiceInfos, showBackButton }) => {
   const theme = useTheme();
+  const sceneTransition = useContext(SceneTransitionContextBase);
 
   return (
     <Styles.Container>
-      <Subtitle1
-        style={{
-          color:
-            theme.mode === "light"
-              ? ColorPalette["gray-700"]
-              : ColorPalette["white"],
-          textAlign: "center",
-        }}
-      >
-        <FormattedMessage id="page.main.components.buy-crypto-modal.title" />
-      </Subtitle1>
+      {showBackButton ? (
+        <Columns sum={1} alignY="center">
+          <Styles.BackButtonContainer
+            onClick={() => {
+              if (sceneTransition) {
+                sceneTransition.pop();
+              } else {
+                close();
+              }
+            }}
+          >
+            <ArrowLeftIcon
+              width="1.5rem"
+              height="1.5rem"
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-200"]
+                  : ColorPalette["gray-300"]
+              }
+            />
+          </Styles.BackButtonContainer>
+
+          <Column weight={1} />
+
+          <Subtitle1
+            style={{
+              color:
+                theme.mode === "light"
+                  ? ColorPalette["gray-700"]
+                  : ColorPalette["white"],
+              textAlign: "center",
+            }}
+          >
+            <FormattedMessage id="page.main.components.buy-crypto-modal.title" />
+          </Subtitle1>
+          <Column weight={1} />
+          {/* 제목을 중앙 정렬시키기 위해서 뒤로가기 버튼과 맞춰야한다. 이를 위한 mock임 */}
+          <Box width="2rem" height="2rem" />
+        </Columns>
+      ) : (
+        <Subtitle1
+          style={{
+            color:
+              theme.mode === "light"
+                ? ColorPalette["gray-700"]
+                : ColorPalette["white"],
+            textAlign: "center",
+          }}
+        >
+          <FormattedMessage id="page.main.components.buy-crypto-modal.title" />
+        </Subtitle1>
+      )}
 
       {buySupportServiceInfos.map((serviceInfo) => {
         return (

@@ -365,7 +365,7 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
                   width={width}
                   height={height}
                   itemCount={searchedTokens.length + searchedRemaining.length}
-                  itemSize={76}
+                  itemSize={66}
                 >
                   {TokenListItem}
                 </FixedSizeList>

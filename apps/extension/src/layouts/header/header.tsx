@@ -4,6 +4,7 @@ import React, {
   useEffect,
   useLayoutEffect,
   useRef,
+  useState,
 } from "react";
 import styled, { css } from "styled-components";
 import { HeaderProps } from "./types";
@@ -23,6 +24,7 @@ import {
 } from "../../components/special-button";
 import { useSpringValue, animated } from "@react-spring/web";
 import { defaultSpringConfig } from "../../styles/spring";
+import { useGlobalSimpleBar } from "../../hooks/global-simplebar";
 
 const pxToRem = (px: number) => {
   const base = parseFloat(
@@ -41,6 +43,7 @@ const Styles = {
 
   HeaderContainer: styled.div<{
     fixedTopHeight?: string;
+    showBorderBottom?: boolean;
   }>`
     height: ${HeaderHeight};
 
@@ -67,6 +70,14 @@ const Styles = {
     right: 0;
 
     z-index: 100;
+    border-bottom: ${({ showBorderBottom, theme }) =>
+      showBorderBottom
+        ? `0.5px solid ${
+            theme.mode === "light"
+              ? ColorPalette["gray-100"]
+              : ColorPalette["gray-500"]
+          }`
+        : "none"};
   `,
 
   HeaderTitle: styled.div`
@@ -277,6 +288,30 @@ export const HeaderLayout: FunctionComponent<
     bottomButtonAnimation.start(hasBottomButton ? 1 : 0);
   }, [bottomButtonAnimation, hasBottomButton]);
 
+  const globalSimpleBar = useGlobalSimpleBar();
+  const [showBorderBottom, setShowBorderBottom] = useState(false);
+
+  useEffect(() => {
+    const scrollElement = globalSimpleBar.ref.current?.getScrollElement();
+    if (!scrollElement) return;
+
+    const handleScroll = () => {
+      if (scrollElement.scrollTop > 0) {
+        setShowBorderBottom(true);
+      } else {
+        setShowBorderBottom(false);
+      }
+    };
+
+    scrollElement.addEventListener("scroll", handleScroll);
+    handleScroll();
+
+    return () => {
+      scrollElement.removeEventListener("scroll", handleScroll);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <Styles.Container as={onSubmit ? "form" : undefined} onSubmit={onSubmit}>
       {fixedTop ? (
@@ -285,6 +320,7 @@ export const HeaderLayout: FunctionComponent<
         </div>
       ) : null}
       <Styles.HeaderContainer
+        showBorderBottom={showBorderBottom}
         style={headerContainerStyle}
         fixedTopHeight={fixedTop?.height}
       >

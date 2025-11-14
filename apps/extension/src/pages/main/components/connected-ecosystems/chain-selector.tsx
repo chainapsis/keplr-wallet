@@ -69,17 +69,17 @@ export const ChainSelector: FunctionComponent<{
               backgroundColor={
                 isSelected
                   ? theme.mode === "light"
-                    ? ColorPalette["gray-100"]
+                    ? ColorPalette["white"]
                     : ColorPalette["gray-650"]
                   : theme.mode === "light"
                   ? ColorPalette["white"]
-                  : ColorPalette["gray-600"]
+                  : ColorPalette["gray-650"]
               }
               hover={{
                 backgroundColor:
                   theme.mode === "light"
                     ? ColorPalette["gray-50"]
-                    : ColorPalette["gray-550"],
+                    : ColorPalette["gray-600"],
               }}
               onClick={async () => {
                 const msg = new updateMessage(activeTabOrigin, chainId);

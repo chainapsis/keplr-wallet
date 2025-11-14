@@ -9,19 +9,21 @@ import { observer } from "mobx-react-lite";
 import styled, { useTheme } from "styled-components";
 import { useStore } from "../../../../stores";
 import { Box } from "../../../../components/box";
-import { TextButton } from "../../../../components/button-text";
 import { XAxis, YAxis } from "../../../../components/axis";
 import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse/collapse";
 import { Body2, Body3 } from "../../../../components/typography";
 import { ColorPalette } from "../../../../styles";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Toggle } from "../../../../components/toggle/toggle";
-import { CloseIcon } from "../../../../components/icon";
+import { AdjustmentIcon, CloseIcon } from "../../../../components/icon";
 import { IconProps } from "../../../../components/icon/types";
-import { useGlobarSimpleBar } from "../../../../hooks/global-simplebar";
+import { useGlobalSimpleBar } from "../../../../hooks/global-simplebar";
 import { Tooltip } from "../../../../components/tooltip";
 import { Gutter } from "../../../../components/gutter";
 import { isRunningInSidePanel } from "../../../../utils";
+import { COMMON_HOVER_OPACITY } from "../../../../styles/constant";
+import { useNavigate } from "react-router";
+import { ContextMenuStyles } from "../../../../components/context-menu";
 
 const Styles = {
   MenuContainer: styled.div`
@@ -32,25 +34,14 @@ const Styles = {
     user-select: none;
     background-color: transparent;
   `,
-  MenuWrapper: styled.div`
+  ContextMenuContent: styled(ContextMenuStyles.Container)`
     position: absolute;
     right: 0;
     top: calc(100% + 0.5rem);
     z-index: 9999;
     min-width: 15.625rem;
     overflow: visible;
-    box-shadow: ${(props) =>
-      props.theme.mode === "light"
-        ? "0px 1px 3px 0px rgba(43, 39, 55, 0.10), 0px 5px 30px 0px rgba(43, 39, 55, 0.05), 0px 10px 50px 0px rgba(43, 39, 55, 0.05)"
-        : "none"};
-  `,
-  ContextMenuContent: styled.div`
     border-radius: 0.5rem;
-    background-color: ${(props) =>
-      props.theme.mode === "light"
-        ? ColorPalette.white
-        : ColorPalette["gray-500"]};
-    box-shadow: 0 0.25rem 1.25rem rgba(0, 0, 0, 0.15);
     overflow: hidden;
   `,
   MenuBackdrop: styled.div`
@@ -62,16 +53,10 @@ const Styles = {
     z-index: 9998;
     background-color: transparent;
   `,
-  MenuItem: styled.div`
+  MenuItem: styled(ContextMenuStyles.Item)`
     padding: 0.75rem 0.75rem 0.75rem 1rem;
-    display: flex;
     justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    background-color: ${(props) =>
-      props.theme.mode === "light"
-        ? ColorPalette.white
-        : ColorPalette["gray-500"]};
+
     border-bottom: 1px solid
       ${(props) =>
         props.theme.mode === "light"
@@ -80,13 +65,6 @@ const Styles = {
 
     &:last-child {
       border-bottom: none;
-    }
-
-    &:hover {
-      background-color: ${(props) =>
-        props.theme.mode === "light"
-          ? ColorPalette["gray-50"]
-          : ColorPalette["gray-450"]};
     }
   `,
   MenuItemXAxis: styled(XAxis)`
@@ -118,6 +96,7 @@ const MainMenu: React.FC<MainMenuProps> = observer(
     const { hideLowBalance, showFiatValue } = uiConfigStore.options;
     const theme = useTheme();
     const intl = useIntl();
+    const navigate = useNavigate();
 
     const handleToggleClick = (e: React.MouseEvent, toggleFn: () => void) => {
       if (!(e.target as HTMLElement).closest(".toggle-component")) {
@@ -137,6 +116,35 @@ const MainMenu: React.FC<MainMenuProps> = observer(
 
     return (
       <YAxis>
+        <Styles.MenuItem
+          onClick={(e) => {
+            e.preventDefault();
+            navigate("/manage-view-asset-token-list");
+          }}
+        >
+          <Styles.MenuItemXAxis alignY="center" gap="0.25rem">
+            <AdjustmentIcon
+              width="1rem"
+              height="1rem"
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-700"]
+                  : ColorPalette["white"]
+              }
+            />
+            <Body3
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-700"]
+                  : ColorPalette["white"]
+              }
+            >
+              {intl.formatMessage({
+                id: "page.main.components.context-menu.manage-asset-list",
+              })}
+            </Body3>
+          </Styles.MenuItemXAxis>
+        </Styles.MenuItem>
         <Styles.MenuItem
           onClick={(e) => handleToggleClick(e, onToggleHideLowBalance)}
         >
@@ -245,19 +253,12 @@ const MainMenu: React.FC<MainMenuProps> = observer(
   }
 );
 
-const CustomTextButton = styled(TextButton)`
-  && button {
-    padding: 0.25rem 0 !important;
-    color: ${ColorPalette["gray-300"]};
-    height: 1rem;
-    font-size: 0.8125rem;
+const CustomBox = styled(Box)`
+  cursor: pointer;
+  transition: opacity 0.1s ease;
 
-    &:hover {
-      color: ${(props) =>
-        props.theme.mode === "light"
-          ? ColorPalette["gray-500"]
-          : ColorPalette["gray-200"]};
-    }
+  &:hover {
+    opacity: ${COMMON_HOVER_OPACITY};
   }
 `;
 
@@ -269,13 +270,11 @@ export const ViewOptionsContextMenu: FunctionComponent<{
 }> = observer(
   ({ isOpen, setIsOpen, showFiatValueVisible, setShowFiatValueVisible }) => {
     const { uiConfigStore, analyticsAmplitudeStore } = useStore();
-    const intl = useIntl();
     const containerRef = useRef<HTMLDivElement>(null);
     const menuContentRef = useRef<HTMLDivElement>(null);
     const [initialized, setInitialized] = useState(false);
     const theme = useTheme();
-    const [isHovered, setIsHovered] = useState(false);
-    const globalSimpleBar = useGlobarSimpleBar();
+    const globalSimpleBar = useGlobalSimpleBar();
 
     useLayoutEffect(() => {
       if (!initialized) {
@@ -403,49 +402,27 @@ export const ViewOptionsContextMenu: FunctionComponent<{
           enabled={uiConfigStore.switchAssetViewModeSuggestion}
           isAlwaysOpen={uiConfigStore.switchAssetViewModeSuggestion}
         >
-          <div
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-          >
-            <CustomTextButton
-              text={intl.formatMessage({
-                id: "page.main.components.context-menu.title",
-              })}
-              size="small"
-              right={
-                <Styles.MenuItemXAxis alignY="center">
-                  <ViewOptionsIcon
-                    width="1rem"
-                    height="1rem"
-                    color={
-                      isHovered
-                        ? theme.mode === "light"
-                          ? ColorPalette["gray-500"]
-                          : ColorPalette["gray-200"]
-                        : ColorPalette["gray-300"]
-                    }
-                  />
-                </Styles.MenuItemXAxis>
-              }
-              onClick={toggleMenu}
+          <CustomBox onClick={toggleMenu}>
+            <ViewOptionsIcon
+              width="1.5rem"
+              height="1.5rem"
+              color={ColorPalette["gray-300"]}
             />
-          </div>
+          </CustomBox>
         </Tooltip>
 
         {isOpen && (
-          <Styles.MenuWrapper>
-            <Styles.ContextMenuContent ref={menuContentRef}>
-              <MainMenu
-                onToggleAssetViewMode={handleToggleAssetViewMode}
-                hideLowBalance={uiConfigStore.options.hideLowBalance}
-                showFiatValue={uiConfigStore.options.showFiatValue}
-                onToggleHideLowBalance={handleToggleHideLowBalance}
-                onToggleShowFiatValue={handleToggleShowFiatValue}
-                showFiatValueVisible={showFiatValueVisible}
-                assetViewMode={uiConfigStore.options.assetViewMode}
-              />
-            </Styles.ContextMenuContent>
-          </Styles.MenuWrapper>
+          <Styles.ContextMenuContent ref={menuContentRef}>
+            <MainMenu
+              onToggleAssetViewMode={handleToggleAssetViewMode}
+              hideLowBalance={uiConfigStore.options.hideLowBalance}
+              showFiatValue={uiConfigStore.options.showFiatValue}
+              onToggleHideLowBalance={handleToggleHideLowBalance}
+              onToggleShowFiatValue={handleToggleShowFiatValue}
+              showFiatValueVisible={showFiatValueVisible}
+              assetViewMode={uiConfigStore.options.assetViewMode}
+            />
+          </Styles.ContextMenuContent>
         )}
       </Styles.MenuContainer>
     );
@@ -516,12 +493,16 @@ const SuggestionTooltipContent: FunctionComponent<{
   );
 };
 
-const ViewOptionsIcon: FunctionComponent<IconProps> = ({ color }) => {
+const ViewOptionsIcon: FunctionComponent<IconProps> = ({
+  color,
+  width,
+  height,
+}) => {
   return (
     <div
       style={{
-        width: "1rem",
-        height: "1rem",
+        width: width,
+        height: height,
         display: "flex",
         justifyContent: "center",
         alignItems: "center",

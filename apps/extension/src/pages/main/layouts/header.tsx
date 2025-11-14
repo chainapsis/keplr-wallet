@@ -1,36 +1,171 @@
 import React, {
+  Fragment,
   PropsWithChildren,
   useEffect,
-  useImperativeHandle,
-  useRef,
+  useMemo,
+  useState,
 } from "react";
 import { Columns } from "../../../components/column";
 import { Box } from "../../../components/box";
-import { Tooltip } from "../../../components/tooltip";
-import { Image } from "../../../components/image";
-import { MenuIcon } from "../../../components/icon";
-import { ProfileButton } from "../../../layouts/header/components";
+import { CopyOutlineIcon } from "../../../components/icon";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import { HeaderLayout } from "../../../layouts/header";
-import { useTheme } from "styled-components";
-import { Modal } from "../../../components/modal";
-import { MenuBar } from "../components";
+import styled, { css, useTheme } from "styled-components";
 import { HeaderProps } from "../../../layouts/header/types";
 import { ColorPalette } from "../../../styles";
-import { YAxis } from "../../../components/axis";
-import { Body2, Subtitle3 } from "../../../components/typography";
-import { FormattedMessage, useIntl } from "react-intl";
+import { XAxis, YAxis } from "../../../components/axis";
+import {
+  Body2,
+  Caption1,
+  Caption2,
+  Subtitle3,
+  Subtitle4,
+} from "../../../components/typography";
 import { Gutter } from "../../../components/gutter";
-import { Button } from "../../../components/button";
-import { ExtensionKVStore } from "@keplr-wallet/common";
 import { ConnectedEcosystems } from "../components/connected-ecosystems";
+import { COMMON_HOVER_OPACITY } from "../../../styles/constant";
+import { IconButton } from "../../../components/icon-button";
+import { FloatingMenuBar } from "../components/floating-menu-bar";
+import { autoUpdate, offset, shift, useFloating } from "@floating-ui/react-dom";
+import { AccountSwitchFloatModal } from "../components/account-switch-float-modal";
+import { FloatModal } from "../../../components/float-modal";
+import { DepositFloatingModal } from "../components/deposit-float-modal";
+import { useLocation } from "react-router";
+import { Tooltip } from "../../../components/tooltip";
+import { FormattedMessage, useIntl } from "react-intl";
+import { Button } from "../../../components/button";
+import { useTotalPrices } from "../../../hooks/use-total-prices";
+import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
+import { Image } from "../../../components/image";
+import { useGetIcnsName } from "../../../hooks/use-get-icns-name";
 
-export interface MainHeaderLayoutRef {
-  toggleSideMenu: () => void;
-  openSideMenu: () => void;
-  closeSideMenu: () => void;
-}
+const Styles = {
+  NameContainer: styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  `,
+
+  NameHoverArea: styled(Box)<{ isHover: boolean }>`
+    display: flex;
+    flex-direction: row;
+    transition: opacity 0.1s ease-in-out;
+    cursor: pointer;
+
+    ${({ isHover }) =>
+      isHover &&
+      css`
+        opacity: ${COMMON_HOVER_OPACITY};
+      `}
+  `,
+};
+
+const NameHoverArea = ({
+  children,
+  onClick,
+  onHover,
+  isHover,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  onHover: (isHover: boolean) => void;
+  isHover: boolean;
+}) => {
+  return (
+    <Styles.NameHoverArea
+      onClick={onClick}
+      isHover={isHover}
+      onHoverStateChange={onHover}
+    >
+      {children}
+    </Styles.NameHoverArea>
+  );
+};
+
+const useHeaderTotalPriceVisibility = ({
+  forcedIsShowTotalPrice,
+}: {
+  forcedIsShowTotalPrice?: boolean;
+}): boolean => {
+  const { uiConfigStore, mainHeaderAnimationStore } = useStore();
+  const location = useLocation();
+  const isNotMainPage = location.pathname !== "/";
+  const isPrivacyMode = uiConfigStore.isPrivacyMode;
+  const trigger = mainHeaderAnimationStore.triggerMainHeaderPriceAnimation;
+
+  const isShowTotalPriceFinally = useMemo(() => {
+    if (isPrivacyMode) {
+      return false;
+    }
+    if (forcedIsShowTotalPrice) {
+      return forcedIsShowTotalPrice;
+    }
+    return isNotMainPage;
+  }, [forcedIsShowTotalPrice, isNotMainPage, isPrivacyMode]);
+
+  // 해당 상태로 UI상 보여줄지를 결정하기 때문에
+  // 페이지 이동시 show or hide 애니메이션을 위해서 존재함
+  const [isShowTotalPrice, setIsShowTotalPrice] = useState<boolean>(() => {
+    if (isPrivacyMode) {
+      return false;
+    }
+    if (trigger === "hide") {
+      return true;
+    }
+    if (trigger === "show" && isShowTotalPriceFinally) {
+      return false;
+    }
+    return isShowTotalPriceFinally;
+  });
+
+  // 여기서 어떻게 isShowTotalPrice를 업데이트 할지 결정한다.
+  // 기본적으로 trigger가 hide이면 isShowTotalPrice가 true -> false 순으로 변경된다.
+  // trigger가 show이고 isShowTotalPriceFinally가 true이면 isShowTotalPrice가 false -> true 순으로 변경된다.
+  // 그리고 한번 실행 되고 나면 임의의 변경 없이 isShowTotalPriceFinally 상태를 따르도록 한다.
+  useEffect(() => {
+    if (trigger === "not-triggered") {
+      setIsShowTotalPrice(isShowTotalPriceFinally);
+      return;
+    }
+
+    if (isPrivacyMode) {
+      setIsShowTotalPrice(false);
+      mainHeaderAnimationStore.resetTriggerForMainHeaderPrice();
+      return;
+    }
+
+    if (trigger === "hide") {
+      const timer = setTimeout(() => {
+        setIsShowTotalPrice(false);
+        mainHeaderAnimationStore.resetTriggerForMainHeaderPrice();
+      }, 0);
+      return () => {
+        clearTimeout(timer);
+      };
+    }
+
+    if (!isShowTotalPriceFinally) {
+      setIsShowTotalPrice(isShowTotalPriceFinally);
+      mainHeaderAnimationStore.resetTriggerForMainHeaderPrice();
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setIsShowTotalPrice(true);
+      mainHeaderAnimationStore.resetTriggerForMainHeaderPrice();
+    }, 0);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [
+    trigger,
+    isShowTotalPriceFinally,
+    isPrivacyMode,
+    mainHeaderAnimationStore,
+  ]);
+  return isShowTotalPrice;
+};
 
 export const MainHeaderLayout = observer<
   PropsWithChildren<
@@ -44,85 +179,57 @@ export const MainHeaderLayout = observer<
       | "headerContainerStyle"
       | "fixedTop"
     >
-  >,
-  MainHeaderLayoutRef
+  > & {
+    isShowTotalPrice?: boolean;
+  }
 >(
-  (props, ref) => {
+  (props) => {
     const { children, ...otherProps } = props;
 
-    const {
-      keyRingStore,
-      uiConfigStore,
-      chainStore,
-      accountStore,
-      queriesStore,
-    } = useStore();
+    const { uiConfigStore, keyRingStore, chainStore, accountStore } =
+      useStore();
+    const [isOpenAccountSwitchModal, setIsOpenAccountSwitchModal] =
+      useState(false);
 
-    const icnsPrimaryName = (() => {
-      if (
-        uiConfigStore.icnsInfo &&
-        chainStore.hasChain(uiConfigStore.icnsInfo.chainId)
-      ) {
-        const queries = queriesStore.get(uiConfigStore.icnsInfo.chainId);
-        const icnsQuery = queries.icns.queryICNSNames.getQueryContract(
-          uiConfigStore.icnsInfo.resolverContractAddress,
-          accountStore.getAccount(uiConfigStore.icnsInfo.chainId).bech32Address
-        );
+    const intl = useIntl();
+    const [isNameHover, setIsNameHover] = useState(false);
+    const isShowTotalPrice = useHeaderTotalPriceVisibility({
+      forcedIsShowTotalPrice: props.isShowTotalPrice,
+    });
 
-        return icnsQuery.primaryName.split(".")[0];
-      }
-    })();
+    const icnsPrimaryName = useGetIcnsName(
+      uiConfigStore.icnsInfo?.chainId
+        ? accountStore.getAccount(uiConfigStore.icnsInfo.chainId).bech32Address
+        : undefined
+    );
+
+    const accountSwitchFloatingModal = useFloating({
+      placement: "bottom-start",
+      middleware: [
+        offset({
+          mainAxis: 10,
+        }),
+      ],
+    });
+    const depositFloatingModal = useFloating({
+      placement: "bottom-start",
+      middleware: [
+        offset({
+          mainAxis: 10,
+        }),
+        shift({ padding: 12 }),
+      ],
+      whileElementsMounted: autoUpdate,
+    });
+    const { totalPrice } = useTotalPrices();
 
     const theme = useTheme();
-    const intl = useIntl();
+    const name = useMemo(() => {
+      return keyRingStore.selectedKeyInfo?.name || "Keplr Account";
+    }, [keyRingStore.selectedKeyInfo?.name]);
 
     const [isOpenMenu, setIsOpenMenu] = React.useState(false);
-
-    const [
-      showSidePanelRecommendationTooltip,
-      setShowSidePanelRecommendationTooltip,
-    ] = React.useState(false);
-
-    useEffect(() => {
-      const kvStore = new ExtensionKVStore(
-        "_side_menu_side_panel_recommendation_tooltip"
-      );
-      kvStore.get<boolean>("hasSeen").then((hasSeen) => {
-        if (hasSeen == null) {
-          // 한번도 side menu가 열린적이 없으면 tooltip을 보여준다.
-          setShowSidePanelRecommendationTooltip(true);
-        }
-      });
-    }, []);
-    const prevIsOpenMenu = useRef(isOpenMenu);
-    useEffect(() => {
-      if (showSidePanelRecommendationTooltip && isOpenMenu) {
-        // 한번이라도 side menu가 열린적이 있으면 tooltip을 보여주지 않는다.
-        const kvStore = new ExtensionKVStore(
-          "_side_menu_side_panel_recommendation_tooltip"
-        );
-        kvStore.set("hasSeen", true);
-      }
-
-      if (isOpenMenu !== prevIsOpenMenu.current) {
-        // side menu가 닫히는 순간에 tooltip을 없앤다.
-        if (
-          prevIsOpenMenu.current &&
-          !isOpenMenu &&
-          showSidePanelRecommendationTooltip
-        ) {
-          setShowSidePanelRecommendationTooltip(false);
-        }
-        prevIsOpenMenu.current = isOpenMenu;
-      }
-    }, [showSidePanelRecommendationTooltip, isOpenMenu]);
-
-    useEffect(() => {
-      // showNewSidePanelHeaderTop이 true면서 사이드 메뉴가 열렸으면 당연히 false로 바꿔줘야함
-      if (isOpenMenu && uiConfigStore.showNewSidePanelHeaderTop) {
-        uiConfigStore.setShowNewSidePanelHeaderTop(false);
-      }
-    }, [isOpenMenu, uiConfigStore]);
+    const [isOpenDepositModal, setIsOpenDepositModal] = React.useState(false);
 
     const openMenu = () => {
       setIsOpenMenu(true);
@@ -140,73 +247,155 @@ export const MainHeaderLayout = observer<
       setIsOpenMenu(false);
     };
 
-    const openMenuRef = useRef(openMenu);
-    openMenuRef.current = openMenu;
-    const closeMenuRef = useRef(closeMenu);
-    closeMenuRef.current = closeMenu;
-
-    useImperativeHandle(
-      ref,
-      () => ({
-        toggleSideMenu: () => {
-          if (isOpenMenu) {
-            closeMenuRef.current();
-          } else {
-            openMenuRef.current();
-          }
-        },
-        openSideMenu: () => {
-          openMenuRef.current();
-        },
-        closeSideMenu: () => {
-          closeMenuRef.current();
-        },
-      }),
-      [isOpenMenu]
-    );
-
     return (
-      <HeaderLayout
-        title={(() => {
-          const name = keyRingStore.selectedKeyInfo?.name || "Keplr Account";
+      <Fragment>
+        <HeaderLayout
+          title={""}
+          left={
+            <React.Fragment>
+              <Gutter size="0.75rem" />
+              <Box>
+                <XAxis alignY="center">
+                  <Styles.NameContainer
+                    ref={accountSwitchFloatingModal.refs.setReference}
+                  >
+                    <NameHoverArea
+                      onHover={setIsNameHover}
+                      isHover={isNameHover}
+                      onClick={() => {
+                        setIsOpenAccountSwitchModal(true);
+                      }}
+                    >
+                      <NameIcon name={name} />
+                      <Gutter size="0.5rem" />
+                    </NameHoverArea>
+                    <Box alignY="center">
+                      <XAxis alignY="center">
+                        <Box
+                          position="relative"
+                          style={{
+                            paddingRight: "1.75rem",
+                          }}
+                        >
+                          <XAxis alignY="center">
+                            <NameHoverArea
+                              onHover={setIsNameHover}
+                              isHover={isNameHover}
+                              onClick={() => {
+                                setIsOpenAccountSwitchModal(true);
+                              }}
+                            >
+                              <Subtitle4
+                                color={
+                                  theme.mode === "light"
+                                    ? ColorPalette["gray-700"]
+                                    : ColorPalette["white"]
+                                }
+                              >
+                                {name}
+                              </Subtitle4>
+                            </NameHoverArea>
 
-          if (icnsPrimaryName !== "") {
-            return (
-              <Columns sum={1} alignY="center" gutter="0.25rem">
-                <Box>{name}</Box>
+                            {icnsPrimaryName && (
+                              <Tooltip
+                                content={
+                                  <Caption2 color={ColorPalette["white"]}>
+                                    {icnsPrimaryName}
+                                  </Caption2>
+                                }
+                                allowedPlacements={["top", "bottom"]}
+                              >
+                                <Image
+                                  alt="icns-icon"
+                                  src={require(theme.mode === "light"
+                                    ? "../../../public/assets/img/icns-icon-light.png"
+                                    : "../../../public/assets/img/icns-icon.png")}
+                                  style={{
+                                    width: "1rem",
+                                    height: "1rem",
+                                    marginLeft: "0.25rem",
+                                  }}
+                                />
+                              </Tooltip>
+                            )}
+                          </XAxis>
+                          <Box
+                            ref={depositFloatingModal.refs.setReference}
+                            position="absolute"
+                            alignY="center"
+                            style={{
+                              top: "50%",
+                              right: "0",
+                              transform: "translateY(-50%)",
+                            }}
+                          >
+                            <IconButton
+                              padding="0.375rem"
+                              hoverColor={
+                                theme.mode === "light"
+                                  ? ColorPalette["gray-100"]
+                                  : ColorPalette["gray-600"]
+                              }
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setIsOpenDepositModal(true);
+                              }}
+                            >
+                              <CopyOutlineIcon
+                                width="0.75rem"
+                                height="0.75rem"
+                                color={ColorPalette["gray-300"]}
+                              />
+                            </IconButton>
+                          </Box>
+                        </Box>
+                      </XAxis>
 
-                <Tooltip
-                  content={
-                    <div style={{ whiteSpace: "nowrap" }}>
-                      ICNS : {icnsPrimaryName}
-                    </div>
-                  }
-                >
-                  <Image
-                    alt="icns-icon"
-                    src={require(theme.mode === "light"
-                      ? "../../../public/assets/img/icns-icon-light.png"
-                      : "../../../public/assets/img/icns-icon.png")}
-                    style={{ width: "1rem", height: "1rem" }}
-                  />
-                </Tooltip>
-              </Columns>
-            );
+                      <VerticalCollapseTransition
+                        collapsed={!isShowTotalPrice}
+                        width="15rem"
+                      >
+                        <NameHoverArea
+                          onHover={setIsNameHover}
+                          isHover={isNameHover}
+                          onClick={() => {
+                            setIsOpenAccountSwitchModal(true);
+                          }}
+                        >
+                          <Subtitle4
+                            color={
+                              theme.mode === "light"
+                                ? ColorPalette["gray-700"]
+                                : ColorPalette["white"]
+                            }
+                          >
+                            {totalPrice?.toString()}
+                          </Subtitle4>
+                        </NameHoverArea>
+                      </VerticalCollapseTransition>
+                    </Box>
+                  </Styles.NameContainer>
+                </XAxis>
+              </Box>
+            </React.Fragment>
           }
-
-          return name;
-        })()}
-        left={
-          <React.Fragment>
-            {/* 일종의 padding left인데 cursor를 가지게 하면서 밑에서 tooltip도 함께 사용하기 위해서 다른 Box로 분리되어있음 */}
-            <Box
-              width="1rem"
-              height="1.5rem"
-              cursor="pointer"
-              onClick={openMenu}
-            />
-            <Box>
+          right={
+            <Columns sum={1} alignY="center" gutter="0.875rem">
+              <ConnectedEcosystems />
               <Tooltip
+                hideArrow={true}
+                borderRadius="1.5rem"
+                borderColor={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-100"]
+                    : ColorPalette["gray-500"]
+                }
+                backgroundColor={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-10"]
+                    : ColorPalette["gray-600"]
+                }
                 content={
                   <Box width="17rem" padding="0.375rem">
                     <YAxis>
@@ -260,12 +449,6 @@ export const MainHeaderLayout = observer<
                     </YAxis>
                   </Box>
                 }
-                backgroundColor={
-                  theme.mode === "light"
-                    ? ColorPalette["white"]
-                    : ColorPalette["gray-500"]
-                }
-                hideBorder={theme.mode === "light"}
                 filter={
                   theme.mode === "light"
                     ? "drop-shadow(0px 1px 10px rgba(43, 39, 55, 0.20))"
@@ -281,39 +464,66 @@ export const MainHeaderLayout = observer<
                 }
               >
                 <Box onClick={openMenu} cursor="pointer">
-                  <MenuIcon />
+                  <FloatingMenuBar
+                    isOpen={isOpenMenu}
+                    openMenu={openMenu}
+                    closeMenu={closeMenu}
+                  />
                 </Box>
               </Tooltip>
-            </Box>
-          </React.Fragment>
-        }
-        right={
-          <Columns sum={1} alignY="center" gutter="0.875rem">
-            <ConnectedEcosystems />
-            <ProfileButton />
-          </Columns>
-        }
-        {...otherProps}
-      >
-        {children}
-
-        <Modal
-          isOpen={isOpenMenu}
-          align="left"
-          close={() => setIsOpenMenu(false)}
+            </Columns>
+          }
+          {...otherProps}
         >
-          <MenuBar
-            isOpen={isOpenMenu}
-            close={() => setIsOpenMenu(false)}
-            showSidePanelRecommendationTooltip={
-              showSidePanelRecommendationTooltip
-            }
+          {children}
+        </HeaderLayout>
+        <AccountSwitchFloatModal
+          isOpen={isOpenAccountSwitchModal}
+          closeModal={() => setIsOpenAccountSwitchModal(false)}
+          floating={accountSwitchFloatingModal}
+        />
+        <FloatModal
+          isOpen={isOpenDepositModal}
+          close={() => setIsOpenDepositModal(false)}
+        >
+          <DepositFloatingModal
+            close={() => setIsOpenDepositModal(false)}
+            floating={depositFloatingModal}
           />
-        </Modal>
-      </HeaderLayout>
+        </FloatModal>
+      </Fragment>
     );
   },
   {
     forwardRef: true,
   }
 );
+
+const NameIcon = ({ name }: { name: string }) => {
+  const theme = useTheme();
+
+  return (
+    <Box
+      alignX="center"
+      alignY="center"
+      width="1.5rem"
+      height="1.5rem"
+      borderRadius="9999px"
+      backgroundColor={
+        theme.mode === "light"
+          ? ColorPalette["gray-100"]
+          : ColorPalette["gray-550"]
+      }
+    >
+      <Caption1
+        color={
+          theme.mode === "light"
+            ? ColorPalette["gray-300"]
+            : ColorPalette["gray-200"]
+        }
+      >
+        {name.length > 0 ? name[0] : ""}
+      </Caption1>
+    </Box>
+  );
+};

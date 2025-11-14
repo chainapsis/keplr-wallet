@@ -9,7 +9,7 @@ import {
   SubmitStarknetTxHashMsg,
 } from "@keplr-wallet/background";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
-import { ClaimAllEachState } from "./use-claim-all-each-state";
+import { ClaimAllEachState } from "../../stores/claim-rewards-state";
 import { useNavigate } from "react-router";
 import { useNotification } from "../notification";
 

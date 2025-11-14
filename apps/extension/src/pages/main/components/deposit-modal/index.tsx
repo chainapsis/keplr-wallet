@@ -6,10 +6,12 @@ import { FixedWidthSceneTransition } from "../../../../components/transition";
 import { useTheme } from "styled-components";
 import { CopyAddressScene } from "./copy-address-scene";
 import { QRCodeScene } from "./qr-code";
+import { BuyCryptoModal } from "../buy-crypto-modal";
 
 export const DepositModal: FunctionComponent<{
   close: () => void;
-}> = observer(({ close }) => {
+  initialSearch?: string;
+}> = observer(({ close, initialSearch }) => {
   const theme = useTheme();
 
   return (
@@ -30,11 +32,17 @@ export const DepositModal: FunctionComponent<{
             element: QRCodeScene,
             width: "100%",
           },
+          {
+            name: "buy-crypto",
+            element: BuyCryptoModal,
+            width: "100%",
+          },
         ]}
         initialSceneProps={{
           name: "copy-address",
           props: {
             close,
+            initialSearch,
           },
         }}
         transitionAlign="bottom"
