@@ -32,7 +32,8 @@ export const EcosystemFilterDropdown: FunctionComponent<Props> = ({
     return () => {
       scrollElement?.removeEventListener("scroll", () => setIsOpen(false));
     };
-  }, [isOpen, globalSimpleBar.ref]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   return (
     <Styles.MenuContainer>

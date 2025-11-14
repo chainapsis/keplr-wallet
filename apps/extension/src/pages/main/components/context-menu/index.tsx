@@ -327,7 +327,8 @@ export const ViewOptionsContextMenu: FunctionComponent<{
         scrollElement?.removeEventListener("wheel", closeMenu);
         scrollElement?.removeEventListener("touchmove", closeMenu);
       };
-    }, [isOpen, globalSimpleBar.ref, closeMenu]);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen, closeMenu]);
 
     const toggleMenu = () => {
       analyticsAmplitudeStore.logEvent("click_view_options_context_menu", {
