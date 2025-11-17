@@ -203,9 +203,6 @@ export const StakePage: FunctionComponent = observer(() => {
                 key={title}
                 removeNumInTitle={true}
                 title={<TokenTitleView title={title} />}
-                titleContainerStyle={{
-                  paddingLeft: "0.25rem",
-                }}
                 lenAlwaysShown={lenAlwaysShown}
                 items={balance.map((viewToken) => {
                   const chainId =
