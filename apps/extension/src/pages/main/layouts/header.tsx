@@ -373,7 +373,7 @@ export const MainHeaderLayout = observer<
                             color={
                               theme.mode === "light"
                                 ? ColorPalette["gray-700"]
-                                : ColorPalette["white"]
+                                : ColorPalette["gray-300"]
                             }
                           >
                             {totalPrice?.toString()}
