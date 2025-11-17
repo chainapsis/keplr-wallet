@@ -36,7 +36,12 @@ class ObservableQueryTopUpStatusInner extends ObservableQuery<StatusResponse> {
 
   @computed
   get topUpStatus(): TopUpStatus | undefined {
-    if (this.error || !this.response?.data || this.isFetching) {
+    if (
+      this.error ||
+      !this.response?.data ||
+      (this.isFetching &&
+        Math.abs(this.response.timestamp - Date.now()) > 30 * 1000)
+    ) {
       return undefined;
     }
 
