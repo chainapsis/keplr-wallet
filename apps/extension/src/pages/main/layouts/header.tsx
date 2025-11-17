@@ -66,17 +66,20 @@ const NameHoverArea = ({
   onClick,
   onHover,
   isHover,
+  style,
 }: {
   children: React.ReactNode;
   onClick: () => void;
   onHover: (isHover: boolean) => void;
   isHover: boolean;
+  style?: React.CSSProperties;
 }) => {
   return (
     <Styles.NameHoverArea
       onClick={onClick}
       isHover={isHover}
       onHoverStateChange={onHover}
+      style={style}
     >
       {children}
     </Styles.NameHoverArea>
@@ -291,6 +294,12 @@ export const MainHeaderLayout = observer<
                                     ? ColorPalette["gray-700"]
                                     : ColorPalette["white"]
                                 }
+                                style={{
+                                  maxWidth: "14rem",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                }}
                               >
                                 {name}
                               </Subtitle4>

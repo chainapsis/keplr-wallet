@@ -130,7 +130,10 @@ const AccountItem = observer(
               </Caption1>
             </Styles.AccountIcon>
             <Gutter size="0.625rem" />
-            <Styles.AccountName isSelected={isSelected}>
+            <Styles.AccountName
+              isSelected={isSelected}
+              hasIcnName={!!icnsPrimaryName}
+            >
               {accountName}
             </Styles.AccountName>
 
@@ -412,9 +415,14 @@ const Styles = {
       `}
   `,
 
-  AccountName: styled(Subtitle4)<{ isSelected: boolean }>`
+  AccountName: styled(Subtitle4)<{ isSelected: boolean; hasIcnName: boolean }>`
     color: ${({ theme }) =>
       theme.mode === "light" ? ColorPalette["gray-700"] : ColorPalette.white};
+
+    max-width: ${({ hasIcnName }) => (hasIcnName ? "13rem" : "15rem")};
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 
     ${({ isSelected }) =>
       isSelected &&
