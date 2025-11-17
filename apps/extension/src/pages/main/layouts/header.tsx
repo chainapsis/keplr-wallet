@@ -295,7 +295,7 @@ export const MainHeaderLayout = observer<
                                     : ColorPalette["white"]
                                 }
                                 style={{
-                                  maxWidth: "14rem",
+                                  maxWidth: "8.75rem",
                                   overflow: "hidden",
                                   textOverflow: "ellipsis",
                                   whiteSpace: "nowrap",
