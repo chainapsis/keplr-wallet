@@ -230,6 +230,7 @@ export const CopyAddressItem = observer(
             >
               <StarIcon width="1.25rem" height="1.25rem" />
             </Box>
+
             <Gutter size="0.5rem" />
             <Box
               height="3.5rem"
@@ -364,30 +365,30 @@ export const CopyAddressItem = observer(
                       if (address.starknetAddress) {
                         return `${address.starknetAddress.slice(
                           0,
-                          10
-                        )}...${address.starknetAddress.slice(-8)}`;
+                          12
+                        )}...${address.starknetAddress.slice(-10)}`;
                       }
 
                       if (address.ethereumAddress) {
                         return address.ethereumAddress.length === 42
                           ? `${address.ethereumAddress.slice(
                               0,
-                              10
-                            )}...${address.ethereumAddress.slice(-8)}`
+                              12
+                            )}...${address.ethereumAddress.slice(-10)}`
                           : address.ethereumAddress;
                       }
 
                       if (address.bech32Address) {
                         return Bech32Address.shortenAddress(
                           address.bech32Address,
-                          20
+                          24
                         );
                       }
 
                       if (address.bitcoinAddress?.bech32Address) {
                         return Bech32Address.shortenAddress(
                           address.bitcoinAddress.bech32Address,
-                          20
+                          24
                         );
                       }
                     })()}
