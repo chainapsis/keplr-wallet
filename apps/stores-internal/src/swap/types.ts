@@ -87,7 +87,7 @@ export interface ValidateTargetAssetsResponse {
   }[];
 }
 
-export interface RouteRequest {
+export interface V2RouteRequest {
   from_chain: string; // source chain id
   from_token: string; // source token denom
   to_chain: string; // destination chain id
@@ -108,8 +108,14 @@ export interface FeeToken {
   image_url: string;
 }
 
+export enum RouteStepType {
+  SWAP = "swap",
+  BRIDGE = "bridge",
+  IBC_TRANSFER = "ibc-transfer",
+}
+
 export interface RouteStep {
-  type: "swap" | "bridge" | "ibc-transfer";
+  type: RouteStepType;
   from_chain: string;
   to_chain: string;
   from_token: string;
@@ -121,10 +127,39 @@ export interface RouteStep {
 export interface CosmosTxData {
   chain_id: string;
   signer_address: string;
-  msgs: {
-    type: string;
-    value: any;
-  }[];
+  msgs: (
+    | {
+        type: "cosmos-sdk/MsgTransfer";
+        source_port: string;
+        source_channel: string;
+        token: {
+          denom: string;
+          amount: string;
+        }[];
+        sender: string;
+        receiver: string;
+        timeout_timestamp: string;
+        memo?: string;
+      }
+    | {
+        type: "wasm/MsgExecuteContract";
+        sender: string;
+        contract: string;
+        msg: object;
+        funds: {
+          denom: string;
+          amount: string;
+        }[];
+      }
+    | {
+        type: "cctp/DepositForBurn";
+        from: string;
+        amount: string;
+        destination_domain: number;
+        mint_recipient: string;
+        burn_token: string;
+      }
+  )[];
 }
 
 export interface EVMTxData {
@@ -143,7 +178,17 @@ export interface EVMTxData {
   }[]; // required erc20 approvals
 }
 
-export interface RouteResponse {
+export type RouteTransaction =
+  | {
+      chain_type: ChainType.COSMOS;
+      tx_data: CosmosTxData;
+    }
+  | {
+      chain_type: ChainType.EVM;
+      tx_data: EVMTxData;
+    };
+
+export interface V2RouteResponse {
   provider: Provider;
   amount_out: string; // expected amount out
   estimated_time: number; // estimated time in seconds
@@ -153,15 +198,7 @@ export interface RouteResponse {
     fee_token: FeeToken;
   }[];
   steps: RouteStep[];
-  transactions:
-    | {
-        chain_type: ChainType.COSMOS;
-        tx_data: CosmosTxData;
-      }
-    | {
-        chain_type: ChainType.EVM;
-        tx_data: EVMTxData;
-      }[];
+  transactions: RouteTransaction[];
 }
 
 export interface TxStatusRequest {
@@ -171,9 +208,16 @@ export interface TxStatusRequest {
   tx_hash: string;
 }
 
+export enum TxStatus {
+  IN_PROGRESS = "in_progress",
+  SUCCESS = "success",
+  PARTIAL_SUCCESS = "partial_success",
+  FAILED = "failed",
+}
+
 export interface TxStatusStep {
   chain_id: string;
-  status: "success" | "failed" | "in_progress";
+  status: Omit<TxStatus, TxStatus.PARTIAL_SUCCESS>;
   tx_hash?: string;
   explorer_url?: string;
 }
@@ -186,7 +230,7 @@ export interface AssetLocation {
 
 export interface TxStatusResponse {
   provider: Provider;
-  status: "in_progress" | "success" | "partial_success" | "failed";
+  status: TxStatus;
   steps: TxStatusStep[];
   asset_location: AssetLocation[];
 }
