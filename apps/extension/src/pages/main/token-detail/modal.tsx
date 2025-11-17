@@ -42,6 +42,7 @@ import { Button } from "../../../components/button";
 import { FormattedMessage } from "react-intl";
 import { NOBLE_CHAIN_ID } from "../../../config.ui";
 import { MintPhotonButton } from "./mint-photon-button";
+import Joi from "joi";
 
 const Styles = {
   Container: styled.div`
@@ -627,7 +628,10 @@ export const TokenDetailModal: FunctionComponent<{
               if (
                 chainInfo.stakeCurrency &&
                 chainInfo.stakeCurrency.coinMinimalDenom ===
-                  currency.coinMinimalDenom
+                  currency.coinMinimalDenom &&
+                chainInfo.walletUrlForStaking &&
+                !Joi.string().uri().validate(chainInfo.walletUrlForStaking)
+                  .error
               ) {
                 return (
                   <React.Fragment>
