@@ -155,7 +155,7 @@ const Styles = {
       background-color: ${(props) =>
         props.theme.mode === "light"
           ? ColorPalette["gray-10"]
-          : ColorPalette["gray-600"]};
+          : ColorPalette["gray-650"]};
     }
   `,
   ChainImageWrapper: styled.div`
