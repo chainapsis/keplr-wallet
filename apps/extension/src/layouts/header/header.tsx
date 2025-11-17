@@ -70,14 +70,15 @@ const Styles = {
     right: 0;
 
     z-index: 100;
-    border-bottom: ${({ showBorderBottom, theme }) =>
+    border-bottom-width: 0.5px;
+    border-bottom-style: solid;
+    border-bottom-color: ${({ showBorderBottom, theme }) =>
       showBorderBottom
-        ? `0.5px solid ${
-            theme.mode === "light"
-              ? ColorPalette["gray-100"]
-              : ColorPalette["gray-500"]
-          }`
-        : "none"};
+        ? theme.mode === "light"
+          ? ColorPalette["gray-100"]
+          : ColorPalette["gray-500"]
+        : "transparent"};
+    transition: border-bottom-color 250ms ease;
   `,
 
   HeaderTitle: styled.div`
