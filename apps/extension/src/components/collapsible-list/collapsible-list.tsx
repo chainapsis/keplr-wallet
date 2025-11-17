@@ -40,6 +40,7 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
   notRenderHiddenItems,
   altViewMoreIntlTextId,
   onCollapse,
+  titleContainerStyle,
 }) => {
   if (!lenAlwaysShown || lenAlwaysShown < 0) {
     lenAlwaysShown = items.length;
@@ -60,10 +61,10 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
     <Stack>
       <Box
         marginBottom="0.5rem"
-        paddingX="0.375rem"
         onClick={(e) => {
           e.preventDefault();
         }}
+        style={titleContainerStyle}
       >
         <Columns sum={1} alignY="center">
           <Subtitle4
