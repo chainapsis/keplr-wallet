@@ -946,6 +946,10 @@ const KeyringItem = observer<
                       theme.mode === "light"
                         ? ColorPalette["gray-700"]
                         : ColorPalette["gray-10"],
+                    maxWidth: "14rem",
+                    textOverflow: "wrap",
+                    whiteSpace: "normal",
+                    wordBreak: "break-word",
                   }}
                 >
                   {keyInfo.name}

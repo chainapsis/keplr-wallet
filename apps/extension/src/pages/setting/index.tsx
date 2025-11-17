@@ -585,6 +585,11 @@ const TopSection: FunctionComponent<{
                     ? ColorPalette["gray-700"]
                     : ColorPalette["gray-10"]
                 }
+                style={{
+                  maxWidth: "14rem",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
               >
                 {keyRingStore.selectedKeyInfo?.name || "Keplr Account"}
               </Subtitle3>
