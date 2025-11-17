@@ -16,9 +16,13 @@ export class ObservableChainQueryRPC<
     chainGetter: ChainGetter,
     url: string
   ) {
-    const chainInfo = chainGetter.getChain(chainId);
+    const modularChainInfo = chainGetter.getModularChain(chainId);
 
-    super(sharedContext, chainInfo.rpc, url);
+    super(
+      sharedContext,
+      "cosmos" in modularChainInfo ? modularChainInfo.cosmos.rpc : "",
+      url
+    );
 
     this._chainId = chainId;
     this.chainGetter = chainGetter;

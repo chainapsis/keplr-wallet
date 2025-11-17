@@ -19,7 +19,7 @@ export const MsgRelationEvmSend: FunctionComponent<{
 }> = observer(({ msg, prices, targetDenom, isInAllActivitiesPage }) => {
   const { chainStore } = useStore();
 
-  const chainInfo = chainStore.getChain(msg.chainId);
+  const chainInfo = chainStore.getModularChainInfoImpl(msg.chainId);
 
   const meta = msg.meta as NativeTransferRelMeta | ERC20TransferRelMeta;
 

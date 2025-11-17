@@ -83,14 +83,18 @@ export class KeyRingEthereumService {
     message: Uint8Array,
     signType: EthSignType
   ): Promise<EthereumSignResponse> {
-    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-    if (chainInfo.hideInUI) {
+    const chainInfo = this.chainsService.getModularChainInfoOrThrow(chainId);
+    if ("cosmos" in chainInfo && chainInfo.cosmos.hideInUI) {
       throw new Error("Can't sign for hidden chain");
     }
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
     const evmInfo = ChainsService.getEVMInfo(chainInfo);
-    const forceEVMLedger = chainInfo.features?.includes(
-      "force-enable-evm-ledger"
+    const forceEVMLedger = Boolean(
+      ("evm" in chainInfo &&
+        chainInfo.evm?.features?.includes("force-enable-evm-ledger")) ||
+        ("cosmos" in chainInfo &&
+          chainInfo.cosmos.features?.includes("force-enable-evm-ledger")) ||
+        false
     );
 
     if (!isEthermintLike && !evmInfo) {

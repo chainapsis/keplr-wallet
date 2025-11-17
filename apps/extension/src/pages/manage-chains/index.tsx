@@ -94,7 +94,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
   ] = useState(chainStore.enabledChainIdentifiers);
 
   const determineLedgerApp = (info: ModularChainInfo, cid: string): string => {
-    if ("cosmos" in info && chainStore.isEvmOrEthermintLikeChain(cid)) {
+    if (chainStore.isEvmOrEthermintLikeChain(cid)) {
       return "Ethereum";
     }
 
@@ -114,7 +114,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
       if (!vaultId || !chainId) return;
 
       if (enable) {
-        if (!chainStore.hasChain(chainId)) {
+        if (!chainStore.hasModularChain(chainId)) {
           const keplr = await getKeplrFromWindow();
           const chainInfoToSuggest = searchedNonNativeChainInfos.find(
             (c) =>
@@ -133,8 +133,9 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
           }
         }
 
-        if (chainStore.hasChain(chainId)) {
-          const chainInfo = chainStore.getChain(chainId);
+        const chainInfo = chainStore.getModularChain(chainId);
+
+        if ("cosmos" in chainInfo) {
           const needModal = await needFinalizeKeyCoinTypeAction(
             vaultId,
             chainInfo
@@ -150,8 +151,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
 
         if (chainStore.hasModularChain(chainId)) {
           if (keyRingStore.selectedKeyInfo?.type === "ledger") {
-            const modularChainInfo = chainStore.getModularChain(chainId);
-            const ledgerApp = determineLedgerApp(modularChainInfo, chainId);
+            const ledgerApp = determineLedgerApp(chainInfo, chainId);
 
             const alreadyAppended = Boolean(
               keyRingStore.selectedKeyInfo?.insensitive?.[ledgerApp]
@@ -333,32 +333,25 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
       {
         key: "chainInfo.currency.coinDenom",
         function: (chainInfo: ModularChainInfo | ChainInfo) => {
-          if (
-            "cosmos" in chainInfo &&
-            chainStore.hasChain(chainInfo.chainId) &&
-            "cosmos" in chainInfo
-          ) {
-            const cosmosChainInfo = chainStore.getChain(
-              chainInfo.cosmos.chainId
-            );
+          if ("cosmos" in chainInfo) {
             return CoinPretty.makeCoinDenomPretty(
-              (cosmosChainInfo.stakeCurrency || cosmosChainInfo.currencies[0])
+              (chainInfo.cosmos.stakeCurrency || chainInfo.cosmos.currencies[0])
                 .coinDenom
             );
-          } else if ("starknet" in chainInfo) {
-            return CoinPretty.makeCoinDenomPretty(
-              chainInfo.starknet.currencies[0].coinDenom
-            );
-          } else if ("bitcoin" in chainInfo) {
-            return CoinPretty.makeCoinDenomPretty(
-              chainInfo.bitcoin.currencies[0].coinDenom
+          } else if (chainStore.hasModularChain(chainInfo.chainId)) {
+            return (
+              CoinPretty.makeCoinDenomPretty(
+                chainStore
+                  .getModularChainInfoImpl(chainInfo.chainId)
+                  .getCurrencies()?.[0].coinDenom ?? ""
+              ) ?? ""
             );
           }
           return "";
         },
       },
     ],
-    [chainStore]
+    []
   );
 
   const nativeChains = Array.from(
@@ -397,7 +390,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
         if (isEthermintLike) {
           // don't filter evm only chains
           const isEvmOnlyChain =
-            chainStore.hasChain(cosmosChainInfo.chainId) &&
+            chainStore.hasModularChain(cosmosChainInfo.chainId) &&
             chainStore.isEvmOnlyChain(cosmosChainInfo.chainId);
 
           if (isEvmOnlyChain) {
@@ -441,17 +434,9 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
         case "All":
           return true;
         case "Cosmos":
-          return (
-            "cosmos" in ci &&
-            chainStore.hasChain(ci.chainId) &&
-            !chainStore.isEvmOnlyChain(ci.chainId)
-          );
+          return "cosmos" in ci && !("evm" in ci);
         case "EVM":
-          return (
-            "cosmos" in ci &&
-            chainStore.hasChain(ci.chainId) &&
-            chainStore.isEvmOnlyChain(ci.chainId)
-          );
+          return "evm" in ci;
         case "Bitcoin":
           return "bitcoin" in ci;
         case "Starknet":
@@ -460,7 +445,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
           return true;
       }
     });
-  }, [searchedAllChains, selectedEcosystem, chainStore]);
+  }, [searchedAllChains, selectedEcosystem]);
 
   const visibleChainInfos = useMemo(() => {
     if (!hideEnabled) {
@@ -508,9 +493,9 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
 
     await Promise.all(
       ids.map(async (id) => {
-        if (!id || !chainStore.hasChain(id)) return;
+        if (!id || !chainStore.hasModularChain(id)) return;
 
-        const chainInfo = chainStore.getChain(id);
+        const chainInfo = chainStore.getModularChain(id);
         const needModal = await needFinalizeKeyCoinTypeAction(
           vaultId,
           chainInfo
@@ -577,11 +562,10 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
 
       await Promise.all(
         derivationChainIds.map(async (chainId) => {
-          if (!chainId || !chainStore.hasChain(chainId)) return;
-          const chainInfo = chainStore.getChain(chainId);
+          if (!chainId || !chainStore.hasModularChain(chainId)) return;
           const stillNeed = await needFinalizeKeyCoinTypeAction(
             vaultId,
-            chainInfo
+            chainStore.getModularChain(chainId)
           );
 
           if (stillNeed) {
@@ -689,9 +673,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
                   }
                   disabled={
                     "cosmos" in ci
-                      ? chainStore.hasChain(ci.chainId)
-                        ? !chainStore.isInChainInfosInListUI(ci.chainId)
-                        : false
+                      ? !chainStore.isInModularChainInfosInListUI(ci.chainId)
                       : false
                   }
                   isNativeChain={nativeChainIdentifierSet.has(identifier)}

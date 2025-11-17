@@ -20,7 +20,10 @@ export function useEarnBottomTag(balances: ViewToken[]) {
 
   const nobleAccount = accountStore.getAccount(NOBLE_CHAIN_ID);
   const queries = queriesStore.get(NOBLE_CHAIN_ID);
-  const chainInfo = chainStore.getChain(NOBLE_CHAIN_ID);
+  const chainInfo = chainStore.getModularChain(NOBLE_CHAIN_ID);
+  if (!("cosmos" in chainInfo)) {
+    throw new Error("cosmos module is not supported on this chain");
+  }
 
   const usdnAsset = (() => {
     if (!nobleAccount?.bech32Address) {
@@ -31,7 +34,7 @@ export function useEarnBottomTag(balances: ViewToken[]) {
       nobleAccount.bech32Address
     );
 
-    const usdnCurrency = chainInfo.currencies.find(
+    const usdnCurrency = chainInfo.cosmos.currencies.find(
       (currency) => currency.coinMinimalDenom === "uusdn"
     );
 

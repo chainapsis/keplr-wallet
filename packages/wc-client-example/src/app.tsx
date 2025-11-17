@@ -98,7 +98,7 @@ export const App: FunctionComponent = observer(() => {
       </button>
       <button
         onClick={() => {
-          const evmosChainInfo = chainStore.getChain("evmos_9001-2");
+          const evmosChainInfo = chainStore.getModularChain("evmos_9001-2");
           const account = accountStore.getAccount(evmosChainInfo.chainId);
 
           const ethereumTx = {

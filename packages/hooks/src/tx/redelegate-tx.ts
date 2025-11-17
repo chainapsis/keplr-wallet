@@ -42,11 +42,17 @@ export const useRedelegateTxConfig = (
   amountConfig.setFeeConfig(feeConfig);
 
   const recipientConfig = useRecipientConfig(chainGetter, chainId);
-  const chainInfo = chainGetter.getChain(chainId);
-  if (chainInfo.bech32Config) {
-    recipientConfig.setBech32Prefix(chainInfo.bech32Config.bech32PrefixValAddr);
+
+  const chainInfo = chainGetter.getModularChain(chainId);
+  if (!("cosmos" in chainInfo)) {
+    throw new Error("cosmos module is not supported on this chain");
   }
-  amountConfig.setCurrency(chainGetter.getChain(chainId).stakeCurrency);
+  if (chainInfo.cosmos.bech32Config) {
+    recipientConfig.setBech32Prefix(
+      chainInfo.cosmos.bech32Config.bech32PrefixValAddr
+    );
+  }
+  amountConfig.setCurrency(chainInfo.cosmos.stakeCurrency);
 
   return {
     amountConfig,

@@ -350,8 +350,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           })();
 
           if (
-            ibcSwapConfigs.amountConfig.chainInfo.chainIdentifier ===
-            chainStore.getChain(swapVenueChainId).chainIdentifier
+            ChainIdHelper.parse(ibcSwapConfigs.amountConfig.chainId)
+              .identifier === ChainIdHelper.parse(swapVenueChainId).identifier
           ) {
             type = `swap-1`;
           }
@@ -494,8 +494,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               .then(({ gasUsed }) => {
                 if (
                   chainStore
-                    .getChain(inChainId)
-                    .features.includes("op-stack-l1-data-fee")
+                    .getModularChainInfoImpl(inChainId)
+                    .hasFeature("op-stack-l1-data-fee")
                 ) {
                   return ethereumAccount
                     .simulateOpStackL1Fee({
@@ -630,7 +630,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     const disposal = autorun(() => {
       noop(
         skipQueriesStore.queryIBCSwap.getSwapDestinationCurrencyAlternativeChains(
-          chainStore.getChain(ibcSwapConfigs.amountConfig.outChainId),
+          chainStore.getModularChain(ibcSwapConfigs.amountConfig.outChainId),
           ibcSwapConfigs.amountConfig.outCurrency
         )
       );
@@ -734,7 +734,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
   const outCurrencyFetched =
     chainStore
-      .getChain(outChainId)
+      .getModularChainInfoImpl(outChainId)
       .findCurrency(outCurrency.coinMinimalDenom) != null;
 
   const interactionBlocked =
@@ -953,7 +953,11 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 const chainIdInKeplr = isOnlyEvm
                   ? `eip155:${chainId}`
                   : chainId;
-                if (!chainStore.hasChain(chainIdInKeplr)) {
+                if (
+                  !chainStore
+                    .getModularChainInfoImpl(chainIdInKeplr)
+                    .matchModules({ or: ["cosmos", "evm"] })
+                ) {
                   continue;
                 }
 
@@ -963,16 +967,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 }
 
                 if (isOnlyEvm && !receiverAccount.ethereumHexAddress) {
-                  const receiverChainInfo =
-                    chainStore.hasChain(chainId) &&
-                    chainStore.getChain(chainId);
                   if (
                     receiverAccount.isNanoLedger &&
-                    receiverChainInfo &&
-                    (receiverChainInfo.bip44.coinType === 60 ||
-                      receiverChainInfo.features.includes("eth-address-gen") ||
-                      receiverChainInfo.features.includes("eth-key-sign") ||
-                      receiverChainInfo.evm != null)
+                    chainStore.isEvmOnlyChain(chainId)
                   ) {
                     throw new Error(
                       "Please connect Ethereum app on Ledger with Keplr to get the address"
@@ -1048,15 +1045,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
                 if (!receiverAccount.bech32Address) {
                   const receiverChainInfo =
-                    chainStore.hasChain(receiverChainId) &&
-                    chainStore.getChain(receiverChainId);
+                    chainStore.hasModularChain(receiverChainId) &&
+                    chainStore.getModularChain(receiverChainId);
                   if (
                     receiverAccount.isNanoLedger &&
                     receiverChainInfo &&
-                    (receiverChainInfo.bip44.coinType === 60 ||
-                      receiverChainInfo.features.includes("eth-address-gen") ||
-                      receiverChainInfo.features.includes("eth-key-sign") ||
-                      receiverChainInfo.evm != null)
+                    "evm" in receiverChainInfo
                   ) {
                     throw new Error(
                       "Please connect Ethereum app on Ledger with Keplr to get the address"
@@ -1124,7 +1118,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                         ibcSwapConfigs.memoConfig.memo,
                         true
                       ).withIBCPacketForwarding(channels, {
-                        currencies: chainStore.getChain(chainId).currencies,
+                        currencies: chainStore
+                          .getModularChainInfoImpl(chainId)
+                          .getCurrencies(),
                       });
                       return await new InExtensionMessageRequester().sendMessage(
                         BACKGROUND_PORT,
@@ -1158,8 +1154,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                         }),
                         ibcSwapConfigs.memoConfig.memo,
                         {
-                          currencies:
-                            chainStore.getChain(outChainId).currencies,
+                          currencies: chainStore
+                            .getModularChainInfoImpl(outChainId)
+                            .getCurrencies(),
                         },
                         !isInterchainSwap // ibc swap이 아닌 interchain swap인 경우, ibc swap history에 추가하는 대신 skip swap history를 추가한다.
                       );
@@ -1218,8 +1215,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                           },
                         ],
                         {
-                          currencies:
-                            chainStore.getChain(outChainId).currencies,
+                          currencies: chainStore
+                            .getModularChainInfoImpl(outChainId)
+                            .getCurrencies(),
                         },
                         routeDurationSeconds ?? 0,
                         Buffer.from(txHash).toString("hex")
@@ -1240,19 +1238,23 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                         );
 
                         if (keyRingStore.selectedKeyInfo) {
-                          const outChainInfo = chainStore.getChain(
+                          const outChainInfo = chainStore.getModularChain(
                             ibcSwapConfigs.amountConfig.outChainId
                           );
                           if (
                             keyRingStore.needKeyCoinTypeFinalize(
                               keyRingStore.selectedKeyInfo.id,
-                              outChainInfo
+                              outChainInfo.chainId
                             )
                           ) {
                             keyRingStore.finalizeKeyCoinType(
                               keyRingStore.selectedKeyInfo.id,
                               outChainInfo.chainId,
-                              outChainInfo.bip44.coinType
+                              "evm" in outChainInfo
+                                ? outChainInfo.evm.bip44.coinType
+                                : "cosmos" in outChainInfo
+                                ? outChainInfo.cosmos.bip44.coinType
+                                : 118
                             );
                           }
                         }
@@ -1556,8 +1558,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                           },
                         ],
                         {
-                          currencies:
-                            chainStore.getChain(outChainId).currencies,
+                          currencies: chainStore
+                            .getModularChainInfoImpl(outChainId)
+                            .getCurrencies(),
                         },
                         routeDurationSeconds ?? 0,
                         txHash
@@ -1702,9 +1705,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                                       },
                                     ],
                                     {
-                                      currencies:
-                                        chainStore.getChain(outChainId)
-                                          .currencies,
+                                      currencies: chainStore
+                                        .getModularChainInfoImpl(outChainId)
+                                        .getCurrencies(),
                                     },
                                     routeDurationSeconds ?? 0,
                                     txHash
@@ -2056,7 +2059,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                         srcChain:
                           ibcSwapConfigs.amountConfig.chainInfo.chainName,
                         outPrice: outPrice?.toString(),
-                        dstChain: chainStore.getChain(
+                        dstChain: chainStore.getModularChain(
                           ibcSwapConfigs.amountConfig.outChainId
                         ).chainName,
                       }

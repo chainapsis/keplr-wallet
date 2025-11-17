@@ -69,10 +69,12 @@ export const FeeSummary: FunctionComponent<{
                 feeConfig.fees.length === 0 ||
                 (isForEVMTx && !gasSimulator?.gasEstimated)
               ) {
-                const chainInfo = chainStore.getChain(feeConfig.chainId);
+                const chainInfo = chainStore.getModularChainInfoImpl(
+                  feeConfig.chainId
+                );
                 return [
                   new CoinPretty(
-                    chainInfo.stakeCurrency || chainInfo.currencies[0],
+                    chainInfo.stakeCurrency || chainInfo.feeCurrencies![0],
                     new Dec(0)
                   ),
                 ];

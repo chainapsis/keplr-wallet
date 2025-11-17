@@ -55,7 +55,7 @@ export class ObservableQueryBitcoinBalanceImpl
       this.chainId
     );
 
-    const currencies = modularChainInfoImpl.getCurrencies("bitcoin");
+    const currencies = modularChainInfoImpl.getCurrenciesByModule("bitcoin");
     const currency = currencies.find((cur) => cur.coinMinimalDenom === denom);
 
     if (!currency) {
