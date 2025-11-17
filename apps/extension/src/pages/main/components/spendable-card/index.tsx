@@ -8,12 +8,21 @@ import { Body3, Subtitle2 } from "../../../../components/typography";
 import { Skeleton } from "../../../../components/skeleton";
 import { ColorPalette } from "../../../../styles";
 import { useStore } from "../../../../stores";
-import { XAxis, YAxis } from "../../../../components/axis";
-import { useTheme } from "styled-components";
+import { YAxis } from "../../../../components/axis";
+import styled, { useTheme } from "styled-components";
 import { Gutter } from "../../../../components/gutter";
 import { ArrowDownLeftIcon } from "../../../../components/icon/arrow-down-left";
 import { ArrowUpRightIcon } from "../../../../components/icon/arrow-up-right";
 import { ArrowSwapIcon } from "../../../../components/icon/arrow-swap";
+
+const Styles = {
+  ButtonContainer: styled.div`
+    display: flex;
+    gap: 0.375rem;
+
+    justify-content: space-between;
+  `,
+};
 
 export const SpendableCard: FunctionComponent<{
   spendableTotalPrice: PricePretty | undefined;
@@ -50,6 +59,7 @@ export const SpendableCard: FunctionComponent<{
           borderWidth="1px"
           borderRadius="1.5rem"
           padding="1rem"
+          width="100%"
         >
           <Box>
             <Skeleton isNotReady={isNotReady} verticalBleed="2px">
@@ -90,7 +100,7 @@ export const SpendableCard: FunctionComponent<{
 
           <Gutter size="1.5rem" />
 
-          <XAxis gap="0.375rem" alignY="center">
+          <Styles.ButtonContainer>
             <Skeleton type="button" isNotReady={isNotReady}>
               <EllipseButton
                 text={intl.formatMessage({
@@ -153,7 +163,7 @@ export const SpendableCard: FunctionComponent<{
                 }}
               />
             </Skeleton>
-          </XAxis>
+          </Styles.ButtonContainer>
         </Box>
       </Fragment>
     );
@@ -202,6 +212,7 @@ const EllipseButton: FunctionComponent<{
           backgroundColor={
             isLightMode ? ColorPalette["blue-50"] : ColorPalette["blue-800"]
           }
+          minWidth="3.5rem"
         >
           {icon}
         </Box>
