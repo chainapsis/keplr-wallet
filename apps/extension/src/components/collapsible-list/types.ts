@@ -20,6 +20,4 @@ export interface CollapsibleListProps {
   altViewMoreIntlTextId?: string;
 
   onCollapse?: (isCollapsed: boolean) => void;
-
-  titleContainerStyle?: React.CSSProperties;
 }
