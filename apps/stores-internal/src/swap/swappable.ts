@@ -4,7 +4,7 @@ import {
   ObservableQuery,
   QuerySharedContext,
 } from "@keplr-wallet/stores";
-import { SwappableResponse } from "./types";
+import { SwappableRequest, SwappableResponse } from "./types";
 import { computed, makeObservable, observable, runInAction } from "mobx";
 import Joi from "joi";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
@@ -93,20 +93,22 @@ export class ObservableQuerySwappableInner extends ObservableQuery<SwappableResp
   protected override async fetchResponse(
     abortController: AbortController
   ): Promise<{ headers: any; data: SwappableResponse }> {
+    const request: SwappableRequest = {
+      tokens: this.tokens.map((t) => {
+        return {
+          chain_id: normalizeChainId(t.chainId),
+          denom: normalizeDenom(this.chainStore, t.chainId, t.denom),
+        };
+      }),
+    };
+
     const _result = await simpleFetch(this.baseURL, this.url, {
       signal: abortController.signal,
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        tokens: this.tokens.map((t) => {
-          return {
-            chain_id: normalizeChainId(t.chainId),
-            denom: normalizeDenom(this.chainStore, t.chainId, t.denom),
-          };
-        }),
-      }),
+      body: JSON.stringify(request),
     });
     const result = {
       headers: _result.headers,

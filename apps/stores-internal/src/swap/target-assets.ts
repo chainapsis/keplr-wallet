@@ -5,7 +5,7 @@ import {
   ObservableQuery,
   QuerySharedContext,
 } from "@keplr-wallet/stores";
-import { TargetAssetsResponse } from "./types";
+import { TargetAssetsRequest, TargetAssetsResponse } from "./types";
 import { computed, makeObservable } from "mobx";
 import Joi from "joi";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
@@ -133,43 +133,45 @@ export class ObservableQueryTargetAssetsInner extends ObservableQuery<TargetAsse
   protected override async fetchResponse(
     abortController: AbortController
   ): Promise<{ headers: any; data: TargetAssetsResponse }> {
+    const request: TargetAssetsRequest = {
+      chain_id: (() => {
+        if (this.chainId.startsWith("eip155:")) {
+          return this.chainId.replace("eip155:", "");
+        }
+        return this.chainId;
+      })(),
+      denom: (() => {
+        const currencies = this.chainStore.getChain(this.chainId).currencies;
+        if (this.chainId.startsWith("eip155:") && currencies.length > 0) {
+          if (currencies[0].coinMinimalDenom === this.denom) {
+            return "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
+          }
+        }
+        if (this.denom.startsWith("erc20:")) {
+          return this.denom.replace("erc20:", "");
+        }
+        return this.denom;
+      })(),
+      page: this.page,
+      limit: this.limit,
+      ...(() => {
+        if (this.search.trim().length > 0) {
+          return {
+            search: this.search,
+          };
+        }
+
+        return {};
+      })(),
+    };
+
     const _result = await simpleFetch(this.baseURL, this.url, {
       signal: abortController.signal,
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        chain_id: (() => {
-          if (this.chainId.startsWith("eip155:")) {
-            return this.chainId.replace("eip155:", "");
-          }
-          return this.chainId;
-        })(),
-        denom: (() => {
-          const currencies = this.chainStore.getChain(this.chainId).currencies;
-          if (this.chainId.startsWith("eip155:") && currencies.length > 0) {
-            if (currencies[0].coinMinimalDenom === this.denom) {
-              return "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
-            }
-          }
-          if (this.denom.startsWith("erc20:")) {
-            return this.denom.replace("erc20:", "");
-          }
-          return this.denom;
-        })(),
-        page: this.page,
-        limit: this.limit,
-        ...(() => {
-          if (this.search.trim().length > 0) {
-            return {
-              search: this.search,
-            };
-          }
-
-          return {};
-        })(),
-      }),
+      body: JSON.stringify(request),
     });
     const result = {
       headers: _result.headers,

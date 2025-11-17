@@ -5,7 +5,7 @@ import {
   ObservableQuery,
   QuerySharedContext,
 } from "@keplr-wallet/stores";
-import { RelatedAssetsResponse } from "./types";
+import { RelatedAssetsRequest, RelatedAssetsResponse } from "./types";
 import { computed, makeObservable } from "mobx";
 import Joi from "joi";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
@@ -122,32 +122,34 @@ export class ObservableQueryRelatedAssetsInner extends ObservableQuery<RelatedAs
   protected override async fetchResponse(
     abortController: AbortController
   ): Promise<{ headers: any; data: RelatedAssetsResponse }> {
+    const request: RelatedAssetsRequest = {
+      chain_id: (() => {
+        if (this.chainId.startsWith("eip155:")) {
+          return this.chainId.replace("eip155:", "");
+        }
+        return this.chainId;
+      })(),
+      denom: (() => {
+        const currencies = this.chainStore.getChain(this.chainId).currencies;
+        if (this.chainId.startsWith("eip155:") && currencies.length > 0) {
+          if (currencies[0].coinMinimalDenom === this.denom) {
+            return "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
+          }
+        }
+        if (this.denom.startsWith("erc20:")) {
+          return this.denom.replace("erc20:", "");
+        }
+        return this.denom;
+      })(),
+    };
+
     const _result = await simpleFetch(this.baseURL, this.url, {
       signal: abortController.signal,
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        chain_id: (() => {
-          if (this.chainId.startsWith("eip155:")) {
-            return this.chainId.replace("eip155:", "");
-          }
-          return this.chainId;
-        })(),
-        denom: (() => {
-          const currencies = this.chainStore.getChain(this.chainId).currencies;
-          if (this.chainId.startsWith("eip155:") && currencies.length > 0) {
-            if (currencies[0].coinMinimalDenom === this.denom) {
-              return "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
-            }
-          }
-          if (this.denom.startsWith("erc20:")) {
-            return this.denom.replace("erc20:", "");
-          }
-          return this.denom;
-        })(),
-      }),
+      body: JSON.stringify(request),
     });
     const result = {
       headers: _result.headers,

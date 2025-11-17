@@ -4,7 +4,10 @@ import {
   ObservableQuery,
   QuerySharedContext,
 } from "@keplr-wallet/stores";
-import { ValidateTargetAssetsResponse } from "./types";
+import {
+  ValidateTargetAssetsRequest,
+  ValidateTargetAssetsResponse,
+} from "./types";
 import {
   computed,
   makeObservable,
@@ -101,22 +104,24 @@ export class ObservableQueryValidateTargetAssetsInner extends ObservableQuery<Va
   protected override async fetchResponse(
     abortController: AbortController
   ): Promise<{ headers: any; data: ValidateTargetAssetsResponse }> {
+    const request: ValidateTargetAssetsRequest = {
+      chain_id: normalizeChainId(this.chainId),
+      denom: normalizeDenom(this.chainStore, this.chainId, this.denom),
+      tokens: this.tokens.map((t) => {
+        return {
+          chain_id: normalizeChainId(t.chainId),
+          denom: normalizeDenom(this.chainStore, t.chainId, t.denom),
+        };
+      }),
+    };
+
     const _result = await simpleFetch(this.baseURL, this.url, {
       signal: abortController.signal,
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        chain_id: normalizeChainId(this.chainId),
-        denom: normalizeDenom(this.chainStore, this.chainId, this.denom),
-        tokens: this.tokens.map((t) => {
-          return {
-            chain_id: normalizeChainId(t.chainId),
-            denom: normalizeDenom(this.chainStore, t.chainId, t.denom),
-          };
-        }),
-      }),
+      body: JSON.stringify(request),
     });
     const result = {
       headers: _result.headers,
