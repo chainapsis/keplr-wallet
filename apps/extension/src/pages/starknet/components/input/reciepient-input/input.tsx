@@ -76,7 +76,7 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
               : "components.input.recipient-input.wallet-address-only-label",
           })}
           value={recipientConfig.value}
-          textSuffix={(() => {
+          suffix={(() => {
             if ("nameServiceResult" in recipientConfig) {
               const r = recipientConfig.nameServiceResult;
               if (r.length > 0) {

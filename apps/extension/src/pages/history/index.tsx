@@ -15,7 +15,7 @@ import { Gutter } from "../../components/gutter";
 import { Dropdown } from "../../components/dropdown";
 import { EmptyView } from "../../components/empty-view";
 import { H4, Subtitle3 } from "../../components/typography";
-import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
+import { useGlobalSimpleBar } from "../../hooks/global-simplebar";
 import {
   IAccountStore,
   IChainInfoImpl,
@@ -91,7 +91,7 @@ class OtherHexAddresses {
   }
 }
 
-export const ActivitiesPage: FunctionComponent = observer(() => {
+export const HistoryPage: FunctionComponent = observer(() => {
   const { chainStore, accountStore, priceStore, queriesStore } = useStore();
 
   const [otherHexAddresses] = useState(
@@ -170,7 +170,7 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
 
   const theme = useTheme();
 
-  const globalSimpleBar = useGlobarSimpleBar();
+  const globalSimpleBar = useGlobalSimpleBar();
   useEffect(() => {
     if (globalSimpleBar.ref.current) {
       const scrollElement = globalSimpleBar.ref.current.getScrollElement();
@@ -221,7 +221,7 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
                 : ColorPalette["white"]
             }
           >
-            <FormattedMessage id="page.activity.title" />
+            <FormattedMessage id="page.history.title" />
           </H4>
         </Box>
         <Box paddingX="0.75rem">

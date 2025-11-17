@@ -74,6 +74,38 @@ const buttonStyleFromColorAndMode: Record<
       `,
     },
   },
+  blue: {
+    light: {
+      enabled: css`
+        color: ${ColorPalette["blue-400"]};
+        ${makeTextAndSvgColor(ColorPalette["blue-400"])}
+
+        :hover {
+          color: ${ColorPalette["blue-300"]};
+          ${makeTextAndSvgColor(ColorPalette["blue-300"])}
+        }
+      `,
+      disabled: css`
+        color: ${ColorPalette["blue-400"]};
+        ${makeTextAndSvgColor(ColorPalette["blue-400"])}
+      `,
+    },
+    dark: {
+      enabled: css`
+        color: ${ColorPalette["blue-400"]};
+        ${makeTextAndSvgColor(ColorPalette["blue-400"])}
+
+        :hover {
+          color: ${ColorPalette["blue-300"]};
+          ${makeTextAndSvgColor(ColorPalette["blue-300"])}
+        }
+      `,
+      disabled: css`
+        color: ${ColorPalette["blue-400"]};
+        ${makeTextAndSvgColor(ColorPalette["blue-400"])}
+      `,
+    },
+  },
 };
 
 export const Styles = {
@@ -83,14 +115,22 @@ export const Styles = {
     align-items: center;
   `,
 
-  Button: styled.button<Omit<TextButtonProps, "onClick">>`
+  Button: styled.button.withConfig<Omit<TextButtonProps, "onClick">>({
+    shouldForwardProp: (prop) => {
+      if (prop === "isLoading") {
+        return false;
+      }
+      return true;
+    },
+  })`
     width: 100%;
     height: 2rem;
     display: flex;
     justify-content: center;
     align-items: center;
     border-radius: 0.375rem;
-    cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
+    cursor: ${({ disabled, isLoading }) =>
+      disabled ? "not-allowed" : isLoading ? "progress" : "pointer"};
     overflow: hidden;
 
     // Default font style.

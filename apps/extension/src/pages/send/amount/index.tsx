@@ -103,7 +103,7 @@ import { autorun } from "mobx";
 import { usePreviousDistinct } from "../../../hooks/use-previous";
 import { SwapFeeInfoForBridgeOnSend } from "./swap-fee-info";
 import { useEffectOnce } from "../../../hooks/use-effect-once";
-import { useGlobarSimpleBar } from "../../../hooks/global-simplebar";
+import { useGlobalSimpleBar } from "../../../hooks/global-simplebar";
 import { FeeCoverageDescription } from "../../../components/top-up";
 import { useTopUp } from "../../../hooks/use-topup";
 import { getShouldTopUpSignOptions } from "../../../utils/should-top-up-sign-options";
@@ -2630,7 +2630,7 @@ const WarningGuideBox: FunctionComponent<{
 
     let collapsed = error == null;
 
-    const globalSimpleBar = useGlobarSimpleBar();
+    const globalSimpleBar = useGlobalSimpleBar();
     useEffect(() => {
       if (!collapsed) {
         const timeoutId = setTimeout(() => {

@@ -34,6 +34,7 @@ export const Tooltip: FunctionComponent<
     backgroundColor?: string;
     hideBorder?: boolean;
     borderColor?: string;
+    borderRadius?: string;
     filter?: string;
     floatingOffset?: number;
 
@@ -53,6 +54,7 @@ export const Tooltip: FunctionComponent<
   hideBorder,
   borderColor: propBorderColor,
   filter,
+  borderRadius: propBorderRadius,
   children,
   forceWidth,
   hideArrow,
@@ -146,7 +148,7 @@ export const Tooltip: FunctionComponent<
 
             backgroundColor,
             padding: "0.625rem",
-            borderRadius: "0.375rem",
+            borderRadius: propBorderRadius || "0.375rem",
 
             borderStyle: "solid",
             borderWidth: "1px",
