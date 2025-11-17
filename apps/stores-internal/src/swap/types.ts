@@ -196,11 +196,12 @@ export interface V2RouteResponse {
     usd_amount: string;
     amount: string;
     fee_token: FeeToken;
-  }[];
+  }[]; // NOTE: only bridge fees are included in the response
   steps: RouteStep[];
   transactions: RouteTransaction[];
 }
 
+// TODO: move status query types out of this file
 export interface TxStatusRequest {
   provider: Provider;
   from_chain: string;

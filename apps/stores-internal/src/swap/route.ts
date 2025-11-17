@@ -63,12 +63,69 @@ const Schema = Joi.object<V2RouteResponse>({
               signer_address: Joi.string().required(),
               msgs: Joi.array()
                 .items(
-                  Joi.object({
-                    type: Joi.string().required(),
-                    value: Joi.any().required(),
+                  Joi.alternatives().conditional(Joi.ref(".type"), {
+                    switch: [
+                      {
+                        is: "cosmos-sdk/MsgTransfer",
+                        then: Joi.object({
+                          type: Joi.string()
+                            .valid("cosmos-sdk/MsgTransfer")
+                            .required(),
+                          source_port: Joi.string().required(),
+                          source_channel: Joi.string().required(),
+                          token: Joi.array()
+                            .items(
+                              Joi.object({
+                                denom: Joi.string().required(),
+                                amount: Joi.string().required(),
+                              })
+                            )
+                            .required(),
+                          sender: Joi.string().required(),
+                          receiver: Joi.string().required(),
+                          timeout_timestamp: Joi.string().required(),
+                          memo: Joi.string().optional(),
+                        }).unknown(true),
+                      },
+                      {
+                        is: "wasm/MsgExecuteContract",
+                        then: Joi.object({
+                          type: Joi.string()
+                            .valid("wasm/MsgExecuteContract")
+                            .required(),
+                          sender: Joi.string().required(),
+                          contract: Joi.string().required(),
+                          msg: Joi.object().required(),
+                          funds: Joi.array()
+                            .items(
+                              Joi.object({
+                                denom: Joi.string().required(),
+                                amount: Joi.string().required(),
+                              })
+                            )
+                            .required(),
+                        }).unknown(true),
+                      },
+                      {
+                        is: "cctp/DepositForBurn",
+                        then: Joi.object({
+                          type: Joi.string()
+                            .valid("cctp/DepositForBurn")
+                            .required(),
+                          from: Joi.string().required(),
+                          amount: Joi.string().required(),
+                          destination_domain: Joi.number().required(),
+                          mint_recipient: Joi.string().required(),
+                          burn_token: Joi.string().required(),
+                        }).unknown(true),
+                      },
+                    ],
+                    otherwise: Joi.object({
+                      type: Joi.string().required(),
+                    }).unknown(true),
                   })
                 )
-                .required(), // TODO: add schema for msgs
+                .required(),
             })
               .unknown(true)
               .required(),
@@ -147,90 +204,49 @@ export class ObservableQueryRouteV2Inner extends ObservableQuery<V2RouteResponse
     );
   }
 
-  // NOTE: 브릿지 수수료, tx 수수료 구분이 안되어 있어서 백엔드 쪽에서 확인하고 처리해야 함
+  @computed
+  get bridgeFees(): CoinPretty[] {
+    if (!this.response) {
+      return [];
+    }
+    if (!this.response.data.fees || this.response.data.fees.length === 0) {
+      return [];
+    }
 
-  // 프로퍼티 이름이 애매하긴 한데... 일단 skip response에서 estimated_fees를 차리하기 위한 property이고
-  // 현재 이 값은 브릿징 수수료를 의미한다.
-  // @computed
-  // get otherFees(): CoinPretty[] {
-  //   if (!this.response) {
-  //     return [];
-  //   }
-  //   if (!this.response.data.fees) {
-  //     return [];
-  //   }
+    const fees = this.response.data.fees;
 
-  //   // return this.response.data.fees.map((fee) => {
-  //   //   return new CoinPretty(
-  //   //     this.chainGetter.hasChain(fee.origin_asset.chain_id)
-  //   //       ? this.chainGetter
-  //   //           .getChain(fee.origin_asset.chain_id)
-  //   //           .forceFindCurrency(fee.origin_asset.denom)
-  //   //       : this.chainGetter
-  //   //           .getChain(`eip155:${fee.origin_asset.chain_id}`)
-  //   //           .forceFindCurrency(
-  //   //             (() => {
-  //   //               if (fee.origin_asset.denom.startsWith("0x")) {
-  //   //                 return `erc20:${fee.origin_asset.denom.toLowerCase()}`;
-  //   //               }
+    // 동일한 denom의 fee가 있으면 합치기
+    // CHECK: usd amount랑 이미지랑 다 주는데 그냥 원본값 반환하기 or 가공해서 반환하기
+    const feeMap = new Map<string, CoinPretty>();
+    for (const fee of fees) {
+      const coinPretty = new CoinPretty(
+        this.chainGetter.hasChain(fee.fee_token.chain_id)
+          ? this.chainGetter
+              .getChain(fee.fee_token.chain_id)
+              .forceFindCurrency(fee.fee_token.denom)
+          : this.chainGetter
+              .getChain(`eip155:${fee.fee_token.chain_id}`)
+              .forceFindCurrency(
+                (() => {
+                  if (fee.fee_token.denom.startsWith("0x")) {
+                    return `erc20:${fee.fee_token.denom.toLowerCase()}`;
+                  }
+                  return fee.fee_token.denom;
+                })()
+              ),
+        fee.amount
+      );
 
-  //   //               return fee.origin_asset.denom;
-  //   //             })()
-  //   //           ),
-  //   //     fee.amount
-  //   //   );
-  //   // });
+      const denom = fee.fee_token.denom;
+      if (feeMap.has(denom)) {
+        feeMap.get(denom)!.add(coinPretty);
+      } else {
+        feeMap.set(denom, coinPretty);
+      }
+    }
 
-  //   return [];
-  // }
-
-  // @computed
-  // get swapFee(): CoinPretty[] {
-  //   if (!this.response) {
-  //     return [
-  //       new CoinPretty(
-  //         this.chainGetter
-  //           .getChain(this.toChainId)
-  //           .forceFindCurrency(this.toDenom),
-  //         "0"
-  //       ),
-  //     ];
-  //   }
-
-  //   const estimatedAffiliateFees: {
-  //     fee: string;
-  //     venueChainId: string;
-  //   }[] = [];
-
-  //   for (const operation of this.response.data.operations) {
-  //     if ("swap" in operation) {
-  //       const swapIn = operation.swap.swap_in ?? operation.swap.smart_swap_in;
-  //       if (swapIn) {
-  //         estimatedAffiliateFees.push({
-  //           fee: operation.swap.estimated_affiliate_fee,
-  //           // QUESTION: swap_out이 생기면...?
-  //           venueChainId: swapIn.swap_venue.chain_id,
-  //         });
-  //       }
-  //     }
-  //   }
-
-  //   return estimatedAffiliateFees.map(({ fee, venueChainId }) => {
-  //     const split = fee.split(/^([0-9]+)(\s)*([a-zA-Z][a-zA-Z0-9/-]*)$/);
-
-  //     if (split.length !== 5) {
-  //       throw new Error(`Invalid fee format: ${fee}`);
-  //     }
-
-  //     const amount = split[1];
-  //     const denom = split[3];
-
-  //     return new CoinPretty(
-  //       this.chainGetter.getChain(venueChainId).forceFindCurrency(denom),
-  //       amount
-  //     );
-  //   });
-  // }
+    return Array.from(feeMap.values());
+  }
 
   @computed
   get transactions(): RouteTransaction[] {
