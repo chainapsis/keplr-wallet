@@ -11,6 +11,7 @@ import Joi from "joi";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { Currency } from "@keplr-wallet/types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { normalizeChainId, normalizeDenom } from "./utils";
 
 const Schema = Joi.object<TargetAssetsResponse>({
   tokens: Joi.array()
@@ -134,24 +135,8 @@ export class ObservableQueryTargetAssetsInner extends ObservableQuery<TargetAsse
     abortController: AbortController
   ): Promise<{ headers: any; data: TargetAssetsResponse }> {
     const request: TargetAssetsRequest = {
-      chain_id: (() => {
-        if (this.chainId.startsWith("eip155:")) {
-          return this.chainId.replace("eip155:", "");
-        }
-        return this.chainId;
-      })(),
-      denom: (() => {
-        const currencies = this.chainStore.getChain(this.chainId).currencies;
-        if (this.chainId.startsWith("eip155:") && currencies.length > 0) {
-          if (currencies[0].coinMinimalDenom === this.denom) {
-            return "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
-          }
-        }
-        if (this.denom.startsWith("erc20:")) {
-          return this.denom.replace("erc20:", "");
-        }
-        return this.denom;
-      })(),
+      chain_id: normalizeChainId(this.chainId),
+      denom: normalizeDenom(this.chainStore, this.chainId, this.denom),
       page: this.page,
       limit: this.limit,
       ...(() => {
