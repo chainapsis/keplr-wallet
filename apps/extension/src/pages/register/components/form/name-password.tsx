@@ -12,6 +12,7 @@ import { useSceneEvents } from "../../../../components/transition";
 import { useIntl } from "react-intl";
 import { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
+import { stringLengthByGrapheme } from "../../../../utils/string";
 
 export interface FormDataNamePassword {
   name: string;
@@ -58,7 +59,7 @@ export const FormNamePassword: FunctionComponent<
       }),
       validate: (value) => {
         const trimmedValue = value.trim();
-        if (trimmedValue.length < 4) {
+        if (stringLengthByGrapheme(trimmedValue) < 4) {
           return intl.formatMessage({
             id: "page.wallet.change-name.min-length-error",
           });

@@ -39,6 +39,7 @@ import { useTotalPrices } from "../../../hooks/use-total-prices";
 import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
 import { Image } from "../../../components/image";
 import { useGetIcnsName } from "../../../hooks/use-get-icns-name";
+import { stringLengthByGrapheme } from "../../../utils/string";
 
 const Styles = {
   NameContainer: styled.div`
@@ -502,6 +503,13 @@ export const MainHeaderLayout = observer<
 const NameIcon = ({ name }: { name: string }) => {
   const theme = useTheme();
 
+  const firstChar = (() => {
+    if (stringLengthByGrapheme(name) !== name.length) {
+      return "A";
+    }
+    return name[0].toUpperCase();
+  })();
+
   return (
     <Box
       alignX="center"
@@ -522,7 +530,7 @@ const NameIcon = ({ name }: { name: string }) => {
             : ColorPalette["gray-200"]
         }
       >
-        {name.length > 0 ? name[0] : ""}
+        {firstChar}
       </Caption1>
     </Box>
   );
