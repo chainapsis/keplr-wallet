@@ -208,4 +208,22 @@ export class ObservableQueryRelatedAssets extends HasMapStore<ObservableQueryRel
       })
     );
   }
+
+  isRelatedAssetsToken(
+    sourceChainId: string,
+    sourceDenom: string,
+    destChainId: string,
+    destDenom: string
+  ): boolean {
+    const observable = this.getObservableQueryRelatedAssets(
+      sourceChainId,
+      sourceDenom
+    );
+    if (observable) {
+      return observable.currencies.some(
+        (c) => c.chainId === destChainId && c.coinMinimalDenom === destDenom
+      );
+    }
+    return false;
+  }
 }

@@ -340,7 +340,8 @@ export class ObservableQueryRouteV2 extends HasMapStore<ObservableQueryRouteInne
 
   getRoute(
     fromChainId: string,
-    fromAmount: CoinPretty,
+    fromDenom: string,
+    fromAmount: string,
     toChainId: string,
     toDenom: string,
     chainIdsToAddresses: Record<string, string>,
@@ -348,10 +349,10 @@ export class ObservableQueryRouteV2 extends HasMapStore<ObservableQueryRouteInne
   ): ObservableQueryRouteInnerV2 {
     const request: RouteRequestV2 = {
       from_chain: fromChainId,
-      from_token: fromAmount.currency.coinMinimalDenom,
+      from_token: fromDenom,
       to_chain: toChainId,
       to_token: toDenom,
-      amount: fromAmount.toCoin().amount,
+      amount: fromAmount,
       chain_ids_to_addresses: chainIdsToAddresses,
       slippage: slippage,
     };
