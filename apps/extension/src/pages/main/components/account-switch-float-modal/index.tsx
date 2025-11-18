@@ -449,9 +449,9 @@ const Styles = {
     min-width: 11.25rem;
   `,
 
-  MenuItem: styled(ContextMenuStyles.Item)<{ isLast?: boolean }>`
-    ${Body3}
-
+  MenuItem: styled(ContextMenuStyles.Item).attrs({ as: Body3 })<{
+    isLast?: boolean;
+  }>`
     padding: 0.5rem 1.5rem;
     height: 2.5rem;
     width: 100%;
