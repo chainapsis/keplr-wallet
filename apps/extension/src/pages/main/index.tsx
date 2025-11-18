@@ -339,7 +339,7 @@ export const MainPage: FunctionComponent<{
                 justifyContent: "center",
                 height: "1px",
                 overflowX: "clip",
-                width: animatedPrivacyModeHover.to((v) => `${v * 1.25}rem`),
+                width: animatedPrivacyModeHover.to((v) => `${v * 1.5}rem`),
               }}
             >
               <PrivacyModeButtonStyles.PrivacyModeButton
