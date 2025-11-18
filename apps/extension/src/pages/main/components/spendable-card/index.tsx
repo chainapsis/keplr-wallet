@@ -212,7 +212,7 @@ const EllipseButton: FunctionComponent<{
           backgroundColor={
             isLightMode ? ColorPalette["blue-50"] : ColorPalette["blue-800"]
           }
-          minWidth="3.5rem"
+          minWidth="2.875rem"
         >
           {icon}
         </Box>
