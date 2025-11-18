@@ -42,8 +42,6 @@ export const RewardsCard: FunctionComponent<{
   const theme = useTheme();
 
   const [isExpanded, setIsExpanded] = useState(false);
-  const [disableHover, setDisableHover] = useState(false);
-  const [isHover, setIsHover] = useState(false);
 
   const {
     viewClaimTokens,
@@ -65,18 +63,12 @@ export const RewardsCard: FunctionComponent<{
   }, []);
 
   return (
-    <Styles.Container
-      isNotReady={isNotReady}
-      isExpanded={isExpanded}
-      disableHover={disableHover}
-      isHover={isHover}
-    >
+    <Styles.Container isNotReady={isNotReady} isExpanded={isExpanded}>
       <Columns sum={1} alignY="center">
-        <Box
+        <Styles.ExpandToggleArea
           paddingY="0.875rem"
           paddingX="1rem"
           cursor="pointer"
-          onHoverStateChange={(hovered) => setIsHover(hovered)}
           onClick={() => {
             analyticsStore.logEvent("click_claimExpandButton");
             if (viewClaimTokens.length > 0) {
@@ -114,7 +106,7 @@ export const RewardsCard: FunctionComponent<{
               </Subtitle2>
             </Skeleton>
           </Stack>
-        </Box>
+        </Styles.ExpandToggleArea>
 
         <Column weight={1} />
 
@@ -124,23 +116,24 @@ export const RewardsCard: FunctionComponent<{
                  특수한 기능이 없다는 것을 암시하기 위해서 ledger일때는 일반 버튼으로 처리한다.
                */}
           {isLedger || isKeystone ? (
-            <TextButton
-              text={intl.formatMessage({
-                id: isExpanded
-                  ? "page.stake.components.rewards-card.hide-all-button"
-                  : "page.stake.components.rewards-card.show-all-button",
-              })}
-              size="small"
-              onClick={() => setIsExpanded(!isExpanded)}
-              color="default"
-            />
+            <Styles.ActionButtonWrapper>
+              <TextButton
+                text={intl.formatMessage({
+                  id: isExpanded
+                    ? "page.stake.components.rewards-card.hide-all-button"
+                    : "page.stake.components.rewards-card.show-all-button",
+                })}
+                size="small"
+                onClick={() => setIsExpanded(!isExpanded)}
+                color="default"
+              />
+            </Styles.ActionButtonWrapper>
           ) : (
-            <div
-              onMouseEnter={() => setDisableHover(true)}
-              onMouseLeave={() => setDisableHover(false)}
+            <Styles.ActionButtonWrapper
               onClick={(e) => {
                 e.stopPropagation();
               }}
+              isDisabled={claimAllDisabled}
             >
               <TextButton
                 text={intl.formatMessage({
@@ -164,7 +157,7 @@ export const RewardsCard: FunctionComponent<{
                   ) : null
                 }
               />
-            </div>
+            </Styles.ActionButtonWrapper>
           )}
         </Skeleton>
       </Columns>
@@ -630,8 +623,6 @@ const Styles = {
   Container: styled.div<{
     isNotReady?: boolean;
     isExpanded?: boolean;
-    disableHover?: boolean;
-    isHover?: boolean;
   }>`
     background-color: ${(props) =>
       props.theme.mode === "light"
@@ -647,11 +638,19 @@ const Styles = {
       props.theme.mode === "light"
         ? ColorPalette["gray-100"]
         : ColorPalette["gray-550"]};
-
+  `,
+  ExpandToggleArea: styled(Box)`
+    &:hover {
+      opacity: 0.7;
+    }
+  `,
+  ActionButtonWrapper: styled.div<{ isDisabled?: boolean }>`
     ${(props) =>
-      props.isHover &&
+      !props.isDisabled &&
       css`
-        opacity: ${props.isExpanded || props.disableHover ? 1 : 0.7};
+        &:hover {
+          opacity: 0.7;
+        }
       `}
   `,
   ItemContentBox: styled(Box)<{ showButton?: boolean; isLastItem?: boolean }>`
