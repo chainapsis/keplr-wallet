@@ -7,7 +7,11 @@ import { ObservableQueryTargetAssets } from "./target-assets";
 import { ObservableQueryRelatedAssets } from "./related-assets";
 import { AppCurrency, IBCCurrency } from "@keplr-wallet/types";
 
-export class ObservableQueryIbcPfmTransferV2 {
+/**
+ * ObservableQueryTransferPaths - v2 queries based transfer paths
+ * @dev named it "TransferPaths" to avoid confusion with "Routes"
+ */
+export class ObservableQueryTransferPaths {
   constructor(
     protected readonly chainStore: InternalChainStore,
     protected readonly queryChains: ObservableQueryChainsV2,
@@ -127,13 +131,13 @@ export class ObservableQueryIbcPfmTransferV2 {
         );
 
       if (relatedQuery.response) {
-        const relatedRoutes = this.computeRoutesFromCurrencies(
+        const relatedPaths = this.computePathsFromCurrencies(
           chainId,
           coinMinimalDenom,
           sourceCurrency,
           relatedQuery.currencies
         );
-        res.push(...relatedRoutes);
+        res.push(...relatedPaths);
       }
 
       const symbol = sourceCurrency.coinDenom;
@@ -146,22 +150,22 @@ export class ObservableQueryIbcPfmTransferV2 {
       );
 
       if (targetQuery.response) {
-        const targetRoutes = this.computeRoutesFromCurrencies(
+        const targetPaths = this.computePathsFromCurrencies(
           chainId,
           coinMinimalDenom,
           sourceCurrency,
           targetQuery.currencies
         );
 
-        for (const route of targetRoutes) {
+        for (const path of targetPaths) {
           if (
             !res.some(
               (r) =>
-                r.destinationChainId === route.destinationChainId &&
-                r.denom === route.denom
+                r.destinationChainId === path.destinationChainId &&
+                r.denom === path.denom
             )
           ) {
-            res.push(route);
+            res.push(path);
           }
         }
       }
@@ -190,7 +194,7 @@ export class ObservableQueryIbcPfmTransferV2 {
   );
 
   /**
-   * Computes the routes from the source currency to the target currencies.
+   * Computes the paths from the source currency to the target currencies.
    *
    * @param sourceChainId - The chain ID of the source chain.
    * @param sourceDenom - The denom of the source currency.
@@ -198,7 +202,7 @@ export class ObservableQueryIbcPfmTransferV2 {
    * @param targetCurrencies - The target currencies.
    * @returns The routes from the source currency to the target currencies.
    */
-  private computeRoutesFromCurrencies(
+  private computePathsFromCurrencies(
     sourceChainId: string,
     sourceDenom: string,
     sourceCurrency: IBCCurrency,

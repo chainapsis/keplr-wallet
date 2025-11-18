@@ -4,6 +4,6 @@ export * from "./target-assets";
 export * from "./validate-target-assets";
 export * from "./route";
 export * from "./chains";
-export * from "./ibc-pfm-transfer";
+export * from "./transfer-paths";
 export * from "./queries";
 export * from "./types";
