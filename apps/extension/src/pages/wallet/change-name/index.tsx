@@ -13,6 +13,7 @@ import { useInteractionInfo } from "../../../hooks";
 import { InteractionWaitingData } from "@keplr-wallet/background";
 import { useIntl } from "react-intl";
 import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
+import { stringLengthByGrapheme } from "../../../utils/string";
 
 const Styles = {
   Container: styled(Stack)`
@@ -161,7 +162,7 @@ export const WalletChangeNamePage: FunctionComponent = observer(() => {
               }),
               validate: (value) => {
                 const trimmedValue = value.trim();
-                if (trimmedValue.length < 4) {
+                if (stringLengthByGrapheme(trimmedValue) < 4) {
                   return intl.formatMessage({
                     id: "page.wallet.change-name.min-length-error",
                   });
