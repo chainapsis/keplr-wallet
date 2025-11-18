@@ -18,7 +18,6 @@ import { XAxis, YAxis } from "../../../components/axis";
 import {
   Body2,
   Caption1,
-  Caption2,
   Subtitle3,
   Subtitle4,
 } from "../../../components/typography";
@@ -37,8 +36,6 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { Button } from "../../../components/button";
 import { useTotalPrices } from "../../../hooks/use-total-prices";
 import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
-import { Image } from "../../../components/image";
-import { useGetIcnsName } from "../../../hooks/use-get-icns-name";
 import { stringLengthByGrapheme } from "../../../utils/string";
 
 const Styles = {
@@ -187,8 +184,7 @@ export const MainHeaderLayout = observer<
   (props) => {
     const { children, ...otherProps } = props;
 
-    const { uiConfigStore, keyRingStore, chainStore, accountStore } =
-      useStore();
+    const { uiConfigStore, keyRingStore, chainStore } = useStore();
     const [isOpenAccountSwitchModal, setIsOpenAccountSwitchModal] =
       useState(false);
 
@@ -197,12 +193,6 @@ export const MainHeaderLayout = observer<
     const isShowTotalPrice = useHeaderTotalPriceVisibility({
       forcedIsShowTotalPrice: props.isShowTotalPrice,
     });
-
-    const icnsPrimaryName = useGetIcnsName(
-      uiConfigStore.icnsInfo?.chainId
-        ? accountStore.getAccount(uiConfigStore.icnsInfo.chainId).bech32Address
-        : undefined
-    );
 
     const accountSwitchFloatingModal = useFloating({
       placement: "bottom-start",
@@ -278,48 +268,23 @@ export const MainHeaderLayout = observer<
                             paddingRight: "1.75rem",
                           }}
                         >
-                          <XAxis alignY="center">
-                            <NameHoverArea
-                              onHover={setIsNameHover}
-                              isHover={isNameHover}
-                              onClick={() => {
-                                setIsOpenAccountSwitchModal(true);
-                              }}
+                          <NameHoverArea
+                            onHover={setIsNameHover}
+                            isHover={isNameHover}
+                            onClick={() => {
+                              setIsOpenAccountSwitchModal(true);
+                            }}
+                          >
+                            <Subtitle4
+                              color={
+                                theme.mode === "light"
+                                  ? ColorPalette["gray-700"]
+                                  : ColorPalette["white"]
+                              }
                             >
-                              <Subtitle4
-                                color={
-                                  theme.mode === "light"
-                                    ? ColorPalette["gray-700"]
-                                    : ColorPalette["white"]
-                                }
-                              >
-                                {name}
-                              </Subtitle4>
-                            </NameHoverArea>
-
-                            {icnsPrimaryName && (
-                              <Tooltip
-                                content={
-                                  <Caption2 color={ColorPalette["white"]}>
-                                    {icnsPrimaryName}
-                                  </Caption2>
-                                }
-                                allowedPlacements={["top", "bottom"]}
-                              >
-                                <Image
-                                  alt="icns-icon"
-                                  src={require(theme.mode === "light"
-                                    ? "../../../public/assets/img/icns-icon-light.png"
-                                    : "../../../public/assets/img/icns-icon.png")}
-                                  style={{
-                                    width: "1rem",
-                                    height: "1rem",
-                                    marginLeft: "0.25rem",
-                                  }}
-                                />
-                              </Tooltip>
-                            )}
-                          </XAxis>
+                              {name}
+                            </Subtitle4>
+                          </NameHoverArea>
                           <Box
                             ref={depositFloatingModal.refs.setReference}
                             position="absolute"
