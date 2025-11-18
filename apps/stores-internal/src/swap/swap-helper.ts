@@ -18,8 +18,7 @@ export class ObservableQuerySwapHelperInner {
     public readonly sourceAmount: string,
     public readonly sourceDenom: string,
     public readonly destChainId: string,
-    public readonly destDenom: string,
-    public readonly slippage: number
+    public readonly destDenom: string
   ) {}
 
   getRoute(
@@ -62,8 +61,7 @@ export class ObservableQuerySwapHelper extends HasMapStore<ObservableQuerySwapHe
         parsed.sourceAmount,
         parsed.sourceDenom,
         parsed.destChainId,
-        parsed.destDenom,
-        parsed.slippage
+        parsed.destDenom
       );
     });
 
@@ -75,8 +73,7 @@ export class ObservableQuerySwapHelper extends HasMapStore<ObservableQuerySwapHe
     sourceAmount: string,
     sourceDenom: string,
     destChainId: string,
-    destDenom: string,
-    slippage: number
+    destDenom: string
   ): ObservableQuerySwapHelperInner {
     return new ObservableQuerySwapHelperInner(
       this.chainStore,
@@ -85,8 +82,7 @@ export class ObservableQuerySwapHelper extends HasMapStore<ObservableQuerySwapHe
       sourceAmount,
       sourceDenom,
       destChainId,
-      destDenom,
-      slippage
+      destDenom
     );
   }
 

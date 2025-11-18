@@ -19,6 +19,7 @@ import Joi from "joi";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import chunk from "lodash.chunk";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { normalizeChainId, normalizeDenom } from "./utils";
 
 const Schema = Joi.object<ValidateTargetAssetsResponse>({
   tokens: Joi.array()
@@ -30,33 +31,6 @@ const Schema = Joi.object<ValidateTargetAssetsResponse>({
     )
     .required(),
 }).unknown(true);
-
-function normalizeDenom(
-  chainStore: IChainStore,
-  chainId: string,
-  denom: string
-): string {
-  denom = denom.toLowerCase();
-  if (denom.startsWith("erc20:")) {
-    return denom.replace("erc20:", "");
-  }
-
-  if (chainStore.hasChain(chainId) && chainId.startsWith("eip155:")) {
-    const currencies = chainStore.getChain(chainId).currencies;
-    if (currencies.length > 0 && currencies[0].coinMinimalDenom === denom) {
-      return "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
-    }
-  }
-
-  return denom;
-}
-
-function normalizeChainId(chainId: string): string {
-  if (chainId.startsWith("eip155:")) {
-    return chainId.replace("eip155:", "");
-  }
-  return chainId;
-}
 
 export class ObservableQueryValidateTargetAssetsInner extends ObservableQuery<ValidateTargetAssetsResponse> {
   constructor(

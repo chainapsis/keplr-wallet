@@ -1,6 +1,6 @@
 import {
-  ChainGetter,
   HasMapStore,
+  IChainStore,
   ObservableQuery,
   QuerySharedContext,
 } from "@keplr-wallet/stores";
@@ -16,6 +16,7 @@ import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { computed, makeObservable } from "mobx";
 import { CoinPretty } from "@keplr-wallet/unit";
 import Joi from "joi";
+import { normalizeChainId, normalizeDenom } from "./utils";
 
 const Schema = Joi.object<RouteResponseV2>({
   provider: Joi.string().valid(Provider.SKIP, Provider.SQUID).required(),
@@ -166,7 +167,7 @@ const Schema = Joi.object<RouteResponseV2>({
 export class ObservableQueryRouteInnerV2 extends ObservableQuery<RouteResponseV2> {
   constructor(
     sharedContext: QuerySharedContext,
-    protected readonly chainGetter: ChainGetter,
+    protected readonly chainStore: IChainStore,
     baseURL: string,
     public readonly fromChainId: string,
     public readonly fromAmount: string,
@@ -191,7 +192,7 @@ export class ObservableQueryRouteInnerV2 extends ObservableQuery<RouteResponseV2
   get outAmount(): CoinPretty {
     if (!this.response) {
       return new CoinPretty(
-        this.chainGetter
+        this.chainStore
           .getChain(this.toChainId)
           .forceFindCurrency(this.toDenom),
         "0"
@@ -199,7 +200,7 @@ export class ObservableQueryRouteInnerV2 extends ObservableQuery<RouteResponseV2
     }
 
     return new CoinPretty(
-      this.chainGetter.getChain(this.toChainId).forceFindCurrency(this.toDenom),
+      this.chainStore.getChain(this.toChainId).forceFindCurrency(this.toDenom),
       this.response.data.amount_out
     );
   }
@@ -220,11 +221,11 @@ export class ObservableQueryRouteInnerV2 extends ObservableQuery<RouteResponseV2
     const feeMap = new Map<string, CoinPretty>();
     for (const fee of fees) {
       const coinPretty = new CoinPretty(
-        this.chainGetter.hasChain(fee.fee_token.chain_id)
-          ? this.chainGetter
+        this.chainStore.hasChain(fee.fee_token.chain_id)
+          ? this.chainStore
               .getChain(fee.fee_token.chain_id)
               .forceFindCurrency(fee.fee_token.denom)
-          : this.chainGetter
+          : this.chainStore
               .getChain(`eip155:${fee.fee_token.chain_id}`)
               .forceFindCurrency(
                 (() => {
@@ -264,13 +265,24 @@ export class ObservableQueryRouteInnerV2 extends ObservableQuery<RouteResponseV2
   protected override async fetchResponse(
     abortController: AbortController
   ): Promise<{ headers: any; data: RouteResponseV2 }> {
+    // CHECK: optimism-native로 보내면 항상 skip으로 오고,
+    // 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee로 보내면 항상 squid로 오는 것 같음
+    const normalizedChainIdsToAddresses: Record<string, string> = {};
+    for (const [chainId, address] of Object.entries(this.chainIdsToAddresses)) {
+      normalizedChainIdsToAddresses[normalizeChainId(chainId)] = address;
+    }
+
     const request: RouteRequestV2 = {
-      from_chain: this.fromChainId,
-      from_token: this.fromDenom,
-      to_chain: this.toChainId,
-      to_token: this.toDenom,
+      from_chain: normalizeChainId(this.fromChainId),
+      from_token: normalizeDenom(
+        this.chainStore,
+        this.fromChainId,
+        this.fromDenom
+      ),
+      to_chain: normalizeChainId(this.toChainId),
+      to_token: normalizeDenom(this.chainStore, this.toChainId, this.toDenom),
       amount: this.fromAmount,
-      chain_ids_to_addresses: this.chainIdsToAddresses,
+      chain_ids_to_addresses: normalizedChainIdsToAddresses,
       slippage: this.slippage,
     };
 
@@ -317,7 +329,7 @@ export class ObservableQueryRouteInnerV2 extends ObservableQuery<RouteResponseV2
 export class ObservableQueryRouteV2 extends HasMapStore<ObservableQueryRouteInnerV2> {
   constructor(
     protected readonly sharedContext: QuerySharedContext,
-    protected readonly chainGetter: ChainGetter,
+    protected readonly chainStore: IChainStore,
     protected readonly baseURL: string
   ) {
     super((str) => {
@@ -325,7 +337,7 @@ export class ObservableQueryRouteV2 extends HasMapStore<ObservableQueryRouteInne
 
       return new ObservableQueryRouteInnerV2(
         this.sharedContext,
-        this.chainGetter,
+        this.chainStore,
         this.baseURL,
         parsed.from_chain,
         parsed.from_token,
