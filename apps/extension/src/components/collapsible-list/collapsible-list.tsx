@@ -60,7 +60,6 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
     <Stack>
       <Box
         marginBottom="0.5rem"
-        paddingX="0.375rem"
         onClick={(e) => {
           e.preventDefault();
         }}

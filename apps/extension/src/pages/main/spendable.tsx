@@ -615,7 +615,7 @@ export const SpendableAssetView: FunctionComponent<{
         ) : (
           <React.Fragment>
             <Stack>
-              <Box paddingX="0.375rem" paddingY="0.25rem">
+              <Box paddingY="0.25rem">
                 <XAxis alignY="center" gap="0.25rem">
                   <TokenTitleView
                     title={intl.formatMessage({

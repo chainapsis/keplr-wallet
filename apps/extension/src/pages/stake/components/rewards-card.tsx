@@ -5,7 +5,7 @@ import { Box } from "../../../components/box";
 import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
 import { Body3, Subtitle2, Subtitle3 } from "../../../components/typography";
 import { ColorPalette } from "../../../styles";
-import styled, { useTheme } from "styled-components";
+import styled, { css, useTheme } from "styled-components";
 import {
   CoinsPlusOutlineIcon,
   LoadingIcon,
@@ -15,7 +15,7 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import { Tooltip } from "../../../components/tooltip";
 import { Skeleton } from "../../../components/skeleton";
-import { XAxis, YAxis } from "../../../components/axis";
+import { XAxis } from "../../../components/axis";
 import { FormattedMessage, useIntl } from "react-intl";
 import { CurrencyImageFallback } from "../../../components/image";
 import { ClaimAllEachState } from "../../../stores/claim-rewards-state";
@@ -42,7 +42,6 @@ export const RewardsCard: FunctionComponent<{
   const theme = useTheme();
 
   const [isExpanded, setIsExpanded] = useState(false);
-  const [disableHover, setDisableHover] = useState(false);
 
   const {
     viewClaimTokens,
@@ -64,54 +63,50 @@ export const RewardsCard: FunctionComponent<{
   }, []);
 
   return (
-    <Styles.Container
-      isNotReady={isNotReady}
-      onClick={() => {
-        analyticsStore.logEvent("click_claimExpandButton");
-        if (viewClaimTokens.length > 0) {
-          setIsExpanded(!isExpanded);
-        }
-      }}
-      isExpanded={isExpanded}
-      disableHover={disableHover}
-    >
+    <Styles.Container isNotReady={isNotReady} isExpanded={isExpanded}>
       <Columns sum={1} alignY="center">
-        <Box paddingY="0.875rem" paddingX="1rem">
+        <Styles.ExpandToggleArea
+          paddingY="0.875rem"
+          paddingX="1rem"
+          cursor="pointer"
+          onClick={() => {
+            analyticsStore.logEvent("click_claimExpandButton");
+            if (viewClaimTokens.length > 0) {
+              setIsExpanded(!isExpanded);
+            }
+          }}
+        >
           <Stack gutter="0.5rem">
-            <YAxis alignX="left">
-              <Skeleton layer={1} isNotReady={isNotReady}>
-                <XAxis alignY="center">
-                  <Body3 style={{ color: ColorPalette["gray-300"] }}>
-                    <FormattedMessage id="page.stake.components.rewards-card.title" />
-                  </Body3>
-                  <ArrowIcon direction={isExpanded ? "up" : "down"} />
-                </XAxis>
-              </Skeleton>
-            </YAxis>
+            <Skeleton layer={1} isNotReady={isNotReady}>
+              <XAxis alignY="center">
+                <Body3 style={{ color: ColorPalette["gray-300"] }}>
+                  <FormattedMessage id="page.stake.components.rewards-card.title" />
+                </Body3>
+                <ArrowIcon direction={isExpanded ? "up" : "down"} />
+              </XAxis>
+            </Skeleton>
 
-            <YAxis alignX="left">
-              <Skeleton
-                layer={1}
-                isNotReady={isNotReady}
-                dummyMinWidth="5.125rem"
+            <Skeleton
+              layer={1}
+              isNotReady={isNotReady}
+              dummyMinWidth="5.125rem"
+            >
+              <Subtitle2
+                style={{
+                  color:
+                    theme.mode === "light"
+                      ? ColorPalette["gray-700"]
+                      : ColorPalette["gray-10"],
+                }}
               >
-                <Subtitle2
-                  style={{
-                    color:
-                      theme.mode === "light"
-                        ? ColorPalette["gray-700"]
-                        : ColorPalette["gray-10"],
-                  }}
-                >
-                  {uiConfigStore.hideStringIfPrivacyMode(
-                    totalPrice ? totalPrice.separator(" ").toString() : "?",
-                    3
-                  )}
-                </Subtitle2>
-              </Skeleton>
-            </YAxis>
+                {uiConfigStore.hideStringIfPrivacyMode(
+                  totalPrice ? totalPrice.separator(" ").toString() : "?",
+                  3
+                )}
+              </Subtitle2>
+            </Skeleton>
           </Stack>
-        </Box>
+        </Styles.ExpandToggleArea>
 
         <Column weight={1} />
 
@@ -121,23 +116,24 @@ export const RewardsCard: FunctionComponent<{
                  특수한 기능이 없다는 것을 암시하기 위해서 ledger일때는 일반 버튼으로 처리한다.
                */}
           {isLedger || isKeystone ? (
-            <TextButton
-              text={intl.formatMessage({
-                id: isExpanded
-                  ? "page.stake.components.rewards-card.hide-all-button"
-                  : "page.stake.components.rewards-card.show-all-button",
-              })}
-              size="small"
-              onClick={() => setIsExpanded(!isExpanded)}
-              color="default"
-            />
+            <Styles.ActionButtonWrapper>
+              <TextButton
+                text={intl.formatMessage({
+                  id: isExpanded
+                    ? "page.stake.components.rewards-card.hide-all-button"
+                    : "page.stake.components.rewards-card.show-all-button",
+                })}
+                size="small"
+                onClick={() => setIsExpanded(!isExpanded)}
+                color="default"
+              />
+            </Styles.ActionButtonWrapper>
           ) : (
-            <div
-              onMouseEnter={() => setDisableHover(true)}
-              onMouseLeave={() => setDisableHover(false)}
+            <Styles.ActionButtonWrapper
               onClick={(e) => {
                 e.stopPropagation();
               }}
+              isDisabled={claimAllDisabled}
             >
               <TextButton
                 text={intl.formatMessage({
@@ -161,7 +157,7 @@ export const RewardsCard: FunctionComponent<{
                   ) : null
                 }
               />
-            </div>
+            </Styles.ActionButtonWrapper>
           )}
         </Skeleton>
       </Columns>
@@ -627,7 +623,6 @@ const Styles = {
   Container: styled.div<{
     isNotReady?: boolean;
     isExpanded?: boolean;
-    disableHover?: boolean;
   }>`
     background-color: ${(props) =>
       props.theme.mode === "light"
@@ -643,12 +638,20 @@ const Styles = {
       props.theme.mode === "light"
         ? ColorPalette["gray-100"]
         : ColorPalette["gray-550"]};
-
-    cursor: pointer;
-
+  `,
+  ExpandToggleArea: styled(Box)`
     &:hover {
-      opacity: ${(props) => (props.isExpanded || props.disableHover ? 1 : 0.7)};
+      opacity: 0.7;
     }
+  `,
+  ActionButtonWrapper: styled.div<{ isDisabled?: boolean }>`
+    ${(props) =>
+      !props.isDisabled &&
+      css`
+        &:hover {
+          opacity: 0.7;
+        }
+      `}
   `,
   ItemContentBox: styled(Box)<{ showButton?: boolean; isLastItem?: boolean }>`
     padding: 0.875rem 1rem;
