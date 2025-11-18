@@ -317,17 +317,9 @@ export const MainPage: FunctionComponent<{
             <Skeleton isNotReady={isNotReady} dummyMinWidth="6rem">
               <MainH1>
                 {uiConfigStore.hideStringIfPrivacyMode(
-                  totalPrice?.toString().split(".")[0] || "-",
+                  totalPrice?.toString() || "-",
                   4
                 )}
-                <span style={{ color: ColorPalette["gray-300"] }}>
-                  {uiConfigStore.hideStringIfPrivacyMode(
-                    totalPrice?.toString().split(".")[1]
-                      ? `.${totalPrice?.toString().split(".")[1]}`
-                      : "",
-                    0
-                  )}
-                </span>
               </MainH1>
             </Skeleton>
 
