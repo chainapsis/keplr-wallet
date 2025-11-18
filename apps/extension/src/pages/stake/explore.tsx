@@ -40,14 +40,10 @@ const TOP_CHAIN_IDS = [
   "injective-1",
 ] as const;
 
-type TopChainId = (typeof TOP_CHAIN_IDS)[number];
-
-type TopItem = {
+type StakeCurrencyItem = {
   key: string;
-  chainId: TopChainId;
   chainInfo: ViewToken["chainInfo"];
   currency: ViewToken["token"]["currency"];
-  chainName: string;
 };
 
 export const StakeExplorePage: FunctionComponent = observer(() => {
@@ -76,23 +72,74 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
     []
   );
 
-  const stakables = useMemo(() => {
-    return [...hugeQueriesStore.stakables]
-      .filter((stakable) => {
+  const stakeCurrencyItems = useMemo<StakeCurrencyItem[]>(() => {
+    const items: StakeCurrencyItem[] = [];
+    for (const chainInfo of chainStore.chainInfosInUI) {
+      if (chainInfo.isTestnet || !chainInfo.stakeCurrency) {
+        continue;
+      }
+      const key = `${chainInfo.chainIdentifier}/${chainInfo.stakeCurrency.coinMinimalDenom}`;
+      if (topChainIdentifierSet.has(chainInfo.chainIdentifier)) {
+        continue;
+      }
+      items.push({
+        key,
+        chainInfo: chainInfo,
+        currency: chainInfo.stakeCurrency,
+      });
+    }
+
+    for (const modularChainInfo of chainStore.modularChainInfosInUI) {
+      if ("starknet" in modularChainInfo) {
+        if (modularChainInfo.isTestnet) {
+          continue;
+        }
+
+        const chainIdentifier = ChainIdHelper.parse(
+          modularChainInfo.chainId
+        ).identifier;
+        if (topChainIdentifierSet.has(chainIdentifier)) {
+          continue;
+        }
+
+        const modularChainInfoImpl = chainStore.getModularChainInfoImpl(
+          modularChainInfo.chainId
+        );
+        const currencies = modularChainInfoImpl.getCurrencies("starknet");
+        if (currencies.length === 0) {
+          continue;
+        }
+
+        const strkContractAddress =
+          modularChainInfo.starknet.strkContractAddress;
+        const strkDenom = `erc20:${strkContractAddress.toLowerCase()}`;
+        const strkCurrency = currencies.find(
+          (currency) => currency.coinMinimalDenom === strkDenom
+        );
+        if (!strkCurrency) {
+          continue;
+        }
+        const strkKey = `${chainIdentifier}/${strkDenom}`;
+        items.push({
+          key: strkKey,
+          chainInfo: modularChainInfo,
+          currency: strkCurrency,
+        });
+      }
+    }
+
+    return items
+      .filter((item) => {
         const identifier = ChainIdHelper.parse(
-          stakable.chainInfo.chainId
+          item.chainInfo.chainId
         ).identifier;
         return !topChainIdentifierSet.has(identifier);
       })
-      .sort((a, b) => {
-        return a.token.currency.coinDenom.localeCompare(
-          b.token.currency.coinDenom
-        );
-      });
-  }, [hugeQueriesStore.stakables, topChainIdentifierSet]);
+      .sort((a, b) => a.currency.coinDenom.localeCompare(b.currency.coinDenom));
+  }, [chainStore, topChainIdentifierSet]);
 
-  const topItems = useMemo<TopItem[]>(() => {
-    const items: TopItem[] = [];
+  const topItems = useMemo<StakeCurrencyItem[]>(() => {
+    const items: StakeCurrencyItem[] = [];
 
     TOP_CHAIN_IDS.forEach((chainId) => {
       if (!chainStore.hasChain(chainId)) {
@@ -119,10 +166,8 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
 
       items.push({
         key: `top-${chainId}`,
-        chainId,
         chainInfo: matchedViewToken?.chainInfo ?? chainInfo,
         currency: matchedViewToken?.token.currency ?? stakeCurrency,
-        chainName: chainInfo.chainName,
       });
     });
 
@@ -133,23 +178,23 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
     ...topItems.map((item) => (
       <AssetCard
         key={item.key}
-        chainId={item.chainId}
+        chainId={item.chainInfo.chainId}
         chainInfo={item.chainInfo}
         currency={item.currency}
         onClick={() => {
-          setDepositInitialSearch(item.chainName);
+          setDepositInitialSearch(item.chainInfo.chainName);
           setIsOpenDepositModal(true);
         }}
       />
     )),
-    ...stakables.map((stakable) => (
+    ...stakeCurrencyItems.map((item) => (
       <AssetCard
-        key={`${stakable.chainInfo.chainId}-${stakable.token.currency.coinMinimalDenom}`}
-        chainId={stakable.chainInfo.chainId}
-        chainInfo={stakable.chainInfo}
-        currency={stakable.token.currency}
+        key={item.key}
+        chainId={item.chainInfo.chainId}
+        chainInfo={item.chainInfo}
+        currency={item.currency}
         onClick={() => {
-          setDepositInitialSearch(stakable.chainInfo.chainName);
+          setDepositInitialSearch(item.chainInfo.chainName);
           setIsOpenDepositModal(true);
         }}
       />
