@@ -674,7 +674,7 @@
   "page.main.components.spendable-card.title": "사용 가능한 자산",
   "page.main.components.rewards-card.title": "리워드",
   "page.main.components.rewards-card.claim-all-button": "한번에 받기",
-  "page.main.components.rewards-card.claim-button": "받기",
+  "page.main.components.rewards-card.view-button": "자세히 보기",
   "page.main.components.rewards-card.review-claim-button": "자세히 보기",
 
   "page.main.components.context-menu.title": "자산 보기 설정",

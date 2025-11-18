@@ -631,7 +631,7 @@
   "page.main.components.spendable-card.title": "可用余额",
   "page.main.components.rewards-card.title": "奖励",
   "page.main.components.rewards-card.claim-all-button": "全部领取",
-  "page.main.components.rewards-card.claim-button": "领取",
+  "page.main.components.rewards-card.view-button": "查看明细",
   "page.main.components.rewards-card.review-claim-button": "查看明细",
 
   "page.main.components.menu-bar.manage-chain-visibility-title": "添加/删除链",
