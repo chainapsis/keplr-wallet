@@ -16,20 +16,17 @@ import { Dropdown } from "../../components/dropdown";
 import { EmptyView } from "../../components/empty-view";
 import { H4, Subtitle3 } from "../../components/typography";
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
-import {
-  IAccountStore,
-  IChainInfoImpl,
-  IChainStore,
-} from "@keplr-wallet/stores";
+import { IAccountStore, IChainStore } from "@keplr-wallet/stores";
 import { action, computed, makeObservable, observable } from "mobx";
 import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import { FormattedMessage } from "react-intl";
+import { ModularChainInfo } from "@keplr-wallet/types";
 
 // React hook으로 처리하기 귀찮은 부분이 많아서
 // 그냥 대충 mobx로...
 class OtherHexAddresses {
   @observable.ref
-  protected supportedChainList: IChainInfoImpl[] = [];
+  protected supportedChainList: ModularChainInfo[] = [];
 
   constructor(
     protected readonly chainStore: IChainStore,
@@ -40,7 +37,7 @@ class OtherHexAddresses {
   }
 
   @action
-  setSupportedChainList(chainInfos: IChainInfoImpl[]) {
+  setSupportedChainList(chainInfos: ModularChainInfo[]) {
     this.supportedChainList = chainInfos;
   }
 
@@ -81,7 +78,7 @@ class OtherHexAddresses {
             : Bech32Address.fromBech32(account.bech32Address).toHex();
 
           return {
-            chainIdentifier: chainInfo.chainIdentifier,
+            chainIdentifier: ChainIdHelper.parse(chainInfo.chainId).identifier,
             hexAddress: accountHexAddress,
           };
         });
@@ -112,10 +109,12 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
       map.set(chainIdentifier, true);
     }
 
-    return chainStore.chainInfosInListUI.filter((chainInfo) => {
-      return map.get(chainInfo.chainIdentifier) ?? false;
+    return chainStore.modularChainInfosInListUI.filter((chainInfo) => {
+      return (
+        map.get(ChainIdHelper.parse(chainInfo.chainId).identifier) ?? false
+      );
     });
-  }, [chainStore.chainInfosInListUI, querySupported.response?.data]);
+  }, [chainStore.modularChainInfosInListUI, querySupported.response?.data]);
 
   otherHexAddresses.setSupportedChainList(supportedChainList);
 

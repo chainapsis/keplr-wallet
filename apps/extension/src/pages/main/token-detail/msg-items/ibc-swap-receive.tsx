@@ -88,9 +88,9 @@ export const MsgRelationIBCSwapReceive: FunctionComponent<{
       }
     })();
 
-    const swapVenueChain = (() => {
+    const swapVenueChainInfoImpl = (() => {
       if (isLegacyOsmosis) {
-        return chainStore.getModularChain("osmosis");
+        return chainStore.getModularChainInfoImpl("osmosis");
       }
 
       const swapVenue = msg.meta["swapVenue"];
@@ -100,8 +100,9 @@ export const MsgRelationIBCSwapReceive: FunctionComponent<{
         )?.chainId;
 
         if (swapVenueChainId) {
-          const venueChainInfo = chainStore.getModularChain(swapVenueChainId);
-          return "cosmos" in venueChainInfo ? venueChainInfo : undefined;
+          return chainStore.hasModularChain(swapVenueChainId)
+            ? chainStore.getModularChainInfoImpl(swapVenueChainId)
+            : undefined;
         }
       }
 
@@ -135,11 +136,9 @@ export const MsgRelationIBCSwapReceive: FunctionComponent<{
             }
             return operations;
           })();
-          if (operations && operations.length > 0 && swapVenueChain) {
+          if (operations && operations.length > 0 && swapVenueChainInfoImpl) {
             const minimalDenom = operations[0].denom_in;
-            const currency = chainStore
-              .getModularChainInfoImpl(swapVenueChain.chainId)
-              .findCurrency(minimalDenom);
+            const currency = swapVenueChainInfoImpl.findCurrency(minimalDenom);
             if (currency) {
               if ("originCurrency" in currency && currency.originCurrency) {
                 return currency.originCurrency.coinDenom;
@@ -213,11 +212,10 @@ export const MsgRelationIBCSwapReceive: FunctionComponent<{
               : obj.wasm.msg.swap_and_action?.user_swap?.swap_exact_asset_in
                   .operations;
 
-            if (operations && operations.length > 0 && swapVenueChain) {
+            if (operations && operations.length > 0 && swapVenueChainInfoImpl) {
               const minimalDenom = operations[0].denom_in;
-              const currency = chainStore
-                .getModularChainInfoImpl(swapVenueChain.chainId)
-                .findCurrency(minimalDenom);
+              const currency =
+                swapVenueChainInfoImpl.findCurrency(minimalDenom);
               if (currency) {
                 if ("originCurrency" in currency && currency.originCurrency) {
                   return currency.originCurrency.coinDenom;
@@ -268,11 +266,10 @@ export const MsgRelationIBCSwapReceive: FunctionComponent<{
             const operations =
               originMsg.msg.swap_and_action?.user_swap?.swap_exact_asset_in
                 .operations;
-            if (operations && operations.length > 0 && swapVenueChain) {
+            if (operations && operations.length > 0 && swapVenueChainInfoImpl) {
               const minimalDenom = operations[0].denom_in;
-              const currency = chainStore
-                .getModularChainInfoImpl(swapVenueChain.chainId)
-                .findCurrency(minimalDenom);
+              const currency =
+                swapVenueChainInfoImpl.findCurrency(minimalDenom);
               if (currency) {
                 if ("originCurrency" in currency && currency.originCurrency) {
                   return currency.originCurrency.coinDenom;

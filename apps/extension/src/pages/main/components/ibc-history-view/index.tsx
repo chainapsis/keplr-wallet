@@ -1187,7 +1187,11 @@ const SkipHistoryViewItem: FunctionComponent<{
                     ? `eip155:${transferAssetRelease.chain_id}`
                     : transferAssetRelease.chain_id;
 
-                  if (chainStore.hasModularChain(chainIdInKeplr)) {
+                  if (
+                    chainStore
+                      .getModularChainInfoImpl(chainIdInKeplr)
+                      .matchModules({ or: ["cosmos", "evm"] })
+                  ) {
                     const releasedChain =
                       chainStore.getModularChainInfoImpl(chainIdInKeplr);
 

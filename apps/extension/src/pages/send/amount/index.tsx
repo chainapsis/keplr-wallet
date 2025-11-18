@@ -986,7 +986,11 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                   const chainIdInKeplr = isOnlyEvm
                     ? `eip155:${chainId}`
                     : chainId;
-                  if (!chainStore.hasModularChain(chainIdInKeplr)) {
+                  if (
+                    !chainStore
+                      .getModularChainInfoImpl(chainIdInKeplr)
+                      .matchModules({ or: ["cosmos", "evm"] })
+                  ) {
                     continue;
                   }
 
