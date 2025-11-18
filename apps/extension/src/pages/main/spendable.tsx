@@ -30,7 +30,12 @@ import { Modal } from "../../components/modal";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { Gutter } from "../../components/gutter";
 import { EmptyView } from "../../components/empty-view";
-import { Body2, Subtitle1, Subtitle3 } from "../../components/typography";
+import {
+  Body2,
+  Body3,
+  Subtitle1,
+  Subtitle3,
+} from "../../components/typography";
 import { XAxis, YAxis } from "../../components/axis";
 import { ColorPalette } from "../../styles";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -349,8 +354,15 @@ export const SpendableAssetView: FunctionComponent<{
   onMoreTokensClosed: () => void;
 
   onClickBuy: () => void;
+  hideNumInTitle: boolean;
 }> = observer(
-  ({ isNotReady, onClickGetStarted, onMoreTokensClosed, onClickBuy }) => {
+  ({
+    isNotReady,
+    onClickGetStarted,
+    onMoreTokensClosed,
+    onClickBuy,
+    hideNumInTitle,
+  }) => {
     const { chainStore, uiConfigStore, keyRingStore } = useStore();
     const intl = useIntl();
     const theme = useTheme();
@@ -597,6 +609,8 @@ export const SpendableAssetView: FunctionComponent<{
       }
     }, [uiConfigStore.assetViewMode]);
 
+    const { TokenViewData } = useAllBalances(trimSearch);
+
     return (
       <React.Fragment>
         {isNotReady ? (
@@ -615,8 +629,18 @@ export const SpendableAssetView: FunctionComponent<{
         ) : (
           <React.Fragment>
             <Stack gutter="0.5rem">
-              <Box paddingY="0.25rem">
+              <Box paddingX="0.25rem" paddingY="0.25rem">
                 <XAxis alignY="center" gap="0.25rem">
+                  <Body3
+                    style={{
+                      color:
+                        theme.mode === "light"
+                          ? ColorPalette["blue-400"]
+                          : ColorPalette["gray-50"],
+                    }}
+                  >
+                    {hideNumInTitle ? "**" : TokenViewData.balance.length}
+                  </Body3>
                   <TokenTitleView
                     title={intl.formatMessage({
                       id: "page.main.spendable.spendable-balance-title",

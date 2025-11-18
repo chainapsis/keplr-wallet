@@ -54,7 +54,6 @@ export const TokenTitleView: FunctionComponent<{
       style={{
         flex: 1,
       }}
-      paddingX="0.25rem"
     >
       <Columns sum={1} alignY="center">
         <Subtitle4

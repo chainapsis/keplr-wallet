@@ -640,7 +640,7 @@
   "page.main.spendable.new-token-found": "{numFoundToken} new token(s) found",
   "page.main.spendable.manage-asset-list-button": "Manage Asset List",
 
-  "page.stake.staked-balance-title": "Staked Balance",
+  "page.stake.staked-balance-title": "Staked Assets",
   "page.stake.unstaking-balance-title": "Unstaking Balance",
   "page.stake.total-staked-title": "Total Staked",
   "page.stake.stake-more-button": "Stake More",
