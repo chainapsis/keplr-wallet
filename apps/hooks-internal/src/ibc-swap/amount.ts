@@ -619,6 +619,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
     }
   }
 
+  // CHECK: 사용처가 없음
   // /route query의 결과와 /msgs_direct query의 결과를 비교하기 위한 키를 생성한다.
   createSwapRouteKeyFromRouteResponse(response: RouteResponse): string {
     let key = "";
@@ -642,6 +643,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
     return key;
   }
 
+  // CHECK: 사용처가 없음
   // /route query의 결과와 /msgs_direct query의 결과를 비교하기 위한 키를 생성한다.
   createSwapRouteKeyFromMsgsDirectResponse(
     response: MsgsDirectResponse
