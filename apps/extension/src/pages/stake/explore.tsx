@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useMemo, useState } from "react";
 import { MainHeaderLayout } from "../main/layouts/header";
 import styled, { useTheme } from "styled-components";
 import { ColorPalette } from "../../styles";
@@ -33,13 +33,30 @@ import { IconProps } from "../../components/icon/types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { COMMON_HOVER_OPACITY } from "../../styles/constant";
 
+const TOP_CHAIN_IDS = [
+  "cosmoshub-4",
+  "osmosis-1",
+  "celestia",
+  "injective-1",
+] as const;
+
+type TopChainId = (typeof TOP_CHAIN_IDS)[number];
+
+type TopItem = {
+  key: string;
+  chainId: TopChainId;
+  chainInfo: ViewToken["chainInfo"];
+  currency: ViewToken["token"]["currency"];
+  chainName: string;
+};
+
 export const StakeExplorePage: FunctionComponent = observer(() => {
   const theme = useTheme();
   const intl = useIntl();
 
   const [searchParams] = useSearchParams();
 
-  const { hugeQueriesStore } = useStore();
+  const { hugeQueriesStore, chainStore } = useStore();
 
   const [isOpenDepositModal, setIsOpenDepositModal] = React.useState(false);
   const [isOpenBuy, setIsOpenBuy] = React.useState(false);
@@ -51,22 +68,93 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
 
   const showBackButton = searchParams.get("showBackButton") === "true";
 
-  const priority = (chainId: string) => {
-    const id = ChainIdHelper.parse(chainId).identifier;
-    if (id === "cosmoshub") return 0;
-    if (id === "osmosis") return 1;
-    if (id === "injective") return 2;
-    if (id === "starknet:SN_MAIN") return 3;
-    return 4;
-  };
+  const topChainIdentifierSet = useMemo(
+    () =>
+      new Set(
+        TOP_CHAIN_IDS.map((chainId) => ChainIdHelper.parse(chainId).identifier)
+      ),
+    []
+  );
 
-  const stakables = [...hugeQueriesStore.stakables].sort((a, b) => {
-    const diff = priority(a.chainInfo.chainId) - priority(b.chainInfo.chainId);
-    if (diff !== 0) {
-      return diff;
-    }
-    return a.token.currency.coinDenom.localeCompare(b.token.currency.coinDenom);
-  });
+  const stakables = useMemo(() => {
+    return [...hugeQueriesStore.stakables]
+      .filter((stakable) => {
+        const identifier = ChainIdHelper.parse(
+          stakable.chainInfo.chainId
+        ).identifier;
+        return !topChainIdentifierSet.has(identifier);
+      })
+      .sort((a, b) => {
+        return a.token.currency.coinDenom.localeCompare(
+          b.token.currency.coinDenom
+        );
+      });
+  }, [hugeQueriesStore.stakables, topChainIdentifierSet]);
+
+  const topItems = useMemo<TopItem[]>(() => {
+    const items: TopItem[] = [];
+
+    TOP_CHAIN_IDS.forEach((chainId) => {
+      if (!chainStore.hasChain(chainId)) {
+        return;
+      }
+      const chainInfo = chainStore.getChain(chainId);
+      const stakeCurrency =
+        chainInfo.stakeCurrency ?? chainInfo.currencies[0] ?? undefined;
+      if (!stakeCurrency) {
+        return;
+      }
+
+      const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId).identifier;
+      const matchedViewToken = hugeQueriesStore.stakables.find((token) => {
+        const tokenIdentifier = ChainIdHelper.parse(
+          token.chainInfo.chainId
+        ).identifier;
+        return (
+          tokenIdentifier === chainIdentifier &&
+          token.token.currency.coinMinimalDenom ===
+            stakeCurrency.coinMinimalDenom
+        );
+      });
+
+      items.push({
+        key: `top-${chainId}`,
+        chainId,
+        chainInfo: matchedViewToken?.chainInfo ?? chainInfo,
+        currency: matchedViewToken?.token.currency ?? stakeCurrency,
+        chainName: chainInfo.chainName,
+      });
+    });
+
+    return items;
+  }, [chainStore, hugeQueriesStore.stakables]);
+
+  const assetCards = [
+    ...topItems.map((item) => (
+      <AssetCard
+        key={item.key}
+        chainId={item.chainId}
+        chainInfo={item.chainInfo}
+        currency={item.currency}
+        onClick={() => {
+          setDepositInitialSearch(item.chainName);
+          setIsOpenDepositModal(true);
+        }}
+      />
+    )),
+    ...stakables.map((stakable) => (
+      <AssetCard
+        key={`${stakable.chainInfo.chainId}-${stakable.token.currency.coinMinimalDenom}`}
+        chainId={stakable.chainInfo.chainId}
+        chainInfo={stakable.chainInfo}
+        currency={stakable.token.currency}
+        onClick={() => {
+          setDepositInitialSearch(stakable.chainInfo.chainName);
+          setIsOpenDepositModal(true);
+        }}
+      />
+    )),
+  ];
 
   return (
     <MainHeaderLayout>
@@ -113,18 +201,7 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
 
         <Gutter size="1.25rem" />
 
-        <CollapsibleGrid
-          items={stakables.map((stakable) => (
-            <AssetCard
-              key={`${stakable.chainInfo.chainId}-${stakable.token.currency.coinMinimalDenom}`}
-              viewToken={stakable}
-              onClick={() => {
-                setDepositInitialSearch(stakable.chainInfo.chainName);
-                setIsOpenDepositModal(true);
-              }}
-            />
-          ))}
-        />
+        <CollapsibleGrid items={assetCards} />
       </Box>
 
       <Modal
@@ -223,17 +300,19 @@ const CollapsibleGrid: FunctionComponent<{
 };
 
 const AssetCard: FunctionComponent<{
-  viewToken: ViewToken;
+  chainId: string;
+  chainInfo: ViewToken["chainInfo"];
+  currency: ViewToken["token"]["currency"];
   onClick: () => void;
-}> = observer(({ viewToken, onClick }) => {
-  const stakingAprDec = useGetStakingApr(viewToken.chainInfo.chainId);
+}> = observer(({ chainId, chainInfo, currency, onClick }) => {
+  const stakingAprDec = useGetStakingApr(chainId);
   const theme = useTheme();
 
   return (
     <Styles.AssetCard onClick={onClick}>
       <CurrencyImageFallback
-        chainInfo={viewToken.chainInfo}
-        currency={viewToken.token.currency}
+        chainInfo={chainInfo}
+        currency={currency}
         size="2rem"
       />
       <Gutter size="0.75rem" />
@@ -245,7 +324,7 @@ const AssetCard: FunctionComponent<{
               : ColorPalette["gray-10"]
           }
         >
-          {viewToken.token.currency.coinDenom}
+          {currency.coinDenom}
         </Subtitle2>
         <Gutter size="0.25rem" />
         <Subtitle3
@@ -259,9 +338,7 @@ const AssetCard: FunctionComponent<{
         </Subtitle3>
       </XAxis>
       <Gutter size="0.25rem" />
-      <Body3 color={ColorPalette["gray-300"]}>
-        {viewToken.chainInfo.chainName}
-      </Body3>
+      <Body3 color={ColorPalette["gray-300"]}>{chainInfo.chainName}</Body3>
     </Styles.AssetCard>
   );
 });
