@@ -54,7 +54,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
       [CosmosAccount, CosmwasmAccount]
     >,
     public readonly ethereumAccountStore: EthereumAccountStore,
-    protected readonly skipQueries: SkipQueries,
+    protected readonly skipQueries: SkipQueries, // TODO: replace with swap queries
     initialChainId: string,
     senderConfig: ISenderConfig,
     initialOutChainId: string,

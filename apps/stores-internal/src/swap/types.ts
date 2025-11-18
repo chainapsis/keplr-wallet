@@ -87,7 +87,7 @@ export interface ValidateTargetAssetsResponse {
   }[];
 }
 
-export interface V2RouteRequest {
+export interface RouteRequestV2 {
   from_chain: string; // source chain id
   from_token: string; // source token denom
   to_chain: string; // destination chain id
@@ -188,7 +188,7 @@ export type RouteTransaction =
       tx_data: EVMTxData;
     };
 
-export interface V2RouteResponse {
+export interface RouteResponseV2 {
   provider: Provider;
   amount_out: string; // expected amount out
   estimated_time: number; // estimated time in seconds
@@ -235,3 +235,31 @@ export interface TxStatusResponse {
   steps: TxStatusStep[];
   asset_location: AssetLocation[];
 }
+
+export interface ChainsResponseV2 {
+  chains: {
+    chain_id: string;
+    pfm_enabled: boolean;
+    supports_memo?: boolean;
+    chain_type: string;
+  }[];
+}
+
+export type NoneIBCBridgeInfoV2 = {
+  destinationChainId: string;
+  denom: string;
+};
+
+export type IBCChannelV2 = {
+  destinationChainId: string;
+  originDenom: string;
+  originChainId: string;
+
+  channels: {
+    portId: string;
+    channelId: string;
+    counterpartyChainId: string;
+  }[];
+
+  denom: string;
+};

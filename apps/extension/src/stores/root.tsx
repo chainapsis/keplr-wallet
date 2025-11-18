@@ -406,7 +406,7 @@ export class RootStore {
     this.swapQueriesStore = new SwapQueries(
       this.queriesStore.sharedContext,
       this.chainStore,
-      "https://keplr-api-dev.keplr.app"
+      "https://keplr-api-dev.keplr.app" // TODO: change to production URL
     );
     this.starknetQueriesStore = new StarknetQueriesStore(
       this.queriesStore.sharedContext,

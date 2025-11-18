@@ -6,19 +6,30 @@ import { ObservableQueryTargetAssets } from "./target-assets";
 import { ObservableQueryRelatedAssets } from "./related-assets";
 import { ObservableQueryValidateTargetAssets } from "./validate-target-assets";
 import { ObservableQueryRouteV2 } from "./route";
+import { ObservableQueryChainsV2 } from "./chains";
+import { ObservableQueryIbcPfmTransferV2 } from "./ibc-pfm-transfer";
 
 export class SwapQueries {
+  public readonly queryChains: DeepReadonly<ObservableQueryChainsV2>;
+
   public readonly querySwappable: DeepReadonly<ObservableQuerySwappable>;
   public readonly queryTargetAssets: DeepReadonly<ObservableQueryTargetAssets>;
   public readonly queryRelatedAssets: DeepReadonly<ObservableQueryRelatedAssets>;
   public readonly queryValidateTargetAssets: DeepReadonly<ObservableQueryValidateTargetAssets>;
   public readonly queryRoute: DeepReadonly<ObservableQueryRouteV2>;
 
+  public readonly queryIBCPacketForwardingTransfer: DeepReadonly<ObservableQueryIbcPfmTransferV2>;
+
   constructor(
     sharedContext: QuerySharedContext,
     chainStore: InternalChainStore,
     baseURL: string
   ) {
+    this.queryChains = new ObservableQueryChainsV2(
+      sharedContext,
+      chainStore,
+      baseURL
+    );
     this.querySwappable = new ObservableQuerySwappable(
       sharedContext,
       chainStore,
@@ -43,6 +54,13 @@ export class SwapQueries {
       sharedContext,
       chainStore,
       baseURL
+    );
+
+    this.queryIBCPacketForwardingTransfer = new ObservableQueryIbcPfmTransferV2(
+      chainStore,
+      this.queryChains,
+      this.queryTargetAssets,
+      this.queryRelatedAssets
     );
   }
 }

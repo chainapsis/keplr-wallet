@@ -7,8 +7,8 @@ import {
 import {
   ChainType,
   Provider,
-  V2RouteRequest,
-  V2RouteResponse,
+  RouteRequestV2,
+  RouteResponseV2,
   RouteStepType,
   RouteTransaction,
 } from "./types";
@@ -17,7 +17,7 @@ import { computed, makeObservable } from "mobx";
 import { CoinPretty } from "@keplr-wallet/unit";
 import Joi from "joi";
 
-const Schema = Joi.object<V2RouteResponse>({
+const Schema = Joi.object<RouteResponseV2>({
   provider: Joi.string().valid(Provider.SKIP, Provider.SQUID).required(),
   amount_out: Joi.string().required(),
   estimated_time: Joi.number().required(),
@@ -163,7 +163,7 @@ const Schema = Joi.object<V2RouteResponse>({
   ),
 }).unknown(true);
 
-export class ObservableQueryRouteV2Inner extends ObservableQuery<V2RouteResponse> {
+export class ObservableQueryRouteInnerV2 extends ObservableQuery<RouteResponseV2> {
   constructor(
     sharedContext: QuerySharedContext,
     protected readonly chainGetter: ChainGetter,
@@ -263,8 +263,8 @@ export class ObservableQueryRouteV2Inner extends ObservableQuery<V2RouteResponse
 
   protected override async fetchResponse(
     abortController: AbortController
-  ): Promise<{ headers: any; data: V2RouteResponse }> {
-    const request: V2RouteRequest = {
+  ): Promise<{ headers: any; data: RouteResponseV2 }> {
+    const request: RouteRequestV2 = {
       from_chain: this.fromChainId,
       from_token: this.fromDenom,
       to_chain: this.toChainId,
@@ -274,7 +274,7 @@ export class ObservableQueryRouteV2Inner extends ObservableQuery<V2RouteResponse
       slippage: this.slippage,
     };
 
-    const _result = await simpleFetch<V2RouteResponse>(this.baseURL, this.url, {
+    const _result = await simpleFetch<RouteResponseV2>(this.baseURL, this.url, {
       method: "POST",
       headers: {
         "content-type": "application/json",
@@ -301,7 +301,7 @@ export class ObservableQueryRouteV2Inner extends ObservableQuery<V2RouteResponse
   }
 
   protected override getCacheKey(): string {
-    const request: V2RouteRequest = {
+    const request: RouteRequestV2 = {
       from_chain: this.fromChainId,
       from_token: this.fromDenom,
       to_chain: this.toChainId,
@@ -314,17 +314,16 @@ export class ObservableQueryRouteV2Inner extends ObservableQuery<V2RouteResponse
   }
 }
 
-// NOTE: named as ObservableQueryRouteV2 to avoid confusion with ObservableQueryRoute in skip directory
-export class ObservableQueryRouteV2 extends HasMapStore<ObservableQueryRouteV2Inner> {
+export class ObservableQueryRouteV2 extends HasMapStore<ObservableQueryRouteInnerV2> {
   constructor(
     protected readonly sharedContext: QuerySharedContext,
     protected readonly chainGetter: ChainGetter,
     protected readonly baseURL: string
   ) {
     super((str) => {
-      const parsed: V2RouteRequest = JSON.parse(str);
+      const parsed: RouteRequestV2 = JSON.parse(str);
 
-      return new ObservableQueryRouteV2Inner(
+      return new ObservableQueryRouteInnerV2(
         this.sharedContext,
         this.chainGetter,
         this.baseURL,
@@ -346,8 +345,8 @@ export class ObservableQueryRouteV2 extends HasMapStore<ObservableQueryRouteV2In
     toDenom: string,
     chainIdsToAddresses: Record<string, string>,
     slippage: number
-  ): ObservableQueryRouteV2Inner {
-    const request: V2RouteRequest = {
+  ): ObservableQueryRouteInnerV2 {
+    const request: RouteRequestV2 = {
       from_chain: fromChainId,
       from_token: fromAmount.currency.coinMinimalDenom,
       to_chain: toChainId,
