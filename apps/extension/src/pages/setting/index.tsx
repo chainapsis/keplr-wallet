@@ -589,6 +589,7 @@ const TopSection: FunctionComponent<{
                   maxWidth: "14rem",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
                 }}
               >
                 {keyRingStore.selectedKeyInfo?.name || "Keplr Account"}
