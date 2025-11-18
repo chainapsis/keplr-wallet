@@ -369,13 +369,7 @@ export const MainHeaderLayout = observer<
                             setIsOpenAccountSwitchModal(true);
                           }}
                         >
-                          <Subtitle4
-                            color={
-                              theme.mode === "light"
-                                ? ColorPalette["gray-700"]
-                                : ColorPalette["gray-300"]
-                            }
-                          >
+                          <Subtitle4 color={ColorPalette["gray-300"]}>
                             {totalPrice?.toString()}
                           </Subtitle4>
                         </NameHoverArea>
