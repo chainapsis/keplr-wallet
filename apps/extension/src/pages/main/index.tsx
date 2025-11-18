@@ -440,6 +440,7 @@ export const MainPage: FunctionComponent<{
                 forcePreventScrollRefreshButtonVisible.current = false;
               }, 1500);
             }}
+            hideNumInTitle={uiConfigStore.isPrivacyMode}
           />
 
           {uiConfigStore.isDeveloper && !isNotReady ? (
