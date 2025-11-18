@@ -91,12 +91,13 @@ export const StakePage: FunctionComponent = observer(() => {
     <MainHeaderLayout>
       <Box paddingX="1rem">
         <Gutter size="1.25rem" />
-
-        <Subtitle3 color={ColorPalette["gray-200"]}>
-          {intl.formatMessage({
-            id: "page.stake.total-staked-title",
-          })}
-        </Subtitle3>
+        <Box paddingLeft="0.25rem">
+          <Subtitle3 color={ColorPalette["gray-200"]}>
+            {intl.formatMessage({
+              id: "page.stake.total-staked-title",
+            })}
+          </Subtitle3>
+        </Box>
         <Gutter size="0.75rem" />
         <Box
           onHoverStateChange={(isHover) => {
@@ -106,6 +107,7 @@ export const StakePage: FunctionComponent = observer(() => {
               animatedPrivacyModeHover.set(0);
             }
           }}
+          paddingLeft="0.25rem"
         >
           <XAxis alignY="center">
             <Skeleton isNotReady={isNotReady} dummyMinWidth="6rem">
@@ -183,7 +185,9 @@ export const StakePage: FunctionComponent = observer(() => {
         </Box>
 
         <Gutter size="1.25rem" />
+      </Box>
 
+      <Box paddingX="0.75rem">
         <RewardsCard isNotReady={isNotReady} initialExpand={initialExpand} />
 
         <Gutter size="1.5rem" />

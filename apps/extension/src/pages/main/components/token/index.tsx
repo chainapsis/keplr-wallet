@@ -58,10 +58,7 @@ export const TokenTitleView: FunctionComponent<{
       <Columns sum={1} alignY="center">
         <Subtitle4
           style={{
-            color:
-              theme.mode === "light"
-                ? ColorPalette["gray-500"]
-                : ColorPalette["gray-200"],
+            color: ColorPalette["gray-300"],
           }}
         >
           {title}
