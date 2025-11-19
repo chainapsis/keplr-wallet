@@ -482,7 +482,7 @@ export class SwapAmountConfig extends AmountConfig {
           amount: "", // TODO: ???
         };
 
-        return sourceAccount.cosmos.makeCCTPTx(
+        return sourceAccount.cosmos.makeCCTPDepositForBurnWithCallerTx(
           JSON.stringify(cctpMsgValue),
           JSON.stringify(sendMsgValue)
         );

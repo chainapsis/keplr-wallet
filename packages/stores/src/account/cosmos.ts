@@ -59,7 +59,10 @@ import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import Long from "long";
 import { IAccountStore } from "./store";
 import { autorun } from "mobx";
-import { MsgDepositForBurnWithCaller } from "@keplr-wallet/proto-types/circle/cctp/v1/tx";
+import {
+  MsgDepositForBurnWithCaller,
+  MsgDepositForBurn,
+} from "@keplr-wallet/proto-types/circle/cctp/v1/tx";
 import { MsgSend as ThorMsgSend } from "@keplr-wallet/proto-types/thorchain/v1/types/msg_send";
 
 export interface CosmosAccount {
@@ -2134,7 +2137,10 @@ export class CosmosAccountImpl {
     );
   }
 
-  makeCCTPTx(rawCCTPMsgValue: string, rawSendMsg: string) {
+  makeCCTPDepositForBurnWithCallerTx(
+    rawCCTPMsgValue: string,
+    rawSendMsg: string
+  ) {
     const cctpMsgValue = JSON.parse(rawCCTPMsgValue);
     const cctpMsg = {
       type: "cctp/DepositForBurnWithCaller",
@@ -2181,6 +2187,71 @@ export class CosmosAccountImpl {
               toAddress: sendMsg.value.to_address,
               amount: sendMsg.value.amount,
             }).finish(),
+          },
+        ],
+      },
+      (tx) => {
+        if (tx.code == null || tx.code === 0) {
+          this.queries.queryBalances
+            .getQueryBech32Address(this.base.bech32Address)
+            .balances.forEach((queryBalance) => queryBalance.fetch());
+        }
+      }
+    );
+  }
+
+  makeCCTPDepositForBurnTx(
+    from: string,
+    amount: string,
+    destinationDomain: number,
+    mintRecipient: string,
+    burnToken: string
+  ) {
+    // Convert Base64-encoded mintRecipient to Uint8Array for proto encoding
+    const mintRecipientBytes = (() => {
+      try {
+        const bin = atob(mintRecipient);
+        const arr = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) {
+          arr[i] = bin.charCodeAt(i);
+        }
+        return arr;
+      } catch (e) {
+        throw new Error(
+          `Failed to decode mintRecipient from Base64: ${
+            e instanceof Error ? e.message : "Unknown error"
+          }`
+        );
+      }
+    })();
+
+    const cctpMsg = {
+      type: "cctp/DepositForBurn",
+      value: {
+        from,
+        burn_token: burnToken,
+        amount,
+        destination_domain: destinationDomain,
+        mint_recipient: mintRecipient,
+      },
+    };
+
+    return this.makeTx(
+      "cctp",
+      {
+        aminoMsgs: [cctpMsg],
+        protoMsgs: [
+          {
+            typeUrl: "/circle.cctp.v1.MsgDepositForBurn",
+            value: MsgDepositForBurn.encode(
+              MsgDepositForBurn.fromPartial({
+                from: cctpMsg.value.from,
+                amount: cctpMsg.value.amount,
+                destinationDomain: cctpMsg.value.destination_domain,
+                mintRecipient: mintRecipientBytes,
+                burnToken: cctpMsg.value.burn_token,
+              })
+            ).finish(),
           },
         ],
       },
