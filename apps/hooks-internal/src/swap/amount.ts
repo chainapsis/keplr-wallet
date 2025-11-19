@@ -412,6 +412,10 @@ export class SwapAmountConfig extends AmountConfig {
     }
 
     // TODO: multiple txs support
+    if (transactions.length > 1) {
+      return;
+    }
+
     const firstTx = transactions[0];
 
     try {
@@ -576,6 +580,15 @@ export class SwapAmountConfig extends AmountConfig {
           };
         }
 
+        if (routeResponse.data.transactions.length !== 1) {
+          return {
+            ...prev,
+            error: new Error(
+              "could not find a path to execute the requested swap"
+            ),
+          };
+        }
+
         const bridgeFee = routeQuery.bridgeFees.reduce(
           (acc: CoinPretty, fee: CoinPretty) => {
             if (
@@ -651,13 +664,15 @@ export class SwapAmountConfig extends AmountConfig {
         };
       }
 
-      // NOTE: now we support multiple txs
-      // if (routeResponse?.data.txs_required !== 1) {
-      //   return {
-      //     ...prev,
-      //     error: new Error("Swap can't be executed with ibc pfm"),
-      //   };
-      // }
+      // TODO: multiple txs support
+      if (routeResponse.data.transactions.length !== 1) {
+        return {
+          ...prev,
+          error: new Error(
+            "could not find a path to execute the requested swap"
+          ),
+        };
+      }
 
       const bridgeFees = routeQuery.bridgeFees;
 

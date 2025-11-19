@@ -2175,9 +2175,15 @@ export class CosmosAccountImpl {
               from: cctpMsg.value.from,
               amount: cctpMsg.value.amount,
               destinationDomain: cctpMsg.value.destination_domain,
-              mintRecipient: cctpMsg.value.mint_recipient,
+              mintRecipient:
+                typeof cctpMsg.value.mint_recipient === "string"
+                  ? this.decodeBase64(cctpMsg.value.mint_recipient)
+                  : cctpMsg.value.mint_recipient,
               burnToken: cctpMsg.value.burn_token,
-              destinationCaller: cctpMsg.value.destination_caller,
+              destinationCaller:
+                typeof cctpMsg.value.destination_caller === "string"
+                  ? this.decodeBase64(cctpMsg.value.destination_caller)
+                  : cctpMsg.value.destination_caller,
             }).finish(),
           },
           {
@@ -2207,24 +2213,6 @@ export class CosmosAccountImpl {
     mintRecipient: string,
     burnToken: string
   ) {
-    // Convert Base64-encoded mintRecipient to Uint8Array for proto encoding
-    const mintRecipientBytes = (() => {
-      try {
-        const bin = atob(mintRecipient);
-        const arr = new Uint8Array(bin.length);
-        for (let i = 0; i < bin.length; i++) {
-          arr[i] = bin.charCodeAt(i);
-        }
-        return arr;
-      } catch (e) {
-        throw new Error(
-          `Failed to decode mintRecipient from Base64: ${
-            e instanceof Error ? e.message : "Unknown error"
-          }`
-        );
-      }
-    })();
-
     const cctpMsg = {
       type: "cctp/DepositForBurn",
       value: {
@@ -2248,7 +2236,7 @@ export class CosmosAccountImpl {
                 from: cctpMsg.value.from,
                 amount: cctpMsg.value.amount,
                 destinationDomain: cctpMsg.value.destination_domain,
-                mintRecipient: mintRecipientBytes,
+                mintRecipient: this.decodeBase64(mintRecipient),
                 burnToken: cctpMsg.value.burn_token,
               })
             ).finish(),
@@ -2267,5 +2255,22 @@ export class CosmosAccountImpl {
 
   protected get queries(): DeepReadonly<QueriesSetBase & CosmosQueries> {
     return this.queriesStore.get(this.chainId);
+  }
+
+  private decodeBase64(base64: string): Uint8Array {
+    try {
+      const bin = atob(base64);
+      const arr = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) {
+        arr[i] = bin.charCodeAt(i);
+      }
+      return arr;
+    } catch (e) {
+      throw new Error(
+        `Failed to decode Base64: ${
+          e instanceof Error ? e.message : "Unknown error"
+        }`
+      );
+    }
   }
 }
