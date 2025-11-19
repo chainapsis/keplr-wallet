@@ -5,15 +5,15 @@ import {
   UIProperties,
 } from "@keplr-wallet/hooks";
 import { AppCurrency } from "@keplr-wallet/types";
-import { CoinPretty, Dec } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
 import {
   ChainGetter,
   CosmosAccount,
   CosmwasmAccount,
   IAccountStoreWithInjects,
   IQueriesStore,
-  // MakeTxResponse,
-  // WalletStatus,
+  MakeTxResponse,
+  WalletStatus,
 } from "@keplr-wallet/stores";
 import { useState } from "react";
 import { action, computed, makeObservable, observable, override } from "mobx";
@@ -21,12 +21,16 @@ import {
   RouteResponseV2,
   RouteStepType,
   SwapQueries,
+  ChainType,
+  ObservableQuerySwapHelperInner,
+  normalizeChainId,
+  CosmosTxData,
+  EVMTxData,
 } from "@keplr-wallet/stores-internal";
 import {
   EthereumAccountStore,
-  // UnsignedEVMTransactionWithErc20Approvals,
+  UnsignedEVMTransactionWithErc20Approvals,
 } from "@keplr-wallet/stores-eth";
-import { ObservableQuerySwapHelperInner } from "@keplr-wallet/stores-internal/build/swap/swap-helper";
 
 export class SwapAmountConfig extends AmountConfig {
   static readonly QueryMsgsDirectRefreshInterval = 10000;
@@ -139,10 +143,7 @@ export class SwapAmountConfig extends AmountConfig {
     if (!querySwapHelper) {
       return new CoinPretty(this.outCurrency, "0");
     }
-    return new CoinPretty(
-      this.outCurrency,
-      querySwapHelper.getRoute({}, 5).response?.data.amount_out ?? "0"
-    );
+    return querySwapHelper.getRoute({}, 5).outAmount;
   }
 
   get outChainId(): string {
@@ -232,362 +233,283 @@ export class SwapAmountConfig extends AmountConfig {
     return "swap";
   }
 
-  // TODO: txs 처리 필요
+  async getTx(
+    slippageTolerancePercent: number,
+    priorOutAmount?: Int,
+    customRecipient?: {
+      chainId: string;
+      recipient: string;
+    }
+  ): Promise<MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals> {
+    const querySwapHelper = this.getQuerySwapHelper();
+    if (!querySwapHelper) {
+      throw new Error("Query Swap Helper is not initialized");
+    }
 
-  // async getTxs(
-  //   slippageTolerancePercent: number,
-  //   priorOutAmount?: Int,
-  //   customRecipient?: {
-  //     chainId: string;
-  //     recipient: string;
-  //   }
-  // ): Promise<MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals> {
-  //   const querySwapHelper = this.getQuerySwapHelper();
-  //   if (!querySwapHelper) {
-  //     throw new Error("Query Swap Helper is not initialized");
-  //   }
+    const routeQuery = querySwapHelper.getRoute({}, slippageTolerancePercent);
 
-  //   const queryRouteResponse = querySwapHelper.getRoute({}, 5).response;
-  //   if (!queryRouteResponse) {
-  //     throw new Error("Failed to fetch route");
-  //   }
+    await routeQuery.waitResponse();
 
-  //   if (queryRouteResponse.timestamp) {
-  //     const now = new Date();
-  //     const diff = now.getTime() - queryRouteResponse.timestamp;
-  //     // 오래전에 캐싱된 쿼리 응답으로 tx를 만들 경우 quote가 크게 변경될 수 있으므로 에러를 발생시킨다.
-  //     // 쿼리 응답 오는데에 시간이 좀 드니, RefreshInterval에 5초를 더 추가한다.
-  //     if (diff > IBCSwapAmountConfig.QueryMsgsDirectRefreshInterval + 5000) {
-  //       throw new Error("The quote is expired. Please try again.");
-  //     }
-  //   }
+    const routeResponse = routeQuery.response;
+    if (!routeResponse) {
+      throw new Error("Failed to fetch route");
+    }
 
-  //   const chainIdsToAddresses: Record<string, string> = {};
+    if (routeResponse.timestamp) {
+      const diff = Date.now() - routeResponse.timestamp;
+      // 오래전에 캐싱된 쿼리 응답으로 tx를 만들 경우 quote가 크게 변경될 수 있으므로 에러를 발생시킨다.
+      // 쿼리 응답 오는데에 시간이 좀 드니, RefreshInterval에 5초를 더 추가한다.
+      if (diff > SwapAmountConfig.QueryMsgsDirectRefreshInterval + 5000) {
+        throw new Error("The quote is expired. Please try again.");
+      }
+    }
 
-  //   const sourceAccount = this.accountStore.getAccount(this.chainId);
-  //   if (sourceAccount.walletStatus === WalletStatus.NotInit) {
-  //     await sourceAccount.init();
-  //   }
+    const chainIds = new Set<string>();
+    for (const step of routeResponse.data.steps) {
+      chainIds.add(step.from_chain);
+      chainIds.add(step.to_chain);
+    }
 
-  //   const isSourceAccountEVMOnly = this.chainId.startsWith("eip155:");
-  //   if (
-  //     isSourceAccountEVMOnly
-  //       ? !sourceAccount.ethereumHexAddress
-  //       : !sourceAccount.bech32Address
-  //   ) {
-  //     throw new Error("Source account is not set");
-  //   }
-  //   chainIdsToAddresses[this.chainId.replace("eip155:", "")] =
-  //     isSourceAccountEVMOnly
-  //       ? sourceAccount.ethereumHexAddress
-  //       : sourceAccount.bech32Address;
+    const chainIdsToAddresses: Record<string, string> = {};
 
-  //   const destinationChainIds = queryRouteResponse.data.chain_ids.map(
-  //     (chainId) => {
-  //       const evmLikeChainId = Number(chainId);
-  //       const isEVMChainId =
-  //         !Number.isNaN(evmLikeChainId) && evmLikeChainId !== 0;
-  //       if (isEVMChainId) {
-  //         return `eip155:${chainId}`;
-  //       }
-  //       return chainId;
-  //     }
-  //   );
-  //   for (const destinationChainId of destinationChainIds) {
-  //     const destinationAccount =
-  //       this.accountStore.getAccount(destinationChainId);
-  //     if (destinationAccount.walletStatus === WalletStatus.NotInit) {
-  //       await destinationAccount.init();
-  //     }
+    for (const chainId of chainIds) {
+      const evmLikeChainId = Number(chainId);
+      const isEVMChainId =
+        !Number.isNaN(evmLikeChainId) && evmLikeChainId !== 0;
 
-  //     const isDestinationChainEVMOnly =
-  //       destinationChainId.startsWith("eip155:");
-  //     if (
-  //       isDestinationChainEVMOnly
-  //         ? !destinationAccount.ethereumHexAddress
-  //         : !destinationAccount.bech32Address
-  //     ) {
-  //       throw new Error("Destination account is not set");
-  //     }
-  //     chainIdsToAddresses[destinationChainId.replace("eip155:", "")] =
-  //       isDestinationChainEVMOnly
-  //         ? destinationAccount.ethereumHexAddress
-  //         : destinationAccount.bech32Address;
-  //   }
+      const formattedChainId = isEVMChainId ? `eip155:${chainId}` : chainId;
 
-  //   for (const swapVenue of queryRouteResponse.data.swap_venues ?? [
-  //     queryRouteResponse.data.swap_venue,
-  //   ]) {
-  //     if (swapVenue) {
-  //       const swapVenueChainId = (() => {
-  //         const evmLikeChainId = Number(swapVenue.chain_id);
-  //         const isEVMChainId =
-  //           !Number.isNaN(evmLikeChainId) && evmLikeChainId !== 0;
-  //         if (isEVMChainId) {
-  //           return `eip155:${swapVenue.chain_id}`;
-  //         }
+      const account = this.accountStore.getAccount(formattedChainId);
+      if (account.walletStatus === WalletStatus.NotInit) {
+        await account.init();
+      }
 
-  //         return swapVenue.chain_id;
-  //       })();
-  //       const swapAccount = this.accountStore.getAccount(swapVenueChainId);
-  //       if (swapAccount.walletStatus === WalletStatus.NotInit) {
-  //         await swapAccount.init();
-  //       }
+      const isChainEVMOnly = formattedChainId.startsWith("eip155:");
+      if (
+        isChainEVMOnly ? !account.ethereumHexAddress : !account.bech32Address
+      ) {
+        throw new Error("Account is not set");
+      }
 
-  //       const isSwapVenueChainEVMOnly = swapVenueChainId.startsWith("eip155:");
-  //       if (
-  //         isSwapVenueChainEVMOnly
-  //           ? !swapAccount.ethereumHexAddress
-  //           : !swapAccount.bech32Address
-  //       ) {
-  //         const swapVenueChainInfo =
-  //           this.chainGetter.hasChain(swapVenueChainId) &&
-  //           this.chainGetter.getChain(swapVenueChainId);
-  //         if (
-  //           swapAccount.isNanoLedger &&
-  //           swapVenueChainInfo &&
-  //           (swapVenueChainInfo.bip44.coinType === 60 ||
-  //             swapVenueChainInfo.features.includes("eth-address-gen") ||
-  //             swapVenueChainInfo.features.includes("eth-key-sign") ||
-  //             swapVenueChainInfo.evm != null)
-  //         ) {
-  //           throw new Error(
-  //             "Please connect Ethereum app on Ledger with Keplr to get the address"
-  //           );
-  //         }
+      chainIdsToAddresses[normalizeChainId(formattedChainId)] = isChainEVMOnly
+        ? account.ethereumHexAddress
+        : account.bech32Address;
+    }
 
-  //         throw new Error("Swap account is not set");
-  //       }
-  //       chainIdsToAddresses[swapVenueChainId.replace("eip155:", "")] =
-  //         isSwapVenueChainEVMOnly
-  //           ? swapAccount.ethereumHexAddress
-  //           : swapAccount.bech32Address;
-  //     }
-  //   }
+    if (customRecipient) {
+      chainIdsToAddresses[normalizeChainId(customRecipient.chainId)] =
+        customRecipient.recipient;
+    }
 
-  //   if (customRecipient) {
-  //     chainIdsToAddresses[customRecipient.chainId.replace("eip155:", "")] =
-  //       customRecipient.recipient;
-  //   }
+    // TODO: query txs here
 
-  //   // const queryMsgsDirect = querySwapHelper.getTxs(
-  //   //   chainIdsToAddresses,
-  //   //   slippageTolerancePercent
-  //   // );
+    // TODO: multiple txs support
+    const tx = this.getTxIfReady(slippageTolerancePercent, customRecipient);
+    if (!tx) {
+      throw new Error("Tx is not ready");
+    }
 
-  //   // await queryMsgsDirect.waitFreshResponse();
-  //   // if (queryMsgsDirect.error) {
-  //   //   throw new Error(queryMsgsDirect.error.message);
-  //   // }
+    if (priorOutAmount) {
+      const currentAmountOut = new Int(routeResponse.data.amount_out);
 
-  //   const tx = this.getTxsIfReady(slippageTolerancePercent, customRecipient);
-  //   if (!tx) {
-  //     throw new Error("Tx is not ready");
-  //   }
+      if (
+        currentAmountOut.lt(priorOutAmount) &&
+        currentAmountOut
+          .sub(priorOutAmount)
+          .abs()
+          .toDec()
+          .quo(priorOutAmount.toDec())
+          .gte(new Dec(0.01)) // 1% 이상 변동
+      ) {
+        throw new Error(
+          "Price change has been detected while building your transaction. Please try again"
+        );
+      }
+    }
 
-  //   if (priorOutAmount) {
-  //     // const queryMsgsDirect = querySwapHelper.getTxs(
-  //     //   chainIdsToAddresses,
-  //     //   slippageTolerancePercent,
-  //     // );
-  //     // if (!queryMsgsDirect.response) {
-  //     // throw new Error("Can't happen: queryMsgsDirect is not ready");
-  //     // }
+    return tx;
+  }
 
-  //     const currentAmountOut = new Int(queryRouteResponse.data.amount_out);
+  /**
+   * Synchronously returns a transaction if all required data is currently available,
+   * without waiting for any pending queries to complete.
+   *
+   * @param slippageTolerancePercent - The maximum slippage tolerance percentage
+   * @param customRecipient - Optional custom recipient override for the destination chain
+   * @returns The constructed transaction if ready, or `undefined` if data is not yet available
+   */
+  getTxIfReady(
+    slippageTolerancePercent: number,
+    customRecipient?: {
+      chainId: string;
+      recipient: string;
+    }
+  ): MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals | undefined {
+    if (!this.currency) {
+      return;
+    }
 
-  //     if (
-  //       currentAmountOut.lt(priorOutAmount) &&
-  //       currentAmountOut
-  //         .sub(priorOutAmount)
-  //         .abs()
-  //         .toDec()
-  //         .quo(priorOutAmount.toDec())
-  //         .gte(new Dec(0.01))
-  //     ) {
-  //       throw new Error(
-  //         "Price change has been detected while building your transaction. Please try again"
-  //       );
-  //     }
-  //   }
+    if (this.amount.length !== 1) {
+      return;
+    }
 
-  //   return tx;
-  // }
+    if (this.amount[0].toDec().lte(new Dec(0))) {
+      return;
+    }
 
-  // getTxsIfReady(
-  //   slippageTolerancePercent: number,
-  //   customRecipient?: {
-  //     chainId: string;
-  //     recipient: string;
-  //   }
-  // ): MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals | undefined {
-  //   if (!this.currency) {
-  //     return;
-  //   }
+    const querySwapHelper = this.getQuerySwapHelper();
+    if (!querySwapHelper) {
+      return;
+    }
 
-  //   if (this.amount.length !== 1) {
-  //     return;
-  //   }
+    const routeQuery = querySwapHelper.getRoute({}, slippageTolerancePercent);
 
-  //   if (this.amount[0].toDec().lte(new Dec(0))) {
-  //     return;
-  //   }
+    const routeResponse = routeQuery.response;
+    if (!routeResponse) {
+      return;
+    }
 
-  //   const querySwapHelper = this.getQuerySwapHelper();
-  //   if (!querySwapHelper) {
-  //     return;
-  //   }
+    const chainIds = new Set<string>();
+    for (const step of routeResponse.data.steps) {
+      chainIds.add(step.from_chain);
+      chainIds.add(step.to_chain);
+    }
 
-  //   // TODO: route query와 txs query 분리
-  //   const queryRouteResponse = querySwapHelper.getRoute({}, 5).response;
-  //   if (!queryRouteResponse) {
-  //     return;
-  //   }
+    const chainIdsToAddresses: Record<string, string> = {};
 
-  //   const chainIdsToAddresses: Record<string, string> = {};
+    for (const chainId of chainIds) {
+      const evmLikeChainId = Number(chainId);
+      const isEVMChainId =
+        !Number.isNaN(evmLikeChainId) && evmLikeChainId !== 0;
 
-  //   const sourceAccount = this.accountStore.getAccount(this.chainId);
-  //   if (sourceAccount.walletStatus === WalletStatus.NotInit) {
-  //     sourceAccount.init();
-  //   }
+      const formattedChainId = isEVMChainId ? `eip155:${chainId}` : chainId;
 
-  //   const isSourceAccountEVMOnly = this.chainId.startsWith("eip155:");
-  //   if (
-  //     isSourceAccountEVMOnly
-  //       ? !sourceAccount.ethereumHexAddress
-  //       : !sourceAccount.bech32Address
-  //   ) {
-  //     return;
-  //   }
-  //   chainIdsToAddresses[this.chainId.replace("eip155:", "")] =
-  //     isSourceAccountEVMOnly
-  //       ? sourceAccount.ethereumHexAddress
-  //       : sourceAccount.bech32Address;
+      const account = this.accountStore.getAccount(formattedChainId);
+      if (account.walletStatus === WalletStatus.NotInit) {
+        account.init();
+      }
 
-  //   const destinationChainIds = queryRouteResponse.data.chain_ids.map(
-  //     (chainId) => {
-  //       const evmLikeChainId = Number(chainId);
-  //       const isEVMChainId =
-  //         !Number.isNaN(evmLikeChainId) && evmLikeChainId !== 0;
-  //       if (isEVMChainId) {
-  //         return `eip155:${chainId}`;
-  //       }
-  //       return chainId;
-  //     }
-  //   );
-  //   for (const destinationChainId of destinationChainIds) {
-  //     const destinationAccount =
-  //       this.accountStore.getAccount(destinationChainId);
+      const isChainEVMOnly = formattedChainId.startsWith("eip155:");
+      if (
+        isChainEVMOnly ? !account.ethereumHexAddress : !account.bech32Address
+      ) {
+        return;
+      }
 
-  //     if (destinationAccount.walletStatus === WalletStatus.NotInit) {
-  //       destinationAccount.init();
-  //     }
+      chainIdsToAddresses[normalizeChainId(formattedChainId)] = isChainEVMOnly
+        ? account.ethereumHexAddress
+        : account.bech32Address;
+    }
 
-  //     const isDestinationChainEVMOnly =
-  //       destinationChainId.startsWith("eip155:");
-  //     if (
-  //       isDestinationChainEVMOnly
-  //         ? !destinationAccount.ethereumHexAddress
-  //         : !destinationAccount.bech32Address
-  //     ) {
-  //       return;
-  //     }
-  //     chainIdsToAddresses[destinationChainId.replace("eip155:", "")] =
-  //       isDestinationChainEVMOnly
-  //         ? destinationAccount.ethereumHexAddress
-  //         : destinationAccount.bech32Address;
-  //   }
+    if (customRecipient) {
+      chainIdsToAddresses[normalizeChainId(customRecipient.chainId)] =
+        customRecipient.recipient;
+    }
 
-  //   for (const swapVenue of queryRouteResponse.data.swap_venues ?? [
-  //     queryRouteResponse.data.swap_venue,
-  //   ]) {
-  //     if (swapVenue) {
-  //       const swapVenueChainId = (() => {
-  //         const evmLikeChainId = Number(swapVenue.chain_id);
-  //         const isEVMChainId =
-  //           !Number.isNaN(evmLikeChainId) && evmLikeChainId !== 0;
-  //         if (isEVMChainId) {
-  //           return `eip155:${swapVenue.chain_id}`;
-  //         }
+    const transactions = routeQuery.transactions;
+    if (transactions.length === 0) {
+      return;
+    }
 
-  //         return swapVenue.chain_id;
-  //       })();
-  //       const swapAccount = this.accountStore.getAccount(swapVenueChainId);
-  //       if (swapAccount.walletStatus === WalletStatus.NotInit) {
-  //         swapAccount.init();
-  //       }
+    // TODO: multiple txs support
+    const firstTx = transactions[0];
 
-  //       const isSwapVenueChainEVMOnly = swapVenueChainId.startsWith("eip155:");
-  //       if (
-  //         isSwapVenueChainEVMOnly
-  //           ? !swapAccount.ethereumHexAddress
-  //           : !swapAccount.bech32Address
-  //       ) {
-  //         return;
-  //       }
-  //       chainIdsToAddresses[swapVenueChainId.replace("eip155:", "")] =
-  //         isSwapVenueChainEVMOnly
-  //           ? swapAccount.ethereumHexAddress
-  //           : swapAccount.bech32Address;
-  //     }
-  //   }
+    try {
+      if (firstTx.chain_type === ChainType.COSMOS) {
+        return this.buildCosmosTx(firstTx.tx_data);
+      } else {
+        return this.buildEVMTx(firstTx.tx_data);
+      }
+    } catch (error) {
+      console.error(error);
+      return;
+    }
+  }
 
-  //   if (customRecipient) {
-  //     chainIdsToAddresses[customRecipient.chainId.replace("eip155:", "")] =
-  //       customRecipient.recipient;
-  //   }
+  private buildCosmosTx(txData: CosmosTxData): MakeTxResponse {
+    const sourceAccount = this.accountStore.getAccount(this.chainId);
 
-  //   const queryMsgsDirect = queryIBCSwap.getQueryMsgsDirect(
-  //     chainIdsToAddresses,
-  //     slippageTolerancePercent,
-  //     affiliateFeeReceiver
-  //   );
-  //   const msg = queryMsgsDirect.msg;
-  //   if (!msg) {
-  //     return;
-  //   }
+    if (txData.msgs.length === 0) {
+      throw new Error("No messages in transaction");
+    }
 
-  //   if (msg.type === "MsgTransfer") {
-  //     const tx = sourceAccount.cosmos.makeIBCTransferTx(
-  //       {
-  //         portId: msg.sourcePort,
-  //         channelId: msg.sourceChannel,
-  //         counterpartyChainId: msg.counterpartyChainId,
-  //       },
-  //       this.amount[0].toDec().toString(),
-  //       this.amount[0].currency,
-  //       msg.receiver,
-  //       msg.memo
-  //     );
-  //     tx.ui.overrideType("ibc-swap");
-  //     return tx;
-  //   } else if (msg.type === "MsgExecuteContract") {
-  //     const tx = sourceAccount.cosmwasm.makeExecuteContractTx(
-  //       "unknown",
-  //       msg.contract,
-  //       msg.msg,
-  //       msg.funds.map((fund) => fund.toCoin())
-  //     );
-  //     tx.ui.overrideType("ibc-swap");
-  //     return tx;
-  //   } else if (msg.type === "evmTx") {
-  //     const ethereumAccount = this.ethereumAccountStore.getAccount(msg.chainId);
-  //     const tx = ethereumAccount.makeTx(msg.to, msg.value, msg.data);
-  //     return {
-  //       ...tx,
-  //       requiredErc20Approvals: msg.requiredErc20Approvals,
-  //     };
-  //   } else if (msg.type === "MsgCCTP") {
-  //     const tx = sourceAccount.cosmos.makeCCTPTx(
-  //       msg.msgs[0].msg,
-  //       msg.msgs[1].msg
-  //     );
-  //     return tx;
-  //   }
-  // }
+    const msg = txData.msgs[0];
+
+    switch (msg.type) {
+      case "cosmos-sdk/MsgTransfer": {
+        const tx = sourceAccount.cosmos.makeIBCTransferTx(
+          {
+            portId: msg.source_port,
+            channelId: msg.source_channel,
+            counterpartyChainId: this.outChainId, // CHECK: multi-tx인 경우 이거 맞는건지 모르겠음, 굳이 체크필요?
+          },
+          this.amount[0].toDec().toString(),
+          this.amount[0].currency,
+          msg.receiver,
+          msg.memo
+        );
+        tx.ui.overrideType("ibc-swap");
+        return tx;
+      }
+      case "wasm/MsgExecuteContract": {
+        const tx = sourceAccount.cosmwasm.makeExecuteContractTx(
+          "unknown",
+          msg.contract,
+          msg.msg,
+          msg.funds
+        );
+        tx.ui.overrideType("ibc-swap");
+        return tx;
+      }
+      case "cctp/DepositForBurn": {
+        // CHECK: squid의 경우 cctp 메시지를 send와 묶어서 처리하지 않고,
+        // destination caller를 빈 칸으로 두고
+        // 메모에 squidRequestId를 넣어서 스퀴드 쪽에서 이걸 보고 처리하는 것으로 보임
+        // skip은 DepositForBurnWithCaller를 사용하고 있음
+        // squid는 DepositForBurn를 사용하고 있음
+        const cctpMsgValue = {
+          from: msg.from,
+          amount: msg.amount,
+          destination_domain: msg.destination_domain,
+          mint_recipient: msg.mint_recipient,
+          burn_token: msg.burn_token,
+          destination_caller: "", // TODO: ???
+        };
+
+        const sendMsgValue = {
+          from_address: "", // TODO: ???
+          to_address: "", // TODO: ???
+          amount: "", // TODO: ???
+        };
+
+        return sourceAccount.cosmos.makeCCTPTx(
+          JSON.stringify(cctpMsgValue),
+          JSON.stringify(sendMsgValue)
+        );
+      }
+      default:
+        throw new Error("Unsupported message type");
+    }
+  }
+
+  private buildEVMTx(
+    txData: EVMTxData
+  ): UnsignedEVMTransactionWithErc20Approvals {
+    const ethereumAccount = this.ethereumAccountStore.getAccount(this.chainId);
+    const tx = ethereumAccount.makeTx(txData.to, txData.value, txData.data);
+
+    return {
+      ...tx,
+      requiredErc20Approvals: txData.approvals.map((approval) => ({
+        amount: approval.amount,
+        spender: approval.spender,
+        tokenAddress: approval.token_contract,
+      })),
+    };
+  }
 
   // CHECK: 브릿지만 사용한다는 플래그가 요청 필드에 필요할 수 있다.
-  _isUseSwapInBridge(routeResponse: RouteResponseV2 | undefined) {
+  private isUseSwapInBridge(routeResponse: RouteResponseV2 | undefined) {
     const isForcedDisableSwap = this.allowSwaps === false;
     if (!isForcedDisableSwap || !routeResponse) {
       return false;
@@ -647,7 +569,7 @@ export class SwapAmountConfig extends AmountConfig {
       //route로 부터 swap을 사용하는 경우가 있으면 에러를 발생시킨다.
       const routeResponse = routeQuery.response;
       if (routeResponse) {
-        if (this._isUseSwapInBridge(routeResponse.data)) {
+        if (this.isUseSwapInBridge(routeResponse.data)) {
           return {
             ...prev,
             error: new Error("Swap in bridge is not allowed"),
@@ -722,7 +644,7 @@ export class SwapAmountConfig extends AmountConfig {
     //route로 부터 swap을 사용하는 경우가 있으면 에러를 발생시킨다.
     const routeResponse = routeQuery.response;
     if (routeResponse) {
-      if (this._isUseSwapInBridge(routeResponse.data)) {
+      if (this.isUseSwapInBridge(routeResponse.data)) {
         return {
           ...prev,
           error: new Error("Swap in bridge is not allowed"),

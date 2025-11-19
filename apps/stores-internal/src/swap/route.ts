@@ -265,8 +265,6 @@ export class ObservableQueryRouteInnerV2 extends ObservableQuery<RouteResponseV2
   protected override async fetchResponse(
     abortController: AbortController
   ): Promise<{ headers: any; data: RouteResponseV2 }> {
-    // CHECK: optimism-native로 보내면 항상 skip으로 오고,
-    // 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee로 보내면 항상 squid로 오는 것 같음
     const normalizedChainIdsToAddresses: Record<string, string> = {};
     for (const [chainId, address] of Object.entries(this.chainIdsToAddresses)) {
       normalizedChainIdsToAddresses[normalizeChainId(chainId)] = address;
