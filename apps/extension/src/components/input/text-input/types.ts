@@ -20,4 +20,7 @@ export interface TextInputProps {
   suffix?: string | React.ReactNode;
 
   borderRadius?: string;
+
+  placeholderColor?: string;
+  iconColor?: string;
 }

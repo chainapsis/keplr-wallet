@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  FunctionComponent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import styled, { css, useTheme } from "styled-components";
 import SimpleBar from "simplebar-react";
 import { ColorPalette } from "../../../../styles";
@@ -6,6 +12,7 @@ import {
   Body3,
   Caption1,
   Caption2,
+  Subtitle3,
   Subtitle4,
 } from "../../../../components/typography";
 import { useStore } from "../../../../stores";
@@ -38,6 +45,8 @@ import { useGetAllSortedKeyInfos } from "../../../../hooks/use-key-ring-sort";
 import { useGetIcnsName } from "../../../../hooks/use-get-icns-name";
 import { ContextMenuStyles } from "../../../../components/context-menu";
 import { stringLengthByGrapheme } from "../../../../utils/string";
+import { IconProps } from "../../../../components/icon/types";
+import { Box } from "../../../../components/box";
 
 const AccountItem = observer(
   ({
@@ -233,9 +242,9 @@ export const AccountSwitchFloatModal = observer(
     const [addressMap, setAddressMap] = useState<Map<string, string>>(
       new Map()
     );
-    const theme = useTheme();
     const searchInputRef = useRef<HTMLInputElement>(null);
-
+    const intl = useIntl();
+    const theme = useTheme();
     const { searchText, setSearchText, searchedKeyInfos } = useSearchKeyInfos();
 
     const closeModalInner = useCallback(() => {
@@ -292,32 +301,24 @@ export const AccountSwitchFloatModal = observer(
             strategy={floating.strategy}
             ref={floating.refs.setFloating}
           >
-            {shouldShowSearch && (
-              <Styles.SearchContainer>
-                <SearchTextInput
-                  ref={searchInputRef}
-                  value={searchText}
-                  onChange={(e) => {
-                    e.preventDefault();
-                    setSearchText(e.target.value);
-                  }}
-                  placeholder="Search"
-                  textInputContainerStyle={{
-                    backgroundColor:
-                      theme.mode === "light"
-                        ? ColorPalette["white"]
-                        : ColorPalette["gray-650"],
-                  }}
-                  inputStyle={{
-                    borderColor: "red",
-                    backgroundColor:
-                      theme.mode === "light"
-                        ? ColorPalette["white"]
-                        : ColorPalette["gray-650"],
-                  }}
-                />
-              </Styles.SearchContainer>
-            )}
+            <Styles.TitleContainer>
+              <Subtitle3>
+                {intl.formatMessage({ id: "page.wallet.title" })}
+              </Subtitle3>
+              <Box
+                cursor="pointer"
+                hover={{
+                  opacity: COMMON_HOVER_OPACITY,
+                }}
+                onClick={async () => {
+                  await browser.tabs.create({
+                    url: "/register.html",
+                  });
+                }}
+              >
+                <_PlusIcon width="1.5rem" height="1.5rem" />
+              </Box>
+            </Styles.TitleContainer>
 
             <SimpleBar
               style={{
@@ -326,6 +327,35 @@ export const AccountSwitchFloatModal = observer(
                 flexDirection: "column",
               }}
             >
+              {shouldShowSearch && (
+                <Styles.SearchContainer>
+                  <SearchTextInput
+                    ref={searchInputRef}
+                    value={searchText}
+                    onChange={(e) => {
+                      e.preventDefault();
+                      setSearchText(e.target.value);
+                    }}
+                    placeholder="Search"
+                    placeholderColor={
+                      theme.mode === "dark"
+                        ? ColorPalette["gray-300"]
+                        : undefined
+                    }
+                    iconColor={
+                      theme.mode === "dark"
+                        ? ColorPalette["gray-300"]
+                        : undefined
+                    }
+                    textInputContainerStyle={{
+                      backgroundColor: "transparent",
+                    }}
+                    inputStyle={{
+                      backgroundColor: "transparent",
+                    }}
+                  />
+                </Styles.SearchContainer>
+              )}
               {sortedKeyInfos.map((keyInfo) => {
                 const isSelected =
                   keyInfo.id === keyRingStore.selectedKeyInfo?.id;
@@ -347,6 +377,23 @@ export const AccountSwitchFloatModal = observer(
     );
   }
 );
+
+const _PlusIcon: FunctionComponent<IconProps> = ({ width, height, color }) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={width}
+      height={height}
+      viewBox="0 0 24 24"
+      fill="none"
+    >
+      <path
+        d="M12.9 5.69993C12.9 5.20287 12.4971 4.79993 12 4.79993C11.503 4.79993 11.1 5.20287 11.1 5.69993V11.0999H5.70005C5.20299 11.0999 4.80005 11.5029 4.80005 11.9999C4.80005 12.497 5.20299 12.8999 5.70005 12.8999L11.1 12.8999V18.2999C11.1 18.797 11.503 19.1999 12 19.1999C12.4971 19.1999 12.9 18.797 12.9 18.2999V12.8999H18.3C18.7971 12.8999 19.2 12.497 19.2 11.9999C19.2 11.5029 18.7971 11.0999 18.3 11.0999H12.9V5.69993Z"
+        fill={color || "currentColor"}
+      />
+    </svg>
+  );
+};
 
 const Styles = {
   ModalContainer: styled.div<{
@@ -376,9 +423,20 @@ const Styles = {
     flex-direction: column;
   `,
 
+  TitleContainer: styled.div`
+    padding: 0 0.5rem 0.25rem 0.5rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    color: ${({ theme }) =>
+      theme.mode === "light" ? ColorPalette["gray-700"] : ColorPalette.white};
+  `,
+
   SearchContainer: styled.div`
-    padding: 0 0.5rem;
-    margin-bottom: 0.5rem;
+    padding: 0 0.3125rem;
+    margin: 0.5rem 0;
   `,
 
   AccountItem: styled.div`

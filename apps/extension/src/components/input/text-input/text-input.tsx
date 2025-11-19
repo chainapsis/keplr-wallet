@@ -141,7 +141,7 @@ export const TextInput = forwardRef<
              */}
             <MockBox show={!!left}>
               <Box alignY="center" marginLeft="1rem">
-                <Styles.Icon>
+                <Styles.Icon iconColor={props.iconColor}>
                   <Box>{left}</Box>
                 </Styles.Icon>
               </Box>
@@ -200,7 +200,7 @@ export const TextInput = forwardRef<
 
             <MockBox show={!!right}>
               <Box alignY="center" marginRight="1rem">
-                <Styles.Icon>
+                <Styles.Icon iconColor={props.iconColor}>
                   <Box>{right}</Box>
                 </Styles.Icon>
               </Box>
