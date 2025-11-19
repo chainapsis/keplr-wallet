@@ -9,11 +9,14 @@ import { computedFn } from "mobx-utils";
 import { ObservableQueryRouteV2, ObservableQueryRouteInnerV2 } from "./route";
 import { ObservableQueryValidateTargetAssets } from "./validate-target-assets";
 import { makeObservable } from "mobx";
+import { ObservableQueryTxInnerV2, ObservableQueryTxV2 } from "./txs";
+import { Provider, SkipOperation } from "./types";
 
 export class ObservableQuerySwapHelperInner {
   constructor(
     protected readonly chainStore: InternalChainStore,
     protected readonly queryRoute: ObservableQueryRouteV2,
+    protected readonly queryTx: ObservableQueryTxV2,
     public readonly sourceChainId: string,
     public readonly sourceAmount: string,
     public readonly sourceDenom: string,
@@ -22,7 +25,8 @@ export class ObservableQuerySwapHelperInner {
   ) {}
 
   getRoute(
-    chainIdsToAddresses: Record<string, string>,
+    fromAddress: string,
+    toAddress: string,
     slippage: number
   ): ObservableQueryRouteInnerV2 {
     return this.queryRoute.getRoute(
@@ -31,12 +35,52 @@ export class ObservableQuerySwapHelperInner {
       this.sourceAmount,
       this.destChainId,
       this.destDenom,
-      chainIdsToAddresses,
+      fromAddress,
+      toAddress,
       slippage
     );
   }
 
-  // TODO: add getTxs method
+  getTx(
+    chainIdsToAddresses: Record<string, string>,
+    slippage: number,
+    provider: Provider,
+    amountOut?: string,
+    required_chain_ids?: string[],
+    skip_operations?: SkipOperation[]
+  ): ObservableQueryTxInnerV2 {
+    if (provider === Provider.SKIP) {
+      if (!amountOut || !required_chain_ids || !skip_operations) {
+        throw new Error(
+          "SKIP provider requires amountOut, required_chain_ids, and skip_operations"
+        );
+      }
+      return this.queryTx.getTx(
+        this.sourceChainId,
+        this.sourceDenom,
+        this.sourceAmount,
+        this.destChainId,
+        this.destDenom,
+        chainIdsToAddresses,
+        slippage,
+        Provider.SKIP,
+        amountOut,
+        required_chain_ids,
+        skip_operations
+      );
+    } else {
+      return this.queryTx.getTx(
+        this.sourceChainId,
+        this.sourceDenom,
+        this.sourceAmount,
+        this.destChainId,
+        this.destDenom,
+        chainIdsToAddresses,
+        slippage,
+        Provider.SQUID
+      );
+    }
+  }
 }
 /**
  * Swap-related query aggregator that provides an interface similar to `ObservableQueryIbcSwap`.
@@ -49,7 +93,8 @@ export class ObservableQuerySwapHelper extends HasMapStore<ObservableQuerySwapHe
     protected readonly queryRelatedAssets: ObservableQueryRelatedAssets,
     protected readonly queryTransferPaths: ObservableQueryTransferPaths,
     protected readonly queryChains: ObservableQueryChainsV2,
-    protected readonly queryRoute: ObservableQueryRouteV2
+    protected readonly queryRoute: ObservableQueryRouteV2,
+    protected readonly queryTx: ObservableQueryTxV2
   ) {
     super((str) => {
       const parsed = JSON.parse(str);
@@ -57,6 +102,7 @@ export class ObservableQuerySwapHelper extends HasMapStore<ObservableQuerySwapHe
       return new ObservableQuerySwapHelperInner(
         this.chainStore,
         this.queryRoute,
+        this.queryTx,
         parsed.sourceChainId,
         parsed.sourceAmount,
         parsed.sourceDenom,
@@ -78,6 +124,7 @@ export class ObservableQuerySwapHelper extends HasMapStore<ObservableQuerySwapHe
     return new ObservableQuerySwapHelperInner(
       this.chainStore,
       this.queryRoute,
+      this.queryTx,
       sourceChainId,
       sourceAmount,
       sourceDenom,

@@ -6,6 +6,7 @@ import { ObservableQueryTargetAssets } from "./target-assets";
 import { ObservableQueryRelatedAssets } from "./related-assets";
 import { ObservableQueryValidateTargetAssets } from "./validate-target-assets";
 import { ObservableQueryRouteV2 } from "./route";
+import { ObservableQueryTxV2 } from "./txs";
 import { ObservableQueryChainsV2 } from "./chains";
 import { ObservableQueryTransferPaths } from "./transfer-paths";
 import { ObservableQuerySwapHelper } from "./swap-helper";
@@ -18,6 +19,7 @@ export class SwapQueries {
   public readonly queryRelatedAssets: DeepReadonly<ObservableQueryRelatedAssets>;
   public readonly queryValidateTargetAssets: DeepReadonly<ObservableQueryValidateTargetAssets>;
   public readonly queryRoute: DeepReadonly<ObservableQueryRouteV2>;
+  public readonly queryTx: DeepReadonly<ObservableQueryTxV2>;
 
   public readonly queryTransferPaths: DeepReadonly<ObservableQueryTransferPaths>;
 
@@ -58,6 +60,7 @@ export class SwapQueries {
       chainStore,
       baseURL
     );
+    this.queryTx = new ObservableQueryTxV2(sharedContext, chainStore, baseURL);
 
     this.queryTransferPaths = new ObservableQueryTransferPaths(
       chainStore,
@@ -73,7 +76,8 @@ export class SwapQueries {
       this.queryRelatedAssets,
       this.queryTransferPaths,
       this.queryChains,
-      this.queryRoute
+      this.queryRoute,
+      this.queryTx
     );
   }
 }

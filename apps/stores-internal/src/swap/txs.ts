@@ -15,7 +15,6 @@ import {
 } from "./types";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { computed, makeObservable } from "mobx";
-import { CoinPretty } from "@keplr-wallet/unit";
 import Joi from "joi";
 import { normalizeChainId, normalizeDenom } from "./utils";
 
@@ -234,34 +233,10 @@ export class ObservableQueryTxV2 extends HasMapStore<ObservableQueryTxInnerV2> {
     });
   }
 
-  // Overload for SKIP provider
   getTx(
     fromChainId: string,
-    amount: CoinPretty,
-    toChainId: string,
-    toDenom: string,
-    chainIdsToAddresses: Record<string, string>,
-    slippage: number,
-    provider: Provider.SKIP,
-    amountOut: string,
-    required_chain_ids: string[],
-    skip_operations: SkipOperation[]
-  ): ObservableQueryTxInnerV2;
-
-  // Overload for SQUID provider
-  getTx(
-    fromChainId: string,
-    amount: CoinPretty,
-    toChainId: string,
-    toDenom: string,
-    chainIdsToAddresses: Record<string, string>,
-    slippage: number,
-    provider: Provider.SQUID
-  ): ObservableQueryTxInnerV2;
-
-  getTx(
-    fromChainId: string,
-    amount: CoinPretty,
+    fromDenom: string,
+    fromAmount: string,
     toChainId: string,
     toDenom: string,
     chainIdsToAddresses: Record<string, string>,
@@ -282,11 +257,11 @@ export class ObservableQueryTxV2 extends HasMapStore<ObservableQueryTxInnerV2> {
       }
       rawRequest = {
         from_chain: fromChainId,
-        from_token: amount.currency.coinMinimalDenom,
+        from_token: fromDenom,
         to_chain: toChainId,
         to_token: toDenom,
         chain_ids_to_addresses: chainIdsToAddresses,
-        amount: amount.toCoin().amount,
+        amount: fromAmount,
         slippage: slippage,
         provider: Provider.SKIP,
         amount_out: amountOut,
@@ -296,11 +271,11 @@ export class ObservableQueryTxV2 extends HasMapStore<ObservableQueryTxInnerV2> {
     } else {
       rawRequest = {
         from_chain: fromChainId,
-        from_token: amount.currency.coinMinimalDenom,
+        from_token: fromDenom,
         to_chain: toChainId,
         to_token: toDenom,
         chain_ids_to_addresses: chainIdsToAddresses,
-        amount: amount.toCoin().amount,
+        amount: fromAmount,
         slippage: slippage,
         provider: Provider.SQUID,
       };
