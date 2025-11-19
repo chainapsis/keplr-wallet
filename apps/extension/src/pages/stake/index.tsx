@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useMemo } from "react";
+import React, { FunctionComponent, useMemo, useEffect, useRef } from "react";
 import { observer } from "mobx-react-lite";
 import { MainHeaderLayout } from "../main/layouts/header";
 import { ColorPalette } from "../../styles";
@@ -28,6 +28,7 @@ import { Subtitle3 } from "../../components/typography";
 import { RewardsCard } from "./components/rewards-card";
 import { useSearchParams } from "react-router-dom";
 import { useGetStakingApr } from "../../hooks/use-get-staking-apr";
+import debounce from "lodash.debounce";
 
 const zeroDec = new Dec(0);
 
@@ -36,7 +37,8 @@ export const StakePage: FunctionComponent = observer(() => {
   const [params] = useSearchParams();
   const initialExpand = params.get("intitialExpand") === "true";
 
-  const { uiConfigStore, hugeQueriesStore } = useStore();
+  const { uiConfigStore, hugeQueriesStore, analyticsAmplitudeStore } =
+    useStore();
   const isNotReady = useIsNotReady();
 
   const animatedPrivacyModeHover = useSpringValue(0, {
@@ -46,6 +48,31 @@ export const StakePage: FunctionComponent = observer(() => {
   const { stakedTotalPrice } = useStakedTotalPrice();
 
   const { delegations, unbondings } = useViewStakingTokens();
+
+  const hasLoggedAnalytics = useRef(false);
+
+  const debouncedLogEvent = useMemo(
+    () =>
+      debounce((delegationCount: number, unbondingCount: number) => {
+        analyticsAmplitudeStore.logEvent("view_stake_page", {
+          delegationCount,
+          unbondingCount,
+        });
+        hasLoggedAnalytics.current = true;
+      }, 500),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  useEffect(() => {
+    if (!isNotReady && !hasLoggedAnalytics.current) {
+      debouncedLogEvent(delegations.length, unbondings.length);
+    }
+
+    return () => {
+      debouncedLogEvent.cancel();
+    };
+  }, [delegations.length, isNotReady, debouncedLogEvent, unbondings.length]);
 
   const hasAnyStakableAsset = useMemo(() => {
     return hugeQueriesStore.stakables.some((token) =>
