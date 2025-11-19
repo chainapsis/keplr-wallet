@@ -60,7 +60,7 @@ export class UIConfigStore {
     hideLowBalance: false,
     showFiatValue: true,
     isPrivacyMode: false,
-    showSearchBar: false,
+    showSearchBar: true,
     rememberLastFeeOption: false,
     lastFeeOption: false,
     show24HChangesInMagePage: true,

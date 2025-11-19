@@ -57,9 +57,9 @@ export const RewardsCard: FunctionComponent<{
           : ColorPalette["gray-550"]
       }
       borderWidth="1px"
+      minWidth="8rem"
       borderRadius="1.5rem"
       padding="1rem"
-      width="100%"
       onHoverStateChange={(hovered) => {
         if (claimAllDisabled) {
           return;

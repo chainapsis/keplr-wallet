@@ -628,8 +628,8 @@ export const SpendableAssetView: FunctionComponent<{
           />
         ) : (
           <React.Fragment>
-            <Stack gutter="0.5rem">
-              <Box paddingX="0.25rem" paddingY="0.25rem">
+            <Stack>
+              <Box paddingX="0.25rem">
                 <XAxis alignY="center" gap="0.25rem">
                   <Body3
                     style={{
@@ -665,45 +665,50 @@ export const SpendableAssetView: FunctionComponent<{
                 </XAxis>
               </Box>
 
+              <Gutter size="0.5rem" />
+
               <VerticalCollapseTransition
                 collapsed={!uiConfigStore.isShowSearchBar}
               >
-                <SearchTextInput
-                  ref={searchRef}
-                  value={search}
-                  onChange={(e) => {
-                    e.preventDefault();
+                <React.Fragment>
+                  <SearchTextInput
+                    ref={searchRef}
+                    value={search}
+                    onChange={(e) => {
+                      e.preventDefault();
 
-                    setSearch(e.target.value);
+                      setSearch(e.target.value);
 
-                    if (e.target.value.trim().length > 0) {
-                      if (!isEnteredSearch) {
-                        setIsEnteredSearch(true);
+                      if (e.target.value.trim().length > 0) {
+                        if (!isEnteredSearch) {
+                          setIsEnteredSearch(true);
+                        }
+
+                        const simpleBarScrollRef =
+                          globalSimpleBar.ref.current?.getScrollElement();
+                        if (
+                          simpleBarScrollRef &&
+                          simpleBarScrollRef.scrollTop < 218
+                        ) {
+                          searchScrollAnim.start(218, {
+                            from: simpleBarScrollRef.scrollTop,
+                            onChange: (anim: any) => {
+                              // XXX: 이거 실제 파라미터랑 타입스크립트 인터페이스가 다르다...???
+                              const v = anim.value != null ? anim.value : anim;
+                              if (typeof v === "number") {
+                                simpleBarScrollRef.scrollTop = v;
+                              }
+                            },
+                          });
+                        }
                       }
-
-                      const simpleBarScrollRef =
-                        globalSimpleBar.ref.current?.getScrollElement();
-                      if (
-                        simpleBarScrollRef &&
-                        simpleBarScrollRef.scrollTop < 218
-                      ) {
-                        searchScrollAnim.start(218, {
-                          from: simpleBarScrollRef.scrollTop,
-                          onChange: (anim: any) => {
-                            // XXX: 이거 실제 파라미터랑 타입스크립트 인터페이스가 다르다...???
-                            const v = anim.value != null ? anim.value : anim;
-                            if (typeof v === "number") {
-                              simpleBarScrollRef.scrollTop = v;
-                            }
-                          },
-                        });
-                      }
-                    }
-                  }}
-                  placeholder={intl.formatMessage({
-                    id: "page.main.search-placeholder",
-                  })}
-                />
+                    }}
+                    placeholder={intl.formatMessage({
+                      id: "page.main.search-placeholder",
+                    })}
+                  />
+                  <Gutter size="0.5rem" />
+                </React.Fragment>
               </VerticalCollapseTransition>
 
               {numFoundToken > 0 && (

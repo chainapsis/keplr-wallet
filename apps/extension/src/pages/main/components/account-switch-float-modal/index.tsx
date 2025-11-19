@@ -422,6 +422,11 @@ const Styles = {
     color: ${({ theme }) =>
       theme.mode === "light" ? ColorPalette["gray-700"] : ColorPalette.white};
 
+    max-width: 8.75rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
     ${({ isSelected }) =>
       isSelected &&
       css`

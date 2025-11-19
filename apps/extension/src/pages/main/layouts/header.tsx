@@ -7,7 +7,6 @@ import React, {
 } from "react";
 import { Columns } from "../../../components/column";
 import { Box } from "../../../components/box";
-import { CopyOutlineIcon } from "../../../components/icon";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import { HeaderLayout } from "../../../layouts/header";
@@ -64,17 +63,20 @@ const NameHoverArea = ({
   onClick,
   onHover,
   isHover,
+  style,
 }: {
   children: React.ReactNode;
   onClick: () => void;
   onHover: (isHover: boolean) => void;
   isHover: boolean;
+  style?: React.CSSProperties;
 }) => {
   return (
     <Styles.NameHoverArea
       onClick={onClick}
       isHover={isHover}
       onHoverStateChange={onHover}
+      style={style}
     >
       {children}
     </Styles.NameHoverArea>
@@ -281,6 +283,12 @@ export const MainHeaderLayout = observer<
                                   ? ColorPalette["gray-700"]
                                   : ColorPalette["white"]
                               }
+                              style={{
+                                maxWidth: "8.75rem",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
                             >
                               {name}
                             </Subtitle4>
@@ -308,9 +316,7 @@ export const MainHeaderLayout = observer<
                                 setIsOpenDepositModal(true);
                               }}
                             >
-                              <CopyOutlineIcon
-                                width="0.75rem"
-                                height="0.75rem"
+                              <_CopyOutlineIcon
                                 color={ColorPalette["gray-300"]}
                               />
                             </IconButton>
@@ -329,13 +335,7 @@ export const MainHeaderLayout = observer<
                             setIsOpenAccountSwitchModal(true);
                           }}
                         >
-                          <Subtitle4
-                            color={
-                              theme.mode === "light"
-                                ? ColorPalette["gray-700"]
-                                : ColorPalette["white"]
-                            }
-                          >
+                          <Subtitle4 color={ColorPalette["gray-300"]}>
                             {totalPrice?.toString()}
                           </Subtitle4>
                         </NameHoverArea>
@@ -498,5 +498,22 @@ const NameIcon = ({ name }: { name: string }) => {
         {firstChar}
       </Caption1>
     </Box>
+  );
+};
+
+const _CopyOutlineIcon = ({ color }: { color: string }) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="12"
+      height="12"
+      viewBox="0 0 12 12"
+      fill="none"
+    >
+      <path
+        d="M2.40034 3.78997C2.40034 3.44255 2.51785 3.14515 2.75288 2.89775C2.98791 2.65035 3.27045 2.52665 3.60049 2.52665L10.8014 2.52665C11.1315 2.52665 11.414 2.65035 11.649 2.89775C11.8841 3.14515 12.0016 3.44255 12.0016 3.78997L12.0016 10.7382C12.0016 11.0857 11.8841 11.3831 11.649 11.6305C11.414 11.8779 11.1315 12.0016 10.8014 12.0016L3.60049 12.0016C3.27045 12.0016 2.98791 11.8779 2.75288 11.6305C2.51785 11.3831 2.40034 11.0857 2.40034 10.7382L2.40034 3.78997ZM3.60049 3.78997L3.60049 10.7382L10.8014 10.7382L10.8014 3.78997L3.60049 3.78997ZM2.48508e-05 1.26332C2.48356e-05 0.915909 0.117539 0.618502 0.35257 0.371101C0.587601 0.1237 0.870138 3.80339e-08 1.20018 5.24605e-08L9.0012 3.93454e-07C9.17122 4.00886e-07 9.31374 0.0605346 9.42875 0.181603C9.54377 0.302671 9.60127 0.452691 9.60127 0.631662C9.60127 0.810632 9.54377 0.960652 9.42875 1.08172C9.31374 1.20279 9.17122 1.26332 9.0012 1.26332L1.20018 1.26332L1.20018 8.84326C1.20018 9.02223 1.14267 9.17225 1.02766 9.29332C0.912644 9.41438 0.770125 9.47492 0.600103 9.47492C0.430081 9.47492 0.287563 9.41438 0.172548 9.29332C0.0575327 9.17225 2.51899e-05 9.02223 2.51821e-05 8.84326L2.48508e-05 1.26332Z"
+        fill={color}
+      />
+    </svg>
   );
 };

@@ -138,12 +138,105 @@ export const CopyAddressItem = observer(
       // 클릭 영역 문제로 레이아웃이 복잡해졌다.
       // 알아서 잘 해결하자
       return (
-        <Box height="4rem" borderRadius="0.375rem" alignY="center">
+        <Box height="3.5rem" borderRadius="0.375rem" alignY="center">
           <XAxis alignY="center">
             <Box
-              height="4rem"
+              cursor={
+                blockInteraction || (!isEVMOnlyChain && address.ethereumAddress)
+                  ? undefined
+                  : "pointer"
+              }
+              onMouseMove={onPointerMove}
+              onHoverStateChange={(isHover) => {
+                setIsBookmarkHover(isHover);
+              }}
+              style={{
+                opacity: !isEVMOnlyChain && address.ethereumAddress ? 0 : 1,
+                pointerEvents:
+                  !isEVMOnlyChain && address.ethereumAddress
+                    ? "none"
+                    : undefined,
+                color: (() => {
+                  const defaultColor =
+                    theme.mode === "light"
+                      ? ColorPalette["gray-100"]
+                      : ColorPalette["gray-300"];
+
+                  if (preventHover) {
+                    return defaultColor;
+                  }
+
+                  if (isBookmarked) {
+                    if (!blockInteraction && isBookmarkHover) {
+                      return theme.mode === "light"
+                        ? ColorPalette["blue-300"]
+                        : ColorPalette["blue-500"];
+                    }
+                    return ColorPalette["blue-400"];
+                  }
+
+                  if (!blockInteraction && isBookmarkHover) {
+                    return theme.mode === "light"
+                      ? ColorPalette["gray-200"]
+                      : ColorPalette["gray-400"];
+                  }
+
+                  return defaultColor;
+                })(),
+              }}
+              onClick={(e) => {
+                if (preventHover) {
+                  return;
+                }
+
+                e.preventDefault();
+                if (blockInteraction) {
+                  return;
+                }
+
+                const newIsBookmarked = !isBookmarked;
+
+                analyticsStore.logEvent("click_favoriteChain", {
+                  chainId: address.modularChainInfo.chainId,
+                  chainName: address.modularChainInfo.chainName,
+                  isFavorite: newIsBookmarked,
+                });
+
+                if (keyRingStore.selectedKeyInfo) {
+                  if (newIsBookmarked) {
+                    uiConfigStore.copyAddressConfig.bookmarkChain(
+                      keyRingStore.selectedKeyInfo.id,
+                      address.modularChainInfo.chainId
+                    );
+                  } else {
+                    uiConfigStore.copyAddressConfig.unbookmarkChain(
+                      keyRingStore.selectedKeyInfo.id,
+                      address.modularChainInfo.chainId
+                    );
+
+                    setSortPriorities((priorities) => {
+                      const identifier = ChainIdHelper.parse(
+                        address.modularChainInfo.chainId
+                      ).identifier;
+                      const newPriorities = { ...priorities };
+                      if (newPriorities[identifier]) {
+                        delete newPriorities[identifier];
+                      }
+                      return newPriorities;
+                    });
+                  }
+                }
+              }}
+            >
+              <StarIcon width="1.25rem" height="1.25rem" />
+            </Box>
+
+            <Gutter size="0.5rem" />
+            <Box
+              height="3.5rem"
               borderRadius="0.375rem"
               alignY="center"
+              paddingLeft="0.5rem"
               // hover와 backgroundColor를 따로 처리하는 이유는
               // js로 hover style을 처리 하면 커서가 해당 컴포넌트 위에 있을때
               // 검색을 하게 되면 hover 스타일을 제거 했다가.
@@ -153,9 +246,6 @@ export const CopyAddressItem = observer(
               hover={{
                 backgroundColor: (() => {
                   if (blockInteraction) {
-                    return;
-                  }
-                  if (isBookmarkHover) {
                     return;
                   }
                   if (preventHover) {
@@ -171,10 +261,6 @@ export const CopyAddressItem = observer(
               }}
               backgroundColor={(() => {
                 if (blockInteraction) {
-                  return;
-                }
-
-                if (isBookmarkHover) {
                   return;
                 }
 
@@ -211,95 +297,6 @@ export const CopyAddressItem = observer(
               }}
             >
               <XAxis alignY="center">
-                <Box
-                  cursor={
-                    blockInteraction ||
-                    (!isEVMOnlyChain && address.ethereumAddress)
-                      ? undefined
-                      : "pointer"
-                  }
-                  onHoverStateChange={(isHover) => {
-                    setIsBookmarkHover(isHover);
-                  }}
-                  style={{
-                    opacity: !isEVMOnlyChain && address.ethereumAddress ? 0 : 1,
-                    pointerEvents:
-                      !isEVMOnlyChain && address.ethereumAddress
-                        ? "none"
-                        : undefined,
-                    color: (() => {
-                      if (isBookmarked) {
-                        if (!blockInteraction && isBookmarkHover) {
-                          return theme.mode === "light"
-                            ? ColorPalette["blue-300"]
-                            : ColorPalette["blue-500"];
-                        }
-                        return ColorPalette["blue-400"];
-                      }
-
-                      if (!blockInteraction && isBookmarkHover) {
-                        return theme.mode === "light"
-                          ? ColorPalette["gray-200"]
-                          : ColorPalette["gray-400"];
-                      }
-
-                      return theme.mode === "light"
-                        ? ColorPalette["gray-100"]
-                        : ColorPalette["gray-300"];
-                    })(),
-                  }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    // 컨테이너로의 전파를 막아야함
-                    e.stopPropagation();
-
-                    if (blockInteraction) {
-                      return;
-                    }
-
-                    const newIsBookmarked = !isBookmarked;
-
-                    analyticsStore.logEvent("click_favoriteChain", {
-                      chainId: address.modularChainInfo.chainId,
-                      chainName: address.modularChainInfo.chainName,
-                      isFavorite: newIsBookmarked,
-                    });
-
-                    if (keyRingStore.selectedKeyInfo) {
-                      if (newIsBookmarked) {
-                        uiConfigStore.copyAddressConfig.bookmarkChain(
-                          keyRingStore.selectedKeyInfo.id,
-                          address.modularChainInfo.chainId
-                        );
-                      } else {
-                        uiConfigStore.copyAddressConfig.unbookmarkChain(
-                          keyRingStore.selectedKeyInfo.id,
-                          address.modularChainInfo.chainId
-                        );
-
-                        setSortPriorities((priorities) => {
-                          const identifier = ChainIdHelper.parse(
-                            address.modularChainInfo.chainId
-                          ).identifier;
-                          const newPriorities = { ...priorities };
-                          if (newPriorities[identifier]) {
-                            delete newPriorities[identifier];
-                          }
-                          return newPriorities;
-                        });
-                      }
-                    }
-                  }}
-                >
-                  <StarIcon width="1.25rem" height="1.25rem" />
-                </Box>
-                <Gutter size="0.5rem" />
-
-                <ChainImageFallback
-                  chainInfo={address.modularChainInfo}
-                  size="2rem"
-                />
-                <Gutter size="0.5rem" />
                 <YAxis>
                   <Box
                     style={{
@@ -309,15 +306,23 @@ export const CopyAddressItem = observer(
                       gap: "0.25rem",
                     }}
                   >
-                    <Subtitle3
-                      color={
-                        theme.mode === "light"
-                          ? ColorPalette["gray-700"]
-                          : ColorPalette["gray-10"]
-                      }
-                    >
-                      {address.modularChainInfo.chainName}
-                    </Subtitle3>
+                    <XAxis alignY="center">
+                      <ChainImageFallback
+                        chainInfo={address.modularChainInfo}
+                        size="1rem"
+                      />
+                      <Gutter size="0.25rem" />
+                      <Subtitle3
+                        style={{ height: "1rem" }}
+                        color={
+                          theme.mode === "light"
+                            ? ColorPalette["gray-700"]
+                            : ColorPalette["gray-10"]
+                        }
+                      >
+                        {address.modularChainInfo.chainName}
+                      </Subtitle3>
+                    </XAxis>
                     {address.bitcoinAddress && (
                       <Box
                         alignX="center"
@@ -360,30 +365,30 @@ export const CopyAddressItem = observer(
                       if (address.starknetAddress) {
                         return `${address.starknetAddress.slice(
                           0,
-                          10
-                        )}...${address.starknetAddress.slice(-8)}`;
+                          12
+                        )}...${address.starknetAddress.slice(-10)}`;
                       }
 
                       if (address.ethereumAddress) {
                         return address.ethereumAddress.length === 42
                           ? `${address.ethereumAddress.slice(
                               0,
-                              10
-                            )}...${address.ethereumAddress.slice(-8)}`
+                              12
+                            )}...${address.ethereumAddress.slice(-10)}`
                           : address.ethereumAddress;
                       }
 
                       if (address.bech32Address) {
                         return Bech32Address.shortenAddress(
                           address.bech32Address,
-                          20
+                          24
                         );
                       }
 
                       if (address.bitcoinAddress?.bech32Address) {
                         return Bech32Address.shortenAddress(
                           address.bitcoinAddress.bech32Address,
-                          20
+                          24
                         );
                       }
                     })()}
