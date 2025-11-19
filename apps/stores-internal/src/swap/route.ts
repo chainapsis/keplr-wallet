@@ -10,11 +10,10 @@ import {
   RouteRequestV2,
   RouteResponseV2,
   RouteStepType,
-  RouteTransaction,
 } from "./types";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { computed, makeObservable } from "mobx";
-import { CoinPretty } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, RatePretty } from "@keplr-wallet/unit";
 import Joi from "joi";
 import { normalizeChainId, normalizeDenom } from "./utils";
 
@@ -22,146 +21,267 @@ const Schema = Joi.object<RouteResponseV2>({
   provider: Joi.string().valid(Provider.SKIP, Provider.SQUID).required(),
   amount_out: Joi.string().required(),
   estimated_time: Joi.number().required(),
-  fees: Joi.array().items(
-    Joi.object({
-      usd_amount: Joi.string().required(),
-      amount: Joi.string().required(),
-      fee_token: Joi.object({
-        type: Joi.string().valid(ChainType.COSMOS, ChainType.EVM).required(),
-        chain_id: Joi.string().required(),
-        denom: Joi.string().required(),
-        symbol: Joi.string().required(),
-        name: Joi.string().required(),
-      }),
-    }).unknown(true)
-  ),
-  steps: Joi.array().items(
-    Joi.object({
-      type: Joi.string()
-        .valid(
-          RouteStepType.SWAP,
-          RouteStepType.BRIDGE,
-          RouteStepType.IBC_TRANSFER
-        )
-        .required(),
-      from_chain: Joi.string().required(),
-      to_chain: Joi.string().required(),
-      from_token: Joi.string().required(),
-      to_token: Joi.string().required(),
-      from_amount: Joi.string().required(),
-      to_amount: Joi.string().required(),
-    }).unknown(true)
-  ),
-  transactions: Joi.array().items(
-    Joi.alternatives().conditional(Joi.ref(".chain_type"), {
-      switch: [
-        {
-          is: ChainType.COSMOS,
-          then: Joi.object({
-            chain_type: Joi.string().valid(ChainType.COSMOS).required(),
-            tx_data: Joi.object({
+  fees: Joi.array()
+    .items(
+      Joi.object({
+        usd_amount: Joi.string().required(),
+        amount: Joi.string().required(),
+        fee_token: Joi.object({
+          type: Joi.string().valid(ChainType.COSMOS, ChainType.EVM).required(),
+          chain_id: Joi.string().required(),
+          denom: Joi.string().required(),
+          symbol: Joi.string().required(),
+          name: Joi.string().required(),
+          decimals: Joi.number().required(),
+          coingecko_id: Joi.string().required(),
+          image_url: Joi.string().required(),
+        })
+          .unknown(true)
+          .required(),
+      }).unknown(true)
+    )
+    .required(),
+  steps: Joi.array()
+    .items(
+      Joi.object({
+        type: Joi.string()
+          .valid(
+            RouteStepType.SWAP,
+            RouteStepType.BRIDGE,
+            RouteStepType.IBC_TRANSFER
+          )
+          .required(),
+        from_chain: Joi.string().required(),
+        to_chain: Joi.string().required(),
+        from_token: Joi.string().required(),
+        to_token: Joi.string().required(),
+        from_amount: Joi.string().required(),
+        to_amount: Joi.string().required(),
+      }).unknown(true)
+    )
+    .required(),
+  required_chain_ids: Joi.array().items(Joi.string()).required(),
+  skip_operations: Joi.array()
+    .items(
+      Joi.object({
+        transfer: Joi.object({
+          port: Joi.string().required(),
+          channel: Joi.string().required(),
+          chain_id: Joi.string().required(),
+          pfm_enabled: Joi.boolean(),
+          dest_denom: Joi.string().required(),
+          supports_memo: Joi.boolean(),
+        })
+          .required()
+          .unknown(true),
+      }).unknown(true),
+      Joi.object({
+        swap: Joi.object({
+          swap_in: Joi.object({
+            swap_venue: Joi.object({
+              name: Joi.string().required(),
               chain_id: Joi.string().required(),
-              signer_address: Joi.string().required(),
-              msgs: Joi.array()
-                .items(
-                  Joi.alternatives().conditional(Joi.ref(".type"), {
-                    switch: [
-                      {
-                        is: "cosmos-sdk/MsgTransfer",
-                        then: Joi.object({
-                          type: Joi.string()
-                            .valid("cosmos-sdk/MsgTransfer")
-                            .required(),
-                          source_port: Joi.string().required(),
-                          source_channel: Joi.string().required(),
-                          token: Joi.array()
-                            .items(
-                              Joi.object({
-                                denom: Joi.string().required(),
-                                amount: Joi.string().required(),
-                              })
-                            )
-                            .required(),
-                          sender: Joi.string().required(),
-                          receiver: Joi.string().required(),
-                          timeout_timestamp: Joi.string().required(),
-                          memo: Joi.string().optional(),
-                        }).unknown(true),
-                      },
-                      {
-                        is: "wasm/MsgExecuteContract",
-                        then: Joi.object({
-                          type: Joi.string()
-                            .valid("wasm/MsgExecuteContract")
-                            .required(),
-                          sender: Joi.string().required(),
-                          contract: Joi.string().required(),
-                          msg: Joi.object().required(),
-                          funds: Joi.array()
-                            .items(
-                              Joi.object({
-                                denom: Joi.string().required(),
-                                amount: Joi.string().required(),
-                              })
-                            )
-                            .required(),
-                        }).unknown(true),
-                      },
-                      {
-                        is: "cctp/DepositForBurn",
-                        then: Joi.object({
-                          type: Joi.string()
-                            .valid("cctp/DepositForBurn")
-                            .required(),
-                          from: Joi.string().required(),
-                          amount: Joi.string().required(),
-                          destination_domain: Joi.number().required(),
-                          mint_recipient: Joi.string().required(),
-                          burn_token: Joi.string().required(),
-                        }).unknown(true),
-                      },
-                    ],
-                    otherwise: Joi.object({
-                      type: Joi.string().required(),
-                    }).unknown(true),
-                  })
-                )
-                .required(),
             })
               .unknown(true)
               .required(),
-          }),
-        },
-        {
-          is: ChainType.EVM,
-          then: Joi.object({
-            chain_type: Joi.string().valid(ChainType.EVM).required(),
-            tx_data: Joi.object({
+            swap_operations: Joi.array()
+              .items(
+                Joi.object({
+                  pool: Joi.string().required(),
+                  denom_in: Joi.string().required(),
+                  denom_out: Joi.string().required(),
+                }).unknown(true)
+              )
+              .required(),
+            swap_amount_in: Joi.string().required(),
+            price_impact_percent: Joi.string(),
+          }).unknown(true),
+          smart_swap_in: Joi.object({
+            swap_venue: Joi.object({
+              name: Joi.string().required(),
               chain_id: Joi.string().required(),
-              to: Joi.string().required(),
-              data: Joi.string().required(),
-              value: Joi.string().required(),
-              gas_limit: Joi.string().optional(),
-              gas_price: Joi.string().optional(),
-              max_fee_per_gas: Joi.string().optional(),
-              max_priority_fee_per_gas: Joi.string().optional(),
-              approvals: Joi.array()
-                .items(
-                  Joi.object({
-                    token_contract: Joi.string().required(),
-                    spender: Joi.string().required(),
-                    amount: Joi.string().required(),
-                  })
-                )
-                .required(),
             })
               .unknown(true)
               .required(),
-          }),
-        },
-      ],
-    })
-  ),
+            swap_routes: Joi.array()
+              .items(
+                Joi.object({
+                  swap_amount_in: Joi.string().required(),
+                  denom_in: Joi.string().required(),
+                  swap_operations: Joi.array()
+                    .items(
+                      Joi.object({
+                        pool: Joi.string().required(),
+                        denom_in: Joi.string().required(),
+                        denom_out: Joi.string().required(),
+                      }).unknown(true)
+                    )
+                    .required(),
+                }).unknown(true)
+              )
+              .required(),
+            estimated_amount_out: Joi.string().required(),
+          }).unknown(true),
+          estimated_affiliate_fee: Joi.string().required(),
+        })
+          .required()
+          .unknown(true),
+      }).unknown(true),
+      Joi.object({
+        evm_swap: Joi.object({
+          amount_in: Joi.string().required(),
+          amount_out: Joi.string().required(),
+          denom_in: Joi.string().required(),
+          denom_out: Joi.string().required(),
+          from_chain_id: Joi.string().required(),
+          input_token: Joi.string().required(),
+          swap_calldata: Joi.string().required(),
+        })
+          .required()
+          .unknown(true),
+      }).unknown(true),
+      Joi.object({
+        cctp_transfer: Joi.object({
+          bridge_id: Joi.string().required(),
+          burn_token: Joi.string().required(),
+          denom_in: Joi.string().required(),
+          denom_out: Joi.string().required(),
+          from_chain_id: Joi.string().required(),
+          to_chain_id: Joi.string().required(),
+          smart_relay: Joi.boolean().required(),
+          smart_relay_fee_quote: Joi.object({
+            fee_amount: Joi.string().required(),
+            fee_denom: Joi.string().required(),
+            relayer_address: Joi.string().required(),
+            expiration: Joi.string().required(),
+          })
+            .required()
+            .unknown(true),
+        })
+          .required()
+          .unknown(true),
+      }).unknown(true),
+      Joi.object({
+        go_fast_transfer: Joi.object({
+          from_chain_id: Joi.string().required(),
+          to_chain_id: Joi.string().required(),
+          fee: Joi.object({
+            fee_asset: Joi.object({
+              denom: Joi.string().required(),
+              chain_id: Joi.string().required(),
+              is_cw20: Joi.boolean().required(),
+              is_evm: Joi.boolean().required(),
+              is_svm: Joi.boolean().required(),
+              symbol: Joi.string().required(),
+              decimals: Joi.number().required(),
+            })
+              .required()
+              .unknown(true),
+            bps_fee: Joi.string().required(),
+            bps_fee_amount: Joi.string().required(),
+            bps_fee_usd: Joi.string().required(),
+            source_chain_fee_amount: Joi.string().required(),
+            source_chain_fee_usd: Joi.string().required(),
+            destination_chain_fee_amount: Joi.string().required(),
+            destination_chain_fee_usd: Joi.string().required(),
+          })
+            .required()
+            .unknown(true),
+          denom_in: Joi.string().required(),
+          denom_out: Joi.string().required(),
+          source_domain: Joi.string().required(),
+          destination_domain: Joi.string().required(),
+        })
+          .required()
+          .unknown(true),
+      }).unknown(true),
+      Joi.object({
+        axelar_transfer: Joi.object({
+          from_chain: Joi.string().required(),
+          from_chain_id: Joi.string().required(),
+          to_chain: Joi.string().required(),
+          to_chain_id: Joi.string().required(),
+          asset: Joi.string().required(),
+          should_unwrap: Joi.boolean().required(),
+          denom_in: Joi.string().required(),
+          denom_out: Joi.string().required(),
+          fee_amount: Joi.string().required(),
+          usd_fee_amount: Joi.string().required(),
+          fee_asset: Joi.object({
+            denom: Joi.string().required(),
+            chain_id: Joi.string().required(),
+            is_cw20: Joi.boolean().required(),
+            is_evm: Joi.boolean().required(),
+            is_svm: Joi.boolean().required(),
+            symbol: Joi.string().required(),
+            name: Joi.string().required(),
+            decimals: Joi.number().required(),
+          })
+            .required()
+            .unknown(true),
+          bridge_id: Joi.string().required(),
+          smart_relay: Joi.boolean().required(),
+        })
+          .required()
+          .unknown(true),
+      }).unknown(true),
+      Joi.object({
+        hyperlane_transfer: Joi.object({
+          from_chain_id: Joi.string().required(),
+          to_chain_id: Joi.string().required(),
+          denom_in: Joi.string().required(),
+          denom_out: Joi.string().required(),
+          hyperlane_contract_address: Joi.string().required(),
+          fee_amount: Joi.string().required(),
+          usd_fee_amount: Joi.string().required(),
+          fee_asset: Joi.object({
+            denom: Joi.string().required(),
+            chain_id: Joi.string().required(),
+            is_cw20: Joi.boolean().required(),
+            is_evm: Joi.boolean().required(),
+            is_svm: Joi.boolean().required(),
+            symbol: Joi.string().required(),
+            decimals: Joi.number().required(),
+          })
+            .required()
+            .unknown(true),
+          bridge_id: Joi.string().required(),
+          smart_relay: Joi.boolean().required(),
+        })
+          .required()
+          .unknown(true),
+      }).unknown(true),
+      Joi.object({
+        eureka_transfer: Joi.object({
+          bridge_id: Joi.string().required(),
+          callback_adapter_contract_address: Joi.string().required(),
+          destination_port: Joi.string().required(),
+          entry_contract_address: Joi.string().required(),
+          denom_in: Joi.string().required(),
+          denom_out: Joi.string().required(),
+          source_client: Joi.string().required(),
+          from_chain_id: Joi.string().required(),
+          to_chain_id: Joi.string().required(),
+          to_chain_callback_contract_address: Joi.string().required(),
+          to_chain_entry_contract_address: Joi.string().required(),
+          pfm_enabled: Joi.boolean().required(),
+          smart_relay: Joi.boolean().required(),
+          smart_relay_fee_quote: Joi.object({
+            fee_amount: Joi.string().required(),
+            fee_denom: Joi.string().required(),
+            relayer_address: Joi.string().required(),
+            expiration: Joi.string().required(),
+          })
+            .required()
+            .unknown(true),
+          supports_memo: Joi.boolean().required(),
+        })
+          .required()
+          .unknown(true),
+      }).unknown(true)
+    )
+    .required(),
+  price_impact_percent: Joi.string(),
 }).unknown(true);
 
 export class ObservableQueryRouteInnerV2 extends ObservableQuery<RouteResponseV2> {
@@ -170,11 +290,12 @@ export class ObservableQueryRouteInnerV2 extends ObservableQuery<RouteResponseV2
     protected readonly chainStore: IChainStore,
     baseURL: string,
     public readonly fromChainId: string,
-    public readonly fromAmount: string,
     public readonly fromDenom: string,
     public readonly toChainId: string,
     public readonly toDenom: string,
-    public readonly chainIdsToAddresses: Record<string, string>,
+    public readonly fromAddress: string,
+    public readonly toAddress: string,
+    public readonly fromAmount: string,
     public readonly slippage: number
   ) {
     super(sharedContext, baseURL, "/v2/swap/route");
@@ -250,26 +371,17 @@ export class ObservableQueryRouteInnerV2 extends ObservableQuery<RouteResponseV2
   }
 
   @computed
-  get transactions(): RouteTransaction[] {
-    if (!this.response) {
-      return [];
+  get swapPriceImpact(): RatePretty | undefined {
+    if (!this.response || !this.response.data.price_impact_percent) {
+      return undefined;
     }
 
-    if (this.response.data.transactions.length === 0) {
-      return [];
-    }
-
-    return this.response.data.transactions;
+    return new RatePretty(new Dec(this.response.data.price_impact_percent));
   }
 
   protected override async fetchResponse(
     abortController: AbortController
   ): Promise<{ headers: any; data: RouteResponseV2 }> {
-    const normalizedChainIdsToAddresses: Record<string, string> = {};
-    for (const [chainId, address] of Object.entries(this.chainIdsToAddresses)) {
-      normalizedChainIdsToAddresses[normalizeChainId(chainId)] = address;
-    }
-
     const request: RouteRequestV2 = {
       from_chain: normalizeChainId(this.fromChainId),
       from_token: normalizeDenom(
@@ -279,8 +391,9 @@ export class ObservableQueryRouteInnerV2 extends ObservableQuery<RouteResponseV2
       ),
       to_chain: normalizeChainId(this.toChainId),
       to_token: normalizeDenom(this.chainStore, this.toChainId, this.toDenom),
+      from_address: this.fromAddress,
+      to_address: this.toAddress,
       amount: this.fromAmount,
-      chain_ids_to_addresses: normalizedChainIdsToAddresses,
       slippage: this.slippage,
     };
 
@@ -316,8 +429,9 @@ export class ObservableQueryRouteInnerV2 extends ObservableQuery<RouteResponseV2
       from_token: this.fromDenom,
       to_chain: this.toChainId,
       to_token: this.toDenom,
+      from_address: this.fromAddress,
+      to_address: this.toAddress,
       amount: this.fromAmount,
-      chain_ids_to_addresses: this.chainIdsToAddresses,
       slippage: this.slippage,
     };
     return `${super.getCacheKey()}-${JSON.stringify(request)}`;
@@ -341,8 +455,9 @@ export class ObservableQueryRouteV2 extends HasMapStore<ObservableQueryRouteInne
         parsed.from_token,
         parsed.to_chain,
         parsed.to_token,
+        parsed.from_address,
+        parsed.to_address,
         parsed.amount,
-        parsed.chain_ids_to_addresses,
         parsed.slippage
       );
     });
@@ -350,24 +465,26 @@ export class ObservableQueryRouteV2 extends HasMapStore<ObservableQueryRouteInne
 
   getRoute(
     fromChainId: string,
-    fromDenom: string,
-    fromAmount: string,
+    amount: CoinPretty,
     toChainId: string,
     toDenom: string,
-    chainIdsToAddresses: Record<string, string>,
+    fromAddress: string,
+    toAddress: string,
     slippage: number
   ): ObservableQueryRouteInnerV2 {
-    const request: RouteRequestV2 = {
+    // NOTE: not normalized yet, should be normalized before fetching
+    const rawRequest: RouteRequestV2 = {
       from_chain: fromChainId,
-      from_token: fromDenom,
+      from_token: amount.currency.coinMinimalDenom,
       to_chain: toChainId,
       to_token: toDenom,
-      amount: fromAmount,
-      chain_ids_to_addresses: chainIdsToAddresses,
+      from_address: fromAddress,
+      to_address: toAddress,
+      amount: amount.toCoin().amount,
       slippage: slippage,
     };
 
-    const str = JSON.stringify(request);
+    const str = JSON.stringify(rawRequest);
 
     return this.get(str);
   }
