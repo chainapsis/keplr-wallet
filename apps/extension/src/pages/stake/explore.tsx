@@ -52,7 +52,7 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
 
   const [searchParams] = useSearchParams();
 
-  const { hugeQueriesStore, chainStore } = useStore();
+  const { chainStore } = useStore();
 
   const [isOpenDepositModal, setIsOpenDepositModal] = React.useState(false);
   const [isOpenBuy, setIsOpenBuy] = React.useState(false);
@@ -74,7 +74,7 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
 
   const stakeCurrencyItems = useMemo<StakeCurrencyItem[]>(() => {
     const items: StakeCurrencyItem[] = [];
-    for (const chainInfo of chainStore.chainInfosInUI) {
+    for (const chainInfo of chainStore.chainInfos) {
       if (chainInfo.isTestnet || !chainInfo.stakeCurrency) {
         continue;
       }
@@ -89,7 +89,7 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
       });
     }
 
-    for (const modularChainInfo of chainStore.modularChainInfosInUI) {
+    for (const modularChainInfo of chainStore.modularChainInfos) {
       if ("starknet" in modularChainInfo) {
         if (modularChainInfo.isTestnet) {
           continue;
@@ -128,14 +128,9 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
       }
     }
 
-    return items
-      .filter((item) => {
-        const identifier = ChainIdHelper.parse(
-          item.chainInfo.chainId
-        ).identifier;
-        return !topChainIdentifierSet.has(identifier);
-      })
-      .sort((a, b) => a.currency.coinDenom.localeCompare(b.currency.coinDenom));
+    return items.sort((a, b) =>
+      a.currency.coinDenom.localeCompare(b.currency.coinDenom)
+    );
   }, [chainStore, topChainIdentifierSet]);
 
   const topItems = useMemo<StakeCurrencyItem[]>(() => {
@@ -152,27 +147,15 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
         return;
       }
 
-      const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId).identifier;
-      const matchedViewToken = hugeQueriesStore.stakables.find((token) => {
-        const tokenIdentifier = ChainIdHelper.parse(
-          token.chainInfo.chainId
-        ).identifier;
-        return (
-          tokenIdentifier === chainIdentifier &&
-          token.token.currency.coinMinimalDenom ===
-            stakeCurrency.coinMinimalDenom
-        );
-      });
-
       items.push({
-        key: `top-${chainId}`,
-        chainInfo: matchedViewToken?.chainInfo ?? chainInfo,
-        currency: matchedViewToken?.token.currency ?? stakeCurrency,
+        key: `${chainInfo.chainIdentifier}/${stakeCurrency.coinMinimalDenom}`,
+        chainInfo: chainInfo,
+        currency: stakeCurrency,
       });
     });
 
     return items;
-  }, [chainStore, hugeQueriesStore.stakables]);
+  }, [chainStore]);
 
   const assetCards = [
     ...topItems.map((item) => (
