@@ -33,12 +33,14 @@ import { IconProps } from "../../components/icon/types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { COMMON_HOVER_OPACITY } from "../../styles/constant";
 
-const TOP_CHAIN_IDS = [
-  "cosmoshub-4",
-  "osmosis-1",
-  "celestia",
-  "injective-1",
-] as const;
+const priority = (chainId: string) => {
+  const id = ChainIdHelper.parse(chainId).identifier;
+  if (id === "cosmoshub") return 0;
+  if (id === "osmosis") return 1;
+  if (id === "celestia") return 2;
+  if (id === "injective") return 3;
+  return 4;
+};
 
 type StakeCurrencyItem = {
   key: string;
@@ -64,14 +66,6 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
 
   const showBackButton = searchParams.get("showBackButton") === "true";
 
-  const topChainIdentifierSet = useMemo(
-    () =>
-      new Set(
-        TOP_CHAIN_IDS.map((chainId) => ChainIdHelper.parse(chainId).identifier)
-      ),
-    []
-  );
-
   const stakeCurrencyItems = useMemo<StakeCurrencyItem[]>(() => {
     const items: StakeCurrencyItem[] = [];
     for (const chainInfo of chainStore.chainInfos) {
@@ -79,9 +73,6 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
         continue;
       }
       const key = `${chainInfo.chainIdentifier}/${chainInfo.stakeCurrency.coinMinimalDenom}`;
-      if (topChainIdentifierSet.has(chainInfo.chainIdentifier)) {
-        continue;
-      }
       items.push({
         key,
         chainInfo: chainInfo,
@@ -98,9 +89,6 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
         const chainIdentifier = ChainIdHelper.parse(
           modularChainInfo.chainId
         ).identifier;
-        if (topChainIdentifierSet.has(chainIdentifier)) {
-          continue;
-        }
 
         const modularChainInfoImpl = chainStore.getModularChainInfoImpl(
           modularChainInfo.chainId
@@ -128,61 +116,15 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
       }
     }
 
-    return items.sort((a, b) =>
-      a.currency.coinDenom.localeCompare(b.currency.coinDenom)
-    );
-  }, [chainStore, topChainIdentifierSet]);
-
-  const topItems = useMemo<StakeCurrencyItem[]>(() => {
-    const items: StakeCurrencyItem[] = [];
-
-    TOP_CHAIN_IDS.forEach((chainId) => {
-      if (!chainStore.hasChain(chainId)) {
-        return;
+    return items.sort((a, b) => {
+      const diff =
+        priority(a.chainInfo.chainId) - priority(b.chainInfo.chainId);
+      if (diff !== 0) {
+        return diff;
       }
-      const chainInfo = chainStore.getChain(chainId);
-      const stakeCurrency =
-        chainInfo.stakeCurrency ?? chainInfo.currencies[0] ?? undefined;
-      if (!stakeCurrency) {
-        return;
-      }
-
-      items.push({
-        key: `${chainInfo.chainIdentifier}/${stakeCurrency.coinMinimalDenom}`,
-        chainInfo: chainInfo,
-        currency: stakeCurrency,
-      });
+      return a.currency.coinDenom.localeCompare(b.currency.coinDenom);
     });
-
-    return items;
   }, [chainStore]);
-
-  const assetCards = [
-    ...topItems.map((item) => (
-      <AssetCard
-        key={item.key}
-        chainId={item.chainInfo.chainId}
-        chainInfo={item.chainInfo}
-        currency={item.currency}
-        onClick={() => {
-          setDepositInitialSearch(item.chainInfo.chainName);
-          setIsOpenDepositModal(true);
-        }}
-      />
-    )),
-    ...stakeCurrencyItems.map((item) => (
-      <AssetCard
-        key={item.key}
-        chainId={item.chainInfo.chainId}
-        chainInfo={item.chainInfo}
-        currency={item.currency}
-        onClick={() => {
-          setDepositInitialSearch(item.chainInfo.chainName);
-          setIsOpenDepositModal(true);
-        }}
-      />
-    )),
-  ];
 
   return (
     <MainHeaderLayout>
@@ -229,7 +171,20 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
 
         <Gutter size="1.25rem" />
 
-        <CollapsibleGrid items={assetCards} />
+        <CollapsibleGrid
+          items={stakeCurrencyItems.map((item) => (
+            <AssetCard
+              key={item.key}
+              chainId={item.chainInfo.chainId}
+              chainInfo={item.chainInfo}
+              currency={item.currency}
+              onClick={() => {
+                setDepositInitialSearch(item.chainInfo.chainName);
+                setIsOpenDepositModal(true);
+              }}
+            />
+          ))}
+        />
       </Box>
 
       <Modal
