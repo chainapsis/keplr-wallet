@@ -373,8 +373,6 @@ const Styles = {
     top: ${({ top }) => top.toString()}px;
     left: ${({ left }) => left.toString()}px;
     max-width: 13.875rem;
-
-    border-radius: 0.75rem;
   `,
 
   MenuItem: styled(ContextMenuStyles.Item)<{
