@@ -136,7 +136,11 @@ export const SpendableCard: FunctionComponent<{
                   <ArrowUpRightIcon
                     width="0.625rem"
                     height="0.625rem"
-                    color={ColorPalette["blue-300"]}
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["blue-400"]
+                        : ColorPalette["blue-300"]
+                    }
                   />
                 }
                 disabled={!hasBalance}
@@ -159,7 +163,11 @@ export const SpendableCard: FunctionComponent<{
                   <ArrowSwapIcon
                     width="1rem"
                     height="1rem"
-                    color={ColorPalette["blue-300"]}
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["blue-400"]
+                        : ColorPalette["blue-300"]
+                    }
                   />
                 }
                 disabled={!hasBalance}
