@@ -113,17 +113,9 @@ export const StakePage: FunctionComponent = observer(() => {
             <Skeleton isNotReady={isNotReady} dummyMinWidth="6rem">
               <MainH1>
                 {uiConfigStore.hideStringIfPrivacyMode(
-                  stakedTotalPrice?.toString().split(".")[0] || "-",
+                  stakedTotalPrice?.toString() || "-",
                   4
                 )}
-                <span style={{ color: ColorPalette["gray-300"] }}>
-                  {uiConfigStore.hideStringIfPrivacyMode(
-                    stakedTotalPrice?.toString().split(".")[1]
-                      ? `.${stakedTotalPrice?.toString().split(".")[1]}`
-                      : "",
-                    0
-                  )}
-                </span>
               </MainH1>
             </Skeleton>
 

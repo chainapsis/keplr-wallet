@@ -37,6 +37,7 @@ import { useSearchKeyInfos } from "../../../../hooks/use-search-key-infos";
 import { useGetAllSortedKeyInfos } from "../../../../hooks/use-key-ring-sort";
 import { useGetIcnsName } from "../../../../hooks/use-get-icns-name";
 import { ContextMenuStyles } from "../../../../components/context-menu";
+import { stringLengthByGrapheme } from "../../../../utils/string";
 
 const AccountItem = observer(
   ({
@@ -112,7 +113,12 @@ const AccountItem = observer(
     })();
 
     const accountName = keyInfo.name || "Keplr Account";
-    const firstLetter = accountName.length > 0 ? accountName[0] : "";
+    const firstLetter = (() => {
+      if (stringLengthByGrapheme(accountName) !== accountName.length) {
+        return "A";
+      }
+      return accountName[0].toUpperCase();
+    })();
 
     return (
       <React.Fragment>
@@ -454,9 +460,9 @@ const Styles = {
     min-width: 11.25rem;
   `,
 
-  MenuItem: styled(ContextMenuStyles.Item)<{ isLast?: boolean }>`
-    ${Body3}
-
+  MenuItem: styled(ContextMenuStyles.Item).attrs({ as: Body3 })<{
+    isLast?: boolean;
+  }>`
     padding: 0.5rem 1.5rem;
     height: 2.5rem;
     width: 100%;

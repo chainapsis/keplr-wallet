@@ -22,6 +22,7 @@ export const SearchTextInput = forwardRef<
       ref={ref}
       inputStyle={{
         paddingLeft: "0.5rem",
+        height: "3rem",
         ...props.inputStyle,
       }}
       left={
