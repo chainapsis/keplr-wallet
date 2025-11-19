@@ -39,7 +39,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import styled, { css, useTheme } from "styled-components";
 import { TokenDetailModal } from "./token-detail";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
+import { ModularChainInfo } from "@keplr-wallet/types";
 import { useGetSearchChains } from "../../hooks/use-get-search-chains";
 import { useEarnBottomTag } from "../earn/components/use-earn-bottom-tag";
 import { AdjustmentIcon } from "../../components/icon/adjustment";
@@ -143,7 +143,7 @@ const chainSearchFields = [
   "chainInfo.chainName",
   {
     key: "ethereum-and-bitcoin",
-    function: (item: { chainInfo: ChainInfo | ModularChainInfo }) => {
+    function: (item: { chainInfo: ModularChainInfo }) => {
       if (
         "starknet" in item.chainInfo ||
         item.chainInfo.chainName.toLowerCase().includes("ethereum")
@@ -539,10 +539,10 @@ export const AvailableTabView: FunctionComponent<{
           <TokenItem
             viewToken={{
               token: new CoinPretty(
-                chainStore.chainInfos[0].currencies[0],
+                chainStore.modularChainInfoImpls[0].getCurrencies()[0],
                 new Dec(0)
               ),
-              chainInfo: chainStore.modularChainInfos[0],
+              chainInfo: chainStore.modularChainInfoImpls[0].embedded,
               isFetching: false,
               error: undefined,
             }}

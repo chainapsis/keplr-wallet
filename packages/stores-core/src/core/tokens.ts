@@ -10,7 +10,7 @@ import {
   InteractionWaitingData,
 } from "@keplr-wallet/background";
 import { action, autorun, makeObservable, observable, runInAction } from "mobx";
-import { AppCurrency } from "@keplr-wallet/types";
+import { AppCurrency, ChainInfoModule } from "@keplr-wallet/types";
 import { IChainStore, IAccountStore } from "@keplr-wallet/stores";
 import { InteractionStore } from "./interaction";
 import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
@@ -110,12 +110,18 @@ export class TokensStore {
       const prevTokens =
         this.prevTokenMap.get(chainIdentifier.identifier) ?? [];
 
-      if (
-        "starknet" in modularChainInfoImpl &&
-        modularChainInfoImpl.starknet != null
-      ) {
+      const module =
+        "evm" in modularChainInfoImpl.embedded
+          ? "evm"
+          : "starknet" in modularChainInfoImpl.embedded
+          ? "starknet"
+          : "bitcoin" in modularChainInfoImpl.embedded
+          ? "bitcoin"
+          : "cosmos";
+
+      if (modularChainInfoImpl.matchModule(module)) {
         modularChainInfoImpl.removeCurrencies(
-          "starknet",
+          module as ChainInfoModule,
           ...prevTokens.map((token) => token.currency.coinMinimalDenom)
         );
       }

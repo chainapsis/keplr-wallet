@@ -410,7 +410,8 @@ export const EnableChainsScene: FunctionComponent<{
           candidateAddresses.length > 0 &&
           enabledChainIdentifiers.length === 1 &&
           enabledChainIdentifiers[0] ===
-            chainStore.chainInfos[0].chainIdentifier
+            ChainIdHelper.parse(chainStore.modularChainInfos[0].chainId)
+              .identifier
         ) {
           enableAllChains = true;
         }

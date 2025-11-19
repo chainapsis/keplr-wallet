@@ -39,8 +39,11 @@ export class CopyAddressConfig {
     // Sync and clear the config if the chain is removed.
     autorun(() => {
       const chainIdentifierMap = new Map<string, boolean>();
-      for (const chainInfo of this.chainStore.chainInfos) {
-        chainIdentifierMap.set(chainInfo.chainIdentifier, true);
+      for (const chainInfo of this.chainStore.modularChainInfos) {
+        chainIdentifierMap.set(
+          ChainIdHelper.parse(chainInfo.chainId).identifier,
+          true
+        );
       }
 
       runInAction(() => {

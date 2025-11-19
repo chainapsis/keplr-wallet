@@ -103,7 +103,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
     if (supportedChainInfos.length > 0) {
       return supportedChainInfos[0].chainId;
     } else {
-      return chainStore.chainInfos[0].chainId;
+      return chainStore.modularChainInfos[0].chainId;
     }
   });
 

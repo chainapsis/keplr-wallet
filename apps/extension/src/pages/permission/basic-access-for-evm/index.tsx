@@ -174,7 +174,7 @@ export const PermissionBasicAccessForEVMPage: FunctionComponent<{
                 <FormattedMessage id="page.permission.basic-access.select-chain-title" />
               </Body2>
               <Dropdown
-                items={chainStore.chainInfos
+                items={chainStore.modularChainInfos
                   .filter((chainInfo) =>
                     chainStore.isEvmChain(chainInfo.chainId)
                   )

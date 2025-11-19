@@ -8,7 +8,6 @@ import { CloseIcon, PlusIcon, QuestionIcon } from "../../../../components/icon";
 import { ColorPalette } from "../../../../styles";
 import { Stack } from "../../../../components/stack";
 import { Body1, Body3, Subtitle3 } from "../../../../components/typography";
-import { ChainInfo } from "@keplr-wallet/types";
 import { Column, Columns } from "../../../../components/column";
 import { ChainImageFallback } from "../../../../components/image";
 import { EmptyView } from "../../../../components/empty-view";
@@ -17,13 +16,15 @@ import { Tooltip } from "../../../../components/tooltip";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
 import { dispatchGlobalEventExceptSelf } from "../../../../utils/global-events";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { ModularChainInfoImpl } from "@keplr-wallet/stores";
 
 export const SettingGeneralDeleteSuggestChainPage: FunctionComponent = observer(
   () => {
     const intl = useIntl();
     const { chainStore } = useStore();
-    const suggestedChains = chainStore.chainInfos.filter(
-      (chainInfo) => !chainInfo.embedded.embedded
+    const suggestedChains = chainStore.modularChainInfos.filter(
+      (chainInfo) => !chainInfo.isNative
     );
 
     return (
@@ -46,11 +47,13 @@ export const SettingGeneralDeleteSuggestChainPage: FunctionComponent = observer(
               suggestedChains.map((chainInfo) => {
                 return (
                   <ChainItem
-                    key={chainInfo.chainIdentifier}
-                    chainInfo={chainInfo}
+                    key={ChainIdHelper.parse(chainInfo.chainId).identifier}
+                    chainInfoImpl={chainStore.getModularChainInfoImpl(
+                      chainInfo.chainId
+                    )}
                     onClickClose={async () => {
                       await chainStore.removeChainInfo(
-                        chainInfo.chainIdentifier
+                        ChainIdHelper.parse(chainInfo.chainId).identifier
                       );
 
                       dispatchGlobalEventExceptSelf(
@@ -78,9 +81,9 @@ export const SettingGeneralDeleteSuggestChainPage: FunctionComponent = observer(
 );
 
 const ChainItem: FunctionComponent<{
-  chainInfo: ChainInfo;
+  chainInfoImpl: ModularChainInfoImpl;
   onClickClose?: () => void;
-}> = ({ chainInfo, onClickClose }) => {
+}> = ({ chainInfoImpl: chainInfo, onClickClose }) => {
   const intl = useIntl();
   const theme = useTheme();
 
@@ -97,7 +100,7 @@ const ChainItem: FunctionComponent<{
     >
       <Columns sum={1} alignY="center" gutter="0.375rem">
         <Box borderRadius="99999px">
-          <ChainImageFallback chainInfo={chainInfo} size="3rem" />
+          <ChainImageFallback chainInfo={chainInfo.embedded} size="3rem" />
         </Box>
         <Stack gutter="0.375rem">
           <Columns sum={1} alignY="center" gutter="0.25rem">
@@ -108,7 +111,7 @@ const ChainItem: FunctionComponent<{
                   : ColorPalette["gray-50"]
               }
             >
-              {chainInfo.chainName}
+              {chainInfo.embedded.chainName}
             </Body1>
             <Tooltip
               content={intl.formatMessage({
@@ -127,7 +130,7 @@ const ChainItem: FunctionComponent<{
             </Tooltip>
           </Columns>
           <Body3 color={ColorPalette["gray-300"]}>
-            {chainInfo.currencies[0].coinDenom}
+            {chainInfo.getCurrencies()[0].coinDenom}
           </Body3>
         </Stack>
 

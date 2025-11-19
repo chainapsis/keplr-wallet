@@ -31,11 +31,7 @@ import {
   useSceneEvents,
   useSceneTransition,
 } from "../../../../components/transition";
-import {
-  ChainInfo,
-  ModularChainInfo,
-  SupportedPaymentType,
-} from "@keplr-wallet/types";
+import { ModularChainInfo, SupportedPaymentType } from "@keplr-wallet/types";
 import { isRunningInSidePanel } from "../../../../utils";
 import { useGetSearchChains } from "../../../../hooks/use-get-search-chains";
 import { LookingForChainItem } from "../looking-for-chains";
@@ -121,7 +117,7 @@ const chainSearchFields = [
   "chainInfo.chainId",
   {
     key: "ethereum-and-bitcoin",
-    function: (item: { chainInfo: ChainInfo | ModularChainInfo }) => {
+    function: (item: { chainInfo: ModularChainInfo }) => {
       if (
         "starknet" in item.chainInfo ||
         item.chainInfo.chainName.toLowerCase().includes("ethereum")

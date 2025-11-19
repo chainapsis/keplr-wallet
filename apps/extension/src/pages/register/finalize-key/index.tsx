@@ -182,7 +182,10 @@ export const FinalizeKeyScene: FunctionComponent<{
 
         let promises: Promise<unknown>[] = [];
 
-        for (const chainInfo of chainStore.chainInfos) {
+        for (const chainInfo of chainStore.modularChainInfos) {
+          if (!("cosmos" in chainInfo) && !("evm" in chainInfo)) {
+            continue;
+          }
           // If mnemonic is fresh, there is no way that additional coin type account has value to select.
           if (mnemonic) {
             if (
@@ -197,7 +200,9 @@ export const FinalizeKeyScene: FunctionComponent<{
                   await keyRingStore.finalizeKeyCoinType(
                     vaultId,
                     chainInfo.chainId,
-                    chainInfo.bip44.coinType
+                    "cosmos" in chainInfo
+                      ? chainInfo.cosmos.bip44.coinType
+                      : chainInfo.evm.bip44.coinType
                   );
                 })()
               );

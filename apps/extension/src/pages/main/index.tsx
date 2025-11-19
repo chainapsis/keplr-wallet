@@ -69,7 +69,7 @@ export interface ViewToken {
 export const useIsNotReady = () => {
   const { chainStore, queriesStore } = useStore();
 
-  const query = queriesStore.get(chainStore.chainInfos[0].chainId).cosmos
+  const query = queriesStore.get(chainStore.modularChainInfos[0].chainId).cosmos
     .queryRPCStatus;
 
   return query.response == null && query.error == null;
