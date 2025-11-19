@@ -44,6 +44,7 @@ export const RewardsCard: FunctionComponent<{
   return (
     <Box
       position="relative"
+      style={{ flex: 13 }}
       backgroundColor={
         isHover
           ? theme.mode === "light"

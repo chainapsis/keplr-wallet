@@ -21,6 +21,10 @@ const Styles = {
     gap: 0.375rem;
 
     justify-content: space-between;
+
+    > * {
+      flex: 1;
+    }
   `,
 };
 
@@ -60,6 +64,7 @@ export const SpendableCard: FunctionComponent<{
           borderRadius="1.5rem"
           padding="1rem"
           width="100%"
+          style={{ flex: 19 }}
         >
           <Box>
             <Skeleton isNotReady={isNotReady} verticalBleed="2px">
@@ -131,7 +136,11 @@ export const SpendableCard: FunctionComponent<{
                   <ArrowUpRightIcon
                     width="0.625rem"
                     height="0.625rem"
-                    color={ColorPalette["blue-300"]}
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["blue-400"]
+                        : ColorPalette["blue-300"]
+                    }
                   />
                 }
                 disabled={!hasBalance}
@@ -154,7 +163,11 @@ export const SpendableCard: FunctionComponent<{
                   <ArrowSwapIcon
                     width="1rem"
                     height="1rem"
-                    color={ColorPalette["blue-300"]}
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["blue-400"]
+                        : ColorPalette["blue-300"]
+                    }
                   />
                 }
                 disabled={!hasBalance}
@@ -189,6 +202,7 @@ const EllipseButton: FunctionComponent<{
         opacity: disabled ? 0.5 : isHover ? 0.8 : 1,
       }}
       cursor={!disabled ? "pointer" : "not-allowed"}
+      width="100%"
       onClick={(e) => {
         e.preventDefault();
 
@@ -213,6 +227,7 @@ const EllipseButton: FunctionComponent<{
             isLightMode ? ColorPalette["blue-50"] : ColorPalette["blue-800"]
           }
           minWidth="2.875rem"
+          width="100%"
         >
           {icon}
         </Box>
