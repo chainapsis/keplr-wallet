@@ -629,7 +629,7 @@ export const SpendableAssetView: FunctionComponent<{
         ) : (
           <React.Fragment>
             <Stack>
-              <Box paddingX="0.25rem" paddingY="0.25rem">
+              <Box paddingX="0.25rem">
                 <XAxis alignY="center" gap="0.25rem">
                   <Body3
                     style={{
