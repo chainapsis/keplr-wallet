@@ -99,7 +99,7 @@ export const RewardsCard: FunctionComponent<{
       <YAxis alignX="right">
         <Skeleton isNotReady={isNotReady}>
           {isLedger || isKeystone ? (
-            <Subtitle3
+            <Body3
               color={
                 theme.mode === "light"
                   ? ColorPalette["gray-700"]
@@ -109,7 +109,7 @@ export const RewardsCard: FunctionComponent<{
               {intl.formatMessage({
                 id: "page.main.components.rewards-card.view-button",
               })}
-            </Subtitle3>
+            </Body3>
           ) : claimAllIsLoading || claimAllIsCompleted ? (
             <YAxis alignX="right">
               <XAxis alignY="center">
