@@ -12,7 +12,7 @@ import { ColorPalette } from "../../../../styles";
 import { XAxis, YAxis } from "../../../../components/axis";
 import {
   BaseTypography,
-  Caption1,
+  Body3,
   Subtitle3,
 } from "../../../../components/typography";
 import { Gutter } from "../../../../components/gutter";
@@ -360,7 +360,7 @@ export const CopyAddressItem = observer(
                     )}
                   </Box>
                   <Gutter size="0.25rem" />
-                  <Caption1 color={ColorPalette["gray-300"]}>
+                  <Body3 color={ColorPalette["gray-300"]}>
                     {(() => {
                       if (address.starknetAddress) {
                         return `${address.starknetAddress.slice(
@@ -392,7 +392,7 @@ export const CopyAddressItem = observer(
                         );
                       }
                     })()}
-                  </Caption1>
+                  </Body3>
                 </YAxis>
 
                 <div
