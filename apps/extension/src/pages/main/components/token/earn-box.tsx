@@ -42,7 +42,7 @@ const StyledEarningsBox = styled.div`
   align-items: center;
   gap: 0.5rem;
   align-self: stretch;
-  border-radius: 0.375rem;
+  border-radius: 0 0.75rem 0.75rem 0.75rem;
   background: ${({ theme }) =>
     theme.mode === "light"
       ? ColorPalette["green-100"]
