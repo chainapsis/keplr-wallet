@@ -1,6 +1,6 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { observer } from "mobx-react-lite";
-import { useIntl } from "react-intl";
+import { useIntl, IntlShape } from "react-intl";
 import { Box } from "../../../../components/box";
 import {
   Body3,
@@ -10,6 +10,7 @@ import {
 } from "../../../../components/typography";
 import { Skeleton } from "../../../../components/skeleton";
 import { ColorPalette } from "../../../../styles";
+import { COMMON_HOVER_OPACITY } from "../../../../styles/constant";
 import { XAxis, YAxis } from "../../../../components/axis";
 import { Gutter } from "../../../../components/gutter";
 import { useRewards } from "../../../../hooks/use-rewards";
@@ -27,7 +28,8 @@ export const RewardsCard: FunctionComponent<{
   const navigate = useNavigate();
   const { mainHeaderAnimationStore } = useStore();
 
-  const [isHover, setIsHover] = React.useState(false);
+  const [isCardHover, setIsCardHover] = React.useState(false);
+  const [isClaimAllHover, setIsClaimAllHover] = React.useState(false);
 
   const {
     totalPrice,
@@ -41,12 +43,17 @@ export const RewardsCard: FunctionComponent<{
     claimCountText,
   } = useRewards();
 
+  const navigateToStake = React.useCallback(() => {
+    mainHeaderAnimationStore.triggerShowForMainHeaderPrice();
+    navigate("/stake?intitialExpand=true");
+  }, [mainHeaderAnimationStore, navigate]);
+
   return (
     <Box
       position="relative"
       style={{ flex: 13 }}
       backgroundColor={
-        isHover
+        isCardHover && !isClaimAllHover
           ? theme.mode === "light"
             ? ColorPalette["gray-50"]
             : "rgba(21, 21, 23, 0.50)"
@@ -62,37 +69,32 @@ export const RewardsCard: FunctionComponent<{
       borderRadius="1.5rem"
       padding="1rem"
       onHoverStateChange={(hovered) => {
-        if (claimAllDisabled) {
-          return;
-        }
-        setIsHover(hovered);
+        setIsCardHover(hovered);
       }}
-      cursor={claimAllDisabled ? "not-allowed" : "pointer"}
-      onClick={
-        claimAllDisabled
-          ? undefined
-          : isLedger ||
-            isKeystone ||
-            claimAllIsLoading ||
-            (claimAllIsCompleted && count >= 1)
-          ? () => {
-              mainHeaderAnimationStore.triggerShowForMainHeaderPrice();
-              navigate("/stake?intitialExpand=true");
-            }
-          : claimAll
-      }
+      cursor="pointer"
+      onClick={navigateToStake}
     >
-      <Skeleton isNotReady={isNotReady}>
-        <Body3 color={ColorPalette["gray-200"]}>
-          {intl.formatMessage({
-            id: "page.main.components.rewards-card.title",
-          })}
-        </Body3>
-      </Skeleton>
-      <Gutter size="0.5rem" />
-      <Skeleton isNotReady={isNotReady} verticalBleed="2px">
-        <Subtitle2>{totalPrice?.toString()}</Subtitle2>
-      </Skeleton>
+      <div style={{ position: "absolute", top: "1rem", right: "0.75rem" }}>
+        <CarouelArrowRightIcon
+          color={ColorPalette["gray-300"]}
+          width="1rem"
+          height="1rem"
+        />
+      </div>
+
+      <Box opacity={isCardHover && !isClaimAllHover ? 0.7 : 1}>
+        <Skeleton isNotReady={isNotReady}>
+          <Body3 color={ColorPalette["gray-200"]}>
+            {intl.formatMessage({
+              id: "page.main.components.rewards-card.title",
+            })}
+          </Body3>
+        </Skeleton>
+        <Gutter size="0.5rem" />
+        <Skeleton isNotReady={isNotReady} verticalBleed="2px">
+          <Subtitle2>{totalPrice?.toString()}</Subtitle2>
+        </Skeleton>
+      </Box>
 
       <div style={{ flex: 1 }} />
 
@@ -167,19 +169,20 @@ export const RewardsCard: FunctionComponent<{
               </XAxis>
             </YAxis>
           ) : (
-            <Subtitle3
-              color={
-                claimAllDisabled
-                  ? ColorPalette["gray-300"]
-                  : ColorPalette["blue-300"]
-              }
-            >
-              {claimAllIsLoading
-                ? claimCountText
-                : intl.formatMessage({
-                    id: "page.main.components.rewards-card.claim-all-button",
-                  })}
-            </Subtitle3>
+            <ClaimAllButton
+              intl={intl}
+              claimAllDisabled={claimAllDisabled}
+              claimAllIsLoading={claimAllIsLoading}
+              claimAllIsCompleted={claimAllIsCompleted}
+              claimCountText={claimCountText}
+              count={count}
+              isLedger={!!isLedger}
+              isKeystone={!!isKeystone}
+              onClaimAll={claimAll}
+              onNavigateToStake={navigateToStake}
+              isHover={isClaimAllHover}
+              setIsHover={setIsClaimAllHover}
+            />
           )}
         </Skeleton>
       </YAxis>
@@ -189,24 +192,155 @@ export const RewardsCard: FunctionComponent<{
   );
 });
 
-const CountdownCircle = styled(Caption1)`
-  width: 1.0625rem;
-  height: 1.1875rem;
-  border-radius: 0.75rem;
-  background-color: ${({ theme }) =>
-    theme.mode === "light"
-      ? ColorPalette["gray-50"]
-      : ColorPalette["gray-600"]};
-  color: ${({ theme }) =>
-    theme.mode === "light"
-      ? ColorPalette["gray-200"]
-      : ColorPalette["gray-300"]};
-  text-align: center;
-  line-height: 1.1875rem;
+type ClaimAllButtonProps = {
+  intl: IntlShape;
+  claimAllDisabled: boolean;
+  claimAllIsLoading: boolean;
+  claimAllIsCompleted: boolean;
+  claimCountText: string;
+  count: number;
+  isLedger: boolean;
+  isKeystone: boolean;
+  onClaimAll: () => void;
+  onNavigateToStake: () => void;
+  isHover: boolean;
+  setIsHover: (hovered: boolean) => void;
+};
 
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
+const ClaimAllButton: FunctionComponent<ClaimAllButtonProps> = ({
+  intl,
+  claimAllDisabled,
+  claimAllIsLoading,
+  claimAllIsCompleted,
+  claimCountText,
+  count,
+  isLedger,
+  isKeystone,
+  onClaimAll,
+  onNavigateToStake,
+  isHover,
+  setIsHover,
+}) => {
+  const [isPressed, setIsPressed] = React.useState(false);
+
+  const shouldDimClaimAllButton =
+    !claimAllDisabled && !claimAllIsLoading && isPressed;
+
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+
+    if (claimAllDisabled) {
+      return;
+    }
+
+    if (
+      isLedger ||
+      isKeystone ||
+      claimAllIsLoading ||
+      (claimAllIsCompleted && count >= 1)
+    ) {
+      onNavigateToStake();
+      return;
+    }
+
+    onClaimAll();
+  };
+
+  useEffect(() => {
+    return () => {
+      setIsPressed(false);
+      setIsHover(false);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <Box
+      onHoverStateChange={(hovered) => {
+        if (!hovered) {
+          setIsPressed(false);
+        }
+        setIsHover(hovered);
+      }}
+      cursor={claimAllDisabled ? "not-allowed" : "pointer"}
+      opacity={shouldDimClaimAllButton ? COMMON_HOVER_OPACITY : undefined}
+      onMouseDown={() => {
+        if (claimAllDisabled || claimAllIsLoading) {
+          return;
+        }
+        setIsPressed(true);
+      }}
+      onClick={handleClick}
+    >
+      <XAxis alignY="center">
+        <SlidingIconContainer $isActive={!claimAllDisabled && isHover}>
+          <Box padding="0.125rem">
+            <CheckIcon
+              width="0.75rem"
+              height="0.75rem"
+              color={
+                claimAllDisabled
+                  ? ColorPalette["gray-300"]
+                  : ColorPalette["blue-300"]
+              }
+            />
+          </Box>
+        </SlidingIconContainer>
+        <Gutter size="0.25rem" />
+        <Subtitle3
+          color={
+            claimAllDisabled
+              ? ColorPalette["gray-300"]
+              : ColorPalette["blue-300"]
+          }
+        >
+          {claimAllIsLoading ? (
+            claimCountText
+          ) : (
+            <ClaimTextWrapper>
+              <ClaimAllText $visible={!isHover}>
+                {intl.formatMessage({
+                  id: "page.main.components.rewards-card.claim-all-button",
+                })}
+              </ClaimAllText>
+              <ApproveText $visible={isHover}>
+                {intl.formatMessage({
+                  id: "button.approve",
+                })}
+              </ApproveText>
+            </ClaimTextWrapper>
+          )}
+        </Subtitle3>
+      </XAxis>
+    </Box>
+  );
+};
+
+const SlidingIconContainer = styled.div<{ $isActive: boolean }>`
+  width: 0.75rem;
+  height: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: ${({ $isActive }) => ($isActive ? 1 : 0)};
+  transform: translateX(${({ $isActive }) => ($isActive ? "0" : "-0.25rem")});
+  transition: opacity 0.3s ease, transform 0.3s ease;
+`;
+
+const ClaimTextWrapper = styled.span`
+  display: inline-grid;
+`;
+
+const ClaimAllText = styled.span<{ $visible: boolean }>`
+  grid-area: 1 / 1;
+  opacity: ${({ $visible }) => ($visible ? 1 : 0)};
+  transition: opacity 0.2s ease;
+`;
+
+const ApproveText = styled.span<{ $visible: boolean }>`
+  grid-area: 1 / 1;
+  opacity: ${({ $visible }) => ($visible ? 1 : 0)};
+  transition: opacity 0.3s ease;
 `;
 
 const CheckIcon: FunctionComponent<IconProps> = ({ width, height, color }) => {
@@ -233,6 +367,26 @@ const CheckIcon: FunctionComponent<IconProps> = ({ width, height, color }) => {
   );
 };
 
+const CountdownCircle = styled(Caption1)`
+  width: 1.0625rem;
+  height: 1.1875rem;
+  border-radius: 0.75rem;
+  background-color: ${({ theme }) =>
+    theme.mode === "light"
+      ? ColorPalette["gray-50"]
+      : ColorPalette["gray-600"]};
+  color: ${({ theme }) =>
+    theme.mode === "light"
+      ? ColorPalette["gray-200"]
+      : ColorPalette["gray-300"]};
+  text-align: center;
+  line-height: 1.1875rem;
+
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+`;
+
 const ArrowRightIcon: FunctionComponent<IconProps> = ({
   width,
   height,
@@ -252,6 +406,40 @@ const ArrowRightIcon: FunctionComponent<IconProps> = ({
         d="M2.39999 7.99999C2.39999 7.66862 2.66862 7.39999 2.99999 7.39999L11.5103 7.39999L8.18413 4.23249C7.94527 4.00281 7.93782 3.62298 8.16749 3.38412C8.39717 3.14526 8.777 3.13781 9.01586 3.36749L13.4159 7.56749C13.5335 7.68061 13.6 7.83678 13.6 7.99999C13.6 8.1632 13.5335 8.31936 13.4159 8.43249L9.01586 12.6325C8.777 12.8622 8.39717 12.8547 8.16749 12.6159C7.93782 12.377 7.94527 11.9972 8.18413 11.7675L11.5103 8.59999L2.99999 8.59999C2.66862 8.59999 2.39999 8.33136 2.39999 7.99999Z"
         fill={color || "currentColor"}
       />
+    </svg>
+  );
+};
+
+const CarouelArrowRightIcon: FunctionComponent<IconProps> = ({
+  width,
+  height,
+  color,
+}) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={width}
+      height={height}
+      viewBox="0 0 14 14"
+      fill="none"
+    >
+      <mask
+        id="mask0_2415_10267"
+        style={{ maskType: "alpha" }}
+        maskUnits="userSpaceOnUse"
+        x="0"
+        y="-1"
+        width="14"
+        height="15"
+      >
+        <rect y="-0.00012207" width="13.3733" height="13.3733" fill="#D9D9D9" />
+      </mask>
+      <g mask="url(#mask0_2415_10267)">
+        <path
+          d="M8.06573 6.68654L3.97016 2.59097C3.83086 2.45166 3.76353 2.28682 3.76817 2.09644C3.77281 1.90605 3.84479 1.74121 3.98409 1.6019C4.1234 1.4626 4.28824 1.39294 4.47863 1.39294C4.66901 1.39294 4.83385 1.4626 4.97316 1.6019L9.24983 5.8925C9.36127 6.00394 9.44485 6.12932 9.50057 6.26862C9.5563 6.40793 9.58416 6.54723 9.58416 6.68654C9.58416 6.82584 9.5563 6.96515 9.50057 7.10445C9.44485 7.24376 9.36127 7.36913 9.24983 7.48058L4.95923 11.7712C4.81992 11.9105 4.6574 11.9778 4.47166 11.9732C4.28592 11.9685 4.1234 11.8966 3.98409 11.7572C3.84479 11.6179 3.77513 11.4531 3.77513 11.2627C3.77513 11.0723 3.84479 10.9075 3.98409 10.7682L8.06573 6.68654Z"
+          fill={color || "currentColor"}
+        />
+      </g>
     </svg>
   );
 };
