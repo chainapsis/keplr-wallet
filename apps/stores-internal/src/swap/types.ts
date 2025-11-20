@@ -438,7 +438,8 @@ export type SwapTransaction =
 
 export interface TxResponse {
   provider: SwapProvider;
-  txs: SwapTransaction[];
+  amount_out: string;
+  transactions: SwapTransaction[];
 }
 
 // TODO: move status query types out of this file

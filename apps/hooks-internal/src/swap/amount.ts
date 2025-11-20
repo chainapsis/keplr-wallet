@@ -440,7 +440,7 @@ export class SwapAmountConfig extends AmountConfig {
         : undefined
     );
 
-    const transactions = txsQuery.txs;
+    const transactions = txsQuery.transactions;
     if (transactions.length === 0) {
       return;
     }

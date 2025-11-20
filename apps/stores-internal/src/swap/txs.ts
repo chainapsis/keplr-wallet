@@ -119,10 +119,10 @@ const EVMTxDataSchema = Joi.object({
   to: Joi.string().required(),
   data: Joi.string().required(),
   value: Joi.string().required(),
-  gas_limit: Joi.string(),
-  gas_price: Joi.string(),
-  max_fee_per_gas: Joi.string(),
-  max_priority_fee_per_gas: Joi.string(),
+  gas_limit: Joi.string().empty("").optional(),
+  gas_price: Joi.string().empty("").optional(),
+  max_fee_per_gas: Joi.string().empty("").optional(),
+  max_priority_fee_per_gas: Joi.string().empty("").optional(),
   approvals: Joi.array()
     .items(
       Joi.object({
@@ -131,14 +131,15 @@ const EVMTxDataSchema = Joi.object({
         amount: Joi.string().required(),
       }).unknown(true)
     )
-    .required(),
+    .optional(),
 }).unknown(true);
 
 const TxResponseSchema = Joi.object<TxResponse>({
   provider: Joi.string()
     .valid(SwapProvider.SKIP, SwapProvider.SQUID)
     .required(),
-  txs: Joi.array()
+  amount_out: Joi.string().required(),
+  transactions: Joi.array()
     .items(
       Joi.object({
         chain_type: Joi.string()
@@ -166,9 +167,9 @@ export class ObservableQueryTxInnerV2 extends ObservableQuery<TxResponse> {
     baseURL: string,
     public readonly fromChainId: string,
     public readonly fromDenom: string,
+    public readonly fromAmount: string,
     public readonly toChainId: string,
     public readonly toDenom: string,
-    public readonly fromAmount: string,
     public readonly chainIdsToAddresses: Record<string, string>,
     public readonly slippage: number,
     public readonly provider: SwapProvider,
@@ -193,12 +194,12 @@ export class ObservableQueryTxInnerV2 extends ObservableQuery<TxResponse> {
   }
 
   @computed
-  get txs(): SwapTransaction[] {
+  get transactions(): SwapTransaction[] {
     if (!this.response) {
       return [];
     }
 
-    return this.response.data.txs;
+    return this.response.data.transactions;
   }
 
   private buildRequest(): TxRequest {
@@ -301,7 +302,7 @@ export class ObservableQueryTxV2 extends HasMapStore<ObservableQueryTxInnerV2> {
         this.baseURL,
         parsed.fromChainId,
         parsed.fromDenom,
-        parsed.amount,
+        parsed.fromAmount,
         parsed.toChainId,
         parsed.toDenom,
         parsed.chainIdsToAddresses,
