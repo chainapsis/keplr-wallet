@@ -5,7 +5,11 @@ import {
   ObservableQuery,
   QuerySharedContext,
 } from "@keplr-wallet/stores";
-import { RelatedAssetsRequest, RelatedAssetsResponse } from "./types";
+import {
+  SwapChainType,
+  RelatedAssetsRequest,
+  RelatedAssetsResponse,
+} from "./types";
 import { computed, makeObservable } from "mobx";
 import Joi from "joi";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
@@ -59,10 +63,12 @@ export class ObservableQueryRelatedAssetsInner extends ObservableQuery<RelatedAs
 
     for (const token of this.response.data.tokens) {
       const chainId =
-        token.type === "evm" ? `eip155:${token.chain_id}` : token.chain_id;
+        token.type === SwapChainType.EVM
+          ? `eip155:${token.chain_id}`
+          : token.chain_id;
       if (this.chainStore.hasChain(chainId) && token.decimals <= 18) {
         const denom = (() => {
-          if (token.type === "evm") {
+          if (token.type === SwapChainType.EVM) {
             if (token.denom === "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee") {
               return this.chainStore.getChain(chainId).currencies[0]
                 .coinMinimalDenom;
@@ -143,8 +149,8 @@ export class ObservableQueryRelatedAssetsInner extends ObservableQuery<RelatedAs
 
     const validated = Schema.validate(result.data);
     if (validated.error) {
-      console.log(
-        "Failed to validate swappable related assets response from source response",
+      console.error(
+        "Failed to validate swappable related assets response",
         validated.error
       );
       throw validated.error;
@@ -205,8 +211,12 @@ export class ObservableQueryRelatedAssets extends HasMapStore<ObservableQueryRel
       sourceDenom
     );
     if (observable) {
+      const chainIdentifier = ChainIdHelper.parse(destChainId).identifier;
+
       return observable.currencies.some(
-        (c) => c.chainId === destChainId && c.coinMinimalDenom === destDenom
+        (c) =>
+          ChainIdHelper.parse(c.chainId).identifier === chainIdentifier &&
+          c.coinMinimalDenom === destDenom
       );
     }
     return false;

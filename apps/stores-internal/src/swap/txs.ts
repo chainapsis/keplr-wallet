@@ -5,8 +5,8 @@ import {
   QuerySharedContext,
 } from "@keplr-wallet/stores";
 import {
-  ChainType,
-  Provider,
+  SwapChainType,
+  SwapProvider,
   SkipOperation,
   SwapTransaction,
   TxRequest,
@@ -57,20 +57,22 @@ const EVMTxDataSchema = Joi.object({
 }).unknown(true);
 
 const TxResponseSchema = Joi.object<TxResponse>({
-  provider: Joi.string().valid(Provider.SKIP, Provider.SQUID).required(),
+  provider: Joi.string()
+    .valid(SwapProvider.SKIP, SwapProvider.SQUID)
+    .required(),
   txs: Joi.array()
     .items(
       Joi.object({
         chain_type: Joi.string()
-          .valid(ChainType.COSMOS, ChainType.EVM)
+          .valid(SwapChainType.COSMOS, SwapChainType.EVM)
           .required(),
         tx_data: Joi.alternatives()
           .conditional("chain_type", {
-            is: ChainType.COSMOS,
+            is: SwapChainType.COSMOS,
             then: CosmosTxDataSchema,
           })
           .conditional("chain_type", {
-            is: ChainType.EVM,
+            is: SwapChainType.EVM,
             then: EVMTxDataSchema,
           })
           .required(),
@@ -91,11 +93,11 @@ export class ObservableQueryTxInnerV2 extends ObservableQuery<TxResponse> {
     public readonly fromAmount: string,
     public readonly chainIdsToAddresses: Record<string, string>,
     public readonly slippage: number,
-    public readonly provider: Provider,
+    public readonly provider: SwapProvider,
     // provided only for SKIP provider
     public readonly amountOut?: string,
-    public readonly required_chain_ids?: string[],
-    public readonly skip_operations?: SkipOperation[]
+    public readonly requiredChainIds?: string[],
+    public readonly skipOperations?: SkipOperation[]
   ) {
     super(sharedContext, baseURL, "/v2/swap/tx");
 
@@ -103,9 +105,9 @@ export class ObservableQueryTxInnerV2 extends ObservableQuery<TxResponse> {
   }
 
   protected override canFetch(): boolean {
-    if (this.provider === Provider.SKIP) {
+    if (this.provider === SwapProvider.SKIP) {
       return (
-        !!this.amountOut && !!this.required_chain_ids && !!this.skip_operations
+        !!this.amountOut && !!this.requiredChainIds && !!this.skipOperations
       );
     }
 
@@ -121,48 +123,41 @@ export class ObservableQueryTxInnerV2 extends ObservableQuery<TxResponse> {
     return this.response.data.txs;
   }
 
-  private buildRequest(normalize: boolean): TxRequest {
-    const requestBase: TxRequestBase = normalize
-      ? {
-          from_chain: normalizeChainId(this.fromChainId),
-          from_token: normalizeDenom(
-            this.chainStore,
-            this.fromChainId,
-            this.fromDenom
-          ),
-          to_chain: normalizeChainId(this.toChainId),
-          to_token: normalizeDenom(
-            this.chainStore,
-            this.toChainId,
-            this.toDenom
-          ),
-          amount: this.fromAmount,
-          chain_ids_to_addresses: this.chainIdsToAddresses,
-          slippage: this.slippage,
-        }
-      : {
-          from_chain: this.fromChainId,
-          from_token: this.fromDenom,
-          to_chain: this.toChainId,
-          to_token: this.toDenom,
-          amount: this.fromAmount,
-          slippage: this.slippage,
-          chain_ids_to_addresses: this.chainIdsToAddresses,
-        };
+  private buildRequest(): TxRequest {
+    const normalizedChainIdsToAddresses = Object.fromEntries(
+      Object.entries(this.chainIdsToAddresses).map(([chainId, address]) => [
+        normalizeChainId(chainId),
+        address,
+      ])
+    );
 
-    if (this.provider === Provider.SKIP) {
+    const requestBase: TxRequestBase = {
+      from_chain: normalizeChainId(this.fromChainId),
+      from_token: normalizeDenom(
+        this.chainStore,
+        this.fromChainId,
+        this.fromDenom
+      ),
+      amount: this.fromAmount,
+      to_chain: normalizeChainId(this.toChainId),
+      to_token: normalizeDenom(this.chainStore, this.toChainId, this.toDenom),
+      chain_ids_to_addresses: normalizedChainIdsToAddresses,
+      slippage: this.slippage,
+    };
+
+    if (this.provider === SwapProvider.SKIP) {
       // canFetch ensures these are defined
       return {
         ...requestBase,
-        provider: Provider.SKIP,
-        amount_out: this.amountOut as string,
-        skip_operations: this.skip_operations as SkipOperation[],
-        required_chain_ids: this.required_chain_ids as string[],
+        provider: SwapProvider.SKIP,
+        amount_out: this.amountOut!,
+        skip_operations: this.skipOperations!,
+        required_chain_ids: this.requiredChainIds!,
       };
     } else {
       return {
         ...requestBase,
-        provider: Provider.SQUID,
+        provider: SwapProvider.SQUID,
       };
     }
   }
@@ -170,7 +165,7 @@ export class ObservableQueryTxInnerV2 extends ObservableQuery<TxResponse> {
   protected override async fetchResponse(
     abortController: AbortController
   ): Promise<{ headers: any; data: TxResponse }> {
-    const request = this.buildRequest(true);
+    const request = this.buildRequest();
 
     const _result = await simpleFetch<TxResponse>(this.baseURL, this.url, {
       method: "POST",
@@ -199,8 +194,16 @@ export class ObservableQueryTxInnerV2 extends ObservableQuery<TxResponse> {
   }
 
   protected override getCacheKey(): string {
-    const request = this.buildRequest(false);
-    // CHECK: skip_operations가 포함된 상태에서 stringify해도 괜찮은가? 너무 길어지는 것 아닌가?
+    const request = this.buildRequest();
+
+    if (this.provider === SwapProvider.SKIP && "skip_operations" in request) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { skip_operations: _, ...rest } = request;
+
+      // CHECK: skip_operations를 제거하고 키를 생성해도 괜찮은지
+      return `${super.getCacheKey()}-${JSON.stringify(rest)}`;
+    }
+
     return `${super.getCacheKey()}-${JSON.stringify(request)}`;
   }
 }
@@ -212,23 +215,23 @@ export class ObservableQueryTxV2 extends HasMapStore<ObservableQueryTxInnerV2> {
     protected readonly baseURL: string
   ) {
     super((str) => {
-      const parsed: TxRequest = JSON.parse(str);
+      const parsed = JSON.parse(str);
 
       return new ObservableQueryTxInnerV2(
         this.sharedContext,
         this.chainStore,
         this.baseURL,
-        parsed.from_chain,
-        parsed.from_token,
-        parsed.to_chain,
-        parsed.to_token,
+        parsed.fromChainId,
+        parsed.fromDenom,
         parsed.amount,
-        parsed.chain_ids_to_addresses,
+        parsed.toChainId,
+        parsed.toDenom,
+        parsed.chainIdsToAddresses,
         parsed.slippage,
         parsed.provider,
-        "amount_out" in parsed ? parsed.amount_out : undefined,
-        "required_chain_ids" in parsed ? parsed.required_chain_ids : undefined,
-        "skip_operations" in parsed ? parsed.skip_operations : undefined
+        parsed.amountOut,
+        parsed.requiredChainIds,
+        parsed.skipOperations
       );
     });
   }
@@ -241,47 +244,44 @@ export class ObservableQueryTxV2 extends HasMapStore<ObservableQueryTxInnerV2> {
     toDenom: string,
     chainIdsToAddresses: Record<string, string>,
     slippage: number,
-    provider: Provider,
+    provider: SwapProvider,
     amountOut?: string,
-    required_chain_ids?: string[],
-    skip_operations?: SkipOperation[]
+    requiredChainIds?: string[],
+    skipOperations?: SkipOperation[]
   ): ObservableQueryTxInnerV2 {
-    // NOTE: not normalized yet, should be normalized before fetching
-    let rawRequest: TxRequest;
+    let str: string;
 
-    if (provider === Provider.SKIP) {
-      if (!amountOut || !required_chain_ids || !skip_operations) {
+    if (provider === SwapProvider.SKIP) {
+      if (!amountOut || !requiredChainIds || !skipOperations) {
         throw new Error(
-          "SKIP provider requires amountOut, required_chain_ids, and skip_operations"
+          "SKIP provider requires amountOut, requiredChainIds, and skipOperations"
         );
       }
-      rawRequest = {
-        from_chain: fromChainId,
-        from_token: fromDenom,
-        to_chain: toChainId,
-        to_token: toDenom,
-        chain_ids_to_addresses: chainIdsToAddresses,
-        amount: fromAmount,
-        slippage: slippage,
-        provider: Provider.SKIP,
-        amount_out: amountOut,
-        required_chain_ids: required_chain_ids,
-        skip_operations: skip_operations,
-      };
+      str = JSON.stringify({
+        fromChainId,
+        fromDenom,
+        fromAmount,
+        toChainId,
+        toDenom,
+        chainIdsToAddresses,
+        slippage,
+        provider: SwapProvider.SKIP,
+        amountOut,
+        requiredChainIds,
+        skipOperations,
+      });
     } else {
-      rawRequest = {
-        from_chain: fromChainId,
-        from_token: fromDenom,
-        to_chain: toChainId,
-        to_token: toDenom,
-        chain_ids_to_addresses: chainIdsToAddresses,
-        amount: fromAmount,
-        slippage: slippage,
-        provider: Provider.SQUID,
-      };
+      str = JSON.stringify({
+        fromChainId,
+        fromDenom,
+        fromAmount,
+        toChainId,
+        toDenom,
+        chainIdsToAddresses,
+        slippage,
+        provider: SwapProvider.SQUID,
+      });
     }
-
-    const str = JSON.stringify(rawRequest);
 
     return this.get(str);
   }

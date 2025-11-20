@@ -5,7 +5,11 @@ import {
   ObservableQuery,
   QuerySharedContext,
 } from "@keplr-wallet/stores";
-import { TargetAssetsRequest, TargetAssetsResponse } from "./types";
+import {
+  SwapChainType,
+  TargetAssetsRequest,
+  TargetAssetsResponse,
+} from "./types";
 import { computed, makeObservable } from "mobx";
 import Joi from "joi";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
@@ -70,10 +74,12 @@ export class ObservableQueryTargetAssetsInner extends ObservableQuery<TargetAsse
 
     for (const token of this.response.data.tokens) {
       const chainId =
-        token.type === "evm" ? `eip155:${token.chain_id}` : token.chain_id;
+        token.type === SwapChainType.EVM
+          ? `eip155:${token.chain_id}`
+          : token.chain_id;
       if (this.chainStore.hasChain(chainId) && token.decimals <= 18) {
         const denom = (() => {
-          if (token.type === "evm") {
+          if (token.type === SwapChainType.EVM) {
             if (token.denom === "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee") {
               return this.chainStore.getChain(chainId).currencies[0]
                 .coinMinimalDenom;
@@ -139,16 +145,11 @@ export class ObservableQueryTargetAssetsInner extends ObservableQuery<TargetAsse
       denom: normalizeDenom(this.chainStore, this.chainId, this.denom),
       page: this.page,
       limit: this.limit,
-      ...(() => {
-        if (this.search.trim().length > 0) {
-          return {
-            search: this.search,
-          };
-        }
-
-        return {};
-      })(),
     };
+
+    if (this.search.trim().length > 0) {
+      request.search = this.search;
+    }
 
     const _result = await simpleFetch(this.baseURL, this.url, {
       signal: abortController.signal,
@@ -165,8 +166,8 @@ export class ObservableQueryTargetAssetsInner extends ObservableQuery<TargetAsse
 
     const validated = Schema.validate(result.data);
     if (validated.error) {
-      console.log(
-        "Failed to validate swappable target assets response from source response",
+      console.error(
+        "Failed to validate swappable target assets response",
         validated.error
       );
       throw validated.error;
@@ -180,8 +181,8 @@ export class ObservableQueryTargetAssetsInner extends ObservableQuery<TargetAsse
 
   protected override getCacheKey(): string {
     return `${super.getCacheKey()}-${JSON.stringify({
-      chainId: this.chainId,
-      denom: this.denom,
+      chainId: normalizeChainId(this.chainId),
+      denom: normalizeDenom(this.chainStore, this.chainId, this.denom),
       page: this.page,
       limit: this.limit,
       search: this.search.trim(),

@@ -5,8 +5,10 @@ import {
   QuerySharedContext,
 } from "@keplr-wallet/stores";
 import {
-  ChainType,
-  Provider,
+  SwapChainType,
+  SwapFee,
+  SwapFeeToken,
+  SwapProvider,
   RouteRequestV2,
   RouteResponseV2,
   RouteStepType,
@@ -17,15 +19,21 @@ import { CoinPretty, Dec, RatePretty } from "@keplr-wallet/unit";
 import Joi from "joi";
 import { normalizeChainId, normalizeDenom } from "./utils";
 
-const FeeTokenSchema = Joi.object({
-  type: Joi.string().valid(ChainType.COSMOS, ChainType.EVM).required(),
+const FeeTokenSchema = Joi.object<SwapFeeToken>({
+  type: Joi.string().valid(SwapChainType.COSMOS, SwapChainType.EVM).required(),
   chain_id: Joi.string().required(),
   denom: Joi.string().required(),
   symbol: Joi.string().required(),
   name: Joi.string().required(),
   decimals: Joi.number().required(),
-  coingecko_id: Joi.string().required(),
-  image_url: Joi.string().required(),
+  coingecko_id: Joi.string().optional(),
+  image_url: Joi.string().optional(),
+}).unknown(true);
+
+const FeeSchema = Joi.object<SwapFee>({
+  usd_amount: Joi.string().required(),
+  amount: Joi.string().required(),
+  fee_token: FeeTokenSchema.required(),
 }).unknown(true);
 
 const RouteStepSchema = Joi.object({
@@ -260,18 +268,12 @@ const SkipOperationsSchema = Joi.array().items(
 );
 
 const RouteResponseV2Schema = Joi.object<RouteResponseV2>({
-  provider: Joi.string().valid(Provider.SKIP, Provider.SQUID).required(),
+  provider: Joi.string()
+    .valid(SwapProvider.SKIP, SwapProvider.SQUID)
+    .required(),
   amount_out: Joi.string().required(),
   estimated_time: Joi.number().required(),
-  fees: Joi.array()
-    .items(
-      Joi.object({
-        usd_amount: Joi.string().required(),
-        amount: Joi.string().required(),
-        fee_token: FeeTokenSchema.required(),
-      }).unknown(true)
-    )
-    .required(),
+  fees: Joi.array().items(FeeSchema).required(),
   steps: Joi.array().items(RouteStepSchema).required(),
   required_chain_ids: Joi.array().items(Joi.string()).required(),
   skip_operations: SkipOperationsSchema.required(),
@@ -285,11 +287,11 @@ export class ObservableQueryRouteInnerV2 extends ObservableQuery<RouteResponseV2
     baseURL: string,
     public readonly fromChainId: string,
     public readonly fromDenom: string,
+    public readonly fromAmount: string,
     public readonly toChainId: string,
     public readonly toDenom: string,
     public readonly fromAddress: string,
     public readonly toAddress: string,
-    public readonly fromAmount: string,
     public readonly slippage: number
   ) {
     super(sharedContext, baseURL, "/v2/swap/route");
@@ -304,7 +306,7 @@ export class ObservableQueryRouteInnerV2 extends ObservableQuery<RouteResponseV2
   }
 
   @computed
-  get provider(): Provider | undefined {
+  get provider(): SwapProvider | undefined {
     if (!this.response) {
       return undefined;
     }
@@ -391,11 +393,11 @@ export class ObservableQueryRouteInnerV2 extends ObservableQuery<RouteResponseV2
         this.fromChainId,
         this.fromDenom
       ),
+      amount: this.fromAmount,
       to_chain: normalizeChainId(this.toChainId),
       to_token: normalizeDenom(this.chainStore, this.toChainId, this.toDenom),
       from_address: this.fromAddress,
       to_address: this.toAddress,
-      amount: this.fromAmount,
       slippage: this.slippage,
     };
 
@@ -426,17 +428,20 @@ export class ObservableQueryRouteInnerV2 extends ObservableQuery<RouteResponseV2
   }
 
   protected override getCacheKey(): string {
-    const request: RouteRequestV2 = {
-      from_chain: this.fromChainId,
-      from_token: this.fromDenom,
-      to_chain: this.toChainId,
-      to_token: this.toDenom,
-      from_address: this.fromAddress,
-      to_address: this.toAddress,
-      amount: this.fromAmount,
+    return `${super.getCacheKey()}-${JSON.stringify({
+      fromChainId: normalizeChainId(this.fromChainId),
+      fromDenom: normalizeDenom(
+        this.chainStore,
+        this.fromChainId,
+        this.fromDenom
+      ),
+      fromAmount: this.fromAmount,
+      toChainId: normalizeChainId(this.toChainId),
+      toDenom: normalizeDenom(this.chainStore, this.toChainId, this.toDenom),
+      fromAddress: this.fromAddress,
+      toAddress: this.toAddress,
       slippage: this.slippage,
-    };
-    return `${super.getCacheKey()}-${JSON.stringify(request)}`;
+    })}`;
   }
 }
 
@@ -447,19 +452,19 @@ export class ObservableQueryRouteV2 extends HasMapStore<ObservableQueryRouteInne
     protected readonly baseURL: string
   ) {
     super((str) => {
-      const parsed: RouteRequestV2 = JSON.parse(str);
+      const parsed = JSON.parse(str);
 
       return new ObservableQueryRouteInnerV2(
         this.sharedContext,
         this.chainStore,
         this.baseURL,
-        parsed.from_chain,
-        parsed.from_token,
-        parsed.to_chain,
-        parsed.to_token,
-        parsed.from_address,
-        parsed.to_address,
-        parsed.amount,
+        parsed.fromChainId,
+        parsed.fromDenom,
+        parsed.fromAmount,
+        parsed.toChainId,
+        parsed.toDenom,
+        parsed.fromAddress,
+        parsed.toAddress,
         parsed.slippage
       );
     });
@@ -475,19 +480,16 @@ export class ObservableQueryRouteV2 extends HasMapStore<ObservableQueryRouteInne
     toAddress: string,
     slippage: number
   ): ObservableQueryRouteInnerV2 {
-    // NOTE: not normalized yet, should be normalized before fetching
-    const rawRequest: RouteRequestV2 = {
-      from_chain: fromChainId,
-      from_token: fromDenom,
-      to_chain: toChainId,
-      to_token: toDenom,
-      from_address: fromAddress,
-      to_address: toAddress,
-      amount: fromAmount,
-      slippage: slippage,
-    };
-
-    const str = JSON.stringify(rawRequest);
+    const str = JSON.stringify({
+      fromChainId,
+      fromDenom,
+      fromAmount,
+      toChainId,
+      toDenom,
+      fromAddress,
+      toAddress,
+      slippage,
+    });
 
     return this.get(str);
   }

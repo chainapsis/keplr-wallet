@@ -1,9 +1,9 @@
-export enum Provider {
+export enum SwapProvider {
   SKIP = "skip",
   SQUID = "squid",
 }
 
-export enum ChainType {
+export enum SwapChainType {
   COSMOS = "cosmos",
   EVM = "evm",
 }
@@ -33,7 +33,7 @@ export interface TargetAssetsRequest {
 export interface TargetAssetsResponse {
   tokens: {
     token_id: string;
-    type: string;
+    type: SwapChainType;
     chain_id: string;
     denom: string;
     symbol: string;
@@ -59,7 +59,7 @@ export interface RelatedAssetsRequest {
 export interface RelatedAssetsResponse {
   tokens: {
     token_id: string;
-    type: string;
+    type: SwapChainType;
     chain_id: string;
     denom: string;
     symbol: string;
@@ -90,23 +90,29 @@ export interface ValidateTargetAssetsResponse {
 export interface RouteRequestV2 {
   from_chain: string; // source chain id
   from_token: string; // source token denom
+  amount: string; // amount to swap
   to_chain: string; // destination chain id
   to_token: string; // destination token denom
   from_address: string; // from chain user address
   to_address: string; // to chain user address
-  amount: string; // amount to swap
   slippage: number; // minimum 0, maximum 100
 }
 
-export interface FeeToken {
-  type: ChainType;
+export interface SwapFeeToken {
+  type: SwapChainType;
   chain_id: string;
   denom: string;
   symbol: string;
   name: string;
   decimals: number;
-  coingecko_id: string;
-  image_url: string;
+  coingecko_id?: string | null;
+  image_url?: string | null;
+}
+
+export interface SwapFee {
+  usd_amount: string;
+  amount: string;
+  fee_token: SwapFeeToken;
 }
 
 export enum RouteStepType {
@@ -303,22 +309,18 @@ interface RouteResponseV2Base {
   amount_out: string;
   price_impact_percent: number;
   estimated_time: number;
-  fees: {
-    usd_amount: string;
-    amount: string;
-    fee_token: FeeToken;
-  }[];
+  fees: SwapFee[];
   steps: RouteStep[];
   required_chain_ids: string[];
 }
 
 export type RouteResponseV2 =
   | (RouteResponseV2Base & {
-      provider: Provider.SKIP;
+      provider: SwapProvider.SKIP;
       skip_operations: SkipOperation[];
     })
   | (RouteResponseV2Base & {
-      provider: Provider.SQUID;
+      provider: SwapProvider.SQUID;
     });
 
 export interface TxRequestBase {
@@ -333,13 +335,13 @@ export interface TxRequestBase {
 
 export type TxRequest =
   | (TxRequestBase & {
-      provider: Provider.SKIP;
+      provider: SwapProvider.SKIP;
       amount_out: string;
       required_chain_ids: string[];
       skip_operations: SkipOperation[];
     })
   | (TxRequestBase & {
-      provider: Provider.SQUID;
+      provider: SwapProvider.SQUID;
     });
 
 export interface CosmosTxData {
@@ -389,34 +391,40 @@ export interface EVMTxData {
   gas_price?: string;
   max_fee_per_gas?: string;
   max_priority_fee_per_gas?: string;
-  approvals: {
+  approvals?: {
     token_contract: string;
     spender: string;
     amount: string;
-  }[]; // required erc20 approvals
+  }[];
 }
 
 export type SwapTransaction =
   | {
-      chain_type: ChainType.COSMOS;
+      chain_type: SwapChainType.COSMOS;
       tx_data: CosmosTxData;
     }
   | {
-      chain_type: ChainType.EVM;
+      chain_type: SwapChainType.EVM;
       tx_data: EVMTxData;
     };
 
 export interface TxResponse {
-  provider: Provider;
+  provider: SwapProvider;
   txs: SwapTransaction[];
 }
 
 // TODO: move status query types out of this file
 export interface TxStatusRequest {
-  provider: Provider;
+  provider: SwapProvider;
   from_chain: string;
-  to_chain: string;
+  to_chain?: string; // optional, used by Squid
   tx_hash: string;
+}
+
+export enum RouteStepStatus {
+  IN_PROGRESS = "in_progress",
+  SUCCESS = "success",
+  FAILED = "failed",
 }
 
 export enum TxStatus {
@@ -428,7 +436,7 @@ export enum TxStatus {
 
 export interface TxStatusStep {
   chain_id: string;
-  status: Omit<TxStatus, TxStatus.PARTIAL_SUCCESS>;
+  status: RouteStepStatus;
   tx_hash?: string;
   explorer_url?: string;
 }
@@ -440,10 +448,10 @@ export interface AssetLocation {
 }
 
 export interface TxStatusResponse {
-  provider: Provider;
+  provider: SwapProvider;
   status: TxStatus;
   steps: TxStatusStep[];
-  asset_location: AssetLocation[];
+  asset_location?: AssetLocation[] | null;
 }
 
 export interface ChainsResponseV2 {

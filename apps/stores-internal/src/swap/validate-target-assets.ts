@@ -104,8 +104,8 @@ export class ObservableQueryValidateTargetAssetsInner extends ObservableQuery<Va
 
     const validated = Schema.validate(result.data);
     if (validated.error) {
-      console.log(
-        "Failed to validate swappable response from source response",
+      console.error(
+        "Failed to validate validate target assets response",
         validated.error
       );
       throw validated.error;

@@ -91,10 +91,7 @@ export class ObservableQuerySwappableInner extends ObservableQuery<SwappableResp
 
     const validated = Schema.validate(result.data);
     if (validated.error) {
-      console.log(
-        "Failed to validate swappable response from source response",
-        validated.error
-      );
+      console.error("Failed to validate swappable response", validated.error);
       throw validated.error;
     }
 
@@ -183,7 +180,7 @@ export class ObservableQuerySwappable extends HasMapStore<ObservableQuerySwappab
           for (const tokens of chunks) {
             const k = JSON.stringify(tokens);
 
-            // Get invokes the creationg of ObservableQuerySwappableInner
+            // Get invokes the creation of ObservableQuerySwappableInner
             this.get(k);
 
             runInAction(() => {

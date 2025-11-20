@@ -10,18 +10,18 @@ import { ObservableQueryRouteV2, ObservableQueryRouteInnerV2 } from "./route";
 import { ObservableQueryValidateTargetAssets } from "./validate-target-assets";
 import { makeObservable } from "mobx";
 import { ObservableQueryTxInnerV2, ObservableQueryTxV2 } from "./txs";
-import { Provider, SkipOperation } from "./types";
+import { SwapProvider, SkipOperation } from "./types";
 
 export class ObservableQuerySwapHelperInner {
   constructor(
     protected readonly chainStore: InternalChainStore,
     protected readonly queryRoute: ObservableQueryRouteV2,
     protected readonly queryTx: ObservableQueryTxV2,
-    public readonly sourceChainId: string,
-    public readonly sourceAmount: string,
-    public readonly sourceDenom: string,
-    public readonly destChainId: string,
-    public readonly destDenom: string
+    public readonly fromChainId: string,
+    public readonly fromDenom: string,
+    public readonly fromAmount: string,
+    public readonly toChainId: string,
+    public readonly toDenom: string
   ) {}
 
   getRoute(
@@ -30,11 +30,11 @@ export class ObservableQuerySwapHelperInner {
     slippage: number
   ): ObservableQueryRouteInnerV2 {
     return this.queryRoute.getRoute(
-      this.sourceChainId,
-      this.sourceDenom,
-      this.sourceAmount,
-      this.destChainId,
-      this.destDenom,
+      this.fromChainId,
+      this.fromDenom,
+      this.fromAmount,
+      this.toChainId,
+      this.toDenom,
       fromAddress,
       toAddress,
       slippage
@@ -44,40 +44,40 @@ export class ObservableQuerySwapHelperInner {
   getTx(
     chainIdsToAddresses: Record<string, string>,
     slippage: number,
-    provider: Provider,
+    provider: SwapProvider,
     amountOut?: string,
-    required_chain_ids?: string[],
-    skip_operations?: SkipOperation[]
+    requiredChainIds?: string[],
+    skipOperations?: SkipOperation[]
   ): ObservableQueryTxInnerV2 {
-    if (provider === Provider.SKIP) {
-      if (!amountOut || !required_chain_ids || !skip_operations) {
+    if (provider === SwapProvider.SKIP) {
+      if (!amountOut || !requiredChainIds || !skipOperations) {
         throw new Error(
-          "SKIP provider requires amountOut, required_chain_ids, and skip_operations"
+          "SKIP provider requires amountOut, requiredChainIds, and skipOperations"
         );
       }
       return this.queryTx.getTx(
-        this.sourceChainId,
-        this.sourceDenom,
-        this.sourceAmount,
-        this.destChainId,
-        this.destDenom,
+        this.fromChainId,
+        this.fromDenom,
+        this.fromAmount,
+        this.toChainId,
+        this.toDenom,
         chainIdsToAddresses,
         slippage,
-        Provider.SKIP,
+        SwapProvider.SKIP,
         amountOut,
-        required_chain_ids,
-        skip_operations
+        requiredChainIds,
+        skipOperations
       );
     } else {
       return this.queryTx.getTx(
-        this.sourceChainId,
-        this.sourceDenom,
-        this.sourceAmount,
-        this.destChainId,
-        this.destDenom,
+        this.fromChainId,
+        this.fromDenom,
+        this.fromAmount,
+        this.toChainId,
+        this.toDenom,
         chainIdsToAddresses,
         slippage,
-        Provider.SQUID
+        SwapProvider.SQUID
       );
     }
   }
@@ -103,11 +103,11 @@ export class ObservableQuerySwapHelper extends HasMapStore<ObservableQuerySwapHe
         this.chainStore,
         this.queryRoute,
         this.queryTx,
-        parsed.sourceChainId,
-        parsed.sourceAmount,
-        parsed.sourceDenom,
-        parsed.destChainId,
-        parsed.destDenom
+        parsed.fromChainId,
+        parsed.fromDenom,
+        parsed.fromAmount,
+        parsed.toChainId,
+        parsed.toDenom
       );
     });
 
@@ -115,22 +115,20 @@ export class ObservableQuerySwapHelper extends HasMapStore<ObservableQuerySwapHe
   }
 
   getSwapHelper(
-    sourceChainId: string,
-    sourceAmount: string,
-    sourceDenom: string,
-    destChainId: string,
-    destDenom: string
+    fromChainId: string,
+    fromDenom: string,
+    fromAmount: string,
+    toChainId: string,
+    toDenom: string
   ): ObservableQuerySwapHelperInner {
-    return new ObservableQuerySwapHelperInner(
-      this.chainStore,
-      this.queryRoute,
-      this.queryTx,
-      sourceChainId,
-      sourceAmount,
-      sourceDenom,
-      destChainId,
-      destDenom
-    );
+    const str = JSON.stringify({
+      fromChainId,
+      fromDenom,
+      fromAmount,
+      toChainId,
+      toDenom,
+    });
+    return this.get(str);
   }
 
   isSwappableCurrency = computedFn(

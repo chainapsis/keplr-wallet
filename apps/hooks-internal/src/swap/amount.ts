@@ -21,12 +21,12 @@ import {
   RouteResponseV2,
   RouteStepType,
   SwapQueries,
-  ChainType,
+  SwapChainType,
   ObservableQuerySwapHelperInner,
   normalizeChainId,
   CosmosTxData,
   EVMTxData,
-  Provider,
+  SwapProvider,
 } from "@keplr-wallet/stores-internal";
 import {
   EthereumAccountStore,
@@ -202,7 +202,7 @@ export class SwapAmountConfig extends AmountConfig {
     ).swapPriceImpact;
   }
 
-  get provider(): Provider | undefined {
+  get provider(): SwapProvider | undefined {
     const querySwapHelper = this.getQuerySwapHelper();
     if (!querySwapHelper) {
       return undefined;
@@ -537,7 +537,7 @@ export class SwapAmountConfig extends AmountConfig {
     const firstTx = transactions[0];
 
     try {
-      if (firstTx.chain_type === ChainType.COSMOS) {
+      if (firstTx.chain_type === SwapChainType.COSMOS) {
         return this.buildCosmosTx(firstTx.tx_data);
       } else {
         return this.buildEVMTx(firstTx.tx_data);
@@ -660,7 +660,7 @@ export class SwapAmountConfig extends AmountConfig {
 
     return {
       ...tx,
-      requiredErc20Approvals: txData.approvals.map((approval) => ({
+      requiredErc20Approvals: txData.approvals?.map((approval) => ({
         amount: approval.amount,
         spender: approval.spender,
         tokenAddress: approval.token_contract,
@@ -978,8 +978,8 @@ export class SwapAmountConfig extends AmountConfig {
 
     return this.swapQueries.querySwapHelper.getSwapHelper(
       this.chainId,
-      amountIn.toCoin().amount,
       amountIn.currency.coinMinimalDenom,
+      amountIn.toCoin().amount,
       this.outChainId,
       this.outCurrency.coinMinimalDenom
     );
