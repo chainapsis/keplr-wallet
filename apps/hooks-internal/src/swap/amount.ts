@@ -601,12 +601,16 @@ export class SwapAmountConfig extends AmountConfig {
           {
             portId: msg.value.source_port,
             channelId: msg.value.source_channel,
-            counterpartyChainId: this.outChainId, // CHECK: multi-tx인 경우 이거 맞는건지 모르겠음, 굳이 체크필요?
+            counterpartyChainId: "",
           },
           this.amount[0].toDec().toString(),
           this.amount[0].currency,
           msg.value.receiver,
-          msg.value.memo
+          msg.value.memo,
+          {
+            // pretend that the counterparty chain info is already validated on the server
+            skipCounterpartyChainInfoValidation: true,
+          }
         );
         tx.ui.overrideType("ibc-swap");
         return tx;
@@ -631,7 +635,8 @@ export class SwapAmountConfig extends AmountConfig {
         );
       }
       case "cctp/DepositForBurnWithCaller": {
-        // there should be two messages for DepositForBurnWithCaller
+        // DepositForBurnWithCaller and MsgSend should be together on skip
+        // as squid don't charge cctp fee, this message won't appear frequently...
         if (txData.msgs.length !== 2) {
           throw new Error(
             "Invalid number of messages for DepositForBurnWithCaller"
