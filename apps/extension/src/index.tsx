@@ -90,6 +90,7 @@ import { IBCSwapPage } from "./pages/ibc-swap";
 import {
   BottomTabHistoryIcon,
   BottomTabHomeIcon,
+  BottomTabSettingsIcon,
   BottomTabsRouteProvider,
   BottomTabStakeIcon,
   BottomTabSwapIcon,
@@ -362,6 +363,14 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               id: "bottom-tabs.home",
             }),
           },
+
+          {
+            pathname: "/stake",
+            icon: <BottomTabStakeIcon width="1.5rem" height="1.5rem" />,
+            text: intl.formatMessage({
+              id: "bottom-tabs.stake",
+            }),
+          },
           {
             pathname: "/ibc-swap",
             icon: <BottomTabSwapIcon width="1.5rem" height="1.5rem" />,
@@ -385,25 +394,17 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
             })(),
           },
           {
-            pathname: "/stake",
-            icon: (
-              <div style={{ padding: "0.125rem" }}>
-                <BottomTabStakeIcon width="1.25rem" height="1.25rem" />
-              </div>
-            ),
+            pathname: "/history",
+            icon: <BottomTabHistoryIcon width="1.5rem" height="1.5rem" />,
             text: intl.formatMessage({
-              id: "bottom-tabs.stake",
+              id: "bottom-tabs.history",
             }),
           },
           {
-            pathname: "/history",
-            icon: (
-              <div style={{ padding: "0.125rem" }}>
-                <BottomTabHistoryIcon width="1.25rem" height="1.25rem" />
-              </div>
-            ),
+            pathname: "/setting",
+            icon: <BottomTabSettingsIcon width="1.5rem" height="1.5rem" />,
             text: intl.formatMessage({
-              id: "bottom-tabs.history",
+              id: "bottom-tabs.settings",
             }),
           },
         ]}
