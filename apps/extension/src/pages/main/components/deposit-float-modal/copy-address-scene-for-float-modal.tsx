@@ -57,7 +57,7 @@ export const CopyAddressSceneForFloatModal: FunctionComponent<{
           : ColorPalette["gray-650"]
       }
     >
-      <Box paddingX="0.75rem">
+      <Box paddingX="0.875rem">
         <SearchTextInput
           ref={searchRef}
           value={search}
@@ -72,7 +72,19 @@ export const CopyAddressSceneForFloatModal: FunctionComponent<{
                   id: "page.main.components.deposit-modal.search-placeholder",
                 })
           }
+          placeholderColor={
+            theme.mode === "dark" ? ColorPalette["gray-300"] : undefined
+          }
+          iconColor={
+            theme.mode === "dark" ? ColorPalette["gray-300"] : undefined
+          }
           suffix={showEnterTag ? <EnterTag /> : undefined}
+          textInputContainerStyle={{
+            backgroundColor: "transparent",
+          }}
+          inputStyle={{
+            backgroundColor: "transparent",
+          }}
         />
       </Box>
 

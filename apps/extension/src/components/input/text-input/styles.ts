@@ -74,7 +74,7 @@ export const Styles = {
 
         return props.theme.mode === "light"
           ? ColorPalette["gray-100"]
-          : ColorPalette["gray-400"];
+          : ColorPalette["gray-500"];
       }};
       border-radius: ${(props) => props.borderRadius || "0.5rem"};
 
@@ -135,10 +135,14 @@ export const Styles = {
         : ColorPalette["gray-50"]};
 
     ::placeholder {
-      color: ${(props) =>
-        props.theme.mode === "light"
-          ? ColorPalette["gray-200"]
-          : ColorPalette["gray-400"]};
+      color: ${(props) => {
+        if (props.placeholderColor) {
+          return props.placeholderColor;
+        }
+        return props.theme.mode === "light"
+          ? ColorPalette["gray-300"]
+          : ColorPalette["gray-400"];
+      }};
     }
 
     ${({ disabled }) => {
@@ -177,7 +181,7 @@ export const Styles = {
     top: 50%;
     transform: translateY(-50%);
     margin-left: 0.75rem;
-    left: ${({ textWidth }) => `${textWidth}px` ?? 0};
+    left: ${({ textWidth }) => (textWidth ? `${textWidth}px` : 0)};
 
     font-size: 0.875rem;
     font-weight: 400;
@@ -192,13 +196,21 @@ export const Styles = {
     ${({ error, paragraph }) =>
       getSubTextStyleForErrorOrParagraph(error, paragraph)}
   `,
-  Icon: styled.div`
+  Icon: styled.div<Pick<TextInputProps, "iconColor">>`
     display: flex;
     flex-direction: column;
     justify-content: center;
 
     height: 1px;
 
-    color: ${ColorPalette["gray-400"]};
+    color: ${({ theme, iconColor }) => {
+      if (iconColor) {
+        return iconColor;
+      }
+
+      return theme.mode === "light"
+        ? ColorPalette["gray-300"]
+        : ColorPalette["gray-400"];
+    }};
   `,
 };

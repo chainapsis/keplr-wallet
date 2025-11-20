@@ -14,7 +14,7 @@ export const ContextMenuStyles = {
         ? `0 1px 3px 0 rgba(43, 39, 55, 0.10), 0 5px 30px 0 rgba(43, 39, 55, 0.05), 0 10px 50px 0 rgba(43, 39, 55, 0.05);`
         : undefined};
 
-    border-radius: 0.5rem;
+    border-radius: 0.75rem;
     overflow: hidden;
   `,
   Item: styled.div`

@@ -41,7 +41,6 @@ const Styles = {
     z-index: 9999;
     min-width: 15.625rem;
     overflow: visible;
-    border-radius: 0.5rem;
     overflow: hidden;
   `,
   MenuBackdrop: styled.div`
