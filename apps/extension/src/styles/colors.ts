@@ -8,7 +8,7 @@ export const ColorPalette = {
   "blue-500": "#009FDD",
   "blue-600": "#0093CC",
   "blue-700": "#00719C",
-  "blue-800": "#0C1E34",
+  "blue-800": "#21262D",
 
   "platinum-10": "#EFF3F8",
   "platinum-50": "#E9EEF5",

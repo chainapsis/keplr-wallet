@@ -13,8 +13,10 @@ export const Button: FunctionComponent<ButtonProps> = ({
   text,
   right,
   isLoading,
+  suppressDefaultLoadingIndicator,
   textOverrideIcon,
   type,
+  buttonStyle,
   ...otherProps
 }) => {
   const theme = useTheme();
@@ -26,6 +28,7 @@ export const Button: FunctionComponent<ButtonProps> = ({
     >
       <Styles.Button
         isLoading={isLoading}
+        style={buttonStyle}
         type={type || "button"}
         {...otherProps}
         onClick={(e) => {
@@ -40,7 +43,7 @@ export const Button: FunctionComponent<ButtonProps> = ({
       >
         {left ? <Styles.Left>{left}</Styles.Left> : null}
 
-        {isLoading ? (
+        {isLoading && !suppressDefaultLoadingIndicator ? (
           <Styles.Loading buttonColor={otherProps.color} theme={theme}>
             <LoadingIcon width="1rem" height="1rem" />
           </Styles.Loading>
