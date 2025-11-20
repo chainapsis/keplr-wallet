@@ -28,6 +28,7 @@ export const useSwapConfig = (
   outChainId: string,
   outCurrency: AppCurrency,
   disableSubFeeFromFaction: boolean,
+  swapFeeBps: number,
   allowSwaps?: boolean
 ) => {
   const senderConfig = useSenderConfig(chainGetter, chainId, sender);
@@ -42,6 +43,7 @@ export const useSwapConfig = (
     outChainId,
     outCurrency,
     disableSubFeeFromFaction,
+    swapFeeBps,
     allowSwaps
   );
 

@@ -276,8 +276,12 @@ const RouteResponseV2Schema = Joi.object<RouteResponseV2>({
   fees: Joi.array().items(FeeSchema).required(),
   steps: Joi.array().items(RouteStepSchema).required(),
   required_chain_ids: Joi.array().items(Joi.string()).required(),
-  skip_operations: SkipOperationsSchema.required(),
-  price_impact_percent: Joi.string(),
+  skip_operations: Joi.when("provider", {
+    is: SwapProvider.SKIP,
+    then: SkipOperationsSchema.required(),
+    otherwise: SkipOperationsSchema.optional(),
+  }),
+  price_impact_percent: Joi.number().required(),
 }).unknown(true);
 
 export class ObservableQueryRouteInnerV2 extends ObservableQuery<RouteResponseV2> {
@@ -341,33 +345,39 @@ export class ObservableQueryRouteInnerV2 extends ObservableQuery<RouteResponseV2
 
     const fees = this.response.data.fees;
 
-    // 동일한 denom의 fee가 있으면 합치기
-    // CHECK: usd amount랑 이미지랑 다 주는데 그냥 원본값 반환하기 or 가공해서 반환하기
+    // merge same denom fees
     const feeMap = new Map<string, CoinPretty>();
     for (const fee of fees) {
-      const coinPretty = new CoinPretty(
-        this.chainStore.hasChain(fee.fee_token.chain_id)
-          ? this.chainStore
-              .getChain(fee.fee_token.chain_id)
-              .forceFindCurrency(fee.fee_token.denom)
-          : this.chainStore
-              .getChain(`eip155:${fee.fee_token.chain_id}`)
-              .forceFindCurrency(
-                (() => {
-                  if (fee.fee_token.denom.startsWith("0x")) {
-                    return `erc20:${fee.fee_token.denom.toLowerCase()}`;
-                  }
-                  return fee.fee_token.denom;
-                })()
-              ),
-        fee.amount
-      );
+      const chainId =
+        fee.fee_token.type === SwapChainType.EVM
+          ? `eip155:${fee.fee_token.chain_id}`
+          : fee.fee_token.chain_id;
+      const denom = (() => {
+        if (fee.fee_token.type === SwapChainType.EVM) {
+          if (
+            fee.fee_token.denom === "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+          ) {
+            return this.chainStore.getChain(chainId).currencies[0]
+              .coinMinimalDenom;
+          }
+          return `erc20:${fee.fee_token.denom}`;
+        } else {
+          return fee.fee_token.denom;
+        }
+      })();
 
-      const denom = fee.fee_token.denom;
-      if (feeMap.has(denom)) {
-        feeMap.get(denom)!.add(coinPretty);
-      } else {
-        feeMap.set(denom, coinPretty);
+      const coinPretty = this.chainStore.hasChain(chainId)
+        ? new CoinPretty(
+            this.chainStore.getChain(chainId).forceFindCurrency(denom),
+            fee.amount
+          )
+        : undefined;
+      if (coinPretty) {
+        if (feeMap.has(denom)) {
+          feeMap.get(denom)!.add(coinPretty);
+        } else {
+          feeMap.set(denom, coinPretty);
+        }
       }
     }
 

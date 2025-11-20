@@ -42,6 +42,8 @@ export class SwapAmountConfig extends AmountConfig {
   @observable.ref
   protected _outCurrency: AppCurrency;
   @observable
+  protected _swapFeeBps: number;
+  @observable
   protected _allowSwaps?: boolean;
 
   protected _oldValue: string;
@@ -59,6 +61,7 @@ export class SwapAmountConfig extends AmountConfig {
     initialOutChainId: string,
     initialOutCurrency: AppCurrency,
     disableSubFeeFromFaction: boolean,
+    swapFeeBps: number,
     allowSwaps?: boolean
   ) {
     super(
@@ -71,6 +74,7 @@ export class SwapAmountConfig extends AmountConfig {
 
     this._outChainId = initialOutChainId;
     this._outCurrency = initialOutCurrency;
+    this._swapFeeBps = swapFeeBps;
     this._allowSwaps = allowSwaps;
     this._oldValue = this._value;
     makeObservable(this);
@@ -160,6 +164,10 @@ export class SwapAmountConfig extends AmountConfig {
     return this._outCurrency;
   }
 
+  get swapFeeBps(): number {
+    return this._swapFeeBps;
+  }
+
   get allowSwaps(): boolean | undefined {
     return this._allowSwaps;
   }
@@ -191,6 +199,11 @@ export class SwapAmountConfig extends AmountConfig {
   @action
   setOutCurrency(currency: AppCurrency): void {
     this._outCurrency = currency;
+  }
+
+  @action
+  setSwapFeeBps(swapFeeBps: number): void {
+    this._swapFeeBps = swapFeeBps;
   }
 
   get otherFees(): CoinPretty[] {
@@ -455,7 +468,9 @@ export class SwapAmountConfig extends AmountConfig {
     const evmLikeChainId = Number(normalizeChainId(chainId));
     const isEVMChainId = !Number.isNaN(evmLikeChainId) && evmLikeChainId !== 0;
 
-    const formattedChainId = isEVMChainId ? `eip155:${chainId}` : chainId;
+    const formattedChainId = isEVMChainId
+      ? `eip155:${evmLikeChainId}`
+      : chainId;
 
     const account = this.accountStore.getAccount(formattedChainId);
     if (account.walletStatus === WalletStatus.NotInit) {
@@ -474,7 +489,9 @@ export class SwapAmountConfig extends AmountConfig {
     const evmLikeChainId = Number(normalizeChainId(chainId));
     const isEVMChainId = !Number.isNaN(evmLikeChainId) && evmLikeChainId !== 0;
 
-    const formattedChainId = isEVMChainId ? `eip155:${chainId}` : chainId;
+    const formattedChainId = isEVMChainId
+      ? `eip155:${evmLikeChainId}`
+      : chainId;
 
     const account = this.accountStore.getAccount(formattedChainId);
     if (account.walletStatus === WalletStatus.NotInit) {
@@ -907,6 +924,7 @@ export const useSwapAmountConfig = (
   outChainId: string,
   outCurrency: AppCurrency,
   disableSubFeeFromFaction: boolean,
+  swapFeeBps: number,
   allowSwaps?: boolean
 ) => {
   const [txConfig] = useState(
@@ -922,6 +940,7 @@ export const useSwapAmountConfig = (
         outChainId,
         outCurrency,
         disableSubFeeFromFaction,
+        swapFeeBps,
         allowSwaps
       )
   );
