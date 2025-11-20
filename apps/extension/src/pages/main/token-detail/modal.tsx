@@ -300,9 +300,9 @@ export const TokenDetailModal: FunctionComponent<{
           }&outCoinMinimalDenom=uusdc&entryPoint=token_detail`
         );
       },
-      disabled: !swapQueriesStore.querySwappable.isSwappableToken(
+      disabled: !swapQueriesStore.querySwapHelper.isSwappableCurrency(
         chainId,
-        currency.coinMinimalDenom
+        currency
       ),
     },
     {

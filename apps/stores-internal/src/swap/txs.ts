@@ -28,8 +28,86 @@ const CosmosTxDataSchema = Joi.object({
           .valid(
             "cosmos-sdk/MsgTransfer",
             "wasm/MsgExecuteContract",
-            "cctp/DepositForBurn"
+            "cctp/DepositForBurn",
+            "cctp/DepositForBurnWithCaller",
+            "cosmos-sdk/MsgSend"
           )
+          .required(),
+        value: Joi.alternatives()
+          .conditional("type", {
+            switch: [
+              {
+                is: "cosmos-sdk/MsgTransfer",
+                then: Joi.object({
+                  source_port: Joi.string().required(),
+                  source_channel: Joi.string().required(),
+                  token: Joi.object({
+                    denom: Joi.string().required(),
+                    amount: Joi.string().required(),
+                  })
+                    .required()
+                    .unknown(true),
+                  sender: Joi.string().required(),
+                  receiver: Joi.string().required(),
+                  timeout_timestamp: Joi.string().required(),
+                  memo: Joi.string().optional(),
+                }).unknown(true),
+              },
+              {
+                is: "wasm/MsgExecuteContract",
+                then: Joi.object({
+                  sender: Joi.string().required(),
+                  contract: Joi.string().required(),
+                  msg: Joi.object().required(),
+                  funds: Joi.array()
+                    .items(
+                      Joi.object({
+                        denom: Joi.string().required(),
+                        amount: Joi.string().required(),
+                      }).unknown(true)
+                    )
+                    .required(),
+                }).unknown(true),
+              },
+              {
+                is: "cctp/DepositForBurn",
+                then: Joi.object({
+                  from: Joi.string().required(),
+                  amount: Joi.string().required(),
+                  destination_domain: Joi.number().required(),
+                  mint_recipient: Joi.string().required(),
+                  burn_token: Joi.string().required(),
+                }).unknown(true),
+              },
+              {
+                is: "cctp/DepositForBurnWithCaller",
+                then: Joi.object({
+                  from: Joi.string().required(),
+                  amount: Joi.string().required(),
+                  destination_domain: Joi.number().required(),
+                  mint_recipient: Joi.string().required(),
+                  burn_token: Joi.string().required(),
+                  destination_caller: Joi.string().required(),
+                }).unknown(true),
+              },
+              {
+                is: "cosmos-sdk/MsgSend",
+                then: Joi.object({
+                  from_address: Joi.string().required(),
+                  to_address: Joi.string().required(),
+                  amount: Joi.array()
+                    .items(
+                      Joi.object({
+                        denom: Joi.string().required(),
+                        amount: Joi.string().required(),
+                      }).unknown(true)
+                    )
+                    .required(),
+                }).unknown(true),
+              },
+            ],
+            otherwise: Joi.object().unknown(true),
+          })
           .required(),
       }).unknown(true)
     )

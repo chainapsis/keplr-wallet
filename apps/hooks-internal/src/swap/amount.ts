@@ -599,14 +599,14 @@ export class SwapAmountConfig extends AmountConfig {
       case "cosmos-sdk/MsgTransfer": {
         const tx = sourceAccount.cosmos.makeIBCTransferTx(
           {
-            portId: msg.source_port,
-            channelId: msg.source_channel,
+            portId: msg.value.source_port,
+            channelId: msg.value.source_channel,
             counterpartyChainId: this.outChainId, // CHECK: multi-tx인 경우 이거 맞는건지 모르겠음, 굳이 체크필요?
           },
           this.amount[0].toDec().toString(),
           this.amount[0].currency,
-          msg.receiver,
-          msg.memo
+          msg.value.receiver,
+          msg.value.memo
         );
         tx.ui.overrideType("ibc-swap");
         return tx;
@@ -614,32 +614,50 @@ export class SwapAmountConfig extends AmountConfig {
       case "wasm/MsgExecuteContract": {
         const tx = sourceAccount.cosmwasm.makeExecuteContractTx(
           "unknown",
-          msg.contract,
-          msg.msg,
-          msg.funds
+          msg.value.contract,
+          msg.value.msg,
+          msg.value.funds
         );
         tx.ui.overrideType("ibc-swap");
         return tx;
       }
       case "cctp/DepositForBurn": {
-        // CHECK: squid의 경우 cctp 메시지를 send와 묶어서 처리하지 않고,
-        // destination caller를 빈 칸으로 두고
-        // 메모에 squidRequestId를 넣어서 스퀴드 쪽에서 이걸 보고 처리하는 것으로 보임
-        // skip은 DepositForBurnWithCaller를 사용하고 있음
-        // squid는 DepositForBurn를 사용하고 있음
+        return sourceAccount.cosmos.makeCCTPDepositForBurnTx(
+          msg.value.from,
+          msg.value.amount,
+          msg.value.destination_domain,
+          msg.value.mint_recipient,
+          msg.value.burn_token
+        );
+      }
+      case "cctp/DepositForBurnWithCaller": {
+        // there should be two messages for DepositForBurnWithCaller
+        if (txData.msgs.length !== 2) {
+          throw new Error(
+            "Invalid number of messages for DepositForBurnWithCaller"
+          );
+        }
+
+        const sendMsg = txData.msgs[1];
+        if (sendMsg.type !== "cosmos-sdk/MsgSend") {
+          throw new Error(
+            "Second message should be MsgSend for DepositForBurnWithCaller"
+          );
+        }
+
         const cctpMsgValue = {
-          from: msg.from,
-          amount: msg.amount,
-          destination_domain: msg.destination_domain,
-          mint_recipient: msg.mint_recipient,
-          burn_token: msg.burn_token,
-          destination_caller: "", // TODO: ???
+          from: msg.value.from,
+          amount: msg.value.amount,
+          destination_domain: msg.value.destination_domain,
+          mint_recipient: msg.value.mint_recipient,
+          burn_token: msg.value.burn_token,
+          destination_caller: msg.value.destination_caller,
         };
 
         const sendMsgValue = {
-          from_address: "", // TODO: ???
-          to_address: "", // TODO: ???
-          amount: "", // TODO: ???
+          from_address: sendMsg.value.from_address,
+          to_address: sendMsg.value.to_address,
+          amount: sendMsg.value.amount,
         };
 
         return sourceAccount.cosmos.makeCCTPDepositForBurnWithCallerTx(

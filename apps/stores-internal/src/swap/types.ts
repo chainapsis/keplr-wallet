@@ -350,34 +350,62 @@ export interface CosmosTxData {
   msgs: (
     | {
         type: "cosmos-sdk/MsgTransfer";
-        source_port: string;
-        source_channel: string;
-        token: {
-          denom: string;
-          amount: string;
-        }[];
-        sender: string;
-        receiver: string;
-        timeout_timestamp: string;
-        memo?: string;
+        value: {
+          source_port: string;
+          source_channel: string;
+          token: {
+            denom: string;
+            amount: string;
+          };
+          sender: string;
+          receiver: string;
+          timeout_timestamp: string;
+          memo?: string;
+        };
       }
     | {
         type: "wasm/MsgExecuteContract";
-        sender: string;
-        contract: string;
-        msg: object;
-        funds: {
-          denom: string;
-          amount: string;
-        }[];
+        value: {
+          sender: string;
+          contract: string;
+          msg: object;
+          funds: {
+            denom: string;
+            amount: string;
+          }[];
+        };
       }
     | {
         type: "cctp/DepositForBurn";
-        from: string;
-        amount: string;
-        destination_domain: number;
-        mint_recipient: string;
-        burn_token: string;
+        value: {
+          from: string;
+          amount: string;
+          destination_domain: number;
+          mint_recipient: string;
+          burn_token: string;
+        };
+      }
+    | {
+        type: "cctp/DepositForBurnWithCaller";
+        value: {
+          from: string;
+          amount: string;
+          destination_domain: number;
+          mint_recipient: string;
+          burn_token: string;
+          destination_caller: string;
+        };
+      }
+    | {
+        type: "cosmos-sdk/MsgSend";
+        value: {
+          from_address: string;
+          to_address: string;
+          amount: Array<{
+            denom: string;
+            amount: string;
+          }>;
+        };
       }
   )[];
 }
