@@ -151,7 +151,7 @@ const AccountItem = observer(
 
             {icnsPrimaryName && (
               <React.Fragment>
-                <Gutter size="0.25rem" />
+                <Gutter size="0.375rem" />
                 <Tooltip
                   content={
                     <Caption2 color={ColorPalette["white"]}>
