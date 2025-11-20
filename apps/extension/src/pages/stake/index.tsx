@@ -190,7 +190,9 @@ export const StakePage: FunctionComponent = observer(() => {
             />
             <Gutter size="0.125rem" />
             <Subtitle3 color={ColorPalette["gray-300"]}>
-              View Total Balance
+              {intl.formatMessage({
+                id: "page.stake.back-to-home-button",
+              })}
             </Subtitle3>
           </XAxis>
         </BackToHomeButton>

@@ -592,6 +592,7 @@
   "page.stake.components.rewards-card.claim-button": "领取",
   "page.stake.components.rewards-card.show-all-button": "全部展开",
   "page.stake.components.rewards-card.hide-all-button": "全部收起",
+  "page.stake.back-to-home-button": "查看总资产金额",
 
   "page.main.components.ibc-history-view.item.pending": "IBC交易失败。",
   "page.main.components.ibc-history-view.item.succeed": "IBC交易成功。",
