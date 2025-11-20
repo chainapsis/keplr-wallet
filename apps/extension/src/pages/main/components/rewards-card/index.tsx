@@ -74,7 +74,14 @@ export const RewardsCard: FunctionComponent<{
       cursor="pointer"
       onClick={navigateToStake}
     >
-      <div style={{ position: "absolute", top: "1rem", right: "0.75rem" }}>
+      <div
+        style={{
+          position: "absolute",
+          top: "1rem",
+          right: "0.75rem",
+          opacity: isCardHover && !isClaimAllHover ? COMMON_HOVER_OPACITY : 1,
+        }}
+      >
         <CarouelArrowRightIcon
           color={ColorPalette["gray-300"]}
           width="1rem"
@@ -82,7 +89,7 @@ export const RewardsCard: FunctionComponent<{
         />
       </div>
 
-      <Box opacity={isCardHover && !isClaimAllHover ? 0.7 : 1}>
+      <Box opacity={isCardHover && !isClaimAllHover ? COMMON_HOVER_OPACITY : 1}>
         <Skeleton isNotReady={isNotReady}>
           <Body3 color={ColorPalette["gray-200"]}>
             {intl.formatMessage({
