@@ -101,16 +101,7 @@ export class SwapAmountConfig extends AmountConfig {
     if (this.fraction > 0) {
       let result = this.maxAmount;
 
-      // CHECK: 이거 동기로 초기화해도 되는지
-      const fromAddress = this.getAddressSync(this.chainId);
-      const toAddress = this.getAddressSync(this.outChainId);
-      if (!fromAddress || !toAddress) {
-        return this._oldValue;
-      }
-
       const queryRoute = this.getQuerySwapHelper(result)?.getRoute(
-        fromAddress,
-        toAddress,
         SwapAmountConfig.DefaultSlippage
       );
       if (queryRoute?.response != null) {
@@ -158,17 +149,7 @@ export class SwapAmountConfig extends AmountConfig {
       return new CoinPretty(this.outCurrency, "0");
     }
 
-    const fromAddress = this.getAddressSync(this.chainId);
-    const toAddress = this.getAddressSync(this.outChainId);
-    if (!fromAddress || !toAddress) {
-      return new CoinPretty(this.outCurrency, "0");
-    }
-
-    return querySwapHelper.getRoute(
-      fromAddress,
-      toAddress,
-      SwapAmountConfig.DefaultSlippage
-    ).outAmount;
+    return querySwapHelper.getRoute(SwapAmountConfig.DefaultSlippage).outAmount;
   }
 
   get outChainId(): string {
@@ -189,17 +170,8 @@ export class SwapAmountConfig extends AmountConfig {
       return undefined;
     }
 
-    const fromAddress = this.getAddressSync(this.chainId);
-    const toAddress = this.getAddressSync(this.outChainId);
-    if (!fromAddress || !toAddress) {
-      return undefined;
-    }
-
-    return querySwapHelper.getRoute(
-      fromAddress,
-      toAddress,
-      SwapAmountConfig.DefaultSlippage
-    ).swapPriceImpact;
+    return querySwapHelper.getRoute(SwapAmountConfig.DefaultSlippage)
+      .swapPriceImpact;
   }
 
   get provider(): SwapProvider | undefined {
@@ -208,17 +180,7 @@ export class SwapAmountConfig extends AmountConfig {
       return undefined;
     }
 
-    const fromAddress = this.getAddressSync(this.chainId);
-    const toAddress = this.getAddressSync(this.outChainId);
-    if (!fromAddress || !toAddress) {
-      return undefined;
-    }
-
-    return querySwapHelper.getRoute(
-      fromAddress,
-      toAddress,
-      SwapAmountConfig.DefaultSlippage
-    ).provider;
+    return querySwapHelper.getRoute(SwapAmountConfig.DefaultSlippage).provider;
   }
 
   @action
@@ -237,53 +199,25 @@ export class SwapAmountConfig extends AmountConfig {
       return [new CoinPretty(this.outCurrency, "0")];
     }
 
-    const fromAddress = this.getAddressSync(this.chainId);
-    const toAddress = this.getAddressSync(this.outChainId);
-    if (!fromAddress || !toAddress) {
-      return [new CoinPretty(this.outCurrency, "0")];
-    }
-
-    // TODO: route query와 txs query 분리
-    return querySwapHelper.getRoute(
-      fromAddress,
-      toAddress,
-      SwapAmountConfig.DefaultSlippage
-    ).bridgeFees;
+    return querySwapHelper.getRoute(SwapAmountConfig.DefaultSlippage)
+      .bridgeFees;
   }
 
   async fetch(): Promise<void> {
     const querySwapHelper = this.getQuerySwapHelper();
     if (querySwapHelper) {
-      const fromAddress = await this.getAddressAsync(this.chainId);
-      const toAddress = await this.getAddressAsync(this.outChainId);
-      if (!fromAddress || !toAddress) {
-        return;
-      }
-      await querySwapHelper
-        .getRoute(fromAddress, toAddress, SwapAmountConfig.DefaultSlippage)
-        .fetch();
+      await querySwapHelper.getRoute(SwapAmountConfig.DefaultSlippage).fetch();
     }
   }
 
   get isFetchingInAmount(): boolean {
     if (this.fraction === 1) {
-      const fromAddress = this.getAddressSync(this.chainId);
-      const toAddress = this.getAddressSync(this.outChainId);
-      if (!fromAddress || !toAddress) {
-        return false;
-      }
-
       return (
         this.getQuerySwapHelper(this.maxAmount)?.getRoute(
-          fromAddress,
-          toAddress,
           SwapAmountConfig.DefaultSlippage
         ).isFetching ??
-        this.getQuerySwapHelper()?.getRoute(
-          fromAddress,
-          toAddress,
-          SwapAmountConfig.DefaultSlippage
-        ).isFetching ??
+        this.getQuerySwapHelper()?.getRoute(SwapAmountConfig.DefaultSlippage)
+          .isFetching ??
         false
       );
     }
@@ -292,17 +226,9 @@ export class SwapAmountConfig extends AmountConfig {
   }
 
   get isFetchingOutAmount(): boolean {
-    const fromAddress = this.getAddressSync(this.chainId);
-    const toAddress = this.getAddressSync(this.outChainId);
-    if (!fromAddress || !toAddress) {
-      return false;
-    }
     return (
-      this.getQuerySwapHelper()?.getRoute(
-        fromAddress,
-        toAddress,
-        SwapAmountConfig.DefaultSlippage
-      ).isFetching ?? false
+      this.getQuerySwapHelper()?.getRoute(SwapAmountConfig.DefaultSlippage)
+        .isFetching ?? false
     );
   }
 
@@ -312,15 +238,7 @@ export class SwapAmountConfig extends AmountConfig {
       return "not-ready";
     }
 
-    const fromAddress = this.getAddressSync(this.chainId);
-    const toAddress = this.getAddressSync(this.outChainId);
-    if (!fromAddress || !toAddress) {
-      return "not-ready";
-    }
-
     const res = querySwapHelper.getRoute(
-      fromAddress,
-      toAddress,
       SwapAmountConfig.DefaultSlippage
     ).response;
     if (!res) {
@@ -357,11 +275,7 @@ export class SwapAmountConfig extends AmountConfig {
       throw new Error("Address is not set");
     }
 
-    const routeQuery = querySwapHelper.getRoute(
-      fromAddress,
-      toAddress,
-      slippageTolerancePercent
-    );
+    const routeQuery = querySwapHelper.getRoute(slippageTolerancePercent);
 
     await routeQuery.waitResponse();
 
@@ -384,7 +298,7 @@ export class SwapAmountConfig extends AmountConfig {
     const chainIdsToAddresses: Record<string, string> = {};
 
     for (const chainId of requiredChainIds) {
-      const address = this.getAddressSync(chainId);
+      const address = await this.getAddressAsync(chainId);
       if (!address) {
         throw new Error("Address is not set");
       }
@@ -397,7 +311,6 @@ export class SwapAmountConfig extends AmountConfig {
         customRecipient.recipient;
     }
 
-    // TODO: query txs here
     const txsQuery = querySwapHelper.getTx(
       chainIdsToAddresses,
       slippageTolerancePercent,
@@ -478,17 +391,7 @@ export class SwapAmountConfig extends AmountConfig {
       return;
     }
 
-    const fromAddress = this.getAddressSync(this.chainId);
-    const toAddress = this.getAddressSync(this.outChainId);
-    if (!fromAddress || !toAddress) {
-      return;
-    }
-
-    const routeQuery = querySwapHelper.getRoute(
-      fromAddress,
-      toAddress,
-      slippageTolerancePercent
-    );
+    const routeQuery = querySwapHelper.getRoute(slippageTolerancePercent);
 
     const routeResponse = routeQuery.response;
     if (!routeResponse) {
@@ -719,19 +622,7 @@ export class SwapAmountConfig extends AmountConfig {
         };
       }
 
-      const fromAddress = this.getAddressSync(this.chainId);
-      const toAddress = this.getAddressSync(this.outChainId);
-      if (!fromAddress || !toAddress) {
-        return {
-          ...prev,
-          error: new Error("Address is not set"),
-        };
-      }
-
-      // TODO: route와 txs 쿼리 분리
       const routeQuery = querySwapHelper.getRoute(
-        fromAddress,
-        toAddress,
         SwapAmountConfig.DefaultSlippage
       );
       if (routeQuery.isFetching) {
@@ -807,18 +698,7 @@ export class SwapAmountConfig extends AmountConfig {
       };
     }
 
-    const fromAddress = this.getAddressSync(this.chainId);
-    const toAddress = this.getAddressSync(this.outChainId);
-    if (!fromAddress || !toAddress) {
-      return {
-        ...prev,
-        error: new Error("Address is not set"),
-      };
-    }
-
     const routeQuery = querySwapHelper.getRoute(
-      fromAddress,
-      toAddress,
       SwapAmountConfig.DefaultSlippage
     );
     if (routeQuery.isFetching) {
@@ -998,13 +878,20 @@ export class SwapAmountConfig extends AmountConfig {
     }
 
     const amountIn = amount ?? this.amount[0];
+    const fromAddress = this.getAddressSync(this.chainId);
+    const toAddress = this.getAddressSync(this.outChainId);
+    if (!fromAddress || !toAddress) {
+      return;
+    }
 
     return this.swapQueries.querySwapHelper.getSwapHelper(
       this.chainId,
       amountIn.currency.coinMinimalDenom,
       amountIn.toCoin().amount,
       this.outChainId,
-      this.outCurrency.coinMinimalDenom
+      this.outCurrency.coinMinimalDenom,
+      fromAddress,
+      toAddress
     );
   }
 }

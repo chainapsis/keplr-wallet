@@ -21,22 +21,20 @@ export class ObservableQuerySwapHelperInner {
     public readonly fromDenom: string,
     public readonly fromAmount: string,
     public readonly toChainId: string,
-    public readonly toDenom: string
+    public readonly toDenom: string,
+    public readonly fromAddress: string,
+    public readonly toAddress: string
   ) {}
 
-  getRoute(
-    fromAddress: string,
-    toAddress: string,
-    slippage: number
-  ): ObservableQueryRouteInnerV2 {
+  getRoute(slippage: number): ObservableQueryRouteInnerV2 {
     return this.queryRoute.getRoute(
       this.fromChainId,
       this.fromDenom,
       this.fromAmount,
       this.toChainId,
       this.toDenom,
-      fromAddress,
-      toAddress,
+      this.fromAddress,
+      this.toAddress,
       slippage
     );
   }
@@ -107,7 +105,9 @@ export class ObservableQuerySwapHelper extends HasMapStore<ObservableQuerySwapHe
         parsed.fromDenom,
         parsed.fromAmount,
         parsed.toChainId,
-        parsed.toDenom
+        parsed.toDenom,
+        parsed.fromAddress,
+        parsed.toAddress
       );
     });
 
@@ -119,7 +119,9 @@ export class ObservableQuerySwapHelper extends HasMapStore<ObservableQuerySwapHe
     fromDenom: string,
     fromAmount: string,
     toChainId: string,
-    toDenom: string
+    toDenom: string,
+    fromAddress: string,
+    toAddress: string
   ): ObservableQuerySwapHelperInner {
     const str = JSON.stringify({
       fromChainId,
@@ -127,6 +129,8 @@ export class ObservableQuerySwapHelper extends HasMapStore<ObservableQuerySwapHe
       fromAmount,
       toChainId,
       toDenom,
+      fromAddress,
+      toAddress,
     });
     return this.get(str);
   }
