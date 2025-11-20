@@ -229,6 +229,15 @@ const ClaimAllButton: FunctionComponent<ClaimAllButtonProps> = ({
   setIsHover,
 }) => {
   const [isPressed, setIsPressed] = React.useState(false);
+  const [labelWidth, setLabelWidth] = React.useState<number>();
+  const claimTextRef = React.useRef<HTMLSpanElement | null>(null);
+  const approveTextRef = React.useRef<HTMLSpanElement | null>(null);
+  const claimLabel = intl.formatMessage({
+    id: "page.main.components.rewards-card.claim-all-button",
+  });
+  const approveLabel = intl.formatMessage({
+    id: "button.approve",
+  });
 
   const shouldDimClaimAllButton =
     !claimAllDisabled && !claimAllIsLoading && isPressed;
@@ -252,6 +261,21 @@ const ClaimAllButton: FunctionComponent<ClaimAllButtonProps> = ({
 
     onClaimAll();
   };
+
+  const updateLabelWidth = React.useCallback(() => {
+    if (claimAllIsLoading) {
+      setLabelWidth(undefined);
+      return;
+    }
+    const target = isHover ? approveTextRef.current : claimTextRef.current;
+    if (target) {
+      setLabelWidth(target.offsetWidth);
+    }
+  }, [isHover, claimAllIsLoading]);
+
+  React.useLayoutEffect(() => {
+    updateLabelWidth();
+  }, [updateLabelWidth, claimLabel, approveLabel]);
 
   useEffect(() => {
     return () => {
@@ -304,16 +328,12 @@ const ClaimAllButton: FunctionComponent<ClaimAllButtonProps> = ({
           {claimAllIsLoading ? (
             claimCountText
           ) : (
-            <ClaimTextWrapper>
-              <ClaimAllText $visible={!isHover}>
-                {intl.formatMessage({
-                  id: "page.main.components.rewards-card.claim-all-button",
-                })}
+            <ClaimTextWrapper $width={labelWidth}>
+              <ClaimAllText ref={claimTextRef} $visible={!isHover}>
+                {claimLabel}
               </ClaimAllText>
-              <ApproveText $visible={isHover}>
-                {intl.formatMessage({
-                  id: "button.approve",
-                })}
+              <ApproveText ref={approveTextRef} $visible={isHover}>
+                {approveLabel}
               </ApproveText>
             </ClaimTextWrapper>
           )}
@@ -324,7 +344,7 @@ const ClaimAllButton: FunctionComponent<ClaimAllButtonProps> = ({
 };
 
 const SlidingIconContainer = styled.div<{ $isActive: boolean }>`
-  width: 0.75rem;
+  width: fit-content;
   height: 0.75rem;
   display: flex;
   align-items: center;
@@ -334,18 +354,29 @@ const SlidingIconContainer = styled.div<{ $isActive: boolean }>`
   transition: opacity 0.3s ease, transform 0.3s ease;
 `;
 
-const ClaimTextWrapper = styled.span`
-  display: inline-grid;
+const ClaimTextWrapper = styled.span<{ $width?: number }>`
+  position: relative;
+  display: inline-flex;
+  justify-content: flex-end;
+  min-height: 1em;
+  width: ${({ $width }) => ($width !== undefined ? `${$width}px` : "auto")};
+  transition: width 0.2s ease;
 `;
 
 const ClaimAllText = styled.span<{ $visible: boolean }>`
-  grid-area: 1 / 1;
+  position: absolute;
+  top: 0;
+  right: 0;
+  white-space: nowrap;
   opacity: ${({ $visible }) => ($visible ? 1 : 0)};
   transition: opacity 0.2s ease;
 `;
 
 const ApproveText = styled.span<{ $visible: boolean }>`
-  grid-area: 1 / 1;
+  position: absolute;
+  top: 0;
+  right: 0;
+  white-space: nowrap;
   opacity: ${({ $visible }) => ($visible ? 1 : 0)};
   transition: opacity 0.3s ease;
 `;
