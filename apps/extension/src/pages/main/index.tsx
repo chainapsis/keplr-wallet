@@ -305,6 +305,9 @@ export const MainPage: FunctionComponent<{
       <Box padding="1.25rem">
         <Box
           ref={totalPriceSectionRef}
+          style={{
+            width: "fit-content",
+          }}
           onHoverStateChange={(isHover) => {
             if (!isNotReady) {
               animatedPrivacyModeHover.start(isHover ? 1 : 0);
@@ -312,6 +315,11 @@ export const MainPage: FunctionComponent<{
               animatedPrivacyModeHover.set(0);
             }
           }}
+          onClick={(e) => {
+            e.preventDefault();
+            uiConfigStore.toggleIsPrivacyMode();
+          }}
+          cursor="pointer"
         >
           <XAxis alignY="center">
             <Skeleton isNotReady={isNotReady} dummyMinWidth="6rem">
@@ -344,10 +352,6 @@ export const MainPage: FunctionComponent<{
                     Math.max(0, (v - 0.3) * (10 / 3))
                   ),
                   marginTop: "2px",
-                }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  uiConfigStore.toggleIsPrivacyMode();
                 }}
               >
                 {uiConfigStore.isPrivacyMode ? (
