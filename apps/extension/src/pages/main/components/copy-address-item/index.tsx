@@ -18,12 +18,7 @@ import {
 import { Gutter } from "../../../../components/gutter";
 import { ChainImageFallback } from "../../../../components/image";
 import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
-import {
-  CheckToggleIcon,
-  CopyOutlineIcon,
-  QRCodeIcon,
-  StarIcon,
-} from "../../../../components/icon";
+import { CheckToggleIcon, QRCodeIcon } from "../../../../components/icon";
 import { IconButton } from "../../../../components/icon-button";
 import { Address } from "../deposit-modal/copy-address-scene";
 
@@ -228,7 +223,7 @@ export const CopyAddressItem = observer(
                 }
               }}
             >
-              <StarIcon width="1.25rem" height="1.25rem" />
+              <_StarIcon />
             </Box>
 
             <Gutter size="0.5rem" />
@@ -409,14 +404,10 @@ export const CopyAddressItem = observer(
                       color={ColorPalette["green-400"]}
                     />
                   ) : (
-                    <CopyOutlineIcon
+                    <_CopyOutlineIcon
                       width="1.25rem"
                       height="1.25rem"
-                      color={
-                        theme.mode === "light"
-                          ? ColorPalette["gray-300"]
-                          : ColorPalette.white
-                      }
+                      color={ColorPalette["gray-300"]}
                     />
                   )}
                 </Box>
@@ -437,7 +428,7 @@ export const CopyAddressItem = observer(
                 }}
               >
                 <IconButton
-                  padding="0.5rem"
+                  padding="0.675rem"
                   hoverColor={
                     preventHover
                       ? "transparent"
@@ -455,13 +446,9 @@ export const CopyAddressItem = observer(
                   }}
                 >
                   <QRCodeIcon
-                    width="1.25rem"
-                    height="1.25rem"
-                    color={
-                      theme.mode === "light"
-                        ? ColorPalette["gray-300"]
-                        : ColorPalette.white
-                    }
+                    width="1rem"
+                    height="1rem"
+                    color={ColorPalette["gray-300"]}
                   />
                 </IconButton>
               </Box>
@@ -474,3 +461,58 @@ export const CopyAddressItem = observer(
 );
 
 CopyAddressItem.displayName = "CopyAddressItem";
+
+const _StarIcon = ({ color }: { color?: string }) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 20 20"
+      fill="none"
+    >
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M8.98995 2.67555C9.36357 1.77726 10.6361 1.77726 11.0097 2.67555L12.7447 6.84698L17.2481 7.20801C18.2179 7.28576 18.6111 8.496 17.8723 9.12892L14.4411 12.068L15.4894 16.4626C15.7151 17.4089 14.6856 18.1569 13.8554 17.6498L9.99983 15.2948L6.14429 17.6498C5.31402 18.1569 4.28453 17.4089 4.51026 16.4626L5.55853 12.068L2.1274 9.12892C1.38854 8.496 1.78176 7.28576 2.75154 7.20801L7.25495 6.84698L8.98995 2.67555Z"
+        fill={color || "currentColor"}
+      />
+    </svg>
+  );
+};
+
+const _CopyOutlineIcon = ({
+  width,
+  height,
+  color,
+}: {
+  width?: string;
+  height?: string;
+  color?: string;
+}) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={width}
+      height={height}
+      viewBox="0 0 20 20"
+      fill="none"
+    >
+      <path
+        d="M13.333 3.33313H5.76086C4.42 3.33313 3.33301 4.42012 3.33301 5.76099V13.3331"
+        stroke={color || "currentColor"}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <rect
+        x="6.5835"
+        y="6.5835"
+        width="10.1667"
+        height="10.1667"
+        rx="1.67786"
+        stroke={color || "currentColor"}
+        strokeWidth="1.5"
+      />
+    </svg>
+  );
+};
