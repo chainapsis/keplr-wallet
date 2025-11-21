@@ -432,8 +432,10 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
         case "Cosmos":
           return (
             "cosmos" in ci &&
-            chainStore.hasChain(ci.chainId) &&
-            !chainStore.isEvmOnlyChain(ci.chainId)
+            !(
+              chainStore.hasChain(ci.chainId) &&
+              chainStore.isEvmOnlyChain(ci.chainId)
+            )
           );
         case "EVM":
           return (
