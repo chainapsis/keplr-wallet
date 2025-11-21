@@ -288,6 +288,9 @@ const ClaimAllButton: FunctionComponent<ClaimAllButtonProps> = ({
   return (
     <Box
       onHoverStateChange={(hovered) => {
+        if (claimAllDisabled || claimAllIsLoading) {
+          return;
+        }
         if (!hovered) {
           setIsPressed(false);
         }
