@@ -5,12 +5,17 @@ import {
   ObservableQuery,
   QuerySharedContext,
 } from "@keplr-wallet/stores";
-import { RelatedAssetsResponse } from "./types";
+import {
+  SwapChainType,
+  RelatedAssetsRequest,
+  RelatedAssetsResponse,
+} from "./types";
 import { computed, makeObservable } from "mobx";
 import Joi from "joi";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { Currency } from "@keplr-wallet/types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { normalizeChainId, normalizeDenom } from "./utils";
 
 const Schema = Joi.object<RelatedAssetsResponse>({
   tokens: Joi.array()
@@ -58,10 +63,12 @@ export class ObservableQueryRelatedAssetsInner extends ObservableQuery<RelatedAs
 
     for (const token of this.response.data.tokens) {
       const chainId =
-        token.type === "evm" ? `eip155:${token.chain_id}` : token.chain_id;
+        token.type === SwapChainType.EVM
+          ? `eip155:${token.chain_id}`
+          : token.chain_id;
       if (this.chainStore.hasChain(chainId) && token.decimals <= 18) {
         const denom = (() => {
-          if (token.type === "evm") {
+          if (token.type === SwapChainType.EVM) {
             if (token.denom === "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee") {
               return this.chainStore.getChain(chainId).currencies[0]
                 .coinMinimalDenom;
@@ -122,32 +129,18 @@ export class ObservableQueryRelatedAssetsInner extends ObservableQuery<RelatedAs
   protected override async fetchResponse(
     abortController: AbortController
   ): Promise<{ headers: any; data: RelatedAssetsResponse }> {
+    const request: RelatedAssetsRequest = {
+      chain_id: normalizeChainId(this.chainId),
+      denom: normalizeDenom(this.chainStore, this.chainId, this.denom),
+    };
+
     const _result = await simpleFetch(this.baseURL, this.url, {
       signal: abortController.signal,
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        chain_id: (() => {
-          if (this.chainId.startsWith("eip155:")) {
-            return this.chainId.replace("eip155:", "");
-          }
-          return this.chainId;
-        })(),
-        denom: (() => {
-          const currencies = this.chainStore.getChain(this.chainId).currencies;
-          if (this.chainId.startsWith("eip155:") && currencies.length > 0) {
-            if (currencies[0].coinMinimalDenom === this.denom) {
-              return "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
-            }
-          }
-          if (this.denom.startsWith("erc20:")) {
-            return this.denom.replace("erc20:", "");
-          }
-          return this.denom;
-        })(),
-      }),
+      body: JSON.stringify(request),
     });
     const result = {
       headers: _result.headers,
@@ -156,8 +149,8 @@ export class ObservableQueryRelatedAssetsInner extends ObservableQuery<RelatedAs
 
     const validated = Schema.validate(result.data);
     if (validated.error) {
-      console.log(
-        "Failed to validate swappable related assets response from source response",
+      console.error(
+        "Failed to validate swappable related assets response",
         validated.error
       );
       throw validated.error;
@@ -205,5 +198,27 @@ export class ObservableQueryRelatedAssets extends HasMapStore<ObservableQueryRel
         denom,
       })
     );
+  }
+
+  isRelatedAssetsToken(
+    sourceChainId: string,
+    sourceDenom: string,
+    destChainId: string,
+    destDenom: string
+  ): boolean {
+    const observable = this.getObservableQueryRelatedAssets(
+      sourceChainId,
+      sourceDenom
+    );
+    if (observable) {
+      const chainIdentifier = ChainIdHelper.parse(destChainId).identifier;
+
+      return observable.currencies.some(
+        (c) =>
+          ChainIdHelper.parse(c.chainId).identifier === chainIdentifier &&
+          c.coinMinimalDenom === destDenom
+      );
+    }
+    return false;
   }
 }

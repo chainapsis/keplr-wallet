@@ -59,7 +59,10 @@ import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import Long from "long";
 import { IAccountStore } from "./store";
 import { autorun } from "mobx";
-import { MsgDepositForBurnWithCaller } from "@keplr-wallet/proto-types/circle/cctp/v1/tx";
+import {
+  MsgDepositForBurnWithCaller,
+  MsgDepositForBurn,
+} from "@keplr-wallet/proto-types/circle/cctp/v1/tx";
 import { MsgSend as ThorMsgSend } from "@keplr-wallet/proto-types/thorchain/v1/types/msg_send";
 
 export interface CosmosAccount {
@@ -1190,14 +1193,18 @@ export class CosmosAccountImpl {
     amount: string,
     currency: AppCurrency,
     recipient: string,
-    memo?: string
+    memo?: string,
+    options?: {
+      skipCounterpartyChainInfoValidation?: boolean;
+    }
   ) {
     return this.makeIBCTransferTxWithAsyncMemoConstructor(
       channel,
       amount,
       currency,
       recipient,
-      async () => memo
+      async () => memo,
+      options
     );
   }
 
@@ -1210,7 +1217,10 @@ export class CosmosAccountImpl {
     amount: string,
     currency: AppCurrency,
     recipient: string | (() => Promise<string>),
-    memoConstructor: () => Promise<string | undefined>
+    memoConstructor: () => Promise<string | undefined>,
+    options?: {
+      skipCounterpartyChainInfoValidation?: boolean;
+    }
   ) {
     if (new DenomHelper(currency.coinMinimalDenom).type !== "native") {
       throw new Error("Only native token can be sent via IBC");
@@ -1221,6 +1231,38 @@ export class CosmosAccountImpl {
       dec = dec.mul(DecUtils.getPrecisionDec(currency.coinDecimals));
       return dec.truncate().toString();
     })();
+
+    const balanceRefreshCallback = (tx: any) => {
+      if (tx.code == null || tx.code === 0) {
+        // After succeeding to send token, refresh the balance.
+        const queryBalance = this.queries.queryBalances
+          .getQueryBech32Address(this.base.bech32Address)
+          .balances.find((bal) => {
+            return bal.currency.coinMinimalDenom === currency.coinMinimalDenom;
+          });
+
+        if (queryBalance) {
+          queryBalance.fetch();
+        }
+      }
+    };
+
+    if (options?.skipCounterpartyChainInfoValidation) {
+      return this.makeTx(
+        "ibcTransfer",
+        async () => {
+          return this.buildIBCTransferMsg(
+            channel,
+            currency,
+            actualAmount,
+            recipient,
+            memoConstructor,
+            undefined
+          );
+        },
+        balanceRefreshCallback
+      );
+    }
 
     const destinationInfo = this.queriesStore.get(channel.counterpartyChainId)
       .cosmos.queryRPCStatus;
@@ -1255,156 +1297,172 @@ export class CosmosAccountImpl {
           );
         }
 
-        const useEthereumSign =
+        return this.buildIBCTransferMsg(
+          channel,
+          currency,
+          actualAmount,
+          recipient,
+          memoConstructor,
+          {
+            revision_number: ChainIdHelper.parse(
+              destinationInfo.network
+            ).version.toString() as string | undefined,
+            revision_height: destinationInfo.latestBlockHeight
+              .add(new Int("150"))
+              .toString(),
+          }
+        );
+      },
+      balanceRefreshCallback
+    );
+  }
+
+  private async buildIBCTransferMsg(
+    channel: {
+      portId: string;
+      channelId: string;
+      counterpartyChainId: string;
+    },
+    currency: AppCurrency,
+    actualAmount: string,
+    recipient: string | (() => Promise<string>),
+    memoConstructor: () => Promise<string | undefined>,
+    timeoutHeight?: {
+      revision_number?: string;
+      revision_height: string;
+    }
+  ): Promise<ProtoMsgsOrWithAminoMsgs> {
+    const useEthereumSign =
+      this.chainGetter
+        .getChain(this.chainId)
+        .features?.includes("eth-key-sign") === true;
+
+    const eip712Signing = useEthereumSign && this.base.isNanoLedger;
+    const chainIsInjective = this.chainId.startsWith("injective");
+
+    let memo = await memoConstructor();
+    if (typeof recipient === "function") {
+      recipient = await recipient();
+    }
+
+    if (eip712Signing && chainIsInjective) {
+      // I don't know why, but memo is required when injective and eip712
+      if (!memo) {
+        memo = "IBC Transfer";
+      }
+    }
+
+    // On ledger with ethermint, eip712 types are required and we can't omit `timeoutTimestamp`.
+    // Although we are not using `timeoutTimestamp` at present, just set it as mas uint64 only for eip712 cosmos tx.
+    const timeoutTimestamp = eip712Signing ? "18446744073709551615" : "0";
+
+    const msgValue: any = {
+      source_port: channel.portId,
+      source_channel: channel.channelId,
+      token: {
+        denom: currency.coinMinimalDenom,
+        amount: actualAmount,
+      },
+      sender: this.base.bech32Address,
+      receiver: recipient,
+      timeout_timestamp: timeoutTimestamp as string | undefined,
+      memo,
+    };
+
+    if (timeoutHeight) {
+      msgValue.timeout_height = {
+        revision_number: timeoutHeight.revision_number,
+        revision_height: timeoutHeight.revision_height,
+      };
+      if (msgValue.timeout_height.revision_number === "0") {
+        delete msgValue.timeout_height.revision_number;
+      }
+    }
+
+    if (msgValue.timeout_timestamp === "0") {
+      delete msgValue.timeout_timestamp;
+    }
+
+    if (!memo) {
+      delete msgValue.memo;
+    }
+
+    const msg = {
+      type: this.msgOpts.ibcTransfer.type,
+      value: msgValue,
+    };
+
+    const forceDirectSign = (() => {
+      if (!this.base.isNanoLedger) {
+        if (
+          this.chainId.startsWith("injective") ||
+          this.chainId.startsWith("stride") ||
           this.chainGetter
             .getChain(this.chainId)
-            .features?.includes("eth-key-sign") === true;
-
-        const eip712Signing = useEthereumSign && this.base.isNanoLedger;
-        const chainIsInjective = this.chainId.startsWith("injective");
-
-        let memo = await memoConstructor();
-        if (typeof recipient === "function") {
-          recipient = await recipient();
-        }
-
-        if (eip712Signing && chainIsInjective) {
-          // I don't know why, but memo is required when injective and eip712
-          if (!memo) {
-            memo = "IBC Transfer";
-          }
-        }
-
-        // On ledger with ethermint, eip712 types are required and we can't omit `timeoutTimestamp`.
-        // Although we are not using `timeoutTimestamp` at present, just set it as mas uint64 only for eip712 cosmos tx.
-        const timeoutTimestamp = eip712Signing ? "18446744073709551615" : "0";
-
-        const msg = {
-          type: this.msgOpts.ibcTransfer.type,
-          value: {
-            source_port: channel.portId,
-            source_channel: channel.channelId,
-            token: {
-              denom: currency.coinMinimalDenom,
-              amount: actualAmount,
-            },
-            sender: this.base.bech32Address,
-            receiver: recipient,
-            timeout_height: {
-              revision_number: ChainIdHelper.parse(
-                destinationInfo.network
-              ).version.toString() as string | undefined,
-              // Set the timeout height as the current height + 150.
-              revision_height: destinationInfo.latestBlockHeight
-                .add(new Int("150"))
-                .toString(),
-            },
-            timeout_timestamp: timeoutTimestamp as string | undefined,
-            memo,
-          },
-        };
-
-        if (msg.value.timeout_height.revision_number === "0") {
-          delete msg.value.timeout_height.revision_number;
-        }
-
-        if (msg.value.timeout_timestamp === "0") {
-          delete msg.value.timeout_timestamp;
-        }
-
-        if (!memo) {
-          delete msg.value.memo;
-        }
-
-        const forceDirectSign = (() => {
-          if (!this.base.isNanoLedger) {
-            if (
-              this.chainId.startsWith("injective") ||
-              this.chainId.startsWith("stride") ||
-              this.chainGetter
-                .getChain(this.chainId)
-                .hasFeature("ibc-go-v7-hot-fix")
-            ) {
-              return true;
-            }
-          }
-          return false;
-        })();
-
-        return {
-          aminoMsgs: forceDirectSign ? undefined : [msg],
-          protoMsgs: [
-            {
-              typeUrl: "/ibc.applications.transfer.v1.MsgTransfer",
-              value: MsgTransfer.encode(
-                MsgTransfer.fromPartial({
-                  sourcePort: msg.value.source_port,
-                  sourceChannel: msg.value.source_channel,
-                  token: msg.value.token,
-                  sender: msg.value.sender,
-                  receiver: msg.value.receiver,
-                  timeoutHeight: {
-                    revisionNumber: msg.value.timeout_height.revision_number
-                      ? msg.value.timeout_height.revision_number
-                      : "0",
-                    revisionHeight: msg.value.timeout_height.revision_height,
-                  },
-                  timeoutTimestamp: msg.value.timeout_timestamp,
-                  memo: msg.value.memo,
-                })
-              ).finish(),
-            },
-          ],
-          rlpTypes: {
-            MsgValue: [
-              { name: "source_port", type: "string" },
-              { name: "source_channel", type: "string" },
-              { name: "token", type: "TypeToken" },
-              { name: "sender", type: "string" },
-              { name: "receiver", type: "string" },
-              { name: "timeout_height", type: "TypeTimeoutHeight" },
-              { name: "timeout_timestamp", type: "uint64" },
-              ...(() => {
-                if (memo != null) {
-                  return [
-                    {
-                      name: "memo",
-                      type: "string",
-                    },
-                  ];
-                }
-
-                return [];
-              })(),
-            ],
-            TypeToken: [
-              { name: "denom", type: "string" },
-              { name: "amount", type: "string" },
-            ],
-            TypeTimeoutHeight: [
-              { name: "revision_number", type: "uint64" },
-              { name: "revision_height", type: "uint64" },
-            ],
-          },
-        };
-      },
-      (tx) => {
-        if (tx.code == null || tx.code === 0) {
-          // After succeeding to send token, refresh the balance.
-          const queryBalance = this.queries.queryBalances
-            .getQueryBech32Address(this.base.bech32Address)
-            .balances.find((bal) => {
-              return (
-                bal.currency.coinMinimalDenom === currency.coinMinimalDenom
-              );
-            });
-
-          if (queryBalance) {
-            queryBalance.fetch();
-          }
+            .hasFeature("ibc-go-v7-hot-fix")
+        ) {
+          return true;
         }
       }
-    );
+      return false;
+    })();
+
+    return {
+      aminoMsgs: forceDirectSign ? undefined : [msg],
+      protoMsgs: [
+        {
+          typeUrl: "/ibc.applications.transfer.v1.MsgTransfer",
+          value: MsgTransfer.encode(
+            MsgTransfer.fromPartial({
+              sourcePort: msg.value.source_port,
+              sourceChannel: msg.value.source_channel,
+              token: msg.value.token,
+              sender: msg.value.sender,
+              receiver: msg.value.receiver,
+              timeoutHeight: {
+                revisionNumber: msg.value.timeout_height.revision_number
+                  ? msg.value.timeout_height.revision_number
+                  : "0",
+                revisionHeight: msg.value.timeout_height.revision_height,
+              },
+              timeoutTimestamp: msg.value.timeout_timestamp,
+              memo: msg.value.memo,
+            })
+          ).finish(),
+        },
+      ],
+      rlpTypes: {
+        MsgValue: [
+          { name: "source_port", type: "string" },
+          { name: "source_channel", type: "string" },
+          { name: "token", type: "TypeToken" },
+          { name: "sender", type: "string" },
+          { name: "receiver", type: "string" },
+          { name: "timeout_height", type: "TypeTimeoutHeight" },
+          { name: "timeout_timestamp", type: "uint64" },
+          ...(() => {
+            if (memo != null) {
+              return [
+                {
+                  name: "memo",
+                  type: "string",
+                },
+              ];
+            }
+
+            return [];
+          })(),
+        ],
+        TypeToken: [
+          { name: "denom", type: "string" },
+          { name: "amount", type: "string" },
+        ],
+        TypeTimeoutHeight: [
+          { name: "revision_number", type: "uint64" },
+          { name: "revision_height", type: "uint64" },
+        ],
+      },
+    };
   }
 
   async sendIBCTransferMsg(
@@ -2134,7 +2192,10 @@ export class CosmosAccountImpl {
     );
   }
 
-  makeCCTPTx(rawCCTPMsgValue: string, rawSendMsg: string) {
+  makeCCTPDepositForBurnWithCallerTx(
+    rawCCTPMsgValue: string,
+    rawSendMsg: string
+  ) {
     const cctpMsgValue = JSON.parse(rawCCTPMsgValue);
     const cctpMsg = {
       type: "cctp/DepositForBurnWithCaller",
@@ -2169,9 +2230,15 @@ export class CosmosAccountImpl {
               from: cctpMsg.value.from,
               amount: cctpMsg.value.amount,
               destinationDomain: cctpMsg.value.destination_domain,
-              mintRecipient: cctpMsg.value.mint_recipient,
+              mintRecipient:
+                typeof cctpMsg.value.mint_recipient === "string"
+                  ? this.decodeBase64(cctpMsg.value.mint_recipient)
+                  : cctpMsg.value.mint_recipient,
               burnToken: cctpMsg.value.burn_token,
-              destinationCaller: cctpMsg.value.destination_caller,
+              destinationCaller:
+                typeof cctpMsg.value.destination_caller === "string"
+                  ? this.decodeBase64(cctpMsg.value.destination_caller)
+                  : cctpMsg.value.destination_caller,
             }).finish(),
           },
           {
@@ -2194,7 +2261,71 @@ export class CosmosAccountImpl {
     );
   }
 
+  makeCCTPDepositForBurnTx(
+    from: string,
+    amount: string,
+    destinationDomain: number,
+    mintRecipient: string,
+    burnToken: string
+  ) {
+    const cctpMsg = {
+      type: "cctp/DepositForBurn",
+      value: {
+        from,
+        burn_token: burnToken,
+        amount,
+        destination_domain: destinationDomain,
+        mint_recipient: mintRecipient,
+      },
+    };
+
+    return this.makeTx(
+      "cctp",
+      {
+        aminoMsgs: [cctpMsg],
+        protoMsgs: [
+          {
+            typeUrl: "/circle.cctp.v1.MsgDepositForBurn",
+            value: MsgDepositForBurn.encode(
+              MsgDepositForBurn.fromPartial({
+                from: cctpMsg.value.from,
+                amount: cctpMsg.value.amount,
+                destinationDomain: cctpMsg.value.destination_domain,
+                mintRecipient: this.decodeBase64(mintRecipient),
+                burnToken: cctpMsg.value.burn_token,
+              })
+            ).finish(),
+          },
+        ],
+      },
+      (tx) => {
+        if (tx.code == null || tx.code === 0) {
+          this.queries.queryBalances
+            .getQueryBech32Address(this.base.bech32Address)
+            .balances.forEach((queryBalance) => queryBalance.fetch());
+        }
+      }
+    );
+  }
+
   protected get queries(): DeepReadonly<QueriesSetBase & CosmosQueries> {
     return this.queriesStore.get(this.chainId);
+  }
+
+  private decodeBase64(base64: string): Uint8Array {
+    try {
+      const bin = atob(base64);
+      const arr = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) {
+        arr[i] = bin.charCodeAt(i);
+      }
+      return arr;
+    } catch (e) {
+      throw new Error(
+        `Failed to decode Base64: ${
+          e instanceof Error ? e.message : "Unknown error"
+        }`
+      );
+    }
   }
 }
