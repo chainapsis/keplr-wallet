@@ -383,19 +383,28 @@ export const AvailableTabView: FunctionComponent<{
           }
         })();
         if (cosmosChainInfo) {
-          // cosmos 계열이면서 ledger일때
-          // background에서 ledger를 지원하지 않는 체인은 다 지워줘야한다.
-          try {
-            if (cosmosChainInfo.features?.includes("force-enable-evm-ledger")) {
-              return true;
-            }
+          const isEthermintLike =
+            cosmosChainInfo.bip44.coinType === 60 ||
+            !!cosmosChainInfo.features?.includes("eth-address-gen") ||
+            !!cosmosChainInfo.features?.includes("eth-key-sign");
 
-            KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
-              cosmosChainInfo.chainId
-            );
-            return true;
-          } catch {
-            return false;
+          if (isEthermintLike) {
+            // cosmos 계열이면서 ledger일때
+            // background에서 ledger를 지원하지 않는 체인은 다 지워줘야한다.
+            try {
+              if (
+                cosmosChainInfo.features?.includes("force-enable-evm-ledger")
+              ) {
+                return true;
+              }
+
+              KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
+                cosmosChainInfo.chainId
+              );
+              return true;
+            } catch {
+              return false;
+            }
           }
         }
       }

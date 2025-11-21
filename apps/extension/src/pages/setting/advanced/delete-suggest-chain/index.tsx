@@ -21,7 +21,7 @@ import { dispatchGlobalEventExceptSelf } from "../../../../utils/global-events";
 export const SettingGeneralDeleteSuggestChainPage: FunctionComponent = observer(
   () => {
     const intl = useIntl();
-    const { chainStore } = useStore();
+    const { chainStore, keyRingStore } = useStore();
     const suggestedChains = chainStore.chainInfos.filter(
       (chainInfo) => !chainInfo.embedded.embedded
     );
@@ -49,9 +49,12 @@ export const SettingGeneralDeleteSuggestChainPage: FunctionComponent = observer(
                     key={chainInfo.chainIdentifier}
                     chainInfo={chainInfo}
                     onClickClose={async () => {
-                      await chainStore.removeChainInfo(
-                        chainInfo.chainIdentifier
-                      );
+                      // 여기서 chain identifier를 쓰면 안되고 꼭 chainId를 써야함
+                      await chainStore.removeChainInfo(chainInfo.chainId);
+
+                      await keyRingStore.refreshKeyRingStatus();
+                      await chainStore.updateChainInfosFromBackground();
+                      await chainStore.updateEnabledChainIdentifiersFromBackground();
 
                       dispatchGlobalEventExceptSelf(
                         "keplr_suggested_chain_removed"

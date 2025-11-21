@@ -1,9 +1,15 @@
-import React, { FunctionComponent, useState } from "react";
+import React, {
+  FunctionComponent,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import styled, { useTheme } from "styled-components";
 import { ColorPalette } from "../../../styles";
 import { Subtitle4 } from "../../../components/typography";
 import { Ecosystem } from "..";
 import { useIntl } from "react-intl";
+import { useGlobarSimpleBar } from "../../../hooks/global-simplebar";
 
 interface Props {
   selected: Ecosystem;
@@ -17,6 +23,52 @@ export const EcosystemFilterDropdown: FunctionComponent<Props> = ({
   const [isOpen, setIsOpen] = useState(false);
   const theme = useTheme();
   const intl = useIntl();
+
+  const globalSimpleBar = useGlobarSimpleBar();
+
+  const closeDropdown = useCallback(() => {
+    setIsOpen(false);
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const scrollElement = globalSimpleBar.ref.current?.getScrollElement();
+
+    if (scrollElement) {
+      /**
+       * 사용자가 직접 스크롤(wheel/touchmove)했을 때만 메뉴를 닫는다.
+       * 단, 터치의 미세한 떨림은 무시한다.
+       */
+      let touchStartY = 0;
+      const TOUCH_MOVE_THRESHOLD = 10; // px
+
+      const onTouchStart = (e: TouchEvent) => {
+        touchStartY = e.touches[0].clientY;
+      };
+
+      const onTouchMove = (e: TouchEvent) => {
+        const currentY = e.touches[0].clientY;
+        const diff = Math.abs(currentY - touchStartY);
+
+        if (diff > TOUCH_MOVE_THRESHOLD) {
+          closeDropdown();
+        }
+      };
+
+      scrollElement.addEventListener("wheel", closeDropdown);
+      scrollElement.addEventListener("touchstart", onTouchStart);
+      scrollElement.addEventListener("touchmove", onTouchMove);
+
+      return () => {
+        scrollElement.removeEventListener("wheel", closeDropdown);
+        scrollElement.removeEventListener("touchstart", onTouchStart);
+        scrollElement.removeEventListener("touchmove", onTouchMove);
+      };
+    }
+  }, [closeDropdown, globalSimpleBar, isOpen]);
 
   return (
     <Styles.MenuContainer>
