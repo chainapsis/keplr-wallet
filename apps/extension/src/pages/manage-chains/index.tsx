@@ -34,6 +34,7 @@ import { useKeyCoinTypeFinalize } from "./hooks/use-key-coin-type-finalize";
 import { EmbedChainInfos } from "../../config";
 import { getKeplrFromWindow } from "@keplr-wallet/stores";
 import { KeyRingCosmosService } from "@keplr-wallet/background";
+import { determineLedgerApp } from "../../utils/determine-ledger-app";
 
 export const Ecosystem = {
   All: "All",
@@ -93,22 +94,6 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
     setBackupSelectedNativeChainIdentifiers,
   ] = useState(chainStore.enabledChainIdentifiers);
 
-  const determineLedgerApp = (info: ModularChainInfo, cid: string): string => {
-    if ("cosmos" in info && chainStore.isEvmOrEthermintLikeChain(cid)) {
-      return "Ethereum";
-    }
-
-    if ("starknet" in info) {
-      return "Starknet";
-    }
-    if ("bitcoin" in info) {
-      const coinType = info.bitcoin.bip44.coinType;
-      return coinType === 1 ? "Bitcoin Test" : "Bitcoin";
-    }
-
-    return "Cosmos";
-  };
-
   const applyEnableChange = useCallback(
     async (chainId: string, enable: boolean) => {
       if (!vaultId || !chainId) return;
@@ -151,7 +136,11 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
         if (chainStore.hasModularChain(chainId)) {
           if (keyRingStore.selectedKeyInfo?.type === "ledger") {
             const modularChainInfo = chainStore.getModularChain(chainId);
-            const ledgerApp = determineLedgerApp(modularChainInfo, chainId);
+            const ledgerApp = determineLedgerApp(
+              chainStore,
+              modularChainInfo,
+              chainId
+            );
 
             const alreadyAppended = Boolean(
               keyRingStore.selectedKeyInfo?.insensitive?.[ledgerApp]
