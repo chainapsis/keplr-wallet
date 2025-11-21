@@ -135,11 +135,13 @@ export const MainPage: FunctionComponent<{
     return parseFloat(stakedDec.quo(totalDec).mul(new Dec(100)).toString());
   }, [totalPrice, stakedTotalPrice]);
 
-  const hasAnyStakableAsset = useMemo(() => {
-    return hugeQueriesStore.stakables.some((token) =>
-      token.token.toDec().gt(new Dec(0))
+  const showRewardsCard = useMemo(() => {
+    return (
+      hugeQueriesStore.stakables.some((token) =>
+        token.token.toDec().gt(new Dec(0))
+      ) && stakedTotalPrice?.toDec().gt(new Dec(0))
     );
-  }, [hugeQueriesStore.stakables]);
+  }, [hugeQueriesStore.stakables, stakedTotalPrice]);
 
   const lastTotalAvailableAmbiguousAvg = useRef(-1);
   const lastTotalStakedAmbiguousAvg = useRef(-1);
@@ -378,7 +380,7 @@ export const MainPage: FunctionComponent<{
 
       <Box paddingX="0.75rem" paddingBottom="1.5rem">
         <Stack gutter="1.5rem">
-          {hasAnyStakableAsset ? (
+          {showRewardsCard ? (
             <XAxis>
               <SpendableCard
                 spendableTotalPrice={spendableTotalPrice}
