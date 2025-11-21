@@ -9,12 +9,14 @@ export const TextButton: FunctionComponent<TextButtonProps> = ({
   text,
   right,
   type,
+  buttonStyle,
   ...otherProps
 }) => {
   return (
     <Styles.Container style={style} className={className}>
       <Styles.Button
         {...otherProps}
+        style={buttonStyle}
         type={type || "button"}
         onClick={(e) => {
           if (onClick) {

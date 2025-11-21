@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useMemo } from "react";
+import React, { FunctionComponent, useMemo, useEffect, useRef } from "react";
 import { observer } from "mobx-react-lite";
 import { MainHeaderLayout } from "../main/layouts/header";
 import { ColorPalette } from "../../styles";
@@ -26,17 +26,22 @@ import { StakeEmptyPage } from "./empty";
 import { IconProps } from "../../components/icon/types";
 import { Subtitle3 } from "../../components/typography";
 import { RewardsCard } from "./components/rewards-card";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useGetStakingApr } from "../../hooks/use-get-staking-apr";
+import styled from "styled-components";
+import { COMMON_HOVER_OPACITY } from "../../styles/constant";
+import debounce from "lodash.debounce";
 
 const zeroDec = new Dec(0);
 
 export const StakePage: FunctionComponent = observer(() => {
   const intl = useIntl();
+  const navigate = useNavigate();
   const [params] = useSearchParams();
   const initialExpand = params.get("intitialExpand") === "true";
 
-  const { uiConfigStore, hugeQueriesStore } = useStore();
+  const { uiConfigStore, hugeQueriesStore, analyticsAmplitudeStore } =
+    useStore();
   const isNotReady = useIsNotReady();
 
   const animatedPrivacyModeHover = useSpringValue(0, {
@@ -46,6 +51,31 @@ export const StakePage: FunctionComponent = observer(() => {
   const { stakedTotalPrice } = useStakedTotalPrice();
 
   const { delegations, unbondings } = useViewStakingTokens();
+
+  const hasLoggedAnalytics = useRef(false);
+
+  const debouncedLogEvent = useMemo(
+    () =>
+      debounce((delegationCount: number, unbondingCount: number) => {
+        analyticsAmplitudeStore.logEvent("view_stake_page", {
+          delegationCount,
+          unbondingCount,
+        });
+        hasLoggedAnalytics.current = true;
+      }, 500),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  useEffect(() => {
+    if (!isNotReady && !hasLoggedAnalytics.current) {
+      debouncedLogEvent(delegations.length, unbondings.length);
+    }
+
+    return () => {
+      debouncedLogEvent.cancel();
+    };
+  }, [delegations.length, isNotReady, debouncedLogEvent, unbondings.length]);
 
   const hasAnyStakableAsset = useMemo(() => {
     return hugeQueriesStore.stakables.some((token) =>
@@ -99,10 +129,7 @@ export const StakePage: FunctionComponent = observer(() => {
           </Subtitle3>
         </Box>
         <Gutter size="0.75rem" />
-        <Box
-          style={{
-            width: "fit-content",
-          }}
+        <BalanceRow
           onHoverStateChange={(isHover) => {
             if (!isNotReady) {
               animatedPrivacyModeHover.start(isHover ? 1 : 0);
@@ -115,7 +142,6 @@ export const StakePage: FunctionComponent = observer(() => {
             e.preventDefault();
             uiConfigStore.toggleIsPrivacyMode();
           }}
-          cursor="pointer"
         >
           <XAxis alignY="center">
             <Skeleton isNotReady={isNotReady} dummyMinWidth="6rem">
@@ -159,8 +185,6 @@ export const StakePage: FunctionComponent = observer(() => {
             </animated.div>
           </XAxis>
 
-          <Gutter size="0.75rem" />
-
           <TextButton
             text={intl.formatMessage({
               id: "page.stake.stake-more-button",
@@ -171,14 +195,34 @@ export const StakePage: FunctionComponent = observer(() => {
                 url: "https://wallet.keplr.app/?modal=staking&utm_source=keplrextension&utm_medium=button&utm_campaign=permanent&utm_content=manage_stake",
               });
             }}
-            right={<ChevronIcon width="1rem" height="1rem" />}
+            right={<ChevronRightIcon width="1rem" height="1rem" />}
             style={{
               color: ColorPalette["blue-400"],
-              alignSelf: "flex-start",
-              margin: "-0.25rem -1rem",
+            }}
+            buttonStyle={{
+              height: "1.3125rem",
+              padding: "0.125rem 0 0.125rem 0.25rem",
             }}
           />
-        </Box>
+        </BalanceRow>
+
+        <Gutter size="0.75rem" />
+
+        <BackToHomeButton paddingLeft="0.25rem" onClick={() => navigate("/")}>
+          <XAxis alignY="center">
+            <ChevronLeftIcon
+              width="1rem"
+              height="1rem"
+              color={ColorPalette["gray-300"]}
+            />
+            <Gutter size="0.125rem" />
+            <Subtitle3 color={ColorPalette["gray-300"]}>
+              {intl.formatMessage({
+                id: "page.stake.back-to-home-button",
+              })}
+            </Subtitle3>
+          </XAxis>
+        </BackToHomeButton>
 
         <Gutter size="1.25rem" />
       </Box>
@@ -199,6 +243,7 @@ export const StakePage: FunctionComponent = observer(() => {
                 key={title}
                 title={<TokenTitleView title={title} />}
                 lenAlwaysShown={lenAlwaysShown}
+                hideNumInTitle={uiConfigStore.isPrivacyMode}
                 items={balance.map((viewToken) => {
                   const chainId =
                     "chainInfo" in viewToken
@@ -361,7 +406,25 @@ function formatRelativeTime(
   };
 }
 
-export const ChevronIcon: FunctionComponent<IconProps> = ({
+const BalanceRow = styled(Box)`
+  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  width: fit-content;
+`;
+
+const BackToHomeButton = styled(Box)`
+  width: fit-content;
+  cursor: pointer;
+  &:hover {
+    opacity: ${COMMON_HOVER_OPACITY};
+  }
+`;
+
+export const ChevronRightIcon: FunctionComponent<IconProps> = ({
   width = "1rem",
   height = "1rem",
 }) => {
@@ -380,6 +443,30 @@ export const ChevronIcon: FunctionComponent<IconProps> = ({
         strokeLinecap="round"
         strokeLinejoin="round"
         fill="none"
+      />
+    </svg>
+  );
+};
+
+const ChevronLeftIcon: FunctionComponent<IconProps> = ({
+  width,
+  height,
+  color,
+}) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={width}
+      height={height}
+      viewBox="0 0 16 16"
+      fill="none"
+    >
+      <path
+        d="M10.3333 3.33342L5.66665 8.00008L10.3333 12.6667"
+        stroke={color || "currentColor"}
+        strokeWidth="1.2963"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );
