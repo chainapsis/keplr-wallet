@@ -21,6 +21,7 @@ import {
   EmptyAmountError,
   IFeeConfig,
   IGasConfig,
+  ISenderConfig,
   useGasSimulator,
   useTxConfigsValidate,
   ZeroAmountError,
@@ -68,6 +69,7 @@ import {
 } from "../earn/utils";
 import { FeeCoverageDescription } from "../../components/top-up";
 import { useTopUp } from "../../hooks/use-topup";
+import { useInsufficientFeeAnalytics } from "../../hooks/analytics/use-insufficient-fee-analytics";
 import { getShouldTopUpSignOptions } from "../../utils/should-top-up-sign-options";
 
 const TextButtonStyles = {
@@ -2033,6 +2035,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             amountConfig={ibcSwapConfigs.amountConfig}
             feeConfig={ibcSwapConfigs.feeConfig}
             gasConfig={ibcSwapConfigs.gasConfig}
+            senderConfig={ibcSwapConfigs.senderConfig}
             title={
               isHighPriceImpact &&
               !calculatingTxError &&
@@ -2152,6 +2155,7 @@ const WarningGuideBox: FunctionComponent<{
   amountConfig: IBCSwapAmountConfig;
   feeConfig: IFeeConfig;
   gasConfig: IGasConfig;
+  senderConfig: ISenderConfig;
 
   forceError?: Error;
   forceWarning?: Error;
@@ -2164,12 +2168,15 @@ const WarningGuideBox: FunctionComponent<{
     amountConfig,
     feeConfig,
     gasConfig,
+    senderConfig,
     forceError,
     forceWarning,
     title,
     showUSDNWarning,
     showCelestiaWarning,
   }) => {
+    useInsufficientFeeAnalytics(feeConfig, senderConfig);
+
     const intl = useIntl();
     const theme = useTheme();
 
