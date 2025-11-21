@@ -34,15 +34,41 @@ export const EcosystemFilterDropdown: FunctionComponent<Props> = ({
     if (!isOpen) {
       return;
     }
+
     const scrollElement = globalSimpleBar.ref.current?.getScrollElement();
 
-    scrollElement?.addEventListener("scroll", closeDropdown);
+    if (scrollElement) {
+      /**
+       * 사용자가 직접 스크롤(wheel/touchmove)했을 때만 메뉴를 닫는다.
+       * 단, 터치의 미세한 떨림은 무시한다.
+       */
+      let touchStartY = 0;
+      const TOUCH_MOVE_THRESHOLD = 10; // px
 
-    return () => {
-      scrollElement?.removeEventListener("scroll", closeDropdown);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
+      const onTouchStart = (e: TouchEvent) => {
+        touchStartY = e.touches[0].clientY;
+      };
+
+      const onTouchMove = (e: TouchEvent) => {
+        const currentY = e.touches[0].clientY;
+        const diff = Math.abs(currentY - touchStartY);
+
+        if (diff > TOUCH_MOVE_THRESHOLD) {
+          closeDropdown();
+        }
+      };
+
+      scrollElement.addEventListener("wheel", closeDropdown);
+      scrollElement.addEventListener("touchstart", onTouchStart);
+      scrollElement.addEventListener("touchmove", onTouchMove);
+
+      return () => {
+        scrollElement.removeEventListener("wheel", closeDropdown);
+        scrollElement.removeEventListener("touchstart", onTouchStart);
+        scrollElement.removeEventListener("touchmove", onTouchMove);
+      };
+    }
+  }, [closeDropdown, globalSimpleBar, isOpen]);
 
   return (
     <Styles.MenuContainer>
