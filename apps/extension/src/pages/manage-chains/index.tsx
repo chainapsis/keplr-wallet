@@ -426,22 +426,35 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
 
   const ecosystemFilteredChainInfos = useMemo(() => {
     return searchedAllChains.filter((ci) => {
+      const cosmosChainInfo = (() => {
+        if ("cosmos" in ci) {
+          return ci.cosmos;
+        }
+        if ("currencies" in ci && "feeCurrencies" in ci) {
+          return ci;
+        }
+      })();
+      const isEvmOnlyChainId = (chainId: string) => {
+        const chainIdLikeCAIP2 = chainId.split(":");
+        return (
+          chainIdLikeCAIP2.length === 2 && chainIdLikeCAIP2[0] === "eip155"
+        );
+      };
       switch (selectedEcosystem) {
         case "All":
           return true;
         case "Cosmos":
           return (
-            "cosmos" in ci &&
-            !(
-              chainStore.hasChain(ci.chainId) &&
-              chainStore.isEvmOnlyChain(ci.chainId)
-            )
+            cosmosChainInfo != null &&
+            "bech32Config" in cosmosChainInfo &&
+            !isEvmOnlyChainId(ci.chainId)
           );
         case "EVM":
           return (
-            "cosmos" in ci &&
-            chainStore.hasChain(ci.chainId) &&
-            chainStore.isEvmOnlyChain(ci.chainId)
+            cosmosChainInfo != null &&
+            !("bech32Config" in cosmosChainInfo) &&
+            "evm" in cosmosChainInfo &&
+            isEvmOnlyChainId(ci.chainId)
           );
         case "Bitcoin":
           return "bitcoin" in ci;
