@@ -1,5 +1,6 @@
 import React, {
   FunctionComponent,
+  useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -303,9 +304,49 @@ export const ViewOptionsContextMenu: FunctionComponent<{
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen]);
 
-    const closeMenu = () => {
+    const closeMenu = useCallback(() => {
       setIsOpen(false);
-    };
+    }, [setIsOpen]);
+
+    useEffect(() => {
+      if (!isOpen) {
+        return;
+      }
+
+      const scrollElement = globalSimpleBar.ref.current?.getScrollElement();
+
+      if (scrollElement) {
+        /**
+         * 사용자가 직접 스크롤(wheel/touchmove)했을 때만 메뉴를 닫는다.
+         * 단, 터치의 미세한 떨림은 무시한다.
+         */
+        let touchStartY = 0;
+        const TOUCH_MOVE_THRESHOLD = 10; // px
+
+        const onTouchStart = (e: TouchEvent) => {
+          touchStartY = e.touches[0].clientY;
+        };
+
+        const onTouchMove = (e: TouchEvent) => {
+          const currentY = e.touches[0].clientY;
+          const diff = Math.abs(currentY - touchStartY);
+
+          if (diff > TOUCH_MOVE_THRESHOLD) {
+            closeMenu();
+          }
+        };
+
+        scrollElement.addEventListener("wheel", closeMenu);
+        scrollElement.addEventListener("touchstart", onTouchStart);
+        scrollElement.addEventListener("touchmove", onTouchMove);
+
+        return () => {
+          scrollElement.removeEventListener("wheel", closeMenu);
+          scrollElement.removeEventListener("touchstart", onTouchStart);
+          scrollElement.removeEventListener("touchmove", onTouchMove);
+        };
+      }
+    }, [isOpen, closeMenu, globalSimpleBar]);
 
     const toggleMenu = () => {
       analyticsAmplitudeStore.logEvent("click_view_options_context_menu", {
