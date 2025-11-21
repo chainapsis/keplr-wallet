@@ -27,6 +27,7 @@
   "bottom-tabs.swap": "스왑",
   "bottom-tabs.stake": "스테이킹",
   "bottom-tabs.history": "활동내역",
+  "bottom-tabs.settings": "설정",
   "bottom-tabs.swap.disabled": "스왑은 현재 코스모스, 이더리움 계열 체인들만 지원하고 있습니다. 사용하려면 코스모스나 이더리움 계열 체인을 추가해주세요",
 
   "pages.register.components.header.intro-title": "내 손 안의 인터체인",

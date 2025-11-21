@@ -22,6 +22,13 @@
   "error.outdated-cosmos-sdk": "不支持：cosmos-sdk 版本过低",
   "error.can-not-find-fee-for-claim-all": "找不到要支付的费用币种",
 
+  "bottom-tabs.home": "首页",
+  "bottom-tabs.swap": "交换",
+  "bottom-tabs.stake": "质押",
+  "bottom-tabs.history": "活动记录",
+  "bottom-tabs.settings": "设置",
+  "bottom-tabs.swap.disabled": "交换仅适用于Cosmos或以太坊系列链。请添加一条链以使用它。",
+
   "pages.register.components.header.intro-title": "你的跨链网关",
   "pages.register.components.header.header-step.title": "步骤",
   "pages.register.components.help-desk-button.title": "帮助中心",

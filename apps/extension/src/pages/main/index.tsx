@@ -135,11 +135,9 @@ export const MainPage: FunctionComponent<{
     return parseFloat(stakedDec.quo(totalDec).mul(new Dec(100)).toString());
   }, [totalPrice, stakedTotalPrice]);
 
-  const hasAnyStakableAsset = useMemo(() => {
-    return hugeQueriesStore.stakables.some((token) =>
-      token.token.toDec().gt(new Dec(0))
-    );
-  }, [hugeQueriesStore.stakables]);
+  const showRewardsCard = useMemo(() => {
+    return stakedTotalPrice?.toDec().gt(new Dec(0));
+  }, [stakedTotalPrice]);
 
   const lastTotalAvailableAmbiguousAvg = useRef(-1);
   const lastTotalStakedAmbiguousAvg = useRef(-1);
@@ -305,6 +303,9 @@ export const MainPage: FunctionComponent<{
       <Box padding="1.25rem">
         <Box
           ref={totalPriceSectionRef}
+          style={{
+            width: "fit-content",
+          }}
           onHoverStateChange={(isHover) => {
             if (!isNotReady) {
               animatedPrivacyModeHover.start(isHover ? 1 : 0);
@@ -312,6 +313,11 @@ export const MainPage: FunctionComponent<{
               animatedPrivacyModeHover.set(0);
             }
           }}
+          onClick={(e) => {
+            e.preventDefault();
+            uiConfigStore.toggleIsPrivacyMode();
+          }}
+          cursor="pointer"
         >
           <XAxis alignY="center">
             <Skeleton isNotReady={isNotReady} dummyMinWidth="6rem">
@@ -345,10 +351,6 @@ export const MainPage: FunctionComponent<{
                   ),
                   marginTop: "2px",
                 }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  uiConfigStore.toggleIsPrivacyMode();
-                }}
               >
                 {uiConfigStore.isPrivacyMode ? (
                   <EyeSlashIcon width="1rem" height="1rem" />
@@ -374,7 +376,7 @@ export const MainPage: FunctionComponent<{
 
       <Box paddingX="0.75rem" paddingBottom="1.5rem">
         <Stack gutter="1.5rem">
-          {hasAnyStakableAsset ? (
+          {showRewardsCard ? (
             <XAxis>
               <SpendableCard
                 spendableTotalPrice={spendableTotalPrice}

@@ -47,6 +47,7 @@ import { ContextMenuStyles } from "../../../../components/context-menu";
 import { stringLengthByGrapheme } from "../../../../utils/string";
 import { IconProps } from "../../../../components/icon/types";
 import { Box } from "../../../../components/box";
+import { Stack } from "../../../../components/stack";
 
 const AccountItem = observer(
   ({
@@ -58,7 +59,7 @@ const AccountItem = observer(
     keyInfo: KeyInfo;
     bech32Address: string;
     isSelected: boolean;
-    onSelect: () => void;
+    onSelect: (isSelected: boolean) => void;
   }) => {
     const theme = useTheme();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -131,7 +132,13 @@ const AccountItem = observer(
 
     return (
       <React.Fragment>
-        <Styles.AccountItem onClick={onSelect}>
+        <Styles.AccountItem
+          isSelected={isSelected}
+          onClick={(e) => {
+            e.preventDefault();
+            onSelect(isSelected);
+          }}
+        >
           <XAxis alignY="center">
             <Styles.AccountIcon isSelected={isSelected}>
               <Caption1
@@ -151,7 +158,7 @@ const AccountItem = observer(
 
             {icnsPrimaryName && (
               <React.Fragment>
-                <Gutter size="0.25rem" />
+                <Gutter size="0.375rem" />
                 <Tooltip
                   content={
                     <Caption2 color={ColorPalette["white"]}>
@@ -168,7 +175,7 @@ const AccountItem = observer(
                     style={{
                       width: "1rem",
                       height: "1rem",
-                      opacity: isSelected ? 0.6 : 1,
+                      opacity: isSelected ? COMMON_HOVER_OPACITY : 1,
                     }}
                   />
                 </Tooltip>
@@ -356,19 +363,27 @@ export const AccountSwitchFloatModal = observer(
                   />
                 </Styles.SearchContainer>
               )}
-              {sortedKeyInfos.map((keyInfo) => {
-                const isSelected =
-                  keyInfo.id === keyRingStore.selectedKeyInfo?.id;
-                return (
-                  <AccountItem
-                    key={keyInfo.id}
-                    keyInfo={keyInfo}
-                    isSelected={isSelected}
-                    onSelect={() => handleAccountSelect(keyInfo)}
-                    bech32Address={addressMap.get(keyInfo.id) ?? ""}
-                  />
-                );
-              })}
+              <Stack gutter="0.5rem">
+                {sortedKeyInfos.map((keyInfo) => {
+                  const isSelected =
+                    keyInfo.id === keyRingStore.selectedKeyInfo?.id;
+                  return (
+                    <AccountItem
+                      key={keyInfo.id}
+                      keyInfo={keyInfo}
+                      isSelected={isSelected}
+                      onSelect={(isSelected) => {
+                        if (isSelected) {
+                          return;
+                        }
+
+                        handleAccountSelect(keyInfo);
+                      }}
+                      bech32Address={addressMap.get(keyInfo.id) ?? ""}
+                    />
+                  );
+                })}
+              </Stack>
               <Gutter size="0.5rem" />
             </SimpleBar>
           </Styles.ModalContainer>
@@ -439,12 +454,21 @@ const Styles = {
     margin: 0.5rem 0;
   `,
 
-  AccountItem: styled.div`
+  AccountItem: styled.div<{ isSelected: boolean }>`
     padding: 1rem 0.5rem;
-    cursor: pointer;
+    cursor: ${({ isSelected }) => (isSelected ? "default" : "pointer")};
     display: flex;
     align-items: center;
     justify-content: space-between;
+
+    ${({ isSelected }) =>
+      isSelected &&
+      css`
+        background-color: ${({ theme }) =>
+          theme.mode === "light"
+            ? ColorPalette["gray-75"]
+            : ColorPalette["gray-600"]};
+      `}
 
     transition: background-color 0.1s ease-in-out;
     border-radius: 0.5rem;
@@ -472,7 +496,7 @@ const Styles = {
     ${({ isSelected }) =>
       isSelected &&
       css`
-        opacity: 0.6;
+        opacity: ${COMMON_HOVER_OPACITY};
       `}
   `,
 
@@ -489,7 +513,7 @@ const Styles = {
     ${({ isSelected }) =>
       isSelected &&
       css`
-        opacity: 0.6;
+        opacity: ${COMMON_HOVER_OPACITY};
       `}
   `,
 

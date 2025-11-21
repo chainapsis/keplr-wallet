@@ -129,17 +129,20 @@ export const StakePage: FunctionComponent = observer(() => {
           </Subtitle3>
         </Box>
         <Gutter size="0.75rem" />
-        <BalanceRow
-          onHoverStateChange={(isHover) => {
-            if (!isNotReady) {
-              animatedPrivacyModeHover.start(isHover ? 1 : 0);
-            } else {
-              animatedPrivacyModeHover.set(0);
-            }
-          }}
-          paddingX="0.25rem"
-        >
-          <XAxis alignY="center">
+        <BalanceRow paddingX="0.25rem">
+          <BalanceRowLeft
+            onHoverStateChange={(isHover) => {
+              if (!isNotReady) {
+                animatedPrivacyModeHover.start(isHover ? 1 : 0);
+              } else {
+                animatedPrivacyModeHover.set(0);
+              }
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              uiConfigStore.toggleIsPrivacyMode();
+            }}
+          >
             <Skeleton isNotReady={isNotReady} dummyMinWidth="6rem">
               <MainH1>
                 {uiConfigStore.hideStringIfPrivacyMode(
@@ -171,10 +174,6 @@ export const StakePage: FunctionComponent = observer(() => {
                   ),
                   marginTop: "2px",
                 }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  uiConfigStore.toggleIsPrivacyMode();
-                }}
               >
                 {uiConfigStore.isPrivacyMode ? (
                   <EyeSlashIcon width="1rem" height="1rem" />
@@ -183,7 +182,7 @@ export const StakePage: FunctionComponent = observer(() => {
                 )}
               </PrivacyModeButtonStyles.PrivacyModeButton>
             </animated.div>
-          </XAxis>
+          </BalanceRowLeft>
 
           <TextButton
             text={intl.formatMessage({
@@ -411,6 +410,15 @@ const BalanceRow = styled(Box)`
   flex-direction: row;
   align-items: flex-end;
   justify-content: space-between;
+`;
+
+const BalanceRowLeft = styled(Box)`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  cursor: pointer;
+  width: fit-content;
 `;
 
 const BackToHomeButton = styled(Box)`

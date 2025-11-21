@@ -27,6 +27,7 @@
   "bottom-tabs.swap": "Swap",
   "bottom-tabs.stake": "Stake",
   "bottom-tabs.history": "History",
+  "bottom-tabs.settings": "Settings",
   "bottom-tabs.swap.disabled": "Swap only works with Cosmos or Ethereum-based chains. Please add one to use it.",
 
   "pages.register.components.header.intro-title": "Your Interchain Gateway",
