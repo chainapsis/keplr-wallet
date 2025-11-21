@@ -32,6 +32,7 @@ import {
 import { PortalTooltip } from "../../../components/tooltip/portal";
 import { useRewards, ViewClaimToken } from "../../../hooks/use-rewards";
 import { TextButton } from "../../../components/button-text";
+import { Button } from "../../../components/button";
 
 export const RewardsCard: FunctionComponent<{
   isNotReady?: boolean;
@@ -135,13 +136,13 @@ export const RewardsCard: FunctionComponent<{
               }}
               isDisabled={claimAllDisabled}
             >
-              <TextButton
+              <Button
+                color="secondary"
                 text={intl.formatMessage({
                   id: "page.stake.components.rewards-card.claim-all-button",
                 })}
                 size="small"
                 disabled={claimAllDisabled}
-                isLoading={claimAllIsLoading}
                 onClick={() => {
                   if (claimAllDisabled || claimAllIsLoading) {
                     return;
@@ -150,12 +151,26 @@ export const RewardsCard: FunctionComponent<{
                   claimAll();
                   setIsExpanded(true);
                 }}
-                color="blue"
                 right={
                   claimAllIsLoading ? (
-                    <LoadingIcon width="1rem" height="1rem" />
+                    <Box padding="0.125rem">
+                      <LoadingIcon
+                        width="0.875rem"
+                        height="0.875rem"
+                        color={
+                          theme.mode === "light"
+                            ? ColorPalette["blue-200"]
+                            : ColorPalette["blue-700"]
+                        }
+                      />
+                    </Box>
                   ) : null
                 }
+                buttonStyle={{
+                  borderRadius: "1.3125rem",
+                  padding: "0.5rem 1rem",
+                }}
+                suppressDefaultLoadingIndicator={true}
               />
             </Styles.ActionButtonWrapper>
           )}
@@ -645,6 +660,8 @@ const Styles = {
     }
   `,
   ActionButtonWrapper: styled.div<{ isDisabled?: boolean }>`
+    margin-right: 1rem;
+
     ${(props) =>
       !props.isDisabled &&
       css`

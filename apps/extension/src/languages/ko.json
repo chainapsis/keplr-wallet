@@ -635,6 +635,7 @@
   "page.stake.components.rewards-card.claim-button": "받기",
   "page.stake.components.rewards-card.show-all-button": "모두 보기",
   "page.stake.components.rewards-card.hide-all-button": "닫기",
+  "page.stake.back-to-home-button": "총액 보기",
 
   "page.main.components.ibc-history-view.item.pending": "IBC 전송 중",
   "page.main.components.ibc-history-view.item.succeed": "IBC 전송 성공",

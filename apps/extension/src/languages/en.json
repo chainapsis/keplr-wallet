@@ -654,6 +654,7 @@
   "page.stake.components.rewards-card.claim-button": "Claim",
   "page.stake.components.rewards-card.show-all-button": "Show All",
   "page.stake.components.rewards-card.hide-all-button": "Hide All",
+  "page.stake.back-to-home-button": "View Total Balance",
 
   "page.main.components.ibc-history-view.item.pending": "IBC Transfer in Progress",
   "page.main.components.ibc-history-view.item.succeed": "IBC Transfer Successful",

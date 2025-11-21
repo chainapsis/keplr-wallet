@@ -11,7 +11,7 @@ import { TokenItem } from "../main/components";
 import { Dec } from "@keplr-wallet/unit";
 import { TextButton } from "../../components/button-text";
 import { useNavigate } from "react-router";
-import { ChevronIcon } from ".";
+import { ChevronRightIcon } from ".";
 import { FormattedMessage, useIntl } from "react-intl";
 import { MainH1 } from "../../components/typography/main-h1";
 import { useGetStakingApr } from "../../hooks/use-get-staking-apr";
@@ -119,7 +119,7 @@ export const StakeEmptyPage: FunctionComponent = observer(() => {
           onClick={() => {
             navigate("/stake/explore?showBackButton=true");
           }}
-          right={<ChevronIcon width="1rem" height="1rem" />}
+          right={<ChevronRightIcon width="1rem" height="1rem" />}
           style={{
             margin: "-0.25rem -1rem",
           }}
