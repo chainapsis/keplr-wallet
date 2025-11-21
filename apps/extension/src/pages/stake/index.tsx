@@ -129,7 +129,7 @@ export const StakePage: FunctionComponent = observer(() => {
           </Subtitle3>
         </Box>
         <Gutter size="0.75rem" />
-        <BalanceRow paddingLeft="0.25rem">
+        <BalanceRow paddingX="0.25rem">
           <BalanceRowLeft
             onHoverStateChange={(isHover) => {
               if (!isNotReady) {
