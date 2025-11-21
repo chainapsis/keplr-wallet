@@ -20,7 +20,10 @@ import {
   RawImageFallback,
 } from "../../../../components/image";
 import { AppCurrency } from "@keplr-wallet/types";
-import { IBCSwapAmountConfig } from "@keplr-wallet/hooks-internal";
+import {
+  IBCSwapAmountConfig,
+  SwapAmountConfig,
+} from "@keplr-wallet/hooks-internal";
 import { useNavigate } from "react-router";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -79,7 +82,7 @@ export const SwapAssetInfo: FunctionComponent<{
   type: "from" | "to";
 
   senderConfig: ISenderConfig;
-  amountConfig: IBCSwapAmountConfig;
+  amountConfig: IBCSwapAmountConfig | SwapAmountConfig;
 
   onDestinationChainSelect?: (
     chainId: string,
@@ -772,7 +775,7 @@ const PriceSymbol: FunctionComponent<{
 
 const SelectDestinationChainModal: FunctionComponent<{
   close: () => void;
-  amountConfig: IBCSwapAmountConfig;
+  amountConfig: IBCSwapAmountConfig | SwapAmountConfig;
   onDestinationChainSelect: (chainId: string, coinMinimalDenom: string) => void;
 }> = observer(({ close, amountConfig, onDestinationChainSelect }) => {
   const { chainStore, swapQueriesStore } = useStore();

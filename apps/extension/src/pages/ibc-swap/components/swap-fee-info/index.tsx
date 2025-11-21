@@ -14,7 +14,7 @@ import {
 import { autorun } from "mobx";
 import { Dec, IntPretty, PricePretty } from "@keplr-wallet/unit";
 import { useStore } from "../../../../stores";
-import { IBCSwapAmountConfig } from "@keplr-wallet/hooks-internal";
+import { SwapAmountConfig } from "@keplr-wallet/hooks-internal";
 import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
 import { Gutter } from "../../../../components/gutter";
@@ -29,7 +29,7 @@ import { getTitleColor } from "../../../../components/guide-box";
 
 export const SwapFeeInfo: FunctionComponent<{
   senderConfig: ISenderConfig;
-  amountConfig: IBCSwapAmountConfig;
+  amountConfig: SwapAmountConfig;
   gasConfig: IGasConfig;
   feeConfig: IFeeConfig;
   gasSimulator: IGasSimulator;
@@ -473,7 +473,7 @@ export const SwapFeeInfo: FunctionComponent<{
               gasSimulator={gasSimulator}
               disableAutomaticFeeSet={disableAutomaticFeeSet}
               isForEVMTx={isForEVMTx}
-              ibcSwapAmountConfig={amountConfig}
+              swapAmountConfig={amountConfig}
               nonceMethod={nonceMethod}
               setNonceMethod={setNonceMethod}
             />

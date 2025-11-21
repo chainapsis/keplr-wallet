@@ -35,7 +35,6 @@ import {
 
 export class SwapAmountConfig extends AmountConfig {
   static readonly QueryMsgsDirectRefreshInterval = 10000;
-  static readonly DefaultSlippage = 50; // TODO: 슬리피지를 이 클래스 안에서 관리해야할 수 있음
 
   @observable
   protected _outChainId: string;
@@ -45,6 +44,9 @@ export class SwapAmountConfig extends AmountConfig {
   protected _swapFeeBps: number;
   @observable
   protected _allowSwaps?: boolean;
+
+  @observable.ref
+  protected _getSlippageTolerancePercent: () => number;
 
   protected _oldValue: string;
 
@@ -62,6 +64,7 @@ export class SwapAmountConfig extends AmountConfig {
     initialOutCurrency: AppCurrency,
     disableSubFeeFromFaction: boolean,
     swapFeeBps: number,
+    getSlippageTolerancePercent: () => number,
     allowSwaps?: boolean
   ) {
     super(
@@ -76,6 +79,7 @@ export class SwapAmountConfig extends AmountConfig {
     this._outCurrency = initialOutCurrency;
     this._swapFeeBps = swapFeeBps;
     this._allowSwaps = allowSwaps;
+    this._getSlippageTolerancePercent = getSlippageTolerancePercent;
     this._oldValue = this._value;
     makeObservable(this);
 
@@ -105,8 +109,10 @@ export class SwapAmountConfig extends AmountConfig {
     if (this.fraction > 0) {
       let result = this.maxAmount;
 
+      const slippageTolerancePercent = this._getSlippageTolerancePercent();
+
       const queryRoute = this.getQuerySwapHelper(result)?.getRoute(
-        SwapAmountConfig.DefaultSlippage
+        slippageTolerancePercent
       );
       if (queryRoute?.response != null) {
         const bridgeFee = queryRoute.bridgeFees.reduce(
@@ -153,7 +159,9 @@ export class SwapAmountConfig extends AmountConfig {
       return new CoinPretty(this.outCurrency, "0");
     }
 
-    return querySwapHelper.getRoute(SwapAmountConfig.DefaultSlippage).outAmount;
+    const slippageTolerancePercent = this._getSlippageTolerancePercent();
+
+    return querySwapHelper.getRoute(slippageTolerancePercent).outAmount;
   }
 
   get outChainId(): string {
@@ -178,8 +186,9 @@ export class SwapAmountConfig extends AmountConfig {
       return undefined;
     }
 
-    return querySwapHelper.getRoute(SwapAmountConfig.DefaultSlippage)
-      .swapPriceImpact;
+    const slippageTolerancePercent = this._getSlippageTolerancePercent();
+
+    return querySwapHelper.getRoute(slippageTolerancePercent).swapPriceImpact;
   }
 
   get provider(): SwapProvider | undefined {
@@ -188,7 +197,9 @@ export class SwapAmountConfig extends AmountConfig {
       return undefined;
     }
 
-    return querySwapHelper.getRoute(SwapAmountConfig.DefaultSlippage).provider;
+    const slippageTolerancePercent = this._getSlippageTolerancePercent();
+
+    return querySwapHelper.getRoute(slippageTolerancePercent).provider;
   }
 
   @action
@@ -212,24 +223,29 @@ export class SwapAmountConfig extends AmountConfig {
       return [new CoinPretty(this.outCurrency, "0")];
     }
 
-    return querySwapHelper.getRoute(SwapAmountConfig.DefaultSlippage)
-      .bridgeFees;
+    const slippageTolerancePercent = this._getSlippageTolerancePercent();
+
+    return querySwapHelper.getRoute(slippageTolerancePercent).bridgeFees;
   }
 
   async fetch(): Promise<void> {
     const querySwapHelper = this.getQuerySwapHelper();
     if (querySwapHelper) {
-      await querySwapHelper.getRoute(SwapAmountConfig.DefaultSlippage).fetch();
+      const slippageTolerancePercent = this._getSlippageTolerancePercent();
+
+      await querySwapHelper.getRoute(slippageTolerancePercent).fetch();
     }
   }
 
   get isFetchingInAmount(): boolean {
     if (this.fraction === 1) {
+      const slippageTolerancePercent = this._getSlippageTolerancePercent();
+
       return (
         this.getQuerySwapHelper(this.maxAmount)?.getRoute(
-          SwapAmountConfig.DefaultSlippage
+          slippageTolerancePercent
         ).isFetching ??
-        this.getQuerySwapHelper()?.getRoute(SwapAmountConfig.DefaultSlippage)
+        this.getQuerySwapHelper()?.getRoute(slippageTolerancePercent)
           .isFetching ??
         false
       );
@@ -239,8 +255,10 @@ export class SwapAmountConfig extends AmountConfig {
   }
 
   get isFetchingOutAmount(): boolean {
+    const slippageTolerancePercent = this._getSlippageTolerancePercent();
+
     return (
-      this.getQuerySwapHelper()?.getRoute(SwapAmountConfig.DefaultSlippage)
+      this.getQuerySwapHelper()?.getRoute(slippageTolerancePercent)
         .isFetching ?? false
     );
   }
@@ -251,9 +269,9 @@ export class SwapAmountConfig extends AmountConfig {
       return "not-ready";
     }
 
-    const res = querySwapHelper.getRoute(
-      SwapAmountConfig.DefaultSlippage
-    ).response;
+    const slippageTolerancePercent = this._getSlippageTolerancePercent();
+
+    const res = querySwapHelper.getRoute(slippageTolerancePercent).response;
     if (!res) {
       return "not-ready";
     }
@@ -381,6 +399,7 @@ export class SwapAmountConfig extends AmountConfig {
    * @returns The constructed transaction if ready, or `undefined` if data is not yet available
    */
   getTxIfReady(
+    // CHECK: _getSlippageTolerancePercent()를 사용하지 않고 외부에서 전달받을 필요가 있을까?
     slippageTolerancePercent: number,
     customRecipient?: {
       chainId: string;
@@ -639,9 +658,9 @@ export class SwapAmountConfig extends AmountConfig {
         };
       }
 
-      const routeQuery = querySwapHelper.getRoute(
-        SwapAmountConfig.DefaultSlippage
-      );
+      const slippageTolerancePercent = this._getSlippageTolerancePercent();
+
+      const routeQuery = querySwapHelper.getRoute(slippageTolerancePercent);
       if (routeQuery.isFetching) {
         return {
           ...prev,
@@ -715,9 +734,9 @@ export class SwapAmountConfig extends AmountConfig {
       };
     }
 
-    const routeQuery = querySwapHelper.getRoute(
-      SwapAmountConfig.DefaultSlippage
-    );
+    const slippageTolerancePercent = this._getSlippageTolerancePercent();
+
+    const routeQuery = querySwapHelper.getRoute(slippageTolerancePercent);
     if (routeQuery.isFetching) {
       return {
         ...prev,
@@ -925,6 +944,7 @@ export const useSwapAmountConfig = (
   outCurrency: AppCurrency,
   disableSubFeeFromFaction: boolean,
   swapFeeBps: number,
+  getSlippageTolerancePercent: () => number,
   allowSwaps?: boolean
 ) => {
   const [txConfig] = useState(
@@ -941,6 +961,7 @@ export const useSwapAmountConfig = (
         outCurrency,
         disableSubFeeFromFaction,
         swapFeeBps,
+        getSlippageTolerancePercent,
         allowSwaps
       )
   );
