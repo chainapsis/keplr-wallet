@@ -136,12 +136,8 @@ export const MainPage: FunctionComponent<{
   }, [totalPrice, stakedTotalPrice]);
 
   const showRewardsCard = useMemo(() => {
-    return (
-      hugeQueriesStore.stakables.some((token) =>
-        token.token.toDec().gt(new Dec(0))
-      ) && stakedTotalPrice?.toDec().gt(new Dec(0))
-    );
-  }, [hugeQueriesStore.stakables, stakedTotalPrice]);
+    return stakedTotalPrice?.toDec().gt(new Dec(0));
+  }, [stakedTotalPrice]);
 
   const lastTotalAvailableAmbiguousAvg = useRef(-1);
   const lastTotalStakedAmbiguousAvg = useRef(-1);
