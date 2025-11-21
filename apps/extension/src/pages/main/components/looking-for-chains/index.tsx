@@ -196,6 +196,8 @@ export const LookingForChainItem: FunctionComponent<{
                 return;
               }
 
+              chainStore.enableChainInfoInUI(chainInfo.chainId);
+
               navigate(
                 `/manage-chains?vaultId=${keyRingStore.selectedKeyInfo.id}&initialSearchValue=${chainInfo.chainName}`
               );
