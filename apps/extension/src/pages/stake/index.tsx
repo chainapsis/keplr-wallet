@@ -100,6 +100,9 @@ export const StakePage: FunctionComponent = observer(() => {
         </Box>
         <Gutter size="0.75rem" />
         <Box
+          style={{
+            width: "fit-content",
+          }}
           onHoverStateChange={(isHover) => {
             if (!isNotReady) {
               animatedPrivacyModeHover.start(isHover ? 1 : 0);
@@ -108,6 +111,11 @@ export const StakePage: FunctionComponent = observer(() => {
             }
           }}
           paddingLeft="0.25rem"
+          onClick={(e) => {
+            e.preventDefault();
+            uiConfigStore.toggleIsPrivacyMode();
+          }}
+          cursor="pointer"
         >
           <XAxis alignY="center">
             <Skeleton isNotReady={isNotReady} dummyMinWidth="6rem">
@@ -140,10 +148,6 @@ export const StakePage: FunctionComponent = observer(() => {
                     Math.max(0, (v - 0.3) * (10 / 3))
                   ),
                   marginTop: "2px",
-                }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  uiConfigStore.toggleIsPrivacyMode();
                 }}
               >
                 {uiConfigStore.isPrivacyMode ? (
