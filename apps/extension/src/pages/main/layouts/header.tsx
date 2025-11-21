@@ -318,7 +318,11 @@ export const MainHeaderLayout = observer<
                               }}
                             >
                               <_CopyOutlineIcon
-                                color={ColorPalette["gray-300"]}
+                                color={
+                                  theme.mode === "light"
+                                    ? ColorPalette["gray-200"]
+                                    : ColorPalette["gray-300"]
+                                }
                               />
                             </IconButton>
                           </Box>
