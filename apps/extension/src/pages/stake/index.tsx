@@ -243,6 +243,7 @@ export const StakePage: FunctionComponent = observer(() => {
                 key={title}
                 title={<TokenTitleView title={title} />}
                 lenAlwaysShown={lenAlwaysShown}
+                hideNumInTitle={uiConfigStore.isPrivacyMode}
                 items={balance.map((viewToken) => {
                   const chainId =
                     "chainInfo" in viewToken
