@@ -540,16 +540,12 @@ export class SwapAmountConfig extends AmountConfig {
           {
             portId: msg.value.source_port,
             channelId: msg.value.source_channel,
-            counterpartyChainId: "",
+            counterpartyChainId: "", // NOTE: counterpartyChainId is not included in the server response
           },
           this.amount[0].toDec().toString(),
           this.amount[0].currency,
           msg.value.receiver,
-          msg.value.memo,
-          {
-            // pretend that the counterparty chain info is already validated on the server
-            skipCounterpartyChainInfoValidation: true,
-          }
+          msg.value.memo
         );
         tx.ui.overrideType("ibc-swap");
         return tx;

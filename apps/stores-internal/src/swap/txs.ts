@@ -12,13 +12,15 @@ import {
   TxRequest,
   TxRequestBase,
   TxResponse,
+  CosmosTxData,
+  EVMTxData,
 } from "./types";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { computed, makeObservable } from "mobx";
 import Joi from "joi";
 import { normalizeChainId, normalizeDenom } from "./utils";
 
-const CosmosTxDataSchema = Joi.object({
+const CosmosTxDataSchema = Joi.object<CosmosTxData>({
   chain_id: Joi.string().required(),
   signer_address: Joi.string().required(),
   msgs: Joi.array()
@@ -49,7 +51,11 @@ const CosmosTxDataSchema = Joi.object({
                     .unknown(true),
                   sender: Joi.string().required(),
                   receiver: Joi.string().required(),
-                  timeout_timestamp: Joi.string().required(),
+                  timeout_timestamp: Joi.any()
+                    .custom((value) =>
+                      typeof value === "number" ? value.toString() : value
+                    )
+                    .required(),
                   memo: Joi.string().optional(),
                 }).unknown(true),
               },
@@ -114,7 +120,7 @@ const CosmosTxDataSchema = Joi.object({
     .required(),
 }).unknown(true);
 
-const EVMTxDataSchema = Joi.object({
+const EVMTxDataSchema = Joi.object<EVMTxData>({
   chain_id: Joi.string().required(),
   to: Joi.string().required(),
   data: Joi.string().required(),
