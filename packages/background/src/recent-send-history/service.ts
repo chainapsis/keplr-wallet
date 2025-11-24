@@ -22,7 +22,10 @@ import {
   StatusRequest,
   SwapProvider,
   SwapV2History,
+  SwapV2RouteStepStatus,
   SwapV2TxStatus,
+  SwapV2TxStatusRequest,
+  SwapV2TxStatusResponse,
   TxStatusResponse,
 } from "./types";
 import { Buffer } from "buffer/";
@@ -230,10 +233,9 @@ export class RecentSendHistoryService {
       );
     });
 
-    // TODO: Track the recent swap v2 history
-    // for (const history of this.getRecentSwapV2Histories()) {
-    //   this.trackSwapV2Recursive(history.id);
-    // }
+    for (const history of this.getRecentSwapV2Histories()) {
+      this.trackSwapV2Recursive(history.id);
+    }
 
     this.chainsService.addChainRemovedHandler(this.onChainRemoved);
   }
@@ -1280,8 +1282,11 @@ export class RecentSendHistoryService {
     retry(
       () => {
         return new Promise<void>((txFulfilledResolve, txFulfilledReject) => {
-          this.checkAndTrackSkipSwapTxFulfilledRecursive(
-            history,
+          this.checkAndTrackSwapTxFulfilledRecursive(
+            "skip",
+            id,
+            history.chainId,
+            history.txHash,
             (keepTracking: boolean) => {
               txFulfilledResolve();
 
@@ -1318,18 +1323,21 @@ export class RecentSendHistoryService {
     );
   }
 
-  protected checkAndTrackSkipSwapTxFulfilledRecursive = (
-    history: SkipHistory,
+  protected checkAndTrackSwapTxFulfilledRecursive = (
+    type: "skip" | "swap-v2",
+    historyId: string,
+    chainId: string,
+    txHash: string,
     onFulfill: (keepTracking: boolean) => void,
     onError: () => void
   ): void => {
-    const chainInfo = this.chainsService.getChainInfo(history.chainId);
+    const chainInfo = this.chainsService.getChainInfo(chainId);
     if (!chainInfo) {
       onFulfill(false);
       return;
     }
 
-    if (this.chainsService.isEvmChain(history.chainId)) {
+    if (this.chainsService.isEvmChain(chainId)) {
       const evmInfo = chainInfo.evm;
       if (!evmInfo) {
         onFulfill(false);
@@ -1348,7 +1356,7 @@ export class RecentSendHistoryService {
         body: JSON.stringify({
           jsonrpc: "2.0",
           method: "eth_getTransactionReceipt",
-          params: [history.txHash],
+          params: [txHash],
           id: 1,
         }),
       })
@@ -1372,8 +1380,8 @@ export class RecentSendHistoryService {
                     })(),
                   },
                   body: JSON.stringify({
-                    tx_hash: history.txHash,
-                    chain_id: history.chainId.replace("eip155:", ""),
+                    tx_hash: txHash,
+                    chain_id: chainId.replace("eip155:", ""),
                   }),
                 })
                   .then((result) => {
@@ -1384,13 +1392,22 @@ export class RecentSendHistoryService {
                   })
                   .catch((e) => {
                     console.log(e);
-                    this.removeRecentSkipHistory(history.id);
+                    if (type === "skip") {
+                      this.removeRecentSkipHistory(historyId);
+                    } else {
+                      this.removeRecentSwapV2History(historyId);
+                    }
+
                     onFulfill(false);
                   });
               }, 2000);
             } else {
               // tx가 실패한거면 종료
-              this.removeRecentSkipHistory(history.id);
+              if (type === "skip") {
+                this.removeRecentSkipHistory(historyId);
+              } else {
+                this.removeRecentSwapV2History(historyId);
+              }
               onFulfill(false);
             }
           } else {
@@ -1405,7 +1422,7 @@ export class RecentSendHistoryService {
       const txTracer = new TendermintTxTracer(chainInfo.rpc, "/websocket");
       txTracer.addEventListener("error", () => onFulfill(false));
       txTracer
-        .traceTx(Buffer.from(history.txHash.replace("0x", ""), "hex"))
+        .traceTx(Buffer.from(txHash.replace("0x", ""), "hex"))
         .then((res: any) => {
           txTracer.close();
 
@@ -1445,8 +1462,8 @@ export class RecentSendHistoryService {
                   })(),
                 },
                 body: JSON.stringify({
-                  tx_hash: history.txHash,
-                  chain_id: history.chainId,
+                  tx_hash: txHash,
+                  chain_id: chainId,
                 }),
               })
                 .then((result) => {
@@ -1457,13 +1474,21 @@ export class RecentSendHistoryService {
                 })
                 .catch((e) => {
                   console.log(e);
-                  this.removeRecentSkipHistory(history.id);
+                  if (type === "skip") {
+                    this.removeRecentSkipHistory(historyId);
+                  } else {
+                    this.removeRecentSwapV2History(historyId);
+                  }
                   onFulfill(false);
                 });
             }, 2000);
           } else {
             // tx가 실패한거면 종료
-            this.removeRecentSkipHistory(history.id);
+            if (type === "skip") {
+              this.removeRecentSkipHistory(historyId);
+            } else {
+              this.removeRecentSwapV2History(historyId);
+            }
             onFulfill(false);
           }
         })
@@ -1830,7 +1855,11 @@ export class RecentSendHistoryService {
             }
 
             if (receiveTxHash) {
-              this.trackDestinationAssetAmount(id, receiveTxHash, onFulfill);
+              this.trackSkipDestinationAssetAmount(
+                id,
+                receiveTxHash,
+                onFulfill
+              );
             } else {
               history.trackDone = true;
               onFulfill();
@@ -1850,7 +1879,7 @@ export class RecentSendHistoryService {
       });
   };
 
-  protected trackDestinationAssetAmount(
+  protected trackSkipDestinationAssetAmount(
     historyId: string,
     txHash: string,
     onFulfill: () => void
@@ -2136,9 +2165,497 @@ export class RecentSendHistoryService {
     this.recentSwapV2HistoryMap.set(id, history);
 
     // TODO: Track the recent swap v2 history
-    // this.trackSwapV2Recursive(id);
+    this.trackSwapV2Recursive(id);
 
     return id;
+  }
+
+  trackSwapV2Recursive(id: string): void {
+    const history = this.getRecentSwapV2History(id);
+    if (!history) {
+      return;
+    }
+
+    // check tx fulfilled and update history
+    retry(
+      () => {
+        return new Promise<void>((txFulfilledResolve, txFulfilledReject) => {
+          this.checkAndTrackSwapTxFulfilledRecursive(
+            "swap-v2",
+            id,
+            history.fromChainId,
+            history.txHash,
+            (keepTracking: boolean) => {
+              txFulfilledResolve();
+
+              if (!keepTracking) {
+                return;
+              }
+
+              retry(
+                () => {
+                  return new Promise<void>((resolve, reject) => {
+                    this.checkAndUpdateSwapV2HistoryRecursive(
+                      id,
+                      resolve,
+                      reject
+                    );
+                  });
+                },
+                {
+                  maxRetries: 50,
+                  waitMsAfterError: 500,
+                  maxWaitMsAfterError: 15000,
+                }
+              );
+            },
+            txFulfilledReject
+          );
+        });
+      },
+      {
+        maxRetries: 50,
+        waitMsAfterError: 500,
+        maxWaitMsAfterError: 15000,
+      }
+    );
+  }
+
+  protected checkAndUpdateSwapV2HistoryRecursive(
+    id: string,
+    onFulfill: () => void,
+    onError: () => void
+  ): void {
+    const history = this.getRecentSwapV2History(id);
+    if (!history) {
+      onFulfill();
+      return;
+    }
+
+    const {
+      txHash,
+      fromChainId,
+      toChainId,
+      provider,
+      status,
+      trackDone,
+      routeIndex,
+      simpleRoute,
+    } = history;
+
+    let needRun = true;
+
+    // if the status is partial success or success, and the route index is the last one, then don't need to run
+    if (
+      status === SwapV2TxStatus.PARTIAL_SUCCESS ||
+      status === SwapV2TxStatus.SUCCESS
+    ) {
+      if (routeIndex === simpleRoute.length - 1) {
+        needRun = false;
+      }
+    }
+
+    // if the track done is not true, then need to run
+    if (!trackDone) {
+      needRun = true;
+    }
+
+    // quit if not need to run
+    if (!needRun) {
+      onFulfill();
+      return;
+    }
+
+    const normalizeChainId = (chainId: string): string => {
+      return chainId.replace("eip155:", "");
+    };
+
+    const request: SwapV2TxStatusRequest = {
+      provider,
+      from_chain: normalizeChainId(fromChainId),
+      to_chain: normalizeChainId(toChainId),
+      tx_hash: txHash,
+    };
+
+    simpleFetch<SwapV2TxStatusResponse>(
+      "https://keplr-api-dev.keplr.app", // TODO: change to production URL
+      "v2/swap/tx_status",
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(request),
+      }
+    )
+      .then((res) => {
+        const { status, steps, asset_location } = res.data;
+
+        // Update the overall status
+        runInAction(() => {
+          history.status = status;
+        });
+
+        let currentRouteIndex =
+          routeIndex < 0 ? 0 : Math.min(routeIndex, steps.length - 1);
+
+        // find the next blocking step (in progress or failed)
+        const nextBlockingStepIndex = steps.findIndex((step) => {
+          return (
+            step.status === SwapV2RouteStepStatus.IN_PROGRESS ||
+            step.status === SwapV2RouteStepStatus.FAILED
+          );
+        });
+        if (
+          nextBlockingStepIndex >= 0 &&
+          nextBlockingStepIndex >= currentRouteIndex
+        ) {
+          currentRouteIndex = nextBlockingStepIndex;
+        }
+
+        const currentStep = steps[currentRouteIndex];
+
+        if (!currentStep) {
+          // No step found, mark as done if status is final
+          if (status !== SwapV2TxStatus.IN_PROGRESS) {
+            runInAction(() => {
+              history.trackDone = true;
+            });
+
+            // if the status is failed and the asset location is not empty,
+            // then we need to find the last asset location and notify the user where the asset is located
+            if (
+              status === SwapV2TxStatus.FAILED &&
+              asset_location &&
+              asset_location.length > 0
+            ) {
+              const lastAssetLocation =
+                asset_location[asset_location.length - 1];
+
+              const chainId = lastAssetLocation.chain_id;
+              const evmLikeChainId = Number(chainId);
+              const isEVMChainId =
+                !Number.isNaN(evmLikeChainId) && evmLikeChainId > 0;
+
+              history.swapRefundInfo = {
+                chainId: isEVMChainId ? `eip155:${chainId}` : chainId,
+                amount: [
+                  {
+                    amount: lastAssetLocation.amount,
+                    denom: lastAssetLocation.denom,
+                  },
+                ],
+              };
+            } else if (status === SwapV2TxStatus.SUCCESS) {
+              const lastStep = steps[steps.length - 1];
+              if (lastStep && lastStep.tx_hash) {
+                this.trackSwapV2DestinationAssetAmount(
+                  id,
+                  lastStep.tx_hash,
+                  onFulfill
+                );
+              } else {
+                onFulfill();
+              }
+            } else {
+              onFulfill();
+            }
+          } else {
+            // if the status is not final, then we need to continue tracking
+            onError();
+          }
+          return;
+        }
+
+        // Update routeIndex based on current step's chain_id
+        // Match the step's chain_id with simpleRoute to find the correct routeIndex
+        // target chain id is not given, so we need to find the current step's chain id in the simpleRoute
+        let updatedRouteIndex = currentRouteIndex;
+        for (let i = 0; i < simpleRoute.length; i++) {
+          const routeChainId = simpleRoute[i].chainId.replace("eip155:", "");
+          if (
+            routeChainId.toLowerCase() === currentStep.chain_id.toLowerCase()
+          ) {
+            updatedRouteIndex = i;
+            break;
+          }
+        }
+
+        runInAction(() => {
+          history.routeIndex = updatedRouteIndex;
+          history.trackError = undefined;
+        });
+
+        switch (currentStep.status) {
+          case SwapV2RouteStepStatus.IN_PROGRESS:
+            // Still in progress, continue tracking
+            onError();
+            break;
+
+          case SwapV2RouteStepStatus.SUCCESS:
+            // Current step succeeded
+            if (
+              status === SwapV2TxStatus.SUCCESS ||
+              status === SwapV2TxStatus.PARTIAL_SUCCESS
+            ) {
+              // Check if this is the last route
+              if (updatedRouteIndex < simpleRoute.length - 1) {
+                // move to the last route forcefully as it's succeeded
+                runInAction(() => {
+                  history.routeIndex = simpleRoute.length - 1;
+                });
+              }
+
+              if (currentStep.tx_hash) {
+                // track the destination asset amount
+                this.trackSwapV2DestinationAssetAmount(
+                  id,
+                  currentStep.tx_hash,
+                  onFulfill
+                );
+              } else {
+                runInAction(() => {
+                  history.trackDone = true;
+                });
+                onFulfill();
+              }
+            } else {
+              // Status is still IN_PROGRESS, continue tracking
+              onError();
+            }
+            break;
+
+          case SwapV2RouteStepStatus.FAILED:
+            // Step failed, mark as done with error
+            runInAction(() => {
+              history.trackDone = true;
+              history.status = SwapV2TxStatus.FAILED;
+              // history.trackError = `Step failed at chain ${currentStep.chain_id}`;
+            });
+            onFulfill();
+            break;
+        }
+      })
+      .catch((e) => {
+        console.error(e);
+
+        onError();
+      });
+  }
+
+  protected trackSwapV2DestinationAssetAmount(
+    historyId: string,
+    txHash: string,
+    onFulfill: () => void
+  ) {
+    const history = this.getRecentSwapV2History(historyId);
+    if (!history) {
+      onFulfill();
+      return;
+    }
+
+    const chainInfo = this.chainsService.getChainInfo(history.toChainId);
+    if (!chainInfo) {
+      onFulfill();
+      return;
+    }
+
+    if (this.chainsService.isEvmChain(history.toChainId)) {
+      const evmInfo = chainInfo.evm;
+      if (!evmInfo) {
+        onFulfill();
+        return;
+      }
+
+      simpleFetch<{
+        result: EthTxReceipt | null;
+        error?: Error;
+      }>(evmInfo.rpc, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "request-source": origin,
+        },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method: "eth_getTransactionReceipt",
+          params: [txHash],
+          id: 1,
+        }),
+      })
+        .then((res) => {
+          const txReceipt = res.data.result;
+          if (txReceipt) {
+            simpleFetch<{
+              result: any;
+              error?: Error;
+            }>(evmInfo.rpc, {
+              method: "POST",
+              headers: {
+                "content-type": "application/json",
+                "request-source": origin,
+              },
+              body: JSON.stringify({
+                jsonrpc: "2.0",
+                method: "debug_traceTransaction",
+                params: [txHash, { tracer: "callTracer" }],
+                id: 1,
+              }),
+            }).then((res) => {
+              runInAction(() => {
+                let isFoundFromCall = false;
+                if (res.data.result) {
+                  const searchForTransfers = (calls: any) => {
+                    for (const call of calls) {
+                      if (
+                        call.type === "CALL" &&
+                        call.to.toLowerCase() ===
+                          history.recipient.toLowerCase()
+                      ) {
+                        const isERC20Transfer =
+                          call.input.startsWith("0xa9059cbb");
+                        const value = BigInt(
+                          isERC20Transfer
+                            ? `0x${call.input.substring(74)}`
+                            : call.value
+                        );
+
+                        history.resAmount.push([
+                          {
+                            amount: value.toString(10),
+                            denom: history.destinationAsset.denom,
+                          },
+                        ]);
+                        isFoundFromCall = true;
+                      }
+
+                      if (call.calls && call.calls.length > 0) {
+                        searchForTransfers(call.calls);
+                      }
+                    }
+                  };
+
+                  searchForTransfers(res.data.result.calls || []);
+                }
+
+                if (isFoundFromCall) {
+                  history.trackDone = true;
+                  return;
+                }
+
+                const logs = txReceipt.logs;
+                const transferTopic = id("Transfer(address,address,uint256)");
+                const withdrawTopic = id("Withdrawal(address,uint256)");
+                const hyperlaneReceiveTopic = id(
+                  "ReceivedTransferRemote(uint32,bytes32,uint256)"
+                );
+                for (const log of logs) {
+                  if (log.topics[0] === transferTopic) {
+                    const to = "0x" + log.topics[2].slice(26);
+                    if (to.toLowerCase() === history.recipient.toLowerCase()) {
+                      const destinationAssetDenom =
+                        history.destinationAsset.denom.replace("erc20:", "");
+
+                      const amount = BigInt(log.data).toString(10);
+                      if (log.address === destinationAssetDenom) {
+                        history.resAmount.push([
+                          {
+                            amount,
+                            denom: history.destinationAsset.denom,
+                          },
+                        ]);
+                      } else {
+                        console.log("refunded", log.address);
+                        // Transfer 토픽인 경우엔 ERC20의 tranfer 호출일텐데
+                        // 받을 토큰의 컨트랙트가 아닌 다른 컨트랙트에서 호출된 경우는 Swap을 실패한 것으로 추측
+                        // 고로 실제로 받은 토큰의 컨트랙트 주소로 환불 정보에 저장한다.
+                        history.trackError = "Swap failed";
+                        history.swapRefundInfo = {
+                          chainId: history.toChainId,
+                          amount: [
+                            {
+                              amount,
+                              denom: `erc20:${log.address.toLowerCase()}`,
+                            },
+                          ],
+                        };
+                      }
+
+                      history.trackDone = true;
+                      return;
+                    }
+                  } else if (log.topics[0] === withdrawTopic) {
+                    const to = "0x" + log.topics[1].slice(26);
+                    if (to.toLowerCase() === txReceipt.to.toLowerCase()) {
+                      const amount = BigInt(log.data).toString(10);
+                      history.resAmount.push([
+                        { amount, denom: history.destinationAsset.denom },
+                      ]);
+                      history.trackDone = true;
+                      return;
+                    }
+                  } else if (log.topics[0] === hyperlaneReceiveTopic) {
+                    const to = "0x" + log.topics[2].slice(26);
+                    if (to.toLowerCase() === history.recipient.toLowerCase()) {
+                      const amount = BigInt(log.data).toString(10);
+                      // Hyperlane을 통해 Forma로 TIA를 받는 경우 토큰 수량이 decimal 6으로 기록되는데,
+                      // Forma에서는 decimal 18이기 때문에 12자리 만큼 0을 붙여준다.
+                      history.resAmount.push([
+                        {
+                          amount:
+                            history.destinationAsset.denom === "forma-native"
+                              ? `${amount}000000000000`
+                              : amount,
+                          denom: history.destinationAsset.denom,
+                        },
+                      ]);
+                      history.trackDone = true;
+                      return;
+                    }
+                  }
+                }
+              });
+            });
+          }
+        })
+        .finally(() => {
+          history.trackDone = true;
+          onFulfill();
+        });
+    } else {
+      const txTracer = new TendermintTxTracer(chainInfo.rpc, "/websocket");
+      txTracer.addEventListener("error", () => onFulfill());
+      txTracer
+        .queryTx({
+          "tx.hash": txHash,
+        })
+        .then((res: any) => {
+          txTracer.close();
+
+          if (!res) {
+            return;
+          }
+          runInAction(() => {
+            const txs = res.txs
+              ? res.txs.map((res: any) => res.tx_result || res)
+              : [res.tx_result || res];
+            for (const tx of txs) {
+              const resAmount = this.getIBCSwapResAmountFromTx(
+                tx,
+                history.recipient
+              );
+
+              history.resAmount.push(resAmount);
+              history.trackDone = true;
+              return;
+            }
+          });
+        })
+        .finally(() => {
+          history.trackDone = true;
+          onFulfill();
+        });
+    }
   }
 
   getRecentSwapV2History(id: string): SwapV2History | undefined {

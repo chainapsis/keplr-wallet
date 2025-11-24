@@ -442,47 +442,6 @@ export interface TxResponse {
   transactions: SwapTransaction[];
 }
 
-// TODO: move status query types out of this file
-export interface TxStatusRequest {
-  provider: SwapProvider;
-  from_chain: string;
-  to_chain?: string; // optional, used by Squid
-  tx_hash: string;
-}
-
-export enum RouteStepStatus {
-  IN_PROGRESS = "in_progress",
-  SUCCESS = "success",
-  FAILED = "failed",
-}
-
-export enum TxStatus {
-  IN_PROGRESS = "in_progress",
-  SUCCESS = "success",
-  PARTIAL_SUCCESS = "partial_success",
-  FAILED = "failed",
-}
-
-export interface TxStatusStep {
-  chain_id: string;
-  status: RouteStepStatus;
-  tx_hash?: string;
-  explorer_url?: string;
-}
-
-export interface AssetLocation {
-  chain_id: string;
-  denom: string;
-  amount: string;
-}
-
-export interface TxStatusResponse {
-  provider: SwapProvider;
-  status: TxStatus;
-  steps: TxStatusStep[];
-  asset_location?: AssetLocation[] | null;
-}
-
 export interface ChainsResponseV2 {
   chains: {
     chain_id: string;

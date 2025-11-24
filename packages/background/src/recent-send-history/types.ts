@@ -507,6 +507,13 @@ export enum SwapProvider {
   SQUID = "squid",
 }
 
+export interface SwapV2TxStatusRequest {
+  provider: SwapProvider;
+  from_chain: string;
+  to_chain?: string; // optional, used by Squid
+  tx_hash: string;
+}
+
 export interface SwapV2TxStatusResponse {
   provider: SwapProvider;
   status: SwapV2TxStatus;
@@ -556,6 +563,9 @@ export interface SwapV2History {
       denom: string;
     }[];
   };
+
+  trackDone?: boolean; // status tracking이 완료되었는지 여부
+  trackError?: string; // status tracking 중 에러가 발생했는지 여부
 
   notified?: boolean;
   notificationInfo?: {
