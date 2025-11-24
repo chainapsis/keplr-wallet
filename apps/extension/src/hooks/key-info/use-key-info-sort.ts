@@ -1,8 +1,8 @@
 import { KeyInfo } from "@keplr-wallet/background";
-import { useStore } from "../stores";
+import { useStore } from "../../stores";
 import { useMemo } from "react";
 
-export const KEYRING_SORT_KEY = {
+export const KEY_INFO_SORT_KEY = {
   MNEMONIC: "sort-mnemonic",
   PRIVATE_KEY: "sort-private-key",
   LEDGER: "sort-ledger",
@@ -31,7 +31,7 @@ const sortKeyInfos = (keyInfos: KeyInfo[], indexMap: Map<string, number>) => {
   });
 };
 
-export const useKeyringSort = (sortKey: string, keyInfos: KeyInfo[]) => {
+export const useKeyInfoSort = (sortKey: string, keyInfos: KeyInfo[]) => {
   const { uiConfigStore } = useStore();
 
   const indexMap =
@@ -182,7 +182,7 @@ export const useGetAllSortedKeyInfos = (keyInfos: KeyInfo[]) => {
     if (mnemonicKeys.length > 0) {
       const indexMap =
         uiConfigStore.selectWalletConfig.getKeyToSortVaultIdsMapIndex(
-          KEYRING_SORT_KEY.MNEMONIC
+          KEY_INFO_SORT_KEY.MNEMONIC
         );
       res.push(...sortKeyInfos(mnemonicKeys, indexMap));
     }
@@ -209,7 +209,7 @@ export const useGetAllSortedKeyInfos = (keyInfos: KeyInfo[]) => {
     if (privateKeyInfos.length > 0) {
       const indexMap =
         uiConfigStore.selectWalletConfig.getKeyToSortVaultIdsMapIndex(
-          KEYRING_SORT_KEY.PRIVATE_KEY
+          KEY_INFO_SORT_KEY.PRIVATE_KEY
         );
       res.push(...sortKeyInfos(privateKeyInfos, indexMap));
     }
@@ -217,7 +217,7 @@ export const useGetAllSortedKeyInfos = (keyInfos: KeyInfo[]) => {
     if (ledgerKeys.length > 0) {
       const indexMap =
         uiConfigStore.selectWalletConfig.getKeyToSortVaultIdsMapIndex(
-          KEYRING_SORT_KEY.LEDGER
+          KEY_INFO_SORT_KEY.LEDGER
         );
       res.push(...sortKeyInfos(ledgerKeys, indexMap));
     }
@@ -225,7 +225,7 @@ export const useGetAllSortedKeyInfos = (keyInfos: KeyInfo[]) => {
     if (keystoneKeys.length > 0) {
       const indexMap =
         uiConfigStore.selectWalletConfig.getKeyToSortVaultIdsMapIndex(
-          KEYRING_SORT_KEY.KEYSTONE
+          KEY_INFO_SORT_KEY.KEYSTONE
         );
       res.push(...sortKeyInfos(keystoneKeys, indexMap));
     }
@@ -233,7 +233,7 @@ export const useGetAllSortedKeyInfos = (keyInfos: KeyInfo[]) => {
     if (unknownKeys.length > 0) {
       const indexMap =
         uiConfigStore.selectWalletConfig.getKeyToSortVaultIdsMapIndex(
-          KEYRING_SORT_KEY.UNKNOWN
+          KEY_INFO_SORT_KEY.UNKNOWN
         );
       res.push(...sortKeyInfos(unknownKeys, indexMap));
     }
