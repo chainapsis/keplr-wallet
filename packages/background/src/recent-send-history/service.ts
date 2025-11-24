@@ -53,6 +53,8 @@ export class RecentSendHistoryService {
   @observable
   protected readonly recentSkipHistoryMap: Map<string, SkipHistory> = new Map();
 
+  // TODO: add swap history map
+
   constructor(
     protected readonly kvStore: KVStore,
     protected readonly chainsService: ChainsService,

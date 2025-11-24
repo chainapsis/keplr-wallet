@@ -570,8 +570,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             channelId: string;
             counterpartyChainId: string;
           }[] = [];
-          const swapChannelIndex: number = -1;
+          let swapChannelIndex: number = -1;
           const swapReceiver: string[] = [];
+          const swapFeeBpsReceiver: string[] = [];
           const simpleRoute: {
             isOnlyEvm: boolean;
             chainId: string;
@@ -655,78 +656,208 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 });
               }
             } else {
-              for (const step of steps) {
-                if (step.type === RouteStepType.IBC_TRANSFER) {
-                  // const queryClientState = queriesStore;
-                  //         .get(operation.transfer.chain_id)
-                  //         .cosmos.queryIBCClientState.getClientState(
-                  //           operation.transfer.port,
-                  //           operation.transfer.channel
-                  //         );
-                  //       await queryClientState.waitResponse();
-                  //       if (!queryClientState.response) {
-                  //         throw new Error("queryClientState.response is undefined");
-                  //       }
-                  //       if (!queryClientState.clientChainId) {
-                  //         throw new Error(
-                  //           "queryClientState.clientChainId is undefined"
-                  //         );
-                  //       }
-                  //       channels.push({
-                  //         portId: operation.transfer.port,
-                  //         channelId: operation.transfer.channel,
-                  //         counterpartyChainId: queryClientState.clientChainId,
-                  //       });
-                } else if (step.type === RouteStepType.SWAP) {
-                  //       const swapIn =
-                  //         operation.swap.swap_in ?? operation.swap.smart_swap_in;
-                  //       if (swapIn) {
-                  //         const swapFeeBpsReceiverAddress = SwapFeeBps.receivers.find(
-                  //           (r) => r.chainId === swapIn.swap_venue.chain_id
-                  //         );
-                  //         if (swapFeeBpsReceiverAddress) {
-                  //           swapFeeBpsReceiver.push(
-                  //             swapFeeBpsReceiverAddress.address
-                  //           );
-                  //         }
-                  //       }
-                  //       swapChannelIndex = channels.length - 1;
+              // 브릿지를 사용하지 않는 경우, 자세한 ibc swap channel 정보를 보여준다.
+              const skipOperations =
+                queryRoute.response.data.provider === "skip"
+                  ? queryRoute.response.data.skip_operations
+                  : undefined;
+
+              // skip_operations에서 상세 정보를 추출한다 (SKIP provider인 경우에만 사용 가능)
+              if (skipOperations) {
+                // skip_operations를 순회하면서 transfer와 swap 정보를 추출
+                for (const operation of skipOperations) {
+                  if ("transfer" in operation) {
+                    const queryClientState = queriesStore
+                      .get(operation.transfer.chain_id)
+                      .cosmos.queryIBCClientState.getClientState(
+                        operation.transfer.port,
+                        operation.transfer.channel
+                      );
+
+                    await queryClientState.waitResponse();
+                    if (!queryClientState.response) {
+                      throw new Error("queryClientState.response is undefined");
+                    }
+                    if (!queryClientState.clientChainId) {
+                      throw new Error(
+                        "queryClientState.clientChainId is undefined"
+                      );
+                    }
+
+                    channels.push({
+                      portId: operation.transfer.port,
+                      channelId: operation.transfer.channel,
+                      counterpartyChainId: queryClientState.clientChainId,
+                    });
+                  } else if ("swap" in operation) {
+                    const swapIn =
+                      operation.swap.swap_in ?? operation.swap.smart_swap_in;
+                    if (swapIn) {
+                      const swapFeeBpsReceiverAddress =
+                        SwapFeeBps.receivers.find(
+                          (r) => r.chainId === swapIn.swap_venue.chain_id
+                        );
+                      if (swapFeeBpsReceiverAddress) {
+                        swapFeeBpsReceiver.push(
+                          swapFeeBpsReceiverAddress.address
+                        );
+                      }
+                    }
+                    // swap이 발생하는 channel index는 마지막 channel 다음이므로
+                    // 현재 channels.length가 swap channel index가 된다
+                    swapChannelIndex = channels.length - 1;
+                  }
+                }
+
+                // receiver chain IDs를 구성하고 각 chain의 receiver address를 가져온다
+                const receiverChainIds = [inChainId];
+                for (const channel of channels) {
+                  receiverChainIds.push(channel.counterpartyChainId);
+                }
+                for (const receiverChainId of receiverChainIds) {
+                  const receiverAccount =
+                    accountStore.getAccount(receiverChainId);
+                  if (receiverAccount.walletStatus !== WalletStatus.Loaded) {
+                    await receiverAccount.init();
+                  }
+
+                  if (!receiverAccount.bech32Address) {
+                    const receiverChainInfo =
+                      chainStore.hasChain(receiverChainId) &&
+                      chainStore.getChain(receiverChainId);
+                    if (
+                      receiverAccount.isNanoLedger &&
+                      receiverChainInfo &&
+                      (receiverChainInfo.bip44.coinType === 60 ||
+                        receiverChainInfo.features.includes(
+                          "eth-address-gen"
+                        ) ||
+                        receiverChainInfo.features.includes("eth-key-sign") ||
+                        receiverChainInfo.evm != null)
+                    ) {
+                      throw new Error(
+                        "Please connect Ethereum app on Ledger with Keplr to get the address"
+                      );
+                    }
+
+                    throw new Error(
+                      "receiverAccount.bech32Address is undefined"
+                    );
+                  }
+                  swapReceiver.push(receiverAccount.bech32Address);
+                }
+              } else {
+                // skip_operations가 없는 경우 (예: SQUID provider)
+                // steps에서 정보를 추출하고, swapQueriesStore를 사용하여 IBC 채널 정보를 찾는다
+                for (const step of steps) {
+                  if (step.type === RouteStepType.IBC_TRANSFER) {
+                    // IBC transfer step의 경우, from_chain과 from_token을 사용하여 채널을 찾는다
+                    const ibcChannels =
+                      swapQueriesStore.queryTransferPaths.getIBCChannels(
+                        step.from_chain,
+                        step.from_token
+                      );
+
+                    // to_chain과 매칭되는 채널을 찾는다
+                    const matchingChannel = ibcChannels.find(
+                      (channel) => channel.destinationChainId === step.to_chain
+                    );
+
+                    if (
+                      matchingChannel &&
+                      matchingChannel.channels.length > 0
+                    ) {
+                      // 매칭되는 채널이 있으면 channels 배열에 추가
+                      // IBCChannelV2의 channels에는 이미 counterpartyChainId가 포함되어 있음
+                      for (const channel of matchingChannel.channels) {
+                        channels.push({
+                          portId: channel.portId,
+                          channelId: channel.channelId,
+                          counterpartyChainId: channel.counterpartyChainId,
+                        });
+                      }
+                    }
+                  } else if (step.type === RouteStepType.SWAP) {
+                    // swap venue chain ID는 step의 to_chain을 사용할 수 있다
+                    // 하지만 정확한 swap_venue 정보는 없으므로 단순히 to_chain을 사용
+                    const evmLikeChainId = Number(step.to_chain);
+                    const isEVMChainId =
+                      !Number.isNaN(evmLikeChainId) && evmLikeChainId > 0;
+
+                    const swapVenueChainId = isEVMChainId
+                      ? `eip155:${evmLikeChainId}`
+                      : step.to_chain;
+                    const swapFeeBpsReceiverAddress = SwapFeeBps.receivers.find(
+                      (r) => r.chainId === swapVenueChainId
+                    );
+                    if (swapFeeBpsReceiverAddress) {
+                      swapFeeBpsReceiver.push(
+                        swapFeeBpsReceiverAddress.address
+                      );
+                    }
+                    // swap이 발생하는 channel index는 마지막 channel 다음이므로
+                    // 현재 channels.length가 swap channel index가 된다
+                    swapChannelIndex = channels.length - 1;
+                  }
+                }
+
+                // receiver chain IDs를 steps에서 추출
+                const receiverChainIds = [inChainId];
+                for (const step of steps) {
+                  if (step.type === RouteStepType.IBC_TRANSFER) {
+                    receiverChainIds.push(step.to_chain);
+                  }
+                }
+                // 마지막 step의 to_chain이 최종 destination이 될 수 있다
+                if (steps.length > 0) {
+                  const lastStep = steps[steps.length - 1];
+                  if (!receiverChainIds.includes(lastStep.to_chain)) {
+                    receiverChainIds.push(lastStep.to_chain);
+                  }
+                }
+
+                for (const receiverChainId of receiverChainIds) {
+                  const evmLikeChainId = Number(receiverChainId);
+                  const isEVMChainId =
+                    !Number.isNaN(evmLikeChainId) && evmLikeChainId > 0;
+
+                  const receiverChainIdInKeplr = isEVMChainId
+                    ? `eip155:${evmLikeChainId}`
+                    : receiverChainId;
+
+                  const receiverAccount = accountStore.getAccount(
+                    receiverChainIdInKeplr
+                  );
+                  if (receiverAccount.walletStatus !== WalletStatus.Loaded) {
+                    await receiverAccount.init();
+                  }
+
+                  if (!receiverAccount.bech32Address) {
+                    const receiverChainInfo =
+                      chainStore.hasChain(receiverChainIdInKeplr) &&
+                      chainStore.getChain(receiverChainIdInKeplr);
+                    if (
+                      receiverAccount.isNanoLedger &&
+                      receiverChainInfo &&
+                      (receiverChainInfo.bip44.coinType === 60 ||
+                        receiverChainInfo.features.includes(
+                          "eth-address-gen"
+                        ) ||
+                        receiverChainInfo.features.includes("eth-key-sign") ||
+                        receiverChainInfo.evm != null)
+                    ) {
+                      throw new Error(
+                        "Please connect Ethereum app on Ledger with Keplr to get the address"
+                      );
+                    }
+
+                    throw new Error(
+                      "receiverAccount.bech32Address is undefined"
+                    );
+                  }
+                  swapReceiver.push(receiverAccount.bech32Address);
                 }
               }
-
-              // const receiverChainIds = [inChainId];
-              //   for (const channel of channels) {
-              //     receiverChainIds.push(channel.counterpartyChainId);
-              //   }
-              //   for (const receiverChainId of receiverChainIds) {
-              //     const receiverAccount =
-              //       accountStore.getAccount(receiverChainId);
-              //     if (receiverAccount.walletStatus !== WalletStatus.Loaded) {
-              //       await receiverAccount.init();
-              //     }
-
-              //     if (!receiverAccount.bech32Address) {
-              //       const receiverChainInfo =
-              //         chainStore.hasChain(receiverChainId) &&
-              //         chainStore.getChain(receiverChainId);
-              //       if (
-              //         receiverAccount.isNanoLedger &&
-              //         receiverChainInfo &&
-              //         (receiverChainInfo.bip44.coinType === 60 ||
-              //           receiverChainInfo.features.includes("eth-address-gen") ||
-              //           receiverChainInfo.features.includes("eth-key-sign") ||
-              //           receiverChainInfo.evm != null)
-              //       ) {
-              //         throw new Error(
-              //           "Please connect Ethereum app on Ledger with Keplr to get the address"
-              //         );
-              //       }
-
-              //       throw new Error("receiverAccount.bech32Address is undefined");
-              //     }
-              //     swapReceiver.push(receiverAccount.bech32Address);
-              //   }
-              // }
             }
 
             const [_tx] = await Promise.all([
