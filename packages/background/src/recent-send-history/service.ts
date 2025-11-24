@@ -20,6 +20,9 @@ import {
   RecentSendHistory,
   SkipHistory,
   StatusRequest,
+  SwapProvider,
+  SwapV2History,
+  SwapV2TxStatus,
   TxStatusResponse,
 } from "./types";
 import { Buffer } from "buffer/";
@@ -53,7 +56,12 @@ export class RecentSendHistoryService {
   @observable
   protected readonly recentSkipHistoryMap: Map<string, SkipHistory> = new Map();
 
-  // TODO: add swap history map
+  @observable
+  protected recentSwapV2HistorySeq: number = 0;
+  // Key: id (sequence, it should be increased by 1 for each)
+  @observable
+  protected readonly recentSwapV2HistoryMap: Map<string, SwapV2History> =
+    new Map();
 
   constructor(
     protected readonly kvStore: KVStore,
@@ -180,6 +188,52 @@ export class RecentSendHistoryService {
     for (const history of this.getRecentSkipHistories()) {
       this.trackSkipSwapRecursive(history.id);
     }
+
+    const recentSwapV2HistorySeqSaved = await this.kvStore.get<number>(
+      "recentSwapV2HistorySeq"
+    );
+    if (recentSwapV2HistorySeqSaved) {
+      runInAction(() => {
+        this.recentSwapV2HistorySeq = recentSwapV2HistorySeqSaved;
+      });
+    }
+
+    // Save the swap v2 history sequence to the storage when the swap v2 history sequence is changed
+    autorun(() => {
+      const js = toJS(this.recentSwapV2HistorySeq);
+      this.kvStore.set<number>("recentSwapV2HistorySeq", js);
+    });
+
+    // Load swap v2 history from the storage
+    const recentSwapV2HistoryMapSaved = await this.kvStore.get<
+      Record<string, SwapV2History>
+    >("recentSwapV2HistoryMap");
+    if (recentSwapV2HistoryMapSaved) {
+      runInAction(() => {
+        let entries = Object.entries(recentSwapV2HistoryMapSaved);
+        entries = entries.sort(([, a], [, b]) => {
+          return parseInt(a.id) - parseInt(b.id);
+        });
+        for (const [key, value] of entries) {
+          this.recentSwapV2HistoryMap.set(key, value);
+        }
+      });
+    }
+
+    // Save the swap v2 history to the storage when the swap v2 history is changed
+    autorun(() => {
+      const js = toJS(this.recentSwapV2HistoryMap);
+      const obj = Object.fromEntries(js);
+      this.kvStore.set<Record<string, SwapV2History>>(
+        "recentSwapV2HistoryMap",
+        obj
+      );
+    });
+
+    // TODO: Track the recent swap v2 history
+    // for (const history of this.getRecentSwapV2Histories()) {
+    //   this.trackSwapV2Recursive(history.id);
+    // }
 
     this.chainsService.addChainRemovedHandler(this.onChainRemoved);
   }
@@ -2023,6 +2077,106 @@ export class RecentSendHistoryService {
     this.recentSkipHistoryMap.clear();
   }
 
+  /**
+   * Swap v2 history related methods
+   */
+
+  @action
+  recordTxWithSwapV2(
+    fromChainId: string,
+    toChainId: string,
+    provider: SwapProvider,
+    destinationAsset: {
+      chainId: string;
+      denom: string;
+      expectedAmount: string;
+    },
+    simpleRoute: {
+      isOnlyEvm: boolean;
+      chainId: string;
+      receiver: string;
+    }[],
+    sender: string,
+    recipient: string,
+    amount: {
+      amount: string;
+      denom: string;
+    }[],
+    notificationInfo: {
+      currencies: AppCurrency[];
+    },
+    routeDurationSeconds: number = 0,
+    txHash: string,
+    isOnlyUseBridge?: boolean
+  ): string {
+    const id = (this.recentSwapV2HistorySeq++).toString();
+
+    const history: SwapV2History = {
+      id,
+      fromChainId,
+      toChainId,
+      provider,
+      timestamp: Date.now(),
+      sender,
+      recipient,
+      amount,
+      notificationInfo,
+      routeDurationSeconds,
+      txHash,
+      isOnlyUseBridge,
+      status: SwapV2TxStatus.IN_PROGRESS,
+      simpleRoute,
+      routeIndex: -1,
+      destinationAsset,
+      resAmount: [],
+      swapRefundInfo: undefined,
+      notified: undefined,
+    };
+
+    this.recentSwapV2HistoryMap.set(id, history);
+
+    // TODO: Track the recent swap v2 history
+    // this.trackSwapV2Recursive(id);
+
+    return id;
+  }
+
+  getRecentSwapV2History(id: string): SwapV2History | undefined {
+    return this.recentSwapV2HistoryMap.get(id);
+  }
+
+  getRecentSwapV2Histories(): SwapV2History[] {
+    return Array.from(this.recentSwapV2HistoryMap.values()).filter(
+      (history) => {
+        if (!this.chainsService.hasChainInfo(history.fromChainId)) {
+          return false;
+        }
+
+        if (!this.chainsService.hasChainInfo(history.toChainId)) {
+          return false;
+        }
+
+        if (
+          history.simpleRoute.some((route) => {
+            return !this.chainsService.hasChainInfo(route.chainId);
+          })
+        ) {
+          return false;
+        }
+
+        return true;
+      }
+    );
+  }
+
+  removeRecentSwapV2History(id: string): boolean {
+    return this.recentSwapV2HistoryMap.delete(id);
+  }
+
+  clearAllRecentSwapV2History(): void {
+    this.recentSwapV2HistoryMap.clear();
+  }
+
   protected getIBCWriteAcknowledgementAckFromTx(
     tx: any,
     sourcePortId: string,
@@ -2686,6 +2840,7 @@ export class RecentSendHistoryService {
     throw new Error("Invalid tx");
   }
 
+  // CHECK: check if this logic need to include swap v2 history
   protected readonly onChainRemoved = (chainInfo: ChainInfo) => {
     const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId).identifier;
 
