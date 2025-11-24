@@ -14,12 +14,7 @@ import styled, { css, useTheme } from "styled-components";
 import { HeaderProps } from "../../../layouts/header/types";
 import { ColorPalette } from "../../../styles";
 import { XAxis, YAxis } from "../../../components/axis";
-import {
-  Body2,
-  Caption1,
-  Subtitle3,
-  Subtitle4,
-} from "../../../components/typography";
+import { Body2, Subtitle3, Subtitle4 } from "../../../components/typography";
 import { Gutter } from "../../../components/gutter";
 import { ConnectedEcosystems } from "../components/connected-ecosystems";
 import { COMMON_HOVER_OPACITY } from "../../../styles/constant";
@@ -35,7 +30,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { Button } from "../../../components/button";
 import { useTotalPrices } from "../../../hooks/use-total-prices";
 import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
-import { stringLengthByGrapheme } from "../../../utils/string";
+import { AccountNameIcon } from "../components/account-icon";
 
 const Styles = {
   NameContainer: styled.div`
@@ -259,7 +254,10 @@ export const MainHeaderLayout = observer<
                         setIsOpenAccountSwitchModal(true);
                       }}
                     >
-                      <NameIcon name={name} />
+                      <AccountNameIcon
+                        keyInfoType={keyRingStore.selectedKeyInfo?.type}
+                        name={name}
+                      />
                       <Gutter size="0.5rem" />
                     </NameHoverArea>
                     <Box alignY="center">
@@ -469,42 +467,6 @@ export const MainHeaderLayout = observer<
     forwardRef: true,
   }
 );
-
-const NameIcon = ({ name }: { name: string }) => {
-  const theme = useTheme();
-
-  const firstChar = (() => {
-    if (stringLengthByGrapheme(name) !== name.length) {
-      return "A";
-    }
-    return name[0].toUpperCase();
-  })();
-
-  return (
-    <Box
-      alignX="center"
-      alignY="center"
-      width="1.5rem"
-      height="1.5rem"
-      borderRadius="9999px"
-      backgroundColor={
-        theme.mode === "light"
-          ? ColorPalette["gray-100"]
-          : ColorPalette["gray-550"]
-      }
-    >
-      <Caption1
-        color={
-          theme.mode === "light"
-            ? ColorPalette["gray-300"]
-            : ColorPalette["gray-200"]
-        }
-      >
-        {firstChar}
-      </Caption1>
-    </Box>
-  );
-};
 
 const _CopyOutlineIcon = ({ color }: { color: string }) => {
   return (
