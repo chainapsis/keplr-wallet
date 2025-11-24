@@ -41,7 +41,7 @@ import { MakeTxResponse, WalletStatus } from "@keplr-wallet/stores";
 import { autorun } from "mobx";
 import {
   LogAnalyticsEventMsg,
-  RecordTxWithSkipSwapMsg,
+  RecordTxWithSwapV2Msg,
   SendTxAndRecordMsg,
   SendTxAndRecordWithIBCSwapMsg,
 } from "@keplr-wallet/background";
@@ -64,7 +64,10 @@ import { useTopUp } from "../../hooks/use-topup";
 import { getShouldTopUpSignOptions } from "../../utils/should-top-up-sign-options";
 import { useSwapFeeBps } from "./hooks/use-swap-fee-bps";
 import { useSwapPriceImpact } from "./hooks/use-swap-price-impact";
-import { RouteStepType } from "@keplr-wallet/stores-internal/build/swap/types";
+import {
+  RouteStepType,
+  SwapProvider,
+} from "@keplr-wallet/stores-internal/build/swap/types";
 // import { useSwapAnalytics } from "./hooks/use-swap-analytics";
 
 const TextButtonStyles = {
@@ -578,6 +581,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             chainId: string;
             receiver: string;
           }[] = [];
+          let provider: SwapProvider | undefined;
           let routeDurationSeconds: number | undefined;
           let isMultiEcosystemSwap: boolean = false;
 
@@ -603,6 +607,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             isMultiEcosystemSwap = steps.some(
               (step) => step.type === RouteStepType.BRIDGE
             );
+            provider = queryRoute.response.data.provider;
 
             // 브릿지를 사용하는 경우, ibc swap channel까지 보여주면 ui가 너무 복잡해질 수 있으므로 (operation이 최소 3개 이상)
             // evm -> osmosis -> destination 식으로 뭉퉁그려서 보여주는 것이 좋다고 판단, 경로를 간소화한다.
@@ -963,9 +968,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 {
                   onBroadcasted: (txHash) => {
                     if (isMultiEcosystemSwap) {
-                      const msg = new RecordTxWithSkipSwapMsg(
+                      const msg = new RecordTxWithSwapV2Msg(
                         inChainId,
                         outChainId,
+                        provider!,
                         {
                           chainId: outChainId,
                           denom: outCurrency.coinMinimalDenom,
@@ -1293,9 +1299,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       }
                       ethereumAccount.setIsSendingTx(false);
 
-                      const msg = new RecordTxWithSkipSwapMsg(
+                      const msg = new RecordTxWithSwapV2Msg(
                         inChainId,
                         outChainId,
+                        provider!,
                         {
                           chainId: outChainId,
                           denom: outCurrency.coinMinimalDenom,
@@ -1432,9 +1439,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
                                   ethereumAccount.setIsSendingTx(false);
 
-                                  const msg = new RecordTxWithSkipSwapMsg(
+                                  const msg = new RecordTxWithSwapV2Msg(
                                     inChainId,
                                     outChainId,
+                                    provider!,
                                     {
                                       chainId: outChainId,
                                       denom: outCurrency.coinMinimalDenom,
