@@ -2,6 +2,7 @@ import React, {
   FunctionComponent,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -22,7 +23,7 @@ import { dispatchGlobalEventExceptSelf } from "../../../../utils/global-events";
 import { SearchTextInput } from "../../../../components/input";
 import { Tooltip } from "../../../../components/tooltip";
 import { EllipsisIcon } from "../../../../components/icon";
-import { XAxis } from "../../../../components/axis";
+import { XAxis, YAxis } from "../../../../components/axis";
 import { Image } from "../../../../components/image";
 import { Gutter } from "../../../../components/gutter";
 import { COMMON_HOVER_OPACITY } from "../../../../styles/constant";
@@ -48,6 +49,7 @@ import { stringLengthByGrapheme } from "../../../../utils/string";
 import { IconProps } from "../../../../components/icon/types";
 import { Box } from "../../../../components/box";
 import { Stack } from "../../../../components/stack";
+import { App, AppCoinType } from "@keplr-wallet/ledger-cosmos";
 
 const AccountItem = observer(
   ({
@@ -77,6 +79,126 @@ const AccountItem = observer(
     const { getReferenceProps, getFloatingProps } = useInteractions([dismiss]);
 
     const icnsPrimaryName = useGetIcnsName(bech32Address);
+
+    const paragraph = useMemo(() => {
+      if (keyInfo.insensitive["bip44Path"]) {
+        const bip44Path = keyInfo.insensitive["bip44Path"] as any;
+
+        // -1 means it can be multiple coin type.
+        let coinType = -1;
+        if (keyInfo.type === "ledger") {
+          const ledgerAppCandidate: (
+            | App
+            | "Ethereum"
+            | "Starknet"
+            | "Bitcoin"
+            | "Bitcoin Test"
+          )[] = [
+            "Cosmos",
+            "Terra",
+            "Secret",
+            "THORChain",
+            "Ethereum",
+            "Starknet",
+            "Bitcoin",
+            "Bitcoin Test",
+          ];
+
+          const app: (
+            | App
+            | "Ethereum"
+            | "Starknet"
+            | "Bitcoin"
+            | "Bitcoin Test"
+          )[] = [];
+          for (const ledgerApp of ledgerAppCandidate) {
+            if (keyInfo.insensitive[ledgerApp] != null) {
+              app.push(ledgerApp);
+            }
+          }
+
+          if (app.length === 0 || app.length >= 2) {
+            coinType = -1;
+          } else if (app[0] === "Ethereum") {
+            coinType = 60;
+          } else if (app[0] === "Starknet") {
+            coinType = 9004;
+          } else if (app[0] === "Bitcoin") {
+            coinType = 0;
+          } else if (app[0] === "Bitcoin Test") {
+            coinType = 1;
+          } else {
+            const c = AppCoinType[app[0]];
+            if (c != null) {
+              coinType = c;
+            } else {
+              coinType = -1;
+            }
+          }
+
+          if (
+            app.length === 1 &&
+            app.includes("Cosmos") &&
+            bip44Path.account === 0 &&
+            bip44Path.change === 0 &&
+            bip44Path.addressIndex === 0
+          ) {
+            return;
+          }
+
+          return `m/-'/${coinType >= 0 ? coinType : "-"}'/${
+            bip44Path.account
+          }'/${bip44Path.change}/${bip44Path.addressIndex}${(() => {
+            if (app.length === 1) {
+              if (
+                app[0] !== "Cosmos" &&
+                app[0] !== "Ethereum" &&
+                app[0] !== "Starknet" &&
+                app[0] !== "Bitcoin" &&
+                app[0] !== "Bitcoin Test"
+              ) {
+                return ` ${intl.formatMessage({
+                  id: `page.wallet.keyring-item.bip44-path-${app[0]}-text`,
+                })}`;
+              }
+            }
+
+            return "";
+          })()}`;
+        }
+
+        if (
+          bip44Path.account === 0 &&
+          bip44Path.change === 0 &&
+          bip44Path.addressIndex === 0
+        ) {
+          return;
+        }
+
+        return `m/-'/${coinType >= 0 ? coinType : "-"}'/${bip44Path.account}'/${
+          bip44Path.change
+        }/${bip44Path.addressIndex}`;
+      }
+
+      if (
+        keyInfo.type === "private-key" &&
+        typeof keyInfo.insensitive === "object" &&
+        keyInfo.insensitive["keyRingMeta"] &&
+        typeof keyInfo.insensitive["keyRingMeta"] === "object" &&
+        keyInfo.insensitive["keyRingMeta"]["web3Auth"] &&
+        typeof keyInfo.insensitive["keyRingMeta"]["web3Auth"] === "object"
+      ) {
+        const web3Auth = keyInfo.insensitive["keyRingMeta"]["web3Auth"];
+        if (
+          web3Auth["type"] &&
+          web3Auth["email"] &&
+          typeof web3Auth["type"] === "string" &&
+          typeof web3Auth["email"] === "string"
+        ) {
+          return web3Auth["email"];
+        }
+      }
+    }, [intl, keyInfo.insensitive, keyInfo.type]);
 
     const dropdownItems = (() => {
       const defaults = [
@@ -152,35 +274,51 @@ const AccountItem = observer(
               </Caption1>
             </Styles.AccountIcon>
             <Gutter size="0.625rem" />
-            <Styles.AccountName isSelected={isSelected}>
-              {accountName}
-            </Styles.AccountName>
 
-            {icnsPrimaryName && (
-              <React.Fragment>
-                <Gutter size="0.375rem" />
-                <Tooltip
-                  content={
-                    <Caption2 color={ColorPalette["white"]}>
-                      {icnsPrimaryName}
-                    </Caption2>
-                  }
-                  allowedPlacements={["top", "bottom"]}
-                >
-                  <Image
-                    alt="icns-icon"
-                    src={require(theme.mode === "light"
-                      ? "../../../../public/assets/img/icns-icon-light.png"
-                      : "../../../../public/assets/img/icns-icon.png")}
+            <YAxis>
+              <XAxis alignY="center">
+                <Styles.AccountName isSelected={isSelected}>
+                  {accountName}
+                </Styles.AccountName>
+                {icnsPrimaryName && (
+                  <React.Fragment>
+                    <Gutter size="0.375rem" />
+                    <Tooltip
+                      content={
+                        <Caption2 color={ColorPalette["white"]}>
+                          {icnsPrimaryName}
+                        </Caption2>
+                      }
+                      allowedPlacements={["top", "bottom"]}
+                    >
+                      <Image
+                        alt="icns-icon"
+                        src={require(theme.mode === "light"
+                          ? "../../../../public/assets/img/icns-icon-light.png"
+                          : "../../../../public/assets/img/icns-icon.png")}
+                        style={{
+                          width: "1rem",
+                          height: "1rem",
+                          opacity: isSelected ? COMMON_HOVER_OPACITY : 1,
+                        }}
+                      />
+                    </Tooltip>
+                  </React.Fragment>
+                )}
+              </XAxis>
+              {paragraph ? (
+                <React.Fragment>
+                  <Gutter size="0.25rem" />
+                  <Body3
                     style={{
-                      width: "1rem",
-                      height: "1rem",
-                      opacity: isSelected ? COMMON_HOVER_OPACITY : 1,
+                      color: ColorPalette["gray-300"],
                     }}
-                  />
-                </Tooltip>
-              </React.Fragment>
-            )}
+                  >
+                    {paragraph}
+                  </Body3>
+                </React.Fragment>
+              ) : null}
+            </YAxis>
           </XAxis>
 
           <Styles.OptionButton
