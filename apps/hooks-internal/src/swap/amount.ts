@@ -614,7 +614,14 @@ export class SwapAmountConfig extends AmountConfig {
     txData: EVMTxData
   ): UnsignedEVMTransactionWithErc20Approvals {
     const ethereumAccount = this.ethereumAccountStore.getAccount(this.chainId);
-    const tx = ethereumAccount.makeTx(txData.to, txData.value, txData.data);
+    const hexValue = txData.value.startsWith("0x")
+      ? txData.value
+      : `0x${BigInt(txData.value).toString(16)}`;
+    const hexData = txData.data.startsWith("0x")
+      ? txData.data
+      : `0x${txData.data}`;
+
+    const tx = ethereumAccount.makeTx(txData.to, hexValue, hexData);
 
     return {
       ...tx,
