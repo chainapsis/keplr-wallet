@@ -2,7 +2,10 @@ import { KeyInfo } from "@keplr-wallet/background";
 import { useMemo } from "react";
 import { App, AppCoinType } from "@keplr-wallet/ledger-cosmos";
 import { useIntl } from "react-intl";
-export const useGetKeyInfoParagraph = (keyInfo: KeyInfo) => {
+export const useGetKeyInfoParagraph = (
+  keyInfo: KeyInfo,
+  whenHardwareAlwaysShowBip44Path: boolean = false
+) => {
   const intl = useIntl();
 
   const paragraph = useMemo(() => {
@@ -66,7 +69,8 @@ export const useGetKeyInfoParagraph = (keyInfo: KeyInfo) => {
           app.includes("Cosmos") &&
           bip44Path.account === 0 &&
           bip44Path.change === 0 &&
-          bip44Path.addressIndex === 0
+          bip44Path.addressIndex === 0 &&
+          !whenHardwareAlwaysShowBip44Path
         ) {
           return;
         }
