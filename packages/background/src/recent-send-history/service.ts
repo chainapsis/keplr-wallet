@@ -2163,8 +2163,6 @@ export class RecentSendHistoryService {
     };
 
     this.recentSwapV2HistoryMap.set(id, history);
-
-    // TODO: Track the recent swap v2 history
     this.trackSwapV2Recursive(id);
 
     return id;
@@ -2296,8 +2294,22 @@ export class RecentSendHistoryService {
           history.status = status;
         });
 
-        let currentRouteIndex =
-          routeIndex < 0 ? 0 : Math.min(routeIndex, steps.length - 1);
+        // Handle empty steps array
+        if (!steps || steps.length === 0) {
+          if (status !== SwapV2TxStatus.IN_PROGRESS) {
+            runInAction(() => {
+              history.trackDone = true;
+            });
+            onFulfill();
+          } else {
+            onError();
+          }
+          return;
+        }
+
+        // steps 배열에는 현재 진행중이거나 완료/실패된 단계만 포함되므로
+        // simpleRoute와 길이가 다를 수 있음
+        // 따라서 steps의 인덱스와 simpleRoute의 인덱스를 구분해야 함
 
         // find the next blocking step (in progress or failed)
         const nextBlockingStepIndex = steps.findIndex((step) => {
@@ -2306,14 +2318,12 @@ export class RecentSendHistoryService {
             step.status === SwapV2RouteStepStatus.FAILED
           );
         });
-        if (
-          nextBlockingStepIndex >= 0 &&
-          nextBlockingStepIndex >= currentRouteIndex
-        ) {
-          currentRouteIndex = nextBlockingStepIndex;
-        }
 
-        const currentStep = steps[currentRouteIndex];
+        // Find the current step to process
+        // If there's a blocking step, use it; otherwise use the last step
+        const currentStepIndex =
+          nextBlockingStepIndex >= 0 ? nextBlockingStepIndex : steps.length - 1;
+        const currentStep = steps[currentStepIndex];
 
         if (!currentStep) {
           // No step found, mark as done if status is final
@@ -2322,17 +2332,14 @@ export class RecentSendHistoryService {
               history.trackDone = true;
             });
 
-            // if the status is failed and the asset location is not empty,
-            // then we need to find the last asset location and notify the user where the asset is located
+            // Handle asset location for failed status
             if (
               status === SwapV2TxStatus.FAILED &&
               asset_location &&
               asset_location.length > 0
             ) {
-              const lastAssetLocation =
-                asset_location[asset_location.length - 1];
-
-              const chainId = lastAssetLocation.chain_id;
+              const location = asset_location[asset_location.length - 1];
+              const chainId = location.chain_id;
               const evmLikeChainId = Number(chainId);
               const isEVMChainId =
                 !Number.isNaN(evmLikeChainId) && evmLikeChainId > 0;
@@ -2341,12 +2348,16 @@ export class RecentSendHistoryService {
                 chainId: isEVMChainId ? `eip155:${chainId}` : chainId,
                 amount: [
                   {
-                    amount: lastAssetLocation.amount,
-                    denom: lastAssetLocation.denom,
+                    amount: location.amount,
+                    denom: location.denom,
                   },
                 ],
               };
-            } else if (status === SwapV2TxStatus.SUCCESS) {
+            } else if (
+              status === SwapV2TxStatus.SUCCESS ||
+              status === SwapV2TxStatus.PARTIAL_SUCCESS
+            ) {
+              // Track destination asset amount using the last step
               const lastStep = steps[steps.length - 1];
               if (lastStep && lastStep.tx_hash) {
                 this.trackSwapV2DestinationAssetAmount(
@@ -2369,15 +2380,40 @@ export class RecentSendHistoryService {
 
         // Update routeIndex based on current step's chain_id
         // Match the step's chain_id with simpleRoute to find the correct routeIndex
-        // target chain id is not given, so we need to find the current step's chain id in the simpleRoute
-        let updatedRouteIndex = currentRouteIndex;
-        for (let i = 0; i < simpleRoute.length; i++) {
-          const routeChainId = simpleRoute[i].chainId.replace("eip155:", "");
-          if (
-            routeChainId.toLowerCase() === currentStep.chain_id.toLowerCase()
-          ) {
-            updatedRouteIndex = i;
-            break;
+        // steps의 인덱스와 simpleRoute의 인덱스는 다를 수 있으므로 chain_id로 매칭해야 함
+        let updatedRouteIndex = routeIndex < 0 ? 0 : routeIndex;
+        if (currentStep.chain_id) {
+          // Find the routeIndex in simpleRoute that matches the current step's chain_id
+          for (let i = 0; i < simpleRoute.length; i++) {
+            const routeChainId = simpleRoute[i].chainId.replace("eip155:", "");
+            if (
+              routeChainId.toLowerCase() === currentStep.chain_id.toLowerCase()
+            ) {
+              updatedRouteIndex = i;
+              break;
+            }
+          }
+          // If not found, try to find the next route after the current routeIndex
+          if (updatedRouteIndex === (routeIndex < 0 ? 0 : routeIndex)) {
+            // If we couldn't find a match, check if we should advance
+            // Look for routes after the current routeIndex
+            for (
+              let i = (routeIndex < 0 ? 0 : routeIndex) + 1;
+              i < simpleRoute.length;
+              i++
+            ) {
+              const routeChainId = simpleRoute[i].chainId.replace(
+                "eip155:",
+                ""
+              );
+              if (
+                routeChainId.toLowerCase() ===
+                currentStep.chain_id.toLowerCase()
+              ) {
+                updatedRouteIndex = i;
+                break;
+              }
+            }
           }
         }
 
@@ -2398,40 +2434,84 @@ export class RecentSendHistoryService {
               status === SwapV2TxStatus.SUCCESS ||
               status === SwapV2TxStatus.PARTIAL_SUCCESS
             ) {
-              // Check if this is the last route
-              if (updatedRouteIndex < simpleRoute.length - 1) {
-                // move to the last route forcefully as it's succeeded
-                runInAction(() => {
-                  history.routeIndex = simpleRoute.length - 1;
-                });
-              }
+              // Check if this is the last route in simpleRoute
+              // steps 배열은 부분 정보이므로 simpleRoute의 마지막 인덱스와 비교해야 함
+              const isLastRoute = updatedRouteIndex >= simpleRoute.length - 1;
 
-              if (currentStep.tx_hash) {
-                // track the destination asset amount
-                this.trackSwapV2DestinationAssetAmount(
-                  id,
-                  currentStep.tx_hash,
-                  onFulfill
-                );
+              if (isLastRoute) {
+                // This is the final route, track destination asset amount
+                if (currentStep.tx_hash) {
+                  this.trackSwapV2DestinationAssetAmount(
+                    id,
+                    currentStep.tx_hash,
+                    onFulfill
+                  );
+                } else {
+                  runInAction(() => {
+                    history.trackDone = true;
+                  });
+                  onFulfill();
+                }
               } else {
+                // Not the last route, continue tracking
+                // Update routeIndex to the next route
                 runInAction(() => {
-                  history.trackDone = true;
+                  history.routeIndex = updatedRouteIndex;
                 });
-                onFulfill();
+                onError(); // Continue tracking
               }
             } else {
               // Status is still IN_PROGRESS, continue tracking
+              runInAction(() => {
+                history.routeIndex = updatedRouteIndex;
+              });
               onError();
             }
             break;
 
           case SwapV2RouteStepStatus.FAILED:
-            // Step failed, mark as done with error
-            runInAction(() => {
-              history.trackDone = true;
-              history.status = SwapV2TxStatus.FAILED;
-              // history.trackError = `Step failed at chain ${currentStep.chain_id}`;
-            });
+            // Step failed
+            // If overall status is still IN_PROGRESS, this might be a temporary failure
+            // Continue tracking in case it recovers
+            if (status === SwapV2TxStatus.IN_PROGRESS) {
+              // Overall status is still in progress, continue tracking
+              // This might be a temporary failure that could recover
+              runInAction(() => {
+                history.routeIndex = updatedRouteIndex;
+                // Don't set trackError yet, as it might recover
+              });
+              onError(); // Continue tracking
+              break;
+            }
+
+            // Overall status is FAILED or final, mark as done with error
+            // Handle asset location if available
+            if (asset_location && asset_location.length > 0) {
+              const location = asset_location[asset_location.length - 1];
+              const chainId = location.chain_id;
+              const evmLikeChainId = Number(chainId);
+              const isEVMChainId =
+                !Number.isNaN(evmLikeChainId) && evmLikeChainId > 0;
+
+              runInAction(() => {
+                history.trackDone = true;
+                history.status = SwapV2TxStatus.FAILED;
+                history.swapRefundInfo = {
+                  chainId: isEVMChainId ? `eip155:${chainId}` : chainId,
+                  amount: [
+                    {
+                      amount: location.amount,
+                      denom: location.denom,
+                    },
+                  ],
+                };
+              });
+            } else {
+              runInAction(() => {
+                history.trackDone = true;
+                history.status = SwapV2TxStatus.FAILED;
+              });
+            }
             onFulfill();
             break;
         }
