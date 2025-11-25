@@ -145,14 +145,17 @@ const NestedTokenItem: FunctionComponent<{
         )}
       </Subtitle3>
     );
-  }, [uiConfigStore.hideStringIfPrivacyMode, viewToken.token, theme.mode]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uiConfigStore.isPrivacyMode, viewToken.token, theme.mode]);
 
   const pricePrettyString = useMemo(() => {
     return uiConfigStore.hideStringIfPrivacyMode(
       pricePretty ? pricePretty.inequalitySymbol(true).toString() : "-",
       2
     );
-  }, [uiConfigStore.hideStringIfPrivacyMode, pricePretty]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uiConfigStore.isPrivacyMode, pricePretty]);
+
   return (
     <NestedTokenItemContainer
       tagPosition={tagPosition}

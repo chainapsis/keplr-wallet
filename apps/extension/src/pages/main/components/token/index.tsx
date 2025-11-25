@@ -325,283 +325,289 @@ interface TokenItemContentProps {
   isLoading?: boolean;
 }
 
-const TokenItemContent: FunctionComponent<TokenItemContentProps> = ({
-  viewToken,
-  forChange,
-  isError,
-  disabled,
-  isNotReady,
-  disableHoverStyle,
-  isHover,
-  setIsHover,
-  onClick,
-  hideBalance,
-  altSentence,
-  copyAddress,
-  right,
-  theme,
-  intl,
-  uiConfigStore,
-  navigate,
-  isIBC,
-  pricePretty,
-  price24HChange,
-  tag,
-}) => (
-  <Styles.Container
-    forChange={forChange}
-    isError={isError}
-    disabled={disabled}
-    isNotReady={isNotReady}
-    disableHoverStyle={disableHoverStyle}
-    onMouseEnter={() => {
-      setIsHover(true);
-    }}
-    onMouseOver={() => {
-      // onMouseOut에 대해서는 처리하지 않는다.
-      // onMouseOver는 레이아웃에 변경에 의해서도 이벤트가 발생하기 때문에
-      // 좀 디테일한 케이스를 처리하기 위해서 사용한다.
-      // 근데 onMouseOut까지 하면 isHover 값이 여러가지 이유로 수시로 변해서...
-      // 근데 hover out의 경우는 딱히 처리할 case가 보이지 않기 때문에
-      // copy address가 별 중요한 기능은 아니기 때문에 문제를 해결하지 않고 그냥 생략한다.
-      setIsHover(true);
-    }}
-    onMouseLeave={() => {
-      setIsHover(false);
-    }}
-    onClick={async (e) => {
-      e.preventDefault();
+const TokenItemContent: FunctionComponent<TokenItemContentProps> = observer(
+  ({
+    viewToken,
+    forChange,
+    isError,
+    disabled,
+    isNotReady,
+    disableHoverStyle,
+    isHover,
+    setIsHover,
+    onClick,
+    hideBalance,
+    altSentence,
+    copyAddress,
+    right,
+    theme,
+    intl,
+    uiConfigStore,
+    navigate,
+    isIBC,
+    pricePretty,
+    price24HChange,
+    tag,
+  }) => (
+    <Styles.Container
+      forChange={forChange}
+      isError={isError}
+      disabled={disabled}
+      isNotReady={isNotReady}
+      disableHoverStyle={disableHoverStyle}
+      onMouseEnter={() => {
+        setIsHover(true);
+      }}
+      onMouseOver={() => {
+        // onMouseOut에 대해서는 처리하지 않는다.
+        // onMouseOver는 레이아웃에 변경에 의해서도 이벤트가 발생하기 때문에
+        // 좀 디테일한 케이스를 처리하기 위해서 사용한다.
+        // 근데 onMouseOut까지 하면 isHover 값이 여러가지 이유로 수시로 변해서...
+        // 근데 hover out의 경우는 딱히 처리할 case가 보이지 않기 때문에
+        // copy address가 별 중요한 기능은 아니기 때문에 문제를 해결하지 않고 그냥 생략한다.
+        setIsHover(true);
+      }}
+      onMouseLeave={() => {
+        setIsHover(false);
+      }}
+      onClick={async (e) => {
+        e.preventDefault();
 
-      if (
-        viewToken.error?.data &&
-        viewToken.error.data instanceof WrongViewingKeyError
-      ) {
-        navigate(
-          `/setting/token/add?chainId=${
-            viewToken.chainInfo.chainId
-          }&contractAddress=${
-            (viewToken.token.currency as Secret20Currency).contractAddress
-          }`
-        );
+        if (
+          viewToken.error?.data &&
+          viewToken.error.data instanceof WrongViewingKeyError
+        ) {
+          navigate(
+            `/setting/token/add?chainId=${
+              viewToken.chainInfo.chainId
+            }&contractAddress=${
+              (viewToken.token.currency as Secret20Currency).contractAddress
+            }`
+          );
 
-        return;
-      }
+          return;
+        }
 
-      if (onClick) {
-        onClick();
-      }
-    }}
-  >
-    <Columns sum={1} gutter="0.5rem" alignY="center">
-      <Skeleton type="circle" layer={1} isNotReady={isNotReady}>
-        <CurrencyImageFallback
-          chainInfo={viewToken.chainInfo}
-          currency={viewToken.token.currency}
-          size="2rem"
-        />
-      </Skeleton>
+        if (onClick) {
+          onClick();
+        }
+      }}
+    >
+      <Columns sum={1} gutter="0.5rem" alignY="center">
+        <Skeleton type="circle" layer={1} isNotReady={isNotReady}>
+          <CurrencyImageFallback
+            chainInfo={viewToken.chainInfo}
+            currency={viewToken.token.currency}
+            size="2rem"
+          />
+        </Skeleton>
 
-      <Gutter size="0.75rem" />
+        <Gutter size="0.75rem" />
 
-      <Stack gutter="0.25rem">
-        <XAxis alignY="center">
-          <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth="3.25rem">
-            <Subtitle2
-              color={
-                theme.mode === "light"
-                  ? ColorPalette["gray-700"]
-                  : ColorPalette["gray-10"]
-              }
-              style={{
-                wordBreak: "break-all",
-              }}
-            >
-              {viewToken.token
-                .hideAmount(true)
-                .hideIBCMetadata(true)
-                .toString()}
-            </Subtitle2>
-          </Skeleton>
-
-          {price24HChange ? (
-            <React.Fragment>
-              <Gutter size="0.25rem" />
-              <Box alignY="center" height="1px">
-                <PriceChangeTag rate={price24HChange} />
-              </Box>
-            </React.Fragment>
-          ) : null}
-
-          {viewToken.isFetching ? (
-            // 처음에는 무조건 로딩이 발생하는데 일반적으로 쿼리는 100ms 정도면 끝난다.
-            // 이정도면 유저가 별 문제를 느끼기 힘들기 때문에
-            // 일괄적으로 로딩을 보여줄 필요가 없다.
-            // 그러므로 로딩 상태가 500ms 이상 지속되면 로딩을 표시힌다.
-            // 근데 또 문제가 있어서 추가 사항이 있는데 그건 DelayedLoadingRender의 주석을 참고
-            <DelayedLoadingRender isFetching={viewToken.isFetching}>
-              <Box
-                marginLeft="0.25rem"
-                style={{
-                  color: ColorPalette["gray-300"],
-                }}
-              >
-                <LoadingIcon width="1rem" height="1rem" />
-              </Box>
-            </DelayedLoadingRender>
-          ) : viewToken.error ? (
-            <Box
-              marginLeft="0.25rem"
-              style={{
-                color: ColorPalette["yellow-400"],
-              }}
-            >
-              <Tooltip
-                content={(() => {
-                  if (
-                    viewToken.error?.message ===
-                    "Wrong viewing key for this address or viewing key not set"
-                  ) {
-                    return intl.formatMessage({
-                      id: "page.main.components.token.wrong-viewing-key-error",
-                    });
-                  }
-
-                  return (
-                    viewToken.error.message ||
-                    "Failed to query response from endpoint. Check again in a few minutes."
-                  );
-                })()}
-              >
-                <ErrorIcon size="1rem" />
-              </Tooltip>
-            </Box>
-          ) : undefined}
-        </XAxis>
-        <Box
-          style={{
-            flex: 1,
-            flexDirection: "row",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: "0.25rem",
-          }}
-        >
-          <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth="4.5rem">
-            <Caption1 style={{ color: ColorPalette["gray-300"] }}>
-              {isIBC
-                ? `on ${viewToken.chainInfo.chainName}`
-                : viewToken.chainInfo.chainName}
-            </Caption1>
-          </Skeleton>
-          <XAxis>
-            {tag ? (
-              <Box alignY="center" key="token-tag">
-                <TokenTag text={tag.text} tooltip={tag.tooltip} />
-              </Box>
-            ) : null}
-            {!isNotReady && copyAddress ? (
-              <Box alignY="center" key="copy-address">
-                <XAxis alignY="center">
-                  <Gutter size="-0.125rem" />
-                  <CopyAddressButton
-                    address={copyAddress}
-                    parentIsHover={isHover}
-                  />
-                </XAxis>
-              </Box>
-            ) : null}
-          </XAxis>
-        </Box>
-      </Stack>
-
-      <Column weight={1} />
-
-      <Columns sum={1} gutter="0.25rem" alignY="center">
-        <Stack gutter="0.25rem" alignX="right">
-          {!hideBalance ? (
+        <Stack gutter="0.25rem">
+          <XAxis alignY="center">
             <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth="3.25rem">
-              <Subtitle3
+              <Subtitle2
                 color={
                   theme.mode === "light"
                     ? ColorPalette["gray-700"]
                     : ColorPalette["gray-10"]
                 }
+                style={{
+                  wordBreak: "break-all",
+                }}
               >
-                {uiConfigStore.hideStringIfPrivacyMode(
-                  viewToken.token
-                    .hideDenom(true)
-                    .maxDecimals(6)
-                    .inequalitySymbol(true)
-                    .shrink(true)
-                    .toString(),
-                  2
-                )}
-              </Subtitle3>
+                {viewToken.token
+                  .hideAmount(true)
+                  .hideIBCMetadata(true)
+                  .toString()}
+              </Subtitle2>
             </Skeleton>
-          ) : null}
-          <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth="4.5rem">
-            {viewToken.error?.data &&
-            viewToken.error.data instanceof WrongViewingKeyError ? (
-              <Box position="relative" alignX="right">
+
+            {price24HChange ? (
+              <React.Fragment>
+                <Gutter size="0.25rem" />
+                <Box alignY="center" height="1px">
+                  <PriceChangeTag rate={price24HChange} />
+                </Box>
+              </React.Fragment>
+            ) : null}
+
+            {viewToken.isFetching ? (
+              // 처음에는 무조건 로딩이 발생하는데 일반적으로 쿼리는 100ms 정도면 끝난다.
+              // 이정도면 유저가 별 문제를 느끼기 힘들기 때문에
+              // 일괄적으로 로딩을 보여줄 필요가 없다.
+              // 그러므로 로딩 상태가 500ms 이상 지속되면 로딩을 표시힌다.
+              // 근데 또 문제가 있어서 추가 사항이 있는데 그건 DelayedLoadingRender의 주석을 참고
+              <DelayedLoadingRender isFetching={viewToken.isFetching}>
+                <Box
+                  marginLeft="0.25rem"
+                  style={{
+                    color: ColorPalette["gray-300"],
+                  }}
+                >
+                  <LoadingIcon width="1rem" height="1rem" />
+                </Box>
+              </DelayedLoadingRender>
+            ) : viewToken.error ? (
+              <Box
+                marginLeft="0.25rem"
+                style={{
+                  color: ColorPalette["yellow-400"],
+                }}
+              >
+                <Tooltip
+                  content={(() => {
+                    if (
+                      viewToken.error?.message ===
+                      "Wrong viewing key for this address or viewing key not set"
+                    ) {
+                      return intl.formatMessage({
+                        id: "page.main.components.token.wrong-viewing-key-error",
+                      });
+                    }
+
+                    return (
+                      viewToken.error.message ||
+                      "Failed to query response from endpoint. Check again in a few minutes."
+                    );
+                  })()}
+                >
+                  <ErrorIcon size="1rem" />
+                </Tooltip>
+              </Box>
+            ) : undefined}
+          </XAxis>
+          <Box
+            style={{
+              flex: 1,
+              flexDirection: "row",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: "0.25rem",
+            }}
+          >
+            <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth="4.5rem">
+              <Caption1 style={{ color: ColorPalette["gray-300"] }}>
+                {isIBC
+                  ? `on ${viewToken.chainInfo.chainName}`
+                  : viewToken.chainInfo.chainName}
+              </Caption1>
+            </Skeleton>
+            <XAxis>
+              {tag ? (
+                <Box alignY="center" key="token-tag">
+                  <TokenTag text={tag.text} tooltip={tag.tooltip} />
+                </Box>
+              ) : null}
+              {!isNotReady && copyAddress ? (
+                <Box alignY="center" key="copy-address">
+                  <XAxis alignY="center">
+                    <Gutter size="-0.125rem" />
+                    <CopyAddressButton
+                      address={copyAddress}
+                      parentIsHover={isHover}
+                    />
+                  </XAxis>
+                </Box>
+              ) : null}
+            </XAxis>
+          </Box>
+        </Stack>
+
+        <Column weight={1} />
+
+        <Columns sum={1} gutter="0.25rem" alignY="center">
+          <Stack gutter="0.25rem" alignX="right">
+            {!hideBalance ? (
+              <Skeleton
+                layer={1}
+                isNotReady={isNotReady}
+                dummyMinWidth="3.25rem"
+              >
                 <Subtitle3
                   color={
                     theme.mode === "light"
-                      ? ColorPalette["gray-200"]
-                      : ColorPalette["gray-100"]
+                      ? ColorPalette["gray-700"]
+                      : ColorPalette["gray-10"]
                   }
-                  style={{
-                    textDecoration: "underline",
-                    position: "absolute",
-                    whiteSpace: "nowrap",
-                  }}
                 >
-                  <FormattedMessage id="page.main.components.token.set-your-viewing-key" />
-                </Subtitle3>
-                <Subtitle3
-                  style={{
-                    textDecoration: "underline",
-                    whiteSpace: "nowrap",
-                    opacity: 0,
-                  }}
-                >
-                  &nbps;
-                </Subtitle3>
-              </Box>
-            ) : (
-              <Subtitle3 color={ColorPalette["gray-300"]}>
-                {(() => {
-                  // XXX: 이 부분에서 hide balance가 true더라도
-                  //      isNotReady 상태에서 스켈레톤이 여전히 보이는 문제가 있긴한데...
-                  //      어차피 이 prop을 쓰는 때는 한정되어있고 지금은 문제가 안되니 이 문제는 패스한다.
-                  if (hideBalance) {
-                    return "";
-                  }
-
-                  if (altSentence) {
-                    return altSentence;
-                  }
-
-                  return uiConfigStore.hideStringIfPrivacyMode(
-                    pricePretty
-                      ? pricePretty.inequalitySymbol(true).toString()
-                      : "-",
+                  {uiConfigStore.hideStringIfPrivacyMode(
+                    viewToken.token
+                      .hideDenom(true)
+                      .maxDecimals(6)
+                      .inequalitySymbol(true)
+                      .shrink(true)
+                      .toString(),
                     2
-                  );
-                })()}
-              </Subtitle3>
-            )}
-          </Skeleton>
-        </Stack>
+                  )}
+                </Subtitle3>
+              </Skeleton>
+            ) : null}
+            <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth="4.5rem">
+              {viewToken.error?.data &&
+              viewToken.error.data instanceof WrongViewingKeyError ? (
+                <Box position="relative" alignX="right">
+                  <Subtitle3
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-200"]
+                        : ColorPalette["gray-100"]
+                    }
+                    style={{
+                      textDecoration: "underline",
+                      position: "absolute",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    <FormattedMessage id="page.main.components.token.set-your-viewing-key" />
+                  </Subtitle3>
+                  <Subtitle3
+                    style={{
+                      textDecoration: "underline",
+                      whiteSpace: "nowrap",
+                      opacity: 0,
+                    }}
+                  >
+                    &nbps;
+                  </Subtitle3>
+                </Box>
+              ) : (
+                <Subtitle3 color={ColorPalette["gray-300"]}>
+                  {(() => {
+                    // XXX: 이 부분에서 hide balance가 true더라도
+                    //      isNotReady 상태에서 스켈레톤이 여전히 보이는 문제가 있긴한데...
+                    //      어차피 이 prop을 쓰는 때는 한정되어있고 지금은 문제가 안되니 이 문제는 패스한다.
+                    if (hideBalance) {
+                      return "";
+                    }
 
-        {forChange ? (
-          <Styles.IconContainer>
-            <ArrowRightIcon />
-          </Styles.IconContainer>
-        ) : null}
+                    if (altSentence) {
+                      return altSentence;
+                    }
+
+                    return uiConfigStore.hideStringIfPrivacyMode(
+                      pricePretty
+                        ? pricePretty.inequalitySymbol(true).toString()
+                        : "-",
+                      2
+                    );
+                  })()}
+                </Subtitle3>
+              )}
+            </Skeleton>
+          </Stack>
+
+          {forChange ? (
+            <Styles.IconContainer>
+              <ArrowRightIcon />
+            </Styles.IconContainer>
+          ) : null}
+        </Columns>
+        {right}
       </Columns>
-      {right}
-    </Columns>
-  </Styles.Container>
+    </Styles.Container>
+  )
 );
 
 const ErrorIcon: FunctionComponent<{
