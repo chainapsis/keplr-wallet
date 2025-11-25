@@ -155,7 +155,7 @@ export const CopyAddressItem = observer(
                   const defaultColor =
                     theme.mode === "light"
                       ? ColorPalette["gray-100"]
-                      : ColorPalette["gray-300"];
+                      : ColorPalette["gray-400"];
 
                   if (preventHover) {
                     return defaultColor;
@@ -173,7 +173,7 @@ export const CopyAddressItem = observer(
                   if (!blockInteraction && isBookmarkHover) {
                     return theme.mode === "light"
                       ? ColorPalette["gray-200"]
-                      : ColorPalette["gray-400"];
+                      : ColorPalette["gray-500"];
                   }
 
                   return defaultColor;
@@ -223,7 +223,7 @@ export const CopyAddressItem = observer(
                 }
               }}
             >
-              <_StarIcon />
+              <_StarIcon width="1.25rem" height="1.25rem" />
             </Box>
 
             <Gutter size="0.5rem" />
@@ -462,12 +462,20 @@ export const CopyAddressItem = observer(
 
 CopyAddressItem.displayName = "CopyAddressItem";
 
-const _StarIcon = ({ color }: { color?: string }) => {
+const _StarIcon = ({
+  width,
+  height,
+  color,
+}: {
+  width?: string;
+  height?: string;
+  color?: string;
+}) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="20"
-      height="20"
+      width={width}
+      height={height}
       viewBox="0 0 20 20"
       fill="none"
     >
