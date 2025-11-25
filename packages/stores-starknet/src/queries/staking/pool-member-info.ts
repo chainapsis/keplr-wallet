@@ -286,6 +286,7 @@ export class ObservableQueryStakingInfo extends ObservableStarknetChainJsonRpcQu
     return this.get(poolAddress) as ObservableQueryPoolMemberInfo;
   });
 
+  @computed
   get totalStakedAmount(): CoinPretty | undefined {
     const stakingCurrency = this.stakingCurrency;
     if (!stakingCurrency) {
@@ -354,6 +355,8 @@ export class ObservableQueryStakingInfo extends ObservableStarknetChainJsonRpcQu
 
     return amount;
   }
+
+  @computed
   get claimableRewards():
     | {
         claimableRewards: ClaimableReward[];

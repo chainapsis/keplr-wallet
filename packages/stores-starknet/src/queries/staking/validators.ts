@@ -17,8 +17,8 @@ export class ObservableQueryValidators extends ObservableQuery<StarknetValidator
   ) {
     super(
       sharedContext,
-      "https://staging-staking-dashboard-backend-api.onrender.com/api/",
-      "query/validators?page=1&per_page=200"
+      "https://api.dashboard.endur.fi/api/",
+      "query/validators?page=1&per_page=200&sort_by=total_stake&sort_order=desc"
     );
     makeObservable(this);
 
