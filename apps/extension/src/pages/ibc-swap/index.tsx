@@ -672,11 +672,22 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 // skip_operations를 순회하면서 transfer와 swap 정보를 추출
                 for (const operation of skipOperations) {
                   if ("transfer" in operation) {
+                    const transfer = operation.transfer;
+                    if (
+                      !transfer.port ||
+                      !transfer.channel ||
+                      !transfer.from_chain_id
+                    ) {
+                      throw new Error(
+                        "unable to construct channel info by missing fields"
+                      );
+                    }
+
                     const queryClientState = queriesStore
-                      .get(operation.transfer.chain_id)
+                      .get(transfer.from_chain_id)
                       .cosmos.queryIBCClientState.getClientState(
-                        operation.transfer.port,
-                        operation.transfer.channel
+                        transfer.port,
+                        transfer.channel
                       );
 
                     await queryClientState.waitResponse();
@@ -690,17 +701,18 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                     }
 
                     channels.push({
-                      portId: operation.transfer.port,
-                      channelId: operation.transfer.channel,
+                      portId: transfer.port,
+                      channelId: transfer.channel,
                       counterpartyChainId: queryClientState.clientChainId,
                     });
                   } else if ("swap" in operation) {
                     const swapIn =
                       operation.swap.swap_in ?? operation.swap.smart_swap_in;
-                    if (swapIn) {
+                    if (swapIn && swapIn.swap_venue) {
+                      const swapVenueChainId = swapIn.swap_venue.chain_id;
                       const swapFeeBpsReceiverAddress =
                         SwapFeeBps.receivers.find(
-                          (r) => r.chainId === swapIn.swap_venue.chain_id
+                          (r) => r.chainId === swapVenueChainId
                         );
                       if (swapFeeBpsReceiverAddress) {
                         swapFeeBpsReceiver.push(

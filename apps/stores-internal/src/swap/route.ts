@@ -12,6 +12,7 @@ import {
   RouteRequestV2,
   RouteResponseV2,
   RouteStepType,
+  RouteStep,
 } from "./types";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { computed, makeObservable } from "mobx";
@@ -26,8 +27,8 @@ const FeeTokenSchema = Joi.object<SwapFeeToken>({
   symbol: Joi.string().required(),
   name: Joi.string().required(),
   decimals: Joi.number().required(),
-  coingecko_id: Joi.string().optional(),
-  image_url: Joi.string().optional(),
+  coingecko_id: Joi.string().allow(null).optional(),
+  image_url: Joi.string().allow(null).optional(),
 }).unknown(true);
 
 const FeeSchema = Joi.object<SwapFee>({
@@ -36,7 +37,7 @@ const FeeSchema = Joi.object<SwapFee>({
   fee_token: FeeTokenSchema.required(),
 }).unknown(true);
 
-const RouteStepSchema = Joi.object({
+const RouteStepSchema = Joi.object<RouteStep>({
   type: Joi.string()
     .valid(RouteStepType.SWAP, RouteStepType.BRIDGE, RouteStepType.IBC_TRANSFER)
     .required(),
@@ -48,224 +49,9 @@ const RouteStepSchema = Joi.object({
   to_amount: Joi.string().required(),
 }).unknown(true);
 
-const SkipOperationsSchema = Joi.array().items(
-  Joi.object({
-    transfer: Joi.object({
-      port: Joi.string().required(),
-      channel: Joi.string().required(),
-      chain_id: Joi.string().required(),
-      pfm_enabled: Joi.boolean(),
-      dest_denom: Joi.string().required(),
-      supports_memo: Joi.boolean(),
-    })
-      .required()
-      .unknown(true),
-  }).unknown(true),
-  Joi.object({
-    swap: Joi.object({
-      swap_in: Joi.object({
-        swap_venue: Joi.object({
-          name: Joi.string().required(),
-          chain_id: Joi.string().required(),
-        })
-          .unknown(true)
-          .required(),
-        swap_operations: Joi.array()
-          .items(
-            Joi.object({
-              pool: Joi.string().required(),
-              denom_in: Joi.string().required(),
-              denom_out: Joi.string().required(),
-            }).unknown(true)
-          )
-          .required(),
-        swap_amount_in: Joi.string().required(),
-        price_impact_percent: Joi.string(),
-      }).unknown(true),
-      smart_swap_in: Joi.object({
-        swap_venue: Joi.object({
-          name: Joi.string().required(),
-          chain_id: Joi.string().required(),
-        })
-          .unknown(true)
-          .required(),
-        swap_routes: Joi.array()
-          .items(
-            Joi.object({
-              swap_amount_in: Joi.string().required(),
-              denom_in: Joi.string().required(),
-              swap_operations: Joi.array()
-                .items(
-                  Joi.object({
-                    pool: Joi.string().required(),
-                    denom_in: Joi.string().required(),
-                    denom_out: Joi.string().required(),
-                  }).unknown(true)
-                )
-                .required(),
-            }).unknown(true)
-          )
-          .required(),
-        estimated_amount_out: Joi.string().required(),
-      }).unknown(true),
-      estimated_affiliate_fee: Joi.string().required(),
-    })
-      .required()
-      .unknown(true),
-  }).unknown(true),
-  Joi.object({
-    evm_swap: Joi.object({
-      amount_in: Joi.string().required(),
-      amount_out: Joi.string().required(),
-      denom_in: Joi.string().required(),
-      denom_out: Joi.string().required(),
-      from_chain_id: Joi.string().required(),
-      input_token: Joi.string().required(),
-      swap_calldata: Joi.string().required(),
-    })
-      .required()
-      .unknown(true),
-  }).unknown(true),
-  Joi.object({
-    cctp_transfer: Joi.object({
-      bridge_id: Joi.string().required(),
-      burn_token: Joi.string().required(),
-      denom_in: Joi.string().required(),
-      denom_out: Joi.string().required(),
-      from_chain_id: Joi.string().required(),
-      to_chain_id: Joi.string().required(),
-      smart_relay: Joi.boolean().required(),
-      smart_relay_fee_quote: Joi.object({
-        fee_amount: Joi.string().required(),
-        fee_denom: Joi.string().required(),
-        relayer_address: Joi.string().required(),
-        expiration: Joi.string().required(),
-      })
-        .required()
-        .unknown(true),
-    })
-      .required()
-      .unknown(true),
-  }).unknown(true),
-  Joi.object({
-    go_fast_transfer: Joi.object({
-      from_chain_id: Joi.string().required(),
-      to_chain_id: Joi.string().required(),
-      fee: Joi.object({
-        fee_asset: Joi.object({
-          denom: Joi.string().required(),
-          chain_id: Joi.string().required(),
-          is_cw20: Joi.boolean().required(),
-          is_evm: Joi.boolean().required(),
-          is_svm: Joi.boolean().required(),
-          symbol: Joi.string().required(),
-          decimals: Joi.number().required(),
-        })
-          .required()
-          .unknown(true),
-        bps_fee: Joi.string().required(),
-        bps_fee_amount: Joi.string().required(),
-        bps_fee_usd: Joi.string().required(),
-        source_chain_fee_amount: Joi.string().required(),
-        source_chain_fee_usd: Joi.string().required(),
-        destination_chain_fee_amount: Joi.string().required(),
-        destination_chain_fee_usd: Joi.string().required(),
-      })
-        .required()
-        .unknown(true),
-      denom_in: Joi.string().required(),
-      denom_out: Joi.string().required(),
-      source_domain: Joi.string().required(),
-      destination_domain: Joi.string().required(),
-    })
-      .required()
-      .unknown(true),
-  }).unknown(true),
-  Joi.object({
-    axelar_transfer: Joi.object({
-      from_chain: Joi.string().required(),
-      from_chain_id: Joi.string().required(),
-      to_chain: Joi.string().required(),
-      to_chain_id: Joi.string().required(),
-      asset: Joi.string().required(),
-      should_unwrap: Joi.boolean().required(),
-      denom_in: Joi.string().required(),
-      denom_out: Joi.string().required(),
-      fee_amount: Joi.string().required(),
-      usd_fee_amount: Joi.string().required(),
-      fee_asset: Joi.object({
-        denom: Joi.string().required(),
-        chain_id: Joi.string().required(),
-        is_cw20: Joi.boolean().required(),
-        is_evm: Joi.boolean().required(),
-        is_svm: Joi.boolean().required(),
-        symbol: Joi.string().required(),
-        name: Joi.string().required(),
-        decimals: Joi.number().required(),
-      })
-        .required()
-        .unknown(true),
-      bridge_id: Joi.string().required(),
-      smart_relay: Joi.boolean().required(),
-    })
-      .required()
-      .unknown(true),
-  }).unknown(true),
-  Joi.object({
-    hyperlane_transfer: Joi.object({
-      from_chain_id: Joi.string().required(),
-      to_chain_id: Joi.string().required(),
-      denom_in: Joi.string().required(),
-      denom_out: Joi.string().required(),
-      hyperlane_contract_address: Joi.string().required(),
-      fee_amount: Joi.string().required(),
-      usd_fee_amount: Joi.string().required(),
-      fee_asset: Joi.object({
-        denom: Joi.string().required(),
-        chain_id: Joi.string().required(),
-        is_cw20: Joi.boolean().required(),
-        is_evm: Joi.boolean().required(),
-        is_svm: Joi.boolean().required(),
-        symbol: Joi.string().required(),
-        decimals: Joi.number().required(),
-      })
-        .required()
-        .unknown(true),
-      bridge_id: Joi.string().required(),
-      smart_relay: Joi.boolean().required(),
-    })
-      .required()
-      .unknown(true),
-  }).unknown(true),
-  Joi.object({
-    eureka_transfer: Joi.object({
-      bridge_id: Joi.string().required(),
-      callback_adapter_contract_address: Joi.string().required(),
-      destination_port: Joi.string().required(),
-      entry_contract_address: Joi.string().required(),
-      denom_in: Joi.string().required(),
-      denom_out: Joi.string().required(),
-      source_client: Joi.string().required(),
-      from_chain_id: Joi.string().required(),
-      to_chain_id: Joi.string().required(),
-      to_chain_callback_contract_address: Joi.string().required(),
-      to_chain_entry_contract_address: Joi.string().required(),
-      pfm_enabled: Joi.boolean().required(),
-      smart_relay: Joi.boolean().required(),
-      smart_relay_fee_quote: Joi.object({
-        fee_amount: Joi.string().required(),
-        fee_denom: Joi.string().required(),
-        relayer_address: Joi.string().required(),
-        expiration: Joi.string().required(),
-      })
-        .required()
-        .unknown(true),
-      supports_memo: Joi.boolean().required(),
-    })
-      .required()
-      .unknown(true),
-  }).unknown(true)
-);
+// Minimal schema validation for skip_operations - all fields are optional/nullable
+// Optimistic validation: just ensure it's an array of objects
+const SkipOperationSchema = Joi.object().unknown(true);
 
 const RouteResponseV2Schema = Joi.object<RouteResponseV2>({
   provider: Joi.string()
@@ -278,8 +64,8 @@ const RouteResponseV2Schema = Joi.object<RouteResponseV2>({
   required_chain_ids: Joi.array().items(Joi.string()).required(),
   skip_operations: Joi.when("provider", {
     is: SwapProvider.SKIP,
-    then: SkipOperationsSchema.required(),
-    otherwise: SkipOperationsSchema.optional(),
+    then: Joi.array().items(SkipOperationSchema).required(),
+    otherwise: Joi.array().items(SkipOperationSchema).optional(),
   }),
   price_impact_percent: Joi.number().required(),
 }).unknown(true);
