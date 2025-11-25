@@ -776,6 +776,7 @@
   "components.bitcoin-guide-box.paragraph.none-of-the-inputs-belong-to-this-wallet": "보안상의 이유로 이 지갑에 속한 입력값에 대해서만 서명이 가능합니다.",
 
   "components.fee-info.bridge-fee": "브릿지 수수료",
+  "components.fee-info.swap-provider": "제공자",
 
   "components.top-up.description.no-fees": "수수료가 없나요? 걱정 마세요! ✨",
   "components.top-up.description.we-cover": "저희가 대신 지불해드립니다 :)",

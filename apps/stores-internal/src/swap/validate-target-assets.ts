@@ -4,7 +4,10 @@ import {
   ObservableQuery,
   QuerySharedContext,
 } from "@keplr-wallet/stores";
-import { ValidateTargetAssetsResponse } from "./types";
+import {
+  ValidateTargetAssetsRequest,
+  ValidateTargetAssetsResponse,
+} from "./types";
 import {
   computed,
   makeObservable,
@@ -16,6 +19,7 @@ import Joi from "joi";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import chunk from "lodash.chunk";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { normalizeChainId, normalizeDenom } from "./utils";
 
 const Schema = Joi.object<ValidateTargetAssetsResponse>({
   tokens: Joi.array()
@@ -27,33 +31,6 @@ const Schema = Joi.object<ValidateTargetAssetsResponse>({
     )
     .required(),
 }).unknown(true);
-
-function normalizeDenom(
-  chainStore: IChainStore,
-  chainId: string,
-  denom: string
-): string {
-  denom = denom.toLowerCase();
-  if (denom.startsWith("erc20:")) {
-    return denom.replace("erc20:", "");
-  }
-
-  if (chainStore.hasChain(chainId) && chainId.startsWith("eip155:")) {
-    const currencies = chainStore.getChain(chainId).currencies;
-    if (currencies.length > 0 && currencies[0].coinMinimalDenom === denom) {
-      return "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
-    }
-  }
-
-  return denom;
-}
-
-function normalizeChainId(chainId: string): string {
-  if (chainId.startsWith("eip155:")) {
-    return chainId.replace("eip155:", "");
-  }
-  return chainId;
-}
 
 export class ObservableQueryValidateTargetAssetsInner extends ObservableQuery<ValidateTargetAssetsResponse> {
   constructor(
@@ -101,22 +78,24 @@ export class ObservableQueryValidateTargetAssetsInner extends ObservableQuery<Va
   protected override async fetchResponse(
     abortController: AbortController
   ): Promise<{ headers: any; data: ValidateTargetAssetsResponse }> {
+    const request: ValidateTargetAssetsRequest = {
+      chain_id: normalizeChainId(this.chainId),
+      denom: normalizeDenom(this.chainStore, this.chainId, this.denom),
+      tokens: this.tokens.map((t) => {
+        return {
+          chain_id: normalizeChainId(t.chainId),
+          denom: normalizeDenom(this.chainStore, t.chainId, t.denom),
+        };
+      }),
+    };
+
     const _result = await simpleFetch(this.baseURL, this.url, {
       signal: abortController.signal,
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        chain_id: normalizeChainId(this.chainId),
-        denom: normalizeDenom(this.chainStore, this.chainId, this.denom),
-        tokens: this.tokens.map((t) => {
-          return {
-            chain_id: normalizeChainId(t.chainId),
-            denom: normalizeDenom(this.chainStore, t.chainId, t.denom),
-          };
-        }),
-      }),
+      body: JSON.stringify(request),
     });
     const result = {
       headers: _result.headers,
@@ -125,8 +104,8 @@ export class ObservableQueryValidateTargetAssetsInner extends ObservableQuery<Va
 
     const validated = Schema.validate(result.data);
     if (validated.error) {
-      console.log(
-        "Failed to validate swappable response from source response",
+      console.error(
+        "Failed to validate validate target assets response",
         validated.error
       );
       throw validated.error;

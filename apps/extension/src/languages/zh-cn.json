@@ -714,6 +714,7 @@
   "components.bitcoin-guide-box.paragraph.none-of-the-inputs-belong-to-this-wallet": "出于安全考虑，只能对属于该钱包的输入进行签名。",
 
   "components.fee-info.bridge-fee": "桥接费用",
+  "components.fee-info.swap-provider": "提供者",
 
   "components.top-up.description.no-fees": "没有手续费？别担心！✨",
   "components.top-up.description.we-cover": "我们会帮您支付 :)",

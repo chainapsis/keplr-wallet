@@ -59,7 +59,10 @@ import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import Long from "long";
 import { IAccountStore } from "./store";
 import { autorun } from "mobx";
-import { MsgDepositForBurnWithCaller } from "@keplr-wallet/proto-types/circle/cctp/v1/tx";
+import {
+  MsgDepositForBurnWithCaller,
+  MsgDepositForBurn,
+} from "@keplr-wallet/proto-types/circle/cctp/v1/tx";
 import { MsgSend as ThorMsgSend } from "@keplr-wallet/proto-types/thorchain/v1/types/msg_send";
 
 export interface CosmosAccount {
@@ -1222,12 +1225,32 @@ export class CosmosAccountImpl {
       return dec.truncate().toString();
     })();
 
-    const destinationInfo = this.queriesStore.get(channel.counterpartyChainId)
-      .cosmos.queryRPCStatus;
-
     return this.makeTx(
       "ibcTransfer",
       async () => {
+        if (channel.counterpartyChainId === "") {
+          const queryClientState = this.queriesStore
+            .get(this.chainId)
+            .cosmos.queryIBCClientState.getClientState(
+              channel.portId,
+              channel.channelId
+            );
+
+          await queryClientState.waitFreshResponse();
+
+          if (!queryClientState.clientChainId) {
+            throw new Error(
+              `Failed to fetch the client chain id of ${channel.counterpartyChainId}`
+            );
+          }
+
+          channel.counterpartyChainId = queryClientState.clientChainId;
+        }
+
+        const destinationInfo = this.queriesStore.get(
+          channel.counterpartyChainId
+        ).cosmos.queryRPCStatus;
+
         // Wait until fetching complete.
         await destinationInfo.waitFreshResponse();
 
@@ -2134,7 +2157,10 @@ export class CosmosAccountImpl {
     );
   }
 
-  makeCCTPTx(rawCCTPMsgValue: string, rawSendMsg: string) {
+  makeCCTPDepositForBurnWithCallerTx(
+    rawCCTPMsgValue: string,
+    rawSendMsg: string
+  ) {
     const cctpMsgValue = JSON.parse(rawCCTPMsgValue);
     const cctpMsg = {
       type: "cctp/DepositForBurnWithCaller",
@@ -2169,9 +2195,15 @@ export class CosmosAccountImpl {
               from: cctpMsg.value.from,
               amount: cctpMsg.value.amount,
               destinationDomain: cctpMsg.value.destination_domain,
-              mintRecipient: cctpMsg.value.mint_recipient,
+              mintRecipient:
+                typeof cctpMsg.value.mint_recipient === "string"
+                  ? this.decodeBase64(cctpMsg.value.mint_recipient)
+                  : cctpMsg.value.mint_recipient,
               burnToken: cctpMsg.value.burn_token,
-              destinationCaller: cctpMsg.value.destination_caller,
+              destinationCaller:
+                typeof cctpMsg.value.destination_caller === "string"
+                  ? this.decodeBase64(cctpMsg.value.destination_caller)
+                  : cctpMsg.value.destination_caller,
             }).finish(),
           },
           {
@@ -2194,7 +2226,71 @@ export class CosmosAccountImpl {
     );
   }
 
+  makeCCTPDepositForBurnTx(
+    from: string,
+    amount: string,
+    destinationDomain: number,
+    mintRecipient: string,
+    burnToken: string
+  ) {
+    const cctpMsg = {
+      type: "cctp/DepositForBurn",
+      value: {
+        from,
+        burn_token: burnToken,
+        amount,
+        destination_domain: destinationDomain,
+        mint_recipient: mintRecipient,
+      },
+    };
+
+    return this.makeTx(
+      "cctp",
+      {
+        aminoMsgs: [cctpMsg],
+        protoMsgs: [
+          {
+            typeUrl: "/circle.cctp.v1.MsgDepositForBurn",
+            value: MsgDepositForBurn.encode(
+              MsgDepositForBurn.fromPartial({
+                from: cctpMsg.value.from,
+                amount: cctpMsg.value.amount,
+                destinationDomain: cctpMsg.value.destination_domain,
+                mintRecipient: this.decodeBase64(mintRecipient),
+                burnToken: cctpMsg.value.burn_token,
+              })
+            ).finish(),
+          },
+        ],
+      },
+      (tx) => {
+        if (tx.code == null || tx.code === 0) {
+          this.queries.queryBalances
+            .getQueryBech32Address(this.base.bech32Address)
+            .balances.forEach((queryBalance) => queryBalance.fetch());
+        }
+      }
+    );
+  }
+
   protected get queries(): DeepReadonly<QueriesSetBase & CosmosQueries> {
     return this.queriesStore.get(this.chainId);
+  }
+
+  private decodeBase64(base64: string): Uint8Array {
+    try {
+      const bin = atob(base64);
+      const arr = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) {
+        arr[i] = bin.charCodeAt(i);
+      }
+      return arr;
+    } catch (e) {
+      throw new Error(
+        `Failed to decode Base64: ${
+          e instanceof Error ? e.message : "Unknown error"
+        }`
+      );
+    }
   }
 }

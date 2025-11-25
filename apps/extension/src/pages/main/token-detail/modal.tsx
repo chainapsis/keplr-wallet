@@ -86,7 +86,7 @@ export const TokenDetailModal: FunctionComponent<{
     bitcoinQueriesStore,
     priceStore,
     price24HChangesStore,
-    skipQueriesStore,
+    swapQueriesStore,
     uiConfigStore,
   } = useStore();
 
@@ -300,7 +300,7 @@ export const TokenDetailModal: FunctionComponent<{
           }&outCoinMinimalDenom=uusdc&entryPoint=token_detail`
         );
       },
-      disabled: !skipQueriesStore.queryIBCSwap.isSwappableCurrency(
+      disabled: !swapQueriesStore.querySwapHelper.isSwappableCurrency(
         chainId,
         currency
       ),

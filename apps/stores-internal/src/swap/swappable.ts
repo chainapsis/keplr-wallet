@@ -4,12 +4,13 @@ import {
   ObservableQuery,
   QuerySharedContext,
 } from "@keplr-wallet/stores";
-import { SwappableResponse } from "./types";
+import { SwappableRequest, SwappableResponse } from "./types";
 import { computed, makeObservable, observable, runInAction } from "mobx";
 import Joi from "joi";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import chunk from "lodash.chunk";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { normalizeChainId, normalizeDenom } from "./utils";
 
 const Schema = Joi.object<SwappableResponse>({
   tokens: Joi.array()
@@ -21,33 +22,6 @@ const Schema = Joi.object<SwappableResponse>({
     )
     .required(),
 }).unknown(true);
-
-function normalizeDenom(
-  chainStore: IChainStore,
-  chainId: string,
-  denom: string
-): string {
-  denom = denom.toLowerCase();
-  if (denom.startsWith("erc20:")) {
-    return denom.replace("erc20:", "");
-  }
-
-  if (chainStore.hasChain(chainId) && chainId.startsWith("eip155:")) {
-    const currencies = chainStore.getChain(chainId).currencies;
-    if (currencies.length > 0 && currencies[0].coinMinimalDenom === denom) {
-      return "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
-    }
-  }
-
-  return denom;
-}
-
-function normalizeChainId(chainId: string): string {
-  if (chainId.startsWith("eip155:")) {
-    return chainId.replace("eip155:", "");
-  }
-  return chainId;
-}
 
 export class ObservableQuerySwappableInner extends ObservableQuery<SwappableResponse> {
   constructor(
@@ -93,20 +67,22 @@ export class ObservableQuerySwappableInner extends ObservableQuery<SwappableResp
   protected override async fetchResponse(
     abortController: AbortController
   ): Promise<{ headers: any; data: SwappableResponse }> {
+    const request: SwappableRequest = {
+      tokens: this.tokens.map((t) => {
+        return {
+          chain_id: normalizeChainId(t.chainId),
+          denom: normalizeDenom(this.chainStore, t.chainId, t.denom),
+        };
+      }),
+    };
+
     const _result = await simpleFetch(this.baseURL, this.url, {
       signal: abortController.signal,
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        tokens: this.tokens.map((t) => {
-          return {
-            chain_id: normalizeChainId(t.chainId),
-            denom: normalizeDenom(this.chainStore, t.chainId, t.denom),
-          };
-        }),
-      }),
+      body: JSON.stringify(request),
     });
     const result = {
       headers: _result.headers,
@@ -115,10 +91,7 @@ export class ObservableQuerySwappableInner extends ObservableQuery<SwappableResp
 
     const validated = Schema.validate(result.data);
     if (validated.error) {
-      console.log(
-        "Failed to validate swappable response from source response",
-        validated.error
-      );
+      console.error("Failed to validate swappable response", validated.error);
       throw validated.error;
     }
 
@@ -207,7 +180,7 @@ export class ObservableQuerySwappable extends HasMapStore<ObservableQuerySwappab
           for (const tokens of chunks) {
             const k = JSON.stringify(tokens);
 
-            // Get invokes the creationg of ObservableQuerySwappableInner
+            // Get invokes the creation of ObservableQuerySwappableInner
             this.get(k);
 
             runInAction(() => {
