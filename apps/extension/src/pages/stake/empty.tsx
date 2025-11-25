@@ -15,6 +15,7 @@ import { ChevronRightIcon } from ".";
 import { FormattedMessage, useIntl } from "react-intl";
 import { MainH1 } from "../../components/typography/main-h1";
 import { useGetStakingApr } from "../../hooks/use-get-staking-apr";
+import { EarnRewardsIcon } from "./components/earn-rewards-icon";
 
 const zeroDec = new Dec(0);
 
@@ -40,6 +41,10 @@ export const StakeEmptyPage: FunctionComponent = observer(() => {
   return (
     <MainHeaderLayout>
       <Box paddingX="1rem" paddingY="1.25rem">
+        <EarnRewardsIcon width="3.25rem" height="3.25rem" />
+
+        <Gutter size="2rem" />
+
         <Box paddingX="0.25rem">
           <MainH1
             color={
