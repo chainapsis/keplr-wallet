@@ -79,8 +79,11 @@ export const useGetSearchChains = ({
   const disabledChainInfosSearched = useMemo(() => {
     return chainStore.modularChainInfosInListUI
       .filter(
-        (modularChainInfo) =>
-          !chainStore.isEnabledChain(modularChainInfo.chainId)
+        ({ chainId }) =>
+          !chainStore.isEnabledChain(chainId) &&
+          chainStore
+            .getModularChainInfoImpl(chainId)
+            .matchModules({ or: ["cosmos", "evm"] })
       )
       .filter((chainInfo) => {
         const modularChainInfoImpl = chainStore.getModularChainInfoImpl(
