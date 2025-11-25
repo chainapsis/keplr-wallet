@@ -31,6 +31,7 @@ import * as RecentSendHistory from "./recent-send-history/internal";
 import * as SidePanel from "./side-panel/internal";
 import * as Settings from "./settings/internal";
 import * as ManageViewAssetToken from "./manage-view-asset-token/internal";
+import * as DirectTxExecutor from "./direct-tx-executor/internal";
 
 export * from "./chains";
 export * from "./chains-ui";
@@ -58,6 +59,7 @@ export * from "./side-panel";
 export * from "./settings";
 export * from "./manage-view-asset-token";
 export * from "./tx-ethereum";
+export * from "./direct-tx-executor";
 
 import { KVStore } from "@keplr-wallet/common";
 import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
@@ -312,6 +314,17 @@ export function init(
       chainsService
     );
 
+  const directTxExecutorService = new DirectTxExecutor.DirectTxExecutorService(
+    storeCreator("direct-tx-executor"),
+    chainsService,
+    keyRingCosmosService,
+    keyRingEthereumService,
+    backgroundTxService,
+    backgroundTxEthereumService,
+    analyticsService,
+    recentSendHistoryService
+  );
+
   Interaction.init(router, interactionService);
   Permission.init(router, permissionService);
   Chains.init(
@@ -367,6 +380,7 @@ export function init(
   SidePanel.init(router, sidePanelService);
   Settings.init(router, settingsService);
   ManageViewAssetToken.init(router, manageViewAssetTokenService);
+  DirectTxExecutor.init(router, directTxExecutorService);
 
   return {
     initFn: async () => {
@@ -406,6 +420,8 @@ export function init(
       await chainsService.afterInit();
 
       await manageViewAssetTokenService.init();
+
+      await directTxExecutorService.init();
     },
     keyRingService: keyRingV2Service,
     analyticsService: analyticsService,
