@@ -159,15 +159,15 @@ export class IBCSwapConfig {
       ChainIdHelper.parse(this.getAmountInChainInfo().chainId).identifier !==
       "osmosis"
     ) {
-      const findIndex = this.chainStore.chainInfosInUI.findIndex(
-        (c) => c.chainIdentifier === "osmosis"
+      const findIndex = this.chainStore.modularChainInfosInUI.findIndex(
+        (c) => ChainIdHelper.parse(c.chainId).identifier === "osmosis"
       );
       if (findIndex >= 0) {
         return this.chainStore.modularChainInfosInUI[findIndex];
       }
     }
 
-    if (this.chainStore.chainInfosInUI.length >= 2) {
+    if (this.chainStore.modularChainInfosInUI.length >= 2) {
       return this.chainStore.modularChainInfosInUI[1];
     }
 

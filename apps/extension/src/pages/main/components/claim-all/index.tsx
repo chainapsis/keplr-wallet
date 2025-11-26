@@ -389,7 +389,15 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
     })();
 
     const claimAllIsLoading = (() => {
-      for (const chainInfo of chainStore.chainInfosInUI) {
+      for (const chainInfo of chainStore.modularChainInfosInUI) {
+        if (
+          !chainStore
+            .getModularChainInfoImpl(chainInfo.chainId)
+            .matchModule("cosmos")
+        ) {
+          continue;
+        }
+
         const state = getClaimAllEachState(chainInfo.chainId);
         if (state.isLoading) {
           return true;

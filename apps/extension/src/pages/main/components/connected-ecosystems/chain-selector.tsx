@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useEffect, useRef } from "react";
 import { useTheme } from "styled-components";
-import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
+import { ModularChainInfo } from "@keplr-wallet/types";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import {
@@ -16,7 +16,7 @@ import { Subtitle3 } from "../../../../components/typography";
 import { ColorPalette } from "../../../../styles";
 
 export const ChainSelector: FunctionComponent<{
-  chainInfos: (ModularChainInfo | ChainInfo)[];
+  chainInfos: ModularChainInfo[];
   currentChainId: string;
   setCurrentChainId: (chainId: string) => void;
   activeTabOrigin: string;
@@ -26,9 +26,9 @@ export const ChainSelector: FunctionComponent<{
     | typeof UpdateCurrentChainIdForEVMMsg;
 
   // Ecosystem-specific options (e.g. Bitcoin uses baseChainId as identifier)
-  getChainId?: (chainInfo: ModularChainInfo | ChainInfo) => string;
+  getChainId?: (chainInfo: ModularChainInfo) => string;
   isChainSelected?: (
-    chainInfo: ModularChainInfo | ChainInfo,
+    chainInfo: ModularChainInfo,
     currentChainId: string
   ) => boolean;
 }> = ({

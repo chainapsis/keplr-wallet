@@ -40,7 +40,9 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
   const intl = useIntl();
 
   // CHECK: starknet, bitcoin만 활성화되어 있는 경우 chainInfosInUI의 길이가 0이 됨으로 인해 참조 오류 발생
-  const [chainId, setChainId] = useState(chainStore.chainInfosInUI[0].chainId);
+  const [chainId, setChainId] = useState(
+    chainStore.modularChainInfosInUI[0].chainId
+  );
   // If edit mode, this will be equal or greater than 0.
   const [editIndex, setEditIndex] = useState(-1);
 

@@ -66,7 +66,7 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
   const initialChainId = searchParams.get("chainId");
   const initialCoinMinimalDenom = searchParams.get("coinMinimalDenom");
 
-  const chainId = initialChainId || chainStore.chainInfosInUI[0].chainId;
+  const chainId = initialChainId || chainStore.modularChainInfosInUI[0].chainId;
 
   const modularChainInfoImpl = chainStore.getModularChainInfoImpl(chainId);
   const account = accountStore.getAccount(chainId);

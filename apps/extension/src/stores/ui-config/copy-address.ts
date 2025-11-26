@@ -62,8 +62,11 @@ export class CopyAddressConfig {
     // Sync and clear the config if the chain is hidden.
     autorun(() => {
       const chainIdentifierMap = new Map<string, boolean>();
-      for (const chainInfo of this.chainStore.chainInfosInUI) {
-        chainIdentifierMap.set(chainInfo.chainIdentifier, true);
+      for (const chainInfo of this.chainStore.modularChainInfosInUI) {
+        chainIdentifierMap.set(
+          ChainIdHelper.parse(chainInfo.chainId).identifier,
+          true
+        );
       }
 
       // 이 로직이 위에 로직보다 밑에 있어야함.
