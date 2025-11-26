@@ -2455,7 +2455,6 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
           coinMinimalDenom:
             "erc20:0x0512feac6339ff7889822cb5aa2a86c848e9d392bb0e3e237c008674feed8343",
           coinDecimals: 6,
-          coinGeckoId: "usd-coin",
           coinImageUrl:
             "https://keplr-ext-update-note-images.s3.amazonaws.com/token/usdc.png",
         },
