@@ -5,17 +5,17 @@ import {
   KeplrError,
   Message,
 } from "@keplr-wallet/router";
-import { DirectTxExecutorService } from "./service";
+import { BackgroundTxExecutorService } from "./service";
 import {
   RecordAndExecuteDirectTxsMsg,
-  GetDirectTxsExecutionDataMsg,
-  ExecuteDirectTxMsg,
-  GetDirectTxsExecutionResultMsg,
-  CancelDirectTxsExecutionMsg,
+  ResumeDirectTxsMsg,
+  CancelDirectTxsMsg,
+  GetDirectTxsBatchMsg,
+  GetDirectTxsBatchResultMsg,
 } from "./messages";
 
-export const getHandler: (service: DirectTxExecutorService) => Handler = (
-  service: DirectTxExecutorService
+export const getHandler: (service: BackgroundTxExecutorService) => Handler = (
+  service: BackgroundTxExecutorService
 ) => {
   return (env: Env, msg: Message<unknown>) => {
     switch (msg.constructor) {
@@ -24,25 +24,25 @@ export const getHandler: (service: DirectTxExecutorService) => Handler = (
           env,
           msg as RecordAndExecuteDirectTxsMsg
         );
-      case GetDirectTxsExecutionDataMsg:
-        return handleGetDirectTxsExecutionDataMsg(service)(
+      case GetDirectTxsBatchMsg:
+        return handleGetDirectTxsBatchMsg(service)(
           env,
-          msg as GetDirectTxsExecutionDataMsg
+          msg as GetDirectTxsBatchMsg
         );
-      case ExecuteDirectTxMsg:
-        return handleExecuteDirectTxMsg(service)(
+      case ResumeDirectTxsMsg:
+        return handleResumeDirectTxsMsg(service)(
           env,
-          msg as ExecuteDirectTxMsg
+          msg as ResumeDirectTxsMsg
         );
-      case GetDirectTxsExecutionResultMsg:
-        return handleGetDirectTxsExecutionResultMsg(service)(
+      case GetDirectTxsBatchResultMsg:
+        return handleGetDirectTxsBatchResultMsg(service)(
           env,
-          msg as GetDirectTxsExecutionResultMsg
+          msg as GetDirectTxsBatchResultMsg
         );
-      case CancelDirectTxsExecutionMsg:
-        return handleCancelDirectTxsExecutionMsg(service)(
+      case CancelDirectTxsMsg:
+        return handleCancelDirectTxsMsg(service)(
           env,
-          msg as CancelDirectTxsExecutionMsg
+          msg as CancelDirectTxsMsg
         );
       default:
         throw new KeplrError("direct-tx-executor", 100, "Unknown msg type");
@@ -51,41 +51,48 @@ export const getHandler: (service: DirectTxExecutorService) => Handler = (
 };
 
 const handleRecordAndExecuteDirectTxsMsg: (
-  service: DirectTxExecutorService
+  service: BackgroundTxExecutorService
 ) => InternalHandler<RecordAndExecuteDirectTxsMsg> = (service) => {
+  return (env, msg) => {
+    return service.recordAndExecuteDirectTxs(env, msg.vaultId, msg.txs);
+  };
+};
+
+const handleResumeDirectTxsMsg: (
+  service: BackgroundTxExecutorService
+) => InternalHandler<ResumeDirectTxsMsg> = (service) => {
   return async (env, msg) => {
-    return await service.recordAndExecuteDirectTxs(env, msg.vaultId, msg.txs);
+    return await service.resumeDirectTxs(
+      env,
+      msg.id,
+      msg.vaultId,
+      msg.txIndex,
+      msg.signedTx,
+      msg.signature
+    );
   };
 };
 
-const handleExecuteDirectTxMsg: (
-  service: DirectTxExecutorService
-) => InternalHandler<ExecuteDirectTxMsg> = (service) => {
-  return async (env, msg) => {
-    return await service.executeDirectTx(env, msg.id, msg.vaultId, msg.txIndex);
+const handleGetDirectTxsBatchMsg: (
+  service: BackgroundTxExecutorService
+) => InternalHandler<GetDirectTxsBatchMsg> = (service) => {
+  return (_env, msg) => {
+    return service.getDirectTxsBatch(msg.id);
   };
 };
 
-const handleGetDirectTxsExecutionDataMsg: (
-  service: DirectTxExecutorService
-) => InternalHandler<GetDirectTxsExecutionDataMsg> = (service) => {
+const handleGetDirectTxsBatchResultMsg: (
+  service: BackgroundTxExecutorService
+) => InternalHandler<GetDirectTxsBatchResultMsg> = (service) => {
+  return (_env, msg) => {
+    return service.getDirectTxsBatchResult(msg.id);
+  };
+};
+
+const handleCancelDirectTxsMsg: (
+  service: BackgroundTxExecutorService
+) => InternalHandler<CancelDirectTxsMsg> = (service) => {
   return async (_env, msg) => {
-    return await service.getDirectTxsExecutionData(msg.id);
-  };
-};
-
-const handleGetDirectTxsExecutionResultMsg: (
-  service: DirectTxExecutorService
-) => InternalHandler<GetDirectTxsExecutionResultMsg> = (service) => {
-  return async (_env, msg) => {
-    return await service.getDirectTxsExecutionResult(msg.id);
-  };
-};
-
-const handleCancelDirectTxsExecutionMsg: (
-  service: DirectTxExecutorService
-) => InternalHandler<CancelDirectTxsExecutionMsg> = (service) => {
-  return async (_env, msg) => {
-    await service.cancelDirectTxsExecution(msg.id);
+    await service.cancelDirectTxs(msg.id);
   };
 };

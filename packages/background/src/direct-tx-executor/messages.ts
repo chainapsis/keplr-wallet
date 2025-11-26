@@ -1,10 +1,6 @@
 import { KeplrError, Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
-import {
-  DirectTxsExecutionData,
-  DirectTxsExecutionResult,
-  DirectTx,
-} from "./types";
+import { DirectTxsBatch, DirectTxsBatchResult, DirectTx } from "./types";
 
 /**
  * Record and execute multiple transactions
@@ -47,18 +43,21 @@ export class RecordAndExecuteDirectTxsMsg extends Message<string> {
 }
 
 /**
- * Execute existing direct transaction by execution id and transaction index
- * Tx hash is returned if the transaction is executed successfully
+ * Resume existing direct transactions by execution id and transaction index
+ * This message is used to resume the execution of direct transactions that were paused by waiting for the asset to be bridged or other reasons.
  */
-export class ExecuteDirectTxMsg extends Message<string> {
+export class ResumeDirectTxsMsg extends Message<void> {
   public static type() {
-    return "execute-existing-direct-tx";
+    return "resume-direct-txs";
   }
 
   constructor(
     public readonly id: string,
     public readonly vaultId: string,
-    public readonly txIndex: number
+    public readonly txIndex: number,
+    // NOTE: these fields are optional for hardware wallet cases
+    public readonly signedTx?: Uint8Array,
+    public readonly signature?: Uint8Array
   ) {
     super();
   }
@@ -84,16 +83,16 @@ export class ExecuteDirectTxMsg extends Message<string> {
   }
 
   type(): string {
-    return ExecuteDirectTxMsg.type();
+    return ResumeDirectTxsMsg.type();
   }
 }
 
 /**
  * Get execution data by execution id
  */
-export class GetDirectTxsExecutionDataMsg extends Message<DirectTxsExecutionData> {
+export class GetDirectTxsBatchMsg extends Message<DirectTxsBatch | undefined> {
   public static type() {
-    return "get-direct-txs-execution-data";
+    return "get-direct-txs-batch";
   }
 
   constructor(public readonly id: string) {
@@ -115,16 +114,18 @@ export class GetDirectTxsExecutionDataMsg extends Message<DirectTxsExecutionData
   }
 
   type(): string {
-    return GetDirectTxsExecutionDataMsg.type();
+    return GetDirectTxsBatchMsg.type();
   }
 }
 
 /**
  * Get execution result by execution id
  */
-export class GetDirectTxsExecutionResultMsg extends Message<DirectTxsExecutionResult> {
+export class GetDirectTxsBatchResultMsg extends Message<
+  DirectTxsBatchResult | undefined
+> {
   public static type() {
-    return "get-direct-txs-execution-result";
+    return "get-direct-txs-batch-result";
   }
   constructor(public readonly id: string) {
     super();
@@ -145,16 +146,16 @@ export class GetDirectTxsExecutionResultMsg extends Message<DirectTxsExecutionRe
   }
 
   type(): string {
-    return GetDirectTxsExecutionResultMsg.type();
+    return GetDirectTxsBatchResultMsg.type();
   }
 }
 
 /**
  * Cancel execution by execution id
  */
-export class CancelDirectTxsExecutionMsg extends Message<void> {
+export class CancelDirectTxsMsg extends Message<void> {
   public static type() {
-    return "cancel-direct-txs-execution";
+    return "cancel-direct-txs";
   }
 
   constructor(public readonly id: string) {
@@ -176,6 +177,6 @@ export class CancelDirectTxsExecutionMsg extends Message<void> {
   }
 
   type(): string {
-    return CancelDirectTxsExecutionMsg.type();
+    return CancelDirectTxsMsg.type();
   }
 }
